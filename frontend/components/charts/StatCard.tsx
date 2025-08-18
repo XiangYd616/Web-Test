@@ -9,5 +9,5 @@ const StatCard: React.FC<StatCardProps> = (props) => {
       <p>组件内容</p>
     </div>
   );
-};'"
-export default StatCard;'"
+};
+export default StatCard;'

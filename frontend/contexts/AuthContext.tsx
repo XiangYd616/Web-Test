@@ -16,7 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider");"
+    throw new Error('useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         await refreshToken();
       } catch (error) {
-        console.error("自动刷新token失败:', error);"
+        console.error("自动刷新token失败:', error);
         await logout();
       }
     }, refreshTime);
@@ -58,17 +58,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return payload.exp * 1000; // 转换为毫秒
     } catch (error) {
-      console.error("解析token失败:', error);"
+      console.error("解析token失败:', error);
       return 0;
     }
   };
 
   // 清除认证数据
   const clearAuthData = () => {
-    localStorage.removeItem('auth_token");"
-    localStorage.removeItem('refresh_token");"
-    localStorage.removeItem('user_data");"
-    localStorage.removeItem('remember_me");"
+    localStorage.removeItem('auth_token");
+    localStorage.removeItem('refresh_token");
+    localStorage.removeItem('user_data");
+    localStorage.removeItem('remember_me");
     localStorage.removeItem("session_id");
     setUser(null);
     setError(null);
@@ -83,10 +83,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // 检查本地存储中的用户信息并验证token
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('auth_token");"
-        const refreshTokenValue = localStorage.getItem('refresh_token");"
-        const userData = localStorage.getItem('user_data");"
-        const rememberMe = localStorage.getItem('remember_me') === 'true'
+        const token = localStorage.getItem('auth_token");
+        const refreshTokenValue = localStorage.getItem('refresh_token");
+        const userData = localStorage.getItem('user_data");
+        const rememberMe = localStorage.getItem('remember_me') === 'true
         if (token && userData) {
           try {
             // 解析用户数据
@@ -111,18 +111,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               try {
                 await refreshToken();
               } catch (error) {
-                throw new Error('Token刷新失败");"
+                throw new Error('Token刷新失败");
               }
             } else {
-              throw new Error('Token已过期");"
+              throw new Error('Token已过期");
             }
           } catch (parseError) {
-            console.error("❌ 解析用户数据失败:', parseError);"
-            throw new Error('用户数据格式错误");"
+            console.error("❌ 解析用户数据失败:', parseError);
+            throw new Error('用户数据格式错误");
           }
         }
       } catch (error) {
-        console.error("❌ 认证检查失败:', error);"
+        console.error("❌ 认证检查失败:', error);
         // 清除无效的认证信息
         clearAuthData();
       } finally {
@@ -145,7 +145,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // 验证必填字段
     if (!email || !password) {
-      throw new Error('邮箱和密码都是必填的");"
+      throw new Error('邮箱和密码都是必填的");
     }
 
     setIsLoading(true);
@@ -157,7 +157,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         rememberMe
       };
 
-      console.log("🔍 发送登录请求:', {"
+      console.log("🔍 发送登录请求:', {
         url: 'http://localhost:3001/api/auth/login',
         data: { ...requestData, password: '***' } // 隐藏密码
       });
@@ -180,7 +180,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (!response.ok) {
-        console.error("❌ 登录请求失败:', {"
+        console.error("❌ 登录请求失败:', {
           status: response.status,
           statusText: response.statusText,
           result: result
@@ -203,7 +203,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('auth_token', data.accessToken);
       localStorage.setItem('refresh_token', data.refreshToken);
       localStorage.setItem('user_data', JSON.stringify(data.user));
-      localStorage.setItem("remember_me', rememberMe.toString());"
+      localStorage.setItem("remember_me', rememberMe.toString());
       setUser(data.user);
 
       // 如果选择记住登录状态，设置自动刷新
@@ -244,7 +244,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || '注册失败");"
+        throw new Error(result.message || '注册失败");
       }
 
       // 检查注册是否成功
@@ -266,7 +266,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       console.log('✅ 注册成功:', data.user.email);
     } catch (error) {
-      console.error("❌ 注册失败:', error);"
+      console.error("❌ 注册失败:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -282,12 +282,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,'`
+            'Authorization': `Bearer ${token}`,
           },
         });
       }
     } catch (error) {
-      console.error("❌ 登出API调用失败:', error);'`"`
+      console.error("❌ 登出API调用失败:', error);
       // 即使API调用失败，也要清除本地存储
     } finally {
       // 清除认证数据
@@ -299,12 +299,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // 添加缺失的方法
   const updateProfile = async (data: any) => {
     try {
-      const token = localStorage.getItem('auth_token");"
+      const token = localStorage.getItem('auth_token");
       const response = await fetch('http://localhost:3001/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          "Authorization': `Bearer ${token}`,'`"
+          "Authorization': `Bearer ${token}`,'
         },
         body: JSON.stringify(data),
       });
@@ -312,7 +312,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || "更新资料失败");``
+        throw new Error(result.message || "更新资料失败");
       }
 
       // 更新本地用户数据
@@ -321,21 +321,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('user_data', JSON.stringify(result.user));
       }
 
-      console.log('✅ 用户资料更新成功");"
+      console.log('✅ 用户资料更新成功");
     } catch (error) {
-      console.error("❌ 更新用户资料失败:', error);"
+      console.error("❌ 更新用户资料失败:', error);
       throw error;
     }
   };
 
   const changePassword = async (data: any) => {
     try {
-      const token = localStorage.getItem('auth_token");"
+      const token = localStorage.getItem('auth_token");
       const response = await fetch('http://localhost:3001/api/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          "Authorization': `Bearer ${token}`,'`"
+          "Authorization': `Bearer ${token}`,'
         },
         body: JSON.stringify(data),
       });
@@ -343,12 +343,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || "修改密码失败");``
+        throw new Error(result.message || "修改密码失败");
       }
 
-      console.log('✅ 密码修改成功");"
+      console.log('✅ 密码修改成功");
     } catch (error) {
-      console.error("❌ 修改密码失败:', error);"
+      console.error("❌ 修改密码失败:', error);
       throw error;
     }
   };
@@ -366,13 +366,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || '发送重置邮件失败");"
+        throw new Error(result.message || '发送重置邮件失败");
       }
 
-      console.log('✅ 重置邮件发送成功");"
+      console.log('✅ 重置邮件发送成功");
       return result;
     } catch (error) {
-      console.error("❌ 发送重置邮件失败:', error);"
+      console.error("❌ 发送重置邮件失败:', error);
       throw error;
     }
   };
@@ -390,38 +390,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || '重置密码失败");"
+        throw new Error(result.message || '重置密码失败");
       }
 
-      console.log('✅ 密码重置成功");"
+      console.log('✅ 密码重置成功");
       return result;
     } catch (error) {
-      console.error("❌ 重置密码失败:', error);"
+      console.error("❌ 重置密码失败:', error);
       throw error;
     }
   };
 
   const sendEmailVerification = async () => {
     try {
-      const token = localStorage.getItem('auth_token");"
+      const token = localStorage.getItem('auth_token");
       const response = await fetch('http://localhost:3001/api/auth/send-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          "Authorization': `Bearer ${token}`,'`"
+          "Authorization': `Bearer ${token}`,'
         },
       });
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || "发送验证邮件失败");``
+        throw new Error(result.message || "发送验证邮件失败");
       }
 
-      console.log('✅ 验证邮件发送成功");"
+      console.log('✅ 验证邮件发送成功");
       return result;
     } catch (error) {
-      console.error("❌ 发送验证邮件失败:', error);"
+      console.error("❌ 发送验证邮件失败:', error);
       throw error;
     }
   };
@@ -439,7 +439,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || '邮箱验证失败");"
+        throw new Error(result.message || '邮箱验证失败");
       }
 
       // 更新用户状态
@@ -449,19 +449,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('user_data', JSON.stringify(updatedUser));
       }
 
-      console.log('✅ 邮箱验证成功");"
+      console.log('✅ 邮箱验证成功");
       return result;
     } catch (error) {
-      console.error("❌ 邮箱验证失败:', error);"
+      console.error("❌ 邮箱验证失败:', error);
       throw error;
     }
   };
 
   const refreshToken = async () => {
     try {
-      const refreshTokenValue = localStorage.getItem('refresh_token");"
+      const refreshTokenValue = localStorage.getItem('refresh_token");
       if (!refreshTokenValue) {
-        throw new Error('没有刷新令牌");"
+        throw new Error('没有刷新令牌");
       }
 
       const response = await fetch('http://localhost:3001/api/auth/refresh', {
@@ -477,7 +477,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || '刷新令牌失败");"
+        throw new Error(result.message || '刷新令牌失败");
       }
 
       // 更新存储的token
@@ -488,12 +488,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (result.user) {
-        localStorage.setItem("user_data', JSON.stringify(result.user));"
+        localStorage.setItem("user_data', JSON.stringify(result.user));
         setUser(result.user);
       }
 
       // 设置下次自动刷新
-      const rememberMe = localStorage.getItem('remember_me') === 'true'
+      const rememberMe = localStorage.getItem('remember_me') === 'true
       if (rememberMe) {
         const expiryTime = parseTokenExpiry(newToken);
         const currentTime = Date.now();
@@ -502,9 +502,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
 
-      console.log('✅ Token刷新成功");"
+      console.log('✅ Token刷新成功");
     } catch (error) {
-      console.error("❌ Token刷新失败:', error);"
+      console.error("❌ Token刷新失败:', error);
       // 刷新失败，清除认证数据
       clearAuthData();
       throw error;

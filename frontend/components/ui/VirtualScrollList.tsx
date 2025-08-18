@@ -21,7 +21,7 @@ function VirtualScrollList<T>({
     itemHeight,
     height,
     renderItem,
-    className ='',
+    className =',
     overscan = 5,
     onScroll,
     loading = false,
@@ -53,9 +53,9 @@ function VirtualScrollList<T>({
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`
+    "aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': ['']
+    'aria-describedby': [']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
@@ -142,9 +142,9 @@ function VirtualScrollList<T>({
         
         return (
             <div className={`flex items-center justify-center ${className`}
-      }`} style={{ height }}>`
+      }`} style={{ height }}>
                 {loadingComponent || (
-                    <div className="flex items-center space-x-2'>`
+                    <div className="flex items-center space-x-2'>
                         <div className='w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin' />
                         <span className='text-gray-600'>加载中...</span>
                     </div>
@@ -158,9 +158,9 @@ function VirtualScrollList<T>({
         
         return (
             <div className={`flex items-center justify-center ${className`}
-      }`} style={{ height }}>`
+      }`} style={{ height }}>
                 {emptyComponent || (
-                    <div className="text-center text-gray-500'>`
+                    <div className="text-center text-gray-500'>
                         <svg className='w-12 h-12 mx-auto mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4' />
                         </svg>
@@ -173,20 +173,20 @@ function VirtualScrollList<T>({
 
     return (
         <div
-            className={`overflow-auto ${className}`}`
+            className={`overflow-auto ${className}`}
             style={{ height }}
             onScroll={handleScrollEvent}
         >
             <div
                 style={{
                     height: totalHeight,
-                    position: "relative";`
+                    position: "relative";
                 }}
             >
                 <div
                     style={{
-                        transform: `translateY(${offsetY}px)`,`
-                        position: "relative";`
+                        transform: `translateY(${offsetY}px)`,
+                        position: "relative";
                     }}
                 >
                     {renderedItems}

@@ -4,8 +4,8 @@ import {
   GlobalOutlined,
   QuestionCircleOutlined,
   SecurityScanOutlined,
-  SettingOutlined
-} from '@ant-design/icons';
+  // SettingOutlined
+} from '@ant-design/icons'; // 已修复
 import { Menu } from 'antd';
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -59,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
   return (
     <div style={{ height: '100%', paddingTop: '16px' }}>
       <Menu
-        mode="inline"
+        mode="inline
         selectedKeys={[location.pathname]}
         items={menuItems}
         onClick={handleMenuClick}

@@ -16,7 +16,7 @@ export const colors = {
     600: '#1e88e5',
     700: '#1976d2',
     800: '#1565c0',
-    900: '#0d47a1'
+    900: '#0d47a1
   },
   
   // 辅助色
@@ -30,7 +30,7 @@ export const colors = {
     600: '#757575',
     700: '#616161',
     800: '#424242',
-    900: '#212121'
+    900: '#212121
   },
   
   // 语义色彩
@@ -39,7 +39,7 @@ export const colors = {
     100: '#c8e6c9',
     500: '#4caf50',
     600: '#43a047',
-    700: '#388e3c'
+    700: '#388e3c
   },
   
   warning: {
@@ -47,7 +47,7 @@ export const colors = {
     100: '#ffecb3',
     500: '#ff9800',
     600: '#fb8c00',
-    700: '#f57c00'
+    700: '#f57c00
   },
   
   error: {
@@ -55,7 +55,7 @@ export const colors = {
     100: '#ffcdd2',
     500: '#f44336',
     600: '#e53935',
-    700: '#d32f2f'
+    700: '#d32f2f
   },
   
   info: {
@@ -63,7 +63,7 @@ export const colors = {
     100: '#b3e5fc',
     500: '#03a9f4',
     600: '#039be5',
-    700: '#0288d1'
+    700: '#0288d1
   },
   
   // 中性色
@@ -77,7 +77,7 @@ export const colors = {
     600: '#757575',
     700: '#616161',
     800: '#424242',
-    900: '#212121'
+    900: '#212121
   }
 };
 
@@ -126,7 +126,7 @@ export const typography = {
     normal: '0em',
     wide: '0.025em',
     wider: '0.05em',
-    widest: '0.1em'
+    widest: '0.1em
   }
 };
 
@@ -159,7 +159,7 @@ export const breakpoints = {
   md: '768px',
   lg: '992px',
   xl: '1200px',
-  xxl: '1400px'
+  xxl: '1400px
 };
 
 // 阴影系统
@@ -171,7 +171,7 @@ export const shadows = {
   lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
   xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
   '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-  inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)'
+  inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)
 };
 
 // 圆角系统
@@ -184,7 +184,7 @@ export const borderRadius = {
   xl: '0.75rem',    // 12px
   '2xl': '1rem',    // 16px
   '3xl': '1.5rem',  // 24px
-  full: '9999px'
+  full: '9999px
 };
 
 // 过渡动画
@@ -195,7 +195,7 @@ export const transitions = {
   colors: 'color 150ms ease-in-out, background-color 150ms ease-in-out, border-color 150ms ease-in-out',
   opacity: 'opacity 150ms ease-in-out',
   shadow: 'box-shadow 150ms ease-in-out',
-  transform: 'transform 150ms ease-in-out'
+  transform: 'transform 150ms ease-in-out
 };
 
 // Z-index层级

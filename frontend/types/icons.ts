@@ -11,40 +11,40 @@ export interface IconProps     {
 
 // 图标组件类型
 export type IconComponent   = React.FC<IconProps>;// 图标名称类型
-export type IconName   = | 'activity'
-  | 'alert-circle'
-  | 'bar-chart-3'
-  | 'bug'
-  | 'check-circle'
-  | 'clock'
-  | 'file-text'
-  | 'globe'
-  | 'history'
-  | 'info'
-  | 'loader-2'
-  | 'minus'
-  | 'moon'
-  | 'play'
-  | 'settings'
-  | 'smartphone'
-  | 'sun'
-  | 'trash-2'
-  | 'trending-up'
-  | 'user'
-  | 'users'
-  | 'x'
-  | 'x-circle'
+export type IconName   = | 'activity
+  | 'alert-circle
+  | 'bar-chart-3
+  | 'bug
+  | 'check-circle
+  | 'clock
+  | 'file-text
+  | 'globe
+  | 'history
+  | 'info
+  | 'loader-2
+  | 'minus
+  | 'moon
+  | 'play
+  | 'settings
+  | 'smartphone
+  | 'sun
+  | 'trash-2
+  | 'trending-up
+  | 'user
+  | 'users
+  | 'x
+  | 'x-circle
   | 'zap';// 图标尺寸类型
 export type IconSize   = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number;// 图标颜色类型
-export type IconColor   = | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'info'
-  | 'muted'
-  | 'inherit'
-  | 'current'
+export type IconColor   = | 'primary
+  | 'secondary
+  | 'success
+  | 'warning
+  | 'error
+  | 'info
+  | 'muted
+  | 'inherit
+  | 'current
   | string;// 扩展的图标属性
 export interface ExtendedIconProps extends IconProps     {
   name?: IconName;

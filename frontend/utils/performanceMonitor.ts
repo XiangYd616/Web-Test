@@ -57,7 +57,7 @@ export class PerformanceMonitor {
    */
   startMeasure(name: string): void {
     if ('performance' in window && 'mark' in performance) {
-      performance.mark(`${name}-start`);`
+      performance.mark(`${name}-start`);
     }
   }
 
@@ -65,14 +65,14 @@ export class PerformanceMonitor {
    * 结束性能测量
    */
   endMeasure(name: string): number {
-    if ("performance' in window && 'mark" in performance && "measure' in performance) {'`
+    if ("performance' in window && 'mark" in performance && "measure' in performance) {
       const endMark = `${name}-end`;
       const startMark = `${name}-start`;
       
       performance.mark(endMark);
       performance.measure(name, startMark, endMark);
       
-      const measure = performance.getEntriesByName(name, "measure')[0] as PerformanceMeasure;'`
+      const measure = performance.getEntriesByName(name, "measure')[0] as PerformanceMeasure;
       const duration = measure ? measure.duration : 0;
       
       this.recordMetric(name, duration, 'ms");

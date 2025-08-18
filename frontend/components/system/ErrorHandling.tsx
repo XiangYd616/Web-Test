@@ -10,4 +10,4 @@ const ErrorHandling: React.FC<ErrorHandlingProps> = (props) => {
     </div>
   );
 };
-export default ErrorHandling;'"
+export default ErrorHandling;

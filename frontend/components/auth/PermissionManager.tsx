@@ -10,4 +10,4 @@ const PermissionManager: React.FC<PermissionManagerProps> = (props) => {
     </div>
   );
 };
-export default PermissionManager;'"
+export default PermissionManager;

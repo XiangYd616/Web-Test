@@ -21,15 +21,15 @@ export interface ContentTestResult     {
   accessibilityScore: number;
   overallScore: number;
   issues: Array<{
-    type: 'error' | 'warning' | 'info'
-    category: 'seo' | 'performance' | 'accessibility' | 'content'
+    type: 'error' | 'warning' | 'info
+    category: 'seo' | 'performance' | 'accessibility' | 'content
     message: string;
-    impact: 'high' | 'medium' | 'low'
+    impact: 'high' | 'medium' | 'low
   }>;
   recommendations: Array<{
-    category: 'seo' | 'performance' | 'accessibility' | 'content'
+    category: 'seo' | 'performance' | 'accessibility' | 'content
     message: string;
-    priority: 'high' | 'medium' | 'low'
+    priority: 'high' | 'medium' | 'low
   }>;
   metrics: {
     pageSize: number;
@@ -92,7 +92,7 @@ export class BrowserTestEngineIntegrator {
         })
       });
 
-      if (!response.ok) {`
+      if (!response.ok) {
         throw new Error(`内容检测服务器响应错误: ${response.status}`);
       }
 
@@ -120,7 +120,7 @@ export class BrowserTestEngineIntegrator {
       };
       return contentTestResult;
     } catch (error) {
-      console.error("真实内容检测失败，回退到基础检测:", error");`
+      console.error("真实内容检测失败，回退到基础检测:", error");
       throw new Error(`内容检测失败: ${error instanceof Error ? error.message : "未知错误"}`);
     }
   }
@@ -144,4 +144,3 @@ export class BrowserTestEngineIntegrator {
       realTimeAnalysis: typeof fetch !== "undefined";};
   }
 }
-`

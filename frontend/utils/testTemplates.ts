@@ -2,19 +2,19 @@ export interface TestTemplate     {
   id: string;
   name: string;
   description: string;
-  category: 'stress' | 'load' | 'spike' | 'volume' | 'endurance'
+  category: 'stress' | 'load' | 'spike' | 'volume' | 'endurance
   config: {
     users: number;
     duration: number;
     rampUp: number;
-    testType: 'gradual' | 'spike' | 'constant' | 'stress'
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+    testType: 'gradual' | 'spike' | 'constant' | 'stress
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE
     timeout: number;
     thinkTime: number;
     warmupDuration: number;
   };
   tags: string[];
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  difficulty: 'beginner' | 'intermediate' | 'advanced
 }
 
 export const stressTestTemplates: TestTemplate[] = [
@@ -34,7 +34,7 @@ export const stressTestTemplates: TestTemplate[] = [
       warmupDuration: 0
     },
     tags: ['初学者', '快速测试', '小型网站'],
-    difficulty: 'beginner'
+    difficulty: 'beginner
   },
   {
     id: 'medium-load',
@@ -52,7 +52,7 @@ export const stressTestTemplates: TestTemplate[] = [
       warmupDuration: 5
     },
     tags: ['标准测试', '中型网站', '日常监控'],
-    difficulty: 'intermediate'
+    difficulty: 'intermediate
   },
   {
     id: 'heavy-load',
@@ -70,7 +70,7 @@ export const stressTestTemplates: TestTemplate[] = [
       warmupDuration: 10
     },
     tags: ['高负载', '压力测试', '性能极限'],
-    difficulty: 'advanced'
+    difficulty: 'advanced
   },
   {
     id: 'spike-test',
@@ -88,7 +88,7 @@ export const stressTestTemplates: TestTemplate[] = [
       warmupDuration: 0
     },
     tags: ['突发流量', '峰值测试', '弹性测试'],
-    difficulty: 'advanced'
+    difficulty: 'advanced
   },
   {
     id: 'endurance-test',
@@ -106,7 +106,7 @@ export const stressTestTemplates: TestTemplate[] = [
       warmupDuration: 15
     },
     tags: ['长时间测试', '稳定性', '内存泄漏'],
-    difficulty: 'advanced'
+    difficulty: 'advanced
   },
   {
     id: 'api-load-test',
@@ -124,7 +124,7 @@ export const stressTestTemplates: TestTemplate[] = [
       warmupDuration: 5
     },
     tags: ['API测试', 'REST接口', '后端测试'],
-    difficulty: 'intermediate'
+    difficulty: 'intermediate
   },
   {
     id: 'mobile-optimized',
@@ -142,7 +142,7 @@ export const stressTestTemplates: TestTemplate[] = [
       warmupDuration: 3
     },
     tags: ['移动端', '慢网络', '用户体验'],
-    difficulty: 'intermediate'
+    difficulty: 'intermediate
   },
   {
     id: 'e-commerce-peak',
@@ -160,7 +160,7 @@ export const stressTestTemplates: TestTemplate[] = [
       warmupDuration: 5
     },
     tags: ['电商', '促销活动', '高并发'],
-    difficulty: 'advanced'
+    difficulty: 'advanced
   }
 ];
 

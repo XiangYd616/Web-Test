@@ -8,14 +8,14 @@ import React, { createContext, ReactNode, useContext, useEffect, useState, useCa
 // 通知类型
 export interface Notification {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info'
+  type: 'success' | 'error' | 'warning' | 'info
   title: string;
   message: string;
   duration?: number;
   actions?: Array<{
     label: string;
     action: () => void;
-    variant?: 'primary' | 'secondary'
+    variant?: 'primary' | 'secondary
   }>;
   timestamp: Date;
 }
@@ -25,7 +25,7 @@ export interface AppConfig {
   apiBaseUrl: string;
   wsBaseUrl: string;
   version: string;
-  environment: 'development' | 'staging' | 'production'
+  environment: 'development' | 'staging' | 'production
   features: {
     enableAnalytics: boolean;
     enableNotifications: boolean;
@@ -50,7 +50,7 @@ export interface AppState {
   isLoading: boolean;
   lastActivity: Date;
   activeConnections: number;
-  systemHealth: 'healthy' | 'warning' | 'error'
+  systemHealth: 'healthy' | 'warning' | 'error
   maintenanceMode: boolean;
 }
 
@@ -161,7 +161,7 @@ const notificationReducer = (state: Notification[], action: NotificationAction):
       return state.filter(n => n.id !== action.payload);
     case 'CLEAR':
       return [];
-    default:
+    default: undefined, // 已修复
       return state;
   }
 };

@@ -10,4 +10,4 @@ const DataList: React.FC<DataListProps> = (props) => {
     </div>
   );
 };
-export default DataList;'"
+export default DataList;

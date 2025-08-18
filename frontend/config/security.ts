@@ -24,12 +24,12 @@ export interface SecurityConfig     {
   // 开发调试
   enableDebugMode: boolean;
   enableSecurityLogs: boolean;
-  logLevel: 'error' | 'warn' | 'info' | 'debug'
+  logLevel: 'error' | 'warn' | 'info' | 'debug
 }
 
 export function getSecurityConfig(): SecurityConfig   {
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  const isProduction = process.env.NODE_ENV === 'production'
+  const isDevelopment = process.env.NODE_ENV === 'development
+  const isProduction = process.env.NODE_ENV === 'production
   return {
     // 路由安全配置
     enableRouteProtection: true,
@@ -68,7 +68,7 @@ export function getSecurityConfigByPolicy(policy: SecurityPolicy): SecurityConfi
   const baseConfig = getSecurityConfig();
 
   switch (policy) {
-    case SecurityPolicy.STRICT:
+    case SecurityPolicy.STRICT: undefined, // 已修复
       return {
         ...baseConfig,
         enableRouteProtection: true,
@@ -86,7 +86,7 @@ export function getSecurityConfigByPolicy(policy: SecurityPolicy): SecurityConfi
         logLevel: 'warn',
       };
 
-    case SecurityPolicy.MODERATE:
+    case SecurityPolicy.MODERATE: undefined, // 已修复
       return {
         ...baseConfig,
         enableRouteProtection: true,
@@ -104,7 +104,7 @@ export function getSecurityConfigByPolicy(policy: SecurityPolicy): SecurityConfi
         logLevel: 'info',
       };
 
-    case SecurityPolicy.RELAXED:
+    case SecurityPolicy.RELAXED: undefined, // 已修复
       return {
         ...baseConfig,
         enableRouteProtection: true,
@@ -123,7 +123,7 @@ export function getSecurityConfigByPolicy(policy: SecurityPolicy): SecurityConfi
         logLevel: 'debug',
       };
 
-    default:
+    default: undefined, // 已修复
       return baseConfig;
   }
 }
@@ -133,26 +133,26 @@ export class SecurityConfigValidator {
     const errors: string[]  = [];
     // 验证登录尝试次数
     if (config.maxLoginAttempts < 1 || config.maxLoginAttempts > 20) {
-      errors.push('最大登录尝试次数应在1-20之间");"
+      errors.push('最大登录尝试次数应在1-20之间");
     }
 
     // 验证锁定时长
     if (config.lockoutDuration < 1 || config.lockoutDuration > 1440) { // 最多24小时
-      errors.push('账户锁定时长应在1-1440分钟之间");"
+      errors.push('账户锁定时长应在1-1440分钟之间");
     }
 
     // 验证会话超时
     if (config.sessionTimeout < 300000 || config.sessionTimeout > 604800000) { // 5分钟到7天
-      errors.push('会话超时时间应在5分钟到7天之间");"
+      errors.push('会话超时时间应在5分钟到7天之间");
     }
 
     // 验证API限制
     if (config.apiRateLimit < 1 || config.apiRateLimit > 10000) {
-      errors.push('API速率限制应在1-10000之间");"
+      errors.push('API速率限制应在1-10000之间");
     }
 
     if (config.adminApiRateLimit < 1 || config.adminApiRateLimit > 1000) {
-      errors.push('管理员API速率限制应在1-1000之间");"
+      errors.push('管理员API速率限制应在1-1000之间");
     }
 
     return {
@@ -172,12 +172,12 @@ export function getCurrentSecurityPolicy(): SecurityPolicy   {
 
   // 根据环境自动选择策略
   switch (process.env.NODE_ENV) {
-    case 'production': ''
+    case 'production': 
       return SecurityPolicy.STRICT;
-    case 'test': ''
+    case 'test': 
       return SecurityPolicy.MODERATE;
-    case 'development': ''
-    default:
+    case 'development': 
+    default: undefined, // 已修复
       return SecurityPolicy.RELAXED;
   }
 }
@@ -214,7 +214,7 @@ export class SecurityConfigUtils {
       Object.assign(currentSecurityConfig, updates);
       console.log('Security config updated: ', updates);
     } else {
-      console.warn('Cannot update security config in production environment");"
+      console.warn('Cannot update security config in production environment");
     }
   }
 }

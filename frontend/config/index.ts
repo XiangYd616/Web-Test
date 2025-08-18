@@ -13,7 +13,7 @@ export interface AppConfig     {
     batchOperations: boolean;
   };
   ui: {
-    theme: 'dark' | 'light'
+    theme: 'dark' | 'light
     language: string;
     pageSize: number;
   };

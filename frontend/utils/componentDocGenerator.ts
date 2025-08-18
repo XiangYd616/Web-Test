@@ -46,7 +46,7 @@ class ComponentDocGenerator {
     const commentMatch = code.match(/\/\*\*([\s\S]*?)\*\//);
     if (commentMatch) {
       return commentMatch[1]
-        .replace(/\*/g, '')
+        .replace(/\*/g, ')
         .split('\n')
         .map(line => line.trim())
         .filter(line => line)
@@ -87,7 +87,7 @@ class ComponentDocGenerator {
    */
   private extractPropDescription(line: string): string {
     const commentMatch = line.match(/\/\/\s*(.+)$/);
-    return commentMatch ? commentMatch[1].trim() : ''
+    return commentMatch ? commentMatch[1].trim() : 
   }
 
   /**
@@ -99,32 +99,32 @@ class ComponentDocGenerator {
     // 基础示例
     examples.push({
       title: '基础用法',
-      code: `<${componentName} />`,`
-      description: "最简单的使用方式";`
+      code: `<${componentName} />`,
+      description: "最简单的使用方式";
     });
 
     // 根据Props生成更多示例
     if (code.includes('onClick')) {
       examples.push({
         title: '带点击事件',
-        code: `<${componentName} onClick={() => console.log('clicked')} />`,'`
-        description: "处理点击事件";`
+        code: `<${componentName} onClick={() => console.log('clicked')} />`,
+        description: "处理点击事件";
       });
     }
 
     if (code.includes('disabled')) {
       examples.push({
         title: '禁用状态',
-        code: `<${componentName} disabled />`,`
-        description: "禁用组件";`
+        code: `<${componentName} disabled />`,
+        description: "禁用组件";
       });
     }
 
     if (code.includes('loading')) {
       examples.push({
         title: '加载状态',
-        code: `<${componentName} loading />`,`
-        description: "显示加载状态";`
+        code: `<${componentName} loading />`,
+        description: "显示加载状态";
       });
     }
 
@@ -138,7 +138,7 @@ class ComponentDocGenerator {
     const accessibility = {
       ariaLabels: [],
       keyboardSupport: [],
-      screenReaderSupport: ''
+      screenReaderSupport: 
     };
 
     // 查找aria属性
@@ -157,9 +157,9 @@ class ComponentDocGenerator {
 
     // 屏幕阅读器支持
     if (accessibility.ariaLabels.length > 0) {
-      accessibility.screenReaderSupport = '支持屏幕阅读器'
+      accessibility.screenReaderSupport = '支持屏幕阅读器
     } else {
-      accessibility.screenReaderSupport = '需要改进屏幕阅读器支持'
+      accessibility.screenReaderSupport = '需要改进屏幕阅读器支持
     }
 
     return accessibility;
@@ -169,8 +169,7 @@ class ComponentDocGenerator {
    * 生成Markdown文档
    */
   generateMarkdown(doc: ComponentDocumentation): string {
-    let markdown = `# ${doc.name}`
-
+    let markdown = `# ${doc.name}
 ${doc.description}
 
 ## Props
@@ -180,34 +179,28 @@ ${doc.description}
 `;
 
     for (const prop of doc.props) {
-      markdown += `| ${prop.name} | ${prop.type} | ${prop.required ? '是' : '否'} | ${prop.defaultValue || '-'} | ${prop.description || "-'} |\n`;'`
+      markdown += `| ${prop.name} | ${prop.type} | ${prop.required ? '是' : '否'} | ${prop.defaultValue || '-'} | ${prop.description || "-'} |\n`;
     }
 
-    markdown += ``
+    markdown += 
 ## 使用示例
 
 `;
 
     for (const example of doc.examples) {
-      markdown += `### ${example.title}`
-
-${example.description || "'}'`
-
-\`\`\`tsx`
+      markdown += `### ${example.title}
+${example.description || "}'
+\`\`\`tsx
 ${example.code}
-\`\`\``
-
+\`\`\
 `;
     }
 
-    markdown += `## 可访问性`
-
+    markdown += `## 可访问性
 ### ARIA 属性
-${doc.accessibility.ariaLabels.map(label => `- ${label}`).join('\n')}'`
-
+${doc.accessibility.ariaLabels.map(label => `- ${label}`).join('\n')}
 ### 键盘支持
-${doc.accessibility.keyboardSupport.map(support => `- ${support}`).join('\n')}'`
-
+${doc.accessibility.keyboardSupport.map(support => `- ${support}`).join('\n')}
 ### 屏幕阅读器
 ${doc.accessibility.screenReaderSupport}
 `;

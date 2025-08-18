@@ -22,7 +22,7 @@ export interface FrontendConfig     {
     lazyLoading: boolean;
   };
   ui: {
-    theme: 'dark' | 'light' | 'auto'
+    theme: 'dark' | 'light' | 'auto
     language: string;
     pageSize: number;
     animationsEnabled: boolean;
@@ -43,7 +43,7 @@ export interface FrontendConfig     {
   };
   cache: {
     enableServiceWorker: boolean;
-    cacheStrategy: 'cache-first' | 'network-first' | 'stale-while-revalidate'
+    cacheStrategy: 'cache-first' | 'network-first' | 'stale-while-revalidate
     maxAge: number;
   };
 }
@@ -55,7 +55,7 @@ export interface ConfigChangeEvent     {
   key: string;
   oldValue: any;
   newValue: any;
-  source: 'local' | 'remote' | 'user'
+  source: 'local' | 'remote' | 'user
 }
 
 /**
@@ -66,8 +66,8 @@ export class ConfigManager extends EventEmitter {
   private remoteConfig: Partial<FrontendConfig> = {};
   private isInitialized = false;
   private syncInterval: number | null = null;
-  private readonly storageKey = 'enhanced-app-config'
-  private readonly remoteConfigUrl = '/api/config/frontend'
+  private readonly storageKey = 'enhanced-app-config
+  private readonly remoteConfigUrl = '/api/config/frontend
   constructor() {
     super();
     this.config = this.getDefaultConfig();
@@ -144,7 +144,7 @@ export class ConfigManager extends EventEmitter {
 
       this.isInitialized = true;
       this.emit('initialized', this.config);
-      console.log('✅ Enhanced Config Manager initialized");"
+      console.log('✅ Enhanced Config Manager initialized");
     } catch (error) {
       console.error('❌ Failed to initialize Enhanced Config Manager: ', error);
       // 使用默认配置继续运行
@@ -175,7 +175,7 @@ export class ConfigManager extends EventEmitter {
       const response = await fetch(this.remoteConfigUrl, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json
         }
       });
 
@@ -215,7 +215,7 @@ export class ConfigManager extends EventEmitter {
       },
       features: {
         realTimeUpdates: import.meta.env.VITE_ENABLE_REAL_TIME === 'true',
-        performanceMonitoring: import.meta.env.VITE_ENABLE_PERFORMANCE_MONITORING !== 'false'
+        performanceMonitoring: import.meta.env.VITE_ENABLE_PERFORMANCE_MONITORING !== 'false
       },
       monitoring: {
         enableErrorTracking: import.meta.env.VITE_ENABLE_ERROR_TRACKING !== 'false',
@@ -248,7 +248,7 @@ export class ConfigManager extends EventEmitter {
         this.mergeConfigs();
 
         // 触发变更事件
-        this.emitConfigChanges(oldConfig, this.config, 'remote");"
+        this.emitConfigChanges(oldConfig, this.config, 'remote");
       }
     } catch (error) {
       console.warn('Failed to sync with remote config: ', error);
@@ -261,10 +261,10 @@ export class ConfigManager extends EventEmitter {
   private setupEnvironmentListeners(): void {
     // 监听主题变化
     if (window.matchMedia) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)");"
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)");
       mediaQuery.addEventListener('change', (e) => {
         if (this.config.ui.theme === 'auto') {
-          this.emit('themeChanged', e.matches ? 'dark' : 'light");"
+          this.emit('themeChanged', e.matches ? 'dark' : 'light");
         }
       });
     }
@@ -340,7 +340,7 @@ export class ConfigManager extends EventEmitter {
     localStorage.removeItem(this.storageKey);
 
     // 触发变更事件
-    this.emitConfigChanges(oldConfig, this.config, 'user");"
+    this.emitConfigChanges(oldConfig, this.config, 'user");
   }
 
   /**
@@ -388,7 +388,7 @@ export class ConfigManager extends EventEmitter {
    * 设置嵌套值
    */
   private setNestedValue(obj: any, path: string, value: any): void {
-    const keys = path.split('.");"
+    const keys = path.split('.");
     const lastKey = keys.pop()!;
     const target = keys.reduce((current, key) => {
       if (!(key in current)) {
@@ -417,16 +417,16 @@ export class ConfigManager extends EventEmitter {
   /**
    * 获取配置差异
    */
-  private getConfigDifferences(oldConfig: any, newConfig: any, prefix = ''): Array<{ key: string, oldValue: any, newValue: any }> {
+  private getConfigDifferences(oldConfig: any, newConfig: any, prefix = '): Array<{ key: string, oldValue: any, newValue: any }> {
     const differences: Array<{ key: string, oldValue: any, newValue: any }>  = [];
     const allKeys = new Set([...Object.keys(oldConfig || {}), ...Object.keys(newConfig || {})]);
 
     for (const key of allKeys) {
-      const fullKey = prefix ? `${prefix}.${key}` : key;`
+      const fullKey = prefix ? `${prefix}.${key}` : key;
       const oldValue = oldConfig?.[key];
       const newValue = newConfig?.[key];
 
-      if (typeof oldValue === "object' && typeof newValue === 'object' &&'`"`
+      if (typeof oldValue === "object' && typeof newValue === 'object' &&'
         oldValue !== null && newValue !== null &&
         !Array.isArray(oldValue) && !Array.isArray(newValue)) {
         differences.push(...this.getConfigDifferences(oldValue, newValue, fullKey));

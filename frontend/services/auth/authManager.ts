@@ -4,7 +4,7 @@
  * 版本: v2.0.0
  */
 
-import { jwtDecode    } from 'jwt-decode';import type { AuthResponse, User  } from '../../types/unified/models';import { defaultErrorHandler    } from '../unified/apiErrorHandler';// ==================== 类型定义 ==================== ''
+import { jwtDecode    } from 'jwt-decode';import type { AuthResponse, User  } from '../../types/unified/models';import { defaultErrorHandler    } from '../unified/apiErrorHandler';// ==================== 类型定义 ==================== 
 export interface AuthConfig     {
   // Token配置
   accessTokenExpiry: number; // 访问token过期时间（秒）
@@ -58,10 +58,10 @@ export interface SessionInfo     {
 }
 
 export interface MFAChallenge     {
-  type: 'sms' | 'email' | 'totp' | 'backup'
+  type: 'sms' | 'email' | 'totp' | 'backup
   challengeId: string;
   expiresAt: string;
-  maskedTarget?: string; // 如 '***@example.com' 或 '***1234'
+  maskedTarget?: string; // 如 '***@example.com' 或 '***1234
 }
 
 export interface MFAVerification     {
@@ -114,7 +114,7 @@ const DEFAULT_CONFIG: AuthConfig  = {
     refresh: '/auth/refresh',
     logout: '/auth/logout',
     mfa: '/auth/mfa',
-    sessions: '/auth/sessions'
+    sessions: '/auth/sessions
   }
 };
 // ==================== 增强认证管理器 ====================
@@ -144,7 +144,7 @@ export class AuthManager {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -182,7 +182,7 @@ export class AuthManager {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -226,7 +226,7 @@ export class AuthManager {
       const fingerprint = await this.generateDeviceFingerprint();
       this.deviceFingerprint = fingerprint;
     } catch (error) {
-      console.warn("Failed to generate device fingerprint: ', error);'`"`
+      console.warn("Failed to generate device fingerprint: ', error);
     }
   }
 
@@ -236,17 +236,17 @@ export class AuthManager {
       navigator.language,
       screen.width + 'x' + screen.height,
       new Date().getTimezoneOffset().toString(),
-      navigator.hardwareConcurrency?.toString() || '',
-      navigator.deviceMemory?.toString() || ''
+      navigator.hardwareConcurrency?.toString() || ',
+      navigator.deviceMemory?.toString() || '
     ];
 
     // 添加Canvas指纹
     try {
-      const canvas = document.createElement('canvas");"
-      const ctx = canvas.getContext('2d");"
+      const canvas = document.createElement('canvas");
+      const ctx = canvas.getContext('2d");
       if (ctx) {
-        ctx.textBaseline = 'top'
-        ctx.font = '14px Arial'
+        ctx.textBaseline = 'top
+        ctx.font = '14px Arial
         ctx.fillText('Device fingerprint test', 2, 2);
         components.push(canvas.toDataURL());
       }
@@ -254,7 +254,7 @@ export class AuthManager {
       // Canvas指纹生成失败，继续使用其他组件
     }
 
-    const fingerprint = components.join('|");"
+    const fingerprint = components.join('|");
     // 生成哈希
     if (crypto.subtle) {
       
@@ -262,10 +262,10 @@ export class AuthManager {
       const data = encoder.encode(fingerprint);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('");"
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join(');
       } else {
       // 降级到简单哈希
-      return btoa(fingerprint).replace(/[^a-zA-Z0-9]/g, "').substring(0, 32);"
+      return btoa(fingerprint).replace(/[^a-zA-Z0-9]/g, ").substring(0, 32);
     }
   }
 
@@ -273,8 +273,8 @@ export class AuthManager {
 
   async login(credentials: { email: string; password: string; rememberMe?: boolean }): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.login}`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.login}`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
           ...(this.deviceFingerprint && { 'X-Device-Fingerprint': this.deviceFingerprint })
@@ -288,7 +288,7 @@ export class AuthManager {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || '登录失败");"
+        throw new Error(data.error?.message || '登录失败");
       }
 
       if (data.success) {
@@ -300,7 +300,7 @@ export class AuthManager {
             success: false,
             requireMFA: true,
             mfaChallenge: data.mfaChallenge,
-            message: '需要多因素认证'
+            message: '需要多因素认证
       };
         }
 
@@ -315,10 +315,10 @@ export class AuthManager {
           success: true,
           user: data.user,
           token: data.token,
-          message: '登录成功'
+          message: '登录成功
         };
       } else {
-        throw new Error(data.message || '登录失败");"
+        throw new Error(data.message || '登录失败");
       }
     } catch (error) {
       const processedError = await defaultErrorHandler.handleError(error);
@@ -335,22 +335,22 @@ export class AuthManager {
     try {
       const refreshToken = await this.getRefreshToken();
       if (!refreshToken) {
-        throw new Error('No refresh token available");"
+        throw new Error('No refresh token available");
       }
 
-      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.refresh}`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.refresh}`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
-          "Authorization': `Bearer ${refreshToken}`,'`"
-          ...(this.deviceFingerprint && { "X-Device-Fingerprint': this.deviceFingerprint })'`"`
+          "Authorization': `Bearer ${refreshToken}`,'
+          ...(this.deviceFingerprint && { "X-Device-Fingerprint': this.deviceFingerprint })'
         }
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || 'Token refresh failed");"
+        throw new Error(data.error?.message || 'Token refresh failed");
       }
 
       if (data.success) {
@@ -359,7 +359,7 @@ export class AuthManager {
         this.emit('tokenRefreshed', data.token);
         return true;
       } else {
-        throw new Error(data.message || 'Token refresh failed");"
+        throw new Error(data.message || 'Token refresh failed");
       }
     } catch (error) {
       console.error('Token refresh failed: ', error);
@@ -407,8 +407,8 @@ export class AuthManager {
 
   async verifyMFA(verification: MFAVerification): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.mfa}/verify`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.mfa}/verify`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
           ...(this.deviceFingerprint && { 'X-Device-Fingerprint': this.deviceFingerprint })
@@ -419,7 +419,7 @@ export class AuthManager {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || 'MFA verification failed");"
+        throw new Error(data.error?.message || 'MFA verification failed");
       }
 
       if (data.success) {
@@ -431,10 +431,10 @@ export class AuthManager {
           success: true,
           user: data.user,
           token: data.token,
-          message: 'MFA验证成功'
+          message: 'MFA验证成功
       };
       } else {
-        throw new Error(data.message || 'MFA验证失败");"
+        throw new Error(data.message || 'MFA验证失败");
       }
     } catch (error) {
       const processedError = await defaultErrorHandler.handleError(error);
@@ -447,12 +447,12 @@ export class AuthManager {
     }
   }
 
-  async requestMFAChallenge(type: 'sms' | "email'): Promise<{ success: boolean; message: string }> {"
+  async requestMFAChallenge(type: 'sms' | "email'): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.mfa}/challenge`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.mfa}/challenge`, {
+        method: "POST',"
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json
         },
         body: JSON.stringify({ type })
       });
@@ -465,7 +465,7 @@ export class AuthManager {
     } catch (error) {
       return {
         success: false,
-        message: '发送验证码失败，请稍后重试'
+        message: '发送验证码失败，请稍后重试
       };
     }
   }
@@ -477,16 +477,16 @@ export class AuthManager {
       const token = await this.getAccessToken();
       if (!token) return [];
 
-      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.sessions}`, {`
+      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.sessions}`, {
         headers: {
-          "Authorization': `Bearer ${token}`'`"
+          "Authorization': `Bearer ${token}`
         }
       });
 
       const data = await response.json();
       return data.success ? data.data : [];
     } catch (error) {
-      console.error("Failed to get sessions: ', error);'`"`
+      console.error("Failed to get sessions: ', error);
       return [];
     }
   }
@@ -496,17 +496,17 @@ export class AuthManager {
       const token = await this.getAccessToken();
       if (!token) return false;
 
-      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.sessions}/${sessionId}`, {`
-        method: "DELETE','`"`
+      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.sessions}/${sessionId}`, {
+        method: "DELETE',"
         headers: {
-          "Authorization': `Bearer ${token}`'`"
+          "Authorization': `Bearer ${token}`
         }
       });
 
       const data = await response.json();
       return data.success;
     } catch (error) {
-      console.error("Failed to terminate session: ', error);'`"`
+      console.error("Failed to terminate session: ', error);
       return false;
     }
   }
@@ -516,17 +516,17 @@ export class AuthManager {
       const token = await this.getAccessToken();
       if (!token) return false;
 
-      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.sessions}/terminate-others`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.sessions}/terminate-others`, {
+        method: "POST',"
         headers: {
-          "Authorization': `Bearer ${token}`'`"
+          "Authorization': `Bearer ${token}`
         }
       });
 
       const data = await response.json();
       return data.success;
     } catch (error) {
-      console.error("Failed to terminate other sessions: ', error);'`"`
+      console.error("Failed to terminate other sessions: ', error);
       return false;
     }
   }
@@ -539,14 +539,14 @@ export class AuthManager {
       if (token) {
         // 检查会话是否仍然有效
         try {
-          const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.sessions}/current`, {`
+          const response = await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.sessions}/current`, {
             headers: {
-              'Authorization': `Bearer ${token}`'`
+              'Authorization': `Bearer ${token}
             }
           });
 
           if (!response.ok) {
-            this.emit("sessionExpired");``
+            this.emit("sessionExpired");
             await this.logout();
           }
         } catch (error) {
@@ -566,37 +566,37 @@ export class AuthManager {
       uppercase: policy.requireUppercase ? /[A-Z]/.test(password) : true,
       lowercase: policy.requireLowercase ? /[a-z]/.test(password) : true,
       numbers: policy.requireNumbers ? //d/.test(password) : true,
-        specialChars : policy.requireSpecialChars ? /[!@#$%^&*(),.?':{}|<>]/.test(password) : true'
+        specialChars : policy.requireSpecialChars ? /[!@#$%^&*(),.?':{}|<>]/.test(password) : true
     };
 
     let score = 0;
 
     if (!requirements.length) {
-      feedback.push(`密码长度至少需要${policy.minLength}个字符`);`
+      feedback.push(`密码长度至少需要${policy.minLength}个字符`);
     } else {
       score += 1;
     }
 
     if (!requirements.uppercase) {
-      feedback.push("密码需要包含大写字母");``
+      feedback.push("密码需要包含大写字母");
     } else {
       score += 1;
     }
 
     if (!requirements.lowercase) {
-      feedback.push('密码需要包含小写字母");"
+      feedback.push('密码需要包含小写字母");
     } else {
       score += 1;
     }
 
     if (!requirements.numbers) {
-      feedback.push('密码需要包含数字");"
+      feedback.push('密码需要包含数字");
     } else {
       score += 1;
     }
 
     if (!requirements.specialChars) {
-      feedback.push('密码需要包含特殊字符");"
+      feedback.push('密码需要包含特殊字符");
     } else {
       score += 1;
     }
@@ -611,7 +611,7 @@ export class AuthManager {
     ];
 
     if (commonPatterns.some(pattern => pattern.test(password))) {
-      feedback.push('密码过于简单，请使用更复杂的密码");"
+      feedback.push('密码过于简单，请使用更复杂的密码");
       score = Math.max(0, score - 2);
     }
 
@@ -645,20 +645,20 @@ export class AuthManager {
   private async getAccessToken(): Promise<string | null> {
     if (this.config.enableSecureStorage) {
       
-        const encrypted = localStorage.getItem('auth_access_token_enc");"
+        const encrypted = localStorage.getItem('auth_access_token_enc");
       return encrypted ? await this.decryptData(encrypted) : null;
       } else {
-      return localStorage.getItem('auth_access_token");"
+      return localStorage.getItem('auth_access_token");
     }
   }
 
   private async getRefreshToken(): Promise<string | null> {
     if (this.config.enableSecureStorage) {
       
-        const encrypted = localStorage.getItem('auth_refresh_token_enc");"
+        const encrypted = localStorage.getItem('auth_refresh_token_enc");
       return encrypted ? await this.decryptData(encrypted) : null;
       } else {
-      return localStorage.getItem('auth_refresh_token");"
+      return localStorage.getItem('auth_refresh_token");
     }
   }
 
@@ -687,15 +687,15 @@ export class AuthManager {
     try {
       const token = await this.getAccessToken();
       if (token) {
-        await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.logout}`, {`
-          method: "POST','`"`
+        await fetch(`${this.config.apiBaseUrl}${this.config.endpoints.logout}`, {
+          method: "POST',"
           headers: {
-            'Authorization': `Bearer ${token}`'`
+            'Authorization': `Bearer ${token}
           }
         });
       }
     } catch (error) {
-      console.error("Logout request failed: ', error);'`"`
+      console.error("Logout request failed: ', error);
     } finally {
       // 清理本地数据
       this.stopAutoRefresh();
@@ -703,11 +703,11 @@ export class AuthManager {
         clearInterval(this.sessionCheckTimer);
       }
 
-      localStorage.removeItem('auth_access_token");"
-      localStorage.removeItem('auth_refresh_token");"
-      localStorage.removeItem('auth_access_token_enc");"
-      localStorage.removeItem('auth_refresh_token_enc");"
-      this.emit('logout");"
+      localStorage.removeItem('auth_access_token");
+      localStorage.removeItem('auth_refresh_token");
+      localStorage.removeItem('auth_access_token_enc");
+      localStorage.removeItem('auth_refresh_token_enc");
+      this.emit('logout");
     }
   }
 

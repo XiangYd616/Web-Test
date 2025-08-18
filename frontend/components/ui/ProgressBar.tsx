@@ -2,9 +2,9 @@ import React from 'react';import { cn    } from '../../utils/cn';interface Progr
   /** 进度值 (0-100) */
   value: number;
   /** 进度条变体 */
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info
   /** 进度条尺寸 */
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg
   /** 是否显示百分比文本 */
   showPercentage?: boolean;
   /** 是否显示动画 */
@@ -35,7 +35,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       onClick?.(event);
     } catch (error) {
       console.error('Click handler error: ', error);
-      setError('操作失败，请重试");"
+      setError('操作失败，请重试");
     }
   }, [disabled, loading, onClick]);
   
@@ -82,13 +82,13 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       'h-2': size === 'md',
       'h-3': size === 'lg',
     },
-    "bg-gray-700 dark:bg-gray-600',"
+    "bg-gray-700 dark:bg-gray-600',
     className
   );
 
   // 进度条样式类
   const progressClasses = cn(
-    "h-full rounded-full transition-all duration-300 ease-in-out',"
+    "h-full rounded-full transition-all duration-300 ease-in-out',
     {
       // 变体颜色
       'bg-blue-500': variant === 'primary',
@@ -98,20 +98,20 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       'bg-red-500': variant === 'danger',
       'bg-cyan-500': variant === 'info',
       // 条纹效果
-      "bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:20px_100%]': striped,"
+      "bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:20px_100%]': striped,
       // 动画效果
-      "animate-pulse': animated && clampedValue > 0 && clampedValue < 100,"
+      "animate-pulse': animated && clampedValue > 0 && clampedValue < 100,
     }
   );
 
   return (
-    <div className= 'space-y-2'>
+    <div className='space-y-2'>
       {/* 标签和百分比 */}
       {(label || showPercentage) && (
-        <div className= 'flex justify-between items-center text-sm'>
-          {label && <span className= 'text-gray-300'>{label}</span>}
+        <div className='flex justify-between items-center text-sm'>
+          {label && <span className='text-gray-300'>{label}</span>}
           {showPercentage && (
-            <span className= 'text-gray-300 font-medium'>
+            <span className='text-gray-300 font-medium'>
               {Math.round(clampedValue)}%
             </span>
           )}
@@ -122,12 +122,12 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       <div className={containerClasses}>
         <div>
           className={progressClasses}
-          style={{ width: `${clampedValue}%` }}`
-          role= "progressbar";``
+          style={{ width: `${clampedValue}%` }}
+          role= "progressbar";
           aria-valuenow={clampedValue}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label={label || `进度: ${Math.round(clampedValue)}%`}`
+          aria-label={label || `进度: ${Math.round(clampedValue)}%`}
         />
       </div>
     </div>
@@ -155,7 +155,7 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   value,
   size = 120,
   strokeWidth = 8,
-  color = "var(--color-primary)','`"`
+  color = "var(--color-primary)','
   backgroundColor = 'var(--color-gray-700)',
   showPercentage = true,
   className
@@ -171,7 +171,7 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
       <svg>
         width={size}
         height={size}
-        className= 'transform -rotate-90'
+        className= 'transform -rotate-90
       >
         {/* 背景圆环 */}
         <circle>
@@ -180,8 +180,7 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
           r={radius}
           stroke={backgroundColor}
           strokeWidth={strokeWidth}
-          fill= 'transparent'
-        />
+          fill='transparent' />
 
         {/* 进度圆环 */}
         <circle>
@@ -190,18 +189,17 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
           r={radius}
           stroke={color}
           strokeWidth={strokeWidth}
-          fill= 'transparent'
+          fill= 'transparent
           strokeDasharray={strokeDasharray}
           strokeDashoffset={strokeDashoffset}
-          strokeLinecap= 'round'
-          className= 'transition-all duration-300 ease-in-out'
-        />
+          strokeLinecap= 'round
+          className='transition-all duration-300 ease-in-out' />
       </svg>
 
       {/* 百分比文本 */}
       {showPercentage && (
-        <div className= 'absolute inset-0 flex items-center justify-center'>
-          <span className= 'text-lg font-semibold text-white'>
+        <div className='absolute inset-0 flex items-center justify-center'>
+          <span className='text-lg font-semibold text-white'>
             {Math.round(clampedValue)}%
           </span>
         </div>
@@ -228,17 +226,17 @@ export const SteppedProgressBar: React.FC<SteppedProgressBarProps> = ({
   className
 }) => {
   return (
-    <div className={cn("w-full', className)}>"
-      <div className= 'flex items-center justify-between mb-2'>
+    <div className={cn("w-full', className)}>
+      <div className='flex items-center justify-between mb-2'>
         {Array.from({ length: totalSteps }, (_, index) => (
-          <div key={index} className= 'flex flex-col items-center'>
+          <div key={index} className='flex flex-col items-center'>
             {/* 步骤圆点 */}
             <div>
               className={cn(
                 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
                 {
                   'bg-blue-500 text-white': index <= currentStep,>
-                  "bg-gray-600 text-gray-400': index > currentStep,"
+                  "bg-gray-600 text-gray-400': index > currentStep,
                 }
               )}
             >
@@ -247,7 +245,7 @@ export const SteppedProgressBar: React.FC<SteppedProgressBarProps> = ({
 
             {/* 步骤标签 */}
             {steps && steps[index] && (
-              <span className= 'text-xs text-gray-400 mt-1 text-center max-w-20'>
+              <span className='text-xs text-gray-400 mt-1 text-center max-w-20'>
                 {steps[index]}
               </span>
             )}
@@ -256,12 +254,12 @@ export const SteppedProgressBar: React.FC<SteppedProgressBarProps> = ({
       </div>
 
       {/* 连接线 */}
-      <div className= 'flex items-center'>
+      <div className='flex items-center'>
         {Array.from({ length: totalSteps - 1 }, (_, index) => (
           <div>
             key={index}
             className={cn(
-              "flex-1 h-1 mx-2',"
+              "flex-1 h-1 mx-2',
               {
                 'bg-blue-500': index < currentStep,>
                 'bg-gray-600': index >= currentStep,

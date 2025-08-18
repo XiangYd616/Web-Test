@@ -93,7 +93,7 @@ class EnhancedApiClient {
         ...config,
         headers: {
           ...config.headers,
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}
         }
       };
     }
@@ -109,7 +109,7 @@ class EnhancedApiClient {
       
       // 重定向到登录页面
       if (window.location.pathname !== '/login') {
-        window.location.href = '/login'
+        window.location.href = '/login
       }
     }
     return response;
@@ -117,8 +117,8 @@ class EnhancedApiClient {
 
   // 生成缓存键
   private getCacheKey(url: string, options: RequestInit): string {
-    const method = options.method || 'GET'
-    const body = options.body ? JSON.stringify(options.body) : ''
+    const method = options.method || 'GET
+    const body = options.body ? JSON.stringify(options.body) : 
     return `${method}:${url}:${body}`;
   }
 

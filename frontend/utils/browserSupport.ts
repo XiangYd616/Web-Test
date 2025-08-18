@@ -110,7 +110,7 @@ const detectImageFormats = async (): Promise<{ webp: boolean; avif: boolean }> =
     formats.avif = await new Promise((resolve) => {
       avifImage.onload = () => resolve(true);
       avifImage.onerror = () => resolve(false);
-      avifImage.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A='
+      avifImage.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A=
     });
   } catch (error) {
     console.warn('图片格式检测失败:', error);
@@ -125,27 +125,27 @@ export const getBrowserInfo = (): BrowserInfo  => {
     name: 'Unknown',
     version: 'Unknown',
     engine: 'Unknown',
-    platform: navigator.platform || 'Unknown'
+    platform: navigator.platform || 'Unknown
   };
   // 检测浏览器名称和版本
   if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
-    browserInfo.name = 'Chrome'
-    browserInfo.engine = 'Blink'
+    browserInfo.name = 'Chrome
+    browserInfo.engine = 'Blink
     const match = userAgent.match(/Chrome\/(\d+)/);
     if (match) browserInfo.version = match[1];
   } else if (userAgent.includes('Firefox')) {
-    browserInfo.name = 'Firefox'
-    browserInfo.engine = 'Gecko'
+    browserInfo.name = 'Firefox
+    browserInfo.engine = 'Gecko
     const match = userAgent.match(/Firefox\/(\d+)/);
     if (match) browserInfo.version = match[1];
   } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
-    browserInfo.name = 'Safari'
-    browserInfo.engine = 'WebKit'
+    browserInfo.name = 'Safari
+    browserInfo.engine = 'WebKit
     const match = userAgent.match(/Version\/(\d+)/);
     if (match) browserInfo.version = match[1];
   } else if (userAgent.includes('Edg')) {
-    browserInfo.name = 'Edge'
-    browserInfo.engine = 'Blink'
+    browserInfo.name = 'Edge
+    browserInfo.engine = 'Blink
     const match = userAgent.match(/Edg\/(\d+)/);
     if (match) browserInfo.version = match[1];
   }
@@ -169,7 +169,7 @@ export const getScreenInfo = () => {
     availHeight: window.screen.availHeight,
     pixelRatio: window.devicePixelRatio || 1,
     colorDepth: window.screen.colorDepth,
-    orientation: window.screen.orientation?.type || 'unknown'
+    orientation: window.screen.orientation?.type || 'unknown
   };
 };
 

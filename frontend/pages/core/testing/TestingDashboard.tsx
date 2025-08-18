@@ -15,9 +15,8 @@ import {
   GlobalOutlined,
   UserOutlined,
   DesktopOutlined,
-  CloudServerOutlined
-} from '@ant-design/icons';
-
+  // CloudServerOutlined
+} from '@ant-design/icons'; // 已修复
 const { Title, Text } = Typography;
 
 const TestingDashboard: React.FC = () => {
@@ -47,7 +46,7 @@ const TestingDashboard: React.FC = () => {
       icon: <ThunderboltOutlined />,
       complexity: 'medium',
       estimatedTime: '30-60秒',
-      path: '/stress-test'
+      path: '/stress-test
     },
     {
       id: 'security',
@@ -56,7 +55,7 @@ const TestingDashboard: React.FC = () => {
       icon: <SecurityScanOutlined />,
       complexity: 'medium',
       estimatedTime: '10-20秒',
-      path: '/stress-test'
+      path: '/stress-test
     },
     {
       id: 'seo',
@@ -65,7 +64,7 @@ const TestingDashboard: React.FC = () => {
       icon: <SearchOutlined />,
       complexity: 'simple',
       estimatedTime: '15-30秒',
-      path: '/stress-test'
+      path: '/stress-test
     },
     {
       id: 'stress',
@@ -74,7 +73,7 @@ const TestingDashboard: React.FC = () => {
       icon: <BugOutlined />,
       complexity: 'complex',
       estimatedTime: '1-5分钟',
-      path: '/stress-test'
+      path: '/stress-test
     },
     {
       id: 'compatibility',
@@ -83,7 +82,7 @@ const TestingDashboard: React.FC = () => {
       icon: <GlobalOutlined />,
       complexity: 'complex',
       estimatedTime: '60-120秒',
-      path: '/stress-test'
+      path: '/stress-test
     },
     {
       id: 'ux',
@@ -92,7 +91,7 @@ const TestingDashboard: React.FC = () => {
       icon: <UserOutlined />,
       complexity: 'complex',
       estimatedTime: '20-40秒',
-      path: '/stress-test'
+      path: '/stress-test
     },
     {
       id: 'website',
@@ -101,7 +100,7 @@ const TestingDashboard: React.FC = () => {
       icon: <DesktopOutlined />,
       complexity: 'complex',
       estimatedTime: '30-90秒',
-      path: '/stress-test'
+      path: '/stress-test
     },
     {
       id: 'infrastructure',
@@ -110,7 +109,7 @@ const TestingDashboard: React.FC = () => {
       icon: <CloudServerOutlined />,
       complexity: 'complex',
       estimatedTime: '1-3分钟',
-      path: '/stress-test'
+      path: '/stress-test
     }
   ];
 
@@ -159,7 +158,7 @@ const TestingDashboard: React.FC = () => {
               style={{ height: '100%' }}
               actions={[
                 <Button 
-                  type="primary" 
+                  type="primary
                   loading={loading}
                   onClick={() => handleStartTest(tool)}
                   style={{ width: '80%' }}

@@ -9,5 +9,5 @@ const MFASetup: React.FC<MFASetupProps> = (props) => {
       <p>组件内容</p>
     </div>
   );
-};'"
-export default MFASetup;'"
+};
+export default MFASetup;'

@@ -29,7 +29,7 @@ export async function handleAsyncError<T>(operation: () => Promise<T>,
     const errorMessage = error instanceof Error ? error.message : String(error);
     
     if (logError) {
-      console.error(`[${context}] Error:`, error);`
+      console.error(`[${context}] Error:`, error);
     }
 
     // 使用错误服务处理
@@ -37,7 +37,7 @@ export async function handleAsyncError<T>(operation: () => Promise<T>,
 
     if (showNotification) {
       // 这里可以集成通知系统
-      console.warn(`操作失败: ${errorMessage}`);`
+      console.warn(`操作失败: ${errorMessage}`);
     }
 
     return null;
@@ -64,7 +64,7 @@ export function catchPromiseError<T>(
   context?: string
 ): Promise<T | null>   {
   return promise.catch(error => {
-    console.error(`[${context || "Promise'}] Error:`, error);'`
+    console.error(`[${context || "Promise'}] Error:`, error);
     errorService.handleError(error, { context });
     return null;
   });

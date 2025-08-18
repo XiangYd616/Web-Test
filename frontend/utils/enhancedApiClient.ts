@@ -53,7 +53,7 @@ constructor(baseUrl: string = '/api') {
   const url = `${this.baseUrl}${endpoint}`;
     
     // 检查缓存
-    if (options.cache && options.method === "GET') {'`
+    if (options.cache && options.method === "GET') {
       const cacheKey = this.getCacheKey(url, options);
       const cached = this.getFromCache(cacheKey);
       if (cached) {
@@ -82,7 +82,7 @@ constructor(baseUrl: string = '/api') {
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          const error = new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);`
+          const error = new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
           (error as any).status = response.status;
           (error as any).statusText = response.statusText;
           
@@ -95,7 +95,7 @@ constructor(baseUrl: string = '/api') {
             throw error;
           }
           
-          console.warn(`API调用失败，第${attempt}次重试:`, error.message);`
+          console.warn(`API调用失败，第${attempt}次重试:`, error.message);
       await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
       continue;
     }
@@ -111,7 +111,7 @@ constructor(baseUrl: string = '/api') {
       }
     };
     // 缓存GET请求结果
-    if (options.cache && options.method === "GET') {'`
+    if (options.cache && options.method === "GET') {
       const cacheKey = this.getCacheKey(url, options);
       this.setCache(cacheKey, apiResponse, options.cacheTTL);
     }
@@ -138,13 +138,13 @@ constructor(baseUrl: string = '/api') {
       };
     }
 
-    console.warn(`API调用异常，第${attempt}次重试:`, (error as Error).message);`
+    console.warn(`API调用异常，第${attempt}次重试:`, (error as Error).message);
       await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
     }
   }
 
 // 这里不应该到达，但为了类型安全
-throw new Error("Unexpected error in request method");`
+throw new Error("Unexpected error in request method");
   }
 
   /**
@@ -195,7 +195,7 @@ throw new Error("Unexpected error in request method");`
       'Content-Type': 'application/json',
     'X-Request-ID': this.generateRequestId(),
     'X-Timestamp': new Date().toISOString(),
-    ...(token && {"Authorization': `Bearer ${token}` }),'`
+    ...(token && {"Authorization': `Bearer ${token}` }),
     ...options.headers,
       },
     };
@@ -227,7 +227,7 @@ throw new Error("Unexpected error in request method");`
      * 缓存相关方法
      */
     private getCacheKey(url: string, options: ApiRequestOptions): string {
-    return `${options.method || "GET'}:${url}:${JSON.stringify(options.body || {})}`;'`
+    return `${options.method || "GET'}:${url}:${JSON.stringify(options.body || {})}`;
   }
 
     private getFromCache(key: string): any | null {
@@ -267,7 +267,7 @@ throw new Error("Unexpected error in request method");`
       this.metrics.totalRequests++;
     this.metrics.failedRequests++;
 
-    const errorType = error.name || "UnknownError";`
+    const errorType = error.name || "UnknownError";
     this.metrics.errorsByType.set(
     errorType,
     (this.metrics.errorsByType.get(errorType) || 0) + 1

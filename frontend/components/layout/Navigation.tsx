@@ -10,4 +10,4 @@ const Navigation: React.FC<NavigationProps> = (props) => {
     </div>
   );
 };
-export default Navigation;'"
+export default Navigation;

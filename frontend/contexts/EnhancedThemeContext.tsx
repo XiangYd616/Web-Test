@@ -6,9 +6,8 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState, useCallback } from 'react
 
 // 主题类型定义
-export type ThemeMode = 'light' | 'dark' | 'auto'
-export type ActualTheme = 'light' | 'dark'
-
+export type ThemeMode = 'light' | 'dark' | 'auto
+export type ActualTheme = 'light' | 'dark
 // 主题配置接口
 export interface ThemeConfig {
   primaryColor: string;
@@ -19,9 +18,9 @@ export interface ThemeConfig {
   textColor: string;
   borderColor: string;
   shadowColor: string;
-  fontSize: 'small' | 'medium' | 'large'
-  borderRadius: 'none' | 'small' | 'medium' | 'large'
-  spacing: 'compact' | 'normal' | 'comfortable'
+  fontSize: 'small' | 'medium' | 'large
+  borderRadius: 'none' | 'small' | 'medium' | 'large
+  spacing: 'compact' | 'normal' | 'comfortable
 }
 
 // 预定义主题
@@ -36,7 +35,7 @@ export const lightTheme: ThemeConfig = {
   shadowColor: 'rgba(0, 0, 0, 0.1)',
   fontSize: 'medium',
   borderRadius: 'medium',
-  spacing: 'normal'
+  spacing: 'normal
 };
 
 export const darkTheme: ThemeConfig = {
@@ -50,7 +49,7 @@ export const darkTheme: ThemeConfig = {
   shadowColor: 'rgba(0, 0, 0, 0.3)',
   fontSize: 'medium',
   borderRadius: 'medium',
-  spacing: 'normal'
+  spacing: 'normal
 };
 
 // 主题上下文类型
@@ -108,7 +107,7 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
   // 系统主题检测
   const [systemTheme, setSystemTheme] = useState<ActualTheme>(() => {
     if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light
     }
     return 'light
   });
@@ -146,7 +145,7 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
   // 辅助功能状态
   const [isHighContrast, setIsHighContrast] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return localStorage.getItem('highContrast') === 'true'
+    return localStorage.getItem('highContrast') === 'true
   });
 
   const [reduceMotion, setReduceMotion] = useState(() => {
@@ -157,7 +156,7 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
       return true;
     }
     
-    return localStorage.getItem('reduceMotion') === 'true'
+    return localStorage.getItem('reduceMotion') === 'true
   });
 
   // 计算实际主题
@@ -204,7 +203,7 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
           primaryColor: actualTheme === 'dark' ? '#FFFFFF' : '#000000',
           backgroundColor: actualTheme === 'dark' ? '#000000' : '#FFFFFF',
           textColor: actualTheme === 'dark' ? '#FFFFFF' : '#000000',
-          borderColor: actualTheme === 'dark' ? '#FFFFFF' : '#000000'
+          borderColor: actualTheme === 'dark' ? '#FFFFFF' : '#000000
         };
         break;
       case 'colorful':
@@ -212,17 +211,17 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
           primaryColor: '#8B5CF6',
           secondaryColor: '#F59E0B',
           accentColor: '#EF4444',
-          borderRadius: 'large'
+          borderRadius: 'large
         };
         break;
       case 'minimal':
         presetConfig = {
           borderRadius: 'none',
           spacing: 'compact',
-          shadowColor: 'transparent'
+          shadowColor: 'transparent
         };
         break;
-      default:
+      default: undefined, // 已修复
         presetConfig = actualTheme === 'dark' ? darkTheme : lightTheme;
     }
     

@@ -6,14 +6,14 @@
 import { useState, useEffect    } from 'react';import { breakpoints    } from '../design/tokens';// 断点类型
 export type Breakpoint   = keyof typeof breakpoints;// 媒体查询工具
 export const mediaQueries = {
-  up: (breakpoint: Breakpoint) => `@media (min-width: ${breakpoints[breakpoint]})`,`
+  up: (breakpoint: Breakpoint) => `@media (min-width: ${breakpoints[breakpoint]})`,
   down: (breakpoint: Breakpoint) => {
     const breakpointValues = Object.values(breakpoints);
     const currentIndex = Object.keys(breakpoints).indexOf(breakpoint);
     const nextValue = breakpointValues[currentIndex + 1];
-    return nextValue ? `@media (max-width: ${parseInt(nextValue) - 1}px)` : '";`
+    return nextValue ? `@media (max-width: ${parseInt(nextValue) - 1}px)` : ';
   },
-  between: (min: Breakpoint, max: Breakpoint) => `@media (min-width: ${breakpoints[min]}) and (max-width: ${parseInt(breakpoints[max]) - 1}px)`,`
+  between: (min: Breakpoint, max: Breakpoint) => `@media (min-width: ${breakpoints[min]}) and (max-width: ${parseInt(breakpoints[max]) - 1}px)`,
   only: (breakpoint: Breakpoint) => {
     const breakpointKeys = Object.keys(breakpoints) as Breakpoint[];
     const currentIndex = breakpointKeys.indexOf(breakpoint);
@@ -32,11 +32,11 @@ export type ResponsiveValue<T>   = T | Partial<Record<Breakpoint, T>>;// 获取�
 export const getCurrentBreakpoint = (): Breakpoint  => {
   const width = window.innerWidth;
 
-  if (width >= parseInt(breakpoints.xxl)) return "xxl";`
-  if (width >= parseInt(breakpoints.xl)) return 'xl'
-  if (width >= parseInt(breakpoints.lg)) return 'lg'
-  if (width >= parseInt(breakpoints.md)) return 'md'
-  if (width >= parseInt(breakpoints.sm)) return 'sm'
+  if (width >= parseInt(breakpoints.xxl)) return "xxl";
+  if (width >= parseInt(breakpoints.xl)) return 'xl
+  if (width >= parseInt(breakpoints.lg)) return 'lg
+  if (width >= parseInt(breakpoints.md)) return 'md
+  if (width >= parseInt(breakpoints.sm)) return 'sm
   return 'xs
 };
 

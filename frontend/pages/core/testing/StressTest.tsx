@@ -35,8 +35,7 @@ const StressTest: React.FC = () => {
 
   // 页面标题管理
   useEffect(() => {
-    document.title = 'Stress Test - Test Web App'
-
+    document.title = 'Stress Test - Test Web App
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         console.log('页面变为可见状态');
@@ -140,11 +139,11 @@ const StressTest: React.FC = () => {
           <Card title="测试控制" className="control-card">
             <Space>
               <Button
-                type="primary"
+                type="primary
                 icon={<PlayCircleOutlined />}
                 onClick={startTest}
                 disabled={isRunning}
-                size="large"
+                size="large
               >
                 开始测试
               </Button>
@@ -153,7 +152,7 @@ const StressTest: React.FC = () => {
                 icon={<PauseCircleOutlined />}
                 onClick={pauseTest}
                 disabled={!isRunning || isPaused}
-                size="large"
+                size="large
               >
                 暂停
               </Button>
@@ -162,7 +161,7 @@ const StressTest: React.FC = () => {
                 icon={<StopOutlined />}
                 onClick={stopTest}
                 disabled={!isRunning}
-                size="large"
+                size="large
               >
                 停止
               </Button>
@@ -171,7 +170,7 @@ const StressTest: React.FC = () => {
                 icon={<ReloadOutlined />}
                 onClick={resetTest}
                 disabled={isRunning}
-                size="large"
+                size="large
               >
                 重置
               </Button>
@@ -203,30 +202,30 @@ const StressTest: React.FC = () => {
               <Row gutter={16}>
                 <Col span={6}>
                   <Statistic
-                    title="总请求数"
+                    title="总请求数
                     value={results.totalRequests}
                     valueStyle={{ color: '#3f8600' }}
                   />
                 </Col>
                 <Col span={6}>
                   <Statistic
-                    title="成功请求"
+                    title="成功请求
                     value={results.successfulRequests}
                     valueStyle={{ color: '#3f8600' }}
                   />
                 </Col>
                 <Col span={6}>
                   <Statistic
-                    title="失败请求"
+                    title="失败请求
                     value={results.failedRequests}
                     valueStyle={{ color: '#cf1322' }}
                   />
                 </Col>
                 <Col span={6}>
                   <Statistic
-                    title="平均响应时间"
+                    title="平均响应时间
                     value={results.averageResponseTime}
-                    suffix="ms"
+                    suffix="ms
                     valueStyle={{ color: '#1890ff' }}
                   />
                 </Col>
@@ -235,23 +234,23 @@ const StressTest: React.FC = () => {
               <Row gutter={16} style={{ marginTop: 16 }}>
                 <Col span={8}>
                   <Statistic
-                    title="最小响应时间"
+                    title="最小响应时间
                     value={results.minResponseTime}
-                    suffix="ms"
+                    suffix="ms
                   />
                 </Col>
                 <Col span={8}>
                   <Statistic
-                    title="最大响应时间"
+                    title="最大响应时间
                     value={results.maxResponseTime}
-                    suffix="ms"
+                    suffix="ms
                   />
                 </Col>
                 <Col span={8}>
                   <Statistic
-                    title="每秒请求数"
+                    title="每秒请求数
                     value={results.requestsPerSecond}
-                    suffix="req/s"
+                    suffix="req/s
                   />
                 </Col>
               </Row>
@@ -262,9 +261,9 @@ const StressTest: React.FC = () => {
 
       {results && results.failedRequests > 0 && (
         <Alert
-          message="测试完成"
+          message="测试完成
           description={`测试已完成，共有 ${results.failedRequests} 个请求失败。请检查目标服务器状态。`}
-          type="warning"
+          type="warning
           showIcon
           style={{ marginTop: 16 }}
         />

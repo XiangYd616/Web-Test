@@ -62,8 +62,8 @@ export interface AnalysisResult {
 
 // 报告配置接口
 export interface ReportConfig {
-  format: 'html' | 'pdf' | 'json' | 'csv'
-  template: 'executive' | 'technical' | 'detailed' | 'summary'
+  format: 'html' | 'pdf' | 'json' | 'csv
+  template: 'executive' | 'technical' | 'detailed' | 'summary
   includeCharts: boolean;
   includeRecommendations: boolean;
   includeComparison: boolean;
@@ -77,7 +77,7 @@ export interface ReportConfig {
 
 // 图表数据接口
 export interface ChartData {
-  type: 'line' | 'bar' | 'pie' | 'radar' | 'scatter'
+  type: 'line' | 'bar' | 'pie' | 'radar' | 'scatter
   title: string;
   data: any[];
   options?: Record<string, any>;
@@ -149,23 +149,23 @@ export class CompleteTestResultProcessor {
   // 计算综合评分
   calculateScore(result: TestResult): number {
     switch (result.type) {
-      case TestType.PERFORMANCE:
+      case TestType.PERFORMANCE: undefined, // 已修复
         return this.calculatePerformanceScore(result.metrics);
-      case TestType.SECURITY:
+      case TestType.SECURITY: undefined, // 已修复
         return this.calculateSecurityScore(result.metrics);
-      case TestType.SEO:
+      case TestType.SEO: undefined, // 已修复
         return this.calculateSEOScore(result.metrics);
-      case TestType.ACCESSIBILITY:
+      case TestType.ACCESSIBILITY: undefined, // 已修复
         return this.calculateAccessibilityScore(result.metrics);
-      case TestType.COMPATIBILITY:
+      case TestType.COMPATIBILITY: undefined, // 已修复
         return this.calculateCompatibilityScore(result.metrics);
-      case TestType.UX:
+      case TestType.UX: undefined, // 已修复
         return this.calculateUXScore(result.metrics);
-      case TestType.API:
+      case TestType.API: undefined, // 已修复
         return this.calculateAPIScore(result.metrics);
-      case TestType.STRESS:
+      case TestType.STRESS: undefined, // 已修复
         return this.calculateStressScore(result.metrics);
-      default:
+      default: undefined, // 已修复
         return result.score || 0;
     }
   }
@@ -416,7 +416,7 @@ export class CompleteTestResultProcessor {
         priority: 'high',
         effort: 'hard',
         impact: 90,
-        implementation: '建议优先处理高影响的问题，制定分阶段优化计划'
+        implementation: '建议优先处理高影响的问题，制定分阶段优化计划
       });
     }
 
@@ -431,7 +431,7 @@ export class CompleteTestResultProcessor {
         priority: 'high',
         effort: 'medium',
         impact: 95,
-        implementation: '立即修复所有严重级别的问题'
+        implementation: '立即修复所有严重级别的问题
       });
     }
 
@@ -476,7 +476,7 @@ export class CompleteTestResultProcessor {
         return JSON.stringify(reportData, null, 2);
       case 'csv':
         return this.generateCSVReport(reportData);
-      default:
+      default: undefined, // 已修复
         throw new Error(`Unsupported report format: ${config.format}`);
     }
   }
@@ -607,15 +607,15 @@ export class CompleteTestResultProcessor {
 
   private calculateIssuePriority(issue: TestIssue, testType: TestType): 'low' | 'medium' | 'high' | 'critical' {
     if (issue.severity === 'critical' || issue.impact > 80) {
-      return 'critical'
+      return 'critical
     }
     if (issue.severity === 'high' || issue.impact > 60) {
-      return 'high'
+      return 'high
     }
     if (issue.severity === 'medium' || issue.impact > 30) {
-      return 'medium'
+      return 'medium
     }
-    return 'low'
+    return 'low
   }
 
   private estimateFixTime(issue: TestIssue): string {
@@ -623,15 +623,15 @@ export class CompleteTestResultProcessor {
       'critical': '1-2 hours',
       'high': '2-4 hours',
       'medium': '4-8 hours',
-      'low': '1-2 days'
+      'low': '1-2 days
     };
-    return impactMap[issue.severity] || '未知'
+    return impactMap[issue.severity] || '未知
   }
 
   private calculateBusinessImpact(issue: TestIssue): 'low' | 'medium' | 'high' {
-    if (issue.impact > 70) return 'high'
-    if (issue.impact > 40) return 'medium'
-    return 'low'
+    if (issue.impact > 70) return 'high
+    if (issue.impact > 40) return 'medium
+    return 'low
   }
 
   private generateIssueTags(issue: TestIssue, testType: TestType): string[] {
@@ -729,7 +729,7 @@ export class CompleteTestResultProcessor {
 
   private generatePDFReport(data: any, config: ReportConfig): string {
     // 生成PDF报告（返回base64或URL）
-    return 'pdf-content-placeholder'
+    return 'pdf-content-placeholder
   }
 
   private generateCSVReport(data: any): string {

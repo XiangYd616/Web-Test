@@ -28,7 +28,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -66,7 +66,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -76,7 +76,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   private wsConnections: Map<string, WebSocket> = new Map();
   private progressCallbacks: Map<string, (progress: TestProgress) => void> = new Map();
 
-  constructor(baseURL: string = "/api/v1', timeout: number = 300000) {'`"`
+  constructor(baseURL: string = "/api/v1', timeout: number = 300000) {'
     this.baseURL = baseURL;
     this.timeout = timeout;
   }
@@ -87,7 +87,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   async startTest(testType: string, config: TestConfig): Promise<{ testId: string }> {
     try {
       const response = await axios.post(
-        `${this.baseURL}/tests/${testType}/start`,`
+        `${this.baseURL}/tests/${testType}/start`,
         config,
         { timeout: this.timeout }
       );
@@ -133,14 +133,14 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      console.log(`WebSocket connected for test ${testId}`);`
+      console.log(`WebSocket connected for test ${testId}`);
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
 
-        if (data.type === "progress') {'`"`
+        if (data.type === "progress') {'
           onProgress(data.payload as TestProgress);
         } else if (data.type === 'complete') {
           onComplete(data.payload as TestResult);
@@ -160,7 +160,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
     };
 
     ws.onclose = () => {
-      console.log(`WebSocket closed for test ${testId}`);`
+      console.log(`WebSocket closed for test ${testId}`);
       this.wsConnections.delete(testId);
     };
 
@@ -182,7 +182,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
    * 获取WebSocket URL
    */
   private getWebSocketURL(): string {
-    const protocol = window.location.protocol === "https: ' ? 'wss: ' : 'ws: ";``
+    const protocol = window.location.protocol === "https: ' ? 'wss: ' : 'ws: ";
     const host = window.location.host;
     return `${protocol}/${host}`;
   }
@@ -193,7 +193,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   async getTestProgress(testType: string, testId: string): Promise<TestProgress> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/${testType}/${testId}/progress``
+        `${this.baseURL}/tests/${testType}/${testId}/progress
       );
 
       return response.data;
@@ -208,7 +208,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   async getTestResult(testType: string, testId: string): Promise<TestResult> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/${testType}/${testId}/result``
+        `${this.baseURL}/tests/${testType}/${testId}/result
       );
 
       return response.data;
@@ -223,7 +223,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   async cancelTest(testType: string, testId: string): Promise<void> {
     try {
       await axios.post(
-        `${this.baseURL}/tests/${testType}/${testId}/cancel``
+        `${this.baseURL}/tests/${testType}/${testId}/cancel
       );
     } catch (error) {
       throw this.handleAPIError(error, testType);
@@ -236,12 +236,12 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   async getTestHistory(testType: string, limit: number = 50): Promise<TestResult[]> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/test/history`,`
+        `${this.baseURL}/test/history`,
         { params: { type: testType, limit } }
       );
 
       // 使用数据转换器转换格式
-      const { TestDataTransformer } = await import("../utils/testDataTransformer");``
+      const { TestDataTransformer } = await import("../utils/testDataTransformer");
       const historyItems = response.data.data?.tests || response.data.data || [];
 
       return historyItems.map((item: any) => TestDataTransformer.transformBackendToFrontend(item));
@@ -255,7 +255,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
    */
   async deleteHistoryItem(testType: string, testId: string): Promise<void> {
     try {
-      await axios.delete(`${this.baseURL}/test/history/${testId}`);`
+      await axios.delete(`${this.baseURL}/test/history/${testId}`);
     } catch (error) {
       throw this.handleAPIError(error, testType);
     }
@@ -267,7 +267,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   async checkEngineAvailability(testType: string): Promise<{ available: boolean; dependencies?: string[] }> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/${testType}/availability``
+        `${this.baseURL}/tests/${testType}/availability
       );
       return response.data;
     } catch (error) {
@@ -281,7 +281,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   async validateConfig(testType: string, config: TestConfig): Promise<{ valid: boolean; errors?: string[] }> {
     try {
       const response = await axios.post(
-        `${this.baseURL}/tests/${testType}/validate`,`
+        `${this.baseURL}/tests/${testType}/validate`,
         config
       );
       return response.data;
@@ -293,18 +293,18 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   /**
    * 导出测试报告
    */
-  async exportReport(testId: string, format: "pdf' | 'html' | 'json' = 'pdf'): Promise<Blob> {'`"`
+  async exportReport(testId: string, format: "pdf' | 'html' | 'json' = 'pdf'): Promise<Blob> {'
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/reports/${testId}/export`,`
+        `${this.baseURL}/tests/reports/${testId}/export`,
         {
           params: { format },
-          responseType: "blob";``
+          responseType: "blob";
         }
       );
       return response.data;
     } catch (error) {
-      throw this.handleAPIError(error, 'export");"
+      throw this.handleAPIError(error, 'export");
     }
   }
 
@@ -314,7 +314,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   async getTestTemplates(testType: string): Promise<Array<{ name: string; config: TestConfig; description: string }>> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/${testType}/templates``
+        `${this.baseURL}/tests/${testType}/templates
       );
       return response.data;
     } catch (error) {
@@ -333,7 +333,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   ): Promise<void> {
     try {
       await axios.post(
-        `${this.baseURL}/tests/${testType}/templates`,`
+        `${this.baseURL}/tests/${testType}/templates`,
         { name, config, description }
       );
     } catch (error) {
@@ -349,12 +349,12 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   ): Promise<{ batchId: string; testIds: string[] }> {
     try {
       const response = await axios.post(
-        `${this.baseURL}/tests/batch/start`,`
+        `${this.baseURL}/tests/batch/start`,
         { tests }
       );
       return response.data;
     } catch (error) {
-      throw this.handleAPIError(error, "batch");``
+      throw this.handleAPIError(error, "batch");
     }
   }
 
@@ -369,11 +369,11 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   }> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/batch/${batchId}/status``
+        `${this.baseURL}/tests/batch/${batchId}/status
       );
       return response.data;
     } catch (error) {
-      throw this.handleAPIError(error, "batch");``
+      throw this.handleAPIError(error, "batch");
     }
   }
 
@@ -401,24 +401,24 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
 
       if (status === 400) {
         return new TestError(`配置错误: ${message`}
-      }`, "CONFIG_ERROR', true);'`"
+      }`, "CONFIG_ERROR', true);
       } else if (status === 404) {
         
         return new TestError(`${testType`}
-      }测试服务不存在`, "SERVICE_NOT_FOUND', false);'`"
+      }测试服务不存在`, "SERVICE_NOT_FOUND', false);
       } else if (status === 500) {
         
         return new TestError(`服务器内部错误: ${message`}
-      }`, "SERVER_ERROR', true);'`"
+      }`, "SERVER_ERROR', true);
       } else if (status === 503) {
         
         return new TestError(`${testType`}
-      }测试服务暂时不可用`, 'SERVICE_UNAVAILABLE', true);'`
+      }测试服务暂时不可用`, 'SERVICE_UNAVAILABLE', true);
       }
     } else if (error.request) {
       
         // 网络错误
-      return new TestError("网络连接失败，请检查网络状态', 'NETWORK_ERROR', true);'`"`
+      return new TestError("网络连接失败，请检查网络状态', 'NETWORK_ERROR', true);"
       }
 
     // 其他错误

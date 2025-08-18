@@ -12,17 +12,16 @@ import {
   Row, 
   Col,
   message,
-  Divider
-} from 'antd';
+  // Divider
+} from 'antd'; // 已修复
 import { 
   SettingOutlined, 
   SaveOutlined, 
   ReloadOutlined,
   SecurityScanOutlined,
   BugOutlined,
-  GlobalOutlined
-} from '@ant-design/icons';
-
+  // GlobalOutlined
+} from '@ant-design/icons'; // 已修复
 const { Title, Text } = Typography;
 const { Option } = Select;
 
@@ -63,7 +62,7 @@ const Settings: React.FC = () => {
     logLevel: 'info',
     emailNotifications: true,
     browserNotifications: false,
-    notificationEmail: ''
+    notificationEmail: 
   });
 
   const handleSave = async (values: SettingsData) => {
@@ -106,7 +105,7 @@ const Settings: React.FC = () => {
 
       <Form
         form={form}
-        layout="vertical"
+        layout="vertical
         initialValues={settings}
         onFinish={handleSave}
         style={{ marginTop: 24 }}
@@ -123,9 +122,9 @@ const Settings: React.FC = () => {
               }
             >
               <Form.Item
-                label="主题模式"
-                name="theme"
-                tooltip="选择界面主题"
+                label="主题模式
+                name="theme
+                tooltip="选择界面主题
               >
                 <Select>
                   <Option value="light">浅色主题</Option>
@@ -135,8 +134,8 @@ const Settings: React.FC = () => {
               </Form.Item>
 
               <Form.Item
-                label="语言"
-                name="language"
+                label="语言
+                name="language
               >
                 <Select>
                   <Option value="zh-CN">简体中文</Option>
@@ -145,9 +144,9 @@ const Settings: React.FC = () => {
               </Form.Item>
 
               <Form.Item
-                label="自动保存"
-                name="autoSave"
-                valuePropName="checked"
+                label="自动保存
+                name="autoSave
+                valuePropName="checked
               >
                 <Switch checkedChildren="开启" unCheckedChildren="关闭" />
               </Form.Item>
@@ -165,9 +164,9 @@ const Settings: React.FC = () => {
               }
             >
               <Form.Item
-                label="最大并发测试数"
-                name="maxConcurrentTests"
-                tooltip="同时运行的最大测试数量"
+                label="最大并发测试数
+                name="maxConcurrentTests
+                tooltip="同时运行的最大测试数量
               >
                 <Slider
                   min={1}
@@ -176,21 +175,21 @@ const Settings: React.FC = () => {
                     1: '1',
                     5: '5',
                     10: '10',
-                    20: '20'
+                    20: '20
                   }}
                 />
               </Form.Item>
 
               <Form.Item
-                label="测试超时时间（秒）"
-                name="testTimeout"
+                label="测试超时时间（秒）
+                name="testTimeout
               >
                 <Input type="number" min={10} max={300} />
               </Form.Item>
 
               <Form.Item
-                label="重试次数"
-                name="retryAttempts"
+                label="重试次数
+                name="retryAttempts
               >
                 <Select>
                   <Option value={1}>1次</Option>
@@ -213,25 +212,25 @@ const Settings: React.FC = () => {
               }
             >
               <Form.Item
-                label="启用安全扫描"
-                name="enableSecurityScan"
-                valuePropName="checked"
+                label="启用安全扫描
+                name="enableSecurityScan
+                valuePropName="checked
               >
                 <Switch checkedChildren="开启" unCheckedChildren="关闭" />
               </Form.Item>
 
               <Form.Item
-                label="严格模式"
-                name="strictMode"
-                valuePropName="checked"
-                tooltip="启用更严格的安全检查"
+                label="严格模式
+                name="strictMode
+                valuePropName="checked
+                tooltip="启用更严格的安全检查
               >
                 <Switch checkedChildren="开启" unCheckedChildren="关闭" />
               </Form.Item>
 
               <Form.Item
-                label="日志级别"
-                name="logLevel"
+                label="日志级别
+                name="logLevel
               >
                 <Select>
                   <Option value="debug">调试</Option>
@@ -247,24 +246,24 @@ const Settings: React.FC = () => {
           <Col xs={24} lg={12}>
             <Card title="通知设置">
               <Form.Item
-                label="邮件通知"
-                name="emailNotifications"
-                valuePropName="checked"
+                label="邮件通知
+                name="emailNotifications
+                valuePropName="checked
               >
                 <Switch checkedChildren="开启" unCheckedChildren="关闭" />
               </Form.Item>
 
               <Form.Item
-                label="浏览器通知"
-                name="browserNotifications"
-                valuePropName="checked"
+                label="浏览器通知
+                name="browserNotifications
+                valuePropName="checked
               >
                 <Switch checkedChildren="开启" unCheckedChildren="关闭" />
               </Form.Item>
 
               <Form.Item
-                label="通知邮箱"
-                name="notificationEmail"
+                label="通知邮箱
+                name="notificationEmail
                 rules={[
                   { type: 'email', message: '请输入有效的邮箱地址' }
                 ]}
@@ -273,7 +272,7 @@ const Settings: React.FC = () => {
               </Form.Item>
 
               <Button 
-                type="link" 
+                type="link
                 onClick={handleTestConnection}
                 style={{ padding: 0 }}
               >
@@ -296,9 +295,9 @@ const Settings: React.FC = () => {
                 重置
               </Button>
               <Button 
-                type="primary" 
+                type="primary
                 icon={<SaveOutlined />} 
-                htmlType="submit"
+                htmlType="submit
                 loading={loading}
               >
                 保存设置

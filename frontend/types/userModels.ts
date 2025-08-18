@@ -18,7 +18,7 @@ export enum UserRole {
   ADMIN = 'admin',
   MODERATOR = 'moderator',
   TESTER = 'tester',
-  MANAGER = 'manager'
+  MANAGER = 'manager
 }
 
 /**
@@ -27,7 +27,7 @@ export enum UserRole {
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  SUSPENDED = 'suspended
 }
 
 /**
@@ -36,7 +36,7 @@ export enum UserStatus {
 export enum UserPlan {
   FREE = 'free',
   PRO = 'pro',
-  ENTERPRISE = 'enterprise'
+  ENTERPRISE = 'enterprise
 }
 
 // ==================== 用户偏好设置 ====================
@@ -54,7 +54,7 @@ export interface NotificationSettings     {
 
 export interface DashboardSettings     {
   defaultView: string;
-  layout: 'grid' | 'list' | 'cards'
+  layout: 'grid' | 'list' | 'cards
   widgets: string[];
   refreshInterval: number; // 秒
   showTips: boolean;
@@ -74,11 +74,11 @@ export interface PrivacySettings     {
 }
 
 export interface UserPreferences     {
-  theme: 'light' | 'dark' | 'auto'
-  language: 'zh-CN' | 'en-US' | 'ja-JP'
+  theme: 'light' | 'dark' | 'auto
+  language: 'zh-CN' | 'en-US' | 'ja-JP
   timezone: string;
-  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY'
-  timeFormat: '24h' | '12h'
+  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY
+  timeFormat: '24h' | '12h
   notifications: NotificationSettings;
   dashboard: DashboardSettings;
   testing: TestingSettings;
@@ -261,8 +261,8 @@ export interface UserFilter     {
 export interface UserListQuery     {
   page?: number;
   limit?: number;
-  sortBy?: 'createdAt' | 'lastLoginAt' | 'username' | 'email'
-  sortOrder?: 'asc' | 'desc'
+  sortBy?: 'createdAt' | 'lastLoginAt' | 'username' | 'email
+  sortOrder?: 'asc' | 'desc
   filter?: UserFilter;
 }
 
@@ -289,7 +289,7 @@ export interface UserActivityLog     {
   ipAddress: string;
   userAgent: string;
   timestamp: Timestamp;
-  severity: 'low' | 'medium' | 'high'
+  severity: 'low' | 'medium' | 'high
   metadata?: Record<string, any>;
 }
 
@@ -332,7 +332,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
 };
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-  timezone: 'Asia/Shanghai'
+  timezone: 'Asia/Shanghai
 };
 
 // ==================== 类型守卫函数 ====================
@@ -367,9 +367,9 @@ export function fromDatabaseFields(dbData: UserDatabaseFields): User   {
       firstName: dbData.first_name,
       lastName: dbData.last_name,
       fullName: dbData.first_name && dbData.last_name
-        ? `${dbData.first_name} ${dbData.last_name}``
+        ? `${dbData.first_name} ${dbData.last_name}
         : undefined,
-      timezone: "Asia/Shanghai' // 默认值'`
+      timezone: "Asia/Shanghai' // 默认值
     },
     preferences: dbData.preferences ? JSON.parse(dbData.preferences) : DEFAULT_USER_PREFERENCES,
     emailVerified: dbData.email_verified,
@@ -392,7 +392,7 @@ export function toDatabaseFields(user: User, passwordHash?: string): UserDatabas
     id: user.id,
     username: user.username,
     email: user.email,
-    password_hash: passwordHash || '', // 需要单独处理
+    password_hash: passwordHash || ', // 需要单独处理
     first_name: user.profile.firstName,
     last_name: user.profile.lastName,
     role: user.role,

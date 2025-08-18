@@ -17,7 +17,7 @@ export interface DataProcessorConfig     {
     enabled: boolean;
     ttl: number; // 毫秒
     maxSize: number;
-    strategy: 'lru' | 'ttl' | 'fifo'
+    strategy: 'lru' | 'ttl' | 'fifo
   };
 
   // 重试配置
@@ -25,7 +25,7 @@ export interface DataProcessorConfig     {
     enabled: boolean;
     maxAttempts: number;
     delay: number; // 毫秒
-    backoff: 'linear' | 'exponential'
+    backoff: 'linear' | 'exponential
   };
 
   // 分页配置
@@ -50,13 +50,13 @@ const DEFAULT_CONFIG: DataProcessorConfig  = {
     enabled: true,
     ttl: 300000, // 5分钟
     maxSize: 100,
-    strategy: 'lru'
+    strategy: 'lru
   },
   retry: {
     enabled: true,
     maxAttempts: 3,
     delay: 1000,
-    backoff: 'exponential'
+    backoff: 'exponential
   },
   pagination: {
     defaultPageSize: 20,
@@ -141,7 +141,7 @@ class DataCache {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -172,7 +172,7 @@ class DataCache {
   }
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   private maxSize: number;
-  private strategy: 'lru' | 'ttl' | 'fifo'
+  private strategy: 'lru' | 'ttl' | 'fifo
   private accessOrder = new Map<string, number>();
 
   constructor(maxSize = 100, strategy: 'lru' | 'ttl' | 'fifo' = 'lru') {
@@ -236,20 +236,20 @@ class DataCache {
     let keyToEvict: string;
 
     switch (this.strategy) {
-      case 'lru': ''
+      case 'lru': 
         // 移除最久未访问的
         keyToEvict = Array.from(this.accessOrder.entries())
           .sort(([, a], [, b]) => a - b)[0][0];
         break;
 
-      case 'ttl': ''
+      case 'ttl': 
         // 移除最早过期的
         keyToEvict = Array.from(this.cache.entries())
           .sort(([, a], [, b]) => (a.timestamp + a.ttl) - (b.timestamp + b.ttl))[0][0];
         break;
 
-      case 'fifo': ''
-      default:
+      case 'fifo': 
+      default: undefined, // 已修复
         // 移除最早添加的
         keyToEvict = this.cache.keys().next().value;
         break;
@@ -290,7 +290,7 @@ export function useDataProcessor<T = any>(
 
   // 生成缓存键
   const generateCacheKey = useCallback((params?: any): string  => {
-    const baseKey = 'data-processor'
+    const baseKey = 'data-processor
     if (!params) return baseKey;
     return `${baseKey}-${JSON.stringify(params)}`;
   }, []);
@@ -300,10 +300,10 @@ export function useDataProcessor<T = any>(
     setState(prev => ({
       ...prev,
       ...updates,
-      loading: updates.state === "loading','`
+      loading: updates.state === "loading',
       success: updates.state === 'success',
       hasError: updates.state === 'error',
-      refreshing: updates.state === 'refreshing'
+      refreshing: updates.state === 'refreshing
     }));
   }, []);
 
@@ -330,7 +330,7 @@ export function useDataProcessor<T = any>(
       return successResponse.data;
     } else {
       const errorResponse = response as ApiErrorResponse;
-      const errorMessage = errorResponse.error.message || '请求失败'
+      const errorMessage = errorResponse.error.message || '请求失败
       updateState({
         state: 'error',
         error: errorMessage,
@@ -396,7 +396,7 @@ export function useDataProcessor<T = any>(
 
       return processResponse(response, cacheKey);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '网络请求失败'
+      const errorMessage = error instanceof Error ? error.message : '网络请求失败
       updateState({
         state: 'error',
         error: errorMessage,
@@ -408,7 +408,7 @@ export function useDataProcessor<T = any>(
         finalConfig.errorHandling?.autoRetry &&
         state.retryCount < (finalConfig.retry.maxAttempts - 1)) {
 
-        const delay = finalConfig.retry.backoff === 'exponential'
+        const delay = finalConfig.retry.backoff === 'exponential
           ? finalConfig.retry.delay * Math.pow(2, state.retryCount): finalConfig.retry.delay;
 
         retryTimeoutRef.current = setTimeout(()  => {
@@ -509,7 +509,7 @@ export function useDataProcessor<T = any>(
 
     setLoading: (loading: boolean) => {
       updateState({
-        state: loading ? 'loading' : 'idle'
+        state: loading ? 'loading' : 'idle
       });
     }
   };

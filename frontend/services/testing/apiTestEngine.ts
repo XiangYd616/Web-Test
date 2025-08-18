@@ -1,7 +1,7 @@
 // ApiTestEngine - API测试引擎
 export interface TestConfig {
   url: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE
   headers?: Record<string, string>;
   body?: any;
   timeout?: number;
@@ -50,7 +50,7 @@ export class ApiTestEngine {
         success: false,
         status: 0,
         responseTime,
-        error: error instanceof Error ? error.message : '未知错误'
+        error: error instanceof Error ? error.message : '未知错误
       };
     }
   }

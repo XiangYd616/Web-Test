@@ -10,4 +10,4 @@ const ResultCard: React.FC<ResultCardProps> = (props) => {
     </div>
   );
 };
-export default ResultCard;'"
+export default ResultCard;

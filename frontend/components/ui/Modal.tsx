@@ -3,7 +3,7 @@ import React, { useEffect, useRef    } from 'react';import { X    } from 'lucide
   onClose: () => void;
   title?: string;
   description?: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
   showCloseButton?: boolean;
@@ -17,7 +17,7 @@ const modalSizes = {
   md: 'max-w-md',
   lg: 'max-w-lg',
   xl: 'max-w-xl',
-  full: 'max-w-full mx-4'
+  full: 'max-w-full mx-4
 };
 
 export const Modal: React.FC<ModalProps> = ({
@@ -39,7 +39,7 @@ export const Modal: React.FC<ModalProps> = ({
     style: computedStyle,
     disabled,
     'aria-label': ariaLabel,
-    "data-testid': testId"
+    "data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -77,7 +77,7 @@ export const Modal: React.FC<ModalProps> = ({
     };
 
     document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener("keydown', handleEscape);"
+    return () => document.removeEventListener("keydown', handleEscape);
   }, [isOpen, closeOnEscape, onClose]);
 
   // 焦点管理
@@ -101,13 +101,13 @@ export const Modal: React.FC<ModalProps> = ({
   // 防止背景滚动
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden
     } else {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset
     }
 
     return () => {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset
     };
   }, [isOpen]);
 
@@ -122,7 +122,7 @@ export const Modal: React.FC<ModalProps> = ({
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Tab') {
       const focusableElements = modalRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex= '-1'])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex= '-1'])
       );
 
       if (focusableElements && focusableElements.length > 0) {
@@ -148,14 +148,14 @@ export const Modal: React.FC<ModalProps> = ({
 
   const modalContent = (
     <div>
-      className= 'fixed inset-0 z-50 flex items-center justify-center p-4'
+      className= 'fixed inset-0 z-50 flex items-center justify-center p-4
       onClick={handleBackdropClick}
     >
       {/* 背景遮罩 */}
       <div>
         className={cn(
           'fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300',
-          isOpen ? 'opacity-100' : 'opacity-0'
+          isOpen ? 'opacity-100' : 'opacity-0
         )}
       />
 
@@ -168,41 +168,40 @@ export const Modal: React.FC<ModalProps> = ({
           'relative w-full bg-gray-800 rounded-lg shadow-xl border border-gray-700',
           'transform transition-all duration-300 ease-out',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900',
-          isOpen ? 'scale-100 opacity-100' : "scale-95 opacity-0',"
+          isOpen ? 'scale-100 opacity-100' : "scale-95 opacity-0',
           modalSizes[size],
           className
         )}
       >
         {/* 头部 */}
         {(title || showCloseButton) && (
-          <div className= 'flex items-center justify-between p-6 border-b border-gray-700'>
+          <div className='flex items-center justify-between p-6 border-b border-gray-700'>
             <div>
               {title && (
-                <h2 className= 'text-lg font-semibold text-white'>
+                <h2 className='text-lg font-semibold text-white'>
                   {title}
                 </h2>
               )}
               {description && (
-                <p className= 'mt-1 text-sm text-gray-400'>
+                <p className='mt-1 text-sm text-gray-400'>
                   {description}
                 </p>
               )}
             </div>
 
             {showCloseButton && (
-              <IconButton icon={<X className= 'w-4 h-4'    />}
-                variant= 'ghost'
-                size= 'sm'
+              <IconButton icon={<X className='w-4 h-4' />}
+                variant= 'ghost
+                size= 'sm
                 onClick={onClose}
-                aria-label= '关闭模态框'
-                className= 'text-gray-400 hover:text-white'
-              />
+                aria-label= '关闭模态框
+                className='text-gray-400 hover:text-white' />
             )}
           </div>
         )}
 
         {/* 内容区域 */}
-        <div className= 'p-6'>
+        <div className='p-6'>
           {children}
         </div>
       </div>
@@ -220,7 +219,7 @@ interface ModalHeaderProps   {
 }
 
 export const ModalHeader: React.FC<ModalHeaderProps> = ({ children, className }) => (
-  <div className={cn("mb-4', className)}>"
+  <div className={cn("mb-4', className)}>
     {children}
   </div>
 );
@@ -232,7 +231,7 @@ interface ModalBodyProps   {
 }
 
 export const ModalBody: React.FC<ModalBodyProps> = ({ children, className }) => (
-  <div className={cn("', className)}>"
+  <div className={cn(", className)}>
     {children}
   </div>
 );
@@ -244,7 +243,7 @@ interface ModalFooterProps   {
 }
 
 export const ModalFooter: React.FC<ModalFooterProps> = ({ children, className }) => (
-  <div className={cn("flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-700', className)}>"
+  <div className={cn("flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-700', className)}>
     {children}
   </div>
 );
@@ -258,7 +257,7 @@ interface ConfirmModalProps   {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'danger' | 'warning' | 'info'
+  variant?: 'danger' | 'warning' | 'info
 }
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -269,7 +268,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   message,
   confirmText = '确认',
   cancelText = '取消',
-  variant = 'danger'
+  variant = 'danger
 }) => {
   const handleConfirm = () => {
     onConfirm();
@@ -281,15 +280,15 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      size= 'sm'
+      size= 'sm
     >
       <ModalBody>
-        <p className= 'text-gray-300'>{message}</p>
+        <p className='text-gray-300'>{message}</p>
       </ModalBody>
 
       <ModalFooter>
         <Button>
-          variant= 'ghost'
+          variant= 'ghost
           onClick={onClose}
         >
           {cancelText}

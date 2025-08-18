@@ -38,7 +38,7 @@ export enum ErrorCode {
   // 服务器错误
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
-  BAD_GATEWAY = 'BAD_GATEWAY'
+  BAD_GATEWAY = 'BAD_GATEWAY
 }
 
 // 错误严重程度
@@ -46,7 +46,7 @@ export enum ErrorSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical
 }
 
 // 扩展的 API 错误接口

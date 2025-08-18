@@ -37,7 +37,7 @@ interface EnhancedErrorBoundaryProps {
   resetOnPropsChange?: boolean;
   resetKeys?: Array<string | number>;
   isolate?: boolean;
-  level?: 'page' | 'section' | 'component'
+  level?: 'page' | 'section' | 'component
 }
 
 class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorBoundaryState> {
@@ -59,7 +59,7 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
     return {
       hasError: true,;
       error,;
-      errorId: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      errorId: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}
     };
   }
 
@@ -151,7 +151,7 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
       await fetch('/api/errors/report', {
         method: 'POST',;
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json
         },)
         body: JSON.stringify(errorDetails);
       });
@@ -207,30 +207,30 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
     // 默认错误界面
     const canRetry = enableRetry && retryCount < maxRetries;
     const levelConfig = {
-      page: {','
+      page: {',
   title: '页面加载失败',;
         description: '抱歉，页面遇到了问题。请尝试刷新页面或联系技术支持。',;
-        icon: '🚫'
+        icon: '🚫
       },
-      section: {','
+      section: {',
   title: '模块加载失败',;
         description: '这个模块暂时无法显示。您可以尝试重新加载或继续使用其他功能。',;
-        icon: '⚠️'
+        icon: '⚠️
       },
-      component: {','
+      component: {',
   title: '组件错误',;
         description: '这个组件遇到了问题，但不会影响页面的其他功能。',;
-        icon: '🔧'
+        icon: '🔧
       }
     };
 
     const config = levelConfig[level];
 
     return (;
-      <div className="error-boundary-fallback p-6 bg-red-50 border border-red-200 rounded-lg">";"
-        <div className="flex items-start space-x-4">";"
+      <div className="error-boundary-fallback p-6 bg-red-50 border border-red-200 rounded-lg">";
+        <div className="flex items-start space-x-4">";
           <div className="text-2xl">{config.icon}</div>
-          <div className="flex-1">";"
+          <div className="flex-1">";
             <h3 className="text-lg font-semibold text-red-800 mb-2">;
               {config.title}
             </h3>
@@ -239,11 +239,11 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
             </p>
             ;
             { process.env.NODE_ENV === 'development' && (
-              <details className="mb-4">";"
+              <details className="mb-4">";
                 <summary className="cursor-pointer text-sm text-red-600 hover:text-red-800">;
                   查看错误详情;
                 </summary>
-                <div className="mt-2 p-3 bg-red-100 rounded text-xs font-mono text-red-800 overflow-auto">";"
+                <div className="mt-2 p-3 bg-red-100 rounded text-xs font-mono text-red-800 overflow-auto">";
                   <div className="mb-2">;
                     <strong>错误信息:</strong> {error.message }
                   </div>
@@ -352,7 +352,7 @@ export function useErrorHandler() {
       method: 'POST',;
       headers: { 'Content-Type': 'application/json' },)
       body: JSON.stringify(errorDetails);
-    }).catch(reportError => {')'
+    }).catch(reportError => {')
       console.error('Failed to report error:', reportError);
     });
   };
@@ -361,4 +361,4 @@ export function useErrorHandler() {
 }
 
 export default EnhancedErrorBoundary;
-'";
+';

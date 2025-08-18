@@ -30,7 +30,7 @@ export type UUID   = string;export type Timestamp   = string;export interface Us
 }
 
 export interface UserPreferences     {
-  theme: 'light' | 'dark' | 'auto'
+  theme: 'light' | 'dark' | 'auto
   language: string;
   timezone: string;
   notifications: {

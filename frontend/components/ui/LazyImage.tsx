@@ -22,7 +22,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   src,
   alt,
   placeholder,
-  className = '',
+  className = ',
   style,
   onLoad,
   onError,
@@ -39,7 +39,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     style: computedStyle,
     disabled,
     'aria-label': ariaLabel,
-    "data-testid': testId'
+    "data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   // 可访问性支持
@@ -55,7 +55,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     'aria-describedby': ariaDescribedBy,
     role,
     tabIndex: disabled ? -1 : tabIndex,
-    "data-testid': testId'
+    "data-testid': testId
   };
 
   // 键盘导航支持
@@ -120,9 +120,9 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   return (
     <div
       ref={imgRef}
-      className={`lazy-image-container ${className}`}`
+      className={`lazy-image-container ${className}`}
       style={{
-        position: "relative','`
+        position: "relative',
         overflow: 'hidden',
         ...style
       }}
@@ -130,7 +130,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       {/* 占位符 */}
       {!isLoaded && !hasError && (
         <div
-          className= 'lazy-image-placeholder'
+          className= 'lazy-image-placeholder
           style={{
             position: 'absolute',
             top: 0,
@@ -141,14 +141,14 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundImage: blurDataURL ? `url(${blurDataURL})` : undefined,`
-            backgroundSize: "cover','`
+            backgroundImage: blurDataURL ? `url(${blurDataURL})` : undefined,
+            backgroundSize: "cover',
             backgroundPosition: 'center',
-            filter: blurDataURL ? "blur(10px)' : undefined'
+            filter: blurDataURL ? "blur(10px)' : undefined
           }}
         >
           {placeholder && !blurDataURL && (
-            <span className= 'text-gray-400'>{placeholder}</span>
+            <span className='text-gray-400'>{placeholder}</span>
           )}
         </div>
       )}
@@ -173,7 +173,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       {/* 错误状态 */}
       {hasError && (
         <div
-          className= 'lazy-image-error'
+          className= 'lazy-image-error
           style={{
             position: 'absolute',
             top: 0,
@@ -184,7 +184,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#999'
+            color: '#999
           }}
         >
           <span>图片加载失败</span>

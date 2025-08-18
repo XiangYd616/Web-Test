@@ -16,7 +16,7 @@ import { createApiUrl    } from '../../config/api';export interface BatchTestCon
 }
 
 export interface BatchExportConfig     {
-  dataType: 'test-results' | 'test-history' | 'analytics' | 'reports'
+  dataType: 'test-results' | 'test-history' | 'analytics' | 'reports
   filters: {
     startDate?: string;
     endDate?: string;
@@ -24,7 +24,7 @@ export interface BatchExportConfig     {
     urls?: string[];
     status?: string[];
   };
-  format: 'json' | 'csv' | 'excel' | 'pdf'
+  format: 'json' | 'csv' | 'excel' | 'pdf
   options: {
     includeDetails?: boolean;
     compressOutput?: boolean;
@@ -34,8 +34,8 @@ export interface BatchExportConfig     {
 
 export interface BatchOperation     {
   id: string;
-  type: 'test' | 'export' | 'delete' | 'update'
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+  type: 'test' | 'export' | 'delete' | 'update
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled
   progress: number;
   totalItems: number;
   completedItems: number;
@@ -52,7 +52,7 @@ export interface BatchTestResult     {
   results: Array<{>
     url: string;
     testType: string;
-    status: 'success' | 'failed'
+    status: 'success' | 'failed
     result?: any;
     error?: string;
     duration: number;
@@ -91,7 +91,7 @@ class BatchOperationService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -132,13 +132,13 @@ class BatchOperationService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`'`
+          'Authorization': `Bearer ${localStorage.getItem('token')}
         },
         body: JSON.stringify(config)
       });
 
       if (!response.ok) {
-        throw new Error(`批量测试启动失败: ${response.status}`);`
+        throw new Error(`批量测试启动失败: ${response.status}`);
       }
 
       const result = await response.json();
@@ -146,7 +146,7 @@ class BatchOperationService {
       if (result.success) {
         const operation: BatchOperation  = {
           id: result.data.operationId,
-          type: "test','`"`
+          type: "test',"
           status: 'pending',
           progress: 0,
           totalItems: config.urls.length * config.testTypes.length,
@@ -160,7 +160,7 @@ class BatchOperationService {
 
         return operation.id;
       } else {
-        throw new Error(result.message || '批量测试启动失败");"
+        throw new Error(result.message || '批量测试启动失败");
       }
     } catch (error) {
       console.error('批量测试启动失败:', error);
@@ -177,13 +177,13 @@ class BatchOperationService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization": `Bearer ${localStorage.getItem('token')}`'`"
+          'Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(config)
       });
 
       if (!response.ok) {
-        throw new Error(`批量导出启动失败: ${response.status}`);`
+        throw new Error(`批量导出启动失败: ${response.status}`);
       }
 
       const result = await response.json();
@@ -191,7 +191,7 @@ class BatchOperationService {
       if (result.success) {
         const operation: BatchOperation  = {
           id: result.data.operationId,
-          type: "export','`"`
+          type: "export',"
           status: 'pending',
           progress: 0,
           totalItems: result.data.totalItems || 1,
@@ -205,7 +205,7 @@ class BatchOperationService {
 
         return operation.id;
       } else {
-        throw new Error(result.message || '批量导出启动失败");"
+        throw new Error(result.message || '批量导出启动失败");
       }
     } catch (error) {
       console.error('批量导出启动失败:', error);
@@ -226,7 +226,7 @@ class BatchOperationService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          "Authorization": `Bearer ${localStorage.getItem('token')}`'`
+          "Authorization": `Bearer ${localStorage.getItem('token')}
         },
         body: JSON.stringify({
           dataType,
@@ -236,7 +236,7 @@ class BatchOperationService {
       });
 
       if (!response.ok) {
-        throw new Error(`批量删除启动失败: ${response.status}`);`
+        throw new Error(`批量删除启动失败: ${response.status}`);
       }
 
       const result = await response.json();
@@ -244,7 +244,7 @@ class BatchOperationService {
       if (result.success) {
         const operation: BatchOperation  = {
           id: result.data.operationId,
-          type: "delete','`"`
+          type: "delete',"
           status: 'pending',
           progress: 0,
           totalItems: ids.length,
@@ -258,10 +258,10 @@ class BatchOperationService {
 
         return operation.id;
       } else {
-        throw new Error(result.message || '批量删除启动失败");"
+        throw new Error(result.message || '批量删除启动失败");
       }
     } catch (error) {
-      console.error("批量删除启动失败:', error);"
+      console.error("批量删除启动失败:', error);
       throw error;
     }
   }
@@ -271,14 +271,14 @@ class BatchOperationService {
    */
   async getOperationStatus(operationId: string): Promise<BatchOperation | null> {
     try {
-      const response = await fetch(createApiUrl(`/api/batch/status/${operationId}`), {`
+      const response = await fetch(createApiUrl(`/api/batch/status/${operationId}`), {
         headers: {
-          'Authorization": `Bearer ${localStorage.getItem('token')}`'`"
+          'Authorization": `Bearer ${localStorage.getItem('token')}`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`获取操作状态失败: ${response.status}`);`
+        throw new Error(`获取操作状态失败: ${response.status}`);
       }
 
       const result = await response.json();
@@ -290,10 +290,10 @@ class BatchOperationService {
         this.notifyListeners(operationId, operation);
         return operation;
       } else {
-        throw new Error(result.message || "获取操作状态失败");``
+        throw new Error(result.message || "获取操作状态失败");
       }
     } catch (error) {
-      console.error("获取操作状态失败:', error);"
+      console.error("获取操作状态失败:', error);
       return null;
     }
   }
@@ -303,15 +303,15 @@ class BatchOperationService {
    */
   async cancelOperation(operationId: string): Promise<boolean> {
     try {
-      const response = await fetch(createApiUrl(`/api/batch/cancel/${operationId}`), {`
-        method: "POST','`"`
+      const response = await fetch(createApiUrl(`/api/batch/cancel/${operationId}`), {
+        method: "POST',"
         headers: {
-          'Authorization": `Bearer ${localStorage.getItem('token')}`'`"
+          'Authorization": `Bearer ${localStorage.getItem('token')}`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`取消操作失败: ${response.status}`);`
+        throw new Error(`取消操作失败: ${response.status}`);
       }
 
       const result = await response.json();
@@ -319,16 +319,16 @@ class BatchOperationService {
       if (result.success) {
         const operation = this.operations.get(operationId);
         if (operation) {
-          operation.status = "cancelled";``
+          operation.status = "cancelled";
           operation.endTime = new Date().toISOString();
           this.notifyListeners(operationId, operation);
         }
         return true;
       } else {
-        throw new Error(result.message || '取消操作失败");"
+        throw new Error(result.message || '取消操作失败");
       }
     } catch (error) {
-      console.error("取消操作失败:', error);"
+      console.error("取消操作失败:', error);
       return false;
     }
   }
@@ -338,14 +338,14 @@ class BatchOperationService {
    */
   async getOperationResults(operationId: string): Promise<any> {
     try {
-      const response = await fetch(createApiUrl(`/api/batch/results/${operationId}`), {`
+      const response = await fetch(createApiUrl(`/api/batch/results/${operationId}`), {
         headers: {
-          'Authorization": `Bearer ${localStorage.getItem('token')}`'`"
+          'Authorization": `Bearer ${localStorage.getItem('token')}`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`获取操作结果失败: ${response.status}`);`
+        throw new Error(`获取操作结果失败: ${response.status}`);
       }
 
       const result = await response.json();
@@ -354,10 +354,10 @@ class BatchOperationService {
         
         return result.data;
       } else {
-        throw new Error(result.message || "获取操作结果失败");``
+        throw new Error(result.message || "获取操作结果失败");
       }
     } catch (error) {
-      console.error("获取操作结果失败:', error);"
+      console.error("获取操作结果失败:', error);
       throw error;
     }
   }
@@ -367,30 +367,30 @@ class BatchOperationService {
    */
   async downloadExportFile(operationId: string): Promise<void> {
     try {
-      const response = await fetch(createApiUrl(`/api/batch/download/${operationId}`), {`
+      const response = await fetch(createApiUrl(`/api/batch/download/${operationId}`), {
         headers: {
-          'Authorization": `Bearer ${localStorage.getItem('token')}`'`"
+          'Authorization": `Bearer ${localStorage.getItem('token')}`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`下载文件失败: ${response.status}`);`
+        throw new Error(`下载文件失败: ${response.status}`);
       }
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
 
       // 从响应头获取文件名
-      const contentDisposition = response.headers.get("Content-Disposition");``
+      const contentDisposition = response.headers.get("Content-Disposition");
       let filename = `export-${operationId}.zip`;
       if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename= "(.+)'/);'`"`
+        const filenameMatch = contentDisposition.match(/filename= "(.+)'/);'
         if (filenameMatch) {
           filename = filenameMatch[1];
         }
       }
 
-      const a = document.createElement('a");"
+      const a = document.createElement('a");
       a.href = url;
       a.download = filename;
       a.click();

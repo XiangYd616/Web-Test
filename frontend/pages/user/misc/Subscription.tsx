@@ -8,7 +8,7 @@ interface SubscriptionPlan   {
   id: string;
   name: string;
   price: number;
-  period: 'month' | 'year'
+  period: 'month' | 'year
   popular?: boolean;
   description: string;
   features: PlanFeature[];
@@ -23,7 +23,7 @@ interface SubscriptionPlan   {
 const Subscription: React.FC  = () => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -34,7 +34,7 @@ const Subscription: React.FC  = () => {
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`"`
+      if (document.visibilityState ==="visible') {'
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -46,17 +46,17 @@ const Subscription: React.FC  = () => {
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: ', message: ' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });
+      setFeedback({ type: ', message: ' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback("error', state.error.message);"
+      showFeedback("error', state.error.message);
     }
   }, [state.error]);
   
@@ -66,12 +66,12 @@ const Subscription: React.FC  = () => {
     const errors = {};
     
     // 基础验证规则
-    if (!data.name || data.name.trim() ==='') {
-      errors.name ='名称不能为空'
+    if (!data.name || data.name.trim() ===') {
+      errors.name ='名称不能为空
     }
     
     if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.email ='请输入有效的邮箱地址'
+      errors.email ='请输入有效的邮箱地址
     }
     
     return errors;
@@ -90,8 +90,8 @@ const Subscription: React.FC  = () => {
     // 提交表单
     await submitForm(formData);
   };
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly");"
-  const [selectedPlan, setSelectedPlan] = useState<string>('pro");"
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly");
+  const [selectedPlan, setSelectedPlan] = useState<string>('pro");
   const plans: SubscriptionPlan[]  = [
     {
       id: 'free',
@@ -144,7 +144,7 @@ const Subscription: React.FC  = () => {
       id: 'enterprise',
       name: '企业版',
       price: billingPeriod ==='monthly' ? 299 : 2990,
-      period: billingPeriod ==='monthly' ? 'month' : "year',"
+      period: billingPeriod ==='monthly' ? 'month' : "year',
       description: '适合大型企业和高频使用场景',
       features: [
         { name: '全部测试功能', included: true },
@@ -169,11 +169,11 @@ const Subscription: React.FC  = () => {
   const handleUpgrade = (planId: string) => {
     setSelectedPlan(planId);
     // 这里实现升级逻辑
-    console.log("升级到计划:', planId);"
+    console.log("升级到计划:', planId);
   };
 
   const formatLimit = (limit: number) => {
-    if (limit === -1) return "无限制"
+    if (limit === -1) return "无限制
     if (limit >= 1000) return `${(limit / 1000).toFixed(0)}K`;
     return limit.toString();
   };
@@ -182,7 +182,7 @@ const Subscription: React.FC  = () => {
   if (state.isLoading || loading) {
     
   if (state.error) {
-    return (<div className="bg-red-50 border border-red-200 rounded-md p-4'>`'"`
+    return (<div className="bg-red-50 border border-red-200 rounded-md p-4'>`
         <div className='flex'>
           <div className='flex-shrink-0'>
             <svg className='h-5 w-5 text-red-400' viewBox='0 0 20 20' fill='currentColor'>
@@ -197,7 +197,7 @@ const Subscription: React.FC  = () => {
             <div className='mt-4'>
               <button>
                 onClick={() => window.location.reload()}
-                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
+                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200
               >
                 重试
               </button>
@@ -233,23 +233,23 @@ const Subscription: React.FC  = () => {
           <button>
             onClick={() => setBillingPeriod('monthly')}
             className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${`}
-              billingPeriod ==="monthly";``
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}`
+              billingPeriod ==="monthly";
+                ? 'bg-white text-gray-900 shadow-sm
+                : 'text-gray-600 hover:text-gray-900
+            }`}
           >
             按月付费
           </button>
           <button>
-            onClick={() => setBillingPeriod("yearly')}'`"`
+            onClick={() => setBillingPeriod("yearly')}'
             className={`px-6 py-2 rounded-md text-sm font-medium transition-colors relative ${`}
-              billingPeriod ==="yearly";``
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}`
+              billingPeriod ==="yearly";
+                ? 'bg-white text-gray-900 shadow-sm
+                : 'text-gray-600 hover:text-gray-900
+            }`}
           >
             按年付费
-            <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full'>`'"`
+            <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full'>`
               省20%
             </span>
           </button>
@@ -263,12 +263,12 @@ const Subscription: React.FC  = () => {
             key={plan.id}
             className={`relative bg-white rounded-2xl shadow-sm border-2 transition-all hover:shadow-lg ${`}
               plan.popular
-                ? "border-blue-500 ring-2 ring-blue-200";``
-                : 'border-gray-200 hover:border-gray-300'
-            }`}`
+                ? "border-blue-500 ring-2 ring-blue-200";
+                : 'border-gray-200 hover:border-gray-300
+            }`}
           >
             {plan.popular && (
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2'>`'"`
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2'>`
                 <span className='bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1'>
                   <Star className='w-4 h-4'    />
                   <span>最受欢迎</span>
@@ -324,10 +324,10 @@ const Subscription: React.FC  = () => {
                     ) : (
                       <X className='w-5 h-5 text-gray-300 flex-shrink-0'    />
                     )}
-                    <span className={`text-sm ${feature.included ? 'text-gray-900' : "text-gray-400'}`}>`"
+                    <span className={`text-sm ${feature.included ? 'text-gray-900' : "text-gray-400'}`}>
                       {feature.name}
                       {feature.limit && (
-                        <span className="text-gray-500 ml-1'>({feature.limit})</span>`'"`
+                        <span className="text-gray-500 ml-1'>({feature.limit})</span>`
                       )}
                     </span>
                   </div>
@@ -339,11 +339,11 @@ const Subscription: React.FC  = () => {
                 onClick={() => handleUpgrade(plan.id)}
                 className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${`}
                   plan.popular
-                    ? "bg-blue-600 text-white hover:bg-blue-700";``
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                }`}`
+                    ? "bg-blue-600 text-white hover:bg-blue-700";
+                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200
+                }`}
               >
-                {plan.id ==="free' ? '免费开始" : "选择此计划'}'``
+                {plan.id ==="free' ? '免费开始" : "选择此计划'}'
               </button>
             </div>
           </div>

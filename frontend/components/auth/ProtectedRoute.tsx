@@ -15,9 +15,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps>  = ({ children }) => {
   const descriptionId = `${componentId}-description`;
   const ariaProps = {
     id: componentId,;
-    "aria-label': ariaLabel,'`';'"`
+    "aria-label': ariaLabel,';
     'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [''];
+    'aria-describedby': ['];
       error ? errorId : null,;
       description ? descriptionId : null,;
       ariaDescribedBy;
@@ -34,17 +34,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps>  = ({ children }) => {
   const location = useLocation();
   if (isLoading) {
         return (;
-      <div className= 'min-h-screen flex items-center justify-center bg-gray-900'>;
-        <LoadingSpinner size= 'lg' text= '验证用户身份...'    />
+      <div className='min-h-screen flex items-center justify-center bg-gray-900'>;
+        <LoadingSpinner size= 'lg' text='验证用户身份...' />
       </div>
     );
       }
   if (!user) { 
-        // 保存当前路径，登录后重定向回来'
+        // 保存当前路径，登录后重定向回来
     return <Navigate to= '/login' state={{ from: location
        }} replace    />;
   }
   return <>{children}</>;
 };
-export default ProtectedRoute;'"
-'";
+export default ProtectedRoute;
+';

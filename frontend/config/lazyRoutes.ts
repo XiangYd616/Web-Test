@@ -29,7 +29,7 @@ export interface LazyRouteConfig     {
   component: React.LazyExoticComponent<React.ComponentType<any>>;
   preload?: boolean;
   chunkName?: string;
-  priority?: 'high' | 'medium' | 'low'
+  priority?: 'high' | 'medium' | 'low
 }
 
 export const lazyRoutes: LazyRouteConfig[] = [
@@ -39,14 +39,14 @@ export const lazyRoutes: LazyRouteConfig[] = [
     component: LazyHome,
     preload: true,
     chunkName: 'home',
-    priority: 'high'
+    priority: 'high
   },
   {
     path: '/dashboard',
     component: LazyDashboard,
     preload: true,
     chunkName: 'dashboard',
-    priority: 'high'
+    priority: 'high
   },
   
   // 认证页面 - 中优先级
@@ -55,14 +55,14 @@ export const lazyRoutes: LazyRouteConfig[] = [
     component: LazyLogin,
     preload: false,
     chunkName: 'auth',
-    priority: 'medium'
+    priority: 'medium
   },
   {
     path: '/register',
     component: LazyRegister,
     preload: false,
     chunkName: 'auth',
-    priority: 'medium'
+    priority: 'medium
   },
   
   // 测试页面 - 中优先级
@@ -71,35 +71,35 @@ export const lazyRoutes: LazyRouteConfig[] = [
     component: LazyPerformanceTest,
     preload: false,
     chunkName: 'testing',
-    priority: 'medium'
+    priority: 'medium
   },
   {
     path: '/test/stress',
     component: LazyStressTest,
     preload: false,
     chunkName: 'testing',
-    priority: 'medium'
+    priority: 'medium
   },
   {
     path: '/test/api',
     component: LazyApiTest,
     preload: false,
     chunkName: 'testing',
-    priority: 'medium'
+    priority: 'medium
   },
   {
     path: '/test/seo',
     component: LazySeoTest,
     preload: false,
     chunkName: 'testing',
-    priority: 'medium'
+    priority: 'medium
   },
   {
     path: '/test/security',
     component: LazySecurityTest,
     preload: false,
     chunkName: 'testing',
-    priority: 'medium'
+    priority: 'medium
   },
   
   // 管理页面 - 低优先级
@@ -108,21 +108,21 @@ export const lazyRoutes: LazyRouteConfig[] = [
     component: LazyTestManagement,
     preload: false,
     chunkName: 'management',
-    priority: 'low'
+    priority: 'low
   },
   {
     path: '/management/data',
     component: LazyDataManagement,
     preload: false,
     chunkName: 'management',
-    priority: 'low'
+    priority: 'low
   },
   {
     path: '/management/users',
     component: LazyUserManagement,
     preload: false,
     chunkName: 'management',
-    priority: 'low'
+    priority: 'low
   },
   
   // 结果和报告页面 - 低优先级
@@ -131,21 +131,21 @@ export const lazyRoutes: LazyRouteConfig[] = [
     component: LazyTestResults,
     preload: false,
     chunkName: 'results',
-    priority: 'low'
+    priority: 'low
   },
   {
     path: '/analytics',
     component: LazyAnalytics,
     preload: false,
     chunkName: 'analytics',
-    priority: 'low'
+    priority: 'low
   },
   {
     path: '/reports',
     component: LazyReports,
     preload: false,
     chunkName: 'reports',
-    priority: 'low'
+    priority: 'low
   },
   
   // 用户页面 - 低优先级
@@ -154,14 +154,14 @@ export const lazyRoutes: LazyRouteConfig[] = [
     component: LazyProfile,
     preload: false,
     chunkName: 'user',
-    priority: 'low'
+    priority: 'low
   },
   {
     path: '/settings',
     component: LazySettings,
     preload: false,
     chunkName: 'user',
-    priority: 'low'
+    priority: 'low
   }
 ];
 

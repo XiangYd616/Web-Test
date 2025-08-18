@@ -1,9 +1,9 @@
 // StressTestRecordService - 测试记录服务
 export interface TestRecord {
   id: string;
-  type: 'stress' | 'compatibility' | 'performance'
+  type: 'stress' | 'compatibility' | 'performance
   name: string;
-  status: 'running' | 'completed' | 'failed'
+  status: 'running' | 'completed' | 'failed
   startTime: Date;
   endTime?: Date;
   results?: any;

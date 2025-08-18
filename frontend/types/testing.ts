@@ -7,7 +7,7 @@ export enum TestStatus {
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
-  PAUSED = 'paused'
+  PAUSED = 'paused
 }
 
 // 测试类型枚举
@@ -21,7 +21,7 @@ export enum TestType {
   ACCESSIBILITY = 'accessibility',
   UX = 'ux',
   LOAD = 'load',
-  SMOKE = 'smoke'
+  SMOKE = 'smoke
 }
 
 // 测试优先级
@@ -29,7 +29,7 @@ export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical
 }
 
 // 测试严重程度
@@ -37,7 +37,7 @@ export enum TestSeverity {
   INFO = 'info',
   WARNING = 'warning',
   ERROR = 'error',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical
 }
 
 // 基础测试配置
@@ -80,7 +80,7 @@ export interface StressTestScenario     {
 // 压力测试步骤
 export interface StressTestStep     {
   name: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
   url: string;
   headers?: Record<string, string>;
   body?: any;
@@ -97,11 +97,11 @@ export interface StressTestCheck     {
 
 // 安全测试配置
 export interface SecurityTestConfig extends BaseTestConfig     {
-  scanDepth?: 'shallow' | 'medium' | 'deep'
+  scanDepth?: 'shallow' | 'medium' | 'deep
   includeTests?: string[]; // 包含的测试类型
   excludeTests?: string[]; // 排除的测试类型
   authentication?: {
-    type: 'basic' | 'bearer' | 'cookie' | 'custom'
+    type: 'basic' | 'bearer' | 'cookie' | 'custom
     credentials: Record<string, string>;
   };
   scope?: {
@@ -126,7 +126,7 @@ export interface APITestConfig extends BaseTestConfig     {
   baseUrl: string;
   endpoints: APIEndpoint[];
   authentication?: {
-    type: 'apikey' | 'bearer' | 'basic' | 'oauth'
+    type: 'apikey' | 'bearer' | 'basic' | 'oauth
     config: Record<string, string>;
   };
   environment?: string;
@@ -135,7 +135,7 @@ export interface APITestConfig extends BaseTestConfig     {
 // API端点定义
 export interface APIEndpoint     {
   name: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
   path: string;
   headers?: Record<string, string>;
   queryParams?: Record<string, any>;
@@ -148,7 +148,7 @@ export interface APIEndpoint     {
 // API测试用例
 export interface APITest     {
   name: string;
-  type: 'response_time' | 'status_code' | 'response_body' | 'headers' | 'schema'
+  type: 'response_time' | 'status_code' | 'response_body' | 'headers' | 'schema
   condition: string;
   expected: any;
 }
@@ -224,7 +224,7 @@ export interface TestCheck     {
   id: string;
   name: string;
   description?: string;
-  status: 'passed' | 'failed' | 'warning' | 'skipped'
+  status: 'passed' | 'failed' | 'warning' | 'skipped
   severity: TestSeverity;
   message?: string;
   expected?: any;
@@ -299,18 +299,18 @@ export interface TestRecommendation     {
   title: string;
   description: string;
   impact?: string;
-  effort?: 'low' | 'medium' | 'high'
+  effort?: 'low' | 'medium' | 'high
   resources?: Array<{
     title: string;
     url: string;
-    type: 'documentation' | 'tutorial' | 'tool' | 'example'
+    type: 'documentation' | 'tutorial' | 'tool' | 'example
   }>;
 }
 
 // 测试产物
 export interface TestArtifact     {
   id: string;
-  type: 'screenshot' | 'video' | 'report' | 'log' | 'data'
+  type: 'screenshot' | 'video' | 'report' | 'log' | 'data
   name: string;
   url: string;
   size?: number;
@@ -323,7 +323,7 @@ export interface TestArtifact     {
 export interface TestLog     {
   id: string;
   timestamp: Timestamp;
-  level: 'debug' | 'info' | 'warn' | 'error'
+  level: 'debug' | 'info' | 'warn' | 'error
   message: string;
   category?: string;
   data?: any;
@@ -352,7 +352,7 @@ export interface TestPlan     {
   description?: string;
   tests: UUID[]; // 测试ID列表
   schedule?: {
-    type: 'once' | 'recurring'
+    type: 'once' | 'recurring
     startTime: Timestamp;
     endTime?: Timestamp;
     interval?: string; // cron表达式
@@ -375,9 +375,9 @@ export interface TestPlan     {
 export interface TestReport     {
   id: UUID;
   name: string;
-  type: 'single' | 'comparison' | 'trend'
+  type: 'single' | 'comparison' | 'trend
   testIds: UUID[];
-  format: 'html' | 'pdf' | 'json' | 'csv'
+  format: 'html' | 'pdf' | 'json' | 'csv
   config: {
     includeDetails?: boolean;
     includeMetrics?: boolean;
@@ -386,7 +386,7 @@ export interface TestReport     {
     customSections?: string[];
   };
   url?: string;
-  status: 'generating' | 'ready' | 'failed'
+  status: 'generating' | 'ready' | 'failed
   userId: UUID;
   createdAt: Timestamp;
   expiresAt?: Timestamp;

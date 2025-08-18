@@ -6,7 +6,7 @@ export enum TestStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
-  FAILED = 'failed'
+  FAILED = 'failed
 }
 
 // 类型别名，用于与其他模块兼容 - 简化版本
@@ -18,21 +18,21 @@ export type TestStatusType   = 'idle' | 'starting' | 'running' | 'completed' | '
   SEO = 'seo',
   STRESS = 'stress',
   UX = 'ux',
-  WEBSITE = 'website'
+  WEBSITE = 'website
 }
 
 export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical
 }
 
 export enum TestEnvironment {
   DEVELOPMENT = 'development',
   STAGING = 'staging',
   PRODUCTION = 'production',
-  LOCAL = 'local'
+  LOCAL = 'local
 }
 
 // 新增：主从表设计相关类型
@@ -204,8 +204,8 @@ export interface BaseTestConfig     {
 
 // 性能测试配置
 export interface PerformanceTestConfig extends BaseTestConfig     {
-  device?: 'desktop' | 'mobile' | 'tablet'
-  connection?: 'fast' | 'slow' | '3g' | '4g' | 'wifi'
+  device?: 'desktop' | 'mobile' | 'tablet
+  connection?: 'fast' | 'slow' | '3g' | '4g' | 'wifi
   metrics?: string[];
   lighthouse?: {
     categories?: string[];
@@ -216,7 +216,7 @@ export interface PerformanceTestConfig extends BaseTestConfig     {
 // 安全测试配置
 export interface SecurityTestConfig extends BaseTestConfig     {
   modules?: string[];
-  depth?: 'basic' | 'standard' | 'comprehensive'
+  depth?: 'basic' | 'standard' | 'comprehensive
   includeSubdomains?: boolean;
   checkCertificate?: boolean;
   scanPorts?: boolean;
@@ -261,7 +261,7 @@ export interface TestResultDetails     {
   security?: {
     vulnerabilities?: Array<{
       type: string;
-      severity: 'low' | 'medium' | 'high' | 'critical'
+      severity: 'low' | 'medium' | 'high' | 'critical
       description: string;
       recommendation?: string;
     }>;
@@ -318,7 +318,7 @@ export interface TestMetadata     {
     timezone?: string;
   };
   device?: {
-    type: 'desktop' | 'mobile' | 'tablet'
+    type: 'desktop' | 'mobile' | 'tablet
     os?: string;
     browser?: string;
     viewport?: {
@@ -432,8 +432,8 @@ export interface TestHistoryQuery     {
   maxScore?: number;
 
   // 排序
-  sortBy?: 'createdAt' | 'startTime' | 'endTime' | 'duration' | 'overallScore' | 'testName' | 'status'
-  sortOrder?: 'asc' | 'desc'
+  sortBy?: 'createdAt' | 'startTime' | 'endTime' | 'duration' | 'overallScore' | 'testName' | 'status
+  sortOrder?: 'asc' | 'desc
   // 包含关联数据
   includeResults?: boolean;
   includeConfig?: boolean;
@@ -517,7 +517,7 @@ export interface TestHistoryStatistics     {
 
 // 导出选项
 export interface ExportOptions     {
-  format: 'csv' | 'json' | 'pdf' | 'excel'
+  format: 'csv' | 'json' | 'pdf' | 'excel
   fields?: string[];
   includeResults?: boolean;
   includeConfig?: boolean;
@@ -530,7 +530,7 @@ export interface ExportOptions     {
 
 // 批量操作
 export interface BatchOperation     {
-  action: 'delete' | 'archive' | 'tag' | 'category' | 'export'
+  action: 'delete' | 'archive' | 'tag' | 'category' | 'export
   testIds: string[];
   options?: {
     tags?: string[];

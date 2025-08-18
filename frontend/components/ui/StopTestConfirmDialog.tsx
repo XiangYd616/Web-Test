@@ -11,13 +11,13 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
   isOpen,
   onConfirm,
   onCancel,
-  testProgress ='',
+  testProgress =',
   testDuration = 0,
   dataCollected = 0
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -28,7 +28,7 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`
+      if (document.visibilityState ==="visible') {
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -75,9 +75,9 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`
+    "aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': ['']
+    'aria-describedby': [']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
@@ -86,7 +86,7 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
     'aria-disabled': disabled,
     'aria-busy': loading,
     'aria-expanded': expanded,
-    "aria-selected': selected,'
+    "aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -111,7 +111,7 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>`
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
       <div className='bg-gray-800 rounded-lg border border-gray-700 max-w-md w-full'>
         {/* 头部 */}
         <div className='flex items-center space-x-3 p-6 border-b border-gray-700'>
@@ -176,16 +176,16 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
         {/* 按钮 */}
         <div className='flex items-center justify-end space-x-3 p-6 border-t border-gray-700'>
           <button
-            type='button'
+            type='button
             onClick={onCancel}
-            className='px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-700/50 transition-colors'
+            className='px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-700/50 transition-colors
           >
             继续测试
           </button>
           <button
-            type='button'
+            type='button
             onClick={onConfirm}
-            className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2'
+            className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-2
           >
             <Square className='w-4 h-4'    />
             <span>确认停止</span>

@@ -33,7 +33,7 @@ export class TestEngineAdapter implements TestEngineAdapter {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -71,7 +71,7 @@ export class TestEngineAdapter implements TestEngineAdapter {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -79,7 +79,7 @@ export class TestEngineAdapter implements TestEngineAdapter {
   async startTest(config: any): Promise<string> {
     // 统一的测试启动接口
     const response = try {
-  await fetch("/api/test/start', {'`
+  await fetch("/api/test/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config)
@@ -100,9 +100,9 @@ export class TestEngineAdapter implements TestEngineAdapter {
 
   async getTestStatus(testId: string): Promise<any> {
     const response = try {
-  await fetch(`/api/test/${testId}/status`);`
+  await fetch(`/api/test/${testId}/status`);
 } catch (error) {
-  console.error("Await error: ', error);'`
+  console.error("Await error: ', error);
   throw error;
 }
     return response.json();
@@ -110,18 +110,18 @@ export class TestEngineAdapter implements TestEngineAdapter {
 
   async stopTest(testId: string): Promise<void> {
     try {
-  await fetch(`/api/test/${testId}/stop`, { method: 'POST' });'`
+  await fetch(`/api/test/${testId}/stop`, { method: 'POST' });
 } catch (error) {
-  console.error("Await error: ', error);'`
+  console.error("Await error: ', error);
   throw error;
 }
   }
 
   async getTestResult(testId: string): Promise<any> {
     const response = try {
-  await fetch(`/api/test/${testId}/result`);`
+  await fetch(`/api/test/${testId}/result`);
 } catch (error) {
-  console.error("Await error:', error);'`
+  console.error("Await error:', error);
   throw error;
 }
     return response.json();

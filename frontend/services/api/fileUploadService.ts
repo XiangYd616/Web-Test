@@ -67,7 +67,7 @@ class FileUploadService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -105,12 +105,12 @@ class FileUploadService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  private readonly API_BASE = "/api/files";``
+  private readonly API_BASE = "/api/files";
   private readonly DEFAULT_CONFIG: UploadConfig = {
     maxSize: 10 * 1024 * 1024, // 10MB
     allowedTypes: [
@@ -138,11 +138,11 @@ class FileUploadService {
       
         return {
         success: false,
-        fileId: '',
+        fileId: ',
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
-        url: '',
+        url: ',
         error: validation.error
       };
     }
@@ -191,16 +191,16 @@ class FileUploadService {
             } else {
               resolve({
                 success: false,
-                fileId: '',
+                fileId: ',
                 fileName: file.name,
                 fileSize: file.size,
                 fileType: file.type,
-                url: "',"
-                error: response.error || `HTTP ${xhr.status}``
+                url: ",
+                error: response.error || `HTTP ${xhr.status}
               });
             }
           } catch (error) {
-            reject(new Error("Invalid response format'));'`"`
+            reject(new Error("Invalid response format'));'
           }
         });
 
@@ -211,9 +211,9 @@ class FileUploadService {
 
         // 发送请求
         const token = this.getAuthToken();
-        xhr.open('POST', `${this.API_BASE}/upload`);'`
+        xhr.open('POST', `${this.API_BASE}/upload`);
         if (token) {
-          xhr.setRequestHeader("Authorization', `Bearer ${token}`);'`"
+          xhr.setRequestHeader("Authorization', `Bearer ${token}`);
         }
         xhr.send(formData);
       });
@@ -221,12 +221,12 @@ class FileUploadService {
     } catch (error) {
       return {
         success: false,
-        fileId: "','`"`
+        fileId: ",'
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
-        url: '',
-        error: error instanceof Error ? error.message : 'Upload failed'
+        url: ',
+        error: error instanceof Error ? error.message : 'Upload failed
       };
     }
   }
@@ -268,12 +268,12 @@ class FileUploadService {
         ...(type && { type })
       });
 
-      const response = await fetch(`${this.API_BASE}?${params}`, {`
+      const response = await fetch(`${this.API_BASE}?${params}`, {
         headers: this.getHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);`
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -281,10 +281,10 @@ class FileUploadService {
         
         return result.data;
       } else {
-        throw new Error(result.error || "Failed to fetch files");``
+        throw new Error(result.error || "Failed to fetch files");
       }
     } catch (error) {
-      console.error("Failed to fetch files: ', error);"
+      console.error("Failed to fetch files: ', error);
       return {
         files: [],
         total: 0,
@@ -299,19 +299,19 @@ class FileUploadService {
    */
   async deleteFile(fileId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.API_BASE}/${fileId}`, {`
-        method: "DELETE','`"`
+      const response = await fetch(`${this.API_BASE}/${fileId}`, {
+        method: "DELETE',"
         headers: this.getHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);`
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
       return result.success;
     } catch (error) {
-      console.error("Failed to delete file: ', error);'`"`
+      console.error("Failed to delete file: ', error);
       return false;
     }
   }
@@ -321,20 +321,20 @@ class FileUploadService {
    */
   async updateFileMetadata(fileId: string, metadata: Partial<FileMetadata>): Promise<boolean> {
     try {
-      const response = await fetch(`${this.API_BASE}/${fileId}/metadata`, {`
-        method: "PUT','`"`
+      const response = await fetch(`${this.API_BASE}/${fileId}/metadata`, {
+        method: "PUT',"
         headers: this.getHeaders(),
         body: JSON.stringify(metadata)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);`
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
       return result.success;
     } catch (error) {
-      console.error("Failed to update file metadata: ', error);'`"`
+      console.error("Failed to update file metadata: ', error);
       return false;
     }
   }
@@ -344,18 +344,18 @@ class FileUploadService {
    */
   async getDownloadUrl(fileId: string): Promise<string | null> {
     try {
-      const response = await fetch(`${this.API_BASE}/${fileId}/download`, {`
+      const response = await fetch(`${this.API_BASE}/${fileId}/download`, {
         headers: this.getHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);`
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const result = await response.json();
       return result.success ? result.data.url : null;
     } catch (error) {
-      console.error("Failed to get download URL: ', error);'`"`
+      console.error("Failed to get download URL: ', error);
       return null;
     }
   }
@@ -370,7 +370,7 @@ class FileUploadService {
         return {
         valid: false,
         error: `文件大小超过限制 (${this.formatFileSize(config.maxSize)`}
-      })``
+      })
       };
     }
 
@@ -378,7 +378,7 @@ class FileUploadService {
     if (config.allowedTypes && !config.allowedTypes.includes(file.type)) {
       return {
         valid: false,
-        error: `不支持的文件类型: ${file.type}``
+        error: `不支持的文件类型: ${file.type}
       };
     }
 
@@ -389,9 +389,9 @@ class FileUploadService {
    * 格式化文件大小
    */
   private formatFileSize(bytes: number): string {
-    if (bytes === 0) return "0 Bytes";``
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB"];"
+    const sizes = ['Bytes', 'KB', 'MB', 'GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
@@ -400,7 +400,7 @@ class FileUploadService {
    * 获取认证token
    */
   private getAuthToken(): string | null {
-    return localStorage.getItem('auth_token') || localStorage.getItem('token");"
+    return localStorage.getItem('auth_token') || localStorage.getItem('token");
   }
 
   /**
@@ -408,11 +408,11 @@ class FileUploadService {
    */
   private getHeaders(): Record<string, string> {
     const headers: Record<string, string>  = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json
     };
     const token = this.getAuthToken();
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;'`
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     return headers;

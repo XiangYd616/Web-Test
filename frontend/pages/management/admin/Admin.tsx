@@ -1,6 +1,6 @@
 import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Monitor, Network, Server, Settings, Shield, TestTube, TrendingUp, Users    } from 'lucide-react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler    } from '../hooks/useAsyncErrorHandler';import React, { useEffect, useState    } from 'react';import BackupManagement from '../../../components/system/BackupManagement.tsx';import SecurityCenter from '../../../components/system/SecurityCenter.tsx';import SystemMonitorComponent from './SystemMonitor.tsx';import SystemSettings from '../../../components/system/SystemSettings.tsx';import TestManagement from '../../../components/system/TestManagement.tsx';import UserManagement from '../../../components/system/UserManagement.tsx';import { adminService    } from '../../../services/adminService.ts';import type { SystemMonitor, SystemStats  } from '../../../types/admin.ts';const Admin: React.FC  = () => {
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -11,7 +11,7 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`"`
+      if (document.visibilityState ==="visible') {'
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -23,17 +23,17 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: ', message: ' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });
+      setFeedback({ type: ', message: ' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback("error', state.error.message);"
+      showFeedback("error', state.error.message);
     }
   }, [state.error]);
   
@@ -43,12 +43,12 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
     const errors = {};
     
     // 基础验证规则
-    if (!data.name || data.name.trim() ==='') {
-      errors.name ='名称不能为空'
+    if (!data.name || data.name.trim() ===') {
+      errors.name ='名称不能为空
     }
     
     if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.email ='请输入有效的邮箱地址'
+      errors.email ='请输入有效的邮箱地址
     }
     
     return errors;
@@ -87,8 +87,8 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
   
   const updateData = async (id, updateData) => {
     const result = await executeAsync(
-      () => fetch(`/api/data/update/${id}`, {`
-        method: "PUT','`"`
+      () => fetch(`/api/data/update/${id}`, {
+        method: "PUT',"
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData)
       }).then(res => res.json()),
@@ -102,8 +102,8 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
   
   const deleteData = async (id) => {
     const result = await executeAsync(
-      () => fetch(`/api/data/delete/${id}`, {`
-        method: "DELETE";``
+      () => fetch(`/api/data/delete/${id}`, {
+        method: "DELETE";
       }).then(res => res.json()),
       { context: 'DataManagement.deleteData' }
     );
@@ -169,7 +169,7 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
             <div className='mt-4'>
               <button>
                 onClick={() => window.location.reload()}
-                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
+                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200
               >
                 重试
               </button>
@@ -205,14 +205,14 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
       const monitorData = await adminService.getSystemMonitor();
       setMonitor(monitorData);
     } catch (error) {
-      console.error("更新监控数据失败:', error);"
+      console.error("更新监控数据失败:', error);
     }
   };
 
   const formatBytes = (bytes: number): string  => {
-    if (bytes === 0) return '0 B'
+    if (bytes === 0) return '0 B
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB"];"
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
@@ -225,9 +225,9 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
   };
 
   const getStatusColor = (usage: number): string  => {
-    if (usage < 50) return "text-green-300 bg-green-500/20 border border-green-500/30";``>
+    if (usage < 50) return "text-green-300 bg-green-500/20 border border-green-500/30";`>
     if (usage < 80) return 'text-yellow-300 bg-yellow-500/20 border border-yellow-500/30'>
-    return 'text-red-300 bg-red-500/20 border border-red-500/30'
+    return 'text-red-300 bg-red-500/20 border border-red-500/30
   };
 
   const tabs = [
@@ -269,10 +269,10 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
                 <span>系统运行时间: {stats ? formatUptime(stats.system.uptime) : '--'}</span>
               </div>
               <div className={`px-3 py-1 rounded-full text-xs font-medium ${monitor && monitor.metrics.application.errorRate < 5`}>
-                  ? "bg-green-500/20 text-green-300 border border-green-500/30";``
-                  : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                }`}>`
-                {monitor && monitor.metrics.application.errorRate < 5 ? "系统正常" : "系统异常'}'``>
+                  ? "bg-green-500/20 text-green-300 border border-green-500/30";
+                  : 'bg-red-500/20 text-red-300 border border-red-500/30
+                }`}>
+                {monitor && monitor.metrics.application.errorRate < 5 ? "系统正常" : "系统异常'}'>
               </div>
             </div>
           </div>
@@ -287,14 +287,14 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
               const Icon = tab.icon;
               return (<button>
                   key={tab.id}
-                  type='button'
+                  type='button
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === tab.id`}
-                      ? "bg-blue-600/20 text-blue-300 border border-blue-500/30 shadow-lg";``
-                      : 'text-gray-300 hover:bg-gray-700/50 hover:text-white border border-transparent'
-                    }`}`
+                      ? "bg-blue-600/20 text-blue-300 border border-blue-500/30 shadow-lg";
+                      : 'text-gray-300 hover:bg-gray-700/50 hover:text-white border border-transparent
+                    }`}
                 >
-                  <Icon className="w-5 h-5 mr-3'    />`'"`
+                  <Icon className="w-5 h-5 mr-3'    />`
                   {tab.name}
                 </button>
               );
@@ -304,7 +304,7 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
 
         {/* 主内容区 */}
         <div className='flex-1'>
-          {activeTab ==='dashboard' 
+          {activeTab ==='dashboard
             <div className='space-y-6'>
               <h2 className='text-2xl font-bold text-white'>系统概览</h2>
 
@@ -385,37 +385,37 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
                         <span className='text-sm font-medium text-gray-300'>CPU 使用率</span>
                       </div>
                       <div className='flex items-center'>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.cpu.usage || 0)}`}>`
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.cpu.usage || 0)}`}>
                           {monitor?.metrics.cpu.usage.toFixed(1)}%
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between'>`'"`
+                    <div className="flex items-center justify-between'>`
                       <div className='flex items-center'>
                         <MemoryStick className='w-5 h-5 text-green-400 mr-2'    />
                         <span className='text-sm font-medium text-gray-300'>内存使用率</span>
                       </div>
                       <div className='flex items-center'>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.memory.usage || 0)}`}>`
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.memory.usage || 0)}`}>
                           {monitor?.metrics.memory.usage.toFixed(1)}%
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between'>`'"`
+                    <div className="flex items-center justify-between'>`
                       <div className='flex items-center'>
                         <HardDrive className='w-5 h-5 text-purple-400 mr-2'    />
                         <span className='text-sm font-medium text-gray-300'>磁盘使用率</span>
                       </div>
                       <div className='flex items-center'>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.disk.usage || 0)}`}>`
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.disk.usage || 0)}`}>
                           {monitor?.metrics.disk.usage.toFixed(1)}%
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between'>`'"`
+                    <div className="flex items-center justify-between'>`
                       <div className='flex items-center'>
                         <Network className='w-5 h-5 text-orange-400 mr-2'    />
                         <span className='text-sm font-medium text-gray-300'>网络连接</span>
@@ -449,8 +449,8 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
 
                     <div className='flex items-center justify-between'>
                       <span className='text-sm font-medium text-gray-300'>错误率</span>
-                      <span className={`text-sm font-medium ${(monitor?.metrics.application.errorRate || 0) < 5 ? "text-green-400' : 'text-red-400";`}>
-                        }`}>`
+                      <span className={`text-sm font-medium ${(monitor?.metrics.application.errorRate || 0) < 5 ? "text-green-400' : 'text-red-400";}>
+                        }`}>
                         {monitor?.metrics.application.errorRate.toFixed(2)}%
                       </span>
                     </div>
@@ -460,11 +460,10 @@ import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Moni
             </div>
           )}
 
-          {activeTab ==="users' && <UserManagement  />}'`"`
-
+          {activeTab ==="users' && <UserManagement  />}'
           {activeTab ==='tests' && <TestManagement  />}
           {activeTab ==='monitor' && <SystemMonitorComponent  />}
-          {activeTab ==='logs' 
+          {activeTab ==='logs
             <div className='bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6'>
               <h3 className='text-lg font-semibold text-white mb-4'>活动日志</h3>
               <p className='text-gray-300'>活动日志功能已移除</p>

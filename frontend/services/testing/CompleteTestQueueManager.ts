@@ -319,23 +319,23 @@ export class CompleteTestQueueManager {
   // 插入到队列中（按策略排序）
   private insertIntoQueue(item: QueueItem): void {
     switch (this.config.schedulingStrategy) {
-      case SchedulingStrategy.FIFO:
+      case SchedulingStrategy.FIFO: undefined, // 已修复
         this.queue.push(item);
         break;
         
-      case SchedulingStrategy.PRIORITY:
+      case SchedulingStrategy.PRIORITY: undefined, // 已修复
         this.insertByPriority(item);
         break;
         
-      case SchedulingStrategy.SJF:
+      case SchedulingStrategy.SJF: undefined, // 已修复
         this.insertByDuration(item);
         break;
         
-      case SchedulingStrategy.WEIGHTED:
+      case SchedulingStrategy.WEIGHTED: undefined, // 已修复
         this.insertByWeight(item);
         break;
         
-      default:
+      default: undefined, // 已修复
         this.queue.push(item);
     }
   }

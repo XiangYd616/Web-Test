@@ -2,7 +2,7 @@ import { Activity, ArrowRight, BarChart3, Bell, Book, Clock, Code, Download, Glo
   id: string;
   title: string;
   description: string;
-  type: 'test' | 'report' | 'setting' | 'help' | 'page'
+  type: 'test' | 'report' | 'setting' | 'help' | 'page
   url: string;
   score: number;
   icon?: string;
@@ -22,7 +22,7 @@ const iconMap: Record<string, React.ComponentType<any>>  = {
   Code, Monitor, Activity, Upload, Download, User, Bell, Key, Play,
   Book, Lock, TestTube, Clock
 };
-const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQuery ='' }) => {
+const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQuery =' }) => {
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);
@@ -75,7 +75,7 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
         setResults(searchResults);
         setSelectedIndex(-1);
       } catch (error) {
-        console.error("Search failed: ', error);'
+        console.error("Search failed: ', error);
         setResults([]);
       } finally {
         setIsSearching(false);
@@ -106,20 +106,20 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
       if (!isOpen) return;
 
       switch (e.key) {
-        case 'Escape': ''
+        case 'Escape': 
           onClose();
           break;
-        case 'ArrowDown': ''
+        case 'ArrowDown': 
           e.preventDefault();
           setSelectedIndex(prev =>
             prev < results.length - 1 ? prev + 1 : prev
           );
           break;
-        case 'ArrowUp': ''
+        case 'ArrowUp': 
           e.preventDefault();
           setSelectedIndex(prev => prev > -1 ? prev - 1 : prev);
           break;
-        case 'Enter': ''
+        case 'Enter': 
           e.preventDefault();
           if (selectedIndex >= 0 && results[selectedIndex]) {
             handleResultClick(results[selectedIndex]);
@@ -131,7 +131,7 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener("keydown', handleKeyDown);'
+    return () => document.removeEventListener("keydown', handleKeyDown);
   }, [isOpen, selectedIndex, results, query]);
 
   // 处理搜索
@@ -142,7 +142,7 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
 
       // 如果没有精确匹配的结果，导航到帮助页面进行搜索
       if (results.length === 0) {
-        navigate(`/help?search=${encodeURIComponent(searchQuery)}`);`
+        navigate(`/help?search=${encodeURIComponent(searchQuery)}`);
       } else {
         // 导航到第一个结果
         handleResultClick(results[0]);
@@ -170,7 +170,7 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
   };
 
   // 渲染图标
-  const renderIcon = (iconName: string, className: string ="w-4 h-4') => {'`
+  const renderIcon = (iconName: string, className: string ="w-4 h-4') => {
     const IconComponent = iconMap[iconName];
     return IconComponent ? <IconComponent className={className}    /> : <Search className={className}    />
   };
@@ -179,11 +179,11 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
   const highlightText = (text: string, searchQuery: string) => {
     if (!searchQuery.trim()) return text;
 
-    const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");`
+    const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
     const parts = text.split(regex);
 
     return parts.map((part, index) => regex.test(part) ? (
-        <span key={index} className="bg-blue-500/30 text-blue-300 font-medium'>`
+        <span key={index} className="bg-blue-500/30 text-blue-300 font-medium'>
           {part}
         </span>
       ) : part
@@ -200,11 +200,11 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
             <Search className='w-5 h-5 text-gray-400 mr-3'    />
             <input
               ref={searchInputRef}
-              type='text'
+              type='text
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder='搜索测试、报告、设置...'
-              className='flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-lg'
+              placeholder='搜索测试、报告、设置...
+              className='flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-lg
               onKeyDown={(e) => {
                 if (e.key ==='Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -217,9 +217,9 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
             )}
             <button
               onClick={onClose}
-              className='p-1 text-gray-400 hover:text-white transition-colors'
-              aria-label='关闭搜索'
-              title='关闭搜索'
+              className='p-1 text-gray-400 hover:text-white transition-colors
+              aria-label='关闭搜索
+              title='关闭搜索
             >
               <X className='w-5 h-5'    />
             </button>
@@ -236,7 +236,7 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
                   </div>
                   <button
                     onClick={clearHistory}
-                    className='text-xs text-gray-500 hover:text-gray-300 transition-colors'
+                    className='text-xs text-gray-500 hover:text-gray-300 transition-colors
                   >
                     清除
                   </button>
@@ -246,7 +246,7 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
                     <button
                       key={index}
                       onClick={() => handleHistoryClick(historyItem)}
-                      className='w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors'
+                      className='w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors
                     >
                       {historyItem}
                     </button>
@@ -263,18 +263,18 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
                         key={result.id}
                         onClick={() => handleResultClick(result)}
                         className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${selectedIndex === index`}
-                          ? "bg-blue-500/20 border border-blue-500/30";`
-                          : 'hover:bg-gray-700/50'
-                          }`}`
+                          ? "bg-blue-500/20 border border-blue-500/30";
+                          : 'hover:bg-gray-700/50
+                          }`}
                       >
-                        <div className="flex items-center space-x-3'>`
-                          <div className={`p-2 rounded-lg ${result.type ==='page' ? 'bg-blue-500/20 text-blue-400' : ''`}
-                            result.type ==="test' ? 'bg-green-500/20 text-green-400' : ''`
-                              result.type ==='setting' ? 'bg-purple-500/20 text-purple-400' : ''
-                                result.type ==='help' ? 'bg-orange-500/20 text-orange-400' : ''
+                        <div className="flex items-center space-x-3'>
+                          <div className={`p-2 rounded-lg ${result.type ==='page' ? 'bg-blue-500/20 text-blue-400' : '}
+                            result.type ==="test' ? 'bg-green-500/20 text-green-400' : '
+                              result.type ==='setting' ? 'bg-purple-500/20 text-purple-400' : 
+                                result.type ==='help' ? 'bg-orange-500/20 text-orange-400' : 
                                   'bg-gray-500/20 text-gray-400
-                            }`}>`
-                            {renderIcon(result.icon || "Search')}'`
+                            }`}>
+                            {renderIcon(result.icon || "Search')}
                           </div>
                           <div className='flex-1 min-w-0'>
                             <div className='flex items-center justify-between'>
@@ -319,7 +319,7 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
                     <button
                       key={index}
                       onClick={() => setQuery(suggestion)}
-                      className='px-3 py-1 bg-gray-700/50 text-gray-300 text-sm rounded-full hover:bg-gray-600/50 transition-colors'
+                      className='px-3 py-1 bg-gray-700/50 text-gray-300 text-sm rounded-full hover:bg-gray-600/50 transition-colors
                     >
                       {suggestion}
                     </button>

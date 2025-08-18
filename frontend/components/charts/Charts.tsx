@@ -9,5 +9,5 @@ const Charts: React.FC<ChartsProps> = (props) => {
       <p>组件内容</p>
     </div>
   );
-};'"
-export default Charts;'"
+};
+export default Charts;'

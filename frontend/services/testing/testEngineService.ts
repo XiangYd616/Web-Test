@@ -22,7 +22,7 @@ export interface TestEngineResult     {
 export interface TestIssue     {
   id: string;
   type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  severity: 'low' | 'medium' | 'high' | 'critical
   title: string;
   description: string;
   element?: string;
@@ -34,14 +34,14 @@ export interface TestRecommendation     {
   category: string;
   title: string;
   description: string;
-  impact: 'low' | 'medium' | 'high'
-  effort: 'low' | 'medium' | 'high'
+  impact: 'low' | 'medium' | 'high
+  effort: 'low' | 'medium' | 'high
   priority: number;
 }
 
 export interface TestEngineOptions     {
   url: string;
-  testType: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility'
+  testType: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility
   customSettings?: Record<string, any>;
   timeout?: number;
   retryOnFailure?: boolean;
@@ -223,11 +223,11 @@ class TestEngineService {
           return await this.runAPITest(options, testId, signal);
         case 'compatibility': 
           return await this.runCompatibilityTest(options, testId, signal);
-        default:
+        default: undefined, // 已修复
           throw new Error(`Unsupported test type: ${options.testType}`);
       }
     } catch (error) {
-      const duration = Date.now() - startTime;`
+      const duration = Date.now() - startTime;
       throw new Error(`Test execution failed after ${duration}ms: ${error}`);
     }
   }
@@ -256,7 +256,7 @@ class TestEngineService {
           id: 'perf_1',
           type: 'performance',
           severity: score < 70 ? 'high' : 'medium',
-          title: '页面加载时间',`
+          title: '页面加载时间',
           description: `页面加载时间为 ${(duration / 1000).toFixed(2)} 秒`,
           recommendation: "优化图片大小和启用压缩",
         }
@@ -470,7 +470,7 @@ class TestEngineService {
   /**
    * 生成测试ID
    */
-  private generateTestId(): string {`
+  private generateTestId(): string {
     return `engine_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 }
@@ -480,4 +480,3 @@ const testEngineService = new TestEngineService();
 
 export default testEngineService;
 export { TestEngineService };
-`

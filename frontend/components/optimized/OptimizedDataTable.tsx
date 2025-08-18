@@ -59,7 +59,7 @@ const OptimizedDataTableComponent = <T extends Record<string, any>>({
   }, [onRowClick]);
 
   // 优化的排序处理
-  const handleSort = useCallback((column: string, direction: 'asc' | "desc') => {"
+  const handleSort = useCallback((column: string, direction: 'asc' | "desc') => {
     onSort?.(column, direction);
   }, [onSort]);
 
@@ -69,14 +69,14 @@ const OptimizedDataTableComponent = <T extends Record<string, any>>({
       <div
         key={index}
         style={style}
-        className='table-row'
+        className='table-row
         onClick={() => handleRowClick(record, index)}
       >
         {optimizedColumns.map((column, colIndex) => (
           <div
             key={column.key}
-            className='table-cell'
-            style={ { width: column.width || "auto'  }}"
+            className='table-cell
+            style={ { width: column.width || "auto'  }}
           >
             {column.render
               ? column.render(record[column.dataIndex], record, index);
@@ -102,7 +102,7 @@ const OptimizedDataTableComponent = <T extends Record<string, any>>({
         {optimizedColumns.map((column) => (
           <div
             key={column.key}
-            className='table-header-cell'
+            className='table-header-cell
             style={ { width: column.width || 'auto'  }}
             onClick={() => handleSort(column.key, 'asc')}
           >
@@ -117,7 +117,7 @@ const OptimizedDataTableComponent = <T extends Record<string, any>>({
         rowHeight={rowHeight}
         containerHeight={height - 50} // 减去表头高度
         onRowClick={handleRowClick}
-        rowKey='id'
+        rowKey='id
          />
 
       {/* 分页 */}
@@ -147,7 +147,7 @@ const OptimizedDataTableComponent = <T extends Record<string, any>>({
 export const OptimizedDataTable = withPerformanceOptimization(OptimizedDataTableComponent,;
   {
     memoize: true,;
-    displayName: 'OptimizedDataTable',';)'
+    displayName: 'OptimizedDataTable',;)
     areEqual: (prevProps, nextProps) => {
       // 自定义比较逻辑
       return (;

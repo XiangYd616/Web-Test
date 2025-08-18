@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState    } from 'react';interface Lo
   url: string;
   users: number;
   duration: number;
-  testType: 'load' | 'stress' | 'spike' | 'volume'
+  testType: 'load' | 'stress' | 'spike' | 'volume
   rampUp?: number;
   thinkTime?: number;
   method?: string;
@@ -65,10 +65,10 @@ export const useLocalStressTest = () => {
         window.environment?.localStressTest &&
         typeof window.environment.localStressTest.start === 'function') {
         setIsAvailable(true);
-        console.log('🚀 本地压力测试功能可用");"
+        console.log('🚀 本地压力测试功能可用");
       } else {
         setIsAvailable(false);
-        console.log('⚠️ 本地压力测试功能仅在桌面应用中可用");"
+        console.log('⚠️ 本地压力测试功能仅在桌面应用中可用");
       }
     };
 
@@ -141,15 +141,15 @@ export const useLocalStressTest = () => {
    */
   const startTest = useCallback(async (config: LocalStressTestConfig) => {
     if (!isAvailable) {
-      throw new Error('本地压力测试功能仅在桌面应用中可用");"
+      throw new Error('本地压力测试功能仅在桌面应用中可用");
     }
 
     if (isRunning) {
-      throw new Error('测试已在运行中");"
+      throw new Error('测试已在运行中");
     }
 
     if (!window.environment?.localStressTest?.start) {
-      throw new Error('本地压力测试API不可用");"
+      throw new Error('本地压力测试API不可用");
     }
 
     try {
@@ -163,7 +163,7 @@ export const useLocalStressTest = () => {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '启动测试失败'
+      const errorMessage = error instanceof Error ? error.message : '启动测试失败
       setError(errorMessage);
       throw error;
     }
@@ -174,15 +174,15 @@ export const useLocalStressTest = () => {
    */
   const stopTest = useCallback(async () => {
     if (!isAvailable) {
-      throw new Error('本地压力测试功能仅在桌面应用中可用");"
+      throw new Error('本地压力测试功能仅在桌面应用中可用");
     }
 
     if (!window.environment?.localStressTest?.stop) {
-      throw new Error('本地压力测试API不可用");"
+      throw new Error('本地压力测试API不可用");
     }
 
     try {
-      console.log('🛑 停止本地压力测试");"
+      console.log('🛑 停止本地压力测试");
       const result = await window.environment.localStressTest.stop();
 
       if (!result.success) {
@@ -191,7 +191,7 @@ export const useLocalStressTest = () => {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '停止测试失败'
+      const errorMessage = error instanceof Error ? error.message : '停止测试失败
       setError(errorMessage);
       throw error;
     }
@@ -232,7 +232,7 @@ export const useLocalStressTest = () => {
     let thinkTime = 1;
 
     if (targetUsers > cpuCores * 500) {
-      console.warn(`⚠️ 目标用户数 ${targetUsers} 可能超出系统能力，推荐最大 ${cpuCores * 500} 用户`);`
+      console.warn(`⚠️ 目标用户数 ${targetUsers} 可能超出系统能力，推荐最大 ${cpuCores * 500} 用户`);
       recommendedUsers = cpuCores * 500;
     }
 
@@ -246,7 +246,7 @@ export const useLocalStressTest = () => {
       rampUp,
       thinkTime,
       timeout: 30,
-      testType: targetUsers > 1000 ? "stress' : 'load";``
+      testType: targetUsers > 1000 ? "stress' : 'load";
     };
   }, [results]);
 

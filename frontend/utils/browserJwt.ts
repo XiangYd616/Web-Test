@@ -28,7 +28,7 @@ export class BrowserJWT {
     return btoa(str)
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
-      .replace(/=/g, '");
+      .replace(/=/g, ');
   }
 
   /**
@@ -48,7 +48,7 @@ export class BrowserJWT {
   public createToken(payload: JWTPayload, expiresIn: number = 3600): string {
     const header: JWTHeader  = {
       alg: 'HS256',
-      typ: 'JWT'
+      typ: 'JWT
     };
     const now = Math.floor(Date.now() / 1000);
     const tokenPayload: JWTPayload  = {
@@ -60,7 +60,7 @@ export class BrowserJWT {
     const encodedPayload = this.base64UrlEncode(JSON.stringify(tokenPayload));
 
     // 在浏览器环境中，我们使用简单的签名（仅用于演示）
-    const signature = this.base64UrlEncode(`${encodedHeader}.${encodedPayload}.mock_signature`);`
+    const signature = this.base64UrlEncode(`${encodedHeader}.${encodedPayload}.mock_signature`);
 
     return `${encodedHeader}.${encodedPayload}.${signature}`;
   }
@@ -70,7 +70,7 @@ export class BrowserJWT {
    */
   public parseToken(token: string): { header: JWTHeader; payload: JWTPayload; signature: string } | null {
     try {
-      const parts = token.split(".");`
+      const parts = token.split(".");
       if (parts.length !== 3) {
         
         return null;
@@ -178,8 +178,8 @@ export class BrowserJWT {
    * 生成随机字符串（用于生成简单的签名）
    */
   private generateRandomString(length: number = 32): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    let result = ''
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
+    let result = 
     for (let i = 0; i < length; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }

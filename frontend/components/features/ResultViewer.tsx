@@ -10,4 +10,4 @@ const ResultViewer: React.FC<ResultViewerProps> = (props) => {
     </div>
   );
 };
-export default ResultViewer;'"
+export default ResultViewer;

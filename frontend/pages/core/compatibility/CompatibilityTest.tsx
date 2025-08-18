@@ -83,7 +83,7 @@ const CompatibilityTest: React.FC<CompatibilityTestProps> = () => {
     {
       title: '版本',
       dataIndex: 'version',
-      key: 'version'
+      key: 'version
     },
     {
       title: '状态',
@@ -106,7 +106,7 @@ const CompatibilityTest: React.FC<CompatibilityTestProps> = () => {
       render: (score: number) => (
         <Progress 
           percent={score} 
-          size="small" 
+          size="small
           status={score >= 90 ? 'success' : score >= 70 ? 'normal' : 'exception'}
         />
       )
@@ -172,7 +172,7 @@ const CompatibilityTest: React.FC<CompatibilityTestProps> = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Title level={4}>兼容性测试</Title>
                   <Button
-                    type="primary"
+                    type="primary
                     icon={<PlayCircleOutlined />}
                     onClick={startTest}
                     loading={isRunning}
@@ -235,7 +235,7 @@ const CompatibilityTest: React.FC<CompatibilityTestProps> = () => {
                     </Row>
 
                     <Alert
-                      message="兼容性测试完成"
+                      message="兼容性测试完成
                       description={`共测试了 ${results.length} 个浏览器，总体兼容性评分为 ${getOverallScore()} 分`}
                       type={getOverallScore() >= 90 ? 'success' : getOverallScore() >= 70 ? 'warning' : 'error'}
                       showIcon
@@ -245,7 +245,7 @@ const CompatibilityTest: React.FC<CompatibilityTestProps> = () => {
                     <Table
                       columns={columns}
                       dataSource={results}
-                      rowKey="id"
+                      rowKey="id
                       expandable={{
                         expandedRowRender,
                         rowExpandable: (record) => record.issues.length > 0

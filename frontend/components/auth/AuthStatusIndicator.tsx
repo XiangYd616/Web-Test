@@ -10,4 +10,4 @@ const AuthStatusIndicator: React.FC<AuthStatusIndicatorProps> = (props) => {
     </div>
   );
 };
-export default AuthStatusIndicator;'"
+export default AuthStatusIndicator;

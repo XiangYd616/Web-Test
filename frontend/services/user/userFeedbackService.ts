@@ -6,7 +6,7 @@ export enum FeedbackType {
   USABILITY_FEEDBACK = 'usability_feedback',
   PERFORMANCE_ISSUE = 'performance_issue',
   UI_UX_FEEDBACK = 'ui_ux_feedback',
-  GENERAL_FEEDBACK = 'general_feedback'
+  GENERAL_FEEDBACK = 'general_feedback
 }
 
 // 页面类型枚举
@@ -16,7 +16,7 @@ export enum PageType {
   PERFORMANCE_TEST = 'performance_test',
   STRESS_TEST = 'stress_test',
   DASHBOARD = 'dashboard',
-  OTHER = 'other'
+  OTHER = 'other
 }
 
 // 反馈严重程度
@@ -24,7 +24,7 @@ export enum FeedbackSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical
 }
 
 // 用户反馈接口
@@ -91,7 +91,7 @@ export class UserFeedbackService {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   
   private getCacheKey(url: string, options: RequestInit): string {
-    return `${options.method || "GET'}:${url}:${JSON.stringify(options.body || {})}`;'`
+    return `${options.method || "GET'}:${url}:${JSON.stringify(options.body || {})}`;
   }
   
   private getFromCache(key: string): any | null {
@@ -122,7 +122,7 @@ export class UserFeedbackService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -149,7 +149,7 @@ export class UserFeedbackService {
   /**
    * 提交用户反馈
    */
-  async submitFeedback(feedback: Omit<UserFeedback, "id' | 'sessionId' | 'timestamp' | 'browserInfo' | 'userAgent' | 'url'>): Promise<void> {'`
+  async submitFeedback(feedback: Omit<UserFeedback, "id' | 'sessionId' | 'timestamp' | 'browserInfo' | 'userAgent' | 'url'>): Promise<void> {
     try {
       const completeFeedback: UserFeedback  = {
         ...feedback,
@@ -230,7 +230,7 @@ export class UserFeedbackService {
       type,
       severity,
       page,
-      title: `Quick ${type} feedback`,`
+      title: `Quick ${type} feedback`,
       description: message
     });
   }
@@ -243,7 +243,7 @@ export class UserFeedbackService {
       type: FeedbackType.BUG_REPORT,
       severity: FeedbackSeverity.HIGH,
       page,
-      title: `Error: ${error.name}`,`
+      title: `Error: ${error.name}`,
       description: error.message,
       actualBehavior: error.stack,
       additionalData: {
@@ -259,36 +259,36 @@ export class UserFeedbackService {
    */
   private getBrowserInfo(): BrowserInfo {
     const ua = navigator.userAgent;
-    let browserName = "Unknown";`
-    let browserVersion = 'Unknown'
+    let browserName = "Unknown";
+    let browserVersion = 'Unknown
     // 检测浏览器
     if (ua.includes('Chrome')) {
-      browserName = 'Chrome'
-      browserVersion = ua.match(/Chrome\/([0-9.]+)/)?.[1] || 'Unknown'
+      browserName = 'Chrome
+      browserVersion = ua.match(/Chrome\/([0-9.]+)/)?.[1] || 'Unknown
     } else if (ua.includes('Firefox')) {
-      browserName = 'Firefox'
-      browserVersion = ua.match(/Firefox\/([0-9.]+)/)?.[1] || 'Unknown'
+      browserName = 'Firefox
+      browserVersion = ua.match(/Firefox\/([0-9.]+)/)?.[1] || 'Unknown
     } else if (ua.includes('Safari')) {
-      browserName = 'Safari'
-      browserVersion = ua.match(/Version\/([0-9.]+)/)?.[1] || 'Unknown'
+      browserName = 'Safari
+      browserVersion = ua.match(/Version\/([0-9.]+)/)?.[1] || 'Unknown
     } else if (ua.includes('Edge')) {
-      browserName = 'Edge'
-      browserVersion = ua.match(/Edg\/([0-9.]+)/)?.[1] || 'Unknown'
+      browserName = 'Edge
+      browserVersion = ua.match(/Edg\/([0-9.]+)/)?.[1] || 'Unknown
     }
 
     // 检测操作系统
-    let os = 'Unknown'
-    if (ua.includes('Windows')) os = 'Windows'
-    else if (ua.includes('Mac')) os = 'macOS'
-    else if (ua.includes('Linux')) os = 'Linux'
-    else if (ua.includes('Android')) os = 'Android'
-    else if (ua.includes('iOS')) os = 'iOS'
+    let os = 'Unknown
+    if (ua.includes('Windows')) os = 'Windows
+    else if (ua.includes('Mac')) os = 'macOS
+    else if (ua.includes('Linux')) os = 'Linux
+    else if (ua.includes('Android')) os = 'Android
+    else if (ua.includes('iOS')) os = 'iOS
     return {
       name: browserName,
       version: browserVersion,
       os,
-      screenResolution: `${screen.width}x${screen.height}`,`
-      viewport: `${window.innerWidth}x${window.innerHeight}`,`
+      screenResolution: `${screen.width}x${screen.height}`,
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
       language: navigator.language,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     };
@@ -313,7 +313,7 @@ export class UserFeedbackService {
    */
   private initializePerformanceMonitoring(): void {
     // 监控页面加载性能
-    if ("PerformanceObserver' in window) {'`
+    if ("PerformanceObserver' in window) {
       try {
         // 监控 LCP
         const lcpObserver = new PerformanceObserver((list) => {

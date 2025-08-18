@@ -4,7 +4,7 @@
  * 版本: v2.0.0
  */
 
-import axios, { AxiosError, AxiosResponse, AxiosRequestConfig  } from 'axios';import type { ApiErrorResponse  } from '../../types/unified/models';// ==================== 错误类型定义 ==================== ''
+import axios, { AxiosError, AxiosResponse, AxiosRequestConfig  } from 'axios';import type { ApiErrorResponse  } from '../../types/unified/models';// ==================== 错误类型定义 ==================== 
 export interface ErrorHandlerConfig     {
   // 重试配置
   retry: {
@@ -26,7 +26,7 @@ export interface ErrorHandlerConfig     {
   // 日志配置
   logging: {
     enabled: boolean;
-    logLevel: 'error' | 'warn' | 'info' | 'debug'
+    logLevel: 'error' | 'warn' | 'info' | 'debug
     includeStack: boolean;
   };
   
@@ -52,7 +52,7 @@ export interface ProcessedError     {
   code: string;
   message: string;
   userMessage: string;
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  severity: 'low' | 'medium' | 'high' | 'critical
   retryable: boolean;
   context: ErrorContext;
   originalError: any;
@@ -77,12 +77,12 @@ const DEFAULT_CONFIG: ErrorHandlerConfig  = {
   logging: {
     enabled: true,
     logLevel: 'error',
-    includeStack: process.env.NODE_ENV === 'development'
+    includeStack: process.env.NODE_ENV === 'development
   },
   auth: {
     tokenRefreshEnabled: true,
     redirectOnUnauthorized: true,
-    loginPath: '/login'
+    loginPath: '/login
   }
 };
 // ==================== 错误消息映射 ====================
@@ -92,77 +92,77 @@ const ERROR_MESSAGES: Record<string, { message: string; userMessage: string; sev
   'NETWORK_ERROR': {
     message: 'Network connection failed',
     userMessage: '网络连接失败，请检查您的网络设置',
-    severity: 'medium'
+    severity: 'medium
   },
   'TIMEOUT_ERROR': {
     message: 'Request timeout',
     userMessage: '请求超时，请稍后重试',
-    severity: 'medium'
+    severity: 'medium
   },
   
   // 认证错误
   'UNAUTHORIZED': {
     message: 'Authentication required',
     userMessage: '请先登录后再进行操作',
-    severity: 'high'
+    severity: 'high
   },
   'FORBIDDEN': {
     message: 'Access forbidden',
     userMessage: '您没有权限执行此操作',
-    severity: 'high'
+    severity: 'high
   },
   'TOKEN_EXPIRED': {
     message: 'Authentication token expired',
     userMessage: '登录已过期，请重新登录',
-    severity: 'high'
+    severity: 'high
   },
   
   // 客户端错误
   'BAD_REQUEST': {
     message: 'Invalid request parameters',
     userMessage: '请求参数有误，请检查后重试',
-    severity: 'medium'
+    severity: 'medium
   },
   'NOT_FOUND': {
     message: 'Resource not found',
     userMessage: '请求的资源不存在',
-    severity: 'medium'
+    severity: 'medium
   },
   'VALIDATION_ERROR': {
     message: 'Data validation failed',
     userMessage: '数据验证失败，请检查输入内容',
-    severity: 'medium'
+    severity: 'medium
   },
   
   // 服务器错误
   'INTERNAL_SERVER_ERROR': {
     message: 'Internal server error',
     userMessage: '服务器内部错误，请稍后重试',
-    severity: 'critical'
+    severity: 'critical
   },
   'SERVICE_UNAVAILABLE': {
     message: 'Service temporarily unavailable',
     userMessage: '服务暂时不可用，请稍后重试',
-    severity: 'high'
+    severity: 'high
   },
   'RATE_LIMITED': {
     message: 'Too many requests',
     userMessage: '请求过于频繁，请稍后重试',
-    severity: 'medium'
+    severity: 'medium
   },
   
   // 业务错误
   'BUSINESS_ERROR': {
     message: 'Business logic error',
     userMessage: '操作失败，请检查相关条件',
-    severity: 'medium'
+    severity: 'medium
   },
   
   // 默认错误
   'UNKNOWN_ERROR': {
     message: 'Unknown error occurred',
     userMessage: '发生未知错误，请稍后重试',
-    severity: 'medium'
+    severity: 'medium
   }
 };
 // ==================== 错误处理器类 ====================
@@ -192,7 +192,7 @@ export class ApiErrorHandler {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -298,7 +298,7 @@ export class ApiErrorHandler {
     // 网络错误
     if (!response && request) {
       
-        const errorInfo = ERROR_MESSAGES['NETWORK_ERROR"];"
+        const errorInfo = ERROR_MESSAGES['NETWORK_ERROR"];
       return {
         code: 'NETWORK_ERROR',
         message: errorInfo.message,
@@ -316,7 +316,7 @@ export class ApiErrorHandler {
     
     // 超时错误
     if (code === 'ECONNABORTED') {
-        const errorInfo = ERROR_MESSAGES['TIMEOUT_ERROR"];"
+        const errorInfo = ERROR_MESSAGES['TIMEOUT_ERROR"];
       return {
         code: 'TIMEOUT_ERROR',
         message: errorInfo.message,
@@ -335,7 +335,7 @@ export class ApiErrorHandler {
       }
     
     // 其他错误
-    const errorInfo = ERROR_MESSAGES['UNKNOWN_ERROR"];"
+    const errorInfo = ERROR_MESSAGES['UNKNOWN_ERROR"];
     return {
       code: 'UNKNOWN_ERROR',
       message: error.message || errorInfo.message,
@@ -365,9 +365,9 @@ export class ApiErrorHandler {
       500: 'INTERNAL_SERVER_ERROR',
       502: 'SERVICE_UNAVAILABLE',
       503: 'SERVICE_UNAVAILABLE',
-      504: 'TIMEOUT_ERROR'
+      504: 'TIMEOUT_ERROR
     };
-    const errorCode = statusCodeMap[status] || 'UNKNOWN_ERROR'
+    const errorCode = statusCodeMap[status] || 'UNKNOWN_ERROR
     const errorInfo = ERROR_MESSAGES[errorCode];
     
     // 尝试从响应中获取更详细的错误信息
@@ -402,8 +402,8 @@ export class ApiErrorHandler {
    * 处理API错误响应
    */
   private processApiError(error: ApiErrorResponse, context: ErrorContext): ProcessedError {
-    const errorCode = error.error.code || 'BUSINESS_ERROR'
-    const errorInfo = ERROR_MESSAGES[errorCode] || ERROR_MESSAGES['BUSINESS_ERROR"];"
+    const errorCode = error.error.code || 'BUSINESS_ERROR
+    const errorInfo = ERROR_MESSAGES[errorCode] || ERROR_MESSAGES['BUSINESS_ERROR"];
     return {
       code: errorCode,
       message: error.error.message || errorInfo.message,
@@ -419,7 +419,7 @@ export class ApiErrorHandler {
    * 处理通用错误
    */
   private processGenericError(error: any, context: ErrorContext): ProcessedError {
-    const errorInfo = ERROR_MESSAGES['UNKNOWN_ERROR"];"
+    const errorInfo = ERROR_MESSAGES['UNKNOWN_ERROR"];
     return {
       code: 'UNKNOWN_ERROR',
       message: error?.message || errorInfo.message,
@@ -439,7 +439,7 @@ export class ApiErrorHandler {
            typeof error === 'object' && 
            error.success === false && 
            error.error && 
-           typeof error.error === 'object'
+           typeof error.error === 'object
   }
 
   /**
@@ -482,12 +482,12 @@ export class ApiErrorHandler {
    */
   private async handleSpecialErrors(error: ProcessedError) {
     switch (error.code) {
-      case 'UNAUTHORIZED': ''
-      case 'TOKEN_EXPIRED': ''
+      case 'UNAUTHORIZED': 
+      case 'TOKEN_EXPIRED': 
         if (this.config.auth.redirectOnUnauthorized) {
           // 清除认证信息
-          localStorage.removeItem('auth_token");"
-          localStorage.removeItem('refresh_token");"
+          localStorage.removeItem('auth_token");
+          localStorage.removeItem('refresh_token");
           // 重定向到登录页
           if (typeof window !== 'undefined' && !window.location.pathname.includes(this.config.auth.loginPath)) {
             setTimeout(() => {
@@ -497,11 +497,11 @@ export class ApiErrorHandler {
         }
         break;
         
-      case 'RATE_LIMITED': ''
+      case 'RATE_LIMITED': 
         // 可以实施退避策略
         break;
         
-      case 'SERVICE_UNAVAILABLE': ''
+      case 'SERVICE_UNAVAILABLE': 
         // 可以显示服务状态页面
         break;
     }

@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect    } from 'react';import { TestType    } from '../../../types/testConfig';import { TestPage    } from '../TestPage';const APITest: React.FC  = () => {
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -15,7 +15,7 @@ import React, { useState, useEffect    } from 'react';import { TestType    } fro
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible') {'`
+      if (document.visibilityState === "visible') {
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -27,11 +27,11 @@ import React, { useState, useEffect    } from 'react';import { TestType    } fro
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: ', message: ' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });
+      setFeedback({ type: ', message: ' });
     }, duration);
   };
   

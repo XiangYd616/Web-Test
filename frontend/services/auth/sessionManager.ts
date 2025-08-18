@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import type { User, UserSession  } from '../../types/user';// ==================== 类型定义 ==================== ''
+import type { User, UserSession  } from '../../types/user';// ==================== 类型定义 ==================== 
 export interface SessionConfig     {
   maxConcurrentSessions: number;
   sessionTimeout: number; // 会话超时时间（毫秒）
@@ -82,8 +82,8 @@ export interface SessionAlert     {
   id: string;
   sessionId: string;
   userId: string;
-  type: 'new_device' | 'new_location' | 'suspicious_activity' | 'concurrent_limit' | 'security_breach'
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  type: 'new_device' | 'new_location' | 'suspicious_activity' | 'concurrent_limit' | 'security_breach
+  severity: 'low' | 'medium' | 'high' | 'critical
   message: string;
   details: Record<string, any>;
   timestamp: string;
@@ -92,7 +92,7 @@ export interface SessionAlert     {
 
 export interface ConcurrentSessionPolicy     {
   maxSessions: number;
-  strategy: 'reject_new' | 'terminate_oldest' | 'terminate_all_others' | 'allow_with_warning'
+  strategy: 'reject_new' | 'terminate_oldest' | 'terminate_all_others' | 'allow_with_warning
   notifyUser: boolean;
   requireConfirmation: boolean;
 }
@@ -124,7 +124,7 @@ class DeviceDetector {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -162,7 +162,7 @@ class DeviceDetector {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -182,7 +182,7 @@ class DeviceDetector {
       browserVersion: this.getBrowserInfo().version,
       os: this.getOSInfo().name,
       osVersion: this.getOSInfo().version,
-      screenResolution: `${screen.width}x${screen.height}`,`
+      screenResolution: `${screen.width}x${screen.height}`,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       language: navigator.language
     };
@@ -192,7 +192,7 @@ class DeviceDetector {
    * 获取设备ID
    */
   private static getDeviceId(): string {
-    let deviceId = localStorage.getItem("device_id");``
+    let deviceId = localStorage.getItem("device_id");
     if (!deviceId) {
       deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
       localStorage.setItem('device_id', deviceId);
@@ -252,12 +252,12 @@ class DeviceDetector {
     if (userAgent.includes('Windows NT 6.3')) return '8.1
     if (userAgent.includes('Windows NT 6.2')) return '8
     if (userAgent.includes('Windows NT 6.1')) return '7
-    return 'Unknown'
+    return 'Unknown
   }
 
   private static getMacVersion(userAgent: string): string {
     const match = userAgent.match(/Mac OS X (\d+_?\d+_?\d*)/);
-    return match ? match[1].replace(/_/g, '.') : 'Unknown'
+    return match ? match[1].replace(/_/g, '.') : 'Unknown
   }
 }
 
@@ -271,7 +271,7 @@ class LocationDetector {
     const locationInfo: LocationInfo  = { ipAddress };
     try {
       // 尝试从IP地址获取地理位置信息
-      const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);`
+      const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
       if (response.ok) {
         const data = await response.json();
         locationInfo.country = data.country_name;
@@ -282,7 +282,7 @@ class LocationDetector {
         locationInfo.isp = data.org;
       }
     } catch (error) {
-      console.warn("获取位置信息失败:', error);'`"`
+      console.warn("获取位置信息失败:', error);
     }
 
     // 检测VPN/Tor（简化实现）
@@ -339,7 +339,7 @@ class SecurityAnalyzer {
     if (sessionData.locationInfo) {
       const knownLocations = userSessions
         .filter(s => s.locationInfo)
-        .map(s => `${s.locationInfo!.country}-${s.locationInfo!.region}`);`
+        .map(s => `${s.locationInfo!.country}-${s.locationInfo!.region}`);
 
       const currentLocation = `${sessionData.locationInfo.country}-${sessionData.locationInfo.region}`;
       if (!knownLocations.includes(currentLocation)) {
@@ -427,7 +427,7 @@ export class SessionManager {
     ipAddress: string,
     policy: ConcurrentSessionPolicy = {
       maxSessions: this.config.maxConcurrentSessions,
-      strategy: "terminate_oldest','`"`
+      strategy: "terminate_oldest',"
       notifyUser: true,
       requireConfirmation: false
     }
@@ -451,8 +451,8 @@ export class SessionManager {
     const sessionData: SessionData  = {
       id: sessionId,
       userId: user.id,
-      token: '', // 将由JWT管理器设置
-      refreshToken: '',
+      token: ', // 将由JWT管理器设置
+      refreshToken: ',
       expiresAt: new Date(Date.now() + this.config.sessionTimeout).toISOString(),
       createdAt: new Date().toISOString(),
       lastActivityAt: new Date().toISOString(),
@@ -533,7 +533,7 @@ export class SessionManager {
     }
 
     // 记录活动
-    this.recordActivity(sessionId, 'session_terminated', "auth', { reason });"
+    this.recordActivity(sessionId, 'session_terminated', "auth', { reason });
     // 标记为非活跃
     session.isActive = false;
     await this.persistSession(session);
@@ -542,7 +542,7 @@ export class SessionManager {
     this.activeSessions.delete(sessionId);
 
     // 清理缓存
-    await defaultMemoryCache.delete(`session_${sessionId}`);`
+    await defaultMemoryCache.delete(`session_${sessionId}`);
   }
 
   /**
@@ -572,7 +572,7 @@ export class SessionManager {
         id: this.generateAlertId(),
         sessionId: sessionData.id,
         userId: sessionData.userId,
-        type: "new_device','`"`
+        type: "new_device',"
         severity: 'medium',
         message: '检测到新设备登录',
         details: { deviceInfo: sessionData.deviceInfo },
@@ -628,26 +628,26 @@ export class SessionManager {
     const userSessions = this.getUserSessions(userId);
 
     switch (policy.strategy) {
-      case 'reject_new': ''
-        throw new Error('已达到最大并发会话数限制");"
-      case 'terminate_oldest': ''
+      case 'reject_new': 
+        throw new Error('已达到最大并发会话数限制");
+      case 'terminate_oldest': 
         const oldestSession = userSessions
           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
         if (oldestSession) {
-          await this.terminateSession(oldestSession.id, 'concurrent_limit");"
-          warnings.push('已终止最旧的会话");"
+          await this.terminateSession(oldestSession.id, 'concurrent_limit");
+          warnings.push('已终止最旧的会话");
         }
         break;
 
-      case 'terminate_all_others': ''
+      case 'terminate_all_others': 
         for (const session of userSessions) {
-          await this.terminateSession(session.id, 'concurrent_limit");"
+          await this.terminateSession(session.id, 'concurrent_limit");
         }
-        warnings.push('已终止所有其他会话");"
+        warnings.push('已终止所有其他会话");
         break;
 
-      case 'allow_with_warning': ''
-        warnings.push('已超过建议的并发会话数");"
+      case 'allow_with_warning': 
+        warnings.push('已超过建议的并发会话数");
         break;
     }
   }
@@ -700,7 +700,7 @@ export class SessionManager {
 
   private async persistSession(session: SessionData): Promise<void> {
     // 缓存会话数据
-    await defaultMemoryCache.set(`session_${session.id}`, session, undefined, this.config.sessionTimeout);`
+    await defaultMemoryCache.set(`session_${session.id}`, session, undefined, this.config.sessionTimeout);
   }
 
   private startHeartbeat(sessionId: string): void {
@@ -719,7 +719,7 @@ export class SessionManager {
 
       if (now - lastActivity > this.config.inactivityTimeout) {
         
-        await this.terminateSession(sessionId, "inactivity_timeout");``
+        await this.terminateSession(sessionId, "inactivity_timeout");
         return;
       }
 
@@ -748,7 +748,7 @@ export class SessionManager {
     }
 
     for (const sessionId of expiredSessions) {
-      await this.terminateSession(sessionId, 'session_expired");"
+      await this.terminateSession(sessionId, 'session_expired");
     }
   }
 

@@ -29,8 +29,8 @@ export interface TestConfig     {
   users: number;
   duration: number;
   rampUp: number;
-  testType: 'gradual' | 'spike' | 'stress' | 'constant' | 'load' | 'volume'
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  testType: 'gradual' | 'spike' | 'stress' | 'constant' | 'load' | 'volume
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
   timeout: number;
   thinkTime: number;
   // 扩展属性以兼容现有代码
@@ -239,7 +239,7 @@ export class TestStateManager {
    * 开始测试
    */
   startTest(testId: string, config: TestConfig): void {
-    if (this.state !== TestState.IDLE) {`
+    if (this.state !== TestState.IDLE) {
       throw new Error(`Cannot start test in state: ${this.state}`);
     }
 
@@ -255,7 +255,7 @@ export class TestStateManager {
     this.endTime = null;
     this.dataPoints = [];
     this.metrics = null;
-`
+
     this.log(`Test started: ${testId}`);
     this.notifyStateChange(previousState, this.state);
   }
@@ -264,7 +264,7 @@ export class TestStateManager {
    * 设置测试为运行状态
    */
   setRunning(): void {
-    if (this.state !== TestState.STARTING) {`
+    if (this.state !== TestState.STARTING) {
       throw new Error(`Cannot set running from state: ${this.state}`);
     }
 
@@ -280,7 +280,7 @@ export class TestStateManager {
    * 完成测试
    */
   completeTest(result?: any): void {
-    if (this.state !== TestState.RUNNING) {`
+    if (this.state !== TestState.RUNNING) {
       throw new Error(`Cannot complete test from state: ${this.state}`);
     }
 
@@ -301,9 +301,9 @@ export class TestStateManager {
     const previousState = this.state;
     this.state = TestState.FAILED;
     this.error = error;
-    this.endTime = Date.now();`
+    this.endTime = Date.now();
     this.progressMessage = `测试失败: ${error.message}`,
-`
+
     this.log(`Test failed: ${error.message}`);
     this.notifyStateChange(previousState, this.state, error.message, error);
   }
@@ -351,7 +351,7 @@ export class TestStateManager {
    */
   updateProgress(progress: number, message: string): void {
     this.progress = Math.max(0, Math.min(100, progress));
-    this.progressMessage = message;`
+    this.progressMessage = message;
     this.log(`Progress updated: ${progress}% - ${message}`);
   }
 
@@ -359,7 +359,7 @@ export class TestStateManager {
    * 更新测试阶段
    */
   updatePhase(phase: TestPhase): void {
-    this.phase = phase;`
+    this.phase = phase;
     this.log(`Phase updated: ${phase}`);
   }
 
@@ -380,7 +380,7 @@ export class TestStateManager {
       this.dataPoints = this.dataPoints.slice(-this.config_.maxDataPoints);
     }
 
-    this.notifyDataUpdate(dataPoint);`
+    this.notifyDataUpdate(dataPoint);
     this.log(`Data point added: ${dataPoint.timestamp}`);
   }
 
@@ -389,7 +389,7 @@ export class TestStateManager {
    */
   updateMetrics(metrics: RealTimeMetrics): void {
     this.metrics = { ...metrics, timestamp: Date.now() };
-    this.notifyMetricsUpdate(this.metrics);`
+    this.notifyMetricsUpdate(this.metrics);
     this.log(`Metrics updated: TPS=${metrics.currentTPS}, RT=${metrics.averageResponseTime}ms`);
   }
 
@@ -397,7 +397,7 @@ export class TestStateManager {
    * 切换数据源
    */
   switchDataSource(source: DataSource): void {
-    this.currentDataSource = source;`
+    this.currentDataSource = source;
     this.log(`Data source switched to: ${source}`);
   }
 
@@ -501,13 +501,13 @@ export class TestStateManager {
 
     this.dataPoints = this.dataPoints.filter(point => point.timestamp > cutoffTime);
 
-    if (this.dataPoints.length < originalLength) {`
+    if (this.dataPoints.length < originalLength) {
       this.log(`Cleaned up ${originalLength - this.dataPoints.length} old data points`);
     }
   }
 
   private log(message: string): void {
-    if (this.config_.enableLogging) {`
+    if (this.config_.enableLogging) {
       console.log(`[TestStateManager] ${message}`);
     }
   }
@@ -531,4 +531,3 @@ export class TestStateManager {
 
 // 创建单例实例
 export const testStateManager = new TestStateManager();
-'`

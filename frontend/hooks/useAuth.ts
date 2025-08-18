@@ -39,13 +39,13 @@ export const useAuth = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`'`
+          'Authorization': `Bearer ${token}
         }
       });
 
       return response.ok;
     } catch (error) {
-      console.error("Token validation error: ', error);'`"`
+      console.error("Token validation error: ', error);
       return false;
     }
   };
@@ -57,7 +57,7 @@ export const useAuth = () => {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json
         },
         body: JSON.stringify(credentials)
       });
@@ -65,7 +65,7 @@ export const useAuth = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || '登录失败");"
+        throw new Error(data.message || '登录失败");
       }
 
       const { user, token } = data;
@@ -85,7 +85,7 @@ export const useAuth = () => {
       });
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '登录失败'
+      const errorMessage = error instanceof Error ? error.message : '登录失败
       dispatch({
         type: 'AUTH_LOGIN_FAILURE',
         payload: { error: errorMessage }
@@ -99,13 +99,13 @@ export const useAuth = () => {
     try {
       dispatch({ type: 'AUTH_LOGIN_START' });
       if (data.password !== data.confirmPassword) {
-        throw new Error('密码确认不匹配");"
+        throw new Error('密码确认不匹配");
       }
 
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json
         },
         body: JSON.stringify({
           username: data.username,
@@ -117,7 +117,7 @@ export const useAuth = () => {
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(responseData.message || '注册失败");"
+        throw new Error(responseData.message || '注册失败");
       }
 
       // 注册成功后自动登录
@@ -127,7 +127,7 @@ export const useAuth = () => {
       });
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '注册失败'
+      const errorMessage = error instanceof Error ? error.message : '注册失败
       dispatch({
         type: 'AUTH_LOGIN_FAILURE',
         payload: { error: errorMessage }
@@ -144,18 +144,18 @@ export const useAuth = () => {
         await fetch('/api/auth/logout', {
           method: 'POST',
           headers: {
-            "Authorization': `Bearer ${auth.token}`'`"
+            "Authorization': `Bearer ${auth.token}`
           }
         });
       }
     } catch (error) {
-      console.error("Logout error: ', error);'`"`
+      console.error("Logout error: ', error);
     } finally {
       // 清除本地存储
-      localStorage.removeItem('authToken");"
-      localStorage.removeItem('userData");"
-      sessionStorage.removeItem('authToken");"
-      sessionStorage.removeItem('userData");"
+      localStorage.removeItem('authToken");
+      localStorage.removeItem('userData");
+      sessionStorage.removeItem('authToken");
+      sessionStorage.removeItem('userData");
       // 重置状态
       dispatch({ type: 'AUTH_LOGOUT' });
     }
@@ -165,7 +165,7 @@ export const useAuth = () => {
   const updateUser = useCallback(async (updates: Partial<User>): Promise<void>  => {
     try {
       if (!auth.user || !auth.token) {
-        throw new Error('用户未登录");"
+        throw new Error('用户未登录");
       }
 
       dispatch({ type: 'UI_SET_LOADING', payload: { key: 'auth', loading: true } });
@@ -173,7 +173,7 @@ export const useAuth = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.token}`'`
+          'Authorization': `Bearer ${auth.token}
         },
         body: JSON.stringify(updates)
       });
@@ -181,13 +181,13 @@ export const useAuth = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "更新失败");``
+        throw new Error(data.message || "更新失败");
       }
 
       const updatedUser = { ...auth.user, ...data.user };
 
       // 更新本地存储
-      const storageKey = localStorage.getItem('authToken') ? 'localStorage' : 'sessionStorage'
+      const storageKey = localStorage.getItem('authToken') ? 'localStorage' : 'sessionStorage
       const storage = storageKey === 'localStorage' ? localStorage : sessionStorage;
       storage.setItem('userData', JSON.stringify(updatedUser));
       dispatch({
@@ -196,7 +196,7 @@ export const useAuth = () => {
       });
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '更新失败'
+      const errorMessage = error instanceof Error ? error.message : '更新失败
       dispatch({
         type: 'AUTH_LOGIN_FAILURE',
         payload: { error: errorMessage }
@@ -211,7 +211,7 @@ export const useAuth = () => {
   const changePassword = useCallback(async (currentPassword: string, newPassword: string): Promise<void>  => {
     try {
       if (!auth.token) {
-        throw new Error('用户未登录");"
+        throw new Error('用户未登录");
       }
 
       dispatch({ type: 'UI_SET_LOADING', payload: { key: 'auth', loading: true } });
@@ -219,7 +219,7 @@ export const useAuth = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          "Authorization': `Bearer ${auth.token}`'`"
+          "Authorization': `Bearer ${auth.token}`
         },
         body: JSON.stringify({
           currentPassword,
@@ -230,11 +230,11 @@ export const useAuth = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "密码修改失败");``
+        throw new Error(data.message || "密码修改失败");
       }
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '密码修改失败'
+      const errorMessage = error instanceof Error ? error.message : '密码修改失败
       dispatch({
         type: 'AUTH_LOGIN_FAILURE',
         payload: { error: errorMessage }

@@ -20,8 +20,8 @@ import { Activity, AlertTriangle, BarChart3, Bell, CheckCircle, Clock, Eye, Glob
   defaultValue?: any;
 
   // 配置属性
-  size?: 'small' | 'medium' | 'large'
-  variant?: 'primary' | 'secondary' | 'outline'
+  size?: 'small' | 'medium' | 'large
+  variant?: 'primary' | 'secondary' | 'outline
   // 可访问性
   'aria-label'?: string;
   'aria-describedby'?: string;
@@ -61,7 +61,7 @@ const RealTimeMonitoring: React.FC = () => {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [showAddSite, setShowAddSite] = useState(false);
   const [showAlertConfig, setShowAlertConfig] = useState(false);
-  const [newSite, setNewSite] = useState({ name: '', url: '', region: '默认' });
+  const [newSite, setNewSite] = useState({ name: ', url: ', region: '默认' });
   const [selectedSite, setSelectedSite] = useState<MonitoringSite | null>(null);
   const [showSiteDetails, setShowSiteDetails] = useState(false);
   const [monitoringStats, setMonitoringStats] = useState<MonitoringStats>({
@@ -114,7 +114,7 @@ const loadMonitoringData = async () => {
     const data = monitoringService.getMonitoringData();
     setRealTimeData(data);
   } catch (error) {
-    console.error("Failed to load monitoring data: ', error);'
+    console.error("Failed to load monitoring data: ', error);
     } finally {
     setLoading(false);
   }
@@ -136,12 +136,12 @@ const addMonitoringSite = async () => {
   console.log('添加监控站点被调用', { newSite });
   if (!newSite.name || !newSite.url) {
     console.log('站点名称或URL为空', { name: newSite.name, url: newSite.url });
-    alert('请填写站点名称和URL");"
+    alert('请填写站点名称和URL");
       return;
   }
 
   try {
-    console.log('开始添加站点...");"
+    console.log('开始添加站点...");
       const site = await monitoringService.addSite({
       name: newSite.name,;
     url: newSite.url,;
@@ -149,15 +149,15 @@ const addMonitoringSite = async () => {
     enabled: true;)
   });
 
-  console.log("站点添加成功', site);"
+  console.log("站点添加成功', site);
       setMonitoringSites(prev => {
     const updated = [...prev, site];)
-        console.log("更新站点列表', updated);"
+        console.log("更新站点列表', updated);
         return updated;
 });
 
 setNewSite({
-  name: '', url: '", region: '默认' });"
+  name: ', url: ', region: '默认' });
       setShowAddSite(false);
 
   // 更新统计
@@ -188,18 +188,18 @@ const toggleMonitoring = () => {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'online': return 'text-green-400 bg-green-500/20'
-    case 'offline': return 'text-red-400 bg-red-500/20'
-    case 'warning': return 'text-yellow-400 bg-yellow-500/20'
-    default: return 'text-gray-400 bg-gray-500/20'
+    case 'online': return 'text-green-400 bg-green-500/20
+    case 'offline': return 'text-red-400 bg-red-500/20
+    case 'warning': return 'text-yellow-400 bg-yellow-500/20
+    default: return 'text-gray-400 bg-gray-500/20
   }
 };
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'online": return <CheckCircle className='w - 4 h - 4' />"
-    case 'offline": return <AlertTriangle className='w - 4 h - 4' />"
-    case "warning': return <Clock className='w-4 h-4' />"
+    case 'online": return <CheckCircle className='w - 4 h - 4' />
+    case 'offline": return <AlertTriangle className='w - 4 h - 4' />
+    case "warning': return <Clock className='w-4 h-4' />
       default: return <Activity className='w-4 h-4' />
   }
 };
@@ -211,14 +211,14 @@ return (<div className='space-y-6'>
     <div className='flex items-center space-x-3'>
       <button>
         onClick={() => setShowAlertConfig(true)}
-        className='flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors'
+        className='flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors
           >
         <Settings className='w-4 h-4' />
         <span>告警设置</span>
       </button>
       <button>
         onClick={() => setShowAddSite(true)}
-        className='flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
+        className='flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors
           >
         <Plus className='w-4 h-4' />
         <span>添加站点</span>
@@ -226,12 +226,12 @@ return (<div className='space-y-6'>
       <button>
         onClick={toggleMonitoring}
         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isMonitoring`}
-              ? "bg-red-600 hover:bg-red-700 text-white";``
-              : "bg-green-600 hover:bg-green-700 text-white;"
-              }`}`
+              ? "bg-red-600 hover:bg-red-700 text-white";
+              : "bg-green-600 hover:bg-green-700 text-white;
+              }`}
           >
-          { isMonitoring?<Pause className = "w-4 h-4'    /> : <Play className='w-4 h-4'    /> }'`"`
-            <span>{ isMonitoring ? "停止监控" : "开始监控' }</span>'
+          { isMonitoring?<Pause className = "w-4 h-4'    /> : <Play className='w-4 h-4'    /> }'
+            <span>{ isMonitoring ? "停止监控" : "开始监控' }</span>
           </button>
         </div>
       </div>
@@ -346,8 +346,8 @@ return (<div className='space-y-6'>
             <LineChart data={realTimeData}>
               <CartesianGrid strokeDasharray='3 3' stroke='var(--color-gray-700)'    />
               <XAxis>
-                dataKey='timestamp'
-                stroke='var(--color-gray-400)'
+                dataKey='timestamp
+                stroke='var(--color-gray-400)
                 fontSize={12}
                 tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', {
                   hour: '2-digit',;
@@ -360,17 +360,17 @@ return (<div className='space-y-6'>
                   backgroundColor: 'var(--color-gray-800)',;
                   border: '1px solid var(--color-gray-700)',;
                   borderRadius: '8px',;
-                  color: 'var(--color-gray-50)'
+                  color: 'var(--color-gray-50)
                 }}
                 labelFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN')}
-                formatter={ (value: number) => [`${value.toFixed(0)}ms`, '响应时间']}'`'`
+                formatter={ (value: number) => [`${value.toFixed(0)}ms`, '响应时间']}'
               />
-        <Line type="monotone";``>
-        dataKey='responseTime'
-        stroke='var(--color-primary)'
+        <Line type="monotone";`>
+        dataKey='responseTime
+        stroke='var(--color-primary)
         strokeWidth={2}
         dot={false}
-        name='响应时间'
+        name='响应时间
                  />
       </LineChart>
     </ResponsiveContainer>
@@ -383,8 +383,8 @@ return (<div className='space-y-6'>
       <AreaChart data={realTimeData}>
         <CartesianGrid strokeDasharray='3 3' stroke='var(--color-gray-700)' />
         <XAxis>
-          dataKey='timestamp'
-          stroke='var(--color-gray-400)'
+          dataKey='timestamp
+          stroke='var(--color-gray-400)
           fontSize={12}
           tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', {
             hour: '2-digit',;
@@ -397,17 +397,17 @@ return (<div className='space-y-6'>
               backgroundColor: 'var(--color-gray-800)',;
             border: '1px solid var(--color-gray-700)',;
             borderRadius: '8px',;
-            color: 'var(--color-gray-50)'
+            color: 'var(--color-gray-50)
                 }}
             labelFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN')}
-            formatter={(value: number) => [`${value.toFixed(2)}%`, "可用性']}'`"`
+            formatter={(value: number) => [`${value.toFixed(2)}%`, "可用性']}'
               />
-              <Area type="monotone";``>
-                dataKey='uptime'
-                stroke='var(--color-success)'
-                fill='var(--color-success)'
+              <Area type="monotone";`>
+                dataKey='uptime
+                stroke='var(--color-success)
+                fill='var(--color-success)
                 fillOpacity={0.6}
-                name='可用性'
+                name='可用性
                  />
             </AreaChart>
           </ResponsiveContainer>
@@ -422,7 +422,7 @@ return (<div className='space-y-6'>
             <p className='text-gray-400'>暂无监控站点</p>
             <button>
               onClick={() => setShowAddSite(true)}
-              className='mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
+              className='mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors
             >
               添加第一个站点;
             </button>
@@ -449,9 +449,9 @@ return (<div className='space-y-6'>
                       </div>
                     </td>
                     <td className='py-3 px-4'>
-                      <span className={`inline - flex items - center space - x - 1 px - 2 py - 1 rounded - full text - xs font - medium ${ getStatusColor(site.status)}`}>`
+                      <span className={`inline - flex items - center space - x - 1 px - 2 py - 1 rounded - full text - xs font - medium ${ getStatusColor(site.status)}`}>
             {getStatusIcon(site.status)}
-            <span>{site.status === "online' ? '在线' : site.status ==='offline' ? '离线" : "警告' }</span>`'"`
+            <span>{site.status === "online' ? '在线' : site.status ==='offline' ? '离线" : "警告' }</span>`
           </span>
         </td>
         <td className='py-3 px-4 text-white'>{site.responseTime}ms</td>
@@ -462,19 +462,19 @@ return (<div className='space-y-6'>
         <td className='py-3 px-4'>
           <div className='flex items-center space-x-2'>
             <button>
-              type='button'
-              className='p-1 text-gray-400 hover:text-blue-400 transition-colors'
-              title='查看详情'
-              aria-label='查看站点详情'
+              type='button
+              className='p-1 text-gray-400 hover:text-blue-400 transition-colors
+              title='查看详情
+              aria-label='查看站点详情
                         >
               <Eye className='w-4 h-4' />
             </button>
             <button>
-              type='button'
+              type='button
               onClick={() => removeSite(site.id)}
-              className='p-1 text-gray-400 hover:text-red-400 transition-colors'
-              title='删除站点'
-              aria-label='删除监控站点'
+              className='p-1 text-gray-400 hover:text-red-400 transition-colors
+              title='删除站点
+              aria-label='删除监控站点
                         >
               <Trash2 className='w-4 h-4' />
             </button>
@@ -497,38 +497,38 @@ return (<div className='space-y-6'>
         <div>
           <label className='block text-sm font-medium text-gray-300 mb-2'>站点名称</label>
           <input>
-            type='text'
+            type='text
             value={newSite.name}
             onChange={(e) => setNewSite(prev => ({ ...prev, name: e.target.value }))}
-            className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-            placeholder='例如：我的网站'
+            className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500
+            placeholder='例如：我的网站
                 />
         </div>
         <div>
           <label className='block text-sm font-medium text-gray-300 mb-2'>URL</label>
           <input>
-            type='url'
+            type='url
             value={newSite.url}
             onChange={(e) => setNewSite(prev => ({ ...prev, url: e.target.value }))}
-            className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-            placeholder='https://example.com'
+            className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500
+            placeholder='https://example.com
                 />
         </div>
       </div>
       <div className='flex items-center justify-end space-x-3 mt-6'>
         <button>
-          type='button'
+          type='button
           onClick={() => setShowAddSite(false)}
-          className='px-4 py-2 text-gray-400 hover:text-white transition-colors'
-          title='取消添加'
-          aria-label='取消添加站点'
+          className='px-4 py-2 text-gray-400 hover:text-white transition-colors
+          title='取消添加
+          aria-label='取消添加站点
               >
           取消;
         </button>
         <button>
-          type='button'
+          type='button
           onClick={addMonitoringSite}
-          className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
+          className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors
               >
           添加;
         </button>

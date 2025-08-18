@@ -16,11 +16,11 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ collapsed, onToggle }) => {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '0 16px',
-      height: '64px'
+      height: '64px
     }}>
       <Space>
         <Button
-          type="text"
+          type="text
           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           onClick={onToggle}
           style={{ fontSize: '16px', width: 64, height: 64 }}

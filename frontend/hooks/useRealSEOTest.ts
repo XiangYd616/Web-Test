@@ -27,7 +27,7 @@ interface SEOTestConfig   {
   checkSocialMedia?: boolean;
   checkStructuredData?: boolean;
   checkSecurity?: boolean;
-  depth?: 'basic' | 'standard' | 'comprehensive'
+  depth?: 'basic' | 'standard' | 'comprehensive
 }
 
 interface SEOTestProgress   {
@@ -40,7 +40,7 @@ export const useRealSEOTest = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState<SEOTestProgress>({
     progress: 0,
-    currentStep: '',
+    currentStep: ',
     isRunning: false
   });
   const [results, setResults] = useState<SEOAnalysisResult | null>(null);
@@ -70,7 +70,7 @@ export const useRealSEOTest = () => {
           performanceData = await getPerformanceMetrics(config.url, {
             includeVitals: true,
             includeMobile: config.checkMobileFriendly,
-            device: 'both'
+            device: 'both
           });
         } catch (error) {
           console.warn('获取性能指标失败，继续SEO分析:', error);
@@ -137,7 +137,7 @@ export const useRealSEOTest = () => {
   // 重置测试
   const reset = useCallback(() => {
     setIsRunning(false);
-    setProgress({ progress: 0, currentStep: '', isRunning: false });
+    setProgress({ progress: 0, currentStep: ', isRunning: false });
     setResults(null);
     setError(null);
     if (seoEngineRef.current) {

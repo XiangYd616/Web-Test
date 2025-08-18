@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState    } from 'react';// // // // 
 // ==================== 类型定义 ====================
 
 export interface UseCacheOptions     {
-  cacheType?: 'memory' | 'localStorage' | 'hybrid'
+  cacheType?: 'memory' | 'localStorage' | 'hybrid
   namespace?: string;
   ttl?: number;
   enableStats?: boolean;
@@ -65,16 +65,16 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
   // 初始化缓存管理器
   useEffect(() => {
     switch (cacheType) {
-      case 'memory': ''
+      case 'memory': 
         cacheManagerRef.current = defaultMemoryCache;
         break;
-      case 'localStorage': ''
+      case 'localStorage': 
         cacheManagerRef.current = defaultLocalStorageCache;
         break;
-      case 'hybrid': ''
+      case 'hybrid': 
         cacheManagerRef.current = CacheFactory.createHybridCache({ ttl, namespace });
         break;
-      default:
+      default: undefined, // 已修复
         cacheManagerRef.current = defaultMemoryCache;
     }
   }, [cacheType, ttl, namespace]);
@@ -83,7 +83,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
   const getCacheManager = useCallback((): CacheManager  => {
     const manager = cacheManagerRef.current;
     if (!manager) {
-      throw new Error('Cache manager not initialized");"
+      throw new Error('Cache manager not initialized");
     }
 
     if (cacheType === 'hybrid') {
@@ -138,7 +138,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         return data;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache get operation failed'
+        const errorMessage = error instanceof Error ? error.message : 'Cache get operation failed
         updateState({ error: errorMessage });
         return null;
       } finally {
@@ -163,7 +163,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         onCacheSet?.(key, data);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache set operation failed'
+        const errorMessage = error instanceof Error ? error.message : 'Cache set operation failed
         updateState({ error: errorMessage });
       } finally {
         updateState({ isLoading: false });
@@ -191,7 +191,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         return deleted;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache delete operation failed'
+        const errorMessage = error instanceof Error ? error.message : 'Cache delete operation failed
         updateState({ error: errorMessage });
         return false;
       } finally {
@@ -214,7 +214,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
           }
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache clear operation failed'
+        const errorMessage = error instanceof Error ? error.message : 'Cache clear operation failed
         updateState({ error: errorMessage });
       } finally {
         updateState({ isLoading: false });
@@ -258,7 +258,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         return count;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache invalidate operation failed'
+        const errorMessage = error instanceof Error ? error.message : 'Cache invalidate operation failed
         updateState({ error: errorMessage });
         return 0;
       } finally {
@@ -302,13 +302,13 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
               await operations.set(key, data, params);
             }
           } catch (error) {
-            console.warn(`Failed to preload cache key: ${key}`, error);`
+            console.warn(`Failed to preload cache key: ${key}`, error);
           }
         });
 
         await Promise.all(promises);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Cache preload operation failed";``
+        const errorMessage = error instanceof Error ? error.message : "Cache preload operation failed";
         updateState({ error: errorMessage });
       } finally {
         updateState({ isLoading: false });
@@ -434,7 +434,7 @@ export function useAdvancedCache<T = any>(config: {
       setIsFromCache(false);
       setLastUpdated(new Date());
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Cache set failed");"
+      const error = err instanceof Error ? err : new Error('Cache set failed");
       setError(error);
       config.onError?.(error);
     } finally {
@@ -462,7 +462,7 @@ export function useAdvancedCache<T = any>(config: {
         return null;
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Cache get failed");"
+      const error = err instanceof Error ? err : new Error('Cache get failed");
       setError(error);
       config.onError?.(error);
       return null;
@@ -487,7 +487,7 @@ export function useAdvancedCache<T = any>(config: {
 
       return result;
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Cache remove failed");"
+      const error = err instanceof Error ? err : new Error('Cache remove failed");
       setError(error);
       config.onError?.(error);
       return false;
@@ -561,22 +561,22 @@ export function useSmartUserCache(userId: string) {
   });
 
   const getProfile = useCallback(async () => {
-    const key = CacheKeys.user(userId, 'profile");"
+    const key = CacheKeys.user(userId, 'profile");
     return profileCache.get(key);
   }, [userId, profileCache]);
 
   const setProfile = useCallback(async (profile: any) => {
-    const key = CacheKeys.user(userId, 'profile");"
+    const key = CacheKeys.user(userId, 'profile");
     return profileCache.set(key, profile);
   }, [userId, profileCache]);
 
   const getPreferences = useCallback(async () => {
-    const key = CacheKeys.user(userId, 'preferences");"
+    const key = CacheKeys.user(userId, 'preferences");
     return preferencesCache.get(key);
   }, [userId, preferencesCache]);
 
   const setPreferences = useCallback(async (preferences: any) => {
-    const key = CacheKeys.user(userId, 'preferences");"
+    const key = CacheKeys.user(userId, 'preferences");
     return preferencesCache.set(key, preferences);
   }, [userId, preferencesCache]);
 

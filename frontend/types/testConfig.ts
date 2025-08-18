@@ -11,11 +11,11 @@ export interface BaseTestConfig     {
 
 // API测试配置
 export interface APITestConfig extends BaseTestConfig     {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE
   headers?: Record<string, string>;
   body?: string;
   auth?: {
-    type: 'bearer' | 'basic' | 'apikey'
+    type: 'bearer' | 'basic' | 'apikey
     token?: string;
     username?: string;
     password?: string;
@@ -33,14 +33,14 @@ export interface APITestConfig extends BaseTestConfig     {
 // 性能测试配置
 export interface PerformanceTestConfig extends BaseTestConfig     {
   categories?: ('performance' | 'accessibility' | 'best-practices' | 'seo')[];
-  device?: 'desktop' | 'mobile'
+  device?: 'desktop' | 'mobile
   throttling?: {
     rttMs?: number;
     throughputKbps?: number;
     cpuSlowdownMultiplier?: number;
   };
   locale?: string;
-  emulatedFormFactor?: 'desktop' | 'mobile'
+  emulatedFormFactor?: 'desktop' | 'mobile
 }
 
 // 安全测试配置
@@ -61,7 +61,7 @@ export interface StressTestConfig extends BaseTestConfig     {
   concurrency?: number;
   requests?: number;
   duration?: number;
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE
   headers?: Record<string, string>;
   body?: string;
   rampUp?: number;
@@ -79,14 +79,14 @@ export interface InfrastructureTestConfig extends BaseTestConfig     {
 // UX测试配置
 export interface UXTestConfig extends BaseTestConfig     {
   checks?: ('accessibility' | 'usability' | 'interactions' | 'mobile' | 'forms')[];
-  device?: 'desktop' | 'mobile' | 'tablet'
+  device?: 'desktop' | 'mobile' | 'tablet
   viewport?: {
     width: number;
     height: number;
   };
   waitForSelector?: string;
   interactions?: Array<{
-    type: 'click' | 'type' | 'scroll' | 'hover'
+    type: 'click' | 'type' | 'scroll' | 'hover
     selector: string;
     value?: string;
   }>;
@@ -129,7 +129,7 @@ export enum TestType {
   INFRASTRUCTURE = 'infrastructure',
   UX = 'ux',
   COMPATIBILITY = 'compatibility',
-  WEBSITE = 'website'
+  WEBSITE = 'website
 }
 
 // 测试状态
@@ -138,7 +138,7 @@ export enum TestStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled
 }
 
 // 测试进度接口
@@ -167,7 +167,7 @@ export interface TestResult     {
   };
   totalTime?: number;
   recommendations?: Array<{
-    priority: 'high' | 'medium' | 'low'
+    priority: 'high' | 'medium' | 'low
     category: string;
     description: string;
     suggestion: string;
@@ -182,6 +182,6 @@ export class TestError extends Error {
     public retryable: boolean = false
   ) {
     super(message);
-    this.name = 'TestError'
+    this.name = 'TestError
   }
 }

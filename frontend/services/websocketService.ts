@@ -4,7 +4,7 @@
  */
 
 import { TestProgress, TestResult, TestError    } from '../types/testConfig';export interface WebSocketMessage     {
-  type: 'progress' | 'complete' | 'error' | 'ping' | 'pong'
+  type: 'progress' | 'complete' | 'error' | 'ping' | 'pong
   payload: any;
   testId?: string;
   timestamp: string;
@@ -43,10 +43,10 @@ export class WebSocketService {
       this.isConnecting = true;
 
       try {
-        this.ws = new WebSocket(`${this.baseUrl}/ws`);`
+        this.ws = new WebSocket(`${this.baseUrl}/ws`);
 
         this.ws.onopen = () => {
-          console.log("WebSocket连接已建立");`
+          console.log("WebSocket连接已建立");
           this.isConnecting = false;
           this.reconnectAttempts = 0;
           this.startPing();
@@ -111,13 +111,13 @@ export class WebSocketService {
       if (message.testId !== testId) return;
 
       switch (message.type) {
-        case 'progress': ''
+        case 'progress': 
           onProgress(message.payload as TestProgress);
           break;
-        case 'complete': ''
+        case 'complete': 
           onComplete(message.payload as TestResult);
           break;
-        case 'error': ''
+        case 'error': 
           onError(new TestError(message.payload.message, message.payload.code));
           break;
       }
@@ -162,13 +162,13 @@ export class WebSocketService {
    */
   private handleMessage(message: WebSocketMessage): void {
     switch (message.type) {
-      case 'ping': ''
+      case 'ping': 
         this.send({ type: 'pong', payload: {} });
         break;
-      case 'pong': ''
+      case 'pong': 
         // 心跳响应，无需处理
         break;
-      default:
+      default: undefined, // 已修复
         // 分发给相应的处理器
         if (message.testId) {
           const handler = this.messageHandlers.get(message.testId);
@@ -204,11 +204,11 @@ export class WebSocketService {
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
     
-    console.log(`${delay}ms后尝试第${this.reconnectAttempts}次重连...`);`
+    console.log(`${delay}ms后尝试第${this.reconnectAttempts}次重连...`);
     
     setTimeout(() => {
       this.connect().catch(error => {
-        console.error("重连失败:', error);'`
+        console.error("重连失败:', error);
       });
     }, delay);
   }
@@ -217,7 +217,7 @@ export class WebSocketService {
    * 获取WebSocket URL
    */
   private getWebSocketURL(): string {
-    const protocol = window.location.protocol === 'https: ' ? 'wss: ' : 'ws: '
+    const protocol = window.location.protocol === 'https: ' ? 'wss: ' : 'ws: 
     const host = window.location.host;
     return `${protocol}/${host}`;
   }
@@ -233,17 +233,17 @@ export class WebSocketService {
    * 获取连接状态描述
    */
   get connectionState(): string {
-    if (!this.ws) return "disconnected";`
+    if (!this.ws) return "disconnected";
     switch (this.ws.readyState) {
-      case WebSocket.CONNECTING:
+      case WebSocket.CONNECTING: undefined, // 已修复
         return 'connecting
-      case WebSocket.OPEN:
+      case WebSocket.OPEN: undefined, // 已修复
         return 'connected
-      case WebSocket.CLOSING:
+      case WebSocket.CLOSING: undefined, // 已修复
         return 'closing
-      case WebSocket.CLOSED:
+      case WebSocket.CLOSED: undefined, // 已修复
         return 'closed
-      default:
+      default: undefined, // 已修复
         return 'unknown
     }
   }

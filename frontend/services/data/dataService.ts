@@ -1,7 +1,7 @@
 
 export interface DataRecord     {
   id: string;
-  type: 'test' | 'user' | 'report' | 'log' | 'config'
+  type: 'test' | 'user' | 'report' | 'log' | 'config
   data: any;
   metadata: {
     createdAt: string;
@@ -22,7 +22,7 @@ export interface DataQuery     {
   search?: string;
   sort?: {
     field: string;
-    order: 'asc' | 'desc'
+    order: 'asc' | 'desc
   };
   pagination?: {
     page: number;
@@ -45,7 +45,7 @@ export interface DataQueryResult     {
 }
 
 export interface DataExportConfig     {
-  format: 'json' | 'csv' | 'xlsx' | 'xml'
+  format: 'json' | 'csv' | 'xlsx' | 'xml
   query?: DataQuery;
   fields?: string[];
   includeMetadata?: boolean;
@@ -58,7 +58,7 @@ export interface DataExportConfig     {
 
 export interface DataImportConfig     {
   type: string;
-  format: 'json' | 'csv' | 'xlsx' | 'xml'
+  format: 'json' | 'csv' | 'xlsx' | 'xml
   mapping?: Record<string, string>;
   validation?: boolean;
   skipDuplicates?: boolean;
@@ -85,10 +85,10 @@ export interface DataAnalysisResult     {
     growth: number;
   }>;
   insights: Array<{>
-    type: 'anomaly' | 'trend' | 'pattern'
+    type: 'anomaly' | 'trend' | 'pattern
     description: string;
     confidence: number;
-    impact: 'low' | 'medium' | 'high'
+    impact: 'low' | 'medium' | 'high
   }>;
 }
 
@@ -96,17 +96,17 @@ export interface DataAnalysisResult     {
 export interface DataBackup     {
   id: string;
   name: string;
-  type: 'full' | 'incremental' | 'differential'
-  status: 'pending' | 'running' | 'completed' | 'failed'
+  type: 'full' | 'incremental' | 'differential
+  status: 'pending' | 'running' | 'completed' | 'failed
   size?: number;
   recordCount?: number;
-  location: 'local' | 'cloud'
+  location: 'local' | 'cloud
   createdAt: string;
   completedAt?: string;
   metadata: {
     description: string;
     tags: string[];
-    compression: 'none' | 'gzip' | 'brotli'
+    compression: 'none' | 'gzip' | 'brotli
     encryption: boolean;
     includeTypes: string[];
     retentionDays: number;
@@ -115,9 +115,9 @@ export interface DataBackup     {
 
 export interface BackupConfig     {
   name: string;
-  type: 'full' | 'incremental' | 'differential'
+  type: 'full' | 'incremental' | 'differential
   includeTypes: string[];
-  compression: 'none' | 'gzip' | 'brotli'
+  compression: 'none' | 'gzip' | 'brotli
   encryption: boolean;
   description: string;
   tags: string[];
@@ -131,7 +131,7 @@ export interface RestoreOptions     {
 }
 
 export interface BatchOperation     {
-  type: 'create' | 'update' | 'delete'
+  type: 'create' | 'update' | 'delete
   id?: string;
   data?: any;
   metadata?: any;
@@ -147,7 +147,7 @@ export class DataService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -157,25 +157,25 @@ export class DataService {
   private cacheTimeout: number;
 
   constructor() {
-    this.baseUrl = "/api/data-management";``
+    this.baseUrl = "/api/data-management";
     this.cache = new Map();
     this.cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
   }
 
   // 通用请求方法
   private async request(endpoint: string, options: RequestInit = {}): Promise<any> {
-    const token = localStorage.getItem('auth_token') || localStorage.getItem('token");"
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {`
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('token");
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
       headers: {
-        "Content-Type': 'application/json','`"`
-        ...(token && { 'Authorization': `Bearer ${token}` }),'`
+        "Content-Type': 'application/json','
+        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);`
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     return response.json();
@@ -201,7 +201,7 @@ export class DataService {
     if (cached) return cached;
 
     try {
-      const result = await this.request("/query', {'`"`
+      const result = await this.request("/query', {'
         method: 'POST',
         body: JSON.stringify(query),
       });
@@ -209,7 +209,7 @@ export class DataService {
       this.setCache(cacheKey, result.data);
       return result.data;
     } catch (error) {
-      console.error("Failed to query data: ', error);"
+      console.error("Failed to query data: ', error);
       throw error;
     }
   }
@@ -221,7 +221,7 @@ export class DataService {
     if (cached) return cached;
 
     try {
-      const result = await this.request("/analyze', {'`"`
+      const result = await this.request("/analyze', {'
         method: 'POST',
         body: JSON.stringify({ query }),
       });
@@ -237,22 +237,22 @@ export class DataService {
   // 数据导出
   async exportData(config: DataExportConfig): Promise<Blob> {
     try {
-      const response = await fetch(`${this.baseUrl}/export`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseUrl}/export`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
-          "Authorization": `Bearer ${localStorage.getItem('auth_token') || localStorage.getItem('token')}`,'`
+          "Authorization": `Bearer ${localStorage.getItem('auth_token') || localStorage.getItem('token')}`,
         },
         body: JSON.stringify(config),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       return response.blob();
     } catch (error) {
-      console.error("Failed to export data: ', error);'`"`
+      console.error("Failed to export data: ', error);
       throw error;
     }
   }
@@ -260,7 +260,7 @@ export class DataService {
   // 数据导入
   async importData(file: File, config: {
     type: string;
-    format: 'json' | 'csv' | 'xlsx' | 'xml'
+    format: 'json' | 'csv' | 'xlsx' | 'xml
     mapping?: Record<string, string>;
     validation?: boolean;
     skipDuplicates?: boolean;
@@ -270,24 +270,24 @@ export class DataService {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('config', JSON.stringify(config));
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('token");"
-      const response = await fetch(`${this.baseUrl}/import`, {`
-        method: "POST','`"`
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token");
+      const response = await fetch(`${this.baseUrl}/import`, {
+        method: "POST',"
         headers: {
-          ...(token && { 'Authorization': `Bearer ${token}` }),'`
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
       this.invalidateCache();
       return result;
     } catch (error) {
-      console.error("Failed to import data: ', error);'`"`
+      console.error("Failed to import data: ', error);
       throw error;
     }
   }
@@ -301,7 +301,7 @@ export class DataService {
       recordId: string;
       type: string;
       message: string;
-      severity: 'low' | 'medium' | 'high'
+      severity: 'low' | 'medium' | 'high
     }>;
   }> {
     try {
@@ -351,29 +351,29 @@ export class DataService {
   async getTaskStatus(taskId: string): Promise<{>
     id: string;
     type: string;
-    status: 'pending' | 'running' | 'completed' | "failed"
+    status: 'pending' | 'running' | 'completed' | "failed
     progress: number;
     message?: string;
     result?: any;
     error?: string;
   }> {
     try {
-      const result = await this.request(`/tasks/${taskId}`);`
+      const result = await this.request(`/tasks/${taskId}`);
       return result.data;
     } catch (error) {
-      console.error("Failed to get task status: ', error);'`"`
+      console.error("Failed to get task status: ', error);
       throw error;
     }
   }
 
   // 备份管理方法
   async getBackups(): Promise<DataBackup[]> {
-    const cacheKey = 'backups-list'
+    const cacheKey = 'backups-list
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
     try {
-      const result = await this.request('/backups");"
+      const result = await this.request('/backups");
       this.setCache(cacheKey, result.data || []);
       return result.data || [];
     } catch (error) {
@@ -391,7 +391,7 @@ export class DataService {
       });
 
       // 清除缓存
-      this.cache.delete('backups-list");"
+      this.cache.delete('backups-list");
       return result.data;
     } catch (error) {
       console.error('Failed to create backup: ', error);
@@ -402,27 +402,27 @@ export class DataService {
 
   async restoreBackup(backupId: string, options: RestoreOptions = {}): Promise<{ taskId: string }> {
     try {
-      const result = await this.request(`/backups/${backupId}/restore`, {`
-        method: "POST','`"`
+      const result = await this.request(`/backups/${backupId}/restore`, {
+        method: "POST',"
         body: JSON.stringify(options),
       });
 
       return result.data;
     } catch (error) {
-      console.error("Failed to restore backup: ', error);"
+      console.error("Failed to restore backup: ', error);
       // 返回模拟任务ID
-      return { taskId: `restore-${Date.now()}` };`
+      return { taskId: `restore-${Date.now()}` };
     }
   }
 
   async deleteBackup(backupId: string): Promise<boolean> {
     try {
-      await this.request(`/backups/${backupId}`, {`
-        method: "DELETE','`"`
+      await this.request(`/backups/${backupId}`, {
+        method: "DELETE',"
       });
 
       // 清除缓存
-      this.cache.delete('backups-list");"
+      this.cache.delete('backups-list");
       return true;
     } catch (error) {
       console.error('Failed to delete backup: ', error);
@@ -463,11 +463,11 @@ export class DataService {
   // 数据分析
   async getAnalytics(timeRange?: { start: string; end: string }): Promise<DataAnalysisResult> {
     try {
-      const params = timeRange ? `?start=${timeRange.start}&end=${timeRange.end}` : '";`"
-      const result = await this.request(`/analytics${params}`);`
+      const params = timeRange ? `?start=${timeRange.start}&end=${timeRange.end}` : ';
+      const result = await this.request(`/analytics${params}`);
       return result.data;
     } catch (error) {
-      console.error("Failed to get analytics: ', error);'`"`
+      console.error("Failed to get analytics: ', error);
       throw error;
     }
   }
@@ -519,9 +519,9 @@ export class DataService {
   private createMockBackup(config: BackupConfig): DataBackup {
     return {
       id: Date.now().toString(),
-      name: config.name || `backup_${Date.now()}`,`
+      name: config.name || `backup_${Date.now()}`,
       type: config.type,
-      status: "completed','`"`
+      status: "completed',"
       size: Math.floor(Math.random() * 50 * 1024 * 1024), // 随机大小
       recordCount: Math.floor(Math.random() * 2000) + 500,
       location: 'local',

@@ -13,11 +13,11 @@ export const usePageTitle = (title?: string,
   options: PageTitleOptions = {}
 ) => {
   const location = useLocation();
-  const previousTitle = useRef<string>('");
+  const previousTitle = useRef<string>(');
   const {
     suffix = 'Test Web',
     separator = ' - ',
-    template = '{title}{separator}{suffix}'
+    template = '{title}{separator}{suffix}
   } = options;
 
   useEffect(() => {
@@ -67,10 +67,9 @@ export const usePageTitle = (title?: string,
  */
 export const usePageMeta = () => {
   const setMetaTag = (name: string, content: string) => {
-    let metaTag = document.querySelector(`meta[name= '${name}']`) as HTMLMetaElement;'`
-
+    let metaTag = document.querySelector(`meta[name= '${name}']`) as HTMLMetaElement;
     if (!metaTag) {
-      metaTag = document.createElement("meta");`
+      metaTag = document.createElement("meta");
       metaTag.name = name;
       document.head.appendChild(metaTag);
     }

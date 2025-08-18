@@ -14,7 +14,7 @@ export interface TestConfig     {
 export interface TestResult     {
     id: string;
     testType: string;
-    status: 'running' | 'completed' | 'failed' | 'cancelled'
+    status: 'running' | 'completed' | 'failed' | 'cancelled
     score?: number;
     startTime: string;
     endTime?: string;
@@ -24,7 +24,7 @@ export interface TestResult     {
     recommendations?: Array<{
         title: string;
         description: string;
-        priority: 'low' | 'medium' | 'high' | 'critical'
+        priority: 'low' | 'medium' | 'high' | 'critical
         solution: string;
     }>;
     error?: string;
@@ -106,30 +106,30 @@ export const useTestEngine = () => {
                         title: '优化页面加载速度',
                         description: '页面加载时间较长，建议优化资源加载',
                         priority: 'high',
-                        solution: '压缩图片、启用缓存、优化CSS和JavaScript'
+                        solution: '压缩图片、启用缓存、优化CSS和JavaScript
                     },
                     {
                         title: '改善SEO元标签',
                         description: '部分页面缺少必要的SEO元标签',
                         priority: 'medium',
-                        solution: '添加meta description和title标签'
+                        solution: '添加meta description和title标签
                     }
                 ]
             };
             updateState({
                 isRunning: false,
                 currentTest: completedResult,
-                stage: '测试完成'
+                stage: '测试完成
             });
 
             return completedResult;
 
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '测试执行失败'
+            const errorMessage = error instanceof Error ? error.message : '测试执行失败
             updateState({
                 isRunning: false,
                 error: errorMessage,
-                stage: '测试失败'
+                stage: '测试失败
             });
 
             throw error;
@@ -181,14 +181,14 @@ export const useTestEngine = () => {
                 startTime: new Date(Date.now() - 3600000).toISOString(),
                 endTime: new Date(Date.now() - 3500000).toISOString(),
                 duration: 100000,
-                summary: '测试完成，性能良好'
+                summary: '测试完成，性能良好
             },
             {
                 id: '2',
                 testType: testType || 'seo',
                 status: 'failed',
                 startTime: new Date(Date.now() - 7200000).toISOString(),
-                error: '连接超时'
+                error: '连接超时
             }
         ];
         return testType

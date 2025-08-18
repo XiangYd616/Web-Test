@@ -9,7 +9,7 @@ const users: User[]  = [
     id: '1',
     username: 'admin',
     email: 'admin@example.com',
-    password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'admin123'
+    password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'admin123
     role: 'admin' as any, // 临时修复，稍后会正确导入枚举
     isActive: true,
     createdAt: new Date('2024-01-01').toISOString(),
@@ -39,7 +39,7 @@ const users: User[]  = [
     id: '2',
     username: 'testuser',
     email: 'test@example.com',
-    password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'test123'
+    password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'test123
     role: 'user' as any, // 临时修复，稍后会正确导入枚举
     isActive: true,
     createdAt: new Date('2024-01-02').toISOString(),
@@ -109,10 +109,10 @@ export const userDao = {
       updatedAt: new Date().toISOString(),
       lastLoginAt: null,
       profile: {
-        firstName: userData.firstName || '',
-        lastName: userData.lastName || '',
+        firstName: userData.firstName || ',
+        lastName: userData.lastName || ',
         avatar: null,
-        bio: '',
+        bio: ',
         phone: null,
         address: null,
         preferences: {

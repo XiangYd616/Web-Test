@@ -10,4 +10,4 @@ const AlertManager: React.FC<AlertManagerProps> = (props) => {
     </div>
   );
 };
-export default AlertManager;'"
+export default AlertManager;

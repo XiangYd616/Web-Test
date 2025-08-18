@@ -178,7 +178,7 @@ export class VersionControlService {
       // 执行迁移
       const migrated = await Promise.race([
         this.migrationSystem.migrateData<T>(typeName, versionedData, targetVersion),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Migration timeout')), this.config.migrationTimeout)'`
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Migration timeout')), this.config.migrationTimeout)
         )
       ]);
 
@@ -192,7 +192,7 @@ export class VersionControlService {
       this.recordMigration(migrationId, result);
 
       if (this.config.logMigrations) {
-        console.log(`Migration completed: ${typeName} from ${versionedData.version} to ${targetVersion}`, result);`
+        console.log(`Migration completed: ${typeName} from ${versionedData.version} to ${targetVersion}`, result);
       }
 
       return result;
@@ -358,8 +358,7 @@ export class VersionControlService {
   // ==================== 私有方法 ====================
 
   private ensureVersionedData(data: VersionedData<any> | any): VersionedData<any> {
-    if (data && typeof data === "object' && 'version' in data && 'data' in data) {'`
-      
+    if (data && typeof data === "object' && 'version' in data && 'data' in data) {
         return data as VersionedData<any>;
       }
 
@@ -369,7 +368,7 @@ export class VersionControlService {
       metadata: {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        source: 'legacy'
+        source: 'legacy
       }
     };
   }
@@ -380,7 +379,7 @@ export class VersionControlService {
     return {
       'User': '1.0.0',
       'TestResult': '1.0.0',
-      'ApiResponse': '1.0.0'
+      'ApiResponse': '1.0.0
     };
   }
 
@@ -444,7 +443,7 @@ export class VersionControlService {
       (data: any) => ({
         ...data,
         metadata: data.metadata || {},
-        version: '1.1.0'
+        version: '1.1.0
       }),
       (data: any) => data && data.metadata
     );

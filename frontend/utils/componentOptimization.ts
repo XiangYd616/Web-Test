@@ -94,7 +94,7 @@ export const withProfiler = <P extends object>(Component: ComponentType<P>,
       commitTime: number
     ) => {
       if (process.env.NODE_ENV === 'development') {
-        console.log(`Profiler [${id}] ${phase}:`, {`
+        console.log(`Profiler [${id}] ${phase}:`, {
           actualDuration,
           baseDuration,
           startTime,
@@ -122,7 +122,7 @@ export const ConditionalRender: React.FC<{
 }> = ({ condition, children, fallback = null, keepMounted = false }) => {
   if (keepMounted) {
     return (
-      <div style={{ display: condition ? "block' : 'none' }}>'`
+      <div style={{ display: condition ? "block' : 'none' }}>
         {children}
       </div>
     );

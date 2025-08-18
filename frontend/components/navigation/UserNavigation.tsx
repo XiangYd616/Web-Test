@@ -7,14 +7,14 @@ import React, { useState, useRef, useEffect    } from 'react';import { Link, use
   className?: string;
   items?: NavigationItem[];
   showAvatar?: boolean;
-  avatarSize?: 'small' | 'medium' | 'large'
+  avatarSize?: 'small' | 'medium' | 'large
  }
 
 export const UserNavigation: React.FC<UserNavigationProps> = ({
-  className ='',;
+  className =',;
   items = [],;
   showAvatar = true,;
-  avatarSize ='medium'
+  avatarSize ='medium
 }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -56,16 +56,16 @@ export const UserNavigation: React.FC<UserNavigationProps> = ({
   };
 
   const getAvatarSizeClass = () => { switch (avatarSize) {
-      case 'small': return 'w-8 h-8'
-      case 'large': return 'w-12 h-12'
-      default: return 'w-10 h-10'
+      case 'small': return 'w-8 h-8
+      case 'large': return 'w-12 h-12
+      default: return 'w-10 h-10
      }
   };
 
   if (!user) {
     return (;
-      <div className={`user-navigation guest ${className}`}>`
-        <Link to="/login' className='login-button'>`'"`
+      <div className={`user-navigation guest ${className}`}>
+        <Link to="/login' className='login-button'>`
           登录;
         </Link>
         <Link to='/register' className='register-button'>
@@ -76,20 +76,20 @@ export const UserNavigation: React.FC<UserNavigationProps> = ({
   }
 
   return (;
-    <div className={`user-navigation ${className}`} ref={dropdownRef}>`
+    <div className={`user-navigation ${className}`} ref={dropdownRef}>
       <button
-        className="user-menu-trigger";`
+        className="user-menu-trigger";
         onClick={toggleDropdown}
         aria-expanded={isOpen}
-        aria-haspopup='true'
+        aria-haspopup='true
       >
         {showAvatar && (
-          <div className={`user-avatar ${getAvatarSizeClass()}`}>`
+          <div className={`user-avatar ${getAvatarSizeClass()}`}>
             {user.avatar ? (
               <img
                 src={user.avatar}
-                alt={user.name || "用户头像'}'`"`
-                className='avatar-image'
+                alt={user.name || "用户头像'}'
+                className='avatar-image
               />
             ) : (;
               <div className='avatar-placeholder'>
@@ -106,13 +106,13 @@ export const UserNavigation: React.FC<UserNavigationProps> = ({
           )}
         </div>
 
-        <span className={ `dropdown-arrow ${isOpen ? 'open' : '' }`}>`
+        <span className={ `dropdown-arrow ${isOpen ? 'open' : ' }`}>
           ▼;
         </span>
       </button>
 
       {isOpen && (
-        <div className="user-menu-dropdown'>`;'"`
+        <div className="user-menu-dropdown'>`;
           <div className='user-menu-header'>
             <div className='user-details'>
               <div className='user-name'>{user.name || user.email}</div>
@@ -131,7 +131,7 @@ export const UserNavigation: React.FC<UserNavigationProps> = ({
             {menuItems.map((item, index) => (
               <div key={index} className='user-menu-item'>
                 {item.action ? (<button
-                    className='user-menu-button'
+                    className='user-menu-button
                     onClick={() => handleItemClick(item)}
                   >
                     {item.icon && <span className='menu-icon'>{item.icon}</span>}
@@ -139,13 +139,13 @@ export const UserNavigation: React.FC<UserNavigationProps> = ({
                   </button>
                 ) : (<Link
                     to={item.path || '#'}
-                    className='user-menu-link'
+                    className='user-menu-link
                     onClick={() => setIsOpen(false)}
                   >
                     {item.icon && <span className='menu-icon'>{item.icon}</span>}
                     <span className='menu-label'>{item.label}</span>
                     {item.badge && (
-                      <span className={`menu-badge menu-badge--${item.badge.variant}`}>`
+                      <span className={`menu-badge menu-badge--${item.badge.variant}`}>
                         {item.badge.text}
                       </span>
                     )}

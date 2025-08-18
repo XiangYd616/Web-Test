@@ -10,4 +10,4 @@ const DashboardCharts: React.FC<DashboardChartsProps> = (props) => {
     </div>
   );
 };
-export default DashboardCharts;'"
+export default DashboardCharts;

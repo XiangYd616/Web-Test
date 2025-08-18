@@ -195,7 +195,7 @@
        * 生成缓存键
        */
       static generateKey(url: string, method: string = 'GET', params?: any): string {
-    const paramStr = params ? JSON.stringify(params) : ''
+    const paramStr = params ? JSON.stringify(params) : 
       return `${method}:${url}:${paramStr}`;
   }
 }

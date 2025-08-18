@@ -27,7 +27,7 @@ export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
     style: computedStyle,
     disabled,
     'aria-label': ariaLabel,
-    "data-testid': testId'
+    "data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   // 可访问性支持
@@ -43,7 +43,7 @@ export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
     'aria-describedby': ariaDescribedBy,
     role,
     tabIndex: disabled ? -1 : tabIndex,
-    "data-testid': testId'
+    "data-testid': testId
   };
 
   // 键盘导航支持

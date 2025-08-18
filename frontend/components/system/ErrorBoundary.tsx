@@ -10,4 +10,4 @@ const ErrorBoundary: React.FC<ErrorBoundaryProps> = (props) => {
     </div>
   );
 };
-export default ErrorBoundary;'"
+export default ErrorBoundary;

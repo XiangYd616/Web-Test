@@ -9,5 +9,5 @@ const SimpleCharts: React.FC<SimpleChartsProps> = (props) => {
       <p>组件内容</p>
     </div>
   );
-};'"
-export default SimpleCharts;'"
+};
+export default SimpleCharts;'

@@ -14,7 +14,7 @@ import React from 'react';import { Link, useLocation    } from 'react-router-dom
  }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
-  className = '',;
+  className = ',;
   separator = '/',
   maxItems = 5,;
   showHome = true,;
@@ -45,34 +45,34 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     return null;
   }
 
-  return (<nav className={`breadcrumb ${className}`} aria-label= '面包屑导航'>`
-      <ol className= "breadcrumb-list'>`;'"`
+  return (<nav className={`breadcrumb ${className}`} aria-label='面包屑导航'>
+      <ol className="breadcrumb-list'>`;
         {displayItems.map((item, index) => {
           const isLast = index === displayItems.length - 1;
-          const isEllipsis = item.label === '...'
+          const isEllipsis = item.label === '...
           return (;
             <li;
               key={index}
-              className={ `breadcrumb-item ${isLast ? 'active' : '' } ${ isEllipsis ? 'ellipsis' : '' }`}'`'`
+              className={ `breadcrumb-item ${isLast ? 'active' : ' } ${ isEllipsis ? 'ellipsis' : ' }`}'
             >;
               {!isLast && !isEllipsis && item.path ? (
                 <Link;
                   to={item.path}
-                  className= "breadcrumb-link";`
+                  className= "breadcrumb-link";
                   aria-current={ isLast ? 'page' : undefined }
                 >;
-                  {item.icon && <span className= 'breadcrumb-icon'>{item.icon}</span>}
-                  <span className= 'breadcrumb-text'>{item.label}</span>
+                  {item.icon && <span className='breadcrumb-icon'>{item.icon}</span>}
+                  <span className='breadcrumb-text'>{item.label}</span>
                 </Link>
               ) : (;
-                <span className= 'breadcrumb-text'>;
-                  {item.icon && <span className= 'breadcrumb-icon'>{item.icon}</span>}
+                <span className='breadcrumb-text'>;
+                  {item.icon && <span className='breadcrumb-icon'>{item.icon}</span>}
                   {item.label}
                 </span>
               )}
 
               {!isLast && (
-                <span className= 'breadcrumb-separator' aria-hidden= 'true'>;
+                <span className= 'breadcrumb-separator' aria-hidden='true'>;
                   {separator}
                 </span>
               )}

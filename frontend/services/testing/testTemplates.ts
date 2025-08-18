@@ -3,8 +3,8 @@ export interface TestTemplate     {
   id: string;
   name: string;
   description: string;
-  category: 'ecommerce' | 'blog' | 'corporate' | 'saas' | 'portfolio' | 'news' | 'custom'
-  testType: 'stress' | 'content' | 'compatibility' | 'api' | 'security' | 'performance' | 'comprehensive'
+  category: 'ecommerce' | 'blog' | 'corporate' | 'saas' | 'portfolio' | 'news' | 'custom
+  testType: 'stress' | 'content' | 'compatibility' | 'api' | 'security' | 'performance' | 'comprehensive
   config: any;
   tags: string[];
   isDefault: boolean;
@@ -373,7 +373,7 @@ export class TestTemplateService {
       // 验证模板格式
       if (this.validateTemplate(template)) {
         return this.saveCustomTemplate({
-          ...template,``
+          ...template,
           name: `${template.name} (导入)`,
           isDefault: false
         });
@@ -391,7 +391,7 @@ export class TestTemplateService {
       typeof template.name === 'string' &&
       typeof template.description === 'string' &&
       typeof template.category === 'string' &&
-      typeof template.testType === 'string &&'
+      typeof template.testType === 'string &&
       template.config &&
       Array.isArray(template.tags)
     );
@@ -427,4 +427,3 @@ export class TestTemplateService {
       .map(item => item.template);
   }
 }
-``

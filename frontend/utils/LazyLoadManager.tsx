@@ -79,21 +79,21 @@ export class LazyLoadManager {
       loadingState.isLoading = true;
       loadingState.error = null;
 
-      const componentName = chunkName || "unknown'; // 已删除 // 已删除'
+      const componentName = chunkName || "unknown'; // 已删除 // 已删除
       // 记录开始加载
-      performanceMonitor.startMeasure(`lazy-load-${componentName}`);`
+      performanceMonitor.startMeasure(`lazy-load-${componentName}`);
 
       try {
         // 设置超时
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error("Component load timeout')), timeout);'`
+          setTimeout(() => reject(new Error("Component load timeout')), timeout);
         });
 
         const result = await Promise.race([importFn(), timeoutPromise]);
 
         // 记录加载完成
-        const duration = performanceMonitor.endMeasure(`lazy-load-${componentName}`);`
-        performanceMonitor.recordMetric(`lazy-load-success-${componentName}`, duration, "ms");`
+        const duration = performanceMonitor.endMeasure(`lazy-load-${componentName}`);
+        performanceMonitor.recordMetric(`lazy-load-success-${componentName}`, duration, "ms");
 
         // 标记为已加载
         this.loadedComponents.set(componentName, true);
@@ -107,11 +107,11 @@ export class LazyLoadManager {
         loadingState.retryCount++;
 
         // 记录加载失败
-        performanceMonitor.recordMetric(`lazy-load-error-${componentName}`, 1, "count");`
+        performanceMonitor.recordMetric(`lazy-load-error-${componentName}`, 1, "count");
 
         // 如果还有重试次数，则重试
         if (loadingState.retryCount < retries) {
-          console.warn(`Component load failed, retrying... (${loadingState.retryCount}/${retries})`);`
+          console.warn(`Component load failed, retrying... (${loadingState.retryCount}/${retries})`);
           await new Promise(resolve => setTimeout(resolve, 1000 * loadingState.retryCount));
           return importWithRetry();
         }
@@ -125,7 +125,7 @@ export class LazyLoadManager {
 
     // 预加载函数
     const preloadFn = async (): Promise<void>  => {
-      const componentName = chunkName || "unknown";`
+      const componentName = chunkName || "unknown";
       if (this.loadedComponents.get(componentName)) {
         return; // 已经加载过了
       }
@@ -246,7 +246,7 @@ export class LazyLoadManager {
           await new Promise(resolve => setTimeout(resolve, 100));
 
         } catch (error) {
-          console.warn(`Failed to preload component: ${chunkName}`, error);`
+          console.warn(`Failed to preload component: ${chunkName}`, error);
         }
       }
 
@@ -261,7 +261,7 @@ export class LazyLoadManager {
   private async preloadComponent(chunkName: string): Promise<void> {
     // 这里需要根据实际的组件映射来实现
     // 可以维护一个组件名到导入函数的映射
-    console.log(`Preloading component: ${chunkName}`);`
+    console.log(`Preloading component: ${chunkName}`);
   }
 
   /**
@@ -270,7 +270,7 @@ export class LazyLoadManager {
   async preloadComponents(chunkNames: string[]): Promise<void> {
     const preloadPromises = chunkNames.map(chunkName =>
       this.preloadComponent(chunkName).catch(error => {
-        console.warn(`Failed to preload ${chunkName}:`, error);`
+        console.warn(`Failed to preload ${chunkName}:`, error);
       })
     );
 
@@ -304,13 +304,13 @@ export class LazyLoadManager {
  * 默认加载组件
  */
 const DefaultLoadingComponent: React.FC  = () => (
-  <div className="lazy-loading-container'>`
+  <div className="lazy-loading-container'>
     <div className='lazy-loading-spinner'>
       <div className='spinner'></div>
     </div>
     <p className='lazy-loading-text'>加载中...</p>
 
-    <style jsx>{``
+    <style jsx>{
       .lazy-loading-container {
         display: flex;
         flex-direction: column;
@@ -343,7 +343,7 @@ const DefaultLoadingComponent: React.FC  = () => (
         font-size: 14px;
         margin: 0;
       }
-    `}</style>`
+    `}</style>
   </div>
 );
 
@@ -352,14 +352,14 @@ const DefaultLoadingComponent: React.FC  = () => (
  */
 export const SkeletonLoadingComponent: React.FC<{ lines?: number; height?: string }> = ({
   lines = 3,
-  height ="200px";`
+  height ="200px";
 }) => (
   <div className='skeleton-container' style={{ minHeight: height }}>
     {Array.from({ length: lines }, (_, index) => (
       <div key={index} className='skeleton-line' />
     ))}
 
-    <style jsx>{``
+    <style jsx>{
       .skeleton-container {
         padding: 20px;
         display: flex;
@@ -387,7 +387,7 @@ export const SkeletonLoadingComponent: React.FC<{ lines?: number; height?: strin
           background-position: -200% 0;
         }
       }
-    `}</style>`
+    `}</style>
   </div>
 );
 
@@ -411,7 +411,7 @@ export function createLazyRoute<P = {}>(importFn: () => Promise<{ default: Compo
     chunkName,
     preload: true,
     errorBoundary: true,
-    fallback: <SkeletonLoadingComponent height="100vh' lines={5}    />`
+    fallback: <SkeletonLoadingComponent height="100vh' lines={5}    />
   });
 }
 

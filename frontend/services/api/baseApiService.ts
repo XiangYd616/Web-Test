@@ -6,7 +6,7 @@ import type { ApiResponse  } from '../../types/unified/apiResponse';/**
 // ApiResponse类型已从统一类型定义导入
 
 export interface RequestConfig     {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
   headers?: Record<string, string>;
   body?: string;
   timeout?: number;
@@ -45,7 +45,7 @@ export class BaseApiService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -81,7 +81,7 @@ export class BaseApiService {
   protected authConfig: AuthConfig = {};
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+    this.baseUrl = baseUrl || import.meta.env.VITE_API_URL || 'http://localhost:3001/api
   }
 
   /**
@@ -97,17 +97,17 @@ export class BaseApiService {
   protected getAuthHeaders(): Record<string, string> {
     const headers: Record<string, string>  = {};
     if (this.authConfig.token) {
-      headers['Authorization'] = `Bearer ${this.authConfig.token}`;'`
+      headers['Authorization'] = `Bearer ${this.authConfig.token}`;
     } else if (this.authConfig.apiKey) {
-      headers["X-API-Key'] = this.authConfig.apiKey;'`"`
+      headers["X-API-Key'] = this.authConfig.apiKey;'
     } else if (this.authConfig.basicAuth) {
       const { username, password } = this.authConfig.basicAuth;
-      headers['Authorization'] = `Basic ${btoa(`${username}:${password}`)}`;'`
+      headers['Authorization'] = `Basic ${btoa(`${username}:${password}`)}`;
     } else {
       // 从localStorage获取token作为备用
-      const token = localStorage.getItem("auth_token");``
+      const token = localStorage.getItem("auth_token");
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;'`
+        headers['Authorization'] = `Bearer ${token}`;
       }
     }
 
@@ -122,7 +122,7 @@ export class BaseApiService {
     config: RequestConfig = {}
   ): Promise<ApiResponse<T>> {
     const {
-      method = "GET','`"`
+      method = "GET','
       headers = {},
       body,
       timeout = this.defaultTimeout,
@@ -130,10 +130,10 @@ export class BaseApiService {
       retryDelay = this.defaultRetryDelay
     } = config;
 
-    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;'`
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
 
     const requestHeaders = {
-      "Content-Type': 'application/json','`"`
+      "Content-Type': 'application/json','
       ...this.getAuthHeaders(),
       ...headers
     };
@@ -148,24 +148,22 @@ export class BaseApiService {
 
     for (let attempt = 0; attempt <= retries; attempt++) {>
       try {
-        console.log(`🌐 API请求 (尝试 ${attempt + 1}/${retries + 1}): ${method} ${url}`);`
-
+        console.log(`🌐 API请求 (尝试 ${attempt + 1}/${retries + 1}): ${method} ${url}`);
         const response = await fetch(url, requestConfig);
         const responseData = await this.parseResponse<T>(response);
 
         if (response.ok) {
-          console.log(`✅ API请求成功: ${method} ${url}`);`
+          console.log(`✅ API请求成功: ${method} ${url}`);
           return responseData;
         } else {
-          const errorMessage = typeof responseData.error === "string";``
+          const errorMessage = typeof responseData.error === "string";
             ? responseData.error
             : responseData.error?.message || `HTTP ${response.status}: ${response.statusText}`;
           throw new Error(errorMessage);
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        console.warn(`⚠️ API请求失败 (尝试 ${attempt + 1}/${retries + 1}): ${lastError.message}`);`
-
+        console.warn(`⚠️ API请求失败 (尝试 ${attempt + 1}/${retries + 1}): ${lastError.message}`);
         // 如果是最后一次尝试，或者是不可重试的错误，直接抛出
         if (attempt === retries || this.isNonRetryableError(lastError)) {
           break;
@@ -178,11 +176,11 @@ export class BaseApiService {
       }
     }
 
-    console.error(`❌ API请求最终失败: ${method} ${url}`, lastError);`
+    console.error(`❌ API请求最终失败: ${method} ${url}`, lastError);
     return {
       success: false,
       error: {
-        code: "API_REQUEST_FAILED','`"`
+        code: "API_REQUEST_FAILED',"
         message: lastError?.message || 'API请求失败',
         timestamp: new Date().toISOString()
       }
@@ -201,7 +199,7 @@ export class BaseApiService {
         return {
           success: response.ok,
           data: undefined as T,
-          message: response.ok ? '请求成功' : '请求失败'
+          message: response.ok ? '请求成功' : '请求失败
       };
       }
 
@@ -225,14 +223,14 @@ export class BaseApiService {
       return {
         success: response.ok,
         data: data as T,
-        message: response.ok ? '请求成功' : '请求失败'
+        message: response.ok ? '请求成功' : '请求失败
       };
     } catch (error) {
       return {
         success: false,
         error: {
           code: 'RESPONSE_PARSE_ERROR',
-          message: `响应解析失败: ${error instanceof Error ? error.message : String(error)}`,`
+          message: `响应解析失败: ${error instanceof Error ? error.message : String(error)}`,
           timestamp: new Date().toISOString()
         }
       };
@@ -264,7 +262,7 @@ export class BaseApiService {
   /**
    * 🔧 GET请求
    */
-  protected async get<T = any>(endpoint: string, config?: Omit<RequestConfig, "method' | 'body'>): Promise<ApiResponse<T>> {'`"`
+  protected async get<T = any>(endpoint: string, config?: Omit<RequestConfig, "method' | 'body'>): Promise<ApiResponse<T>> {'
     return this.request<T>(endpoint, { ...config, method: 'GET' });
   }
 
@@ -312,14 +310,14 @@ export class BaseApiService {
    * 🔧 健康检查
    */
   async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: number }>> {
-    return this.get('/health");"
+    return this.get('/health");
   }
 
   /**
    * 🔧 获取API版本信息
    */
   async getVersion(): Promise<ApiResponse<{ version: string; build: string }>> {
-    return this.get('/version");"
+    return this.get('/version");
   }
 }
 

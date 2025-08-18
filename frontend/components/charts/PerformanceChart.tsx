@@ -10,4 +10,4 @@ const PerformanceChart: React.FC<PerformanceChartProps> = (props) => {
     </div>
   );
 };
-export default PerformanceChart;'"
+export default PerformanceChart;

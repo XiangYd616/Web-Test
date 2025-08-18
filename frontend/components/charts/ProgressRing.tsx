@@ -15,7 +15,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
   color = '#3B82F6',;
   backgroundColor = '#E5E7EB',;
   showText = true,;
-  className = '',;
+  className = ',;
   label;
 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -29,7 +29,7 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
         <circle;
           cx={size / 2}
           cy={size / 2}
-          r={radius}""
+          r={radius}
           fill="transparent";
           stroke={backgroundColor}
           strokeWidth={strokeWidth}
@@ -38,25 +38,25 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
         <circle;
           cx={size / 2}
           cy={size / 2}
-          r={radius}""
+          r={radius}
           fill="transparent";
           stroke={color}
-          strokeWidth={strokeWidth}""
+          strokeWidth={strokeWidth}
           strokeLinecap="round";
           strokeDasharray={strokeDasharray}
           strokeDashoffset={strokeDashoffset}
-          style={{''
+          style={{
             transition: 'stroke-dashoffset 0.5s ease-in-out',;
           }}
         />
       </svg>
-      {showText && ("
-        <div className="absolute inset-0 flex items-center justify-center">";"
-          <div className="text-center">";"
+      {showText && (
+        <div className="absolute inset-0 flex items-center justify-center">";
+          <div className="text-center">";
             <span className="text-2xl font-bold" style={{ color }}>
               {Math.round(percentage)}%
             </span>
-            {label && ("
+            {label && (
               <div className="text-xs text-gray-500 mt-1">{label}</div>
             )}
           </div>
@@ -65,5 +65,5 @@ const ProgressRing: React.FC<ProgressRingProps> = ({
     </div>
   );
 };
-export default ProgressRing;'"
-'";
+export default ProgressRing;
+';

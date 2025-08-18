@@ -5,7 +5,7 @@
 
 export interface ComponentTestOptions     {
   name: string;
-  type: 'ui' | 'form' | 'data' | 'layout' | 'interactive'
+  type: 'ui' | 'form' | 'data' | 'layout' | 'interactive
   hasProps: boolean;
   hasEvents: boolean;
   hasState: boolean;
@@ -25,13 +25,12 @@ export class ComponentTestGenerator {
 
     const imports = this.generateImports(hasAsyncOperations);
     const basicTests = this.generateBasicTests(name);
-    const propTests = hasProps ? this.generatePropTests(name) : ''
-    const eventTests = hasEvents ? this.generateEventTests(name) : ''
-    const stateTests = hasState ? this.generateStateTests(name) : ''
-    const asyncTests = hasAsyncOperations ? this.generateAsyncTests(name) : ''
-    return `${imports}`
-
-describe("${name}', () => {'`
+    const propTests = hasProps ? this.generatePropTests(name) : 
+    const eventTests = hasEvents ? this.generateEventTests(name) : '
+    const stateTests = hasState ? this.generateStateTests(name) : 
+    const asyncTests = hasAsyncOperations ? this.generateAsyncTests(name) : '
+    return `${imports}
+describe("${name}', () => {
 ${basicTests}
 
 ${propTests}
@@ -46,7 +45,7 @@ ${asyncTests}
 
   private generateImports(hasAsyncOperations: boolean): string {
     const imports = [
-      "import React from 'react";,'`
+      "import React from 'react";,
       'import { render, screen, fireEvent   } from '@testing-library/react";,
       'import '@testing-library/jest-dom";;
     ];
@@ -59,13 +58,13 @@ ${asyncTests}
   }
 
   private generateBasicTests(name: string): string {
-    return `  it('renders without crashing', () => {'`
+    return `  it('renders without crashing', () => {
     render(<${name} />);
-    expect(screen.getByRole("button')).toBeInTheDocument();'`
+    expect(screen.getByRole("button')).toBeInTheDocument();
   });
 
   it('applies custom className', () => {
-    const customClass = 'custom-class'
+    const customClass = 'custom-class
     render(<${name} className={customClass} />);
     expect(screen.getByRole('button')).toHaveClass(customClass);
   });
@@ -77,26 +76,26 @@ ${asyncTests}
   }
 
   private generatePropTests(name: string): string {
-    return `  describe('Props', () => {'`
-    it("renders with different variants', () => {'`
-      const { rerender } = render(<${name} variant= 'primary' />);
+    return `  describe('Props', () => {
+    it("renders with different variants', () => {
+      const { rerender } = render(<${name} variant='primary' />);
       expect(screen.getByRole('button')).toHaveClass('component--primary");
-      rerender(<${name} variant= 'secondary' />);
+      rerender(<${name} variant='secondary' />);
       expect(screen.getByRole('button')).toHaveClass('component--secondary");
     });
 
     it('renders with different sizes', () => {
-      const { rerender } = render(<${name} size= 'small' />);
+      const { rerender } = render(<${name} size='small' />);
       expect(screen.getByRole('button')).toHaveClass('component--small");
-      rerender(<${name} size= 'large' />);
+      rerender(<${name} size='large' />);
       expect(screen.getByRole('button')).toHaveClass('component--large");
     });
   });`;
   }
 
   private generateEventTests(name: string): string {
-    return `  describe('Events', () => {'`
-    it("handles click events', () => {'`
+    return `  describe('Events', () => {
+    it("handles click events', () => {
       const handleClick = jest.fn();
       render(<${name} onClick={handleClick} />);
 
@@ -123,8 +122,8 @@ ${asyncTests}
   }
 
   private generateStateTests(name: string): string {
-    return `  describe('State Management', () => {'`
-    it("manages focus state', () => {'`
+    return `  describe('State Management', () => {
+    it("manages focus state', () => {
       render(<${name} />);
       const button = screen.getByRole('button");
       fireEvent.focus(button);
@@ -147,8 +146,8 @@ ${asyncTests}
   }
 
   private generateAsyncTests(name: string): string {
-    return `  describe("Async Operations', () => {'`
-    it("handles loading state', async () => {'`
+    return `  describe("Async Operations', () => {
+    it("handles loading state', async () => {
       const asyncOperation = jest.fn().mockResolvedValue('success");
       render(<${name} onClick={asyncOperation} />);
 

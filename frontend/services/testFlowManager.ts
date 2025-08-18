@@ -4,7 +4,7 @@
  */
 
 import apiClient from '../utils/apiClient';export interface TestConfig     {
-  testType: 'performance' | 'stress' | 'api' | 'seo' | 'security'
+  testType: 'performance' | 'stress' | 'api' | 'seo' | 'security
   url: string;
   duration: number;
   concurrency?: number;
@@ -13,7 +13,7 @@ import apiClient from '../utils/apiClient';export interface TestConfig     {
 
 export interface TestExecution     {
   id: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled
   progress: number;
   startTime: string;
   endTime?: string;
@@ -64,15 +64,15 @@ class TestFlowManager {
    */
   async getTestResults(executionId: string): Promise<any> {
     try {
-      const response = await apiClient.get(`/tests/results/${executionId}`);`
+      const response = await apiClient.get(`/tests/results/${executionId}`);
       
       if (response.success) {
         return response.data;
       } else {
-        throw new Error(response.error?.message || "获取测试结果失败");`
+        throw new Error(response.error?.message || "获取测试结果失败");
       }
     } catch (error) {
-      console.error("获取测试结果失败:', error);'
+      console.error("获取测试结果失败:', error);
       throw error;
     }
   }
@@ -82,12 +82,12 @@ class TestFlowManager {
    */
   async cancelTest(executionId: string): Promise<void> {
     try {
-      const response = await apiClient.post(`/tests/cancel/${executionId}`);`
+      const response = await apiClient.post(`/tests/cancel/${executionId}`);
       
       if (response.success) {
         const execution = this.executions.get(executionId);
         if (execution) {
-          execution.status = "cancelled";`
+          execution.status = "cancelled";
           this.executions.set(executionId, execution);
           this.notifyListeners(execution);
         }
@@ -106,7 +106,7 @@ class TestFlowManager {
   private async pollTestStatus(executionId: string) {
     const interval = setInterval(async () => {
       try {
-        const response = await apiClient.get(`/tests/results/${executionId}`);`
+        const response = await apiClient.get(`/tests/results/${executionId}`);
         
         if (response.success) {
           const execution = this.executions.get(executionId);
@@ -115,7 +115,7 @@ class TestFlowManager {
             execution.progress = response.data.progress || 0;
             execution.results = response.data.results;
             
-            if (response.data.status === "completed') {'`
+            if (response.data.status === "completed') {
               execution.endTime = response.data.completedAt;
               clearInterval(interval);
             } else if (response.data.status === 'failed' || response.data.status === 'cancelled') {

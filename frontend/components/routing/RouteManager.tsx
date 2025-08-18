@@ -30,17 +30,17 @@ export const RouteManager: React.FC<RouteManagerProps> = ({
     window.scrollTo(0, 0);
 
     // 设置页面标题（可以根据路由配置动态设置）
-    const pathSegments = location.pathname.split("/').filter(Boolean);"
+    const pathSegments = location.pathname.split("/').filter(Boolean);
     const pageTitle = pathSegments.length > 0;
       ? pathSegments[pathSegments.length - 1].replace(/[-_]/g, ' ')
-      : '首页'
+      : '首页
     setTitle(pageTitle);
   }, [location.pathname, setTitle]);
 
   return (<ErrorBoundary>;
       <Suspense fallback={<Fallback    />}>
         <div;
-          className= 'route-container'
+          className= 'route-container
           onMouseEnter={(e) => {
             // 预加载悬停的路由
             const target = e.target as HTMLElement;

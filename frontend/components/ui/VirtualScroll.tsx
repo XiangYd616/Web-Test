@@ -9,7 +9,7 @@ export interface VirtualScrollConfig     {
   itemHeight: number | ((index: number) => number);
   containerHeight: number;
   overscan?: number; // 预渲染的额外项目数量
-  scrollBehavior?: 'auto' | 'smooth'
+  scrollBehavior?: 'auto' | 'smooth
   threshold?: number; // 滚动阈值
   enableHorizontal?: boolean; // 是否启用横向滚动
   itemWidth?: number | ((index: number) => number);
@@ -114,7 +114,7 @@ export const VirtualScroll = <T,>({
   enableHorizontal = false,
   itemWidth,
   containerWidth,
-  className = '',
+  className = ',
   style,
   onScroll,
   onVisibleRangeChange,
@@ -131,9 +131,9 @@ export const VirtualScroll = <T,>({
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`
+    "aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': ['']
+    'aria-describedby': [']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
@@ -280,7 +280,7 @@ export const VirtualScroll = <T,>({
       const top = calculateItemOffset(i, itemHeight);
       const height = typeof itemHeight === 'number' ? itemHeight : itemHeight(i);
       let left = 0;
-      let width = '100%'
+      let width = '100%
       if (enableHorizontal && itemWidth) {
         left = calculateItemOffset(i, itemWidth);
         width = typeof itemWidth === 'number' ? itemWidth : itemWidth(i);
@@ -292,7 +292,7 @@ export const VirtualScroll = <T,>({
         left,
         width,
         height,
-        transform: isScrolling ? "translateZ(0)' : undefined // 硬件加速'
+        transform: isScrolling ? "translateZ(0)' : undefined // 硬件加速
       };
       items.push(
         <div key={i} style={itemStyle}>
@@ -318,7 +318,7 @@ export const VirtualScroll = <T,>({
         return (
       <div 
         className={`flex items-center justify-center ${className`}
-      }`}`
+      }`}
         style={{ height: containerHeight, ...style }}
       >
         {emptyComponent}
@@ -329,7 +329,7 @@ export const VirtualScroll = <T,>({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-auto ${className}`}`
+      className={`relative overflow-auto ${className}`}
       style={{
         height: containerHeight,
         width: containerWidth,
@@ -341,8 +341,8 @@ export const VirtualScroll = <T,>({
       <div
         style={{
           height: totalHeight,
-          width: enableHorizontal ? totalWidth : "100%','`
-          position: 'relative'
+          width: enableHorizontal ? totalWidth : "100%',
+          position: 'relative
         }}
       >
         {/* 可见项目 */}
@@ -358,7 +358,7 @@ export const VirtualScroll = <T,>({
               right: 0,
               display: 'flex',
               justifyContent: 'center',
-              padding: '16px'
+              padding: '16px
             }}
           >
             {loadingComponent}

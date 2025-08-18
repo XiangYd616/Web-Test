@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import type { ApiResponse  } from '../types/api';// ==================== 缓存配置类型 ==================== ''
+import type { ApiResponse  } from '../types/api';// ==================== 缓存配置类型 ==================== 
 export interface CacheConfig     {
   ttl: number; // 生存时间（毫秒）
   maxSize: number; // 最大缓存条目数
@@ -60,8 +60,8 @@ export class DefaultCacheKeyGenerator implements CacheKeyGenerator {
     // 对参数进行排序以确保一致性
     const sortedParams = Object.keys(params)
       .sort()
-      .map(key => `${key}=${JSON.stringify(params[key])}`)`
-      .join("&");`
+      .map(key => `${key}=${JSON.stringify(params[key])}`)
+      .join("&");
 
     return `${baseKey}:${this.hashString(sortedParams)}`;
   }
@@ -132,7 +132,7 @@ export class MemoryCacheStorage<T = any> implements CacheStorage<T> {
 export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
   private prefix: string;
 
-  constructor(prefix: string = "cache') {'`
+  constructor(prefix: string = "cache') {
     this.prefix = prefix;
   }
 
@@ -184,7 +184,7 @@ export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
     const keys: string[]  = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith(`${this.prefix}:`)) {`
+      if (key && key.startsWith(`${this.prefix}:`)) {
         keys.push(key.substring(this.prefix.length + 1));
       }
     }
@@ -289,7 +289,7 @@ export class CacheManager<T = any> {
     this.config = {
       ttl: 300000, // 5分钟
       maxSize: 1000,
-      strategy: "lru','`
+      strategy: "lru',
       compression: false,
       encryption: false,
       persistToDisk: false,
@@ -415,18 +415,18 @@ export class CacheManager<T = any> {
 
   private createEvictionStrategy(strategy: CacheStrategy): EvictionStrategy<T> {
     switch (strategy) {
-      case 'lru': ''
+      case 'lru': 
         return new LRUEvictionStrategy<T>();
-      case 'lfu': ''
+      case 'lfu': 
         return new LFUEvictionStrategy<T>();
-      case 'fifo': ''
+      case 'fifo': 
         return new FIFOEvictionStrategy<T>();
-      case 'ttl': ''
+      case 'ttl': 
         return new TTLEvictionStrategy<T>();
-      case "adaptive': '
+      case "adaptive': 
         // 自适应策略：根据访问模式动态选择
         return new LRUEvictionStrategy<T>(); // 默认使用LRU
-      default:
+      default: undefined, // 已修复
         return new LRUEvictionStrategy<T>();
     }
   }
@@ -575,10 +575,10 @@ export function cached<T extends (...args: any[]) => Promise<ApiResponse<any>>>(
 export const defaultMemoryCache = new CacheManager(
   new MemoryCacheStorage(),
   {
-    namespace: "memory','`
+    namespace: "memory',
     maxSize: 1000,
     ttl: 300000, // 5分钟
-    strategy: 'lru'
+    strategy: 'lru
   }
 );
 

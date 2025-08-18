@@ -20,8 +20,8 @@ import { CheckCircle, Clock, Download, Eye, FileText, Filter, Plus, Share2, Tras
   defaultValue?: any;
 
   // 配置属性
-  size?: 'small' | 'medium' | 'large'
-  variant?: 'primary' | 'secondary' | 'outline'
+  size?: 'small' | 'medium' | 'large
+  variant?: 'primary' | 'secondary' | 'outline
   // 可访问性
   'aria-label'?: string;
   'aria-describedby'?: string;
@@ -34,14 +34,14 @@ interface ReportTemplate {
   id: string;,
   name: string;
   description: string;,
-  type: 'performance' | 'security' | 'comprehensive'
+  type: 'performance' | 'security' | 'comprehensive
   icon: React.ReactNode;
 }
 
 const ReportManagement: React.FC<ReportManagementProps> = (props) => {
 
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -52,7 +52,7 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible') {'`"`
+      if (document.visibilityState === "visible') {'
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -75,7 +75,7 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
   );
   const [reports, setReports] = useState<Report[]>([]);
   const [showCreateReport, setShowCreateReport] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('");"
+  const [selectedTemplate, setSelectedTemplate] = useState<string>(');
   const [reportConfig, setReportConfig] = useState<ReportConfig>({
     dateRange: 30,;
     testTypes: [],;
@@ -84,7 +84,7 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
     includeMonitoring: false,;
     includeRawData: false;
   });
-  const [reportName, setReportName] = useState('");"
+  const [reportName, setReportName] = useState(');
   const [reportFormat, setReportFormat] = useState<'pdf' | 'excel' | 'html'>("pdf");
   const [loading, setLoading] = useState(true);
 
@@ -122,7 +122,7 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
       setShowCreateReport(false);
 
       // 重置表单
-      setReportName('");
+      setReportName(');
       setReportFormat('pdf");
       setReportConfig({
         dateRange: 30,;
@@ -132,7 +132,7 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
         includeMonitoring: false,;
         includeRawData: false;)
       });
-      setSelectedTemplate("");
+      setSelectedTemplate(");
       // 定期检查报告状态
       const checkStatus = setInterval(async () => {
         const updatedReports = await reportService.getReports();
@@ -167,26 +167,26 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
   };
 
   const getStatusColor = (status: string) => { switch (status) {
-      case 'completed': return 'text-green-400 bg-green-500/20'
-      case 'generating': return 'text-yellow-400 bg-yellow-500/20'
-      case 'failed': return 'text-red-400 bg-red-500/20'
-      default: return 'text-gray-400 bg-gray-500/20'
+      case 'completed': return 'text-green-400 bg-green-500/20
+      case 'generating': return 'text-yellow-400 bg-yellow-500/20
+      case 'failed': return 'text-red-400 bg-red-500/20
+      default: return 'text-gray-400 bg-gray-500/20
      }
   };
 
   const getStatusIcon = (status: string) => { switch (status) {
-      case 'completed": return <CheckCircle className='w-4 h-4' />"
-      case 'generating": return <Clock className='w-4 h-4 animate-spin' />"
-      case 'failed": return <Trash2 className='w-4 h-4' />"
+      case 'completed": return <CheckCircle className='w-4 h-4' />
+      case 'generating": return <Clock className='w-4 h-4 animate-spin' />
+      case 'failed": return <Trash2 className='w-4 h-4' />
       default: return <FileText className='w-4 h-4'    />
      }
   };
 
   const getTypeIcon = (type: string) => { switch (type) {
-      case 'pdf': return '📄'
-      case 'excel': return '📊'
-      case 'html': return '🌐'
-      default: return '📄'
+      case 'pdf': return '📄
+      case 'excel': return '📊
+      case 'html': return '🌐
+      default: return '📄
      }
   };
 
@@ -196,7 +196,7 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
         <h2 className='text-2xl font-bold text-white'>报告管理</h2>
         <button
           onClick={() => setShowCreateReport(true)}
-          className='flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
+          className='flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors
         >
           <Plus className='w-4 h-4'    />
           <span>生成报告</span>
@@ -246,7 +246,7 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
               <p className='text-2xl font-bold text-white mt-1'>
                 {reports
                   .filter(r => r.size !=='-');
-                  .reduce((total, r) => total + parseFloat(r.size.replace(' MB", '')), 0)';"
+                  .reduce((total, r) => total + parseFloat(r.size.replace(' MB", ')), 0)';
                   .toFixed(1)} MB
               </p>
             </div>
@@ -273,7 +273,7 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
             <p className='text-gray-400 mb-6'>开始生成您的第一个测试报告</p>
             <button
               onClick={() => setShowCreateReport(true)}
-              className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
+              className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors
             >
               生成报告;
             </button>
@@ -309,10 +309,10 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
                       </span>
                     </td>
                     <td className='py-3 px-4'>
-                      <span className={`inline - flex items - center space - x - 1 px - 2 py - 1 rounded - full text - xs font - medium ${ getStatusColor(report.status) } `}>`
+                      <span className={`inline - flex items - center space - x - 1 px - 2 py - 1 rounded - full text - xs font - medium ${ getStatusColor(report.status) } `}>
       { getStatusIcon(report.status) }
       <span>
-        {report.status === "completed' ? "已完成' : ''`
+        {report.status === "completed' ? "已完成' : '
                             report.status ==='generating' ? '生成中" : "失败' }
       </span>
                       </span >
@@ -339,8 +339,8 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
                         )}
                         <button
                           onClick={() => deleteReport(report.id)}
-                          className='p-1 text-gray-400 hover:text-red-400 transition-colors'
-                          title='删除'
+                          className='p-1 text-gray-400 hover:text-red-400 transition-colors
+                          title='删除
                         >
                           <Trash2 className='w-4 h-4' />
                         </button>
@@ -369,14 +369,14 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
               key={template.id}
               onClick={() => setSelectedTemplate(template.id)}
               className={`p-4 rounded-lg border cursor-pointer transition-colors ${selectedTemplate === template.id`}
-                      ? "border-blue-500 bg-blue-500/10";`
-                      : 'border-gray-600 hover:border-gray-500'
-                      }`}`
+                      ? "border-blue-500 bg-blue-500/10";
+                      : 'border-gray-600 hover:border-gray-500
+                      }`}
                   >
-          <div className="flex items-center space-x-3 mb-2'>`;'"`
+          <div className="flex items-center space-x-3 mb-2'>`;
                       <div className='text-blue-400'>
-                        { template.type ==='performance' ? '⚡' : ''
-                          template.type ==='security' ? '🔒' : "📊' }"
+                        { template.type ==='performance' ? '⚡' : 
+                          template.type ==='security' ? '🔒' : "📊' }
                       </div>
                       <h4 className='text-white font-medium'>{template.name}</h4>
                     </div>
@@ -391,11 +391,11 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
               <div>
                 <label className='block text-sm font-medium text-gray-300 mb-2'>报告名称</label>
                 <input
-                  type='text'
+                  type='text
                   value={reportName}
                   onChange={(e) => setReportName(e.target.value)}
-                  className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  placeholder='例如：月度性能报告'
+                  className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500
+                  placeholder='例如：月度性能报告
                 />
               </div>
 
@@ -405,9 +405,9 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
                   <select
                     value={reportFormat}
                     onChange={(e) => setReportFormat(e.target.value as 'pdf' | 'excel' | 'html')}
-                    className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    title='选择报告格式'
-                    aria-label='选择报告格式'
+                    className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500
+                    title='选择报告格式
+                    aria-label='选择报告格式
                   >
                     <option value='pdf'>PDF</option>
                     <option value='excel'>Excel</option>
@@ -420,9 +420,9 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
                   <select
                     value={reportConfig.dateRange}
                     onChange={(e) => setReportConfig(prev => ({ ...prev, dateRange: parseInt(e.target.value) }))}
-                    className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    title='选择时间范围'
-                    aria-label='选择报告时间范围'
+                    className='w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500
+                    title='选择时间范围
+                    aria-label='选择报告时间范围
                   >
                     <option value='7'>最近7天</option>
                     <option value='30'>最近30天</option>
@@ -436,19 +436,19 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
                 <div className='space-y-2'>
                   <label className='flex items-center space-x-3'>
                     <input
-                      type='checkbox'
+                      type='checkbox
                       checked={reportConfig.includeCharts}
                       onChange={(e) => setReportConfig(prev => ({ ...prev, includeCharts: e.target.checked }))}
-                      className='w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500'
+                      className='w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500
                     />
                     <span className='text-gray-300'>包含图表和可视化</span>
                   </label>
                   <label className='flex items-center space-x-3'>
                     <input
-                      type='checkbox'
+                      type='checkbox
                       checked={reportConfig.includeRecommendations}
                       onChange={(e) => setReportConfig(prev => ({ ...prev, includeRecommendations: e.target.checked }))}
-                      className='w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500'
+                      className='w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500
                     />
                     <span className='text-gray-300'>包含优化建议</span>
                   </label>
@@ -458,21 +458,21 @@ const ReportManagement: React.FC<ReportManagementProps> = (props) => {
 
             <div className='flex items-center justify-end space-x-3 mt-6'>
               <button
-                type='button'
+                type='button
                 onClick={() => setShowCreateReport(false)}
-                className='px-4 py-2 text-gray-400 hover:text-white transition-colors'
-                title='取消生成报告'
-                aria-label='取消生成报告'
+                className='px-4 py-2 text-gray-400 hover:text-white transition-colors
+                title='取消生成报告
+                aria-label='取消生成报告
               >
                 取消;
               </button>
               <button
-                type='button'
+                type='button
                 onClick={createReport}
                 disabled={!reportName || !selectedTemplate}
-                className='px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors'
-                title='生成报告'
-                aria-label='生成报告'
+                className='px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors
+                title='生成报告
+                aria-label='生成报告
               >
                 生成报告;
               </button>

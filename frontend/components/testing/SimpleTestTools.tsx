@@ -10,7 +10,7 @@ import { SimpleBarChart, StatCard, ProgressRing } from '../charts/SimpleCharts
 interface TestResult {
   id: string;
   name: string;
-  status: 'running' | 'completed' | 'failed' | 'pending'
+  status: 'running' | 'completed' | 'failed' | 'pending
   score?: number;
   details?: string;
   timestamp: Date;
@@ -40,18 +40,18 @@ const URLInput: React.FC<URLInputProps> = ({
   return (
     <form onSubmit={handleSubmit} className="flex gap-2">
       <input
-        type="url"
+        type="url
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100
         required
       />
       <button
-        type="submit"
+        type="submit
         disabled={disabled || !value.trim()}
-        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors
       >
         开始测试
       </button>
@@ -78,27 +78,27 @@ const TestProgress: React.FC<TestProgressProps> = ({ tests, currentTest }) => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex space-x-4">
           <StatCard
-            title="已完成"
+            title="已完成
             value={completedTests}
-            className="flex-1"
+            className="flex-1
           />
           <StatCard
-            title="失败"
+            title="失败
             value={failedTests}
-            changeType="negative"
-            className="flex-1"
+            changeType="negative
+            className="flex-1
           />
           <StatCard
-            title="总计"
+            title="总计
             value={totalTests}
-            className="flex-1"
+            className="flex-1
           />
         </div>
         
         <ProgressRing
           percentage={progress}
           size={80}
-          label="总进度"
+          label="总进度
         />
       </div>
 
@@ -151,7 +151,7 @@ const TestResults: React.FC<TestResultsProps> = ({ results }) => {
     name: result.name,
     value: result.score || 0,
     color: (result.score || 0) >= 80 ? '#10B981' : 
-           (result.score || 0) >= 60 ? '#F59E0B' : '#EF4444'
+           (result.score || 0) >= 60 ? '#F59E0B' : '#EF4444
   }));
 
   const averageScore = completedResults.reduce((sum, r) => sum + (r.score || 0), 0) / completedResults.length;
@@ -160,24 +160,24 @@ const TestResults: React.FC<TestResultsProps> = ({ results }) => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
-          title="平均分数"
+          title="平均分数
           value={`${Math.round(averageScore)}分`}
           changeType={averageScore >= 80 ? 'positive' : averageScore >= 60 ? 'neutral' : 'negative'}
         />
         <StatCard
-          title="通过测试"
+          title="通过测试
           value={completedResults.filter(r => (r.score || 0) >= 60).length}
-          changeType="positive"
+          changeType="positive
         />
         <StatCard
-          title="需要改进"
+          title="需要改进
           value={completedResults.filter(r => (r.score || 0) < 60).length}
-          changeType="negative"
+          changeType="negative
         />
       </div>
 
       <SimpleBarChart
-        title="测试结果详情"
+        title="测试结果详情
         data={chartData}
       />
 
@@ -215,11 +215,11 @@ interface SimpleTestToolsProps {
   className?: string;
 }
 
-const SimpleTestTools: React.FC<SimpleTestToolsProps> = ({ className = '' }) => {
-  const [url, setUrl] = useState('');
+const SimpleTestTools: React.FC<SimpleTestToolsProps> = ({ className = ' }) => {
+  const [url, setUrl] = useState(');
   const [isRunning, setIsRunning] = useState(false);
   const [tests, setTests] = useState<TestResult[]>([]);
-  const [currentTest, setCurrentTest] = useState<string>('');
+  const [currentTest, setCurrentTest] = useState<string>(');
 
   const runTests = async () => {
     if (!url.trim()) return;
@@ -267,7 +267,7 @@ const SimpleTestTools: React.FC<SimpleTestToolsProps> = ({ className = '' }) => 
       ));
     }
 
-    setCurrentTest('');
+    setCurrentTest(');
     setIsRunning(false);
   };
 
