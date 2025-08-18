@@ -8,8 +8,8 @@ export class ThemeSystem {
   private options: ThemeSystemOptions;
 
   constructor(options: ThemeSystemOptions = {}) {
-    this.options = options;
-  }
+    this.options = options
+}
 
   // 添加方法实现
 }

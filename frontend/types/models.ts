@@ -9,39 +9,40 @@
 
 // 重新导出基础类型
 export type {
+
   Email, Timestamp,
   // URL, UUID
-} from './common'; // 已修复
+} from './common; // 已修复
 //   = =================== 枚举类型导出 ====================
 
 // 重新导出所有枚举类型（只导出实际存在的枚举）
 export {
   Language, TestGrade,
   TestPriority, TestStatus, TestType, ThemeMode, Timezone, UserPlan, UserRole,
-  // UserStatus;} from './enums'; // 已修复
+  // UserStatus'} from './enums; // 已修复
 // ==================== 用户相关类型导出 ====================
 
 // 重新导出用户相关类型
 export type {
+
   AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES, LoginCredentials,
   RegisterData, UpdateUserData, User, UserActivityLog,
-  // UserPreferences, UserProfile, UserSession, UserStats
-} from './user'; // 已修复
+  // UserPreferences, UserProfile, UserSession, UserStats'} from './user; // 已修复
 //   = =================== API响应类型导出 ====================
 
 // 重新导出API响应类型
 export type {
   ApiError, ApiErrorResponse, ApiMeta, ApiResponse, ApiResponseUtils, ApiSuccessResponse, AuthConfig, CreatedResponse, ErrorCode, ErrorResponseMethods, NoContentResponse, PaginatedRequest, PaginatedResponse,
   PaginationInfo, QueryParams,
-  // RequestConfig, ResponseBuilder, ValidationError;} from './apiResponse'; // 已修复
+  // RequestConfig, ResponseBuilder, ValidationError'} from './apiResponse; // 已修复
 // ==================== 测试相关类型导出 ====================
 
 // 测试相关枚举已在上面导出，这里只导出接口类型
 
 // 重新导出测试相关接口类型（从现有的test.ts文件导入）
 export type {
-  // APITestConfig, ContentTestConfig, PerformanceTestConfig, SecurityTestConfig
-} from './testEngines'; // 已修复
+
+  // APITestConfig, ContentTestConfig, PerformanceTestConfig, SecurityTestConfig'} from './testEngines; // 已修复
 /**
  * 测试配置接口
  */
@@ -51,50 +52,40 @@ export interface TestConfig     {
     users?: number;
     duration?: number;
     rampUpTime?: number;
-    scenarios?: string[];
-  };
-
-  // API测试配置
-  api?: {
+    scenarios?: string[]
+} // API测试配置
+  api?: {;
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
-    headers?: Record<string, string>;
+    headers?: Record<string, string>
     body?: any;
-    expectedStatus?: number[];
-    timeout?: number;
-  };
-
-  // 内容测试配置
+    expectedStatus?: number[]
+    timeout?: number
+} // 内容测试配置
   content?: {
     checkSEO?: boolean;
     checkAccessibility?: boolean;
     checkPerformance?: boolean;
     checkSecurity?: boolean;
     checkMobile?: boolean;
-    customKeywords?: string[];
-  };
-
-  // 压力测试配置
+    customKeywords?: string[]
+} // 压力测试配置
   stress?: {
     maxUsers: number;
     duration: number;
     rampUpTime?: number;
-    scenarios?: string[];
-  };
-
-  // 安全测试配置
+    scenarios?: string[]
+} // 安全测试配置
   security?: {
     checkSSL?: boolean;
     checkHeaders?: boolean;
     checkVulnerabilities?: boolean;
-    customChecks?: string[];
-  };
-
-  // 兼容性测试配置
+    customChecks?: string[]
+} // 兼容性测试配置
   compatibility?: {
-    browsers?: string[];
-    devices?: string[];
-    viewports?: Array<{ width: number; height: number }>;
-  };
+    browsers?: string[]
+    devices?: string[]
+    viewports?: Array<{ width: number; height: number }>
+  }
 }
 
 /**
@@ -104,14 +95,10 @@ export interface TestResult     {
   // 基础信息
   id: string;
   testId: string;
-  userId: string;
-
-  // 测试配置
+  userId: string; // 测试配置
   type: string;
   url: string;
-  config: any;
-
-  // 执行状态
+  config: any; // 执行状态
   status: string;
   startTime?: string;
   endTime?: string;
@@ -119,17 +106,17 @@ export interface TestResult     {
 
   // 结果数据
   results: any; // 具体结果数据，根据测试类型而定
-  metrics: Record<string, number>; // 性能指标
+  metrics: Record<string, number> // 性能指标
   errors: Array<{
     type: string;
     message: string;
-    details?: any;
-  }>;
+    details?: any
+}>
 
   // 元数据
-  metadata: Record<string, any>;
+  metadata: Record<string, any>
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string
 }
 
 /**
@@ -143,7 +130,7 @@ export interface TestHistory     {
   status: string;
   results?: TestResult;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string
 }
 
 //   = =================== 数据库映射接口 ====================
@@ -166,7 +153,7 @@ export interface TestResultDatabaseFields     {
   errors: string; // JSON字符串
   metadata: string; // JSON字符串
   created_at: string;
-  updated_at: string;
+  updated_at: string
 }
 
 /**
@@ -180,7 +167,7 @@ export interface TestHistoryDatabaseFields     {
   status: string;
   results?: string; // JSON字符串
   created_at: string;
-  updated_at: string;
+  updated_at: string
 }
 
 // ==================== 数据转换函数 ====================
@@ -189,7 +176,7 @@ export interface TestHistoryDatabaseFields     {
  * 将数据库字段转换为TestResult对象
  */
 export function testResultFromDatabase(dbData: TestResultDatabaseFields): TestResult   {
-  return {
+  return {;
     id: dbData.id,
     testId: dbData.test_id,
     userId: dbData.user_id,
@@ -206,7 +193,7 @@ export function testResultFromDatabase(dbData: TestResultDatabaseFields): TestRe
     metadata: JSON.parse(dbData.metadata || '{}'),
     createdAt: dbData.created_at,
     updatedAt: dbData.updated_at
-  };
+  }
 }
 
 /**
@@ -230,7 +217,7 @@ export function testResultToDatabase(testResult: TestResult): TestResultDatabase
     metadata: JSON.stringify(testResult.metadata),
     created_at: testResult.createdAt,
     updated_at: testResult.updatedAt
-  };
+  }
 }
 
 /**
@@ -246,7 +233,7 @@ export function testHistoryFromDatabase(dbData: TestHistoryDatabaseFields): Test
     results: dbData.results ? JSON.parse(dbData.results) : undefined,
     createdAt: dbData.created_at,
     updatedAt: dbData.updated_at
-  };
+  }
 }
 
 /**
@@ -262,7 +249,7 @@ export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryData
     results: testHistory.results ? JSON.stringify(testHistory.results) : undefined,
     created_at: testHistory.createdAt,
     updated_at: testHistory.updatedAt
-  };
+  }
 }
 
 // ==================== 验证函数 ====================
@@ -271,37 +258,37 @@ export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryData
  * 验证测试配置
  */
 export function validateTestConfig(type: string, config: any):   { isValid: boolean; errors: string[] } {
-  const errors: string[]  = [];
-  switch (type) {
+  const errors: string[]  = []
+  switch (type) {;
     case 'performance': 
-      if (!config.performance?.users || config.performance.users < 1) {
-        errors.push('性能测试需要指定用户数量");
-      }
-      if (!config.performance?.duration || config.performance.duration < 1) {
-        errors.push('性能测试需要指定持续时间");
-      }
+      if (!config.performance?.users || config.performance.users < 1) {;
+        errors.push('性能测试需要指定用户数量")
+}
+      if (!config.performance?.duration || config.performance.duration < 1) {;
+        errors.push('性能测试需要指定持续时间")
+}
       break;
-
+;
     case 'api': 
-      if (!config.api?.method) {
-        errors.push('API测试需要指定HTTP方法");
-      }
+      if (!config.api?.method) {;
+        errors.push('API测试需要指定HTTP方法")
+}
       break;
-
+;
     case 'stress': 
-      if (!config.stress?.maxUsers || config.stress.maxUsers < 1) {
-        errors.push('压力测试需要指定最大用户数");
-      }
-      if (!config.stress?.duration || config.stress.duration < 1) {
-        errors.push('压力测试需要指定持续时间");
-      }
-      break;
-  }
+      if (!config.stress?.maxUsers || config.stress.maxUsers < 1) {;
+        errors.push('压力测试需要指定最大用户数")
+}
+      if (!config.stress?.duration || config.stress.duration < 1) {;
+        errors.push('压力测试需要指定持续时间")
+}
+      break
+}
 
   return {
     isValid: errors.length === 0,
     errors
-  };
+  }
 }
 
 /**
@@ -310,8 +297,8 @@ export function validateTestConfig(type: string, config: any):   { isValid: bool
 export function validateUrl(url: string): boolean   {
   try {
     new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
+    return true
+} catch {
+    return false
+}
 }

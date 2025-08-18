@@ -1,5 +1,11 @@
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Button, Space, Typography } from 'antd';
+import {
+  BellOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  PlusOutlined,
+  UserOutlined
+} from '@ant-design/icons';
+import { Avatar, Badge, Button, Dropdown, Typography } from 'antd';
 import React from 'react';
 
 const { Title } = Typography;
@@ -10,31 +16,62 @@ interface TopNavbarProps {
 }
 
 const TopNavbar: React.FC<TopNavbarProps> = ({ collapsed, onToggle }) => {
+  const userMenuItems = [
+    {
+      key: 'profile',
+      label: '个人资料',
+    },
+    {
+      key: 'settings',
+      label: '账户设置',
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      label: '退出登录',
+    },
+  ];
+
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '0 16px',
-      height: '64px
-    }}>
-      <Space>
+    <div className={`top-navbar ${collapsed ? 'collapsed' : ''}`}>
+      <div className="top-navbar-left">
         <Button
-          type="text
+          type="text"
           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           onClick={onToggle}
-          style={{ fontSize: '16px', width: 64, height: 64 }}
+          className="top-navbar-toggle"
         />
-        <Title level={4} style={{ margin: 0 }}>
-          Web测试平台
+        <Title level={4} className="top-navbar-title">
+          Test-Web 压力测试平台
         </Title>
-      </Space>
+      </div>
 
-      <Space>
-        <Button type="primary">
+      <div className="top-navbar-right">
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          className="top-navbar-new-test-btn"
+        >
           新建测试
         </Button>
-      </Space>
+
+        <Badge count={3} size="small">
+          <Button
+            type="text"
+            icon={<BellOutlined />}
+            className="top-navbar-notification"
+          />
+        </Badge>
+
+        <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+          <Button type="text" className="top-navbar-user">
+            <Avatar size={32} icon={<UserOutlined />} />
+            <span className="top-navbar-user-name">管理员</span>
+          </Button>
+        </Dropdown>
+      </div>
     </div>
   );
 };

@@ -1,14 +1,17 @@
 import {
+  BarChartOutlined,
   BugOutlined,
   DashboardOutlined,
-  GlobalOutlined,
   QuestionCircleOutlined,
   SecurityScanOutlined,
-  // SettingOutlined
-} from '@ant-design/icons'; // 已修复
-import { Menu } from 'antd';
+  SettingOutlined,
+  ThunderboltOutlined
+} from '@ant-design/icons';
+import { Layout, Menu } from 'antd';
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+const { Sider } = Layout;
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -26,14 +29,19 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       label: '仪表板',
     },
     {
-      key: '/testing',
-      icon: <BugOutlined />,
-      label: '测试工具',
+      key: '/testing-dashboard',
+      icon: <BarChartOutlined />,
+      label: '测试管理',
     },
     {
       key: '/stress-test',
-      icon: <GlobalOutlined />,
+      icon: <ThunderboltOutlined />,
       label: '压力测试',
+    },
+    {
+      key: '/testing',
+      icon: <BugOutlined />,
+      label: '测试工具',
     },
     {
       key: '/content-detection',
@@ -52,20 +60,31 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     },
   ];
 
-  const handleMenuClick = ({ key }: { key: string }) => {
-    navigate(key);
-  };
-
   return (
-    <div style={{ height: '100%', paddingTop: '16px' }}>
+    <Sider
+      trigger={null}
+      collapsible
+      collapsed={collapsed}
+      width={240}
+      className={`sidebar-container ${collapsed ? 'collapsed' : ''}`}
+    >
+      {/* Logo区域 */}
+      <div className={`sidebar-logo ${collapsed ? 'collapsed' : ''}`}>
+        <div className={`sidebar-logo-text ${collapsed ? 'collapsed' : ''}`}>
+          {collapsed ? 'TW' : 'Test-Web'}
+        </div>
+      </div>
+
+      {/* 菜单区域 */}
       <Menu
-        mode="inline
+        theme="dark"
+        mode="inline"
         selectedKeys={[location.pathname]}
         items={menuItems}
-        onClick={handleMenuClick}
-        style={{ border: 'none' }}
+        onClick={({ key }) => navigate(key)}
+        className="sidebar-menu"
       />
-    </div>
+    </Sider>
   );
 };
 

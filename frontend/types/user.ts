@@ -5,7 +5,7 @@
  */
 
 // 导入基础类型
-import type { UserRole, UserStatus  } from './enums';// 定义用户相关类型
+import type { UserRole, UserStatus  } from './enums; // 定义用户相关类型;';
 export type UUID   = string;export type Timestamp   = string;export interface User     {
   id: UUID;
   username: string;
@@ -19,17 +19,17 @@ export type UUID   = string;export type Timestamp   = string;export interface Us
   updatedAt: Timestamp;
   lastLoginAt?: Timestamp | null; // 最后登录时间
   lockedUntil?: Timestamp | null; // 账户锁定到期时间
-  preferences?: Partial<UserPreferences>;
+  preferences?: Partial<UserPreferences>
   profile?: UserProfile; // 用户资料
-  permissions?: string[]; // 用户权限列表
-  metadata?: Record<string, any>; // 用户元数据
+  permissions?: string[] // 用户权限列表
+  metadata?: Record<string, any> // 用户元数据
   avatar?: string; // 头像URL
   emailVerified?: boolean; // 邮箱验证状态
   loginAttempts?: number; // 登录尝试次数
   plan?: string; // 用户计划
 }
 
-export interface UserPreferences     {
+export interface UserPreferences {
   theme: 'light' | 'dark' | 'auto
   language: string;
   timezone: string;
@@ -38,7 +38,7 @@ export interface UserPreferences     {
     push: boolean;
     sms: boolean;
     browser: boolean; // 浏览器通知
-  };
+  }
 }
 
 export interface UserProfile     {
@@ -50,7 +50,7 @@ export interface UserProfile     {
   bio?: string;
   phone?: string | null;
   address?: string | null;
-  preferences?: UserPreferences;
+  preferences?: UserPreferences
 }
 
 export interface UserSession     {
@@ -58,7 +58,7 @@ export interface UserSession     {
   userId: UUID;
   token: string;
   expiresAt: Timestamp;
-  createdAt: Timestamp;
+  createdAt: Timestamp
 }
 
 export interface AuthResponse     {
@@ -67,9 +67,9 @@ export interface AuthResponse     {
   token?: string;
   refreshToken?: string; // 刷新令牌
   message?: string;
-  errors?: Record<string, string>; // 错误信息映射
+  errors?: Record<string, string> // 错误信息映射
   expiresIn?: number; // 令牌过期时间（秒）
-  permissions?: string[]; // 用户权限列表
+  permissions?: string[] // 用户权限列表
   sessionId?: string; // 会话ID
   requireMFA?: boolean; // 是否需要多因子认证
 }
@@ -102,7 +102,7 @@ export interface CreateUserData     {
   password: string;
   role?: UserRole;
   firstName?: string;
-  lastName?: string;
+  lastName?: string
 }
 
 export interface UpdateUserData     {
@@ -110,13 +110,13 @@ export interface UpdateUserData     {
   email?: string;
   role?: UserRole;
   isActive?: boolean;
-  profile?: Partial<UserProfile>;
+  profile?: Partial<UserProfile>
 }
 
 export interface ChangePasswordData     {
   currentPassword: string;
   newPassword: string;
-  confirmPassword: string;
+  confirmPassword: string
 }
 
 export interface UserActivityLog     {
@@ -126,7 +126,7 @@ export interface UserActivityLog     {
   timestamp: Timestamp;
   ipAddress?: string;
   userAgent?: string;
-  details?: Record<string, any>;
+  details?: Record<string, any>
 }
 
 export interface UserStats     {
@@ -134,10 +134,9 @@ export interface UserStats     {
   activeUsers: number;
   newUsersToday: number;
   newUsersThisWeek: number;
-  newUsersThisMonth: number;
+  newUsersThisMonth: number'
 }
-
-export const DEFAULT_USER_PREFERENCES: UserPreferences = {
+export const DEFAULT_USER_PREFERENCES: UserPreferences = {;
   theme: 'auto',
   language: 'zh-CN',
   timezone: 'Asia/Shanghai',
@@ -147,21 +146,17 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
     sms: false,
     browser: true,
   },
-};
-
-// 向后兼容的类型别名
-export type { User as UserInterface };
-
-// 扩展类型定义（不在通用类型中的特定用户管理类型）
+} // 向后兼容的类型别名
+export type { User as UserInterface } // 扩展类型定义（不在通用类型中的特定用户管理类型）
 export interface CreateUserData     {
   username: string;
   email: string;
   password: string;
   fullName?: string;
   role?: UserRole;
-  permissions?: string[];
+  permissions?: string[]
   avatar?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any>
 }
 
 export interface UpdateUserData     {
@@ -169,16 +164,16 @@ export interface UpdateUserData     {
   email?: string;
   fullName?: string;
   role?: UserRole;
-  permissions?: string[];
+  permissions?: string[]
   avatar?: string;
-  preferences?: Partial<UserPreferences>;
-  metadata?: Record<string, any>;
+  preferences?: Partial<UserPreferences>
+  metadata?: Record<string, any>
 }
 
 export interface ChangePasswordData     {
   currentPassword: string;
   newPassword: string;
-  confirmPassword: string;
+  confirmPassword: string
 }
 
 // 重复定义已移除，使用上面的 UserActivityLog 和 UserStats 定义
@@ -188,14 +183,14 @@ export interface Permission     {
   name: string;
   description: string;
   category: string;
-  isSystem: boolean;
+  isSystem: boolean
 }
 
 export interface Role     {
   id: string;
   name: string;
   description: string;
-  permissions: Permission[];
+  permissions: Permission[]
   isSystem: boolean;
-  userCount: number;
+  userCount: number
 }

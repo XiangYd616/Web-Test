@@ -7,8 +7,8 @@
 
 // ==================== 基础类型定义 ====================
 
-export type UUID   = string;export type Timestamp  = string;// ISO 8601 格式
-export type Email   = string;// ==================== 枚举定义 ====================
+export type UUID   = string;export type Timestamp  = string; // ISO 8601 格式
+export type Email   = string; // ==================== 枚举定义 ====================
 
 /**
  * 用户角色枚举 - 与数据库约束保持一致
@@ -18,25 +18,23 @@ export enum UserRole {
   ADMIN = 'admin',
   MODERATOR = 'moderator',
   TESTER = 'tester',
-  MANAGER = 'manager
+  MANAGER = 'manager',
 }
-
-/**
- * 用户状态枚举 - 与数据库约束保持一致
- */
-export enum UserStatus {
+/**;',
+ * 用户状态枚举 - 与数据库约束保持一致;
+ */;',
+export enum UserStatus {;
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  SUSPENDED = 'suspended
+  SUSPENDED = 'suspended',
 }
-
-/**
- * 用户计划枚举 - 与数据库约束保持一致
- */
-export enum UserPlan {
+/**;',
+ * 用户计划枚举 - 与数据库约束保持一致;
+ */;',
+export enum UserPlan {;
   FREE = 'free',
   PRO = 'pro',
-  ENTERPRISE = 'enterprise
+  ENTERPRISE = 'enterprise;',
 }
 
 // ==================== 用户偏好设置 ====================
@@ -47,42 +45,40 @@ export interface NotificationSettings     {
   push: boolean;
   browser: boolean;
   testComplete: boolean;
-  testFailed: boolean;
+  testFailed: boolean;',
   weeklyReport: boolean;
-  securityAlert: boolean;
-}
-
-export interface DashboardSettings     {
+  securityAlert: boolean;'
+}',
+export interface DashboardSettings     {;',
   defaultView: string;
   layout: 'grid' | 'list' | 'cards
-  widgets: string[];
+  widgets: string[]
   refreshInterval: number; // 秒
-  showTips: boolean;
+  showTips: boolean
 }
 
 export interface TestingSettings     {
   defaultTimeout: number; // 毫秒
   maxConcurrentTests: number;
   autoSaveResults: boolean;
-  enableAdvancedFeatures: boolean;
+  enableAdvancedFeatures: boolean
 }
 
 export interface PrivacySettings     {
   shareUsageData: boolean;
   allowCookies: boolean;
-  trackingEnabled: boolean;
+  trackingEnabled: boolean'
 }
-
-export interface UserPreferences     {
-  theme: 'light' | 'dark' | 'auto
-  language: 'zh-CN' | 'en-US' | 'ja-JP
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'auto;
+  language: 'zh-CN' | 'en-US' | 'ja-JP;
   timezone: string;
-  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY
+  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY;
   timeFormat: '24h' | '12h
   notifications: NotificationSettings;
   dashboard: DashboardSettings;
   testing: TestingSettings;
-  privacy: PrivacySettings;
+  privacy: PrivacySettings
 }
 
 // ==================== 用户档案信息 ====================
@@ -96,7 +92,7 @@ export interface UserProfile     {
   phone?: string;
   timezone: string;
   bio?: string;
-  avatar?: string;
+  avatar?: string
 }
 
 // ==================== 用户会话信息 ====================
@@ -106,13 +102,13 @@ export interface UserSession     {
   userId: UUID;
   sessionToken: string;
   refreshToken?: string;
-  deviceInfo: Record<string, any>;
+  deviceInfo: Record<string, any>
   ipAddress: string;
   userAgent: string;
   createdAt: Timestamp;
   lastAccessedAt: Timestamp;
   expiresAt: Timestamp;
-  isActive: boolean;
+  isActive: boolean
 }
 
 // ==================== 核心用户接口 ====================
@@ -125,36 +121,24 @@ export interface User     {
   // 基础标识信息
   id: UUID;
   username: string;
-  email: Email;
-
-  // 角色和权限
+  email: Email; // 角色和权限
   role: UserRole;
   plan: UserPlan;
   status: UserStatus;
-  permissions: string[];
-
-  // 个人信息
+  permissions: string[] // 个人信息
   profile: UserProfile;
-  preferences: UserPreferences;
-
-  // 安全相关
+  preferences: UserPreferences; // 安全相关
   emailVerified: boolean;
   emailVerifiedAt?: Timestamp;
   twoFactorEnabled?: boolean;
   loginAttempts: number;
-  lockedUntil?: Timestamp;
-
-  // 时间戳 - 使用统一的字段名
+  lockedUntil?: Timestamp; // 时间戳 - 使用统一的字段名
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  lastLoginAt?: Timestamp;
-
-  // 统计信息
+  lastLoginAt?: Timestamp; // 统计信息
   loginCount: number;
-  testCount?: number;
-
-  // 元数据
-  metadata: Record<string, any>;
+  testCount?: number; // 元数据
+  metadata: Record<string, any>
 }
 
 // ==================== 数据库映射接口 ====================
@@ -182,7 +166,7 @@ export interface UserDatabaseFields     {
   preferences: string; // JSON字符串
   metadata: string; // JSON字符串
   created_at: string;
-  updated_at: string;
+  updated_at: string
 }
 
 // ==================== 用户操作相关接口 ====================
@@ -191,28 +175,28 @@ export interface CreateUserData     {
   username: string;
   email: Email;
   password: string;
-  profile?: Partial<UserProfile>;
+  profile?: Partial<UserProfile>
   role?: UserRole;
   plan?: UserPlan;
-  permissions?: string[];
-  metadata?: Record<string, any>;
+  permissions?: string[]
+  metadata?: Record<string, any>
 }
 
 export interface UpdateUserData     {
   username?: string;
   email?: Email;
-  profile?: Partial<UserProfile>;
+  profile?: Partial<UserProfile>
   role?: UserRole;
   plan?: UserPlan;
-  permissions?: string[];
-  preferences?: Partial<UserPreferences>;
-  metadata?: Record<string, any>;
+  permissions?: string[]
+  preferences?: Partial<UserPreferences>
+  metadata?: Record<string, any>
 }
 
 export interface ChangePasswordData     {
   currentPassword: string;
   newPassword: string;
-  confirmPassword: string;
+  confirmPassword: string
 }
 
 // ==================== 认证相关接口 ====================
@@ -221,7 +205,7 @@ export interface LoginCredentials     {
   username: string;
   password: string;
   rememberMe?: boolean;
-  twoFactorCode?: string;
+  twoFactorCode?: string
 }
 
 export interface RegisterData     {
@@ -229,8 +213,8 @@ export interface RegisterData     {
   email: Email;
   password: string;
   confirmPassword: string;
-  profile?: Partial<UserProfile>;
-  acceptTerms: boolean;
+  profile?: Partial<UserProfile>
+  acceptTerms: boolean
 }
 
 export interface AuthResponse     {
@@ -240,30 +224,28 @@ export interface AuthResponse     {
   refreshToken?: string;
   expiresAt?: Timestamp;
   message?: string;
-  errors?: string[];
+  errors?: string[]
 }
 
 // ==================== 用户查询和过滤 ====================
 
 export interface UserFilter     {
-  role?: UserRole | UserRole[];
-  status?: UserStatus | UserStatus[];
-  plan?: UserPlan | UserPlan[];
+  role?: UserRole | UserRole[]
+  status?: UserStatus | UserStatus[]
+  plan?: UserPlan | UserPlan[]
   search?: string; // 搜索用户名、邮箱、姓名
   emailVerified?: boolean;
   department?: string;
   createdAfter?: Timestamp;
   createdBefore?: Timestamp;
   lastLoginAfter?: Timestamp;
-  lastLoginBefore?: Timestamp;
-}
-
-export interface UserListQuery     {
+  lastLoginBefore?: Timestamp'}
+export interface UserListQuery {
   page?: number;
   limit?: number;
-  sortBy?: 'createdAt' | 'lastLoginAt' | 'username' | 'email
+  sortBy?: 'createdAt' | 'lastLoginAt' | 'username' | 'email;
   sortOrder?: 'asc' | 'desc
-  filter?: UserFilter;
+  filter?: UserFilter
 }
 
 // ==================== 用户统计信息 ====================
@@ -274,9 +256,9 @@ export interface UserStats     {
   newUsersToday: number;
   newUsersThisWeek: number;
   newUsersThisMonth: number;
-  usersByRole: Record<UserRole, number>;
-  usersByStatus: Record<UserStatus, number>;
-  usersByPlan: Record<UserPlan, number>;
+  usersByRole: Record<UserRole, number>
+  usersByStatus: Record<UserStatus, number>
+  usersByPlan: Record<UserPlan, number>
 }
 
 // ==================== 用户活动日志 ====================
@@ -290,12 +272,9 @@ export interface UserActivityLog     {
   userAgent: string;
   timestamp: Timestamp;
   severity: 'low' | 'medium' | 'high
-  metadata?: Record<string, any>;
-}
-
-// ==================== 默认值定义 ====================
-
-export const DEFAULT_USER_PREFERENCES: UserPreferences = {
+  metadata?: Record<string, any>'}
+// ==================== 默认值定义 ==================== ;
+export const DEFAULT_USER_PREFERENCES: UserPreferences = {;
   theme: 'auto',
   language: 'zh-CN',
   timezone: 'Asia/Shanghai',
@@ -311,7 +290,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
     weeklyReport: false,
     securityAlert: true
   },
-  dashboard: {
+  dashboard: {;
     defaultView: 'overview',
     layout: 'grid',
     widgets: [],
@@ -329,24 +308,22 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
     allowCookies: true,
     trackingEnabled: false
   }
-};
+}
 
-export const DEFAULT_USER_PROFILE: UserProfile = {
-  timezone: 'Asia/Shanghai
-};
-
-// ==================== 类型守卫函数 ====================
+export const DEFAULT_USER_PROFILE: UserProfile = {;
+  timezone: 'Asia/Shanghai;'
+} // ==================== 类型守卫函数 ====================
 
 export function isValidUserRole(role: string): role is UserRole   {
-  return Object.values(UserRole).includes(role as UserRole);
+  return Object.values(UserRole).includes(role as UserRole)
 }
 
 export function isValidUserStatus(status: string): status is UserStatus   {
-  return Object.values(UserStatus).includes(status as UserStatus);
+  return Object.values(UserStatus).includes(status as UserStatus)
 }
 
 export function isValidUserPlan(plan: string): plan is UserPlan   {
-  return Object.values(UserPlan).includes(plan as UserPlan);
+  return Object.values(UserPlan).includes(plan as UserPlan)
 }
 
 // ==================== 数据转换工具函数 ====================
@@ -366,7 +343,7 @@ export function fromDatabaseFields(dbData: UserDatabaseFields): User   {
     profile: {
       firstName: dbData.first_name,
       lastName: dbData.last_name,
-      fullName: dbData.first_name && dbData.last_name
+      fullName: dbData.first_name && dbData.last_name;
         ? `${dbData.first_name} ${dbData.last_name}
         : undefined,
       timezone: "Asia/Shanghai' // 默认值
@@ -381,9 +358,8 @@ export function fromDatabaseFields(dbData: UserDatabaseFields): User   {
     lastLoginAt: dbData.last_login,
     loginCount: dbData.login_count,
     metadata: dbData.metadata ? JSON.parse(dbData.metadata) : {}
-  };
-}
-
+  }
+}`
 /**
  * 将前端User对象转换为数据库字段
  */
@@ -405,8 +381,5 @@ export function toDatabaseFields(user: User, passwordHash?: string): UserDatabas
     failed_login_attempts: user.loginAttempts,
     locked_until: user.lockedUntil,
     preferences: JSON.stringify(user.preferences),
-    metadata: JSON.stringify(user.metadata),
-    created_at: user.createdAt,
-    updated_at: user.updatedAt
-  };
-}
+    metadata: JSON.stringify(user.metadata),    created_at: user.createdAt,`;
+    updated_at: user.updatedAt  }`;"}``

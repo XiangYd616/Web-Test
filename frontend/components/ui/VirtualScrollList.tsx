@@ -3,8 +3,8 @@
  * 用于高效渲染大量数据列表
  */
 
-import React, { useMemo    } from 'react';import { useVirtualScroll    } from '../../hooks/usePerformanceOptimization';interface VirtualScrollListProps<T>   {
-    items: T[];
+import React, { useMemo    } from 'react;import { useVirtualScroll    } from '../../hooks/usePerformanceOptimization;interface VirtualScrollListProps<T>   {;';
+    items: T[]
     itemHeight: number;
     height: number;
     renderItem: (item: T, index: number) => React.ReactNode;
@@ -13,7 +13,7 @@ import React, { useMemo    } from 'react';import { useVirtualScroll    } from '.
     onScroll?: (scrollTop: number) => void;
     loading?: boolean;
     loadingComponent?: React.ReactNode;
-    emptyComponent?: React.ReactNode;
+    emptyComponent?: React.ReactNode
 }
 
 function VirtualScrollList<T>({
@@ -21,7 +21,7 @@ function VirtualScrollList<T>({
     itemHeight,
     height,
     renderItem,
-    className =',
+    className = ',
     overscan = 5,
     onScroll,
     loading = false,
@@ -39,7 +39,7 @@ function VirtualScrollList<T>({
     const handleScrollEvent = (e: React.UIEvent<HTMLDivElement>) => {
   
   // 性能优化
-  const memoizedProps = useMemo(() => ({
+  const memoizedProps = useMemo(() => ({;
     className: combinedClassName,
     style: computedStyle,
     disabled,
@@ -58,7 +58,7 @@ function VirtualScrollList<T>({
     'aria-describedby': [']
       error ? errorId : null,
       description ? descriptionId : null,
-      ariaDescribedBy
+      ariaDescribedBy;
     ].filter(Boolean).join(' ') || undefined,
     'aria-invalid': !!error,
     'aria-disabled': disabled,
@@ -67,39 +67,39 @@ function VirtualScrollList<T>({
     'aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
-  };
+  }
   
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     
     try {
-      onClick?.(event);
-    } catch (error) {
-      console.error('Click handler error: ', error);
-      setError('操作失败，请重试");
-    }
+      onClick?.(event)
+} catch (error) {;
+      console.error('Click handler error: ', error);';
+      setError('操作失败，请重试")
+}
   }, [disabled, loading, onClick]);
   
   const handleChange = useCallback((newValue: any) => {
     updateState({ value: newValue, touched: true, error: null });
     
     try {
-      onChange?.(newValue);
-    } catch (error) {
-      console.error('Change handler error: ', error);
-      updateState({ error: '值更新失败' });
-    }
+      onChange?.(newValue)
+} catch (error) {;
+      console.error('Change handler error: ', error);';
+      updateState({ error: '值更新失败' })
+}
   }, [onChange, updateState]);
   
   const handleFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
     updateState({ focused: true });
-    onFocus?.(event);
-  }, [onFocus, updateState]);
+    onFocus?.(event)
+}, [onFocus, updateState]);
   
   const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
     updateState({ focused: false });
-    onBlur?.(event);
-  }, [onBlur, updateState]);
+    onBlur?.(event)
+}, [onBlur, updateState]);
   
   const [state, setState] = useState({
     value: defaultValue,
@@ -110,12 +110,11 @@ function VirtualScrollList<T>({
   });
   
   const updateState = useCallback((updates: Partial<typeof state>) => {
-    setState(prev => ({ ...prev, ...updates }));
-  }, []);
+    setState(prev => ({ ...prev, ...updates }))
+}, []);
         handleScroll(e);
-        onScroll?.(e.currentTarget.scrollTop);
-    };
-
+        onScroll?.(e.currentTarget.scrollTop)
+}`
     // 渲染可见项目
     const renderedItems = useMemo(() => {
         return visibleItems.map((item, index) => {
@@ -133,44 +132,41 @@ function VirtualScrollList<T>({
                 >
                     {renderItem(item, actualIndex)}
                 </div>
-            );
-        });
-    }, [visibleItems, startIndex, itemHeight, renderItem]);
-
+            )
+})
+}, [visibleItems, startIndex, itemHeight, renderItem]);`
     // 加载状态
     if (loading) {
         
         return (
             <div className={`flex items-center justify-center ${className`}
       }`} style={{ height }}>
-                {loadingComponent || (
-                    <div className="flex items-center space-x-2'>
-                        <div className='w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin' />
-                        <span className='text-gray-600'>加载中...</span>
+                {loadingComponent || (;
+                    <div className="flex items-center space-x-2>
+                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin />
+                        <span className="text-gray-600>加载中...</span>
                     </div>
                 )}
             </div>
-        );
-    }
-
+        )
+}`
     // 空状态
     if (items.length === 0) {
         
         return (
             <div className={`flex items-center justify-center ${className`}
       }`} style={{ height }}>
-                {emptyComponent || (
-                    <div className="text-center text-gray-500'>
-                        <svg className='w-12 h-12 mx-auto mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4' />
+                {emptyComponent || (;
+                    <div className="text-center text-gray-500>
+                        <svg className="w-12 h-12 mx-auto mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                            <path strokeLinecap='round strokeLinejoin= round strokeWidth={2} d= M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4 />
                         </svg>
                         <p>暂无数据</p>
                     </div>
                 )}
             </div>
-        );
-    }
-
+        )
+}`
     return (
         <div
             className={`overflow-auto ${className}`}
@@ -180,20 +176,18 @@ function VirtualScrollList<T>({
             <div
                 style={{
                     height: totalHeight,
-                    position: "relative";
-                }}
+                    position: "relative"
+}}
             >
                 <div
                     style={{
                         transform: `translateY(${offsetY}px)`,
-                        position: "relative";
-                    }}
+                        position: "relative"
+}}
                 >
                     {renderedItems}
                 </div>
             </div>
-        </div>
-    );
-}
-
+        </div>    );`
+}`;
 export default React.memo(VirtualScrollList);

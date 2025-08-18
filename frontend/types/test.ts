@@ -1,11 +1,11 @@
 
 
-export type TestType   = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';export interface TestConfig     {
+export type TestType   = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website;export interface TestConfig     {
   url: string;
   timeout?: number;
   retries?: number;
   userAgent?: string;
-  headers?: Record<string, string>;
+  headers?: Record<string, string>
 }
 
 export interface PerformanceTestConfig extends TestConfig     {
@@ -15,20 +15,19 @@ export interface PerformanceTestConfig extends TestConfig     {
   thresholds?: {
     responseTime: number;
     errorRate: number;
-    throughput: number;
-  };
+    throughput: number
+}
 }
 
 export interface ContentTestConfig extends TestConfig     {
-  checkSEO: boolean;
-  // checkAccessibility: boolean; // Removed - functionality moved to compatibility test
+  checkSEO: boolean; // checkAccessibility: boolean; // Removed - functionality moved to compatibility test
   checkPerformance: boolean;
   checkLinks?: boolean;
   checkSecurity?: boolean;
   checkImages?: boolean;
   checkSpeed?: boolean;
-  customKeywords?: string[];
-  depth?: number;
+  customKeywords?: string[]
+  depth?: number
 }
 
 export interface SecurityTestConfig extends TestConfig     {
@@ -40,21 +39,21 @@ export interface SecurityTestConfig extends TestConfig     {
   checkCSRF?: boolean;
   checkCookies: boolean;
   checkRedirects: boolean;
-  checkMixedContent: boolean;
+  checkMixedContent: boolean
 }
 
-export interface APITestConfig extends TestConfig     {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
+export interface APITestConfig extends TestConfig     {;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH;
   body?: string;
   expectedStatus?: number;
   expectedResponse?: string;
-  authentication?: {
+  authentication?: {;
     type: 'bearer' | 'basic' | 'api-key
     token?: string;
     username?: string;
     password?: string;
-    apiKey?: string;
-  };
+    apiKey?: string
+}
 }
 
 export interface NetworkTestConfig extends TestConfig     {
@@ -64,10 +63,9 @@ export interface NetworkTestConfig extends TestConfig     {
   testDNS?: boolean;
   testRouting?: boolean;
   testFirewall?: boolean;
-  packetCount?: number;
+  packetCount?: number
 }
-
-export interface TestResult     {
+export interface TestResult {
   id: string;
   testType: TestType;
   url: string;
@@ -76,19 +74,18 @@ export interface TestResult     {
   endTime?: string;
   duration?: number;
   score?: number;
-  metrics?: Record<string, any>;
-  errors?: string[];
-  warnings?: string[];
-  recommendations?: string[];
-  screenshots?: string[];
+  metrics?: Record<string, any>
+  errors?: string[]
+  warnings?: string[]
+  recommendations?: string[]
+  screenshots?: string[]
   reports?: {
     html?: string;
     json?: string;
-    pdf?: string;
-  };
+    pdf?: string
 }
-
-export interface TestHistory     {
+}
+export interface TestHistory {
   id: string;
   testName: string;
   testType: TestType;
@@ -106,10 +103,10 @@ export interface TestHistory     {
   minorIssues?: number;
   warnings?: number;
   environment?: string;
-  tags?: string[];
+  tags?: string[]
   description?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string
 }
 
 export interface TestFilter     {
@@ -117,21 +114,20 @@ export interface TestFilter     {
   status?: string;
   dateRange?: {
     start: string;
-    end: string;
-  };
+    end: string
+}
   userId?: string;
   search?: string;
-  priority?: string;
+  priority?: string
 }
-
-export interface TestEngine     {
+export interface TestEngine {
   name: string;
   version: string;
   available: boolean;
   status: 'healthy' | 'warning' | 'error
-  capabilities?: string[];
+  capabilities?: string[]
   lastCheck?: string;
-  error?: string;
+  error?: string
 }
 
 export interface TestProgress     {
@@ -139,7 +135,7 @@ export interface TestProgress     {
   stage: string;
   progress: number;
   message: string;
-  timestamp: string;
+  timestamp: string
 }
 
 export interface TestTemplate     {
@@ -151,29 +147,29 @@ export interface TestTemplate     {
   isDefault: boolean;
   createdBy: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string
 }
 
-export interface TestSchedule     {
+export interface TestSchedule {
   id: string;
   name: string;
   testType: TestType;
   config: TestConfig;
-  schedule: {
+  schedule: {;
     type: 'once' | 'daily' | 'weekly' | 'monthly
     time: string;
     timezone: string;
-    daysOfWeek?: number[];
-    dayOfMonth?: number;
-  };
+    daysOfWeek?: number[]
+    dayOfMonth?: number
+}
   enabled: boolean;
   lastRun?: string;
   nextRun: string;
   createdBy: string;
-  createdAt: string;
+  createdAt: string
 }
 
-export interface TestReport     {
+export interface TestReport {
   id: string;
   testId: string;
   testType: TestType;
@@ -187,8 +183,8 @@ export interface TestReport     {
     status: string;
     duration: number;
     issues: number;
-    recommendations: number;
-  };
+    recommendations: number
+}
 }
 
 // 简化的测试配置接口（兼容性）
@@ -196,7 +192,7 @@ export interface SimpleStressTestConfig     {
   url: string;
   users: number;
   duration: number;
-  rampUpTime?: number;
+  rampUpTime?: number
 }
 
 export interface SimpleContentTestConfig     {
@@ -204,7 +200,7 @@ export interface SimpleContentTestConfig     {
   checkSEO: boolean;
   checkAccessibility: boolean;
   checkPerformance: boolean;
-  keywords?: string[];
+  keywords?: string[]
 }
 
 export interface SimpleSecurityTestConfig     {
@@ -212,7 +208,7 @@ export interface SimpleSecurityTestConfig     {
   checkSSL: boolean;
   checkHeaders: boolean;
   checkXSS: boolean;
-  checkSQLInjection: boolean;
+  checkSQLInjection: boolean
 }
 
 export interface TestEngineStatus     {
@@ -220,20 +216,18 @@ export interface TestEngineStatus     {
   lighthouse: TestEngine;
   playwright: TestEngine;
   zap: TestEngine;
-  nuclei: TestEngine;
+  nuclei: TestEngine
 }
 
 // 批量测试
 export interface BatchTestConfig     {
   name: string;
-  urls: string[];
+  urls: string[]
   testType: TestType;
   config: TestConfig;
   parallel: boolean;
-  maxConcurrency?: number;
-}
-
-export interface BatchTestResult     {
+  maxConcurrency?: number'}
+export interface BatchTestResult {
   id: string;
   name: string;
   status: 'pending' | 'running' | 'completed' | 'failed
@@ -242,5 +236,5 @@ export interface BatchTestResult     {
   failedTests: number;
   startTime: string;
   endTime?: string;
-  results: TestResult[];
+  results: TestResult[]'
 }

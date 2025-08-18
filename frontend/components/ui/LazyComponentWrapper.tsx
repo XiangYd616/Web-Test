@@ -3,13 +3,13 @@
  * 提供统一的懒加载组件加载体验
  */
 
-import React, { Suspense, ComponentType, LazyExoticComponent    } from 'react';import LoadingFallback from './LoadingFallback';import ErrorBoundary from './ErrorBoundary';interface LazyComponentWrapperProps   {
-  component: LazyExoticComponent<ComponentType<any>>;
+import React, { Suspense, ComponentType, LazyExoticComponent    } from 'react;import LoadingFallback from './LoadingFallback;import ErrorBoundary from './ErrorBoundary;interface LazyComponentWrapperProps {';
+  component: LazyExoticComponent<ComponentType<any>>
   fallback?: React.ComponentType;
-  errorFallback?: React.ComponentType<{ error: Error; retry: () => void }>;
+  errorFallback?: React.ComponentType<{ error: Error; retry: () => void }>
   preload?: boolean;
   onLoad?: () => void;
-  onError?: (error: Error) => void;
+  onError?: (error: Error) => void
 }
 
 export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
@@ -28,40 +28,35 @@ export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
     disabled,
     'aria-label': ariaLabel,
     "data-testid': testId
-  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
-  
-  // 可访问性支持
-  const {
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]); // 可访问性支持
+  const {;
     'aria-label': ariaLabel,
     'aria-describedby': ariaDescribedBy,
     role,
     tabIndex  = 0,
     'data-testid': testId
   } = props;
-  const accessibilityProps = {
+  const accessibilityProps = {;
     'aria-label': ariaLabel,
     'aria-describedby': ariaDescribedBy,
     role,
     tabIndex: disabled ? -1 : tabIndex,
     "data-testid': testId
-  };
-
-  // 键盘导航支持
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  } // 键盘导航支持
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {;
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      onClick?.(event as any);
-    }
-  }, [onClick]);
-  // 预加载组件
+      onClick?.(event as any)
+}
+  }, [onClick]); // 预加载组件
   React.useEffect(() => {
     if (preload) {
       Component().then(() => {
-        onLoad?.();
-      }).catch((error) => {
-        onError?.(error);
-      });
-    }
+        onLoad?.()
+}).catch((error) => {
+        onError?.(error)
+})
+}
   }, [Component, preload, onLoad, onError]);
 
   return (
@@ -70,8 +65,8 @@ export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
         <Component  />
       </Suspense>
     </ErrorBoundary>
-  );
-};
+  )
+}
 
 /**
  * 高阶组件：为组件添加懒加载功能
@@ -80,8 +75,8 @@ export const withLazyLoading = <P extends object>(Component: ComponentType<P>,
   options: {
     fallback?: React.ComponentType;
     preload?: boolean;
-    chunkName?: string;
-  } = {}
+    chunkName?: string
+} = {}
 ) => {
   const LazyComponent = React.lazy(() => 
     Promise.resolve({ default: Component })
@@ -92,8 +87,8 @@ export const withLazyLoading = <P extends object>(Component: ComponentType<P>,
       fallback={options.fallback}
       preload={options.preload}
        />
-  );
-};
+  )
+}
 
 /**
  * Hook：懒加载组件状态管理
@@ -113,14 +108,14 @@ export const useLazyComponent = (componentLoader: () => Promise<{ default: Compo
     try {
       const { default: LoadedComponent }  = await componentLoader();
       setComponent(() => LoadedComponent);
-      return LoadedComponent;
-    } catch (err) {
+      return LoadedComponent
+} catch (err) {;
       const error = err instanceof Error ? err : new Error("组件加载失败");
       setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+      throw error
+} finally {
+      setLoading(false)
+}
   }, [componentLoader, Component]);
 
   return {
@@ -128,7 +123,6 @@ export const useLazyComponent = (componentLoader: () => Promise<{ default: Compo
     loading,
     error,
     loadComponent
-  };
-};
-
+  }
+}
 export default React.memo(LazyComponentWrapper);

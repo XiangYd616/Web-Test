@@ -5,8 +5,8 @@ export interface rbacOptions {
 export class rbac {
   private options: rbacOptions;
   constructor(options: rbacOptions = {}) {
-    this.options = options;
-  }
+    this.options = options
+}
   // 添加方法实现
 }
 export default rbac;

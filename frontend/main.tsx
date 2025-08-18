@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-// 全局样式
 import './styles/index.css';
+
 // 错误边界组件
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -12,12 +12,15 @@ class ErrorBoundary extends React.Component<
     super(props);
     this.state = { hasError: false };
   }
+
   static getDerivedStateFromError(): { hasError: boolean } {
     return { hasError: true };
   }
+
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('应用错误:', error, errorInfo);
+    console.error('应用错误: ', error, errorInfo);
   }
+
   render() {
     if (this.state.hasError) {
       return (
@@ -33,10 +36,12 @@ class ErrorBoundary extends React.Component<
     return this.props.children;
   }
 }
+
 // 渲染应用
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
 root.render(
   <React.StrictMode>
     <ErrorBoundary>
@@ -44,6 +49,7 @@ root.render(
     </ErrorBoundary>
   </React.StrictMode>
 );
+
 // 性能监控
 if (import.meta.env.DEV) {
   console.log('🔧 开发模式已启用');
