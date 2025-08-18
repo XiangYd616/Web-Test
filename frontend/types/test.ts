@@ -1,6 +1,6 @@
 
 
-export type TestType   = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';export interface TestConfig     {'
+export type TestType   = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';export interface TestConfig     {
   url: string;
   timeout?: number;
   retries?: number;
@@ -44,12 +44,12 @@ export interface SecurityTestConfig extends TestConfig     {
 }
 
 export interface APITestConfig extends TestConfig     {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   body?: string;
   expectedStatus?: number;
   expectedResponse?: string;
   authentication?: {
-    type: 'bearer' | 'basic' | 'api-key';
+    type: 'bearer' | 'basic' | 'api-key'
     token?: string;
     username?: string;
     password?: string;
@@ -71,7 +71,7 @@ export interface TestResult     {
   id: string;
   testType: TestType;
   url: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
   startTime: string;
   endTime?: string;
   duration?: number;
@@ -93,7 +93,7 @@ export interface TestHistory     {
   testName: string;
   testType: TestType;
   url: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
   score: number;
   grade?: string;
   duration: number; // 秒
@@ -128,7 +128,7 @@ export interface TestEngine     {
   name: string;
   version: string;
   available: boolean;
-  status: 'healthy' | 'warning' | 'error';
+  status: 'healthy' | 'warning' | 'error'
   capabilities?: string[];
   lastCheck?: string;
   error?: string;
@@ -160,7 +160,7 @@ export interface TestSchedule     {
   testType: TestType;
   config: TestConfig;
   schedule: {
-    type: 'once' | 'daily' | 'weekly' | 'monthly';
+    type: 'once' | 'daily' | 'weekly' | 'monthly'
     time: string;
     timezone: string;
     daysOfWeek?: number[];
@@ -179,7 +179,7 @@ export interface TestReport     {
   testType: TestType;
   url: string;
   generatedAt: string;
-  format: 'html' | 'pdf' | 'json';
+  format: 'html' | 'pdf' | 'json'
   filePath: string;
   fileSize: number;
   summary: {
@@ -236,7 +236,7 @@ export interface BatchTestConfig     {
 export interface BatchTestResult     {
   id: string;
   name: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'completed' | 'failed'
   totalTests: number;
   completedTests: number;
   failedTests: number;

@@ -44,7 +44,10 @@ router.get('/statistics', optionalAuth, async (req, res) => {
   try {
     const statistics = await storageService.getStorageStatistics();
 
-    res.success(statistics);
+    res.json({
+      success: true,
+      data: statistics
+    });
 
   } catch (error) {
     console.error('获取存储统计失败:', error);
@@ -81,7 +84,9 @@ router.post('/archive',
 
       const result = await storageService.archiveData(engineType, criteria);
 
-      res.success(`数据归档${engineType ? ` (${engineType)` : ''}已完成`,
+      res.json({
+        success: true,
+        message: `数据归档${engineType ? ` (${engineType})` : ''}已完成`,
         data: result
       });
 
@@ -121,26 +126,28 @@ router.post('/cleanup',
 
       // 如果是强制清理，需要额外权限验�?      if (force && !req.user.isAdmin) {
 
-        return res.status(403).json({
-          success: false,
-          error: '强制清理需要管理员权限'
-        });
-      }
+      return res.status(403).json({
+        success: false,
+        error: '强制清理需要管理员权限'
+      });
+    }
 
       const result = await storageService.cleanupData(engineType);
 
-      res.success(`数据清理${engineType ? ` (${engineType)` : ''}已完成`,
-        data: result
-      });
+    res.json({
+      success: true,
+      message: `数据清理${engineType ? ` (${engineType})` : ''}已完成`,
+      data: result
+    });
 
-    } catch (error) {
-      console.error('手动清理失败:', error);
-      res.status(500).json({
-        success: false,
-        error: '数据清理失败',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      });
-    }
+  } catch (error) {
+    console.error('手动清理失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '数据清理失败',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
   }
 );
 
@@ -184,7 +191,11 @@ router.post('/maintenance',
 
       const result = await storageService.performMaintenance(options);
 
-      res.success('存储维护已完�?);
+      res.json({
+        success: true,
+        message: '存储维护已完�?,
+        data: result
+      });
 
     } catch (error) {
       console.error('存储维护失败:', error);
@@ -214,7 +225,10 @@ router.get('/configuration', authMiddleware, async (req, res) => {
 
     const configuration = storageService.getConfiguration();
 
-    res.success(configuration);
+    res.json({
+      success: true,
+      data: configuration
+    });
 
   } catch (error) {
     console.error('获取存储配置失败:', error);
@@ -265,7 +279,11 @@ router.put('/configuration',
 
       storageService.updateConfiguration(newConfig);
 
-      res.success('存储配置已更�?);
+      res.json({
+        success: true,
+        message: '存储配置已更�?,
+        data: storageService.getConfiguration()
+      });
 
     } catch (error) {
       console.error('更新存储配置失败:', error);
@@ -300,33 +318,36 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
     }
 
     // 获取引擎策略（这里需要实现具体的策略获取逻辑�?    const policy = {
-      engineType,
+    engineType,
       storage: {
-        compress: true,
+      compress: true,
         encrypt: engineType === 'security',
-        shard: ['performance', 'stress', 'compatibility'].includes(engineType)
-      },
-      retention: {
-        hotData: 7,
+          shard: ['performance', 'stress', 'compatibility'].includes(engineType)
+    },
+    retention: {
+      hotData: 7,
         warmData: 30,
-        coldData: 90
-      },
-      archive: {
-        enabled: true,
+          coldData: 90
+    },
+    archive: {
+      enabled: true,
         schedule: 'daily'
-      }
-    };
+    }
+  };
 
-    res.success(policy);
+  res.json({
+    success: true,
+    data: policy
+  });
 
-  } catch (error) {
-    console.error('获取引擎策略失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '获取引擎策略失败',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
+} catch (error) {
+  console.error('获取引擎策略失败:', error);
+  res.status(500).json({
+    success: false,
+    error: '获取引擎策略失败',
+    details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+  });
+}
 });
 
 /**
@@ -376,7 +397,10 @@ router.put('/engines/:engineType/policy',
         storageService.setArchivePolicy(engineType, archive);
       }
 
-      res.success(null, '${engineType} 引擎存储策略已更新');
+      res.json({
+        success: true,
+        message: `${engineType} 引擎存储策略已更新`
+      });
 
     } catch (error) {
       console.error('更新引擎策略失败:', error);
@@ -415,7 +439,10 @@ router.get('/usage', optionalAuth, async (req, res) => {
       }
     };
 
-    res.success(usage);
+    res.json({
+      success: true,
+      data: usage
+    });
 
   } catch (error) {
     console.error('获取存储使用情况失败:', error);

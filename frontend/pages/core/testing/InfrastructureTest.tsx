@@ -1,5 +1,5 @@
-import { Database, Network, Server    } from 'lucide-react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler    } from '../hooks/useAsyncErrorHandler';import TestResults from '../components/TestResults';import React, { useState    } from 'react';import { useAuthCheck    } from '../../../components/auth/WithAuthCheck.tsx';import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';import { useUserStats    } from '../../../hooks/useUserStats.ts';// 基础设施测试类型'
-type InfrastructureTestType = 'database' | 'network' | 'server' | 'all';
+import { Database, Network, Server    } from 'lucide-react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler    } from '../hooks/useAsyncErrorHandler';import TestResults from '../components/TestResults';import React, { useState    } from 'react';import { useAuthCheck    } from '../../../components/auth/WithAuthCheck.tsx';import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';import { useUserStats    } from '../../../hooks/useUserStats.ts';// 基础设施测试类型
+type InfrastructureTestType = 'database' | 'network' | 'server' | 'all'
 // 数据库连接配置
 interface DatabaseConfig   {
   host: string;
@@ -7,7 +7,7 @@ interface DatabaseConfig   {
   database: string;
   username: string;
   password: string;
-  type: 'postgresql' | 'mysql' | 'mongodb' | 'redis' | 'sqlite';
+  type: 'postgresql' | 'mysql' | 'mongodb' | 'redis' | 'sqlite'
   ssl: boolean;
   timeout: number;
   maxConnections: number;
@@ -16,7 +16,7 @@ interface DatabaseConfig   {
 // 网络测试配置
 interface NetworkConfig   {
   target: string;
-  testType: 'ping' | 'traceroute' | 'bandwidth' | 'dns' | 'all';
+  testType: 'ping' | 'traceroute' | 'bandwidth' | 'dns' | 'all'
   timeout: number;
   packetCount: number;
   packetSize: number;
@@ -67,40 +67,40 @@ interface InfrastructureTestResult   {
 const InfrastructureTest: React.FC  = () => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('');'
+  const [pageTitle, setPageTitle] = useState('");"
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible') {'`
+      if (document.visibilityState === "visible') {'`"`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);'
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);'
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });'
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });'
+      setFeedback({ type: '', message: '' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);'
+      showFeedback('error', state.error.message);
     }
   }, [state.error]);
   
@@ -138,12 +138,12 @@ const InfrastructureTest: React.FC  = () => {
   
   const runTest = async (config) => {
     setIsRunning(true);
-    const result = await executeAsync(() => fetch('/api/tests/run', {'
-        method: 'POST','
-        headers: { 'Content-Type': 'application/json' },'
-        body: JSON.stringify({ testType: 'performance', config })'
+    const result = await executeAsync(() => fetch('/api/tests/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testType: 'performance', config })
       }).then(res => res.json()),
-      { context: 'TestExecution.runTest' }'
+      { context: 'TestExecution.runTest' }
     );
     
     if (result && result.success) {
@@ -158,10 +158,10 @@ const InfrastructureTest: React.FC  = () => {
     const interval = setInterval(async () => {
       const result = await executeAsync(
         () => fetch(`/api/tests/results/${executionId}`).then(res => res.json()),`
-        { context: "TestExecution.pollResult' }'`
+        { context: "TestExecution.pollResult' }'`"`
       );
       
-      if (result && result.success && result.data.status === 'completed') {'
+      if (result && result.success && result.data.status === 'completed') {
         setTestResult(result.data);
         clearInterval(interval);
       }
@@ -177,24 +177,24 @@ const InfrastructureTest: React.FC  = () => {
     requireLogin,
     LoginPromptComponent
   } = useAuthCheck({
-    feature: '基础设施测试','
-    description: '使用基础设施测试功能';
+    feature: '基础设施测试',
+    description: '使用基础设施测试功能'
   });
 
   // 用户统计
   const { recordTestCompletion } = useUserStats();
 
   const [config, setConfig] = useState<InfrastructureTestConfig>({
-    testType: 'all','
+    testType: 'all',
     database: {
       enabled: true,
       config: {
-        host: 'localhost','
+        host: 'localhost',
         port: 5432,
-        database: 'testdb','
-        username: '','
-        password: '','
-        type: 'postgresql','
+        database: 'testdb',
+        username: '',
+        password: '',
+        type: 'postgresql',
         ssl: false,
         timeout: 30000,
         maxConnections: 10,
@@ -209,8 +209,8 @@ const InfrastructureTest: React.FC  = () => {
     network: {
       enabled: true,
       config: {
-        target: 'google.com','
-        testType: 'all','
+        target: 'google.com',
+        testType: 'all',
         timeout: 30000,
         packetCount: 10,
         packetSize: 64,
@@ -224,7 +224,7 @@ const InfrastructureTest: React.FC  = () => {
     },
   });
 
-  const [testStatus, setTestStatus] = useState<'idle' | 'running' | 'completed' | 'failed'>("idle');'
+  const [testStatus, setTestStatus] = useState<'idle' | 'running' | 'completed' | 'failed'>("idle");
   const [results, setResults] = useState<InfrastructureTestResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -236,7 +236,7 @@ const InfrastructureTest: React.FC  = () => {
       return;
       }
 
-    setTestStatus('running');'
+    setTestStatus('running");"
     setError(null);
 
     try {
@@ -259,21 +259,21 @@ const InfrastructureTest: React.FC  = () => {
         } : undefined,
       };
       setResults(mockResult);
-      setTestStatus('completed');'
-      recordTestCompletion('infrastructure', true);'
+      setTestStatus('completed");"
+      recordTestCompletion('infrastructure', true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '测试失败');'
-      setTestStatus("failed');'
+      setError(err instanceof Error ? err.message : '测试失败");"
+      setTestStatus("failed");
     }
   };
 
   // 处理测试选择和重新运行
   const handleTestSelect = (test: any) => {
-    console.log('选择测试:', test);'
+    console.log('选择测试:', test);
   };
 
   const handleTestRerun = (test: any) => {
-    console.log('重新运行测试:', test);'
+    console.log('重新运行测试:', test);
   };
 
   
@@ -302,9 +302,9 @@ const InfrastructureTest: React.FC  = () => {
               <p>{state.error.message}</p>
             </div>
             <div className= 'mt-4'>
-              <button
+              <button>
                 onClick={() => window.location.reload()}
-                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
               >
                 重试
               </button>
@@ -315,10 +315,10 @@ const InfrastructureTest: React.FC  = () => {
     );
   }
 
-  return (<BaseTestPage
-      testType= 'performance';
-      title= '基础设施测试';
-      description= '全面测试数据库性能、网络连接质量和服务器基础设施';
+  return (<BaseTestPage>
+      testType= 'performance'
+      title= '基础设施测试'
+      description= '全面测试数据库性能、网络连接质量和服务器基础设施'
       icon={Server}
       isTestDisabled={!config.database.enabled && !config.network.enabled}
       onStartTest={handleStartTest}
@@ -331,15 +331,15 @@ const InfrastructureTest: React.FC  = () => {
             <h3 className= 'text-xl font-semibold text-white mb-4'>选择测试类型</h3>
             <div className= 'grid grid-cols-1 md:grid-cols-2 gap-4'>
               {/* 数据库测试 */}
-              <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.database.enabled`}
-                ? "border-blue-500 bg-blue-500/10';'`
-                : 'border-gray-600 bg-gray-800/50';
+              <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.database.enabled`}>
+                ? "border-blue-500 bg-blue-500/10";``
+                : 'border-gray-600 bg-gray-800/50'
                 }`}`
                 onClick={() => setConfig(prev => ({
                   ...prev,
                   database: { ...prev.database, enabled: !prev.database.enabled }
                 }))}>
-                <div className= "flex items-center space-x-3'>`
+                <div className= "flex items-center space-x-3'>`'"`
                   <Database className= 'w-6 h-6 text-blue-400'    />
                   <div>
                     <h4 className= 'font-semibold text-white'>数据库测试</h4>
@@ -349,15 +349,15 @@ const InfrastructureTest: React.FC  = () => {
               </div>
 
               {/* 网络测试 */}
-              <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.network.enabled`}
-                ? "border-green-500 bg-green-500/10';'`
-                : 'border-gray-600 bg-gray-800/50';
+              <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.network.enabled`}>
+                ? "border-green-500 bg-green-500/10";``
+                : 'border-gray-600 bg-gray-800/50'
                 }`}`
                 onClick={() => setConfig(prev => ({
                   ...prev,
                   network: { ...prev.network, enabled: !prev.network.enabled }
                 }))}>
-                <div className= "flex items-center space-x-3'>`
+                <div className= "flex items-center space-x-3'>`'"`
                   <Network className= 'w-6 h-6 text-green-400'    />
                   <div>
                     <h4 className= 'font-semibold text-white'>网络测试</h4>
@@ -380,7 +380,7 @@ const InfrastructureTest: React.FC  = () => {
                       <div className= 'flex justify-between'>
                         <span className= 'text-gray-300'>连接测试:</span>
                         <span className={results.database.connectionTest.success ? 'text-green-400' : 'text-red-400'}>
-                          {results.database.connectionTest.success ? '成功" : "失败'}'
+                          {results.database.connectionTest.success ? '成功" : "失败'}
                         </span>
                       </div>
                       <div className= 'flex justify-between'>

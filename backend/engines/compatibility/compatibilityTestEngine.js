@@ -375,7 +375,7 @@ class CompatibilityTestEngine {
         // 检查ES6+特性
         try {
           features.arrow_functions = typeof (() => { }) === 'function';
-          features.const_let = typeof const !== 'undefined';
+          features.const_let = (function () { try { eval('const x = 1'); return true; } catch (e) { return false; } })();
           features.template_literals = `test` === 'test';
           features.promises = typeof Promise !== 'undefined';
           features.fetch = typeof fetch !== 'undefined';
@@ -479,11 +479,11 @@ class CompatibilityTestEngine {
   async stopTest(testId) {
     const test = this.activeTests.get(testId);
     if (test && test.status === 'running') {
-      
-        test.status = 'cancelled';
+
+      test.status = 'cancelled';
       this.activeTests.set(testId, test);
       return true;
-      }
+    }
     return false;
   }
 }

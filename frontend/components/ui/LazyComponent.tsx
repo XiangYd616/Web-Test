@@ -3,7 +3,7 @@
  * 提供组件级别的懒加载功能
  */
 
-import React, { ComponentType, Suspense, lazy, useEffect, useState    } from 'react';import { LoadingSpinner    } from './LoadingSpinner';// // import ErrorBoundary from './ErrorBoundary';// 懒加载组件的配置选项'
+import React, { ComponentType, Suspense, lazy, useEffect, useState    } from 'react';import { LoadingSpinner    } from './LoadingSpinner';// // import ErrorBoundary from './ErrorBoundary';// 懒加载组件的配置选项
 interface LazyComponentOptions   {
   /** 加载延迟（毫秒） */
   delay?: number;
@@ -31,7 +31,7 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
     fallback,
     retryCount = 3,
     loadOnVisible = false,
-    preload = 'none';
+    preload = 'none'
   } = options;
 
   // 创建懒加载组件
@@ -48,22 +48,22 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
     id: componentId,
     "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
     "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
@@ -117,9 +117,9 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
     useEffect(() => {
       if (preload === "immediate') {'`
         setShouldLoad(true);
-      } else if (preload === 'idle') {'
+      } else if (preload === 'idle') {
         const timeoutId = setTimeout(() => {
-          if ("requestIdleCallback' in window) {'
+          if ("requestIdleCallback' in window) {
             requestIdleCallback(() => setShouldLoad(true));
           } else {
             setShouldLoad(true);
@@ -152,7 +152,7 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
         <div
           id={`lazy-component-${Math.random()`}
       }`}`
-          className= "min-h-[100px] flex items-center justify-center';'`
+          className= "min-h-[100px] flex items-center justify-center";`
         >
           <div className= 'text-gray-500 text-sm'>组件准备加载...</div>
         </div>
@@ -178,7 +178,7 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
             {retries < retryCount && (
               <button
                 onClick={handleRetry}
-                className= 'px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700';
+                className= 'px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
               >
                 重试 ({retries + 1}/{retryCount})
               </button>
@@ -216,7 +216,7 @@ export const LazyContainer: React.FC<LazyContainerProps> = ({
   loadOnVisible = true,
   placeholderHeight = 200,
   placeholder,
-  rootMargin = '50px';
+  rootMargin = '50px'
 }) => {
   const [isVisible, setIsVisible] = useState(!loadOnVisible);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -245,7 +245,7 @@ export const LazyContainer: React.FC<LazyContainerProps> = ({
 
   const defaultPlaceholder = (
     <div
-      className= 'flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg';
+      className= 'flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg'
       style={{ height: placeholderHeight }}
     >
       <div className= 'text-gray-500 text-sm'>内容加载中...</div>
@@ -262,12 +262,12 @@ export const LazyContainer: React.FC<LazyContainerProps> = ({
 /**
  * 图表懒加载组件示例
  */
-export const LazyChart = createLazyComponent(() => import('../charts/Chart'),'
+export const LazyChart = createLazyComponent(() => import('../charts/Chart'),
   {
     delay: 100,
     minLoadTime: 300,
     loadOnVisible: true,
-    preload: 'idle','
+    preload: 'idle',
     fallback: (
       <div className= 'h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center'>
         <LoadingSpinner size= 'lg' text= '加载图表...'    />
@@ -279,10 +279,10 @@ export const LazyChart = createLazyComponent(() => import('../charts/Chart'),'
 /**
  * 数据表格懒加载组件示例
  */
-export const LazyDataTable = createLazyComponent(() => import('../ui/DataTable'),'
+export const LazyDataTable = createLazyComponent(() => import('../ui/DataTable'),
   {
     loadOnVisible: true,
-    preload: 'hover','
+    preload: 'hover',
     fallback: (
       <div className= 'h-96 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-center'>
         <LoadingSpinner size= 'lg' text= '加载数据表格...'    />
@@ -294,9 +294,9 @@ export const LazyDataTable = createLazyComponent(() => import('../ui/DataTable')
 /**
  * 代码编辑器懒加载组件示例
  */
-export const LazyCodeEditor = createLazyComponent(() => import('../ui/CodeEditor'),'
+export const LazyCodeEditor = createLazyComponent(() => import('../ui/CodeEditor'),
   {
-    preload: 'none', // 只在需要时加载'
+    preload: 'none', // 只在需要时加载
     minLoadTime: 500,
     fallback: (
       <div className= 'h-80 bg-gray-900 rounded-lg flex items-center justify-center'>

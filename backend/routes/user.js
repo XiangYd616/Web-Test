@@ -24,8 +24,8 @@ router.get('/profile', authMiddleware, asyncHandler(async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      
-        return res.notFound('资源', '用户不存在');
+
+      return res.notFound('资源', '用户不存在');
     }
 
     const user = result.rows[0];
@@ -61,8 +61,8 @@ router.put('/profile', authMiddleware, asyncHandler(async (req, res) => {
 
   // 验证输入
   if (username && username.length < 3) {
-    
-        return res.validationError([], '用户名长度至少3位');
+
+    return res.validationError([], '用户名长度至少3位');
   }
 
   if (website && !isValidUrl(website)) {
@@ -72,8 +72,8 @@ router.put('/profile', authMiddleware, asyncHandler(async (req, res) => {
   try {
     // 检查用户名是否已被使用
     if (username) {
-      
-        const existingUser = await query(
+
+      const existingUser = await query(
         'SELECT id FROM users WHERE username = $1 AND id != $2',
         [username, req.user.id]
       );
@@ -264,8 +264,8 @@ router.delete('/account', authMiddleware, asyncHandler(async (req, res) => {
   const { password } = req.body;
 
   if (!password) {
-    
-        return res.validationError([], '需要提供密码确认');
+
+    return res.validationError([], '需要提供密码确认');
   }
 
   try {
@@ -276,16 +276,16 @@ router.delete('/account', authMiddleware, asyncHandler(async (req, res) => {
     );
 
     if (userResult.rows.length === 0) {
-      
-        return res.notFound('资源', '用户不存在');
+
+      return res.notFound('资源', '用户不存在');
     }
 
     const bcrypt = require('bcryptjs');
     const isPasswordValid = await bcrypt.compare(password, userResult.rows[0].password);
 
     if (!isPasswordValid) {
-      
-        return res.unauthorized('密码错误');
+
+      return res.unauthorized('密码错误');
     }
 
     // 软删除用户（标记为非活跃）
@@ -362,11 +362,11 @@ router.get('/stats/:userId', authMiddleware, asyncHandler(async (req, res) => {
 
   // 检查权限：只能查看自己的统计或管理员可以查看所有
   if (req.user.id !== userId && req.user.role !== 'admin') {
-    
-        return res.status(403).json({
+
+    return res.status(403).json({
       success: false,
       error: '无权访问此用户的统计数据'
-      });
+    });
   }
 
   try {
@@ -416,8 +416,9 @@ router.get('/stats/:userId', authMiddleware, asyncHandler(async (req, res) => {
     });
 
     res.success({
-        total_tests: parseInt(stats.total_tests) || 0))
-      }
+      total_tests: parseInt(stats.total_tests) || 0,
+      tests_by_type: testsByTypeObj,
+      most_used_type: mostUsedType
     });
 
   } catch (error) {

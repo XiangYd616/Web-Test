@@ -3,8 +3,8 @@
  * 提供完整的用户认证、权限管理和会话控制功能
  */
 
-import React, { createContext, ReactNode, useContext, useEffect, useState, useCallback } from 'react';
-import type { AuthContextType, User, UserRole, AuthStatus } from '../types/auth';
+import React, { createContext, ReactNode, useContext, useEffect, useState, useCallback } from 'react
+import type { AuthContextType, User, UserRole, AuthStatus } from '../types/auth
 
 // 认证相关接口
 interface LoginCredentials {

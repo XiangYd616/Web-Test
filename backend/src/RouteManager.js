@@ -252,6 +252,14 @@ class RouteManager {
         group: 'testSpecific'
       },
 
+      // 测试引擎路由 - 统一测试引擎管理
+      {
+        path: '/api/test-engine',
+        module: '../routes/testEngine.js',
+        description: '统一测试引擎API',
+        group: 'testSpecific'
+      },
+
       // 数据管理路由 - 新增
       {
         path: '/api/data',

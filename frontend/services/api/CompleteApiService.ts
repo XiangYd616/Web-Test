@@ -4,8 +4,8 @@
  * 支持请求拦截、响应处理和自动重试机制
  */
 
-import { apiClient } from '../EnhancedApiClient';
-import type { TestConfig, TestResult, TestType } from '../testing/CompleteTestEngine';
+import { apiClient } from '../EnhancedApiClient
+import type { TestConfig, TestResult, TestType } from '../testing/CompleteTestEngine
 
 // API响应基础接口
 export interface ApiResponse<T = any> {
@@ -37,7 +37,7 @@ export interface PaginationParams {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: 'asc' | 'desc'
   search?: string;
   filters?: Record<string, any>;
 }
@@ -57,7 +57,7 @@ export interface User {
     language?: string;
   };
   preferences: {
-    theme: 'light' | 'dark' | 'auto';
+    theme: 'light' | 'dark' | 'auto'
     notifications: boolean;
     emailUpdates: boolean;
   };
@@ -84,14 +84,14 @@ export interface Report {
   id: string;
   title: string;
   description?: string;
-  type: 'single' | 'comparison' | 'trend';
+  type: 'single' | 'comparison' | 'trend'
   testIds: string[];
   config: {
     includeCharts: boolean;
     includeRecommendations: boolean;
-    format: 'pdf' | 'html' | 'json';
+    format: 'pdf' | 'html' | 'json'
   };
-  status: 'generating' | 'completed' | 'failed';
+  status: 'generating' | 'completed' | 'failed'
   downloadUrl?: string;
   createdAt: string;
   userId: string;
@@ -163,7 +163,7 @@ export class CompleteApiService {
 
   // 用户相关API
   async getCurrentUser(): Promise<ApiResponse<User>> {
-    const cacheKey = 'current-user';
+    const cacheKey = 'current-user'
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
@@ -243,8 +243,8 @@ export class CompleteApiService {
     testIds: string[];
     title: string;
     description?: string;
-    type: 'single' | 'comparison' | 'trend';
-    format: 'pdf' | 'html' | 'json';
+    type: 'single' | 'comparison' | 'trend'
+    format: 'pdf' | 'html' | 'json'
     includeCharts?: boolean;
     includeRecommendations?: boolean;
   }): Promise<ApiResponse<{ reportId: string }>> {
@@ -290,7 +290,7 @@ export class CompleteApiService {
 
   // 系统统计API
   async getSystemStats(): Promise<ApiResponse<SystemStats>> {
-    const cacheKey = 'system-stats';
+    const cacheKey = 'system-stats'
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
@@ -307,7 +307,7 @@ export class CompleteApiService {
     totalTime: number;
     recentActivity: any[];
   }>> {
-    const url = userId ? `/user/stats/${userId}` : '/user/stats';
+    const url = userId ? `/user/stats/${userId}` : '/user/stats'
     const response = await apiClient.get(url);
     return this.handleResponse(response);
   }
@@ -360,7 +360,7 @@ export class CompleteApiService {
 
   // 健康检查API
   async healthCheck(): Promise<ApiResponse<{
-    status: 'healthy' | 'degraded' | 'unhealthy';
+    status: 'healthy' | 'degraded' | 'unhealthy'
     services: Record<string, { status: string; responseTime: number }>;
     uptime: number;
     version: string;
@@ -489,7 +489,7 @@ export class CompleteApiService {
 
   // 批量请求
   async batch<T>(requests: Array<{
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE'
     url: string;
     data?: any;
   }>): Promise<Array<ApiResponse<T> | Error>> {

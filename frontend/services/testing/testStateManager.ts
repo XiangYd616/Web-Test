@@ -29,8 +29,8 @@ export interface TestConfig     {
   users: number;
   duration: number;
   rampUp: number;
-  testType: 'gradual' | 'spike' | 'stress' | 'constant' | 'load' | 'volume';
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  testType: 'gradual' | 'spike' | 'stress' | 'constant' | 'load' | 'volume'
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   timeout: number;
   thinkTime: number;
   // 扩展属性以兼容现有代码
@@ -131,7 +131,7 @@ export class TestStateManager {
   private dataPoints: TestDataPoint[] = [];
   private error: Error | null = null;
   private progress: number = 0;
-  private progressMessage: string = ';
+  private progressMessage: string = 
   private startTime: number | null = null;
   private endTime: number | null = null;
 
@@ -338,7 +338,7 @@ export class TestStateManager {
     this.dataPoints = [];
     this.error = null;
     this.progress = 0;
-    this.progressMessage = ';
+    this.progressMessage = 
     this.startTime = null;
     this.endTime = null;
 
@@ -452,8 +452,7 @@ export class TestStateManager {
       try {
         listener(event);
       } catch (err) {
-        console.error("Error in state change listener: ", err");
-      "}
+        console.error("Error in state change listener: ", err");}
     });
   }
 

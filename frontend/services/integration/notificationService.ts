@@ -1,6 +1,6 @@
 // 通知服务
 export class NotificationService {
-  async sendNotification(message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info'): Promise<void> {'
+  async sendNotification(message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info'): Promise<void> {
     console.log(`[${type.toUpperCase()}] ${message}`);`
   }
 

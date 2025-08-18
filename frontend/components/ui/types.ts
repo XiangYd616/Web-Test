@@ -2,7 +2,7 @@
  * UI组件类型定义
  */
 
-import { ReactNode    } from 'react';// 基础组件属性'
+import { ReactNode    } from 'react';// 基础组件属性
 export interface BaseComponentProps     {
   className?: string;
   children?: ReactNode;
@@ -11,17 +11,17 @@ export interface BaseComponentProps     {
 
 // 按钮属性
 export interface ButtonProps extends BaseComponentProps     {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+  size?: 'sm' | 'md' | 'lg'
   disabled?: boolean;
   loading?: boolean;
   onClick?: () => void;
-  type?: 'button' | 'submit' | 'reset';
+  type?: 'button' | 'submit' | 'reset'
 }
 
 // 输入框属性
 export interface InputProps extends BaseComponentProps     {
-  type?: 'text' | 'email' | 'password' | 'number' | 'url';
+  type?: 'text' | 'email' | 'password' | 'number' | 'url'
   placeholder?: string;
   value?: string;
   onChange?: (value: string) => void;
@@ -68,8 +68,8 @@ export interface CheckboxProps extends BaseComponentProps     {
 
 // 卡片属性
 export interface CardProps extends BaseComponentProps     {
-  variant?: 'default' | 'outlined' | 'elevated';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'outlined' | 'elevated'
+  padding?: 'none' | 'sm' | 'md' | 'lg'
 }
 
 // 模态框属性
@@ -77,7 +77,7 @@ export interface ModalProps extends BaseComponentProps     {
   open: boolean;
   onClose: () => void;
   title?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   closable?: boolean;
 }
 
@@ -88,7 +88,7 @@ export interface TableColumn     {
   dataIndex?: string;
   render?: (value: any, record: any, index: number) => ReactNode;
   width?: number | string;
-  align?: 'left' | 'center' | 'right';
+  align?: 'left' | 'center' | 'right'
   sortable?: boolean;
 }
 
@@ -106,7 +106,7 @@ export interface TablePagination     {
 export interface TableRowSelection     {
   selectedRowKeys: string[];
   onChange: (selectedRowKeys: string[], selectedRows: any[]) => void;
-  type?: 'checkbox' | 'radio';
+  type?: 'checkbox' | 'radio'
 }
 
 // 表格属性
@@ -117,13 +117,13 @@ export interface TableProps extends BaseComponentProps     {
   pagination?: TablePagination | false;
   rowSelection?: TableRowSelection;
   rowKey?: string | ((record: any) => string);
-  size?: 'small' | 'middle' | 'large';
+  size?: 'small' | 'middle' | 'large'
 }
 
 // 徽章属性
 export interface BadgeProps extends BaseComponentProps     {
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger'
+  size?: 'sm' | 'md' | 'lg'
   dot?: boolean;
   count?: number;
   showZero?: boolean;
@@ -132,32 +132,32 @@ export interface BadgeProps extends BaseComponentProps     {
 // 进度条属性
 export interface ProgressProps extends BaseComponentProps     {
   percent: number;
-  status?: 'normal' | 'active' | 'success' | 'exception';
+  status?: 'normal' | 'active' | 'success' | 'exception'
   showInfo?: boolean;
-  size?: 'small' | 'default' | 'large';
+  size?: 'small' | 'default' | 'large'
   strokeColor?: string;
 }
 
 // 状态指示器属性
 export interface StatusIndicatorProps extends BaseComponentProps     {
-  status: 'success' | 'warning' | 'error' | 'info' | 'loading';
+  status: 'success' | 'warning' | 'error' | 'info' | 'loading'
   text?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg'
 }
 
 // 图表属性
 export interface ChartProps extends BaseComponentProps     {
   data: any[];
-  type?: 'line' | 'bar' | 'pie' | 'area';
+  type?: 'line' | 'bar' | 'pie' | 'area'
   width?: number;
   height?: number;
   loading?: boolean;
 }
 
 // 通用类型
-export type Size   = 'sm' | 'md' | 'lg';export type Variant   = 'primary' | 'secondary' | 'success' | 'warning' | 'danger';export type Status   = 'success' | 'warning' | 'error' | 'info' | 'loading';export type Position   = 'top' | 'bottom' | 'left' | 'right';export type Alignment   = 'left' | 'center' | 'right';export type ThemeMode   = 'light' | 'dark' | 'auto';// 事件处理器类型'
+export type Size   = 'sm' | 'md' | 'lg';export type Variant   = 'primary' | 'secondary' | 'success' | 'warning' | 'danger';export type Status   = 'success' | 'warning' | 'error' | 'info' | 'loading';export type Position   = 'top' | 'bottom' | 'left' | 'right';export type Alignment   = 'left' | 'center' | 'right';export type ThemeMode   = 'light' | 'dark' | 'auto';// 事件处理器类型
 export type ClickHandler   = (event: React.MouseEvent) => void;export type ChangeHandler   = (value: any) => void;export type FocusHandler   = (event: React.FocusEvent) => void;export type BlurHandler   = (event: React.FocusEvent) => void;export type KeyboardHandler   = (event: React.KeyboardEvent) => void;export type EventHandler   = (event: React.SyntheticEvent) => void;// 组件状态类型
-export type ComponentState   = 'idle' | 'loading' | 'success' | 'error';// 响应式值类型'
+export type ComponentState   = 'idle' | 'loading' | 'success' | 'error';// 响应式值类型
 export type ResponsiveValue<T>  = T | { xs?: T;sm?: T; md?: T; lg?: T; xl?: T };
 
 // 表单组件属性
@@ -179,7 +179,7 @@ export interface InteractiveComponentProps extends BaseComponentProps     {
 }
 
 // 加载相关类型
-export type LoadingType   = 'spinner' | 'dots' | 'pulse' | 'skeleton';export type LoadingSize   = 'xs' | 'sm' | 'md' | 'lg' | 'xl';export interface LoadingProps extends BaseComponentProps     {'
+export type LoadingType   = 'spinner' | 'dots' | 'pulse' | 'skeleton';export type LoadingSize   = 'xs' | 'sm' | 'md' | 'lg' | 'xl';export interface LoadingProps extends BaseComponentProps     {
   type?: LoadingType;
   size?: LoadingSize;
   text?: string;

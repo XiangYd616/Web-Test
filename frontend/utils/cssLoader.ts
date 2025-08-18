@@ -20,8 +20,8 @@ export const loadCSS = (href: string, id?: string): Promise<void>  => {
       }
 
     // 创建link元素
-    const link = document.createElement("link');'`
-    link.rel = 'stylesheet';
+    const link = document.createElement("link");`
+    link.rel = 'stylesheet'
     link.href = href;
     if (id) {
       link.id = id;
@@ -57,14 +57,14 @@ export const preloadCSS = (href: string): void  => {
       }
 
   // 创建preload link元素
-  const link = document.createElement("link');'`
-  link.rel = 'preload';
-  link.as = 'style';
+  const link = document.createElement("link");`
+  link.rel = 'preload'
+  link.as = 'style'
   link.href = href;
 
   // 预加载完成后转换为stylesheet
   link.onload = () => {
-    link.rel = 'stylesheet';
+    link.rel = 'stylesheet'
     loadedCSS.add(href);
   };
 

@@ -3,7 +3,7 @@
  * 提供组件的可视化测试和调试功能
  */
 
-import React, { useState    } from 'react';export interface ComponentTestProps     {'
+import React, { useState    } from 'react';export interface ComponentTestProps     {
   component: React.ComponentType<any>;
   props?: Record<string, any>;
   variants?: Record<string, Record<string, any>>;
@@ -14,12 +14,12 @@ export const ComponentTester: React.FC<ComponentTestProps> = ({
   component: Component,
   props = {},
   variants = {},
-  title = 'Component Test';
+  title = 'Component Test'
 }) => {
-  const [selectedVariant, setSelectedVariant] = useState('default');'
+  const [selectedVariant, setSelectedVariant] = useState('default");
   const [customProps, setCustomProps] = useState(props);
 
-  const currentProps = selectedVariant === 'default';
+  const currentProps = selectedVariant === 'default'
     ? customProps 
     : { ...customProps, ...variants[selectedVariant] };
 
@@ -33,7 +33,7 @@ export const ComponentTester: React.FC<ComponentTestProps> = ({
           <select
             value={selectedVariant}
             onChange={(e) => setSelectedVariant(e.target.value)}
-            className= 'border rounded px-3 py-1';
+            className= 'border rounded px-3 py-1'
           >
             <option value= 'default'>默认</option>
             {Object.keys(variants).map(variant => (
@@ -60,7 +60,7 @@ export const ComponentTester: React.FC<ComponentTestProps> = ({
               // 忽略无效JSON
             }
           }}
-          className= 'w-full h-32 p-2 border rounded font-mono text-sm';
+          className= 'w-full h-32 p-2 border rounded font-mono text-sm'
         />
       </div>
 

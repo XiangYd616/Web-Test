@@ -9,7 +9,7 @@ export interface PageTestConfig     {
   expectedElements: string[];
   apiEndpoints: string[];
   userInteractions: Array<{
-    type: 'click' | 'input' | 'submit';
+    type: 'click' | 'input' | 'submit'
     selector: string;
     value?: string;
   }>;
@@ -101,7 +101,7 @@ export class PageTestingTool {
     try {
       const element = document.querySelector(interaction.selector);
       if (!element) {
-        throw new Error("Element not found');'`
+        throw new Error("Element not found");`
       }
 
       switch (interaction.type) {
@@ -109,9 +109,9 @@ export class PageTestingTool {
           (element as HTMLElement).click();
           break;
         case 'input': ''
-          (element as HTMLInputElement).value = interaction.value || '';
+          (element as HTMLInputElement).value = interaction.value || ''
           break;
-        case "submit': ''
+        case "submit': '
           (element as HTMLFormElement).submit();
           break;
       }

@@ -6,7 +6,7 @@
 
 import type { ApiResponse,
   Timestamp
- } from './common';import type { TestStatus, TestType  } from './enums';// 定义缺失的类型'
+ } from './common';import type { TestStatus, TestType  } from './enums';// 定义缺失的类型
 export type UUID    = string;export interface PaginationInfo        {
   page: number;
   limit: number;
@@ -19,7 +19,7 @@ export type UUID    = string;export interface PaginationInfo        {
 // ==================== 请求配置类型 ====================
 
 export interface RequestConfig        {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
   headers?: Record<string, string>;
   body?: string | FormData | URLSearchParams;
   timeout?: number;
@@ -69,7 +69,7 @@ export interface QueryParams        {
   page?: number;
   limit?: number;
   sort?: string;
-  order?: 'asc' | 'desc';
+  order?: 'asc' | 'desc'
   search?: string;
   filters?: Record<string, any>;
 }
@@ -97,7 +97,7 @@ export interface TestStartRequest        {
   url: string;
   testType: TestType;
   config?: Record<string, any>;
-  priority?: 'low' | 'medium' | 'high' | 'critical';
+  priority?: 'low' | 'medium' | 'high' | 'critical'
   tags?: string[];
   metadata?: Record<string, any>;
 }
@@ -129,7 +129,7 @@ export interface TestStatusResponse extends ApiResponse<       {
 
 export interface TestResultRequest        {
   testId: UUID;
-  format?: 'json' | 'summary' | 'detailed';
+  format?: 'json' | 'summary' | 'detailed'
   includeRawData?: boolean;
 }
 
@@ -197,7 +197,7 @@ export interface TestHistoryRecord        {
 export interface TestHistoryResponse extends PaginatedResponse<TestHistoryRecord>      { }
 
 export interface TestHistoryStatsRequest        {
-  timeRange?: '7d' | '30d' | '90d' | '1y';
+  timeRange?: '7d' | '30d' | '90d' | '1y'
   testType?: TestType;
   userId?: UUID;
 }
@@ -264,7 +264,7 @@ export interface ChangePasswordResponse extends ApiResponse<       {
 // ==================== 系统API类型 ====================
 
 export interface SystemStatsRequest        {
-  timeRange?: '1h' | '24h' | '7d' | '30d';
+  timeRange?: '1h' | '24h' | '7d' | '30d'
   includeDetails?: boolean;
 }
 
@@ -282,7 +282,7 @@ export interface SystemStatsResponse extends ApiResponse<       {
     errorRate: number;
   };
   services: Record<string, {
-    status: 'healthy' | 'warning' | 'critical';
+    status: 'healthy' | 'warning' | 'critical'
     responseTime: number;
     lastCheck: Timestamp;
   }>;
@@ -294,7 +294,7 @@ export interface SystemHealthRequest        {
 }
 
 export interface SystemHealthResponse extends ApiResponse<       {
-  status: 'healthy' | 'warning' | 'critical';
+  status: 'healthy' | 'warning' | 'critical'
   uptime: number;
   services?: Record<string, any>;
   resources?: Record<string, any>;
@@ -316,7 +316,7 @@ export interface MonitoringSiteResponse extends ApiResponse<       {
   id: UUID;
   name: string;
   url: string;
-  status: 'online' | 'offline' | 'warning' | 'unknown';
+  status: 'online' | 'offline' | 'warning' | 'unknown'
   checkInterval: number;
   alertsEnabled: boolean;
   createdAt: Timestamp;
@@ -327,14 +327,14 @@ export interface MonitoringSiteResponse extends ApiResponse<       {
 
 export interface MonitoringDataQuery extends QueryParams        {
   siteId: UUID;
-  timeRange?: '1h' | '24h' | '7d' | '30d';
+  timeRange?: '1h' | '24h' | '7d' | '30d'
   metrics?: string[];
 }
 
 export interface MonitoringDataResponse extends PaginatedResponse<       {
   timestamp: Timestamp;
   siteId: UUID;
-  status: 'online' | 'offline' | 'warning';
+  status: 'online' | 'offline' | 'warning'
   responseTime: number;
   statusCode: number;
   errorMessage?: string;
@@ -344,8 +344,8 @@ export interface MonitoringDataResponse extends PaginatedResponse<       {
 // ==================== 导出API类型 ====================
 
 export interface ExportRequest        {
-  type: 'test-results' | 'test-history' | 'monitoring-data' | 'system-logs';
-  format: 'json' | 'csv' | 'pdf' | 'xlsx';
+  type: 'test-results' | 'test-history' | 'monitoring-data' | 'system-logs'
+  format: 'json' | 'csv' | 'pdf' | 'xlsx'
   filters?: Record<string, any>;
   dateRange?: {
     start: string;
@@ -356,7 +356,7 @@ export interface ExportRequest        {
 
 export interface ExportResponse extends ApiResponse<       {
   exportId: UUID;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed'
   downloadUrl?: string;
   expiresAt?: Timestamp;
   fileSize?: number;
@@ -369,7 +369,7 @@ export interface ExportStatusRequest        {
 
 export interface ExportStatusResponse extends ApiResponse<       {
   exportId: UUID;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed'
   progress: number;
   downloadUrl?: string;
   expiresAt?: Timestamp;
@@ -394,26 +394,26 @@ export interface TestProgressMessage extends WebSocketMessage<       {
   metrics?: Record<string, any>;
   error?: string;
 }> {
-  type: 'test-progress';
+  type: 'test-progress'
 }
 
 export interface SystemStatusMessage extends WebSocketMessage<       {
-  status: 'healthy' | 'warning' | 'critical';
+  status: 'healthy' | 'warning' | 'critical'
   services: Record<string, any>;
   metrics: Record<string, any>;
 }> {
-  type: 'system-status';
+  type: 'system-status'
 }
 
 export interface MonitoringAlertMessage extends WebSocketMessage<       {
   siteId: UUID;
   siteName: string;
-  alertType: 'down' | 'slow' | 'error' | 'recovered';
+  alertType: 'down' | 'slow' | 'error' | 'recovered'
   message: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'low' | 'medium' | 'high' | 'critical'
   timestamp: Timestamp;
 }> {
-  type: 'monitoring-alert';
+  type: 'monitoring-alert'
 }
 
 // ==================== 批量操作类型 ====================
@@ -421,7 +421,7 @@ export interface MonitoringAlertMessage extends WebSocketMessage<       {
 export interface BatchRequest<T = any>        {
   operations: Array<{
     id: UUID;
-    operation: 'create' | 'update' | 'delete';
+    operation: 'create' | 'update' | 'delete'
     data?: T;
   }>;
   options?: {
@@ -446,7 +446,7 @@ export interface BatchResponse<T = any> extends ApiResponse<       {
 
 export interface FileUploadRequest        {
   file: File;
-  type: 'avatar' | 'test-data' | 'import' | 'backup';
+  type: 'avatar' | 'test-data' | 'import' | 'backup'
   metadata?: Record<string, any>;
 }
 
@@ -463,7 +463,7 @@ export interface FileUploadResponse extends ApiResponse<       {
 
 export interface SearchRequest extends QueryParams        {
   query: string;
-  type?: 'tests' | 'users' | 'sites' | 'all';
+  type?: 'tests' | 'users' | 'sites' | 'all'
   filters?: Record<string, any>;
   highlight?: boolean;
 }
@@ -480,7 +480,7 @@ export interface SearchResponse extends PaginatedResponse<       {
 }> { }
 
 // 重新导出 ApiResponse 以解决导入问题
-// export type { ApiResponse } from './common'; // 已修复'
+// export type { ApiResponse } from './common'; // 已修复
 // 成功响应类型
 export interface ApiSuccessResponse<T  = any> extends ApiResponse<T>        {
   success: true;data: T;

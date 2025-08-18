@@ -3,24 +3,24 @@
  * 展示如何在其他测试页面中集成测试历史标签页
  */
 
-import React, { useState    } from 'react';import TestPageWithHistory from '../components/testing/TestPageWithHistory';import TestPageHistory from '../components/ui/TestPageHistory.tsx';const SecurityTestWithHistory: React.FC  = () => {'
+import React, { useState    } from 'react';import TestPageWithHistory from '../components/testing/TestPageWithHistory';import TestPageHistory from '../components/ui/TestPageHistory.tsx';const SecurityTestWithHistory: React.FC  = () => {
   // 安全测试的状态
-  const [testUrl, setTestUrl] = useState('');'
-  const [testName, setTestName] = useState("');'
+  const [testUrl, setTestUrl] = useState('");"
+  const [testName, setTestName] = useState("");
   const [isTestRunning, setIsTestRunning] = useState(false);
   const [testResults, setTestResults] = useState<any>(null);
 
   // 开始安全测试
   const handleStartTest = async () => {
     if (!testUrl.trim()) {
-      alert('请输入测试URL');'
+      alert('请输入测试URL");"
       return;
     }
 
     setIsTestRunning(true);
     try {
       // 这里是安全测试的逻辑
-      console.log("开始安全测试:', { testUrl, testName });'
+      console.log("开始安全测试:', { testUrl, testName });"
       // 模拟测试过程
       await new Promise(resolve => setTimeout(resolve, 3000));
       
@@ -28,11 +28,11 @@ import React, { useState    } from 'react';import TestPageWithHistory from '../c
       setTestResults({
         overallScore: 85,
         vulnerabilities: 3,
-        securityGrade: 'B+','
+        securityGrade: 'B+',
         // ... 其他安全测试结果
       });
     } catch (error) {
-      console.error("安全测试失败:', error);'
+      console.error("安全测试失败:', error);"
     } finally {
       setIsTestRunning(false);
     }
@@ -40,20 +40,20 @@ import React, { useState    } from 'react';import TestPageWithHistory from '../c
 
   // 处理测试记录选择
   const handleTestSelect = (test: any) => {
-    console.log("选择的测试记录:', test);'
+    console.log("选择的测试记录:', test);"
     // 可以在这里处理测试记录的选择，比如显示详情
   };
 
   // 处理重新运行测试
   const handleTestRerun = (test: any) => {
-    console.log("重新运行测试:', test);'
+    console.log("重新运行测试:', test);"
     // 预填测试配置
     setTestUrl(test.url);
     setTestName(`${test.testName} - 重新运行`);`
   };
 
   // 安全测试内容
-  const testContent = (<div className= "space-y-6'>`
+  const testContent = (<div className= "space-y-6'>`'"`
       {/* URL 输入区域 */}
       <div className= 'bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-6'>
         <h3 className= 'text-lg font-semibold text-white mb-4 flex items-center gap-2'>
@@ -65,12 +65,12 @@ import React, { useState    } from 'react';import TestPageWithHistory from '../c
             <label className= 'block text-sm font-medium text-gray-300 mb-2'>
               测试名称
             </label>
-            <input
-              type= 'text';
+            <input>
+              type= 'text'
               value={testName}
               onChange={(e) => setTestName(e.target.value)}
-              placeholder= '输入测试名称...';
-              className= 'w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50';
+              placeholder= '输入测试名称...'
+              className= 'w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50'
             />
           </div>
 
@@ -78,19 +78,19 @@ import React, { useState    } from 'react';import TestPageWithHistory from '../c
             <label className= 'block text-sm font-medium text-gray-300 mb-2'>
               测试URL
             </label>
-            <input
-              type= 'url';
+            <input>
+              type= 'url'
               value={testUrl}
               onChange={(e) => setTestUrl(e.target.value)}
-              placeholder= 'https://example.com';
-              className= 'w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50';
+              placeholder= 'https://example.com'
+              className= 'w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50'
             />
           </div>
 
-          <button
+          <button>
             onClick={handleStartTest}
             disabled={isTestRunning || !testUrl.trim()}
-            className= 'w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2';
+            className= 'w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2'
           >
             {isTestRunning ? (
               <>
@@ -196,20 +196,20 @@ import React, { useState    } from 'react';import TestPageWithHistory from '../c
 
   // 历史记录内容
   const historyContent = (
-    <TestPageHistory testType= 'security';
+    <TestPageHistory testType= 'security'>
       onTestSelect={handleTestSelect}
       onTestRerun={handleTestRerun}
        />
   );
 
-  return (<TestPageWithHistory
-      testType= 'security';
-      testName= '安全测试';
-      testIcon= '🛡️';
+  return (<TestPageWithHistory>
+      testType= 'security'
+      testName= '安全测试'
+      testIcon= '🛡️'
       testContent={testContent}
       historyContent={historyContent}
       onTabChange={(tab) => {
-        console.log('切换到标签页:', tab);'
+        console.log('切换到标签页:', tab);
       }}
     />
   );

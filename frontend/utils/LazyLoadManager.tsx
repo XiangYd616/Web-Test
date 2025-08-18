@@ -3,7 +3,7 @@
  * 提供组件级别的懒加载和代码分割功能
  */
 
-import React, { ComponentType, LazyExoticComponent, ReactNode, Suspense    } from 'react';import ErrorBoundary from '../components/system/ErrorBoundary';import { enhancedConfigManager    } from '../config/ConfigManager';// // import { performanceMonitor   } from './performanceMonitor';/**'
+import React, { ComponentType, LazyExoticComponent, ReactNode, Suspense    } from 'react';import ErrorBoundary from '../components/system/ErrorBoundary';import { enhancedConfigManager    } from '../config/ConfigManager';// // import { performanceMonitor   } from './performanceMonitor';/**
  * 懒加载配置
  */
 interface LazyLoadConfig   {
@@ -28,8 +28,8 @@ interface LoadingState   {
  * 懒加载组件包装器
  */
 interface LazyComponentWrapper<P =  {}> {
-  Component: LazyExoticComponent<ComponentType<P>>;
-  preload: () => Promise<void>;
+  Component: LazyExoticComponent<ComponentType<P>>
+  preload: () => Promise<void>
   isLoaded: () => boolean;
   getLoadingState: () => LoadingState;
 }
@@ -93,7 +93,7 @@ export class LazyLoadManager {
 
         // 记录加载完成
         const duration = performanceMonitor.endMeasure(`lazy-load-${componentName}`);`
-        performanceMonitor.recordMetric(`lazy-load-success-${componentName}`, duration, "ms');'`
+        performanceMonitor.recordMetric(`lazy-load-success-${componentName}`, duration, "ms");`
 
         // 标记为已加载
         this.loadedComponents.set(componentName, true);
@@ -107,7 +107,7 @@ export class LazyLoadManager {
         loadingState.retryCount++;
 
         // 记录加载失败
-        performanceMonitor.recordMetric(`lazy-load-error-${componentName}`, 1, "count');'`
+        performanceMonitor.recordMetric(`lazy-load-error-${componentName}`, 1, "count");`
 
         // 如果还有重试次数，则重试
         if (loadingState.retryCount < retries) {
@@ -125,7 +125,7 @@ export class LazyLoadManager {
 
     // 预加载函数
     const preloadFn = async (): Promise<void>  => {
-      const componentName = chunkName || "unknown';'`
+      const componentName = chunkName || "unknown";`
       if (this.loadedComponents.get(componentName)) {
         return; // 已经加载过了
       }
@@ -135,7 +135,7 @@ export class LazyLoadManager {
       }
 
       const loadingPromise = importWithRetry().catch(error => {
-        console.error('Preload failed: ', error);'
+        console.error('Preload failed: ', error);
         this.loadingComponents.delete(componentName);
         throw error;
       });
@@ -153,7 +153,7 @@ export class LazyLoadManager {
 
     // 检查是否已加载
     const isLoadedFn = (): boolean  => {
-      return this.loadedComponents.get(chunkName || 'unknown') || false;'
+      return this.loadedComponents.get(chunkName || 'unknown') || false;
     };
 
     // 获取加载状态
@@ -176,7 +176,7 @@ export class LazyLoadManager {
       if (errorBoundary) {
         
         return (
-          <ErrorBoundary level= 'component'>
+          <ErrorBoundary level='component'>
             {content
       }
           </ErrorBoundary>
@@ -203,7 +203,7 @@ export class LazyLoadManager {
     }
 
     // 如果启用了懒加载，开始预加载
-    if (enhancedConfigManager.get('features.lazyLoading') && !this.isPreloading) {'
+    if (enhancedConfigManager.get('features.lazyLoading') && !this.isPreloading) {
       this.startPreloading();
     }
   }
@@ -223,14 +223,14 @@ export class LazyLoadManager {
       // 检查网络状态
       const connection = (navigator as any).connection;
       const isSlowConnection = connection && (
-        connection.effectiveType === 'slow-2g' ||'
-        connection.effectiveType === '2g' ||'
+        connection.effectiveType ==='slow-2g' ||
+        connection.effectiveType ==='2g' ||
         connection.saveData
       );
 
       if (isSlowConnection) {
         
-        console.log('Slow connection detected, skipping preload');'
+        console.log('Slow connection detected, skipping preload");
         return;
       }
 
@@ -304,11 +304,11 @@ export class LazyLoadManager {
  * 默认加载组件
  */
 const DefaultLoadingComponent: React.FC  = () => (
-  <div className= "lazy-loading-container'>`
-    <div className= 'lazy-loading-spinner'>
-      <div className= 'spinner'></div>
+  <div className="lazy-loading-container'>`
+    <div className='lazy-loading-spinner'>
+      <div className='spinner'></div>
     </div>
-    <p className= 'lazy-loading-text'>加载中...</p>
+    <p className='lazy-loading-text'>加载中...</p>
 
     <style jsx>{``
       .lazy-loading-container {
@@ -352,11 +352,11 @@ const DefaultLoadingComponent: React.FC  = () => (
  */
 export const SkeletonLoadingComponent: React.FC<{ lines?: number; height?: string }> = ({
   lines = 3,
-  height = "200px';'`
+  height ="200px";`
 }) => (
-  <div className= 'skeleton-container' style={{ minHeight: height }}>
+  <div className='skeleton-container' style={{ minHeight: height }}>
     {Array.from({ length: lines }, (_, index) => (
-      <div key={index} className= 'skeleton-line' />
+      <div key={index} className='skeleton-line' />
     ))}
 
     <style jsx>{``
@@ -411,7 +411,7 @@ export function createLazyRoute<P = {}>(importFn: () => Promise<{ default: Compo
     chunkName,
     preload: true,
     errorBoundary: true,
-    fallback: <SkeletonLoadingComponent height= "100vh' lines={5}    />`
+    fallback: <SkeletonLoadingComponent height="100vh' lines={5}    />`
   });
 }
 

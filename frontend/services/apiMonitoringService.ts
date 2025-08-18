@@ -45,7 +45,7 @@
     /**
      * 记录API调用
      */
-    logApiCall(log: Omit<ApiCallLog, 'id' | 'timestamp'>): void {'
+    logApiCall(log: Omit<ApiCallLog, 'id' | 'timestamp'>): void {
     const apiLog: ApiCallLog  = {
       ...log,
       id: this.generateId(),
@@ -73,7 +73,7 @@
       this.metrics.failedRequests++;
 
     // 记录错误类型
-    const errorType = log.error || 'Unknown';
+    const errorType = log.error || 'Unknown'
     this.metrics.errorsByType[errorType] = (this.metrics.errorsByType[errorType] || 0) + 1;
     }
 
@@ -86,7 +86,7 @@
     this.metrics.successRate = (this.metrics.successfulRequests / this.metrics.totalRequests) * 100;
 
     // 更新端点指标
-    const endpoint = `${log.method} ${log.url}`;`
+    const endpoint = `${log.method} ${log.url}`;
     if (!this.metrics.endpointMetrics[endpoint]) {
       this.metrics.endpointMetrics[endpoint] = {
         requests: 0,
@@ -171,7 +171,7 @@
   }
 
     private generateId(): string {
-    return `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;`
+    return `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }
 

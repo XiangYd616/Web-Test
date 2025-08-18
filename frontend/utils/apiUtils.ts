@@ -3,7 +3,7 @@
  * 提供API响应格式化、错误处理和查询字符串构建等功能
  */
 
-import type { ApiResponse  } from '../types/common';/**'
+import type { ApiResponse  } from '../types/common';/**
  * 格式化API响应
  * @param data 响应数据
  * @param error 错误信息
@@ -20,13 +20,13 @@ export function formatApiResponse<T>(
         return {
             success: false,
             error: {
-                code: 'UNKNOWN_ERROR','
+                code: 'UNKNOWN_ERROR',
                 message: error.message,
       },
             meta: {
                 timestamp,
                 requestId: generateRequestId(),
-                version: '1.0.0','
+                version: '1.0.0',
             },
         };
     }
@@ -37,7 +37,7 @@ export function formatApiResponse<T>(
         meta: {
             timestamp,
             requestId: generateRequestId(),
-            version: '1.0.0','
+            version: '1.0.0',
         },
     };
 }
@@ -49,10 +49,10 @@ export function formatApiResponse<T>(
  */
 export function handleApiError(error: any) {
     // 网络错误
-    if (error.code === 'NETWORK_ERROR' || !error.response) {'
+    if (error.code === 'NETWORK_ERROR' || !error.response) {
         return {
-            type: 'network','
-            message: '网络连接失败，请检查网络设置','
+            type: 'network',
+            message: '网络连接失败，请检查网络设置',
             canRetry: true,
       };
     }
@@ -63,8 +63,8 @@ export function handleApiError(error: any) {
     if (status === 401) {
         
         return {
-            type: 'auth','
-            message: '登录已过期，请重新登录','
+            type: 'auth',
+            message: '登录已过期，请重新登录',
             canRetry: false,
       };
     }
@@ -73,8 +73,8 @@ export function handleApiError(error: any) {
     if (status === 403) {
         
         return {
-            type: 'permission','
-            message: '没有权限执行此操作','
+            type: 'permission',
+            message: '没有权限执行此操作',
             canRetry: false,
       };
     }
@@ -83,8 +83,8 @@ export function handleApiError(error: any) {
     if (status === 404) {
         
         return {
-            type: 'notFound','
-            message: '请求的资源不存在','
+            type: 'notFound',
+            message: '请求的资源不存在',
             canRetry: false,
       };
     }
@@ -93,8 +93,8 @@ export function handleApiError(error: any) {
     if (status >= 400 && status < 500) {
         
         return {
-            type: 'client','
-            message: error.response?.data?.message || '请求参数错误','
+            type: 'client',
+            message: error.response?.data?.message || '请求参数错误',
             canRetry: false,
       };
     }
@@ -103,16 +103,16 @@ export function handleApiError(error: any) {
     if (status >= 500) {
         
         return {
-            type: 'server','
-            message: '服务器错误，请稍后重试','
+            type: 'server',
+            message: '服务器错误，请稍后重试',
             canRetry: true,
       };
     }
 
     // 未知错误
     return {
-        type: 'unknown','
-        message: error.message || '未知错误','
+        type: 'unknown',
+        message: error.message || '未知错误',
         canRetry: true,
     };
 }
@@ -126,9 +126,9 @@ export function buildQueryString(params: Record<string, any>): string   {
     const searchParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {'
+        if (value !== null && value !== undefined && value !== '') {
             if (Array.isArray(value)) {
-                searchParams.append(key, value.join(','));'
+                searchParams.append(key, value.join(','));
             } else {
                 searchParams.append(key, String(value));
             }
@@ -143,7 +143,7 @@ export function buildQueryString(params: Record<string, any>): string   {
  * @returns 唯一的请求ID
  */
 function generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
 /**

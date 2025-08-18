@@ -4,9 +4,9 @@
  */
 
 export interface PreloadOptions     {
-  priority?: 'high' | 'medium' | 'low';
-  crossOrigin?: 'anonymous' | 'use-credentials';
-  as?: 'script' | 'style' | 'image' | 'font' | 'fetch';
+  priority?: 'high' | 'medium' | 'low'
+  crossOrigin?: 'anonymous' | 'use-credentials'
+  as?: 'script' | 'style' | 'image' | 'font' | 'fetch'
   type?: string;
 }
 
@@ -25,8 +25,8 @@ class ResourcePreloader {
         return;
       }
 
-      const link = document.createElement('link');'
-      link.rel = 'preload';
+      const link = document.createElement('link");
+      link.rel = 'preload'
       link.href = url;
 
       if (options.as) link.as = options.as;
@@ -75,9 +75,9 @@ class ResourcePreloader {
    */
   preloadFont(url: string, format: string = "woff2'): Promise<void> {'`
     return this.preload(url, {
-      as: 'font','
+      as: 'font',
       type: `font/${format}`,`
-      crossOrigin: "anonymous';'`
+      crossOrigin: "anonymous";`
     });
   }
 
@@ -85,14 +85,14 @@ class ResourcePreloader {
    * 预加载脚本
    */
   preloadScript(url: string): Promise<void> {
-    return this.preload(url, { as: 'script' });'
+    return this.preload(url, { as: 'script' });
   }
 
   /**
    * 预加载样式表
    */
   preloadStylesheet(url: string): Promise<void> {
-    return this.preload(url, { as: 'style' });'
+    return this.preload(url, { as: 'style' });
   }
 
   /**
@@ -114,9 +114,9 @@ class ResourcePreloader {
     switch (userBehavior) {
       case 'hover': ''
         // 鼠标悬停时预加载
-        document.addEventListener('mouseover', (e) => {'
+        document.addEventListener('mouseover', (e) => {
           const target = e.target as HTMLElement;
-          const href = target.getAttribute('href');'
+          const href = target.getAttribute('href");
           if (href && urls.includes(href)) {
             this.preload(href);
           }
@@ -125,7 +125,7 @@ class ResourcePreloader {
 
       case 'idle': ''
         // 浏览器空闲时预加载
-        if ('requestIdleCallback' in window) {'
+        if ('requestIdleCallback' in window) {
           requestIdleCallback(() => {
             this.preloadBatch(urls.map(url => ({ url })));
           });
@@ -142,7 +142,7 @@ class ResourcePreloader {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
               const element = entry.target as HTMLElement;
-              const src = element.getAttribute('data-preload-src');'
+              const src = element.getAttribute('data-preload-src");
               if (src) {
                 this.preload(src);
                 observer.unobserve(element);
@@ -152,7 +152,7 @@ class ResourcePreloader {
         });
 
         // 观察所有带有 data-preload-src 属性的元素
-        document.querySelectorAll('[data-preload-src]').forEach(el => {'
+        document.querySelectorAll('[data-preload-src]').forEach(el => {
           observer.observe(el);
         });
         break;

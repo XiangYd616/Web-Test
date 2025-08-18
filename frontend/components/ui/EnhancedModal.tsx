@@ -4,8 +4,8 @@
  * 支持动画、键盘导航、焦点管理和无障碍访问
  */
 
-import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useEffect, useRef, useCallback, useState } from 'react
+import { createPortal } from 'react-dom
 
 // 基础模态框属性
 export interface EnhancedModalProps {
@@ -35,11 +35,11 @@ export interface EnhancedModalProps {
 
 // 确认对话框属性
 export interface EnhancedConfirmModalProps extends Omit<EnhancedModalProps, 'footer'> {
-  type?: 'info' | 'success' | 'warning' | 'error' | 'confirm';
+  type?: 'info' | 'success' | 'warning' | 'error' | 'confirm'
   content?: React.ReactNode;
   okText?: string;
   cancelText?: string;
-  okType?: 'primary' | 'danger' | 'default';
+  okType?: 'primary' | 'danger' | 'default'
   okButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
   cancelButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
   icon?: React.ReactNode;
@@ -48,8 +48,8 @@ export interface EnhancedConfirmModalProps extends Omit<EnhancedModalProps, 'foo
 
 // 抽屉属性
 export interface EnhancedDrawerProps extends Omit<EnhancedModalProps, 'centered'> {
-  placement?: 'top' | 'right' | 'bottom' | 'left';
-  size?: 'small' | 'default' | 'large';
+  placement?: 'top' | 'right' | 'bottom' | 'left'
+  size?: 'small' | 'default' | 'large'
   push?: boolean;
   level?: string | string[] | null;
   handler?: React.ReactNode;
@@ -179,9 +179,9 @@ export const EnhancedModal: React.FC<EnhancedModalProps> = ({
   // 阻止滚动
   useEffect(() => {
     if (visible) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden'
       return () => {
-        document.body.style.overflow = '';
+        document.body.style.overflow = ''
       };
     }
   }, [visible]);

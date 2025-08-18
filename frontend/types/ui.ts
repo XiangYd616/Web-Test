@@ -1,28 +1,28 @@
 // UI组件相关类型定义
-import React from 'react';// 基础UI属性'
+import React from 'react';// 基础UI属性
 export interface BaseUIProps     {
   className?: string;
   children?: React.ReactNode;
   id?: string;
-  'data-testid'?: string;'
+  'data-testid'?: string;
 }
 
 // 尺寸类型
-export type Size   = 'xs' | 'sm' | 'md' | 'lg' | 'xl';export type LoadingSize   = Size;// 颜色变体'
-export type ColorVariant   = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';// 按钮属性'
+export type Size   = 'xs' | 'sm' | 'md' | 'lg' | 'xl';export type LoadingSize   = Size;// 颜色变体
+export type ColorVariant   = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';// 按钮属性
 export interface ButtonProps extends BaseUIProps     {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link'
   size?: Size;
   disabled?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  type?: 'button' | 'submit' | 'reset';
+  type?: 'button' | 'submit' | 'reset'
 }
 
 // 输入框属性
 export interface InputProps extends BaseUIProps     {
-  type?: 'text' | 'email' | 'password' | 'number' | 'url' | 'tel' | 'search';
+  type?: 'text' | 'email' | 'password' | 'number' | 'url' | 'tel' | 'search'
   placeholder?: string;
   value?: string;
   defaultValue?: string;
@@ -70,7 +70,7 @@ export interface ModalProps extends BaseUIProps     {
   open: boolean;
   onClose: () => void;
   title?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
   closable?: boolean;
   maskClosable?: boolean;
   footer?: React.ReactNode;
@@ -85,10 +85,10 @@ export interface Column<T = any>     {
   width?: number | string;
   minWidth?: number;
   maxWidth?: number;
-  align?: 'left' | 'center' | 'right';
+  align?: 'left' | 'center' | 'right'
   sortable?: boolean;
   filterable?: boolean;
-  fixed?: 'left' | 'right';
+  fixed?: 'left' | 'right'
   ellipsis?: boolean;
   render?: (value: any, record: T, index: number) => React.ReactNode;
   sorter?: (a: T, b: T) => number;
@@ -114,7 +114,7 @@ export interface TableProps<T = any> extends BaseUIProps     {
     rowExpandable?: (record: T) => boolean;
   };
   rowSelection?: {
-    type?: 'checkbox' | 'radio';
+    type?: 'checkbox' | 'radio'
     selectedRowKeys?: string[];
     onChange?: (selectedRowKeys: string[], selectedRows: T[]) => void;
   };
@@ -152,8 +152,8 @@ export interface BadgeProps extends BaseUIProps     {
 // 提示框属性
 export interface TooltipProps extends BaseUIProps     {
   title: React.ReactNode;
-  placement?: 'top' | 'bottom' | 'left' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-  trigger?: 'hover' | 'focus' | 'click' | 'contextMenu';
+  placement?: 'top' | 'bottom' | 'left' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
+  trigger?: 'hover' | 'focus' | 'click' | 'contextMenu'
   visible?: boolean;
   defaultVisible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
@@ -175,7 +175,7 @@ export interface LoadingProps extends BaseUIProps     {
 
 // 警告框属性
 export interface AlertProps extends BaseUIProps     {
-  type?: 'success' | 'info' | 'warning' | 'error';
+  type?: 'success' | 'info' | 'warning' | 'error'
   message: React.ReactNode;
   description?: React.ReactNode;
   showIcon?: boolean;
@@ -198,7 +198,7 @@ export interface CardProps extends BaseUIProps     {
   hoverable?: boolean;
   loading?: boolean;
   size?: Size;
-  type?: 'inner';
+  type?: 'inner'
   bodyStyle?: React.CSSProperties;
   headStyle?: React.CSSProperties;
 }
@@ -208,7 +208,7 @@ export interface DrawerProps extends BaseUIProps     {
   open: boolean;
   onClose: () => void;
   title?: React.ReactNode;
-  placement?: 'top' | 'right' | 'bottom' | 'left';
+  placement?: 'top' | 'right' | 'bottom' | 'left'
   size?: Size | number;
   mask?: boolean;
   maskClosable?: boolean;
@@ -230,12 +230,12 @@ export interface DrawerProps extends BaseUIProps     {
 // 步骤条属性
 export interface StepsProps extends BaseUIProps     {
   current?: number;
-  direction?: 'horizontal' | 'vertical';
-  labelPlacement?: 'horizontal' | 'vertical';
+  direction?: 'horizontal' | 'vertical'
+  labelPlacement?: 'horizontal' | 'vertical'
   progressDot?: boolean | ((iconDot: React.ReactNode, { index, status, title, description }: any) => React.ReactNode);
-  size?: 'default' | 'small';
-  status?: 'wait' | 'process' | 'finish' | 'error';
-  type?: 'default' | 'navigation';
+  size?: 'default' | 'small'
+  status?: 'wait' | 'process' | 'finish' | 'error'
+  type?: 'default' | 'navigation'
   onChange?: (current: number) => void;
   items?: StepItem[];
 }
@@ -244,7 +244,7 @@ export interface StepItem     {
   title: React.ReactNode;
   subTitle?: React.ReactNode;
   description?: React.ReactNode;
-  status?: 'wait' | 'process' | 'finish' | 'error';
+  status?: 'wait' | 'process' | 'finish' | 'error'
   icon?: React.ReactNode;
   disabled?: boolean;
 }
@@ -253,16 +253,16 @@ export interface StepItem     {
 export interface TabsProps extends BaseUIProps     {
   activeKey?: string;
   defaultActiveKey?: string;
-  type?: 'line' | 'card' | 'editable-card';
+  type?: 'line' | 'card' | 'editable-card'
   size?: Size;
-  tabPosition?: 'top' | 'right' | 'bottom' | 'left';
+  tabPosition?: 'top' | 'right' | 'bottom' | 'left'
   tabBarGutter?: number;
   tabBarStyle?: React.CSSProperties;
   animated?: boolean | { inkBar: boolean; tabPane: boolean };
   renderTabBar?: (props: any, DefaultTabBar: React.ComponentType<any>) => React.ReactElement;
   onChange?: (activeKey: string) => void;
   onTabClick?: (key: string, event: React.MouseEvent) => void;
-  onEdit?: (targetKey: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => void;'
+  onEdit?: (targetKey: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => void;
   hideAdd?: boolean;
   centered?: boolean;
   items?: TabItem[];
@@ -279,7 +279,7 @@ export interface TabItem     {
 
 // 通用事件处理器类型
 export type EventHandler<T   = HTMLElement> = (event: React.SyntheticEvent<T>) => void;export type ChangeHandler<T   = HTMLInputElement> = (event: React.ChangeEvent<T>) => void;export type ClickHandler<T   = HTMLElement> = (event: React.MouseEvent<T>) => void;export type KeyboardHandler<T   = HTMLElement> = (event: React.KeyboardEvent<T>) => void;// 响应式断点
-export type Breakpoint   = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';// 栅格系统'
+export type Breakpoint   = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';// 栅格系统
 export interface ColProps extends BaseUIProps     {
   span?: number;
   offset?: number;
@@ -304,8 +304,8 @@ export interface ColSize     {
 
 export interface RowProps extends BaseUIProps     {
   gutter?: number | [number, number] | Partial<Record<Breakpoint, number>>;
-  align?: 'top' | 'middle' | 'bottom' | 'stretch';
-  justify?: 'start' | 'end' | 'center' | 'space-around' | 'space-between' | 'space-evenly';
+  align?: 'top' | 'middle' | 'bottom' | 'stretch'
+  justify?: 'start' | 'end' | 'center' | 'space-around' | 'space-between' | 'space-evenly'
   wrap?: boolean;
 }
 

@@ -3,31 +3,31 @@
  * 提供完整的数据分析和洞察功能
  */
 
-import { BarChart3, Calendar, Download, Filter, Settings, Share2, Target, // TrendingUp    } from 'lucide-react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler   } from '../hooks/useAsyncErrorHandler';// 已修复'
-import React, { useState    } from 'react';import Analytics from '../../components/analytics/Analytics';import { useAuthCheck    } from '../../components/auth/WithAuthCheck';const AnalyticsPage: React.FC  = () => {'
-  const [feedback, setFeedback] = useState({ type: '', message: '' });'
+import { BarChart3, Calendar, Download, Filter, Settings, Share2, Target, // TrendingUp    } from 'lucide-react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler   } from '../hooks/useAsyncErrorHandler';// 已修复
+import React, { useState    } from 'react';import Analytics from '../../components/analytics/Analytics';import { useAuthCheck    } from '../../components/auth/WithAuthCheck';const AnalyticsPage: React.FC  = () => {
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });'
+      setFeedback({ type: '', message: '' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);'
+      showFeedback('error', state.error.message);
     }
   }, [state.error]);
   
   
   const createData = async (newData) => {
     const result = await executeAsync(
-      () => fetch('/api/data/create', {'
-        method: 'POST','
-        headers: { 'Content-Type': 'application/json' },'
+      () => fetch('/api/data/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newData)
       }).then(res => res.json()),
-      { context: 'DataManagement.createData' }'
+      { context: 'DataManagement.createData' }
     );
     
     if (result && result.success) {
@@ -39,11 +39,11 @@ import React, { useState    } from 'react';import Analytics from '../../componen
   const updateData = async (id, updateData) => {
     const result = await executeAsync(
       () => fetch(`/api/data/update/${id}`, {`
-        method: "PUT','`
-        headers: { 'Content-Type': 'application/json' },'
+        method: "PUT','`"`
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData)
       }).then(res => res.json()),
-      { context: 'DataManagement.updateData' }'
+      { context: 'DataManagement.updateData' }
     );
     
     if (result && result.success) {
@@ -54,9 +54,9 @@ import React, { useState    } from 'react';import Analytics from '../../componen
   const deleteData = async (id) => {
     const result = await executeAsync(
       () => fetch(`/api/data/delete/${id}`, {`
-        method: "DELETE';'`
+        method: "DELETE";``
       }).then(res => res.json()),
-      { context: 'DataManagement.deleteData' }'
+      { context: 'DataManagement.deleteData' }
     );
     
     if (result && result.success) {
@@ -67,8 +67,8 @@ import React, { useState    } from 'react';import Analytics from '../../componen
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const result = await executeAsync(() => fetch('/api/data/list').then(res => res.json()),'
-        { context: 'DataFetching' }'
+      const result = await executeAsync(() => fetch('/api/data/list').then(res => res.json()),
+        { context: 'DataFetching' }
       );
       
       if (result && result.success) {
@@ -84,29 +84,29 @@ import React, { useState    } from 'react';import Analytics from '../../componen
   const [loading, setLoading] = useState(false);
   useAuthCheck();
 
-  const [selectedDataType, setSelectedDataType] = useState<'performance' | 'security' | 'seo' | 'accessibility'>('performance');'
-  const [selectedTimeRange, setSelectedTimeRange] = useState<'24h' | '7d' | '30d' | '90d'>('7d');'
+  const [selectedDataType, setSelectedDataType] = useState<'performance' | 'security' | 'seo' | 'accessibility'>('performance");"
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'24h' | '7d' | '30d' | '90d'>('7d");"
   const [showFilters, setShowFilters] = useState(false);
   const [insights, setInsights] = useState<string[]>([]);
 
   const dataTypes = [
-    { key: 'performance', label: '性能分析', icon: TrendingUp, color: 'blue' },'
-    { key: 'security', label: '安全分析', icon: Target, color: 'red' },'
-    { key: 'seo', label: 'SEO分析', icon: BarChart3, color: 'green' },'
-    { key: 'accessibility', label: '可访问性', icon: Settings, color: 'purple' }'
+    { key: 'performance', label: '性能分析', icon: TrendingUp, color: 'blue' },
+    { key: 'security', label: '安全分析', icon: Target, color: 'red' },
+    { key: 'seo', label: 'SEO分析', icon: BarChart3, color: 'green' },
+    { key: 'accessibility', label: '可访问性', icon: Settings, color: 'purple' }
   ];
 
   const timeRanges = [
-    { key: '24h', label: '过去24小时' },'
-    { key: '7d', label: '过去7天' },'
-    { key: '30d', label: '过去30天' },'
-    { key: '90d', label: '过去90天' }'
+    { key: '24h', label: '过去24小时' },
+    { key: '7d', label: '过去7天' },
+    { key: '30d', label: '过去30天' },
+    { key: '90d', label: '过去90天' }
   ];
 
   const handleInsightClick = (insight: string) => {
     setInsights(prev => [...prev, insight]);
     // 这里可以添加更多的洞察处理逻辑
-    console.log("洞察点击:', insight);'
+    console.log("洞察点击:', insight);"
   };
 
   const handleExportReport = () => {
@@ -119,12 +119,12 @@ import React, { useState    } from 'react';import Analytics from '../../componen
     };
 
     const blob = new Blob([JSON.stringify(reportData, null, 2)], {
-      type: 'application/json';
+      type: 'application/json'
     });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');'
+    const a = document.createElement('a");"
     a.href = url;
-    a.download = `analytics-report-${selectedDataType}-${selectedTimeRange}-${new Date().toISOString().split("T')[0]}.json`;'`
+    a.download = `analytics-report-${selectedDataType}-${selectedTimeRange}-${new Date().toISOString().split("T')[0]}.json`;'`"
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -138,12 +138,12 @@ import React, { useState    } from 'react';import Analytics from '../../componen
           url: window.location.href
         });
       } catch (error) {
-        console.log("分享失败:', error);'`
+        console.log("分享失败:', error);'`"`
       }
     } else {
       // 复制链接到剪贴板
       navigator.clipboard.writeText(window.location.href);
-      alert('链接已复制到剪贴板');'
+      alert('链接已复制到剪贴板");"
     }
   };
 
@@ -173,9 +173,9 @@ import React, { useState    } from 'react';import Analytics from '../../componen
               <p>{state.error.message}</p>
             </div>
             <div className= 'mt-4'>
-              <button
+              <button>
                 onClick={() => window.location.reload()}
-                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
               >
                 重试
               </button>
@@ -201,25 +201,25 @@ import React, { useState    } from 'react';import Analytics from '../../componen
           </div>
 
           <div className= 'flex gap-3'>
-            <button
+            <button>
               onClick={() => setShowFilters(!showFilters)}
-              className= 'px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 flex items-center gap-2';
+              className= 'px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 flex items-center gap-2'
             >
               <Filter className= 'w-4 h-4'    />
               筛选
             </button>
 
-            <button
+            <button>
               onClick={handleExportReport}
-              className= 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2';
+              className= 'px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2'
             >
               <Download className= 'w-4 h-4'    />
               导出报告
             </button>
 
-            <button
+            <button>
               onClick={handleShareReport}
-              className= 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2';
+              className= 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2'
             >
               <Share2 className= 'w-4 h-4'    />
               分享
@@ -239,15 +239,15 @@ import React, { useState    } from 'react';import Analytics from '../../componen
                 </label>
                 <div className= 'grid grid-cols-2 gap-2'>
                   {dataTypes.map(type => (
-                    <button
+                    <button>
                       key={type.key}
                       onClick={() => setSelectedDataType(type.key as any)}
                       className={`p-3 rounded-lg border transition-colors flex items-center gap-2 ${selectedDataType === type.key`}
                         ? `bg-${type.color}-600 border-${type.color}-500 text-white``
-                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600';'`
+                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600";``
                         }`}`
                     >
-                      <type.icon className= "w-4 h-4' />`
+                      <type.icon className= "w-4 h-4' />`'"`
                       <span className= 'text-sm'>{type.label}</span>
                     </button>
                   ))}
@@ -261,15 +261,15 @@ import React, { useState    } from 'react';import Analytics from '../../componen
                 </label>
                 <div className= 'space-y-2'>
                   {timeRanges.map(range => (
-                    <button
+                    <button>
                       key={range.key}
                       onClick={() => setSelectedTimeRange(range.key as any)}
                       className={`w-full p-3 rounded-lg border transition-colors flex items-center gap-2 ${selectedTimeRange === range.key`}
-                        ? "bg-blue-600 border-blue-500 text-white';'`
-                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600';
+                        ? "bg-blue-600 border-blue-500 text-white";``
+                        : "bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
                         }`}`
                     >
-                      <Calendar className= "w-4 h-4'    />`
+                      <Calendar className= "w-4 h-4'    />`'"`
                       <span className= 'text-sm'>{range.label}</span>
                     </button>
                   ))}
@@ -282,15 +282,15 @@ import React, { useState    } from 'react';import Analytics from '../../componen
         {/* 快速选择器 */}
         <div className= 'flex flex-wrap gap-3'>
           {dataTypes.map(type => (
-            <button
+            <button>
               key={type.key}
               onClick={() => setSelectedDataType(type.key as any)}
               className={`px-4 py-2 rounded-lg border transition-colors flex items-center gap-2 ${selectedDataType === type.key`}
                 ? `bg-${type.color}-600 border-${type.color}-500 text-white``
-                : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700';'`
+                : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700";``
                 }`}`
             >
-              <type.icon className= "w-4 h-4' />`
+              <type.icon className= "w-4 h-4' />`'"`
               {type.label}
             </button>
           ))}
@@ -299,12 +299,12 @@ import React, { useState    } from 'react';import Analytics from '../../componen
         {/* 时间范围选择器 */}
         <div className= 'flex gap-2'>
           {timeRanges.map(range => (
-            <button
+            <button>
               key={range.key}
               onClick={() => setSelectedTimeRange(range.key as any)}
               className={`px-3 py-1 rounded-md text-sm transition-colors ${selectedTimeRange === range.key`}
-                ? "bg-blue-600 text-white';'`
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600';
+                ? "bg-blue-600 text-white";``
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}`
             >
               {range.label}
@@ -313,14 +313,14 @@ import React, { useState    } from 'react';import Analytics from '../../componen
         </div>
 
         {/* 主要分析组件 */}
-        <Analytics dataType={selectedDataType}
+        <Analytics dataType={selectedDataType}>
           timeRange={selectedTimeRange}
           onInsightClick={handleInsightClick}
            />
 
         {/* 洞察收集器 */}
         {insights.length > 0 && (
-          <div className= "bg-gray-800 rounded-lg border border-gray-700 p-6'>`
+          <div className= "bg-gray-800 rounded-lg border border-gray-700 p-6'>`'"`
             <h3 className= 'text-white font-medium mb-4 flex items-center gap-2'>
               <Target className= 'w-5 h-5 text-blue-500'    />
               收集的洞察 ({insights.length})
@@ -328,9 +328,9 @@ import React, { useState    } from 'react';import Analytics from '../../componen
 
             <div className= 'space-y-2 max-h-60 overflow-y-auto'>
               {insights.map((insight, index) => (
-                <div
+                <div>
                   key={index}
-                  className= 'p-3 bg-gray-700 rounded-lg text-gray-300 text-sm flex items-start gap-2';
+                  className= 'p-3 bg-gray-700 rounded-lg text-gray-300 text-sm flex items-start gap-2'
                 >
                   <span className= 'text-blue-400 font-medium'>{index + 1}.</span>
                   <span>{insight}</span>
@@ -339,20 +339,20 @@ import React, { useState    } from 'react';import Analytics from '../../componen
             </div>
 
             <div className= 'mt-4 flex gap-2'>
-              <button
+              <button>
                 onClick={() => setInsights([])}
-                className= 'px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm';
+                className= 'px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm'
               >
                 清空洞察
               </button>
 
-              <button
+              <button>
                 onClick={() => {
-                  const insightText = insights.map((insight, i) => `${i + 1}. ${insight}`).join('\n');'`
+                  const insightText = insights.map((insight, i) => `${i + 1}. ${insight}`).join('\n");`"
                   navigator.clipboard.writeText(insightText);
-                  alert("洞察已复制到剪贴板');'`
+                  alert("洞察已复制到剪贴板");``
                 }}
-                className= 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm';
+                className= 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm'
               >
                 复制洞察
               </button>
@@ -365,7 +365,7 @@ import React, { useState    } from 'react';import Analytics from '../../componen
           <h4 className= 'text-blue-400 font-medium mb-2'>💡 使用提示</h4>
           <ul className= 'text-blue-300 text-sm space-y-1'>
             <li>• 点击图表中的数据点可以查看详细信息</li>
-            <li>• 使用"对比分析'按钮比较不同时期的数据</li>
+            <li>• 使用"对比分析'按钮比较不同时期的数据</li>"
             <li>• 点击洞察和建议可以收集到下方的洞察收集器中</li>
             <li>• 使用导出功能保存分析报告</li>
             <li>• 切换不同的数据类型和时间范围获取更全面的分析</li>

@@ -5,9 +5,9 @@
 
 export interface TestState     {
   id: string;
-  type: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility';
+  type: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility'
   url: string;
-  status: 'idle' | 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: 'idle' | 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
   progress: number;
   startTime?: Date;
   endTime?: Date;
@@ -33,7 +33,7 @@ export interface StateChangeListener     {
 class TestStateManager {
   private state: GlobalTestState;
   private listeners: Set<StateChangeListener> = new Set();
-  private storageKey = 'test-state';
+  private storageKey = 'test-state'
   constructor() {
     this.state = {
       activeTests: new Map(),
@@ -72,7 +72,7 @@ class TestStateManager {
    * 创建新测试
    */
   createTest(
-    type: TestState['type'],'
+    type: TestState['type'],
     url: string,
     metadata?: Record<string, any>
   ): TestState {
@@ -80,7 +80,7 @@ class TestStateManager {
       id: this.generateTestId(),
       type,
       url,
-      status: 'idle','
+      status: 'idle',
       progress: 0,
       metadata
     };
@@ -101,14 +101,14 @@ class TestStateManager {
    */
   startTest(testId: string): boolean {
     const test = this.state.activeTests.get(testId);
-    if (!test || test.status !== 'idle') {'
+    if (!test || test.status !== 'idle') {
         return false;
       }
 
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
       if (testToUpdate) {
-        testToUpdate.status = 'running';
+        testToUpdate.status = 'running'
         testToUpdate.startTime = new Date();
         testToUpdate.progress = 0;
         state.currentTest = testToUpdate;
@@ -124,7 +124,7 @@ class TestStateManager {
    */
   updateTestProgress(testId: string, progress: number): boolean {
     const test = this.state.activeTests.get(testId);
-    if (!test || test.status !== 'running') {'
+    if (!test || test.status !== 'running') {
         return false;
       }
 
@@ -143,14 +143,14 @@ class TestStateManager {
    */
   completeTest(testId: string, results: any): boolean {
     const test = this.state.activeTests.get(testId);
-    if (!test || test.status !== 'running') {'
+    if (!test || test.status !== 'running') {
         return false;
       }
 
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
       if (testToUpdate) {
-        testToUpdate.status = 'completed';
+        testToUpdate.status = 'completed'
         testToUpdate.endTime = new Date();
         testToUpdate.duration = testToUpdate.endTime.getTime() - (testToUpdate.startTime?.getTime() || 0);
         testToUpdate.progress = 100;
@@ -184,7 +184,7 @@ class TestStateManager {
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
       if (testToUpdate) {
-        testToUpdate.status = 'failed';
+        testToUpdate.status = 'failed'
         testToUpdate.endTime = new Date();
         testToUpdate.duration = testToUpdate.endTime.getTime() - (testToUpdate.startTime?.getTime() || 0);
         testToUpdate.error = error;
@@ -220,7 +220,7 @@ class TestStateManager {
       // 从活跃测试中移除
       if (state.activeTests.has(testId)) {
         const testToUpdate = state.activeTests.get(testId)!;
-        testToUpdate.status = 'cancelled';
+        testToUpdate.status = 'cancelled'
         testToUpdate.endTime = new Date();
         testToUpdate.duration = testToUpdate.endTime.getTime() - (testToUpdate.startTime?.getTime() || 0);
 
@@ -232,7 +232,7 @@ class TestStateManager {
       const queueIndex = state.queuedTests.findIndex(t => t.id === testId);
       if (queueIndex !== -1) {
         const queuedTest = state.queuedTests[queueIndex];
-        queuedTest.status = 'cancelled';
+        queuedTest.status = 'cancelled'
         state.testHistory.unshift({ ...queuedTest });
         state.queuedTests.splice(queueIndex, 1);
       }
@@ -306,8 +306,8 @@ class TestStateManager {
     failedCount: number;
     totalCount: number;
   } {
-    const completed = this.state.testHistory.filter(t => t.status === 'completed').length;'
-    const failed = this.state.testHistory.filter(t => t.status === 'failed').length;'
+    const completed = this.state.testHistory.filter(t => t.status === 'completed').length;
+    const failed = this.state.testHistory.filter(t => t.status === 'failed').length;
     return {
       activeCount: this.state.activeTests.size,
       queuedCount: this.state.queuedTests.length,
@@ -330,7 +330,7 @@ class TestStateManager {
    * 更新全局标志
    */
   private updateGlobalFlags(state: GlobalTestState): void {
-    state.isAnyTestRunning = Array.from(state.activeTests.values()).some(t => t.status === 'running');'
+    state.isAnyTestRunning = Array.from(state.activeTests.values()).some(t => t.status === 'running");
     if (!state.isAnyTestRunning) {
       state.currentTest = undefined;
     }
@@ -355,7 +355,7 @@ class TestStateManager {
       try {
         listener(currentState);
       } catch (error) {
-        console.error('Error in state change listener: ', error);'
+        console.error('Error in state change listener: ', error);
       }
     });
   }
@@ -371,7 +371,7 @@ class TestStateManager {
       };
       localStorage.setItem(this.storageKey, JSON.stringify(stateToSave));
     } catch (error) {
-      console.warn('Failed to save test state: ', error);'
+      console.warn('Failed to save test state: ', error);
     }
   }
 
@@ -391,7 +391,7 @@ class TestStateManager {
         this.state.maxConcurrentTests = parsed.maxConcurrentTests || 3;
       }
     } catch (error) {
-      console.warn('Failed to load test state:', error);'
+      console.warn('Failed to load test state:', error);
     }
   }
 
@@ -399,7 +399,7 @@ class TestStateManager {
    * 生成测试ID
    */
   private generateTestId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 }
 

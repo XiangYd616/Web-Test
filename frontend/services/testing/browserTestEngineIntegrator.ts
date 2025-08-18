@@ -21,15 +21,15 @@ export interface ContentTestResult     {
   accessibilityScore: number;
   overallScore: number;
   issues: Array<{
-    type: 'error' | 'warning' | 'info';
-    category: 'seo' | 'performance' | 'accessibility' | 'content';
+    type: 'error' | 'warning' | 'info'
+    category: 'seo' | 'performance' | 'accessibility' | 'content'
     message: string;
-    impact: 'high' | 'medium' | 'low';
+    impact: 'high' | 'medium' | 'low'
   }>;
   recommendations: Array<{
-    category: 'seo' | 'performance' | 'accessibility' | 'content';
+    category: 'seo' | 'performance' | 'accessibility' | 'content'
     message: string;
-    priority: 'high' | 'medium' | 'low';
+    priority: 'high' | 'medium' | 'low'
   }>;
   metrics: {
     pageSize: number;
@@ -71,7 +71,7 @@ export class BrowserTestEngineIntegrator {
   public async runContentTest(config: ContentTestConfig): Promise<ContentTestResult> {
     try {
       // 调用真实的内容检测API
-      const response = await fetch('/api/content-test', {'
+      const response = await fetch('/api/content-test', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json,
@@ -141,8 +141,7 @@ export class BrowserTestEngineIntegrator {
       accessibilityAnalysis: true,
       contentAnalysis: true,
       mobileAnalysis: true,
-      realTimeAnalysis: typeof fetch !== "undefined";
-    "};
+      realTimeAnalysis: typeof fetch !== "undefined";};
   }
 }
 `

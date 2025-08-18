@@ -3,43 +3,43 @@
  * 针对大型组件和库进行更细粒度的动态导入
  */
 
-import React, { ComponentType, lazy    } from 'react';// 大型组件的动态导入映射'
+import React, { ComponentType, lazy    } from 'react';// 大型组件的动态导入映射
 export const largeComponentImports = {
   // SEO 相关组件 - 按功能分割
-  // 'SEOResults': () => // import('../components/seo/SEOResults'), // 已删除'
-  // LocalSEOResults: () => import('../components/seo/LocalSEOResults'), // 已删除'
-  // FileUploadSEO: () => import('../components/seo/FileUploadSEO'), // 已删除'
-  // NetworkErrorPrompt: () => import('../components/seo/NetworkErrorPrompt'), // 已删除'
+  // 'SEOResults': () => // import('../components/seo/SEOResults'), // 已删除
+  // LocalSEOResults: () => import('../components/seo/LocalSEOResults'), // 已删除
+  // FileUploadSEO: () => import('../components/seo/FileUploadSEO'), // 已删除
+  // NetworkErrorPrompt: () => import('../components/seo/NetworkErrorPrompt'), // 已删除
   // 测试相关组件 - 按测试类型分割
-  // TestInterface: () => import('../components/testing/TestInterface'), // 已删除'
-  // TestResultDisplay: () => import('../components/testing/TestResultDisplay'), // 已删除'
-  // TestEngineStatus: () => import('../components/testing/TestEngineStatus'), // 已删除'
+  // TestInterface: () => import('../components/testing/TestInterface'), // 已删除
+  // TestResultDisplay: () => import('../components/testing/TestResultDisplay'), // 已删除
+  // TestEngineStatus: () => import('../components/testing/TestEngineStatus'), // 已删除
   // 数据管理组件 - 按功能分割
-  // DataList: () => import('../components/data/DataList'), // 已删除'
-  DataManager: () => import('../components/data/DataManager'),'
-  // DataManagement: () => import('../components/data/DataManagement'), // 已删除'
-  // DataStats: () => import('../components/data/DataStats'), // 已删除'
+  // DataList: () => import('../components/data/DataList'), // 已删除
+  DataManager: () => import('../components/data/DataManager'),
+  // DataManagement: () => import('../components/data/DataManagement'), // 已删除
+  // DataStats: () => import('../components/data/DataStats'), // 已删除
   // 图表组件 - 按图表类型分割
-  // Charts: () => import('../components/charts/Charts'), // 已删除'
-  // PerformanceChart: () => import('../components/charts/PerformanceChart'), // 已删除'
-  // StressTestChart: () => import('../components/charts/StressTestChart'), // 已删除'
+  // Charts: () => import('../components/charts/Charts'), // 已删除
+  // PerformanceChart: () => import('../components/charts/PerformanceChart'), // 已删除
+  // StressTestChart: () => import('../components/charts/StressTestChart'), // 已删除
   // 现代化组件 - 按复杂度分割
-  // Layout: () => import('../components/modern/Layout'), // 已删除'
-  // Chart: () => import('../components/modern/Chart'), // 已删除'
-  // StatCard: () => import('../components/modern/StatCard'), // 已删除'
-  // Card: () => import('../components/ui/Card'), // 已删除'
+  // Layout: () => import('../components/modern/Layout'), // 已删除
+  // Chart: () => import('../components/modern/Chart'), // 已删除
+  // StatCard: () => import('../components/modern/StatCard'), // 已删除
+  // Card: () => import('../components/ui/Card'), // 已删除
 };
 
 // 创建带分析的懒加载组件
 export function createAnalyzedLazyComponent<T extends ComponentType<any>>(componentName: string,
   importFn: () => Promise<{ default: T }>,
   options: {
-    priority?: 'high' | 'medium' | 'low'; // 已删除 // 已删除'
+    priority?: 'high' | 'medium' | 'low'; // 已删除 // 已删除
     preload?: boolean;
     chunkName?: string;
   } = {}
 ) {
-  const { priority = 'medium', preload = false, chunkName } = options;'
+  const { priority = 'medium', preload = false, chunkName } = options;
   // 添加 webpack 魔法注释来控制分块
   const enhancedImportFn = () => {
     const startTime = performance.now();
@@ -52,7 +52,7 @@ export function createAnalyzedLazyComponent<T extends ComponentType<any>>(compon
 
       // 发送性能数据（如果有分析服务）
       if (typeof window !== "undefined' && (window as any).analytics) {'`
-        (window as any).analytics.track("component_load_time', {'
+        (window as any).analytics.track("component_load_time', {
           component: componentName,
           loadTime,
           priority,
@@ -86,41 +86,41 @@ export function createAnalyzedLazyComponent<T extends ComponentType<any>>(compon
 export const lazyLibraries = {
   // 图表库按需加载
   recharts: {
-    LineChart: () => import('recharts').then(m => ({ default: m.LineChart })),'
-    BarChart: () => import('recharts').then(m => ({ default: m.BarChart })),'
-    PieChart: () => import('recharts').then(m => ({ default: m.PieChart })),'
-    AreaChart: () => import('recharts').then(m => ({ default: m.AreaChart })),'
-    ScatterChart: () => import('recharts').then(m => ({ default: m.ScatterChart })),'
-    XAxis: () => import('recharts').then(m => ({ default: m.XAxis })),'
-    YAxis: () => import('recharts').then(m => ({ default: m.YAxis })),'
-    CartesianGrid: () => import('recharts').then(m => ({ default: m.CartesianGrid })),'
-    Tooltip: () => import('recharts').then(m => ({ default: m.Tooltip })),'
-    Legend: () => import('recharts').then(m => ({ default: m.Legend })),'
-    ResponsiveContainer: () => import('recharts').then(m => ({ default: m.ResponsiveContainer })),'
+    LineChart: () => import('recharts').then(m => ({ default: m.LineChart })),
+    BarChart: () => import('recharts').then(m => ({ default: m.BarChart })),
+    PieChart: () => import('recharts').then(m => ({ default: m.PieChart })),
+    AreaChart: () => import('recharts').then(m => ({ default: m.AreaChart })),
+    ScatterChart: () => import('recharts').then(m => ({ default: m.ScatterChart })),
+    XAxis: () => import('recharts').then(m => ({ default: m.XAxis })),
+    YAxis: () => import('recharts').then(m => ({ default: m.YAxis })),
+    CartesianGrid: () => import('recharts').then(m => ({ default: m.CartesianGrid })),
+    Tooltip: () => import('recharts').then(m => ({ default: m.Tooltip })),
+    Legend: () => import('recharts').then(m => ({ default: m.Legend })),
+    ResponsiveContainer: () => import('recharts').then(m => ({ default: m.ResponsiveContainer })),
   },
 
   // 日期处理库按需加载
   dateFns: {
-    format: () => import('date-fns/format'),'
-    parseISO: () => import('date-fns/parseISO'),'
-    startOfDay: () => import('date-fns/startOfDay'),'
-    endOfDay: () => import('date-fns/endOfDay'),'
-    addDays: () => import('date-fns/addDays'),'
-    subDays: () => import('date-fns/subDays'),'
-    differenceInDays: () => import('date-fns/differenceInDays'),'
+    format: () => import('date-fns/format'),
+    parseISO: () => import('date-fns/parseISO'),
+    startOfDay: () => import('date-fns/startOfDay'),
+    endOfDay: () => import('date-fns/endOfDay'),
+    addDays: () => import('date-fns/addDays'),
+    subDays: () => import('date-fns/subDays'),
+    differenceInDays: () => import('date-fns/differenceInDays'),
   },
 
   // Lodash 工具函数按需加载
   lodash: {
-    debounce: () => import('lodash/debounce'),'
-    throttle: () => import('lodash/throttle'),'
-    cloneDeep: () => import('lodash/cloneDeep'),'
-    merge: () => import('lodash/merge'),'
-    pick: () => import('lodash/pick'),'
-    omit: () => import('lodash/omit'),'
-    groupBy: () => import('lodash/groupBy'),'
-    sortBy: () => import('lodash/sortBy'),'
-    uniqBy: () => import('lodash/uniqBy'),'
+    debounce: () => import('lodash/debounce'),
+    throttle: () => import('lodash/throttle'),
+    cloneDeep: () => import('lodash/cloneDeep'),
+    merge: () => import('lodash/merge'),
+    pick: () => import('lodash/pick'),
+    omit: () => import('lodash/omit'),
+    groupBy: () => import('lodash/groupBy'),
+    sortBy: () => import('lodash/sortBy'),
+    uniqBy: () => import('lodash/uniqBy'),
   }
 };
 
@@ -184,24 +184,24 @@ export const createPageChunks = (pageName: string) => {
   const chunkStrategies = {
     // 大型测试页面 - 使用实际存在的页面
     "StressTest': {'`
-      main: () => import('../pages/testing/StressTest'),'
-      detail: () => import('../pages/StressTestDetail'),'
-      report: () => import('../pages/StressTestReport'),'
+      main: () => import('../pages/testing/StressTest'),
+      detail: () => import('../pages/StressTestDetail'),
+      report: () => import('../pages/StressTestReport'),
     },
 
-    'SEOTest': {'
-      main: () => import('../pages/testing/SEOTest'),'
+    'SEOTest': {
+      main: () => import('../pages/testing/SEOTest'),
     },
 
-    'DatabaseTest': {'
-      main: () => import('../pages/InfrastructureTest'),'
+    'DatabaseTest': {
+      main: () => import('../pages/InfrastructureTest'),
     },
 
-    'Admin': {'
-      main: () => import('../pages/admin/Admin'),'
-      dataStorage: () => import('../pages/admin/DataStorage'),'
-      settings: () => import('../pages/settings/Settings'),'
-      systemMonitor: () => import('../pages/admin/SystemMonitor'),'
+    'Admin': {
+      main: () => import('../pages/admin/Admin'),
+      dataStorage: () => import('../pages/admin/DataStorage'),
+      settings: () => import('../pages/settings/Settings'),
+      systemMonitor: () => import('../pages/admin/SystemMonitor'),
     }
   };
 
@@ -250,9 +250,9 @@ export const initializeAggressiveCodeSplitting = () => {
   // 预加载高优先级组件
   const highPriorityComponents = [
     "TestInterface','`
-    'TestResultsDisplay','
-    'Chart','
-    'StatCard';
+    'TestResultsDisplay',
+    'Chart',
+    'StatCard
   ];
 
   highPriorityComponents.forEach(componentName => {
@@ -263,9 +263,9 @@ export const initializeAggressiveCodeSplitting = () => {
   });
 
   // 监控性能
-  if (typeof window !== 'undefined') {'
+  if (typeof window !== 'undefined') {
     setTimeout(() => {
-      console.log('📊 Aggressive code splitting stats:', aggressivePreloader.getStats());'
+      console.log('📊 Aggressive code splitting stats:', aggressivePreloader.getStats());
     }, 5000);
   }
 };

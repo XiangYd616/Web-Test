@@ -1,17 +1,17 @@
 
-import React from 'react';interface DynamicProgressBarProps   {'
+import React from 'react';interface DynamicProgressBarProps   {
   progress: number;
   className?: string;
-  height?: 'sm' | 'md' | 'lg';
-  color?: 'blue' | 'green' | 'red' | 'yellow' | 'purple';
+  height?: 'sm' | 'md' | 'lg'
+  color?: 'blue' | 'green' | 'red' | 'yellow' | 'purple'
   animated?: boolean;
 }
 
 export const DynamicProgressBar: React.FC<DynamicProgressBarProps> = ({
   progress,
-  className = '','
-  height = 'md','
-  color = 'blue','
+  className = '',
+  height = 'md',
+  color = 'blue',
   animated = true
 }) => {
   
@@ -21,20 +21,20 @@ export const DynamicProgressBar: React.FC<DynamicProgressBarProps> = ({
     style: computedStyle,
     disabled,
     "aria-label': ariaLabel,'
-    'data-testid': testId'
+    'data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   const heightClasses = {
-    sm: 'h-1','
-    md: 'h-2','
-    lg: 'h-3';
+    sm: 'h-1',
+    md: 'h-2',
+    lg: 'h-3'
   };
 
   const colorClasses = {
-    blue: 'bg-blue-500','
-    green: 'bg-green-500','
-    red: 'bg-red-500','
-    yellow: 'bg-yellow-500','
-    purple: 'bg-purple-500';
+    blue: 'bg-blue-500',
+    green: 'bg-green-500',
+    red: 'bg-red-500',
+    yellow: 'bg-yellow-500',
+    purple: 'bg-purple-500'
   };
 
   const progressValue = Math.max(0, Math.min(100, progress));
@@ -43,10 +43,10 @@ export const DynamicProgressBar: React.FC<DynamicProgressBarProps> = ({
     <div className={`w-full bg-gray-700 rounded-full ${heightClasses[height]} ${className}`}>`
       <div
         className={`${heightClasses[height]} rounded-full ${colorClasses[color]} ${`}
-          animated ? "transition-all duration-300' : '';'`
+          animated ? "transition-all duration-300' : '";`
         }`}`
         style={{ width: `${progressValue}%` }}`
-        role= "progressbar';'`
+        role= "progressbar";`
         aria-valuenow={progressValue}
         aria-valuemin={0}
         aria-valuemax={100}

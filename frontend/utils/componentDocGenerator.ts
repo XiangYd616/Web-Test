@@ -46,13 +46,13 @@ class ComponentDocGenerator {
     const commentMatch = code.match(/\/\*\*([\s\S]*?)\*\//);
     if (commentMatch) {
       return commentMatch[1]
-        .replace(/\*/g, '')'
-        .split('\n')'
+        .replace(/\*/g, '')
+        .split('\n')
         .map(line => line.trim())
         .filter(line => line)
-        .join(' ');'
+        .join(' ");
     }
-    return '暂无描述';
+    return '暂无描述
   }
 
   /**
@@ -64,7 +64,7 @@ class ComponentDocGenerator {
     const propsInterfaceMatch = code.match(/interface\s+\w+Props\s*{([\s\S]*?)}/);
     if (propsInterfaceMatch) {
       const propsContent = propsInterfaceMatch[1];
-      const propLines = propsContent.split('\n').filter(line => line.trim());'
+      const propLines = propsContent.split('\n').filter(line => line.trim());
       for (const line of propLines) {
         const propMatch = line.match(/^\s*(\w+)(\?)?:\s*([^;]+);?/);
         if (propMatch) {
@@ -87,7 +87,7 @@ class ComponentDocGenerator {
    */
   private extractPropDescription(line: string): string {
     const commentMatch = line.match(/\/\/\s*(.+)$/);
-    return commentMatch ? commentMatch[1].trim() : '';
+    return commentMatch ? commentMatch[1].trim() : ''
   }
 
   /**
@@ -98,33 +98,33 @@ class ComponentDocGenerator {
 
     // 基础示例
     examples.push({
-      title: '基础用法','
+      title: '基础用法',
       code: `<${componentName} />`,`
-      description: "最简单的使用方式';'`
+      description: "最简单的使用方式";`
     });
 
     // 根据Props生成更多示例
-    if (code.includes('onClick')) {'
+    if (code.includes('onClick')) {
       examples.push({
-        title: '带点击事件','
+        title: '带点击事件',
         code: `<${componentName} onClick={() => console.log('clicked')} />`,'`
-        description: "处理点击事件';'`
+        description: "处理点击事件";`
       });
     }
 
-    if (code.includes('disabled')) {'
+    if (code.includes('disabled')) {
       examples.push({
-        title: '禁用状态','
+        title: '禁用状态',
         code: `<${componentName} disabled />`,`
-        description: "禁用组件';'`
+        description: "禁用组件";`
       });
     }
 
-    if (code.includes('loading')) {'
+    if (code.includes('loading')) {
       examples.push({
-        title: '加载状态','
+        title: '加载状态',
         code: `<${componentName} loading />`,`
-        description: "显示加载状态';'`
+        description: "显示加载状态";`
       });
     }
 
@@ -138,7 +138,7 @@ class ComponentDocGenerator {
     const accessibility = {
       ariaLabels: [],
       keyboardSupport: [],
-      screenReaderSupport: '';
+      screenReaderSupport: ''
     };
 
     // 查找aria属性
@@ -148,18 +148,18 @@ class ComponentDocGenerator {
     }
 
     // 检查键盘支持
-    if (code.includes('onKeyDown') || code.includes('onKeyPress')) {'
-      accessibility.keyboardSupport.push('键盘导航');'
+    if (code.includes('onKeyDown') || code.includes('onKeyPress')) {
+      accessibility.keyboardSupport.push('键盘导航");
     }
-    if (code.includes('tabIndex')) {'
-      accessibility.keyboardSupport.push('Tab键导航');'
+    if (code.includes('tabIndex')) {
+      accessibility.keyboardSupport.push('Tab键导航");
     }
 
     // 屏幕阅读器支持
     if (accessibility.ariaLabels.length > 0) {
-      accessibility.screenReaderSupport = '支持屏幕阅读器';
+      accessibility.screenReaderSupport = '支持屏幕阅读器'
     } else {
-      accessibility.screenReaderSupport = '需要改进屏幕阅读器支持';
+      accessibility.screenReaderSupport = '需要改进屏幕阅读器支持'
     }
 
     return accessibility;
@@ -177,7 +177,7 @@ ${doc.description}
 
 | 属性名 | 类型 | 必需 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-`;`
+`;
 
     for (const prop of doc.props) {
       markdown += `| ${prop.name} | ${prop.type} | ${prop.required ? '是' : '否'} | ${prop.defaultValue || '-'} | ${prop.description || "-'} |\n`;'`
@@ -186,7 +186,7 @@ ${doc.description}
     markdown += ``
 ## 使用示例
 
-`;`
+`;
 
     for (const example of doc.examples) {
       markdown += `### ${example.title}`
@@ -197,7 +197,7 @@ ${example.description || "'}'`
 ${example.code}
 \`\`\``
 
-`;`
+`;
     }
 
     markdown += `## 可访问性`
@@ -210,7 +210,7 @@ ${doc.accessibility.keyboardSupport.map(support => `- ${support}`).join('\n')}'`
 
 ### 屏幕阅读器
 ${doc.accessibility.screenReaderSupport}
-`;`
+`;
 
     return markdown;
   }

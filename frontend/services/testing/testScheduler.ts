@@ -6,14 +6,14 @@ export interface ScheduledTest     {
   testType: string;
   config: any;
   schedule: {
-    type: 'once' | 'recurring';
+    type: 'once' | 'recurring'
     startTime: string;
     endTime?: string;
-    interval?: 'hourly' | 'daily' | 'weekly' | 'monthly';
+    interval?: 'hourly' | 'daily' | 'weekly' | 'monthly'
     cron?: string;
     timezone: string;
   };
-  status: 'active' | 'paused' | 'completed' | 'failed';
+  status: 'active' | 'paused' | 'completed' | 'failed'
   lastRun?: string;
   nextRun?: string;
   runCount: number;
@@ -40,14 +40,14 @@ export interface TestExecution     {
   id: string;
   scheduleId: string;
   testId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
   startTime: string;
   endTime?: string;
   duration?: number;
   results?: any;
   error?: string;
   retryCount: number;
-  triggeredBy: 'schedule' | 'manual';
+  triggeredBy: 'schedule' | 'manual'
 }
 
 export interface BatchTestConfig     {
@@ -60,7 +60,7 @@ export interface BatchTestConfig     {
     dependencies?: string[];
   }>;
   execution: {
-    mode: 'sequential' | 'parallel' | 'mixed';
+    mode: 'sequential' | 'parallel' | 'mixed'
     maxConcurrency?: number;
     timeout: number;
     continueOnFailure: boolean;
@@ -172,7 +172,7 @@ export class TestScheduler {
       await this.runTest(execution, schedule);
     } catch (error) {
       execution.status = 'failed',
-      execution.error = error instanceof Error ? error.message : 'Unknown error';
+      execution.error = error instanceof Error ? error.message : 'Unknown error'
       execution.endTime = new Date().toISOString();
     }
 
@@ -364,7 +364,7 @@ export class TestScheduler {
 
     } catch (error) {
       execution.status = 'failed',
-      execution.error = error instanceof Error ? error.message : 'Unknown error';
+      execution.error = error instanceof Error ? error.message : 'Unknown error'
       execution.endTime = new Date().toISOString();
 
       // 重试逻辑

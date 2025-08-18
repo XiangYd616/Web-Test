@@ -6,7 +6,7 @@
  * 提供React组件中异步操作的统一错误处理
  */
 
-import { useCallback, useState, useRef    } from 'react';import { errorService    } from '../services/errorService';export interface AsyncErrorState     {'
+import { useCallback, useState, useRef    } from 'react';import { errorService    } from '../services/errorService';export interface AsyncErrorState     {
   isLoading: boolean;
   error: Error | null;
   lastError: Error | null;
@@ -63,7 +63,7 @@ export function useAsyncErrorHandler(
       retryDelay = 1000,
       showNotification = true,
       logError = true,
-      context = 'Async operation','
+      context = 'Async operation',
       onError,
       onRetry,
       onSuccess
@@ -200,12 +200,12 @@ export function useAsyncErrorHandler(
 function isRetryableError(error: Error): boolean {
   const retryablePatterns = [
     "network','`
-    'timeout','
-    'connection','
-    'fetch','
-    'ECONNRESET','
-    'ENOTFOUND','
-    'ETIMEDOUT';
+    'timeout',
+    'connection',
+    'fetch',
+    'ECONNRESET',
+    'ENOTFOUND',
+    'ETIMEDOUT
   ];
 
   const errorMessage = error.message.toLowerCase();
@@ -239,7 +239,7 @@ export function useApiErrorHandler() {
     retryDelay: 1000,
     showNotification: true,
     logError: true,
-    context: 'API call';
+    context: 'API call'
   });
 }
 
@@ -252,7 +252,7 @@ export function useFileErrorHandler() {
     retryDelay: 500,
     showNotification: true,
     logError: true,
-    context: 'File operation';
+    context: 'File operation'
   });
 }
 
@@ -265,6 +265,6 @@ export function useDatabaseErrorHandler() {
     retryDelay: 2000,
     showNotification: false,
     logError: true,
-    context: 'Database operation';
+    context: 'Database operation'
   });
 }

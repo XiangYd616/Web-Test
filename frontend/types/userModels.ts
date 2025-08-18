@@ -14,29 +14,29 @@ export type Email   = string;// ==================== 枚举定义 ==============
  * 用户角色枚举 - 与数据库约束保持一致
  */
 export enum UserRole {
-  USER = 'user','
-  ADMIN = 'admin','
-  MODERATOR = 'moderator','
-  TESTER = 'tester','
-  MANAGER = 'manager';
+  USER = 'user',
+  ADMIN = 'admin',
+  MODERATOR = 'moderator',
+  TESTER = 'tester',
+  MANAGER = 'manager'
 }
 
 /**
  * 用户状态枚举 - 与数据库约束保持一致
  */
 export enum UserStatus {
-  ACTIVE = 'active','
-  INACTIVE = 'inactive','
-  SUSPENDED = 'suspended';
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended'
 }
 
 /**
  * 用户计划枚举 - 与数据库约束保持一致
  */
 export enum UserPlan {
-  FREE = 'free','
-  PRO = 'pro','
-  ENTERPRISE = 'enterprise';
+  FREE = 'free',
+  PRO = 'pro',
+  ENTERPRISE = 'enterprise'
 }
 
 // ==================== 用户偏好设置 ====================
@@ -54,7 +54,7 @@ export interface NotificationSettings     {
 
 export interface DashboardSettings     {
   defaultView: string;
-  layout: 'grid' | 'list' | 'cards';
+  layout: 'grid' | 'list' | 'cards'
   widgets: string[];
   refreshInterval: number; // 秒
   showTips: boolean;
@@ -74,11 +74,11 @@ export interface PrivacySettings     {
 }
 
 export interface UserPreferences     {
-  theme: 'light' | 'dark' | 'auto';
-  language: 'zh-CN' | 'en-US' | 'ja-JP';
+  theme: 'light' | 'dark' | 'auto'
+  language: 'zh-CN' | 'en-US' | 'ja-JP'
   timezone: string;
-  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY';
-  timeFormat: '24h' | '12h';
+  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY'
+  timeFormat: '24h' | '12h'
   notifications: NotificationSettings;
   dashboard: DashboardSettings;
   testing: TestingSettings;
@@ -261,8 +261,8 @@ export interface UserFilter     {
 export interface UserListQuery     {
   page?: number;
   limit?: number;
-  sortBy?: 'createdAt' | 'lastLoginAt' | 'username' | 'email';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: 'createdAt' | 'lastLoginAt' | 'username' | 'email'
+  sortOrder?: 'asc' | 'desc'
   filter?: UserFilter;
 }
 
@@ -289,18 +289,18 @@ export interface UserActivityLog     {
   ipAddress: string;
   userAgent: string;
   timestamp: Timestamp;
-  severity: 'low' | 'medium' | 'high';
+  severity: 'low' | 'medium' | 'high'
   metadata?: Record<string, any>;
 }
 
 // ==================== 默认值定义 ====================
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  theme: 'auto','
-  language: 'zh-CN','
-  timezone: 'Asia/Shanghai','
-  dateFormat: 'YYYY-MM-DD','
-  timeFormat: '24h','
+  theme: 'auto',
+  language: 'zh-CN',
+  timezone: 'Asia/Shanghai',
+  dateFormat: 'YYYY-MM-DD',
+  timeFormat: '24h',
   notifications: {
     email: true,
     sms: false,
@@ -312,8 +312,8 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
     securityAlert: true
   },
   dashboard: {
-    defaultView: 'overview','
-    layout: 'grid','
+    defaultView: 'overview',
+    layout: 'grid',
     widgets: [],
     refreshInterval: 30,
     showTips: true
@@ -332,7 +332,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
 };
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-  timezone: 'Asia/Shanghai';
+  timezone: 'Asia/Shanghai'
 };
 
 // ==================== 类型守卫函数 ====================
@@ -392,7 +392,7 @@ export function toDatabaseFields(user: User, passwordHash?: string): UserDatabas
     id: user.id,
     username: user.username,
     email: user.email,
-    password_hash: passwordHash || '', // 需要单独处理'
+    password_hash: passwordHash || '', // 需要单独处理
     first_name: user.profile.firstName,
     last_name: user.profile.lastName,
     role: user.role,

@@ -32,7 +32,7 @@ export const dynamicImport = async <T = any>(importFn: () => Promise<T>,
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Import timeout')), timeout);'
+        setTimeout(() => reject(new Error('Import timeout')), timeout);
       });
 
       const result = await Promise.race([importFn(), timeoutPromise]);
@@ -61,7 +61,7 @@ export const dynamicImport = async <T = any>(importFn: () => Promise<T>,
     }
   }
 
-  throw lastError || new Error('Dynamic import failed');'
+  throw lastError || new Error('Dynamic import failed");
 };
 
 /**
@@ -69,7 +69,7 @@ export const dynamicImport = async <T = any>(importFn: () => Promise<T>,
  */
 export const preloadModule = (importFn: () => Promise<any>): void => {
   // 在空闲时预加载
-  if ('requestIdleCallback' in window) {'
+  if ('requestIdleCallback' in window) {
     requestIdleCallback(() => {
       importFn().catch(() => {
         // 忽略预加载错误

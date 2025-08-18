@@ -7,9 +7,22 @@
  * 包括数据库服务、业务逻辑服务、外部服务等
  */
 
-import { User, UserProfile, UserSession, TestConfiguration, TestExecution, TestResult, TestReport, CreateUserData, UpdateUserData, CreateTestConfigData, UpdateTestConfigData, CreateTestExecutionData, UpdateTestExecutionData, QueryResult, PaginatedQueryResult, RequestContext } from './models';
+import {
+  CreateTestConfigData,
+  CreateUserData,
+  PaginatedQueryResult,
+  QueryResult,
+  TestConfiguration,
+  TestExecution,
+  TestReport,
+  TestResult,
+  UpdateTestConfigData,
+  UpdateUserData,
+  User,
+  UserProfile,
+  UserSession
+} from './models';
 
-import { PaginationMeta } from '../../shared/types/standardApiResponse';
 
 // ==================== 数据库服务接口 ====================
 
@@ -18,16 +31,16 @@ export interface DatabaseService {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   isConnected(): boolean;
-  
+
   // 事务管理
   beginTransaction(): Promise<any>;
   commitTransaction(transaction: any): Promise<void>;
   rollbackTransaction(transaction: any): Promise<void>;
-  
+
   // 查询执行
   query<T = any>(sql: string, params?: any[]): Promise<QueryResult<T>>;
   queryOne<T = any>(sql: string, params?: any[]): Promise<T | null>;
-  
+
   // 健康检查
   healthCheck(): Promise<boolean>;
 }
@@ -40,24 +53,24 @@ export interface UserService {
   createUser(userData: CreateUserData): Promise<User>;
   updateUser(userId: number, userData: UpdateUserData): Promise<User>;
   deleteUser(userId: number): Promise<void>;
-  
+
   // 用户查询
   getUserById(userId: number): Promise<User | null>;
   getUserByUsername(username: string): Promise<User | null>;
   getUserByEmail(email: string): Promise<User | null>;
   getUsers(query: GetUsersQuery): Promise<PaginatedQueryResult<User>>;
-  
+
   // 密码管理
   changePassword(userId: number, currentPassword: string, newPassword: string): Promise<void>;
   resetPassword(email: string): Promise<string>; // 返回重置令牌
   confirmPasswordReset(token: string, newPassword: string): Promise<void>;
-  
+
   // 用户状态管理
   activateUser(userId: number): Promise<void>;
   deactivateUser(userId: number): Promise<void>;
   lockUser(userId: number, duration?: number): Promise<void>;
   unlockUser(userId: number): Promise<void>;
-  
+
   // 用户资料
   getUserProfile(userId: number): Promise<UserProfile | null>;
   updateUserProfile(userId: number, profileData: Partial<UserProfile>): Promise<UserProfile>;
@@ -112,7 +125,7 @@ export interface TestExecutionService {
   getTestExecution(executionId: number): Promise<TestExecution | null>;
   getTestExecutions(query: GetTestExecutionsQuery): Promise<PaginatedQueryResult<TestExecution>>;
   updateTestStatus(executionId: number, status: string, metadata?: any): Promise<void>;
-  
+
   // 测试引擎管理
   getAvailableEngines(): Promise<TestEngine[]>;
   getEngineStatus(engineId: string): Promise<EngineStatus>;
@@ -160,7 +173,7 @@ export interface ReportService {
   getReport(reportId: number): Promise<TestReport | null>;
   getReports(query: GetReportsQuery): Promise<PaginatedQueryResult<TestReport>>;
   deleteReport(reportId: number): Promise<void>;
-  
+
   // 报告模板管理
   getReportTemplates(): Promise<ReportTemplate[]>;
   createReportTemplate(templateData: any): Promise<ReportTemplate>;
@@ -214,7 +227,7 @@ export interface FileService {
   downloadFile(fileId: string): Promise<FileStream>;
   deleteFile(fileId: string): Promise<void>;
   getFileInfo(fileId: string): Promise<FileRecord | null>;
-  
+
   // 文件存储管理
   getStorageStats(): Promise<StorageStats>;
   cleanupExpiredFiles(): Promise<number>;
@@ -260,7 +273,7 @@ export interface NotificationService {
   sendSMS(to: string, message: string): Promise<void>;
   sendWebSocketMessage(userId: number, message: any): Promise<void>;
   broadcastMessage(message: any, userIds?: number[]): Promise<void>;
-  
+
   // 通知模板管理
   getEmailTemplate(templateName: string): Promise<EmailTemplate | null>;
   renderEmailTemplate(templateName: string, data: any): Promise<string>;
@@ -282,7 +295,7 @@ export interface CacheService {
   delete(key: string): Promise<void>;
   clear(pattern?: string): Promise<void>;
   exists(key: string): Promise<boolean>;
-  
+
   // 缓存统计
   getStats(): Promise<CacheStats>;
 }
@@ -343,50 +356,28 @@ export interface ServiceContainer {
 // ==================== 导出所有服务类型 ====================
 
 export type {
-  // 数据库服务
-  DatabaseService,
-  
-  // 用户相关服务
-  UserService,
-  SessionService,
-  GetUsersQuery,
-  
-  // 测试相关服务
-  TestConfigService,
-  TestExecutionService,
-  TestResultService,
-  GetTestConfigsQuery,
-  GetTestExecutionsQuery,
-  GetTestResultsQuery,
-  
-  // 报告服务
-  ReportService,
-  CreateReportData,
-  GetReportsQuery,
-  ReportFile,
-  ReportTemplate,
-  
-  // 文件服务
-  FileService,
-  FileUpload,
-  FileRecord,
-  FileStream,
-  StorageStats,
-  
-  // 通知服务
-  NotificationService,
-  EmailTemplate,
-  
+
   // 缓存服务
   CacheService,
-  CacheStats,
-  
-  // 验证和工具
-  ValidationResult,
-  ValidationError,
-  TestEngine,
-  EngineStatus,
-  
+  CacheStats, CreateReportData,
+  // 数据库服务
+  DatabaseService, EmailTemplate, EngineStatus, FileRecord,
+  // 文件服务
+  FileService, FileStream, FileUpload, GetReportsQuery, GetTestConfigsQuery,
+  GetTestExecutionsQuery,
+  GetTestResultsQuery, GetUsersQuery,
+  // 通知服务
+  NotificationService, ReportFile,
+  // 报告服务
+  ReportService, ReportTemplate,
   // 服务容器
-  ServiceContainer
+  ServiceContainer, SessionService, StorageStats,
+  // 测试相关服务
+  TestConfigService, TestEngine, TestExecutionService,
+  TestResultService,
+  // 用户相关服务
+  UserService, ValidationError,
+  // 验证和工具
+  ValidationResult
 };
+

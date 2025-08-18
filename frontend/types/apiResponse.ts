@@ -11,7 +11,7 @@ export {
   StandardApiError as ApiError, StandardApiErrorResponse as ApiErrorResponse, StandardApiMeta as ApiMeta,
   StandardApiResponse as ApiResponse,
   StandardApiSuccessResponse as ApiSuccessResponse, StandardCreatedResponse as CreatedResponse, StandardErrorCode as ErrorCode, StandardErrorMessages as ErrorMessages, HttpStatusCode, isStandardApiErrorResponse as isApiErrorResponse, isStandardApiSuccessResponse as isApiSuccessResponse, StandardNoContentResponse as NoContentResponse, StandardPaginatedResponse as PaginatedResponse, PaginationMeta, StandardStatusCodeMap as StatusCodeMap, Timestamp, UUID, ValidationError
-} from '../../shared/types/standardApiResponse';
+} from '../../shared/types/standardApiResponse
 // ==================== 向后兼容的类型别名 ====================
 
 // 为了向后兼容，保留一些旧的类型别名
@@ -20,11 +20,11 @@ export type PaginationInfo   = PaginationMeta;// ==================== 向后兼�
 // 重新导出一些常用的工具函数，保持向后兼容性
 export {
   createCreatedResponse, createErrorResponse, createNoContentResponse, createPaginatedResponse, createPaginationMeta as createPagination, createSuccessResponse, generateRequestId
-} from '../../shared/utils/apiResponseBuilder';
+} from '../../shared/utils/apiResponseBuilder
 // ==================== 前端特有的接口定义 ====================
 
 export interface RequestConfig     {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
   headers?: Record<string, string>;
   body?: string | FormData | URLSearchParams | Record<string, any>;
   timeout?: number;
@@ -45,7 +45,7 @@ export interface QueryParams     {
   page?: number;
   limit?: number;
   sort?: string;
-  order?: 'asc' | 'desc';
+  order?: 'asc' | 'desc'
   search?: string;
   filters?: Record<string, any>;
 }
@@ -97,7 +97,7 @@ export function extractError<T>(response: ApiResponse<T>): ApiError | null   {
  * 提取分页信息
  */
 export function extractPagination<T>(response: ApiResponse<T>): PaginationMeta | null   {
-  if (isApiSuccessResponse(response) && 'pagination' in response.meta) {'
+  if (isApiSuccessResponse(response) && 'pagination' in response.meta) {
     return (response.meta as any).pagination;
   }
   return null;

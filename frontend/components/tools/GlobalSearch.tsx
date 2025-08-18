@@ -1,8 +1,8 @@
-import { Activity, ArrowRight, BarChart3, Bell, Book, Clock, Code, Download, Globe, HelpCircle, Home, Key, Lock, Monitor, Play, Search, Settings, Shield, TestTube, TrendingUp, Upload, User, X, Zap    } from 'lucide-react';import React, { useEffect, useRef, useState    } from 'react';import { useNavigate    } from 'react-router-dom';import { default as globalSearchService    } from '../../services/search/globalSearchService';interface SearchResult   {'
+import { Activity, ArrowRight, BarChart3, Bell, Book, Clock, Code, Download, Globe, HelpCircle, Home, Key, Lock, Monitor, Play, Search, Settings, Shield, TestTube, TrendingUp, Upload, User, X, Zap    } from 'lucide-react';import React, { useEffect, useRef, useState    } from 'react';import { useNavigate    } from 'react-router-dom';import { default as globalSearchService    } from '../../services/search/globalSearchService';interface SearchResult   {
   id: string;
   title: string;
   description: string;
-  type: 'test' | 'report' | 'setting' | 'help' | 'page';
+  type: 'test' | 'report' | 'setting' | 'help' | 'page'
   url: string;
   score: number;
   icon?: string;
@@ -22,7 +22,7 @@ const iconMap: Record<string, React.ComponentType<any>>  = {
   Code, Monitor, Activity, Upload, Download, User, Bell, Key, Play,
   Book, Lock, TestTube, Clock
 };
-const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQuery = '' }) => {'
+const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQuery ='' }) => {
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);
@@ -130,7 +130,7 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);'
+    document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener("keydown', handleKeyDown);'
   }, [isOpen, selectedIndex, results, query]);
 
@@ -170,20 +170,20 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
   };
 
   // 渲染图标
-  const renderIcon = (iconName: string, className: string = "w-4 h-4') => {'`
+  const renderIcon = (iconName: string, className: string ="w-4 h-4') => {'`
     const IconComponent = iconMap[iconName];
-    return IconComponent ? <IconComponent className={className}    /> : <Search className={className}    />;
+    return IconComponent ? <IconComponent className={className}    /> : <Search className={className}    />
   };
 
   // 高亮搜索词
   const highlightText = (text: string, searchQuery: string) => {
     if (!searchQuery.trim()) return text;
 
-    const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi');'`
+    const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");`
     const parts = text.split(regex);
 
     return parts.map((part, index) => regex.test(part) ? (
-        <span key={index} className= "bg-blue-500/30 text-blue-300 font-medium'>`
+        <span key={index} className="bg-blue-500/30 text-blue-300 font-medium'>`
           {part}
         </span>
       ) : part
@@ -192,61 +192,61 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
 
   if (!isOpen) return null;
 
-  return (<div className= 'fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-start justify-center pt-20'>
-      <div className= 'w-full max-w-2xl mx-4'>
+  return (<div className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-start justify-center pt-20'>
+      <div className='w-full max-w-2xl mx-4'>
         {/* 搜索框 */}
-        <div className= 'bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl overflow-hidden'>
-          <div className= 'flex items-center p-4 border-b border-gray-600/50'>
-            <Search className= 'w-5 h-5 text-gray-400 mr-3'    />
+        <div className='bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl overflow-hidden'>
+          <div className='flex items-center p-4 border-b border-gray-600/50'>
+            <Search className='w-5 h-5 text-gray-400 mr-3'    />
             <input
               ref={searchInputRef}
-              type= 'text';
+              type='text'
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder= '搜索测试、报告、设置...';
-              className= 'flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-lg';
+              placeholder='搜索测试、报告、设置...'
+              className='flex-1 bg-transparent text-white placeholder-gray-400 outline-none text-lg'
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {'
+                if (e.key ==='Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSearch(query);
                 }
               }}
             />
             {isSearching && (
-              <div className= 'animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-3'></div>
+              <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-3'></div>
             )}
             <button
               onClick={onClose}
-              className= 'p-1 text-gray-400 hover:text-white transition-colors';
-              aria-label= '关闭搜索';
-              title= '关闭搜索';
+              className='p-1 text-gray-400 hover:text-white transition-colors'
+              aria-label='关闭搜索'
+              title='关闭搜索'
             >
-              <X className= 'w-5 h-5'    />
+              <X className='w-5 h-5'    />
             </button>
           </div>
 
           {/* 搜索结果或历史记录 */}
-          <div ref={resultsRef} className= 'max-h-96 overflow-y-auto'>
+          <div ref={resultsRef} className='max-h-96 overflow-y-auto'>
             {showHistory && searchHistory.length > 0 && (
-              <div className= 'p-4'>
-                <div className= 'flex items-center justify-between mb-3'>
-                  <div className= 'flex items-center text-gray-400'>
-                    <Clock className= 'w-4 h-4 mr-2'    />
-                    <span className= 'text-sm font-medium'>最近搜索</span>
+              <div className='p-4'>
+                <div className='flex items-center justify-between mb-3'>
+                  <div className='flex items-center text-gray-400'>
+                    <Clock className='w-4 h-4 mr-2'    />
+                    <span className='text-sm font-medium'>最近搜索</span>
                   </div>
                   <button
                     onClick={clearHistory}
-                    className= 'text-xs text-gray-500 hover:text-gray-300 transition-colors';
+                    className='text-xs text-gray-500 hover:text-gray-300 transition-colors'
                   >
                     清除
                   </button>
                 </div>
-                <div className= 'space-y-1'>
+                <div className='space-y-1'>
                   {searchHistory.slice(0, 5).map((historyItem, index) => (
                     <button
                       key={index}
                       onClick={() => handleHistoryClick(historyItem)}
-                      className= 'w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors';
+                      className='w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors'
                     >
                       {historyItem}
                     </button>
@@ -255,39 +255,39 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
               </div>
             )}
 
-            {!showHistory && query && (<div className= 'p-2'>
+            {!showHistory && query && (<div className='p-2'>
                 {results.length > 0 ? (
-                  <div className= 'space-y-1'>
+                  <div className='space-y-1'>
                     {results.map((result, index) => (
                       <button
                         key={result.id}
                         onClick={() => handleResultClick(result)}
                         className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${selectedIndex === index`}
-                          ? "bg-blue-500/20 border border-blue-500/30';'`
-                          : 'hover:bg-gray-700/50';
+                          ? "bg-blue-500/20 border border-blue-500/30";`
+                          : 'hover:bg-gray-700/50'
                           }`}`
                       >
-                        <div className= "flex items-center space-x-3'>`
-                          <div className={`p-2 rounded-lg ${result.type === 'page' ? 'bg-blue-500/20 text-blue-400' : ''`}
-                            result.type === "test' ? 'bg-green-500/20 text-green-400' : ''`
-                              result.type === 'setting' ? 'bg-purple-500/20 text-purple-400' : ''
-                                result.type === 'help' ? 'bg-orange-500/20 text-orange-400' : ''
-                                  'bg-gray-500/20 text-gray-400';
+                        <div className="flex items-center space-x-3'>`
+                          <div className={`p-2 rounded-lg ${result.type ==='page' ? 'bg-blue-500/20 text-blue-400' : ''`}
+                            result.type ==="test' ? 'bg-green-500/20 text-green-400' : ''`
+                              result.type ==='setting' ? 'bg-purple-500/20 text-purple-400' : ''
+                                result.type ==='help' ? 'bg-orange-500/20 text-orange-400' : ''
+                                  'bg-gray-500/20 text-gray-400
                             }`}>`
                             {renderIcon(result.icon || "Search')}'`
                           </div>
-                          <div className= 'flex-1 min-w-0'>
-                            <div className= 'flex items-center justify-between'>
-                              <h3 className= 'font-medium text-white truncate'>
+                          <div className='flex-1 min-w-0'>
+                            <div className='flex items-center justify-between'>
+                              <h3 className='font-medium text-white truncate'>
                                 {highlightText(result.title, query)}
                               </h3>
-                              <ArrowRight className= 'w-4 h-4 text-gray-400 ml-2 flex-shrink-0'    />
+                              <ArrowRight className='w-4 h-4 text-gray-400 ml-2 flex-shrink-0'    />
                             </div>
-                            <p className= 'text-sm text-gray-400 truncate mt-1'>
+                            <p className='text-sm text-gray-400 truncate mt-1'>
                               {highlightText(result.description, query)}
                             </p>
-                            <div className= 'flex items-center mt-2'>
-                              <span className= 'text-xs px-2 py-1 bg-gray-600/50 text-gray-300 rounded'>
+                            <div className='flex items-center mt-2'>
+                              <span className='text-xs px-2 py-1 bg-gray-600/50 text-gray-300 rounded'>
                                 {result.category}
                               </span>
                             </div>
@@ -297,10 +297,10 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
                     ))}
                   </div>
                 ) : !isSearching ? (
-                  <div className= 'p-8 text-center text-gray-400'>
-                    <Search className= 'w-8 h-8 mx-auto mb-3 text-gray-500'    />
-                    <p className= 'text-sm'>没有找到相关结果</p>
-                    <p className= 'text-xs text-gray-500 mt-1'>
+                  <div className='p-8 text-center text-gray-400'>
+                    <Search className='w-8 h-8 mx-auto mb-3 text-gray-500'    />
+                    <p className='text-sm'>没有找到相关结果</p>
+                    <p className='text-xs text-gray-500 mt-1'>
                       尝试使用不同的关键词或查看帮助文档
                     </p>
                   </div>
@@ -309,17 +309,17 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
             )}
 
             {/* 搜索建议 */}
-            {suggestions.length > 0 && query && !showHistory && (<div className= 'border-t border-gray-600/50 p-4'>
-                <div className= 'flex items-center text-gray-400 mb-2'>
-                  <TrendingUp className= 'w-4 h-4 mr-2'    />
-                  <span className= 'text-sm font-medium'>搜索建议</span>
+            {suggestions.length > 0 && query && !showHistory && (<div className='border-t border-gray-600/50 p-4'>
+                <div className='flex items-center text-gray-400 mb-2'>
+                  <TrendingUp className='w-4 h-4 mr-2'    />
+                  <span className='text-sm font-medium'>搜索建议</span>
                 </div>
-                <div className= 'flex flex-wrap gap-2'>
+                <div className='flex flex-wrap gap-2'>
                   {suggestions.map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => setQuery(suggestion)}
-                      className= 'px-3 py-1 bg-gray-700/50 text-gray-300 text-sm rounded-full hover:bg-gray-600/50 transition-colors';
+                      className='px-3 py-1 bg-gray-700/50 text-gray-300 text-sm rounded-full hover:bg-gray-600/50 transition-colors'
                     >
                       {suggestion}
                     </button>
@@ -330,9 +330,9 @@ const GlobalSearch: React.FC<GlobalSearchProps>  = ({ isOpen, onClose, initialQu
           </div>
 
           {/* 快捷提示 */}
-          <div className= 'border-t border-gray-600/50 px-4 py-3 bg-gray-800/50'>
-            <div className= 'flex items-center justify-between text-xs text-gray-500'>
-              <div className= 'flex items-center space-x-4'>
+          <div className='border-t border-gray-600/50 px-4 py-3 bg-gray-800/50'>
+            <div className='flex items-center justify-between text-xs text-gray-500'>
+              <div className='flex items-center space-x-4'>
                 <span>↑↓ 导航</span>
                 <span>↵ 选择</span>
                 <span>ESC 关闭</span>

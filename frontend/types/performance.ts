@@ -31,7 +31,7 @@ declare global {
 
 export interface PerformanceConfig     {
   /** 检测级别 */
-  level: 'basic' | 'standard' | 'comprehensive';
+  level: 'basic' | 'standard' | 'comprehensive'
   /** 页面速度检测 */
   pageSpeed: boolean;
 
@@ -60,7 +60,7 @@ export interface PerformanceConfig     {
   mobilePerformance: boolean;
 
   /** 设备类型 */
-  device: 'desktop' | 'mobile' | 'both';
+  device: 'desktop' | 'mobile' | 'both'
   /** 超时时间（秒） */
   timeout: number;
 
@@ -151,7 +151,7 @@ export interface ResourceAnalysis     {
 
 export interface CacheAnalysis     {
   /** 缓存策略 */
-  strategy: 'none' | 'basic' | 'advanced';
+  strategy: 'none' | 'basic' | 'advanced'
   /** 缓存命中率 */
   hitRate: number;
 
@@ -178,7 +178,7 @@ export interface CacheAnalysis     {
 
 export interface CompressionAnalysis     {
   /** 压缩类型 */
-  type: 'none' | 'gzip' | 'brotli' | 'deflate';
+  type: 'none' | 'gzip' | 'brotli' | 'deflate'
   /** 压缩率 */
   ratio: number;
 
@@ -220,7 +220,7 @@ export interface PerformanceTestResult     {
   overallScore: number;
 
   /** 性能等级 */
-  grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
+  grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'
   /** Core Web Vitals */
   coreWebVitals?: CoreWebVitals;
 
@@ -258,7 +258,7 @@ export interface PerformanceTestResult     {
 
 export interface PerformanceRecommendation     {
   /** 建议类型 */
-  type: 'critical' | 'important' | 'minor';
+  type: 'critical' | 'important' | 'minor'
   /** 建议标题 */
   title: string;
 
@@ -266,18 +266,18 @@ export interface PerformanceRecommendation     {
   description: string;
 
   /** 预期收益 */
-  impact: 'high' | 'medium' | 'low';
+  impact: 'high' | 'medium' | 'low'
   /** 实施难度 */
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: 'easy' | 'medium' | 'hard'
   /** 相关指标 */
   metrics: string[];
 }
 
 export interface PerformanceIssue     {
   /** 问题类型 */
-  type: 'speed' | 'size' | 'optimization' | 'caching' | 'compression';
+  type: 'speed' | 'size' | 'optimization' | 'caching' | 'compression'
   /** 严重程度 */
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: 'critical' | 'high' | 'medium' | 'low'
   /** 问题描述 */
   description: string;
 
@@ -295,7 +295,7 @@ export interface PerformanceIssue     {
 
 export interface PerformanceTestProgress     {
   /** 当前阶段 */
-  phase: 'initializing' | 'analyzing' | 'measuring' | 'optimizing' | 'reporting' | 'completed' | 'failed';
+  phase: 'initializing' | 'analyzing' | 'measuring' | 'optimizing' | 'reporting' | 'completed' | 'failed'
   /** 进度百分比 (0-100) */
   progress: number;
 
@@ -323,7 +323,7 @@ export interface PerformanceTestProgress     {
 
 export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
   basic: {
-    level: 'basic','
+    level: 'basic',
     pageSpeed: true,
     coreWebVitals: false,
     resourceOptimization: false,
@@ -333,13 +333,13 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
     javascriptOptimization: false,
     cssOptimization: false,
     mobilePerformance: false,
-    device: 'desktop','
+    device: 'desktop',
     timeout: 30,
     retries: 1
   },
 
   standard: {
-    level: 'standard','
+    level: 'standard',
     pageSpeed: true,
     coreWebVitals: true,
     resourceOptimization: true,
@@ -349,13 +349,13 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
     javascriptOptimization: false,
     cssOptimization: false,
     mobilePerformance: true,
-    device: 'both','
+    device: 'both',
     timeout: 60,
     retries: 2
   },
 
   comprehensive: {
-    level: 'comprehensive','
+    level: 'comprehensive',
     pageSpeed: true,
     coreWebVitals: true,
     resourceOptimization: true,
@@ -365,7 +365,7 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
     javascriptOptimization: true,
     cssOptimization: true,
     mobilePerformance: true,
-    device: 'both','
+    device: 'both',
     timeout: 120,
     retries: 3
   }

@@ -92,12 +92,12 @@ class QueryOptimizer {
     } = options;
 
     if (enableTransaction && !enableParallel) {
-      
-        return this.executeBatchInTransaction(queries);
-      } else if (enableParallel) {
-      
-        return this.executeBatchInParallel(queries, maxConcurrency);
-      } else {
+
+      return this.executeBatchInTransaction(queries);
+    } else if (enableParallel) {
+
+      return this.executeBatchInParallel(queries, maxConcurrency);
+    } else {
       return this.executeBatchSequential(queries);
     }
   }
@@ -134,13 +134,13 @@ class QueryOptimizer {
    */
   async executeBatchInParallel(queries, maxConcurrency) {
     const results = [];
-    
+
     for (let i = 0; i < queries.length; i += maxConcurrency) {
       const batch = queries.slice(i, i + maxConcurrency);
-      const batchPromises = batch.map(query => 
+      const batchPromises = batch.map(query =>
         this.executeOptimizedQuery(query.sql, query.params, query.options)
       );
-      
+
       const batchResults = await Promise.all(batchPromises);
       results.push(...batchResults);
     }
@@ -153,11 +153,11 @@ class QueryOptimizer {
    */
   async executeBatchSequential(queries) {
     const results = [];
-    
+
     for (const query of queries) {
       const result = await this.executeOptimizedQuery(
-        query.sql, 
-        query.params, 
+        query.sql,
+        query.params,
         query.options
       );
       results.push(result);
@@ -174,14 +174,14 @@ class QueryOptimizer {
       const explainSql = `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${sql}`;
       const pool = getPool();
       const result = await pool.query(explainSql, params);
-      
+
       const plan = result.rows[0]['QUERY PLAN'][0];
       const executionTime = plan['Execution Time'];
       const planningTime = plan['Planning Time'];
 
       // 检查潜在问题
       const issues = this.detectQueryIssues(plan);
-      
+
       if (issues.length > 0) {
         Logger.warn('Query performance issues detected', {
           sql: sql.substring(0, 100) + '...',
@@ -260,7 +260,7 @@ class QueryOptimizer {
 
     // 生成优化建议
     const suggestions = await this.generateOptimizationSuggestions(sql);
-    
+
     if (suggestions.length > 0) {
       Logger.info('Query optimization suggestions', {
         operationName,
@@ -319,7 +319,7 @@ class QueryOptimizer {
    * 生成查询哈希
    */
   generateQueryHash(sql, params) {
-    const normalizedSql = sql.replace(//s+/g, ' ').trim().toLowerCase();
+    const normalizedSql = sql.replace(/\s+/g, ' ').trim().toLowerCase();
     const paramStr = JSON.stringify(params);
     return require('crypto')
       .createHash('md5')
@@ -379,7 +379,7 @@ class QueryOptimizer {
    */
   getPerformanceStats() {
     const stats = [];
-    
+
     for (const [queryHash, stat] of this.performanceStats.entries()) {
       stats.push({
         queryHash,
@@ -418,17 +418,17 @@ const queryOptimizer = new QueryOptimizer();
 module.exports = {
   QueryOptimizer,
   queryOptimizer,
-  
+
   // 便捷方法
-  executeOptimizedQuery: (sql, params, options) => 
+  executeOptimizedQuery: (sql, params, options) =>
     queryOptimizer.executeOptimizedQuery(sql, params, options),
-    
-  executeBatchQueries: (queries, options) => 
+
+  executeBatchQueries: (queries, options) =>
     queryOptimizer.executeBatchQueries(queries, options),
-    
-  getPerformanceStats: () => 
+
+  getPerformanceStats: () =>
     queryOptimizer.getPerformanceStats(),
-    
-  clearCache: () => 
+
+  clearCache: () =>
     queryOptimizer.clearCache()
 };

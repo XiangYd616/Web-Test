@@ -3,24 +3,24 @@
  * 提供前端错误处理、日志记录、用户通知的统一接口
  */
 
-import { toast    } from 'react-hot-toast';// 错误类型枚举'
+import { toast    } from 'react-hot-toast';// 错误类型枚举
 export enum ErrorType {
-  NETWORK = 'NETWORK','
-  VALIDATION = 'VALIDATION','
-  AUTHENTICATION = 'AUTHENTICATION','
-  AUTHORIZATION = 'AUTHORIZATION','
-  SERVER = 'SERVER','
-  CLIENT = 'CLIENT','
-  TIMEOUT = 'TIMEOUT','
-  UNKNOWN = 'UNKNOWN';
+  NETWORK = 'NETWORK',
+  VALIDATION = 'VALIDATION',
+  AUTHENTICATION = 'AUTHENTICATION',
+  AUTHORIZATION = 'AUTHORIZATION',
+  SERVER = 'SERVER',
+  CLIENT = 'CLIENT',
+  TIMEOUT = 'TIMEOUT',
+  UNKNOWN = 'UNKNOWN'
 }
 
 // 错误严重程度
 export enum ErrorSeverity {
-  LOW = 'LOW','
-  MEDIUM = 'MEDIUM','
-  HIGH = 'HIGH','
-  CRITICAL = 'CRITICAL';
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
 }
 
 // 标准化错误接口
@@ -44,7 +44,7 @@ interface ErrorHandlerConfig   {
   enableLogging: boolean;
   enableUserNotification: boolean;
   enableReporting: boolean;
-  logLevel: 'error' | 'warn' | 'info' | 'debug';
+  logLevel: 'error' | 'warn' | 'info' | 'debug'
 }
 
 class ErrorService {
@@ -72,7 +72,7 @@ class ErrorService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -84,7 +84,7 @@ class ErrorService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -110,7 +110,7 @@ class ErrorService {
       enableLogging: true,
       enableUserNotification: true,
       enableReporting: false,
-      logLevel: 'error','
+      logLevel: 'error',
       ...config
     };
   }
@@ -150,7 +150,7 @@ class ErrorService {
     const timestamp = new Date().toISOString();
 
     // 处理不同类型的错误输入
-    if (typeof error === 'string') {'
+    if (typeof error === 'string') {
       return {
         id,
         type: ErrorType.UNKNOWN,
@@ -186,7 +186,7 @@ class ErrorService {
     if (error?.response || error?.status) {
 
       const status = error.status || error.response?.status;
-      const message = error.message || error.response?.data?.message || '请求失败';
+      const message = error.message || error.response?.data?.message || '请求失败'
       return {
         id,
         type: this.getTypeFromStatus(status),
@@ -205,10 +205,10 @@ class ErrorService {
       id,
       type: ErrorType.UNKNOWN,
       severity: ErrorSeverity.MEDIUM,
-      message: error?.message || '未知错误','
+      message: error?.message || '未知错误',
       timestamp,
       context,
-      userFriendlyMessage: '发生了未知错误，请稍后重试','
+      userFriendlyMessage: '发生了未知错误，请稍后重试',
       retryable: true
     };
   }
@@ -219,22 +219,22 @@ class ErrorService {
   private determineErrorType(error: Error): ErrorType {
     const message = error.message.toLowerCase();
 
-    if (message.includes('network') || message.includes('fetch')) {'
+    if (message.includes('network') || message.includes('fetch')) {
       return ErrorType.NETWORK;
     }
-    if (message.includes('timeout')) {'
+    if (message.includes('timeout')) {
       return ErrorType.TIMEOUT;
     }
-    if (message.includes('unauthorized') || message.includes('401')) {'
+    if (message.includes('unauthorized') || message.includes('401')) {
       return ErrorType.AUTHENTICATION;
     }
-    if (message.includes('forbidden') || message.includes('403')) {'
+    if (message.includes('forbidden') || message.includes('403')) {
       return ErrorType.AUTHORIZATION;
     }
-    if (message.includes('validation') || message.includes('invalid')) {'
+    if (message.includes('validation') || message.includes('invalid')) {
       return ErrorType.VALIDATION;
     }
-    if (message.includes('server') || message.includes('500')) {'
+    if (message.includes('server') || message.includes('500')) {
       return ErrorType.SERVER;
     }
 
@@ -265,19 +265,19 @@ class ErrorService {
   private getUserFriendlyMessage(error: Error, type: ErrorType): string {
     switch (type) {
       case ErrorType.NETWORK:
-        return '网络连接失败，请检查您的网络设置';
+        return '网络连接失败，请检查您的网络设置'
       case ErrorType.TIMEOUT:
-        return '请求超时，请稍后重试';
+        return '请求超时，请稍后重试'
       case ErrorType.AUTHENTICATION:
-        return '登录已过期，请重新登录';
+        return '登录已过期，请重新登录'
       case ErrorType.AUTHORIZATION:
-        return '权限不足，无法执行此操作';
+        return '权限不足，无法执行此操作'
       case ErrorType.VALIDATION:
-        return '输入信息有误，请检查后重试';
+        return '输入信息有误，请检查后重试'
       case ErrorType.SERVER:
-        return '服务器暂时不可用，请稍后重试';
+        return '服务器暂时不可用，请稍后重试'
       default:
-        return '操作失败，请稍后重试';
+        return '操作失败，请稍后重试'
     }
   }
 
@@ -287,15 +287,15 @@ class ErrorService {
   private getSuggestions(error: Error, type: ErrorType): string[] {
     switch (type) {
       case ErrorType.NETWORK:
-        return ['检查网络连接', '尝试刷新页面', '联系网络管理员'];'
+        return ['检查网络连接', '尝试刷新页面', '联系网络管理员"];"
       case ErrorType.TIMEOUT:
-        return ['稍后重试', '检查网络速度', '减少并发操作'];'
+        return ['稍后重试', '检查网络速度', '减少并发操作"];"
       case ErrorType.AUTHENTICATION:
-        return ['重新登录', '清除浏览器缓存', '联系管理员'];'
+        return ['重新登录', '清除浏览器缓存', '联系管理员"];"
       case ErrorType.VALIDATION:
-        return ['检查输入格式', '确认必填字段', '参考帮助文档'];'
+        return ['检查输入格式', '确认必填字段', '参考帮助文档"];"
       default:
-        return ['刷新页面重试', '清除浏览器缓存', '联系技术支持'];'
+        return ['刷新页面重试', '清除浏览器缓存', '联系技术支持"];"
     }
   }
 
@@ -332,18 +332,18 @@ class ErrorService {
    */
   private getStatusMessage(status: number): string {
     const messages: Record<number, string>  = {
-      400: '请求参数错误','
-      401: '登录已过期，请重新登录','
-      403: '权限不足，无法执行此操作','
-      404: '请求的资源不存在','
-      408: '请求超时，请稍后重试','
-      429: '请求过于频繁，请稍后重试','
-      500: '服务器内部错误','
-      502: '网关错误','
-      503: '服务暂时不可用','
-      504: '网关超时';
+      400: '请求参数错误',
+      401: '登录已过期，请重新登录',
+      403: '权限不足，无法执行此操作',
+      404: '请求的资源不存在',
+      408: '请求超时，请稍后重试',
+      429: '请求过于频繁，请稍后重试',
+      500: '服务器内部错误',
+      502: '网关错误',
+      503: '服务暂时不可用',
+      504: '网关超时'
     };
-    return messages[status] || `请求失败 (${status})`;`
+    return messages[status] || `请求失败 (${status})`;
   }
 
   /**
@@ -357,8 +357,8 @@ class ErrorService {
    * 记录错误日志
    */
   private logError(error: StandardError): void {
-    const logMethod = error.severity === ErrorSeverity.CRITICAL ? "error' : ''`
-      error.severity === ErrorSeverity.HIGH ? 'warn' : 'info';
+    const logMethod = error.severity === ErrorSeverity.CRITICAL ? "error' : ''`"`
+      error.severity === ErrorSeverity.HIGH ? 'warn' : 'info'
     console[logMethod](`[${error.type}] ${error.message}`, {`
       id: error.id,
       severity: error.severity,
@@ -405,15 +405,15 @@ class ErrorService {
    */
   private async reportError(error: StandardError): Promise<void> {
     try {
-      await fetch("/api/errors/report', {'`
-        method: 'POST','
+      await fetch("/api/errors/report', {'`"`
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json','
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(error)
       });
     } catch (reportError) {
-      console.warn('Failed to report error: ', reportError);'
+      console.warn('Failed to report error: ', reportError);
     }
   }
 
@@ -421,7 +421,7 @@ class ErrorService {
    * 生成错误ID
    */
   private generateErrorId(): string {
-    return `err_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+    return `err_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
@@ -456,7 +456,7 @@ class ErrorService {
     maxRetries?: number;
     operation?: string;
   }): StandardError {
-    const errorObj = typeof error === "string' ? new Error(error) : error;'`
+    const errorObj = typeof error === "string' ? new Error(error) : error;'`"`
     const errorType = this.determineAsyncErrorType(errorObj);
     const severity = this.determineAsyncErrorSeverity(errorObj, context);
 
@@ -467,7 +467,7 @@ class ErrorService {
       message: errorObj.message,
       timestamp: new Date().toISOString(),
       context: {
-        operation: context?.operation || 'async operation','
+        operation: context?.operation || 'async operation',
         retryCount: context?.retryCount || 0,
         maxRetries: context?.maxRetries || 3,
         ...context
@@ -486,19 +486,19 @@ class ErrorService {
   private determineAsyncErrorType(error: Error): ErrorType {
     const message = error.message.toLowerCase();
 
-    if (message.includes('network') || message.includes('fetch')) {'
+    if (message.includes('network') || message.includes('fetch')) {
       return ErrorType.NETWORK;
     }
-    if (message.includes('timeout')) {'
+    if (message.includes('timeout')) {
       return ErrorType.TIMEOUT;
     }
-    if (message.includes('unauthorized') || message.includes('auth')) {'
+    if (message.includes('unauthorized') || message.includes('auth')) {
       return ErrorType.AUTHENTICATION;
     }
-    if (message.includes('forbidden') || message.includes('permission')) {'
+    if (message.includes('forbidden') || message.includes('permission')) {
       return ErrorType.AUTHORIZATION;
     }
-    if (message.includes('validation') || message.includes('invalid')) {'
+    if (message.includes('validation') || message.includes('invalid')) {
       return ErrorType.VALIDATION;
     }
 
@@ -511,7 +511,7 @@ class ErrorService {
   private determineAsyncErrorSeverity(error: Error, context?: any): ErrorSeverity {
     const message = error.message.toLowerCase();
 
-    if (message.includes('critical') || message.includes('fatal')) {'
+    if (message.includes('critical') || message.includes('fatal')) {
       return ErrorSeverity.CRITICAL;
     }
 
@@ -519,7 +519,7 @@ class ErrorService {
       return ErrorSeverity.HIGH;
     }
 
-    if (message.includes('network') || message.includes('timeout')) {'
+    if (message.includes('network') || message.includes('timeout')) {
       return ErrorSeverity.MEDIUM;
     }
 
@@ -532,17 +532,17 @@ class ErrorService {
   private generateAsyncErrorMessage(error: Error, context?: any): string {
     const message = error.message.toLowerCase();
 
-    if (message.includes('network')) {'
-      return '网络连接失败，请检查网络后重试';
+    if (message.includes('network')) {
+      return '网络连接失败，请检查网络后重试'
     }
-    if (message.includes('timeout')) {'
-      return '操作超时，请稍后重试';
+    if (message.includes('timeout')) {
+      return '操作超时，请稍后重试'
     }
     if (context?.retryCount >= (context?.maxRetries || 3)) {
-      return '操作多次失败，请稍后再试或联系技术支持';
+      return '操作多次失败，请稍后再试或联系技术支持'
     }
 
-    return '操作失败，请重试';
+    return '操作失败，请重试'
   }
 
   /**
@@ -551,18 +551,18 @@ class ErrorService {
   private generateAsyncSuggestions(error: Error, context?: any): string[] {
     const message = error.message.toLowerCase();
     const suggestions: string[]  = [];
-    if (message.includes('network')) {'
-      suggestions.push('检查网络连接', '尝试刷新页面');'
+    if (message.includes('network')) {
+      suggestions.push('检查网络连接', '尝试刷新页面");"
     }
-    if (message.includes('timeout')) {'
-      suggestions.push('稍后重试', '检查网络速度');'
+    if (message.includes('timeout')) {
+      suggestions.push('稍后重试', '检查网络速度");"
     }
     if (context?.retryCount >= (context?.maxRetries || 3)) {
-      suggestions.push('联系技术支持', '检查系统状态');'
+      suggestions.push('联系技术支持', '检查系统状态");"
     }
 
     if (suggestions.length === 0) {
-      suggestions.push('重试操作', '刷新页面');'
+      suggestions.push('重试操作', '刷新页面");"
     }
 
     return suggestions;
@@ -580,13 +580,13 @@ class ErrorService {
     }
 
     // 网络错误和超时错误通常可以重试
-    if (message.includes('network') || message.includes('timeout') ||'
-      message.includes('fetch') || message.includes('connection')) {'
+    if (message.includes('network') || message.includes('timeout') ||
+      message.includes('fetch') || message.includes('connection')) {
       return true;
     }
 
     // 认证和授权错误通常不应该重试
-    if (message.includes('unauthorized') || message.includes('forbidden')) {'
+    if (message.includes('unauthorized') || message.includes('forbidden')) {
       return false;
     }
 

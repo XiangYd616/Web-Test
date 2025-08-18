@@ -1,0 +1,31 @@
+# 忽略测试文件
+__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# 忽略构建输出
+dist/
+build/
+coverage/
+
+# 忽略配置文件
+*.config.js
+*.config.ts
+vite.config.ts
+
+# 忽略类型声明文件
+*.d.ts
+
+# 忽略第三方库
+node_modules/
+
+# 忽略公共资源
+public/
+
+# 忽略文档
+docs/
+
+# 忽略脚本
+scripts/

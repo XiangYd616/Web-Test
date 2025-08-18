@@ -13,7 +13,7 @@ export interface AppConfig     {
     batchOperations: boolean;
   };
   ui: {
-    theme: 'dark' | 'light';
+    theme: 'dark' | 'light'
     language: string;
     pageSize: number;
   };
@@ -22,7 +22,7 @@ export interface AppConfig     {
 // 默认配置
 const defaultConfig: AppConfig  = {
   api: {
-    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3001','
+    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3001',
     timeout: 30000
   },
   features: {
@@ -31,8 +31,8 @@ const defaultConfig: AppConfig  = {
     batchOperations: true
   },
   ui: {
-    theme: 'dark','
-    language: 'zh-CN','
+    theme: 'dark',
+    language: 'zh-CN',
     pageSize: 20
   }
 };
@@ -49,14 +49,14 @@ class ConfigManager {
    */
   private loadConfig(): AppConfig {
     try {
-      const saved = localStorage.getItem('app-config');'
+      const saved = localStorage.getItem('app-config");
       if (saved) {
         
         return { ...defaultConfig, ...JSON.parse(saved)
       };
       }
     } catch (error) {
-      console.warn('加载配置失败，使用默认配置:', error);'
+      console.warn('加载配置失败，使用默认配置:', error);
     }
     return defaultConfig;
   }
@@ -66,9 +66,9 @@ class ConfigManager {
    */
   private saveConfig() {
     try {
-      localStorage.setItem('app-config', JSON.stringify(this.config));'
+      localStorage.setItem('app-config', JSON.stringify(this.config));
     } catch (error) {
-      console.error('保存配置失败:', error);'
+      console.error('保存配置失败:', error);
     }
   }
 

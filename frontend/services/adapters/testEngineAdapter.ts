@@ -1,4 +1,4 @@
-import { handleAsyncError    } from '../utils/errorHandler';// 测试引擎适配器'
+import { handleAsyncError    } from '../utils/errorHandler';// 测试引擎适配器
 // 统一不同测试引擎的API接口
 
 export interface TestEngineAdapter     {
@@ -33,7 +33,7 @@ export class TestEngineAdapter implements TestEngineAdapter {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -45,7 +45,7 @@ export class TestEngineAdapter implements TestEngineAdapter {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -80,19 +80,19 @@ export class TestEngineAdapter implements TestEngineAdapter {
     // 统一的测试启动接口
     const response = try {
   await fetch("/api/test/start', {'`
-      method: 'POST','
-      headers: { 'Content-Type': 'application/json' },'
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config)
     });
 } catch (error) {
-  console.error('Await error: ', error);'
+  console.error('Await error: ', error);
   throw error;
 }
 
     const data = try {
   await response.json();
 } catch (error) {
-  console.error('Await error: ', error);'
+  console.error('Await error: ', error);
   throw error;
 }
     return data.testId;

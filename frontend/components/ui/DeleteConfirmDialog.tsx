@@ -1,4 +1,4 @@
-import React from 'react';import { AlertTriangle, Trash2, X    } from 'lucide-react';interface DeleteConfirmDialogProps   {'
+import React from 'react';import { AlertTriangle, Trash2, X    } from 'lucide-react';interface DeleteConfirmDialogProps   {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -6,7 +6,7 @@ import React from 'react';import { AlertTriangle, Trash2, X    } from 'lucide-re
   message: string;
   itemNames?: string[];
   isLoading?: boolean;
-  type?: 'single' | 'batch';
+  type?: 'single' | 'batch'
 }
 
 export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
@@ -17,7 +17,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
   message,
   itemNames = [],
   isLoading = false,
-  type = 'single';
+  type = 'single'
 }) => {
   
   // 性能优化
@@ -25,8 +25,8 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,'
-    'data-testid': testId'
+    'aria-label': ariaLabel,
+    'data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -40,22 +40,22 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
     id: componentId,
     "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
     "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
@@ -69,7 +69,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
   };
 
   return (<div 
-      className= 'fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+      className= 'fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4'
       onClick={handleBackdropClick}
     >
       <div className= 'bg-gray-800 rounded-xl border border-gray-700 shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden'>
@@ -86,7 +86,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className= 'p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors';
+            className= 'p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors'
           >
             <X className= 'w-5 h-5'    />
           </button>
@@ -102,7 +102,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
           {itemNames.length > 0 && (
             <div className= 'mb-4'>
               <p className= 'text-sm text-gray-400 mb-2'>
-                {type === 'batch' ? '将要删除的记录：" : "删除的记录：'}'
+                {type === 'batch' ? '将要删除的记录：" : "删除的记录：'}
               </p>
               <div className= 'bg-gray-900/50 rounded-lg p-3 max-h-32 overflow-y-auto'>
                 {itemNames.map((name, index) => (
@@ -138,14 +138,14 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className= 'flex-1 px-4 py-2 text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+            className= 'flex-1 px-4 py-2 text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
           >
             取消
           </button>
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className= 'flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
+            className= 'flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
           >
             {isLoading ? (
               <>

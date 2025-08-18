@@ -32,7 +32,7 @@ export interface JwtPayload     {
   fingerprint?: string;
   iat: number;
   exp: number;
-  type: 'access' | 'refresh';
+  type: 'access' | 'refresh'
 }
 
 export interface SessionInfo     {
@@ -81,7 +81,7 @@ class DeviceFingerprinter {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -93,7 +93,7 @@ class DeviceFingerprinter {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -111,7 +111,7 @@ class DeviceFingerprinter {
     };
   }
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {>
       try {
         return await fn();
       } catch (error) {
@@ -133,18 +133,18 @@ class DeviceFingerprinter {
     components.push(navigator.userAgent);
     components.push(navigator.language);
     components.push(navigator.platform);
-    components.push(screen.width + "x' + screen.height);'`
+    components.push(screen.width + "x' + screen.height);'`"`
     components.push(screen.colorDepth.toString());
     components.push(new Date().getTimezoneOffset().toString());
 
     // Canvas指纹
     try {
-      const canvas = document.createElement('canvas');'
-      const ctx = canvas.getContext('2d');'
+      const canvas = document.createElement('canvas");"
+      const ctx = canvas.getContext('2d");"
       if (ctx) {
-        ctx.textBaseline = 'top';
-        ctx.font = '14px Arial';
-        ctx.fillText('Device fingerprint test', 2, 2);'
+        ctx.textBaseline = 'top'
+        ctx.font = '14px Arial'
+        ctx.fillText('Device fingerprint test', 2, 2);
         components.push(canvas.toDataURL());
       }
     } catch (e) {
@@ -153,10 +153,10 @@ class DeviceFingerprinter {
 
     // WebGL指纹
     try {
-      const canvas = document.createElement('canvas');'
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');'
+      const canvas = document.createElement('canvas");"
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl");"
       if (gl) {
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');'
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info");"
         if (debugInfo) {
           components.push(gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL));
           components.push(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL));
@@ -167,7 +167,7 @@ class DeviceFingerprinter {
     }
 
     // 生成哈希
-    const fingerprint = await this.hashString(components.join('|'));'
+    const fingerprint = await this.hashString(components.join('|'));
     return fingerprint;
   }
 
@@ -179,15 +179,15 @@ class DeviceFingerprinter {
       
         const encoder = new TextEncoder();
       const data = encoder.encode(str);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);'
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');'
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('");"
       } else {
       // 降级到简单哈希
       let hash = 0;
-      for (let i = 0; i < str.length; i++) {
+      for (let i = 0; i < str.length; i++) {>
         const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
+        hash = ((hash << 5) - hash) + char;>
         hash = hash & hash; // 转换为32位整数
       }
       return Math.abs(hash).toString(16);
@@ -198,8 +198,8 @@ class DeviceFingerprinter {
 // ==================== 安全存储管理器 ====================
 
 class SecureStorageManager {
-  private static readonly STORAGE_KEY_PREFIX = 'testweb_secure_';
-  private static readonly ENCRYPTION_KEY = 'testweb_encryption_key';
+  private static readonly STORAGE_KEY_PREFIX = 'testweb_secure_'
+  private static readonly ENCRYPTION_KEY = 'testweb_encryption_key'
   /**
    * 安全存储数据
    */
@@ -209,7 +209,7 @@ class SecureStorageManager {
       const encrypted = await this.encrypt(serialized);
       localStorage.setItem(this.STORAGE_KEY_PREFIX + key, encrypted);
     } catch (error) {
-      console.error('安全存储失败:', error);'
+      console.error('安全存储失败:', error);
       // 降级到普通存储
       localStorage.setItem(this.STORAGE_KEY_PREFIX + key, JSON.stringify(value));
     }
@@ -231,7 +231,7 @@ class SecureStorageManager {
         return JSON.parse(stored);
       }
     } catch (error) {
-      console.error('安全获取失败:', error);'
+      console.error('安全获取失败:', error);
       return null;
     }
   }
@@ -266,7 +266,7 @@ class SecureStorageManager {
       const iv = crypto.getRandomValues(new Uint8Array(12));
       
       const encrypted = await crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv },'
+        { name: 'AES-GCM', iv },
         key,
         data
       );
@@ -288,7 +288,7 @@ class SecureStorageManager {
   private static async decrypt(encryptedText: string): Promise<string> {
     if (crypto.subtle) {
       const combined = new Uint8Array(
-        atob(encryptedText).split('').map(char => char.charCodeAt(0))'
+        atob(encryptedText).split('').map(char => char.charCodeAt(0))
       );
       
       const iv = combined.slice(0, 12);
@@ -296,7 +296,7 @@ class SecureStorageManager {
       
       const key = await this.getEncryptionKey();
       const decrypted = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv },'
+        { name: 'AES-GCM', iv },
         key,
         encrypted
       );
@@ -313,24 +313,24 @@ class SecureStorageManager {
    */
   private static async getEncryptionKey(): Promise<CryptoKey> {
     const keyMaterial = await crypto.subtle.importKey(
-      'raw','
+      'raw',
       new TextEncoder().encode(this.ENCRYPTION_KEY),
-      { name: 'PBKDF2' },'
+      { name: 'PBKDF2' },
       false,
-      ['deriveKey']'
+      ['deriveKey']
     );
 
     return crypto.subtle.deriveKey(
       {
-        name: 'PBKDF2','
-        salt: new TextEncoder().encode('testweb_salt'),'
+        name: 'PBKDF2',
+        salt: new TextEncoder().encode('testweb_salt'),
         iterations: 100000,
-        hash: 'SHA-256';
+        hash: 'SHA-256'
       },
       keyMaterial,
-      { name: 'AES-GCM', length: 256 },'
+      { name: 'AES-GCM', length: 256 },
       false,
-      ['encrypt', 'decrypt']'
+      ['encrypt', 'decrypt']
     );
   }
 }
@@ -353,7 +353,7 @@ export class JwtManager {
       maxConcurrentSessions: 5,
       enableFingerprinting: true,
       enableSecureStorage: true,
-      apiBaseUrl: '/api','
+      apiBaseUrl: '/api',
       ...config
     };
 
@@ -372,7 +372,7 @@ export class JwtManager {
       try {
         this.fingerprint = await DeviceFingerprinter.generateFingerprint();
       } catch (error) {
-        console.warn('设备指纹生成失败:', error);'
+        console.warn('设备指纹生成失败:', error);
       }
     }
   }
@@ -381,10 +381,10 @@ export class JwtManager {
    * 生成设备ID
    */
   private generateDeviceId(): string {
-    let deviceId = localStorage.getItem('device_id');'
+    let deviceId = localStorage.getItem('device_id");"
     if (!deviceId) {
-      deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);'
-      localStorage.setItem('device_id', deviceId);'
+      deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('device_id', deviceId);
     }
     return deviceId;
   }
@@ -394,14 +394,14 @@ export class JwtManager {
    */
   private async loadStoredTokens(): Promise<void> {
     if (this.config.enableSecureStorage) {
-      this.currentTokens = await SecureStorageManager.getItem<TokenPair>('tokens');'
+      this.currentTokens = await SecureStorageManager.getItem<TokenPair>('tokens");"
     } else {
-      const stored = localStorage.getItem('auth_tokens');'
+      const stored = localStorage.getItem('auth_tokens");"
       if (stored) {
         try {
           this.currentTokens = JSON.parse(stored);
         } catch (error) {
-          console.error('解析存储的tokens失败:', error);'
+          console.error('解析存储的tokens失败:', error);
         }
       }
     }
@@ -420,9 +420,9 @@ export class JwtManager {
     this.currentTokens = tokens;
     
     if (this.config.enableSecureStorage) {
-      await SecureStorageManager.setItem('tokens', tokens);'
+      await SecureStorageManager.setItem('tokens', tokens);
     } else {
-      localStorage.setItem('auth_tokens', JSON.stringify(tokens));'
+      localStorage.setItem('auth_tokens', JSON.stringify(tokens));
     }
 
     this.scheduleTokenRefresh();
@@ -518,16 +518,16 @@ export class JwtManager {
       
         return {
         success: false,
-        error: '没有刷新token','
+        error: '没有刷新token',
         requiresReauth: true
       };
     }
 
     try {
       const response = await fetch(`${this.config.apiBaseUrl}/auth/refresh`, {`
-        method: "POST','`
+        method: "POST','`"`
         headers: {
-          'Content-Type': 'application/json';
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           refreshToken,
@@ -539,7 +539,7 @@ export class JwtManager {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || '刷新失败');'
+        throw new Error(result.message || '刷新失败");"
       }
 
       const newTokens: TokenPair  = {
@@ -556,13 +556,13 @@ export class JwtManager {
         user: result.user
       };
     } catch (error) {
-      console.error('Token刷新失败:', error);'
+      console.error('Token刷新失败:', error);
       // 清除无效的tokens
       await this.clearTokens();
       
       return {
         success: false,
-        error: error instanceof Error ? error.message : '刷新失败','
+        error: error instanceof Error ? error.message : '刷新失败',
         requiresReauth: true
       };
     }
@@ -587,14 +587,14 @@ export class JwtManager {
 
       const response = await fetch(`${this.config.apiBaseUrl}/auth/sessions`, {`
         headers: {
-          "Authorization': `Bearer ${token}`'`
+          "Authorization': `Bearer ${token}`'`"
         }
       });
 
       const result = await response.json();
       return result.success ? result.sessions : [];
     } catch (error) {
-      console.error("获取活跃会话失败:', error);'`
+      console.error("获取活跃会话失败:', error);'`"`
       return [];
     }
   }
@@ -608,16 +608,16 @@ export class JwtManager {
       if (!token) return false;
 
       const response = await fetch(`${this.config.apiBaseUrl}/auth/sessions/${sessionId}`, {`
-        method: "DELETE','`
+        method: "DELETE','`"`
         headers: {
-          "Authorization': `Bearer ${token}`'`
+          "Authorization': `Bearer ${token}`'`"
         }
       });
 
       const result = await response.json();
       return result.success;
     } catch (error) {
-      console.error("终止会话失败:', error);'`
+      console.error("终止会话失败:', error);'`"`
       return false;
     }
   }
@@ -631,16 +631,16 @@ export class JwtManager {
       if (!token) return false;
 
       const response = await fetch(`${this.config.apiBaseUrl}/auth/sessions/terminate-others`, {`
-        method: "POST','`
+        method: "POST','`"`
         headers: {
-          "Authorization': `Bearer ${token}`'`
+          "Authorization': `Bearer ${token}`'`"
         }
       });
 
       const result = await response.json();
       return result.success;
     } catch (error) {
-      console.error("终止其他会话失败:', error);'`
+      console.error("终止其他会话失败:', error);'`"`
       return false;
     }
   }
@@ -659,9 +659,9 @@ export class JwtManager {
     }
 
     if (this.config.enableSecureStorage) {
-      SecureStorageManager.removeItem('tokens');'
+      SecureStorageManager.removeItem('tokens");"
     } else {
-      localStorage.removeItem('auth_tokens');'
+      localStorage.removeItem('auth_tokens");"
     }
   }
 

@@ -1,11 +1,11 @@
 
-import React, { useState, useEffect    } from 'react';import { Activity, Server, TrendingUp, Users    } from 'lucide-react';import SystemResourceMonitor from '../../../components/system/SystemResourceMonitor.tsx';import { useStressTestRecord    } from '../../../hooks/useStressTestRecord.ts';const SystemMonitor: React.FC  = () => {'
+import React, { useState, useEffect    } from 'react';import { Activity, Server, TrendingUp, Users    } from 'lucide-react';import SystemResourceMonitor from '../../../components/system/SystemResourceMonitor.tsx';import { useStressTestRecord    } from '../../../hooks/useStressTestRecord.ts';const SystemMonitor: React.FC  = () => {
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("');'
+  const [pageTitle, setPageTitle] = useState("");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
@@ -18,9 +18,9 @@ import React, { useState, useEffect    } from 'react';import { Activity, Server,
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);'
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener("visibilitychange', handleVisibilityChange);'
+      document.removeEventListener("visibilitychange', handleVisibilityChange);
     };
   }, [fetchData]);
   
@@ -32,11 +32,11 @@ import React, { useState, useEffect    } from 'react';import { Activity, Server,
   const handleCreate = useCallback(async (newItem) => {
     try {
       setLoading(true);
-      const response = await apiClient.post('/api/items', newItem);'
+      const response = await apiClient.post('/api/items', newItem);
       setData(prev => [...(prev || []), response.data]);
       setIsCreating(false);
     } catch (err) {
-      handleError(err, "create');'
+      handleError(err, "create");
     } finally {
       setLoading(false);
     }
@@ -52,14 +52,14 @@ import React, { useState, useEffect    } from 'react';import { Activity, Server,
       setIsEditing(false);
       setSelectedItem(null);
     } catch (err) {
-      handleError(err, "update');'`
+      handleError(err, "update");`
     } finally {
       setLoading(false);
     }
   }, [handleError]);
 
   const handleDelete = useCallback(async (id) => {
-    if (!window.confirm('确定要删除这个项目吗？')) {'
+    if (!window.confirm('确定要删除这个项目吗？')) {
       return;
     }
 
@@ -68,23 +68,23 @@ import React, { useState, useEffect    } from 'react';import { Activity, Server,
       await apiClient.delete(`/api/items/${id}`);`
       setData(prev => prev?.filter(item => item.id !== id));
     } catch (err) {
-      handleError(err, "delete');'`
+      handleError(err, "delete");`
     } finally {
       setLoading(false);
     }
   }, [handleError]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });'
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });'
+      setFeedback({ type: '', message: '' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);'
+      showFeedback('error', state.error.message);
     }
   }, [state.error]);
   const { queueStats } = useStressTestRecord({ autoLoad: false });
@@ -108,7 +108,7 @@ import React, { useState, useEffect    } from 'react';import { Activity, Server,
             <div className= 'mt-4'>
               <button
                 onClick={() => window.location.reload()}
-                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
               >
                 重试
               </button>
@@ -203,7 +203,7 @@ import React, { useState, useEffect    } from 'react';import { Activity, Server,
                 <span className= 'text-white'>
                   {queueStats.averageWaitTime > 0
                     ? `${Math.round(queueStats.averageWaitTime / 60)} 分钟``
-                    : "暂无数据';'`
+                    : "暂无数据";`
                   }
                 </span>
               </div>
@@ -213,7 +213,7 @@ import React, { useState, useEffect    } from 'react';import { Activity, Server,
                 <span className= 'text-white'>
                   {queueStats.averageExecutionTime > 0
                     ? `${Math.round(queueStats.averageExecutionTime / 60)} 分钟``
-                    : "暂无数据';'`
+                    : "暂无数据";`
                   }
                 </span>
               </div>
@@ -245,7 +245,7 @@ import React, { useState, useEffect    } from 'react';import { Activity, Server,
                     </div>
                     <div className= 'w-20 h-2 bg-gray-600 rounded-full mt-1'>
                       <div
-                        className= 'h-full bg-green-500 rounded-full transition-all duration-300';
+                        className= 'h-full bg-green-500 rounded-full transition-all duration-300'
                         style={{ width: `${test.progress || 0}%` }}`
                       />
                     </div>

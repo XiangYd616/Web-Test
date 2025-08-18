@@ -3,7 +3,7 @@
  * 支持WebSocket实时更新和完整的测试生命周期管理
  */
 
-import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResult    } from '../types/testConfig';export class TestService {'
+import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResult    } from '../types/testConfig';export class TestService {
   // 监控和指标收集
   private metrics = {
     totalRequests: 0,
@@ -28,7 +28,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -40,7 +40,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -58,7 +58,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
     };
   }
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {>
       try {
         return await fn();
       } catch (error) {
@@ -76,7 +76,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   private wsConnections: Map<string, WebSocket> = new Map();
   private progressCallbacks: Map<string, (progress: TestProgress) => void> = new Map();
 
-  constructor(baseURL: string = "/api/v1', timeout: number = 300000) {'`
+  constructor(baseURL: string = "/api/v1', timeout: number = 300000) {'`"`
     this.baseURL = baseURL;
     this.timeout = timeout;
   }
@@ -129,7 +129,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
     onComplete: (result: TestResult) => void,
     onError: (error: TestError) => void
   ): void {
-    const wsUrl = `${this.getWebSocketURL()}/tests/${testId}/progress`;`
+    const wsUrl = `${this.getWebSocketURL()}/tests/${testId}/progress`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
@@ -140,23 +140,23 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
       try {
         const data = JSON.parse(event.data);
 
-        if (data.type === "progress') {'`
+        if (data.type === "progress') {'`"`
           onProgress(data.payload as TestProgress);
-        } else if (data.type === 'complete') {'
+        } else if (data.type === 'complete') {
           onComplete(data.payload as TestResult);
           this.closeWebSocket(testId);
-        } else if (data.type === 'error') {'
+        } else if (data.type === 'error') {
           onError(new TestError(data.payload.message, data.payload.code));
           this.closeWebSocket(testId);
         }
       } catch (error) {
-        console.error('WebSocket message parsing error: ', error);'
+        console.error('WebSocket message parsing error: ', error);
       }
     };
 
     ws.onerror = (error) => {
-      console.error('WebSocket error: ', error);'
-      onError(new TestError('WebSocket连接错误', 'WEBSOCKET_ERROR'));'
+      console.error('WebSocket error: ', error);
+      onError(new TestError('WebSocket连接错误', 'WEBSOCKET_ERROR'));
     };
 
     ws.onclose = () => {
@@ -182,9 +182,9 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
    * 获取WebSocket URL
    */
   private getWebSocketURL(): string {
-    const protocol = window.location.protocol === "https: ' ? 'wss: ' : 'ws: ';'`
+    const protocol = window.location.protocol === "https: ' ? 'wss: ' : 'ws: ";``
     const host = window.location.host;
-    return `${protocol}/${host}`;`
+    return `${protocol}/${host}`;
   }
 
   /**
@@ -241,7 +241,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
       );
 
       // 使用数据转换器转换格式
-      const { TestDataTransformer } = await import("../utils/testDataTransformer');'`
+      const { TestDataTransformer } = await import("../utils/testDataTransformer");``
       const historyItems = response.data.data?.tests || response.data.data || [];
 
       return historyItems.map((item: any) => TestDataTransformer.transformBackendToFrontend(item));
@@ -293,18 +293,18 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
   /**
    * 导出测试报告
    */
-  async exportReport(testId: string, format: "pdf' | 'html' | 'json' = 'pdf'): Promise<Blob> {'`
+  async exportReport(testId: string, format: "pdf' | 'html' | 'json' = 'pdf'): Promise<Blob> {'`"`
     try {
       const response = await axios.get(
         `${this.baseURL}/tests/reports/${testId}/export`,`
         {
           params: { format },
-          responseType: "blob';'`
+          responseType: "blob";``
         }
       );
       return response.data;
     } catch (error) {
-      throw this.handleAPIError(error, 'export');'
+      throw this.handleAPIError(error, 'export");"
     }
   }
 
@@ -354,14 +354,14 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
       );
       return response.data;
     } catch (error) {
-      throw this.handleAPIError(error, "batch');'`
+      throw this.handleAPIError(error, "batch");``
     }
   }
 
   /**
    * 获取批量测试状态
    */
-  async getBatchTestStatus(batchId: string): Promise<{
+  async getBatchTestStatus(batchId: string): Promise<{>
     batchId: string;
     status: string;
     progress: number;
@@ -373,7 +373,7 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
       );
       return response.data;
     } catch (error) {
-      throw this.handleAPIError(error, "batch');'`
+      throw this.handleAPIError(error, "batch");``
     }
   }
 
@@ -401,15 +401,15 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
 
       if (status === 400) {
         return new TestError(`配置错误: ${message`}
-      }`, "CONFIG_ERROR', true);'`
+      }`, "CONFIG_ERROR', true);'`"
       } else if (status === 404) {
         
         return new TestError(`${testType`}
-      }测试服务不存在`, "SERVICE_NOT_FOUND', false);'`
+      }测试服务不存在`, "SERVICE_NOT_FOUND', false);'`"
       } else if (status === 500) {
         
         return new TestError(`服务器内部错误: ${message`}
-      }`, "SERVER_ERROR', true);'`
+      }`, "SERVER_ERROR', true);'`"
       } else if (status === 503) {
         
         return new TestError(`${testType`}
@@ -418,11 +418,11 @@ import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResu
     } else if (error.request) {
       
         // 网络错误
-      return new TestError("网络连接失败，请检查网络状态', 'NETWORK_ERROR', true);'`
+      return new TestError("网络连接失败，请检查网络状态', 'NETWORK_ERROR', true);'`"`
       }
 
     // 其他错误
-    return new TestError(error.message || '未知错误', 'UNKNOWN_ERROR', true);'
+    return new TestError(error.message || '未知错误', 'UNKNOWN_ERROR', true);
   }
 }
 

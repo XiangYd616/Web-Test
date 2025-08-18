@@ -3,7 +3,7 @@
  * 提供统一的确认操作界面
  */
 
-import React from 'react';export interface ConfirmDialogProps     {'
+import React from 'react';export interface ConfirmDialogProps     {
   isOpen: boolean;
   title?: string;
   message: string;
@@ -11,18 +11,18 @@ import React from 'react';export interface ConfirmDialogProps     {'
   cancelText?: string;
   onConfirm: () => void;
   onCancel: () => void;
-  type?: 'danger' | 'warning' | 'info';
+  type?: 'danger' | 'warning' | 'info'
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
-  title = '确认操作','
+  title = '确认操作',
   message,
-  confirmText = '确认','
-  cancelText = '取消','
+  confirmText = '确认',
+  cancelText = '取消',
   onConfirm,
   onCancel,
-  type = 'info';
+  type = 'info'
 }) => {
   
   // 性能优化
@@ -30,28 +30,28 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,'
-    'data-testid': testId'
+    'aria-label': ariaLabel,
+    'data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
     id: componentId,
     "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
-    'aria-selected': selected,'
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -59,16 +59,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   const typeStyles = {
     danger: {
-      icon: 'text-red-600','
-      button: 'bg-red-600 hover:bg-red-700 text-white';
+      icon: 'text-red-600',
+      button: 'bg-red-600 hover:bg-red-700 text-white'
     },
     warning: {
-      icon: 'text-yellow-600','
-      button: 'bg-yellow-600 hover:bg-yellow-700 text-white';
+      icon: 'text-yellow-600',
+      button: 'bg-yellow-600 hover:bg-yellow-700 text-white'
     },
     info: {
-      icon: 'text-blue-600','
-      button: 'bg-blue-600 hover:bg-blue-700 text-white';
+      icon: 'text-blue-600',
+      button: 'bg-blue-600 hover:bg-blue-700 text-white'
     }
   };
 
@@ -96,7 +96,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             </button>
             <button
               onClick={onCancel}
-              className= "px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600';'`
+              className= "px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600";`
             >
               {cancelText}
             </button>

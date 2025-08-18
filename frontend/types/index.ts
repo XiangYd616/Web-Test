@@ -29,4 +29,4 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]>     {
   };
 }
 
-export * from '../services/types/versionTypes';
+export * from '../services/types/versionTypes

@@ -1,7 +1,7 @@
-import { apiClient } from './api';
+import { apiClient } from './api
 
 export interface DataExportOptions {
-  format: 'json' | 'csv' | 'xlsx';
+  format: 'json' | 'csv' | 'xlsx'
   dateRange?: {
     start: string;
     end: string;
@@ -11,7 +11,7 @@ export interface DataExportOptions {
 
 export interface DataImportOptions {
   file: File;
-  format: 'json' | 'csv' | 'xlsx';
+  format: 'json' | 'csv' | 'xlsx'
   mapping?: Record<string, string>;
 }
 
@@ -25,8 +25,8 @@ export interface DataBackupOptions {
 export interface DataSyncOptions {
   endpoint: string;
   apiKey?: string;
-  syncDirection: 'upload' | 'download' | 'bidirectional';
-  conflictResolution: 'local' | 'remote' | 'merge';
+  syncDirection: 'upload' | 'download' | 'bidirectional'
+  conflictResolution: 'local' | 'remote' | 'merge'
 }
 
 class DataService {

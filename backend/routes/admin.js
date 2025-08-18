@@ -21,7 +21,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
     const [usersResult, testsResult, activeUsersResult] = await Promise.all([
       query('SELECT COUNT(*) as total FROM users'),
       query('SELECT COUNT(*) as total FROM test_sessions WHERE deleted_at IS NULL'),
-      query('SELECT COUNT(*) as total FROM users WHERE last_login >= NOW() - INTERVAL /'30 days\'')
+      query('SELECT COUNT(*) as total FROM users WHERE last_login >= NOW() - INTERVAL \'30 days\'')
     ]);
 
     res.json({
@@ -100,8 +100,8 @@ router.put('/users/:userId/status', asyncHandler(async (req, res) => {
   const { isActive } = req.body;
 
   if (typeof isActive !== 'boolean') {
-    
-        return res.validationError([], '状态值必须是布尔类型');
+
+    return res.validationError([], '状态值必须是布尔类型');
   }
 
   try {
@@ -111,8 +111,8 @@ router.put('/users/:userId/status', asyncHandler(async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      
-        return res.notFound('资源', '用户不存在');
+
+      return res.notFound('资源', '用户不存在');
     }
 
     res.success(result.rows[0], '用户状态更新成功');

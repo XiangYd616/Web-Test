@@ -3,8 +3,8 @@
  * 提供统一的通知消息管理功能
  */
 
-import { useCallback, useState    } from 'react';// 通知类型'
-export type NotificationType   = 'success' | 'error' | 'warning' | 'info';// 通知项接口'
+import { useCallback, useState    } from 'react';// 通知类型
+export type NotificationType   = 'success' | 'error' | 'warning' | 'info';// 通知项接口
 export interface NotificationItem     {
     id: string;
     type: NotificationType;
@@ -33,9 +33,9 @@ export interface NotificationContextValue     {
 
 // 默认配置
 const DEFAULT_DURATION = 4000;
-const DEFAULT_TYPE: NotificationType  = 'info';
+const DEFAULT_TYPE: NotificationType  = 'info'
 // 生成唯一ID
-const generateId = () => `notification-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;`
+const generateId = () => `notification-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
 // 通知Hook
 export const useNotification = () => {
@@ -81,22 +81,22 @@ export const useNotification = () => {
 
     // 成功通知的快捷方法
     const success = useCallback((message: string, config?: Omit<NotificationConfig, "type'>) => {'`
-        return showNotification(message, 'success', config);'
+        return showNotification(message, 'success', config);
     }, [showNotification]);
 
     // 错误通知的快捷方法
-    const error = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {'
-        return showNotification(message, 'error', { duration: 6000, ...config });'
+    const error = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {
+        return showNotification(message, 'error', { duration: 6000, ...config });
     }, [showNotification]);
 
     // 警告通知的快捷方法
-    const warning = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {'
-        return showNotification(message, 'warning', config);'
+    const warning = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {
+        return showNotification(message, 'warning', config);
     }, [showNotification]);
 
     // 信息通知的快捷方法
-    const info = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {'
-        return showNotification(message, 'info', config);'
+    const info = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {
+        return showNotification(message, 'info', config);
     }, [showNotification]);
 
     return {

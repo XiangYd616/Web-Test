@@ -3,7 +3,7 @@
  * 版本: v2.0.0
  */
 
-import { errorService    } from '../services/errorService';export interface AsyncErrorOptions     {'
+import { errorService    } from '../services/errorService';export interface AsyncErrorOptions     {
   context?: string;
   showNotification?: boolean;
   logError?: boolean;
@@ -17,7 +17,7 @@ export async function handleAsyncError<T>(operation: () => Promise<T>,
   options: AsyncErrorOptions = {}
 ): Promise<T | null> {
   const {
-    context = 'Unknown operation','
+    context = 'Unknown operation',
     showNotification = true,
     logError = true,
     retryable = false

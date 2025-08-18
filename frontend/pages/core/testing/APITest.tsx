@@ -2,13 +2,13 @@
  * API测试页面 - 使用统一的测试组件
  */
 
-import React, { useState, useEffect    } from 'react';import { TestType    } from '../../../types/testConfig';import { TestPage    } from '../TestPage';const APITest: React.FC  = () => {'
+import React, { useState, useEffect    } from 'react';import { TestType    } from '../../../types/testConfig';import { TestPage    } from '../TestPage';const APITest: React.FC  = () => {
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("');'
+  const [pageTitle, setPageTitle] = useState("");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
@@ -21,23 +21,23 @@ import React, { useState, useEffect    } from 'react';import { TestType    } fro
       }
     };
 
-    document.addEventListener("visibilitychange', handleVisibilityChange);'
+    document.addEventListener("visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);'
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });'
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });'
+      setFeedback({ type: '', message: '' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);'
+      showFeedback('error', state.error.message);
     }
   }, [state.error]);
   

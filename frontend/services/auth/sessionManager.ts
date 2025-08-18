@@ -82,8 +82,8 @@ export interface SessionAlert     {
   id: string;
   sessionId: string;
   userId: string;
-  type: 'new_device' | 'new_location' | 'suspicious_activity' | 'concurrent_limit' | 'security_breach';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: 'new_device' | 'new_location' | 'suspicious_activity' | 'concurrent_limit' | 'security_breach'
+  severity: 'low' | 'medium' | 'high' | 'critical'
   message: string;
   details: Record<string, any>;
   timestamp: string;
@@ -92,7 +92,7 @@ export interface SessionAlert     {
 
 export interface ConcurrentSessionPolicy     {
   maxSessions: number;
-  strategy: 'reject_new' | 'terminate_oldest' | 'terminate_all_others' | 'allow_with_warning';
+  strategy: 'reject_new' | 'terminate_oldest' | 'terminate_all_others' | 'allow_with_warning'
   notifyUser: boolean;
   requireConfirmation: boolean;
 }
@@ -124,7 +124,7 @@ class DeviceDetector {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -136,7 +136,7 @@ class DeviceDetector {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -154,7 +154,7 @@ class DeviceDetector {
     };
   }
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {>
       try {
         return await fn();
       } catch (error) {
@@ -192,10 +192,10 @@ class DeviceDetector {
    * 获取设备ID
    */
   private static getDeviceId(): string {
-    let deviceId = localStorage.getItem("device_id');'`
+    let deviceId = localStorage.getItem("device_id");``
     if (!deviceId) {
-      deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);'
-      localStorage.setItem('device_id', deviceId);'
+      deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('device_id', deviceId);
     }
     return deviceId;
   }
@@ -206,21 +206,21 @@ class DeviceDetector {
   private static getBrowserInfo(): { name: string; version: string } {
     const userAgent = navigator.userAgent;
 
-    if (userAgent.includes('Chrome')) {'
+    if (userAgent.includes('Chrome')) {
       const match = userAgent.match(/Chrome\/(\d+)/);
-      return { name: 'Chrome', version: match ? match[1] : 'Unknown' };'
-    } else if (userAgent.includes('Firefox')) {'
+      return { name: 'Chrome', version: match ? match[1] : 'Unknown' };
+    } else if (userAgent.includes('Firefox')) {
       const match = userAgent.match(/Firefox\/(\d+)/);
-      return { name: 'Firefox', version: match ? match[1] : 'Unknown' };'
-    } else if (userAgent.includes('Safari')) {'
+      return { name: 'Firefox', version: match ? match[1] : 'Unknown' };
+    } else if (userAgent.includes('Safari')) {
       const match = userAgent.match(/Safari\/(\d+)/);
-      return { name: 'Safari', version: match ? match[1] : 'Unknown' };'
-    } else if (userAgent.includes('Edge')) {'
+      return { name: 'Safari', version: match ? match[1] : 'Unknown' };
+    } else if (userAgent.includes('Edge')) {
       const match = userAgent.match(/Edge\/(\d+)/);
-      return { name: 'Edge', version: match ? match[1] : 'Unknown' };'
+      return { name: 'Edge', version: match ? match[1] : 'Unknown' };
     }
 
-    return { name: 'Unknown', version: 'Unknown' };'
+    return { name: 'Unknown', version: 'Unknown' };
   }
 
   /**
@@ -230,34 +230,34 @@ class DeviceDetector {
     const userAgent = navigator.userAgent;
     const platform = navigator.platform;
 
-    if (platform.includes('Win')) {'
-      return { name: 'Windows', version: this.getWindowsVersion(userAgent) };'
-    } else if (platform.includes('Mac')) {'
-      return { name: 'macOS', version: this.getMacVersion(userAgent) };'
-    } else if (platform.includes('Linux')) {'
-      return { name: 'Linux', version: 'Unknown' };'
-    } else if (userAgent.includes('Android')) {'
+    if (platform.includes('Win')) {
+      return { name: 'Windows', version: this.getWindowsVersion(userAgent) };
+    } else if (platform.includes('Mac')) {
+      return { name: 'macOS', version: this.getMacVersion(userAgent) };
+    } else if (platform.includes('Linux')) {
+      return { name: 'Linux', version: 'Unknown' };
+    } else if (userAgent.includes('Android')) {
       const match = userAgent.match(/Android (\d+\.?\d*)/);
-      return { name: 'Android', version: match ? match[1] : 'Unknown' };'
-    } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {'
+      return { name: 'Android', version: match ? match[1] : 'Unknown' };
+    } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
       const match = userAgent.match(/OS (\d+_?\d*)/);
-      return { name: 'iOS', version: match ? match[1].replace('_', '.') : 'Unknown' };'
+      return { name: 'iOS', version: match ? match[1].replace('_', '.') : 'Unknown' };
     }
 
-    return { name: 'Unknown', version: 'Unknown' };'
+    return { name: 'Unknown', version: 'Unknown' };
   }
 
   private static getWindowsVersion(userAgent: string): string {
-    if (userAgent.includes('Windows NT 10.0')) return '10';
-    if (userAgent.includes('Windows NT 6.3')) return '8.1';
-    if (userAgent.includes('Windows NT 6.2')) return '8';
-    if (userAgent.includes('Windows NT 6.1')) return '7';
-    return 'Unknown';
+    if (userAgent.includes('Windows NT 10.0')) return '10
+    if (userAgent.includes('Windows NT 6.3')) return '8.1
+    if (userAgent.includes('Windows NT 6.2')) return '8
+    if (userAgent.includes('Windows NT 6.1')) return '7
+    return 'Unknown'
   }
 
   private static getMacVersion(userAgent: string): string {
     const match = userAgent.match(/Mac OS X (\d+_?\d+_?\d*)/);
-    return match ? match[1].replace(/_/g, '.') : 'Unknown';
+    return match ? match[1].replace(/_/g, '.') : 'Unknown'
   }
 }
 
@@ -282,7 +282,7 @@ class LocationDetector {
         locationInfo.isp = data.org;
       }
     } catch (error) {
-      console.warn("获取位置信息失败:', error);'`
+      console.warn("获取位置信息失败:', error);'`"`
     }
 
     // 检测VPN/Tor（简化实现）
@@ -341,7 +341,7 @@ class SecurityAnalyzer {
         .filter(s => s.locationInfo)
         .map(s => `${s.locationInfo!.country}-${s.locationInfo!.region}`);`
 
-      const currentLocation = `${sessionData.locationInfo.country}-${sessionData.locationInfo.region}`;`
+      const currentLocation = `${sessionData.locationInfo.country}-${sessionData.locationInfo.region}`;
       if (!knownLocations.includes(currentLocation)) {
         isNewLocation = true;
         riskScore += 15;
@@ -427,7 +427,7 @@ export class SessionManager {
     ipAddress: string,
     policy: ConcurrentSessionPolicy = {
       maxSessions: this.config.maxConcurrentSessions,
-      strategy: "terminate_oldest','`
+      strategy: "terminate_oldest','`"`
       notifyUser: true,
       requireConfirmation: false
     }
@@ -451,8 +451,8 @@ export class SessionManager {
     const sessionData: SessionData  = {
       id: sessionId,
       userId: user.id,
-      token: '', // 将由JWT管理器设置'
-      refreshToken: '','
+      token: '', // 将由JWT管理器设置
+      refreshToken: '',
       expiresAt: new Date(Date.now() + this.config.sessionTimeout).toISOString(),
       createdAt: new Date().toISOString(),
       lastActivityAt: new Date().toISOString(),
@@ -491,7 +491,7 @@ export class SessionManager {
     this.startHeartbeat(sessionId);
 
     // 记录活动
-    this.recordActivity(sessionId, 'session_created', 'auth', {'
+    this.recordActivity(sessionId, 'session_created', 'auth', {
       deviceInfo: deviceInfo,
       locationInfo: locationInfo
     });
@@ -521,7 +521,7 @@ export class SessionManager {
   /**
    * 终止会话
    */
-  async terminateSession(sessionId: string, reason: string = 'user_logout'): Promise<void> {'
+  async terminateSession(sessionId: string, reason: string = 'user_logout'): Promise<void> {
     const session = this.activeSessions.get(sessionId);
     if (!session) return;
 
@@ -533,7 +533,7 @@ export class SessionManager {
     }
 
     // 记录活动
-    this.recordActivity(sessionId, 'session_terminated', "auth', { reason });'
+    this.recordActivity(sessionId, 'session_terminated', "auth', { reason });"
     // 标记为非活跃
     session.isActive = false;
     await this.persistSession(session);
@@ -572,9 +572,9 @@ export class SessionManager {
         id: this.generateAlertId(),
         sessionId: sessionData.id,
         userId: sessionData.userId,
-        type: "new_device','`
-        severity: 'medium','
-        message: '检测到新设备登录','
+        type: "new_device','`"`
+        severity: 'medium',
+        message: '检测到新设备登录',
         details: { deviceInfo: sessionData.deviceInfo },
         timestamp: new Date().toISOString(),
         acknowledged: false
@@ -586,9 +586,9 @@ export class SessionManager {
         id: this.generateAlertId(),
         sessionId: sessionData.id,
         userId: sessionData.userId,
-        type: 'new_location','
-        severity: 'medium','
-        message: '检测到新位置登录','
+        type: 'new_location',
+        severity: 'medium',
+        message: '检测到新位置登录',
         details: { locationInfo: sessionData.locationInfo },
         timestamp: new Date().toISOString(),
         acknowledged: false
@@ -600,9 +600,9 @@ export class SessionManager {
         id: this.generateAlertId(),
         sessionId: sessionData.id,
         userId: sessionData.userId,
-        type: 'suspicious_activity','
-        severity: 'high','
-        message: '检测到可疑活动','
+        type: 'suspicious_activity',
+        severity: 'high',
+        message: '检测到可疑活动',
         details: { riskScore: sessionData.securityFlags.riskScore },
         timestamp: new Date().toISOString(),
         acknowledged: false
@@ -629,25 +629,25 @@ export class SessionManager {
 
     switch (policy.strategy) {
       case 'reject_new': ''
-        throw new Error('已达到最大并发会话数限制');'
+        throw new Error('已达到最大并发会话数限制");"
       case 'terminate_oldest': ''
         const oldestSession = userSessions
           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
         if (oldestSession) {
-          await this.terminateSession(oldestSession.id, 'concurrent_limit');'
-          warnings.push('已终止最旧的会话');'
+          await this.terminateSession(oldestSession.id, 'concurrent_limit");"
+          warnings.push('已终止最旧的会话");"
         }
         break;
 
       case 'terminate_all_others': ''
         for (const session of userSessions) {
-          await this.terminateSession(session.id, 'concurrent_limit');'
+          await this.terminateSession(session.id, 'concurrent_limit");"
         }
-        warnings.push('已终止所有其他会话');'
+        warnings.push('已终止所有其他会话");"
         break;
 
       case 'allow_with_warning': ''
-        warnings.push('已超过建议的并发会话数');'
+        warnings.push('已超过建议的并发会话数");"
         break;
     }
   }
@@ -655,11 +655,11 @@ export class SessionManager {
   // ==================== 私有方法 ====================
 
   private generateSessionId(): string {
-    return 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);'
+    return 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
   }
 
   private generateAlertId(): string {
-    return 'alert_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);'
+    return 'alert_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
   }
 
   private recordActivity(
@@ -719,7 +719,7 @@ export class SessionManager {
 
       if (now - lastActivity > this.config.inactivityTimeout) {
         
-        await this.terminateSession(sessionId, "inactivity_timeout');'`
+        await this.terminateSession(sessionId, "inactivity_timeout");``
         return;
       }
 
@@ -748,14 +748,14 @@ export class SessionManager {
     }
 
     for (const sessionId of expiredSessions) {
-      await this.terminateSession(sessionId, 'session_expired');'
+      await this.terminateSession(sessionId, 'session_expired");"
     }
   }
 
   private async sendSecurityNotifications(alerts: SessionAlert[]): Promise<void> {
     // 这里应该实现实际的通知发送逻辑
     // 例如：邮件、短信、推送通知等
-    console.log('安全警报:', alerts);'
+    console.log('安全警报:', alerts);
   }
 }
 

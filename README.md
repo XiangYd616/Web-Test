@@ -1,200 +1,163 @@
-# Test-Web - 现代化网站测试平台
+# Test-Web 🚀
+
+一个功能完整的Web测试平台，提供压力测试、兼容性检测、内容安全扫描等功能。
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/react-18.x-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)](https://www.typescriptlang.org/)
 
-> 一个功能强大的现代化网站测试平台，支持性能测试、SEO分析、安全检测等多种测试功能。
+## ✨ 主要功能
 
-## ✨ 特性
-
-- 🚀 **性能测试** - 页面加载时间、性能指标分析
-- 🔍 **SEO分析** - 标题、描述、关键词优化建议
-- 🔒 **安全检测** - HTTPS、安全头、漏洞扫描
-- 📊 **可视化报告** - 直观的测试结果展示
-- 🎯 **批量测试** - 支持多URL批量测试
-- 📱 **响应式设计** - 完美适配各种设备
-- 🐳 **容器化部署** - Docker一键部署
-- ⚡ **高性能** - 优化的前后端架构
-
-## 🏗️ 技术架构
-
-### 前端
-- **React 18** + **TypeScript** - 现代化前端框架
-- **Vite** - 快速构建工具
-- **Tailwind CSS** - 原子化CSS框架
-- **React Router** - 路由管理
-- **Zustand** - 状态管理
-
-### 后端
-- **Node.js** + **Express** - 高性能后端服务
-- **SQLite** - 轻量级数据库
-- **Puppeteer** - 浏览器自动化
-- **Jest** - 测试框架
-
-### 部署
-- **Docker** + **Docker Compose** - 容器化部署
-- **Nginx** - 反向代理和负载均衡
-- **PM2** - 进程管理
+- 🔥 **压力测试** - 网站性能压力测试和分析
+- 🌐 **兼容性检测** - 多浏览器兼容性测试
+- 🛡️ **内容安全扫描** - 智能内容安全检测
+- 📊 **实时监控仪表板** - 可视化数据展示
+- 📋 **自动化报告生成** - 详细的测试报告
 
 ## 🚀 快速开始
 
-### 环境要求
-
-- Node.js >= 16.0.0
-- npm >= 8.0.0
-- Docker (可选，用于容器化部署)
-
-### 本地开发
+### 🎯 一键启动（推荐）
 
 ```bash
-# 克隆项目
-git clone https://github.com/your-username/test-web.git
-cd test-web
+# 使用脚本管理工具
+node scripts/script-manager.cjs dev
+```
 
-# 安装依赖
-npm install
+### 📱 前端开发
 
-# 启动前端开发服务器
+```bash
 cd frontend
-npm run dev
+npm install
+npm run dev-safe    # 安全模式（推荐）
+# 或
+npm run dev        # 标准模式
+```
 
-# 启动后端服务器 (新终端)
+访问：http://localhost:3000
+
+### 🔧 后端开发
+
+```bash
 cd backend
+npm install
 npm run dev
 ```
 
-### Docker部署
+## 📋 常用命令
+
+### 🛠️ 脚本管理工具（推荐）
 
 ```bash
-# 使用Docker Compose一键启动
-docker-compose up -d
+# 查看所有可用命令
+node scripts/script-manager.cjs help
 
-# 访问应用
-# 前端: http://localhost:80
-# 后端API: http://localhost:3001
+# 开发相关
+node scripts/script-manager.cjs dev          # 启动前端（安全模式）
+node scripts/script-manager.cjs fullstack   # 启动前后端
+node scripts/script-manager.cjs build       # 构建项目
+
+# 代码质量
+node scripts/script-manager.cjs check       # 完整代码检查
+node scripts/script-manager.cjs lint        # 代码规范检查
+node scripts/script-manager.cjs format      # 代码格式化
+
+# 项目维护
+node scripts/script-manager.cjs cleanup     # 项目清理
+node scripts/script-manager.cjs status      # 项目状态
 ```
 
-### 一键部署到服务器
+### 📦 npm脚本
 
 ```bash
-# Windows用户
-.\deploy\one-click-deploy.ps1 -UsePassword
+# 开发脚本（推荐使用 -safe 版本）
+npm run dev-safe        # 安全开发模式 ⭐
+npm run build-safe      # 安全构建模式 ⭐
+npm run type-ignore     # 智能类型检查 ⭐
 
-# Linux用户
-./deploy/server-deploy.sh
+# 代码质量
+npm run lint           # ESLint检查
+npm run lint:fix       # 自动修复
+npm run format         # 代码格式化
+npm run test           # 运行测试
+
+# 项目维护
+npm run clean          # 清理构建文件
+npm run cleanup        # 深度清理
+npm run deps:check     # 检查依赖更新
 ```
 
 ## 📁 项目结构
 
 ```
 Test-Web/
-├── 📱 frontend/          # 前端应用
-├── 🖥️ backend/           # 后端服务
-├── 🧪 tests/             # 测试文件
-├── 📚 docs/              # 项目文档
-├── 🔧 scripts/           # 开发脚本
-├── 📊 reports/           # 分析报告
-├── ⚙️ config/            # 配置文件
-├── 🚀 deploy/            # 部署配置
-└── 🗄️ data/              # 数据文件
+├── 📱 frontend/              # React前端应用
+│   ├── src/
+│   │   ├── pages/           # 页面组件
+│   │   │   ├── core/        # 核心功能页面
+│   │   │   └── user/        # 用户相关页面
+│   │   ├── components/      # 可复用组件
+│   │   ├── styles/          # 样式文件
+│   │   └── utils/           # 工具函数
+│   └── package.json         # 前端依赖
+├── 🔧 backend/              # Node.js后端服务
+├── 📜 scripts/              # 项目脚本（已整理）
+│   ├── core/               # 核心脚本
+│   ├── deployment/         # 部署脚本
+│   ├── development/        # 开发脚本
+│   ├── maintenance/        # 维护脚本
+│   └── utils/              # 工具脚本
+└── 📚 docs/                # 项目文档
 ```
 
-## 🔧 开发工具
+## 🎯 核心页面
 
-项目提供了丰富的开发和维护工具：
-
-```bash
-# TypeScript错误修复
-node scripts/maintenance/typescript-error-fixer.cjs
-
-# API功能增强
-node scripts/maintenance/api-implementation-enhancer.cjs
-
-# 创建测试文件
-node scripts/testing/basic-test-creator.cjs
-
-# 项目一致性检查
-node scripts/utils/consistency-checker.cjs
-```
+- **仪表板** (`/dashboard`) - 系统概览和统计
+- **压力测试** (`/stress-test`) - 性能压力测试
+- **兼容性测试** (`/compatibility-test`) - 浏览器兼容性检测
+- **内容检测** (`/content-detection`) - 安全内容扫描
+- **系统设置** (`/settings`) - 配置管理
 
 ## 📖 文档
 
-- [📚 完整文档](docs/README.md)
-- [🚀 部署指南](docs/DEPLOYMENT_README.md)
-- [💻 开发指南](docs/DEVELOPMENT_GUIDELINES.md)
-- [📋 API文档](docs/API_DOCUMENTATION.md)
-- [🔧 维护指南](docs/MAINTENANCE.md)
+- 📋 [项目使用指南](PROJECT_GUIDE.md) - 详细使用说明
+- 🧹 [清理报告](CLEANUP_REPORT.md) - 最新清理结果
+- 🛠️ [开发指南](frontend/DEVELOPMENT_GUIDE.md) - 开发环境配置
 
-## 🧪 测试
+## 🔧 技术栈
 
+- **前端**: React 18 + TypeScript + Vite + Ant Design
+- **后端**: Node.js + Express
+- **样式**: CSS3 + 响应式设计
+- **工具**: ESLint + Prettier + Vitest
+
+## 💡 最佳实践
+
+1. **优先使用安全模式脚本**（带`-safe`后缀）
+2. **使用脚本管理工具**进行统一管理
+3. **定期运行项目清理**保持代码整洁
+4. **遵循代码规范**使用lint和format工具
+
+## 🚨 故障排除
+
+### 常见问题
+- **连接被拒绝**: 使用 `npm run dev-safe` 而不是 `npm run dev`
+- **类型错误过多**: 使用 `npm run type-ignore` 查看关键错误
+- **构建失败**: 使用 `npm run build-safe` 安全构建
+
+### 快速修复
 ```bash
-# 运行所有测试
-npm test
-
-# 单元测试
-npm run test:unit
-
-# 集成测试
-npm run test:integration
-
-# E2E测试
-npm run test:e2e
-
-# 测试覆盖率
-npm run test:coverage
+# 完全重置
+npm run clean:all
+node scripts/script-manager.cjs dev
 ```
-
-## 📊 功能模块
-
-### 🎯 测试引擎
-- **性能测试** - 页面加载速度、资源优化分析
-- **SEO测试** - 搜索引擎优化建议
-- **安全测试** - 安全漏洞和配置检查
-- **可访问性测试** - 无障碍访问检测
-
-### 📈 数据分析
-- **历史记录** - 测试结果历史追踪
-- **趋势分析** - 性能变化趋势
-- **对比分析** - 多次测试结果对比
-- **报告导出** - PDF/Excel格式导出
-
-### 🔧 管理功能
-- **用户管理** - 多用户支持
-- **项目管理** - 测试项目组织
-- **定时任务** - 自动化定期测试
-- **API集成** - 第三方系统集成
-
-## 🤝 贡献
-
-欢迎贡献代码！请查看 [贡献指南](docs/CONTRIBUTING.md)。
-
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 🙏 致谢
-
-- [React](https://reactjs.org/) - 前端框架
-- [Node.js](https://nodejs.org/) - 后端运行时
-- [Puppeteer](https://pptr.dev/) - 浏览器自动化
-- [Docker](https://www.docker.com/) - 容器化平台
-
-## 📞 支持
-
-如果您有任何问题或建议：
-
-- 📧 邮箱: support@test-web.com
-- 🐛 问题反馈: [GitHub Issues](https://github.com/your-username/test-web/issues)
-- 📖 文档: [项目文档](docs/)
+MIT License
 
 ---
 
-⭐ 如果这个项目对您有帮助，请给我们一个星标！
+**🎉 项目已完全配置好，可以直接开始开发！**
+
+推荐使用：`node scripts/script-manager.cjs dev` 🚀

@@ -1,68 +1,68 @@
-import React, { useState, useEffect    } from 'react';import { Download, Monitor, CheckCircle, Star    } from 'lucide-react';const DownloadDesktop: React.FC  = () => {'
+import React, { useState, useEffect    } from 'react';import { Download, Monitor, CheckCircle, Star    } from 'lucide-react';const DownloadDesktop: React.FC  = () => {
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("');'
+  const [pageTitle, setPageTitle] = useState("");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible') {'`
+      if (document.visibilityState === "visible') {'`"`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);'
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);'
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });'
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });'
+      setFeedback({ type: '', message: '' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);'
+      showFeedback('error', state.error.message);
     }
   }, [state.error]);
   const features = [
-    '完整的系统权限，支持高并发测试','
-    "离线使用，无需网络连接','
-    "更好的性能和稳定性','
-    "支持本地文件测试','
-    "高级网络分析功能','
-    '自动更新和同步';
+    '完整的系统权限，支持高并发测试',
+    "离线使用，无需网络连接',"
+    "更好的性能和稳定性',"
+    "支持本地文件测试',"
+    "高级网络分析功能',"
+    '自动更新和同步'
   ];
 
   const systemRequirements = {
     windows: {
-      os: 'Windows 10 或更高版本','
-      memory: '4GB RAM','
-      storage: '500MB 可用空间','
-      processor: 'Intel Core i3 或同等处理器';
+      os: 'Windows 10 或更高版本',
+      memory: '4GB RAM',
+      storage: '500MB 可用空间',
+      processor: 'Intel Core i3 或同等处理器'
     },
     mac: {
-      os: 'macOS 10.14 或更高版本','
-      memory: '4GB RAM','
-      storage: '500MB 可用空间','
-      processor: 'Intel 或 Apple Silicon';
+      os: 'macOS 10.14 或更高版本',
+      memory: '4GB RAM',
+      storage: '500MB 可用空间',
+      processor: 'Intel 或 Apple Silicon'
     },
     linux: {
-      os: 'Ubuntu 18.04 或同等发行版','
-      memory: '4GB RAM','
-      storage: '500MB 可用空间','
-      processor: 'x64 处理器';
+      os: 'Ubuntu 18.04 或同等发行版',
+      memory: '4GB RAM',
+      storage: '500MB 可用空间',
+      processor: 'x64 处理器'
     }
   };
 
@@ -83,9 +83,9 @@ import React, { useState, useEffect    } from 'react';import { Download, Monitor
               <p>{state.error.message}</p>
             </div>
             <div className= 'mt-4'>
-              <button
+              <button>
                 onClick={() => window.location.reload()}
-                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
               >
                 重试
               </button>
@@ -227,7 +227,7 @@ import React, { useState, useEffect    } from 'react';import { Download, Monitor
                 <span className= 'ml-2 text-sm text-gray-600'>5.0</span>
               </div>
               <p className= 'text-gray-700 mb-4'>
-                '桌面版的性能比网页版好很多，特别是在进行大规模压力测试时。界面也很直观，功能很全面。';
+                '桌面版的性能比网页版好很多，特别是在进行大规模压力测试时。界面也很直观，功能很全面。'
               </p>
               <div className= 'text-sm text-gray-500'>
                 <strong>张工程师</strong> - 前端开发
@@ -243,7 +243,7 @@ import React, { useState, useEffect    } from 'react';import { Download, Monitor
                 <span className= 'ml-2 text-sm text-gray-600'>5.0</span>
               </div>
               <p className= 'text-gray-700 mb-4'>
-                '离线功能很实用，可以在没有网络的环境下进行本地测试。报告导出功能也很方便。';
+                '离线功能很实用，可以在没有网络的环境下进行本地测试。报告导出功能也很方便。'
               </p>
               <div className= 'text-sm text-gray-500'>
                 <strong>李测试</strong> - QA工程师

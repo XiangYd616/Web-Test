@@ -4,12 +4,12 @@
  * 版本: v2.0.0 - 整合新的缓存管理系统
  */
 
-import { useCallback, useEffect, useRef, useState    } from 'react';// // // // // // // // import type { CacheManager, CacheStats  } from '../services/cacheStrategy';// 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除'
-// // // // // // // // import { CacheFactory, defaultLocalStorageCache, defaultMemoryCache   } from '../services/cacheStrategy';// 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除'
+import { useCallback, useEffect, useRef, useState    } from 'react';// // // // // // // // import type { CacheManager, CacheStats  } from '../services/cacheStrategy';// 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
+// // // // // // // // import { CacheFactory, defaultLocalStorageCache, defaultMemoryCache   } from '../services/cacheStrategy';// 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
 // ==================== 类型定义 ====================
 
 export interface UseCacheOptions     {
-  cacheType?: 'memory' | 'localStorage' | 'hybrid';
+  cacheType?: 'memory' | 'localStorage' | 'hybrid'
   namespace?: string;
   ttl?: number;
   enableStats?: boolean;
@@ -41,8 +41,8 @@ export interface CacheState     {
 
 export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, CacheOperations<T>]   {
   const {
-    cacheType = 'memory','
-    namespace = 'default','
+    cacheType = 'memory',
+    namespace = 'default',
     ttl = 300000, // 5分钟
     enableStats = false,
     onCacheHit,
@@ -83,10 +83,10 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
   const getCacheManager = useCallback((): CacheManager  => {
     const manager = cacheManagerRef.current;
     if (!manager) {
-      throw new Error('Cache manager not initialized');'
+      throw new Error('Cache manager not initialized");"
     }
 
-    if (cacheType === 'hybrid') {'
+    if (cacheType === 'hybrid') {
         return (manager as { memory: CacheManager; localStorage: CacheManager
       }).memory;
     }
@@ -96,7 +96,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
   // 获取混合缓存的localStorage管理器
   const getLocalStorageManager = useCallback((): CacheManager | null  => {
-    if (cacheType !== 'hybrid') return null;'
+    if (cacheType !== 'hybrid') return null;
     const manager = cacheManagerRef.current;
     if (!manager) return null;
 
@@ -113,12 +113,12 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
     // 获取缓存数据
     get: useCallback(async (key: string, params?: Record<string, any>) => {
       try {
-        updateState({ isLoading: true, error: null, lastOperation: 'get' });'
+        updateState({ isLoading: true, error: null, lastOperation: 'get' });
         const cacheManager = getCacheManager();
         let data = await cacheManager.get(key, params);
 
         // 如果是混合缓存且内存中没有，尝试从localStorage获取
-        if (!data && cacheType === 'hybrid') {'
+        if (!data && cacheType === 'hybrid') {
           const localStorageManager = getLocalStorageManager();
           if (localStorageManager) {
             data = await localStorageManager.get(key, params);
@@ -138,7 +138,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         return data;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache get operation failed';
+        const errorMessage = error instanceof Error ? error.message : 'Cache get operation failed'
         updateState({ error: errorMessage });
         return null;
       } finally {
@@ -149,12 +149,12 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
     // 设置缓存数据
     set: useCallback(async (key: string, data: T, params?: Record<string, any>, customTTL?: number) => {
       try {
-        updateState({ isLoading: true, error: null, lastOperation: 'set' });'
+        updateState({ isLoading: true, error: null, lastOperation: 'set' });
         const cacheManager = getCacheManager();
         await cacheManager.set(key, data, params, customTTL || ttl);
 
         // 如果是混合缓存，同时设置到localStorage
-        if (cacheType === 'hybrid') {'
+        if (cacheType === 'hybrid') {
           const localStorageManager = getLocalStorageManager();
           if (localStorageManager) {
             await localStorageManager.set(key, data, params, (customTTL || ttl) * 5); // localStorage保存更久
@@ -163,7 +163,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         onCacheSet?.(key, data);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache set operation failed';
+        const errorMessage = error instanceof Error ? error.message : 'Cache set operation failed'
         updateState({ error: errorMessage });
       } finally {
         updateState({ isLoading: false });
@@ -173,12 +173,12 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
     // 删除缓存数据
     delete: useCallback(async (key: string, params?: Record<string, any>) => {
       try {
-        updateState({ isLoading: true, error: null, lastOperation: 'delete' });'
+        updateState({ isLoading: true, error: null, lastOperation: 'delete' });
         const cacheManager = getCacheManager();
         const deleted = await cacheManager.delete(key, params);
 
         // 如果是混合缓存，同时从localStorage删除
-        if (cacheType === 'hybrid') {'
+        if (cacheType === 'hybrid') {
           const localStorageManager = getLocalStorageManager();
           if (localStorageManager) {
             await localStorageManager.delete(key, params);
@@ -191,7 +191,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         return deleted;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache delete operation failed';
+        const errorMessage = error instanceof Error ? error.message : 'Cache delete operation failed'
         updateState({ error: errorMessage });
         return false;
       } finally {
@@ -202,19 +202,19 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
     // 清空缓存
     clear: useCallback(async () => {
       try {
-        updateState({ isLoading: true, error: null, lastOperation: 'clear' });'
+        updateState({ isLoading: true, error: null, lastOperation: 'clear' });
         const cacheManager = getCacheManager();
         await cacheManager.clear();
 
         // 如果是混合缓存，同时清空localStorage
-        if (cacheType === 'hybrid') {'
+        if (cacheType === 'hybrid') {
           const localStorageManager = getLocalStorageManager();
           if (localStorageManager) {
             await localStorageManager.clear();
           }
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache clear operation failed';
+        const errorMessage = error instanceof Error ? error.message : 'Cache clear operation failed'
         updateState({ error: errorMessage });
       } finally {
         updateState({ isLoading: false });
@@ -228,7 +228,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
         const exists = await cacheManager.has(key, params);
 
         // 如果内存中没有但是混合缓存，检查localStorage
-        if (!exists && cacheType === 'hybrid') {'
+        if (!exists && cacheType === 'hybrid') {
         const localStorageManager = getLocalStorageManager();
           if (localStorageManager) {
             return await localStorageManager.has(key, params);
@@ -244,12 +244,12 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
     // 按模式失效缓存
     invalidatePattern: useCallback(async (pattern: string) => {
       try {
-        updateState({ isLoading: true, error: null, lastOperation: 'invalidatePattern' });'
+        updateState({ isLoading: true, error: null, lastOperation: 'invalidatePattern' });
         const cacheManager = getCacheManager();
         let count = await cacheManager.invalidatePattern(pattern);
 
         // 如果是混合缓存，同时失效localStorage
-        if (cacheType === 'hybrid') {'
+        if (cacheType === 'hybrid') {
           const localStorageManager = getLocalStorageManager();
           if (localStorageManager) {
             count += await localStorageManager.invalidatePattern(pattern);
@@ -258,7 +258,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         return count;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Cache invalidate operation failed';
+        const errorMessage = error instanceof Error ? error.message : 'Cache invalidate operation failed'
         updateState({ error: errorMessage });
         return 0;
       } finally {
@@ -292,7 +292,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
     // 预加载数据
     preload: useCallback(async (keys: Array<{ key: string; loader: () => Promise<T>; params?: Record<string, any> }>) => {
       try {
-        updateState({ isLoading: true, error: null, lastOperation: 'preload' });'
+        updateState({ isLoading: true, error: null, lastOperation: 'preload' });
         const promises = keys.map(async ({ key, loader, params }) => {
           try {
             // 检查是否已经缓存
@@ -308,7 +308,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         await Promise.all(promises);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Cache preload operation failed';'`
+        const errorMessage = error instanceof Error ? error.message : "Cache preload operation failed";``
         updateState({ error: errorMessage });
       } finally {
         updateState({ isLoading: false });
@@ -343,48 +343,48 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 /**
  * API响应缓存Hook
  */
-export function useApiCache<T = any>(options: Omit<UseCacheOptions, 'namespace'> = {}) {'
+export function useApiCache<T = any>(options: Omit<UseCacheOptions, 'namespace'> = {}) {
   return useCache<T>({
     ...options,
-    namespace: 'api','
+    namespace: 'api',
     ttl: options.ttl || 300000, // 5分钟
-    cacheType: 'hybrid' // API响应使用混合缓存'
+    cacheType: 'hybrid' // API响应使用混合缓存
   });
 }
 
 /**
  * 用户数据缓存Hook
  */
-export function useUserCache<T = any>(options: Omit<UseCacheOptions, 'namespace'> = {}) {'
+export function useUserCache<T = any>(options: Omit<UseCacheOptions, 'namespace'> = {}) {
   return useCache<T>({
     ...options,
-    namespace: 'user','
+    namespace: 'user',
     ttl: options.ttl || 600000, // 10分钟
-    cacheType: 'localStorage' // 用户数据使用localStorage'
+    cacheType: 'localStorage' // 用户数据使用localStorage
   });
 }
 
 /**
  * 临时数据缓存Hook
  */
-export function useTempCache<T = any>(options: Omit<UseCacheOptions, 'namespace'> = {}) {'
+export function useTempCache<T = any>(options: Omit<UseCacheOptions, 'namespace'> = {}) {
   return useCache<T>({
     ...options,
-    namespace: 'temp','
+    namespace: 'temp',
     ttl: options.ttl || 60000, // 1分钟
-    cacheType: 'memory' // 临时数据只使用内存缓存'
+    cacheType: 'memory' // 临时数据只使用内存缓存
   });
 }
 
 /**
  * 测试结果缓存Hook
  */
-export function useTestResultCache<T = any>(options: Omit<UseCacheOptions, 'namespace'> = {}) {'
+export function useTestResultCache<T = any>(options: Omit<UseCacheOptions, 'namespace'> = {}) {
   return useCache<T>({
     ...options,
-    namespace: 'test_results','
+    namespace: 'test_results',
     ttl: options.ttl || 3600000, // 1小时
-    cacheType: 'hybrid' // 测试结果使用混合缓存'
+    cacheType: 'hybrid' // 测试结果使用混合缓存
   });
 }
 
@@ -434,7 +434,7 @@ export function useAdvancedCache<T = any>(config: {
       setIsFromCache(false);
       setLastUpdated(new Date());
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Cache set failed');'
+      const error = err instanceof Error ? err : new Error('Cache set failed");"
       setError(error);
       config.onError?.(error);
     } finally {
@@ -462,7 +462,7 @@ export function useAdvancedCache<T = any>(config: {
         return null;
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Cache get failed');'
+      const error = err instanceof Error ? err : new Error('Cache get failed");"
       setError(error);
       config.onError?.(error);
       return null;
@@ -487,7 +487,7 @@ export function useAdvancedCache<T = any>(config: {
 
       return result;
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Cache remove failed');'
+      const error = err instanceof Error ? err : new Error('Cache remove failed");"
       setError(error);
       config.onError?.(error);
       return false;
@@ -520,7 +520,7 @@ export function useAdvancedCache<T = any>(config: {
 export function useSmartApiCache<T = any>(endpoint: string, params?: Record<string, any>) {
   const cache = useAdvancedCache<T>({
     dataType: DataType.API_RESPONSES,
-    onError: (error) => console.error('Smart API cache error: ', error)'
+    onError: (error) => console.error('Smart API cache error: ', error)
   });
 
   const cacheKey = CacheKeys.api(endpoint, params);
@@ -552,31 +552,31 @@ export function useSmartApiCache<T = any>(endpoint: string, params?: Record<stri
 export function useSmartUserCache(userId: string) {
   const profileCache = useAdvancedCache<any>({
     dataType: DataType.USER_PROFILE,
-    onError: (error) => console.error('User profile cache error: ', error)'
+    onError: (error) => console.error('User profile cache error: ', error)
   });
 
   const preferencesCache = useAdvancedCache<any>({
     dataType: DataType.USER_PREFERENCES,
-    onError: (error) => console.error('User preferences cache error: ', error)'
+    onError: (error) => console.error('User preferences cache error: ', error)
   });
 
   const getProfile = useCallback(async () => {
-    const key = CacheKeys.user(userId, 'profile');'
+    const key = CacheKeys.user(userId, 'profile");"
     return profileCache.get(key);
   }, [userId, profileCache]);
 
   const setProfile = useCallback(async (profile: any) => {
-    const key = CacheKeys.user(userId, 'profile');'
+    const key = CacheKeys.user(userId, 'profile");"
     return profileCache.set(key, profile);
   }, [userId, profileCache]);
 
   const getPreferences = useCallback(async () => {
-    const key = CacheKeys.user(userId, 'preferences');'
+    const key = CacheKeys.user(userId, 'preferences");"
     return preferencesCache.get(key);
   }, [userId, preferencesCache]);
 
   const setPreferences = useCallback(async (preferences: any) => {
-    const key = CacheKeys.user(userId, 'preferences');'
+    const key = CacheKeys.user(userId, 'preferences");"
     return preferencesCache.set(key, preferences);
   }, [userId, preferencesCache]);
 

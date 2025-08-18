@@ -18,7 +18,7 @@ export interface UserActivityStats     {
 
 export interface ActivityItem     {
   id: string;
-  type: 'test_completed' | 'test_failed' | 'bookmark_added' | 'profile_updated';
+  type: 'test_completed' | 'test_failed' | 'bookmark_added' | 'profile_updated'
   title: string;
   description: string;
   timestamp: string;
@@ -50,7 +50,7 @@ class UserStatsService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -62,7 +62,7 @@ class UserStatsService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -93,8 +93,8 @@ class UserStatsService {
   }
 }
   }
-  private readonly STORAGE_KEY = "user_activity_stats';'`
-  private readonly ACTIVITY_KEY = 'user_recent_activity';
+  private readonly STORAGE_KEY = "user_activity_stats";`
+  private readonly ACTIVITY_KEY = 'user_recent_activity'
   // 获取用户统计数据
   async getUserStats(userId: string): Promise<UserActivityStats> {
     try {
@@ -133,7 +133,7 @@ class UserStatsService {
           ...stats
         };
       } catch (error) {
-        console.error('Failed to parse user stats: ', error);'
+        console.error('Failed to parse user stats: ', error);
       }
     }
 
@@ -144,15 +144,15 @@ class UserStatsService {
   // 从API获取统计数据
   private async fetchStatsFromAPI(userId: string): Promise<UserActivityStats | null> {
     try {
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');'
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token");
       if (!token) {
-        throw new Error('No auth token available');'
+        throw new Error('No auth token available");
       }
 
       const response = await fetch(`/api/user/stats/${userId}`, {`
         headers: {
           'Authorization': `Bearer ${token}`,'`
-          "Content-Type': "application/json';'`
+          "Content-Type': "application/json";`
         }
       });
 
@@ -185,7 +185,7 @@ class UserStatsService {
       failedTests: apiData.failed_tests || apiData.failedTests || 0,
       averageScore: apiData.average_score || apiData.averageScore || 0,
       totalTestTime: apiData.total_test_time || apiData.totalTestTime || 0,
-      mostUsedTestType: apiData.most_used_test_type || apiData.mostUsedTestType || '压力测试','
+      mostUsedTestType: apiData.most_used_test_type || apiData.mostUsedTestType || '压力测试',
       testsByType: apiData.tests_by_type || apiData.testsByType || {},
       recentActivity: apiData.recent_activity || apiData.recentActivity || []
     };
@@ -203,7 +203,7 @@ class UserStatsService {
       failedTests: 0,
       averageScore: 0,
       totalTestTime: 0,
-      mostUsedTestType: '暂无','
+      mostUsedTestType: '暂无',
       testsByType: {},
       recentActivity: []
     };
@@ -285,12 +285,12 @@ class UserStatsService {
   async recordBookmarkAction(userId: string, action: "add' | 'remove', itemTitle: string): Promise<void> {'`
     const stats = await this.getUserStats(userId);
 
-    if (action === 'add') {'
+    if (action === 'add') {
       stats.favoriteTests += 1;
       this.addActivity(userId, {
         id: `bookmark_${Date.now()}`,`
         type: "bookmark_added','`
-        title: '添加收藏','
+        title: '添加收藏',
         description: `收藏了 ${itemTitle}`,`
         timestamp: new Date().toISOString(),
         metadata: { action, itemTitle }
@@ -343,7 +343,7 @@ class UserStatsService {
     );
 
     stats.testsThisWeek = weekActivities.filter(activity =>
-      activity.type === 'test_completed' || activity.type === 'test_failed';
+      activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
     this.updateUserStats(userId, stats);
@@ -361,7 +361,7 @@ class UserStatsService {
     );
 
     stats.testsThisMonth = monthActivities.filter(activity =>
-      activity.type === 'test_completed' || activity.type === 'test_failed';
+      activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
     this.updateUserStats(userId, stats);

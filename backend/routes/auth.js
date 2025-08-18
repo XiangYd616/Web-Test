@@ -13,7 +13,7 @@ const {
   createUserSession
 } = require('../middleware/auth');
 const { loginRateLimiter, registerRateLimiter } = require('../middleware/rateLimiter');
-const { asyncHandler } = require('../middleware/errorHandler');
+const { ErrorHandler, asyncHandler } = require('../middleware/errorHandler');
 const { securityLogger } = require('../middleware/logger');
 
 const router = express.Router();

@@ -1,28 +1,28 @@
 
 // 检查是否在浏览器环境中
-export const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+export const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined'
 // 检查是否在 Node.js 环境中
-export const isNode = typeof process !== 'undefined' && process.versions && process.versions.node;'
+export const isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
 // 检查是否在 Electron 环境中
-export const isElectron = typeof window !== 'undefined' && (window as any).process && (window as any).process.type;'
+export const isElectron = typeof window !== 'undefined' && (window as any).process && (window as any).process.type;
 // 检查是否在桌面环境中运行
 export const isDesktopEnvironment = () => {
   return !!(
-    typeof window !== 'undefined' &&'
+    typeof window !== 'undefined' &&
     (
       (window as any).electronAPI ||
       (window as any).electron ||
       (window as any).__TAURI__ ||
-      navigator.userAgent.includes('Electron') ||'
+      navigator.userAgent.includes('Electron') ||
       isElectron
     )
   );
 };
 
 // 检查是否在开发环境中
-export const isDevelopment = import.meta.env.MODE === 'development';
+export const isDevelopment = import.meta.env.MODE === 'development'
 // 检查是否在生产环境中
-export const isProduction = import.meta.env.MODE === 'production';
+export const isProduction = import.meta.env.MODE === 'production'
 export const canUseDatabase = isNode || isElectron;
 
 export const canUseFileSystem = isNode || isElectron;

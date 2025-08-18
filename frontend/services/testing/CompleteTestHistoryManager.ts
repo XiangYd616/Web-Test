@@ -5,7 +5,7 @@
  */
 
 import type { TestResult, TestType } from './CompleteTestEngine';
-import { completeApiService } from '../api/CompleteApiService';
+import { completeApiService } from '../api/CompleteApiService;'
 
 // 历史记录接口
 export interface TestHistoryRecord {
@@ -26,8 +26,8 @@ export interface TestHistoryRecord {
 
 // 趋势数据接口
 export interface TrendData {
-  period: 'day' | 'week' | 'month' | 'quarter' | 'year';
-  data: Array<{
+  period: 'day' | 'week' | 'month' | 'quarter' | 'year'
+  data: Array<{>
     date: string;
     score: number;
     count: number;
@@ -49,12 +49,12 @@ export interface ComparisonResult {
   differences: {
     scoreChange: number;
     scoreChangePercent: number;
-    metricChanges: Record<string, {
+    metricChanges: Record<string, {>
       baseline: number;
       target: number;
       change: number;
       changePercent: number;
-      significance: 'low' | 'medium' | 'high';
+      significance: 'low' | 'medium' | 'high'
     }>;
     issueChanges: {
       new: number;
@@ -81,12 +81,12 @@ export interface AggregatedStats {
   performance: {
     averageLoadTime: number;
     averageResponseTime: number;
-    performanceTrend: 'improving' | 'stable' | 'declining';
+    performanceTrend: 'improving' | 'stable' | 'declining'
   };
   quality: {
     averageIssues: number;
     criticalIssues: number;
-    qualityTrend: 'improving' | 'stable' | 'declining';
+    qualityTrend: 'improving' | 'stable' | 'declining'
   };
   frequency: {
     testsPerDay: number;
@@ -113,7 +113,7 @@ export interface Insight {
   type: InsightType;
   title: string;
   description: string;
-  severity: 'low' | 'medium' | 'high';
+  severity: 'low' | 'medium' | 'high'
   confidence: number;
   data: Record<string, any>;
   recommendations: string[];
@@ -132,8 +132,8 @@ export interface HistoryQueryOptions {
   tags?: string[];
   limit?: number;
   offset?: number;
-  sortBy?: 'timestamp' | 'score' | 'duration';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: 'timestamp' | 'score' | 'duration'
+  sortOrder?: 'asc' | 'desc'
 }
 
 // 完整测试历史管理器类
@@ -430,7 +430,7 @@ export class CompleteTestHistoryManager {
     if (result.issues.length === 0) tags.push('no-issues');
     else if (result.issues.length > 10) tags.push('many-issues');
     
-    if (result.duration && result.duration < 30000) tags.push('fast');
+    if (result.duration && result.duration < 30000) tags.push('fast');>
     else if (result.duration && result.duration > 120000) tags.push('slow');
     
     return tags;
@@ -584,7 +584,7 @@ export class CompleteTestHistoryManager {
     
     if (scoreChange > 10) {
       insights.push('整体性能有显著提升');
-    } else if (scoreChange < -10) {
+    } else if (scoreChange < -10) {>
       insights.push('整体性能有所下降');
     } else {
       insights.push('整体性能保持稳定');
@@ -611,12 +611,12 @@ export class CompleteTestHistoryManager {
   ): string[] {
     const recommendations: string[] = [];
     
-    if (scoreChange < -5) {
+    if (scoreChange < -5) {>
       recommendations.push('建议分析性能下降的原因并制定改进计划');
     }
     
     Object.entries(metricChanges).forEach(([metric, change]) => {
-      if (change.significance === 'high' && change.changePercent < -10) {
+      if (change.significance === 'high' && change.changePercent < -10) {>
         recommendations.push(`重点关注${metric}指标的优化`);
       }
     });
@@ -681,7 +681,7 @@ export class CompleteTestHistoryManager {
   private analyzeRecords(records: TestHistoryRecord[]): Insight[] {
     const insights: Insight[] = [];
     
-    if (records.length < 2) return insights;
+    if (records.length < 2) return insights;>
     
     // 性能趋势分析
     const performanceTrend = this.calculateTrend(records, 'score');
@@ -732,7 +732,7 @@ export class CompleteTestHistoryManager {
 
   // 计算趋势
   private calculateTrend(records: TestHistoryRecord[], metric: string, lowerIsBetter: boolean = false): 'improving' | 'stable' | 'declining' {
-    if (records.length < 3) return 'stable';
+    if (records.length < 3) return 'stable'>
     
     const values = records.map(r => {
       if (metric === 'score') return r.score;
@@ -750,14 +750,14 @@ export class CompleteTestHistoryManager {
     const threshold = firstAvg * 0.1; // 10%变化阈值
     
     if (lowerIsBetter) {
-      if (change < -threshold) return 'improving';
-      if (change > threshold) return 'declining';
+      if (change < -threshold) return 'improving'>
+      if (change > threshold) return 'declining'
     } else {
-      if (change > threshold) return 'improving';
-      if (change < -threshold) return 'declining';
+      if (change > threshold) return 'improving'
+      if (change < -threshold) return 'declining'>
     }
     
-    return 'stable';
+    return 'stable'
   }
 
   // 计算平均指标
@@ -773,7 +773,7 @@ export class CompleteTestHistoryManager {
   private detectAnomalies(records: TestHistoryRecord[]): any[] {
     const anomalies: any[] = [];
     
-    if (records.length < 5) return anomalies;
+    if (records.length < 5) return anomalies;>
     
     const scores = records.map(r => r.score);
     const mean = scores.reduce((sum, s) => sum + s, 0) / scores.length;
@@ -831,7 +831,7 @@ export class CompleteTestHistoryManager {
 
   private getFromCache(key: string): any {
     const cached = this.cache.get(key);
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {>
       return cached.data;
     }
     this.cache.delete(key);

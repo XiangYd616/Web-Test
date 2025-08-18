@@ -1,4 +1,4 @@
-import React, { useState, useEffect    } from 'react';import { Shield, AlertTriangle, Lock, Eye    } from 'lucide-react';interface SecurityTestConfigProps   {'
+import React, { useState, useEffect    } from 'react';import { Shield, AlertTriangle, Lock, Eye    } from 'lucide-react';interface SecurityTestConfigProps   {
   config: any;
   onConfigChange: (config: any) => void;
   onSaveConfig?: (config: any) => void;
@@ -13,11 +13,11 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("');'
+  const [pageTitle, setPageTitle] = useState("");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
@@ -30,9 +30,9 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);'
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener("visibilitychange', handleVisibilityChange);'
+      document.removeEventListener("visibilitychange', handleVisibilityChange);
     };
   }, [fetchData]);
   
@@ -47,23 +47,23 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
     id: componentId,
     "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
-    'aria-selected': selected,'
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -79,9 +79,9 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
   });
 
   const [scanSettings, setScanSettings] = useState({
-    depth: config.depth || 'standard','
+    depth: config.depth || 'standard',
     timeout: config.timeout || 30000,
-    userAgent: config.userAgent || 'SecurityTestBot/1.0','
+    userAgent: config.userAgent || 'SecurityTestBot/1.0',
     followRedirects: config.followRedirects ?? true,
     maxRedirects: config.maxRedirects || 5
   });
@@ -91,7 +91,7 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
     excludePatterns: config.excludePatterns || [],
     includeSubdomains: config.includeSubdomains ?? false,
     checkPorts: config.checkPorts || [80, 443, 8080, 8443],
-    authConfig: config.authConfig || { type: 'none' }'
+    authConfig: config.authConfig || { type: 'none' }
   });
 
   // 更新配置
@@ -119,71 +119,71 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
 
   const securityCheckOptions = [
     {
-      key: 'checkSSL','
-      label: 'SSL/TLS检查','
-      description: '检查SSL证书有效性、加密强度和配置','
+      key: 'checkSSL',
+      label: 'SSL/TLS检查',
+      description: '检查SSL证书有效性、加密强度和配置',
       icon: Lock,
-      severity: 'high';
+      severity: 'high'
     },
     {
-      key: 'checkHeaders','
-      label: '安全头检查','
-      description: '检查HSTS、CSP、X-Frame-Options等安全头','
+      key: 'checkHeaders',
+      label: '安全头检查',
+      description: '检查HSTS、CSP、X-Frame-Options等安全头',
       icon: Shield,
-      severity: 'medium';
+      severity: 'medium'
     },
     {
-      key: 'checkVulnerabilities','
-      label: '漏洞扫描','
-      description: '扫描常见的Web应用漏洞','
+      key: 'checkVulnerabilities',
+      label: '漏洞扫描',
+      description: '扫描常见的Web应用漏洞',
       icon: AlertTriangle,
-      severity: 'high';
+      severity: 'high'
     },
     {
-      key: 'checkCookies','
-      label: 'Cookie安全','
-      description: '检查Cookie的安全属性设置','
+      key: 'checkCookies',
+      label: 'Cookie安全',
+      description: '检查Cookie的安全属性设置',
       icon: Eye,
-      severity: 'medium';
+      severity: 'medium'
     },
     {
-      key: 'checkCSP','
-      label: '内容安全策略','
-      description: '检查CSP配置和有效性','
+      key: 'checkCSP',
+      label: '内容安全策略',
+      description: '检查CSP配置和有效性',
       icon: Shield,
-      severity: 'medium';
+      severity: 'medium'
     },
     {
-      key: 'checkXSS','
-      label: 'XSS检测','
-      description: '检测跨站脚本攻击漏洞（谨慎使用）','
+      key: 'checkXSS',
+      label: 'XSS检测',
+      description: '检测跨站脚本攻击漏洞（谨慎使用）',
       icon: AlertTriangle,
-      severity: 'high','
+      severity: 'high',
       warning: true
     },
     {
-      key: 'checkSQLInjection','
-      label: 'SQL注入检测','
-      description: '检测SQL注入漏洞（谨慎使用）','
+      key: 'checkSQLInjection',
+      label: 'SQL注入检测',
+      description: '检测SQL注入漏洞（谨慎使用）',
       icon: AlertTriangle,
-      severity: 'high','
+      severity: 'high',
       warning: true
     },
     {
-      key: 'checkMixedContent','
-      label: '混合内容检查','
-      description: '检查HTTPS页面中的HTTP资源','
+      key: 'checkMixedContent',
+      label: '混合内容检查',
+      description: '检查HTTPS页面中的HTTP资源',
       icon: Lock,
-      severity: 'low';
+      severity: 'low'
     }
   ];
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'high': return 'text-red-600 bg-red-100';
-      case 'medium': return 'text-yellow-600 bg-yellow-100';
-      case 'low': return 'text-green-600 bg-green-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'high': return 'text-red-600 bg-red-100'
+      case 'medium': return 'text-yellow-600 bg-yellow-100'
+      case 'low': return 'text-green-600 bg-green-100'
+      default: return 'text-gray-600 bg-gray-100'
     }
   };
 
@@ -224,11 +224,11 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
                   </div>
                   <label className= 'flex items-center'>
                     <input
-                      type= 'checkbox';
+                      type= 'checkbox'
                       checked={securityChecks[option.key]}
                       onChange={(e) => handleSecurityCheckChange(option.key, e.target.checked)}
                       disabled={disabled}
-                      className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500';
+                      className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500'
                     />
                   </label>
                 </div>
@@ -269,9 +269,9 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
             </label>
             <select
               value={scanSettings.depth}
-              onChange={(e) => handleScanSettingChange('depth', e.target.value)}'
+              onChange={(e) => handleScanSettingChange('depth', e.target.value)}
               disabled={disabled}
-              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white';
+              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white'
             >
               <option value= 'basic'>基础扫描</option>
               <option value= 'standard'>标准扫描</option>
@@ -287,14 +287,14 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
               超时时间 (毫秒)
             </label>
             <input
-              type= 'number';
+              type= 'number'
               value={scanSettings.timeout}
-              onChange={(e) => handleScanSettingChange('timeout', parseInt(e.target.value))}'
+              onChange={(e) => handleScanSettingChange('timeout', parseInt(e.target.value))}
               disabled={disabled}
-              min= '5000';
-              max= '300000';
-              step= '1000';
-              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white';
+              min= '5000'
+              max= '300000'
+              step= '1000'
+              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white'
             />
           </div>
 
@@ -303,11 +303,11 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
               用户代理
             </label>
             <input
-              type= 'text';
+              type= 'text'
               value={scanSettings.userAgent}
-              onChange={(e) => handleScanSettingChange('userAgent', e.target.value)}'
+              onChange={(e) => handleScanSettingChange('userAgent', e.target.value)}
               disabled={disabled}
-              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white';
+              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white'
             />
           </div>
 
@@ -316,13 +316,13 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
               最大重定向次数
             </label>
             <input
-              type= 'number';
+              type= 'number'
               value={scanSettings.maxRedirects}
-              onChange={(e) => handleScanSettingChange('maxRedirects', parseInt(e.target.value))}'
+              onChange={(e) => handleScanSettingChange('maxRedirects', parseInt(e.target.value))}
               disabled={disabled}
-              min= '0';
-              max= '20';
-              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white';
+              min= '0'
+              max= '20'
+              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white'
             />
           </div>
         </div>
@@ -330,11 +330,11 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
         <div className= 'mt-4'>
           <label className= 'flex items-center'>
             <input
-              type= 'checkbox';
+              type= 'checkbox'
               checked={scanSettings.followRedirects}
               onChange={(e) => handleScanSettingChange("followRedirects', e.target.checked)}'
               disabled={disabled}
-              className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500';
+              className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500'
             />
             <span className= 'ml-2 text-sm text-gray-700 dark:text-gray-300'>跟随重定向</span>
           </label>
@@ -349,11 +349,11 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
           <div>
             <label className= 'flex items-center'>
               <input
-                type= 'checkbox';
+                type= 'checkbox'
                 checked={advancedSettings.includeSubdomains}
-                onChange={(e) => handleAdvancedSettingChange('includeSubdomains', e.target.checked)}'
+                onChange={(e) => handleAdvancedSettingChange('includeSubdomains', e.target.checked)}
                 disabled={disabled}
-                className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500';
+                className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500'
               />
               <span className= 'ml-2 text-sm text-gray-700 dark:text-gray-300'>包含子域名检查</span>
             </label>
@@ -364,14 +364,14 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
               检查端口 (逗号分隔)
             </label>
             <input
-              type= 'text';
-              value={advancedSettings.checkPorts.join(', ')}'
-              onChange={(e) => handleAdvancedSettingChange('checkPorts','
-                e.target.value.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p))'
+              type= 'text'
+              value={advancedSettings.checkPorts.join(', ')}
+              onChange={(e) => handleAdvancedSettingChange('checkPorts',
+                e.target.value.split(',').map(p => parseInt(p.trim())).filter(p => !isNaN(p))
               )}
               disabled={disabled}
-              placeholder= '80, 443, 8080, 8443';
-              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white';
+              placeholder= '80, 443, 8080, 8443'
+              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white'
             />
           </div>
 
@@ -381,13 +381,13 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
             </label>
             <textarea
               value={advancedSettings.excludePatterns.join("/n')}'
-              onChange={(e) => handleAdvancedSettingChange('excludePatterns','
-                e.target.value.split('/n').filter(p => p.trim())'
+              onChange={(e) => handleAdvancedSettingChange('excludePatterns',
+                e.target.value.split('/n').filter(p => p.trim())
               )}
               disabled={disabled}
-              placeholder= '.*/.pdf$/n.*/.jpg$';
+              placeholder= '.*/.pdf$/n.*/.jpg$'
               rows={3}
-              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white';
+              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white'
             />
           </div>
         </div>

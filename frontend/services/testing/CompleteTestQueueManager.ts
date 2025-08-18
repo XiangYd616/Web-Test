@@ -4,7 +4,7 @@
  * 支持智能调度算法、负载均衡和故障恢复
  */
 
-import type { TestConfig, TestResult, TestType, TestPriority, TestStatus } from './CompleteTestEngine';
+import type { TestConfig, TestResult, TestType, TestPriority, TestStatus } from './CompleteTestEngine
 
 // 队列项接口
 export interface QueueItem {

@@ -1,4 +1,4 @@
-import { apiService    } from '../api/apiService';export interface TestConfigTemplate     {'
+import { apiService    } from '../api/apiService';export interface TestConfigTemplate     {
   id: string;
   name: string;
   testType: string;
@@ -34,7 +34,7 @@ class ConfigService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -46,7 +46,7 @@ class ConfigService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -90,7 +90,7 @@ class ConfigService {
     });
   }
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {>
       try {
         return await fn();
       } catch (error) {
@@ -103,18 +103,18 @@ class ConfigService {
   }
 }
   }
-  private baseUrl = "/api/test/config';'`
-  private localStorageKey = 'test-configs';
+  private baseUrl = "/api/test/config";``
+  private localStorageKey = 'test-configs'
   /**
    * 获取测试配置模板
    */
   async getConfigTemplates(testType?: string): Promise<TestConfigTemplate[]> {
     try {
-      const params = testType ? `?testType=${testType}` : "';'`
+      const params = testType ? `?testType=${testType}` : "";`
       const response = await apiService.get(`${this.baseUrl}/templates${params}`);`
       return response.data || [];
     } catch (error) {
-      console.error("获取配置模板失败:', error);'`
+      console.error("获取配置模板失败:', error);'`"`
       // 返回本地存储的配置
       return this.getLocalConfigs(testType);
     }
@@ -123,12 +123,12 @@ class ConfigService {
   /**
    * 保存配置模板
    */
-  async saveConfigTemplate(template: Omit<TestConfigTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<TestConfigTemplate> {'
+  async saveConfigTemplate(template: Omit<TestConfigTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<TestConfigTemplate> {
     try {
       const response = await apiService.post(`${this.baseUrl}/templates`, template);`
       return response.data;
     } catch (error) {
-      console.error("保存配置模板失败:', error);'`
+      console.error("保存配置模板失败:', error);'`"`
       // 保存到本地存储
       return this.saveLocalConfig(template);
     }
@@ -142,8 +142,8 @@ class ConfigService {
       const response = await apiService.put(`${this.baseUrl}/templates/${id}`, template);`
       return response.data;
     } catch (error) {
-      console.error("更新配置模板失败:', error);'`
-      throw new Error('更新配置模板失败');'
+      console.error("更新配置模板失败:', error);'`"`
+      throw new Error('更新配置模板失败");"
     }
   }
 
@@ -154,8 +154,8 @@ class ConfigService {
     try {
       await apiService.delete(`${this.baseUrl}/templates/${id}`);`
     } catch (error) {
-      console.error("删除配置模板失败:', error);'`
-      throw new Error('删除配置模板失败');'
+      console.error("删除配置模板失败:', error);'`"`
+      throw new Error('删除配置模板失败");"
     }
   }
 
@@ -171,7 +171,7 @@ class ConfigService {
         validateSSL: true,
         headers: {},
         authentication: {
-          type: 'none';
+          type: 'none'
         }
       },
       security: {
@@ -181,7 +181,7 @@ class ConfigService {
         checkXSS: true,
         checkSQLInjection: true,
         checkCSRF: true,
-        scanDepth: 'medium';
+        scanDepth: 'medium'
       },
       stress: {
         duration: 60,
@@ -200,9 +200,9 @@ class ConfigService {
         checkSocial: true
       },
       compatibility: {
-        browsers: ['chrome', 'firefox', 'safari', 'edge'],'
-        devices: ['desktop', 'tablet', 'mobile'],'
-        resolutions: ['1920x1080', '1366x768', '375x667'],'
+        browsers: ['chrome', 'firefox', 'safari', 'edge'],
+        devices: ['desktop', 'tablet', 'mobile'],
+        resolutions: ['1920x1080', '1366x768', '375x667'],
         checkCSS: true,
         checkJS: true
       },
@@ -212,7 +212,7 @@ class ConfigService {
         checkUsability: true,
         checkMobile: true,
         performanceThreshold: 3000,
-        accessibilityLevel: 'AA';
+        accessibilityLevel: 'AA'
       }
     };
 
@@ -224,36 +224,36 @@ class ConfigService {
    */
   validateConfig(testType: string, config: any): { valid: boolean; errors: string[] } {
     const errors: string[]  = [];
-    if (!config || typeof config !== 'object') {'
-        errors.push('配置不能为空');'
+    if (!config || typeof config !== 'object') {
+        errors.push('配置不能为空");"
       return { valid: false, errors
       };
     }
 
     switch (testType) {
       case 'api': ''
-        if (config.timeout && (typeof config.timeout !== 'number' || config.timeout < 1000 || config.timeout > 300000)) {'
-          errors.push('超时时间必须是1秒到5分钟之间的数字');'
+        if (config.timeout && (typeof config.timeout !== 'number' || config.timeout < 1000 || config.timeout > 300000)) {
+          errors.push('超时时间必须是1秒到5分钟之间的数字");"
         }
-        if (config.retries && (typeof config.retries !== 'number' || config.retries < 0 || config.retries > 10)) {'
-          errors.push('重试次数必须是0到10之间的数字');'
+        if (config.retries && (typeof config.retries !== 'number' || config.retries < 0 || config.retries > 10)) {
+          errors.push('重试次数必须是0到10之间的数字");"
         }
         break;
 
       case 'stress': ''
-        if (config.duration && (typeof config.duration !== 'number' || config.duration < 10 || config.duration > 3600)) {'
-          errors.push('测试时长必须是10秒到1小时之间的数字');'
+        if (config.duration && (typeof config.duration !== 'number' || config.duration < 10 || config.duration > 3600)) {
+          errors.push('测试时长必须是10秒到1小时之间的数字");"
         }
-        if (config.concurrency && (typeof config.concurrency !== 'number' || config.concurrency < 1 || config.concurrency > 1000)) {'
-          errors.push('并发用户数必须是1到1000之间的数字');'
+        if (config.concurrency && (typeof config.concurrency !== 'number' || config.concurrency < 1 || config.concurrency > 1000)) {
+          errors.push('并发用户数必须是1到1000之间的数字");"
         }
         break;
 
       case 'seo': ''
-        const requiredChecks = ['checkTechnical', 'checkContent', 'checkMobile'];'
+        const requiredChecks = ['checkTechnical', 'checkContent', 'checkMobile"];"
         const hasAnyCheck = requiredChecks.some(check => config[check] === true);
         if (!hasAnyCheck) {
-          errors.push('至少需要选择一项SEO检查');'
+          errors.push('至少需要选择一项SEO检查");"
         }
         break;
     }
@@ -279,7 +279,7 @@ class ConfigService {
 
       return configs;
     } catch (error) {
-      console.error('读取本地配置失败:', error);'
+      console.error('读取本地配置失败:', error);
       return [];
     }
   }
@@ -287,7 +287,7 @@ class ConfigService {
   /**
    * 保存配置到本地存储
    */
-  private saveLocalConfig(template: Omit<TestConfigTemplate, 'id' | 'createdAt' | "updatedAt'>): TestConfigTemplate {'
+  private saveLocalConfig(template: Omit<TestConfigTemplate, 'id' | 'createdAt' | "updatedAt'>): TestConfigTemplate {"
     try {
       const configs = this.getLocalConfigs();
       const newTemplate: TestConfigTemplate  = {
@@ -301,8 +301,8 @@ class ConfigService {
 
       return newTemplate;
     } catch (error) {
-      console.error("保存本地配置失败:', error);'`
-      throw new Error('保存配置失败');'
+      console.error("保存本地配置失败:', error);'`"`
+      throw new Error('保存配置失败");"
     }
   }
 
@@ -319,7 +319,7 @@ class ConfigService {
           const configs = JSON.parse(content);
 
           if (!Array.isArray(configs)) {
-            reject(new Error('配置文件格式不正确'));'
+            reject(new Error('配置文件格式不正确'));
             return;
           }
 
@@ -330,12 +330,12 @@ class ConfigService {
 
           resolve(validConfigs);
         } catch (error) {
-          reject(new Error('配置文件解析失败'));'
+          reject(new Error('配置文件解析失败'));
         }
       };
 
       reader.onerror = () => {
-        reject(new Error('文件读取失败'));'
+        reject(new Error('文件读取失败'));
       };
 
       reader.readAsText(file);
@@ -348,10 +348,10 @@ class ConfigService {
   exportConfig(configs: TestConfigTemplate[]): void {
     try {
       const dataStr = JSON.stringify(configs, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });'
+      const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
 
-      const link = document.createElement('a');'
+      const link = document.createElement('a");"
       link.href = url;
       link.download = `test-configs-${new Date().toISOString().split('T')[0]}.json`;'`
       document.body.appendChild(link);
@@ -360,8 +360,8 @@ class ConfigService {
 
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("导出配置失败:', error);'`
-      throw new Error('导出配置失败');'
+      console.error("导出配置失败:', error);'`"`
+      throw new Error('导出配置失败");"
     }
   }
 }

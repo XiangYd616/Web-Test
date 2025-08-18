@@ -1,30 +1,30 @@
 
 // 反馈类型枚举
 export enum FeedbackType {
-  BUG_REPORT = 'bug_report','
-  FEATURE_REQUEST = 'feature_request','
-  USABILITY_FEEDBACK = 'usability_feedback','
-  PERFORMANCE_ISSUE = 'performance_issue','
-  UI_UX_FEEDBACK = 'ui_ux_feedback','
-  GENERAL_FEEDBACK = 'general_feedback';
+  BUG_REPORT = 'bug_report',
+  FEATURE_REQUEST = 'feature_request',
+  USABILITY_FEEDBACK = 'usability_feedback',
+  PERFORMANCE_ISSUE = 'performance_issue',
+  UI_UX_FEEDBACK = 'ui_ux_feedback',
+  GENERAL_FEEDBACK = 'general_feedback'
 }
 
 // 页面类型枚举
 export enum PageType {
-  SEO_TEST = 'seo_test','
-  SECURITY_TEST = 'security_test','
-  PERFORMANCE_TEST = 'performance_test','
-  STRESS_TEST = 'stress_test','
-  DASHBOARD = 'dashboard','
-  OTHER = 'other';
+  SEO_TEST = 'seo_test',
+  SECURITY_TEST = 'security_test',
+  PERFORMANCE_TEST = 'performance_test',
+  STRESS_TEST = 'stress_test',
+  DASHBOARD = 'dashboard',
+  OTHER = 'other'
 }
 
 // 反馈严重程度
 export enum FeedbackSeverity {
-  LOW = 'low','
-  MEDIUM = 'medium','
-  HIGH = 'high','
-  CRITICAL = 'critical';
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
 }
 
 // 用户反馈接口
@@ -167,16 +167,16 @@ export class UserFeedbackService {
         await this.submitQueuedFeedback();
       }
 
-      console.log('Feedback queued: ', completeFeedback);'
+      console.log('Feedback queued: ', completeFeedback);
     } catch (error) {
-      console.error('Failed to submit feedback: ', error);'
+      console.error('Failed to submit feedback: ', error);
     }
   }
 
   /**
    * 记录使用统计
    */
-  recordUsageStats(stats: Omit<UsageStats, 'sessionId' | 'timestamp'>): void {'
+  recordUsageStats(stats: Omit<UsageStats, 'sessionId' | 'timestamp'>): void {
     try {
       const completeStats: UsageStats  = {
         ...stats,
@@ -184,9 +184,9 @@ export class UserFeedbackService {
         timestamp: Date.now()
       };
       this.usageStatsQueue.push(completeStats);
-      console.log('Usage stats recorded: ', completeStats);'
+      console.log('Usage stats recorded: ', completeStats);
     } catch (error) {
-      console.error('Failed to record usage stats: ', error);'
+      console.error('Failed to record usage stats: ', error);
     }
   }
 
@@ -195,30 +195,30 @@ export class UserFeedbackService {
    */
   recordPagePerformance(page: PageType): void {
     try {
-      if ('performance' in window) {'
-        const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;'
-        const paint = performance.getEntriesByType('paint');'
+      if ('performance' in window) {
+        const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        const paint = performance.getEntriesByType('paint");
         const metrics: PagePerformanceMetrics  = {
           sessionId: this.sessionId,
           page,
           timestamp: Date.now(),
           loadTime: navigation.loadEventEnd - navigation.loadEventStart,
-          firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,'
+          firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,
           largestContentfulPaint: 0, // 需要使用 PerformanceObserver 获取
           cumulativeLayoutShift: 0, // 需要使用 PerformanceObserver 获取
           firstInputDelay: 0, // 需要使用 PerformanceObserver 获取
-          networkRequests: performance.getEntriesByType('resource').length'
+          networkRequests: performance.getEntriesByType('resource').length
         };
         // 获取内存使用情况（如果支持）
-        if ('memory' in performance) {'
+        if ('memory' in performance) {
           metrics.memoryUsage = (performance as any).memory.usedJSHeapSize;
         }
 
         this.performanceQueue.push(metrics);
-        console.log('Performance metrics recorded: ', metrics);'
+        console.log('Performance metrics recorded: ', metrics);
       }
     } catch (error) {
-      console.error('Failed to record performance metrics: ', error);'
+      console.error('Failed to record performance metrics: ', error);
     }
   }
 
@@ -259,30 +259,30 @@ export class UserFeedbackService {
    */
   private getBrowserInfo(): BrowserInfo {
     const ua = navigator.userAgent;
-    let browserName = "Unknown';'`
-    let browserVersion = 'Unknown';
+    let browserName = "Unknown";`
+    let browserVersion = 'Unknown'
     // 检测浏览器
-    if (ua.includes('Chrome')) {'
-      browserName = 'Chrome';
-      browserVersion = ua.match(/Chrome\/([0-9.]+)/)?.[1] || 'Unknown';
-    } else if (ua.includes('Firefox')) {'
-      browserName = 'Firefox';
-      browserVersion = ua.match(/Firefox\/([0-9.]+)/)?.[1] || 'Unknown';
-    } else if (ua.includes('Safari')) {'
-      browserName = 'Safari';
-      browserVersion = ua.match(/Version\/([0-9.]+)/)?.[1] || 'Unknown';
-    } else if (ua.includes('Edge')) {'
-      browserName = 'Edge';
-      browserVersion = ua.match(/Edg\/([0-9.]+)/)?.[1] || 'Unknown';
+    if (ua.includes('Chrome')) {
+      browserName = 'Chrome'
+      browserVersion = ua.match(/Chrome\/([0-9.]+)/)?.[1] || 'Unknown'
+    } else if (ua.includes('Firefox')) {
+      browserName = 'Firefox'
+      browserVersion = ua.match(/Firefox\/([0-9.]+)/)?.[1] || 'Unknown'
+    } else if (ua.includes('Safari')) {
+      browserName = 'Safari'
+      browserVersion = ua.match(/Version\/([0-9.]+)/)?.[1] || 'Unknown'
+    } else if (ua.includes('Edge')) {
+      browserName = 'Edge'
+      browserVersion = ua.match(/Edg\/([0-9.]+)/)?.[1] || 'Unknown'
     }
 
     // 检测操作系统
-    let os = 'Unknown';
-    if (ua.includes('Windows')) os = 'Windows';
-    else if (ua.includes('Mac')) os = 'macOS';
-    else if (ua.includes('Linux')) os = 'Linux';
-    else if (ua.includes('Android')) os = 'Android';
-    else if (ua.includes('iOS')) os = 'iOS';
+    let os = 'Unknown'
+    if (ua.includes('Windows')) os = 'Windows'
+    else if (ua.includes('Mac')) os = 'macOS'
+    else if (ua.includes('Linux')) os = 'Linux'
+    else if (ua.includes('Android')) os = 'Android'
+    else if (ua.includes('iOS')) os = 'iOS'
     return {
       name: browserName,
       version: browserVersion,
@@ -298,14 +298,14 @@ export class UserFeedbackService {
    * 生成会话ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
    * 生成唯一ID
    */
   private generateId(): string {
-    return `feedback_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+    return `feedback_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
@@ -319,9 +319,9 @@ export class UserFeedbackService {
         const lcpObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
           const lastEntry = entries[entries.length - 1];
-          console.log('LCP: ', lastEntry.startTime);'
+          console.log('LCP: ', lastEntry.startTime);
         });
-        lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });'
+        lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
         // 监控 CLS
         const clsObserver = new PerformanceObserver((list) => {
           let clsValue = 0;
@@ -330,18 +330,18 @@ export class UserFeedbackService {
               clsValue += (entry as any).value;
             }
           }
-          console.log('CLS: ', clsValue);'
+          console.log('CLS: ', clsValue);
         });
-        clsObserver.observe({ entryTypes: ['layout-shift'] });'
+        clsObserver.observe({ entryTypes: ['layout-shift'] });
         // 监控 FID
         const fidObserver = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
-            console.log('FID: ', (entry as any).processingStart - entry.startTime);'
+            console.log('FID: ', (entry as any).processingStart - entry.startTime);
           }
         });
-        fidObserver.observe({ entryTypes: ['first-input'] });'
+        fidObserver.observe({ entryTypes: ['first-input'] });
       } catch (error) {
-        console.warn('Performance monitoring not fully supported: ', error);'
+        console.warn('Performance monitoring not fully supported: ', error);
       }
     }
   }
@@ -356,13 +356,13 @@ export class UserFeedbackService {
     }, 5 * 60 * 1000);
 
     // 页面卸载时提交数据
-    window.addEventListener('beforeunload', () => {'
+    window.addEventListener('beforeunload', () => {
       this.submitQueuedData();
     });
 
     // 页面隐藏时提交数据
-    document.addEventListener('visibilitychange', () => {'
-      if (document.visibilityState === 'hidden') {'
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
         this.submitQueuedData();
       }
     });
@@ -376,14 +376,14 @@ export class UserFeedbackService {
 
     try {
       // 这里应该调用实际的API端点
-      console.log('Submitting feedback: ', this.feedbackQueue);'
+      console.log('Submitting feedback: ', this.feedbackQueue);
       // 模拟API调用
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // 清空队列
       this.feedbackQueue = [];
     } catch (error) {
-      console.error('Failed to submit feedback queue: ', error);'
+      console.error('Failed to submit feedback queue: ', error);
     }
   }
 
@@ -398,7 +398,7 @@ export class UserFeedbackService {
         this.submitPerformanceMetrics()
       ]);
     } catch (error) {
-      console.error('Failed to submit queued data: ', error);'
+      console.error('Failed to submit queued data: ', error);
     }
   }
 
@@ -409,11 +409,11 @@ export class UserFeedbackService {
     if (this.usageStatsQueue.length === 0) return;
 
     try {
-      console.log('Submitting usage stats: ', this.usageStatsQueue);'
+      console.log('Submitting usage stats: ', this.usageStatsQueue);
       await new Promise(resolve => setTimeout(resolve, 500));
       this.usageStatsQueue = [];
     } catch (error) {
-      console.error('Failed to submit usage stats: ', error);'
+      console.error('Failed to submit usage stats: ', error);
     }
   }
 
@@ -424,11 +424,11 @@ export class UserFeedbackService {
     if (this.performanceQueue.length === 0) return;
 
     try {
-      console.log('Submitting performance metrics: ', this.performanceQueue);'
+      console.log('Submitting performance metrics: ', this.performanceQueue);
       await new Promise(resolve => setTimeout(resolve, 500));
       this.performanceQueue = [];
     } catch (error) {
-      console.error('Failed to submit performance metrics:', error);'
+      console.error('Failed to submit performance metrics:', error);
     }
   }
 }

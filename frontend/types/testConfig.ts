@@ -11,11 +11,11 @@ export interface BaseTestConfig     {
 
 // API测试配置
 export interface APITestConfig extends BaseTestConfig     {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   headers?: Record<string, string>;
   body?: string;
   auth?: {
-    type: 'bearer' | 'basic' | 'apikey';
+    type: 'bearer' | 'basic' | 'apikey'
     token?: string;
     username?: string;
     password?: string;
@@ -32,27 +32,27 @@ export interface APITestConfig extends BaseTestConfig     {
 
 // 性能测试配置
 export interface PerformanceTestConfig extends BaseTestConfig     {
-  categories?: ('performance' | 'accessibility' | 'best-practices' | 'seo')[];'
-  device?: 'desktop' | 'mobile';
+  categories?: ('performance' | 'accessibility' | 'best-practices' | 'seo')[];
+  device?: 'desktop' | 'mobile'
   throttling?: {
     rttMs?: number;
     throughputKbps?: number;
     cpuSlowdownMultiplier?: number;
   };
   locale?: string;
-  emulatedFormFactor?: 'desktop' | 'mobile';
+  emulatedFormFactor?: 'desktop' | 'mobile'
 }
 
 // 安全测试配置
 export interface SecurityTestConfig extends BaseTestConfig     {
-  checks?: ('ssl' | 'headers' | 'vulnerabilities' | 'cookies' | 'redirects')[];'
+  checks?: ('ssl' | 'headers' | 'vulnerabilities' | 'cookies' | 'redirects')[];
   maxRedirects?: number;
   userAgent?: string;
 }
 
 // SEO测试配置
 export interface SEOTestConfig extends BaseTestConfig     {
-  checks?: ('meta' | 'headings' | 'images' | 'links' | 'structured-data' | 'robots' | 'sitemap')[];'
+  checks?: ('meta' | 'headings' | 'images' | 'links' | 'structured-data' | 'robots' | 'sitemap')[];
   userAgent?: string;
 }
 
@@ -61,7 +61,7 @@ export interface StressTestConfig extends BaseTestConfig     {
   concurrency?: number;
   requests?: number;
   duration?: number;
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   headers?: Record<string, string>;
   body?: string;
   rampUp?: number;
@@ -70,7 +70,7 @@ export interface StressTestConfig extends BaseTestConfig     {
 
 // 基础设施测试配置
 export interface InfrastructureTestConfig extends BaseTestConfig     {
-  checks?: ('connectivity' | 'dns' | 'ssl' | 'ports' | 'headers' | 'redirects')[];'
+  checks?: ('connectivity' | 'dns' | 'ssl' | 'ports' | 'headers' | 'redirects')[];
   ports?: number[];
   dnsServers?: string[];
   maxRedirects?: number;
@@ -78,15 +78,15 @@ export interface InfrastructureTestConfig extends BaseTestConfig     {
 
 // UX测试配置
 export interface UXTestConfig extends BaseTestConfig     {
-  checks?: ('accessibility' | 'usability' | 'interactions' | 'mobile' | 'forms')[];'
-  device?: 'desktop' | 'mobile' | 'tablet';
+  checks?: ('accessibility' | 'usability' | 'interactions' | 'mobile' | 'forms')[];
+  device?: 'desktop' | 'mobile' | 'tablet'
   viewport?: {
     width: number;
     height: number;
   };
   waitForSelector?: string;
   interactions?: Array<{
-    type: 'click' | 'type' | 'scroll' | 'hover';
+    type: 'click' | 'type' | 'scroll' | 'hover'
     selector: string;
     value?: string;
   }>;
@@ -94,16 +94,16 @@ export interface UXTestConfig extends BaseTestConfig     {
 
 // 兼容性测试配置
 export interface CompatibilityTestConfig extends BaseTestConfig     {
-  browsers?: ('chromium' | 'firefox' | 'webkit')[];'
-  devices?: ('desktop' | 'mobile' | 'tablet')[];'
-  checks?: ('rendering' | 'javascript' | 'css' | 'responsive' | 'features')[];'
+  browsers?: ('chromium' | 'firefox' | 'webkit')[];
+  devices?: ('desktop' | 'mobile' | 'tablet')[];
+  checks?: ('rendering' | 'javascript' | 'css' | 'responsive' | 'features')[];
   screenshots?: boolean;
   waitForSelector?: string;
 }
 
 // 网站综合测试配置
 export interface WebsiteTestConfig extends BaseTestConfig     {
-  checks?: ('health' | 'seo' | 'performance' | 'security' | 'accessibility' | 'best-practices')[];'
+  checks?: ('health' | 'seo' | 'performance' | 'security' | 'accessibility' | 'best-practices')[];
   depth?: number;
   maxPages?: number;
   followExternalLinks?: boolean;
@@ -121,24 +121,24 @@ export type TestConfig   = | APITestConfig
   | CompatibilityTestConfig
   | WebsiteTestConfig;// 测试类型枚举
 export enum TestType {
-  API = 'api','
-  PERFORMANCE = 'performance','
-  SECURITY = 'security','
-  SEO = 'seo','
-  STRESS = 'stress','
-  INFRASTRUCTURE = 'infrastructure','
-  UX = 'ux','
-  COMPATIBILITY = 'compatibility','
-  WEBSITE = 'website';
+  API = 'api',
+  PERFORMANCE = 'performance',
+  SECURITY = 'security',
+  SEO = 'seo',
+  STRESS = 'stress',
+  INFRASTRUCTURE = 'infrastructure',
+  UX = 'ux',
+  COMPATIBILITY = 'compatibility',
+  WEBSITE = 'website'
 }
 
 // 测试状态
 export enum TestStatus {
-  PENDING = 'pending','
-  RUNNING = 'running','
-  COMPLETED = 'completed','
-  FAILED = 'failed','
-  CANCELLED = 'cancelled';
+  PENDING = 'pending',
+  RUNNING = 'running',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled'
 }
 
 // 测试进度接口
@@ -167,7 +167,7 @@ export interface TestResult     {
   };
   totalTime?: number;
   recommendations?: Array<{
-    priority: 'high' | 'medium' | 'low';
+    priority: 'high' | 'medium' | 'low'
     category: string;
     description: string;
     suggestion: string;
@@ -182,6 +182,6 @@ export class TestError extends Error {
     public retryable: boolean = false
   ) {
     super(message);
-    this.name = 'TestError';
+    this.name = 'TestError'
   }
 }

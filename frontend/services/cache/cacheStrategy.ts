@@ -15,10 +15,10 @@ export interface CacheConfig     {
   namespace: string;
 }
 
-export type CacheStrategy   = | 'lru' // 最近最少使用'
-  | 'lfu' // 最少使用频率'
-  | 'fifo' // 先进先出'
-  | 'ttl' // 基于时间;| 'adaptive'; // 自适应'
+export type CacheStrategy   = | 'lru' // 最近最少使用
+  | 'lfu' // 最少使用频率
+  | 'fifo' // 先进先出
+  | 'ttl' // 基于时间;| 'adaptive'; // 自适应
 export interface CacheEntry<T = any>     {
   key: string;
   data: T;
@@ -51,7 +51,7 @@ export interface CacheKeyGenerator     {
 
 export class DefaultCacheKeyGenerator implements CacheKeyGenerator {
   generate(namespace: string, identifier: string, params?: Record<string, any>): string {
-    const baseKey = `${namespace}:${identifier}`;`
+    const baseKey = `${namespace}:${identifier}`;
     
     if (!params || Object.keys(params).length === 0) {
       return baseKey;
@@ -61,9 +61,9 @@ export class DefaultCacheKeyGenerator implements CacheKeyGenerator {
     const sortedParams = Object.keys(params)
       .sort()
       .map(key => `${key}=${JSON.stringify(params[key])}`)`
-      .join("&');'`
+      .join("&");`
 
-    return `${baseKey}:${this.hashString(sortedParams)}`;`
+    return `${baseKey}:${this.hashString(sortedParams)}`;
   }
 
   private hashString(str: string): string {
@@ -196,7 +196,7 @@ export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
   }
 
   private getStorageKey(key: string): string {
-    return `${this.prefix}:${key}`;`
+    return `${this.prefix}:${key}`;
   }
 
   private async cleanup(): Promise<void> {
@@ -293,7 +293,7 @@ export class CacheManager<T = any> {
       compression: false,
       encryption: false,
       persistToDisk: false,
-      namespace: 'default','
+      namespace: 'default',
       ...config
     };
     this.keyGenerator = keyGenerator;
@@ -423,7 +423,7 @@ export class CacheManager<T = any> {
         return new FIFOEvictionStrategy<T>();
       case 'ttl': ''
         return new TTLEvictionStrategy<T>();
-      case "adaptive': ''
+      case "adaptive': '
         // 自适应策略：根据访问模式动态选择
         return new LRUEvictionStrategy<T>(); // 默认使用LRU
       default:
@@ -546,7 +546,7 @@ export function cached<T extends (...args: any[]) => Promise<ApiResponse<any>>>(
       }
 
       // 生成缓存键
-      const cacheKey = keyGenerator ? keyGenerator(args) : `${propertyKey}_${JSON.stringify(args)}`;`
+      const cacheKey = keyGenerator ? keyGenerator(args) : `${propertyKey}_${JSON.stringify(args)}`;
       
       // 尝试从缓存获取
       const cachedResult = await cacheManager.get(cacheKey);
@@ -578,17 +578,17 @@ export const defaultMemoryCache = new CacheManager(
     namespace: "memory','`
     maxSize: 1000,
     ttl: 300000, // 5分钟
-    strategy: 'lru';
+    strategy: 'lru'
   }
 );
 
 export const defaultLocalStorageCache = new CacheManager(
-  new LocalStorageCacheStorage('app-cache'),'
+  new LocalStorageCacheStorage('app-cache'),
   {
-    namespace: 'localStorage','
+    namespace: 'localStorage',
     maxSize: 500,
     ttl: 3600000, // 1小时
-    strategy: 'ttl','
+    strategy: 'ttl',
     persistToDisk: true
   }
 );
@@ -598,16 +598,16 @@ export const defaultLocalStorageCache = new CacheManager(
 export class CacheFactory {
   static createMemoryCache(config?: Partial<CacheConfig>): CacheManager {
     return new CacheManager(new MemoryCacheStorage(), {
-      namespace: 'memory','
-      strategy: 'lru','
+      namespace: 'memory',
+      strategy: 'lru',
       ...config
     });
   }
 
   static createLocalStorageCache(prefix?: string, config?: Partial<CacheConfig>): CacheManager {
     return new CacheManager(new LocalStorageCacheStorage(prefix), {
-      namespace: 'localStorage','
-      strategy: 'ttl','
+      namespace: 'localStorage',
+      strategy: 'ttl',
       persistToDisk: true,
       ...config
     });
@@ -619,7 +619,7 @@ export class CacheFactory {
   } {
     return {
       memory: this.createMemoryCache({ ttl: 60000, ...config }), // 1分钟
-      localStorage: this.createLocalStorageCache('hybrid', { ttl: 3600000, ...config }) // 1小时'
+      localStorage: this.createLocalStorageCache('hybrid', { ttl: 3600000, ...config }) // 1小时
     };
   }
 }

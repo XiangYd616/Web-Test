@@ -1,18 +1,18 @@
-import axios from 'axios';const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import axios from 'axios';const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 // 创建axios实例
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json','
+    'Content-Type': 'application/json',
   },
 });
 
 // 请求拦截器 - 添加认证token
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('auth_token');'
+    const token = localStorage.getItem('auth_token");"
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;`
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -26,9 +26,9 @@ api.interceptors.response.use((response) => response,
   (error) => {
     if (error.response?.status === 401) {
       // Token过期，清除本地存储并重定向到登录页
-      localStorage.removeItem("auth_token');'`
-      localStorage.removeItem('user_data');'
-      window.location.href = '/login';
+      localStorage.removeItem("auth_token");``
+      localStorage.removeItem('user_data");"
+      window.location.href = '/login'
     }
     return Promise.reject(error);
   }
@@ -38,7 +38,7 @@ api.interceptors.response.use((response) => response,
 export const systemSettingsAPI = {
   // 获取所有系统设置
   getAllSettings: async () => {
-    const response = await api.get('/admin/settings');'
+    const response = await api.get('/admin/settings");"
     return response.data;
   },
 
@@ -71,7 +71,7 @@ export const systemSettingsAPI = {
 export const userPreferencesAPI = {
   // 获取所有用户偏好
   getAllPreferences: async () => {
-    const response = await api.get("/preferences');'`
+    const response = await api.get("/preferences");``
     return response.data;
   },
 
@@ -101,20 +101,20 @@ export const userPreferencesAPI = {
 
   // 重置用户偏好到默认值
   resetPreferences: async (category?: string) => {
-    const url = category ? `/preferences/reset/${category}` : '/preferences/reset';'`
+    const url = category ? `/preferences/reset/${category}` : '/preferences/reset";`"
     const response = await api.post(url);
     return response.data;
   },
 
   // 导出用户偏好
   exportPreferences: async () => {
-    const response = await api.get("/preferences/export/all');'`
+    const response = await api.get("/preferences/export/all");``
     return response.data;
   },
 
   // 导入用户偏好
-  importPreferences: async (preferences: Record<string, any>) => {
-    const response = await api.post("/preferences/import', { preferences });'
+  importPreferences: async (preferences: Record<string, any>) => {;
+    const response = await api.post("/preferences/import', { preferences });"
     return response.data;
   },
 };
@@ -122,7 +122,7 @@ export const userPreferencesAPI = {
 // 设置服务类
 export class SettingsService {
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {>
       try {
         return await fn();
       } catch (error) {
@@ -143,13 +143,13 @@ export class SettingsService {
 
   // 检查缓存是否有效
   private static isCacheValid(): boolean {
-    return Date.now() - this.cacheTimestamp < this.CACHE_DURATION;
+    return Date.now() - this.cacheTimestamp < this.CACHE_DURATION;>
   }
 
   // 获取系统设置（带缓存）
   static async getSystemSettings(category?: string, useCache = true): Promise<any> {
-    if (useCache && this.isCacheValid() && this.systemSettingsCache[category || "all']) {'`
-      return this.systemSettingsCache[category || 'all'];'
+    if (useCache && this.isCacheValid() && this.systemSettingsCache[category || "all']) {'`"`
+      return this.systemSettingsCache[category || 'all"];"
     }
 
     try {
@@ -158,12 +158,12 @@ export class SettingsService {
         : await systemSettingsAPI.getAllSettings();
 
       // 更新缓存
-      this.systemSettingsCache[category || 'all'] = result.data;'
+      this.systemSettingsCache[category || 'all'] = result.data;
       this.cacheTimestamp = Date.now();
 
       return result.data;
     } catch (error) {
-      console.error('Failed to get system settings: ', error);'
+      console.error('Failed to get system settings: ', error);
       throw error;
     }
   }
@@ -178,15 +178,15 @@ export class SettingsService {
 
       return result.data;
     } catch (error) {
-      console.error('Failed to update system settings: ', error);'
+      console.error('Failed to update system settings: ', error);
       throw error;
     }
   }
 
   // 获取用户偏好（带缓存）
   static async getUserPreferences(category?: string, useCache = true): Promise<any> {
-    if (useCache && this.isCacheValid() && this.userPreferencesCache[category || 'all']) {'
-      return this.userPreferencesCache[category || 'all'];'
+    if (useCache && this.isCacheValid() && this.userPreferencesCache[category || 'all']) {
+      return this.userPreferencesCache[category || 'all"];"
     }
 
     try {
@@ -195,12 +195,12 @@ export class SettingsService {
         : await userPreferencesAPI.getAllPreferences();
 
       // 更新缓存
-      this.userPreferencesCache[category || 'all'] = result.data;'
+      this.userPreferencesCache[category || 'all'] = result.data;
       this.cacheTimestamp = Date.now();
 
       return result.data;
     } catch (error) {
-      console.error('Failed to get user preferences: ', error);'
+      console.error('Failed to get user preferences: ', error);
       throw error;
     }
   }
@@ -215,7 +215,7 @@ export class SettingsService {
 
       return result.data;
     } catch (error) {
-      console.error('Failed to update user preferences: ', error);'
+      console.error('Failed to update user preferences: ', error);
       throw error;
     }
   }
@@ -239,12 +239,12 @@ export class SettingsService {
         publicSettings[category] = {};
         // 这里需要根据实际的isPublic字段来过滤
         // 暂时返回一些基础的公开设置
-        if (category === 'general') {'
+        if (category === 'general') {
           publicSettings[category] = {
-            siteName: settings[category]?.siteName || 'Test Web App','
-            siteDescription: settings[category]?.siteDescription || '专业的Web测试平台','
-            timezone: settings[category]?.timezone || 'Asia/Shanghai','
-            language: settings[category]?.language || 'zh-CN','
+            siteName: settings[category]?.siteName || 'Test Web App',
+            siteDescription: settings[category]?.siteDescription || '专业的Web测试平台',
+            timezone: settings[category]?.timezone || 'Asia/Shanghai',
+            language: settings[category]?.language || 'zh-CN',
             maintenanceMode: settings[category]?.maintenanceMode || false,
             registrationEnabled: settings[category]?.registrationEnabled || true,
           };
@@ -253,14 +253,14 @@ export class SettingsService {
 
       return publicSettings;
     } catch (error) {
-      console.error('Failed to get public settings: ', error);'
+      console.error('Failed to get public settings: ', error);
       // 返回默认设置
       return {
         general: {
-          siteName: 'Test Web App','
-          siteDescription: '专业的Web测试平台','
-          timezone: 'Asia/Shanghai','
-          language: 'zh-CN','
+          siteName: 'Test Web App',
+          siteDescription: '专业的Web测试平台',
+          timezone: 'Asia/Shanghai',
+          language: 'zh-CN',
           maintenanceMode: false,
           registrationEnabled: true,
         }
@@ -273,13 +273,13 @@ export class SettingsService {
 export const accountAPI = {
   // 更新用户个人信息
   updateProfile: async (profileData: any) => {
-    const response = await api.put('/auth/profile', profileData);'
+    const response = await api.put('/auth/profile', profileData);
     return response.data;
   },
 
   // 修改密码
   changePassword: async (passwordData: any) => {
-    const response = await api.put('/auth/change-password', passwordData);'
+    const response = await api.put('/auth/change-password', passwordData);
     return response.data;
   },
 };
@@ -288,19 +288,19 @@ export const accountAPI = {
 export const monitoringAPI = {
   // 获取系统监控数据
   getSystemMonitoring: async () => {
-    const response = await api.get('/monitoring/system');'
+    const response = await api.get('/monitoring/system");"
     return response.data;
   },
 
   // 获取系统健康状态
   getSystemHealth: async () => {
-    const response = await api.get('/monitoring/health');'
+    const response = await api.get('/monitoring/health");"
     return response.data;
   },
 
   // 更新监控设置
   updateMonitoringSettings: async (settings: any) => {
-    const response = await api.put('/monitoring/settings', { settings });'
+    const response = await api.put('/monitoring/settings', { settings });
     return response.data;
   },
 };
@@ -309,13 +309,13 @@ export const monitoringAPI = {
 export const scheduledTasksAPI = {
   // 获取定时任务列表
   getTasks: async () => {
-    const response = await api.get('/scheduled-tasks');'
+    const response = await api.get('/scheduled-tasks");"
     return response.data;
   },
 
   // 创建定时任务
   createTask: async (taskData: any) => {
-    const response = await api.post('/scheduled-tasks', taskData);'
+    const response = await api.post('/scheduled-tasks', taskData);
     return response.data;
   },
 
@@ -342,21 +342,21 @@ export const scheduledTasksAPI = {
 export const systemLogsAPI = {
   // 获取系统日志
   getLogs: async (params: any = {}) => {
-    const response = await api.get("/system-logs', { params });'`
+    const response = await api.get("/system-logs', { params });'`"`
     return response.data;
   },
 
   // 清理系统日志
   cleanLogs: async (conditions: any) => {
-    const response = await api.delete('/system-logs', { data: conditions });'
+    const response = await api.delete('/system-logs', { data: conditions });
     return response.data;
   },
 
   // 导出系统日志
   exportLogs: async (params: any = {}) => {
-    const response = await api.get('/system-logs/export', {'
+    const response = await api.get('/system-logs/export', {
       params,
-      responseType: 'blob';
+      responseType: 'blob'
     });
     return response;
   },
@@ -366,13 +366,13 @@ export const systemLogsAPI = {
 export const backupAPI = {
   // 获取备份列表
   getBackups: async () => {
-    const response = await api.get('/backups');'
+    const response = await api.get('/backups");"
     return response.data;
   },
 
   // 创建备份
   createBackup: async (backupData: any) => {
-    const response = await api.post("/backups', backupData);'
+    const response = await api.post("/backups', backupData);"
     return response.data;
   },
 
@@ -387,31 +387,31 @@ export const backupAPI = {
 export const dataManagementAPI = {
   // 获取导出任务列表
   getExportTasks: async () => {
-    const response = await api.get("/data-management/exports');'`
+    const response = await api.get("/data-management/exports");``
     return response.data;
   },
 
   // 获取导入任务列表
   getImportTasks: async () => {
-    const response = await api.get('/data-management/imports');'
+    const response = await api.get('/data-management/imports");"
     return response.data;
   },
 
   // 创建导出任务
   createExportTask: async (exportData: any) => {
-    const response = await api.post('/data-management/exports', exportData);'
+    const response = await api.post('/data-management/exports', exportData);
     return response.data;
   },
 
   // 创建导入任务
   createImportTask: async (importData: any) => {
-    const response = await api.post('/data-management/imports', importData);'
+    const response = await api.post('/data-management/imports', importData);
     return response.data;
   },
 
   // 获取数据管理统计
   getStats: async () => {
-    const response = await api.get('/data-management/stats');'
+    const response = await api.get('/data-management/stats");"
     return response.data;
   },
 };

@@ -94,8 +94,8 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
 
     // 验证必填字段
     if (!name || !type || !config) {
-      
-        return res.validationError([], '名称、类型和配置是必填的');
+
+      return res.validationError([], '名称、类型和配置是必填的');
     }
 
     // 验证集成类型
@@ -106,8 +106,8 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
     // 验证配置
     const validationResult = validateIntegrationConfig(type, config);
     if (!validationResult.valid) {
-      
-        return res.validationError([], '配置验证失败');
+
+      return res.validationError([], '配置验证失败');
     }
 
     // 创建新集成
@@ -219,8 +219,8 @@ router.post('/cicd', authMiddleware, asyncHandler(async (req, res) => {
   } = req.body;
 
   if (!name || !platform || !configuration) {
-    
-        return res.validationError([], '缺少必要参数: name, platform, configuration');
+
+    return res.validationError([], '缺少必要参数: name, platform, configuration');
   }
 
   try {
@@ -339,9 +339,7 @@ router.get('/cicd/templates/:platform', authMiddleware, asyncHandler(async (req,
 
     const template = templates[platform];
     if (!template) {
-      
-        return res.notFound('资源', '不支持的平台: ${platform
-      }');
+      return res.notFound('资源', `不支持的平台: ${platform}`);
     }
 
     res.success(template);

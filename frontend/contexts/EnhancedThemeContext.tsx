@@ -3,11 +3,11 @@
  * 提供完整的主题管理、深色/浅色模式切换和主题定制功能
  */
 
-import React, { createContext, ReactNode, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState, useCallback } from 'react
 
 // 主题类型定义
-export type ThemeMode = 'light' | 'dark' | 'auto';
-export type ActualTheme = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark' | 'auto'
+export type ActualTheme = 'light' | 'dark'
 
 // 主题配置接口
 export interface ThemeConfig {
@@ -19,9 +19,9 @@ export interface ThemeConfig {
   textColor: string;
   borderColor: string;
   shadowColor: string;
-  fontSize: 'small' | 'medium' | 'large';
-  borderRadius: 'none' | 'small' | 'medium' | 'large';
-  spacing: 'compact' | 'normal' | 'comfortable';
+  fontSize: 'small' | 'medium' | 'large'
+  borderRadius: 'none' | 'small' | 'medium' | 'large'
+  spacing: 'compact' | 'normal' | 'comfortable'
 }
 
 // 预定义主题
@@ -108,9 +108,9 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
   // 系统主题检测
   const [systemTheme, setSystemTheme] = useState<ActualTheme>(() => {
     if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }
-    return 'light';
+    return 'light
   });
 
   const [isSystemThemeSupported] = useState(() => {
@@ -146,7 +146,7 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
   // 辅助功能状态
   const [isHighContrast, setIsHighContrast] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return localStorage.getItem('highContrast') === 'true';
+    return localStorage.getItem('highContrast') === 'true'
   });
 
   const [reduceMotion, setReduceMotion] = useState(() => {
@@ -157,7 +157,7 @@ export const EnhancedThemeProvider: React.FC<EnhancedThemeProviderProps> = ({
       return true;
     }
     
-    return localStorage.getItem('reduceMotion') === 'true';
+    return localStorage.getItem('reduceMotion') === 'true'
   });
 
   // 计算实际主题

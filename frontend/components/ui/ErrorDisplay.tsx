@@ -3,43 +3,43 @@
  * 提供统一的错误信息展示
  */
 
-import React from 'react';export interface ErrorDisplayProps     {'
+import React from 'react';export interface ErrorDisplayProps     {
   error: Error | string;
   onRetry?: () => void;
   className?: string;
-  type?: 'standard' | 'inline' | 'minimal';
+  type?: 'standard' | 'inline' | 'minimal'
 }
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   error,
   onRetry,
-  className = '','
-  type = 'standard';
+  className = '',
+  type = 'standard'
 }) => {
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
     id: componentId,
     "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
-    'aria-selected': selected,'
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
-  const errorMessage = typeof error === 'string' ? error : error.message;'
-  if (type === 'inline') {'
+  const errorMessage = typeof error === 'string' ? error : error.message;
+  if (type === 'inline') {
     return (
       <div className={`bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 ${className}`}>`
         <strong className= "font-bold'>错误: </strong>`
@@ -48,7 +48,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
     );
   }
 
-  if (type === 'minimal') {'
+  if (type === 'minimal') {
     return (
       <div className={`text-red-600 text-sm ${className}`}>`
         {errorMessage}
@@ -73,7 +73,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
             <div className= 'mt-4'>
               <button
                 onClick={onRetry}
-                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
               >
                 重试
               </button>

@@ -777,7 +777,7 @@ class DataImportService extends EventEmitter {
 
     // 邮箱格式验证
     if (row.email) {
-      const emailRegex = /^[^/s@]+@[^/s@]+/.[^ /s@]+$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(row.email)) {
         errors.push({
           row: rowNumber,
@@ -1092,16 +1092,16 @@ class DataImportService extends EventEmitter {
       // 先从内存中查找
       const memoryTask = this.importQueue.get(taskId) || this.activeImports.get(taskId);
       if (memoryTask && memoryTask.userId === userId) {
-        
+
         return {
           success: true,
           data: memoryTask
-      };
+        };
       }
 
       // 从数据库查找
       if (this.dbPool) {
-        
+
         const result = await this.dbPool.query(
           'SELECT * FROM import_tasks WHERE id = $1 AND user_id = $2',
           [taskId, userId]
@@ -1131,7 +1131,7 @@ class DataImportService extends EventEmitter {
               createdAt: task.created_at,
               startedAt: task.started_at,
               completedAt: task.completed_at
-      }
+            }
           };
         }
       }
@@ -1155,19 +1155,19 @@ class DataImportService extends EventEmitter {
       const task = this.importQueue.get(taskId) || this.activeImports.get(taskId);
 
       if (!task || task.userId !== userId) {
-        
+
         return {
           success: false,
           error: '任务不存在或无权限访问'
-      };
+        };
       }
 
       if (task.status === 'completed' || task.status === 'failed') {
-        
+
         return {
           success: false,
           error: '任务已完成，无法取消'
-      };
+        };
       }
 
       // 更新任务状态
@@ -1209,12 +1209,13 @@ class DataImportService extends EventEmitter {
       const offset = (page - 1) * limit;
 
       if (!this.dbPool) {
-        
+
         return {
           success: true,
           data: [],
-          pagination: { page, limit, total: 0, totalPages: 0
-      }
+          pagination: {
+            page, limit, total: 0, totalPages: 0
+          }
         };
       }
 

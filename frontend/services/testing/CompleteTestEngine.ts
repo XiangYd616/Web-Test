@@ -4,7 +4,7 @@
  * 支持并发测试、实时监控和详细报告生成
  */
 
-import { apiClient } from '../EnhancedApiClient';
+import { apiClient } from '../EnhancedApiClient
 
 // 测试类型枚举
 export enum TestType {
@@ -65,7 +65,7 @@ export interface TestResult {
 // 测试问题接口
 export interface TestIssue {
   id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'low' | 'medium' | 'high' | 'critical'
   category: string;
   title: string;
   description: string;
@@ -81,8 +81,8 @@ export interface TestRecommendation {
   category: string;
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high';
-  effort: 'easy' | 'medium' | 'hard';
+  priority: 'low' | 'medium' | 'high'
+  effort: 'easy' | 'medium' | 'hard'
   impact: number;
   implementation?: string;
 }

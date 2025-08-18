@@ -64,13 +64,13 @@ export interface TestProgressMessage {
 // 通知消息
 export interface NotificationMessage {
   id: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: 'info' | 'success' | 'warning' | 'error'
   title: string;
   message: string;
   actions?: Array<{
     label: string;
     action: string;
-    variant?: 'primary' | 'secondary';
+    variant?: 'primary' | 'secondary'
   }>;
   duration?: number;
   persistent?: boolean;
@@ -78,7 +78,7 @@ export interface NotificationMessage {
 
 // 系统状态消息
 export interface SystemStatusMessage {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: 'healthy' | 'degraded' | 'unhealthy'
   services: Record<string, {
     status: string;
     responseTime: number;
@@ -493,7 +493,7 @@ export class CompleteWebSocketService {
 }
 
 // 创建默认WebSocket服务实例
-const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:3001/ws';
+const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:3001/ws'
 export const completeWebSocketService = new CompleteWebSocketService({
   url: wsUrl,
   autoReconnect: true,

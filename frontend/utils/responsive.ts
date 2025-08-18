@@ -3,7 +3,7 @@
  * 提供响应式设计相关的工具函数和Hook
  */
 
-import { useState, useEffect    } from 'react';import { breakpoints    } from '../design/tokens';// 断点类型'
+import { useState, useEffect    } from 'react';import { breakpoints    } from '../design/tokens';// 断点类型
 export type Breakpoint   = keyof typeof breakpoints;// 媒体查询工具
 export const mediaQueries = {
   up: (breakpoint: Breakpoint) => `@media (min-width: ${breakpoints[breakpoint]})`,`
@@ -11,7 +11,7 @@ export const mediaQueries = {
     const breakpointValues = Object.values(breakpoints);
     const currentIndex = Object.keys(breakpoints).indexOf(breakpoint);
     const nextValue = breakpointValues[currentIndex + 1];
-    return nextValue ? `@media (max-width: ${parseInt(nextValue) - 1}px)` : '';'`
+    return nextValue ? `@media (max-width: ${parseInt(nextValue) - 1}px)` : '";`
   },
   between: (min: Breakpoint, max: Breakpoint) => `@media (min-width: ${breakpoints[min]}) and (max-width: ${parseInt(breakpoints[max]) - 1}px)`,`
   only: (breakpoint: Breakpoint) => {
@@ -32,21 +32,21 @@ export type ResponsiveValue<T>   = T | Partial<Record<Breakpoint, T>>;// 获取�
 export const getCurrentBreakpoint = (): Breakpoint  => {
   const width = window.innerWidth;
 
-  if (width >= parseInt(breakpoints.xxl)) return "xxl';'`
-  if (width >= parseInt(breakpoints.xl)) return 'xl';
-  if (width >= parseInt(breakpoints.lg)) return 'lg';
-  if (width >= parseInt(breakpoints.md)) return 'md';
-  if (width >= parseInt(breakpoints.sm)) return 'sm';
-  return 'xs';
+  if (width >= parseInt(breakpoints.xxl)) return "xxl";`
+  if (width >= parseInt(breakpoints.xl)) return 'xl'
+  if (width >= parseInt(breakpoints.lg)) return 'lg'
+  if (width >= parseInt(breakpoints.md)) return 'md'
+  if (width >= parseInt(breakpoints.sm)) return 'sm'
+  return 'xs
 };
 
 // 响应式断点Hook
 export const useBreakpoint = () => {
   const [breakpoint, setBreakpoint] = useState<Breakpoint>(() => {
-    if (typeof window !== 'undefined') {'
+    if (typeof window !== 'undefined') {
       return getCurrentBreakpoint();
     }
-    return 'md';
+    return 'md
   });
 
   useEffect(() => {
@@ -54,8 +54,8 @@ export const useBreakpoint = () => {
       setBreakpoint(getCurrentBreakpoint());
     };
 
-    window.addEventListener('resize', handleResize);'
-    return () => window.removeEventListener('resize', handleResize);'
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return breakpoint;
@@ -64,7 +64,7 @@ export const useBreakpoint = () => {
 // 媒体查询Hook
 export const useMediaQuery = (query: string): boolean  => {
   const [matches, setMatches] = useState(() => {
-    if (typeof window !== 'undefined') {'
+    if (typeof window !== 'undefined') {
       return window.matchMedia(query).matches;
     }
     return false;
@@ -87,11 +87,11 @@ export const useMediaQuery = (query: string): boolean  => {
 export const resolveResponsiveValue = <T>(value: ResponsiveValue<T>,
   currentBreakpoint: Breakpoint
 ): T  => {
-  if (typeof value !== 'object' || value === null) {'
+  if (typeof value !== 'object' || value === null) {
     return value as T;
   }
 
-  const breakpointOrder: Breakpoint[]  = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'];'
+  const breakpointOrder: Breakpoint[]  = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl"];
   const currentIndex = breakpointOrder.indexOf(currentBreakpoint);
 
   // 从当前断点向下查找最近的值
@@ -132,7 +132,7 @@ export const useDeviceDetection = () => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
     const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent);
     const isDesktop = !isMobile && !isTablet;
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;'
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     setDeviceInfo({
       isMobile,
       isTablet,

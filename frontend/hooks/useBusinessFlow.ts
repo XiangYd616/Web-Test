@@ -3,7 +3,7 @@
  * 提供业务流程的统一状态管理
  */
 
-import { useState, useCallback    } from 'react';import { useAuth    } from '../contexts/AuthContext';import testFlowManager, { TestConfig  } from '../services/testFlowManager';import dataFlowManager, { DataQuery  } from '../services/dataFlowManager';import { useAsyncErrorHandler    } from './useAsyncErrorHandler';export const useBusinessFlow = () => {'
+import { useState, useCallback    } from 'react';import { useAuth    } from '../contexts/AuthContext';import testFlowManager, { TestConfig  } from '../services/testFlowManager';import dataFlowManager, { DataQuery  } from '../services/dataFlowManager';import { useAsyncErrorHandler    } from './useAsyncErrorHandler';export const useBusinessFlow = () => {
   const { isAuthenticated } = useAuth();
   const { executeAsync, state } = useAsyncErrorHandler();
   const [activeFlows, setActiveFlows] = useState<string[]>([]);
@@ -11,10 +11,10 @@ import { useState, useCallback    } from 'react';import { useAuth    } from '../
   // 执行测试流程
   const executeTestFlow = useCallback(async (config: TestConfig) => {
     if (!isAuthenticated) {
-      throw new Error('请先登录');'
+      throw new Error('请先登录");
     }
 
-    const flowId = `test_${Date.now()}`;`
+    const flowId = `test_${Date.now()}`;
     setActiveFlows(prev => [...prev, flowId]);
 
     try {
@@ -29,12 +29,12 @@ import { useState, useCallback    } from 'react';import { useAuth    } from '../
   }, [isAuthenticated, executeAsync]);
 
   // 执行数据管理流程
-  const executeDataFlow = useCallback(async (operation: 'query' | 'create' | 'update' | 'delete', data?: any) => {'
+  const executeDataFlow = useCallback(async (operation: 'query' | 'create' | 'update' | 'delete', data?: any) => {
     if (!isAuthenticated) {
-      throw new Error('请先登录');'
+      throw new Error('请先登录");
     }
 
-    const flowId = `data_${Date.now()}`;`
+    const flowId = `data_${Date.now()}`;
     setActiveFlows(prev => [...prev, flowId]);
 
     try {
@@ -42,22 +42,22 @@ import { useState, useCallback    } from 'react';import { useAuth    } from '../
       switch (operation) {
         case "query': ''`
           result = await executeAsync(() => dataFlowManager.queryData(data as DataQuery),
-            { context: 'BusinessFlow.queryData' }'
+            { context: 'BusinessFlow.queryData' }
           );
           break;
         case 'create': ''
           result = await executeAsync(() => dataFlowManager.createData(data),
-            { context: 'BusinessFlow.createData' }'
+            { context: 'BusinessFlow.createData' }
           );
           break;
         case 'update': ''
           result = await executeAsync(() => dataFlowManager.updateData(data.id, data),
-            { context: 'BusinessFlow.updateData' }'
+            { context: 'BusinessFlow.updateData' }
           );
           break;
         case 'delete': ''
           result = await executeAsync(() => dataFlowManager.deleteData(data.id),
-            { context: 'BusinessFlow.deleteData' }'
+            { context: 'BusinessFlow.deleteData' }
           );
           break;
         default:
@@ -92,7 +92,7 @@ import { useState, useCallback    } from 'react';import { useAuth    } from '../
 
     // 流程状态检查
     isTestFlowActive: () => isFlowActive("test'),'`
-    isDataFlowActive: () => isFlowActive('data'),'
+    isDataFlowActive: () => isFlowActive('data'),
     hasActiveFlows: () => activeFlows.length > 0
   };
 };

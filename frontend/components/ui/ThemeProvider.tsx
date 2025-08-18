@@ -1,11 +1,11 @@
-import React from 'react';import { ThemeProvider as BaseThemeProvider    } from '../../contexts/ThemeContext';interface ThemeProviderProps   {'
+import React from 'react';import { ThemeProvider as BaseThemeProvider    } from '../../contexts/ThemeContext';interface ThemeProviderProps   {
   children: React.ReactNode;
-  defaultTheme?: 'light' | 'dark';
+  defaultTheme?: 'light' | 'dark'
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
-  defaultTheme = 'dark';
+  defaultTheme = 'dark'
 }) => {
   
   // 性能优化
@@ -13,7 +13,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,'
+    'aria-label': ariaLabel,
     "data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
@@ -21,19 +21,19 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const variantStyles = useMemo(() => {
     const styles = {
       primary: {
-        backgroundColor: '#007bff','
-        color: '#ffffff','
-        border: '1px solid #007bff';
+        backgroundColor: '#007bff',
+        color: '#ffffff',
+        border: '1px solid #007bff'
       },
       secondary: {
-        backgroundColor: '#6c757d','
-        color: '#ffffff','
-        border: '1px solid #6c757d';
+        backgroundColor: '#6c757d',
+        color: '#ffffff',
+        border: '1px solid #6c757d'
       },
       outline: {
-        backgroundColor: 'transparent','
-        color: '#007bff','
-        border: '1px solid #007bff';
+        backgroundColor: 'transparent',
+        color: '#007bff',
+        border: '1px solid #007bff'
       }
     };
 
@@ -43,16 +43,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const sizeStyles = useMemo(() => {
     const styles = {
       small: {
-        padding: '0.25rem 0.5rem','
-        fontSize: '0.875rem';
+        padding: '0.25rem 0.5rem',
+        fontSize: '0.875rem'
       },
       medium: {
-        padding: '0.5rem 1rem','
-        fontSize: '1rem';
+        padding: '0.5rem 1rem',
+        fontSize: '1rem'
       },
       large: {
-        padding: '0.75rem 1.5rem','
-        fontSize: '1.125rem';
+        padding: '0.75rem 1.5rem',
+        fontSize: '1.125rem'
       }
     };
 
@@ -67,23 +67,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   
   // 可访问性支持
   const {
-    'aria-label': ariaLabel,'
-    'aria-describedby': ariaDescribedBy,'
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
     role,
     tabIndex  = 0,
-    'data-testid': testId'
+    'data-testid': testId
   } = props;
   const accessibilityProps = {
-    'aria-label': ariaLabel,'
-    'aria-describedby': ariaDescribedBy,'
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
     role,
     tabIndex: disabled ? -1 : tabIndex,
-    'data-testid': testId'
+    'data-testid': testId
   };
 
   // 键盘导航支持
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {'
+    if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onClick?.(event as any);
     }

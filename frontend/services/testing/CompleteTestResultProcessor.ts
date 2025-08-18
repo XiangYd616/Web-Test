@@ -62,8 +62,8 @@ export interface AnalysisResult {
 
 // 报告配置接口
 export interface ReportConfig {
-  format: 'html' | 'pdf' | 'json' | 'csv';
-  template: 'executive' | 'technical' | 'detailed' | 'summary';
+  format: 'html' | 'pdf' | 'json' | 'csv'
+  template: 'executive' | 'technical' | 'detailed' | 'summary'
   includeCharts: boolean;
   includeRecommendations: boolean;
   includeComparison: boolean;
@@ -77,7 +77,7 @@ export interface ReportConfig {
 
 // 图表数据接口
 export interface ChartData {
-  type: 'line' | 'bar' | 'pie' | 'radar' | 'scatter';
+  type: 'line' | 'bar' | 'pie' | 'radar' | 'scatter'
   title: string;
   data: any[];
   options?: Record<string, any>;
@@ -407,7 +407,7 @@ export class CompleteTestResultProcessor {
     const recommendations: TestRecommendation[] = [...result.recommendations];
     
     // 基于评分生成建议
-    if (result.score < 70) {
+    if (result.score < 70) {>
       recommendations.push({
         id: 'overall-improvement',
         category: 'general',
@@ -487,7 +487,7 @@ export class CompleteTestResultProcessor {
     trends: Record<string, number>;
     insights: string[];
   } {
-    if (results.length < 2) {
+    if (results.length < 2) {>
       throw new Error('At least 2 results are required for comparison');
     }
 
@@ -522,7 +522,7 @@ export class CompleteTestResultProcessor {
     // 生成洞察
     if (trends.scoreChange > 10) {
       insights.push('整体性能有显著提升');
-    } else if (trends.scoreChange < -10) {
+    } else if (trends.scoreChange < -10) {>
       insights.push('整体性能有所下降，需要关注');
     }
 
@@ -533,11 +533,11 @@ export class CompleteTestResultProcessor {
 
   private getPerformanceMetricScore(value: number, good: number, poor: number, lowerIsBetter: boolean = false): number {
     if (lowerIsBetter) {
-      if (value <= good) return 100;
+      if (value <= good) return 100;>
       if (value >= poor) return 0;
       return Math.round(100 - ((value - good) / (poor - good)) * 100);
     } else {
-      if (value <= good) return 100;
+      if (value <= good) return 100;>
       if (value >= poor) return 0;
       return Math.round(100 - ((value - good) / (poor - good)) * 100);
     }
@@ -607,15 +607,15 @@ export class CompleteTestResultProcessor {
 
   private calculateIssuePriority(issue: TestIssue, testType: TestType): 'low' | 'medium' | 'high' | 'critical' {
     if (issue.severity === 'critical' || issue.impact > 80) {
-      return 'critical';
+      return 'critical'
     }
     if (issue.severity === 'high' || issue.impact > 60) {
-      return 'high';
+      return 'high'
     }
     if (issue.severity === 'medium' || issue.impact > 30) {
-      return 'medium';
+      return 'medium'
     }
-    return 'low';
+    return 'low'
   }
 
   private estimateFixTime(issue: TestIssue): string {
@@ -625,13 +625,13 @@ export class CompleteTestResultProcessor {
       'medium': '4-8 hours',
       'low': '1-2 days'
     };
-    return impactMap[issue.severity] || '未知';
+    return impactMap[issue.severity] || '未知'
   }
 
   private calculateBusinessImpact(issue: TestIssue): 'low' | 'medium' | 'high' {
-    if (issue.impact > 70) return 'high';
-    if (issue.impact > 40) return 'medium';
-    return 'low';
+    if (issue.impact > 70) return 'high'
+    if (issue.impact > 40) return 'medium'
+    return 'low'
   }
 
   private generateIssueTags(issue: TestIssue, testType: TestType): string[] {
@@ -729,7 +729,7 @@ export class CompleteTestResultProcessor {
 
   private generatePDFReport(data: any, config: ReportConfig): string {
     // 生成PDF报告（返回base64或URL）
-    return 'pdf-content-placeholder';
+    return 'pdf-content-placeholder'
   }
 
   private generateCSVReport(data: any): string {

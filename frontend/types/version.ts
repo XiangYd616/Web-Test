@@ -6,9 +6,9 @@
 
 // ==================== 版本信息 ====================
 
-export const DATA_MODEL_VERSION = '1.0.0';
-export const API_VERSION = 'v1';
-export const SCHEMA_VERSION = '2024.1';
+export const DATA_MODEL_VERSION = '1.0.0'
+export const API_VERSION = 'v1'
+export const SCHEMA_VERSION = '2024.1'
 // ==================== 版本兼容性映射 ====================
 
 export interface VersionInfo     {
@@ -24,15 +24,15 @@ export interface VersionInfo     {
 
 export const VERSION_HISTORY: VersionInfo[] = [
   {
-    version: '1.0.0','
-    releaseDate: '2024-08-07','
-    description: '统一数据模型初始版本','
+    version: '1.0.0',
+    releaseDate: '2024-08-07',
+    description: '统一数据模型初始版本',
     breaking: false,
     added: [
-      'common.ts - 统一基础类型定义','
-      'testEngines.ts - 测试引擎类型定义','
-      'api.ts - API接口类型定义','
-      'version.ts - 版本控制机制';
+      'common.ts - 统一基础类型定义',
+      'testEngines.ts - 测试引擎类型定义',
+      'api.ts - API接口类型定义',
+      'version.ts - 版本控制机制
     ]
   }
 ];
@@ -48,19 +48,19 @@ export interface TypeVersionMap     {
 }
 
 export const TYPE_VERSIONS: TypeVersionMap = {
-  'User': {'
-    currentVersion: '1.0.0','
-    supportedVersions: ['1.0.0'],'
+  'User': {
+    currentVersion: '1.0.0',
+    supportedVersions: ['1.0.0'],
     migrationPath: {}
   },
-  'TestResult': {'
-    currentVersion: '1.0.0','
-    supportedVersions: ['1.0.0'],'
+  'TestResult': {
+    currentVersion: '1.0.0',
+    supportedVersions: ['1.0.0'],
     migrationPath: {}
   },
-  'ApiResponse': {'
-    currentVersion: '1.0.0','
-    supportedVersions: ['1.0.0'],'
+  'ApiResponse': {
+    currentVersion: '1.0.0',
+    supportedVersions: ['1.0.0'],
     migrationPath: {}
   }
 };
@@ -83,29 +83,29 @@ export class VersionChecker {
    * 获取主版本号
    */
   static getMajorVersion(version: string): number {
-    return parseInt(version.split('.')[0]);'
+    return parseInt(version.split('.')[0]);
   }
 
   /**
    * 获取次版本号
    */
   static getMinorVersion(version: string): number {
-    return parseInt(version.split('.')[1] || '0');'
+    return parseInt(version.split('.')[1] || '0");
   }
 
   /**
    * 获取补丁版本号
    */
   static getPatchVersion(version: string): number {
-    return parseInt(version.split('.')[2] || '0');'
+    return parseInt(version.split('.')[2] || '0");
   }
 
   /**
    * 比较版本号
    */
   static compareVersions(version1: string, version2: string): number {
-    const v1Parts = version1.split('.').map(Number);'
-    const v2Parts = version2.split('.').map(Number);'
+    const v1Parts = version1.split('.').map(Number);
+    const v2Parts = version2.split('.').map(Number);
     for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
       const v1Part = v1Parts[i] || 0;
       const v2Part = v2Parts[i] || 0;
@@ -190,7 +190,7 @@ export class VersionedDataWrapper<T = any> {
     return new VersionedDataWrapper(version, data, {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      source: 'client';
+      source: 'client'
     });
   }
 
@@ -407,7 +407,7 @@ export class AutoMigrationSystem {
         metadata: {
           ...currentData.metadata,
           updatedAt: new Date().toISOString(),
-          source: "migration';'`
+          source: "migration";`
         }
       };
     }
@@ -539,24 +539,24 @@ export const autoMigrationSystem = new AutoMigrationSystem();
 // 注册默认的类型版本信息
 TypeVersionRegistry.register({
   name: "User','`
-  version: '1.0.0','
+  version: '1.0.0',
   validator: (data: any) => {
-    return data && typeof data.id === 'string' && typeof data.email === 'string';
+    return data && typeof data.id === 'string' && typeof data.email === 'string'
   }
 });
 
 TypeVersionRegistry.register({
-  name: 'TestResult','
-  version: '1.0.0','
+  name: 'TestResult',
+  version: '1.0.0',
   validator: (data: any) => {
-    return data && typeof data.id === 'string' && typeof data.testType === 'string';
+    return data && typeof data.id === 'string' && typeof data.testType === 'string'
   }
 });
 
 TypeVersionRegistry.register({
-  name: 'ApiResponse','
-  version: '1.0.0','
+  name: 'ApiResponse',
+  version: '1.0.0',
   validator: (data: any) => {
-    return data && typeof data.success === 'boolean';
+    return data && typeof data.success === 'boolean'
   }
 });

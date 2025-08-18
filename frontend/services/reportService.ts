@@ -1,15 +1,15 @@
-import { apiClient } from './api';
+import { apiClient } from './api
 
 export interface ReportTemplate {
   id: string;
   name: string;
   description: string;
-  type: 'performance' | 'security' | 'seo' | 'accessibility' | 'comprehensive';
-  format: 'pdf' | 'html' | 'json' | 'csv' | 'xlsx';
+  type: 'performance' | 'security' | 'seo' | 'accessibility' | 'comprehensive'
+  format: 'pdf' | 'html' | 'json' | 'csv' | 'xlsx'
   sections: Array<{
     id: string;
     name: string;
-    type: 'chart' | 'table' | 'text' | 'metrics' | 'recommendations';
+    type: 'chart' | 'table' | 'text' | 'metrics' | 'recommendations'
     config: any;
     order: number;
   }>;
@@ -24,9 +24,9 @@ export interface Report {
   name: string;
   description?: string;
   templateId?: string;
-  type: 'performance' | 'security' | 'seo' | 'accessibility' | 'comprehensive';
-  format: 'pdf' | 'html' | 'json' | 'csv' | 'xlsx';
-  status: 'generating' | 'completed' | 'failed';
+  type: 'performance' | 'security' | 'seo' | 'accessibility' | 'comprehensive'
+  format: 'pdf' | 'html' | 'json' | 'csv' | 'xlsx'
+  status: 'generating' | 'completed' | 'failed'
   progress: number;
   data: any;
   downloadUrl?: string;
@@ -54,7 +54,7 @@ export interface ReportSchedule {
   timezone: string;
   isActive: boolean;
   recipients: Array<{
-    type: 'email' | 'webhook' | 'slack';
+    type: 'email' | 'webhook' | 'slack'
     address: string;
     format?: string;
   }>;
@@ -149,8 +149,8 @@ class ReportService {
     name: string;
     description?: string;
     templateId?: string;
-    type: 'performance' | 'security' | 'seo' | 'accessibility' | 'comprehensive';
-    format: 'pdf' | 'html' | 'json' | 'csv' | 'xlsx';
+    type: 'performance' | 'security' | 'seo' | 'accessibility' | 'comprehensive'
+    format: 'pdf' | 'html' | 'json' | 'csv' | 'xlsx'
     data?: any;
     testIds?: string[];
     dateRange?: {
@@ -275,7 +275,7 @@ class ReportService {
 
   // 报告分享
   async shareReport(id: string, config: {
-    type: 'public' | 'private';
+    type: 'public' | 'private'
     expiresIn?: number; // 小时
     password?: string;
     allowDownload?: boolean;
