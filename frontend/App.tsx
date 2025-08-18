@@ -2,6 +2,8 @@ import { ConfigProvider, theme } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import React, { useEffect, useState } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+// 导入布局组件
+import Layout from './components/layout/Layout';
 // 导入页面组件
 import CompatibilityTest from './pages/core/compatibility/CompatibilityTest';
 import Dashboard from './pages/core/Dashboard';
@@ -60,13 +62,15 @@ const App: React.FC = () => {
       <div className={`app ${isDarkMode ? 'dark-theme' : 'light-theme'}`}>
         <Router>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/stress-test" element={<StressTest />} />
-            <Route path="/content-detection" element={<ContentDetection />} />
-            <Route path="/compatibility-test" element={<CompatibilityTest />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/help" element={<Help />} />
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="stress-test" element={<StressTest />} />
+              <Route path="content-detection" element={<ContentDetection />} />
+              <Route path="compatibility-test" element={<CompatibilityTest />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="help" element={<Help />} />
+            </Route>
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </Router>
