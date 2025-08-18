@@ -12,7 +12,7 @@ export interface SystemStats     {
   networkTraffic: {
     incoming: number; // 字节
     outgoing: number; // 字节
-  };
+  }
   errorRate: number; // 百分比
   responseTime: number; // 毫秒
   // 扩展字段以支持更多统计信息
@@ -27,26 +27,26 @@ export interface SystemStats     {
     popularTypes: {
       type: string;
       count: number;
-      percentage: number;
-    }[];
-  };
+      percentage: number
+}[]
+}
   users: {
     total: number;
     active: number;
     online: number;
-    newToday: number;
-  };
+    newToday: number
+}
   performance: {
     successRate: number;
     averageResponseTime: number;
-    errorRate: number;
-  };
+    errorRate: number
+}
   system: {
     uptime: number;
     cpuUsage: number;
     memoryUsage: number;
-    diskUsage: number;
-  };
+    diskUsage: number
+}
 }
 
 export interface SystemConfig     {
@@ -58,8 +58,8 @@ export interface SystemConfig     {
     language: string;
     maintenanceMode: boolean;
     registrationEnabled: boolean;
-    emailVerificationRequired: boolean;
-  };
+    emailVerificationRequired: boolean
+}
   testing: {
     maxConcurrentTests: number;
     maxTestsPerUser: number;
@@ -73,28 +73,28 @@ export interface SystemConfig     {
       apiTest: boolean;
       uptimeMonitor: boolean;
       syntheticMonitor: boolean;
-      realUserMonitor: boolean;
-    };
-    defaultLocations: string[];
+      realUserMonitor: boolean
+}
+    defaultLocations: string[]
     maxFileUploadSize: number; // MB
     screenshotQuality: 'low' | 'medium' | 'high
     videoRecording: boolean;
-    harGeneration: boolean;
-  };
+    harGeneration: boolean
+}
   monitoring: {
     uptimeCheckInterval: number; // 秒
     alertThresholds: {
       responseTime: number; // 毫秒
       errorRate: number; // 百分比
       availability: number; // 百分比
-    };
+    }
     retentionPeriods: {
       rawData: number; // 天
       aggregatedData: number; // 天
       screenshots: number; // 天
       videos: number; // 天
-    };
-  };
+    }
+}
   security: {
     passwordMinLength: number;
     passwordRequireSpecialChars: boolean;
@@ -102,8 +102,8 @@ export interface SystemConfig     {
     maxLoginAttempts: number;
     lockoutDurationMinutes: number;
     twoFactorRequired: boolean;
-    ipWhitelist: string[];
-  };
+    ipWhitelist: string[]
+}
   notifications: {
     emailEnabled: boolean;
     smtpHost: string;
@@ -111,21 +111,20 @@ export interface SystemConfig     {
     smtpUser: string;
     smtpPassword: string;
     fromEmail: string;
-    fromName: string;
-  };
-  backup: {
+    fromName: string'
+}
+  backup: {;
     enabled: boolean;
-    frequency: 'hourly' | 'daily' | 'weekly' | 'monthly
+    frequency: 'hourly' | 'daily' | 'weekly' | 'monthly;
     retentionDays: number;
     location: 'local' | 'cloud' | 's3
-  };
+  }
 }
-
-export interface User     {
+export interface User {
   id: string;
   username: string;
   email: string;
-  role: 'admin' | 'user' | 'viewer
+  role: 'admin' | 'user' | 'viewer;
   status: 'active' | 'inactive' | 'suspended
   createdAt: string;
   lastLogin?: string;
@@ -137,7 +136,7 @@ export interface User     {
   lastName?: string;
   phone?: string;
   department?: string;
-  permissions?: string[];
+  permissions?: string[]
 }
 
 export interface UserFilter     {
@@ -145,19 +144,17 @@ export interface UserFilter     {
   status?: string;
   search?: string;
   emailVerified?: boolean;
-  department?: string;
-}
-
-export interface SystemLog     {
+  department?: string'}
+export interface SystemLog {
   id: string;
   timestamp: string;
-  level: 'debug' | 'info' | 'warning' | 'error' | 'critical
+  level: 'debug' | 'info' | 'warning' | 'error' | 'critical;
   category: 'auth' | 'test' | 'system' | 'admin' | 'api' | 'security
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, any>
   userId?: string;
   ip?: string;
-  userAgent?: string;
+  userAgent?: string
 }
 
 export interface LogFilter     {
@@ -166,42 +163,38 @@ export interface LogFilter     {
   startDate?: string;
   endDate?: string;
   userId?: string;
-  search?: string;
-}
-
-export interface SystemHealth     {
+  search?: string'}
+export interface SystemHealth {
   status: 'healthy' | 'warning' | 'critical
   uptime: number; // 秒
   services: {
     database: ServiceStatus;
     redis: ServiceStatus;
     storage: ServiceStatus;
-    email: ServiceStatus;
-  };
+    email: ServiceStatus
+}
   resources: {
     cpu: ResourceUsage;
     memory: MemoryUsage;
     disk: DiskUsage;
-    network: NetworkUsage;
-  };
+    network: NetworkUsage
+}
   metrics: {
     requestsPerMinute: number;
     errorRate: number;
     averageResponseTime: number;
-    activeConnections: number;
-  };
-}
-
-export interface ServiceStatus     {
+    activeConnections: number
+}'}
+export interface ServiceStatus {
   status: 'healthy' | 'warning' | 'critical
   responseTime: number; // 毫秒
   lastCheck?: string;
-  error?: string;
+  error?: string
 }
 
 export interface ResourceUsage     {
   usage: number; // 百分比
-  cores?: number;
+  cores?: number
 }
 
 export interface MemoryUsage     {
@@ -218,20 +211,19 @@ export interface DiskUsage     {
 
 export interface NetworkUsage     {
   incoming: number; // KB/s
-  outgoing: number; // KB/s
+  outgoing: number; // KB/s'
 }
-
-export interface BackupInfo     {
+export interface BackupInfo {
   id: string;
   name: string;
-  type: 'full' | 'incremental' | 'config
+  type: 'full' | 'incremental' | 'config;
   status: 'pending' | 'running' | 'completed' | 'failed
   createdAt: string;
   completedAt?: string;
   size: number; // 字节
   location: string;
   description?: string;
-  error?: string;
+  error?: string
 }
 
 export interface MaintenanceInfo     {
@@ -240,41 +232,38 @@ export interface MaintenanceInfo     {
   nextScheduledMaintenance?: string;
   maintenanceMessage?: string;
   systemVersion: string;
-  availableUpdates: SystemUpdate[];
-  maintenanceHistory: MaintenanceRecord[];
+  availableUpdates: SystemUpdate[]
+  maintenanceHistory: MaintenanceRecord[]'
 }
-
-export interface SystemUpdate     {
+export interface SystemUpdate {
   version: string;
   type: 'major' | 'minor' | 'patch
   description: string;
   releaseDate: string;
   size: number; // 字节
-  critical?: boolean;
-}
-
-export interface MaintenanceRecord     {
+  critical?: boolean'}
+export interface MaintenanceRecord {
   date: string;
   type: 'scheduled' | 'emergency' | 'update
   description: string;
   duration: number; // 秒
   success: boolean;
-  notes?: string;
+  notes?: string
 }
 
 export interface Permission     {
   id: string;
   name: string;
   description: string;
-  category: string;
+  category: string
 }
 
 export interface Role     {
   id: string;
   name: string;
   description: string;
-  permissions: string[];
-  isSystem: boolean;
+  permissions: string[]
+  isSystem: boolean
 }
 
 export interface AuditLog     {
@@ -285,14 +274,12 @@ export interface AuditLog     {
   action: string;
   resource: string;
   resourceId?: string;
-  details: Record<string, any>;
+  details: Record<string, any>
   ip: string;
   userAgent: string;
   success: boolean;
-  error?: string;
-}
-
-export interface SystemAlert     {
+  error?: string'}
+export interface SystemAlert {
   id: string;
   type: 'info' | 'warning' | 'error' | 'critical
   title: string;
@@ -314,43 +301,43 @@ export interface DatabaseInfo     {
   size: number; // MB
   connections: {
     active: number;
-    max: number;
-  };
+    max: number
+}
   performance: {
     queryTime: number; // 毫秒
     slowQueries: number;
-    lockWaits: number;
-  };
+    lockWaits: number
+}
   tables: {
     name: string;
     rows: number;
     size: number; // MB
-  }[];
+  }[]
 }
 
 // 系统监控指标接口
 export interface SystemMetrics     {
   system: {
     uptime: number;
-    loadAverage: number[];
+    loadAverage: number[]
     memoryUsage: {
       total: number;
       used: number;
       free: number;
-      percentage: number;
-    };
+      percentage: number
+}
     diskUsage: {
       total: number;
       used: number;
       free: number;
-      percentage: number;
-    };
+      percentage: number
+}
     cpuUsage: {
       usage: number;
       cores: number;
-      temperature?: number;
-    };
-  };
+      temperature?: number
+}
+}
   application: {
     activeConnections: number;
     requestsPerMinute: number;
@@ -359,41 +346,39 @@ export interface SystemMetrics     {
     cacheHitRate: number;
     activeUsers: number;
     runningTests: number;
-    queuedTests: number;
-  };
+    queuedTests: number
+}
   database: {
     connections: number;
     queryTime: number;
     cacheHitRate: number;
-    size: number;
-  };
-  // 兼容旧版本的字段
+    size: number
+} // 兼容旧版本的字段
   cpu?: {
     usage: number;
     cores: number;
-    temperature?: number;
-  };
+    temperature?: number
+}
   memory?: {
     usage: number;
     used: number;
-    total: number;
-  };
+    total: number
+}
   disk?: {
     usage: number;
     used: number;
-    total: number;
-  };
+    total: number
+}
   network?: {
     connections: number;
     incoming: number;
-    outgoing: number;
-  };
+    outgoing: number
 }
-
-export interface SystemMonitor     {
+}
+export interface SystemMonitor {
   id: string;
   timestamp: string;
   metrics: SystemMetrics;
-  alerts: SystemAlert[];
-  status: 'healthy' | 'warning' | 'critical
+  alerts: SystemAlert[]
+  status: 'healthy' | 'warning' | 'critical'
 }

@@ -1,4 +1,4 @@
-import React from 'react
+import React from 'react;';
 
 interface TestPageHistoryProps {
   // 定义组件属性
@@ -10,7 +10,8 @@ const TestPageHistory: React.FC<TestPageHistoryProps> = (props) => {
       <h1>TestPageHistory</h1>
       <p>组件内容</p>
     </div>
-  );
-};
+  )
+}
 
 export default TestPageHistory;
+;

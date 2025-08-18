@@ -1,13 +1,14 @@
 import { Layout as AntLayout } from 'antd';
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import '../../styles/layout.css';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
 
 const { Header, Sider, Content } = AntLayout;
 
 export interface LayoutProps {
-  children?: React.ReactNode;
+  children?: React.ReactNode
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -18,29 +19,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <AntLayout style={{ minHeight: '100vh' }}>
+    <AntLayout className="main-layout">
+      {/* 侧边栏 */}
+      <Sidebar collapsed={collapsed} onToggle={toggleSidebar} />
+
       {/* 顶部导航栏 */}
-      <Header style={{ padding: 0, background: '#fff' }}>
-        <TopNavbar collapsed={collapsed} onToggle={toggleSidebar} />
-      </Header>
+      <TopNavbar collapsed={collapsed} onToggle={toggleSidebar} />
 
-      <AntLayout>
-        {/* 侧边栏 */}
-        <Sider
-          trigger={null}
-          collapsible
-          collapsed={collapsed}
-          width={240}
-          style={{ background: '#fff' }}
-        >
-          <Sidebar collapsed={collapsed} onToggle={toggleSidebar} />
-        </Sider>
-
-        {/* 主内容区域 */}
-        <Content style={{ margin: '16px', background: '#fff', borderRadius: '8px' }}>
+      {/* 主内容区域 */}
+      <Content className={`main-content ${collapsed ? 'collapsed' : ''}`}>
+        <div className="content-container">
           {children || <Outlet />}
-        </Content>
-      </AntLayout>
+        </div>
+      </Content>
     </AntLayout>
   );
 };

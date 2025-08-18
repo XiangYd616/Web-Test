@@ -1,4 +1,4 @@
-import React from 'react
+import React from 'react;';
 interface CardProps {
   // 定义组件属性
 }
@@ -8,6 +8,6 @@ const Card: React.FC<CardProps> = (props) => {
       <h1>Card</h1>
       <p>组件内容</p>
     </div>
-  );
-};
+  )
+}
 export default Card;

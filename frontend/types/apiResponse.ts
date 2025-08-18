@@ -15,39 +15,37 @@ export {
 // ==================== 向后兼容的类型别名 ====================
 
 // 为了向后兼容，保留一些旧的类型别名
-export type PaginationInfo   = PaginationMeta;// ==================== 向后兼容的工具函数 ====================
-
-// 重新导出一些常用的工具函数，保持向后兼容性
-export {
-  createCreatedResponse, createErrorResponse, createNoContentResponse, createPaginatedResponse, createPaginationMeta as createPagination, createSuccessResponse, generateRequestId
-} from '../../shared/utils/apiResponseBuilder
+export type PaginationInfo   = PaginationMeta; // ==================== 向后兼容的工具函数 ====================
+;
+// 重新导出一些常用的工具函数，保持向后兼容性;
+export {;
+  createCreatedResponse, createErrorResponse, createNoContentResponse, createPaginatedResponse, createPaginationMeta as createPagination, createSuccessResponse, generateRequestId'} from '../../shared/utils/apiResponseBuilder
 // ==================== 前端特有的接口定义 ====================
-
-export interface RequestConfig     {
+;
+export interface RequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS
-  headers?: Record<string, string>;
-  body?: string | FormData | URLSearchParams | Record<string, any>;
+  headers?: Record<string, string>
+  body?: string | FormData | URLSearchParams | Record<string, any>
   timeout?: number;
   retries?: number;
   retryDelay?: number;
   cache?: boolean;
-  cacheTTL?: number;
+  cacheTTL?: number
 }
 
 export interface AuthConfig     {
   token?: string;
   apiKey?: string;
-  basicAuth?: { username: string; password: string };
-  oauth2?: { accessToken: string; refreshToken?: string };
+  basicAuth?: { username: string; password: string }
+  oauth2?: { accessToken: string; refreshToken?: string }
 }
-
-export interface QueryParams     {
+export interface QueryParams {
   page?: number;
   limit?: number;
   sort?: string;
   order?: 'asc' | 'desc
   search?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, any>
 }
 
 export interface PaginatedRequest extends QueryParams     {
@@ -57,11 +55,11 @@ export interface PaginatedRequest extends QueryParams     {
 // ==================== 前端API客户端接口 ====================
 
 export interface ApiClient     {
-  get<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
-  post<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>;
-  put<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>;
-  delete<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
-  patch<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>;
+  get<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>
+  post<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>
+  put<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>
+  delete<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>
+  patch<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>
 }
 
 // ==================== 前端特有的常量 ====================
@@ -75,30 +73,27 @@ export const DEFAULT_PAGINATION: PaginationInfo = {
   hasPrev: false,
   nextPage: null,
   prevPage: null
-};
-
-// ==================== 前端特有的工具函数 ====================
+} // ==================== 前端特有的工具函数 ====================
 
 /**
  * 提取响应数据
  */
 export function extractData<T>(response: ApiResponse<T>): T | null   {
-  return isApiSuccessResponse(response) ? response.data : null;
+  return isApiSuccessResponse(response) ? response.data: null
 }
 
 /**
  * 提取错误信息
  */
 export function extractError<T>(response: ApiResponse<T>): ApiError | null   {
-  return isApiErrorResponse(response) ? response.error : null;
+  return isApiErrorResponse(response) ? response.error: null
 }
-
-/**
- * 提取分页信息
- */
-export function extractPagination<T>(response: ApiResponse<T>): PaginationMeta | null   {
+/**;
+ * 提取分页信息;
+ */;
+export function extractPagination<T>(response: ApiResponse<T>): PaginationMeta | null   {;
   if (isApiSuccessResponse(response) && 'pagination' in response.meta) {
-    return (response.meta as any).pagination;
-  }
-  return null;
+    return (response.meta as any).pagination
+}
+  return null
 }

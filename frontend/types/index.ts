@@ -5,19 +5,19 @@
 export interface BaseEntity     {
   id: string;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt: Date
 }
 
 export interface ApiResponse<T = any>     {
   success: boolean;
   data?: T;
   error?: string;
-  message?: string;
+  message?: string
 }
 
 export interface PaginationParams     {
   page: number;
-  pageSize: number;
+  pageSize: number
 }
 
 export interface PaginatedResponse<T> extends ApiResponse<T[]>     {
@@ -25,8 +25,8 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]>     {
     page: number;
     pageSize: number;
     total: number;
-    totalPages: number;
-  };
+    totalPages: number
+}
 }
 
-export * from '../services/types/versionTypes
+export * from '../services/types/versionTypes;

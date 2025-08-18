@@ -3,32 +3,30 @@ declare module 'react' {
   export = React;
   export as namespace React;
   namespace React {
-    type FC<P = {}> = FunctionComponent<P>;
+    type FC<P = {}> = FunctionComponent<P>
     interface FunctionComponent<P = {}> {
-      (props: P & { children?: ReactNode }): ReactElement | null;
-    }
+      (props: P & { children?: ReactNode }): ReactElement | null
+}
     type ReactElement = any;
     type ReactNode = any;
     type Component = any;
     type ComponentType = any;
-    function useState<T>(initialState: T | (() => T)): [T, (value: T) => void];
+    function useState<T>(initialState: T | (() => T)): [T, (value: T) => void]
     function useEffect(effect: () => void | (() => void), deps?: any[]): void;
     function useCallback<T extends (...args: any[]) => any>(callback: T, deps: any[]): T;
     function useMemo<T>(factory: () => T, deps: any[]): T;
-    function useRef<T>(initialValue: T): { current: T };
+    function useRef<T>(initialValue: T): { current: T }
     function useContext<T>(context: any): T;
     function createContext<T>(defaultValue: T): any;
     const Fragment: any;
-    const StrictMode: any;
-  }
+    const StrictMode: any
 }
-
+}
 declare module 'react-dom/client' {
   export function createRoot(container: any): {
-    render(element: any): void;
-  };
+    render(element: any): void
 }
-
+}
 declare module 'react-router-dom' {
   export const BrowserRouter: any;
   export const Router: any;
@@ -39,9 +37,8 @@ declare module 'react-router-dom' {
   export const NavLink: any;
   export const useNavigate: () => any;
   export const useLocation: () => any;
-  export const useParams: () => any;
+  export const useParams: () => any
 }
-
 declare module 'antd' {
   export const ConfigProvider: any;
   export const theme: any;
@@ -96,14 +93,12 @@ declare module 'antd' {
   export const List: any;
   export const Empty: any;
   export const Result: any;
-  export const Skeleton: any;
+  export const Skeleton: any
 }
-
 declare module 'antd/locale/zh_CN' {
   const zhCN: any;
-  export default zhCN;
+  export default zhCN
 }
-
 declare module '@ant-design/icons' {
   export const PlayCircleOutlined: any;
   export const PauseCircleOutlined: any;
@@ -164,11 +159,11 @@ declare module '@ant-design/icons' {
   export const LeftOutlined: any;
   export const RightOutlined: any;
   export const UpOutlined: any;
-  export const DownOutlined: any;
+  export const DownOutlined: any
 }
 
-// 通用模块声明
+// 通用模块声明;
 declare module '*' {
   const content: any;
-  export default content;
+  export default content
 }

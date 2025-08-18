@@ -6,21 +6,17 @@ export enum UserRole {
   USER = 'user',
   TESTER = 'tester',
   MANAGER = 'manager',
-  VIEWER = 'viewer
-}
-
-export enum UserStatus {
+  VIEWER = 'viewer}',',
+export enum UserStatus {;
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   SUSPENDED = 'suspended',
-  PENDING = 'pending
-}
-
-export enum AuthStatus {
+  PENDING = 'pending}',',
+export enum AuthStatus {;
   AUTHENTICATED = 'authenticated',
   UNAUTHENTICATED = 'unauthenticated',
   LOADING = 'loading',
-  ERROR = 'error
+  ERROR = 'error;',
 }
 
 export interface Permission     {
@@ -28,25 +24,23 @@ export interface Permission     {
   name: string;
   description: string;
   category: string;
-  isSystem?: boolean;
+  isSystem?: boolean
 }
 
 export interface Role     {
-  id: string;
+  id: string;',
   name: string;
   description: string;
-  permissions: Permission[];
+  permissions: Permission[]',
   isSystem?: boolean;
-  userCount?: number;
-}
-
-// ==================== 用户相关类型 ====================
-
-export interface UserPreferences     {
-  theme: 'light' | 'dark' | 'auto
-  language: 'zh-CN' | 'en-US' | 'ja-JP
+  userCount?: number',
+} // ==================== 用户相关类型 ==================== ;
+;
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'auto;
+  language: 'zh-CN' | 'en-US' | 'ja-JP;
   timezone: string;
-  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY
+  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY;
   timeFormat: '24h' | '12h
   notifications: {
     email: boolean;
@@ -56,26 +50,26 @@ export interface UserPreferences     {
     testComplete: boolean;
     testFailed: boolean;
     weeklyReport: boolean;
-    securityAlert: boolean;
-  };
+    securityAlert: boolean
+}
   dashboard?: {
     defaultView: string;
     layout?: string;
-    widgets?: string[];
+    widgets?: string[]
     refreshInterval: number;
-    showTips?: boolean;
-  };
+    showTips?: boolean
+}
   testing?: {
     defaultTimeout: number;
     maxConcurrentTests: number;
     autoSaveResults: boolean;
-    enableAdvancedFeatures: boolean;
-  };
+    enableAdvancedFeatures: boolean
+}
   privacy?: {
     shareUsageData: boolean;
     allowCookies: boolean;
-    trackingEnabled: boolean;
-  };
+    trackingEnabled: boolean
+}
 }
 
 export interface UserProfile     {
@@ -86,7 +80,7 @@ export interface UserProfile     {
   department?: string;
   phone?: string;
   timezone: string;
-  avatar?: string;
+  avatar?: string
 }
 
 export interface User     {
@@ -95,28 +89,18 @@ export interface User     {
   email: string;
   role: UserRole;
   status: UserStatus;
-  permissions: string[];
-
-  // 个人信息
+  permissions: string[] // 个人信息
   profile: UserProfile;
-  preferences: UserPreferences;
-
-  // 状态信息
+  preferences: UserPreferences; // 状态信息
   emailVerified: boolean;
   twoFactorEnabled?: boolean;
   loginAttempts?: number;
-  lockedUntil?: string;
-
-  // 时间戳
+  lockedUntil?: string; // 时间戳
   createdAt: string;
   updatedAt: string;
-  lastLoginAt?: string;
-
-  // 统计信息
-  testCount?: number;
-
-  // 元数据
-  metadata?: Record<string, any>;
+  lastLoginAt?: string; // 统计信息
+  testCount?: number; // 元数据
+  metadata?: Record<string, any>
 }
 
 // ==================== 认证相关类型 ====================
@@ -126,7 +110,7 @@ export interface LoginCredentials     {
   username?: string; // 支持用户名登录（向后兼容）
   password: string;
   rememberMe?: boolean;
-  twoFactorCode?: string;
+  twoFactorCode?: string
 }
 
 export interface RegisterData     {
@@ -136,7 +120,7 @@ export interface RegisterData     {
   confirmPassword: string;
   fullName?: string;
   acceptTerms: boolean;
-  inviteCode?: string;
+  inviteCode?: string
 }
 
 export interface AuthResponse     {
@@ -146,7 +130,7 @@ export interface AuthResponse     {
   token?: string;
   refreshToken?: string;
   expiresAt?: string;
-  errors?: Record<string, string>;
+  errors?: Record<string, string>
 }
 
 export interface UserSession     {
@@ -160,27 +144,27 @@ export interface UserSession     {
   ipAddress: string;
   userAgent: string;
   isActive: boolean;
-  deviceInfo?: {
+  deviceInfo?: {;
     type: 'desktop' | 'mobile' | 'tablet
     os?: string;
-    browser?: string;
-  };
+    browser?: string
+}
 }
 
 export interface PasswordResetRequest     {
-  email: string;
+  email: string
 }
 
 export interface PasswordReset     {
   token: string;
   newPassword: string;
-  confirmPassword: string;
+  confirmPassword: string
 }
 
 export interface ChangePasswordData     {
   currentPassword: string;
   newPassword: string;
-  confirmPassword: string;
+  confirmPassword: string
 }
 
 // ==================== 用户管理类型 ====================
@@ -191,9 +175,9 @@ export interface CreateUserData     {
   password: string;
   fullName?: string;
   role?: UserRole;
-  permissions?: string[];
+  permissions?: string[]
   avatar?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any>
 }
 
 export interface UpdateUserData     {
@@ -201,22 +185,22 @@ export interface UpdateUserData     {
   email?: string;
   fullName?: string;
   role?: UserRole;
-  permissions?: string[];
+  permissions?: string[]
   avatar?: string;
-  preferences?: Partial<UserPreferences>;
-  metadata?: Record<string, any>;
+  preferences?: Partial<UserPreferences>
+  metadata?: Record<string, any>
 }
 
 export interface UserFilter     {
-  role?: UserRole | UserRole[];
-  status?: UserStatus | UserStatus[];
+  role?: UserRole | UserRole[]
+  status?: UserStatus | UserStatus[]
   search?: string;
   emailVerified?: boolean;
   department?: string;
   createdAfter?: string;
   createdBefore?: string;
   lastLoginAfter?: string;
-  lastLoginBefore?: string;
+  lastLoginBefore?: string
 }
 
 export interface UserStats     {
@@ -225,8 +209,8 @@ export interface UserStats     {
   newUsersToday: number;
   newUsersThisWeek: number;
   newUsersThisMonth: number;
-  usersByRole: Record<string, number>;
-  usersByStatus: Record<string, number>;
+  usersByRole: Record<string, number>
+  usersByStatus: Record<string, number>
 }
 
 // ==================== 认证上下文类型 ====================
@@ -237,31 +221,27 @@ export interface AuthContextType     {
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  error: string | null;
-
-  // 基础认证方法
-  login: (credentials: LoginCredentials) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
-  logout: () => Promise<void>;
-  updateProfile: (data: Partial<UpdateUserData>) => Promise<void>;
-  changePassword: (data: ChangePasswordData) => Promise<void>;
-  refreshToken: () => Promise<void>;
+  error: string | null; // 基础认证方法
+  login: (credentials: LoginCredentials) => Promise<void>
+  register: (data: RegisterData) => Promise<void>
+  logout: () => Promise<void>
+  updateProfile: (data: Partial<UpdateUserData>) => Promise<void>
+  changePassword: (data: ChangePasswordData) => Promise<void>
+  refreshToken: () => Promise<void>
 
   // 密码重置
-  forgotPassword: (email: string) => Promise<any>;
-  resetPassword: (token: string, newPassword: string, confirmPassword: string) => Promise<any>;
+  forgotPassword: (email: string) => Promise<any>
+  resetPassword: (token: string, newPassword: string, confirmPassword: string) => Promise<any>
 
   // 邮箱验证
-  sendEmailVerification: () => Promise<any>;
-  verifyEmail: (token: string) => Promise<any>;
+  sendEmailVerification: () => Promise<any>
+  verifyEmail: (token: string) => Promise<any>
 
   // 权限检查
   hasPermission: (permission: string) => boolean;
   hasRole: (role: UserRole | string) => boolean;
-  hasAnyRole: (roles: (UserRole | string)[]) => boolean;
-
-  // 工具方法
-  clearError: () => void;
+  hasAnyRole: (roles: (UserRole | string)[]) => boolean; // 工具方法
+  clearError: () => void
 }
 
 // ==================== 认证检查类型 ====================
@@ -272,7 +252,7 @@ export interface AuthCheckOptions     {
   requireAuth?: boolean;
   showPrompt?: boolean;
   requiredRole?: UserRole | string;
-  requiredPermissions?: string[];
+  requiredPermissions?: string[]
 }
 
 export interface AuthCheckResult     {
@@ -281,7 +261,7 @@ export interface AuthCheckResult     {
   requireLogin: () => boolean;
   showLoginPrompt: () => void;
   hideLoginPrompt: () => void;
-  LoginPromptComponent: React.ReactNode | null;
+  LoginPromptComponent: React.ReactNode | null
 }
 
 // ==================== API 响应类型 ====================
@@ -291,7 +271,7 @@ export interface ApiResponse<T = any>     {
   data?: T;
   message?: string;
   error?: string;
-  errors?: Record<string, string>;
+  errors?: Record<string, string>
 }
 
 export interface PaginatedResponse<T = any> extends ApiResponse<T>     {
@@ -301,8 +281,8 @@ export interface PaginatedResponse<T = any> extends ApiResponse<T>     {
     total: number;
     totalPages: number;
     hasNext: boolean;
-    hasPrev: boolean;
-  };
+    hasPrev: boolean
+}
 }
 
 // ==================== 安全相关类型 ====================
@@ -314,26 +294,23 @@ export interface LoginAttempt     {
   userAgent: string;
   success: boolean;
   failureReason?: string;
-  timestamp: string;
+  timestamp: string'
 }
-
-export interface SecurityEvent     {
+export interface SecurityEvent {
   id: string;
   userId?: string;
-  type: 'login' | 'logout' | 'password_change' | 'permission_change' | 'suspicious_activity
+  type: 'login' | 'logout' | 'password_change' | 'permission_change' | 'suspicious_activity;
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical
   ipAddress: string;
   userAgent: string;
   timestamp: string;
-  metadata?: Record<string, any>;
-}
-
-export interface TwoFactorAuth     {
+  metadata?: Record<string, any>'}
+export interface TwoFactorAuth {
   enabled: boolean;
   method: 'totp' | 'sms' | 'email
-  backupCodes?: string[];
-  lastUsed?: string;
+  backupCodes?: string[]
+  lastUsed?: string
 }
 
 // ==================== 导出所有类型 ====================
@@ -342,6 +319,4 @@ export type {
   UserSession as AuthSession,
   // 重新导出以保持向后兼容
   User as AuthUser, AuthResponse as LoginResponse,
-  AuthResponse as RegisterResponse
-};
-
+  AuthResponse as RegisterResponse'}

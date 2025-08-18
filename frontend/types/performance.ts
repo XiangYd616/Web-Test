@@ -5,26 +5,26 @@ declare global {
     memory?: {
       usedJSHeapSize: number;
       totalJSHeapSize: number;
-      jsHeapSizeLimit: number;
-    };
-  }
+      jsHeapSizeLimit: number
+}
+}
 
   interface PerformanceEntry   {
     processingStart?: number;
     processingEnd?: number;
     renderStart?: number;
-    renderEnd?: number;
-  }
+    renderEnd?: number
+}
 
   interface PerformanceNavigationTiming   {
     processingStart?: number;
-    processingEnd?: number;
-  }
+    processingEnd?: number
+}
 
   interface PerformanceResourceTiming   {
     processingStart?: number;
-    processingEnd?: number;
-  }
+    processingEnd?: number
+}
 }
 
 // ==================== 性能配置接口 ====================
@@ -55,17 +55,17 @@ export interface PerformanceConfig     {
 
   /** CSS优化检测 */
   cssOptimization: boolean;
-
-  /** 移动端性能检测 */
+;
+  /** 移动端性能检测 */;
   mobilePerformance: boolean;
-
-  /** 设备类型 */
+;
+  /** 设备类型 */;
   device: 'desktop' | 'mobile' | 'both
   /** 超时时间（秒） */
   timeout: number;
 
   /** 重试次数 */
-  retries: number;
+  retries: number
 }
 
 // ==================== 性能指标接口 ====================
@@ -90,7 +90,7 @@ export interface CoreWebVitals     {
   speedIndex: number;
 
   /** 交互时间 (ms) */
-  tti: number;
+  tti: number
 }
 
 export interface PageSpeedMetrics     {
@@ -113,7 +113,7 @@ export interface PageSpeedMetrics     {
   responseTime: number;
 
   /** 传输大小 (bytes) */
-  transferSize: number;
+  transferSize: number
 }
 
 export interface ResourceAnalysis     {
@@ -122,35 +122,33 @@ export interface ResourceAnalysis     {
     count: number;
     totalSize: number;
     unoptimized: number;
-    missingAlt: number;
-  };
+    missingAlt: number
+}
 
   /** JavaScript资源分析 */
   javascript: {
     count: number;
     totalSize: number;
     blocking: number;
-    unused: number;
-  };
+    unused: number
+}
 
   /** CSS资源分析 */
   css: {
     count: number;
     totalSize: number;
     blocking: number;
-    unused: number;
-  };
+    unused: number
+}
 
   /** 字体资源分析 */
   fonts: {
     count: number;
     totalSize: number;
-    webFonts: number;
-  };
-}
-
-export interface CacheAnalysis     {
-  /** 缓存策略 */
+    webFonts: number
+}'}
+export interface CacheAnalysis {
+  /** 缓存策略 */;
   strategy: 'none' | 'basic' | 'advanced
   /** 缓存命中率 */
   hitRate: number;
@@ -158,26 +156,24 @@ export interface CacheAnalysis     {
   /** 可缓存资源 */
   cacheable: {
     count: number;
-    size: number;
-  };
+    size: number
+}
 
   /** 未缓存资源 */
   uncached: {
     count: number;
-    size: number;
-  };
+    size: number
+}
 
   /** 缓存头分析 */
   headers: {
     cacheControl: boolean;
     etag: boolean;
     lastModified: boolean;
-    expires: boolean;
-  };
-}
-
-export interface CompressionAnalysis     {
-  /** 压缩类型 */
+    expires: boolean
+}'}
+export interface CompressionAnalysis {
+  /** 压缩类型 */;
   type: 'none' | 'gzip' | 'brotli' | 'deflate
   /** 压缩率 */
   ratio: number;
@@ -191,14 +187,14 @@ export interface CompressionAnalysis     {
   /** 可压缩资源 */
   compressible: {
     count: number;
-    size: number;
-  };
+    size: number
+}
 
   /** 未压缩资源 */
   uncompressed: {
     count: number;
-    size: number;
-  };
+    size: number
+}
 }
 
 // ==================== 性能测试结果接口 ====================
@@ -215,11 +211,11 @@ export interface PerformanceTestResult     {
 
   /** 测试配置 */
   config: PerformanceConfig;
-
-  /** 总体评分 (0-100) */
+;
+  /** 总体评分 (0-100) */;
   overallScore: number;
-
-  /** 性能等级 */
+;
+  /** 性能等级 */;
   grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F
   /** Core Web Vitals */
   coreWebVitals?: CoreWebVitals;
@@ -239,62 +235,57 @@ export interface PerformanceTestResult     {
   /** 移动端性能 */
   mobilePerformance?: {
     score: number;
-    issues: string[];
-    recommendations: string[];
-  };
+    issues: string[]
+    recommendations: string[]
+}
 
   /** 性能建议 */
-  recommendations: PerformanceRecommendation[];
+  recommendations: PerformanceRecommendation[]
 
   /** 详细问题 */
-  issues: PerformanceIssue[];
+  issues: PerformanceIssue[]
 
   /** 测试持续时间 (ms) */
   duration: number;
 
   /** 错误信息 */
-  error?: string;
-}
-
-export interface PerformanceRecommendation     {
-  /** 建议类型 */
+  error?: string'}
+export interface PerformanceRecommendation {
+  /** 建议类型 */;
   type: 'critical' | 'important' | 'minor
   /** 建议标题 */
   title: string;
-
-  /** 建议描述 */
+;
+  /** 建议描述 */;
   description: string;
-
-  /** 预期收益 */
-  impact: 'high' | 'medium' | 'low
-  /** 实施难度 */
+;
+  /** 预期收益 */;
+  impact: 'high' | 'medium' | 'low;
+  /** 实施难度 */;
   difficulty: 'easy' | 'medium' | 'hard
   /** 相关指标 */
-  metrics: string[];
+  metrics: string[]'
 }
-
-export interface PerformanceIssue     {
-  /** 问题类型 */
-  type: 'speed' | 'size' | 'optimization' | 'caching' | 'compression
-  /** 严重程度 */
+export interface PerformanceIssue {
+  /** 问题类型 */;
+  type: 'speed' | 'size' | 'optimization' | 'caching' | 'compression;
+  /** 严重程度 */;
   severity: 'critical' | 'high' | 'medium' | 'low
   /** 问题描述 */
   description: string;
 
   /** 影响的指标 */
-  affectedMetrics: string[];
+  affectedMetrics: string[]
 
   /** 修复建议 */
   solution: string;
 
   /** 相关资源 */
-  resources?: string[];
+  resources?: string[]
 }
-
-// ==================== 性能测试进度接口 ====================
-
-export interface PerformanceTestProgress     {
-  /** 当前阶段 */
+// ==================== 性能测试进度接口 ==================== ;
+export interface PerformanceTestProgress {
+  /** 当前阶段 */;
   phase: 'initializing' | 'analyzing' | 'measuring' | 'optimizing' | 'reporting' | 'completed' | 'failed
   /** 进度百分比 (0-100) */
   progress: number;
@@ -306,7 +297,7 @@ export interface PerformanceTestProgress     {
   estimatedTimeRemaining?: number;
 
   /** 已完成的检测项 */
-  completedChecks: string[];
+  completedChecks: string[]
 
   /** 当前检测项 */
   currentCheck?: string;
@@ -315,14 +306,12 @@ export interface PerformanceTestProgress     {
   realTimeMetrics?: {
     responseTime: number;
     throughput: number;
-    errorRate: number;
-  };
+    errorRate: number
 }
-
-// ==================== 预设配置模板 ====================
-
-export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
-  basic: {
+}
+// ==================== 预设配置模板 ==================== ;
+export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {;
+  basic: {;
     level: 'basic',
     pageSpeed: true,
     coreWebVitals: false,
@@ -338,7 +327,7 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
     retries: 1
   },
 
-  standard: {
+  standard: {;
     level: 'standard',
     pageSpeed: true,
     coreWebVitals: true,
@@ -354,7 +343,7 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
     retries: 2
   },
 
-  comprehensive: {
+  comprehensive: {;
     level: 'comprehensive',
     pageSpeed: true,
     coreWebVitals: true,
@@ -369,9 +358,7 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
     timeout: 120,
     retries: 3
   }
-};
-
-// ==================== 工具函数类型 ====================
+} // ==================== 工具函数类型 ====================
 
 export type PerformanceTestCallback   = (progress: PerformanceTestProgress) => void;export interface PerformanceTestOptions     {
   /** 进度回调 */
@@ -384,5 +371,5 @@ export type PerformanceTestCallback   = (progress: PerformanceTestProgress) => v
   testName?: string;
 
   /** 是否保存结果 */
-  saveResults?: boolean;
+  saveResults?: boolean
 }

@@ -1,0 +1,327 @@
+/* 页面特定样式 */
+
+/* Dashboard 页面 */
+.dashboard-container {
+  width: 100%;
+}
+
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-stat-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.dashboard-stat-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.dashboard-quick-actions {
+  margin: 24px 0;
+}
+
+.dashboard-recent-tests {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.dashboard-system-status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+/* Settings 页面 */
+.settings-container {
+  width: 100%;
+}
+
+.settings-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.settings-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.settings-actions {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  text-align: center;
+}
+
+/* StressTest 页面 */
+.stress-test-container {
+  width: 100%;
+}
+
+.stress-test-layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 24px;
+  height: calc(100vh - 200px);
+}
+
+.stress-test-config {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  height: fit-content;
+}
+
+.stress-test-results {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.stress-test-progress {
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.stress-test-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.stress-test-results-table {
+  height: 400px;
+  overflow-y: auto;
+}
+
+/* TestingDashboard 页面 */
+.testing-dashboard-container {
+  width: 100%;
+}
+
+.testing-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.testing-dashboard-controls {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.testing-dashboard-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.testing-dashboard-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.testing-dashboard-table {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Help 页面 */
+.help-container {
+  width: 100%;
+}
+
+.help-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 24px;
+}
+
+.help-navigation {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  height: fit-content;
+  position: sticky;
+  top: 24px;
+}
+
+.help-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.help-section {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.help-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.help-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.help-contact {
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 24px;
+  text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .stress-test-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  
+  .help-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .help-navigation {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-system-status {
+    grid-template-columns: 1fr;
+  }
+  
+  .settings-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stress-test-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .testing-dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .testing-dashboard-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .testing-dashboard-filters,
+  .testing-dashboard-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-stats-grid,
+  .stress-test-stats,
+  .testing-dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .testing-dashboard-filters,
+  .testing-dashboard-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+/* 深色主题适配 */
+.dark-theme .dashboard-stat-card,
+.dark-theme .settings-section,
+.dark-theme .stress-test-config,
+.dark-theme .stress-test-results,
+.dark-theme .testing-dashboard-controls,
+.dark-theme .testing-dashboard-table,
+.dark-theme .help-navigation,
+.dark-theme .help-content {
+  background: #1f1f1f;
+  border-color: #434343;
+}
+
+.dark-theme .settings-section-title,
+.dark-theme .help-section-title {
+  color: #fff;
+}
+
+.dark-theme .stress-test-progress {
+  background: rgba(24, 144, 255, 0.1);
+  border-color: rgba(24, 144, 255, 0.3);
+}
+
+.dark-theme .help-contact {
+  background: rgba(82, 196, 26, 0.1);
+  border-color: rgba(82, 196, 26, 0.3);
+}
+
+.dark-theme .help-section {
+  border-bottom-color: #434343;
+}

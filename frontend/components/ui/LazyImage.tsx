@@ -3,7 +3,7 @@
  * 支持渐进式加载和占位符
  */
 
-import React, { useState, useRef, useEffect    } from 'react';export interface LazyImageProps     {
+import React, { useState, useRef, useEffect    } from 'react;export interface LazyImageProps {';
   src: string;
   alt: string;
   placeholder?: string;
@@ -15,7 +15,7 @@ import React, { useState, useRef, useEffect    } from 'react';export interface L
   rootMargin?: string;
   blurDataURL?: string;
   quality?: number;
-  priority?: boolean;
+  priority?: boolean
 }
 
 export const LazyImage: React.FC<LazyImageProps> = ({
@@ -40,46 +40,40 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     disabled,
     'aria-label': ariaLabel,
     "data-testid': testId
-  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
-  
-  // 可访问性支持
-  const {
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]); // 可访问性支持
+  const {;
     'aria-label': ariaLabel,
     'aria-describedby': ariaDescribedBy,
     role,
     tabIndex  = 0,
     'data-testid': testId
   } = props;
-  const accessibilityProps = {
+  const accessibilityProps = {;
     'aria-label': ariaLabel,
     'aria-describedby': ariaDescribedBy,
     role,
     tabIndex: disabled ? -1 : tabIndex,
     "data-testid': testId
-  };
-
-  // 键盘导航支持
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  } // 键盘导航支持
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {;
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      onClick?.(event as any);
-    }
+      onClick?.(event as any)
+}
   }, [onClick]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-
-  // 设置Intersection Observer
+  const observerRef = useRef<IntersectionObserver | null>(null); // 设置Intersection Observer
   useEffect(() => {
     if (priority || isInView) return;
 
     observerRef.current = new IntersectionObserver(([entry]) => {
         if (entry.isIntersecting) {
           setIsInView(true);
-          observerRef.current?.disconnect();
-        }
+          observerRef.current?.disconnect()
+}
       },
       {
         threshold,
@@ -88,50 +82,42 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     );
 
     if (imgRef.current) {
-      observerRef.current.observe(imgRef.current);
-    }
+      observerRef.current.observe(imgRef.current)
+}
 
     return () => {
-      observerRef.current?.disconnect();
-    };
-  }, [threshold, rootMargin, priority, isInView]);
-
-  // 处理图片加载
+      observerRef.current?.disconnect()
+}
+}, [threshold, rootMargin, priority, isInView]); // 处理图片加载
   const handleLoad = () => {
     setIsLoaded(true);
-    onLoad?.();
-  };
-
-  // 处理图片错误
+    onLoad?.()
+} // 处理图片错误
   const handleError = () => {
     setHasError(true);
-    onError?.();
-  };
-
-  // 生成优化的图片URL
+    onError?.()
+} // 生成优化的图片URL
   const getOptimizedSrc = (originalSrc: string, quality: number) => {
     // 这里可以集成图片CDN或优化服务
     // 例如：return `${originalSrc}?q=${quality}&auto=format`;
-    return originalSrc;
-  };
-
-  const optimizedSrc = getOptimizedSrc(src, quality);
-
+    return originalSrc
+}`
+  const optimizedSrc = getOptimizedSrc(src, quality);`
   return (
     <div
       ref={imgRef}
       className={`lazy-image-container ${className}`}
-      style={{
+      style={{;
         position: "relative',
         overflow: 'hidden',
         ...style
       }}
     >
       {/* 占位符 */}
-      {!isLoaded && !hasError && (
-        <div
-          className= 'lazy-image-placeholder
-          style={{
+      {!isLoaded && !hasError && (;
+        <div;
+          className="lazy-image-placeholder;
+          style={{;
             position: 'absolute',
             top: 0,
             left: 0,
@@ -140,19 +126,18 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             backgroundColor: '#f0f0f0',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center,';
             backgroundImage: blurDataURL ? `url(${blurDataURL})` : undefined,
             backgroundSize: "cover',
             backgroundPosition: 'center',
             filter: blurDataURL ? "blur(10px)' : undefined
           }}
         >
-          {placeholder && !blurDataURL && (
-            <span className='text-gray-400'>{placeholder}</span>
+          {placeholder && !blurDataURL && (;
+            <span className="text-gray-400'>{placeholder}</span>
           )}
         </div>
-      )}
-
+      )}`
       {/* 实际图片 */}
       {isInView && !hasError && (
         <img
@@ -160,21 +145,20 @@ export const LazyImage: React.FC<LazyImageProps> = ({
           alt={alt}
           onLoad={handleLoad}
           onError={handleError}
-          style={{
+          style={{;
             width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            transition: 'opacity 0.3s ease-in-out',
+            height: '100%,';
+            objectFit: cover,
+            transition: opacity 0.3s ease-in-out,
             opacity: isLoaded ? 1 : 0
           }}
         />
-      )}
-
+      )}`
       {/* 错误状态 */}
       {hasError && (
-        <div
-          className= 'lazy-image-error
-          style={{
+        <div;
+          className="lazy-image-error;
+          style={{;
             position: 'absolute',
             top: 0,
             left: 0,
@@ -183,15 +167,12 @@ export const LazyImage: React.FC<LazyImageProps> = ({
             backgroundColor: '#f5f5f5',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            color: '#999
-          }}
+            justifyContent: 'center',            color: '#999;`';
+}}
         >
           <span>图片加载失败</span>
         </div>
       )}
     </div>
-  );
-};
-
+  )}
 export default React.memo(LazyImage);

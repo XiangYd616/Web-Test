@@ -1,6 +1,6 @@
 // 管理员相关类型定义
 
-import type { User  } from './user';export interface SystemStats     {
+import type { User  } from './user;export interface SystemStats {';
   users: {
     total: number;
     active: number;
@@ -9,8 +9,8 @@ import type { User  } from './user';export interface SystemStats     {
     growthRate: number;
     newToday: number;
     newThisWeek: number;
-    newThisMonth: number;
-  };
+    newThisMonth: number
+}
   tests: {
     total: number;
     today: number;
@@ -22,14 +22,14 @@ import type { User  } from './user';export interface SystemStats     {
     popularTypes: Array<{
       type: string;
       count: number;
-      percentage: number;
-    }>;
-  };
+      percentage: number
+}>
+  }
   performance: {
     successRate: number;
     averageResponseTime: number;
-    errorRate: number;
-  };
+    errorRate: number
+}
   system: {
     uptime: number;
     version: string;
@@ -37,8 +37,8 @@ import type { User  } from './user';export interface SystemStats     {
     lastBackup: string;
     diskUsage: number;
     memoryUsage: number;
-    cpuUsage: number;
-  };
+    cpuUsage: number
+}
 }
 
 export interface SystemMonitor     {
@@ -46,45 +46,44 @@ export interface SystemMonitor     {
   metrics: {
     system: {
       uptime: number;
-      loadAverage: number[];
+      loadAverage: number[]
       memoryUsage: {
         total: number;
         used: number;
         free: number;
-        percentage: number;
-      };
+        percentage: number
+}
       diskUsage: {
         total: number;
         used: number;
         free: number;
-        percentage: number;
-      };
+        percentage: number
+}
       cpuUsage: {
         percentage: number;
-        cores: number;
-      };
-    };
-    // 为了兼容组件中的使用，添加直接的cpu、memory、disk、network属性
+        cores: number
+}
+} // 为了兼容组件中的使用，添加直接的cpu、memory、disk、network属性
     cpu: {
       usage: number;
       cores: number;
-      temperature?: number;
-    };
+      temperature?: number
+}
     memory: {
       usage: number;
       used: number;
-      total: number;
-    };
+      total: number
+}
     disk: {
       usage: number;
       used: number;
-      total: number;
-    };
+      total: number
+}
     network: {
       connections: number;
       incoming: number;
-      outgoing: number;
-    };
+      outgoing: number
+}
     application: {
       activeConnections: number;
       requestsPerMinute: number;
@@ -93,29 +92,29 @@ export interface SystemMonitor     {
       cacheHitRate: number;
       activeUsers: number;
       runningTests: number;
-      queuedTests: number;
-    };
+      queuedTests: number
+}
     database: {
       connections: number;
       queryTime: number;
       slowQueries: number;
-      size: number;
-    };
-  };
+      size: number
+}
+}
   alerts: Array<{
     id: string;
     type: 'warning' | 'error' | 'info
     message: string;
     timestamp: string;
-    resolved: boolean;
-  }>;
+    resolved: boolean
+}>
 }
 
 export interface AdminUser extends User     {
   testCount: number;
   lastActivity: string;
   ipAddress: string;
-  userAgent: string;
+  userAgent: string
 }
 
 export interface UserFilter     {
@@ -126,17 +125,15 @@ export interface UserFilter     {
   createdAfter?: string;
   createdBefore?: string;
   page?: number;
-  limit?: number;
-}
-
-export interface UserBulkAction     {
+  limit?: number'}
+export interface UserBulkAction {
   action: 'activate' | 'deactivate' | 'suspend' | 'changeRole' | 'delete
-  userIds: string[];
+  userIds: string[]
   newRole?: string;
-  reason?: string;
+  reason?: string
 }
 
-export interface TestManagement     {
+export interface TestManagement {
   id: string;
   type: string;
   url: string;
@@ -147,7 +144,7 @@ export interface TestManagement     {
   completedAt?: string;
   duration?: number;
   result?: any;
-  error?: string;
+  error?: string
 }
 
 export interface TestFilter     {
@@ -159,7 +156,7 @@ export interface TestFilter     {
   createdAfter?: string;
   createdBefore?: string;
   page?: number;
-  limit?: number;
+  limit?: number
 }
 
 export interface SystemConfig     {
@@ -171,8 +168,8 @@ export interface SystemConfig     {
     language: string;
     maintenanceMode: boolean;
     registrationEnabled: boolean;
-    emailVerificationRequired: boolean;
-  };
+    emailVerificationRequired: boolean
+}
   testing: {
     maxConcurrentTests: number;
     maxTestsPerUser: number;
@@ -186,28 +183,28 @@ export interface SystemConfig     {
       apiTest: boolean;
       uptimeMonitor: boolean;
       syntheticMonitor: boolean;
-      realUserMonitor: boolean;
-    };
-    defaultLocations: string[];
+      realUserMonitor: boolean'
+}
+    defaultLocations: string[]
     maxFileUploadSize: number;
     screenshotQuality: 'low' | 'medium' | 'high
     videoRecording: boolean;
-    harGeneration: boolean;
-  };
+    harGeneration: boolean
+}
   monitoring: {
     uptimeCheckInterval: number;
     alertThresholds: {
       responseTime: number;
       errorRate: number;
-      availability: number;
-    };
+      availability: number
+}
     retentionPeriods: {
       rawData: number;
       aggregatedData: number;
       screenshots: number;
-      videos: number;
-    };
-  };
+      videos: number
+}
+}
   security: {
     passwordMinLength: number;
     passwordRequireSpecialChars: boolean;
@@ -215,8 +212,8 @@ export interface SystemConfig     {
     maxLoginAttempts: number;
     lockoutDurationMinutes: number;
     twoFactorRequired: boolean;
-    ipWhitelist: string[];
-  };
+    ipWhitelist: string[]
+}
   notifications: {
     emailEnabled: boolean;
     smtpHost: string;
@@ -224,20 +221,20 @@ export interface SystemConfig     {
     smtpUser: string;
     smtpPassword: string;
     fromEmail: string;
-    fromName: string;
-  };
-  backup: {
+    fromName: string'
+}
+  backup: {;
     enabled: boolean;
-    frequency: 'daily' | 'weekly' | 'monthly
+    frequency: 'daily' | 'weekly' | 'monthly;
     retentionDays: number;
     location: 'local' | 's3' | 'ftp
     s3Config?: {
       bucket: string;
       region: string;
       accessKey: string;
-      secretKey: string;
-    };
-  };
+      secretKey: string
+}
+}
 }
 
 export interface ActivityLog     {
@@ -254,7 +251,7 @@ export interface ActivityLog     {
   severity: 'info' | 'warning' | 'error' | 'critical
   category?: string;
   success: boolean;
-  errorMessage?: string;
+  errorMessage?: string
 }
 
 export interface ActivityFilter     {
@@ -268,26 +265,25 @@ export interface ActivityFilter     {
   startDate?: string;
   endDate?: string;
   page?: number;
-  limit?: number;
+  limit?: number
 }
-
-export interface BackupInfo     {
+export interface BackupInfo {
   id: string;
   filename: string;
   size: number;
   createdAt: string;
-  type: 'manual' | 'scheduled
+  type: 'manual' | 'scheduled;
   status: 'completed' | 'failed' | 'in_progress
-  description?: string;
+  description?: string
 }
 
 export interface PermissionGroup     {
   id: string;
   name: string;
   description: string;
-  permissions: string[];
+  permissions: string[]
   userCount: number;
-  isSystem: boolean;
+  isSystem: boolean
 }
 
 export interface AdminApiResponse<T = any>     {
@@ -299,6 +295,5 @@ export interface AdminApiResponse<T = any>     {
     page: number;
     limit: number;
     total: number;
-    totalPages: number;
-  };
-}
+    totalPages: number
+}'}

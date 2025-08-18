@@ -7,14 +7,14 @@ export interface ButtonProps     {
   children?: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
-  className?: string;
+  className?: string
 }
 
 export interface InputProps     {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
-  className?: string;
+  className?: string
 }
 
 // 占位符组件 - 使用简单的函数声明避免JSX语法问题

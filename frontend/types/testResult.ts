@@ -7,8 +7,8 @@
 
 // ==================== 基础类型定义 ====================
 
-export type UUID   = string;export type Timestamp  = string;// ISO 8601 格式
-export type URL   = string;// ==================== 测试相关枚举定义 ====================
+export type UUID   = string;export type Timestamp  = string; // ISO 8601 格式
+export type URL   = string; // ==================== 测试相关枚举定义 ====================
 
 /**
  * 测试类型枚举 - 与数据库约束保持一致
@@ -21,34 +21,31 @@ export enum TestType {
   SEO = 'seo',
   STRESS = 'stress',
   UX = 'ux',
-  WEBSITE = 'website
+  WEBSITE = 'website',
 }
-
-/**
- * 测试状态枚举 - 与数据库约束保持一致
- */
-export enum TestStatus {
+/**;',
+ * 测试状态枚举 - 与数据库约束保持一致;
+ */;',
+export enum TestStatus {;
   PENDING = 'pending',
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled
+  CANCELLED = 'cancelled',
 }
-
-/**
- * 测试优先级枚举
- */
-export enum TestPriority {
+/**;',
+ * 测试优先级枚举;
+ */;',
+export enum TestPriority {;
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical
+  CRITICAL = 'critical',
 }
-
-/**
- * 测试等级枚举
- */
-export enum TestGrade {
+/**;',
+ * 测试等级枚举;
+ */;',
+export enum TestGrade {;
   A_PLUS = 'A+',
   A = 'A',
   B_PLUS = 'B+',
@@ -56,59 +53,50 @@ export enum TestGrade {
   C_PLUS = 'C+',
   C = 'C',
   D = 'D',
-  F = 'F
+  F = 'F;',
 }
 
 // ==================== 测试配置接口 ====================
-
-export interface BaseTestConfig     {
+',
+export interface BaseTestConfig {
   url: URL;
-  timeout?: number; // 毫秒
+  timeout?: number; // 毫秒;',
   retries?: number;
-  priority?: TestPriority;
-  tags?: string[];
+  priority?: TestPriority;',
+  tags?: string[]
   environment?: 'development' | 'staging' | 'production
-  metadata?: Record<string, any>;
-}
-
-export interface PerformanceTestConfig extends BaseTestConfig     {
-  device?: 'desktop' | 'mobile' | 'tablet
+  metadata?: Record<string, any>'}
+export interface PerformanceTestConfig extends BaseTestConfig     {;
+  device?: 'desktop' | 'mobile' | 'tablet;
   throttling?: 'none' | '3g' | '4g' | 'slow-3g
   location?: string;
   lighthouse?: boolean;
-  metrics?: string[];
-}
-
-export interface SecurityTestConfig extends BaseTestConfig     {
+  metrics?: string[]'}
+export interface SecurityTestConfig extends BaseTestConfig     {;
   scanDepth?: 'shallow' | 'medium' | 'deep
   includeSubdomains?: boolean;
   checkSSL?: boolean;
   checkHeaders?: boolean;
-  customPayloads?: string[];
-}
-
-export interface APITestConfig extends BaseTestConfig     {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
-  headers?: Record<string, string>;
+  customPayloads?: string[]'}
+export interface APITestConfig extends BaseTestConfig     {;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH;
+  headers?: Record<string, string>
   body?: any;
-  expectedStatus?: number[];
+  expectedStatus?: number[]
   schema?: any;
-  authentication?: {
+  authentication?: {;
     type: 'none' | 'basic' | 'bearer' | 'api-key
-    credentials?: Record<string, string>;
-  };
+    credentials?: Record<string, string>
+  }
 }
-
-export interface StressTestConfig extends BaseTestConfig     {
+export interface StressTestConfig extends BaseTestConfig     {;
   concurrentUsers?: number;
-  duration?: number; // 秒
-  rampUpTime?: number; // 秒
+  duration?: number; // 秒;
+  rampUpTime?: number; // 秒;
   testType?: 'load' | 'stress' | 'spike' | 'volume
 }
-
-// ==================== 测试结果相关接口 ====================
-
-export interface TestError     {
+// ==================== 测试结果相关接口 ==================== ;
+export interface TestError {
   code: string;
   message: string;
   severity: 'low' | 'medium' | 'high' | 'critical
@@ -116,7 +104,7 @@ export interface TestError     {
   line?: number;
   column?: number;
   element?: string;
-  details?: Record<string, any>;
+  details?: Record<string, any>
 }
 
 export interface TestWarning     {
@@ -124,7 +112,7 @@ export interface TestWarning     {
   message: string;
   category?: string;
   element?: string;
-  details?: Record<string, any>;
+  details?: Record<string, any>
 }
 
 export interface TestRecommendation     {
@@ -148,25 +136,20 @@ export interface TestMetrics     {
   firstInputDelay?: number;
   timeToInteractive?: number;
   speedIndex?: number;
-  totalBlockingTime?: number;
-
-  // 资源指标
+  totalBlockingTime?: number; // 资源指标
   pageSize?: number;
   requestCount?: number;
-  domElements?: number;
-
-  // 自定义指标
-  [key: string]: any;
+  domElements?: number; // 自定义指标
+  [key: string]: any'
 }
-
-export interface TestArtifact     {
+export interface TestArtifact {
   type: 'screenshot' | 'video' | 'report' | 'log' | 'trace' | 'har
   name: string;
   url?: string;
   path?: string;
   size?: number;
   mimeType?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any>
 }
 
 // ==================== 核心测试结果接口 ====================
@@ -181,9 +164,7 @@ export interface TestResult     {
   userId: UUID;
   testType: TestType;
   testName: string;
-  url: URL;
-
-  // 状态和时间信息
+  url: URL; // 状态和时间信息
   status: TestStatus;
   startedAt: Timestamp;
   completedAt?: Timestamp;
@@ -191,40 +172,30 @@ export interface TestResult     {
 
   // 评分和等级
   overallScore?: number; // 0-100
-  grade?: TestGrade;
-
-  // 测试配置和结果
-  config: Record<string, any>;
-  results: Record<string, any>;
+  grade?: TestGrade; // 测试配置和结果
+  config: Record<string, any>
+  results: Record<string, any>
 
   // 详细信息
   summary?: string;
   metrics?: TestMetrics;
-  errors?: TestError[];
-  warnings?: TestWarning[];
-  recommendations?: TestRecommendation[];
-  artifacts?: TestArtifact[];
-
-  // 统计信息
+  errors?: TestError[]
+  warnings?: TestWarning[]
+  recommendations?: TestRecommendation[]
+  artifacts?: TestArtifact[] // 统计信息
   totalIssues?: number;
   criticalIssues?: number;
   majorIssues?: number;
   minorIssues?: number;
-  warningCount?: number;
-
-  // 环境和标签
+  warningCount?: number; // 环境和标签
   environment?: string;
-  tags?: string[];
+  tags?: string[]
   description?: string;
-  notes?: string;
-
-  // 时间戳
+  notes?: string; // 时间戳
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  deletedAt?: Timestamp;
-
-  // 元数据
-  metadata?: Record<string, any>;
+  deletedAt?: Timestamp; // 元数据
+  metadata?: Record<string, any>
 }
 
 // ==================== 数据库映射接口 ====================
@@ -254,7 +225,7 @@ export interface TestResultDatabaseFields     {
   minor_issues?: number;
   warnings?: number;
   environment?: string;
-  tags?: string[]; // PostgreSQL数组
+  tags?: string[] // PostgreSQL数组
   description?: string;
   notes?: string;
   created_at: string;
@@ -268,32 +239,32 @@ export interface TestResultDatabaseFields     {
 export interface TestHistory     {
   id: UUID;
   userId: UUID;
-  testResults: TestResult[];
+  testResults: TestResult[]
   totalTests: number;
   successfulTests: number;
   failedTests: number;
   averageScore: number;
   createdAt: Timestamp;
-  updatedAt: Timestamp;
+  updatedAt: Timestamp
 }
 
-export interface TestSession     {
+export interface TestSession {
   id: UUID;
   userId: UUID;
   name: string;
   description?: string;
-  tests: TestResult[];
+  tests: TestResult[]
   status: 'active' | 'completed' | 'cancelled
   startedAt: Timestamp;
   completedAt?: Timestamp;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any>
 }
 
 // ==================== 测试查询和过滤 ====================
 
 export interface TestResultFilter     {
-  testType?: TestType | TestType[];
-  status?: TestStatus | TestStatus[];
+  testType?: TestType | TestType[]
+  status?: TestStatus | TestStatus[]
   userId?: UUID;
   url?: string;
   startedAfter?: Timestamp;
@@ -302,20 +273,18 @@ export interface TestResultFilter     {
   completedBefore?: Timestamp;
   minScore?: number;
   maxScore?: number;
-  grade?: TestGrade | TestGrade[];
-  tags?: string[];
+  grade?: TestGrade | TestGrade[]
+  tags?: string[]
   environment?: string;
   hasErrors?: boolean;
-  hasWarnings?: boolean;
-}
-
-export interface TestResultQuery     {
+  hasWarnings?: boolean'}
+export interface TestResultQuery {
   page?: number;
   limit?: number;
-  sortBy?: 'startedAt' | 'completedAt' | 'overallScore' | 'testName' | 'duration
+  sortBy?: 'startedAt' | 'completedAt' | 'overallScore' | 'testName' | 'duration;
   sortOrder?: 'asc' | 'desc
   filter?: TestResultFilter;
-  includeDeleted?: boolean;
+  includeDeleted?: boolean
 }
 
 // ==================== 测试统计信息 ====================
@@ -327,10 +296,10 @@ export interface TestStats     {
   runningTests: number;
   averageScore: number;
   averageDuration: number;
-  testsByType: Record<TestType, number>;
-  testsByStatus: Record<TestStatus, number>;
-  testsByGrade: Record<TestGrade, number>;
-  recentTests: TestResult[];
+  testsByType: Record<TestType, number>
+  testsByStatus: Record<TestStatus, number>
+  testsByGrade: Record<TestGrade, number>
+  recentTests: TestResult[]
 }
 
 // ==================== 批量测试相关接口 ====================
@@ -338,19 +307,18 @@ export interface TestStats     {
 export interface BatchTestRequest     {
   name: string;
   description?: string;
-  tests: Array<{
+  tests: Array<{;
     testType: TestType;
-    config: BaseTestConfig;
-  }>;
-  schedule?: {
+    config: BaseTestConfig'
+}>
+  schedule?: {;
     type: 'once' | 'recurring
     startAt?: Timestamp;
     interval?: number; // 分钟
-    endAt?: Timestamp;
-  };
+    endAt?: Timestamp
 }
-
-export interface BatchTestResult     {
+}
+export interface BatchTestResult {
   id: UUID;
   name: string;
   description?: string;
@@ -360,30 +328,30 @@ export interface BatchTestResult     {
   failedTests: number;
   startedAt: Timestamp;
   completedAt?: Timestamp;
-  results: TestResult[];
+  results: TestResult[]
   summary?: {
     averageScore: number;
     totalIssues: number;
-    recommendations: TestRecommendation[];
-  };
+    recommendations: TestRecommendation[]
+}
 }
 
 // ==================== 类型守卫函数 ====================
 
 export function isValidTestType(type: string): type is TestType   {
-  return Object.values(TestType).includes(type as TestType);
+  return Object.values(TestType).includes(type as TestType)
 }
 
 export function isValidTestStatus(status: string): status is TestStatus   {
-  return Object.values(TestStatus).includes(status as TestStatus);
+  return Object.values(TestStatus).includes(status as TestStatus)
 }
 
 export function isValidTestPriority(priority: string): priority is TestPriority   {
-  return Object.values(TestPriority).includes(priority as TestPriority);
+  return Object.values(TestPriority).includes(priority as TestPriority)
 }
 
 export function isValidTestGrade(grade: string): grade is TestGrade   {
-  return Object.values(TestGrade).includes(grade as TestGrade);
+  return Object.values(TestGrade).includes(grade as TestGrade)
 }
 
 // ==================== 数据转换工具函数 ====================
@@ -420,7 +388,7 @@ export function fromDatabaseFields(dbData: TestResultDatabaseFields): TestResult
     updatedAt: dbData.updated_at,
     deletedAt: dbData.deleted_at,
     metadata: dbData.metadata ? JSON.parse(dbData.metadata) : {}
-  };
+  }
 }
 
 /**
@@ -455,5 +423,4 @@ export function toDatabaseFields(testResult: TestResult): TestResultDatabaseFiel
     updated_at: testResult.updatedAt,
     deleted_at: testResult.deletedAt,
     metadata: JSON.stringify(testResult.metadata)
-  };
-}
+  }'}
