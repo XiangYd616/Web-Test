@@ -119,6 +119,7 @@ backend/runtime/backups/
 *.code-workspace
 .kiro
 .augment
+rules
 
 # macOS
 .AppleDouble
