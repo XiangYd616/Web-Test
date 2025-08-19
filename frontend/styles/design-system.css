@@ -3,6 +3,10 @@
  * 整合项目中重复的样式和组件样式
  */
 
+/* ===== 导入组件样式 ===== */
+@import './components.css';
+@import './pagination.css';
+
 /* ===== 设计令牌 (Design Tokens) ===== */
 
 :root {
@@ -501,6 +505,4 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* ===== 导入组件样式 ===== */
-@import './components.css';
-@import './pagination.css';
+

@@ -25,7 +25,7 @@ export default defineConfig({
         : '[name]__[local]__[hash:base64:5]'
     },
     // PostCSS配置 - 使用外部postcss.config.js
-    // postcss: './postcss.config.js',
+    postcss: './postcss.config.js',
     // CSS预处理器配置
     preprocessorOptions: {
       scss: {
