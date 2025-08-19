@@ -82,7 +82,7 @@
   max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
+  gap: 0.5rem;
 }
 
 /* URL输入框包装器 - 处理flex布局 */
@@ -105,11 +105,11 @@
   width: 100%;
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-3);
+  gap: 0.75rem;
 }
 
 /* 在较大屏幕上，URL输入框可以与按钮并排 */
-@media (min-width: 641px) and (max-width: 1024px) {
+@media (min-width: 768px) {
   .url-input-responsive.with-button {
     grid-template-columns: 1fr auto;
     align-items: start;
@@ -121,7 +121,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
+  gap: 0.5rem;
 }
 
 .url-input-form-group .url-input-field {
@@ -131,7 +131,7 @@
 /* URL输入框在卡片中的布局 */
 .url-input-card {
   width: 100%;
-  padding: var(--spacing-4);
+  padding: 1rem;
 }
 
 .url-input-card .url-input-field {
@@ -154,15 +154,15 @@
 /* 移动端优化 */
 @media (max-width: 640px) {
   .url-input-container {
-    gap: var(--spacing-3);
+    gap: 0.75rem;
   }
 
   .url-input-field {
-    font-size: var(--font-size-base); /* 防止iOS缩放 */
+    font-size: 16px; /* 防止iOS缩放 */
   }
 
   .url-input-responsive {
-    gap: var(--spacing-4);
+    gap: 1rem;
   }
 }
 
@@ -173,6 +173,6 @@
   }
 
   .url-input-card {
-    padding: var(--spacing-3);
+    padding: 0.75rem;
   }
 }

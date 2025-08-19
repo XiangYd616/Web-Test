@@ -1,22 +1,31 @@
-// 业务组件导出
-// 这些组件包含特定的业务逻辑和功能
+/**
+ * 业务组件统一导出
+ * 提供重构后的业务组件，支持多种测试类型的统一界面
+ */
 
-// 数据管理组件
-export { default as DataManagement } from './DataManagement';
-export { default as DataManager } from './DataManager';
+// 核心业务组件
+export { default as DataExporter } from './DataExporter';
+export { default as MonitorDashboard } from './MonitorDashboard';
+export { default as ResultViewer } from './ResultViewer';
+export { default as TestRunner } from './TestRunner';
 
-// 测试结果组件
-export { default as TestResults } from './TestResults';
-export { default as ResultCard } from './ResultCard';
-export { default as ResultList } from './ResultList';
-export { default as ResultsDisplay } from './ResultsDisplay';
+// 类型定义导出
+export type {
+    TestConfig,
+    TestResult,
+    TestRunnerProps, TestType
+} from './TestRunner';
 
-// 分析组件
-export { default as Analytics } from './Analytics';
+export type {
+    ResultDetails,
+    ResultViewerProps
+} from './ResultViewer';
 
-// 批处理组件
-export { default as BatchOperationPanel } from './BatchOperationPanel';
+export type {
+    Alert,
+    MonitorDashboardProps, MonitorStats, MonitorTarget
+} from './MonitorDashboard';
 
-// 安全测试组件
-export { default as SecurityTest } from './SecurityTest';
-export { default as UrlInput } from './UrlInput';
+export type {
+    DataExporterProps, ExportConfig, ExportDataType, ExportFormat, ExportTask
+} from './DataExporter';

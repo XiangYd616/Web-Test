@@ -1,5 +1,5 @@
-import { Activity, BarChart3, PieChart, TrendingUp } from 'lucide-react';
 import React from 'react';
+import { Activity, BarChart3, PieChart, TrendingUp } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface ChartContainerProps {
@@ -34,14 +34,6 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   children,
   height = 300
 }) => {
-  // 图表容器样式
-  const containerClasses = cn(
-    "bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4",
-    className
-  );
-
-  const chartHeight = typeof height === 'number' ? `${height}px` : height;
-
   // 图表类型图标
   const typeIcons = {
     line: TrendingUp,
@@ -51,6 +43,16 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   };
 
   const Icon = typeIcons[type];
+
+  // 容器样式
+  const containerClasses = cn(
+    'bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4',
+    className
+  );
+
+  // 图表高度样式
+  const chartHeight = typeof height === 'number' ? `${height}px` : height;
+
   return (
     <div className={containerClasses}>
       {/* 图表标题 */}
@@ -121,7 +123,7 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
     return (
       <div
         className={cn(
-          "flex items-center justify-center bg-gray-700/30 rounded border border-gray-600/50",
+          'flex items-center justify-center bg-gray-700/30 rounded border border-gray-600/50',
           className
         )}
         style={{ height: `${height}px` }}
@@ -134,9 +136,10 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
   // 简单的条形图实现
   if (type === 'bar') {
     const maxValue = Math.max(...data.map(d => d.value));
+
     return (
       <div
-        className={cn("p-4 bg-gray-700/30 rounded border border-gray-600/50", className)}
+        className={cn('p-4 bg-gray-700/30 rounded border border-gray-600/50', className)}
         style={{ height: `${height}px` }}
       >
         <div className="flex items-end justify-between h-full gap-2">
@@ -144,12 +147,12 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
             <div key={index} className="flex flex-col items-center flex-1">
               <div
                 className={cn(
-                  "w-full rounded-t transition-all duration-300",
-                  item.color || "bg-blue-500"
+                  'w-full rounded-t transition-all duration-300',
+                  item.color || 'bg-blue-500'
                 )}
                 style={{
                   height: `${(item.value / maxValue) * 80}%`,
-                  minHeight: "4px"
+                  minHeight: '4px'
                 }}
               />
               <span className="text-xs text-gray-400 mt-2 truncate">
@@ -169,7 +172,7 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-center bg-gray-700/30 rounded border border-gray-600/50",
+        'flex items-center justify-center bg-gray-700/30 rounded border border-gray-600/50',
         className
       )}
       style={{ height: `${height}px` }}
@@ -200,7 +203,7 @@ interface MetricChartProps {
 export const MetricChart: React.FC<MetricChartProps> = ({
   name,
   value,
-  unit = "",
+  unit = '',
   trend = [],
   showTrend = true,
   className
@@ -211,14 +214,17 @@ export const MetricChart: React.FC<MetricChartProps> = ({
         <span className="text-sm text-gray-400">{name}</span>
         <TrendingUp className="w-4 h-4 text-gray-400" />
       </div>
+
       <div className="text-2xl font-bold text-white mb-2">
         {value.toLocaleString()}{unit}
       </div>
+
       {showTrend && trend.length > 0 && (
         <div className="h-8 flex items-end gap-1">
           {trend.slice(-10).map((point, index) => {
             const maxTrend = Math.max(...trend);
             const height = maxTrend > 0 ? (point / maxTrend) * 100 : 0;
+
             return (
               <div
                 key={index}
@@ -232,4 +238,5 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     </div>
   );
 };
+
 export default ChartContainer;

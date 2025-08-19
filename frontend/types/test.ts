@@ -1,4 +1,6 @@
-export type TestType = "api" | "compatibility" | "infrastructure" | "security" | "seo" | "stress" | "ux" | "website";
+
+
+export type TestType = 'performance' | 'content' | 'security' | 'api' | 'stress' | 'compatibility';
 
 export interface TestConfig {
   url: string;
@@ -21,6 +23,7 @@ export interface PerformanceTestConfig extends TestConfig {
 
 export interface ContentTestConfig extends TestConfig {
   checkSEO: boolean;
+  // checkAccessibility: boolean; // Removed - functionality moved to compatibility test
   checkPerformance: boolean;
   checkLinks?: boolean;
   checkSecurity?: boolean;
@@ -31,156 +34,215 @@ export interface ContentTestConfig extends TestConfig {
 }
 
 export interface SecurityTestConfig extends TestConfig {
-  scanDepth?: "shallow" | "medium" | "deep";
-  includeSubdomains?: boolean;
-  authRequired?: boolean;
-  customPayloads?: string[];
+  checkSSL: boolean;
+  checkHeaders: boolean;
+  checkCSP: boolean;
+  checkXSS: boolean;
+  checkSQLInjection: boolean;
+  checkCSRF?: boolean;
+  checkCookies: boolean;
+  checkRedirects: boolean;
+  checkMixedContent: boolean;
 }
 
 export interface APITestConfig extends TestConfig {
-  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-  body?: string | Record<string, any>;
-  expectedStatus?: number[];
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  body?: string;
+  expectedStatus?: number;
+  expectedResponse?: string;
   authentication?: {
-    type: "bearer" | "basic" | "api-key";
-    credentials?: Record<string, string>;
+    type: 'bearer' | 'basic' | 'api-key';
+    token?: string;
+    username?: string;
+    password?: string;
+    apiKey?: string;
   };
+}
+
+export interface NetworkTestConfig extends TestConfig {
+  testLatency?: boolean;
+  testBandwidth?: boolean;
+  testConnectivity?: boolean;
+  testDNS?: boolean;
+  testRouting?: boolean;
+  testFirewall?: boolean;
+  packetCount?: number;
 }
 
 export interface TestResult {
   id: string;
-  testId: string;
-  type: TestType;
+  testType: TestType;
   url: string;
-  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   startTime: string;
   endTime?: string;
   duration?: number;
-  score: number;
-  grade: string;
-  passed: boolean;
-  summary: {
-    total: number;
-    passed: number;
-    failed: number;
-    warnings: number;
+  score?: number;
+  metrics?: Record<string, any>;
+  errors?: string[];
+  warnings?: string[];
+  recommendations?: string[];
+  screenshots?: string[];
+  reports?: {
+    html?: string;
+    json?: string;
+    pdf?: string;
   };
-  details: Record<string, any>;
-  recommendations: Array<{
-    priority: "high" | "medium" | "low";
-    title: string;
-    description: string;
-  }>;
-  error?: string;
 }
 
-export interface TestSession {
+export interface TestHistory {
   id: string;
-  name: string;
-  description?: string;
-  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  testName: string;
+  testType: TestType;
+  url: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  score: number;
+  grade?: string;
+  duration: number; // 秒
   startTime: string;
-  endTime?: string;
-  duration?: number;
-  tests: TestResult[];
-  summary: {
-    total: number;
-    completed: number;
-    failed: number;
-    cancelled: number;
-    averageScore: number;
+  endTime: string;
+  userId?: string;
+  totalIssues?: number;
+  criticalIssues?: number;
+  majorIssues?: number;
+  minorIssues?: number;
+  warnings?: number;
+  environment?: string;
+  tags?: string[];
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TestFilter {
+  testType?: TestType;
+  status?: string;
+  dateRange?: {
+    start: string;
+    end: string;
   };
+  userId?: string;
+  search?: string;
+  priority?: string;
 }
 
 export interface TestEngine {
-  id: string;
   name: string;
-  type: TestType;
   version: string;
-  status: "healthy" | "warning" | "error";
-  capabilities: string[];
-  config: Record<string, any>;
-  lastHealthCheck: string;
+  available: boolean;
+  status: 'healthy' | 'warning' | 'error';
+  capabilities?: string[];
+  lastCheck?: string;
+  error?: string;
 }
 
-export interface TestQueue {
+export interface TestProgress {
+  testId: string;
+  stage: string;
+  progress: number;
+  message: string;
+  timestamp: string;
+}
+
+export interface TestTemplate {
   id: string;
   name: string;
-  status: "active" | "paused" | "stopped";
-  tests: Array<{
-    id: string;
-    priority: number;
-    config: TestConfig;
-    status: "queued" | "running" | "completed" | "failed";
-  }>;
-  maxConcurrency: number;
-  currentRunning: number;
+  description: string;
+  testType: TestType;
+  config: TestConfig;
+  isDefault: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TestSchedule {
   id: string;
   name: string;
-  description?: string;
-  testConfigs: TestConfig[];
+  testType: TestType;
+  config: TestConfig;
   schedule: {
-    type: "once" | "daily" | "weekly" | "monthly";
-    startTime: string;
-    interval?: number;
-    endTime?: string;
+    type: 'once' | 'daily' | 'weekly' | 'monthly';
+    time: string;
+    timezone: string;
+    daysOfWeek?: number[];
+    dayOfMonth?: number;
   };
-  status: "active" | "paused" | "completed";
+  enabled: boolean;
   lastRun?: string;
-  nextRun?: string;
+  nextRun: string;
+  createdBy: string;
+  createdAt: string;
 }
 
 export interface TestReport {
   id: string;
-  name: string;
-  type: "single" | "comparison" | "trend";
-  testIds: string[];
-  format: "html" | "pdf" | "json";
-  status: "generating" | "ready" | "failed";
-  url?: string;
-  createdAt: string;
-  expiresAt?: string;
+  testId: string;
+  testType: TestType;
+  url: string;
+  generatedAt: string;
+  format: 'html' | 'pdf' | 'json';
+  filePath: string;
+  fileSize: number;
+  summary: {
+    score: number;
+    status: string;
+    duration: number;
+    issues: number;
+    recommendations: number;
+  };
 }
 
-export interface TestMetrics {
-  totalTests: number;
-  completedTests: number;
-  failedTests: number;
-  averageScore: number;
-  averageDuration: number;
-  successRate: number;
-  testsToday: number;
-  testsThisWeek: number;
-  testsThisMonth: number;
+// 简化的测试配置接口（兼容性）
+export interface SimpleStressTestConfig {
+  url: string;
+  users: number;
+  duration: number;
+  rampUpTime?: number;
 }
 
+export interface SimpleContentTestConfig {
+  url: string;
+  checkSEO: boolean;
+  checkAccessibility: boolean;
+  checkPerformance: boolean;
+  keywords?: string[];
+}
+
+export interface SimpleSecurityTestConfig {
+  url: string;
+  checkSSL: boolean;
+  checkHeaders: boolean;
+  checkXSS: boolean;
+  checkSQLInjection: boolean;
+}
+
+export interface TestEngineStatus {
+  k6: TestEngine;
+  lighthouse: TestEngine;
+  playwright: TestEngine;
+  zap: TestEngine;
+  nuclei: TestEngine;
+}
+
+// 批量测试
 export interface BatchTestConfig {
   name: string;
-  description?: string;
-  tests: Array<{
-    type: TestType;
-    config: TestConfig;
-  }>;
+  urls: string[];
+  testType: TestType;
+  config: TestConfig;
+  parallel: boolean;
   maxConcurrency?: number;
 }
 
 export interface BatchTestResult {
   id: string;
-  batchId: string;
-  status: "pending" | "running" | "completed" | "failed";
+  name: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  totalTests: number;
+  completedTests: number;
+  failedTests: number;
   startTime: string;
   endTime?: string;
-  duration?: number;
   results: TestResult[];
-  summary: {
-    total: number;
-    completed: number;
-    failed: number;
-    averageScore: number;
-  };
 }
-
-// ���Ͳ���ҪĬ�ϵ���
