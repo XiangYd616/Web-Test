@@ -11,7 +11,7 @@
 import { Layout, theme } from 'antd';
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import ModernSidebar from '../components/layout/ModernSidebar';
+import EnhancedModernSidebar from '../components/layout/EnhancedModernSidebar';
 import TopNavbar from '../components/layout/TopNavbar';
 
 const { Header, Sider, Content } = Layout;
@@ -25,7 +25,7 @@ const AppLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* 侧边栏 */}
-      <ModernSidebar collapsed={collapsed} />
+      <EnhancedModernSidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
 
       {/* 主内容区域 */}
       <div className={`transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-72'}`}>

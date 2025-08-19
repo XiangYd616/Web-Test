@@ -1,154 +1,198 @@
 import {
   Activity,
   BarChart3,
-  Bug,
   ChevronDown,
   ChevronRight,
+  Code,
   Database,
-  Download,
+  GitBranch,
   Globe,
-  HelpCircle,
   Home,
+  Key,
+  Link2,
   Monitor,
+  Package,
   Search,
   Settings,
   Shield,
-  Users,
+  TestTube,
   Zap
 } from 'lucide-react';
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   collapsed: boolean;
+  onToggle?: () => void;
 }
 
 interface MenuItem {
-  key: string;
-  icon: React.ReactNode;
-  label: string;
-  path?: string;
-  category?: string;
-  children?: MenuItem[];
-  isNew?: boolean;
+  id: string;
+  name: string;
+  icon: React.ComponentType<any>;
+  href: string;
   badge?: string;
+  children?: MenuItem[];
 }
 
-const ModernSidebar: React.FC<SidebarProps> = ({ collapsed }) => {
-  const navigate = useNavigate();
+const ModernSidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   const location = useLocation();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [expandedItems, setExpandedItems] = useState<string[]>(['testing-tools']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['testing']);
+  const [hoverPosition, setHoverPosition] = useState<{ top: number; left: number } | null>(null);
+  const [clickedItem, setClickedItem] = useState<string | null>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const menuItems: MenuItem[] = [
     {
-      key: 'dashboard',
-      icon: <Home size={20} />,
-      label: '仪表板',
-      path: '/dashboard',
-      category: '概览'
+      id: 'dashboard',
+      name: '仪表板',
+      icon: Home,
+      href: '/dashboard'
     },
     {
-      key: 'testing-tools',
-      icon: <Bug size={20} />,
-      label: '测试工具',
-      category: '测试工具',
+      id: 'testing',
+      name: '测试工具',
+      icon: TestTube,
+      href: '#',
       children: [
         {
-          key: 'testing',
-          icon: <Globe size={16} />,
-          label: '网站测试',
-          path: '/testing'
+          id: 'website-test',
+          name: '网站测试',
+          icon: Globe,
+          href: '/testing'
         },
         {
-          key: 'stress-test',
-          icon: <Zap size={16} />,
-          label: '压力测试',
-          path: '/stress-test'
+          id: 'stress-test',
+          name: '压力测试',
+          icon: Zap,
+          href: '/stress-test'
         },
         {
-          key: 'seo-test',
-          icon: <Search size={16} />,
-          label: 'SEO测试',
-          path: '/seo-test'
+          id: 'seo-test',
+          name: 'SEO测试',
+          icon: Search,
+          href: '/seo-test'
         },
         {
-          key: 'security-test',
-          icon: <Shield size={16} />,
-          label: '安全测试',
-          path: '/security-test',
-          isNew: true
+          id: 'security-test',
+          name: '安全测试',
+          icon: Shield,
+          href: '/security-test',
+          badge: 'NEW'
         },
         {
-          key: 'performance-test',
-          icon: <Activity size={16} />,
-          label: '性能测试',
-          path: '/performance-test',
-          isNew: true
+          id: 'performance-test',
+          name: '性能测试',
+          icon: Activity,
+          href: '/performance-test',
+          badge: 'NEW'
         },
         {
-          key: 'api-test',
-          icon: <Monitor size={16} />,
-          label: 'API测试',
-          path: '/api-test'
+          id: 'compatibility-test',
+          name: '兼容性测试',
+          icon: Monitor,
+          href: '/compatibility-test'
+        },
+        {
+          id: 'api-test',
+          name: 'API测试',
+          icon: Code,
+          href: '/api-test'
         }
       ]
     },
     {
-      key: 'data-center',
-      icon: <Database size={20} />,
-      label: '数据中心',
-      path: '/data-center',
-      category: '数据管理'
+      id: 'data',
+      name: '数据管理',
+      icon: Database,
+      href: '#',
+      children: [
+        {
+          id: 'test-history',
+          name: '测试历史',
+          icon: TestTube,
+          href: '/test-history',
+          badge: 'v2.0'
+        },
+        {
+          id: 'statistics',
+          name: '统计分析',
+          icon: BarChart3,
+          href: '/statistics'
+        },
+        {
+          id: 'data-center',
+          name: '数据中心',
+          icon: Database,
+          href: '/data-center'
+        }
+      ]
     },
     {
-      key: 'reports',
-      icon: <BarChart3 size={20} />,
-      label: '测试报告',
-      path: '/reports',
-      category: '数据管理'
+      id: 'integration',
+      name: '集成配置',
+      icon: Package,
+      href: '#',
+      children: [
+        {
+          id: 'cicd',
+          name: 'CI/CD集成',
+          icon: GitBranch,
+          href: '/cicd'
+        },
+        {
+          id: 'api-keys',
+          name: 'API密钥',
+          icon: Key,
+          href: '/api-keys'
+        },
+        {
+          id: 'webhooks',
+          name: 'Webhooks',
+          icon: Link2,
+          href: '/webhooks'
+        },
+        {
+          id: 'integrations',
+          name: '第三方集成',
+          icon: Package,
+          href: '/integrations'
+        }
+      ]
     },
     {
-      key: 'import-export',
-      icon: <Download size={20} />,
-      label: '导入/导出',
-      path: '/import-export',
-      category: '数据管理'
-    },
-    {
-      key: 'team',
-      icon: <Users size={20} />,
-      label: '团队管理',
-      path: '/team',
-      category: '系统管理'
-    },
-    {
-      key: 'settings',
-      icon: <Settings size={20} />,
-      label: '设置',
-      path: '/settings',
-      category: '系统管理'
-    },
-    {
-      key: 'help',
-      icon: <HelpCircle size={20} />,
-      label: '帮助',
-      path: '/help',
-      category: '系统管理'
+      id: 'settings',
+      name: '系统设置',
+      icon: Settings,
+      href: '/settings'
     }
   ];
 
-  const handleItemClick = (path?: string) => {
-    if (path) {
-      navigate(path);
+  // 处理按钮点击效果
+  const handleButtonClick = (itemId: string) => {
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
     }
+    setClickedItem(itemId);
+    clickTimeoutRef.current = setTimeout(() => {
+      setClickedItem(null);
+    }, 300);
   };
 
-  const toggleExpanded = (key: string) => {
+  const toggleExpanded = (groupId: string) => {
+    if (collapsed) {
+      onToggle?.();
+      setExpandedItems(prev =>
+        prev.includes(groupId) ? prev : [...prev, groupId]
+      );
+      return;
+    }
     setExpandedItems(prev =>
-      prev.includes(key)
-        ? prev.filter(item => item !== key)
-        : [...prev, key]
+      prev.includes(groupId)
+        ? prev.filter(id => id !== groupId)
+        : [...prev, groupId]
     );
   };
 

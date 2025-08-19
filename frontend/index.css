@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 增强主题系统 */
+@import './styles/enhanced-theme.css';
+
 /* 全局样式重置 */
 * {
   margin: 0;
