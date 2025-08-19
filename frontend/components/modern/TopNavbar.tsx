@@ -231,44 +231,47 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
       globalSearchService.recordSearch(query);
       setSearchHistory(globalSearchService.getSearchHistory());
       setShowSearchDropdown(false);
-      // 如果没有精确匹配的结果，导航到帮助页面进行搜�?      if (searchResults.length === 0) {
-      window.location.href = `/help?search=${encodeURIComponent(query)}`;
-    } else {
-      // 导航到第一个结�?        handleSearchResultClick(searchResults[0]);
+      // 如果没有精确匹配的结果，导航到帮助页面进行搜索
+      if (searchResults.length === 0) {
+        window.location.href = `/help?search=${encodeURIComponent(query)}`;
+      } else {
+        // 导航到第一个结果
+        handleSearchResultClick(searchResults[0]);
+      }
     }
-  }
-};
-
-const clearSearchHistory = () => {
-  globalSearchService.clearSearchHistory();
-  setSearchHistory([]);
-};
-
-// 渲染搜索图标
-const renderSearchIcon = (iconName: string) => {
-  const iconMap: Record<string, React.ComponentType<any>> = {
-    Home, Globe, Zap, Shield, Search, BarChart3, Settings, HelpCircle,
-    Code, Monitor, Activity, Upload, Download, User, Bell, Key, Play,
-    Book, Lock, TestTube, Clock
   };
-  const IconComponent = iconMap[iconName];
-  return IconComponent ? <IconComponent className="w-3 h-3" /> : <Search className="w-3 h-3" />;
-};
 
-// 高亮搜索结果
-const highlightSearchText = (text: string, searchQuery: string) => {
-  if (!searchQuery.trim()) return text;
+  const clearSearchHistory = () => {
+    globalSearchService.clearSearchHistory();
+    setSearchHistory([]);
+  };
 
-  const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  const parts = text.split(regex);
+  // 渲染搜索图标
+  const renderSearchIcon = (iconName: string) => {
+    const iconMap: Record<string, React.ComponentType<any>> = {
+      Home, Globe, Zap, Shield, Search, BarChart3, Settings, HelpCircle,
+      Code, Monitor, Activity, Upload, Download, User, Bell, Key, Play,
+      Book, Lock, TestTube, Clock
+    };
+    const IconComponent = iconMap[iconName];
+    return IconComponent ? <IconComponent className="w-3 h-3" /> : <Search className="w-3 h-3" />;
+  };
 
-  return parts.map((part, index) =>
-    regex.test(part) ? (
-      <span key={index} className="bg-blue-500/30 text-blue-300 font-medium">
-        {part}
-      </span>
-    ) : part
-  );
+  // 高亮搜索结果
+  const highlightSearchText = (text: string, searchQuery: string) => {
+    if (!searchQuery.trim()) return text;
+
+    const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+
+    return parts.map((part, index) =>
+      regex.test(part) ? (
+        <span key={index} className="bg-blue-500/30 text-blue-300 font-medium">
+          {part}
+        </span>
+      ) : part
+    );
+  };
 
   return (
     <header className={`px-6 py-4 relative z-[1000] transition-all duration-300 ${actualTheme === 'light'

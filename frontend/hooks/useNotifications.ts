@@ -151,10 +151,32 @@ export const useNotifications = () => {
   useEffect(() => {
     const loadNotifications = async () => {
       try {
-        // 首先尝试从后端API获取通知
+        // 检查是否在开发环境且没有后端服务器
+        const isDevelopment = process.env.NODE_ENV === 'development';
+
+        if (isDevelopment) {
+          // 在开发环境下，先检查后端是否可用
+          try {
+            const healthCheck = await fetch('/api/health', {
+              method: 'GET',
+              timeout: 2000 // 2秒超时
+            });
+            if (!healthCheck.ok) {
+              throw new Error('Backend not available');
+            }
+          } catch (healthError) {
+            console.info('Backend server not running, using local storage for notifications');
+            loadNotificationsFromStorage();
+            setLoading(false);
+            return;
+          }
+        }
+
+        // 尝试从后端API获取通知
         await fetchNotificationsFromAPI();
       } catch (error) {
-        console.warn('Failed to fetch notifications from API, using local storage:', error);
+        // 静默处理错误，避免控制台污染
+        console.info('Using local storage for notifications');
         // 如果API失败，从本地存储加载
         loadNotificationsFromStorage();
       } finally {
@@ -172,28 +194,43 @@ export const useNotifications = () => {
       throw new Error('No auth token available');
     }
 
-    const response = await fetch('/api/user/notifications', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+    // 创建带超时的fetch请求
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+
+    try {
+      const response = await fetch('/api/user/notifications', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    if (result.success && result.data) {
-      const apiNotifications = result.data.map((n: any) => ({
-        ...n,
-        createdAt: new Date(n.createdAt || n.created_at)
-      }));
-      setNotifications(apiNotifications);
-      // 同步到本地存储
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(apiNotifications));
-    } else {
-      throw new Error('Invalid API response');
+      const result = await response.json();
+      if (result.success && result.data) {
+        const apiNotifications = result.data.map((n: any) => ({
+          ...n,
+          createdAt: new Date(n.createdAt || n.created_at)
+        }));
+        setNotifications(apiNotifications);
+        // 同步到本地存储
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(apiNotifications));
+      } else {
+        throw new Error('Invalid API response');
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout');
+      }
+      throw error;
     }
   };
 

@@ -65,7 +65,7 @@ class RealTimeMonitoringService {
    */
   private initializeSocket() {
     const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-    
+
     this.socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       timeout: 10000,
@@ -100,11 +100,11 @@ class RealTimeMonitoringService {
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('Socket连接错误:', error);
+      // 静默处理连接错误，避免控制台污染
       this.reconnectAttempts++;
-      
+
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.warn('达到最大重连次数，切换到轮询模式');
+        console.info('WebSocket连接失败，使用本地数据模式');
         this.startPollingMode();
       }
     });
@@ -153,7 +153,7 @@ class RealTimeMonitoringService {
       site.status = data.status;
       site.responseTime = data.responseTime;
       site.lastCheck = data.timestamp;
-      
+
       if (data.metrics) {
         site.metrics = { ...site.metrics, ...data.metrics };
       }
@@ -169,7 +169,7 @@ class RealTimeMonitoringService {
    */
   private handleNewAlert(alert: Alert) {
     this.alerts.unshift(alert);
-    
+
     // 只保留最近100条告警
     if (this.alerts.length > 100) {
       this.alerts = this.alerts.slice(0, 100);
@@ -196,8 +196,16 @@ class RealTimeMonitoringService {
    * 启动轮询模式（当WebSocket不可用时）
    */
   private startPollingMode() {
+    // 在开发环境下检查后端是否可用
+    const isDevelopment = process.env.NODE_ENV === 'development';
+
+    if (isDevelopment) {
+      console.info('🔄 开发环境：跳过轮询模式，使用本地数据');
+      return;
+    }
+
     console.log('🔄 启动轮询模式');
-    
+
     const pollInterval = setInterval(async () => {
       if (this.isConnected) {
         clearInterval(pollInterval);
@@ -207,7 +215,8 @@ class RealTimeMonitoringService {
       try {
         await this.fetchMonitoringData();
       } catch (error) {
-        console.error('轮询获取监控数据失败:', error);
+        // 静默处理错误，避免控制台污染
+        console.info('轮询模式：使用本地数据');
       }
     }, 30000); // 30秒轮询一次
   }
@@ -218,12 +227,20 @@ class RealTimeMonitoringService {
   private async fetchMonitoringData() {
     try {
       const token = localStorage.getItem('auth_token');
+
+      // 创建带超时的fetch请求
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+
       const response = await fetch('/api/monitoring/status', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -232,7 +249,10 @@ class RealTimeMonitoringService {
         }
       }
     } catch (error) {
-      console.error('获取监控数据失败:', error);
+      // 静默处理错误，避免控制台污染
+      if (error.name !== 'AbortError') {
+        console.info('监控数据获取失败，使用本地数据');
+      }
     }
   }
 
