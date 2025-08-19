@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface UXProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const UX: React.FC<UXProps> = (props) => {
+
+const UX: React.FC<UXProps> = ({ className, children, ...props }) => {
   return (
-    <div className="ux">
-      <h1>UX</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`ux ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">UX</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default UX;

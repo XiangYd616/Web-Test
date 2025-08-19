@@ -1,17 +1,17 @@
-import React from 'react;';
+import React from "react";
 
 interface TestPageHistoryProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
 
-const TestPageHistory: React.FC<TestPageHistoryProps> = (props) => {
+const TestPageHistory: React.FC<TestPageHistoryProps> = ({ className, children, ...props }) => {
   return (
-    <div className="testpagehistory">
-      <h1>TestPageHistory</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`test-page-history ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">TestPageHistory</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
 
 export default TestPageHistory;
-;

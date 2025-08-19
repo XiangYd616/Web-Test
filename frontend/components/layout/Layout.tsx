@@ -5,7 +5,7 @@ import '../../styles/layout.css';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
 
-const { Header, Sider, Content } = AntLayout;
+const { Content } = AntLayout;
 
 export interface LayoutProps {
   children?: React.ReactNode

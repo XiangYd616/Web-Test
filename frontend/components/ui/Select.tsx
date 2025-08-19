@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface SelectProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const Select: React.FC<SelectProps> = (props) => {
+
+const Select: React.FC<SelectProps> = ({ className, children, ...props }) => {
   return (
-    <div className="select">
-      <h1>Select</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`select ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">Select</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default Select;

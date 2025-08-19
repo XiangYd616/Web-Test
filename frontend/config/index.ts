@@ -1,94 +1,29 @@
-/**
- * 应用配置管理
- */
+// 统一配置导出
+// 提供项目所有配置的统一入口
 
-export interface AppConfig     {
-  api: {
-    baseUrl: string;
-    timeout: number
-}
-  features: {
-    realTimeUpdates: boolean;
-    advancedAnalytics: boolean;
-    batchOperations: boolean
-}
-  ui: {
-    theme: 'dark' | 'light
-    language: string;
-    pageSize: number
-}'}
-// 默认配置;
-const defaultConfig: AppConfig  = {;
-  api: {;
-    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3001',
-    timeout: 30000
-  },
-  features: {
-    realTimeUpdates: true,
-    advancedAnalytics: true,
-    batchOperations: true
-  },
-  ui: {;
-    theme: 'dark',
-    language: 'zh-CN',
-    pageSize: 20
-  }
-} // 配置管理器
-class ConfigManager {
-  private config: AppConfig;
+// 应用配置
+export { default as apiConfig } from './app/api';
+export { default as ConfigManager } from './app/ConfigManager';
+export { default as browserCacheConfig } from './app/browserCacheConfig';
 
-  constructor() {
-    this.config = this.loadConfig()
-}
+// 主题配置
+export { default as theme } from './theme/theme';
+export { default as tokens } from './theme/tokens';
 
-  /**
-   * 加载配置
-   */
-  private loadConfig(): AppConfig {
-    try {;
-      const saved = localStorage.getItem('app-config");
-      if (saved) {
-        
-        return { ...defaultConfig, ...JSON.parse(saved)
-      }
-}
-    } catch (error) {;
-      console.warn('加载配置失败，使用默认配置: ', error);'}
-    return defaultConfig
-}
+// 环境配置
+export const isDevelopment = import.meta.env.DEV;
+export const isProduction = import.meta.env.PROD;
+export const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-  /**
-   * 保存配置
-   */;
-  private saveConfig() {;
-    try {;
-      localStorage.setItem('app-config', JSON.stringify(this.config))
-} catch (error) {;
-      console.error('保存配置失败: ', error);'}
-  }
+// 应用常量
+export const APP_NAME = 'Test-Web';
+export const APP_VERSION = '1.0.0';
+export const APP_DESCRIPTION = '现代化Web测试平台';
 
-  /**
-   * 获取配置
-   */
-  get(): AppConfig {
-    return this.config
-}
-
-  /**
-   * 更新配置
-   */
-  update(updates: Partial<AppConfig>) {
-    this.config = { ...this.config, ...updates }
-    this.saveConfig()
-}
-
-  /**
-   * 重置配置
-   */
-  reset() {
-    this.config = defaultConfig;
-    this.saveConfig()
-}
-}
-export const configManager = new ConfigManager();
-export default configManager;
+// 默认配置
+export const defaultConfig = {
+  theme: 'dark',
+  language: 'zh-CN',
+  autoSave: true,
+  notifications: true,
+} as const;

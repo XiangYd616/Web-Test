@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface CardProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const Card: React.FC<CardProps> = (props) => {
+
+const Card: React.FC<CardProps> = ({ className, children, ...props }) => {
   return (
-    <div className="card">
-      <h1>Card</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`card ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">Card</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default Card;

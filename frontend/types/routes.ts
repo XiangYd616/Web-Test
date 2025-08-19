@@ -1,78 +1,90 @@
-/**
- * è·¯ç”±ç›¸å…³çš„ç±»åž‹å®šä¹‰
- */
-
-export interface RouteConfig        {
+export interface RouteConfig {
   path: string;
-  component: string;
-  exact?: boolean;
-  roles?: string[]
-  public?: boolean;
-  children?: RouteConfig[]
-  meta?: RouteMeta
+  component?: React.ComponentType<any>;
+  element?: React.ReactElement;
+  children?: RouteConfig[];
+  meta?: RouteMeta;
+  guards?: RouteGuard[];
 }
 
-export interface RouteMeta        {
+export interface RouteMeta {
   title?: string;
   description?: string;
-  keywords?: string[]
+  keywords?: string[];
   requiresAuth?: boolean;
-  requiredRoles?: string[]
-  breadcrumb?: BreadcrumbItem[]
+  roles?: string[];
+  permissions?: string[];
   layout?: string;
-  cache?: boolean;
-  preload?: boolean
+  icon?: string;
+  hidden?: boolean;
+  disabled?: boolean;
+  order?: number;
 }
 
-export interface BreadcrumbItem        {
+export interface RouteGuard {
+  name: string;
+  handler: (context: RouteGuardContext) => RouteGuardResult | Promise<RouteGuardResult>;
+}
+
+export interface NavigationItem {
+  id: string;
   label: string;
   path?: string;
   icon?: string;
-  active?: boolean
-}
-
-export interface NavigationItem        {
-  label: string;
-  path?: string;
-  icon?: string;
-  action?: string;
-  roles?: string[]
+  roles?: string[];
+  permissions?: string[];
   public?: boolean;
-  children?: NavigationItem[]
+  children?: NavigationItem[];
   badge?: {
     text: string;
-    variant: 'primary' | 'secondary' | 'success' | 'warning' | 'error'
-}
+    variant: "primary" | "secondary" | "success" | "warning" | "error";
+  };
   external?: boolean;
-  target?: '_blank' | '_self
+  target?: "_blank" | "_self";
 }
 
-export interface RouteGuardContext        {
+export interface RouteGuardContext {
   user: any;
   isAuthenticated: boolean;
-  userRoles: string[]
-  permissions: string[]
+  userRoles: string[];
+  permissions: string[];
 }
 
-export interface RouteTransition        {
+export interface RouteTransition {
   enter: string;
   exit: string;
-  duration: number
+  duration: number;
 }
 
-export type RouteChangeHandler    = (to: string, from: string) => void | Promise<void>
-export interface RouterState        {
+export type RouteChangeHandler = (to: string, from: string) => void | Promise<void>;
+
+export interface RouterState {
   currentPath: string;
   previousPath: string;
-  params: Record<string, string>
-  query: Record<string, string>
+  params: Record<string, string>;
+  query: Record<string, string>;
   meta: RouteMeta;
   isLoading: boolean;
-  error: string | null
+  error: string | null;
 }
 
-export interface RouteGuardResult        {
+export interface RouteGuardResult {
   allowed: boolean;
   redirectTo?: string;
-  reason?: string'}
-export default RouteConfig;
+  reason?: string;
+}
+
+export interface BreadcrumbItem {
+  label: string;
+  path?: string;
+  active?: boolean;
+}
+
+export interface RouteError {
+  code: number;
+  message: string;
+  path: string;
+  timestamp: string;
+}
+
+// ÀàÐÍ²»ÐèÒªÄ¬ÈÏµ¼³ö

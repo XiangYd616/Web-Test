@@ -1,108 +1,181 @@
-/**
- * 统一的测试配置类型定义
- * 与后端测试引擎接口完全匹配
- */
-
-// 基础配置接口
-export interface BaseTestConfig     {
+export interface BaseTestConfig {
   url: string;
-  timeout?: number
+  timeout?: number;
+  retries?: number;
+  name?: string;
+  description?: string;
+  tags?: string[];
+  environment?: "development" | "staging" | "production";
 }
 
-// API测试配置
-export interface APITestConfig extends BaseTestConfig     {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE;
-  headers?: Record<string, string>
-  body?: string;
-  auth?: {;
-    type: 'bearer' | 'basic' | 'apikey
+export interface APITestConfig extends BaseTestConfig {
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+  headers?: Record<string, string>;
+  body?: string | Record<string, any>;
+  auth?: {
+    type: "bearer" | "basic" | "apikey" | "oauth";
     token?: string;
     username?: string;
     password?: string;
     apiKey?: string;
-    apiKeyHeader?: string
-}
+    apiKeyHeader?: string;
+  };
   validation?: {
     statusCode?: number;
     responseTime?: number;
     contentType?: string;
-    schema?: any
-}'}
-// 性能测试配置;
-export interface PerformanceTestConfig extends BaseTestConfig     {;
-  categories?: ('performance' | 'accessibility' | 'best-practices' | 'seo')[]
-  device?: 'desktop' | 'mobile
+    schema?: any;
+  };
+}
+
+export interface PerformanceTestConfig extends BaseTestConfig {
+  device?: "desktop" | "mobile" | "tablet";
   throttling?: {
-    rttMs?: number;
-    throughputKbps?: number;
-    cpuSlowdownMultiplier?: number'}
-  locale?: string;
-  emulatedFormFactor?: 'desktop' | 'mobile'}
-// 安全测试配置;
-export interface SecurityTestConfig extends BaseTestConfig     {;
-  checks?: ('ssl' | 'headers' | 'vulnerabilities' | 'cookies' | 'redirects')[]
-  maxRedirects?: number;
-  userAgent?: string
+    downloadThroughput?: number;
+    uploadThroughput?: number;
+    latency?: number;
+    cpuSlowdownMultiplier?: number;
+  };
+  metrics?: string[];
+  lighthouse?: boolean;
 }
 
-// SEO测试配置
-export interface SEOTestConfig extends BaseTestConfig     {;
-  checks?: ('meta' | 'headings' | 'images' | 'links' | 'structured-data' | 'robots' | 'sitemap')[]
-  userAgent?: string
+export interface SecurityTestConfig extends BaseTestConfig {
+  scanDepth?: "shallow" | "medium" | "deep";
+  includeSubdomains?: boolean;
+  authRequired?: boolean;
+  customPayloads?: string[];
 }
 
-// 压力测试配置
-export interface StressTestConfig extends BaseTestConfig     {
-  concurrency?: number;
-  requests?: number;
-  duration?: number;
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE
-  headers?: Record<string, string>
-  body?: string;
+export interface SEOTestConfig extends BaseTestConfig {
+  checkMeta?: boolean;
+  checkImages?: boolean;
+  checkLinks?: boolean;
+  checkStructuredData?: boolean;
+  checkPerformance?: boolean;
+}
+
+export interface StressTestConfig extends BaseTestConfig {
+  users: number;
+  duration: number;
   rampUp?: number;
-  keepAlive?: boolean'}
-// 基础设施测试配置;
-export interface InfrastructureTestConfig extends BaseTestConfig     {;
-  checks?: ('connectivity' | 'dns' | 'ssl' | 'ports' | 'headers' | 'redirects')[]
-  ports?: number[]
-  dnsServers?: string[]
-  maxRedirects?: number
+  method?: "GET" | "POST" | "PUT" | "DELETE";
+  headers?: Record<string, string>;
+  body?: string;
+  keepAlive?: boolean;
 }
 
-// UX测试配置
-export interface UXTestConfig extends BaseTestConfig     {;
-  checks?: ('accessibility' | 'usability' | 'interactions' | 'mobile' | 'forms')[]
-  device?: 'desktop' | 'mobile' | 'tablet
+export interface InfrastructureTestConfig extends BaseTestConfig {
+  checkDNS?: boolean;
+  checkSSL?: boolean;
+  checkPorts?: number[];
+  checkServices?: string[];
+  checkDatabase?: boolean;
+  checkCache?: boolean;
+}
+
+export interface UXTestConfig extends BaseTestConfig {
+  device?: "desktop" | "mobile" | "tablet";
   viewport?: {
     width: number;
-    height: number'
-}
-  waitForSelector?: string;
-  interactions?: Array<{;
-    type: 'click' | 'type' | 'scroll' | 'hover
+    height: number;
+  };
+  interactions?: Array<{
+    type: "click" | "type" | "scroll" | "hover";
     selector: string;
-    value?: string
-}>'}
-// 兼容性测试配置;
-export interface CompatibilityTestConfig extends BaseTestConfig     {;
-  browsers?: ('chromium' | 'firefox' | 'webkit')[]
-  devices?: ('desktop' | 'mobile' | 'tablet')[]
-  checks?: ('rendering' | 'javascript' | 'css' | 'responsive' | 'features')[]
-  screenshots?: boolean;
-  waitForSelector?: string
+    value?: string;
+  }>;
 }
 
-// 网站综合测试配置
-export interface WebsiteTestConfig extends BaseTestConfig     {;
-  checks?: ('health' | 'seo' | 'performance' | 'security' | 'accessibility' | 'best-practices')[]
+export interface CompatibilityTestConfig extends BaseTestConfig {
+  browsers?: string[];
+  devices?: string[];
+  resolutions?: Array<{ width: number; height: number }>;
+  checkCSS?: boolean;
+  checkJS?: boolean;
+}
+
+export interface WebsiteTestConfig extends BaseTestConfig {
+  checkAccessibility?: boolean;
+  checkSEO?: boolean;
+  checkPerformance?: boolean;
+  checkSecurity?: boolean;
+  checkMobile?: boolean;
   depth?: number;
   maxPages?: number;
-  followExternalLinks?: boolean;
-  userAgent?: string
 }
 
-// 联合类型
-export type TestConfig   = | APITestConfig
+export enum TestType {
+  API = "api",
+  PERFORMANCE = "performance",
+  SECURITY = "security",
+  SEO = "seo",
+  STRESS = "stress",
+  INFRASTRUCTURE = "infrastructure",
+  UX = "ux",
+  COMPATIBILITY = "compatibility",
+  WEBSITE = "website"
+}
+
+export enum TestStatus {
+  PENDING = "pending",
+  RUNNING = "running",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled"
+}
+
+export interface TestResult {
+  id: string;
+  testId: string;
+  type: TestType;
+  status: TestStatus;
+  startTime: string;
+  endTime?: string;
+  duration?: number;
+  
+  summary: {
+    passed?: number;
+    failed?: number;
+    warnings?: number;
+    score: number;
+  };
+  
+  totalTime?: number;
+  recommendations?: Array<{
+    priority: "high" | "medium" | "low";
+    title: string;
+    description: string;
+  }>;
+  
+  details?: Record<string, any>;
+  error?: string;
+}
+
+export class TestConfigValidator {
+  constructor(
+    private config: BaseTestConfig,
+    private type: TestType,
+    public retryable: boolean = false
+  ) {}
+
+  validate(): string[] {
+    const errors: string[] = [];
+    
+    if (!this.config.url) {
+      errors.push("URL is required");
+    }
+    
+    if (this.config.timeout && this.config.timeout < 0) {
+      errors.push("Timeout must be positive");
+    }
+    
+    return errors;
+  }
+}
+
+export type TestConfig = 
+  | APITestConfig
   | PerformanceTestConfig
   | SecurityTestConfig
   | SEOTestConfig
@@ -110,65 +183,36 @@ export type TestConfig   = | APITestConfig
   | InfrastructureTestConfig
   | UXTestConfig
   | CompatibilityTestConfig
-  | WebsiteTestConfig; // 测试类型枚举
-export enum TestType {;
-  API = 'api',
-  PERFORMANCE = 'performance',
-  SECURITY = 'security',
-  SEO = 'seo',
-  STRESS = 'stress',
-  INFRASTRUCTURE = 'infrastructure',
-  UX = 'ux',
-  COMPATIBILITY = 'compatibility',
-  WEBSITE = 'website',
-} // 测试状态;',
-export enum TestStatus {;
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled;',
+  | WebsiteTestConfig;
+
+export function createTestConfig(type: TestType, baseConfig: BaseTestConfig): TestConfig {
+  switch (type) {
+    case TestType.API:
+      return { ...baseConfig, method: "GET" } as APITestConfig;
+    case TestType.PERFORMANCE:
+      return { ...baseConfig, device: "desktop" } as PerformanceTestConfig;
+    case TestType.SECURITY:
+      return { ...baseConfig, scanDepth: "medium" } as SecurityTestConfig;
+    case TestType.SEO:
+      return { ...baseConfig, checkMeta: true } as SEOTestConfig;
+    case TestType.STRESS:
+      return { ...baseConfig, users: 10, duration: 60 } as StressTestConfig;
+    case TestType.INFRASTRUCTURE:
+      return { ...baseConfig, checkDNS: true } as InfrastructureTestConfig;
+    case TestType.UX:
+      return { ...baseConfig, device: "desktop" } as UXTestConfig;
+    case TestType.COMPATIBILITY:
+      return { ...baseConfig, browsers: ["chrome", "firefox"] } as CompatibilityTestConfig;
+    case TestType.WEBSITE:
+      return { ...baseConfig, checkAccessibility: true } as WebsiteTestConfig;
+    default:
+      return baseConfig as TestConfig;
+  }
 }
 
-// 测试进度接口
-export interface TestProgress     {
-  testId: string;
-  status: TestStatus;
-  progress: number;
-  message?: string;
-  startTime?: number;
-  estimatedTimeRemaining?: number
+export function validateTestConfig(config: TestConfig, type: TestType): string[] {
+  const validator = new TestConfigValidator(config, type);
+  return validator.validate();
 }
 
-// 测试结果接口
-export interface TestResult     {
-  testId: string;
-  url: string;
-  timestamp: string;
-  checks?: Record<string, any>
-  summary: {
-    totalChecks?: number;
-    passed?: number;',
-    failed?: number;
-    warnings?: number;
-    score: number;',
-    status?: string}
-  totalTime?: number;',
-  recommendations?: Array<{;
-    priority: 'high' | 'medium' | 'low
-    category: string;
-    description: string;
-    suggestion: string
-}>
-}
-
-// 测试错误类
-export class TestError extends Error {
-  constructor(;
-    message: string,
-    public code: string,
-    public retryable: boolean = false;
-  ) {;
-    super(message);
-    this.name = 'TestError'
-}'}
+// ���Ͳ���ҪĬ�ϵ���

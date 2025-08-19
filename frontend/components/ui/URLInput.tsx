@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface URLInputProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const URLInput: React.FC<URLInputProps> = (props) => {
+
+const URLInput: React.FC<URLInputProps> = ({ className, children, ...props }) => {
   return (
-    <div className="urlinput">
-      <h1>URLInput</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`url-input ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">URLInput</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default URLInput;

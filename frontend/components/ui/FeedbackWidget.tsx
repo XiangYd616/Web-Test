@@ -1,17 +1,17 @@
-import React from 'react;';
+import React from "react";
 
 interface FeedbackWidgetProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
 
-const FeedbackWidget: React.FC<FeedbackWidgetProps> = (props) => {
+const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ className, children, ...props }) => {
   return (
-    <div className="feedbackwidget">
-      <h1>FeedbackWidget</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`feedback-widget ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">FeedbackWidget</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
 
 export default FeedbackWidget;
-;
