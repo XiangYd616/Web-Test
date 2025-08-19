@@ -10,37 +10,37 @@
   background-position: right 0.5rem center !important;
   background-repeat: no-repeat !important;
   background-size: 1.5em 1.5em !important;
-  padding-right: var(--spacing-10) !important;
-  background-color: var(--color-gray-700) !important; /* gray-700 */
+  padding-right: 2.5rem !important;
+  background-color: #374151 !important; /* gray-700 */
   color: white !important;
 }
 
 /* 强制设置选项样式 - 使用更高优先级 */
 .pagination-select option {
-  background-color: var(--color-gray-700) !important; /* gray-700 */
+  background-color: #374151 !important; /* gray-700 */
   color: white !important;
 }
 
 /* 针对WebKit浏览器的特殊处理 */
 .pagination-select::-webkit-scrollbar {
-  background-color: var(--color-gray-700);
+  background-color: #374151;
 }
 
 .pagination-select::-webkit-scrollbar-thumb {
-  background-color: var(--color-gray-600);
+  background-color: #4b5563;
 }
 
 /* 浏览器兼容性 - 针对不同浏览器的选项样式 */
 @supports (-webkit-appearance: none) {
   .pagination-select option {
-    background-color: var(--color-gray-700);
+    background-color: #374151;
     color: white;
   }
 }
 
 @supports (-moz-appearance: none) {
   .pagination-select option {
-    background-color: var(--color-gray-700);
+    background-color: #374151;
     color: white;
   }
 }
@@ -63,7 +63,7 @@
 }
 
 .pagination-button:hover:not(:disabled) {
-  background-color: var(--color-gray-600); /* gray-600 */
+  background-color: #4b5563; /* gray-600 */
   transform: translateY(-1px);
 }
 
@@ -74,15 +74,15 @@
 
 /* 分页信息文本 */
 .pagination-info {
-  color: var(--color-gray-400); /* gray-400 */
-  font-size: var(--font-size-sm);
+  color: #9ca3af; /* gray-400 */
+  font-size: 0.875rem;
 }
 
 /* 响应式设计 */
 @media (max-width: 640px) {
   .pagination-container {
     flex-direction: column;
-    gap: var(--spacing-4);
+    gap: 1rem;
   }
   
   .pagination-controls {
@@ -90,6 +90,6 @@
   }
   
   .pagination-select {
-    min-width: 5.00rem;
+    min-width: 80px;
   }
 }

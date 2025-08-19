@@ -1,5 +1,6 @@
 import React from 'react';
-import { AlertTriangle, CheckCircle, Clock, Loader, XCircle, Info } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Loader, XCircle } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
 export type StatusType = 'success' | 'error' | 'warning' | 'pending' | 'loading' | 'info';
 
@@ -14,10 +15,8 @@ interface StatusIndicatorProps {
   showIcon?: boolean;
   /** 自定义类名 */
   className?: string;
-  /** 是否显示为徽章样式 */
-  variant?: 'default' | 'badge' | 'dot';
-  /** 点击事件 */
-  onClick?: () => void;
+  /** 是否显示为圆点 */
+  dot?: boolean;
 }
 
 export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
@@ -25,120 +24,96 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   text,
   size = 'md',
   showIcon = true,
-  className = '',
-  variant = 'default',
-  onClick
+  className,
+  dot = false
 }) => {
-  // 获取状态配置
-  const getStatusConfig = () => {
-    switch (status) {
-      case 'success':
-        return {
-          icon: CheckCircle,
-          color: 'text-green-600',
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
-          dotColor: 'bg-green-500'
-        };
-      case 'error':
-        return {
-          icon: XCircle,
-          color: 'text-red-600',
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          dotColor: 'bg-red-500'
-        };
-      case 'warning':
-        return {
-          icon: AlertTriangle,
-          color: 'text-yellow-600',
-          bgColor: 'bg-yellow-50',
-          borderColor: 'border-yellow-200',
-          dotColor: 'bg-yellow-500'
-        };
-      case 'pending':
-        return {
-          icon: Clock,
-          color: 'text-gray-600',
-          bgColor: 'bg-gray-50',
-          borderColor: 'border-gray-200',
-          dotColor: 'bg-gray-500'
-        };
-      case 'loading':
-        return {
-          icon: Loader,
-          color: 'text-blue-600',
-          bgColor: 'bg-blue-50',
-          borderColor: 'border-blue-200',
-          dotColor: 'bg-blue-500'
-        };
-      case 'info':
-        return {
-          icon: Info,
-          color: 'text-blue-600',
-          bgColor: 'bg-blue-50',
-          borderColor: 'border-blue-200',
-          dotColor: 'bg-blue-500'
-        };
-      default:
-        return {
-          icon: Info,
-          color: 'text-gray-600',
-          bgColor: 'bg-gray-50',
-          borderColor: 'border-gray-200',
-          dotColor: 'bg-gray-500'
-        };
+  // 状态配置
+  const statusConfig = {
+    success: {
+      icon: CheckCircle,
+      color: 'text-green-400',
+      bgColor: 'bg-green-500/20',
+      borderColor: 'border-green-500/30',
+      dotColor: 'bg-green-500'
+    },
+    error: {
+      icon: XCircle,
+      color: 'text-red-400',
+      bgColor: 'bg-red-500/20',
+      borderColor: 'border-red-500/30',
+      dotColor: 'bg-red-500'
+    },
+    warning: {
+      icon: AlertTriangle,
+      color: 'text-yellow-400',
+      bgColor: 'bg-yellow-500/20',
+      borderColor: 'border-yellow-500/30',
+      dotColor: 'bg-yellow-500'
+    },
+    pending: {
+      icon: Clock,
+      color: 'text-gray-400',
+      bgColor: 'bg-gray-500/20',
+      borderColor: 'border-gray-500/30',
+      dotColor: 'bg-gray-500'
+    },
+    loading: {
+      icon: Loader,
+      color: 'text-blue-400',
+      bgColor: 'bg-blue-500/20',
+      borderColor: 'border-blue-500/30',
+      dotColor: 'bg-blue-500'
+    },
+    info: {
+      icon: CheckCircle,
+      color: 'text-blue-400',
+      bgColor: 'bg-blue-500/20',
+      borderColor: 'border-blue-500/30',
+      dotColor: 'bg-blue-500'
     }
   };
 
-  // 获取尺寸配置
-  const getSizeConfig = () => {
-    switch (size) {
-      case 'sm':
-        return {
-          iconSize: 'w-3 h-3',
-          textSize: 'text-xs',
-          padding: 'px-2 py-1',
-          dotSize: 'w-2 h-2'
-        };
-      case 'md':
-        return {
-          iconSize: 'w-4 h-4',
-          textSize: 'text-sm',
-          padding: 'px-3 py-1.5',
-          dotSize: 'w-3 h-3'
-        };
-      case 'lg':
-        return {
-          iconSize: 'w-5 h-5',
-          textSize: 'text-base',
-          padding: 'px-4 py-2',
-          dotSize: 'w-4 h-4'
-        };
-      default:
-        return {
-          iconSize: 'w-4 h-4',
-          textSize: 'text-sm',
-          padding: 'px-3 py-1.5',
-          dotSize: 'w-3 h-3'
-        };
+  const config = statusConfig[status];
+  const Icon = config.icon;
+
+  // 尺寸配置
+  const sizeConfig = {
+    sm: {
+      icon: 'w-3 h-3',
+      text: 'text-xs',
+      padding: 'px-2 py-1',
+      dot: 'w-2 h-2'
+    },
+    md: {
+      icon: 'w-4 h-4',
+      text: 'text-sm',
+      padding: 'px-3 py-1.5',
+      dot: 'w-3 h-3'
+    },
+    lg: {
+      icon: 'w-5 h-5',
+      text: 'text-base',
+      padding: 'px-4 py-2',
+      dot: 'w-4 h-4'
     }
   };
 
-  const statusConfig = getStatusConfig();
-  const sizeConfig = getSizeConfig();
-  const IconComponent = statusConfig.icon;
+  const sizeClasses = sizeConfig[size];
 
-  // 点状指示器
-  if (variant === 'dot') {
+  // 圆点模式
+  if (dot) {
     return (
-      <div 
-        className={`flex items-center space-x-2 ${onClick ? 'cursor-pointer' : ''} ${className}`}
-        onClick={onClick}
-      >
-        <div className={`${sizeConfig.dotSize} ${statusConfig.dotColor} rounded-full flex-shrink-0`} />
+      <div className={cn('flex items-center gap-2', className)}>
+        <div
+          className={cn(
+            'rounded-full',
+            sizeClasses.dot,
+            config.dotColor,
+            status === 'loading' && 'animate-pulse'
+          )}
+        />
         {text && (
-          <span className={`${sizeConfig.textSize} ${statusConfig.color} font-medium`}>
+          <span className={cn(sizeClasses.text, config.color)}>
             {text}
           </span>
         )}
@@ -146,49 +121,28 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     );
   }
 
-  // 徽章样式
-  if (variant === 'badge') {
-    return (
-      <span 
-        className={`
-          inline-flex items-center space-x-1 rounded-full border
-          ${sizeConfig.padding} ${sizeConfig.textSize}
-          ${statusConfig.color} ${statusConfig.bgColor} ${statusConfig.borderColor}
-          ${onClick ? 'cursor-pointer hover:opacity-80' : ''}
-          ${className}
-        `}
-        onClick={onClick}
-      >
-        {showIcon && (
-          <IconComponent 
-            className={`${sizeConfig.iconSize} ${status === 'loading' ? 'animate-spin' : ''}`} 
-          />
-        )}
-        {text && <span className="font-medium">{text}</span>}
-      </span>
-    );
-  }
-
-  // 默认样式
+  // 标准模式
   return (
-    <div 
-      className={`
-        flex items-center space-x-2
-        ${onClick ? 'cursor-pointer hover:opacity-80' : ''}
-        ${className}
-      `}
-      onClick={onClick}
+    <div
+      className={cn(
+        'inline-flex items-center gap-2 rounded-full border',
+        sizeClasses.padding,
+        config.bgColor,
+        config.borderColor,
+        className
+      )}
     >
       {showIcon && (
-        <IconComponent 
-          className={`
-            ${sizeConfig.iconSize} ${statusConfig.color}
-            ${status === 'loading' ? 'animate-spin' : ''}
-          `} 
+        <Icon
+          className={cn(
+            sizeClasses.icon,
+            config.color,
+            status === 'loading' && 'animate-spin'
+          )}
         />
       )}
       {text && (
-        <span className={`${sizeConfig.textSize} ${statusConfig.color} font-medium`}>
+        <span className={cn(sizeClasses.text, config.color)}>
           {text}
         </span>
       )}
@@ -196,106 +150,88 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   );
 };
 
-// 状态列表组件
-interface StatusListProps {
-  items: Array<{
-    id: string;
-    status: StatusType;
-    text: string;
-    description?: string;
-    timestamp?: string;
-  }>;
-  variant?: StatusIndicatorProps['variant'];
-  size?: StatusIndicatorProps['size'];
+interface TestStatusIndicatorProps {
+  /** 测试状态 */
+  status: 'idle' | 'running' | 'completed' | 'failed' | 'cancelled';
+  /** 自定义文本 */
+  text?: string;
+  /** 尺寸 */
+  size?: 'sm' | 'md' | 'lg';
+  /** 自定义类名 */
   className?: string;
-  onItemClick?: (id: string) => void;
 }
 
-export const StatusList: React.FC<StatusListProps> = ({
-  items,
-  variant = 'default',
+export const TestStatusIndicator: React.FC<TestStatusIndicatorProps> = ({
+  status,
+  text,
   size = 'md',
-  className = '',
-  onItemClick
+  className
 }) => {
+  const statusMap: Record<string, StatusType> = {
+    idle: 'pending',
+    running: 'loading',
+    completed: 'success',
+    failed: 'error',
+    cancelled: 'warning'
+  };
+
+  const defaultText = {
+    idle: '待开始',
+    running: '运行中',
+    completed: '已完成',
+    failed: '失败',
+    cancelled: '已取消'
+  };
+
   return (
-    <div className={`space-y-2 ${className}`}>
-      {items.map((item) => (
-        <div 
-          key={item.id}
-          className={`
-            flex items-start justify-between p-3 rounded-lg border
-            ${onItemClick ? 'cursor-pointer hover:bg-gray-50' : ''}
-          `}
-          onClick={() => onItemClick?.(item.id)}
-        >
-          <div className="flex-1">
-            <StatusIndicator
-              status={item.status}
-              text={item.text}
-              variant={variant}
-              size={size}
-            />
-            {item.description && (
-              <p className="mt-1 text-sm text-gray-600">{item.description}</p>
-            )}
-          </div>
-          {item.timestamp && (
-            <span className="text-xs text-gray-500 ml-4 flex-shrink-0">
-              {item.timestamp}
-            </span>
-          )}
-        </div>
-      ))}
-    </div>
+    <StatusIndicator
+      status={statusMap[status]}
+      text={text || defaultText[status]}
+      size={size}
+      className={className}
+    />
   );
 };
 
-// 状态统计组件
-interface StatusStatsProps {
-  stats: Record<StatusType, number>;
-  total?: number;
-  size?: StatusIndicatorProps['size'];
+interface ConnectionStatusIndicatorProps {
+  /** 连接状态 */
+  status: 'connected' | 'disconnected' | 'connecting' | 'error';
+  /** 自定义文本 */
+  text?: string;
+  /** 是否显示为圆点 */
+  dot?: boolean;
+  /** 自定义类名 */
   className?: string;
-  onStatusClick?: (status: StatusType) => void;
 }
 
-export const StatusStats: React.FC<StatusStatsProps> = ({
-  stats,
-  total,
-  size = 'md',
-  className = '',
-  onStatusClick
+export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
+  status,
+  text,
+  dot = true,
+  className
 }) => {
-  const totalCount = total || Object.values(stats).reduce((sum, count) => sum + count, 0);
+  const statusMap: Record<string, StatusType> = {
+    connected: 'success',
+    disconnected: 'error',
+    connecting: 'loading',
+    error: 'error'
+  };
+
+  const defaultText = {
+    connected: '已连接',
+    disconnected: '已断开',
+    connecting: '连接中',
+    error: '连接错误'
+  };
 
   return (
-    <div className={`flex flex-wrap gap-4 ${className}`}>
-      {Object.entries(stats).map(([status, count]) => {
-        const percentage = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
-        
-        return (
-          <div
-            key={status}
-            className={`
-              flex items-center space-x-2 p-2 rounded-lg border
-              ${onStatusClick ? 'cursor-pointer hover:bg-gray-50' : ''}
-            `}
-            onClick={() => onStatusClick?.(status as StatusType)}
-          >
-            <StatusIndicator
-              status={status as StatusType}
-              variant="dot"
-              size={size}
-            />
-            <div className="text-sm">
-              <div className="font-medium text-gray-900">{count}</div>
-              <div className="text-gray-500">{percentage}%</div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <StatusIndicator
+      status={statusMap[status]}
+      text={text || defaultText[status]}
+      dot={dot}
+      size="sm"
+      className={className}
+    />
   );
 };
 

@@ -1,211 +1,551 @@
-export type UUID = string;
-export type Timestamp = string;
-export type URL = string;
+
 
 export enum TestStatus {
-  IDLE = "idle",
-  STARTING = "starting",
-  RUNNING = "running",
-  COMPLETED = "completed",
-  CANCELLED = "cancelled",
-  FAILED = "failed"
+  IDLE = 'idle',
+  STARTING = 'starting',
+  RUNNING = 'running',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+  FAILED = 'failed'
 }
 
-export type TestStatusType = "idle" | "starting" | "running" | "completed" | "cancelled" | "failed";
+// 类型别名，用于与其他模块兼容 - 简化版本
+export type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'cancelled' | 'failed';
 
 export enum TestType {
-  API = "api",
-  COMPATIBILITY = "compatibility",
-  INFRASTRUCTURE = "infrastructure",
-  SECURITY = "security",
-  SEO = "seo",
-  STRESS = "stress",
-  UX = "ux",
-  WEBSITE = "website"
+  PERFORMANCE = 'performance',
+  SECURITY = 'security',
+  SEO = 'seo',
+  STRESS = 'stress',
+  API = 'api',
+  WEBSITE = 'website',
+  DATABASE = 'database',
+  COMPATIBILITY = 'compatibility',
+  NETWORK = 'network'
 }
 
 export enum TestPriority {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  CRITICAL = "critical"
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
 }
 
 export enum TestEnvironment {
-  DEVELOPMENT = "development",
-  STAGING = "staging",
-  PRODUCTION = "production",
-  LOCAL = "local"
+  DEVELOPMENT = 'development',
+  STAGING = 'staging',
+  PRODUCTION = 'production',
+  LOCAL = 'local'
 }
 
-export interface TestHistoryItem {
-  id: UUID;
-  testId: UUID;
+// 新增：主从表设计相关类型
+export interface TestSession {
+  id: string;
+  userId: string;
   testName: string;
   testType: TestType;
-  url: URL;
-  
-  status: TestStatus;
-  startTime: Timestamp;
-  endTime?: Timestamp;
-  duration?: number;
-  
-  overallScore: number;
-  grade: string;
-  passed: boolean;
-  
-  environment: TestEnvironment;
-  priority: TestPriority;
-  
-  result: {
-    summary?: string;
-    details?: Record<string, any>;
-    metrics?: Record<string, number>;
-    issues?: Array<{
-      type: string;
-      severity: "low" | "medium" | "high" | "critical";
-      message: string;
-    }>;
-    recommendations?: Array<{
-      category: string;
-      priority: "low" | "medium" | "high";
-      message: string;
-    }>;
-  };
-  
-  metadata: {
-    userAgent?: string;
-    device?: string;
-    viewport?: { width: number; height: number };
-    version?: string;
-    tags?: string[];
-    notes?: string;
-  };
-  
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  url?: string;
+  status: TestStatusType;
+  createdAt: string;
+  updatedAt: string;
+  startTime?: string;
+  endTime?: string;
+  duration?: number; // 秒
+  config?: any;
+  overallScore?: number;
+  grade?: string; // A+, A, B+, B, C+, C, D, F
+  totalIssues?: number;
+  criticalIssues?: number;
+  majorIssues?: number;
+  minorIssues?: number;
+  warnings?: number;
+  environment: string;
+  tags: string[];
+  description?: string;
+  notes?: string;
+  deletedAt?: string;
+}
+
+// 安全测试详情
+export interface SecurityTestDetails {
+  sessionId: string;
+  securityScore?: number;
+  sslScore?: number;
+  headerSecurityScore?: number;
+  authenticationScore?: number;
+  vulnerabilitiesTotal?: number;
+  vulnerabilitiesCritical?: number;
+  vulnerabilitiesHigh?: number;
+  vulnerabilitiesMedium?: number;
+  vulnerabilitiesLow?: number;
+  sqlInjectionFound?: number;
+  xssVulnerabilities?: number;
+  csrfVulnerabilities?: number;
+  httpsEnforced?: boolean;
+  hstsEnabled?: boolean;
+  csrfProtection?: boolean;
+}
+
+// 性能测试详情
+export interface PerformanceTestDetails {
+  sessionId: string;
+  firstContentfulPaint?: number;
+  largestContentfulPaint?: number;
+  firstInputDelay?: number;
+  cumulativeLayoutShift?: number;
+  timeToInteractive?: number;
+  speedIndex?: number;
+  totalBlockingTime?: number;
+  domContentLoaded?: number;
+  loadEventEnd?: number;
+  totalPageSize?: number;
+  imageSize?: number;
+  cssSize?: number;
+  jsSize?: number;
+  fontSize?: number;
+  dnsLookupTime?: number;
+  tcpConnectTime?: number;
+  sslHandshakeTime?: number;
+  serverResponseTime?: number;
+}
+
+// 压力测试详情
+export interface StressTestDetails {
+  sessionId: string;
+  concurrentUsers?: number;
+  rampUpTime?: number;
+  testDuration?: number;
+  thinkTime?: number;
+  tpsPeak?: number;
+  tpsAverage?: number;
+  totalRequests?: number;
+  successfulRequests?: number;
+  failedRequests?: number;
+  responseTimeAvg?: number;
+  responseTimeMin?: number;
+  responseTimeMax?: number;
+  responseTimeP50?: number;
+  responseTimeP90?: number;
+  responseTimeP95?: number;
+  responseTimeP99?: number;
+  errorRate?: number;
+  timeoutErrors?: number;
+  connectionErrors?: number;
+  serverErrors?: number;
+  clientErrors?: number;
+  cpuUsageAvg?: number;
+  cpuUsageMax?: number;
+  memoryUsageAvg?: number;
+  memoryUsageMax?: number;
+  bytesSent?: number;
+  bytesReceived?: number;
 }
 
 export interface TestHistoryQuery {
-  testType?: TestType | TestType[];
-  status?: TestStatus | TestStatus[];
-  environment?: TestEnvironment | TestEnvironment[];
-  priority?: TestPriority | TestPriority[];
-  
-  dateRange?: {
-    start: Timestamp;
-    end: Timestamp;
-  };
-  
-  scoreRange?: {
-    min: number;
-    max: number;
-  };
-  
-  search?: string;
-  url?: string;
-  testName?: string;
-  
-  tags?: string[];
-  
-  sortBy?: "createdAt" | "startTime" | "endTime" | "duration" | "overallScore" | "testName" | "status";
-  sortOrder?: "asc" | "desc";
-  
   page?: number;
   limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  testType?: TestType | TestType[];
+  status?: string;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
-export interface TestHistoryFilters {
-  testTypes: TestType[];
-  statuses: TestStatus[];
-  environments: TestEnvironment[];
-  priorities: TestPriority[];
-  dateRange: {
-    start: Timestamp;
-    end: Timestamp;
+export interface TestHistoryResponse {
+  success: boolean;
+  data: {
+    tests: TestSession[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
   };
-  scoreRange: {
-    min: number;
-    max: number;
-  };
-  tags: string[];
 }
 
-export interface TestHistoryStats {
-  total: number;
-  byStatus: Record<TestStatus, number>;
-  byType: Record<TestType, number>;
-  byEnvironment: Record<TestEnvironment, number>;
-  byPriority: Record<TestPriority, number>;
-  
+// 详细测试结果（包含详情数据）
+export interface DetailedTestResult extends TestSession {
+  securityDetails?: SecurityTestDetails;
+  performanceDetails?: PerformanceTestDetails;
+  stressDetails?: StressTestDetails;
+  // 可以根据需要添加其他测试类型的详情
+}
+
+// 测试详情响应
+export interface TestDetailsResponse {
+  success: boolean;
+  data: DetailedTestResult;
+}
+
+export interface TestStatistics {
+  totalTests: number;
+  completedTests: number;
+  failedTests: number;
   averageScore: number;
-  averageDuration: number;
-  successRate: number;
-  
-  recentActivity: {
-    last24Hours: number;
-    last7Days: number;
-    last30Days: number;
-  };
-  
-  trends: {
-    scoreOverTime: Array<{
-      date: string;
-      averageScore: number;
-      testCount: number;
-    }>;
-    typeDistribution: Array<{
-      type: TestType;
-      count: number;
-      percentage: number;
-    }>;
+  testsByType: Record<TestType, number>;
+}
+
+export interface BatchOperationResult {
+  success: boolean;
+  processed: number;
+  failed: number;
+  errors?: string[];
+}
+
+// 基础测试配置
+export interface BaseTestConfig {
+  timeout?: number;
+  retries?: number;
+  environment?: TestEnvironment;
+  userAgent?: string;
+  headers?: Record<string, string>;
+  cookies?: Record<string, string>;
+  proxy?: {
+    host: string;
+    port: number;
+    auth?: {
+      username: string;
+      password: string;
+    };
   };
 }
 
-export interface TestHistoryComparison {
-  baseline: TestHistoryItem;
-  current: TestHistoryItem;
-  
-  changes: {
-    score: {
-      difference: number;
-      percentage: number;
-      improved: boolean;
-    };
-    duration: {
-      difference: number;
-      percentage: number;
-      improved: boolean;
-    };
-    issues: {
-      added: number;
-      resolved: number;
-      changed: number;
+// 性能测试配置
+export interface PerformanceTestConfig extends BaseTestConfig {
+  device?: 'desktop' | 'mobile' | 'tablet';
+  connection?: 'fast' | 'slow' | '3g' | '4g' | 'wifi';
+  metrics?: string[];
+  lighthouse?: {
+    categories?: string[];
+    onlyCategories?: string[];
+  };
+}
+
+// 安全测试配置
+export interface SecurityTestConfig extends BaseTestConfig {
+  modules?: string[];
+  depth?: 'basic' | 'standard' | 'comprehensive';
+  includeSubdomains?: boolean;
+  checkCertificate?: boolean;
+  scanPorts?: boolean;
+}
+
+// SEO测试配置
+export interface SEOTestConfig extends BaseTestConfig {
+  includeImages?: boolean;
+  checkLinks?: boolean;
+  analyzeContent?: boolean;
+  checkMeta?: boolean;
+  validateSchema?: boolean;
+}
+
+// 压力测试配置
+export interface StressTestConfig extends BaseTestConfig {
+  virtualUsers?: number;
+  duration?: number;
+  rampUpTime?: number;
+  rampDownTime?: number;
+  thresholds?: {
+    responseTime?: number;
+    errorRate?: number;
+    throughput?: number;
+  };
+}
+
+export interface TestResultDetails {
+  // 性能指标
+  performance?: {
+    loadTime?: number;
+    firstContentfulPaint?: number;
+    largestContentfulPaint?: number;
+    cumulativeLayoutShift?: number;
+    firstInputDelay?: number;
+    timeToInteractive?: number;
+    speedIndex?: number;
+    totalBlockingTime?: number;
+  };
+
+  // 安全指标
+  security?: {
+    vulnerabilities?: Array<{
+      type: string;
+      severity: 'low' | 'medium' | 'high' | 'critical';
+      description: string;
+      recommendation?: string;
+    }>;
+    sslScore?: number;
+    headersSecurity?: Record<string, any>;
+    certificateInfo?: Record<string, any>;
+  };
+
+  // SEO指标
+  seo?: {
+    metaTags?: Record<string, string>;
+    headings?: Array<{ level: number; text: string }>;
+    images?: Array<{ src: string; alt?: string; issues?: string[] }>;
+    links?: Array<{ href: string; text: string; type: 'internal' | 'external' }>;
+    structuredData?: any[];
+    socialTags?: Record<string, string>;
+  };
+
+  // 压力测试指标
+  stress?: {
+    totalRequests?: number;
+    successfulRequests?: number;
+    failedRequests?: number;
+    averageResponseTime?: number;
+    minResponseTime?: number;
+    maxResponseTime?: number;
+    throughput?: number;
+    errorRate?: number;
+    concurrentUsers?: number;
+  };
+
+  // 通用指标
+  general?: {
+    httpStatus?: number;
+    responseSize?: number;
+    redirects?: number;
+    resources?: Array<{
+      url: string;
+      type: string;
+      size: number;
+      loadTime: number;
+    }>;
+    errors?: string[];
+    warnings?: string[];
+  };
+}
+
+export interface TestMetadata {
+  userAgent?: string;
+  ipAddress?: string;
+  location?: {
+    country?: string;
+    city?: string;
+    timezone?: string;
+  };
+  device?: {
+    type: 'desktop' | 'mobile' | 'tablet';
+    os?: string;
+    browser?: string;
+    viewport?: {
+      width: number;
+      height: number;
     };
   };
-  
-  recommendations: Array<{
-    category: string;
-    message: string;
-    priority: "low" | "medium" | "high";
+  network?: {
+    type: string;
+    speed?: string;
+    latency?: number;
+  };
+}
+
+// 增强的测试记录接口
+export interface EnhancedTestRecord {
+  // 基础信息
+  id: string;
+  testName: string;
+  testType: TestType;
+  url: string;
+  status: TestStatus;
+  priority?: TestPriority;
+
+  // 时间信息
+  startTime: string;
+  endTime?: string;
+  duration?: number; // 毫秒
+  createdAt: string;
+  updatedAt?: string;
+
+  // 用户信息
+  userId?: string;
+  userName?: string;
+
+  // 配置信息
+  config: BaseTestConfig | PerformanceTestConfig | SecurityTestConfig | SEOTestConfig | StressTestConfig;
+
+  // 结果信息
+  overallScore?: number;
+  results?: TestResultDetails;
+  reportPath?: string;
+  reportUrl?: string;
+
+  // 分类和标签
+  tags?: string[];
+  category?: string;
+  environment?: TestEnvironment;
+
+  // 元数据
+  metadata?: TestMetadata;
+
+  // 关联信息
+  parentTestId?: string; // 父测试ID（用于测试套件）
+  childTestIds?: string[]; // 子测试ID
+  relatedTestIds?: string[]; // 相关测试ID
+
+  // 统计信息
+  viewCount?: number;
+  shareCount?: number;
+  bookmarked?: boolean;
+
+  // 备注和注释
+  notes?: string;
+  comments?: Array<{
+    id: string;
+    userId: string;
+    userName: string;
+    content: string;
+    createdAt: string;
+  }>;
+
+  // 文件附件
+  attachments?: Array<{
+    id: string;
+    name: string;
+    type: string;
+    size: number;
+    url: string;
+    uploadedAt: string;
   }>;
 }
 
+export interface TestHistoryQuery {
+  // 分页
+  page?: number;
+  limit?: number;
+  offset?: number;
+
+  // 搜索
+  search?: string;
+  searchFields?: string[]; // 搜索字段
+
+  // 过滤
+  testType?: TestType | TestType[];
+  status?: TestStatus | TestStatus[];
+  priority?: TestPriority | TestPriority[];
+  environment?: TestEnvironment | TestEnvironment[];
+  tags?: string[];
+  category?: string;
+  userId?: string;
+
+  // 时间范围
+  dateFrom?: string;
+  dateTo?: string;
+  createdAfter?: string;
+  createdBefore?: string;
+
+  // 分数范围
+  minScore?: number;
+  maxScore?: number;
+
+  // 排序
+  sortBy?: 'createdAt' | 'startTime' | 'endTime' | 'duration' | 'overallScore' | 'testName' | 'status';
+  sortOrder?: 'asc' | 'desc';
+
+  // 包含关联数据
+  includeResults?: boolean;
+  includeConfig?: boolean;
+  includeMetadata?: boolean;
+  includeComments?: boolean;
+  includeAttachments?: boolean;
+}
+
+export interface TestHistoryResponse {
+  success: boolean;
+  data: {
+    tests: EnhancedTestRecord[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+    filters?: {
+      availableTypes: TestType[];
+      availableStatuses: TestStatus[];
+      availableTags: string[];
+      availableCategories: string[];
+      dateRange: {
+        earliest: string;
+        latest: string;
+      };
+      scoreRange: {
+        min: number;
+        max: number;
+      };
+    };
+  };
+  message?: string;
+  error?: string;
+}
+
+export interface TestHistoryStatistics {
+  overview: {
+    totalTests: number;
+    completedTests: number;
+    failedTests: number;
+    averageScore: number;
+    averageDuration: number;
+    successRate: number;
+  };
+
+  byType: Array<{
+    type: TestType;
+    count: number;
+    averageScore: number;
+    successRate: number;
+  }>;
+
+  byStatus: Array<{
+    status: TestStatus;
+    count: number;
+    percentage: number;
+  }>;
+
+  byTimeRange: Array<{
+    date: string;
+    count: number;
+    averageScore: number;
+  }>;
+
+  topUrls: Array<{
+    url: string;
+    count: number;
+    averageScore: number;
+  }>;
+
+  recentActivity: Array<{
+    date: string;
+    testsRun: number;
+    averageScore: number;
+  }>;
+}
+
+// 导出选项
 export interface ExportOptions {
-  format: "csv" | "json" | "pdf" | "excel";
-  includeDetails: boolean;
-  includeMetrics: boolean;
-  includeRecommendations: boolean;
+  format: 'csv' | 'json' | 'pdf' | 'excel';
+  fields?: string[];
+  includeResults?: boolean;
+  includeConfig?: boolean;
   dateRange?: {
-    start: Timestamp;
-    end: Timestamp;
+    from: string;
+    to: string;
   };
   filters?: Partial<TestHistoryQuery>;
 }
 
+// 批量操作
 export interface BatchOperation {
-  action: "delete" | "archive" | "tag" | "category" | "export";
-  testIds: UUID[];
+  action: 'delete' | 'archive' | 'tag' | 'category' | 'export';
+  testIds: string[];
   options?: {
     tags?: string[];
     category?: string;
@@ -213,72 +553,24 @@ export interface BatchOperation {
   };
 }
 
-export interface BatchOperationResult {
-  success: boolean;
-  processed: number;
-  failed: number;
-  errors: Array<{
-    testId: UUID;
-    error: string;
-  }>;
-  result?: {
-    downloadUrl?: string;
-    message?: string;
+export interface TestComparison {
+  baseTest: EnhancedTestRecord;
+  compareTests: EnhancedTestRecord[];
+  metrics: {
+    scoreComparison: Array<{
+      testId: string;
+      testName: string;
+      score: number;
+      difference: number;
+      percentageChange: number;
+    }>;
+    performanceComparison?: Array<{
+      metric: string;
+      values: Array<{
+        testId: string;
+        value: number;
+        difference: number;
+      }>;
+    }>;
   };
 }
-
-export interface TestHistoryResponse {
-  items: TestHistoryItem[];
-  total: number;
-  page: number;
-  limit: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-  stats?: TestHistoryStats;
-}
-
-export interface TestHistoryDetailResponse {
-  item: TestHistoryItem;
-  related: TestHistoryItem[];
-  comparison?: TestHistoryComparison;
-}
-
-export const DEFAULT_HISTORY_QUERY: Partial<TestHistoryQuery> = {
-  sortBy: "createdAt",
-  sortOrder: "desc",
-  page: 1,
-  limit: 20
-};
-
-export const DEFAULT_EXPORT_OPTIONS: ExportOptions = {
-  format: "json",
-  includeDetails: true,
-  includeMetrics: true,
-  includeRecommendations: true
-};
-
-export const TEST_STATUS_COLORS: Record<TestStatus, string> = {
-  [TestStatus.IDLE]: "#6b7280",
-  [TestStatus.STARTING]: "#f59e0b",
-  [TestStatus.RUNNING]: "#3b82f6",
-  [TestStatus.COMPLETED]: "#10b981",
-  [TestStatus.CANCELLED]: "#6b7280",
-  [TestStatus.FAILED]: "#ef4444"
-};
-
-export const TEST_TYPE_ICONS: Record<TestType, string> = {
-  [TestType.API]: "api",
-  [TestType.COMPATIBILITY]: "devices",
-  [TestType.INFRASTRUCTURE]: "server",
-  [TestType.SECURITY]: "shield",
-  [TestType.SEO]: "search",
-  [TestType.STRESS]: "activity",
-  [TestType.UX]: "user",
-  [TestType.WEBSITE]: "globe"
-};
-
-export type TestHistoryFilter = (item: TestHistoryItem) => boolean;
-export type TestHistorySorter = (a: TestHistoryItem, b: TestHistoryItem) => number;
-export type TestHistoryGrouper = (items: TestHistoryItem[]) => Record<string, TestHistoryItem[]>;
-
-// ���Ͳ���ҪĬ�ϵ���

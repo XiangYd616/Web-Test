@@ -33,13 +33,12 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   disabled,
   ...props
 }) => {
-  // 获取尺寸配置
-  const sizeConfig = checkboxSizes[size];
+  const sizeClasses = checkboxSizes[size];
 
   return (
     <label className={cn(
       'flex items-start gap-3 cursor-pointer group',
-      disabled && "cursor-not-allowed opacity-50",
+      disabled && 'cursor-not-allowed opacity-50',
       className
     )}>
       <div className="relative flex items-center">
@@ -55,11 +54,18 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         {/* 自定义checkbox外观 */}
         <div className={cn(
           'rounded-md border-2 transition-all duration-200 flex items-center justify-center',
-          sizeConfig.container,
+          sizeClasses.container,
           // 未选中状态
-          !checked && !indeterminate && 'bg-gray-700/50 border-gray-600/60 group-hover:border-gray-500/80 group-hover:bg-gray-600/50 group-focus-within:ring-2 group-focus-within:ring-blue-500 group-focus-within:ring-offset-2 group-focus-within:ring-offset-gray-900',
+          !checked && !indeterminate && [
+            'bg-gray-700/50 border-gray-600/60',
+            'group-hover:border-gray-500/80 group-hover:bg-gray-600/50',
+            'group-focus-within:ring-2 group-focus-within:ring-blue-500 group-focus-within:ring-offset-2 group-focus-within:ring-offset-gray-900'
+          ],
           // 选中状态
-          (checked || indeterminate) && 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-500/25 group-hover:bg-blue-700 group-hover:border-blue-700',
+          (checked || indeterminate) && [
+            'bg-blue-600 border-blue-600 shadow-lg shadow-blue-500/25',
+            'group-hover:bg-blue-700 group-hover:border-blue-700'
+          ],
           // 禁用状态
           disabled && 'opacity-50 cursor-not-allowed'
         )}>
@@ -68,7 +74,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
             <svg
               className={cn(
                 'text-white animate-in fade-in duration-150',
-                sizeConfig.icon
+                sizeClasses.icon
               )}
               fill="none"
               stroke="currentColor"
@@ -88,8 +94,9 @@ export const Checkbox: React.FC<CheckboxProps> = ({
             <svg
               className={cn(
                 'text-white animate-in fade-in duration-150',
-                sizeConfig.icon
+                sizeClasses.icon
               )}
+              fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
@@ -141,5 +148,3 @@ interface SimpleCheckboxProps extends Omit<CheckboxProps, 'label' | 'description
 export const SimpleCheckbox: React.FC<SimpleCheckboxProps> = (props) => {
   return <Checkbox {...props} />;
 };
-
-export default Checkbox;

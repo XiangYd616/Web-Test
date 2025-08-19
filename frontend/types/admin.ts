@@ -1,4 +1,6 @@
-import type { User } from "./user";
+// 管理员相关类型定义
+
+import type { User } from './user';
 
 export interface SystemStats {
   users: {
@@ -18,7 +20,7 @@ export interface SystemStats {
     thisMonth: number;
     successRate: number;
     averageResponseTime: number;
-    todayCount: number;
+    todayCount: number; // 添加缺失的属性
     popularTypes: Array<{
       type: string;
       count: number;
@@ -28,190 +30,277 @@ export interface SystemStats {
   performance: {
     successRate: number;
     averageResponseTime: number;
-    uptime: number;
-    cpuUsage: number;
-    memoryUsage: number;
-    diskUsage: number;
+    errorRate: number;
   };
   system: {
-    version: string;
     uptime: number;
-    lastRestart: string;
-    environment: "development" | "staging" | "production";
+    version: string;
+    environment: string;
+    lastBackup: string;
+    diskUsage: number;
+    memoryUsage: number;
+    cpuUsage: number;
   };
 }
 
-export interface AdminDashboard {
-  stats: SystemStats;
-  recentUsers: User[];
-  recentTests: Array<{
+export interface SystemMonitor {
+  timestamp: string;
+  metrics: {
+    system: {
+      uptime: number;
+      loadAverage: number[];
+      memoryUsage: {
+        total: number;
+        used: number;
+        free: number;
+        percentage: number;
+      };
+      diskUsage: {
+        total: number;
+        used: number;
+        free: number;
+        percentage: number;
+      };
+      cpuUsage: {
+        percentage: number;
+        cores: number;
+      };
+    };
+    // 为了兼容组件中的使用，添加直接的cpu、memory、disk、network属性
+    cpu: {
+      usage: number;
+      cores: number;
+      temperature?: number;
+    };
+    memory: {
+      usage: number;
+      used: number;
+      total: number;
+    };
+    disk: {
+      usage: number;
+      used: number;
+      total: number;
+    };
+    network: {
+      connections: number;
+      incoming: number;
+      outgoing: number;
+    };
+    application: {
+      activeConnections: number;
+      requestsPerMinute: number;
+      averageResponseTime: number;
+      errorRate: number;
+      cacheHitRate: number;
+      activeUsers: number;
+      runningTests: number;
+      queuedTests: number;
+    };
+    database: {
+      connections: number;
+      queryTime: number;
+      slowQueries: number;
+      size: number;
+    };
+  };
+  alerts: Array<{
     id: string;
-    name: string;
-    type: string;
-    status: string;
-    createdAt: string;
-  }>;
-  systemAlerts: Array<{
-    id: string;
-    type: "warning" | "error" | "info";
+    type: 'warning' | 'error' | 'info';
     message: string;
     timestamp: string;
-  }>;
-  performanceMetrics: Array<{
-    timestamp: string;
-    cpu: number;
-    memory: number;
-    requests: number;
+    resolved: boolean;
   }>;
 }
 
-export interface UserManagement {
-  users: User[];
-  totalUsers: number;
-  activeUsers: number;
-  filters: {
-    role?: string;
-    status?: string;
-    search?: string;
-  };
-  pagination: {
-    page: number;
-    limit: number;
-  };
+export interface AdminUser extends User {
+  testCount: number;
+  lastActivity: string;
+  ipAddress: string;
+  userAgent: string;
+}
+
+export interface UserFilter {
+  role?: string;
+  status?: string;
+  search?: string;
+  emailVerified?: boolean;
+  createdAfter?: string;
+  createdBefore?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface UserBulkAction {
-  action: "activate" | "deactivate" | "suspend" | "changeRole" | "delete";
+  action: 'activate' | 'deactivate' | 'suspend' | 'changeRole' | 'delete';
   userIds: string[];
-  options?: {
-    role?: string;
-    reason?: string;
-  };
+  newRole?: string;
+  reason?: string;
 }
 
-export interface SystemTask {
+export interface TestManagement {
   id: string;
-  name: string;
-  type: "backup" | "cleanup" | "maintenance" | "update";
-  status: "idle" | "starting" | "running" | "completed" | "failed" | "cancelled";
-  progress: number;
-  startTime?: string;
-  endTime?: string;
-  logs: string[];
+  type: string;
+  url: string;
+  userId: string;
+  username: string;
+  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled';
+  createdAt: string;
+  completedAt?: string;
+  duration?: number;
+  result?: any;
   error?: string;
+}
+
+export interface TestFilter {
+  type?: string;
+  status?: string;
+  userId?: string;
+  search?: string;
+  priority?: string; // 添加缺失的priority属性
+  createdAfter?: string;
+  createdBefore?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface SystemConfig {
   general: {
     siteName: string;
-    siteUrl: string;
+    siteDescription: string;
     adminEmail: string;
     timezone: string;
     language: string;
     maintenanceMode: boolean;
+    registrationEnabled: boolean;
+    emailVerificationRequired: boolean;
   };
-  security: {
-    sessionTimeout: number;
-    maxLoginAttempts: number;
-    passwordPolicy: {
-      minLength: number;
-      requireUppercase: boolean;
-      requireLowercase: boolean;
-      requireNumbers: boolean;
-      requireSymbols: boolean;
-    };
-    twoFactorAuth: boolean;
-    ipWhitelist: string[];
-  };
-  features: {
-    userRegistration: boolean;
-    emailVerification: boolean;
-    socialLogin: boolean;
-    apiAccess: boolean;
-    fileUploads: boolean;
-  };
-  limits: {
-    maxUsers: number;
+  testing: {
+    maxConcurrentTests: number;
     maxTestsPerUser: number;
-    maxFileSize: number;
-    apiRateLimit: number;
+    testTimeoutMinutes: number;
+    dataRetentionDays: number;
+    enabledTestTypes: {
+      coreWebVitals: boolean;
+      lighthouseAudit: boolean;
+      securityScan: boolean;
+      loadTest: boolean;
+      apiTest: boolean;
+      uptimeMonitor: boolean;
+      syntheticMonitor: boolean;
+      realUserMonitor: boolean;
+    };
+    defaultLocations: string[];
+    maxFileUploadSize: number;
+    screenshotQuality: 'low' | 'medium' | 'high';
+    videoRecording: boolean;
+    harGeneration: boolean;
   };
   monitoring: {
-    enabled: boolean;
-    logLevel: "debug" | "info" | "warn" | "error";
-    retentionDays: number;
-    realUserMonitor: boolean;
+    uptimeCheckInterval: number;
+    alertThresholds: {
+      responseTime: number;
+      errorRate: number;
+      availability: number;
+    };
+    retentionPeriods: {
+      rawData: number;
+      aggregatedData: number;
+      screenshots: number;
+      videos: number;
+    };
   };
-  performance: {
-    cacheEnabled: boolean;
-    compressionEnabled: boolean;
-    screenshotQuality: "low" | "medium" | "high";
+  security: {
+    passwordMinLength: number;
+    passwordRequireSpecialChars: boolean;
+    sessionTimeoutMinutes: number;
+    maxLoginAttempts: number;
+    lockoutDurationMinutes: number;
+    twoFactorRequired: boolean;
+    ipWhitelist: string[];
   };
   notifications: {
-    email: {
-      enabled: boolean;
-      smtp: {
-        host: string;
-        port: number;
-        secure: boolean;
-        username: string;
-        password: string;
-      };
-      from: string;
-      fromName: string;
-    };
-    backup: {
-      enabled: boolean;
-      frequency: "daily" | "weekly" | "monthly";
-      retention: number;
-      location: "local" | "s3" | "ftp";
+    emailEnabled: boolean;
+    smtpHost: string;
+    smtpPort: number;
+    smtpUser: string;
+    smtpPassword: string;
+    fromEmail: string;
+    fromName: string;
+  };
+  backup: {
+    enabled: boolean;
+    frequency: 'daily' | 'weekly' | 'monthly';
+    retentionDays: number;
+    location: 'local' | 's3' | 'ftp';
+    s3Config?: {
+      bucket: string;
+      region: string;
+      accessKey: string;
+      secretKey: string;
     };
   };
 }
 
-export interface SystemLog {
+export interface ActivityLog {
   id: string;
-  timestamp: string;
-  level: "debug" | "info" | "warn" | "error";
-  category: "auth" | "api" | "system" | "test" | "admin";
-  message: string;
   userId?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  metadata?: Record<string, any>;
+  userName?: string;
+  username?: string;
+  action: string;
+  resource: string;
+  details: any;
+  ipAddress: string;
+  userAgent: string;
+  timestamp: string;
+  severity: 'info' | 'warning' | 'error' | 'critical';
+  category?: string;
+  success: boolean;
+  errorMessage?: string;
 }
 
-export interface SystemAlert {
-  id: string;
-  type: "info" | "warning" | "error" | "critical";
-  title: string;
-  message: string;
-  timestamp: string;
-  resolved: boolean;
-  resolvedAt?: string;
-  resolvedBy?: string;
-  severity: "info" | "warning" | "error" | "critical";
-  category: string;
-  metadata?: Record<string, any>;
+export interface ActivityFilter {
+  userId?: string;
+  action?: string;
+  resource?: string;
+  severity?: string;
+  category?: string;
+  search?: string;
+  success?: boolean;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface BackupInfo {
   id: string;
-  name: string;
-  type: "manual" | "scheduled";
-  status: "completed" | "failed" | "in_progress";
+  filename: string;
   size: number;
-  location: string;
   createdAt: string;
-  expiresAt?: string;
-  metadata?: Record<string, any>;
+  type: 'manual' | 'scheduled';
+  status: 'completed' | 'failed' | 'in_progress';
+  description?: string;
 }
 
-export interface AdminUser extends User {
-  lastLoginIp?: string;
-  loginCount: number;
-  isOnline: boolean;
+export interface PermissionGroup {
+  id: string;
+  name: string;
+  description: string;
   permissions: string[];
+  userCount: number;
+  isSystem: boolean;
 }
 
-// ���Ͳ���ҪĬ�ϵ���
+export interface AdminApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
