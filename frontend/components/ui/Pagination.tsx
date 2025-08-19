@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface PaginationProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const Pagination: React.FC<PaginationProps> = (props) => {
+
+const Pagination: React.FC<PaginationProps> = ({ className, children, ...props }) => {
   return (
-    <div className="pagination">
-      <h1>Pagination</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`pagination ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">Pagination</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default Pagination;

@@ -1,259 +1,280 @@
-import React from 'react;import { cn    } from '../../utils/cn;interface ProgressBarProps {';
+import React from 'react';
+
+interface ProgressBarProps {
   /** 进度值 (0-100) */
   value: number;
-  /** 进度条变体 */;
-  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info;
-  /** 进度条尺寸 */;
-  size?: 'sm' | 'md' | 'lg
+  /** 进度条变体 */
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
+  /** 进度条尺寸 */
+  size?: 'sm' | 'md' | 'lg';
   /** 是否显示百分比文本 */
   showPercentage?: boolean;
   /** 是否显示动画 */
   animated?: boolean;
+  /** 是否显示条纹 */
+  striped?: boolean;
   /** 自定义类名 */
   className?: string;
   /** 自定义标签 */
   label?: string;
-  /** 是否显示条纹 */
-  striped?: boolean'}
-export const ProgressBar: React.FC<ProgressBarProps> = ({;
+  /** 最大值 */
+  max?: number;
+  /** 最小值 */
+  min?: number;
+}
+
+export const ProgressBar: React.FC<ProgressBarProps> = ({
   value,
   variant = 'primary',
   size = 'md',
   showPercentage = false,
-  animated = true,
-  className,
+  animated = false,
+  striped = false,
+  className = '',
   label,
-  striped = false
+  max = 100,
+  min = 0
 }) => {
-  
-  const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    if (disabled || loading) return;
-    
-    try {
-      onClick?.(event)
-} catch (error) {;
-      console.error('Click handler error: ', error);';
-      setError('操作失败，请重试")
-}
-  }, [disabled, loading, onClick]);
-  
-  const handleChange = useCallback((newValue: any) => {
-    updateState({ value: newValue, touched: true, error: null });
-    
-    try {
-      onChange?.(newValue)
-} catch (error) {;
-      console.error('Change handler error: ', error);';
-      updateState({ error: '值更新失败' })
-}
-  }, [onChange, updateState]);
-  
-  const handleFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
-    updateState({ focused: true });
-    onFocus?.(event)
-}, [onFocus, updateState]);
-  
-  const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
-    updateState({ focused: false });
-    onBlur?.(event)
-}, [onBlur, updateState]);
-  
-  const [state, setState] = useState({
-    value: defaultValue,
-    loading: false,
-    error: null,
-    touched: false,
-    focused: false
-  });
-  
-  const updateState = useCallback((updates: Partial<typeof state>) => {
-    setState(prev => ({ ...prev, ...updates }))
-}, []); // 确保值在0-100范围内
-  const clampedValue = Math.max(0, Math.min(100, value)); // 基础样式类
-  const containerClasses = cn(;
-    'w-full rounded-full overflow-hidden',
-    {;
-      'h-1': size === 'sm',
-      'h-2': size === 'md',
-      'h-3': size === 'lg',
-    },
-    "bg-gray-700 dark:bg-gray-600',
-    className
-  ); // 进度条样式类
-  const progressClasses = cn(;
-    "h-full rounded-full transition-all duration-300 ease-in-out',
-    {
-      // 变体颜色;
-      'bg-blue-500': variant === 'primary',
-      'bg-gray-500': variant === 'secondary',
-      'bg-green-500': variant === 'success',
-      'bg-yellow-500': variant === 'warning',
-      'bg-red-500': variant === 'danger',
-      'bg-cyan-500': variant === 'info',
-      // 条纹效果;
-      "bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:20px_100%]': striped,
-      // 动画效果;
-      "animate-pulse': animated && clampedValue > 0 && clampedValue < 100,
+  // 确保值在有效范围内
+  const clampedValue = Math.max(min, Math.min(max, value));
+  const percentage = ((clampedValue - min) / (max - min)) * 100;
+
+  // 获取变体样式
+  const getVariantClasses = () => {
+    switch (variant) {
+      case 'primary':
+        return 'bg-blue-600';
+      case 'secondary':
+        return 'bg-gray-600';
+      case 'success':
+        return 'bg-green-600';
+      case 'warning':
+        return 'bg-yellow-600';
+      case 'danger':
+        return 'bg-red-600';
+      case 'info':
+        return 'bg-cyan-600';
+      default:
+        return 'bg-blue-600';
     }
-  );
+  };
+
+  // 获取尺寸样式
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'sm':
+        return 'h-2';
+      case 'md':
+        return 'h-4';
+      case 'lg':
+        return 'h-6';
+      default:
+        return 'h-4';
+    }
+  };
+
+  // 获取文本尺寸
+  const getTextSizeClasses = () => {
+    switch (size) {
+      case 'sm':
+        return 'text-xs';
+      case 'md':
+        return 'text-sm';
+      case 'lg':
+        return 'text-base';
+      default:
+        return 'text-sm';
+    }
+  };
 
   return (
-    <div className="space-y-2>
+    <div className={`progress-bar-container ${className}`}>
       {/* 标签和百分比 */}
-      {(label || showPercentage) && (;
-        <div className="flex justify-between items-center text-sm>
-          {label && <span className="text-gray-300>{label}</span>}
-          {showPercentage && (;
-            <span className="text-gray-300 font-medium>
-              {Math.round(clampedValue)}%
+      {(label || showPercentage) && (
+        <div className="flex justify-between items-center mb-2">
+          {label && (
+            <span className={`font-medium text-gray-700 ${getTextSizeClasses()}`}>
+              {label}
+            </span>
+          )}
+          {showPercentage && (
+            <span className={`font-medium text-gray-600 ${getTextSizeClasses()}`}>
+              {Math.round(percentage)}%
             </span>
           )}
         </div>
       )}
 
       {/* 进度条容器 */}
-      <div className={containerClasses}>
-        <div>
-          className={progressClasses}
-          style={{ width: `${clampedValue}%` }}
-          role= "progressbar;
-          aria-valuenow={clampedValue}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={label || `进度: ${Math.round(clampedValue)}%`}
-        />
-      </div>
-    </div>
-  )
-}`
-interface CircularProgressBarProps   {
-  /** 进度值 (0-100) */
-  value: number;
-  /** 圆形进度条尺寸 */
-  size?: number;
-  /** 线条宽度 */
-  strokeWidth?: number;
-  /** 进度条颜色 */
-  color?: string;
-  /** 背景颜色 */
-  backgroundColor?: string;
-  /** 是否显示百分比 */
-  showPercentage?: boolean;
-  /** 自定义类名 */
-  className?: string
-}`
-export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
-  value,
-  size = 120,
-  strokeWidth = 8,  color = "var(--color-primary)',`;
-  backgroundColor = 'var(--color-gray-700)',
-  showPercentage = true,
-  className
-}) => {
-  const clampedValue = Math.max(0, Math.min(100, value));
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const strokeDasharray = circumference;
-  const strokeDashoffset = circumference - (clampedValue / 100) * circumference;
-
-  return (
-    <div className={cn('relative inline-flex items-center justify-center', className)}>
-      <svg>
-        width={size}
-        height={size}
-        className="transform -rotate-90;
+      <div 
+        className={`
+          w-full bg-gray-200 rounded-full overflow-hidden
+          ${getSizeClasses()}
+        `}
+        role="progressbar"
+        aria-valuenow={clampedValue}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-label={label || `进度: ${Math.round(percentage)}%`}
       >
-        {/* 背景圆环 */}
-        <circle>
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={backgroundColor}
-          strokeWidth={strokeWidth}
-          fill='transparent' />
+        {/* 进度条填充 */}
+        <div
+          className={`
+            h-full transition-all duration-300 ease-out
+            ${getVariantClasses()}
+            ${striped ? 'bg-stripes' : ''}
+            ${animated ? 'animate-pulse' : ''}
+          `}
+          style={{ width: `${percentage}%` }}
+        >
+          {/* 条纹效果 */}
+          {striped && (
+            <div 
+              className="h-full w-full opacity-25"
+              style={{
+                backgroundImage: `repeating-linear-gradient(
+                  45deg,
+                  transparent,
+                  transparent 10px,
+                  rgba(255,255,255,.2) 10px,
+                  rgba(255,255,255,.2) 20px
+                )`
+              }}
+            />
+          )}
+        </div>
+      </div>
 
-        {/* 进度圆环 */}
-        <circle>
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={color}
-          strokeWidth={strokeWidth}
-          fill= transparent;
-          strokeDasharray={strokeDasharray}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap= round;
-          className="transition-all duration-300 ease-in-out />
-      </svg>`
-      {/* 百分比文本 */}
-      {showPercentage && (;
-        <div className="absolute inset-0 flex items-center justify-center>
-          <span className="text-lg font-semibold text-white>
-            {Math.round(clampedValue)}%
+      {/* 内联百分比文本（仅在大尺寸时显示） */}
+      {showPercentage && size === 'lg' && percentage > 20 && (
+        <div 
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ top: label ? '1.5rem' : '0' }}
+        >
+          <span className="text-white font-medium text-sm">
+            {Math.round(percentage)}%
           </span>
         </div>
       )}
     </div>
-  )
-}`
-interface SteppedProgressBarProps   {
-  /** 当前步骤 (从0开始) */
-  currentStep: number;
-  /** 总步骤数 */
-  totalSteps: number;
-  /** 步骤标签 */
-  steps?: string[]
-  /** 自定义类名 */
-  className?: string
-}`
-export const SteppedProgressBar: React.FC<SteppedProgressBarProps> = ({
-  currentStep,
-  totalSteps,
-  steps,
-  className
+  );
+};
+
+// 多段进度条组件
+interface MultiProgressBarProps {
+  segments: Array<{
+    value: number;
+    variant?: ProgressBarProps['variant'];
+    label?: string;
+  }>;
+  size?: ProgressBarProps['size'];
+  showPercentage?: boolean;
+  className?: string;
+  max?: number;
+}
+
+export const MultiProgressBar: React.FC<MultiProgressBarProps> = ({
+  segments,
+  size = 'md',
+  showPercentage = false,
+  className = '',
+  max = 100
 }) => {
+  const total = segments.reduce((sum, segment) => sum + segment.value, 0);
+  const clampedTotal = Math.min(total, max);
+
+  // 获取尺寸样式
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'sm':
+        return 'h-2';
+      case 'md':
+        return 'h-4';
+      case 'lg':
+        return 'h-6';
+      default:
+        return 'h-4';
+    }
+  };
+
+  // 获取变体样式
+  const getVariantClasses = (variant: ProgressBarProps['variant'] = 'primary') => {
+    switch (variant) {
+      case 'primary':
+        return 'bg-blue-600';
+      case 'secondary':
+        return 'bg-gray-600';
+      case 'success':
+        return 'bg-green-600';
+      case 'warning':
+        return 'bg-yellow-600';
+      case 'danger':
+        return 'bg-red-600';
+      case 'info':
+        return 'bg-cyan-600';
+      default:
+        return 'bg-blue-600';
+    }
+  };
+
   return (
-    <div className={cn("w-full', className)}>
-      <div className="flex items-center justify-between mb-2>
-        {Array.from({ length: totalSteps }, (_, index) => (;
-          <div key={index} className="flex flex-col items-center'>
-            {/* 步骤圆点 */}
-            <div>
-              className={cn(;
-                w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium,
-                {
-                  bg-blue-500 text-white: index <= currentStep,>
-                  "bg-gray-600 text-gray-400': index > currentStep,
-                }
-              )}
-            >
-              {index + 1}
-            </div>`
-            {/* 步骤标签 */}
-            {steps && steps[index] && (;
-              <span className="text-xs text-gray-400 mt-1 text-center max-w-20>
-                {steps[index]}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>`
-      {/* 连接线 */}
-      <div className="flex items-center>
-        {Array.from({ length: totalSteps - 1 }, (_, index) => (
-          <div>
-            key={index}
-            className={cn(;
-              "flex-1 h-1 mx-2',
-              {;
-                'bg-blue-500': index < currentStep,>
-                'bg-gray-600': index >= currentStep,
-              }
-            )}
-          />
-        ))}
+    <div className={`multi-progress-bar-container ${className}`}>
+      {/* 总百分比 */}
+      {showPercentage && (
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium text-gray-700">总进度</span>
+          <span className="text-sm font-medium text-gray-600">
+            {Math.round((clampedTotal / max) * 100)}%
+          </span>
+        </div>
+      )}
+
+      {/* 多段进度条 */}
+      <div 
+        className={`
+          w-full bg-gray-200 rounded-full overflow-hidden flex
+          ${getSizeClasses()}
+        `}
+        role="progressbar"
+        aria-valuenow={clampedTotal}
+        aria-valuemin={0}
+        aria-valuemax={max}
+      >
+        {segments.map((segment, index) => {
+          const segmentPercentage = (segment.value / max) * 100;
+          return (
+            <div
+              key={index}
+              className={`
+                h-full transition-all duration-300 ease-out
+                ${getVariantClasses(segment.variant)}
+              `}
+              style={{ width: `${segmentPercentage}%` }}
+              title={segment.label ? `${segment.label}: ${Math.round(segmentPercentage)}%` : undefined}
+            />
+          );
+        })}
       </div>
+
+      {/* 图例 */}
+      {segments.some(s => s.label) && (
+        <div className="flex flex-wrap gap-4 mt-2">
+          {segments.map((segment, index) => 
+            segment.label ? (
+              <div key={index} className="flex items-center space-x-2">
+                <div 
+                  className={`w-3 h-3 rounded-sm ${getVariantClasses(segment.variant)}`}
+                />
+                <span className="text-xs text-gray-600">
+                  {segment.label} ({Math.round((segment.value / max) * 100)}%)
+                </span>
+              </div>
+            ) : null
+          )}
+        </div>
+      )}
     </div>
-  )
-}`;
-export default ProgressBar;`
+  );
+};
+
+export default ProgressBar;

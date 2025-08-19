@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface TestingToolsProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const TestingTools: React.FC<TestingToolsProps> = (props) => {
+
+const TestingTools: React.FC<TestingToolsProps> = ({ className, children, ...props }) => {
   return (
-    <div className="testingtools">
-      <h1>TestingTools</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`testing-tools ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">TestingTools</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default TestingTools;

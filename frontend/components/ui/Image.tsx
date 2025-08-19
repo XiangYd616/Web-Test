@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface ImageProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const Image: React.FC<ImageProps> = (props) => {
+
+const Image: React.FC<ImageProps> = ({ className, children, ...props }) => {
   return (
-    <div className="image">
-      <h1>Image</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`image ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">Image</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default Image;

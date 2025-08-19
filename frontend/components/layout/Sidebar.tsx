@@ -29,9 +29,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       label: '仪表板',
     },
     {
-      key: '/testing-dashboard',
-      icon: <BarChartOutlined />,
-      label: '测试管理',
+      key: '/testing',
+      icon: <BugOutlined />,
+      label: '测试工具',
     },
     {
       key: '/stress-test',
@@ -39,19 +39,19 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       label: '压力测试',
     },
     {
-      key: '/testing',
-      icon: <BugOutlined />,
-      label: '测试工具',
-    },
-    {
       key: '/content-detection',
       icon: <SecurityScanOutlined />,
-      label: '内容检测',
+      label: 'SEO测试',
+    },
+    {
+      key: '/performance-test',
+      icon: <BarChartOutlined />,
+      label: '性能测试',
     },
     {
       key: '/settings',
       icon: <SettingOutlined />,
-      label: '系统设置',
+      label: '设置',
     },
     {
       key: '/help',
@@ -71,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
       {/* Logo区域 */}
       <div className={`sidebar-logo ${collapsed ? 'collapsed' : ''}`}>
         <div className={`sidebar-logo-text ${collapsed ? 'collapsed' : ''}`}>
-          {collapsed ? 'TW' : 'Test-Web'}
+          {collapsed ? 'TW' : 'Test Web App'}
         </div>
       </div>
 
@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         mode="inline"
         selectedKeys={[location.pathname]}
         items={menuItems}
-        onClick={({ key }) => navigate(key)}
+        onClick={({ key }: { key: string }) => navigate(key)}
         className="sidebar-menu"
       />
     </Sider>

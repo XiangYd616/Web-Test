@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface LoadingStatesProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const LoadingStates: React.FC<LoadingStatesProps> = (props) => {
+
+const LoadingStates: React.FC<LoadingStatesProps> = ({ className, children, ...props }) => {
   return (
-    <div className="loadingstates">
-      <h1>LoadingStates</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`loading-states ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">LoadingStates</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default LoadingStates;

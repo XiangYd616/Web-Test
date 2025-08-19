@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface ThemeToggleProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const ThemeToggle: React.FC<ThemeToggleProps> = (props) => {
+
+const ThemeToggle: React.FC<ThemeToggleProps> = ({ className, children, ...props }) => {
   return (
-    <div className="themetoggle">
-      <h1>ThemeToggle</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`theme-toggle ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">ThemeToggle</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default ThemeToggle;

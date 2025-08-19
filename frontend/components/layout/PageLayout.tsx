@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface PageLayoutProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const PageLayout: React.FC<PageLayoutProps> = (props) => {
+
+const PageLayout: React.FC<PageLayoutProps> = ({ className, children, ...props }) => {
   return (
-    <div className="pagelayout">
-      <h1>PageLayout</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`page-layout ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">PageLayout</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default PageLayout;

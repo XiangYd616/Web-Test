@@ -1,17 +1,17 @@
-import React from 'react;';
+import React from "react";
 
 interface UserPreferencesPanelProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
 
-const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = (props) => {
+const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ className, children, ...props }) => {
   return (
-    <div className="userpreferencespanel">
-      <h1>UserPreferencesPanel</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`user-preferences-panel ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">UserPreferencesPanel</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
 
 export default UserPreferencesPanel;
-;

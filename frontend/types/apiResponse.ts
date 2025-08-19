@@ -1,99 +1,136 @@
-/**
- * API响应类型定义 - 标准版本
- * 版本: v2.0.0
- * 创建时间: 2025-08-16
- *
- * 此文件现在导入共享的标准类型定义，确保前后端完全一致
- */
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+  code?: number;
+  timestamp: string;
+  requestId: string;
+}
 
-// 导入共享的标准类型定义
-export {
-  StandardApiError as ApiError, StandardApiErrorResponse as ApiErrorResponse, StandardApiMeta as ApiMeta,
-  StandardApiResponse as ApiResponse,
-  StandardApiSuccessResponse as ApiSuccessResponse, StandardCreatedResponse as CreatedResponse, StandardErrorCode as ErrorCode, StandardErrorMessages as ErrorMessages, HttpStatusCode, isStandardApiErrorResponse as isApiErrorResponse, isStandardApiSuccessResponse as isApiSuccessResponse, StandardNoContentResponse as NoContentResponse, StandardPaginatedResponse as PaginatedResponse, PaginationMeta, StandardStatusCodeMap as StatusCodeMap, Timestamp, UUID, ValidationError
-} from '../../shared/types/standardApiResponse
-// ==================== 向后兼容的类型别名 ====================
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: Record<string, any>;
+  timestamp: string;
+  requestId: string;
+}
 
-// 为了向后兼容，保留一些旧的类型别名
-export type PaginationInfo   = PaginationMeta; // ==================== 向后兼容的工具函数 ====================
-;
-// 重新导出一些常用的工具函数，保持向后兼容性;
-export {;
-  createCreatedResponse, createErrorResponse, createNoContentResponse, createPaginatedResponse, createPaginationMeta as createPagination, createSuccessResponse, generateRequestId'} from '../../shared/utils/apiResponseBuilder
-// ==================== 前端特有的接口定义 ====================
-;
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
+  pagination: PaginationMeta;
+}
+
+export interface ValidationError {
+  field: string;
+  message: string;
+  value?: any;
+}
+
+export enum ErrorCode {
+  UNKNOWN_ERROR = "UNKNOWN_ERROR",
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  NETWORK_ERROR = "NETWORK_ERROR",
+  TIMEOUT_ERROR = "TIMEOUT_ERROR",
+  UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
+  NOT_FOUND = "NOT_FOUND",
+  CONFLICT = "CONFLICT",
+  RATE_LIMIT = "RATE_LIMIT",
+  INTERNAL_ERROR = "INTERNAL_ERROR"
+}
+
 export interface RequestConfig {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS
-  headers?: Record<string, string>
-  body?: string | FormData | URLSearchParams | Record<string, any>
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
+  headers?: Record<string, string>;
+  body?: string | FormData | URLSearchParams | Record<string, any>;
   timeout?: number;
   retries?: number;
-  retryDelay?: number;
-  cache?: boolean;
-  cacheTTL?: number
+  baseURL?: string;
 }
 
-export interface AuthConfig     {
-  token?: string;
-  apiKey?: string;
-  basicAuth?: { username: string; password: string }
-  oauth2?: { accessToken: string; refreshToken?: string }
+export interface SortConfig {
+  field: string;
+  order?: "asc" | "desc";
 }
+
+export interface FilterConfig {
+  field: string;
+  operator: "eq" | "ne" | "gt" | "gte" | "lt" | "lte" | "like" | "in";
+  value: any;
+}
+
 export interface QueryParams {
   page?: number;
   limit?: number;
-  sort?: string;
-  order?: 'asc' | 'desc
+  sort?: SortConfig[];
+  filters?: FilterConfig[];
   search?: string;
-  filters?: Record<string, any>
 }
 
-export interface PaginatedRequest extends QueryParams     {
-  // 继承查询参数
+export function createSuccessResponse<T>(
+  data: T,
+  message?: string
+): ApiResponse<T> {
+  return {
+    success: true,
+    data,
+    message,
+    timestamp: new Date().toISOString(),
+    requestId: generateRequestId()
+  };
 }
 
-// ==================== 前端API客户端接口 ====================
-
-export interface ApiClient     {
-  get<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>
-  post<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>
-  put<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>
-  delete<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>
-  patch<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>
+export function createErrorResponse(
+  error: string,
+  code?: string
+): ApiResponse {
+  return {
+    success: false,
+    error,
+    code: code ? parseInt(code) : 500,
+    timestamp: new Date().toISOString(),
+    requestId: generateRequestId()
+  };
 }
 
-// ==================== 前端特有的常量 ====================
-
-export const DEFAULT_PAGINATION: PaginationInfo = {
-  page: 1,
-  limit: 10,
-  total: 0,
-  totalPages: 0,
-  hasNext: false,
-  hasPrev: false,
-  nextPage: null,
-  prevPage: null
-} // ==================== 前端特有的工具函数 ====================
-
-/**
- * 提取响应数据
- */
-export function extractData<T>(response: ApiResponse<T>): T | null   {
-  return isApiSuccessResponse(response) ? response.data: null
+export function createPaginatedResponse<T>(
+  data: T[],
+  pagination: PaginationMeta,
+  message?: string
+): PaginatedResponse<T> {
+  return {
+    success: true,
+    data,
+    pagination,
+    message,
+    timestamp: new Date().toISOString(),
+    requestId: generateRequestId()
+  };
 }
 
-/**
- * 提取错误信息
- */
-export function extractError<T>(response: ApiResponse<T>): ApiError | null   {
-  return isApiErrorResponse(response) ? response.error: null
+export function generateRequestId(): string {
+  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
-/**;
- * 提取分页信息;
- */;
-export function extractPagination<T>(response: ApiResponse<T>): PaginationMeta | null   {;
-  if (isApiSuccessResponse(response) && 'pagination' in response.meta) {
-    return (response.meta as any).pagination
+
+export function isApiError(response: ApiResponse): boolean {
+  return !response.success;
 }
-  return null
+
+export function extractData<T>(response: ApiResponse<T>): T | null {
+  return response.success ? response.data || null : null;
 }
+
+export function extractError(response: ApiResponse): string | null {
+  return response.success ? null : response.error || "Unknown error";
+}
+
+// ���Ͳ���ҪĬ�ϵ���

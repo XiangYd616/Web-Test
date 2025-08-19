@@ -1,375 +1,286 @@
-
-// 扩展 Performance 接口
 declare global {
-  interface Performance   {
+  interface Performance {
     memory?: {
       usedJSHeapSize: number;
       totalJSHeapSize: number;
-      jsHeapSizeLimit: number
-}
-}
+      jsHeapSizeLimit: number;
+    };
+  }
 
-  interface PerformanceEntry   {
+  interface PerformanceEntry {
     processingStart?: number;
     processingEnd?: number;
     renderStart?: number;
-    renderEnd?: number
-}
-
-  interface PerformanceNavigationTiming   {
-    processingStart?: number;
-    processingEnd?: number
-}
-
-  interface PerformanceResourceTiming   {
-    processingStart?: number;
-    processingEnd?: number
-}
-}
-
-// ==================== 性能配置接口 ====================
-
-export interface PerformanceConfig     {
-  /** 检测级别 */
-  level: 'basic' | 'standard' | 'comprehensive
-  /** 页面速度检测 */
-  pageSpeed: boolean;
-
-  /** Core Web Vitals检测 */
-  coreWebVitals: boolean;
-
-  /** 资源优化检测 */
-  resourceOptimization: boolean;
-
-  /** 缓存策略检测 */
-  caching: boolean;
-
-  /** 压缩优化检测 */
-  compression: boolean;
-
-  /** 图片优化检测 */
-  imageOptimization: boolean;
-
-  /** JavaScript优化检测 */
-  javascriptOptimization: boolean;
-
-  /** CSS优化检测 */
-  cssOptimization: boolean;
-;
-  /** 移动端性能检测 */;
-  mobilePerformance: boolean;
-;
-  /** 设备类型 */;
-  device: 'desktop' | 'mobile' | 'both
-  /** 超时时间（秒） */
-  timeout: number;
-
-  /** 重试次数 */
-  retries: number
-}
-
-// ==================== 性能指标接口 ====================
-
-export interface CoreWebVitals     {
-  /** 最大内容绘制时间 (ms) */
-  lcp: number;
-
-  /** 首次输入延迟 (ms) */
-  fid: number;
-
-  /** 累积布局偏移 */
-  cls: number;
-
-  /** 首次内容绘制时间 (ms) */
-  fcp: number;
-
-  /** 首次有意义绘制时间 (ms) */
-  fmp: number;
-
-  /** 速度指数 */
-  speedIndex: number;
-
-  /** 交互时间 (ms) */
-  tti: number
-}
-
-export interface PageSpeedMetrics     {
-  /** 页面加载时间 (ms) */
-  loadTime: number;
-
-  /** DOM内容加载时间 (ms) */
-  domContentLoaded: number;
-
-  /** 首字节时间 (ms) */
-  ttfb: number;
-
-  /** 页面大小 (bytes) */
-  pageSize: number;
-
-  /** 请求数量 */
-  requestCount: number;
-
-  /** 响应时间 (ms) */
-  responseTime: number;
-
-  /** 传输大小 (bytes) */
-  transferSize: number
-}
-
-export interface ResourceAnalysis     {
-  /** 图片资源分析 */
-  images: {
-    count: number;
-    totalSize: number;
-    unoptimized: number;
-    missingAlt: number
-}
-
-  /** JavaScript资源分析 */
-  javascript: {
-    count: number;
-    totalSize: number;
-    blocking: number;
-    unused: number
-}
-
-  /** CSS资源分析 */
-  css: {
-    count: number;
-    totalSize: number;
-    blocking: number;
-    unused: number
-}
-
-  /** 字体资源分析 */
-  fonts: {
-    count: number;
-    totalSize: number;
-    webFonts: number
-}'}
-export interface CacheAnalysis {
-  /** 缓存策略 */;
-  strategy: 'none' | 'basic' | 'advanced
-  /** 缓存命中率 */
-  hitRate: number;
-
-  /** 可缓存资源 */
-  cacheable: {
-    count: number;
-    size: number
-}
-
-  /** 未缓存资源 */
-  uncached: {
-    count: number;
-    size: number
-}
-
-  /** 缓存头分析 */
-  headers: {
-    cacheControl: boolean;
-    etag: boolean;
-    lastModified: boolean;
-    expires: boolean
-}'}
-export interface CompressionAnalysis {
-  /** 压缩类型 */;
-  type: 'none' | 'gzip' | 'brotli' | 'deflate
-  /** 压缩率 */
-  ratio: number;
-
-  /** 原始大小 (bytes) */
-  originalSize: number;
-
-  /** 压缩后大小 (bytes) */
-  compressedSize: number;
-
-  /** 可压缩资源 */
-  compressible: {
-    count: number;
-    size: number
-}
-
-  /** 未压缩资源 */
-  uncompressed: {
-    count: number;
-    size: number
-}
-}
-
-// ==================== 性能测试结果接口 ====================
-
-export interface PerformanceTestResult     {
-  /** 测试ID */
-  testId: string;
-
-  /** 测试URL */
-  url: string;
-
-  /** 测试时间戳 */
-  timestamp: number;
-
-  /** 测试配置 */
-  config: PerformanceConfig;
-;
-  /** 总体评分 (0-100) */;
-  overallScore: number;
-;
-  /** 性能等级 */;
-  grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F
-  /** Core Web Vitals */
-  coreWebVitals?: CoreWebVitals;
-
-  /** 页面速度指标 */
-  pageSpeed?: PageSpeedMetrics;
-
-  /** 资源分析 */
-  resources?: ResourceAnalysis;
-
-  /** 缓存分析 */
-  cache?: CacheAnalysis;
-
-  /** 压缩分析 */
-  compression?: CompressionAnalysis;
-
-  /** 移动端性能 */
-  mobilePerformance?: {
-    score: number;
-    issues: string[]
-    recommendations: string[]
-}
-
-  /** 性能建议 */
-  recommendations: PerformanceRecommendation[]
-
-  /** 详细问题 */
-  issues: PerformanceIssue[]
-
-  /** 测试持续时间 (ms) */
-  duration: number;
-
-  /** 错误信息 */
-  error?: string'}
-export interface PerformanceRecommendation {
-  /** 建议类型 */;
-  type: 'critical' | 'important' | 'minor
-  /** 建议标题 */
-  title: string;
-;
-  /** 建议描述 */;
-  description: string;
-;
-  /** 预期收益 */;
-  impact: 'high' | 'medium' | 'low;
-  /** 实施难度 */;
-  difficulty: 'easy' | 'medium' | 'hard
-  /** 相关指标 */
-  metrics: string[]'
-}
-export interface PerformanceIssue {
-  /** 问题类型 */;
-  type: 'speed' | 'size' | 'optimization' | 'caching' | 'compression;
-  /** 严重程度 */;
-  severity: 'critical' | 'high' | 'medium' | 'low
-  /** 问题描述 */
-  description: string;
-
-  /** 影响的指标 */
-  affectedMetrics: string[]
-
-  /** 修复建议 */
-  solution: string;
-
-  /** 相关资源 */
-  resources?: string[]
-}
-// ==================== 性能测试进度接口 ==================== ;
-export interface PerformanceTestProgress {
-  /** 当前阶段 */;
-  phase: 'initializing' | 'analyzing' | 'measuring' | 'optimizing' | 'reporting' | 'completed' | 'failed
-  /** 进度百分比 (0-100) */
-  progress: number;
-
-  /** 当前步骤描述 */
-  currentStep: string;
-
-  /** 预计剩余时间 (ms) */
-  estimatedTimeRemaining?: number;
-
-  /** 已完成的检测项 */
-  completedChecks: string[]
-
-  /** 当前检测项 */
-  currentCheck?: string;
-
-  /** 实时指标 */
-  realTimeMetrics?: {
-    responseTime: number;
-    throughput: number;
-    errorRate: number
-}
-}
-// ==================== 预设配置模板 ==================== ;
-export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {;
-  basic: {;
-    level: 'basic',
-    pageSpeed: true,
-    coreWebVitals: false,
-    resourceOptimization: false,
-    caching: false,
-    compression: false,
-    imageOptimization: false,
-    javascriptOptimization: false,
-    cssOptimization: false,
-    mobilePerformance: false,
-    device: 'desktop',
-    timeout: 30,
-    retries: 1
-  },
-
-  standard: {;
-    level: 'standard',
-    pageSpeed: true,
-    coreWebVitals: true,
-    resourceOptimization: true,
-    caching: true,
-    compression: true,
-    imageOptimization: true,
-    javascriptOptimization: false,
-    cssOptimization: false,
-    mobilePerformance: true,
-    device: 'both',
-    timeout: 60,
-    retries: 2
-  },
-
-  comprehensive: {;
-    level: 'comprehensive',
-    pageSpeed: true,
-    coreWebVitals: true,
-    resourceOptimization: true,
-    caching: true,
-    compression: true,
-    imageOptimization: true,
-    javascriptOptimization: true,
-    cssOptimization: true,
-    mobilePerformance: true,
-    device: 'both',
-    timeout: 120,
-    retries: 3
+    renderEnd?: number;
   }
-} // ==================== 工具函数类型 ====================
 
-export type PerformanceTestCallback   = (progress: PerformanceTestProgress) => void;export interface PerformanceTestOptions     {
-  /** 进度回调 */
-  onProgress?: PerformanceTestCallback;
+  interface PerformanceNavigationTiming {
+    processingStart?: number;
+    processingEnd?: number;
+  }
 
-  /** 用户ID */
-  userId?: string;
-
-  /** 测试名称 */
-  testName?: string;
-
-  /** 是否保存结果 */
-  saveResults?: boolean
+  interface PerformanceResourceTiming {
+    processingStart?: number;
+    processingEnd?: number;
+  }
 }
+
+export type Timestamp = string;
+export type UUID = string;
+
+export interface PerformanceConfig {
+  url: string;
+  testName?: string;
+  description?: string;
+  
+  device?: "desktop" | "mobile" | "tablet";
+  viewport?: {
+    width: number;
+    height: number;
+  };
+  
+  throttling?: {
+    type: "none" | "3g" | "4g" | "slow-3g" | "custom";
+    downloadThroughput?: number;
+    uploadThroughput?: number;
+    latency?: number;
+  };
+  
+  iterations?: number;
+  timeout?: number;
+  cacheDisabled?: boolean;
+  
+  lighthouse?: {
+    categories?: Array<"performance" | "accessibility" | "best-practices" | "seo" | "pwa">;
+    onlyCategories?: string[];
+    skipAudits?: string[];
+    locale?: string;
+  };
+  
+  customMetrics?: string[];
+  
+  monitoring?: {
+    realUserMonitoring?: boolean;
+    syntheticMonitoring?: boolean;
+    continuousMonitoring?: boolean;
+  };
+}
+
+export interface CoreWebVitals {
+  fcp?: number;
+  lcp?: number;
+  fid?: number;
+  tti?: number;
+  tbt?: number;
+  cls?: number;
+  ttfb?: number;
+  si?: number;
+}
+
+export interface PerformanceMetrics extends CoreWebVitals {
+  navigationTiming?: {
+    navigationStart: number;
+    unloadEventStart: number;
+    unloadEventEnd: number;
+    redirectStart: number;
+    redirectEnd: number;
+    fetchStart: number;
+    domainLookupStart: number;
+    domainLookupEnd: number;
+    connectStart: number;
+    connectEnd: number;
+    secureConnectionStart: number;
+    requestStart: number;
+    responseStart: number;
+    responseEnd: number;
+    domLoading: number;
+    domInteractive: number;
+    domContentLoadedEventStart: number;
+    domContentLoadedEventEnd: number;
+    domComplete: number;
+    loadEventStart: number;
+    loadEventEnd: number;
+  };
+  
+  resourceTiming?: Array<{
+    name: string;
+    entryType: string;
+    startTime: number;
+    duration: number;
+    initiatorType: string;
+    transferSize: number;
+    encodedBodySize: number;
+    decodedBodySize: number;
+  }>;
+  
+  memoryUsage?: {
+    usedJSHeapSize: number;
+    totalJSHeapSize: number;
+    jsHeapSizeLimit: number;
+  };
+  
+  customMetrics?: Record<string, number>;
+}
+
+export interface LighthouseResult {
+  scores: {
+    performance: number;
+    accessibility: number;
+    bestPractices: number;
+    seo: number;
+    pwa: number;
+  };
+  
+  audits: Record<string, {
+    id: string;
+    title: string;
+    description: string;
+    score: number | null;
+    scoreDisplayMode: "binary" | "numeric" | "informative";
+    displayValue?: string;
+    details?: any;
+  }>;
+  
+  opportunities: Array<{
+    id: string;
+    title: string;
+    description: string;
+    savings: number;
+    impact: "low" | "medium" | "high";
+    details?: any;
+  }>;
+  
+  diagnostics: Array<{
+    id: string;
+    title: string;
+    description: string;
+    details?: any;
+  }>;
+}
+
+export interface PerformanceTestResult {
+  id: UUID;
+  testId: UUID;
+  url: string;
+  testName?: string;
+  timestamp: Timestamp;
+  
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
+  startTime: Timestamp;
+  endTime?: Timestamp;
+  duration?: number;
+  
+  metrics: PerformanceMetrics;
+  lighthouse?: LighthouseResult;
+  
+  overallScore: number;
+  grade: "A+" | "A" | "B+" | "B" | "C+" | "C" | "D+" | "D" | "F";
+  
+  recommendations: Array<{
+    id: string;
+    category: string;
+    priority: "low" | "medium" | "high" | "critical";
+    title: string;
+    description: string;
+    impact: string;
+    effort: "low" | "medium" | "high";
+    savings?: {
+      time?: number;
+      bytes?: number;
+      requests?: number;
+    };
+    resources?: Array<{
+      title: string;
+      url: string;
+      type: "documentation" | "tutorial" | "tool";
+    }>;
+  }>;
+  
+  errors: Array<{
+    code: string;
+    message: string;
+    severity: "low" | "medium" | "high" | "critical";
+    details?: any;
+  }>;
+  
+  warnings: Array<{
+    code: string;
+    message: string;
+    suggestion?: string;
+    details?: any;
+  }>;
+  
+  metadata: {
+    device: string;
+    userAgent: string;
+    viewport: { width: number; height: number };
+    throttling?: any;
+    environment: "development" | "staging" | "production";
+    version: string;
+  };
+}
+
+export interface PerformanceMonitor {
+  startMonitoring(): void;
+  stopMonitoring(): void;
+  getCurrentMetrics(): PerformanceMetrics;
+  onMetricUpdate(callback: (metrics: PerformanceMetrics) => void): void;
+  onThresholdExceeded(callback: (metric: string, value: number, threshold: number) => void): void;
+}
+
+export interface PerformanceThresholds {
+  fcp?: { good: number; needsImprovement: number };
+  lcp?: { good: number; needsImprovement: number };
+  fid?: { good: number; needsImprovement: number };
+  cls?: { good: number; needsImprovement: number };
+  ttfb?: { good: number; needsImprovement: number };
+  tti?: { good: number; needsImprovement: number };
+  si?: { good: number; needsImprovement: number };
+  custom?: Record<string, { good: number; needsImprovement: number }>;
+}
+
+export const DEFAULT_PERFORMANCE_CONFIG: Partial<PerformanceConfig> = {
+  device: "desktop",
+  viewport: { width: 1920, height: 1080 },
+  throttling: { type: "none" },
+  iterations: 1,
+  timeout: 30000,
+  cacheDisabled: false,
+  lighthouse: {
+    categories: ["performance", "accessibility", "best-practices", "seo"]
+  }
+};
+
+export const DEFAULT_PERFORMANCE_THRESHOLDS: PerformanceThresholds = {
+  fcp: { good: 1800, needsImprovement: 3000 },
+  lcp: { good: 2500, needsImprovement: 4000 },
+  fid: { good: 100, needsImprovement: 300 },
+  cls: { good: 0.1, needsImprovement: 0.25 },
+  ttfb: { good: 800, needsImprovement: 1800 },
+  tti: { good: 3800, needsImprovement: 7300 },
+  si: { good: 3400, needsImprovement: 5800 }
+};
+
+export type PerformanceAnalyzer = {
+  analyzeMetrics(metrics: PerformanceMetrics): {
+    score: number;
+    grade: string;
+    issues: Array<{ metric: string; value: number; threshold: number; severity: string }>;
+  };
+  
+  compareResults(baseline: PerformanceTestResult, current: PerformanceTestResult): {
+    improvements: Array<{ metric: string; improvement: number; percentage: number }>;
+    regressions: Array<{ metric: string; regression: number; percentage: number }>;
+    summary: { better: number; worse: number; same: number };
+  };
+  
+  generateRecommendations(result: PerformanceTestResult): Array<{
+    category: string;
+    priority: string;
+    title: string;
+    description: string;
+    impact: string;
+  }>;
+};
+
+// ���Ͳ���ҪĬ�ϵ���

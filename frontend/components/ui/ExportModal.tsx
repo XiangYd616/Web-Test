@@ -1,13 +1,17 @@
-import React from 'react;';
+import React from "react";
+
 interface ExportModalProps {
-  // å®šä¹‰ç»„ä»¶å±žæ€§
+  className?: string;
+  children?: React.ReactNode;
 }
-const ExportModal: React.FC<ExportModalProps> = (props) => {
+
+const ExportModal: React.FC<ExportModalProps> = ({ className, children, ...props }) => {
   return (
-    <div className="exportmodal">
-      <h1>ExportModal</h1>
-      <p>ç»„ä»¶å†…å®¹</p>
+    <div className={`export-modal ${className || ""}`} {...props}>
+      <h2 className="text-lg font-semibold mb-2">ExportModal</h2>
+      {children || <p className="text-gray-500">´Ë×é¼þÕýÔÚ¿ª·¢ÖÐ...</p>}
     </div>
-  )
-}
+  );
+};
+
 export default ExportModal;
