@@ -4,24 +4,22 @@
  * 版本: v1.0.0
  */
 
-import { 
-  VersionChecker, 
+import type {
+  ApiVersionNegotiation,
+  DataMigration,
+  VersionedData
+} from '../types/version.types';
+import {
   ApiVersionNegotiator,
   AutoMigrationSystem,
-  CompatibilityChecker,
-  TypeVersionRegistry,
-  VersionedDataWrapper,
   autoMigrationSystem,
+  CompatibilityChecker,
+  DATA_MODEL_VERSION,
+  TypeVersionRegistry,
   VERSION_INFO,
-  DATA_MODEL_VERSION
-} from '../types/version';
-import type { 
-  VersionedData, 
-  DataMigration, 
-  ApiVersionNegotiation,
-  VersionInfo 
-} from '../types/version';
-import type { ApiResponse } from '../types/api';
+  VersionChecker,
+  VersionedDataWrapper
+} from '../types/version.types';
 import { defaultMemoryCache } from './cacheStrategy';
 
 // ==================== 版本控制配置 ====================
@@ -95,7 +93,7 @@ export class VersionControlService {
     dataModels: Record<string, string> = {}
   ): Promise<CompatibilityReport> {
     const cacheKey = `compatibility_${clientVersion}_${serverVersion}`;
-    
+
     if (this.config.enableVersionCache) {
       const cached = await defaultMemoryCache.get(cacheKey);
       if (cached) {
@@ -163,7 +161,7 @@ export class VersionControlService {
     try {
       // 包装数据为版本化格式
       const versionedData = this.ensureVersionedData(data);
-      
+
       if (versionedData.version === targetVersion) {
         return {
           success: true,
@@ -175,7 +173,7 @@ export class VersionControlService {
       // 执行迁移
       const migrated = await Promise.race([
         this.migrationSystem.migrateData<T>(typeName, versionedData, targetVersion),
-        new Promise<never>((_, reject) => 
+        new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('Migration timeout')), this.config.migrationTimeout)
         )
       ]);
@@ -222,7 +220,7 @@ export class VersionControlService {
     onProgress?: (completed: number, total: number, current?: MigrationResult<T>) => void
   ): Promise<MigrationResult<T>[]> {
     const results: MigrationResult<T>[] = [];
-    
+
     for (let i = 0; i < dataList.length; i++) {
       const result = await this.migrateData<T>(typeName, dataList[i], targetVersion);
       results.push(result);
@@ -305,12 +303,12 @@ export class VersionControlService {
       const history = this.migrationHistory.get(migrationId);
       return history ? history[0] : null;
     }
-    
+
     const allHistory: MigrationResult[] = [];
     for (const history of this.migrationHistory.values()) {
       allHistory.push(...history);
     }
-    
+
     return allHistory.sort((a, b) => (b.duration || 0) - (a.duration || 0));
   }
 
@@ -363,7 +361,7 @@ export class VersionControlService {
     if (data && typeof data === 'object' && 'version' in data && 'data' in data) {
       return data as VersionedData<any>;
     }
-    
+
     return {
       version: '1.0.0', // 默认版本
       data,

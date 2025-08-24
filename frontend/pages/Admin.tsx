@@ -7,7 +7,7 @@ import SystemSettings from '../components/admin/SystemSettings';
 import TestManagement from '../components/admin/TestManagement';
 import UserManagement from '../components/admin/UserManagement';
 import { adminService } from '../services/adminService';
-import type { SystemMonitor, SystemStats } from '../types/admin';
+import type { SystemMonitor, SystemStats } from '../types/admin.types';
 
 const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -108,8 +108,8 @@ const Admin: React.FC = () => {
                 <span>系统运行时间: {stats ? formatUptime(stats.system.uptime) : '--'}</span>
               </div>
               <div className={`px-3 py-1 rounded-full text-xs font-medium ${monitor && monitor.metrics.application.errorRate < 5
-                  ? 'bg-green-500/20 text-green-300 border border-green-500/30'
-                  : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                : 'bg-red-500/20 text-red-300 border border-red-500/30'
                 }`}>
                 {monitor && monitor.metrics.application.errorRate < 5 ? '系统正常' : '系统异常'}
               </div>
@@ -130,8 +130,8 @@ const Admin: React.FC = () => {
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === tab.id
-                      ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30 shadow-lg'
-                      : 'text-gray-300 hover:bg-gray-700/50 hover:text-white border border-transparent'
+                    ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30 shadow-lg'
+                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white border border-transparent'
                     }`}
                 >
                   <Icon className="w-5 h-5 mr-3" />

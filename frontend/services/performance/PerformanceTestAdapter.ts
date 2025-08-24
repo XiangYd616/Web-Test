@@ -1,6 +1,6 @@
 
-import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, UnifiedPerformanceConfig } from '../../types/performance';
-import { performanceTestCore } from './PerformanceTestCore';
+import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, UnifiedPerformanceConfig } from '../../types/performance.types';
+import { performanceTestCore } from './performanceTestCore';
 
 // ==================== 兼容性接口定义 ====================
 

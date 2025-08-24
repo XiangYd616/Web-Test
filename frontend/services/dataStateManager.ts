@@ -4,8 +4,8 @@
  * 版本: v1.0.0
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import type { ApiResponse, ApiError } from '../types/api';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ApiError, ApiResponse } from '../types/api.types';
 
 // ==================== 状态类型定义 ====================
 
@@ -41,15 +41,15 @@ export interface AsyncOperation<T = any> {
 export function useDataState<T = any>(
   options: DataStateOptions = {}
 ): [
-  DataStateInfo<T>,
-  {
-    execute: (operation: AsyncOperation<T>) => Promise<T | null>;
-    retry: () => Promise<T | null>;
-    reset: () => void;
-    setData: (data: T) => void;
-    setError: (error: ApiError) => void;
-  }
-] {
+    DataStateInfo<T>,
+    {
+      execute: (operation: AsyncOperation<T>) => Promise<T | null>;
+      retry: () => Promise<T | null>;
+      reset: () => void;
+      setData: (data: T) => void;
+      setError: (error: ApiError) => void;
+    }
+  ] {
   const {
     initialData = null,
     retryLimit = 3,
@@ -103,7 +103,7 @@ export function useDataState<T = any>(
 
     try {
       const response = await operation();
-      
+
       if (response.success && response.data !== undefined) {
         const responseData = response.data;
         setData(responseData);
@@ -160,7 +160,7 @@ export function useDataState<T = any>(
     setLastUpdated(null);
     setRetryCount(0);
     lastOperationRef.current = null;
-    
+
     if (retryTimeoutRef.current) {
       clearTimeout(retryTimeoutRef.current);
       retryTimeoutRef.current = null;
@@ -211,15 +211,15 @@ export function useBatchDataState(
   keys: string[],
   options: DataStateOptions = {}
 ): [
-  BatchDataStateInfo,
-  {
-    execute: (key: string, operation: AsyncOperation) => Promise<any>;
-    executeAll: (operations: Record<string, AsyncOperation>) => Promise<Record<string, any>>;
-    retry: (key: string) => Promise<any>;
-    retryAll: () => Promise<Record<string, any>>;
-    reset: (key?: string) => void;
-  }
-] {
+    BatchDataStateInfo,
+    {
+      execute: (key: string, operation: AsyncOperation) => Promise<any>;
+      executeAll: (operations: Record<string, AsyncOperation>) => Promise<Record<string, any>>;
+      retry: (key: string) => Promise<any>;
+      retryAll: () => Promise<Record<string, any>>;
+      reset: (key?: string) => void;
+    }
+  ] {
   const stateHooks = keys.reduce((acc, key) => {
     acc[key] = useDataState(options);
     return acc;
@@ -269,7 +269,7 @@ export function useBatchDataState(
   // 执行所有操作
   const executeAll = useCallback(async (operations: Record<string, AsyncOperation>) => {
     const results: Record<string, any> = {};
-    
+
     await Promise.allSettled(
       Object.entries(operations).map(async ([key, operation]) => {
         const result = await execute(key, operation);
@@ -292,7 +292,7 @@ export function useBatchDataState(
   // 重试所有失败的操作
   const retryAll = useCallback(async () => {
     const results: Record<string, any> = {};
-    
+
     await Promise.allSettled(
       Object.entries(stateHooks).map(async ([key, [stateInfo, actions]]) => {
         if (stateInfo.hasError) {
@@ -349,22 +349,22 @@ export function usePaginatedDataState<T = any>(
     initialLimit?: number;
   } = {}
 ): [
-  PaginatedDataState<T>,
-  {
-    loadPage: (operation: AsyncOperation<T[]>, page: number, limit?: number) => Promise<T[] | null>;
-    loadMore: (operation: AsyncOperation<T[]>) => Promise<T[] | null>;
-    refresh: () => Promise<T[] | null>;
-    reset: () => void;
-  }
-] {
+    PaginatedDataState<T>,
+    {
+      loadPage: (operation: AsyncOperation<T[]>, page: number, limit?: number) => Promise<T[] | null>;
+      loadMore: (operation: AsyncOperation<T[]>) => Promise<T[] | null>;
+      refresh: () => Promise<T[] | null>;
+      reset: () => void;
+    }
+  ] {
   const { initialPage = 1, initialLimit = 20, ...dataStateOptions } = options;
-  
+
   const [dataState, dataActions] = useDataState<T[]>({ ...dataStateOptions, initialData: [] });
   const [page, setPage] = useState(initialPage);
   const [limit, setLimit] = useState(initialLimit);
   const [total, setTotal] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  
+
   const lastOperationRef = useRef<AsyncOperation<T[]> | null>(null);
 
   // 计算分页信息
@@ -385,8 +385,8 @@ export function usePaginatedDataState<T = any>(
 
   // 加载指定页面
   const loadPage = useCallback(async (
-    operation: AsyncOperation<T[]>, 
-    targetPage: number, 
+    operation: AsyncOperation<T[]>,
+    targetPage: number,
     targetLimit?: number
   ): Promise<T[] | null> => {
     lastOperationRef.current = operation;
@@ -396,7 +396,7 @@ export function usePaginatedDataState<T = any>(
     }
 
     const result = await dataActions.execute(operation);
-    
+
     // 假设API响应包含分页信息
     // 实际实现中需要根据API响应格式调整
     if (result && Array.isArray(result)) {
@@ -414,17 +414,17 @@ export function usePaginatedDataState<T = any>(
     }
 
     setIsLoadingMore(true);
-    
+
     try {
       const nextPage = page + 1;
       const result = await loadPage(operation, nextPage);
-      
+
       if (result && dataState.data) {
         // 合并数据
         const mergedData = [...dataState.data, ...result];
         dataActions.setData(mergedData);
       }
-      
+
       return result;
     } finally {
       setIsLoadingMore(false);
@@ -474,20 +474,20 @@ export function useRealtimeDataState<T = any>(
     autoSync?: boolean;
   } = {}
 ): [
-  RealtimeDataState<T>,
-  {
-    startSync: (operation: AsyncOperation<T>) => void;
-    stopSync: () => void;
-    sync: () => Promise<T | null>;
-    reset: () => void;
-  }
-] {
+    RealtimeDataState<T>,
+    {
+      startSync: (operation: AsyncOperation<T>) => void;
+      stopSync: () => void;
+      sync: () => Promise<T | null>;
+      reset: () => void;
+    }
+  ] {
   const { syncInterval = 30000, autoSync = false, ...dataStateOptions } = options;
-  
+
   const [dataState, dataActions] = useDataState<T>(dataStateOptions);
   const [isConnected, setIsConnected] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
-  
+
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const currentOperationRef = useRef<AsyncOperation<T> | null>(null);
 

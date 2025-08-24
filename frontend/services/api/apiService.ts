@@ -1,6 +1,7 @@
-import type { ApiResponse, ApiSuccessResponse, ApiErrorResponse } from '../../types/unified/apiResponse';
+import type { ApiResponse } from '../../types/unified/apiResponse.types';
+import { normalizeApiResponse } from '../../types/unified/apiResponse.types';
 
-import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/user';
+import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/user.types';
 import { isDesktopEnvironment } from '../../utils/environment';
 
 // 延迟导入以避免循环依赖
@@ -72,16 +73,46 @@ class UnifiedApiService {
   }
 
   // 基础 HTTP 客户端方法
-  private async request(url: string, options: RequestInit = {}): Promise<any> {
-    const response = await fetch(`${this.baseURL}${url}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
-        ...options.headers
-      },
-      ...options
-    });
-    return response.json();
+  private async request(url: string, options: RequestInit = {}): Promise<ApiResponse> {
+    try {
+      const response = await fetch(`${this.baseURL}${url}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
+          ...options.headers
+        },
+        ...options
+      });
+
+      const data = await response.json();
+
+      // 如果HTTP状态码不是2xx，创建错误响应
+      if (!response.ok) {
+        return normalizeApiResponse({
+          success: false,
+          error: {
+            code: `HTTP_${response.status}`,
+            message: data.message || data.error?.message || `HTTP ${response.status} 错误`,
+            details: data
+          },
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      // 标准化响应格式
+      return normalizeApiResponse(data);
+    } catch (error) {
+      // 网络错误或其他异常
+      return normalizeApiResponse({
+        success: false,
+        error: {
+          code: 'NETWORK_ERROR',
+          message: error instanceof Error ? error.message : '网络请求失败',
+          details: { error }
+        },
+        timestamp: new Date().toISOString()
+      });
+    }
   }
 
   // 检查是否使用远程 API
@@ -90,69 +121,38 @@ class UnifiedApiService {
   }
 
   // 通用 HTTP 方法
-  async get($2): Promise<ApiResponse> {
+  async get(url: string, config?: RequestInit): Promise<ApiResponse> {
     if (this.useRemoteApi) {
-      // 使用 fetch 直接调用
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
-          ...config?.headers
-        },
-        ...config
-      });
-      return response.json();
+      return this.request(url, { method: 'GET', ...config });
     }
     throw new Error('GET method not supported in desktop mode');
   }
 
-  async post($2): Promise<ApiResponse> {
+  async post(url: string, data?: any, config?: RequestInit): Promise<ApiResponse> {
     if (this.useRemoteApi) {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
+      return this.request(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
-          ...config?.headers
-        },
         body: data ? JSON.stringify(data) : undefined,
         ...config
       });
-      return response.json();
     }
     throw new Error('POST method not supported in desktop mode');
   }
 
-  async put($2): Promise<ApiResponse> {
+  async put(url: string, data?: any, config?: RequestInit): Promise<ApiResponse> {
     if (this.useRemoteApi) {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
+      return this.request(url, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
-          ...config?.headers
-        },
         body: data ? JSON.stringify(data) : undefined,
         ...config
       });
-      return response.json();
     }
     throw new Error('PUT method not supported in desktop mode');
   }
 
-  async delete($2): Promise<ApiResponse> {
+  async delete(url: string, config?: RequestInit): Promise<ApiResponse> {
     if (this.useRemoteApi) {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
-          ...config?.headers
-        },
-        ...config
-      });
-      return response.json();
+      return this.request(url, { method: 'DELETE', ...config });
     }
     throw new Error('DELETE method not supported in desktop mode');
   }
@@ -161,7 +161,7 @@ class UnifiedApiService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     if (this.useRemoteApi) {
       try {
-        const response = await this.request('/api/auth/login', {
+        const response = await this.request('/api/v1/auth/login', {
           method: 'POST',
           body: JSON.stringify(credentials)
         });

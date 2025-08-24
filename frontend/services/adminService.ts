@@ -14,8 +14,8 @@ import type {
   TestManagement,
   UserBulkAction,
   UserFilter
-} from '../types/admin';
-import type { CreateUserData, UpdateUserData, User } from '../types/user';
+} from '../types/admin.types';
+import type { CreateUserData, UpdateUserData, User } from '../types/user.types';
 
 class AdminService {
   private static instance: AdminService;

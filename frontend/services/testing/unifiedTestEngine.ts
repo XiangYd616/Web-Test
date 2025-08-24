@@ -95,7 +95,8 @@ export interface AccessibilityViolation {
   nodes: any[];
 }
 
-export type TestType = 'stress' | 'content' | 'compatibility' | 'api' | 'security' | 'accessibility' | 'performance';
+// TestType 已迁移到统一类型系统
+import type { TestType } from '../../types/unified/testTypes';
 
 export interface TestProgress {
   stage: string;

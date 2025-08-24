@@ -1,6 +1,6 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { parseAuthError } from '../components/auth/AuthErrorHandler';
-import type { AuthContextType, User } from '../types/auth';
+import type { AuthContextType, User } from '../types/auth.types';
 
 interface LoginCredentials {
   email: string;
