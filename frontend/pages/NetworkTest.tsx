@@ -1,7 +1,13 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Cloud, Download, Globe, MapPin, Play, Router, Server, Signal, Square, Upload, Wifi, XCircle, Zap } from 'lucide-react';
 import React, { useState } from 'react';
+import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
+import type {
+  NetworkTestConfig,
+  NetworkTestResult
+} from '../types';
 
-interface NetworkTestConfig {
+// 本地网络测试配置，扩展统一类型
+interface LocalNetworkTestConfig extends Partial<NetworkTestConfig> {
   target: string;
   testType: 'latency' | 'bandwidth' | 'dns' | 'traceroute' | 'comprehensive';
   locations: string[];
@@ -56,7 +62,20 @@ interface NetworkTestResult {
 }
 
 const NetworkTest: React.FC = () => {
-  const [config, setConfig] = useState<NetworkTestConfig>({
+  // 登录检查
+  const {
+    isAuthenticated,
+    requireLogin,
+    LoginPromptComponent
+  } = useAuthCheck({
+    feature: "网络测试",
+    description: "使用网络测试功能"
+  });
+
+  // 用户统计
+  const { recordTestCompletion } = useUserStats();
+
+  const [config, setConfig] = useState<LocalNetworkTestConfig>({
     target: '',
     testType: 'comprehensive',
     locations: ['beijing', 'shanghai', 'guangzhou'],
@@ -71,6 +90,66 @@ const NetworkTest: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [error, setError] = useState('');
+
+  // 后台测试管理状态
+  const [currentTestId, setCurrentTestId] = useState<string | null>(null);
+  const [backgroundTestInfo, setBackgroundTestInfo] = useState<any>(null);
+  const [canSwitchPages, setCanSwitchPages] = useState(true);
+
+  // 检查是否有正在运行的后台测试
+  useEffect(() => {
+    const checkBackgroundTest = () => {
+      const tasks = unifiedBackgroundTestManager.getAllTasks();
+      const runningNetworkTest = tasks.find(task =>
+        task.type === 'network' &&
+        ['running', 'pending', 'queued'].includes(task.status)
+      );
+
+      if (runningNetworkTest) {
+        setCurrentTestId(runningNetworkTest.id);
+        setBackgroundTestInfo(runningNetworkTest);
+        setIsRunning(true);
+        setProgress(runningNetworkTest.progress);
+        setCurrentStep(runningNetworkTest.currentStep);
+        setCanSwitchPages(runningNetworkTest.canSwitchPages);
+
+        // 监听测试进度
+        const handleProgress = (progress: number, step: string) => {
+          setProgress(progress);
+          setCurrentStep(step);
+        };
+
+        const handleComplete = (results: any) => {
+          setResult(results);
+          setIsRunning(false);
+          setCurrentTestId(null);
+          setBackgroundTestInfo(null);
+          setCanSwitchPages(true);
+          recordTestCompletion('network', 'completed');
+        };
+
+        const handleError = (error: string) => {
+          setError(error);
+          setIsRunning(false);
+          setCurrentTestId(null);
+          setBackgroundTestInfo(null);
+          setCanSwitchPages(true);
+        };
+
+        unifiedBackgroundTestManager.on(`progress:${runningNetworkTest.id}`, handleProgress);
+        unifiedBackgroundTestManager.on(`complete:${runningNetworkTest.id}`, handleComplete);
+        unifiedBackgroundTestManager.on(`error:${runningNetworkTest.id}`, handleError);
+
+        return () => {
+          unifiedBackgroundTestManager.off(`progress:${runningNetworkTest.id}`, handleProgress);
+          unifiedBackgroundTestManager.off(`complete:${runningNetworkTest.id}`, handleComplete);
+          unifiedBackgroundTestManager.off(`error:${runningNetworkTest.id}`, handleError);
+        };
+      }
+    };
+
+    checkBackgroundTest();
+  }, [recordTestCompletion]);
 
   const testTypes = [
     { value: 'latency', label: '延迟测试', description: '测试网络延迟和丢包率' },
@@ -112,9 +191,14 @@ const NetworkTest: React.FC = () => {
     }
   };
 
-  const handleStartTest = async () => {
+  const handleStartTest = async (runInBackground: boolean = false) => {
     if (!config.target) {
       setError('请输入要测试的目标地址');
+      return;
+    }
+
+    if (!isAuthenticated) {
+      requireLogin();
       return;
     }
 
@@ -124,6 +208,40 @@ const NetworkTest: React.FC = () => {
     setError('');
 
     try {
+      if (runInBackground) {
+        // 启动后台测试
+        const taskId = await unifiedBackgroundTestManager.startBackgroundTest(
+          'network',
+          config,
+          {
+            onProgress: (progress: number, step: string) => {
+              setProgress(progress);
+              setCurrentStep(step);
+            },
+            onComplete: (results: any) => {
+              setResult(results);
+              setIsRunning(false);
+              setCurrentTestId(null);
+              setBackgroundTestInfo(null);
+              setCanSwitchPages(true);
+              recordTestCompletion('network', 'completed');
+            },
+            onError: (error: string) => {
+              setError(error);
+              setIsRunning(false);
+              setCurrentTestId(null);
+              setBackgroundTestInfo(null);
+              setCanSwitchPages(true);
+            }
+          }
+        );
+
+        setCurrentTestId(taskId);
+        setCanSwitchPages(true);
+        return;
+      }
+
+      // 前台测试逻辑保持不变
       const steps = [
         '正在初始化网络测试...',
         '测试网络延迟...',
@@ -189,6 +307,22 @@ const NetworkTest: React.FC = () => {
     if (latency <= 50) return 'text-green-400';
     if (latency <= 100) return 'text-yellow-400';
     return 'text-red-400';
+  };
+
+  const handleStopTest = async () => {
+    if (currentTestId) {
+      // 取消后台测试
+      const cancelled = await unifiedBackgroundTestManager.cancelTask(currentTestId);
+      if (cancelled) {
+        setCurrentTestId(null);
+        setBackgroundTestInfo(null);
+        setCanSwitchPages(true);
+      }
+    }
+
+    setIsRunning(false);
+    setProgress(0);
+    setCurrentStep('');
   };
 
 
@@ -362,27 +496,56 @@ const NetworkTest: React.FC = () => {
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={handleStartTest}
-                disabled={isRunning || !config.target || config.locations.length === 0}
-                className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-all ${isRunning || !config.target || config.locations.length === 0
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  }`}
-              >
-                {isRunning ? (
-                  <>
+              <div className="flex items-center space-x-3">
+                {isRunning && (
+                  <button
+                    type="button"
+                    onClick={handleStopTest}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium flex items-center space-x-2 transition-all"
+                  >
                     <Square className="w-4 h-4" />
-                    <span>测试中...</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" />
-                    <span>开始测试</span>
-                  </>
+                    <span>停止测试</span>
+                  </button>
                 )}
-              </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleStartTest(false)}
+                  disabled={isRunning || !config.target || config.locations.length === 0}
+                  className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-all ${isRunning || !config.target || config.locations.length === 0
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
+                >
+                  {isRunning ? (
+                    <>
+                      <Activity className="w-4 h-4 animate-pulse" />
+                      <span>测试中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4" />
+                      <span>开始测试</span>
+                    </>
+                  )}
+                </button>
+
+                {!isRunning && (
+                  <button
+                    type="button"
+                    onClick={() => handleStartTest(true)}
+                    disabled={!config.target || config.locations.length === 0}
+                    className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition-all ${!config.target || config.locations.length === 0
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                      }`}
+                    title="在后台运行测试，可以切换到其他页面"
+                  >
+                    <Cloud className="w-4 h-4" />
+                    <span>后台测试</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 

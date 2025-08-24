@@ -13,6 +13,7 @@ import { useLocalStressTest } from '../hooks/useLocalStressTest';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
 import { useStressTestRecord } from '../hooks/useStressTestRecord';
 import { useUserStats } from '../hooks/useUserStats';
+import { testApiService } from '../services/api/testApiService';
 import backgroundTestManager from '../services/backgroundTestManager';
 import ExportUtils from '../utils/exportUtils';
 
@@ -20,7 +21,6 @@ import { systemResourceMonitor } from '../services/systemResourceMonitor';
 import { testEngineManager } from '../services/testEngines';
 import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/TestStateManager';
 import '../styles/progress-bar.css';
-import type { TestStatusType } from '../types/testHistory';
 import { getTemplateById } from '../utils/testTemplates';
 
 // 工具函数：安全地从URL获取主机名
@@ -264,36 +264,47 @@ const StressTest: React.FC = () => {
                 }
             },
 
-            // 直接启动测试的方法
+            // 直接启动测试的方法 - 集成新的API服务
             startTestDirectly: async (config: any, recordId: string) => {
-                const response = await fetch('/api/test/stress', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                // 构建压力测试配置，适配新的API格式
+                const stressTestConfig = {
+                    concurrent_users: config.users || 10,
+                    duration_seconds: config.duration || 30,
+                    ramp_up_time: config.rampUp || 5,
+                    test_scenarios: [{
+                        name: 'default',
+                        method: config.method || 'GET',
+                        headers: config.headers || {},
+                        body: config.body || '',
+                        timeout: config.timeout || 10,
+                        think_time: config.thinkTime || 1
+                    }],
+                    // 保持代理设置
+                    proxy: config.proxy?.enabled ? {
+                        enabled: true,
+                        type: config.proxy.type || 'http',
+                        host: config.proxy.host || '',
+                        port: config.proxy.port || 8080,
+                        username: config.proxy.username || '',
+                        password: config.proxy.password || ''
+                    } : {
+                        enabled: false
                     },
-                    body: JSON.stringify({
-                        ...config,
-                        recordId: recordId,
-                        // 🌐 代理设置
-                        proxy: config.proxy?.enabled ? {
-                            enabled: true,
-                            type: config.proxy.type || 'http',
-                            host: config.proxy.host || '',
-                            port: config.proxy.port || 8080,
-                            username: config.proxy.username || '',
-                            password: config.proxy.password || ''
-                        } : {
-                            enabled: false
-                        }
-                    })
-                });
+                    // 保持记录ID用于追踪
+                    recordId: recordId
+                };
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                // 使用新的API服务执行压力测试
+                const response = await testApiService.executeStressTest(
+                    config.url,
+                    stressTestConfig
+                );
+
+                if (!response.success) {
+                    throw new Error(response.message || '启动压力测试失败');
                 }
 
-                const result = await response.json();
+                const result = response.data;
 
                 setCurrentStatus('WAITING');
                 setStatusMessage('等待测试开始...');
@@ -301,6 +312,10 @@ const StressTest: React.FC = () => {
                 const testId = result.testId || result.data?.testId || recordId;
                 if (testId) {
                     setCurrentTestId(testId);
+
+                    // 启动API进度监控作为补充
+                    console.log('📊 启动API进度监控作为补充监控:', testId);
+                    startApiMonitoring(testId);
                 }
 
                 return testId;
@@ -766,6 +781,28 @@ const StressTest: React.FC = () => {
     const socketRef = useRef<any>(null);
     const [currentTestId, setCurrentTestId] = useState<string | null>(null);
     const currentTestIdRef = useRef<string>(''); // 用于在事件监听器中获取最新的testId
+
+    // 集成新的测试进度监控作为补充监控
+    const {
+        progress: apiProgress,
+        isMonitoring: apiIsMonitoring,
+        startMonitoring: startApiMonitoring,
+        stopMonitoring: stopApiMonitoring,
+        error: apiProgressError
+    } = useTestProgress(currentTestId || undefined, {
+        onProgress: (progressData) => {
+            // 作为补充监控，不覆盖现有的WebSocket数据
+            console.log('📊 API进度监控补充数据:', progressData);
+        },
+        onComplete: (result) => {
+            console.log('✅ API监控确认测试完成:', result);
+            // 可以作为WebSocket的备用确认机制
+        },
+        onError: (error) => {
+            console.warn('⚠️ API进度监控错误:', error);
+            // 不影响主要的WebSocket监控流程
+        }
+    });
 
     // 页面加载时检查是否有正在运行的测试，防止自动重启
     useEffect(() => {

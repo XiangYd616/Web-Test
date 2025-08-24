@@ -17,12 +17,8 @@ export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as LoadingStates } from './LoadingStates';
 
 // 增强UI组件
-export { default as EnhancedErrorBoundary } from './EnhancedErrorBoundary';
-export { default as EnhancedLoadingSpinner, InlineLoadingSpinner, SimpleLoadingSpinner } from './EnhancedLoadingSpinner';
+export { InlineLoadingSpinner, default as LoadingSpinner, SimpleLoadingSpinner } from './LoadingSpinner';
 export { default as NotificationSystem } from './NotificationSystem';
-
-// 为了向后兼容，将EnhancedLoadingSpinner也导出为LoadingSpinner
-export { default as LoadingSpinner } from './EnhancedLoadingSpinner';
 
 // 按钮组件
 export {
@@ -145,8 +141,8 @@ export type { ChartProps } from './types';
 
 // 测试工具组件
 export {
-    TestProgress,
-    TestResultSummary, TestingToolbar
+    TestingToolbar, TestProgress,
+    TestResultSummary
 } from './TestingTools';
 
 // 工具函数

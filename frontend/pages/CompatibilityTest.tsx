@@ -1,10 +1,14 @@
-import { AlertTriangle, CheckCircle, Clock, Eye, Globe, Grid, Loader, Lock, Monitor, Play, RotateCcw, Settings, Smartphone, Square, Tablet, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Eye, Globe, Grid, Monitor, Settings, Smartphone, Tablet, XCircle } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
 import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
+import type {
+  CompatibilityTestConfig,
+  DeviceType
+} from '../types';
 
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
@@ -38,8 +42,8 @@ interface FeatureCompatibility {
   mdn?: string;
 }
 
-// 兼容性测试配置
-interface CompatibilityConfig {
+// 本地兼容性测试配置，扩展统一类型
+interface LocalCompatibilityConfig extends Partial<CompatibilityTestConfig> {
   url: string;
   testType: 'compatibility';
   targetBrowsers: BrowserVersion[];
@@ -846,100 +850,8 @@ const CompatibilityTest: React.FC = () => {
       additionalComponents={LoginPromptComponent}
       testContent={
         <div className="space-y-6">
-          {/* 页面标题 */}
+          {/* URL输入和基础配置 */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-white">兼容性测试</h2>
-                <p className="text-gray-300 mt-1">检测网站在不同浏览器和设备上的兼容性</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                {testStatus === 'idle' ? (
-                  <button
-                    type="button"
-                    onClick={handleStartTest}
-                    disabled={!config.url}
-                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${!config.url
-                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                      : isAuthenticated
-                        ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800'
-                        : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
-                      }`}
-                  >
-                    {isAuthenticated ? (
-                      <Play className="w-4 h-4" />
-                    ) : (
-                      <Lock className="w-4 h-4" />
-                    )}
-                    <span>开始测试</span>
-                  </button>
-                ) : testStatus === 'starting' ? (
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
-                    <Loader className="w-4 h-4 animate-spin text-purple-400" />
-                    <span className="text-sm text-purple-300 font-medium">正在启动...</span>
-                  </div>
-                ) : testStatus === 'running' ? (
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
-                      <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm text-purple-300 font-medium">
-                        测试进行中 {Math.round(progress)}%
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleStopTest}
-                      className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center space-x-1"
-                    >
-                      <Square className="w-3 h-3" />
-                      <span className="text-sm">停止</span>
-                    </button>
-                    <div className="flex items-center space-x-1 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded text-xs text-green-300">
-                      <Clock className="w-3 h-3" />
-                      <span>可切换页面</span>
-                    </div>
-                  </div>
-                ) : testStatus === 'completed' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                      <CheckCircle className="w-4 h-4 text-green-400" />
-                      <span className="text-sm text-green-300 font-medium">测试完成</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        clearResults();
-                        clearError();
-                        setTestStatus('idle');
-                      }}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center space-x-2"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>重新测试</span>
-                    </button>
-                  </div>
-                ) : testStatus === 'failed' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                      <XCircle className="w-4 h-4 text-red-400" />
-                      <span className="text-sm text-red-300 font-medium">测试失败</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        clearError();
-                        setTestStatus('idle');
-                      }}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center space-x-2"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>重试</span>
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
             {/* URL输入 */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -1644,7 +1556,7 @@ const CompatibilityTest: React.FC = () => {
               </div>
             )
           }
-        </div>
+        </div >
       }
     />
   );

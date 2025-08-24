@@ -2,10 +2,16 @@ import { AlertTriangle, BarChart3, CheckCircle, Clock, Download, Eye, Gauge, Ima
 import React, { useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { useUserStats } from '../hooks/useUserStats';
+import type {
+  CoreWebVitals,
+  UXTestConfig,
+  UXTestResult
+} from '../types';
 
 // CSS样式已迁移到组件库中
 
-interface UXTestConfig {
+// 本地UX测试配置，扩展统一类型
+interface LocalUXTestConfig extends Partial<UXTestConfig> {
   url: string;
   device: 'desktop' | 'mobile' | 'tablet';
   network: 'fast3g' | 'slow3g' | '4g' | 'wifi';
@@ -70,7 +76,7 @@ const UXTest: React.FC = () => {
   // 用户统计
   const { recordTestCompletion } = useUserStats();
 
-  const [config, setConfig] = useState<UXTestConfig>({
+  const [config, setConfig] = useState<LocalUXTestConfig>({
     url: '',
     device: 'desktop',
     network: '4g',

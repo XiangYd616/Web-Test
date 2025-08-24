@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle, Clock, Code, Download, Eye, Gauge, Globe, Loader, Lock, Play, RotateCcw, Search, Share2, Shield, Square, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Code, Download, Eye, Gauge, Globe, Search, Share2, Shield, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
@@ -359,105 +359,35 @@ const WebsiteTest: React.FC = () => {
       additionalComponents={LoginPromptComponent}
       testContent={
         <div className="space-y-6">
-          {/* 页面标题 */}
+          {/* URL输入和基础配置 */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-white">网站综合测试</h2>
-                <p className="text-gray-300 mt-1">全方位分析您的网站性能、SEO、安全性和用户体验</p>
+            {/* 错误显示 */}
+            {error && (
+              <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <XCircle className="w-4 h-4 text-red-400" />
+                  <span className="text-sm font-medium text-red-300">测试错误</span>
+                </div>
+                <p className="text-sm text-red-300">{error}</p>
               </div>
+            )}
 
-              {/* 测试控制按钮 */}
-              <div>
-                {testStatus === 'idle' ? (
-                  <button
-                    type="button"
-                    onClick={handleStartTest}
-                    disabled={!config.url.trim() || selectedTestsCount === 0}
-                    className={`btn btn-md flex items-center space-x-2 ${!config.url.trim() || selectedTestsCount === 0
-                      ? 'btn-disabled opacity-50 cursor-not-allowed'
-                      : isAuthenticated
-                        ? 'btn-primary hover:btn-primary-dark'
-                        : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
-                      }`}
-                  >
-                    {isAuthenticated ? (
-                      <Play className="w-4 h-4" />
-                    ) : (
-                      <Lock className="w-4 h-4" />
-                    )}
-                    <span>开始测试</span>
-                  </button>
-                ) : testStatus === 'starting' ? (
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                    <Loader className="w-4 h-4 animate-spin text-blue-400" />
-                    <span className="text-sm font-medium text-blue-300">正在启动...</span>
-                  </div>
-                ) : testStatus === 'running' ? (
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                      <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm font-medium text-blue-300">
-                        测试进行中 {Math.round(progress)}%
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleStopTest}
-                      className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center space-x-1"
-                    >
-                      <Square className="w-3 h-3" />
-                      <span className="text-sm">停止</span>
-                    </button>
-                    <div className="flex items-center space-x-1 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded text-xs text-green-300">
-                      <Clock className="w-3 h-3" />
-                      <span>可切换页面</span>
-                    </div>
-                  </div>
-                ) : testStatus === 'completed' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                      <CheckCircle className="w-4 h-4 text-green-400" />
-                      <span className="text-sm text-green-300 font-medium">测试完成</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        clearResults();
-                        clearError();
-                        setTestStatus('idle');
-                      }}
-                      className="btn btn-md flex items-center space-x-2 btn-primary hover:btn-primary-dark"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>重新测试</span>
-                    </button>
-                  </div>
-                ) : testStatus === 'failed' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                      <XCircle className="w-4 h-4 text-red-400" />
-                      <span className="text-sm text-red-300 font-medium">测试失败</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        clearError();
-                        setTestStatus('idle');
-                      }}
-                      className="btn btn-md flex items-center space-x-2 btn-primary hover:btn-primary-dark"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>重试</span>
-                    </button>
-                  </div>
-                ) : null}
-              </div>
+            {/* URL 输入 */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">测试URL</label>
+              <URLInput
+                value={config.url}
+                onChange={(url) => setConfig(prev => ({ ...prev, url }))}
+                placeholder="输入要测试的网站URL..."
+                enableReachabilityCheck={false}
+              />
             </div>
+          </div>
 
-            {/* 详细进度显示 */}
-            {(currentStep || isRunning) && (
-              <div className="mt-4 space-y-3">
+          {/* 测试进度显示 */}
+          {(currentStep || isRunning) && (
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <div className="space-y-3">
                 {/* 当前步骤 */}
                 <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
@@ -506,30 +436,8 @@ const WebsiteTest: React.FC = () => {
                   </div>
                 )}
               </div>
-            )}
-
-            {/* 错误显示 */}
-            {error && (
-              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                <div className="flex items-center space-x-2 mb-2">
-                  <XCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm font-medium text-red-300">测试错误</span>
-                </div>
-                <p className="text-sm text-red-300">{error}</p>
-              </div>
-            )}
-
-            {/* URL 输入 */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-300">测试URL</label>
-              <URLInput
-                value={config.url}
-                onChange={(url) => setConfig(prev => ({ ...prev, url }))}
-                placeholder="输入要测试的网站URL..."
-                enableReachabilityCheck={false}
-              />
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* 测试配置 */}
@@ -870,7 +778,7 @@ const WebsiteTest: React.FC = () => {
               </div>
             )
           }
-        </div>
+        </div >
       }
     />
   );

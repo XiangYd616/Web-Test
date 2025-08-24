@@ -4,6 +4,7 @@ import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
 import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
+import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
@@ -86,6 +87,32 @@ const APITest: React.FC = () => {
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
   const [backgroundTestInfo, setBackgroundTestInfo] = useState<any>(null);
   const [canSwitchPages, setCanSwitchPages] = useState(true);
+
+  // 集成新的测试进度监控
+  const {
+    progress: apiProgress,
+    isMonitoring: apiIsMonitoring,
+    startMonitoring: startApiMonitoring,
+    stopMonitoring: stopApiMonitoring,
+    cancelTest: cancelApiTest,
+    error: apiProgressError
+  } = useTestProgress(currentTestId || undefined, {
+    onProgress: (progressData) => {
+      console.log('📊 API测试进度:', progressData);
+      setTestProgress(progressData.message);
+    },
+    onComplete: (result) => {
+      console.log('✅ API测试完成:', result);
+      setResult(result);
+      setTestStatus('completed');
+      recordTestCompletion('api');
+    },
+    onError: (error) => {
+      console.error('❌ API测试失败:', error);
+      setError(error);
+      setTestStatus('failed');
+    }
+  });
 
   // 监听后台测试状态变化
   useEffect(() => {
@@ -182,39 +209,85 @@ const APITest: React.FC = () => {
       }
     };
 
-    // 使用后台测试管理器启动测试
-    const testId = backgroundTestManager.startTest(
-      'api',
-      testConfigData,
-      // onProgress 回调
-      (_: number, step: string) => {
-        setTestProgress(step);
+    try {
+      // 构建API测试配置
+      const apiTestConfig = {
+        endpoints: testConfig.endpoints.map(endpoint => ({
+          url: `${testConfig.baseUrl}${endpoint.path}`,
+          method: endpoint.method,
+          headers: {
+            ...Object.fromEntries(globalHeaders.filter(h => h.enabled).map(h => [h.key, h.value])),
+            ...(authentication.type === 'bearer' ? { 'Authorization': `Bearer ${authentication.token}` } : {}),
+            ...(authentication.type === 'apikey' ? { [authentication.headerName]: authentication.apiKey } : {})
+          },
+          body: endpoint.body || '',
+          assertions: endpoint.expectedStatus?.map(status => `status == ${status}`) || []
+        })),
+        configuration: {
+          timeout: testConfig.timeout || 30000,
+          retry_count: testConfig.retries || 0,
+          parallel_requests: testConfig.loadTest ? 5 : 1
+        }
+      };
+
+      // 使用新的API服务执行测试
+      const response = await testApiService.executeApiTest(apiTestConfig);
+
+      if (response.success) {
+        const testId = response.data.id || response.data.testId;
+        setCurrentTestId(testId);
         setTestStatus('running');
-      },
-      // onComplete 回调
-      (result: any) => {
-        setResult(result);
-        setTestStatus('completed');
-        setTestProgress('API 测试完成！');
-        setCanSwitchPages(true);
 
-        // 记录测试完成统计
-        const success = result.success !== false;
-        const score = result.successRate || result.score;
-        const duration = result.totalTime || 30; // 默认30秒
-        recordTestCompletion('API测试', success, score, duration);
-      },
-      // onError 回调
-      (error: Error) => {
-        setError(error.message || '测试失败');
-        setTestStatus('failed');
-        setCanSwitchPages(true);
+        // 启动API进度监控
+        if (testId) {
+          startApiMonitoring(testId);
+        }
+      } else {
+        throw new Error(response.message || '启动API测试失败');
       }
-    );
 
-    setCurrentTestId(testId);
-    setCanSwitchPages(true); // 允许切换页面
-    setTestStatus('running');
+      // 同时使用后台测试管理器作为备用（保持现有功能）
+      const backupTestId = backgroundTestManager.startTest(
+        'api',
+        testConfigData,
+        // onProgress 回调
+        (_: number, step: string) => {
+          setTestProgress(step);
+          setTestStatus('running');
+        },
+        // onComplete 回调
+        (result: any) => {
+          // 如果API监控没有返回结果，使用后台管理器的结果
+          if (!apiProgress || apiProgress.status !== 'completed') {
+            setResult(result);
+            setTestStatus('completed');
+            setTestProgress('API 测试完成！');
+          }
+          setCanSwitchPages(true);
+
+          // 记录测试完成统计
+          const success = result.success !== false;
+          const score = result.successRate || result.score;
+          const duration = result.totalTime || 30; // 默认30秒
+          recordTestCompletion('API测试', success, score, duration);
+        },
+        // onError 回调
+        (error: Error) => {
+          setError(error.message || '测试失败');
+          setTestStatus('failed');
+          setCanSwitchPages(true);
+        }
+      );
+
+      setCurrentTestId(testId);
+      setCanSwitchPages(true); // 允许切换页面
+      setTestStatus('running');
+    } catch (error) {
+      console.error('API测试启动失败:', error);
+      setError(error instanceof Error ? error.message : '启动测试失败');
+      setTestStatus('failed');
+      setCanSwitchPages(true);
+    }
   };
 
   const handleStopTest = () => {

@@ -1,6 +1,8 @@
 /**
  * 测试引擎Hook
  * 提供统一的测试执行和管理功能
+ *
+ * 已迁移到新的类型系统，使用统一的类型定义
  */
 
 import { useCallback, useState } from 'react';
