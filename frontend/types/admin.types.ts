@@ -1,6 +1,6 @@
 // 管理员相关类型定义
 
-import type { User } from './user';
+import type { User } from './user.types';
 
 export interface SystemStats {
   users: {

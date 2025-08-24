@@ -1,31 +1,20 @@
 /**
- * 通用类型定义
- * 包含项目中常用的基础类型和接口
+ * 通用类型定义 - 重构版本
+ * 使用统一的类型定义，解决前后端不一致问题
+ * 版本: v2.0.0
  */
 
-// 基础类型
+// 重新导出统一类型
+export * from '../../shared/types/unifiedTypes';
+
+// 向后兼容的类型别名
 export type ID = string | number;
-export type Timestamp = string | number | Date;
 export type Status = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
-// API响应类型
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  error?: {
-    code: string;
-    message: string;
-    details?: any;
-  };
-  meta?: {
-    timestamp: string;
-    requestId: string;
-    version: string;
-  };
-}
+// 注意：API响应类型已从统一类型定义中导入
+// 这里保留注释以说明类型来源
 
-// 分页类型
+// 分页类型 - 向后兼容
 export interface PaginationParams {
   page: number;
   limit: number;
@@ -33,19 +22,7 @@ export interface PaginationParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface PaginationMeta {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: PaginationMeta;
-}
+// 注意：PaginationMeta 和 PaginatedResponse 已从统一类型定义中导入
 
 // 用户类型
 export interface User {
@@ -59,15 +36,8 @@ export interface User {
   lastLogin?: Timestamp;
 }
 
-// 测试相关类型
-export type TestType =
-  | 'stress'
-  | 'seo'
-  | 'security'
-  | 'performance'
-  | 'accessibility'
-  | 'compatibility'
-  | 'api';
+// 测试相关类型 - 已迁移到统一类型系统
+import type { TestType } from './unified/testTypes';
 
 export interface TestConfig {
   url: string;
@@ -238,3 +208,4 @@ export type {
   FormState, LoadingProps, MonitoringTarget, NotificationConfig, PaginatedResponse, PaginationMeta, PaginationParams, TestConfig,
   TestResult, TestType, Theme, User
 };
+

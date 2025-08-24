@@ -22,7 +22,8 @@ export interface TestCase {
   dependencies?: string[];
 }
 
-export type TestType =
+// 重命名以避免与统一类型系统中的TestType冲突
+export type ModernTestType =
   | 'core-web-vitals'
   | 'lighthouse-audit'
   | 'security-scan'
@@ -33,6 +34,9 @@ export type TestType =
   | 'uptime-monitor'
   | 'synthetic-monitor'
   | 'real-user-monitor';
+
+// 兼容性导出
+export type TestType = ModernTestType;
 
 export interface CoreWebVitalsConfig extends TestConfig {
   metrics: {

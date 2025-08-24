@@ -26,9 +26,9 @@ export {
 
 // 重新导出用户相关类型
 export type {
-  AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES, DEFAULT_USER_PROFILE, fromDatabaseFields, LoginCredentials,
-  RegisterData, toDatabaseFields, UpdateUserData, User, UserActivityLog, UserDatabaseFields, UserFilter,
-  UserListQuery, UserPreferences, UserProfile, UserSession, UserStats
+  AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES, DEFAULT_USER_PROFILE, LoginCredentials,
+  RegisterData, UpdateUserData, User, UserActivityLog, UserDatabaseFields, UserFilter,
+  UserListQuery, UserPreferences, UserProfile, UserSession, UserStats, fromDatabaseFields, toDatabaseFields
 } from './user';
 
 // ==================== API响应类型导出 ====================
@@ -44,10 +44,15 @@ export type {
 
 // 测试相关枚举已在上面导出，这里只导出接口类型
 
-// 重新导出测试相关接口类型（从现有的test.ts文件导入）
+// 重新导出测试相关接口类型（从统一类型系统导入）
 export type {
-  APITestConfig, ContentTestConfig, PerformanceTestConfig, SecurityTestConfig
-} from '../test';
+  ApiTestConfig as APITestConfig,
+  PerformanceTestConfig,
+  SecurityTestConfig
+} from './api/client.types';
+
+// ContentTestConfig 已废弃，使用 UxTestConfig 替代
+export type { UxTestConfig as ContentTestConfig } from './api/client.types';
 
 /**
  * 测试配置接口
