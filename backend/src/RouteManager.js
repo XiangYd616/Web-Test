@@ -105,29 +105,8 @@ class RouteManager {
    * 设置全局中间件
    */
   setupGlobalMiddleware() {
-    // API响应格式化中间件
-    this.app.use('/api', (req, res, next) => {
-      // 添加统一的响应方法
-      res.success = (data, message = 'Success') => {
-        res.json({
-          success: true,
-          data,
-          message,
-          timestamp: new Date().toISOString()
-        });
-      };
-
-      res.error = (message, statusCode = 500, details = null) => {
-        res.status(statusCode).json({
-          success: false,
-          error: message,
-          details,
-          timestamp: new Date().toISOString()
-        });
-      };
-
-      next();
-    });
+    // 注意：API响应格式化中间件已在app.js中统一设置
+    // 这里不再重复设置，避免冲突
 
     // 版本检测中间件
     this.app.use('/api', (req, res, next) => {
@@ -235,6 +214,9 @@ class RouteManager {
    * 批量注册标准路由
    */
   registerStandardRoutes() {
+    // 首先设置Swagger API文档
+    this.setupSwaggerDocs();
+
     const routeConfigs = [
       // 认证路由 - 最高优先级
       {
@@ -242,6 +224,32 @@ class RouteManager {
         module: '../routes/auth.js',
         description: '用户认证API',
         group: 'auth'
+      },
+
+      // 缺失API路由 - 补充前端需要的API
+      {
+        path: '/api',
+        module: '../routes/missing-apis.js',
+        description: '缺失API端点实现 - 第一部分',
+        group: 'general'
+      },
+      {
+        path: '/api',
+        module: '../routes/missing-apis-part2.js',
+        description: '缺失API端点实现 - 第二部分',
+        group: 'general'
+      },
+      {
+        path: '/api',
+        module: '../routes/missing-apis-part3.js',
+        description: '缺失API端点实现 - 第三部分',
+        group: 'general'
+      },
+      {
+        path: '/api',
+        module: '../routes/missing-apis-part4.js',
+        description: '缺失API端点实现 - 第四部分',
+        group: 'general'
       },
 
       // 测试执行路由 - 新增
@@ -664,6 +672,19 @@ class RouteManager {
       console.log(`  ${group}: ${count} routes`);
     }
     console.log(`  Total: ${this.routes.size} routes\n`);
+  }
+
+  /**
+   * 设置Swagger API文档
+   */
+  setupSwaggerDocs() {
+    try {
+      const { setupSwagger } = require('../config/swagger');
+      setupSwagger(this.app);
+      console.log('📚 Swagger API文档已集成');
+    } catch (error) {
+      console.warn('⚠️  Swagger集成失败，跳过API文档设置:', error.message);
+    }
   }
 
   /**
