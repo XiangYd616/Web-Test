@@ -1,28 +1,7 @@
 
-
-export enum TestStatus {
-  IDLE = 'idle',
-  STARTING = 'starting',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  FAILED = 'failed'
-}
-
-// 类型别名，用于与其他模块兼容 - 简化版本
-export type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'cancelled' | 'failed';
-
-export enum TestType {
-  PERFORMANCE = 'performance',
-  SECURITY = 'security',
-  SEO = 'seo',
-  STRESS = 'stress',
-  API = 'api',
-  WEBSITE = 'website',
-  DATABASE = 'database',
-  COMPATIBILITY = 'compatibility',
-  NETWORK = 'network'
-}
+// TestType 和 TestStatus 已迁移到统一类型系统
+// 请从 '../types' 或 '../types/unified/testTypes' 导入
+import type { TestStatus, TestStatusType, TestType } from './unified/testTypes';
 
 export enum TestPriority {
   LOW = 'low',

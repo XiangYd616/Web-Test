@@ -53,27 +53,10 @@ export enum UserPlan {
 // ==================== 测试相关枚举 ====================
 
 /**
- * 测试类型枚举 - 统一定义，解决多版本不一致问题
- * 
- * 修复问题：解决存在3个不同TestType定义的混乱状况
- * 
- * 此定义替代以下文件中的定义：
- * - src/types/test.ts (旧版本，将被废弃)
- * - src/types/modernTest.ts (现代化版本，将被整合)
- * - 其他分散的定义
- * 
- * 数据库约束：
- * CHECK (test_type IN ('seo', 'performance', 'security', 'api', 'compatibility', 'accessibility', 'stress'))
+ * 测试类型枚举 - 已迁移到统一类型系统
+ * 请从 '../types/unified/testTypes' 导入 TestType 和 TestTypeEnum
  */
-export enum TestType {
-  SEO = 'seo',
-  PERFORMANCE = 'performance',
-  SECURITY = 'security',
-  API = 'api',
-  COMPATIBILITY = 'compatibility',
-  ACCESSIBILITY = 'accessibility',
-  STRESS = 'stress'
-}
+import type { TestType } from './unified/testTypes';
 
 /**
  * 测试状态枚举 - 与数据库约束保持一致
@@ -261,14 +244,8 @@ export function getTestStatusDisplayName(status: TestStatus): string {
 // ==================== 导出所有枚举 ====================
 
 export {
-  UserRole,
-  UserStatus,
-  UserPlan,
-  TestType,
-  TestStatus,
-  TestGrade,
-  TestPriority,
-  ThemeMode,
-  Language,
-  Timezone
+  Language, TestGrade,
+  TestPriority, TestStatus, TestType, ThemeMode, Timezone, UserPlan, UserRole,
+  UserStatus
 };
+
