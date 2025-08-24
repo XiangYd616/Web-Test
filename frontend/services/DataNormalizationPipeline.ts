@@ -1,5 +1,5 @@
 
-import { RealTimeMetrics, TestDataPoint, TestPhase } from './TestStateManager';
+import { RealTimeMetrics, TestDataPoint, TestPhase } from './testStateManager';
 
 // 原始数据源接口
 export interface RawWebSocketData {

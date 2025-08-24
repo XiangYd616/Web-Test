@@ -1,5 +1,5 @@
 
-import { CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PERFORMANCE_CONFIG_PRESETS, PerformanceIssue, PerformanceRecommendation, PerformanceTestCallback, PerformanceTestOptions, PerformanceTestProgress, PerformanceTestResult, ResourceAnalysis, UnifiedPerformanceConfig } from '../../types/performance';
+import { CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PERFORMANCE_CONFIG_PRESETS, PerformanceIssue, PerformanceRecommendation, PerformanceTestCallback, PerformanceTestOptions, PerformanceTestProgress, PerformanceTestResult, ResourceAnalysis, UnifiedPerformanceConfig } from '../../types/performance.types';
 
 export class PerformanceTestCore {
   private activeTests = new Map<string, any>();

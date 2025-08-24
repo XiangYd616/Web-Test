@@ -5,7 +5,7 @@ export { default as AuthLoadingState } from './AuthLoadingState';
 export { default as AuthStatusIndicator } from './AuthStatusIndicator';
 export { default as LoginPrompt } from './LoginPrompt';
 export { default as ProtectedFeature } from './ProtectedFeature';
-export { default as withAuthCheck } from './withAuthCheck';
+export { default as withAuthCheck } from './WithAuthCheck';
 
 // 兼容性导出
 export { default as ProtectedRoute } from './ProtectedRoute';

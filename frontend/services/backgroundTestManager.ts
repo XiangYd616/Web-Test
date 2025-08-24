@@ -1,19 +1,31 @@
 
+/**
+ * 后台测试管理器
+ * 已迁移到新的类型系统，使用统一的类型定义
+ */
+
+import type {
+  CompletionCallback,
+  ErrorCallback,
+  ProgressCallback,
+  TestStatus,
+  TestType
+} from '../types';
+
 export interface TestInfo {
   id: string;
-  type: 'database' | 'api' | 'performance' | 'security' | 'compatibility' | 'content' | 'stress' | 'seo' | 'website';
-  // 'accessibility' type removed - functionality moved to compatibility test
+  type: TestType;
   config: any;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  status: TestStatus;
   progress: number;
   startTime: Date;
   endTime?: Date;
   currentStep: string;
   result: any;
   error: any;
-  onProgress?: (progress: number, step: string, metrics?: any) => void;
-  onComplete?: (result: any) => void;
-  onError?: (error: Error) => void;
+  onProgress?: ProgressCallback;
+  onComplete?: CompletionCallback;
+  onError?: ErrorCallback;
 }
 
 export type TestEvent = 'testStarted' | 'testProgress' | 'testCompleted' | 'testFailed' | 'testCancelled';
@@ -42,11 +54,11 @@ class BackgroundTestManager {
 
   // 开始新测试
   startTest(
-    testType: TestInfo['type'],
+    testType: TestType,
     config: any,
-    onProgress?: (progress: number, step: string, metrics?: any) => void,
-    onComplete?: (result: any) => void,
-    onError?: (error: Error) => void
+    onProgress?: ProgressCallback,
+    onComplete?: CompletionCallback,
+    onError?: ErrorCallback
   ): string {
     const testId = this.generateTestId();
 
@@ -148,16 +160,13 @@ class BackgroundTestManager {
 
       this.updateTestProgress(testInfo.id, 30, '🔍 正在执行综合测试...');
 
-      // 模拟网站测试步骤
-      await this.simulateProgressiveTest(testInfo.id, 30, 90, [
-        '⚡ 正在测试性能指标...',
-        '🔍 正在分析SEO优化...',
-        '🔒 正在检查安全配置...',
-        '🌍 正在测试兼容性...',
-        '📊 正在生成综合报告...'
-      ]);
-
+      // 真实的网站测试 - 等待后端完成
       const data = await response.json();
+
+      if (data.testId) {
+        // 轮询测试状态直到完成
+        await this.pollTestStatus(testInfo.id, data.testId, 'website');
+      }
 
       if (data.success || data.status === 'completed') {
         const testResult = data.data || data.results || data;
@@ -192,16 +201,13 @@ class BackgroundTestManager {
 
       this.updateTestProgress(testInfo.id, 30, '📊 正在分析性能指标...');
 
-      // 模拟性能测试步骤
-      await this.simulateProgressiveTest(testInfo.id, 30, 90, [
-        '🚀 正在测试页面加载速度...',
-        '📱 正在检查移动端性能...',
-        '🖼️ 正在优化图片资源...',
-        '⚡ 正在分析Core Web Vitals...',
-        '📈 正在生成性能报告...'
-      ]);
-
+      // 真实的性能测试 - 等待后端完成
       const data = await response.json();
+
+      if (data.testId) {
+        // 轮询测试状态直到完成
+        await this.pollTestStatus(testInfo.id, data.testId, 'performance');
+      }
 
       if (data.success || data.status === 'completed') {
         this.completeTest(testInfo.id, data.results || data);

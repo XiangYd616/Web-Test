@@ -4,7 +4,7 @@ import Login from '../../pages/Login';
 import Register from '../../pages/Register';
 import { AdminGuard, ProtectedRoute } from '../auth';
 import { ModernLayout } from '../modern';
-import { EnhancedErrorBoundary, LoadingSpinner } from '../ui';
+import { ErrorBoundary, LoadingSpinner } from '../ui';
 
 // 懒加载页面组件
 const ModernDashboard = lazy(() => import('../../pages/dashboard/ModernDashboard'));
@@ -65,7 +65,7 @@ const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
 const ScheduledTasks = lazy(() => import('../../pages/ScheduledTasks'));
 
 // 其他功能
-const Settings = lazy(() => import('../../pages/Settings'));
+const Settings = lazy(() => import('../../pages/admin/Settings'));
 const Help = lazy(() => import('../../pages/Help'));
 // ThemeShowcase 已删除
 const Subscription = lazy(() => import('../../pages/Subscription'));
@@ -78,11 +78,11 @@ interface LazyPageWrapperProps {
 }
 
 const LazyPageWrapper: React.FC<LazyPageWrapperProps> = ({ children }) => (
-  <EnhancedErrorBoundary>
+  <ErrorBoundary>
     <Suspense fallback={<LoadingSpinner size="lg" text="加载页面..." />}>
       {children}
     </Suspense>
-  </EnhancedErrorBoundary>
+  </ErrorBoundary>
 );
 
 const AppRoutes: React.FC = () => {
