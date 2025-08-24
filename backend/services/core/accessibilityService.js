@@ -3,6 +3,7 @@
  * 提供无障碍检测、评估、优化建议功能
  */
 
+const puppeteer = require('puppeteer');
 const Logger = require('../../middleware/logger.js');
 
 class AccessibilityService {
@@ -170,10 +171,10 @@ class AccessibilityService {
     const elements = await this.simulateElementDetection(url);
 
     // 检查ARIA标签
-    const elementsWithoutAria = elements.filter(el => 
+    const elementsWithoutAria = elements.filter(el =>
       el.interactive && !el.ariaLabel && !el.ariaLabelledBy
     );
-    
+
     if (elementsWithoutAria.length > 0) {
       issues.push({
         type: 'missing-aria-labels',
@@ -186,14 +187,14 @@ class AccessibilityService {
     // 检查标题结构
     const headings = elements.filter(el => el.type === 'heading');
     const headingLevels = headings.map(h => h.level).sort();
-    
+
     for (let i = 1; i < headingLevels.length; i++) {
-      if (headingLevels[i] - headingLevels[i-1] > 1) {
+      if (headingLevels[i] - headingLevels[i - 1] > 1) {
         issues.push({
           type: 'heading-structure',
           severity: 'medium',
           message: '标题层级跳跃，影响屏幕阅读器导航',
-          details: `从H${headingLevels[i-1]}跳跃到H${headingLevels[i]}`
+          details: `从H${headingLevels[i - 1]}跳跃到H${headingLevels[i]}`
         });
       }
     }
@@ -300,7 +301,7 @@ class AccessibilityService {
 
     // 检查语义化元素使用
     const divCount = elements.filter(el => el.tagName === 'div').length;
-    const semanticCount = elements.filter(el => 
+    const semanticCount = elements.filter(el =>
       ['header', 'nav', 'main', 'section', 'article', 'aside', 'footer'].includes(el.tagName)
     ).length;
 
@@ -552,12 +553,12 @@ class AccessibilityService {
     // 简化的亮度计算
     const rgb = this.hexToRgb(color);
     if (!rgb) return 0;
-    
+
     const [r, g, b] = [rgb.r, rgb.g, rgb.b].map(c => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
-    
+
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 
@@ -590,52 +591,249 @@ class AccessibilityService {
     ];
   }
 
-  async simulateTextElementDetection(url) {
-    return [
-      { selector: 'p', foreground: '#333333', background: '#ffffff', fontSize: 16, bold: false },
-      { selector: 'h1', foreground: '#000000', background: '#ffffff', fontSize: 24, bold: true },
-      { selector: '.small-text', foreground: '#666666', background: '#ffffff', fontSize: 12, bold: false }
-    ];
+  async detectTextElements(url) {
+    try {
+      const browser = await puppeteer.launch({ headless: true });
+      const page = await browser.newPage();
+      await page.goto(url, { waitUntil: 'networkidle0' });
+
+      // 检测文本元素的颜色对比度和字体大小
+      const textElements = await page.evaluate(() => {
+        const elements = [];
+        const textSelectors = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div', 'a', 'button'];
+
+        textSelectors.forEach(selector => {
+          const nodeList = document.querySelectorAll(selector);
+          nodeList.forEach(element => {
+            const computedStyle = window.getComputedStyle(element);
+            const text = element.textContent?.trim();
+
+            if (text && text.length > 0) {
+              elements.push({
+                selector: selector,
+                text: text.substring(0, 100), // 限制文本长度
+                foreground: computedStyle.color,
+                background: computedStyle.backgroundColor,
+                fontSize: parseInt(computedStyle.fontSize),
+                fontWeight: computedStyle.fontWeight,
+                bold: computedStyle.fontWeight === 'bold' || parseInt(computedStyle.fontWeight) >= 600
+              });
+            }
+          });
+        });
+
+        return elements;
+      });
+
+      await browser.close();
+      return textElements;
+    } catch (error) {
+      console.error('Text element detection failed:', error);
+      throw new Error(`无法检测文本元素: ${error.message}`);
+    }
   }
 
-  async simulateInteractiveElementDetection(url) {
-    return [
-      { type: 'button', focusVisible: true },
-      { type: 'link', focusVisible: false },
-      { type: 'modal', focusTrap: false }
-    ];
+  async detectInteractiveElements(url) {
+    try {
+      const browser = await puppeteer.launch({ headless: true });
+      const page = await browser.newPage();
+      await page.goto(url, { waitUntil: 'networkidle0' });
+
+      // 检测交互元素的可访问性
+      const interactiveElements = await page.evaluate(() => {
+        const elements = [];
+        const interactiveSelectors = ['button', 'a', 'input', 'select', 'textarea', '[role="button"]', '[tabindex]'];
+
+        interactiveSelectors.forEach(selector => {
+          const nodeList = document.querySelectorAll(selector);
+          nodeList.forEach(element => {
+            const computedStyle = window.getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+
+            elements.push({
+              type: element.tagName.toLowerCase(),
+              role: element.getAttribute('role'),
+              tabIndex: element.tabIndex,
+              focusVisible: computedStyle.outline !== 'none',
+              ariaLabel: element.getAttribute('aria-label'),
+              ariaDescribedBy: element.getAttribute('aria-describedby'),
+              disabled: element.disabled || element.getAttribute('aria-disabled') === 'true',
+              visible: rect.width > 0 && rect.height > 0,
+              hasText: element.textContent?.trim().length > 0
+            });
+          });
+        });
+
+        return elements;
+      });
+
+      await browser.close();
+      return interactiveElements;
+    } catch (error) {
+      console.error('Interactive element detection failed:', error);
+      throw new Error(`无法检测交互元素: ${error.message}`);
+    }
   }
 
-  async simulateImageDetection(url) {
-    return [
-      { src: 'image1.jpg', alt: 'Description', decorative: false },
-      { src: 'image2.jpg', alt: '', decorative: true },
-      { src: 'image3.jpg', alt: null, decorative: false }
-    ];
+  async detectImages(url) {
+    try {
+      const browser = await puppeteer.launch({ headless: true });
+      const page = await browser.newPage();
+      await page.goto(url, { waitUntil: 'networkidle0' });
+
+      // 检测图片的可访问性
+      const images = await page.evaluate(() => {
+        const imageElements = [];
+        const images = document.querySelectorAll('img');
+
+        images.forEach(img => {
+          const rect = img.getBoundingClientRect();
+          const alt = img.getAttribute('alt');
+          const role = img.getAttribute('role');
+          const ariaLabel = img.getAttribute('aria-label');
+
+          imageElements.push({
+            src: img.src,
+            alt: alt,
+            hasAlt: alt !== null,
+            altEmpty: alt === '',
+            role: role,
+            ariaLabel: ariaLabel,
+            decorative: role === 'presentation' || role === 'none' || alt === '',
+            visible: rect.width > 0 && rect.height > 0,
+            width: rect.width,
+            height: rect.height,
+            loading: img.getAttribute('loading'),
+            title: img.getAttribute('title')
+          });
+        });
+
+        return imageElements;
+      });
+
+      await browser.close();
+      return images;
+    } catch (error) {
+      console.error('Image detection failed:', error);
+      throw new Error(`无法检测图片元素: ${error.message}`);
+    }
   }
 
-  async simulateFormDetection(url) {
-    return [
-      {
-        id: 'contact-form',
-        inputs: [
-          { type: 'text', label: true, required: true, errorMessage: true },
-          { type: 'email', label: false, required: true, errorMessage: false }
-        ]
-      }
-    ];
+  async detectForms(url) {
+    try {
+      const browser = await puppeteer.launch({ headless: true });
+      const page = await browser.newPage();
+      await page.goto(url, { waitUntil: 'networkidle0' });
+
+      // 检测表单的可访问性
+      const forms = await page.evaluate(() => {
+        const formElements = [];
+        const forms = document.querySelectorAll('form');
+
+        forms.forEach(form => {
+          const inputs = [];
+          const formInputs = form.querySelectorAll('input, select, textarea');
+
+          formInputs.forEach(input => {
+            const label = form.querySelector(`label[for="${input.id}"]`) ||
+              input.closest('label') ||
+              form.querySelector(`[aria-labelledby="${input.id}"]`);
+
+            inputs.push({
+              type: input.type || input.tagName.toLowerCase(),
+              id: input.id,
+              name: input.name,
+              required: input.required || input.getAttribute('aria-required') === 'true',
+              hasLabel: !!label,
+              labelText: label?.textContent?.trim(),
+              placeholder: input.placeholder,
+              ariaLabel: input.getAttribute('aria-label'),
+              ariaDescribedBy: input.getAttribute('aria-describedby'),
+              hasErrorMessage: !!form.querySelector(`[aria-describedby="${input.id}"]`),
+              disabled: input.disabled
+            });
+          });
+
+          formElements.push({
+            id: form.id,
+            action: form.action,
+            method: form.method,
+            inputs: inputs,
+            hasSubmitButton: !!form.querySelector('button[type="submit"], input[type="submit"]')
+          });
+        });
+
+        return formElements;
+      });
+
+      await browser.close();
+      return forms;
+    } catch (error) {
+      console.error('Form detection failed:', error);
+      throw new Error(`无法检测表单元素: ${error.message}`);
+    }
   }
 
-  async simulateMediaDetection(url) {
-    return {
-      videos: [
-        { src: 'video1.mp4', captions: false },
-        { src: 'video2.mp4', captions: true }
-      ],
-      audios: [
-        { src: 'audio1.mp3', transcript: false }
-      ]
-    };
+  async detectMedia(url) {
+    try {
+      const browser = await puppeteer.launch({ headless: true });
+      const page = await browser.newPage();
+      await page.goto(url, { waitUntil: 'networkidle0' });
+
+      // 检测媒体元素的可访问性
+      const media = await page.evaluate(() => {
+        const videos = [];
+        const audios = [];
+
+        // 检测视频元素
+        const videoElements = document.querySelectorAll('video');
+        videoElements.forEach(video => {
+          const tracks = video.querySelectorAll('track');
+          const captionTracks = Array.from(tracks).filter(track =>
+            track.kind === 'captions' || track.kind === 'subtitles'
+          );
+
+          videos.push({
+            src: video.src || video.currentSrc,
+            poster: video.poster,
+            controls: video.controls,
+            autoplay: video.autoplay,
+            muted: video.muted,
+            captions: captionTracks.length > 0,
+            captionLanguages: captionTracks.map(track => track.srclang),
+            ariaLabel: video.getAttribute('aria-label'),
+            title: video.getAttribute('title')
+          });
+        });
+
+        // 检测音频元素
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => {
+          const tracks = audio.querySelectorAll('track');
+          const transcriptTracks = Array.from(tracks).filter(track =>
+            track.kind === 'descriptions' || track.kind === 'metadata'
+          );
+
+          audios.push({
+            src: audio.src || audio.currentSrc,
+            controls: audio.controls,
+            autoplay: audio.autoplay,
+            muted: audio.muted,
+            transcript: transcriptTracks.length > 0,
+            ariaLabel: audio.getAttribute('aria-label'),
+            title: audio.getAttribute('title')
+          });
+        });
+
+        return { videos, audios };
+      });
+
+      await browser.close();
+      return media;
+    } catch (error) {
+      console.error('Media detection failed:', error);
+      throw new Error(`无法检测媒体元素: ${error.message}`);
+    }
   }
 
   getHighPriorityActions(issues) {

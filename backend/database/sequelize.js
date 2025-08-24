@@ -4,13 +4,12 @@ const config = require('../config/database');
 // 创建Sequelize实例
 const sequelize = new Sequelize(
   config.database,
-  config.username,
+  config.username || config.user,
   config.password,
   {
     host: config.host,
-    dialect: config.dialect || 'sqlite',
+    dialect: 'postgres', // 固定使用PostgreSQL
     port: config.port,
-    dialect: config.dialect,
     logging: config.logging || false,
     pool: config.pool || {
       max: 20,
