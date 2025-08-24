@@ -5,18 +5,17 @@
 
 import {
   Calendar,
-  Download,
   Eye,
   Filter,
   MoreHorizontal,
   RefreshCw,
   Search,
-  Star,
-  Trash2
+  Star
 } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import type { EnhancedTestRecord, TestType } from '../../types/testHistory';
+import type { TestType } from '../../types';
+import type { EnhancedTestRecord } from '../../types/testHistory';
 
 interface TestTypeHistoryProps {
   testType: TestType;
@@ -38,7 +37,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
   showActions = true
 }) => {
   const { isAuthenticated } = useAuth();
-  
+
   // 状态管理
   const [tests, setTests] = useState<EnhancedTestRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,7 +71,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
     try {
       setLoading(true);
       const currentPage = reset ? 1 : page;
-      
+
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: limit.toString(),
@@ -94,7 +93,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         if (reset) {
           setTests(data.data.tests);
@@ -203,7 +202,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
           <h3>{config.name}历史</h3>
           <span className="test-count">({tests.length})</span>
         </div>
-        
+
         {!compact && (
           <div className="header-actions">
             <button
@@ -213,7 +212,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
             >
               <RefreshCw className={`icon ${loading ? 'spinning' : ''}`} />
             </button>
-            
+
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`action-btn filter-btn ${showFilters ? 'active' : ''}`}
@@ -237,7 +236,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
               className="search-input"
             />
           </div>
-          
+
           {showFilters && (
             <div className="status-filters">
               {['all', 'completed', 'running', 'failed'].map(status => (
@@ -276,7 +275,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
                     {getStatusText(test.status)}
                   </span>
                 </div>
-                
+
                 <div className="item-details">
                   <span className="test-url">{test.url}</span>
                   <span className="test-time">
@@ -284,7 +283,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
                     {formatTime(test.createdAt)}
                   </span>
                 </div>
-                
+
                 {test.overallScore && (
                   <div className="item-score">
                     <Star className="score-icon" />
@@ -292,7 +291,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
                   </div>
                 )}
               </div>
-              
+
               {showActions && (
                 <div className="item-actions">
                   <button
@@ -302,7 +301,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
                   >
                     <Eye className="icon" />
                   </button>
-                  
+
                   {onTestRerun && test.status === 'completed' && (
                     <button
                       onClick={(e) => handleRerun(test, e)}
@@ -312,7 +311,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
                       <RefreshCw className="icon" />
                     </button>
                   )}
-                  
+
                   <button className="action-btn more-btn" title="更多操作">
                     <MoreHorizontal className="icon" />
                   </button>
@@ -321,14 +320,14 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
             </div>
           ))
         )}
-        
+
         {/* 加载更多 */}
         {hasMore && !loading && (
           <button onClick={loadMore} className="load-more-btn">
             加载更多
           </button>
         )}
-        
+
         {loading && (
           <div className="loading-indicator">
             <RefreshCw className="spinning" />

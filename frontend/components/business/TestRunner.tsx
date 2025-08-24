@@ -19,8 +19,8 @@ import {
     type SelectOption
 } from '../ui';
 
-// 测试类型定义
-export type TestType = 'stress' | 'security' | 'seo' | 'api' | 'performance' | 'accessibility' | 'compatibility';
+// 测试类型定义 - 使用统一类型系统
+import type { TestType } from '../../types';
 
 // 测试配置接口
 export interface TestConfig {

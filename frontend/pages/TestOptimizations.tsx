@@ -5,8 +5,8 @@
 
 import { AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { SmartTooltip, useSmartNotification } from '../components/ui/EnhancedUX';
 import { useLoadingState } from '../components/ui/LoadingStates';
+import { SmartTooltip, useSmartNotification } from '../components/ui/UXComponents';
 import { usePerformanceOptimization } from '../hooks/usePerformanceOptimization';
 import { createTestRunner, PerformanceTestResult, TestResult, UXTestResult } from '../utils/testUtils';
 
@@ -300,8 +300,8 @@ const TestOptimizations: React.FC = () => {
                     key={key}
                     onClick={() => setSelectedTab(key as any)}
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${selectedTab === key
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                   >
                     <Icon className="w-4 h-4 mr-2" />

@@ -1,8 +1,9 @@
-import { CheckCircle, Clock, Gauge, Image, Play, Smartphone, Square, Timer, Zap } from 'lucide-react';
+import { CheckCircle, Clock, Gauge, Image, Play, Smartphone, Timer, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import TestHistory from '../components/common/TestHistory';
 import { URLInput } from '../components/ui/URLInput';
+import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
 
 // 性能测试相关类型定义
@@ -139,7 +140,31 @@ const PerformanceTest: React.FC = () => {
 
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
-  const [testProgress, setTestProgress] = useState('');
+  const [currentTestId, setCurrentTestId] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<PerformanceTestResult | null>(null);
+
+  // 使用测试进度监控Hook
+  const {
+    progress,
+    isMonitoring,
+    startMonitoring,
+    stopMonitoring,
+    cancelTest,
+    error: progressError
+  } = useTestProgress(currentTestId || undefined, {
+    onProgress: (progressData) => {
+      setTestStatus(progressData.status as TestStatusType);
+    },
+    onComplete: (result) => {
+      setTestResult(result);
+      setTestStatus('completed');
+      recordTestCompletion('performance');
+    },
+    onError: (error) => {
+      setTestStatus('failed');
+      console.error('测试失败:', error);
+    }
+  });
 
   // 保存标签页状态到 localStorage
   useEffect(() => {
@@ -165,33 +190,57 @@ const PerformanceTest: React.FC = () => {
     }
 
     setTestStatus('starting');
+    setTestResult(null);
 
     try {
-      // 这里可以添加实际的性能测试逻辑
       console.log('开始性能测试:', testConfig);
 
-      // 模拟测试过程
-      setTestProgress('正在初始化性能测试...');
+      // 构建测试配置
+      const performanceConfig = {
+        device: testConfig.device === 'both' ? 'desktop' : testConfig.device,
+        network_condition: testConfig.networkCondition || 'no-throttling',
+        lighthouse_config: {
+          categories: ['performance'],
+          throttling: testConfig.networkCondition || 'none'
+        },
+        custom_metrics: []
+      };
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 执行性能测试
+      const response = await testApiService.executePerformanceTest(
+        testConfig.url,
+        performanceConfig
+      );
 
-      setTestProgress('正在分析页面性能...');
+      if (response.success) {
+        const testId = response.data.id || response.data.testId;
+        setCurrentTestId(testId);
+        setTestStatus('running');
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      setTestProgress('正在生成测试报告...');
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      setTestStatus('completed');
-      setTestProgress('测试完成');
-
-      // 记录测试完成
-      recordTestCompletion('performance', true);
+        // 开始监控测试进度
+        if (testId) {
+          startMonitoring(testId);
+        }
+      } else {
+        throw new Error(response.message || '启动测试失败');
+      }
 
     } catch (error) {
       console.error('性能测试失败:', error);
       setTestStatus('failed');
+    }
+  };
+
+  // 停止测试
+  const handleStopTest = async () => {
+    if (currentTestId) {
+      try {
+        await cancelTest();
+        setTestStatus('idle');
+        setCurrentTestId(null);
+      } catch (error) {
+        console.error('停止测试失败:', error);
+      }
     }
   };
 
@@ -332,39 +381,119 @@ const PerformanceTest: React.FC = () => {
                 </div>
 
                 {/* 测试控制按钮 */}
-                {testStatus === 'running' ? (
+                {testStatus === 'running' || isMonitoring ? (
                   <button
                     type="button"
-                    onClick={() => {
-                      setTestStatus('idle');
-                      setTestProgress('');
-                    }}
+                    onClick={handleStopTest}
                     className="flex items-center space-x-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
-                    <Square className="w-4 h-4" />
-                    <span>取消测试</span>
+                    <StopCircle className="w-4 h-4" />
+                    <span>停止测试</span>
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handleStartTest}
-                    disabled={!testConfig.url}
+                    disabled={!testConfig.url || testStatus === 'starting'}
                     className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
                   >
                     <Play className="w-4 h-4" />
-                    <span>开始测试</span>
+                    <span>{testStatus === 'starting' ? '启动中...' : '开始测试'}</span>
                   </button>
                 )}
               </div>
             </div>
 
             {/* 测试进度指示器 */}
-            {testStatus === 'running' && testProgress && (
-              <div className="mt-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span className="text-gray-300 text-sm">{testProgress}</span>
+            {(testStatus === 'running' || isMonitoring) && progress && (
+              <div className="mt-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="text-gray-300 text-sm">{progress.message}</span>
+                  </div>
+                  <span className="text-blue-400 text-sm font-medium">{progress.progress}%</span>
                 </div>
+
+                {/* 进度条 */}
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progress.progress}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
+            {/* 错误显示 */}
+            {(testStatus === 'failed' || progressError) && (
+              <div className="mt-4 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                  <div>
+                    <h4 className="text-red-400 font-medium">测试失败</h4>
+                    <p className="text-red-300 text-sm mt-1">
+                      {progressError || '测试过程中发生错误，请重试'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 测试结果显示 */}
+            {testStatus === 'completed' && testResult && (
+              <div className="mt-6 p-6 bg-gray-800/50 rounded-lg border border-gray-700/50">
+                <h3 className="text-white text-lg font-semibold mb-4">测试结果</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-gray-700/50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-green-400">
+                      {testResult.overallScore || 0}
+                    </div>
+                    <div className="text-gray-400 text-sm">总体得分</div>
+                  </div>
+
+                  <div className="bg-gray-700/50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-400">
+                      {testResult.metrics?.loadTime || 0}ms
+                    </div>
+                    <div className="text-gray-400 text-sm">加载时间</div>
+                  </div>
+
+                  <div className="bg-gray-700/50 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-400">
+                      {testResult.metrics?.requests || 0}
+                    </div>
+                    <div className="text-gray-400 text-sm">请求数量</div>
+                  </div>
+                </div>
+
+                {/* Core Web Vitals */}
+                {testResult.coreWebVitals && (
+                  <div className="mb-6">
+                    <h4 className="text-white font-medium mb-3">Core Web Vitals</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-gray-700/30 p-3 rounded">
+                        <div className="text-lg font-semibold text-yellow-400">
+                          {testResult.coreWebVitals.lcp}ms
+                        </div>
+                        <div className="text-gray-400 text-xs">LCP</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-3 rounded">
+                        <div className="text-lg font-semibold text-green-400">
+                          {testResult.coreWebVitals.fid}ms
+                        </div>
+                        <div className="text-gray-400 text-xs">FID</div>
+                      </div>
+                      <div className="bg-gray-700/30 p-3 rounded">
+                        <div className="text-lg font-semibold text-blue-400">
+                          {testResult.coreWebVitals.cls}
+                        </div>
+                        <div className="text-gray-400 text-xs">CLS</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

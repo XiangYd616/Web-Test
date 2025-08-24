@@ -3,11 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useTheme } from '../contexts/ThemeContext';
 import backgroundTestManager from '../services/backgroundTestManager';
+import type {
+  DatabaseTestConfig,
+  DatabaseTestResult
+} from '../types';
 
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
 
-interface DatabaseConfig {
+// 本地数据库配置，保留向后兼容性
+interface LocalDatabaseConfig {
   host: string;
   port: number;
   database: string;
@@ -19,7 +24,8 @@ interface DatabaseConfig {
   maxConnections: number;
 }
 
-interface DatabaseTestConfig {
+// 本地数据库测试配置，扩展统一类型
+interface LocalDatabaseTestConfig extends Partial<DatabaseTestConfig> {
   connectionTest: boolean;
   performanceTest: boolean;
   integrityTest: boolean;
@@ -77,7 +83,7 @@ interface DatabaseTestResult {
 
 const DatabaseTest: React.FC = () => {
   const { actualTheme } = useTheme();
-  const [dbConfig, setDbConfig] = useState<DatabaseConfig>({
+  const [dbConfig, setDbConfig] = useState<LocalDatabaseConfig>({
     host: 'localhost',
     port: 5432,
     database: 'testweb_prod',
@@ -89,7 +95,7 @@ const DatabaseTest: React.FC = () => {
     maxConnections: 100
   });
 
-  const [testConfig, setTestConfig] = useState<DatabaseTestConfig>({
+  const [testConfig, setTestConfig] = useState<LocalDatabaseTestConfig>({
     connectionTest: true,
     performanceTest: true,
     integrityTest: true,

@@ -1,27 +1,34 @@
 import { AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import EnhancedSEOResults from '../components/seo/EnhancedSEOResults';
 import FileUploadSEO from '../components/seo/FileUploadSEO';
 import LocalSEOResults from '../components/seo/LocalSEOResults';
 import NetworkErrorPrompt from '../components/seo/NetworkErrorPrompt';
+import SEOResults from '../components/seo/SEOResults';
 import { URLInput } from '../components/testing';
 import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
+import type {
+  SeoTestConfig
+} from '../types';
 
 // CSS样式已迁移到组件库中
 
-type TestMode = 'standard' | 'comprehensive';
-type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed';
+// 本地类型定义已迁移到统一的类型系统
+// 使用 SeoTestConfig 替代本地的 SEOTestConfig
+// 使用 TestStatus 替代本地的 TestStatusType
 
-interface SEOTestConfig {
+type TestMode = 'standard' | 'comprehensive';
+
+// 扩展统一的SEO测试配置以支持本地特定需求
+interface LocalSEOTestConfig extends Partial<SeoTestConfig> {
   url: string;
   keywords: string;
   mode: TestMode;
   checkTechnicalSEO: boolean;
   checkContentQuality: boolean;
-  checkPageSpeed: boolean; // 重命名，仅检查基础页面速度
+  checkPageSpeed: boolean;
   checkMobileFriendly: boolean;
   checkSocialMedia: boolean;
   checkStructuredData: boolean;
@@ -57,7 +64,7 @@ const SEOTest: React.FC = () => {
     switchMode
   } = useUnifiedSEOTest();
 
-  const [testConfig, setTestConfig] = useState<SEOTestConfig>({
+  const [testConfig, setTestConfig] = useState<LocalSEOTestConfig>({
     url: '',
     keywords: '',
     mode: 'standard',
@@ -75,7 +82,7 @@ const SEOTest: React.FC = () => {
     checkKeywordDensity: false,
   });
 
-  const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
+  const [testStatus, setTestStatus] = useState<TestStatus>('idle');
   const [error, setError] = useState('');
   const [seoTestMode, setSeoTestMode] = useState<SEOTestMode>('online');
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -1186,7 +1193,7 @@ const SEOTest: React.FC = () => {
                 </div>
 
                 {seoTestMode === 'online' ? (
-                  <EnhancedSEOResults results={results} onExport={handleExportReport} />
+                  <SEOResults results={results} onExport={handleExportReport} />
                 ) : (
                   <LocalSEOResults results={results} onExport={handleExportReport} />
                 )}
