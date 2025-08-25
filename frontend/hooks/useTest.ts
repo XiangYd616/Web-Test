@@ -3,8 +3,9 @@
  * 基于全局状态管理的测试功能
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
+import { TestProgress } from '../services/api/testProgressService';
 
 // 测试配置接口
 export interface TestConfig {
@@ -37,6 +38,8 @@ export interface TestResult {
 
 // 测试Hook
 export const useTest = () => {
+  const [error, setError] = useState<string | null>(null);
+
     const { state, dispatch } = useAppContext();
     const { test } = state;
 

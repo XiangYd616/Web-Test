@@ -9,6 +9,7 @@ import type {
   AdapterConfig
 } from '../../types';
 import { unifiedTestApiClient } from '../unifiedTestApiService';
+import { TestProgress } from '../../../services/api/testProgressService';
 
 // 测试信息接口（保持与原有一致）
 export interface TestInfo {

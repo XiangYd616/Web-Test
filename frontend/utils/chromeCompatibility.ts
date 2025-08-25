@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 
 export class ChromeCompatibilityHelper {
   /**

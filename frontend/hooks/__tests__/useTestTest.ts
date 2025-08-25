@@ -7,6 +7,7 @@ import { ReactNode } from 'react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AppProvider } from '../../contexts/AppContext';
 import { useTest } from '../useTest';
+import { TestProgress } from '../../services/api/testProgressService';
 
 // Mock fetch
 global.fetch = vi.fn();

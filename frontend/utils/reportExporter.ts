@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 export interface ExportOptions {
   format: 'html' | 'pdf' | 'json' | 'csv';
   includeCharts: boolean;

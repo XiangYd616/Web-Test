@@ -1,3 +1,5 @@
+import { TestProgress } from '../services/api/testProgressService';
+import SecurityTestResult from '../types';
 
 // ==================== 错误类型 ====================
 

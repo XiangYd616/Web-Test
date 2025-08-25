@@ -1,3 +1,4 @@
+import { useState } from 'react';
 /**
  * 共享安全检查模块
  * 为所有测试页面提供统一的安全检查功能
@@ -443,6 +444,8 @@ export default securityCheckModule;
 
 // 导出React Hook
 export const useSecurityCheck = () => {
+  const [error, setError] = useState<string | null>(null);
+
   return {
     checkSSL: securityCheckModule.checkSSL.bind(securityCheckModule),
     checkSecurityHeaders: securityCheckModule.checkSecurityHeaders.bind(securityCheckModule),

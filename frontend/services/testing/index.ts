@@ -1,3 +1,4 @@
+import { TestProgress } from '../../services/api/testProgressService';
 // 🧪 测试服务统一导出
 export { default as apiTestEngine } from './apiTestEngine';
 export { default as testScheduler } from './testScheduler';

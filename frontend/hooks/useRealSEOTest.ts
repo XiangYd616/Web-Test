@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { RealSEOAnalysisEngine, SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
+import { TestProgress } from '../services/api/testProgressService';
 
 const getPerformanceMetrics = async (url: string, options: any) => {
   

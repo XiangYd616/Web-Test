@@ -5,6 +5,7 @@
  */
 
 import type {
+import SecurityTestResult from '../types';
   BaseTestConfig,
   BaseTestResult,
   TestType,

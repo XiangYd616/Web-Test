@@ -1,3 +1,4 @@
+import { TestProgress } from '../services/api/testProgressService';
 /**
  * 真实的后台测试管理器
  * 移除所有模拟实现，使用真实的API调用

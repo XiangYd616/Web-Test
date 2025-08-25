@@ -1,3 +1,4 @@
+import { useState } from 'react';
 /**
  * 字段命名转换工具
  * 统一前后端字段命名的转换逻辑
@@ -190,6 +191,8 @@ export const validateFieldNaming = (obj: any, context: 'frontend' | 'database' =
   }
   
   const validateKey = (key: string, path: string = '') => {
+  const [error, setError] = useState<string | null>(null);
+
     const fullPath = path ? `${path}.${key}` : key;
     
     if (context === 'frontend') {

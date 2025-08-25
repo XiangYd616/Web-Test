@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import { dataAnalysisService } from '../analytics';
 import { monitoringService } from '../monitoring';
+import { createElement } from 'react';
 
 export interface Report {
   id: string;

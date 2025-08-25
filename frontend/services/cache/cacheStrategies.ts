@@ -356,4 +356,3 @@ export const CacheKeys = {
 };
 
 // 导入缓存管理器（避免循环依赖）
-import { cacheManager } from './cacheManager';

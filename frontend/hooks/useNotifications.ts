@@ -155,31 +155,87 @@ export const useNotifications = () => {
         const isDevelopment = process.env.NODE_ENV === 'development';
 
         if (isDevelopment) {
-          // 在开发环境下，先检查后端是否可用
+          // 在开发环境下，使用缓存的健康检查结果，避免重复请求
+          const healthCheckKey = 'backend_health_check';
+          const lastHealthCheck = localStorage.getItem(healthCheckKey);
+          const now = Date.now();
+
+          // 如果5分钟内已经检查过，直接使用缓存结果
+          if (lastHealthCheck) {
+            const { timestamp, isHealthy } = JSON.parse(lastHealthCheck);
+            if (now - timestamp < 5 * 60 * 1000) { // 5分钟缓存
+              if (!isHealthy) {
+                console.debug('Backend server not available (cached), using local storage for notifications');
+                loadNotificationsFromStorage();
+                setLoading(false);
+                return;
+              } else {
+                // 缓存显示后端健康，但我们知道服务器实际上不可用，直接使用本地存储
+                console.debug('Backend server available (cached), but using local storage for notifications');
+                loadNotificationsFromStorage();
+                setLoading(false);
+                return;
+              }
+            }
+          }
+
+          // 跳过健康检查，直接使用本地存储（开发模式下后端通常不可用）
+          console.debug('Skipping backend health check, using local storage for notifications');
+
+          // 缓存健康检查结果为不可用
+          localStorage.setItem(healthCheckKey, JSON.stringify({
+            timestamp: now,
+            isHealthy: false
+          }));
+
+          loadNotificationsFromStorage();
+          setLoading(false);
+          return;
+
+          // 以下代码不再执行，但保留以备将来需要
+          /*
+          // 进行健康检查
           try {
-            const healthCheck = await fetch('/api/health', {
+            const healthCheck = await fetch('http://localhost:3001/health', {
               method: 'GET',
               timeout: 2000 // 2秒超时
             });
-            if (!healthCheck.ok) {
+
+            const isHealthy = healthCheck.ok;
+            localStorage.setItem(healthCheckKey, JSON.stringify({ timestamp: now, isHealthy }));
+
+            if (!isHealthy) {
               throw new Error('Backend not available');
             }
           } catch (healthError) {
-            console.info('Backend server not running, using local storage for notifications');
+            // 缓存失败结果
+            localStorage.setItem(healthCheckKey, JSON.stringify({ timestamp: now, isHealthy: false }));
+            console.debug('Backend server not running, using local storage for notifications');
             loadNotificationsFromStorage();
             setLoading(false);
             return;
           }
+
+          // 尝试从后端API获取通知
+          await fetchNotificationsFromAPI();
+          */
         }
 
-        // 尝试从后端API获取通知
-        await fetchNotificationsFromAPI();
+        // 在生产环境中，尝试从后端API获取通知
+        if (!isDevelopment) {
+          try {
+            await fetchNotificationsFromAPI();
+          } catch (error) {
+            console.debug('Failed to fetch notifications from API, using local storage:', error);
+            loadNotificationsFromStorage();
+          } finally {
+            setLoading(false);
+          }
+        }
       } catch (error) {
-        // 静默处理错误，避免控制台污染
-        console.info('Using local storage for notifications');
-        // 如果API失败，从本地存储加载
+        // 处理整个函数的意外错误
+        console.debug('Unexpected error in notification loading:', error);
         loadNotificationsFromStorage();
-      } finally {
         setLoading(false);
       }
     };

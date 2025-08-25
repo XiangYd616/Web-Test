@@ -7,6 +7,7 @@
 import { jwtDecode } from 'jwt-decode';
 import type { User, AuthResponse } from '../../types/unified/models';
 import { defaultErrorHandler } from '../unified/apiErrorHandler';
+import { createElement } from 'react';
 
 // ==================== 类型定义 ====================
 

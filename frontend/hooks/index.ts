@@ -1,3 +1,5 @@
+import { useTestProgress } from '../hooks/useTestProgress';
+import { TestProgress } from '../services/api/testProgressService';
 /**
  * 测试专用Hook统一导出
  * 各个测试页面可以选择性使用这些Hook，不强制替换现有实现

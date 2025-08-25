@@ -4,6 +4,7 @@
  */
 
 import { errorService } from '../services/errorService';
+import { useState } from 'react';
 
 // 测试结果接口
 interface TestResult {
@@ -226,6 +227,8 @@ export class UXTester {
       const startTime = performance.now();
       
       const handleClick = () => {
+  const [error, setError] = useState<string | null>(null);
+
         const responseTime = performance.now() - startTime;
         button.removeEventListener('click', handleClick);
         

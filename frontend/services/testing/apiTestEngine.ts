@@ -1,3 +1,4 @@
+import { useState } from 'react';
 // API 接口测试引擎
 
 export interface APITestConfig {
@@ -828,6 +829,8 @@ export class APITestEngine {
     responseTimes.sort((a, b) => a - b);
 
     const getPercentile = (arr: number[], percentile: number) => {
+  const [error, setError] = useState<string | null>(null);
+
       const index = Math.ceil(arr.length * percentile) - 1;
       return arr[Math.max(0, index)] || 0;
     };

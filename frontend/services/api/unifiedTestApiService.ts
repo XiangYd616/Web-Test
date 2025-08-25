@@ -4,6 +4,7 @@
  */
 
 import { BaseApiService } from './baseApiService';
+import { TestProgress } from '../../services/api/testProgressService';
 
 export interface TestConfig {
   url: string;

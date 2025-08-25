@@ -10,6 +10,7 @@ console.warn('⚠️ 警告: testApiService.ts 已弃用，请使用 unifiedApiS
 
 // 重新导出统一API服务
 import { unifiedApiService } from './api/unifiedApiService';
+import { TestProgress } from '../services/api/testProgressService';
 export { unifiedApiService as testApiService };
 export default unifiedApiService;
 

@@ -1,3 +1,4 @@
+import { TestProgress } from '../services/api/testProgressService';
 
 // ==================== 性能配置接口 ====================
 

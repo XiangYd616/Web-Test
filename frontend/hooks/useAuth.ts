@@ -3,7 +3,7 @@
  * 基于全局状态管理的认证功能
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { type User } from '../contexts/AppContext';
 
 // 登录凭据接口
@@ -23,6 +23,8 @@ export interface RegisterData {
 
 // 认证Hook
 export const useAuth = () => {
+  const [error, setError] = useState<string | null>(null);
+
   // 临时解决方案：使用默认状态而不是 AppContext
   const defaultAuthState = {
     user: null,

@@ -5,6 +5,7 @@
  */
 
 import type { 
+import { TestProgress } from '../services/api/testProgressService';
   ApiResponse, 
   PaginationInfo, 
   UUID, 

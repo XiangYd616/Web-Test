@@ -3,8 +3,7 @@
  * 统一处理所有API请求的错误响应
  */
 
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { errorService, ErrorType, ErrorSeverity } from './errorService';
+import axios, { AxiosError } from 'axios';
 
 // API错误响应接口
 interface ApiErrorResponse {
@@ -47,7 +46,7 @@ class ApiErrorInterceptor {
     axios.interceptors.request.use(
       (config) => {
         // 添加请求ID用于重试跟踪
-        config.metadata = { 
+        config.metadata = {
           requestId: this.generateRequestId(),
           startTime: Date.now()
         };
@@ -105,16 +104,16 @@ class ApiErrorInterceptor {
 
     // 解析错误响应
     const errorData = this.parseErrorResponse(error);
-    
+
     // 创建标准化错误
-    const standardError = errorService.handleError(error, {
+    const standardError = frontendErrorHandler.handleError(error, {
       phase: 'response',
       url,
       method,
       status: error.response?.status,
       statusText: error.response?.statusText,
       responseData: errorData,
-      duration: error.config?.metadata?.startTime ? 
+      duration: error.config?.metadata?.startTime ?
         Date.now() - error.config.metadata.startTime : undefined
     });
 
@@ -138,7 +137,7 @@ class ApiErrorInterceptor {
     }
 
     const data = error.response.data;
-    
+
     // 标准API错误格式
     if (data && typeof data === 'object' && 'success' in data) {
       return data as ApiErrorResponse;
@@ -172,7 +171,7 @@ class ApiErrorInterceptor {
    */
   private shouldRetry(error: AxiosError, requestId: string): boolean {
     const currentRetries = this.retryCount.get(requestId) || 0;
-    
+
     return (
       currentRetries < this.retryConfig.maxRetries &&
       this.retryConfig.retryCondition(error)
@@ -214,17 +213,17 @@ class ApiErrorInterceptor {
         // 未授权，可能需要重新登录
         await this.handleUnauthorized(error);
         break;
-      
+
       case 403:
         // 禁止访问，记录权限问题
         this.handleForbidden(error);
         break;
-      
+
       case 429:
         // 请求过于频繁，实施退避策略
         this.handleRateLimit(error);
         break;
-      
+
       case 500:
       case 502:
       case 503:
@@ -242,12 +241,12 @@ class ApiErrorInterceptor {
     // 清除本地认证信息
     localStorage.removeItem('auth_token');
     localStorage.removeItem('refresh_token');
-    
+
     // 如果不是登录页面，重定向到登录
     if (!window.location.pathname.includes('/login')) {
       // 保存当前页面用于登录后跳转
       localStorage.setItem('redirect_after_login', window.location.pathname);
-      
+
       // 延迟跳转，让用户看到错误消息
       setTimeout(() => {
         window.location.href = '/login';
@@ -350,7 +349,7 @@ export const apiErrorInterceptor = new ApiErrorInterceptor();
 
 // 便捷方法：手动处理API错误
 export const handleApiError = (error: AxiosError, context?: Record<string, any>) => {
-  return errorService.handleError(error, {
+  return frontendErrorHandler.handleError(error, {
     ...context,
     phase: 'manual',
     url: error.config?.url,
