@@ -6,7 +6,7 @@
   "scripts": {
     "_comment_main": "🚀 主要启动命令",
     "start": "cross-env NODE_ENV=production node src/app.js",
-    "dev": "cross-env NODE_ENV=development nodemon src/app.js",
+    "dev": "node src/app.js",
     "_comment_test": "🧪 测试相关",
     "test": "jest",
     "test:watch": "jest --watch",

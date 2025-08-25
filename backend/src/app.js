@@ -471,6 +471,30 @@ app.get('/api', (req, res) => {
   });
 });
 
+// 手动应用关键路由作为备用方案（修复路由管理器问题）
+// 必须在404处理器之前应用
+try {
+  console.log('🔧 应用备用路由...');
+
+  // 手动应用测试路由
+  const testRoutes = require('../routes/test.js');
+  app.use('/api/test', testRoutes);
+  console.log('✅ 备用测试路由已应用: /api/test');
+
+  // 手动应用认证路由
+  const authRoutes = require('../routes/auth.js');
+  app.use('/api/auth', authRoutes);
+  console.log('✅ 备用认证路由已应用: /api/auth');
+
+  // 手动应用系统路由
+  const systemRoutes = require('../routes/system.js');
+  app.use('/api/system', systemRoutes);
+  console.log('✅ 备用系统路由已应用: /api/system');
+
+} catch (error) {
+  console.error('⚠️ 备用路由应用失败:', error.message);
+}
+
 // 404处理 - 使用统一格式
 app.use('*', notFoundHandler);
 
