@@ -51,6 +51,8 @@ export default defineConfig({
       'X-Frame-Options': 'SAMEORIGIN',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
+      // 修复CSP指令名称
+      'Content-Security-Policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' ws: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
     },
     proxy: {
       // 代理API请求到后端服务器
