@@ -770,7 +770,7 @@ class EngineFactory {
   static createUXEngine() {
     try {
       const UXEngine = require('../api/uxTestEngine');
-      const engine = new UXEngine.RealUXTestEngine();
+      const engine = new UXEngine();
       return new EngineAdapter(engine, 'ux');
     } catch (error) {
       console.error('Failed to create UX engine:', error);
@@ -781,7 +781,7 @@ class EngineFactory {
   static createNetworkEngine() {
     try {
       const NetworkEngine = require('../api/networkTestEngine');
-      const engine = new NetworkEngine.RealNetworkTestEngine();
+      const engine = new NetworkEngine();
       return new EngineAdapter(engine, 'network');
     } catch (error) {
       console.error('Failed to create network engine:', error);
