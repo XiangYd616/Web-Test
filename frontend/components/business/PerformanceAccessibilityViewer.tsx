@@ -38,7 +38,8 @@ import {
     TrendingUp,
     Zap
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { Bar, Doughnut, Radar } from 'react-chartjs-2';
 
 // 注册Chart.js组件

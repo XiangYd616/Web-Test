@@ -1,6 +1,8 @@
 import { AlertTriangle, BarChart3, CheckCircle, Clock, Download, Eye, Gauge, ImageIcon, MousePointer, Play, Square, Target, TrendingUp, XCircle, Zap } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { useUserStats } from '../hooks/useUserStats';
 import type {
   CoreWebVitals,
@@ -218,7 +220,7 @@ const UXTest: React.FC = () => {
   };
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="ux"
       title="用户体验测试"
       description="评估网站的可用性、可访问性和用户交互体验"

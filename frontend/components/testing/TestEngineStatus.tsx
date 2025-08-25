@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 
 import { AlertTriangle, CheckCircle, Code, Globe, RefreshCw, Shield, XCircle, Zap } from 'lucide-react';
 

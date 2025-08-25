@@ -1,6 +1,6 @@
 
 import { AlertTriangle, CheckCircle, ExternalLink, Globe, HelpCircle, RefreshCw, Zap } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { URLValidationResult, validateUrlSync } from '../../utils/urlValidator';
 
 interface EnhancedUrlInputProps {
@@ -278,3 +278,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
 };
 
 export default EnhancedUrlInput;
+
+// 为了兼容性，也导出为 UrlInput
+export { EnhancedUrlInput as UrlInput };
+

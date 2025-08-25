@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { DataManagement as DataManagementComponent } from '../components/data/DataManagement';
 
 /**

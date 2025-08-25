@@ -1,5 +1,6 @@
 import { Activity, Archive, BarChart3, Copy, Database, Download, Edit, Eye, FileText, Filter, HardDrive, RefreshCw, RotateCcw, Search, Settings, Shield, TestTube, Trash2, Users } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { advancedDataManager, DataAnalysisResult, DataQuery, DataRecord } from '../../services/advancedDataService';
 
 interface AdvancedDataManagerProps {

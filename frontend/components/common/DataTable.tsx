@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode } from 'react';
 import { ChevronDown, ChevronUp, SortAsc } from 'lucide-react';
 
 import '../../styles/data-table.css';

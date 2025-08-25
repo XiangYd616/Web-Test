@@ -7,9 +7,11 @@ import {
   Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, 
   History, Loader, Play, Settings, StopCircle, Users, XCircle 
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useUnifiedTestState } from '../../hooks/useUnifiedTestState';
 import type { BaseTestConfig } from '../../services/testing/UnifiedTestStateManager';
+import { TestProgress } from '../../services/api/testProgressService';
 
 export interface UnifiedTestPanelProps {
   testType: string;

@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import type { FC } from 'react';
 import { AlertCircle, CheckCircle, Loader, Upload, X } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 

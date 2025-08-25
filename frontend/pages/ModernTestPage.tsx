@@ -10,7 +10,8 @@
  * 5. 响应式设计
  */
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
+import type { FC } from 'react';
 import type {
   BaseComponentProps,
   CompletionCallback,

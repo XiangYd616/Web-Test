@@ -4,7 +4,8 @@
  */
 
 import { AlertCircle, CheckCircle, Clock, Loader, StopCircle, XCircle } from 'lucide-react';
-import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import type { TestProgress } from '../../services/api/testProgressService';
 
 export interface UnifiedTestProgressProps {
@@ -33,6 +34,10 @@ export const UnifiedTestProgress: React.FC<UnifiedTestProgressProps> = ({
 
   // 获取状态图标和颜色
   const getStatusIcon = () => {
+  const [testProgress, setTestProgress] = useState<any>(null);
+
+  const [error, setError] = useState<string | null>(null);
+
     if (error || progress?.status === 'failed') {
       return <XCircle className="w-5 h-5 text-red-400" />;
     }

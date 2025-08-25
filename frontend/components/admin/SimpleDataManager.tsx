@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { AlertTriangle, Database, Download, RefreshCw, Trash2, Upload } from 'lucide-react';
 import Logger from '../../utils/logger';
 

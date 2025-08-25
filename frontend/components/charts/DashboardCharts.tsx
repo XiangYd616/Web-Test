@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { TrendingUp, TrendingDown, Activity, Clock, Target, Users } from 'lucide-react';
 
 interface ChartData {

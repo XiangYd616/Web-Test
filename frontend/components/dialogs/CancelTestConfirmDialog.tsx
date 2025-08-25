@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, Clock, Square, Users, X } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
 interface CancelTestConfirmDialogProps {
   isOpen: boolean;

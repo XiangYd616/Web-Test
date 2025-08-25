@@ -1,4 +1,5 @@
-import React, { createContext, ReactNode, useCallback, useContext, useState } from 'react';
+import { ReactNode, createContext, useCallback, useContext, useState } from 'react';
+import type { FC } from 'react';
 
 import { AlertTriangle, CheckCircle, Info, X, XCircle } from 'lucide-react';
 

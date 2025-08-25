@@ -1,11 +1,14 @@
 import { Shield, XCircle } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
+import type { TestProgress } from '../services/api/testProgressService';
 import type {
-  SecurityTestConfig
+  SecurityTestConfig,
+  SecurityTestResult
 } from '../types';
 
 // CSS样式已迁移到组件库中
@@ -26,6 +29,10 @@ const SecurityTest: React.FC = () => {
 
   // 状态管理 - 使用统一类型系统
   const [testUrl, setTestUrl] = useState('');
+  const [isTestRunning, setIsTestRunning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [testProgress, setTestProgress] = useState<any>(null);
+  const [canStartTest, setCanStartTest] = useState(false);
   const [testConfig, setTestConfig] = useState<Partial<SecurityTestConfig>>({
     url: '',
     testType: 'security',
@@ -112,7 +119,7 @@ const SecurityTest: React.FC = () => {
   };
 
   // 更新按钮状态
-  React.useEffect(() => {
+  useEffect(() => {
     const updateButtonState = () => {
       if (testPanelRef.current) {
         const canStart = testPanelRef.current.canStartTest();
@@ -174,7 +181,7 @@ const SecurityTest: React.FC = () => {
   // 在使用功能时才提示登录
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="security"
       title="安全测试"
       description="全面检测网站安全漏洞和防护措施"

@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, BarChart3, Calendar, CheckCircle, Download, Filter, Globe, RefreshCw, TrendingDown, TrendingUp } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
+import type { ReactNode, FC } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { AnalyticsData, dataAnalysisService } from '../../services/dataAnalysisService';
 

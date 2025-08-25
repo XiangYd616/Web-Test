@@ -1,5 +1,6 @@
 import { AlertTriangle, Bell, Check, CheckCircle, ExternalLink, Info, RefreshCw, Search, Trash2, X } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { NotificationItem, useNotifications } from '../hooks/useNotifications';
 

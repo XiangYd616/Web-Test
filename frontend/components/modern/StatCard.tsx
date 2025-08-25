@@ -1,8 +1,9 @@
-import React from 'react';
+import { createElement, isValidElement, useState } from 'react';
+import type { ReactElement, ComponentType, FC } from 'react';
 import { LucideIcon, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
-// CSS样式已迁移到组件库和主题配置�?
+// CSS样式已迁移到组件库和主题配置�?
 export interface StatCardProps {
   title: string;
   value: string | number;
@@ -34,6 +35,8 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => {
   const { actualTheme } = useTheme();
   const getTrendIcon = () => {
+  const [error, setError] = useState<string | null>(null);
+
     if (!trend) return null;
 
     switch (trend.direction) {

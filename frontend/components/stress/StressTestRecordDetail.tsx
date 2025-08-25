@@ -1,6 +1,7 @@
 
 import { Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, Globe, Settings, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
-import React, { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import type { FC } from 'react';
 import type { StressTestRecord } from '../../services/stressTestRecordService';
 
 interface StressTestRecordDetailProps {
@@ -76,6 +77,8 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
 
   // 格式化时间
   const formatTime = (timestamp?: string) => {
+  const [error, setError] = useState<string | null>(null);
+
     if (!timestamp) return 'N/A';
     try {
       return new Date(timestamp).toLocaleString('zh-CN');

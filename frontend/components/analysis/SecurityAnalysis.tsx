@@ -1,5 +1,6 @@
 import { AlertCircle, AlertTriangle, CheckCircle, Eye, Info, Lock, Shield, TrendingDown, TrendingUp, XCircle } from 'lucide-react';
 import React from 'react';
+import type { FC } from 'react';
 
 interface SecurityAnalysisResult {
   securityScore: number;

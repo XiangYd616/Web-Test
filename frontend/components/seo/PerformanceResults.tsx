@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle, Info, Lightbulb, TrendingUp, XCircle, Zap } from 'lucide-react';
 import React from 'react';
+import type { FC } from 'react';
 import { PerformanceResult } from '../../services/realSEOAnalysisEngine';
 
 interface PerformanceResultsProps {

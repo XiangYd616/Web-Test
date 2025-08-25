@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode, FC } from 'react';
 import { LucideIcon } from 'lucide-react';
 
 import '../../styles/design-system.css';

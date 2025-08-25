@@ -12,6 +12,7 @@ import { URLInput } from '../components/testing';
 import { useLocalStressTest } from '../hooks/useLocalStressTest';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
 import { useStressTestRecord } from '../hooks/useStressTestRecord';
+import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
 import { testApiService } from '../services/api/testApiService';
 import backgroundTestManager from '../services/backgroundTestManager';
@@ -2110,17 +2111,26 @@ const StressTest: React.FC = () => {
             try {
                 const { io } = await import('socket.io-client');
 
-                // 创建WebSocket连接
+                // 创建WebSocket连接 - 使用稳定的polling传输
                 const socket = io('http://localhost:3001', {
-                    transports: ['websocket', 'polling'],
-                    timeout: 20000,
+                    transports: ['polling'], // 只使用polling，避免websocket升级问题
+                    timeout: 10000, // 增加超时时间
+                    // 完全禁用自动重连，手动控制
+                    reconnection: false, // 禁用自动重连
+                    autoConnect: false, // 禁用自动连接
+                    forceNew: true, // 强制创建新连接
+                    upgrade: false, // 禁用协议升级，避免websocket错误
                 });
 
                 socketRef.current = socket;
 
                 // 连接事件
+                let connectionFailureCount = 0; // 移动到这里，让所有事件处理器都能访问
+                const maxFailures = 3; // 最大失败次数
+
                 socket.on('connect', () => {
                     console.log('✅ WebSocket连接成功:', socket.id);
+                    connectionFailureCount = 0; // 连接成功时重置失败计数
 
                     // 连接成功后立即检查是否有当前测试需要加入房间
                     const currentTestIdValue = currentTestIdRef.current;
@@ -2252,15 +2262,33 @@ const StressTest: React.FC = () => {
                     }
                 });
 
-                // 连接错误处理
+                // 连接错误处理 - 完全禁用自动重连
+
                 socket.on('connect_error', (error) => {
-                    console.error('❌❌❌ WebSocket连接错误 ❌❌❌:', error);
-                    console.error('❌ 错误详情:', {
-                        message: error.message,
-                        description: (error as any).description,
-                        context: (error as any).context,
-                        type: (error as any).type
-                    });
+                    connectionFailureCount++;
+
+                    if (connectionFailureCount === 1) {
+                        // 第一次失败时显示友好提示
+                        console.warn('⚠️ WebSocket连接失败，将使用本地模式:', error.message);
+                    } else if (connectionFailureCount >= maxFailures) {
+                        // 多次失败后完全停止
+                        console.warn('🛑 WebSocket连接多次失败，停止重连，使用本地模式');
+                        socket.disconnect();
+                        socket.close();
+                        socket.removeAllListeners(); // 移除所有事件监听器
+                        return;
+                    }
+
+                    // 详细错误信息仅在开发模式下显示
+                    if (process.env.NODE_ENV === 'development' && connectionFailureCount <= 2) {
+                        console.debug('WebSocket错误详情:', {
+                            attempt: connectionFailureCount,
+                            message: error.message,
+                            description: (error as any).description,
+                            context: (error as any).context,
+                            type: (error as any).type
+                        });
+                    }
 
                     // 如果有正在运行的测试，检查是否需要重置
                     if (isRunning && currentTestIdRef.current) {
@@ -2713,6 +2741,14 @@ const StressTest: React.FC = () => {
                         console.log('🛑 测试已取消，跳过完成记录更新');
                     }
                 });
+
+                // 手动尝试连接（因为禁用了自动连接）
+                setTimeout(() => {
+                    if (socket && !socket.connected && connectionFailureCount < maxFailures) {
+                        console.debug('🔄 尝试手动连接WebSocket');
+                        socket.connect();
+                    }
+                }, 1000);
 
             } catch (error) {
                 console.error('WebSocket初始化失败:', error);

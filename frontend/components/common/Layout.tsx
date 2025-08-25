@@ -5,6 +5,7 @@
 
 import { LucideIcon } from 'lucide-react';
 import React from 'react';
+import type { ReactNode, FC } from 'react';
 
 // 基础页面布局
 export interface PageLayoutProps {

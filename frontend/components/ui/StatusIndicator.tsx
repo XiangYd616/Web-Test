@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { AlertTriangle, CheckCircle, Clock, Loader, XCircle } from 'lucide-react';
 import { cn } from '../../utils/cn';
 

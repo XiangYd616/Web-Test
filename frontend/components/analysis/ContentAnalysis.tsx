@@ -1,4 +1,5 @@
-import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
 import { AlertTriangle, CheckCircle, Info, TrendingDown, TrendingUp, XCircle } from 'lucide-react';
 
@@ -36,6 +37,8 @@ interface ContentAnalysisProps {
 
 export const ContentAnalysis: React.FC<ContentAnalysisProps> = ({ result }) => {
   const getScoreColor = (score: number) => {
+  const [error, setError] = useState<string | null>(null);
+
     if (score >= 90) return 'text-green-600 bg-green-50';
     if (score >= 70) return 'text-yellow-600 bg-yellow-50';
     if (score >= 50) return 'text-orange-600 bg-orange-50';

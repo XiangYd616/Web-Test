@@ -9,7 +9,8 @@
  * 4. 展示最佳实践
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { CheckCircle, Clock, AlertCircle, FileText, Code, Database, Layers } from 'lucide-react';
 import type {
   BaseComponentProps,

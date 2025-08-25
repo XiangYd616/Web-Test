@@ -1,5 +1,6 @@
 import { AlertCircle, Archive, CheckCircle, Clock, Cloud, HardDrive, Plus, RefreshCw, RotateCcw, Shield, Trash2, X, Zap } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { advancedDataManager, DataBackup } from '../../services/advancedDataService';
 
 interface DataBackupManagerProps {

@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle, Clock, Shield, XCircle, Zap } from 'lucide-react';
-import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
 interface APITestResult {
   endpoint: string;
@@ -46,6 +47,8 @@ interface APIAnalysisProps {
 
 export const APIAnalysis: React.FC<APIAnalysisProps> = ({ results, analysis }) => {
   const getScoreColor = (score: number) => {
+  const [error, setError] = useState<string | null>(null);
+
     if (score >= 90) return 'text-green-600 bg-green-50';
     if (score >= 70) return 'text-yellow-600 bg-yellow-50';
     if (score >= 50) return 'text-orange-600 bg-orange-50';

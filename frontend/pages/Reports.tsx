@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { FileText, Download, Calendar, Filter, Search, BarChart3, PieChart, TrendingUp, Users, Globe, Shield, Zap, Plus, RefreshCw, Eye, Trash2, Settings, Clock } from 'lucide-react';
 
 interface ReportData {

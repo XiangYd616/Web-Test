@@ -1,5 +1,6 @@
 import { AlertCircle, CheckCircle, Loader2, Square } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 
 interface CancelProgressFeedbackProps {
   isVisible: boolean;

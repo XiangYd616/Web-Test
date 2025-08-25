@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { ReactNode, FC } from 'react';
 import { cn } from '../../utils/cn';
 
 // 表格列定义接口

@@ -1,5 +1,6 @@
 import { BarChart3, Info, Settings, TrendingUp, Zap } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
+import type { FC } from 'react';
 
 interface DataDensityControlProps {
   totalDataPoints: number;

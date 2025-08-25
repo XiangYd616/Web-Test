@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, Bell, CheckCircle, Clock, Edit, Eye, EyeOff, Globe, Pause, Play, Plus, Trash2, TrendingUp, Zap } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 
 interface MonitoringTarget {
   id: string;

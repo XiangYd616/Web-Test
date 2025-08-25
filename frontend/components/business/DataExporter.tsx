@@ -14,7 +14,8 @@ import {
     Filter,
     Settings
 } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import { createElement, useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 import {
     Badge,

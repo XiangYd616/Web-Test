@@ -1,5 +1,6 @@
 import { AlertTriangle, BarChart3, CheckCircle, TrendingDown, TrendingUp } from 'lucide-react';
-import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
 // CSS样式已迁移到组件库，不再需要外部CSS文件
 
@@ -43,6 +44,8 @@ export const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({ result
   const { metrics, performanceAnalysis } = result;
 
   const getGradeColor = (grade: string) => {
+  const [error, setError] = useState<string | null>(null);
+
     switch (grade) {
       case 'A': return 'text-green-600 bg-green-50';
       case 'B': return 'text-blue-600 bg-blue-50';

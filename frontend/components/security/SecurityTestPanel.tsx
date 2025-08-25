@@ -4,6 +4,7 @@ import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'r
 import { SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEngine } from '../../services/unifiedSecurityEngine';
 import { createCommonErrors, createError } from '../../utils/errorHandler';
 import { URLValidationResult } from '../../utils/urlValidator';
+import { URLInput } from '../ui/URLInput';
 import { EnhancedError } from './ErrorDisplay';
 
 interface UnifiedSecurityTestPanelProps {
@@ -238,14 +239,15 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     <div className="unified-security-test-panel space-y-3 fade-in-up compact-layout">
       {/* URL 输入 - 增强版 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-        <UrlInput
+        <URLInput
           value={config.url}
-          onChange={handleUrlChange}
-          onValidationChange={handleUrlValidation}
+          onChange={(e) => handleUrlChange(e.target.value)}
+          onValidationChange={(isValid) => handleUrlValidation(isValid)}
           placeholder="请输入要测试的网站URL，例如：https://example.com"
           disabled={isRunning}
-          showSuggestions={true}
-          autoFix={true}
+          enableValidation={true}
+          showProtocolSuggestion={true}
+          autoAddProtocol={true}
         />
       </div>
 

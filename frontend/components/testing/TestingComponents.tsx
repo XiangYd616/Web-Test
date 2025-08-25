@@ -1,5 +1,8 @@
 import { AlertTriangle, CheckCircle, Clock, Download, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
-import React from 'react';
+import { useState } from 'react';
+import type { ReactNode, FC } from 'react';
+import TestHeader from '../../components/testing/TestHeader';
+import { TestProgress } from '../../services/api/testProgressService';
 
 // 统一的测试状态类型 - 使用统一类型系统
 import type { TestStatus } from '../../types';
@@ -105,6 +108,8 @@ export const TestProgressDisplay: React.FC<TestProgressProps> = ({
   status
 }) => {
   const getStatusIcon = () => {
+  const [error, setError] = useState<string | null>(null);
+
     switch (status) {
       case 'running':
         return <Loader className="w-5 h-5 text-blue-500 animate-spin" />;

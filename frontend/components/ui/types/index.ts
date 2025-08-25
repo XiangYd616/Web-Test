@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import type { ReactNode } from 'react';
 
 // 基础尺寸类型
 export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
