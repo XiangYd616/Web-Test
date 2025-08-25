@@ -18,8 +18,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 
 // 服务和错误处理导入
+import './services/api/unifiedErrorHandler';
 import './services/apiErrorInterceptor';
-import './services/errorService';
 
 // 性能优化工具导入
 import { initializePerformanceOptimization } from './utils/performanceOptimization';
