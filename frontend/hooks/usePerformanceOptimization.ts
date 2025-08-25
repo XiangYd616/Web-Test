@@ -3,6 +3,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Component } from 'react';
 import {
   frontendCache,
   lazyImageLoader,

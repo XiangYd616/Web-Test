@@ -6,7 +6,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CacheManager, CacheStats } from '../services/cacheStrategy';
-import { CacheFactory, defaultLocalStorageCache, defaultMemoryCache } from '../services/cacheStrategy';
 
 // ==================== 类型定义 ====================
 

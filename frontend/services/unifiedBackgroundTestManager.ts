@@ -5,6 +5,7 @@
 
 import { EventEmitter } from 'events';
 import type { 
+import { TestProgress } from '../services/api/testProgressService';
   TestType, 
   TestStatus, 
   TestRecord,

@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 
 // 已加载的CSS文件缓存
 const loadedCSS = new Set<string>();

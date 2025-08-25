@@ -1,5 +1,6 @@
 
 import { EnhancedError, ErrorSolution } from '../components/security/EnhancedErrorDisplay';
+import type { ReactNode } from 'react';
 
 export interface ErrorContext {
   url?: string;

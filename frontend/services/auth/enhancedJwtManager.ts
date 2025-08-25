@@ -6,6 +6,7 @@
 
 import { jwtDecode } from 'jwt-decode';
 import type { User } from '../../types/common';
+import { createElement } from 'react';
 
 // ==================== 类型定义 ====================
 

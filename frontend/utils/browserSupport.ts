@@ -1,3 +1,4 @@
+import { createElement, useState } from 'react';
 
 // 浏览器信息接口
 interface BrowserInfo {
@@ -180,6 +181,8 @@ export const isTouchDevice = (): boolean => {
 };
 
 export const getScreenInfo = () => {
+  const [error, setError] = useState<string | null>(null);
+
   return {
     width: window.screen.width,
     height: window.screen.height,

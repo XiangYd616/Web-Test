@@ -11,6 +11,7 @@ import type {
   TestStatus,
   TestType
 } from '../types';
+import { TestProgress } from './api/testProgressService';
 
 export interface TestInfo {
   id: string;

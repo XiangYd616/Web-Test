@@ -1,3 +1,4 @@
+import { TestProgress } from '../../services/api/testProgressService';
 /**
  * API服务统一导出 - 重构版本
  * 版本: v2.0.0

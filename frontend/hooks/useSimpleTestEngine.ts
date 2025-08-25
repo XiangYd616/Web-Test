@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { createElement, useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/backgroundTestManager';
 import { testAPI } from '../services/testApiService';
+import { TestProgress } from '../services/api/testProgressService';
 
 export interface AdvancedStressTestConfig {
   url: string;

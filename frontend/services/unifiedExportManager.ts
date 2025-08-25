@@ -4,6 +4,7 @@
  */
 
 import type { TestType } from '../types';
+import { createElement, useState } from 'react';
 
 // 导出格式枚举
 export type ExportFormat = 'json' | 'csv' | 'pdf' | 'html' | 'xml';
@@ -698,6 +699,8 @@ export default unifiedExportManager;
 
 // 导出React组件使用的Hook
 export const useExportManager = () => {
+  const [error, setError] = useState<string | null>(null);
+
   return {
     createExport: unifiedExportManager.createExportTask.bind(unifiedExportManager),
     getTask: unifiedExportManager.getTask.bind(unifiedExportManager),

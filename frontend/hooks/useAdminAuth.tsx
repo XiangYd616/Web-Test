@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactNode, FC } from 'react';
 import { useAuth } from './useAuth';
 import type { User } from '../types/user';
 

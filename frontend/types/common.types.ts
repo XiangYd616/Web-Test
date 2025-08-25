@@ -38,6 +38,7 @@ export interface User {
 
 // 测试相关类型 - 已迁移到统一类型系统
 import type { TestType } from './unified/testTypes';
+import type { ReactNode } from 'react';
 
 export interface TestConfig {
   url: string;

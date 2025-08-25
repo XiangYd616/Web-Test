@@ -1,4 +1,5 @@
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
+import type { FC } from 'react';
 
 // 主题类型定义
 export type ThemeMode = 'light' | 'dark';

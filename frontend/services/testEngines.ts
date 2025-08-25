@@ -40,7 +40,10 @@ export class K6Engine implements TestEngine {
       this.lastCheckTime = now;
       return false;
     } catch (error) {
-      console.error('K6 availability check failed:', error);
+      // 静默处理，避免控制台噪音
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('K6 availability check failed (expected in local mode):', error);
+      }
       this.isAvailable = false;
       this.lastCheckTime = now;
       return false;
@@ -129,7 +132,10 @@ export class LighthouseEngine implements TestEngine {
       this.lastCheckTime = now;
       return false;
     } catch (error) {
-      console.error('Lighthouse availability check failed:', error);
+      // 静默处理，避免控制台噪音
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Lighthouse availability check failed (expected in local mode):', error);
+      }
       this.isAvailable = false;
       this.lastCheckTime = now;
       return false;
@@ -214,7 +220,10 @@ export class PlaywrightEngine implements TestEngine {
       this.lastCheckTime = now;
       return false;
     } catch (error) {
-      console.error('Playwright availability check failed:', error);
+      // 静默处理，避免控制台噪音
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Playwright availability check failed (expected in local mode):', error);
+      }
       this.isAvailable = false;
       this.lastCheckTime = now;
       return false;

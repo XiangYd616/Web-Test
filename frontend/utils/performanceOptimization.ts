@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 /**
  * 前端性能优化工具集
  * 提供图片懒加载、资源预加载、性能监控等功能

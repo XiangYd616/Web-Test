@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { UnifiedTestStateManager, type BaseTestConfig, type QueueStats, type TestPhase, type TestStatus } from '../services/testing/unifiedTestStateManager';
+import { TestProgress } from '../services/api/testProgressService';
 
 export interface UseUnifiedTestStateOptions {
   testType: string;

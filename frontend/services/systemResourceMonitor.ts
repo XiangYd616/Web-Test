@@ -1,3 +1,4 @@
+// 移除React Hook导入，这是一个服务文件，不应该使用React Hook
 
 export interface SystemResources {
   cpu: {
@@ -106,7 +107,24 @@ class SystemResourceMonitor {
    */
   private async updateResources(): Promise<void> {
     try {
-      // 在浏览器环境中，我们需要通过API获取资源信息
+      // 在开发模式下，跳过API调用，使用模拟数据
+      if (import.meta.env.DEV) {
+        const mockResources = this.getMockResources();
+        this.resources = mockResources;
+        const status = this.evaluateResourceStatus(mockResources);
+
+        // 通知监听器
+        this.listeners.forEach(listener => {
+          try {
+            listener(mockResources, status);
+          } catch (error) {
+            console.warn('Resource listener error:', error);
+          }
+        });
+        return;
+      }
+
+      // 在生产环境中，通过API获取资源信息
       const resources = await this.fetchResourcesFromAPI();
 
       this.resources = resources;
@@ -127,11 +145,42 @@ class SystemResourceMonitor {
   }
 
   /**
+   * 获取模拟资源数据（开发模式使用）
+   */
+  private getMockResources(): SystemResources {
+    return {
+      cpu: {
+        usage: Math.random() * 30 + 10, // 10-40% CPU使用率
+        cores: 8,
+        model: 'Mock CPU'
+      },
+      memory: {
+        total: 16 * 1024 * 1024 * 1024, // 16GB
+        used: Math.random() * 8 * 1024 * 1024 * 1024 + 4 * 1024 * 1024 * 1024, // 4-12GB
+        free: 0, // 将在计算中设置
+        usage: 0 // 将在计算中设置
+      },
+      disk: {
+        total: 500 * 1024 * 1024 * 1024, // 500GB
+        used: Math.random() * 200 * 1024 * 1024 * 1024 + 100 * 1024 * 1024 * 1024, // 100-300GB
+        free: 0, // 将在计算中设置
+        usage: 0 // 将在计算中设置
+      },
+      network: {
+        bytesReceived: Math.floor(Math.random() * 1000000),
+        bytesSent: Math.floor(Math.random() * 1000000),
+        packetsReceived: Math.floor(Math.random() * 10000),
+        packetsSent: Math.floor(Math.random() * 10000)
+      }
+    };
+  }
+
+  /**
    * 从API获取资源信息
    */
   private async fetchResourcesFromAPI(): Promise<SystemResources> {
     try {
-      const response = await fetch('/api/system/resources', {
+      const response = await fetch('http://localhost:3001/api/system/resources', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
@@ -334,6 +383,9 @@ class SystemResourceMonitor {
 
 // 创建全局实例 - 静默启动监控
 export const systemResourceMonitor = (() => {
+  // 使用普通变量而不是React Hook
+  let error: string | null = null;
+
   try {
     const instance = new SystemResourceMonitor();
 
@@ -345,8 +397,9 @@ export const systemResourceMonitor = (() => {
     }
 
     return instance;
-  } catch (error) {
-    console.warn('⚠️ 系统资源监控器初始化失败:', error);
+  } catch (err) {
+    error = err instanceof Error ? err.message : String(err);
+    console.warn('⚠️ 系统资源监控器初始化失败:', err);
 
     // 返回一个安全的默认实现
     return {

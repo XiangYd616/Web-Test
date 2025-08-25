@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { LocalSEOAnalysisEngine, LocalSEOConfig } from '../services/localSEOAnalysisEngine';
 import { SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
 import { useRealSEOTest } from './useRealSEOTest';
+import { TestProgress } from '../services/api/testProgressService';
 
 export type SEOTestMode = 'online' | 'local';
 
