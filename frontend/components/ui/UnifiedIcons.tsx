@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import type { FC } from 'react';
 import {
   // 测试类型图标
   Zap, Shield, Globe, Smartphone, Eye, Search, Network, Database,

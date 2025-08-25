@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode, FC } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 import '../../styles/design-system.css';

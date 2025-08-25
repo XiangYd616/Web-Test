@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Globe, TestTube } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { ModernDoughnutChart, ModernLineChart } from '../../components/modern/ModernChart';
 import { useTheme } from '../../contexts/ThemeContext';
 

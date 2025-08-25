@@ -4,7 +4,8 @@
  * 版本: v1.0.0
  */
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { Card, Button, Input, Select, Alert, Spin, Tabs, Space, Typography, Divider } from 'antd';
 import { PlayCircleOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { unifiedApiService } from '../services/api/apiService';

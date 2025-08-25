@@ -1,5 +1,6 @@
 import { Activity, ArrowRight, BarChart3, Bell, Book, Clock, Code, Download, Globe, HelpCircle, Home, Key, Lock, Monitor, Play, Search, Settings, Shield, TestTube, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ComponentType, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchResult {

@@ -1,5 +1,6 @@
 import { AlertCircle, BarChart3, CheckCircle, Clock, Database, Download, Eye, FileText, Globe, Shield, TrendingDown, TrendingUp, Wifi, XCircle, Zap } from 'lucide-react';
-import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
 interface TestResult {
   testId: string;
@@ -28,6 +29,8 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
   onRetry
 }) => {
   const getTestTypeIcon = (type: string) => {
+  const [error, setError] = useState<string | null>(null);
+
     if (!type) return <BarChart3 className="w-5 h-5" />;
     switch (type.toLowerCase()) {
       case 'website':

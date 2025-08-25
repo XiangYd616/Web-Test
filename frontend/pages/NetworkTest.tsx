@@ -1,6 +1,7 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Cloud, Download, Globe, MapPin, Play, Router, Server, Signal, Square, Upload, Wifi, XCircle, Zap } from 'lucide-react';
-import React, { useState } from 'react';
-import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import type {
   NetworkTestConfig,
   NetworkTestResult
@@ -328,7 +329,7 @@ const NetworkTest: React.FC = () => {
 
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="network"
       title="网络测试"
       description="检测网络连接质量、延迟、带宽和DNS解析性能"

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import type { FC } from 'react';
 import { Clock, Users, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { type QueueStats } from '../../services/stressTestQueueManager';
 

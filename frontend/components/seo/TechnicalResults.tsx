@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle, FileText, Info, Link, Search, XCircle } from 'lucide-react';
 import React from 'react';
+import type { FC } from 'react';
 import { TechnicalSEOResult } from '../../services/realSEOAnalysisEngine';
 
 interface TechnicalResultsProps {

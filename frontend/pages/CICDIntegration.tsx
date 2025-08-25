@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
 import { GitBranch, Code, Settings, Play, Copy, CheckCircle, ExternalLink, Webhook, Key, Shield, Zap, Clock, AlertTriangle, Book, Download, Terminal, Globe, Layers } from 'lucide-react';
 

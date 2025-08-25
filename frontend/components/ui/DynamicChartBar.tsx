@@ -1,5 +1,6 @@
 
 import React from 'react';
+import type { FC } from 'react';
 
 interface DynamicChartBarProps {
   value: number;

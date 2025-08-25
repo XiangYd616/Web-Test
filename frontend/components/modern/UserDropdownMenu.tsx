@@ -1,5 +1,6 @@
 import { Bookmark, ChevronRight, Crown, HelpCircle, LogOut, Monitor, Settings, User } from 'lucide-react';
 import React from 'react';
+import type { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';

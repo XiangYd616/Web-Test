@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { HardDrive, Info } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 

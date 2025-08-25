@@ -1,4 +1,5 @@
-import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { AlertTriangle, Square, Clock, Database } from 'lucide-react';
 
 interface StopTestConfirmDialogProps {
@@ -21,6 +22,8 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
   if (!isOpen) return null;
 
   const formatDuration = (seconds: number) => {
+  const [testProgress, setTestProgress] = useState<any>(null);
+
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}分${secs}秒`;

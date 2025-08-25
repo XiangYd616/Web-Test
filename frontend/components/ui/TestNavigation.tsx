@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { Card, CardHeader, CardTitle, CardBody } from './Card';
 import { Button } from './Button';
 import { Badge, StatusBadge } from './Badge';

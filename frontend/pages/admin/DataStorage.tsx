@@ -1,5 +1,6 @@
 import { Activity, BarChart3, ChevronDown, ChevronUp, Code, Database, Download, Eye, FileText, Filter, Globe, RefreshCw, Search, Shield, SortAsc, SortDesc, Trash2, TrendingUp, Wifi, Zap } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useLocation } from 'react-router-dom';
 import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
 import ImportExport from '../../components/analytics/ImportExport';

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode, FC } from 'react';
 
 interface PageLayoutProps {
   children: React.ReactNode;

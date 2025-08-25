@@ -1,5 +1,6 @@
 import { AlertTriangle, Archive, Bell, CheckCircle, Clock, Database, Download, FileText, Globe, Info, Lock, Mail, Monitor, Pause, Play, RefreshCw, RotateCcw, Server, Settings, Settings as SettingsIcon, Shield, Trash2, Upload, User } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { ComponentType, FC } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { SettingsService } from '../../services/settingsService';

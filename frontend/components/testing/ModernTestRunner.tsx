@@ -9,7 +9,8 @@
  * 4. 现代化的React模式
  */
 
-import React, { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import type { FC } from 'react';
 import type {
   TestType,
   TestStatus,

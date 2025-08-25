@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import { ArrowLeft, Download, Share2, BarChart3, Clock, Gauge, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, XCircle, Info, ExternalLink, Copy, Calendar, MapPin, Monitor, Smartphone, Users, Activity, Zap, Globe, RefreshCw, FileText, Eye } from 'lucide-react';

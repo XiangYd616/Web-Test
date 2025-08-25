@@ -11,8 +11,9 @@ import {
   Info,
   XCircle
 } from 'lucide-react';
-import React, { useState } from 'react';
-import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
+import { useEffect, useState } from 'react';
+import type { ComponentType, FC } from 'react';
+import TestPageLayout from '../components/testing/TestPageLayout';
 
 // 浏览器信息接口
 interface BrowserInfo {
@@ -381,7 +382,7 @@ const BrowserCompatibilityTest: React.FC = () => {
   }
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       title="浏览器兼容性测试"
       description="检测网站在不同浏览器和设备上的兼容性，提供详细的兼容性分析和优化建议"
       currentTest={backgroundTestInfo}
@@ -834,7 +835,7 @@ const BrowserCompatibilityTest: React.FC = () => {
           </div>
         )}
       </div>
-    </UnifiedTestPageLayout>
+    </TestPageLayout>
   );
 };
 

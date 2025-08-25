@@ -1,9 +1,10 @@
 import { AlertTriangle, CheckCircle, Clock, Code, Download, Eye, Gauge, Globe, Search, Share2, Shield, XCircle } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
-import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 
@@ -344,7 +345,7 @@ const WebsiteTest: React.FC = () => {
   const estimatedTime = selectedTestsCount * 45; // 平均45秒每个测试
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="website"
       title="网站综合测试"
       description="全面检测网站的性能、安全性、SEO和用户体验"

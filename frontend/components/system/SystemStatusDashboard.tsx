@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { Activity, AlertTriangle, BarChart3, Server, TestTube, Users } from 'lucide-react';
 import { useNotifications } from '../ui/NotificationSystem';
 import SystemHealthCheck from './SystemHealthCheck';

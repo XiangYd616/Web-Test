@@ -3,7 +3,8 @@
  * 支持懒加载、WebP格式、响应式图片等功能
  */
 
-import React, { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useDevicePerformance, useLazyImage, useNetworkStatus } from '../../hooks/usePerformanceOptimization';
 
 interface ImageProps {

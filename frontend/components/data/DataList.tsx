@@ -1,5 +1,6 @@
 import { Code, Copy, Database, Edit, Eye, Globe, Shield, Trash2, Wifi, Zap } from 'lucide-react';
 import React from 'react';
+import type { ReactNode, FC } from 'react';
 import { Column, DataTable } from '../../../components/shared';
 import { TestRecord } from '../../../hooks/useDataStorage';
 

@@ -4,7 +4,8 @@
  * 版本: v2.0.0
  */
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 // 虚拟滚动配置接口
 export interface VirtualScrollConfig {

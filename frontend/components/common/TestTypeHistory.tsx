@@ -12,7 +12,8 @@ import {
   Search,
   Star
 } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import type { TestType } from '../../types';
 import type { EnhancedTestRecord } from '../../types/testHistory';

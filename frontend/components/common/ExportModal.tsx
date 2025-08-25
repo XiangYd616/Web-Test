@@ -1,5 +1,6 @@
 import { BarChart3, Database, Download, Grid, X, Zap } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { ComponentType, FC } from 'react';
 import { createPortal } from 'react-dom';
 
 // 导出类型定义

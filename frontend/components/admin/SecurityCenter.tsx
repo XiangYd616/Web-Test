@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
 import { Activity, AlertTriangle, Eye, EyeOff, Key, Lock, Shield, Users } from 'lucide-react';
 

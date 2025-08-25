@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { cn } from '../../utils/cn';
 
 interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {

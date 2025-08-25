@@ -1,14 +1,13 @@
 import { AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import FileUploadSEO from '../components/seo/FileUploadSEO';
 import LocalSEOResults from '../components/seo/LocalSEOResults';
 import NetworkErrorPrompt from '../components/seo/NetworkErrorPrompt';
 import SEOResults from '../components/seo/SEOResults';
 import { URLInput } from '../components/testing';
-import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
-import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
-import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
+import TestPageLayout from '../components/testing/TestPageLayout';
+import { useUnifiedSEOTest, type SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import type {
   SeoTestConfig
 } from '../types';
@@ -500,7 +499,7 @@ const SEOTest: React.FC = () => {
 
   // 历史记录处理
   const handleTestSelect = (test: any) => {
-    // 历史测试选择由UnifiedTestPageLayout处理
+    // 历史测试选择由TestPageLayout处理
     console.log('Selected test:', test);
   };
 
@@ -516,7 +515,7 @@ const SEOTest: React.FC = () => {
   // 在使用功能时才提示登录
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="seo"
       title="SEO综合分析"
       description="全面分析网站SEO状况，发现关键问题和优化机会"

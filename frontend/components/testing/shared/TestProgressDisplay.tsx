@@ -16,7 +16,9 @@ import {
   XCircle,
   Zap
 } from 'lucide-react';
-import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
+import { TestProgress } from '../../../services/api/testProgressService';
 
 // 测试状态类型 - 使用统一类型系统
 import type { TestStatus } from '../../../types';
@@ -74,6 +76,8 @@ export const TestProgressDisplay: React.FC<TestProgressDisplayProps> = ({
    * 获取状态图标和颜色
    */
   const getStatusInfo = () => {
+  const [error, setError] = useState<string | null>(null);
+
     switch (status) {
       case 'idle':
         return {

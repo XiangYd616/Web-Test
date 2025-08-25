@@ -4,7 +4,8 @@
  */
 
 import { Activity, BarChart3, Shield, Zap } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { UnifiedTestPanel } from '../components/testing/UnifiedTestPanel';
 import { useUnifiedTestState, useBatchTestState } from '../hooks/useUnifiedTestState';
 import type { BaseTestConfig } from '../services/testing/UnifiedTestStateManager';

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { BarChart3, CheckCircle, Database, XCircle } from 'lucide-react';
 import { StatCard } from '../../../components/shared';
 import { PaginationInfo, TestRecord } from '../../../hooks/useDataStorage';

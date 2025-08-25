@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 
 import { Download, Monitor, CheckCircle, Star } from 'lucide-react';
 

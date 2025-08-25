@@ -1,5 +1,6 @@
 import { AlertCircle, Calendar, Camera, CheckCircle, Clock, Edit, Github, Globe, Key, Linkedin, Loader, Save, Trash2, Twitter, User, X } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { FC } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { UpdateProfileData, UserProfile, userService, UserStats } from '../services/user/userService';

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode, FC } from 'react';
 import { ThemeProvider as BaseThemeProvider } from '../../contexts/ThemeContext';
 
 interface ThemeProviderProps {

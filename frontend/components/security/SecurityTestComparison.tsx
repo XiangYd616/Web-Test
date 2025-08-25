@@ -1,6 +1,7 @@
 
 import { ArrowDown, ArrowUp, Calendar, ChevronDown, ChevronRight, Minus, Shield, TrendingDown, TrendingUp, X } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { SecurityTestResult } from '../../services/unifiedSecurityEngine';
 
 interface SecurityTestComparisonProps {

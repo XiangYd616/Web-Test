@@ -1,6 +1,6 @@
 
 import { Calendar, ChevronDown, ChevronRight, Clock, Eye, RefreshCw, Search, Shield, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { SecurityTestResult } from '../../services/unifiedSecurityEngine';
 
 interface SecurityTestHistoryProps {

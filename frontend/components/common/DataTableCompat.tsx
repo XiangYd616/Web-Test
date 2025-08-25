@@ -1,4 +1,5 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 import { Table, TableColumn } from '../ui/Table';
 

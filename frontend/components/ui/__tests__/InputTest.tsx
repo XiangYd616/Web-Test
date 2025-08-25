@@ -4,12 +4,15 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { useState } from 'react';
+import type { ReactElement } from 'react';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
 import { Input, NumberInput, PasswordInput, SearchInput, Select, Textarea } from '../Input';
 
 // 测试工具函数
 const renderWithTheme = (component: React.ReactElement) => {
+  const [error, setError] = useState<string | null>(null);
+
     return render(
         <ThemeProvider>
             {component}

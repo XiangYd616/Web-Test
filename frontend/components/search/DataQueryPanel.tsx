@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
 import { Search, Filter, Calendar, BarChart3, Download, RefreshCw, ChevronDown, ChevronUp, X, Database, Globe, Zap, Shield, Code, Eye, Wifi, FileText } from 'lucide-react';
 

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import type { FC } from 'react';
 import { Activity, Server, TrendingUp, Users } from 'lucide-react';
 import SystemResourceMonitor from '../../components/system/SystemResourceMonitor';
 import { useStressTestRecord } from '../../hooks/useStressTestRecord';

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { AlertTriangle, X, RefreshCw, LogIn } from 'lucide-react';
 
 export enum AuthErrorType {

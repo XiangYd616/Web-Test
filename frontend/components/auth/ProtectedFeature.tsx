@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { ReactNode, FC } from 'react';
 import { Lock, Eye, EyeOff, Shield, Star } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import LoginPrompt from './LoginPrompt';

@@ -1,5 +1,6 @@
-import React from 'react';
 import { Download, Play, RotateCcw, Settings, Share2, Square } from 'lucide-react';
+import React from 'react';
+import type { FC } from 'react';
 import { cn } from '../../utils/cn';
 import { Button } from './Button';
 

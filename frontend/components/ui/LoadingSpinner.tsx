@@ -1,5 +1,6 @@
 import { BarChart3, Code, Globe, Loader2, Shield, Zap } from 'lucide-react';
 import React from 'react';
+import type { FC } from 'react';
 
 // CSS样式已迁移到组件内部，不再需要外部CSS文件
 

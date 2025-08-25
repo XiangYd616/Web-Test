@@ -3,7 +3,8 @@
  * 各个测试页面可以选择使用，不强制替换现有实现
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { ReactNode, FC } from 'react';
 import { 
   BarChart3, Download, Eye, EyeOff, FileText, Share2, 
   CheckCircle, XCircle, AlertTriangle, Info, Zap,

@@ -1,3 +1,4 @@
+import { TestProgress } from '../../services/api/testProgressService';
 
 /**
  * UI组件库统一导出

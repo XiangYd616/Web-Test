@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { Activity, Cpu, HardDrive, Wifi, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface SystemResources {
@@ -47,7 +48,7 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
   // 获取资源信息
   const fetchResources = async () => {
     try {
-      const response = await fetch('/api/system/resources', {
+      const response = await fetch('http://localhost:3001/api/system/resources', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }

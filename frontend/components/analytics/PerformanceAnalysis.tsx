@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle, Clock, Gauge, Minus, TrendingDown, TrendingUp, Zap } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { CartesianGrid, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { dataAnalysisService, PerformanceAnalysis } from '../../services/dataAnalysisService';
 

@@ -21,7 +21,8 @@ import {
     Wifi,
     Zap
 } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 import { useRealTimeData } from '../../hooks/useRealTimeData';
 import {

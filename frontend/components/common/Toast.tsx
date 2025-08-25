@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode, FC } from 'react';
 import toast, { Toaster, ToastOptions } from 'react-hot-toast';
 
 // Toast 配置

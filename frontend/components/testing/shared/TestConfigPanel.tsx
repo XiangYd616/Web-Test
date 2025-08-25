@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import type { ReactNode, FC } from 'react';
 import { Settings, Globe, Clock, Zap, Shield, AlertCircle } from 'lucide-react';
 
 // 基础配置接口

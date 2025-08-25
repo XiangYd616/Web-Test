@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { AlertTriangle, Download, Monitor, Globe } from 'lucide-react';
 
 interface EnvironmentPromptProps {

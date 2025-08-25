@@ -1,5 +1,6 @@
 import { CheckCircle, Clock, Download, Eye, FileText, Filter, Plus, Share2, Trash2 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactNode, FC } from 'react';
 import { ReportConfig } from '../../services/reporting';
 import reportService, { Report } from '../../services/reporting/reportService';
 

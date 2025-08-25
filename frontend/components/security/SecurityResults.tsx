@@ -1,6 +1,7 @@
 
 import { AlertTriangle, Award, CheckCircle, ChevronDown, ChevronRight, Clock, Download, Eye, EyeOff, FileText, Info, Lock, Network, Shield, Target, TrendingUp, Zap } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 
 import { SecurityTestResult } from '../../services/unifiedSecurityEngine';
 

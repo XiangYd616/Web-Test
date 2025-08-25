@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { AlertTriangle, CheckCircle, Download, Info, Share2, XCircle } from 'lucide-react';
 import { TestResult } from '../../services/advancedTestEngine';
 

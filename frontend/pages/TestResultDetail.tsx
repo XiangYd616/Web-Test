@@ -1,5 +1,6 @@
 import { AlertCircle, ArrowLeft, BarChart3, Calendar, CheckCircle, Clock, Copy, Database, Download, FileText, Globe, Info, Settings, Share2, Shield, Star, TrendingUp, XCircle, Zap } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { EnhancedTestRecord } from '../types/testHistory';
 

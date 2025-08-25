@@ -3,7 +3,8 @@
  * 为现有测试页面提供可选的UI增强功能，不强制替换现有实现
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ReactNode, ComponentType, FC } from 'react';
 import { UnifiedIcon, TestTypeIcon, ActionIcon } from './UnifiedIcons';
 import { FeedbackCard, StatusIndicator, ProgressFeedback } from './UnifiedFeedback';
 import { ChevronDown, ChevronUp, Copy, Check, ExternalLink, Maximize2, Minimize2 } from 'lucide-react';

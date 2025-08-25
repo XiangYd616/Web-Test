@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode, FC } from 'react';
 import { Activity, BarChart3, PieChart, TrendingUp } from 'lucide-react';
 import { cn } from '../../utils/cn';
 

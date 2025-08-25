@@ -1,4 +1,5 @@
 import React from 'react';
+import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Lock, User, ArrowRight, Shield, Star, X, LogIn } from 'lucide-react';

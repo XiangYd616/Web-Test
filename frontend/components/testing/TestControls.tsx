@@ -1,6 +1,7 @@
 
 import { AlertCircle, CheckCircle, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
-import React from 'react';
+import { useState } from 'react';
+import type { ComponentType, FC } from 'react';
 import { TestPhase, TestState } from '../../services/TestStateManager';
 
 // 控制组件属性接口
@@ -128,6 +129,10 @@ export const TestControls: React.FC<TestControlsProps> = ({
 
   // 处理开始测试
   const handleStartTest = () => {
+  const [canStartTest, setCanStartTest] = useState(false);
+
+  const [error, setError] = useState<string | null>(null);
+
     if (!isAuthenticated) {
       onRequireLogin();
       return;

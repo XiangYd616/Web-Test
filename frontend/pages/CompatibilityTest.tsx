@@ -1,8 +1,9 @@
 import { AlertTriangle, CheckCircle, Clock, Eye, Globe, Grid, Monitor, Settings, Smartphone, Tablet, XCircle } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
-import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 import type {
@@ -835,7 +836,7 @@ const CompatibilityTest: React.FC = () => {
   };
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="compatibility"
       title="兼容性测试"
       description="检测网站在不同浏览器和设备上的兼容性"
