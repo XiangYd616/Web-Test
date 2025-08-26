@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import { ChevronDown, Filter, RefreshCw, Search } from 'lucide-react';
 import { FilterOptions } from '../../../hooks/useDataStorage';
 

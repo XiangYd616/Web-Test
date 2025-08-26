@@ -1,6 +1,5 @@
 import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Monitor, Network, Server, Settings, Shield, TestTube, TrendingUp, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import BackupManagement from '../components/admin/BackupManagement';
 import SecurityCenter from '../components/admin/SecurityCenter';
 import SystemMonitorComponent from '../components/admin/SystemMonitor';

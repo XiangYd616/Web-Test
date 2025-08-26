@@ -4,19 +4,10 @@
  * 版本: v1.0.0
  */
 
-import type {
 import SecurityTestResult from '../types';
+import type {
   BaseTestConfig,
-  BaseTestResult,
-  TestType,
-  TestStatus,
-  TestPriority,
-  TestError,
-  TestWarning,
-  TestRecommendation,
-  UUID,
-  Timestamp,
-  URL
+  BaseTestResult
 } from './common';
 
 // ==================== SEO 测试类型 ====================

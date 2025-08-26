@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { ComponentType } from 'react';
+import type { useState, ComponentType } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import LoginPrompt from './LoginPrompt';
 

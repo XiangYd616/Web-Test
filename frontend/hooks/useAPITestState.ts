@@ -22,12 +22,13 @@ import type {
 // 使用统一的Hook类型定义
 // 注意：现在返回 APITestHook 类型，它包含了所有必要的状态和操作
 
-// 批量操作
-importEndpoints: (endpoints: APIEndpoint[]) => void;
-exportEndpoints: () => APIEndpoint[];
+interface APITestOperations {
+  // 批量操作
+  importEndpoints: (endpoints: APIEndpoint[]) => void;
+  exportEndpoints: () => APIEndpoint[];
 
-// 验证方法
-validateConfig: () => { isValid: boolean; errors: string[] };
+  // 验证方法
+  validateConfig: () => { isValid: boolean; errors: string[] };
 }
 
 /**

@@ -1,6 +1,5 @@
 import { AlertTriangle, CheckCircle, ChevronDown, ChevronRight, HelpCircle, Info, Settings, Shield, X, Zap } from 'lucide-react';
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 
 interface SecurityTestGuideProps {
   isOpen: boolean;

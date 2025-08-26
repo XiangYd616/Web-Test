@@ -1,5 +1,4 @@
-import { Suspense, lazy } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { Suspense, lazy, ReactNode, FC } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from '../../pages/Login';
 import Register from '../../pages/Register';

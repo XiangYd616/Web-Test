@@ -1,6 +1,5 @@
 import { Activity, AlertCircle, CheckCircle, Pause, Play, XCircle } from 'lucide-react';
-import { createElement } from 'react';
-import type { ReactElement, ComponentType } from 'react';
+import type { createElement, ReactElement, ComponentType } from 'react';
 
 // 测试状态类型 - 简化版本
 export type TestStatus = 'idle' | 'starting' | 'running' | 'completed' | 'cancelled' | 'failed';

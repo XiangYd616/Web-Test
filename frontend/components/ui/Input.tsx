@@ -1,6 +1,5 @@
 import { AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { forwardRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { forwardRef, useState, ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 
 // 基础Input组件

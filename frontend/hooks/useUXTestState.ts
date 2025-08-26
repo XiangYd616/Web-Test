@@ -8,25 +8,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type {
-  UXTestHook,
   UXTestConfig,
-  UXTestState,
-  UXTestActions,
-  UXTestResult,
-  UserFlow,
-  UserAction,
-  AccessibilityResult,
-  PerformanceResult
+  UXTestHook,
+  UXTestResult
 } from '../types';
 
 // 所有类型定义已迁移到统一的类型系统
 // 请从 '../types' 导入所需的类型
-action: 'click' | 'type' | 'scroll' | 'wait';
-selector ?: string;
-value ?: string;
-duration ?: number;
-    }>;
-  }>;
+
+interface UXTestAction {
+  action: 'click' | 'type' | 'scroll' | 'wait';
+  selector?: string;
+  value?: string;
+  duration?: number;
 }
 
 // UX测试结果接口

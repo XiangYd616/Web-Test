@@ -1,6 +1,5 @@
 import { AlertTriangle, CheckCircle, Database, Globe, Mail, Monitor, Save, Server, Shield } from 'lucide-react';
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import type { SystemConfig } from '../../types/admin';
 
 const SystemSettings: React.FC = () => {

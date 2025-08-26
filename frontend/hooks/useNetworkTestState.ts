@@ -8,42 +8,39 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type {
-  NetworkTestHook,
   NetworkTestConfig,
-  NetworkTestState,
-  NetworkTestActions,
-  NetworkTestResult,
-  PortTestResult,
-  ProtocolTestResult
+  NetworkTestHook,
+  NetworkTestResult
 } from '../types';
 
 // 所有类型定义已迁移到统一的类型系统
 // 请从 '../types' 导入所需的类型
 
-// 带宽测试配置
-bandwidthConfig: {
-  downloadTest: boolean;
-  uploadTest: boolean;
-  testFileSize: number; // MB
-};
+interface NetworkTestConfigLocal {
+  // 带宽测试配置
+  bandwidthConfig: {
+    downloadTest: boolean;
+    uploadTest: boolean;
+    testFileSize: number; // MB
+  };
 
-// DNS测试配置
-dnsConfig: {
-  dnsServers: string[];
-  recordTypes: ('A' | 'AAAA' | 'CNAME' | 'MX' | 'TXT' | 'NS')[];
-};
+  // DNS测试配置
+  dnsConfig: {
+    dnsServers: string[];
+    recordTypes: ('A' | 'AAAA' | 'CNAME' | 'MX' | 'TXT' | 'NS')[];
+  };
 
-// 端口扫描配置
-portConfig: {
-  ports: number[];
-  scanType: 'tcp' | 'udp' | 'both';
-};
+  // 端口扫描配置
+  portConfig: {
+    ports: number[];
+    scanType: 'tcp' | 'udp' | 'both';
+  };
 
-// 路由追踪配置
-tracerouteConfig: {
-  maxHops: number;
-  timeout: number;
-};
+  // 路由追踪配置
+  tracerouteConfig: {
+    maxHops: number;
+    timeout: number;
+  };
 }
 
 // 网络测试结果接口

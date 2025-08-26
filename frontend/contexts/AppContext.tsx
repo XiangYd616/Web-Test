@@ -3,8 +3,7 @@
  * 使用React Context + useReducer实现统一的状态管理
  */
 
-import { ReactNode, createContext, useContext, useEffect, useReducer } from 'react';
-import type { FC } from 'react';
+import type { ReactNode, createContext, useContext, useEffect, useReducer, FC } from 'react';
 
 // 用户状态接口
 export interface User {

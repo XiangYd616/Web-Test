@@ -1,6 +1,5 @@
 import { AlertTriangle, CheckCircle, Clock, Code, Download, Eye, Gauge, Globe, Search, Share2, Shield, XCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';

@@ -1,6 +1,5 @@
 import { Activity, AlertCircle, ArrowLeft, BarChart3, Calendar, CheckCircle, Clock, Download, Settings, Share2, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
-import { createElement, useCallback, useEffect, useMemo, useState } from 'react';
-import type { FC } from 'react';
+import type { createElement, useCallback, useEffect, useMemo, useState, FC } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 

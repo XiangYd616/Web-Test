@@ -1,6 +1,5 @@
 import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Download, ExternalLink, FileText, Globe, Hash, Info, Lightbulb, Shield, Smartphone, TrendingUp, Type, Users, XCircle, Zap } from 'lucide-react';
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import PerformanceResults from './PerformanceResults';
 import TechnicalResults from './TechnicalResults';

@@ -1,6 +1,5 @@
 import { CheckCircle, Clock, Gauge, Image, Play, Smartphone, Timer, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import TestHistory from '../components/common/TestHistory';
 import { URLInput } from '../components/ui/URLInput';

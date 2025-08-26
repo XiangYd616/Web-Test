@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import { AlertTriangle, Square, Clock, Database } from 'lucide-react';
 
 interface StopTestConfirmDialogProps {

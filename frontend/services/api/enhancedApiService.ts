@@ -12,7 +12,6 @@ import type {
   ValidationError 
 } from '../../types/api';
 import type { VersionedData } from '../../types/version';
-
 // ==================== 配置接口 ====================
 
 export interface EnhancedApiConfig {

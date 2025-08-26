@@ -2,7 +2,6 @@ import { Shield, XCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
-import TestPageLayout from '../components/testing/TestPageLayout';
 import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
 import type { TestProgress } from '../services/api/testProgressService';
@@ -181,20 +180,107 @@ const SecurityTest: React.FC = () => {
   // 在使用功能时才提示登录
 
   return (
-    <TestPageLayout
-      testType="security"
-      title="安全测试"
-      description="全面检测网站安全漏洞和防护措施"
-      icon={Shield}
-      testTabLabel="安全测试"
-      historyTabLabel="测试历史"
-      testStatus={isTestRunning ? 'running' : 'idle'}
-      isTestDisabled={!canStartTest}
-      onStartTest={handleStartTest}
-      onTestSelect={handleTestSelect}
-      onTestRerun={handleTestRerun}
-      additionalComponents={LoginPromptComponent}
-      testContent={
+    <div className="space-y-4 dark-page-scrollbar">
+      <div className="space-y-6">
+        {/* 美化的页面标题和控制 - 统一设计风格 */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl">
+          {/* 背景装饰 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-red-600/5 via-orange-600/5 to-yellow-600/5"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-red-500/10 to-transparent rounded-full blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-orange-500/10 to-transparent rounded-full blur-xl"></div>
+
+          {/* 内容区域 */}
+          <div className="relative p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              {/* 标题区域 */}
+              <div className="flex items-center space-x-4">
+                {/* 图标装饰 */}
+                <div className="relative">
+                  <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-gray-800 animate-pulse"></div>
+                </div>
+
+                {/* 标题文字 */}
+                <div>
+                  <div className="flex items-center space-x-3">
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-red-100 to-orange-100 bg-clip-text text-transparent">
+                      安全测试
+                    </h2>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse [animation-delay:0.4s]"></div>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 text-sm mt-1 flex items-center space-x-2">
+                    <Shield className="w-4 h-4 text-red-400" />
+                    <span>全面检测网站安全漏洞和防护措施</span>
+                  </p>
+
+                  {/* 状态指示器 */}
+                  <div className="flex items-center space-x-4 mt-2">
+                    <div className="flex items-center space-x-2 text-xs">
+                      <div className={`w-2 h-2 rounded-full ${isTestRunning ? 'bg-red-500 animate-pulse' : 'bg-gray-500'}`}></div>
+                      <span className="text-gray-400">
+                        {isTestRunning ? '安全扫描进行中' : '等待开始'}
+                      </span>
+                    </div>
+
+                    {testConfig.url && (
+                      <div className="flex items-center space-x-2 text-xs">
+                        <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                        <span className="text-gray-400 truncate max-w-48">
+                          目标: {testConfig.url}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 测试控制按钮 */}
+              <div className="flex items-center space-x-2">
+                {!isTestRunning ? (
+                  <button
+                    type="button"
+                    onClick={handleTestStart}
+                    disabled={!canStartTest}
+                    className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!canStartTest
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : isAuthenticated
+                        ? 'bg-red-600 hover:bg-red-700 text-white'
+                        : 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                      }`}
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span>开始扫描</span>
+                  </button>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 rounded-md">
+                      <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-red-300 font-medium">
+                        扫描进行中
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleTestStop}
+                      className="px-3 py-1.5 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs bg-gray-600 hover:bg-gray-700"
+                    >
+                      <XCircle className="w-3 h-3" />
+                      <span>停止</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试内容区域 */}
         <div className="space-y-6">
           {/* 统一安全测试面板 */}
           <SecurityTestPanel
@@ -223,8 +309,8 @@ const SecurityTest: React.FC = () => {
             </div>
           )}
         </div>
-      }
-    />
+      </div>
+    </div>
   );
 };
 

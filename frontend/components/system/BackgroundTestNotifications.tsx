@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ExternalLink } from 'lucide-react';
 import { useNotifications } from '../../hooks/useNotifications';

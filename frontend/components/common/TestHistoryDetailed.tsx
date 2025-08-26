@@ -1,6 +1,5 @@
 import { AlertCircle, Archive, BarChart3, CheckCircle, Clock, Database, Download, Eye, FileText, Filter, Globe, MoreHorizontal, RefreshCw, Search, Shield, Star, Tag, Trash2, TrendingUp, XCircle, Zap } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useCallback, useEffect, useState, FC } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 import { EnhancedTestRecord, TestHistoryQuery, TestHistoryResponse, TestHistoryStatistics, TestStatus, TestType } from '../../types/testHistory';

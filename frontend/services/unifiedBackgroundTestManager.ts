@@ -4,14 +4,12 @@
  */
 
 import { EventEmitter } from 'events';
-import type { 
-import { TestProgress } from '../services/api/testProgressService';
-  TestType, 
-  TestStatus, 
-  TestRecord,
+import type {
+  CompatibilityTestConfig,
   NetworkTestConfig,
-  UXTestConfig,
-  CompatibilityTestConfig
+  TestStatus,
+  TestType,
+  UXTestConfig
 } from '../types';
 
 // 后台测试任务接口
@@ -62,7 +60,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
   private initializeWorkers() {
     // 为每种测试类型初始化Worker占位
     const testTypes: TestType[] = [
-      'stress', 'performance', 'security', 'api', 
+      'stress', 'performance', 'security', 'api',
       'compatibility', 'seo', 'ux', 'network', 'database'
     ];
 
@@ -84,7 +82,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
     }
   ): Promise<string> {
     const taskId = this.generateTaskId();
-    
+
     const task: BackgroundTestTask = {
       id: taskId,
       type,
@@ -165,19 +163,19 @@ class UnifiedBackgroundTestManager extends EventEmitter {
     switch (type) {
       case 'network':
         return this.runNetworkTest(task, config as NetworkTestConfig);
-      
+
       case 'ux':
         return this.runUXTest(task, config as UXTestConfig);
-      
+
       case 'compatibility':
         return this.runCompatibilityTest(task, config as CompatibilityTestConfig);
-      
+
       case 'performance':
         return this.runPerformanceTest(task, config);
-      
+
       case 'security':
         return this.runSecurityTest(task, config);
-      
+
       default:
         throw new Error(`不支持的测试类型: ${type}`);
     }
@@ -210,9 +208,9 @@ class UnifiedBackgroundTestManager extends EventEmitter {
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
       const progress = Math.round((i / steps.length) * 100);
-      
+
       this.emit(`progress:${task.id}`, progress, step);
-      
+
       // 模拟测试执行时间
       await this.delay(2000 + Math.random() * 3000);
 
@@ -227,7 +225,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
             packetLoss: Math.random() * 2
           };
           break;
-        
+
         case 2: // 带宽测试
           results.bandwidthResults = {
             downloadSpeed: 50 + Math.random() * 100,
@@ -235,7 +233,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
             ping: 15 + Math.random() * 30
           };
           break;
-        
+
         case 3: // DNS测试
           results.dnsResults = {
             resolveTime: 10 + Math.random() * 50,
@@ -285,7 +283,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
       const progress = Math.round((i / steps.length) * 100);
-      
+
       this.emit(`progress:${task.id}`, progress, step);
       await this.delay(3000 + Math.random() * 2000);
 
@@ -300,7 +298,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
             ttfb: 200 + Math.random() * 300
           };
           break;
-        
+
         case 2: // 性能指标
           results.performanceMetrics = {
             loadTime: 2000 + Math.random() * 2000,
@@ -310,7 +308,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
             timeToInteractive: 3000 + Math.random() * 2000
           };
           break;
-        
+
         case 3: // 可访问性
           results.accessibilityScore = Math.round(75 + Math.random() * 20);
           break;
@@ -353,7 +351,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
       const progress = Math.round((i / steps.length) * 100);
-      
+
       this.emit(`progress:${task.id}`, progress, step);
       await this.delay(2000 + Math.random() * 2000);
     }
@@ -373,7 +371,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
   private async runPerformanceTest(task: BackgroundTestTask, config: any): Promise<any> {
     // 性能测试实现
     const steps = ['分析页面资源', '测试加载速度', '检查优化建议'];
-    
+
     for (let i = 0; i < steps.length; i++) {
       this.emit(`progress:${task.id}`, Math.round((i / steps.length) * 100), steps[i]);
       await this.delay(3000);
@@ -392,7 +390,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
   private async runSecurityTest(task: BackgroundTestTask, config: any): Promise<any> {
     // 安全测试实现
     const steps = ['SSL/TLS检查', '安全头检查', '漏洞扫描'];
-    
+
     for (let i = 0; i < steps.length; i++) {
       this.emit(`progress:${task.id}`, Math.round((i / steps.length) * 100), steps[i]);
       await this.delay(4000);
@@ -484,10 +482,10 @@ class UnifiedBackgroundTestManager extends EventEmitter {
    */
   cleanupCompletedTasks(olderThanHours: number = 24) {
     const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000);
-    
+
     for (const [taskId, task] of this.tasks.entries()) {
-      if (task.endTime && task.endTime < cutoffTime && 
-          ['completed', 'failed', 'cancelled'].includes(task.status)) {
+      if (task.endTime && task.endTime < cutoffTime &&
+        ['completed', 'failed', 'cancelled'].includes(task.status)) {
         this.tasks.delete(taskId);
         this.removeAllListeners(`progress:${taskId}`);
         this.removeAllListeners(`complete:${taskId}`);

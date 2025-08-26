@@ -4,10 +4,8 @@
  */
 
 import { CheckCircle, Download, FileText, Loader2, Settings, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import type { TestType } from '../../types';
-import type { ExportFormat, ExportOptions } from '../../services/unifiedExportManager';
 
 interface UnifiedExportButtonProps {
   testType: TestType;

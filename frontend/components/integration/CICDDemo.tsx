@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import { Play, GitBranch, CheckCircle, XCircle, Clock, Code } from 'lucide-react';
 
 interface PipelineStep {

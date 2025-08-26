@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useRef, useState, FC } from 'react';
 import { ChevronDown, LogOut, Settings, Shield, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';

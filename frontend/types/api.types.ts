@@ -4,14 +4,13 @@
  * 版本: v1.0.0
  */
 
-import type { 
-import { TestProgress } from '../services/api/testProgressService';
-  ApiResponse, 
-  PaginationInfo, 
-  UUID, 
-  Timestamp,
+import type {
+  ApiResponse,
+  PaginationInfo,
+  TestStatus,
   TestType,
-  TestStatus
+  Timestamp,
+  UUID
 } from './common';
 
 // ==================== 请求配置类型 ====================
@@ -97,7 +96,7 @@ export interface TestStartResponse extends ApiResponse<{
   sessionId: UUID;
   status: TestStatus;
   estimatedDuration?: number;
-}> {}
+}> { }
 
 export interface TestStatusRequest {
   testId: UUID;
@@ -115,7 +114,7 @@ export interface TestStatusResponse extends ApiResponse<{
   duration?: number;
   metrics?: Record<string, any>;
   error?: string;
-}> {}
+}> { }
 
 export interface TestResultRequest {
   testId: UUID;
@@ -138,7 +137,7 @@ export interface TestResultResponse extends ApiResponse<{
     description: string;
     action: string;
   }>;
-}> {}
+}> { }
 
 export interface TestCancelRequest {
   testId: UUID;
@@ -149,7 +148,7 @@ export interface TestCancelResponse extends ApiResponse<{
   testId: UUID;
   status: TestStatus;
   cancelled: boolean;
-}> {}
+}> { }
 
 // ==================== 测试历史API类型 ====================
 
@@ -184,7 +183,7 @@ export interface TestHistoryRecord {
   environment?: string;
 }
 
-export interface TestHistoryResponse extends PaginatedResponse<TestHistoryRecord> {}
+export interface TestHistoryResponse extends PaginatedResponse<TestHistoryRecord> { }
 
 export interface TestHistoryStatsRequest {
   timeRange?: '7d' | '30d' | '90d' | '1y';
@@ -205,7 +204,7 @@ export interface TestHistoryStatsResponse extends ApiResponse<{
     count: number;
     averageScore: number;
   }>;
-}> {}
+}> { }
 
 // ==================== 用户API类型 ====================
 
@@ -226,7 +225,7 @@ export interface UserProfileResponse extends ApiResponse<{
   preferences: Record<string, any>;
   profile: Record<string, any>;
   permissions: string[];
-}> {}
+}> { }
 
 export interface UpdateUserProfileRequest {
   fullName?: string;
@@ -238,7 +237,7 @@ export interface UpdateUserProfileRequest {
 export interface UpdateUserProfileResponse extends ApiResponse<{
   updated: boolean;
   user: Record<string, any>;
-}> {}
+}> { }
 
 export interface ChangePasswordRequest {
   currentPassword: string;
@@ -249,7 +248,7 @@ export interface ChangePasswordRequest {
 export interface ChangePasswordResponse extends ApiResponse<{
   changed: boolean;
   message: string;
-}> {}
+}> { }
 
 // ==================== 系统API类型 ====================
 
@@ -276,7 +275,7 @@ export interface SystemStatsResponse extends ApiResponse<{
     responseTime: number;
     lastCheck: Timestamp;
   }>;
-}> {}
+}> { }
 
 export interface SystemHealthRequest {
   includeServices?: boolean;
@@ -289,7 +288,7 @@ export interface SystemHealthResponse extends ApiResponse<{
   services?: Record<string, any>;
   resources?: Record<string, any>;
   metrics?: Record<string, any>;
-}> {}
+}> { }
 
 // ==================== 监控API类型 ====================
 
@@ -313,7 +312,7 @@ export interface MonitoringSiteResponse extends ApiResponse<{
   lastCheck?: Timestamp;
   uptime: number;
   responseTime: number;
-}> {}
+}> { }
 
 export interface MonitoringDataQuery extends QueryParams {
   siteId: UUID;
@@ -329,7 +328,7 @@ export interface MonitoringDataResponse extends PaginatedResponse<{
   statusCode: number;
   errorMessage?: string;
   metrics: Record<string, number>;
-}> {}
+}> { }
 
 // ==================== 导出API类型 ====================
 
@@ -351,7 +350,7 @@ export interface ExportResponse extends ApiResponse<{
   expiresAt?: Timestamp;
   fileSize?: number;
   recordCount?: number;
-}> {}
+}> { }
 
 export interface ExportStatusRequest {
   exportId: UUID;
@@ -364,7 +363,7 @@ export interface ExportStatusResponse extends ApiResponse<{
   downloadUrl?: string;
   expiresAt?: Timestamp;
   error?: string;
-}> {}
+}> { }
 
 // ==================== WebSocket 消息类型 ====================
 
@@ -430,7 +429,7 @@ export interface BatchResponse<T = any> extends ApiResponse<{
     data?: T;
     error?: string;
   }>;
-}> {}
+}> { }
 
 // ==================== 文件上传类型 ====================
 
@@ -447,7 +446,7 @@ export interface FileUploadResponse extends ApiResponse<{
   mimeType: string;
   url: string;
   expiresAt?: Timestamp;
-}> {}
+}> { }
 
 // ==================== 搜索API类型 ====================
 
@@ -467,4 +466,4 @@ export interface SearchResponse extends PaginatedResponse<{
   score: number;
   highlights?: Record<string, string[]>;
   metadata?: Record<string, any>;
-}> {}
+}> { }

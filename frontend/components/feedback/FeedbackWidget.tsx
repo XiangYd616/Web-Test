@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import { MessageSquare, Star, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { FeedbackSeverity, FeedbackType, PageType, userFeedbackService } from '../../services/userFeedbackService';
 

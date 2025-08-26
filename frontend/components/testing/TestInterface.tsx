@@ -1,6 +1,5 @@
 import { Clock, Play, Square, Target } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import type { useCallback, useState, ComponentType, FC } from 'react';
 import { TestResult, TestType } from '../../services/testing/unifiedTestEngine';
 import { ButtonFeedback } from '../integration/InteractiveFeedback';
 import { ErrorDisplay, useErrorHandler, useNotifications } from '../system/ErrorHandling';

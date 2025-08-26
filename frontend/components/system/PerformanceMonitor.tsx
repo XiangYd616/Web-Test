@@ -3,8 +3,7 @@
  * 显示应用性能指标和核心Web指标
  */
 
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import {
     useDevicePerformance,
     useMemoryMonitor,

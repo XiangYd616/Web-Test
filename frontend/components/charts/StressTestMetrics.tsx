@@ -1,6 +1,5 @@
 
-import { useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import type { useState, ComponentType, FC } from 'react';
 
 import { AlertTriangle, BarChart3, CheckCircle, Clock, TrendingDown, TrendingUp, Users, Zap } from 'lucide-react';
 

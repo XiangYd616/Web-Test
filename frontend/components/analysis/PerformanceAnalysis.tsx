@@ -1,6 +1,5 @@
 import { AlertTriangle, BarChart3, CheckCircle, TrendingDown, TrendingUp } from 'lucide-react';
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 
 // CSS样式已迁移到组件库，不再需要外部CSS文件
 

@@ -16,8 +16,7 @@ import {
     Share2,
     TrendingUp
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import type { FC } from 'react';
+import type { useMemo, useState, FC } from 'react';
 import {
     Badge,
     Button,

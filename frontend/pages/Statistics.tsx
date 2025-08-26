@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 
 import { Activity, BarChart3, Calendar, PieChart, TrendingUp } from 'lucide-react';
 

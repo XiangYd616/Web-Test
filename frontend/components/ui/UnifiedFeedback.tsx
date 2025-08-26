@@ -3,8 +3,7 @@
  * 为所有测试页面提供一致的用户反馈体验，但不强制替换现有反馈机制
  */
 
-import { useEffect, useState } from 'react';
-import type { ReactNode, ComponentType, FC } from 'react';
+import type { useEffect, useState, ReactNode, ComponentType, FC } from 'react';
 import { UnifiedIcon, TestStatusIcon, InfoIcon } from './UnifiedIcons';
 import { CheckCircle, XCircle, AlertTriangle, Info, X, Loader } from 'lucide-react';
 

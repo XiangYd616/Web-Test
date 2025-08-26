@@ -12,7 +12,6 @@
  */
 
 import type {
-import { TestProgress } from '../../services/api/testProgressService';
   ApiResponse,
   PaginatedResponse,
   PaginationParams

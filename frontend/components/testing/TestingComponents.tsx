@@ -1,6 +1,5 @@
 import { AlertTriangle, CheckCircle, Clock, Download, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
-import { useState } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { useState, ReactNode, FC } from 'react';
 import TestHeader from '../../components/testing/TestHeader';
 import { TestProgress } from '../../services/api/testProgressService';
 

@@ -1,6 +1,5 @@
 import { LucideIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { useEffect, useState, ReactNode, FC } from 'react';
 import { useLocation } from 'react-router-dom';
 import TestHistory from '../common/TestHistory';
 import TestHeader from './TestHeader';

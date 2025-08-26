@@ -4,8 +4,7 @@
  */
 
 import { BarChart3, Eye, RefreshCw, Search, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useRef, useState, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {

@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 
 import { Clock, Play, Pause, Trash2, Plus, CheckCircle, XCircle, RefreshCw, Settings, Timer, Target, BarChart3, Activity } from 'lucide-react';
 

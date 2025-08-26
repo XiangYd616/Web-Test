@@ -1,6 +1,5 @@
 import { BarChart3, ChevronRight, Code, Database, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Zap } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import type { useEffect, useRef, useState, ComponentType, FC } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';

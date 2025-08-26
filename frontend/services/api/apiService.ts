@@ -1,5 +1,4 @@
 import type { ApiResponse } from '../../types/unified/apiResponse.types';
-
 import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/user.types';
 import { isDesktopEnvironment } from '../../utils/environment';
 

@@ -5,7 +5,6 @@ import { SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEn
 import { createCommonErrors, createError } from '../../utils/errorHandler';
 import { URLValidationResult } from '../../utils/urlValidator';
 import { URLInput } from '../ui/URLInput';
-import { EnhancedError } from './ErrorDisplay';
 
 interface UnifiedSecurityTestPanelProps {
   onTestStart?: () => void;

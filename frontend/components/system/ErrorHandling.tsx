@@ -1,7 +1,6 @@
 import { AlertCircle, AlertTriangle, ArrowLeft, CheckCircle, Clock, Globe, Home, Info, RefreshCw, Server, Shield, WifiOff, XCircle } from 'lucide-react';
-import { ErrorInfo, useEffect, useState } from 'react';
-import type { ReactNode, ComponentType, FC, Component } from 'react';
 import React from 'react';
+import type { ErrorInfo, useEffect, useState, ReactNode, ComponentType, FC, Component } from 'react';
 
 // 错误类型定义
 export type ErrorType =

@@ -1,6 +1,5 @@
 import { AlertTriangle, CheckCircle, Clock, Shield, XCircle, Zap } from 'lucide-react';
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 
 interface APITestResult {
   endpoint: string;
