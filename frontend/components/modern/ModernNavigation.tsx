@@ -1,6 +1,5 @@
 import { BarChart3, Bell, Calendar, ChevronDown, Code, Database, Eye, FileText, Gauge, Globe, HelpCircle, LogOut, Menu, Monitor, Search, Settings, Shield, User, Wifi, X, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import type { useEffect, useState, ComponentType, FC } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 

@@ -1,6 +1,5 @@
 import { AlertCircle, BarChart3, CheckCircle, Clock, Database, Download, Eye, FileText, Globe, Shield, TrendingDown, TrendingUp, Wifi, XCircle, Zap } from 'lucide-react';
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 
 interface TestResult {
   testId: string;

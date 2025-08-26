@@ -4,8 +4,7 @@
  */
 
 import { AlertTriangle, CheckCircle, ChevronRight, HelpCircle, Info, Lightbulb, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { useCallback, useEffect, useState, ReactNode, FC } from 'react';
 import { toast } from 'react-hot-toast';
 
 // 通知类型

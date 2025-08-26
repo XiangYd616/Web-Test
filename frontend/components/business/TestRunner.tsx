@@ -4,8 +4,7 @@
  */
 
 import { Download, History, Play, RefreshCw, Settings, Square } from 'lucide-react';
-import { createElement, useCallback, useEffect, useState } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { createElement, useCallback, useEffect, useState, ReactNode, FC } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 import { useTestEngine } from '../../hooks/useTestEngine';
 import {

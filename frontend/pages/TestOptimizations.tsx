@@ -4,8 +4,7 @@
  */
 
 import { AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { useEffect, useState, ReactNode, FC } from 'react';
 import { useLoadingState } from '../components/ui/LoadingStates';
 import { SmartTooltip, useSmartNotification } from '../components/ui/UXComponents';
 import { usePerformanceOptimization } from '../hooks/usePerformanceOptimization';

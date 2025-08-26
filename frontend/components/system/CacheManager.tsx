@@ -4,8 +4,7 @@
  * 版本: v1.0.0
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import type { useCallback, useEffect, useState, ComponentType, FC } from 'react';
 import {
   Database,
   Trash2,

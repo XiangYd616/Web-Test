@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 
 import { Copy, Key, Zap, Globe, BarChart3, CheckCircle, AlertTriangle, Play, Download, Github } from 'lucide-react';
 

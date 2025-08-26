@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 
 import { Check, X, Star, Zap, Shield, Globe, BarChart3, Users, Clock, Headphones, Crown, Sparkles, ArrowRight, CreditCard, Gift } from 'lucide-react';
 

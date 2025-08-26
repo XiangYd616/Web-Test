@@ -1,6 +1,5 @@
 
-import { useMemo, useState } from 'react';
-import type { FC } from 'react';
+import type { useMemo, useState, FC } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { TestResult } from '../../services/advancedTestEngine';
 

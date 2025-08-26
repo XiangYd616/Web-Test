@@ -1,5 +1,4 @@
-import { createElement, isValidElement, useState } from 'react';
-import type { ReactElement, ComponentType, FC } from 'react';
+import type { createElement, isValidElement, useState, ReactElement, ComponentType, FC } from 'react';
 import { LucideIcon, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 

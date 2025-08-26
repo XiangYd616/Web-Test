@@ -1,9 +1,7 @@
 import { AlertTriangle, CheckCircle, Clock, Eye, Globe, Grid, Monitor, Settings, Smartphone, Tablet, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import type { FC } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
-import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 import type {
@@ -836,20 +834,152 @@ const CompatibilityTest: React.FC = () => {
   };
 
   return (
-    <TestPageLayout
-      testType="compatibility"
-      title="兼容性测试"
-      description="检测网站在不同浏览器和设备上的兼容性"
-      icon={Grid}
-      testTabLabel="兼容性测试"
-      historyTabLabel="测试历史"
-      testStatus={testStatus === 'starting' ? 'running' : testStatus as 'idle' | 'running' | 'completed' | 'failed'}
-      isTestDisabled={!config.url}
-      onStartTest={handleStartTest}
-      onTestSelect={handleTestSelect}
-      onTestRerun={handleTestRerun}
-      additionalComponents={LoginPromptComponent}
-      testContent={
+    <div className="space-y-4 dark-page-scrollbar">
+      <div className="space-y-6">
+        {/* 美化的页面标题和控制 - 统一设计风格 */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl">
+          {/* 背景装饰 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 via-blue-600/5 to-cyan-600/5"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-full blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-xl"></div>
+
+          {/* 内容区域 */}
+          <div className="relative p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              {/* 标题区域 */}
+              <div className="flex items-center space-x-4">
+                {/* 图标装饰 */}
+                <div className="relative">
+                  <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Grid className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 rounded-full border-2 border-gray-800 animate-pulse"></div>
+                </div>
+
+                {/* 标题文字 */}
+                <div>
+                  <div className="flex items-center space-x-3">
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-100 to-blue-100 bg-clip-text text-transparent">
+                      兼容性测试
+                    </h2>
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
+                      <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse [animation-delay:0.4s]"></div>
+                    </div>
+                  </div>
+                  <p className="text-gray-300 text-sm mt-1 flex items-center space-x-2">
+                    <Globe className="w-4 h-4 text-purple-400" />
+                    <span>检测网站在不同浏览器和设备上的兼容性</span>
+                  </p>
+
+                  {/* 状态指示器 */}
+                  <div className="flex items-center space-x-4 mt-2">
+                    <div className="flex items-center space-x-2 text-xs">
+                      <div className={`w-2 h-2 rounded-full ${testStatus === 'running' ? 'bg-purple-500 animate-pulse' :
+                        testStatus === 'completed' ? 'bg-blue-500' :
+                          testStatus === 'failed' ? 'bg-red-500' :
+                            testStatus === 'cancelled' ? 'bg-yellow-500' :
+                              'bg-gray-500'
+                        }`}></div>
+                      <span className="text-gray-400">
+                        {testStatus === 'running' ? '兼容性检测中' :
+                          testStatus === 'completed' ? '检测完成' :
+                            testStatus === 'failed' ? '检测失败' :
+                              testStatus === 'cancelled' ? '检测已取消' :
+                                '等待开始'}
+                      </span>
+                    </div>
+
+                    {config.url && (
+                      <div className="flex items-center space-x-2 text-xs">
+                        <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                        <span className="text-gray-400 truncate max-w-48">
+                          目标: {config.url}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 测试控制按钮 */}
+              <div className="flex items-center space-x-2">
+                {testStatus === 'idle' ? (
+                  <button
+                    type="button"
+                    onClick={handleStartTest}
+                    disabled={!config.url}
+                    className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!config.url
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : isAuthenticated
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                        : 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                      }`}
+                  >
+                    <Grid className="w-4 h-4" />
+                    <span>开始检测</span>
+                  </button>
+                ) : testStatus === 'running' ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-md">
+                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-purple-300 font-medium">
+                        检测进行中
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleStopTest}
+                      className="px-3 py-1.5 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs bg-red-600 hover:bg-red-700"
+                    >
+                      <XCircle className="w-3 h-3" />
+                      <span>停止</span>
+                    </button>
+                  </div>
+                ) : testStatus === 'completed' ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      <span className="text-sm text-green-300 font-medium">检测完成</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTestStatus('idle');
+                        setError('');
+                      }}
+                      className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
+                    >
+                      <Grid className="w-4 h-4" />
+                      <span>重新检测</span>
+                    </button>
+                  </div>
+                ) : testStatus === 'failed' ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+                      <XCircle className="w-4 h-4 text-red-400" />
+                      <span className="text-sm text-red-300 font-medium">检测失败</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTestStatus('idle');
+                        setError('');
+                      }}
+                      className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
+                    >
+                      <Grid className="w-4 h-4" />
+                      <span>重试</span>
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 测试内容区域 */}
         <div className="space-y-6">
           {/* URL输入和基础配置 */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
@@ -1557,9 +1687,9 @@ const CompatibilityTest: React.FC = () => {
               </div>
             )
           }
-        </div >
-      }
-    />
+        </div>
+      </div>
+    </div>
   );
 };
 

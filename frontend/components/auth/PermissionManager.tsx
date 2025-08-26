@@ -4,8 +4,7 @@
  * 版本: v1.0.0
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import type { useEffect, useMemo, useState, ComponentType, FC } from 'react';
 import {
   Shield,
   Users,
@@ -22,7 +21,6 @@ import {
   AlertTriangle,
   Info
 } from 'lucide-react';
-import { useRBAC } from '../../services/auth/rbacService';
 
 // ==================== 类型定义 ====================
 

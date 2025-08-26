@@ -1,6 +1,5 @@
 import { Activity, AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, CloudOff, Cpu, Database, Download, Gauge, HardDrive, History, Layers, Lock, Monitor, Network, Pause, Play, RefreshCw, RotateCcw, Save, Search, Server, Settings, Shield, Signal, Square, Target, Timer, TrendingUp, Wifi, WifiOff, XCircle, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useTheme } from '../contexts/ThemeContext';

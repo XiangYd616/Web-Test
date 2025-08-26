@@ -1,6 +1,5 @@
 import { AlertCircle, Bookmark, Calendar, CheckCircle, Clock, Loader, Plus, Search, Star, Trash2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { BookmarkItem, userService } from '../services/user/userService';
 

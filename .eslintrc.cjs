@@ -7,10 +7,8 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
-    'plugin:jsx-a11y/recommended',
   ],
   ignorePatterns: [
     'dist',
@@ -54,7 +52,7 @@ module.exports = {
     // TypeScript 规则
     '@typescript-eslint/no-unused-vars': [
       'warn',
-      { 
+      {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^_',

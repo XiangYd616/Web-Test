@@ -1,6 +1,5 @@
 import { Bookmark, BookmarkCheck, Clock, Plus, Search, Star, Tag, TrendingUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import { TestTemplate, TestTemplateService } from '../../services/testTemplates';
 
 export interface TestTemplateSelectorProps {

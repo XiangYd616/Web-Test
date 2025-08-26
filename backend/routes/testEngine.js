@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const testEngineService = require('../services/core/TestEngineService');
 const { optionalAuth } = require('../middleware/auth');
-const { asyncHandler } = require('../utils/asyncErrorHandler');
+const asyncHandler = require('../middleware/asyncHandler');
 
 /**
  * 获取所有可用的测试引擎
@@ -16,7 +16,7 @@ const { asyncHandler } = require('../utils/asyncErrorHandler');
 router.get('/engines', optionalAuth, asyncHandler(async (req, res) => {
   const engines = testEngineService.getAvailableEngines();
   const healthStatus = await testEngineService.getEngineHealthStatus();
-  
+
   res.json({
     success: true,
     data: {
@@ -34,10 +34,10 @@ router.get('/engines', optionalAuth, asyncHandler(async (req, res) => {
  */
 router.get('/engines/:engineType/status', optionalAuth, asyncHandler(async (req, res) => {
   const { engineType } = req.params;
-  
+
   try {
     const availability = await testEngineService.checkEngineAvailability(engineType);
-    
+
     res.json({
       success: true,
       data: {
@@ -94,7 +94,7 @@ router.post('/test/:testType', optionalAuth, asyncHandler(async (req, res) => {
   try {
     // 异步启动测试
     const result = await testEngineService.startTest(testType, url, options);
-    
+
     res.json({
       success: true,
       data: {
@@ -121,7 +121,7 @@ router.post('/test/:testType', optionalAuth, asyncHandler(async (req, res) => {
  */
 router.get('/test/:testId/status', optionalAuth, asyncHandler(async (req, res) => {
   const { testId } = req.params;
-  
+
   const status = testEngineService.getTestStatus(testId);
   if (!status) {
     return res.status(404).json({
@@ -142,7 +142,7 @@ router.get('/test/:testId/status', optionalAuth, asyncHandler(async (req, res) =
  */
 router.get('/test/:testId/result', optionalAuth, asyncHandler(async (req, res) => {
   const { testId } = req.params;
-  
+
   const result = testEngineService.getTestResult(testId);
   if (!result) {
     return res.status(404).json({
@@ -163,10 +163,10 @@ router.get('/test/:testId/result', optionalAuth, asyncHandler(async (req, res) =
  */
 router.post('/test/:testId/stop', optionalAuth, asyncHandler(async (req, res) => {
   const { testId } = req.params;
-  
+
   try {
     const result = await testEngineService.stopTest(testId);
-    
+
     res.json({
       success: true,
       data: result
@@ -206,7 +206,7 @@ router.post('/comprehensive', optionalAuth, asyncHandler(async (req, res) => {
 
   try {
     const result = await testEngineService.runComprehensiveTest(url, options);
-    
+
     res.json({
       success: true,
       data: result
@@ -227,13 +227,13 @@ router.post('/comprehensive', optionalAuth, asyncHandler(async (req, res) => {
 router.get('/health', optionalAuth, asyncHandler(async (req, res) => {
   try {
     const healthStatus = await testEngineService.getEngineHealthStatus();
-    
+
     const totalEngines = Object.keys(healthStatus).length;
     const healthyEngines = Object.values(healthStatus).filter(status => status.healthy).length;
     const healthPercentage = totalEngines > 0 ? Math.round((healthyEngines / totalEngines) * 100) : 0;
-    
-    const overallStatus = healthPercentage >= 80 ? 'healthy' : 
-                         healthPercentage >= 50 ? 'degraded' : 'unhealthy';
+
+    const overallStatus = healthPercentage >= 80 ? 'healthy' :
+      healthPercentage >= 50 ? 'degraded' : 'unhealthy';
 
     res.json({
       success: true,
@@ -276,7 +276,7 @@ router.post('/batch', optionalAuth, asyncHandler(async (req, res) => {
   for (const test of tests) {
     try {
       const { type, url, options = {} } = test;
-      
+
       if (!type || !url) {
         errors.push({
           test,
@@ -316,11 +316,11 @@ router.post('/batch', optionalAuth, asyncHandler(async (req, res) => {
  */
 router.get('/history', optionalAuth, asyncHandler(async (req, res) => {
   const { limit = 50, offset = 0, type } = req.query;
-  
+
   // 这里应该从数据库获取历史记录
   // 目前返回内存中的数据作为示例
   const allResults = Array.from(testEngineService.testResults.values());
-  
+
   let filteredResults = allResults;
   if (type) {
     filteredResults = allResults.filter(result => result.type === type);

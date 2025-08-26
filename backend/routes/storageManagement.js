@@ -11,7 +11,8 @@ const { query, body, validationResult } = require('express-validator');
 
 /**
  * GET /api/storage/status
- * 获取存储系统状�? */
+ * 获取存储系统状态
+ */
 router.get('/status', optionalAuth, async (req, res) => {
   try {
     const healthStatus = await storageService.getHealthStatus();
@@ -27,10 +28,10 @@ router.get('/status', optionalAuth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取存储状态失�?', error);
+    console.error('获取存储状态失败', error);
     res.status(500).json({
       success: false,
-      error: '获取存储状态失�?,
+      error: '获取存储状态失败',
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }

@@ -1,6 +1,5 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Cloud, Download, Globe, MapPin, Play, Router, Server, Signal, Square, Upload, Wifi, XCircle, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import type {
   NetworkTestConfig,

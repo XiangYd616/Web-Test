@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { useEffect, useState, ReactNode, FC } from 'react';
 import { Activity, AlertTriangle, CheckCircle, Clock, Database, Globe, Server, Wifi } from 'lucide-react';
 
 interface HealthMetric {

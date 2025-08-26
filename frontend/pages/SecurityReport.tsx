@@ -1,6 +1,5 @@
 import { AlertTriangle, CheckCircle, Database, Eye, EyeOff, Globe, Info, Lock, RefreshCw, Settings, Shield, XCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import { currentSecurityConfig, SecurityConfigValidator } from '../config/security';
 import { useAuth } from '../contexts/AuthContext';
 

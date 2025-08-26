@@ -4,8 +4,7 @@
  * 版本: v1.0.0
  */
 
-import { createElement, useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { createElement, useEffect, useState, FC } from 'react';
 import { 
   Shield, 
   Smartphone, 
@@ -18,7 +17,6 @@ import {
   Loader2,
   Download
 } from 'lucide-react';
-import { useMFA } from '../../services/auth/mfaService';
 
 // ==================== 类型定义 ====================
 

@@ -11,8 +11,7 @@ import {
   Info,
   XCircle
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import type { useEffect, useState, ComponentType, FC } from 'react';
 import TestPageLayout from '../components/testing/TestPageLayout';
 
 // 浏览器信息接口

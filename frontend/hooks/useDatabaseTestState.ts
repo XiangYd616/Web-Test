@@ -9,138 +9,135 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { testApiService } from '../services/api/testApiService';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type {
-  DatabaseTestHook,
   DatabaseTestConfig,
-  DatabaseTestState,
-  DatabaseTestActions,
-  DatabaseTestResult,
-  DatabaseQuery,
-  DatabaseInfo
+  DatabaseTestHook,
+  DatabaseTestResult
 } from '../types';
 
 // 所有类型定义已迁移到统一的类型系统
 // 请从 '../types' 导入所需的类型
 
 // 数据库测试结果接口已迁移到统一类型系统
-id: string;
-config: DatabaseTestConfig;
-status: 'completed' | 'failed' | 'partial';
-startTime: Date;
-endTime: Date;
-duration: number;
-summary: {
-  overallHealth: 'healthy' | 'warning' | 'critical';
-  connectionScore: number;
-  performanceScore: number;
-  integrityScore: number;
-  securityScore: number;
-};
-
-// 连接测试结果
-connectionResults: {
-  status: 'success' | 'failed';
-  connectionTime: number;
-  maxConnections: number;
-  currentConnections: number;
-  version: string;
-  serverInfo: Record<string, any>;
-};
-
-// 性能测试结果
-performanceResults: {
-  status: 'good' | 'acceptable' | 'poor';
-  averageQueryTime: number;
-  slowestQuery: {
-    query: string;
-    duration: number;
-  };
-  fastestQuery: {
-    query: string;
-    duration: number;
-  };
-  throughput: number; // queries per second
-  resourceUsage: {
-    cpu: number;
-    memory: number;
-    disk: number;
-  };
-  indexEfficiency: number;
-};
-
-// 数据完整性结果
-integrityResults: {
-  status: 'valid' | 'issues_found';
-  constraintViolations: Array<{
-    table: string;
-    constraint: string;
-    violationCount: number;
-  }>;
-  orphanedRecords: Array<{
-    table: string;
-    count: number;
-  }>;
-  indexIssues: Array<{
-    table: string;
-    index: string;
-    issue: string;
-  }>;
-  dataConsistency: {
-    score: number;
-    issues: string[];
-  };
-};
-
-// 负载测试结果
-loadTestResults: {
-  status: 'passed' | 'failed';
-  maxConcurrentConnections: number;
-  averageResponseTime: number;
-  errorRate: number;
-  throughputOverTime: Array<{
-    timestamp: Date;
-    throughput: number;
-  }>;
-  resourceUtilization: Array<{
-    timestamp: Date;
-    cpu: number;
-    memory: number;
-    connections: number;
-  }>;
-};
-
-// 安全测试结果
-securityResults: {
-  status: 'secure' | 'vulnerabilities_found';
-  vulnerabilities: Array<{
-    type: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    description: string;
-    recommendation: string;
-  }>;
-  permissionIssues: Array<{
-    user: string;
-    issue: string;
-    risk: string;
-  }>;
-  encryptionStatus: {
-    dataAtRest: boolean;
-    dataInTransit: boolean;
-    passwordHashing: boolean;
-  };
-};
-
-// 自定义查询结果
-customQueryResults: Array<{
-  queryId: string;
-  queryName: string;
-  status: 'success' | 'failed' | 'timeout';
+interface DatabaseTestResultLocal {
+  id: string;
+  config: DatabaseTestConfig;
+  status: 'completed' | 'failed' | 'partial';
+  startTime: Date;
+  endTime: Date;
   duration: number;
-  rowCount?: number;
-  error?: string;
-  result?: any;
-}>;
+  summary: {
+    overallHealth: 'healthy' | 'warning' | 'critical';
+    connectionScore: number;
+    performanceScore: number;
+    integrityScore: number;
+    securityScore: number;
+  };
 
-recommendations: string[];
+  // 连接测试结果
+  connectionResults: {
+    status: 'success' | 'failed';
+    connectionTime: number;
+    maxConnections: number;
+    currentConnections: number;
+    version: string;
+    serverInfo: Record<string, any>;
+  };
+
+  // 性能测试结果
+  performanceResults: {
+    status: 'good' | 'acceptable' | 'poor';
+    averageQueryTime: number;
+    slowestQuery: {
+      query: string;
+      duration: number;
+    };
+    fastestQuery: {
+      query: string;
+      duration: number;
+    };
+    throughput: number; // queries per second
+    resourceUsage: {
+      cpu: number;
+      memory: number;
+      disk: number;
+    };
+    indexEfficiency: number;
+  };
+
+  // 数据完整性结果
+  integrityResults: {
+    status: 'valid' | 'issues_found';
+    constraintViolations: Array<{
+      table: string;
+      constraint: string;
+      violationCount: number;
+    }>;
+    orphanedRecords: Array<{
+      table: string;
+      count: number;
+    }>;
+    indexIssues: Array<{
+      table: string;
+      index: string;
+      issue: string;
+    }>;
+    dataConsistency: {
+      score: number;
+      issues: string[];
+    };
+  };
+
+  // 负载测试结果
+  loadTestResults: {
+    status: 'passed' | 'failed';
+    maxConcurrentConnections: number;
+    averageResponseTime: number;
+    errorRate: number;
+    throughputOverTime: Array<{
+      timestamp: Date;
+      throughput: number;
+    }>;
+    resourceUtilization: Array<{
+      timestamp: Date;
+      cpu: number;
+      memory: number;
+      connections: number;
+    }>;
+  };
+
+  // 安全测试结果
+  securityResults: {
+    status: 'secure' | 'vulnerabilities_found';
+    vulnerabilities: Array<{
+      type: string;
+      severity: 'low' | 'medium' | 'high' | 'critical';
+      description: string;
+      recommendation: string;
+    }>;
+    permissionIssues: Array<{
+      user: string;
+      issue: string;
+      risk: string;
+    }>;
+    encryptionStatus: {
+      dataAtRest: boolean;
+      dataInTransit: boolean;
+      passwordHashing: boolean;
+    };
+  };
+
+  // 自定义查询结果
+  customQueryResults: Array<{
+    queryId: string;
+    queryName: string;
+    status: 'success' | 'failed' | 'timeout';
+    duration: number;
+    rowCount?: number;
+    error?: string;
+    result?: any;
+  }>;
+
+  recommendations: string[];
 }
 
 // Hook状态接口

@@ -4,8 +4,7 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useState } from 'react';
-import type { ReactElement } from 'react';
+import type { useState, ReactElement } from 'react';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
 import { Input, NumberInput, PasswordInput, SearchInput, Select, Textarea } from '../Input';
 

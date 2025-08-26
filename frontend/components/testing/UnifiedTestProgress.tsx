@@ -4,8 +4,7 @@
  */
 
 import { AlertCircle, CheckCircle, Clock, Loader, StopCircle, XCircle } from 'lucide-react';
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import type { TestProgress } from '../../services/api/testProgressService';
 
 export interface UnifiedTestProgressProps {

@@ -1,6 +1,5 @@
 import { ChevronDown, Download, FileText, Image, Table } from 'lucide-react';
-import { createElement, useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import type { createElement, useState, ComponentType, FC } from 'react';
 
 // 导出格式配置
 export interface ExportFormat {

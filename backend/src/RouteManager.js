@@ -333,26 +333,9 @@ class RouteManager {
       },
 
       // 数据管理路由
-      {
-        path: '/api/data-management',
-        module: '../routes/dataManagement.js',
-        description: '数据管理API',
-        group: 'dataSpecific'
-      },
-      {
-        path: '/api/data-export',
-        module: '../routes/dataExport.js',
-        description: '数据导出API',
-        group: 'dataSpecific',
-        exportProperty: 'router'
-      },
-      {
-        path: '/api/data-import',
-        module: '../routes/dataImport.js',
-        description: '数据导入API',
-        group: 'dataSpecific',
-        exportProperty: 'router'
-      },
+      
+      
+      
       {
         path: '/api/data',
         module: '../routes/data.js',

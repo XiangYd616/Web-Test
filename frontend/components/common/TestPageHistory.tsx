@@ -4,8 +4,7 @@
  */
 
 import { BarChart3, Calendar, Eye, MoreHorizontal, RefreshCw, Search, Star } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useCallback, useEffect, useState, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 

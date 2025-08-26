@@ -4,8 +4,7 @@
  * 版本: v1.0.0
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { useCallback, useEffect, useMemo, useRef, useState, ReactNode, FC } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 

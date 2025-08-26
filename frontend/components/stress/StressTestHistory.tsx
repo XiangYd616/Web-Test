@@ -1,6 +1,5 @@
 import { Activity, BarChart3, Download, ExternalLink, Eye, RefreshCw, Search, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useRef, useState, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ExportUtils from '../../utils/exportUtils';

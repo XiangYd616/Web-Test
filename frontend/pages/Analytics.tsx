@@ -1,7 +1,6 @@
 // React相关导入
 import { Activity, AlertTriangle, ArrowDownRight, ArrowUpRight, BarChart3, Brain, ExternalLink, Eye, Info, Lightbulb, Minus, RefreshCw, Search, Shield, Target, TrendingDown, TrendingUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 
 import { analyticsService as AdvancedAnalyticsService } from '../services/analytics';
 

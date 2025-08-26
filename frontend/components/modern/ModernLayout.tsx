@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import ModernSidebar from './ModernSidebar';

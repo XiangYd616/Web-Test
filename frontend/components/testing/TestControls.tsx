@@ -1,7 +1,6 @@
 
 import { AlertCircle, CheckCircle, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
-import { useState } from 'react';
-import type { ComponentType, FC } from 'react';
+import type { useState, ComponentType, FC } from 'react';
 import { TestPhase, TestState } from '../../services/TestStateManager';
 
 // 控制组件属性接口

@@ -1,5 +1,4 @@
-import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { ReactNode, createContext, useContext, useEffect, useState, FC } from 'react';
 import { parseAuthError } from '../components/auth/AuthErrorHandler';
 import type { AuthContextType, User } from '../types/auth.types';
 

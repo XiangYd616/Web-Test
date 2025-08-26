@@ -1,6 +1,5 @@
 import { AlertTriangle, CheckCircle, ChevronDown, ChevronRight, Download, Eye, FileText, TrendingUp, XCircle } from 'lucide-react';
-import { useState } from 'react';
-import type { FC } from 'react';
+import type { useState, FC } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface LocalSEOResultsProps {

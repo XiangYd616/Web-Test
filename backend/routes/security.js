@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { asyncHandler } = require('../middleware/errorHandler');
+const asyncHandler = require('../middleware/asyncHandler');
 const { authMiddleware } = require('../middleware/auth');
 const { SecurityEngine } = require('../engines/security/SecurityAnalyzer');
 
@@ -22,8 +22,8 @@ router.post('/advanced-test', asyncHandler(async (req, res) => {
   const { url, testTypes = ['all'], depth = 'standard', options = {} } = req.body;
 
   if (!url) {
-    
-        return res.validationError([], '需要提供测试URL');
+
+    return res.validationError([], '需要提供测试URL');
   }
 
   // 验证URL格式
@@ -35,7 +35,7 @@ router.post('/advanced-test', asyncHandler(async (req, res) => {
 
   try {
     console.log(`🔒 开始高级安全测试: ${url}`);
-    
+
     const result = await securityEngine.executeTest({
       url,
       testTypes,
@@ -64,8 +64,8 @@ router.post('/quick-check', asyncHandler(async (req, res) => {
   const { url } = req.body;
 
   if (!url) {
-    
-        return res.validationError([], '需要提供测试URL');
+
+    return res.validationError([], '需要提供测试URL');
   }
 
   try {
@@ -267,8 +267,8 @@ router.post('/export-report', asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
   if (!testId) {
-    
-        return res.validationError([], '需要提供测试ID');
+
+    return res.validationError([], '需要提供测试ID');
   }
 
   try {
@@ -292,7 +292,7 @@ router.post('/export-report', asyncHandler(async (req, res) => {
       case 'csv':
         // 生成CSV格式报告
         const csvData = 'Test ID,URL,Security Score,Vulnerabilities\n' +
-                       `${testId},https://example.com,75,3`;
+          `${testId},https://example.com,75,3`;
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', `attachment; filename="security-report-${testId}.csv"`);
         res.send(csvData);
@@ -348,7 +348,7 @@ router.get('/recommendations', asyncHandler(async (req, res) => {
       ]
     };
 
-    const result = category === 'all' 
+    const result = category === 'all'
       ? Object.values(recommendations).flat()
       : recommendations[category] || [];
 

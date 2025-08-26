@@ -1,6 +1,5 @@
 import { AlertTriangle, CheckCircle, Clock, Database, Download, File, FileText, Folder, Upload, X } from 'lucide-react';
-import { useRef, useState } from 'react';
-import type { FC } from 'react';
+import type { useRef, useState, FC } from 'react';
 
 interface ImportTask {
   id: string;

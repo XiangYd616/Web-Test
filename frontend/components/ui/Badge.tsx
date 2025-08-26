@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { useState, ReactNode, FC } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, Clock, Loader, Info } from 'lucide-react';
 
 import { cn } from '../../utils/cn';

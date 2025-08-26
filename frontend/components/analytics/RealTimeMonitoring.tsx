@@ -1,6 +1,5 @@
 import { Activity, AlertTriangle, BarChart3, Bell, CheckCircle, Clock, Eye, Globe, Pause, Play, Plus, Settings, Shield, Target, Trash2, TrendingDown, TrendingUp, Wifi, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useState, FC } from 'react';
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { MonitoringData, monitoringService, MonitoringSite, MonitoringStats } from '../../services/monitoringService';
 

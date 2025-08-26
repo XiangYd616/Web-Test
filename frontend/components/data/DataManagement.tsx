@@ -11,8 +11,7 @@ import {
   RefreshCw,
   Search
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { ReactNode, FC } from 'react';
+import type { useEffect, useState, ReactNode, FC } from 'react';
 import TestHistory from '../common/TestHistory';
 // import { TestStatisticsPanel } from './TestStatisticsPanel';
 // import { DataExportPanel } from './DataExportPanel';

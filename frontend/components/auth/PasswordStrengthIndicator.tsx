@@ -4,8 +4,7 @@
  * 版本: v1.0.0
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import type { FC } from 'react';
+import type { useEffect, useMemo, useState, FC } from 'react';
 import { 
   Eye, 
   EyeOff, 
@@ -16,7 +15,6 @@ import {
   Info,
   Clock
 } from 'lucide-react';
-import { defaultPasswordPolicyService } from '../../services/auth/passwordPolicyService';
 
 // ==================== 类型定义 ====================
 
