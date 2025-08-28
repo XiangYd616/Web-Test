@@ -285,8 +285,9 @@ const APITest: React.FC = () => {
           recordTestCompletion('API测试', success, score, duration);
         },
         // onError 回调
-        (error: Error) => {
-          setError(error.message || '测试失败');
+        (error: string | Error) => {
+          const errorMessage = typeof error === 'string' ? error : error.message;
+          setError(errorMessage || '测试失败');
           setTestStatus('failed');
           setCanSwitchPages(true);
         }

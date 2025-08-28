@@ -8,12 +8,12 @@ import type {
   CompletionCallback,
   ErrorCallback,
   ProgressCallback
-} from '../types';
+} from '../types/base.types';
 
 import {
   TestStatus,
   TestType
-} from '../types';
+} from '../types/enums';
 
 export interface TestInfo {
   id: string;

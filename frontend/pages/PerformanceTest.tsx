@@ -196,8 +196,9 @@ const PerformanceTest: React.FC = () => {
           const success = result.overallScore > 0;
           recordTestCompletion('性能测试', success, result.overallScore, 60);
         },
-        (error: Error) => {
-          setError(error.message || '测试失败');
+        (error: string | Error) => {
+          const errorMessage = typeof error === 'string' ? error : error.message;
+          setError(errorMessage || '测试失败');
           setIsRunning(false);
           setCurrentTestId(null);
           setCanSwitchPages(true);
