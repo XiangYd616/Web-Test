@@ -1,6 +1,14 @@
 /**
- * 🎯 统一测试引擎执行器组件
+ * 🎯 统一测试引擎执行器组件 - 重构优化版本
+ * 整合了UnifiedTestPanel、ModernUnifiedTestPanel、ModernTestRunner的功能
  * 提供完整的测试执行、监控和结果展示功能
+ *
+ * 重构特性：
+ * - 整合多个重复组件的功能
+ * - 统一的用户界面和交互
+ * - 支持所有测试类型
+ * - 提供向后兼容性
+ * - 优化的性能和用户体验
  */
 
 import {
@@ -10,11 +18,10 @@ import {
   DeleteOutlined,
   DownloadOutlined,
   ExclamationCircleOutlined,
-  EyeOutlined,
+  HistoryOutlined,
   PlayCircleOutlined,
   ReloadOutlined,
-  SettingOutlined,
-  StopOutlined
+  SettingOutlined
 } from '@ant-design/icons';
 import {
   Badge,
@@ -22,17 +29,13 @@ import {
   Card,
   Col,
   Divider,
-  Empty,
   Form, Input,
   Modal,
-  Progress,
   Row,
   Select,
   Space,
   Statistic,
-  Table,
   Tabs,
-  Tag,
   Timeline,
   Typography
 } from 'antd';
@@ -41,14 +44,45 @@ import { useTestResultAnalysis, useUnifiedTestEngine } from '../../hooks/useUnif
 import { TestPriority, TestType } from '../../types/enums';
 import type { TestResult } from '../../types/unifiedEngine.types';
 
+// 导入专用子组件
+import { TestHistoryPanel } from './shared/TestHistoryPanel';
+import { TestProgressMonitor } from './shared/TestProgressMonitor';
+import { TestResultsTable } from './shared/TestResultsTable';
+import { TestStatsPanel } from './shared/TestStatsPanel';
+
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
 
+// 扩展的Props接口 - 整合其他组件功能
 interface UnifiedTestExecutorProps {
   className?: string;
+
+  // 基础回调
   onTestComplete?: (testId: string, result: TestResult) => void;
   onTestError?: (error: Error) => void;
+
+  // 整合ModernUnifiedTestPanel功能
+  testType?: TestType;
+  defaultConfig?: Partial<any>;
+  showHistory?: boolean;
+  showStats?: boolean;
+  allowMultipleTests?: boolean;
+
+  // 整合UnifiedTestPanel功能
+  enableQueue?: boolean;
+  enableWebSocket?: boolean;
+  maxConcurrentTests?: number;
+
+  // 整合ModernTestRunner功能
+  showAdvancedOptions?: boolean;
+  enableRealTimeMetrics?: boolean;
+  enableExport?: boolean;
+
+  // 扩展回调
+  onTestStarted?: (data: any) => void;
+  onTestProgress?: (data: any) => void;
+  onConfigChange?: (config: any) => void;
 }
 
 /**
@@ -56,14 +90,35 @@ interface UnifiedTestExecutorProps {
  */
 export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   className = '',
+  testType: defaultTestType,
+  defaultConfig = {},
+  showHistory = true,
+  showStats = true,
+  allowMultipleTests = false,
+  enableQueue = true,
+  enableWebSocket = true,
+  maxConcurrentTests = 3,
+  showAdvancedOptions = false,
+  enableRealTimeMetrics = true,
+  enableExport = true,
   onTestComplete,
-  onTestError
+  onTestError,
+  onTestStarted,
+  onTestProgress,
+  onConfigChange
 }) => {
   const [form] = Form.useForm();
-  const [selectedTestType, setSelectedTestType] = useState<TestType>(TestType.PERFORMANCE);
+  const [selectedTestType, setSelectedTestType] = useState<TestType>(
+    defaultTestType || TestType.PERFORMANCE
+  );
   const [activeTab, setActiveTab] = useState<string>('config');
   const [selectedTestId, setSelectedTestId] = useState<string>('');
   const [showResultModal, setShowResultModal] = useState(false);
+
+  // 整合其他组件的状态
+  const [testHistory, setTestHistory] = useState<any[]>([]);
+  const [testStatistics, setTestStatistics] = useState<any>(null);
+  const [realTimeMetrics, setRealTimeMetrics] = useState<any>(null);
 
   // 使用统一测试引擎Hook
   const engine = useUnifiedTestEngine();
@@ -71,16 +126,99 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   // 当前选中测试的结果分析
   const resultAnalysis = useTestResultAnalysis(selectedTestId);
 
+  // 整合的功能方法
+
   /**
-   * 执行测试
+   * 加载测试历史 - 整合UnifiedTestPanel功能
+   */
+  const loadTestHistory = useCallback(async () => {
+    try {
+      const history = await engine.getTestHistory(selectedTestType);
+      setTestHistory(history);
+    } catch (error) {
+      console.error('加载测试历史失败:', error);
+    }
+  }, [engine, selectedTestType]);
+
+  /**
+   * 加载测试统计 - 整合ModernUnifiedTestPanel功能
+   */
+  const loadTestStatistics = useCallback(async () => {
+    try {
+      const stats = engine.getStats();
+      setTestStatistics(stats);
+    } catch (error) {
+      console.error('加载测试统计失败:', error);
+    }
+  }, [engine]);
+
+  /**
+   * 启动实时指标监控 - 整合ModernTestRunner功能
+   */
+  const startRealTimeMetrics = useCallback((testId: string) => {
+    if (!enableRealTimeMetrics) return () => { };
+
+    const interval = setInterval(async () => {
+      try {
+        const status = await engine.getTestStatus(testId);
+        if (status) {
+          setRealTimeMetrics({
+            progress: status.progress,
+            currentStep: status.currentStep,
+            timestamp: Date.now()
+          });
+        }
+      } catch (error) {
+        console.error('获取实时指标失败:', error);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [engine, enableRealTimeMetrics]);
+
+  // 组件初始化 - 整合其他组件的初始化逻辑
+  React.useEffect(() => {
+    // 初始化表单默认值
+    if (defaultConfig && Object.keys(defaultConfig).length > 0) {
+      form.setFieldsValue(defaultConfig);
+    }
+
+    // 加载初始数据
+    if (showHistory) {
+      loadTestHistory();
+    }
+    if (showStats) {
+      loadTestStatistics();
+    }
+
+    // 连接WebSocket
+    if (enableWebSocket) {
+      engine.connectWebSocket();
+    }
+  }, [form, defaultConfig, showHistory, showStats, enableWebSocket, engine, loadTestHistory, loadTestStatistics]);
+
+  // 监听测试进度更新
+  React.useEffect(() => {
+    if (enableRealTimeMetrics && selectedTestId) {
+      const cleanup = startRealTimeMetrics(selectedTestId);
+      return cleanup;
+    }
+    return undefined;
+  }, [selectedTestId, enableRealTimeMetrics, startRealTimeMetrics]);
+
+  /**
+   * 执行测试 - 整合所有组件的测试执行逻辑
    */
   const handleExecuteTest = useCallback(async () => {
     try {
       const values = await form.validateFields();
 
+      // 合并默认配置
+      const finalConfig = { ...defaultConfig, ...values };
+
       const testId = await engine.executeTest({
         testType: selectedTestType,
-        config: values,
+        config: finalConfig,
         options: {
           priority: TestPriority.MEDIUM,
           tags: [selectedTestType, 'unified-engine', 'web-ui']
@@ -89,17 +227,26 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
 
       console.log(`🚀 测试已启动: ${testId}`);
 
+      // 触发回调
+      onTestStarted?.({ testId, config: finalConfig });
+      onConfigChange?.(finalConfig);
+
       // 切换到监控标签页
       setActiveTab('monitor');
 
       // 订阅测试更新
       engine.subscribeToTest(testId);
 
+      // 启动实时监控
+      if (enableRealTimeMetrics) {
+        startRealTimeMetrics(testId);
+      }
+
     } catch (error) {
       console.error('测试执行失败:', error);
       onTestError?.(error as Error);
     }
-  }, [form, engine, selectedTestType, onTestError]);
+  }, [form, engine, selectedTestType, defaultConfig, onTestError, onTestStarted, onConfigChange, enableRealTimeMetrics, startRealTimeMetrics]);
 
   /**
    * 查看测试结果
@@ -108,6 +255,56 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
     setSelectedTestId(testId);
     setShowResultModal(true);
   }, []);
+
+  /**
+   * 导出测试结果 - 整合ModernTestRunner功能
+   */
+  const handleExportResult = useCallback(async (testId: string, format: 'json' | 'csv' | 'pdf') => {
+    if (!enableExport) return;
+
+    try {
+      const result = await engine.getTestResult(testId);
+      if (result) {
+        // 创建下载链接
+        const dataStr = format === 'json' ?
+          JSON.stringify(result, null, 2) :
+          `测试ID,测试类型,分数,持续时间\n${testId},${result.testType},${result.overallScore},${result.duration}`;
+
+        const dataBlob = new Blob([dataStr], { type: format === 'json' ? 'application/json' : 'text/csv' });
+        const url = URL.createObjectURL(dataBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `test-result-${testId}.${format}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('导出测试结果失败:', error);
+      onTestError?.(error as Error);
+    }
+  }, [engine, enableExport, onTestError]);
+
+  /**
+   * 批量操作 - 整合UnifiedTestPanel功能
+   */
+  const handleBatchCancel = useCallback(async () => {
+    try {
+      await engine.cancelAllTests();
+      console.log('✅ 已取消所有运行中的测试');
+    } catch (error) {
+      console.error('批量取消失败:', error);
+      onTestError?.(error as Error);
+    }
+  }, [engine, onTestError]);
+
+  const handleClearHistory = useCallback(() => {
+    engine.clearCompletedTests();
+    setTestHistory([]);
+    console.log('✅ 已清理测试历史');
+  }, [engine]);
 
   /**
    * 渲染测试配置表单
@@ -391,171 +588,66 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   };
 
   /**
-   * 渲染测试监控
+   * 渲染测试监控 - 使用专用子组件
    */
   const renderTestMonitor = () => {
-    const activeTestsArray = Array.from(engine.activeTests.values())
-      .filter(test => test.status === 'running' || test.status === 'pending');
-
     return (
-      <Card title="📊 测试监控" className="mb-4">
-        {activeTestsArray.length === 0 ? (
-          <Empty
-            description="暂无运行中的测试"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          />
-        ) : (
-          <Space direction="vertical" className="w-full">
-            {activeTestsArray.map(test => (
-              <Card key={test.testId} size="small" className="mb-2">
-                <div className="flex justify-between items-center mb-3">
-                  <Space>
-                    <Text strong>{test.testId}</Text>
-                    <Tag color={getStatusColor(test.status)}>
-                      {getStatusText(test.status)}
-                    </Tag>
-                  </Space>
-
-                  <Space>
-                    <Button
-                      size="small"
-                      icon={<EyeOutlined />}
-                      onClick={() => handleViewResult(test.testId)}
-                    >
-                      查看
-                    </Button>
-                    <Button
-                      size="small"
-                      icon={<StopOutlined />}
-                      onClick={() => engine.cancelTest(test.testId)}
-                      danger
-                    >
-                      取消
-                    </Button>
-                  </Space>
-                </div>
-
-                <Progress
-                  percent={test.progress}
-                  status={test.status === 'failed' ? 'exception' : 'active'}
-                  strokeColor={{
-                    '0%': '#108ee9',
-                    '100%': '#87d068',
-                  }}
-                  showInfo={true}
-                />
-
-                <div className="mt-2">
-                  <Text type="secondary" className="text-sm">
-                    {test.currentStep}
-                  </Text>
-                  <div className="text-xs text-gray-400 mt-1">
-                    开始时间: {new Date(test.startTime).toLocaleString()}
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </Space>
-        )}
-      </Card>
+      <TestProgressMonitor
+        activeTests={engine.activeTests}
+        realTimeMetrics={realTimeMetrics}
+        onStopTest={(testId: string) => engine.cancelTest(testId)}
+        onCancelTest={(testId: string) => engine.cancelTest(testId)}
+        className="mb-4"
+      />
     );
   };
 
   /**
-   * 渲染测试结果列表
+   * 渲染统计面板 - 使用专用子组件
    */
-  const renderTestResults = () => {
-    const resultsArray = Array.from(engine.testResults.entries());
+  const renderStatsPanel = () => {
+    if (!showStats) return null;
 
-    const columns = [
-      {
-        title: '测试ID',
-        dataIndex: 'testId',
-        key: 'testId',
-        width: 200,
-        render: (testId: string) => (
-          <Text code copyable={{ text: testId }}>
-            {testId.substring(0, 12)}...
-          </Text>
-        )
-      },
-      {
-        title: '测试类型',
-        dataIndex: 'testType',
-        key: 'testType',
-        render: (type: string) => (
-          <Tag color="blue">{getTestTypeLabel(type)}</Tag>
-        )
-      },
-      {
-        title: '评分',
-        dataIndex: 'overallScore',
-        key: 'score',
-        render: (score: number) => (
-          <Space>
-            <Progress
-              type="circle"
-              size={40}
-              percent={score}
-              strokeColor={getScoreColor(score)}
-            />
-            <Text strong>{score}分</Text>
-          </Space>
-        )
-      },
-      {
-        title: '时长',
-        dataIndex: 'duration',
-        key: 'duration',
-        render: (duration: number) => `${(duration / 1000).toFixed(1)}s`
-      },
-      {
-        title: '完成时间',
-        dataIndex: 'timestamp',
-        key: 'timestamp',
-        render: (timestamp: string) => new Date(timestamp).toLocaleString()
-      },
-      {
-        title: '操作',
-        key: 'actions',
-        render: (_: any, record: [string, TestResult]) => (
-          <Space>
-            <Button
-              size="small"
-              icon={<EyeOutlined />}
-              onClick={() => handleViewResult(record[0])}
-            >
-              查看
-            </Button>
-            <Button
-              size="small"
-              icon={<DownloadOutlined />}
-              onClick={() => downloadResult(record[1])}
-            >
-              下载
-            </Button>
-          </Space>
-        )
-      }
-    ];
+    const stats = engine.getStats();
 
     return (
-      <Card title="📋 测试结果" className="mb-4">
-        <Table
-          dataSource={resultsArray}
-          columns={columns}
-          rowKey={([testId]) => testId}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条结果`
-          }}
-          locale={{
-            emptyText: <Empty description="暂无测试结果" />
-          }}
-        />
-      </Card>
+      <TestStatsPanel
+        stats={stats}
+        className="mb-4"
+      />
+    );
+  };
+
+  /**
+   * 渲染历史记录面板 - 使用专用子组件
+   */
+  const renderHistoryPanel = () => {
+    if (!showHistory) return null;
+
+    return (
+      <TestHistoryPanel
+        testHistory={testHistory}
+        onViewResult={handleViewResult}
+        onExportResult={enableExport ? handleExportResult : undefined}
+        onClearHistory={handleClearHistory}
+        enableExport={enableExport}
+        className="mb-4"
+      />
+    );
+  };
+
+  /**
+   * 渲染测试结果列表 - 使用专用子组件
+   */
+  const renderTestResults = () => {
+    return (
+      <TestResultsTable
+        testResults={engine.testResults}
+        onViewResult={handleViewResult}
+        onDownloadResult={enableExport ? (result: TestResult) => downloadResult(result) : undefined}
+        enableExport={enableExport}
+        className="mb-4"
+      />
     );
   };
 
@@ -652,6 +744,12 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
     <div className={`unified-test-executor ${className}`}>
       {renderEngineStatus()}
 
+      {/* 整合的统计面板 */}
+      {showStats && renderStatsPanel()}
+
+      {/* 整合的历史记录面板 */}
+      {showHistory && renderHistoryPanel()}
+
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
@@ -685,7 +783,28 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
               </span>
             ),
             children: renderTestResults()
-          }
+          },
+          // 整合的新标签页
+          ...(showStats ? [{
+            key: 'stats',
+            label: (
+              <span>
+                <BarChartOutlined />
+                统计信息
+              </span>
+            ),
+            children: renderStatsPanel()
+          }] : []),
+          ...(showHistory ? [{
+            key: 'history',
+            label: (
+              <span>
+                <HistoryOutlined />
+                测试历史
+              </span>
+            ),
+            children: renderHistoryPanel()
+          }] : [])
         ]}
       />
 

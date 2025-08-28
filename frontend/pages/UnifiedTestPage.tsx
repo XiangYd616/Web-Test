@@ -27,7 +27,6 @@ import {
   Typography
 } from 'antd';
 import React, { useState } from 'react';
-import { ModernUnifiedTestPanel } from '../components/testing/ModernUnifiedTestPanel';
 import { UnifiedTestExecutor } from '../components/testing/UnifiedTestExecutor';
 import { useUnifiedTestEngine } from '../hooks/useUnifiedTestEngine';
 import type { TestResult } from '../types/unifiedEngine.types';
@@ -254,16 +253,21 @@ export const UnifiedTestPage: React.FC = () => {
               label: (
                 <span>
                   <SettingOutlined />
-                  经典面板
+                  高级面板
                 </span>
               ),
               children: (
-                <ModernUnifiedTestPanel
+                <UnifiedTestExecutor
                   onTestComplete={handleTestComplete}
                   onTestError={handleTestError}
                   showHistory={true}
                   showStats={true}
                   allowMultipleTests={true}
+                  enableQueue={true}
+                  enableWebSocket={true}
+                  showAdvancedOptions={true}
+                  enableRealTimeMetrics={true}
+                  enableExport={true}
                 />
               )
             }

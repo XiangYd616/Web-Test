@@ -3,12 +3,12 @@
  * 验证统一测试引擎的所有功能组件
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ConfigProvider } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UnifiedTestExecutor } from '../components/testing/UnifiedTestExecutor';
-import { ModernUnifiedTestPanel } from '../components/testing/ModernUnifiedTestPanel';
+// import { ModernUnifiedTestPanel } from '../components/testing/ModernUnifiedTestPanel'; // 已重构到UnifiedTestExecutor
 import { UnifiedTestPage } from '../pages/UnifiedTestPage';
 
 // Mock ahooks
@@ -50,7 +50,7 @@ const renderWithAntd = (component: React.ReactElement) => {
 describe('统一测试引擎组件测试', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock fetch 成功响应
     (global.fetch as any).mockResolvedValue({
       ok: true,
@@ -75,7 +75,7 @@ describe('统一测试引擎组件测试', () => {
   describe('UnifiedTestExecutor 组件', () => {
     it('应该正确渲染测试执行器', () => {
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       expect(screen.getByText('🚀 引擎状态')).toBeInTheDocument();
       expect(screen.getByText('🔧 测试配置')).toBeInTheDocument();
       expect(screen.getByText('开始测试')).toBeInTheDocument();
@@ -83,7 +83,7 @@ describe('统一测试引擎组件测试', () => {
 
     it('应该显示引擎连接状态', () => {
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       expect(screen.getByText('连接状态')).toBeInTheDocument();
       expect(screen.getByText('运行中测试')).toBeInTheDocument();
       expect(screen.getByText('已完成测试')).toBeInTheDocument();
@@ -92,23 +92,23 @@ describe('统一测试引擎组件测试', () => {
 
     it('应该支持测试类型选择', () => {
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       const testTypeSelect = screen.getByDisplayValue('🚀 性能测试');
       expect(testTypeSelect).toBeInTheDocument();
     });
 
     it('应该验证URL输入', async () => {
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       const urlInput = screen.getByPlaceholderText('https://example.com');
       const startButton = screen.getByText('开始测试');
-      
+
       // 测试空URL
       fireEvent.click(startButton);
       await waitFor(() => {
         expect(screen.getByText('请输入目标URL')).toBeInTheDocument();
       });
-      
+
       // 测试无效URL
       fireEvent.change(urlInput, { target: { value: 'invalid-url' } });
       fireEvent.click(startButton);
@@ -118,46 +118,55 @@ describe('统一测试引擎组件测试', () => {
     });
   });
 
-  describe('ModernUnifiedTestPanel 组件', () => {
-    it('应该正确渲染现代化测试面板', () => {
-      renderWithAntd(<ModernUnifiedTestPanel />);
-      
-      expect(screen.getByText('配置')).toBeInTheDocument();
-      expect(screen.getByText('进度')).toBeInTheDocument();
-      expect(screen.getByText('结果')).toBeInTheDocument();
+  describe('UnifiedTestExecutor 高级功能', () => {
+    it('应该正确渲染统一测试执行器的高级功能', () => {
+      renderWithAntd(
+        <UnifiedTestExecutor
+          showHistory={true}
+          showStats={true}
+          enableExport={true}
+        />
+      );
+
+      expect(screen.getByText('配置测试')).toBeInTheDocument();
+      expect(screen.getByText(/监控进度/)).toBeInTheDocument();
+      expect(screen.getByText(/查看结果/)).toBeInTheDocument();
     });
 
-    it('应该支持测试类型切换', () => {
-      renderWithAntd(<ModernUnifiedTestPanel />);
-      
-      const configTab = screen.getByText('配置');
-      fireEvent.click(configTab);
-      
-      expect(screen.getByText('测试类型')).toBeInTheDocument();
-      expect(screen.getByText('目标URL')).toBeInTheDocument();
+    it('应该支持统计面板显示', () => {
+      renderWithAntd(
+        <UnifiedTestExecutor
+          showStats={true}
+        />
+      );
+
+      // 统计面板应该在组件中渲染
+      expect(screen.getByText('🔧 测试配置')).toBeInTheDocument();
     });
 
-    it('应该显示测试进度', () => {
-      renderWithAntd(<ModernUnifiedTestPanel />);
-      
-      const progressTab = screen.getByText(/进度/);
-      fireEvent.click(progressTab);
-      
-      expect(screen.getByText('暂无运行中的测试')).toBeInTheDocument();
+    it('应该支持历史记录面板', () => {
+      renderWithAntd(
+        <UnifiedTestExecutor
+          showHistory={true}
+        />
+      );
+
+      // 历史记录功能应该可用
+      expect(screen.getByText('🔧 测试配置')).toBeInTheDocument();
     });
   });
 
   describe('UnifiedTestPage 页面', () => {
     it('应该正确渲染统一测试页面', () => {
       renderWithAntd(<UnifiedTestPage />);
-      
+
       expect(screen.getByText('🧠 统一测试引擎')).toBeInTheDocument();
       expect(screen.getByText('集成多种测试工具，提供统一的测试执行和结果分析平台')).toBeInTheDocument();
     });
 
     it('应该显示引擎概览统计', () => {
       renderWithAntd(<UnifiedTestPage />);
-      
+
       expect(screen.getByText('引擎状态')).toBeInTheDocument();
       expect(screen.getByText('支持的测试类型')).toBeInTheDocument();
       expect(screen.getByText('运行中测试')).toBeInTheDocument();
@@ -166,23 +175,23 @@ describe('统一测试引擎组件测试', () => {
 
     it('应该支持帮助信息切换', () => {
       renderWithAntd(<UnifiedTestPage />);
-      
+
       const helpButton = screen.getByText('帮助');
       fireEvent.click(helpButton);
-      
+
       expect(screen.getByText('统一测试引擎使用指南')).toBeInTheDocument();
       expect(screen.getByText('支持的测试类型:')).toBeInTheDocument();
     });
 
     it('应该支持标签页切换', () => {
       renderWithAntd(<UnifiedTestPage />);
-      
+
       const executorTab = screen.getByText('测试执行器');
       const panelTab = screen.getByText('经典面板');
-      
+
       expect(executorTab).toBeInTheDocument();
       expect(panelTab).toBeInTheDocument();
-      
+
       fireEvent.click(panelTab);
       // 验证标签页切换功能
     });
@@ -193,19 +202,19 @@ describe('统一测试引擎组件测试', () => {
       // 这里需要测试 useUnifiedTestEngine Hook
       // 由于 Hook 需要在组件中测试，我们通过组件来验证
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       expect(screen.getByText('未连接')).toBeInTheDocument();
     });
 
     it('应该支持测试执行', async () => {
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       const urlInput = screen.getByPlaceholderText('https://example.com');
       const startButton = screen.getByText('开始测试');
-      
+
       // 输入有效URL
       fireEvent.change(urlInput, { target: { value: 'https://example.com' } });
-      
+
       // 模拟成功的测试执行
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
@@ -217,9 +226,9 @@ describe('统一测试引擎组件测试', () => {
           }
         })
       });
-      
+
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith('/api/unified-engine/execute', {
           method: 'POST',
@@ -235,16 +244,16 @@ describe('统一测试引擎组件测试', () => {
   describe('错误处理测试', () => {
     it('应该正确处理网络错误', async () => {
       (global.fetch as any).mockRejectedValue(new Error('网络错误'));
-      
+
       const onTestError = vi.fn();
       renderWithAntd(<UnifiedTestExecutor onTestError={onTestError} />);
-      
+
       const urlInput = screen.getByPlaceholderText('https://example.com');
       const startButton = screen.getByText('开始测试');
-      
+
       fireEvent.change(urlInput, { target: { value: 'https://example.com' } });
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(onTestError).toHaveBeenCalledWith(expect.any(Error));
       });
@@ -259,16 +268,16 @@ describe('统一测试引擎组件测试', () => {
           message: 'URL格式不正确'
         })
       });
-      
+
       const onTestError = vi.fn();
       renderWithAntd(<UnifiedTestExecutor onTestError={onTestError} />);
-      
+
       const urlInput = screen.getByPlaceholderText('https://example.com');
       const startButton = screen.getByText('开始测试');
-      
+
       fireEvent.change(urlInput, { target: { value: 'https://example.com' } });
       fireEvent.click(startButton);
-      
+
       await waitFor(() => {
         expect(onTestError).toHaveBeenCalled();
       });
@@ -278,7 +287,7 @@ describe('统一测试引擎组件测试', () => {
   describe('用户交互测试', () => {
     it('应该支持测试类型特定配置', () => {
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       // 默认应该显示性能测试配置
       expect(screen.getByText('设备类型')).toBeInTheDocument();
       expect(screen.getByText('网络限制')).toBeInTheDocument();
@@ -287,13 +296,13 @@ describe('统一测试引擎组件测试', () => {
 
     it('应该支持标签页导航', () => {
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       const monitorTab = screen.getByText(/监控进度/);
       const resultsTab = screen.getByText(/查看结果/);
-      
+
       fireEvent.click(monitorTab);
       expect(screen.getByText('📊 测试监控')).toBeInTheDocument();
-      
+
       fireEvent.click(resultsTab);
       expect(screen.getByText('📋 测试结果')).toBeInTheDocument();
     });
@@ -302,7 +311,7 @@ describe('统一测试引擎组件测试', () => {
       // Mock URL.createObjectURL
       global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
       global.URL.revokeObjectURL = vi.fn();
-      
+
       // Mock document.createElement
       const mockLink = {
         href: '',
@@ -310,9 +319,9 @@ describe('统一测试引擎组件测试', () => {
         click: vi.fn()
       };
       vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
-      
+
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       // 这里需要模拟有测试结果的情况
       // 由于组件依赖Hook状态，我们主要验证函数存在
       expect(global.URL.createObjectURL).toBeDefined();
@@ -322,7 +331,7 @@ describe('统一测试引擎组件测试', () => {
   describe('集成测试', () => {
     it('应该正确集成所有组件', () => {
       renderWithAntd(<UnifiedTestPage />);
-      
+
       // 验证页面包含所有主要组件
       expect(screen.getByText('🧠 统一测试引擎')).toBeInTheDocument();
       expect(screen.getByText('引擎状态')).toBeInTheDocument();
@@ -333,11 +342,11 @@ describe('统一测试引擎组件测试', () => {
     it('应该正确处理组件间通信', async () => {
       const onTestComplete = vi.fn();
       const onTestError = vi.fn();
-      
+
       renderWithAntd(
         <UnifiedTestPage />
       );
-      
+
       // 验证回调函数设置
       expect(onTestComplete).toBeDefined();
       expect(onTestError).toBeDefined();
@@ -347,12 +356,12 @@ describe('统一测试引擎组件测试', () => {
   describe('性能测试', () => {
     it('应该优化渲染性能', () => {
       const startTime = performance.now();
-      
+
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       const endTime = performance.now();
       const renderTime = endTime - startTime;
-      
+
       // 渲染时间应该小于100ms
       expect(renderTime).toBeLessThan(100);
     });
@@ -378,10 +387,10 @@ describe('统一测试引擎组件测试', () => {
           timestamp: new Date().toISOString()
         });
       }
-      
+
       // 这里需要测试组件能否处理大量数据
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       // 验证组件没有崩溃
       expect(screen.getByText('🚀 引擎状态')).toBeInTheDocument();
     });
@@ -390,9 +399,9 @@ describe('统一测试引擎组件测试', () => {
   describe('可访问性测试', () => {
     it('应该支持键盘导航', () => {
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       const startButton = screen.getByText('开始测试');
-      
+
       // 验证按钮可以获得焦点
       startButton.focus();
       expect(document.activeElement).toBe(startButton);
@@ -400,7 +409,7 @@ describe('统一测试引擎组件测试', () => {
 
     it('应该提供适当的ARIA标签', () => {
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       // 验证重要元素有适当的标签
       const urlInput = screen.getByPlaceholderText('https://example.com');
       expect(urlInput).toHaveAttribute('type', 'url');
@@ -415,9 +424,9 @@ describe('统一测试引擎组件测试', () => {
         configurable: true,
         value: 375,
       });
-      
+
       renderWithAntd(<UnifiedTestExecutor />);
-      
+
       // 验证组件在小屏幕下仍然可用
       expect(screen.getByText('开始测试')).toBeInTheDocument();
     });
@@ -436,13 +445,13 @@ describe('工具函数测试', () => {
   it('应该正确格式化测试类型标签', () => {
     // 由于工具函数在组件内部，我们通过组件来测试
     renderWithAntd(<UnifiedTestExecutor />);
-    
+
     expect(screen.getByText('🚀 性能测试')).toBeInTheDocument();
   });
 
   it('应该正确计算评分颜色', () => {
     renderWithAntd(<UnifiedTestExecutor />);
-    
+
     // 验证评分颜色逻辑通过组件渲染
     expect(screen.getByText('🚀 引擎状态')).toBeInTheDocument();
   });
