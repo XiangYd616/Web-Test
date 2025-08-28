@@ -1,7 +1,10 @@
 
 /**
- * 后台测试管理器
+ * 后台测试管理器 - 重构优化版本
+ * 现在内部使用统一测试服务，保持向后兼容性
  * 已迁移到新的类型系统，使用统一的类型定义
+ *
+ * @deprecated 建议使用 unifiedTestService 或通过 serviceCompatibility 导入
  */
 
 import type {
@@ -14,6 +17,10 @@ import {
   TestStatus,
   TestType
 } from '../types/enums';
+
+// 导入统一测试服务
+import type { UnifiedTestCallbacks, UnifiedTestConfig } from './testing/unifiedTestService';
+import { unifiedTestService } from './testing/unifiedTestService';
 
 export interface TestInfo {
   id: string;
@@ -49,6 +56,48 @@ class BackgroundTestManager {
 
     // 定期保存状态
     setInterval(() => this.saveToStorage(), 5000);
+
+    // 监听统一测试服务的事件
+    this.setupUnifiedServiceListeners();
+  }
+
+  /**
+   * 设置统一服务监听器
+   */
+  private setupUnifiedServiceListeners(): void {
+    unifiedTestService.on('testStarted', (data) => {
+      this.notifyListeners('testStarted', this.adaptUnifiedStatus(data));
+    });
+
+    unifiedTestService.on('testProgress', (data) => {
+      this.notifyListeners('testProgress', this.adaptUnifiedStatus(data));
+    });
+
+    unifiedTestService.on('testCompleted', (data) => {
+      this.notifyListeners('testCompleted', this.adaptUnifiedStatus(data));
+    });
+
+    unifiedTestService.on('testFailed', (data) => {
+      this.notifyListeners('testFailed', this.adaptUnifiedStatus(data));
+    });
+  }
+
+  /**
+   * 适配统一服务状态到本地格式
+   */
+  private adaptUnifiedStatus(data: any): TestInfo {
+    return {
+      id: data.testId || data.id,
+      type: data.testType,
+      config: data.config || {},
+      status: data.status,
+      progress: data.progress || 0,
+      startTime: data.startTime || new Date(),
+      endTime: data.endTime,
+      currentStep: data.step || data.currentStep || '',
+      result: data.result,
+      error: data.error
+    };
   }
 
   // 生成唯一测试ID
@@ -56,7 +105,7 @@ class BackgroundTestManager {
     return `test_${Date.now()}_${++this.testCounter}`;
   }
 
-  // 开始新测试
+  // 开始新测试 - 重构为使用统一测试服务
   startTest(
     testType: TestType,
     config: any,
@@ -64,34 +113,56 @@ class BackgroundTestManager {
     onComplete?: CompletionCallback,
     onError?: ErrorCallback
   ): string {
-    const testId = this.generateTestId();
-
-    const testInfo: TestInfo = {
-      id: testId,
-      type: testType,
-      config: config,
-      status: TestStatus.RUNNING,
-      progress: 0,
-      startTime: new Date(),
-      currentStep: '正在初始化测试...',
-      result: null,
-      error: null,
-      onProgress: onProgress,
-      onComplete: onComplete,
-      onError: onError
+    // 转换为统一测试配置
+    const unifiedConfig: UnifiedTestConfig = {
+      testType,
+      targetUrl: config.url || config.targetUrl,
+      configuration: config
     };
 
-    this.runningTests.set(testId, testInfo);
-    this.notifyListeners('testStarted', testInfo);
+    const callbacks: UnifiedTestCallbacks = {
+      onProgress,
+      onComplete,
+      onError
+    };
 
-    // 根据测试类型执行相应的测试
-    this.executeTest(testInfo);
+    // 使用统一测试服务执行
+    const testPromise = unifiedTestService.startTest(unifiedConfig, callbacks);
+
+    // 为了保持同步接口兼容性，我们需要立即返回一个ID
+    const testId = this.generateTestId();
+
+    // 异步处理实际的测试ID映射
+    testPromise.then(actualTestId => {
+      // 更新本地映射
+      const testInfo: TestInfo = {
+        id: actualTestId,
+        type: testType,
+        config: config,
+        status: TestStatus.RUNNING,
+        progress: 0,
+        startTime: new Date(),
+        currentStep: '正在初始化测试...',
+        result: null,
+        error: null,
+        onProgress: onProgress,
+        onComplete: onComplete,
+        onError: onError
+      };
+
+      this.runningTests.set(actualTestId, testInfo);
+      this.notifyListeners('testStarted', testInfo);
+    });
 
     return testId;
   }
 
-  // 取消测试
+  // 取消测试 - 重构为使用统一测试服务
   cancelTest(testId: string): void {
+    // 委托给统一测试服务
+    unifiedTestService.cancelTest(testId);
+
+    // 更新本地状态
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
       testInfo.status = TestStatus.CANCELLED;
