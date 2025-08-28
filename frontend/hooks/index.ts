@@ -1,16 +1,24 @@
 /**
- * 测试专用Hook统一导出
- * 各个测试页面可以选择性使用这些Hook，不强制替换现有实现
+ * 测试专用Hook统一导出 - 重构优化版本
+ * 提供统一的测试引擎接口和向后兼容性
  */
 
-// 导出专用Hook
+// 🚀 主要Hook - 推荐使用
+export { useTestExecution, useTestResultAnalysis, useUnifiedTestEngine } from './useUnifiedTestEngine';
+
+// 🔄 兼容性Hook - 为现有代码提供无缝迁移
+export {
+  useSimpleTestEngine, useTestEngine, useTestState, useUnifiedTestState, useUniversalTest
+} from './legacy-compatibility';
+
+// 📋 专用测试Hook
 export { useAPITestState } from './useAPITestState';
 export { useCompatibilityTestState } from './useCompatibilityTestState';
 export { useDatabaseTestState } from './useDatabaseTestState';
 export { useNetworkTestState } from './useNetworkTestState';
 export { useUXTestState } from './useUXTestState';
 
-// 导出现有Hook（保持兼容性）
+// 🛠️ 工具Hook（保持兼容性）
 export { useTestProgress } from './useTestProgress';
 export { useUnifiedSEOTest } from './useUnifiedSEOTest';
 export { useUserStats } from './useUserStats';

@@ -396,12 +396,51 @@ class StressTestEngine {
   async stopTest(testId) {
     const test = this.activeTests.get(testId);
     if (test && test.status === 'running') {
-      
-        test.status = 'cancelled';
+
+      test.status = 'cancelled';
       this.activeTests.set(testId, test);
       return true;
-      }
+    }
     return false;
+  }
+
+  /**
+   * 清理所有测试房间
+   */
+  async cleanupAllTestRooms() {
+    try {
+      console.log('🧹 开始清理压力测试房间...');
+
+      // 取消所有运行中的测试
+      let cancelledCount = 0;
+      for (const [testId, test] of this.activeTests.entries()) {
+        if (test.status === 'running') {
+          await this.stopTest(testId);
+          cancelledCount++;
+        }
+      }
+
+      // 清理过期的测试记录 (超过1小时的)
+      const oneHourAgo = Date.now() - 60 * 60 * 1000;
+      let cleanedCount = 0;
+      for (const [testId, test] of this.activeTests.entries()) {
+        if (test.startTime && test.startTime < oneHourAgo) {
+          this.activeTests.delete(testId);
+          cleanedCount++;
+        }
+      }
+
+      console.log(`✅ 压力测试房间清理完成: 取消 ${cancelledCount} 个运行中的测试, 清理 ${cleanedCount} 个过期记录`);
+
+      return {
+        cancelled: cancelledCount,
+        cleaned: cleanedCount,
+        remaining: this.activeTests.size
+      };
+    } catch (error) {
+      console.error('❌ 清理压力测试房间失败:', error);
+      throw error;
+    }
   }
 }
 

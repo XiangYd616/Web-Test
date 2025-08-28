@@ -108,7 +108,109 @@ const registerRateLimiter = rateLimit({
 });
 
 /**
- * 测试API速率限制
+ * 统一测试引擎速率限制
+ * 基于express-rate-limit最佳实践，支持动态限制和用户角色
+ */
+const unifiedEngineRateLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5分钟窗口
+  limit: async (req) => {
+    // 根据用户类型和测试类型动态设置限制
+    const testType = req.body?.testType;
+    const userRole = req.user?.role || 'guest';
+
+    // 压力测试限制更严格
+    if (testType === 'stress') {
+      switch (userRole) {
+        case 'admin': return 100;
+        case 'premium': return 10;
+        case 'standard': return 5;
+        default: return 2;
+      }
+    }
+
+    // 安全测试适度限制
+    if (testType === 'security') {
+      switch (userRole) {
+        case 'admin': return 100;
+        case 'premium': return 30;
+        case 'standard': return 15;
+        default: return 5;
+      }
+    }
+
+    // 其他测试类型标准限制
+    switch (userRole) {
+      case 'admin': return 200;
+      case 'premium': return 50;
+      case 'standard': return 20;
+      default: return 10;
+    }
+  },
+  standardHeaders: 'draft-8', // 使用最新的标准头
+  legacyHeaders: false,
+  message: async (req) => {
+    const testType = req.body?.testType || '测试';
+    const userRole = req.user?.role || 'guest';
+
+    return {
+      success: false,
+      error: '测试执行频率限制',
+      message: `${testType}测试请求过于频繁，请稍后再试`,
+      userType: userRole,
+      testType,
+      upgradeHint: userRole === 'guest' ? '注册用户可获得更高的测试限额' :
+        userRole === 'standard' ? '升级到高级用户可获得更高的测试限额' : null
+    };
+  },
+  keyGenerator: (req) => {
+    // 使用用户ID + IP + 测试类型的组合作为键
+    const userId = req.user?.id || 'anonymous';
+    const ip = req.ip || req.connection.remoteAddress;
+    const testType = req.body?.testType || 'general';
+    return `unified:${testType}:${userId}:${ip}`;
+  },
+  skip: (req) => {
+    // 管理员和健康检查跳过限制
+    return (req.user && req.user.role === 'admin') || req.path === '/health';
+  },
+  requestWasSuccessful: (req, res) => {
+    // 只对成功启动的测试计数
+    return res.statusCode < 400;
+  },
+  handler: (req, res) => {
+    const testType = req.body?.testType || 'unknown';
+    const userRole = req.user?.role || 'guest';
+
+    securityLogger('unified_engine_rate_limit_exceeded', {
+      ip: req.ip,
+      url: req.originalUrl,
+      user: req.user ? req.user.id : 'anonymous',
+      userRole,
+      testType,
+      limit: req.rateLimit.limit,
+      used: req.rateLimit.used
+    }, req);
+
+    res.status(429).json({
+      success: false,
+      error: '测试执行频率限制',
+      message: `${testType}测试请求过于频繁，请稍后再试`,
+      details: {
+        userType: userRole,
+        testType,
+        currentUsage: req.rateLimit.used,
+        limit: req.rateLimit.limit,
+        resetTime: new Date(req.rateLimit.resetTime).toISOString(),
+        retryAfter: Math.round((req.rateLimit.resetTime - Date.now()) / 1000)
+      },
+      upgradeHint: userRole === 'guest' ? '注册用户可获得更高的测试限额' :
+        userRole === 'standard' ? '升级到高级用户可获得更高的测试限额' : null
+    });
+  }
+});
+
+/**
+ * 测试API速率限制（保持向后兼容）
  */
 const testRateLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5分钟
@@ -190,12 +292,12 @@ const dynamicRateLimiter = (options = {}) => {
     max: (req) => {
       // 管理员用户更高的限制
       if (req.user && req.user.role === 'admin') {
-        
+
         return options.adminMax || 1000;
       }
       // 认证用户的限制
       if (req.user) {
-        
+
         return options.userMax || 200;
       }
       // 匿名用户的限制
@@ -231,9 +333,9 @@ const ipWhitelist = (whitelist = []) => {
 
     // 开发环境跳过检查
     if (process.env.NODE_ENV === 'development') {
-      
-        return next();
-      }
+
+      return next();
+    }
 
     if (whitelist.length > 0 && !whitelist.includes(clientIP)) {
       securityLogger('ip_not_whitelisted', {
@@ -257,6 +359,7 @@ module.exports = {
   loginRateLimiter,
   registerRateLimiter,
   testRateLimiter,
+  unifiedEngineRateLimiter, // 新增：统一测试引擎专用速率限制
   uploadRateLimiter,
   historyRateLimiter,
   dynamicRateLimiter,

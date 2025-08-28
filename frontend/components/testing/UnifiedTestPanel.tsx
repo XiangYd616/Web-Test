@@ -3,16 +3,14 @@
  * 展示统一状态管理系统的完整功能
  */
 
-import React from 'react';
-import { 
-  Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, 
-  History, Loader, Play, Settings, StopCircle, Users, XCircle 
+import {
+  Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download,
+  History, Loader, Play, Settings, StopCircle, Users, XCircle
 } from 'lucide-react';
-import { createElement, useEffect, useState } from 'react';
-import type { FC } from 'react';;
-import { useUnifiedTestState } from '../../hooks/useUnifiedTestState';
+import React, { useEffect, useState } from 'react';
+import { useUnifiedTestState } from '../../hooks/legacy-compatibility';
 import type { BaseTestConfig } from '../../services/testing/unifiedTestStateManager';
-import { TestProgress } from '../../services/api/testProgressService';
+;
 
 export interface UnifiedTestPanelProps {
   testType: string;
@@ -66,27 +64,27 @@ export const UnifiedTestPanel: React.FC<UnifiedTestPanelProps> = ({
     enableQueue: true,
     enableWebSocket: true,
     enablePersistence: true,
-    onTestStarted: (data) => {
+    onTestStarted: (data: any) => {
       console.log('🚀 测试已启动:', data);
       setActiveTab('progress');
     },
-    onTestProgress: (data) => {
+    onTestProgress: (data: any) => {
       console.log('📊 测试进度:', data);
     },
-    onTestCompleted: (data) => {
+    onTestCompleted: (data: any) => {
       console.log('✅ 测试完成:', data);
       onTestComplete?.(data.result);
       loadTestHistory();
       loadTestStatistics();
     },
-    onTestFailed: (data) => {
+    onTestFailed: (data: any) => {
       console.error('❌ 测试失败:', data);
       onTestError?.(data.error);
     },
-    onTestQueued: (data) => {
+    onTestQueued: (data: any) => {
       console.log('⏳ 测试已排队:', data);
     },
-    onStatusUpdate: (data) => {
+    onStatusUpdate: (data: any) => {
       console.log('📋 状态更新:', data);
     }
   });
@@ -214,11 +212,10 @@ export const UnifiedTestPanel: React.FC<UnifiedTestPanelProps> = ({
           <button
             key={key}
             onClick={() => setActiveTab(key as any)}
-            className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium transition-colors ${
-              activeTab === key
-                ? 'text-blue-400 border-b-2 border-blue-400 bg-gray-800/50'
-                : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/30'
-            }`}
+            className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium transition-colors ${activeTab === key
+              ? 'text-blue-400 border-b-2 border-blue-400 bg-gray-800/50'
+              : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/30'
+              }`}
           >
             <Icon className="w-4 h-4" />
             <span>{label}</span>
@@ -264,9 +261,9 @@ export const UnifiedTestPanel: React.FC<UnifiedTestPanelProps> = ({
               <input
                 type="number"
                 value={(testConfig.timeout || 300000) / 1000}
-                onChange={(e) => setTestConfig(prev => ({ 
-                  ...prev, 
-                  timeout: parseInt(e.target.value) * 1000 
+                onChange={(e) => setTestConfig(prev => ({
+                  ...prev,
+                  timeout: parseInt(e.target.value) * 1000
                 }))}
                 min="30"
                 max="3600"
@@ -303,7 +300,7 @@ export const UnifiedTestPanel: React.FC<UnifiedTestPanelProps> = ({
                   <span>开始测试</span>
                 </button>
               )}
-              
+
               <button
                 onClick={reset}
                 className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
@@ -322,17 +319,16 @@ export const UnifiedTestPanel: React.FC<UnifiedTestPanelProps> = ({
             <div className="bg-gray-800/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-white font-medium">当前状态</h3>
-                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                  status === 'running' ? 'bg-blue-600 text-blue-100' :
+                <span className={`px-2 py-1 rounded text-xs font-medium ${status === 'running' ? 'bg-blue-600 text-blue-100' :
                   status === 'completed' ? 'bg-green-600 text-green-100' :
-                  status === 'failed' ? 'bg-red-600 text-red-100' :
-                  status === 'queued' ? 'bg-orange-600 text-orange-100' :
-                  'bg-gray-600 text-gray-100'
-                }`}>
+                    status === 'failed' ? 'bg-red-600 text-red-100' :
+                      status === 'queued' ? 'bg-orange-600 text-orange-100' :
+                        'bg-gray-600 text-gray-100'
+                  }`}>
                   {status}
                 </span>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">阶段</span>
@@ -429,11 +425,10 @@ export const UnifiedTestPanel: React.FC<UnifiedTestPanelProps> = ({
                         <p className="text-gray-400 text-xs">{test.url}</p>
                       </div>
                       <div className="text-right">
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          test.status === 'completed' ? 'bg-green-600 text-green-100' :
+                        <span className={`px-2 py-1 rounded text-xs ${test.status === 'completed' ? 'bg-green-600 text-green-100' :
                           test.status === 'failed' ? 'bg-red-600 text-red-100' :
-                          'bg-gray-600 text-gray-100'
-                        }`}>
+                            'bg-gray-600 text-gray-100'
+                          }`}>
                           {test.status}
                         </span>
                         <p className="text-gray-400 text-xs mt-1">
@@ -474,14 +469,14 @@ export const UnifiedTestPanel: React.FC<UnifiedTestPanelProps> = ({
                   </div>
                   <div className="text-gray-400 text-sm">总测试数</div>
                 </div>
-                
+
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <div className="text-2xl font-bold text-green-400">
                     {testStatistics.successRate || 0}%
                   </div>
                   <div className="text-gray-400 text-sm">成功率</div>
                 </div>
-                
+
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <div className="text-2xl font-bold text-purple-400">
                     {testStatistics.averageDuration || 0}s

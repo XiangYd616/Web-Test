@@ -1,9 +1,8 @@
-import React from 'react';
 import { BarChart3, Bell, Calendar, ChevronDown, Code, Database, Eye, FileText, Gauge, Globe, HelpCircle, LogOut, Menu, Monitor, Search, Settings, Shield, User, Wifi, X, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { ComponentType, FC } from 'react';;
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+;
 
 interface NavigationItem {
   name: string;
@@ -90,6 +89,12 @@ const ModernNavigation: React.FC = () => {
       href: '/test-schedule',
       icon: Calendar,
       description: '定时和批量测试管理'
+    },
+    {
+      name: '统一测试引擎',
+      href: '/unified-test',
+      icon: Zap,
+      description: '集成多种测试工具的统一平台'
     }
   ];
 

@@ -7,13 +7,13 @@ const express = require('express');
 const router = express.Router();
 const asyncHandler = require('../middleware/asyncHandler');
 const { authMiddleware } = require('../middleware/auth');
-const { SecurityEngine } = require('../engines/security/SecurityAnalyzer');
+const SecurityAnalyzer = require('../engines/security/SecurityAnalyzer');
 
 // 应用认证中间件
 router.use(authMiddleware);
 
 // 创建安全引擎实例
-const securityEngine = new SecurityEngine();
+const securityEngine = new SecurityAnalyzer();
 
 /**
  * 高级安全测试

@@ -1,9 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
-import { RealSEOAnalysisEngine, SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
-import { TestProgress } from '../services/api/testProgressService';
+import { RealSEOAnalysisEngine as SEOAnalysisEngine, SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
 
 const getPerformanceMetrics = async (url: string, options: any) => {
-  
+
   return {
     loadTime: Math.random() * 3000 + 1000,
     fcp: Math.random() * 2000 + 500,
@@ -50,7 +49,7 @@ export const useRealSEOTest = () => {
   });
   const [results, setResults] = useState<SEOAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const seoEngineRef = useRef<RealSEOAnalysisEngine | null>(null);
+  const seoEngineRef = useRef<SEOAnalysisEngine | null>(null);
 
   // 开始SEO测试
   const startTest = useCallback(async (config: SEOTestConfig) => {
@@ -61,7 +60,7 @@ export const useRealSEOTest = () => {
       setProgress({ progress: 0, currentStep: '正在初始化...', isRunning: true });
 
       // 创建新的SEO分析引擎实例
-      seoEngineRef.current = new RealSEOAnalysisEngine();
+      seoEngineRef.current = new SEOAnalysisEngine();
 
       // 如果需要性能检测，先获取性能指标
       let performanceData = null;

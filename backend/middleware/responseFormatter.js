@@ -367,7 +367,15 @@ const errorResponseFormatter = (err, req, res, next) => {
         };
     }
 
-    return res.error(errorCode, err.message, details, statusCode, meta);
+    return res.status(statusCode).json({
+        success: false,
+        error: {
+            code: errorCode,
+            message: err.message,
+            details
+        },
+        meta
+    });
 };
 
 /**

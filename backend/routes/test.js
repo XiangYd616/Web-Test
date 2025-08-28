@@ -16,7 +16,7 @@ const { apiCache, dbCache } = require('../middleware/cache.js');
 
 // 导入测试引擎类
 const APIAnalyzer = require('../engines/api/ApiAnalyzer.js');
-const { RealStressTestEngine } = require('../engines/stress/StressTestEngine.js');
+const StressTestEngine = require('../engines/stress/StressTestEngine.js');
 const RealSecurityTestEngine = require('../engines/security/securityTestEngine.js'); // 直接导出
 const CompatibilityTestEngine = require('../engines/compatibility/compatibilityTestEngine.js');
 const UXAnalyzer = require('../engines/api/UXAnalyzer.js');

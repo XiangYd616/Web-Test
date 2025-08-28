@@ -226,31 +226,31 @@ class RouteManager {
         group: 'auth'
       },
 
-      // 缺失API路由 - 补充前端需要的API
-      {
-        path: '/api',
-        module: '../routes/missing-apis.js',
-        description: '缺失API端点实现 - 第一部分',
-        group: 'general'
-      },
-      {
-        path: '/api',
-        module: '../routes/missing-apis-part2.js',
-        description: '缺失API端点实现 - 第二部分',
-        group: 'general'
-      },
-      {
-        path: '/api',
-        module: '../routes/missing-apis-part3.js',
-        description: '缺失API端点实现 - 第三部分',
-        group: 'general'
-      },
-      {
-        path: '/api',
-        module: '../routes/missing-apis-part4.js',
-        description: '缺失API端点实现 - 第四部分',
-        group: 'general'
-      },
+      // 缺失API路由 - 补充前端需要的API (已禁用，避免路径冲突)
+      // {
+      //   path: '/api',
+      //   module: '../routes/missing-apis.js',
+      //   description: '缺失API端点实现 - 第一部分',
+      //   group: 'general'
+      // },
+      // {
+      //   path: '/api',
+      //   module: '../routes/missing-apis-part2.js',
+      //   description: '缺失API端点实现 - 第二部分',
+      //   group: 'general'
+      // },
+      // {
+      //   path: '/api',
+      //   module: '../routes/missing-apis-part3.js',
+      //   description: '缺失API端点实现 - 第三部分',
+      //   group: 'general'
+      // },
+      // {
+      //   path: '/api',
+      //   module: '../routes/missing-apis-part4.js',
+      //   description: '缺失API端点实现 - 第四部分',
+      //   group: 'general'
+      // },
 
       // 测试执行路由 - 新增
       {
@@ -333,9 +333,9 @@ class RouteManager {
       },
 
       // 数据管理路由
-      
-      
-      
+
+
+
       {
         path: '/api/data',
         module: '../routes/data.js',
@@ -429,6 +429,13 @@ class RouteManager {
         module: '../routes/apiExample.js',
         description: 'API示例（仅开发环境）',
         group: 'general'
+      });
+
+      routeConfigs.push({
+        path: '/api/database-fix',
+        module: '../routes/database-fix.js',
+        description: '数据库修复API（仅开发环境）',
+        group: 'system'
       });
     }
 

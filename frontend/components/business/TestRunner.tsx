@@ -5,8 +5,8 @@
 
 import { Download, History, Play, RefreshCw, Settings, Square } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { useTestEngine } from '../../hooks/legacy-compatibility';
 import { useNotification } from '../../hooks/useNotification';
-import { useTestEngine } from '../../hooks/useTestEngine';
 import {
     Badge,
     Button,

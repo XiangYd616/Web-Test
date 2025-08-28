@@ -12,7 +12,7 @@ export const colorClassMapping = {
   'bg-gray-200': 'themed-bg-tertiary',
   'bg-gray-800': 'themed-bg-secondary',
   'bg-gray-900': 'themed-bg-primary',
-  
+
   // 文本颜色映射
   'text-gray-900': 'themed-text-primary',
   'text-gray-800': 'themed-text-primary',
@@ -21,14 +21,14 @@ export const colorClassMapping = {
   'text-gray-500': 'themed-text-tertiary',
   'text-gray-400': 'themed-text-tertiary',
   'text-white': 'themed-text-primary',
-  
+
   // 边框颜色映射
   'border-gray-200': 'themed-border-primary',
   'border-gray-300': 'themed-border-secondary',
   'border-gray-400': 'themed-border-tertiary',
   'border-gray-600': 'themed-border-primary',
   'border-gray-700': 'themed-border-secondary',
-  
+
   // 按钮颜色映射
   'bg-blue-600': 'themed-button-primary',
   'bg-gray-600': 'themed-button-secondary',
@@ -55,13 +55,13 @@ export const specialColorClasses = {
 export function detectHardcodedColors(element: Element): string[] {
   const classList = Array.from(element.classList);
   const hardcodedColors: string[] = [];
-  
+
   classList.forEach(className => {
-    if (colorClassMapping[className]) {
+    if (colorClassMapping[className as keyof typeof colorClassMapping]) {
       hardcodedColors.push(className);
     }
   });
-  
+
   return hardcodedColors;
 }
 
@@ -70,9 +70,9 @@ export function detectHardcodedColors(element: Element): string[] {
  */
 export function replaceHardcodedColors(element: Element): void {
   const hardcodedColors = detectHardcodedColors(element);
-  
+
   hardcodedColors.forEach(colorClass => {
-    const themeClass = colorClassMapping[colorClass];
+    const themeClass = colorClassMapping[colorClass as keyof typeof colorClassMapping];
     if (themeClass) {
       element.classList.remove(colorClass);
       element.classList.add(themeClass);
@@ -106,7 +106,7 @@ export function setupThemeColorWatcher(): void {
       }
     });
   });
-  
+
   // 观察document.documentElement的class变化
   observer.observe(document.documentElement, {
     attributes: true,
@@ -124,9 +124,9 @@ export function initThemeColorFixer(): void {
   } else {
     fixPageColors();
   }
-  
+
   // 设置主题变化监听
   setupThemeColorWatcher();
-  
+
   console.log('🎨 主题颜色修复系统已初始化');
 }

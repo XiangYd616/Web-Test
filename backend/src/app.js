@@ -491,6 +491,11 @@ try {
   app.use('/api/system', systemRoutes);
   console.log('✅ 备用系统路由已应用: /api/system');
 
+  // 手动应用统一测试引擎路由
+  const unifiedEngineRoutes = require('../routes/unifiedTestEngine.js');
+  app.use('/api/unified-engine', unifiedEngineRoutes);
+  console.log('✅ 统一测试引擎路由已应用: /api/unified-engine');
+
 } catch (error) {
   console.error('⚠️ 备用路由应用失败:', error.message);
 }
@@ -607,6 +612,11 @@ const startServer = async () => {
     try {
       setupWebSocketHandlers(io);
       console.log('✅ WebSocket事件处理器已设置');
+
+      // 设置统一测试引擎WebSocket处理
+      const { getUnifiedEngineWSHandler } = require('../websocket/unifiedEngineHandler.js');
+      global.unifiedEngineWSHandler = getUnifiedEngineWSHandler();
+      console.log('✅ 统一测试引擎WebSocket处理器已设置');
     } catch (wsError) {
       console.warn('⚠️ WebSocket事件处理器设置失败，继续启动:', wsError.message);
     }
@@ -614,8 +624,8 @@ const startServer = async () => {
     // 清理旧的测试房间
     setTimeout(async () => {
       try {
-        // //         const { RealStressTestEngine } = require('../engines/stress/StressTestEngine'); // 已删除 // 已删除
-        const stressTestEngine = new RealStressTestEngine();
+        const StressTestEngine = require('../engines/stress/stressTestEngine');
+        const stressTestEngine = new StressTestEngine();
         try {
           stressTestEngine.io = io; // 设置WebSocket实例
         } catch (ioError) {
@@ -674,6 +684,17 @@ const startServer = async () => {
 
 // WebSocket事件处理
 function setupWebSocketHandlers(io) {
+  // 设置统一测试引擎命名空间
+  const unifiedEngineNamespace = io.of('/unified-engine');
+  unifiedEngineNamespace.on('connection', (socket) => {
+    console.log(`🧠 统一测试引擎WebSocket连接: ${socket.id}`);
+
+    // 使用统一引擎WebSocket处理器
+    if (global.unifiedEngineWSHandler) {
+      global.unifiedEngineWSHandler.handleConnection(socket, socket.request);
+    }
+  });
+
   io.on('connection', (socket) => {
     console.log(`🔌🔌🔌 WebSocket客户端连接 🔌🔌🔌: ${socket.id}`);
     console.log(`🔌 连接详情:`, {
@@ -796,8 +817,8 @@ function setupWebSocketHandlers(io) {
         }
 
         // 获取测试引擎实例
-        // //         const { RealStressTestEngine } = require('../engines/stress/StressTestEngine'); // 已删除 // 已删除
-        const stressTestEngine = new RealStressTestEngine();
+        const StressTestEngine = require('../engines/stress/stressTestEngine');
+        const stressTestEngine = new StressTestEngine();
         stressTestEngine.io = io;
 
         // 调用取消测试方法

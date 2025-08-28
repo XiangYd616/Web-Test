@@ -116,6 +116,13 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           name: 'UX测试',
           icon: Eye,
           href: '/ux-test'
+        },
+        {
+          id: 'unified-test',
+          name: '统一测试引擎',
+          icon: TestTube,
+          href: '/unified-test',
+          badge: 'NEW'
         }
       ]
     },

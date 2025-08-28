@@ -55,8 +55,8 @@ export default defineConfig({
       'Content-Security-Policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' ws: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
     },
     proxy: {
-      // 代理API请求到后端服务器
-      '/api': {
+      // 代理API请求到后端服务器 - 只代理真正的API路径
+      '/api/': {
         target: `http://localhost:${process.env.PORT || '3001'}`,
         changeOrigin: true,
         secure: false,

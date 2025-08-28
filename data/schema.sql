@@ -696,10 +696,13 @@ CREATE TABLE IF NOT EXISTS monitoring_sites (
     description TEXT,
 
     -- 监控配置
+    monitoring_type VARCHAR(50) DEFAULT 'uptime' CHECK (monitoring_type IN ('uptime', 'performance', 'security', 'seo')),
     check_interval INTEGER DEFAULT 300, -- 秒
     timeout INTEGER DEFAULT 30, -- 秒
     expected_status_code INTEGER DEFAULT 200,
     expected_content TEXT,
+    config JSONB DEFAULT '{}',
+    notification_settings JSONB DEFAULT '{}',
 
     -- 通知设置
     notify_on_down BOOLEAN DEFAULT true,

@@ -1,27 +1,46 @@
 /**
- * 验证中间件
- * 提供常用的请求参数验证功能
+ * 🔍 统一测试引擎验证中间件
+ * 基于Joi的最佳实践，为测试配置提供严格的验证
  */
+
+const Joi = require('joi');
+
+// 测试类型枚举
+const TEST_TYPES = [
+  'performance',
+  'security',
+  'api',
+  'stress',
+  'database',
+  'network',
+  'ux',
+  'seo',
+  'compatibility',
+  'website'
+];
+
+/**
+ * 基础URL验证Schema
+ */
+const urlSchema = Joi.string()
+  .uri({ scheme: ['http', 'https'] })
+  .required()
+  .messages({
+    'string.uri': '请输入有效的URL地址',
+    'any.required': 'URL地址是必需的'
+  });
 
 /**
  * 验证测试类型
  */
 const validateTestType = (req, res, next) => {
-  const { testType } = req.query;
-  const validTestTypes = [
-    'stress',
-    'security',
-    'api',
-    'performance',
-    'compatibility',
-    'seo',
-    'accessibility'
-  ];
+  const schema = Joi.string().valid(...TEST_TYPES);
+  const { error } = schema.validate(req.query.testType);
 
-  if (testType && !validTestTypes.includes(testType)) {
+  if (error) {
     return res.status(400).json({
       success: false,
-      error: `无效的测试类型。支持的类型: ${validTestTypes.join(', ')}`
+      error: `无效的测试类型。支持的类型: ${TEST_TYPES.join(', ')}`
     });
   }
 
@@ -36,8 +55,8 @@ const validatePagination = (req, res, next) => {
 
   // 验证页码
   if (page !== undefined) {
-    
-        const pageNum = parseInt(page);
+
+    const pageNum = parseInt(page);
     if (isNaN(pageNum) || pageNum < 1) {
       return res.status(400).json({
         success: false,
@@ -49,8 +68,8 @@ const validatePagination = (req, res, next) => {
 
   // 验证每页数量
   if (limit !== undefined) {
-    
-        const limitNum = parseInt(limit);
+
+    const limitNum = parseInt(limit);
     if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
       return res.status(400).json({
         success: false,
@@ -124,8 +143,8 @@ const validateDateRange = (req, res, next) => {
   const { dateFrom, dateTo } = req.query;
 
   if (dateFrom) {
-    
-        const fromDate = new Date(dateFrom);
+
+    const fromDate = new Date(dateFrom);
     if (isNaN(fromDate.getTime())) {
       return res.status(400).json({
         success: false,
@@ -136,8 +155,8 @@ const validateDateRange = (req, res, next) => {
   }
 
   if (dateTo) {
-    
-        const toDate = new Date(dateTo);
+
+    const toDate = new Date(dateTo);
     if (isNaN(toDate.getTime())) {
       return res.status(400).json({
         success: false,
@@ -165,8 +184,8 @@ const validateSearch = (req, res, next) => {
   const { search } = req.query;
 
   if (search !== undefined) {
-    
-        // 清理搜索字符串
+
+    // 清理搜索字符串
     const cleanSearch = search.trim();
 
     if (cleanSearch.length > 100) {
@@ -206,8 +225,8 @@ const validateTimeRange = (req, res, next) => {
   const { timeRange } = req.query;
 
   if (timeRange !== undefined) {
-    
-        const timeRangeNum = parseInt(timeRange);
+
+    const timeRangeNum = parseInt(timeRange);
     if (isNaN(timeRangeNum) || timeRangeNum < 1 || timeRangeNum > 365) {
       return res.status(400).json({
         success: false,

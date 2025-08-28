@@ -7,7 +7,7 @@ const { Pool } = require('pg');
 const EventEmitter = require('events');
 const axios = require('axios');
 const { performance } = require('perf_hooks');
-const logger = require('../../middleware/logger.js');
+const logger = require('../../utils/logger.js');
 
 class MonitoringService extends EventEmitter {
     constructor(dbPool) {
@@ -37,10 +37,10 @@ class MonitoringService extends EventEmitter {
     async start() {
         try {
             if (this.isRunning) {
-                
-        logger.warn('监控服务已在运行中');
+
+                logger.warn('监控服务已在运行中');
                 return;
-      }
+            }
 
             logger.info('启动监控服务...');
 
@@ -69,9 +69,9 @@ class MonitoringService extends EventEmitter {
     async stop() {
         try {
             if (!this.isRunning) {
-                
-        return;
-      }
+
+                return;
+            }
 
             logger.info('停止监控服务...');
 
@@ -105,30 +105,66 @@ class MonitoringService extends EventEmitter {
      */
     async loadMonitoringTargets() {
         try {
-            const query = `
-        SELECT 
-          id, user_id, name, url, monitoring_type, 
-          check_interval, timeout, config, status,
-          notification_settings, last_check, consecutive_failures
-        FROM monitoring_sites 
-        WHERE status = 'active' AND deleted_at IS NULL
-        ORDER BY check_interval ASC
-      `;
+            // 首先检查表结构，如果缺少字段则使用基础查询
+            let query;
+            try {
+                // 尝试使用完整查询
+                query = `
+          SELECT
+            id, user_id, name, url, monitoring_type,
+            check_interval, timeout, config, status,
+            notification_settings, last_check, consecutive_failures
+          FROM monitoring_sites
+          WHERE status = 'active' AND deleted_at IS NULL
+          ORDER BY check_interval ASC
+        `;
+                const result = await this.dbPool.query(query);
+                const targets = result.rows;
 
-            const result = await this.dbPool.query(query);
-            const targets = result.rows;
+                logger.info(`加载了 ${targets.length} 个监控目标`);
 
-            logger.info(`加载了 ${targets.length} 个监控目标`);
+                // 为每个目标创建监控任务
+                for (const target of targets) {
+                    this.createMonitoringTask(target);
+                }
 
-            // 为每个目标创建监控任务
-            for (const target of targets) {
-                this.createMonitoringTask(target);
+                return targets;
+            } catch (fieldError) {
+                // 如果字段不存在，使用基础查询
+                logger.warn('监控表字段不完整，使用基础查询:', fieldError.message);
+
+                query = `
+          SELECT
+            id, user_id, name, url,
+            'uptime' as monitoring_type,
+            check_interval, timeout,
+            '{}' as config,
+            'active' as status,
+            '{}' as notification_settings,
+            NULL as last_check,
+            0 as consecutive_failures
+          FROM monitoring_sites
+          WHERE is_active = true
+          ORDER BY check_interval ASC
+        `;
+
+                const result = await this.dbPool.query(query);
+                const targets = result.rows;
+
+                logger.info(`使用基础查询加载了 ${targets.length} 个监控目标`);
+
+                // 为每个目标创建监控任务
+                for (const target of targets) {
+                    this.createMonitoringTask(target);
+                }
+
+                return targets;
             }
-
-            return targets;
         } catch (error) {
             logger.error('加载监控目标失败:', error);
-            throw error;
+            // 不抛出错误，而是返回空数组，让系统继续运行
+            logger.warn('监控系统将在无目标模式下运行');
+            return [];
         }
     }
 
@@ -254,26 +290,28 @@ class MonitoringService extends EventEmitter {
 
             // 判断错误类型
             if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
-                
-        return {
+
+                return {
                     status: 'timeout',
                     response_time: Math.round(duration),
                     status_code: null,
                     error_message: '请求超时',
-                    results: { timeout: true, duration
-      }
+                    results: {
+                        timeout: true, duration
+                    }
                 };
             }
 
             if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-                
-        return {
+
+                return {
                     status: 'down',
                     response_time: Math.round(duration),
                     status_code: null,
                     error_message: '无法连接到服务器',
-                    results: { connection_error: true, code: error.code
-      }
+                    results: {
+                        connection_error: true, code: error.code
+                    }
                 };
             }
 
@@ -318,9 +356,9 @@ class MonitoringService extends EventEmitter {
         const uptimeResult = await this.performUptimeCheck(target, timeout);
 
         if (uptimeResult.status !== 'up') {
-            
-        return uptimeResult;
-      }
+
+            return uptimeResult;
+        }
 
         // 添加性能指标
         const performanceMetrics = {
@@ -355,9 +393,9 @@ class MonitoringService extends EventEmitter {
         const uptimeResult = await this.performUptimeCheck(target, timeout);
 
         if (uptimeResult.status !== 'up') {
-            
-        return uptimeResult;
-      }
+
+            return uptimeResult;
+        }
 
         const securityChecks = {
             https: target.url.startsWith('https://'),
@@ -394,9 +432,9 @@ class MonitoringService extends EventEmitter {
         const uptimeResult = await this.performUptimeCheck(target, timeout);
 
         if (uptimeResult.status !== 'up') {
-            
-        return uptimeResult;
-      }
+
+            return uptimeResult;
+        }
 
         // 简单的SEO检查（可以扩展）
         const seoChecks = {
@@ -516,9 +554,9 @@ class MonitoringService extends EventEmitter {
             const isFailure = ['down', 'timeout', 'error'].includes(result.status);
 
             if (!isFailure) {
-                
-        return;
-      }
+
+                return;
+            }
 
             // 获取当前连续失败次数
             const query = `
@@ -530,9 +568,9 @@ class MonitoringService extends EventEmitter {
             const queryResult = await this.dbPool.query(query, [target.id]);
 
             if (queryResult.rows.length === 0) {
-                
-        return;
-      }
+
+                return;
+            }
 
             const { consecutive_failures, notification_settings } = queryResult.rows[0];
             const alertThreshold = this.config.maxConsecutiveFailures;
@@ -716,27 +754,27 @@ class MonitoringService extends EventEmitter {
     determineOverallHealth(stats) {
         // 数据库不健康
         if (stats.databaseStatus !== 'healthy') {
-            
-        return 'critical';
-      }
+
+            return 'critical';
+        }
 
         // 内存使用过高
         if (stats.resources.memory.usage > 90) {
-            
-        return 'degraded';
-      }
+
+            return 'degraded';
+        }
 
         // 有卡住的任务
         if (stats.taskStats.stuck > 0) {
-            
-        return 'degraded';
-      }
+
+            return 'degraded';
+        }
 
         // 错误任务过多
         if (stats.taskStats.error > stats.taskStats.total * 0.5) {
-            
-        return 'degraded';
-      }
+
+            return 'degraded';
+        }
 
         return 'healthy';
     }
@@ -1684,28 +1722,28 @@ class MonitoringService extends EventEmitter {
         const filename = `monitoring-report-${reportType}-${timestamp}.${format}`;
 
         if (format === 'json') {
-            
-        return {
+
+            return {
                 filename,
                 data: JSON.stringify(reportData, null, 2),
                 contentType: 'application/json'
-      };
+            };
         } else if (format === 'csv') {
-            
-        const csvData = this.convertToCSV(reportData);
+
+            const csvData = this.convertToCSV(reportData);
             return {
                 filename: filename.replace('.csv', '.csv'),
                 data: csvData,
                 contentType: 'text/csv'
-      };
+            };
         } else if (format === 'pdf') {
-            
-        // 这里可以集成PDF生成库，暂时返回JSON格式
+
+            // 这里可以集成PDF生成库，暂时返回JSON格式
             return {
                 filename: filename.replace('.pdf', '.json'),
                 data: JSON.stringify(reportData, null, 2),
                 contentType: 'application/json'
-      };
+            };
         }
 
         throw new Error(`不支持的报告格式: ${format}`);
@@ -1788,10 +1826,10 @@ class MonitoringService extends EventEmitter {
         } catch (error) {
             // 如果表不存在，先创建表
             if (error.code === '42P01') {
-                
-        await this.createReportsTable();
+
+                await this.createReportsTable();
                 return this.saveReportRecord(userId, reportInfo);
-      }
+            }
             throw error;
         }
     }
@@ -1880,9 +1918,9 @@ class MonitoringService extends EventEmitter {
             const result = await this.dbPool.query(query, [reportId, userId]);
 
             if (result.rows.length === 0) {
-                
-        return null;
-      }
+
+                return null;
+            }
 
             const report = result.rows[0];
 

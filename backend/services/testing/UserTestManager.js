@@ -3,7 +3,7 @@
  * 每个用户管理自己的测试实例，不需要全局状态
  */
 
-const { RealStressTestEngine } = require('../../engines/stress/stressTestEngine');
+const StressTestEngine = require('../../engines/stress/stressTestEngine');
 // 暂时使用console.log替代Logger
 const Logger = {
   info: (msg, meta) => console.log(`[INFO] ${msg}`, meta || ''),
@@ -45,9 +45,9 @@ class UserTestManager {
   getUserTestEngine(userId, testId) {
     const userTests = this.userTests.get(userId);
     if (!userTests) {
-      
-        return null;
-      }
+
+      return null;
+    }
     return userTests.get(testId);
   }
 
@@ -69,7 +69,7 @@ class UserTestManager {
     }
 
     // 创建新的测试引擎实例
-    const testEngine = new RealStressTestEngine();
+    const testEngine = new StressTestEngine();
 
     // 设置进度回调，直接推送给用户
     testEngine.setProgressCallback((progress) => {
@@ -126,9 +126,9 @@ class UserTestManager {
   getUserTestStatus(userId, testId) {
     const testEngine = this.getUserTestEngine(userId, testId);
     if (!testEngine) {
-      
-        return null;
-      }
+
+      return null;
+    }
     return testEngine.getTestStatus(testId);
   }
 

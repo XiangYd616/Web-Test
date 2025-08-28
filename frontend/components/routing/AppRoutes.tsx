@@ -1,12 +1,11 @@
-import React from 'react';
-import { Suspense, lazy } from 'react';
-import type { ReactNode, FC } from 'react';;
+import React, { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from '../../pages/Login';
 import Register from '../../pages/Register';
 import { AdminGuard, ProtectedRoute } from '../auth';
 import { ModernLayout } from '../modern';
 import { ErrorBoundary, LoadingSpinner } from '../ui';
+;
 
 // 懒加载页面组件
 const ModernDashboard = lazy(() => import('../../pages/dashboard/ModernDashboard'));
@@ -22,6 +21,7 @@ const StressTest = lazy(() => import('../../pages/StressTest'));
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
 const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
 const UXTest = lazy(() => import('../../pages/UXTest'));
+const UnifiedTestPage = lazy(() => import('../../pages/UnifiedTestPage'));
 
 // 演示和测试页面
 // URLInputDemo 已删除
@@ -30,6 +30,7 @@ const UXTest = lazy(() => import('../../pages/UXTest'));
 // 数据管理相关页面
 const DataStorage = lazy(() => import('../../pages/admin/DataStorage'));
 const DataManagement = lazy(() => import('../../pages/DataManagement'));
+const DataCenter = lazy(() => import('../../pages/DataCenter'));
 const Statistics = lazy(() => import('../../pages/Statistics'));
 const Analytics = lazy(() => import('../../pages/analytics'));
 const MonitoringDashboard = lazy(() => import('../../pages/MonitoringDashboard'));
@@ -158,6 +159,13 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         } />
 
+        {/* 统一测试引擎 */}
+        <Route path="unified-test" element={
+          <LazyPageWrapper>
+            <UnifiedTestPage />
+          </LazyPageWrapper>
+        } />
+
         {/* 测试优化页面 */}
         <Route path="test-optimizations" element={
           <LazyPageWrapper>
@@ -252,6 +260,14 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
+
+      <Route path="data-center" element={
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <DataCenter />
+          </LazyPageWrapper>
+        </ProtectedRoute>
+      } />
       <Route path="analytics" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -305,14 +321,18 @@ const AppRoutes: React.FC = () => {
         </LazyPageWrapper>
       } />
       <Route path="webhooks" element={
-        <LazyPageWrapper>
-          <Webhooks />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <Webhooks />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
       <Route path="api-keys" element={
-        <LazyPageWrapper>
-          <APIKeys />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <APIKeys />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
 
       {/* 调度和任务 - 需要登录 */}

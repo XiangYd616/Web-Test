@@ -5,7 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const Logger = require('../../middleware/logger.js');
+const Logger = require('../../utils/logger.js');
 
 class ApiDocumentationService {
   constructor() {
@@ -51,7 +51,7 @@ class ApiDocumentationService {
   registerRoute(method, path, options = {}) {
     try {
       const routeKey = `${method.toUpperCase()} ${path}`;
-      
+
       const routeInfo = {
         method: method.toUpperCase(),
         path,
@@ -101,7 +101,7 @@ class ApiDocumentationService {
       // 重新构建路径文档
       for (const [routeKey, routeInfo] of this.apiRoutes) {
         const { method, path: routePath, ...pathInfo } = routeInfo;
-        
+
         if (!this.documentation.paths[routePath]) {
           this.documentation.paths[routePath] = {};
         }
@@ -164,11 +164,11 @@ class ApiDocumentationService {
       const routeInfo = this.apiRoutes.get(routeKey);
 
       if (!routeInfo) {
-        
+
         return {
           success: false,
           error: '路由不存在'
-      };
+        };
       }
 
       return {
@@ -235,7 +235,7 @@ class ApiDocumentationService {
       }
 
       const filePath = outputPath || path.join(process.cwd(), 'docs', filename);
-      
+
       // 确保目录存在
       const dir = path.dirname(filePath);
       if (!fs.existsSync(dir)) {

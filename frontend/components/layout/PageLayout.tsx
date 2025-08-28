@@ -6,6 +6,7 @@ interface PageLayoutProps {
   description?: string;
   className?: string;
   compact?: boolean;
+  icon?: React.ComponentType<any>;
 }
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
@@ -13,7 +14,8 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   title,
   description,
   className = '',
-  compact = true
+  compact = true,
+  icon: Icon
 }) => {
   return (
     <div className={`
@@ -25,7 +27,8 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
       {(title || description) && (
         <div className="mb-4 lg:mb-6">
           {title && (
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              {Icon && <Icon className="w-8 h-8" />}
               {title}
             </h1>
           )}

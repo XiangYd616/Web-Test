@@ -10,7 +10,7 @@ const crypto = require('crypto');
 // 注意：需要安装这些依赖包
 // npm install speakeasy qrcode
 const { getPool } = require('../../config/database.js');
-const Logger = require('../../middleware/logger.js');
+const Logger = require('../../utils/logger.js');
 const emailService = require('../email/emailService');
 const smsService = require('../sms/smsService');
 
@@ -99,9 +99,10 @@ class MFAService {
       `, [userId]);
 
       if (result.rows.length === 0) {
-        
-        return { success: false, message: 'TOTP设置未找到或已启用'
-      };
+
+        return {
+          success: false, message: 'TOTP设置未找到或已启用'
+        };
       }
 
       const secret = result.rows[0].secret;
@@ -152,335 +153,341 @@ class MFAService {
       // 这里应该验证当前密码
       // const isPasswordValid = await this.verifyPassword(userId, currentPassword);
       // if (!isPasswordValid) {
-      
-        //   return { success: false, message: '当前密码错误'
-      };
-      // }
 
-      await pool.query(`
+      //   return { success: false, message: '当前密码错误'
+    };
+    // }
+
+    await pool.query(`
         DELETE FROM user_mfa_settings 
         WHERE user_id = $1 AND type IN ('totp', 'backup_codes')
       `, [userId]);
 
-      // 清除信任设备
-      await this.clearTrustedDevices(userId);
+    // 清除信任设备
+    await this.clearTrustedDevices(userId);
 
-      Logger.info('TOTP disabled', { userId });
+    Logger.info('TOTP disabled', { userId });
 
-      return { success: true, message: 'TOTP认证已禁用' };
-    } catch (error) {
-      Logger.error('Failed to disable TOTP', error, { userId });
-      throw error;
-    }
+    return { success: true, message: 'TOTP认证已禁用' };
+  } catch(error) {
+    Logger.error('Failed to disable TOTP', error, { userId });
+    throw error;
   }
+}
 
   /**
    * 生成备用码
    */
   async generateBackupCodes(userId) {
-    const pool = getPool();
+  const pool = getPool();
 
-    try {
-      const codes = [];
-      for (let i = 0; i < MFA_CONFIG.backupCodesCount; i++) {
-        codes.push(this.generateRandomCode(MFA_CONFIG.backupCodeLength));
-      }
+  try {
+    const codes = [];
+    for (let i = 0; i < MFA_CONFIG.backupCodesCount; i++) {
+      codes.push(this.generateRandomCode(MFA_CONFIG.backupCodeLength));
+    }
 
-      // 哈希备用码后存储
-      const hashedCodes = codes.map(code => ({
-        code: crypto.createHash('sha256').update(code).digest('hex'),
-        used: false
-      }));
+    // 哈希备用码后存储
+    const hashedCodes = codes.map(code => ({
+      code: crypto.createHash('sha256').update(code).digest('hex'),
+      used: false
+    }));
 
-      await pool.query(`
+    await pool.query(`
         INSERT INTO user_mfa_settings (user_id, type, secret, is_enabled, created_at)
         VALUES ($1, 'backup_codes', $2, true, NOW())
         ON CONFLICT (user_id, type) 
         DO UPDATE SET secret = $2, created_at = NOW()
       `, [userId, JSON.stringify(hashedCodes)]);
 
-      Logger.info('Backup codes generated', { userId, count: codes.length });
+    Logger.info('Backup codes generated', { userId, count: codes.length });
 
-      return codes;
-    } catch (error) {
-      Logger.error('Failed to generate backup codes', error, { userId });
-      throw error;
-    }
+    return codes;
+  } catch (error) {
+    Logger.error('Failed to generate backup codes', error, { userId });
+    throw error;
   }
+}
 
   /**
    * 发送短信验证码
    */
   async sendSMSChallenge(userId, phoneNumber) {
-    try {
-      const code = this.generateRandomCode(MFA_CONFIG.codeLength);
-      const challengeId = this.generateChallengeId();
+  try {
+    const code = this.generateRandomCode(MFA_CONFIG.codeLength);
+    const challengeId = this.generateChallengeId();
 
-      // 存储挑战
-      this.activeChallenges.set(challengeId, {
-        userId,
-        type: 'sms',
-        code: crypto.createHash('sha256').update(code).digest('hex'),
-        phoneNumber,
-        attempts: 0,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + (MFA_CONFIG.codeExpiry * 1000)
-      });
+    // 存储挑战
+    this.activeChallenges.set(challengeId, {
+      userId,
+      type: 'sms',
+      code: crypto.createHash('sha256').update(code).digest('hex'),
+      phoneNumber,
+      attempts: 0,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (MFA_CONFIG.codeExpiry * 1000)
+    });
 
-      // 发送短信
-      await smsService.sendSMS(phoneNumber, `您的验证码是：${code}，有效期${MFA_CONFIG.codeExpiry / 60}分钟。`);
+    // 发送短信
+    await smsService.sendSMS(phoneNumber, `您的验证码是：${code}，有效期${MFA_CONFIG.codeExpiry / 60}分钟。`);
 
-      Logger.info('SMS challenge sent', { userId, challengeId, phoneNumber: this.maskPhoneNumber(phoneNumber) });
+    Logger.info('SMS challenge sent', { userId, challengeId, phoneNumber: this.maskPhoneNumber(phoneNumber) });
 
-      return {
-        success: true,
-        challengeId,
-        maskedPhone: this.maskPhoneNumber(phoneNumber),
-        expiresIn: MFA_CONFIG.codeExpiry
-      };
-    } catch (error) {
-      Logger.error('Failed to send SMS challenge', error, { userId, phoneNumber });
-      throw error;
-    }
+    return {
+      success: true,
+      challengeId,
+      maskedPhone: this.maskPhoneNumber(phoneNumber),
+      expiresIn: MFA_CONFIG.codeExpiry
+    };
+  } catch (error) {
+    Logger.error('Failed to send SMS challenge', error, { userId, phoneNumber });
+    throw error;
   }
+}
 
   /**
    * 发送邮箱验证码
    */
   async sendEmailChallenge(userId, email) {
-    try {
-      const code = this.generateRandomCode(MFA_CONFIG.codeLength);
-      const challengeId = this.generateChallengeId();
+  try {
+    const code = this.generateRandomCode(MFA_CONFIG.codeLength);
+    const challengeId = this.generateChallengeId();
 
-      // 存储挑战
-      this.activeChallenges.set(challengeId, {
-        userId,
-        type: 'email',
-        code: crypto.createHash('sha256').update(code).digest('hex'),
-        email,
-        attempts: 0,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + (MFA_CONFIG.codeExpiry * 1000)
-      });
+    // 存储挑战
+    this.activeChallenges.set(challengeId, {
+      userId,
+      type: 'email',
+      code: crypto.createHash('sha256').update(code).digest('hex'),
+      email,
+      attempts: 0,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (MFA_CONFIG.codeExpiry * 1000)
+    });
 
-      // 发送邮件
-      await emailService.sendEmail({
-        to: email,
-        subject: '登录验证码',
-        template: 'mfa-code',
-        data: {
-          code,
-          expiryMinutes: MFA_CONFIG.codeExpiry / 60,
-          appName: MFA_CONFIG.appName
-        }
-      });
+    // 发送邮件
+    await emailService.sendEmail({
+      to: email,
+      subject: '登录验证码',
+      template: 'mfa-code',
+      data: {
+        code,
+        expiryMinutes: MFA_CONFIG.codeExpiry / 60,
+        appName: MFA_CONFIG.appName
+      }
+    });
 
-      Logger.info('Email challenge sent', { userId, challengeId, email: this.maskEmail(email) });
+    Logger.info('Email challenge sent', { userId, challengeId, email: this.maskEmail(email) });
 
-      return {
-        success: true,
-        challengeId,
-        maskedEmail: this.maskEmail(email),
-        expiresIn: MFA_CONFIG.codeExpiry
-      };
-    } catch (error) {
-      Logger.error('Failed to send email challenge', error, { userId, email });
-      throw error;
-    }
+    return {
+      success: true,
+      challengeId,
+      maskedEmail: this.maskEmail(email),
+      expiresIn: MFA_CONFIG.codeExpiry
+    };
+  } catch (error) {
+    Logger.error('Failed to send email challenge', error, { userId, email });
+    throw error;
   }
+}
 
   /**
    * 验证MFA挑战
    */
   async verifyChallenge(challengeId, code, deviceFingerprint = null) {
-    try {
-      const challenge = this.activeChallenges.get(challengeId);
+  try {
+    const challenge = this.activeChallenges.get(challengeId);
 
-      if (!challenge) {
-        
-        return { success: false, message: '验证码已过期或无效'
-      };
-      }
-
-      // 检查过期时间
-      if (Date.now() > challenge.expiresAt) {
-        this.activeChallenges.delete(challengeId);
-        return { success: false, message: '验证码已过期' };
-      }
-
-      // 检查尝试次数
-      if (challenge.attempts >= MFA_CONFIG.maxAttempts) {
-        
-        this.activeChallenges.delete(challengeId);
-        return { success: false, message: '验证失败次数过多，请重新获取验证码'
-      };
-      }
-
-      // 验证码码
-      const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
-
-      if (challenge.code !== hashedCode) {
-        
-        challenge.attempts++;
-        return { success: false, message: '验证码错误'
-      };
-      }
-
-      // 验证成功，清除挑战
-      this.activeChallenges.delete(challengeId);
-
-      // 如果提供了设备指纹，可以选择信任设备
-      let trustToken = null;
-      if (deviceFingerprint) {
-        trustToken = await this.createTrustedDevice(challenge.userId, deviceFingerprint);
-      }
-
-      Logger.info('MFA challenge verified', {
-        userId: challenge.userId,
-        challengeId,
-        type: challenge.type
-      });
+    if (!challenge) {
 
       return {
-        success: true,
-        message: '验证成功',
-        trustToken
+        success: false, message: '验证码已过期或无效'
       };
-    } catch (error) {
-      Logger.error('Failed to verify challenge', error, { challengeId });
-      throw error;
     }
+
+    // 检查过期时间
+    if (Date.now() > challenge.expiresAt) {
+      this.activeChallenges.delete(challengeId);
+      return { success: false, message: '验证码已过期' };
+    }
+
+    // 检查尝试次数
+    if (challenge.attempts >= MFA_CONFIG.maxAttempts) {
+
+      this.activeChallenges.delete(challengeId);
+      return {
+        success: false, message: '验证失败次数过多，请重新获取验证码'
+      };
+    }
+
+    // 验证码码
+    const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
+
+    if (challenge.code !== hashedCode) {
+
+      challenge.attempts++;
+      return {
+        success: false, message: '验证码错误'
+      };
+    }
+
+    // 验证成功，清除挑战
+    this.activeChallenges.delete(challengeId);
+
+    // 如果提供了设备指纹，可以选择信任设备
+    let trustToken = null;
+    if (deviceFingerprint) {
+      trustToken = await this.createTrustedDevice(challenge.userId, deviceFingerprint);
+    }
+
+    Logger.info('MFA challenge verified', {
+      userId: challenge.userId,
+      challengeId,
+      type: challenge.type
+    });
+
+    return {
+      success: true,
+      message: '验证成功',
+      trustToken
+    };
+  } catch (error) {
+    Logger.error('Failed to verify challenge', error, { challengeId });
+    throw error;
   }
+}
 
   /**
    * 验证TOTP令牌
    */
   async verifyTOTP(userId, token) {
-    const pool = getPool();
+  const pool = getPool();
 
-    try {
-      // 获取用户的TOTP密钥
-      const result = await pool.query(`
+  try {
+    // 获取用户的TOTP密钥
+    const result = await pool.query(`
         SELECT secret FROM user_mfa_settings 
         WHERE user_id = $1 AND type = 'totp' AND is_enabled = true
       `, [userId]);
 
-      if (result.rows.length === 0) {
-        
-        return { success: false, message: 'TOTP未启用'
+    if (result.rows.length === 0) {
+
+      return {
+        success: false, message: 'TOTP未启用'
       };
-      }
-
-      const secret = result.rows[0].secret;
-
-      // 验证TOTP令牌
-      const verified = speakeasy.totp.verify({
-        secret,
-        encoding: 'base32',
-        token,
-        window: MFA_CONFIG.totpWindow,
-        step: MFA_CONFIG.totpStep
-      });
-
-      if (verified) {
-        Logger.info('TOTP verified successfully', { userId });
-        return { success: true, message: 'TOTP验证成功' };
-      } else {
-        return { success: false, message: 'TOTP令牌无效' };
-      }
-    } catch (error) {
-      Logger.error('Failed to verify TOTP', error, { userId });
-      throw error;
     }
+
+    const secret = result.rows[0].secret;
+
+    // 验证TOTP令牌
+    const verified = speakeasy.totp.verify({
+      secret,
+      encoding: 'base32',
+      token,
+      window: MFA_CONFIG.totpWindow,
+      step: MFA_CONFIG.totpStep
+    });
+
+    if (verified) {
+      Logger.info('TOTP verified successfully', { userId });
+      return { success: true, message: 'TOTP验证成功' };
+    } else {
+      return { success: false, message: 'TOTP令牌无效' };
+    }
+  } catch (error) {
+    Logger.error('Failed to verify TOTP', error, { userId });
+    throw error;
   }
+}
 
   /**
    * 验证备用码
    */
   async verifyBackupCode(userId, code) {
-    const pool = getPool();
+  const pool = getPool();
 
-    try {
-      const result = await pool.query(`
+  try {
+    const result = await pool.query(`
         SELECT secret FROM user_mfa_settings 
         WHERE user_id = $1 AND type = 'backup_codes' AND is_enabled = true
       `, [userId]);
 
-      if (result.rows.length === 0) {
-        
-        return { success: false, message: '备用码未设置'
+    if (result.rows.length === 0) {
+
+      return {
+        success: false, message: '备用码未设置'
       };
-      }
+    }
 
-      const backupCodes = JSON.parse(result.rows[0].secret);
-      const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
+    const backupCodes = JSON.parse(result.rows[0].secret);
+    const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
 
-      // 查找匹配的备用码
-      const codeIndex = backupCodes.findIndex(bc => bc.code === hashedCode && !bc.used);
+    // 查找匹配的备用码
+    const codeIndex = backupCodes.findIndex(bc => bc.code === hashedCode && !bc.used);
 
-      if (codeIndex === -1) {
-        
-        return { success: false, message: '备用码无效或已使用'
+    if (codeIndex === -1) {
+
+      return {
+        success: false, message: '备用码无效或已使用'
       };
-      }
+    }
 
-      // 标记备用码为已使用
-      backupCodes[codeIndex].used = true;
-      backupCodes[codeIndex].usedAt = new Date().toISOString();
+    // 标记备用码为已使用
+    backupCodes[codeIndex].used = true;
+    backupCodes[codeIndex].usedAt = new Date().toISOString();
 
-      await pool.query(`
+    await pool.query(`
         UPDATE user_mfa_settings 
         SET secret = $1 
         WHERE user_id = $2 AND type = 'backup_codes'
       `, [JSON.stringify(backupCodes), userId]);
 
-      // 检查剩余备用码数量
-      const remainingCodes = backupCodes.filter(bc => !bc.used).length;
+    // 检查剩余备用码数量
+    const remainingCodes = backupCodes.filter(bc => !bc.used).length;
 
-      Logger.info('Backup code used', { userId, remainingCodes });
+    Logger.info('Backup code used', { userId, remainingCodes });
 
-      return {
-        success: true,
-        message: '备用码验证成功',
-        remainingCodes
-      };
-    } catch (error) {
-      Logger.error('Failed to verify backup code', error, { userId });
-      throw error;
-    }
+    return {
+      success: true,
+      message: '备用码验证成功',
+      remainingCodes
+    };
+  } catch (error) {
+    Logger.error('Failed to verify backup code', error, { userId });
+    throw error;
   }
+}
 
   /**
    * 检查设备是否受信任
    */
   async isDeviceTrusted(userId, deviceFingerprint) {
-    const pool = getPool();
+  const pool = getPool();
 
-    try {
-      const result = await pool.query(`
+  try {
+    const result = await pool.query(`
         SELECT id FROM trusted_devices 
         WHERE user_id = $1 AND device_fingerprint = $2 
         AND expires_at > NOW() AND is_active = true
       `, [userId, deviceFingerprint]);
 
-      return result.rows.length > 0;
-    } catch (error) {
-      Logger.error('Failed to check trusted device', error, { userId });
-      return false;
-    }
+    return result.rows.length > 0;
+  } catch (error) {
+    Logger.error('Failed to check trusted device', error, { userId });
+    return false;
   }
+}
 
   /**
    * 创建信任设备
    */
   async createTrustedDevice(userId, deviceFingerprint, deviceInfo = {}) {
-    const pool = getPool();
+  const pool = getPool();
 
-    try {
-      const trustToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + MFA_CONFIG.trustDeviceDuration * 1000);
+  try {
+    const trustToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + MFA_CONFIG.trustDeviceDuration * 1000);
 
-      await pool.query(`
+    await pool.query(`
         INSERT INTO trusted_devices (
           user_id, device_fingerprint, trust_token, device_info,
           created_at, expires_at, is_active
@@ -493,125 +500,125 @@ class MFAService {
           updated_at = NOW()
       `, [userId, deviceFingerprint, trustToken, JSON.stringify(deviceInfo), expiresAt]);
 
-      Logger.info('Trusted device created', { userId, deviceFingerprint });
+    Logger.info('Trusted device created', { userId, deviceFingerprint });
 
-      return trustToken;
-    } catch (error) {
-      Logger.error('Failed to create trusted device', error, { userId });
-      return null;
-    }
+    return trustToken;
+  } catch (error) {
+    Logger.error('Failed to create trusted device', error, { userId });
+    return null;
   }
+}
 
   /**
    * 清除用户的所有信任设备
    */
   async clearTrustedDevices(userId) {
-    const pool = getPool();
+  const pool = getPool();
 
-    try {
-      const result = await pool.query(`
+  try {
+    const result = await pool.query(`
         UPDATE trusted_devices 
         SET is_active = false 
         WHERE user_id = $1 AND is_active = true
         RETURNING id
       `, [userId]);
 
-      Logger.info('Trusted devices cleared', { userId, count: result.rows.length });
+    Logger.info('Trusted devices cleared', { userId, count: result.rows.length });
 
-      return result.rows.length;
-    } catch (error) {
-      Logger.error('Failed to clear trusted devices', error, { userId });
-      return 0;
-    }
+    return result.rows.length;
+  } catch (error) {
+    Logger.error('Failed to clear trusted devices', error, { userId });
+    return 0;
   }
+}
 
   /**
    * 获取用户MFA状态
    */
   async getUserMFAStatus(userId) {
-    const pool = getPool();
+  const pool = getPool();
 
-    try {
-      const result = await pool.query(`
+  try {
+    const result = await pool.query(`
         SELECT type, is_enabled, created_at, verified_at 
         FROM user_mfa_settings 
         WHERE user_id = $1
       `, [userId]);
 
-      const mfaSettings = {};
-      result.rows.forEach(row => {
-        mfaSettings[row.type] = {
-          enabled: row.is_enabled,
-          createdAt: row.created_at,
-          verifiedAt: row.verified_at
-        };
-      });
+    const mfaSettings = {};
+    result.rows.forEach(row => {
+      mfaSettings[row.type] = {
+        enabled: row.is_enabled,
+        createdAt: row.created_at,
+        verifiedAt: row.verified_at
+      };
+    });
 
-      // 获取备用码剩余数量
-      if (mfaSettings.backup_codes?.enabled) {
-        const backupResult = await pool.query(`
+    // 获取备用码剩余数量
+    if (mfaSettings.backup_codes?.enabled) {
+      const backupResult = await pool.query(`
           SELECT secret FROM user_mfa_settings 
           WHERE user_id = $1 AND type = 'backup_codes'
         `, [userId]);
 
-        if (backupResult.rows.length > 0) {
-          const backupCodes = JSON.parse(backupResult.rows[0].secret);
-          mfaSettings.backup_codes.remaining = backupCodes.filter(bc => !bc.used).length;
-        }
+      if (backupResult.rows.length > 0) {
+        const backupCodes = JSON.parse(backupResult.rows[0].secret);
+        mfaSettings.backup_codes.remaining = backupCodes.filter(bc => !bc.used).length;
       }
-
-      return mfaSettings;
-    } catch (error) {
-      Logger.error('Failed to get user MFA status', error, { userId });
-      return {};
     }
+
+    return mfaSettings;
+  } catch (error) {
+    Logger.error('Failed to get user MFA status', error, { userId });
+    return {};
   }
+}
 
-  // ==================== 私有方法 ====================
+// ==================== 私有方法 ====================
 
-  generateRandomCode(length) {
-    const digits = '0123456789';
-    let code = '';
-    for (let i = 0; i < length; i++) {
-      code += digits[Math.floor(Math.random() * digits.length)];
-    }
-    return code;
+generateRandomCode(length) {
+  const digits = '0123456789';
+  let code = '';
+  for (let i = 0; i < length; i++) {
+    code += digits[Math.floor(Math.random() * digits.length)];
   }
+  return code;
+}
 
-  generateChallengeId() {
-    return crypto.randomBytes(16).toString('hex');
-  }
+generateChallengeId() {
+  return crypto.randomBytes(16).toString('hex');
+}
 
-  maskPhoneNumber(phone) {
-    if (!phone || phone.length < 4) return '***';
-    return phone.slice(0, 3) + '***' + phone.slice(-4);
-  }
+maskPhoneNumber(phone) {
+  if (!phone || phone.length < 4) return '***';
+  return phone.slice(0, 3) + '***' + phone.slice(-4);
+}
 
-  maskEmail(email) {
-    if (!email || !email.includes('@')) return '***@***.***';
-    const [local, domain] = email.split('@');
-    const maskedLocal = local.length > 2 ? local.slice(0, 2) + '***' : '***';
-    return `${maskedLocal}@${domain}`;
-  }
+maskEmail(email) {
+  if (!email || !email.includes('@')) return '***@***.***';
+  const [local, domain] = email.split('@');
+  const maskedLocal = local.length > 2 ? local.slice(0, 2) + '***' : '***';
+  return `${maskedLocal}@${domain}`;
+}
 
-  startCleanupTimer() {
-    // 每分钟清理过期的挑战
-    this.cleanupTimer = setInterval(() => {
-      const now = Date.now();
-      for (const [challengeId, challenge] of this.activeChallenges.entries()) {
-        if (now > challenge.expiresAt) {
-          this.activeChallenges.delete(challengeId);
-        }
+startCleanupTimer() {
+  // 每分钟清理过期的挑战
+  this.cleanupTimer = setInterval(() => {
+    const now = Date.now();
+    for (const [challengeId, challenge] of this.activeChallenges.entries()) {
+      if (now > challenge.expiresAt) {
+        this.activeChallenges.delete(challengeId);
       }
-    }, 60000);
-  }
-
-  destroy() {
-    if (this.cleanupTimer) {
-      clearInterval(this.cleanupTimer);
     }
-    this.activeChallenges.clear();
+  }, 60000);
+}
+
+destroy() {
+  if (this.cleanupTimer) {
+    clearInterval(this.cleanupTimer);
   }
+  this.activeChallenges.clear();
+}
 }
 
 // ==================== 数据库表创建 ====================

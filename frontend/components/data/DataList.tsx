@@ -12,10 +12,10 @@ interface DataTableProps {
   rowKey?: string;
 }
 
-import { DataTable } from '@/components/shared';
 import { TestRecord } from '@/hooks/useDataStorage';
 import { Code, Copy, Database, Edit, Eye, Globe, Shield, Trash2, Wifi, Zap } from 'lucide-react';
 import React from 'react';
+import { DataTable } from '../shared/index';
 
 interface DataListProps {
   records: TestRecord[];

@@ -6,7 +6,7 @@
 
 const crypto = require('crypto');
 const { getPool } = require('../../config/database.js');
-const Logger = require('../../middleware/logger.js');
+const Logger = require('../../utils/logger.js');
 
 // ==================== 配置 ====================
 
@@ -31,23 +31,23 @@ class SessionManager {
    */
   async createSession(userId, deviceInfo, ipAddress, userAgent) {
     const pool = getPool();
-    
+
     try {
       // 生成会话ID
       const sessionId = this.generateSessionId();
-      
+
       // 获取设备指纹
       const deviceId = this.generateDeviceId(deviceInfo);
-      
+
       // 获取位置信息（如果启用）
       let location = null;
       if (SESSION_CONFIG.enableLocationTracking) {
         location = await this.getLocationFromIP(ipAddress);
       }
-      
+
       // 检查并清理超出限制的会话
       await this.enforceSessionLimit(userId);
-      
+
       // 创建会话记录
       const result = await pool.query(`
         INSERT INTO user_sessions (
@@ -69,7 +69,7 @@ class SessionManager {
       ]);
 
       const session = result.rows[0];
-      
+
       Logger.info('Session created', {
         sessionId,
         userId,
@@ -95,7 +95,7 @@ class SessionManager {
    */
   async validateSession(sessionId, userId) {
     const pool = getPool();
-    
+
     try {
       const result = await pool.query(`
         SELECT * FROM user_sessions 
@@ -104,16 +104,17 @@ class SessionManager {
       `, [sessionId, userId]);
 
       if (result.rows.length === 0) {
-        
-        return { valid: false, reason: 'SESSION_NOT_FOUND'
-      };
+
+        return {
+          valid: false, reason: 'SESSION_NOT_FOUND'
+        };
       }
 
       const session = result.rows[0];
-      
+
       // 更新最后活动时间
       await this.updateSessionActivity(sessionId);
-      
+
       return {
         valid: true,
         session: {
@@ -136,7 +137,7 @@ class SessionManager {
    */
   async updateSessionActivity(sessionId) {
     const pool = getPool();
-    
+
     try {
       await pool.query(`
         UPDATE user_sessions 
@@ -154,7 +155,7 @@ class SessionManager {
    */
   async getUserSessions(userId) {
     const pool = getPool();
-    
+
     try {
       const result = await pool.query(`
         SELECT 
@@ -190,7 +191,7 @@ class SessionManager {
    */
   async terminateSession(sessionId, userId) {
     const pool = getPool();
-    
+
     try {
       const result = await pool.query(`
         UPDATE user_sessions 
@@ -203,7 +204,7 @@ class SessionManager {
         Logger.info('Session terminated', { sessionId, userId });
         return true;
       }
-      
+
       return false;
     } catch (error) {
       Logger.error('Failed to terminate session', error, { sessionId, userId });
@@ -216,7 +217,7 @@ class SessionManager {
    */
   async terminateOtherSessions(currentSessionId, userId) {
     const pool = getPool();
-    
+
     try {
       const result = await pool.query(`
         UPDATE user_sessions 
@@ -226,18 +227,18 @@ class SessionManager {
       `, [userId, currentSessionId]);
 
       const terminatedCount = result.rows.length;
-      
-      Logger.info('Other sessions terminated', { 
-        userId, 
-        currentSessionId, 
-        terminatedCount 
+
+      Logger.info('Other sessions terminated', {
+        userId,
+        currentSessionId,
+        terminatedCount
       });
-      
+
       return terminatedCount;
     } catch (error) {
-      Logger.error('Failed to terminate other sessions', error, { 
-        currentSessionId, 
-        userId 
+      Logger.error('Failed to terminate other sessions', error, {
+        currentSessionId,
+        userId
       });
       return 0;
     }
@@ -248,7 +249,7 @@ class SessionManager {
    */
   async terminateAllUserSessions(userId) {
     const pool = getPool();
-    
+
     try {
       const result = await pool.query(`
         UPDATE user_sessions 
@@ -258,9 +259,9 @@ class SessionManager {
       `, [userId]);
 
       const terminatedCount = result.rows.length;
-      
+
       Logger.info('All user sessions terminated', { userId, terminatedCount });
-      
+
       return terminatedCount;
     } catch (error) {
       Logger.error('Failed to terminate all user sessions', error, { userId });
@@ -273,7 +274,7 @@ class SessionManager {
    */
   async enforceSessionLimit(userId) {
     const pool = getPool();
-    
+
     try {
       // 获取当前活跃会话数
       const countResult = await pool.query(`
@@ -283,11 +284,11 @@ class SessionManager {
       `, [userId]);
 
       const currentCount = parseInt(countResult.rows[0].count);
-      
+
       if (currentCount >= SESSION_CONFIG.maxConcurrentSessions) {
         // 终止最旧的会话
         const sessionsToTerminate = currentCount - SESSION_CONFIG.maxConcurrentSessions + 1;
-        
+
         await pool.query(`
           UPDATE user_sessions 
           SET is_active = false, terminated_at = NOW()
@@ -299,9 +300,9 @@ class SessionManager {
           )
         `, [userId, sessionsToTerminate]);
 
-        Logger.info('Sessions terminated due to limit', { 
-          userId, 
-          terminatedCount: sessionsToTerminate 
+        Logger.info('Sessions terminated due to limit', {
+          userId,
+          terminatedCount: sessionsToTerminate
         });
       }
     } catch (error) {
@@ -314,7 +315,7 @@ class SessionManager {
    */
   async cleanupExpiredSessions() {
     const pool = getPool();
-    
+
     try {
       const result = await pool.query(`
         UPDATE user_sessions 
@@ -324,11 +325,11 @@ class SessionManager {
       `);
 
       const cleanedCount = result.rows.length;
-      
+
       if (cleanedCount > 0) {
         Logger.info('Expired sessions cleaned up', { cleanedCount });
       }
-      
+
       return cleanedCount;
     } catch (error) {
       Logger.error('Failed to cleanup expired sessions', error);
@@ -341,7 +342,7 @@ class SessionManager {
    */
   async getSessionStats() {
     const pool = getPool();
-    
+
     try {
       const result = await pool.query(`
         SELECT 
@@ -380,7 +381,7 @@ class SessionManager {
       deviceInfo.fingerprint || '',
       deviceInfo.language || ''
     ].join('|');
-    
+
     return crypto.createHash('sha256').update(components).digest('hex').substring(0, 32);
   }
 
@@ -389,7 +390,7 @@ class SessionManager {
    */
   parseDeviceName(userAgent) {
     if (!userAgent) return 'Unknown Device';
-    
+
     // 简单的设备名称解析
     if (userAgent.includes('iPhone')) return 'iPhone';
     if (userAgent.includes('iPad')) return 'iPad';
@@ -397,7 +398,7 @@ class SessionManager {
     if (userAgent.includes('Windows')) return 'Windows PC';
     if (userAgent.includes('Macintosh')) return 'Mac';
     if (userAgent.includes('Linux')) return 'Linux PC';
-    
+
     return 'Unknown Device';
   }
 
@@ -406,14 +407,14 @@ class SessionManager {
    */
   parseDeviceType(userAgent) {
     if (!userAgent) return 'unknown';
-    
+
     if (userAgent.includes('Mobile') || userAgent.includes('iPhone') || userAgent.includes('Android')) {
       return 'mobile';
     }
     if (userAgent.includes('iPad') || userAgent.includes('Tablet')) {
       return 'tablet';
     }
-    
+
     return 'desktop';
   }
 
@@ -433,7 +434,7 @@ class SessionManager {
           timezone: 'Local'
         };
       }
-      
+
       // 实际项目中应该调用真实的地理位置API
       return {
         country: 'Unknown',
@@ -478,7 +479,7 @@ class SessionManager {
 
 const createSessionTable = async () => {
   const pool = getPool();
-  
+
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS user_sessions (
@@ -502,7 +503,7 @@ const createSessionTable = async () => {
       CREATE INDEX IF NOT EXISTS idx_user_sessions_active ON user_sessions(is_active, expires_at);
       CREATE INDEX IF NOT EXISTS idx_user_sessions_cleanup ON user_sessions(is_active, expires_at) WHERE is_active = true;
     `);
-    
+
     Logger.info('User sessions table created/verified');
   } catch (error) {
     Logger.error('Failed to create user sessions table', error);

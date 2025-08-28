@@ -10,7 +10,7 @@
 const crypto = require('crypto');
 const uuidv4 = () => crypto.randomUUID();
 const { getPool } = require('../../config/database.js');
-const Logger = require('../../middleware/logger.js');
+const Logger = require('../../utils/logger.js');
 
 // ==================== 配置 ====================
 
@@ -157,8 +157,8 @@ class RBACService {
 
     // 拒绝优先原则
     if (deniedBy.length > 0) {
-      
-        return {
+
+      return {
         allowed: false,
         reason: 'Explicitly denied by permission rules',
         matchedRules,
@@ -169,8 +169,8 @@ class RBACService {
 
     // 检查是否有允许的权限
     if (allowedBy.length > 0) {
-      
-        return {
+
+      return {
         allowed: true,
         reason: 'Allowed by permission rules',
         matchedRules,
@@ -195,17 +195,17 @@ class RBACService {
   isPermissionMatch(permission, resource, action, context) {
     // 检查资源和操作
     if (permission.resource !== resource || permission.action !== action) {
-      
-        return false;
-      }
+
+      return false;
+    }
 
     // 检查条件
     if (permission.conditions && permission.conditions.length > 0) {
-      
-        return permission.conditions.every(condition =>
+
+      return permission.conditions.every(condition =>
         this.validateCondition(condition, context)
       );
-      }
+    }
 
     return true;
   }
@@ -459,7 +459,7 @@ class RBACService {
       }
 
       if (updateFields.length === 0) {
-        
+
         return currentRole;
       }
 
