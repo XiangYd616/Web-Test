@@ -67,7 +67,7 @@ function App() {
           <AuthProvider>
             <AppRoutes />
             <BackgroundTestNotifications />
-            <PerformanceMonitor showDetails={process.env.NODE_ENV === 'development'} />
+            <PerformanceMonitor />
           </AuthProvider>
           {/* </NotificationProvider> */}
         </ThemeProvider>

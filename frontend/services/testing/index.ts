@@ -1,4 +1,3 @@
-import { TestProgress } from '../../services/api/testProgressService';
 // 🧪 测试服务统一导出
 export { default as apiTestEngine } from './apiTestEngine';
 export { default as testScheduler } from './testScheduler';
@@ -10,7 +9,8 @@ export type { TestScheduler } from './testScheduler';
 export type { UnifiedTestEngine } from './unifiedTestEngine';
 
 // 重新导出常用类型
+export { TestType } from '../../types/unified/testTypes';
 export type { APIEndpoint, APITestConfig } from './apiTestEngine';
 export type { ScheduledTest, TestExecution } from './testScheduler';
-export type { TestProgress, TestResult, TestType } from './unifiedTestEngine';
+export type { TestProgress, TestResult } from './unifiedTestEngine';
 

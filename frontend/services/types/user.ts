@@ -6,9 +6,15 @@
 
 // 重新导出统一的用户类型定义
 export type {
-  AuthResponse, fromDatabaseFields, LoginCredentials,
-  RegisterData, toDatabaseFields, User, UserDatabaseFields, UserPlan, UserPreferences, UserProfile, UserRole, UserSession, UserStatus
+  AuthResponse, LoginCredentials,
+  RegisterData, User, UserPreferences, UserProfile
 } from '../../types/unified/models';
+
+// 从枚举中导入用户相关枚举
+export { UserRole } from '../../types/enums';
+
+// 注释掉不存在的类型导入
+// fromDatabaseFields, toDatabaseFields, UserDatabaseFields, UserPlan, UserSession, UserStatus
 
 // 扩展类型定义（服务层特有的类型）
 export interface PasswordResetRequest {

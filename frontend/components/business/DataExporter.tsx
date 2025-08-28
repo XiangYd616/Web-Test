@@ -3,6 +3,7 @@
  * 支持多格式数据导出功能
  */
 
+import React from 'react';
 import {
     AlertCircle,
     CheckCircle,
@@ -12,9 +13,11 @@ import {
     FileSpreadsheet,
     FileText,
     Filter,
-    Settings
+    Settings,
+    Trash2,
+    X
 } from 'lucide-react';
-import type { createElement, useCallback, useEffect, useState, FC } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 import {
     Badge,
@@ -24,8 +27,7 @@ import {
     Input,
     Modal,
     ProgressBar,
-    Select,
-    type SelectOption
+    Select
 } from '../ui';
 
 // 导出格式类型
@@ -81,8 +83,14 @@ export interface DataExporterProps {
     className?: string;
 }
 
+// 本地SelectOption类型定义
+interface LocalSelectOption {
+    value: string;
+    label: string;
+}
+
 // 格式选项
-const formatOptions: SelectOption[] = [
+const formatOptions: LocalSelectOption[] = [
     { value: 'pdf', label: 'PDF报告' },
     { value: 'excel', label: 'Excel表格' },
     { value: 'csv', label: 'CSV文件' },
@@ -90,7 +98,7 @@ const formatOptions: SelectOption[] = [
 ];
 
 // 数据类型选项
-const dataTypeOptions: SelectOption[] = [
+const dataTypeOptions: LocalSelectOption[] = [
     { value: 'test-results', label: '测试结果' },
     { value: 'monitoring-data', label: '监控数据' },
     { value: 'user-data', label: '用户数据' },
@@ -99,7 +107,7 @@ const dataTypeOptions: SelectOption[] = [
 ];
 
 // 状态筛选选项
-const statusOptions: SelectOption[] = [
+const statusOptions: LocalSelectOption[] = [
     { value: 'all', label: '全部状态' },
     { value: 'completed', label: '已完成' },
     { value: 'failed', label: '失败' },
@@ -389,13 +397,13 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             label="导出格式"
                             options={formatOptions}
                             value={config.format}
-                            onChange={(value) => setConfig(prev => ({ ...prev, format: value as ExportFormat }))}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setConfig(prev => ({ ...prev, format: e.target.value as ExportFormat }))}
                         />
                         <Select
                             label="数据类型"
                             options={dataTypeOptions}
                             value={config.dataType}
-                            onChange={(value) => setConfig(prev => ({ ...prev, dataType: value as ExportDataType }))}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setConfig(prev => ({ ...prev, dataType: e.target.value as ExportDataType }))}
                         />
                     </div>
 
@@ -405,18 +413,18 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             label="开始日期"
                             type="date"
                             value={config.dateRange.start}
-                            onChange={(value) => setConfig(prev => ({
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                 ...prev,
-                                dateRange: { ...prev.dateRange, start: value as string }
+                                dateRange: { ...prev.dateRange, start: e.target.value }
                             }))}
                         />
                         <Input
                             label="结束日期"
                             type="date"
                             value={config.dateRange.end}
-                            onChange={(value) => setConfig(prev => ({
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                 ...prev,
-                                dateRange: { ...prev.dateRange, end: value as string }
+                                dateRange: { ...prev.dateRange, end: e.target.value }
                             }))}
                         />
                     </div>
@@ -428,9 +436,9 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             <label className="flex items-center space-x-2">
                                 <Checkbox
                                     checked={config.options.includeCharts || false}
-                                    onChange={(checked) => setConfig(prev => ({
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                         ...prev,
-                                        options: { ...prev.options, includeCharts: checked as boolean }
+                                        options: { ...prev.options, includeCharts: e.target.checked }
                                     }))}
                                 />
                                 <span className="text-sm text-gray-700">包含图表</span>
@@ -438,9 +446,9 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             <label className="flex items-center space-x-2">
                                 <Checkbox
                                     checked={config.options.includeRecommendations || false}
-                                    onChange={(checked) => setConfig(prev => ({
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                         ...prev,
-                                        options: { ...prev.options, includeRecommendations: checked as boolean }
+                                        options: { ...prev.options, includeRecommendations: e.target.checked }
                                     }))}
                                 />
                                 <span className="text-sm text-gray-700">包含建议</span>
@@ -448,9 +456,9 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             <label className="flex items-center space-x-2">
                                 <Checkbox
                                     checked={config.options.includeRawData || false}
-                                    onChange={(checked) => setConfig(prev => ({
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                         ...prev,
-                                        options: { ...prev.options, includeRawData: checked as boolean }
+                                        options: { ...prev.options, includeRawData: e.target.checked }
                                     }))}
                                 />
                                 <span className="text-sm text-gray-700">包含原始数据</span>
@@ -458,9 +466,9 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             <label className="flex items-center space-x-2">
                                 <Checkbox
                                     checked={config.options.compression || false}
-                                    onChange={(checked) => setConfig(prev => ({
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                         ...prev,
-                                        options: { ...prev.options, compression: checked as boolean }
+                                        options: { ...prev.options, compression: e.target.checked }
                                     }))}
                                 />
                                 <span className="text-sm text-gray-700">压缩文件</span>
@@ -624,9 +632,9 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             type="password"
                             placeholder="设置文件密码"
                             value={config.options.password || ''}
-                            onChange={(value) => setConfig(prev => ({
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                 ...prev,
-                                options: { ...prev.options, password: value as string }
+                                options: { ...prev.options, password: e.target.value }
                             }))}
                         />
                     </div>

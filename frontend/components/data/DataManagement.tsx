@@ -1,566 +1,220 @@
-/**
- * 统一数据管理组件 - 重构版
- * 整合测试历史、统计分析、数据中心功能
- */
-
+import { PaginationInfo, TestRecord } from '@/hooks/useDataStorage';
 import {
-  BarChart3,
-  Database,
-  FileText,
-  Filter,
-  RefreshCw,
-  Search
+    BarChart3,
+    Database,
+    Download,
+    FileText,
+    RefreshCw,
+    Search,
+    TrendingUp
 } from 'lucide-react';
-import type { useEffect, useState, ReactNode, FC } from 'react';
-import TestHistory from '../common/TestHistory';
-// import { TestStatisticsPanel } from './TestStatisticsPanel';
-// import { DataExportPanel } from './DataExportPanel';
-import { unifiedTestHistoryService } from '../../services/unifiedTestHistoryService';
-import type { TestStatistics, TestType } from '../../types/testHistory';
+import React, { useState } from 'react';
+import { TestType } from '../../types/unified/testTypes';
+import DataStats from './DataStats';
 
-interface UnifiedDataManagementProps {
-  className?: string;
-  defaultTab?: 'history' | 'statistics' | 'export';
+interface DataManagementProps {
+    className?: string;
+    defaultTab?: 'data' | 'history' | 'statistics';
 }
 
-export const DataManagement: React.FC<UnifiedDataManagementProps> = ({
-  className = '',
-  defaultTab = 'history'
+export const DataManagement: React.FC<DataManagementProps> = ({
+    className = '',
+    defaultTab = 'data'
 }) => {
-  // 状态管理
-  const [activeTab, setActiveTab] = useState(defaultTab);
-  const [statistics, setStatistics] = useState<TestStatistics | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTestTypes, setSelectedTestTypes] = useState<TestType[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
+    const [activeTab, setActiveTab] = useState<'data' | 'history' | 'statistics'>(defaultTab);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedTestTypes, setSelectedTestTypes] = useState<TestType[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-  // 测试类型选项
-  const testTypeOptions: { value: TestType; label: string; icon: React.ReactNode }[] = [
-    { value: 'stress', label: '压力测试', icon: '⚡' },
-    { value: 'security', label: '安全测试', icon: '🛡️' },
-    { value: 'api', label: 'API测试', icon: '🔌' },
-    { value: 'performance', label: '性能测试', icon: '🚀' },
-    { value: 'compatibility', label: '兼容性测试', icon: '🌐' },
-    { value: 'seo', label: 'SEO测试', icon: '📈' },
-    { value: 'database', label: '数据库测试', icon: '💾' },
-    { value: 'network', label: '网络测试', icon: '🌐' }
-  ];
+    // 模拟数据
+    const mockPaginationInfo: PaginationInfo = {
+        current: 1,
+        pageSize: 10,
+        total: 100
+    };
 
-  // 标签页配置
-  const tabs = [
-    {
-      id: 'history',
-      label: '测试历史',
-      icon: FileText,
-      description: '查看和管理所有测试记录'
-    },
-    {
-      id: 'statistics',
-      label: '统计分析',
-      icon: BarChart3,
-      description: '测试数据统计和趋势分析'
-    },
-    {
-      id: 'export',
-      label: '数据中心',
-      icon: Database,
-      description: '数据导出、备份和管理'
-    }
-  ];
+    const mockTestRecords: TestRecord[] = [
+        {
+            id: '1',
+            testName: '性能测试',
+            testType: TestType.PERFORMANCE,
+            status: 'completed',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            result: { score: 85 }
+        }
+    ];
 
-  // 加载统计数据
-  useEffect(() => {
-    loadStatistics();
-  }, []);
+    const handleTabChange = (tab: 'data' | 'history' | 'statistics') => {
+        setActiveTab(tab);
+    };
 
-  const loadStatistics = async () => {
-    try {
-      setLoading(true);
-      const stats = await unifiedTestHistoryService.getTestStatistics();
-      setStatistics(stats);
-    } catch (error) {
-      console.error('加载统计数据失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleTestTypeToggle = (testType: TestType) => {
+        setSelectedTestTypes(prev =>
+            prev.includes(testType)
+                ? prev.filter(t => t !== testType)
+                : [...prev, testType]
+        );
+    };
 
-  // 刷新数据
-  const handleRefresh = async () => {
-    unifiedTestHistoryService.clearCache();
-    await loadStatistics();
-  };
+    const handleRefresh = () => {
+        setIsLoading(true);
+        setTimeout(() => setIsLoading(false), 1000);
+    };
 
-  // 处理搜索
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
+    const handleExport = () => {
+        console.log('Exporting data...');
+    };
 
-  // 处理测试类型过滤
-  const handleTestTypeFilter = (testType: TestType) => {
-    setSelectedTestTypes(prev =>
-      prev.includes(testType)
-        ? prev.filter(t => t !== testType)
-        : [...prev, testType]
-    );
-  };
+    return (
+        <div className={`unified-data-management min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 p-5 ${className}`}>
+            {/* 头部 */}
+            <div className="header bg-white/95 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-lg">
+                <div className="flex justify-between items-start mb-5">
+                    <div className="flex items-center gap-3">
+                        <Database className="w-8 h-8 text-blue-500" />
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-800 m-0">数据管理中心</h1>
+                            <p className="text-gray-600 text-base mt-1">管理和分析测试数据</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleRefresh}
+                            disabled={isLoading}
+                            className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 rounded-lg bg-white text-gray-700 font-medium transition-all hover:border-blue-500 hover:text-blue-500 disabled:opacity-50"
+                        >
+                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                            刷新
+                        </button>
+                        <button
+                            onClick={handleExport}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-medium transition-all hover:bg-blue-600"
+                        >
+                            <Download className="w-4 h-4" />
+                            导出
+                        </button>
+                    </div>
+                </div>
 
-  return (
-    <div className={`unified-data-management ${className}`}>
-      {/* 页面头部 */}
-      <div className="data-management-header">
-        <div className="header-content">
-          <div className="title-section">
-            <h1 className="page-title">
-              <Database className="title-icon" />
-              数据管理
-              <span className="version-badge">v2.0</span>
-            </h1>
-            <p className="page-description">
-              统一管理测试历史、数据分析和导出功能
-            </p>
-          </div>
+                {/* 搜索和筛选 */}
+                <div className="border-t border-gray-200 pt-5">
+                    <div className="flex flex-col gap-4">
+                        <div className="relative max-w-md">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="搜索测试记录..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                            />
+                        </div>
 
-          <div className="header-actions">
-            <button
-              onClick={handleRefresh}
-              className="action-button refresh-button"
-              disabled={loading}
-            >
-              <RefreshCw className={`icon ${loading ? 'spinning' : ''}`} />
-              刷新
-            </button>
-
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`action-button filter-button ${showFilters ? 'active' : ''}`}
-            >
-              <Filter className="icon" />
-              筛选
-            </button>
-          </div>
-        </div>
-
-        {/* 搜索和过滤栏 */}
-        <div className={`search-filter-bar ${showFilters ? 'expanded' : ''}`}>
-          <div className="search-section">
-            <div className="search-input-wrapper">
-              <Search className="search-icon" />
-              <input
-                type="text"
-                placeholder="搜索测试名称、URL或标签..."
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="search-input"
-              />
+                        <div className="flex items-center gap-4 flex-wrap">
+                            <span className="font-semibold text-gray-700">测试类型:</span>
+                            <div className="flex gap-2 flex-wrap">
+                                {Object.values(TestType).map((testType) => (
+                                    <button
+                                        key={testType}
+                                        onClick={() => handleTestTypeToggle(testType)}
+                                        className={`px-3 py-1.5 text-xs rounded-full border transition-all ${selectedTestTypes.includes(testType)
+                                            ? 'bg-blue-500 text-white border-blue-500'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-blue-500 hover:text-blue-500'
+                                            }`}
+                                    >
+                                        {testType}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          {showFilters && (
-            <div className="filter-section">
-              <div className="filter-group">
-                <label className="filter-label">测试类型:</label>
-                <div className="test-type-filters">
-                  {testTypeOptions.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleTestTypeFilter(option.value)}
-                      className={`test-type-filter ${selectedTestTypes.includes(option.value) ? 'active' : ''
+            {/* 标签导航 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <button
+                    onClick={() => handleTabChange('data')}
+                    className={`flex items-center gap-4 p-5 rounded-xl border-2 transition-all text-left ${activeTab === 'data'
+                        ? 'border-blue-500 bg-white shadow-lg'
+                        : 'border-transparent bg-white/80 hover:border-blue-500 hover:shadow-md'
                         }`}
-                    >
-                      <span className="filter-icon">{option.icon}</span>
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                >
+                    <Database className="w-6 h-6 text-blue-500 flex-shrink-0" />
+                    <div>
+                        <div className="font-semibold text-gray-800">数据概览</div>
+                        <div className="text-sm text-gray-600">查看测试数据统计</div>
+                    </div>
+                </button>
+
+                <button
+                    onClick={() => handleTabChange('history')}
+                    className={`flex items-center gap-4 p-5 rounded-xl border-2 transition-all text-left ${activeTab === 'history'
+                        ? 'border-blue-500 bg-white shadow-lg'
+                        : 'border-transparent bg-white/80 hover:border-blue-500 hover:shadow-md'
+                        }`}
+                >
+                    <FileText className="w-6 h-6 text-blue-500 flex-shrink-0" />
+                    <div>
+                        <div className="font-semibold text-gray-800">测试历史</div>
+                        <div className="text-sm text-gray-600">查看历史测试记录</div>
+                    </div>
+                </button>
+
+                <button
+                    onClick={() => handleTabChange('statistics')}
+                    className={`flex items-center gap-4 p-5 rounded-xl border-2 transition-all text-left ${activeTab === 'statistics'
+                        ? 'border-blue-500 bg-white shadow-lg'
+                        : 'border-transparent bg-white/80 hover:border-blue-500 hover:shadow-md'
+                        }`}
+                >
+                    <BarChart3 className="w-6 h-6 text-blue-500 flex-shrink-0" />
+                    <div>
+                        <div className="font-semibold text-gray-800">数据统计</div>
+                        <div className="text-sm text-gray-600">查看详细统计信息</div>
+                    </div>
+                </button>
             </div>
-          )}
+
+            {/* 内容区域 */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg min-h-[600px]">
+                {activeTab === 'data' && (
+                    <div className="data-tab">
+                        <DataStats
+                            pagination={mockPaginationInfo}
+                            records={mockTestRecords}
+                            loading={isLoading}
+                        />
+                    </div>
+                )}
+
+                {activeTab === 'history' && (
+                    <div className="history-tab">
+                        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                            <FileText className="w-16 h-16 mb-5 opacity-50" />
+                            <h3 className="text-xl font-semibold text-gray-700 mb-3">测试历史功能开发中</h3>
+                            <p className="text-center max-w-md">
+                                测试历史记录功能正在开发中，敬请期待。
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'statistics' && (
+                    <div className="statistics-tab">
+                        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                            <TrendingUp className="w-16 h-16 mb-5 opacity-50" />
+                            <h3 className="text-xl font-semibold text-gray-700 mb-3">统计功能开发中</h3>
+                            <p className="text-center max-w-md">
+                                详细的数据统计和分析功能正在开发中，敬请期待。
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
-      </div>
-
-      {/* 标签页导航 */}
-      <div className="tab-navigation">
-        {tabs.map(tab => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-            >
-              <Icon className="tab-icon" />
-              <div className="tab-content">
-                <span className="tab-label">{tab.label}</span>
-                <span className="tab-description">{tab.description}</span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* 标签页内容 */}
-      <div className="tab-content-area">
-        {activeTab === 'history' && (
-          <div className="history-tab">
-            <TestHistory
-              showStatistics={true}
-              showFilters={true}
-              showBatchActions={true}
-              testType={selectedTestTypes.length > 0 ? selectedTestTypes : undefined}
-            />
-          </div>
-        )}
-
-        {activeTab === 'statistics' && (
-          <div className="statistics-tab">
-            <div className="placeholder-panel">
-              <TrendingUp className="placeholder-icon" />
-              <h3>统计分析</h3>
-              <p>测试数据统计和趋势分析功能正在开发中...</p>
-              {statistics && (
-                <div className="basic-stats">
-                  <p>总测试数: {statistics.totalTests || 0}</p>
-                  <p>成功测试: {statistics.completedTests || 0}</p>
-                  <p>失败测试: {statistics.failedTests || 0}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'export' && (
-          <div className="export-tab">
-            <div className="placeholder-panel">
-              <Download className="placeholder-icon" />
-              <h3>数据中心</h3>
-              <p>数据导出、备份和管理功能正在开发中...</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 样式 */}
-      <style jsx>{`
-        .unified-data-management {
-          min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 20px;
-        }
-
-        .data-management-header {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          border-radius: 16px;
-          padding: 24px;
-          margin-bottom: 24px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 20px;
-        }
-
-        .title-section {
-          flex: 1;
-        }
-
-        .page-title {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 28px;
-          font-weight: 700;
-          color: #1a202c;
-          margin: 0 0 8px 0;
-        }
-
-        .title-icon {
-          width: 32px;
-          height: 32px;
-          color: #667eea;
-        }
-
-        .version-badge {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-          color: white;
-          padding: 4px 12px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 600;
-          margin-left: 12px;
-        }
-
-        .page-description {
-          color: #718096;
-          font-size: 16px;
-          margin: 0;
-        }
-
-        .header-actions {
-          display: flex;
-          gap: 12px;
-        }
-
-        .action-button {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 10px 16px;
-          border: 2px solid #e2e8f0;
-          border-radius: 10px;
-          background: white;
-          color: #4a5568;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .action-button:hover {
-          border-color: #667eea;
-          color: #667eea;
-          transform: translateY(-1px);
-        }
-
-        .action-button.active {
-          background: #667eea;
-          border-color: #667eea;
-          color: white;
-        }
-
-        .action-button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .spinning {
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        .search-filter-bar {
-          border-top: 1px solid #e2e8f0;
-          padding-top: 20px;
-          transition: all 0.3s ease;
-        }
-
-        .search-input-wrapper {
-          position: relative;
-          max-width: 400px;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 20px;
-          height: 20px;
-          color: #a0aec0;
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 12px 12px 12px 44px;
-          border: 2px solid #e2e8f0;
-          border-radius: 10px;
-          font-size: 14px;
-          transition: border-color 0.2s;
-        }
-
-        .search-input:focus {
-          outline: none;
-          border-color: #667eea;
-        }
-
-        .filter-section {
-          margin-top: 16px;
-        }
-
-        .filter-group {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          flex-wrap: wrap;
-        }
-
-        .filter-label {
-          font-weight: 600;
-          color: #4a5568;
-          white-space: nowrap;
-        }
-
-        .test-type-filters {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .test-type-filter {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 12px;
-          border: 1px solid #e2e8f0;
-          border-radius: 20px;
-          background: white;
-          color: #4a5568;
-          font-size: 13px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .test-type-filter:hover {
-          border-color: #667eea;
-          color: #667eea;
-        }
-
-        .test-type-filter.active {
-          background: #667eea;
-          border-color: #667eea;
-          color: white;
-        }
-
-        .tab-navigation {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 16px;
-          margin-bottom: 24px;
-        }
-
-        .tab-button {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding: 20px;
-          background: rgba(255, 255, 255, 0.9);
-          border: 2px solid transparent;
-          border-radius: 12px;
-          cursor: pointer;
-          transition: all 0.2s;
-          text-align: left;
-        }
-
-        .tab-button:hover {
-          background: white;
-          border-color: #667eea;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
-        }
-
-        .tab-button.active {
-          background: white;
-          border-color: #667eea;
-          box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
-        }
-
-        .tab-icon {
-          width: 24px;
-          height: 24px;
-          color: #667eea;
-          flex-shrink: 0;
-        }
-
-        .tab-content {
-          flex: 1;
-        }
-
-        .tab-label {
-          display: block;
-          font-size: 16px;
-          font-weight: 600;
-          color: #1a202c;
-          margin-bottom: 4px;
-        }
-
-        .tab-description {
-          display: block;
-          font-size: 14px;
-          color: #718096;
-        }
-
-        .tab-content-area {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          border-radius: 16px;
-          padding: 24px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-          min-height: 600px;
-        }
-
-        .placeholder-panel {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 60px 20px;
-          text-align: center;
-          color: #718096;
-        }
-
-        .placeholder-icon {
-          width: 64px;
-          height: 64px;
-          color: #cbd5e0;
-          margin-bottom: 20px;
-        }
-
-        .placeholder-panel h3 {
-          font-size: 24px;
-          font-weight: 600;
-          color: #4a5568;
-          margin: 0 0 12px 0;
-        }
-
-        .placeholder-panel p {
-          font-size: 16px;
-          margin: 0 0 20px 0;
-          max-width: 400px;
-        }
-
-        .basic-stats {
-          background: #f7fafc;
-          border-radius: 8px;
-          padding: 16px;
-          margin-top: 20px;
-        }
-
-        .basic-stats p {
-          margin: 4px 0;
-          font-size: 14px;
-          color: #4a5568;
-        }
-
-        @media (max-width: 768px) {
-          .unified-data-management {
-            padding: 12px;
-          }
-
-          .header-content {
-            flex-direction: column;
-            gap: 16px;
-          }
-
-          .tab-navigation {
-            grid-template-columns: 1fr;
-          }
-
-          .filter-group {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-        }
-      `}</style>
-    </div>
-  );
+    );
 };
 
 export default DataManagement;

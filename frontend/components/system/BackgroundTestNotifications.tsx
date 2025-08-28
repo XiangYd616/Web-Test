@@ -1,4 +1,6 @@
-import type { useState, FC } from 'react';
+﻿import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, ExternalLink } from 'lucide-react';
 import { useNotifications } from '../../hooks/useNotifications';
@@ -63,7 +65,7 @@ const BackgroundTestNotifications: React.FC = () => {
               type="button"
               onClick={() => deleteNotification(notification.id)}
               className="ml-2 text-white/70 hover:text-white transition-colors flex-shrink-0"
-              title="关闭通知"
+              title="鍏抽棴閫氱煡"
             >
               <X className="w-3 h-3" />
             </button>
@@ -75,3 +77,4 @@ const BackgroundTestNotifications: React.FC = () => {
 };
 
 export default BackgroundTestNotifications;
+

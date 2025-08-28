@@ -6,15 +6,15 @@ import { TestProgress } from '../../../services/api/testProgressService';
 
 // 导出组件
 export { TestConfigPanel } from './TestConfigPanel';
-export { TestProgressDisplay } from './TestProgressDisplay';
+// export { TestProgressDisplay } from './TestProgressDisplay';
 export { TestResultsViewer } from './TestResultsViewer';
 
 // 导出类型
 export type { BaseTestConfig } from './TestConfigPanel';
-export type { TestStatus, QueueStats } from './TestProgressDisplay';
+// export type { TestStatus, QueueStats } from './TestProgressDisplay';
 export type { TestResult } from './TestResultsViewer';
 
 // 导出组件属性类型
 export type { TestConfigPanelProps } from './TestConfigPanel';
-export type { TestProgressDisplayProps } from './TestProgressDisplay';
+// export type { TestProgressDisplayProps } from './TestProgressDisplay';
 export type { TestResultsViewerProps } from './TestResultsViewer';

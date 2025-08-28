@@ -1,4 +1,3 @@
-import { TestProgress } from '../services/api/testProgressService';
 
 // ==================== 性能配置接口 ====================
 
@@ -218,6 +217,34 @@ export interface PerformanceTestResult {
   mobilePerformance?: {
     score: number;
     issues: string[];
+    recommendations: string[];
+  };
+
+  /** 现代Web功能 */
+  modernWebFeatures?: {
+    score: number;
+    features: Record<string, boolean>;
+    recommendations: string[];
+    modernityLevel: 'high' | 'medium' | 'low' | 'unknown';
+  };
+
+  /** 网络优化 */
+  networkOptimization?: {
+    score: number;
+    issues: string[];
+    recommendations: string[];
+    metrics: Record<string, number>;
+  };
+
+  /** 第三方影响 */
+  thirdPartyImpact?: {
+    score: number;
+    totalBlockingTime: number;
+    scripts: Array<{
+      url: string;
+      blockingTime: number;
+      impact: 'high' | 'medium' | 'low';
+    }>;
     recommendations: string[];
   };
 

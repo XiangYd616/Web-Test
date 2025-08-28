@@ -31,14 +31,47 @@
     "noImplicitReturns": true, // 启用：函数必须有明确返回值
     "noImplicitOverride": false, // 暂时关闭
     "exactOptionalPropertyTypes": false, // 暂时关闭
-    /* Path mapping */
+    /* Path mapping - 基于Context7最佳实践 */
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
+        "frontend/*"
+      ],
+      "@components/*": [
+        "frontend/components/*"
+      ],
+      "@pages/*": [
+        "frontend/pages/*"
+      ],
+      "@services/*": [
+        "frontend/services/*"
+      ],
+      "@types/*": [
+        "frontend/types/*"
+      ],
+      "@utils/*": [
+        "frontend/utils/*"
+      ],
+      "@hooks/*": [
+        "frontend/hooks/*"
+      ],
+      "@contexts/*": [
+        "frontend/contexts/*"
+      ],
+      "@styles/*": [
+        "frontend/styles/*"
+      ],
+      "@shared/*": [
+        "shared/*"
+      ],
+      "@backend/*": [
+        "backend/*"
       ],
       "@electron/*": [
         "electron/*"
+      ],
+      "@tools/*": [
+        "tools/*"
       ]
     }
   },

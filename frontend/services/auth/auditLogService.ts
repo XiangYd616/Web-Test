@@ -4,12 +4,12 @@
  * 版本: v1.0.0
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import { defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
 
-export type AuditEventType = 
+export type AuditEventType =
   | 'login' | 'logout' | 'login_failed' | 'password_change' | 'password_reset'
   | 'mfa_setup' | 'mfa_verify' | 'mfa_failed'
   | 'permission_granted' | 'permission_denied' | 'permission_check'
@@ -17,7 +17,7 @@ export type AuditEventType =
   | 'user_created' | 'user_updated' | 'user_deleted' | 'user_locked' | 'user_unlocked'
   | 'session_created' | 'session_terminated' | 'session_expired'
   | 'security_alert' | 'suspicious_activity' | 'data_access' | 'data_modification'
-  | 'system_config' | 'admin_action' | 'api_access' | 'file_access';
+  | 'data_export' | 'system_config' | 'admin_action' | 'api_access' | 'file_access';
 
 export type AuditSeverity = 'low' | 'medium' | 'high' | 'critical';
 
@@ -133,12 +133,11 @@ class RiskScorer {
       'mfa_failed': 25,
       'permission_denied': 15,
       'suspicious_activity': 80,
-      'privilege_escalation': 90,
-      'data_exfiltration': 95,
+      'login': 90,
+      'data_access': 95,
       'user_locked': 30,
       'session_terminated': 10,
       'password_change': 5,
-      'login': 0,
       'logout': 0,
       'password_reset': 10,
       'mfa_setup': 5,
@@ -157,8 +156,8 @@ class RiskScorer {
       'session_created': 0,
       'session_expired': 5,
       'security_alert': 60,
-      'data_access': 5,
-      'data_modification': 15,
+      'data_modification': 5,
+      'data_export': 15,
       'system_config': 30,
       'admin_action': 25,
       'api_access': 5,
@@ -387,7 +386,7 @@ class SecurityEventDetector {
 
     if (entry.status === 'failure') factors.push('操作失败');
     if (entry.severity === 'critical' || entry.severity === 'high') factors.push('高严重程度');
-    
+
     const hour = new Date(entry.timestamp).getHours();
     if (hour < 6 || hour > 22) factors.push('非工作时间');
 
@@ -400,9 +399,9 @@ class SecurityEventDetector {
   private static getRecentEvents(key: string, eventType: AuditEventType, timeWindow: number): AuditLogEntry[] {
     const events = this.recentEvents.get(key) || [];
     const cutoff = Date.now() - timeWindow;
-    
-    return events.filter(event => 
-      event.eventType === eventType && 
+
+    return events.filter(event =>
+      event.eventType === eventType &&
       new Date(event.timestamp).getTime() > cutoff
     );
   }
@@ -413,14 +412,14 @@ class SecurityEventDetector {
   static addEventToCache(entry: AuditLogEntry): void {
     const key = `${entry.ipAddress}_${entry.userId || 'unknown'}`;
     const events = this.recentEvents.get(key) || [];
-    
+
     events.unshift(entry);
-    
+
     // 保持最近100个事件
     if (events.length > 100) {
       events.splice(100);
     }
-    
+
     this.recentEvents.set(key, events);
   }
 
@@ -516,7 +515,7 @@ export class AuditLogService {
 
     // 存储日志
     this.logs.unshift(entry);
-    
+
     // 限制日志大小
     if (this.logs.length > this.config.maxLogSize) {
       this.logs = this.logs.slice(0, this.config.maxLogSize);
@@ -529,7 +528,7 @@ export class AuditLogService {
     if (this.config.enableRealTimeMonitoring) {
       const securityAlerts = SecurityEventDetector.detectSecurityEvents(entry);
       this.alerts.push(...securityAlerts);
-      
+
       // 缓存安全事件
       SecurityEventDetector.addEventToCache(entry);
     }
@@ -549,12 +548,12 @@ export class AuditLogService {
     options: any;
   }>): Promise<AuditLogEntry[]> {
     const entries: AuditLogEntry[] = [];
-    
+
     for (const event of events) {
       const entry = await this.logEvent(event.eventType, event.details, event.options);
       entries.push(entry);
     }
-    
+
     return entries;
   }
 
@@ -573,70 +572,70 @@ export class AuditLogService {
     // 时间范围过滤
     if (query.startTime) {
       const startTime = new Date(query.startTime).getTime();
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         new Date(log.timestamp).getTime() >= startTime
       );
     }
 
     if (query.endTime) {
       const endTime = new Date(query.endTime).getTime();
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         new Date(log.timestamp).getTime() <= endTime
       );
     }
 
     // 事件类型过滤
     if (query.eventTypes && query.eventTypes.length > 0) {
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         query.eventTypes!.includes(log.eventType)
       );
     }
 
     // 严重程度过滤
     if (query.severities && query.severities.length > 0) {
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         query.severities!.includes(log.severity)
       );
     }
 
     // 状态过滤
     if (query.statuses && query.statuses.length > 0) {
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         query.statuses!.includes(log.status)
       );
     }
 
     // 用户过滤
     if (query.userIds && query.userIds.length > 0) {
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         log.userId && query.userIds!.includes(log.userId)
       );
     }
 
     // IP地址过滤
     if (query.ipAddresses && query.ipAddresses.length > 0) {
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         query.ipAddresses!.includes(log.ipAddress)
       );
     }
 
     // 资源过滤
     if (query.resources && query.resources.length > 0) {
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         log.resource && query.resources!.includes(log.resource)
       );
     }
 
     // 操作过滤
     if (query.actions && query.actions.length > 0) {
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         log.action && query.actions!.includes(log.action)
       );
     }
 
     // 标签过滤
     if (query.tags && query.tags.length > 0) {
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         query.tags!.some(tag => log.tags.includes(tag))
       );
     }
@@ -644,7 +643,7 @@ export class AuditLogService {
     // 搜索词过滤
     if (query.searchTerm) {
       const searchTerm = query.searchTerm.toLowerCase();
-      filteredLogs = filteredLogs.filter(log => 
+      filteredLogs = filteredLogs.filter(log =>
         log.username?.toLowerCase().includes(searchTerm) ||
         log.ipAddress.includes(searchTerm) ||
         log.resource?.toLowerCase().includes(searchTerm) ||
@@ -656,10 +655,10 @@ export class AuditLogService {
     // 排序
     const sortBy = query.sortBy || 'timestamp';
     const sortOrder = query.sortOrder || 'desc';
-    
+
     filteredLogs.sort((a, b) => {
       let aValue: any, bValue: any;
-      
+
       switch (sortBy) {
         case 'timestamp':
           aValue = new Date(a.timestamp).getTime();
@@ -678,7 +677,7 @@ export class AuditLogService {
           aValue = a.timestamp;
           bValue = b.timestamp;
       }
-      
+
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : -1;
       } else {
@@ -893,6 +892,7 @@ export class AuditLogService {
       'session_expired': 'low',
       'data_access': 'low',
       'data_modification': 'medium',
+      'data_export': 'medium',
       'api_access': 'low',
       'file_access': 'low'
     };
@@ -952,7 +952,7 @@ export class AuditLogService {
 
   private cleanupOldLogs(): void {
     const cutoffTime = Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000);
-    this.logs = this.logs.filter(log => 
+    this.logs = this.logs.filter(log =>
       new Date(log.timestamp).getTime() > cutoffTime
     );
   }
@@ -972,7 +972,7 @@ export function useAuditLog() {
   ) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await auditService.logEvent(eventType, details, options);
       return result;
@@ -988,7 +988,7 @@ export function useAuditLog() {
   const queryLogs = useCallback(async (query: AuditQuery = {}) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await auditService.queryLogs(query);
       return result;
@@ -1004,7 +1004,7 @@ export function useAuditLog() {
   const getStatistics = useCallback(async (query: AuditQuery = {}) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await auditService.getStatistics(query);
       return result;

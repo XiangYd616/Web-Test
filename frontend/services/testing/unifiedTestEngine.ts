@@ -96,8 +96,7 @@ export interface AccessibilityViolation {
 }
 
 // TestType 已迁移到统一类型系统
-import type { TestType } from '../../types/unified/testTypes';
-import { TestProgress } from '../../services/api/testProgressService';
+import { TestType } from '../../types/unified/testTypes';
 
 export interface TestProgress {
   stage: string;
@@ -301,19 +300,17 @@ export abstract class UnifiedTestEngine {
 export class TestEngineFactory {
   static createEngine(type: TestType, config: BaseTestConfig, progressCallback?: ProgressCallback): UnifiedTestEngine {
     switch (type) {
-      case 'stress':
+      case TestType.STRESS:
         return new StressTestEngine(config, progressCallback);
-      case 'content':
-        return new ContentTestEngine(config, progressCallback);
-      case 'compatibility':
+      case TestType.COMPATIBILITY:
         return new CompatibilityTestEngine(config, progressCallback);
-      case 'api':
+      case TestType.API:
         return new APITestEngine(config, progressCallback);
-      case 'security':
+      case TestType.SECURITY:
         return new SecurityTestEngine(config, progressCallback);
-      case 'accessibility':
+      case TestType.SEO:
         return new AccessibilityTestEngine(config, progressCallback);
-      case 'performance':
+      case TestType.PERFORMANCE:
         return new PerformanceTestEngine(config, progressCallback);
       default:
         throw new Error(`Unsupported test type: ${type}`);

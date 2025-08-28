@@ -56,7 +56,7 @@ export enum UserPlan {
  * 测试类型枚举 - 已迁移到统一类型系统
  * 请从 '../types/unified/testTypes' 导入 TestType 和 TestTypeEnum
  */
-import type { TestType } from './unified/testTypes';
+import { TestType } from './unified/testTypes';
 
 /**
  * 测试状态枚举 - 与数据库约束保持一致
@@ -221,10 +221,10 @@ export function getTestTypeDisplayName(type: TestType): string {
     [TestType.SECURITY]: '安全测试',
     [TestType.API]: 'API测试',
     [TestType.COMPATIBILITY]: '兼容性测试',
-    [TestType.ACCESSIBILITY]: '可访问性测试',
+    // [TestType.ACCESSIBILITY]: '可访问性测试', // ACCESSIBILITY不存在于TestType枚举中
     [TestType.STRESS]: '压力测试'
   };
-  return typeNames[type] || type;
+  return typeNames[type as keyof typeof typeNames] || type;
 }
 
 /**
@@ -243,9 +243,13 @@ export function getTestStatusDisplayName(status: TestStatus): string {
 
 // ==================== 导出所有枚举 ====================
 
-export {
-  Language, TestGrade,
-  TestPriority, TestStatus, TestType, ThemeMode, Timezone, UserPlan, UserRole,
-  UserStatus
-};
+// ==================== 枚举导出说明 ====================
+// 基于Context7最佳实践：所有enum定义已通过export关键字导出
+// 无需额外的导出语句，避免重复导出冲突
+
+// 所有枚举已通过以下方式导出：
+// - export enum TestType { ... }
+// - export enum TestStatus { ... }
+// - export enum UserRole { ... }
+// - 等等...
 

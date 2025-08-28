@@ -3,8 +3,8 @@
  * 统一管理所有UI组件的Props、State和相关类型
  */
 
-import { ReactNode, ComponentType } from 'react';
-import { TestType, TestStatus } from '../api/client.types';
+import { ComponentType, ReactNode } from 'react';
+import { TestStatus, TestType } from '../unified/testTypes';
 
 // ==================== 基础UI类型 ====================
 
@@ -12,18 +12,18 @@ import { TestType, TestStatus } from '../api/client.types';
 export type ComponentSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 /** 组件颜色主题 */
-export type ComponentColor = 
-  | 'primary' 
-  | 'secondary' 
-  | 'tertiary' 
-  | 'muted' 
+export type ComponentColor =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'muted'
   | 'disabled'
-  | 'success' 
-  | 'warning' 
-  | 'error' 
+  | 'success'
+  | 'warning'
+  | 'error'
   | 'info'
-  | 'white' 
-  | 'black' 
+  | 'white'
+  | 'black'
   | 'current';
 
 /** 组件变体 */
@@ -33,12 +33,12 @@ export type ComponentVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | '
 export type FeedbackType = 'success' | 'error' | 'warning' | 'info' | 'loading';
 
 /** 反馈位置 */
-export type FeedbackPosition = 
-  | 'top' 
-  | 'bottom' 
-  | 'top-left' 
-  | 'top-right' 
-  | 'bottom-left' 
+export type FeedbackPosition =
+  | 'top'
+  | 'bottom'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
   | 'bottom-right';
 
 // ==================== 图标组件类型 ====================

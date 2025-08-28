@@ -10,18 +10,39 @@
  * 5. 响应式设计
  */
 
-import type { useCallback, useState, FC } from 'react';
+import React, { useCallback, useState } from 'react';
 import type {
   BaseComponentProps,
-  CompletionCallback,
-  ComponentColor,
-  ErrorCallback,
-  ProgressCallback,
-  TestExecution,
-  TestStatus,
-  TestType,
-  UnifiedTestConfig
+  ComponentColor
 } from '../types';
+import type { TestStatus, TestType } from '../types/unified/testTypes.types';
+
+// 临时类型定义
+type CompletionCallback = (result: any) => void;
+type ErrorCallback = (error: string | Error) => void;
+type ProgressCallback = (progress: number, step: string, metrics?: any) => void;
+
+interface TestExecution {
+  id: string;
+  testType: TestType;
+  status: TestStatus;
+  result?: any;
+  error?: string;
+  timestamp: string;
+  config?: UnifiedTestConfig;
+  startTime?: string;
+  endTime?: string;
+  duration?: number;
+}
+
+interface UnifiedTestConfig {
+  testType: TestType;
+  url?: string;
+  timeout?: number;
+  retries?: number;
+  [key: string]: any;
+}
+;
 
 // 页面Props接口
 interface ModernTestPageProps extends BaseComponentProps {
@@ -55,6 +76,7 @@ interface TestPageState {
 
 // 支持的测试类型配置
 const TEST_TYPE_CONFIG: Record<TestType, { label: string; description: string; color: ComponentColor }> = {
+  stress: { label: '压力测试', description: '测试系统在高负载下的表现', color: 'error' },
   performance: { label: '性能测试', description: '检测网站加载速度和性能指标', color: 'primary' },
   security: { label: '安全测试', description: '扫描安全漏洞和风险', color: 'error' },
   api: { label: 'API测试', description: '测试API端点的功能和性能', color: 'info' },
@@ -86,7 +108,7 @@ export const ModernTestPage: React.FC<ModernTestPageProps> = ({
       timeout: 30000,
       retries: 3
     },
-    status: 'idle',
+    status: 'idle' as TestStatus,
     progress: 0,
     currentStep: '准备就绪',
     result: null,
@@ -133,7 +155,7 @@ export const ModernTestPage: React.FC<ModernTestPageProps> = ({
       ...prev,
       progress,
       currentStep: step,
-      status: 'running'
+      status: 'running' as TestStatus
     }));
 
     console.log(`测试进度: ${progress}% - ${step}`);
@@ -146,19 +168,20 @@ export const ModernTestPage: React.FC<ModernTestPageProps> = ({
   const handleComplete: CompletionCallback = useCallback((result) => {
     const testExecution: TestExecution = {
       id: `test_${Date.now()}`,
-      status: 'completed',
-      progress: 100,
-      currentStep: '测试完成',
-      startTime: new Date().toISOString(),
-      endTime: new Date().toISOString(),
+      testType: state.testType,
+      status: 'completed' as TestStatus,
       result,
       error: null,
-      config: state.config as UnifiedTestConfig
+      timestamp: new Date().toISOString(),
+      config: state.config as UnifiedTestConfig,
+      startTime: new Date().toISOString(),
+      endTime: new Date().toISOString(),
+      duration: 0
     };
 
     setState(prev => ({
       ...prev,
-      status: 'completed',
+      status: 'completed' as TestStatus,
       progress: 100,
       currentStep: '测试完成',
       result: testExecution,
@@ -173,9 +196,9 @@ export const ModernTestPage: React.FC<ModernTestPageProps> = ({
   const handleError: ErrorCallback = useCallback((error) => {
     setState(prev => ({
       ...prev,
-      status: 'failed',
+      status: 'failed' as TestStatus,
       currentStep: '测试失败',
-      error: error.message
+      error: typeof error === 'string' ? error : error.message
     }));
 
     console.error('测试失败:', error);
@@ -590,7 +613,7 @@ export const ModernTestPage: React.FC<ModernTestPageProps> = ({
                 <div key={test.id} className="flex items-center justify-between p-3 bg-gray-800 rounded">
                   <div>
                     <span className="text-sm font-medium text-gray-300">
-                      {TEST_TYPE_CONFIG[test.config.testType].label}
+                      {TEST_TYPE_CONFIG[test.config.testType as TestType]?.label || test.config.testType}
                     </span>
                     <span className="text-xs text-gray-500 ml-2">
                       {new Date(test.startTime).toLocaleString()}

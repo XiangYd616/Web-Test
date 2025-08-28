@@ -394,77 +394,79 @@ export interface EnhancedTestRecord {
   }>;
 }
 
-export interface TestHistoryQuery {
-  // 分页
-  page?: number;
-  limit?: number;
-  offset?: number;
+// 重复接口 TestHistoryQuery 已注释
+// export interface TestHistoryQuery {
+//   // 分页
+//   page?: number;
+//   limit?: number;
+//   offset?: number;
+// 
+//   // 搜索
+//   search?: string;
+//   searchFields?: string[]; // 搜索字段
+// 
+//   // 过滤
+//   testType?: TestType | TestType[];
+//   status?: TestStatus | TestStatus[];
+//   priority?: TestPriority | TestPriority[];
+//   environment?: TestEnvironment | TestEnvironment[];
+//   tags?: string[];
+//   category?: string;
+//   userId?: string;
+// 
+//   // 时间范围
+//   dateFrom?: string;
+//   dateTo?: string;
+//   createdAfter?: string;
+//   createdBefore?: string;
+// 
+//   // 分数范围
+//   minScore?: number;
+//   maxScore?: number;
+// 
+//   // 排序
+//   sortBy?: 'createdAt' | 'startTime' | 'endTime' | 'duration' | 'overallScore' | 'testName' | 'status';
+//   sortOrder?: 'asc' | 'desc';
+// 
+//   // 包含关联数据
+//   includeResults?: boolean;
+//   includeConfig?: boolean;
+//   includeMetadata?: boolean;
+//   includeComments?: boolean;
+//   includeAttachments?: boolean;
+// }
 
-  // 搜索
-  search?: string;
-  searchFields?: string[]; // 搜索字段
-
-  // 过滤
-  testType?: TestType | TestType[];
-  status?: TestStatus | TestStatus[];
-  priority?: TestPriority | TestPriority[];
-  environment?: TestEnvironment | TestEnvironment[];
-  tags?: string[];
-  category?: string;
-  userId?: string;
-
-  // 时间范围
-  dateFrom?: string;
-  dateTo?: string;
-  createdAfter?: string;
-  createdBefore?: string;
-
-  // 分数范围
-  minScore?: number;
-  maxScore?: number;
-
-  // 排序
-  sortBy?: 'createdAt' | 'startTime' | 'endTime' | 'duration' | 'overallScore' | 'testName' | 'status';
-  sortOrder?: 'asc' | 'desc';
-
-  // 包含关联数据
-  includeResults?: boolean;
-  includeConfig?: boolean;
-  includeMetadata?: boolean;
-  includeComments?: boolean;
-  includeAttachments?: boolean;
-}
-
-export interface TestHistoryResponse {
-  success: boolean;
-  data: {
-    tests: EnhancedTestRecord[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-      hasNext: boolean;
-      hasPrev: boolean;
-    };
-    filters?: {
-      availableTypes: TestType[];
-      availableStatuses: TestStatus[];
-      availableTags: string[];
-      availableCategories: string[];
-      dateRange: {
-        earliest: string;
-        latest: string;
-      };
-      scoreRange: {
-        min: number;
-        max: number;
-      };
-    };
-  };
-  message?: string;
-  error?: string;
-}
+// 重复接口 TestHistoryResponse 已注释
+// export interface TestHistoryResponse {
+//   success: boolean;
+//   data: {
+//     tests: EnhancedTestRecord[];
+//     pagination: {
+//       page: number;
+//       limit: number;
+//       total: number;
+//       totalPages: number;
+//       hasNext: boolean;
+//       hasPrev: boolean;
+//     };
+//     filters?: {
+//       availableTypes: TestType[];
+//       availableStatuses: TestStatus[];
+//       availableTags: string[];
+//       availableCategories: string[];
+//       dateRange: {
+//         earliest: string;
+//         latest: string;
+//       };
+//       scoreRange: {
+//         min: number;
+//         max: number;
+//       };
+//     };
+//   };
+//   message?: string;
+//   error?: string;
+// }
 
 export interface TestHistoryStatistics {
   overview: {

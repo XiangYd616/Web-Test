@@ -6,7 +6,6 @@
 
 import { jwtDecode } from 'jwt-decode';
 import type { User } from '../../types/common';
-import { createElement } from 'react';
 
 // ==================== 类型定义 ====================
 
@@ -94,7 +93,7 @@ class DeviceFingerprinter {
     try {
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (gl) {
+      if (gl && gl instanceof WebGLRenderingContext) {
         const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
         if (debugInfo) {
           components.push(gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL));
@@ -203,7 +202,7 @@ class SecureStorageManager {
       const data = encoder.encode(text);
       const key = await this.getEncryptionKey();
       const iv = crypto.getRandomValues(new Uint8Array(12));
-      
+
       const encrypted = await crypto.subtle.encrypt(
         { name: 'AES-GCM', iv },
         key,
@@ -213,7 +212,7 @@ class SecureStorageManager {
       const combined = new Uint8Array(iv.length + encrypted.byteLength);
       combined.set(iv);
       combined.set(new Uint8Array(encrypted), iv.length);
-      
+
       return btoa(String.fromCharCode(...combined));
     } else {
       // 降级到Base64编码
@@ -229,10 +228,10 @@ class SecureStorageManager {
       const combined = new Uint8Array(
         atob(encryptedText).split('').map(char => char.charCodeAt(0))
       );
-      
+
       const iv = combined.slice(0, 12);
       const encrypted = combined.slice(12);
-      
+
       const key = await this.getEncryptionKey();
       const decrypted = await crypto.subtle.decrypt(
         { name: 'AES-GCM', iv },
@@ -357,7 +356,7 @@ export class EnhancedJwtManager {
    */
   async setTokens(tokens: TokenPair): Promise<void> {
     this.currentTokens = tokens;
-    
+
     if (this.config.enableSecureStorage) {
       await SecureStorageManager.setItem('tokens', tokens);
     } else {
@@ -372,11 +371,11 @@ export class EnhancedJwtManager {
    */
   getAccessToken(): string | null {
     if (!this.currentTokens) return null;
-    
+
     if (this.isTokenExpired(this.currentTokens.accessToken)) {
       return null;
     }
-    
+
     return this.currentTokens.accessToken;
   }
 
@@ -496,10 +495,10 @@ export class EnhancedJwtManager {
       };
     } catch (error) {
       console.error('Token刷新失败:', error);
-      
+
       // 清除无效的tokens
       await this.clearTokens();
-      
+
       return {
         success: false,
         error: error instanceof Error ? error.message : '刷新失败',
@@ -592,7 +591,7 @@ export class EnhancedJwtManager {
    */
   async clearTokens(): Promise<void> {
     this.currentTokens = undefined;
-    
+
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer);
       this.refreshTimer = undefined;
@@ -610,11 +609,11 @@ export class EnhancedJwtManager {
    */
   async cleanup(): Promise<void> {
     await this.clearTokens();
-    
+
     if (this.config.enableSecureStorage) {
       SecureStorageManager.clear();
     }
-    
+
     this.activeSessions.clear();
   }
 
@@ -625,10 +624,10 @@ export class EnhancedJwtManager {
    */
   getTokenTimeRemaining(): number {
     if (!this.currentTokens) return 0;
-    
+
     const decoded = this.decodeToken(this.currentTokens.accessToken);
     if (!decoded) return 0;
-    
+
     return Math.max(0, decoded.exp * 1000 - Date.now());
   }
 
@@ -638,10 +637,10 @@ export class EnhancedJwtManager {
   getCurrentUser(): Partial<User> | null {
     const token = this.getAccessToken();
     if (!token) return null;
-    
+
     const decoded = this.decodeToken(token);
     if (!decoded) return null;
-    
+
     return {
       id: decoded.sub,
       username: decoded.username,

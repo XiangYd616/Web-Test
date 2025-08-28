@@ -1,4 +1,6 @@
-import type { useState, FC } from 'react';
+﻿import React from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import ModernSidebar from './ModernSidebar';
@@ -14,22 +16,22 @@ const ModernLayout: React.FC = () => {
 
   return (
     <div className={`h-screen flex flex-col theme-transition ${actualTheme === 'light' ? 'light-theme-wrapper' : 'dark-theme-wrapper'}`}>
-      {/* 顶部导航�?*/}
+      {/* 椤堕儴瀵艰埅锟?*/}
       <TopNavbar
         sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={toggleSidebar}
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* 侧边�?*/}
+        {/* 渚ц竟锟?*/}
         <ModernSidebar
           collapsed={sidebarCollapsed}
           onToggle={toggleSidebar}
         />
 
-        {/* 主内容区�?*/}
+        {/* 涓诲唴瀹瑰尯锟?*/}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* 主内�?*/}
+          {/* 涓诲唴锟?*/}
           <main className="flex-1 overflow-y-auto dark-page-scrollbar">
             <div className="p-0">
               <Outlet />
@@ -42,3 +44,4 @@ const ModernLayout: React.FC = () => {
 };
 
 export default ModernLayout;
+

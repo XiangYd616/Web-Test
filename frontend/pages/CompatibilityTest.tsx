@@ -1,13 +1,32 @@
 import { AlertTriangle, CheckCircle, Clock, Eye, Globe, Grid, Monitor, Settings, Smartphone, Tablet, XCircle } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { URLInput } from '../components/testing';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
-import type {
-  CompatibilityTestConfig,
-  DeviceType
-} from '../types';
+
+// 临时TestCharts组件实现
+const TestCharts = ({
+  results,
+  testType,
+  theme,
+  height,
+  interactive,
+  showComparison
+}: {
+  results: any;
+  testType?: string;
+  theme?: string;
+  height?: number;
+  interactive?: boolean;
+  showComparison?: boolean;
+}) => (
+  <div className="bg-white rounded-lg shadow p-6" style={{ height: height || 'auto' }}>
+    <h3 className="text-lg font-semibold mb-4">测试结果图表 ({testType})</h3>
+    <p className="text-gray-600">图表功能开发中... (主题: {theme || 'light'})</p>
+    {showComparison && <p className="text-sm text-blue-600 mt-2">对比模式已启用</p>}
+  </div>
+);
 
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
@@ -42,18 +61,21 @@ interface FeatureCompatibility {
 }
 
 // 本地兼容性测试配置，扩展统一类型
-interface LocalCompatibilityConfig extends Partial<CompatibilityTestConfig> {
+interface LocalCompatibilityConfig {
   url: string;
   testType: 'compatibility';
   targetBrowsers: BrowserVersion[];
   features: string[];
   engines: CompatibilityEngine[];
+  // 从CompatibilityTestConfig继承的属性
+  browsers?: string[];
+  devices?: string[];
+  viewports?: any[];
   // 保持向后兼容的属性
   checkDesktop?: boolean;
   checkMobile?: boolean;
   checkTablet?: boolean;
   checkAccessibility?: boolean;
-  browsers?: string[];
   options: {
     includeDesktop: boolean;
     includeMobile: boolean;
@@ -185,7 +207,7 @@ const CompatibilityTest: React.FC = () => {
   // 用户统计
   const { recordTestCompletion } = useUserStats();
 
-  const [config, setConfig] = useState<CompatibilityConfig>({
+  const [config, setConfig] = useState<LocalCompatibilityConfig>({
     url: '',
     testType: 'compatibility',
     targetBrowsers: [
@@ -364,7 +386,7 @@ const CompatibilityTest: React.FC = () => {
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0);
 
   // 真实的兼容性测试引擎集成
-  const runRealCompatibilityTest = useCallback(async (url: string, config: CompatibilityConfig) => {
+  const runRealCompatibilityTest = useCallback(async (url: string, config: LocalCompatibilityConfig) => {
     try {
       console.log('🚀 Starting real compatibility test for:', url, 'with engine:', selectedEngine);
 
@@ -396,7 +418,7 @@ const CompatibilityTest: React.FC = () => {
   }, [selectedEngine]);
 
   // Can I Use 数据库测试
-  const runCanIUseTest = async (url: string, config: CompatibilityConfig): Promise<CompatibilityResult> => {
+  const runCanIUseTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
     setCurrentStep('正在使用 Can I Use 数据库分析...');
     setProgress(20);
 
@@ -459,7 +481,7 @@ const CompatibilityTest: React.FC = () => {
   };
 
   // BrowserStack 真实浏览器测试
-  const runBrowserStackTest = async (url: string, config: CompatibilityConfig): Promise<CompatibilityResult> => {
+  const runBrowserStackTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
     setCurrentStep('正在使用 BrowserStack 进行真实浏览器测试...');
     setProgress(20);
 
@@ -525,7 +547,7 @@ const CompatibilityTest: React.FC = () => {
   };
 
   // 特性检测测试
-  const runFeatureDetectionTest = async (url: string, config: CompatibilityConfig): Promise<CompatibilityResult> => {
+  const runFeatureDetectionTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
     setCurrentStep('正在进行特性检测分析...');
     setProgress(20);
 
@@ -591,7 +613,7 @@ const CompatibilityTest: React.FC = () => {
   };
 
   // 本地兼容性测试
-  const runLocalCompatibilityTest = async (url: string, config: CompatibilityConfig): Promise<CompatibilityResult> => {
+  const runLocalCompatibilityTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
     setCurrentStep('正在进行本地兼容性分析...');
     setProgress(20);
 
@@ -676,7 +698,7 @@ const CompatibilityTest: React.FC = () => {
   };
 
   // 状态管理
-  const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
+  const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled'>('idle');
 
   // 历史记录处理
   const handleTestSelect = (test: any) => {

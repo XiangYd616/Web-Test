@@ -1,3 +1,5 @@
+import { TestStatus, TestType } from '../../frontend/types/unified/testTypes';
+
 /**
  * 统一类型定义 - 前后端共享
  * 版本: v2.0.0
@@ -389,17 +391,17 @@ export class FieldMapper {
           if (operation === 'serialize') {
             // 前端 -> 后端：对象转JSON字符串
             if (typeof result[field] === 'object') {
-              result[field] = JSON.stringify(result[field]);
+              (result as any)[field] = JSON.stringify((result as any)[field]);
             }
           } else {
             // 后端 -> 前端：JSON字符串转对象
             if (typeof result[field] === 'string') {
-              result[field] = JSON.parse(result[field]);
+              (result as any)[field] = JSON.parse((result as any)[field]);
             }
           }
         } catch (error) {
           console.warn(`Failed to ${operation} JSON field ${field}:`, error);
-          result[field] = operation === 'serialize' ? '{}' : {};
+          (result as any)[field] = operation === 'serialize' ? '{}' : {};
         }
       }
     }
@@ -436,7 +438,7 @@ export class UserTypeConverter {
     // 再转换字段名
     user = FieldMapper.toCamelCase(user, USER_FIELD_MAPPING);
 
-    return user as Partial<User>;
+    return user as unknown as Partial<User>;
   }
 }
 

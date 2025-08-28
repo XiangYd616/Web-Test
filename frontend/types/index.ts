@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import React from 'react';
 /**
  * 类型定义统一导出
  * 提供项目中所有类型的统一入口
@@ -6,68 +6,36 @@ import type { ReactNode } from 'react';
  * 版本: v2.0.0 - 使用统一的测试类型定义
  */
 
-// ==================== 核心测试类型 ====================
+// ==================== 基础类型 ====================
 export type {
-  TestStatus, TestStatusEnum, TestStatusType,
-  // 统一的测试类型定义
-  TestType, TestTypeConfig, TestTypeEnum, // 兼容性导出
-  TestTypeType // 兼容性导出
-} from './unified/testTypes';
+  ComponentColor, ComponentSize, ComponentVariant,
+  // Status, Timestamp, // 注释掉重复的导出
+  UUID
+} from './unified/baseTypes';
 
-export {
-  TEST_TYPE_CONFIG, getAvailableTestTypes, getEnabledTestTypes, getTestStatusInfo, getTestTypeConfig, isValidTestStatus, isValidTestType
-} from './unified/testTypes';
+// ==================== API响应类型 ====================
+export type {
+  ApiError, ApiErrorResponse, ApiResponse,
+  ApiSuccessResponse, PaginationInfo, QueryParams,
+  RequestConfig,
+  ValidationError
+} from './unified/apiResponse.types';
+
+// ==================== 核心测试类型 ====================
+export { TestStatus, TestType } from './unified/testTypes';
+
+export { getAvailableTestTypes, getEnabledTestTypes, getTestStatusInfo, getTestTypeConfig, isValidTestStatus, isValidTestType, TEST_TYPE_CONFIG } from './unified/testTypes';
 
 // ==================== API相关类型 ====================
-export type {
-
-  // API端点和认证
-  ApiEndpoint, ApiHeaders,
-  ApiRequestConfig, ApiResponse, ApiTestConfig, AuthConfig,
-  // API客户端接口
-  BaseApiClient, BaseApiResponse, BaseTestConfig, CompatibilityTestConfig, CompletionCallback, DatabaseTestConfig,
-  // 其他测试相关类型
-  DeviceType, ErrorApiResponse, ErrorCallback,
-  // 基础API类型
-  HttpMethod, NetworkCondition, NetworkTestConfig, PerformanceTestConfig,
-  // 回调函数
-  ProgressCallback, SecurityTestConfig, SeoTestConfig, SuccessApiResponse, TestApiClient, TestCallbacks,
-  // 测试执行
-  TestExecution,
-  TestHistory, UnifiedTestConfig, UserAction, UserFlow, UxTestConfig, ValidationRule, WebsiteTestConfig
-} from './api/client.types';
-
-// ==================== 组件相关类型 ====================
-export type {
-
-  // 反馈组件
-  BaseFeedbackProps, ButtonProps,
-
-  // 布局组件
-  CardProps, CodeBlockProps,
-  // 增强组件
-  CollapsiblePanelProps, ComponentColor,
-  // 基础UI类型
-  ComponentSize, ComponentVariant, DrawerProps, EmptyStateProps, FeedbackPosition, FeedbackType, FullscreenWrapperProps,
-  // 图标组件
-  IconProps,
-  // 表单组件
-  InputProps, LinkPreviewProps, LoadingFeedbackProps, ModalProps, NotificationProps, PaginationProps, ProgressFeedbackProps, QuickActionProps, RowSelectionProps, SelectOption, SelectProps, StatsCardProps, StatusIndicatorProps,
-  // 数据展示组件
-  TableColumn,
-  TableProps, TestStatusIconProps, TestTypeIconProps, ThemeConfig,
-  ThemeContext,
-  // 主题相关
-  ThemeMode
-} from './components/ui.types';
+// 注意：TestStatus和TestType已从unified/testTypes导出，避免重复导出
 
 // ==================== Hook相关类型 ====================
 export type {
-  APIEndpoint, APIEndpointResult, APITestActions,
-  // API测试Hook
-  APITestConfig, APITestHook, APITestResult, APITestState, AccessibilityCheck,
+  AccessibilityCheck,
   AccessibilityNode, AccessibilityResult,
-  AccessibilityViolation, AuthenticationConfig, BaseTestActions,
+  AccessibilityViolation, APIEndpoint, APIEndpointResult, APITestActions,
+  // API测试Hook
+  APITestConfig, APITestHook, APITestResult, APITestState, AuthenticationConfig, BaseTestActions,
   BaseTestHook,
   // 基础测试状态
   BaseTestState, BrowserConfig, BrowserTestResult, CompatibilityIssue, CompatibilityTestActions,
@@ -78,9 +46,9 @@ export type {
   DatabaseTestConfig, DatabaseTestHook, DatabaseTestResult, DatabaseTestState, DeviceConfig, DeviceTestResult, NetworkTestActions,
   // 网络测试Hook
   NetworkTestConfig, NetworkTestHook, NetworkTestResult, NetworkTestState, PerformanceMetrics, PerformanceResult, PortTestResult,
-  ProtocolTestResult, UXIssue, UXTestActions,
+  ProtocolTestResult, UserActionResult, UserFlowResult, UXIssue, UXTestActions,
   // UX测试Hook
-  UXTestConfig, UXTestHook, UXTestResult, UXTestState, UserActionResult, UserFlowResult, ValidationResult
+  UXTestConfig, UXTestHook, UXTestResult, UXTestState, ValidationResult
 } from './hooks/testState.types';
 
 // ==================== 通用基础类型 ====================
@@ -103,19 +71,19 @@ export type {
   // 表单相关
   FormFieldType, FormValidationError, GroupedOption,
   // 基础数据类型
-  ID, LogEntry,
+  LogEntry,
   // 日志相关
   LogLevel, Notification,
   NotificationAction, NotificationPriority,
   // 通知相关
-  NotificationType, OperationResult, OptionalFields, PaginatedResponse,
+  NotificationType, OperationResult, OptionalFields,
   // 分页相关
   PaginationParams, Parameters, Permission,
   // 权限相关
   PermissionType, RequiredFields, ReturnType, Role, SearchCondition,
   // 搜索相关
   SearchOperator, SearchParams,
-  SearchResult, SortDirection, Status, Timestamp, TreeOption, UserInfo, ValidationRuleType, ValueOf
+  SearchResult, SortDirection, TreeOption, UserInfo, ValidationRuleType, ValueOf
 } from './common/base.types';
 
 // ==================== 服务相关类型 ====================
@@ -168,9 +136,9 @@ export interface ServiceInfo {
   /** 服务状态 */
   status: ServiceStatus;
   /** 启动时间 */
-  startTime: Timestamp;
+  startTime: string;
   /** 最后活动时间 */
-  lastActivity: Timestamp;
+  lastActivity: string;
   /** 服务配置 */
   config: Record<string, any>;
   /** 服务指标 */
@@ -295,43 +263,72 @@ export interface BuildInfo {
   buildEnv: Environment;
 }
 
+// ==================== 适配器和测试配置类型 ====================
+
+// 适配器配置类型
+export interface AdapterConfig {
+  name: string;
+  version: string;
+  enabled: boolean;
+  settings: Record<string, any>;
+  timeout?: number;
+  retries?: number;
+}
+
+// 性能测试配置类型
+export interface PerformanceTestConfig {
+  duration: number;
+  concurrency: number;
+  rampUp: number;
+  rampDown: number;
+  targetRPS?: number;
+  maxResponseTime?: number;
+  device?: string;
+  network_condition?: string;
+  thresholds: {
+    responseTime: number;
+    errorRate: number;
+    throughput: number;
+  };
+}
+
+// 安全测试配置类型
+export interface SecurityTestConfig {
+  scanDepth: 'shallow' | 'medium' | 'deep';
+  includeVulnerabilities: string[];
+  excludeVulnerabilities: string[];
+  include_ssl?: boolean;
+  include_headers?: boolean;
+  custom_checks?: string[];
+  authConfig?: {
+    type: 'basic' | 'bearer' | 'cookie';
+    credentials: Record<string, string>;
+  };
+  customHeaders?: Record<string, string>;
+}
+
+// 测试API客户端接口
+export interface TestApiClient {
+  executeTest(config: any): Promise<any>;
+  getTestResult(testId: string): Promise<any>;
+  cancelTest(testId: string): Promise<any>;
+  getTestHistory(filters?: any): Promise<any>;
+}
+
+// 回调函数类型
+export type CompletionCallback = (result: any) => void;
+export type ProgressCallback = (progress: number, stage: string) => void;
+export type ErrorCallback = (error: Error) => void;
+
+// ==================== 第三方库类型扩展 ====================
+
+// 导入Axios类型扩展
+import './axios';
+
+// 导入浏览器API类型扩展
+import './browser';
+
 // ==================== 导出默认类型集合 ====================
 
-/** 常用类型集合 */
-export interface CommonTypes {
-  ID: ID;
-  Timestamp: Timestamp;
-  Status: Status;
-  ApiResponse: ApiResponse;
-  TestType: TestType;
-  TestStatus: TestStatus;
-  ComponentSize: ComponentSize;
-  ComponentColor: ComponentColor;
-  BaseComponentProps: BaseComponentProps;
-  Callback: Callback;
-  ErrorHandler: ErrorHandler;
-}
+// 注意：移除了有问题的类型集合定义，直接使用具体的类型导出
 
-/** 测试相关类型集合 */
-export interface TestTypes {
-  TestType: TestType;
-  TestStatus: TestStatus;
-  TestConfig: UnifiedTestConfig;
-  TestExecution: TestExecution;
-  TestResult: any;
-  TestCallbacks: TestCallbacks;
-}
-
-/** UI组件类型集合 */
-export interface UITypes {
-  ComponentSize: ComponentSize;
-  ComponentColor: ComponentColor;
-  ComponentVariant: ComponentVariant;
-  BaseComponentProps: BaseComponentProps;
-  IconProps: IconProps;
-  ButtonProps: ButtonProps;
-  InputProps: InputProps;
-}
-
-// 默认导出常用类型
-export default CommonTypes;

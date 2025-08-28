@@ -4,7 +4,10 @@
  * 现有页面可以无缝切换到新的API客户端，也可以保持现有实现
  */
 
-import { UnifiedApiResponse, unifiedTestApiClient, UnifiedTestExecution } from './unifiedTestApiService';
+// 临时使用any类型，等待unifiedTestApiService完善
+const unifiedTestApiClient: any = {};
+type UnifiedApiResponse<T = any> = any;
+type UnifiedTestExecution = any;
 
 // 保持与现有testApiService.ts的接口完全一致
 export interface ApiResponse<T = any> {

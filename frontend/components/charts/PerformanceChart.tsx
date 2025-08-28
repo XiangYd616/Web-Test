@@ -1,4 +1,4 @@
-import type { memo, useCallback, useEffect, useMemo, useState, FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { DataPoint, dataVisualizationOptimizer, OptimizationConfig } from '../../utils/dataVisualization';
 
@@ -214,11 +214,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
               stroke="#f59e0b"
               strokeDasharray="5 5"
               strokeWidth={2}
-              label={{
-                value: `平均: ${averageValue.toFixed(3)}`,
-                position: 'topRight',
-                style: { fill: '#f59e0b', fontSize: '12px' }
-              }}
+              label={`平均: ${averageValue.toFixed(3)}`}
             />
           )}
 

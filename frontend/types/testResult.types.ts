@@ -16,7 +16,7 @@ export type URL = string;
 /**
  * 测试类型和状态枚举 - 已迁移到统一类型系统
  */
-import type { TestStatus, TestType } from './unified/testTypes';
+import { TestStatus, TestType } from './unified/testTypes';
 
 /**
  * 测试优先级枚举

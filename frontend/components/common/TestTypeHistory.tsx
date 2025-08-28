@@ -3,6 +3,7 @@
  * 用于在每个测试页面显示该测试类型的历史记录
  */
 
+import React from 'react';
 import {
   Calendar,
   Eye,
@@ -12,10 +13,10 @@ import {
   Search,
   Star
 } from 'lucide-react';
-import type { useCallback, useEffect, useState, FC } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import type { TestType } from '../../types';
-import type { EnhancedTestRecord } from '../../types/testHistory';
+import type { EnhancedTestRecord } from '../../types/testHistory.types';
 
 interface TestTypeHistoryProps {
   testType: TestType;
@@ -62,7 +63,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
     accessibility: { name: '可访问性测试', icon: '♿', color: '#6366f1' }
   };
 
-  const config = testTypeConfig[testType] || { name: '测试', icon: '🔧', color: '#6b7280' };
+  const config = testTypeConfig[testType as keyof typeof testTypeConfig] || { name: '测试', icon: '🔧', color: '#6b7280' };
 
   // 加载测试历史
   const loadTestHistory = useCallback(async (reset = false) => {
@@ -336,303 +337,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
         )}
       </div>
 
-      {/* 样式 */}
-      <style jsx>{`
-        .test-type-history {
-          background: white;
-          border-radius: 12px;
-          border: 1px solid #e5e7eb;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-        }
 
-        .history-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 16px 20px;
-          border-bottom: 1px solid #f3f4f6;
-          background: #fafafa;
-        }
-
-        .header-title {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .test-icon {
-          font-size: 20px;
-        }
-
-        .header-title h3 {
-          margin: 0;
-          font-size: 16px;
-          font-weight: 600;
-          color: #1f2937;
-        }
-
-        .test-count {
-          color: #6b7280;
-          font-size: 14px;
-        }
-
-        .header-actions {
-          display: flex;
-          gap: 8px;
-        }
-
-        .action-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          background: white;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-          border-color: ${config.color};
-          color: ${config.color};
-        }
-
-        .action-btn.active {
-          background: ${config.color};
-          border-color: ${config.color};
-          color: white;
-        }
-
-        .icon {
-          width: 16px;
-          height: 16px;
-        }
-
-        .spinning {
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        .history-filters {
-          padding: 16px 20px;
-          border-bottom: 1px solid #f3f4f6;
-          background: #fafafa;
-        }
-
-        .search-box {
-          position: relative;
-          margin-bottom: 12px;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 16px;
-          height: 16px;
-          color: #9ca3af;
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 8px 12px 8px 36px;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-size: 14px;
-        }
-
-        .search-input:focus {
-          outline: none;
-          border-color: ${config.color};
-        }
-
-        .status-filters {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .status-filter {
-          padding: 4px 12px;
-          border: 1px solid #d1d5db;
-          border-radius: 16px;
-          background: white;
-          font-size: 12px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .status-filter:hover {
-          border-color: ${config.color};
-        }
-
-        .status-filter.active {
-          background: ${config.color};
-          border-color: ${config.color};
-          color: white;
-        }
-
-        .history-list {
-          flex: 1;
-          overflow-y: auto;
-          padding: 8px;
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 40px 20px;
-          color: #6b7280;
-        }
-
-        .empty-icon {
-          font-size: 48px;
-          margin-bottom: 16px;
-        }
-
-        .empty-hint {
-          font-size: 14px;
-          margin-top: 8px;
-        }
-
-        .history-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 12px 16px;
-          margin-bottom: 8px;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .history-item:hover {
-          border-color: ${config.color};
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .history-item.selected {
-          border-color: ${config.color};
-          background: ${config.color}08;
-        }
-
-        .item-main {
-          flex: 1;
-        }
-
-        .item-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 8px;
-        }
-
-        .test-name {
-          margin: 0;
-          font-size: 14px;
-          font-weight: 500;
-          color: #1f2937;
-        }
-
-        .status-badge {
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 500;
-        }
-
-        .item-details {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 12px;
-          color: #6b7280;
-        }
-
-        .test-url {
-          flex: 1;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          margin-right: 12px;
-        }
-
-        .test-time {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-
-        .time-icon {
-          width: 12px;
-          height: 12px;
-        }
-
-        .item-score {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          margin-top: 8px;
-          color: ${config.color};
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        .score-icon {
-          width: 14px;
-          height: 14px;
-        }
-
-        .item-actions {
-          display: flex;
-          gap: 4px;
-          margin-left: 12px;
-        }
-
-        .view-btn:hover {
-          color: #3b82f6;
-          border-color: #3b82f6;
-        }
-
-        .rerun-btn:hover {
-          color: #10b981;
-          border-color: #10b981;
-        }
-
-        .load-more-btn {
-          width: 100%;
-          padding: 12px;
-          border: 1px dashed #d1d5db;
-          border-radius: 8px;
-          background: white;
-          color: #6b7280;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .load-more-btn:hover {
-          border-color: ${config.color};
-          color: ${config.color};
-        }
-
-        .loading-indicator {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 20px;
-          color: #6b7280;
-        }
-      `}</style>
     </div>
   );
 };

@@ -4,8 +4,17 @@
  * 版本: v2.0.0
  */
 
-import axios, { AxiosError, AxiosResponse, AxiosRequestConfig } from 'axios';
-import type { ApiErrorResponse } from '../../types/unified/models';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+// 临时类型定义
+interface ApiErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+  timestamp: string;
+}
 
 // ==================== 错误类型定义 ====================
 
@@ -18,7 +27,7 @@ export interface ErrorHandlerConfig {
     backoffFactor: number;
     retryableStatuses: number[];
   };
-  
+
   // 通知配置
   notification: {
     enabled: boolean;
@@ -26,14 +35,14 @@ export interface ErrorHandlerConfig {
     showError: boolean;
     duration: number;
   };
-  
+
   // 日志配置
   logging: {
     enabled: boolean;
     logLevel: 'error' | 'warn' | 'info' | 'debug';
     includeStack: boolean;
   };
-  
+
   // 认证配置
   auth: {
     tokenRefreshEnabled: boolean;
@@ -104,7 +113,7 @@ const ERROR_MESSAGES: Record<string, { message: string; userMessage: string; sev
     userMessage: '请求超时，请稍后重试',
     severity: 'medium'
   },
-  
+
   // 认证错误
   'UNAUTHORIZED': {
     message: 'Authentication required',
@@ -121,7 +130,7 @@ const ERROR_MESSAGES: Record<string, { message: string; userMessage: string; sev
     userMessage: '登录已过期，请重新登录',
     severity: 'high'
   },
-  
+
   // 客户端错误
   'BAD_REQUEST': {
     message: 'Invalid request parameters',
@@ -138,7 +147,7 @@ const ERROR_MESSAGES: Record<string, { message: string; userMessage: string; sev
     userMessage: '数据验证失败，请检查输入内容',
     severity: 'medium'
   },
-  
+
   // 服务器错误
   'INTERNAL_SERVER_ERROR': {
     message: 'Internal server error',
@@ -155,14 +164,14 @@ const ERROR_MESSAGES: Record<string, { message: string; userMessage: string; sev
     userMessage: '请求过于频繁，请稍后重试',
     severity: 'medium'
   },
-  
+
   // 业务错误
   'BUSINESS_ERROR': {
     message: 'Business logic error',
     userMessage: '操作失败，请检查相关条件',
     severity: 'medium'
   },
-  
+
   // 默认错误
   'UNKNOWN_ERROR': {
     message: 'Unknown error occurred',
@@ -201,20 +210,20 @@ export class ApiErrorHandler {
    */
   async handleError(error: any, context: Partial<ErrorContext> = {}): Promise<ProcessedError> {
     const processedError = this.processError(error, context);
-    
+
     // 记录日志
     if (this.config.logging.enabled) {
       this.logError(processedError);
     }
-    
+
     // 显示通知
     if (this.config.notification.enabled && this.config.notification.showError) {
       this.showErrorNotification(processedError);
     }
-    
+
     // 处理特殊错误类型
     await this.handleSpecialErrors(processedError);
-    
+
     return processedError;
   }
 
@@ -233,12 +242,12 @@ export class ApiErrorHandler {
     if (axios.isAxiosError(error)) {
       return this.processAxiosError(error, fullContext);
     }
-    
+
     // 处理API错误响应
     if (this.isApiErrorResponse(error)) {
       return this.processApiError(error, fullContext);
     }
-    
+
     // 处理普通错误
     return this.processGenericError(error, fullContext);
   }
@@ -248,7 +257,7 @@ export class ApiErrorHandler {
    */
   private processAxiosError(error: AxiosError, context: ErrorContext): ProcessedError {
     const { response, request, code } = error;
-    
+
     // 网络错误
     if (!response && request) {
       const errorInfo = ERROR_MESSAGES['NETWORK_ERROR'];
@@ -266,7 +275,7 @@ export class ApiErrorHandler {
         originalError: error
       };
     }
-    
+
     // 超时错误
     if (code === 'ECONNABORTED') {
       const errorInfo = ERROR_MESSAGES['TIMEOUT_ERROR'];
@@ -280,12 +289,12 @@ export class ApiErrorHandler {
         originalError: error
       };
     }
-    
+
     // HTTP状态码错误
     if (response) {
       return this.processHttpStatusError(response, context, error);
     }
-    
+
     // 其他错误
     const errorInfo = ERROR_MESSAGES['UNKNOWN_ERROR'];
     return {
@@ -304,7 +313,7 @@ export class ApiErrorHandler {
    */
   private processHttpStatusError(response: AxiosResponse, context: ErrorContext, originalError: any): ProcessedError {
     const { status, data } = response;
-    
+
     // 状态码映射
     const statusCodeMap: Record<number, string> = {
       400: 'BAD_REQUEST',
@@ -319,14 +328,14 @@ export class ApiErrorHandler {
       503: 'SERVICE_UNAVAILABLE',
       504: 'TIMEOUT_ERROR'
     };
-    
+
     const errorCode = statusCodeMap[status] || 'UNKNOWN_ERROR';
     const errorInfo = ERROR_MESSAGES[errorCode];
-    
+
     // 尝试从响应中获取更详细的错误信息
     let message = errorInfo.message;
     let userMessage = errorInfo.userMessage;
-    
+
     if (data && typeof data === 'object') {
       if (data.error?.message) {
         message = data.error.message;
@@ -335,7 +344,7 @@ export class ApiErrorHandler {
         userMessage = data.message;
       }
     }
-    
+
     return {
       code: errorCode,
       message,
@@ -357,7 +366,7 @@ export class ApiErrorHandler {
   private processApiError(error: ApiErrorResponse, context: ErrorContext): ProcessedError {
     const errorCode = error.error.code || 'BUSINESS_ERROR';
     const errorInfo = ERROR_MESSAGES[errorCode] || ERROR_MESSAGES['BUSINESS_ERROR'];
-    
+
     return {
       code: errorCode,
       message: error.error.message || errorInfo.message,
@@ -374,7 +383,7 @@ export class ApiErrorHandler {
    */
   private processGenericError(error: any, context: ErrorContext): ProcessedError {
     const errorInfo = ERROR_MESSAGES['UNKNOWN_ERROR'];
-    
+
     return {
       code: 'UNKNOWN_ERROR',
       message: error?.message || errorInfo.message,
@@ -390,11 +399,11 @@ export class ApiErrorHandler {
    * 检查是否为API错误响应
    */
   private isApiErrorResponse(error: any): error is ApiErrorResponse {
-    return error && 
-           typeof error === 'object' && 
-           error.success === false && 
-           error.error && 
-           typeof error.error === 'object';
+    return error &&
+      typeof error === 'object' &&
+      error.success === false &&
+      error.error &&
+      typeof error.error === 'object';
   }
 
   /**
@@ -443,7 +452,7 @@ export class ApiErrorHandler {
           // 清除认证信息
           localStorage.removeItem('auth_token');
           localStorage.removeItem('refresh_token');
-          
+
           // 重定向到登录页
           if (typeof window !== 'undefined' && !window.location.pathname.includes(this.config.auth.loginPath)) {
             setTimeout(() => {
@@ -452,11 +461,11 @@ export class ApiErrorHandler {
           }
         }
         break;
-        
+
       case 'RATE_LIMITED':
         // 可以实施退避策略
         break;
-        
+
       case 'SERVICE_UNAVAILABLE':
         // 可以显示服务状态页面
         break;
@@ -474,9 +483,9 @@ export class ApiErrorHandler {
    * 检查错误是否可重试
    */
   isRetryable(error: ProcessedError): boolean {
-    return error.retryable && 
-           this.config.retry.enabled && 
-           error.context.retryCount < this.config.retry.maxAttempts;
+    return error.retryable &&
+      this.config.retry.enabled &&
+      error.context.retryCount < this.config.retry.maxAttempts;
   }
 
   /**

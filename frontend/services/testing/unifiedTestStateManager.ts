@@ -191,7 +191,7 @@ export class UnifiedTestStateManager extends EventEmitter {
 
       case 'security':
         return await testApiService.executeSecurityTest(config.url, {
-          scan_depth: 'medium',
+          scan_depth: 'standard',
           include_ssl: true,
           include_headers: true,
           custom_checks: []

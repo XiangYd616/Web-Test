@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { AlertTriangle, CheckCircle, ExternalLink, Globe, HelpCircle, RefreshCw, Zap } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { URLValidationResult, validateUrlSync } from '../../utils/urlValidator';

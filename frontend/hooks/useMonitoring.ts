@@ -51,7 +51,7 @@ export interface MonitoringStats {
 
 // 监控Hook
 export const useMonitoring = () => {
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const { state, dispatch } = useAppContext();
     const { monitoring } = state;
@@ -242,11 +242,11 @@ export const useMonitoring = () => {
             }
 
             const data = await response.json();
-            return data.targets || monitoring.targets;
+            return data.targets || (monitoring.targets as MonitoringTarget[]);
 
         } catch (error) {
             console.error('Get targets error:', error);
-            return monitoring.targets;
+            return monitoring.targets as MonitoringTarget[];
         }
     }, [state.auth.token, monitoring.targets]);
 
@@ -279,7 +279,7 @@ export const useMonitoring = () => {
 
         } catch (error) {
             console.error('Get alerts error:', error);
-            return monitoring.alerts;
+            return monitoring.alerts as Alert[];
         }
     }, [state.auth.token, monitoring.alerts]);
 
@@ -391,7 +391,8 @@ export const useMonitoring = () => {
 
         } catch (error) {
             console.error('Get target details error:', error);
-            return monitoring.targets.find(t => t.id === targetId) || null;
+            const target = (monitoring.targets as MonitoringTarget[]).find(t => t.id === targetId);
+            return target || null;
         }
     }, [state.auth.token, monitoring.targets]);
 

@@ -1,13 +1,33 @@
+
+// Mock Storybook types for development
+interface Meta<T = any> {
+    title: string;
+    component: T;
+    parameters?: any;
+    decorators?: any[];
+    argTypes?: any;
+    tags?: string[];
+}
+
+interface StoryObj<T = any> {
+    args?: any;
+    parameters?: any;
+    render?: (args: any) => any;
+}
+
+// Mock action function
+const action = (name: string) => (...args: any[]) => console.log(name, args);
+
 /**
  * Button组件Storybook文档
  */
 
-import { action } from '@storybook/addon-actions';
-import type { Meta, StoryObj } from '@storybook/react';
+import React from 'react';
+// import { action } from '@storybook/addon-actions'; // Storybook未安装
+// import type { Meta, StoryObj } from '@storybook/react'; // Storybook未安装
 import { Download, Play, Plus, Settings, Trash2 } from 'lucide-react';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
 import { Button, DeleteButton, GhostButton, IconButton, OutlineButton, PrimaryButton, SecondaryButton } from '../Button';
-import { useState } from 'react';
 
 const meta: Meta<typeof Button> = {
     title: 'UI组件/Button',
@@ -21,7 +41,7 @@ const meta: Meta<typeof Button> = {
         },
     },
     decorators: [
-        (Story) => (
+        (Story: any) => (
             <ThemeProvider>
                 <div className="p-4">
                     <Story />

@@ -5,7 +5,7 @@
  */
 
 import { ApiError, ErrorCode } from '../../types/unified/apiResponse';
-import { enhanceError, ErrorContext as UtilsErrorContext } from '../../utils/errorHandler';
+import type { ErrorContext as UtilsErrorContext } from '../../utils/errorHandler';
 
 // 错误处理配置
 export interface ErrorHandlerConfig {
@@ -57,28 +57,26 @@ const DEFAULT_CONFIG: ErrorHandlerConfig = {
     'CONNECTION_ERROR'
   ] as ErrorCode[],
   userFriendlyMessages: {
-    'NETWORK_ERROR': '网络连接失败，请检查网络设置后重试',
-    'TIMEOUT_ERROR': '请求超时，请稍后重试',
-    'SERVER_ERROR': '服务器暂时不可用，请稍后重试',
-    'SERVICE_UNAVAILABLE': '服务暂时不可用，请稍后重试',
-    'CONNECTION_ERROR': '连接失败，请检查网络连接',
-    'INVALID_CREDENTIALS': '用户名或密码错误，请重新输入',
-    'TOKEN_EXPIRED': '登录已过期，请重新登录',
-    'TOKEN_INVALID': '登录状态无效，请重新登录',
-    'PERMISSION_DENIED': '权限不足，无法执行此操作',
-    'RESOURCE_NOT_FOUND': '请求的资源不存在或已被删除',
-    'VALIDATION_ERROR': '输入信息有误，请检查后重试',
-    'RATE_LIMIT_EXCEEDED': '请求过于频繁，请稍后重试',
-    'ACCOUNT_LOCKED': '账户已被锁定，请联系管理员',
-    'USER_NOT_FOUND': '用户不存在，请检查用户信息',
-    'EMAIL_ALREADY_EXISTS': '邮箱已被注册，请使用其他邮箱',
-    'USERNAME_ALREADY_EXISTS': '用户名已被使用，请选择其他用户名',
-    'WEAK_PASSWORD': '密码强度不足，请使用包含字母、数字和特殊字符的密码',
-    'FILE_TOO_LARGE': '文件大小超出限制，请选择较小的文件',
-    'UNSUPPORTED_FILE_TYPE': '不支持的文件类型，请选择其他格式',
-    'QUOTA_EXCEEDED': '已达到使用限额，请升级账户或稍后重试',
-    'MAINTENANCE_MODE': '系统正在维护中，请稍后访问',
-    'UNKNOWN_ERROR': '发生未知错误，请稍后重试或联系技术支持'
+    [ErrorCode.NETWORK_ERROR]: '网络连接失败，请检查网络设置后重试',
+    [ErrorCode.TIMEOUT_ERROR]: '请求超时，请稍后重试',
+    [ErrorCode.INTERNAL_SERVER_ERROR]: '服务器暂时不可用，请稍后重试',
+    [ErrorCode.SERVICE_UNAVAILABLE]: '服务暂时不可用，请稍后重试',
+    [ErrorCode.CONNECTION_ERROR]: '连接失败，请检查网络连接',
+    [ErrorCode.UNAUTHORIZED]: '用户名或密码错误，请重新输入',
+    [ErrorCode.TOKEN_EXPIRED]: '登录已过期，请重新登录',
+    [ErrorCode.INVALID_TOKEN]: '登录状态无效，请重新登录',
+    [ErrorCode.FORBIDDEN]: '权限不足，无法执行此操作',
+    [ErrorCode.NOT_FOUND]: '请求的资源不存在或已被删除',
+    [ErrorCode.VALIDATION_ERROR]: '输入信息有误，请检查后重试',
+    [ErrorCode.BAD_REQUEST]: '请求参数错误',
+    [ErrorCode.CONFLICT]: '数据冲突',
+    [ErrorCode.METHOD_NOT_ALLOWED]: '不支持的操作方法',
+    [ErrorCode.UNPROCESSABLE_ENTITY]: '数据验证失败',
+    [ErrorCode.TOO_MANY_REQUESTS]: '请求过于频繁，请稍后重试',
+    [ErrorCode.RATE_LIMIT_EXCEEDED]: '请求过于频繁，请稍后重试',
+    [ErrorCode.QUOTA_EXCEEDED]: '已达到使用限额，请升级账户或稍后重试',
+    [ErrorCode.RESOURCE_LOCKED]: '资源被锁定，请稍后重试',
+    [ErrorCode.UNKNOWN_ERROR]: '发生未知错误，请稍后重试或联系技术支持'
   } as Record<ErrorCode, string>
 };
 
@@ -118,13 +116,14 @@ export class ApiErrorHandler {
     // 判断是否应该重试
     const shouldRetry = this.shouldRetryRequest(apiError.code, errorContext.requestId);
 
-    // 使用现有的错误增强功能
-    const enhancedError = enhanceError(error, {
+    // 创建增强错误信息
+    const enhancedError = {
+      ...error,
       url: errorContext.url,
       operation: errorContext.operation,
       userAgent: errorContext.userAgent,
       timestamp: errorContext.timestamp
-    });
+    };
 
     // 记录错误历史
     this.recordErrorHistory(errorContext, apiError);
@@ -207,7 +206,7 @@ export class ApiErrorHandler {
     // 网络相关错误
     if (this.isNetworkError(error)) {
       return {
-        code: 'NETWORK_ERROR' as ErrorCode,
+        code: ErrorCode.NETWORK_ERROR,
         message: '网络连接失败',
         details: {
           originalError: error.message,
@@ -215,6 +214,7 @@ export class ApiErrorHandler {
           stack: error.stack
         },
         context,
+        timestamp: new Date().toISOString(),
         retryable: true
       };
     }
@@ -222,13 +222,14 @@ export class ApiErrorHandler {
     // 超时错误
     if (this.isTimeoutError(error)) {
       return {
-        code: 'TIMEOUT_ERROR' as ErrorCode,
+        code: ErrorCode.TIMEOUT_ERROR,
         message: '请求超时',
         details: {
           timeout: error.timeout,
           originalError: error.message
         },
         context,
+        timestamp: new Date().toISOString(),
         retryable: true
       };
     }
@@ -240,7 +241,7 @@ export class ApiErrorHandler {
 
     // 默认未知错误
     return {
-      code: 'UNKNOWN_ERROR' as ErrorCode,
+      code: ErrorCode.UNKNOWN_ERROR,
       message: error.message || '未知错误',
       details: {
         originalError: error,
@@ -248,6 +249,7 @@ export class ApiErrorHandler {
         stack: error.stack
       },
       context,
+      timestamp: new Date().toISOString(),
       retryable: false
     };
   }
@@ -270,23 +272,23 @@ export class ApiErrorHandler {
 
     // 根据HTTP状态码映射错误
     const errorMapping: Record<number, { code: ErrorCode; message: string; retryable: boolean }> = {
-      400: { code: 'VALIDATION_ERROR', message: '请求参数错误', retryable: false },
-      401: { code: 'TOKEN_EXPIRED', message: '认证失败', retryable: false },
-      403: { code: 'PERMISSION_DENIED', message: '权限不足', retryable: false },
-      404: { code: 'RESOURCE_NOT_FOUND', message: '资源不存在', retryable: false },
-      409: { code: 'VALIDATION_ERROR', message: '数据冲突', retryable: false },
-      413: { code: 'FILE_TOO_LARGE', message: '请求体过大', retryable: false },
-      415: { code: 'UNSUPPORTED_FILE_TYPE', message: '不支持的媒体类型', retryable: false },
-      422: { code: 'VALIDATION_ERROR', message: '数据验证失败', retryable: false },
-      429: { code: 'RATE_LIMIT_EXCEEDED', message: '请求过于频繁', retryable: true },
-      500: { code: 'SERVER_ERROR', message: '服务器内部错误', retryable: true },
-      502: { code: 'SERVICE_UNAVAILABLE', message: '网关错误', retryable: true },
-      503: { code: 'SERVICE_UNAVAILABLE', message: '服务不可用', retryable: true },
-      504: { code: 'TIMEOUT_ERROR', message: '网关超时', retryable: true }
+      400: { code: ErrorCode.BAD_REQUEST, message: '请求参数错误', retryable: false },
+      401: { code: ErrorCode.UNAUTHORIZED, message: '认证失败', retryable: false },
+      403: { code: ErrorCode.FORBIDDEN, message: '权限不足', retryable: false },
+      404: { code: ErrorCode.NOT_FOUND, message: '资源不存在', retryable: false },
+      409: { code: ErrorCode.CONFLICT, message: '数据冲突', retryable: false },
+      413: { code: ErrorCode.UNPROCESSABLE_ENTITY, message: '请求体过大', retryable: false },
+      415: { code: ErrorCode.UNPROCESSABLE_ENTITY, message: '不支持的媒体类型', retryable: false },
+      422: { code: ErrorCode.UNPROCESSABLE_ENTITY, message: '数据验证失败', retryable: false },
+      429: { code: ErrorCode.TOO_MANY_REQUESTS, message: '请求过于频繁', retryable: true },
+      500: { code: ErrorCode.INTERNAL_SERVER_ERROR, message: '服务器内部错误', retryable: true },
+      502: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '网关错误', retryable: true },
+      503: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '服务不可用', retryable: true },
+      504: { code: ErrorCode.TIMEOUT_ERROR, message: '网关超时', retryable: true }
     };
 
     const errorInfo = errorMapping[status] || {
-      code: 'UNKNOWN_ERROR' as ErrorCode,
+      code: ErrorCode.UNKNOWN_ERROR,
       message: `HTTP ${status} 错误`,
       retryable: status >= 500
     };
@@ -301,6 +303,7 @@ export class ApiErrorHandler {
         headers: error.response.headers
       },
       context,
+      timestamp: new Date().toISOString(),
       retryable: errorInfo.retryable
     };
   }
@@ -340,8 +343,8 @@ export class ApiErrorHandler {
   /**
    * 获取用户友好的错误消息
    */
-  private getUserFriendlyMessage(errorCode: ErrorCode): string {
-    return this.config.userFriendlyMessages[errorCode] || this.config.userFriendlyMessages['UNKNOWN_ERROR'];
+  public getUserFriendlyMessage(errorCode: ErrorCode): string {
+    return this.config.userFriendlyMessages[errorCode] || this.config.userFriendlyMessages[ErrorCode.UNKNOWN_ERROR];
   }
 
   /**
@@ -567,7 +570,8 @@ export const ErrorHandlerUtils = {
     code,
     message,
     details,
-    retryable: ['NETWORK_ERROR', 'TIMEOUT_ERROR', 'SERVER_ERROR', 'SERVICE_UNAVAILABLE'].includes(code)
+    timestamp: new Date().toISOString(),
+    retryable: [ErrorCode.NETWORK_ERROR, ErrorCode.TIMEOUT_ERROR, ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.SERVICE_UNAVAILABLE].includes(code)
   }),
 
   /**
@@ -597,7 +601,7 @@ export const ErrorHandlerUtils = {
     }
 
     return ErrorHandlerUtils.createError(
-      status >= 500 ? 'SERVER_ERROR' : 'UNKNOWN_ERROR',
+      status >= 500 ? ErrorCode.INTERNAL_SERVER_ERROR : ErrorCode.UNKNOWN_ERROR,
       `HTTP ${status} Error`,
       { status, statusText: response.statusText, data }
     );

@@ -1,207 +1,158 @@
-/**
- * 可选的统一测试进度显示组件
- * 各个测试页面可以选择使用，不强制替换现有实现
- */
+import React from 'react';
+import { useState, useEffect } from 'react';
+import { Play, Pause, Square, Clock, CheckCircle, AlertTriangle, XCircle, Activity, TrendingUp } from 'lucide-react';
 
-import {
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Loader, Play,
-  RotateCcw,
-  Square,
-  Timer,
-  Users,
-  XCircle,
-  Zap
-} from 'lucide-react';
-import type { useState, FC } from 'react';
-import { TestProgress } from '../../../services/api/testProgressService';
-
-// 测试状态类型 - 使用统一类型系统
-import type { TestStatus } from '../../../types';
-
-// 队列统计接口
-export interface QueueStats {
-  totalRunning: number;
-  totalQueued: number;
-  maxConcurrent: number;
-  estimatedWaitTime: number;
+interface TestStep {
+  id: string;
+  name: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  startTime?: string;
+  endTime?: string;
+  duration?: number;
+  progress: number;
+  details?: string;
+  error?: string;
 }
 
-// 进度显示属性
-export interface TestProgressDisplayProps {
-  status: TestStatus;
-  progress?: number;
-  message?: string;
-  currentStep?: string;
-  testId?: string;
-  startTime?: Date;
-  endTime?: Date;
-  queueStats?: QueueStats;
-  error?: string;
+interface TestProgressDisplayProps {
+  testId: string;
+  testName: string;
+  status: 'idle' | 'running' | 'completed' | 'failed' | 'cancelled';
+  progress: number;
+  steps: TestStep[];
+  startTime?: string;
+  endTime?: string;
+  estimatedDuration?: number;
+  onPause?: () => void;
+  onResume?: () => void;
   onCancel?: () => void;
-  onRetry?: () => void;
-  onReset?: () => void;
-  showControls?: boolean;
-  showQueueInfo?: boolean;
-  showTimeInfo?: boolean;
+  showDetails?: boolean;
   compact?: boolean;
 }
 
-/**
- * 可选的统一测试进度显示组件
- */
-export const TestProgressDisplay: React.FC<TestProgressDisplayProps> = ({
-  status,
-  progress = 0,
-  message = '',
-  currentStep = '',
+const TestProgressDisplay: React.FC<TestProgressDisplayProps> = ({
   testId,
+  testName,
+  status,
+  progress,
+  steps,
   startTime,
   endTime,
-  queueStats,
-  error,
+  estimatedDuration,
+  onPause,
+  onResume,
   onCancel,
-  onRetry,
-  onReset,
-  showControls = true,
-  showQueueInfo = true,
-  showTimeInfo = true,
+  showDetails = true,
   compact = false
 }) => {
-  /**
-   * 获取状态图标和颜色
-   */
-  const getStatusInfo = () => {
-  const [error, setError] = useState<string | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0);
 
-    switch (status) {
-      case 'idle':
-        return {
-          icon: Activity,
-          color: 'text-gray-400',
-          bgColor: 'bg-gray-600/20',
-          label: '准备就绪'
-        };
-      case 'starting':
-        return {
-          icon: Play,
-          color: 'text-blue-400',
-          bgColor: 'bg-blue-600/20',
-          label: '正在启动'
-        };
-      case 'queued':
-        return {
-          icon: Clock,
-          color: 'text-orange-400',
-          bgColor: 'bg-orange-600/20',
-          label: '排队等待'
-        };
-      case 'running':
-        return {
-          icon: Loader,
-          color: 'text-blue-400',
-          bgColor: 'bg-blue-600/20',
-          label: '正在运行',
-          animate: true
-        };
-      case 'completed':
-        return {
-          icon: CheckCircle,
-          color: 'text-green-400',
-          bgColor: 'bg-green-600/20',
-          label: '测试完成'
-        };
-      case 'failed':
-        return {
-          icon: XCircle,
-          color: 'text-red-400',
-          bgColor: 'bg-red-600/20',
-          label: '测试失败'
-        };
-      case 'cancelled':
-        return {
-          icon: Square,
-          color: 'text-yellow-400',
-          bgColor: 'bg-yellow-600/20',
-          label: '已取消'
-        };
-      case 'stopping':
-        return {
-          icon: Square,
-          color: 'text-orange-400',
-          bgColor: 'bg-orange-600/20',
-          label: '正在停止'
-        };
-      default:
-        return {
-          icon: Activity,
-          color: 'text-gray-400',
-          bgColor: 'bg-gray-600/20',
-          label: '未知状态'
-        };
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (status === 'running' && startTime) {
+      interval = setInterval(() => {
+        const elapsed = Date.now() - new Date(startTime).getTime();
+        setElapsedTime(elapsed);
+
+        if (estimatedDuration && progress > 0) {
+          const totalEstimated = (elapsed / progress) * 100;
+          const remaining = Math.max(0, totalEstimated - elapsed);
+          setEstimatedTimeRemaining(remaining);
+        }
+      }, 1000);
     }
-  };
 
-  /**
-   * 计算运行时间
-   */
-  const getRunningTime = (): string => {
-    if (!startTime) return '';
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [status, startTime, progress, estimatedDuration]);
 
-    const endTimeToUse = endTime || new Date();
-    const duration = endTimeToUse.getTime() - startTime.getTime();
-    const seconds = Math.floor(duration / 1000);
+  const formatTime = (milliseconds: number): string => {
+    const seconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
 
     if (hours > 0) {
-      return `${hours}小时${minutes % 60}分钟`;
+      return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
     } else if (minutes > 0) {
-      return `${minutes}分钟${seconds % 60}秒`;
+      return `${minutes}m ${seconds % 60}s`;
     } else {
-      return `${seconds}秒`;
+      return `${seconds}s`;
     }
   };
 
-  /**
-   * 格式化队列等待时间
-   */
-  const formatWaitTime = (seconds: number): string => {
-    if (seconds < 60) {
-      return `${seconds}秒`;
-    } else if (seconds < 3600) {
-      return `${Math.floor(seconds / 60)}分钟`;
-    } else {
-      return `${Math.floor(seconds / 3600)}小时`;
+  const getStatusIcon = (stepStatus: string) => {
+    switch (stepStatus) {
+      case 'completed':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'failed':
+        return <XCircle className="w-4 h-4 text-red-500" />;
+      case 'running':
+        return <Activity className="w-4 h-4 text-blue-500 animate-pulse" />;
+      case 'skipped':
+        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-400" />;
     }
   };
 
-  const statusInfo = getStatusInfo();
-  const IconComponent = statusInfo.icon;
-  const isRunning = ['starting', 'running', 'stopping'].includes(status);
-  const isCompleted = ['completed', 'failed', 'cancelled'].includes(status);
+  const getStatusColor = (stepStatus: string) => {
+    switch (stepStatus) {
+      case 'completed':
+        return 'bg-green-500';
+      case 'failed':
+        return 'bg-red-500';
+      case 'running':
+        return 'bg-blue-500';
+      case 'skipped':
+        return 'bg-yellow-500';
+      default:
+        return 'bg-gray-300';
+    }
+  };
 
-  // 紧凑模式
+  const getOverallStatusColor = () => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-500';
+      case 'failed':
+        return 'bg-red-500';
+      case 'running':
+        return 'bg-blue-500';
+      case 'cancelled':
+        return 'bg-yellow-500';
+      default:
+        return 'bg-gray-300';
+    }
+  };
+
+  const completedSteps = steps.filter(step => step.status === 'completed').length;
+  const failedSteps = steps.filter(step => step.status === 'failed').length;
+  const totalSteps = steps.length;
+
   if (compact) {
     return (
-      <div className="flex items-center space-x-3">
-        <div className={`p-2 rounded-lg ${statusInfo.bgColor}`}>
-          <IconComponent
-            className={`w-4 h-4 ${statusInfo.color} ${statusInfo.animate ? 'animate-spin' : ''}`}
-          />
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-900 truncate">{testName}</h3>
+          <span className="text-xs text-gray-500">{Math.round(progress)}%</span>
         </div>
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <span className="text-white text-sm font-medium">{statusInfo.label}</span>
-            {isRunning && (
-              <span className="text-blue-400 text-sm">{progress.toFixed(0)}%</span>
-            )}
-          </div>
-          {message && (
-            <p className="text-gray-400 text-xs mt-1">{message}</p>
+        
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+          <div
+            className={`h-2 rounded-full transition-all duration-300 ${getOverallStatusColor()}`}
+            style={{ width: `${Math.min(100, progress)}%` }}
+          ></div>
+        </div>
+
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>{completedSteps}/{totalSteps} steps</span>
+          {status === 'running' && (
+            <span>{formatTime(elapsedTime)}</span>
           )}
         </div>
       </div>
@@ -209,154 +160,175 @@ export const TestProgressDisplay: React.FC<TestProgressDisplayProps> = ({
   }
 
   return (
-    <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-      {/* 状态标题 */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className={`p-3 rounded-lg ${statusInfo.bgColor}`}>
-            <IconComponent
-              className={`w-6 h-6 ${statusInfo.color} ${statusInfo.animate ? 'animate-spin' : ''}`}
-            />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-white">{statusInfo.label}</h3>
-            {testId && (
-              <p className="text-gray-400 text-sm font-mono">ID: {testId}</p>
-            )}
-          </div>
+    <div className="bg-white rounded-lg shadow-lg p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">{testName}</h2>
+          <p className="text-sm text-gray-500">Test ID: {testId}</p>
         </div>
-
-        {/* 控制按钮 */}
-        {showControls && (
-          <div className="flex items-center space-x-2">
-            {isRunning && onCancel && (
-              <button
-                onClick={onCancel}
-                className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors flex items-center space-x-2"
-              >
-                <Square className="w-4 h-4" />
-                <span>取消</span>
-              </button>
-            )}
-
-            {status === 'failed' && onRetry && (
-              <button
-                onClick={onRetry}
-                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors flex items-center space-x-2"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>重试</span>
-              </button>
-            )}
-
-            {isCompleted && onReset && (
-              <button
-                onClick={onReset}
-                className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm transition-colors flex items-center space-x-2"
-              >
-                <Activity className="w-4 h-4" />
-                <span>重置</span>
-              </button>
-            )}
-          </div>
-        )}
+        
+        <div className="flex items-center space-x-2">
+          {status === 'running' && onPause && (
+            <button
+              onClick={onPause}
+              className="px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 flex items-center space-x-1"
+            >
+              <Pause className="w-4 h-4" />
+              <span>Pause</span>
+            </button>
+          )}
+          
+          {status === 'idle' && onResume && (
+            <button
+              onClick={onResume}
+              className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center space-x-1"
+            >
+              <Play className="w-4 h-4" />
+              <span>Resume</span>
+            </button>
+          )}
+          
+          {(status === 'running' || status === 'idle') && onCancel && (
+            <button
+              onClick={onCancel}
+              className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center space-x-1"
+            >
+              <Square className="w-4 h-4" />
+              <span>Cancel</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* 进度条 */}
-      {isRunning && (
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-gray-300 text-sm">进度</span>
-            <span className="text-blue-400 text-sm font-medium">{progress.toFixed(1)}%</span>
-          </div>
-          <div className="w-full bg-gray-700 rounded-full h-2">
-            <div
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
-            />
-          </div>
+      {/* Progress Bar */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-700">Overall Progress</span>
+          <span className="text-sm text-gray-500">{Math.round(progress)}%</span>
         </div>
-      )}
-
-      {/* 当前步骤和消息 */}
-      {(currentStep || message) && (
-        <div className="mb-4">
-          {currentStep && (
-            <div className="flex items-center space-x-2 mb-2">
-              <Zap className="w-4 h-4 text-yellow-400" />
-              <span className="text-white text-sm font-medium">{currentStep}</span>
-            </div>
-          )}
-          {message && (
-            <p className="text-gray-300 text-sm">{message}</p>
-          )}
+        
+        <div className="w-full bg-gray-200 rounded-full h-3">
+          <div
+            className={`h-3 rounded-full transition-all duration-500 ${getOverallStatusColor()}`}
+            style={{ width: `${Math.min(100, progress)}%` }}
+          ></div>
         </div>
-      )}
+      </div>
 
-      {/* 错误信息 */}
-      {error && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <AlertTriangle className="w-4 h-4 text-red-400" />
-            <span className="text-red-400 text-sm font-medium">错误信息</span>
-          </div>
-          <p className="text-red-300 text-sm mt-1">{error}</p>
+      {/* Statistics */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="text-center">
+          <div className="text-2xl font-bold text-gray-900">{completedSteps}</div>
+          <div className="text-sm text-gray-500">Completed</div>
         </div>
-      )}
-
-      {/* 队列信息 */}
-      {showQueueInfo && status === 'queued' && queueStats && (
-        <div className="mb-4 p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-          <div className="flex items-center space-x-2 mb-2">
-            <Users className="w-4 h-4 text-orange-400" />
-            <span className="text-orange-400 text-sm font-medium">队列信息</span>
-          </div>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-400">当前运行:</span>
-              <span className="text-orange-300 ml-2">{queueStats.totalRunning}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">队列等待:</span>
-              <span className="text-orange-300 ml-2">{queueStats.totalQueued}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">最大并发:</span>
-              <span className="text-orange-300 ml-2">{queueStats.maxConcurrent}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">预计等待:</span>
-              <span className="text-orange-300 ml-2">
-                {formatWaitTime(queueStats.estimatedWaitTime)}
-              </span>
-            </div>
-          </div>
+        
+        <div className="text-center">
+          <div className="text-2xl font-bold text-red-600">{failedSteps}</div>
+          <div className="text-sm text-gray-500">Failed</div>
         </div>
-      )}
-
-      {/* 时间信息 */}
-      {showTimeInfo && (startTime || endTime) && (
-        <div className="flex items-center justify-between text-sm text-gray-400">
-          <div className="flex items-center space-x-4">
-            {startTime && (
-              <div className="flex items-center space-x-2">
-                <Timer className="w-4 h-4" />
-                <span>开始: {startTime.toLocaleTimeString()}</span>
-              </div>
-            )}
-            {endTime && (
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4" />
-                <span>结束: {endTime.toLocaleTimeString()}</span>
-              </div>
-            )}
+        
+        <div className="text-center">
+          <div className="text-2xl font-bold text-blue-600">{totalSteps}</div>
+          <div className="text-sm text-gray-500">Total Steps</div>
+        </div>
+        
+        <div className="text-center">
+          <div className="text-2xl font-bold text-gray-900">
+            {status === 'running' ? formatTime(elapsedTime) : 
+             endTime && startTime ? formatTime(new Date(endTime).getTime() - new Date(startTime).getTime()) : 
+             '--'}
           </div>
-          {startTime && (
+          <div className="text-sm text-gray-500">Duration</div>
+        </div>
+      </div>
+
+      {/* Time Information */}
+      {status === 'running' && (
+        <div className="bg-blue-50 rounded-lg p-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4" />
-              <span>用时: {getRunningTime()}</span>
+              <Clock className="w-4 h-4 text-blue-500" />
+              <span className="text-gray-600">Elapsed:</span>
+              <span className="font-medium">{formatTime(elapsedTime)}</span>
             </div>
-          )}
+            
+            {estimatedTimeRemaining > 0 && (
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="w-4 h-4 text-blue-500" />
+                <span className="text-gray-600">Remaining:</span>
+                <span className="font-medium">{formatTime(estimatedTimeRemaining)}</span>
+              </div>
+            )}
+            
+            {estimatedDuration && (
+              <div className="flex items-center space-x-2">
+                <Activity className="w-4 h-4 text-blue-500" />
+                <span className="text-gray-600">Estimated:</span>
+                <span className="font-medium">{formatTime(estimatedDuration)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Step Details */}
+      {showDetails && (
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Test Steps</h3>
+          <div className="space-y-3">
+            {steps.map((step, index) => (
+              <div
+                key={step.id}
+                className={`p-4 rounded-lg border ${
+                  step.status === 'running' ? 'border-blue-200 bg-blue-50' :
+                  step.status === 'completed' ? 'border-green-200 bg-green-50' :
+                  step.status === 'failed' ? 'border-red-200 bg-red-50' :
+                  step.status === 'skipped' ? 'border-yellow-200 bg-yellow-50' :
+                  'border-gray-200 bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm text-gray-500">#{index + 1}</span>
+                    {getStatusIcon(step.status)}
+                    <span className="font-medium text-gray-900">{step.name}</span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    {step.status === 'running' && (
+                      <span>{Math.round(step.progress)}%</span>
+                    )}
+                    
+                    {step.duration && (
+                      <span>{formatTime(step.duration)}</span>
+                    )}
+                  </div>
+                </div>
+
+                {step.status === 'running' && (
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1">
+                      <div
+                        className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min(100, step.progress)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                {step.details && (
+                  <p className="mt-2 text-sm text-gray-600">{step.details}</p>
+                )}
+
+                {step.error && (
+                  <div className="mt-2 p-2 bg-red-100 border border-red-200 rounded text-sm text-red-700">
+                    <strong>Error:</strong> {step.error}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

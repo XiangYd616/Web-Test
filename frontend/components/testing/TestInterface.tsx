@@ -1,9 +1,11 @@
 import { Clock, Play, Square, Target } from 'lucide-react';
-import type { useCallback, useState, ComponentType, FC } from 'react';
-import { TestResult, TestType } from '../../services/testing/unifiedTestEngine';
+import React, { useCallback, useState } from 'react';
+import { TestResult } from '../../services/testing/unifiedTestEngine';
+import { TestType } from '../../types/unified/testTypes';
 import { ButtonFeedback } from '../integration/InteractiveFeedback';
 import { ErrorDisplay, useErrorHandler, useNotifications } from '../system/ErrorHandling';
 import { SmartLoader, useLoadingState } from '../ui/LoadingStates';
+;
 
 export interface TestInterfaceProps {
   testType: TestType;
@@ -161,7 +163,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
           </>
         )}
 
-        {testType === 'content' && (
+        {testType === TestType.SEO && (
           <div className="space-y-3">
             <label className="flex items-center space-x-2">
               <input

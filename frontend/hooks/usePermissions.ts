@@ -4,16 +4,39 @@
  * 版本: v2.0.0
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { authManager } from '../services/auth/enhancedAuthManager';
-import type { 
-  Permission, 
-  Role, 
-  ResourceType, 
-  PermissionAction,
-  PermissionCheckRequest,
-  PermissionCheckResult 
-} from '../types/unified/rbac';
+// 临时类型定义，直到rbac模块实现完成
+interface Permission {
+  id: string;
+  name: string;
+  resource: string;
+  action: string;
+  effect?: 'allow' | 'deny';
+  conditions?: any;
+}
+
+interface Role {
+  id: string;
+  name: string;
+  permissions: string[];
+  isActive?: boolean;
+  description?: string;
+}
+
+type ResourceType = string;
+type PermissionAction = string;
+
+interface PermissionCheckRequest {
+  userId: string;
+  resource: string;
+  action: string;
+}
+
+interface PermissionCheckResult {
+  allowed: boolean;
+  reason?: string;
+}
 
 // ==================== 类型定义 ====================
 
@@ -111,8 +134,8 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
   });
 
   // 权限缓存
-  const permissionCache = useMemo(() => 
-    enableCache ? new PermissionCache(cacheExpiry) : null, 
+  const permissionCache = useMemo(() =>
+    enableCache ? new PermissionCache(cacheExpiry) : null,
     [enableCache, cacheExpiry]
   );
 
@@ -123,9 +146,9 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
       const user = await authManager.getCurrentUser();
       if (!user) {
-        setState(prev => ({ 
-          ...prev, 
-          loading: false, 
+        setState(prev => ({
+          ...prev,
+          loading: false,
           error: '用户未认证',
           permissions: [],
           roles: []
@@ -137,12 +160,12 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       const [permissionsResponse, rolesResponse] = await Promise.all([
         fetch('/api/auth/permissions', {
           headers: {
-            'Authorization': `Bearer ${await authManager.getAccessToken()}`
+            'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
           }
         }),
         fetch('/api/auth/roles', {
           headers: {
-            'Authorization': `Bearer ${await authManager.getAccessToken()}`
+            'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
           }
         })
       ]);
@@ -177,8 +200,8 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
   // 检查单个权限
   const checkPermission = useCallback(async (
-    resource: ResourceType, 
-    action: PermissionAction, 
+    resource: ResourceType,
+    action: PermissionAction,
     resourceId?: string
   ): Promise<boolean> => {
     try {
@@ -191,8 +214,8 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       }
 
       // 本地权限检查（基于已获取的权限列表）
-      const hasLocalPermission = state.permissions.some(permission => 
-        permission.resource === resource && 
+      const hasLocalPermission = state.permissions.some(permission =>
+        permission.resource === resource &&
         permission.action === action &&
         permission.effect === 'allow'
       );
@@ -210,7 +233,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await authManager.getAccessToken()}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
         },
         body: JSON.stringify({
           resource,
@@ -249,7 +272,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       // 检查缓存
       for (const check of checks) {
         const key = `${check.resource}:${check.action}:${check.resourceId || 'null'}`;
-        
+
         if (permissionCache) {
           const cached = permissionCache.getCachedPermission(check.resource, check.action, check.resourceId);
           if (cached !== null) {
@@ -271,7 +294,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await authManager.getAccessToken()}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
         },
         body: JSON.stringify({ checks: uncachedChecks })
       });
@@ -281,19 +304,19 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         // 合并结果并缓存
         Object.entries(data.data.results).forEach(([key, result]: [string, any]) => {
           results[key] = result.allowed;
-          
+
           // 缓存结果
           if (permissionCache) {
             const [resource, action, resourceId] = key.split(':');
             permissionCache.setCachedPermission(
-              resource as ResourceType, 
-              action as PermissionAction, 
-              resourceId === 'null' ? undefined : resourceId, 
+              resource as ResourceType,
+              action as PermissionAction,
+              resourceId === 'null' ? undefined : resourceId,
               result.allowed
             );
           }
@@ -349,6 +372,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       const interval = setInterval(fetchPermissions, refreshInterval);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [fetchPermissions, autoRefresh, refreshInterval]);
 
   // 监听认证状态变化
@@ -370,9 +394,9 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
     });
 
     return () => {
-      // 清理事件监听器
-      authManager.off?.('loginSuccess', handleAuthChange);
-      authManager.off?.('logout', handleAuthChange);
+      // 清理事件监听器（EnhancedAuthManager没有off方法，暂时跳过）
+      // authManager.off?.('loginSuccess', handleAuthChange);
+      // authManager.off?.('logout', handleAuthChange);
     };
   }, [fetchPermissions, clearCache]);
 
@@ -395,8 +419,8 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
  * 简化的权限检查Hook
  */
 export function usePermissionCheck(
-  resource: ResourceType, 
-  action: PermissionAction, 
+  resource: ResourceType,
+  action: PermissionAction,
   resourceId?: string
 ) {
   const [{ permissions, loading }] = usePermissions();
@@ -406,8 +430,8 @@ export function usePermissionCheck(
     if (loading) return;
 
     // 本地权限检查
-    const localCheck = permissions.some(permission => 
-      permission.resource === resource && 
+    const localCheck = permissions.some(permission =>
+      permission.resource === resource &&
       permission.action === action &&
       permission.effect === 'allow'
     );
@@ -435,7 +459,7 @@ export function useRoleCheck(roleNames: string | string[]) {
 
   const hasRole = useMemo(() => {
     if (loading) return null;
-    
+
     const userRoleNames = roles.filter(role => role.isActive).map(role => role.name);
     return roleArray.some(roleName => userRoleNames.includes(roleName));
   }, [roles, loading, roleArray]);

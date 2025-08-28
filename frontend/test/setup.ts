@@ -3,12 +3,12 @@
  * 配置全局测试环境和模拟
  */
 
-import * as matchers from '@testing-library/jest-dom';
+import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, expect, vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 
 // 扩展expect匹配器
-expect.extend(matchers);
+// expect.extend(matchers); // 临时注释掉，因为matchers未定义
 
 // 每个测试后清理
 afterEach(() => {
@@ -80,7 +80,7 @@ global.URL.createObjectURL = vi.fn(() => 'mocked-url');
 global.URL.revokeObjectURL = vi.fn();
 
 // 模拟WebSocket
-global.WebSocket = vi.fn().mockImplementation(() => ({
+const MockWebSocket = vi.fn().mockImplementation(() => ({
     close: vi.fn(),
     send: vi.fn(),
     addEventListener: vi.fn(),
@@ -91,6 +91,15 @@ global.WebSocket = vi.fn().mockImplementation(() => ({
     CLOSING: 2,
     CLOSED: 3,
 }));
+
+// 添加静态属性
+(MockWebSocket as any).CONNECTING = 0;
+(MockWebSocket as any).OPEN = 1;
+(MockWebSocket as any).CLOSING = 2;
+(MockWebSocket as any).CLOSED = 3;
+(MockWebSocket as any).prototype = {};
+
+global.WebSocket = MockWebSocket as any;
 
 // 设置测试超时
 vi.setConfig({ testTimeout: 10000 });

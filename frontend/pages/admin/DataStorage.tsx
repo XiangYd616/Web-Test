@@ -1,12 +1,19 @@
 import { Activity, BarChart3, ChevronDown, ChevronUp, Code, Database, Download, Eye, FileText, Filter, Globe, RefreshCw, Search, Shield, SortAsc, SortDesc, Trash2, TrendingUp, Wifi, Zap } from 'lucide-react';
-import type { createElement, useEffect, useState, FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
-import ImportExport from '../../components/analytics/ImportExport';
+;
+// 临时注释掉不存在的组件导入
+// import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
+// import ImportExport from '../../components/analytics/ImportExport';
 import PerformanceAnalysis from '../../components/analytics/PerformanceAnalysis';
-import RealTimeMonitoring from '../../components/analytics/RealTimeMonitoring';
+// import RealTimeMonitoring from '../../components/analytics/RealTimeMonitoring';
 import ReportManagement from '../../components/analytics/ReportManagement';
 import { TestResultDisplay } from '../../components/testing';
+
+// 临时组件替代
+const AnalyticsOverview = () => <div className="p-4 bg-gray-100 rounded">分析概览组件开发中...</div>;
+const ImportExport = () => <div className="p-4 bg-gray-100 rounded">导入导出组件开发中...</div>;
+const RealTimeMonitoring = () => <div className="p-4 bg-gray-100 rounded">实时监控组件开发中...</div>;
 
 interface TestRecord {
   id: string;
@@ -254,15 +261,15 @@ const DataStorage: React.FC = () => {
       let aValue: any, bValue: any;
 
       switch (sortBy) {
-        case 'date':
+        case 'created_at':
           aValue = new Date(a.startTime).getTime();
           bValue = new Date(b.startTime).getTime();
           break;
-        case 'score':
+        case 'overall_score':
           aValue = a.overallScore || 0;
           bValue = b.overallScore || 0;
           break;
-        case 'type':
+        case 'test_type':
           aValue = a.testType;
           bValue = b.testType;
           break;
@@ -601,19 +608,19 @@ const DataStorage: React.FC = () => {
                     <li key={record.id} className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/50">
                       <article className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
-                          {getTestTypeIcon(record.test_type)}
+                          {getTestTypeIcon(record.testType)}
 
                           <div className="flex-1">
                             <header className="flex items-center space-x-3 mb-2">
                               <h4 className="text-lg font-semibold text-white">
-                                {getTestTypeLabel(record.test_type)}
+                                {getTestTypeLabel(record.testType)}
                               </h4>
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
                                 {getStatusLabel(record.status)}
                               </span>
-                              {record.overall_score && (
-                                <span className={`text-sm font-bold ${getScoreColor(record.overall_score)}`}>
-                                  {Math.round(record.overall_score)}分
+                              {record.overallScore && (
+                                <span className={`text-sm font-bold ${getScoreColor(record.overallScore)}`}>
+                                  {Math.round(record.overallScore)}分
                                 </span>
                               )}
                             </header>
@@ -704,22 +711,34 @@ const DataStorage: React.FC = () => {
                   </button>
                 </div>
 
-                <TestResultDisplay
-                  result={{
-                    testId: selectedRecord.id,
-                    testType: selectedRecord.testType,
-                    url: selectedRecord.url,
-                    status: selectedRecord.status,
-                    overallScore: selectedRecord.overallScore,
-                    startTime: selectedRecord.startTime,
-                    endTime: selectedRecord.endTime,
-                    actualDuration: selectedRecord.duration,
-                    error: selectedRecord.error,
-                    ...selectedRecord.results
-                  }}
-                  onViewDetails={() => { }}
-                  onDownloadReport={() => { }}
-                />
+                <TestResultDisplay>
+                  <div className="p-4 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-gray-400">测试ID:</span>
+                        <span className="ml-2 text-white">{selectedRecord.id}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">测试类型:</span>
+                        <span className="ml-2 text-white">{selectedRecord.testType}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">URL:</span>
+                        <span className="ml-2 text-white">{selectedRecord.url}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">状态:</span>
+                        <span className="ml-2 text-white">{selectedRecord.status}</span>
+                      </div>
+                      {selectedRecord.overallScore && (
+                        <div>
+                          <span className="text-gray-400">评分:</span>
+                          <span className="ml-2 text-white">{selectedRecord.overallScore}分</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </TestResultDisplay>
               </header>
             </article>
           </div>

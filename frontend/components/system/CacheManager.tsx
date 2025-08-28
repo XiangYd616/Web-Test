@@ -1,26 +1,44 @@
+// CacheStats接口定义 - 与cacheStrategy.ts保持一致
+interface CacheStats {
+  totalEntries: number;
+  totalSize: number;
+  hitCount: number;
+  missCount: number;
+  hitRate: number;
+  evictionCount: number;
+  averageAccessTime: number;
+  memoryUsage: number;
+  // 兼容性属性
+  hits?: number;
+  misses?: number;
+  size?: number;
+  operations?: number;
+  lastAccess?: string;
+}
+
 /**
  * 缓存管理组件
  * 提供缓存状态监控和管理界面
  * 版本: v1.0.0
  */
 
-import type { useCallback, useEffect, useState, ComponentType, FC } from 'react';
 import {
-  Database,
-  Trash2,
-  RefreshCw,
-  BarChart3,
-  Settings,
+  Activity,
   AlertTriangle,
+  BarChart3,
   CheckCircle,
   Clock,
+  Database,
   HardDrive,
-  Zap,
-  TrendingUp,
-  Activity
+  RefreshCw,
+  Settings,
+  Trash2,
+  Zap
 } from 'lucide-react';
-import { useCache, useApiCache, useUserCache, useTempCache, useTestResultCache } from '../../hooks/useCache';
-import type { CacheStats } from '../../services/cacheStrategy';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useApiCache, useCache, useTempCache, useTestResultCache, useUserCache } from '../../hooks/useCache';
+;
+// import type { CacheStats } from '../../services/cacheStrategy'; // 使用本地定义
 
 // ==================== 类型定义 ====================
 
@@ -54,7 +72,7 @@ const CacheStatsCard: React.FC<{
   onClear: () => void;
   onRefresh: () => void;
 }> = ({ title, stats, icon: Icon, color, isLoading, error, onClear, onRefresh }) => {
-  const hitRate = stats ? (stats.hitRate * 100).toFixed(1) : '0.0';
+  const hitRate = stats ? (stats.hitRate > 1 ? stats.hitRate.toFixed(1) : (stats.hitRate * 100).toFixed(1)) : '0.0';
   const memoryUsage = stats ? (stats.memoryUsage / 1024 / 1024).toFixed(2) : '0.00';
 
   return (
@@ -69,7 +87,7 @@ const CacheStatsCard: React.FC<{
             <p className="text-sm text-gray-400">缓存统计</p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <button
             onClick={onRefresh}
@@ -106,10 +124,9 @@ const CacheStatsCard: React.FC<{
             </div>
             <div className="w-full bg-gray-700 rounded-full h-2">
               <div
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  parseFloat(hitRate) > 80 ? 'bg-green-500' :
+                className={`h-2 rounded-full transition-all duration-300 ${parseFloat(hitRate) > 80 ? 'bg-green-500' :
                   parseFloat(hitRate) > 60 ? 'bg-yellow-500' : 'bg-red-500'
-                }`}
+                  }`}
                 style={{ width: `${hitRate}%` }}
               />
             </div>
@@ -123,7 +140,7 @@ const CacheStatsCard: React.FC<{
                 <span className="text-xs text-gray-400">命中</span>
               </div>
               <span className="text-lg font-semibold text-white">
-                {stats?.hits.toLocaleString() || '0'}
+                {(stats?.hitCount || stats?.hits || 0).toLocaleString()}
               </span>
             </div>
 
@@ -133,7 +150,7 @@ const CacheStatsCard: React.FC<{
                 <span className="text-xs text-gray-400">未命中</span>
               </div>
               <span className="text-lg font-semibold text-white">
-                {stats?.misses.toLocaleString() || '0'}
+                {(stats?.missCount || stats?.misses || 0).toLocaleString()}
               </span>
             </div>
 
@@ -143,7 +160,7 @@ const CacheStatsCard: React.FC<{
                 <span className="text-xs text-gray-400">条目数</span>
               </div>
               <span className="text-lg font-semibold text-white">
-                {stats?.size.toLocaleString() || '0'}
+                {(stats?.totalEntries || stats?.size || 0).toLocaleString()}
               </span>
             </div>
 
@@ -188,18 +205,18 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // 各种缓存Hook
-  const [memoryState, memoryOps] = useCache({ 
-    cacheType: 'memory', 
+  const [memoryState, memoryOps] = useCache({
+    cacheType: 'memory',
     enableStats: true,
     namespace: 'memory'
   });
-  
-  const [localStorageState, localStorageOps] = useCache({ 
-    cacheType: 'localStorage', 
+
+  const [localStorageState, localStorageOps] = useCache({
+    cacheType: 'localStorage',
     enableStats: true,
     namespace: 'localStorage'
   });
-  
+
   const [apiState, apiOps] = useApiCache({ enableStats: true });
   const [userState, userOps] = useUserCache({ enableStats: true });
   const [tempState, tempOps] = useTempCache({ enableStats: true });
@@ -272,7 +289,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
   // 刷新所有统计
   const refreshAllStats = useCallback(async () => {
     setRefreshTrigger(prev => prev + 1);
-    
+
     // 触发所有缓存的统计更新
     await Promise.all([
       memoryOps.getStats(),
@@ -286,7 +303,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
 
   // 自动刷新
   useEffect(() => {
-    if (!autoRefresh) return;
+    if (!autoRefresh) return undefined;
 
     const interval = setInterval(refreshAllStats, refreshInterval);
     return () => clearInterval(interval);
@@ -309,7 +326,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
     return acc;
   }, { hits: 0, misses: 0, size: 0, memoryUsage: 0, operations: 0 });
 
-  const totalHitRate = totalStats.hits + totalStats.misses > 0 
+  const totalHitRate = totalStats.hits + totalStats.misses > 0
     ? (totalStats.hits / (totalStats.hits + totalStats.misses) * 100).toFixed(1)
     : '0.0';
 
@@ -321,7 +338,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
           <h2 className="text-2xl font-bold text-white">缓存管理</h2>
           <p className="text-gray-400">监控和管理系统缓存状态</p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <button
             onClick={refreshAllStats}
@@ -336,28 +353,28 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
       {/* 总体统计 */}
       <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <h3 className="text-lg font-semibold text-white mb-4">总体统计</h3>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-green-400">{totalHitRate}%</div>
             <div className="text-sm text-gray-400">总命中率</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-400">{totalStats.hits.toLocaleString()}</div>
             <div className="text-sm text-gray-400">总命中数</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-2xl font-bold text-red-400">{totalStats.misses.toLocaleString()}</div>
             <div className="text-sm text-gray-400">总未命中</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-400">{totalStats.size.toLocaleString()}</div>
             <div className="text-sm text-gray-400">总条目数</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-2xl font-bold text-yellow-400">
               {(totalStats.memoryUsage / 1024 / 1024).toFixed(2)}MB
@@ -378,11 +395,10 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
             <button
               key={key}
               onClick={() => setActiveTab(key as any)}
-              className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === key
-                  ? 'border-blue-500 text-blue-400'
-                  : 'border-transparent text-gray-400 hover:text-gray-300'
-              }`}
+              className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === key
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-gray-400 hover:text-gray-300'
+                }`}
             >
               <Icon className="w-4 h-4" />
               <span>{label}</span>
@@ -413,7 +429,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
       {activeTab === 'details' && (
         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
           <h3 className="text-lg font-semibold text-white mb-4">详细缓存信息</h3>
-          
+
           <div className="space-y-4">
             {cacheTypes.map((cache, index) => (
               <div key={index} className="border border-gray-600 rounded-lg p-4">
@@ -427,7 +443,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
                       <p className="text-sm text-gray-400">{cache.description}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => cache.operations.getStats()}
@@ -443,7 +459,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
                     </button>
                   </div>
                 </div>
-                
+
                 {cache.stats && (
                   <div className="grid grid-cols-4 gap-4 text-sm">
                     <div>
@@ -473,7 +489,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
       {activeTab === 'settings' && (
         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
           <h3 className="text-lg font-semibold text-white mb-4">缓存设置</h3>
-          
+
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -493,7 +509,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
                 <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
-            
+
             <div>
               <h4 className="font-medium text-white mb-2">刷新间隔</h4>
               <select className="bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2">
@@ -503,7 +519,7 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
                 <option value="300000">5分钟</option>
               </select>
             </div>
-            
+
             <div className="pt-4 border-t border-gray-600">
               <button
                 onClick={() => {

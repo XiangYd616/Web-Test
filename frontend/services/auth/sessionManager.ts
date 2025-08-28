@@ -4,7 +4,8 @@
  * 版本: v1.0.0
  */
 
-import type { User, UserSession } from '../../types/common';
+import type { UserSession } from '../../types/auth.types';
+import type { User } from '../../types/user';
 import { defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
@@ -37,6 +38,7 @@ export interface DeviceInfo {
   screenResolution: string;
   timezone: string;
   language: string;
+  type: 'desktop' | 'mobile' | 'tablet';
   fingerprint?: string;
 }
 
@@ -98,7 +100,7 @@ class DeviceDetector {
   static getDeviceInfo(): DeviceInfo {
     const userAgent = navigator.userAgent;
     const platform = navigator.platform;
-    
+
     return {
       deviceId: this.getDeviceId(),
       userAgent,
@@ -109,8 +111,23 @@ class DeviceDetector {
       osVersion: this.getOSInfo().version,
       screenResolution: `${screen.width}x${screen.height}`,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      language: navigator.language
+      language: navigator.language,
+      type: this.getDeviceType()
     };
+  }
+
+  /**
+   * 获取设备类型
+   */
+  static getDeviceType(): 'desktop' | 'mobile' | 'tablet' {
+    const userAgent = navigator.userAgent;
+    if (/tablet|ipad|playbook|silk/i.test(userAgent)) {
+      return 'tablet';
+    }
+    if (/mobile|iphone|ipod|android|blackberry|opera|mini|windows\sce|palm|smartphone|iemobile/i.test(userAgent)) {
+      return 'mobile';
+    }
+    return 'desktop';
   }
 
   /**
@@ -130,7 +147,7 @@ class DeviceDetector {
    */
   private static getBrowserInfo(): { name: string; version: string } {
     const userAgent = navigator.userAgent;
-    
+
     if (userAgent.includes('Chrome')) {
       const match = userAgent.match(/Chrome\/(\d+)/);
       return { name: 'Chrome', version: match ? match[1] : 'Unknown' };
@@ -144,7 +161,7 @@ class DeviceDetector {
       const match = userAgent.match(/Edge\/(\d+)/);
       return { name: 'Edge', version: match ? match[1] : 'Unknown' };
     }
-    
+
     return { name: 'Unknown', version: 'Unknown' };
   }
 
@@ -154,7 +171,7 @@ class DeviceDetector {
   private static getOSInfo(): { name: string; version: string } {
     const userAgent = navigator.userAgent;
     const platform = navigator.platform;
-    
+
     if (platform.includes('Win')) {
       return { name: 'Windows', version: this.getWindowsVersion(userAgent) };
     } else if (platform.includes('Mac')) {
@@ -168,7 +185,7 @@ class DeviceDetector {
       const match = userAgent.match(/OS (\d+_?\d*)/);
       return { name: 'iOS', version: match ? match[1].replace('_', '.') : 'Unknown' };
     }
-    
+
     return { name: 'Unknown', version: 'Unknown' };
   }
 
@@ -266,7 +283,7 @@ class SecurityAnalyzer {
       const knownLocations = userSessions
         .filter(s => s.locationInfo)
         .map(s => `${s.locationInfo!.country}-${s.locationInfo!.region}`);
-      
+
       const currentLocation = `${sessionData.locationInfo.country}-${sessionData.locationInfo.region}`;
       if (!knownLocations.includes(currentLocation)) {
         isNewLocation = true;
@@ -369,9 +386,10 @@ export class SessionManager {
     }
 
     // 检查并发会话限制
-    const userSessions = this.getUserSessions(user.id);
+    const userId = String(user.id);
+    const userSessions = this.getUserSessions(userId);
     if (userSessions.length >= policy.maxSessions) {
-      await this.handleConcurrentSessionLimit(user.id, policy, warnings);
+      await this.handleConcurrentSessionLimit(userId, policy, warnings);
     }
 
     // 创建会话数据
@@ -404,7 +422,7 @@ export class SessionManager {
       sessionData.securityFlags = SecurityAnalyzer.analyzeSession(
         sessionData,
         userSessions,
-        this.getUserActivityHistory(user.id)
+        this.getUserActivityHistory(userId)
       );
 
       // 生成安全警报
@@ -627,7 +645,7 @@ export class SessionManager {
       allActivities.push(...session.activityLog);
     });
 
-    return allActivities.sort((a, b) => 
+    return allActivities.sort((a, b) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
@@ -649,7 +667,7 @@ export class SessionManager {
       // 检查非活跃超时
       const lastActivity = new Date(session.lastActivityAt).getTime();
       const now = Date.now();
-      
+
       if (now - lastActivity > this.config.inactivityTimeout) {
         await this.terminateSession(sessionId, 'inactivity_timeout');
         return;

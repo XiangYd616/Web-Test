@@ -5,6 +5,7 @@ export interface ProxyResponse {
   status: number;
   url: string;
   loadTime: number;
+  data?: any;
 }
 
 export class ProxyService {

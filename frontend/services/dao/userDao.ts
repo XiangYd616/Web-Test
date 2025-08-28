@@ -3,7 +3,8 @@
  * 提供用户相关的数据库操作
  */
 
-import { User, CreateUserData, UpdateUserData } from '../../types/user';
+import { UserRole, UserStatus } from '../../types/enums';
+import { CreateUserData, UpdateUserData, User } from '../../types/user';
 
 // 模拟用户数据存储
 const users: User[] = [
@@ -12,26 +13,29 @@ const users: User[] = [
     username: 'admin',
     email: 'admin@example.com',
     password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'admin123'
-    role: 'admin',
-    isActive: true,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
+    role: UserRole.ADMIN,
+    status: UserStatus.ACTIVE,
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
     lastLoginAt: null,
     profile: {
       firstName: 'Admin',
       lastName: 'User',
-      avatar: null,
-      bio: 'System Administrator',
-      phone: null,
-      address: null,
-      preferences: {
-        theme: 'light',
-        language: 'zh-CN',
-        notifications: {
-          email: true,
-          push: true,
-          sms: false
-        }
+      bio: 'System Administrator'
+    },
+    preferences: {
+      theme: 'light',
+      language: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+        browser: true
+      },
+      dashboard: {
+        layout: 'grid',
+        widgets: ['overview', 'recent-tests']
       }
     }
   },
@@ -40,26 +44,29 @@ const users: User[] = [
     username: 'testuser',
     email: 'test@example.com',
     password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'test123'
-    role: 'user',
-    isActive: true,
-    createdAt: new Date('2024-01-02'),
-    updatedAt: new Date('2024-01-02'),
+    role: UserRole.USER,
+    status: UserStatus.ACTIVE,
+    createdAt: '2024-01-02T00:00:00.000Z',
+    updatedAt: '2024-01-02T00:00:00.000Z',
     lastLoginAt: null,
     profile: {
       firstName: 'Test',
       lastName: 'User',
-      avatar: null,
-      bio: 'Test User Account',
-      phone: null,
-      address: null,
-      preferences: {
-        theme: 'light',
-        language: 'zh-CN',
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        }
+      bio: 'Test User Account'
+    },
+    preferences: {
+      theme: 'light',
+      language: 'zh-CN',
+      timezone: 'Asia/Shanghai',
+      notifications: {
+        email: true,
+        push: false,
+        sms: false,
+        browser: false
+      },
+      dashboard: {
+        layout: 'list',
+        widgets: ['recent-tests']
       }
     }
   }
@@ -102,26 +109,29 @@ export const userDao = {
       username: userData.username,
       email: userData.email,
       password: userData.password,
-      role: userData.role || 'user',
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      role: userData.role || UserRole.USER,
+      status: UserStatus.ACTIVE,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       lastLoginAt: null,
       profile: {
         firstName: userData.firstName || '',
         lastName: userData.lastName || '',
-        avatar: null,
-        bio: '',
-        phone: null,
-        address: null,
-        preferences: {
-          theme: 'light',
-          language: 'zh-CN',
-          notifications: {
-            email: true,
-            push: true,
-            sms: false
-          }
+        bio: ''
+      },
+      preferences: {
+        theme: 'light',
+        language: 'zh-CN',
+        timezone: 'Asia/Shanghai',
+        notifications: {
+          email: true,
+          push: true,
+          sms: false,
+          browser: true
+        },
+        dashboard: {
+          layout: 'grid',
+          widgets: ['overview']
         }
       }
     };
@@ -143,10 +153,14 @@ export const userDao = {
     const updatedUser: User = {
       ...user,
       ...updateData,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
       profile: {
         ...user.profile,
         ...updateData.profile
+      },
+      preferences: {
+        ...user.preferences,
+        ...updateData.preferences
       }
     };
 
@@ -180,8 +194,8 @@ export const userDao = {
   async updateLastLogin(id: string): Promise<void> {
     const user = users.find(u => u.id === id);
     if (user) {
-      user.lastLoginAt = new Date();
-      user.updatedAt = new Date();
+      user.lastLoginAt = new Date().toISOString();
+      user.updatedAt = new Date().toISOString();
     }
   },
 
@@ -247,7 +261,7 @@ export const userDao = {
    */
   async search(query: string): Promise<User[]> {
     const lowercaseQuery = query.toLowerCase();
-    return users.filter(user => 
+    return users.filter(user =>
       user.username.toLowerCase().includes(lowercaseQuery) ||
       user.email.toLowerCase().includes(lowercaseQuery) ||
       user.profile.firstName?.toLowerCase().includes(lowercaseQuery) ||
@@ -274,12 +288,12 @@ export const userDao = {
    */
   async batchUpdateStatus(userIds: string[], isActive: boolean): Promise<number> {
     let updatedCount = 0;
-    
+
     for (const id of userIds) {
       const user = users.find(u => u.id === id);
       if (user) {
         user.isActive = isActive;
-        user.updatedAt = new Date();
+        user.updatedAt = new Date().toISOString();
         updatedCount++;
       }
     }

@@ -3,7 +3,8 @@
  * 提供API响应格式化、错误处理和查询字符串构建等功能
  */
 
-import type { ApiResponse } from '../types/common';
+import type { ApiResponse } from '../types/unified/apiResponse.types';
+import { ErrorCode } from '../types/unified/apiResponse.types';
 
 /**
  * 格式化API响应
@@ -21,8 +22,9 @@ export function formatApiResponse<T>(
         return {
             success: false,
             error: {
-                code: 'UNKNOWN_ERROR',
+                code: ErrorCode.UNKNOWN_ERROR,
                 message: error.message,
+                timestamp: timestamp,
             },
             meta: {
                 timestamp,
@@ -166,5 +168,13 @@ export function extractApiData<T>(response: ApiResponse<T>): T | null {
  * @returns 错误信息
  */
 export function extractApiError<T>(response: ApiResponse<T>): string | null {
-    return !isApiSuccess(response) ? response.error?.message || '未知错误' : null;
+    if (isApiSuccess(response)) return null;
+
+    const error = response.error;
+    if (typeof error === 'string') {
+        return error;
+    } else if (error && typeof error === 'object' && 'message' in error) {
+        return error.message || '未知错误';
+    }
+    return '未知错误';
 }

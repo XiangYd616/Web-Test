@@ -239,14 +239,16 @@ export const TEST_TYPE_CONFIG: Record<TestType, TestTypeConfig> = {
  * 检查测试类型是否有效
  */
 export function isValidTestType(type: string): type is TestType {
-  return Object.values(TestTypeEnum).includes(type as TestType);
+  const validTypes = ['stress', 'security', 'api', 'performance', 'compatibility', 'seo', 'database', 'network', 'ux', 'website'];
+  return validTypes.includes(type);
 }
 
 /**
  * 检查测试状态是否有效
  */
 export function isValidTestStatus(status: string): status is TestStatus {
-  return Object.values(TestStatusEnum).includes(status as TestStatus);
+  const validStatuses = ['pending', 'running', 'completed', 'failed', 'cancelled', 'starting'];
+  return validStatuses.includes(status);
 }
 
 /**

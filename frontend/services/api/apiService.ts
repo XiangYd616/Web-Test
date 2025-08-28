@@ -2,6 +2,21 @@ import type { ApiResponse } from '../../types/unified/apiResponse.types';
 import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/user.types';
 import { isDesktopEnvironment } from '../../utils/environment';
 
+// 标准化API响应函数
+function normalizeApiResponse<T = any>(response: any): ApiResponse<T> {
+  return {
+    success: response.success || false,
+    data: response.data,
+    message: response.message,
+    error: response.error,
+    errors: response.errors,
+    meta: {
+      timestamp: new Date().toISOString(),
+      ...response.meta
+    }
+  };
+}
+
 // 延迟导入以避免循环依赖
 let authService: any = null;
 let remoteApiService: any = null;
@@ -173,8 +188,8 @@ class UnifiedApiService {
         } else {
           return {
             success: false,
-            message: response.error || '登录失败',
-            errors: response.errors
+            message: typeof response.error === 'string' ? response.error : '登录失败',
+            errors: Array.isArray(response.errors) ? response.errors : []
           };
         }
       } catch (error) {

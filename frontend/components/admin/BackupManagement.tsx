@@ -1,4 +1,5 @@
-import type { useState, FC } from 'react';
+import React from 'react';
+import { useState } from 'react';
 
 import { AlertTriangle, Calendar, Database, Download, HardDrive, RefreshCw, Upload } from 'lucide-react';
 

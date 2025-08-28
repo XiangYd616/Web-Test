@@ -3,6 +3,7 @@
  * 支持多种测试类型的结果可视化和分析
  */
 
+import React from 'react';
 import {
     AlertTriangle,
     BarChart3,
@@ -16,7 +17,7 @@ import {
     Share2,
     TrendingUp
 } from 'lucide-react';
-import type { useMemo, useState, FC } from 'react';
+import { useMemo, useState } from 'react';
 import {
     Badge,
     Button,
@@ -25,10 +26,15 @@ import {
     Modal,
     Select,
     Table,
-    type SelectOption,
     type TableColumn
 } from '../ui';
 import { TestResult } from './TestRunner';
+
+// 本地SelectOption类型定义
+interface LocalSelectOption {
+    value: string;
+    label: string;
+}
 
 // 结果详情接口
 export interface ResultDetails {
@@ -69,7 +75,7 @@ export interface ResultViewerProps {
 }
 
 // 筛选选项
-const severityOptions: SelectOption[] = [
+const severityOptions: LocalSelectOption[] = [
     { value: 'all', label: '全部' },
     { value: 'critical', label: '严重' },
     { value: 'high', label: '高' },
@@ -77,7 +83,7 @@ const severityOptions: SelectOption[] = [
     { value: 'low', label: '低' }
 ];
 
-const categoryOptions: SelectOption[] = [
+const categoryOptions: LocalSelectOption[] = [
     { value: 'all', label: '全部分类' },
     { value: 'performance', label: '性能' },
     { value: 'security', label: '安全' },
@@ -398,19 +404,19 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
                         <Select
                             options={severityOptions}
                             value={severityFilter}
-                            onChange={(value) => setSeverityFilter(value as string)}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSeverityFilter(e.target.value)}
                             placeholder="筛选严重程度"
                         />
                         <Select
                             options={categoryOptions}
                             value={categoryFilter}
-                            onChange={(value) => setCategoryFilter(value as string)}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCategoryFilter(e.target.value)}
                             placeholder="筛选分类"
                         />
                         <Input
                             placeholder="搜索问题..."
                             value={searchQuery}
-                            onChange={(value) => setSearchQuery(value as string)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                             leftIcon={<Filter className="w-4 h-4" />}
                         />
                     </div>

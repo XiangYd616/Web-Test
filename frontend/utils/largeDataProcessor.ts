@@ -93,7 +93,7 @@ export class DataChunkManager<T = any> {
     for (let i = 0; i < data.length; i += chunkSize) {
       const chunkData = data.slice(i, i + chunkSize);
       const chunkId = this.generateChunkId(i, i + chunkData.length - 1);
-      
+
       const chunk: DataChunk<T> = {
         id: chunkId,
         data: chunkData,
@@ -151,7 +151,7 @@ export class DataChunkManager<T = any> {
   async getRange(startIndex: number, endIndex: number): Promise<T[]> {
     const result: T[] = [];
     const chunkSize = this.options.chunkSize;
-    
+
     const startChunk = Math.floor(startIndex / chunkSize);
     const endChunk = Math.floor(endIndex / chunkSize);
 
@@ -159,12 +159,12 @@ export class DataChunkManager<T = any> {
       const chunkStart = chunkIndex * chunkSize;
       const chunkEnd = chunkStart + chunkSize - 1;
       const chunkId = this.generateChunkId(chunkStart, chunkEnd);
-      
+
       const chunk = await this.getChunk(chunkId);
       if (chunk) {
         const localStart = Math.max(0, startIndex - chunkStart);
         const localEnd = Math.min(chunk.size - 1, endIndex - chunkStart);
-        
+
         result.push(...chunk.data.slice(localStart, localEnd + 1));
       }
     }
@@ -228,12 +228,12 @@ export class DataChunkManager<T = any> {
     const toRemove = sortedChunks.length - this.options.maxChunks;
     for (let i = 0; i < toRemove; i++) {
       const [chunkId, chunk] = sortedChunks[i];
-      
+
       // 缓存到持久存储
       if (this.options.enableCache) {
         defaultMemoryCache.set(chunkId, chunk, undefined, this.options.cacheTimeout);
       }
-      
+
       this.chunks.delete(chunkId);
     }
 
@@ -299,7 +299,7 @@ export class DataChunkManager<T = any> {
     }
 
     this.loadingChunks.add(chunkId);
-    
+
     try {
       // 这里应该实现实际的数据加载逻辑
       // 目前只是模拟
@@ -313,11 +313,11 @@ export class DataChunkManager<T = any> {
   private updateMemoryUsage(): void {
     const chunks = this.chunks.size;
     const items = Array.from(this.chunks.values()).reduce((sum, chunk) => sum + chunk.size, 0);
-    
+
     // 估算内存使用量（简化计算）
     const estimatedSize = items * 100; // 假设每个项目100字节
-    const totalMemory = performance.memory?.usedJSHeapSize || estimatedSize;
-    
+    const totalMemory = (performance as any).memory?.usedJSHeapSize || estimatedSize;
+
     this.metrics.memoryUsage = {
       used: estimatedSize,
       total: totalMemory,
@@ -332,7 +332,7 @@ export class DataChunkManager<T = any> {
     if (totalRequests === 1) {
       this.metrics.averageLoadTime = loadTime;
     } else {
-      this.metrics.averageLoadTime = 
+      this.metrics.averageLoadTime =
         (this.metrics.averageLoadTime * (totalRequests - 1) + loadTime) / totalRequests;
     }
   }
@@ -363,13 +363,13 @@ export class LazyLoadManager<T = any> {
 
     try {
       const newData = await this.options.loadMore(this.offset, this.options.pageSize);
-      
+
       this.data.push(...newData);
       this.offset += newData.length;
       this.hasMore = newData.length === this.options.pageSize;
 
       this.options.onLoad?.(newData, this.hasMore);
-      
+
       return newData;
     } catch (error) {
       this.options.onError?.(error as Error);
@@ -435,10 +435,10 @@ export class PerformanceMonitor {
     if (!this.metrics.has(name)) {
       this.metrics.set(name, []);
     }
-    
+
     const values = this.metrics.get(name)!;
     values.push(value);
-    
+
     // 保持最近的100个值
     if (values.length > 100) {
       values.shift();
@@ -472,7 +472,7 @@ export class PerformanceMonitor {
    * 记录内存快照
    */
   takeMemorySnapshot(): MemoryUsage {
-    const memory = performance.memory;
+    const memory = (performance as any).memory;
     const snapshot: MemoryUsage = {
       used: memory?.usedJSHeapSize || 0,
       total: memory?.totalJSHeapSize || 0,
@@ -482,7 +482,7 @@ export class PerformanceMonitor {
     };
 
     this.memorySnapshots.push(snapshot);
-    
+
     if (this.memorySnapshots.length > this.maxSnapshots) {
       this.memorySnapshots.shift();
     }
@@ -536,17 +536,17 @@ export function processBatches<T, R>(
 ): Promise<R[]> {
   return new Promise(async (resolve, reject) => {
     const results: R[] = [];
-    
+
     try {
       for (let i = 0; i < data.length; i += batchSize) {
         const batch = data.slice(i, i + batchSize);
         const batchResults = await processor(batch);
         results.push(...batchResults);
-        
+
         // 让出控制权，避免阻塞UI
         await new Promise(resolve => setTimeout(resolve, 0));
       }
-      
+
       resolve(results);
     } catch (error) {
       reject(error);
@@ -568,11 +568,11 @@ export function estimateMemoryUsage(data: any): number {
 export function compressData<T>(data: T[]): { compressed: string; originalSize: number; compressedSize: number } {
   const json = JSON.stringify(data);
   const originalSize = new Blob([json]).size;
-  
+
   // 简单的压缩（实际项目中可以使用更好的压缩算法）
   const compressed = btoa(json);
   const compressedSize = new Blob([compressed]).size;
-  
+
   return {
     compressed,
     originalSize,

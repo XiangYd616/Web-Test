@@ -63,16 +63,16 @@ describe('Button组件', () => {
     });
 
     it('应该应用正确的尺寸样式', () => {
-        const { rerender } = render(<Button size="small">小按钮</Button>);
+        const { rerender } = render(<Button size="sm">小按钮</Button>);
 
         let button = screen.getByRole('button');
         expect(button).toHaveClass('px-3', 'py-1.5', 'text-sm');
 
-        rerender(<Button size="medium">中等按钮</Button>);
+        rerender(<Button size="md">中等按钮</Button>);
         button = screen.getByRole('button');
         expect(button).toHaveClass('px-4', 'py-2', 'text-base');
 
-        rerender(<Button size="large">大按钮</Button>);
+        rerender(<Button size="lg">大按钮</Button>);
         button = screen.getByRole('button');
         expect(button).toHaveClass('px-6', 'py-3', 'text-lg');
     });
@@ -118,7 +118,7 @@ describe('Button组件', () => {
     it('应该支持仅图标按钮', () => {
         const TestIcon = () => <span data-testid="test-icon">图标</span>;
 
-        render(<Button icon={<TestIcon />} iconOnly aria-label="图标按钮" />);
+        render(<Button icon={<TestIcon />} aria-label="图标按钮">图标</Button>);
 
         expect(screen.getByTestId('test-icon')).toBeInTheDocument();
         expect(screen.getByLabelText('图标按钮')).toBeInTheDocument();

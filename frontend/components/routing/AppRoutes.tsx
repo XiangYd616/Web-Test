@@ -1,4 +1,6 @@
-import type { Suspense, lazy, ReactNode, FC } from 'react';
+import React from 'react';
+import { Suspense, lazy } from 'react';
+import type { ReactNode, FC } from 'react';;
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from '../../pages/Login';
 import Register from '../../pages/Register';
@@ -29,7 +31,7 @@ const UXTest = lazy(() => import('../../pages/UXTest'));
 const DataStorage = lazy(() => import('../../pages/admin/DataStorage'));
 const DataManagement = lazy(() => import('../../pages/DataManagement'));
 const Statistics = lazy(() => import('../../pages/Statistics'));
-const Analytics = lazy(() => import('../../pages/Analytics'));
+const Analytics = lazy(() => import('../../pages/analytics'));
 const MonitoringDashboard = lazy(() => import('../../pages/MonitoringDashboard'));
 
 // 报告和历史
@@ -43,7 +45,7 @@ const StressTestReport = lazy(() => import('../../pages/StressTestReport'));
 const SecurityReport = lazy(() => import('../../pages/SecurityReport'));
 
 // 系统管理 - 只保留Admin页面，其他管理功能都在Admin内部
-const Admin = lazy(() => import('../../pages/Admin'));
+const Admin = lazy(() => import('../../pages/admin'));
 
 // 用户相关
 const UserProfile = lazy(() => import('../../pages/UserProfile'));

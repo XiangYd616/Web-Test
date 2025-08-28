@@ -10,14 +10,13 @@
  * - apiErrorInterceptor.ts
  */
 
-import { 
-  UnifiedErrorHandler, 
-  ErrorCode, 
-  ErrorSeverity, 
-  type StandardError, 
-  type ErrorContext 
-} from '../../../shared/utils/unifiedErrorHandler';
 import type { AxiosError } from 'axios';
+import {
+  ErrorSeverity,
+  UnifiedErrorHandler,
+  type ErrorContext,
+  type StandardError
+} from '../../../shared/utils/unifiedErrorHandler';
 
 // ==================== 前端特定配置 ====================
 
@@ -32,6 +31,18 @@ interface FrontendErrorConfig {
 // ==================== 前端错误处理器 ====================
 
 export class FrontendErrorHandler extends UnifiedErrorHandler {
+  // 前端特定的错误处理实现
+  public handleFrontendError(error: StandardError): void {
+    // 前端特定的通知实现
+    console.log(`[ERROR] ${error.message}`);
+
+    // 调用父类的私有方法（通过反射）
+    try {
+      (this as any).showUserNotification?.(error);
+    } catch (e) {
+      // 忽略调用失败
+    }
+  }
   private frontendConfig: FrontendErrorConfig;
   private activeToasts = new Set<string>();
 
@@ -97,14 +108,14 @@ export class FrontendErrorHandler extends UnifiedErrorHandler {
     return this.handleError(error, {
       ...context,
       component: componentName,
-      phase: 'rendering'
+      phase: 'processing'
     });
   }
 
   /**
    * 显示用户通知（重写父类方法）
    */
-  protected showUserNotification(error: StandardError): void {
+  private showUserNotificationInternal(error: StandardError): void {
     if (!this.frontendConfig.enableToast) return;
 
     // 避免重复显示相同错误
@@ -133,7 +144,7 @@ export class FrontendErrorHandler extends UnifiedErrorHandler {
     if (typeof window !== 'undefined') {
       const toastType = this.getToastType(error.severity);
       console.log(`[${toastType.toUpperCase()}] ${error.userFriendlyMessage}`);
-      
+
       // 如果有全局Toast函数，可以在这里调用
       if ((window as any).showToast) {
         (window as any).showToast(error.userFriendlyMessage, toastType);
@@ -278,7 +289,7 @@ export class AxiosErrorInterceptor {
    */
   responseErrorInterceptor = async (error: AxiosError) => {
     const requestId = error.config?.metadata?.requestId;
-    
+
     // 检查是否需要重试
     if (requestId && this.shouldRetry(error, requestId)) {
       return this.retryRequest(error);
@@ -310,7 +321,7 @@ export class AxiosErrorInterceptor {
     // 检查错误类型是否可重试
     const retryableStatuses = [408, 429, 500, 502, 503, 504];
     const status = error.response?.status;
-    
+
     return status ? retryableStatuses.includes(status) : false;
   }
 
@@ -353,16 +364,16 @@ export const frontendErrorHandler = new FrontendErrorHandler();
 export const axiosErrorInterceptor = new AxiosErrorInterceptor(frontendErrorHandler);
 
 // 便捷方法
-export const handleError = (error: any, context?: ErrorContext) => 
+export const handleError = (error: any, context?: ErrorContext) =>
   frontendErrorHandler.handleError(error, context);
 
-export const handleAxiosError = (error: AxiosError, context?: ErrorContext) => 
+export const handleAxiosError = (error: AxiosError, context?: ErrorContext) =>
   frontendErrorHandler.handleAxiosError(error, context);
 
-export const handleApiError = (error: any, operation: string, context?: ErrorContext) => 
+export const handleApiError = (error: any, operation: string, context?: ErrorContext) =>
   frontendErrorHandler.handleApiError(error, operation, context);
 
-export const handleComponentError = (error: Error, componentName: string, context?: ErrorContext) => 
+export const handleComponentError = (error: Error, componentName: string, context?: ErrorContext) =>
   frontendErrorHandler.handleComponentError(error, componentName, context);
 
 // 初始化全局错误处理

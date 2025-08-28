@@ -1,4 +1,6 @@
-import type { Fragment, useEffect, useState, ReactNode, ComponentType, FC } from 'react';
+import React from 'react';
+import { Fragment, useEffect, useState } from 'react';
+import type { ReactNode, ComponentType, FC } from 'react';;
 
 import { Check, Copy, Download, Share2, Heart, ThumbsUp, ThumbsDown, Star, Bookmark, BookmarkCheck, Eye, EyeOff, Volume2, VolumeX, Zap, Sparkles, Target, TrendingUp, Award, Gift } from 'lucide-react';
 

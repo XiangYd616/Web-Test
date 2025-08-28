@@ -1,5 +1,6 @@
+import React from 'react';
 import { ChevronDown, Download, FileText, Image, Table } from 'lucide-react';
-import type { createElement, useState, ComponentType, FC } from 'react';
+import { useState } from 'react';
 
 // 导出格式配置
 export interface ExportFormat {
@@ -196,20 +197,20 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
   const convertToCSV = (data: any): string => {
     if (Array.isArray(data)) {
       if (data.length === 0) return '';
-      
+
       const headers = Object.keys(data[0]);
       const csvContent = [
         headers.join(','),
-        ...data.map(row => 
+        ...data.map(row =>
           headers.map(header => {
             const value = row[header];
-            return typeof value === 'string' && value.includes(',') 
-              ? `"${value}"` 
+            return typeof value === 'string' && value.includes(',')
+              ? `"${value}"`
               : value;
           }).join(',')
         )
       ].join('\n');
-      
+
       return csvContent;
     } else {
       // 对象转换为键值对CSV

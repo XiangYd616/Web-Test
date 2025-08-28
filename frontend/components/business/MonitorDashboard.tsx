@@ -3,6 +3,7 @@
  * 集成实时监控功能，提供统一的监控界面
  */
 
+import React from 'react';
 import {
     Activity,
     AlertTriangle,
@@ -21,7 +22,7 @@ import {
     Wifi,
     Zap
 } from 'lucide-react';
-import type { useCallback, useEffect, useState, FC } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 import { useRealTimeData } from '../../hooks/useRealTimeData';
 import {
@@ -32,9 +33,14 @@ import {
     Modal,
     Select,
     Table,
-    type SelectOption,
     type TableColumn
 } from '../ui';
+
+// 本地SelectOption类型定义
+interface LocalSelectOption {
+    value: string;
+    label: string;
+}
 
 // 监控目标接口
 export interface MonitorTarget {
@@ -85,7 +91,7 @@ export interface MonitorDashboardProps {
 }
 
 // 监控类型选项
-const monitorTypeOptions: SelectOption[] = [
+const monitorTypeOptions: LocalSelectOption[] = [
     { value: 'website', label: '网站' },
     { value: 'api', label: 'API' },
     { value: 'database', label: '数据库' },
@@ -93,7 +99,7 @@ const monitorTypeOptions: SelectOption[] = [
 ];
 
 // 检查间隔选项
-const intervalOptions: SelectOption[] = [
+const intervalOptions: LocalSelectOption[] = [
     { value: '30', label: '30秒' },
     { value: '60', label: '1分钟' },
     { value: '300', label: '5分钟' },
@@ -438,14 +444,18 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
                         onClick={() => toggleTargetEnabled(record.id)}
                         icon={record.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                         title={record.enabled ? '禁用' : '启用'}
-                    />
+                    >
+                        {record.enabled ? '禁用' : '启用'}
+                    </Button>
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleManualCheck(record.id)}
                         icon={<Activity className="w-4 h-4" />}
                         title="手动检查"
-                    />
+                    >
+                        检查
+                    </Button>
                     <Button
                         variant="ghost"
                         size="sm"
@@ -455,14 +465,18 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
                         }}
                         icon={<Edit className="w-4 h-4" />}
                         title="编辑"
-                    />
+                    >
+                        编辑
+                    </Button>
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteTarget(record.id)}
                         icon={<Trash2 className="w-4 h-4" />}
                         title="删除"
-                    />
+                    >
+                        删除
+                    </Button>
                 </div>
             )
         }
@@ -647,34 +661,34 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
                         label="名称"
                         placeholder="输入监控目标名称"
                         value={newTarget.name || ''}
-                        onChange={(value) => setNewTarget(prev => ({ ...prev, name: value as string }))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTarget(prev => ({ ...prev, name: e.target.value }))}
                         required
                     />
                     <Input
                         label="URL"
                         placeholder="https://example.com"
                         value={newTarget.url || ''}
-                        onChange={(value) => setNewTarget(prev => ({ ...prev, url: value as string }))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTarget(prev => ({ ...prev, url: e.target.value }))}
                         required
                     />
                     <Select
                         label="类型"
                         options={monitorTypeOptions}
                         value={newTarget.type || 'website'}
-                        onChange={(value) => setNewTarget(prev => ({ ...prev, type: value as any }))}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewTarget(prev => ({ ...prev, type: e.target.value as any }))}
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <Select
                             label="检查间隔"
                             options={intervalOptions}
                             value={newTarget.interval?.toString() || '60'}
-                            onChange={(value) => setNewTarget(prev => ({ ...prev, interval: parseInt(value as string) }))}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewTarget(prev => ({ ...prev, interval: parseInt(e.target.value) }))}
                         />
                         <Input
                             label="超时时间(秒)"
                             type="number"
                             value={newTarget.timeout || 30}
-                            onChange={(value) => setNewTarget(prev => ({ ...prev, timeout: parseInt(value as string) || 30 }))}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTarget(prev => ({ ...prev, timeout: parseInt(e.target.value) || 30 }))}
                             min={5}
                             max={300}
                         />
@@ -702,13 +716,13 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
                         <Input
                             label="名称"
                             value={selectedTarget.name}
-                            onChange={(value) => setSelectedTarget(prev => prev ? { ...prev, name: value as string } : null)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedTarget(prev => prev ? { ...prev, name: e.target.value } : null)}
                             required
                         />
                         <Input
                             label="URL"
                             value={selectedTarget.url}
-                            onChange={(value) => setSelectedTarget(prev => prev ? { ...prev, url: value as string } : null)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedTarget(prev => prev ? { ...prev, url: e.target.value } : null)}
                             required
                         />
                         <Select
@@ -722,13 +736,13 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
                                 label="检查间隔"
                                 options={intervalOptions}
                                 value={selectedTarget.interval.toString()}
-                                onChange={(value) => setSelectedTarget(prev => prev ? { ...prev, interval: parseInt(value as string) } : null)}
+                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedTarget(prev => prev ? { ...prev, interval: parseInt(e.target.value) } : null)}
                             />
                             <Input
                                 label="超时时间(秒)"
                                 type="number"
                                 value={selectedTarget.timeout}
-                                onChange={(value) => setSelectedTarget(prev => prev ? { ...prev, timeout: parseInt(value as string) || 30 } : null)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedTarget(prev => prev ? { ...prev, timeout: parseInt(e.target.value) || 30 } : null)}
                                 min={5}
                                 max={300}
                             />

@@ -27,15 +27,15 @@ export const useAuth = () => {
 
   // 临时解决方案：使用默认状态而不是 AppContext
   const defaultAuthState = {
-    user: null,
-    token: null,
+    user: null as any,
+    token: null as string | null,
     isAuthenticated: false,
     isLoading: false,
-    error: null
+    error: null as string | null
   };
 
   const auth = defaultAuthState;
-  const dispatch = () => { }; // 临时的空 dispatch
+  const dispatch = (action: any) => { }; // 临时的空 dispatch
 
   // 验证token
   const validateToken = async (token: string): Promise<boolean> => {

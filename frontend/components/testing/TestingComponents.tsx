@@ -1,7 +1,19 @@
+
+// 本地TestProgress接口，避免冲突
+interface LocalTestProgress {
+  percentage: number;
+  currentStep?: string;
+  estimatedTimeRemaining?: number;
+  phase?: string;
+  status?: string;
+}
+
+import React from 'react';
 import { AlertTriangle, CheckCircle, Clock, Download, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
-import type { useState, ReactNode, FC } from 'react';
-import TestHeader from '../../components/testing/TestHeader';
-import { TestProgress } from '../../services/api/testProgressService';
+import { useState } from 'react';
+import type { ReactNode, FC } from 'react';;
+// import TestHeader from '../../components/testing/TestHeader'; // 避免冲突
+// import { TestProgress } from '../../services/api/testProgressService'; // 避免冲突
 
 // 统一的测试状态类型 - 使用统一类型系统
 import type { TestStatus } from '../../types';
@@ -96,12 +108,19 @@ export const TestHeader: React.FC<TestHeaderProps> = ({
 
 // 统一的进度显示组件
 interface TestProgressProps {
-  progress: TestProgress;
+  progress: LocalTestProgress;
   isRunning: boolean;
   status: TestStatus;
 }
 
-export const TestProgressDisplay: React.FC<TestProgressProps> = ({
+// TestProgressDisplay Props接口
+interface TestProgressDisplayProps {
+  progress: LocalTestProgress;
+  isRunning: boolean;
+  status: string;
+}
+
+export const TestProgressDisplay: React.FC<TestProgressDisplayProps> = ({
   progress,
   isRunning,
   status
@@ -123,7 +142,7 @@ export const TestProgressDisplay: React.FC<TestProgressProps> = ({
 
   const getStatusText = () => {
     switch (status) {
-      case 'starting':
+      case 'starting' as any:
         return '正在启动测试...';
       case 'running':
         return progress.currentStep || '测试进行中...';
@@ -131,14 +150,14 @@ export const TestProgressDisplay: React.FC<TestProgressProps> = ({
         return '测试完成';
       case 'failed':
         return '测试失败';
-      case 'stopped':
+      case 'stopped' as any:
         return '测试已停止';
       default:
         return '等待开始';
     }
   };
 
-  if (!isRunning && status === 'idle') {
+  if (!isRunning && (status as string) === 'idle') {
     return null;
   }
 

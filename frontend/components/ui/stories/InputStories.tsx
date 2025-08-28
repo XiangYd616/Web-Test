@@ -1,9 +1,29 @@
+
+// Mock Storybook types for development
+interface Meta<T = any> {
+    title: string;
+    component: T;
+    parameters?: any;
+    decorators?: any[];
+    argTypes?: any;
+    tags?: string[];
+}
+
+interface StoryObj<T = any> {
+    args?: any;
+    parameters?: any;
+    render?: (args: any) => any;
+}
+
+// Mock action function
+const action = (name: string) => (...args: any[]) => console.log(name, args);
+
 /**
  * Input组件Storybook文档
  */
 
-import { action } from '@storybook/addon-actions';
-import type { Meta, StoryObj } from '@storybook/react';
+// import { action } from '@storybook/addon-actions'; // Storybook未安装
+// import type { Meta, StoryObj } from '@storybook/react'; // Storybook未安装
 import { Lock, Mail, Phone, Search, User } from 'lucide-react';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
 import { Input, NumberInput, PasswordInput, SearchInput, Select, Textarea } from '../Input';
@@ -20,7 +40,7 @@ const meta: Meta<typeof Input> = {
         },
     },
     decorators: [
-        (Story) => (
+        (Story: any) => (
             <ThemeProvider>
                 <div className="p-4 w-80">
                     <Story />

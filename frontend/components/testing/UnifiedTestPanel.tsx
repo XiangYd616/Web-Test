@@ -3,13 +3,15 @@
  * 展示统一状态管理系统的完整功能
  */
 
+import React from 'react';
 import { 
   Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, 
   History, Loader, Play, Settings, StopCircle, Users, XCircle 
 } from 'lucide-react';
-import type { createElement, useEffect, useState, FC } from 'react';
+import { createElement, useEffect, useState } from 'react';
+import type { FC } from 'react';;
 import { useUnifiedTestState } from '../../hooks/useUnifiedTestState';
-import type { BaseTestConfig } from '../../services/testing/UnifiedTestStateManager';
+import type { BaseTestConfig } from '../../services/testing/unifiedTestStateManager';
 import { TestProgress } from '../../services/api/testProgressService';
 
 export interface UnifiedTestPanelProps {

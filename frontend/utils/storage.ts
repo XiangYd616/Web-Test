@@ -13,8 +13,8 @@ export interface CacheItem<T = any> {
     expiry?: number;
 }
 
-// 内存缓存
-const memoryCache = new Map<string, CacheItem>();
+// 内存缓存（用于StorageManager内部使用）
+const internalMemoryCache = new Map<string, CacheItem>();
 
 // 存储工具类
 export class StorageManager {
@@ -65,7 +65,7 @@ export class StorageManager {
                 storage.setItem(fullKey, JSON.stringify(item));
             } else {
                 // 使用内存缓存
-                memoryCache.set(fullKey, item);
+                internalMemoryCache.set(fullKey, item);
             }
 
             return true;
@@ -86,7 +86,7 @@ export class StorageManager {
                 itemStr = storage.getItem(fullKey);
             } else {
                 // 使用内存缓存
-                const item = memoryCache.get(fullKey);
+                const item = internalMemoryCache.get(fullKey);
                 if (item) {
                     itemStr = JSON.stringify(item);
                 }
@@ -120,7 +120,7 @@ export class StorageManager {
             if (storage) {
                 storage.removeItem(fullKey);
             } else {
-                memoryCache.delete(fullKey);
+                internalMemoryCache.delete(fullKey);
             }
 
             return true;
@@ -144,10 +144,10 @@ export class StorageManager {
                 });
             } else {
                 // 清除内存缓存中带有前缀的项
-                const keys = Array.from(memoryCache.keys());
+                const keys = Array.from(internalMemoryCache.keys());
                 keys.forEach(key => {
                     if (key.startsWith(this.prefix)) {
-                        memoryCache.delete(key);
+                        internalMemoryCache.delete(key);
                     }
                 });
             }
@@ -169,7 +169,7 @@ export class StorageManager {
                     .filter(key => key.startsWith(this.prefix))
                     .map(key => key.substring(this.prefix.length));
             } else {
-                const keys = Array.from(memoryCache.keys());
+                const keys = Array.from(internalMemoryCache.keys());
                 return keys
                     .filter(key => key.startsWith(this.prefix))
                     .map(key => key.substring(this.prefix.length));
@@ -204,7 +204,7 @@ export class StorageManager {
                 return size;
             } else {
                 let size = 0;
-                memoryCache.forEach((value, key) => {
+                internalMemoryCache.forEach((value, key) => {
                     if (key.startsWith(this.prefix)) {
                         size += key.length + JSON.stringify(value).length;
                     }

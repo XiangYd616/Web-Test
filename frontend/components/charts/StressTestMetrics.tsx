@@ -1,5 +1,6 @@
 
-import type { useState, ComponentType, FC } from 'react';
+import React from 'react';
+import { useState } from 'react';
 
 import { AlertTriangle, BarChart3, CheckCircle, Clock, TrendingDown, TrendingUp, Users, Zap } from 'lucide-react';
 
@@ -69,7 +70,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   description
 }) => {
   const getCardStyle = () => {
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     if (critical) return 'bg-red-500/20 border-red-500/50';
     if (warning) return 'bg-yellow-500/20 border-yellow-500/50';

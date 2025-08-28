@@ -1,3 +1,11 @@
+/* eslint-env node */
+/**
+ * ESLint 配置文件
+ * 基于 TypeScript ESLint 最佳实践
+ *
+ * 参考：https://typescript-eslint.io/getting-started/
+ */
+
 module.exports = {
   root: true,
   env: {
@@ -7,8 +15,12 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended-type-checked',
+    'plugin:@typescript-eslint/stylistic-type-checked',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
+    'plugin:jsx-a11y/recommended',
   ],
   ignorePatterns: [
     'dist',
@@ -24,10 +36,11 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
+    project: ['./tsconfig.json', './tsconfig.node.json'],
+    tsconfigRootDir: __dirname,
     ecmaFeatures: {
       jsx: true,
     },
-    project: './tsconfig.json',
   },
   plugins: [
     'react',
@@ -49,21 +62,19 @@ module.exports = {
       { allowConstantExport: true },
     ],
 
-    // TypeScript 规则
+    // TypeScript 相关规则
     '@typescript-eslint/no-unused-vars': [
-      'warn',
-      {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
-      },
+      'error',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
     ],
     '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-non-null-assertion': 'warn',
     '@typescript-eslint/prefer-const': 'error',
-    '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'warn',
+    '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      { prefer: 'type-imports' },
+    ],
 
     // 通用规则
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
@@ -88,7 +99,9 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*.js', '*.cjs'],
+      // JavaScript 文件的特殊配置
+      files: ['*.js', '*.cjs', '*.mjs'],
+      extends: ['plugin:@typescript-eslint/disable-type-checked'],
       env: {
         node: true,
       },

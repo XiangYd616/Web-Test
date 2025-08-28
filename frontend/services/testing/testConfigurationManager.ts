@@ -3,7 +3,7 @@
  * 提供完整的测试配置管理功能，包括模板、预设、验证等
  */
 
-import type { BaseTestConfig } from './UnifiedTestStateManager';
+import type { BaseTestConfig } from './unifiedTestStateManager';
 
 // 配置模板接口
 export interface TestConfigTemplate {
@@ -272,8 +272,8 @@ export class TestConfigurationManager {
       result.warnings.push('测试持续时间过长，建议分阶段进行');
     }
 
-    if (config.rampUpTime && config.concurrentUsers && 
-        config.rampUpTime < config.concurrentUsers / 10) {
+    if (config.rampUpTime && config.concurrentUsers &&
+      config.rampUpTime < config.concurrentUsers / 10) {
       result.suggestions.push('建议增加爬坡时间以获得更准确的结果');
     }
 
@@ -302,7 +302,7 @@ export class TestConfigurationManager {
   createTemplate(template: Omit<TestConfigTemplate, 'id' | 'createdAt' | 'updatedAt'>): string {
     const id = this.generateId();
     const now = new Date();
-    
+
     const newTemplate: TestConfigTemplate = {
       ...template,
       id,
@@ -312,7 +312,7 @@ export class TestConfigurationManager {
 
     this.templates.set(id, newTemplate);
     this.saveToStorage();
-    
+
     return id;
   }
 
@@ -334,7 +334,7 @@ export class TestConfigurationManager {
 
     this.templates.set(id, updatedTemplate);
     this.saveToStorage();
-    
+
     return true;
   }
 
@@ -439,11 +439,11 @@ export class TestConfigurationManager {
     try {
       const config = JSON.parse(configJson);
       const validation = this.validateConfig(config);
-      
+
       if (!validation.isValid) {
         throw new Error(`配置验证失败: ${validation.errors.join(', ')}`);
       }
-      
+
       return config;
     } catch (error: any) {
       throw new Error(`导入配置失败: ${error.message}`);
@@ -455,7 +455,7 @@ export class TestConfigurationManager {
    */
   generateConfigSuggestions(config: BaseTestConfig): string[] {
     const suggestions: string[] = [];
-    
+
     // 基于测试类型的建议
     switch (config.testType) {
       case 'performance':
@@ -513,11 +513,11 @@ export class TestConfigurationManager {
       const data = localStorage.getItem(this.storageKey);
       if (data) {
         const parsed = JSON.parse(data);
-        
+
         if (parsed.templates) {
           this.templates = new Map(parsed.templates);
         }
-        
+
         if (parsed.presets) {
           this.presets = new Map(parsed.presets);
         }

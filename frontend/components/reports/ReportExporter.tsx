@@ -1,5 +1,7 @@
+import React from 'react';
 import { AlertCircle, CheckCircle, Download, Eye, FileText, Layout, Loader, Settings, Table } from 'lucide-react';
-import type { createElement, useState, FC } from 'react';
+import { createElement, useState } from 'react';
+import type { FC } from 'react';;
 import { EnhancedReportGenerator, ExportFormat, ReportConfig, ReportData } from '../../services/reportGeneratorService';
 
 interface ReportExporterProps {

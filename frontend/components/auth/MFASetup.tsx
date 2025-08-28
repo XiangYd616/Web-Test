@@ -4,21 +4,25 @@
  * 版本: v1.0.0
  */
 
-import type { createElement, useEffect, useState, FC } from 'react';
-import { 
-  Shield, 
-  Smartphone, 
-  Mail, 
-  Key, 
-  QrCode, 
-  Copy, 
-  Check,
+import React from 'react';
+import {
   AlertTriangle,
+  Check,
+  Copy,
+  Download,
+  Key,
   Loader2,
-  Download
+  Mail,
+  QrCode,
+  Shield,
+  Smartphone
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { TOTPSetupResult, useMFA } from '../../hooks/useMFA';
 
 // ==================== 类型定义 ====================
+
+type MFAMethod = 'totp' | 'sms' | 'email' | 'backup_codes';
 
 interface MFASetupProps {
   userId: string;
@@ -79,9 +83,9 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
     if (!verificationCode.trim()) return;
 
     try {
-      const result = await enableTOTP(userId, verificationCode);
-      if (result.success && result.backupCodes) {
-        onComplete(result.backupCodes);
+      const success = await enableTOTP(userId, verificationCode);
+      if (success && setupData?.backupCodes) {
+        onComplete(setupData.backupCodes);
       }
     } catch (error) {
       console.error('验证TOTP失败:', error);
@@ -113,9 +117,9 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
 
           <div className="bg-gray-800 rounded-lg p-6 space-y-4">
             <div className="text-center">
-              <img 
-                src={setupData.qrCodeUrl} 
-                alt="TOTP QR Code" 
+              <img
+                src={setupData.qrCodeUrl}
+                alt="TOTP QR Code"
                 className="mx-auto bg-white p-4 rounded-lg"
               />
             </div>
@@ -247,7 +251,7 @@ const BackupCodesDisplay: React.FC<BackupCodesDisplayProps> = ({
 
   const handleDownload = () => {
     const content = `TestWeb 平台备用码\n生成时间: ${new Date().toLocaleString()}\n\n${codes.map((code, index) => `${index + 1}. ${code}`).join('\n')}\n\n重要提示:\n- 每个备用码只能使用一次\n- 请将这些代码保存在安全的地方\n- 如果丢失，请重新生成新的备用码`;
-    
+
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -257,7 +261,7 @@ const BackupCodesDisplay: React.FC<BackupCodesDisplayProps> = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     setDownloaded(true);
     onDownload();
   };
@@ -324,15 +328,21 @@ const BackupCodesDisplay: React.FC<BackupCodesDisplayProps> = ({
 
 // ==================== 主组件 ====================
 
+interface MFASetupData {
+  method: MFAMethod;
+  enabled: boolean;
+  setupDate: string;
+}
+
 export const MFASetup: React.FC<MFASetupProps> = ({
   userId,
   userEmail,
   onSetupComplete,
   onClose
 }) => {
-  const { getUserSetups } = useMFA();
+  const { getMFAStatus } = useMFA();
   const [selectedMethod, setSelectedMethod] = useState<MFAMethod | null>(null);
-  const [currentSetups, setCurrentSetups] = useState<MFASetup[]>([]);
+  const [currentSetups, setCurrentSetups] = useState<MFASetupData[]>([]);
   const [showBackupCodes, setShowBackupCodes] = useState(false);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
 
@@ -342,7 +352,12 @@ export const MFASetup: React.FC<MFASetupProps> = ({
 
   const loadUserSetups = async () => {
     try {
-      const setups = await getUserSetups(userId);
+      const status = await getMFAStatus(userId);
+      const setups: MFASetupData[] = status.methods.map(method => ({
+        method: method as MFAMethod,
+        enabled: status.enabled,
+        setupDate: new Date().toISOString()
+      }));
       setCurrentSetups(setups);
     } catch (error) {
       console.error('加载MFA设置失败:', error);
@@ -366,7 +381,7 @@ export const MFASetup: React.FC<MFASetupProps> = ({
   };
 
   const isMethodEnabled = (method: MFAMethod) => {
-    return currentSetups.some(setup => setup.method === method && setup.isEnabled);
+    return currentSetups.some(setup => setup.method === method && setup.enabled);
   };
 
   if (showBackupCodes) {
@@ -374,7 +389,7 @@ export const MFASetup: React.FC<MFASetupProps> = ({
       <div className="max-w-md mx-auto">
         <BackupCodesDisplay
           codes={backupCodes}
-          onDownload={() => {}}
+          onDownload={() => { }}
           onContinue={handleSetupComplete}
         />
       </div>
@@ -410,16 +425,14 @@ export const MFASetup: React.FC<MFASetupProps> = ({
         {/* TOTP身份验证器 */}
         <div
           onClick={() => !isMethodEnabled('totp') && handleMethodSelect('totp')}
-          className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-            isMethodEnabled('totp')
-              ? 'bg-green-900/30 border-green-700'
-              : 'bg-gray-800 border-gray-600 hover:border-gray-500'
-          }`}
+          className={`p-4 rounded-lg border cursor-pointer transition-colors ${isMethodEnabled('totp')
+            ? 'bg-green-900/30 border-green-700'
+            : 'bg-gray-800 border-gray-600 hover:border-gray-500'
+            }`}
         >
           <div className="flex items-center space-x-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              isMethodEnabled('totp') ? 'bg-green-600' : 'bg-gray-600'
-            }`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isMethodEnabled('totp') ? 'bg-green-600' : 'bg-gray-600'
+              }`}>
               <Smartphone className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">

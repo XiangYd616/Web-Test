@@ -8,15 +8,88 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type {
-  CompatibilityTestConfig,
-  CompatibilityTestResult
+  CompatibilityTestConfig
 } from '../types';
 
-// 所有类型定义已迁移到统一的类型系统
-// 请从 '../types' 导入所需的类型
+// 本地类型定义
+interface BrowserConfig {
+  name: string;
+  version: string;
+  enabled: boolean;
+}
 
-// 兼容性测试结果接口
-export interface CompatibilityTestResult {
+interface DeviceConfig {
+  name: string;
+  type: 'desktop' | 'mobile' | 'tablet';
+  screenSize: {
+    width: number;
+    height: number;
+  };
+  enabled: boolean;
+}
+
+// 补充类型定义
+interface ViewportConfig {
+  name: string;
+  width: number;
+  height: number;
+}
+
+interface CompatibilityTestItem {
+  id: string;
+  name: string;
+  type: 'css' | 'javascript' | 'html5' | 'api';
+  enabled: boolean;
+}
+
+// 完整的兼容性测试配置类型（不继承，避免类型冲突）
+interface ExtendedCompatibilityTestConfig {
+  url: string;
+  testEngine?: 'caniuse' | 'browserstack' | 'local';
+  browsers: BrowserConfig[];
+  devices: DeviceConfig[];
+  features?: string[];
+  testViewports?: ViewportConfig[];
+  includeScreenshots?: boolean;
+  includeAccessibility?: boolean;
+  includePerformance?: boolean;
+  timeout?: number;
+  retries?: number;
+}
+
+// 浏览器测试结果类型
+interface BrowserTestResult {
+  browser: BrowserConfig;
+  score: number;
+  success: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+// 设备测试结果类型
+interface DeviceTestResult {
+  device: DeviceConfig;
+  score: number;
+  success: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+// 本地兼容性测试结果类型
+interface LocalCompatibilityTestResult {
+  id: string;
+  url: string;
+  timestamp: string;
+  overallScore: number;
+  browserResults: BrowserTestResult[];
+  deviceResults: DeviceTestResult[];
+  summary: string;
+  details: any;
+  duration?: number;
+}
+
+// 兼容性测试结果接口（详细版本）
+interface DetailedCompatibilityTestResult {
   id: string;
   config: CompatibilityTestConfig;
   status: 'completed' | 'failed' | 'partial';
@@ -65,8 +138,8 @@ export interface CompatibilityTestResult {
 // Hook状态接口
 export interface UseCompatibilityTestStateReturn {
   // 配置状态
-  config: CompatibilityTestConfig;
-  updateConfig: (updates: Partial<CompatibilityTestConfig>) => void;
+  config: ExtendedCompatibilityTestConfig;
+  updateConfig: (updates: Partial<ExtendedCompatibilityTestConfig>) => void;
   resetConfig: () => void;
 
   // 测试状态
@@ -76,7 +149,7 @@ export interface UseCompatibilityTestStateReturn {
   testId: string | null;
 
   // 结果状态
-  result: CompatibilityTestResult | null;
+  result: LocalCompatibilityTestResult | null;
   error: string | null;
 
   // 操作方法
@@ -85,10 +158,10 @@ export interface UseCompatibilityTestStateReturn {
   resetTest: () => void;
 
   // 配置管理
-  addBrowser: (browser: string) => void;
-  removeBrowser: (browser: string) => void;
-  addDevice: (device: string) => void;
-  removeDevice: (device: string) => void;
+  addBrowser: (browser: BrowserConfig) => void;
+  removeBrowser: (browserName: string) => void;
+  addDevice: (device: DeviceConfig) => void;
+  removeDevice: (deviceName: string) => void;
   addFeature: (feature: string) => void;
   removeFeature: (feature: string) => void;
   addViewport: (viewport: { name: string; width: number; height: number }) => void;
@@ -106,11 +179,19 @@ export interface UseCompatibilityTestStateReturn {
  */
 export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => {
   // 基础状态
-  const [config, setConfig] = useState<CompatibilityTestConfig>({
+  const [config, setConfig] = useState<ExtendedCompatibilityTestConfig>({
     url: '',
     testEngine: 'caniuse',
-    browsers: ['chrome', 'firefox', 'safari', 'edge'],
-    devices: ['desktop', 'mobile'],
+    browsers: [
+      { name: 'chrome', version: 'latest', enabled: true },
+      { name: 'firefox', version: 'latest', enabled: true },
+      { name: 'safari', version: 'latest', enabled: true },
+      { name: 'edge', version: 'latest', enabled: true }
+    ],
+    devices: [
+      { name: 'desktop', type: 'desktop' as const, screenSize: { width: 1920, height: 1080 }, enabled: true },
+      { name: 'mobile', type: 'mobile' as const, screenSize: { width: 375, height: 667 }, enabled: true }
+    ],
     features: [],
     includeScreenshots: false,
     includeAccessibility: true,
@@ -128,7 +209,7 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [testId, setTestId] = useState<string | null>(null);
-  const [result, setResult] = useState<CompatibilityTestResult | null>(null);
+  const [result, setResult] = useState<LocalCompatibilityTestResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // 引用
@@ -137,7 +218,7 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
   /**
    * 更新配置
    */
-  const updateConfig = useCallback((updates: Partial<CompatibilityTestConfig>) => {
+  const updateConfig = useCallback((updates: Partial<ExtendedCompatibilityTestConfig>) => {
     setConfig(prev => ({ ...prev, ...updates }));
     setError(null);
   }, []);
@@ -149,8 +230,16 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
     setConfig({
       url: '',
       testEngine: 'caniuse',
-      browsers: ['chrome', 'firefox', 'safari', 'edge'],
-      devices: ['desktop', 'mobile'],
+      browsers: [
+        { name: 'chrome', version: 'latest', enabled: true },
+        { name: 'firefox', version: 'latest', enabled: true },
+        { name: 'safari', version: 'latest', enabled: true },
+        { name: 'edge', version: 'latest', enabled: true }
+      ],
+      devices: [
+        { name: 'desktop', type: 'desktop' as const, screenSize: { width: 1920, height: 1080 }, enabled: true },
+        { name: 'mobile', type: 'mobile' as const, screenSize: { width: 375, height: 667 }, enabled: true }
+      ],
       features: [],
       includeScreenshots: false,
       includeAccessibility: true,
@@ -220,19 +309,19 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
 
       // 启动后台测试
       const newTestId = backgroundTestManager.startTest(
-        'compatibility',
+        'compatibility' as any,
         config,
-        (progress, step) => {
+        (progress: number, step: string) => {
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult) => {
+        (testResult: any) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError) => {
+        (testError: any) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -281,40 +370,44 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
   /**
    * 添加浏览器
    */
-  const addBrowser = useCallback((browser: string) => {
+  const addBrowser = useCallback((browser: BrowserConfig) => {
     setConfig(prev => ({
       ...prev,
-      browsers: [...prev.browsers, browser].filter((b, i, arr) => arr.indexOf(b) === i)
+      browsers: [...prev.browsers, browser].filter((b, i, arr) =>
+        arr.findIndex(item => item.name === b.name) === i
+      )
     }));
   }, []);
 
   /**
    * 移除浏览器
    */
-  const removeBrowser = useCallback((browser: string) => {
+  const removeBrowser = useCallback((browserName: string) => {
     setConfig(prev => ({
       ...prev,
-      browsers: prev.browsers.filter(b => b !== browser)
+      browsers: prev.browsers.filter(b => b.name !== browserName)
     }));
   }, []);
 
   /**
    * 添加设备
    */
-  const addDevice = useCallback((device: string) => {
+  const addDevice = useCallback((device: DeviceConfig) => {
     setConfig(prev => ({
       ...prev,
-      devices: [...prev.devices, device].filter((d, i, arr) => arr.indexOf(d) === i)
+      devices: [...prev.devices, device].filter((d, i, arr) =>
+        arr.findIndex(item => item.name === d.name) === i
+      )
     }));
   }, []);
 
   /**
    * 移除设备
    */
-  const removeDevice = useCallback((device: string) => {
+  const removeDevice = useCallback((deviceName: string) => {
     setConfig(prev => ({
       ...prev,
-      devices: prev.devices.filter(d => d !== device)
+      devices: prev.devices.filter(d => d.name !== deviceName)
     }));
   }, []);
 
@@ -324,7 +417,7 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
   const addFeature = useCallback((feature: string) => {
     setConfig(prev => ({
       ...prev,
-      features: [...prev.features, feature].filter((f, i, arr) => arr.indexOf(f) === i)
+      features: [...(prev.features || []), feature].filter((f, i, arr) => arr.indexOf(f) === i)
     }));
   }, []);
 
@@ -334,17 +427,17 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
   const removeFeature = useCallback((feature: string) => {
     setConfig(prev => ({
       ...prev,
-      features: prev.features.filter(f => f !== feature)
+      features: (prev.features || []).filter(f => f !== feature)
     }));
   }, []);
 
   /**
    * 添加视口
    */
-  const addViewport = useCallback((viewport: { name: string; width: number; height: number }) => {
+  const addViewport = useCallback((viewport: ViewportConfig) => {
     setConfig(prev => ({
       ...prev,
-      testViewports: [...prev.testViewports, viewport]
+      testViewports: [...(prev.testViewports || []), viewport]
     }));
   }, []);
 
@@ -354,7 +447,7 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
   const removeViewport = useCallback((index: number) => {
     setConfig(prev => ({
       ...prev,
-      testViewports: prev.testViewports.filter((_, i) => i !== index)
+      testViewports: (prev.testViewports || []).filter((_, i) => i !== index)
     }));
   }, []);
 
@@ -362,10 +455,18 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
    * 加载预设配置
    */
   const loadPreset = useCallback((preset: 'modern' | 'legacy' | 'mobile' | 'desktop') => {
-    const presets = {
+    const presets: Record<string, Partial<ExtendedCompatibilityTestConfig>> = {
       modern: {
-        browsers: ['chrome', 'firefox', 'safari', 'edge'],
-        devices: ['desktop', 'mobile'],
+        browsers: [
+          { name: 'chrome', version: 'latest', enabled: true },
+          { name: 'firefox', version: 'latest', enabled: true },
+          { name: 'safari', version: 'latest', enabled: true },
+          { name: 'edge', version: 'latest', enabled: true }
+        ],
+        devices: [
+          { name: 'desktop', type: 'desktop' as const, screenSize: { width: 1920, height: 1080 }, enabled: true },
+          { name: 'mobile', type: 'mobile' as const, screenSize: { width: 375, height: 667 }, enabled: true }
+        ],
         features: ['flexbox', 'grid', 'es6', 'webp', 'http2'],
         testViewports: [
           { name: '桌面', width: 1920, height: 1080 },
@@ -373,16 +474,31 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
         ]
       },
       legacy: {
-        browsers: ['chrome', 'firefox', 'safari', 'edge', 'ie11'],
-        devices: ['desktop'],
+        browsers: [
+          { name: 'chrome', version: 'latest', enabled: true },
+          { name: 'firefox', version: 'latest', enabled: true },
+          { name: 'safari', version: 'latest', enabled: true },
+          { name: 'edge', version: 'latest', enabled: true },
+          { name: 'ie11', version: '11', enabled: true }
+        ],
+        devices: [
+          { name: 'desktop', type: 'desktop' as const, screenSize: { width: 1366, height: 768 }, enabled: true }
+        ],
         features: ['css3', 'html5', 'javascript'],
         testViewports: [
           { name: '桌面', width: 1366, height: 768 }
         ]
       },
       mobile: {
-        browsers: ['chrome', 'safari', 'samsung'],
-        devices: ['mobile', 'tablet'],
+        browsers: [
+          { name: 'chrome', version: 'latest', enabled: true },
+          { name: 'safari', version: 'latest', enabled: true },
+          { name: 'samsung', version: 'latest', enabled: true }
+        ],
+        devices: [
+          { name: 'mobile', type: 'mobile' as const, screenSize: { width: 375, height: 667 }, enabled: true },
+          { name: 'tablet', type: 'tablet' as const, screenSize: { width: 768, height: 1024 }, enabled: true }
+        ],
         features: ['touch', 'geolocation', 'camera', 'responsive'],
         testViewports: [
           { name: 'iPhone', width: 375, height: 667 },
@@ -391,8 +507,15 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
         ]
       },
       desktop: {
-        browsers: ['chrome', 'firefox', 'safari', 'edge'],
-        devices: ['desktop'],
+        browsers: [
+          { name: 'chrome', version: 'latest', enabled: true },
+          { name: 'firefox', version: 'latest', enabled: true },
+          { name: 'safari', version: 'latest', enabled: true },
+          { name: 'edge', version: 'latest', enabled: true }
+        ],
+        devices: [
+          { name: 'desktop', type: 'desktop' as const, screenSize: { width: 1920, height: 1080 }, enabled: true }
+        ],
         features: ['css3', 'html5', 'javascript', 'webgl'],
         testViewports: [
           { name: '1080p', width: 1920, height: 1080 },

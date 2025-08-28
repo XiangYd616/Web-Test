@@ -108,7 +108,10 @@ export class BaseApiService {
           console.log(`✅ API请求成功: ${method} ${url}`);
           return responseData;
         } else {
-          throw new Error(responseData.error || `HTTP ${response.status}: ${response.statusText}`);
+          const errorMessage = typeof responseData.error === 'string'
+            ? responseData.error
+            : responseData.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+          throw new Error(errorMessage);
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));

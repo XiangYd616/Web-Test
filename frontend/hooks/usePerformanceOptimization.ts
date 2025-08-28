@@ -2,13 +2,14 @@
  * 性能优化相关的React Hook
  */
 
-import type { useCallback, useEffect, useMemo, useRef, useState, Component } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   frontendCache,
   lazyImageLoader,
   performanceMonitor,
   performanceUtils
 } from '../utils/performanceOptimization';
+;
 
 /**
  * 图片懒加载Hook
@@ -20,7 +21,7 @@ export function useLazyImage() {
 
   useEffect(() => {
     const img = imgRef.current;
-    if (!img) return;
+    if (!img) return undefined;
 
     const handleLoad = () => setLoaded(true);
     const handleError = () => setError(true);

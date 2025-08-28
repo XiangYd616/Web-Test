@@ -3,10 +3,9 @@
  * 为现有测试页面提供可选的UI增强功能，不强制替换现有实现
  */
 
-import type { useEffect, useRef, useState, ReactNode, ComponentType, FC } from 'react';
-import { UnifiedIcon, TestTypeIcon, ActionIcon } from './UnifiedIcons';
-import { FeedbackCard, StatusIndicator, ProgressFeedback } from './UnifiedFeedback';
-import { ChevronDown, ChevronUp, Copy, Check, ExternalLink, Maximize2, Minimize2 } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Copy, ExternalLink, Maximize2, Minimize2 } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActionIcon, UnifiedIcon } from './UnifiedIcons';
 
 // 可折叠面板属性
 export interface CollapsiblePanelProps {
@@ -88,6 +87,7 @@ export const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
     <div className={`bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden ${className}`}>
       {/* 头部 */}
       <button
+        type="button"
         onClick={handleToggle}
         className={`
           w-full px-6 py-4 flex items-center justify-between
@@ -97,7 +97,7 @@ export const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
       >
         <div className="flex items-center space-x-3">
           {Icon && (
-            <UnifiedIcon icon={Icon} size="md" color="primary" />
+            <UnifiedIcon icon={Icon as any} size="md" color="primary" />
           )}
           <h3 className="text-lg font-medium text-white">{title}</h3>
         </div>
@@ -155,6 +155,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
           )}
           {copyable && (
             <button
+              type="button"
               onClick={handleCopy}
               className="flex items-center space-x-2 px-3 py-1 text-sm text-gray-400 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors"
             >
@@ -222,7 +223,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           {change && (
             <div className={`
               flex items-center space-x-1 mt-2 text-sm
-              ${change.type === 'increase' ? 'text-green-400' : 
+              ${change.type === 'increase' ? 'text-green-400' :
                 change.type === 'decrease' ? 'text-red-400' : 'text-gray-400'}
             `}>
               <span>
@@ -234,7 +235,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         </div>
         {Icon && (
           <div className={`p-3 rounded-lg bg-gray-800/50 ${iconColors[color]}`}>
-            <UnifiedIcon icon={Icon} size="lg" color="current" />
+            <UnifiedIcon icon={Icon as any} size="lg" color="current" />
           </div>
         )}
       </div>
@@ -269,6 +270,7 @@ export const QuickAction: React.FC<QuickActionProps> = ({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled || loading}
       className={`
@@ -281,7 +283,7 @@ export const QuickAction: React.FC<QuickActionProps> = ({
       `}
     >
       <UnifiedIcon
-        icon={Icon}
+        icon={Icon as any}
         size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
         color="current"
         className={loading ? 'animate-spin' : ''}
@@ -345,6 +347,7 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({
       >
         {/* 全屏切换按钮 */}
         <button
+          type="button"
           onClick={toggleFullscreen}
           className="absolute top-4 right-4 z-10 p-2 bg-gray-800/80 hover:bg-gray-700/80 rounded-lg transition-colors"
           title={isFullscreen ? '退出全屏' : '进入全屏'}
@@ -385,6 +388,7 @@ export const LinkPreview: React.FC<{
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       className={`
         w-full p-4 bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50
@@ -520,6 +524,7 @@ export const EnhancementsUsageGuide: React.FC = () => {
               点击右上角的全屏按钮可以进入全屏模式。在全屏模式下，按 ESC 键可以退出。
             </p>
             <button
+              type="button"
               onClick={() => setFullscreenEnabled(!fullscreenEnabled)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
             >

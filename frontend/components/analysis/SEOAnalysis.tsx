@@ -1,12 +1,69 @@
-import React from 'react';
-import type { FC } from 'react';
 import { AlertTriangle, CheckCircle, Download, Info, Share2, XCircle } from 'lucide-react';
-import { TestResult } from '../../services/advancedTestEngine';
+import React from 'react';
 
 // CSS样式已迁移到组件库，不再需要外部CSS文件
 
+interface SEOScore {
+  overall: number;
+  technical: number;
+  content: number;
+  performance: number;
+  accessibility: number;
+}
+
+interface SEOIssue {
+  id: string;
+  type: 'error' | 'warning' | 'info';
+  category: string;
+  title: string;
+  description: string;
+  message: string;
+  impact: 'high' | 'medium' | 'low';
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  recommendation: string;
+}
+
+interface SEORecommendation {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  effort: 'easy' | 'medium' | 'hard';
+  actionItems: string[];
+}
+
+interface KeywordData {
+  density: number;
+  count: number;
+  status: 'optimal' | 'high' | 'low' | 'missing';
+}
+
+interface SEOTestResult {
+  id: string;
+  url: string;
+  timestamp: string;
+  duration: number;
+  overallScore: number;
+  scoreGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  scoreDescription: string;
+  scores: SEOScore;
+  issues: SEOIssue[];
+  recommendations: SEORecommendation[];
+  keywords?: {
+    density: Record<string, KeywordData>;
+  };
+  metadata: {
+    title: string;
+    description: string;
+    keywords: string[];
+    loadTime: number;
+    pageSize: number;
+  };
+}
+
 interface EnhancedSEOAnalysisProps {
-  results: TestResult;
+  results: SEOTestResult;
   onExportReport: (format: 'pdf' | 'html' | 'json' | 'csv') => void;
   onShareResults: () => void;
 }

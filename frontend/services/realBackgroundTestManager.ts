@@ -1,4 +1,3 @@
-import { TestProgress } from '../services/api/testProgressService';
 /**
  * 真实的后台测试管理器
  * 移除所有模拟实现，使用真实的API调用
@@ -17,7 +16,7 @@ export interface TestProgress {
   id: string;
   progress: number;
   message: string;
-  status: 'idle' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   results?: any;
   error?: string;
 }
@@ -55,7 +54,7 @@ export class RealBackgroundTestManager {
       }
 
       const data = await response.json();
-      
+
       if (data.testId) {
         await this.pollTestStatus(testInfo.id, data.testId, 'website');
       } else {
@@ -90,7 +89,7 @@ export class RealBackgroundTestManager {
       }
 
       const data = await response.json();
-      
+
       if (data.testId) {
         await this.pollTestStatus(testInfo.id, data.testId, 'performance');
       } else {
@@ -124,7 +123,7 @@ export class RealBackgroundTestManager {
       }
 
       const data = await response.json();
-      
+
       if (data.testId) {
         await this.pollTestStatus(testInfo.id, data.testId, 'security');
       } else {
@@ -158,7 +157,7 @@ export class RealBackgroundTestManager {
       }
 
       const data = await response.json();
-      
+
       if (data.testId) {
         await this.pollTestStatus(testInfo.id, data.testId, 'api');
       } else {
@@ -192,7 +191,7 @@ export class RealBackgroundTestManager {
       }
 
       const data = await response.json();
-      
+
       if (data.testId) {
         await this.pollTestStatus(testInfo.id, data.testId, 'stress');
       } else {
@@ -215,7 +214,7 @@ export class RealBackgroundTestManager {
     interval: number = 2000
   ): Promise<void> {
     let attempts = 0;
-    
+
     while (attempts < maxAttempts) {
       try {
         const response = await fetch(`${this.apiBaseUrl}/test/${testType}/status/${backendTestId}`, {
@@ -223,44 +222,44 @@ export class RealBackgroundTestManager {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           }
         });
-        
+
         if (!response.ok) {
           throw new Error(`Status check failed: ${response.status}`);
         }
-        
+
         const statusData = await response.json();
-        
+
         // 更新进度
         if (statusData.progress !== undefined) {
           this.updateTestProgress(frontendTestId, statusData.progress, statusData.message || '测试进行中...');
         }
-        
+
         // 检查是否完成
         if (statusData.status === 'completed' || statusData.status === 'finished') {
           this.completeTest(frontendTestId, statusData.results || statusData);
           return;
         }
-        
+
         // 检查是否失败
         if (statusData.status === 'failed' || statusData.status === 'error') {
           throw new Error(statusData.message || '测试失败');
         }
-        
+
         attempts++;
         await new Promise(resolve => setTimeout(resolve, interval));
-        
+
       } catch (error) {
         console.error(`轮询测试状态失败 (尝试 ${attempts + 1}/${maxAttempts}):`, error);
         attempts++;
-        
+
         if (attempts >= maxAttempts) {
           throw new Error(`测试状态轮询超时: ${error instanceof Error ? error.message : String(error)}`);
         }
-        
+
         await new Promise(resolve => setTimeout(resolve, interval));
       }
     }
-    
+
     throw new Error('测试状态轮询超时');
   }
 
@@ -272,7 +271,7 @@ export class RealBackgroundTestManager {
       id: testInfo.id,
       progress: 0,
       message: '准备开始测试...',
-      status: 'idle'
+      status: 'pending'
     });
 
     if (testInfo.onProgress) {
@@ -291,7 +290,7 @@ export class RealBackgroundTestManager {
       testProgress.progress = progress;
       testProgress.message = message;
       testProgress.status = 'running';
-      
+
       const callback = this.progressCallbacks.get(testId);
       if (callback) {
         callback(testProgress);
@@ -309,7 +308,7 @@ export class RealBackgroundTestManager {
       testProgress.message = '测试完成';
       testProgress.status = 'completed';
       testProgress.results = results;
-      
+
       const callback = this.progressCallbacks.get(testId);
       if (callback) {
         callback(testProgress);
@@ -326,7 +325,7 @@ export class RealBackgroundTestManager {
       testProgress.status = 'failed';
       testProgress.error = error;
       testProgress.message = `测试失败: ${error}`;
-      
+
       const callback = this.progressCallbacks.get(testId);
       if (callback) {
         callback(testProgress);
