@@ -3,14 +3,18 @@
  * 检查ModernSidebar中的路由是否都有对应的页面组件和路由配置
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // 从ModernSidebar.tsx提取的路由配置
 const sidebarRoutes = [
   // 仪表板
   { id: 'dashboard', name: '仪表板', href: '/' },
-  
+
   // 测试工具
   { id: 'website-test', name: '网站测试', href: '/website-test' },
   { id: 'stress-test', name: '压力测试', href: '/stress-test' },
@@ -23,18 +27,18 @@ const sidebarRoutes = [
   { id: 'database-test', name: '数据库测试', href: '/database-test' },
   { id: 'ux-test', name: 'UX测试', href: '/ux-test' },
   { id: 'unified-test', name: '统一测试引擎', href: '/unified-test' },
-  
+
   // 数据管理
   { id: 'test-history', name: '测试历史', href: '/test-history' },
   { id: 'statistics', name: '统计分析', href: '/statistics' },
   { id: 'data-center', name: '数据中心', href: '/data-center' },
-  
+
   // 集成配置
   { id: 'cicd', name: 'CI/CD集成', href: '/cicd' },
   { id: 'api-keys', name: 'API密钥', href: '/api-keys' },
   { id: 'webhooks', name: 'Webhooks', href: '/webhooks' },
   { id: 'integrations', name: '第三方集成', href: '/integrations' },
-  
+
   // 系统设置
   { id: 'settings', name: '系统设置', href: '/settings' }
 ];
@@ -68,7 +72,7 @@ const pageFileMapping = {
  */
 function checkPageExists(pagePath) {
   if (!pagePath) return false;
-  
+
   const fullPath = path.join(__dirname, '../frontend/pages', pagePath);
   return fs.existsSync(fullPath);
 }
@@ -78,21 +82,21 @@ function checkPageExists(pagePath) {
  */
 function checkRouteConfigExists(routePath) {
   const appRoutesPath = path.join(__dirname, '../frontend/components/routing/AppRoutes.tsx');
-  
+
   if (!fs.existsSync(appRoutesPath)) {
     return false;
   }
-  
+
   const content = fs.readFileSync(appRoutesPath, 'utf8');
-  
+
   // 检查路由是否在AppRoutes.tsx中定义
   const routePattern = new RegExp(`path="${routePath.replace('/', '')}"`, 'g');
   const indexPattern = new RegExp(`path="/".*element.*ModernDashboard`, 's');
-  
+
   if (routePath === '/') {
     return indexPattern.test(content);
   }
-  
+
   return routePattern.test(content);
 }
 
@@ -102,14 +106,14 @@ function checkRouteConfigExists(routePath) {
 function getAllPageFiles() {
   const pagesDir = path.join(__dirname, '../frontend/pages');
   const files = [];
-  
+
   function scanDirectory(dir, prefix = '') {
     const items = fs.readdirSync(dir);
-    
+
     for (const item of items) {
       const fullPath = path.join(dir, item);
       const relativePath = prefix ? `${prefix}/${item}` : item;
-      
+
       if (fs.statSync(fullPath).isDirectory()) {
         scanDirectory(fullPath, relativePath);
       } else if (item.endsWith('.tsx') && !item.includes('.backup')) {
@@ -117,7 +121,7 @@ function getAllPageFiles() {
       }
     }
   }
-  
+
   scanDirectory(pagesDir);
   return files;
 }
@@ -127,7 +131,7 @@ function getAllPageFiles() {
  */
 function checkRoutesConsistency() {
   console.log('🔍 开始侧边栏路由和页面一致性检查...\n');
-  
+
   const results = {
     total: sidebarRoutes.length,
     valid: 0,
@@ -136,16 +140,16 @@ function checkRoutesConsistency() {
     orphanedPages: [],
     backupFiles: []
   };
-  
+
   // 1. 检查侧边栏路由对应的页面
   console.log('📋 检查侧边栏路由对应的页面:');
   sidebarRoutes.forEach(route => {
     const pagePath = pageFileMapping[route.href];
     const pageExists = checkPageExists(pagePath);
     const routeExists = checkRouteConfigExists(route.href);
-    
+
     console.log(`  ${route.href.padEnd(20)} | ${route.name.padEnd(15)} | 页面: ${pageExists ? '✅' : '❌'} | 路由: ${routeExists ? '✅' : '❌'}`);
-    
+
     if (pageExists && routeExists) {
       results.valid++;
     } else {
@@ -164,12 +168,12 @@ function checkRoutesConsistency() {
       }
     }
   });
-  
+
   // 2. 检查孤立的页面文件
   console.log('\n📂 检查孤立的页面文件:');
   const allPageFiles = getAllPageFiles();
   const usedPageFiles = Object.values(pageFileMapping).filter(Boolean);
-  
+
   allPageFiles.forEach(file => {
     if (!usedPageFiles.includes(file)) {
       // 检查是否是备份文件
@@ -182,7 +186,7 @@ function checkRoutesConsistency() {
       }
     }
   });
-  
+
   // 3. 生成报告
   console.log('\n📊 检查结果汇总:');
   console.log(`  总路由数: ${results.total}`);
@@ -191,7 +195,7 @@ function checkRoutesConsistency() {
   console.log(`  缺失路由配置: ${results.missingRoutes.length}`);
   console.log(`  孤立页面: ${results.orphanedPages.length}`);
   console.log(`  备份文件: ${results.backupFiles.length}`);
-  
+
   // 4. 详细问题列表
   if (results.missing.length > 0) {
     console.log('\n❌ 缺失的页面文件:');
@@ -199,28 +203,28 @@ function checkRoutesConsistency() {
       console.log(`  - ${item.route} (${item.name}) -> 需要创建: ${item.expectedFile}`);
     });
   }
-  
+
   if (results.missingRoutes.length > 0) {
     console.log('\n❌ 缺失的路由配置:');
     results.missingRoutes.forEach(item => {
       console.log(`  - ${item.route} (${item.name}) -> 需要在AppRoutes.tsx中添加`);
     });
   }
-  
+
   if (results.orphanedPages.length > 0) {
     console.log('\n⚠️ 孤立的页面文件:');
     results.orphanedPages.forEach(file => {
       console.log(`  - ${file} -> 考虑删除或添加到侧边栏`);
     });
   }
-  
+
   if (results.backupFiles.length > 0) {
     console.log('\n🗑️ 可删除的备份文件:');
     results.backupFiles.forEach(file => {
       console.log(`  - ${file}`);
     });
   }
-  
+
   // 5. 建议
   console.log('\n💡 修复建议:');
   if (results.missing.length > 0) {
@@ -235,22 +239,22 @@ function checkRoutesConsistency() {
   if (results.orphanedPages.length > 0) {
     console.log('  4. 处理孤立的页面文件');
   }
-  
+
   console.log('\n🎯 一致性检查完成！');
-  
+
   return results;
 }
 
 // 执行检查
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   try {
     const results = checkRoutesConsistency();
-    
+
     // 输出JSON格式的结果供其他脚本使用
     const outputPath = path.join(__dirname, 'route-consistency-report.json');
     fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
     console.log(`\n📄 详细报告已保存到: ${outputPath}`);
-    
+
     process.exit(results.missing.length === 0 && results.missingRoutes.length === 0 ? 0 : 1);
   } catch (error) {
     console.error('❌ 检查失败:', error);
@@ -258,4 +262,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { checkRoutesConsistency };
+export { checkRoutesConsistency };

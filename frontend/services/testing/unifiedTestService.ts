@@ -18,7 +18,28 @@
  * - 缓存和持久化支持
  */
 
-import { EventEmitter } from 'events';
+// 简单的事件发射器实现 (浏览器兼容)
+class SimpleEventEmitter {
+  private listeners = new Map<string, Function[]>();
+
+  on(event: string, listener: Function): void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, []);
+    }
+    this.listeners.get(event)!.push(listener);
+  }
+
+  emit(event: string, ...args: any[]): void {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      eventListeners.forEach(listener => listener(...args));
+    }
+  }
+
+  removeAllListeners(): void {
+    this.listeners.clear();
+  }
+}
 import { TestType } from '../../types/enums';
 import { unifiedApiService } from '../api/unifiedApiService';
 import { testResultsCache } from '../cache/testResultsCache';
@@ -73,7 +94,7 @@ export interface UnifiedTestServiceConfig {
 /**
  * 统一测试服务管理器类
  */
-export class UnifiedTestService extends EventEmitter {
+export class UnifiedTestService extends SimpleEventEmitter {
   private static instance: UnifiedTestService;
   private config: UnifiedTestServiceConfig;
   private activeTests = new Map<string, UnifiedTestStatus>();
