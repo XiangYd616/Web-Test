@@ -18,6 +18,9 @@ export interface SEOAnalysisResult {
   structuredData: StructuredDataResult;
   security: SecurityResult;
   metadata: PageMetadata;
+  coreWebVitals?: any;
+  internationalization?: any;
+  localSEO?: any;
 }
 
 export interface SEOIssue {

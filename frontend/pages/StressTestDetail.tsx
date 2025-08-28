@@ -1,7 +1,8 @@
 import { Activity, AlertCircle, ArrowLeft, BarChart3, Calendar, CheckCircle, Clock, Download, Settings, Share2, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
-import type { createElement, useCallback, useEffect, useMemo, useState, FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+;
 
 import '../components/stress/StatusLabel.css';
 import { DataProcessingUtils } from '../utils/dataProcessingUtils';
@@ -290,14 +291,14 @@ const StressTestDetail: React.FC = () => {
     // 只导出必要的数据，减少序列化开销
     const exportRecord = {
       id: record.id,
-      test_name: record.test_name,
+      testName: record.testName,
       url: record.url,
       status: record.status,
-      start_time: record.start_time,
-      end_time: record.end_time,
+      startTime: record.startTime,
+      endTime: record.endTime,
       duration: record.duration,
-      overall_score: record.overall_score,
-      grade: record.grade,
+      overallScore: record.overallScore,
+      testType: record.testType,
       config: record.config,
       results: {
         metrics: record.results?.metrics,
@@ -889,7 +890,7 @@ const StressTestDetail: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">测试类型:</span>
-                      <span className="text-white capitalize">{record.test_type}</span>
+                      <span className="text-white capitalize">{record.testType}</span>
                     </div>
                     {record.config?.duration && (
                       <div className="flex justify-between">

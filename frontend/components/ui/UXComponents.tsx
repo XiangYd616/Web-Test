@@ -4,8 +4,9 @@
  */
 
 import { AlertTriangle, CheckCircle, ChevronRight, HelpCircle, Info, Lightbulb, X } from 'lucide-react';
-import type { useCallback, useEffect, useState, ReactNode, FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+;
 
 // 通知类型
 type NotificationType = 'success' | 'error' | 'warning' | 'info';
@@ -71,6 +72,7 @@ export const EnhancedNotification: React.FC<NotificationProps> = ({
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [duration, onClose]);
 
   const getIcon = () => {
@@ -121,8 +123,8 @@ export const EnhancedNotification: React.FC<NotificationProps> = ({
                   key={index}
                   onClick={action.onClick}
                   className={`text-sm px-3 py-1 rounded ${action.variant === 'primary'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500'
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500'
                     }`}
                 >
                   {action.label}
@@ -197,9 +199,9 @@ export const SmartTooltip: React.FC<TooltipProps> = ({
           <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 max-w-xs shadow-lg">
             {content}
             <div className={`absolute w-2 h-2 bg-gray-900 transform rotate-45 ${position === 'top' ? 'top-full left-1/2 -translate-x-1/2 -mt-1' :
-                position === 'bottom' ? 'bottom-full left-1/2 -translate-x-1/2 -mb-1' :
-                  position === 'left' ? 'left-full top-1/2 -translate-y-1/2 -ml-1' :
-                    'right-full top-1/2 -translate-y-1/2 -mr-1'
+              position === 'bottom' ? 'bottom-full left-1/2 -translate-x-1/2 -mb-1' :
+                position === 'left' ? 'left-full top-1/2 -translate-y-1/2 -ml-1' :
+                  'right-full top-1/2 -translate-y-1/2 -mr-1'
               }`} />
           </div>
         </div>

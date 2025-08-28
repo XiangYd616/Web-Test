@@ -75,9 +75,12 @@ class ApiErrorInterceptor {
   /**
    * 处理请求错误
    */
-  private handleRequestError(error: any): any {
-    const standardError = errorService.handleError(error, {
-      phase: 'request',
+  private async handleRequestError(error: any): Promise<any> {
+    // 创建错误处理实例
+    // 使用错误处理函数
+    const { useErrorHandler } = await import('./api/errorHandler');
+    const errorHandler = useErrorHandler();
+    const standardError = errorHandler.handleError(error, {
       url: error.config?.url,
       method: error.config?.method
     });
@@ -106,6 +109,8 @@ class ApiErrorInterceptor {
     const errorData = this.parseErrorResponse(error);
 
     // 创建标准化错误
+    // 创建前端错误处理实例
+    const frontendErrorHandler = new (await import('./api/unifiedErrorHandler')).FrontendErrorHandler();
     const standardError = frontendErrorHandler.handleError(error, {
       phase: 'response',
       url,
@@ -348,10 +353,12 @@ class ApiErrorInterceptor {
 export const apiErrorInterceptor = new ApiErrorInterceptor();
 
 // 便捷方法：手动处理API错误
-export const handleApiError = (error: AxiosError, context?: Record<string, any>) => {
+export const handleApiError = async (error: AxiosError, context?: Record<string, any>) => {
+  // 创建前端错误处理实例
+  const frontendErrorHandler = new (await import('./api/unifiedErrorHandler')).FrontendErrorHandler();
   return frontendErrorHandler.handleError(error, {
     ...context,
-    phase: 'manual',
+    phase: 'processing',
     url: error.config?.url,
     method: error.config?.method,
     status: error.response?.status

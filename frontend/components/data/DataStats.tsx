@@ -1,8 +1,8 @@
-import React from 'react';
-import type { FC } from 'react';
+
+import { PaginationInfo, TestRecord } from '@/hooks/useDataStorage';
 import { BarChart3, CheckCircle, Database, XCircle } from 'lucide-react';
-import { StatCard } from '../../../components/shared';
-import { PaginationInfo, TestRecord } from '../../../hooks/useDataStorage';
+import React from 'react';
+import StatCard from '../modern/StatCard'; // 使用支持subtitle的StatCard
 
 interface DataStatsProps {
   records: TestRecord[];
@@ -20,9 +20,9 @@ const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) =
     avgScore: records.length > 0 ?
       Math.round(
         records
-          .filter(r => r.overallScore)
-          .reduce((sum, r) => sum + (r.overallScore || 0), 0) /
-        records.filter(r => r.overallScore).length
+          .filter(r => r.result?.score || 0)
+          .reduce((sum, r) => sum + (r.result?.score || 0 || 0), 0) /
+        records.filter(r => r.result?.score || 0).length
       ) || 0 : 0
   };
 
@@ -36,7 +36,7 @@ const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) =
         title="总记录数"
         value={pagination.total}
         subtitle={`当前页: ${currentPageStats.total}`}
-        icon={Database}
+        icon={<Database />}
         color="bg-blue-500/20"
         loading={loading}
       />
@@ -46,7 +46,7 @@ const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) =
         value={currentPageStats.completed}
         subtitle={`成功率: ${successRate}%`}
         change={parseFloat(successRate) > 80 ? 5.2 : -2.1}
-        icon={CheckCircle}
+        icon={<CheckCircle />}
         color="bg-green-500/20"
         loading={loading}
       />
@@ -56,7 +56,7 @@ const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) =
         value={currentPageStats.failed}
         subtitle={`失败率: ${(100 - parseFloat(successRate)).toFixed(1)}%`}
         change={currentPageStats.failed > currentPageStats.completed ? 3.1 : -1.5}
-        icon={XCircle}
+        icon={<XCircle />}
         color="bg-red-500/20"
         loading={loading}
       />
@@ -66,7 +66,7 @@ const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) =
         value={currentPageStats.avgScore}
         subtitle="当前页平均"
         change={currentPageStats.avgScore > 70 ? 8.3 : -3.7}
-        icon={BarChart3}
+        icon={<BarChart3 />}
         color="bg-purple-500/20"
         loading={loading}
       />

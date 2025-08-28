@@ -1,5 +1,7 @@
+import React from 'react';
 import { Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
-import type { useEffect, useRef, useState, ComponentType, FC } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ComponentType, FC } from 'react';;
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -199,7 +201,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     ];
 
     // 简单的确认对话框实�?    const actionText = notification.read ? '删除此通知�? : '标记为已读并删除�?;
-    if (confirm(actionText)) {
+    if (confirm("确认执行此操作？")) {
       deleteNotification(notification.id);
     }
   };

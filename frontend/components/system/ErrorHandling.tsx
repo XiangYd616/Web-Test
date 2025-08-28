@@ -1,6 +1,29 @@
+// 本地ErrorInfo接口，避免与React.ErrorInfo冲突
+interface LocalErrorInfo {
+  type: string;
+  message: string;
+  code?: string;
+  timestamp: string;
+  stack?: string;
+  suggestions?: string[];
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  context?: Record<string, any>;
+  title?: string;  // 添加title属性
+  details?: string; // 添加details属性
+}
+
 import { AlertCircle, AlertTriangle, ArrowLeft, CheckCircle, Clock, Globe, Home, Info, RefreshCw, Server, Shield, WifiOff, XCircle } from 'lucide-react';
 import React from 'react';
-import type { ErrorInfo, useEffect, useState, ReactNode, ComponentType, FC, Component } from 'react';
+// 自定义错误信息接口
+interface CustomErrorInfo {
+  type: string;
+  title: string;
+  message: string;
+  details?: string;
+  code?: string;
+  suggestions?: string[];
+}
+
 
 // 错误类型定义
 export type ErrorType =
@@ -13,7 +36,7 @@ export type ErrorType =
   | 'rate-limit'
   | 'unknown';
 
-export interface ErrorInfo {
+export interface SystemErrorInfo {
   type: ErrorType;
   title: string;
   message: string;
@@ -25,7 +48,7 @@ export interface ErrorInfo {
 
 // 基础错误组件
 export const ErrorDisplay: React.FC<{
-  error: ErrorInfo;
+  error: LocalErrorInfo;
   onRetry?: () => void;
   onGoBack?: () => void;
   onGoHome?: () => void;
@@ -67,8 +90,8 @@ export const ErrorDisplay: React.FC<{
     }
   };
 
-  const Icon = getErrorIcon(error.type);
-  const colorClass = getErrorColor(error.type);
+  const Icon = getErrorIcon(error.type as ErrorType);
+  const colorClass = getErrorColor(error.type as ErrorType);
 
   return (
     <div className={`text-center p-8 ${className}`}>
@@ -143,10 +166,12 @@ export const NetworkError: React.FC<{
   onRetry: () => void;
   className?: string;
 }> = ({ onRetry, className = '' }) => {
-  const error: ErrorInfo = {
+  const error: LocalErrorInfo = {
     type: 'network',
     title: '网络连接失败',
     message: '无法连接到服务器，请检查您的网络连接',
+    timestamp: new Date().toISOString(),
+    severity: 'high',
     suggestions: [
       '检查网络连接是否正常',
       '尝试刷新页面',
@@ -165,11 +190,13 @@ export const ServerError: React.FC<{
   onGoHome?: () => void;
   className?: string;
 }> = ({ statusCode = 500, onRetry, onGoHome, className = '' }) => {
-  const error: ErrorInfo = {
+  const error: LocalErrorInfo = {
     type: 'server',
     title: '服务器错误',
     message: '服务器遇到了一个错误，无法完成您的请求',
-    code: statusCode,
+    code: statusCode.toString(),
+    timestamp: new Date().toISOString(),
+    severity: 'critical',
     suggestions: [
       '稍后再试',
       '刷新页面',
@@ -186,10 +213,12 @@ export const PermissionError: React.FC<{
   onGoHome?: () => void;
   className?: string;
 }> = ({ onGoBack, onGoHome, className = '' }) => {
-  const error: ErrorInfo = {
+  const error: LocalErrorInfo = {
     type: 'permission',
     title: '访问被拒绝',
     message: '您没有权限访问此资源',
+    timestamp: new Date().toISOString(),
+    severity: 'medium',
     suggestions: [
       '检查您的登录状态',
       '联系管理员获取权限',
@@ -207,11 +236,13 @@ export const NotFoundError: React.FC<{
   onGoHome?: () => void;
   className?: string;
 }> = ({ resource = '页面', onGoBack, onGoHome, className = '' }) => {
-  const error: ErrorInfo = {
+  const error: LocalErrorInfo = {
     type: 'not-found',
     title: `${resource}未找到`,
     message: `您访问的${resource}不存在或已被移除`,
-    code: 404,
+    code: "404",
+    timestamp: new Date().toISOString(),
+    severity: 'medium',
     suggestions: [
       '检查URL是否正确',
       '返回上一页',
@@ -389,11 +420,13 @@ export class ErrorBoundary extends React.Component<
 
 // 默认错误回退组件
 const DefaultErrorFallback: React.FC<{ error: Error; resetError: () => void }> = ({ error, resetError }) => {
-  const errorInfo: ErrorInfo = {
+  const errorInfo: LocalErrorInfo = {
     type: 'unknown',
     title: '应用程序错误',
     message: '应用程序遇到了一个意外错误',
     details: error.message,
+    timestamp: new Date().toISOString(),
+    severity: 'critical',
     suggestions: [
       '刷新页面重试',
       '清除浏览器缓存',
@@ -416,44 +449,54 @@ const DefaultErrorFallback: React.FC<{ error: Error; resetError: () => void }> =
 
 // 错误处理Hook
 export const useErrorHandler = () => {
-  const [error, setError] = React.useState<ErrorInfo | null>(null);
+  const [error, setError] = React.useState<LocalErrorInfo | null>(null);
 
   const handleError = (error: any, context?: string) => {
-    let errorInfo: ErrorInfo;
+    let errorInfo: LocalErrorInfo;
 
     if (error.name === 'NetworkError' || error.message?.includes('fetch')) {
       errorInfo = {
         type: 'network',
         title: '网络错误',
         message: '网络连接失败，请检查您的网络连接',
-        details: context ? `在${context}时发生错误` : undefined
+        details: context ? `在${context}时发生错误` : undefined,
+        timestamp: new Date().toISOString(),
+        severity: 'high'
       };
     } else if (error.status === 404) {
       errorInfo = {
         type: 'not-found',
         title: '资源未找到',
         message: '请求的资源不存在',
-        code: 404
+        code: '404',
+        timestamp: new Date().toISOString(),
+        severity: 'medium'
       };
     } else if (error.status >= 500) {
       errorInfo = {
         type: 'server',
         title: '服务器错误',
         message: '服务器遇到了一个错误',
-        code: error.status
+        code: error.status,
+        timestamp: new Date().toISOString(),
+        severity: 'critical'
       };
     } else if (error.status === 403) {
       errorInfo = {
         type: 'permission',
         title: '权限不足',
-        message: '您没有权限执行此操作'
+        message: '您没有权限执行此操作',
+        timestamp: new Date().toISOString(),
+        severity: 'medium'
       };
     } else {
       errorInfo = {
         type: 'unknown',
         title: '未知错误',
         message: error.message || '发生了一个未知错误',
-        details: context ? `在${context}时发生错误` : undefined
+        details: context ? `在${context}时发生错误` : undefined,
+        timestamp: new Date().toISOString(),
+        severity: 'medium'
       };
     }
 

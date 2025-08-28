@@ -99,7 +99,7 @@ class TOTPGenerator {
     const keyBytes = this.base32Decode(secret);
     const key = await crypto.subtle.importKey(
       'raw',
-      keyBytes,
+      keyBytes.buffer as ArrayBuffer,
       { name: 'HMAC', hash: 'SHA-1' },
       false,
       ['sign']

@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Calendar, ChevronDown, ChevronRight, Clock, Eye, RefreshCw, Search, Shield, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { SecurityTestResult } from '../../services/unifiedSecurityEngine';

@@ -11,7 +11,7 @@
 export type {
   Email, Timestamp,
   URL, UUID
-} from '../common';
+} from './common';
 
 // ==================== 枚举类型导出 ====================
 
@@ -24,21 +24,32 @@ export {
 
 // ==================== 用户相关类型导出 ====================
 
-// 重新导出用户相关类型
+// 重新导出用户相关类型（仅导出存在的类型）
 export type {
-  AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES, DEFAULT_USER_PROFILE, LoginCredentials,
-  RegisterData, UpdateUserData, User, UserActivityLog, UserDatabaseFields, UserFilter,
-  UserListQuery, UserPreferences, UserProfile, UserSession, UserStats, fromDatabaseFields, toDatabaseFields
+  ChangePasswordData, CreateUserData, LoginCredentials,
+  RegisterData, UpdateUserData, User, UserPreferences, UserProfile, UserQuery, UserStats
 } from './user';
+
+// 从common.ts导入基础用户类型
+export type {
+  AuthResponse, UserSession
+} from './common';
+
+// 注释掉不存在的类型导入
+// DEFAULT_USER_PREFERENCES, DEFAULT_USER_PROFILE, UserActivityLog, UserDatabaseFields, UserFilter,
+// UserListQuery, fromDatabaseFields, toDatabaseFields
 
 // ==================== API响应类型导出 ====================
 
-// 重新导出API响应类型
+// 重新导出API响应类型（仅导出存在的类型）
 export type {
-  ApiError, ApiErrorResponse, ApiMeta, ApiResponse, ApiResponseUtils, ApiSuccessResponse, AuthConfig, CreatedResponse, ErrorCode, ErrorResponseMethods, NoContentResponse, PaginatedRequest, PaginatedResponse,
-  PaginationInfo, QueryParams,
-  RequestConfig, ResponseBuilder, ValidationError
+  ApiError, ApiErrorResponse, ApiResponse, ApiSuccessResponse, ErrorCode, PaginatedResponse,
+  PaginationInfo, QueryParams, RequestConfig, ValidationError
 } from './apiResponse';
+
+// 注释掉不存在的类型导入
+// ApiMeta, ApiResponseUtils, AuthConfig, CreatedResponse, ErrorResponseMethods,
+// NoContentResponse, PaginatedRequest, ResponseBuilder
 
 // ==================== 测试相关类型导出 ====================
 

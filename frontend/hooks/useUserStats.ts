@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { userStatsService, UserActivityStats, ActivityItem } from '../services/userStatsService';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityItem, UserActivityStats, userStatsService } from '../services/userStatsService';
 import { useAuth } from './useAuth';
 
 export const useUserStats = () => {
@@ -8,7 +8,7 @@ export const useUserStats = () => {
   const [loading, setLoading] = useState(true);
 
   // 加载用户统计数据
-  const loadStats = useCallback(() => {
+  const loadStats = useCallback(async () => {
     if (!user?.id) {
       setStats(null);
       setLoading(false);
@@ -16,13 +16,13 @@ export const useUserStats = () => {
     }
 
     try {
-      const userStats = userStatsService.getUserStats(user.id);
+      const userStats = await userStatsService.getUserStats(user.id);
       // 计算周和月统计
-      userStatsService.calculateWeekStats(user.id);
-      userStatsService.calculateMonthStats(user.id);
+      await userStatsService.calculateWeekStats(user.id);
+      await userStatsService.calculateMonthStats(user.id);
 
       // 重新获取更新后的统计数据
-      const updatedStats = userStatsService.getUserStats(user.id);
+      const updatedStats = await userStatsService.getUserStats(user.id);
       setStats(updatedStats);
     } catch (error) {
       console.error('Failed to load user stats:', error);

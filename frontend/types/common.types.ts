@@ -4,12 +4,23 @@
  * 版本: v2.0.0
  */
 
+// 导入基础类型
+import type { Timestamp } from './unified/apiResponse.types';
+
 // 重新导出统一类型
 export * from '../../shared/types/unifiedTypes';
+
+// 导出基础类型
+export type { Timestamp };
 
 // 向后兼容的类型别名
 export type ID = string | number;
 export type Status = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+// 添加缺失的基础类型
+export type Email = string;
+export type URL = string;
+export type UUID = string;
 
 // 注意：API响应类型已从统一类型定义中导入
 // 这里保留注释以说明类型来源
@@ -36,9 +47,47 @@ export interface User {
   lastLogin?: Timestamp;
 }
 
+// 添加用户相关的缺失类型
+export interface AuthResponse {
+  success: boolean;
+  token?: string;
+  user?: User;
+  message?: string;
+  errors?: string[];
+}
+
+export interface LoginCredentials {
+  username: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface RegisterData {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  fullName?: string;
+}
+
+export interface UserSession {
+  id: string;
+  userId: string;
+  token: string;
+  expiresAt: Timestamp;
+  createdAt: Timestamp;
+  lastActivity: Timestamp;
+}
+
+export interface DEFAULT_USER_PREFERENCES {
+  theme: 'light' | 'dark' | 'auto';
+  language: string;
+  notifications: boolean;
+  emailUpdates: boolean;
+}
+
 // 测试相关类型 - 已迁移到统一类型系统
 import type { TestType } from './unified/testTypes';
-import type { ReactNode } from 'react';
 
 export interface TestConfig {
   url: string;
@@ -46,6 +95,27 @@ export interface TestConfig {
   duration?: number;
   concurrency?: number;
   options?: Record<string, any>;
+}
+
+// 添加基础测试配置和结果类型
+export interface BaseTestConfig {
+  url: string;
+  type: TestType;
+  duration?: number;
+  concurrency?: number;
+  options?: Record<string, any>;
+}
+
+export interface BaseTestResult {
+  id: ID;
+  testId: ID;
+  type: TestType;
+  status: Status;
+  results?: Record<string, any>;
+  metrics?: Record<string, number>;
+  error?: string;
+  startedAt: Timestamp;
+  completedAt?: Timestamp;
 }
 
 export interface TestResult {
@@ -201,12 +271,13 @@ export interface AppConfig {
 }
 
 // 导出所有类型
-export type {
-  AlertCondition, AlertConfig,
-  // 重新导出以确保类型可用
-  ApiResponse, AppConfig, BaseComponentProps, CustomEvent, ErrorProps,
-  FormField,
-  FormState, LoadingProps, MonitoringTarget, NotificationConfig, PaginatedResponse, PaginationMeta, PaginationParams, TestConfig,
-  TestResult, TestType, Theme, User
-};
+// ==================== 类型导出说明 ====================
+// 基于Context7最佳实践：所有interface和type定义已通过export关键字导出
+// 无需额外的导出语句，避免重复导出冲突
+
+// 所有类型已通过以下方式导出：
+// - export interface User { ... }
+// - export interface TestResult { ... }
+// - export interface ApiResponse<T> { ... }
+// - 等等...
 

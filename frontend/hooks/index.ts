@@ -1,5 +1,3 @@
-import { useTestProgress } from '../hooks/useTestProgress';
-import { TestProgress } from '../services/api/testProgressService';
 /**
  * 测试专用Hook统一导出
  * 各个测试页面可以选择性使用这些Hook，不强制替换现有实现
@@ -8,42 +6,38 @@ import { TestProgress } from '../services/api/testProgressService';
 // 导出专用Hook
 export { useAPITestState } from './useAPITestState';
 export { useCompatibilityTestState } from './useCompatibilityTestState';
-export { useUXTestState } from './useUXTestState';
-export { useNetworkTestState } from './useNetworkTestState';
 export { useDatabaseTestState } from './useDatabaseTestState';
+export { useNetworkTestState } from './useNetworkTestState';
+export { useUXTestState } from './useUXTestState';
 
 // 导出现有Hook（保持兼容性）
-export { useUnifiedSEOTest } from './useUnifiedSEOTest';
 export { useTestProgress } from './useTestProgress';
+export { useUnifiedSEOTest } from './useUnifiedSEOTest';
 export { useUserStats } from './useUserStats';
 
-// 导出类型定义
-export type { 
-  APITestConfig, 
-  APITestResult, 
-  UseAPITestStateReturn 
-} from './useAPITestState';
+// 导出类型定义 - 从统一类型系统导入
+export type {
+  APITestConfig,
+  APITestResult
+} from '../types';
 
-export type { 
-  CompatibilityTestConfig, 
-  CompatibilityTestResult, 
-  UseCompatibilityTestStateReturn 
-} from './useCompatibilityTestState';
+export type {
+  CompatibilityTestConfig,
+  CompatibilityTestResult
+} from '../types';
 
-export type { 
-  UXTestConfig, 
-  UXTestResult, 
-  UseUXTestStateReturn 
-} from './useUXTestState';
+export type {
+  UXTestConfig,
+  UXTestResult
+} from '../types';
 
-export type { 
-  NetworkTestConfig, 
-  NetworkTestResult, 
-  UseNetworkTestStateReturn 
-} from './useNetworkTestState';
+export type {
+  NetworkTestConfig,
+  NetworkTestResult
+} from '../types';
 
-export type { 
-  DatabaseTestConfig, 
-  DatabaseTestResult, 
-  UseDatabaseTestStateReturn 
-} from './useDatabaseTestState';
+export type {
+  DatabaseTestConfig,
+  DatabaseTestResult
+} from '../types';
+

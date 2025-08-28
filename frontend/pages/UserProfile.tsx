@@ -1,5 +1,6 @@
+import React from 'react';
 import { AlertCircle, Calendar, Camera, CheckCircle, Clock, Edit, Github, Globe, Key, Linkedin, Loader, Save, Trash2, Twitter, User, X } from 'lucide-react';
-import type { useEffect, useRef, useState, FC } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { UpdateProfileData, UserProfile, userService, UserStats } from '../services/user/userService';
@@ -265,8 +266,8 @@ const UserProfilePage: React.FC = () => {
 
         {/* 页面标题和头像 */}
         <div className={`rounded-xl border p-6 mb-8 ${actualTheme === 'light'
-            ? 'bg-white border-gray-200'
-            : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
+          ? 'bg-white border-gray-200'
+          : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
           }`}>
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center space-x-6 mb-4 lg:mb-0">
@@ -401,8 +402,8 @@ const UserProfilePage: React.FC = () => {
           {/* 左侧：个人资料表单 */}
           <div className="lg:col-span-2">
             <div className={`rounded-xl border p-6 ${actualTheme === 'light'
-                ? 'bg-white border-gray-200'
-                : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
+              ? 'bg-white border-gray-200'
+              : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
               }`}>
               <h2 className={`text-xl font-semibold mb-6 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
                 }`}>
@@ -422,8 +423,8 @@ const UserProfilePage: React.FC = () => {
                       value={formData.fullName || ''}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
-                          ? 'bg-white border-gray-300 text-gray-900'
-                          : 'bg-gray-700 border-gray-600 text-white'
+                        ? 'bg-white border-gray-300 text-gray-900'
+                        : 'bg-gray-700 border-gray-600 text-white'
                         }`}
                       placeholder="请输入您的全名"
                     />
@@ -468,8 +469,8 @@ const UserProfilePage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                       rows={3}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
-                          ? 'bg-white border-gray-300 text-gray-900'
-                          : 'bg-gray-700 border-gray-600 text-white'
+                        ? 'bg-white border-gray-300 text-gray-900'
+                        : 'bg-gray-700 border-gray-600 text-white'
                         }`}
                       placeholder="介绍一下您自己..."
                     />
@@ -493,8 +494,8 @@ const UserProfilePage: React.FC = () => {
                         value={formData.phone || ''}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
-                            ? 'bg-white border-gray-300 text-gray-900'
-                            : 'bg-gray-700 border-gray-600 text-white'
+                          ? 'bg-white border-gray-300 text-gray-900'
+                          : 'bg-gray-700 border-gray-600 text-white'
                           }`}
                         placeholder="+86 138****8888"
                       />
@@ -516,8 +517,8 @@ const UserProfilePage: React.FC = () => {
                         value={formData.location || ''}
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
-                            ? 'bg-white border-gray-300 text-gray-900'
-                            : 'bg-gray-700 border-gray-600 text-white'
+                          ? 'bg-white border-gray-300 text-gray-900'
+                          : 'bg-gray-700 border-gray-600 text-white'
                           }`}
                         placeholder="北京, 中国"
                       />
@@ -554,8 +555,8 @@ const UserProfilePage: React.FC = () => {
                             value={(formData as any)[key] || ''}
                             onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
                             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
-                                ? 'bg-white border-gray-300 text-gray-900'
-                                : 'bg-gray-700 border-gray-600 text-white'
+                              ? 'bg-white border-gray-300 text-gray-900'
+                              : 'bg-gray-700 border-gray-600 text-white'
                               }`}
                             placeholder={placeholder}
                           />
@@ -576,8 +577,8 @@ const UserProfilePage: React.FC = () => {
           <div className="space-y-6">
             {/* 用户统计 */}
             <div className={`rounded-xl border p-6 ${actualTheme === 'light'
-                ? 'bg-white border-gray-200'
-                : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
+              ? 'bg-white border-gray-200'
+              : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
               }`}>
               <h3 className={`text-lg font-semibold mb-4 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
                 }`}>
@@ -632,8 +633,8 @@ const UserProfilePage: React.FC = () => {
 
             {/* 账户安全 */}
             <div className={`rounded-xl border p-6 ${actualTheme === 'light'
-                ? 'bg-white border-gray-200'
-                : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
+              ? 'bg-white border-gray-200'
+              : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
               }`}>
               <h3 className={`text-lg font-semibold mb-4 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
                 }`}>
@@ -678,8 +679,8 @@ const UserProfilePage: React.FC = () => {
         {showPasswordModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className={`w-full max-w-md mx-4 rounded-xl border p-6 ${actualTheme === 'light'
-                ? 'bg-white border-gray-200'
-                : 'bg-gray-800 border-gray-700'
+              ? 'bg-white border-gray-200'
+              : 'bg-gray-800 border-gray-700'
               }`}>
               <h3 className={`text-lg font-semibold mb-4 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
                 }`}>
@@ -697,8 +698,8 @@ const UserProfilePage: React.FC = () => {
                     value={passwordForm.currentPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
-                        ? 'bg-white border-gray-300 text-gray-900'
-                        : 'bg-gray-700 border-gray-600 text-white'
+                      ? 'bg-white border-gray-300 text-gray-900'
+                      : 'bg-gray-700 border-gray-600 text-white'
                       }`}
                     aria-label="当前密码"
                     placeholder="请输入当前密码"
@@ -715,8 +716,8 @@ const UserProfilePage: React.FC = () => {
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
-                        ? 'bg-white border-gray-300 text-gray-900'
-                        : 'bg-gray-700 border-gray-600 text-white'
+                      ? 'bg-white border-gray-300 text-gray-900'
+                      : 'bg-gray-700 border-gray-600 text-white'
                       }`}
                     aria-label="新密码"
                     placeholder="请输入新密码"
@@ -733,8 +734,8 @@ const UserProfilePage: React.FC = () => {
                     value={passwordForm.confirmPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
-                        ? 'bg-white border-gray-300 text-gray-900'
-                        : 'bg-gray-700 border-gray-600 text-white'
+                      ? 'bg-white border-gray-300 text-gray-900'
+                      : 'bg-gray-700 border-gray-600 text-white'
                       }`}
                     aria-label="确认新密码"
                     placeholder="请再次输入新密码"

@@ -1,6 +1,8 @@
 
+import React from 'react';
 import { Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, Globe, Settings, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
-import type { useMemo, useState, FC } from 'react';
+import { useMemo, useState } from 'react';
+import type { FC } from 'react';;
 import type { StressTestRecord } from '../../services/stressTestRecordService';
 
 interface StressTestRecordDetailProps {
@@ -149,7 +151,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
           </div>
           <div>
             <h2 className="text-xl font-semibold text-white mb-1">
-              {record.test_name}
+              {record.testName}
             </h2>
             <div className="flex items-center gap-3">
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-sm font-medium ${getStatusStyle(record.status)}`}>

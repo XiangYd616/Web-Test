@@ -106,8 +106,8 @@ describe('API工具函数', () => {
             const params = {
                 page: 1,
                 search: '',
-                active: null,
-                undefined: undefined,
+                active: null as any,
+                undefined: undefined as any,
             };
 
             const result = buildQueryString(params);

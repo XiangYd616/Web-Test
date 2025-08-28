@@ -50,7 +50,7 @@ class RealTimeMonitoringService {
   private socket: Socket | null = null;
   private sites: Map<string, MonitoringSite> = new Map();
   private alerts: Alert[] = [];
-  private isConnected = false;
+  private _isConnected = false;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private listeners: Map<string, Function[]> = new Map();
@@ -76,14 +76,14 @@ class RealTimeMonitoringService {
 
     this.socket.on('connect', () => {
       console.log('🔌 实时监控服务已连接');
-      this.isConnected = true;
+      this._isConnected = true;
       this.reconnectAttempts = 0;
       this.emit('connected');
     });
 
     this.socket.on('disconnect', () => {
       console.log('🔌 实时监控服务已断开');
-      this.isConnected = false;
+      this._isConnected = false;
       this.emit('disconnected');
     });
 
@@ -207,7 +207,7 @@ class RealTimeMonitoringService {
     console.log('🔄 启动轮询模式');
 
     const pollInterval = setInterval(async () => {
-      if (this.isConnected) {
+      if (this._isConnected) {
         clearInterval(pollInterval);
         return;
       }
@@ -250,7 +250,7 @@ class RealTimeMonitoringService {
       }
     } catch (error) {
       // 静默处理错误，避免控制台污染
-      if (error.name !== 'AbortError') {
+      if ((error as Error)?.name !== 'AbortError') {
         console.info('监控数据获取失败，使用本地数据');
       }
     }
@@ -420,8 +420,8 @@ class RealTimeMonitoringService {
     }
   }
 
-  public isConnected(): boolean {
-    return this.isConnected;
+  public getConnectionStatus(): boolean {
+    return this._isConnected;
   }
 
   public disconnect() {

@@ -4,11 +4,34 @@
  */
 
 import { AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap } from 'lucide-react';
-import type { useEffect, useState, ReactNode, FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLoadingState } from '../components/ui/LoadingStates';
 import { SmartTooltip, useSmartNotification } from '../components/ui/UXComponents';
 import { usePerformanceOptimization } from '../hooks/usePerformanceOptimization';
-import { createTestRunner, PerformanceTestResult, TestResult, UXTestResult } from '../utils/testUtils';
+import { createTestRunner } from '../utils/testUtils';
+;
+
+// 临时类型定义
+interface PerformanceTestResult {
+  id: string;
+  score: number;
+  metrics: any;
+  timestamp: string;
+}
+
+interface TestResult {
+  id: string;
+  status: string;
+  result: any;
+  timestamp: string;
+}
+
+interface UXTestResult {
+  id: string;
+  score: number;
+  issues: any[];
+  timestamp: string;
+}
 
 interface TestResults {
   performance: PerformanceTestResult[];
@@ -42,21 +65,21 @@ const TestOptimizations: React.FC = () => {
    */
   const runTestSuite = async () => {
     setIsRunningTests(true);
-    loadingState.setLoading('正在运行测试套件...');
+    loadingState.startLoading('正在运行测试套件...');
 
     try {
       const testRunner = createTestRunner();
       const results = await testRunner.runFullTestSuite();
 
-      setTestResults(results);
-      loadingState.setSuccess('测试完成');
+      setTestResults(results as unknown as TestResults);
+      loadingState.finishLoading();
 
       showSuccess(
         '测试套件完成',
         `性能测试: ${results.summary.performance.passed}/${results.summary.performance.total} 通过`
       );
     } catch (error) {
-      loadingState.setError('测试失败');
+      loadingState.setLoadingError('测试失败');
       showError('测试失败', error instanceof Error ? error.message : '未知错误');
     } finally {
       setIsRunningTests(false);
@@ -231,12 +254,20 @@ const TestOptimizations: React.FC = () => {
         {/* 加载状态 */}
         {loadingState.isLoading && (
           <div className="mb-8">
-            <LoadingStates
-              state="loading"
-              message={loadingState.message}
-              progress={loadingState.progress}
-              showProgress={true}
-            />
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <div>
+                  <p className="text-blue-800 font-medium">{loadingState.stage}</p>
+                  <div className="w-64 bg-blue-200 rounded-full h-2 mt-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${loadingState.progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

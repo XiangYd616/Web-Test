@@ -4,7 +4,6 @@
  * 版本: v1.0.0
  */
 
-import type { ApiResponse, ApiError } from '../../types/unified/apiResponse';
 
 // ==================== 错误处理配置 ====================
 
@@ -115,7 +114,7 @@ export class ApiErrorHandler {
    */
   async handleError(error: any, requestInfo?: any): Promise<ApiRequestError> {
     const apiError = this.normalizeError(error);
-    
+
     // 记录错误
     if (this.config.logErrors) {
       this.logError(apiError, requestInfo);
@@ -145,7 +144,7 @@ export class ApiErrorHandler {
         attempt++;
 
         const apiError = this.normalizeError(error);
-        
+
         // 检查是否应该重试
         if (!this.shouldRetry(apiError, attempt)) {
           break;
@@ -153,9 +152,9 @@ export class ApiErrorHandler {
 
         // 计算延迟时间
         const delay = this.calculateRetryDelay(attempt);
-        
+
         console.warn(`请求失败，${delay}ms后进行第${attempt}次重试:`, apiError.message);
-        
+
         // 等待重试
         await this.sleep(delay);
       }
@@ -223,7 +222,7 @@ export class ApiErrorHandler {
     if (error.response) {
       const statusCode = error.response.status;
       const responseData = error.response.data;
-      
+
       let code = 'HTTP_ERROR';
       let message = `HTTP ${statusCode} 错误`;
       let retryable = false;
@@ -302,8 +301,8 @@ export class ApiErrorHandler {
     }
 
     // 检查状态码是否在可重试列表中
-    if (error.statusCode && 
-        !this.config.retryConfig.retryableStatusCodes.includes(error.statusCode)) {
+    if (error.statusCode &&
+      !this.config.retryConfig.retryableStatusCodes.includes(error.statusCode)) {
       return false;
     }
 
@@ -388,7 +387,7 @@ export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
   descriptor.value = async function (...args: any[]) {
     try {
       return await globalErrorHandler.executeWithRetry(
-        () => originalMethod.apply(this, args),
+        function (this: any) { return originalMethod.apply(this, args); },
         { method: propertyKey, args }
       );
     } catch (error) {

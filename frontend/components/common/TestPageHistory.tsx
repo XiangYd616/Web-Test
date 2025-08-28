@@ -3,8 +3,9 @@
  * 基于压力测试历史的设计，适配所有测试类型
  */
 
+import React from 'react';
 import { BarChart3, Calendar, Eye, MoreHorizontal, RefreshCw, Search, Star } from 'lucide-react';
-import type { useCallback, useEffect, useState, FC } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 

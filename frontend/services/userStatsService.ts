@@ -153,8 +153,8 @@ class UserStatsService {
   }
 
   // 记录测试完成
-  recordTestCompletion(userId: string, testType: string, success: boolean, score?: number, duration?: number): void {
-    const stats = this.getUserStats(userId);
+  async recordTestCompletion(userId: string, testType: string, success: boolean, score?: number, duration?: number): Promise<void> {
+    const stats = await this.getUserStats(userId);
     const now = new Date();
     const today = now.toDateString();
 
@@ -210,12 +210,12 @@ class UserStatsService {
       metadata: { testType, success, score, duration }
     });
 
-    this.updateUserStats(userId, stats);
+    await this.updateUserStats(userId, stats);
   }
 
   // 记录收藏操作
-  recordBookmarkAction(userId: string, action: 'add' | 'remove', itemTitle: string): void {
-    const stats = this.getUserStats(userId);
+  async recordBookmarkAction(userId: string, action: 'add' | 'remove', itemTitle: string): Promise<void> {
+    const stats = await this.getUserStats(userId);
 
     if (action === 'add') {
       stats.favoriteTests += 1;
@@ -263,8 +263,8 @@ class UserStatsService {
   }
 
   // 计算周统计
-  calculateWeekStats(userId: string): void {
-    const stats = this.getUserStats(userId);
+  async calculateWeekStats(userId: string): Promise<void> {
+    const stats = await this.getUserStats(userId);
     const activities = this.getRecentActivity(userId);
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -277,12 +277,12 @@ class UserStatsService {
       activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
-    this.updateUserStats(userId, stats);
+    await this.updateUserStats(userId, stats);
   }
 
   // 计算月统计
-  calculateMonthStats(userId: string): void {
-    const stats = this.getUserStats(userId);
+  async calculateMonthStats(userId: string): Promise<void> {
+    const stats = await this.getUserStats(userId);
     const activities = this.getRecentActivity(userId);
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
@@ -295,7 +295,7 @@ class UserStatsService {
       activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
-    this.updateUserStats(userId, stats);
+    await this.updateUserStats(userId, stats);
   }
 
   // 重置统计数据

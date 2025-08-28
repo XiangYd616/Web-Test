@@ -1,3 +1,12 @@
+import type { 
+  BaseComponentProps, 
+  ComponentSize, 
+  ComponentColor, 
+  ComponentVariant,
+  UnifiedTestConfig,
+  ProgressCallback,
+  CompletionCallback 
+} from '../../types/base.types';
 /**
  * 现代化测试运行器组件
  * 展示如何使用新的类型系统构建测试组件
@@ -9,20 +18,9 @@
  * 4. 现代化的React模式
  */
 
-import type { useCallback, useState, FC } from 'react';
-import type {
-  TestType,
-  TestStatus,
-  UnifiedTestConfig,
-  TestExecution,
-  ProgressCallback,
-  CompletionCallback,
-  ErrorCallback,
-  ComponentSize,
-  ComponentColor,
-  ComponentVariant,
-  BaseComponentProps
-} from '../../types';
+import React from 'react';
+import { useCallback, useState } from 'react';
+import { TestStatus, TestType } from '../../types';
 
 // 组件Props接口 - 使用统一的类型系统
 interface ModernTestRunnerProps extends BaseComponentProps {
@@ -46,20 +44,17 @@ interface ModernTestRunnerProps extends BaseComponentProps {
 
 // 组件状态接口
 interface TestRunnerState {
-  /** 当前测试类型 */
-  testType: TestType;
-  /** 测试配置 */
-  config: Partial<UnifiedTestConfig>;
-  /** 测试状态 */
-  status: TestStatus;
-  /** 测试进度 */
+  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled' | 'pending';
   progress: number;
-  /** 当前步骤 */
   currentStep: string;
-  /** 测试结果 */
   result: any;
-  /** 错误信息 */
   error: string | null;
+  testType: string;
+  config: UnifiedTestConfig;
+  metrics?: any;
+  logs?: string[];
+  startTime?: number;
+  endTime?: number;
 }
 
 /**
@@ -80,14 +75,14 @@ export const ModernTestRunner: React.FC<ModernTestRunnerProps> = ({
 }) => {
   // 状态管理 - 使用类型安全的状态
   const [state, setState] = useState<TestRunnerState>({
-    testType: defaultTestType,
+    testType: defaultTestType as TestType,
     config: {
       url: '',
-      testType: defaultTestType,
+      testType: defaultTestType as TestType,
       timeout: 30000,
       retries: 3
     },
-    status: 'idle',
+    status: 'pending' as const,
     progress: 0,
     currentStep: '准备就绪',
     result: null,
@@ -160,7 +155,7 @@ export const ModernTestRunner: React.FC<ModernTestRunnerProps> = ({
   // 开始测试
   const startTest = useCallback(async () => {
     if (!state.config.url) {
-      handleError(new Error('请输入测试URL'));
+      handleError(new Error('请输入测试URL') as any);
       return;
     }
 
@@ -212,7 +207,7 @@ export const ModernTestRunner: React.FC<ModernTestRunnerProps> = ({
       handleComplete(mockResult);
 
     } catch (error) {
-      handleError(error as Error);
+      handleError(error as any);
     }
   }, [state.config, state.testType, handleProgress, handleComplete, handleError]);
 
@@ -229,7 +224,7 @@ export const ModernTestRunner: React.FC<ModernTestRunnerProps> = ({
   const resetTest = useCallback(() => {
     setState(prev => ({
       ...prev,
-      status: 'idle',
+      status: 'pending' as const,
       progress: 0,
       currentStep: '准备就绪',
       result: null,
@@ -259,7 +254,7 @@ export const ModernTestRunner: React.FC<ModernTestRunnerProps> = ({
             {type === 'seo' && 'SEO测试'}
             {type === 'network' && '网络测试'}
             {type === 'database' && '数据库测试'}
-            {type === 'website' && '网站综合测试'}
+            {(type as string) === 'website' && '网站综合测试'}
           </option>
         ))}
       </select>

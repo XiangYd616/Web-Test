@@ -1,14 +1,15 @@
 
 import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import { SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEngine } from '../../services/unifiedSecurityEngine';
+import { SecurityTestConfig, TestProgress as SecurityTestProgress, SecurityTestResult, unifiedSecurityEngine } from '../../services/unifiedSecurityEngine';
 import { createCommonErrors, createError } from '../../utils/errorHandler';
 import { URLValidationResult } from '../../utils/urlValidator';
 import { URLInput } from '../ui/URLInput';
+import { EnhancedError, EnhancedErrorDisplay as ErrorDisplay } from './ErrorDisplay';
 
 interface UnifiedSecurityTestPanelProps {
   onTestStart?: () => void;
-  onTestProgress?: (progress: TestProgress) => void;
+  onTestProgress?: (progress: SecurityTestProgress) => void;
   onTestComplete?: (result: SecurityTestResult) => void;
   onTestError?: (error: string) => void;
 }
@@ -44,7 +45,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   });
 
   const [isRunning, setIsRunning] = useState(false);
-  const [progress, setProgress] = useState<TestProgress | null>(null);
+  const [progress, setProgress] = useState<SecurityTestProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [enhancedError, setEnhancedError] = useState<EnhancedError | null>(null);
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
@@ -191,8 +192,8 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
       const result = await unifiedSecurityEngine.runSecurityTest(
         config,
         (progressData) => {
-          setProgress(progressData);
-          onTestProgress?.(progressData);
+          setProgress(progressData as any);
+          onTestProgress?.(progressData as any);
         }
       );
 

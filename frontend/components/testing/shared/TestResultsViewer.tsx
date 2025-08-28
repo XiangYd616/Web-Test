@@ -3,7 +3,9 @@
  * 各个测试页面可以选择使用，不强制替换现有实现
  */
 
-import type { useState, ReactNode, FC } from 'react';
+import React from 'react';
+import { useState } from 'react';
+import type { ReactNode, FC } from 'react';;
 import { 
   BarChart3, Download, Eye, EyeOff, FileText, Share2, 
   CheckCircle, XCircle, AlertTriangle, Info, Zap,
@@ -295,7 +297,7 @@ export const TestResultsViewer: React.FC<TestResultsViewerProps> = ({
             ].map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
-                onClick={() => setActiveTab(key)}
+                onClick={() => setActiveTab(key as "summary" | "metrics" | "issues" | "raw")}
                 className={`flex items-center space-x-2 px-4 py-3 text-sm font-medium transition-colors ${
                   activeTab === key
                     ? 'text-blue-400 border-b-2 border-blue-400'

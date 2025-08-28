@@ -1,4 +1,3 @@
-import { createElement } from 'react';
 /**
  * 前端性能优化工具集
  * 提供图片懒加载、资源预加载、性能监控等功能
@@ -322,7 +321,7 @@ class PerformanceMonitor {
                 const fidObserver = new PerformanceObserver((list) => {
                     const entries = list.getEntries();
                     entries.forEach((entry) => {
-                        this.metrics.set('FID', entry.processingStart - entry.startTime);
+                        this.metrics.set('FID', (entry as any).processingStart - entry.startTime);
                     });
                 });
                 fidObserver.observe({ entryTypes: ['first-input'] });
@@ -373,7 +372,7 @@ class PerformanceMonitor {
         this.metrics.set('ResourceLoad', entry.loadEventEnd - entry.domContentLoadedEventEnd);
 
         // 总页面加载时间
-        this.metrics.set('PageLoad', entry.loadEventEnd - entry.navigationStart);
+        this.metrics.set('PageLoad', entry.loadEventEnd - (entry as any).navigationStart);
 
         // 首次内容绘制 (FCP)
         const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];

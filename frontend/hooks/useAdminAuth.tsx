@@ -1,6 +1,7 @@
-import type { useEffect, useState, ReactNode, FC } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { User } from '../types/common';
 import { useAuth } from './useAuth';
-import type { User } from '../types/user';
+;
 
 interface AdminAuthState {
   isAdmin: boolean;

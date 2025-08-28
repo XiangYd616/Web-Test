@@ -7,12 +7,23 @@
  */
 
 import type {
-  ApiTestConfig,
-  PerformanceTestConfig,
-  SecurityTestConfig,
   TestApiClient
 } from '../../types';
-import type { ApiResponse } from '../../types/unified/apiResponse';
+import type {
+  ApiRequestConfig,
+  ApiResponse,
+  RequestConfig,
+  TestCallbacks,
+  UnifiedTestConfig
+} from '../../types/unified/apiResponse.types';
+import type {
+  TestExecution,
+  TestHistory,
+  TestType
+} from '../../types/unified/testTypes';
+import {
+  TestStatus
+} from '../../types/unified/testTypes';
 import { unifiedApiService } from './apiService';
 
 // 本地类型定义已迁移到统一的类型系统
@@ -46,16 +57,16 @@ export interface TestExecutionResponse {
   result?: Record<string, any>;
 }
 
-// 性能测试配置
-export interface PerformanceTestConfig {
+// 性能测试配置（本地版本）
+export interface LocalPerformanceTestConfig {
   device: 'desktop' | 'mobile';
   network_condition: string;
   lighthouse_config?: Record<string, any>;
   custom_metrics?: string[];
 }
 
-// 安全测试配置
-export interface SecurityTestConfig {
+// 安全测试配置（本地版本）
+export interface LocalSecurityTestConfig {
   scan_depth: 'basic' | 'standard' | 'comprehensive';
   include_ssl: boolean;
   include_headers: boolean;
@@ -78,8 +89,8 @@ export interface ApiTestConfig {
   };
 }
 
-// 压力测试配置
-export interface StressTestConfig {
+// 压力测试配置 - 后端API专用
+export interface TestApiStressConfig {
   concurrent_users: number;
   duration_seconds: number;
   ramp_up_time: number;
@@ -132,29 +143,29 @@ class TestApiService implements TestApiClient {
   /**
    * 执行GET请求
    */
-  async get<T = any>(url: string, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return unifiedApiService.get(url, config);
+  async get<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
+    return unifiedApiService.get(url, config as any);
   }
 
   /**
    * 执行POST请求
    */
   async post<T = any>(url: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return unifiedApiService.post(url, data, config);
+    return unifiedApiService.post(url, data, config as any);
   }
 
   /**
    * 执行PUT请求
    */
   async put<T = any>(url: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return unifiedApiService.put(url, data, config);
+    return unifiedApiService.put(url, data, config as any);
   }
 
   /**
    * 执行DELETE请求
    */
   async delete<T = any>(url: string, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return unifiedApiService.delete(url, config);
+    return unifiedApiService.delete(url, config as any);
   }
 
   // ==================== 测试配置管理 ====================
@@ -192,7 +203,7 @@ class TestApiService implements TestApiClient {
     // 适配后端API格式
     const backendRequest = {
       testType: config.testType,
-      url: config.url,
+      url: config.target,
       config: config,
       testName: `${config.testType}_test_${Date.now()}`
     };
@@ -203,12 +214,12 @@ class TestApiService implements TestApiClient {
     if (response.success && response.data) {
       const testExecution: TestExecution = {
         id: response.data.id,
+        testType: config.testType as TestType,
         status: response.data.status as TestStatus,
         progress: response.data.progress || 0,
-        currentStep: response.data.current_step || '准备中',
         startTime: response.data.started_at || new Date().toISOString(),
         endTime: response.data.completed_at,
-        result: response.data.result,
+        results: response.data.result,
         error: response.data.error,
         config: config
       };
@@ -286,7 +297,7 @@ class TestApiService implements TestApiClient {
    */
   async executePerformanceTest(
     target_url: string,
-    configuration: PerformanceTestConfig
+    configuration: LocalPerformanceTestConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
     return unifiedApiService.post(`${this.baseUrl}/performance`, {
       url: target_url,
@@ -320,7 +331,7 @@ class TestApiService implements TestApiClient {
    */
   async executeSecurityTest(
     target_url: string,
-    configuration: SecurityTestConfig
+    configuration: LocalSecurityTestConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
     return unifiedApiService.post(`${this.baseUrl}/security`, {
       url: target_url,
@@ -383,7 +394,7 @@ class TestApiService implements TestApiClient {
    */
   async executeStressTest(
     target_url: string,
-    configuration: StressTestConfig
+    configuration: TestApiStressConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
     return unifiedApiService.post(`${this.baseUrl}/stress`, {
       url: target_url,
@@ -529,11 +540,26 @@ class TestApiService implements TestApiClient {
     target_url: string,
     configuration: Record<string, any> = {}
   ): Promise<ApiResponse<TestExecutionResponse>> {
-    return this.executeTest({
-      test_type,
-      target_url,
-      configuration
+    const result = await this.executeTest({
+      testType: test_type,
+      target: target_url,
+      options: configuration
     });
+
+    // 转换为TestExecutionResponse格式
+    return {
+      ...result,
+      data: {
+        ...result.data,
+        test_type: test_type,
+        target_url: target_url,
+        created_at: new Date().toISOString(),
+        status: result.data?.status === TestStatus.RUNNING ? 'running' :
+          result.data?.status === TestStatus.COMPLETED ? 'completed' :
+            result.data?.status === TestStatus.FAILED ? 'failed' :
+              result.data?.status === TestStatus.CANCELLED ? 'cancelled' : 'pending'
+      }
+    };
   }
 
   // ==================== 用户体验测试 ====================
@@ -667,12 +693,12 @@ class TestApiService implements TestApiClient {
     if (response.success && response.data) {
       const testExecution: TestExecution = {
         id: response.data.id || testId,
+        testType: testType,
         status: response.data.status as TestStatus,
         progress: response.data.progress || 0,
-        currentStep: response.data.current_step || '未知',
         startTime: response.data.started_at || new Date().toISOString(),
         endTime: response.data.completed_at,
-        result: response.data.result,
+        results: response.data.result,
         error: response.data.error,
         config: response.data.config || {}
       };
@@ -690,14 +716,14 @@ class TestApiService implements TestApiClient {
   /**
    * 取消测试
    */
-  async cancelTest(testId: string, testType: TestType): Promise<ApiResponse<void>> {
+  async cancelTest(testId: string, testType?: TestType): Promise<ApiResponse<void>> {
     return unifiedApiService.post(`${this.baseUrl}/${testType}/cancel/${testId}`);
   }
 
   /**
    * 获取测试结果
    */
-  async getTestResult(testId: string, testType: TestType): Promise<ApiResponse<any>> {
+  async getTestResult(testId: string, testType?: TestType): Promise<ApiResponse<any>> {
     return unifiedApiService.get(`${this.baseUrl}/${testType}/result/${testId}`);
   }
 
@@ -717,7 +743,8 @@ class TestApiService implements TestApiClient {
         tests: response.data.tests || [],
         total: response.data.total || 0,
         page: response.data.page || 1,
-        pageSize: response.data.pageSize || limit || 10
+        pageSize: response.data.pageSize || limit || 10,
+        hasMore: response.data.hasMore || false
       };
 
       return {
@@ -744,7 +771,7 @@ class TestApiService implements TestApiClient {
     const testId = response.data.id;
 
     // 启动实时监控
-    this.startRealtimeMonitoring(testId, config.testType, callbacks);
+    this.startRealtimeMonitoring(testId, config.testType as TestType, callbacks);
 
     return testId;
   }
@@ -764,13 +791,13 @@ class TestApiService implements TestApiClient {
 
           // 调用进度回调
           if (callbacks.onProgress) {
-            callbacks.onProgress(execution.progress, execution.currentStep);
+            callbacks.onProgress(execution.progress);
           }
 
           // 检查是否完成
           if (execution.status === 'completed') {
             if (callbacks.onComplete) {
-              callbacks.onComplete(execution.result);
+              callbacks.onComplete(execution.results);
             }
             return; // 停止轮询
           }
@@ -801,12 +828,6 @@ class TestApiService implements TestApiClient {
 // 创建单例实例
 export const testApiService = new TestApiService();
 
-// 导出所有接口类型
-export type {
-  ApiTestConfig, CompatibilityTestConfig, InfrastructureTestConfig, PerformanceTestConfig,
-  SecurityTestConfig, SeoTestConfig, StressTestConfig, TestConfiguration,
-  TestExecutionRequest,
-  TestExecutionResponse, UxTestConfig
-};
+// 注意：接口类型已通过 export interface 直接导出，无需重复导出
 
 export default testApiService;

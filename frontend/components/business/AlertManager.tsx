@@ -3,6 +3,7 @@
  * 提供告警查看、管理和配置功能
  */
 
+import React from 'react';
 import {
     AlertCircle,
     AlertTriangle,
@@ -19,7 +20,7 @@ import {
     Webhook,
     XCircle
 } from 'lucide-react';
-import type { useCallback, useEffect, useState, FC } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
@@ -149,7 +150,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
         } catch (err) {
             // 静默处理错误，使用空数据
             setAlerts([]);
-            if (err.name !== 'AbortError') {
+            if (err instanceof Error && err.name !== 'AbortError') {
                 console.info('告警数据获取失败，使用空数据');
             }
         } finally {
@@ -164,14 +165,14 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
             const isDevelopment = process.env.NODE_ENV === 'development';
             if (isDevelopment) {
                 setStats({
-                    total: 0,
-                    active: 0,
-                    acknowledged: 0,
-                    resolved: 0,
-                    critical: 0,
-                    high: 0,
-                    medium: 0,
-                    low: 0
+                    totalAlerts: 0,
+                    criticalAlerts: 0,
+                    highAlerts: 0,
+                    mediumAlerts: 0,
+                    lowAlerts: 0,
+                    activeAlerts: 0,
+                    resolvedAlerts: 0,
+                    timeRange: '24h'
                 });
                 return;
             }
@@ -197,16 +198,16 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
         } catch (err) {
             // 静默处理错误，使用默认数据
             setStats({
-                total: 0,
-                active: 0,
-                acknowledged: 0,
-                resolved: 0,
-                critical: 0,
-                high: 0,
-                medium: 0,
-                low: 0
+                totalAlerts: 0,
+                criticalAlerts: 0,
+                highAlerts: 0,
+                mediumAlerts: 0,
+                lowAlerts: 0,
+                activeAlerts: 0,
+                resolvedAlerts: 0,
+                timeRange: '24h'
             });
-            if (err.name !== 'AbortError') {
+            if (err instanceof Error && err.name !== 'AbortError') {
                 console.info('告警统计获取失败，使用默认数据');
             }
         }
@@ -218,7 +219,20 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
             // 在开发环境下使用模拟数据
             const isDevelopment = process.env.NODE_ENV === 'development';
             if (isDevelopment) {
-                setAlertRules([]);
+                setAlertRules({
+                    enabled: false,
+                    thresholds: {
+                        critical: 90,
+                        high: 80,
+                        medium: 70
+                    },
+                    notifications: {
+                        email: false,
+                        webhook: false,
+                        slack: false
+                    },
+                    cooldown: 300
+                });
                 return;
             }
 
@@ -242,8 +256,21 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
             setAlertRules(data.data);
         } catch (err) {
             // 静默处理错误，使用空数据
-            setAlertRules([]);
-            if (err.name !== 'AbortError') {
+            setAlertRules({
+                enabled: false,
+                thresholds: {
+                    critical: 90,
+                    high: 80,
+                    medium: 70
+                },
+                notifications: {
+                    email: false,
+                    webhook: false,
+                    slack: false
+                },
+                cooldown: 300
+            });
+            if (err instanceof Error && err.name !== 'AbortError') {
                 console.info('告警规则获取失败，使用空数据');
             }
         }

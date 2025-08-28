@@ -3,8 +3,9 @@
  * 基于StressTestHistory.tsx的实现，支持所有测试类型
  */
 
+import React from 'react';
 import { BarChart3, Eye, RefreshCw, Search, Trash2 } from 'lucide-react';
-import type { useEffect, useRef, useState, FC } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -163,7 +164,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                 const mockData = {
                     success: true,
                     data: {
-                        tests: [],
+                        tests: [] as TestRecord[],
                         pagination: {
                             total: 0,
                             page: params.page || 1
@@ -179,7 +180,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
 
                 if (data.success) {
                     const { tests = [], pagination = {} } = data.data;
-                    const { total = 0, page = 1 } = pagination;
+                    const { total = 0, page = 1 } = pagination as { total?: number; page?: number };
                     setRecords(tests);
                     setTotalRecords(total);
                     setCurrentPage(page);
@@ -998,12 +999,10 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                         ? `确定要删除测试记录 "${deleteDialog.recordName}" 吗？`
                         : `确定要删除选中的 ${selectedRecords.size} 条测试记录吗？`
                 }
-                confirmText="删除"
-                cancelText="取消"
                 isLoading={deleteDialog.isLoading}
                 onConfirm={confirmDelete}
-                onCancel={cancelDelete}
-                variant="danger"
+                onClose={cancelDelete}
+                type={deleteDialog.type}
             />
 
             {/* 导出模态框 */}
@@ -1011,8 +1010,11 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                 isOpen={isExportModalOpen}
                 onClose={() => setIsExportModalOpen(false)}
                 data={records}
-                filename={`${testType}-test-history`}
-                title={`导出${getTestTypeName(testType)}历史`}
+                testType={testType as 'stress' | 'api' | 'performance'}
+                onExport={async (type: string, data: any) => {
+                    // 导出处理逻辑
+                    console.log('导出类型:', type, '数据:', data);
+                }}
             />
         </div>
     );

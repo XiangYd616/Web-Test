@@ -22,35 +22,35 @@ export enum ErrorCode {
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
   BAD_REQUEST = 'BAD_REQUEST',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
-  
+
   // 认证和授权错误
   UNAUTHORIZED = 'UNAUTHORIZED',
   FORBIDDEN = 'FORBIDDEN',
   TOKEN_EXPIRED = 'TOKEN_EXPIRED',
   TOKEN_INVALID = 'TOKEN_INVALID',
   TOKEN_MISSING = 'TOKEN_MISSING',
-  
+
   // 资源错误
   NOT_FOUND = 'NOT_FOUND',
   CONFLICT = 'CONFLICT',
   DUPLICATE_RESOURCE = 'DUPLICATE_RESOURCE',
-  
+
   // 网络和连接错误
   NETWORK_ERROR = 'NETWORK_ERROR',
   TIMEOUT_ERROR = 'TIMEOUT_ERROR',
   CONNECTION_ERROR = 'CONNECTION_ERROR',
-  
+
   // 数据库错误
   DATABASE_ERROR = 'DATABASE_ERROR',
   FOREIGN_KEY_VIOLATION = 'FOREIGN_KEY_VIOLATION',
   UNIQUE_CONSTRAINT_VIOLATION = 'UNIQUE_CONSTRAINT_VIOLATION',
-  
+
   // 测试相关错误
   TEST_CONFIGURATION_ERROR = 'TEST_CONFIGURATION_ERROR',
   TEST_EXECUTION_ERROR = 'TEST_EXECUTION_ERROR',
   TEST_TIMEOUT = 'TEST_TIMEOUT',
   ENGINE_UNAVAILABLE = 'ENGINE_UNAVAILABLE',
-  
+
   // 业务逻辑错误
   BUSINESS_LOGIC_ERROR = 'BUSINESS_LOGIC_ERROR',
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
@@ -192,7 +192,7 @@ export class UnifiedErrorHandler {
    */
   handleError(error: any, context: ErrorContext = {}): StandardError {
     const standardError = this.standardizeError(error, context);
-    
+
     // 记录错误
     if (this.config.enableLogging) {
       this.logError(standardError);
@@ -227,7 +227,7 @@ export class UnifiedErrorHandler {
     if (error instanceof Error) {
       message = error.message;
       stack = error.stack;
-      
+
       // 根据错误名称或属性确定错误代码
       code = this.mapErrorToCode(error);
       severity = this.determineSeverity(code);
@@ -259,10 +259,10 @@ export class UnifiedErrorHandler {
     // JWT错误
     if (error.name === 'TokenExpiredError') return ErrorCode.TOKEN_EXPIRED;
     if (error.name === 'JsonWebTokenError') return ErrorCode.TOKEN_INVALID;
-    
+
     // 验证错误
     if (error.name === 'ValidationError') return ErrorCode.VALIDATION_ERROR;
-    
+
     // 网络错误
     if ('code' in error) {
       const errorCode = (error as any).code;
@@ -289,13 +289,13 @@ export class UnifiedErrorHandler {
       ErrorCode.INTERNAL_SERVER_ERROR,
       ErrorCode.DATABASE_ERROR
     ];
-    
+
     const highErrors = [
       ErrorCode.UNAUTHORIZED,
       ErrorCode.FORBIDDEN,
       ErrorCode.TEST_EXECUTION_ERROR
     ];
-    
+
     const lowErrors = [
       ErrorCode.VALIDATION_ERROR,
       ErrorCode.BAD_REQUEST,
@@ -305,7 +305,7 @@ export class UnifiedErrorHandler {
     if (criticalErrors.includes(code)) return ErrorSeverity.CRITICAL;
     if (highErrors.includes(code)) return ErrorSeverity.HIGH;
     if (lowErrors.includes(code)) return ErrorSeverity.LOW;
-    
+
     return ErrorSeverity.MEDIUM;
   }
 
@@ -313,7 +313,7 @@ export class UnifiedErrorHandler {
    * 生成错误建议
    */
   private generateSuggestions(code: ErrorCode): string[] {
-    const suggestions: Record<ErrorCode, string[]> = {
+    const suggestions: Partial<Record<ErrorCode, string[]>> = {
       [ErrorCode.TOKEN_EXPIRED]: ['请重新登录', '检查系统时间是否正确'],
       [ErrorCode.NETWORK_ERROR]: ['检查网络连接', '稍后重试'],
       [ErrorCode.VALIDATION_ERROR]: ['检查输入数据格式', '确保必填字段已填写'],
@@ -330,7 +330,7 @@ export class UnifiedErrorHandler {
   private logError(error: StandardError): void {
     const logLevel = this.config.logLevel;
     const logMessage = `[${error.severity.toUpperCase()}] ${error.code}: ${error.message}`;
-    
+
     if (typeof console !== 'undefined') {
       switch (error.severity) {
         case ErrorSeverity.CRITICAL:
@@ -352,7 +352,7 @@ export class UnifiedErrorHandler {
    */
   private addToHistory(error: StandardError): void {
     this.errorHistory.push(error);
-    
+
     // 保持历史记录在合理范围内
     if (this.errorHistory.length > 100) {
       this.errorHistory = this.errorHistory.slice(-50);
@@ -449,7 +449,7 @@ export class UnifiedErrorHandler {
 
 export const unifiedErrorHandler = new UnifiedErrorHandler();
 
-export const handleError = (error: any, context?: ErrorContext) => 
+export const handleError = (error: any, context?: ErrorContext) =>
   unifiedErrorHandler.handleError(error, context);
 
 export const createApiError = (code: ErrorCode, message?: string, context?: ErrorContext) => {

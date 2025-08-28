@@ -1,7 +1,8 @@
 
-import type { useMemo, useState, FC } from 'react';
+import React from 'react';
+import { useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { TestResult } from '../../services/advancedTestEngine';
+import { TestResult } from '../../services/testEngine';
 
 // CSS样式已迁移到组件库，不再需要外部CSS文件
 

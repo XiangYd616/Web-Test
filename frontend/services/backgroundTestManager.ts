@@ -7,11 +7,13 @@
 import type {
   CompletionCallback,
   ErrorCallback,
-  ProgressCallback,
+  ProgressCallback
+} from '../types';
+
+import {
   TestStatus,
   TestType
 } from '../types';
-import { TestProgress } from './api/testProgressService';
 
 export interface TestInfo {
   id: string;
@@ -24,6 +26,7 @@ export interface TestInfo {
   currentStep: string;
   result: any;
   error: any;
+  canSwitchPages?: boolean;
   onProgress?: ProgressCallback;
   onComplete?: CompletionCallback;
   onError?: ErrorCallback;
@@ -67,7 +70,7 @@ class BackgroundTestManager {
       id: testId,
       type: testType,
       config: config,
-      status: 'running',
+      status: TestStatus.RUNNING,
       progress: 0,
       startTime: new Date(),
       currentStep: '正在初始化测试...',
@@ -91,7 +94,7 @@ class BackgroundTestManager {
   cancelTest(testId: string): void {
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
-      testInfo.status = 'cancelled';
+      testInfo.status = TestStatus.CANCELLED;
       testInfo.endTime = new Date();
       testInfo.error = '用户取消了测试';
 
@@ -110,7 +113,7 @@ class BackgroundTestManager {
   private async executeTest(testInfo: TestInfo): Promise<void> {
     try {
       switch (testInfo.type) {
-        case 'website':
+        case TestType.STRESS:
           await this.executeWebsiteTest(testInfo);
           break;
         case 'performance':
@@ -401,7 +404,7 @@ class BackgroundTestManager {
       this.notifyListeners('testProgress', testInfo);
 
       if (testInfo.onProgress) {
-        testInfo.onProgress(progress, step, metrics);
+        testInfo.onProgress(progress, step);
       }
     }
   }
@@ -410,7 +413,7 @@ class BackgroundTestManager {
   completeTest(testId: string, result: any): void {
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
-      testInfo.status = 'completed';
+      testInfo.status = TestStatus.COMPLETED;
       testInfo.endTime = new Date();
       testInfo.result = result;
       testInfo.progress = 100;
@@ -431,7 +434,7 @@ class BackgroundTestManager {
   handleTestError(testId: string, error: Error): void {
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
-      testInfo.status = 'failed';
+      testInfo.status = TestStatus.FAILED;
       testInfo.endTime = new Date();
       testInfo.error = error.message;
       testInfo.currentStep = '❌ 测试失败';
@@ -505,6 +508,51 @@ class BackgroundTestManager {
   addListener(callback: TestListener): () => void {
     this.listeners.add(callback);
     return () => this.listeners.delete(callback);
+  }
+
+  // 轮询测试状态
+  private async pollTestStatus(testId: string, backendTestId: string, testType: string): Promise<void> {
+    const maxAttempts = 60; // 最多轮询60次（5分钟）
+    const pollInterval = 5000; // 每5秒轮询一次
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const response = await fetch(`/api/test-status/${backendTestId}`);
+        const data = await response.json();
+
+        if (data.status === 'completed') {
+          // 测试完成，更新结果
+          this.completeTest(testId, data.results || data.data);
+          return;
+        } else if (data.status === 'failed' || data.status === 'error') {
+          // 测试失败
+          throw new Error(data.message || `${testType}测试失败`);
+        } else if (data.status === 'running' || data.status === 'pending') {
+          // 测试仍在进行中，更新进度
+          const progress = Math.min(90, 30 + (attempt * 2)); // 从30%开始，最多到90%
+          this.updateTestProgress(testId, progress, `🔄 ${testType}测试进行中...`);
+
+          // 等待下次轮询
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+        } else {
+          // 未知状态，继续轮询
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+        }
+      } catch (error) {
+        console.error(`轮询测试状态失败 (尝试 ${attempt + 1}/${maxAttempts}):`, error);
+
+        if (attempt === maxAttempts - 1) {
+          // 最后一次尝试失败，抛出错误
+          throw new Error(`${testType}测试轮询超时`);
+        }
+
+        // 等待后重试
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+      }
+    }
+
+    // 轮询超时
+    throw new Error(`${testType}测试轮询超时`);
   }
 
   // 通知监听器

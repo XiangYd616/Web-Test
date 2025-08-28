@@ -1,4 +1,6 @@
-import type { createElement, useEffect, useState, FC } from 'react';
+import React from 'react';
+import { createElement, useEffect, useState } from 'react';
+import type { FC } from 'react';;
 
 // 延迟导入 Chart.js 以避免初始化问题
 let ChartJS: any;

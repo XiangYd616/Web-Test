@@ -4,7 +4,31 @@
  * 版本: v1.0.0
  */
 
-import type { ApiResponse, BackendApiResponse } from '../../types/unified/apiResponse';
+// 临时类型定义
+interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+  errors?: Record<string, string>;
+  meta?: {
+    timestamp: string;
+    requestId?: string;
+    [key: string]: any;
+  };
+}
+
+interface BackendApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  timestamp?: string;
+  error?: string | {
+    code: string;
+    message: string;
+    details?: any;
+  };
+}
 
 // ==================== Mock数据生成器 ====================
 
@@ -184,7 +208,7 @@ export function expectValidApiResponse<T>(response: ApiResponse<T>) {
   expect(response).toHaveProperty('success');
   expect(response).toHaveProperty('meta');
   expect(response.meta).toHaveProperty('timestamp');
-  
+
   if (response.success) {
     expect(response).toHaveProperty('data');
     expect(response).toHaveProperty('message');
@@ -342,29 +366,5 @@ export function clearAuthToken() {
   localStorage.removeItem('auth_token');
 }
 
-// ==================== 导出所有工具函数 ====================
+// ==================== 所有函数已通过export function导出 ====================
 
-export {
-  createMockBackendSuccessResponse,
-  createMockBackendErrorResponse,
-  createMockProject,
-  createMockTestExecution,
-  createMockUser,
-  createMockFetchResponse,
-  mockFetchSuccess,
-  mockFetchError,
-  mockFetchNetworkError,
-  expectValidApiResponse,
-  expectFetchCalledWith,
-  expectAuthHeaderSet,
-  generatePaginationScenarios,
-  generateSearchScenarios,
-  generateErrorScenarios,
-  validateProjectData,
-  validateTestExecutionData,
-  validateUserData,
-  setupTestEnvironment,
-  cleanupTestEnvironment,
-  setAuthToken,
-  clearAuthToken
-};

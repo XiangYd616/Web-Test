@@ -1,4 +1,5 @@
-import type { useState, ComponentType } from 'react';
+import React from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import LoginPrompt from './LoginPrompt';
 
@@ -35,7 +36,7 @@ export function withAuthCheck<P extends object>(
               <p className="text-gray-300 mb-6">{description}需要登录账户</p>
               <LoginPrompt
                 isOpen={true}
-                onClose={() => {}}
+                onClose={() => { }}
                 feature={feature}
                 description={description}
               />

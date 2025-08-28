@@ -36,6 +36,7 @@ export interface RequestConfig {
   body?: any;
   timeout?: number;
   retries?: number;
+  retryDelay?: number;
   cache?: boolean;
   cacheTTL?: number;
 }

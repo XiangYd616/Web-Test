@@ -1,251 +1,350 @@
-/**
- * 性能监控组件
- * 显示应用性能指标和核心Web指标
- */
+import React from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { 
+  Activity, 
+  Cpu, 
+  HardDrive, 
+  Network, 
+  Zap, 
+  TrendingUp, 
+  TrendingDown, 
+  AlertTriangle, 
+  CheckCircle, 
+  Clock,
+  BarChart3,
+  RefreshCw
+} from 'lucide-react';
 
-import type { useState, FC } from 'react';
-import {
-    useDevicePerformance,
-    useMemoryMonitor,
-    useNetworkStatus,
-    usePerformanceMonitor,
-    useVisibility
-} from '../../hooks/usePerformanceOptimization';
-
-interface PerformanceMonitorProps {
-    className?: string;
-    showDetails?: boolean;
-    autoHide?: boolean; // 在生产环境自动隐藏
+interface PerformanceMetric {
+  id: string;
+  name: string;
+  value: number;
+  unit: string;
+  threshold: number;
+  status: 'good' | 'warning' | 'critical';
+  trend: 'up' | 'down' | 'stable';
+  icon: React.ComponentType<any>;
+  color: string;
 }
 
-const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
-    className = '',
-    showDetails = false,
-    autoHide = true
-}) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const { metrics, coreVitals, sendMetrics } = usePerformanceMonitor();
-    const { isOnline, isSlowNetwork, networkType } = useNetworkStatus();
-    const { performanceLevel, deviceInfo } = useDevicePerformance();
-    const memoryInfo = useMemoryMonitor();
-    const isVisible = useVisibility();
+interface SystemResource {
+  cpu: number;
+  memory: number;
+  disk: number;
+  network: number;
+}
 
-    // 在生产环境且设置了自动隐藏时不显示
-    if (autoHide && process.env.NODE_ENV === 'production') {
-        return null;
+const PerformanceMonitor: React.FC = () => {
+  const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
+  const [systemResources, setSystemResources] = useState<SystemResource>({
+    cpu: 0,
+    memory: 0,
+    disk: 0,
+    network: 0
+  });
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
+  const generateMetrics = useCallback((): PerformanceMetric[] => {
+    return [
+      {
+        id: 'response-time',
+        name: 'Response Time',
+        value: Math.floor(Math.random() * 200) + 50,
+        unit: 'ms',
+        threshold: 200,
+        status: Math.random() > 0.7 ? 'warning' : 'good',
+        trend: Math.random() > 0.5 ? 'up' : 'down',
+        icon: Clock,
+        color: 'blue'
+      },
+      {
+        id: 'throughput',
+        name: 'Throughput',
+        value: Math.floor(Math.random() * 50) + 20,
+        unit: 'req/s',
+        threshold: 100,
+        status: 'good',
+        trend: 'stable',
+        icon: Zap,
+        color: 'green'
+      },
+      {
+        id: 'error-rate',
+        name: 'Error Rate',
+        value: Math.random() * 5,
+        unit: '%',
+        threshold: 5,
+        status: Math.random() > 0.8 ? 'critical' : 'good',
+        trend: Math.random() > 0.6 ? 'down' : 'up',
+        icon: AlertTriangle,
+        color: 'red'
+      },
+      {
+        id: 'active-users',
+        name: 'Active Users',
+        value: Math.floor(Math.random() * 500) + 100,
+        unit: 'users',
+        threshold: 1000,
+        status: 'good',
+        trend: 'up',
+        icon: Activity,
+        color: 'purple'
+      }
+    ];
+  }, []);
+
+  const updateSystemResources = useCallback(() => {
+    setSystemResources({
+      cpu: Math.random() * 80 + 10,
+      memory: Math.random() * 70 + 20,
+      disk: Math.random() * 60 + 15,
+      network: Math.random() * 50 + 10
+    });
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isMonitoring) {
+      interval = setInterval(() => {
+        setMetrics(generateMetrics());
+        updateSystemResources();
+        setLastUpdate(new Date());
+      }, 2000);
     }
 
-    // 页面不可见时不更新
-    if (!isVisible) {
-        return null;
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isMonitoring, generateMetrics, updateSystemResources]);
+
+  useEffect(() => {
+    // Initialize with default metrics
+    setMetrics(generateMetrics());
+    updateSystemResources();
+  }, [generateMetrics, updateSystemResources]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'good':
+        return 'text-green-600 bg-green-100';
+      case 'warning':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'critical':
+        return 'text-red-600 bg-red-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
+  };
 
-    // 获取性能等级颜色
-    const getPerformanceColor = (value: number, thresholds: { good: number; needs: number }) => {
-        if (value <= thresholds.good) return 'text-green-600';
-        if (value <= thresholds.needs) return 'text-yellow-600';
-        return 'text-red-600';
-    };
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'good':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'warning':
+        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      case 'critical':
+        return <AlertTriangle className="w-4 h-4 text-red-500" />;
+      default:
+        return <Activity className="w-4 h-4 text-gray-500" />;
+    }
+  };
 
-    // 格式化数值
-    const formatValue = (value: number | undefined, unit: string = 'ms') => {
-        if (value === undefined) return 'N/A';
-        return `${Math.round(value)}${unit}`;
-    };
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case 'up':
+        return <TrendingUp className="w-4 h-4 text-green-500" />;
+      case 'down':
+        return <TrendingDown className="w-4 h-4 text-red-500" />;
+      default:
+        return <Activity className="w-4 h-4 text-gray-500" />;
+    }
+  };
 
-    // 格式化字节
-    const formatBytes = (bytes: number) => {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-    };
+  const getResourceColor = (percentage: number) => {
+    if (percentage >= 80) return 'bg-red-500';
+    if (percentage >= 60) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
 
-    return (
-        <div className={`fixed bottom-4 right-4 z-50 ${className}`}>
-            {/* 简化视图 */}
-            {!isExpanded && (
-                <div
-                    className="bg-black bg-opacity-80 text-white p-3 rounded-lg cursor-pointer hover:bg-opacity-90 transition-all"
-                    onClick={() => setIsExpanded(true)}
-                >
-                    <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                        <span className="text-sm font-mono">性能监控</span>
-                    </div>
-                    <div className="text-xs mt-1 space-y-1">
-                        <div>LCP: <span className={getPerformanceColor(coreVitals.LCP || 0, { good: 2500, needs: 4000 })}>{formatValue(coreVitals.LCP)}</span></div>
-                        <div>FID: <span className={getPerformanceColor(coreVitals.FID || 0, { good: 100, needs: 300 })}>{formatValue(coreVitals.FID)}</span></div>
-                        <div>CLS: <span className={getPerformanceColor((coreVitals.CLS || 0) * 1000, { good: 100, needs: 250 })}>{formatValue((coreVitals.CLS || 0) * 1000, '')}</span></div>
-                    </div>
-                </div>
-            )}
+  const formatValue = (value: number, unit: string) => {
+    if (unit === '%') {
+      return `${value.toFixed(1)}${unit}`;
+    }
+    return `${Math.round(value)} ${unit}`;
+  };
 
-            {/* 详细视图 */}
-            {isExpanded && (
-                <div className="bg-black bg-opacity-90 text-white p-4 rounded-lg max-w-md max-h-96 overflow-y-auto">
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-lg font-semibold">性能监控</h3>
-                        <button
-                            onClick={() => setIsExpanded(false)}
-                            className="text-gray-400 hover:text-white"
-                        >
-                            ✕
-                        </button>
-                    </div>
-
-                    {/* 核心Web指标 */}
-                    <div className="mb-4">
-                        <h4 className="text-sm font-semibold mb-2 text-blue-300">核心Web指标</h4>
-                        <div className="grid grid-cols-3 gap-2 text-xs">
-                            <div className="bg-gray-800 p-2 rounded">
-                                <div className="text-gray-400">LCP</div>
-                                <div className={getPerformanceColor(coreVitals.LCP || 0, { good: 2500, needs: 4000 })}>
-                                    {formatValue(coreVitals.LCP)}
-                                </div>
-                            </div>
-                            <div className="bg-gray-800 p-2 rounded">
-                                <div className="text-gray-400">FID</div>
-                                <div className={getPerformanceColor(coreVitals.FID || 0, { good: 100, needs: 300 })}>
-                                    {formatValue(coreVitals.FID)}
-                                </div>
-                            </div>
-                            <div className="bg-gray-800 p-2 rounded">
-                                <div className="text-gray-400">CLS</div>
-                                <div className={getPerformanceColor((coreVitals.CLS || 0) * 1000, { good: 100, needs: 250 })}>
-                                    {formatValue((coreVitals.CLS || 0) * 1000, '')}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* 页面加载指标 */}
-                    {showDetails && (
-                        <div className="mb-4">
-                            <h4 className="text-sm font-semibold mb-2 text-green-300">页面加载</h4>
-                            <div className="text-xs space-y-1">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">DNS查询:</span>
-                                    <span>{formatValue(metrics.DNS)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">TCP连接:</span>
-                                    <span>{formatValue(metrics.TCP)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">请求响应:</span>
-                                    <span>{formatValue(metrics.Request)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">DOM解析:</span>
-                                    <span>{formatValue(metrics.DOMParse)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">总加载时间:</span>
-                                    <span className="font-semibold">{formatValue(metrics.PageLoad)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 网络状态 */}
-                    <div className="mb-4">
-                        <h4 className="text-sm font-semibold mb-2 text-yellow-300">网络状态</h4>
-                        <div className="text-xs space-y-1">
-                            <div className="flex justify-between">
-                                <span className="text-gray-400">连接状态:</span>
-                                <span className={isOnline ? 'text-green-400' : 'text-red-400'}>
-                                    {isOnline ? '在线' : '离线'}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-400">网络类型:</span>
-                                <span>{networkType}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-400">慢速网络:</span>
-                                <span className={isSlowNetwork ? 'text-red-400' : 'text-green-400'}>
-                                    {isSlowNetwork ? '是' : '否'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* 设备信息 */}
-                    <div className="mb-4">
-                        <h4 className="text-sm font-semibold mb-2 text-purple-300">设备信息</h4>
-                        <div className="text-xs space-y-1">
-                            <div className="flex justify-between">
-                                <span className="text-gray-400">性能等级:</span>
-                                <span className={
-                                    performanceLevel === 'high' ? 'text-green-400' :
-                                        performanceLevel === 'medium' ? 'text-yellow-400' : 'text-red-400'
-                                }>
-                                    {performanceLevel === 'high' ? '高' : performanceLevel === 'medium' ? '中' : '低'}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-400">CPU核心:</span>
-                                <span>{deviceInfo.cores}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-400">内存:</span>
-                                <span>{deviceInfo.memory}GB</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* 内存使用 */}
-                    {memoryInfo && (
-                        <div className="mb-4">
-                            <h4 className="text-sm font-semibold mb-2 text-red-300">内存使用</h4>
-                            <div className="text-xs space-y-1">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">已使用:</span>
-                                    <span>{formatBytes(memoryInfo.used)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">总计:</span>
-                                    <span>{formatBytes(memoryInfo.total)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-400">使用率:</span>
-                                    <span className={getPerformanceColor(memoryInfo.percentage, { good: 60, needs: 80 })}>
-                                        {memoryInfo.percentage.toFixed(1)}%
-                                    </span>
-                                </div>
-                                <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
-                                    <div
-                                        className={`h-2 rounded-full ${memoryInfo.percentage > 80 ? 'bg-red-500' :
-                                                memoryInfo.percentage > 60 ? 'bg-yellow-500' : 'bg-green-500'
-                                            }`}
-                                        style={{ width: `${Math.min(memoryInfo.percentage, 100)}%` }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 操作按钮 */}
-                    <div className="flex space-x-2">
-                        <button
-                            onClick={sendMetrics}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 px-3 rounded transition-colors"
-                        >
-                            发送指标
-                        </button>
-                        <button
-                            onClick={() => setIsExpanded(false)}
-                            className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs py-2 px-3 rounded transition-colors"
-                        >
-                            收起
-                        </button>
-                    </div>
-                </div>
-            )}
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <Activity className="w-6 h-6 text-blue-600" />
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">Performance Monitor</h2>
+            <p className="text-sm text-gray-600">Real-time system performance metrics</p>
+          </div>
         </div>
-    );
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-500">
+            Last updated: {lastUpdate.toLocaleTimeString()}
+          </span>
+          <button
+            onClick={() => setIsMonitoring(!isMonitoring)}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
+              isMonitoring 
+                ? 'bg-red-600 text-white hover:bg-red-700' 
+                : 'bg-green-600 text-white hover:bg-green-700'
+            }`}
+          >
+            <Activity className="w-4 h-4" />
+            <span>{isMonitoring ? 'Stop Monitoring' : 'Start Monitoring'}</span>
+          </button>
+          <button
+            onClick={() => {
+              setMetrics(generateMetrics());
+              updateSystemResources();
+              setLastUpdate(new Date());
+            }}
+            className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Performance Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {metrics.map((metric) => (
+          <div key={metric.id} className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <metric.icon className={`w-5 h-5 text-${metric.color}-600`} />
+                <span className="font-medium text-gray-900">{metric.name}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                {getStatusIcon(metric.status)}
+                {getTrendIcon(metric.trend)}
+              </div>
+            </div>
+            
+            <div className="mb-2">
+              <span className="text-2xl font-bold text-gray-900">
+                {formatValue(metric.value, metric.unit)}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className={`px-2 py-1 text-xs font-medium rounded ${getStatusColor(metric.status)}`}>
+                {metric.status.toUpperCase()}
+              </span>
+              <span className="text-xs text-gray-500">
+                Threshold: {formatValue(metric.threshold, metric.unit)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* System Resources */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center space-x-2 mb-6">
+          <BarChart3 className="w-5 h-5 text-gray-600" />
+          <h3 className="text-lg font-medium text-gray-900">System Resources</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Cpu className="w-4 h-4 text-red-600" />
+              <span className="font-medium text-gray-900">CPU Usage</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className={`h-3 rounded-full ${getResourceColor(systemResources.cpu)}`}
+                style={{ width: `${systemResources.cpu}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">{systemResources.cpu.toFixed(1)}%</span>
+              <span className="text-gray-500">100%</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <HardDrive className="w-4 h-4 text-blue-600" />
+              <span className="font-medium text-gray-900">Memory Usage</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className={`h-3 rounded-full ${getResourceColor(systemResources.memory)}`}
+                style={{ width: `${systemResources.memory}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">{systemResources.memory.toFixed(1)}%</span>
+              <span className="text-gray-500">100%</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <HardDrive className="w-4 h-4 text-purple-600" />
+              <span className="font-medium text-gray-900">Disk Usage</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className={`h-3 rounded-full ${getResourceColor(systemResources.disk)}`}
+                style={{ width: `${systemResources.disk}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">{systemResources.disk.toFixed(1)}%</span>
+              <span className="text-gray-500">100%</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Network className="w-4 h-4 text-green-600" />
+              <span className="font-medium text-gray-900">Network Usage</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className={`h-3 rounded-full ${getResourceColor(systemResources.network)}`}
+                style={{ width: `${systemResources.network}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600">{systemResources.network.toFixed(1)}%</span>
+              <span className="text-gray-500">100%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Performance Chart Placeholder */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center space-x-2 mb-6">
+          <TrendingUp className="w-5 h-5 text-gray-600" />
+          <h3 className="text-lg font-medium text-gray-900">Performance Trends</h3>
+        </div>
+        
+        <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+          <div className="text-center">
+            <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+            <p className="text-gray-500">Performance chart would be rendered here</p>
+            <p className="text-sm text-gray-400">Showing metrics over time</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default PerformanceMonitor;

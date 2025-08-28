@@ -1,5 +1,4 @@
-import { TestProgress } from '../services/api/testProgressService';
-import SecurityTestResult from '../types';
+// 移除重复的SecurityTestResult定义，使用下面的完整定义
 
 // ==================== 错误类型 ====================
 
@@ -845,8 +844,8 @@ class UnifiedSecurityEngine {
   private calculateFinalScores(result: SecurityTestResult): void {
     // 计算总体分数
     const moduleScores = Object.values(result.modules)
-      .filter(module => module && typeof module.score === 'number')
-      .map(module => module.score);
+      .filter(module => module && typeof (module as any).score === 'number')
+      .map(module => (module as any).score);
 
     if (moduleScores.length > 0) {
       result.overallScore = Math.round(
@@ -915,8 +914,8 @@ class UnifiedSecurityEngine {
 
     // 从各个模块收集建议
     Object.values(result.modules).forEach(module => {
-      if (module?.recommendations) {
-        module.recommendations.forEach((rec, index) => {
+      if ((module as any)?.recommendations) {
+        (module as any).recommendations.forEach((rec: any, index: number) => {
           recommendations.push({
             id: `rec-${recommendations.length + 1}`,
             category: 'general',

@@ -4,16 +4,15 @@
  * 版本: v1.0.0
  */
 
-import type { ApiResponse } from '../../types/unified/apiResponse';
 import type {
-  Project,
   CreateProjectRequest,
-  UpdateProjectRequest,
-  ProjectListQuery,
-  ProjectResponse,
+  Project,
   ProjectListResponse,
-  ProjectStatsResponse
+  ProjectResponse,
+  ProjectStatsResponse,
+  UpdateProjectRequest
 } from '../../types/project';
+import type { ApiResponse } from '../../types/unified/apiResponse';
 import { unifiedApiService } from './apiService';
 
 class ProjectApiService {
@@ -24,9 +23,9 @@ class ProjectApiService {
   /**
    * 获取用户项目列表
    */
-  async getProjects(query?: ProjectListQuery): Promise<ProjectListResponse> {
+  async getProjects(query?: any): Promise<ProjectListResponse> {
     const queryParams = new URLSearchParams();
-    
+
     if (query?.page) queryParams.append('page', query.page.toString());
     if (query?.limit) queryParams.append('limit', query.limit.toString());
     if (query?.search) queryParams.append('search', query.search);
@@ -70,7 +69,7 @@ class ProjectApiService {
    * 获取项目统计信息
    */
   async getProjectStats(projectId?: string): Promise<ProjectStatsResponse> {
-    const url = projectId 
+    const url = projectId
       ? `${this.baseUrl}/projects/${projectId}/stats`
       : `${this.baseUrl}/projects/stats`;
     return unifiedApiService.get(url);
@@ -98,7 +97,7 @@ class ProjectApiService {
    * 复制项目
    */
   async duplicateProject(
-    projectId: string, 
+    projectId: string,
     newName: string,
     includeTests: boolean = true
   ): Promise<ProjectResponse> {
@@ -128,7 +127,7 @@ class ProjectApiService {
   async importProject(file: File): Promise<ProjectResponse> {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return unifiedApiService.post(`${this.baseUrl}/projects/import`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -149,7 +148,7 @@ class ProjectApiService {
    * 更新项目设置
    */
   async updateProjectSettings(
-    projectId: string, 
+    projectId: string,
     settings: Record<string, any>
   ): Promise<ApiResponse<any>> {
     return unifiedApiService.put(`${this.baseUrl}/projects/${projectId}/settings`, settings);
@@ -221,7 +220,7 @@ class ProjectApiService {
     }
   ): Promise<ApiResponse<any[]>> {
     const queryParams = new URLSearchParams();
-    
+
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.activity_type) queryParams.append('activity_type', params.activity_type);
@@ -285,7 +284,7 @@ class ProjectApiService {
   ): Promise<ProjectListResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append('q', query);
-    
+
     if (filters?.status) queryParams.append('status', filters.status);
     if (filters?.created_after) queryParams.append('created_after', filters.created_after);
     if (filters?.created_before) queryParams.append('created_before', filters.created_before);

@@ -4,17 +4,17 @@
  * 版本: v1.0.0
  */
 
-import type { useCallback, useEffect, useMemo, useRef, useState, ReactNode, FC } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronsLeft, 
+import React from 'react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
   ChevronsRight,
-  MoreHorizontal,
-  Loader2
+  Loader2,
+  MoreHorizontal
 } from 'lucide-react';
-import { defaultMemoryCache } from '../../services/cacheStrategy';
-import type { PaginationInfo } from '../../types/common';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { PaginationInfo } from '../../types/apiResponse.types';
 
 // ==================== 类型定义 ====================
 
@@ -92,7 +92,7 @@ export function usePagination(options: UsePaginationOptions = {}) {
     setState(prev => ({
       ...prev,
       ...pagination,
-      totalPages: pagination.total && pagination.limit 
+      totalPages: pagination.total && pagination.limit
         ? Math.ceil(pagination.total / pagination.limit)
         : prev.totalPages
     }));
@@ -102,7 +102,7 @@ export function usePagination(options: UsePaginationOptions = {}) {
   const handlePageChange = useCallback((page: number, pageSize?: number) => {
     const newPageSize = pageSize || state.pageSize;
     const newTotalPages = Math.ceil(state.total / newPageSize);
-    
+
     if (page < 1 || page > newTotalPages) {
       return;
     }
@@ -132,16 +132,16 @@ export function usePagination(options: UsePaginationOptions = {}) {
       setState(prev => ({ ...prev, isPreloading: true }));
 
       const pagesToPreload: number[] = [];
-      
+
       // 预加载前后几页
       for (let i = 1; i <= preloadPages; i++) {
         const prevPage = currentPage - i;
         const nextPage = currentPage + i;
-        
+
         if (prevPage >= 1 && !state.preloadedPages.has(prevPage)) {
           pagesToPreload.push(prevPage);
         }
-        
+
         if (nextPage <= totalPages && !state.preloadedPages.has(nextPage)) {
           pagesToPreload.push(nextPage);
         }
@@ -224,10 +224,10 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
   const pageNumbers = useMemo(() => {
     const pages: (number | 'ellipsis')[] = [];
     const half = Math.floor(maxVisiblePages / 2);
-    
+
     let start = Math.max(1, current - half);
     let end = Math.min(totalPages, start + maxVisiblePages - 1);
-    
+
     // 调整起始位置
     if (end - start + 1 < maxVisiblePages) {
       start = Math.max(1, end - maxVisiblePages + 1);
@@ -260,22 +260,22 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
   // 页面变化处理
   const handlePageChange = useCallback((page: number) => {
     if (page === current || disabled || loading) return;
-    
+
     onChange(page, pageSize);
 
     // 预加载
     if (enablePreload && onPreload) {
       setIsPreloading(true);
       const preloadPromises: Promise<void>[] = [];
-      
+
       for (let i = 1; i <= preloadPages; i++) {
         const prevPage = page - i;
         const nextPage = page + i;
-        
+
         if (prevPage >= 1) {
           preloadPromises.push(onPreload(prevPage));
         }
-        
+
         if (nextPage <= totalPages) {
           preloadPromises.push(onPreload(nextPage));
         }
@@ -333,8 +333,8 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
     const isActive = page === current;
     const buttonClass = `
       ${buttonSizeClasses[size]}
-      ${isActive 
-        ? 'bg-blue-600 text-white border-blue-600' 
+      ${isActive
+        ? 'bg-blue-600 text-white border-blue-600'
         : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600 hover:text-white'
       }
       border rounded-lg transition-colors duration-200

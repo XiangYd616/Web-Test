@@ -5,7 +5,6 @@
 
 import { useCallback, useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
-import { TestProgress } from '../services/api/testProgressService';
 
 // 测试配置接口
 export interface TestConfig {
@@ -38,7 +37,7 @@ export interface TestResult {
 
 // 测试Hook
 export const useTest = () => {
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     const { state, dispatch } = useAppContext();
     const { test } = state;
@@ -161,11 +160,23 @@ export const useTest = () => {
             }
 
             const data = await response.json();
-            return data.results || [];
+            return (data.results || []).map((item: any): TestResult => ({
+                id: item.id || '',
+                type: item.type || '',
+                status: item.status || 'completed',
+                score: item.score,
+                startTime: item.startTime || new Date().toISOString(),
+                endTime: item.endTime,
+                duration: item.duration,
+                summary: item.summary,
+                details: item.details,
+                recommendations: item.recommendations,
+                error: item.error
+            }));
 
         } catch (error) {
             console.error('Get test history error:', error);
-            return test.history;
+            return test.history as TestResult[];
         }
     }, [state.auth.token, test.history]);
 
@@ -212,11 +223,18 @@ export const useTest = () => {
             }
 
             const data = await response.json();
-            return data.configurations || test.configurations;
+            const mappedConfigs: TestConfig[] = (data.configurations || []).map((item: any) => ({
+                id: item.id,
+                name: item.name || '',
+                type: item.type || '',
+                url: item.url || '',
+                options: item.config || item.options || {}
+            }));
+            return mappedConfigs;
 
         } catch (error) {
             console.error('Get configurations error:', error);
-            return test.configurations;
+            return test.configurations as unknown as TestConfig[];
         }
     }, [state.auth.token, test.configurations]);
 

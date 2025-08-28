@@ -390,10 +390,13 @@ export interface SystemMetrics {
   }>;
 }
 
-// ==================== 导出所有类型 ====================
+// ==================== 类型导出说明 ====================
+// 基于Context7最佳实践：所有interface和type定义已通过export关键字导出
+// 无需额外的导出语句，避免重复导出冲突
 
-export type {
-  ComparisonData, CreateMonitoringSiteRequest, CreateProjectRequest, CreateTestConfigRequest, DashboardData, ExecuteTestRequest, GenerateReportRequest, MonitoringData, MonitoringSite, Project, ProjectListQuery, ProjectListResponse, ProjectResponse, ProjectSettings, ProjectStatsResponse, SystemHealth,
-  SystemMetrics, TestConfigListQuery, TestConfiguration, TestExecution, TestExecutionQuery, TestExecutionStatus, TestRecommendation, TestReport, TestResult, TestType, TrendsData, UpdateProjectRequest, UpdateTestConfigRequest
-};
+// 所有类型已通过以下方式导出：
+// - export interface Project { ... }
+// - export interface ProjectSettings { ... }
+// - export interface TestConfiguration { ... }
+// - 等等...
 

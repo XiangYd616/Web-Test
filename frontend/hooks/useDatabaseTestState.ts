@@ -13,11 +13,57 @@ import type {
   DatabaseTestHook,
   DatabaseTestResult
 } from '../types';
+import { TestStatus } from '../types/unified/testTypes';
 
-// 所有类型定义已迁移到统一的类型系统
-// 请从 '../types' 导入所需的类型
+// 扩展数据库测试配置类型，兼容统一类型系统
+interface ExtendedDatabaseTestConfig extends DatabaseTestConfig {
+  // 扩展属性
+  connectionConfig?: {
+    type: 'mysql' | 'postgresql' | 'mongodb' | 'redis' | 'sqlite';
+    host: string;
+    port: number;
+    database: string;
+    username: string;
+    password: string;
+    ssl: boolean;
+    connectionTimeout: number;
+  };
+  testTypes?: ('connection' | 'performance' | 'integrity' | 'load' | 'security')[];
+  performanceConfig?: {
+    queryTimeout: number;
+    maxConnections: number;
+    testDuration: number;
+    queryComplexity: 'simple' | 'medium' | 'complex';
+  };
+  integrityConfig?: {
+    checkConstraints: boolean;
+    checkIndexes: boolean;
+    checkForeignKeys: boolean;
+    validateData: boolean;
+  };
+  loadTestConfig?: {
+    concurrentConnections: number;
+    operationsPerSecond: number;
+    testDuration: number;
+    operationTypes: ('select' | 'insert' | 'update' | 'delete')[];
+  };
+  securityConfig?: {
+    checkPermissions: boolean;
+    checkEncryption: boolean;
+    checkAuthentication: boolean;
+    scanVulnerabilities: boolean;
+  };
+  customQueries?: Array<{
+    id: string;
+    name: string;
+    query: string;
+    expectedResult?: any;
+    timeout?: number;
+  }>;
+}
 
-// 数据库测试结果接口已迁移到统一类型系统
+// 导入统一的DatabaseQuery类型
+import type { DatabaseQuery } from '../types/hooks/testState.types';
 interface DatabaseTestResultLocal {
   id: string;
   config: DatabaseTestConfig;
@@ -164,8 +210,8 @@ export interface UseDatabaseTestStateReturn {
   testConnection: () => Promise<boolean>;
 
   // 查询管理
-  addCustomQuery: (query: Omit<DatabaseTestConfig['customQueries'][0], 'id'>) => void;
-  updateCustomQuery: (id: string, updates: Partial<DatabaseTestConfig['customQueries'][0]>) => void;
+  addCustomQuery: (query: DatabaseQuery) => void;
+  updateCustomQuery: (id: string, updates: Partial<DatabaseQuery>) => void;
   removeCustomQuery: (id: string) => void;
 
   // 预设配置
@@ -182,7 +228,15 @@ export interface UseDatabaseTestStateReturn {
  */
 export const useDatabaseTestState = (): DatabaseTestHook => {
   // 基础状态
-  const [config, setConfig] = useState<DatabaseTestConfig>({
+  const [config, setConfig] = useState<ExtendedDatabaseTestConfig>({
+    // 基础DatabaseTestConfig属性
+    dbType: 'mysql',
+    connectionString: 'mysql://localhost:3306/testdb',
+    testQueries: [],
+    connectionTimeout: 10000,
+    queryTimeout: 30000,
+
+    // 扩展属性
     connectionConfig: {
       type: 'mysql',
       host: 'localhost',
@@ -244,6 +298,14 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
    */
   const resetConfig = useCallback(() => {
     setConfig({
+      // 基础DatabaseTestConfig属性
+      dbType: 'mysql',
+      connectionString: 'mysql://localhost:3306/testdb',
+      testQueries: [],
+      connectionTimeout: 10000,
+      queryTimeout: 30000,
+
+      // 扩展属性
       connectionConfig: {
         type: 'mysql',
         host: 'localhost',
@@ -323,7 +385,7 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
       setCurrentStep('正在测试数据库连接...');
 
       // 这里应该调用实际的连接测试API
-      const response = await testApiService.testDatabaseConnection(config.connectionConfig);
+      const response = await (testApiService as any).testDatabaseConnection(config.connectionConfig);
 
       if (response.success) {
         setCurrentStep('连接测试成功');
@@ -359,19 +421,19 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
 
       // 启动后台测试
       const newTestId = backgroundTestManager.startTest(
-        'database',
+        'database' as any,
         config,
-        (progress, step) => {
+        (progress: number, step: string) => {
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult) => {
+        (testResult: any) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError) => {
+        (testError: any) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -420,26 +482,35 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   /**
    * 添加自定义查询
    */
-  const addCustomQuery = useCallback((query: Omit<DatabaseTestConfig['customQueries'][0], 'id'>) => {
-    const newQuery = {
-      ...query,
-      id: `query_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
-    };
-
+  const addCustomQuery = useCallback((query: DatabaseQuery) => {
     setConfig(prev => ({
       ...prev,
-      customQueries: [...prev.customQueries, newQuery]
+      testQueries: [...(prev.testQueries || []), query],
+      customQueries: [...(prev.customQueries || []), {
+        id: query.id,
+        name: query.name,
+        query: query.sql,
+        expectedResult: undefined,
+        timeout: undefined
+      }]
     }));
   }, []);
 
   /**
    * 更新自定义查询
    */
-  const updateCustomQuery = useCallback((id: string, updates: Partial<DatabaseTestConfig['customQueries'][0]>) => {
+  const updateCustomQuery = useCallback((id: string, updates: Partial<DatabaseQuery>) => {
     setConfig(prev => ({
       ...prev,
-      customQueries: prev.customQueries.map(query =>
+      testQueries: (prev.testQueries || []).map(query =>
         query.id === id ? { ...query, ...updates } : query
+      ),
+      customQueries: (prev.customQueries || []).map(query =>
+        query.id === id ? {
+          ...query,
+          name: updates.name || query.name,
+          query: updates.sql || query.query
+        } : query
       )
     }));
   }, []);
@@ -450,7 +521,8 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   const removeCustomQuery = useCallback((id: string) => {
     setConfig(prev => ({
       ...prev,
-      customQueries: prev.customQueries.filter(query => query.id !== id)
+      testQueries: (prev.testQueries || []).filter(query => query.id !== id),
+      customQueries: (prev.customQueries || []).filter(query => query.id !== id)
     }));
   }, []);
 
@@ -458,7 +530,7 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
    * 加载预设配置
    */
   const loadPreset = useCallback((preset: 'basic' | 'comprehensive' | 'performance' | 'security') => {
-    const presets = {
+    const presets: Record<string, Partial<ExtendedDatabaseTestConfig>> = {
       basic: {
         testTypes: ['connection', 'performance'] as const
       },
@@ -535,7 +607,7 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   }, []);
 
   // 计算派生状态
-  const status: TestStatus = isRunning ? 'running' : (result ? 'completed' : (error ? 'failed' : 'idle'));
+  const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.PENDING));
   const isCompleted = status === 'completed';
   const hasError = status === 'failed';
   const currentQuery = config.customQueries.length > 0 ? config.customQueries[0]?.name || null : null;
@@ -567,13 +639,8 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
     removeQuery: removeCustomQuery,
     updateQuery: updateCustomQuery,
 
-    // ==================== 额外的便利方法（保持向后兼容） ====================
-    resetConfig,
-    testConnection,
-    loadPreset,
-    loadDatabasePreset,
-    validateConfig,
-    testId  // 保留testId以便调试
+    // 注意：resetConfig, testConnection, loadPreset等方法不属于DatabaseTestHook接口
+    // 如果需要这些方法，请使用UseDatabaseTestStateReturn接口
   };
 };
 

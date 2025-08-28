@@ -4,7 +4,7 @@
  */
 
 import { Download, History, Play, RefreshCw, Settings, Square } from 'lucide-react';
-import type { createElement, useCallback, useEffect, useState, ReactNode, FC } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 import { useTestEngine } from '../../hooks/useTestEngine';
 import {
@@ -15,12 +15,20 @@ import {
     Loading,
     Modal,
     ProgressBar,
-    Select,
-    type SelectOption
+    Select
 } from '../ui';
+
+// 本地SelectOption类型定义
+interface LocalSelectOption {
+    value: string;
+    label: string;
+}
 
 // 测试类型定义 - 使用统一类型系统
 import type { TestType } from '../../types';
+
+// 重新导出TestType以供其他模块使用
+export type { TestType };
 
 // 测试配置接口
 export interface TestConfig {
@@ -62,7 +70,7 @@ export interface TestRunnerProps {
 }
 
 // 测试类型选项
-const testTypeOptions: SelectOption[] = [
+const testTypeOptions: LocalSelectOption[] = [
     { value: 'stress', label: '压力测试' },
     { value: 'security', label: '安全测试' },
     { value: 'seo', label: 'SEO测试' },
@@ -170,6 +178,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
             const completedResult: TestResult = {
                 ...testResult,
                 ...result,
+                testType: testType, // 确保使用正确的TestType枚举
                 status: 'completed',
                 endTime: new Date().toISOString()
             };
@@ -277,7 +286,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                 label="测试URL"
                 placeholder="https://example.com"
                 value={config.url}
-                onChange={(value) => setConfig(prev => ({ ...prev, url: value as string }))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({ ...prev, url: e.target.value }))}
                 required
                 disabled={isRunning}
             />
@@ -286,7 +295,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                 label="测试类型"
                 options={testTypeOptions}
                 value={config.testType}
-                onChange={(value) => setConfig(prev => ({ ...prev, testType: value as TestType }))}
+                onChange={(value) => setConfig(prev => ({ ...prev, testType: value as unknown as TestType }))}
                 disabled={isRunning}
             />
 
@@ -297,9 +306,9 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                         label="并发用户数"
                         type="number"
                         value={config.options.users || 10}
-                        onChange={(value) => setConfig(prev => ({
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                             ...prev,
-                            options: { ...prev.options, users: parseInt(value as string) || 10 }
+                            options: { ...prev.options, users: parseInt(e.target.value) || 10 }
                         }))}
                         min={1}
                         max={1000}
@@ -309,9 +318,9 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                         label="测试时长(秒)"
                         type="number"
                         value={config.options.duration || 30}
-                        onChange={(value) => setConfig(prev => ({
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                             ...prev,
-                            options: { ...prev.options, duration: parseInt(value as string) || 30 }
+                            options: { ...prev.options, duration: parseInt(e.target.value) || 30 }
                         }))}
                         min={10}
                         max={3600}

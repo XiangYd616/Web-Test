@@ -925,6 +925,30 @@ class StressTestRecordService {
       throw error;
     }
   }
+
+  /**
+   * 获取本地存储的记录
+   */
+  private getLocalRecords(): StressTestRecord[] {
+    try {
+      const stored = localStorage.getItem('stress_test_records');
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('获取本地记录失败:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 保存记录到本地存储
+   */
+  private saveLocalRecords(records: StressTestRecord[]): void {
+    try {
+      localStorage.setItem('stress_test_records', JSON.stringify(records));
+    } catch (error) {
+      console.error('保存本地记录失败:', error);
+    }
+  }
 }
 
 export const stressTestRecordService = new StressTestRecordService();

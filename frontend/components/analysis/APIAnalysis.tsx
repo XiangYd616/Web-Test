@@ -1,260 +1,389 @@
-import { AlertTriangle, CheckCircle, Clock, Shield, XCircle, Zap } from 'lucide-react';
-import type { useState, FC } from 'react';
+import React from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { 
+  Globe, 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  AlertTriangle, 
+  TrendingUp, 
+  TrendingDown, 
+  Activity, 
+  Zap, 
+  Database,
+  RefreshCw,
+  BarChart3,
+  Target,
+  Server
+} from 'lucide-react';
 
-interface APITestResult {
-  endpoint: string;
-  method: string;
-  statusCode: number;
+interface APIEndpoint {
+  id: string;
+  name: string;
+  url: string;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  status: 'healthy' | 'warning' | 'error';
   responseTime: number;
-  responseSize: number;
-  success: boolean;
-  headers: Record<string, string>;
-  body?: any;
-  error?: string;
-  timestamp: number;
+  successRate: number;
+  errorRate: number;
+  lastChecked: string;
+  requestCount: number;
 }
 
-interface APIAnalysis {
-  overallScore: number;
-  performanceScore: number;
-  reliabilityScore: number;
-  securityScore: number;
-  issues: Array<{
-    type: 'error' | 'warning' | 'info';
-    category: 'performance' | 'security' | 'reliability' | 'format';
-    message: string;
-    severity: 'high' | 'medium' | 'low';
-  }>;
-  recommendations: Array<{
-    category: 'performance' | 'security' | 'reliability' | 'format';
-    message: string;
-    priority: 'high' | 'medium' | 'low';
-  }>;
-  metrics: {
-    averageResponseTime: number;
-    successRate: number;
-    errorRate: number;
-    totalRequests: number;
-    dataTransferred: number;
-  };
+interface APIMetrics {
+  totalEndpoints: number;
+  healthyEndpoints: number;
+  averageResponseTime: number;
+  totalRequests: number;
+  successRate: number;
+  errorRate: number;
 }
 
-interface APIAnalysisProps {
-  results: APITestResult[];
-  analysis: APIAnalysis;
-}
+const APIAnalysis: React.FC = () => {
+  const [endpoints, setEndpoints] = useState<APIEndpoint[]>([]);
+  const [metrics, setMetrics] = useState<APIMetrics>({
+    totalEndpoints: 0,
+    healthyEndpoints: 0,
+    averageResponseTime: 0,
+    totalRequests: 0,
+    successRate: 0,
+    errorRate: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-export const APIAnalysis: React.FC<APIAnalysisProps> = ({ results, analysis }) => {
-  const getScoreColor = (score: number) => {
-  const [error, setError] = useState<string | null>(null);
+  const loadAPIData = useCallback(async () => {
+    setLoading(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const mockEndpoints: APIEndpoint[] = [
+      {
+        id: '1',
+        name: 'User Authentication',
+        url: '/api/auth/login',
+        method: 'POST',
+        status: 'healthy',
+        responseTime: 120,
+        successRate: 99.5,
+        errorRate: 0.5,
+        lastChecked: new Date().toISOString(),
+        requestCount: 15420
+      },
+      {
+        id: '2',
+        name: 'Get User Profile',
+        url: '/api/users/profile',
+        method: 'GET',
+        status: 'healthy',
+        responseTime: 85,
+        successRate: 98.8,
+        errorRate: 1.2,
+        lastChecked: new Date().toISOString(),
+        requestCount: 8930
+      },
+      {
+        id: '3',
+        name: 'Create Test',
+        url: '/api/tests',
+        method: 'POST',
+        status: 'warning',
+        responseTime: 350,
+        successRate: 95.2,
+        errorRate: 4.8,
+        lastChecked: new Date().toISOString(),
+        requestCount: 2340
+      },
+      {
+        id: '4',
+        name: 'Get Test Results',
+        url: '/api/tests/results',
+        method: 'GET',
+        status: 'error',
+        responseTime: 1200,
+        successRate: 87.3,
+        errorRate: 12.7,
+        lastChecked: new Date().toISOString(),
+        requestCount: 5670
+      },
+      {
+        id: '5',
+        name: 'Update Settings',
+        url: '/api/settings',
+        method: 'PUT',
+        status: 'healthy',
+        responseTime: 95,
+        successRate: 99.1,
+        errorRate: 0.9,
+        lastChecked: new Date().toISOString(),
+        requestCount: 1230
+      }
+    ];
 
-    if (score >= 90) return 'text-green-600 bg-green-50';
-    if (score >= 70) return 'text-yellow-600 bg-yellow-50';
-    if (score >= 50) return 'text-orange-600 bg-orange-50';
-    return 'text-red-600 bg-red-50';
-  };
+    setEndpoints(mockEndpoints);
+    
+    // Calculate metrics
+    const totalEndpoints = mockEndpoints.length;
+    const healthyEndpoints = mockEndpoints.filter(ep => ep.status === 'healthy').length;
+    const averageResponseTime = mockEndpoints.reduce((sum, ep) => sum + ep.responseTime, 0) / totalEndpoints;
+    const totalRequests = mockEndpoints.reduce((sum, ep) => sum + ep.requestCount, 0);
+    const weightedSuccessRate = mockEndpoints.reduce((sum, ep) => sum + (ep.successRate * ep.requestCount), 0) / totalRequests;
+    const weightedErrorRate = mockEndpoints.reduce((sum, ep) => sum + (ep.errorRate * ep.requestCount), 0) / totalRequests;
 
-  const getStatusColor = (statusCode: number) => {
-    if (statusCode >= 200 && statusCode < 300) return 'text-green-600 bg-green-50';
-    if (statusCode >= 300 && statusCode < 400) return 'text-blue-600 bg-blue-50';
-    if (statusCode >= 400 && statusCode < 500) return 'text-orange-600 bg-orange-50';
-    return 'text-red-600 bg-red-50';
-  };
+    setMetrics({
+      totalEndpoints,
+      healthyEndpoints,
+      averageResponseTime,
+      totalRequests,
+      successRate: weightedSuccessRate,
+      errorRate: weightedErrorRate
+    });
 
-  const getIssueIcon = (type: string) => {
-    switch (type) {
-      case 'error': return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
-      case 'info': return <CheckCircle className="w-4 h-4 text-blue-500" />;
-      default: return <CheckCircle className="w-4 h-4 text-gray-500" />;
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadAPIData();
+  }, [loadAPIData]);
+
+  const runAnalysis = useCallback(async () => {
+    setIsAnalyzing(true);
+    
+    // Simulate analysis
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Update endpoints with new data
+    setEndpoints(prev => prev.map(endpoint => ({
+      ...endpoint,
+      responseTime: Math.floor(Math.random() * 500) + 50,
+      successRate: Math.random() * 10 + 90,
+      errorRate: Math.random() * 10,
+      lastChecked: new Date().toISOString(),
+      status: Math.random() > 0.8 ? 'warning' : Math.random() > 0.9 ? 'error' : 'healthy'
+    })));
+    
+    setIsAnalyzing(false);
+  }, []);
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'healthy':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'warning':
+        return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+      case 'error':
+        return <XCircle className="w-4 h-4 text-red-500" />;
+      default:
+        return <Activity className="w-4 h-4 text-gray-500" />;
     }
   };
 
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'healthy':
+        return 'text-green-600 bg-green-100 border-green-200';
+      case 'warning':
+        return 'text-yellow-600 bg-yellow-100 border-yellow-200';
+      case 'error':
+        return 'text-red-600 bg-red-100 border-red-200';
+      default:
+        return 'text-gray-600 bg-gray-100 border-gray-200';
+    }
   };
+
+  const getMethodColor = (method: string) => {
+    switch (method) {
+      case 'GET':
+        return 'text-blue-600 bg-blue-100';
+      case 'POST':
+        return 'text-green-600 bg-green-100';
+      case 'PUT':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'DELETE':
+        return 'text-red-600 bg-red-100';
+      case 'PATCH':
+        return 'text-purple-600 bg-purple-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  const formatNumber = (num: number) => {
+    return num.toLocaleString();
+  };
+
+  const formatPercentage = (num: number) => {
+    return `${num.toFixed(1)}%`;
+  };
+
+  const formatTime = (ms: number) => {
+    return `${ms}ms`;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* 总体评分 */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="text-center">
-          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full text-2xl font-bold ${getScoreColor(analysis.overallScore)}`}>
-            {analysis.overallScore}
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <Globe className="w-6 h-6 text-blue-600" />
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">API Analysis</h2>
+            <p className="text-sm text-gray-600">Monitor API endpoint performance and health</p>
           </div>
-          <div className="mt-2 text-sm font-medium text-gray-900">总体评分</div>
         </div>
-
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-2">
-            <Zap className="w-5 h-5 text-blue-500 mr-1" />
-            <span className="text-2xl font-bold text-gray-900">{analysis.performanceScore}</span>
-          </div>
-          <div className="text-sm text-gray-600">性能表现</div>
-        </div>
-
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-2">
-            <Shield className="w-5 h-5 text-green-500 mr-1" />
-            <span className="text-2xl font-bold text-gray-900">{analysis.reliabilityScore}</span>
-          </div>
-          <div className="text-sm text-gray-600">可靠性</div>
-        </div>
-
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-2">
-            <Shield className="w-5 h-5 text-purple-500 mr-1" />
-            <span className="text-2xl font-bold text-gray-900">{analysis.securityScore}</span>
-          </div>
-          <div className="text-sm text-gray-600">安全性</div>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => loadAPIData()}
+            className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh</span>
+          </button>
+          <button
+            onClick={runAnalysis}
+            disabled={isAnalyzing}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
+          >
+            <Target className="w-4 h-4" />
+            <span>{isAnalyzing ? 'Analyzing...' : 'Run Analysis'}</span>
+          </button>
         </div>
       </div>
 
-      {/* 关键指标 */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">关键指标</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{analysis.metrics.averageResponseTime}ms</div>
-            <div className="text-xs text-gray-600">平均响应时间</div>
+      {/* Metrics Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center space-x-2 mb-2">
+            <Server className="w-5 h-5 text-blue-600" />
+            <span className="text-sm font-medium text-gray-600">Total Endpoints</span>
           </div>
+          <p className="text-2xl font-bold text-gray-900">{metrics.totalEndpoints}</p>
+        </div>
 
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{analysis.metrics.successRate.toFixed(1)}%</div>
-            <div className="text-xs text-gray-600">成功率</div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center space-x-2 mb-2">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span className="text-sm font-medium text-gray-600">Healthy</span>
           </div>
+          <p className="text-2xl font-bold text-gray-900">{metrics.healthyEndpoints}</p>
+        </div>
 
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{analysis.metrics.totalRequests}</div>
-            <div className="text-xs text-gray-600">总请求数</div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center space-x-2 mb-2">
+            <Clock className="w-5 h-5 text-purple-600" />
+            <span className="text-sm font-medium text-gray-600">Avg Response</span>
           </div>
+          <p className="text-2xl font-bold text-gray-900">{formatTime(Math.round(metrics.averageResponseTime))}</p>
+        </div>
 
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{formatBytes(analysis.metrics.dataTransferred)}</div>
-            <div className="text-xs text-gray-600">数据传输</div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center space-x-2 mb-2">
+            <Activity className="w-5 h-5 text-orange-600" />
+            <span className="text-sm font-medium text-gray-600">Total Requests</span>
           </div>
+          <p className="text-2xl font-bold text-gray-900">{formatNumber(metrics.totalRequests)}</p>
+        </div>
 
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{analysis.metrics.errorRate.toFixed(1)}%</div>
-            <div className="text-xs text-gray-600">错误率</div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center space-x-2 mb-2">
+            <TrendingUp className="w-5 h-5 text-green-600" />
+            <span className="text-sm font-medium text-gray-600">Success Rate</span>
           </div>
+          <p className="text-2xl font-bold text-gray-900">{formatPercentage(metrics.successRate)}</p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center space-x-2 mb-2">
+            <TrendingDown className="w-5 h-5 text-red-600" />
+            <span className="text-sm font-medium text-gray-600">Error Rate</span>
+          </div>
+          <p className="text-2xl font-bold text-gray-900">{formatPercentage(metrics.errorRate)}</p>
         </div>
       </div>
 
-      {/* 请求详情 */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">请求详情</h4>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">端点</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">方法</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态码</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">响应时间</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">大小</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {results.map((result, index) => (
-                <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {result.endpoint}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                      {result.method}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(result.statusCode)}`}>
-                      {result.statusCode}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 text-gray-400 mr-1" />
-                      {result.responseTime}ms
+      {/* Endpoints List */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">API Endpoints</h3>
+        </div>
+        <div className="divide-y divide-gray-200">
+          {endpoints.map((endpoint) => (
+            <div key={endpoint.id} className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <span className={`px-2 py-1 text-xs font-medium rounded ${getMethodColor(endpoint.method)}`}>
+                    {endpoint.method}
+                  </span>
+                  <div>
+                    <h4 className="font-medium text-gray-900">{endpoint.name}</h4>
+                    <p className="text-sm text-gray-600">{endpoint.url}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`px-3 py-1 rounded-full border ${getStatusColor(endpoint.status)}`}>
+                    <div className="flex items-center space-x-1">
+                      {getStatusIcon(endpoint.status)}
+                      <span className="text-sm font-medium capitalize">{endpoint.status}</span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatBytes(result.responseSize)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {result.success ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div>
+                  <span className="text-sm text-gray-600">Response Time:</span>
+                  <div className="font-medium text-gray-900">{formatTime(endpoint.responseTime)}</div>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Success Rate:</span>
+                  <div className="font-medium text-green-600">{formatPercentage(endpoint.successRate)}</div>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Error Rate:</span>
+                  <div className="font-medium text-red-600">{formatPercentage(endpoint.errorRate)}</div>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Requests:</span>
+                  <div className="font-medium text-gray-900">{formatNumber(endpoint.requestCount)}</div>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Last Checked:</span>
+                  <div className="font-medium text-gray-900">
+                    {new Date(endpoint.lastChecked).toLocaleTimeString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* 问题列表 */}
-      {analysis.issues.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">发现的问题</h4>
-          <div className="space-y-3">
-            {analysis.issues.map((issue, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                {getIssueIcon(issue.type)}
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-gray-900">{issue.message}</span>
-                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${issue.severity === 'high' ? 'bg-red-100 text-red-800' :
-                        issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-green-100 text-green-800'
-                      }`}>
-                      {issue.severity === 'high' ? '高' : issue.severity === 'medium' ? '中' : '低'}
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    分类: {issue.category}
-                  </div>
-                </div>
-              </div>
-            ))}
+      {/* Performance Chart Placeholder */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center space-x-2 mb-6">
+          <BarChart3 className="w-5 h-5 text-gray-600" />
+          <h3 className="text-lg font-medium text-gray-900">API Performance Trends</h3>
+        </div>
+        
+        <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+          <div className="text-center">
+            <Activity className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+            <p className="text-gray-500">API performance chart would be rendered here</p>
+            <p className="text-sm text-gray-400">Showing response times and success rates over time</p>
           </div>
         </div>
-      )}
-
-      {/* 优化建议 */}
-      {analysis.recommendations.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">优化建议</h4>
-          <div className="space-y-3">
-            {analysis.recommendations.map((recommendation, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <CheckCircle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-blue-900">{recommendation.message}</span>
-                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${recommendation.priority === 'high' ? 'bg-red-100 text-red-800' :
-                        recommendation.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-green-100 text-green-800'
-                      }`}>
-                      {recommendation.priority === 'high' ? '高优先级' :
-                        recommendation.priority === 'medium' ? '中优先级' : '低优先级'}
-                    </span>
-                  </div>
-                  <div className="text-xs text-blue-700 mt-1">
-                    分类: {recommendation.category}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
+
+export default APIAnalysis;

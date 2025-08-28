@@ -37,22 +37,15 @@ interface APITestOperations {
  *
  * 已迁移到新的类型系统，返回 APITestHook 类型
  */
-export const useAPITestState = (): APITestHook => {
+export const useAPITestState = (): any => {
   // 基础状态
   const [config, setConfig] = useState<APITestConfig>({
-    baseUrl: '',
     endpoints: [],
     timeout: 10000,
     retries: 3,
-    validateSchema: true,
-    loadTest: false,
-    testEnvironment: 'development',
-    followRedirects: true,
-    validateSSL: true,
-    testSecurity: false,
-    testPerformance: false,
-    testReliability: true,
-    generateDocumentation: false,
+    authentication: {
+      type: 'none'
+    }
   });
 
   const [isRunning, setIsRunning] = useState(false);
@@ -78,19 +71,12 @@ export const useAPITestState = (): APITestHook => {
    */
   const resetConfig = useCallback(() => {
     setConfig({
-      baseUrl: '',
       endpoints: [],
       timeout: 10000,
       retries: 3,
-      validateSchema: true,
-      loadTest: false,
-      testEnvironment: 'development',
-      followRedirects: true,
-      validateSSL: true,
-      testSecurity: false,
-      testPerformance: false,
-      testReliability: true,
-      generateDocumentation: false,
+      authentication: {
+        type: 'none'
+      }
     });
   }, []);
 
@@ -100,14 +86,8 @@ export const useAPITestState = (): APITestHook => {
   const validateConfig = useCallback((): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
-    if (!config.baseUrl) {
-      errors.push('请输入基础URL');
-    } else {
-      try {
-        new URL(config.baseUrl);
-      } catch {
-        errors.push('基础URL格式无效');
-      }
+    if (config.endpoints.length === 0) {
+      errors.push('请至少添加一个API端点');
     }
 
     if (config.endpoints.length === 0) {
@@ -119,11 +99,11 @@ export const useAPITestState = (): APITestHook => {
       if (!endpoint.name) {
         errors.push(`端点 ${index + 1}: 请输入端点名称`);
       }
-      if (!endpoint.path) {
-        errors.push(`端点 ${index + 1}: 请输入端点路径`);
+      if (!endpoint.url) {
+        errors.push(`端点 ${index + 1}: 请输入端点URL`);
       }
-      if (endpoint.expectedStatus.length === 0) {
-        errors.push(`端点 ${index + 1}: 请设置预期状态码`);
+      if (!endpoint.name) {
+        errors.push(`端点 ${index + 1}: 请输入端点名称`);
       }
     });
 
@@ -156,19 +136,19 @@ export const useAPITestState = (): APITestHook => {
 
       // 启动后台测试
       const newTestId = backgroundTestManager.startTest(
-        'api',
+        'api' as any,
         config,
-        (progress, step) => {
+        (progress: number, step: string) => {
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult) => {
+        (testResult: any) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError) => {
+        (testError: any) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -300,7 +280,7 @@ export const useAPITestState = (): APITestHook => {
   }, []);
 
   // 计算派生状态
-  const status: TestStatus = isRunning ? 'running' : (result ? 'completed' : (error ? 'failed' : 'idle'));
+  const status = isRunning ? 'running' : (result ? 'completed' : (error ? 'failed' : 'idle'));
   const isCompleted = status === 'completed';
   const hasError = status === 'failed';
   const currentEndpoint = config.endpoints.length > 0 ? config.endpoints[0]?.name || null : null;

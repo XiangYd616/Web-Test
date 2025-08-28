@@ -97,7 +97,7 @@ export interface BaseTestConfig {
 
 /** 性能测试配置 */
 export interface PerformanceTestConfig extends BaseTestConfig {
-  testType: 'performance';
+  testType: TestType.PERFORMANCE;
   /** 是否包含截图 */
   includeScreenshots?: boolean;
   /** Lighthouse测试类别 */
@@ -108,7 +108,7 @@ export interface PerformanceTestConfig extends BaseTestConfig {
 
 /** API测试配置 */
 export interface ApiTestConfig extends BaseTestConfig {
-  testType: 'api';
+  testType: TestType.API;
   /** API端点列表 */
   endpoints?: ApiEndpoint[];
   /** 认证信息 */
@@ -163,7 +163,7 @@ export interface ValidationRule {
 
 /** 安全测试配置 */
 export interface SecurityTestConfig extends BaseTestConfig {
-  testType: 'security';
+  testType: TestType.SECURITY;
   /** 扫描深度 */
   scanDepth?: 'basic' | 'standard' | 'comprehensive';
   /** 要检查的安全项目 */
@@ -172,7 +172,7 @@ export interface SecurityTestConfig extends BaseTestConfig {
 
 /** 兼容性测试配置 */
 export interface CompatibilityTestConfig extends BaseTestConfig {
-  testType: 'compatibility';
+  testType: TestType.COMPATIBILITY;
   /** 目标浏览器 */
   browsers?: string[];
   /** 目标设备 */
@@ -181,7 +181,7 @@ export interface CompatibilityTestConfig extends BaseTestConfig {
 
 /** UX测试配置 */
 export interface UxTestConfig extends BaseTestConfig {
-  testType: 'ux';
+  testType: TestType.UX;
   /** 用户流程 */
   userFlows?: UserFlow[];
   /** 可访问性检查 */
@@ -210,7 +210,7 @@ export interface UserAction {
 
 /** SEO测试配置 */
 export interface SeoTestConfig extends BaseTestConfig {
-  testType: 'seo';
+  testType: TestType.SEO;
   /** 检查项目 */
   checks?: string[];
   /** 关键词 */
@@ -219,7 +219,7 @@ export interface SeoTestConfig extends BaseTestConfig {
 
 /** 网络测试配置 */
 export interface NetworkTestConfig extends BaseTestConfig {
-  testType: 'network';
+  testType: TestType.NETWORK;
   /** 测试端口 */
   ports?: number[];
   /** 协议类型 */
@@ -228,7 +228,7 @@ export interface NetworkTestConfig extends BaseTestConfig {
 
 /** 数据库测试配置 */
 export interface DatabaseTestConfig extends BaseTestConfig {
-  testType: 'database';
+  testType: TestType.DATABASE;
   /** 数据库类型 */
   dbType: 'mysql' | 'postgresql' | 'mongodb' | 'redis';
   /** 连接字符串 */
@@ -239,7 +239,7 @@ export interface DatabaseTestConfig extends BaseTestConfig {
 
 /** 网站综合测试配置 */
 export interface WebsiteTestConfig extends BaseTestConfig {
-  testType: 'website';
+  testType: TestType.WEBSITE;
   /** 包含的测试类型 */
   includeTests?: TestType[];
   /** 测试深度 */

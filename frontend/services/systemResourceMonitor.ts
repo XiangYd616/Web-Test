@@ -109,7 +109,7 @@ class SystemResourceMonitor {
     try {
       // 在开发模式下，跳过API调用，使用模拟数据
       if (import.meta.env.DEV) {
-        const mockResources = this.getMockResources();
+        const mockResources = this.getMockResourcesV1();
         this.resources = mockResources;
         const status = this.evaluateResourceStatus(mockResources);
 
@@ -147,30 +147,30 @@ class SystemResourceMonitor {
   /**
    * 获取模拟资源数据（开发模式使用）
    */
-  private getMockResources(): SystemResources {
+  private getMockResourcesV1(): SystemResources {
     return {
+      timestamp: Date.now(),
       cpu: {
         usage: Math.random() * 30 + 10, // 10-40% CPU使用率
         cores: 8,
-        model: 'Mock CPU'
+        loadAverage: [0.5, 0.7, 0.9]
       },
       memory: {
-        total: 16 * 1024 * 1024 * 1024, // 16GB
         used: Math.random() * 8 * 1024 * 1024 * 1024 + 4 * 1024 * 1024 * 1024, // 4-12GB
-        free: 0, // 将在计算中设置
-        usage: 0 // 将在计算中设置
+        total: 16 * 1024 * 1024 * 1024, // 16GB
+        usage: 0, // 将在计算中设置
+        available: 0 // 将在计算中设置
       },
       disk: {
-        total: 500 * 1024 * 1024 * 1024, // 500GB
-        used: Math.random() * 200 * 1024 * 1024 * 1024 + 100 * 1024 * 1024 * 1024, // 100-300GB
-        free: 0, // 将在计算中设置
-        usage: 0 // 将在计算中设置
+        usage: Math.random() * 50 + 20, // 20-70% 磁盘使用率
+        available: Math.random() * 200 * 1024 * 1024 * 1024 + 100 * 1024 * 1024 * 1024 // 100-300GB可用
       },
       network: {
-        bytesReceived: Math.floor(Math.random() * 1000000),
-        bytesSent: Math.floor(Math.random() * 1000000),
-        packetsReceived: Math.floor(Math.random() * 10000),
-        packetsSent: Math.floor(Math.random() * 10000)
+        activeConnections: Math.floor(Math.random() * 100) + 10,
+        bandwidth: {
+          upload: Math.random() * 100,
+          download: Math.random() * 1000
+        }
       }
     };
   }
@@ -196,14 +196,14 @@ class SystemResourceMonitor {
     } catch (error) {
       // 如果API不可用，返回模拟数据
       // console.warn('无法获取真实资源信息，使用模拟数据:', error); // 静默处理
-      return this.getMockResources();
+      return this.getMockResourcesV2();
     }
   }
 
   /**
    * 获取模拟资源数据（用于开发和测试）
    */
-  private getMockResources(): SystemResources {
+  private getMockResourcesV2(): SystemResources {
     const now = Date.now();
     const baseUsage = 30 + Math.sin(now / 60000) * 20; // 30-50% 基础使用率，带周期性波动
 

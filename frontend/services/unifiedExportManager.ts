@@ -3,8 +3,8 @@
  * 为所有测试类型提供标准化的导出功能
  */
 
+import { useState } from 'react';
 import type { TestType } from '../types';
-import { createElement, useState } from 'react';
 
 // 导出格式枚举
 export type ExportFormat = 'json' | 'csv' | 'pdf' | 'html' | 'xml';
@@ -621,7 +621,8 @@ class UnifiedExportManager {
       seo: 'SEO测试',
       ux: 'UX测试',
       compatibility: '兼容性测试',
-      database: '数据库测试'
+      database: '数据库测试',
+      website: '网站测试'
     };
 
     return names[testType] || testType;

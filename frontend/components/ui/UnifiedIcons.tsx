@@ -3,37 +3,76 @@
  * 为所有测试页面提供一致的图标使用规范，但不强制替换现有图标
  */
 
-import React from 'react';
-import type { FC } from 'react';
 import {
-  // 测试类型图标
-  Zap, Shield, Globe, Smartphone, Eye, Search, Network, Database,
-  // 状态图标
-  Play, Square, RotateCcw, CheckCircle, XCircle, AlertTriangle, Clock, Loader,
-  // 操作图标
-  Settings, Download, Upload, Share2, Copy, Edit, Trash2, Plus, Minus,
-  // 导航图标
-  ChevronLeft, ChevronRight, ChevronUp, ChevronDown, ArrowLeft, ArrowRight,
-  // 信息图标
-  Info, HelpCircle, AlertCircle, Bell, Star, Heart, Bookmark,
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft, ArrowRight, ArrowUpDown,
   // 数据图标
-  BarChart3, PieChart, TrendingUp, TrendingDown, Activity, Target,
-  // 文件图标
-  FileText, File, Folder, Image, Video, Music,
-  // 用户图标
-  User, Users, UserPlus, UserMinus, UserCheck,
+  BarChart3,
+  Bell,
+  Bookmark,
+  CheckCircle,
+  ChevronDown,
+  // 导航图标
+  ChevronLeft, ChevronRight, ChevronUp,
+  Clock,
+  Copy,
+  Database,
+  Download,
+  Edit,
+  Eye,
+  Filter,
+  Globe,
+  Heart,
+  HelpCircle,
   // 系统图标
-  Home, Menu, X, Search as SearchIcon, Filter, Sort,
+  Home,
+  // 信息图标
+  Info,
+  Loader,
+  Menu,
+  Minus,
+  Network,
+  PieChart,
+  // 状态图标
+  Play,
+  Plus,
+  RotateCcw,
+  Search,
+  Search as SearchIcon,
+  // 操作图标
+  Settings,
+  Share2,
+  Shield,
+  Smartphone,
+  Square,
+  Star,
+  Target,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  Upload,
   // 工具图标
-  Tool, Wrench, Hammer, Cog, Sliders,
+  Wrench,
+  X,
+  XCircle,
+  // 测试类型图标
+  Zap,
   type LucideIcon
 } from 'lucide-react';
+import React from 'react';
+
+// 替代缺失的图标
+const Sort = ArrowUpDown;
+const Tool = Wrench;
+
 
 // 图标尺寸类型
 export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 // 图标颜色类型
-export type IconColor = 
+export type IconColor =
   | 'primary' | 'secondary' | 'tertiary' | 'muted' | 'disabled'
   | 'success' | 'warning' | 'error' | 'info'
   | 'white' | 'black' | 'current';
@@ -228,7 +267,7 @@ export const TestStatusIcon: React.FC<{
   animated?: boolean;
 }> = ({ status, size = 'md', className = '', animated = false }) => {
   const Icon = TestStatusIcons[status];
-  
+
   // 状态颜色映射
   const statusColors: Record<keyof typeof TestStatusIcons, IconColor> = {
     idle: 'muted',
@@ -241,8 +280,8 @@ export const TestStatusIcon: React.FC<{
     pending: 'muted'
   };
 
-  const animationClass = animated && (status === 'starting' || status === 'running') 
-    ? 'animate-spin' 
+  const animationClass = animated && (status === 'starting' || status === 'running')
+    ? 'animate-spin'
     : '';
 
   return (
@@ -339,7 +378,7 @@ export const IconUsageGuide: React.FC = () => {
   return (
     <div className="space-y-8 p-6 bg-gray-900 text-white">
       <h2 className="text-2xl font-bold">统一图标系统使用指南</h2>
-      
+
       {/* 测试类型图标 */}
       <div>
         <h3 className="text-lg font-semibold mb-4">测试类型图标</h3>

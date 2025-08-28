@@ -5,7 +5,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ApiError, ApiResponse } from '../types/api.types';
+import type { ApiError } from '../types/api.types';
+import type { ApiResponse } from '../types/unified/apiResponse.types';
 
 // ==================== 状态类型定义 ====================
 
@@ -113,7 +114,9 @@ export function useDataState<T = any>(
         onSuccess?.(responseData);
         return responseData;
       } else {
-        const apiError: ApiError = response.error || {
+        const apiError: ApiError = (typeof response.error === 'string'
+          ? { code: 'UNKNOWN_ERROR' as any, message: response.error, timestamp: new Date().toISOString() }
+          : response.error) || {
           code: 'UNKNOWN_ERROR',
           message: 'Unknown error occurred',
           timestamp: new Date().toISOString()

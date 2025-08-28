@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import SecurityTestResult from '../types';
+// import SecurityTestResult from '../types'; // 避免冲突
 import type {
   BaseTestConfig,
   BaseTestResult
@@ -181,7 +181,7 @@ export interface SecurityTestConfig extends BaseTestConfig {
   customChecks?: string[];
 }
 
-export interface SecurityTestResult extends BaseTestResult {
+export interface LocalSecurityTestResult extends BaseTestResult {
   testType: 'security';
   securityScore: number;
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
@@ -519,6 +519,8 @@ export interface StressTestMetrics {
   throughput: number;
   errorRate: number;
   concurrentUsers: number;
+  // 添加索引签名以兼容BaseTestResult的metrics类型
+  [key: string]: number;
 }
 
 export interface StressTestError {
@@ -559,7 +561,7 @@ export type TestConfig =
 export type TestResult =
   | SEOTestResult
   | PerformanceTestResult
-  | SecurityTestResult
+  | LocalSecurityTestResult
   | APITestResult
   | CompatibilityTestResult
   | AccessibilityTestResult

@@ -5,13 +5,11 @@
  */
 
 import type {
-  ApiResponse,
-  PaginationInfo,
-  TestStatus,
-  TestType,
   Timestamp,
   UUID
 } from './common';
+import type { PaginationInfo } from './unified/baseTypes';
+import type { TestStatus, TestType } from './unified/testTypes';
 
 // ==================== 请求配置类型 ====================
 
@@ -73,7 +71,10 @@ export interface PaginatedRequest extends QueryParams {
   // 继承查询参数
 }
 
-export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
+export interface PaginatedResponse<T = any> {
+  success: boolean;
+  data: T[];
+  message?: string;
   meta: {
     pagination: PaginationInfo;
     [key: string]: any;
@@ -91,12 +92,16 @@ export interface TestStartRequest {
   metadata?: Record<string, any>;
 }
 
-export interface TestStartResponse extends ApiResponse<{
-  testId: UUID;
-  sessionId: UUID;
-  status: TestStatus;
-  estimatedDuration?: number;
-}> { }
+export interface TestStartResponse {
+  success: boolean;
+  data: {
+    testId: UUID;
+    sessionId: UUID;
+    status: TestStatus;
+    estimatedDuration?: number;
+  };
+  message?: string;
+}
 
 export interface TestStatusRequest {
   testId: UUID;
@@ -104,17 +109,21 @@ export interface TestStatusRequest {
   includeMetrics?: boolean;
 }
 
-export interface TestStatusResponse extends ApiResponse<{
-  testId: UUID;
-  status: TestStatus;
-  progress: number;
-  currentStep?: string;
-  startTime: Timestamp;
-  endTime?: Timestamp;
-  duration?: number;
-  metrics?: Record<string, any>;
-  error?: string;
-}> { }
+export interface TestStatusResponse {
+  success: boolean;
+  data: {
+    testId: UUID;
+    status: TestStatus;
+    progress: number;
+    currentStep?: string;
+    startTime: Timestamp;
+    endTime?: Timestamp;
+    duration?: number;
+    metrics?: Record<string, any>;
+    error?: string;
+  };
+  message?: string;
+}
 
 export interface TestResultRequest {
   testId: UUID;
@@ -122,33 +131,41 @@ export interface TestResultRequest {
   includeRawData?: boolean;
 }
 
-export interface TestResultResponse extends ApiResponse<{
-  testId: UUID;
-  testType: TestType;
-  status: TestStatus;
-  result: Record<string, any>;
-  summary?: string;
-  score?: number;
-  grade?: string;
-  recommendations?: Array<{
-    category: string;
-    priority: string;
-    title: string;
-    description: string;
-    action: string;
-  }>;
-}> { }
+export interface TestResultResponse {
+  success: boolean;
+  data: {
+    testId: UUID;
+    testType: TestType;
+    status: TestStatus;
+    result: Record<string, any>;
+    summary?: string;
+    score?: number;
+    grade?: string;
+    recommendations?: Array<{
+      category: string;
+      priority: string;
+      title: string;
+      description: string;
+      action: string;
+    }>;
+  };
+  message?: string;
+}
 
 export interface TestCancelRequest {
   testId: UUID;
   reason?: string;
 }
 
-export interface TestCancelResponse extends ApiResponse<{
-  testId: UUID;
-  status: TestStatus;
-  cancelled: boolean;
-}> { }
+export interface TestCancelResponse {
+  success: boolean;
+  data: {
+    testId: UUID;
+    status: TestStatus;
+    cancelled: boolean;
+  };
+  message?: string;
+}
 
 // ==================== 测试历史API类型 ====================
 
@@ -191,20 +208,24 @@ export interface TestHistoryStatsRequest {
   userId?: UUID;
 }
 
-export interface TestHistoryStatsResponse extends ApiResponse<{
-  totalTests: number;
-  successfulTests: number;
-  failedTests: number;
-  averageScore: number;
-  averageDuration: number;
-  testsByType: Record<TestType, number>;
-  testsByStatus: Record<TestStatus, number>;
-  trendsData: Array<{
-    date: string;
-    count: number;
+export interface TestHistoryStatsResponse {
+  success: boolean;
+  data: {
+    totalTests: number;
+    successfulTests: number;
+    failedTests: number;
     averageScore: number;
-  }>;
-}> { }
+    averageDuration: number;
+    testsByType: Record<TestType, number>;
+    testsByStatus: Record<TestStatus, number>;
+    trendsData: Array<{
+      date: string;
+      count: number;
+      averageScore: number;
+    }>;
+  };
+  message?: string;
+}
 
 // ==================== 用户API类型 ====================
 
@@ -212,20 +233,24 @@ export interface UserProfileRequest {
   userId?: UUID; // 如果不提供，获取当前用户
 }
 
-export interface UserProfileResponse extends ApiResponse<{
-  id: UUID;
-  username: string;
-  email: string;
-  fullName?: string;
-  role: string;
-  status: string;
-  avatar?: string;
-  createdAt: Timestamp;
-  lastLoginAt?: Timestamp;
-  preferences: Record<string, any>;
-  profile: Record<string, any>;
-  permissions: string[];
-}> { }
+export interface UserProfileResponse {
+  success: boolean;
+  data: {
+    id: UUID;
+    username: string;
+    email: string;
+    fullName?: string;
+    role: string;
+    status: string;
+    avatar?: string;
+    createdAt: Timestamp;
+    lastLoginAt?: Timestamp;
+    preferences: Record<string, any>;
+    profile: Record<string, any>;
+    permissions: string[];
+  };
+  message?: string;
+}
 
 export interface UpdateUserProfileRequest {
   fullName?: string;
@@ -234,10 +259,14 @@ export interface UpdateUserProfileRequest {
   profile?: Record<string, any>;
 }
 
-export interface UpdateUserProfileResponse extends ApiResponse<{
-  updated: boolean;
-  user: Record<string, any>;
-}> { }
+export interface UpdateUserProfileResponse {
+  success: boolean;
+  data: {
+    updated: boolean;
+    user: Record<string, any>;
+  };
+  message?: string;
+}
 
 export interface ChangePasswordRequest {
   currentPassword: string;
@@ -245,10 +274,14 @@ export interface ChangePasswordRequest {
   confirmPassword: string;
 }
 
-export interface ChangePasswordResponse extends ApiResponse<{
-  changed: boolean;
-  message: string;
-}> { }
+export interface ChangePasswordResponse {
+  success: boolean;
+  data: {
+    changed: boolean;
+    message: string;
+  };
+  message?: string;
+}
 
 // ==================== 系统API类型 ====================
 
@@ -257,38 +290,46 @@ export interface SystemStatsRequest {
   includeDetails?: boolean;
 }
 
-export interface SystemStatsResponse extends ApiResponse<{
-  totalUsers: number;
-  activeUsers: number;
-  totalTests: number;
-  testsToday: number;
-  systemUptime: number;
-  performance: {
-    cpuUsage: number;
-    memoryUsage: number;
-    diskUsage: number;
-    responseTime: number;
-    errorRate: number;
+export interface SystemStatsResponse {
+  success: boolean;
+  data: {
+    totalUsers: number;
+    activeUsers: number;
+    totalTests: number;
+    testsToday: number;
+    systemUptime: number;
+    performance: {
+      cpuUsage: number;
+      memoryUsage: number;
+      diskUsage: number;
+      responseTime: number;
+      errorRate: number;
+    };
+    services: Record<string, {
+      status: 'healthy' | 'warning' | 'critical';
+      responseTime: number;
+      lastCheck: Timestamp;
+    }>;
   };
-  services: Record<string, {
-    status: 'healthy' | 'warning' | 'critical';
-    responseTime: number;
-    lastCheck: Timestamp;
-  }>;
-}> { }
+  message?: string;
+}
 
 export interface SystemHealthRequest {
   includeServices?: boolean;
   includeMetrics?: boolean;
 }
 
-export interface SystemHealthResponse extends ApiResponse<{
-  status: 'healthy' | 'warning' | 'critical';
-  uptime: number;
-  services?: Record<string, any>;
-  resources?: Record<string, any>;
-  metrics?: Record<string, any>;
-}> { }
+export interface SystemHealthResponse {
+  success: boolean;
+  data: {
+    status: 'healthy' | 'warning' | 'critical';
+    uptime: number;
+    services?: Record<string, any>;
+    resources?: Record<string, any>;
+    metrics?: Record<string, any>;
+  };
+  message?: string;
+}
 
 // ==================== 监控API类型 ====================
 
@@ -301,18 +342,22 @@ export interface MonitoringSiteRequest {
   metadata?: Record<string, any>;
 }
 
-export interface MonitoringSiteResponse extends ApiResponse<{
-  id: UUID;
-  name: string;
-  url: string;
-  status: 'online' | 'offline' | 'warning' | 'unknown';
-  checkInterval: number;
-  alertsEnabled: boolean;
-  createdAt: Timestamp;
-  lastCheck?: Timestamp;
-  uptime: number;
-  responseTime: number;
-}> { }
+export interface MonitoringSiteResponse {
+  success: boolean;
+  data: {
+    id: UUID;
+    name: string;
+    url: string;
+    status: 'online' | 'offline' | 'warning' | 'unknown';
+    checkInterval: number;
+    alertsEnabled: boolean;
+    createdAt: Timestamp;
+    lastCheck?: Timestamp;
+    uptime: number;
+    responseTime: number;
+  };
+  message?: string;
+}
 
 export interface MonitoringDataQuery extends QueryParams {
   siteId: UUID;
@@ -343,27 +388,35 @@ export interface ExportRequest {
   includeDetails?: boolean;
 }
 
-export interface ExportResponse extends ApiResponse<{
-  exportId: UUID;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  downloadUrl?: string;
-  expiresAt?: Timestamp;
-  fileSize?: number;
-  recordCount?: number;
-}> { }
+export interface ExportResponse {
+  success: boolean;
+  data: {
+    exportId: UUID;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    downloadUrl?: string;
+    expiresAt?: Timestamp;
+    fileSize?: number;
+    recordCount?: number;
+  };
+  message?: string;
+}
 
 export interface ExportStatusRequest {
   exportId: UUID;
 }
 
-export interface ExportStatusResponse extends ApiResponse<{
-  exportId: UUID;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress: number;
-  downloadUrl?: string;
-  expiresAt?: Timestamp;
-  error?: string;
-}> { }
+export interface ExportStatusResponse {
+  success: boolean;
+  data: {
+    exportId: UUID;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    progress: number;
+    downloadUrl?: string;
+    expiresAt?: Timestamp;
+    error?: string;
+  };
+  message?: string;
+}
 
 // ==================== WebSocket 消息类型 ====================
 
@@ -419,17 +472,21 @@ export interface BatchRequest<T = any> {
   };
 }
 
-export interface BatchResponse<T = any> extends ApiResponse<{
-  totalOperations: number;
-  successfulOperations: number;
-  failedOperations: number;
-  results: Array<{
-    id: UUID;
-    success: boolean;
-    data?: T;
-    error?: string;
-  }>;
-}> { }
+export interface BatchResponse<T = any> {
+  success: boolean;
+  data: {
+    totalOperations: number;
+    successfulOperations: number;
+    failedOperations: number;
+    results: Array<{
+      id: UUID;
+      success: boolean;
+      data?: T;
+      error?: string;
+    }>;
+  };
+  message?: string;
+}
 
 // ==================== 文件上传类型 ====================
 
@@ -439,14 +496,18 @@ export interface FileUploadRequest {
   metadata?: Record<string, any>;
 }
 
-export interface FileUploadResponse extends ApiResponse<{
-  fileId: UUID;
-  filename: string;
-  size: number;
-  mimeType: string;
-  url: string;
-  expiresAt?: Timestamp;
-}> { }
+export interface FileUploadResponse {
+  success: boolean;
+  data: {
+    fileId: UUID;
+    filename: string;
+    size: number;
+    mimeType: string;
+    url: string;
+    expiresAt?: Timestamp;
+  };
+  message?: string;
+}
 
 // ==================== 搜索API类型 ====================
 

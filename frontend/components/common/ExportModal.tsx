@@ -1,5 +1,6 @@
+import React from 'react';
 import { BarChart3, Database, Download, Grid, X, Zap } from 'lucide-react';
-import type { useState, ComponentType, FC } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
 // 导出类型定义
@@ -137,11 +138,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* 背景遮罩 */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* 模态框内容 */}
       <div className="relative bg-gray-900 rounded-xl border border-gray-700 shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* 头部 */}

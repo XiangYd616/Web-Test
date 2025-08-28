@@ -169,13 +169,13 @@ export class CacheKeyGenerator {
   private static simpleHash(str: string): string {
     let hash = 0;
     if (str.length === 0) return hash.toString();
-    
+
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // 转换为32位整数
     }
-    
+
     return Math.abs(hash).toString(36);
   }
 }
@@ -325,19 +325,21 @@ export function cached(
 
     descriptor.value = async function (...args: any[]) {
       const cacheKey = keyGenerator ? keyGenerator(...args) : `${propertyName}:${JSON.stringify(args)}`;
-      
+
       // 尝试从缓存获取
-      const cached = await cacheManager.get(cacheKey, finalConfig.strategy);
+      // 临时禁用缓存功能，等待cacheManager实现
+      const cached: any = null; // await cacheManager.get(cacheKey, finalConfig.strategy);
       if (cached !== null) {
         return cached;
       }
 
       // 执行原方法
       const result = await method.apply(this, args);
-      
+
       // 存储到缓存
-      await cacheManager.set(cacheKey, result, finalConfig.ttl, finalConfig.strategy);
-      
+      // 临时禁用缓存功能，等待cacheManager实现
+      // await cacheManager.set(cacheKey, result, finalConfig.ttl, finalConfig.strategy);
+
       return result;
     };
 

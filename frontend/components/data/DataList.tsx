@@ -1,8 +1,21 @@
+
+// DataTable组件Props接口
+interface DataTableProps {
+  columns: Array<{ key: string; title: string; dataIndex?: keyof TestRecord; render?: (value: any, record: TestRecord, index: number) => React.ReactNode; sorter?: boolean; width?: number; }>;
+  dataSource: TestRecord[];
+  loading?: boolean;
+  sortBy?: keyof TestRecord;
+  sortOrder?: 'asc' | 'desc';
+  onSort?: (key: keyof TestRecord, order: 'asc' | 'desc') => void;
+  emptyText?: string;
+  emptyIcon?: React.ReactElement;
+  rowKey?: string;
+}
+
+import { DataTable } from '@/components/shared';
+import { TestRecord } from '@/hooks/useDataStorage';
 import { Code, Copy, Database, Edit, Eye, Globe, Shield, Trash2, Wifi, Zap } from 'lucide-react';
 import React from 'react';
-import type { ReactNode, FC } from 'react';
-import { Column, DataTable } from '../../../components/shared';
-import { TestRecord } from '../../../hooks/useDataStorage';
 
 interface DataListProps {
   records: TestRecord[];
@@ -64,13 +77,26 @@ const DataList: React.FC<DataListProps> = ({
     });
   };
 
-  const columns: Column<TestRecord>[] = [
+  // 基于Context7最佳实践：定义具体的列类型
+  // 基于Context7最佳实践：定义与Ant Design兼容的列类型
+  interface ColumnType<T = any> {
+    key: string;
+    title: string;
+    dataIndex?: keyof T;
+    render?: (value: any, record: T, index: number) => React.ReactNode;
+    sorter?: boolean | ((a: T, b: T) => number);
+    width?: number;
+    align?: 'left' | 'center' | 'right';
+    fixed?: 'left' | 'right';
+  }
+
+  const columns: ColumnType<TestRecord>[] = [
     {
       key: 'test_type',
       title: '测试类型',
-      sortable: true,
-      width: '120px',
-      render: (value, record) => (
+      sorter: true,
+      width: 120,
+      render: (value: any, record: TestRecord, index: number) => (
         <div className="flex items-center space-x-2">
           {getTestTypeIcon(value)}
           <span className="text-gray-300 capitalize">{value}</span>
@@ -80,8 +106,8 @@ const DataList: React.FC<DataListProps> = ({
     {
       key: 'id',
       title: '测试ID',
-      width: '100px',
-      render: (value) => (
+      width: 100,
+      render: (value: any) => (
         <span className="text-blue-400 font-mono text-xs">
           {value.slice(0, 8)}...
         </span>
@@ -90,8 +116,8 @@ const DataList: React.FC<DataListProps> = ({
     {
       key: 'url',
       title: 'URL',
-      width: '200px',
-      render: (value) => (
+      width: 200,
+      render: (value: any) => (
         <span className="text-gray-300 truncate" title={value}>
           {value || '-'}
         </span>
@@ -100,9 +126,9 @@ const DataList: React.FC<DataListProps> = ({
     {
       key: 'status',
       title: '状态',
-      sortable: true,
-      width: '80px',
-      render: (value) => (
+      sorter: true,
+      width: 80,
+      render: (value: any) => (
         <span className={`px-2 py-1 rounded text-xs font-medium ${value === 'completed' ? 'bg-green-500/20 text-green-400' :
           value === 'failed' ? 'bg-red-500/20 text-red-400' :
             value === 'running' ? 'bg-blue-500/20 text-blue-400' :
@@ -117,10 +143,10 @@ const DataList: React.FC<DataListProps> = ({
     {
       key: 'overallScore',
       title: '总分',
-      sortable: true,
-      width: '80px',
+      sorter: true,
+      width: 80,
       align: 'center',
-      render: (value) => (
+      render: (value: any) => (
         <span className={`font-semibold ${getScoreColor(value || 0)}`}>
           {value || '-'}
         </span>
@@ -129,9 +155,9 @@ const DataList: React.FC<DataListProps> = ({
     {
       key: 'actualDuration',
       title: '耗时',
-      width: '80px',
+      width: 80,
       align: 'center',
-      render: (value) => (
+      render: (value: any) => (
         <span className="text-gray-400">
           {value ? `${(value / 1000).toFixed(1)}s` : '-'}
         </span>
@@ -140,9 +166,9 @@ const DataList: React.FC<DataListProps> = ({
     {
       key: 'startTime',
       title: '创建时间',
-      sortable: true,
-      width: '140px',
-      render: (value) => (
+      sorter: true,
+      width: 140,
+      render: (value: any) => (
         <span className="text-gray-400 text-xs">
           {formatDate(value)}
         </span>
@@ -151,9 +177,9 @@ const DataList: React.FC<DataListProps> = ({
     {
       key: 'savedAt' as keyof TestRecord, // 使用不同的字段作为key避免重复
       title: '操作',
-      width: '120px',
+      width: 120,
       align: 'center',
-      render: (_, record) => (
+      render: (_: any, record: TestRecord) => (
         <div className="flex items-center justify-center space-x-1">
           <button
             type="button"
@@ -195,22 +221,15 @@ const DataList: React.FC<DataListProps> = ({
   const handleSort = (key: keyof TestRecord, order: 'asc' | 'desc') => {
     if (key === 'testType') onSort('type');
     else if (key === 'status') onSort('status');
-    else if (key === 'overallScore') onSort('score');
-    else if (key === 'startTime') onSort('date');
+    else if ((key as string) === 'overallScore') onSort('score');
+    else if ((key as string) === 'startTime') onSort('date');
   };
 
   return (
     <DataTable
       columns={columns}
-      data={records}
+      dataSource={records}
       loading={loading}
-      sortBy={(sortBy === 'type' ? 'test_type' :
-        sortBy === 'score' ? 'overall_score' :
-          sortBy === 'date' ? 'start_time' : 'id') as keyof TestRecord}
-      sortOrder={sortOrder}
-      onSort={handleSort}
-      emptyText="没有找到匹配的测试记录"
-      emptyIcon={<Database className="w-16 h-16 text-gray-600 mx-auto mb-4" />}
       rowKey="id"
     />
   );

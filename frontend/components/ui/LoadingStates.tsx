@@ -1,4 +1,6 @@
-import type { useState, ReactNode, ComponentType, FC } from 'react';
+import React from 'react';
+import { useState } from 'react';
+import type { ReactNode, ComponentType, FC } from 'react';;
 
 import { Activity, CheckCircle, Clock, Loader, Target, Zap } from 'lucide-react';
 

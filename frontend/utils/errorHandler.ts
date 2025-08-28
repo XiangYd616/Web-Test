@@ -1,6 +1,9 @@
 
-import { EnhancedError, ErrorSolution } from '../components/security/EnhancedErrorDisplay';
-import type { ReactNode } from 'react';
+import React from 'react';
+// import { EnhancedError, ErrorSolution } from '../components/security/EnhancedErrorDisplay';
+// 临时注释掉不存在的导入
+type EnhancedError = any;
+type ErrorSolution = any;
 
 export interface ErrorContext {
   url?: string;

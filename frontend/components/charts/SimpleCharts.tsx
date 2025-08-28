@@ -1,5 +1,6 @@
+import React from 'react';
 import { format } from 'date-fns';
-import type { useMemo, useState, FC } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Area, AreaChart, Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Funnel, FunnelChart, LabelList, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -1411,7 +1412,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
       let minResponseTime = 0;
 
       if (hasResponseTimes) {
-        const sum = group.responseTimes.reduce((acc, time) => acc + time, 0);
+        const sum = group.responseTimes.reduce((acc: number, time: number) => acc + time, 0);
         avgResponseTime = Math.round(sum / group.responseTimes.length);
         maxResponseTime = Math.max(...group.responseTimes);
         minResponseTime = Math.min(...group.responseTimes);

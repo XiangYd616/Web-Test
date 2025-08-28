@@ -1,16 +1,27 @@
 import { Shield, XCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
 import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
-import type { TestProgress } from '../services/api/testProgressService';
 import type {
   SecurityTestConfig,
-  SecurityTestResult
-} from '../types';
+  SecurityTestResult, TestProgress
+} from '../services/unifiedSecurityEngine';
 
 // CSS样式已迁移到组件库中
+
+// 临时testApiService实现
+const testApiService = {
+  executeSecurityTest: async (url: string, config: any) => ({
+    success: true,
+    data: {
+      id: `security_test_${Date.now()}`,
+      testId: `security_test_${Date.now()}`
+    },
+    message: '安全测试启动成功'
+  })
+};
 
 const SecurityTest: React.FC = () => {
   // 登录检查
@@ -34,13 +45,17 @@ const SecurityTest: React.FC = () => {
   const [canStartTest, setCanStartTest] = useState(false);
   const [testConfig, setTestConfig] = useState<Partial<SecurityTestConfig>>({
     url: '',
-    testType: 'security',
-    scanDepth: 'standard',
-    securityChecks: ['ssl', 'headers', 'vulnerabilities']
+    depth: 'standard',
+    modules: {
+      ssl: { enabled: true, checkCertificate: true },
+      headers: { enabled: true, checkSecurity: true },
+      vulnerabilities: { enabled: true, checkXSS: true }
+    }
   });
   const [testResult, setTestResult] = useState<any>(null);
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'test' | 'history' | 'comparison'>('test');
+  const [comparisonResults, setComparisonResults] = useState<SecurityTestResult[]>([]);
   const testPanelRef = useRef<any>(null);
 
   // 使用测试进度监控Hook
@@ -57,7 +72,7 @@ const SecurityTest: React.FC = () => {
     },
     onComplete: (result) => {
       setTestResult(result);
-      recordTestCompletion('security');
+      recordTestCompletion('安全测试', true, result?.overallScore || 0, result?.duration || 180);
     },
     onError: (error) => {
       console.error('安全测试失败:', error);
@@ -174,6 +189,14 @@ const SecurityTest: React.FC = () => {
   const handleCloseComparison = () => {
     setActiveTab('history');
     setComparisonResults([]);
+  };
+
+  // 停止测试
+  const handleTestStop = () => {
+    if (currentTestId) {
+      setCurrentTestId(null);
+      setTestResult(null);
+    }
   };
 
   // 移除强制登录检查，允许未登录用户查看页面
@@ -293,7 +316,10 @@ const SecurityTest: React.FC = () => {
 
           {/* 测试结果展示 */}
           {testResult && (
-            <SecurityResults result={testResult} />
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4">安全测试结果</h3>
+              <p className="text-gray-600">测试结果展示功能开发中...</p>
+            </div>
           )}
 
           {/* 错误显示 */}

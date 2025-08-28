@@ -19,7 +19,7 @@ class WebSocketService {
    * 初始化WebSocket服务器
    */
   initialize(server) {
-    this.wss = new WebSocket.Server({ 
+    this.wss = new WebSocket.Server({
       server,
       path: '/ws',
       verifyClient: this.verifyClient.bind(this)
@@ -36,9 +36,9 @@ class WebSocketService {
     try {
       const url = new URL(info.req.url, 'http://localhost');
       const token = url.searchParams.get('token');
-      
+
       if (!token) {
-        
+
         console.log('❌ WebSocket连接被拒绝: 缺少token');
         return false;
       }
@@ -59,7 +59,7 @@ class WebSocketService {
   handleConnection(ws, req) {
     const clientId = uuidv4();
     const user = req.user;
-    
+
     // 存储客户端信息
     const clientInfo = {
       id: clientId,
@@ -69,9 +69,9 @@ class WebSocketService {
       lastPing: new Date(),
       subscriptions: new Set()
     };
-    
+
     this.clients.set(clientId, clientInfo);
-    
+
     console.log(`✅ 用户 ${user.email} 已连接 WebSocket (${clientId})`);
 
     // 发送连接确认
@@ -83,10 +83,10 @@ class WebSocketService {
 
     // 设置消息处理
     ws.on('message', (data) => this.handleMessage(clientId, data));
-    
+
     // 设置连接关闭处理
     ws.on('close', () => this.handleDisconnection(clientId));
-    
+
     // 设置错误处理
     ws.on('error', (error) => this.handleError(clientId, error));
 
@@ -105,7 +105,7 @@ class WebSocketService {
     try {
       const message = JSON.parse(data);
       const client = this.clients.get(clientId);
-      
+
       if (!client) return;
 
       console.log(`📨 收到消息 from ${clientId}:`, message.type);
@@ -114,23 +114,23 @@ class WebSocketService {
         case 'subscribe_test':
           this.handleTestSubscription(clientId, message.testId);
           break;
-          
+
         case 'unsubscribe_test':
           this.handleTestUnsubscription(clientId, message.testId);
           break;
-          
+
         case 'join_room':
           this.handleJoinRoom(clientId, message.room);
           break;
-          
+
         case 'leave_room':
           this.handleLeaveRoom(clientId, message.room);
           break;
-          
+
         case 'ping':
           this.sendToClient(clientId, { type: 'pong', timestamp: new Date().toISOString() });
           break;
-          
+
         default:
           console.log(`⚠️ 未知消息类型: ${message.type}`);
       }
@@ -152,7 +152,7 @@ class WebSocketService {
     if (!client) return;
 
     client.subscriptions.add(`test:${testId}`);
-    
+
     this.sendToClient(clientId, {
       type: 'subscription_confirmed',
       subscription: `test:${testId}`,
@@ -170,7 +170,7 @@ class WebSocketService {
     if (!client) return;
 
     client.subscriptions.delete(`test:${testId}`);
-    
+
     this.sendToClient(clientId, {
       type: 'unsubscription_confirmed',
       subscription: `test:${testId}`,
@@ -187,9 +187,9 @@ class WebSocketService {
     if (!this.rooms.has(roomName)) {
       this.rooms.set(roomName, new Set());
     }
-    
+
     this.rooms.get(roomName).add(clientId);
-    
+
     const client = this.clients.get(clientId);
     if (client) {
       client.subscriptions.add(`room:${roomName}`);
@@ -210,13 +210,13 @@ class WebSocketService {
   handleLeaveRoom(clientId, roomName) {
     if (this.rooms.has(roomName)) {
       this.rooms.get(roomName).delete(clientId);
-      
+
       // 如果房间为空，删除房间
       if (this.rooms.get(roomName).size === 0) {
         this.rooms.delete(roomName);
       }
     }
-    
+
     const client = this.clients.get(clientId);
     if (client) {
       client.subscriptions.delete(`room:${roomName}`);
@@ -250,7 +250,7 @@ class WebSocketService {
 
     // 移除客户端
     this.clients.delete(clientId);
-    
+
     console.log(`❌ 客户端 ${clientId} 已断开连接`);
   }
 
@@ -267,9 +267,9 @@ class WebSocketService {
   sendToClient(clientId, message) {
     const client = this.clients.get(clientId);
     if (!client || client.ws.readyState !== WebSocket.OPEN) {
-      
-        return false;
-      }
+
+      return false;
+    }
 
     try {
       client.ws.send(JSON.stringify({
@@ -286,15 +286,23 @@ class WebSocketService {
   /**
    * 广播测试进度更新
    */
-  broadcastTestProgress(testId, progress, currentStep, totalSteps, message) {
+  broadcastTestProgress(testId, progress, currentStep, totalSteps, message, metrics = {}) {
     const progressMessage = {
       type: 'test_progress',
       testId,
-      progress: Math.min(100, Math.max(0, progress)),
-      currentStep,
-      totalSteps,
-      message,
-      timestamp: new Date().toISOString()
+      data: {
+        progress: Math.min(100, Math.max(0, progress)),
+        currentStep,
+        totalSteps,
+        message,
+        responseTime: metrics.responseTime || 0,
+        throughput: metrics.throughput || 0,
+        activeUsers: metrics.activeUsers || 0,
+        errorRate: metrics.errorRate || 0,
+        successRate: metrics.successRate || (100 - (metrics.errorRate || 0)),
+        phase: metrics.phase,
+        timestamp: new Date().toISOString()
+      }
     };
 
     this.broadcastToSubscribers(`test:${testId}`, progressMessage);
@@ -358,7 +366,7 @@ class WebSocketService {
    */
   broadcastToSubscribers(subscription, message) {
     let sentCount = 0;
-    
+
     for (const [clientId, client] of this.clients.entries()) {
       if (client.subscriptions.has(subscription)) {
         if (this.sendToClient(clientId, message)) {
@@ -366,7 +374,7 @@ class WebSocketService {
         }
       }
     }
-    
+
     return sentCount;
   }
 
@@ -383,7 +391,7 @@ class WebSocketService {
         sentCount++;
       }
     }
-    
+
     return sentCount;
   }
 

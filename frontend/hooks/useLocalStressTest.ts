@@ -79,7 +79,7 @@ export const useLocalStressTest = () => {
 
   // 设置事件监听器
   useEffect(() => {
-    if (!isAvailable || !window.environment?.localStressTest) return;
+    if (!isAvailable || !window.environment?.localStressTest) return undefined;
 
     const api = window.environment.localStressTest;
 
@@ -123,7 +123,7 @@ export const useLocalStressTest = () => {
 
   // 定期更新系统使用情况
   useEffect(() => {
-    if (!isAvailable || !isRunning || !window.environment?.localStressTest?.getSystemUsage) return;
+    if (!isAvailable || !isRunning || !window.environment?.localStressTest?.getSystemUsage) return undefined;
 
     const updateSystemUsage = async () => {
       try {

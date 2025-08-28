@@ -514,7 +514,15 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         status: 'running',
         startTime: new Date().toISOString(),
         createdAt: new Date().toISOString(),
-        config: testData.config || {},
+        config: testData.config || {
+          users: 10,
+          duration: 60,
+          rampUpTime: 10,
+          testType: 'gradual',
+          method: 'GET',
+          timeout: 30,
+          thinkTime: 1
+        },
         testId: testData.testId,
         userId: 'local',
         tags: testData.tags || [],
@@ -548,7 +556,15 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         status: 'running',
         startTime: new Date().toISOString(),
         createdAt: new Date().toISOString(),
-        config: testData.config || {},
+        config: testData.config || {
+          users: 10,
+          duration: 60,
+          rampUpTime: 10,
+          testType: 'gradual',
+          method: 'GET',
+          timeout: 30,
+          thinkTime: 1
+        },
         testId: testData.testId,
         userId: 'local',
         tags: testData.tags || [],

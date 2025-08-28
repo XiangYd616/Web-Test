@@ -3,9 +3,10 @@
  * 为所有测试页面提供一致的用户反馈体验，但不强制替换现有反馈机制
  */
 
-import type { useEffect, useState, ReactNode, ComponentType, FC } from 'react';
-import { UnifiedIcon, TestStatusIcon, InfoIcon } from './UnifiedIcons';
-import { CheckCircle, XCircle, AlertTriangle, Info, X, Loader } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Info, Loader, X, XCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { TestStatusIcon, UnifiedIcon } from './UnifiedIcons';
+;
 
 // 反馈类型
 export type FeedbackType = 'success' | 'error' | 'warning' | 'info' | 'loading';
@@ -160,6 +161,7 @@ export const Notification: React.FC<NotificationProps> = ({
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [duration, persistent, feedbackProps.onClose]);
 
   // 位置样式
@@ -225,7 +227,11 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     `}>
       {showIcon && (
         <TestStatusIcon
-          status={status === 'loading' ? 'running' : status === 'idle' ? 'idle' : status}
+          status={status === 'loading' ? 'running' :
+            status === 'idle' ? 'idle' :
+              status === 'success' ? 'completed' :
+                status === 'error' ? 'failed' :
+                  status === 'warning' ? 'warning' : 'idle'}
           size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
           animated={status === 'loading'}
         />
@@ -306,23 +312,23 @@ export const LoadingFeedback: React.FC<{
   size = 'md',
   className = ''
 }) => {
-  return (
-    <div className={`flex items-center justify-center space-x-3 ${className}`}>
-      <UnifiedIcon
-        icon={Loader}
-        size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
-        color="primary"
-        className="animate-spin"
-      />
-      <span className={`
+    return (
+      <div className={`flex items-center justify-center space-x-3 ${className}`}>
+        <UnifiedIcon
+          icon={Loader}
+          size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
+          color="primary"
+          className="animate-spin"
+        />
+        <span className={`
         ${size === 'sm' ? 'text-sm' : size === 'lg' ? 'text-lg' : 'text-base'}
         text-gray-300
       `}>
-        {message}
-      </span>
-    </div>
-  );
-};
+          {message}
+        </span>
+      </div>
+    );
+  };
 
 /**
  * 空状态组件
@@ -340,28 +346,28 @@ export const EmptyState: React.FC<{
   icon: Icon,
   className = ''
 }) => {
-  return (
-    <div className={`text-center py-12 ${className}`}>
-      {Icon && (
-        <div className="mb-4">
-          <UnifiedIcon
-            icon={Icon}
-            size="2xl"
-            color="muted"
-            className="mx-auto"
-          />
-        </div>
-      )}
-      <h3 className="text-lg font-medium text-gray-300 mb-2">{title}</h3>
-      {description && (
-        <p className="text-gray-500 mb-6 max-w-md mx-auto">{description}</p>
-      )}
-      {action && (
-        <div>{action}</div>
-      )}
-    </div>
-  );
-};
+    return (
+      <div className={`text-center py-12 ${className}`}>
+        {Icon && (
+          <div className="mb-4">
+            <UnifiedIcon
+              icon={Icon as any}
+              size="2xl"
+              color="muted"
+              className="mx-auto"
+            />
+          </div>
+        )}
+        <h3 className="text-lg font-medium text-gray-300 mb-2">{title}</h3>
+        {description && (
+          <p className="text-gray-500 mb-6 max-w-md mx-auto">{description}</p>
+        )}
+        {action && (
+          <div>{action}</div>
+        )}
+      </div>
+    );
+  };
 
 /**
  * 反馈使用示例组件（用于文档）

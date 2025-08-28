@@ -1,6 +1,7 @@
 import { Activity, Archive, BarChart3, Copy, Database, Download, Edit, Eye, FileText, Filter, HardDrive, RefreshCw, RotateCcw, Search, Settings, Shield, TestTube, Trash2, Users } from 'lucide-react';
-import type { createElement, useEffect, useState, FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { advancedDataManager, DataAnalysisResult, DataQuery, DataRecord } from '../../services/advancedDataService';
+;
 
 interface AdvancedDataManagerProps {
   className?: string;
@@ -35,7 +36,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
     setLoading(true);
     try {
       const result = await advancedDataManager.queryData(query);
-      setRecords(result?.data || []);
+      setRecords(result || []);
     } catch (error) {
       console.error('Failed to load data:', error);
       setRecords([]); // 确保在错误时设置为空数组
@@ -46,7 +47,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
 
   const loadAnalytics = async () => {
     try {
-      const analyticsData = await advancedDataManager.getAnalytics();
+      const analyticsData = await advancedDataManager.getAnalytics(query);
       setAnalytics(analyticsData);
     } catch (error) {
       console.error('Failed to load analytics:', error);
@@ -55,7 +56,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    setQuery(prev => ({
+    setQuery((prev: DataQuery) => ({
       ...prev,
       search: term,
       offset: 0
@@ -63,7 +64,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
   };
 
   const handleFilterChange = (filters: Partial<DataQuery>) => {
-    setQuery(prev => ({
+    setQuery((prev: DataQuery) => ({
       ...prev,
       ...filters,
       pagination: {
@@ -104,7 +105,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
         id
       }));
 
-      await advancedDataManager.batchOperation(operations);
+      await advancedDataManager.batchOperation('delete', Array.from(selectedRecords));
       setSelectedRecords(new Set());
       loadData();
     } catch (error) {
@@ -115,17 +116,14 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
 
   const handleExport = async (format: 'json' | 'csv' | 'xlsx') => {
     try {
-      const result = await advancedDataManager.exportData({
-        query: selectedRecords.size > 0 ? {
-          ...query,
-          // 只导出选中的记录
-        } : query,
-        format,
-        compression: true
-      });
+      const result = await advancedDataManager.exportData(format, selectedRecords.size > 0 ? {
+        ...query,
+        // 只导出选中的记录
+      } : query);
 
       // 创建下载链接
-      const url = URL.createObjectURL(result);
+      const blob = new Blob([result], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `data-export-${Date.now()}.${format}`;
@@ -306,11 +304,11 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                       <label htmlFor="sort-field-select" className="block text-sm font-medium text-gray-300 mb-2">排序方式</label>
                       <select
                         id="sort-field-select"
-                        value={query.sort?.field || 'created_at'}
+                        value={typeof query.sort === 'object' ? query.sort.field : 'created_at'}
                         onChange={(e) => handleFilterChange({
                           sort: {
                             field: e.target.value,
-                            order: query.sort?.order || 'desc'
+                            order: typeof query.sort === 'object' ? query.sort.order : 'desc'
                           }
                         })}
                         className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2"
@@ -327,10 +325,10 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                       <label htmlFor="sort-order-select" className="block text-sm font-medium text-gray-300 mb-2">排序顺序</label>
                       <select
                         id="sort-order-select"
-                        value={query.sort?.order || 'desc'}
+                        value={typeof query.sort === 'object' ? query.sort.order : 'desc'}
                         onChange={(e) => handleFilterChange({
                           sort: {
-                            field: query.sort?.field || 'createdAt',
+                            field: typeof query.sort === 'object' ? query.sort.field : 'createdAt',
                             order: e.target.value as 'asc' | 'desc'
                           }
                         })}
@@ -438,7 +436,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex flex-wrap gap-1">
-                                {record.metadata.tags.slice(0, 2).map((tag, index) => (
+                                {record.metadata.tags.slice(0, 2).map((tag: string, index: number) => (
                                   <span
                                     key={index}
                                     className="px-2 py-1 text-xs bg-blue-600/20 text-blue-300 rounded"

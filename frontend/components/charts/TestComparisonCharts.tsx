@@ -1,6 +1,7 @@
 
-import type { useMemo, useState, FC } from 'react';
+import React from 'react';
 import { BarChart3, Download, GitCompare, Target, TrendingUp } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import { Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 

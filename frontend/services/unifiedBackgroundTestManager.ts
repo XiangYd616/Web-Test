@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import type {
+import {
   CompatibilityTestConfig,
   NetworkTestConfig,
   TestStatus,
@@ -60,8 +60,8 @@ class UnifiedBackgroundTestManager extends EventEmitter {
   private initializeWorkers() {
     // 为每种测试类型初始化Worker占位
     const testTypes: TestType[] = [
-      'stress', 'performance', 'security', 'api',
-      'compatibility', 'seo', 'ux', 'network', 'database'
+      TestType.STRESS, TestType.PERFORMANCE, TestType.SECURITY, TestType.API,
+      TestType.COMPATIBILITY, TestType.SEO, TestType.UX, TestType.NETWORK, TestType.DATABASE
     ];
 
     testTypes.forEach(type => {
@@ -87,7 +87,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
       id: taskId,
       type,
       config,
-      status: 'pending',
+      status: TestStatus.PENDING,
       progress: 0,
       currentStep: '准备测试...',
       startTime: new Date(),
@@ -113,7 +113,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
     } else {
       // 否则加入队列
       this.taskQueue.push(task);
-      task.status = 'queued';
+      task.status = TestStatus.PENDING;
       this.emit(`status:${taskId}`, 'queued');
     }
 
@@ -125,14 +125,14 @@ class UnifiedBackgroundTestManager extends EventEmitter {
    */
   private async executeTask(task: BackgroundTestTask) {
     try {
-      task.status = 'running';
+      task.status = TestStatus.RUNNING;
       this.emit(`status:${task.id}`, 'running');
       this.emit(`progress:${task.id}`, 0, '开始测试...');
 
       // 根据测试类型执行相应的测试逻辑
       const results = await this.runTestByType(task);
 
-      task.status = 'completed';
+      task.status = TestStatus.COMPLETED;
       task.endTime = new Date();
       task.results = results;
       task.progress = 100;
@@ -142,7 +142,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
       this.emit(`complete:${task.id}`, results);
 
     } catch (error) {
-      task.status = 'failed';
+      task.status = TestStatus.FAILED;
       task.endTime = new Date();
       task.error = error instanceof Error ? error.message : String(error);
 
@@ -269,8 +269,8 @@ class UnifiedBackgroundTestManager extends EventEmitter {
       id: task.id,
       timestamp: new Date().toISOString(),
       url: config.url,
-      device: config.device || 'desktop',
-      network: config.network || '4g',
+      // device: config.device || 'desktop', // 临时注释，等待UXTestConfig接口完善
+      // network: config.network || '4g', // 临时注释，等待UXTestConfig接口完善
       overallScore: 0,
       coreWebVitals: {},
       performanceMetrics: {},
@@ -411,17 +411,17 @@ class UnifiedBackgroundTestManager extends EventEmitter {
     if (!task) return false;
 
     if (task.status === 'running') {
-      task.status = 'cancelled';
+      task.status = TestStatus.CANCELLED;
       task.endTime = new Date();
       this.emit(`status:${taskId}`, 'cancelled');
       return true;
     }
 
-    if (task.status === 'queued') {
+    if (task.status === TestStatus.PENDING) {
       const queueIndex = this.taskQueue.findIndex(t => t.id === taskId);
       if (queueIndex !== -1) {
         this.taskQueue.splice(queueIndex, 1);
-        task.status = 'cancelled';
+        task.status = TestStatus.CANCELLED;
         this.emit(`status:${taskId}`, 'cancelled');
         return true;
       }

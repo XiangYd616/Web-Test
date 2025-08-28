@@ -1,4 +1,3 @@
-import { TestProgress } from '../../services/api/testProgressService';
 /**
  * API服务统一导出 - 重构版本
  * 版本: v2.0.0
@@ -7,9 +6,7 @@ import { TestProgress } from '../../services/api/testProgressService';
  */
 
 // 主要API服务导出
-export {
-    UnifiedApiService, unifiedApiService as apiService, default as defaultApiService
-} from './unifiedApiService';
+export { unifiedApiService as apiService, default as defaultApiService, UnifiedApiService } from './unifiedApiService';
 
 // 类型导出
 export type {
@@ -23,5 +20,8 @@ export { unifiedApiService as baseApiService, unifiedApiService as enhancedApiSe
 export * from './errorHandler';
 
 // 默认导出
+// 创建默认实例
+import { UnifiedApiService } from './unifiedApiService';
+const unifiedApiService = new UnifiedApiService();
 export default unifiedApiService;
 

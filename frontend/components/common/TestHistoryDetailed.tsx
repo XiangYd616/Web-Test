@@ -1,8 +1,9 @@
 import { AlertCircle, Archive, BarChart3, CheckCircle, Clock, Database, Download, Eye, FileText, Filter, Globe, MoreHorizontal, RefreshCw, Search, Shield, Star, Tag, Trash2, TrendingUp, XCircle, Zap } from 'lucide-react';
-import type { useCallback, useEffect, useState, FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
-import { EnhancedTestRecord, TestHistoryQuery, TestHistoryResponse, TestHistoryStatistics, TestStatus, TestType } from '../../types/testHistory';
+import { EnhancedTestRecord, TestHistoryQuery, TestHistoryResponse, TestHistoryStatistics } from '../../types/testHistory.types';
+import { TestStatus, TestType } from '../../types/unified/testTypes.types';
 
 interface TestHistoryDetailedProps {
   className?: string;
@@ -95,13 +96,13 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
       const data: TestHistoryResponse = await response.json();
 
       if (data.success) {
-        setTestHistory(data.data.tests);
+        setTestHistory(data.data.tests as unknown as EnhancedTestRecord[]);
         setPagination(data.data.pagination);
-        if (data.data.filters) {
-          setFilterOptions(data.data.filters);
+        if ((data.data as any).filters) {
+          setFilterOptions((data.data as any).filters);
         }
       } else {
-        throw new Error(data.message || '获取测试历史失败');
+        throw new Error((data as any).message || '获取测试历史失败');
       }
     } catch (error) {
       console.error('获取测试历史失败:', error);
@@ -554,7 +555,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
                 min="0"
                 max="100"
                 className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
-                value={query.minScore || ''}
+                value={(query as any).minScore || ''}
                 onChange={(e) => handleFilter('minScore', e.target.value ? parseFloat(e.target.value) : undefined)}
               />
             </label>

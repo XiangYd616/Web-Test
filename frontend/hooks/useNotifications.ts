@@ -283,7 +283,7 @@ export const useNotifications = () => {
       }
     } catch (error) {
       clearTimeout(timeoutId);
-      if (error.name === 'AbortError') {
+      if ((error as any)?.name === 'AbortError') {
         throw new Error('Request timeout');
       }
       throw error;

@@ -4,13 +4,12 @@
  * 版本: v2.0.0
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import type { 
-  ApiResponse, 
-  ApiSuccessResponse, 
-  ApiErrorResponse, 
-  PaginatedResponse,
-  PaginationInfo 
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type {
+  ApiErrorResponse,
+  ApiResponse,
+  ApiSuccessResponse,
+  PaginationInfo
 } from '../types/unified/models';
 
 // ==================== 数据处理配置 ====================
@@ -23,7 +22,7 @@ export interface DataProcessorConfig {
     maxSize: number;
     strategy: 'lru' | 'ttl' | 'fifo';
   };
-  
+
   // 重试配置
   retry?: {
     enabled: boolean;
@@ -31,7 +30,7 @@ export interface DataProcessorConfig {
     delay: number; // 毫秒
     backoff: 'linear' | 'exponential';
   };
-  
+
   // 分页配置
   pagination?: {
     defaultPageSize: number;
@@ -39,7 +38,7 @@ export interface DataProcessorConfig {
     showSizeChanger: boolean;
     showQuickJumper: boolean;
   };
-  
+
   // 错误处理配置
   errorHandling?: {
     showNotification: boolean;
@@ -84,18 +83,18 @@ export interface DataState<T = any> {
   state: LoadingState;
   data: T | null;
   error: string | null;
-  
+
   // 状态标志
   loading: boolean;
   success: boolean;
   hasError: boolean;
   refreshing: boolean;
-  
+
   // 元数据
   lastUpdated: string | null;
   retryCount: number;
   cacheHit: boolean;
-  
+
   // 分页信息（如果适用）
   pagination?: PaginationInfo;
 }
@@ -106,15 +105,15 @@ export interface DataActions<T = any> {
   refresh: () => Promise<T | null>;
   retry: () => Promise<T | null>;
   reset: () => void;
-  
+
   // 分页操作
   loadPage: (page: number) => Promise<T | null>;
   changePageSize: (size: number) => Promise<T | null>;
-  
+
   // 缓存操作
   clearCache: () => void;
   invalidateCache: (key?: string) => void;
-  
+
   // 手动设置
   setData: (data: T) => void;
   setError: (error: string) => void;
@@ -195,13 +194,13 @@ class DataCache {
         keyToEvict = Array.from(this.accessOrder.entries())
           .sort(([, a], [, b]) => a - b)[0][0];
         break;
-      
+
       case 'ttl':
         // 移除最早过期的
         keyToEvict = Array.from(this.cache.entries())
           .sort(([, a], [, b]) => (a.timestamp + a.ttl) - (b.timestamp + b.ttl))[0][0];
         break;
-      
+
       case 'fifo':
       default:
         // 移除最早添加的
@@ -222,7 +221,7 @@ export function useDataProcessor<T = any>(
   config: Partial<DataProcessorConfig> = {}
 ): [DataState<T>, DataActions<T>] {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
-  
+
   // 状态管理
   const [state, setState] = useState<DataState<T>>({
     state: 'idle',
@@ -265,7 +264,7 @@ export function useDataProcessor<T = any>(
   const processResponse = useCallback((response: ApiResponse<T>, cacheKey?: string): T | null => {
     if (response.success) {
       const successResponse = response as ApiSuccessResponse<T>;
-      
+
       // 缓存数据
       if (finalConfig.cache?.enabled && cacheKey) {
         globalCache.set(cacheKey, successResponse.data, finalConfig.cache.ttl);
@@ -284,7 +283,9 @@ export function useDataProcessor<T = any>(
       return successResponse.data;
     } else {
       const errorResponse = response as ApiErrorResponse;
-      const errorMessage = errorResponse.error.message || '请求失败';
+      const errorMessage = typeof errorResponse.error === 'string'
+        ? errorResponse.error
+        : errorResponse.error?.message || '请求失败';
 
       updateState({
         state: 'error',
@@ -342,17 +343,17 @@ export function useDataProcessor<T = any>(
     try {
       // 创建新的AbortController
       abortControllerRef.current = new AbortController();
-      
+
       // 保存请求函数用于重试
       lastRequestRef.current = requestFn;
 
       // 执行请求
       const response = await requestFn();
-      
+
       return processResponse(response, cacheKey);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '网络请求失败';
-      
+
       updateState({
         state: 'error',
         error: errorMessage,
@@ -360,11 +361,11 @@ export function useDataProcessor<T = any>(
       });
 
       // 自动重试
-      if (finalConfig.retry?.enabled && 
-          finalConfig.errorHandling?.autoRetry && 
-          state.retryCount < (finalConfig.retry.maxAttempts - 1)) {
-        
-        const delay = finalConfig.retry.backoff === 'exponential' 
+      if (finalConfig.retry?.enabled &&
+        finalConfig.errorHandling?.autoRetry &&
+        state.retryCount < (finalConfig.retry.maxAttempts - 1)) {
+
+        const delay = finalConfig.retry.backoff === 'exponential'
           ? finalConfig.retry.delay * Math.pow(2, state.retryCount)
           : finalConfig.retry.delay;
 

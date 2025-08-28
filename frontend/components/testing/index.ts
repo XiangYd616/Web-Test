@@ -11,9 +11,9 @@ export { default as TestTemplateSelector } from './TestTemplateSelector';
 export { default as URLInput } from './URLInput';
 
 // 类型导出
-export type { TestEngineStatusProps } from './TestEngineStatus';
+// export type { TestEngineStatusProps } from './TestEngineStatus';
 export type { TestHeaderProps } from './TestHeader';
 export type { TestInterfaceProps } from './TestInterface';
-export type { TestResultDisplayProps } from './TestResultDisplay';
-export type { TestTemplateSelectorProps } from './TestTemplateSelector';
+// export type { TestResultDisplayProps } from './TestResultDisplay';
+// export type { TestTemplateSelectorProps } from './TestTemplateSelector';
 

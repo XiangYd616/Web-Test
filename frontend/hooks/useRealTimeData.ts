@@ -182,9 +182,9 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
             return;
         }
 
-        updateState(prev => ({
-            reconnectAttempts: prev.reconnectAttempts + 1
-        }));
+        updateState({
+            reconnectAttempts: (state.reconnectAttempts || 0) + 1
+        });
 
         reconnectTimeoutRef.current = setTimeout(() => {
             if (mountedRef.current) {

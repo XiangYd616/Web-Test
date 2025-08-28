@@ -5,9 +5,8 @@
 
 import { FileText } from 'lucide-react';
 import React from 'react';
-import type { FC } from 'react';
 import { PageLayout } from '../components/common/Layout';
-import TestHistory from '../components/common/TestHistory';
+import TestHistoryComponent from '../components/common/TestHistory';
 
 const TestHistory: React.FC = () => {
   return (
@@ -18,10 +17,10 @@ const TestHistory: React.FC = () => {
       background="dark"
       maxWidth="xl"
     >
-      <TestHistory
-        showStatistics={true}
-        showFilters={true}
-        showBatchActions={true}
+      <TestHistoryComponent
+        testType="all"
+        title="所有测试历史"
+        description="查看和管理您的所有测试记录"
       />
     </PageLayout>
   );

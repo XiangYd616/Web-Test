@@ -162,13 +162,29 @@ export class PerformanceTestCore {
         result.mobilePerformance = await this.checkMobilePerformance(url, config);
         break;
       case 'modernWebFeatures':
-        result.modernWebFeatures = await this.checkModernWebFeatures(url, config);
+        const modernFeatures = await this.checkModernWebFeatures(url, config);
+        result.modernWebFeatures = {
+          ...modernFeatures,
+          modernityLevel: modernFeatures.modernityLevel as "low" | "medium" | "high" | "unknown"
+        };
         break;
       case 'networkOptimization':
-        result.networkOptimization = await this.analyzeNetworkOptimization(url, config);
+        const networkOpt = await this.analyzeNetworkOptimization(url, config);
+        result.networkOptimization = {
+          score: networkOpt.score,
+          issues: [],
+          recommendations: networkOpt.recommendations || [],
+          metrics: {}
+        };
         break;
       case 'thirdPartyImpact':
-        result.thirdPartyImpact = await this.analyzeThirdPartyImpact(url, config);
+        const thirdParty = await this.analyzeThirdPartyImpact(url, config);
+        result.thirdPartyImpact = {
+          score: thirdParty.score,
+          totalBlockingTime: 0,
+          scripts: [],
+          recommendations: thirdParty.recommendations || []
+        };
         break;
     }
   }
@@ -189,7 +205,7 @@ export class PerformanceTestCore {
       }
 
       const data = await response.json();
-      return data.success ? data.data : this.getDefaultPageSpeedMetrics();
+      return data.success ? data.data : this.getDefaultPageSpeedMetrics(url);
 
     } catch (error) {
       console.warn('页面速度检测失败，使用客户端分析:', error);

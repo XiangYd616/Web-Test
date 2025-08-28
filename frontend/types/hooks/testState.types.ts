@@ -3,16 +3,9 @@
  * 统一管理所有测试状态管理Hook的类型
  */
 
-import { 
-  TestType, 
-  TestStatus, 
-  UnifiedTestConfig,
-  TestExecution,
-  ApiResponse,
-  ProgressCallback,
-  CompletionCallback,
-  ErrorCallback
-} from '../api/client.types';
+import {
+  TestStatus
+} from '../unified/testTypes';
 
 // ==================== 基础测试状态类型 ====================
 
@@ -49,7 +42,7 @@ export interface BaseTestActions {
 }
 
 /** 基础测试Hook返回值 */
-export interface BaseTestHook extends BaseTestState, BaseTestActions {}
+export interface BaseTestHook extends BaseTestState, BaseTestActions { }
 
 // ==================== API测试Hook类型 ====================
 
@@ -202,7 +195,7 @@ export interface APITestActions extends BaseTestActions {
 }
 
 /** API测试Hook返回值 */
-export interface APITestHook extends APITestState, APITestActions {}
+export interface APITestHook extends APITestState, APITestActions { }
 
 // ==================== 兼容性测试Hook类型 ====================
 
@@ -344,7 +337,7 @@ export interface CompatibilityTestActions extends BaseTestActions {
 }
 
 /** 兼容性测试Hook返回值 */
-export interface CompatibilityTestHook extends CompatibilityTestState, CompatibilityTestActions {}
+export interface CompatibilityTestHook extends CompatibilityTestState, CompatibilityTestActions { }
 
 // ==================== UX测试Hook类型 ====================
 
@@ -547,7 +540,7 @@ export interface UXTestActions extends BaseTestActions {
 }
 
 /** UX测试Hook返回值 */
-export interface UXTestHook extends UXTestState, UXTestActions {}
+export interface UXTestHook extends UXTestState, UXTestActions { }
 
 // ==================== 网络测试Hook类型 ====================
 
@@ -555,6 +548,10 @@ export interface UXTestHook extends UXTestState, UXTestActions {}
 export interface NetworkTestConfig {
   /** 目标主机 */
   host: string;
+  /** 目标地址（别名，向后兼容） */
+  target?: string;
+  /** 目标URL（用于HTTP/HTTPS测试） */
+  url?: string;
   /** 测试端口 */
   ports: number[];
   /** 协议类型 */
@@ -622,7 +619,7 @@ export interface NetworkTestActions extends BaseTestActions {
 }
 
 /** 网络测试Hook返回值 */
-export interface NetworkTestHook extends NetworkTestState, NetworkTestActions {}
+export interface NetworkTestHook extends NetworkTestState, NetworkTestActions { }
 
 // ==================== 数据库测试Hook类型 ====================
 
@@ -721,4 +718,4 @@ export interface DatabaseTestActions extends BaseTestActions {
 }
 
 /** 数据库测试Hook返回值 */
-export interface DatabaseTestHook extends DatabaseTestState, DatabaseTestActions {}
+export interface DatabaseTestHook extends DatabaseTestState, DatabaseTestActions { }
