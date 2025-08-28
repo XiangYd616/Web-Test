@@ -19,7 +19,8 @@ export enum TestType {
   INTEGRATION = 'integration',
   UNIT = 'unit',
   E2E = 'e2e',
-  ACCESSIBILITY = 'accessibility'
+  ACCESSIBILITY = 'accessibility',
+  WEBSITE = 'website'
 }
 
 // 测试状态枚举
