@@ -1,5 +1,4 @@
 import React from 'react';
-import type { ReactNode, FC } from 'react';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -200,12 +199,12 @@ export const CompactCard: React.FC<CompactCardProps> = ({
 
   return (
     <div className={`
-      bg-white rounded-lg shadow-sm border border-gray-200
+      themed-card rounded-lg shadow-sm border themed-border-primary
       ${getPadding()}
       ${className}
     `}>
       {title && (
-        <h3 className="text-base lg:text-lg font-medium text-gray-900 mb-2 lg:mb-3">
+        <h3 className="text-base lg:text-lg font-medium themed-text-primary mb-2 lg:mb-3">
           {title}
         </h3>
       )}
@@ -233,11 +232,11 @@ export const ResponsiveButton: React.FC<ResponsiveButtonProps> = ({
 }) => {
   const getVariant = () => {
     switch (variant) {
-      case 'primary': return 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500';
-      case 'secondary': return 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500';
-      case 'outline': return 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 focus:ring-blue-500';
+      case 'primary': return 'themed-button-primary';
+      case 'secondary': return 'themed-button-secondary';
+      case 'outline': return 'themed-bg-primary themed-text-primary themed-border-primary hover:themed-bg-secondary focus:ring-blue-500';
       case 'danger': return 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500';
-      default: return 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500';
+      default: return 'themed-button-primary';
     }
   };
 

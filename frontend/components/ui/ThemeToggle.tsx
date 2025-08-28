@@ -1,6 +1,5 @@
-import React from 'react';
-import type { FC } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface ThemeToggleProps {
@@ -114,8 +113,7 @@ export const ThemeSelector: React.FC<{ className?: string }> = ({ className = ''
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <label htmlFor="theme-select" className={`block text-sm font-medium ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-        }`}>
+      <label htmlFor="theme-select" className="block text-sm font-medium themed-text-secondary">
         主题模式
       </label>
       <select
@@ -123,14 +121,7 @@ export const ThemeSelector: React.FC<{ className?: string }> = ({ className = ''
         value={theme}
         onChange={(e) => setTheme(e.target.value as 'light' | 'dark')}
         aria-label="选择主题模式"
-        className={`
-          w-full px-3 py-2 rounded-lg border transition-all duration-200
-          focus:outline-none focus:ring-2 focus:ring-blue-500
-          ${actualTheme === 'light'
-            ? 'bg-white border-gray-300 text-gray-900 hover:border-gray-400'
-            : 'bg-gray-800 border-gray-600 text-white hover:border-gray-500'
-          }
-        `}
+        className="w-full px-3 py-2 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 themed-input"
       >
         <option value="light">浅色主题</option>
         <option value="dark">深色主题</option>
@@ -149,7 +140,7 @@ export const ThemeSwitch: React.FC<{ className?: string }> = ({ className = '' }
 
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
-      <Sun className={`w-4 h-4 ${theme === 'light' ? 'text-yellow-500' : 'text-gray-400'}`} />
+      <Sun className={`w-4 h-4 ${theme === 'light' ? 'text-yellow-500' : 'themed-text-tertiary'}`} />
 
       <button
         type="button"
@@ -158,7 +149,7 @@ export const ThemeSwitch: React.FC<{ className?: string }> = ({ className = '' }
           relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
           ${theme === 'light'
-            ? 'bg-gray-200 focus:ring-offset-white'
+            ? 'themed-bg-tertiary focus:ring-offset-white'
             : 'bg-blue-600 focus:ring-offset-gray-900'
           }
         `}

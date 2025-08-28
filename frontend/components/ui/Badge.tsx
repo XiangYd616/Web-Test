@@ -1,7 +1,6 @@
-import React from 'react';
-import { useState } from 'react';
-import type { ReactNode, FC } from 'react';;
-import { CheckCircle, XCircle, AlertTriangle, Clock, Loader, Info } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Info, Loader, XCircle } from 'lucide-react';
+import React, { useState } from 'react';
+;
 
 import { cn } from '../../utils/cn';
 
@@ -15,16 +14,16 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const badgeVariants = {
   default: {
-    solid: 'bg-gray-600 text-white border-gray-600',
-    outline: 'bg-transparent text-gray-300 border-gray-600'
+    solid: 'themed-button-secondary',
+    outline: 'bg-transparent themed-text-secondary themed-border-primary'
   },
   primary: {
-    solid: 'bg-blue-600 text-white border-blue-600',
+    solid: 'themed-button-primary',
     outline: 'bg-blue-600/10 text-blue-400 border-blue-600/30'
   },
   secondary: {
-    solid: 'bg-gray-500 text-white border-gray-500',
-    outline: 'bg-gray-500/10 text-gray-400 border-gray-500/30'
+    solid: 'themed-button-secondary',
+    outline: 'bg-gray-500/10 themed-text-tertiary border-gray-500/30'
   },
   success: {
     solid: 'bg-green-600 text-white border-green-600',
@@ -250,7 +249,7 @@ export const ProgressBadge: React.FC<ProgressBadgeProps> = ({
 
   // 根据进度自动选择颜色
   const getVariant = () => {
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     if (variant !== 'primary') return variant;
     if (percentage >= 80) return 'success';

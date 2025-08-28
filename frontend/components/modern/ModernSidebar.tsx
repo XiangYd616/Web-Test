@@ -1,10 +1,9 @@
-import React from 'react';
-import { BarChart3, ChevronRight, Code, Database, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Zap } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import type { ComponentType, FC } from 'react';;
+import { BarChart3, ChevronRight, Code, Database, Eye, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Wifi, Zap } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';
+;
 
 interface SidebarItem {
   id: string;
@@ -99,6 +98,24 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           name: 'API测试',
           icon: Code,
           href: '/api-test'
+        },
+        {
+          id: 'network-test',
+          name: '网络测试',
+          icon: Wifi,
+          href: '/network-test'
+        },
+        {
+          id: 'database-test',
+          name: '数据库测试',
+          icon: Database,
+          href: '/database-test'
+        },
+        {
+          id: 'ux-test',
+          name: 'UX测试',
+          icon: Eye,
+          href: '/ux-test'
         }
       ]
     },

@@ -258,8 +258,8 @@ const PerformanceTest: React.FC = () => {
               onClick={() => setConfig(prev => ({ ...prev, device: value as any }))}
               disabled={isRunning}
               className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center space-y-2 ${config.device === value
-                ? 'border-blue-500 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-blue-500 themed-bg-tertiary themed-text-primary ring-2 ring-blue-500/20'
+                : 'themed-border-primary hover:themed-border-secondary themed-text-secondary hover:themed-bg-secondary'
                 } ${isRunning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               <Icon className="w-5 h-5" />
@@ -278,7 +278,7 @@ const PerformanceTest: React.FC = () => {
           value={config.networkCondition}
           onChange={(e) => setConfig(prev => ({ ...prev, networkCondition: e.target.value as any }))}
           disabled={isRunning}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+          className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
         >
           <option value="no-throttling">无限制</option>
           <option value="fast-3g">快速3G</option>
@@ -353,9 +353,9 @@ const PerformanceTest: React.FC = () => {
           {!isAuthenticated && <>{LoginPromptComponent}</>}
 
           {/* 配置面板 */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <Settings className="w-5 h-5 mr-2" />
+          <div className="themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6">
+            <h2 className="text-xl font-semibold themed-text-primary mb-4 flex items-center">
+              <Settings className="w-5 h-5 mr-2 text-blue-400" />
               测试配置
             </h2>
             {renderConfigPanel()}
@@ -412,9 +412,9 @@ const PerformanceTest: React.FC = () => {
 
           {/* 进度显示 */}
           {isRunning && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Activity className="w-5 h-5 mr-2" />
+            <div className="themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6">
+              <h3 className="text-lg font-semibold themed-text-primary mb-4 flex items-center">
+                <Activity className="w-5 h-5 mr-2 text-blue-400" />
                 测试进度
               </h3>
               <ProgressBar value={progress} />
@@ -443,8 +443,8 @@ const PerformanceTest: React.FC = () => {
 
           {/* 结果显示 */}
           {result && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6">
+              <h3 className="text-lg font-semibold themed-text-primary mb-4 flex items-center">
                 <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
                 测试结果
               </h3>

@@ -1,6 +1,6 @@
-import React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
-import type { ReactNode, FC } from 'react';;
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+;
 
 // 主题类型定义
 export type ThemeMode = 'light' | 'dark';
@@ -62,6 +62,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     root.classList.add(`${actualTheme}-theme`);
     // 同时添加 Tailwind CSS 需要的类
     root.classList.add(actualTheme);
+
+    // 设置data-theme属性（推荐做法）
+    root.setAttribute('data-theme', actualTheme);
 
     // 设置CSS变量
     if (actualTheme === 'dark') {

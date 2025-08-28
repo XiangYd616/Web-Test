@@ -1,10 +1,9 @@
-﻿import React, { useCallback, useEffect, useRef, useState } from 'react';
+﻿import { Zap } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import StressTestForm from '../components/stress/StressTestForm';
-import StressTestHeader from '../components/stress/StressTestHeader';
-import StressTestHistory from '../components/stress/StressTestHistory';
 import StressTestResults from '../components/stress/StressTestResults';
-import StressTestTabs from '../components/stress/StressTestTabs';
 import { useErrorHandler } from '../components/system/ErrorHandling';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { useAuth } from '../hooks/useAuth';
 import useStressTestWebSocket from '../hooks/useStressTestWebSocket';
 
@@ -44,8 +43,6 @@ const StressTest: React.FC = () => {
     const { handleError } = useErrorHandler();
 
     // 状态管理
-    const [activeTab, setActiveTab] = useState<'test' | 'history'>('test');
-    const [testMode, setTestMode] = useState<'real' | 'local'>('real');
     const [currentStatus, setCurrentStatus] = useState<CurrentStatusType>('IDLE');
     const [statusMessage, setStatusMessage] = useState('准备开始测试');
     const [testProgress, setTestProgress] = useState('');
@@ -241,52 +238,35 @@ const StressTest: React.FC = () => {
     }, []);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4">
-            <div className="max-w-7xl mx-auto space-y-6">
-                {/* 页面标题和控制区域 */}
-                <StressTestHeader
-                    isRunning={isRunning}
-                    currentStatus={currentStatus}
-                    statusMessage={statusMessage}
-                    testProgress={testProgress}
-                    onStartTest={handleStartTest}
-                    onStopTest={handleStopTest}
-                    onResetTest={handleResetTest}
-                    onShowSettings={handleShowSettings}
-                />
+        <TestPageLayout
+            testType="stress"
+            title="压力测试"
+            description="测试网站在高并发情况下的性能表现"
+            icon={Zap}
+            testStatus={isRunning ? 'running' : 'idle'}
+            isTestDisabled={false}
+            onStartTest={handleStartTest}
+            onStopTest={handleStopTest}
+            testContent={
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* 测试配置 */}
+                    <StressTestForm
+                        config={config}
+                        onConfigChange={setConfig}
+                        isRunning={isRunning}
+                        error={error}
+                    />
 
-                {/* 标签页切换 */}
-                <StressTestTabs
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    testMode={testMode}
-                    onModeChange={setTestMode}
-                />
-
-                {/* 内容区域 */}
-                {activeTab === 'test' ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* 测试配置 */}
-                        <StressTestForm
-                            config={config}
-                            onConfigChange={setConfig}
-                            isRunning={isRunning}
-                            error={error}
-                        />
-
-                        {/* 测试结果 */}
-                        <StressTestResults
-                            result={result}
-                            isRunning={isRunning}
-                            testId={currentTestId}
-                            currentMetrics={currentMetrics}
-                        />
-                    </div>
-                ) : (
-                    <StressTestHistory />
-                )}
-            </div>
-        </div>
+                    {/* 测试结果 */}
+                    <StressTestResults
+                        result={result}
+                        isRunning={isRunning}
+                        testId={currentTestId}
+                        currentMetrics={currentMetrics}
+                    />
+                </div>
+            }
+        />
     );
 };
 

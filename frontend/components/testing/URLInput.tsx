@@ -1,8 +1,7 @@
-import React from 'react';
 import { AlertCircle, AlertTriangle, CheckCircle, Globe, Link, Loader } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import type { FC } from 'react';;
+import React, { useCallback, useEffect, useState } from 'react';
 import { URLValidationResult, validateUrlEnhanced as validateURL } from '../../utils/urlValidator';
+;
 
 interface URLInputProps {
   value: string;
@@ -111,7 +110,7 @@ const URLInput: React.FC<URLInputProps> = ({
           required={required}
           autoFocus={autoFocus}
           className={`
-            themed-input !pl-12 !pr-12
+            w-full px-12 py-3 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400
             ${getBorderColor()}
             ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
           `}

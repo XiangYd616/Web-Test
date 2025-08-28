@@ -1,5 +1,4 @@
 import React from 'react';
-import type { ReactNode, FC, Component } from 'react';
 import { cn } from '../../utils/cn';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -24,21 +23,21 @@ export const Card: React.FC<CardProps> = ({
         'rounded-lg transition-all duration-200',
         // 变体样式
         {
-          // 默认样式 - 深色主题卡片
-          'bg-gray-800/50 border border-gray-700/50': variant === 'default',
+          // 默认样式 - 使用主题变量
+          'themed-card border themed-border-primary': variant === 'default',
           // 轮廓样式 - 透明背景，边框突出
-          'bg-transparent border-2 border-gray-600/60 hover:border-gray-500/80': variant === 'outlined',
+          'bg-transparent border-2 themed-border-secondary hover:themed-border-primary': variant === 'outlined',
           // 阴影样式 - 更深背景，明显阴影
-          'bg-gray-800/70 border border-gray-700/50 shadow-lg shadow-black/20': variant === 'elevated',
+          'themed-bg-secondary border themed-border-primary shadow-lg': variant === 'elevated',
           // 玻璃样式 - 毛玻璃效果
-          'bg-gray-800/30 backdrop-blur-sm border border-gray-700/30': variant === 'glass',
+          'glass-effect': variant === 'glass',
         },
         // 悬停效果
         hover && {
-          'hover:bg-gray-800/70 hover:border-gray-600/50 hover:shadow-md': variant === 'default',
-          'hover:bg-gray-800/20': variant === 'outlined',
-          'hover:bg-gray-800/80 hover:shadow-xl hover:shadow-black/30': variant === 'elevated',
-          'hover:bg-gray-800/40 hover:backdrop-blur-md': variant === 'glass',
+          'hover:themed-bg-tertiary hover:themed-border-secondary hover:shadow-md': variant === 'default',
+          'hover:themed-bg-secondary/20': variant === 'outlined',
+          'hover:themed-bg-tertiary hover:shadow-xl': variant === 'elevated',
+          'hover:bg-hover hover:backdrop-blur-md': variant === 'glass',
         },
         // 内边距
         {

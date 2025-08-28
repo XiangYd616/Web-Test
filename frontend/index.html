@@ -38,6 +38,49 @@
     <meta name="color-scheme" content="light dark" />
     
     <title>Test Web App - 专业网站测试平台</title>
+
+    <!-- 防止主题闪烁的内联脚本 - 基于最佳实践 -->
+    <script>
+      (function() {
+        try {
+          // 从localStorage获取主题
+          const theme = localStorage.getItem('theme');
+          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          const actualTheme = theme === 'system' || !theme ? systemTheme : theme;
+
+          // 立即应用主题类
+          const root = document.documentElement;
+          root.classList.remove('light', 'dark', 'light-theme', 'dark-theme');
+          root.classList.add(actualTheme, actualTheme + '-theme');
+          root.setAttribute('data-theme', actualTheme);
+
+          // 设置CSS变量
+          if (actualTheme === 'dark') {
+            root.style.setProperty('--bg-primary', '#111827');
+            root.style.setProperty('--bg-secondary', '#1f2937');
+            root.style.setProperty('--bg-tertiary', '#374151');
+            root.style.setProperty('--text-primary', '#f9fafb');
+            root.style.setProperty('--text-secondary', '#d1d5db');
+            root.style.setProperty('--text-tertiary', '#9ca3af');
+            root.style.setProperty('--border-primary', '#374151');
+            root.style.setProperty('--border-secondary', '#4b5563');
+            root.style.setProperty('--border-tertiary', '#6b7280');
+          } else {
+            root.style.setProperty('--bg-primary', '#ffffff');
+            root.style.setProperty('--bg-secondary', '#f9fafb');
+            root.style.setProperty('--bg-tertiary', '#f3f4f6');
+            root.style.setProperty('--text-primary', '#111827');
+            root.style.setProperty('--text-secondary', '#374151');
+            root.style.setProperty('--text-tertiary', '#6b7280');
+            root.style.setProperty('--border-primary', '#d1d5db');
+            root.style.setProperty('--border-secondary', '#9ca3af');
+            root.style.setProperty('--border-tertiary', '#6b7280');
+          }
+        } catch (e) {
+          console.warn('Theme initialization failed:', e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

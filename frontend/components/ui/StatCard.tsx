@@ -1,6 +1,5 @@
-import React from 'react';
-import type { FC } from 'react';
 import { LucideIcon } from 'lucide-react';
+import React from 'react';
 import { cn } from '../../utils/cn';
 
 interface StatCardProps {
@@ -22,7 +21,7 @@ const colorVariants = {
     iconBg: 'bg-blue-500/20',
     iconBorder: 'border-blue-500/30',
     iconColor: 'text-blue-400',
-    valueColor: 'text-white'
+    valueColor: 'themed-text-primary'
   },
   green: {
     border: 'hover:border-green-500/50',
@@ -43,28 +42,28 @@ const colorVariants = {
     iconBg: 'bg-yellow-500/20',
     iconBorder: 'border-yellow-500/30',
     iconColor: 'text-yellow-400',
-    valueColor: 'text-white'
+    valueColor: 'themed-text-primary'
   },
   purple: {
     border: 'hover:border-purple-500/50',
     iconBg: 'bg-purple-500/20',
     iconBorder: 'border-purple-500/30',
     iconColor: 'text-purple-400',
-    valueColor: 'text-white'
+    valueColor: 'themed-text-primary'
   },
   indigo: {
     border: 'hover:border-indigo-500/50',
     iconBg: 'bg-indigo-500/20',
     iconBorder: 'border-indigo-500/30',
     iconColor: 'text-indigo-400',
-    valueColor: 'text-white'
+    valueColor: 'themed-text-primary'
   },
   gray: {
     border: 'hover:border-gray-500/50',
     iconBg: 'bg-gray-500/20',
     iconBorder: 'border-gray-500/30',
-    iconColor: 'text-gray-400',
-    valueColor: 'text-white'
+    iconColor: 'themed-text-tertiary',
+    valueColor: 'themed-text-primary'
   }
 };
 

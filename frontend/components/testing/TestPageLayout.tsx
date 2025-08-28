@@ -1,17 +1,20 @@
-import React from 'react';
 import { LucideIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { ReactNode, FC } from 'react';;
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import TestHistory from '../common/TestHistory';
 import TestHeader from './TestHeader';
+;
 
 interface TestPageLayoutProps {
   // 页面基本信息
-  testType: 'stress' | 'security' | 'api' | 'performance' | 'compatibility' | 'seo' | 'accessibility' | 'website' | 'network';
+  testType: 'stress' | 'security' | 'api' | 'performance' | 'compatibility' | 'seo' | 'accessibility' | 'website' | 'network' | 'ux' | 'database';
   title: string;
   description: string;
   icon: LucideIcon;
+
+  // 主题色彩配置（可选，会根据testType自动选择）
+  primaryColor?: 'blue' | 'green' | 'purple' | 'red' | 'yellow' | 'indigo' | 'pink' | 'orange';
+  secondaryColor?: 'blue' | 'green' | 'purple' | 'red' | 'yellow' | 'indigo' | 'pink' | 'orange';
 
   // 测试内容
   testContent: React.ReactNode;
@@ -45,6 +48,8 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   title,
   description,
   icon,
+  primaryColor,
+  secondaryColor,
   testContent,
   testStatus = 'idle',
   isTestDisabled = false,
@@ -59,6 +64,28 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   historyTabLabel
 }) => {
   const location = useLocation();
+
+  // 根据测试类型自动选择颜色主题
+  const getTestTypeColors = (type: string) => {
+    const colorMap = {
+      stress: { primary: 'red' as const, secondary: 'orange' as const },
+      security: { primary: 'purple' as const, secondary: 'indigo' as const },
+      api: { primary: 'green' as const, secondary: 'blue' as const },
+      performance: { primary: 'yellow' as const, secondary: 'orange' as const },
+      compatibility: { primary: 'indigo' as const, secondary: 'purple' as const },
+      seo: { primary: 'green' as const, secondary: 'blue' as const },
+      accessibility: { primary: 'blue' as const, secondary: 'green' as const },
+      website: { primary: 'indigo' as const, secondary: 'blue' as const },
+      network: { primary: 'blue' as const, secondary: 'green' as const },
+      ux: { primary: 'pink' as const, secondary: 'purple' as const },
+      database: { primary: 'purple' as const, secondary: 'blue' as const }
+    };
+    return colorMap[type as keyof typeof colorMap] || { primary: 'blue' as const, secondary: 'green' as const };
+  };
+
+  const colors = getTestTypeColors(testType);
+  const finalPrimaryColor = primaryColor || colors.primary;
+  const finalSecondaryColor = secondaryColor || colors.secondary;
 
   // 状态持久化的键名
   const storageKey = `unified-test-page-${testType}-active-tab`;
@@ -135,6 +162,8 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
         title={title}
         description={description}
         icon={icon}
+        primaryColor={finalPrimaryColor}
+        secondaryColor={finalSecondaryColor}
         activeTab={activeTab}
         onTabChange={handleTabChange}
         testTabLabel={testTabLabel}

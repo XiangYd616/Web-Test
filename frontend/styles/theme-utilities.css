@@ -1,0 +1,210 @@
+/**
+ * 主题工具类
+ * 基于React Spectrum和Remix Themes的最佳实践
+ */
+
+/* ==================== 主题工具类 ==================== */
+
+/* 背景色工具类 */
+.themed-bg-primary {
+  background-color: var(--bg-primary);
+}
+
+.themed-bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.themed-bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+/* 文本颜色工具类 */
+.themed-text-primary {
+  color: var(--text-primary);
+}
+
+.themed-text-secondary {
+  color: var(--text-secondary);
+}
+
+.themed-text-tertiary {
+  color: var(--text-tertiary);
+}
+
+/* 边框颜色工具类 */
+.themed-border-primary {
+  border-color: var(--border-primary);
+}
+
+.themed-border-secondary {
+  border-color: var(--border-secondary);
+}
+
+.themed-border-tertiary {
+  border-color: var(--border-tertiary);
+}
+
+/* 组件工具类 */
+.themed-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.themed-input {
+  background-color: var(--field-background);
+  border: 1px solid var(--border-primary);
+  color: var(--field-text-color);
+}
+
+.themed-input:focus {
+  border-color: var(--focus-ring-color);
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: -1px;
+}
+
+.themed-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.themed-button-primary {
+  background-color: var(--highlight-background);
+  color: var(--highlight-foreground);
+  border: 1px solid var(--highlight-background);
+}
+
+.themed-button-primary:hover {
+  background-color: var(--highlight-background-pressed, var(--highlight-background));
+  opacity: 0.9;
+}
+
+.themed-button-secondary {
+  background-color: var(--button-background);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+}
+
+.themed-button-secondary:hover {
+  background-color: var(--button-background-pressed);
+}
+
+/* ==================== 响应式主题工具 ==================== */
+
+/* 系统主题支持 */
+@media (prefers-color-scheme: dark) {
+  .system {
+    --bg-primary: var(--color-gray-900);
+    --bg-secondary: var(--color-gray-800);
+    --bg-tertiary: var(--color-gray-700);
+    
+    --text-primary: var(--color-gray-50);
+    --text-secondary: var(--color-gray-300);
+    --text-tertiary: var(--color-gray-400);
+    
+    --border-primary: var(--color-gray-700);
+    --border-secondary: var(--color-gray-600);
+    --border-tertiary: var(--color-gray-500);
+    
+    --field-background: var(--color-gray-800);
+    --field-text-color: var(--color-gray-100);
+    --button-background: var(--color-gray-700);
+    --button-background-pressed: var(--color-gray-600);
+    --highlight-background: var(--color-primary-500);
+    --highlight-foreground: #ffffff;
+    --focus-ring-color: var(--color-primary-400);
+  }
+}
+
+/* ==================== 过渡动画 ==================== */
+
+/* 主题切换时禁用过渡，防止闪烁 */
+.theme-transition-disabled *,
+.theme-transition-disabled *:before,
+.theme-transition-disabled *:after {
+  transition: none !important;
+}
+
+/* 正常的主题过渡 */
+.themed-transition {
+  transition: background-color 0.2s ease-in-out,
+              border-color 0.2s ease-in-out,
+              color 0.2s ease-in-out;
+}
+
+/* ==================== 特殊状态 ==================== */
+
+/* 强制颜色模式支持 */
+@media (forced-colors: active) {
+  .themed-card {
+    border: 1px solid ButtonBorder;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+  
+  .themed-button-primary {
+    background: Highlight;
+    color: HighlightText;
+    border: 1px solid Highlight;
+  }
+  
+  .themed-input {
+    background: Field;
+    color: FieldText;
+    border: 1px solid FieldText;
+  }
+}
+
+/* ==================== 调试工具 ==================== */
+
+/* 开发环境下的主题调试 */
+.theme-debug {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--text-primary);
+  z-index: 9999;
+}
+
+.theme-debug::before {
+  content: "Theme: " attr(data-theme);
+}
+
+/* ==================== 兼容性支持 ==================== */
+
+/* 为不支持CSS变量的浏览器提供回退 */
+.themed-bg-primary {
+  background-color: #ffffff; /* 回退值 */
+  background-color: var(--bg-primary);
+}
+
+.themed-text-primary {
+  color: #111827; /* 回退值 */
+  color: var(--text-primary);
+}
+
+.themed-border-primary {
+  border-color: #d1d5db; /* 回退值 */
+  border-color: var(--border-primary);
+}
+
+/* ==================== 打印样式 ==================== */
+
+@media print {
+  .themed-bg-primary,
+  .themed-bg-secondary,
+  .themed-bg-tertiary {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .themed-text-primary,
+  .themed-text-secondary,
+  .themed-text-tertiary {
+    color: black !important;
+  }
+}

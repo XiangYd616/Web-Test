@@ -5,7 +5,6 @@
 
 import { LucideIcon } from 'lucide-react';
 import React from 'react';
-import type { ReactNode, FC } from 'react';
 
 // 基础页面布局
 export interface PageLayoutProps {
@@ -260,9 +259,9 @@ export const Card: React.FC<CardProps> = ({
 
   const getVariant = () => {
     const variantMap = {
-      default: 'border border-gray-200',
-      outlined: 'border-2 border-gray-300',
-      elevated: 'shadow-lg border border-gray-100',
+      default: 'border themed-border-primary',
+      outlined: 'border-2 themed-border-secondary',
+      elevated: 'shadow-lg border themed-border-primary',
       glass: 'backdrop-blur-sm border border-white/20'
     };
     return variantMap[variant];
@@ -270,9 +269,9 @@ export const Card: React.FC<CardProps> = ({
 
   const getBackground = () => {
     const bgMap = {
-      white: 'bg-white',
-      gray: 'bg-gray-50',
-      dark: 'bg-gray-800',
+      white: 'themed-bg-primary',
+      gray: 'themed-bg-secondary',
+      dark: 'themed-bg-tertiary',
       transparent: 'bg-transparent'
     };
     return bgMap[background];

@@ -238,11 +238,11 @@ export const createThemeVariables = (theme: Theme): Record<string, string> => {
 // 主题相关的CSS类名生成器
 export const themeClasses = {
     button: {
-        primary: 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700 focus:ring-blue-500 active:bg-blue-800',
-        secondary: 'bg-gray-600 text-white border-gray-600 hover:bg-gray-700 hover:border-gray-700 focus:ring-gray-500 active:bg-gray-800',
+        primary: 'themed-button-primary',
+        secondary: 'themed-button-secondary',
         danger: 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 focus:ring-red-500 active:bg-red-800',
-        ghost: 'bg-transparent text-gray-400 border-gray-600 hover:text-white hover:bg-gray-700 hover:border-gray-500 focus:ring-gray-500 active:bg-gray-800',
-        outline: 'bg-transparent text-gray-300 border-gray-600 hover:bg-gray-700 hover:text-white hover:border-gray-500 focus:ring-gray-500 active:bg-gray-800',
+        ghost: 'bg-transparent themed-text-tertiary themed-border-primary hover:themed-text-primary hover:themed-bg-secondary hover:themed-border-secondary focus:ring-gray-500 active:themed-bg-tertiary',
+        outline: 'bg-transparent themed-text-secondary themed-border-primary hover:themed-bg-secondary hover:themed-text-primary hover:themed-border-secondary focus:ring-gray-500 active:themed-bg-tertiary',
     },
     input: {
         default: 'bg-gray-700/50 border-gray-600/60 hover:border-gray-500/80 hover:bg-gray-600/50 focus:border-blue-500 focus:bg-gray-700/70 focus:ring-2 focus:ring-blue-500/20',

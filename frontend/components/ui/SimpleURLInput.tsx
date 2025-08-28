@@ -1,5 +1,5 @@
-import React, { forwardRef } from 'react';
 import { Globe } from 'lucide-react';
+import React, { forwardRef } from 'react';
 import { cn } from '../../utils/cn';
 
 interface SimpleURLInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
@@ -49,13 +49,12 @@ export const SimpleURLInput = forwardRef<HTMLInputElement, SimpleURLInputProps>(
           className={cn(
             // 基础样式 - 确保占满宽度
             'w-full min-w-0 pl-10 pr-4 py-3 rounded-lg border transition-all duration-200',
-            'text-sm font-medium placeholder:text-gray-500',
+            'text-sm font-medium placeholder:themed-text-tertiary',
             'focus:outline-none focus:ring-2',
 
-            // 深色主题样式
-            'bg-gray-800/50 border-gray-600/60 text-gray-100',
-            'hover:bg-gray-700/50 hover:border-gray-500/80',
-            'focus:bg-gray-700/70 focus:border-blue-500 focus:ring-blue-500/20',
+            // 主题样式
+            'themed-input',
+            'focus:border-blue-500 focus:ring-blue-500/20',
 
             // 禁用状态
             disabled && 'opacity-50 cursor-not-allowed',

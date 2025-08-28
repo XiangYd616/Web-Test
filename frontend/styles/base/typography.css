@@ -31,7 +31,8 @@ html {
   }
 }
 
-/* 默认body样式 */
+/* 默认body样式 - 使用主题变量 */
 body {
-  @apply bg-gray-50 text-gray-900;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }

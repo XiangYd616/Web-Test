@@ -1,8 +1,7 @@
-import React from 'react';
 import { AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { forwardRef, useState } from 'react';
-import type { ReactNode } from 'react';;
+import React, { forwardRef } from 'react';
 import { cn } from '../../utils/cn';
+;
 
 // 基础Input组件
 interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -65,7 +64,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
     <div className="w-full">
       {/* 标签 */}
       {label && (
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium themed-text-secondary mb-2">
           {label}
           {props.required && <span className="text-red-400 ml-1">*</span>}
         </label>
@@ -75,7 +74,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({
       <div className="relative">
         {/* 左侧图标 */}
         {leftIcon && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 themed-text-tertiary">
             {leftIcon}
           </div>
         )}

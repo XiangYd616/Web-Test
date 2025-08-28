@@ -3,7 +3,6 @@
  * 支持多种测试类型的结果可视化和分析
  */
 
-import React from 'react';
 import {
     AlertTriangle,
     BarChart3,
@@ -17,7 +16,7 @@ import {
     Share2,
     TrendingUp
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
     Badge,
     Button,
@@ -462,12 +461,12 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
             {details?.recommendations?.map((rec, index) => (
                 <Card key={index} className="p-6">
                     <div className="flex items-start justify-between mb-3">
-                        <h4 className="font-semibold text-gray-900">{rec.title}</h4>
+                        <h4 className="font-semibold themed-text-primary">{rec.title}</h4>
                         <Badge variant={rec.priority === 'critical' ? 'danger' : 'primary'} size="sm">
                             {rec.priority}
                         </Badge>
                     </div>
-                    <p className="text-gray-700 mb-3">{rec.description}</p>
+                    <p className="themed-text-secondary mb-3">{rec.description}</p>
                     <div className="bg-blue-50 p-3 rounded-lg mb-3">
                         <h5 className="font-medium text-blue-900 mb-1">解决方案</h5>
                         <p className="text-blue-800 text-sm">{rec.solution}</p>
@@ -504,8 +503,8 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
                             )}
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">测试结果</h1>
-                            <p className="text-gray-600 mt-1">
+                            <h1 className="text-2xl font-bold themed-text-primary">测试结果</h1>
+                            <p className="themed-text-secondary mt-1">
                                 {result.testType} • {new Date(result.startTime).toLocaleString()}
                             </p>
                         </div>

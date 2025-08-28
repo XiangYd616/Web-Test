@@ -9,7 +9,6 @@ import { useEffect } from 'react';
 // 路由和组件导入
 import AppRoutes from './components/routing/AppRoutes';
 import BackgroundTestNotifications from './components/system/BackgroundTestNotifications';
-import PerformanceMonitor from './components/system/PerformanceMonitor';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 
 // 上下文提供者导入
@@ -67,7 +66,6 @@ function App() {
           <AuthProvider>
             <AppRoutes />
             <BackgroundTestNotifications />
-            <PerformanceMonitor />
           </AuthProvider>
           {/* </NotificationProvider> */}
         </ThemeProvider>

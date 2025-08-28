@@ -1,5 +1,4 @@
 import React from 'react';
-import type { ReactNode, FC } from 'react';
 import { cn } from '../../utils/cn';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,17 +12,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const buttonVariants = {
   primary: [
-    'bg-blue-600 text-white border-blue-600',
-    'hover:bg-blue-700 hover:border-blue-700',
-    'focus:ring-blue-500',
-    'active:bg-blue-800'
+    'themed-button-primary'
   ].join(' '),
 
   secondary: [
-    'bg-gray-600 text-white border-gray-600',
-    'hover:bg-gray-700 hover:border-gray-700',
-    'focus:ring-gray-500',
-    'active:bg-gray-800'
+    'themed-button-secondary'
   ].join(' '),
 
   danger: [
@@ -35,17 +28,17 @@ const buttonVariants = {
   ].join(' '),
 
   ghost: [
-    'bg-transparent text-gray-400 border-gray-600',
-    'hover:text-white hover:bg-gray-700 hover:border-gray-500',
+    'bg-transparent themed-text-tertiary themed-border-primary',
+    'hover:themed-text-primary hover:themed-bg-secondary hover:themed-border-secondary',
     'focus:ring-gray-500',
-    'active:bg-gray-800'
+    'active:themed-bg-tertiary'
   ].join(' '),
 
   outline: [
-    'bg-transparent text-gray-300 border-gray-600',
-    'hover:bg-gray-700 hover:text-white hover:border-gray-500',
+    'bg-transparent themed-text-secondary themed-border-primary',
+    'hover:themed-bg-secondary hover:themed-text-primary hover:themed-border-secondary',
     'focus:ring-gray-500',
-    'active:bg-gray-800'
+    'active:themed-bg-tertiary'
   ].join(' ')
 };
 

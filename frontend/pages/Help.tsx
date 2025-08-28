@@ -1,9 +1,8 @@
-import React from 'react';
 import { BarChart3, Book, ChevronRight, Clock, Code, Download, FileText, Filter, HelpCircle, Mail, MessageCircle, Phone, Play, Search, Send, Shield, Tag, ThumbsDown, ThumbsUp, Users, Video, Zap } from 'lucide-react';
-import { createElement, useEffect, useState } from 'react';
-import type { ComponentType, FC } from 'react';;
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { helpService } from '../services/helpService';
+;
 
 interface FAQItem {
   id: string;
@@ -482,7 +481,7 @@ const Help: React.FC = () => {
       case 'green': return 'text-green-400 bg-green-500/10 border border-green-500/20';
       case 'purple': return 'text-purple-400 bg-purple-500/10 border border-purple-500/20';
       case 'indigo': return 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/20';
-      default: return 'text-gray-400 bg-gray-500/10 border border-gray-500/20';
+      default: return 'themed-text-tertiary bg-gray-500/10 border themed-border-primary';
     }
   };
 
@@ -553,8 +552,8 @@ const Help: React.FC = () => {
                 type="button"
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === tab.id
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-600/50'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-600/50'
                   }`}
               >
                 <tab.icon className="w-4 h-4" />

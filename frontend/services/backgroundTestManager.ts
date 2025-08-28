@@ -131,6 +131,15 @@ class BackgroundTestManager {
         case 'database':
           await this.executeDatabaseTest(testInfo);
           break;
+        case 'network':
+          await this.executeNetworkTest(testInfo);
+          break;
+        case 'ux':
+          await this.executeUXTest(testInfo);
+          break;
+        case 'website':
+          await this.executeWebsiteTest(testInfo);
+          break;
         case 'stress':
           await this.executeStressTest(testInfo);
           break;
@@ -309,6 +318,86 @@ class BackgroundTestManager {
         this.completeTest(testInfo.id, data.results || data);
       } else {
         throw new Error(data.message || 'API测试失败');
+      }
+    } catch (error) {
+      this.handleTestError(testInfo.id, error as Error);
+    }
+  }
+
+  // 执行网络测试
+  private async executeNetworkTest(testInfo: TestInfo): Promise<void> {
+    const { config } = testInfo;
+
+    this.updateTestProgress(testInfo.id, 10, '🌐 正在准备网络测试...');
+
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/test/network`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify(config)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      this.updateTestProgress(testInfo.id, 30, '🔍 正在执行网络测试...');
+
+      const data = await response.json();
+
+      if (data.testId) {
+        // 轮询测试状态直到完成
+        await this.pollTestStatus(testInfo.id, data.testId, 'network');
+      }
+
+      if (data.success || data.status === 'completed') {
+        const testResult = data.data || data.results || data;
+        this.completeTest(testInfo.id, testResult);
+      } else {
+        throw new Error(data.message || '网络测试失败');
+      }
+    } catch (error) {
+      this.handleTestError(testInfo.id, error as Error);
+    }
+  }
+
+  // 执行UX测试
+  private async executeUXTest(testInfo: TestInfo): Promise<void> {
+    const { config } = testInfo;
+
+    this.updateTestProgress(testInfo.id, 10, '👥 正在准备用户体验测试...');
+
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/test/ux`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify(config)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      this.updateTestProgress(testInfo.id, 30, '🔍 正在分析用户体验...');
+
+      const data = await response.json();
+
+      if (data.testId) {
+        // 轮询测试状态直到完成
+        await this.pollTestStatus(testInfo.id, data.testId, 'ux');
+      }
+
+      if (data.success || data.status === 'completed') {
+        const testResult = data.data || data.results || data;
+        this.completeTest(testInfo.id, testResult);
+      } else {
+        throw new Error(data.message || 'UX测试失败');
       }
     } catch (error) {
       this.handleTestError(testInfo.id, error as Error);
