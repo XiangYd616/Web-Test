@@ -1,0 +1,116 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: testweb-ingress
+  namespace: testweb
+  labels:
+    app: testweb
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+  - hosts:
+    - testweb.app
+    - www.testweb.app
+    - api.testweb.app
+    secretName: testweb-tls-secret
+  rules:
+  - host: testweb.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: testweb-app-service
+            port:
+              number: 80
+  - host: www.testweb.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: testweb-app-service
+            port:
+              number: 80
+  - host: api.testweb.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: testweb-app-service
+            port:
+              number: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testweb-monitoring-service
+  namespace: testweb
+  labels:
+    app: testweb
+    component: monitoring
+spec:
+  selector:
+    app: testweb
+    component: monitoring
+  ports:
+  - name: prometheus
+    port: 9090
+    targetPort: 9090
+  - name: grafana
+    port: 3000
+    targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: testweb-monitoring-ingress
+  namespace: testweb
+  labels:
+    app: testweb
+    component: monitoring
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: testweb-monitoring-auth
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - TestWeb Monitoring'
+spec:
+  tls:
+  - hosts:
+    - monitoring.testweb.app
+    secretName: testweb-monitoring-tls-secret
+  rules:
+  - host: monitoring.testweb.app
+    http:
+      paths:
+      - path: /prometheus
+        pathType: Prefix
+        backend:
+          service:
+            name: testweb-monitoring-service
+            port:
+              number: 9090
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: testweb-monitoring-service
+            port:
+              number: 3000

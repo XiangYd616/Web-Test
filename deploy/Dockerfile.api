@@ -24,19 +24,19 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # 复制package文件
-COPY package*.json ./
+COPY package*.json yarn.lock ./
 COPY server/package*.json ./server/
 
 # 开发阶段
 FROM base AS development
 
 # 安装所有依赖（包括开发依赖）
-RUN npm ci --include=dev
-RUN cd server && npm ci --include=dev
+RUN yarn install
+RUN cd server && yarn install
 
 # 安装测试引擎
-RUN npm install -g k6 lighthouse
-RUN npx playwright install --with-deps
+RUN yarn global add k6 lighthouse
+RUN yarn dlx playwright install --with-deps
 
 # 复制源代码
 COPY . .
@@ -45,20 +45,20 @@ COPY . .
 EXPOSE 3001
 
 # 开发命令
-CMD ["npm", "run", "dev:server"]
+CMD ["yarn", "dev:server"]
 
 # 生产构建阶段
 FROM base AS build
 
 # 安装依赖
-RUN npm ci --only=production
-RUN cd server && npm ci --only=production
+RUN yarn install --production --frozen-lockfile
+RUN cd server && yarn install --production --frozen-lockfile
 
 # 复制源代码
 COPY . .
 
 # 构建应用
-RUN npm run build:server
+RUN yarn build:server
 
 # 生产阶段
 FROM node:18-alpine AS production
@@ -88,16 +88,16 @@ RUN addgroup -g 1001 -S nodejs && \
 WORKDIR /app
 
 # 复制package文件
-COPY --chown=nodejs:nodejs package*.json ./
+COPY --chown=nodejs:nodejs package*.json yarn.lock ./
 COPY --chown=nodejs:nodejs server/package*.json ./server/
 
 # 安装生产依赖
-RUN npm ci --only=production && npm cache clean --force
-RUN cd server && npm ci --only=production && npm cache clean --force
+RUN yarn install --production --frozen-lockfile && yarn cache clean
+RUN cd server && yarn install --production --frozen-lockfile && yarn cache clean
 
 # 安装测试引擎
-RUN npm install -g k6 lighthouse
-RUN npx playwright install --with-deps chromium
+RUN yarn global add k6 lighthouse
+RUN yarn dlx playwright install --with-deps chromium
 
 # 复制构建产物
 COPY --from=build --chown=nodejs:nodejs /app/server/dist ./server/dist
@@ -133,34 +133,34 @@ FROM development AS test
 COPY tests/ ./tests/
 
 # 运行测试
-RUN npm test
+RUN yarn test
 
 # 安全扫描阶段
 FROM base AS security
 
 # 安装安全扫描工具
-RUN npm install -g audit-ci snyk
+RUN yarn global add audit-ci snyk
 
 # 复制package文件
-COPY package*.json ./
+COPY package*.json yarn.lock ./
 COPY server/package*.json ./server/
 
 # 运行安全扫描
-RUN npm audit --audit-level moderate
-RUN cd server && npm audit --audit-level moderate
+RUN yarn audit --level moderate
+RUN cd server && yarn audit --level moderate
 
 # 文档生成阶段
 FROM base AS docs
 
 # 安装文档工具
-RUN npm install -g @apidevtools/swagger-parser swagger-ui-dist
+RUN yarn global add @apidevtools/swagger-parser swagger-ui-dist
 
 # 复制API文档
 COPY docs/ ./docs/
 COPY server/docs/ ./server/docs/
 
 # 生成API文档
-RUN npm run docs:generate
+RUN yarn docs:generate
 
 # 多架构支持
 FROM --platform=$BUILDPLATFORM node:18-alpine AS cross-build
@@ -177,4 +177,4 @@ RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
 
 WORKDIR /app
 COPY . .
-RUN npm ci --only=production
+RUN yarn install --production --frozen-lockfile

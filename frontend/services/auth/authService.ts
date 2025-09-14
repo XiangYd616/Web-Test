@@ -1,7 +1,25 @@
-import { UserRole, UserStatus } from '../../types/enums';
-import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
-import { browserJwt } from '../../utils/browserJwt';
-import { canUseDatabase } from '../../utils/environment';
+import { UserRole, UserStatus } from '@types/enums';
+import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '@types/user';
+import { browserJwt } from '@utils/browserJwt';
+import { canUseDatabase } from '@utils/environment';
+import { jwtDecode } from 'jwt-decode';
+
+// 导入企业级功能模块
+import { DeviceFingerprinter } from './core/deviceFingerprint';
+import { SecureStorageManager } from './core/secureStorage';
+import { PasswordSecurityManager } from './core/passwordSecurity';
+import type { 
+  EnhancedAuthConfig, 
+  PasswordStrength, 
+  SessionInfo, 
+  MFAChallenge, 
+  MFAVerification,
+  IAuthService,
+  JwtPayload,
+  TokenPair,
+  RefreshResult,
+  DeviceInfo
+} from './core/authTypes';
 
 // 动态导入数据库模块（避免前端构建时的依赖问题）
 let jwt: any, userDao: any;
@@ -24,7 +42,7 @@ const isElectron = typeof window !== 'undefined' && (window as any).process?.typ
 const isBrowser = typeof window !== 'undefined' && !isElectron;
 const isNode = typeof window === 'undefined';
 
-export class UnifiedAuthService {
+export class UnifiedAuthService implements IAuthService {
   private readonly TOKEN_KEY = 'test_web_app_token';
   private readonly USER_KEY = 'test_web_app_user';
   private readonly REFRESH_TOKEN_KEY = 'test_web_app_refresh_token';
@@ -32,9 +50,79 @@ export class UnifiedAuthService {
   private currentUser: User | null = null;
   private authListeners: ((user: User | null) => void)[] = [];
   private isInitialized = false;
+  
+  // 企业级功能配置
+  private enhancedConfig: Partial<EnhancedAuthConfig>;
+  private deviceFingerprint?: string;
+  private deviceId: string;
+  private refreshTimer?: NodeJS.Timeout;
+  private sessionCheckTimer?: NodeJS.Timeout;
+  private eventListeners: Map<string, Function[]> = new Map();
+  
+  // JWT管理
+  private currentTokenPair?: TokenPair;
+  private activeSessions = new Map<string, SessionInfo>();
 
-  constructor() {
+  constructor(enhancedConfig: Partial<EnhancedAuthConfig> = {}) {
+    // 初始化企业级配置
+    this.enhancedConfig = {
+      enableDeviceFingerprinting: true,
+      enableSecureStorage: true,
+      requireMFA: false,
+      enableSessionTracking: true,
+      autoRefreshThreshold: 300, // 5分钟
+      accessTokenExpiry: 900, // 15分钟
+      refreshTokenExpiry: 604800, // 7天
+      maxConcurrentSessions: 5,
+      passwordPolicy: PasswordSecurityManager.DEFAULT_POLICY,
+      apiBaseUrl: '/api',
+      ...enhancedConfig
+    };
+    
+    // 初始化设备ID
+    this.deviceId = this.generateDeviceId();
+    
     this.initializeAuth();
+    this.initializeEnhancedFeatures();
+  }
+  
+  /**
+   * 生成设备ID
+   */
+  private generateDeviceId(): string {
+    if (typeof window !== 'undefined') {
+      let deviceId = localStorage.getItem('device_id');
+      if (!deviceId) {
+        deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('device_id', deviceId);
+      }
+      return deviceId;
+    } else {
+      // Node.js环境使用稳定的ID
+      return 'server_device_' + Date.now();
+    }
+  }
+
+  /**
+   * 初始化企业级功能
+   */
+  private async initializeEnhancedFeatures(): Promise<void> {
+    // 初始化设备指纹
+    if (this.enhancedConfig.enableDeviceFingerprinting) {
+      try {
+        this.deviceFingerprint = await DeviceFingerprinter.generateFingerprint();
+      } catch (error) {
+        console.warn('设备指纹生成失败:', error);
+      }
+    }
+    
+    // 启动会话监控
+    if (this.enhancedConfig.enableSessionTracking) {
+      this.startSessionMonitoring();
+    }
+    
+    // 加载存储的token
+    await this.loadStoredTokens();
   }
 
   // 初始化认证状态
@@ -323,6 +411,16 @@ export class UnifiedAuthService {
         token = this.generateToken(user);
         refreshToken = this.generateRefreshToken(user);
       }
+      
+      // 创建token对用于企业级管理
+      const tokenPair: TokenPair = {
+        accessToken: token,
+        refreshToken,
+        expiresAt: Date.now() + (this.enhancedConfig.accessTokenExpiry || 900) * 1000,
+        issuedAt: Date.now()
+      };
+      
+      await this.setTokenPair(tokenPair);
 
       // 更新最后登录时间
       if (isNode && userDao) {
@@ -641,10 +739,10 @@ export class UnifiedAuthService {
   }
 
   // 用户登出
-  logout(): void {
+  async logout(): Promise<void> {
     try {
       if (this.currentUser) {
-        this.logActivity(
+        await this.logActivity(
           this.currentUser.id,
           'logout',
           'auth',
@@ -662,6 +760,9 @@ export class UnifiedAuthService {
         sessionStorage.removeItem(this.USER_KEY);
         sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
       }
+      
+      // 清理企业级JWT资源
+      await this.clearTokenPair();
 
       this.currentUser = null;
       this.notifyAuthListeners(null);
@@ -947,6 +1048,493 @@ export class UnifiedAuthService {
       isNode,
       hasDatabase: isNode
     };
+  }
+
+  // ==================== JWT Token管理 ====================
+
+  /**
+   * 加载存储的tokens
+   */
+  private async loadStoredTokens(): Promise<void> {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      if (this.enhancedConfig.enableSecureStorage) {
+        this.currentTokenPair = await SecureStorageManager.getItem<TokenPair>('token_pair');
+      } else {
+        const stored = localStorage.getItem('auth_token_pair');
+        if (stored) {
+          this.currentTokenPair = JSON.parse(stored);
+        }
+      }
+
+      if (this.currentTokenPair && this.isTokenExpiringSoon(this.currentTokenPair.accessToken)) {
+        this.scheduleTokenRefresh();
+      }
+    } catch (error) {
+      console.error('加载存储的tokens失败:', error);
+    }
+  }
+
+  /**
+   * 设置token对
+   */
+  async setTokenPair(tokens: TokenPair): Promise<void> {
+    this.currentTokenPair = tokens;
+
+    if (typeof window !== 'undefined') {
+      if (this.enhancedConfig.enableSecureStorage) {
+        await SecureStorageManager.setItem('token_pair', tokens);
+      } else {
+        localStorage.setItem('auth_token_pair', JSON.stringify(tokens));
+      }
+    }
+
+    this.scheduleTokenRefresh();
+  }
+
+  /**
+   * 获取当前访问token
+   */
+  getAccessToken(): string | null {
+    if (!this.currentTokenPair) {
+      return this.getToken(); // 后退兼容
+    }
+
+    if (this.isTokenExpired(this.currentTokenPair.accessToken)) {
+      return null;
+    }
+
+    return this.currentTokenPair.accessToken;
+  }
+
+  /**
+   * 获取刷新token
+   */
+  getRefreshTokenFromPair(): string | null {
+    return this.currentTokenPair?.refreshToken || null;
+  }
+
+  /**
+   * 检查token是否过期
+   */
+  isTokenExpired(token: string): boolean {
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      return Date.now() >= decoded.exp * 1000;
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * 检查token是否即将过期
+   */
+  isTokenExpiringSoon(token: string): boolean {
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      const expiryTime = decoded.exp * 1000;
+      const thresholdTime = Date.now() + (this.enhancedConfig.autoRefreshThreshold || 300) * 1000;
+      return thresholdTime >= expiryTime;
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * 解码token
+   */
+  decodeToken(token: string): JwtPayload | null {
+    try {
+      return jwtDecode<JwtPayload>(token);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * 调度token刷新
+   */
+  private scheduleTokenRefresh(): void {
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+    }
+
+    if (!this.currentTokenPair || typeof window === 'undefined') return;
+
+    const decoded = this.decodeToken(this.currentTokenPair.accessToken);
+    if (!decoded) return;
+
+    const expiryTime = decoded.exp * 1000;
+    const refreshTime = expiryTime - (this.enhancedConfig.autoRefreshThreshold! * 1000);
+    const delay = Math.max(0, refreshTime - Date.now());
+
+    this.refreshTimer = setTimeout(() => {
+      this.refreshTokenPair();
+    }, delay);
+  }
+
+  /**
+   * 刷新token对
+   */
+  async refreshTokenPair(): Promise<RefreshResult> {
+    const refreshToken = this.getRefreshTokenFromPair();
+    if (!refreshToken) {
+      return {
+        success: false,
+        error: '没有刷新token',
+        requiresReauth: true
+      };
+    }
+
+    try {
+      const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          refreshToken,
+          deviceId: this.deviceId,
+          fingerprint: this.deviceFingerprint
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || '刷新失败');
+      }
+
+      const newTokens: TokenPair = {
+        accessToken: result.token || result.accessToken,
+        refreshToken: result.refreshToken,
+        expiresAt: Date.now() + (this.enhancedConfig.accessTokenExpiry! * 1000),
+        issuedAt: Date.now()
+      };
+
+      await this.setTokenPair(newTokens);
+
+      return {
+        success: true,
+        tokens: newTokens,
+        user: result.user
+      };
+    } catch (error) {
+      console.error('Token刷新失败:', error);
+
+      // 清除无效的tokens
+      await this.clearTokenPair();
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '刷新失败',
+        requiresReauth: true
+      };
+    }
+  }
+
+  /**
+   * 清除token对
+   */
+  async clearTokenPair(): Promise<void> {
+    this.currentTokenPair = undefined;
+
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+      this.refreshTimer = undefined;
+    }
+
+    if (typeof window !== 'undefined') {
+      if (this.enhancedConfig.enableSecureStorage) {
+        SecureStorageManager.removeItem('token_pair');
+      } else {
+        localStorage.removeItem('auth_token_pair');
+      }
+    }
+  }
+
+  /**
+   * 获取token剩余时间
+   */
+  getTokenTimeRemaining(): number {
+    if (!this.currentTokenPair) return 0;
+
+    const decoded = this.decodeToken(this.currentTokenPair.accessToken);
+    if (!decoded) return 0;
+
+    return Math.max(0, decoded.exp * 1000 - Date.now());
+  }
+
+  /**
+   * 从JWT token中获取用户信息
+   */
+  getUserFromToken(): Partial<User> | null {
+    const token = this.getAccessToken();
+    if (!token) return null;
+
+    const decoded = this.decodeToken(token);
+    if (!decoded) return null;
+
+    return {
+      id: decoded.sub,
+      username: decoded.username,
+      email: decoded.email,
+      role: decoded.role as any
+    };
+  }
+
+  /**
+   * 检查是否已通过JWT认证
+   */
+  isJwtAuthenticated(): boolean {
+    const token = this.getAccessToken();
+    return token !== null && !this.isTokenExpired(token);
+  }
+
+  // ==================== 企业级功能 API ====================
+
+  /**
+   * 验证密码强度
+   */
+  validatePasswordStrength(password: string): PasswordStrength {
+    return PasswordSecurityManager.validatePasswordStrength(
+      password, 
+      this.enhancedConfig.passwordPolicy || PasswordSecurityManager.DEFAULT_POLICY
+    );
+  }
+
+  /**
+   * 生成强密码建议
+   */
+  generatePasswordSuggestion(length: number = 12): string {
+    return PasswordSecurityManager.generatePasswordSuggestion(length);
+  }
+
+  /**
+   * 检查是否为常见密码
+   */
+  isCommonPassword(password: string): boolean {
+    return PasswordSecurityManager.isCommonPassword(password);
+  }
+
+  /**
+   * 获取设备信息
+   */
+  async getDeviceInfo() {
+    return DeviceFingerprinter.getDeviceInfo();
+  }
+
+  // ==================== 会话管理 ====================
+
+  /**
+   * 获取活跃会话
+   */
+  async getSessions(): Promise<SessionInfo[]> {
+    try {
+      const token = this.getAccessToken();
+      if (!token) return [];
+
+      const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/sessions`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+      return result.success ? result.sessions : [];
+    } catch (error) {
+      console.error('获取活跃会话失败:', error);
+      return [];
+    }
+  }
+
+  /**
+   * 终止会话
+   */
+  async terminateSession(sessionId: string): Promise<boolean> {
+    try {
+      const token = this.getAccessToken();
+      if (!token) return false;
+
+      const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/sessions/${sessionId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+      return result.success;
+    } catch (error) {
+      console.error('终止会话失败:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 终止所有其他会话
+   */
+  async terminateOtherSessions(): Promise<boolean> {
+    try {
+      const token = this.getAccessToken();
+      if (!token) return false;
+
+      const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/sessions/terminate-others`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+      return result.success;
+    } catch (error) {
+      console.error('终止其他会话失败:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 添加事件监听器
+   */
+  on(event: string, callback: Function): void {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, []);
+    }
+    this.eventListeners.get(event)!.push(callback);
+  }
+
+  /**
+   * 移除事件监听器
+   */
+  off(event: string, callback: Function): void {
+    const listeners = this.eventListeners.get(event);
+    if (listeners) {
+      const index = listeners.indexOf(callback);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
+    }
+  }
+
+  /**
+   * 触发事件
+   */
+  private emit(event: string, data?: any): void {
+    const listeners = this.eventListeners.get(event);
+    if (listeners) {
+      listeners.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error(`事件监听器执行错误 (${event}):`, error);
+        }
+      });
+    }
+  }
+
+  /**
+   * 启动会话监控
+   */
+  private startSessionMonitoring(): void {
+    if (typeof window === 'undefined') return;
+
+    this.sessionCheckTimer = setInterval(() => {
+      if (this.currentUser) {
+        // 检查token是否即将过期
+        const token = this.getToken();
+        if (token && this.isTokenExpiringSoon(token)) {
+          this.emit('tokenExpiringSoon', { user: this.currentUser, token });
+          // 可以在这里自动刷新token
+        }
+      }
+    }, 60000); // 每分钟检查一次
+  }
+
+  /**
+   * 检查token是否即将过期
+   */
+  private isTokenExpiringSoon(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiryTime = payload.exp * 1000;
+      const thresholdTime = Date.now() + (this.enhancedConfig.autoRefreshThreshold || 300) * 1000;
+      return thresholdTime >= expiryTime;
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * 安全存储token
+   */
+  private async storeTokenSecurely(key: string, value: string): Promise<void> {
+    if (this.enhancedConfig.enableSecureStorage) {
+      try {
+        await SecureStorageManager.setItem(key, value);
+      } catch (error) {
+        console.warn('安全存储失败，使用普通存储:', error);
+        localStorage.setItem(key, value);
+      }
+    } else {
+      localStorage.setItem(key, value);
+    }
+  }
+
+  /**
+   * 安全获取token
+   */
+  private async getTokenSecurely(key: string): Promise<string | null> {
+    if (this.enhancedConfig.enableSecureStorage) {
+      try {
+        return await SecureStorageManager.getItem<string>(key);
+      } catch (error) {
+        console.warn('安全获取失败，使用普通存储:', error);
+        return localStorage.getItem(key);
+      }
+    } else {
+      return localStorage.getItem(key);
+    }
+  }
+
+  /**
+   * 获取增强配置
+   */
+  getEnhancedConfig(): Partial<EnhancedAuthConfig> {
+    return { ...this.enhancedConfig };
+  }
+
+  /**
+   * 更新增强配置
+   */
+  updateEnhancedConfig(config: Partial<EnhancedAuthConfig>): void {
+    this.enhancedConfig = { ...this.enhancedConfig, ...config };
+  }
+
+  /**
+   * 获取token（兼容方法）
+   */
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * 清理资源
+   */
+  async destroy(): Promise<void> {
+    if (this.refreshTimer) {
+      clearTimeout(this.refreshTimer);
+    }
+    if (this.sessionCheckTimer) {
+      clearInterval(this.sessionCheckTimer);
+    }
+    
+    // 清理JWT资源
+    await this.clearTokenPair();
+    
+    this.eventListeners.clear();
+    this.activeSessions.clear();
   }
 
   // 数据迁移：从本地存储迁移到数据库

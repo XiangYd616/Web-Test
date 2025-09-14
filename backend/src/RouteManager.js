@@ -316,6 +316,14 @@ class RouteManager {
         group: 'testSpecific'
       },
 
+      // 性能测试路由
+      {
+        path: '/api/test/performance',
+        module: '../routes/performanceTestRoutes.js',
+        description: '性能测试API（Lighthouse集成）',
+        group: 'testSpecific'
+      },
+
       // 引擎状态路由
       {
         path: '/api/engines',

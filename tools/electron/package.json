@@ -17,7 +17,7 @@
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
-    "dist": "npm run build",
+    "dist": "yarn build",
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps"
   },

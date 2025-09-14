@@ -6,7 +6,7 @@
 
 ### 应用无法启动
 
-#### 问题：运行 `npm start` 后应用无法启动
+#### 问题：运行 `yarn start` 后应用无法启动
 
 **可能原因和解决方案：**
 
@@ -28,13 +28,13 @@
 2. **依赖安装不完整**
    ```bash
    # 清理并重新安装依赖
-   npm run clean:all
-   npm install
+   yarn clean:all
+   yarn install
    
    # 如果仍有问题，尝试
-   rm -rf node_modules package-lock.json
-   rm -rf backend/node_modules backend/package-lock.json
-   npm install
+   rm -rf node_modules yarn.lock
+   rm -rf backend/node_modules
+   yarn install
    ```
 
 3. **Node.js 版本不兼容**
@@ -61,13 +61,13 @@
    rm -rf dist
    
    # 重新启动
-   npm run frontend
+   yarn frontend
    ```
 
 2. **检查 TypeScript 配置**
    ```bash
    # 运行类型检查
-   npm run type-check
+   yarn type-check
    
    # 如果有类型错误，修复后重新启动
    ```
@@ -90,7 +90,7 @@
 1. **数据库连接问题**
    ```bash
    # 检查数据库连接
-   npm run db:check
+   yarn db:status
    
    # 如果连接失败，检查配置
    cat backend/.env
@@ -164,7 +164,7 @@
 
 ### 数据库迁移失败
 
-#### 问题：运行 `npm run db:setup` 失败
+#### 问题：运行 `yarn db:init` 失败
 
 **解决方案：**
 
@@ -189,10 +189,10 @@
 3. **重置数据库**
    ```bash
    # 完全重置数据库
-   npm run db:reset
+   yarn db:clean
    
    # 重新初始化
-   npm run db:setup
+   yarn db:init
    ```
 
 ## 🔧 功能问题
@@ -224,7 +224,7 @@
    tail -f backend/logs/app.log
    
    # 或者在启动时查看控制台输出
-   npm run backend
+   yarn backend
    ```
 
 ### WebSocket 连接失败
@@ -275,7 +275,7 @@
    df -h
    
    # 清理临时文件
-   npm run clean
+   yarn clean
    ```
 
 3. **权限问题**
@@ -313,9 +313,9 @@
 3. **重新构建前端**
    ```bash
    # 清理并重新构建
-   npm run clean
-   npm run build
-   npm run preview
+   yarn clean
+   yarn build
+   yarn preview
    ```
 
 ### 响应式布局问题
@@ -468,13 +468,13 @@
 
 ```bash
 # 前端调试
-DEBUG=* npm run frontend
+DEBUG=* yarn frontend
 
 # 后端调试
-DEBUG=* npm run backend
+DEBUG=* yarn backend
 
 # 或者设置特定的调试命名空间
-DEBUG=app:* npm run backend
+DEBUG=app:* yarn backend
 ```
 
 ### 查看详细日志
@@ -529,30 +529,30 @@ tail -f backend/logs/access.log
 
 ```bash
 # 应用启动
-npm start                    # 启动完整应用
-npm run frontend            # 仅启动前端
-npm run backend             # 仅启动后端
+yarn start                  # 启动完整应用
+yarn frontend              # 仅启动前端
+yarn backend               # 仅启动后端
 
 # 数据库操作
-npm run db:setup            # 初始化数据库
-npm run db:check            # 检查数据库连接
-npm run db:reset            # 重置数据库
+yarn db:init               # 初始化数据库
+yarn db:status             # 检查数据库连接
+yarn db:clean              # 重置数据库
 
 # 测试
-npm test                    # 运行测试
-npm run test:coverage       # 测试覆盖率
-npm run e2e                 # 端到端测试
+yarn test                  # 运行测试
+yarn test:coverage         # 测试覆盖率
+yarn e2e                   # 端到端测试
 
 # 构建和部署
-npm run build               # 构建生产版本
-npm run preview             # 预览生产版本
-npm run electron:build      # 构建桌面应用
+yarn build                 # 构建生产版本
+yarn preview               # 预览生产版本
+yarn electron:build        # 构建桌面应用
 
 # 维护
-npm run clean               # 清理构建文件
-npm run clean:all           # 清理所有文件
-npm run lint                # 代码检查
-npm run format              # 代码格式化
+yarn clean                 # 清理构建文件
+yarn clean:all             # 清理所有文件
+yarn lint                  # 代码检查
+yarn format                # 代码格式化
 ```
 
 ---

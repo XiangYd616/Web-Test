@@ -1,21 +1,44 @@
 /**
  * 统一API服务 - 整合所有API调用功能
- * 版本: v2.0.0
- * 创建时间: 2025-08-24
+ * 版本: v3.0.0
+ * 更新时间: 2025-01-14
  * 
  * 此文件整合了以下重复的API服务文件：
  * - apiService.ts
  * - baseApiService.ts  
- * - enhancedApiService.ts
+ * - enhancedApiService.ts (企业级功能已整合)
  * - unifiedTestApiService.ts
  * - testApiService.ts
+ * 
+ * 新增企业级功能：
+ * - 专业错误处理和分类
+ * - 智能重试机制
+ * - 高级缓存管理
+ * - 性能指标收集
+ * - 请求/响应拦截器
  */
 
 import type {
   ApiResponse,
   PaginatedResponse,
   PaginationParams
-} from '../../types/common';
+} from '@types/common';
+
+// 导入企业级功能模块
+import { ApiCache } from './core/apiCache';
+import { MetricsCollector } from './core/apiMetrics';
+import { 
+  createErrorFromResponse, 
+  handleRequestError, 
+  ApiServiceError,
+  NetworkError,
+  TimeoutError 
+} from './core/apiErrors';
+import type { 
+  ApiMetrics,
+  RequestInterceptor,
+  ResponseInterceptor 
+} from './core/apiTypes';
 
 // ==================== 配置接口 ====================
 
@@ -24,10 +47,15 @@ export interface ApiConfig {
   timeout: number;
   retries: number;
   retryDelay: number;
+  retryBackoff?: number; // 新增：指数退避系数
   enableCache: boolean;
   cacheTTL: number;
+  maxCacheSize?: number; // 新增：最大缓存大小
   enableLogging: boolean;
   enableMetrics: boolean;
+  enableVersioning?: boolean; // 新增：启用版本控制
+  apiVersion?: string; // 新增：API版本
+  enableAdvancedErrors?: boolean; // 新增：启用企业级错误处理
 }
 
 export interface RequestConfig {
@@ -82,6 +110,10 @@ export class UnifiedApiService {
   private config: ApiConfig;
   private authConfig: AuthConfig = {};
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private advancedCache?: ApiCache; // 企业级缓存
+  private metricsCollector?: MetricsCollector; // 企业级指标
+  private requestInterceptors: RequestInterceptor[] = []; // 请求拦截器
+  private responseInterceptors: ResponseInterceptor[] = []; // 响应拦截器
   private metrics = {
     requests: 0,
     errors: 0,
@@ -95,12 +127,72 @@ export class UnifiedApiService {
       timeout: 30000,
       retries: 3,
       retryDelay: 1000,
+      retryBackoff: 2, // 新增默认值
       enableCache: true,
       cacheTTL: 300000, // 5分钟
+      maxCacheSize: 1000, // 新增默认值
       enableLogging: import.meta.env.DEV,
       enableMetrics: true,
+      enableVersioning: false, // 新增默认值
+      apiVersion: 'v1', // 新增默认值
+      enableAdvancedErrors: true, // 新增默认值
       ...config
     };
+    
+    // 初始化企业级功能
+    this.initializeEnhancedFeatures();
+  }
+  
+  private initializeEnhancedFeatures(): void {
+    // 初始化高级缓存
+    if (this.config.enableCache && this.config.maxCacheSize) {
+      this.advancedCache = new ApiCache(this.config.maxCacheSize);
+    }
+    
+    // 初始化指标收集器
+    if (this.config.enableMetrics) {
+      this.metricsCollector = new MetricsCollector();
+    }
+  }
+
+  // ==================== 企业级功能 API ====================
+
+  /**
+   * 添加请求拦截器
+   */
+  addRequestInterceptor(interceptor: RequestInterceptor): void {
+    this.requestInterceptors.push(interceptor);
+  }
+
+  /**
+   * 添加响应拦截器
+   */
+  addResponseInterceptor(interceptor: ResponseInterceptor): void {
+    this.responseInterceptors.push(interceptor);
+  }
+
+  /**
+   * 获取高级指标
+   */
+  getAdvancedMetrics(): ApiMetrics | null {
+    return this.metricsCollector?.getMetrics() || null;
+  }
+
+  /**
+   * 清空高级缓存
+   */
+  clearAdvancedCache(): void {
+    this.advancedCache?.clear();
+  }
+
+  /**
+   * 获取高级缓存状态
+   */
+  getAdvancedCacheStats() {
+    return this.advancedCache ? {
+      size: this.advancedCache.size(),
+      maxSize: this.config.maxCacheSize || 1000
+    } : null;
   }
 
   // ==================== 认证管理 ====================
@@ -166,31 +258,69 @@ export class UnifiedApiService {
   ): Promise<ApiResponse<T>> {
     const fullUrl = url.startsWith('http') ? url : `${this.config.baseURL}${url}`;
     const cacheKey = this.getCacheKey(fullUrl, config);
+    
+    // 记录企业级指标
+    this.metricsCollector?.recordRequest();
 
-    // 检查缓存
+    // 检查高级缓存（优先使用）
     if (config.method === 'GET' || !config.method) {
+      if (this.advancedCache?.has(cacheKey)) {
+        const cached = this.advancedCache.get<ApiResponse<T>>(cacheKey);
+        if (cached) {
+          this.metricsCollector?.recordCacheHit();
+          if (this.config.enableLogging) {
+            console.log(`🎯 高级缓存命中: ${config.method || 'GET'} ${url}`);
+          }
+          return cached;
+        }
+      }
+      
+      // 备用：检查传统缓存
       const cached = this.getFromCache(cacheKey);
       if (cached) {
+        this.metricsCollector?.recordCacheHit();
         if (this.config.enableLogging) {
           console.log(`🎯 缓存命中: ${config.method || 'GET'} ${url}`);
         }
         return cached;
       }
+      
+      this.metricsCollector?.recordCacheMiss();
     }
 
-    const requestConfig: RequestInit = {
+    // 构建请求配置
+    let requestConfig: RequestConfig = {
       method: config.method || 'GET',
       headers: {
         'Content-Type': 'application/json',
         ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
+        ...(this.config.enableVersioning ? { 'API-Version': this.config.apiVersion || 'v1' } : {}),
         ...config.headers
       },
       ...(config.body ? { body: JSON.stringify(config.body) } : {}),
-      signal: AbortSignal.timeout(config.timeout || this.config.timeout)
+      timeout: config.timeout || this.config.timeout
+    };
+    
+    // 应用请求拦截器
+    for (const interceptor of this.requestInterceptors) {
+      try {
+        requestConfig = await interceptor(requestConfig);
+      } catch (error) {
+        console.warn('请求拦截器执行失败:', error);
+      }
+    }
+    
+    // 转换为 fetch 配置
+    const fetchConfig: RequestInit = {
+      method: requestConfig.method,
+      headers: requestConfig.headers,
+      body: requestConfig.body,
+      signal: AbortSignal.timeout(requestConfig.timeout!)
     };
 
     const retries = config.retries ?? this.config.retries;
     let lastError: Error;
+    const startTime = Date.now();
 
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
@@ -200,38 +330,105 @@ export class UnifiedApiService {
           console.log(`🌐 API请求 (尝试 ${attempt + 1}/${retries + 1}): ${config.method || 'GET'} ${url}`);
         }
 
-        const response = await fetch(fullUrl, requestConfig);
-        const responseData = await response.json();
+        const response = await fetch(fullUrl, fetchConfig);
+        
+        // 解析响应
+        let responseData: any;
+        const contentType = response.headers.get('content-type');
+        try {
+          if (contentType?.includes('application/json')) {
+            responseData = await response.json();
+          } else {
+            responseData = await response.text();
+          }
+        } catch (parseError) {
+          responseData = null;
+        }
 
         if (response.ok) {
+          const responseTime = Date.now() - startTime;
+          
+          // 记录成功指标
+          this.metricsCollector?.recordSuccess(responseTime);
+          
+          // 标准化响应格式
+          let finalResponse: ApiResponse<T>;
+          if (responseData && typeof responseData === 'object' && 'success' in responseData) {
+            finalResponse = responseData;
+          } else {
+            finalResponse = {
+              success: true,
+              data: responseData as T,
+              meta: {
+                timestamp: new Date().toISOString()
+              }
+            };
+          }
+          
+          // 应用响应拦截器
+          for (const interceptor of this.responseInterceptors) {
+            try {
+              finalResponse = await interceptor(finalResponse);
+            } catch (error) {
+              console.warn('响应拦截器执行失败:', error);
+            }
+          }
+          
           // 缓存成功响应
           if (config.method === 'GET' || !config.method) {
-            this.setCache(cacheKey, responseData, config.cacheTTL);
+            // 优先使用高级缓存
+            if (this.advancedCache) {
+              this.advancedCache.set(cacheKey, finalResponse, config.cacheTTL || this.config.cacheTTL);
+            } else {
+              this.setCache(cacheKey, finalResponse, config.cacheTTL);
+            }
           }
 
           if (this.config.enableLogging) {
-            console.log(`✅ API请求成功: ${config.method || 'GET'} ${url}`);
+            console.log(`✅ API请求成功: ${config.method || 'GET'} ${url} (耗时: ${responseTime}ms)`);
           }
 
-          return responseData;
+          return finalResponse;
         } else {
-          throw new Error(responseData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+          // 使用企业级错误处理
+          if (this.config.enableAdvancedErrors) {
+            throw createErrorFromResponse(response, responseData);
+          } else {
+            throw new Error(responseData?.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+          }
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         this.metrics.errors++;
+        
+        // 记录失败指标
+        if (error instanceof ApiServiceError) {
+          this.metricsCollector?.recordFailure(error.code);
+        }
 
         if (this.config.enableLogging) {
           console.warn(`⚠️ API请求失败 (尝试 ${attempt + 1}/${retries + 1}): ${lastError.message}`);
         }
 
-        // 如果是最后一次尝试，或者是不可重试的错误，直接抛出
-        if (attempt === retries || this.isNonRetryableError(lastError)) {
-          break;
+        // 判断是否可重试
+        let shouldRetry = false;
+        if (this.config.enableAdvancedErrors && lastError instanceof ApiServiceError) {
+          shouldRetry = lastError.retryable;
+        } else {
+          shouldRetry = !this.isNonRetryableError(lastError);
         }
 
-        // 等待后重试
-        await this.delay(config.retryDelay || this.config.retryDelay);
+        // 如果是最后一次尝试，或者错误不可重试，直接抛出
+        if (attempt === retries || !shouldRetry) {
+          break;
+        }
+        
+        // 记录重试指标
+        this.metricsCollector?.recordRetry();
+
+        // 计算重试延迟（指数退避）
+        const retryDelay = this.calculateRetryDelay(attempt, config.retryDelay || this.config.retryDelay);
+        await this.delay(retryDelay);
       }
     }
 
@@ -296,6 +493,16 @@ export class UnifiedApiService {
 
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * 计算指数退避重试延迟
+   */
+  private calculateRetryDelay(attempt: number, baseDelay: number): number {
+    const backoff = this.config.retryBackoff || 2;
+    const delay = baseDelay * Math.pow(backoff, attempt);
+    const maxDelay = 30000; // 最大30秒
+    return Math.min(delay, maxDelay);
   }
 
   // ==================== 测试API方法 ====================

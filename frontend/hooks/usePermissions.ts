@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { authManager } from '../services/auth/enhancedAuthManager';
+import { unifiedAuthService } from '../services/auth/authService';
 // 临时类型定义，直到rbac模块实现完成
 interface Permission {
   id: string;
@@ -144,7 +144,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
-      const user = await authManager.getCurrentUser();
+      const user = unifiedAuthService.getCurrentUser();
       if (!user) {
         setState(prev => ({
           ...prev,

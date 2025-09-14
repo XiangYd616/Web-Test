@@ -23,17 +23,24 @@ import { TestTypeConfig } from '../components/testing/UniversalTestPage';
 export const stressTestConfig: TestTypeConfig = {
   id: 'stress',
   name: '压力测试',
-  description: '测试系统在高负载下的性能表现',
+  description: '测试系统在高负载下的性能表现和稳定性',
   icon: Zap,
-  color: 'yellow',
+  color: 'red',
   defaultConfig: {
     targetUrl: '',
+    method: 'GET',
     concurrentUsers: 10,
     duration: 60,
     rampUpTime: 10,
     testType: 'load',
-    requestsPerSecond: 10,
-    timeout: 30000
+    requestsPerSecond: 100,
+    timeout: 30000,
+    headers: {},
+    body: '',
+    enableAdvanced: false,
+    followRedirects: true,
+    keepAlive: true,
+    compression: true
   },
   configSchema: {
     fields: [
@@ -41,11 +48,26 @@ export const stressTestConfig: TestTypeConfig = {
         key: 'targetUrl',
         type: 'url',
         label: '目标URL',
-        placeholder: 'https://www.example.com',
+        placeholder: 'https://www.example.com/api/endpoint',
         required: true,
         validation: [
           { type: 'required', message: '请输入目标URL' },
           { type: 'pattern', value: '^https?://.+', message: '请输入有效的URL' }
+        ]
+      },
+      {
+        key: 'method',
+        type: 'select',
+        label: '请求方法',
+        required: true,
+        options: [
+          { value: 'GET', label: 'GET' },
+          { value: 'POST', label: 'POST' },
+          { value: 'PUT', label: 'PUT' },
+          { value: 'DELETE', label: 'DELETE' },
+          { value: 'PATCH', label: 'PATCH' },
+          { value: 'HEAD', label: 'HEAD' },
+          { value: 'OPTIONS', label: 'OPTIONS' }
         ]
       },
       {
@@ -54,10 +76,11 @@ export const stressTestConfig: TestTypeConfig = {
         label: '测试类型',
         required: true,
         options: [
-          { value: 'load', label: '负载测试' },
-          { value: 'stress', label: '压力测试' },
-          { value: 'spike', label: '峰值测试' },
-          { value: 'volume', label: '容量测试' }
+          { value: 'load', label: '负载测试 - 测试预期负载下的表现' },
+          { value: 'stress', label: '压力测试 - 测试系统极限' },
+          { value: 'spike', label: '峰值测试 - 测试突发流量' },
+          { value: 'volume', label: '容量测试 - 测试大量数据处理' },
+          { value: 'endurance', label: '耐久测试 - 长时间运行测试' }
         ]
       },
       {
@@ -66,10 +89,22 @@ export const stressTestConfig: TestTypeConfig = {
         label: '并发用户数',
         required: true,
         min: 1,
-        max: 1000,
+        max: 10000,
         validation: [
           { type: 'min', value: 1, message: '并发用户数至少为1' },
-          { type: 'max', value: 1000, message: '并发用户数不能超过1000' }
+          { type: 'max', value: 10000, message: '并发用户数不能超过10000' }
+        ]
+      },
+      {
+        key: 'requestsPerSecond',
+        type: 'number',
+        label: '目标RPS (请求/秒)',
+        required: true,
+        min: 1,
+        max: 100000,
+        validation: [
+          { type: 'min', value: 1, message: 'RPS至少为1' },
+          { type: 'max', value: 100000, message: 'RPS不能超过100000' }
         ]
       },
       {
@@ -78,26 +113,134 @@ export const stressTestConfig: TestTypeConfig = {
         label: '测试时长(秒)',
         required: true,
         min: 10,
-        max: 3600
+        max: 3600,
+        validation: [
+          { type: 'min', value: 10, message: '测试时长至少10秒' },
+          { type: 'max', value: 3600, message: '测试时长不能超过1小时' }
+        ]
       },
       {
         key: 'rampUpTime',
         type: 'number',
-        label: '预热时间(秒)',
+        label: '爬升时间(秒)',
         min: 0,
-        max: 300
+        max: 300,
+        placeholder: '逐步增加负载的时间'
+      },
+      {
+        key: 'timeout',
+        type: 'number',
+        label: '请求超时(毫秒)',
+        min: 100,
+        max: 120000,
+        validation: [
+          { type: 'min', value: 100, message: '超时时间至少100ms' },
+          { type: 'max', value: 120000, message: '超时时间不能超过2分钟' }
+        ]
+      },
+      {
+        key: 'headers',
+        type: 'textarea',
+        label: '自定义请求头(JSON)',
+        placeholder: '{\n  "Authorization": "Bearer token",\n  "Content-Type": "application/json"\n}',
+        validation: [
+          {
+            type: 'custom',
+            message: '请输入有效的JSON格式',
+            validator: (value: string) => {
+              if (!value || value.trim() === '') return true;
+              try {
+                JSON.parse(value);
+                return true;
+              } catch {
+                return false;
+              }
+            }
+          }
+        ]
+      },
+      {
+        key: 'body',
+        type: 'textarea',
+        label: '请求体',
+        placeholder: '{\n  "key": "value"\n}',
+        dependencies: [
+          {
+            field: 'method',
+            value: 'GET',
+            action: 'hide'
+          },
+          {
+            field: 'method',
+            value: 'HEAD',
+            action: 'hide'
+          }
+        ]
+      },
+      {
+        key: 'enableAdvanced',
+        type: 'checkbox',
+        label: '启用高级选项'
+      },
+      {
+        key: 'followRedirects',
+        type: 'checkbox',
+        label: '跟随重定向',
+        dependencies: [
+          {
+            field: 'enableAdvanced',
+            value: false,
+            action: 'hide'
+          }
+        ]
+      },
+      {
+        key: 'keepAlive',
+        type: 'checkbox',
+        label: '保持连接',
+        dependencies: [
+          {
+            field: 'enableAdvanced',
+            value: false,
+            action: 'hide'
+          }
+        ]
+      },
+      {
+        key: 'compression',
+        type: 'checkbox',
+        label: '启用压缩',
+        dependencies: [
+          {
+            field: 'enableAdvanced',
+            value: false,
+            action: 'hide'
+          }
+        ]
       }
     ],
     sections: [
       {
         title: '基础配置',
-        fields: ['targetUrl', 'testType'],
+        fields: ['targetUrl', 'method', 'testType'],
         defaultExpanded: true
       },
       {
         title: '负载参数',
-        fields: ['concurrentUsers', 'duration', 'rampUpTime'],
+        fields: ['concurrentUsers', 'requestsPerSecond', 'duration', 'rampUpTime'],
         defaultExpanded: true
+      },
+      {
+        title: '请求配置',
+        fields: ['timeout', 'headers', 'body'],
+        collapsible: true,
+        defaultExpanded: false
+      },
+      {
+        title: '高级选项',
+        fields: ['enableAdvanced', 'followRedirects', 'keepAlive', 'compression'],
+        collapsible: true,
+        defaultExpanded: false
       }
     ]
   },
@@ -109,20 +252,68 @@ export const stressTestConfig: TestTypeConfig = {
         type: 'cards'
       },
       {
-        key: 'performance',
-        title: '性能指标',
+        key: 'responseTime',
+        title: '响应时间趋势',
+        type: 'chart'
+      },
+      {
+        key: 'throughput',
+        title: '吞吐量趋势',
+        type: 'chart'
+      },
+      {
+        key: 'errorRate',
+        title: '错误率分析',
+        type: 'chart'
+      },
+      {
+        key: 'concurrentUsers',
+        title: '并发用户数',
         type: 'chart'
       },
       {
         key: 'errors',
-        title: '错误分析',
+        title: '错误日志',
         type: 'table'
       }
     ],
+    charts: [
+      {
+        key: 'responseTimeChart',
+        type: 'line',
+        title: '响应时间趋势',
+        dataKey: 'metrics.responseTime'
+      },
+      {
+        key: 'throughputChart',
+        type: 'line',
+        title: '吞吐量趋势',
+        dataKey: 'metrics.throughput'
+      },
+      {
+        key: 'errorRateChart',
+        type: 'bar',
+        title: '错误率',
+        dataKey: 'metrics.errorRate'
+      },
+      {
+        key: 'usersChart',
+        type: 'area',
+        title: '并发用户数',
+        dataKey: 'metrics.activeUsers'
+      }
+    ],
     metrics: [
-      { key: 'avgResponseTime', label: '平均响应时间', format: 'time' },
-      { key: 'throughput', label: '吞吐量', format: 'number' },
-      { key: 'errorRate', label: '错误率', format: 'percentage' }
+      { key: 'totalRequests', label: '总请求数', format: 'number', color: 'blue' },
+      { key: 'successfulRequests', label: '成功请求', format: 'number', color: 'green' },
+      { key: 'failedRequests', label: '失败请求', format: 'number', color: 'red' },
+      { key: 'avgResponseTime', label: '平均响应时间', format: 'time', color: 'yellow' },
+      { key: 'minResponseTime', label: '最小响应时间', format: 'time', color: 'green' },
+      { key: 'maxResponseTime', label: '最大响应时间', format: 'time', color: 'red' },
+      { key: 'percentile95', label: '95百分位', format: 'time', color: 'orange' },
+      { key: 'percentile99', label: '99百分位', format: 'time', color: 'red' },
+      { key: 'throughput', label: '吞吐量(req/s)', format: 'number', color: 'purple' },
+      { key: 'errorRate', label: '错误率', format: 'percentage', color: 'red' }
     ]
   }
 };

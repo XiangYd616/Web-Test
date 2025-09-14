@@ -36,6 +36,18 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'frontend'),
+      '@components': resolve(__dirname, 'frontend/components'),
+      '@pages': resolve(__dirname, 'frontend/pages'),
+      '@services': resolve(__dirname, 'frontend/services'),
+      '@types': resolve(__dirname, 'frontend/types'),
+      '@utils': resolve(__dirname, 'frontend/utils'),
+      '@hooks': resolve(__dirname, 'frontend/hooks'),
+      '@contexts': resolve(__dirname, 'frontend/contexts'),
+      '@config': resolve(__dirname, 'frontend/config'),
+      '@styles': resolve(__dirname, 'frontend/styles'),
+      '@shared': resolve(__dirname, 'shared'),
+      '@backend': resolve(__dirname, 'backend'),
+      '@tools': resolve(__dirname, 'tools'),
     },
   },
   root: 'frontend',

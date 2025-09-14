@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { type User } from '../contexts/AppContext';
+import { type User } from '@contexts/AppContext';
 
 // 登录凭据接口
 export interface LoginCredentials {

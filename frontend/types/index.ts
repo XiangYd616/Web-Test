@@ -320,6 +320,33 @@ export type CompletionCallback = (result: any) => void;
 export type ProgressCallback = (progress: number, stage: string) => void;
 export type ErrorCallback = (error: Error) => void;
 
+// ==================== 错误处理类型 ====================
+export type {
+  AppError,
+  AnyError,
+  AuthenticationError,
+  AuthorizationError,
+  BusinessError,
+  ErrorBoundaryProps,
+  ErrorBoundaryState,
+  ErrorCategory,
+  ErrorCode,
+  ErrorFactory,
+  ErrorHandler,
+  ErrorHandlerConfig,
+  ErrorHandlingResult,
+  ErrorReporter,
+  ErrorSeverity,
+  NetworkError,
+  RecoveryConfig,
+  RecoveryStrategy,
+  SystemError,
+  UIError,
+  ValidationError
+} from './errors';
+
+export { ERROR_CODES } from './errors';
+
 // ==================== 第三方库类型扩展 ====================
 
 // 导入Axios类型扩展

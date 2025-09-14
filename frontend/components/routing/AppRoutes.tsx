@@ -17,7 +17,7 @@ const SEOTest = lazy(() => import('../../pages/SEOTest'));
 const APITest = lazy(() => import('../../pages/APITest'));
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
-const StressTest = lazy(() => import('../../pages/StressTest'));
+const UnifiedStressTest = lazy(() => import('../../pages/UnifiedStressTest')); // 统一压力测试页面
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
 const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
 const UXTest = lazy(() => import('../../pages/UXTest'));
@@ -40,9 +40,6 @@ const TestHistory = lazy(() => import('../../pages/TestHistory'));
 
 const Reports = lazy(() => import('../../pages/Reports'));
 const TestResultDetail = lazy(() => import('../../pages/TestResultDetail'));
-const StressTestDetail = lazy(() => import('../../pages/StressTestDetail'));
-
-const StressTestReport = lazy(() => import('../../pages/StressTestReport'));
 const SecurityReport = lazy(() => import('../../pages/SecurityReport'));
 
 // 系统管理 - 只保留Admin页面，其他管理功能都在Admin内部
@@ -140,7 +137,7 @@ const AppRoutes: React.FC = () => {
         } />
         <Route path="stress-test" element={
           <LazyPageWrapper>
-            <StressTest />
+            <UnifiedStressTest />
           </LazyPageWrapper>
         } />
         <Route path="compatibility-test" element={
@@ -185,17 +182,6 @@ const AppRoutes: React.FC = () => {
         <Route path="test-result/:id" element={
           <LazyPageWrapper>
             <TestResultDetail />
-          </LazyPageWrapper>
-        } />
-        <Route path="stress-test/:testId" element={
-          <LazyPageWrapper>
-            <StressTestDetail />
-          </LazyPageWrapper>
-        } />
-
-        <Route path="stress-test-report" element={
-          <LazyPageWrapper>
-            <StressTestReport />
           </LazyPageWrapper>
         } />
         <Route path="security-report" element={

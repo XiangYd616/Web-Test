@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testweb-app
+  namespace: testweb
+  labels:
+    app: testweb
+    component: app
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: testweb
+      component: app
+  template:
+    metadata:
+      labels:
+        app: testweb
+        component: app
+    spec:
+      containers:
+      - name: testweb-app
+        image: testweb:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: testweb-secrets
+              key: db-host
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: testweb-secrets
+              key: db-name
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: testweb-secrets
+              key: db-user
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: testweb-secrets
+              key: db-password
+        - name: REDIS_HOST
+          value: testweb-redis
+        - name: REDIS_PORT
+          value: "6379"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: testweb-secrets
+              key: jwt-secret
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        volumeMounts:
+        - name: logs-volume
+          mountPath: /app/logs
+        - name: uploads-volume
+          mountPath: /app/uploads
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: testweb-logs-pvc
+      - name: uploads-volume
+        persistentVolumeClaim:
+          claimName: testweb-uploads-pvc
+      - name: config-volume
+        configMap:
+          name: testweb-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testweb-app-service
+  namespace: testweb
+  labels:
+    app: testweb
+    component: app
+spec:
+  selector:
+    app: testweb
+    component: app
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+    protocol: TCP
+  type: ClusterIP

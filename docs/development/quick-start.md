@@ -7,7 +7,7 @@
 ### 环境要求
 
 - **Node.js**: >= 18.0.0
-- **npm**: >= 8.0.0
+- **Yarn**: >= 1.22.0
 - **TypeScript**: >= 5.0.0
 - **IDE**: 推荐使用VSCode
 
@@ -19,10 +19,10 @@ git clone <repository-url>
 cd Test-Web
 
 # 安装依赖
-npm install
+yarn install
 
 # 启动开发服务器
-npm run dev
+yarn dev
 
 # 在浏览器中打开 http://localhost:3000
 ```
