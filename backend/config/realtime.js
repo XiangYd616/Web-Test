@@ -1,87 +1,132 @@
 /**
  * 实时通信配置和初始化
- * 管理WebSocket连接、实时服务等
+ * 管理WebSocket连接、实时服务等 - 使用增强版WebSocket管理器
  */
 
-const SocketManager = require('../utils/websocket/SocketManager');
+// 使用新的增强版WebSocket管理器
+const EnhancedWebSocketManager = require('../services/realtime/EnhancedWebSocketManager');
 const RealtimeService = require('../services/realtime/RealtimeService');
 
 class RealtimeConfig {
   constructor() {
-    this.socketManager = null;
+    this.websocketManager = null;
     this.realtimeService = null;
     this.isInitialized = false;
     this.cleanupInterval = null;
     
-    // 配置选项
+    // 增强版配置选项
     this.config = {
-      // Socket.IO配置
-      socket: {
-        cors: {
-          origin: process.env.FRONTEND_URL || "http://localhost:3000",
-          methods: ["GET", "POST"],
-          credentials: true
+      // WebSocket管理器配置
+      websocket: {
+        socketIO: {
+          cors: {
+            origin: process.env.CORS_ORIGINS?.split(',') || [
+              "http://localhost:5174",
+              "http://localhost:3001",
+              "http://127.0.0.1:5174",
+              "http://127.0.0.1:3001"
+            ],
+            methods: ["GET", "POST"],
+            credentials: true
+          },
+          pingTimeout: 60000,
+          pingInterval: 25000,
+          maxHttpBufferSize: 1e6,
+          transports: ['websocket', 'polling'],
+          allowEIO3: true
         },
-        pingTimeout: 60000,
-        pingInterval: 25000,
-        maxHttpBufferSize: 1e6,
-        transports: ['websocket', 'polling']
+        connection: {
+          maxConnections: 10000,
+          maxConnectionsPerUser: 10,
+          maxRoomsPerUser: 50,
+          connectionTimeout: 30000,
+          idleTimeout: 300000 // 5分钟空闲超时
+        },
+        heartbeat: {
+          interval: 30000, // 30秒心跳间隔
+          timeout: 10000   // 10秒心跳超时
+        },
+        messageQueue: {
+          maxSize: 1000,
+          batchSize: 10,
+          processInterval: 100,
+          priority: {
+            high: 1,
+            normal: 5,
+            low: 10
+          }
+        },
+        performance: {
+          enableCompression: true,
+          enableBatching: true,
+          batchDelay: 50,
+          maxBatchSize: 100,
+          enableStatistics: true
+        }
       },
       
       // 实时服务配置
       realtime: {
-        maxQueueSize: 1000,
-        batchSize: 10,
-        processInterval: 100,
-        retryAttempts: 3,
+        maxQueueSize: 2000,
+        batchSize: 20,
+        processInterval: 50,
+        retryAttempts: 5,
         retryDelay: 1000,
-        cleanupInterval: 60 * 60 * 1000 // 1小时清理一次
+        cleanupInterval: 30 * 60 * 1000 // 30分钟清理一次
       },
       
-      // 连接限制
+      // 连接限制（已移至websocket配置中）
       limits: {
-        maxConnectionsPerUser: 5,
-        maxRoomsPerUser: 10,
-        messageRateLimit: 100, // 每分钟最大消息数
-        inactiveTimeout: 30 * 60 * 1000 // 30分钟非活跃超时
+        maxConnectionsPerUser: 10,
+        maxRoomsPerUser: 50,
+        messageRateLimit: 200, // 每分钟最大消息数
+        inactiveTimeout: 5 * 60 * 1000 // 5分钟非活跃超时
       }
     };
   }
 
   /**
-   * 初始化实时通信系统
+   * 初始化增强版实时通信系统
    */
   async initialize(server, redisClient, cacheManager) {
     try {
-      console.log('🚀 初始化实时通信系统...');
+      console.log('🚀 初始化增强版实时通信系统...');
       
       if (this.isInitialized) {
-        
         console.warn('实时通信系统已初始化');
         return this.getServices();
       }
       
-      // 初始化Socket管理器
-      this.socketManager = new SocketManager(server, redisClient);
-      this.socketManager.initialize();
+      // 初始化增强版WebSocket管理器
+      this.websocketManager = new EnhancedWebSocketManager(server, this.config.websocket);
+      await this.websocketManager.initialize();
       
-      // 初始化实时服务
-      this.realtimeService = new RealtimeService(this.socketManager, cacheManager);
+      // 初始化实时服务（如果存在）
+      try {
+        this.realtimeService = new RealtimeService(this.websocketManager, cacheManager);
+        console.log('✅ 实时服务已初始化');
+      } catch (error) {
+        console.warn('⚠️ 实时服务初始化失败，使用基本WebSocket功能:', error.message);
+        this.realtimeService = null;
+      }
+      
+      // 设置WebSocket事件监听
+      this.setupWebSocketEventListeners();
       
       // 设置定期清理
       this.setupCleanupTasks();
       
-      // 设置事件监听
+      // 设置全局事件监听
       this.setupEventListeners();
       
       this.isInitialized = true;
       
-      console.log('✅ 实时通信系统初始化完成');
+      console.log('✅ 增强版实时通信系统初始化完成');
       
       return this.getServices();
       
     } catch (error) {
-      console.error('❌ 实时通信系统初始化失败:', error);
+      console.error('❌ 增强版实时通信系统初始化失败:', error);
       throw error;
     }
   }

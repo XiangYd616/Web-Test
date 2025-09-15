@@ -67,6 +67,19 @@ class TestEngineService {
       throw new Error(`不支持的测试类型: ${testType}`);
     }
 
+    // 检查缓存
+    if (options.useCache !== false) {
+      const cachedResult = this.getCachedResult(testType, url, options);
+      if (cachedResult) {
+        return {
+          testId: cachedResult.id,
+          status: 'completed',
+          result: cachedResult.result,
+          fromCache: true
+        };
+      }
+    }
+
     const testId = uuidv4();
     const startTime = new Date();
 
@@ -130,6 +143,11 @@ class TestEngineService {
       };
 
       this.testResults.set(testId, finalResult);
+
+      // 缓存结果（如果启用了缓存）
+      if (options.useCache !== false) {
+        this.setCachedResult(testType, url, options, finalResult);
+      }
 
       // 更新测试状态
       this.activeTests.set(testId, {
@@ -365,14 +383,373 @@ class TestEngineService {
       }
     }
   }
+
+  /**
+   * 测试调度功能
+   */
+  async scheduleTest(testType, url, options = {}, scheduleOptions = {}) {
+    const {
+      executeAt,
+      recurring = false,
+      interval = null,
+      maxRetries = 3,
+      priority = 'normal'
+    } = scheduleOptions;
+
+    const testId = uuidv4();
+    const scheduledTest = {
+      id: testId,
+      testType,
+      url,
+      options,
+      scheduleOptions: {
+        executeAt: new Date(executeAt),
+        recurring,
+        interval,
+        maxRetries,
+        priority,
+        retryCount: 0,
+        status: 'scheduled',
+        createdAt: new Date()
+      }
+    };
+
+    // 添加到调度队列
+    if (!this.scheduledTests) {
+      this.scheduledTests = new Map();
+    }
+    this.scheduledTests.set(testId, scheduledTest);
+
+    // 如果是立即执行，直接加入执行队列
+    if (new Date(executeAt) <= new Date()) {
+      this.processScheduledTest(testId);
+    }
+
+    return { testId, status: 'scheduled', executeAt };
+  }
+
+  /**
+   * 处理调度测试
+   */
+  async processScheduledTest(testId) {
+    const scheduledTest = this.scheduledTests?.get(testId);
+    if (!scheduledTest) return;
+
+    try {
+      const result = await this.startTest(
+        scheduledTest.testType,
+        scheduledTest.url,
+        scheduledTest.options
+      );
+
+      // 更新调度状态
+      scheduledTest.scheduleOptions.status = 'completed';
+      scheduledTest.scheduleOptions.lastExecutedAt = new Date();
+      scheduledTest.scheduleOptions.retryCount = 0;
+
+      // 如果是循环任务，安排下次执行
+      if (scheduledTest.scheduleOptions.recurring && scheduledTest.scheduleOptions.interval) {
+        const nextExecution = new Date(Date.now() + scheduledTest.scheduleOptions.interval);
+        scheduledTest.scheduleOptions.executeAt = nextExecution;
+        scheduledTest.scheduleOptions.status = 'scheduled';
+      } else {
+        // 非循环任务完成后移除
+        this.scheduledTests.delete(testId);
+      }
+
+      return result;
+    } catch (error) {
+      // 重试逻辑
+      scheduledTest.scheduleOptions.retryCount++;
+      if (scheduledTest.scheduleOptions.retryCount < scheduledTest.scheduleOptions.maxRetries) {
+        const retryDelay = Math.pow(2, scheduledTest.scheduleOptions.retryCount) * 60000; // 指数退避
+        scheduledTest.scheduleOptions.executeAt = new Date(Date.now() + retryDelay);
+        scheduledTest.scheduleOptions.status = 'retrying';
+      } else {
+        scheduledTest.scheduleOptions.status = 'failed';
+        scheduledTest.scheduleOptions.lastError = error.message;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * 获取调度测试列表
+   */
+  getScheduledTests() {
+    if (!this.scheduledTests) return [];
+    return Array.from(this.scheduledTests.values()).map(test => ({
+      id: test.id,
+      testType: test.testType,
+      url: test.url,
+      ...test.scheduleOptions
+    }));
+  }
+
+  /**
+   * 取消调度测试
+   */
+  cancelScheduledTest(testId) {
+    if (this.scheduledTests?.has(testId)) {
+      this.scheduledTests.delete(testId);
+      return { success: true, message: '调度测试已取消' };
+    }
+    return { success: false, message: '调度测试不存在' };
+  }
+
+  /**
+   * 结果缓存功能
+   */
+  getCachedResult(testType, url, options = {}) {
+    const cacheKey = this.generateCacheKey(testType, url, options);
+    if (!this.resultCache) {
+      this.resultCache = new Map();
+    }
+
+    const cached = this.resultCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < (options.cacheMaxAge || 300000)) { // 5分钟默认缓存
+      return cached.result;
+    }
+    return null;
+  }
+
+  /**
+   * 缓存测试结果
+   */
+  setCachedResult(testType, url, options = {}, result) {
+    const cacheKey = this.generateCacheKey(testType, url, options);
+    if (!this.resultCache) {
+      this.resultCache = new Map();
+    }
+
+    this.resultCache.set(cacheKey, {
+      result,
+      timestamp: Date.now(),
+      testType,
+      url
+    });
+
+    // 限制缓存大小
+    if (this.resultCache.size > 1000) {
+      const oldestKey = this.resultCache.keys().next().value;
+      this.resultCache.delete(oldestKey);
+    }
+  }
+
+  /**
+   * 生成缓存键
+   */
+  generateCacheKey(testType, url, options) {
+    const optionsStr = JSON.stringify(options, Object.keys(options).sort());
+    return `${testType}:${url}:${Buffer.from(optionsStr).toString('base64')}`;
+  }
+
+  /**
+   * 清理缓存
+   */
+  clearCache(pattern = null) {
+    if (!this.resultCache) return { cleared: 0 };
+
+    if (!pattern) {
+      const size = this.resultCache.size;
+      this.resultCache.clear();
+      return { cleared: size };
+    }
+
+    let cleared = 0;
+    for (const [key, value] of this.resultCache.entries()) {
+      if (key.includes(pattern) || value.testType === pattern || value.url.includes(pattern)) {
+        this.resultCache.delete(key);
+        cleared++;
+      }
+    }
+    return { cleared };
+  }
+
+  /**
+   * 性能监控功能
+   */
+  getPerformanceMetrics() {
+    const now = Date.now();
+    const metrics = {
+      activeTests: this.activeTests.size,
+      scheduledTests: this.scheduledTests?.size || 0,
+      cachedResults: this.resultCache?.size || 0,
+      enginesStatus: {},
+      systemHealth: {
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        cpu: process.cpuUsage()
+      }
+    };
+
+    // 引擎性能指标
+    for (const [engineType] of Object.entries(this.engines)) {
+      const engineTests = Array.from(this.activeTests.values())
+        .filter(test => test.type === engineType);
+      
+      metrics.enginesStatus[engineType] = {
+        activeTests: engineTests.length,
+        avgResponseTime: this.calculateAvgResponseTime(engineType),
+        successRate: this.calculateSuccessRate(engineType),
+        lastActivity: this.getLastActivity(engineType)
+      };
+    }
+
+    return metrics;
+  }
+
+  /**
+   * 计算平均响应时间
+   */
+  calculateAvgResponseTime(engineType) {
+    const recentResults = Array.from(this.testResults.values())
+      .filter(result => result.type === engineType && 
+        (Date.now() - result.startTime.getTime()) < 3600000) // 最近1小时
+      .map(result => result.duration);
+
+    if (recentResults.length === 0) return 0;
+    return recentResults.reduce((sum, duration) => sum + duration, 0) / recentResults.length;
+  }
+
+  /**
+   * 计算成功率
+   */
+  calculateSuccessRate(engineType) {
+    const recentResults = Array.from(this.testResults.values())
+      .filter(result => result.type === engineType && 
+        (Date.now() - result.startTime.getTime()) < 3600000); // 最近1小时
+
+    if (recentResults.length === 0) return 100;
+    const successCount = recentResults.filter(result => result.status === 'completed').length;
+    return (successCount / recentResults.length) * 100;
+  }
+
+  /**
+   * 获取最后活动时间
+   */
+  getLastActivity(engineType) {
+    const engineResults = Array.from(this.testResults.values())
+      .filter(result => result.type === engineType)
+      .sort((a, b) => b.endTime - a.endTime);
+
+    return engineResults.length > 0 ? engineResults[0].endTime : null;
+  }
+
+  /**
+   * 批量测试功能
+   */
+  async runBatchTests(testConfigs, options = {}) {
+    const {
+      parallel = true,
+      maxConcurrency = 5,
+      stopOnError = false
+    } = options;
+
+    const results = [];
+    const errors = [];
+
+    if (parallel) {
+      // 并行执行，控制并发数
+      const semaphore = new Array(maxConcurrency).fill(null).map(() => Promise.resolve());
+      let semaphoreIndex = 0;
+
+      const promises = testConfigs.map(async (config, index) => {
+        await semaphore[semaphoreIndex];
+        semaphoreIndex = (semaphoreIndex + 1) % maxConcurrency;
+
+        try {
+          const result = await this.startTest(config.testType, config.url, config.options || {});
+          results[index] = result;
+          semaphore[semaphoreIndex % maxConcurrency] = Promise.resolve();
+        } catch (error) {
+          errors[index] = error;
+          if (stopOnError) {
+            throw error;
+          }
+          semaphore[semaphoreIndex % maxConcurrency] = Promise.resolve();
+        }
+      });
+
+      await Promise.allSettled(promises);
+    } else {
+      // 顺序执行
+      for (let i = 0; i < testConfigs.length; i++) {
+        const config = testConfigs[i];
+        try {
+          const result = await this.startTest(config.testType, config.url, config.options || {});
+          results[i] = result;
+        } catch (error) {
+          errors[i] = error;
+          if (stopOnError) {
+            break;
+          }
+        }
+      }
+    }
+
+    return {
+      results,
+      errors,
+      summary: {
+        total: testConfigs.length,
+        successful: results.filter(r => r).length,
+        failed: errors.filter(e => e).length
+      }
+    };
+  }
+
+  /**
+   * 处理调度任务
+   */
+  processScheduledTasks() {
+    if (!this.scheduledTests) return;
+
+    const now = new Date();
+    const tasksToExecute = [];
+
+    // 查找需要执行的任务
+    for (const [testId, scheduledTest] of this.scheduledTests.entries()) {
+      if (scheduledTest.scheduleOptions.status === 'scheduled' && 
+          scheduledTest.scheduleOptions.executeAt <= now) {
+        tasksToExecute.push(testId);
+      }
+    }
+
+    // 按优先级排序
+    tasksToExecute.sort((a, b) => {
+      const testA = this.scheduledTests.get(a);
+      const testB = this.scheduledTests.get(b);
+      const priorityOrder = { high: 3, normal: 2, low: 1 };
+      return priorityOrder[testB.scheduleOptions.priority] - priorityOrder[testA.scheduleOptions.priority];
+    });
+
+    // 执行任务
+    tasksToExecute.forEach(testId => {
+      this.processScheduledTest(testId).catch(error => {
+        console.error(`执行调度测试失败: ${testId}`, error);
+      });
+    });
+
+    return {
+      processed: tasksToExecute.length,
+      remaining: this.scheduledTests.size - tasksToExecute.length
+    };
+  }
 }
 
 // 创建单例实例
 const testEngineService = new TestEngineService();
 
-// 定期清理过期数据
+// 定期清理过期数据和处理调度任务
 setInterval(() => {
   testEngineService.cleanupExpiredTests();
+  testEngineService.processScheduledTasks();
 }, 60 * 60 * 1000); // 每小时清理一次
+
+// 更频繁地检查调度任务
+setInterval(() => {
+  testEngineService.processScheduledTasks();
+}, 60 * 1000); // 每分钟检查一次调度任务
 
 module.exports = testEngineService;
