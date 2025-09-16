@@ -78,7 +78,8 @@
   "include": [
     "frontend",
     "src",
-    "electron"
+    "electron",
+    "shared"
   ],
   "exclude": [
     "src/tests",
