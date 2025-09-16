@@ -1,360 +1,367 @@
 /**
- * 系统资源监控API路由
- * 
- * 提供系统资源状态查询接口
+ * 系统路由
+ * 处理系统配置、监控等管理功能
  */
 
 const express = require('express');
-const os = require('os');
-const fs = require('fs').promises;
-const path = require('path');
-const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
+
+const { getPool, healthCheck, getStats } = require('../../../config/database');
+const { requireRole, ROLES } = require('../../middleware/auth.js');
+const { asyncHandler } = require('../../middleware/errorHandler.js');
+const { formatValidationErrors } = require('../../middleware/responseFormatter.js');
 
 const router = express.Router();
 
-// 系统资源监控专用的宽松速率限制
-const systemResourceRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15分钟
-  max: 1000, // 允许更多请求，因为这是内部监控
-  message: {
-    success: false,
-    message: '系统监控请求过于频繁，请稍后再试'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: (req) => {
-    // 在开发环境跳过限制
-    return process.env.NODE_ENV === 'development';
-  }
-});
+// =====================================================
+// 验证规则
+// =====================================================
+
+const configValidation = [
+  body('category')
+    .notEmpty()
+    .withMessage('配置分类不能为空')
+    .isLength({ max: 50 })
+    .withMessage('配置分类长度不能超过50个字符'),
+
+  body('key')
+    .notEmpty()
+    .withMessage('配置键不能为空')
+    .isLength({ max: 100 })
+    .withMessage('配置键长度不能超过100个字符'),
+
+  body('value')
+    .notEmpty()
+    .withMessage('配置值不能为空'),
+
+  body('dataType')
+    .optional()
+    .isIn(['string', 'number', 'boolean', 'json'])
+    .withMessage('数据类型必须是string、number、boolean或json'),
+
+  body('description')
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage('描述长度不能超过500个字符')
+];
+
+// =====================================================
+// 辅助函数
+// =====================================================
 
 /**
- * 获取系统资源信息
+ * 格式化配置值
  */
-router.get('/resources', systemResourceRateLimit, async (req, res) => {
-  try {
-    // console.log('📊 获取系统资源信息'); // 注释掉日志输出
+const formatConfigValue = (value, dataType) => {
+  switch (dataType) {
+    case 'number':
+      return parseFloat(value);
+    case 'boolean':
+      return value === 'true' || value === true;
+    case 'json':
+      return typeof value === 'string' ? JSON.parse(value) : value;
+    default:
+      return value;
+  }
+};
 
-    // 获取CPU信息
-    const cpus = os.cpus();
-    const cpuUsage = await getCPUUsage();
+/**
+ * 获取系统信息
+ */
+const getSystemInfo = () => {
+  return {
+    platform: process.platform,
+    arch: process.arch,
+    nodeVersion: process.version,
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    cpu: process.cpuUsage(),
+    env: process.env.NODE_ENV,
+    pid: process.pid
+  };
+};
 
-    // 获取内存信息
-    const totalMemory = os.totalmem();
-    const freeMemory = os.freemem();
-    const usedMemory = totalMemory - freeMemory;
-    const memoryUsage = (usedMemory / totalMemory) * 100;
+// =====================================================
+// 路由处理器
+// =====================================================
 
-    // 获取负载平均值
-    const loadAverage = os.loadavg();
+/**
+ * GET /api/v1/system/info
+ * 获取系统信息
+ */
+router.get('/info', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
+  const systemInfo = getSystemInfo();
+  const dbHealth = await healthCheck();
+  const dbStats = await getStats();
 
-    // 获取网络连接信息（简化版）
-    const networkInfo = await getNetworkInfo();
+  res.success({
+    system: systemInfo,
+    database: {
+      health: dbHealth,
+      stats: dbStats
+    },
+    timestamp: new Date().toISOString()
+  }, '获取系统信息成功');
+}));
 
-    // 获取磁盘使用信息
-    const diskInfo = await getDiskInfo();
+/**
+ * GET /api/v1/system/config
+ * 获取系统配置
+ */
+router.get('/config', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
+  const { category, includePrivate = false } = req.query;
+  const pool = getPool();
 
-    const resources = {
-      cpu: {
-        usage: cpuUsage,
-        cores: cpus.length,
-        loadAverage: loadAverage
-      },
-      memory: {
-        used: Math.round(usedMemory / 1024 / 1024), // MB
-        total: Math.round(totalMemory / 1024 / 1024), // MB
-        usage: memoryUsage,
-        available: Math.round(freeMemory / 1024 / 1024) // MB
-      },
-      network: {
-        activeConnections: networkInfo.connections,
-        bandwidth: {
-          upload: networkInfo.upload,
-          download: networkInfo.download
-        }
-      },
-      disk: {
-        usage: diskInfo.usage,
-        available: diskInfo.available
-      },
-      timestamp: Date.now()
+  let whereConditions = [];
+  let queryParams = [];
+  let paramIndex = 1;
+
+  if (category) {
+    whereConditions.push(`category = $${paramIndex}`);
+    queryParams.push(category);
+    paramIndex++;
+  }
+
+  if (!includePrivate) {
+    whereConditions.push('is_public = true');
+  }
+
+  const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+
+  const result = await pool.query(
+    `SELECT category, key, value, data_type, description, is_public, created_at, updated_at
+     FROM system_config 
+     ${whereClause}
+     ORDER BY category, key`,
+    queryParams
+  );
+
+  // 按分类组织配置
+  const configByCategory = {};
+  result.rows.forEach(config => {
+    if (!configByCategory[config.category]) {
+      configByCategory[config.category] = {};
+    }
+
+    configByCategory[config.category][config.key] = {
+      value: formatConfigValue(config.value, config.data_type),
+      dataType: config.data_type,
+      description: config.description,
+      isPublic: config.is_public,
+      updatedAt: config.updated_at
     };
-
-    // console.log('✅ 系统资源信息获取成功:', {
-    //   cpuUsage: `${cpuUsage.toFixed(1)}%`,
-    //   memoryUsage: `${memoryUsage.toFixed(1)}%`,
-    //   diskUsage: `${diskInfo.usage.toFixed(1)}%`
-    // }); // 注释掉成功日志
-
-    res.success(resources);
-
-  } catch (error) {
-    console.error('❌ 获取系统资源信息失败:', error);
-    res.serverError('获取系统资源信息失败');
-  }
-});
-
-/**
- * 获取CPU使用率
- */
-async function getCPUUsage() {
-  return new Promise((resolve) => {
-    const startMeasure = cpuAverage();
-
-    setTimeout(() => {
-      const endMeasure = cpuAverage();
-      const idleDifference = endMeasure.idle - startMeasure.idle;
-      const totalDifference = endMeasure.total - startMeasure.total;
-      const usage = 100 - ~~(100 * idleDifference / totalDifference);
-      resolve(usage);
-    }, 100);
   });
-}
+
+  res.success(configByCategory, '获取系统配置成功');
+}));
 
 /**
- * 计算CPU平均值
+ * PUT /api/v1/system/config
+ * 更新系统配置
  */
-function cpuAverage() {
-  const cpus = os.cpus();
-  let user = 0, nice = 0, sys = 0, idle = 0, irq = 0;
-
-  for (let cpu of cpus) {
-    user += cpu.times.user;
-    nice += cpu.times.nice;
-    sys += cpu.times.sys;
-    idle += cpu.times.idle;
-    irq += cpu.times.irq;
+router.put('/config', requireRole(ROLES.ADMIN), configValidation, asyncHandler(async (req, res) => {
+  // 验证输入
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.validationError('配置验证失败', formatValidationErrors(errors));
   }
 
-  const total = user + nice + sys + idle + irq;
+  const { category, key, value, dataType = 'string', description, isPublic = false } = req.body;
+  const pool = getPool();
 
-  return {
-    idle: idle,
-    total: total
-  };
-}
-
-/**
- * 获取网络信息（简化版）
- */
-async function getNetworkInfo() {
-  try {
-    // 在实际环境中，这里可以调用系统命令获取真实的网络统计
-    // 这里提供一个模拟实现
-    const networkInterfaces = os.networkInterfaces();
-    let activeConnections = 0;
-
-    // 计算活跃的网络接口数量作为连接数的近似值
-    Object.keys(networkInterfaces).forEach(interfaceName => {
-      const interfaces = networkInterfaces[interfaceName];
-      interfaces.forEach(iface => {
-        if (!iface.internal && iface.family === 'IPv4') {
-          activeConnections += 10; // 模拟每个接口10个连接
-        }
-      });
-    });
-
-    return {
-      connections: Math.min(activeConnections, 100), // 限制最大值
-      upload: Math.random() * 10, // 模拟上传速度 (Mbps)
-      download: Math.random() * 50 // 模拟下载速度 (Mbps)
-    };
-  } catch (error) {
-    console.warn('获取网络信息失败，使用默认值:', error);
-    return {
-      connections: 50,
-      upload: 5,
-      download: 25
-    };
-  }
-}
-
-/**
- * 获取磁盘使用信息
- */
-async function getDiskInfo() {
-  try {
-    // 在不同操作系统上获取磁盘信息的方法不同
-    // 这里提供一个跨平台的简化实现
-
-    if (process.platform === 'win32') {
-      
-        // Windows系统
-      return await getWindowsDiskInfo();
-      } else {
-      // Unix-like系统
-      return await getUnixDiskInfo();
+  // 验证JSON格式（如果是JSON类型）
+  if (dataType === 'json') {
+    try {
+      JSON.parse(typeof value === 'string' ? value : JSON.stringify(value));
+    } catch (error) {
+      return res.badRequest('无效的JSON格式');
     }
-  } catch (error) {
-    console.warn('获取磁盘信息失败，使用默认值:', error);
-    return {
-      usage: 45 + Math.random() * 20, // 45-65%
-      available: 100 + Math.random() * 400 // 100-500GB
-    };
   }
-}
+
+  // 更新或插入配置
+  const result = await pool.query(
+    `INSERT INTO system_config (category, key, value, data_type, description, is_public)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (category, key) 
+     DO UPDATE SET 
+       value = EXCLUDED.value,
+       data_type = EXCLUDED.data_type,
+       description = EXCLUDED.description,
+       is_public = EXCLUDED.is_public,
+       updated_at = NOW()
+     RETURNING *`,
+    [category, key, value, dataType, description, isPublic]
+  );
+
+  const config = result.rows[0];
+
+  res.success({
+    category: config.category,
+    key: config.key,
+    value: formatConfigValue(config.value, config.data_type),
+    dataType: config.data_type,
+    description: config.description,
+    isPublic: config.is_public,
+    updatedAt: config.updated_at
+  }, '系统配置更新成功');
+}));
 
 /**
- * 获取Windows磁盘信息
+ * DELETE /api/v1/system/config/:category/:key
+ * 删除系统配置
  */
-async function getWindowsDiskInfo() {
-  try {
-    const { exec } = require('child_process');
-    const { promisify } = require('util');
-    const execAsync = promisify(exec);
+router.delete('/config/:category/:key', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
+  const { category, key } = req.params;
+  const pool = getPool();
 
-    // 使用wmic命令获取磁盘信息
-    const { stdout } = await execAsync('wmic logicaldisk get size,freespace,caption');
-    const lines = stdout.trim().split('/n').slice(1); // 跳过标题行
+  const result = await pool.query(
+    'DELETE FROM system_config WHERE category = $1 AND key = $2 RETURNING *',
+    [category, key]
+  );
 
-    let totalSize = 0;
-    let totalFree = 0;
-
-    lines.forEach(line => {
-      const parts = line.trim().split(/\s+/);
-      if (parts.length >= 3) {
-        const freeSpace = parseInt(parts[1]) || 0;
-        const size = parseInt(parts[2]) || 0;
-        totalSize += size;
-        totalFree += freeSpace;
+  if (result.rows.length === 0) {
+    
+        return res.notFound('配置项不存在');
       }
-    });
 
-    const usage = totalSize > 0 ? ((totalSize - totalFree) / totalSize) * 100 : 50;
-    const availableGB = totalFree / (1024 * 1024 * 1024);
-
-    return {
-      usage: usage,
-      available: availableGB
-    };
-  } catch (error) {
-    throw error;
-  }
-}
+  res.success(null, '配置删除成功');
+}));
 
 /**
- * 获取Unix磁盘信息
+ * GET /api/v1/system/engines
+ * 获取测试引擎状态
  */
-async function getUnixDiskInfo() {
+router.get('/engines', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
+  const pool = getPool();
+
+  const result = await pool.query(
+    `SELECT engine_type, engine_version, status, last_check, response_time, 
+            error_message, metadata, created_at, updated_at
+     FROM engine_status 
+     ORDER BY engine_type`
+  );
+
+  res.success(result.rows, '获取引擎状态成功');
+}));
+
+/**
+ * PUT /api/v1/system/engines/:type
+ * 更新测试引擎状态
+ */
+router.put('/engines/:type', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
+  const engineType = req.params.type;
+  const { status, errorMessage, metadata } = req.body;
+  const pool = getPool();
+
+  // 验证状态值
+  const validStatuses = ['healthy', 'degraded', 'down'];
+  if (status && !validStatuses.includes(status)) {
+    return res.badRequest('无效的引擎状态');
+  }
+
+  const result = await pool.query(
+    `UPDATE engine_status 
+     SET status = COALESCE($1, status),
+         error_message = $2,
+         metadata = COALESCE($3, metadata),
+         last_check = NOW(),
+         updated_at = NOW()
+     WHERE engine_type = $4
+     RETURNING *`,
+    [status, errorMessage, metadata ? JSON.stringify(metadata) : null, engineType]
+  );
+
+  if (result.rows.length === 0) {
+    
+        return res.notFound('引擎不存在');
+      }
+
+  res.success(result.rows[0], '引擎状态更新成功');
+}));
+
+/**
+ * POST /api/v1/system/maintenance
+ * 执行系统维护
+ */
+router.post('/maintenance', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
+  const pool = getPool();
+
   try {
-    const { exec } = require('child_process');
-    const { promisify } = require('util');
-    const execAsync = promisify(exec);
+    // 执行数据库维护函数
+    const result = await pool.query('SELECT perform_maintenance() as result');
+    const maintenanceResult = result.rows[0].result;
 
-    // 使用df命令获取磁盘信息
-    const { stdout } = await execAsync('df -h /');
-    const lines = stdout.trim().split('/n');
-
-    if (lines.length >= 2) {
-      
-        const parts = lines[1].split(/\s+/);
-      if (parts.length >= 5) {
-        const usagePercent = parseInt(parts[4].replace('%', '')) || 50;
-        const available = parseFloat(parts[3].replace(/[^/d.]/g, '')) || 100;
-
-        return {
-          usage: usagePercent,
-          available: available
-      };
-      }
-    }
-
-    throw new Error('无法解析df命令输出');
-  } catch (error) {
-    throw error;
-  }
-}
-
-/**
- * 获取系统健康状态
- */
-router.get('/health', systemResourceRateLimit, async (req, res) => {
-  try {
-    const resources = await getSystemResources();
-
-    // 评估系统健康状态
-    let status = 'healthy';
-    const issues = [];
-
-    if (resources.cpu.usage > 85) {
-      status = 'critical';
-      issues.push('CPU使用率过高');
-    } else if (resources.cpu.usage > 70) {
-      status = 'warning';
-      issues.push('CPU使用率较高');
-    }
-
-    if (resources.memory.usage > 90) {
-      status = 'critical';
-      issues.push('内存使用率过高');
-    } else if (resources.memory.usage > 75) {
-      if (status !== 'critical') status = 'warning';
-      issues.push('内存使用率较高');
-    }
-
-    if (resources.disk.usage > 95) {
-      status = 'critical';
-      issues.push('磁盘空间不足');
-    } else if (resources.disk.usage > 85) {
-      if (status !== 'critical') status = 'warning';
-      issues.push('磁盘空间较少');
-    }
-
-    res.json({
-      success: true,
-      health: {
-        status: status,
-        issues: issues,
-        resources: resources,
-        timestamp: Date.now()
-      }
-    });
+    res.success({
+      result: maintenanceResult,
+      timestamp: new Date().toISOString()
+    }, '系统维护执行成功');
 
   } catch (error) {
-    console.error('❌ 获取系统健康状态失败:', error);
-    res.serverError('获取系统健康状态失败');
+    res.internalError('系统维护执行失败', error.message);
   }
-});
+}));
 
 /**
- * 内部函数：获取系统资源（复用上面的逻辑）
+ * GET /api/v1/system/logs
+ * 获取系统日志（简化版本）
  */
-async function getSystemResources() {
-  const cpus = os.cpus();
-  const cpuUsage = await getCPUUsage();
-  const totalMemory = os.totalmem();
-  const freeMemory = os.freemem();
-  const usedMemory = totalMemory - freeMemory;
-  const memoryUsage = (usedMemory / totalMemory) * 100;
-  const loadAverage = os.loadavg();
-  const networkInfo = await getNetworkInfo();
-  const diskInfo = await getDiskInfo();
+router.get('/logs', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
+  const { level = 'info', limit = 100 } = req.query;
 
-  return {
-    cpu: {
-      usage: cpuUsage,
-      cores: cpus.length,
-      loadAverage: loadAverage
-    },
-    memory: {
-      used: Math.round(usedMemory / 1024 / 1024),
-      total: Math.round(totalMemory / 1024 / 1024),
-      usage: memoryUsage,
-      available: Math.round(freeMemory / 1024 / 1024)
-    },
-    network: {
-      activeConnections: networkInfo.connections,
-      bandwidth: {
-        upload: networkInfo.upload,
-        download: networkInfo.download
-      }
-    },
-    disk: {
-      usage: diskInfo.usage,
-      available: diskInfo.available
-    },
-    timestamp: Date.now()
-  };
-}
+  // 这里应该从日志文件或日志服务中获取日志
+  // 暂时返回模拟数据
+  const logs = [
+    {
+      timestamp: new Date().toISOString(),
+      level: 'info',
+      message: '系统正常运行',
+      source: 'system'
+    }
+  ];
+
+  res.success(logs, '获取系统日志成功');
+}));
+
+/**
+ * GET /api/v1/system/stats
+ * 获取系统统计信息
+ */
+router.get('/stats', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
+  const pool = getPool();
+
+  // 获取用户统计
+  const userStatsResult = await pool.query(`
+    SELECT 
+      COUNT(*) as total_users,
+      COUNT(CASE WHEN status = 'active' THEN 1 END) as active_users,
+      COUNT(CASE WHEN created_at >= CURRENT_DATE - INTERVAL '7 days' THEN 1 END) as new_users_week
+    FROM users
+  `);
+
+  // 获取测试统计
+  const testStatsResult = await pool.query(`
+    SELECT 
+      COUNT(*) as total_tests,
+      COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
+      COUNT(CASE WHEN created_at >= CURRENT_DATE THEN 1 END) as tests_today,
+      test_type,
+      COUNT(*) as count_by_type
+    FROM test_results 
+    WHERE deleted_at IS NULL
+    GROUP BY ROLLUP(test_type)
+  `);
+
+  // 获取系统资源使用情况
+  const systemInfo = getSystemInfo();
+  const dbStats = await getStats();
+
+  res.success({
+    users: userStatsResult.rows[0],
+    tests: testStatsResult.rows,
+    system: systemInfo,
+    database: dbStats,
+    timestamp: new Date().toISOString()
+  }, '获取系统统计成功');
+}));
 
 module.exports = router;
