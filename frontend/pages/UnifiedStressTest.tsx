@@ -16,7 +16,7 @@ import {
   Clock,
   AlertCircle
 } from 'lucide-react';
-import { useAuthCheck } from '../components/auth/WithAuthCheck';
+import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { UniversalTestPage } from '../components/testing/UniversalTestPage';
 import { stressTestConfig } from '../config/testTypes';
 import { toast } from 'react-hot-toast';
@@ -142,7 +142,7 @@ const UnifiedStressTest: React.FC = () => {
       if (errorRate > 10) {
         toast.error(`测试完成，但错误率较高: ${errorRate.toFixed(1)}%`);
       } else if (avgResponseTime > 1000) {
-        toast.warning(`测试完成，响应时间较慢: ${avgResponseTime.toFixed(0)}ms`);
+        toast(`测试完成，响应时间较慢: ${avgResponseTime.toFixed(0)}ms`);
       } else {
         toast.success('测试完成，性能表现良好');
       }

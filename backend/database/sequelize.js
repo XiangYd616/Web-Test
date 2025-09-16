@@ -219,6 +219,40 @@ models.User = sequelize.define('users', {
     type: DataTypes.JSONB,
     allowNull: true,
     defaultValue: {}
+  },
+  
+  // MFA (Multi-Factor Authentication) 相关字段
+  mfa_enabled: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    field: 'mfa_enabled'
+  },
+  mfa_secret: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'mfa_secret'
+  },
+  mfa_backup_codes: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    field: 'mfa_backup_codes'
+  },
+  mfa_temp_secret: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    field: 'mfa_temp_secret'
+  },
+  
+  // 安全相关字段
+  failed_login_attempts: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  locked_until: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 });
 

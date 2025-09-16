@@ -5,12 +5,12 @@
 
 import { Activity, BarChart3, CheckCircle, Eye, Globe, Loader, Play, RotateCcw, Search, Settings, Shield, Square, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { useAuthCheck } from '@components/auth/WithAuthCheck';
+import { useAuthCheck } from '@components/auth/withAuthCheck';
 import TestPageLayout from '@components/testing/TestPageLayout';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { useUserStats } from '@hooks/useUserStats';
 import backgroundTestManager from '@services/backgroundTestManager';
-import { TestType } from '@types/enums';
+import { TestType } from '../types/enums';
 
 interface WebsiteConfig {
   targetUrl: string;

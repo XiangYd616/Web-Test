@@ -48,7 +48,6 @@ import {
   Pie,
   Doughnut,
   Radar,
-  Area,
   Scatter,
   Bubble,
   PolarArea
@@ -401,8 +400,7 @@ const EnhancedCharts: React.FC = () => {
         x: {
           grid: {
             color: themeConfig.gridColor,
-            drawBorder: false
-          },
+            },
           ticks: {
             color: themeConfig.textColor,
             font: {
@@ -413,8 +411,7 @@ const EnhancedCharts: React.FC = () => {
         y: {
           grid: {
             color: themeConfig.gridColor,
-            drawBorder: false
-          },
+            },
           ticks: {
             color: themeConfig.textColor,
             font: {
@@ -698,7 +695,7 @@ const EnhancedCharts: React.FC = () => {
         break;
       case 'svg':
         // SVG导出需要额外的处理
-        toast.info('SVG导出功能开发中');
+        toast('SVG导出功能开发中');
         break;
     }
     
@@ -988,8 +985,7 @@ const EnhancedCharts: React.FC = () => {
                   x: {
                     grid: {
                       color: 'rgba(156, 163, 175, 0.1)',
-                      drawBorder: false
-                    },
+                      },
                     ticks: {
                       color: '#6B7280',
                       font: { size: 11 }
@@ -1001,8 +997,7 @@ const EnhancedCharts: React.FC = () => {
                     position: 'left' as const,
                     grid: {
                       color: 'rgba(156, 163, 175, 0.1)',
-                      drawBorder: false
-                    },
+                      },
                     ticks: {
                       color: '#6B7280',
                       font: { size: 11 }
@@ -1119,8 +1114,7 @@ const EnhancedCharts: React.FC = () => {
                 x: {
                   grid: {
                     color: 'rgba(156, 163, 175, 0.1)',
-                    drawBorder: false
-                  },
+                    },
                   ticks: {
                     color: '#6B7280',
                     font: { size: 11 }
@@ -1132,8 +1126,7 @@ const EnhancedCharts: React.FC = () => {
                   position: 'left' as const,
                   grid: {
                     color: 'rgba(156, 163, 175, 0.1)',
-                    drawBorder: false
-                  },
+                    },
                   ticks: {
                     color: '#6B7280',
                     font: { size: 11 },
@@ -1259,7 +1252,7 @@ const EnhancedCharts: React.FC = () => {
                   <button
                     onClick={() => {
                       // 导出所有图表
-                      toast.info('批量导出功能开发中');
+                      toast('批量导出功能开发中');
                     }}
                     className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                   >

@@ -7,7 +7,7 @@
 
 import type { UnifiedApiConfig } from './apiConfig';
 import type { UnifiedAuthConfig } from './authConfig';
-import type { ErrorSeverity } from '@types/errors';
+import type { ErrorSeverity } from './errors';
 
 // ==================== 验证结果接口 ====================
 

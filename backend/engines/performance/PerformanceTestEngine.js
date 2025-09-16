@@ -3,12 +3,14 @@
  * 真实实现性能测试功能，使用Lighthouse进行专业性能分析
  */
 
+const EventEmitter = require('events');
 const lighthouse = require('lighthouse');
 const chromeLauncher = require('chrome-launcher');
 const Joi = require('joi');
 
-class PerformanceTestEngine {
+class PerformanceTestEngine extends EventEmitter {
   constructor() {
+    super();
     this.name = 'performance';
     this.activeTests = new Map();
     this.defaultTimeout = 60000;
@@ -67,6 +69,13 @@ class PerformanceTestEngine {
         dependencies: ['lighthouse', 'chrome-launcher', 'puppeteer']
       };
     }
+  }
+
+  /**
+   * 执行性能测试 - 新的标准接口
+   */
+  async execute(config) {
+    return await this.runPerformanceTest(config);
   }
 
   /**
@@ -132,6 +141,13 @@ class PerformanceTestEngine {
           results
         });
 
+        // 发射完成事件
+        this.emit('complete', {
+          testId,
+          result: results,
+          engineType: this.name
+        });
+
         return results;
 
       } finally {
@@ -144,6 +160,13 @@ class PerformanceTestEngine {
         status: 'failed',
         progress: 0,
         error: error.message
+      });
+
+      // 发射错误事件
+      this.emit('error', {
+        testId,
+        error: error.message,
+        engineType: this.name
       });
 
       throw error;
@@ -224,6 +247,14 @@ class PerformanceTestEngine {
       test.message = message;
       this.activeTests.set(testId, test);
       console.log(`[${this.name.toUpperCase()}-${testId}] ${progress}% - ${message}`);
+      
+      // 发射进度事件
+      this.emit('progress', {
+        testId,
+        progress,
+        message,
+        engineType: this.name
+      });
     }
   }
 
@@ -240,12 +271,31 @@ class PerformanceTestEngine {
   async stopTest(testId) {
     const test = this.activeTests.get(testId);
     if (test && test.status === 'running') {
-      
-        test.status = 'cancelled';
+      test.status = 'cancelled';
       this.activeTests.set(testId, test);
       return true;
-      }
+    }
     return false;
+  }
+
+  /**
+   * 取消测试 - 新的标准接口
+   */
+  async cancel(testId) {
+    return await this.stopTest(testId);
+  }
+
+  /**
+   * 清理资源
+   */
+  async cleanup() {
+    // 取消所有活跃的测试
+    for (const [testId, test] of this.activeTests.entries()) {
+      if (test.status === 'running') {
+        await this.stopTest(testId);
+      }
+    }
+    this.activeTests.clear();
   }
 }
 

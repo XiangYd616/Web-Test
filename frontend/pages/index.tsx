@@ -14,11 +14,13 @@ import {
   Clock,
   Users
 } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const HomePage = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const testCategories = [
     {
@@ -94,15 +96,13 @@ const HomePage = () => {
               帮助您构建更快、更安全、更可靠的Web应用
             </p>
             <div className="flex justify-center space-x-4">
-              <Link
-                href="/EnhancedPerformanceTest"
+              <Link to="/EnhancedPerformanceTest"
                 className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 开始测试
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
-              <Link
-                href="/Help"
+              <Link to="/Help"
                 className="inline-flex items-center px-6 py-3 bg-white text-gray-700 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 transition-all duration-200"
               >
                 查看文档
@@ -143,7 +143,7 @@ const HomePage = () => {
             <div
               key={index}
               className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer"
-              onClick={() => router.push(category.href)}
+              onClick={() => navigate(category.href)}
             >
               {/* Card Header */}
               <div className={`h-2 bg-gradient-to-r ${category.color}`}></div>
@@ -201,8 +201,7 @@ const HomePage = () => {
           <p className="text-lg text-blue-100 mb-8">
             立即开始使用我们的增强版性能测试工具，获得详细的Core Web Vitals分析
           </p>
-          <Link
-            href="/EnhancedPerformanceTest"
+          <Link to="/EnhancedPerformanceTest"
             className="inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg font-medium hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             立即体验增强版性能测试

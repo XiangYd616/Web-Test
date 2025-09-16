@@ -69,7 +69,6 @@ export type {
   // 文件相关
   FileType, FileUploadConfig, FormFieldConfig,
   // 表单相关
-  FormFieldType, FormValidationError, GroupedOption,
   // 基础数据类型
   LogEntry,
   // 日志相关
@@ -332,8 +331,6 @@ export type {
   ErrorCategory,
   ErrorCode,
   ErrorFactory,
-  ErrorHandler,
-  ErrorHandlerConfig,
   ErrorHandlingResult,
   ErrorReporter,
   ErrorSeverity,
@@ -342,7 +339,6 @@ export type {
   RecoveryStrategy,
   SystemError,
   UIError,
-  ValidationError
 } from './errors';
 
 export { ERROR_CODES } from './errors';

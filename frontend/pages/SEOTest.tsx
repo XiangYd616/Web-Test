@@ -1,6 +1,6 @@
 import { AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useAuthCheck } from '../components/auth/WithAuthCheck';
+import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
 import type { } from '../types';
 // import FileUploadSEO from '../components/seo/FileUploadSEO';

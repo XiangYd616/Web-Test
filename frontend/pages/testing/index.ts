@@ -8,12 +8,12 @@ export { default as DatabaseTest } from '../DatabaseTest';
 export { default as NetworkTest } from '../NetworkTest';
 export { default as SecurityTest } from '../SecurityTest';
 export { default as SEOTest } from '../SEOTest';
-export { default as StressTest } from '../StressTest';
+// export { default as StressTest } from '../StressTest';
 export { default as UXTest } from '../UXTest';
 export { default as WebsiteTest } from '../WebsiteTest';
 
 // 类型导出 - 注释掉不存在的类型
-// export type { StressTestProps } from '../StressTest';
+// // export type { StressTestProps } from '../StressTest';
 // export type { APITestProps } from '../APITest';
 // export type { SecurityTestProps } from '../SecurityTest';
 // export type { CompatibilityTestProps } from '../CompatibilityTest';

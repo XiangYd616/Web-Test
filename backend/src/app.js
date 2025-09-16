@@ -493,7 +493,7 @@ try {
   console.log('✅ 备用系统路由已应用: /api/system');
 
   // 手动应用统一测试引擎路由
-  const unifiedEngineRoutes = require('../routes/unifiedTestEngine.js');
+  const unifiedEngineRoutes = require('../routes/testEngine.js');
   app.use('/api/unified-engine', unifiedEngineRoutes);
   console.log('✅ 统一测试引擎路由已应用: /api/unified-engine');
 
@@ -568,6 +568,32 @@ const startServer = async () => {
     // 🔧 移除全局测试历史服务，改为各模块使用本地实例
     // 这样可以避免全局状态的复杂性，让每个模块都有独立的服务实例
     console.log('✅ 测试历史服务将在各模块中独立初始化');
+
+    // 初始化测试管理服务
+    try {
+      const TestManagementService = require('../services/testing/TestManagementService.js');
+      const testManagementService = new TestManagementService();
+      
+      // 初始化服务，传入数据库连接和WebSocket管理器
+      await testManagementService.initialize({
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 5432,
+        database: process.env.DB_NAME || 'test_web_db',
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres'
+      }, global.realtimeService);
+      
+      // 设置测试管理服务到路由
+      const testingRoutes = require('../routes/testing.js');
+      testingRoutes.setTestManagementService(testManagementService);
+      
+      // 设置为全局变量供其他模块使用
+      global.testManagementService = testManagementService;
+      
+      console.log('✅ 测试管理服务初始化成功');
+    } catch (error) {
+      console.warn('⚠️ 测试管理服务初始化失败，继续使用无测试管理模式:', error.message);
+    }
 
     // 初始化监控服务
     try {
@@ -850,6 +876,23 @@ function setupWebSocketHandlers(io) {
     socket.onAny((eventName, ...args) => {
       if (['join-stress-test', 'leave-stress-test', 'cancel-stress-test'].includes(eventName)) {
         console.log(`📥 收到关键事件: ${eventName}`, { socketId: socket.id, data: args[0] });
+      }
+    });
+
+    // 测试管理WebSocket事件
+    socket.on('subscribe-test', (data) => {
+      const { testId } = data;
+      if (testId) {
+        socket.join(`test-${testId}`);
+        console.log(`📊 客户端 ${socket.id} 订阅测试: ${testId}`);
+      }
+    });
+
+    socket.on('unsubscribe-test', (data) => {
+      const { testId } = data;
+      if (testId) {
+        socket.leave(`test-${testId}`);
+        console.log(`📊 客户端 ${socket.id} 取消订阅测试: ${testId}`);
       }
     });
 

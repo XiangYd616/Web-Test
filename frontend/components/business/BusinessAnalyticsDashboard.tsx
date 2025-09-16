@@ -1,12 +1,10 @@
-/**
- * 业务分析仪表板组件
- * 显示系统监控、业务指标、用户行为等分析数据
+﻿/**
+ * 涓氬姟鍒嗘瀽浠〃鏉跨粍浠?
+ * 鏄剧ず绯荤粺鐩戞帶銆佷笟鍔℃寚鏍囥€佺敤鎴疯涓虹瓑鍒嗘瀽鏁版嵁
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Card, 
-  Grid, 
+import { Card, 
   Typography, 
   Box, 
   Chip, 
@@ -28,8 +26,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  CircularProgress
-} from '@mui/material';
+  CircularProgress } from '@mui/material';
+import Grid from \"@mui/material/Grid\"
 import {
   TrendingUp,
   TrendingDown,
@@ -153,7 +151,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
 
-  // 获取仪表板数据
+  // 鑾峰彇浠〃鏉挎暟鎹?
   const fetchDashboardData = async () => {
     try {
       setError(null);
@@ -164,35 +162,35 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`获取数据失败: ${response.statusText}`);
+        throw new Error(`鑾峰彇鏁版嵁澶辫触: ${response.statusText}`);
       }
 
       const result = await response.json();
       if (result.success) {
         setDashboardData(result.data);
       } else {
-        throw new Error(result.error || '获取数据失败');
+        throw new Error(result.error || '鑾峰彇鏁版嵁澶辫触');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '获取数据失败');
-      console.error('获取仪表板数据失败:', err);
+      setError(err instanceof Error ? err.message : '鑾峰彇鏁版嵁澶辫触');
+      console.error('鑾峰彇浠〃鏉挎暟鎹け璐?', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // 初始化和自动刷新
+  // 鍒濆鍖栧拰鑷姩鍒锋柊
   useEffect(() => {
     fetchDashboardData();
 
     if (autoRefresh) {
-      const interval = setInterval(fetchDashboardData, 30000); // 30秒刷新一次
+      const interval = setInterval(fetchDashboardData, 30000); // 30绉掑埛鏂颁竴娆?
       setRefreshInterval(interval);
       return () => clearInterval(interval);
     }
   }, [autoRefresh]);
 
-  // 清理定时器
+  // 娓呯悊瀹氭椂鍣?
   useEffect(() => {
     return () => {
       if (refreshInterval) {
@@ -201,7 +199,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
     };
   }, [refreshInterval]);
 
-  // 获取健康状态颜色
+  // 鑾峰彇鍋ュ悍鐘舵€侀鑹?
   const getHealthColor = (health: string) => {
     switch (health) {
       case 'healthy': return '#4caf50';
@@ -211,7 +209,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
     }
   };
 
-  // 获取告警级别颜色
+  // 鑾峰彇鍛婅绾у埆棰滆壊
   const getAlertSeverity = (level: string) => {
     switch (level) {
       case 'info': return 'info';
@@ -221,14 +219,14 @@ const BusinessAnalyticsDashboard: React.FC = () => {
     }
   };
 
-  // 获取趋势图标
+  // 鑾峰彇瓒嬪娍鍥炬爣
   const getTrendIcon = (current: number, previous: number) => {
     if (current > previous * 1.05) return <TrendingUp color="success" />;
     if (current < previous * 0.95) return <TrendingDown color="error" />;
     return <TrendingFlat color="action" />;
   };
 
-  // 格式化图表数据
+  // 鏍煎紡鍖栧浘琛ㄦ暟鎹?
   const formatChartData = (data: any[]) => {
     return data.map((item, index) => ({
       time: new Date(item.timestamp).toLocaleTimeString(),
@@ -236,7 +234,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
     }));
   };
 
-  // 生成测试类型图表数据
+  // 鐢熸垚娴嬭瘯绫诲瀷鍥捐〃鏁版嵁
   const testTypeChartData = useMemo(() => {
     if (!dashboardData?.business?.business?.testTypes) return [];
     
@@ -254,7 +252,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
         <CircularProgress size={60} />
         <Typography variant="h6" sx={{ ml: 2 }}>
-          加载分析数据...
+          鍔犺浇鍒嗘瀽鏁版嵁...
         </Typography>
       </Box>
     );
@@ -267,7 +265,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         sx={{ m: 2 }}
         action={
           <Button color="inherit" size="small" onClick={fetchDashboardData}>
-            重试
+            閲嶈瘯
           </Button>
         }
       >
@@ -279,42 +277,42 @@ const BusinessAnalyticsDashboard: React.FC = () => {
   if (!dashboardData) {
     return (
       <Alert severity="warning" sx={{ m: 2 }}>
-        暂无分析数据
+        鏆傛棤鍒嗘瀽鏁版嵁
       </Alert>
     );
   }
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* 顶部控制栏 */}
+      {/* 椤堕儴鎺у埗鏍?*/}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h4" component="h1">
-          业务分析仪表板
+          涓氬姟鍒嗘瀽浠〃鏉?
         </Typography>
         
         <Box display="flex" alignItems="center" gap={2}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>时间范围</InputLabel>
+            <InputLabel>鏃堕棿鑼冨洿</InputLabel>
             <Select
               value={timeRange}
-              label="时间范围"
+              label="鏃堕棿鑼冨洿"
               onChange={(e) => setTimeRange(e.target.value)}
             >
-              <MenuItem value="1h">1小时</MenuItem>
-              <MenuItem value="6h">6小时</MenuItem>
-              <MenuItem value="24h">24小时</MenuItem>
-              <MenuItem value="7d">7天</MenuItem>
-              <MenuItem value="30d">30天</MenuItem>
+              <MenuItem value="1h">1灏忔椂</MenuItem>
+              <MenuItem value="6h">6灏忔椂</MenuItem>
+              <MenuItem value="24h">24灏忔椂</MenuItem>
+              <MenuItem value="7d">7澶?/MenuItem>
+              <MenuItem value="30d">30澶?/MenuItem>
             </Select>
           </FormControl>
 
-          <Tooltip title="刷新数据">
+          <Tooltip title="鍒锋柊鏁版嵁">
             <IconButton onClick={fetchDashboardData}>
               <Refresh />
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="导出数据">
+          <Tooltip title="瀵煎嚭鏁版嵁">
             <IconButton>
               <Download />
             </IconButton>
@@ -322,20 +320,20 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         </Box>
       </Box>
 
-      {/* 系统概览卡片 */}
+      {/* 绯荤粺姒傝鍗＄墖 */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ p: 2, height: '100%' }}>
             <Box display="flex" alignItems="center" mb={1}>
               <CheckCircle sx={{ color: getHealthColor(dashboardData.summary.systemHealth), mr: 1 }} />
-              <Typography variant="subtitle2">系统健康</Typography>
+              <Typography variant="subtitle2">绯荤粺鍋ュ悍</Typography>
             </Box>
             <Typography variant="h4" color={getHealthColor(dashboardData.summary.systemHealth)}>
-              {dashboardData.summary.systemHealth === 'healthy' ? '正常' :
-               dashboardData.summary.systemHealth === 'warning' ? '警告' : '严重'}
+              {dashboardData.summary.systemHealth === 'healthy' ? '姝ｅ父' :
+               dashboardData.summary.systemHealth === 'warning' ? '璀﹀憡' : '涓ラ噸'}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              运行时间: {formatDuration(dashboardData.system?.system?.uptime * 1000 || 0)}
+              杩愯鏃堕棿: {formatDuration(dashboardData.system?.system?.uptime * 1000 || 0)}
             </Typography>
           </Card>
         </Grid>
@@ -344,13 +342,13 @@ const BusinessAnalyticsDashboard: React.FC = () => {
           <Card sx={{ p: 2, height: '100%' }}>
             <Box display="flex" alignItems="center" mb={1}>
               <Assessment sx={{ color: '#2196f3', mr: 1 }} />
-              <Typography variant="subtitle2">测试总数</Typography>
+              <Typography variant="subtitle2">娴嬭瘯鎬绘暟</Typography>
             </Box>
             <Typography variant="h4">
               {formatNumber(dashboardData.summary.totalTests)}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              成功率: {dashboardData.summary.successRate.toFixed(1)}%
+              鎴愬姛鐜? {dashboardData.summary.successRate.toFixed(1)}%
             </Typography>
           </Card>
         </Grid>
@@ -359,13 +357,13 @@ const BusinessAnalyticsDashboard: React.FC = () => {
           <Card sx={{ p: 2, height: '100%' }}>
             <Box display="flex" alignItems="center" mb={1}>
               <Timer sx={{ color: '#ff9800', mr: 1 }} />
-              <Typography variant="subtitle2">响应时间</Typography>
+              <Typography variant="subtitle2">鍝嶅簲鏃堕棿</Typography>
             </Box>
             <Typography variant="h4">
               {dashboardData.summary.averageResponseTime}ms
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              平均响应时间
+              骞冲潎鍝嶅簲鏃堕棿
             </Typography>
           </Card>
         </Grid>
@@ -374,19 +372,19 @@ const BusinessAnalyticsDashboard: React.FC = () => {
           <Card sx={{ p: 2, height: '100%' }}>
             <Box display="flex" alignItems="center" mb={1}>
               <People sx={{ color: '#4caf50', mr: 1 }} />
-              <Typography variant="subtitle2">活跃用户</Typography>
+              <Typography variant="subtitle2">娲昏穬鐢ㄦ埛</Typography>
             </Box>
             <Typography variant="h4">
               {dashboardData.summary.activeUsers}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              当前在线用户
+              褰撳墠鍦ㄧ嚎鐢ㄦ埛
             </Typography>
           </Card>
         </Grid>
       </Grid>
 
-      {/* 标签页 */}
+      {/* 鏍囩椤?*/}
       <Paper sx={{ width: '100%', mb: 3 }}>
         <Tabs 
           value={activeTab} 
@@ -394,25 +392,25 @@ const BusinessAnalyticsDashboard: React.FC = () => {
           indicatorColor="primary"
           textColor="primary"
         >
-          <Tab label="系统监控" icon={<Memory />} />
-          <Tab label="业务指标" icon={<Assessment />} />
-          <Tab label="用户分析" icon={<People />} />
-          <Tab label="告警中心" icon={<Warning />} />
+          <Tab label="绯荤粺鐩戞帶" icon={<Memory />} />
+          <Tab label="涓氬姟鎸囨爣" icon={<Assessment />} />
+          <Tab label="鐢ㄦ埛鍒嗘瀽" icon={<People />} />
+          <Tab label="鍛婅涓績" icon={<Warning />} />
         </Tabs>
       </Paper>
 
-      {/* 系统监控面板 */}
+      {/* 绯荤粺鐩戞帶闈㈡澘 */}
       {activeTab === 0 && (
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
               <Typography variant="h6" mb={2}>
                 <Memory sx={{ mr: 1, verticalAlign: 'middle' }} />
-                内存使用情况
+                鍐呭瓨浣跨敤鎯呭喌
               </Typography>
               <Box mb={2}>
                 <Box display="flex" justifyContent="space-between" mb={1}>
-                  <Typography variant="body2">已用内存</Typography>
+                  <Typography variant="body2">宸茬敤鍐呭瓨</Typography>
                   <Typography variant="body2">
                     {dashboardData.system?.system?.memoryPercent.toFixed(1)}%
                   </Typography>
@@ -434,11 +432,11 @@ const BusinessAnalyticsDashboard: React.FC = () => {
             <Card sx={{ p: 2 }}>
               <Typography variant="h6" mb={2}>
                 <Speed sx={{ mr: 1, verticalAlign: 'middle' }} />
-                CPU使用率
+                CPU浣跨敤鐜?
               </Typography>
               <Box mb={2}>
                 <Box display="flex" justifyContent="space-between" mb={1}>
-                  <Typography variant="body2">CPU负载</Typography>
+                  <Typography variant="body2">CPU璐熻浇</Typography>
                   <Typography variant="body2">
                     {dashboardData.system?.system?.cpuPercent?.toFixed(1) || 0}%
                   </Typography>
@@ -451,19 +449,19 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 />
               </Box>
               <Typography variant="body2" color="textSecondary">
-                负载平均值: {dashboardData.system?.system?.loadAverage?.[0]?.toFixed(2) || 'N/A'}
+                璐熻浇骞冲潎鍊? {dashboardData.system?.system?.loadAverage?.[0]?.toFixed(2) || 'N/A'}
               </Typography>
             </Card>
           </Grid>
         </Grid>
       )}
 
-      {/* 业务指标面板 */}
+      {/* 涓氬姟鎸囨爣闈㈡澘 */}
       {activeTab === 1 && (
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>测试执行趋势</Typography>
+              <Typography variant="h6" mb={2}>娴嬭瘯鎵ц瓒嬪娍</Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={[]} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -471,8 +469,8 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                   <YAxis />
                   <RechartsTooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="completed" stroke="#4caf50" name="成功" />
-                  <Line type="monotone" dataKey="failed" stroke="#f44336" name="失败" />
+                  <Line type="monotone" dataKey="completed" stroke="#4caf50" name="鎴愬姛" />
+                  <Line type="monotone" dataKey="failed" stroke="#f44336" name="澶辫触" />
                 </LineChart>
               </ResponsiveContainer>
             </Card>
@@ -480,7 +478,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
           <Grid item xs={12} md={4}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>测试类型分布</Typography>
+              <Typography variant="h6" mb={2}>娴嬭瘯绫诲瀷鍒嗗竷</Typography>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -505,7 +503,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
           <Grid item xs={12}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>关键业务指标</Typography>
+              <Typography variant="h6" mb={2}>鍏抽敭涓氬姟鎸囨爣</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={3}>
                   <Box textAlign="center">
@@ -513,7 +511,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                       {dashboardData.business?.business?.throughput || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      每小时测试数
+                      姣忓皬鏃舵祴璇曟暟
                     </Typography>
                   </Box>
                 </Grid>
@@ -523,7 +521,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                       {dashboardData.business?.business?.errorRate?.toFixed(1) || 0}%
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      错误率
+                      閿欒鐜?
                     </Typography>
                   </Box>
                 </Grid>
@@ -533,7 +531,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                       {dashboardData.business?.business?.userSatisfaction?.toFixed(1) || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      用户满意度
+                      鐢ㄦ埛婊℃剰搴?
                     </Typography>
                   </Box>
                 </Grid>
@@ -543,7 +541,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                       {dashboardData.business?.business?.activeTests || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      活跃测试
+                      娲昏穬娴嬭瘯
                     </Typography>
                   </Box>
                 </Grid>
@@ -553,12 +551,12 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         </Grid>
       )}
 
-      {/* 用户分析面板 */}
+      {/* 鐢ㄦ埛鍒嗘瀽闈㈡澘 */}
       {activeTab === 2 && (
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>用户活动统计</Typography>
+              <Typography variant="h6" mb={2}>鐢ㄦ埛娲诲姩缁熻</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <Box textAlign="center">
@@ -566,7 +564,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                       {dashboardData.user?.users?.activeUsers || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      活跃用户
+                      娲昏穬鐢ㄦ埛
                     </Typography>
                   </Box>
                 </Grid>
@@ -576,7 +574,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                       {dashboardData.user?.users?.newUsers || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      新增用户
+                      鏂板鐢ㄦ埛
                     </Typography>
                   </Box>
                 </Grid>
@@ -586,7 +584,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>会话统计</Typography>
+              <Typography variant="h6" mb={2}>浼氳瘽缁熻</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <Box textAlign="center">
@@ -594,7 +592,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                       {formatDuration(dashboardData.user?.users?.userSessions?.averageSessionDuration * 1000 || 0)}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      平均会话时长
+                      骞冲潎浼氳瘽鏃堕暱
                     </Typography>
                   </Box>
                 </Grid>
@@ -604,7 +602,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                       {(dashboardData.user?.users?.userSessions?.bounceRate * 100)?.toFixed(1) || 0}%
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      跳出率
+                      璺冲嚭鐜?
                     </Typography>
                   </Box>
                 </Grid>
@@ -614,14 +612,14 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 
           <Grid item xs={12}>
             <Card sx={{ p: 2 }}>
-              <Typography variant="h6" mb={2}>热门用户操作</Typography>
+              <Typography variant="h6" mb={2}>鐑棬鐢ㄦ埛鎿嶄綔</Typography>
               <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>操作</TableCell>
-                      <TableCell align="right">次数</TableCell>
-                      <TableCell align="right">占比</TableCell>
+                      <TableCell>鎿嶄綔</TableCell>
+                      <TableCell align="right">娆℃暟</TableCell>
+                      <TableCell align="right">鍗犳瘮</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -645,14 +643,14 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         </Grid>
       )}
 
-      {/* 告警中心面板 */}
+      {/* 鍛婅涓績闈㈡澘 */}
       {activeTab === 3 && (
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Card sx={{ p: 2 }}>
               <Typography variant="h6" mb={2}>
                 <Warning sx={{ mr: 1, verticalAlign: 'middle' }} />
-                最新告警 ({dashboardData.alerts?.length || 0})
+                鏈€鏂板憡璀?({dashboardData.alerts?.length || 0})
               </Typography>
               
               {dashboardData.alerts && dashboardData.alerts.length > 0 ? (
@@ -673,7 +671,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                       <strong>{alert.type}:</strong> {alert.message}
                       {alert.value && alert.threshold && (
                         <Typography variant="body2" sx={{ mt: 0.5 }}>
-                          当前值: {alert.value} | 阈值: {alert.threshold}
+                          褰撳墠鍊? {alert.value} | 闃堝€? {alert.threshold}
                         </Typography>
                       )}
                     </Alert>
@@ -681,7 +679,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 </Box>
               ) : (
                 <Alert severity="success">
-                  暂无告警，系统运行正常
+                  鏆傛棤鍛婅锛岀郴缁熻繍琛屾甯?
                 </Alert>
               )}
             </Card>
@@ -689,12 +687,12 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         </Grid>
       )}
 
-      {/* 底部状态栏 */}
+      {/* 搴曢儴鐘舵€佹爮 */}
       <Box mt={4} pt={2} borderTop="1px solid" borderColor="divider">
         <Typography variant="body2" color="textSecondary" align="center">
-          最后更新: {new Date(dashboardData.summary.lastUpdated).toLocaleString()} |
-          自动刷新: {autoRefresh ? '开启' : '关闭'} |
-          数据来源: BusinessAnalyticsService
+          鏈€鍚庢洿鏂? {new Date(dashboardData.summary.lastUpdated).toLocaleString()} |
+          鑷姩鍒锋柊: {autoRefresh ? '寮€鍚? : '鍏抽棴'} |
+          鏁版嵁鏉ユ簮: BusinessAnalyticsService
         </Typography>
       </Box>
     </Box>
@@ -702,3 +700,4 @@ const BusinessAnalyticsDashboard: React.FC = () => {
 };
 
 export default BusinessAnalyticsDashboard;
+

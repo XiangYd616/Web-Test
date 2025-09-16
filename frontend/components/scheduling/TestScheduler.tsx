@@ -292,7 +292,7 @@ const TestScheduler: React.FC = () => {
   // 批量操作
   const handleBatchAction = async (action: BatchAction) => {
     if (selectedTasks.size === 0) {
-      toast.warning('请选择要操作的任务');
+      toast('请选择要操作的任务');
       return;
     }
 

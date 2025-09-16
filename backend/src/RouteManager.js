@@ -255,8 +255,16 @@ class RouteManager {
       // 测试执行路由 - 新增
       {
         path: '/api/tests',
-        module: '../routes/tests.js',
+        module: '../routes/test.js',
         description: '测试执行API',
+        group: 'testSpecific'
+      },
+      
+      // 测试管理路由 - 新增统一测试管理系统
+      {
+        path: '/api/testing',
+        module: '../routes/testing.js',
+        description: '统一测试管理API',
         group: 'testSpecific'
       },
 

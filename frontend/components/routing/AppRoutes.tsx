@@ -14,12 +14,16 @@ const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
 const PerformanceTest = lazy(() => import('../../pages/PerformanceTest'));
 const SEOTest = lazy(() => import('../../pages/SEOTest'));
 
+// MFA认证相关页面
+const MFASetup = lazy(() => import('../../pages/auth/MFASetup'));
+const MFAVerification = lazy(() => import('../../pages/auth/MFAVerification'));
+
 const APITest = lazy(() => import('../../pages/APITest'));
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
 const UnifiedStressTest = lazy(() => import('../../pages/UnifiedStressTest')); // 统一压力测试页面
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
-const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
+// const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
 const UXTest = lazy(() => import('../../pages/UXTest'));
 const UnifiedTestPage = lazy(() => import('../../pages/UnifiedTestPage'));
 
@@ -91,6 +95,20 @@ const AppRoutes: React.FC = () => {
       {/* 公开路由 */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      
+      {/* MFA认证路由 */}
+      <Route path="/auth/mfa/setup" element={
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <MFASetup />
+          </LazyPageWrapper>
+        </ProtectedRoute>
+      } />
+      <Route path="/auth/mfa/verify" element={
+        <LazyPageWrapper>
+          <MFAVerification />
+        </LazyPageWrapper>
+      } />
       {/* LoginDemo 路由已移除，因为文件不存在 */}
       {/* background-test-demo 路由已移除 */}
 
@@ -147,7 +165,7 @@ const AppRoutes: React.FC = () => {
         } />
         <Route path="chrome-compatibility-test" element={
           <LazyPageWrapper>
-            <ChromeCompatibilityTest />
+//             <ChromeCompatibilityTest />
           </LazyPageWrapper>
         } />
         <Route path="ux-test" element={
@@ -261,14 +279,14 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
-      {/* 暂时注释掉监控面板路由，等待修复 */}
-      {/* <Route path="monitoring" element={
+      {/* 监控面板 - 管理员可访问 */}
+      <Route path="monitoring" element={
         <ProtectedRoute>
           <LazyPageWrapper>
             <MonitoringDashboard />
           </LazyPageWrapper>
         </ProtectedRoute>
-      } /> */}
+      } />
 
       {/* 报告管理 - 需要登录 */}
       <Route path="reports" element={

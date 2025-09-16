@@ -5,7 +5,9 @@
   "private": true,
   "workspaces": [
     ".",
-    "server"
+    "backend",
+    "shared",
+    "tools/electron"
   ],
   "description": "集成压力测试、内容检测、兼容性测试的跨平台桌面应用",
   "author": {
@@ -52,6 +54,15 @@
     "lint:fix": "eslint frontend --ext .ts,.tsx --fix",
     "format": "prettier --write \"frontend/**/*.{ts,tsx,js,jsx,css,md}\"",
     "format:check": "prettier --check \"frontend/**/*.{ts,tsx,js,jsx,css,md}\"",
+    "consolidate-testing": "node scripts/consolidate-testing.cjs",
+    "consolidate-testing:dry": "node scripts/consolidate-testing.cjs --dry-run",
+    "consolidate-testing:verbose": "node scripts/consolidate-testing.cjs --verbose",
+    "validate-consolidation": "node scripts/validate-consolidation.cjs",
+    "validate-consolidation:verbose": "node scripts/validate-consolidation.cjs --verbose",
+    "validate-consolidation:fix": "node scripts/validate-consolidation.cjs --fix",
+    "fix:all-errors": "node scripts/fix-all-errors.cjs",
+    "fix:all-errors:dry": "node scripts/fix-all-errors.cjs --dry-run",
+    "fix:all-errors:skip-install": "node scripts/fix-all-errors.cjs --skip-install",
     "fix:imports": "node scripts/fix-imports-and-naming.cjs",
     "fix:imports:precise": "node scripts/precise-import-fixer.cjs",
     "fix:imports:duplicate": "node scripts/fix-duplicate-imports.cjs",
@@ -74,7 +85,13 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@heroicons/react": "^2.2.0",
+    "@mui/icons-material": "^7.3.2",
+    "@mui/lab": "^7.0.0-beta.17",
+    "@mui/material": "^7.3.2",
+    "@types/qrcode": "^1.5.5",
     "@types/react-datepicker": "^7.0.0",
     "ahooks": "^3.9.4",
     "antd": "^5.27.1",
@@ -88,6 +105,8 @@
     "lucide-react": "^0.544.0",
     "pg": "^8.11.3",
     "pixelmatch": "^7.1.0",
+    "qrcode": "^1.5.4",
+    "qrcode.react": "^4.2.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.3.0",
     "react-datepicker": "^8.7.0",
@@ -100,6 +119,7 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",

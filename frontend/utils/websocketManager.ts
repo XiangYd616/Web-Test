@@ -266,7 +266,7 @@ export class WebSocketManager {
       }
 
       this.stats.messagesReceived++;
-      this.stats.bytesTransferred += event.data.length || 0;
+      this.stats.bytesTransferred += (typeof event.data === 'string' ? event.data.length : event.data.byteLength) || 0;
 
       // 处理确认消息
       if (message.type === 'ack' && message.messageId) {

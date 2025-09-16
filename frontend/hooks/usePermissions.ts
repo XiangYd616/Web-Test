@@ -381,17 +381,17 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       fetchPermissions();
     };
 
-    authManager.on('loginSuccess', handleAuthChange);
-    authManager.on('logout', () => {
-      setState({
-        permissions: [],
-        roles: [],
-        loading: false,
-        error: null,
-        lastUpdated: null
-      });
-      clearCache();
-    });
+    // authManager.on('loginSuccess', handleAuthChange);
+    // authManager.on('logout', () => {
+    //   setState({
+    //     permissions: [],
+    //     roles: [],
+    //     loading: false,
+    //     error: null,
+    //     lastUpdated: null
+    //   });
+    //   clearCache();
+    // });
 
     return () => {
       // 清理事件监听器（EnhancedAuthManager没有off方法，暂时跳过）

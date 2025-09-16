@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-09-15T12:27:54.626Z",
+  "dryRun": false,
+  "backupDir": "D:\\myproject\\Test-Web\\backup\\consolidation-1757939274531",
+  "actions": {
+    "routesMerged": [],
+    "pagesMerged": [],
+    "referencesUpdated": [],
+    "pagesCreated": []
+  }
+}

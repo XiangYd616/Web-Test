@@ -12,7 +12,7 @@ import {
   Database,
   Globe,
   HardDrive,
-  Memory,
+  MemoryStick as Memory,
   Network,
   Server,
   Wifi,

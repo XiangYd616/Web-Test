@@ -1,5 +1,5 @@
-import { UserRole, UserStatus } from '@types/enums';
-import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '@types/user';
+import { UserRole, UserStatus } from '../../types/enums';
+import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
 import { browserJwt } from '@utils/browserJwt';
 import { canUseDatabase } from '@utils/environment';
 import { jwtDecode } from 'jwt-decode';
@@ -1458,9 +1458,10 @@ export class UnifiedAuthService implements IAuthService {
   private isTokenExpiringSoon(token: string): boolean {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const expiryTime = payload.exp * 1000;
-      const thresholdTime = Date.now() + (this.enhancedConfig.autoRefreshThreshold || 300) * 1000;
-      return thresholdTime >= expiryTime;
+      const expirationTime = payload.exp * 1000;
+      const now = Date.now();
+      const timeUntilExpiry = expirationTime - now;
+      return timeUntilExpiry < 5 * 60 * 1000; // 5分钟内过期
     } catch {
       return true;
     }

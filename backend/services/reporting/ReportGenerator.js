@@ -29,9 +29,60 @@ class ReportGenerator {
   }
 
   /**
-   * 生成测试报告
+   * 生成测试报告 - 简化版本，适配新的测试管理系统
    */
-  async generateReport(testIds, userId, projectId, options = {}) {
+  async generateReport(test, result, options = {}) {
+    try {
+      const {
+        type = 'summary',
+        format = 'json'
+      } = options;
+
+      const report = {
+        type,
+        format,
+        data: {
+          test: {
+            id: test.test_id,
+            name: test.test_name,
+            url: test.test_url,
+            engineType: test.engine_type,
+            createdAt: test.created_at,
+            completedAt: test.completed_at,
+            duration: test.execution_time
+          },
+          result: {
+            score: result.score,
+            grade: result.grade,
+            metrics: result.metrics,
+            recommendations: result.recommendations || [],
+            vulnerabilities: result.vulnerabilities || [],
+            opportunities: result.opportunities || []
+          },
+          summary: this.generateSummary(result),
+          timestamp: new Date().toISOString()
+        },
+        filePath: null
+      };
+
+      // 根据格式生成文件
+      if (format === 'pdf') {
+        report.filePath = await this.generatePDFFile(report.data);
+      } else if (format === 'html') {
+        report.filePath = await this.generateHTMLFile(report.data);
+      }
+
+      return report;
+    } catch (error) {
+      console.error('生成报告失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 生成测试报告 - 原始版本
+   */
+  async generateFullReport(testIds, userId, projectId, options = {}) {
     try {
       const {
         format = 'html',
@@ -568,6 +619,180 @@ class ReportGenerator {
       stream.on('finish', () => resolve(filePath));
       stream.on('error', reject);
     });
+  }
+  /**
+   * 生成摘要
+   */
+  generateSummary(result) {
+    const summary = {
+      overview: '',
+      strengths: [],
+      weaknesses: [],
+      criticalIssues: [],
+      nextSteps: []
+    };
+
+    // 根据分数生成概述
+    if (result.score >= 90) {
+      summary.overview = '测试结果优秀，系统性能和质量达到高标准。';
+    } else if (result.score >= 70) {
+      summary.overview = '测试结果良好，但仍有优化空间。';
+    } else if (result.score >= 50) {
+      summary.overview = '测试结果一般，需要进行重要改进。';
+    } else {
+      summary.overview = '测试结果不理想，建议立即采取优化措施。';
+    }
+
+    // 分析优势和劣势
+    if (result.metrics) {
+      Object.entries(result.metrics).forEach(([key, metric]) => {
+        if (metric.passed) {
+          summary.strengths.push(`${key}: ${metric.value}${metric.unit || ''}`);
+        } else if (metric.severity === 'critical' || metric.severity === 'error') {
+          summary.criticalIssues.push(`${key}: ${metric.recommendation || '需要优化'}`);
+        } else {
+          summary.weaknesses.push(`${key}: ${metric.recommendation || '需要改进'}`);
+        }
+      });
+    }
+
+    // 生成下一步建议
+    if (summary.criticalIssues.length > 0) {
+      summary.nextSteps.push('立即解决关键问题');
+    }
+    if (summary.weaknesses.length > 0) {
+      summary.nextSteps.push('制定优化计划');
+    }
+    summary.nextSteps.push('持续监控和测试');
+
+    return summary;
+  }
+
+  /**
+   * 生成PDF文件
+   */
+  async generatePDFFile(data) {
+    const fileName = `report_${Date.now()}.pdf`;
+    const filePath = path.join(this.reportsDir, fileName);
+    
+    return new Promise((resolve, reject) => {
+      const doc = new PDFDocument();
+      const stream = doc.pipe(fs.createWriteStream(filePath));
+      
+      // 添加标题
+      doc.fontSize(20).text('测试报告', { align: 'center' });
+      doc.moveDown();
+      
+      // 添加测试信息
+      doc.fontSize(14).text(`测试名称: ${data.test.name}`);
+      doc.text(`URL: ${data.test.url}`);
+      doc.text(`类型: ${data.test.engineType}`);
+      doc.text(`时间: ${data.test.createdAt}`);
+      doc.moveDown();
+      
+      // 添加结果
+      doc.fontSize(16).text('测试结果', { underline: true });
+      doc.fontSize(14).text(`分数: ${data.result.score}/100`);
+      doc.text(`等级: ${data.result.grade}`);
+      doc.moveDown();
+      
+      // 添加摘要
+      if (data.summary) {
+        doc.fontSize(16).text('摘要', { underline: true });
+        doc.fontSize(12).text(data.summary.overview);
+        doc.moveDown();
+      }
+      
+      // 结束文档
+      doc.end();
+      
+      stream.on('finish', () => resolve(filePath));
+      stream.on('error', reject);
+    });
+  }
+
+  /**
+   * 生成HTML文件
+   */
+  async generateHTMLFile(data) {
+    const fileName = `report_${Date.now()}.html`;
+    const filePath = path.join(this.reportsDir, fileName);
+    
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>测试报告 - ${data.test.name}</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+    h1 { color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+    h2 { color: #666; margin-top: 30px; }
+    .info { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    .score { font-size: 48px; font-weight: bold; color: #4CAF50; }
+    .grade { font-size: 24px; color: #666; margin-left: 20px; }
+    .metric { padding: 10px; margin: 10px 0; border-left: 3px solid #ddd; }
+    .metric.passed { border-color: #4CAF50; }
+    .metric.failed { border-color: #f44336; }
+    .summary { background: #e8f5e9; padding: 20px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>测试报告</h1>
+  
+  <div class="info">
+    <h2>测试信息</h2>
+    <p><strong>名称:</strong> ${data.test.name}</p>
+    <p><strong>URL:</strong> ${data.test.url}</p>
+    <p><strong>类型:</strong> ${data.test.engineType}</p>
+    <p><strong>时间:</strong> ${new Date(data.test.createdAt).toLocaleString()}</p>
+    <p><strong>耗时:</strong> ${data.test.duration}秒</p>
+  </div>
+  
+  <div class="info">
+    <h2>测试结果</h2>
+    <span class="score">${data.result.score}</span>
+    <span class="grade">等级: ${data.result.grade}</span>
+  </div>
+  
+  ${data.summary ? `
+  <div class="summary">
+    <h2>摘要</h2>
+    <p>${data.summary.overview}</p>
+    ${data.summary.strengths.length > 0 ? `
+      <h3>优势</h3>
+      <ul>${data.summary.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+    ` : ''}
+    ${data.summary.weaknesses.length > 0 ? `
+      <h3>需要改进</h3>
+      <ul>${data.summary.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
+    ` : ''}
+    ${data.summary.criticalIssues.length > 0 ? `
+      <h3>关键问题</h3>
+      <ul>${data.summary.criticalIssues.map(i => `<li>${i}</li>`).join('')}</ul>
+    ` : ''}
+  </div>
+  ` : ''}
+  
+  <div class="info">
+    <h2>详细指标</h2>
+    ${Object.entries(data.result.metrics || {}).map(([key, metric]) => `
+      <div class="metric ${metric.passed ? 'passed' : 'failed'}">
+        <strong>${key}:</strong> ${metric.value}${metric.unit || ''}
+        ${metric.recommendation ? `<br><small>${metric.recommendation}</small>` : ''}
+      </div>
+    `).join('')}
+  </div>
+  
+  <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #999;">
+    <p>生成时间: ${new Date().toLocaleString()}</p>
+  </div>
+</body>
+</html>
+    `;
+    
+    await fs.writeFile(filePath, html, 'utf8');
+    return filePath;
   }
 }
 
