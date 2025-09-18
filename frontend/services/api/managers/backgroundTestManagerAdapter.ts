@@ -7,7 +7,7 @@
 
 // AdapterConfig 类型暂时移除，使用基础配置
 // import type { AdapterConfig } from '../../types';
-// import { TestStatus } from '../../types/unified/testTypes';
+// import { TestStatus } from '@shared/types';
 // 使用字符串字面量类型替代
 type TestStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 // import { unifiedTestApiClient } from '../unifiedTestApiService';

@@ -9,7 +9,7 @@ import {
     TrendingUp
 } from 'lucide-react';
 import React, { useState } from 'react';
-import { TestType } from '../../types/unified/testTypes';
+import { TestType } from '@shared/types';
 import DataStats from './DataStats';
 
 interface DataManagementProps {

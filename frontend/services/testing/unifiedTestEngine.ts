@@ -96,7 +96,7 @@ export interface AccessibilityViolation {
 }
 
 // TestType 已迁移到统一类型系统
-import { TestType } from '../../types/unified/testTypes';
+import { TestType } from '@shared/types';
 
 export interface TestProgress {
   stage: string;

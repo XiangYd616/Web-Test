@@ -12,7 +12,7 @@ import type {
   ProjectStatsResponse,
   UpdateProjectRequest
 } from '../../types/project';
-import type { ApiResponse } from '../../types/unified/apiResponse';
+import { ApiResponse } from '@shared/types';
 import { unifiedApiService } from './apiService';
 
 class ProjectApiService {

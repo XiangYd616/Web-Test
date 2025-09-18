@@ -3,8 +3,8 @@
  * 提供API响应格式化、错误处理和查询字符串构建等功能
  */
 
-import type { ApiResponse } from '../types/unified/apiResponse.types';
-import { ErrorCode } from '../types/unified/apiResponse.types';
+import type { ApiResponse } from '@shared/types';
+import { ErrorCode } from '@shared/types';
 
 /**
  * 格式化API响应

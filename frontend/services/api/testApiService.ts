@@ -10,20 +10,22 @@ import type {
   TestApiClient
 } from '../../types';
 import type {
+  ApiResponse
+} from '@shared/types';
+import type {
   ApiRequestConfig,
-  ApiResponse,
   RequestConfig,
   TestCallbacks,
   UnifiedTestConfig
-} from '../../types/unified/apiResponse.types';
+} from '@shared/types';
+import type {
+  TestType,
+  TestStatus
+} from '@shared/types';
 import type {
   TestExecution,
-  TestHistory,
-  TestType
-} from '../../types/unified/testTypes';
-import {
-  TestStatus
-} from '../../types/unified/testTypes';
+  TestHistory
+} from '@shared/types';
 import { unifiedApiService } from './apiService';
 
 // 本地类型定义已迁移到统一的类型系统

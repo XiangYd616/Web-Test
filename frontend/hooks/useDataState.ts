@@ -6,7 +6,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { apiErrorHandler } from '../services/api/errorHandler';
-import type { ApiError } from '../types/unified/baseTypes';
+import type { ApiError } from '@shared/types';
 
 // 数据状态枚举
 export enum DataStatus {

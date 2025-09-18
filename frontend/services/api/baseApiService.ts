@@ -1,4 +1,4 @@
-import type { ApiResponse } from '../../types/unified/apiResponse';
+import { ApiResponse } from '@shared/types';
 
 /**
  * 统一的API服务基类

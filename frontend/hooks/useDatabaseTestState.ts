@@ -13,7 +13,7 @@ import type {
   DatabaseTestHook,
   DatabaseTestResult
 } from '../types';
-import { TestStatus } from '../types/unified/testTypes';
+import { TestStatus } from '@shared/types';
 
 // 扩展数据库测试配置类型，兼容统一类型系统
 interface ExtendedDatabaseTestConfig extends DatabaseTestConfig {

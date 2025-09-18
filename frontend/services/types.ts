@@ -5,7 +5,7 @@
 
 // 重新导出所有类型，避免重复导出
 export * from '../types/api';
-export * from '../types/unified/apiResponse.types';
+export * from '@shared/types';
 
 // 选择性导出以避免与unified/models的冲突
 export type {

@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ApiError } from '../types/api.types';
-import type { ApiResponse } from '../types/unified/apiResponse.types';
+import type { ApiResponse } from '@shared/types';
 
 // ==================== 状态类型定义 ====================
 

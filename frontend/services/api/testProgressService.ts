@@ -4,7 +4,7 @@
  */
 
 import { unifiedApiService } from './apiService';
-import type { ApiResponse } from '../../types/unified/apiResponse';
+import type { ApiResponse } from '@shared/types';
 // 测试进度接口
 export interface TestProgress {
   id: string;

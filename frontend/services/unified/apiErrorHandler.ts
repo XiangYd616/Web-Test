@@ -3,8 +3,8 @@
  * 版本: v2.0.0
  */
 
-import type { ApiError, ApiResponse } from '../../types/unified/apiResponse.types';
-import { ErrorCode } from '../../types/unified/apiResponse.types';
+import type { ApiError, ApiResponse } from '@shared/types';
+import { ErrorCode } from '@shared/types';
 
 // 错误类型枚举
 export enum ErrorType {

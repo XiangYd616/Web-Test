@@ -9,7 +9,7 @@ export type { TestScheduler } from './testScheduler';
 export type { UnifiedTestEngine } from './unifiedTestEngine';
 
 // 重新导出常用类型
-export { TestType } from '../../types/unified/testTypes';
+export { TestType } from '@shared/types';
 export type { APIEndpoint, APITestConfig } from './apiTestEngine';
 export type { ScheduledTest, TestExecution } from './testScheduler';
 export type { TestProgress, TestResult } from './unifiedTestEngine';
