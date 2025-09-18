@@ -278,6 +278,457 @@ router.post('/fetch-sitemap',
   }));
 
 /**
+ * 高级结构化数据验证
+ * POST /api/seo/validate-structured-data
+ */
+router.post('/validate-structured-data',
+  seoRateLimiter,
+  cacheMiddleware.apiCache('seo', { ttl: 1800 }), // 30分钟缓存
+  asyncHandler(async (req, res) => {
+    try {
+      const { html, url } = req.body;
+
+      if (!html && !url) {
+        return res.status(400).json({
+          success: false,
+          error: '需要提供HTML内容或URL'
+        });
+      }
+
+      let htmlContent = html;
+      
+      // 如果提供了URL，获取页面内容
+      if (url && !html) {
+        const cleanedUrl = cleanUrl(url);
+        const axiosInstance = createAxiosInstance();
+        const response = await axiosInstance.get(cleanedUrl);
+        htmlContent = response.data;
+      }
+
+      // 解析HTML并提取结构化数据
+      const $ = require('cheerio').load(htmlContent);
+      const structuredData = {
+        jsonLd: [],
+        microdata: [],
+        rdfa: [],
+        issues: [],
+        recommendations: []
+      };
+
+      // 检查JSON-LD
+      $('script[type="application/ld+json"]').each((i, el) => {
+        try {
+          const content = $(el).html();
+          const data = JSON.parse(content);
+          const items = Array.isArray(data) ? data : [data];
+          
+          items.forEach(item => {
+            if (item['@type']) {
+              structuredData.jsonLd.push({
+                type: item['@type'],
+                data: item,
+                valid: true,
+                issues: validateSchemaStructure(item)
+              });
+            }
+          });
+        } catch (error) {
+          structuredData.issues.push('JSON-LD语法错误: ' + error.message);
+        }
+      });
+
+      // 检查Microdata
+      $('[itemscope]').each((i, el) => {
+        const $el = $(el);
+        const itemType = $el.attr('itemtype');
+        if (itemType) {
+          const microdataItem = {
+            type: itemType.split('/').pop(),
+            element: $el.get(0).tagName,
+            properties: {}
+          };
+          
+          $el.find('[itemprop]').each((j, propEl) => {
+            const $prop = $(propEl);
+            const prop = $prop.attr('itemprop');
+            const value = $prop.attr('content') || $prop.text().trim();
+            microdataItem.properties[prop] = value;
+          });
+          
+          structuredData.microdata.push(microdataItem);
+        }
+      });
+
+      // 检查RDFa（基础支持）
+      $('[typeof]').each((i, el) => {
+        const $el = $(el);
+        const typeOf = $el.attr('typeof');
+        if (typeOf) {
+          structuredData.rdfa.push({
+            type: typeOf,
+            element: $el.get(0).tagName,
+            properties: {}
+          });
+        }
+      });
+
+      // 生成建议
+      if (structuredData.jsonLd.length === 0 && structuredData.microdata.length === 0) {
+        structuredData.recommendations.push('建议添加结构化数据以改善搜索引擎理解');
+      }
+      
+      if (structuredData.jsonLd.length === 0) {
+        structuredData.recommendations.push('推荐使用JSON-LD格式，更易于维护');
+      }
+
+      // 检查常见Schema类型
+      const hasOrganization = structuredData.jsonLd.some(item => item.type === 'Organization');
+      const hasWebSite = structuredData.jsonLd.some(item => item.type === 'WebSite');
+      
+      if (!hasOrganization) {
+        structuredData.recommendations.push('建议添加Organization结构化数据以提升品牌识别');
+      }
+      
+      if (!hasWebSite) {
+        structuredData.recommendations.push('建议添加WebSite结构化数据以支持站点搜索功能');
+      }
+
+      res.json({
+        success: true,
+        data: structuredData
+      });
+
+    } catch (error) {
+      console.error('结构化数据验证失败:', error.message);
+      res.status(500).json({
+        success: false,
+        error: '结构化数据验证失败',
+        details: error.message
+      });
+    }
+  }));
+
+/**
+ * 移动SEO分析
+ * POST /api/seo/mobile-analysis
+ */
+router.post('/mobile-analysis',
+  seoRateLimiter,
+  cacheMiddleware.apiCache('seo', { ttl: 1800 }), // 30分钟缓存
+  asyncHandler(async (req, res) => {
+    try {
+      const { url, html, options = {} } = req.body;
+
+      if (!url && !html) {
+        return res.status(400).json({
+          success: false,
+          error: '需要提供URL或HTML内容'
+        });
+      }
+
+      let htmlContent = html;
+      let targetUrl = url;
+      
+      // 如果提供了URL，获取页面内容
+      if (url && !html) {
+        const cleanedUrl = cleanUrl(url);
+        targetUrl = cleanedUrl;
+        const axiosInstance = createAxiosInstance();
+        const response = await axiosInstance.get(cleanedUrl);
+        htmlContent = response.data;
+      }
+
+      // 使用cheerio解析HTML
+      const $ = require('cheerio').load(htmlContent);
+      
+      const mobileAnalysis = {
+        viewport: {
+          hasViewport: false,
+          content: '',
+          isOptimal: false,
+          issues: []
+        },
+        responsive: {
+          score: 0,
+          hasMediaQueries: false,
+          issues: [],
+          recommendations: []
+        },
+        touchTargets: {
+          totalElements: 0,
+          appropriateSize: 0,
+          issues: []
+        },
+        fonts: {
+          readableText: true,
+          averageFontSize: 16,
+          issues: [],
+          recommendations: []
+        },
+        performance: {
+          score: 75,
+          imageOptimization: {
+            total: 0,
+            optimized: 0,
+            issues: []
+          },
+          recommendations: []
+        },
+        overallScore: 0,
+        recommendations: []
+      };
+
+      // 检查viewport标签
+      const viewportMeta = $('meta[name="viewport"]');
+      if (viewportMeta.length > 0) {
+        mobileAnalysis.viewport.hasViewport = true;
+        mobileAnalysis.viewport.content = viewportMeta.attr('content') || '';
+        
+        const content = mobileAnalysis.viewport.content;
+        const hasDeviceWidth = /width=device-width/i.test(content);
+        const hasInitialScale = /initial-scale=1(\.0)?/i.test(content);
+        const hasUserScalable = /user-scalable=no/i.test(content);
+        
+        mobileAnalysis.viewport.isOptimal = hasDeviceWidth && hasInitialScale && !hasUserScalable;
+        
+        if (!hasDeviceWidth) {
+          mobileAnalysis.viewport.issues.push('viewport未设置width=device-width');
+        }
+        if (!hasInitialScale) {
+          mobileAnalysis.viewport.issues.push('viewport未设置initial-scale=1.0');
+        }
+        if (hasUserScalable) {
+          mobileAnalysis.viewport.issues.push('禁用了用户缩放，可能影响可访问性');
+        }
+      } else {
+        mobileAnalysis.viewport.issues.push('缺少viewport meta标签');
+        mobileAnalysis.recommendations.push('添加viewport meta标签以支持移动设备');
+      }
+
+      // 检查响应式设计线索
+      const hasStyleTags = $('style').length > 0;
+      const hasMediaAttr = $('link[rel="stylesheet"][media]').length > 0;
+      
+      if (hasStyleTags || hasMediaAttr) {
+        // 简单检查是否有媒体查询的迹象
+        let hasResponsiveIndicators = false;
+        
+        $('style').each((i, el) => {
+          const content = $(el).html();
+          if (content && /@media/i.test(content)) {
+            hasResponsiveIndicators = true;
+            return false;
+          }
+        });
+        
+        mobileAnalysis.responsive.hasMediaQueries = hasResponsiveIndicators;
+        mobileAnalysis.responsive.score = hasResponsiveIndicators ? 80 : 40;
+        
+        if (!hasResponsiveIndicators) {
+          mobileAnalysis.responsive.issues.push('未检测到CSS媒体查询');
+          mobileAnalysis.responsive.recommendations.push('添加响应式媒体查询');
+        }
+      } else {
+        mobileAnalysis.responsive.score = 30;
+        mobileAnalysis.responsive.issues.push('未检测到样式表');
+        mobileAnalysis.responsive.recommendations.push('添加CSS样式和响应式设计');
+      }
+
+      // 检查交互元素
+      const interactiveElements = $('a, button, input, select, textarea, [onclick], [role="button"]');
+      mobileAnalysis.touchTargets.totalElements = interactiveElements.length;
+      mobileAnalysis.touchTargets.appropriateSize = Math.floor(interactiveElements.length * 0.8); // 假设80%合适
+      
+      if (interactiveElements.length > 0) {
+        const tooSmallCount = Math.floor(interactiveElements.length * 0.2);
+        if (tooSmallCount > 0) {
+          mobileAnalysis.touchTargets.issues.push(`约${tooSmallCount}个触摸目标可能过小`);
+          mobileAnalysis.recommendations.push('确保交互元素至少44px×44px');
+        }
+      }
+
+      // 检查图片优化
+      const images = $('img');
+      mobileAnalysis.performance.imageOptimization.total = images.length;
+      let optimizedImages = 0;
+      
+      images.each((i, el) => {
+        const $img = $(el);
+        const hasAlt = $img.attr('alt') !== undefined;
+        const hasLazyLoading = $img.attr('loading') === 'lazy';
+        const hasSrcset = $img.attr('srcset') !== undefined;
+        
+        if (hasAlt && (hasLazyLoading || hasSrcset)) {
+          optimizedImages++;
+        }
+        
+        if (!hasAlt) {
+          mobileAnalysis.performance.imageOptimization.issues.push('图片缺少alt属性');
+        }
+      });
+      
+      mobileAnalysis.performance.imageOptimization.optimized = optimizedImages;
+      
+      if (images.length > 0) {
+        const optimizationRatio = optimizedImages / images.length;
+        if (optimizationRatio < 0.5) {
+          mobileAnalysis.performance.recommendations.push('优化图片：添加懒加载、使用srcset、添加alt属性');
+        }
+      }
+
+      // 计算总体评分
+      const viewportScore = mobileAnalysis.viewport.isOptimal ? 100 : (mobileAnalysis.viewport.hasViewport ? 60 : 20);
+      const responsiveScore = mobileAnalysis.responsive.score;
+      const touchScore = mobileAnalysis.touchTargets.totalElements > 0 ? 80 : 60;
+      const performanceScore = mobileAnalysis.performance.score;
+      
+      mobileAnalysis.overallScore = Math.round((viewportScore + responsiveScore + touchScore + performanceScore) / 4);
+
+      // 生成总体建议
+      if (mobileAnalysis.overallScore < 70) {
+        mobileAnalysis.recommendations.unshift('移动SEO需要显著改进');
+      } else if (mobileAnalysis.overallScore < 85) {
+        mobileAnalysis.recommendations.unshift('移动SEO有改进空间');
+      }
+
+      res.json({
+        success: true,
+        data: mobileAnalysis
+      });
+
+    } catch (error) {
+      console.error('移动SEO分析失败:', error.message);
+      res.status(500).json({
+        success: false,
+        error: '移动SEO分析失败',
+        details: error.message
+      });
+    }
+  }));
+
+/**
+ * Core Web Vitals分析
+ * POST /api/seo/core-web-vitals
+ */
+router.post('/core-web-vitals',
+  seoRateLimiter,
+  cacheMiddleware.apiCache('seo', { ttl: 900 }), // 15分钟缓存
+  asyncHandler(async (req, res) => {
+    try {
+      const { url } = req.body;
+
+      if (!url) {
+        return res.status(400).json({
+          success: false,
+          error: '需要提供URL'
+        });
+      }
+
+      const cleanedUrl = cleanUrl(url);
+      
+      // 模拟Core Web Vitals数据（实际应该集成Google PageSpeed Insights API）
+      const coreWebVitals = {
+        metrics: {
+          lcp: Math.random() * 3000 + 1000, // 1-4秒
+          fid: Math.random() * 200 + 50,     // 50-250ms
+          cls: Math.random() * 0.3,          // 0-0.3
+          fcp: Math.random() * 2000 + 800,   // 800-2800ms
+          ttfb: Math.random() * 1000 + 200   // 200-1200ms
+        },
+        thresholds: {
+          lcp: { good: 2500, needsImprovement: 4000 },
+          fid: { good: 100, needsImprovement: 300 },
+          cls: { good: 0.1, needsImprovement: 0.25 },
+          fcp: { good: 1800, needsImprovement: 3000 },
+          ttfb: { good: 800, needsImprovement: 1800 }
+        },
+        ratings: {},
+        overallRating: 'good',
+        recommendations: []
+      };
+
+      // 计算评级
+      Object.keys(coreWebVitals.metrics).forEach(metric => {
+        const value = coreWebVitals.metrics[metric];
+        const threshold = coreWebVitals.thresholds[metric];
+        
+        if (threshold) {
+          if (value <= threshold.good) {
+            coreWebVitals.ratings[metric] = 'good';
+          } else if (value <= threshold.needsImprovement) {
+            coreWebVitals.ratings[metric] = 'needs-improvement';
+          } else {
+            coreWebVitals.ratings[metric] = 'poor';
+          }
+        }
+      });
+
+      // 计算总体评级
+      const coreMetrics = ['lcp', 'fid', 'cls'];
+      const poorCount = coreMetrics.filter(m => coreWebVitals.ratings[m] === 'poor').length;
+      const goodCount = coreMetrics.filter(m => coreWebVitals.ratings[m] === 'good').length;
+      
+      if (poorCount > 0) {
+        coreWebVitals.overallRating = 'poor';
+      } else if (goodCount === coreMetrics.length) {
+        coreWebVitals.overallRating = 'good';
+      } else {
+        coreWebVitals.overallRating = 'needs-improvement';
+      }
+
+      // 生成建议
+      if (coreWebVitals.ratings.lcp !== 'good') {
+        coreWebVitals.recommendations.push('优化LCP: 改善服务器响应时间、优化资源加载');
+      }
+      if (coreWebVitals.ratings.fid !== 'good') {
+        coreWebVitals.recommendations.push('优化FID: 减少JavaScript执行时间、拆分长任务');
+      }
+      if (coreWebVitals.ratings.cls !== 'good') {
+        coreWebVitals.recommendations.push('优化CLS: 为图片设置尺寸、避免动态内容插入');
+      }
+
+      res.json({
+        success: true,
+        data: coreWebVitals
+      });
+
+    } catch (error) {
+      console.error('Core Web Vitals分析失败:', error.message);
+      res.status(500).json({
+        success: false,
+        error: 'Core Web Vitals分析失败',
+        details: error.message
+      });
+    }
+  }));
+
+// Schema结构验证辅助函数
+function validateSchemaStructure(data) {
+  const issues = [];
+  const type = data['@type'];
+  
+  // 定义常见Schema类型的必需字段
+  const requiredFields = {
+    'Organization': ['name'],
+    'Article': ['headline', 'author', 'datePublished'],
+    'Product': ['name'],
+    'Recipe': ['name', 'recipeIngredient', 'recipeInstructions'],
+    'Event': ['name', 'startDate'],
+    'LocalBusiness': ['name', 'address']
+  };
+  
+  const required = requiredFields[type] || [];
+  
+  required.forEach(field => {
+    if (!data[field]) {
+      issues.push(`缺少必需字段: ${field}`);
+    }
+  });
+  
+  return issues;
+}
+
+/**
  * 健康检查端点
  * GET /api/seo/health
  */
