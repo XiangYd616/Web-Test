@@ -145,3 +145,26 @@ backend/runtime/temp/
 backend/runtime/exports/
 docs/reports/*.html
 scripts/logs/
+
+# Test results and reports
+test-results.json
+*.test-report.json
+test-*.ps1
+test-*.js
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Environment overrides
+.env.development
+.env.production
+.env.staging
+
+# WARP temporary files
+WARP.md
+
+# Archive directories
+scripts/archive/
+scripts/migration/old/
