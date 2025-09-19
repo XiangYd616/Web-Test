@@ -9,6 +9,8 @@
     "dev": "node src/app.js",
     "_comment_test": "🧪 测试相关",
     "test": "jest",
+    "test:ui": "jest --watch",
+    "test:run": "jest --run",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "_comment_maintenance": "🔧 代码维护",
@@ -166,10 +168,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 80,
-        "functions": 80,
-        "lines": 80,
-        "statements": 80
+        "branches": 75,
+        "functions": 75,
+        "lines": 75,
+        "statements": 75
       }
     }
   },

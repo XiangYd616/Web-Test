@@ -7,7 +7,7 @@ const EventEmitter = require('events');
 const { query, transaction } = require('../../config/database');
 
 // 导入测试引擎
-const ApiTestEngine = require('../../engines/api/apiTestEngine');
+const ApiTestEngine = require('../../engines/api/ApiTestEngine');
 const PerformanceTestEngine = require('../../engines/performance/performanceTestEngine');
 const SecurityTestEngine = require('../../engines/security/SecurityTestEngine');
 const SeoTestEngine = require('../../engines/seo/SEOTestEngine');

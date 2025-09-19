@@ -5,27 +5,54 @@
 
 const { v4: uuidv4 } = require('uuid');
 
-// 导入所有测试引擎
+// 导入统一的测试类型定义
+const { TestType, TestStatus } = require('../../../shared/types/unified-test-types');
+
+// 导入所有测试引擎 - 完整列表
 const performanceEngine = require('../../engines/performance/performanceTestEngine');
 const seoEngine = require('../../engines/seo/seoTestEngine');
-const securityEngine = require('../../engines/security/securityTestEngine');
-const compatibilityEngine = require('../../engines/compatibility/compatibilityTestEngine');
-const apiEngine = require('../../engines/api/apiTestEngine');
-const stressEngine = require('../../engines/stress/stressTestEngine');
+const securityEngine = require('../../engines/security/SecurityTestEngine');
+const compatibilityEngine = require('../../engines/compatibility/CompatibilityTestEngine');
+const apiEngine = require('../../engines/api/ApiTestEngine');
+const stressEngine = require('../../engines/stress/StressTestEngine');
 const uxEngine = require('../../engines/ux/uxTestEngine');
 const infrastructureEngine = require('../../engines/infrastructure/infrastructureTestEngine');
 
+// 导入扩展测试引擎
+const accessibilityEngine = require('../../engines/accessibility/AccessibilityTestEngine');
+const databaseEngine = require('../../engines/database/DatabaseTestEngine');
+const networkEngine = require('../../engines/network/NetworkTestEngine');
+const websiteEngine = require('../../engines/website/websiteTestEngine');
+const contentEngine = require('../../engines/content/ContentTestEngine');
+const documentationEngine = require('../../engines/documentation/DocumentationTestEngine');
+const regressionEngine = require('../../engines/regression/RegressionTestEngine');
+const automationEngine = require('../../engines/automation/AutomationTestEngine');
+const clientsEngine = require('../../engines/clients/ClientsTestEngine');
+const servicesEngine = require('../../engines/services/ServicesTestEngine');
+
 class TestEngineService {
   constructor() {
+    // 使用统一的TestType常量映射所有引擎
     this.engines = {
-      performance: performanceEngine,
-      seo: seoEngine,
-      security: securityEngine,
-      compatibility: compatibilityEngine,
-      api: apiEngine,
-      stress: stressEngine,
-      ux: uxEngine,
-      infrastructure: infrastructureEngine
+      [TestType.PERFORMANCE]: performanceEngine,
+      [TestType.SEO]: seoEngine,
+      [TestType.SECURITY]: securityEngine,
+      [TestType.COMPATIBILITY]: compatibilityEngine,
+      [TestType.API]: apiEngine,
+      [TestType.STRESS]: stressEngine,
+      [TestType.UX]: uxEngine,
+      [TestType.INFRASTRUCTURE]: infrastructureEngine,
+      // 新增的测试引擎
+      [TestType.ACCESSIBILITY]: accessibilityEngine,
+      [TestType.DATABASE]: databaseEngine,
+      [TestType.NETWORK]: networkEngine,
+      [TestType.WEBSITE]: websiteEngine,
+      [TestType.CONTENT]: contentEngine,
+      [TestType.DOCUMENTATION]: documentationEngine,
+      [TestType.REGRESSION]: regressionEngine,
+      [TestType.AUTOMATION]: automationEngine,
+      [TestType.CLIENTS]: clientsEngine,
+      [TestType.SERVICES]: servicesEngine
     };
 
     this.activeTests = new Map();
@@ -101,33 +128,44 @@ class TestEngineService {
       // 统一的配置对象
       const testConfig = { url, ...options };
 
-      switch (testType) {
-        case 'performance':
-          result = await engine.runPerformanceTest(testConfig);
-          break;
-        case 'seo':
-          result = await engine.runSeoTest(testConfig);
-          break;
-        case 'security':
-          result = await engine.runSecurityTest(testConfig);
-          break;
-        case 'compatibility':
-          result = await engine.runCompatibilityTest(testConfig);
-          break;
-        case 'api':
-          result = await engine.runApiTest(testConfig);
-          break;
-        case 'stress':
-          result = await engine.runStressTest(testConfig);
-          break;
-        case 'ux':
-          result = await engine.runUxTest(testConfig);
-          break;
-        case 'infrastructure':
-          result = await engine.runInfrastructureTest(testConfig);
-          break;
-        default:
-          throw new Error(`不支持的测试类型: ${testType}`);
+      // 统一的测试执行方法映射
+      const testMethodMap = {
+        [TestType.PERFORMANCE]: 'runPerformanceTest',
+        [TestType.SEO]: 'runSeoTest',
+        [TestType.SECURITY]: 'runSecurityTest',
+        [TestType.COMPATIBILITY]: 'runCompatibilityTest',
+        [TestType.API]: 'runApiTest',
+        [TestType.STRESS]: 'runStressTest',
+        [TestType.UX]: 'runUxTest',
+        [TestType.INFRASTRUCTURE]: 'runInfrastructureTest',
+        [TestType.ACCESSIBILITY]: 'runAccessibilityTest',
+        [TestType.DATABASE]: 'runDatabaseTest',
+        [TestType.NETWORK]: 'runNetworkTest',
+        [TestType.WEBSITE]: 'runWebsiteTest',
+        [TestType.CONTENT]: 'runContentTest',
+        [TestType.DOCUMENTATION]: 'runDocumentationTest',
+        [TestType.REGRESSION]: 'runRegressionTest',
+        [TestType.AUTOMATION]: 'runAutomationTest',
+        [TestType.CLIENTS]: 'runClientsTest',
+        [TestType.SERVICES]: 'runServicesTest'
+      };
+
+      const testMethod = testMethodMap[testType];
+      if (!testMethod) {
+        throw new Error(`不支持的测试类型: ${testType}`);
+      }
+
+      // 尝试调用特定的测试方法，如果不存在则使用通用方法
+      if (typeof engine[testMethod] === 'function') {
+        result = await engine[testMethod](testConfig);
+      } else if (typeof engine.runTest === 'function') {
+        // 使用通用的runTest方法
+        result = await engine.runTest(testConfig);
+      } else if (typeof engine.execute === 'function') {
+        // 使用execute方法
+        result = await engine.execute(testConfig);
+      } else {
+        throw new Error(`测试引擎 ${testType} 没有可用的执行方法`);
       }
 
       // 保存测试结果
@@ -752,4 +790,8 @@ setInterval(() => {
   testEngineService.processScheduledTasks();
 }, 60 * 1000); // 每分钟检查一次调度任务
 
+// 创建并导出单例
+const testEngineService = new TestEngineService();
+
 module.exports = testEngineService;
+module.exports.TestEngineService = TestEngineService;

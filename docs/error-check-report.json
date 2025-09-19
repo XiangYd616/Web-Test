@@ -1,0 +1,2387 @@
+{
+  "critical": [
+    {
+      "file": "frontend\\components\\auth\\AuthLoadingState.tsx",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\components\\auth\\AuthLoadingState.tsx",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\contexts\\AuthContext.tsx",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\hooks\\useMFA.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\hooks\\__tests__\\useAuthTest.tsx",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\hooks\\__tests__\\useAuthTest.tsx",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\pages\\Login.tsx",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\pages\\Register.tsx",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\pages\\UserProfile.tsx",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\services\\auth\\authService.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\services\\dao\\userDao.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\services\\integrationService.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\services\\integrationService.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\services\\__tests__\\apiIntegrationTest.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\services\\__tests__\\apiIntegrationTest.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\services\\__tests__\\apiTest.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\services\\__tests__\\apiTest.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "frontend\\types\\unified\\apiResponse.types.ts",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "backend\\config\\fieldMapping.js",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "backend\\config\\swaggerEnhanced.js",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "backend\\docs\\unifiedEngineAPI.js",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "backend\\middleware\\__tests__\\auth.test.js",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "backend\\middleware\\__tests__\\auth.test.js",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "backend\\middleware\\__tests__\\auth.test.js",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "backend\\routes\\integrations.js",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    },
+    {
+      "file": "backend\\scripts\\seedDatabase.js",
+      "issue": "可能包含硬编码的敏感信息",
+      "severity": "critical"
+    }
+  ],
+  "errors": [],
+  "warnings": [
+    {
+      "file": "frontend\\components\\api\\EndpointDependencyManager.tsx",
+      "issue": "可能未使用的变量: addDataMapping",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\auth\\AuthErrorHandler.tsx",
+      "issue": "可能未使用的变量: ERROR_MESSAGES",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\auth\\AuthErrorHandler.tsx",
+      "issue": "可能未使用的变量: getErrorMessage",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\auth\\AuthErrorHandler.tsx",
+      "issue": "可能未使用的变量: shouldRelogin",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\auth\\LoginPrompt.tsx",
+      "issue": "可能未使用的变量: handleRegister",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\business\\BusinessAnalyticsDashboard.tsx",
+      "issue": "可能未使用的变量: getTrendIcon",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\business\\BusinessAnalyticsDashboard.tsx",
+      "issue": "可能未使用的变量: formatChartData",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\EnhancedCharts.tsx",
+      "issue": "可能未使用的变量: createGradient",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\EnhancedCharts.tsx",
+      "issue": "可能未使用的变量: getHeatmapData",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\EnhancedCharts.tsx",
+      "issue": "可能未使用的变量: addAnnotation",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\SimpleCharts.tsx",
+      "issue": "可能未使用的变量: SimpleStressTestChart",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\SimpleCharts.tsx",
+      "issue": "可能未使用的变量: SimplePerformanceChart",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\SimpleCharts.tsx",
+      "issue": "可能未使用的变量: SimpleSecurityChart",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\SimpleCharts.tsx",
+      "issue": "可能未使用的变量: SimplePieChart",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\SimpleCharts.tsx",
+      "issue": "可能未使用的变量: SimpleTrendChart",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\StressTestCharts.tsx",
+      "issue": "过多的console语句 (7个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\components\\charts\\StressTestCharts.tsx",
+      "issue": "可能未使用的变量: handleZoom",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\charts\\StressTestMetrics.tsx",
+      "issue": "可能未使用的变量: allMetrics",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\common\\DataTableCompat.tsx",
+      "issue": "可能未使用的变量: handleSortChange",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\common\\TestHistory.tsx",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\components\\common\\TestHistory.tsx",
+      "issue": "可能未使用的变量: navigate",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\common\\TestHistoryDetailed.tsx",
+      "issue": "可能未使用的变量: handleSort",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\common\\TestPageHistory.tsx",
+      "issue": "可能未使用的变量: handleSelectAll",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\data\\DataFilters.tsx",
+      "issue": "可能未使用的变量: uniqueOwners",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\data\\DataFilters.tsx",
+      "issue": "可能未使用的变量: addCustomFilter",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\data\\DataFilters.tsx",
+      "issue": "可能未使用的变量: removeFilter",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\data\\DataList.tsx",
+      "issue": "可能未使用的变量: getStatusColor",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\data\\DataList.tsx",
+      "issue": "可能未使用的变量: handleSort",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\data\\DataManager.tsx",
+      "issue": "可能未使用的变量: operations",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\modern\\ModernChart.tsx",
+      "issue": "可能存在未处理的Promise错误 (3 then vs 0 catch)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\components\\modern\\ModernSidebar.tsx",
+      "issue": "可能未使用的变量: isAdmin",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\modern\\TopNavbar.tsx",
+      "issue": "可能未使用的变量: isAdmin",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\modern\\TopNavbar.tsx",
+      "issue": "可能未使用的变量: actions",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\monitoring\\RealTimeMonitoringDashboard.tsx",
+      "issue": "可能未使用的变量: formatDuration",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\reports\\ReportGenerator.tsx",
+      "issue": "可能未使用的变量: handleDownload",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\security\\SecurityTestHistory.tsx",
+      "issue": "可能未使用的变量: SecurityTestHistory",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\security\\SecurityTestPanel.tsx",
+      "issue": "可能未使用的变量: stopTest",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\seo\\FileUploadSEO.tsx",
+      "issue": "可能未使用的变量: seoOptimizedName",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\seo\\NetworkErrorPrompt.tsx",
+      "issue": "可能未使用的变量: is404Error",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\seo\\NetworkErrorPrompt.tsx",
+      "issue": "可能未使用的变量: isCORSError",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\seo\\NetworkErrorPrompt.tsx",
+      "issue": "可能未使用的变量: isTimeoutError",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\stress\\StressTestHistory.tsx",
+      "issue": "过多的console语句 (6个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\components\\testing\\shared\\TestProgressDisplay.tsx",
+      "issue": "可能未使用的变量: getStatusColor",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestEngineStatus.tsx",
+      "issue": "可能未使用的变量: saveEngineConfig",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestEngineStatus.tsx",
+      "issue": "可能未使用的变量: getHealthColor",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\testing\\UnifiedTestExecutor.tsx",
+      "issue": "可能未使用的变量: handleBatchCancel",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\testing\\UnifiedTestExecutor.tsx",
+      "issue": "可能未使用的变量: getStatusColor",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\testing\\UnifiedTestExecutor.tsx",
+      "issue": "可能未使用的变量: getStatusText",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\testing\\UniversalTestPage.tsx",
+      "issue": "可能未使用的变量: handleTestComplete",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\theme\\PreventFlashOnWrongTheme.tsx",
+      "issue": "可能未使用的变量: useThemeInitialization",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\theme\\PreventFlashOnWrongTheme.tsx",
+      "issue": "可能未使用的变量: useThemeSync",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\ui\\OptionalEnhancements.tsx",
+      "issue": "可能未使用的变量: response",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\ui\\Table.tsx",
+      "issue": "可能未使用的变量: handleFilter",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+      "issue": "可能未使用的变量: getTheme",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+      "issue": "可能未使用的变量: createThemeVariables",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+      "issue": "可能未使用的变量: themeClasses",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\components\\ui\\UnifiedIcons.tsx",
+      "issue": "可能未使用的变量: Tool",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\config\\testTypes.ts",
+      "issue": "可能未使用的变量: getTestTypeConfig",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\config\\testTypes.ts",
+      "issue": "可能未使用的变量: getAllTestTypes",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\contexts\\AuthContext.tsx",
+      "issue": "过多的console语句 (13个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\hooks\\useAuth.ts",
+      "issue": "可能未使用的变量: validateToken",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useCache.ts",
+      "issue": "可能未使用的变量: CacheStrategyManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useCSS.ts",
+      "issue": "可能未使用的变量: useCSS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useCSS.ts",
+      "issue": "可能未使用的变量: useComponentCSS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useCSS.ts",
+      "issue": "可能未使用的变量: useRouteCSS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useDataManagement.ts",
+      "issue": "可能未使用的变量: useDataManagement",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useDataManagement.ts",
+      "issue": "可能未使用的变量: exportQuery",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useLocalStressTest.ts",
+      "issue": "过多的console语句 (6个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\hooks\\useLocalStressTest.ts",
+      "issue": "可能未使用的变量: totalMemoryGB",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useNotifications.ts",
+      "issue": "过多的console语句 (6个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\hooks\\useNotifications.ts",
+      "issue": "可能未使用的变量: generateMockNotifications",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useNotifications.ts",
+      "issue": "可能未使用的变量: useNotifications",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useRealSEOTest.ts",
+      "issue": "可能未使用的变量: useRealSEOTest",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useRealTimeData.ts",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\hooks\\useUnifiedSEOTest.ts",
+      "issue": "可能未使用的变量: useUnifiedSEOTest",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useUnifiedTestEngine.ts",
+      "issue": "可能未使用的变量: useTestExecution",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useUnifiedTestEngine.ts",
+      "issue": "可能未使用的变量: useTestResultAnalysis",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useUserStats.ts",
+      "issue": "可能未使用的变量: useUserStats",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\hooks\\useUserStats.ts",
+      "issue": "可能未使用的变量: userStats",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\admin\\DataStorage.tsx",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\pages\\APITest.tsx",
+      "issue": "可能未使用的变量: handleResumeTest",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\CompatibilityTest.tsx",
+      "issue": "可能未使用的变量: handleTestSelect",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\CompatibilityTest.tsx",
+      "issue": "可能未使用的变量: handleTestRerun",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\CompatibilityTest.tsx",
+      "issue": "可能未使用的变量: clearResults",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\CompatibilityTest.tsx",
+      "issue": "可能未使用的变量: clearError",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\ContentTest.tsx",
+      "issue": "可能未使用的变量: handleResumeTest",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\DatabaseTest.tsx",
+      "issue": "可能未使用的变量: authCheck",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\DocumentationTest.tsx",
+      "issue": "可能未使用的变量: handleResumeTest",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\InfrastructureTest.tsx",
+      "issue": "可能未使用的变量: handleResumeTest",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\NetworkTest.tsx",
+      "issue": "可能未使用的变量: authCheck",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\PerformanceTest.tsx",
+      "issue": "可能未使用的变量: testProgressHook",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\SecurityTest.tsx",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\pages\\SecurityTest.tsx",
+      "issue": "可能未使用的变量: handleTestSelect",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\SecurityTest.tsx",
+      "issue": "可能未使用的变量: handleTestRerun",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\SecurityTest.tsx",
+      "issue": "可能未使用的变量: handleStopTest",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\SecurityTest.tsx",
+      "issue": "可能未使用的变量: handleCompareTests",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\SecurityTest.tsx",
+      "issue": "可能未使用的变量: handleCloseComparison",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\SecurityTest.tsx",
+      "issue": "可能未使用的变量: handleTestStop",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\SEOTest.tsx",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\pages\\SEOTest.tsx",
+      "issue": "可能未使用的变量: handleTestSelect",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\SEOTest.tsx",
+      "issue": "可能未使用的变量: handleTestRerun",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\UnifiedTestPage.tsx",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\pages\\UXTest.tsx",
+      "issue": "可能未使用的变量: authCheck",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\pages\\WebsiteTest.tsx",
+      "issue": "可能未使用的变量: authCheck",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\scripts\\fixThemeColors.js",
+      "issue": "过多的console语句 (14个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\scripts\\validateProject.ts",
+      "issue": "过多的console语句 (28个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\services\\adminService.ts",
+      "issue": "可能未使用的变量: adminService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\advancedDataService.ts",
+      "issue": "可能未使用的变量: advancedDataManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\advancedTestEngine.ts",
+      "issue": "可能未使用的变量: advancedTestEngine",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\analytics\\analyticsService.ts",
+      "issue": "可能未使用的变量: analyticsService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\api\\baseApiService.ts",
+      "issue": "可能未使用的变量: unifiedApiService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\api\\managers\\backgroundTestManagerAdapter.ts",
+      "issue": "可能未使用的变量: enhancedBackgroundTestManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\api\\projectApiService.ts",
+      "issue": "可能未使用的变量: projectApiService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\api.ts",
+      "issue": "可能未使用的变量: authApi",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\api.ts",
+      "issue": "可能未使用的变量: testApi",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\api.ts",
+      "issue": "可能未使用的变量: oauthApi",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\api.ts",
+      "issue": "可能未使用的变量: apiUtils",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\api.ts",
+      "issue": "可能未使用的变量: handleApiError",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\apiErrorInterceptor.ts",
+      "issue": "可能未使用的变量: handleApiError",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\auth\\authService.ts",
+      "issue": "过多的console语句 (17个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\services\\auth\\authService.ts",
+      "issue": "可能未使用的变量: authService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\cache\\cacheManager.ts",
+      "issue": "可能未使用的变量: cacheManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\cache\\cacheStrategies.ts",
+      "issue": "可能未使用的变量: CacheKeys",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\cacheStrategy.ts",
+      "issue": "可能未使用的变量: defaultMemoryCache",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\cacheStrategy.ts",
+      "issue": "可能未使用的变量: defaultLocalStorageCache",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\dataAnalysisService.ts",
+      "issue": "可能未使用的变量: dataAnalysisService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\DataNormalizationPipeline.ts",
+      "issue": "可能未使用的变量: dataNormalizationPipeline",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\dataService.ts",
+      "issue": "可能未使用的变量: advancedDataManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\dataStateManager.ts",
+      "issue": "可能未使用的变量: DEFAULT_PAGINATION_OPTIONS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\dataStateManager.ts",
+      "issue": "可能未使用的变量: DEFAULT_REALTIME_OPTIONS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\globalSearchService.ts",
+      "issue": "可能未使用的变量: globalSearchService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\googlePageSpeedService.ts",
+      "issue": "可能未使用的变量: googlePageSpeedService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\helpService.ts",
+      "issue": "可能未使用的变量: helpService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\integration\\configService.ts",
+      "issue": "可能未使用的变量: configService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\integration\\dataService.ts",
+      "issue": "可能未使用的变量: dataService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\integration\\notificationService.ts",
+      "issue": "可能未使用的变量: notificationService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\localSEOAnalysisEngine.ts",
+      "issue": "可能未使用的变量: analyzer",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\monitoring\\realTimeMonitoring.ts",
+      "issue": "可能未使用的变量: recentResults",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\monitoring\\realTimeMonitoring.ts",
+      "issue": "可能未使用的变量: realTimeMonitoring",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\monitoringService.ts",
+      "issue": "可能未使用的变量: monitoringService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\orchestration\\TestOrchestrator.ts",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\services\\performance\\PerformanceTestAdapter.ts",
+      "issue": "可能未使用的变量: performanceTestAdapter",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\performance\\PerformanceTestCore.ts",
+      "issue": "可能未使用的变量: performanceTestCore",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\proxyService.ts",
+      "issue": "可能未使用的变量: proxyService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\realBackgroundTestManager.ts",
+      "issue": "可能未使用的变量: realBackgroundTestManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\realSEOAnalysisEngine.ts",
+      "issue": "可能未使用的变量: realSEOAnalysisEngine",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\realTimeMonitoringService.ts",
+      "issue": "过多的console语句 (7个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\services\\reportGeneratorService.ts",
+      "issue": "可能未使用的变量: EnhancedReportGenerator",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\settingsService.ts",
+      "issue": "可能未使用的变量: accountAPI",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\settingsService.ts",
+      "issue": "可能未使用的变量: monitoringAPI",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\settingsService.ts",
+      "issue": "可能未使用的变量: scheduledTasksAPI",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\settingsService.ts",
+      "issue": "可能未使用的变量: systemLogsAPI",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\settingsService.ts",
+      "issue": "可能未使用的变量: backupAPI",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\settingsService.ts",
+      "issue": "可能未使用的变量: dataManagementAPI",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\settingsService.ts",
+      "issue": "可能未使用的变量: settingsService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\shared\\securityCheckModule.ts",
+      "issue": "可能未使用的变量: useSecurityCheck",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\stressTestQueueManager.ts",
+      "issue": "过多的console语句 (12个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\services\\stressTestQueueManager.ts",
+      "issue": "可能未使用的变量: stressTestQueueManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\systemResourceMonitor.ts",
+      "issue": "可能未使用的变量: systemResourceMonitor",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\systemService.ts",
+      "issue": "可能未使用的变量: systemService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testEngine.ts",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\services\\testEngines.ts",
+      "issue": "过多的console语句 (12个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\services\\testEngines.ts",
+      "issue": "可能未使用的变量: testEngineManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "过多的console语句 (15个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能未使用的变量: rampUpTime",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能未使用的变量: requestStart",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能未使用的变量: totalThroughput",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能未使用的变量: errorsByStatus",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能未使用的变量: performanceDegradation",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能未使用的变量: successfulResponses",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能未使用的变量: failedResponses",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能未使用的变量: fastEndpoints",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "issue": "可能未使用的变量: mtbf",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\testing\\testScheduler.ts",
+      "issue": "可能未使用的变量: testScheduler",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\TestStateManager.ts",
+      "issue": "可能未使用的变量: testStateManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\unified\\apiErrorHandler.ts",
+      "issue": "可能未使用的变量: errorHandler",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\unifiedExportManager.ts",
+      "issue": "可能未使用的变量: useExportManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\user\\userService.ts",
+      "issue": "可能未使用的变量: userService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\userFeedbackService.ts",
+      "issue": "过多的console语句 (9个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\services\\userFeedbackService.ts",
+      "issue": "可能未使用的变量: userFeedbackService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\userStatsService.ts",
+      "issue": "可能未使用的变量: userStatsService",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\services\\websocketManager.ts",
+      "issue": "可能未使用的变量: websocketManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\test\\exportModal.test.tsx",
+      "issue": "可能未使用的变量: mockExportUtils",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\tests\\integration\\unifiedEngineIntegration.test.tsx",
+      "issue": "可能未使用的变量: mockOnTestError",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\types\\version.types.ts",
+      "issue": "可能未使用的变量: VERSION_INFO",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\types\\version.types.ts",
+      "issue": "可能未使用的变量: autoMigrationSystem",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\browserSupport.ts",
+      "issue": "可能未使用的变量: generateCompatibilityReport",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\browserSupport.ts",
+      "issue": "可能未使用的变量: browserSupport",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\cssLoader.ts",
+      "issue": "可能未使用的变量: loadPageCSS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\cssLoader.ts",
+      "issue": "可能未使用的变量: preloadPageCSS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\cssLoader.ts",
+      "issue": "可能未使用的变量: loadComponentCSS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\cssLoader.ts",
+      "issue": "可能未使用的变量: unloadCSS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\cssLoader.ts",
+      "issue": "可能未使用的变量: getLoadedCSS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\cssLoader.ts",
+      "issue": "可能未使用的变量: clearDynamicCSS",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\cssLoader.ts",
+      "issue": "可能未使用的变量: cssLoadingMetrics",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\dataVisualization.ts",
+      "issue": "可能未使用的变量: dataVisualizationOptimizer",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\environment.ts",
+      "issue": "可能未使用的变量: isFeatureSupported",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\environment.ts",
+      "issue": "可能未使用的变量: getEnvironmentInfo",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\errorHandler.ts",
+      "issue": "可能未使用的变量: createCommonErrors",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\fieldMapping.ts",
+      "issue": "可能未使用的变量: transformApiResponse",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\fieldMapping.ts",
+      "issue": "可能未使用的变量: transformApiRequest",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\fieldMapping.ts",
+      "issue": "可能未使用的变量: batchTransformFields",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\fieldMapping.ts",
+      "issue": "可能未使用的变量: validateFieldNaming",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\fieldMapping.ts",
+      "issue": "可能未使用的变量: getFieldMappingStats",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\fieldMapping.ts",
+      "issue": "可能未使用的变量: userTransformer",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\fieldMapping.ts",
+      "issue": "可能未使用的变量: testTransformer",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\fieldMapping.ts",
+      "issue": "可能未使用的变量: monitoringTransformer",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\largeDataProcessor.ts",
+      "issue": "可能未使用的变量: defaultChunkManager",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\MobileSEODetector.ts",
+      "issue": "可能未使用的变量: hasWebPSupport",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatErrorRate",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatUptime",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatLatency",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatBandwidth",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatCurrency",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatDate",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatRelativeTime",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatRange",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatConfidenceInterval",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: lower",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: upper",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatGrowthRate",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "issue": "可能未使用的变量: formatMetric",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\performanceOptimization.ts",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\utils\\performanceOptimization.ts",
+      "issue": "可能未使用的变量: frontendCache",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\performanceOptimization.ts",
+      "issue": "可能未使用的变量: performanceUtils",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\routeUtils.ts",
+      "issue": "可能未使用的变量: getRouteName",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\routeUtils.ts",
+      "issue": "可能未使用的变量: isProtectedRoute",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\routeUtils.ts",
+      "issue": "可能未使用的变量: isAdminRoute",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\routeUtils.ts",
+      "issue": "可能未使用的变量: getNavigationRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\routeUtils.ts",
+      "issue": "可能未使用的变量: getBreadcrumbs",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "issue": "可能未使用的变量: getStatusText",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "issue": "可能未使用的变量: getStatusIcon",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "issue": "可能未使用的变量: getStatusStyleClasses",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "issue": "可能未使用的变量: parseErrorMessage",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "issue": "可能未使用的变量: calculateTestCompletion",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "issue": "可能未使用的变量: formatDuration",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "issue": "可能未使用的变量: formatDateTime",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "issue": "可能未使用的变量: getStatusDescription",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testTemplates.ts",
+      "issue": "可能未使用的变量: getTemplateById",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testTemplates.ts",
+      "issue": "可能未使用的变量: getTemplatesByCategory",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testTemplates.ts",
+      "issue": "可能未使用的变量: getTemplatesByDifficulty",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testTemplates.ts",
+      "issue": "可能未使用的变量: searchTemplates",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testTemplates.ts",
+      "issue": "可能未使用的变量: getRecommendedTemplates",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testTemplates.ts",
+      "issue": "可能未使用的变量: getTemplateCategories",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\testUtils.ts",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "frontend\\utils\\testUtils.ts",
+      "issue": "可能未使用的变量: frameDuration",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\themeColorFixer.ts",
+      "issue": "可能未使用的变量: specialColorClasses",
+      "severity": "low"
+    },
+    {
+      "file": "frontend\\utils\\themeValidation.ts",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\api\\middleware\\requestLogger.js",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\config\\ConfigCenter.js",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\config\\database.js",
+      "issue": "过多的console语句 (23个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\config\\performanceOptimization.js",
+      "issue": "过多的console语句 (7个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\config\\realtime.js",
+      "issue": "过多的console语句 (7个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\docs\\unifiedEngineAPI.js",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\compatibility\\analyzers\\CSSJavaScriptCompatibilityAnalyzer.js",
+      "issue": "可能未使用的变量: fetchData",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\engines\\compatibility\\analyzers\\ResponsiveDesignAnalyzer.js",
+      "issue": "可能未使用的变量: layoutShifts",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\engines\\compatibility\\CompatibilityAnalyzer.js",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\compatibility\\compatibilityTestEngine.js",
+      "issue": "可能未使用的变量: x",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\engines\\compatibility\\managers\\BrowserManager.js",
+      "issue": "过多的console语句 (8个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\core\\services\\AnalysisCore.js",
+      "issue": "过多的console语句 (6个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\core\\services\\HTTPTestCore.js",
+      "issue": "过多的console语句 (7个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\core\\services\\PerformanceTestCore.js",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\core\\services\\SecurityTestCore.js",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\core\\TestEngineManager.js",
+      "issue": "过多的console语句 (11个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\core\\UnifiedTestEngine.js",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\network\\EnhancedNetworkTestEngine.js",
+      "issue": "可能未使用的变量: openPortsCount",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\engines\\security\\analyzers\\XSSAnalyzer.js",
+      "issue": "过多的console语句 (4个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\security\\utils\\SecurityRiskAssessment.js",
+      "issue": "可能未使用的变量: maxScore",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\engines\\stress\\generators\\LoadGenerator.js",
+      "issue": "过多的console语句 (7个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\engines\\stress\\StressTestWebSocketHandler.js",
+      "issue": "过多的console语句 (6个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\middleware\\urlValidator.js",
+      "issue": "过多的console语句 (9个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\middleware\\validation.js",
+      "issue": "可能未使用的变量: urlSchema",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\migrations\\001-add-mfa-fields.js",
+      "issue": "过多的console语句 (13个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\migrations\\002-add-oauth-tables.js",
+      "issue": "过多的console语句 (11个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\routes\\batch.js",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\routes\\performance.js",
+      "issue": "可能未使用的变量: Logger",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\seo.js",
+      "issue": "过多的console语句 (6个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\routes\\test.js",
+      "issue": "过多的console语句 (88个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\routes\\test.js",
+      "issue": "可能未使用的变量: enhancedTestHistoryService",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\test.js",
+      "issue": "可能未使用的变量: realStressTestEngine",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\test.js",
+      "issue": "可能未使用的变量: upload",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\test.js",
+      "issue": "可能未使用的变量: ipLocationCache",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\test.js",
+      "issue": "可能未使用的变量: CACHE_DURATION",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\test.js",
+      "issue": "可能未使用的变量: updateStatus",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\test.js",
+      "issue": "文件过大 (132KB)，建议拆分",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\routes\\tests.js",
+      "issue": "可能未使用的变量: uxEngine",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\tests.js",
+      "issue": "可能未使用的变量: infrastructureEngine",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\tests.js",
+      "issue": "可能未使用的变量: websiteEngine",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\user.js",
+      "issue": "可能未使用的变量: Queries",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\routes\\user.js",
+      "issue": "可能未使用的变量: recentActivity",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\scripts\\analyze-project-implementation.js",
+      "issue": "过多的console语句 (66个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\fix-route-conflicts.js",
+      "issue": "过多的console语句 (14个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\generateApiDocs.js",
+      "issue": "过多的console语句 (14个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\initDatabase.js",
+      "issue": "过多的console语句 (41个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\initPostgreSQL.js",
+      "issue": "过多的console语句 (14个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\logManager.js",
+      "issue": "过多的console语句 (35个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\migrate.js",
+      "issue": "过多的console语句 (20个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\migrateDatabase.js",
+      "issue": "过多的console语句 (35个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\performanceOptimizer.js",
+      "issue": "过多的console语句 (61个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\run-migrations.js",
+      "issue": "过多的console语句 (46个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\seedDatabase.js",
+      "issue": "过多的console语句 (22个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\test-business-features.js",
+      "issue": "过多的console语句 (53个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\test-oauth.js",
+      "issue": "过多的console语句 (45个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\scripts\\validateDatabaseStructure.js",
+      "issue": "过多的console语句 (35个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\server.js",
+      "issue": "过多的console语句 (14个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\server.js",
+      "issue": "可能未使用的变量: authMiddleware",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\services\\collaboration\\CollaborationService.js",
+      "issue": "过多的console语句 (11个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\core\\geoLocationService.js",
+      "issue": "过多的console语句 (6个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\core\\geoUpdateService.js",
+      "issue": "过多的console语句 (20个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\data\\DataManagementService.js",
+      "issue": "过多的console语句 (9个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\database\\backupService.js",
+      "issue": "过多的console语句 (12个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\database\\connectionMonitor.js",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\integration\\CICDIntegrationService.js",
+      "issue": "过多的console语句 (18个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\monitoring\\AnalyticsIntegrator.js",
+      "issue": "过多的console语句 (11个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\monitoring\\BusinessAnalyticsService.js",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\performance\\PerformanceBenchmarkService.js",
+      "issue": "过多的console语句 (9个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\realtime\\EnhancedWebSocketManager.js",
+      "issue": "过多的console语句 (14个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\realtime\\EnhancedWebSocketManager.js",
+      "issue": "可能未使用的变量: priorities",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\services\\realtime\\RealtimeService.js",
+      "issue": "过多的console语句 (18个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\realtime\\WebSocketManager.js",
+      "issue": "过多的console语句 (14个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\reporting\\AutomatedReportingService.js",
+      "issue": "过多的console语句 (16个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\storage\\DataArchiveManager.js",
+      "issue": "过多的console语句 (21个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\storage\\DataCleanupManager.js",
+      "issue": "过多的console语句 (27个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\storage\\StorageService.js",
+      "issue": "过多的console语句 (22个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\testing\\RealtimeTestRunner.js",
+      "issue": "过多的console语句 (5个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\services\\testing\\TestManagementService.js",
+      "issue": "可能未使用的变量: WebSocketManager",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\services\\WebSocketService.js",
+      "issue": "过多的console语句 (17个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "过多的console语句 (47个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: seoRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: unifiedSecurityRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: userRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: adminRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: dataRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: testHistoryRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: reportRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: integrationRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: cacheRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: errorRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: performanceRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: filesRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: unifiedTestRoutes",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: redisConnection",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\app.js",
+      "issue": "可能未使用的变量: redisClient",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\src\\index.js",
+      "issue": "过多的console语句 (12个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\src\\RouteManager.js",
+      "issue": "过多的console语句 (15个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\utils\\download-geodb.js",
+      "issue": "过多的console语句 (33个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\utils\\download-geodb.js",
+      "issue": "可能未使用的变量: pipelineAsync",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\utils\\ErrorMonitoringSystem.js",
+      "issue": "过多的console语句 (10个)",
+      "severity": "warning"
+    },
+    {
+      "file": "backend\\utils\\MonitoringSystem.js",
+      "issue": "可能未使用的变量: CommonUtils",
+      "severity": "low"
+    },
+    {
+      "file": "backend\\utils\\websocket\\SocketManager.js",
+      "issue": "可能未使用的变量: heartbeatMessage",
+      "severity": "low"
+    }
+  ],
+  "todos": [
+    {
+      "file": "frontend\\components\\admin\\BackupManagement.tsx",
+      "line": 131,
+      "content": "alert('恢复功能正在开发中...');",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\auth\\BackupCodes.tsx",
+      "line": 3,
+      "content": "* TODO: 实现BackupCodes功能",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\components\\auth\\BackupCodes.tsx",
+      "line": 9,
+      "content": "// TODO: 定义组件属性类型",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\components\\auth\\BackupCodes.tsx",
+      "line": 13,
+      "content": "// TODO: 实现组件状态和逻辑",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\components\\auth\\BackupCodes.tsx",
+      "line": 18,
+      "content": "{/* TODO: 实现组件UI */}",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\components\\auth\\BackupCodes.tsx",
+      "line": 19,
+      "content": "<p>组件开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\business\\ResultViewer.tsx",
+      "line": 316,
+      "content": "<span className=\"ml-2 text-gray-500\">图表占位符</span>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\charts\\EnhancedCharts.tsx",
+      "line": 698,
+      "content": "toast('SVG导出功能开发中');",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\charts\\EnhancedCharts.tsx",
+      "line": 1255,
+      "content": "toast('批量导出功能开发中');",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\common\\PlaceholderComponent.tsx",
+      "line": 2,
+      "content": "* 共享的占位符组件",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\common\\PlaceholderComponent.tsx",
+      "line": 24,
+      "content": "<h3 className=\"text-lg font-medium text-gray-900\">{componentName}开发中</h3>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\common\\PlaceholderComponent.tsx",
+      "line": 25,
+      "content": "<p className=\"text-sm text-gray-500 mt-1\">此组件正在开发中，敬请期待</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\data\\DataFilters.tsx",
+      "line": 287,
+      "content": "toast.error('Excel导出功能开发中');",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\data\\DataManagement.tsx",
+      "line": 196,
+      "content": "<h3 className=\"text-xl font-semibold text-gray-700 mb-3\">测试历史功能开发中</h3>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\data\\DataManagement.tsx",
+      "line": 198,
+      "content": "测试历史记录功能正在开发中，敬请期待。",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\data\\DataManagement.tsx",
+      "line": 208,
+      "content": "<h3 className=\"text-xl font-semibold text-gray-700 mb-3\">统计功能开发中</h3>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\data\\DataManagement.tsx",
+      "line": 210,
+      "content": "详细的数据统计和分析功能正在开发中，敬请期待。",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\data\\DataManager.tsx",
+      "line": 569,
+      "content": "<p>此功能正在开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\seo\\SEOResultVisualization.tsx",
+      "line": 530,
+      "content": "<p>对比功能开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\seo\\SEOResultVisualization.tsx",
+      "line": 540,
+      "content": "<p>趋势分析功能开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\ui\\Chart.tsx",
+      "line": 112,
+      "content": "/** 占位符文本 */",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\ui\\Chart.tsx",
+      "line": 172,
+      "content": "// 其他图表类型的占位符",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\ui\\Image.tsx",
+      "line": 136,
+      "content": "// 占位符样式",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\ui\\Image.tsx",
+      "line": 157,
+      "content": "{/* 占位符 */}",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\ui\\stories\\InputStories.tsx",
+      "line": 491,
+      "content": "story: '选择框组件支持选项列表、占位符、禁用选项等功能。',",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\ui\\TestNavigation.tsx",
+      "line": 123,
+      "content": "text={page.status === 'complete' ? '已完成' : '开发中'}",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\components\\ui\\__tests__\\InputTest.tsx",
+      "line": 323,
+      "content": "it('应该显示占位符', () => {",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\admin\\Admin.tsx",
+      "line": 281,
+      "content": "// 未实现的模块显示占位符",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\admin\\Admin.tsx",
+      "line": 297,
+      "content": "<p className=\"text-sm text-gray-500\">此功能正在开发中，敬请期待...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\admin\\DataStorage.tsx",
+      "line": 14,
+      "content": "const AnalyticsOverview = () => <div className=\"p-4 bg-gray-100 rounded\">分析概览组件开发中...</div>;",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\admin\\DataStorage.tsx",
+      "line": 15,
+      "content": "const ImportExport = () => <div className=\"p-4 bg-gray-100 rounded\">导入导出组件开发中...</div>;",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\admin\\DataStorage.tsx",
+      "line": 16,
+      "content": "const RealTimeMonitoring = () => <div className=\"p-4 bg-gray-100 rounded\">实时监控组件开发中...</div>;",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\APIDocs.tsx",
+      "line": 17,
+      "content": "APIDocs页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\APIKeys.tsx",
+      "line": 17,
+      "content": "APIKeys页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+      "line": 3,
+      "content": "* TODO: 实现MFAManagement功能",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+      "line": 9,
+      "content": "// TODO: 定义组件属性类型",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+      "line": 13,
+      "content": "// TODO: 实现组件状态和逻辑",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+      "line": 18,
+      "content": "{/* TODO: 实现组件UI */}",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+      "line": 19,
+      "content": "<p>组件开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\CICDIntegration.tsx",
+      "line": 17,
+      "content": "CICDIntegration页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\CompatibilityTest.tsx",
+      "line": 27,
+      "content": "<p className=\"text-gray-600\">图表功能开发中... (主题: {theme || 'light'})</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\dashboard\\ManagerDashboard.tsx",
+      "line": 65,
+      "content": "status: 'todo' | 'in-progress' | 'review' | 'completed';",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\pages\\dashboard\\ManagerDashboard.tsx",
+      "line": 238,
+      "content": "todo: 'text-gray-600 bg-gray-100',",
+      "type": "TODO"
+    },
+    {
+      "file": "frontend\\pages\\dashboard\\MonitoringDashboard.tsx",
+      "line": 12,
+      "content": "<p>监控面板功能正在开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\Integrations.tsx",
+      "line": 17,
+      "content": "Integrations页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\Notifications.tsx",
+      "line": 17,
+      "content": "Notifications页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\Reports.tsx",
+      "line": 17,
+      "content": "Reports页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\ScheduledTasks.tsx",
+      "line": 17,
+      "content": "ScheduledTasks页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\SecurityReport.tsx",
+      "line": 17,
+      "content": "SecurityReport页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\SecurityTest.tsx",
+      "line": 233,
+      "content": "<p className=\"text-gray-600\">测试结果展示功能开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\SEOTest.tsx",
+      "line": 25,
+      "content": "<p className=\"text-gray-600 mb-4\">文件上传功能开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\SEOTest.tsx",
+      "line": 52,
+      "content": "<p className=\"text-gray-600\">本地SEO结果展示功能开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\SEOTest.tsx",
+      "line": 101,
+      "content": "<p className=\"text-gray-600\">SEO结果展示功能开发中...</p>",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\Statistics.tsx",
+      "line": 17,
+      "content": "Statistics页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\Subscription.tsx",
+      "line": 17,
+      "content": "Subscription页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\TestResultDetail.tsx",
+      "line": 17,
+      "content": "TestResultDetail页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\TestSchedule.tsx",
+      "line": 17,
+      "content": "TestSchedule页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\pages\\Webhooks.tsx",
+      "line": 17,
+      "content": "Webhooks页面正在开发中...",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\scripts\\fixThemeColors.js",
+      "line": 71,
+      "content": "// 占位符颜色",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\services\\analytics\\analyticsService.ts",
+      "line": 534,
+      "content": "// 其他辅助方法的占位符",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\services\\analytics\\analyticsService.ts",
+      "line": 556,
+      "content": "// 类型定义的占位符",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "line": 1147,
+      "content": "const present = false; // 待实现真实检测",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\services\\testing\\unifiedTestEngine.ts",
+      "line": 321,
+      "content": "// 占位符类，实际实现将在各自的文件中",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\services\\unifiedExportManager.ts",
+      "line": 661,
+      "content": "throw new Error('导出任务不存在或未完成');",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\types\\common\\base.types.ts",
+      "line": 144,
+      "content": "/** 占位符 */",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\types\\components\\ui.types.ts",
+      "line": 287,
+      "content": "/** 占位符 */",
+      "type": "中文标记"
+    },
+    {
+      "file": "frontend\\types\\components\\ui.types.ts",
+      "line": 315,
+      "content": "/** 占位符 */",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\engines\\core\\TestEngineManager.js",
+      "line": 178,
+      "content": "// 如果引擎正在运行测试，等待完成或强制停止",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\engines\\performance\\optimizers\\PerformanceOptimizationEngine.js",
+      "line": 144,
+      "content": "title: '动态内容占位符',",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\engines\\seo\\utils\\ReportGenerator.js",
+      "line": 735,
+      "content": "// 更多分析方法的占位符",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\routes\\auth.js",
+      "line": 501,
+      "content": "// TODO: 发送重置密码邮件",
+      "type": "TODO"
+    },
+    {
+      "file": "backend\\routes\\auth.js",
+      "line": 589,
+      "content": "// TODO: 发送验证邮件",
+      "type": "TODO"
+    },
+    {
+      "file": "backend\\routes\\dataExport.js",
+      "line": 221,
+      "content": "return res.status(400).json(formatResponse(false, null, '任务未完成，无法下载'));",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\routes\\errors.js",
+      "line": 126,
+      "content": "note: '错误详情功能正在开发中'",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\scripts\\run-migrations.js",
+      "line": 353,
+      "content": "console.log('📝 创建迁移功能待实现');",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\scripts\\run-migrations.js",
+      "line": 365,
+      "content": "console.log('  create <name>           创建新迁移（待实现）\\n');",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\services\\testing\\TestManagementService.js",
+      "line": 80,
+      "content": "// 恢复未完成的测试",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\services\\testing\\TestManagementService.js",
+      "line": 591,
+      "content": "* 恢复未完成的测试",
+      "type": "中文标记"
+    },
+    {
+      "file": "backend\\services\\UnifiedErrorHandler.js",
+      "line": 272,
+      "content": "// TODO: 实际的告警实现",
+      "type": "TODO"
+    },
+    {
+      "file": "backend\\utils\\asyncErrorHandler.js",
+      "line": 26,
+      "content": "// TODO: 集成日志系统",
+      "type": "TODO"
+    }
+  ],
+  "inconsistencies": [
+    {
+      "file": "backend\\engines\\compatibility\\analyzers\\CSSJavaScriptCompatibilityAnalyzer.js",
+      "issue": "混用了 require 和 import 语句",
+      "severity": "inconsistency"
+    },
+    {
+      "type": "API路由缺失",
+      "issue": "network测试有引擎但没有对应的路由文件",
+      "severity": "warning"
+    }
+  ],
+  "improvements": []
+}

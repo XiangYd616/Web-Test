@@ -1,163 +1,404 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": "2025-08-15T12:32:13.303Z",
-  "tools": [
-    {
-      "id": "api",
-      "name": "API测试",
-      "description": "REST API端点测试、负载测试、安全测试",
-      "category": "performance",
-      "enabled": true,
-      "defaultConfig": {
-        "url": "",
-        "timeout": 30000,
-        "retries": 2,
-        "advanced": {}
-      },
-      "estimatedTime": 2,
-      "dependencies": [
-        "axios"
+  "version": "3.0.0",
+  "lastUpdated": "2025-09-19T10:19:00.000Z",
+  "description": "完整的测试工具配置文件 - 包含所有20个后端测试引擎",
+  "architecture": {
+    "description": "架构说明",
+    "frontend": "仅负责UI展示、用户交互、测试调度和结果展示",
+    "backend": "负责所有实际的测试执行、数据处理和结果生成",
+    "communication": "前后端通过RESTful API和WebSocket进行通信"
+  },
+  "engines": {
+    "functional": {
+      "description": "功能性测试引擎 - 核心业务功能测试",
+      "engines": [
+        {
+          "id": "api",
+          "name": "API测试",
+          "description": "REST API端点测试、负载测试、API文档验证",
+          "category": "functional",
+          "enabled": true,
+          "priority": "high",
+          "features": ["端点测试", "认证验证", "JSON Schema验证", "负载测试"],
+          "defaultConfig": {
+            "url": "",
+            "endpoints": [],
+            "methods": ["GET", "POST", "PUT", "DELETE"],
+            "timeout": 30000
+          },
+          "estimatedTime": 2
+        },
+        {
+          "id": "automation",
+          "name": "自动化测试",
+          "description": "UI自动化测试、端到端测试、工作流测试",
+          "category": "functional",
+          "enabled": true,
+          "priority": "high",
+          "features": ["UI自动化", "E2E测试", "工作流验证", "回归测试"],
+          "defaultConfig": {
+            "url": "",
+            "scenarios": [],
+            "browser": "chromium",
+            "timeout": 60000
+          },
+          "estimatedTime": 8
+        },
+        {
+          "id": "core",
+          "name": "核心测试",
+          "description": "核心功能测试引擎，管理和协调其他测试",
+          "category": "functional",
+          "enabled": true,
+          "priority": "critical",
+          "features": ["测试协调", "引擎管理", "结果聚合", "状态监控"],
+          "defaultConfig": {
+            "orchestration": true,
+            "parallel": false,
+            "timeout": 30000
+          },
+          "estimatedTime": 1
+        },
+        {
+          "id": "regression",
+          "name": "回归测试",
+          "description": "版本间差异对比、功能回归验证",
+          "category": "functional",
+          "enabled": true,
+          "priority": "medium",
+          "features": ["版本对比", "功能回归", "代码覆盖", "变更影响分析"],
+          "defaultConfig": {
+            "baseline": "",
+            "current": "",
+            "threshold": 0.95,
+            "timeout": 45000
+          },
+          "estimatedTime": 5
+        }
       ]
     },
-    {
-      "id": "compatibility",
-      "name": "兼容性测试",
-      "description": "多浏览器、多设备兼容性测试",
-      "category": "quality",
-      "enabled": true,
-      "defaultConfig": {
-        "url": "",
-        "timeout": 30000,
-        "retries": 2,
-        "advanced": {}
-      },
-      "estimatedTime": 8,
-      "dependencies": [
-        "playwright"
+    "performance": {
+      "description": "性能测试引擎 - 系统性能和压力测试",
+      "engines": [
+        {
+          "id": "performance",
+          "name": "性能测试",
+          "description": "Lighthouse集成、Core Web Vitals、页面加载性能",
+          "category": "performance",
+          "enabled": true,
+          "priority": "high",
+          "features": ["Lighthouse分析", "Core Web Vitals", "性能预算", "渲染分析"],
+          "defaultConfig": {
+            "url": "",
+            "device": "desktop",
+            "categories": ["performance"],
+            "timeout": 60000
+          },
+          "estimatedTime": 5
+        },
+        {
+          "id": "stress",
+          "name": "压力测试",
+          "description": "并发负载测试、性能极限测试、可扩展性验证",
+          "category": "performance",
+          "enabled": true,
+          "priority": "high",
+          "features": ["K6集成", "负载生成", "性能基准", "瓶颈识别"],
+          "defaultConfig": {
+            "url": "",
+            "concurrent": 10,
+            "duration": 10000,
+            "rampUp": 1000
+          },
+          "estimatedTime": 10
+        }
       ]
     },
-    {
-      "id": "infrastructure",
-      "name": "基础设施测试",
-      "description": "服务器监控、网络连接、系统资源测试",
-      "category": "performance",
-      "enabled": true,
-      "defaultConfig": {
-        "url": "",
-        "timeout": 30000,
-        "retries": 2,
-        "advanced": {}
-      },
-      "estimatedTime": 3,
-      "dependencies": [
-        "axios"
+    "quality": {
+      "description": "质量保证测试引擎 - 代码和内容质量",
+      "engines": [
+        {
+          "id": "accessibility",
+          "name": "可访问性测试",
+          "description": "WCAG合规性、无障碍访问、辅助技术兼容",
+          "category": "quality",
+          "enabled": true,
+          "priority": "medium",
+          "features": ["WCAG合规", "颜色对比", "键盘导航", "屏幕阅读器"],
+          "defaultConfig": {
+            "url": "",
+            "wcagLevel": "AA",
+            "checkContrast": true,
+            "validateARIA": true,
+            "timeout": 30000
+          },
+          "estimatedTime": 4
+        },
+        {
+          "id": "compatibility",
+          "name": "兼容性测试",
+          "description": "多浏览器、多设备、跨平台兼容性验证",
+          "category": "quality",
+          "enabled": true,
+          "priority": "medium",
+          "features": ["Playwright集成", "多浏览器", "响应式设计", "CSS兼容"],
+          "defaultConfig": {
+            "url": "",
+            "browsers": ["chromium", "firefox", "webkit"],
+            "devices": ["desktop", "mobile"],
+            "timeout": 30000
+          },
+          "estimatedTime": 8
+        },
+        {
+          "id": "content",
+          "name": "内容测试",
+          "description": "内容质量、可读性、SEO内容优化",
+          "category": "quality",
+          "enabled": true,
+          "priority": "low",
+          "features": ["内容质量", "可读性分析", "关键词密度", "内容结构"],
+          "defaultConfig": {
+            "url": "",
+            "analyzeReadability": true,
+            "checkGrammar": false,
+            "timeout": 20000
+          },
+          "estimatedTime": 3
+        },
+        {
+          "id": "documentation",
+          "name": "文档测试",
+          "description": "API文档、代码文档、用户文档完整性",
+          "category": "quality",
+          "enabled": true,
+          "priority": "low",
+          "features": ["文档完整性", "示例验证", "链接检查", "版本一致性"],
+          "defaultConfig": {
+            "docPath": "",
+            "checkLinks": true,
+            "validateExamples": true,
+            "timeout": 15000
+          },
+          "estimatedTime": 2
+        },
+        {
+          "id": "ux",
+          "name": "用户体验测试",
+          "description": "用户流程、交互体验、可用性测试",
+          "category": "quality",
+          "enabled": true,
+          "priority": "medium",
+          "features": ["用户流程", "交互分析", "热力图", "用户反馈"],
+          "defaultConfig": {
+            "url": "",
+            "recordSession": false,
+            "analyzeFlow": true,
+            "timeout": 30000
+          },
+          "estimatedTime": 6
+        }
       ]
     },
-    {
-      "id": "performance",
-      "name": "性能测试",
-      "description": "Core Web Vitals、页面速度、可访问性测试",
-      "category": "performance",
-      "enabled": true,
-      "defaultConfig": {
-        "url": "",
-        "timeout": 30000,
-        "retries": 2,
-        "advanced": {}
-      },
-      "estimatedTime": 5,
-      "dependencies": [
-        "lighthouse",
-        "puppeteer"
+    "security": {
+      "description": "安全测试引擎 - 安全漏洞和合规性检查",
+      "engines": [
+        {
+          "id": "security",
+          "name": "安全测试",
+          "description": "安全漏洞扫描、OWASP Top 10、SSL/TLS验证",
+          "category": "security",
+          "enabled": true,
+          "priority": "critical",
+          "features": ["漏洞扫描", "SSL检测", "安全头", "XSS/SQL注入"],
+          "defaultConfig": {
+            "url": "",
+            "checkSSL": true,
+            "checkHeaders": true,
+            "scanVulnerabilities": true,
+            "timeout": 45000
+          },
+          "estimatedTime": 6
+        }
       ]
     },
-    {
-      "id": "security",
-      "name": "安全测试",
-      "description": "SSL检查、漏洞扫描、OWASP Top 10测试",
-      "category": "security",
-      "enabled": true,
-      "defaultConfig": {
-        "url": "",
-        "timeout": 30000,
-        "retries": 2,
-        "advanced": {}
-      },
-      "estimatedTime": 6,
-      "dependencies": [
-        "puppeteer",
-        "axe-puppeteer"
+    "infrastructure": {
+      "description": "基础设施测试引擎 - 服务器和网络测试",
+      "engines": [
+        {
+          "id": "database",
+          "name": "数据库测试",
+          "description": "数据库连接、查询性能、数据完整性",
+          "category": "infrastructure",
+          "enabled": true,
+          "priority": "high",
+          "features": ["连接池测试", "查询优化", "索引分析", "事务测试"],
+          "defaultConfig": {
+            "type": "postgresql",
+            "host": "localhost",
+            "port": 5432,
+            "timeout": 30000
+          },
+          "estimatedTime": 4
+        },
+        {
+          "id": "infrastructure",
+          "name": "基础设施测试",
+          "description": "服务器健康、DNS解析、端口扫描",
+          "category": "infrastructure",
+          "enabled": true,
+          "priority": "high",
+          "features": ["服务器监控", "DNS检查", "端口扫描", "SSL验证"],
+          "defaultConfig": {
+            "url": "",
+            "checks": ["connectivity", "dns", "ssl"],
+            "timeout": 30000
+          },
+          "estimatedTime": 5
+        },
+        {
+          "id": "network",
+          "name": "网络测试",
+          "description": "网络延迟、带宽测试、路由追踪",
+          "category": "infrastructure",
+          "enabled": true,
+          "priority": "medium",
+          "features": ["Ping测试", "带宽测量", "路由追踪", "CDN分析"],
+          "defaultConfig": {
+            "targets": [],
+            "pingCount": 10,
+            "timeout": 30000
+          },
+          "estimatedTime": 6
+        },
+        {
+          "id": "services",
+          "name": "服务测试",
+          "description": "微服务健康、API网关、服务发现",
+          "category": "infrastructure",
+          "enabled": true,
+          "priority": "medium",
+          "features": ["健康检查", "服务发现", "负载均衡", "熔断测试"],
+          "defaultConfig": {
+            "services": [],
+            "healthEndpoint": "/health",
+            "timeout": 20000
+          },
+          "estimatedTime": 3
+        }
       ]
     },
-    {
-      "id": "seo",
-      "name": "SEO测试",
-      "description": "Meta分析、结构化数据、技术SEO测试",
-      "category": "analysis",
-      "enabled": true,
-      "defaultConfig": {
-        "url": "",
-        "timeout": 30000,
-        "retries": 2,
-        "advanced": {}
-      },
-      "estimatedTime": 3,
-      "dependencies": [
-        "cheerio",
-        "puppeteer"
+    "analysis": {
+      "description": "分析型测试引擎 - SEO和业务分析",
+      "engines": [
+        {
+          "id": "seo",
+          "name": "SEO分析",
+          "description": "搜索引擎优化、Meta标签、结构化数据",
+          "category": "analysis",
+          "enabled": true,
+          "priority": "medium",
+          "features": ["Meta分析", "结构化数据", "站点地图", "爬虫友好性"],
+          "defaultConfig": {
+            "url": "",
+            "analyzeKeywords": true,
+            "checkStructuredData": true,
+            "timeout": 30000
+          },
+          "estimatedTime": 3
+        },
+        {
+          "id": "clients",
+          "name": "客户端测试",
+          "description": "客户端SDK、第三方集成、浏览器兼容",
+          "category": "analysis",
+          "enabled": true,
+          "priority": "low",
+          "features": ["SDK测试", "集成验证", "客户端性能", "错误追踪"],
+          "defaultConfig": {
+            "clientTypes": [],
+            "validateIntegration": true,
+            "timeout": 25000
+          },
+          "estimatedTime": 4
+        }
       ]
     },
-    {
-      "id": "stress",
-      "name": "压力测试",
-      "description": "负载测试、并发测试、性能极限测试",
-      "category": "performance",
-      "enabled": true,
-      "defaultConfig": {
-        "url": "",
-        "timeout": 30000,
-        "retries": 2,
-        "advanced": {}
-      },
-      "estimatedTime": 10,
-      "dependencies": [
-        "k6"
-      ]
-    },
-    {
-      "id": "ux",
-      "name": "UX测试",
-      "description": "用户体验分析、交互测试、可用性评估",
-      "category": "quality",
-      "enabled": true,
-      "defaultConfig": {
-        "url": "",
-        "timeout": 30000,
-        "retries": 2,
-        "advanced": {}
-      },
-      "estimatedTime": 7,
-      "dependencies": [
-        "puppeteer"
-      ]
-    },
-    {
-      "id": "website",
-      "name": "网站测试",
-      "description": "网站综合评估、内容分析、技术指标",
-      "category": "analysis",
-      "enabled": true,
-      "defaultConfig": {
-        "url": "",
-        "timeout": 30000,
-        "retries": 2,
-        "advanced": {}
-      },
-      "estimatedTime": 4,
-      "dependencies": [
-        "puppeteer",
-        "cheerio"
+    "composite": {
+      "description": "复合测试引擎 - 组合多个测试引擎",
+      "engines": [
+        {
+          "id": "website",
+          "name": "网站综合测试",
+          "description": "整合性能、SEO、可访问性的综合测试",
+          "category": "composite",
+          "enabled": true,
+          "priority": "high",
+          "composedOf": ["performance", "seo", "accessibility"],
+          "features": ["一键测试", "综合评分", "完整报告", "优化建议"],
+          "defaultConfig": {
+            "url": "",
+            "includeAll": true,
+            "generateReport": true,
+            "timeout": 90000
+          },
+          "estimatedTime": 15
+        },
+        {
+          "id": "base",
+          "name": "基础测试套件",
+          "description": "基础功能验证的测试组合",
+          "category": "composite",
+          "enabled": true,
+          "priority": "medium",
+          "composedOf": ["api", "security", "performance"],
+          "features": ["快速验证", "基础覆盖", "CI/CD集成", "基准测试"],
+          "defaultConfig": {
+            "quickMode": false,
+            "ciMode": false,
+            "timeout": 60000
+          },
+          "estimatedTime": 10
+        }
       ]
     }
-  ]
+  },
+  "statistics": {
+    "totalEngines": 20,
+    "byCategory": {
+      "functional": 4,
+      "performance": 2,
+      "quality": 5,
+      "security": 1,
+      "infrastructure": 4,
+      "analysis": 2,
+      "composite": 2
+    },
+    "enabledEngines": 20,
+    "criticalEngines": ["core", "security"],
+    "highPriorityEngines": ["api", "automation", "performance", "stress", "database", "infrastructure", "website"]
+  },
+  "routes": {
+    "description": "后端API路由映射",
+    "api": "/api/test/api",
+    "automation": "/api/test/automation",
+    "core": "/api/test/core",
+    "regression": "/api/test/regression",
+    "performance": "/api/test/performance",
+    "stress": "/api/test/stress",
+    "accessibility": "/api/test/accessibility",
+    "compatibility": "/api/test/compatibility",
+    "content": "/api/test/content",
+    "documentation": "/api/test/documentation",
+    "ux": "/api/test/ux",
+    "security": "/api/test/security",
+    "database": "/api/test/database",
+    "infrastructure": "/api/test/infrastructure",
+    "network": "/api/test/network",
+    "services": "/api/test/services",
+    "seo": "/api/test/seo",
+    "clients": "/api/test/clients",
+    "website": "/api/test/website",
+    "base": "/api/test/base"
+  }
 }

@@ -6,6 +6,7 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 // 导入数据库配置
 const dbConfigModule = require('../config/database');
@@ -24,6 +25,31 @@ const config = dbConfigModule.getDatabaseConfig ? dbConfigModule.getDatabaseConf
 
 console.log('🌱 Test-Web数据库种子数据脚本');
 console.log('📊 环境:', environment);
+
+/**
+ * 生成安全的随机密码
+ */
+function generateSecurePassword() {
+  return crypto.randomBytes(12).toString('base64').slice(0, 16);
+}
+
+/**
+ * 获取种子密码（从环境变量或生成随机密码）
+ */
+function getSeedPassword(username) {
+  // 首先尝试从环境变量获取
+  const envKey = `SEED_PASSWORD_${username.toUpperCase()}`;
+  if (process.env[envKey]) {
+    return process.env[envKey];
+  }
+  
+  // 生成随机密码并显示给用户
+  const password = generateSecurePassword();
+  console.log(`⚠️  生成的密码 for ${username}: ${password}`);
+  console.log(`   提示：建议在生产环境设置环境变量 ${envKey}`);
+  
+  return password;
+}
 
 // 创建连接池
 const pool = new Pool({
@@ -44,7 +70,7 @@ const seedData = {
       id: uuidv4(),
       username: 'admin',
       email: 'admin@testweb.com',
-      password: 'admin123', // 将被加密
+      password: getSeedPassword('admin'), // 从环境变量或生成随机密码
       role: 'admin',
       profile: {
         firstName: '管理员',
@@ -62,7 +88,7 @@ const seedData = {
       id: uuidv4(),
       username: 'testuser',
       email: 'test@testweb.com',
-      password: 'test123', // 将被加密
+      password: getSeedPassword('testuser'), // 从环境变量或生成随机密码
       role: 'user',
       profile: {
         firstName: '测试',
@@ -80,7 +106,7 @@ const seedData = {
       id: uuidv4(),
       username: 'developer',
       email: 'dev@testweb.com',
-      password: 'dev123', // 将被加密
+      password: getSeedPassword('developer'), // 从环境变量或生成随机密码
       role: 'developer',
       profile: {
         firstName: '开发者',

@@ -1,0 +1,639 @@
+{
+  "summary": {
+    "critical": 9,
+    "highPriority": 13,
+    "mediumPriority": 0,
+    "lowPriority": 67,
+    "oversizedFiles": 0,
+    "emptyFiles": 0,
+    "routeIssues": 2
+  },
+  "details": {
+    "critical": [
+      {
+        "file": "frontend\\components\\auth\\AuthLoadingState.tsx",
+        "issue": "可能包含硬编码的敏感信息",
+        "severity": "critical",
+        "validation": {
+          "found": true,
+          "type": "真实敏感信息",
+          "matches": [
+            "PASSWORD = 'change_password'",
+            "PASSWORD = 'forgot_password'",
+            "PASSWORD = 'reset_password'"
+          ]
+        }
+      },
+      {
+        "file": "frontend\\components\\auth\\AuthLoadingState.tsx",
+        "issue": "可能包含硬编码的敏感信息",
+        "severity": "critical",
+        "validation": {
+          "found": true,
+          "type": "真实敏感信息",
+          "matches": [
+            "PASSWORD = 'change_password'",
+            "PASSWORD = 'forgot_password'",
+            "PASSWORD = 'reset_password'"
+          ]
+        }
+      },
+      {
+        "file": "frontend\\pages\\Login.tsx",
+        "issue": "可能包含硬编码的敏感信息",
+        "severity": "critical",
+        "validation": {
+          "found": true,
+          "type": "真实敏感信息",
+          "matches": [
+            "password = '密码至少需要6个字符'"
+          ]
+        }
+      },
+      {
+        "file": "frontend\\pages\\Register.tsx",
+        "issue": "可能包含硬编码的敏感信息",
+        "severity": "critical",
+        "validation": {
+          "found": true,
+          "type": "真实敏感信息",
+          "matches": [
+            "password = '密码至少需要8个字符'",
+            "password = '密码必须包含大小写字母和数字'",
+            "Password = '两次输入的密码不一致'"
+          ]
+        }
+      },
+      {
+        "file": "frontend\\pages\\UserProfile.tsx",
+        "issue": "可能包含硬编码的敏感信息",
+        "severity": "critical",
+        "validation": {
+          "found": true,
+          "type": "真实敏感信息",
+          "matches": [
+            "password:', error);\n      setError('"
+          ]
+        }
+      },
+      {
+        "file": "frontend\\services\\auth\\authService.ts",
+        "issue": "可能包含硬编码的敏感信息",
+        "severity": "critical",
+        "validation": {
+          "found": true,
+          "type": "真实敏感信息",
+          "matches": [
+            "password = '密码至少需要6个字符'",
+            "Password = '两次输入的密码不一致'",
+            "Password: '当前密码错误'"
+          ]
+        }
+      },
+      {
+        "file": "frontend\\services\\dao\\userDao.ts",
+        "issue": "可能包含硬编码的敏感信息",
+        "severity": "critical",
+        "validation": {
+          "found": true,
+          "type": "真实敏感信息",
+          "matches": [
+            "password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ'",
+            "password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ'"
+          ]
+        }
+      },
+      {
+        "file": "backend\\config\\swaggerEnhanced.js",
+        "issue": "可能包含硬编码的敏感信息",
+        "severity": "critical",
+        "validation": {
+          "found": true,
+          "type": "真实敏感信息",
+          "matches": [
+            "password: 'SecurePassword123!'",
+            "password: 'AdminPassword456!'"
+          ]
+        }
+      },
+      {
+        "file": "backend\\scripts\\seedDatabase.js",
+        "issue": "可能包含硬编码的敏感信息",
+        "severity": "critical",
+        "validation": {
+          "found": true,
+          "type": "真实敏感信息",
+          "matches": [
+            "password: 'admin123'",
+            "password: 'test123'",
+            "password: 'dev123'"
+          ]
+        }
+      }
+    ],
+    "todos": {
+      "high": [
+        {
+          "file": "frontend\\components\\auth\\BackupCodes.tsx",
+          "line": 3,
+          "content": "* TODO: 实现BackupCodes功能",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\components\\auth\\BackupCodes.tsx",
+          "line": 13,
+          "content": "// TODO: 实现组件状态和逻辑",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\components\\auth\\BackupCodes.tsx",
+          "line": 18,
+          "content": "{/* TODO: 实现组件UI */}",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\pages\\admin\\Admin.tsx",
+          "line": 281,
+          "content": "// 未实现的模块显示占位符",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+          "line": 3,
+          "content": "* TODO: 实现MFAManagement功能",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+          "line": 13,
+          "content": "// TODO: 实现组件状态和逻辑",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+          "line": 18,
+          "content": "{/* TODO: 实现组件UI */}",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\services\\testing\\apiTestEngine.ts",
+          "line": 1147,
+          "content": "const present = false; // 待实现真实检测",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\services\\testing\\unifiedTestEngine.ts",
+          "line": 321,
+          "content": "// 占位符类，实际实现将在各自的文件中",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\routes\\errors.js",
+          "line": 126,
+          "content": "note: '错误详情功能正在开发中'",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\scripts\\run-migrations.js",
+          "line": 353,
+          "content": "console.log('📝 创建迁移功能待实现');",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\scripts\\run-migrations.js",
+          "line": 365,
+          "content": "console.log('  create <name>           创建新迁移（待实现）\\n');",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\services\\UnifiedErrorHandler.js",
+          "line": 272,
+          "content": "// TODO: 实际的告警实现",
+          "type": "TODO"
+        }
+      ],
+      "medium": [],
+      "low": [
+        {
+          "file": "frontend\\components\\admin\\BackupManagement.tsx",
+          "line": 131,
+          "content": "alert('恢复功能正在开发中...');",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\auth\\BackupCodes.tsx",
+          "line": 9,
+          "content": "// TODO: 定义组件属性类型",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\components\\auth\\BackupCodes.tsx",
+          "line": 19,
+          "content": "<p>组件开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\business\\ResultViewer.tsx",
+          "line": 316,
+          "content": "<span className=\"ml-2 text-gray-500\">图表占位符</span>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\charts\\EnhancedCharts.tsx",
+          "line": 698,
+          "content": "toast('SVG导出功能开发中');",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\charts\\EnhancedCharts.tsx",
+          "line": 1255,
+          "content": "toast('批量导出功能开发中');",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\common\\PlaceholderComponent.tsx",
+          "line": 2,
+          "content": "* 共享的占位符组件",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\common\\PlaceholderComponent.tsx",
+          "line": 24,
+          "content": "<h3 className=\"text-lg font-medium text-gray-900\">{componentName}开发中</h3>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\common\\PlaceholderComponent.tsx",
+          "line": 25,
+          "content": "<p className=\"text-sm text-gray-500 mt-1\">此组件正在开发中，敬请期待</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\data\\DataFilters.tsx",
+          "line": 287,
+          "content": "toast.error('Excel导出功能开发中');",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\data\\DataManagement.tsx",
+          "line": 196,
+          "content": "<h3 className=\"text-xl font-semibold text-gray-700 mb-3\">测试历史功能开发中</h3>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\data\\DataManagement.tsx",
+          "line": 198,
+          "content": "测试历史记录功能正在开发中，敬请期待。",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\data\\DataManagement.tsx",
+          "line": 208,
+          "content": "<h3 className=\"text-xl font-semibold text-gray-700 mb-3\">统计功能开发中</h3>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\data\\DataManagement.tsx",
+          "line": 210,
+          "content": "详细的数据统计和分析功能正在开发中，敬请期待。",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\data\\DataManager.tsx",
+          "line": 569,
+          "content": "<p>此功能正在开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\seo\\SEOResultVisualization.tsx",
+          "line": 530,
+          "content": "<p>对比功能开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\seo\\SEOResultVisualization.tsx",
+          "line": 540,
+          "content": "<p>趋势分析功能开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\ui\\Chart.tsx",
+          "line": 112,
+          "content": "/** 占位符文本 */",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\ui\\Chart.tsx",
+          "line": 172,
+          "content": "// 其他图表类型的占位符",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\ui\\Image.tsx",
+          "line": 136,
+          "content": "// 占位符样式",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\ui\\Image.tsx",
+          "line": 157,
+          "content": "{/* 占位符 */}",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\ui\\stories\\InputStories.tsx",
+          "line": 491,
+          "content": "story: '选择框组件支持选项列表、占位符、禁用选项等功能。',",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\ui\\TestNavigation.tsx",
+          "line": 123,
+          "content": "text={page.status === 'complete' ? '已完成' : '开发中'}",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\components\\ui\\__tests__\\InputTest.tsx",
+          "line": 323,
+          "content": "it('应该显示占位符', () => {",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\admin\\Admin.tsx",
+          "line": 297,
+          "content": "<p className=\"text-sm text-gray-500\">此功能正在开发中，敬请期待...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\admin\\DataStorage.tsx",
+          "line": 14,
+          "content": "const AnalyticsOverview = () => <div className=\"p-4 bg-gray-100 rounded\">分析概览组件开发中...</div>;",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\admin\\DataStorage.tsx",
+          "line": 15,
+          "content": "const ImportExport = () => <div className=\"p-4 bg-gray-100 rounded\">导入导出组件开发中...</div>;",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\admin\\DataStorage.tsx",
+          "line": 16,
+          "content": "const RealTimeMonitoring = () => <div className=\"p-4 bg-gray-100 rounded\">实时监控组件开发中...</div>;",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\APIDocs.tsx",
+          "line": 17,
+          "content": "APIDocs页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\APIKeys.tsx",
+          "line": 17,
+          "content": "APIKeys页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+          "line": 9,
+          "content": "// TODO: 定义组件属性类型",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\pages\\auth\\MFAManagement.tsx",
+          "line": 19,
+          "content": "<p>组件开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\CICDIntegration.tsx",
+          "line": 17,
+          "content": "CICDIntegration页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\CompatibilityTest.tsx",
+          "line": 27,
+          "content": "<p className=\"text-gray-600\">图表功能开发中... (主题: {theme || 'light'})</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\dashboard\\ManagerDashboard.tsx",
+          "line": 65,
+          "content": "status: 'todo' | 'in-progress' | 'review' | 'completed';",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\pages\\dashboard\\ManagerDashboard.tsx",
+          "line": 238,
+          "content": "todo: 'text-gray-600 bg-gray-100',",
+          "type": "TODO"
+        },
+        {
+          "file": "frontend\\pages\\dashboard\\MonitoringDashboard.tsx",
+          "line": 12,
+          "content": "<p>监控面板功能正在开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\Integrations.tsx",
+          "line": 17,
+          "content": "Integrations页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\Notifications.tsx",
+          "line": 17,
+          "content": "Notifications页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\Reports.tsx",
+          "line": 17,
+          "content": "Reports页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\ScheduledTasks.tsx",
+          "line": 17,
+          "content": "ScheduledTasks页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\SecurityReport.tsx",
+          "line": 17,
+          "content": "SecurityReport页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\SecurityTest.tsx",
+          "line": 233,
+          "content": "<p className=\"text-gray-600\">测试结果展示功能开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\SEOTest.tsx",
+          "line": 25,
+          "content": "<p className=\"text-gray-600 mb-4\">文件上传功能开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\SEOTest.tsx",
+          "line": 52,
+          "content": "<p className=\"text-gray-600\">本地SEO结果展示功能开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\SEOTest.tsx",
+          "line": 101,
+          "content": "<p className=\"text-gray-600\">SEO结果展示功能开发中...</p>",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\Statistics.tsx",
+          "line": 17,
+          "content": "Statistics页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\Subscription.tsx",
+          "line": 17,
+          "content": "Subscription页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\TestResultDetail.tsx",
+          "line": 17,
+          "content": "TestResultDetail页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\TestSchedule.tsx",
+          "line": 17,
+          "content": "TestSchedule页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\pages\\Webhooks.tsx",
+          "line": 17,
+          "content": "Webhooks页面正在开发中...",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\scripts\\fixThemeColors.js",
+          "line": 71,
+          "content": "// 占位符颜色",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\services\\analytics\\analyticsService.ts",
+          "line": 534,
+          "content": "// 其他辅助方法的占位符",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\services\\analytics\\analyticsService.ts",
+          "line": 556,
+          "content": "// 类型定义的占位符",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\services\\unifiedExportManager.ts",
+          "line": 661,
+          "content": "throw new Error('导出任务不存在或未完成');",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\types\\common\\base.types.ts",
+          "line": 144,
+          "content": "/** 占位符 */",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\types\\components\\ui.types.ts",
+          "line": 287,
+          "content": "/** 占位符 */",
+          "type": "中文标记"
+        },
+        {
+          "file": "frontend\\types\\components\\ui.types.ts",
+          "line": 315,
+          "content": "/** 占位符 */",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\engines\\core\\TestEngineManager.js",
+          "line": 178,
+          "content": "// 如果引擎正在运行测试，等待完成或强制停止",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\engines\\performance\\optimizers\\PerformanceOptimizationEngine.js",
+          "line": 144,
+          "content": "title: '动态内容占位符',",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\engines\\seo\\utils\\ReportGenerator.js",
+          "line": 735,
+          "content": "// 更多分析方法的占位符",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\routes\\auth.js",
+          "line": 501,
+          "content": "// TODO: 发送重置密码邮件",
+          "type": "TODO"
+        },
+        {
+          "file": "backend\\routes\\auth.js",
+          "line": 589,
+          "content": "// TODO: 发送验证邮件",
+          "type": "TODO"
+        },
+        {
+          "file": "backend\\routes\\dataExport.js",
+          "line": 221,
+          "content": "return res.status(400).json(formatResponse(false, null, '任务未完成，无法下载'));",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\services\\testing\\TestManagementService.js",
+          "line": 80,
+          "content": "// 恢复未完成的测试",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\services\\testing\\TestManagementService.js",
+          "line": 591,
+          "content": "* 恢复未完成的测试",
+          "type": "中文标记"
+        },
+        {
+          "file": "backend\\utils\\asyncErrorHandler.js",
+          "line": 26,
+          "content": "// TODO: 集成日志系统",
+          "type": "TODO"
+        }
+      ]
+    },
+    "fileSizes": {
+      "oversizedFiles": [],
+      "emptyFiles": []
+    },
+    "routeIssues": [
+      {
+        "type": "database",
+        "issue": "缺少路由文件: backend/routes/database.js",
+        "severity": "medium"
+      },
+      {
+        "type": "network",
+        "issue": "缺少路由文件: backend/routes/network.js",
+        "severity": "medium"
+      }
+    ]
+  },
+  "timestamp": "2025-09-19T07:21:47.663Z"
+}

@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const StressTestEngine = require('../engines/stress/stressTestEngine');
+const StressTestEngine = require('../engines/stress/StressTestEngine');
 const { authMiddleware } = require('../middleware/auth');
 const { validateRequest } = require('../middleware/validation');
 const { body, param } = require('express-validator');

@@ -94,6 +94,13 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           href: '/compatibility-test'
         },
         {
+          id: 'accessibility-test',
+          name: '可访问性测试',
+          icon: Eye,
+          href: '/accessibility-test',
+          badge: 'NEW'
+        },
+        {
           id: 'api-test',
           name: 'API测试',
           icon: Code,

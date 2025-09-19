@@ -17,10 +17,10 @@ const { apiCache, dbCache } = require('../middleware/cache.js');
 // 导入测试引擎类
 const APIAnalyzer = require('../engines/api/ApiAnalyzer.js');
 const StressTestEngine = require('../engines/stress/StressTestEngine.js');
-const RealSecurityTestEngine = require('../engines/security/securityTestEngine.js'); // 直接导出
-const CompatibilityTestEngine = require('../engines/compatibility/compatibilityTestEngine.js');
+const RealSecurityTestEngine = require('../engines/security/SecurityTestEngine.js'); // 直接导出
+const CompatibilityTestEngine = require('../engines/compatibility/CompatibilityTestEngine.js');
 const UXAnalyzer = require('../engines/api/UXAnalyzer.js');
-const ApiTestEngine = require('../engines/api/apiTestEngine.js');
+const ApiTestEngine = require('../engines/api/ApiTestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const userTestManager = require('../services/testing/UserTestManager.js');

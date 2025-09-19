@@ -1,7 +1,6 @@
 {
   "name": "test-web-shared",
   "version": "1.0.0",
-  "type": "module",
   "description": "Shared utilities and types for Test Web App",
   "main": "index.js",
   "types": "index.d.ts",

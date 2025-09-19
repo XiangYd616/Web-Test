@@ -293,7 +293,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./frontend/test/setup.ts'],
+    setupFiles: ['./frontend/tests/setup/setup.ts'],
     include: [
       'frontend/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
       'backend/tests/**/*.{test,spec}.{js,ts}',
@@ -315,10 +315,10 @@ export default defineConfig({
       ],
       thresholds: {
         global: {
-          branches: 70,
-          functions: 70,
-          lines: 70,
-          statements: 70
+          branches: 75,
+          functions: 75,
+          lines: 75,
+          statements: 75
         }
       }
     }

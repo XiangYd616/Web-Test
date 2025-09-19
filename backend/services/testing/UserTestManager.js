@@ -3,7 +3,7 @@
  * 每个用户管理自己的测试实例，不需要全局状态
  */
 
-const StressTestEngine = require('../../engines/stress/stressTestEngine');
+const StressTestEngine = require('../../engines/stress/StressTestEngine');
 // 暂时使用console.log替代Logger
 const Logger = {
   info: (msg, meta) => console.log(`[INFO] ${msg}`, meta || ''),

@@ -18,17 +18,11 @@ const { securityLogger } = require('../middleware/logger');
 
 const router = express.Router();
 
-// 导入MFA路由
-const mfaRoutes = require('../src/routes/mfa');
-
-// 导入OAuth路由
-const oauthRoutes = require('./oauth');
-
-// 将MFA路由挂载到/mfa路径
-router.use('/mfa', mfaRoutes);
-
-// 将OAuth路由挂载到/oauth路径
-router.use('/oauth', oauthRoutes);
+// MFA和OAuth功能暂时禁用，避免模块缺失错误
+// const mfaRoutes = require('../src/routes/mfa');
+// const oauthRoutes = require('./oauth');
+// router.use('/mfa', mfaRoutes);
+// router.use('/oauth', oauthRoutes);
 
 /**
  * 用户注册

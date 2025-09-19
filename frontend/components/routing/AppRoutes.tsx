@@ -23,6 +23,7 @@ const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
 const UnifiedStressTest = lazy(() => import('../../pages/UnifiedStressTest')); // 统一压力测试页面
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
+const AccessibilityTest = lazy(() => import('../../pages/AccessibilityTest'));
 // const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
 const UXTest = lazy(() => import('../../pages/UXTest'));
 const UnifiedTestPage = lazy(() => import('../../pages/UnifiedTestPage'));
@@ -161,6 +162,11 @@ const AppRoutes: React.FC = () => {
         <Route path="compatibility-test" element={
           <LazyPageWrapper>
             <CompatibilityTest />
+          </LazyPageWrapper>
+        } />
+        <Route path="accessibility-test" element={
+          <LazyPageWrapper>
+            <AccessibilityTest />
           </LazyPageWrapper>
         } />
         {/* Chrome兼容性测试路由暂时禁用，重定向到通用兼容性测试 */}

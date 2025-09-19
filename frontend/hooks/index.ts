@@ -4,7 +4,7 @@
  */
 
 // 🚀 主要Hook - 推荐使用
-export { useTestExecution, useTestResultAnalysis, useUnifiedTestEngine } from './useUnifiedTestEngine';
+export { useTestManager } from './useTestManager';
 
 // 🔄 兼容性Hook - 为现有代码提供无缝迁移
 export {

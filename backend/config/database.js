@@ -44,8 +44,8 @@ const dbConfig = {
   statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000,
   query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT) || 30000,
 
-  // SSL配置 (生产环境)
-  ssl: process.env.NODE_ENV === 'production' ? {
+  // SSL配置 (根据环境变量决定)
+  ssl: process.env.DB_SSL === 'true' ? {
     rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false'
   } : false,
 

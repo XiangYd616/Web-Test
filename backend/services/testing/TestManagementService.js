@@ -15,8 +15,8 @@ const SecurityTestEngine = require('../../engines/security/SecurityTestEngine');
 const SEOTestEngine = require('../../engines/seo/SEOTestEngine');
 const APITestEngine = require('../../engines/api/APITestEngine');
 const StressTestEngine = require('../../engines/stress/StressTestEngine');
-const DatabaseTestEngine = require('../../engines/database/EnhancedDatabaseTestEngine');
-const NetworkTestEngine = require('../../engines/network/EnhancedNetworkTestEngine');
+const DatabaseTestEngine = require('../../engines/database/DatabaseTestEngine');
+const NetworkTestEngine = require('../../engines/network/NetworkTestEngine');
 
 class TestManagementService extends EventEmitter {
   constructor() {
