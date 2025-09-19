@@ -111,6 +111,7 @@ packages/
 backup-*.sql
 backend/backups/*.sql
 backend/runtime/backups/
+backup/
 
 # IDE specific files
 .vscode/settings.json
