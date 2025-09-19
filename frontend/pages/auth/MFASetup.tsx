@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import QRCode from 'qrcode.react';
+import * as QRCodeReact from 'qrcode.react';
+const QRCode = (QRCodeReact as any).default || QRCodeReact;
 import { Alert, Button, Card, Input, Steps, Typography, Space, Divider, Spin } from 'antd';
 import { CheckCircleOutlined, QrcodeOutlined, SafetyOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useAuthCheck } from '../../components/auth/withAuthCheck';

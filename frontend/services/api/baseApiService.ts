@@ -266,4 +266,7 @@ export class BaseApiService {
   }
 }
 
+// 创建统一API服务实例
+export const unifiedApiService = new BaseApiService();
+
 export default BaseApiService;

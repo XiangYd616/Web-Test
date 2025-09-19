@@ -1,1 +1,464 @@
-/**\n * 报告生成器组件\n * 提供多种报告生成功能：测试报告、性能分析、安全评估等\n */\n\nimport React, { useState, useEffect } from 'react';\nimport {\n  Card,\n  Form,\n  Select,\n  DatePicker,\n  Button,\n  Steps,\n  Progress,\n  Table,\n  Tag,\n  Space,\n  Alert,\n  Divider,\n  Checkbox,\n  Radio,\n  Input,\n  notification\n} from 'antd';\nimport {\n  FileTextOutlined,\n  DownloadOutlined,\n  EyeOutlined,\n  BarChartOutlined,\n  SecurityScanOutlined,\n  ClockCircleOutlined,\n  CheckCircleOutlined,\n  LoadingOutlined\n} from '@ant-design/icons';\nimport type { ColumnsType } from 'antd/es/table';\nimport dayjs from 'dayjs';\n\nconst { Step } = Steps;\nconst { RangePicker } = DatePicker;\nconst { Option } = Select;\nconst { TextArea } = Input;\n\ninterface ReportConfig {\n  type: 'performance' | 'security' | 'comprehensive' | 'custom';\n  dateRange: [string, string];\n  testTypes: string[];\n  includeCharts: boolean;\n  includeRawData: boolean;\n  format: 'pdf' | 'html' | 'excel' | 'json';\n  recipients?: string[];\n}\n\ninterface ReportTemplate {\n  id: string;\n  name: string;\n  description: string;\n  type: string;\n  sections: string[];\n  estimatedTime: number; // 分钟\n}\n\ninterface GeneratedReport {\n  id: string;\n  name: string;\n  type: string;\n  status: 'generating' | 'completed' | 'failed';\n  progress: number;\n  createdAt: string;\n  fileSize?: string;\n  downloadUrl?: string;\n}\n\nconst ReportGenerator: React.FC = () => {\n  const [currentStep, setCurrentStep] = useState(0);\n  const [form] = Form.useForm();\n  const [generating, setGenerating] = useState(false);\n  const [generationProgress, setGenerationProgress] = useState(0);\n  const [selectedTemplate, setSelectedTemplate] = useState<string>('');\n  const [recentReports, setRecentReports] = useState<GeneratedReport[]>([]);\n\n  // 报告模板数据\n  const [templates] = useState<ReportTemplate[]>([\n    {\n      id: '1',\n      name: '性能测试报告',\n      description: '包含网站性能、加载时间、性能优化建议',\n      type: 'performance',\n      sections: ['性能概览', '响应时间分析', '资源加载分析', '优化建议'],\n      estimatedTime: 5\n    },\n    {\n      id: '2',\n      name: '安全评估报告',\n      description: '安全漏洞扫描、风险评估、修复建议',\n      type: 'security',\n      sections: ['安全概览', '漏洞详情', '风险评级', '修复建议'],\n      estimatedTime: 8\n    },\n    {\n      id: '3',\n      name: '综合测试报告',\n      description: '全面的网站测试报告，包含所有测试类型',\n      type: 'comprehensive',\n      sections: ['执行摘要', '性能分析', '安全评估', 'SEO分析', '兼容性测试', '总结建议'],\n      estimatedTime: 15\n    },\n    {\n      id: '4',\n      name: '自定义报告',\n      description: '根据需要自定义报告内容和格式',\n      type: 'custom',\n      sections: ['自定义内容'],\n      estimatedTime: 10\n    }\n  ]);\n\n  // 最近生成的报告\n  useEffect(() => {\n    const mockReports: GeneratedReport[] = [\n      {\n        id: '1',\n        name: '网站性能测试报告_20241215',\n        type: 'performance',\n        status: 'completed',\n        progress: 100,\n        createdAt: '2024-12-15 10:30:00',\n        fileSize: '2.5MB',\n        downloadUrl: '/api/reports/download/1'\n      },\n      {\n        id: '2',\n        name: '安全评估报告_20241214',\n        type: 'security',\n        status: 'completed',\n        progress: 100,\n        createdAt: '2024-12-14 16:45:00',\n        fileSize: '1.8MB',\n        downloadUrl: '/api/reports/download/2'\n      },\n      {\n        id: '3',\n        name: '综合测试报告_20241213',\n        type: 'comprehensive',\n        status: 'generating',\n        progress: 65,\n        createdAt: '2024-12-13 14:20:00'\n      }\n    ];\n    setRecentReports(mockReports);\n  }, []);\n\n  // 报告列表表格列\n  const reportColumns: ColumnsType<GeneratedReport> = [\n    {\n      title: '报告名称',\n      dataIndex: 'name',\n      key: 'name',\n      render: (text, record) => (\n        <Space>\n          <FileTextOutlined />\n          <span>{text}</span>\n        </Space>\n      )\n    },\n    {\n      title: '类型',\n      dataIndex: 'type',\n      key: 'type',\n      render: (type: string) => {\n        const typeMap = {\n          performance: { text: '性能', color: 'blue' },\n          security: { text: '安全', color: 'red' },\n          comprehensive: { text: '综合', color: 'green' },\n          custom: { text: '自定义', color: 'purple' }\n        };\n        const config = typeMap[type as keyof typeof typeMap] || { text: type, color: 'default' };\n        return <Tag color={config.color}>{config.text}</Tag>;\n      }\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      key: 'status',\n      render: (status: string, record) => {\n        if (status === 'generating') {\n          return (\n            <Space>\n              <LoadingOutlined />\n              <span>生成中</span>\n              <Progress percent={record.progress} size=\"small\" style={{ width: 60 }} />\n            </Space>\n          );\n        } else if (status === 'completed') {\n          return (\n            <Space>\n              <CheckCircleOutlined style={{ color: 'green' }} />\n              <span>已完成</span>\n            </Space>\n          );\n        }\n        return <Tag color=\"red\">失败</Tag>;\n      }\n    },\n    {\n      title: '创建时间',\n      dataIndex: 'createdAt',\n      key: 'createdAt'\n    },\n    {\n      title: '文件大小',\n      dataIndex: 'fileSize',\n      key: 'fileSize',\n      render: (size: string) => size || '-'\n    },\n    {\n      title: '操作',\n      key: 'actions',\n      render: (_, record) => (\n        <Space>\n          {record.status === 'completed' && (\n            <>\n              <Button size=\"small\" icon={<EyeOutlined />}>预览</Button>\n              <Button \n                size=\"small\" \n                type=\"primary\" \n                icon={<DownloadOutlined />}\n                onClick={() => handleDownload(record)}\n              >\n                下载\n              </Button>\n            </>\n          )}\n          {record.status === 'generating' && (\n            <Button size=\"small\" disabled>\n              生成中...\n            </Button>\n          )}\n        </Space>\n      )\n    }\n  ];\n\n  const handleTemplateSelect = (templateId: string) => {\n    setSelectedTemplate(templateId);\n    const template = templates.find(t => t.id === templateId);\n    if (template) {\n      form.setFieldsValue({\n        type: template.type,\n        testTypes: template.sections\n      });\n    }\n  };\n\n  const handleGenerateReport = async () => {\n    try {\n      const values = await form.validateFields();\n      setGenerating(true);\n      setGenerationProgress(0);\n      setCurrentStep(2);\n\n      // 模拟报告生成过程\n      const progressInterval = setInterval(() => {\n        setGenerationProgress(prev => {\n          if (prev >= 100) {\n            clearInterval(progressInterval);\n            setGenerating(false);\n            setCurrentStep(3);\n            notification.success({\n              message: '报告生成成功',\n              description: '报告已生成完成，可以在报告列表中查看和下载。'\n            });\n            return 100;\n          }\n          return prev + Math.random() * 15;\n        });\n      }, 500);\n\n      console.log('生成报告配置:', values);\n    } catch (error) {\n      console.error('表单验证失败:', error);\n    }\n  };\n\n  const handleDownload = (report: GeneratedReport) => {\n    // 模拟下载\n    notification.success({\n      message: '下载开始',\n      description: `正在下载 ${report.name}`\n    });\n  };\n\n  const resetWizard = () => {\n    setCurrentStep(0);\n    setGenerating(false);\n    setGenerationProgress(0);\n    form.resetFields();\n    setSelectedTemplate('');\n  };\n\n  const steps = [\n    {\n      title: '选择模板',\n      icon: <FileTextOutlined />\n    },\n    {\n      title: '配置选项',\n      icon: <BarChartOutlined />\n    },\n    {\n      title: '生成报告',\n      icon: generating ? <LoadingOutlined /> : <ClockCircleOutlined />\n    },\n    {\n      title: '完成',\n      icon: <CheckCircleOutlined />\n    }\n  ];\n\n  return (\n    <div className=\"report-generator p-6\">\n      <div className=\"mb-6\">\n        <h1 className=\"text-2xl font-bold text-gray-900 mb-2\">报告生成器</h1>\n        <p className=\"text-gray-600\">生成专业的测试报告，支持多种格式和自定义配置</p>\n      </div>\n\n      <div className=\"grid grid-cols-1 lg:grid-cols-3 gap-6\">\n        {/* 报告生成向导 */}\n        <div className=\"lg:col-span-2\">\n          <Card title=\"创建新报告\">\n            <Steps current={currentStep} className=\"mb-8\">\n              {steps.map((step, index) => (\n                <Step key={index} title={step.title} icon={step.icon} />\n              ))}\n            </Steps>\n\n            {/* 步骤1: 选择模板 */}\n            {currentStep === 0 && (\n              <div>\n                <h3 className=\"text-lg font-medium mb-4\">选择报告模板</h3>\n                <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4 mb-6\">\n                  {templates.map(template => (\n                    <Card\n                      key={template.id}\n                      size=\"small\"\n                      hoverable\n                      className={`cursor-pointer transition-all ${\n                        selectedTemplate === template.id\n                          ? 'border-blue-500 bg-blue-50'\n                          : 'border-gray-200'\n                      }`}\n                      onClick={() => handleTemplateSelect(template.id)}\n                    >\n                      <div className=\"flex justify-between items-start mb-2\">\n                        <h4 className=\"font-medium text-gray-900\">{template.name}</h4>\n                        <Tag color=\"blue\">{template.estimatedTime}min</Tag>\n                      </div>\n                      <p className=\"text-sm text-gray-600 mb-3\">{template.description}</p>\n                      <div>\n                        <span className=\"text-xs text-gray-500\">包含: </span>\n                        {template.sections.slice(0, 2).map(section => (\n                          <Tag key={section} size=\"small\">{section}</Tag>\n                        ))}\n                        {template.sections.length > 2 && (\n                          <Tag size=\"small\">+{template.sections.length - 2}</Tag>\n                        )}\n                      </div>\n                    </Card>\n                  ))}\n                </div>\n                <div className=\"flex justify-end\">\n                  <Button\n                    type=\"primary\"\n                    disabled={!selectedTemplate}\n                    onClick={() => setCurrentStep(1)}\n                  >\n                    下一步\n                  </Button>\n                </div>\n              </div>\n            )}\n\n            {/* 步骤2: 配置选项 */}\n            {currentStep === 1 && (\n              <div>\n                <Form form={form} layout=\"vertical\">\n                  <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n                    <Form.Item label=\"报告名称\" name=\"name\" rules={[{ required: true, message: '请输入报告名称' }]}>\n                      <Input placeholder=\"输入报告名称\" />\n                    </Form.Item>\n                    <Form.Item label=\"时间范围\" name=\"dateRange\" rules={[{ required: true, message: '请选择时间范围' }]}>\n                      <RangePicker\n                        style={{ width: '100%' }}\n                        defaultValue={[dayjs().subtract(7, 'day'), dayjs()]}\n                      />\n                    </Form.Item>\n                  </div>\n\n                  <Form.Item label=\"包含的测试类型\" name=\"testTypes\">\n                    <Checkbox.Group>\n                      <div className=\"grid grid-cols-2 gap-2\">\n                        <Checkbox value=\"performance\">性能测试</Checkbox>\n                        <Checkbox value=\"security\">安全测试</Checkbox>\n                        <Checkbox value=\"seo\">SEO分析</Checkbox>\n                        <Checkbox value=\"compatibility\">兼容性测试</Checkbox>\n                        <Checkbox value=\"ux\">用户体验</Checkbox>\n                        <Checkbox value=\"accessibility\">可访问性</Checkbox>\n                      </div>\n                    </Checkbox.Group>\n                  </Form.Item>\n\n                  <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n                    <Form.Item label=\"报告格式\" name=\"format\" initialValue=\"pdf\">\n                      <Radio.Group>\n                        <Radio value=\"pdf\">PDF</Radio>\n                        <Radio value=\"html\">HTML</Radio>\n                        <Radio value=\"excel\">Excel</Radio>\n                        <Radio value=\"json\">JSON</Radio>\n                      </Radio.Group>\n                    </Form.Item>\n                  </div>\n\n                  <Form.Item label=\"附加选项\">\n                    <Checkbox.Group>\n                      <div className=\"space-y-2\">\n                        <div><Checkbox value=\"charts\">包含图表</Checkbox></div>\n                        <div><Checkbox value=\"rawData\">包含原始数据</Checkbox></div>\n                        <div><Checkbox value=\"recommendations\">包含优化建议</Checkbox></div>\n                        <div><Checkbox value=\"trend\">包含趋势分析</Checkbox></div>\n                      </div>\n                    </Checkbox.Group>\n                  </Form.Item>\n\n                  <Form.Item label=\"报告描述\" name=\"description\">\n                    <TextArea rows={3} placeholder=\"可选：添加报告描述\" />\n                  </Form.Item>\n                </Form>\n\n                <div className=\"flex justify-between\">\n                  <Button onClick={() => setCurrentStep(0)}>上一步</Button>\n                  <Button type=\"primary\" onClick={handleGenerateReport}>生成报告</Button>\n                </div>\n              </div>\n            )}\n\n            {/* 步骤3: 生成进度 */}\n            {currentStep === 2 && (\n              <div className=\"text-center py-8\">\n                <LoadingOutlined className=\"text-4xl text-blue-500 mb-4\" />\n                <h3 className=\"text-lg font-medium mb-4\">正在生成报告...</h3>\n                <Progress percent={Math.floor(generationProgress)} className=\"mb-4\" />\n                <p className=\"text-gray-600\">预计剩余时间: {Math.max(1, Math.floor((100 - generationProgress) / 20))} 分钟</p>\n              </div>\n            )}\n\n            {/* 步骤4: 完成 */}\n            {currentStep === 3 && (\n              <div className=\"text-center py-8\">\n                <CheckCircleOutlined className=\"text-4xl text-green-500 mb-4\" />\n                <h3 className=\"text-lg font-medium mb-4\">报告生成完成！</h3>\n                <p className=\"text-gray-600 mb-6\">您的报告已成功生成，可以在右侧的报告列表中查看。</p>\n                <Space>\n                  <Button type=\"primary\" icon={<EyeOutlined />}>预览报告</Button>\n                  <Button icon={<DownloadOutlined />}>下载报告</Button>\n                  <Button onClick={resetWizard}>创建新报告</Button>\n                </Space>\n              </div>\n            )}\n          </Card>\n        </div>\n\n        {/* 最近报告列表 */}\n        <div>\n          <Card title=\"最近生成的报告\" size=\"small\">\n            <Table\n              columns={reportColumns.slice(0, 3)} // 只显示部分列\n              dataSource={recentReports.slice(0, 5)}\n              rowKey=\"id\"\n              pagination={false}\n              size=\"small\"\n            />\n            <Divider />\n            <div className=\"text-center\">\n              <Button type=\"link\" size=\"small\">查看所有报告</Button>\n            </div>\n          </Card>\n\n          <Card title=\"使用提示\" size=\"small\" className=\"mt-4\">\n            <div className=\"text-sm text-gray-600 space-y-2\">\n              <p>• 选择合适的报告模板以快速开始</p>\n              <p>• 自定义报告配置以满足特定需求</p>\n              <p>• PDF格式适合分享，Excel适合数据分析</p>\n              <p>• 生成时间取决于数据量和复杂度</p>\n            </div>\n          </Card>\n        </div>\n      </div>\n    </div>\n  );\n};\n\nexport default ReportGenerator;"
+/**
+ * 报告生成器组件
+ * 提供多种报告生成功能：测试报告、性能分析、安全评估等
+ */
+
+import React, { useState, useEffect } from 'react';
+import {
+  Card,
+  Form,
+  Select,
+  DatePicker,
+  Button,
+  Steps,
+  Progress,
+  Table,
+  Tag,
+  Space,
+  Alert,
+  Divider,
+  Checkbox,
+  Radio,
+  Input,
+  notification
+} from 'antd';
+import {
+  FileTextOutlined,
+  DownloadOutlined,
+  EyeOutlined,
+  BarChartOutlined,
+  SecurityScanOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  LoadingOutlined
+} from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
+
+const { Step } = Steps;
+const { RangePicker } = DatePicker;
+const { Option } = Select;
+const { TextArea } = Input;
+
+interface ReportConfig {
+  type: 'performance' | 'security' | 'comprehensive' | 'custom';
+  dateRange: [string, string];
+  testTypes: string[];
+  includeCharts: boolean;
+  includeRawData: boolean;
+  format: 'pdf' | 'html' | 'excel' | 'json';
+  recipients?: string[];
+}
+
+interface ReportTemplate {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  sections: string[];
+  estimatedTime: number; // 分钟
+}
+
+interface GeneratedReport {
+  id: string;
+  name: string;
+  type: string;
+  status: 'generating' | 'completed' | 'failed';
+  progress: number;
+  createdAt: string;
+  fileSize?: string;
+  downloadUrl?: string;
+}
+
+const ReportGenerator: React.FC = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [form] = Form.useForm();
+  const [generating, setGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [recentReports, setRecentReports] = useState<GeneratedReport[]>([]);
+
+  // 报告模板数据
+  const [templates] = useState<ReportTemplate[]>([
+    {
+      id: '1',
+      name: '性能测试报告',
+      description: '包含网站性能、加载时间、性能优化建议',
+      type: 'performance',
+      sections: ['性能概览', '响应时间分析', '资源加载分析', '优化建议'],
+      estimatedTime: 5
+    },
+    {
+      id: '2',
+      name: '安全评估报告',
+      description: '安全漏洞扫描、风险评估、修复建议',
+      type: 'security',
+      sections: ['安全概览', '漏洞详情', '风险评级', '修复建议'],
+      estimatedTime: 8
+    },
+    {
+      id: '3',
+      name: '综合测试报告',
+      description: '全面的网站测试报告，包含所有测试类型',
+      type: 'comprehensive',
+      sections: ['执行摘要', '性能分析', '安全评估', 'SEO分析', '兼容性测试', '总结建议'],
+      estimatedTime: 15
+    },
+    {
+      id: '4',
+      name: '自定义报告',
+      description: '根据需要自定义报告内容和格式',
+      type: 'custom',
+      sections: ['自定义内容'],
+      estimatedTime: 10
+    }
+  ]);
+
+  // 最近生成的报告
+  useEffect(() => {
+    const mockReports: GeneratedReport[] = [
+      {
+        id: '1',
+        name: '网站性能测试报告_20241215',
+        type: 'performance',
+        status: 'completed',
+        progress: 100,
+        createdAt: '2024-12-15 10:30:00',
+        fileSize: '2.5MB',
+        downloadUrl: '/api/reports/download/1'
+      },
+      {
+        id: '2',
+        name: '安全评估报告_20241214',
+        type: 'security',
+        status: 'completed',
+        progress: 100,
+        createdAt: '2024-12-14 16:45:00',
+        fileSize: '1.8MB',
+        downloadUrl: '/api/reports/download/2'
+      },
+      {
+        id: '3',
+        name: '综合测试报告_20241213',
+        type: 'comprehensive',
+        status: 'generating',
+        progress: 65,
+        createdAt: '2024-12-13 14:20:00'
+      }
+    ];
+    setRecentReports(mockReports);
+  }, []);
+
+  // 报告列表表格列
+  const reportColumns: ColumnsType<GeneratedReport> = [
+    {
+      title: '报告名称',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text, record) => (
+        <Space>
+          <FileTextOutlined />
+          <span>{text}</span>
+        </Space>
+      )
+    },
+    {
+      title: '类型',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type: string) => {
+        const typeMap = {
+          performance: { text: '性能', color: 'blue' },
+          security: { text: '安全', color: 'red' },
+          comprehensive: { text: '综合', color: 'green' },
+          custom: { text: '自定义', color: 'purple' }
+        };
+        const config = typeMap[type as keyof typeof typeMap] || { text: type, color: 'default' };
+        return <Tag color={config.color}>{config.text}</Tag>;
+      }
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string, record) => {
+        if (status === 'generating') {
+          return (
+            <Space>
+              <LoadingOutlined />
+              <span>生成中</span>
+              <Progress percent={record.progress} size="small" style={{ width: 60 }} />
+            </Space>
+          );
+        } else if (status === 'completed') {
+          return (
+            <Space>
+              <CheckCircleOutlined style={{ color: 'green' }} />
+              <span>已完成</span>
+            </Space>
+          );
+        }
+        return <Tag color="red">失败</Tag>;
+      }
+    }
+  ];
+
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      form.setFieldsValue({
+        type: template.type,
+        testTypes: template.sections
+      });
+    }
+  };
+
+  const handleGenerateReport = async () => {
+    try {
+      const values = await form.validateFields();
+      setGenerating(true);
+      setGenerationProgress(0);
+      setCurrentStep(2);
+
+      // 模拟报告生成过程
+      const progressInterval = setInterval(() => {
+        setGenerationProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(progressInterval);
+            setGenerating(false);
+            setCurrentStep(3);
+            notification.success({
+              message: '报告生成成功',
+              description: '报告已生成完成，可以在报告列表中查看和下载。'
+            });
+            return 100;
+          }
+          return prev + Math.random() * 15;
+        });
+      }, 500);
+
+      console.log('生成报告配置:', values);
+    } catch (error) {
+      console.error('表单验证失败:', error);
+    }
+  };
+
+  const handleDownload = (report: GeneratedReport) => {
+    // 模拟下载
+    notification.success({
+      message: '下载开始',
+      description: `正在下载 ${report.name}`
+    });
+  };
+
+  const resetWizard = () => {
+    setCurrentStep(0);
+    setGenerating(false);
+    setGenerationProgress(0);
+    form.resetFields();
+    setSelectedTemplate('');
+  };
+
+  const steps = [
+    {
+      title: '选择模板',
+      icon: <FileTextOutlined />
+    },
+    {
+      title: '配置选项',
+      icon: <BarChartOutlined />
+    },
+    {
+      title: '生成报告',
+      icon: generating ? <LoadingOutlined /> : <ClockCircleOutlined />
+    },
+    {
+      title: '完成',
+      icon: <CheckCircleOutlined />
+    }
+  ];
+
+  return (
+    <div className="report-generator p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">报告生成器</h1>
+        <p className="text-gray-600">生成专业的测试报告，支持多种格式和自定义配置</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 报告生成向导 */}
+        <div className="lg:col-span-2">
+          <Card title="创建新报告">
+            <Steps current={currentStep} className="mb-8">
+              {steps.map((step, index) => (
+                <Step key={index} title={step.title} icon={step.icon} />
+              ))}
+            </Steps>
+
+            {/* 步骤1: 选择模板 */}
+            {currentStep === 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-4">选择报告模板</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  {templates.map(template => (
+                    <Card
+                      key={template.id}
+                      size="small"
+                      hoverable
+                      className={`cursor-pointer transition-all ${
+                        selectedTemplate === template.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200'
+                      }`}
+                      onClick={() => handleTemplateSelect(template.id)}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-medium text-gray-900">{template.name}</h4>
+                        <Tag color="blue">{template.estimatedTime}min</Tag>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                      <div>
+                        <span className="text-xs text-gray-500">包含: </span>
+                        {template.sections.slice(0, 2).map(section => (
+                          <Tag key={section} size="small">{section}</Tag>
+                        ))}
+                        {template.sections.length > 2 && (
+                          <Tag size="small">+{template.sections.length - 2}</Tag>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    type="primary"
+                    disabled={!selectedTemplate}
+                    onClick={() => setCurrentStep(1)}
+                  >
+                    下一步
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* 步骤2: 配置选项 */}
+            {currentStep === 1 && (
+              <div>
+                <Form form={form} layout="vertical">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Form.Item label="报告名称" name="name" rules={[{ required: true, message: '请输入报告名称' }]}>
+                      <Input placeholder="输入报告名称" />
+                    </Form.Item>
+                    <Form.Item label="时间范围" name="dateRange" rules={[{ required: true, message: '请选择时间范围' }]}>
+                      <RangePicker
+                        style={{ width: '100%' }}
+                        defaultValue={[dayjs().subtract(7, 'day'), dayjs()]}
+                      />
+                    </Form.Item>
+                  </div>
+
+                  <Form.Item label="包含的测试类型" name="testTypes">
+                    <Checkbox.Group>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Checkbox value="performance">性能测试</Checkbox>
+                        <Checkbox value="security">安全测试</Checkbox>
+                        <Checkbox value="seo">SEO分析</Checkbox>
+                        <Checkbox value="compatibility">兼容性测试</Checkbox>
+                        <Checkbox value="ux">用户体验</Checkbox>
+                        <Checkbox value="accessibility">可访问性</Checkbox>
+                      </div>
+                    </Checkbox.Group>
+                  </Form.Item>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Form.Item label="报告格式" name="format" initialValue="pdf">
+                      <Radio.Group>
+                        <Radio value="pdf">PDF</Radio>
+                        <Radio value="html">HTML</Radio>
+                        <Radio value="excel">Excel</Radio>
+                        <Radio value="json">JSON</Radio>
+                      </Radio.Group>
+                    </Form.Item>
+                  </div>
+
+                  <Form.Item label="附加选项">
+                    <Checkbox.Group>
+                      <div className="space-y-2">
+                        <div><Checkbox value="charts">包含图表</Checkbox></div>
+                        <div><Checkbox value="rawData">包含原始数据</Checkbox></div>
+                        <div><Checkbox value="recommendations">包含优化建议</Checkbox></div>
+                        <div><Checkbox value="trend">包含趋势分析</Checkbox></div>
+                      </div>
+                    </Checkbox.Group>
+                  </Form.Item>
+
+                  <Form.Item label="报告描述" name="description">
+                    <TextArea rows={3} placeholder="可选：添加报告描述" />
+                  </Form.Item>
+                </Form>
+
+                <div className="flex justify-between">
+                  <Button onClick={() => setCurrentStep(0)}>上一步</Button>
+                  <Button type="primary" onClick={handleGenerateReport}>生成报告</Button>
+                </div>
+              </div>
+            )}
+
+            {/* 步骤3: 生成进度 */}
+            {currentStep === 2 && (
+              <div className="text-center py-8">
+                <LoadingOutlined className="text-4xl text-blue-500 mb-4" />
+                <h3 className="text-lg font-medium mb-4">正在生成报告...</h3>
+                <Progress percent={Math.floor(generationProgress)} className="mb-4" />
+                <p className="text-gray-600">预计剩余时间: {Math.max(1, Math.floor((100 - generationProgress) / 20))} 分钟</p>
+              </div>
+            )}
+
+            {/* 步骤4: 完成 */}
+            {currentStep === 3 && (
+              <div className="text-center py-8">
+                <CheckCircleOutlined className="text-4xl text-green-500 mb-4" />
+                <h3 className="text-lg font-medium mb-4">报告生成完成！</h3>
+                <p className="text-gray-600 mb-6">您的报告已成功生成，可以在右侧的报告列表中查看。</p>
+                <Space>
+                  <Button type="primary" icon={<EyeOutlined />}>预览报告</Button>
+                  <Button icon={<DownloadOutlined />}>下载报告</Button>
+                  <Button onClick={resetWizard}>创建新报告</Button>
+                </Space>
+              </div>
+            )}
+          </Card>
+        </div>
+
+        {/* 最近报告列表 */}
+        <div>
+          <Card title="最近生成的报告" size="small">
+            <Table
+              columns={reportColumns.slice(0, 3)} // 只显示部分列
+              dataSource={recentReports.slice(0, 5)}
+              rowKey="id"
+              pagination={false}
+              size="small"
+            />
+            <Divider />
+            <div className="text-center">
+              <Button type="link" size="small">查看所有报告</Button>
+            </div>
+          </Card>
+
+          <Card title="使用提示" size="small" className="mt-4">
+            <div className="text-sm text-gray-600 space-y-2">
+              <p>• 选择合适的报告模板以快速开始</p>
+              <p>• 自定义报告配置以满足特定需求</p>
+              <p>• PDF格式适合分享，Excel适合数据分析</p>
+              <p>• 生成时间取决于数据量和复杂度</p>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ReportGenerator;

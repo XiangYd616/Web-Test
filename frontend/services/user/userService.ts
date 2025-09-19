@@ -1,4 +1,4 @@
-import { unifiedApiService } from '../api/apiService';
+import { unifiedApiService } from '../api/baseApiService';
 
 export interface UserProfile {
   id: string;
@@ -105,7 +105,7 @@ class UserService {
   // 获取用户个人资料
   async getProfile(): Promise<UserProfile> {
     try {
-      const response = await unifiedApiService.get('/api/user/profile');
+      const response = await unifiedApiService.apiGet('/api/user/profile');
       if (response.success) {
         return response.data.user;
       }
@@ -119,7 +119,7 @@ class UserService {
   // 更新用户个人资料
   async updateProfile(data: UpdateProfileData): Promise<UserProfile> {
     try {
-      const response = await unifiedApiService.put('/api/user/profile', data);
+      const response = await unifiedApiService.apiPut('/api/user/profile', data);
       if (response.success) {
         return response.data.user;
       }
@@ -133,7 +133,7 @@ class UserService {
   // 获取用户统计信息
   async getUserStats(): Promise<UserStats> {
     try {
-      const response = await unifiedApiService.get('/api/user/stats');
+      const response = await unifiedApiService.apiGet('/api/user/stats');
       if (response.success) {
         return response.data;
       }
@@ -147,7 +147,7 @@ class UserService {
   // 获取用户设置
   async getSettings(): Promise<UserSettings> {
     try {
-      const response = await unifiedApiService.get('/api/user/settings');
+      const response = await unifiedApiService.apiGet('/api/user/settings');
       if (response.success) {
         return response.data.settings;
       }
@@ -161,7 +161,7 @@ class UserService {
   // 更新用户设置
   async updateSettings(settings: Partial<UserSettings>): Promise<UserSettings> {
     try {
-      const response = await unifiedApiService.put('/api/user/settings', { settings });
+      const response = await unifiedApiService.apiPut('/api/user/settings', { settings });
       if (response.success) {
         return response.data.settings;
       }
@@ -178,7 +178,7 @@ class UserService {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await unifiedApiService.post('/api/user/avatar', formData, {
+      const response = await unifiedApiService.apiPost('/api/user/avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -197,7 +197,7 @@ class UserService {
   // 删除用户头像
   async deleteAvatar(): Promise<void> {
     try {
-      const response = await unifiedApiService.delete('/api/user/avatar');
+      const response = await unifiedApiService.apiDelete('/api/user/avatar');
       if (!response.success) {
         throw new Error(response.message || '删除头像失败');
       }
@@ -210,7 +210,7 @@ class UserService {
   // 修改密码
   async changePassword(data: ChangePasswordData): Promise<void> {
     try {
-      const response = await unifiedApiService.put('/api/user/password', data);
+      const response = await unifiedApiService.apiPut('/api/user/password', data);
       if (!response.success) {
         throw new Error(response.message || '修改密码失败');
       }
@@ -223,7 +223,7 @@ class UserService {
   // 获取用户收藏夹
   async getBookmarks(): Promise<BookmarkItem[]> {
     try {
-      const response = await unifiedApiService.get('/api/user/bookmarks');
+      const response = await unifiedApiService.apiGet('/api/user/bookmarks');
       if (response.success) {
         return response.data.bookmarks;
       }
@@ -237,7 +237,7 @@ class UserService {
   // 添加收藏
   async addBookmark(bookmark: Omit<BookmarkItem, 'id' | 'createdAt' | 'visitCount'>): Promise<BookmarkItem> {
     try {
-      const response = await unifiedApiService.post('/api/user/bookmarks', bookmark);
+      const response = await unifiedApiService.apiPost('/api/user/bookmarks', bookmark);
       if (response.success) {
         return response.data.bookmark;
       }
@@ -251,7 +251,7 @@ class UserService {
   // 更新收藏
   async updateBookmark(id: string, updates: Partial<BookmarkItem>): Promise<BookmarkItem> {
     try {
-      const response = await unifiedApiService.put(`/api/user/bookmarks/${id}`, updates);
+      const response = await unifiedApiService.apiPut(`/api/user/bookmarks/${id}`, updates);
       if (response.success) {
         return response.data.bookmark;
       }

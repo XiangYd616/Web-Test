@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle, Clock, Eye, Globe, Grid, Monitor, Settings, Smartphone, Tablet, XCircle } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import { URLInput } from '../components/testing';
+import { URLInput } from '../components/ui';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';

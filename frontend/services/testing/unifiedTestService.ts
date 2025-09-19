@@ -41,7 +41,7 @@ class SimpleEventEmitter {
   }
 }
 import { TestType } from '../../types/enums';
-import { unifiedApiService } from '../api/unifiedApiService';
+import { unifiedApiService } from '../api/baseApiService';
 import { testResultsCache } from '../cache/testResultsCache';
 
 // 统一的测试配置接口
@@ -241,7 +241,7 @@ export class UnifiedTestService extends SimpleEventEmitter {
    * 使用统一API执行测试
    */
   private async executeWithUnifiedApi(config: UnifiedTestConfig): Promise<any> {
-    const response = await unifiedApiService.post(this.config.apiEndpoint, {
+    const response = await unifiedApiService.apiPost(this.config.apiEndpoint, {
       testType: config.testType,
       targetUrl: config.targetUrl,
       configuration: config.configuration,

@@ -163,10 +163,9 @@ const AppRoutes: React.FC = () => {
             <CompatibilityTest />
           </LazyPageWrapper>
         } />
+        {/* Chrome兼容性测试路由暂时禁用，重定向到通用兼容性测试 */}
         <Route path="chrome-compatibility-test" element={
-          <LazyPageWrapper>
-//             <ChromeCompatibilityTest />
-          </LazyPageWrapper>
+          <Navigate to="/compatibility-test" replace />
         } />
         <Route path="ux-test" element={
           <LazyPageWrapper>

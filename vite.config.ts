@@ -294,8 +294,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./frontend/test/setup.ts'],
-    include: ['frontend/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    exclude: [...configDefaults.exclude, 'e2e/*'],
+    include: [
+      'frontend/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+      'backend/tests/**/*.{test,spec}.{js,ts}',
+      'tests/**/*.{test,spec}.{js,ts}'
+    ],
+    exclude: [...configDefaults.exclude, 'e2e/*', 'tools/**/*'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

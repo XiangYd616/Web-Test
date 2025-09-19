@@ -27,7 +27,7 @@ import { Card,
   TableHead,
   TableRow,
   CircularProgress } from '@mui/material';
-import Grid from \"@mui/material/Grid\"
+import Grid from '@mui/material/Grid';
 import {
   TrendingUp,
   TrendingDown,
@@ -301,8 +301,8 @@ const BusinessAnalyticsDashboard: React.FC = () => {
               <MenuItem value="1h">1灏忔椂</MenuItem>
               <MenuItem value="6h">6灏忔椂</MenuItem>
               <MenuItem value="24h">24灏忔椂</MenuItem>
-              <MenuItem value="7d">7澶?/MenuItem>
-              <MenuItem value="30d">30澶?/MenuItem>
+              <MenuItem value="7d">7天</MenuItem>
+              <MenuItem value="30d">30天</MenuItem>
             </Select>
           </FormControl>
 
@@ -691,7 +691,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       <Box mt={4} pt={2} borderTop="1px solid" borderColor="divider">
         <Typography variant="body2" color="textSecondary" align="center">
           鏈€鍚庢洿鏂? {new Date(dashboardData.summary.lastUpdated).toLocaleString()} |
-          鑷姩鍒锋柊: {autoRefresh ? '寮€鍚? : '鍏抽棴'} |
+          自动刷新: {autoRefresh ? '开启' : '关闭'} |
           鏁版嵁鏉ユ簮: BusinessAnalyticsService
         </Typography>
       </Box>

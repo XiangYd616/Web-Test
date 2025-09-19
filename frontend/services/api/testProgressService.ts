@@ -3,7 +3,7 @@
  * 提供实时测试进度更新和状态监控
  */
 
-import { unifiedApiService } from './apiService';
+import { unifiedApiService } from './baseApiService';
 import type { ApiResponse } from '@shared/types';
 // 测试进度接口
 export interface TestProgress {
@@ -131,13 +131,13 @@ class TestProgressService {
   async getTestStatus(testId: string): Promise<ApiResponse<any>> {
     try {
       // 首先尝试从测试历史获取
-      const historyResponse = await unifiedApiService.get(`${this.baseUrl}/history/${testId}`);
+      const historyResponse = await unifiedApiService.apiGet(`${this.baseUrl}/history/${testId}`);
       if (historyResponse.success) {
         return historyResponse;
       }
 
       // 如果历史记录中没有，尝试从实时状态获取
-      return await unifiedApiService.get(`${this.baseUrl}/${testId}/status`);
+      return await unifiedApiService.apiGet(`${this.baseUrl}/${testId}/status`);
     } catch (error) {
       console.error('获取测试状态失败:', error);
       return {
@@ -153,7 +153,7 @@ class TestProgressService {
    */
   async getTestResult(testId: string): Promise<ApiResponse<any>> {
     try {
-      return await unifiedApiService.get(`${this.baseUrl}/${testId}/result`);
+      return await unifiedApiService.apiGet(`${this.baseUrl}/${testId}/result`);
     } catch (error) {
       console.error('获取测试结果失败:', error);
       return {
@@ -169,7 +169,7 @@ class TestProgressService {
    */
   async cancelTest(testId: string): Promise<ApiResponse<any>> {
     try {
-      const response = await unifiedApiService.post(`${this.baseUrl}/${testId}/cancel`);
+      const response = await unifiedApiService.apiPost(`${this.baseUrl}/${testId}/cancel`);
       
       // 停止监控
       this.stopMonitoring(testId);
@@ -190,7 +190,7 @@ class TestProgressService {
    */
   async stopTest(testId: string): Promise<ApiResponse<any>> {
     try {
-      const response = await unifiedApiService.post(`${this.baseUrl}/${testId}/stop`);
+      const response = await unifiedApiService.apiPost(`${this.baseUrl}/${testId}/stop`);
       
       // 停止监控
       this.stopMonitoring(testId);
@@ -237,7 +237,7 @@ class TestProgressService {
    */
   async getQueueStatus(): Promise<ApiResponse<any>> {
     try {
-      return await unifiedApiService.get(`${this.baseUrl}/queue/status`);
+      return await unifiedApiService.apiGet(`${this.baseUrl}/queue/status`);
     } catch (error) {
       console.error('获取队列状态失败:', error);
       return {
@@ -251,9 +251,9 @@ class TestProgressService {
   /**
    * 获取测试统计信息
    */
-  async getTestStatistics(timeRange: number = 30): Promise<ApiResponse<any>> {
+  async getTestStatistics(timeRange: string = '7d'): Promise<ApiResponse<any>> {
     try {
-      return await unifiedApiService.get(`${this.baseUrl}/statistics?timeRange=${timeRange}`);
+      return await unifiedApiService.apiGet(`${this.baseUrl}/statistics?timeRange=${timeRange}`);
     } catch (error) {
       console.error('获取测试统计失败:', error);
       return {

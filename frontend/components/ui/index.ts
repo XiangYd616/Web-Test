@@ -83,7 +83,6 @@ export type {
 } from './types';
 
 // URL输入组件
-export { SimpleURLInput } from './SimpleURLInput';
 export { URLInput } from './URLInput';
 
 // 徽章组件

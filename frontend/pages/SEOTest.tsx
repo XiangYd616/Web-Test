@@ -1,7 +1,7 @@
 import { AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap, BarChart3, Database, Download } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import { URLInput } from '../components/testing';
+import { URLInput } from '../components/ui';
 import type { } from '../types';
 import StructuredDataAnalyzer from '../components/seo/StructuredDataAnalyzer';
 import SEOResultVisualization from '../components/seo/SEOResultVisualization';
@@ -1095,8 +1095,8 @@ const SEOTest: React.FC = () => {
           
           {/* SEO测试内容 */}
           {activeTab === 'test' && (
-          <div>
-          {/* 测试模式选择 */}
+            <div>
+              {/* 测试模式选择 */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <div className="space-y-4">
               <div>
@@ -1549,6 +1549,8 @@ const SEOTest: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+          )}
 
           {/* 进度显示 */}
           {(isRunning || progress > 0) && (
@@ -1647,7 +1649,6 @@ const SEOTest: React.FC = () => {
                 )}
               </div>
             </div>
-          )}
           )}
           
           {/* 结果分析标签页 */}
