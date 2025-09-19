@@ -1,0 +1,54 @@
+{
+  "timestamp": "2025-09-19T08:36:12.970Z",
+  "operations": {
+    "renamed": [
+      {
+        "from": "api/apiTestEngine.js",
+        "to": "api/ApiTestEngine.js"
+      },
+      {
+        "from": "compatibility/compatibilityTestEngine.js",
+        "to": "compatibility/CompatibilityTestEngine.js"
+      },
+      {
+        "from": "security/securityTestEngine.js",
+        "to": "security/SecurityTestEngine.js"
+      },
+      {
+        "from": "stress/stressTestEngine.js",
+        "to": "stress/StressTestEngine.js"
+      },
+      {
+        "from": "website/websiteTestEngine.js",
+        "to": "website/WebsiteTestEngine.js"
+      }
+    ],
+    "updated": [
+      "routes/database.js",
+      "routes/network.js",
+      "routes/stress.js",
+      "routes/test.js",
+      "backend\\services\\core\\TestEngineService.js",
+      "backend\\services\\testing\\RealtimeTestRunner.js",
+      "backend\\services\\testing\\TestManagementService.js",
+      "backend\\services\\testing\\UserTestManager.js"
+    ],
+    "created": [
+      "database/index.js",
+      "network/index.js",
+      "core/index.js"
+    ],
+    "errors": [],
+    "warnings": [
+      "BaseTestEngine.ts 保留为TypeScript文件",
+      "RegressionTestEngine.ts 保留为TypeScript文件"
+    ]
+  },
+  "summary": {
+    "renamed": 5,
+    "created": 3,
+    "updated": 8,
+    "warnings": 2,
+    "errors": 0
+  }
+}
