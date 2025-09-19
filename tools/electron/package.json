@@ -131,7 +131,7 @@
     "sqlite3": "^5.1.6",
     "better-sqlite3": "^9.2.2",
     "playwright": "^1.40.0",
-    "puppeteer": "^21.6.1",
+    "puppeteer": "^24.10.2",
     "node-fetch": "^3.3.2",
     "fs-extra": "^11.2.0",
     "archiver": "^6.0.1",

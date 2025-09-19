@@ -1,8 +1,26 @@
 {
   "name": "test-web-shared",
   "version": "1.0.0",
-  "type": "commonjs",
+  "type": "module",
   "description": "Shared utilities and types for Test Web App",
   "main": "index.js",
-  "private": true
+  "types": "index.d.ts",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
