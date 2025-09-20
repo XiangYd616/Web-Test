@@ -12,7 +12,8 @@ const { URL } = require('url');
 const MetaTagAnalyzer = require('./analyzers/MetaTagAnalyzer');
 const ContentAnalyzer = require('./analyzers/ContentAnalyzer');
 const ContentQualityAnalyzer = require('./analyzers/ContentQualityAnalyzer');
-const PerformanceAnalyzer = require('./analyzers/PerformanceAnalyzer');
+// 使用共享性能指标服务替代本地PerformanceAnalyzer
+const PerformanceMetricsService = require('../shared/services/PerformanceMetricsService');
 const StructuredDataAnalyzer = require('./analyzers/StructuredDataAnalyzer');
 const LinkAnalyzer = require('./analyzers/LinkAnalyzer');
 const MobileOptimizationAnalyzer = require('./analyzers/MobileOptimizationAnalyzer');
@@ -303,11 +304,66 @@ class SEOAnalyzer {
   }
 
   /**
-   * 性能分析
+   * 性能分析 - 使用共享服务
    */
   async analyzePerformance(pageData) {
-    const analyzer = new PerformanceAnalyzer();
-    return await analyzer.analyze(pageData);
+    try {
+      // 初始化性能指标服务
+      const metricsService = new PerformanceMetricsService();
+      await metricsService.initialize();
+      
+      // 收集性能指标
+      const metricsResult = await metricsService.collectMetrics(pageData.url, {
+        iterations: 1, // SEO分析中只需要一次
+        userAgent: this.options.userAgent,
+        includeContent: false // 已经有页面数据了
+      });
+      
+      if (metricsResult.success) {
+        const metrics = metricsResult.data;
+        
+        // 转换为SEO分析器期望的格式
+        return {
+          basicTiming: {
+            loadTime: metrics.basicTiming.totalTime.avg,
+            ttfb: metrics.basicTiming.ttfb.avg,
+            dnsTime: metrics.basicTiming.dnsTime.avg,
+            connectionTime: metrics.basicTiming.connectionTime.avg,
+            downloadTime: metrics.basicTiming.downloadTime.avg
+          },
+          coreWebVitals: metrics.coreWebVitals,
+          performanceScore: metrics.performanceScore,
+          networkMetrics: metrics.networkMetrics,
+          recommendations: metricsService.generateOptimizationRecommendations(metrics),
+          success: true,
+          source: 'shared-service'
+        };
+      } else {
+        console.warn('性能指标收集失败，使用基础数据:', metricsResult.error);
+        
+        // 降级到基础性能数据
+        return {
+          basicTiming: {
+            loadTime: pageData.loadTime || 0,
+            ttfb: 0,
+            dnsTime: 0,
+            connectionTime: 0,
+            downloadTime: pageData.loadTime || 0
+          },
+          performanceScore: { score: 50, grade: 'C' },
+          success: false,
+          error: metricsResult.error,
+          source: 'fallback'
+        };
+      }
+    } catch (error) {
+      console.error('性能分析失败:', error);
+      return {
+        success: false,
+        error: error.message,
+        source: 'error'
+      };
+    }
   }
 
   /**

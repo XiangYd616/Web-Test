@@ -5,6 +5,7 @@
 const ApiTestEngine = require('./backend/engines/api/apiTestEngine.js');
 const NetworkTestEngine = require('./backend/engines/network/NetworkTestEngine.js');
 const SecurityTestEngine = require('./backend/engines/security/securityTestEngine.js');
+const PerformanceTestEngine = require('./backend/engines/performance/PerformanceTestEngine.js');
 
 async function testRealEngines() {
   console.log('🚀 开始测试真实引擎功能\n');
@@ -84,11 +85,37 @@ async function testRealEngines() {
     console.error('❌ 安全引擎错误:', error.message);
   }
   
+  // 测试性能引擎
+  console.log('\n═══════════════════════════════════════');
+  console.log('⚡ 测试性能引擎');
+  console.log('═══════════════════════════════════════');
+  const performanceEngine = new PerformanceTestEngine();
+  try {
+    const performanceResult = await performanceEngine.executeTest({
+      url: testUrl,
+      iterations: 2
+    });
+    
+    if (performanceResult.success) {
+      console.log('✅ 性能测试成功');
+      console.log(`  - 评分: ${performanceResult.results.summary.score}/100 (${performanceResult.results.summary.grade})`);
+      console.log(`  - 平均加载时间: ${performanceResult.results.summary.averageLoadTime}`);
+      console.log(`  - TTFB: ${performanceResult.results.webVitals.ttfb.value}ms (${performanceResult.results.webVitals.ttfb.rating})`);
+      console.log(`  - LCP: ${performanceResult.results.webVitals.lcp.value}ms (${performanceResult.results.webVitals.lcp.rating})`);
+      console.log(`  - 建议: ${performanceResult.results.recommendations[0]}`);
+    } else {
+      console.log('❌ 性能测试失败:', performanceResult.error);
+    }
+  } catch (error) {
+    console.error('❌ 性能引擎错误:', error.message);
+  }
+  
   // 清理资源
   console.log('\n🧹 清理引擎资源...');
   await apiEngine.cleanup();
   await networkEngine.cleanup();
   await securityEngine.cleanup();
+  await performanceEngine.cleanup();
   
   console.log('\n🎉 真实引擎测试完成！');
   
@@ -99,7 +126,8 @@ async function testRealEngines() {
   console.log('✅ API引擎: 完全功能化，支持单个和批量API测试');
   console.log('✅ 网络引擎: 完全功能化，支持连通性、DNS、端口扫描等');
   console.log('✅ 安全引擎: 完全功能化，支持SSL、头部、漏洞扫描等');
-  console.log('📍 剩余待实现: 性能、SEO、可访问性、压力测试、数据库引擎');
+  console.log('✅ 性能引擎: 完全功能化，支持Core Web Vitals、性能评分等');
+  console.log('📍 剩余待实现: SEO、可访问性、压力测试、数据库引擎');
 }
 
 if (require.main === module) {

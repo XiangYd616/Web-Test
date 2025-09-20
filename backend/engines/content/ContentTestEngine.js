@@ -1,39 +1,58 @@
 /**
- * 内容测试引擎
- * 内容质量分析、可读性检测、SEO优化建议
+ * 内容测试引擎（重构版本）
+ * 使用共享服务，消除重复代码
  */
 
-const Joi = require('joi');
-const axios = require('axios');
-const cheerio = require('cheerio');
-const { URL } = require('url');
+import HTMLParsingService from '../shared/services/HTMLParsingService.js';
+import ContentAnalysisService from '../shared/services/ContentAnalysisService.js';
+import PerformanceMetricsService from '../shared/services/PerformanceMetricsService.js';
+import https from 'https';
+import http from 'http';
+import { URL } from 'url';
 
 class ContentTestEngine {
   constructor() {
     this.name = 'content';
-    this.version = '1.0.0';
+    this.version = '2.0.0';
+    this.description = '内容测试引擎 (使用共享服务)';
     this.activeTests = new Map();
-    this.stopWords = {
-      en: ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those'],
-      zh: ['的', '是', '在', '有', '和', '与', '或', '但', '不', '也', '都', '很', '更', '最', '就', '会', '能', '要', '可以', '应该', '必须', '这', '那', '这个', '那个', '什么', '怎么', '为什么', '哪里', '哪个']
-    };
+    
+    // 初始化服务
+    this.htmlService = new HTMLParsingService();
+    this.contentService = new ContentAnalysisService();
+    this.performanceService = new PerformanceMetricsService();
+    this.initialized = false;
+  }
+
+  async initialize() {
+    if (this.initialized) {
+      return true;
+    }
+    
+    // 初始化所有服务
+    await Promise.all([
+      this.htmlService.initialize(),
+      this.contentService.initialize(),
+      this.performanceService.initialize()
+    ]);
+    
+    this.initialized = true;
+    return true;
   }
 
   async checkAvailability() {
-    try {
-      return {
-        available: true,
-        version: this.version,
-        capabilities: this.getCapabilities(),
-        dependencies: ['axios', 'cheerio']
-      };
-    } catch (error) {
-      return {
-        available: false,
-        error: error.message,
-        dependencies: ['axios', 'cheerio']
-      };
-    }
+    await this.initialize();
+
+    return {
+      available: this.initialized,
+      version: this.version,
+      capabilities: this.getCapabilities(),
+      services: {
+        html: this.htmlService.checkAvailability(),
+        content: this.contentService.checkAvailability(),
+        performance: this.performanceService.checkAvailability()
+      }
+    };
   }
 
   getCapabilities() {
@@ -71,49 +90,41 @@ class ContentTestEngine {
   }
 
   validateConfig(config) {
-    const schema = Joi.object({
-      url: Joi.string().uri().required(),
-      analysisTypes: Joi.array().items(
-        Joi.string().valid(
-          'content-quality', 'readability', 'seo-optimization',
-          'keyword-analysis', 'content-structure', 'duplicate-content',
-          'content-freshness', 'multimedia-analysis'
-        )
-      ).default(['content-quality', 'readability', 'seo-optimization']),
-      language: Joi.string().valid('en', 'zh', 'auto-detect').default('auto-detect'),
-      targetKeywords: Joi.array().items(Joi.string()).default([]),
-      minWordCount: Joi.number().min(0).default(300),
-      maxWordCount: Joi.number().min(100).default(10000),
-      includeImages: Joi.boolean().default(true),
-      includeLinks: Joi.boolean().default(true),
-      seoChecks: Joi.object({
-        titleLength: Joi.object({
-          min: Joi.number().default(30),
-          max: Joi.number().default(60)
-        }).default(),
-        metaDescriptionLength: Joi.object({
-          min: Joi.number().default(120),
-          max: Joi.number().default(160)
-        }).default(),
-        headingStructure: Joi.boolean().default(true),
-        keywordDensity: Joi.object({
-          min: Joi.number().default(0.5),
-          max: Joi.number().default(3.0)
-        }).default()
-      }).default({})
-    });
-
-    const { error, value } = schema.validate(config);
-    if (error) {
-      throw new Error(`配置验证失败: ${error.details[0].message}`);
+    if (!config || !config.url) {
+      throw new Error('配置验证失败: URL必填');
     }
-    return value;
+
+    try {
+      new URL(config.url);
+    } catch (error) {
+      throw new Error('配置验证失败: URL格式无效');
+    }
+
+    return {
+      url: config.url,
+      analysisTypes: config.analysisTypes || ['content-quality', 'readability', 'seo-optimization'],
+      language: config.language || 'auto-detect',
+      targetKeywords: config.targetKeywords || [],
+      minWordCount: config.minWordCount || 300,
+      maxWordCount: config.maxWordCount || 10000,
+      includeImages: config.includeImages !== false,
+      includeLinks: config.includeLinks !== false,
+      includePerformance: config.includePerformance || false,
+      seoChecks: {
+        titleLength: { min: 30, max: 60 },
+        metaDescriptionLength: { min: 120, max: 160 },
+        headingStructure: true,
+        keywordDensity: { min: 0.5, max: 3.0 },
+        ...config.seoChecks
+      }
+    };
   }
 
   async runContentTest(config) {
     const testId = `content_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     
     try {
+      await this.initialize();
       const validatedConfig = this.validateConfig(config);
       
       this.activeTests.set(testId, {
@@ -156,70 +167,115 @@ class ContentTestEngine {
       const pageData = await this.fetchPageContent(config.url);
       this.updateTestProgress(testId, 15, '解析页面结构');
       
-      const $ = cheerio.load(pageData.html);
+      // 使用HTML解析服务解析页面
+      const parseResult = this.htmlService.parseHTML(pageData.html);
+      if (!parseResult.success) {
+        throw new Error(`HTML解析失败: ${parseResult.error}`);
+      }
+
+      this.updateTestProgress(testId, 25, '提取内容数据');
       
-      // 提取内容
-      const contentData = this.extractContentData($, config);
-      this.updateTestProgress(testId, 25, '提取文本内容');
-      
-      // 检测语言
-      const detectedLanguage = config.language === 'auto-detect' 
-        ? this.detectLanguage(contentData.textContent)
-        : config.language;
-      
+      // 使用HTML解析服务提取完整分析数据
+      const htmlAnalysis = await this.htmlService.analyzeHTML(pageData.html, {
+        baseUrl: config.url
+      });
+
+      if (!htmlAnalysis.success) {
+        throw new Error(`HTML分析失败: ${htmlAnalysis.error}`);
+      }
+
+      this.updateTestProgress(testId, 40, '准备内容分析数据');
+
+      // 准备内容数据用于分析
+      const contentData = {
+        textContent: htmlAnalysis.data.textContent.totalText,
+        headings: htmlAnalysis.data.headingStructure.headings,
+        images: htmlAnalysis.data.images.images,
+        links: htmlAnalysis.data.links.links,
+        paragraphCount: htmlAnalysis.data.textContent.paragraphCount,
+        metaTags: htmlAnalysis.data.metaTags.metaData
+      };
+
+      this.updateTestProgress(testId, 50, '执行内容质量分析');
+
+      // 使用内容分析服务进行分析
+      const contentAnalysisResult = await this.contentService.analyzeContent(contentData, {
+        analysisTypes: config.analysisTypes,
+        language: config.language,
+        targetKeywords: config.targetKeywords,
+        ...config
+      });
+
+      if (!contentAnalysisResult.success) {
+        console.warn('内容分析失败，使用基础数据:', contentAnalysisResult.error);
+      }
+
+      this.updateTestProgress(testId, 70, 'SEO优化分析');
+
+      // SEO分析
+      const seoAnalysis = await this.analyzeSEO(htmlAnalysis.data, config);
+
+      this.updateTestProgress(testId, 85, '多媒体内容分析');
+
+      // 多媒体分析
+      const multimediaAnalysis = this.analyzeMultimedia(htmlAnalysis.data);
+
+      // 性能指标（可选）
+      let performanceAnalysis = null;
+      if (config.includePerformance) {
+        this.updateTestProgress(testId, 90, '性能指标收集');
+        const perfResult = await this.performanceService.collectMetrics(config.url, {
+          iterations: 1,
+          includeContent: false
+        });
+        
+        if (perfResult.success) {
+          performanceAnalysis = {
+            loadTime: perfResult.data.basicTiming.totalTime.avg,
+            ttfb: perfResult.data.basicTiming.ttfb.avg,
+            performanceScore: perfResult.data.performanceScore.score
+          };
+        }
+      }
+
+      // 汇总结果
       const results = {
         testId,
         url: config.url,
         timestamp: new Date().toISOString(),
         config,
-        language: detectedLanguage,
-        contentData,
-        analyses: {},
+        language: this.detectLanguage(contentData.textContent),
+        
+        // 基础数据
+        htmlAnalysis: htmlAnalysis.data,
+        
+        // 内容分析结果
+        contentAnalysis: contentAnalysisResult.success ? contentAnalysisResult.data : null,
+        
+        // SEO分析
+        seoAnalysis,
+        
+        // 多媒体分析
+        multimediaAnalysis,
+        
+        // 性能分析（可选）
+        performanceAnalysis,
+        
+        // 综合评分
         summary: {
           totalIssues: 0,
           criticalIssues: 0,
           warnings: 0,
           suggestions: 0,
           overallScore: 0
-        },
-        recommendations: []
+        }
       };
 
-      // 执行各种分析
-      let currentProgress = 30;
-      const progressPerAnalysis = 60 / config.analysisTypes.length;
-
-      for (const analysisType of config.analysisTypes) {
-        this.updateTestProgress(testId, currentProgress, `执行${this.getAnalysisTypeName(analysisType)}`);
-        
-        try {
-          const analysisResult = await this.performSpecificAnalysis(
-            analysisType, contentData, $, config, detectedLanguage
-          );
-          results.analyses[analysisType] = analysisResult;
-          
-          // 更新摘要统计
-          results.summary.totalIssues += analysisResult.issues?.length || 0;
-          results.summary.criticalIssues += analysisResult.critical?.length || 0;
-          results.summary.warnings += analysisResult.warnings?.length || 0;
-          results.summary.suggestions += analysisResult.suggestions?.length || 0;
-        } catch (analysisError) {
-          results.analyses[analysisType] = {
-            error: analysisError.message,
-            completed: false
-          };
-        }
-        
-        currentProgress += progressPerAnalysis;
-      }
-
       // 计算综合评分
-      this.updateTestProgress(testId, 90, '计算综合评分');
-      results.summary.overallScore = this.calculateOverallScore(results.analyses);
+      results.summary = this.calculateOverallSummary(results);
       
       // 生成综合建议
-      this.updateTestProgress(testId, 95, '生成优化建议');
-      results.recommendations = this.generateComprehensiveRecommendations(results.analyses, config);
+      results.recommendations = this.generateComprehensiveRecommendations(results);
 
       return results;
     } catch (error) {
@@ -229,849 +285,393 @@ class ContentTestEngine {
 
   async fetchPageContent(url) {
     try {
-      const response = await axios.get(url, {
-        timeout: 30000,
-        headers: {
-          'User-Agent': 'ContentTestEngine/1.0.0 (Content Analysis Bot)'
-        }
-      });
+      const urlObj = new URL(url);
+      const client = urlObj.protocol === 'https:' ? https : http;
       
-      return {
-        html: response.data,
-        statusCode: response.status,
-        headers: response.headers,
-        size: response.data.length
-      };
+      return new Promise((resolve, reject) => {
+        const options = {
+          hostname: urlObj.hostname,
+          port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
+          path: urlObj.pathname + urlObj.search,
+          method: 'GET',
+          headers: {
+            'User-Agent': 'ContentTestEngine/2.0.0',
+            'Accept': 'text/html,application/xhtml+xml'
+          },
+          timeout: 30000
+        };
+        
+        const req = client.request(options, (res) => {
+          let data = '';
+          
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
+          
+          res.on('end', () => {
+            resolve({
+              html: data,
+              statusCode: res.statusCode,
+              headers: res.headers,
+              size: data.length
+            });
+          });
+        });
+        
+        req.on('error', reject);
+        req.on('timeout', () => {
+          req.destroy();
+          reject(new Error('请求超时'));
+        });
+        
+        req.end();
+      });
     } catch (error) {
       throw new Error(`无法获取页面内容: ${error.message}`);
     }
   }
 
-  extractContentData($, config) {
-    const contentData = {
-      title: $('title').text().trim(),
-      metaDescription: $('meta[name="description"]').attr('content') || '',
-      metaKeywords: $('meta[name="keywords"]').attr('content') || '',
-      headings: {
-        h1: [],
-        h2: [],
-        h3: [],
-        h4: [],
-        h5: [],
-        h6: []
-      },
-      textContent: '',
-      paragraphs: [],
-      links: {
-        internal: [],
-        external: []
-      },
-      images: [],
-      lists: [],
-      tables: [],
-      forms: [],
-      scripts: [],
-      styles: [],
-      wordCount: 0,
-      sentenceCount: 0,
-      paragraphCount: 0
-    };
+  async analyzeSEO(htmlData, config) {
+    try {
+      const { metaTags, headingStructure, images, links, textContent } = htmlData;
+      const seoIssues = [];
+      const seoScore = { total: 0, maxScore: 0 };
 
-    // 提取标题
-    for (let i = 1; i <= 6; i++) {
-      $(`h${i}`).each((index, element) => {
-        const text = $(element).text().trim();
-        if (text) {
-          contentData.headings[`h${i}`].push({
-            text,
-            level: i,
-            position: index
+      // 标题分析
+      const titleAnalysis = {
+        title: metaTags.metaData.title,
+        length: metaTags.metaData.title.length,
+        hasTitle: metaTags.metaData.title.length > 0,
+        isOptimal: metaTags.metaData.title.length >= config.seoChecks.titleLength.min && 
+                   metaTags.metaData.title.length <= config.seoChecks.titleLength.max,
+        isTooShort: metaTags.metaData.title.length < config.seoChecks.titleLength.min,
+        isTooLong: metaTags.metaData.title.length > config.seoChecks.titleLength.max
+      };
+
+      seoScore.maxScore += 20;
+      if (titleAnalysis.hasTitle) {
+        if (titleAnalysis.isOptimal) seoScore.total += 20;
+        else if (!titleAnalysis.isTooShort) seoScore.total += 10;
+      } else {
+        seoIssues.push({
+          type: 'title-missing',
+          severity: 'critical',
+          message: '缺少页面标题'
+        });
+      }
+
+      // Meta描述分析
+      const metaDescription = metaTags.metaData.description;
+      const descriptionAnalysis = {
+        description: metaDescription,
+        length: metaDescription.length,
+        hasDescription: metaDescription.length > 0,
+        isOptimal: metaDescription.length >= config.seoChecks.metaDescriptionLength.min && 
+                   metaDescription.length <= config.seoChecks.metaDescriptionLength.max,
+        isTooShort: metaDescription.length < config.seoChecks.metaDescriptionLength.min,
+        isTooLong: metaDescription.length > config.seoChecks.metaDescriptionLength.max
+      };
+
+      seoScore.maxScore += 15;
+      if (descriptionAnalysis.hasDescription) {
+        if (descriptionAnalysis.isOptimal) seoScore.total += 15;
+        else if (!descriptionAnalysis.isTooShort) seoScore.total += 10;
+      } else {
+        seoIssues.push({
+          type: 'meta-description-missing',
+          severity: 'high',
+          message: '缺少Meta描述'
+        });
+      }
+
+      // 标题结构分析
+      seoScore.maxScore += 20;
+      if (headingStructure.hasH1) {
+        seoScore.total += 10;
+        if (!headingStructure.hasMultipleH1) {
+          seoScore.total += 10;
+        } else {
+          seoIssues.push({
+            type: 'multiple-h1',
+            severity: 'high',
+            message: `页面有${headingStructure.h1Count}个H1标题`
           });
         }
-      });
-    }
+      } else {
+        seoIssues.push({
+          type: 'h1-missing',
+          severity: 'critical',
+          message: '缺少H1标题'
+        });
+      }
 
-    // 提取主要文本内容
-    $('p, article, section, main, .content, .post, .article').each((index, element) => {
-      const text = $(element).text().trim();
-      if (text && text.length > 10) {
-        contentData.paragraphs.push(text);
-        contentData.textContent += text + ' ';
+      // 图片优化分析
+      seoScore.maxScore += 15;
+      if (images.totalCount > 0) {
+        const altPercentage = (images.withAlt / images.totalCount) * 100;
+        if (altPercentage >= 90) seoScore.total += 15;
+        else if (altPercentage >= 70) seoScore.total += 10;
+        else seoScore.total += 5;
+
+        if (images.withoutAlt > 0) {
+          seoIssues.push({
+            type: 'missing-alt-text',
+            severity: 'medium',
+            message: `${images.withoutAlt}张图片缺少alt属性`
+          });
+        }
+      } else {
+        seoScore.total += 10; // 没有图片也不算问题
+      }
+
+      // 链接分析
+      seoScore.maxScore += 10;
+      if (links.totalCount > 0) {
+        seoScore.total += 5;
+        if (links.internal > 0) seoScore.total += 3;
+        if (links.external > 0) seoScore.total += 2;
+
+        if (links.externalWithoutNoopener > 0) {
+          seoIssues.push({
+            type: 'external-links-security',
+            severity: 'low',
+            message: `${links.externalWithoutNoopener}个外部链接缺少安全属性`
+          });
+        }
+      }
+
+      // 内容长度分析
+      seoScore.maxScore += 20;
+      const wordCount = textContent.wordCount;
+      if (wordCount >= config.minWordCount) {
+        if (wordCount >= 800) seoScore.total += 20;
+        else if (wordCount >= 500) seoScore.total += 15;
+        else seoScore.total += 10;
+      } else {
+        seoIssues.push({
+          type: 'content-too-short',
+          severity: 'high',
+          message: `内容过短 (${wordCount}词)，建议至少${config.minWordCount}词`
+        });
+      }
+
+      const finalScore = seoScore.maxScore > 0 ? Math.round((seoScore.total / seoScore.maxScore) * 100) : 0;
+
+      return {
+        title: titleAnalysis,
+        metaDescription: descriptionAnalysis,
+        headingStructure: {
+          hasH1: headingStructure.hasH1,
+          h1Count: headingStructure.h1Count,
+          totalHeadings: headingStructure.totalCount,
+          hasProperHierarchy: headingStructure.hierarchy.isProper
+        },
+        images: {
+          total: images.totalCount,
+          withAlt: images.withAlt,
+          withoutAlt: images.withoutAlt,
+          altCoverage: images.totalCount > 0 ? Math.round((images.withAlt / images.totalCount) * 100) : 0
+        },
+        links: {
+          total: links.totalCount,
+          internal: links.internal,
+          external: links.external,
+          securityIssues: links.externalWithoutNoopener
+        },
+        content: {
+          wordCount: wordCount,
+          isAdequate: wordCount >= config.minWordCount
+        },
+        score: finalScore,
+        grade: this.getSEOGrade(finalScore),
+        issues: seoIssues
+      };
+    } catch (error) {
+      return {
+        error: error.message,
+        score: 0,
+        grade: 'F'
+      };
+    }
+  }
+
+  analyzeMultimedia(htmlData) {
+    try {
+      const { images } = htmlData;
+      
+      // 分析图片
+      const imageAnalysis = {
+        totalImages: images.totalCount,
+        formats: this.analyzeImageFormats(images.images),
+        sizeIssues: this.identifyImageSizeIssues(images.images),
+        lazyLoadingSupport: images.images.filter(img => img.loading === 'lazy').length,
+        responsiveImages: images.images.filter(img => img.srcset).length
+      };
+
+      // 检测视频和音频（基础检测）
+      const videoCount = 0; // HTML解析服务暂不支持，可以扩展
+      const audioCount = 0; // HTML解析服务暂不支持，可以扩展
+
+      return {
+        images: imageAnalysis,
+        videos: { count: videoCount },
+        audios: { count: audioCount },
+        totalMultimedia: imageAnalysis.totalImages + videoCount + audioCount,
+        hasMultimedia: imageAnalysis.totalImages + videoCount + audioCount > 0,
+        optimizationScore: this.calculateMultimediaScore(imageAnalysis, videoCount, audioCount)
+      };
+    } catch (error) {
+      return {
+        error: error.message,
+        optimizationScore: 0
+      };
+    }
+  }
+
+  // 工具方法
+
+  detectLanguage(textContent) {
+    if (!textContent) return 'unknown';
+    
+    // 简单的语言检测
+    const chineseChars = (textContent.match(/[\u4e00-\u9fff]/g) || []).length;
+    const totalChars = textContent.length;
+    
+    if (chineseChars / totalChars > 0.1) return 'zh';
+    return 'en';
+  }
+
+  analyzeImageFormats(images) {
+    const formats = {};
+    
+    images.forEach(image => {
+      if (image.src) {
+        const extension = image.src.split('.').pop()?.toLowerCase();
+        if (extension) {
+          formats[extension] = (formats[extension] || 0) + 1;
+        }
       }
     });
+    
+    return formats;
+  }
 
-    // 如果没有找到主要内容，使用body
-    if (contentData.textContent.trim().length === 0) {
-      const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
-      contentData.textContent = bodyText;
-      contentData.paragraphs = [bodyText];
+  identifyImageSizeIssues(images) {
+    const issues = [];
+    
+    images.forEach((image, index) => {
+      if (!image.width && !image.height) {
+        issues.push({
+          index,
+          issue: 'missing-dimensions',
+          message: '图片缺少尺寸属性'
+        });
+      }
+    });
+    
+    return issues;
+  }
+
+  calculateMultimediaScore(imageAnalysis, videoCount, audioCount) {
+    let score = 50; // 基础分
+    
+    // 图片优化评分
+    if (imageAnalysis.totalImages > 0) {
+      score += 20;
+      
+      if (imageAnalysis.lazyLoadingSupport > 0) {
+        score += 15;
+      }
+      
+      if (imageAnalysis.responsiveImages > 0) {
+        score += 15;
+      }
+    }
+    
+    return Math.min(100, score);
+  }
+
+  getSEOGrade(score) {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+  }
+
+  calculateOverallSummary(results) {
+    let totalIssues = 0;
+    let criticalIssues = 0;
+    let warnings = 0;
+    let totalScore = 0;
+    let scoreCount = 0;
+
+    // 统计内容分析问题
+    if (results.contentAnalysis && results.contentAnalysis.summary) {
+      totalIssues += results.contentAnalysis.summary.totalIssues;
+      criticalIssues += results.contentAnalysis.summary.criticalIssues;
+      warnings += results.contentAnalysis.summary.warnings;
+      totalScore += results.contentAnalysis.summary.overallScore;
+      scoreCount++;
     }
 
-    // 统计字词句段落
-    contentData.wordCount = this.countWords(contentData.textContent);
-    contentData.sentenceCount = this.countSentences(contentData.textContent);
-    contentData.paragraphCount = contentData.paragraphs.length;
-
-    // 提取链接
-    if (config.includeLinks) {
-      $('a[href]').each((index, element) => {
-        const href = $(element).attr('href');
-        const text = $(element).text().trim();
-        const linkData = { href, text, title: $(element).attr('title') || '' };
-        
-        if (href.startsWith('http') || href.startsWith('//')) {
-          contentData.links.external.push(linkData);
-        } else if (href.startsWith('/') || href.startsWith('#') || !href.includes('://')) {
-          contentData.links.internal.push(linkData);
-        }
-      });
+    // 统计SEO问题
+    if (results.seoAnalysis && results.seoAnalysis.issues) {
+      totalIssues += results.seoAnalysis.issues.length;
+      criticalIssues += results.seoAnalysis.issues.filter(i => i.severity === 'critical').length;
+      warnings += results.seoAnalysis.issues.filter(i => i.severity === 'medium').length;
+      totalScore += results.seoAnalysis.score;
+      scoreCount++;
     }
 
-    // 提取图片
-    if (config.includeImages) {
-      $('img').each((index, element) => {
-        const src = $(element).attr('src');
-        const alt = $(element).attr('alt') || '';
-        const title = $(element).attr('title') || '';
-        const width = $(element).attr('width');
-        const height = $(element).attr('height');
-        
-        contentData.images.push({
-          src,
-          alt,
-          title,
-          width: width ? parseInt(width) : null,
-          height: height ? parseInt(height) : null,
-          hasAlt: !!alt,
-          hasTitle: !!title
+    return {
+      totalIssues,
+      criticalIssues,
+      warnings,
+      suggestions: totalIssues - criticalIssues - warnings,
+      overallScore: scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0
+    };
+  }
+
+  generateComprehensiveRecommendations(results) {
+    const recommendations = [];
+
+    // 从内容分析获取建议
+    if (results.contentAnalysis && results.contentAnalysis.recommendations) {
+      recommendations.push(...results.contentAnalysis.recommendations);
+    }
+
+    // 从SEO分析获取建议
+    if (results.seoAnalysis && results.seoAnalysis.issues) {
+      results.seoAnalysis.issues.forEach(issue => {
+        recommendations.push({
+          category: 'seo',
+          type: issue.type,
+          priority: issue.severity,
+          message: issue.message,
+          suggestion: this.getSEOSuggestion(issue.type)
         });
       });
     }
 
-    // 提取列表
-    $('ul, ol').each((index, element) => {
-      const type = element.tagName.toLowerCase();
-      const items = [];
-      $(element).find('li').each((i, li) => {
-        items.push($(li).text().trim());
-      });
-      contentData.lists.push({ type, items, count: items.length });
-    });
+    // 按优先级排序
+    const priorityOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
+    recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
-    // 提取表格
-    $('table').each((index, element) => {
-      const rows = $(element).find('tr').length;
-      const cols = $(element).find('tr:first th, tr:first td').length;
-      const hasHeaders = $(element).find('th').length > 0;
-      contentData.tables.push({ rows, cols, hasHeaders });
-    });
-
-    return contentData;
-  }
-
-  detectLanguage(text) {
-    const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;
-    const totalChars = text.replace(/\s/g, '').length;
-    
-    if (chineseChars / totalChars > 0.3) {
-      return 'zh';
-    }
-    return 'en';
-  }
-
-  countWords(text) {
-    if (!text) return 0;
-    // 处理中文和英文混合文本
-    const chineseWords = (text.match(/[\u4e00-\u9fff]/g) || []).length;
-    const englishWords = (text.match(/\b[a-zA-Z]+\b/g) || []).length;
-    return chineseWords + englishWords;
-  }
-
-  countSentences(text) {
-    if (!text) return 0;
-    // 匹配句号、问号、感叹号等
-    const sentences = text.match(/[.!?。！？]+/g);
-    return sentences ? sentences.length : 0;
-  }
-
-  async performSpecificAnalysis(analysisType, contentData, $, config, language) {
-    switch (analysisType) {
-      case 'content-quality':
-        return this.analyzeContentQuality(contentData, config, language);
-      case 'readability':
-        return this.analyzeReadability(contentData, language);
-      case 'seo-optimization':
-        return this.analyzeSEO(contentData, $, config);
-      case 'keyword-analysis':
-        return this.analyzeKeywords(contentData, config, language);
-      case 'content-structure':
-        return this.analyzeContentStructure(contentData, $);
-      case 'duplicate-content':
-        return this.analyzeDuplicateContent(contentData);
-      case 'content-freshness':
-        return this.analyzeContentFreshness($, contentData);
-      case 'multimedia-analysis':
-        return this.analyzeMultimedia(contentData);
-      default:
-        throw new Error(`未支持的分析类型: ${analysisType}`);
-    }
-  }
-
-  analyzeContentQuality(contentData, config, language) {
-    const analysis = {
-      score: 0,
-      issues: [],
-      warnings: [],
-      suggestions: [],
-      metrics: {}
-    };
-
-    // 字数检查
-    analysis.metrics.wordCount = contentData.wordCount;
-    if (contentData.wordCount < config.minWordCount) {
-      analysis.issues.push(`内容字数(${contentData.wordCount})少于建议最少字数(${config.minWordCount})`);
-    } else if (contentData.wordCount > config.maxWordCount) {
-      analysis.warnings.push(`内容字数(${contentData.wordCount})超过建议最大字数(${config.maxWordCount})`);
-    }
-
-    // 段落数量检查
-    analysis.metrics.paragraphCount = contentData.paragraphCount;
-    if (contentData.paragraphCount < 3) {
-      analysis.warnings.push(`段落数量较少(${contentData.paragraphCount})，建议增加段落以提高可读性`);
-    }
-
-    // 平均段落长度
-    const avgParagraphLength = contentData.wordCount / contentData.paragraphCount;
-    analysis.metrics.avgParagraphLength = Math.round(avgParagraphLength);
-    if (avgParagraphLength > 100) {
-      analysis.suggestions.push('段落平均长度较长，建议分割为较短的段落');
-    }
-
-    // 句子数量和平均长度
-    analysis.metrics.sentenceCount = contentData.sentenceCount;
-    const avgSentenceLength = contentData.wordCount / contentData.sentenceCount;
-    analysis.metrics.avgSentenceLength = Math.round(avgSentenceLength);
-    
-    if (avgSentenceLength > 20) {
-      analysis.suggestions.push('句子平均长度较长，建议使用更简洁的表达');
-    }
-
-    // 内容丰富度
-    const uniqueWords = new Set(this.extractWords(contentData.textContent, language)).size;
-    analysis.metrics.vocabularyRichness = Math.round((uniqueWords / contentData.wordCount) * 100);
-    
-    if (analysis.metrics.vocabularyRichness < 30) {
-      analysis.suggestions.push('词汇多样性较低，建议使用更丰富的词汇');
-    }
-
-    // 计算质量评分
-    let score = 100;
-    score -= analysis.issues.length * 15;
-    score -= analysis.warnings.length * 10;
-    score -= analysis.suggestions.length * 5;
-    analysis.score = Math.max(0, score);
-
-    return analysis;
-  }
-
-  analyzeReadability(contentData, language) {
-    const analysis = {
-      score: 0,
-      readabilityScore: 0,
-      readingLevel: '',
-      issues: [],
-      warnings: [],
-      suggestions: [],
-      metrics: {}
-    };
-
-    const wordCount = contentData.wordCount;
-    const sentenceCount = contentData.sentenceCount;
-    const syllableCount = this.estimateSyllables(contentData.textContent, language);
-
-    // Flesch Reading Ease (适配中文)
-    let fleschScore;
-    if (language === 'zh') {
-      // 中文可读性评分（简化版）
-      const avgWordsPerSentence = wordCount / sentenceCount;
-      const avgSyllablesPerWord = syllableCount / wordCount;
-      fleschScore = 206.835 - (1.015 * avgWordsPerSentence) - (84.6 * avgSyllablesPerWord);
-    } else {
-      // 英文 Flesch Reading Ease
-      const avgWordsPerSentence = wordCount / sentenceCount;
-      const avgSyllablesPerWord = syllableCount / wordCount;
-      fleschScore = 206.835 - (1.015 * avgWordsPerSentence) - (84.6 * avgSyllablesPerWord);
-    }
-
-    analysis.readabilityScore = Math.max(0, Math.min(100, Math.round(fleschScore)));
-    analysis.metrics.avgWordsPerSentence = Math.round(wordCount / sentenceCount);
-    analysis.metrics.avgSyllablesPerWord = Math.round((syllableCount / wordCount) * 100) / 100;
-
-    // 确定阅读水平
-    if (analysis.readabilityScore >= 90) {
-      analysis.readingLevel = '非常容易';
-    } else if (analysis.readabilityScore >= 80) {
-      analysis.readingLevel = '容易';
-    } else if (analysis.readabilityScore >= 70) {
-      analysis.readingLevel = '较容易';
-    } else if (analysis.readabilityScore >= 60) {
-      analysis.readingLevel = '标准';
-    } else if (analysis.readabilityScore >= 50) {
-      analysis.readingLevel = '较难';
-    } else if (analysis.readabilityScore >= 30) {
-      analysis.readingLevel = '困难';
-    } else {
-      analysis.readingLevel = '非常困难';
-    }
-
-    // 生成建议
-    if (analysis.readabilityScore < 50) {
-      analysis.issues.push(`可读性评分较低(${analysis.readabilityScore})，需要简化内容表达`);
-    } else if (analysis.readabilityScore < 70) {
-      analysis.warnings.push(`可读性评分一般(${analysis.readabilityScore})，建议适当简化`);
-    }
-
-    if (analysis.metrics.avgWordsPerSentence > 20) {
-      analysis.suggestions.push('句子平均长度较长，建议分解为较短的句子');
-    }
-
-    analysis.score = Math.min(100, analysis.readabilityScore + 10);
-    return analysis;
-  }
-
-  analyzeSEO(contentData, $, config) {
-    const analysis = {
-      score: 0,
-      issues: [],
-      warnings: [],
-      suggestions: [],
-      metrics: {},
-      seoFactors: {}
-    };
-
-    // 标题分析
-    const titleLength = contentData.title.length;
-    analysis.seoFactors.title = {
-      text: contentData.title,
-      length: titleLength,
-      optimal: titleLength >= config.seoChecks.titleLength.min && titleLength <= config.seoChecks.titleLength.max
-    };
-
-    if (titleLength === 0) {
-      analysis.issues.push('页面缺少标题标签');
-    } else if (titleLength < config.seoChecks.titleLength.min) {
-      analysis.warnings.push(`标题过短(${titleLength}字符)，建议${config.seoChecks.titleLength.min}-${config.seoChecks.titleLength.max}字符`);
-    } else if (titleLength > config.seoChecks.titleLength.max) {
-      analysis.warnings.push(`标题过长(${titleLength}字符)，建议${config.seoChecks.titleLength.min}-${config.seoChecks.titleLength.max}字符`);
-    }
-
-    // Meta描述分析
-    const metaDescLength = contentData.metaDescription.length;
-    analysis.seoFactors.metaDescription = {
-      text: contentData.metaDescription,
-      length: metaDescLength,
-      optimal: metaDescLength >= config.seoChecks.metaDescriptionLength.min && metaDescLength <= config.seoChecks.metaDescriptionLength.max
-    };
-
-    if (metaDescLength === 0) {
-      analysis.issues.push('页面缺少Meta描述');
-    } else if (metaDescLength < config.seoChecks.metaDescriptionLength.min) {
-      analysis.warnings.push(`Meta描述过短(${metaDescLength}字符)`);
-    } else if (metaDescLength > config.seoChecks.metaDescriptionLength.max) {
-      analysis.warnings.push(`Meta描述过长(${metaDescLength}字符)`);
-    }
-
-    // 标题结构分析
-    const h1Count = contentData.headings.h1.length;
-    analysis.seoFactors.headingStructure = {
-      h1Count,
-      hasH1: h1Count > 0,
-      multipleH1: h1Count > 1,
-      hierarchical: this.checkHeadingHierarchy(contentData.headings)
-    };
-
-    if (h1Count === 0) {
-      analysis.issues.push('页面缺少H1标题');
-    } else if (h1Count > 1) {
-      analysis.warnings.push(`页面有多个H1标题(${h1Count}个)，建议只使用一个`);
-    }
-
-    if (!analysis.seoFactors.headingStructure.hierarchical) {
-      analysis.suggestions.push('标题层次结构不规范，建议按H1>H2>H3的顺序组织');
-    }
-
-    // 图片SEO分析
-    const imagesWithoutAlt = contentData.images.filter(img => !img.hasAlt).length;
-    analysis.seoFactors.images = {
-      total: contentData.images.length,
-      withoutAlt: imagesWithoutAlt,
-      altOptimization: ((contentData.images.length - imagesWithoutAlt) / contentData.images.length) * 100
-    };
-
-    if (imagesWithoutAlt > 0) {
-      analysis.warnings.push(`${imagesWithoutAlt}张图片缺少Alt属性`);
-    }
-
-    // 链接分析
-    analysis.seoFactors.links = {
-      internal: contentData.links.internal.length,
-      external: contentData.links.external.length,
-      total: contentData.links.internal.length + contentData.links.external.length
-    };
-
-    if (contentData.links.internal.length < 3) {
-      analysis.suggestions.push('内部链接较少，建议增加相关页面链接');
-    }
-
-    // 计算SEO评分
-    let score = 100;
-    score -= analysis.issues.length * 20;
-    score -= analysis.warnings.length * 10;
-    score -= analysis.suggestions.length * 5;
-    analysis.score = Math.max(0, score);
-
-    return analysis;
-  }
-
-  analyzeKeywords(contentData, config, language) {
-    const analysis = {
-      score: 0,
-      targetKeywords: config.targetKeywords,
-      keywordDensity: {},
-      topKeywords: [],
-      issues: [],
-      warnings: [],
-      suggestions: []
-    };
-
-    const words = this.extractWords(contentData.textContent, language);
-    const totalWords = words.length;
-    
-    // 统计词频
-    const wordFreq = {};
-    words.forEach(word => {
-      word = word.toLowerCase();
-      wordFreq[word] = (wordFreq[word] || 0) + 1;
-    });
-
-    // 计算目标关键词密度
-    config.targetKeywords.forEach(keyword => {
-      const keywordLower = keyword.toLowerCase();
-      const count = wordFreq[keywordLower] || 0;
-      const density = (count / totalWords) * 100;
-      
-      analysis.keywordDensity[keyword] = {
-        count,
-        density: Math.round(density * 100) / 100
-      };
-
-      if (density < config.seoChecks.keywordDensity.min) {
-        analysis.warnings.push(`关键词"${keyword}"密度过低(${density.toFixed(2)}%)`);
-      } else if (density > config.seoChecks.keywordDensity.max) {
-        analysis.issues.push(`关键词"${keyword}"密度过高(${density.toFixed(2)}%)，可能被认为是关键词堆砌`);
-      }
-    });
-
-    // 找出高频词汇
-    const stopWords = this.stopWords[language] || this.stopWords.en;
-    const filteredWords = Object.entries(wordFreq)
-      .filter(([word]) => !stopWords.includes(word.toLowerCase()))
-      .filter(([word]) => word.length > 2)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 10);
-
-    analysis.topKeywords = filteredWords.map(([word, count]) => ({
-      word,
-      count,
-      density: Math.round((count / totalWords) * 10000) / 100
-    }));
-
-    // 计算关键词分析评分
-    let score = 70;
-    if (config.targetKeywords.length > 0) {
-      const wellOptimizedKeywords = Object.values(analysis.keywordDensity)
-        .filter(kw => kw.density >= config.seoChecks.keywordDensity.min && 
-                     kw.density <= config.seoChecks.keywordDensity.max).length;
-      score += (wellOptimizedKeywords / config.targetKeywords.length) * 30;
-    }
-    
-    score -= analysis.issues.length * 15;
-    score -= analysis.warnings.length * 5;
-    analysis.score = Math.max(0, Math.min(100, score));
-
-    return analysis;
-  }
-
-  analyzeContentStructure(contentData, $) {
-    const analysis = {
-      score: 0,
-      structure: {},
-      issues: [],
-      warnings: [],
-      suggestions: []
-    };
-
-    // 分析内容结构
-    analysis.structure = {
-      headings: {
-        total: Object.values(contentData.headings).flat().length,
-        distribution: {
-          h1: contentData.headings.h1.length,
-          h2: contentData.headings.h2.length,
-          h3: contentData.headings.h3.length,
-          h4: contentData.headings.h4.length,
-          h5: contentData.headings.h5.length,
-          h6: contentData.headings.h6.length
-        }
-      },
-      lists: {
-        total: contentData.lists.length,
-        types: contentData.lists.reduce((acc, list) => {
-          acc[list.type] = (acc[list.type] || 0) + 1;
-          return acc;
-        }, {})
-      },
-      tables: {
-        total: contentData.tables.length,
-        withHeaders: contentData.tables.filter(t => t.hasHeaders).length
-      },
-      paragraphs: contentData.paragraphCount,
-      textToCodeRatio: this.calculateTextToCodeRatio($)
-    };
-
-    // 检查结构问题
-    if (analysis.structure.headings.total === 0) {
-      analysis.issues.push('页面缺少标题结构，影响内容组织和SEO');
-    }
-
-    if (analysis.structure.headings.distribution.h2 === 0 && contentData.paragraphCount > 5) {
-      analysis.warnings.push('内容较长但缺少H2子标题，建议添加章节标题');
-    }
-
-    if (contentData.lists.length === 0 && contentData.wordCount > 500) {
-      analysis.suggestions.push('考虑使用列表来组织要点，提高可读性');
-    }
-
-    if (analysis.structure.tables.total > 0 && analysis.structure.tables.withHeaders === 0) {
-      analysis.warnings.push('表格缺少标题行，影响可访问性');
-    }
-
-    // 计算结构评分
-    let score = 60;
-    if (analysis.structure.headings.total > 0) score += 20;
-    if (analysis.structure.headings.distribution.h2 > 0) score += 10;
-    if (contentData.lists.length > 0) score += 5;
-    if (analysis.structure.tables.withHeaders === analysis.structure.tables.total) score += 5;
-    
-    score -= analysis.issues.length * 15;
-    score -= analysis.warnings.length * 5;
-    analysis.score = Math.max(0, Math.min(100, score));
-
-    return analysis;
-  }
-
-  analyzeDuplicateContent(contentData) {
-    const analysis = {
-      score: 90, // 默认高分，因为无法检测外部重复
-      duplicateRisk: 'low',
-      issues: [],
-      warnings: [],
-      suggestions: [],
-      metrics: {}
-    };
-
-    // 检查内部重复内容
-    const paragraphs = contentData.paragraphs;
-    const duplicateParagraphs = [];
-    
-    for (let i = 0; i < paragraphs.length; i++) {
-      for (let j = i + 1; j < paragraphs.length; j++) {
-        const similarity = this.calculateTextSimilarity(paragraphs[i], paragraphs[j]);
-        if (similarity > 0.8) {
-          duplicateParagraphs.push({ index1: i, index2: j, similarity });
-        }
-      }
-    }
-
-    analysis.metrics.duplicateParagraphs = duplicateParagraphs.length;
-    
-    if (duplicateParagraphs.length > 0) {
-      analysis.warnings.push(`发现${duplicateParagraphs.length}组高度相似的段落`);
-      analysis.score -= duplicateParagraphs.length * 10;
-    }
-
-    // 检查重复标题
-    const allHeadings = Object.values(contentData.headings).flat().map(h => h.text);
-    const duplicateHeadings = allHeadings.filter((heading, index) => 
-      allHeadings.indexOf(heading) !== index
-    );
-
-    if (duplicateHeadings.length > 0) {
-      analysis.warnings.push(`发现${duplicateHeadings.length}个重复的标题`);
-      analysis.score -= duplicateHeadings.length * 5;
-    }
-
-    // 设置风险等级
-    if (analysis.score < 70) {
-      analysis.duplicateRisk = 'high';
-    } else if (analysis.score < 85) {
-      analysis.duplicateRisk = 'medium';
-    }
-
-    return analysis;
-  }
-
-  analyzeContentFreshness($, contentData) {
-    const analysis = {
-      score: 50, // 中等分数，因为无法确定确切的更新时间
-      publishDate: null,
-      lastModified: null,
-      freshnessIndicators: [],
-      issues: [],
-      warnings: [],
-      suggestions: []
-    };
-
-    // 查找发布日期
-    const dateSelectors = [
-      'time[datetime]',
-      '.publish-date', '.published', '.date',
-      'meta[property="article:published_time"]',
-      'meta[name="date"]'
-    ];
-
-    dateSelectors.forEach(selector => {
-      const element = $(selector).first();
-      if (element.length) {
-        const dateText = element.attr('datetime') || element.attr('content') || element.text();
-        if (dateText) {
-          const parsedDate = new Date(dateText);
-          if (!isNaN(parsedDate.getTime())) {
-            analysis.publishDate = parsedDate.toISOString();
-            analysis.freshnessIndicators.push(`发布日期: ${selector}`);
-          }
-        }
-      }
-    });
-
-    // 查找更新日期
-    const updateSelectors = [
-      'meta[property="article:modified_time"]',
-      '.update-date', '.modified', '.last-updated'
-    ];
-
-    updateSelectors.forEach(selector => {
-      const element = $(selector).first();
-      if (element.length) {
-        const dateText = element.attr('content') || element.text();
-        if (dateText) {
-          const parsedDate = new Date(dateText);
-          if (!isNaN(parsedDate.getTime())) {
-            analysis.lastModified = parsedDate.toISOString();
-            analysis.freshnessIndicators.push(`更新日期: ${selector}`);
-          }
-        }
-      }
-    });
-
-    // 分析时效性
-    if (analysis.publishDate) {
-      const publishDate = new Date(analysis.publishDate);
-      const now = new Date();
-      const daysSincePublish = (now - publishDate) / (1000 * 60 * 60 * 24);
-
-      if (daysSincePublish < 30) {
-        analysis.score = 95;
-        analysis.freshnessIndicators.push('内容非常新鲜（30天内）');
-      } else if (daysSincePublish < 90) {
-        analysis.score = 85;
-        analysis.freshnessIndicators.push('内容较新（3个月内）');
-      } else if (daysSincePublish < 365) {
-        analysis.score = 70;
-        analysis.suggestions.push('内容超过3个月，建议考虑更新');
-      } else {
-        analysis.score = 40;
-        analysis.warnings.push('内容超过1年，建议及时更新以保持时效性');
-      }
-    } else {
-      analysis.warnings.push('未找到发布日期信息，建议添加结构化的日期标记');
-    }
-
-    return analysis;
-  }
-
-  analyzeMultimedia(contentData) {
-    const analysis = {
-      score: 0,
-      multimedia: {
-        images: contentData.images.length,
-        optimizedImages: contentData.images.filter(img => img.hasAlt && img.hasTitle).length,
-        videos: 0,
-        audio: 0
-      },
-      issues: [],
-      warnings: [],
-      suggestions: []
-    };
-
-    // 图片分析
-    if (contentData.images.length === 0) {
-      analysis.suggestions.push('页面没有图片，考虑添加相关图片以增强内容吸引力');
-      analysis.score = 60;
-    } else {
-      const imagesWithAlt = contentData.images.filter(img => img.hasAlt).length;
-      const altOptimization = (imagesWithAlt / contentData.images.length) * 100;
-      
-      if (altOptimization < 50) {
-        analysis.issues.push(`${contentData.images.length - imagesWithAlt}张图片缺少Alt文本`);
-      } else if (altOptimization < 80) {
-        analysis.warnings.push('部分图片缺少Alt文本，影响可访问性');
-      }
-      
-      analysis.score = Math.max(70, altOptimization);
-    }
-
-    // 图片尺寸建议
-    const largeImages = contentData.images.filter(img => 
-      (img.width && img.width > 1200) || (img.height && img.height > 800)
-    ).length;
-    
-    if (largeImages > 0) {
-      analysis.suggestions.push(`${largeImages}张图片尺寸较大，建议优化以提高加载速度`);
-    }
-
-    return analysis;
-  }
-
-  // 辅助方法
-  extractWords(text, language) {
-    if (language === 'zh') {
-      // 中文分词（简单版）
-      const chineseChars = text.match(/[\u4e00-\u9fff]/g) || [];
-      const englishWords = text.match(/[a-zA-Z]+/g) || [];
-      return [...chineseChars, ...englishWords];
-    } else {
-      // 英文分词
-      return text.match(/\b[a-zA-Z]+\b/g) || [];
-    }
-  }
-
-  estimateSyllables(text, language) {
-    if (language === 'zh') {
-      // 中文字符数近似音节数
-      return (text.match(/[\u4e00-\u9fff]/g) || []).length;
-    } else {
-      // 英文音节估算
-      const words = text.match(/\b[a-zA-Z]+\b/g) || [];
-      return words.reduce((total, word) => {
-        let syllables = word.toLowerCase().match(/[aeiouy]+/g) || [];
-        if (word.endsWith('e')) syllables.pop();
-        return total + Math.max(1, syllables.length);
-      }, 0);
-    }
-  }
-
-  checkHeadingHierarchy(headings) {
-    const levels = [];
-    for (let i = 1; i <= 6; i++) {
-      if (headings[`h${i}`].length > 0) {
-        levels.push(i);
-      }
-    }
-    
-    // 检查是否按顺序出现
-    for (let i = 0; i < levels.length - 1; i++) {
-      if (levels[i + 1] - levels[i] > 1) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  calculateTextSimilarity(text1, text2) {
-    const words1 = new Set(text1.toLowerCase().match(/\b\w+\b/g) || []);
-    const words2 = new Set(text2.toLowerCase().match(/\b\w+\b/g) || []);
-    
-    const intersection = new Set([...words1].filter(x => words2.has(x)));
-    const union = new Set([...words1, ...words2]);
-    
-    return intersection.size / union.size;
-  }
-
-  calculateTextToCodeRatio($) {
-    const textLength = $('body').text().replace(/\s+/g, ' ').trim().length;
-    const codeLength = $('script, style').text().length;
-    
-    return textLength / (textLength + codeLength);
-  }
-
-  calculateOverallScore(analyses) {
-    const scores = Object.values(analyses)
-      .filter(analysis => typeof analysis.score === 'number')
-      .map(analysis => analysis.score);
-    
-    if (scores.length === 0) return 0;
-    
-    return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length);
-  }
-
-  generateComprehensiveRecommendations(analyses, config) {
-    const recommendations = [];
-    
-    // 收集所有问题和建议
-    const allIssues = [];
-    const allSuggestions = [];
-    
-    Object.values(analyses).forEach(analysis => {
-      if (analysis.issues) allIssues.push(...analysis.issues);
-      if (analysis.suggestions) allSuggestions.push(...analysis.suggestions);
-    });
-    
-    // 生成优先级建议
-    if (allIssues.length > 0) {
-      recommendations.push({
-        priority: 'high',
-        category: '严重问题',
-        items: allIssues.slice(0, 5) // 只显示前5个最重要的问题
-      });
-    }
-    
-    if (allSuggestions.length > 0) {
-      recommendations.push({
-        priority: 'medium',
-        category: '改进建议',
-        items: allSuggestions.slice(0, 10) // 只显示前10个建议
-      });
-    }
-    
-    // 添加通用最佳实践建议
-    recommendations.push({
-      priority: 'low',
-      category: '最佳实践',
-      items: [
-        '定期更新内容以保持时效性',
-        '确保所有多媒体内容都有适当的描述',
-        '使用内部链接建立页面间的关联',
-        '保持一致的内容风格和语调',
-        '考虑添加目录或导航以改善用户体验'
-      ]
-    });
-    
     return recommendations;
   }
 
-  getAnalysisTypeName(type) {
-    const names = {
-      'content-quality': '内容质量分析',
-      'readability': '可读性检测',
-      'seo-optimization': 'SEO优化分析',
-      'keyword-analysis': '关键词分析',
-      'content-structure': '内容结构分析',
-      'duplicate-content': '重复内容检测',
-      'content-freshness': '内容时效性分析',
-      'multimedia-analysis': '多媒体内容分析'
+  getSEOSuggestion(issueType) {
+    const suggestions = {
+      'title-missing': '添加页面标题，确保每个页面都有唯一的标题',
+      'meta-description-missing': '添加Meta描述，简洁描述页面内容',
+      'h1-missing': '添加H1标题，明确页面主要主题',
+      'multiple-h1': '确保每个页面只有一个H1标题',
+      'missing-alt-text': '为所有图片添加描述性的alt属性',
+      'content-too-short': '增加内容长度，提供更详细和有价值的信息'
     };
-    return names[type] || type;
+    
+    return suggestions[issueType] || '根据具体情况进行SEO优化';
   }
 
   updateTestProgress(testId, progress, message) {
@@ -1079,21 +679,20 @@ class ContentTestEngine {
     if (test) {
       test.progress = progress;
       test.message = message;
+      this.activeTests.set(testId, test);
     }
   }
 
-  getTestStatus(testId) {
-    return this.activeTests.get(testId);
+  getTestProgress(testId) {
+    return this.activeTests.get(testId) || null;
   }
 
-  async stopTest(testId) {
-    const test = this.activeTests.get(testId);
-    if (test) {
-      this.activeTests.delete(testId);
-      return true;
-    }
-    return false;
+  getAllActiveTests() {
+    return Array.from(this.activeTests.entries()).map(([id, data]) => ({
+      testId: id,
+      ...data
+    }));
   }
 }
 
-module.exports = ContentTestEngine;
+export default ContentTestEngine;

@@ -1,40 +1,63 @@
 /**
- * 性能测试引擎
- * 提供真实的页面加载时间、资源分析、性能指标测试
+ * 性能测试引擎（重构版本）
+ * 使用共享服务，避免代码重复
  */
 
-const https = require('https');
-const http = require('http');
-const { URL } = require('url');
-const { performance } = require('perf_hooks');
-const dns = require('dns');
-const { promisify } = require('util');
+import PerformanceMetricsService from '../shared/services/PerformanceMetricsService.js';
+import HTMLParsingService from '../shared/services/HTMLParsingService.js';
 
 class PerformanceTestEngine {
   constructor() {
     this.name = 'performance';
-    this.version = '2.0.0';
-    this.description = '性能测试引擎';
+    this.version = '3.0.0';
+    this.description = '性能测试引擎 (使用共享服务)';
     this.options = {
       timeout: 30000,
-      userAgent: 'Performance-Test/2.0.0'
+      userAgent: 'Performance-Test/3.0.0'
     };
+    
+    this.metricsService = new PerformanceMetricsService();
+    this.htmlService = new HTMLParsingService();
+    this.initialized = false;
+  }
+
+  /**
+   * 初始化引擎
+   */
+  async initialize() {
+    if (this.initialized) {
+      return true;
+    }
+    
+    // 初始化服务
+    await this.metricsService.initialize();
+    await this.htmlService.initialize();
+    
+    this.initialized = true;
+    return true;
   }
 
   /**
    * 检查引擎可用性
    */
-  checkAvailability() {
+  async checkAvailability() {
+    await this.initialize();
+
     return {
-      available: true,
+      available: this.initialized,
       version: this.version,
       features: [
         'page-load-timing',
         'dns-performance',
         'ttfb-measurement',
         'resource-analysis',
-        'performance-scoring'
-      ]
+        'performance-scoring',
+        'core-web-vitals-simulation'
+      ],
+      services: {
+        metrics: this.metricsService.checkAvailability(),
+        html: this.htmlService.checkAvailability()
+      }
     };
   }
 
@@ -43,11 +66,63 @@ class PerformanceTestEngine {
    */
   async executeTest(config) {
     try {
-      const { url = 'https://example.com', iterations = 3 } = config;
+      // 确保初始化
+      await this.initialize();
       
-      console.log(`⚡ 开始性能测试: ${url}`);
+      const { 
+        url = 'https://example.com', 
+        iterations = 3,
+        includeResources = true,
+        fetchHtml = true,
+        verbose = false
+      } = config;
       
-      const results = await this.runPerformanceTest(url, iterations);
+      if (verbose) {
+        console.log(`⚡ 开始性能测试: ${url} (${iterations} 次迭代)`);
+      }
+      
+      // 收集性能指标
+      const metricsOptions = {
+        iterations,
+        userAgent: this.options.userAgent,
+        timeout: this.options.timeout,
+        includeContent: fetchHtml,
+        cacheControl: 'no-cache'
+      };
+      
+      const metricsResult = await this.metricsService.collectMetrics(url, metricsOptions);
+      
+      if (!metricsResult.success) {
+        throw new Error(`性能指标收集失败: ${metricsResult.error}`);
+      }
+      
+      // 分析HTML资源（如果获取了HTML内容）
+      let resourceAnalysis = null;
+      
+      if (includeResources && fetchHtml && metricsResult.data.basicTiming.rawResults[0]?.content) {
+        const htmlContent = metricsResult.data.basicTiming.rawResults[0].content;
+        
+        if (htmlContent) {
+          const parseResult = this.htmlService.parseHTML(htmlContent);
+          
+          if (parseResult.success) {
+            resourceAnalysis = {
+              resources: this.analyzeResources(parseResult.$),
+              contentAnalysis: this.analyzeContent(parseResult.$, url)
+            };
+          }
+        }
+      }
+      
+      // 格式化结果
+      const results = this.formatResults(metricsResult.data, resourceAnalysis);
+      
+      // 生成优化建议
+      results.recommendations = this.generateRecommendations(results);
+      
+      if (verbose) {
+        console.log(`✅ 性能测试完成，评分: ${results.summary.score}/100 (${results.summary.grade})`);
+      }
       
       return {
         engine: this.name,
@@ -69,441 +144,280 @@ class PerformanceTestEngine {
   }
 
   /**
-   * 运行性能测试
+   * 格式化结果
    */
-  async runPerformanceTest(url, iterations = 3) {
-    console.log(`  🔄 执行 ${iterations} 次测试迭代...`);
-    
-    const testResults = [];
-    
-    for (let i = 0; i < iterations; i++) {
-      console.log(`  📊 迭代 ${i + 1}/${iterations}...`);
-      const iteration = await this.testSingleIteration(url);
-      testResults.push(iteration);
-      
-      // 避免过快请求
-      if (i < iterations - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-    
-    // 计算平均值和统计数据
-    const stats = this.calculateStatistics(testResults);
-    
-    // 性能评分
-    const score = this.calculatePerformanceScore(stats);
-    
-    // Core Web Vitals 模拟
-    const webVitals = this.simulateWebVitals(stats);
-    
+  formatResults(metrics, resourceAnalysis) {
     const results = {
-      url,
-      timestamp: new Date().toISOString(),
-      iterations,
+      url: metrics.url,
+      timestamp: metrics.timestamp,
+      iterations: metrics.basicTiming.iterations,
       summary: {
-        score,
-        grade: this.getPerformanceGrade(score),
-        averageLoadTime: `${Math.round(stats.avgTotalTime)}ms`,
-        fastestLoadTime: `${Math.round(stats.minTotalTime)}ms`,
-        slowestLoadTime: `${Math.round(stats.maxTotalTime)}ms`
+        score: metrics.performanceScore.score,
+        grade: metrics.performanceScore.grade,
+        averageLoadTime: `${Math.round(metrics.basicTiming.totalTime.avg)}ms`,
+        fastestLoadTime: `${Math.round(metrics.basicTiming.totalTime.min)}ms`,
+        slowestLoadTime: `${Math.round(metrics.basicTiming.totalTime.max)}ms`
       },
       metrics: {
         dns: {
-          average: `${Math.round(stats.avgDns)}ms`,
-          min: `${Math.round(stats.minDns)}ms`,
-          max: `${Math.round(stats.maxDns)}ms`
+          average: `${Math.round(metrics.basicTiming.dnsTime.avg)}ms`,
+          min: `${Math.round(metrics.basicTiming.dnsTime.min)}ms`,
+          max: `${Math.round(metrics.basicTiming.dnsTime.max)}ms`
         },
         connection: {
-          average: `${Math.round(stats.avgConnection)}ms`,
-          min: `${Math.round(stats.minConnection)}ms`,
-          max: `${Math.round(stats.maxConnection)}ms`
+          average: `${Math.round(metrics.basicTiming.connectionTime.avg)}ms`,
+          min: `${Math.round(metrics.basicTiming.connectionTime.min)}ms`,
+          max: `${Math.round(metrics.basicTiming.connectionTime.max)}ms`
         },
         ttfb: {
-          average: `${Math.round(stats.avgTtfb)}ms`,
-          min: `${Math.round(stats.minTtfb)}ms`,
-          max: `${Math.round(stats.maxTtfb)}ms`,
-          rating: this.getTTFBRating(stats.avgTtfb)
+          average: `${Math.round(metrics.basicTiming.ttfb.avg)}ms`,
+          min: `${Math.round(metrics.basicTiming.ttfb.min)}ms`,
+          max: `${Math.round(metrics.basicTiming.ttfb.max)}ms`,
+          rating: this.getRating(metrics.basicTiming.ttfb.avg)
         },
         download: {
-          average: `${Math.round(stats.avgDownload)}ms`,
-          min: `${Math.round(stats.minDownload)}ms`,
-          max: `${Math.round(stats.maxDownload)}ms`
+          average: `${Math.round(metrics.basicTiming.downloadTime.avg)}ms`,
+          min: `${Math.round(metrics.basicTiming.downloadTime.min)}ms`,
+          max: `${Math.round(metrics.basicTiming.downloadTime.max)}ms`
         },
         contentSize: {
-          average: `${Math.round(stats.avgSize / 1024)}KB`,
-          min: `${Math.round(stats.minSize / 1024)}KB`,
-          max: `${Math.round(stats.maxSize / 1024)}KB`
+          average: `${Math.round(metrics.basicTiming.contentLength.avg / 1024)}KB`,
+          min: `${Math.round(metrics.basicTiming.contentLength.min / 1024)}KB`,
+          max: `${Math.round(metrics.basicTiming.contentLength.max / 1024)}KB`
         }
       },
-      webVitals,
-      iterations: testResults,
-      recommendations: this.generateRecommendations(stats, webVitals)
+      webVitals: {
+        lcp: {
+          value: metrics.coreWebVitals.lcp.value,
+          rating: metrics.coreWebVitals.lcp.rating
+        },
+        fcp: {
+          value: metrics.coreWebVitals.fcp.value,
+          rating: metrics.coreWebVitals.fcp.rating
+        },
+        cls: {
+          value: metrics.coreWebVitals.cls.value,
+          rating: metrics.coreWebVitals.cls.rating
+        },
+        ttfb: {
+          value: metrics.coreWebVitals.ttfb.value,
+          rating: metrics.coreWebVitals.ttfb.rating
+        }
+      }
     };
     
-    console.log(`✅ 性能测试完成，评分: ${score}/100`);
+    // 添加资源分析（如果有）
+    if (resourceAnalysis) {
+      results.resources = resourceAnalysis.resources;
+      results.contentAnalysis = resourceAnalysis.contentAnalysis;
+    }
+    
     return results;
   }
 
   /**
-   * 测试单次迭代
+   * 分析资源
    */
-  async testSingleIteration(url) {
-    const urlObj = new URL(url);
-    const isHttps = urlObj.protocol === 'https:';
-    const client = isHttps ? https : http;
-    
-    const metrics = {
-      startTime: 0,
-      dnsStart: 0,
-      dnsEnd: 0,
-      connectionStart: 0,
-      connectionEnd: 0,
-      requestStart: 0,
-      responseStart: 0,
-      responseEnd: 0,
-      totalTime: 0,
-      contentLength: 0
+  analyzeResources($) {
+    // 分析页面中的资源
+    const resources = {
+      images: [],
+      scripts: [],
+      stylesheets: [],
+      fonts: [],
+      other: []
     };
     
-    // DNS查询时间
-    const dnsStart = performance.now();
-    const dnsLookup = promisify(dns.lookup);
+    // 提取图片
+    $('img[src]').each((i, el) => {
+      const $el = $(el);
+      resources.images.push({
+        src: $el.attr('src'),
+        alt: $el.attr('alt') || '',
+        width: $el.attr('width') || null,
+        height: $el.attr('height') || null,
+        loading: $el.attr('loading') || null,
+        type: 'image'
+      });
+    });
+    
+    // 提取脚本
+    $('script[src]').each((i, el) => {
+      const $el = $(el);
+      resources.scripts.push({
+        src: $el.attr('src'),
+        type: $el.attr('type') || 'text/javascript',
+        async: $el.attr('async') !== undefined,
+        defer: $el.attr('defer') !== undefined,
+        integrity: $el.attr('integrity') || null
+      });
+    });
+    
+    // 提取样式表
+    $('link[rel="stylesheet"]').each((i, el) => {
+      const $el = $(el);
+      resources.stylesheets.push({
+        href: $el.attr('href'),
+        media: $el.attr('media') || 'all',
+        type: $el.attr('type') || 'text/css'
+      });
+    });
+    
+    // 提取字体
+    $('link[rel="preload"][as="font"]').each((i, el) => {
+      const $el = $(el);
+      resources.fonts.push({
+        href: $el.attr('href'),
+        type: $el.attr('type') || null,
+        crossOrigin: $el.attr('crossorigin') || null
+      });
+    });
+    
+    // 统计信息
+    const counts = {
+      images: resources.images.length,
+      scripts: resources.scripts.length,
+      stylesheets: resources.stylesheets.length,
+      fonts: resources.fonts.length,
+      total: resources.images.length + resources.scripts.length + resources.stylesheets.length + resources.fonts.length
+    };
+    
+    return { resources, counts };
+  }
+
+  /**
+   * 分析内容
+   */
+  analyzeContent($, url) {
     try {
-      await dnsLookup(urlObj.hostname);
-    } catch (error) {
-      // 忽略DNS错误，可能已缓存
-    }
-    const dnsEnd = performance.now();
-    metrics.dnsTime = dnsEnd - dnsStart;
-    
-    // HTTP请求
-    return new Promise((resolve) => {
-      metrics.startTime = performance.now();
-      metrics.connectionStart = performance.now();
+      const title = $('title').text().trim();
+      const metaDescription = $('meta[name="description"]').attr('content') || '';
+      const h1 = $('h1').first().text().trim();
       
-      const options = {
-        hostname: urlObj.hostname,
-        port: urlObj.port || (isHttps ? 443 : 80),
-        path: urlObj.pathname + urlObj.search,
-        method: 'GET',
-        headers: {
-          'User-Agent': this.options.userAgent,
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache'
+      // 基本HTML结构分析
+      const structureAnalysis = {
+        title: {
+          content: title,
+          length: title.length,
+          hasTitle: title.length > 0
         },
-        timeout: this.options.timeout
+        meta: {
+          description: metaDescription,
+          descriptionLength: metaDescription.length,
+          hasDescription: metaDescription.length > 0
+        },
+        h1: {
+          content: h1,
+          hasH1: h1.length > 0
+        },
+        resourceHints: {
+          preconnect: $('link[rel="preconnect"]').length,
+          prefetch: $('link[rel="prefetch"]').length,
+          preload: $('link[rel="preload"]').length,
+          dns_prefetch: $('link[rel="dns-prefetch"]').length
+        }
       };
       
-      const req = client.request(options, (res) => {
-        metrics.connectionEnd = performance.now();
-        metrics.responseStart = performance.now();
-        
-        let dataSize = 0;
-        
-        res.on('data', (chunk) => {
-          dataSize += chunk.length;
-        });
-        
-        res.on('end', () => {
-          metrics.responseEnd = performance.now();
-          metrics.contentLength = dataSize;
-          
-          // 计算各项指标
-          const result = {
-            timestamp: new Date().toISOString(),
-            statusCode: res.statusCode,
-            contentType: res.headers['content-type'],
-            server: res.headers['server'],
-            metrics: {
-              dns: metrics.dnsTime,
-              connection: metrics.connectionEnd - metrics.connectionStart,
-              ttfb: metrics.responseStart - metrics.startTime, // Time To First Byte
-              download: metrics.responseEnd - metrics.responseStart,
-              total: metrics.responseEnd - metrics.startTime,
-              contentSize: metrics.contentLength
-            },
-            headers: {
-              cacheControl: res.headers['cache-control'],
-              expires: res.headers['expires'],
-              etag: res.headers['etag'],
-              compression: res.headers['content-encoding']
-            }
-          };
-          
-          resolve(result);
-        });
-      });
-      
-      req.on('error', (error) => {
-        resolve({
-          error: error.message,
-          metrics: {
-            dns: metrics.dnsTime || 0,
-            connection: 0,
-            ttfb: 0,
-            download: 0,
-            total: performance.now() - metrics.startTime,
-            contentSize: 0
-          }
-        });
-      });
-      
-      req.setTimeout(this.options.timeout, () => {
-        req.destroy();
-      });
-      
-      req.end();
-    });
-  }
-
-  /**
-   * 计算统计数据
-   */
-  calculateStatistics(results) {
-    const validResults = results.filter(r => !r.error);
-    
-    if (validResults.length === 0) {
-      return {
-        avgTotalTime: 0,
-        minTotalTime: 0,
-        maxTotalTime: 0,
-        avgDns: 0,
-        minDns: 0,
-        maxDns: 0,
-        avgConnection: 0,
-        minConnection: 0,
-        maxConnection: 0,
-        avgTtfb: 0,
-        minTtfb: 0,
-        maxTtfb: 0,
-        avgDownload: 0,
-        minDownload: 0,
-        maxDownload: 0,
-        avgSize: 0,
-        minSize: 0,
-        maxSize: 0
-      };
+      return structureAnalysis;
+    } catch (error) {
+      console.error('内容分析失败:', error);
+      return { error: error.message };
     }
-    
-    const extract = (key) => validResults.map(r => r.metrics[key]);
-    
-    const stats = (arr) => ({
-      avg: arr.reduce((a, b) => a + b, 0) / arr.length,
-      min: Math.min(...arr),
-      max: Math.max(...arr)
-    });
-    
-    const totalTimes = extract('total');
-    const dnsTimes = extract('dns');
-    const connectionTimes = extract('connection');
-    const ttfbTimes = extract('ttfb');
-    const downloadTimes = extract('download');
-    const sizes = extract('contentSize');
-    
-    return {
-      avgTotalTime: stats(totalTimes).avg,
-      minTotalTime: stats(totalTimes).min,
-      maxTotalTime: stats(totalTimes).max,
-      avgDns: stats(dnsTimes).avg,
-      minDns: stats(dnsTimes).min,
-      maxDns: stats(dnsTimes).max,
-      avgConnection: stats(connectionTimes).avg,
-      minConnection: stats(connectionTimes).min,
-      maxConnection: stats(connectionTimes).max,
-      avgTtfb: stats(ttfbTimes).avg,
-      minTtfb: stats(ttfbTimes).min,
-      maxTtfb: stats(ttfbTimes).max,
-      avgDownload: stats(downloadTimes).avg,
-      minDownload: stats(downloadTimes).min,
-      maxDownload: stats(downloadTimes).max,
-      avgSize: stats(sizes).avg,
-      minSize: stats(sizes).min,
-      maxSize: stats(sizes).max
-    };
   }
 
   /**
-   * 计算性能评分
+   * 获取性能评级
    */
-  calculatePerformanceScore(stats) {
-    let score = 100;
-    
-    // 基于TTFB评分 (40%权重)
-    if (stats.avgTtfb > 1800) score -= 40;
-    else if (stats.avgTtfb > 800) score -= 20;
-    else if (stats.avgTtfb > 200) score -= 10;
-    
-    // 基于总加载时间评分 (30%权重)
-    if (stats.avgTotalTime > 5000) score -= 30;
-    else if (stats.avgTotalTime > 3000) score -= 15;
-    else if (stats.avgTotalTime > 1000) score -= 5;
-    
-    // 基于文件大小评分 (20%权重)
-    const sizeKB = stats.avgSize / 1024;
-    if (sizeKB > 1000) score -= 20;
-    else if (sizeKB > 500) score -= 10;
-    else if (sizeKB > 200) score -= 5;
-    
-    // 基于连接时间评分 (10%权重)
-    if (stats.avgConnection > 1000) score -= 10;
-    else if (stats.avgConnection > 500) score -= 5;
-    
-    return Math.max(0, Math.round(score));
-  }
-
-  /**
-   * 模拟 Core Web Vitals
-   */
-  simulateWebVitals(stats) {
-    // 基于实际测量估算Web Vitals
-    return {
-      lcp: {
-        value: Math.round(stats.avgTotalTime * 0.8), // 假设LCP为总时间的80%
-        rating: this.getLCPRating(stats.avgTotalTime * 0.8),
-        description: 'Largest Contentful Paint (最大内容绘制)'
-      },
-      fid: {
-        value: Math.round(stats.avgTtfb * 0.1), // 基于TTFB估算FID
-        rating: this.getFIDRating(stats.avgTtfb * 0.1),
-        description: 'First Input Delay (首次输入延迟)'
-      },
-      cls: {
-        value: 0.05, // 模拟CLS值
-        rating: 'good',
-        description: 'Cumulative Layout Shift (累积布局偏移)'
-      },
-      fcp: {
-        value: Math.round(stats.avgTtfb * 1.2), // FCP通常略高于TTFB
-        rating: this.getFCPRating(stats.avgTtfb * 1.2),
-        description: 'First Contentful Paint (首次内容绘制)'
-      },
-      ttfb: {
-        value: Math.round(stats.avgTtfb),
-        rating: this.getTTFBRating(stats.avgTtfb),
-        description: 'Time to First Byte (首字节时间)'
-      }
-    };
-  }
-
-  /**
-   * 获取LCP评级
-   */
-  getLCPRating(value) {
-    if (value <= 2500) return 'good';
-    if (value <= 4000) return 'needs-improvement';
+  getRating(ttfb) {
+    if (ttfb <= 800) return 'good';
+    if (ttfb <= 1800) return 'needs-improvement';
     return 'poor';
   }
 
   /**
-   * 获取FID评级
+   * 生成性能优化建议
    */
-  getFIDRating(value) {
-    if (value <= 100) return 'good';
-    if (value <= 300) return 'needs-improvement';
-    return 'poor';
-  }
-
-  /**
-   * 获取FCP评级
-   */
-  getFCPRating(value) {
-    if (value <= 1800) return 'good';
-    if (value <= 3000) return 'needs-improvement';
-    return 'poor';
-  }
-
-  /**
-   * 获取TTFB评级
-   */
-  getTTFBRating(value) {
-    if (value <= 800) return 'good';
-    if (value <= 1800) return 'needs-improvement';
-    return 'poor';
-  }
-
-  /**
-   * 获取性能等级
-   */
-  getPerformanceGrade(score) {
-    if (score >= 90) return 'A';
-    if (score >= 80) return 'B';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
-    if (score >= 50) return 'E';
-    return 'F';
-  }
-
-  /**
-   * 生成性能建议
-   */
-  generateRecommendations(stats, webVitals) {
+  generateRecommendations(results) {
     const recommendations = [];
     
-    // TTFB建议
-    if (webVitals.ttfb.rating === 'poor') {
-      recommendations.push('⚠️ 首字节时间过长，建议优化服务器响应速度或使用CDN');
-    } else if (webVitals.ttfb.rating === 'needs-improvement') {
-      recommendations.push('💡 首字节时间可以进一步优化');
+    try {
+      // TTFB建议
+      if (results.metrics.ttfb.rating === 'poor') {
+        recommendations.push({
+          type: 'server-response',
+          priority: 'high',
+          title: '优化服务器响应时间',
+          description: `服务器响应时间 (TTFB) 为 ${results.metrics.ttfb.average}，远超理想值 (800ms)`,
+          impact: '高',
+          suggestions: [
+            '使用内容分发网络 (CDN)',
+            '优化服务器配置和资源使用',
+            '改进缓存策略',
+            '优化数据库查询',
+            '检查第三方服务响应时间'
+          ]
+        });
+      }
+      
+      // LCP建议
+      if (results.webVitals.lcp.rating === 'poor') {
+        recommendations.push({
+          type: 'largest-contentful-paint',
+          priority: 'high',
+          title: '优化最大内容绘制 (LCP)',
+          description: `最大内容绘制时间为 ${results.webVitals.lcp.value}ms，超过推荐的 2500ms`,
+          impact: '高',
+          suggestions: [
+            '优化关键渲染路径',
+            '移除渲染阻塞资源',
+            '优化和压缩图片',
+            '实现适当的资源提示',
+            '使用服务工作器缓存资源'
+          ]
+        });
+      }
+      
+      // CLS建议
+      if (results.webVitals.cls && results.webVitals.cls.rating === 'poor') {
+        recommendations.push({
+          type: 'cumulative-layout-shift',
+          priority: 'medium',
+          title: '减少累积布局偏移 (CLS)',
+          description: `累积布局偏移值为 ${results.webVitals.cls.value}，超过推荐的 0.1`,
+          impact: '中',
+          suggestions: [
+            '为所有图片设置尺寸属性（宽度和高度）',
+            '确保广告元素有保留空间',
+            '避免在用户交互之外插入内容',
+            '使用transform动画替代影响布局的属性'
+          ]
+        });
+      }
+      
+      // 资源建议
+      if (results.resources && results.resources.counts.total > 30) {
+        recommendations.push({
+          type: 'resource-optimization',
+          priority: 'medium',
+          title: '优化资源加载',
+          description: `页面包含 ${results.resources.counts.total} 个资源，可能影响加载性能`,
+          impact: '中',
+          suggestions: [
+            '合并和压缩CSS和JavaScript文件',
+            '延迟加载非关键JavaScript',
+            '优化和压缩图片资源',
+            '实现有效的HTTP缓存策略',
+            '使用资源优先级提示'
+          ]
+        });
+      }
+      
+      return recommendations;
+    } catch (error) {
+      console.error('生成建议失败:', error);
+      return [];
     }
-    
-    // LCP建议
-    if (webVitals.lcp.rating === 'poor') {
-      recommendations.push('⚠️ 最大内容绘制时间过长，建议优化关键资源加载');
-    }
-    
-    // FCP建议
-    if (webVitals.fcp.rating === 'poor') {
-      recommendations.push('⚠️ 首次内容绘制时间过长，建议减少阻塞渲染的资源');
-    }
-    
-    // 文件大小建议
-    const sizeKB = stats.avgSize / 1024;
-    if (sizeKB > 1000) {
-      recommendations.push('⚠️ 页面文件过大，建议启用压缩和优化资源');
-    } else if (sizeKB > 500) {
-      recommendations.push('💡 考虑进一步压缩页面资源');
-    }
-    
-    // DNS建议
-    if (stats.avgDns > 100) {
-      recommendations.push('💡 DNS解析时间较长，考虑使用DNS预解析');
-    }
-    
-    // 连接建议
-    if (stats.avgConnection > 500) {
-      recommendations.push('💡 连接建立时间较长，考虑使用持久连接');
-    }
-    
-    // 总体建议
-    if (stats.avgTotalTime > 3000) {
-      recommendations.push('⚠️ 页面加载时间超过3秒，需要整体优化');
-    }
-    
-    if (recommendations.length === 0) {
-      recommendations.push('✅ 性能表现良好，继续保持');
-    }
-    
-    return recommendations;
-  }
-
-  /**
-   * 获取引擎信息
-   */
-  getInfo() {
-    return {
-      name: this.name,
-      version: this.version,
-      description: this.description,
-      available: this.checkAvailability()
-    };
-  }
-
-  /**
-   * 清理资源
-   */
-  async cleanup() {
-    console.log('✅ 性能测试引擎清理完成');
   }
 }
 
-module.exports = PerformanceTestEngine;
+export default PerformanceTestEngine;
