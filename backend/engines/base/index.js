@@ -2,9 +2,6 @@
  * Base测试引擎导出
  */
 
-const BaseTestEngine = require('./BaseTestEngine');
+const BaseTestEngine = require('./baseTestEngine');
 
-module.exports = {
-  BaseTestEngine,
-  default: BaseTestEngine
-};
+module.exports = BaseTestEngine;

@@ -2,6 +2,6 @@
  * Core测试工具索引
  */
 
-const UnifiedTestEngine = require('./UnifiedTestEngine.js');
+const CoreTestEngine = require('./coreTestEngine.js');
 
-module.exports = UnifiedTestEngine;
+module.exports = CoreTestEngine;

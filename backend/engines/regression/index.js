@@ -2,9 +2,6 @@
  * Regression测试引擎导出
  */
 
-const RegressionTestEngine = require('./RegressionTestEngine');
+const RegressionTestEngine = require('./regressionTestEngine');
 
-module.exports = {
-  RegressionTestEngine,
-  default: RegressionTestEngine
-};
+module.exports = RegressionTestEngine;

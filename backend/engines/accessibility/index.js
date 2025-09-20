@@ -2,9 +2,6 @@
  * Accessibility测试引擎导出
  */
 
-const AccessibilityTestEngine = require('./AccessibilityTestEngine');
+const AccessibilityTestEngine = require('./accessibilityTestEngine');
 
-module.exports = {
-  AccessibilityTestEngine,
-  default: AccessibilityTestEngine
-};
+module.exports = AccessibilityTestEngine;

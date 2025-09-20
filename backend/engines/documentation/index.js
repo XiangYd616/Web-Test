@@ -2,9 +2,6 @@
  * Documentation测试引擎导出
  */
 
-const DocumentationTestEngine = require('./DocumentationTestEngine');
+const DocumentationTestEngine = require('./documentationTestEngine');
 
-module.exports = {
-  DocumentationTestEngine,
-  default: DocumentationTestEngine
-};
+module.exports = DocumentationTestEngine;

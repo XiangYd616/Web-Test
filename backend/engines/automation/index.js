@@ -2,9 +2,6 @@
  * Automation测试引擎导出
  */
 
-const AutomationTestEngine = require('./AutomationTestEngine');
+const AutomationTestEngine = require('./automationTestEngine');
 
-module.exports = {
-  AutomationTestEngine,
-  default: AutomationTestEngine
-};
+module.exports = AutomationTestEngine;

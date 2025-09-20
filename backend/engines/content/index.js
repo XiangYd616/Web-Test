@@ -2,6 +2,6 @@
  * 内容检测引擎索引
  */
 
-const ContentDetectionEngine = require('./contentDetectionEngine');
+const ContentTestEngine = require('./contentTestEngine');
 
-module.exports = ContentDetectionEngine;
+module.exports = ContentTestEngine;
