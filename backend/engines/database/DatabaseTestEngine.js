@@ -9,11 +9,71 @@ const { MongoClient } = require('mongodb');
 
 class EnhancedDatabaseTestEngine {
   constructor() {
+    this.name = 'database';
+    this.version = '2.0.0';
     this.connectionPool = null;
     this.dbType = null;
     this.config = null;
     this.testResults = [];
     this.performanceMetrics = [];
+  }
+
+  /**
+   * 检查引擎可用性
+   */
+  checkAvailability() {
+    return {
+      available: true,
+      version: this.version,
+      features: [
+        'connection-testing',
+        'performance-analysis',
+        'query-optimization',
+        'index-analysis'
+      ]
+    };
+  }
+
+  /**
+   * 执行测试
+   */
+  async executeTest(config) {
+    try {
+      // 如果没有初始化，先进行初始化
+      if (!this.connectionPool) {
+        await this.initialize(config);
+      }
+      
+      const results = await this.runComprehensiveTest();
+      
+      return {
+        engine: this.name,
+        version: this.version,
+        success: true,
+        results,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        engine: this.name,
+        version: this.version,
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * 获取引擎信息
+   */
+  getInfo() {
+    return {
+      name: this.name,
+      version: this.version,
+      description: '增强的数据库测试引擎',
+      available: this.checkAvailability().available
+    };
   }
 
   /**
