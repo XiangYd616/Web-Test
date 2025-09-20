@@ -168,3 +168,56 @@ WARP.md
 # Archive directories
 scripts/archive/
 scripts/migration/old/
+
+# Backup and temporary files
+*.backup.js
+*.old.js
+*.new.js
+*.removed
+*.backup
+*.bak
+*.orig
+*.temp
+*.tmp
+*.swp
+*.swo
+*~
+
+# Test artifacts
+test-*.cjs
+*.test-report.json
+test-results/
+test-reports/
+coverage/
+.nyc_output/
+
+# Development artifacts
+*.log
+*.pid
+*.seed
+*.pid.lock
+*.tgz
+*.tar.gz
+
+# Runtime generated files
+storage/temp/
+storage/cache/
+logs/
+runtime/
+
+# IDE and system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Project specific temp files
+analysis/temp/
+docs/temp/
+backend/temp/
+frontend/temp/
