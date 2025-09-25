@@ -117,7 +117,7 @@ test.describe('用户体验测试', () => {
       await expect(page.locator('[data-testid="start-test-button"]')).toContainText('测试中');
 
       // 等待测试完成
-      await page.waitForSelector('[data-testid="test-completed"]', { timeout: 30000 });
+      await page.waitForSelector('[data-testid="test-completed"]', { timeout: process.env.REQUEST_TIMEOUT || 30000 });
 
       // 加载指示器应消失
       await expect(page.locator('[data-testid="loading-indicator"]')).not.toBeVisible();
@@ -233,7 +233,7 @@ test.describe('用户体验测试', () => {
       await page.click('[data-testid="start-test-button"]');
 
       // 等待错误消息
-      await page.waitForSelector('[data-testid="error-message"]', { timeout: 30000 });
+      await page.waitForSelector('[data-testid="error-message"]', { timeout: process.env.REQUEST_TIMEOUT || 30000 });
 
       // 检查错误消息是否友好
       const errorMessage = await page.locator('[data-testid="error-message"]').textContent();

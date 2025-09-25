@@ -271,6 +271,16 @@ class ComparisonService {
   ): Promise<string> {
     try {
       const params = new URLSearchParams({ format });
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const response = await fetch(`${this.baseUrl}/${comparisonId}/export?${params}`);
 
       if (format === 'json') {

@@ -75,7 +75,7 @@ test.describe('API Test Page', () => {
 
     // Wait for test completion (with timeout)
     await page.waitForSelector('[data-testid="test-completed"]', {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       state: 'visible'
     });
 
@@ -126,7 +126,7 @@ test.describe('API Test Page', () => {
 
     // Wait for error
     await page.waitForSelector('[data-testid="test-error"]', {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       state: 'visible'
     });
 

@@ -11,6 +11,16 @@ import { performance } from 'perf_hooks';
 import dns from 'dns';
 import { promisify } from 'util';
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 class PerformanceMetricsService extends BaseService {
   constructor() {
     super('PerformanceMetricsService');
@@ -170,6 +180,21 @@ class PerformanceMetricsService extends BaseService {
           metrics.totalTime = endTime - startTime;
           metrics.downloadTime = endTime - firstByteTime;
           metrics.contentLength = contentLength;
+
+          
+          /**
+
+          
+           * if功能函数
+
+          
+           * @param {Object} params - 参数对象
+
+          
+           * @returns {Promise<Object>} 返回结果
+
+          
+           */
           metrics.connectionTime = firstByteTime - startTime - metrics.dnsTime;
           
           if (isHttps) {
@@ -630,6 +655,21 @@ class PerformanceMetricsService extends BaseService {
       }
       
       if (metrics.resourceMetrics && metrics.resourceMetrics.success) {
+
+        
+        /**
+
+        
+         * if功能函数
+
+        
+         * @param {Object} params - 参数对象
+
+        
+         * @returns {Promise<Object>} 返回结果
+
+        
+         */
         const resources = metrics.resourceMetrics;
         
         if (resources.counts.total > 50) {

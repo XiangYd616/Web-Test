@@ -161,7 +161,7 @@ export function createMockFetchResponse(
     bodyUsed: false,
     redirected: false,
     type: 'basic',
-    url: 'http://localhost:3001/api/v1/test'
+    url: 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/test'
   } as Response;
 }
 
@@ -339,7 +339,7 @@ export function validateUserData(user: any) {
  * 设置测试环境变量
  */
 export function setupTestEnvironment() {
-  process.env.REACT_APP_API_URL = 'http://localhost:3001';
+  process.env.REACT_APP_API_URL = process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}';
   process.env.NODE_ENV = 'test';
 }
 

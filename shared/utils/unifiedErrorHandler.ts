@@ -375,7 +375,6 @@ export class UnifiedErrorHandler {
   private async reportError(error: StandardError, context: ErrorContext): Promise<void> {
     try {
       // 这里可以集成错误报告服务
-      console.log('报告错误:', { error, context });
     } catch (reportError) {
       console.error('错误报告失败:', reportError);
     }

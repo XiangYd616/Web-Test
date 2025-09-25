@@ -131,12 +131,11 @@ const RealTimeMonitoringDashboard: React.FC = () => {
   // 初始化WebSocket连接
   const initWebSocket = useCallback(() => {
     try {
-      const ws = new WebSocket('ws://localhost:3001/monitoring');
+      const ws = new WebSocket('ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/monitoring');
       
       ws.onopen = () => {
         setIsConnected(true);
         toast.success('监控连接已建立');
-        console.log('WebSocket connected');
         
         // 订阅实时数据
         ws.send(JSON.stringify({
@@ -166,7 +165,6 @@ const RealTimeMonitoringDashboard: React.FC = () => {
         // 自动重连
         if (autoRefresh) {
           reconnectTimeoutRef.current = setTimeout(() => {
-            console.log('Attempting to reconnect...');
             initWebSocket();
           }, 5000);
         }
@@ -195,7 +193,6 @@ const RealTimeMonitoringDashboard: React.FC = () => {
         updateServiceHealth(data.data);
         break;
       default:
-        console.log('Unknown message type:', data.type);
     }
   };
 

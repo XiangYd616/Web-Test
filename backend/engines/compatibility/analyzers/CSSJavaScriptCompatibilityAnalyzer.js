@@ -176,7 +176,7 @@ class CSSJavaScriptCompatibilityAnalyzer {
       });
 
       const page = await this.browser.newPage();
-      await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.goto(url, { waitUntil: 'networkidle0', timeout: process.env.REQUEST_TIMEOUT || 30000 });
 
       // 分析CSS兼容性
       analysis.cssCompatibility = await this.analyzeCSSCompatibility(page);

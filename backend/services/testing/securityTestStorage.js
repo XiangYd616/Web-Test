@@ -12,7 +12,6 @@ class SecurityTestStorage {
    */
   async saveSecurityTestResult(testResult, userId = null) {
     try {
-      console.log('💾 保存安全测试结果到数据库:', testResult.id);
 
       const sessionId = testResult.id || uuidv4();
       const now = new Date();

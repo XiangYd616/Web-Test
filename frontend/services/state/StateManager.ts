@@ -242,6 +242,21 @@ class StateManager {
   private state: AppState;
   private listeners: Map<StateEventType | 'all', Set<StateListener>> = new Map();
   private persistenceKey = 'test-web-state';
+
+
+  /**
+
+
+   * 处理constructor事件
+
+
+   * @param {Object} event - 事件对象
+
+
+   * @returns {Promise<void>}
+
+
+   */
   private persistenceFields = ['user.preferences', 'ui.theme', 'ui.sidebarCollapsed'];
 
   constructor() {
@@ -433,6 +448,16 @@ class StateManager {
         break;
 
       case 'UPDATE_TEST_PROGRESS':
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const activeTest = testState.activeTests.get(payload.id);
         if (activeTest) {
           Object.assign(activeTest, payload);
@@ -440,6 +465,16 @@ class StateManager {
         break;
 
       case 'COMPLETE_TEST':
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const completedTest = testState.activeTests.get(payload.id);
         if (completedTest) {
           completedTest.status = 'completed';
@@ -460,6 +495,16 @@ class StateManager {
         break;
 
       case 'FAIL_TEST':
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const failedTest = testState.activeTests.get(payload.id);
         if (failedTest) {
           failedTest.status = 'failed';
@@ -469,6 +514,16 @@ class StateManager {
         break;
 
       case 'CANCEL_TEST':
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const cancelledTest = testState.activeTests.get(payload.id);
         if (cancelledTest) {
           cancelledTest.status = 'cancelled';
@@ -657,6 +712,16 @@ class StateManager {
 
   private loadPersistedState(): void {
     try {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const persistedData = localStorage.getItem(this.persistenceKey);
       if (persistedData) {
         const parsed = JSON.parse(persistedData);
@@ -671,6 +736,16 @@ class StateManager {
     const persistable: any = {};
     
     for (const field of this.persistenceFields) {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const value = this.getNestedValue(this.state, field);
       if (value !== undefined) {
         this.setNestedValue(persistable, field, value);
@@ -680,8 +755,28 @@ class StateManager {
     return persistable;
   }
 
+
+    /**
+
+     * for功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   private mergePersistedState(persistedState: any): void {
     for (const field of this.persistenceFields) {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const value = this.getNestedValue(persistedState, field);
       if (value !== undefined) {
         this.setNestedValue(this.state, field, value);

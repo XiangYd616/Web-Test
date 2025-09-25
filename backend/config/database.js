@@ -72,7 +72,6 @@ const createPool = () => {
 
     // 连接池事件监听
     pool.on('connect', (client) => {
-      console.log('🔗 新的数据库连接已建立');
 
       // 设置连接级别的优化参数
       client.query(`
@@ -102,18 +101,15 @@ const createPool = () => {
 
     pool.on('acquire', (client) => {
       if (process.env.NODE_ENV === 'development') {
-        console.log('📥 获取数据库连接');
       }
     });
 
     pool.on('release', (client) => {
       if (process.env.NODE_ENV === 'development') {
-        console.log('📤 释放数据库连接');
       }
     });
 
     pool.on('remove', (client) => {
-      console.log('🔌 数据库连接已移除');
     });
   }
   return pool;
@@ -219,8 +215,6 @@ const initializeTables = async () => {
       `);
 
       if (parseInt(newTablesResult.rows[0].count) < 3) {
-        console.log('🔄 检测到旧版数据库架构，建议运行迁移脚本');
-        console.log('💡 运行: node backend/scripts/migrate-database.js');
       }
 
       return;
@@ -253,17 +247,11 @@ const initializeTables = async () => {
 
     } else {
       console.log('⚠️ 未找到数据库初始化脚本，跳过表创建');
-      console.log('💡 提示：运行 npm run init-db 手动初始化数据库');
     }
   } catch (error) {
     console.error('❌ 数据库表初始化失败:', error.message);
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('💡 开发环境提示：');
-      console.log('   1. 检查数据库连接配置');
-      console.log('   2. 确保PostgreSQL服务正在运行');
-      console.log('   3. 运行 npm run init-db 手动初始化');
-      console.log('   4. 或运行 npm run reset-db 重置数据库');
     }
 
     // 不抛出错误，允许应用继续启动
@@ -458,7 +446,6 @@ const getConnectionManager = async () => {
     });
 
     connectionManager.on('reconnected', (data) => {
-      console.log('🔄 数据库重连成功', `尝试次数: ${data.attempts}`);
     });
 
     connectionManager.on('healthCheck', (data) => {

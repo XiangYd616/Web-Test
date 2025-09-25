@@ -72,7 +72,6 @@ class TestScriptEngine {
       return { success: true, tests: [], passed: 0, failed: 0 };
     }
 
-    console.log('🧪 执行 Test Script...');
     this.testResults = [];
     
     try {
@@ -117,11 +116,20 @@ class TestScriptEngine {
           const message = args.map(arg => this.formatValue(arg)).join(' ');
           this.consoleOutput.push({ type: 'log', message, timestamp: new Date().toISOString() });
           if (this.options.enableConsoleLog) {
-            console.log('[Script]', message);
           }
         },
         error: (...args) => {
           const message = args.map(arg => this.formatValue(arg)).join(' ');
+
+          /**
+
+           * if功能函数
+
+           * @param {Object} params - 参数对象
+
+           * @returns {Promise<Object>} 返回结果
+
+           */
           this.consoleOutput.push({ type: 'error', message, timestamp: new Date().toISOString() });
           if (this.options.enableConsoleLog) {
             console.error('[Script]', message);
@@ -129,6 +137,16 @@ class TestScriptEngine {
         },
         warn: (...args) => {
           const message = args.map(arg => this.formatValue(arg)).join(' ');
+
+          /**
+
+           * if功能函数
+
+           * @param {Object} params - 参数对象
+
+           * @returns {Promise<Object>} 返回结果
+
+           */
           this.consoleOutput.push({ type: 'warn', message, timestamp: new Date().toISOString() });
           if (this.options.enableConsoleLog) {
             console.warn('[Script]', message);
@@ -248,10 +266,8 @@ class TestScriptEngine {
           // 输出测试结果
           const icon = testCase.passed ? '✓' : '✗';
           const status = testCase.passed ? 'PASS' : 'FAIL';
-          console.log(`  ${icon} ${name} (${testCase.duration}ms) [${status}]`);
           
           if (!testCase.passed && testCase.error) {
-            console.log(`    Error: ${testCase.error}`);
           }
         } : undefined,
 
@@ -266,6 +282,16 @@ class TestScriptEngine {
                   }
                 },
                 header: (name, value) => {
+
+                  /**
+
+                   * if功能函数
+
+                   * @param {Object} params - 参数对象
+
+                   * @returns {Promise<Object>} 返回结果
+
+                   */
                   const headerValue = context.response?.headers[name.toLowerCase()];
                   if (value !== undefined) {
                     if (headerValue !== value) {
@@ -278,6 +304,16 @@ class TestScriptEngine {
                   }
                 },
                 body: (matcher) => {
+
+                  /**
+
+                   * if功能函数
+
+                   * @param {Object} params - 参数对象
+
+                   * @returns {Promise<Object>} 返回结果
+
+                   */
                   const body = context.response?.body;
                   if (typeof matcher === 'string') {
                     if (!JSON.stringify(body).includes(matcher)) {
@@ -291,6 +327,16 @@ class TestScriptEngine {
                 },
                 jsonBody: (path, value) => {
                   const body = context.response?.body;
+
+                  /**
+
+                   * if功能函数
+
+                   * @param {Object} params - 参数对象
+
+                   * @returns {Promise<Object>} 返回结果
+
+                   */
                   const actual = _.get(body, path);
                   if (value !== undefined) {
                     if (actual !== value) {
@@ -305,12 +351,32 @@ class TestScriptEngine {
               },
               be: {
                 ok: () => {
+
+                  /**
+
+                   * if功能函数
+
+                   * @param {Object} params - 参数对象
+
+                   * @returns {Promise<Object>} 返回结果
+
+                   */
                   const code = context.response?.code;
                   if (code < 200 || code >= 300) {
                     throw new Error(`Expected successful response (2xx), but got ${code}`);
                   }
                 },
                 error: () => {
+
+                  /**
+
+                   * if功能函数
+
+                   * @param {Object} params - 参数对象
+
+                   * @returns {Promise<Object>} 返回结果
+
+                   */
                   const code = context.response?.code;
                   if (code < 400) {
                     throw new Error(`Expected error response (4xx or 5xx), but got ${code}`);
@@ -324,7 +390,6 @@ class TestScriptEngine {
         // 发送请求（用于工作流）
         sendRequest: async (request, callback) => {
           // 这里可以集成实际的 HTTP 请求发送
-          console.log('发送请求:', request);
           if (callback) {
             callback(null, { code: 200, body: {} });
           }
@@ -517,7 +582,6 @@ class TestScriptEngine {
     const startTime = Date.now();
 
     for (const test of testSuite.tests) {
-      console.log(`\n📋 运行测试: ${test.name}`);
       
       // 执行 Pre-request Script
       if (test.preRequestScript) {
@@ -572,30 +636,17 @@ class TestScriptEngine {
    * 生成测试报告
    */
   generateTestReport(results) {
-    console.log('\n' + '='.repeat(60));
     console.log('📊 测试报告');
-    console.log('='.repeat(60));
-    console.log(`测试套件: ${results.name}`);
-    console.log(`开始时间: ${results.startTime}`);
-    console.log(`结束时间: ${results.endTime}`);
-    console.log(`总耗时: ${results.totalTime}ms`);
-    console.log('-'.repeat(60));
-    console.log(`总测试数: ${results.totalTests}`);
     console.log(`✅ 通过: ${results.passedTests}`);
     console.log(`❌ 失败: ${results.failedTests}`);
-    console.log(`通过率: ${results.totalTests > 0 ? ((results.passedTests / results.totalTests) * 100).toFixed(2) : 0}%`);
-    console.log('='.repeat(60));
 
     // 详细结果
     if (results.failedTests > 0) {
-      console.log('\n失败的测试:');
       for (const test of results.tests) {
         if (test.tests) {
           for (const t of test.tests) {
             if (!t.passed) {
-              console.log(`  ❌ ${test.name} - ${t.name}`);
               if (t.error) {
-                console.log(`     错误: ${t.error}`);
               }
             }
           }

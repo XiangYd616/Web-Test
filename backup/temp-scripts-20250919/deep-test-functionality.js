@@ -21,7 +21,6 @@ const colors = {
 };
 
 console.log('🔍 Test-Web 深度功能验证测试');
-console.log('=' .repeat(60));
 
 /**
  * 分析文件内容深度
@@ -242,7 +241,6 @@ function testCoreFiles() {
     }
   ];
   
-  console.log('\n开始深度分析...\n');
   
   const results = {
     complete: 0,
@@ -253,8 +251,6 @@ function testCoreFiles() {
   };
   
   for (const group of testGroups) {
-    console.log(`\n${group.name}`);
-    console.log('-'.repeat(50));
     
     for (const file of group.files) {
       const analysis = analyzeFileContent(file.path, file.name);
@@ -280,55 +276,36 @@ function testCoreFiles() {
           break;
       }
       
-      console.log(`${statusIcon} ${file.name}: ${analysis.message}`);
       
       if (analysis.features && analysis.features.length > 0) {
-        console.log(`   特征: ${analysis.features.join(', ')}`);
       }
       
       if (analysis.hasPlaceholder) {
-        console.log(`   ${colors.yellow}⚠ 包含占位符或TODO标记${colors.reset}`);
       }
     }
   }
   
   // 生成总结报告
-  console.log('\n' + '='.repeat(60));
   console.log('📊 深度分析总结');
-  console.log('='.repeat(60));
   
   const realImplementation = results.complete + results.partial;
   const realPercentage = Math.round((realImplementation / results.total) * 100);
   
-  console.log(`\n统计结果:`);
-  console.log(`${colors.green}✅ 完整实现: ${results.complete}${colors.reset}`);
-  console.log(`${colors.yellow}⚠️  部分实现: ${results.partial}${colors.reset}`);
-  console.log(`${colors.red}🔴 占位符: ${results.placeholder}${colors.reset}`);
-  console.log(`${colors.red}❌ 文件缺失: ${results.missing}${colors.reset}`);
   console.log(`📊 总计: ${results.total}`);
   
-  console.log(`\n真实实现率: ${realPercentage}%`);
   
   if (realPercentage >= 80) {
-    console.log(`${colors.green}✨ 优秀！大部分功能已真实实现${colors.reset}`);
   } else if (realPercentage >= 60) {
-    console.log(`${colors.yellow}👍 良好！主要功能已实现，但仍有改进空间${colors.reset}`);
   } else if (realPercentage >= 40) {
-    console.log(`${colors.yellow}📝 需要改进：部分功能仅有框架${colors.reset}`);
   } else {
-    console.log(`${colors.red}⚠️  警告：大部分功能未真实实现${colors.reset}`);
   }
   
   // 建议
-  console.log('\n💡 建议:');
   if (results.missing > 0) {
-    console.log('1. 创建缺失的测试引擎文件');
   }
   if (results.placeholder > 0) {
-    console.log('2. 完善占位符文件的实际功能');
   }
   if (results.partial > 0) {
-    console.log('3. 补充部分实现文件的完整功能');
   }
   
   return realPercentage;
@@ -336,5 +313,4 @@ function testCoreFiles() {
 
 // 执行测试
 const score = testCoreFiles();
-console.log('\n测试完成！');
 process.exit(score >= 60 ? 0 : 1);

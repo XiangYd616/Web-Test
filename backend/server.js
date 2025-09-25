@@ -27,7 +27,7 @@ const performanceRoutes = require('./routes/performance');
 // 导入中间件
 const authMiddleware = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
-const logMiddleware = require('./middleware/logging');
+const { requestLogger, performanceMonitor, apiStats } = require('./middleware/logger');
 
 // 创建Express应用
 const app = express();
@@ -94,7 +94,9 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // 自定义日志中间件
-app.use(logMiddleware);
+app.use(requestLogger);
+app.use(performanceMonitor);
+app.use(apiStats);
 
 // 健康检查端点
 app.get('/health', (req, res) => {
@@ -163,7 +165,6 @@ app.use(errorHandler);
 
 // 优雅关闭处理
 const gracefulShutdown = () => {
-  console.log('\n🔄 Received shutdown signal, starting graceful shutdown...');
   
   server.close(() => {
     console.log('✅ HTTP server closed');
@@ -213,17 +214,14 @@ const startServer = async () => {
     const logsDir = path.join(__dirname, 'logs');
     if (!fs.existsSync(logsDir)) {
       fs.mkdirSync(logsDir, { recursive: true });
-      console.log('📁 Created logs directory');
     }
     
     // 连接数据库
-    console.log('🔗 Connecting to database...');
     const dbConnected = await connectDatabase();
     
     if (dbConnected) {
       // 同步数据库表结构（仅在开发环境）
       if (NODE_ENV === 'development') {
-        console.log('🔄 Syncing database tables...');
         await syncDatabase(false); // false = 不强制重建表
       }
     } else {
@@ -233,16 +231,11 @@ const startServer = async () => {
     // 启动HTTP服务器
     const server = app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
-      console.log(`🌍 Environment: ${NODE_ENV}`);
-      console.log(`📡 API Base URL: http://localhost:${PORT}/api`);
-      console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
       
       if (NODE_ENV === 'development') {
-        console.log(`📖 API Documentation: http://localhost:${PORT}/api/info`);
         console.log('🔧 Development mode - CORS enabled for all origins');
       }
       
-      console.log('\n🎯 Test-Web Platform Backend is ready to serve requests!');
     });
 
     // 设置服务器超时

@@ -159,6 +159,16 @@ router.put('/sites/:id', authMiddleware, validateRequest(updateSiteSchema), asyn
   const userId = req.user.id;
   const updateData = req.validatedData;
 
+
+  /**
+
+   * if功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const updatedSite = await monitoringService.updateMonitoringTarget(siteId, userId, updateData);
 
   if (!updatedSite) {
@@ -194,6 +204,16 @@ router.delete('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
   const siteId = req.params.id;
   const userId = req.user.id;
 
+
+  /**
+
+   * if功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const deleted = await monitoringService.removeMonitoringTarget(siteId, userId);
 
   if (!deleted) {
@@ -311,6 +331,16 @@ router.put('/alerts/:id/read', authMiddleware, asyncHandler(async (req, res) => 
   const alertId = req.params.id;
   const userId = req.user.id;
 
+
+  /**
+
+   * if功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const updated = await monitoringService.markAlertAsRead(alertId, userId);
 
   if (!updated) {
@@ -594,6 +624,16 @@ router.get('/reports/:id/download', authMiddleware, asyncHandler(async (req, res
   const reportId = req.params.id;
   const userId = req.user.id;
 
+
+  /**
+
+   * if功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const reportFile = await monitoringService.downloadReport(reportId, userId);
 
   if (!reportFile) {

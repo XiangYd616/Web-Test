@@ -203,7 +203,6 @@ export async function logThemeReport(): Promise<void> {
   if (report.colorIssues.summary.elementsWithIssues > 0) {
     console.group('🔍 发现的问题元素:');
     report.colorIssues.elements.slice(0, 5).forEach((item, index) => {
-      console.log(`${index + 1}.`, item.element, {
         hardcodedClasses: item.hardcodedClasses,
         suggestions: item.suggestions
       });
@@ -211,7 +210,6 @@ export async function logThemeReport(): Promise<void> {
     console.groupEnd();
   }
 
-  console.log('💡 建议:', report.recommendations);
   console.groupEnd();
 }
 
@@ -230,5 +228,4 @@ export function initThemeValidation(): void {
   (window as any).validateTheme = logThemeReport;
   (window as any).detectColors = detectHardcodedColorsInPage;
 
-  console.log('🎨 主题验证工具已初始化，使用 validateTheme() 运行验证');
 }

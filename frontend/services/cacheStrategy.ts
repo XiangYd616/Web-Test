@@ -378,6 +378,16 @@ export class CacheManager<T = any> {
 
   async delete(identifier: string, params?: Record<string, any>): Promise<boolean> {
     const key = this.keyGenerator.generate(this.config.namespace, identifier, params);
+    
+    /**
+    
+     * if功能函数
+    
+     * @param {Object} params - 参数对象
+    
+     * @returns {Promise<Object>} 返回结果
+    
+     */
     const result = await this.storage.delete(key);
     
     if (result) {
@@ -441,6 +451,16 @@ export class CacheManager<T = any> {
   }
 
   private async ensureCapacity(): Promise<void> {
+    
+    /**
+    
+     * if功能函数
+    
+     * @param {Object} params - 参数对象
+    
+     * @returns {Promise<Object>} 返回结果
+    
+     */
     const currentSize = await this.storage.size();
     
     if (currentSize >= this.config.maxSize) {
@@ -449,9 +469,24 @@ export class CacheManager<T = any> {
     }
   }
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   private async evictEntries(count: number): Promise<void> {
     if (this.storage instanceof MemoryCacheStorage) {
       const entries = this.storage.getEntries();
+      
+      /**
+      
+       * for功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       const keysToEvict = this.evictionStrategy.selectForEviction(entries, count);
       
       for (const key of keysToEvict) {
@@ -506,6 +541,11 @@ export class CacheManager<T = any> {
   }
 
   private updateAverageAccessTime(accessTime: number): void {
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const totalRequests = this.stats.hitCount + this.stats.missCount;
     if (totalRequests === 1) {
       this.stats.averageAccessTime = accessTime;

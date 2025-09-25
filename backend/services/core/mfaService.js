@@ -621,6 +621,16 @@ destroy() {
 }
 }
 
+
+/**
+
+ * 创建新的createMFATables
+
+ * @param {Object} data - 创建数据
+
+ * @returns {Promise<Object>} 创建的对象
+
+ */
 // ==================== 数据库表创建 ====================
 
 const createMFATables = async () => {

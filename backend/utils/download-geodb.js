@@ -40,14 +40,12 @@ class GeoDBDownloader {
     if (!this.licenseKey) {
       
         console.error('❌ 请设置 MAXMIND_LICENSE_KEY 环境变量');
-      console.log('💡 获取许可证密钥：https://www.maxmind.com/en/accounts/current/license-key');
       return false;
       }
 
     const url = `${this.baseUrl}?edition_id=${edition}&license_key=${this.licenseKey}&suffix=tar.gz`;
     const outputPath = path.join(this.dataDir, filename);
 
-    console.log(`📥 下载 ${edition}...`);
 
     try {
       // 下载压缩文件
@@ -55,7 +53,6 @@ class GeoDBDownloader {
       await this.downloadFile(url, tempFile);
 
       // 解压文件
-      console.log(`📦 解压 ${edition}...`);
       await this.extractDatabase(tempFile, outputPath, edition);
 
       // 删除临时文件
@@ -75,7 +72,6 @@ class GeoDBDownloader {
   async downloadFile(url, outputPath, retries = 3) {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        console.log(`📥 下载尝试 ${attempt}/${retries}: ${url}`);
         await this.downloadFileOnce(url, outputPath);
         console.log(`✅ 下载成功: ${outputPath}`);
         return;
@@ -88,7 +84,6 @@ class GeoDBDownloader {
 
         // 等待后重试
         const delay = attempt * 5000; // 5秒, 10秒, 15秒
-        console.log(`⏳ ${delay / 1000} 秒后重试...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
@@ -132,7 +127,6 @@ class GeoDBDownloader {
         response.pipe(fileStream);
 
         fileStream.on('finish', () => {
-          console.log(''); // 换行
           fileStream.close();
           resolve();
         });
@@ -159,7 +153,6 @@ class GeoDBDownloader {
         fs.mkdirSync(tempDir);
       }
 
-      console.log(`📦 解压 ${edition}...`);
 
       tar.extract({
         file: tarFile,
@@ -168,7 +161,6 @@ class GeoDBDownloader {
         try {
           // 查找 .mmdb 文件
           const extractedDirs = fs.readdirSync(tempDir);
-          console.log(`📂 解压目录: ${extractedDirs.join(', ')}`);
 
           const extractedDir = extractedDirs.find(dir => dir.startsWith(edition));
           if (!extractedDir) {
@@ -178,7 +170,6 @@ class GeoDBDownloader {
 
           const extractedDirPath = path.join(tempDir, extractedDir);
           const files = fs.readdirSync(extractedDirPath);
-          console.log(`📄 目录文件: ${files.join(', ')}`);
 
           const mmdbFile = files.find(file => file.endsWith('.mmdb'));
 
@@ -189,7 +180,6 @@ class GeoDBDownloader {
 
           // 移动文件到目标位置
           const sourcePath = path.join(extractedDirPath, mmdbFile);
-          console.log(`📋 移动文件: ${sourcePath} -> ${outputPath}`);
 
           if (fs.existsSync(outputPath)) {
             fs.unlinkSync(outputPath);
@@ -217,7 +207,6 @@ class GeoDBDownloader {
    * 下载所有数据库
    */
   async downloadAll() {
-    console.log('🌍 开始下载 MaxMind GeoLite2 数据库...');
 
     const databases = [
       { edition: 'GeoLite2-City', filename: 'GeoLite2-City.mmdb' },
@@ -233,14 +222,10 @@ class GeoDBDownloader {
       }
     }
 
-    console.log(`/n📊 下载完成: ${successCount}/${databases.length} 个数据库`);
 
     if (successCount > 0) {
-      console.log('\n✅ 地理位置数据库已准备就绪！');
       console.log('🚀 重启服务器以使用本地数据库查询');
     } else {
-      console.log('/n❌ 所有数据库下载失败');
-      console.log('💡 请检查许可证密钥和网络连接');
     }
 
     return successCount > 0;
@@ -255,7 +240,6 @@ class GeoDBDownloader {
       { name: 'GeoLite2-Country', file: 'GeoLite2-Country.mmdb' }
     ];
 
-    console.log('📋 数据库状态检查:');
 
     for (const db of databases) {
       const filePath = path.join(this.dataDir, db.file);
@@ -285,16 +269,6 @@ if (require.main === module) {
       downloader.checkStatus();
       break;
     default:
-      console.log('MaxMind GeoLite2 数据库管理工具');
-      console.log('');
-      console.log('使用方法:');
-      console.log('  node download-geodb.js download  # 下载数据库');
-      console.log('  node download-geodb.js status    # 检查状态');
-      console.log('');
-      console.log('环境变量:');
-      console.log('  MAXMIND_LICENSE_KEY  # MaxMind 许可证密钥');
-      console.log('');
-      console.log('获取许可证密钥: https://www.maxmind.com/en/geolite2/signup');
   }
 }
 

@@ -1,3 +1,10 @@
+/**
+ * BackgroundTestNotifications.tsx - React组件
+ * 
+ * 文件路径: frontend\components\system\BackgroundTestNotifications.tsx
+ * 创建时间: 2025-09-25
+ */
+
 ﻿import React from 'react';
 import { useState } from 'react';
 import type { FC } from 'react';
@@ -7,6 +14,16 @@ import { useNotifications } from '../../hooks/useNotifications';
 
 const BackgroundTestNotifications: React.FC = () => {
   const navigate = useNavigate();
+
+  /**
+
+   * 获取getNotificationColor数据
+
+   * @param {string} id - 对象ID
+
+   * @returns {Promise<Object|null>} 获取的数据
+
+   */
   const { notifications, deleteNotification } = useNotifications();
 
   const getNotificationColor = (type: string) => {

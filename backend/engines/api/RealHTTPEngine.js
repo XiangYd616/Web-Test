@@ -12,8 +12,18 @@ const FormData = require('form-data');
 class RealHTTPEngine {
   constructor(options = {}) {
     this.options = {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       maxRedirects: 5,
+
+      /**
+
+       * 分析validateStatus数据
+
+       * @param {Object} options - 分析选项
+
+       * @returns {Promise<Object>} 分析结果
+
+       */
       maxContentLength: 50 * 1024 * 1024, // 50MB
       validateStatus: () => true, // 接受所有状态码
       ...options

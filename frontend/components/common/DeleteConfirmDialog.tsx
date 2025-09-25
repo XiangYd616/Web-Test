@@ -1,3 +1,10 @@
+/**
+ * DeleteConfirmDialog.tsx - React组件
+ * 
+ * 文件路径: frontend\components\common\DeleteConfirmDialog.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import type { FC } from 'react';
 import { AlertTriangle, Trash2, X } from 'lucide-react';
@@ -25,6 +32,11 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
 }) => {
   if (!isOpen) return null;
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();

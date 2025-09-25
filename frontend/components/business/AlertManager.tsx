@@ -638,6 +638,16 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                                         <input
                                             type="checkbox"
                                             checked={selectedAlerts.length === alerts.length}
+
+                                                /**
+
+                                                 * if功能函数
+
+                                                 * @param {Object} params - 参数对象
+
+                                                 * @returns {Promise<Object>} 返回结果
+
+                                                 */
                                             onChange={(e) => {
                                                 if (e.target.checked) {
                                                     setSelectedAlerts(alerts.map(alert => alert.id));
@@ -675,6 +685,16 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                                             <input
                                                 type="checkbox"
                                                 checked={selectedAlerts.includes(alert.id)}
+
+                                                    /**
+
+                                                     * if功能函数
+
+                                                     * @param {Object} params - 参数对象
+
+                                                     * @returns {Promise<Object>} 返回结果
+
+                                                     */
                                                 onChange={(e) => {
                                                     if (e.target.checked) {
                                                         setSelectedAlerts(prev => [...prev, alert.id]);
@@ -831,6 +851,21 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
     onClose,
     onTestNotification
 }) => {
+
+
+    /**
+
+
+     * 处理handleSubmit事件
+
+
+     * @param {Object} event - 事件对象
+
+
+     * @returns {Promise<void>}
+
+
+     */
     const [formData, setFormData] = useState<AlertRules>(rules);
 
     const handleSubmit = (e: React.FormEvent) => {

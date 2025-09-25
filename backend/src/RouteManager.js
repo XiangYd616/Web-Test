@@ -206,7 +206,6 @@ class RouteManager {
       registeredAt: new Date()
     });
 
-    console.log(`📝 Registered route: ${path} (priority: ${priority}, group: ${group})`);
     return true;
   }
 
@@ -405,6 +404,15 @@ class RouteManager {
         group: 'files'
       },
 
+      // API映射修复路由 - 统一处理缺失的API端点
+      {
+        path: '/api',
+        module: '../routes/api-mappings.js',
+        description: 'API映射修复 - 统一处理缺失的API端点',
+        group: 'general',
+        priority: 50  // 给予较低优先级，确保具体路由优先
+      },
+
       // 其他路由
       {
         path: '/api/performance',
@@ -465,7 +473,8 @@ class RouteManager {
 
         const success = this.registerRoute(config.path, router, {
           group: config.group,
-          description: config.description
+          description: config.description,
+          priority: config.priority  // 传递自定义优先级
         });
 
         if (success) {
@@ -477,7 +486,6 @@ class RouteManager {
       }
     }
 
-    console.log(`🎉 Route registration complete: ${successCount} success, ${errorCount} errors`);
   }
 
   /**
@@ -510,7 +518,6 @@ class RouteManager {
       }
     }
 
-    console.log(`🎉 Routes applied: ${appliedCount}/${this.routes.size}`);
     this.logRoutesSummary();
   }
 
@@ -668,16 +675,13 @@ class RouteManager {
   }
 
   logRoutesSummary() {
-    console.log('\n📊 Routes Summary:');
     const groupCounts = {};
     for (const route of this.routes.values()) {
       groupCounts[route.group] = (groupCounts[route.group] || 0) + 1;
     }
 
     for (const [group, count] of Object.entries(groupCounts)) {
-      console.log(`  ${group}: ${count} routes`);
     }
-    console.log(`  Total: ${this.routes.size} routes\n`);
   }
 
   /**
@@ -687,7 +691,6 @@ class RouteManager {
     try {
       const { setupSwagger } = require('../config/swagger');
       setupSwagger(this.app);
-      console.log('📚 Swagger API文档已集成');
     } catch (error) {
       console.warn('⚠️  Swagger集成失败，跳过API文档设置:', error.message);
     }

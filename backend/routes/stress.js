@@ -106,6 +106,21 @@ router.post('/stop',
       const { testId } = req.body;
       const userId = req.user.id;
 
+
+      
+      /**
+
+      
+       * if功能函数
+
+      
+       * @param {Object} params - 参数对象
+
+      
+       * @returns {Promise<Object>} 返回结果
+
+      
+       */
       const testSession = activeTests.get(testId);
       
       if (!testSession) {
@@ -163,6 +178,21 @@ router.get('/status/:testId',
     try {
       const { testId } = req.params;
       
+
+      
+      /**
+
+      
+       * if功能函数
+
+      
+       * @param {Object} params - 参数对象
+
+      
+       * @returns {Promise<Object>} 返回结果
+
+      
+       */
       const testSession = activeTests.get(testId);
       
       if (!testSession) {

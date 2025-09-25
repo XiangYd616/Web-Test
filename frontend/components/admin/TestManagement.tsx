@@ -1,3 +1,10 @@
+/**
+ * TestManagement.tsx - React组件
+ * 
+ * 文件路径: frontend\components\admin\TestManagement.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { Download, Eye, Pause, Trash2 } from 'lucide-react';

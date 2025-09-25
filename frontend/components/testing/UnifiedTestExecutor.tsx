@@ -160,6 +160,11 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
 
     const interval = setInterval(async () => {
       try {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const status = await engine.getTestStatus(testId);
         if (status) {
           setRealTimeMetrics({

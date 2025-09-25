@@ -255,6 +255,16 @@ export const TestTrendAnalyzer: React.FC<TestTrendAnalyzerProps> = ({
     return causes.length > 0 ? causes : ['Normal variation'];
   };
 
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const generatePredictions = (metrics: TestMetric[]) => {
     if (metrics.length < 3) {
       return {

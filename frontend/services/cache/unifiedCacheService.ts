@@ -279,7 +279,6 @@ export class UnifiedCacheService {
     this.updateStats();
 
     if (this.config.enableMetrics && expiredKeys.length > 0) {
-      console.log(`🧹 缓存清理: 删除了 ${expiredKeys.length} 个过期项`);
     }
   }
 

@@ -213,7 +213,6 @@ export class ErrorHandler {
         console.info(logMessage);
         break;
       default:
-        console.log(logMessage);
     }
   }
 

@@ -30,7 +30,7 @@ export class BaseApiService {
   protected authConfig: AuthConfig = {};
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl || import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+    this.baseUrl = baseUrl || import.meta.env.VITE_API_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api';
   }
 
   /**
@@ -99,9 +99,18 @@ export class BaseApiService {
 
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
-        console.log(`🌐 API请求 (尝试 ${attempt + 1}/${retries + 1}): ${method} ${url}`);
 
         const response = await fetch(url, requestConfig);
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const responseData = await this.parseResponse<T>(response);
 
         if (response.ok) {

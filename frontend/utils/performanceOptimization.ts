@@ -98,7 +98,6 @@ class ResourcePreloader {
     public async preloadCriticalResources() {
         // 在开发环境中跳过资源预加载，避免404错误
         if (process.env.NODE_ENV === 'development') {
-            console.log('Development mode: Skipping critical resource preloading');
             return;
         }
 
@@ -488,7 +487,6 @@ class MemoryManager {
     }
 
     private performCleanup() {
-        console.log('Performing memory cleanup...');
 
         // 执行注册的清理任务
         this.cleanupTasks.forEach((task) => {
@@ -608,7 +606,6 @@ export const frontendCache = new FrontendCacheManager();
 
 // 初始化性能优化
 export function initializePerformanceOptimization() {
-    console.log('Initializing performance optimization...');
 
     // 只在生产环境中进行资源预加载
     if (process.env.NODE_ENV === 'production') {
@@ -621,7 +618,6 @@ export function initializePerformanceOptimization() {
         resourcePreloader.preconnectDomain('https://fonts.googleapis.com');
         resourcePreloader.preconnectDomain('https://fonts.gstatic.com');
     } else {
-        console.log('Development mode: Skipping resource preloading');
     }
 
     // 页面加载完成后发送性能指标（仅在生产环境）

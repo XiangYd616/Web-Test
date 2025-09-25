@@ -109,7 +109,6 @@ function replaceColorsInFile(filePath) {
       if (regex.test(content)) {
         content = content.replace(regex, newClass);
         hasChanges = true;
-        console.log(`  ✓ ${oldClass} → ${newClass}`);
       }
     });
 
@@ -142,13 +141,11 @@ function fixColorsInDirectory(directory) {
     ]
   });
 
-  console.log(`📁 找到 ${files.length} 个文件`);
 
   let processedFiles = 0;
   let modifiedFiles = 0;
 
   files.forEach(file => {
-    console.log(`\n📝 处理: ${path.relative(process.cwd(), file)}`);
 
     if (replaceColorsInFile(file)) {
       modifiedFiles++;
@@ -187,29 +184,21 @@ ${Object.entries(COLOR_MAPPINGS).map(([old, new_]) => `- \`${old}\` → \`${new_
 `;
 
   fs.writeFileSync('theme-fix-report.md', report, 'utf8');
-  console.log('\n📋 修复报告已生成: theme-fix-report.md');
 }
 
 /**
  * 主函数
  */
 function main() {
-  console.log('🎨 开始修复主题颜色...\n');
 
   const frontendDir = path.join(__dirname, '..');
   const results = fixColorsInDirectory(frontendDir);
 
-  console.log('\n✅ 修复完成!');
   console.log(`📊 处理了 ${results.processedFiles} 个文件`);
   console.log(`🔧 修改了 ${results.modifiedFiles} 个文件`);
 
   generateReport(results);
 
-  console.log('\n🎯 建议下一步操作:');
-  console.log('1. 运行 npm run dev 启动开发服务器');
-  console.log('2. 在浏览器中测试主题切换');
-  console.log('3. 检查各页面颜色是否正确');
-  console.log('4. 运行 validateTheme() 进行验证');
 }
 
 // 运行脚本

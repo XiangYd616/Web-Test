@@ -131,7 +131,6 @@ const UnifiedStressTest: React.FC = () => {
 
   // 测试完成回调
   const handleTestComplete = useCallback((result: any) => {
-    console.log('压力测试完成:', result);
     
     // 添加到历史记录
     setTestHistory(prev => [result, ...prev.slice(0, 4)]);
@@ -151,7 +150,6 @@ const UnifiedStressTest: React.FC = () => {
 
   // 配置变更回调
   const handleConfigChange = useCallback((config: any) => {
-    console.log('配置已更新:', config);
   }, []);
 
   // 导出测试结果

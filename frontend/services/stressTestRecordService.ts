@@ -809,6 +809,16 @@ class StressTestRecordService {
     reason: string = '批量取消',
     cancelReason: CancelReason = CancelReason.USER_CANCELLED
   ): Promise<{ success: string[], failed: string[] }> {
+
+    /**
+
+     * for功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const results: { success: string[], failed: string[] } = { success: [], failed: [] };
 
     for (const id of ids) {
@@ -900,6 +910,11 @@ class StressTestRecordService {
   ): Promise<Blob> {
     try {
       const params = new URLSearchParams();
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
       Object.entries(query).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           params.append(key, value.toString());

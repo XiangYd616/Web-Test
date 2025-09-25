@@ -430,6 +430,11 @@ export class AdvancedAnalyticsService {
     };
   }
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   private static rateMetric(value: number, thresholds: [number, number], inverse = false): 'good' | 'needs-improvement' | 'poor' {
     if (inverse) {
       if (value <= thresholds[0]) return 'good';
@@ -452,6 +457,11 @@ export class AdvancedAnalyticsService {
       ttfb: [200, 800, 1800, 3000]
     };
 
+    /**
+     * for功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const benchmark = benchmarks[metric] || [0, 1000, 2000, 3000];
     for (let i = 0; i < benchmark.length; i++) {
       if (value <= benchmark[i]) {

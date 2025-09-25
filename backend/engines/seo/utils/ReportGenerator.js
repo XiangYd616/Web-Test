@@ -714,6 +714,11 @@ document.addEventListener('click', async () => {
     return optimized;
   }
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   generateOptimizedDescription(currentDescription, analysisResults) {
     if (!currentDescription) {
       

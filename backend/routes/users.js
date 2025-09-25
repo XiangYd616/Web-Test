@@ -6,10 +6,10 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 
-const { getPool } = require('../../../config/database');
-const { requireRole, ROLES } = require('../../middleware/auth.js');
-const { asyncHandler } = require('../../middleware/errorHandler.js');
-const { formatValidationErrors } = require('../../middleware/responseFormatter.js');
+const { getPool } = require('../config/database');
+const { requireRole, ROLES } = require('../middleware/auth.js');
+const { asyncHandler } = require('../middleware/errorHandler.js');
+const { formatValidationErrors } = require('../middleware/responseFormatter.js');
 
 const router = express.Router();
 

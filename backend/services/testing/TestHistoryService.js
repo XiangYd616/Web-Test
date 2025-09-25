@@ -201,6 +201,16 @@ class TestHistoryService {
     `;
 
     try {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const sessionResult = await this.db.query(sessionQuery, [sessionId, userId]);
 
       if (sessionResult.rows.length === 0) {
@@ -431,6 +441,16 @@ class TestHistoryService {
         RETURNING *
       `;
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const result = await this.db.query(query, updateValues);
 
       if (result.rows.length === 0) {
@@ -508,6 +528,16 @@ class TestHistoryService {
     `;
 
     try {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const checkResult = await this.db.query(checkQuery, [sessionId, userId]);
 
       if (checkResult.rows.length === 0) {

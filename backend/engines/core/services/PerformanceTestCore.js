@@ -31,7 +31,6 @@ class PerformanceTestCore {
     }
 
     try {
-      console.log(`🎯 检测 Core Web Vitals: ${url}`);
       
       // 启动 Chrome
       const chrome = await chromeLauncher.launch({
@@ -101,7 +100,6 @@ class PerformanceTestCore {
     }
 
     try {
-      console.log(`⚡ 分析页面速度: ${url}`);
 
       const browser = await puppeteer.launch({ 
         headless: true,
@@ -140,7 +138,7 @@ class PerformanceTestCore {
 
         // 开始性能监控
         const startTime = Date.now();
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: process.env.REQUEST_TIMEOUT || 30000 });
         const loadTime = Date.now() - startTime;
 
         // 获取性能指标
@@ -215,7 +213,6 @@ class PerformanceTestCore {
     }
 
     try {
-      console.log(`📦 分析资源优化: ${url}`);
 
       const browser = await puppeteer.launch({ 
         headless: true,
@@ -249,7 +246,7 @@ class PerformanceTestCore {
           }
         });
 
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: process.env.REQUEST_TIMEOUT || 30000 });
 
         // 分析资源
         const analysis = {
@@ -282,7 +279,6 @@ class PerformanceTestCore {
    */
   async analyzeCaching(url, config = {}) {
     try {
-      console.log(`🗄️ 分析缓存策略: ${url}`);
 
       const response = await axios.get(url, {
         timeout: 10000,
@@ -472,7 +468,6 @@ class PerformanceTestCore {
    */
   clearCache() {
     this.cache.clear();
-    console.log('🧹 性能测试缓存已清理');
   }
 
   /**

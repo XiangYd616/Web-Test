@@ -67,7 +67,6 @@ class RealtimeService {
         subscribedAt: new Date().toISOString()
       }, 24 * 60 * 60); // 24小时过期
 
-      console.log(`🔔 用户 ${userId} 订阅测试进度: ${testId}`);
 
       // 如果测试已有进度，立即发送
       const currentProgress = this.testProgress.get(testId);
@@ -95,7 +94,6 @@ class RealtimeService {
       // 删除缓存
       await this.cache.delete('temporary', `subscription:${subscriptionKey}`);
 
-      console.log(`🔕 用户 ${userId} 取消订阅测试进度: ${testId}`);
 
       return true;
     } catch (error) {
@@ -322,7 +320,6 @@ class RealtimeService {
         this.socketManager.broadcastSystemNotification(notification.message, notification.level);
       }
 
-      console.log(`📢 系统通知已发送: ${notification.message}`);
 
       return notification.id;
     } catch (error) {
@@ -507,7 +504,6 @@ class RealtimeService {
         }
       }
 
-      console.log('🧹 实时服务数据清理完成');
     } catch (error) {
       console.error('清理实时服务数据失败:', error);
     }
@@ -572,7 +568,6 @@ class RealtimeService {
         });
       }
 
-      console.log(`🔔 推送通知: ${notification.title}`);
     } catch (error) {
       console.error('推送通知失败:', error);
     }
@@ -595,7 +590,6 @@ class RealtimeService {
         message
       });
 
-      console.log(`⚡ 推送系统状态: ${status.type}`);
     } catch (error) {
       console.error('推送系统状态失败:', error);
     }
@@ -620,7 +614,6 @@ class RealtimeService {
         excludeUserId: userId
       });
 
-      console.log(`👤 推送用户活动: ${userId} - ${activity.type}`);
     } catch (error) {
       console.error('推送用户活动失败:', error);
     }
@@ -646,7 +639,6 @@ class RealtimeService {
       // 缓存房间信息
       await this.cache.set('temporary', `room:${roomId}`, room, 24 * 60 * 60);
 
-      console.log(`🏠 创建协作房间: ${roomId}`);
       return room;
     } catch (error) {
       console.error('创建协作房间失败:', error);
@@ -691,7 +683,6 @@ class RealtimeService {
         excludeUserId: userId
       });
 
-      console.log(`👥 用户 ${userId} 加入房间 ${roomId}`);
       return room;
     } catch (error) {
       console.error('加入协作房间失败:', error);
@@ -726,10 +717,8 @@ class RealtimeService {
       if (room.members.size === 0) {
         this.rooms.delete(roomId);
         await this.cache.delete('temporary', `room:${roomId}`);
-        console.log(`🗑️ 删除空房间: ${roomId}`);
       }
 
-      console.log(`🚪 用户 ${userId} 离开房间 ${roomId}`);
     } catch (error) {
       console.error('离开协作房间失败:', error);
     }
@@ -758,7 +747,6 @@ class RealtimeService {
         if (now - room.lastActivity > expireTime || room.members.size === 0) {
           this.rooms.delete(roomId);
           await this.cache.delete('temporary', `room:${roomId}`);
-          console.log(`🧹 清理过期房间: ${roomId}`);
         }
       }
     } catch (error) {
@@ -809,7 +797,6 @@ class RealtimeService {
    * 关闭服务
    */
   async shutdown() {
-    console.log('🔌 关闭实时通信服务...');
 
     this.isProcessingQueue = false;
 

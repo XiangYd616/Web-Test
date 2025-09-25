@@ -57,7 +57,7 @@ export class TestApiClient {
     this.baseUrl = baseUrl;
     this.api = axios.create({
       baseURL: baseUrl,
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -222,6 +222,16 @@ export class TestApiClient {
     this.wsConnection.onmessage = (event) => {
       try {
         const progress: TestProgress = JSON.parse(event.data);
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const callback = this.progressCallbacks.get(progress.testId);
         if (callback) {
           callback(progress);
@@ -236,7 +246,6 @@ export class TestApiClient {
     };
 
     this.wsConnection.onclose = () => {
-      console.log('WebSocket连接关闭');
       this.wsConnection = null;
     };
   }

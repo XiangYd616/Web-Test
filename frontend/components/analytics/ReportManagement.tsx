@@ -1,3 +1,10 @@
+/**
+ * ReportManagement.tsx - React组件
+ * 
+ * 文件路径: frontend\components\analytics\ReportManagement.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { CheckCircle, Clock, Download, Eye, FileText, Filter, Plus, Share2, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';

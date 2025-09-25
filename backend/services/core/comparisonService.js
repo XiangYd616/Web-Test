@@ -412,6 +412,16 @@ class ComparisonService {
       if (trend.direction !== 'stable') {
         const isNegativeMetric = ['responseTime', 'errorRate', 'cpuUsage', 'memoryUsage'].includes(metric);
         const isProblematic = (isNegativeMetric && trend.direction === 'increasing') ||
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
                              (!isNegativeMetric && trend.direction === 'decreasing');
 
         if (isProblematic) {

@@ -367,6 +367,11 @@ export const useDataManagement = (): UseDataManagementReturn => {
 
   const deleteRecord = useCallback(async (id: string): Promise<boolean> => {
     try {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const success = await extendedDataManager.deleteRecord(id);
       if (success) {
         await loadData(); // 重新加载数据
@@ -413,7 +418,6 @@ export const useDataManagement = (): UseDataManagementReturn => {
       const result = await advancedDataManager.restoreBackup(backupId);
       // 如果有选项，可以在这里处理
       if (options) {
-        console.log('Restore options:', options);
       }
       return result;
     } catch (err) {

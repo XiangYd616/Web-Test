@@ -11,7 +11,7 @@ class BrowserManager {
   constructor(options = {}) {
     this.options = {
       headless: true,
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       viewport: { width: 1920, height: 1080 },
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       ...options
@@ -207,7 +207,6 @@ class BrowserManager {
         ...options
       };
       
-      console.log(`🌐 导航到URL: ${url} (${pageInstance.browserType})`);
       
       const response = await page.goto(url, navigationOptions);
       
@@ -339,7 +338,6 @@ class BrowserManager {
       
       this.activePages.delete(pageKey);
       
-      console.log(`🗑️ 页面已关闭: ${pageKey}`);
       
       return true;
       
@@ -376,7 +374,6 @@ class BrowserManager {
       
       this.activeBrowsers.delete(browserKey);
       
-      console.log(`🗑️ 浏览器已关闭: ${browserType} ${version}`);
       
       return true;
       
@@ -438,7 +435,6 @@ class BrowserManager {
       await this.closePage(pageKey);
     }
     
-    console.log(`🧹 清理了 ${pagesToClose.length} 个非活跃页面`);
     
     return pagesToClose.length;
   }
@@ -448,7 +444,6 @@ class BrowserManager {
    */
   async closeAll() {
     try {
-      console.log('🗑️ 关闭所有浏览器和页面...');
       
       // 关闭所有页面
       const pageKeys = Array.from(this.activePages.keys());

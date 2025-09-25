@@ -4,7 +4,6 @@
 
 const http = require('http');
 
-console.log('🧪 测试WebSocket服务...');
 
 try {
   // 创建简单的HTTP服务器
@@ -14,17 +13,14 @@ try {
   });
 
   // 尝试加载WebSocket服务
-  console.log('1. 加载WebSocket服务...');
   const webSocketService = require('../backend/services/websocketService');
   console.log('✅ WebSocket服务加载成功');
 
   // 启动服务器
   server.listen(3002, () => {
-    console.log('2. 启动测试服务器...');
     console.log('✅ 测试服务器运行在端口 3002');
 
     // 初始化WebSocket服务
-    console.log('3. 初始化WebSocket服务...');
     try {
       webSocketService.initialize(server);
       console.log('✅ WebSocket服务初始化成功');
@@ -37,12 +33,9 @@ try {
       const stats = webSocketService.getStats();
       console.log('📊 WebSocket统计:', stats);
 
-      console.log('\n🎉 WebSocket服务测试完成！');
-      console.log('🔌 WebSocket地址: ws://localhost:3002/ws');
       
       // 5秒后关闭
       setTimeout(() => {
-        console.log('\n🔚 关闭测试服务器...');
         webSocketService.close();
         server.close();
         process.exit(0);

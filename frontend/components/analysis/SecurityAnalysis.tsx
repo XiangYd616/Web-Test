@@ -1,3 +1,10 @@
+/**
+ * SecurityAnalysis.tsx - React组件
+ * 
+ * 文件路径: frontend\components\analysis\SecurityAnalysis.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { AlertCircle, AlertTriangle, CheckCircle, Eye, Info, Lock, Shield, TrendingDown, TrendingUp, XCircle } from 'lucide-react';
 import React from 'react';
 import type { FC } from 'react';
@@ -56,6 +63,11 @@ interface EnhancedSecurityAnalysisProps {
   result: SecurityAnalysisResult;
 }
 
+  /**
+   * 获取getScoreColor数据
+   * @param {string} id - 对象ID
+   * @returns {Promise<Object|null>} 获取的数据
+   */
 export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> = ({ result }) => {
   const getScoreColor = (score: number) => {
     if (score >= 85) return 'text-green-400 bg-green-500/20 border-green-500/30';
@@ -95,6 +107,11 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
     }
   };
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical':

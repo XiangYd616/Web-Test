@@ -1,3 +1,10 @@
+/**
+ * ModernNavigation.tsx - React组件
+ * 
+ * 文件路径: frontend\components\modern\ModernNavigation.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { BarChart3, Bell, Calendar, ChevronDown, Code, Database, Eye, FileText, Gauge, Globe, HelpCircle, LogOut, Menu, Monitor, Search, Settings, Shield, User, Wifi, X, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';

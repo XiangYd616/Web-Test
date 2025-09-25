@@ -598,7 +598,7 @@ const AccountSettings: React.FC = () => {
         }
 
         // 如果useAuth中没有用户信息，尝试从API获取
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api';
         const response = await fetch(`${API_BASE_URL}/auth/me`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token') || localStorage.getItem('test_web_app_token') || localStorage.getItem('token')}`

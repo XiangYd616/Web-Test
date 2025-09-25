@@ -1,3 +1,10 @@
+/**
+ * UserDropdownMenu.tsx - React组件
+ * 
+ * 文件路径: frontend\components\modern\UserDropdownMenu.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { Bookmark, ChevronRight, Crown, HelpCircle, LogOut, Monitor, Settings, User } from 'lucide-react';
 import React from 'react';
 import type { FC } from 'react';
@@ -14,6 +21,21 @@ interface UserDropdownMenuProps {
 const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
   const { user, logout, isAdmin } = useAuth();
   const { actualTheme } = useTheme();
+
+
+  /**
+
+
+   * 处理handleLogout事件
+
+
+   * @param {Object} event - 事件对象
+
+
+   * @returns {Promise<void>}
+
+
+   */
   const { stats, loading: statsLoading } = useUserStats();
 
   const handleLogout = () => {

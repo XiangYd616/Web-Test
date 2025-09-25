@@ -15,7 +15,6 @@ const collaborationServer = new RealtimeCollaborationServer({ port: 8080 });
  * 示例1: 创建和管理工作空间
  */
 async function workspaceExample() {
-  console.log('\n🔵 示例1: 创建和管理工作空间\n');
   
   // 创建用户
   const users = [
@@ -40,8 +39,6 @@ async function workspaceExample() {
   });
   
   console.log(`✅ 创建工作空间: ${workspace.name}`);
-  console.log(`   ID: ${workspace.id}`);
-  console.log(`   创建者: ${workspace.createdBy}`);
   
   // 邀请成员
   const invitation1 = await workspaceManager.inviteMember(
@@ -58,18 +55,13 @@ async function workspaceExample() {
     'viewer'
   );
   
-  console.log('\n📧 发送邀请:');
-  console.log(`   - Bob (Editor): ${invitation1.token}`);
-  console.log(`   - Charlie (Viewer): ${invitation2.token}`);
   
   // 接受邀请
   await workspaceManager.acceptInvitation(invitation1.token, 'user2');
   await workspaceManager.acceptInvitation(invitation2.token, 'user3');
   
-  console.log('\n👥 工作空间成员:');
   workspace.members.forEach((member, userId) => {
     const user = workspaceManager.users.get(userId);
-    console.log(`   - ${user.name} (${member.role})`);
   });
   
   return workspace;
@@ -79,7 +71,6 @@ async function workspaceExample() {
  * 示例2: 资源管理和权限控制
  */
 async function resourceManagementExample(workspace) {
-  console.log('\n🔵 示例2: 资源管理和权限控制\n');
   
   // 创建不同类型的资源
   const collection = await workspaceManager.createResource(
@@ -136,10 +127,6 @@ async function resourceManagementExample(workspace) {
     }
   );
   
-  console.log('📄 创建的资源:');
-  console.log(`   - Collection: ${collection.name} (${collection.id})`);
-  console.log(`   - Environment: ${environment.name} (${environment.id})`);
-  console.log(`   - Test: ${testCase.name} (${testCase.id})`);
   
   // 尝试不同权限的操作
   try {
@@ -152,9 +139,7 @@ async function resourceManagementExample(workspace) {
       { name: '用户管理 API v2' },
       { acquireLock: true }
     );
-    console.log('\n✅ Editor 成功更新资源');
   } catch (error) {
-    console.log('\n❌ Editor 更新失败:', error.message);
   }
   
   try {
@@ -177,7 +162,6 @@ async function resourceManagementExample(workspace) {
  * 示例3: 评论和活动
  */
 async function commentingExample(workspace, resources) {
-  console.log('\n🔵 示例3: 评论和活动\n');
   
   // 添加评论
   const comment1 = await workspaceManager.addComment(
@@ -205,20 +189,15 @@ async function commentingExample(workspace, resources) {
     '开发环境的 API Key 需要更新'
   );
   
-  console.log('💬 评论:');
   workspace.comments.forEach(comment => {
     const user = workspaceManager.users.get(comment.userId);
-    console.log(`   - ${user.name}: ${comment.content}`);
     if (comment.mentions.length > 0) {
-      console.log(`     提及: ${comment.mentions.join(', ')}`);
     }
   });
   
   // 查看活动历史
   const activities = workspaceManager.getWorkspaceActivities(workspace.id, 10);
-  console.log('\n📊 最近活动:');
   activities.forEach(activity => {
-    console.log(`   - ${activity.type}: ${JSON.stringify(activity.data)}`);
   });
 }
 
@@ -226,7 +205,6 @@ async function commentingExample(workspace, resources) {
  * 示例4: 实时协作
  */
 async function realtimeCollaborationExample() {
-  console.log('\n🔵 示例4: 实时协作\n');
   
   // 启动协作服务器
   collaborationServer.start();
@@ -242,7 +220,6 @@ async function realtimeCollaborationExample() {
     const userName = ['Alice', 'Bob', 'Charlie'][i];
     
     ws.on('open', () => {
-      console.log(`👤 ${userName} 连接成功`);
       
       // 加入房间
       ws.send(JSON.stringify({
@@ -259,25 +236,20 @@ async function realtimeCollaborationExample() {
       
       switch (message.type) {
         case 'connect':
-          console.log(`   ${userName} 获得客户端ID: ${message.clientId}`);
           break;
           
         case 'room_info':
-          console.log(`   ${userName} 加入房间，当前成员: ${message.members.length}`);
           break;
           
         case 'user_status':
           if (message.status === 'joined') {
-            console.log(`   📢 ${message.userName} 加入了房间`);
           }
           break;
           
         case 'cursor_move':
-          console.log(`   🖱️ ${message.userName} 移动光标到 ${JSON.stringify(message.position)}`);
           break;
           
         case 'content_change':
-          console.log(`   ✏️ ${message.userName} 修改了内容`);
           break;
       }
     });
@@ -289,7 +261,6 @@ async function realtimeCollaborationExample() {
   await new Promise(resolve => setTimeout(resolve, 1000));
   
   // 模拟协作操作
-  console.log('\n🎯 模拟协作操作:\n');
   
   // Alice 移动光标
   clients[0].ws.send(JSON.stringify({
@@ -347,30 +318,16 @@ async function realtimeCollaborationExample() {
  * 示例5: 工作空间统计
  */
 async function workspaceStatistics(workspace) {
-  console.log('\n🔵 示例5: 工作空间统计\n');
   
   const stats = workspaceManager.getWorkspaceStatistics(workspace.id);
   
-  console.log('📈 工作空间统计:');
-  console.log(`   名称: ${stats.name}`);
-  console.log(`   成员数: ${stats.memberCount}`);
-  console.log(`   在线成员: ${stats.onlineMembers}`);
-  console.log(`   资源统计:`);
-  console.log(`     - Collections: ${stats.resources.collections}`);
-  console.log(`     - Environments: ${stats.resources.environments}`);
-  console.log(`     - Requests: ${stats.resources.requests}`);
-  console.log(`     - Tests: ${stats.resources.tests}`);
-  console.log(`   最后活动: ${stats.activity.lastActivity}`);
-  console.log(`   总活动数: ${stats.activity.totalActivities}`);
 }
 
 /**
  * 运行所有示例
  */
 async function runAllExamples() {
-  console.log('='.repeat(60));
   console.log('🚀 Test-Web 协作功能示例');
-  console.log('='.repeat(60));
   
   try {
     // 创建工作空间
@@ -388,9 +345,7 @@ async function runAllExamples() {
     // 统计信息
     await workspaceStatistics(workspace);
     
-    console.log('\n' + '='.repeat(60));
     console.log('✅ 所有示例运行完成！');
-    console.log('='.repeat(60));
     
     // 清理
     server.stop();

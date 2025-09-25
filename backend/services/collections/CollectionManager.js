@@ -75,7 +75,6 @@ class CollectionManager {
     this.collections.set(collection.id, collection);
     await this.saveCollection(collection);
     
-    console.log(`📁 创建API集合: ${collection.name} (${collection.id})`);
     
     return collection;
   }
@@ -184,7 +183,6 @@ class CollectionManager {
    * 批量导入Postman集合
    */
   async importPostmanCollection(postmanData) {
-    console.log('📥 开始导入Postman集合...');
     
     const collection = await this.createCollection({
       name: postmanData.info?.name || 'Imported Collection',
@@ -201,8 +199,6 @@ class CollectionManager {
     }
 
     console.log(`✅ 成功导入Postman集合: ${collection.name}`);
-    console.log(`   - 集合ID: ${collection.id}`);
-    console.log(`   - 项目数: ${this.countItemsInCollection(collection)}`);
     
     return collection;
   }
@@ -308,10 +304,6 @@ class CollectionManager {
     results.duration = results.endTime - results.startTime;
     
     console.log(`✅ 集合运行完成: ${collection.name}`);
-    console.log(`   - 总请求数: ${results.totalRequests}`);
-    console.log(`   - 成功: ${results.passedRequests}`);
-    console.log(`   - 失败: ${results.failedRequests}`);
-    console.log(`   - 耗时: ${results.duration}ms`);
 
     return results;
   }
@@ -333,7 +325,6 @@ class CollectionManager {
         results.totalRequests++;
         
         const requestPath = folderPath ? `${folderPath}/${item.name}` : item.name;
-        console.log(`   执行请求: ${requestPath}`);
 
         try {
           // 解析变量和环境
@@ -365,10 +356,8 @@ class CollectionManager {
 
           if (requestResult.success) {
             results.passedRequests++;
-            console.log(`     ✅ 成功 (${response.duration}ms)`);
           } else {
             results.failedRequests++;
-            console.log(`     ❌ 失败: ${response.message}`);
           }
 
           // 请求间延迟
@@ -378,7 +367,6 @@ class CollectionManager {
 
         } catch (error) {
           results.failedRequests++;
-          console.log(`     ❌ 错误: ${error.message}`);
           
           results.results.push({
             id: uuidv4(),
@@ -433,8 +421,6 @@ class CollectionManager {
     // 保存分享信息
     await this.saveShareData(shareData);
 
-    console.log(`🔗 创建集合分享链接: ${collection.name}`);
-    console.log(`   分享链接: ${shareUrl}`);
 
     return shareData;
   }
@@ -678,7 +664,6 @@ class CollectionManager {
       console.warn('删除集合文件失败:', error.message);
     }
 
-    console.log(`🗑️ 删除集合: ${collection.name}`);
     return true;
   }
 }

@@ -34,7 +34,7 @@ export const stressTestConfig: TestTypeConfig = {
     rampUpTime: 10,
     testType: 'load',
     requestsPerSecond: 100,
-    timeout: 30000,
+    timeout: process.env.REQUEST_TIMEOUT || 30000,
     headers: {},
     body: '',
     enableAdvanced: false,
@@ -466,7 +466,7 @@ export const databaseTestConfig: TestTypeConfig = {
   defaultConfig: {
     connectionString: '',
     testType: 'comprehensive',
-    timeout: 30000,
+    timeout: process.env.REQUEST_TIMEOUT || 30000,
     maxConnections: 10,
     includePerformanceTests: true,
     includeSecurityTests: true

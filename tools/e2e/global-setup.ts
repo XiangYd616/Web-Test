@@ -16,10 +16,9 @@ async function globalSetup(config: FullConfig) {
 
     try {
         // 检查应用是否可访问
-        console.log(`📡 检查应用可访问性: ${baseURL}`);
         await page.goto(baseURL || 'http://localhost:5174', {
             waitUntil: 'networkidle',
-            timeout: 30000
+            timeout: process.env.REQUEST_TIMEOUT || 30000
         });
 
         // 等待应用加载完成
@@ -47,7 +46,6 @@ async function globalSetup(config: FullConfig) {
  */
 async function setupTestUser(page: any) {
     try {
-        console.log('👤 设置测试用户...');
 
         // 这里可以调用API创建测试用户
         // 或者确保测试用户存在
@@ -62,10 +60,8 @@ async function setupTestUser(page: any) {
         if (response.ok()) {
             console.log('✅ 测试用户设置完成');
         } else {
-            console.log('ℹ️ 测试用户可能已存在');
         }
     } catch (error) {
-        console.log('ℹ️ 跳过测试用户设置:', error.message);
     }
 }
 
@@ -74,7 +70,6 @@ async function setupTestUser(page: any) {
  */
 async function cleanupTestData(page: any) {
     try {
-        console.log('🧹 清理测试数据...');
 
         // 清理之前的测试数据
         const response = await page.request.post('/api/test/cleanup', {
@@ -87,7 +82,6 @@ async function cleanupTestData(page: any) {
             console.log('✅ 测试数据清理完成');
         }
     } catch (error) {
-        console.log('ℹ️ 跳过测试数据清理:', error.message);
     }
 }
 

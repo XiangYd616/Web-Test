@@ -248,6 +248,16 @@ export function useBatchDataState(
   batchInfo.allSuccess = states.every(s => s.success);
   batchInfo.hasAnyError = states.some(s => s.hasError);
   batchInfo.completedCount = states.filter(s => s.success || s.hasError).length;
+
+  /**
+
+   * if功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   batchInfo.progress = batchInfo.completedCount / batchInfo.totalCount;
 
   if (batchInfo.allLoading) {
@@ -420,6 +430,16 @@ export function usePaginatedDataState<T = any>(
 
     try {
       const nextPage = page + 1;
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const result = await loadPage(operation, nextPage);
 
       if (result && dataState.data) {

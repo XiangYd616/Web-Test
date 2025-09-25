@@ -39,7 +39,6 @@ class SecurityTestCore {
     }
 
     try {
-      console.log(`🔒 检查 SSL/TLS: ${url}`);
       
       const parsedUrl = new URL(url);
       
@@ -110,7 +109,6 @@ class SecurityTestCore {
     }
 
     try {
-      console.log(`🛡️ 检查安全头: ${url}`);
 
       const response = await axios.get(url, {
         timeout: 10000,
@@ -231,7 +229,6 @@ class SecurityTestCore {
     }
 
     try {
-      console.log(`🍪 分析 Cookie 安全: ${url}`);
 
       const response = await axios.get(url, {
         timeout: 10000,
@@ -376,6 +373,11 @@ class SecurityTestCore {
     const missing = [];
     const recommendations = [];
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
     Object.keys(this.securityHeaders).forEach(header => {
       if (headers[header]) {
         score += 10;
@@ -453,6 +455,11 @@ class SecurityTestCore {
         'sqlite_'
       ];
 
+      /**
+       * for功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const responseText = response.data.toLowerCase();
       for (const error of sqlErrors) {
         if (responseText.includes(error)) {
@@ -702,7 +709,6 @@ class SecurityTestCore {
    */
   clearCache() {
     this.cache.clear();
-    console.log('🧹 安全测试缓存已清理');
   }
 
   /**

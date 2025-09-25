@@ -67,7 +67,6 @@ class WebSocketManager {
         this.ws = new WebSocket(this.config.url);
 
         this.ws.onopen = () => {
-          console.log('🔌 WebSocket连接已建立');
           this.setConnectionStatus('connected');
           this.reconnectAttempts = 0;
           this.startHeartbeat();
@@ -79,7 +78,6 @@ class WebSocketManager {
         };
 
         this.ws.onclose = (event) => {
-          console.log('🔌 WebSocket连接已关闭', event.code, event.reason);
           this.setConnectionStatus('disconnected');
           this.stopHeartbeat();
           
@@ -243,7 +241,6 @@ class WebSocketManager {
     this.reconnectAttempts++;
     this.setConnectionStatus('reconnecting');
 
-    console.log(`🔄 WebSocket重连中... (${this.reconnectAttempts}/${this.config.maxReconnectAttempts})`);
 
     this.reconnectTimeout = setTimeout(() => {
       this.reconnectTimeout = null;

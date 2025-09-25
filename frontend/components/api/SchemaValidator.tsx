@@ -145,6 +145,16 @@ export const SchemaValidator: React.FC<SchemaValidatorProps> = ({
     switch (rule.type) {
       case 'range':
         if (typeof value === 'number') {
+
+          /**
+
+           * if功能函数
+
+           * @param {Object} params - 参数对象
+
+           * @returns {Promise<Object>} 返回结果
+
+           */
           const [min, max] = rule.value as [number, number];
           if (value < min || value > max) {
             return { isValid: false, message: rule.message || `Value must be between ${min} and ${max}` };
@@ -206,6 +216,16 @@ export const SchemaValidator: React.FC<SchemaValidatorProps> = ({
     return <XCircle size={16} className="text-red-400" />;
   };
 
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const getBusinessImpactColor = (impact?: string) => {
     switch (impact) {
       case 'high': return 'text-red-400';

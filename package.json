@@ -231,5 +231,12 @@
   },
   "optionalDependencies": {
     "@esbuild/win32-x64": "^0.25.5"
+  },
+  "resolutions": {
+    "glob": "^10.3.0",
+    "rimraf": "^5.0.0",
+    "eslint": "^8.57.0",
+    "inflight": "^1.0.6",
+    "@types/node": "*"
   }
 }

@@ -102,6 +102,16 @@ export const EndpointDependencyManager: React.FC<EndpointDependencyManagerProps>
   }, [endpoints, onEndpointsChange]);
 
   const removeDependency = useCallback((endpointId: string, dependencyId: string) => {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
     const updatedEndpoints = endpoints.map(endpoint => {
       if (endpoint.id === endpointId) {
         return {
@@ -115,6 +125,16 @@ export const EndpointDependencyManager: React.FC<EndpointDependencyManagerProps>
   }, [endpoints, onEndpointsChange]);
 
   const addDataMapping = useCallback((endpointId: string, mapping: EndpointDependency['dataMapping'][0]) => {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
     const updatedEndpoints = endpoints.map(endpoint => {
       if (endpoint.id === endpointId) {
         return {
@@ -127,6 +147,16 @@ export const EndpointDependencyManager: React.FC<EndpointDependencyManagerProps>
     onEndpointsChange(updatedEndpoints);
   }, [endpoints, onEndpointsChange]);
 
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'text-red-500 bg-red-100';

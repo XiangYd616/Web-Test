@@ -59,7 +59,6 @@ class CollaborationService extends EventEmitter {
     const userId = this.extractUserId(req);
     const sessionId = this.generateSessionId();
     
-    console.log(`👤 用户连接协作服务: ${userId}`);
     
     // 存储用户连接信息
     const userInfo = {
@@ -223,7 +222,6 @@ class CollaborationService extends EventEmitter {
       timestamp: new Date().toISOString()
     });
 
-    console.log(`👥 用户 ${user.id} 加入房间 ${roomId}`);
   }
 
   /**
@@ -250,12 +248,10 @@ class CollaborationService extends EventEmitter {
       // 如果房间为空，删除房间
       if (room.users.size === 0) {
         this.rooms.delete(roomId);
-        console.log(`🗑️ 删除空房间: ${roomId}`);
       }
     }
 
     user.currentRoom = null;
-    console.log(`👋 用户 ${user.id} 离开房间 ${roomId}`);
   }
 
   /**
@@ -267,6 +263,11 @@ class CollaborationService extends EventEmitter {
     
     if (!user) return;
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const document = this.documents.get(documentId);
     if (!document) {
       this.sendToUser(sessionId, {
@@ -390,7 +391,6 @@ class CollaborationService extends EventEmitter {
       });
     }
 
-    console.log(`💬 用户 ${user.id} 添加评论: ${commentId}`);
   }
 
   /**
@@ -423,7 +423,6 @@ class CollaborationService extends EventEmitter {
       }
     });
 
-    console.log(`🔗 用户 ${user.id} 创建分享链接: ${shareId}`);
   }
 
   /**
@@ -443,7 +442,6 @@ class CollaborationService extends EventEmitter {
     const user = this.users.get(sessionId);
     
     if (user) {
-      console.log(`👋 用户断开连接: ${user.id}`);
       
       // 离开当前房间
       if (user.currentRoom) {
@@ -546,7 +544,6 @@ class CollaborationService extends EventEmitter {
     
     for (const [sessionId, user] of this.users) {
       if (now - user.lastActivity > timeout) {
-        console.log(`🧹 清理不活跃用户: ${user.id}`);
         this.handleDisconnection(sessionId);
       }
     }
@@ -559,7 +556,6 @@ class CollaborationService extends EventEmitter {
     for (const [roomId, room] of this.rooms) {
       if (room.users.size === 0) {
         this.rooms.delete(roomId);
-        console.log(`🧹 清理空房间: ${roomId}`);
       }
     }
   }
@@ -573,7 +569,6 @@ class CollaborationService extends EventEmitter {
     for (const [shareId, shareLink] of this.shareLinks) {
       if (shareLink.expiresAt && now > shareLink.expiresAt) {
         this.shareLinks.delete(shareId);
-        console.log(`🧹 清理过期分享链接: ${shareId}`);
       }
     }
   }

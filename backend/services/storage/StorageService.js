@@ -48,13 +48,10 @@ class StorageService {
 
     try {
       // 初始化各个组件
-      console.log('   📦 初始化专门存储管理器...');
       // storageManager 不需要特殊初始化
 
-      console.log('   🗄️ 初始化数据归档管理器...');
       // archiveManager 已在构造函数中初始化
 
-      console.log('   🧹 初始化数据清理管理器...');
       // cleanupManager 已在构造函数中初始化
 
       this.isInitialized = true;
@@ -76,7 +73,6 @@ class StorageService {
 
       const result = await this.storageManager.storeTestResult(engineType, testId, data);
 
-      console.log(`📦 存储 ${engineType} 测试结果: ${testId}`);
       return result;
 
     } catch (error) {
@@ -95,7 +91,6 @@ class StorageService {
 
       const result = await this.storageManager.retrieveTestResult(engineType, testId);
 
-      console.log(`📥 读取 ${engineType} 测试结果: ${testId}`);
       return result;
 
     } catch (error) {
@@ -114,7 +109,6 @@ class StorageService {
 
       const result = await this.archiveManager.archiveEngineData(engineType, criteria);
 
-      console.log(`🗄️ 归档 ${engineType} 数据完成`);
       return result;
 
     } catch (error) {
@@ -133,7 +127,6 @@ class StorageService {
 
       const result = await this.cleanupManager.manualCleanup(engineType);
 
-      console.log(`🧹 清理 ${engineType || '所有'} 数据完成`);
       return result;
 
     } catch (error) {
@@ -241,7 +234,6 @@ class StorageService {
     try {
       // 1. 数据归档
       if (options.archive !== false) {
-        console.log('   🗄️ 执行数据归档...');
         try {
           await this.archiveManager.runScheduledArchive();
           maintenanceResult.operations.push('archive');
@@ -252,7 +244,6 @@ class StorageService {
 
       // 2. 数据清理
       if (options.cleanup !== false) {
-        console.log('   🧹 执行数据清理...');
         try {
           await this.cleanupManager.runScheduledCleanup();
           maintenanceResult.operations.push('cleanup');
@@ -263,7 +254,6 @@ class StorageService {
 
       // 3. 存储优化
       if (options.optimize !== false) {
-        console.log('   ⚡ 执行存储优化...');
         try {
           await this.optimizeStorage();
           maintenanceResult.operations.push('optimize');
@@ -273,7 +263,6 @@ class StorageService {
       }
 
       // 4. 健康检查
-      console.log('   🏥 执行健康检查...');
       const healthStatus = await this.getHealthStatus();
       maintenanceResult.healthStatus = healthStatus;
 
@@ -296,7 +285,6 @@ class StorageService {
    * 优化存储
    */
   async optimizeStorage() {
-    console.log('⚡ 优化存储性能...');
 
     // 1. 清理临时文件
     await this.cleanupTempFiles();
@@ -307,7 +295,6 @@ class StorageService {
     // 3. 重建索引
     await this.rebuildIndexes();
 
-    console.log('   ✅ 存储优化完成');
   }
 
   /**
@@ -315,7 +302,6 @@ class StorageService {
    */
   async cleanupTempFiles() {
     // 实现临时文件清理逻辑
-    console.log('     🧹 清理临时文件...');
   }
 
   /**
@@ -323,7 +309,6 @@ class StorageService {
    */
   async compressOldFiles() {
     // 实现文件压缩逻辑
-    console.log('     🗜️ 压缩旧文件...');
   }
 
   /**
@@ -331,7 +316,6 @@ class StorageService {
    */
   async rebuildIndexes() {
     // 实现索引重建逻辑
-    console.log('     📇 重建索引...');
   }
 
   /**
@@ -446,7 +430,6 @@ class StorageService {
    * 关闭存储服务
    */
   async shutdown() {
-    console.log('🔄 关闭统一存储服务...');
 
     try {
       // 关闭各个管理器

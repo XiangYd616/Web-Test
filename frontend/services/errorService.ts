@@ -18,6 +18,11 @@ export class ErrorService {
     return ErrorService.instance;
   }
   
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   public handleError(error: Error | ErrorInfo): ErrorInfo {
     if ('type' in error) {
       return error as ErrorInfo;

@@ -256,7 +256,6 @@ class CSSFeatureDetector {
    */
   async detectFeatures(page) {
     try {
-      console.log('🎨 开始CSS特性检测...');
       
       const results = await page.evaluate((cssFeatures) => {
         const featureResults = {};
@@ -353,6 +352,11 @@ class CSSFeatureDetector {
       for (const prefix of this.vendorPrefixes) {
         try {
           const testEl = document.createElement('div');
+          /**
+           * if功能函数
+           * @param {Object} params - 参数对象
+           * @returns {Promise<Object>} 返回结果
+           */
           testEl.style[prefix + 'transition'] = 'all 0.3s ease';
           if (testEl.style[prefix + 'transition']) {
             supportedPrefixes.push(prefix);
@@ -366,6 +370,11 @@ class CSSFeatureDetector {
       for (const prefix of this.vendorPrefixes) {
         try {
           const testEl = document.createElement('div');
+          /**
+           * if功能函数
+           * @param {Object} params - 参数对象
+           * @returns {Promise<Object>} 返回结果
+           */
           testEl.style[prefix + 'animation'] = 'test 1s linear';
           if (testEl.style[prefix + 'animation']) {
             supportedPrefixes.push(prefix);

@@ -1,3 +1,10 @@
+/**
+ * SystemSettings.tsx - React组件
+ * 
+ * 文件路径: frontend\components\admin\SystemSettings.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { useState } from 'react';
 import type { FC } from 'react';
 import { Save, Mail, Database, Shield, Globe } from 'lucide-react';
@@ -60,6 +67,16 @@ const SystemSettings: FC = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  /**
+
+   * 处理handleSave事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   const [testingEmail, setTestingEmail] = useState(false);
 
   const handleSave = async () => {

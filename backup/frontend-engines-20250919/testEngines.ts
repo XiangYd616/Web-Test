@@ -52,7 +52,6 @@ export class K6Engine implements TestEngine {
 
   async install(): Promise<boolean> {
     try {
-      console.log('Installing k6...');
       // 通过API请求后端安装k6
       const response = await fetch('/api/test/k6/install', {
         method: 'POST',
@@ -144,7 +143,6 @@ export class LighthouseEngine implements TestEngine {
 
   async install(): Promise<boolean> {
     try {
-      console.log('Installing Lighthouse...');
       const response = await fetch('/api/test/lighthouse/install', {
         method: 'POST',
         headers: {
@@ -232,7 +230,6 @@ export class PlaywrightEngine implements TestEngine {
 
   async install(): Promise<boolean> {
     try {
-      console.log('Installing Playwright...');
       const response = await fetch('/api/test/playwright/install', {
         method: 'POST',
         headers: {
@@ -298,13 +295,11 @@ export class TestEngineManager {
   async initializeEngines(): Promise<void> {
     // 如果已经初始化过，直接返回
     if (this.isInitialized) {
-      console.log('🔄 Test engines already initialized');
       return;
     }
 
     // 如果正在初始化，等待初始化完成
     if (this.initializationPromise) {
-      console.log('⏳ Waiting for ongoing initialization...');
       return this.initializationPromise;
     }
 
@@ -316,7 +311,6 @@ export class TestEngineManager {
   }
 
   private async doInitialization(): Promise<void> {
-    console.log('Initializing test engines...');
 
     for (const [name, engine] of this.engines) {
       try {
@@ -337,7 +331,6 @@ export class TestEngineManager {
     // 如果缓存还有效，直接返回缓存结果
     const now = Date.now();
     if (now - this.lastCheckAllTime < this.checkAllCacheTimeout && Object.keys(this.cachedResults).length > 0) {
-      console.log('🔄 Using cached engine status results');
       return { ...this.cachedResults };
     }
 

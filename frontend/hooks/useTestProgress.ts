@@ -241,6 +241,11 @@ export function useTestQueue() {
     setError(null);
 
     try {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const response = await testProgressService.getQueueStatus();
       if (response.success) {
         setQueueStatus(response.data);
@@ -284,6 +289,11 @@ export function useTestStatistics(timeRange: number = 30) {
     setError(null);
 
     try {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const response = await testProgressService.getTestStatistics(timeRange);
       if (response.success) {
         setStatistics(response.data);

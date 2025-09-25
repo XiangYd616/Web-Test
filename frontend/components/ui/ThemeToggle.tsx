@@ -1,3 +1,10 @@
+/**
+ * ThemeToggle.tsx - React组件
+ * 
+ * 文件路径: frontend\components\ui\ThemeToggle.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { Moon, Sun } from 'lucide-react';
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -13,6 +20,16 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
   showLabel = false,
   size = 'md'
 }) => {
+
+  /**
+
+   * 获取getIcon数据
+
+   * @param {string} id - 对象ID
+
+   * @returns {Promise<Object|null>} 获取的数据
+
+   */
   const { theme, setTheme, actualTheme } = useTheme();
 
   const getIcon = () => {

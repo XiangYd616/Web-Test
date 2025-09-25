@@ -86,7 +86,6 @@ const loadMigrations = () => {
   const migrationsDir = path.join(__dirname, '../migrations');
   
   if (!fs.existsSync(migrationsDir)) {
-    console.log('📁 创建迁移目录...');
     fs.mkdirSync(migrationsDir, { recursive: true });
     return [];
   }
@@ -133,11 +132,9 @@ const runMigrations = async (targetVersion = null) => {
     const migrations = loadMigrations();
     
     if (migrations.length === 0) {
-      console.log('📝 没有找到迁移文件');
       return;
     }
     
-    console.log(`📋 找到 ${migrations.length} 个迁移文件`);
     
     // 获取已执行的迁移
     const executedMigrations = await getExecutedMigrations();
@@ -155,16 +152,13 @@ const runMigrations = async (targetVersion = null) => {
     }
     
     if (migrationsToRun.length === 0) {
-      console.log('✨ 数据库已是最新状态');
       return;
     }
     
-    console.log(`🔄 将执行 ${migrationsToRun.length} 个迁移:`);
-    migrationsToRun.forEach(m => console.log(`  - ${m.version}: ${m.description || 'No description'}`));
+    migrationsToRun.forEach(m => );
     
     // 执行迁移
     for (const migration of migrationsToRun) {
-      console.log(`\n🔨 执行迁移: ${migration.version} - ${migration.description || 'No description'}`);
       
       const startTime = Date.now();
       
@@ -186,7 +180,6 @@ const runMigrations = async (targetVersion = null) => {
         console.error(error);
         
         // 尝试回滚
-        console.log(`🔄 尝试回滚迁移: ${migration.version}`);
         try {
           await migration.down(sequelize.getQueryInterface(), sequelize.Sequelize);
           console.log(`✅ 回滚成功: ${migration.version}`);
@@ -199,7 +192,6 @@ const runMigrations = async (targetVersion = null) => {
       }
     }
     
-    console.log(`\n🎉 所有迁移执行完成！`);
     
   } catch (error) {
     console.error('❌ 迁移过程失败:', error);
@@ -212,7 +204,6 @@ const runMigrations = async (targetVersion = null) => {
  */
 const rollbackMigration = async (version = null) => {
   try {
-    console.log('🔄 开始迁移回滚...');
     
     // 创建迁移状态表
     await createMigrationsTable();
@@ -222,7 +213,6 @@ const rollbackMigration = async (version = null) => {
     const executedMigrations = await getExecutedMigrations();
     
     if (executedMigrations.length === 0) {
-      console.log('📝 没有可回滚的迁移');
       return;
     }
     
@@ -247,7 +237,6 @@ const rollbackMigration = async (version = null) => {
       throw new Error('找不到要回滚的迁移');
     }
     
-    console.log(`🔨 回滚迁移: ${migrationToRollback.version} - ${migrationToRollback.description || 'No description'}`);
     
     const startTime = Date.now();
     
@@ -283,27 +272,18 @@ const showStatus = async () => {
     const executedMigrations = await getExecutedMigrations();
     
     if (migrations.length === 0) {
-      console.log('📝 没有找到迁移文件');
       return;
     }
     
-    console.log('\n迁移文件状态:');
-    console.log('─'.repeat(80));
-    console.log('版本\t\t状态\t\t描述');
-    console.log('─'.repeat(80));
     
     migrations.forEach(migration => {
       const status = executedMigrations.includes(migration.version) ? '✅ 已执行' : '⏳ 待执行';
       const description = migration.description || 'No description';
-      console.log(`${migration.version}\t${status}\t${description}`);
     });
     
-    console.log('─'.repeat(80));
-    console.log(`总计: ${migrations.length} 个迁移，${executedMigrations.length} 个已执行\n`);
     
     // 显示执行历史
     if (executedMigrations.length > 0) {
-      console.log('执行历史:');
       const [results] = await sequelize.query(`
         SELECT version, description, executed_at, execution_time 
         FROM migrations 
@@ -313,7 +293,6 @@ const showStatus = async () => {
       results.forEach(record => {
         const date = new Date(record.executed_at).toLocaleString();
         const time = record.execution_time ? `(${record.execution_time}ms)` : '';
-        console.log(`  ${record.version}: ${date} ${time}`);
       });
     }
     
@@ -350,23 +329,9 @@ const main = async () => {
         break;
         
       case 'create':
-        console.log('📝 创建迁移功能待实现');
-        console.log('💡 请手动在 migrations/ 目录下创建迁移文件');
         break;
         
       default:
-        console.log('数据库迁移管理工具\n');
-        console.log('使用方法:');
-        console.log('  node scripts/run-migrations.js <command> [argument]\n');
-        console.log('命令:');
-        console.log('  migrate|up [version]    执行迁移（可选：到指定版本）');
-        console.log('  rollback|down [version] 回滚迁移（可选：指定版本）');
-        console.log('  status                  显示迁移状态');
-        console.log('  create <name>           创建新迁移（待实现）\n');
-        console.log('示例:');
-        console.log('  node scripts/run-migrations.js migrate     # 执行所有待执行的迁移');
-        console.log('  node scripts/run-migrations.js rollback    # 回滚最新的迁移');
-        console.log('  node scripts/run-migrations.js status      # 显示状态');
         break;
     }
     

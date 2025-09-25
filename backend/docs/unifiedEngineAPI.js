@@ -19,7 +19,7 @@ const unifiedEngineAPIDoc = {
   },
   servers: [
     {
-      url: 'http://localhost:3001/api/unified-engine',
+      url: 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/unified-engine',
       description: '开发环境'
     },
     {
@@ -449,7 +449,7 @@ const configExamples = {
     checkVulnerabilities: true,
     checkCookies: true,
     scanDepth: 3,
-    timeout: 30000
+    timeout: process.env.REQUEST_TIMEOUT || 30000
   },
   api: {
     baseUrl: 'https://api.example.com',
@@ -481,7 +481,7 @@ const configExamples = {
   database: {
     connectionString: 'mongodb://localhost:27017/testdb',
     testType: 'comprehensive',
-    timeout: 30000,
+    timeout: process.env.REQUEST_TIMEOUT || 30000,
     maxConnections: 10,
     includePerformanceTests: true,
     includeSecurityTests: true
@@ -502,7 +502,7 @@ const configExamples = {
 const webSocketEvents = {
   connection: {
     description: '客户端连接到统一测试引擎WebSocket',
-    url: 'ws://localhost:3001/unified-engine',
+    url: 'ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/unified-engine',
     events: {
       engineStatus: {
         description: '引擎状态更新',
@@ -612,7 +612,7 @@ console.log('测试ID:', result.data.testId);
     `,
     webSocket: `
 // WebSocket连接
-const ws = new WebSocket('ws://localhost:3001/unified-engine');
+const ws = new WebSocket('ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/unified-engine');
 
 ws.onopen = () => {
   console.log('连接到统一测试引擎');
@@ -644,7 +644,7 @@ ws.onmessage = (event) => {
   curl: {
     executeTest: `
 # 执行性能测试
-curl -X POST http://localhost:3001/api/unified-engine/execute \\
+curl -X POST http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/unified-engine/execute \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer your-jwt-token" \\
   -d '{
@@ -657,7 +657,7 @@ curl -X POST http://localhost:3001/api/unified-engine/execute \\
     `,
     getStatus: `
 # 获取测试状态
-curl -X GET http://localhost:3001/api/unified-engine/status/your-test-id \\
+curl -X GET http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/unified-engine/status/your-test-id \\
   -H "Authorization: Bearer your-jwt-token"
     `
   }

@@ -296,7 +296,6 @@ async function executeBatchTest(operation) {
         operation.completedItems = completed;
         operation.progress = (completed / operation.totalItems) * 100;
         
-        console.log(`批量测试进度: ${completed}/${operation.totalItems}`);
         
       } catch (error) {
         console.error('测试任务执行失败:', error);
@@ -325,6 +324,16 @@ async function executeBatchTest(operation) {
       await Promise.all(executing);
     };
 
+    
+    /**
+    
+     * if功能函数
+    
+     * @param {Object} params - 参数对象
+    
+     * @returns {Promise<Object>} 返回结果
+    
+     */
     await executeWithConcurrency(tasks, concurrent);
     
     if (operation.status !== 'cancelled') {
@@ -332,7 +341,6 @@ async function executeBatchTest(operation) {
       operation.results = results;
       operation.endTime = new Date().toISOString();
       
-      console.log(`批量测试完成: ${operation.id}`);
     }
     
   } catch (error) {
@@ -372,7 +380,6 @@ async function executeBatchExport(operation) {
       };
       operation.endTime = new Date().toISOString();
       
-      console.log(`批量导出完成: ${operation.id}`);
     }
     
   } catch (error) {
@@ -411,7 +418,6 @@ async function executeBatchDelete(operation) {
       };
       operation.endTime = new Date().toISOString();
       
-      console.log(`批量删除完成: ${operation.id}`);
     }
     
   } catch (error) {
@@ -445,7 +451,6 @@ setInterval(() => {
   for (const [id, operation] of batchOperations) {
     if (operation.endTime && new Date(operation.endTime) < cutoff) {
       batchOperations.delete(id);
-      console.log(`清理批量操作: ${id}`);
     }
   }
 }, 60 * 60 * 1000); // 每小时清理一次

@@ -43,8 +43,6 @@ class LogManager {
     }
 
     console.log(`📊 分析日志文件: ${logFile}`);
-    console.log(`📋 显示最近 ${lines} 行`);
-    console.log('=' .repeat(80));
 
     try {
       // 读取最后N行
@@ -57,7 +55,6 @@ class LogManager {
       if (logType === 'error') {
         await this.analyzeErrorLog(output);
       } else {
-        console.log(output);
       }
       
     } catch (error) {
@@ -101,27 +98,21 @@ class LogManager {
 
     // 显示统计结果
     console.log(`📊 错误统计 (总计: ${errorStats.total})`);
-    console.log('\n🏷️  按类型分布:');
     Object.entries(errorStats.byType)
       .sort(([,a], [,b]) => b - a)
       .forEach(([type, count]) => {
-        console.log(`  ${type}: ${count} (${(count/errorStats.total*100).toFixed(1)}%)`);
       });
 
-    console.log('\n⏰ 按小时分布:');
     Object.entries(errorStats.byHour)
       .sort(([a], [b]) => parseInt(a) - parseInt(b))
       .forEach(([hour, count]) => {
         const bar = '█'.repeat(Math.ceil(count / errorStats.total * 20));
-        console.log(`  ${hour.padStart(2, '0')}:00 ${bar} ${count}`);
       });
 
-    console.log('\n🔥 最常见错误 (前10):');
     Object.entries(errorStats.topErrors)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 10)
       .forEach(([message, count], index) => {
-        console.log(`  ${index + 1}. ${message.substring(0, 60)}... (${count}次)`);
       });
   }
 
@@ -129,7 +120,6 @@ class LogManager {
    * 清理旧日志
    */
   async cleanupLogs(daysToKeep = 7) {
-    console.log(`🧹 清理 ${daysToKeep} 天前的日志文件...`);
     
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
@@ -148,7 +138,6 @@ class LogManager {
           totalSize += stats.size;
           fs.unlinkSync(filePath);
           cleanedFiles++;
-          console.log(`  删除: ${file} (${this.formatBytes(stats.size)})`);
         }
       }
       
@@ -163,7 +152,6 @@ class LogManager {
    * 归档日志
    */
   async archiveLogs() {
-    console.log('📦 归档当前日志文件...');
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
     let archivedFiles = 0;
@@ -183,7 +171,6 @@ class LogManager {
           
           totalSize += stats.size;
           archivedFiles++;
-          console.log(`  归档: ${logType}.log -> ${path.basename(archiveFile)} (${this.formatBytes(stats.size)})`);
         }
       }
       
@@ -205,9 +192,6 @@ class LogManager {
       return;
     }
 
-    console.log(`👀 实时监控日志: ${logFile}`);
-    console.log('按 Ctrl+C 停止监控');
-    console.log('=' .repeat(80));
 
     // 监控文件变化
     fs.watchFile(logFile, (curr, prev) => {
@@ -231,9 +215,7 @@ class LogManager {
               const level = logEntry.level?.toUpperCase() || 'INFO';
               const message = logEntry.message || line;
               
-              console.log(`[${timestamp}] ${level}: ${message}`);
             } catch {
-              console.log(line);
             }
           }
         });
@@ -249,7 +231,6 @@ class LogManager {
    */
   getLogStats() {
     console.log('📊 日志文件统计:');
-    console.log('=' .repeat(50));
 
     let totalSize = 0;
     let totalFiles = 0;
@@ -260,16 +241,10 @@ class LogManager {
         const size = this.formatBytes(stats.size);
         const modified = stats.mtime.toLocaleString();
         
-        console.log(`📄 ${logType}.log:`);
-        console.log(`   大小: ${size}`);
-        console.log(`   修改时间: ${modified}`);
-        console.log('');
         
         totalSize += stats.size;
         totalFiles++;
       } else {
-        console.log(`📄 ${logType}.log: 不存在`);
-        console.log('');
       }
     }
 
@@ -284,7 +259,6 @@ class LogManager {
         archiveSize += stats.size;
       });
 
-      console.log(`📦 归档文件: ${archiveFiles.length} 个，${this.formatBytes(archiveSize)}`);
     }
 
     console.log(`📊 总计: ${totalFiles} 个活跃日志文件，${this.formatBytes(totalSize)}`);
@@ -337,7 +311,6 @@ async function main() {
       break;
       
     default:
-      console.log(`
 📋 日志管理工具
 
 使用方法:

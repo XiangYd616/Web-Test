@@ -27,6 +27,11 @@ class SeoTestEngine {
       userAgent: Joi.string().default('Mozilla/5.0 (compatible; SEO-Bot/1.0)')
     });
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const { error, value } = schema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);
@@ -360,7 +365,6 @@ class SeoTestEngine {
       test.progress = progress;
       test.message = message;
       this.activeTests.set(testId, test);
-      console.log(`[SEO-${testId}] ${progress}% - ${message}`);
     }
   }
 
@@ -694,6 +698,11 @@ class SeoTestEngine {
       sitemap: 10
     };
     
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
     for (const [checkName, checkResult] of Object.entries(checks)) {
       if (checkResult && typeof checkResult === 'object') {
         const weight = weights[checkName] || 10;
@@ -780,7 +789,6 @@ class SeoTestEngine {
    */
   async cleanup() {
     this.activeTests.clear();
-    console.log('SEO测试引擎清理完成');
   }
 }
 

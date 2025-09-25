@@ -1,3 +1,10 @@
+/**
+ * reportService.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\reporting\reportService.ts
+ * 创建时间: 2025-09-25
+ */
+
 import { format } from 'date-fns';
 import { dataAnalysisService } from '../analytics';
 import { monitoringService } from '../monitoring';
@@ -45,7 +52,7 @@ export interface ReportSection {
 }
 
 class ReportService {
-  private baseUrl = 'http://localhost:3001/api';
+  private baseUrl = 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api';
   private reports: Report[] = [];
 
   /**
@@ -180,6 +187,11 @@ class ReportService {
     }
 
     try {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const response = await fetch(`${this.baseUrl}/reports/${reportId}/download`);
       if (response.ok) {
         const blob = await response.blob();

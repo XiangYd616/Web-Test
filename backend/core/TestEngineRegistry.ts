@@ -41,7 +41,6 @@ export class TestEngineRegistry {
    * 私有构造函数，确保单例
    */
   private constructor() {
-    console.log('🔌 初始化测试引擎注册器');
   }
 
   /**
@@ -278,7 +277,6 @@ export class TestEngineRegistry {
     config: CompositeTestConfig,
     options: TestExecutionOptions = {}
   ): Promise<CompositeTestResult> {
-    console.log(`🎯 执行组合测试，包含 ${config.engines.length} 个引擎`);
 
     const startTime = new Date();
     const results = new Map<TestEngineType, BaseTestResult>();
@@ -471,7 +469,6 @@ export class TestEngineRegistry {
    * 清理所有资源
    */
   public async cleanup(): Promise<void> {
-    console.log('🧹 清理测试引擎注册器...');
 
     // 取消所有运行中的测试
     for (const testId of this.runningTests.keys()) {

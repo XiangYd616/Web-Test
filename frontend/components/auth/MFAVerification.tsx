@@ -125,6 +125,16 @@ export const MFAVerification: React.FC<MFAVerificationProps> = ({
     }
   };
 
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
       // 如果当前输入框为空，删除前一个字符并移动焦点

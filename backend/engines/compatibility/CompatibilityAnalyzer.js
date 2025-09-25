@@ -8,12 +8,18 @@ const BrowserManager = require('./managers/BrowserManager');
 const ScreenshotComparator = require('./analyzers/ScreenshotComparator');
 const CSSFeatureDetector = require('./analyzers/CSSFeatureDetector');
 const ResponsiveDesignAnalyzer = require('./analyzers/ResponsiveDesignAnalyzer');
+
+/**
+
+ * CompatibilityAnalyzer类 - 负责处理相关功能
+
+ */
 const CSSJavaScriptCompatibilityAnalyzer = require('./analyzers/CSSJavaScriptCompatibilityAnalyzer');
 
 class CompatibilityAnalyzer {
   constructor(options = {}) {
     this.options = {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       viewport: { width: 1920, height: 1080 },
       browsers: ['chrome', 'firefox', 'safari', 'edge'],
       versions: ['latest'],
@@ -39,7 +45,6 @@ class CompatibilityAnalyzer {
     const startTime = Date.now();
 
     try {
-      console.log(`🌐 开始兼容性分析: ${url}`);
 
       const analysisConfig = { ...this.options, ...config };
       const results = {

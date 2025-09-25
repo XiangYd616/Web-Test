@@ -1,3 +1,10 @@
+/**
+ * DashboardCharts.tsx - React组件
+ * 
+ * 文件路径: frontend\components\charts\DashboardCharts.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import type { FC } from 'react';
 import { TrendingUp, TrendingDown, Activity, Clock, Target, Users } from 'lucide-react';

@@ -290,6 +290,16 @@ export const MFAManagement: React.FC<MFAManagementProps> = ({
 
   const handleDisableMFA = async (verificationCode: string) => {
     try {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const success = await disableMFA(userId, verificationCode);
       if (success) {
         setShowDisableModal(false);

@@ -27,7 +27,7 @@ const options = {
       {
         url: process.env.NODE_ENV === 'production'
           ? 'https://api.testweb.com/api/v1'
-          : 'http://localhost:3001/api/v1',
+          : 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1',
         description: process.env.NODE_ENV === 'production' ? '生产环境' : '开发环境'
       }
     ],

@@ -97,6 +97,11 @@ export class RealTimeMonitoringService {
     this.loadFromStorage();
   }
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   public static getInstance(): RealTimeMonitoringService {
     if (!RealTimeMonitoringService.instance) {
       RealTimeMonitoringService.instance = new RealTimeMonitoringService();
@@ -427,7 +432,6 @@ export class RealTimeMonitoringService {
 
   // 邮件通知（模拟实现）
   private async sendEmailNotification(config: NotificationConfig, alert: Alert, target: MonitoringTarget): Promise<void> {
-    console.log('Sending email notification:', {
       to: config.config.email?.recipients,
       subject: `[${alert.severity.toUpperCase()}] ${alert.title}`,
       body: `目标: ${target.name}\nURL: ${target.url}\n消息: ${alert.message}\n时间: ${alert.timestamp}`
@@ -513,6 +517,11 @@ export class RealTimeMonitoringService {
   }
 
   public off(event: string, callback: Function): void {
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       const index = listeners.indexOf(callback);
@@ -523,6 +532,11 @@ export class RealTimeMonitoringService {
   }
 
   private emit(event: string, data?: any): void {
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       listeners.forEach(callback => callback(data));
@@ -562,12 +576,22 @@ export class RealTimeMonitoringService {
 
   private loadFromStorage(): void {
     try {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const targetsData = localStorage.getItem('monitoring_targets');
       if (targetsData) {
         const entries = JSON.parse(targetsData);
         this.targets = new Map(entries);
       }
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const alertsData = localStorage.getItem('monitoring_alerts');
       if (alertsData) {
         const entries = JSON.parse(alertsData);

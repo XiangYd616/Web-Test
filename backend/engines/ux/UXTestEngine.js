@@ -36,6 +36,11 @@ class UxTestEngine {
       })).default([])
     });
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const { error, value } = schema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);
@@ -255,6 +260,16 @@ class UxTestEngine {
 
       for (const link of links) {
         const text = await link.evaluate(el => el.textContent.trim());
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const ariaLabel = await link.getAttribute('aria-label');
 
         if (text || ariaLabel) {
@@ -523,7 +538,6 @@ class UxTestEngine {
       test.progress = progress;
       test.message = message;
       this.activeTests.set(testId, test);
-      console.log(`[${this.name.toUpperCase()}-${testId}] ${progress}% - ${message}`);
     }
   }
 

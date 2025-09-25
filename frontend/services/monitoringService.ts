@@ -1,3 +1,10 @@
+/**
+ * monitoringService.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\monitoringService.ts
+ * 创建时间: 2025-09-25
+ */
+
 import { format } from 'date-fns';
 
 export interface MonitoringSite {
@@ -58,7 +65,7 @@ export interface MonitoringStats {
 }
 
 class MonitoringService {
-  private baseUrl = 'http://localhost:3001/api';
+  private baseUrl = 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api';
   private monitoringInterval: NodeJS.Timeout | null = null;
   private sites: MonitoringSite[] = [];
   private alertRules: AlertRule[] = [];

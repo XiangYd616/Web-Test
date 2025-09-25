@@ -10,8 +10,6 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('➕ 创建缺失的测试引擎文件');
-console.log('='.repeat(60));
 
 const missingEngines = [
   {
@@ -861,13 +859,7 @@ for (const engine of missingEngines) {
   }
 }
 
-console.log('\n' + '='.repeat(60));
 console.log(`📊 完成: 创建了 ${created} 个文件, ${errors} 个错误`);
 
 if (created > 0) {
-  console.log('\n✅ 所有缺失的测试引擎文件已创建！');
-  console.log('\n后续步骤:');
-  console.log('1. 运行 npm install 安装可能缺失的依赖');
-  console.log('2. 运行测试验证引擎功能');
-  console.log('3. 提交代码变更');
 }

@@ -402,11 +402,18 @@ const getAvailableEndpoints = () => {
     return {
         auth: '/api/auth',
         test: '/api/test',
+        seo: '/api/seo',
+        security: '/api/security',
+        engines: '/api/engines',
         user: '/api/user',
         admin: '/api/admin',
         monitoring: '/api/monitoring',
         reports: '/api/reports',
         system: '/api/system',
+        performance: '/api/performance',
+        integrations: '/api/integrations',
+        files: '/api/files',
+        data: '/api/data',
         health: '/health'
     };
 };

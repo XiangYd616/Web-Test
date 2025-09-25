@@ -1,3 +1,10 @@
+/**
+ * LocalAnalysisPrompt.tsx - React组件
+ * 
+ * 文件路径: frontend\components\seo\LocalAnalysisPrompt.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import type { FC } from 'react';
 import { HardDrive, Info } from 'lucide-react';

@@ -148,7 +148,6 @@ async function validateTableStructure() {
     console.log('🔍 开始验证数据库表结构...');
 
     // 1. 验证必需表是否存在
-    console.log('📋 验证必需表...');
     const tablesResult = await client.query(`
       SELECT table_name 
       FROM information_schema.tables 
@@ -202,7 +201,6 @@ async function validateTableStructure() {
     }
 
     // 3. 验证外键关系
-    console.log('🔗 验证外键关系...');
     const foreignKeysResult = await client.query(`
       SELECT 
         tc.table_name,
@@ -279,7 +277,6 @@ async function validateTableStructure() {
     }
 
     // 5. 验证JSONB字段
-    console.log('📄 验证JSONB字段...');
     for (const jsonbField of expectedStructure.jsonbFields) {
       const fieldResult = await client.query(`
         SELECT data_type 
@@ -322,7 +319,6 @@ async function validateApiCoverage() {
   const results = { passed: 0, failed: 0, details: [] };
 
   try {
-    console.log('🌐 验证API接口覆盖度...');
 
     const tablesResult = await client.query(`
       SELECT table_name 
@@ -377,25 +373,11 @@ function generateValidationReport(structureResults, apiResults) {
   const apiScore = Math.round((apiResults.passed / (apiResults.passed + apiResults.failed)) * 100);
   const overallScore = Math.round((structureScore + apiScore) / 2);
 
-  console.log('\n📊 数据库结构验证报告');
-  console.log('='.repeat(50));
 
-  console.log('\n🏗️ 表结构验证:');
-  console.log(`   表存在性: ${structureResults.tables.passed}/${structureResults.tables.passed + structureResults.tables.failed} (${Math.round(structureResults.tables.passed / (structureResults.tables.passed + structureResults.tables.failed) * 100)}%)`);
-  console.log(`   字段完整性: ${structureResults.fields.passed}/${structureResults.fields.passed + structureResults.fields.failed} (${Math.round(structureResults.fields.passed / (structureResults.fields.passed + structureResults.fields.failed) * 100)}%)`);
-  console.log(`   外键关系: ${structureResults.foreignKeys.passed}/${structureResults.foreignKeys.passed + structureResults.foreignKeys.failed} (${Math.round(structureResults.foreignKeys.passed / (structureResults.foreignKeys.passed + structureResults.foreignKeys.failed) * 100)}%)`);
-  console.log(`   索引优化: ${structureResults.indexes.passed}/${structureResults.indexes.passed + structureResults.indexes.failed} (${Math.round(structureResults.indexes.passed / (structureResults.indexes.passed + structureResults.indexes.failed) * 100)}%)`);
-  console.log(`   JSONB字段: ${structureResults.jsonbFields.passed}/${structureResults.jsonbFields.passed + structureResults.jsonbFields.failed} (${Math.round(structureResults.jsonbFields.passed / (structureResults.jsonbFields.passed + structureResults.jsonbFields.failed) * 100)}%)`);
 
-  console.log('\n🌐 API接口覆盖度:');
   apiResults.details.forEach(detail => {
-    console.log(`   ${detail.status} ${detail.category}: ${detail.coverage}% (${detail.endpoints}个接口)`);
   });
 
-  console.log('\n🎯 总体评分:');
-  console.log(`   结构完整性: ${structureScore}%`);
-  console.log(`   API覆盖度: ${apiScore}%`);
-  console.log(`   综合评分: ${overallScore}%`);
 
   // 评级
   let grade = 'F';
@@ -407,24 +389,17 @@ function generateValidationReport(structureResults, apiResults) {
   else if (overallScore >= 70) grade = 'C';
   else if (overallScore >= 60) grade = 'D';
 
-  console.log(`   等级评定: ${grade}`);
 
   // 建议
-  console.log('\n💡 改进建议:');
   if (structureResults.tables.failed > 0) {
-    console.log('   - 创建缺失的数据表');
   }
   if (structureResults.fields.failed > 0) {
-    console.log('   - 添加缺失的表字段');
   }
   if (structureResults.foreignKeys.failed > 0) {
-    console.log('   - 建立缺失的外键关系');
   }
   if (structureResults.indexes.failed > 0) {
-    console.log('   - 创建性能优化索引');
   }
   if (apiResults.failed > 0) {
-    console.log('   - 补充API接口所需的数据表');
   }
 
   return {
@@ -441,13 +416,11 @@ if (require.main === module) {
   (async () => {
     try {
       console.log('🔍 Test-Web数据库结构验证脚本启动');
-      console.log('='.repeat(50));
 
       const structureResults = await validateTableStructure();
       const apiResults = await validateApiCoverage();
       const report = generateValidationReport(structureResults, apiResults);
 
-      console.log('='.repeat(50));
       if (report.passed) {
         console.log('✅ 数据库结构验证通过！');
       } else {

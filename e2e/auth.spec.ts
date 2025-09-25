@@ -496,5 +496,4 @@ test.describe('用户认证流程', () => {
 // 清理钩子
 test.afterAll(async () => {
   // 在所有测试完成后执行清理
-  console.log('认证测试套件完成');
 });

@@ -1,3 +1,10 @@
+/**
+ * useCSS.ts - 核心功能模块
+ * 
+ * 文件路径: frontend\hooks\useCSS.ts
+ * 创建时间: 2025-09-25
+ */
+
 import { useEffect, useState } from 'react';
 import { loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS } from '../utils/cssLoader';
 
@@ -84,6 +91,16 @@ export const usePageCSS = (
     };
 
     loadPageCSSFiles();
+
+  /**
+
+   * 获取load数据
+
+   * @param {string} id - 对象ID
+
+   * @returns {Promise<Object|null>} 获取的数据
+
+   */
   }, [pageName, options.immediate, options.preload]);
 
   const load = async () => {

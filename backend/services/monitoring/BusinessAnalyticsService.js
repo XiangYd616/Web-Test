@@ -290,7 +290,6 @@ class BusinessAnalyticsService extends EventEmitter {
       console.error('存储告警记录失败:', error);
     }
 
-    console.log(`🚨 告警: ${alert.message}`);
   }
 
   /**
@@ -682,7 +681,6 @@ class BusinessAnalyticsService extends EventEmitter {
     // 停止所有收集器
     for (const [name, collector] of this.collectors) {
       clearInterval(collector);
-      console.log(`   停止${name}指标收集器`);
     }
     
     this.collectors.clear();

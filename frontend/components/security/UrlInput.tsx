@@ -1,3 +1,10 @@
+/**
+ * UrlInput.tsx - React组件
+ * 
+ * 文件路径: frontend\components\security\UrlInput.tsx
+ * 创建时间: 2025-09-25
+ */
+
 
 import React from 'react';
 import { AlertTriangle, CheckCircle, ExternalLink, Globe, HelpCircle, RefreshCw, Zap } from 'lucide-react';

@@ -1,4 +1,14 @@
 import { useCallback, useRef, useState } from 'react';
+
+/**
+
+ * 获取getPerformanceMetrics数据
+
+ * @param {string} id - 对象ID
+
+ * @returns {Promise<Object|null>} 获取的数据
+
+ */
 import { RealSEOAnalysisEngine as SEOAnalysisEngine, SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
 
 const getPerformanceMetrics = async (url: string, options: any) => {

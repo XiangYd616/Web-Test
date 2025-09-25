@@ -48,7 +48,17 @@ class BackgroundTestManager {
   private completedTests = new Map<string, TestInfo>();
   private listeners = new Set<TestListener>();
   private testCounter = 0;
-  private apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
+  private apiBaseUrl = import.meta.env.VITE_API_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api';
 
   constructor() {
     // 从localStorage恢复状态
@@ -172,6 +182,16 @@ class BackgroundTestManager {
       this.runningTests.delete(testId);
       this.completedTests.set(testId, testInfo);
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       this.notifyListeners('testCancelled', testInfo);
 
       if (testInfo.onError) {
@@ -499,6 +519,16 @@ class BackgroundTestManager {
 
       const data = await response.json();
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       this.updateTestProgress(testInfo.id, 90, '✅ 正在生成测试报告...');
 
       if (data.success) {
@@ -561,6 +591,16 @@ class BackgroundTestManager {
       testInfo.progress = progress;
       testInfo.currentStep = step;
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       this.notifyListeners('testProgress', testInfo);
 
       if (testInfo.onProgress) {
@@ -582,6 +622,16 @@ class BackgroundTestManager {
       this.runningTests.delete(testId);
       this.completedTests.set(testId, testInfo);
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       this.notifyListeners('testCompleted', testInfo);
 
       if (testInfo.onComplete) {
@@ -602,6 +652,16 @@ class BackgroundTestManager {
       this.runningTests.delete(testId);
       this.completedTests.set(testId, testInfo);
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       this.notifyListeners('testFailed', testInfo);
 
       if (testInfo.onError) {
@@ -618,10 +678,30 @@ class BackgroundTestManager {
     steps: string[],
     stepDuration: number = 2000
   ): Promise<void> {
+
+    /**
+
+     * for功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const progressIncrement = (endProgress - startProgress) / steps.length;
 
     for (let i = 0; i < steps.length; i++) {
       const currentProgress = startProgress + (progressIncrement * (i + 1));
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       this.updateTestProgress(testId, currentProgress, steps[i]);
 
       if (i < steps.length - 1) {

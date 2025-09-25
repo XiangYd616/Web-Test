@@ -1,3 +1,10 @@
+/**
+ * SEOReportGenerator.tsx - React组件
+ * 
+ * 文件路径: frontend\components\seo\SEOReportGenerator.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React, { useState, useCallback } from 'react';
 import { Download, FileText, Share2, Printer, Eye, Settings, BarChart3, TrendingUp } from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';

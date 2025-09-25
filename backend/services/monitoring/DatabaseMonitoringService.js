@@ -7,6 +7,16 @@ const EventEmitter = require('events');
 const winston = require('winston');
 const { getConnectionManager } = require('../../config/database.js');
 
+
+    /**
+
+     * 处理constructor事件
+
+     * @param {Object} event - 事件对象
+
+     * @returns {Promise<void>}
+
+     */
 class DatabaseMonitoringService extends EventEmitter {
     constructor() {
         super();
@@ -581,6 +591,16 @@ class DatabaseMonitoringService extends EventEmitter {
                 metric => metric.timestamp > cutoffTime
             );
 
+
+            /**
+
+             * if功能函数
+
+             * @param {Object} params - 参数对象
+
+             * @returns {Promise<Object>} 返回结果
+
+             */
             const cleaned = originalLength - this.metrics[type].length;
             if (cleaned > 0) {
                 this.logger.debug(`清理过期监控数据: ${type}, 清理 ${cleaned} 条记录`);

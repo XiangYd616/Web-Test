@@ -1,3 +1,10 @@
+/**
+ * ErrorBoundary.tsx - React组件
+ * 
+ * 文件路径: frontend\components\ui\ErrorBoundary.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { Component, ErrorInfo, ReactNode } from 'react';
 import Logger from '../../utils/logger';
@@ -15,6 +22,11 @@ interface State {
   errorId: string;
 }
 
+  /**
+   * 处理constructor事件
+   * @param {Object} event - 事件对象
+   * @returns {Promise<void>}
+   */
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);

@@ -317,6 +317,16 @@ export class BackgroundTestManagerAdapter {
     endProgress: number,
     steps: string[]
   ): Promise<void> {
+
+    /**
+
+     * for功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const progressStep = (endProgress - startProgress) / steps.length;
 
     for (let i = 0; i < steps.length; i++) {

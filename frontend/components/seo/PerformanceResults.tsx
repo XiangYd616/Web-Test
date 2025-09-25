@@ -1,3 +1,10 @@
+/**
+ * PerformanceResults.tsx - React组件
+ * 
+ * 文件路径: frontend\components\seo\PerformanceResults.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { AlertTriangle, CheckCircle, Info, Lightbulb, TrendingUp, XCircle, Zap } from 'lucide-react';
 import React from 'react';
 import type { FC } from 'react';
@@ -7,7 +14,17 @@ interface PerformanceResultsProps {
   results: PerformanceResult;
 }
 
+  /**
+   * 获取getVitalStatusIcon数据
+   * @param {string} id - 对象ID
+   * @returns {Promise<Object|null>} 获取的数据
+   */
 const PerformanceResults: React.FC<PerformanceResultsProps> = ({ results }) => {
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getVitalStatusIcon = (status: string) => {
     switch (status) {
       case 'good':
@@ -21,6 +38,11 @@ const PerformanceResults: React.FC<PerformanceResultsProps> = ({ results }) => {
     }
   };
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getVitalStatusColor = (status: string) => {
     switch (status) {
       case 'good':

@@ -130,24 +130,20 @@ class DatabaseMigrator {
    * 执行所有待执行的迁移
    */
   async migrate() {
-    console.log('🔄 开始数据库迁移...');
     
     await this.initMigrationTable();
     const pendingMigrations = await this.getPendingMigrations();
     
     if (pendingMigrations.length === 0) {
-      console.log('ℹ️  没有待执行的迁移');
       return;
     }
     
-    console.log(`📋 发现 ${pendingMigrations.length} 个待执行的迁移:`);
-    pendingMigrations.forEach(file => console.log(`  - ${file}`));
+    pendingMigrations.forEach(file => );
     
     for (const migration of pendingMigrations) {
       await this.executeMigration(migration);
     }
     
-    console.log('🎉 数据库迁移完成！');
   }
 
   /**
@@ -162,18 +158,13 @@ class DatabaseMigrator {
       const executedMigrations = await this.getExecutedMigrations();
       const pendingMigrations = await this.getPendingMigrations();
       
-      console.log('\n📊 数据库迁移状态:');
-      console.log(`  已执行迁移: ${executedMigrations.length}`);
-      console.log(`  待执行迁移: ${pendingMigrations.length}`);
       
       if (executedMigrations.length > 0) {
-        console.log('\n✅ 已执行的迁移:');
-        executedMigrations.forEach(version => console.log(`  - ${version}`));
+        executedMigrations.forEach(version => );
       }
       
       if (pendingMigrations.length > 0) {
-        console.log('\n⏳ 待执行的迁移:');
-        pendingMigrations.forEach(file => console.log(`  - ${file}`));
+        pendingMigrations.forEach(file => );
       }
       
     } catch (error) {
@@ -188,7 +179,6 @@ class DatabaseMigrator {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupFile = path.join(BACKUPS_DIR, `backup-${timestamp}.sql`);
     
-    console.log('💾 创建数据库备份...');
     
     try {
       const command = `pg_dump -h ${dbConfig.host} -p ${dbConfig.port} -U ${dbConfig.user} -d ${dbConfig.database} -f ${backupFile}`;
@@ -240,7 +230,6 @@ COMMIT;
     
     fs.writeFileSync(filePath, template);
     console.log(`✅ 迁移文件创建成功: ${filename}`);
-    console.log(`📝 请编辑文件: ${filePath}`);
     
     return filePath;
   }
@@ -285,7 +274,6 @@ async function main() {
         break;
         
       default:
-        console.log(`
 🗄️  数据库迁移工具
 
 使用方法:

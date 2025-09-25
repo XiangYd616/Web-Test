@@ -505,7 +505,6 @@ class SpecializedStorageManager {
 
     // 这里应该写入索引数据库
     // 简化实现，实际应该使用数据库
-    console.log('创建索引:', indexData);
   }
 
   /**

@@ -20,6 +20,12 @@ const MobileOptimizationAnalyzer = require('./analyzers/MobileOptimizationAnalyz
 const ScoreCalculator = require('./utils/scoreCalculator');
 const RecommendationEngine = require('./utils/recommendationEngine');
 const ReportGenerator = require('./utils/ReportGenerator');
+
+/**
+
+ * SEOAnalyzer类 - 负责处理相关功能
+
+ */
 const OptimizationEngine = require('./utils/optimizationEngine');
 
 class SEOAnalyzer {
@@ -184,7 +190,6 @@ class SEOAnalyzer {
    */
   async loadPage(url) {
     try {
-      console.log(`📄 加载页面: ${url}`);
 
       // 记录性能指标
       const startTime = Date.now();

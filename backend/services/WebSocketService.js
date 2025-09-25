@@ -26,7 +26,6 @@ class WebSocketService {
     });
 
     this.wss.on('connection', this.handleConnection.bind(this));
-    console.log('🔌 WebSocket服务已启动');
   }
 
   /**
@@ -108,7 +107,6 @@ class WebSocketService {
 
       if (!client) return;
 
-      console.log(`📨 收到消息 from ${clientId}:`, message.type);
 
       switch (message.type) {
         case 'subscribe_test':
@@ -159,7 +157,6 @@ class WebSocketService {
       timestamp: new Date().toISOString()
     });
 
-    console.log(`📡 客户端 ${clientId} 订阅测试 ${testId}`);
   }
 
   /**
@@ -177,7 +174,6 @@ class WebSocketService {
       timestamp: new Date().toISOString()
     });
 
-    console.log(`📡 客户端 ${clientId} 取消订阅测试 ${testId}`);
   }
 
   /**
@@ -201,7 +197,6 @@ class WebSocketService {
       timestamp: new Date().toISOString()
     });
 
-    console.log(`🏠 客户端 ${clientId} 加入房间 ${roomName}`);
   }
 
   /**
@@ -228,7 +223,6 @@ class WebSocketService {
       timestamp: new Date().toISOString()
     });
 
-    console.log(`🏠 客户端 ${clientId} 离开房间 ${roomName}`);
   }
 
   /**
@@ -323,7 +317,6 @@ class WebSocketService {
     };
 
     this.broadcastToSubscribers(`test:${testId}`, statusMessage);
-    console.log(`📡 广播测试状态: ${testId} - ${status}`);
   }
 
   /**
@@ -421,9 +414,13 @@ class WebSocketService {
       const now = new Date();
       const timeout = 30000; // 30秒超时
 
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
       for (const [clientId, client] of this.clients.entries()) {
         if (now - client.lastPing > timeout) {
-          console.log(`💔 客户端 ${clientId} 心跳超时，断开连接`);
           client.ws.terminate();
           this.handleDisconnection(clientId);
         } else if (client.ws.readyState === WebSocket.OPEN) {
@@ -439,7 +436,6 @@ class WebSocketService {
   close() {
     if (this.wss) {
       this.wss.close();
-      console.log('🔌 WebSocket服务已关闭');
     }
   }
 }

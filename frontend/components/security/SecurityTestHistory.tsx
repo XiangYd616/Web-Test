@@ -1,3 +1,10 @@
+/**
+ * SecurityTestHistory.tsx - React组件
+ * 
+ * 文件路径: frontend\components\security\SecurityTestHistory.tsx
+ * 创建时间: 2025-09-25
+ */
+
 
 import React from 'react';
 import { Calendar, ChevronDown, ChevronRight, Clock, Eye, RefreshCw, Search, Shield, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
@@ -66,6 +73,16 @@ export const SecurityTestHistory = React.forwardRef<
     });
 
     setFilteredHistory(filtered);
+
+  /**
+
+   * 获取loadHistory数据
+
+   * @param {string} id - 对象ID
+
+   * @returns {Promise<Object|null>} 获取的数据
+
+   */
   }, [history, searchTerm, filterRisk, sortBy, sortOrder]);
 
   const loadHistory = async () => {

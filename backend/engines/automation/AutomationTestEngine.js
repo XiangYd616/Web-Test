@@ -51,7 +51,7 @@ class AutomationTestEngine {
       ],
       supportedBrowsers: this.supportedBrowsers,
       maxConcurrent: 3,
-      timeout: 300000,
+      timeout: process.env.REQUEST_TIMEOUT || 300000,
       screenshots: true,
       videoRecording: true
     };
@@ -82,6 +82,11 @@ class AutomationTestEngine {
       slowMo: Joi.number().min(0).max(5000).default(0)
     });
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const { error, value } = schema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);
@@ -335,6 +340,16 @@ class AutomationTestEngine {
     try {
       const links = await page.$$('a[href]');
       let navigationCount = 0;
+      
+      /**
+      
+       * for功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       const maxNavigations = Math.min(config.maxLinks || 3, links.length);
       
       for (let i = 0; i < maxNavigations; i++) {
@@ -375,6 +390,16 @@ class AutomationTestEngine {
       
       for (const button of buttons) {
         const isVisible = await button.isVisible();
+        
+        /**
+        
+         * if功能函数
+        
+         * @param {Object} params - 参数对象
+        
+         * @returns {Promise<Object>} 返回结果
+        
+         */
         const isEnabled = await button.isEnabled();
         
         if (isVisible && isEnabled) {

@@ -234,6 +234,16 @@ class UnifiedExportManager {
 
     const data = task.data.results || task.data;
     let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     xmlContent += `<testReport type="${task.testType}" exportedAt="${new Date().toISOString()}">\n`;
 
     if (task.options.includeConfig && task.data.config) {

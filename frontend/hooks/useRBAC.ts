@@ -1,3 +1,10 @@
+/**
+ * useRBAC.ts - 核心功能模块
+ * 
+ * 文件路径: frontend\hooks\useRBAC.ts
+ * 创建时间: 2025-09-25
+ */
+
 import { useState, useCallback } from 'react';
 
 export interface RBACService {

@@ -23,7 +23,6 @@ class ProjectCleaner {
    * 执行清理
    */
   async cleanup() {
-    console.log('🧹 开始项目清理...\n');
 
     // 1. 识别重复文件
     await this.identifyDuplicates();
@@ -37,7 +36,6 @@ class ProjectCleaner {
     // 4. 执行清理（需要确认）
     await this.executeCleanup();
 
-    console.log('\n✅ 项目清理完成！');
   }
 
   /**
@@ -91,7 +89,6 @@ class ProjectCleaner {
       }
     }
 
-    console.log(`   发现 ${this.duplicates.engines.length} 组重复的测试引擎`);
   }
 
   /**
@@ -123,7 +120,6 @@ class ProjectCleaner {
       this.duplicates.routes.push(...conflicts);
     }
 
-    console.log(`   发现 ${conflicts.length} 个路由冲突`);
   }
 
   /**
@@ -157,7 +153,6 @@ class ProjectCleaner {
       }
     }
 
-    console.log(`   发现 ${this.duplicates.components.length} 组重复的组件功能`);
   }
 
   /**
@@ -184,7 +179,6 @@ class ProjectCleaner {
     const duplicateServices = this.findDuplicateServices(services);
     this.duplicates.services.push(...duplicateServices);
 
-    console.log(`   发现 ${duplicateServices.length} 组重复的服务`);
   }
 
   /**
@@ -548,19 +542,16 @@ class ProjectCleaner {
    * 分析文件依赖
    */
   async analyzeDependencies() {
-    console.log('🔗 分析文件依赖关系...');
     
     // 这里应该分析哪些文件被其他文件引用
     // 避免删除被大量引用的文件
     
-    console.log('   依赖分析完成');
   }
 
   /**
    * 生成清理计划
    */
   async generateCleanupPlan() {
-    console.log('📋 生成清理计划...');
     
     // 生成详细的清理计划
     const plan = {
@@ -582,8 +573,6 @@ class ProjectCleaner {
     const planPath = path.join(this.projectRoot, 'cleanup-plan.json');
     fs.writeFileSync(planPath, JSON.stringify(plan, null, 2));
     
-    console.log(`   清理计划已保存到: ${planPath}`);
-    console.log(`   发现 ${plan.summary.totalDuplicates} 个重复项`);
   }
 
   /**
@@ -591,8 +580,6 @@ class ProjectCleaner {
    */
   async executeCleanup() {
     console.log('⚠️  清理操作需要手动确认');
-    console.log('   请查看 cleanup-plan.json 文件');
-    console.log('   确认无误后运行: node scripts/cleanup/execute-cleanup.js');
   }
 }
 

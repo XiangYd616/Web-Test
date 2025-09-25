@@ -524,6 +524,16 @@ export function useAdvancedCache<T = any>(config: {
       setError(null);
 
       const strategy = getStrategy();
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const result = await cacheManager.get(key) as T | null;
 
       if (result !== null) {
@@ -551,6 +561,16 @@ export function useAdvancedCache<T = any>(config: {
       setLoading(true);
       setError(null);
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const result = await cacheManager.delete(key);
 
       if (result) {

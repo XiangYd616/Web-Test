@@ -72,7 +72,6 @@ class FrontendLogger {
 
   debug(message: string, context?: LogContext): void {
     if (!this.shouldLog(LogLevel.DEBUG)) return;
-    console.log(this.formatMessage('debug', message, context));
   }
 
   // 用户操作日志

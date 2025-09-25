@@ -155,6 +155,16 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
     }
 
     let content: string;
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     let filename = exportData.filename || `export-${Date.now()}`;
 
     switch (format) {

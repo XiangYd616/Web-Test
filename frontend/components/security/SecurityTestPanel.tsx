@@ -1,3 +1,10 @@
+/**
+ * SecurityTestPanel.tsx - React组件
+ * 
+ * 文件路径: frontend\components\security\SecurityTestPanel.tsx
+ * 创建时间: 2025-09-25
+ */
+
 
 import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
@@ -30,7 +37,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   const [config, setConfig] = useState<SecurityTestConfig>({
     url: '',
     depth: 'standard',
-    timeout: 30000,
+    timeout: process.env.REQUEST_TIMEOUT || 30000,
     concurrent: true,
     retries: 2,
     modules: {

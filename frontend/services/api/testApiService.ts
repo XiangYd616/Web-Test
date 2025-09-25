@@ -620,7 +620,7 @@ class TestApiService implements TestApiClient {
    * 下载报告文件
    */
   async downloadReport(report_id: string): Promise<Response> {
-    const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${this.baseUrl}/reports/${report_id}/download`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL || process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}'}${this.baseUrl}/reports/${report_id}/download`, {
       headers: {
         'Authorization': `Bearer ${unifiedApiService.getToken()}`
       }
@@ -738,6 +738,16 @@ class TestApiService implements TestApiClient {
     if (limit) params.append('limit', limit.toString());
 
     const url = `${this.baseUrl}/history${params.toString() ? '?' + params.toString() : ''}`;
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const response = await unifiedApiService.get(url);
 
     if (response.success && response.data) {
@@ -786,6 +796,16 @@ class TestApiService implements TestApiClient {
 
     const poll = async () => {
       try {
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const statusResponse = await this.getTestStatus(testId, testType);
 
         if (statusResponse.success && statusResponse.data) {

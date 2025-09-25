@@ -215,7 +215,6 @@ export class SecurityConfigUtils {
   static updateConfig(updates: Partial<SecurityConfig>): void {
     if (process.env.NODE_ENV === 'development') {
       Object.assign(currentSecurityConfig, updates);
-      console.log('Security config updated:', updates);
     } else {
       console.warn('Cannot update security config in production environment');
     }

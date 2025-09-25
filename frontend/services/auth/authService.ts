@@ -291,7 +291,6 @@ export class UnifiedAuthService implements IAuthService {
   // 用户登录
   async login(credentials: LoginCredentials, clientInfo?: Record<string, any>): Promise<AuthResponse> {
     try {
-      console.log('🔐 用户登录尝试:', credentials.email);
 
       let user: User | null = null;
       let isValidPassword = false;
@@ -306,7 +305,6 @@ export class UnifiedAuthService implements IAuthService {
       } else {
         // 在浏览器环境中通过API验证
         try {
-          console.log('🌐 浏览器环境，通过API登录...');
 
           const response = await fetch('/api/auth/login', {
             method: 'POST',
@@ -491,7 +489,6 @@ export class UnifiedAuthService implements IAuthService {
 
     // 浏览器环境下通过 API 验证用户
     try {
-      console.log('🌐 浏览器环境，通过API验证用户...');
 
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -600,7 +597,6 @@ export class UnifiedAuthService implements IAuthService {
   // 用户注册
   async register(data: RegisterData, clientInfo?: Record<string, any>): Promise<AuthResponse> {
     try {
-      console.log('📝 用户注册尝试:', data.username);
 
       // 验证数据
       const errors: Record<string, string> = {};
@@ -643,7 +639,6 @@ export class UnifiedAuthService implements IAuthService {
         newUser = await userDao.createUser(createUserData);
       } else {
         // 浏览器环境通过 API 注册
-        console.log('🌐 浏览器环境，通过API注册用户...');
 
         const response = await fetch('/api/auth/register', {
           method: 'POST',
@@ -1062,6 +1057,11 @@ export class UnifiedAuthService implements IAuthService {
       if (this.enhancedConfig.enableSecureStorage) {
         this.currentTokenPair = await SecureStorageManager.getItem<TokenPair>('token_pair');
       } else {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const stored = localStorage.getItem('auth_token_pair');
         if (stored) {
           this.currentTokenPair = JSON.parse(stored);
@@ -1545,7 +1545,6 @@ export class UnifiedAuthService implements IAuthService {
     }
 
     try {
-      console.log('🔄 开始数据迁移...');
 
       // 这里需要从浏览器环境获取数据，实际实现时需要考虑如何获取
       // 暂时返回成功状态
@@ -1577,7 +1576,6 @@ export class UnifiedAuthService implements IAuthService {
       this.currentUser = null;
       this.notifyAuthListeners(null);
 
-      console.log('🗑️ 所有认证数据已清除');
     } catch (error) {
       console.error('❌ 清除认证数据失败:', error);
     }

@@ -19,7 +19,7 @@ test.describe('User Flow Tests', () => {
     await page.click('[data-testid="start-test-button"]');
 
     // 4. Wait for test completion
-    await page.waitForSelector('[data-testid="test-completed"]', { timeout: 30000 });
+    await page.waitForSelector('[data-testid="test-completed"]', { timeout: process.env.REQUEST_TIMEOUT || 30000 });
 
     // 5. View results
     await expect(page.locator('[data-testid="test-results"]')).toBeVisible();

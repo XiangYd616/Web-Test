@@ -15,6 +15,12 @@ import type {
   UserBulkAction,
   UserFilter
 } from '../types/admin.types';
+
+/**
+
+ * AdminService类 - 负责处理相关功能
+
+ */
 import type { CreateUserData, UpdateUserData, User } from '../types/user.types';
 
 class AdminService {

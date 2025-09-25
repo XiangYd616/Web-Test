@@ -5,7 +5,7 @@
 
 // API配置
 const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
+  BASE_URL: process.env.REACT_APP_API_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api',
   TIMEOUT: 30000, // 30秒超时
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000 // 1秒重试延迟
@@ -197,6 +197,16 @@ class ApiClient {
     
     if (params && Object.keys(params).length > 0) {
       const searchParams = new URLSearchParams();
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           searchParams.append(key, String(value));

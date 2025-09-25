@@ -1,3 +1,10 @@
+/**
+ * stressTestQueueManager.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\stressTestQueueManager.ts
+ * 创建时间: 2025-09-25
+ */
+
 
 import { stressTestRecordService } from './stressTestRecordService';
 import { systemResourceMonitor } from './systemResourceMonitor';
@@ -104,7 +111,6 @@ class StressTestQueueManager {
    */
   private setupResourceMonitoring(): void {
     // 简化资源监控，不再依赖复杂的系统监控
-    console.log('📋 队列管理器使用简化的资源管理策略');
 
     // 使用固定的并发限制，不再动态调整
     // 这样可以避免不必要的系统资源监控调用
@@ -167,7 +173,6 @@ class StressTestQueueManager {
       estimatedWaitTime: this.estimateWaitTime(queuedTest.id)
     });
 
-    console.log(`📋 测试已加入队列: ${queuedTest.testName} (优先级: ${priority})`);
     return queuedTest.id;
   }
 
@@ -341,7 +346,6 @@ class StressTestQueueManager {
    */
   private async executeRealStressTest(test: QueuedTest): Promise<void> {
     try {
-      console.log(`🎯 开始执行真实压力测试: ${test.testName}`);
 
       // 调用后端压力测试API
       const response = await fetch('/api/test/stress', {
@@ -403,7 +407,6 @@ class StressTestQueueManager {
 
           // 检查是否超时
           if (Date.now() - startTime > maxWaitTime) {
-            console.log(`⏰ 测试超时: ${test.testName}`);
             reject(new Error('测试执行超时'));
             return;
           }
@@ -462,7 +465,6 @@ class StressTestQueueManager {
 
       setTimeout(() => {
         this.insertByPriority(test);
-        console.log(`🔄 测试重试: ${test.testName} (${test.retryCount}/${test.maxRetries})`);
       }, this.config.retryDelay);
     } else {
       // 标记为失败
@@ -493,6 +495,11 @@ class StressTestQueueManager {
     let insertIndex = this.queue.length;
 
     for (let i = 0; i < this.queue.length; i++) {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const existingWeight = this.config.priorityWeights[this.queue[i].priority];
       if (weight > existingWeight) {
         insertIndex = i;

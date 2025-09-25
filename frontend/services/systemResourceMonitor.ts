@@ -41,6 +41,12 @@ export interface ResourceThresholds {
   };
 }
 
+
+/**
+
+ * SystemResourceMonitor类 - 负责处理相关功能
+
+ */
 export type ResourceStatus = 'healthy' | 'warning' | 'critical' | 'overloaded';
 
 class SystemResourceMonitor {
@@ -99,7 +105,7 @@ class SystemResourceMonitor {
       clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
     }
-    // console.log('⏹️ 系统资源监控已停止'); // 静默停止
+    // // 静默停止
   }
 
   /**
@@ -180,7 +186,7 @@ class SystemResourceMonitor {
    */
   private async fetchResourcesFromAPI(): Promise<SystemResources> {
     try {
-      const response = await fetch('http://localhost:3001/api/system/resources', {
+      const response = await fetch('http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/system/resources', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }

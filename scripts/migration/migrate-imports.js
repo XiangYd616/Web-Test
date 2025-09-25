@@ -59,7 +59,6 @@ function processFile(filePath) {
       if (mapping.pattern.test(content)) {
         content = content.replace(mapping.pattern, mapping.replacement);
         modified = true;
-        console.log(`✓ ${path.relative(process.cwd(), filePath)}: 更新导入路径`);
       }
     }
 
@@ -80,7 +79,6 @@ function processFile(filePath) {
  * 主函数
  */
 function main() {
-  console.log('开始批量迁移导入语句...\n');
 
   // 查找所有符合条件的文件
   const files = [];
@@ -97,23 +95,14 @@ function main() {
 
   // 去重
   const uniqueFiles = [...new Set(files)];
-  console.log(`找到 ${uniqueFiles.length} 个文件需要检查\n`);
 
   // 处理每个文件
   uniqueFiles.forEach(processFile);
 
   // 输出统计结果
-  console.log('\n迁移完成！');
-  console.log(`总计检查文件: ${totalFiles}`);
-  console.log(`修改文件: ${modifiedFiles}`);
-  console.log(`错误文件: ${errorFiles}`);
 
   // 输出建议
   if (modifiedFiles > 0) {
-    console.log('\n建议：');
-    console.log('1. 运行 npm run type-check 检查类型错误');
-    console.log('2. 运行 npm run test 确保测试通过');
-    console.log('3. 提交更改: git add -A && git commit -m "refactor: migrate imports to @shared/types"');
   }
 }
 

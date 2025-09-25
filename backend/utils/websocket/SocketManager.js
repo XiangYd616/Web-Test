@@ -57,7 +57,6 @@ class SocketManager extends EventEmitter {
     this.setupSocketListeners(connection);
 
     this.emit('connection:registered', connection);
-    console.log(`WebSocket连接已注册: ${connectionId}, 用户: ${connection.userId || '匿名'}`);
 
     return connection;
   }
@@ -91,7 +90,6 @@ class SocketManager extends EventEmitter {
     this.connectionStats.active--;
 
     this.emit('connection:unregistered', connection);
-    console.log(`WebSocket连接已注销: ${connectionId}`);
 
     return true;
   }
@@ -331,7 +329,6 @@ class SocketManager extends EventEmitter {
     });
 
     toRemove.forEach(connectionId => {
-      console.log(`清理非活跃连接: ${connectionId}`);
       this.unregisterConnection(connectionId);
     });
 

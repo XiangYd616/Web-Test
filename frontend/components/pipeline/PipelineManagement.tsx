@@ -114,6 +114,16 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
     }
   };
 
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'text-red-500 bg-red-900/20';

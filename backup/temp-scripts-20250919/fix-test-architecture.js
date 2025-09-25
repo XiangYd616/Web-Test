@@ -14,7 +14,6 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 
 console.log('🔧 Test-Web 测试架构自动修复工具');
-console.log('='.repeat(80));
 
 // 读取分析结果
 const analysisPath = path.join(projectRoot, 'test-architecture-analysis.json');
@@ -34,7 +33,6 @@ const fixes = {
 
 // 1. 修复命名问题
 function fixNamingIssues() {
-  console.log('\n📝 修复命名问题...');
   
   // 修复TypeScript文件扩展名
   const tsToJsFiles = [
@@ -54,7 +52,6 @@ function fixNamingIssues() {
         fs.writeFileSync(toPath, content);
         fs.unlinkSync(fromPath);
         fixes.renamed.push({ from: file.from, to: file.to });
-        console.log(`  ✓ 重命名: ${file.from} → ${file.to}`);
       } catch (error) {
         fixes.errors.push({ file: file.from, error: error.message });
         console.error(`  ❌ 重命名失败: ${file.from} - ${error.message}`);
@@ -97,7 +94,6 @@ function fixNamingIssues() {
       try {
         fs.unlinkSync(fromPath);
         fixes.deleted.push(fromPath);
-        console.log(`  ✓ 删除冗余文件: ${mapping.from}`);
       } catch (error) {
         fixes.errors.push({ file: mapping.from, error: error.message });
       }
@@ -114,7 +110,6 @@ function fixNamingIssues() {
           fs.unlinkSync(mergePath);
           fixes.created.push(toPath);
           fixes.deleted.push(fromPath, mergePath);
-          console.log(`  ✓ 合并文件: ${mapping.from} + ${mapping.merge} → ${mapping.to}`);
         } catch (error) {
           fixes.errors.push({ file: mapping.from, error: error.message });
         }
@@ -124,7 +119,6 @@ function fixNamingIssues() {
       try {
         fs.renameSync(fromPath, toPath);
         fixes.renamed.push({ from: mapping.from, to: mapping.to });
-        console.log(`  ✓ 重命名: ${mapping.from} → ${mapping.to}`);
       } catch (error) {
         fixes.errors.push({ file: mapping.from, error: error.message });
       }
@@ -134,7 +128,6 @@ function fixNamingIssues() {
 
 // 2. 创建缺失的主引擎文件
 function createMissingEngines() {
-  console.log('\n🚀 创建缺失的主引擎文件...');
   
   const missingEngines = [
     {
@@ -166,7 +159,6 @@ function createMissingEngines() {
       try {
         fs.writeFileSync(enginePath, engine.content);
         fixes.created.push(enginePath);
-        console.log(`  ✓ 创建: ${engine.dir}/${engine.name}`);
       } catch (error) {
         fixes.errors.push({ file: engine.name, error: error.message });
         console.error(`  ❌ 创建失败: ${engine.name} - ${error.message}`);
@@ -177,7 +169,6 @@ function createMissingEngines() {
 
 // 3. 创建缺失的路由文件
 function createMissingRoutes() {
-  console.log('\n📡 创建缺失的路由文件...');
   
   const missingRoutes = [
     'automation', 'clients', 'compatibility', 'content', 'core',
@@ -192,7 +183,6 @@ function createMissingRoutes() {
         const routeContent = generateRouteTemplate(routeName);
         fs.writeFileSync(routePath, routeContent);
         fixes.created.push(routePath);
-        console.log(`  ✓ 创建路由: routes/${routeName}.js`);
       } catch (error) {
         fixes.errors.push({ file: `${routeName}.js`, error: error.message });
         console.error(`  ❌ 创建路由失败: ${routeName}.js - ${error.message}`);
@@ -203,7 +193,6 @@ function createMissingRoutes() {
 
 // 4. 创建缺失的index文件
 function createMissingIndexFiles() {
-  console.log('\n📄 创建缺失的index文件...');
   
   const dirsNeedingIndex = [
     'automation', 'base', 'clients', 'documentation', 
@@ -218,7 +207,6 @@ function createMissingIndexFiles() {
         const indexContent = generateIndexTemplate(dir);
         fs.writeFileSync(indexPath, indexContent);
         fixes.created.push(indexPath);
-        console.log(`  ✓ 创建: ${dir}/index.js`);
       } catch (error) {
         fixes.errors.push({ file: `${dir}/index.js`, error: error.message });
       }
@@ -228,7 +216,6 @@ function createMissingIndexFiles() {
 
 // 5. 创建前端映射页面缺失的后端引擎
 function createMissingBackendForFrontend() {
-  console.log('\n🔗 为前端页面创建缺失的后端引擎...');
   
   // 这些是辅助页面，不需要独立的测试引擎
   const helperPages = ['testhistory', 'testoptimizations', 'testresultdetail', 'testschedule', 'unifiedtestpage'];
@@ -253,7 +240,6 @@ function createMissingBackendForFrontend() {
       // 创建引擎文件
       fs.writeFileSync(enginePath, engineContent);
       fixes.created.push(enginePath);
-      console.log(`  ✓ 创建引擎: accessibility/AccessibilityTestEngine.js`);
       
       // 创建index文件
       fs.writeFileSync(indexPath, generateIndexTemplate('accessibility'));
@@ -262,7 +248,6 @@ function createMissingBackendForFrontend() {
       // 创建路由文件
       fs.writeFileSync(routePath, generateRouteTemplate('accessibility'));
       fixes.created.push(routePath);
-      console.log(`  ✓ 创建路由: routes/accessibility.js`);
     } catch (error) {
       fixes.errors.push({ file: 'accessibility', error: error.message });
     }
@@ -518,31 +503,20 @@ function extractMethods(content) {
 
 // 生成修复报告
 function generateFixReport() {
-  console.log('\n' + '='.repeat(80));
   console.log('📊 修复报告');
-  console.log('='.repeat(80));
   
-  console.log('\n✅ 成功修复:');
-  console.log(`  - 重命名文件: ${fixes.renamed.length}`);
-  console.log(`  - 创建文件: ${fixes.created.length}`);
-  console.log(`  - 删除冗余: ${fixes.deleted.length}`);
-  console.log(`  - 更新文件: ${fixes.updated.length}`);
   
   if (fixes.errors.length > 0) {
-    console.log('\n❌ 修复失败:');
     fixes.errors.forEach(error => {
-      console.log(`  - ${error.file}: ${error.error}`);
     });
   }
   
   // 保存修复记录
   const reportPath = path.join(projectRoot, 'test-architecture-fixes.json');
   fs.writeFileSync(reportPath, JSON.stringify(fixes, null, 2));
-  console.log(`\n📁 修复记录已保存到: ${reportPath}`);
 }
 
 // 执行修复
-console.log(`\n🚀 开始修复项目: ${projectRoot}`);
 
 fixNamingIssues();
 createMissingEngines();
@@ -551,9 +525,3 @@ createMissingIndexFiles();
 createMissingBackendForFrontend();
 generateFixReport();
 
-console.log('\n✨ 修复完成！');
-console.log('\n建议后续步骤:');
-console.log('1. 运行 npm install 确保依赖正确');
-console.log('2. 运行 comprehensive-test-architecture-analysis.js 重新分析');
-console.log('3. 检查并测试各个引擎功能');
-console.log('4. 提交更改到版本控制');

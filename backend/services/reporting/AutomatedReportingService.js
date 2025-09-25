@@ -14,13 +14,11 @@ const cron = {
   schedule: (schedule, callback, options = {}) => {
     const task = {
       start: () => {
-        console.log(`定时任务已启动: ${schedule}`);
         if (!options.scheduled) {
           setInterval(callback, 60000);
         }
       },
       stop: () => {
-        console.log(`定时任务已停止: ${schedule}`);
       }
     };
     return task;
@@ -30,12 +28,9 @@ const cron = {
 const nodemailer = {
   createTransporter: (config) => ({
     verify: async () => {
-      console.log('邮件配置验证成功');
       return true;
     },
     sendMail: async (options) => {
-      console.log(`模拟发送邮件到: ${options.to}`);
-      console.log(`主题: ${options.subject}`);
       return { messageId: 'mock-message-id' };
     }
   })
@@ -43,6 +38,11 @@ const nodemailer = {
 const fs = require('fs').promises;
 const path = require('path');
 
+  /**
+   * 处理constructor事件
+   * @param {Object} event - 事件对象
+   * @returns {Promise<void>}
+   */
 class AutomatedReportingService extends EventEmitter {
   constructor() {
     super();
@@ -164,7 +164,6 @@ class AutomatedReportingService extends EventEmitter {
     // 保存到文件
     await this.saveScheduledReports();
 
-    console.log(`📅 创建定时报告: ${name} (${reportId})`);
     this.emit('reportScheduled', scheduledReport);
 
     return reportId;
@@ -184,7 +183,6 @@ class AutomatedReportingService extends EventEmitter {
     reportConfig.cronTask = task;
     task.start();
 
-    console.log(`⏰ 安排定时报告: ${reportConfig.name}`);
   }
 
   /**
@@ -198,7 +196,6 @@ class AutomatedReportingService extends EventEmitter {
         return;
       }
 
-    console.log(`🔄 执行定时报告: ${reportConfig.name}`);
 
     try {
       reportConfig.lastRun = new Date();
@@ -282,7 +279,6 @@ class AutomatedReportingService extends EventEmitter {
 
     await fs.writeFile(filepath, content);
 
-    console.log(`💾 报告已保存: ${filepath}`);
     return filepath;
   }
 
@@ -311,7 +307,6 @@ class AutomatedReportingService extends EventEmitter {
     };
 
     await this.emailTransporter.sendMail(mailOptions);
-    console.log(`📧 报告邮件已发送: ${reportConfig.name}`);
   }
 
   /**
@@ -452,7 +447,6 @@ class AutomatedReportingService extends EventEmitter {
 
     await this.saveScheduledReports();
 
-    console.log(`📝 更新定时报告: ${report.name}`);
     this.emit('reportUpdated', report);
   }
 
@@ -475,7 +469,6 @@ class AutomatedReportingService extends EventEmitter {
     this.scheduledReports.delete(reportId);
     await this.saveScheduledReports();
 
-    console.log(`🗑️ 删除定时报告: ${report.name}`);
     this.emit('reportDeleted', reportId);
   }
 
@@ -571,6 +564,16 @@ class AutomatedReportingService extends EventEmitter {
       const reports = JSON.parse(data);
 
       for (const report of reports) {
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         this.scheduledReports.set(report.id, report);
 
         if (report.enabled) {
@@ -578,7 +581,6 @@ class AutomatedReportingService extends EventEmitter {
         }
       }
 
-      console.log(`📂 加载了 ${reports.length} 个定时报告`);
     } catch (error) {
       if (error.code !== 'ENOENT') {
         console.error('加载定时报告配置失败:', error);

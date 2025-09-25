@@ -1,3 +1,10 @@
+/**
+ * SecurityCenter.tsx - React组件
+ * 
+ * 文件路径: frontend\components\admin\SecurityCenter.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { useState } from 'react';
 
@@ -66,8 +73,23 @@ const SecurityCenter: React.FC = () => {
     }
   });
 
+
+  /**
+
+   * 获取getSeverityColor数据
+
+   * @param {string} id - 对象ID
+
+   * @returns {Promise<Object|null>} 获取的数据
+
+   */
   const [showPasswordPolicy, setShowPasswordPolicy] = useState(false);
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'high': return 'bg-red-100 text-red-800';

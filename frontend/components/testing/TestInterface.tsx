@@ -1,7 +1,8 @@
 import { Clock, Play, Square, Target } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { TestResult } from '../../services/testing/unifiedTestEngine';
-import { TestType } from '@shared/types';
+// import { TestType } from '@shared/types'; // 暂时禁用
+type TestType = 'website' | 'security' | 'performance' | 'seo' | 'api' | 'network' | 'database' | 'compatibility' | 'accessibility' | 'ux';
 import { ButtonFeedback } from '../integration/InteractiveFeedback';
 import { ErrorDisplay, useErrorHandler, useNotifications } from '../system/ErrorHandling';
 import { SmartLoader, useLoadingState } from '../ui/LoadingStates';
@@ -34,6 +35,11 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   const { error: handledError, handleError, clearError } = useErrorHandler();
   const { success, error: notifyError } = useNotifications();
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const handleStartTest = useCallback(async () => {
     if (!config.url) {
       notifyError('输入错误', '请输入有效的URL');
@@ -80,6 +86,16 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
       console.error('取消测试失败:', err);
       handleError(err, '取消测试');
     }
+
+  /**
+
+   * 获取getScoreColor数据
+
+   * @param {string} id - 对象ID
+
+   * @returns {Promise<Object|null>} 获取的数据
+
+   */
   }, [onCancelTest, setLoadingError, handleError, success]);
 
   const getScoreColor = (score: number) => {
@@ -96,6 +112,11 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
     return 'bg-red-50 border-red-200';
   };
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'bg-red-100 text-red-800';

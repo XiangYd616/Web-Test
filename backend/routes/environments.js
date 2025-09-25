@@ -100,6 +100,16 @@ router.put('/:environmentId', async (req, res) => {
     const { environmentId } = req.params;
     const updateData = req.body;
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const environment = environmentManager.getEnvironment(environmentId);
     if (!environment) {
       return res.status(404).json({
@@ -387,6 +397,21 @@ router.get('/global/variables', async (req, res) => {
 
 router.post('/global/variables', async (req, res) => {
   try {
+
+    
+    /**
+
+    
+     * if功能函数
+
+    
+     * @param {Object} params - 参数对象
+
+    
+     * @returns {Promise<Object>} 返回结果
+
+    
+     */
     const { key, value, type, description, secret } = req.body;
     
     if (!key) {

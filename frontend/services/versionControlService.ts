@@ -92,9 +92,24 @@ export class VersionControlService {
     endpoints: string[] = [],
     dataModels: Record<string, string> = {}
   ): Promise<CompatibilityReport> {
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const cacheKey = `compatibility_${clientVersion}_${serverVersion}`;
 
     if (this.config.enableVersionCache) {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const cached = await defaultMemoryCache.get(cacheKey);
       if (cached) {
         return cached;
@@ -189,7 +204,6 @@ export class VersionControlService {
       this.recordMigration(migrationId, result);
 
       if (this.config.logMigrations) {
-        console.log(`Migration completed: ${typeName} from ${versionedData.version} to ${targetVersion}`, result);
       }
 
       return result;

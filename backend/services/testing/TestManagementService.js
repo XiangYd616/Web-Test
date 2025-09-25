@@ -16,8 +16,27 @@ const SEOTestEngine = require('../../engines/seo/SEOTestEngine');
 const APITestEngine = require('../../engines/api/APITestEngine');
 const StressTestEngine = require('../../engines/stress/StressTestEngine');
 const DatabaseTestEngine = require('../../engines/database/DatabaseTestEngine');
+
+
+/**
+
+
+ * TestManagementService类 - 负责处理相关功能
+
+
+ */
 const NetworkTestEngine = require('../../engines/network/NetworkTestEngine');
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 class TestManagementService extends EventEmitter {
   constructor() {
     super();
@@ -80,7 +99,6 @@ class TestManagementService extends EventEmitter {
     // 恢复未完成的测试
     await this.recoverPendingTests();
     
-    console.log('TestManagementService initialized successfully');
   }
 
   /**
@@ -143,6 +161,16 @@ class TestManagementService extends EventEmitter {
       throw new Error(`Test ${testId} not found in queue`);
     }
 
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const engine = this.engines.get(test.engine_type);
     if (!engine || !engine.instance) {
       throw new Error(`Engine ${test.engine_type} not available`);
@@ -315,6 +343,21 @@ class TestManagementService extends EventEmitter {
       GROUP BY th.id, tr.id
     `;
 
+
+    
+    /**
+
+    
+     * if功能函数
+
+    
+     * @param {Object} params - 参数对象
+
+    
+     * @returns {Promise<Object>} 返回结果
+
+    
+     */
     const result = await this.db.query(query, [testId, userId]);
     
     if (result.rows.length === 0) {
@@ -603,7 +646,6 @@ class TestManagementService extends EventEmitter {
     );
 
     if (result.rows.length > 0) {
-      console.log(`Recovered ${result.rows.length} pending tests`);
     }
   }
 

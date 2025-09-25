@@ -1,3 +1,10 @@
+/**
+ * useLocalStressTest.ts - 核心功能模块
+ * 
+ * 文件路径: frontend\hooks\useLocalStressTest.ts
+ * 创建时间: 2025-09-25
+ */
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface LocalStressTestConfig {
@@ -85,7 +92,6 @@ export const useLocalStressTest = () => {
 
     // 测试开始事件
     const cleanupStarted = api.onTestStarted((data: any) => {
-      console.log('🎯 本地压力测试开始:', data);
       setIsRunning(true);
       setError(null);
     });
@@ -158,6 +164,16 @@ export const useLocalStressTest = () => {
       setError(null);
       console.log('🚀 启动本地压力测试:', config);
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const result = await window.environment.localStressTest.start(config);
 
       if (!result.success) {
@@ -185,7 +201,16 @@ export const useLocalStressTest = () => {
     }
 
     try {
-      console.log('🛑 停止本地压力测试');
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const result = await window.environment.localStressTest.stop();
 
       if (!result.success) {

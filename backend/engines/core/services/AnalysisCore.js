@@ -123,7 +123,6 @@ class AnalysisCore {
    * 生成安全测试摘要 - 统一实现
    */
   generateSecuritySummary(results) {
-    console.log('🛡️ 生成安全测试摘要');
     
     const summary = {
       overallScore: 0,
@@ -207,7 +206,6 @@ class AnalysisCore {
    * 生成HTTP测试摘要 - 统一实现
    */
   generateHTTPSummary(results, testType) {
-    console.log(`🌐 生成${testType}测试摘要`);
     
     const summary = {
       overallScore: 0,
@@ -343,6 +341,16 @@ class AnalysisCore {
       
       if (results.deviceCompatibility) {
         const deviceCompat = results.deviceCompatibility;
+        
+        /**
+        
+         * if功能函数
+        
+         * @param {Object} params - 参数对象
+        
+         * @returns {Promise<Object>} 返回结果
+        
+         */
         summary.metrics.deviceSupport = deviceCompat.supportPercentage;
         
         if (deviceCompat.mobileOptimized) {
@@ -361,7 +369,6 @@ class AnalysisCore {
    * 生成综合建议 - 统一实现
    */
   async generateRecommendations(testResult) {
-    console.log('💡 生成综合建议');
     
     const recommendations = {
       immediate: [], // 立即处理
@@ -692,7 +699,6 @@ class AnalysisCore {
    */
   clearAnalysisHistory() {
     this.analysisHistory = [];
-    console.log('🧹 分析历史已清理');
   }
 }
 

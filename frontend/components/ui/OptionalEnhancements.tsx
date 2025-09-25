@@ -75,6 +75,16 @@ export const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
   contentClassName = '',
   onToggle
 }) => {
+
+  /**
+
+   * 处理handleToggle事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const handleToggle = () => {
@@ -303,6 +313,16 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({
   className = ''
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  /**
+
+   * toggleFullscreen功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = () => {
@@ -312,6 +332,11 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({
   };
 
   useEffect(() => {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isFullscreen) {
         toggleFullscreen();
@@ -381,6 +406,11 @@ export const LinkPreview: React.FC<{
   title?: string;
   description?: string;
   className?: string;
+  /**
+   * 处理handleClick事件
+   * @param {Object} event - 事件对象
+   * @returns {Promise<void>}
+   */
 }> = ({ url, title, description, className = '' }) => {
   const handleClick = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -492,19 +522,19 @@ export const EnhancementsUsageGuide: React.FC = () => {
           <QuickAction
             label="开始测试"
             icon={ActionIcon}
-            onClick={() => console.log('开始测试')}
+            onClick={() => }
             variant="primary"
           />
           <QuickAction
             label="导出结果"
             icon={ActionIcon}
-            onClick={() => console.log('导出结果')}
+            onClick={() => }
             variant="secondary"
           />
           <QuickAction
             label="分享"
             icon={ActionIcon}
-            onClick={() => console.log('分享')}
+            onClick={() => }
             variant="ghost"
           />
         </div>

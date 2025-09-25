@@ -18,10 +18,8 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     
     try {
-      console.log('🔄 开始执行OAuth2表迁移...');
       
       // 创建OAuth账户关联表
-      console.log('📝 创建user_oauth_accounts表...');
       await queryInterface.createTable('user_oauth_accounts', {
         id: {
           type: DataTypes.UUID,
@@ -151,7 +149,6 @@ module.exports = {
       });
 
       // 创建OAuth应用配置表（用于管理OAuth应用信息）
-      console.log('📝 创建oauth_applications表...');
       await queryInterface.createTable('oauth_applications', {
         id: {
           type: DataTypes.UUID,
@@ -226,7 +223,6 @@ module.exports = {
       });
 
       // 创建OAuth会话表（用于跟踪OAuth登录会话）
-      console.log('📝 创建oauth_sessions表...');
       await queryInterface.createTable('oauth_sessions', {
         id: {
           type: DataTypes.UUID,
@@ -315,7 +311,6 @@ module.exports = {
 
       // 注意：security_logs表的risk_level是VARCHAR类型，不是ENUM
       // OAuth登录事件可以使用现有的risk_level值 (如 'low', 'medium', 'high')
-      console.log('📝 OAuth相关安全事件将使用现有的risk_level值');
 
       // 提交事务
       await transaction.commit();
@@ -342,13 +337,11 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     
     try {
-      console.log('🔄 开始回滚OAuth2表迁移...');
       
       // 删除OAuth表（按依赖关系逆序删除）
       const tablesToDrop = ['oauth_sessions', 'oauth_applications', 'user_oauth_accounts'];
       
       for (const table of tablesToDrop) {
-        console.log(`🗑️ 删除${table}表...`);
         await queryInterface.dropTable(table, { transaction });
       }
       

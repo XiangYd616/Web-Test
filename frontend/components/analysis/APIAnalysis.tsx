@@ -1,3 +1,10 @@
+/**
+ * APIAnalysis.tsx - React组件
+ * 
+ * 文件路径: frontend\components\analysis\APIAnalysis.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { 

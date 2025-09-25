@@ -104,7 +104,7 @@ const PerformanceConfig = {
     http: {
       maxSockets: 50,
       maxFreeSockets: 10,
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       freeSocketTimeout: 30000,
       keepAlive: true,
       keepAliveMsecs: 1000,
@@ -276,7 +276,6 @@ class EnhancedCacheService {
       });
       
       this.memoryCache.on('expired', (key, value) => {
-        console.log(`缓存过期: ${key}`);
       });
 
       // 启动定期统计报告

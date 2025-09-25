@@ -198,6 +198,16 @@ class PerformanceCollector {
       stats.count++;
       stats.totalTime += req.responseTime;
       stats.minTime = Math.min(stats.minTime, req.responseTime);
+      
+      /**
+      
+       * if功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       stats.maxTime = Math.max(stats.maxTime, req.responseTime);
       
       if (req.statusCode >= 400 || req.error) {

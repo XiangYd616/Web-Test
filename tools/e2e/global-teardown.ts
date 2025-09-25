@@ -6,7 +6,6 @@
 import { chromium, FullConfig } from '@playwright/test';
 
 async function globalTeardown(config: FullConfig) {
-    console.log('🧹 开始E2E测试全局清理...');
 
     const { baseURL } = config.projects[0].use;
 
@@ -37,7 +36,6 @@ async function globalTeardown(config: FullConfig) {
  */
 async function cleanupTestData(page: any) {
     try {
-        console.log('🗑️ 清理测试数据...');
 
         const response = await page.request.post('/api/test/cleanup', {
             data: {
@@ -50,7 +48,6 @@ async function cleanupTestData(page: any) {
             console.log('✅ 测试数据清理完成');
         }
     } catch (error) {
-        console.log('ℹ️ 跳过测试数据清理:', error.message);
     }
 }
 
@@ -59,7 +56,6 @@ async function cleanupTestData(page: any) {
  */
 async function cleanupTestFiles() {
     try {
-        console.log('📁 清理测试文件...');
 
         const fs = await import('fs/promises');
         const path = await import('path');
@@ -75,7 +71,6 @@ async function cleanupTestFiles() {
         }
 
     } catch (error) {
-        console.log('ℹ️ 跳过测试文件清理:', error.message);
     }
 }
 

@@ -9,8 +9,8 @@ const LoadGenerator = require('./generators/LoadGenerator');
 class StressAnalyzer {
   constructor(options = {}) {
     this.options = {
-      timeout: 30000,
-      maxConcurrency: 100,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       defaultDuration: 60,
       ...options
     };

@@ -123,10 +123,9 @@ const DataStorage: React.FC = () => {
   const loadTestRecords = async () => {
     setLoading(true);
     try {
-      console.log('🔄 Loading test records from backend...');
 
       // 从后端API加载真实数据（需要认证）
-      const response = await fetch('http://localhost:3001/api/test-history?' + new URLSearchParams({
+      const response = await fetch('http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test-history?' + new URLSearchParams({
         sortBy: sortBy,
         sortOrder: sortOrder
       }), {
@@ -165,9 +164,8 @@ const DataStorage: React.FC = () => {
     }
 
     try {
-      console.log('🗑️ Deleting test record:', recordId);
 
-      const response = await fetch(`http://localhost:3001/api/test-history/${recordId}`, {
+      const response = await fetch(`http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test-history/${recordId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });

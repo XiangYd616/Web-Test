@@ -39,7 +39,6 @@ class BackupService {
       await fs.access(this.backupDir);
     } catch (error) {
       await fs.mkdir(this.backupDir, { recursive: true });
-      console.log('📁 创建备份目录:', this.backupDir);
     }
   }
 
@@ -51,7 +50,6 @@ class BackupService {
     const backupName = customName || `backup_${timestamp}`;
     const backupFile = path.join(this.backupDir, `${backupName}.sql`);
 
-    console.log('🔄 开始创建数据库备份...');
 
     try {
       await this.performBackup(backupFile);
@@ -215,7 +213,6 @@ class BackupService {
       
       for (const file of filesToDelete) {
         await fs.unlink(file.path);
-        console.log('🗑️ 删除旧备份:', file.name);
       }
 
       if (filesToDelete.length > 0) {
@@ -231,7 +228,6 @@ class BackupService {
    * 恢复数据库
    */
   async restoreBackup(backupFile) {
-    console.log('🔄 开始恢复数据库...');
 
     try {
       // 验证备份文件存在
@@ -312,7 +308,6 @@ class BackupService {
     }
 
     this.scheduledTask = cron.schedule(cronExpression, async () => {
-      console.log('⏰ 执行定时备份任务');
       await this.createBackup();
     }, {
       scheduled: false
@@ -321,7 +316,6 @@ class BackupService {
     this.scheduledTask.start();
     this.isScheduled = true;
 
-    console.log('📅 自动备份调度已启动:', cronExpression);
   }
 
   /**
@@ -334,7 +328,6 @@ class BackupService {
     }
     
     this.isScheduled = false;
-    console.log('🛑 自动备份调度已停止');
   }
 
   /**

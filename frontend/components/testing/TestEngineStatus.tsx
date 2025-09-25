@@ -250,7 +250,7 @@ const TestEngineStatus: React.FC = () => {
         capabilities: ['元标签分析', '关键词密度', '站点地图检查', '结构化数据'],
         config: {
           maxConcurrent: 10,
-          timeout: 30000,
+          timeout: process.env.REQUEST_TIMEOUT || 30000,
           retryAttempts: 3,
           priority: 3
         },
@@ -326,7 +326,7 @@ const TestEngineStatus: React.FC = () => {
         capabilities: ['负载测试', '并发测试', '峰值测试', '持续压力'],
         config: {
           maxConcurrent: 1,
-          timeout: 300000,
+          timeout: process.env.REQUEST_TIMEOUT || 300000,
           retryAttempts: 1,
           priority: 4
         },
@@ -443,11 +443,10 @@ const TestEngineStatus: React.FC = () => {
   // WebSocket连接
   const connectWebSocket = useCallback(() => {
     try {
-      const ws = new WebSocket('ws://localhost:3001/engines');
+      const ws = new WebSocket('ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/engines');
       
       ws.onopen = () => {
         setIsConnected(true);
-        console.log('Engine WebSocket connected');
         ws.send(JSON.stringify({ type: 'subscribe', channels: ['engines', 'queue'] }));
       };
 
@@ -495,7 +494,6 @@ const TestEngineStatus: React.FC = () => {
         updateEngineHealth(data.engineId, data.health);
         break;
       default:
-        console.log('Unknown WebSocket message type:', data.type);
     }
   };
 

@@ -1,3 +1,10 @@
+/**
+ * StressTestDetailModal.tsx - React组件
+ * 
+ * 文件路径: frontend\components\stress\StressTestDetailModal.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Copy, Download, ExternalLink, Settings, TrendingUp, Users, X, XCircle, Zap } from 'lucide-react';
 import React from 'react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
@@ -61,6 +68,11 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
   };
 
   const calculateTestCompletion = (record: any) => {
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     if (!record || record.status === 'completed') return 100;
     if (record.status === 'failed' || record.status === 'cancelled') {
       const actualDuration = record.duration || 0;
@@ -590,6 +602,11 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
 
 
 
+  /**
+   * 处理modalContent事件
+   * @param {Object} event - 事件对象
+   * @returns {Promise<void>}
+   */
   // 使用React Portal确保模态窗口渲染到document.body，避免父容器样式影响
   const modalContent = (
     <div className="stress-test-modal-container">

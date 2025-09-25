@@ -12,8 +12,6 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('🧪 Test-Web 功能完整性测试');
-console.log('=' .repeat(60));
 
 // 测试配置
 const config = {
@@ -84,7 +82,6 @@ function checkFileExists(filePath, description) {
  * 测试核心测试工具页面
  */
 function testCoreTestPages() {
-  console.log('\n📄 检查核心测试工具页面...');
   
   const corePages = [
     { file: 'frontend/pages/WebsiteTest.tsx', name: '网站综合测试' },
@@ -117,7 +114,6 @@ function testCoreTestPages() {
  * 测试业务组件
  */
 function testBusinessComponents() {
-  console.log('\n🧩 检查业务组件...');
   
   const businessComponents = [
     { file: 'frontend/components/business/TestRunner.tsx', name: 'TestRunner 测试运行器' },
@@ -144,7 +140,6 @@ function testBusinessComponents() {
  * 测试后端API路由
  */
 function testBackendAPIs() {
-  console.log('\n🔌 检查后端API实现...');
   
   const apiRoutes = [
     { file: 'backend/routes/auth.js', name: '认证API' },
@@ -175,7 +170,6 @@ function testBackendAPIs() {
  * 测试测试引擎
  */
 function testEngines() {
-  console.log('\n⚙️ 检查测试引擎...');
   
   const engines = [
     { file: 'backend/engines/apiTestEngine.js', name: 'API测试引擎' },
@@ -206,7 +200,6 @@ function testEngines() {
  * 测试数据流功能
  */
 function testDataFlow() {
-  console.log('\n💾 检查数据流功能...');
   
   const dataFeatures = [
     { file: 'backend/services/DataManagementService.js', name: '数据管理服务' },
@@ -234,7 +227,6 @@ function testDataFlow() {
  * 测试用户体验功能
  */
 function testUserExperience() {
-  console.log('\n🎨 检查用户体验功能...');
   
   const uxFeatures = [
     { file: 'frontend/components/ui/LoadingSpinner.tsx', name: '加载状态组件' },
@@ -262,47 +254,36 @@ function testUserExperience() {
  * 生成测试报告
  */
 function generateReport(results) {
-  console.log('\n' + '='.repeat(60));
   console.log('📊 功能完整性测试报告');
-  console.log('='.repeat(60));
   
   // 计算总体完整度
   const totalItems = results.reduce((sum, r) => sum + r.total, 0);
   const implementedItems = results.reduce((sum, r) => sum + r.implemented, 0);
   const overallPercentage = Math.round((implementedItems / totalItems) * 100);
   
-  console.log('\n📈 各模块完整度：');
   results.forEach(result => {
     const status = result.percentage >= 80 ? '🟢' : result.percentage >= 60 ? '🟡' : '🔴';
-    console.log(`${status} ${result.name}: ${result.implemented}/${result.total} (${result.percentage}%)`);
   });
   
-  console.log('\n📊 总体统计：');
   console.log(`✅ 通过测试: ${testResults.passed.length}`);
   console.log(`⚠️  警告: ${testResults.warnings.length}`);
   console.log(`❌ 失败: ${testResults.failed.length}`);
   
-  console.log('\n🎯 整体完整度: ' + overallPercentage + '%');
   
   if (overallPercentage >= 90) {
-    console.log('✨ 优秀！项目功能实现非常完整');
   } else if (overallPercentage >= 75) {
-    console.log('👍 良好！大部分功能已实现');
   } else if (overallPercentage >= 60) {
-    console.log('📝 尚可，但仍有较多功能需要完善');
   } else {
     console.log('⚠️  警告：许多功能尚未实现');
   }
   
   // 显示具体问题
   if (testResults.failed.length > 0) {
-    console.log('\n❌ 失败项目：');
-    testResults.failed.forEach(item => console.log('  ' + item));
+    testResults.failed.forEach(item => );
   }
   
   if (testResults.warnings.length > 0) {
-    console.log('\n⚠️  警告项目：');
-    testResults.warnings.forEach(item => console.log('  ' + item));
+    testResults.warnings.forEach(item => );
   }
   
   return overallPercentage;
@@ -312,7 +293,6 @@ function generateReport(results) {
  * 主测试函数
  */
 async function runTests() {
-  console.log('开始测试...\n');
   
   const results = [];
   
@@ -353,7 +333,6 @@ async function runTests() {
 
 // 执行测试
 runTests().then(result => {
-  console.log('\n测试完成！');
   process.exit(result.success ? 0 : 1);
 }).catch(error => {
   console.error('测试失败:', error);

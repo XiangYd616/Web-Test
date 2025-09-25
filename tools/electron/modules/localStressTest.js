@@ -37,7 +37,6 @@ class LocalStressTestEngine extends EventEmitter {
     };
     
     console.log(`🚀 本地压力测试引擎初始化完成`);
-    console.log(`💻 系统信息: ${this.systemInfo.cpus}核CPU, ${Math.round(this.systemInfo.totalMemory / 1024 / 1024 / 1024)}GB内存`);
   }
 
   /**
@@ -66,7 +65,6 @@ class LocalStressTestEngine extends EventEmitter {
       throughput: 0
     };
 
-    console.log(`🎯 开始本地压力测试: ${config.users}用户, ${config.duration}秒`);
     console.log(`📊 测试类型: ${config.testType}, 目标URL: ${config.url}`);
 
     try {
@@ -74,7 +72,6 @@ class LocalStressTestEngine extends EventEmitter {
       const optimalWorkers = this.calculateOptimalWorkers(config.users);
       const usersPerWorker = Math.ceil(config.users / optimalWorkers);
 
-      console.log(`⚡ 创建 ${optimalWorkers} 个Worker进程，每个处理 ${usersPerWorker} 个用户`);
 
       // 创建Worker进程
       for (let i = 0; i < optimalWorkers; i++) {
@@ -190,7 +187,6 @@ class LocalStressTestEngine extends EventEmitter {
         console.log(`✅ Worker ${data.workerId} 准备就绪`);
         break;
       case 'worker_finished':
-        console.log(`🏁 Worker ${data.workerId} 完成测试`);
         break;
       case 'error':
         this.results.errors.push({
@@ -242,7 +238,6 @@ class LocalStressTestEngine extends EventEmitter {
   async stopTest() {
     if (!this.isRunning) return;
 
-    console.log('🛑 停止本地压力测试...');
     this.isRunning = false;
     this.results.endTime = Date.now();
 

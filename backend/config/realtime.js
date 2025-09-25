@@ -22,7 +22,7 @@ class RealtimeConfig {
           cors: {
             origin: process.env.CORS_ORIGINS?.split(',') || [
               "http://localhost:5174",
-              "http://localhost:3001",
+              "http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}",
               "http://127.0.0.1:5174",
               "http://127.0.0.1:3001"
             ],
@@ -342,7 +342,6 @@ class RealtimeConfig {
    */
   async restart(server, redisClient, cacheManager) {
     try {
-      console.log('🔄 重启实时通信系统...');
       
       // 关闭现有服务
       await this.shutdown();
@@ -364,7 +363,6 @@ class RealtimeConfig {
    */
   async shutdown() {
     try {
-      console.log('🔌 关闭实时通信系统...');
       
       // 清理定时任务
       if (this.cleanupInterval) {

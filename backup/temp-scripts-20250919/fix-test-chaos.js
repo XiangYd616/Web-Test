@@ -12,7 +12,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 console.log('🔧 开始修复测试工具混乱问题');
-console.log('='.repeat(60));
 
 const fixes = {
   renamed: [],
@@ -26,7 +25,6 @@ const fixes = {
  * 修复重复的网络测试引擎
  */
 async function fixDuplicateNetworkEngine() {
-  console.log('\n🔄 修复重复的Network测试引擎...');
   
   const apiNetworkEngine = path.join(__dirname, '..', 'backend', 'engines', 'api', 'networkTestEngine.js');
   const networkEngine = path.join(__dirname, '..', 'backend', 'engines', 'network', 'EnhancedNetworkTestEngine.js');
@@ -37,7 +35,6 @@ async function fixDuplicateNetworkEngine() {
       // 删除api文件夹中的networkTestEngine
       fs.unlinkSync(apiNetworkEngine);
       fixes.deleted.push('api/networkTestEngine.js');
-      console.log('  ✅ 删除了 api/networkTestEngine.js');
       
       // 重命名network文件夹中的引擎
       const newNetworkEngine = path.join(__dirname, '..', 'backend', 'engines', 'network', 'NetworkTestEngine.js');
@@ -46,7 +43,6 @@ async function fixDuplicateNetworkEngine() {
         from: 'network/EnhancedNetworkTestEngine.js',
         to: 'network/NetworkTestEngine.js'
       });
-      console.log('  ✅ 重命名 EnhancedNetworkTestEngine.js 为 NetworkTestEngine.js');
     }
   } catch (error) {
     fixes.errors.push(`修复Network引擎失败: ${error.message}`);
@@ -57,7 +53,6 @@ async function fixDuplicateNetworkEngine() {
  * 修复API测试引擎
  */
 async function fixApiTestEngine() {
-  console.log('\n🔧 修复API测试引擎...');
   
   const apiEngine = path.join(__dirname, '..', 'backend', 'engines', 'api', 'apiTestEngine.js');
   const newApiEngine = path.join(__dirname, '..', 'backend', 'engines', 'api', 'ApiTestEngine.js');
@@ -69,7 +64,6 @@ async function fixApiTestEngine() {
         from: 'api/apiTestEngine.js',
         to: 'api/ApiTestEngine.js'
       });
-      console.log('  ✅ 重命名 apiTestEngine.js 为 ApiTestEngine.js');
     }
   } catch (error) {
     fixes.errors.push(`修复API引擎失败: ${error.message}`);
@@ -80,7 +74,6 @@ async function fixApiTestEngine() {
  * 修复命名不规范的测试引擎
  */
 async function fixNamingConventions() {
-  console.log('\n📝 修复命名规范...');
   
   const renamings = [
     { 
@@ -143,7 +136,6 @@ async function fixNamingConventions() {
           from: `${rename.folder}/${rename.from}`,
           to: `${rename.folder}/${rename.to}`
         });
-        console.log(`  ✅ 重命名 ${rename.from} 为 ${rename.to}`);
       }
     } catch (error) {
       fixes.errors.push(`重命名 ${rename.from} 失败: ${error.message}`);
@@ -155,7 +147,6 @@ async function fixNamingConventions() {
  * 更新index.js文件中的引用
  */
 async function updateIndexFiles() {
-  console.log('\n📄 更新index.js文件引用...');
   
   const indexUpdates = [
     { folder: 'api', oldName: 'apiTestEngine', newName: 'ApiTestEngine' },
@@ -179,7 +170,6 @@ async function updateIndexFiles() {
         if (content.includes(oldRequire)) {
           content = content.replace(oldRequire, newRequire);
           fs.writeFileSync(indexPath, content);
-          console.log(`  ✅ 更新 ${update.folder}/index.js`);
         }
       }
     } catch (error) {
@@ -192,7 +182,6 @@ async function updateIndexFiles() {
  * 创建缺失的content测试引擎
  */
 async function createContentTestEngine() {
-  console.log('\n➕ 创建缺失的Content测试引擎...');
   
   const contentEngineContent = `/**
  * 内容测试引擎
@@ -233,7 +222,6 @@ module.exports = ContentTestEngine;`;
     if (!fs.existsSync(contentEnginePath)) {
       fs.writeFileSync(contentEnginePath, contentEngineContent);
       fixes.created.push('content/ContentTestEngine.js');
-      console.log('  ✅ 创建了 ContentTestEngine.js');
     }
   } catch (error) {
     fixes.errors.push(`创建ContentTestEngine失败: ${error.message}`);
@@ -244,7 +232,6 @@ module.exports = ContentTestEngine;`;
  * 修复前端页面命名
  */
 async function fixFrontendPageNames() {
-  console.log('\n🎨 检查前端页面命名...');
   
   // UnifiedStressTest.tsx 应该重命名为 StressTest.tsx
   const oldStressPage = path.join(__dirname, '..', 'frontend', 'pages', 'UnifiedStressTest.tsx');
@@ -257,7 +244,6 @@ async function fixFrontendPageNames() {
         from: 'frontend/pages/UnifiedStressTest.tsx',
         to: 'frontend/pages/StressTest.tsx'
       });
-      console.log('  ✅ 重命名 UnifiedStressTest.tsx 为 StressTest.tsx');
     }
   } catch (error) {
     fixes.errors.push(`重命名前端页面失败: ${error.message}`);
@@ -268,51 +254,37 @@ async function fixFrontendPageNames() {
  * 生成修复报告
  */
 function generateReport() {
-  console.log('\n' + '='.repeat(60));
   console.log('📊 修复报告');
-  console.log('='.repeat(60));
 
-  console.log('\n✅ 成功的修复:');
   
   if (fixes.renamed.length > 0) {
-    console.log('\n📝 重命名的文件:');
     fixes.renamed.forEach(item => {
-      console.log(`  - ${item.from} → ${item.to}`);
     });
   }
 
   if (fixes.moved.length > 0) {
-    console.log('\n📦 移动的文件:');
     fixes.moved.forEach(item => {
-      console.log(`  - ${item}`);
     });
   }
 
   if (fixes.deleted.length > 0) {
-    console.log('\n🗑️ 删除的文件:');
     fixes.deleted.forEach(item => {
-      console.log(`  - ${item}`);
     });
   }
 
   if (fixes.created.length > 0) {
-    console.log('\n➕ 创建的文件:');
     fixes.created.forEach(item => {
-      console.log(`  - ${item}`);
     });
   }
 
   if (fixes.errors.length > 0) {
-    console.log('\n❌ 错误:');
     fixes.errors.forEach(error => {
-      console.log(`  - ${error}`);
     });
   }
 
   const totalFixes = fixes.renamed.length + fixes.moved.length + 
                      fixes.deleted.length + fixes.created.length;
   
-  console.log(`\n📈 总计: ${totalFixes} 个修复, ${fixes.errors.length} 个错误`);
 }
 
 /**
@@ -333,7 +305,6 @@ function saveFixLog() {
   };
   
   fs.writeFileSync(logPath, JSON.stringify(logContent, null, 2));
-  console.log(`\n💾 修复日志已保存到: ${logPath}`);
 }
 
 /**
@@ -353,8 +324,6 @@ async function main() {
     generateReport();
     saveFixLog();
     
-    console.log('\n✨ 修复完成！');
-    console.log('建议运行 npm run test 验证修复结果');
     
   } catch (error) {
     console.error('❌ 修复过程中出错:', error);

@@ -8,7 +8,7 @@ const axios = require('axios');
 class HTTPClient {
   constructor(options = {}) {
     this.options = {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       maxRedirects: 5,
       ...options
     };

@@ -80,7 +80,6 @@ const performanceFix = `
    */
   async runWebsiteTest(url, config = {}) {
     try {
-      console.log('🌐 Running website test for:', url);
       
       const result = {
         success: true,
@@ -137,7 +136,6 @@ function fixApiAnalyzer() {
       fs.writeFileSync(filePath, content);
       console.log('✅ Fixed ApiAnalyzer.js');
     } else {
-      console.log('ℹ️ ApiAnalyzer.js already has the methods');
     }
   } catch (error) {
     console.error('❌ Failed to fix ApiAnalyzer.js:', error.message);
@@ -155,7 +153,6 @@ function fixSecurityEngine() {
   async runSecurityTest(config) {
     try {
       const url = config.url || config;
-      console.log('🔒 Running security test for:', url);
       
       const result = {
         url,
@@ -219,7 +216,6 @@ function fixSecurityEngine() {
       fs.writeFileSync(filePath, content);
       console.log('✅ Fixed SecurityTestEngine.js');
     } else {
-      console.log('ℹ️ SecurityTestEngine.js already has the methods');
     }
   } catch (error) {
     console.error('❌ Failed to fix SecurityTestEngine.js:', error.message);
@@ -236,7 +232,6 @@ function fixCompatibilityEngine() {
    */
   async runCompatibilityTest(url, options = {}) {
     try {
-      console.log('🌐 Running compatibility test for:', url);
       
       const result = {
         success: true,
@@ -288,7 +283,6 @@ function fixCompatibilityEngine() {
       fs.writeFileSync(filePath, content);
       console.log('✅ Fixed CompatibilityTestEngine.js');
     } else {
-      console.log('ℹ️ CompatibilityTestEngine.js already has the methods');
     }
   } catch (error) {
     console.error('❌ Failed to fix CompatibilityTestEngine.js:', error.message);
@@ -305,7 +299,6 @@ function fixApiTestEngine() {
    */
   async runAPITest(config) {
     try {
-      console.log('🔌 Running API test');
       
       const result = {
         success: true,
@@ -368,7 +361,6 @@ function fixApiTestEngine() {
       fs.writeFileSync(filePath, content);
       console.log('✅ Fixed ApiTestEngine.js');
     } else {
-      console.log('ℹ️ ApiTestEngine.js already has the methods');
     }
   } catch (error) {
     console.error('❌ Failed to fix ApiTestEngine.js:', error.message);
@@ -385,7 +377,6 @@ function fixUxEngine() {
    */
   async runUXTest(url, options = {}) {
     try {
-      console.log('👤 Running UX test for:', url);
       
       const result = {
         success: true,
@@ -446,7 +437,6 @@ function fixUxEngine() {
       fs.writeFileSync(filePath, content);
       console.log('✅ Fixed UXAnalyzer.js');
     } else {
-      console.log('ℹ️ UXAnalyzer.js already has the methods');
     }
   } catch (error) {
     console.error('❌ Failed to fix UXAnalyzer.js:', error.message);
@@ -456,7 +446,6 @@ function fixUxEngine() {
 // 运行所有修复
 async function runFixes() {
   console.log('🔧 Starting engine fixes...');
-  console.log('================================');
   
   fixApiAnalyzer();
   fixSecurityEngine();
@@ -464,7 +453,6 @@ async function runFixes() {
   fixApiTestEngine();
   fixUxEngine();
   
-  console.log('================================');
   console.log('✅ Engine fixes completed!');
 }
 

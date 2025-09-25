@@ -144,6 +144,21 @@ router.get('/task/:taskId/status',
             const userId = req.user.id;
             const taskId = req.params.taskId;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await req.importService.getTaskStatus(taskId, userId);
 
             if (!result.success) {
@@ -169,6 +184,21 @@ router.get('/task/:taskId/preview',
             const userId = req.user.id;
             const taskId = req.params.taskId;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await req.importService.getTaskStatus(taskId, userId);
 
             if (!result.success) {
@@ -176,6 +206,16 @@ router.get('/task/:taskId/preview',
         return res.status(404).json(formatResponse(false, null, result.error));
       }
 
+
+            /**
+
+             * if功能函数
+
+             * @param {Object} params - 参数对象
+
+             * @returns {Promise<Object>} 返回结果
+
+             */
             const previewData = result.data.previewData;
             if (!previewData) {
                 
@@ -200,6 +240,21 @@ router.post('/task/:taskId/start',
             const userId = req.user.id;
             const taskId = req.params.taskId;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await req.importService.startImport(taskId, userId);
 
             if (!result.success) {
@@ -251,6 +306,21 @@ router.post('/task/:taskId/cancel',
             const userId = req.user.id;
             const taskId = req.params.taskId;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await req.importService.cancelTask(taskId, userId);
 
             if (!result.success) {
@@ -378,6 +448,16 @@ router.get('/mapping-template/:dataType',
                 }
             };
 
+
+            /**
+
+             * if功能函数
+
+             * @param {Object} params - 参数对象
+
+             * @returns {Promise<Object>} 返回结果
+
+             */
             const template = templates[dataType];
             if (!template) {
                 

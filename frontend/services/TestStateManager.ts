@@ -1,3 +1,10 @@
+/**
+ * TestStateManager.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\TestStateManager.ts
+ * 创建时间: 2025-09-25
+ */
+
 
 
 export enum TestState {
@@ -410,6 +417,11 @@ export class TestStateManager {
   onDataUpdate(listener: (dataPoint: TestDataPoint) => void): () => void {
     this.dataUpdateListeners.push(listener);
     return () => {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const index = this.dataUpdateListeners.indexOf(listener);
       if (index > -1) {
         this.dataUpdateListeners.splice(index, 1);
@@ -420,6 +432,11 @@ export class TestStateManager {
   onMetricsUpdate(listener: (metrics: RealTimeMetrics) => void): () => void {
     this.metricsUpdateListeners.push(listener);
     return () => {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const index = this.metricsUpdateListeners.indexOf(listener);
       if (index > -1) {
         this.metricsUpdateListeners.splice(index, 1);
@@ -498,7 +515,6 @@ export class TestStateManager {
 
   private log(message: string): void {
     if (this.config_.enableLogging) {
-      console.log(`[TestStateManager] ${message}`);
     }
   }
 

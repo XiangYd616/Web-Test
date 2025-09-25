@@ -81,7 +81,7 @@ export interface UnifiedApiConfig {
 
 export const DEFAULT_API_CONFIG: UnifiedApiConfig = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
-  timeout: 30000,
+  timeout: process.env.REQUEST_TIMEOUT || 30000,
   version: 'v3.0',
   
   cache: {
@@ -165,7 +165,7 @@ export const DEVELOPMENT_API_CONFIG: Partial<UnifiedApiConfig> = {
 
 export const PRODUCTION_API_CONFIG: Partial<UnifiedApiConfig> = {
   enableDebugLogging: false,
-  timeout: 30000,
+  timeout: process.env.REQUEST_TIMEOUT || 30000,
   cache: {
     ...DEFAULT_API_CONFIG.cache,
     enabled: true,

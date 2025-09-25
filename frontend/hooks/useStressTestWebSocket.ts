@@ -1,3 +1,10 @@
+/**
+ * useStressTestWebSocket.ts - 核心功能模块
+ * 
+ * 文件路径: frontend\hooks\useStressTestWebSocket.ts
+ * 创建时间: 2025-09-25
+ */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { websocketManager, ConnectionStatus, WebSocketMessage } from '../services/websocketManager';
 
@@ -97,6 +104,11 @@ export const useStressTestWebSocket = (
     }
   }, [onProgress]);
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const handleStatusMessage = useCallback((message: WebSocketMessage) => {
     if (message.type === 'test_status_update' && message.data) {
       const status: StressTestStatus = {
@@ -111,6 +123,11 @@ export const useStressTestWebSocket = (
     }
   }, [onStatusChange]);
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const handleCompleteMessage = useCallback((message: WebSocketMessage) => {
     if (message.type === 'test_completed' && message.data) {
       const result: StressTestResult = {
@@ -124,6 +141,11 @@ export const useStressTestWebSocket = (
     }
   }, [onComplete]);
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const handleErrorMessage = useCallback((message: WebSocketMessage) => {
     if (message.type === 'test_error' && message.data) {
       onError?.(message.data);
@@ -174,7 +196,6 @@ export const useStressTestWebSocket = (
 
     if (success) {
       subscribedTestsRef.current.add(testId);
-      console.log(`📡 已订阅测试: ${testId}`);
     } else {
       console.warn(`❌ 订阅测试失败: ${testId}`);
     }
@@ -194,7 +215,6 @@ export const useStressTestWebSocket = (
 
     if (success) {
       subscribedTestsRef.current.delete(testId);
-      console.log(`📡 已取消订阅测试: ${testId}`);
     } else {
       console.warn(`❌ 取消订阅测试失败: ${testId}`);
     }

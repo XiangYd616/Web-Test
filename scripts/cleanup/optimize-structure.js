@@ -22,7 +22,6 @@ class StructureOptimizer {
    * 执行结构优化
    */
   async optimize() {
-    console.log('🏗️  开始项目结构优化...\n');
 
     // 1. 统一测试引擎架构
     await this.unifyEngineArchitecture();
@@ -42,7 +41,6 @@ class StructureOptimizer {
     // 6. 生成优化报告
     await this.generateOptimizationReport();
 
-    console.log('\n✅ 项目结构优化完成！');
   }
 
   /**
@@ -100,7 +98,6 @@ class StructureOptimizer {
     const restructurePlan = this.generateEngineRestructurePlan(currentEngines, targetStructure);
     
     this.optimizations.engines = restructurePlan;
-    console.log(`   计划重构 ${restructurePlan.length} 个引擎`);
   }
 
   /**
@@ -195,7 +192,6 @@ class StructureOptimizer {
    * 统一API路由结构
    */
   async unifyRouteStructure() {
-    console.log('🛣️  统一API路由结构...');
 
     const targetStructure = {
       'backend/routes/': [
@@ -217,7 +213,6 @@ class StructureOptimizer {
     const routePlan = this.generateRouteRestructurePlan(currentRoutes, targetStructure);
     
     this.optimizations.routes = routePlan;
-    console.log(`   计划重构 ${routePlan.length} 个路由`);
   }
 
   /**
@@ -340,7 +335,6 @@ class StructureOptimizer {
    * 统一前端组件架构
    */
   async unifyComponentArchitecture() {
-    console.log('🎨 统一前端组件架构...');
 
     const targetStructure = {
       'frontend/components/': {
@@ -375,7 +369,6 @@ class StructureOptimizer {
     const componentPlan = this.generateComponentRestructurePlan(currentComponents, targetStructure);
     
     this.optimizations.components = componentPlan;
-    console.log(`   计划重构 ${componentPlan.length} 个组件`);
   }
 
   /**
@@ -553,7 +546,6 @@ class StructureOptimizer {
    * 统一服务层架构
    */
   async unifyServiceArchitecture() {
-    console.log('⚙️  统一服务层架构...');
 
     const targetStructure = {
       'frontend/services/': {
@@ -586,7 +578,6 @@ class StructureOptimizer {
     const servicePlan = this.generateServiceRestructurePlan(currentServices, targetStructure);
     
     this.optimizations.services = servicePlan;
-    console.log(`   计划重构 ${servicePlan.length} 个服务`);
   }
 
   /**
@@ -712,13 +703,11 @@ class StructureOptimizer {
    * 统一配置管理
    */
   async unifyConfigManagement() {
-    console.log('⚙️  统一配置管理...');
 
     const configFiles = this.scanConfigFiles();
     const configPlan = this.generateConfigOptimizationPlan(configFiles);
     
     this.optimizations.configs = configPlan;
-    console.log(`   计划优化 ${configPlan.length} 个配置`);
   }
 
   /**
@@ -852,8 +841,6 @@ class StructureOptimizer {
     const reportPath = path.join(this.projectRoot, 'structure-optimization-report.json');
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
-    console.log(`   优化报告已保存到: ${reportPath}`);
-    console.log(`   发现 ${report.summary.totalOptimizations} 个优化项`);
   }
 
   /**

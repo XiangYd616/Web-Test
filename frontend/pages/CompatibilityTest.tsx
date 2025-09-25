@@ -247,7 +247,7 @@ const CompatibilityTest: React.FC = () => {
         checkSemanticHTML: true,
       },
       minMarketShare: 1.0,
-      timeout: 300000
+      timeout: process.env.REQUEST_TIMEOUT || 300000
     }
   });
 

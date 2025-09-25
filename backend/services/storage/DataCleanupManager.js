@@ -116,7 +116,6 @@ class DataCleanupManager {
   initializeScheduler() {
     // 每天凌晨1点执行清理任务
     cron.schedule('0 1 * * *', async () => {
-      console.log('🧹 开始执行定时清理任务...');
       await this.runScheduledCleanup();
     });
 
@@ -127,11 +126,9 @@ class DataCleanupManager {
 
     // 每周日凌晨4点执行深度清理
     cron.schedule('0 4 * * 0', async () => {
-      console.log('🧹 开始执行深度清理任务...');
       await this.runDeepCleanup();
     });
 
-    console.log('📅 数据清理调度器已启动');
   }
 
   /**
@@ -203,11 +200,9 @@ class DataCleanupManager {
    * 清理特定引擎的数据
    */
   async cleanupEngineData(engineType) {
-    console.log(`🧹 开始清理 ${engineType} 引擎数据...`);
 
     const policy = this.config.retentionPolicies[engineType];
     if (!policy) {
-      console.log(`   ⚠️ 未找到 ${engineType} 的清理策略`);
       return;
     }
 
@@ -244,7 +239,6 @@ class DataCleanupManager {
       this.statistics.totalSizeFreed += totalSizeFreed;
       this.statistics.cleanupCount += 1;
 
-      console.log(`   ✅ ${engineType} 清理完成: 删除 ${totalCleaned} 条记录, 释放 ${this.formatSize(totalSizeFreed)} 空间`);
 
     } catch (error) {
       console.error(`   ❌ ${engineType} 清理失败:`, error);
@@ -266,7 +260,6 @@ class DataCleanupManager {
 
     // 这里应该查询数据库获取过期数据
     // 简化实现，实际应该连接数据库
-    console.log(`   🔍 查询 ${engineType} 在 ${coldDataCutoff.toISOString()} 之前的过期数据...`);
 
     // 实际实现应该是：
     // const query = `
@@ -287,7 +280,6 @@ class DataCleanupManager {
    */
   async getExcessData(engineType, policy) {
     // 查询超过最大记录数的数据
-    console.log(`   🔍 查询 ${engineType} 超过 ${policy.maxRecords} 条记录的超量数据...`);
 
     // 实际实现应该是：
     // const query = `
@@ -308,7 +300,6 @@ class DataCleanupManager {
    */
   async getCorruptedData(engineType) {
     // 查询损坏或无效的数据
-    console.log(`   🔍 查询 ${engineType} 的损坏数据...`);
 
     // 实际实现应该是：
     // const query = `
@@ -333,7 +324,6 @@ class DataCleanupManager {
    */
   async cleanupExpiredData(expiredData) {
     if (this.config.dryRun) {
-      console.log(`   🔍 [DRY RUN] 将删除 ${expiredData.length} 条过期数据`);
       return { count: 0, size: 0 };
     }
 
@@ -356,7 +346,6 @@ class DataCleanupManager {
       }
     }
 
-    console.log(`   🗑️ 删除了 ${cleanedCount} 条过期数据`);
     return { count: cleanedCount, size: freedSize };
   }
 
@@ -365,7 +354,6 @@ class DataCleanupManager {
    */
   async cleanupExcessData(excessData) {
     if (this.config.dryRun) {
-      console.log(`   🔍 [DRY RUN] 将删除 ${excessData.length} 条超量数据`);
       return { count: 0, size: 0 };
     }
 
@@ -390,7 +378,6 @@ class DataCleanupManager {
       }
     }
 
-    console.log(`   🗑️ 删除了 ${cleanedCount} 条超量数据`);
     return { count: cleanedCount, size: freedSize };
   }
 
@@ -399,7 +386,6 @@ class DataCleanupManager {
    */
   async cleanupCorruptedData(corruptedData) {
     if (this.config.dryRun) {
-      console.log(`   🔍 [DRY RUN] 将删除 ${corruptedData.length} 条损坏数据`);
       return { count: 0, size: 0 };
     }
 
@@ -419,7 +405,6 @@ class DataCleanupManager {
       }
     }
 
-    console.log(`   🗑️ 删除了 ${cleanedCount} 条损坏数据`);
     return { count: cleanedCount, size: freedSize };
   }
 
@@ -431,7 +416,6 @@ class DataCleanupManager {
     // await db.query('DELETE FROM test_results WHERE session_id = ?', [testId]);
     // await db.query('DELETE FROM test_sessions WHERE id = ?', [testId]);
     
-    console.log(`     🗑️ 删除测试记录: ${testId}`);
   }
 
   /**
@@ -488,7 +472,6 @@ class DataCleanupManager {
    * 运行紧急清理
    */
   async runEmergencyCleanup() {
-    console.log('🚨 执行紧急清理...');
 
     // 紧急清理策略：更激进的清理参数
     const emergencyPolicies = { ...this.config.retentionPolicies };
@@ -516,7 +499,6 @@ class DataCleanupManager {
    * 清理孤立文件
    */
   async cleanupOrphanedFiles() {
-    console.log('🧹 清理孤立文件...');
     // 实现孤立文件清理逻辑
   }
 
@@ -524,7 +506,6 @@ class DataCleanupManager {
    * 清理临时文件
    */
   async cleanupTempFiles() {
-    console.log('🧹 清理临时文件...');
     // 实现临时文件清理逻辑
   }
 
@@ -540,7 +521,6 @@ class DataCleanupManager {
    * 清理日志文件
    */
   async cleanupLogFiles() {
-    console.log('🧹 清理日志文件...');
     // 实现日志文件清理逻辑
   }
 
@@ -594,7 +574,6 @@ class DataCleanupManager {
    * 停止清理管理器
    */
   async shutdown() {
-    console.log('🔄 关闭数据清理管理器...');
     this.isRunning = false;
     console.log('✅ 数据清理管理器已关闭');
   }

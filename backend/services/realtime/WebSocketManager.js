@@ -102,7 +102,6 @@ class WebSocketManager extends EventEmitter {
     // 存储连接
     this.connections.set(connectionId, connection);
 
-    console.log(`🔌 新连接: ${connectionId} from ${clientIP}`);
 
     // 设置消息处理
     ws.on('message', async (data) => {
@@ -161,7 +160,6 @@ class WebSocketManager extends EventEmitter {
       const message = JSON.parse(data.toString());
       const { type, data: messageData, id: messageId } = message;
 
-      console.log(`📨 收到消息: ${connectionId} -> ${type}`);
 
       // 应用中间件
       for (const middleware of this.middlewares) {
@@ -281,7 +279,6 @@ class WebSocketManager extends EventEmitter {
         id: messageId
       });
 
-      console.log(`🔐 连接 ${connectionId} 认证成功: ${decoded.username}`);
       this.emit('user_authenticated', { connectionId, user: decoded });
     } catch (error) {
       console.error(`认证失败 ${connectionId}:`, error);
@@ -322,7 +319,6 @@ class WebSocketManager extends EventEmitter {
       id: messageId
     });
 
-    console.log(`📡 连接 ${connectionId} 订阅频道: ${channel}`);
     this.emit('channel_subscribed', { connectionId, channel, filters });
   }
 
@@ -357,7 +353,6 @@ class WebSocketManager extends EventEmitter {
       id: messageId
     });
 
-    console.log(`📡 连接 ${connectionId} 取消订阅频道: ${channel}`);
     this.emit('channel_unsubscribed', { connectionId, channel });
   }
 
@@ -436,7 +431,6 @@ class WebSocketManager extends EventEmitter {
       }
     }, [connectionId]);
 
-    console.log(`🏠 连接 ${connectionId} 加入房间: ${room}`);
     this.emit('room_joined', { connectionId, room, memberCount: roomData.members.size });
   }
 
@@ -487,10 +481,8 @@ class WebSocketManager extends EventEmitter {
     } else {
       // 如果房间为空，删除房间
       this.rooms.delete(room);
-      console.log(`🗑️ 删除空房间: ${room}`);
     }
 
-    console.log(`🚪 连接 ${connectionId} 离开房间: ${room}`);
     this.emit('room_left', { connectionId, room, memberCount: roomData.members.size });
   }
 
@@ -551,7 +543,6 @@ class WebSocketManager extends EventEmitter {
       id: messageId
     });
 
-    console.log(`💬 房间消息: ${room} <- ${connection.user?.username || 'Anonymous'}`);
     this.emit('room_message_sent', { connectionId, room, message: messageData });
   }
 
@@ -566,6 +557,16 @@ class WebSocketManager extends EventEmitter {
 
     const onlineUsers = [];
     
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
     for (const [userId, connections] of this.userConnections.entries()) {
       if (connections.size > 0) {
         // 获取用户的第一个连接来获取用户信息
@@ -603,7 +604,6 @@ class WebSocketManager extends EventEmitter {
     const connection = this.connections.get(connectionId);
     if (!connection) return;
 
-    console.log(`🔌 连接断开: ${connectionId} (${code}: ${reason})`);
 
     // 从用户连接映射中移除
     if (connection.user) {
@@ -828,7 +828,6 @@ class WebSocketManager extends EventEmitter {
     }
 
     if (staleConnections.length > 0) {
-      console.log(`💓 心跳检查: 断开 ${staleConnections.length} 个超时连接`);
     }
   }
 
@@ -900,7 +899,6 @@ class WebSocketManager extends EventEmitter {
    * 优雅关闭
    */
   async shutdown() {
-    console.log('🔌 正在关闭WebSocket服务...');
     
     // 通知所有客户端
     this.broadcastToAll({

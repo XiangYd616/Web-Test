@@ -37,7 +37,7 @@ app.use('/api/', limiter);
 // 创建axios实例，配置更好的请求头
 const createAxiosInstance = () => {
   return axios.create({
-    timeout: 30000, // 30秒超时
+    timeout: process.env.REQUEST_TIMEOUT || 30000, // 30秒超时
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -104,7 +104,6 @@ app.post('/api/seo/fetch-page', async (req, res) => {
       });
     }
     
-    console.log(`📡 开始获取页面: ${cleanedUrl}`);
     
     const axiosInstance = createAxiosInstance();
     const response = await axiosInstance.get(cleanedUrl);
@@ -182,7 +181,6 @@ app.post('/api/seo/fetch-robots', async (req, res) => {
     }
     
     const robotsUrl = `${baseUrl}/robots.txt`;
-    console.log(`🤖 获取robots.txt: ${robotsUrl}`);
     
     const axiosInstance = createAxiosInstance();
     const response = await axiosInstance.get(robotsUrl);
@@ -223,7 +221,6 @@ app.post('/api/seo/fetch-sitemap', async (req, res) => {
       });
     }
     
-    console.log(`🗺️ 获取sitemap: ${sitemapUrl}`);
     
     const axiosInstance = createAxiosInstance();
     const response = await axiosInstance.get(sitemapUrl);
@@ -295,18 +292,14 @@ app.use('*', (req, res) => {
 // 启动服务器
 app.listen(PORT, () => {
   console.log(`🚀 SEO API服务已启动`);
-  console.log(`📡 服务地址: http://localhost:${PORT}`);
   console.log(`🔍 健康检查: http://localhost:${PORT}/api/health`);
-  console.log(`⏰ 启动时间: ${new Date().toLocaleString()}`);
 });
 
 // 优雅关闭
 process.on('SIGTERM', () => {
-  console.log('🛑 收到SIGTERM信号，正在关闭服务器...');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('🛑 收到SIGINT信号，正在关闭服务器...');
   process.exit(0);
 });

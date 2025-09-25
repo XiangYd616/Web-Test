@@ -804,6 +804,21 @@ class AlertService extends EventEmitter {
         RETURNING id
       `;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await this.dbPool.query(query, [alertId, userId]);
 
             if (result.rows.length > 0) {
@@ -838,6 +853,21 @@ class AlertService extends EventEmitter {
         RETURNING id
       `;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await this.dbPool.query(query, [alertId, userId]);
 
             if (result.rows.length > 0) {
@@ -869,6 +899,21 @@ class AlertService extends EventEmitter {
         RETURNING id
       `;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await this.dbPool.query(query, [alertId, userId]);
 
             if (result.rows.length > 0) {
@@ -1014,6 +1059,21 @@ class AlertService extends EventEmitter {
         WHERE id = $1 AND deleted_at IS NULL
       `;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await this.dbPool.query(query, [userId]);
 
             if (result.rows.length === 0) {
@@ -1043,6 +1103,21 @@ class AlertService extends EventEmitter {
         RETURNING preferences
       `;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await this.dbPool.query(query, [userId, JSON.stringify(rules)]);
 
             if (result.rows.length > 0) {

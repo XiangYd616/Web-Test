@@ -311,6 +311,11 @@ class I18nService {
         };
       }
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       let translations = this.translations.get(locale);
       if (!translations) {
         translations = {};
@@ -505,6 +510,11 @@ class I18nService {
       };
 
       for (const locale of this.supportedLocales) {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const translations = this.translations.get(locale);
         if (translations) {
           stats.locales[locale] = {

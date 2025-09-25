@@ -1,3 +1,10 @@
+/**
+ * PerformanceAnalysis.tsx - React组件
+ * 
+ * 文件路径: frontend\components\analysis\PerformanceAnalysis.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { 
@@ -246,6 +253,11 @@ const PerformanceAnalysis: React.FC = () => {
     }
   };
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const formatValue = (value: number, unit: string) => {
     if (unit === '%') {
       return `${value.toFixed(1)}${unit}`;
@@ -261,6 +273,16 @@ const PerformanceAnalysis: React.FC = () => {
 
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
+    
+    /**
+    
+     * if功能函数
+    
+     * @param {Object} params - 参数对象
+    
+     * @returns {Promise<Object>} 返回结果
+    
+     */
     const minutes = Math.floor((seconds % 3600) / 60);
     
     if (hours > 0) {

@@ -8,7 +8,6 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('🔧 开始修复路由冲突和缺失模块问题');
-console.log('='.repeat(60));
 
 // 1. 创建缺失的路由文件
 const missingRoutes = [
@@ -27,7 +26,6 @@ if (!fs.existsSync(routesDir)) {
   fs.mkdirSync(routesDir, { recursive: true });
 }
 
-console.log('\n📁 创建缺失的路由文件:');
 
 missingRoutes.forEach(routeFile => {
   const filePath = path.join(routesDir, routeFile);
@@ -109,13 +107,10 @@ module.exports = router;
     }
     
     fs.writeFileSync(filePath, content);
-    console.log(`   ✅ 创建: ${routeFile}`);
   } else {
-    console.log(`   ⚠️  已存在: ${routeFile}`);
   }
 });
 
-console.log('\n🔧 修复RouteManager中的路由冲突:');
 
 // 2. 修复RouteManager.js中的路由冲突
 const routeManagerPath = path.join(__dirname, '../src/RouteManager.js');
@@ -149,15 +144,7 @@ conflictingRoutes.forEach(({ pattern, replacement }) => {
 
 if (hasChanges) {
   fs.writeFileSync(routeManagerPath, routeManagerContent);
-  console.log('   ✅ 移除了重复的路由配置');
 } else {
-  console.log('   ℹ️  没有发现需要修复的路由冲突');
 }
 
-console.log('\n📊 修复结果:');
-console.log(`   • 创建缺失路由文件: ${missingRoutes.length}个`);
-console.log(`   • 修复路由冲突: ${hasChanges ? '是' : '否'}`);
-console.log(`   • asyncHandler中间件: 已创建`);
 
-console.log('\n🎉 路由冲突和缺失模块修复完成!');
-console.log('建议重启服务器以应用更改。');

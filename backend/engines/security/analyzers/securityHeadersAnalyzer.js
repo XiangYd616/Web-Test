@@ -32,7 +32,6 @@ class SecurityHeadersAnalyzer {
    */
   async analyze(url) {
     try {
-      console.log(`🛡️ 开始安全头分析: ${url}`);
       
       const urlObj = new URL(url);
       
@@ -128,6 +127,16 @@ class SecurityHeadersAnalyzer {
 
     Object.keys(this.securityHeaders).forEach(headerKey => {
       const headerName = this.securityHeaders[headerKey];
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const headerValue = headers[headerKey] || headers[headerKey.toLowerCase()];
 
       if (headerValue) {

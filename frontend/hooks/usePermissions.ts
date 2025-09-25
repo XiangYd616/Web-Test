@@ -57,6 +57,11 @@ export interface PermissionState {
 
 export interface PermissionActions {
   checkPermission: (resource: ResourceType, action: PermissionAction, resourceId?: string) => Promise<boolean>;
+  /**
+   * hasRole功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
   checkBatchPermissions: (checks: Array<{ resource: ResourceType; action: PermissionAction; resourceId?: string }>) => Promise<Record<string, boolean>>;
   hasRole: (roleName: string) => boolean;
   hasAnyRole: (roleNames: string[]) => boolean;

@@ -30,12 +30,10 @@ function testProviderConfigurations() {
   
   if (providers.length === 0) {
     console.log('⚠️  没有配置任何OAuth提供商');
-    console.log('💡 请检查环境变量配置，参考 .env.oauth.example');
     return false;
   }
   
   providers.forEach(provider => {
-    console.log(`  ✅ ${provider.name} (${provider.id}) - 已配置`);
   });
   
   return true;
@@ -45,7 +43,6 @@ function testProviderConfigurations() {
  * 测试授权URL生成
  */
 function testAuthUrlGeneration() {
-  console.log('\n🔗 测试授权URL生成...');
   
   const providers = oauthService.getAvailableProviders();
   
@@ -61,14 +58,10 @@ function testAuthUrlGeneration() {
       const result = oauthService.generateAuthUrl(provider.id, mockReq);
       
       if (result.authUrl && result.state) {
-        console.log(`  ✅ ${provider.name}: 授权URL生成成功`);
-        console.log(`     URL: ${result.authUrl.substring(0, 80)}...`);
       } else {
-        console.log(`  ❌ ${provider.name}: 授权URL生成失败`);
         success = false;
       }
     } catch (error) {
-      console.log(`  ❌ ${provider.name}: ${error.message}`);
       success = false;
     }
   });
@@ -80,7 +73,6 @@ function testAuthUrlGeneration() {
  * 测试State参数验证
  */
 function testStateValidation() {
-  console.log('\n🔐 测试State参数验证...');
   
   const providers = oauthService.getAvailableProviders();
   
@@ -95,14 +87,11 @@ function testStateValidation() {
   try {
     // 生成state
     const state = oauthService.generateState(testProvider, mockReq);
-    console.log(`  ✅ State生成成功 (长度: ${state.length})`);
     
     // 验证state
     const isValid = oauthService.validateState(state, testProvider, mockReq);
     if (isValid) {
-      console.log('  ✅ State验证成功');
     } else {
-      console.log('  ❌ State验证失败');
       success = false;
     }
     
@@ -110,14 +99,11 @@ function testStateValidation() {
     const invalidState = 'invalid_state';
     const isInvalid = oauthService.validateState(invalidState, testProvider, mockReq);
     if (!isInvalid) {
-      console.log('  ✅ 无效State正确拒绝');
     } else {
-      console.log('  ❌ 无效State未被拒绝');
       success = false;
     }
     
   } catch (error) {
-    console.log(`  ❌ State测试失败: ${error.message}`);
     success = false;
   }
   
@@ -128,7 +114,6 @@ function testStateValidation() {
  * 测试数据库连接
  */
 async function testDatabaseConnection() {
-  console.log('\n🗄️  测试数据库连接...');
   
   try {
     const { connectDB, query } = require('../config/database');
@@ -143,24 +128,19 @@ async function testDatabaseConnection() {
       ORDER BY table_name;
     `);
     
-    console.log(`  ✅ 数据库连接成功`);
-    console.log(`  📊 找到 ${tablesResult.rows.length}/3 个OAuth表:`);
     
     const expectedTables = ['oauth_applications', 'oauth_sessions', 'user_oauth_accounts'];
     const foundTables = tablesResult.rows.map(r => r.table_name);
     
     expectedTables.forEach(table => {
       if (foundTables.includes(table)) {
-        console.log(`    ✅ ${table} - 存在`);
       } else {
-        console.log(`    ❌ ${table} - 缺失`);
       }
     });
     
     return foundTables.length === expectedTables.length;
     
   } catch (error) {
-    console.log(`  ❌ 数据库测试失败: ${error.message}`);
     return false;
   }
 }
@@ -169,25 +149,20 @@ async function testDatabaseConnection() {
  * 测试用户名生成
  */
 async function testUsernameGeneration() {
-  console.log('\n👤 测试用户名生成...');
   
   try {
     // 测试基于名称的用户名生成
     const username1 = await oauthService.generateUniqueUsername('John Doe', 'john@example.com');
-    console.log(`  ✅ 基于姓名生成: ${username1}`);
     
     // 测试基于邮箱的用户名生成
     const username2 = await oauthService.generateUniqueUsername(null, 'test.user@domain.com');
-    console.log(`  ✅ 基于邮箱生成: ${username2}`);
     
     // 测试特殊字符处理
     const username3 = await oauthService.generateUniqueUsername('张三@#$', 'zhangsan@example.com');
-    console.log(`  ✅ 特殊字符处理: ${username3}`);
     
     return true;
     
   } catch (error) {
-    console.log(`  ❌ 用户名生成测试失败: ${error.message}`);
     return false;
   }
 }
@@ -196,32 +171,18 @@ async function testUsernameGeneration() {
  * 生成测试报告
  */
 function generateTestReport(results) {
-  console.log('\n' + '='.repeat(50));
-  console.log('📋 OAuth2 集成测试报告');
-  console.log('='.repeat(50));
   
   const totalTests = Object.keys(results).length;
   const passedTests = Object.values(results).filter(Boolean).length;
   const failedTests = totalTests - passedTests;
   
-  console.log(`总测试数: ${totalTests}`);
-  console.log(`通过测试: ${passedTests}`);
-  console.log(`失败测试: ${failedTests}`);
   
-  console.log('\n详细结果:');
   Object.entries(results).forEach(([testName, passed]) => {
     const icon = passed ? '✅' : '❌';
-    console.log(`  ${icon} ${testName}`);
   });
   
   if (passedTests === totalTests) {
-    console.log('\n🎉 所有测试通过! OAuth2集成准备就绪');
-    console.log('\n下一步:');
-    console.log('  1. 配置OAuth2提供商密钥 (.env 文件)');
-    console.log('  2. 创建前端OAuth登录组件');
-    console.log('  3. 测试完整的OAuth登录流程');
   } else {
-    console.log('\n⚠️  部分测试失败，请检查配置和实现');
   }
 }
 

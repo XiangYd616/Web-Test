@@ -1,3 +1,10 @@
+/**
+ * TechnicalResults.tsx - React组件
+ * 
+ * 文件路径: frontend\components\seo\TechnicalResults.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { AlertTriangle, CheckCircle, FileText, Info, Link, Search, XCircle } from 'lucide-react';
 import React from 'react';
 import type { FC } from 'react';
@@ -7,6 +14,11 @@ interface TechnicalResultsProps {
   results: TechnicalSEOResult;
 }
 
+  /**
+   * 获取getStatusIcon数据
+   * @param {string} id - 对象ID
+   * @returns {Promise<Object|null>} 获取的数据
+   */
 const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
   const getStatusIcon = (status: boolean | undefined, hasIssues?: boolean) => {
     if (status === undefined) return <Info className="w-5 h-5 text-gray-400" />;

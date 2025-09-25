@@ -14,7 +14,6 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 
 console.log('🔍 Test-Web 测试架构全面分析');
-console.log('='.repeat(80));
 
 // 分析结果收集
 const analysis = {
@@ -43,7 +42,6 @@ const analysis = {
 
 // 1. 分析后端测试引擎
 function analyzeBackendEngines() {
-  console.log('\n📦 分析后端测试引擎...');
   const enginesDir = path.join(projectRoot, 'backend', 'engines');
   
   if (!fs.existsSync(enginesDir)) {
@@ -128,12 +126,10 @@ function analyzeBackendEngines() {
     }
   });
 
-  console.log(`  ✓ 发现 ${engineDirs.length} 个引擎目录`);
 }
 
 // 2. 分析后端路由
 function analyzeBackendRoutes() {
-  console.log('\n📡 分析后端路由...');
   const routesDir = path.join(projectRoot, 'backend', 'routes');
   
   if (!fs.existsSync(routesDir)) {
@@ -173,12 +169,10 @@ function analyzeBackendRoutes() {
     };
   });
 
-  console.log(`  ✓ 发现 ${routeFiles.length} 个路由文件`);
 }
 
 // 3. 分析前端测试页面
 function analyzeFrontendPages() {
-  console.log('\n🖼️  分析前端测试页面...');
   const pagesDir = path.join(projectRoot, 'frontend', 'pages');
   
   if (!fs.existsSync(pagesDir)) {
@@ -236,12 +230,10 @@ function analyzeFrontendPages() {
     }
   });
 
-  console.log(`  ✓ 发现 ${pageFiles.length} 个测试页面`);
 }
 
 // 4. 分析前端组件
 function analyzeFrontendComponents() {
-  console.log('\n🧩 分析前端测试组件...');
   const componentsDir = path.join(projectRoot, 'frontend', 'components');
   
   if (!fs.existsSync(componentsDir)) {
@@ -287,12 +279,10 @@ function analyzeFrontendComponents() {
     };
   });
 
-  console.log(`  ✓ 发现 ${Object.keys(analysis.frontend.components).length} 个测试组件`);
 }
 
 // 5. 分析前端Hooks
 function analyzeFrontendHooks() {
-  console.log('\n🪝 分析前端Hooks...');
   const hooksDir = path.join(projectRoot, 'frontend', 'hooks');
   
   if (!fs.existsSync(hooksDir)) {
@@ -319,12 +309,10 @@ function analyzeFrontendHooks() {
     };
   });
 
-  console.log(`  ✓ 发现 ${hookFiles.length} 个测试相关Hooks`);
 }
 
 // 6. 检查架构一致性
 function checkArchitectureConsistency() {
-  console.log('\n🏗️  检查架构一致性...');
   
   // 检查每个后端引擎是否有对应的路由
   Object.keys(analysis.backend.engines).forEach(engine => {
@@ -373,7 +361,6 @@ function checkArchitectureConsistency() {
 
 // 7. 生成修复建议
 function generateRecommendations() {
-  console.log('\n💡 生成修复建议...');
   
   // 基于发现的问题生成建议
   if (analysis.issues.naming.length > 0) {
@@ -610,66 +597,39 @@ function checkAPIConsistency() {
 
 // 生成详细报告
 function generateReport() {
-  console.log('\n' + '='.repeat(80));
   console.log('📊 分析报告');
-  console.log('='.repeat(80));
   
   // 统计信息
-  console.log('\n📈 统计信息:');
-  console.log(`  - 后端引擎: ${Object.keys(analysis.backend.engines).length}`);
-  console.log(`  - 后端路由: ${Object.keys(analysis.backend.routes).length}`);
-  console.log(`  - 前端页面: ${Object.keys(analysis.frontend.pages).length}`);
-  console.log(`  - 前端组件: ${Object.keys(analysis.frontend.components).length}`);
-  console.log(`  - 前端Hooks: ${Object.keys(analysis.frontend.hooks).length}`);
   
   // 问题统计
-  console.log('\n⚠️  发现的问题:');
-  console.log(`  - 命名问题: ${analysis.issues.naming.length}`);
-  console.log(`  - 映射问题: ${analysis.issues.mapping.length}`);
-  console.log(`  - 架构问题: ${analysis.issues.architecture.length}`);
-  console.log(`  - 冗余问题: ${analysis.issues.redundancy.length}`);
-  console.log(`  - 一致性问题: ${analysis.issues.inconsistency.length}`);
   
   // 详细问题列表
   if (analysis.issues.naming.length > 0) {
-    console.log('\n📝 命名问题:');
     analysis.issues.naming.forEach(issue => {
-      console.log(`  - ${issue.message}`);
     });
   }
   
   if (analysis.issues.mapping.length > 0) {
-    console.log('\n🔗 映射问题:');
     analysis.issues.mapping.forEach(issue => {
-      console.log(`  - ${issue.message}`);
     });
   }
   
   if (analysis.issues.architecture.length > 0) {
-    console.log('\n🏗️  架构问题:');
     analysis.issues.architecture.forEach(issue => {
-      console.log(`  - ${issue.message}`);
     });
   }
   
   if (analysis.issues.redundancy.length > 0) {
-    console.log('\n🔄 冗余问题:');
     analysis.issues.redundancy.forEach(issue => {
-      console.log(`  - ${issue.message}`);
     });
   }
   
   if (analysis.issues.inconsistency.length > 0) {
-    console.log('\n⚡ 一致性问题:');
     analysis.issues.inconsistency.forEach(issue => {
-      console.log(`  - ${issue.message}`);
     });
   }
   
   // 建议
-  console.log('\n' + '='.repeat(80));
-  console.log('💡 修复建议');
-  console.log('='.repeat(80));
   
   const priorityOrder = { high: 1, medium: 2, low: 3 };
   analysis.recommendations.sort((a, b) => 
@@ -677,20 +637,13 @@ function generateReport() {
   );
   
   analysis.recommendations.forEach((rec, index) => {
-    console.log(`\n${index + 1}. [${rec.priority.toUpperCase()}] ${rec.title}`);
     rec.actions.forEach(action => {
       if (action.type === 'rename') {
-        console.log(`   - 重命名: ${action.from} → ${action.to}`);
       } else if (action.type === 'create_engine') {
-        console.log(`   - 创建引擎: ${action.name} (for ${action.for})`);
       } else if (action.type === 'create_page') {
-        console.log(`   - 创建页面: ${action.name} (for ${action.for})`);
       } else if (action.type === 'consolidate') {
-        console.log(`   - 合并文件: ${action.files.join(', ')} in ${action.location}`);
       } else if (action.type === 'create' || action.type === 'update') {
-        console.log(`   - ${action.type === 'create' ? '创建' : '更新'}: ${action.name} - ${action.description}`);
       } else {
-        console.log(`   - ${action.solution}`);
       }
     });
   });
@@ -700,11 +653,9 @@ function generateReport() {
 function saveAnalysisResults() {
   const outputPath = path.join(projectRoot, 'test-architecture-analysis.json');
   fs.writeFileSync(outputPath, JSON.stringify(analysis, null, 2));
-  console.log(`\n📁 详细分析结果已保存到: ${outputPath}`);
 }
 
 // 执行分析
-console.log(`\n🚀 开始分析项目: ${projectRoot}`);
 
 analyzeBackendEngines();
 analyzeBackendRoutes();
@@ -716,4 +667,3 @@ generateRecommendations();
 generateReport();
 saveAnalysisResults();
 
-console.log('\n✨ 分析完成！');

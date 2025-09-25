@@ -164,6 +164,11 @@ export interface UseCompatibilityTestStateReturn {
   removeDevice: (deviceName: string) => void;
   addFeature: (feature: string) => void;
   removeFeature: (feature: string) => void;
+  /**
+   * 删除removeViewport数据
+   * @param {string} id - 对象ID
+   * @returns {Promise<boolean>} 删除是否成功
+   */
   addViewport: (viewport: { name: string; width: number; height: number }) => void;
   removeViewport: (index: number) => void;
 

@@ -1,3 +1,10 @@
+/**
+ * useStressTestRecord.ts - 核心功能模块
+ * 
+ * 文件路径: frontend\hooks\useStressTestRecord.ts
+ * 创建时间: 2025-09-25
+ */
+
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { stressTestQueueManager, type QueueStats } from '../services/stressTestQueueManager';
@@ -381,10 +388,8 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         estimatedDuration: testData.config?.duration || 60,
         maxRetries: 3,
         onProgress: (progress: number, message: string) => {
-          console.log(`队列测试进度: ${progress}% - ${message}`);
         },
         onComplete: (result: any) => {
-          console.log('队列测试完成:', result);
           setCurrentQueueId(null);
           // 记录刷新将通过队列事件监听器处理
         },
@@ -661,7 +666,6 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
     // 添加队列事件监听
     const removeListener = stressTestQueueManager.addListener((event: string, data: any) => {
-      console.log(`队列事件: ${event}`, data);
 
       // 更新队列统计
       const newStats = stressTestQueueManager.getQueueStats();

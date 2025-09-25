@@ -248,6 +248,16 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
   onValidationChange
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+
+  /**
+
+   * togglePasswordVisibility功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const [isFocused, setIsFocused] = useState(false);
 
   const togglePasswordVisibility = () => {

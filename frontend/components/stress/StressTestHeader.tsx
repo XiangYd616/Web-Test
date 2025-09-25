@@ -1,3 +1,10 @@
+/**
+ * StressTestHeader.tsx - React组件
+ * 
+ * 文件路径: frontend\components\stress\StressTestHeader.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { Play, Square, RotateCcw, Settings } from 'lucide-react';
 

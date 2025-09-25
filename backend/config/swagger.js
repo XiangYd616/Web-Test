@@ -27,7 +27,7 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3001',
+        url: process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}',
         description: '开发环境'
       },
       {
@@ -365,8 +365,5 @@ module.exports = {
       res.send(specs);
     });
     
-    console.log('📚 Swagger API文档已启用:');
-    console.log('   - 交互式文档: http://localhost:3001/api-docs');
-    console.log('   - JSON规范: http://localhost:3001/api-docs.json');
   }
 };

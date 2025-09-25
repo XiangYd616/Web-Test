@@ -12,7 +12,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 console.log('🚀 执行完整的测试工具规范化');
-console.log('='.repeat(60));
 
 const operations = {
   renamed: [],
@@ -26,7 +25,6 @@ const operations = {
  * 批量重命名测试引擎文件
  */
 async function batchRenameEngines() {
-  console.log('\n📝 批量重命名测试引擎文件...');
   
   const renameTasks = [
     { 
@@ -83,7 +81,6 @@ async function batchRenameEngines() {
           from: `${task.folder}/${task.from}`,
           to: `${task.folder}/${task.to}`
         });
-        console.log(`  ✅ ${task.from} → ${task.to}`);
       } else if (!fs.existsSync(newPath)) {
         operations.warnings.push(`文件不存在: ${task.folder}/${task.from}`);
       }
@@ -97,7 +94,6 @@ async function batchRenameEngines() {
  * 更新所有index.js文件的引用
  */
 async function updateAllIndexFiles() {
-  console.log('\n🔄 更新所有index文件引用...');
   
   const enginesDir = path.join(__dirname, '..', 'backend', 'engines');
   const folders = fs.readdirSync(enginesDir).filter(f => {
@@ -135,7 +131,6 @@ async function updateAllIndexFiles() {
         if (updated) {
           fs.writeFileSync(indexPath, content);
           operations.updated.push(`${folder}/index.js`);
-          console.log(`  ✅ 更新 ${folder}/index.js`);
         }
       } catch (error) {
         operations.errors.push(`更新 ${folder}/index.js 失败: ${error.message}`);
@@ -148,19 +143,16 @@ async function updateAllIndexFiles() {
  * 更新TypeScript配置文件
  */
 async function updateTypeScriptFiles() {
-  console.log('\n📘 处理TypeScript文件...');
   
   // 处理 base/BaseTestEngine.ts
   const baseTsPath = path.join(__dirname, '..', 'backend', 'engines', 'base', 'BaseTestEngine.ts');
   if (fs.existsSync(baseTsPath)) {
-    console.log('  ℹ️ 保留 BaseTestEngine.ts (基类需要TypeScript)');
     operations.warnings.push('BaseTestEngine.ts 保留为TypeScript文件');
   }
   
   // 处理 regression/RegressionTestEngine.ts
   const regressionTsPath = path.join(__dirname, '..', 'backend', 'engines', 'regression', 'RegressionTestEngine.ts');
   if (fs.existsSync(regressionTsPath)) {
-    console.log('  ℹ️ 保留 RegressionTestEngine.ts (高级功能需要TypeScript)');
     operations.warnings.push('RegressionTestEngine.ts 保留为TypeScript文件');
   }
 }
@@ -169,7 +161,6 @@ async function updateTypeScriptFiles() {
  * 创建缺失的index文件
  */
 async function createMissingIndexFiles() {
-  console.log('\n➕ 创建缺失的index文件...');
   
   const foldersNeedingIndex = [
     'database',
@@ -211,7 +202,6 @@ module.exports = ${engineFile};
         
         fs.writeFileSync(indexPath, indexContent);
         operations.created.push(`${folder}/index.js`);
-        console.log(`  ✅ 创建 ${folder}/index.js`);
       } catch (error) {
         operations.errors.push(`创建 ${folder}/index.js 失败: ${error.message}`);
       }
@@ -223,7 +213,6 @@ module.exports = ${engineFile};
  * 更新路由文件中的引用
  */
 async function updateRouteReferences() {
-  console.log('\n🔗 更新路由文件引用...');
   
   const routesDir = path.join(__dirname, '..', 'backend', 'routes');
   
@@ -258,7 +247,6 @@ async function updateRouteReferences() {
         if (updated) {
           fs.writeFileSync(filePath, content);
           operations.updated.push(`routes/${file}`);
-          console.log(`  ✅ 更新 routes/${file}`);
         }
       } catch (error) {
         operations.errors.push(`更新 routes/${file} 失败: ${error.message}`);
@@ -271,7 +259,6 @@ async function updateRouteReferences() {
  * 更新服务层引用
  */
 async function updateServiceReferences() {
-  console.log('\n⚙️ 更新服务层引用...');
   
   const servicesDir = path.join(__dirname, '..', 'backend', 'services');
   
@@ -321,7 +308,6 @@ async function updateServiceReferences() {
           fs.writeFileSync(filePath, content);
           const relativePath = path.relative(path.join(__dirname, '..'), filePath);
           operations.updated.push(relativePath);
-          console.log(`  ✅ 更新 ${relativePath}`);
         }
       } catch (error) {
         operations.errors.push(`更新服务文件失败: ${error.message}`);
@@ -334,7 +320,6 @@ async function updateServiceReferences() {
  * 验证所有引擎文件
  */
 async function validateEngines() {
-  console.log('\n✅ 验证所有引擎文件...');
   
   const expectedEngines = [
     { folder: 'api', file: 'ApiTestEngine.js' },
@@ -356,10 +341,8 @@ async function validateEngines() {
   for (const engine of expectedEngines) {
     const enginePath = path.join(__dirname, '..', 'backend', 'engines', engine.folder, engine.file);
     if (!fs.existsSync(enginePath)) {
-      console.log(`  ❌ 缺失: ${engine.folder}/${engine.file}`);
       allValid = false;
     } else {
-      console.log(`  ✅ 存在: ${engine.folder}/${engine.file}`);
     }
   }
   
@@ -370,47 +353,33 @@ async function validateEngines() {
  * 生成最终报告
  */
 function generateFinalReport() {
-  console.log('\n' + '='.repeat(60));
   console.log('📊 规范化执行报告');
-  console.log('='.repeat(60));
   
-  console.log('\n✅ 成功操作:');
   
   if (operations.renamed.length > 0) {
-    console.log('\n📝 重命名:');
     operations.renamed.forEach(item => {
-      console.log(`  - ${item.from} → ${item.to}`);
     });
   }
   
   if (operations.created.length > 0) {
-    console.log('\n➕ 创建:');
     operations.created.forEach(item => {
-      console.log(`  - ${item}`);
     });
   }
   
   if (operations.updated.length > 0) {
-    console.log('\n🔄 更新引用:');
-    console.log(`  - 共更新 ${operations.updated.length} 个文件`);
   }
   
   if (operations.warnings.length > 0) {
-    console.log('\n⚠️ 警告:');
     operations.warnings.forEach(warning => {
-      console.log(`  - ${warning}`);
     });
   }
   
   if (operations.errors.length > 0) {
-    console.log('\n❌ 错误:');
     operations.errors.forEach(error => {
-      console.log(`  - ${error}`);
     });
   }
   
   const totalOps = operations.renamed.length + operations.created.length + operations.updated.length;
-  console.log(`\n📈 总计: ${totalOps} 个成功操作, ${operations.errors.length} 个错误`);
 }
 
 /**
@@ -431,7 +400,6 @@ function saveOperationLog() {
   };
   
   fs.writeFileSync(logPath, JSON.stringify(logContent, null, 2));
-  console.log(`\n💾 操作日志已保存到: ${logPath}`);
 }
 
 /**
@@ -455,15 +423,9 @@ async function main() {
     saveOperationLog();
     
     if (isValid) {
-      console.log('\n🎉 规范化完成！所有测试引擎文件已符合命名规范。');
     } else {
-      console.log('\n⚠️ 规范化完成，但仍有部分文件需要手动检查。');
     }
     
-    console.log('\n建议后续操作:');
-    console.log('1. 运行 npm test 验证所有测试');
-    console.log('2. 提交变更到版本控制');
-    console.log('3. 更新相关文档');
     
   } catch (error) {
     console.error('\n❌ 规范化过程中出错:', error);

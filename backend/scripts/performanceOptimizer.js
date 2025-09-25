@@ -26,7 +26,6 @@ class PerformanceOptimizer {
    */
   async analyzePerformance() {
     console.log('🔍 分析系统性能...');
-    console.log('=' .repeat(60));
 
     try {
       // 获取性能统计
@@ -65,43 +64,18 @@ class PerformanceOptimizer {
    */
   displayBasicStats(stats) {
     console.log('📊 系统概览:');
-    console.log(`  运行时间: ${this.formatUptime(stats.uptime)}`);
-    console.log(`  总请求数: ${stats.requests.total.toLocaleString()}`);
-    console.log(`  错误数: ${stats.requests.errors.toLocaleString()}`);
-    console.log(`  吞吐量: ${stats.requests.throughput} 请求/秒`);
-    console.log(`  错误率: ${stats.requests.errorRate}%`);
-    console.log(`  平均响应时间: ${stats.requests.avgResponseTime}ms`);
-    console.log(`  P95响应时间: ${stats.requests.p95ResponseTime}ms`);
-    console.log(`  活跃请求: ${stats.requests.activeRequests}`);
-    console.log('');
 
-    console.log('💻 系统资源:');
-    console.log(`  CPU使用率: ${stats.system.cpu}%`);
-    console.log(`  内存使用率: ${stats.system.memory}%`);
-    console.log(`  可用内存: ${stats.system.freeMemory}MB / ${stats.system.totalMemory}MB`);
-    console.log(`  负载平均: ${stats.system.loadAverage.map(l => l.toFixed(2)).join(', ')}`);
-    console.log(`  平台: ${stats.system.platform} ${stats.system.arch}`);
-    console.log(`  Node.js版本: ${stats.system.nodeVersion}`);
-    console.log('');
 
     console.log('🔧 进程信息:');
     const memUsage = stats.process.memoryUsage;
-    console.log(`  PID: ${stats.process.pid}`);
-    console.log(`  堆内存: ${Math.round(memUsage.heapUsed / 1024 / 1024)}MB / ${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`);
-    console.log(`  外部内存: ${Math.round(memUsage.external / 1024 / 1024)}MB`);
-    console.log(`  数组缓冲区: ${Math.round(memUsage.arrayBuffers / 1024 / 1024)}MB`);
-    console.log('');
   }
 
   /**
    * 显示API统计信息
    */
   displayApiStats(apiStats) {
-    console.log('🌐 API端点统计 (前10个最活跃):');
     
     if (apiStats.length === 0) {
-      console.log('  暂无API统计数据');
-      console.log('');
       return;
     }
 
@@ -109,41 +83,22 @@ class PerformanceOptimizer {
       const status = api.errorRate > this.thresholds.errorRate ? '❌' : 
                     api.avgTime > this.thresholds.responseTime ? '⚠️' : '✅';
       
-      console.log(`  ${index + 1}. ${status} ${api.method} ${api.path}`);
-      console.log(`     请求数: ${api.count.toLocaleString()}, 平均时间: ${api.avgTime}ms`);
-      console.log(`     错误率: ${api.errorRate}%, 时间范围: ${api.minTime}-${api.maxTime}ms`);
     });
-    console.log('');
   }
 
   /**
    * 显示缓存统计信息
    */
   displayCacheStats(cacheStats) {
-    console.log('💾 缓存统计:');
-    console.log(`  策略: ${cacheStats.strategy}`);
     
     if (cacheStats.memory) {
-      console.log(`  内存缓存:`);
-      console.log(`    命中率: ${(cacheStats.memory.hitRate * 100).toFixed(1)}%`);
-      console.log(`    大小: ${cacheStats.memory.size} / ${cacheStats.memory.maxSize}`);
-      console.log(`    命中: ${cacheStats.memory.hits}, 未命中: ${cacheStats.memory.misses}`);
     }
     
     if (cacheStats.redis && cacheStats.redis.connected) {
-      console.log(`  Redis缓存:`);
-      console.log(`    连接状态: ${cacheStats.redis.connected ? '✅ 已连接' : '❌ 未连接'}`);
-      console.log(`    命中率: ${(cacheStats.redis.hitRate * 100).toFixed(1)}%`);
-      console.log(`    内存使用: ${Math.round(cacheStats.redis.memoryUsed / 1024 / 1024)}MB`);
-      console.log(`    命中: ${cacheStats.redis.hits}, 未命中: ${cacheStats.redis.misses}`);
     }
     
     if (cacheStats.combined) {
-      console.log(`  总体缓存:`);
-      console.log(`    总命中率: ${(cacheStats.combined.overallHitRate * 100).toFixed(1)}%`);
-      console.log(`    总命中: ${cacheStats.combined.totalHits}, 总未命中: ${cacheStats.combined.totalMisses}`);
     }
-    console.log('');
   }
 
   /**
@@ -240,11 +195,8 @@ class PerformanceOptimizer {
    * 显示优化建议
    */
   displayRecommendations(recommendations) {
-    console.log('💡 优化建议:');
     
     if (recommendations.length === 0) {
-      console.log('  🎉 系统性能良好，暂无优化建议');
-      console.log('');
       return;
     }
 
@@ -252,13 +204,8 @@ class PerformanceOptimizer {
       const severityIcon = rec.severity === 'high' ? '🔴' : 
                           rec.severity === 'medium' ? '🟡' : '🟢';
       
-      console.log(`  ${index + 1}. ${severityIcon} ${rec.title}`);
-      console.log(`     ${rec.description}`);
-      console.log(`     建议:`);
       rec.suggestions.forEach(suggestion => {
-        console.log(`       • ${suggestion}`);
       });
-      console.log('');
     });
   }
 
@@ -284,7 +231,6 @@ class PerformanceOptimizer {
    * 清理缓存
    */
   async cleanupCache() {
-    console.log('🧹 清理缓存...');
     
     try {
       await cacheService.clear();
@@ -298,7 +244,6 @@ class PerformanceOptimizer {
    * 重置性能统计
    */
   resetStats() {
-    console.log('🔄 重置性能统计...');
     
     try {
       performanceCollector.reset();
@@ -331,7 +276,6 @@ async function main() {
         break;
         
       default:
-        console.log(`
 🚀 性能优化工具
 
 使用方法:

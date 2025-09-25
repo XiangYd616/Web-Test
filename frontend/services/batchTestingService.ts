@@ -303,6 +303,16 @@ class BatchTestingService {
   ): Promise<string> {
     try {
       const params = new URLSearchParams({ format });
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const response = await fetch(`${this.baseUrl}/${batchId}/export?${params}`);
 
       if (format === 'json') {
@@ -434,6 +444,11 @@ class BatchTestingService {
       });
     }
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
     if (batchData.config.execution.mode === 'parallel') {
       if (!batchData.config.execution.concurrency || batchData.config.execution.concurrency < 1) {
         errors.push('并行模式需要指定有效的并发数');
@@ -459,7 +474,7 @@ class BatchTestingService {
         mode: 'sequential',
         concurrency: 3
       },
-      timeout: 300000, // 5分钟
+      timeout: process.env.REQUEST_TIMEOUT || 300000, // 5分钟
       retries: 0,
       stopOnFailure: false
     };

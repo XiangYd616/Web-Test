@@ -1,3 +1,10 @@
+/**
+ * dataAnalysisService.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\dataAnalysisService.ts
+ * 创建时间: 2025-09-25
+ */
+
 
 import { format, subDays } from 'date-fns';
 import { createElement } from 'react';
@@ -56,7 +63,7 @@ export interface PerformanceAnalysis {
 }
 
 export class DataAnalysisService {
-  private baseUrl = 'http://localhost:3001/api';
+  private baseUrl = 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api';
 
   /**
    * 处理测试数据 - 直接使用数据库字段名，避免不必要的映射
@@ -308,7 +315,6 @@ export class DataAnalysisService {
 
       // 如果没有网站测试数据，生成示例数据
       if (websiteTests.length === 0) {
-        console.log('No website test data found, generating sample data');
         return this.generateSamplePerformanceData();
       }
 
@@ -439,6 +445,11 @@ export class DataAnalysisService {
     const urlStats: { [key: string]: { scores: number[]; dates: string[] } } = {};
 
     records.forEach(record => {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
       if (record.url && record.overall_score !== undefined) {
         if (!urlStats[record.url]) {
           urlStats[record.url] = { scores: [], dates: [] };

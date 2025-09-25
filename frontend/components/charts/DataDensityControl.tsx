@@ -1,3 +1,10 @@
+/**
+ * DataDensityControl.tsx - React组件
+ * 
+ * 文件路径: frontend\components\charts\DataDensityControl.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { BarChart3, Info, Settings, TrendingUp, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 

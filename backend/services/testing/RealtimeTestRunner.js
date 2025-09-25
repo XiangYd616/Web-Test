@@ -81,7 +81,6 @@ class RealtimeTestRunner extends EventEmitter {
       // 排序队列 (优先级高的先执行)
       this.testQueue.sort((a, b) => b.priority - a.priority);
 
-      console.log(`📋 测试已添加到队列: ${test.uuid} (${testConfig.type})`);
 
       // 通知客户端
       this.emitToUser(userId, 'test-queued', {
@@ -147,7 +146,6 @@ class RealtimeTestRunner extends EventEmitter {
         progress: 0
       });
 
-      console.log(`🧪 开始执行测试: ${uuid} (${type})`);
 
       // 通知客户端测试开始
       this.emitToUser(userId, 'test-started', {
@@ -431,7 +429,6 @@ class RealtimeTestRunner extends EventEmitter {
       const queueIndex = this.testQueue.findIndex(item => item.uuid === testId);
       if (queueIndex !== -1) {
         this.testQueue.splice(queueIndex, 1);
-        console.log(`📋 已从队列中移除测试: ${testId}`);
       }
 
       // 更新数据库状态

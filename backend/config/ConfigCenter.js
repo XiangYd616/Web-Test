@@ -492,7 +492,6 @@ class ConfigCenter extends EventEmitter {
           this.setConfigValue(key, value, 'file');
         }
         
-        console.log(`📄 从文件加载配置: ${this.configFile}`);
       }
     } catch (error) {
       console.warn(`⚠️ 加载配置文件失败: ${error.message}`);
@@ -609,7 +608,6 @@ class ConfigCenter extends EventEmitter {
       }
       
       fs.writeFileSync(this.configFile, JSON.stringify(hotReloadConfig, null, 2));
-      console.log(`💾 配置已保存到文件: ${this.configFile}`);
     } catch (error) {
       console.error('保存配置文件失败:', error);
       throw error;
@@ -623,7 +621,6 @@ class ConfigCenter extends EventEmitter {
     if (fs.existsSync(this.configFile)) {
       fs.watchFile(this.configFile, { interval: 1000 }, async () => {
         try {
-          console.log('📁 检测到配置文件变更，重新加载...');
           await this.loadFromFile();
           this.emit('fileReloaded');
         } catch (error) {

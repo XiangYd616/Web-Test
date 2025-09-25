@@ -35,7 +35,6 @@ class RegressionTestEngine {
     const testId = `regression_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     
     try {
-      console.log(`🔄 开始回归测试: ${testId}`);
       
       this.activeTests.set(testId, {
         status: 'running',
@@ -118,6 +117,16 @@ class RegressionTestEngine {
     }
     
     if (config.baselineVersion) {
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
       for (const [id, baseline] of this.testBaselines.entries()) {
         if (baseline.version === config.baselineVersion) {
           return baseline;

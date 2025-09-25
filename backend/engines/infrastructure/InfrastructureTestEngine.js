@@ -31,6 +31,11 @@ class InfrastructureTestEngine {
       maxRedirects: Joi.number().min(0).max(10).default(5)
     });
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const { error, value } = schema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);
@@ -391,7 +396,6 @@ class InfrastructureTestEngine {
       test.progress = progress;
       test.message = message;
       this.activeTests.set(testId, test);
-      console.log(`[${this.name.toUpperCase()}-${testId}] ${progress}% - ${message}`);
     }
   }
 

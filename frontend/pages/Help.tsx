@@ -444,7 +444,6 @@ const Help: React.FC = () => {
       document.body.removeChild(link);
 
       // 可以显示下载成功提示
-      console.log('下载开始:', resource.title);
     } catch (error) {
       console.error('下载失败:', error);
       alert('下载失败，请稍后重试。');

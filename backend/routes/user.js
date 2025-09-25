@@ -281,6 +281,16 @@ router.delete('/account', authMiddleware, asyncHandler(async (req, res) => {
     }
 
     const bcrypt = require('bcryptjs');
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const isPasswordValid = await bcrypt.compare(password, userResult.rows[0].password);
 
     if (!isPasswordValid) {

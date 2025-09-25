@@ -457,7 +457,6 @@ class ErrorMonitoringManager extends EventEmitter {
     }
 
     if (cleanedCount > 0) {
-      console.log(`🧹 清理了 ${cleanedCount} 个过期错误记录`);
     }
   }
 

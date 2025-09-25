@@ -161,18 +161,7 @@ class BrowserSecurityConfig {
    */
   printSecurityWarning() {
     if (this.requiresNoSandbox()) {
-      console.log('\n🔒 ===== 浏览器安全警告 =====');
       console.log('⚠️  当前环境需要禁用Chrome沙盒机制');
-      console.log('📋 环境信息:');
-      console.log(`   - 容器环境: ${this.isContainerEnv ? '是' : '否'}`);
-      console.log(`   - CI环境: ${this.isCIEnv ? '是' : '否'}`);
-      console.log(`   - Root用户: ${this.isRootUser ? '是' : '否'}`);
-      console.log('\n🛡️  安全建议:');
-      console.log('   1. 仅在受信任的环境中运行');
-      console.log('   2. 避免处理不受信任的网页内容');
-      console.log('   3. 考虑使用专用的测试用户');
-      console.log('   4. 定期更新浏览器版本');
-      console.log('=============================\n');
     }
   }
 }

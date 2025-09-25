@@ -1,3 +1,10 @@
+/**
+ * testTemplates.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\testTemplates.ts
+ * 创建时间: 2025-09-25
+ */
+
 
 export interface TestTemplate {
   id: string;

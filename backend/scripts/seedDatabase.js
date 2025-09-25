@@ -23,7 +23,6 @@ const config = dbConfigModule.getDatabaseConfig ? dbConfigModule.getDatabaseConf
   password: process.env.DB_PASSWORD || 'postgres'
 };
 
-console.log('🌱 Test-Web数据库种子数据脚本');
 console.log('📊 环境:', environment);
 
 /**
@@ -46,7 +45,6 @@ function getSeedPassword(username) {
   // 生成随机密码并显示给用户
   const password = generateSecurePassword();
   console.log(`⚠️  生成的密码 for ${username}: ${password}`);
-  console.log(`   提示：建议在生产环境设置环境变量 ${envKey}`);
   
   return password;
 }
@@ -232,12 +230,10 @@ async function seedDatabase() {
   const client = await pool.connect();
 
   try {
-    console.log('🌱 开始插入种子数据...');
 
     await client.query('BEGIN');
 
     // 1. 插入用户数据
-    console.log('👥 插入用户数据...');
     for (const user of seedData.users) {
       // 加密密码
       const hashedPassword = await bcrypt.hash(user.password, 10);
@@ -264,7 +260,6 @@ async function seedDatabase() {
     }
 
     // 2. 插入网站数据
-    console.log('🌐 插入网站数据...');
     const adminUser = seedData.users[0]; // 使用admin用户
 
     for (const website of seedData.websites) {
@@ -291,7 +286,6 @@ async function seedDatabase() {
     }
 
     // 3. 插入测试记录
-    console.log('🧪 插入测试记录...');
     for (const test of seedData.tests) {
       const sql = `
         INSERT INTO tests (id, type, url, config, results, status, user_id, started_at, completed_at, created_at)
@@ -316,7 +310,6 @@ async function seedDatabase() {
     }
 
     // 4. 插入测试历史记录
-    console.log('📝 插入测试历史记录...');
     for (const test of seedData.tests) {
       const historyRecords = [
         {
@@ -358,7 +351,6 @@ async function seedDatabase() {
 
     await client.query('COMMIT');
 
-    console.log('🎉 种子数据插入完成!');
 
     // 显示统计信息
     await showSeedStats(client);
@@ -383,7 +375,6 @@ async function showSeedStats(client) {
 
     for (const table of tables) {
       const result = await client.query(`SELECT COUNT(*) as count FROM ${table}`);
-      console.log(`   - ${table}: ${result.rows[0].count} 条记录`);
     }
 
   } catch (error) {
@@ -398,7 +389,6 @@ async function cleanSeedData() {
   const client = await pool.connect();
 
   try {
-    console.log('🧹 开始清理种子数据...');
 
     await client.query('BEGIN');
 
@@ -407,7 +397,6 @@ async function cleanSeedData() {
 
     for (const table of tables) {
       await client.query(`DELETE FROM ${table} WHERE created_at IS NOT NULL`);
-      console.log(`🗑️ 清理表 ${table}`);
     }
 
     await client.query('COMMIT');
@@ -426,8 +415,6 @@ async function cleanSeedData() {
 if (require.main === module) {
   (async () => {
     try {
-      console.log('🌱 Test-Web数据库种子数据脚本启动');
-      console.log('='.repeat(50));
 
       const args = process.argv.slice(2);
       const command = args[0] || 'seed';
@@ -443,11 +430,9 @@ if (require.main === module) {
 
         default:
           console.log('❌ 未知命令:', command);
-          console.log('可用命令: seed, clean');
           process.exit(1);
       }
 
-      console.log('='.repeat(50));
       console.log('✅ 种子数据脚本执行完成');
 
     } catch (error) {

@@ -161,7 +161,6 @@ router.post('/fix-monitoring-fields', async (req, res) => {
 
     console.log('📊 监控表字段状态:');
     fieldCheck.rows.forEach(row => {
-      console.log(`  ✅ ${row.column_name}: ${row.data_type}`);
     });
 
     res.json({

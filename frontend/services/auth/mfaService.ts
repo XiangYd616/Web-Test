@@ -67,6 +67,12 @@ export interface TOTPSetupResult {
   backupCodes: string[];
 }
 
+
+/**
+
+ * TOTPGenerator类 - 负责处理相关功能
+
+ */
 // ==================== TOTP工具类 ====================
 
 class TOTPGenerator {
@@ -127,6 +133,16 @@ class TOTPGenerator {
 
     for (let i = -window; i <= window; i++) {
       const timeStep = (currentTime + i) * 30 * 1000;
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const expectedToken = await this.generateTOTP(secret, timeStep);
 
       if (expectedToken === token) {
@@ -175,6 +191,12 @@ class TOTPGenerator {
   }
 }
 
+
+/**
+
+ * CodeGenerator类 - 负责处理相关功能
+
+ */
 // ==================== 验证码生成器 ====================
 
 class CodeGenerator {
@@ -227,6 +249,16 @@ export class MFAService {
   private config: MFAConfig;
   private userSetups = new Map<string, MFASetup[]>();
   private activeChallenges = new Map<string, MFAChallenge>();
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   private attemptCounts = new Map<string, { count: number; lockoutUntil?: number }>();
 
   constructor(config: Partial<MFAConfig> = {}) {
@@ -285,6 +317,11 @@ export class MFAService {
       return { success: false };
     }
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const isValid = await TOTPGenerator.verifyTOTP(setupData.secret, token);
     if (!isValid) {
       return { success: false };
@@ -423,6 +460,16 @@ export class MFAService {
       throw new Error('未找到启用的MFA方法');
     }
 
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const challengeId = this.generateChallengeId();
 
     switch (method) {
@@ -677,12 +724,10 @@ export class MFAService {
 
   private async sendSMS(phone: string, code: string): Promise<void> {
     // 这里应该集成实际的短信服务
-    console.log(`发送短信到 ${phone}: 验证码 ${code}`);
   }
 
   private async sendEmail(email: string, code: string): Promise<void> {
     // 这里应该集成实际的邮件服务
-    console.log(`发送邮件到 ${email}: 验证码 ${code}`);
   }
 }
 
@@ -745,6 +790,11 @@ export function useMFA() {
     setError(null);
 
     try {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const result = await defaultMFAService.verifyChallenge(challengeId, code);
       if (!result.success && result.error) {
         setError(result.error);

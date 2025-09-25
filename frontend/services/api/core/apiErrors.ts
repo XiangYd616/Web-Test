@@ -16,6 +16,16 @@ export class ApiServiceError extends Error {
   }
 }
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 export class NetworkError extends ApiServiceError {
   constructor(message: string, details?: any) {
     super(message, 'NETWORK_ERROR', undefined, details, true);
@@ -23,6 +33,16 @@ export class NetworkError extends ApiServiceError {
   }
 }
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 export class TimeoutError extends ApiServiceError {
   constructor(timeout: number) {
     super(`Request timeout after ${timeout}ms`, 'TIMEOUT_ERROR', 408, { timeout }, true);
@@ -30,6 +50,16 @@ export class TimeoutError extends ApiServiceError {
   }
 }
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 export class ValidationError extends ApiServiceError {
   constructor(message: string, errors: any[] = []) {
     super(message, 'VALIDATION_ERROR', 400, { errors }, false);
@@ -37,6 +67,16 @@ export class ValidationError extends ApiServiceError {
   }
 }
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 export class AuthenticationError extends ApiServiceError {
   constructor(message: string = 'Authentication required') {
     super(message, 'AUTH_ERROR', 401, undefined, false);
@@ -44,6 +84,16 @@ export class AuthenticationError extends ApiServiceError {
   }
 }
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 export class AuthorizationError extends ApiServiceError {
   constructor(message: string = 'Access denied') {
     super(message, 'AUTHORIZATION_ERROR', 403, undefined, false);
@@ -51,6 +101,16 @@ export class AuthorizationError extends ApiServiceError {
   }
 }
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 export class RateLimitError extends ApiServiceError {
   constructor(retryAfter?: number) {
     super('Rate limit exceeded', 'RATE_LIMIT_ERROR', 429, { retryAfter }, true);
@@ -58,6 +118,16 @@ export class RateLimitError extends ApiServiceError {
   }
 }
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 export class ServerError extends ApiServiceError {
   constructor(message: string, status: number, details?: any) {
     super(message, 'SERVER_ERROR', status, details, true);

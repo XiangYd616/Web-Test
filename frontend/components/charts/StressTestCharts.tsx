@@ -1,3 +1,10 @@
+/**
+ * StressTestCharts.tsx - React组件
+ * 
+ * 文件路径: frontend\components\charts\StressTestCharts.tsx
+ * 创建时间: 2025-09-25
+ */
+
 
 import { RotateCcw } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -121,7 +128,6 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     // 明确区分数据源：实时数据用于实时监控，测试结果数据用于结果视图
     let sourceData: any[] = [];
 
-    console.log('🎯 EnhancedStressTestCharts 数据处理开始:', {
       chartType,
       realTimeDataLength: realTimeData?.length || 0,
       testResultDataLength: testResultData?.length || 0,
@@ -439,6 +445,11 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           borderRadius: '8px',
           color: '#F9FAFB'
         }}
+          /**
+           * if功能函数
+           * @param {Object} params - 参数对象
+           * @returns {Promise<Object>} 返回结果
+           */
         formatter={(value: any, name: string) => {
           if (name === 'count') {
             const percentage = responseTimeDistribution.find(item => item.count === value)?.percentage || 0;
@@ -552,7 +563,6 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             {(() => {
-              console.log('🎯 渲染图表:', { chartType, dataLength: processedData.length });
               switch (chartType) {
                 case 'realtime':
                   return renderRealTimeChart();

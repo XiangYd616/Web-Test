@@ -1,3 +1,10 @@
+/**
+ * useAdminAuth.tsx - 核心功能模块
+ * 
+ * 文件路径: frontend\hooks\useAdminAuth.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React, { useEffect, useState } from 'react';
 import type { User } from '../types/common';
 import { useAuth } from './useAuth';

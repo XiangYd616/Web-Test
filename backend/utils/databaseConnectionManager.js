@@ -8,12 +8,11 @@ const EventEmitter = require('events');
 
 // 简单的日志记录器
 const Logger = {
-    info: (msg, data) => console.log(`[INFO] ${msg}`, data ? JSON.stringify(data) : ''),
+    info: (msg, data) => : ''),
     warn: (msg, data) => console.warn(`[WARN] ${msg}`, data ? JSON.stringify(data) : ''),
     error: (msg, error, data) => console.error(`[ERROR] ${msg}`, error?.message || error, data ? JSON.stringify(data) : ''),
     debug: (msg, data) => {
         if (process.env.NODE_ENV === 'development') {
-            console.log(`[DEBUG] ${msg}`, data ? JSON.stringify(data) : '');
         }
     }
 };

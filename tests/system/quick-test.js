@@ -9,7 +9,6 @@ async function quickTest() {
   
   try {
     // 测试HTML解析服务
-    console.log('🧪 测试 HTMLParsingService');
     const htmlService = new HTMLParsingService();
     await htmlService.initialize();
     
@@ -37,19 +36,13 @@ async function quickTest() {
       console.log('✅ HTML解析成功');
       
       const metaResult = htmlService.extractMetaTags(parseResult.$);
-      console.log('📋 标题:', metaResult.metaData.title);
-      console.log('📝 描述:', metaResult.metaData.description);
       
       const headingResult = htmlService.extractHeadingStructure(parseResult.$);
-      console.log('🏷️  标题数量:', headingResult.totalCount);
       
       const imageResult = htmlService.extractImages(parseResult.$);
-      console.log('🖼️  图片数量:', imageResult.totalCount);
       
       const linkResult = htmlService.extractLinks(parseResult.$);
-      console.log('🔗 链接总数:', linkResult.totalCount);
       
-      console.log('\n🎉 HTML解析服务测试通过！');
     } else {
       console.error('❌ HTML解析失败:', parseResult.error);
       return false;
@@ -64,10 +57,8 @@ async function quickTest() {
 
 quickTest().then(success => {
   if (success) {
-    console.log('\n✅ 快速测试成功！重构的共享服务工作正常。');
     process.exit(0);
   } else {
-    console.log('\n❌ 快速测试失败。');
     process.exit(1);
   }
 }).catch(error => {

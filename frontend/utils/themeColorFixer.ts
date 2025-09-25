@@ -128,5 +128,4 @@ export function initThemeColorFixer(): void {
   // 设置主题变化监听
   setupThemeColorWatcher();
 
-  console.log('🎨 主题颜色修复系统已初始化');
 }

@@ -77,6 +77,12 @@ export interface RoleHierarchy {
   level: number; // 层级深度
 }
 
+
+/**
+
+ * PermissionCalculator类 - 负责处理相关功能
+
+ */
 // ==================== 权限计算器 ====================
 
 class PermissionCalculator {
@@ -153,6 +159,16 @@ class PermissionCalculator {
     context: Record<string, any>
   ): boolean {
     return conditions.every(condition => {
+      
+      /**
+      
+       * switch功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       const contextValue = context[condition.type];
       
       switch (condition.operator) {
@@ -181,6 +197,16 @@ export class RBACService {
   private permissions = new Map<string, Permission>();
   private roles = new Map<string, Role>();
   private userPermissions = new Map<string, UserPermissions>();
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   private roleHierarchies = new Map<string, RoleHierarchy>();
 
   constructor() {

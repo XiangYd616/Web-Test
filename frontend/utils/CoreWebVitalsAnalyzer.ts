@@ -168,7 +168,6 @@ export class CoreWebVitalsAnalyzer {
         try {
           metrics.inp = await this.measureINP();
         } catch (error) {
-          console.log('INP measurement not supported in this browser');
         }
       } else {
         // 模拟数据（用于服务器端或测试环境）

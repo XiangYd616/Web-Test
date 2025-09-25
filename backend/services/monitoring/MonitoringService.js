@@ -565,6 +565,21 @@ class MonitoringService extends EventEmitter {
         WHERE id = $1
       `;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const queryResult = await this.dbPool.query(query, [target.id]);
 
             if (queryResult.rows.length === 0) {
@@ -699,6 +714,16 @@ class MonitoringService extends EventEmitter {
         let stuckTasks = 0;
         let errorTasks = 0;
 
+
+            /**
+
+             * if功能函数
+
+             * @param {Object} params - 参数对象
+
+             * @returns {Promise<Object>} 返回结果
+
+             */
         for (const [taskId, task] of this.activeMonitors) {
             if (task.isRunning) {
                 // 检查是否有任务卡住
@@ -818,6 +843,16 @@ class MonitoringService extends EventEmitter {
 
         for (const [taskId, task] of this.activeMonitors) {
             if (task.isRunning) {
+
+                /**
+
+                 * if功能函数
+
+                 * @param {Object} params - 参数对象
+
+                 * @returns {Promise<Object>} 返回结果
+
+                 */
                 const runningTime = now - (task.startTime || now);
                 if (runningTime > 300000) { // 5分钟
                     stuckTasks.push({ taskId, task });
@@ -973,6 +1008,21 @@ class MonitoringService extends EventEmitter {
         RETURNING name
       `;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await this.dbPool.query(query, [targetId]);
 
             if (result.rows.length > 0) {
@@ -1167,6 +1217,21 @@ class MonitoringService extends EventEmitter {
         RETURNING *
       `;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await this.dbPool.query(query, values);
 
             if (result.rows.length > 0) {
@@ -1915,6 +1980,21 @@ class MonitoringService extends EventEmitter {
                 WHERE id = $1 AND user_id = $2
             `;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await this.dbPool.query(query, [reportId, userId]);
 
             if (result.rows.length === 0) {

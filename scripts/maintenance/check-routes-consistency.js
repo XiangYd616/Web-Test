@@ -142,13 +142,11 @@ function checkRoutesConsistency() {
   };
 
   // 1. 检查侧边栏路由对应的页面
-  console.log('📋 检查侧边栏路由对应的页面:');
   sidebarRoutes.forEach(route => {
     const pagePath = pageFileMapping[route.href];
     const pageExists = checkPageExists(pagePath);
     const routeExists = checkRouteConfigExists(route.href);
 
-    console.log(`  ${route.href.padEnd(20)} | ${route.name.padEnd(15)} | 页面: ${pageExists ? '✅' : '❌'} | 路由: ${routeExists ? '✅' : '❌'}`);
 
     if (pageExists && routeExists) {
       results.valid++;
@@ -170,7 +168,6 @@ function checkRoutesConsistency() {
   });
 
   // 2. 检查孤立的页面文件
-  console.log('\n📂 检查孤立的页面文件:');
   const allPageFiles = getAllPageFiles();
   const usedPageFiles = Object.values(pageFileMapping).filter(Boolean);
 
@@ -179,68 +176,45 @@ function checkRoutesConsistency() {
       // 检查是否是备份文件
       if (file.includes('.backup') || file.includes('Refactored') || file.includes('Demo')) {
         results.backupFiles.push(file);
-        console.log(`  🗑️  备份/演示文件: ${file}`);
       } else {
         results.orphanedPages.push(file);
-        console.log(`  ⚠️  孤立页面: ${file}`);
       }
     }
   });
 
   // 3. 生成报告
-  console.log('\n📊 检查结果汇总:');
-  console.log(`  总路由数: ${results.total}`);
-  console.log(`  有效路由: ${results.valid}`);
-  console.log(`  缺失页面: ${results.missing.length}`);
-  console.log(`  缺失路由配置: ${results.missingRoutes.length}`);
-  console.log(`  孤立页面: ${results.orphanedPages.length}`);
-  console.log(`  备份文件: ${results.backupFiles.length}`);
 
   // 4. 详细问题列表
   if (results.missing.length > 0) {
-    console.log('\n❌ 缺失的页面文件:');
     results.missing.forEach(item => {
-      console.log(`  - ${item.route} (${item.name}) -> 需要创建: ${item.expectedFile}`);
     });
   }
 
   if (results.missingRoutes.length > 0) {
-    console.log('\n❌ 缺失的路由配置:');
     results.missingRoutes.forEach(item => {
-      console.log(`  - ${item.route} (${item.name}) -> 需要在AppRoutes.tsx中添加`);
     });
   }
 
   if (results.orphanedPages.length > 0) {
-    console.log('\n⚠️ 孤立的页面文件:');
     results.orphanedPages.forEach(file => {
-      console.log(`  - ${file} -> 考虑删除或添加到侧边栏`);
     });
   }
 
   if (results.backupFiles.length > 0) {
-    console.log('\n🗑️ 可删除的备份文件:');
     results.backupFiles.forEach(file => {
-      console.log(`  - ${file}`);
     });
   }
 
   // 5. 建议
-  console.log('\n💡 修复建议:');
   if (results.missing.length > 0) {
-    console.log('  1. 创建缺失的页面组件');
   }
   if (results.missingRoutes.length > 0) {
-    console.log('  2. 在AppRoutes.tsx中添加缺失的路由配置');
   }
   if (results.backupFiles.length > 0) {
-    console.log('  3. 删除备份和演示文件');
   }
   if (results.orphanedPages.length > 0) {
-    console.log('  4. 处理孤立的页面文件');
   }
 
-  console.log('\n🎯 一致性检查完成！');
 
   return results;
 }
@@ -253,7 +227,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     // 输出JSON格式的结果供其他脚本使用
     const outputPath = path.join(__dirname, 'route-consistency-report.json');
     fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
-    console.log(`\n📄 详细报告已保存到: ${outputPath}`);
 
     process.exit(results.missing.length === 0 && results.missingRoutes.length === 0 ? 0 : 1);
   } catch (error) {

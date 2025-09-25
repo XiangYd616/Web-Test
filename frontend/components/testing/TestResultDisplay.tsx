@@ -185,6 +185,16 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
     }
 
     filtered.sort((a, b) => {
+
+      /**
+
+       * switch功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
       switch (sortBy) {
         case 'priority':

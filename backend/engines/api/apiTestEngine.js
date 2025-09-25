@@ -14,7 +14,7 @@ class ApiTestEngine {
     this.version = '2.0.0';
     this.description = 'API端点测试引擎';
     this.options = {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       maxRedirects: 5,
       userAgent: 'API-Test-Engine/2.0.0',
       ...options
@@ -102,6 +102,16 @@ class ApiTestEngine {
       
       if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
         const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         requestOptions.headers['Content-Length'] = Buffer.byteLength(bodyStr);
         if (!requestOptions.headers['Content-Type']) {
           requestOptions.headers['Content-Type'] = 'application/json';
@@ -422,11 +432,31 @@ class ApiTestEngine {
       recommendations.push(`${summary.failed} 个端点测试失败，建议检查服务器状态`);
     }
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const avgTime = parseInt(summary.averageResponseTime);
     if (avgTime > 1000) {
       recommendations.push(`平均响应时间较长 (${summary.averageResponseTime})，建议优化性能`);
     }
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const successRate = parseInt(summary.successRate);
     if (successRate < 95) {
       recommendations.push(`成功率较低 (${summary.successRate})，建议检查失败的端点`);

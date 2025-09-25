@@ -159,7 +159,7 @@ class CoreTestEngine {
     return {
       supportedTests: ['core', 'system', 'health'],
       maxConcurrent: 5,
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       features: [
         'system-monitoring',
         'resource-tracking',

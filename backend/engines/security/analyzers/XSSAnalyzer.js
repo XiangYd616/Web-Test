@@ -77,7 +77,7 @@ class XSSAnalyzer {
       'alert("XSS")',
       'alert(/'XSS\')',
       'alert(`XSS`)',
-      'console.log("XSS")',
+      '',
       'document.write("XSS")'
     ];
     
@@ -244,6 +244,11 @@ class XSSAnalyzer {
         const formData = [];
         
         formElements.forEach((form, index) => {
+          /**
+           * if功能函数
+           * @param {Object} params - 参数对象
+           * @returns {Promise<Object>} 返回结果
+           */
           const inputs = form.querySelectorAll('input[type="text"], input[type="search"], textarea');
           if (inputs.length > 0) {
             formData.push({
@@ -396,7 +401,7 @@ class XSSAnalyzer {
     
     try {
       const uniqueMarker = this.uniqueId();
-      const testPayload = `<script>console.log("STORED_XSS_${uniqueMarker}")</script>`;
+      const testPayload = `<script></script>`;
       
       // 提交存储型XSS载荷
       for (const input of form.inputs) {

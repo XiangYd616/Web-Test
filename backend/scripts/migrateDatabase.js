@@ -23,7 +23,6 @@ const config = dbConfigModule.getDatabaseConfig ? dbConfigModule.getDatabaseConf
   password: process.env.DB_PASSWORD || 'postgres'
 };
 
-console.log('🔄 Test-Web数据库迁移管理脚本');
 console.log('📊 环境:', environment);
 
 // 创建连接池
@@ -135,7 +134,6 @@ async function executeMigration(migration) {
   const client = await pool.connect();
 
   try {
-    console.log(`🔄 执行迁移: ${migration.filename}`);
 
     const startTime = Date.now();
 
@@ -201,7 +199,6 @@ async function executeMigration(migration) {
  */
 async function runMigrations() {
   try {
-    console.log('🔄 开始执行数据库迁移...');
 
     // 确保迁移记录表存在
     await createMigrationsTable();
@@ -210,8 +207,6 @@ async function runMigrations() {
     const migrationFiles = await getMigrationFiles();
     const executedMigrations = await getExecutedMigrations();
 
-    console.log(`📁 发现 ${migrationFiles.length} 个迁移文件`);
-    console.log(`📋 已执行 ${executedMigrations.length} 个迁移`);
 
     // 找出待执行的迁移
     const executedVersions = new Set(executedMigrations.map(m => m.version));
@@ -222,8 +217,7 @@ async function runMigrations() {
       return;
     }
 
-    console.log(`🔄 需要执行 ${pendingMigrations.length} 个迁移:`);
-    pendingMigrations.forEach(m => console.log(`   - ${m.filename}`));
+    pendingMigrations.forEach(m => );
 
     // 执行待执行的迁移
     let successCount = 0;
@@ -240,8 +234,6 @@ async function runMigrations() {
       }
     }
 
-    console.log(`🎉 迁移执行完成: ${successCount}/${pendingMigrations.length} 成功`);
-    console.log(`⏱️ 总执行时间: ${totalTime}ms`);
 
   } catch (error) {
     console.error('❌ 迁移执行失败:', error);
@@ -259,16 +251,12 @@ async function showMigrationStatus() {
     const migrationFiles = await getMigrationFiles();
     const executedMigrations = await getExecutedMigrations();
 
-    console.log(`📁 迁移文件总数: ${migrationFiles.length}`);
     console.log(`✅ 已执行迁移: ${executedMigrations.length}`);
-    console.log(`⏳ 待执行迁移: ${migrationFiles.length - executedMigrations.length}`);
 
     if (executedMigrations.length > 0) {
-      console.log('\n📋 已执行的迁移:');
       executedMigrations.forEach(m => {
         const status = m.success ? '✅' : '❌';
         const time = m.execution_time ? `(${m.execution_time}ms)` : '';
-        console.log(`   ${status} ${m.filename} - ${m.executed_at} ${time}`);
       });
     }
 
@@ -276,9 +264,7 @@ async function showMigrationStatus() {
     const pendingMigrations = migrationFiles.filter(m => !executedVersions.has(m.version));
 
     if (pendingMigrations.length > 0) {
-      console.log('\n⏳ 待执行的迁移:');
       pendingMigrations.forEach(m => {
-        console.log(`   ⏳ ${m.filename}`);
       });
     }
 
@@ -367,7 +353,6 @@ async function createMigration(name) {
 
     await fs.writeFile(filepath, template);
     console.log(`✅ 迁移文件创建成功: ${filename}`);
-    console.log(`📁 文件路径: ${filepath}`);
 
   } catch (error) {
     console.error('❌ 创建迁移文件失败:', error);
@@ -378,8 +363,6 @@ async function createMigration(name) {
 if (require.main === module) {
   (async () => {
     try {
-      console.log('🔄 Test-Web数据库迁移脚本启动');
-      console.log('='.repeat(50));
 
       const args = process.argv.slice(2);
       const command = args[0] || 'migrate';
@@ -410,15 +393,9 @@ if (require.main === module) {
 
         default:
           console.log('❌ 未知命令:', command);
-          console.log('可用命令:');
-          console.log('  migrate/up  - 执行待执行的迁移');
-          console.log('  status      - 显示迁移状态');
-          console.log('  validate    - 验证迁移文件完整性');
-          console.log('  create      - 创建新的迁移文件');
           process.exit(1);
       }
 
-      console.log('='.repeat(50));
       console.log('✅ 迁移脚本执行完成');
 
     } catch (error) {

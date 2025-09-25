@@ -418,6 +418,16 @@ const TablePagination: React.FC<TablePaginationProps> = ({
 }) => {
   const totalPages = Math.ceil(total / pageSize);
   const startItem = (current - 1) * pageSize + 1;
+
+  /**
+
+   * 处理handlePageChange事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   const endItem = Math.min(current * pageSize, total);
 
   const handlePageChange = (page: number) => {

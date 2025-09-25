@@ -62,7 +62,6 @@ class EngineMonitor extends EventEmitter {
     this.healthHistory.set(name, []);
     
     this.emit('engineRegistered', { name, config: engineConfig });
-    console.log(`引擎 ${name} 已注册到监控系统`);
   }
 
   /**
@@ -77,7 +76,6 @@ class EngineMonitor extends EventEmitter {
     this.healthHistory.delete(name);
     
     this.emit('engineUnregistered', { name });
-    console.log(`引擎 ${name} 已从监控系统中移除`);
   }
 
   /**
@@ -85,7 +83,6 @@ class EngineMonitor extends EventEmitter {
    */
   startMonitoring() {
     if (this.monitoring) {
-      console.log('监控已经在运行中');
       return;
     }
 
@@ -97,7 +94,6 @@ class EngineMonitor extends EventEmitter {
     }, this.options.checkInterval);
 
     this.emit('monitoringStarted');
-    console.log(`引擎监控已启动，检查间隔: ${this.options.checkInterval}ms`);
   }
 
   /**
@@ -105,7 +101,6 @@ class EngineMonitor extends EventEmitter {
    */
   stopMonitoring() {
     if (!this.monitoring) {
-      console.log('监控未在运行');
       return;
     }
 
@@ -116,7 +111,6 @@ class EngineMonitor extends EventEmitter {
     }
 
     this.emit('monitoringStopped');
-    console.log('引擎监控已停止');
   }
 
   /**
@@ -448,7 +442,6 @@ class EngineMonitor extends EventEmitter {
     
     // 输出警报日志
     const severity = alert.severity.toUpperCase();
-    console.log(`[${severity}] ${alert.message}`);
   }
 
   /**
@@ -641,7 +634,6 @@ class EngineMonitor extends EventEmitter {
     if (options.filePath) {
       try {
         await fs.writeFile(options.filePath, JSON.stringify(data, null, 2));
-        console.log(`监控数据已导出到: ${options.filePath}`);
       } catch (error) {
         throw new Error(`导出数据失败: ${error.message}`);
       }
@@ -686,7 +678,6 @@ class EngineMonitor extends EventEmitter {
     });
     
     const cleanedAlertsCount = initialAlertsCount - this.alerts.length;
-    console.log(`清理完成: 删除${cleanedAlertsCount}条警报记录`);
     
     this.emit('cleanupCompleted', { 
       cleanedAlerts: cleanedAlertsCount,
@@ -703,7 +694,6 @@ class EngineMonitor extends EventEmitter {
     this.healthHistory.clear();
     this.alerts = [];
     this.removeAllListeners();
-    console.log('引擎监控实例已销毁');
   }
 }
 

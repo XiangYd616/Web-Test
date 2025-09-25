@@ -62,7 +62,6 @@ class ConsoleLogOutput extends LogOutput {
       output = this.colors[logEntry.level] + output + this.colors.reset;
     }
     
-    console.log(output);
   }
 }
 
@@ -591,7 +590,6 @@ class ErrorLogAggregator extends EventEmitter {
     this.outputs = [];
     this.isInitialized = false;
     
-    console.log('📝 错误日志聚合器已关闭');
   }
 }
 

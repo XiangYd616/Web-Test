@@ -1,3 +1,10 @@
+/**
+ * TestHistoryDetailed.tsx - React组件
+ * 
+ * 文件路径: frontend\components\common\TestHistoryDetailed.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { AlertCircle, Archive, BarChart3, CheckCircle, Clock, Database, Download, Eye, FileText, Filter, Globe, MoreHorizontal, RefreshCw, Search, Shield, Star, Tag, Trash2, TrendingUp, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -69,6 +76,11 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
       }
 
       const params = new URLSearchParams();
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
       Object.entries(query).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           if (Array.isArray(value)) {
@@ -80,6 +92,11 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
       });
 
       const headers: Record<string, string> = {};
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const token = localStorage.getItem('auth_token');
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -93,6 +110,16 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
         throw new Error('获取测试历史失败');
       }
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const data: TestHistoryResponse = await response.json();
 
       if (data.success) {
@@ -136,11 +163,10 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
   useEffect(() => {
     // 连接到后端WebSocket服务器
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//localhost:3001`;
+    const wsUrl = `${protocol}//${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      console.log('测试历史WebSocket连接已建立');
       // 加入测试历史更新房间
       ws.send(JSON.stringify({
         type: 'join-room',
@@ -175,7 +201,6 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
     };
 
     ws.onclose = () => {
-      console.log('测试历史WebSocket连接已关闭');
     };
 
     ws.onerror = (error) => {
@@ -588,6 +613,11 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
             <button
               type="button"
               onClick={() => {
+                /**
+                 * if功能函数
+                 * @param {Object} params - 参数对象
+                 * @returns {Promise<Object>} 返回结果
+                 */
                 const tags = prompt('请输入标签（用逗号分隔）:');
                 if (tags) {
                   handleBatchAction('tag', { tags: tags.split(',').map(t => t.trim()) });

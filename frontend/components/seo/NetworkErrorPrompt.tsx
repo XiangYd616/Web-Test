@@ -1,3 +1,10 @@
+/**
+ * NetworkErrorPrompt.tsx - React组件
+ * 
+ * 文件路径: frontend\components\seo\NetworkErrorPrompt.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import type { FC } from 'react';
 import { AlertTriangle, HardDrive, RefreshCw, Wifi } from 'lucide-react';

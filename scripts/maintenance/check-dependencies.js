@@ -35,7 +35,6 @@ class DependencyChecker {
    * 检查导入路径
    */
   async checkImportPaths() {
-    console.log('📦 检查导入路径...');
     
     const files = this.getAllTSFiles();
     let checkedCount = 0;
@@ -61,19 +60,15 @@ class DependencyChecker {
         
         checkedCount++;
       } catch (error) {
-        console.log(`   ⚠️ 无法读取文件: ${file}`);
       }
     }
 
-    console.log(`   ✅ 检查了 ${checkedCount} 个文件`);
-    console.log(`   ${issueCount > 0 ? '❌' : '✅'} 发现 ${issueCount} 个路径问题\n`);
   }
 
   /**
    * 检查未使用的导入
    */
   async checkUnusedImports() {
-    console.log('🧹 检查未使用的导入...');
     
     const files = this.getAllTSFiles();
     let checkedCount = 0;
@@ -101,12 +96,9 @@ class DependencyChecker {
         
         checkedCount++;
       } catch (error) {
-        console.log(`   ⚠️ 无法读取文件: ${file}`);
       }
     }
 
-    console.log(`   ✅ 检查了 ${checkedCount} 个文件`);
-    console.log(`   ${unusedCount > 0 ? '⚠️' : '✅'} 发现 ${unusedCount} 个可能未使用的导入\n`);
   }
 
   /**
@@ -255,53 +247,34 @@ class DependencyChecker {
       this.issues.missingFiles.length + 
       this.issues.unusedImports.length;
 
-    console.log('='.repeat(60));
-    console.log('📋 依赖检查报告');
-    console.log('='.repeat(60));
 
     // 缺失文件
     if (this.issues.missingFiles.length > 0) {
-      console.log(`\n❌ 缺失文件 (${this.issues.missingFiles.length}个):`);
       this.issues.missingFiles.slice(0, 10).forEach(issue => {
-        console.log(`   ${issue.file}:${issue.line} - ${issue.import}`);
       });
       if (this.issues.missingFiles.length > 10) {
-        console.log(`   ... 还有 ${this.issues.missingFiles.length - 10} 个问题`);
       }
     }
 
     // 可能未使用的导入
     if (this.issues.unusedImports.length > 0) {
-      console.log(`\n⚠️ 可能未使用的导入 (${this.issues.unusedImports.length}个):`);
       this.issues.unusedImports.slice(0, 10).forEach(issue => {
-        console.log(`   ${issue.file}:${issue.line} - ${issue.import}`);
       });
       if (this.issues.unusedImports.length > 10) {
-        console.log(`   ... 还有 ${this.issues.unusedImports.length - 10} 个问题`);
       }
     }
 
     // 总结
-    console.log('\n' + '='.repeat(60));
     console.log('📊 检查总结:');
-    console.log(`   缺失文件: ${this.issues.missingFiles.length}个`);
-    console.log(`   可能未使用导入: ${this.issues.unusedImports.length}个`);
-    console.log(`   总问题数: ${totalIssues}个`);
 
     if (totalIssues === 0) {
-      console.log('\n🎉 恭喜！没有发现依赖问题！');
     } else {
-      console.log('\n💡 建议:');
       if (this.issues.missingFiles.length > 0) {
-        console.log('   1. 检查缺失的文件是否需要创建');
-        console.log('   2. 修正错误的导入路径');
       }
       if (this.issues.unusedImports.length > 0) {
-        console.log('   3. 清理未使用的导入语句');
       }
     }
 
-    console.log('='.repeat(60));
   }
 }
 

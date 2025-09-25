@@ -15,7 +15,7 @@ class NetworkTestEngine {
     this.version = '2.0.0';
     this.testResults = [];
     this.config = {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       maxRetries: 3,
       concurrency: 10
     };
@@ -44,7 +44,6 @@ class NetworkTestEngine {
     try {
       const { url = 'https://example.com', targets = ['8.8.8.8'] } = config;
       
-      console.log(`🌐 开始网络测试...`);
       
       const results = await this.runNetworkTest(url, targets);
       
@@ -71,31 +70,24 @@ class NetworkTestEngine {
    */
   async runNetworkTest(url, targets) {
     const startTime = Date.now();
-    console.log(`🌍 开始网络综合测试...`);
     
     const tests = {};
     
     // 1. 连通性测试
-    console.log('  🔍 测试连通性...');
     tests.connectivity = await this.testConnectivity(targets);
     
     // 2. DNS解析测试
     if (url) {
-      console.log('  🌐 测试DNS解析...');
       tests.dnsResolution = await this.testDNSResolution(url);
       
-      console.log('  📊 测试HTTP性能...');
       tests.httpPerformance = await this.testHTTPPerformance(url);
       
-      console.log('  🔍 扫描端口...');
       tests.portScan = await this.testCommonPorts(url);
       
-      console.log('  📁 检测网络路由...');
       tests.routing = await this.testRouting(url);
     }
     
     // 3. 网络质量测试
-    console.log('  📎 测试网络质量...');
     tests.quality = await this.testNetworkQuality(targets);
     
     const endTime = Date.now();
@@ -291,9 +283,34 @@ class NetworkTestEngine {
     try {
       const urlObj = new URL(url);
       const hostname = urlObj.hostname;
+
+
+      /**
+
+
+       * for功能函数
+
+
+       * @param {Object} params - 参数对象
+
+
+       * @returns {Promise<Object>} 返回结果
+
+
+       */
       const commonPorts = [80, 443, 22, 21, 25, 53];
 
       for (const port of commonPorts) {
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const isOpen = await this.testPort(hostname, port);
         if (isOpen) {
           result.openPorts.push(port);

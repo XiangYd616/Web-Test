@@ -36,6 +36,11 @@ class ClientsTestEngine {
       timeout: Joi.number().min(1000).max(300000).default(30000)
     });
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const { error, value } = schema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);

@@ -53,7 +53,6 @@ export const UnifiedTestPage: React.FC = () => {
 
     // 显示成功通知
     if (result.overallScore >= 80) {
-      console.log('🎉 测试结果优秀！');
     } else if (result.overallScore >= 60) {
       console.log('⚠️ 测试结果良好，有改进空间');
     } else {

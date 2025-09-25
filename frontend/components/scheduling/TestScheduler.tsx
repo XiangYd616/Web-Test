@@ -130,7 +130,7 @@ const TestScheduler: React.FC = () => {
         config: {
           targets: [`https://example${i + 1}.com`],
           parameters: {},
-          timeout: 300000,
+          timeout: process.env.REQUEST_TIMEOUT || 300000,
           retryAttempts: 3,
           notifications: {
             onSuccess: false,

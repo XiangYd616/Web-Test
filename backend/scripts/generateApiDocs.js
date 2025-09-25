@@ -22,7 +22,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3001',
+        url: process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}',
         description: '开发环境'
       },
       {
@@ -41,7 +41,6 @@ const swaggerOptions = {
  * 生成API文档
  */
 async function generateApiDocs() {
-  console.log('📚 开始生成API文档...');
   
   try {
     // 生成Swagger规范
@@ -72,13 +71,7 @@ async function generateApiDocs() {
     
     // 统计信息
     const stats = analyzeApiSpecs(specs);
-    console.log('\n📊 API文档统计:');
-    console.log(`  - 总路径数: ${stats.totalPaths}`);
-    console.log(`  - 总操作数: ${stats.totalOperations}`);
-    console.log(`  - 已文档化操作: ${stats.documentedOperations}`);
-    console.log(`  - 文档化率: ${(stats.documentedOperations / stats.totalOperations * 100).toFixed(1)}%`);
     
-    console.log('\n🎉 API文档生成完成！');
     
   } catch (error) {
     console.error('❌ API文档生成失败:', error);
@@ -281,7 +274,6 @@ async function main() {
       break;
       
     default:
-      console.log(`
 📚 API文档生成工具
 
 使用方法:

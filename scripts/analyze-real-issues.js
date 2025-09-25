@@ -11,8 +11,6 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('🎯 Test-Web 真实问题分析');
-console.log('=' .repeat(60));
 
 // 读取之前的报告
 const reportPath = path.join(__dirname, '..', 'docs', 'error-check-report.json');
@@ -195,10 +193,8 @@ function checkRouteEngineSync() {
  * 生成优化报告
  */
 function generateOptimizedReport() {
-  console.log('\n🔍 开始分析真实问题...\n');
   
   // 1. 验证敏感信息
-  console.log('检查敏感信息...');
   report.critical.forEach(issue => {
     if (issue.issue.includes('敏感信息')) {
       const validation = validateSensitiveInfo(issue.file);
@@ -212,120 +208,72 @@ function generateOptimizedReport() {
   });
   
   // 2. 分析TODO优先级
-  console.log('分析TODO优先级...');
   const todoAnalysis = analyzeTodosPriority(report.todos);
   
   // 3. 分析文件大小
-  console.log('分析文件大小问题...');
   const { oversizedFiles, emptyFiles } = analyzeFileSizes();
   
   // 4. 检查路由引擎同步
-  console.log('检查路由引擎同步...');
   const routeIssues = checkRouteEngineSync();
   
   // 5. 生成报告
-  console.log('\n' + '='.repeat(60));
   console.log('📊 真实问题分析报告');
-  console.log('='.repeat(60));
   
   // 严重问题
-  console.log('\n🔴 严重问题:');
   if (realIssues.critical.length > 0) {
     realIssues.critical.forEach(issue => {
-      console.log(`  ❌ ${issue.file}`);
       if (issue.validation && issue.validation.matches) {
-        console.log(`     找到: ${issue.validation.matches.join(', ')}`);
       }
     });
   } else {
-    console.log('  ✅ 没有发现真实的硬编码敏感信息');
   }
   
   // TODO分析
-  console.log('\n📝 TODO/FIXME 分析:');
-  console.log(`  高优先级 (影响功能): ${todoAnalysis.high.length} 个`);
-  console.log(`  中优先级 (功能增强): ${todoAnalysis.medium.length} 个`);
-  console.log(`  低优先级 (代码优化): ${todoAnalysis.low.length} 个`);
   
   if (todoAnalysis.high.length > 0) {
-    console.log('\n  高优先级TODO示例:');
     todoAnalysis.high.slice(0, 3).forEach(todo => {
-      console.log(`    - ${todo.file}:${todo.line}`);
-      console.log(`      ${todo.content.substring(0, 60)}...`);
     });
   }
   
   // 文件大小问题
-  console.log('\n📦 文件大小问题:');
-  console.log(`  超大文件 (>200KB): ${oversizedFiles.length} 个`);
-  console.log(`  空文件: ${emptyFiles.length} 个`);
   
   if (oversizedFiles.length > 0) {
-    console.log('\n  超大文件:');
     oversizedFiles.slice(0, 5).forEach(file => {
-      console.log(`    - ${file.file}: ${file.size}KB`);
     });
   }
   
   // 路由引擎同步问题
   if (routeIssues.length > 0) {
-    console.log('\n🔄 路由引擎同步问题:');
     routeIssues.forEach(issue => {
-      console.log(`  - ${issue.type}: ${issue.issue}`);
     });
   }
   
   // 总结
-  console.log('\n' + '='.repeat(60));
-  console.log('🎯 问题总结和建议');
-  console.log('='.repeat(60));
   
   const criticalCount = realIssues.critical.length;
   const highTodoCount = todoAnalysis.high.length;
   const totalRealIssues = criticalCount + highTodoCount + routeIssues.length;
   
-  console.log('\n📊 真实问题统计:');
-  console.log(`  🔴 需立即修复: ${criticalCount} 个`);
-  console.log(`  🟡 需尽快处理: ${highTodoCount} 个`);
-  console.log(`  🟢 建议优化: ${todoAnalysis.medium.length + oversizedFiles.length} 个`);
   
-  console.log('\n✨ 优先级建议:');
   
   if (criticalCount > 0) {
-    console.log('\n1️⃣ 立即处理（严重）:');
-    console.log('   - 移除或替换硬编码的敏感信息');
-    console.log('   - 使用环境变量管理配置');
   }
   
   if (routeIssues.length > 0) {
-    console.log('\n2️⃣ 尽快处理（重要）:');
-    console.log('   - 创建缺失的路由文件');
-    console.log('   - 确保前后端API一致');
   }
   
   if (highTodoCount > 0) {
-    console.log('\n3️⃣ 计划处理（中等）:');
-    console.log('   - 完成影响功能的TODO项');
-    console.log('   - 实现待完成的核心功能');
   }
   
   if (oversizedFiles.length > 0) {
-    console.log('\n4️⃣ 优化建议（低）:');
-    console.log('   - 拆分超大文件');
-    console.log('   - 清理空文件');
-    console.log('   - 优化代码结构');
   }
   
   // 整体评估
-  console.log('\n' + '='.repeat(60));
-  console.log('💡 整体评估:');
   
   if (totalRealIssues === 0) {
-    console.log('🎉 优秀！项目代码质量很高，没有发现严重问题。');
   } else if (criticalCount === 0 && totalRealIssues < 10) {
     console.log('✅ 良好！项目整体健康，只有少量需要优化的地方。');
   } else if (criticalCount === 0) {
-    console.log('👍 不错！没有严重问题，但有一些TODO需要完成。');
   } else {
     console.log('⚠️  需要关注！存在一些问题需要修复。');
   }
@@ -352,7 +300,6 @@ function generateOptimizedReport() {
   
   const outputPath = path.join(__dirname, '..', 'docs', 'real-issues-report.json');
   fs.writeFileSync(outputPath, JSON.stringify(optimizedReport, null, 2));
-  console.log(`\n📄 详细报告已保存到: docs/real-issues-report.json`);
 }
 
 // 执行分析

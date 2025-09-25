@@ -39,6 +39,21 @@ function VirtualScrollList<T>({
         offsetY,
         handleScroll,
         startIndex
+
+
+    /**
+
+
+     * 处理handleScrollEvent事件
+
+
+     * @param {Object} event - 事件对象
+
+
+     * @returns {Promise<void>}
+
+
+     */
     } = useVirtualScroll(items, itemHeight, height, overscan);
 
     const handleScrollEvent = (e: React.UIEvent<HTMLDivElement>) => {

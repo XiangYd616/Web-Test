@@ -53,7 +53,7 @@ const DatabaseTest: React.FC = () => {
   const [config, setConfig] = useState<DatabaseConfig>({
     connectionString: '',
     testType: 'comprehensive',
-    timeout: 30000,
+    timeout: process.env.REQUEST_TIMEOUT || 30000,
     maxConnections: 10,
     queryTimeout: 5000,
     includePerformanceTests: true,

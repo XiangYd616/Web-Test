@@ -6,7 +6,7 @@
 class UXAnalyzer {
   constructor(options = {}) {
     this.options = {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       ...options
     };
   }
@@ -118,15 +118,12 @@ class UXAnalyzer {
       };
     }
   }
-}
-
 
   /**
    * 运行UX测试
    */
   async runUXTest(url, options = {}) {
     try {
-      console.log('👤 Running UX test for:', url);
       
       const result = {
         success: true,
@@ -169,5 +166,6 @@ class UXAnalyzer {
       throw error;
     }
   }
+}
 
 module.exports = UXAnalyzer;

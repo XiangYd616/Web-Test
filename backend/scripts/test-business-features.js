@@ -13,7 +13,6 @@ console.log('🚀 开始核心业务功能测试...\n');
  * 测试项目结构和关键文件
  */
 function testProjectStructure() {
-  console.log('📁 检查项目结构...');
   
   const criticalPaths = [
     // 后端核心路由
@@ -42,15 +41,12 @@ function testProjectStructure() {
   
   criticalPaths.forEach(({ path: filePath, desc }) => {
     if (fs.existsSync(filePath)) {
-      console.log(`  ✅ ${desc}`);
       existingFiles++;
     } else {
-      console.log(`  ❌ ${desc} - 文件不存在: ${filePath}`);
       missingFiles++;
     }
   });
   
-  console.log(`\n📊 文件检查结果: ${existingFiles}个存在, ${missingFiles}个缺失\n`);
   return missingFiles === 0;
 }
 
@@ -58,7 +54,6 @@ function testProjectStructure() {
  * 测试后端路由语法
  */
 function testBackendRoutes() {
-  console.log('⚙️ 测试后端路由语法...');
   
   const routes = [
     'routes/seo.js',
@@ -80,23 +75,18 @@ function testBackendRoutes() {
         
         // 检查基本语法错误
         if (content.includes('module.exports') || content.includes('router.')) {
-          console.log(`  ✅ ${route} - 语法正常`);
           passedRoutes++;
         } else {
-          console.log(`  ⚠️  ${route} - 可能语法有问题`);
           failedRoutes++;
         }
       } else {
-        console.log(`  ❌ ${route} - 文件不存在`);
         failedRoutes++;
       }
     } catch (error) {
-      console.log(`  ❌ ${route} - 检查失败: ${error.message}`);
       failedRoutes++;
     }
   });
   
-  console.log(`\n📊 路由检查结果: ${passedRoutes}个正常, ${failedRoutes}个有问题\n`);
   return failedRoutes === 0;
 }
 
@@ -104,7 +94,6 @@ function testBackendRoutes() {
  * 测试数据库连接和表结构
  */
 async function testDatabaseIntegrity() {
-  console.log('🗄️ 测试数据库完整性...');
   
   try {
     const { connectDB, query } = require('../config/database');
@@ -132,24 +121,18 @@ async function testDatabaseIntegrity() {
     let foundTables = 0;
     businessTables.forEach(table => {
       if (existingTables.includes(table)) {
-        console.log(`  ✅ ${table} 表存在`);
         foundTables++;
       } else {
-        console.log(`  ❌ ${table} 表缺失`);
       }
     });
     
-    console.log(`  📊 总计表数: ${existingTables.length}, 核心表: ${foundTables}/${businessTables.length}`);
     
     // 测试基本查询
     const testQuery = await query('SELECT COUNT(*) as count FROM users');
-    console.log(`  👥 用户总数: ${testQuery.rows[0].count}`);
     
-    console.log('  ✅ 数据库连接和查询正常\n');
     return true;
     
   } catch (error) {
-    console.log(`  ❌ 数据库测试失败: ${error.message}\n`);
     return false;
   }
 }
@@ -158,7 +141,6 @@ async function testDatabaseIntegrity() {
  * 测试关键API端点
  */
 async function testAPIEndpoints() {
-  console.log('🔗 测试API端点可用性...');
   
   // 这里我们只测试路由是否能加载，不发起真实请求
   const apiRoutes = [
@@ -177,20 +159,15 @@ async function testAPIEndpoints() {
         // 尝试require路由文件
         const routeModule = require(`../${route.path}`);
         if (routeModule && typeof routeModule === 'function') {
-          console.log(`  ✅ ${route.desc} - 可加载`);
           loadableRoutes++;
         } else {
-          console.log(`  ⚠️  ${route.desc} - 模块格式异常`);
         }
       } else {
-        console.log(`  ❌ ${route.desc} - 文件不存在`);
       }
     } catch (error) {
-      console.log(`  ❌ ${route.desc} - 加载失败: ${error.message}`);
     }
   }
   
-  console.log(`\n📊 API路由结果: ${loadableRoutes}/${apiRoutes.length} 可用\n`);
   return loadableRoutes === apiRoutes.length;
 }
 
@@ -198,7 +175,6 @@ async function testAPIEndpoints() {
  * 测试前端组件可用性
  */
 function testFrontendComponents() {
-  console.log('🖼️ 检查前端核心组件...');
   
   const frontendComponents = [
     { path: '../frontend/pages/WebsiteTest.tsx', desc: '网站测试页面' },
@@ -216,17 +192,13 @@ function testFrontendComponents() {
       // 简单检查是否包含React组件标识
       const content = fs.readFileSync(path, 'utf8');
       if (content.includes('React') && (content.includes('export') || content.includes('function'))) {
-        console.log(`  ✅ ${desc}`);
         existingComponents++;
       } else {
-        console.log(`  ⚠️  ${desc} - 可能不是有效的React组件`);
       }
     } else {
-      console.log(`  ❌ ${desc} - 文件不存在`);
     }
   });
   
-  console.log(`\n📊 前端组件: ${existingComponents}/${frontendComponents.length} 可用\n`);
   return existingComponents >= frontendComponents.length * 0.8; // 80%通过率
 }
 
@@ -234,7 +206,6 @@ function testFrontendComponents() {
  * 检查用户核心功能流程
  */
 function testUserWorkflows() {
-  console.log('👤 验证用户核心功能流程...');
   
   const workflows = [
     {
@@ -282,17 +253,13 @@ function testUserWorkflows() {
     const missingFiles = workflow.requirements.filter(file => !fs.existsSync(file));
     
     if (missingFiles.length === 0) {
-      console.log(`  ✅ ${workflow.name} - 功能完整`);
       completedWorkflows++;
     } else if (missingFiles.length <= workflow.requirements.length / 2) {
-      console.log(`  ⚠️  ${workflow.name} - 部分可用 (缺少: ${missingFiles.length}个文件)`);
       completedWorkflows += 0.5;
     } else {
-      console.log(`  ❌ ${workflow.name} - 功能不可用 (缺少关键文件)`);
     }
   });
   
-  console.log(`\n📊 用户流程: ${completedWorkflows}/${workflows.length} 可用\n`);
   return completedWorkflows >= workflows.length * 0.7;
 }
 
@@ -300,32 +267,17 @@ function testUserWorkflows() {
  * 生成业务功能测试报告
  */
 function generateBusinessTestReport(results) {
-  console.log('='.repeat(60));
-  console.log('📋 核心业务功能测试报告');
-  console.log('='.repeat(60));
   
   const totalTests = Object.keys(results).length;
   const passedTests = Object.values(results).filter(Boolean).length;
   const failedTests = totalTests - passedTests;
   
-  console.log(`总测试项: ${totalTests}`);
-  console.log(`通过测试: ${passedTests}`);
-  console.log(`失败测试: ${failedTests}`);
-  console.log(`通过率: ${Math.round((passedTests / totalTests) * 100)}%`);
   
-  console.log('\n详细结果:');
   Object.entries(results).forEach(([testName, passed]) => {
     const icon = passed ? '✅' : '❌';
-    console.log(`  ${icon} ${testName}`);
   });
   
   if (passedTests === totalTests) {
-    console.log('\n🎉 所有核心功能测试通过！用户可以正常使用系统');
-    console.log('\n🚀 建议操作:');
-    console.log('  1. 启动前端和后端服务');
-    console.log('  2. 在浏览器中访问 http://localhost:5174');
-    console.log('  3. 测试用户注册、登录和核心测试功能');
-    console.log('  4. 验证测试结果和报告生成');
   } else {
     const criticalIssues = [];
     
@@ -339,15 +291,11 @@ function generateBusinessTestReport(results) {
       criticalIssues.push('前端页面组件缺失或有问题');
     }
     
-    console.log('\n⚠️ 需要修复的问题:');
     criticalIssues.forEach(issue => {
-      console.log(`  - ${issue}`);
     });
     
     if (passedTests >= totalTests * 0.7) {
-      console.log('\n✨ 大部分功能可用，可以进行基础测试');
     } else {
-      console.log('\n🔧 建议优先修复核心问题后再测试');
     }
   }
 }

@@ -6,8 +6,8 @@
 const axios = require('axios');
 const WebSocket = require('ws');
 
-const BASE_URL = 'http://localhost:3001';
-const WS_URL = 'ws://localhost:3001';
+const BASE_URL = process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}';
+const WS_URL = 'ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}';
 
 /**
  * 验证脚本主类
@@ -49,7 +49,6 @@ class UnifiedEngineVerifier {
    * 验证API功能
    */
   async verifyAPIFunctions() {
-    console.log('📡 验证API功能...');
 
     // 验证获取测试类型
     try {
@@ -126,14 +125,12 @@ class UnifiedEngineVerifier {
       }
     }
 
-    console.log('');
   }
 
   /**
    * 验证WebSocket功能
    */
   async verifyWebSocketFunctions() {
-    console.log('🔌 验证WebSocket功能...');
 
     return new Promise((resolve) => {
       try {
@@ -207,7 +204,6 @@ class UnifiedEngineVerifier {
         });
 
         ws.on('close', () => {
-          console.log('🔌 WebSocket连接已关闭');
           clearTimeout(timeout);
           resolve();
         });
@@ -228,7 +224,6 @@ class UnifiedEngineVerifier {
    * 验证集成功能
    */
   async verifyIntegrationFunctions() {
-    console.log('🔗 验证集成功能...');
 
     // 验证健康检查
     try {
@@ -266,7 +261,6 @@ class UnifiedEngineVerifier {
       console.log('❌ API文档: 失败 -', error.message);
     }
 
-    console.log('');
   }
 
   /**
@@ -274,27 +268,20 @@ class UnifiedEngineVerifier {
    */
   generateReport() {
     console.log('📊 统一测试引擎验证报告');
-    console.log('='.repeat(50));
 
     // API功能报告
-    console.log('\n📡 API功能验证:');
     Object.entries(this.results.api).forEach(([key, result]) => {
       const status = result.success ? '✅' : '❌';
-      console.log(`  ${status} ${key}: ${result.message}`);
     });
 
     // WebSocket功能报告
-    console.log('\n🔌 WebSocket功能验证:');
     Object.entries(this.results.websocket).forEach(([key, result]) => {
       const status = result.success ? '✅' : '❌';
-      console.log(`  ${status} ${key}: ${result.message}`);
     });
 
     // 集成功能报告
-    console.log('\n🔗 集成功能验证:');
     Object.entries(this.results.integration).forEach(([key, result]) => {
       const status = result.success ? '✅' : '❌';
-      console.log(`  ${status} ${key}: ${result.message}`);
     });
 
     // 总体评估
@@ -302,24 +289,12 @@ class UnifiedEngineVerifier {
     const successfulTests = this.getSuccessfulTestCount();
     const successRate = (successfulTests / totalTests * 100).toFixed(1);
 
-    console.log('\n📈 总体评估:');
-    console.log(`  总测试数: ${totalTests}`);
-    console.log(`  成功数: ${successfulTests}`);
-    console.log(`  成功率: ${successRate}%`);
 
     if (successRate >= 80) {
-      console.log('\n🎉 统一测试引擎验证通过！功能正常。');
     } else if (successRate >= 60) {
-      console.log('\n⚠️ 统一测试引擎部分功能正常，需要优化。');
     } else {
-      console.log('\n❌ 统一测试引擎存在严重问题，需要修复。');
     }
 
-    console.log('\n🔗 访问链接:');
-    console.log(`  前端界面: http://localhost:5175`);
-    console.log(`  后端API: http://localhost:3001/api`);
-    console.log(`  API文档: http://localhost:3001/api-docs`);
-    console.log(`  健康检查: http://localhost:3001/health`);
   }
 
   /**

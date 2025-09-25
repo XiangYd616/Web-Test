@@ -91,6 +91,12 @@ export interface ConcurrentSessionPolicy {
   requireConfirmation: boolean;
 }
 
+
+/**
+
+ * DeviceDetector类 - 负责处理相关功能
+
+ */
 // ==================== 设备信息检测器 ====================
 
 class DeviceDetector {
@@ -203,6 +209,12 @@ class DeviceDetector {
   }
 }
 
+
+/**
+
+ * LocationDetector类 - 负责处理相关功能
+
+ */
 // ==================== 位置信息检测器 ====================
 
 class LocationDetector {
@@ -343,6 +355,16 @@ export class SessionManager {
   private config: SessionConfig;
   private activeSessions = new Map<string, SessionData>();
   private sessionAlerts: SessionAlert[] = [];
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   private heartbeatTimers = new Map<string, NodeJS.Timeout>();
 
   constructor(config: Partial<SessionConfig> = {}) {
@@ -573,6 +595,16 @@ export class SessionManager {
     policy: ConcurrentSessionPolicy,
     warnings: string[]
   ): Promise<void> {
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const userSessions = this.getUserSessions(userId);
 
     switch (policy.strategy) {
@@ -657,6 +689,11 @@ export class SessionManager {
 
   private startHeartbeat(sessionId: string): void {
     const timer = setInterval(async () => {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const session = this.activeSessions.get(sessionId);
       if (!session) {
         clearInterval(timer);
@@ -692,6 +729,11 @@ export class SessionManager {
     const expiredSessions: string[] = [];
 
     for (const [sessionId, session] of this.activeSessions.entries()) {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const expiryTime = new Date(session.expiresAt).getTime();
       if (now > expiryTime) {
         expiredSessions.push(sessionId);
@@ -706,7 +748,6 @@ export class SessionManager {
   private async sendSecurityNotifications(alerts: SessionAlert[]): Promise<void> {
     // 这里应该实现实际的通知发送逻辑
     // 例如：邮件、短信、推送通知等
-    console.log('安全警报:', alerts);
   }
 }
 

@@ -1,3 +1,10 @@
+/**
+ * PerformanceChart.tsx - React组件
+ * 
+ * 文件路径: frontend\components\charts\PerformanceChart.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { DataPoint, dataVisualizationOptimizer, OptimizationConfig } from '../../utils/dataVisualization';

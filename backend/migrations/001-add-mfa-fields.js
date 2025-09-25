@@ -18,7 +18,6 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     
     try {
-      console.log('🔄 开始执行MFA字段迁移...');
       
       // 检查表是否存在
       const tableExists = await queryInterface.describeTable('users');
@@ -105,10 +104,8 @@ module.exports = {
         const { field, ...options } = fieldInfo;
         
         if (!existingColumns[field]) {
-          console.log(`➕ 添加字段: ${field}`);
           await queryInterface.addColumn('users', field, options, { transaction });
         } else {
-          console.log(`⏭️ 字段已存在，跳过: ${field}`);
         }
       }
       
@@ -117,7 +114,6 @@ module.exports = {
         .then(tables => tables.includes('security_logs'));
       
       if (!securityLogsTableExists) {
-        console.log('📝 创建security_logs表...');
         await queryInterface.createTable('security_logs', {
           id: {
             type: DataTypes.UUID,
@@ -201,7 +197,6 @@ module.exports = {
         .then(tables => tables.includes('user_sessions'));
       
       if (!userSessionsTableExists) {
-        console.log('📝 创建user_sessions表...');
         await queryInterface.createTable('user_sessions', {
           id: {
             type: DataTypes.UUID,
@@ -317,7 +312,6 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     
     try {
-      console.log('🔄 开始回滚MFA字段迁移...');
       
       // 要移除的字段列表
       const fieldsToRemove = [
@@ -339,18 +333,15 @@ module.exports = {
       
       for (const field of fieldsToRemove) {
         if (existingColumns[field]) {
-          console.log(`➖ 移除字段: ${field}`);
           await queryInterface.removeColumn('users', field, { transaction });
         }
       }
       
       // 删除安全日志表
       await queryInterface.dropTable('security_logs', { transaction });
-      console.log('🗑️ 删除security_logs表');
       
       // 删除用户会话表
       await queryInterface.dropTable('user_sessions', { transaction });
-      console.log('🗑️ 删除user_sessions表');
       
       await transaction.commit();
       console.log('✅ MFA字段迁移回滚完成');

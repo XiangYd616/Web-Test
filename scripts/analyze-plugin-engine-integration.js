@@ -13,7 +13,6 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 
 console.log('🔍 插件系统与传统引擎整合分析');
-console.log('='.repeat(80));
 
 const analysis = {
   timestamp: new Date().toISOString(),
@@ -30,7 +29,6 @@ const analysis = {
 
 // 1. 分析传统测试引擎
 function analyzeTraditionalEngines() {
-  console.log('\n📦 分析传统测试引擎...');
   const enginesDir = path.join(projectRoot, 'backend', 'engines');
   
   if (!fs.existsSync(enginesDir)) {
@@ -66,12 +64,10 @@ function analyzeTraditionalEngines() {
     }
   });
 
-  console.log(`  ✓ 发现 ${Object.keys(analysis.traditionalEngines).length} 个传统引擎`);
 }
 
 // 2. 分析插件系统
 function analyzePluginSystem() {
-  console.log('\n🔌 分析插件系统...');
   const pluginsDir = path.join(projectRoot, 'backend', 'plugins');
   
   if (!fs.existsSync(pluginsDir)) {
@@ -130,14 +126,10 @@ function analyzePluginSystem() {
     });
   }
 
-  console.log(`  ✓ 插件管理器: ${analysis.pluginSystem.manager ? '已配置' : '未配置'}`);
-  console.log(`  ✓ 插件接口: ${analysis.pluginSystem.interfaces.length} 个`);
-  console.log(`  ✓ 示例插件: ${analysis.pluginSystem.plugins.length} 个`);
 }
 
 // 3. 检测冲突和重叠
 function detectConflictsAndOverlaps() {
-  console.log('\n⚠️  检测冲突和重叠...');
   
   // 检查功能重叠
   Object.entries(analysis.traditionalEngines).forEach(([name, engine]) => {
@@ -184,13 +176,10 @@ function detectConflictsAndOverlaps() {
     });
   }
 
-  console.log(`  ✓ 发现 ${analysis.overlaps.length} 个功能重叠`);
-  console.log(`  ✓ 发现 ${analysis.conflicts.length} 个潜在冲突`);
 }
 
 // 4. 生成整合建议
 function generateIntegrationRecommendations() {
-  console.log('\n💡 生成整合建议...');
   
   // 建议1: 统一架构
   analysis.recommendations.push({
@@ -390,60 +379,39 @@ class TraditionalEngineAdapter extends BasePlugin {
 
 // 生成报告
 function generateReport() {
-  console.log('\n' + '='.repeat(80));
   console.log('📊 分析报告');
-  console.log('='.repeat(80));
   
   // 架构现状
-  console.log('\n🏗️  架构现状:');
-  console.log(`  传统引擎: ${Object.keys(analysis.traditionalEngines).length} 个`);
-  console.log(`  插件系统: ${analysis.pluginSystem.manager ? '已启用' : '未启用'}`);
-  console.log(`  插件数量: ${analysis.pluginSystem.plugins.length} 个`);
   
   // 兼容性分析
   const compatibleEngines = Object.values(analysis.traditionalEngines)
     .filter(e => e.isPluginCompatible).length;
   const totalEngines = Object.keys(analysis.traditionalEngines).length;
   
-  console.log('\n🔄 兼容性分析:');
-  console.log(`  插件兼容: ${compatibleEngines}/${totalEngines} (${(compatibleEngines/totalEngines*100).toFixed(1)}%)`);
-  console.log(`  功能重叠: ${analysis.overlaps.length} 处`);
-  console.log(`  架构冲突: ${analysis.conflicts.length} 处`);
   
   // 问题详情
   if (analysis.conflicts.length > 0) {
-    console.log('\n❌ 发现的冲突:');
     analysis.conflicts.forEach(conflict => {
-      console.log(`  - [${conflict.type}] ${conflict.issue}`);
     });
   }
   
   if (analysis.overlaps.length > 0) {
-    console.log('\n⚡ 功能重叠:');
     analysis.overlaps.forEach(overlap => {
-      console.log(`  - ${overlap.description}`);
     });
   }
   
   // 建议
-  console.log('\n💡 整合建议:');
   analysis.recommendations.forEach((rec, index) => {
-    console.log(`\n${index + 1}. [${rec.priority.toUpperCase()}] ${rec.title}`);
-    console.log(`   ${rec.description}`);
     if (rec.steps) {
       rec.steps.forEach(step => {
-        console.log(`   • ${step}`);
       });
     }
   });
   
   // 迁移计划
   const migrationPlan = createMigrationPlan();
-  console.log('\n📅 建议迁移计划:');
   migrationPlan.phases.forEach(phase => {
-    console.log(`\n  阶段 ${phase.phase}: ${phase.title} (${phase.duration})`);
     phase.tasks.forEach(task => {
-      console.log(`    - ${task}`);
     });
   });
 }
@@ -455,11 +423,9 @@ function saveAnalysisResults() {
     ...analysis,
     migrationPlan: createMigrationPlan()
   }, null, 2));
-  console.log(`\n📁 详细分析结果已保存到: ${outputPath}`);
 }
 
 // 执行分析
-console.log(`\n🚀 开始分析项目: ${projectRoot}`);
 
 analyzeTraditionalEngines();
 analyzePluginSystem();
@@ -468,9 +434,3 @@ generateIntegrationRecommendations();
 generateReport();
 saveAnalysisResults();
 
-console.log('\n✨ 分析完成！');
-console.log('\n建议下一步:');
-console.log('1. 选择统一的架构方向（推荐插件化）');
-console.log('2. 创建传统引擎的插件适配器');
-console.log('3. 逐步迁移到统一架构');
-console.log('4. 更新文档和测试用例');

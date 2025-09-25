@@ -52,16 +52,13 @@ const CACHE_STRATEGIES = {
 
 // 安装事件
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
 
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME)
       .then((cache) => {
-        console.log('Caching static assets...');
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        console.log('Static assets cached successfully');
         return self.skipWaiting();
       })
       .catch((error) => {
@@ -72,7 +69,6 @@ self.addEventListener('install', (event) => {
 
 // 激活事件
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
 
   event.waitUntil(
     caches.keys()
@@ -83,14 +79,12 @@ self.addEventListener('activate', (event) => {
             if (cacheName !== STATIC_CACHE_NAME &&
               cacheName !== DYNAMIC_CACHE_NAME &&
               cacheName !== CACHE_STRATEGIES.images.cacheName) {
-              console.log('Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       })
       .then(() => {
-        console.log('Service Worker activated');
         return self.clients.claim();
       })
   );
@@ -342,7 +336,6 @@ self.addEventListener('sync', (event) => {
 // 执行后台同步
 async function doBackgroundSync() {
   // 这里可以实现离线数据同步逻辑
-  console.log('Background sync triggered');
 }
 
 // 推送通知

@@ -1,3 +1,10 @@
+/**
+ * StressTestRecordDetail.tsx - React组件
+ * 
+ * 文件路径: frontend\components\stress\StressTestRecordDetail.tsx
+ * 创建时间: 2025-09-25
+ */
+
 
 import React from 'react';
 import { Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, Globe, Settings, TrendingUp, Users, XCircle, Zap } from 'lucide-react';

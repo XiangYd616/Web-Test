@@ -95,7 +95,7 @@ const TestTemplates: React.FC = () => {
           lastUsed: '2025-09-16T10:30:00Z',
           tags: ['性能', '基准测试', 'Web', '标准'],
           configuration: {
-            timeout: 30000,
+            timeout: process.env.REQUEST_TIMEOUT || 30000,
             retries: 3,
             concurrency: 5,
             metrics: ['loading_time', 'first_contentful_paint', 'largest_contentful_paint']

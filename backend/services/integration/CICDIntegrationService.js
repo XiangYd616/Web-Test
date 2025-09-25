@@ -127,7 +127,6 @@ class CICDIntegrationService extends EventEmitter {
       await this.setupIntegrationWebhook(integration);
     }
 
-    console.log(`🔗 创建CI/CD集成: ${name} (${platform})`);
     this.emit('integrationCreated', integration);
 
     return integrationId;
@@ -154,6 +153,16 @@ class CICDIntegrationService extends EventEmitter {
       integration.lastTriggered = new Date();
       integration.triggerCount++;
 
+      
+      /**
+      
+       * if功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       const result = await this.executePlatformTrigger(integration, eventType, data);
       
       if (result.success) {
@@ -201,9 +210,6 @@ class CICDIntegrationService extends EventEmitter {
   async triggerJenkins(config, eventType, data) {
     try {
       // 模拟Jenkins API调用
-      console.log(`触发Jenkins构建: ${config.jobName}`);
-      console.log(`事件类型: ${eventType}`);
-      console.log(`数据:`, data);
       
       // 这里应该实际调用Jenkins API
       // const response = await fetch(`${config.serverUrl}/job/${config.jobName}/build`, {
@@ -232,9 +238,6 @@ class CICDIntegrationService extends EventEmitter {
   async triggerGitHubActions(config, eventType, data) {
     try {
       // 模拟GitHub Actions API调用
-      console.log(`触发GitHub Actions: ${config.repoOwner}/${config.repoName}`);
-      console.log(`工作流文件: ${config.workflowFile}`);
-      console.log(`事件类型: ${eventType}`);
       
       // 这里应该实际调用GitHub API
       // const response = await fetch(`https://api.github.com/repos/${config.repoOwner}/${config.repoName}/actions/workflows/${config.workflowFile}/dispatches`, {
@@ -271,8 +274,6 @@ class CICDIntegrationService extends EventEmitter {
   async triggerGitLabCI(config, eventType, data) {
     try {
       // 模拟GitLab CI API调用
-      console.log(`触发GitLab CI: 项目 ${config.projectId}`);
-      console.log(`Pipeline文件: ${config.pipelineFile}`);
       
       return {
         success: true,
@@ -293,7 +294,6 @@ class CICDIntegrationService extends EventEmitter {
   async triggerAzureDevOps(config, eventType, data) {
     try {
       // 模拟Azure DevOps API调用
-      console.log(`触发Azure DevOps: ${config.organization}/${config.project}`);
       
       return {
         success: true,
@@ -314,7 +314,6 @@ class CICDIntegrationService extends EventEmitter {
   async triggerCircleCI(config, eventType, data) {
     try {
       // 模拟CircleCI API调用
-      console.log(`触发CircleCI: ${config.projectSlug}`);
       
       return {
         success: true,
@@ -343,7 +342,6 @@ class CICDIntegrationService extends EventEmitter {
       // 解析webhook数据
       const webhookData = this.parseWebhookPayload(platform, payload);
       
-      console.log(`📥 收到${platform} webhook:`, webhookData.event);
       
       // 触发相应的事件处理
       this.emit('webhookReceived', {
@@ -436,12 +434,10 @@ class CICDIntegrationService extends EventEmitter {
 
   async setupIntegrationWebhook(integration) {
     // 这里应该实际设置webhook
-    console.log(`设置${integration.platform} webhook: ${integration.name}`);
   }
 
   setupWebhookHandlers() {
     // 设置webhook处理器
-    console.log('设置webhook处理器');
   }
 
   verifyWebhookSignature(platform, payload, signature) {
@@ -460,7 +456,6 @@ class CICDIntegrationService extends EventEmitter {
 
   async loadIntegrations() {
     // 这里应该从数据库加载集成配置
-    console.log('加载CI/CD集成配置');
   }
 }
 

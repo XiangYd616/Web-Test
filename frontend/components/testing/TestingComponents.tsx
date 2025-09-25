@@ -126,6 +126,16 @@ export const TestProgressDisplay: React.FC<TestProgressDisplayProps> = ({
   status
 }) => {
   const getStatusIcon = () => {
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const [error, setError] = useState<string | null>(null);
 
     switch (status) {

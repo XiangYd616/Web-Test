@@ -11,8 +11,8 @@ const http = require('http');
 class LoadGenerator {
   constructor(options = {}) {
     this.options = {
-      maxConcurrency: 100,
-      timeout: 30000,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       keepAlive: true,
       maxSockets: 1000,
       ...options
@@ -170,7 +170,6 @@ class LoadGenerator {
     const normalConcurrency = Math.max(1, Math.floor(concurrency / 4));
     
     // 正常负载阶段
-    console.log(`开始正常负载阶段: ${normalConcurrency} 并发`);
     await this.runLoadPhase({
       ...config,
       concurrency: normalConcurrency,
@@ -178,7 +177,6 @@ class LoadGenerator {
     }, onProgress);
     
     // 峰值负载阶段
-    console.log(`开始峰值负载阶段: ${concurrency} 并发`);
     await this.runLoadPhase({
       ...config,
       concurrency: concurrency,
@@ -186,7 +184,6 @@ class LoadGenerator {
     }, onProgress);
     
     // 恢复正常负载阶段
-    console.log(`恢复正常负载阶段: ${normalConcurrency} 并发`);
     await this.runLoadPhase({
       ...config,
       concurrency: normalConcurrency,
@@ -211,7 +208,6 @@ class LoadGenerator {
         Math.floor(concurrency * (0.5 + 0.5 * Math.sin(phase)))
       );
       
-      console.log(`波浪 ${i + 1}/${waveCount}: ${currentConcurrency} 并发`);
       
       await this.runLoadPhase({
         ...config,
@@ -423,7 +419,6 @@ class LoadGenerator {
    * 停止负载测试
    */
   stop() {
-    console.log('🛑 停止负载测试...');
     this.shouldStop = true;
   }
 

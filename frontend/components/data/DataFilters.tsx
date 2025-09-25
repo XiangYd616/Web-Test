@@ -338,6 +338,21 @@ const DataFilters: React.FC<DataFiltersProps> = ({
     setIsLoading(true);
     
     setTimeout(() => {
+
+      
+      /**
+
+      
+       * switch功能函数
+
+      
+       * @param {Object} params - 参数对象
+
+      
+       * @returns {Promise<Object>} 返回结果
+
+      
+       */
       const selectedIds = Array.from(selectedItems);
       
       switch (action) {

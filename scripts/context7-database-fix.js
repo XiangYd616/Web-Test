@@ -13,12 +13,9 @@ const pool = new Pool({
   password: 'postgres'
 });
 
-console.log('📚 基于Context7 PostgreSQL文档的智能修复');
-console.log('🎯 使用官方推荐的最佳实践');
 
 async function context7DatabaseFix() {
   try {
-    console.log('\n🔍 检查当前表结构...');
 
     // 1. 检查monitoring_sites表的当前字段
     const currentFields = await pool.query(`
@@ -89,7 +86,6 @@ async function context7DatabaseFix() {
       }
     };
 
-    console.log('\n🔧 开始添加缺失字段...');
 
     let addedCount = 0;
     let skippedCount = 0;
@@ -110,7 +106,6 @@ async function context7DatabaseFix() {
           }
 
           console.log(`🔧 添加字段: ${fieldName}`);
-          console.log(`   SQL: ${sql}`);
 
           await pool.query(sql);
           addedCount++;
@@ -125,9 +120,6 @@ async function context7DatabaseFix() {
       }
     }
 
-    console.log('\n📊 字段添加统计:');
-    console.log(`  ✅ 新增字段: ${addedCount}`);
-    console.log(`  ⏭️ 跳过字段: ${skippedCount}`);
 
     // 4. 验证最终结果
     const finalFields = await pool.query(`
@@ -137,10 +129,8 @@ async function context7DatabaseFix() {
       ORDER BY ordinal_position
     `);
 
-    console.log(`\n🎉 修复完成！monitoring_sites表现在有 ${finalFields.rows.length} 个字段`);
 
     // 5. 创建security_logs表（如果不存在）
-    console.log('\n🔒 检查security_logs表...');
 
     const securityTableExists = await pool.query(`
       SELECT EXISTS (
@@ -172,7 +162,6 @@ async function context7DatabaseFix() {
     }
 
     // 6. 创建性能优化索引
-    console.log('\n🚀 创建性能优化索引...');
 
     const indexes = [
       'CREATE INDEX IF NOT EXISTS idx_monitoring_sites_status ON monitoring_sites(status)',
@@ -191,8 +180,6 @@ async function context7DatabaseFix() {
       }
     }
 
-    console.log('\n🎉 Context7数据库修复完全成功！');
-    console.log('🔄 请重启服务器以应用所有修复');
 
     return { success: true, addedFields: addedCount };
 
@@ -208,10 +195,8 @@ async function context7DatabaseFix() {
 context7DatabaseFix()
   .then(result => {
     if (result.success) {
-      console.log('\n🎉 修复成功！');
       process.exit(0);
     } else {
-      console.log('\n❌ 修复失败:', result.error);
       process.exit(1);
     }
   })

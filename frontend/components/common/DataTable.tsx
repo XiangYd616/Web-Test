@@ -1,3 +1,10 @@
+/**
+ * DataTable.tsx - React组件
+ * 
+ * 文件路径: frontend\components\common\DataTable.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import type { ReactNode } from 'react';
 import { ChevronDown, ChevronUp, SortAsc } from 'lucide-react';
@@ -38,6 +45,11 @@ function DataTable<T extends Record<string, any>>({
   className = '',
   rowKey = 'id'
 }: DataTableProps<T>) {
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getRowKey = (record: T, index: number): string => {
     if (typeof rowKey === 'function') {
       return rowKey(record);

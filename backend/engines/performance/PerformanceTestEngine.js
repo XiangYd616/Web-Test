@@ -12,7 +12,7 @@ class PerformanceTestEngine {
     this.version = '3.0.0';
     this.description = '性能测试引擎 (使用共享服务)';
     this.options = {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       userAgent: 'Performance-Test/3.0.0'
     };
     
@@ -78,7 +78,6 @@ class PerformanceTestEngine {
       } = config;
       
       if (verbose) {
-        console.log(`⚡ 开始性能测试: ${url} (${iterations} 次迭代)`);
       }
       
       // 收集性能指标
@@ -90,6 +89,21 @@ class PerformanceTestEngine {
         cacheControl: 'no-cache'
       };
       
+
+      
+      /**
+
+      
+       * if功能函数
+
+      
+       * @param {Object} params - 参数对象
+
+      
+       * @returns {Promise<Object>} 返回结果
+
+      
+       */
       const metricsResult = await this.metricsService.collectMetrics(url, metricsOptions);
       
       if (!metricsResult.success) {
@@ -103,6 +117,21 @@ class PerformanceTestEngine {
         const htmlContent = metricsResult.data.basicTiming.rawResults[0].content;
         
         if (htmlContent) {
+
+          
+          /**
+
+          
+           * if功能函数
+
+          
+           * @param {Object} params - 参数对象
+
+          
+           * @returns {Promise<Object>} 返回结果
+
+          
+           */
           const parseResult = this.htmlService.parseHTML(htmlContent);
           
           if (parseResult.success) {

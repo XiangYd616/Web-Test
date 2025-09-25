@@ -85,43 +85,31 @@ function quickPlaceholderScan() {
  * 生成报告
  */
 function generateReport() {
-  console.log('\n' + '='.repeat(60));
   console.log('📊 快速成熟度检查报告');
-  console.log('='.repeat(60));
   
   // 缺失文件
-  console.log('\n📁 缺失的重要文件:');
   if (issues.missing.length > 0) {
     issues.missing.forEach(item => {
-      console.log(`  ❌ ${item.path}: ${item.description}`);
     });
   } else {
-    console.log('  ✅ 所有重要文件都存在');
   }
   
   // 占位符
-  console.log('\n📝 包含占位符的文件:');
   if (issues.placeholders.length > 0) {
     const totalTodos = issues.placeholders.reduce((sum, p) => sum + p.todos, 0);
     const totalPlaceholders = issues.placeholders.reduce((sum, p) => sum + p.placeholders, 0);
-    console.log(`  总计: ${totalTodos} 个TODO, ${totalPlaceholders} 个占位符`);
     
     // 显示前5个文件
     issues.placeholders.slice(0, 5).forEach(p => {
-      console.log(`  - ${p.file}: ${p.todos} TODO, ${p.placeholders} 占位符`);
     });
     if (issues.placeholders.length > 5) {
-      console.log(`  ... 还有 ${issues.placeholders.length - 5} 个文件`);
     }
   } else {
-    console.log('  ✅ 没有发现占位符');
   }
   
   // 空文件
   if (issues.emptyFiles.length > 0) {
-    console.log(`\n⚠️  可能为空或过小的文件: ${issues.emptyFiles.length} 个`);
     issues.emptyFiles.slice(0, 3).forEach(f => {
-      console.log(`  - ${f}`);
     });
   }
   
@@ -132,8 +120,6 @@ function generateReport() {
   score -= issues.emptyFiles.length * 2;
   score = Math.max(0, Math.min(100, score));
   
-  console.log('\n' + '='.repeat(60));
-  console.log(`🎯 快速评分: ${score}%`);
   
   return score;
 }
@@ -159,7 +145,6 @@ function main() {
     JSON.stringify(report, null, 2)
   );
   
-  console.log('\n📄 报告已保存到: docs/quick-maturity-report.json');
   
   return score;
 }

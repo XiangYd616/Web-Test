@@ -125,6 +125,21 @@ router.put('/:id/acknowledge', authMiddleware, asyncHandler(async (req, res) => 
     const alertId = req.params.id;
     const userId = req.user.id;
 
+
+
+    /**
+
+
+     * if功能函数
+
+
+     * @param {Object} params - 参数对象
+
+
+     * @returns {Promise<Object>} 返回结果
+
+
+     */
     const updated = await alertService.acknowledgeAlert(alertId, userId);
 
     if (!updated) {
@@ -160,6 +175,21 @@ router.put('/:id/resolve', authMiddleware, asyncHandler(async (req, res) => {
     const alertId = req.params.id;
     const userId = req.user.id;
 
+
+
+    /**
+
+
+     * if功能函数
+
+
+     * @param {Object} params - 参数对象
+
+
+     * @returns {Promise<Object>} 返回结果
+
+
+     */
     const updated = await alertService.resolveAlert(alertId, userId);
 
     if (!updated) {
@@ -242,6 +272,21 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
     const alertId = req.params.id;
     const userId = req.user.id;
 
+
+
+    /**
+
+
+     * if功能函数
+
+
+     * @param {Object} params - 参数对象
+
+
+     * @returns {Promise<Object>} 返回结果
+
+
+     */
     const alert = await alertService.getAlertDetails(alertId, userId);
 
     if (!alert) {
@@ -277,6 +322,21 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
     const alertId = req.params.id;
     const userId = req.user.id;
 
+
+
+    /**
+
+
+     * if功能函数
+
+
+     * @param {Object} params - 参数对象
+
+
+     * @returns {Promise<Object>} 返回结果
+
+
+     */
     const deleted = await alertService.deleteAlert(alertId, userId);
 
     if (!deleted) {

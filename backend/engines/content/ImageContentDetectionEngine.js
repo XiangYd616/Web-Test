@@ -51,7 +51,6 @@ class ImageContentDetectionEngine {
      */
     async analyzeImage(input) {
         try {
-            console.log('开始图像内容检测...');
             const startTime = Date.now();
 
             // 初始化结果
@@ -108,6 +107,21 @@ class ImageContentDetectionEngine {
 
         if (typeof input === 'string') {
             filePath = input;
+
+            
+            /**
+
+            
+             * if功能函数
+
+            
+             * @param {Object} params - 参数对象
+
+            
+             * @returns {Promise<Object>} 返回结果
+
+            
+             */
             const stats = await fs.stat(filePath);
             
             if (stats.size > this.config.maxFileSize) {
@@ -574,6 +588,21 @@ class ImageContentDetectionEngine {
                 .ensureAlpha()
                 .toBuffer({ resolveWithObject: true });
             
+
+            
+            /**
+
+            
+             * if功能函数
+
+            
+             * @param {Object} params - 参数对象
+
+            
+             * @returns {Promise<Object>} 返回结果
+
+            
+             */
             const code = jsQR(data, info.width, info.height);
             
             if (code) {
@@ -843,6 +872,21 @@ class ImageContentDetectionEngine {
     }
 
     parseCompressionScore(compressionQuality) {
+
+        
+        /**
+
+        
+         * switch功能函数
+
+        
+         * @param {Object} params - 参数对象
+
+        
+         * @returns {Promise<Object>} 返回结果
+
+        
+         */
         if (!compressionQuality?.efficiency) return 50;
         
         switch (compressionQuality.efficiency) {

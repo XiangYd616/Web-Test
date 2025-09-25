@@ -269,7 +269,7 @@ export class IntegrationService {
         createdAt: new Date().toISOString(),
         successCount: 0,
         failureCount: 0,
-        timeout: 30000
+        timeout: process.env.REQUEST_TIMEOUT || 30000
       };
 
       // 清除缓存
@@ -478,7 +478,7 @@ export class IntegrationService {
         lastTriggered: '2025-06-19T09:30:00Z',
         successCount: 1250,
         failureCount: 15,
-        timeout: 30000
+        timeout: process.env.REQUEST_TIMEOUT || 30000
       },
       {
         id: '2',

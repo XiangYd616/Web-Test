@@ -502,7 +502,6 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
                   checked={autoRefresh}
                   onChange={(e) => {
                     // 这里应该有状态更新逻辑
-                    console.log('Auto refresh toggled:', e.target.checked);
                   }}
                   className="sr-only peer"
                 />

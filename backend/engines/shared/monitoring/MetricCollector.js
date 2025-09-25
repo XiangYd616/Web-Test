@@ -352,6 +352,16 @@ class MetricCollector {
     
     this.metricDefinitions.forEach((definition, name) => {
       if (definition.category === category) {
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const series = this.timeSeries.get(name);
         if (series) {
           categoryMetrics[name] = {
@@ -400,6 +410,16 @@ class MetricCollector {
     );
     
     if (responseTime !== null) {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       health.metrics.responseTime = responseTime;
       if (responseTime > 5000) {
         health.status = 'degraded';

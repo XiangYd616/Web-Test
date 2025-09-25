@@ -127,6 +127,16 @@ class AssertionLibrary {
           );
         },
         toHaveProperty: (path, expectedValue = undefined) => {
+
+          /**
+
+           * if功能函数
+
+           * @param {Object} params - 参数对象
+
+           * @returns {Promise<Object>} 返回结果
+
+           */
           const hasProperty = has(response.data, path);
           if (expectedValue !== undefined) {
             const actualValue = get(response.data, path);
@@ -519,6 +529,16 @@ class AssertionLibrary {
         
         if (actualValue !== undefined) {
           if (schemaValue.type) {
+
+            /**
+
+             * if功能函数
+
+             * @param {Object} params - 参数对象
+
+             * @returns {Promise<Object>} 返回结果
+
+             */
             const actualType = Array.isArray(actualValue) ? 'array' : typeof actualValue;
             if (actualType !== schemaValue.type) {
               errors.push(`'${fullPath}' 类型错误: 期望 ${schemaValue.type}, 实际 ${actualType}`);
@@ -579,12 +599,9 @@ class AssertionLibrary {
     
     if (passed) {
       this.passed++;
-      console.log(`  ✓ ${description}`);
     } else {
       this.failed++;
-      console.log(`  ✗ ${description}`);
       if (failureMessage) {
-        console.log(`    → ${failureMessage}`);
       }
     }
     

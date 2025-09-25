@@ -16,7 +16,7 @@ interface StoryObj<T = any> {
 }
 
 // Mock action function
-const action = (name: string) => (...args: any[]) => console.log(name, args);
+const action = (name: string) => (...args: any[]) => 
 
 /**
  * Input组件Storybook文档

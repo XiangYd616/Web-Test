@@ -116,6 +116,11 @@ router.put('/', async (req, res) => {
     
     for (const [key, value] of Object.entries(configs)) {
       try {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const schema = configCenter.getSchema()[key];
         if (!schema) {
           errors.push({ key, error: '配置项不存在' });
@@ -425,6 +430,11 @@ router.post('/meta/import', async (req, res) => {
     
     for (const [key, value] of Object.entries(configs)) {
       try {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const schema = configCenter.getSchema()[key];
         if (!schema) {
           errors.push({ key, error: '配置项不存在' });
@@ -436,6 +446,11 @@ router.post('/meta/import', async (req, res) => {
           continue;
         }
         
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const currentValue = configCenter.get(key);
         if (currentValue !== undefined && !overwrite) {
           errors.push({ key, error: '配置已存在，使用overwrite=true强制覆盖' });

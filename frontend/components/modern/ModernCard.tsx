@@ -1,3 +1,10 @@
+/**
+ * ModernCard.tsx - React组件
+ * 
+ * 文件路径: frontend\components\modern\ModernCard.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import type { ReactNode, FC } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';

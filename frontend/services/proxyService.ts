@@ -1,3 +1,10 @@
+/**
+ * proxyService.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\proxyService.ts
+ * 创建时间: 2025-09-25
+ */
+
 
 export interface ProxyResponse {
   html: string;
@@ -149,10 +156,9 @@ export class ProxyService {
       const startTime = Date.now();
 
       // 后端API地址
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const backendUrl = process.env.REACT_APP_API_URL || process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}';
       const apiEndpoint = `${backendUrl}/api/seo/fetch-page`;
 
-      console.log(`🔄 尝试后端API: ${apiEndpoint}`);
 
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -402,7 +408,7 @@ export class ProxyService {
   }> {
     try {
       // 首先尝试后端API
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const backendUrl = process.env.REACT_APP_API_URL || process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}';
       const apiEndpoint = `${backendUrl}/api/seo/fetch-robots`;
 
       const response = await fetch(apiEndpoint, {
@@ -450,7 +456,7 @@ export class ProxyService {
   }> {
     try {
       // 首先尝试后端API
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const backendUrl = process.env.REACT_APP_API_URL || process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}';
       const apiEndpoint = `${backendUrl}/api/seo/fetch-sitemap`;
 
       const response = await fetch(apiEndpoint, {

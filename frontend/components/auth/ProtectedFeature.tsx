@@ -1,3 +1,10 @@
+/**
+ * ProtectedFeature.tsx - React组件
+ * 
+ * 文件路径: frontend\components\auth\ProtectedFeature.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { Eye, EyeOff, Lock, Shield, Star } from 'lucide-react';
 import { useState } from 'react';

@@ -130,6 +130,16 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
   const currentColors = colors[theme];
   const bgColor = theme === 'dark' ? '#1F2937' : '#FFFFFF';
   const textColor = theme === 'dark' ? '#F9FAFB' : '#111827';
+
+  /**
+
+   * renderChart功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const gridColor = theme === 'dark' ? '#374151' : '#E5E7EB';
 
   const renderChart = () => {
@@ -1133,6 +1143,16 @@ export const AdvancedTrendChart: React.FC<AdvancedTrendChartProps> = ({
   timeRange = 'month'
 }) => {
   const [selectedTimeRange, setSelectedTimeRange] = useState(timeRange);
+
+  /**
+
+   * generateDefaultData功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const [showConfidenceInterval, setShowConfidenceInterval] = useState(false);
 
   const generateDefaultData = () => {
@@ -1389,6 +1409,11 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
       }
 
       const group = groupedData.get(timeKey);
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       group.responseTimes.push(point.responseTime);
       if (point.success) {
         group.successes++;
@@ -1504,11 +1529,41 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
                 color: '#F9FAFB'
               }}
               formatter={(value, name) => {
+                  /**
+                   * 处理responseTime事件
+                   * @param {Object} event - 事件对象
+                   * @returns {Promise<void>}
+                   */
                 const formatters: Record<string, (v: any) => string[]> = {
+                  /**
+                   * 处理maxResponseTime事件
+                   * @param {Object} event - 事件对象
+                   * @returns {Promise<void>}
+                   */
                   responseTime: (v: any) => [`${v}ms`, '平均响应时间'],
+                  /**
+                   * throughput功能函数
+                   * @param {Object} params - 参数对象
+                   * @returns {Promise<Object>} 返回结果
+                   */
                   maxResponseTime: (v: any) => [`${v}ms`, '最大响应时间'],
+                  /**
+                   * successRate功能函数
+                   * @param {Object} params - 参数对象
+                   * @returns {Promise<Object>} 返回结果
+                   */
                   throughput: (v: any) => [`${v} req/s`, '吞吐量'],
+                  /**
+                   * errorRate功能函数
+                   * @param {Object} params - 参数对象
+                   * @returns {Promise<Object>} 返回结果
+                   */
                   successRate: (v: any) => [`${v}%`, '成功率'],
+                  /**
+                   * activeUsers功能函数
+                   * @param {Object} params - 参数对象
+                   * @returns {Promise<Object>} 返回结果
+                   */
                   errorRate: (v: any) => [`${v}%`, '错误率'],
                   activeUsers: (v: any) => [`${v}`, '活跃用户']
                 };

@@ -1,3 +1,10 @@
+/**
+ * useUnifiedSEOTest.ts - 核心功能模块
+ * 
+ * 文件路径: frontend\hooks\useUnifiedSEOTest.ts
+ * 创建时间: 2025-09-25
+ */
+
 import { useCallback, useRef, useState } from 'react';
 import { LocalSEOAnalysisEngine, LocalSEOConfig } from '../services/localSEOAnalysisEngine';
 import { SEOAnalysisResult } from '../services/realSEOAnalysisEngine';

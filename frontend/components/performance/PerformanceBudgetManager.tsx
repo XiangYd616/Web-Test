@@ -186,6 +186,16 @@ export const PerformanceBudgetManager: React.FC<PerformanceBudgetManagerProps> =
     };
   }, [results]);
 
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const getBudgetStatusColor = (status: string) => {
     switch (status) {
       case 'good': return 'text-green-400 bg-green-100';
@@ -195,6 +205,16 @@ export const PerformanceBudgetManager: React.FC<PerformanceBudgetManagerProps> =
     }
   };
 
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'text-red-500 bg-red-100';

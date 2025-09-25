@@ -1,3 +1,10 @@
+/**
+ * TestNavigation.tsx - React组件
+ * 
+ * 文件路径: frontend\components\ui\TestNavigation.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import type { FC } from 'react';
 import { Card, CardHeader, CardTitle, CardBody } from './Card';

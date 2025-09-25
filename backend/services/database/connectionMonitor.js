@@ -60,7 +60,6 @@ class ConnectionMonitor extends EventEmitter {
       this.monitorInterval = null;
     }
 
-    console.log('🛑 数据库连接池监控已停止');
   }
 
   /**
@@ -268,7 +267,6 @@ class ConnectionMonitor extends EventEmitter {
       lastHealthCheck: null
     };
 
-    console.log('🔄 监控指标已重置');
   }
 
   /**

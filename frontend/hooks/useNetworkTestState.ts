@@ -200,7 +200,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
   const [localConfig, setLocalConfig] = useState({
     target: '',
     testType: 'comprehensive',
-    timeout: 30000,
+    timeout: process.env.REQUEST_TIMEOUT || 30000,
     retries: 3,
     interval: 1000,
     duration: 60,
@@ -262,7 +262,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     setLocalConfig({
       target: '',
       testType: 'comprehensive',
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       retries: 3,
       interval: 1000,
       duration: 60,
@@ -570,6 +570,12 @@ export const useNetworkTestState = (): NetworkTestHook => {
     reset: resetTest,
     clearError: () => setError(null),
 
+    /**
+     * 更新updateConfig数据
+     * @param {string} id - 对象ID
+     * @param {Object} data - 更新数据
+     * @returns {Promise<Object>} 更新后的对象
+     */
     // ==================== NetworkTestActions ====================
     updateConfig: (updates: Partial<NetworkTestConfig>) => {
       // 适配更新格式

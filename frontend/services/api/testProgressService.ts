@@ -116,6 +116,11 @@ class TestProgressService {
     } catch (error) {
       console.error('检查测试进度失败:', error);
       
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const monitor = this.activeMonitors.get(testId);
       if (monitor) {
         monitor.listeners.forEach(listener => {

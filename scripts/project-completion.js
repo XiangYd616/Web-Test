@@ -96,7 +96,6 @@ class ProjectCompletionTool {
   }
 
   log(message, color = 'reset') {
-    console.log(`${colors[color]}${message}${colors.reset}`);
   }
 
   logHeader(title) {

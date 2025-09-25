@@ -65,6 +65,16 @@ export class ApiCache {
     let oldestKey: string | null = null;
     let oldestTimestamp = Infinity;
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
     for (const [key, entry] of this.cache.entries()) {
       if (entry.timestamp < oldestTimestamp) {
         oldestTimestamp = entry.timestamp;

@@ -44,7 +44,6 @@ class AlertChannel {
     
     // 检查速率限制
     if (this.isRateLimited(alert)) {
-      console.log(`告警被速率限制跳过: ${alert.id}`);
       return;
     }
     
@@ -104,9 +103,6 @@ class EmailAlertChannel extends AlertChannel {
 
   async doSend(alert) {
     // 这里可以集成实际的邮件服务
-    console.log(`📧 邮件告警发送: ${alert.title}`);
-    console.log(`收件人: ${this.recipients.join(', ')}`);
-    console.log(`内容: ${alert.message}`);
     
     // 模拟邮件发送
     return new Promise(resolve => setTimeout(resolve, 100));
@@ -154,7 +150,6 @@ class WebhookAlertChannel extends AlertChannel {
         throw new Error(`Webhook响应错误: ${response.status}`);
       }
 
-      console.log(`🔗 Webhook告警发送成功: ${alert.title}`);
     } catch (error) {
       console.error(`Webhook告警发送失败:`, error);
       throw error;
@@ -214,7 +209,6 @@ class SlackAlertChannel extends AlertChannel {
       throw new Error(`Slack告警发送失败: ${response.status}`);
     }
 
-    console.log(`💬 Slack告警发送成功: ${alert.title}`);
   }
 
   getSeverityColor(severity) {
@@ -262,7 +256,6 @@ class DingTalkAlertChannel extends AlertChannel {
       throw new Error(`钉钉告警发送失败: ${response.status}`);
     }
 
-    console.log(`📱 钉钉告警发送成功: ${alert.title}`);
   }
 
   generateSign(timestamp) {
@@ -476,7 +469,6 @@ class ErrorMonitoringSystem extends EventEmitter {
       this.channels.set(AlertChannels.DINGTALK, new DingTalkAlertChannel(dingtalkConfig));
     }
 
-    console.log(`📡 已设置 ${this.channels.size} 个告警通道`);
   }
 
   /**
@@ -520,7 +512,6 @@ class ErrorMonitoringSystem extends EventEmitter {
       
       await Promise.allSettled(sendPromises);
       
-      console.log(`📢 告警发送完成: ${alert.title}`);
       this.emit('alertSent', alert);
       
     } catch (error) {

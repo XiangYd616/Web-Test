@@ -7,6 +7,11 @@ const { EventEmitter } = require('events');
 const fs = require('fs').promises;
 const path = require('path');
 
+  /**
+   * 处理constructor事件
+   * @param {Object} event - 事件对象
+   * @returns {Promise<void>}
+   */
 class PerformanceBenchmarkService extends EventEmitter {
   constructor() {
     super();
@@ -139,7 +144,6 @@ class PerformanceBenchmarkService extends EventEmitter {
       
       // 预热运行
       if (benchmark.warmupRuns > 0) {
-        console.log(`🔥 执行 ${benchmark.warmupRuns} 次预热运行...`);
         for (let i = 0; i < benchmark.warmupRuns; i++) {
           await this.executeSingleRun(benchmark, { isWarmup: true });
         }
@@ -148,7 +152,6 @@ class PerformanceBenchmarkService extends EventEmitter {
       // 正式测试运行
       const results = [];
       for (let i = 0; i < benchmark.iterations; i++) {
-        console.log(`📈 执行第 ${i + 1}/${benchmark.iterations} 次测试...`);
         const result = await this.executeSingleRun(benchmark, { iteration: i + 1 });
         results.push(result);
         
@@ -406,12 +409,22 @@ class PerformanceBenchmarkService extends EventEmitter {
     
     const comparison = { hasBaseline: true, improvements: {}, regressions: {} };
     
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
     for (const [metric, stats] of Object.entries(statistics)) {
       if (baseline.statistics[metric]) {
         const baselineValue = baseline.statistics[metric].mean;
         const currentValue = stats.mean;
         const change = ((currentValue - baselineValue) / baselineValue) * 100;
         
+          /**
+           * if功能函数
+           * @param {Object} params - 参数对象
+           * @returns {Promise<Object>} 返回结果
+           */
         if (Math.abs(change) > 5) { // 5%以上的变化才认为是显著的
           if (change < 0) {
             comparison.improvements[metric] = Math.abs(change);
@@ -510,7 +523,6 @@ class PerformanceBenchmarkService extends EventEmitter {
     this.baselines.set(benchmarkId, baseline);
     await this.saveBaselines();
     
-    console.log(`📏 设置性能基线: ${benchmarkId}`);
     this.emit('baselineSet', baseline);
     
     return baseline;
@@ -595,6 +607,11 @@ class PerformanceBenchmarkService extends EventEmitter {
   }
 
   async ensureDirectories() {
+    /**
+     * for功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const dirs = ['benchmarks', 'baselines', 'reports'];
     for (const dir of dirs) {
       await fs.mkdir(path.join(process.cwd(), 'data', dir), { recursive: true });
@@ -633,12 +650,10 @@ class PerformanceBenchmarkService extends EventEmitter {
 
   async loadBaselines() {
     // 从文件加载基线数据
-    console.log('📂 加载性能基线数据...');
   }
 
   async saveBaselines() {
     // 保存基线数据到文件
-    console.log('💾 保存性能基线数据...');
   }
 
   generateSummary(benchmarkReports) {

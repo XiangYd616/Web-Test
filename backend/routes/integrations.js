@@ -296,6 +296,16 @@ router.post('/webhook/:platform', asyncHandler(async (req, res) => {
   try {
     const result = await cicdIntegrationService.handleWebhook(platform, payload, signature);
 
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     Logger.info(`处理${platform} webhook`, { success: result.success });
 
     if (result.success) {

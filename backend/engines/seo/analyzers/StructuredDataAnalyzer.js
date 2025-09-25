@@ -116,6 +116,16 @@ class StructuredDataAnalyzer {
       $item.find('[itemprop]').each((j, propEl) => {
         const $prop = $(propEl);
         const propName = $prop.attr('itemprop');
+        
+        /**
+        
+         * if功能函数
+        
+         * @param {Object} params - 参数对象
+        
+         * @returns {Promise<Object>} 返回结果
+        
+         */
         const propValue = this.extractMicrodataValue($prop);
         
         if (propName && propValue) {
@@ -169,6 +179,16 @@ class StructuredDataAnalyzer {
       $item.find('[property]').each((j, propEl) => {
         const $prop = $(propEl);
         const propName = $prop.attr('property');
+        
+        /**
+        
+         * if功能函数
+        
+         * @param {Object} params - 参数对象
+        
+         * @returns {Promise<Object>} 返回结果
+        
+         */
         const propValue = this.extractRdfaValue($prop);
         
         if (propName && propValue) {

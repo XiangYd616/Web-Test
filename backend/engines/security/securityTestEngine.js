@@ -15,7 +15,7 @@ class SecurityTestEngine {
     this.version = '2.0.0';
     this.description = '安全测试引擎';
     this.options = {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       userAgent: 'Security-Scanner/2.0.0',
       ...options
     };
@@ -44,7 +44,6 @@ class SecurityTestEngine {
     try {
       const { url = 'https://example.com' } = config;
       
-      console.log(`🔒 开始安全测试: ${url}`);
       
       const results = await this.performSecurityScan(url);
       
@@ -74,19 +73,14 @@ class SecurityTestEngine {
     const startTime = Date.now();
     const urlObj = new URL(url);
     
-    console.log('  📊 检查SSL/TLS...');
     const sslAnalysis = await this.analyzeSSL(urlObj);
     
-    console.log('  📡 检查安全头部...');
     const headersAnalysis = await this.analyzeSecurityHeaders(url);
     
-    console.log('  🔍 扫描常见漏洞...');
     const vulnerabilityAnalysis = await this.scanVulnerabilities(url);
     
-    console.log('  📝 检查信息泄露...');
     const informationDisclosure = await this.checkInformationDisclosure(url);
     
-    console.log('  🚪 测试访问控制...');
     const accessControl = await this.testAccessControl(url);
     
     const endTime = Date.now();
@@ -159,6 +153,21 @@ class SecurityTestEngine {
       
       return new Promise((resolve) => {
         const req = https.request(options, (res) => {
+
+          
+          /**
+
+          
+           * if功能函数
+
+          
+           * @param {Object} params - 参数对象
+
+          
+           * @returns {Promise<Object>} 返回结果
+
+          
+           */
           const cert = res.socket.getPeerCertificate();
           
           if (cert) {

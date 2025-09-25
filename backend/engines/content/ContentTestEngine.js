@@ -298,7 +298,7 @@ class ContentTestEngine {
             'User-Agent': 'ContentTestEngine/2.0.0',
             'Accept': 'text/html,application/xhtml+xml'
           },
-          timeout: 30000
+          timeout: process.env.REQUEST_TIMEOUT || 30000
         };
         
         const req = client.request(options, (res) => {
@@ -546,6 +546,16 @@ class ContentTestEngine {
     
     images.forEach(image => {
       if (image.src) {
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const extension = image.src.split('.').pop()?.toLowerCase();
         if (extension) {
           formats[extension] = (formats[extension] || 0) + 1;

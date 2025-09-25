@@ -22,8 +22,6 @@ const colors = {
   cyan: '\x1b[36m'
 };
 
-console.log(`${colors.cyan}🔍 Test-Web 综合错误和问题检查${colors.reset}`);
-console.log('=' .repeat(60));
 
 // 收集所有发现的问题
 const issues = {
@@ -227,7 +225,6 @@ function checkFileSize(filePath) {
  * 检查API路由一致性
  */
 function checkAPIConsistency() {
-  console.log('\n📡 检查API路由一致性...');
   
   const routesDir = path.join(__dirname, '..', 'backend', 'routes');
   const enginesDir = path.join(__dirname, '..', 'backend', 'engines');
@@ -282,7 +279,6 @@ function checkAPIConsistency() {
  * 检查前后端接口匹配
  */
 function checkFrontBackendSync() {
-  console.log('\n🔄 检查前后端接口同步...');
   
   const apiServicePath = path.join(__dirname, '..', 'frontend', 'services', 'api.ts');
   if (fs.existsSync(apiServicePath)) {
@@ -315,7 +311,6 @@ function checkFrontBackendSync() {
  * 检查环境配置
  */
 function checkEnvironmentConfig() {
-  console.log('\n⚙️ 检查环境配置...');
   
   const envPath = path.join(__dirname, '..', '.env');
   const envExamplePath = path.join(__dirname, '..', '.env.example');
@@ -358,9 +353,6 @@ function checkEnvironmentConfig() {
  * 生成报告
  */
 function generateReport() {
-  console.log('\n' + '='.repeat(60));
-  console.log(`${colors.cyan}📊 综合检查报告${colors.reset}`);
-  console.log('='.repeat(60));
   
   // 统计
   const totalIssues = 
@@ -371,91 +363,59 @@ function generateReport() {
     issues.inconsistencies.length + 
     issues.improvements.length;
   
-  console.log(`\n📈 问题统计:`);
-  console.log(`${colors.red}🔴 严重问题: ${issues.critical.length}${colors.reset}`);
-  console.log(`${colors.red}❌ 错误: ${issues.errors.length}${colors.reset}`);
-  console.log(`${colors.yellow}⚠️  警告: ${issues.warnings.length}${colors.reset}`);
-  console.log(`${colors.blue}📝 TODO/FIXME: ${issues.todos.length}${colors.reset}`);
-  console.log(`${colors.magenta}🔄 不一致性: ${issues.inconsistencies.length}${colors.reset}`);
-  console.log(`${colors.green}💡 改进建议: ${issues.improvements.length}${colors.reset}`);
-  console.log(`\n📊 总计: ${totalIssues} 个问题`);
   
   // 显示严重问题
   if (issues.critical.length > 0) {
-    console.log(`\n${colors.red}🔴 严重问题:${colors.reset}`);
     issues.critical.slice(0, 5).forEach(issue => {
-      console.log(`  - ${issue.file}: ${issue.issue}`);
     });
   }
   
   // 显示错误
   if (issues.errors.length > 0) {
-    console.log(`\n${colors.red}❌ 错误:${colors.reset}`);
     issues.errors.slice(0, 5).forEach(issue => {
-      console.log(`  - ${issue.file}: ${issue.issue}`);
     });
   }
   
   // 显示警告
   if (issues.warnings.length > 0) {
-    console.log(`\n${colors.yellow}⚠️  警告:${colors.reset}`);
     issues.warnings.slice(0, 5).forEach(issue => {
-      console.log(`  - ${issue.file || issue.type}: ${issue.issue}`);
     });
     if (issues.warnings.length > 5) {
-      console.log(`  ... 还有 ${issues.warnings.length - 5} 个警告`);
     }
   }
   
   // 显示TODO/FIXME
   if (issues.todos.length > 0) {
-    console.log(`\n${colors.blue}📝 TODO/FIXME 标记:${colors.reset}`);
     
     // 按类型统计
     const todoCount = issues.todos.filter(t => t.type === 'TODO').length;
     const fixmeCount = issues.todos.filter(t => t.type === 'FIXME').length;
     const chineseCount = issues.todos.filter(t => t.type === '中文标记').length;
     
-    console.log(`  - TODO: ${todoCount} 个`);
-    console.log(`  - FIXME: ${fixmeCount} 个`);
-    console.log(`  - 中文标记: ${chineseCount} 个`);
     
     // 显示前几个
-    console.log(`\n  示例:`);
     issues.todos.slice(0, 3).forEach(todo => {
-      console.log(`  - ${todo.file}:${todo.line} [${todo.type}]`);
-      console.log(`    ${todo.content.substring(0, 80)}...`);
     });
   }
   
   // 显示不一致性
   if (issues.inconsistencies.length > 0) {
-    console.log(`\n${colors.magenta}🔄 不一致性:${colors.reset}`);
     issues.inconsistencies.forEach(issue => {
-      console.log(`  - ${issue.type}: ${issue.issue}`);
     });
   }
   
   // 显示改进建议
   if (issues.improvements.length > 0) {
-    console.log(`\n${colors.green}💡 改进建议:${colors.reset}`);
     issues.improvements.slice(0, 5).forEach(issue => {
-      console.log(`  - ${issue.type || issue.file}: ${issue.issue}`);
     });
   }
   
   // 整体评估
-  console.log('\n' + '='.repeat(60));
-  console.log('🎯 整体评估:');
   
   if (issues.critical.length > 0) {
-    console.log(`${colors.red}⚠️  存在严重问题，需要立即处理${colors.reset}`);
   } else if (issues.errors.length > 0) {
-    console.log(`${colors.yellow}⚠️  存在一些错误，建议尽快修复${colors.reset}`);
   } else if (issues.warnings.length > 20) {
-    console.log(`${colors.yellow}📝 有较多警告和待办事项，建议逐步清理${colors.reset}`);
   } else {
-    console.log(`${colors.green}✅ 代码质量良好，只有少量需要优化的地方${colors.reset}`);
   }
   
   return {
@@ -470,10 +430,8 @@ function generateReport() {
  * 主函数
  */
 async function main() {
-  console.log('开始综合检查...\n');
   
   // 1. 扫描所有源代码文件
-  console.log('📂 扫描源代码文件...');
   const frontendDir = path.join(__dirname, '..', 'frontend');
   const backendDir = path.join(__dirname, '..', 'backend');
   
@@ -518,7 +476,6 @@ async function main() {
   // 6. 保存详细报告
   const reportPath = path.join(__dirname, '..', 'docs', 'error-check-report.json');
   fs.writeFileSync(reportPath, JSON.stringify(issues, null, 2));
-  console.log(`\n📄 详细报告已保存到: docs/error-check-report.json`);
   
   // 返回退出码
   if (result.critical > 0 || result.errors > 0) {

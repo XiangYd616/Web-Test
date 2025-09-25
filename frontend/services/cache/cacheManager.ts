@@ -71,6 +71,16 @@ export class CacheManager {
     hitRate: 0,
     evictions: 0
   };
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor(config: Partial<CacheConfig> = {}) {
@@ -161,8 +171,18 @@ export class CacheManager {
         cacheItem = await this.getStorageCache(key);
         break;
       case CacheStrategy.MEMORY_FIRST:
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         cacheItem = await this.getMemoryCache(key);
         if (!cacheItem) {
+          /**
+           * if功能函数
+           * @param {Object} params - 参数对象
+           * @returns {Promise<Object>} 返回结果
+           */
           cacheItem = await this.getStorageCache(key);
           if (cacheItem) {
             // 将存储缓存提升到内存缓存
@@ -171,6 +191,11 @@ export class CacheManager {
         }
         break;
       case CacheStrategy.STORAGE_FIRST:
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         cacheItem = await this.getStorageCache(key);
         if (!cacheItem) {
           cacheItem = await this.getMemoryCache(key);
@@ -310,6 +335,11 @@ export class CacheManager {
 
     try {
       const storageKey = `cache_${key}`;
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const stored = localStorage.getItem(storageKey);
       if (stored) {
         this.stats.storageHits++;

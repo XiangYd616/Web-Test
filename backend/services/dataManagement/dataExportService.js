@@ -784,10 +784,25 @@ class DataExportService extends EventEmitter {
       const task = this.exportQueue.get(taskId) || this.activeExports.get(taskId);
       if (task) {
         task.status = status;
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         if (progress !== null) task.progress = progress;
         if (additionalData) {
           Object.assign(task, additionalData);
         }
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         if (errorMessage) task.errorMessage = errorMessage;
 
         if (status === 'processing' && !task.startedAt) {

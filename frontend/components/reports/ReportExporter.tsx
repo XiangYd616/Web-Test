@@ -1,3 +1,10 @@
+/**
+ * ReportExporter.tsx - React组件
+ * 
+ * 文件路径: frontend\components\reports\ReportExporter.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { AlertCircle, CheckCircle, Download, Eye, FileText, Layout, Loader, Settings, Table } from 'lucide-react';
 import { createElement, useState } from 'react';

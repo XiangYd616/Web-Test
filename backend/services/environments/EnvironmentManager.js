@@ -85,7 +85,6 @@ class EnvironmentManager {
     this.environments.set(environment.id, environment);
     await this.saveEnvironment(environment);
     
-    console.log(`🌍 创建环境: ${environment.name} (${environment.id})`);
     
     return environment;
   }
@@ -124,6 +123,16 @@ class EnvironmentManager {
       await this.saveEnvironment(this.activeEnvironment);
     }
 
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const environment = this.environments.get(environmentId);
     if (!environment) {
       throw new Error(`环境不存在: ${environmentId}`);
@@ -133,7 +142,6 @@ class EnvironmentManager {
     this.activeEnvironment = environment;
     await this.saveEnvironment(environment);
 
-    console.log(`🔄 切换到环境: ${environment.name}`);
     
     // 记录环境切换历史
     this.recordEnvironmentSwitch(environment);
@@ -252,7 +260,6 @@ class EnvironmentManager {
     // 记录变量变更历史
     this.recordVariableChange(key, value, scope, environmentId);
     
-    console.log(`📝 设置变量: ${key} (${scope})`);
   }
 
   /**
@@ -291,6 +298,16 @@ class EnvironmentManager {
     }
 
     const resolved = {};
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
     for (const [key, value] of Object.entries(obj)) {
       if (typeof value === 'string') {
         resolved[key] = this.resolveVariables(value, options);
@@ -312,6 +329,16 @@ class EnvironmentManager {
   }
 
   resolveDynamicVariable(key) {
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const generator = this.dynamicVariables[key];
     if (typeof generator === 'function') {
       return generator();
@@ -323,7 +350,6 @@ class EnvironmentManager {
    * 导入/导出功能
    */
   async importEnvironment(environmentData) {
-    console.log('📥 导入环境配置...');
     
     // 支持Postman环境格式
     if (environmentData.values) {
@@ -352,6 +378,16 @@ class EnvironmentManager {
   }
 
   async exportEnvironment(environmentId, format = 'testweb') {
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const environment = this.environments.get(environmentId);
     if (!environment) {
       throw new Error(`环境不存在: ${environmentId}`);
@@ -535,6 +571,16 @@ class EnvironmentManager {
   }
 
   getEnvironment(environmentId) {
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const environment = this.environments.get(environmentId);
     if (!environment) {
       return null;
@@ -594,7 +640,6 @@ class EnvironmentManager {
       console.warn('删除环境文件失败:', error.message);
     }
 
-    console.log(`🗑️ 删除环境: ${environment.name}`);
     return true;
   }
 }

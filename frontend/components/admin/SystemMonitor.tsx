@@ -1,3 +1,10 @@
+/**
+ * SystemMonitor.tsx - React组件
+ * 
+ * 文件路径: frontend\components\admin\SystemMonitor.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { Activity, Cpu, Database, HardDrive, MemoryStick } from 'lucide-react';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';

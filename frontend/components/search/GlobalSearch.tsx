@@ -1,3 +1,10 @@
+/**
+ * GlobalSearch.tsx - React组件
+ * 
+ * 文件路径: frontend\components\search\GlobalSearch.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { Activity, ArrowRight, BarChart3, Bell, Book, Clock, Code, Download, Globe, HelpCircle, Home, Key, Lock, Monitor, Play, Search, Settings, Shield, TestTube, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';

@@ -34,7 +34,6 @@ class WebsiteTestEngine {
     try {
       const { url = 'https://example.com' } = config;
       
-      console.log(`🌐 开始网站综合测试: ${url}`);
       
       // 执行基础网站检查
       const basicChecks = await this.performBasicChecks(url);

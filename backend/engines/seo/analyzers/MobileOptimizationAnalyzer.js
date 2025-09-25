@@ -211,6 +211,16 @@ class MobileOptimizationAnalyzer {
         textElements.forEach(element => {
           const computedStyle = window.getComputedStyle(element);
           const fontSize = parseFloat(computedStyle.fontSize);
+          
+          /**
+          
+           * if功能函数
+          
+           * @param {Object} params - 参数对象
+          
+           * @returns {Promise<Object>} 返回结果
+          
+           */
           const text = element.textContent.trim();
           
           if (text.length > 0 && fontSize > 0) {

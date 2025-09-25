@@ -1,3 +1,10 @@
+/**
+ * TestProgressDisplay.tsx - React组件
+ * 
+ * 文件路径: frontend\components\testing\shared\TestProgressDisplay.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { Play, Pause, Square, Clock, CheckCircle, AlertTriangle, XCircle, Activity, TrendingUp } from 'lucide-react';
@@ -100,6 +107,11 @@ const TestProgressDisplay: React.FC<TestProgressDisplayProps> = ({
     }
   };
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getStatusColor = (stepStatus: string) => {
     switch (stepStatus) {
       case 'completed':

@@ -169,7 +169,6 @@ describe('API服务集成测试', () => {
                 expect(result.data).toEqual(mockTestResults);
             } else {
                 // 如果方法不存在，跳过验证
-                console.log('getTestResults method not implemented, skipping test');
             }
         });
 
@@ -206,7 +205,6 @@ describe('API服务集成测试', () => {
                 expect(result.data?.id).toBe('test-123');
             } else {
                 // 如果方法不存在，跳过验证
-                console.log('createTest method not implemented, skipping test');
             }
         });
     });

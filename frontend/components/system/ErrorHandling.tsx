@@ -53,6 +53,11 @@ export const ErrorDisplay: React.FC<{
   onGoBack?: () => void;
   onGoHome?: () => void;
   className?: string;
+  /**
+   * 获取getErrorIcon数据
+   * @param {string} id - 对象ID
+   * @returns {Promise<Object|null>} 获取的数据
+   */
 }> = ({ error, onRetry, onGoBack, onGoHome, className = '' }) => {
   const getErrorIcon = (type: ErrorType) => {
     switch (type) {
@@ -313,6 +318,11 @@ export const Notification: React.FC<{
     return undefined;
   }, [autoClose, duration, onClose]);
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getNotificationStyle = (type: string) => {
     switch (type) {
       case 'success':
@@ -528,12 +538,42 @@ export const useNotifications = () => {
   };
 
   const success = (title: string, message?: string) =>
+
+  /**
+
+   * warning功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
     addNotification({ type: 'success', title, message });
 
   const warning = (title: string, message?: string) =>
+
+  /**
+
+   * error功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
     addNotification({ type: 'warning', title, message });
 
   const error = (title: string, message?: string) =>
+
+  /**
+
+   * info功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
     addNotification({ type: 'error', title, message });
 
   const info = (title: string, message?: string) =>

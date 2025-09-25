@@ -286,13 +286,11 @@ class SeoTestEngineReal {
       console.log(`🔍 开始SEO测试: ${validatedConfig.url}`);
 
       // 获取页面内容
-      console.log('  📄 获取页面内容...');
       let response;
       try {
         response = await this.fetchPageContent(validatedConfig.url, validatedConfig.timeout);
       } catch (error) {
         // 如果无法访问，使用模拟数据
-        console.log('  ⚠️ 无法访问URL，使用模拟数据进行测试');
         response = {
           statusCode: 200,
           data: this.getMockHTML()
@@ -300,7 +298,6 @@ class SeoTestEngineReal {
       }
 
       // 解析HTML
-      console.log('  🔍 分析页面结构...');
       const parsedData = this.parseHTML(response.data);
       
       const results = {
@@ -319,7 +316,6 @@ class SeoTestEngineReal {
 
       // 执行各项SEO检查
       for (const check of validatedConfig.checks) {
-        console.log(`  📊 检查${check}...`);
         
         switch (check) {
           case 'meta':

@@ -244,11 +244,9 @@ function validateURLMiddleware(options = {}) {
 
       // 如果有警告或建议，记录日志
       if (validationResult.warnings.length > 0) {
-        console.log('🔶 URL验证警告:', validationResult.warnings);
       }
 
       if (validationResult.suggestions.length > 0) {
-        console.log('💡 URL验证建议:', validationResult.suggestions);
       }
 
       next();
@@ -269,7 +267,6 @@ function validateURLMiddleware(options = {}) {
  */
 function validateAPIURLMiddleware(options = {}) {
   return async (req, res, next) => {
-    console.log('🔌 API测试请求体:', JSON.stringify(req.body, null, 2));
 
     const { url, baseUrl, endpoints, config = {}, authentication, globalHeaders } = req.body;
 
@@ -323,11 +320,9 @@ function validateAPIURLMiddleware(options = {}) {
 
       // 如果有警告或建议，记录日志
       if (validationResult.warnings.length > 0) {
-        console.log('🔶 URL验证警告:', validationResult.warnings);
       }
 
       if (validationResult.suggestions.length > 0) {
-        console.log('💡 URL验证建议:', validationResult.suggestions);
       }
 
       next();

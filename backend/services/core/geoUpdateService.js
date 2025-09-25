@@ -32,7 +32,6 @@ class GeoUpdateService {
    * 初始化更新服务
    */
   init() {
-    console.log('🔄 初始化 GeoLite2 自动更新服务...');
 
     const licenseKey = process.env.MAXMIND_LICENSE_KEY;
 
@@ -44,7 +43,6 @@ class GeoUpdateService {
 
     if (!this.config.enabled) {
       
-        console.log('⏸️  自动更新已禁用');
       return;
       }
 
@@ -57,7 +55,6 @@ class GeoUpdateService {
     this.scheduleUpdates();
 
     console.log('✅ GeoLite2 自动更新服务已启动');
-    console.log(`📅 更新计划: ${this.config.schedule}`);
   }
 
   /**
@@ -76,7 +73,6 @@ class GeoUpdateService {
         timezone: process.env.TZ || 'Asia/Shanghai'
       });
 
-      console.log(`⏰ 定时更新任务已设置: ${this.config.schedule}`);
     } catch (error) {
       console.error('❌ 设置定时任务失败:', error.message);
     }
@@ -88,7 +84,6 @@ class GeoUpdateService {
   async checkAndUpdate() {
     if (this.isUpdating) {
       
-        console.log('🔄 更新正在进行中，跳过检查');
       return false;
       }
 
@@ -100,7 +95,6 @@ class GeoUpdateService {
 
       if (needsUpdate) {
         
-        console.log('📥 检测到需要更新数据库');
         return await this.performUpdate();
       } else {
         console.log('✅ 数据库是最新的，无需更新');
@@ -121,7 +115,6 @@ class GeoUpdateService {
 
     // 如果数据库文件不存在，需要下载
     if (!fs.existsSync(cityDbPath)) {
-      console.log('📂 未找到数据库文件，需要下载');
       return true;
     }
 
@@ -130,7 +123,6 @@ class GeoUpdateService {
     const fileAge = Date.now() - stats.mtime.getTime();
 
     if (fileAge > this.updateInterval) {
-      console.log(`📅 数据库文件过期 (${Math.floor(fileAge / (24 * 60 * 60 * 1000))} 天前)，需要更新`);
       return true;
     }
 
@@ -149,7 +141,6 @@ class GeoUpdateService {
   async performUpdate() {
     if (this.isUpdating) {
       
-        console.log('🔄 更新已在进行中');
       return false;
       }
 
@@ -160,6 +151,16 @@ class GeoUpdateService {
       try {
         console.log(`🚀 开始更新 GeoLite2 数据库 (尝试 ${retries + 1}/${this.config.maxRetries})`);
 
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const success = await this.downloader.downloadAll();
 
         if (success) {
@@ -177,10 +178,19 @@ class GeoUpdateService {
         }
       } catch (error) {
         retries++;
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         console.error(`❌ 更新失败 (尝试 ${retries}/${this.config.maxRetries}):`, error.message);
 
         if (retries < this.config.maxRetries) {
-          console.log(`⏳ ${this.config.retryDelay / 1000} 秒后重试...`);
           await this.sleep(this.config.retryDelay);
         }
       }
@@ -198,7 +208,6 @@ class GeoUpdateService {
     try {
       const geoLocationService = require('./geoLocationService');
       if (geoLocationService && typeof geoLocationService.init === 'function') {
-        console.log('🔄 重新加载地理位置服务...');
         geoLocationService.init();
       }
     } catch (error) {
@@ -210,7 +219,6 @@ class GeoUpdateService {
    * 手动触发更新
    */
   async triggerUpdate() {
-    console.log('🎯 手动触发数据库更新');
     return await this.performUpdate();
   }
 
@@ -305,7 +313,6 @@ class GeoUpdateService {
         this.updateTask.stop();
         this.updateTask = null;
       }
-      console.log('⏸️  自动更新已禁用');
     }
   }
 
@@ -327,7 +334,6 @@ class GeoUpdateService {
       this.updateTask.stop();
       this.updateTask = null;
     }
-    console.log('🛑 GeoLite2 自动更新服务已停止');
   }
 
   /**

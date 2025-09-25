@@ -139,9 +139,24 @@ class CoreWebVitalsAnalyzer {
             let sessionEntries = [];
             
             const clsObserver = new PerformanceObserver((entryList) => {
+                /**
+                 * if功能函数
+                 * @param {Object} params - 参数对象
+                 * @returns {Promise<Object>} 返回结果
+                 */
               for (const entry of entryList.getEntries()) {
                 if (!entry.hadRecentInput) {
                   const firstSessionEntry = sessionEntries[0];
+                  
+                  /**
+                  
+                   * if功能函数
+                  
+                   * @param {Object} params - 参数对象
+                  
+                   * @returns {Promise<Object>} 返回结果
+                  
+                   */
                   const lastSessionEntry = sessionEntries[sessionEntries.length - 1];
                   
                   if (sessionValue && 
@@ -391,6 +406,11 @@ class CoreWebVitalsAnalyzer {
     let totalScore = 0;
     let totalWeight = 0;
     
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
     Object.entries(weights).forEach(([metric, weight]) => {
       if (analysis[metric] && analysis[metric].score !== null) {
         totalScore += analysis[metric].score * weight;

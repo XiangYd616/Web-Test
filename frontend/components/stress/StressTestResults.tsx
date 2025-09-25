@@ -1,3 +1,10 @@
+/**
+ * StressTestResults.tsx - React组件
+ * 
+ * 文件路径: frontend\components\stress\StressTestResults.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { Activity, AlertTriangle, BarChart3, Clock, TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import useStressTestWebSocket from '../../hooks/useStressTestWebSocket';

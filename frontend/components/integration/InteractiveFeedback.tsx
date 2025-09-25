@@ -161,6 +161,16 @@ export const LikeButton: React.FC<{
   className?: string;
 }> = ({ liked = false, count, onToggle, variant = 'heart', className = '' }) => {
   const [isLiked, setIsLiked] = useState(liked);
+
+  /**
+
+   * 处理handleToggle事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   const [isAnimating, setIsAnimating] = useState(false);
 
   const handleToggle = () => {

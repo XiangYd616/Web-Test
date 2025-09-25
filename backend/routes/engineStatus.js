@@ -15,17 +15,19 @@ const { optionalAuth } = require('../middleware/auth');
 router.get('/status', optionalAuth, async (req, res) => {
   try {
     // 确保引擎管理器已初始化
-    if (!testEngineManager.isInitialized) {
+    if (!testEngineManager.initialized) {
       await testEngineManager.initialize();
     }
 
-    const healthStatus = testEngineManager.getHealthStatus();
-    const engineStats = testEngineManager.getAllEngineStatus();
+    // 使用正确的方法
+    const healthStatus = await testEngineManager.healthCheck();
+    const engineStats = testEngineManager.getEnginesStatus();
 
     // 计算总体状态
-    const totalEngines = Object.keys(healthStatus).length;
-    const healthyEngines = Object.values(healthStatus).filter(status => status.healthy).length;
-    const overallHealth = healthyEngines / totalEngines;
+    const engineList = Object.values(healthStatus.engines);
+    const healthyEngines = engineList.filter(engine => engine.available !== false).length;
+    const totalEngines = engineList.length;
+    const overallHealth = totalEngines > 0 ? healthyEngines / totalEngines : 0;
 
     res.json({
       success: true,
@@ -37,8 +39,9 @@ router.get('/status', optionalAuth, async (req, res) => {
           healthPercentage: Math.round(overallHealth * 100),
           lastCheck: new Date().toISOString()
         },
-        engines: healthStatus,
-        stats: engineStats
+        engines: healthStatus.engines,
+        stats: engineStats,
+        managerStatus: healthStatus.status
       }
     });
 
@@ -75,15 +78,25 @@ router.get('/status/:engineType', optionalAuth, async (req, res) => {
     }
 
     // 确保引擎管理器已初始化
-    if (!testEngineManager.isInitialized) {
+    if (!testEngineManager.initialized) {
       await testEngineManager.initialize();
     }
 
-    const healthStatus = testEngineManager.getHealthStatus();
-    const engineStats = testEngineManager.getAllEngineStatus();
+    const healthStatus = await testEngineManager.healthCheck();
+    const engineStats = testEngineManager.getEnginesStatus();
 
-    const engineHealth = healthStatus[engineType];
-    const engineStat = engineStats[engineType];
+    const engineHealth = healthStatus.engines[engineType];
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
+    const engineStat = engineStats.engines[engineType];
 
     if (!engineHealth) {
       
@@ -203,7 +216,7 @@ function getEngineCapabilities(engineType) {
         '批量端点测试'
       ],
       supportedFormats: ['JSON', 'XML', 'Form Data'],
-      maxConcurrency: 10,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       averageTestTime: '2-5秒'
     },
     performance: {
@@ -218,7 +231,7 @@ function getEngineCapabilities(engineType) {
         '可访问性评分'
       ],
       supportedDevices: ['Desktop', 'Mobile'],
-      maxConcurrency: 2,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       averageTestTime: '30-60秒'
     },
     security: {
@@ -233,7 +246,7 @@ function getEngineCapabilities(engineType) {
         '安全配置评估'
       ],
       supportedProtocols: ['HTTP', 'HTTPS'],
-      maxConcurrency: 3,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       averageTestTime: '10-20秒'
     },
     seo: {
@@ -248,7 +261,7 @@ function getEngineCapabilities(engineType) {
         '结构化数据验证'
       ],
       supportedFormats: ['HTML', 'XML'],
-      maxConcurrency: 3,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       averageTestTime: '5-15秒'
     },
     stress: {
@@ -263,7 +276,7 @@ function getEngineCapabilities(engineType) {
         '资源使用监控'
       ],
       maxVirtualUsers: 1000,
-      maxConcurrency: 2,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       averageTestTime: '可配置 (1-30分钟)'
     },
     infrastructure: {
@@ -278,7 +291,7 @@ function getEngineCapabilities(engineType) {
         '重定向链分析'
       ],
       supportedPorts: [80, 443, 8080, 8443],
-      maxConcurrency: 2,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       averageTestTime: '15-30秒'
     },
     ux: {
@@ -293,7 +306,7 @@ function getEngineCapabilities(engineType) {
         '视觉元素检查'
       ],
       supportedDevices: ['Desktop', 'Mobile', 'Tablet'],
-      maxConcurrency: 2,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       averageTestTime: '20-40秒'
     },
     compatibility: {
@@ -308,7 +321,7 @@ function getEngineCapabilities(engineType) {
         '截图对比'
       ],
       supportedBrowsers: ['Chromium', 'Firefox', 'WebKit'],
-      maxConcurrency: 2,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       averageTestTime: '60-120秒'
     },
     website: {
@@ -323,7 +336,7 @@ function getEngineCapabilities(engineType) {
         '改进建议生成'
       ],
       maxPages: 50,
-      maxConcurrency: 2,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       averageTestTime: '30-90秒'
     }
   };

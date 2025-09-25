@@ -64,7 +64,7 @@ describe('用户流程测试', () => {
       await page.click('button[type="submit"]');
       
       // 等待测试完成（可能需要较长时间）
-      await page.waitForSelector('.test-results', { timeout: 30000 });
+      await page.waitForSelector('.test-results', { timeout: process.env.REQUEST_TIMEOUT || 30000 });
       
       const resultsElement = await page.$('.test-results');
       expect(resultsElement).toBeTruthy();
@@ -90,7 +90,7 @@ describe('用户流程测试', () => {
       // 假设已经有测试结果
       await page.type('input[type="url"]', 'https://example.com');
       await page.click('button[type="submit"]');
-      await page.waitForSelector('.test-results', { timeout: 30000 });
+      await page.waitForSelector('.test-results', { timeout: process.env.REQUEST_TIMEOUT || 30000 });
       
       // 点击导出按钮
       const exportButton = await page.$('.export-button');

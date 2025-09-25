@@ -254,7 +254,6 @@ const stressTestEngine = new LocalStressTestEngine();
 app.whenReady().then(async () => {
   try {
     await localDB.init();
-    console.log('本地数据库初始化成功');
   } catch (error) {
     console.error('本地数据库初始化失败:', error);
   }

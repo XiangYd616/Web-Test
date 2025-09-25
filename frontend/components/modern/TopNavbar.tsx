@@ -1,3 +1,10 @@
+/**
+ * TopNavbar.tsx - React组件
+ * 
+ * 文件路径: frontend\components\modern\TopNavbar.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -145,6 +152,16 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
 
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'success': return <CheckCircle className="w-4 h-4 text-green-400" />;
@@ -154,6 +171,16 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     }
   };
 
+
+    /**
+
+     * switch功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
       case 'urgent': return 'border-l-red-500';

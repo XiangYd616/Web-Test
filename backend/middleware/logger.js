@@ -36,7 +36,6 @@ const requestLogger = (req, res, next) => {
     // 控制台输出（开发环境）
     if (process.env.NODE_ENV === 'development') {
       const statusColor = getStatusColor(res.statusCode);
-      console.log(
         `${timestamp} ${req.method} ${req.originalUrl} ${statusColor}${res.statusCode}/x1b[0m ${duration}ms`
       );
     }
@@ -196,7 +195,6 @@ const apiStats = (() => {
 
     // 定期输出统计信息
     if (endpointStats.count % 100 === 0) {
-      console.log(`[API STATS] ${endpoint}: ${endpointStats.count} calls, avg: ${(endpointStats.totalTime / endpointStats.count).toFixed(2)}ms, errors: ${endpointStats.errors}`);
     }
 
     next();

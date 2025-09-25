@@ -86,6 +86,12 @@ export interface PasswordValidationResult {
   suggestions: string[];
 }
 
+
+/**
+
+ * PasswordAnalyzer类 - 负责处理相关功能
+
+ */
 // ==================== 密码强度分析器 ====================
 
 class PasswordAnalyzer {
@@ -308,6 +314,16 @@ export class PasswordPolicyService {
   private userSecurityQuestions = new Map<string, UserSecurityQuestions>();
   private accountLocks = new Map<string, AccountLockInfo>();
   private loginAttempts = new Map<string, LoginAttempt[]>();
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   private passwordHistory = new Map<string, string[]>();
 
   constructor(policy: Partial<PasswordPolicy> = {}) {

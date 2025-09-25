@@ -377,6 +377,11 @@ class UnifiedTestHistoryService {
     params.append('search', searchQuery);
 
     if (filters) {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {

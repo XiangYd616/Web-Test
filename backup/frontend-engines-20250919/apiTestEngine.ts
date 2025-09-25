@@ -731,7 +731,6 @@ export class APITestEngine {
       const phaseUsers = Math.ceil(concurrentUsers * (phase + 1) / 3);
       const phaseDuration = testDuration / 3;
 
-      console.log(`🔄 负载测试阶段 ${phase + 1}/3，并发用户: ${phaseUsers}`);
 
       // 并发请求模拟
       const phasePromises = [];
@@ -1048,7 +1047,6 @@ export class APITestEngine {
   }
 
   private async performSecurityAnalysis(config: APITestConfig, result: APITestResult): Promise<void> {
-    console.log('🔒 开始深度安全分析...');
     await new Promise(resolve => setTimeout(resolve, 1200));
 
     let securityScore = 100;
@@ -1192,11 +1190,9 @@ export class APITestEngine {
       result.summary.security = 'poor';
     }
 
-    console.log(`🔒 安全分析完成，评分: ${result.securityAnalysis.securityScore}/100`);
   }
 
   private async performReliabilityTest(config: APITestConfig, result: APITestResult): Promise<void> {
-    console.log('🔄 开始可靠性测试...');
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     const uptimeTests = 20; // 增加测试次数
@@ -1306,7 +1302,6 @@ export class APITestEngine {
       result.summary.reliability = 'poor';
     }
 
-    console.log(`🔄 可靠性测试完成，可用性: ${result.reliabilityMetrics.uptime.toFixed(2)}%`);
   }
 
   private generateAPIDocumentation(config: APITestConfig, result: APITestResult): void {
@@ -1439,7 +1434,6 @@ export class APITestEngine {
   }
 
   private generateRecommendations(result: APITestResult): void {
-    console.log('💡 生成智能优化建议...');
     const recommendations: any[] = [];
 
     // 1. 性能优化建议
@@ -1461,7 +1455,6 @@ export class APITestEngine {
     this.generateMonitoringRecommendations(result, recommendations);
 
     result.recommendations = recommendations;
-    console.log(`💡 生成了 ${recommendations.length} 条优化建议`);
   }
 
   private generatePerformanceRecommendations(result: APITestResult, recommendations: any[]): void {
@@ -1811,7 +1804,6 @@ export class APITestEngine {
   }
 
   private calculateOverallScore(result: APITestResult): void {
-    console.log('🎯 计算综合评分...');
     let score = 100;
 
     // 基于通过率扣分（权重30%）
@@ -1856,7 +1848,6 @@ export class APITestEngine {
     }
 
     result.overallScore = Math.round(Math.max(0, Math.min(100, score)));
-    console.log(`🎯 综合评分计算完成: ${result.overallScore}/100`);
   }
 }
 

@@ -245,6 +245,21 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       value: count,
       color: colors[index % colors.length]
     }));
+
+
+  /**
+
+
+   * if功能函数
+
+
+   * @param {Object} params - 参数对象
+
+
+   * @returns {Promise<Object>} 返回结果
+
+
+   */
   }, [dashboardData?.business?.business?.testTypes]);
 
   if (loading) {

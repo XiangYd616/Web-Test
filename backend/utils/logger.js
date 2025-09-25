@@ -79,7 +79,6 @@ class Logger {
    */
   static debug(message, meta = {}) {
     if (CURRENT_LOG_LEVEL >= LOG_LEVELS.DEBUG) {
-      console.log(formatLogMessage('debug', message, meta));
     }
   }
 

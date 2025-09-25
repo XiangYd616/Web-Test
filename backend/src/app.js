@@ -91,7 +91,7 @@ const APP_VERSION = process.env.APP_VERSION || '1.0.0';
 // CORS配置 - 需要在Socket.IO之前定义
 const corsOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-  : ['http://localhost:5174', 'http://localhost:3001', 'http://127.0.0.1:5174', 'http://127.0.0.1:3001'];
+  : ['http://localhost:5174', process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}', 'http://127.0.0.1:5174', 'http://127.0.0.1:3001'];
 
 // 创建HTTP服务器和Socket.IO实例
 const server = http.createServer(app);
@@ -194,42 +194,95 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // 初始化错误处理系统
 const { initializeErrorHandlingSystem, unifiedErrorHandler } = require('../utils/errorHandler');
 
-// 使用统一路由管理器 - 修复API路由架构问题
-const RouteManager = require('./RouteManager.js');
-const routeManager = new RouteManager(app);
-
-// 初始化应用系统
-async function initializeApp() {
-  try {
-    // 1. 初始化错误处理系统
-    await initializeErrorHandlingSystem();
-
-    // 2. 设置全局错误处理中间件
-    app.use(unifiedErrorHandler);
-
-    // 3. 初始化统一测试引擎管理器（如果存在）
-    // console.log('🔧 初始化测试引擎管理器...');
-    // await testEngineManager.initialize();
-    // console.log('✅ 测试引擎管理器初始化完成');
-
-    // 4. 初始化路由管理器
-    await routeManager.initialize();
-
-    // 5. 注册所有标准路由
-    routeManager.registerStandardRoutes();
-
-    // 6. 应用所有路由
-    routeManager.applyRoutes();
-
-    console.log('✅ Application systems initialized successfully');
-  } catch (error) {
-    console.error('❌ Failed to initialize application:', error);
-    process.exit(1);
-  }
+// 初始化错误处理系统（同步）
+try {
+  const { initializeErrorHandlingSystem, unifiedErrorHandler } = require('../utils/errorHandler');
+  // 注意：这里我们不能使用异步初始化，改为同步导入
+  console.log('✅ 错误处理系统已导入');
+  
+  // 设置全局错误处理中间件
+  app.use(unifiedErrorHandler);
+  console.log('✅ 统一错误处理中间件已应用');
+} catch (error) {
+  console.warn('⚠️ 错误处理系统导入失败:', error.message);
 }
 
-// 立即初始化应用
-initializeApp();
+// 同步应用所有关键路由（必须在404处理器之前）
+console.log('🔧 开始同步应用关键路由...');
+
+// 应用认证路由
+try {
+  const authRoutes = require('../routes/auth.js');
+  app.use('/api/auth', authRoutes);
+  console.log('✅ 认证路由已应用: /api/auth');
+} catch (error) {
+  console.error('⚠️ 认证路由应用失败:', error.message);
+}
+
+// 应用系统路由
+try {
+  const systemRoutes = require('../routes/system.js');
+  app.use('/api/system', systemRoutes);
+  console.log('✅ 系统路由已应用: /api/system');
+} catch (error) {
+  console.error('⚠️ 系统路由应用失败:', error.message);
+}
+
+// 应用SEO路由
+try {
+  const seoRoutes = require('../routes/seo.js');
+  app.use('/api/seo', seoRoutes);
+  console.log('✅ SEO路由已应用: /api/seo');
+} catch (error) {
+  console.error('⚠️ SEO路由应用失败:', error.message);
+}
+
+// 应用安全路由（使用简化版本）
+try {
+  const securityRoutes = require('../routes/security-simple.js');
+  app.use('/api/security', securityRoutes);
+  console.log('✅ 简化安全路由已应用: /api/security');
+} catch (error) {
+  console.error('⚠️ 安全路由应用失败:', error.message);
+}
+
+// 应用引擎状态路由
+try {
+  const engineStatusRoutes = require('../routes/engineStatus.js');
+  app.use('/api/engines', engineStatusRoutes);
+  console.log('✅ 引擎状态路由已应用: /api/engines');
+} catch (error) {
+  console.error('⚠️ 引擎状态路由应用失败:', error.message);
+}
+
+// 应用测试路由
+try {
+  const testRoutes = require('../routes/test.js');
+  app.use('/api/test', testRoutes);
+  console.log('✅ 测试路由已应用: /api/test');
+} catch (error) {
+  console.error('⚠️ 测试路由应用失败:', error.message);
+}
+
+// 应用简单测试路由
+try {
+  const simpleTestRoutes = require('../routes/simple-test.js');
+  app.use('/api/simple', simpleTestRoutes);
+  console.log('✅ 简单测试路由已应用: /api/simple');
+} catch (error) {
+  console.error('⚠️ 简单测试路由应用失败:', error.message);
+}
+
+// 应用API映射修复路由（作为后备）
+try {
+  const apiMappings = require('../routes/api-mappings.js');
+  app.use('/api', apiMappings);
+  console.log('✅ API映射修复路由已应用');
+} catch (error) {
+  console.error('⚠️ API映射应用失败:', error.message);
+}
+
+console.log('✅ 所有关键路由已同步应用完成');
 
 // 健康检查端点
 app.get('/health', async (req, res) => {
@@ -459,41 +512,7 @@ app.get('/api', (req, res) => {
   });
 });
 
-// 手动应用关键路由作为备用方案（修复路由管理器问题）
-// 必须在404处理器之前应用
-try {
-  console.log('🔧 应用备用路由...');
-
-  // 手动应用测试路由
-  const testRoutes = require('../routes/test.js');
-  app.use('/api/test', testRoutes);
-  console.log('✅ 备用测试路由已应用: /api/test');
-
-  // 手动应用认证路由
-  const authRoutes = require('../routes/auth.js');
-  app.use('/api/auth', authRoutes);
-  console.log('✅ 备用认证路由已应用: /api/auth');
-
-  // 手动应用系统路由
-  const systemRoutes = require('../routes/system.js');
-  app.use('/api/system', systemRoutes);
-  console.log('✅ 备用系统路由已应用: /api/system');
-
-  // 手动应用统一测试引擎路由
-  const unifiedEngineRoutes = require('../routes/testEngine.js');
-  app.use('/api/unified-engine', unifiedEngineRoutes);
-  console.log('✅ 统一测试引擎路由已应用: /api/unified-engine');
-
-} catch (error) {
-  console.error('⚠️ 备用路由应用失败:', error.message);
-}
-
-// 404处理 - 使用统一格式
-app.use('*', notFoundHandler);
-
-// 错误处理中间件 - 使用统一格式
-app.use(errorResponseFormatter);
-app.use(ErrorHandler.globalErrorHandler);
+// 404处理和错误处理将在startServer函数中应用（所有路由之后）
 
 // 启动服务器
 const startServer = async () => {
@@ -651,20 +670,27 @@ const startServer = async () => {
       }
     }, 2000); // 延迟2秒执行，确保服务器完全启动
 
+    // 现在应用404处理和错误处理中间件（所有路由之后）
+    console.log('🔧 应用404处理和错误处理中间件...');
+    
+    // 404处理 - 使用统一格式
+    app.use('*', notFoundHandler);
+    console.log('✅ 404处理器已应用');
+    
+    // 错误处理中间件 - 使用统一格式
+    app.use(errorResponseFormatter);
+    app.use(ErrorHandler.globalErrorHandler);
+    console.log('✅ 错误处理中间件已应用');
+    
     // 启动服务器
     server.listen(PORT, () => {
       console.log(`🚀 服务器运行在端口 ${PORT}`);
-      console.log(`📖 API文档: http://localhost:${PORT}/api`);
-      console.log(`🏥 健康检查: http://localhost:${PORT}/health`);
-      console.log(`🌍 环境: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔌 WebSocket服务已启动`);
 
       // 初始化新的WebSocket服务
       try {
         const webSocketService = require('../services/websocketService');
         webSocketService.initialize(server);
         webSocketService.startHeartbeat();
-        console.log(`🔌 新WebSocket服务已启动: ws://localhost:${PORT}/ws`);
       } catch (wsError) {
         console.warn('⚠️ 新WebSocket服务启动失败:', wsError.message);
       }
@@ -672,17 +698,13 @@ const startServer = async () => {
       // 显示地理位置服务状态
       const geoUpdateService = require('../services/core/geoUpdateService.js');
       const geoStatus = geoUpdateService.getStatus();
-      console.log(`🗺️  地理位置自动更新: ${geoStatus.enabled ? '已启用' : '已禁用'}`);
       if (geoStatus.enabled) {
-        console.log(`📅 更新计划: ${geoStatus.schedule}`);
       }
     });
 
     // 优雅关闭
     const gracefulShutdown = (signal) => {
-      console.log(`/n收到 ${signal} 信号，开始优雅关闭...`);
       server.close(() => {
-        console.log('HTTP服务器已关闭');
         process.exit(0);
       });
     };
@@ -701,7 +723,6 @@ function setupWebSocketHandlers(io) {
   // 设置统一测试引擎命名空间
   const unifiedEngineNamespace = io.of('/unified-engine');
   unifiedEngineNamespace.on('connection', (socket) => {
-    console.log(`🧠 统一测试引擎WebSocket连接: ${socket.id}`);
 
     // 使用统一引擎WebSocket处理器
     if (global.unifiedEngineWSHandler) {
@@ -710,8 +731,6 @@ function setupWebSocketHandlers(io) {
   });
 
   io.on('connection', (socket) => {
-    console.log(`🔌🔌🔌 WebSocket客户端连接 🔌🔌🔌: ${socket.id}`);
-    console.log(`🔌 连接详情:`, {
       socketId: socket.id,
       remoteAddress: socket.handshake.address,
       userAgent: socket.handshake.headers['user-agent'],
@@ -721,7 +740,6 @@ function setupWebSocketHandlers(io) {
     // 🔧 重构：简化的用户测试连接
     socket.on('join-stress-test', (data) => {
       const { testId, userId } = data;
-      console.log(`🔥 用户连接测试: ${userId}/${testId}`, { socketId: socket.id });
 
       // 🔧 重构：注册用户WebSocket连接
       const userTestManager = require('../services/testing/UserTestManager.js');
@@ -745,7 +763,6 @@ function setupWebSocketHandlers(io) {
       const currentTest = userTestManager.getUserTestStatus(userId, testId);
 
       if (currentTest) {
-        console.log(`📤 向新加入的客户端发送当前测试状态:`, {
           testId,
           status: currentTest.status,
           hasData: !!currentTest.data,
@@ -789,7 +806,6 @@ function setupWebSocketHandlers(io) {
     socket.on('join-room', (data) => {
       if (data.room === 'test-history-updates') {
         socket.join('test-history-updates');
-        console.log(`📋 客户端 ${socket.id} 加入测试历史更新房间`);
 
         // 发送房间加入确认
         socket.emit('room-joined', {
@@ -804,12 +820,10 @@ function setupWebSocketHandlers(io) {
     socket.on('leave-room', (data) => {
       if (data.room === 'test-history-updates') {
         socket.leave('test-history-updates');
-        console.log(`📋 客户端 ${socket.id} 离开测试历史更新房间`);
       }
     });
 
     socket.on('test-ping', (data) => {
-      console.log(`🏓 收到测试ping:`, data);
       socket.emit('test-pong', {
         ...data,
         pongTime: Date.now(),
@@ -819,7 +833,6 @@ function setupWebSocketHandlers(io) {
 
     // 🔧 添加WebSocket取消测试事件处理
     socket.on('cancel-stress-test', async (data) => {
-      console.log(`🛑 收到WebSocket取消测试事件:`, { socketId: socket.id, data });
 
       try {
         const { testId, reason = '用户手动取消' } = data;
@@ -838,7 +851,6 @@ function setupWebSocketHandlers(io) {
         // 调用取消测试方法
         const result = await stressTestEngine.cancelStressTest(testId, reason, true);
 
-        console.log(`🛑 WebSocket取消测试结果:`, { testId, result });
 
         // 向客户端发送取消确认
         socket.emit('cancel-stress-test-ack', {
@@ -862,7 +874,6 @@ function setupWebSocketHandlers(io) {
     // 简化的事件监听器 - 只记录关键事件
     socket.onAny((eventName, ...args) => {
       if (['join-stress-test', 'leave-stress-test', 'cancel-stress-test'].includes(eventName)) {
-        console.log(`📥 收到关键事件: ${eventName}`, { socketId: socket.id, data: args[0] });
       }
     });
 
@@ -885,7 +896,6 @@ function setupWebSocketHandlers(io) {
 
     // 处理断开连接
     socket.on('disconnect', () => {
-      console.log(`🔌 WebSocket客户端断开连接: ${socket.id}`);
 
       // 🔧 重构：清理用户WebSocket连接
       // 注意：这里我们不知道具体的userId，所以需要在连接时存储

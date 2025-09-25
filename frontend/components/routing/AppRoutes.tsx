@@ -21,7 +21,7 @@ const MFAVerification = lazy(() => import('../../pages/auth/MFAVerification'));
 const APITest = lazy(() => import('../../pages/APITest'));
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
-const UnifiedStressTest = lazy(() => import('../../pages/UnifiedStressTest')); // 统一压力测试页面
+// const UnifiedStressTest = lazy(() => import('../../pages/UnifiedStressTest')); // 统一压力测试页面 - 暂时禁用
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
 const AccessibilityTest = lazy(() => import('../../pages/AccessibilityTest'));
 // const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
@@ -156,7 +156,7 @@ const AppRoutes: React.FC = () => {
         } />
         <Route path="stress-test" element={
           <LazyPageWrapper>
-            <UnifiedStressTest />
+            <PerformanceTest />
           </LazyPageWrapper>
         } />
         <Route path="compatibility-test" element={

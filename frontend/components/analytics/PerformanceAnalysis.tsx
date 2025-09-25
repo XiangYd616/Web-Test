@@ -1,3 +1,10 @@
+/**
+ * PerformanceAnalysis.tsx - React组件
+ * 
+ * 文件路径: frontend\components\analytics\PerformanceAnalysis.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { useState, useEffect } from 'react';
 import { Clock, TrendingUp, TrendingDown, Activity, Zap, AlertCircle, BarChart3 } from 'lucide-react';
 
@@ -138,6 +145,16 @@ const PerformanceAnalysis = () => {
   ) || [];
 
   const getMetricStatus = (metric: PerformanceMetric): 'good' | 'warning' | 'critical' => {
+    
+    /**
+    
+     * if功能函数
+    
+     * @param {Object} params - 参数对象
+    
+     * @returns {Promise<Object>} 返回结果
+    
+     */
     const { value, threshold, category } = metric;
     
     if (category === 'error_rate') {
@@ -155,6 +172,11 @@ const PerformanceAnalysis = () => {
     }
   };
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getStatusColor = (status: 'good' | 'warning' | 'critical'): string => {
     switch (status) {
       case 'good': return 'text-green-600';
@@ -164,6 +186,11 @@ const PerformanceAnalysis = () => {
     }
   };
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getStatusBgColor = (status: 'good' | 'warning' | 'critical'): string => {
     switch (status) {
       case 'good': return 'bg-green-100';
@@ -173,6 +200,11 @@ const PerformanceAnalysis = () => {
     }
   };
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
       case 'up': return TrendingUp;
@@ -183,6 +215,16 @@ const PerformanceAnalysis = () => {
   };
 
   const getTrendColor = (trend: 'up' | 'down' | 'stable', category: string): string => {
+    
+    /**
+    
+     * if功能函数
+    
+     * @param {Object} params - 参数对象
+    
+     * @returns {Promise<Object>} 返回结果
+    
+     */
     if (trend === 'stable') return 'text-gray-500';
     
     if (category === 'error_rate' || category === 'response_time' || category === 'resource_usage') {
@@ -192,6 +234,11 @@ const PerformanceAnalysis = () => {
     }
   };
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getCategoryLabel = (category: string): string => {
     switch (category) {
       case 'response_time': return 'Response Time';

@@ -1,3 +1,10 @@
+/**
+ * SEOResultVisualization.tsx - React组件
+ * 
+ * 文件路径: frontend\components\seo\SEOResultVisualization.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React, { useState, useMemo } from 'react';
 import { BarChart3, PieChart, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Clock, Zap } from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';

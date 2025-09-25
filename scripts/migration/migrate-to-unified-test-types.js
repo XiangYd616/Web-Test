@@ -154,10 +154,6 @@ async function main() {
     }
   }
   
-  console.log('\n📊 迁移完成:');
-  console.log(`   总文件数: ${totalFiles}`);
-  console.log(`   更新文件数: ${updatedFiles}`);
-  console.log(`   未修改文件数: ${totalFiles - updatedFiles}`);
   
   // 创建迁移报告
   const report = {
@@ -173,8 +169,6 @@ async function main() {
     JSON.stringify(report, null, 2)
   );
   
-  console.log('\n📝 迁移报告已保存到 migration-report.json');
-  console.log('\n✨ 迁移成功完成！');
 }
 
 // 运行主函数

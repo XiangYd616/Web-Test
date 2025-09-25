@@ -8,6 +8,16 @@ const { Server } = require('socket.io');
 const Redis = require('ioredis');
 const EventEmitter = require('events');
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 class EnhancedWebSocketManager extends EventEmitter {
   constructor(server, options = {}) {
     super();
@@ -26,7 +36,7 @@ class EnhancedWebSocketManager extends EventEmitter {
       // Socket.IO配置
       socketIO: {
         cors: {
-          origin: process.env.CORS_ORIGINS?.split(',') || ["http://localhost:5174", "http://localhost:3001"],
+          origin: process.env.CORS_ORIGINS?.split(',') || ["http://localhost:5174", "http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}"],
           methods: ["GET", "POST"],
           credentials: true
         },
@@ -249,7 +259,6 @@ class EnhancedWebSocketManager extends EventEmitter {
     this.connections.set(socket.id, connectionInfo);
     this.updateConnectionStats('connect');
     
-    console.log(`🔌 新WebSocket连接: ${socket.id} (用户: ${connectionInfo.userId || '匿名'})`);
     
     // 设置连接事件监听器
     this.setupConnectionListeners(socket, connectionInfo);
@@ -316,7 +325,6 @@ class EnhancedWebSocketManager extends EventEmitter {
    * 处理断开连接
    */
   handleDisconnection(socket, connectionInfo, reason) {
-    console.log(`🔌❌ WebSocket断开连接: ${socket.id} (原因: ${reason})`);
     
     // 清理连接数据
     this.connections.delete(socket.id);
@@ -378,7 +386,6 @@ class EnhancedWebSocketManager extends EventEmitter {
         await this.redisClient.hset(`connection:${socket.id}:rooms`, roomId, Date.now());
       }
       
-      console.log(`📺 ${socket.id} 加入房间: ${roomId}`);
       
       if (callback) callback({ success: true, roomId });
       this.emit('room:joined', socket, roomId);
@@ -414,7 +421,6 @@ class EnhancedWebSocketManager extends EventEmitter {
         await this.redisClient.hdel(`connection:${socket.id}:rooms`, roomId);
       }
       
-      console.log(`📺❌ ${socket.id} 离开房间: ${roomId}`);
       
       if (callback) callback({ success: true, roomId });
       this.emit('room:left', socket, roomId);
@@ -582,6 +588,16 @@ class EnhancedWebSocketManager extends EventEmitter {
     this.messageQueues.forEach((queue, socketId) => {
       if (queue.length === 0) return;
       
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const socket = this.io.sockets.sockets.get(socketId);
       if (!socket) {
         // 清理已断开连接的队列
@@ -639,7 +655,6 @@ class EnhancedWebSocketManager extends EventEmitter {
       // 检查上次活动时间
       const lastActivity = connectionInfo.lastActivity.getTime();
       if (now - lastActivity > this.config.connection.idleTimeout) {
-        console.log(`⏰ 连接空闲超时，断开连接: ${socketId}`);
         socket.disconnect(true);
       }
     });
@@ -662,7 +677,6 @@ class EnhancedWebSocketManager extends EventEmitter {
    */
   async performCleanup() {
     try {
-      console.log('🧹 开始WebSocket清理任务...');
       
       // 清理断开的连接
       const connectedSockets = new Set(this.io.sockets.sockets.keys());
@@ -715,7 +729,6 @@ class EnhancedWebSocketManager extends EventEmitter {
       
       if (keysToDelete.length > 0) {
         await this.redisClient.del(...keysToDelete);
-        console.log(`🗑️ 清理了${keysToDelete.length}个Redis键`);
       }
       
     } catch (error) {
@@ -841,7 +854,6 @@ class EnhancedWebSocketManager extends EventEmitter {
    */
   async shutdown() {
     try {
-      console.log('🔌 关闭增强版WebSocket管理器...');
       
       // 停止心跳
       if (this.heartbeatInterval) {

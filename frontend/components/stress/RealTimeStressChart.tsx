@@ -1,3 +1,10 @@
+/**
+ * RealTimeStressChart.tsx - React组件
+ * 
+ * 文件路径: frontend\components\stress\RealTimeStressChart.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Activity, TrendingUp, Users, Zap, AlertTriangle } from 'lucide-react';
@@ -54,7 +61,6 @@ const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('🔌 WebSocket连接已建立');
         setConnectionStatus('connected');
         
         // 订阅测试数据
@@ -98,7 +104,6 @@ const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
       };
 
       ws.onclose = () => {
-        console.log('🔌 WebSocket连接已关闭');
         setConnectionStatus('disconnected');
         
         // 如果测试还在运行，尝试重连

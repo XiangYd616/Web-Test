@@ -204,7 +204,6 @@ class StressTestWorker {
       duration: Date.now() - this.startTime
     });
     
-    console.log(`🏁 Worker ${this.config.workerId} 停止，共发送 ${this.requestCount} 个请求`);
   }
 
   /**

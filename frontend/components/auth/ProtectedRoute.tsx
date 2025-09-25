@@ -1,3 +1,10 @@
+/**
+ * ProtectedRoute.tsx - React组件
+ * 
+ * 文件路径: frontend\components\auth\ProtectedRoute.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import type { ReactNode, FC } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';

@@ -352,7 +352,17 @@ export const SmartLoader: React.FC<{
   progress?: number;
   stage?: string;
   className?: string;
+  /**
+   * if功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
 }> = ({ type, testType, progress, stage, className = '' }) => {
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   if (type === 'test' && testType && progress !== undefined && stage) {
     switch (testType) {
       case 'stress':

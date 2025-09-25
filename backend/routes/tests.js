@@ -7,21 +7,21 @@
 const express = require('express');
 const { body, query, validationResult } = require('express-validator');
 
-const { getPool } = require('../../../config/database');
-const { authMiddleware, requirePlan, PLANS } = require('./auth.js');
-const { asyncHandler } = require('../../middleware/errorHandler.js');
-const { formatValidationErrors, createPagination, ERROR_CODES } = require('../../middleware/responseFormatter.js');
+const { getPool } = require('../config/database');
+const { authMiddleware, requirePlan, PLANS } = require('../middleware/auth.js');
+const { asyncHandler } = require('../middleware/errorHandler.js');
+const { formatValidationErrors, createPagination, ERROR_CODES } = require('../middleware/responseFormatter.js');
 
 // 导入测试引擎
-const seoEngine = require('../../../engines/seo/index');
-const performanceEngine = require('../../../engines/performance/index');
-const securityEngine = require('../../../engines/security/index');
-const stressEngine = require('../../../engines/stress/index');
-const apiEngine = require('../../../engines/api/index');
-const compatibilityEngine = require('../../../engines/compatibility/index');
-const uxEngine = require('../../../engines/ux/index');
-const infrastructureEngine = require('../../../engines/infrastructure/index');
-const websiteEngine = require('../../../engines/website/index');
+const seoEngine = require('../engines/seo/index');
+const performanceEngine = require('../engines/performance/index');
+const securityEngine = require('../engines/security/index');
+const stressEngine = require('../engines/stress/index');
+const apiEngine = require('../engines/api/index');
+const compatibilityEngine = require('../engines/compatibility/index');
+const uxEngine = require('../engines/ux/index');
+const infrastructureEngine = require('../engines/infrastructure/index');
+const websiteEngine = require('../engines/website/index');
 
 const router = express.Router();
 
@@ -122,6 +122,16 @@ const checkTestLimits = async (userId, testType, userPlan) => {
     [PLANS.ENTERPRISE]: 10
   };
 
+
+  /**
+
+   * if功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const maxConcurrent = concurrentLimits[userPlan] || 1;
 
   if (runningTests >= maxConcurrent) {
@@ -146,6 +156,16 @@ const checkTestLimits = async (userId, testType, userPlan) => {
     [PLANS.ENTERPRISE]: {} // 无限制
   };
 
+
+  /**
+
+   * if功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const dailyLimit = dailyLimits[userPlan]?.[testType];
 
   if (dailyLimit && todayTests >= dailyLimit) {

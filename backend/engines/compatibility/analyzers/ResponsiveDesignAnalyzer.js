@@ -48,7 +48,6 @@ class ResponsiveDesignAnalyzer {
    * 分析响应式设计
    */
   async analyzeResponsiveDesign(url, options = {}) {
-    console.log('📱 开始响应式设计分析...');
 
     const analysis = {
       url,
@@ -79,7 +78,6 @@ class ResponsiveDesignAnalyzer {
 
       // 在不同设备上测试
       for (const device of devicesToTest) {
-        console.log(`📱 测试设备: ${device.name} (${device.width}x${device.height})`);
         const deviceResult = await this.testOnDevice(url, device);
         analysis.deviceTests.push(deviceResult);
       }
@@ -174,7 +172,7 @@ class ResponsiveDesignAnalyzer {
       }
 
       // 导航到页面
-      await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.goto(url, { waitUntil: 'networkidle0', timeout: process.env.REQUEST_TIMEOUT || 30000 });
 
       // 等待页面稳定
       await page.waitForTimeout(2000);
@@ -397,6 +395,11 @@ class ResponsiveDesignAnalyzer {
           let layoutShifts = 0;
 
           elements.forEach(el => {
+            /**
+             * if功能函数
+             * @param {Object} params - 参数对象
+             * @returns {Promise<Object>} 返回结果
+             */
             const rect = el.getBoundingClientRect();
             if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
               overflowCount++;
@@ -450,6 +453,16 @@ class ResponsiveDesignAnalyzer {
 
         interactiveElements.forEach((el, index) => {
           const rect = el.getBoundingClientRect();
+
+          /**
+
+           * if功能函数
+
+           * @param {Object} params - 参数对象
+
+           * @returns {Promise<Object>} 返回结果
+
+           */
           const isAdequate = rect.width >= 44 && rect.height >= 44;
 
           if (isAdequate) {

@@ -34,7 +34,6 @@ class LocalDatabase {
       await this.createTables();
 
       this.isInitialized = true;
-      console.log('本地数据库初始化成功:', this.dbPath);
 
       return { success: true, path: this.dbPath };
     } catch (error) {

@@ -1,3 +1,10 @@
+/**
+ * NotificationSystem.tsx - React组件
+ * 
+ * 文件路径: frontend\components\ui\NotificationSystem.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { createContext, useCallback, useContext, useState } from 'react';
 import type { ReactNode, FC } from 'react';;
@@ -31,6 +38,11 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const useNotifications = () => {
+  /**
+   * if功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
   const context = useContext(NotificationContext);
   if (!context) {
     throw new Error('useNotifications must be used within a NotificationProvider');
@@ -116,6 +128,16 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 };
 
 const NotificationContainer: React.FC = () => {
+
+  /**
+
+   * if功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const { notifications, removeNotification } = useNotifications();
 
   if (notifications.length === 0) {
@@ -140,6 +162,11 @@ interface NotificationItemProps {
   onRemove: () => void;
 }
 
+  /**
+   * 获取getIcon数据
+   * @param {string} id - 对象ID
+   * @returns {Promise<Object|null>} 获取的数据
+   */
 const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onRemove }) => {
   const getIcon = () => {
     switch (notification.type) {

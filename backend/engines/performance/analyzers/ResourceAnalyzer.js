@@ -40,7 +40,6 @@ class ResourceAnalyzer {
    */
   async analyze(page) {
     try {
-      console.log('📦 开始资源加载分析...');
       
       // 收集资源数据
       const resources = await this.collectResources(page);

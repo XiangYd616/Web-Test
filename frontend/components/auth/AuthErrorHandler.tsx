@@ -1,3 +1,10 @@
+/**
+ * AuthErrorHandler.tsx - React组件
+ * 
+ * 文件路径: frontend\components\auth\AuthErrorHandler.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { AlertTriangle, LogIn, RefreshCw, X } from 'lucide-react';
 import React from 'react';
 import type { FC } from 'react';
@@ -160,6 +167,11 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
   );
 };
 
+  /**
+   * if功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
 export const parseAuthError = (error: any): AuthErrorType => {
   if (typeof error === 'string') {
     // 尝试从错误消息中推断错误类型

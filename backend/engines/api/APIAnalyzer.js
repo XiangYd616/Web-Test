@@ -8,13 +8,19 @@ const { TestCaseManager } = require('../../managers/testCaseManager');
 const HTTPClient = require('../clients/httpClient');
 const APITestAutomation = require('../automation/apiTestAutomation');
 const APIPerformanceTester = require('../performance/apiPerformanceTester');
+
+/**
+
+ * APIAnalyzer类 - 负责处理相关功能
+
+ */
 const APIDocumentationGenerator = require('../documentation/apiDocumentationGenerator');
 
 class APIAnalyzer {
   constructor(options = {}) {
     this.options = {
-      timeout: 30000,
-      maxConcurrency: 10,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
+      maxConcurrency: parseInt(process.env.MAX_CONCURRENCY || '10'),
       retryAttempts: 3,
       retryDelay: 1000,
       ...options
@@ -982,7 +988,6 @@ class APIAnalyzer {
    */
   async runWebsiteTest(url, config = {}) {
     try {
-      console.log('🌐 Running website test for:', url);
       
       const result = {
         success: true,

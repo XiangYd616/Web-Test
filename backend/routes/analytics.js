@@ -323,6 +323,16 @@ function calculateLinearRegression(dataPoints) {
 
 function generatePrediction(dataPoints, regression, days) {
   const prediction = [];
+  
+  /**
+  
+   * for功能函数
+  
+   * @param {Object} params - 参数对象
+  
+   * @returns {Promise<Object>} 返回结果
+  
+   */
   const lastTimestamp = new Date(dataPoints[dataPoints.length - 1].timestamp);
   
   for (let i = 1; i <= days; i++) {
@@ -355,6 +365,16 @@ function generateTrendInsights(trend, strength, changeRate, confidence) {
   insights.push(`数据呈现${trend === 'increasing' ? '上升' : trend === 'decreasing' ? '下降' : '稳定'}趋势`);
   insights.push(`趋势强度为${(strength * 100).toFixed(1)}%`);
   insights.push(`相对变化率为${changeRate.toFixed(2)}%`);
+  
+  /**
+  
+   * if功能函数
+  
+   * @param {Object} params - 参数对象
+  
+   * @returns {Promise<Object>} 返回结果
+  
+   */
   insights.push(`预测置信度为${(confidence * 100).toFixed(1)}%`);
   
   if (strength > 0.7) {
@@ -375,6 +395,11 @@ function generateComparisonInsights(summary, totalPoints) {
   insights.push(`最大差异为${summary.maxDifference.toFixed(2)}`);
   insights.push(`显著变化点数量为${summary.significantChanges}/${totalPoints}`);
   
+  /**
+   * if功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
   const significanceRatio = summary.significantChanges / totalPoints;
   if (significanceRatio > 0.5) {
     insights.push('大部分数据点存在显著差异');

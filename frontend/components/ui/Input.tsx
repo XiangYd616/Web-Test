@@ -156,6 +156,16 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(({
   showToggle = true,
   ...props
 }, ref) => {
+
+  /**
+
+   * togglePassword功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   const [showPassword, setShowPassword] = React.useState(false);
 
   const togglePassword = () => setShowPassword(!showPassword);
@@ -196,6 +206,16 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
   showClearButton = true,
   ...props
 }, ref) => {
+
+  /**
+
+   * 处理handleChange事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   const [value, setValue] = React.useState(props.value || '');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,6 +224,11 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
     props.onChange?.(e);
   };
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       onSearch?.(value as string);
@@ -264,6 +289,16 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(({
   showControls = true,
   ...props
 }, ref) => {
+
+  /**
+
+   * 处理handleIncrement事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   const [value, setValue] = React.useState(props.value || '');
 
   const handleIncrement = () => {

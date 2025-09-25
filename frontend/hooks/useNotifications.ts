@@ -1,3 +1,10 @@
+/**
+ * useNotifications.ts - 核心功能模块
+ * 
+ * 文件路径: frontend\hooks\useNotifications.ts
+ * 创建时间: 2025-09-25
+ */
+
 import { useCallback, useEffect, useState } from 'react';
 
 export interface NotificationItem {
@@ -196,12 +203,22 @@ export const useNotifications = () => {
           /*
           // 进行健康检查
           try {
-            const healthCheck = await fetch('http://localhost:3001/health', {
+            const healthCheck = await fetch('http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/health', {
               method: 'GET',
               timeout: 2000 // 2秒超时
             });
 
             const isHealthy = healthCheck.ok;
+
+            /**
+
+             * if功能函数
+
+             * @param {Object} params - 参数对象
+
+             * @returns {Promise<Object>} 返回结果
+
+             */
             localStorage.setItem(healthCheckKey, JSON.stringify({ timestamp: now, isHealthy }));
 
             if (!isHealthy) {

@@ -515,7 +515,7 @@ const initialData = {
         headers: {
           'Content-Type': 'application/json'
         },
-        timeout: 30000,
+        timeout: process.env.REQUEST_TIMEOUT || 30000,
         validateResponse: true
       },
       is_default: false,
@@ -586,7 +586,7 @@ const initialData = {
     {
       service_name: 'api_server',
       service_type: 'api',
-      endpoint: 'http://localhost:3001/health',
+      endpoint: 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/health',
       status: 'healthy',
       details: {
         uptime: 'running',
@@ -609,7 +609,6 @@ async function initializeDatabase() {
     await client.query('BEGIN');
 
     // 1. 创建扩展
-    console.log('📦 创建PostgreSQL扩展...');
     try {
       // PostgreSQL 13+ 内置 gen_random_uuid()，但为了兼容性也创建 uuid-ossp
       await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
@@ -620,7 +619,6 @@ async function initializeDatabase() {
     }
 
     // 2. 创建表
-    console.log('🏗️ 创建数据表...');
     let tableCount = 0;
     for (const [tableName, sql] of Object.entries(createTables)) {
       try {
@@ -658,7 +656,6 @@ async function initializeDatabase() {
     console.log(`✅ 共创建 ${indexCount} 个索引`);
 
     // 4. 插入初始数据
-    console.log('📝 插入初始数据...');
     let dataCount = 0;
 
     for (const [tableName, records] of Object.entries(initialData)) {
@@ -708,7 +705,6 @@ async function initializeDatabase() {
     // 提交事务
     await client.query('COMMIT');
 
-    console.log('🎉 数据库初始化完成!');
 
     // 显示数据库统计信息
     await showDatabaseStats(client);
@@ -739,9 +735,7 @@ async function showDatabaseStats(client) {
       ORDER BY table_name
     `);
 
-    console.log(`📋 数据表: ${tablesResult.rows.length} 个`);
     tablesResult.rows.forEach(row => {
-      console.log(`   - ${row.table_name} (${row.column_count} 列)`);
     });
 
     // 获取索引信息
@@ -769,7 +763,6 @@ async function showDatabaseStats(client) {
 
     console.log('📊 数据统计:');
     dataStats.forEach(stat => {
-      console.log(`   - ${stat.table}: ${stat.count} 条记录`);
     });
 
   } catch (error) {
@@ -787,8 +780,6 @@ async function checkDatabaseStatus() {
     // 测试连接
     const result = await client.query('SELECT NOW() as current_time, version() as version');
     console.log('✅ 数据库连接正常');
-    console.log(`🕒 服务器时间: ${result.rows[0].current_time}`);
-    console.log(`📋 PostgreSQL版本: ${result.rows[0].version.split(' ')[0]} ${result.rows[0].version.split(' ')[1]}`);
 
     return true;
   } catch (error) {
@@ -816,7 +807,6 @@ async function cleanDatabase() {
     for (const tableName of tablesToDrop) {
       try {
         await client.query(`DROP TABLE IF EXISTS ${tableName} CASCADE`);
-        console.log(`🗑️ 删除表 ${tableName}`);
       } catch (error) {
         console.error(`❌ 删除表 ${tableName} 失败:`, error.message);
       }
@@ -838,7 +828,6 @@ async function cleanDatabase() {
  * 重置数据库 (清理后重新初始化)
  */
 async function resetDatabase() {
-  console.log('🔄 开始重置数据库...');
 
   try {
     await cleanDatabase();
@@ -867,7 +856,6 @@ if (require.main === module) {
   (async () => {
     try {
       console.log('🚀 Test-Web数据库初始化脚本启动');
-      console.log('='.repeat(50));
 
       // 检查命令行参数
       const args = process.argv.slice(2);
@@ -875,19 +863,16 @@ if (require.main === module) {
 
       switch (command) {
         case 'init':
-          console.log('📋 执行数据库初始化...');
           await checkDatabaseStatus();
           await initializeDatabase();
           break;
 
         case 'reset':
-          console.log('🔄 执行数据库重置...');
           await checkDatabaseStatus();
           await resetDatabase();
           break;
 
         case 'clean':
-          console.log('🗑️ 执行数据库清理...');
           await checkDatabaseStatus();
           await cleanDatabase();
           break;
@@ -902,11 +887,9 @@ if (require.main === module) {
 
         default:
           console.log('❌ 未知命令:', command);
-          console.log('可用命令: init, reset, clean, status');
           process.exit(1);
       }
 
-      console.log('='.repeat(50));
       console.log('✅ 数据库脚本执行完成');
 
     } catch (error) {

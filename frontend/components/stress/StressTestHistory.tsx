@@ -1,3 +1,10 @@
+/**
+ * StressTestHistory.tsx - React组件
+ * 
+ * 文件路径: frontend\components\stress\StressTestHistory.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { Activity, BarChart3, Download, ExternalLink, Eye, RefreshCw, Search, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -126,13 +133,11 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
       // 如果参数相同，避免重复请求
       if (requestKey === lastRequestParamsRef.current && requestCacheRef.current.has(requestKey)) {
-        console.log('🔄 使用缓存的请求结果，避免重复请求');
         return;
       }
 
       // 如果有相同的请求正在进行，等待其完成
       if (requestCacheRef.current.has(requestKey)) {
-        console.log('⏳ 等待相同请求完成...');
         await requestCacheRef.current.get(requestKey);
         return;
       }
@@ -663,7 +668,6 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     const recordName = recordToDelete ? recordToDelete.testName : '测试记录';
 
     try {
-      console.log('🗑️ 开始删除测试记录:', recordId);
 
       const response = await fetch(`/api/test/history/${recordId}`, {
         method: 'DELETE',
@@ -737,7 +741,6 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     }
 
     try {
-      console.log('🗑️ 开始批量删除测试记录:', Array.from(selectedRecords));
 
       // 使用真正的批量删除API
       const response = await fetch('/api/test/history/batch', {

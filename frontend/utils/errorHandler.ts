@@ -241,7 +241,6 @@ function createQuickActions(type: string, context: ErrorContext): Array<{
           label: '自动修复URL',
           action: () => {
             // 这里可以触发URL自动修复
-            console.log('Auto-fix URL:', context.url);
           }
         });
       }

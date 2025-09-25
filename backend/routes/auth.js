@@ -37,6 +37,16 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
   if (!username) errors.push({ field: 'username', message: '用户名是必填的' });
   if (!email) errors.push({ field: 'email', message: '邮箱是必填的' });
   if (!password) errors.push({ field: 'password', message: '密码是必填的' });
+
+  /**
+
+   * if功能函数
+
+   * @param {Object} params - 参数对象
+
+   * @returns {Promise<Object>} 返回结果
+
+   */
   if (!confirmPassword) errors.push({ field: 'confirmPassword', message: '确认密码是必填的' });
 
   if (password && confirmPassword && password !== confirmPassword) {
@@ -493,7 +503,6 @@ router.post('/forgot-password', asyncHandler(async (req, res) => {
     );
 
     // TODO: 发送重置密码邮件
-    console.log(`密码重置令牌: ${resetToken} (用户: ${user.email})`);
 
     res.success('如果该邮箱地址存在，我们已发送重置密码的邮件');
 
@@ -581,7 +590,6 @@ router.post('/send-verification', authMiddleware, asyncHandler(async (req, res) 
     );
 
     // TODO: 发送验证邮件
-    console.log(`邮箱验证令牌: ${verificationToken} (用户: ${user.email})`);
 
     res.success('验证邮件已发送，请检查您的邮箱');
 

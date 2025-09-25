@@ -181,7 +181,6 @@ const colorLog = (level, message) => {
   };
   
   const color = colors[level] || colors.reset;
-  console.log(`${color}${message}${colors.reset}`);
 };
 
 /**
@@ -225,7 +224,6 @@ const requestLogger = (req, res, next) => {
       
       // 详细日志（仅在调试模式下）
       if (process.env.DEBUG === 'true') {
-        console.log('📋 详细请求日志:', JSON.stringify(logData, null, 2));
       }
     } else {
       // 生产环境：结构化JSON日志
@@ -242,7 +240,6 @@ const requestLogger = (req, res, next) => {
           console.info(logMessage);
           break;
         default:
-          console.log(logMessage);
       }
     }
     

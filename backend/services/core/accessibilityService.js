@@ -230,6 +230,16 @@ class AccessibilityService {
     for (const element of textElements) {
       const contrast = this.calculateContrastRatio(element.foreground, element.background);
       const isLargeText = element.fontSize >= 18 || (element.fontSize >= 14 && element.bold);
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const minRatio = isLargeText ? requiredRatio.large : requiredRatio.normal;
 
       if (contrast < minRatio) {
@@ -606,6 +616,16 @@ class AccessibilityService {
           const nodeList = document.querySelectorAll(selector);
           nodeList.forEach(element => {
             const computedStyle = window.getComputedStyle(element);
+
+            /**
+
+             * if功能函数
+
+             * @param {Object} params - 参数对象
+
+             * @returns {Promise<Object>} 返回结果
+
+             */
             const text = element.textContent?.trim();
 
             if (text && text.length > 0) {

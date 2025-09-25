@@ -69,7 +69,6 @@ const SecurityTest: React.FC = () => {
     error: progressError
   } = useTestProgress(currentTestId || undefined, {
     onProgress: (progressData) => {
-      console.log('安全测试进度:', progressData);
     },
     onComplete: (result) => {
       setTestResult(result);
@@ -82,12 +81,10 @@ const SecurityTest: React.FC = () => {
 
   // 处理测试选择和重新运行
   const handleTestSelect = (test: any) => {
-    console.log('选择测试:', test);
     // 可以在这里加载选中的测试配置
   };
 
   const handleTestRerun = (test: any) => {
-    console.log('重新运行测试:', test);
     // 可以在这里重新运行选中的测试
   };
 
@@ -99,7 +96,6 @@ const SecurityTest: React.FC = () => {
     }
 
     try {
-      console.log('开始安全测试:', testUrl, testConfig);
 
       // 执行安全测试
       const response = await testApiService.executeSecurityTest(testUrl, testConfig);

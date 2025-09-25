@@ -128,7 +128,6 @@ export class UserFeedbackService {
         await this.submitQueuedFeedback();
       }
 
-      console.log('Feedback queued:', completeFeedback);
     } catch (error) {
       console.error('Failed to submit feedback:', error);
     }
@@ -146,7 +145,6 @@ export class UserFeedbackService {
       };
 
       this.usageStatsQueue.push(completeStats);
-      console.log('Usage stats recorded:', completeStats);
     } catch (error) {
       console.error('Failed to record usage stats:', error);
     }
@@ -179,7 +177,6 @@ export class UserFeedbackService {
         }
 
         this.performanceQueue.push(metrics);
-        console.log('Performance metrics recorded:', metrics);
       }
     } catch (error) {
       console.error('Failed to record performance metrics:', error);
@@ -285,7 +282,6 @@ export class UserFeedbackService {
         const lcpObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
           const lastEntry = entries[entries.length - 1];
-          console.log('LCP:', lastEntry.startTime);
         });
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
 
@@ -297,14 +293,12 @@ export class UserFeedbackService {
               clsValue += (entry as any).value;
             }
           }
-          console.log('CLS:', clsValue);
         });
         clsObserver.observe({ entryTypes: ['layout-shift'] });
 
         // 监控 FID
         const fidObserver = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
-            console.log('FID:', (entry as any).processingStart - entry.startTime);
           }
         });
         fidObserver.observe({ entryTypes: ['first-input'] });
@@ -344,7 +338,6 @@ export class UserFeedbackService {
 
     try {
       // 这里应该调用实际的API端点
-      console.log('Submitting feedback:', this.feedbackQueue);
 
       // 模拟API调用
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -378,7 +371,6 @@ export class UserFeedbackService {
     if (this.usageStatsQueue.length === 0) return;
 
     try {
-      console.log('Submitting usage stats:', this.usageStatsQueue);
       await new Promise(resolve => setTimeout(resolve, 500));
       this.usageStatsQueue = [];
     } catch (error) {
@@ -393,7 +385,6 @@ export class UserFeedbackService {
     if (this.performanceQueue.length === 0) return;
 
     try {
-      console.log('Submitting performance metrics:', this.performanceQueue);
       await new Promise(resolve => setTimeout(resolve, 500));
       this.performanceQueue = [];
     } catch (error) {

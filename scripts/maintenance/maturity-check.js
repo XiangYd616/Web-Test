@@ -262,55 +262,41 @@ function generateOptimizationSuggestions() {
  * 生成报告
  */
 function generateReport() {
-  console.log('\n' + '='.repeat(60));
   console.log('📊 项目成熟度分析报告');
-  console.log('='.repeat(60));
   
   // 重复文件
   if (issues.duplicates.length > 0) {
-    console.log('\n🔁 发现重复或高度相似的文件:');
     issues.duplicates.slice(0, 5).forEach(dup => {
-      console.log(`  - ${dup.file1}`);
-      console.log(`    与 ${dup.file2} 相似度: ${dup.similarity}`);
     });
   } else {
-    console.log('\n✅ 没有发现重复文件');
   }
   
   // 缺失文件
   if (issues.missing.length > 0) {
-    console.log('\n❌ 缺失的重要文件:');
     issues.missing.forEach(item => {
-      console.log(`  - ${item.path}: ${item.description}`);
     });
   } else {
-    console.log('\n✅ 所有重要文件都存在');
   }
   
   // 占位符统计
   if (issues.placeholders.length > 0) {
-    console.log('\n📝 占位符和待完成内容:');
     const summary = {};
     issues.placeholders.forEach(item => {
       summary[item.type] = (summary[item.type] || 0) + item.count;
     });
     
     Object.entries(summary).forEach(([type, count]) => {
-      console.log(`  - ${type}: ${count} 处`);
     });
   }
   
   // 不完整的实现
   if (issues.incomplete.length > 0) {
-    console.log('\n⚠️  可能不完整的实现:');
     issues.incomplete.slice(0, 5).forEach(item => {
-      console.log(`  - ${item.file}: ${item.issue}`);
     });
   }
   
   // 优化建议
   if (issues.suggestions.length > 0) {
-    console.log('\n💡 优化建议:');
     issues.suggestions
       .sort((a, b) => {
         const priorityOrder = { high: 0, medium: 1, low: 2 };
@@ -319,22 +305,15 @@ function generateReport() {
       .forEach(suggestion => {
         const icon = suggestion.priority === 'high' ? '🔴' : 
                     suggestion.priority === 'medium' ? '🟡' : '🟢';
-        console.log(`  ${icon} [${suggestion.priority.toUpperCase()}] ${suggestion.category || suggestion.location}:`);
-        console.log(`     ${suggestion.suggestion}`);
       });
   }
   
   // 成熟度评分
   const score = calculateMaturityScore();
-  console.log('\n' + '='.repeat(60));
-  console.log(`🎯 项目成熟度评分: ${score}%`);
   
   if (score >= 90) {
-    console.log('✨ 优秀！项目非常成熟完整');
   } else if (score >= 75) {
-    console.log('👍 良好！项目基本成熟，仍有改进空间');
   } else if (score >= 60) {
-    console.log('📝 及格！需要进一步完善');
   } else {
     console.log('⚠️  需要大量工作来提升项目成熟度');
   }
@@ -365,19 +344,15 @@ async function main() {
   const projectRoot = path.join(__dirname, '..');
   
   // 1. 检查缺失文件
-  console.log('📁 检查缺失文件...');
   checkMissingFiles();
   
   // 2. 查找重复文件
-  console.log('🔁 查找重复文件...');
   findDuplicates(projectRoot);
   
   // 3. 扫描占位符和不完整内容
-  console.log('📝 扫描占位符内容...');
   scanProject(projectRoot);
   
   // 4. 检查组件一致性
-  console.log('🧩 检查组件一致性...');
   checkComponentConsistency();
   
   // 5. 生成优化建议
@@ -394,7 +369,6 @@ async function main() {
     timestamp: new Date().toISOString()
   }, null, 2));
   
-  console.log(`\n📄 详细报告已保存到: docs/maturity-report.json`);
 }
 
 main().catch(console.error);

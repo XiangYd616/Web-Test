@@ -419,7 +419,6 @@ export class TestRunner {
     api: TestResult[];
     summary: any;
   }> {
-    console.log('🧪 开始运行完整测试套件...');
 
     try {
       // 性能测试
@@ -431,11 +430,9 @@ export class TestRunner {
       }
 
       // 用户体验测试
-      console.log('👤 运行用户体验测试...');
       const uxResults: UXTestResult[] = [];
 
       // API测试
-      console.log('🌐 运行API测试...');
       const apiResults: TestResult[] = [];
 
       // 测试健康检查端点

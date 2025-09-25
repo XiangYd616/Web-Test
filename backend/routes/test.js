@@ -387,7 +387,6 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
 router.post('/k6/install', authMiddleware, adminAuth, asyncHandler(async (req, res) => {
   try {
     // 模拟安装过程
-    console.log('Installing K6...');
 
     res.success('https://k6.io/docs/getting-started/installation/', 'K6安装请求已提交，请手动安装K6');
   } catch (error) {
@@ -433,7 +432,6 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
  */
 router.post('/lighthouse/install', authMiddleware, adminAuth, asyncHandler(async (req, res) => {
   try {
-    console.log('Installing Lighthouse...');
 
     res.success(require('lighthouse/package.json').version, 'Lighthouse已包含在项目依赖中');
   } catch (error) {
@@ -450,7 +448,6 @@ router.post('/lighthouse/run', authMiddleware, asyncHandler(async (req, res) => 
   const { url, device = 'desktop', categories = ['performance'] } = req.body;
 
   try {
-    console.log(`Running Lighthouse for: ${url}`);
 
     // 模拟Lighthouse运行结果
     const mockResult = {
@@ -510,7 +507,6 @@ router.get('/playwright/status', asyncHandler(async (req, res) => {
  */
 router.post('/playwright/install', authMiddleware, adminAuth, asyncHandler(async (req, res) => {
   try {
-    console.log('Installing Playwright...');
 
     res.success(require('playwright/package.json').version, 'Playwright已包含在项目依赖中');
   } catch (error) {
@@ -527,7 +523,6 @@ router.post('/playwright/run', authMiddleware, asyncHandler(async (req, res) => 
   const { url, browsers = ['chromium'], tests = ['basic'], viewport } = req.body;
 
   try {
-    console.log(`Running Playwright for: ${url}`);
 
     // 模拟Playwright运行结果
     const mockResult = {
@@ -577,6 +572,11 @@ router.get('/status', asyncHandler(async (req, res) => {
             const { promisify } = require('util');
             const execAsync = promisify(exec);
 
+            /**
+             * if功能函数
+             * @param {Object} params - 参数对象
+             * @returns {Promise<Object>} 返回结果
+             */
             const { stdout } = await execAsync('k6 version');
             if (stdout) {
               engineStatus.available = true;
@@ -948,7 +948,6 @@ router.post('/run', authMiddleware, testRateLimiter, asyncHandler(async (req, re
     if (testId) {
       try {
         // await databaseService.updateTestStatus(testId, 'failed', 100, error.message);
-        console.log('测试状态更新已跳过（服务已删除）');
       } catch (dbError) {
         console.error('更新测试状态失败:', dbError);
       }
@@ -997,7 +996,6 @@ router.post('/:testId/cancel', authMiddleware, asyncHandler(async (req, res) => 
   try {
     // await testQueueService.cancelTest(testId);
     // 临时返回成功响应
-    console.log(`测试取消请求: ${testId} (服务已删除)`);
 
     res.success('测试已取消');
   } catch (error) {
@@ -1605,10 +1603,8 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
     console.log('🔍 API returning test result:', JSON.stringify(testResult, null, 2));
 
     if (testResult.success && testResult.data) {
-      console.log('📤 Sending nested data structure');
       res.success(testResult.data);
     } else {
-      console.log('📤 Sending direct data structure');
       res.success(testResult);
     }
   } catch (error) {
@@ -1638,6 +1634,16 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
           ORDER BY created_at DESC
           LIMIT 1
         `;
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const historyResult = await query(historyQuery, [`%${testId}%`]);
 
         if (historyResult.rows.length > 0) {
@@ -1714,7 +1720,6 @@ router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, r
   const { reason = '用户手动取消', preserveData = true } = req.body;
 
   try {
-    console.log(`🛑 收到取消压力测试请求: ${testId}`, {
       reason,
       preserveData,
       userId: req.user?.id
@@ -1727,7 +1732,6 @@ router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, r
     if (result.success) {
       // 记录取消操作到用户活动日志
       if (req.user?.id) {
-        console.log(`📝 记录用户 ${req.user.id} 的取消操作`);
       }
 
       res.json({
@@ -1759,7 +1763,6 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
   const { testId } = req.params;
 
   try {
-    console.log(`🛑 收到停止压力测试请求(向后兼容): ${testId}`);
 
     // 🔧 重构：使用用户测试管理器停止测试
     await userTestManager.stopUserTest(req.user?.id, testId);
@@ -1814,7 +1817,6 @@ router.get('/stress/running', optionalAuth, asyncHandler(async (req, res) => {
  */
 router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
   try {
-    console.log('🧹 管理员强制清理所有运行中的测试');
 
     // 🔧 重构：清理所有用户测试
     const stats = userTestManager.getStats();
@@ -2059,7 +2061,6 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
     }
 
     // 2. 立即返回响应，然后异步运行压力测试
-    console.log('🔄 准备异步启动压力测试引擎:', {
       url: validatedURL,
       testId: testId,
       hasTestId: !!testId,
@@ -2142,7 +2143,6 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
             if (responseData.status === 'cancelled') {
               // 🔒 取消状态不可覆盖，直接使用
               finalStatus = 'cancelled';
-              console.log('🔒 保持取消状态，不允许覆盖');
             } else if (responseData.status === 'completed') {
               // 明确的完成状态
               finalStatus = 'completed';
@@ -2327,7 +2327,6 @@ router.post('/security',
       // 保存测试结果到数据库
       try {
         await securityTestStorage.saveSecurityTestResult(testResult, req.user?.id);
-        console.log('💾 Security test result saved to database');
       } catch (saveError) {
         console.error('⚠️ Failed to save security test result:', saveError.message);
         // 不影响主要响应，只记录错误
@@ -2591,7 +2590,6 @@ router.post('/performance/core-web-vitals', optionalAuth, testRateLimiter, valid
   const validatedURL = req.validatedURL.url.toString();
 
   try {
-    console.log(`🎯 Starting Core Web Vitals test for: ${validatedURL}`);
 
     // 使用网站测试引擎进行Core Web Vitals检测
     const testResult = await realTestEngine.runTest(validatedURL, {
@@ -2632,8 +2630,6 @@ router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddlewa
   const validatedURL = req.validatedURL.url.toString();
 
   try {
-    console.log(`🌐 Starting enhanced compatibility test for: ${validatedURL}`);
-    console.log(`📋 Options:`, JSON.stringify(options, null, 2));
 
     // 增强的测试配置
     const enhancedOptions = {
@@ -2687,8 +2683,6 @@ router.post('/caniuse', optionalAuth, testRateLimiter, asyncHandler(async (req, 
 
   try {
     console.log(`🔍 Starting Can I Use compatibility test for: ${url}`);
-    console.log(`📋 Features:`, features);
-    console.log(`🌐 Browsers:`, browsers);
 
     // 真实的Can I Use兼容性分析
     const realResult = await this.performRealCompatibilityAnalysis(validatedURL, features, browsers);
@@ -2749,8 +2743,6 @@ router.post('/feature-detection', optionalAuth, testRateLimiter, asyncHandler(as
 
   try {
     console.log(`🔍 Starting feature detection compatibility test for: ${url}`);
-    console.log(`📋 Features:`, features);
-    console.log(`🌐 Browsers:`, browsers);
 
     // 模拟特性检测结果
     const featureDetectionResults = {};
@@ -3015,7 +3007,6 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
   }
 
   try {
-    console.log(`💾 Saving performance test result:`, result.testId);
 
     const sessionId = result.testId || `perf_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const actualUserId = userId || req.user?.id;
@@ -3520,7 +3511,6 @@ router.post('/accessibility', optionalAuth, testRateLimiter, validateURLMiddlewa
   const validatedURL = req.validatedURL.url.toString();
 
   try {
-    console.log(`♿ Starting accessibility test for: ${validatedURL}`);
 
     // 重定向到专用的无障碍API
     const accessibilityResponse = await fetch(`${req.protocol}://${req.get('host')}/api/accessibility/check`, {
@@ -3577,7 +3567,6 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
   }
 
   try {
-    console.log(`🔌 Starting API test for: ${baseUrl}`);
     console.log(`📊 Testing ${endpoints.length} endpoints`);
 
     // 准备测试配置
@@ -3592,6 +3581,11 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
       testPerformance: config.testPerformance || true,
       testReliability: config.testReliability || false,
       concurrentUsers: config.concurrentUsers || 1,
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
       headers: globalHeaders.reduce((acc, header) => {
         if (header.enabled && header.key && header.value) {
           acc[header.key] = header.value;
@@ -3627,7 +3621,6 @@ router.post('/content', optionalAuth, testRateLimiter, asyncHandler(async (req, 
   }
 
   try {
-    console.log(`📝 Starting content test for: ${url}`);
     
     const result = {
       success: true,
@@ -3675,7 +3668,6 @@ router.post('/network', optionalAuth, testRateLimiter, asyncHandler(async (req, 
   }
 
   try {
-    console.log(`🌐 Starting network test for ${targets.length} targets`);
     
     const results = [];
     for (const target of targets) {
@@ -3725,7 +3717,6 @@ router.post('/infrastructure', optionalAuth, testRateLimiter, asyncHandler(async
   }
 
   try {
-    console.log(`🏗️ Starting infrastructure test for: ${url}`);
     
     const result = {
       success: true,
@@ -3919,6 +3910,11 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
           const { promisify } = require('util');
           const execAsync = promisify(exec);
 
+          /**
+           * if功能函数
+           * @param {Object} params - 参数对象
+           * @returns {Promise<Object>} 返回结果
+           */
           const { stdout } = await execAsync('k6 version');
           if (stdout) {
             engineStatus.available = true;
@@ -4073,7 +4069,6 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
       proxyUrl = `${proxyType}://${proxy.host}:${proxyPort}`;
     }
 
-    console.log(`🌐 通过代理获取出口IP: ${proxy.host}:${proxyPort}`);
 
     // 使用代理访问测试网站获取出口IP
     const fetch = require('node-fetch');
@@ -4131,7 +4126,6 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
       try {
         locationInfo = await geoLocationService.getLocation(exitIp);
         if (locationInfo) {
-          console.log(`📍 出口IP ${exitIp} 位置: ${locationInfo.country}/${locationInfo.region}`);
         }
       } catch (geoError) {
         console.warn('获取出口IP地理位置信息失败:', geoError.message);
@@ -4263,7 +4257,6 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       proxyUrl = `${proxyType}://${proxy.host}:${proxyPort}`;
     }
 
-    console.log(`🌐 测试代理连接: ${proxy.host}:${proxyPort}`);
 
     // 使用 node-fetch 通过代理发送请求
     const fetch = require('node-fetch');
@@ -4325,7 +4318,6 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       try {
         locationInfo = await geoLocationService.getLocation(proxyIp);
         if (locationInfo) {
-          console.log(`📍 IP ${proxyIp} 位置: ${locationInfo.country}/${locationInfo.region} (${locationInfo.source})`);
         }
       } catch (geoError) {
         console.warn('获取IP地理位置信息失败:', geoError.message);
@@ -4439,7 +4431,6 @@ router.get('/geo-status', optionalAuth, asyncHandler(async (req, res) => {
  */
 router.post('/geo-update', optionalAuth, asyncHandler(async (req, res) => {
   try {
-    console.log('🎯 收到手动更新请求');
     const success = await geoUpdateService.triggerUpdate();
 
     res.json({

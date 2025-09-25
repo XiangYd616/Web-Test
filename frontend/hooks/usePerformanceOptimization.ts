@@ -298,7 +298,6 @@ export function useRenderPerformance(componentName: string) {
     // 每100次渲染报告一次平均性能
     if (renderCount.current % 100 === 0) {
       const avgRenderTime = totalRenderTime.current / renderCount.current;
-      console.log(`Component ${componentName} average render time: ${avgRenderTime.toFixed(2)}ms over ${renderCount.current} renders`);
     }
   });
 
@@ -377,7 +376,6 @@ export function usePerformanceOptimization() {
       end: () => {
         const endTime = performance.now();
         const renderTime = endTime - startTime;
-        console.log(`${componentName} render time: ${renderTime.toFixed(2)}ms`);
         return renderTime;
       }
     };
@@ -433,7 +431,6 @@ export function usePerformanceOptimization() {
       frontendCache.clear();
     }
 
-    console.log('Performance optimizations applied');
   }, [performanceLevel, isSlowNetwork, metrics.memoryUsage]);
 
   return {

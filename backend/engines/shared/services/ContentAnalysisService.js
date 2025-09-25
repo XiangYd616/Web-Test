@@ -782,6 +782,16 @@ class ContentAnalysisService extends BaseService {
     let criticalIssues = 0;
     let warnings = 0;
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
     Object.values(analyses).forEach(analysis => {
       if (analysis.overallScore !== undefined) {
         totalScore += analysis.overallScore;
@@ -807,6 +817,16 @@ class ContentAnalysisService extends BaseService {
   generateRecommendations(analyses) {
     const recommendations = [];
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
     Object.entries(analyses).forEach(([type, analysis]) => {
       if (analysis.issues) {
         analysis.issues.forEach(issue => {

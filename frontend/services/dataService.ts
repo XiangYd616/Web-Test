@@ -1,3 +1,10 @@
+/**
+ * dataService.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\dataService.ts
+ * 创建时间: 2025-09-25
+ */
+
 
 export interface DataRecord {
   id: string;

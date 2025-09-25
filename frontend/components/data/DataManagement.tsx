@@ -1,3 +1,10 @@
+/**
+ * DataManagement.tsx - React组件
+ * 
+ * 文件路径: frontend\components\data\DataManagement.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { PaginationInfo, TestRecord } from '@/hooks/useDataStorage';
 import {
     BarChart3,
@@ -9,7 +16,8 @@ import {
     TrendingUp
 } from 'lucide-react';
 import React, { useState } from 'react';
-import { TestType } from '@shared/types';
+// import { TestType } from '@shared/types'; // 暂时禁用
+type TestType = 'website' | 'security' | 'performance' | 'seo' | 'api' | 'network' | 'database' | 'compatibility' | 'accessibility' | 'ux';
 import DataStats from './DataStats';
 
 interface DataManagementProps {
@@ -63,7 +71,6 @@ export const DataManagement: React.FC<DataManagementProps> = ({
     };
 
     const handleExport = () => {
-        console.log('Exporting data...');
     };
 
     return (

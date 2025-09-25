@@ -319,14 +319,12 @@ class FinalProjectChecker {
       deployScore: Math.round(deployScore)
     };
 
-    console.log(`🎯 总体完成度: ${this.results.summary.totalScore}%`);
   }
 
   /**
    * 生成建议
    */
   generateRecommendations() {
-    console.log('💡 生成改进建议...');
     
     // 根据缺失项目生成建议
     if (this.results.frontend.pages.missing.length > 0) {
@@ -387,7 +385,6 @@ class FinalProjectChecker {
     };
 
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    console.log(`📄 详细报告已保存到: ${reportPath}`);
     
     return report;
   }
@@ -399,47 +396,28 @@ class FinalProjectChecker {
     console.log('🚀 开始最终项目状态检查...\n');
     
     this.checkFrontendComponents();
-    console.log('');
     
     this.checkBackendRoutes();
-    console.log('');
     
     this.checkTestEngines();
-    console.log('');
     
     this.checkDatabase();
-    console.log('');
     
     this.checkConfiguration();
-    console.log('');
     
     await this.checkProjectStartability();
-    console.log('');
     
     this.calculateCompletionScore();
-    console.log('');
     
     this.generateRecommendations();
-    console.log('');
 
     // 打印总结
-    console.log('📋 最终检查结果:');
-    console.log('==================');
-    console.log(`总体完成度: ${this.results.summary.totalScore}%`);
-    console.log(`前端模块: ${this.results.summary.frontendScore}%`);
-    console.log(`后端模块: ${this.results.summary.backendScore}%`);
-    console.log(`配置文件: ${this.results.summary.configScore}%`);
-    console.log(`部署就绪: ${this.results.summary.deployScore}%`);
-    console.log('');
 
     // 打印建议
     if (this.results.recommendations.length > 0) {
-      console.log('💡 改进建议:');
-      console.log('============');
       this.results.recommendations.forEach((rec, index) => {
         const priorityIcon = rec.priority === 'high' ? '🔴' : 
                             rec.priority === 'medium' ? '🟡' : '🔵';
-        console.log(`${priorityIcon} ${rec.message}`);
       });
     }
 
@@ -450,7 +428,6 @@ class FinalProjectChecker {
 // 运行检查
 const checker = new FinalProjectChecker();
 checker.runFullCheck().then(() => {
-  console.log('\n✅ 最终项目检查完成！');
 }).catch(error => {
   console.error('❌ 检查过程中出现错误:', error);
 });

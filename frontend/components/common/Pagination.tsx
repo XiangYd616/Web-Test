@@ -182,6 +182,11 @@ export function usePagination(options: UsePaginationOptions = {}) {
     goToPrev: () => handlePageChange(Math.max(1, state.currentPage - 1)),
     goToNext: () => handlePageChange(Math.min(state.totalPages, state.currentPage + 1)),
     canGoPrev: state.currentPage > 1,
+    /**
+     * 获取getPageRange数据
+     * @param {string} id - 对象ID
+     * @returns {Promise<Object|null>} 获取的数据
+     */
     canGoNext: state.currentPage < state.totalPages,
     getPageRange: () => {
       const start = (state.currentPage - 1) * state.pageSize + 1;

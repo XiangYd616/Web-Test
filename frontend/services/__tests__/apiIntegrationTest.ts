@@ -173,7 +173,7 @@ describe('API Integration Tests', () => {
       const response = await unifiedApiService.login(credentials) as BackendApiResponse<{ token: string; user: any }>;
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/v1/auth/login',
+        'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/auth/login',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -224,7 +224,7 @@ describe('API Integration Tests', () => {
       );
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/v1/tests/performance/execute',
+        'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/tests/performance/execute',
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({
@@ -260,7 +260,7 @@ describe('API Integration Tests', () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/v1/configurations?test_type=performance&project_id=123&is_template=false',
+        'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/configurations?test_type=performance&project_id=123&is_template=false',
         expect.objectContaining({
           method: 'GET'
         })
@@ -300,7 +300,7 @@ describe('API Integration Tests', () => {
       const response = await projectApiService.createProject(projectData);
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/v1/projects',
+        'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/projects',
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify(projectData)
@@ -342,7 +342,7 @@ describe('API Integration Tests', () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:3001/api/v1/projects?page=1&limit=10&search=test&status=active&sort=name&order=asc',
+        'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/projects?page=1&limit=10&search=test&status=active&sort=name&order=asc',
         expect.objectContaining({
           method: 'GET'
         })

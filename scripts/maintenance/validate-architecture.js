@@ -14,7 +14,6 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.join(__dirname, '..');
 
 console.log('✅ Test-Web 架构验证工具');
-console.log('='.repeat(80));
 
 const validation = {
   passed: [],
@@ -24,7 +23,6 @@ const validation = {
 
 // 1. 验证所有引擎都有主文件
 function validateEngineFiles() {
-  console.log('\n🔍 验证引擎文件...');
   const enginesDir = path.join(projectRoot, 'backend', 'engines');
   const engineDirs = fs.readdirSync(enginesDir).filter(f => 
     fs.statSync(path.join(enginesDir, f)).isDirectory()
@@ -61,7 +59,6 @@ function validateEngineFiles() {
 
 // 2. 验证路由文件
 function validateRoutes() {
-  console.log('\n🔍 验证路由文件...');
   const routesDir = path.join(projectRoot, 'backend', 'routes');
   const enginesDir = path.join(projectRoot, 'backend', 'engines');
   
@@ -83,7 +80,6 @@ function validateRoutes() {
 
 // 3. 验证前后端映射
 function validateFrontendBackendMapping() {
-  console.log('\n🔍 验证前后端映射...');
   const pagesDir = path.join(projectRoot, 'frontend', 'pages');
   const enginesDir = path.join(projectRoot, 'backend', 'engines');
   
@@ -122,7 +118,6 @@ function validateFrontendBackendMapping() {
 
 // 4. 验证文件命名一致性
 function validateNamingConsistency() {
-  console.log('\n🔍 验证命名一致性...');
   
   const issues = [];
   
@@ -154,7 +149,6 @@ function validateNamingConsistency() {
 
 // 5. 验证API端点
 function validateAPIEndpoints() {
-  console.log('\n🔍 验证API端点...');
   const routesDir = path.join(projectRoot, 'backend', 'routes');
   const routeFiles = fs.readdirSync(routesDir).filter(f => f.endsWith('.js'));
   
@@ -181,38 +175,26 @@ function validateAPIEndpoints() {
 
 // 6. 生成验证报告
 function generateReport() {
-  console.log('\n' + '='.repeat(80));
   console.log('📊 验证报告');
-  console.log('='.repeat(80));
   
   const totalChecks = validation.passed.length + validation.failed.length + validation.warnings.length;
   const passRate = ((validation.passed.length / totalChecks) * 100).toFixed(1);
   
-  console.log('\n📈 总体统计:');
-  console.log(`  - 总检查项: ${totalChecks}`);
-  console.log(`  - 通过: ${validation.passed.length} (${passRate}%)`);
-  console.log(`  - 失败: ${validation.failed.length}`);
-  console.log(`  - 警告: ${validation.warnings.length}`);
   
   if (validation.passed.length > 0) {
-    console.log('\n✅ 通过的检查:');
-    validation.passed.forEach(item => console.log(`  ${item}`));
+    validation.passed.forEach(item => );
   }
   
   if (validation.warnings.length > 0) {
-    console.log('\n⚠️  警告:');
-    validation.warnings.forEach(item => console.log(`  ${item}`));
+    validation.warnings.forEach(item => );
   }
   
   if (validation.failed.length > 0) {
-    console.log('\n❌ 失败的检查:');
-    validation.failed.forEach(item => console.log(`  ${item}`));
+    validation.failed.forEach(item => );
   }
   
   // 整体评估
-  console.log('\n' + '='.repeat(80));
   if (validation.failed.length === 0) {
-    console.log('🎉 架构验证通过！所有核心组件都已正确配置。');
   } else if (validation.failed.length <= 3) {
     console.log('⚠️  架构基本完整，但还有少量问题需要修复。');
   } else {
@@ -233,11 +215,9 @@ function generateReport() {
     details: validation
   }, null, 2));
   
-  console.log(`\n📁 验证结果已保存到: ${reportPath}`);
 }
 
 // 执行验证
-console.log(`\n🚀 开始验证项目: ${projectRoot}`);
 
 validateEngineFiles();
 validateRoutes();
@@ -246,4 +226,3 @@ validateNamingConsistency();
 validateAPIEndpoints();
 generateReport();
 
-console.log('\n✨ 验证完成！');

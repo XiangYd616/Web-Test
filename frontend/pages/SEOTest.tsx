@@ -770,7 +770,6 @@ const SEOTest: React.FC = () => {
   // 历史记录处理
   const handleTestSelect = (test: any) => {
     // 历史测试选择由TestPageLayout处理
-    console.log('Selected test:', test);
   };
 
   const handleTestRerun = (test: any) => {
@@ -1660,7 +1659,6 @@ const SEOTest: React.FC = () => {
                   htmlContent={seoTestMode === 'local' ? undefined : undefined}
                   dom={seoTestMode === 'local' ? undefined : undefined}
                   onAnalysisComplete={(result) => {
-                    console.log('结构化数据分析结果:', result);
                   }}
                 />
               )}
@@ -1713,7 +1711,6 @@ const SEOTest: React.FC = () => {
                   }
                 }}
                 onReportGenerated={(format, data) => {
-                  console.log(`报告已生成: ${format}`, data);
                 }}
                 onError={(error) => {
                   console.error('报告生成错误:', error);

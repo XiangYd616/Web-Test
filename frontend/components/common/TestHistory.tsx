@@ -141,13 +141,11 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
 
             // 如果参数相同，避免重复请求
             if (requestKey === lastRequestParamsRef.current && requestCacheRef.current.has(requestKey)) {
-                console.log('🔄 使用缓存的请求结果，避免重复请求');
                 return;
             }
 
             // 如果有相同的请求正在进行，等待其完成
             if (requestCacheRef.current.has(requestKey)) {
-                console.log('⏳ 等待相同请求完成...');
                 await requestCacheRef.current.get(requestKey);
                 return;
             }
@@ -1013,7 +1011,6 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                 testType={testType as 'stress' | 'api' | 'performance'}
                 onExport={async (type: string, data: any) => {
                     // 导出处理逻辑
-                    console.log('导出类型:', type, '数据:', data);
                 }}
             />
         </div>

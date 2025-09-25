@@ -32,6 +32,12 @@ const RBAC_CONFIG = {
   }
 };
 
+
+/**
+
+ * RBACService类 - 负责处理相关功能
+
+ */
 // ==================== RBAC服务 ====================
 
 class RBACService {

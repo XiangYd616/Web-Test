@@ -99,6 +99,11 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
     }
   };
 
+    /**
+     * switch功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const getRecommendationIcon = (priority: string) => {
     switch (priority) {
       case 'high':

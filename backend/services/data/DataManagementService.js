@@ -7,8 +7,19 @@ const { EventEmitter } = require('events');
 const fs = require('fs').promises;
 const path = require('path');
 const csv = require('csv-parser');
+
+/**
+
+ * DataManagementService类 - 负责处理相关功能
+
+ */
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
+  /**
+   * 处理constructor事件
+   * @param {Object} event - 事件对象
+   * @returns {Promise<void>}
+   */
 class DataManagementService extends EventEmitter {
   constructor() {
     super();
@@ -94,7 +105,6 @@ class DataManagementService extends EventEmitter {
       // 触发事件
       this.emit('dataCreated', { type, id, record });
       
-      console.log(`📝 创建数据记录: ${type}/${id}`);
       return { id, record };
       
     } catch (error) {
@@ -160,7 +170,6 @@ class DataManagementService extends EventEmitter {
       // 触发事件
       this.emit('dataUpdated', { type, id, record: updatedRecord, changes: updates });
       
-      console.log(`📝 更新数据记录: ${type}/${id}`);
       return updatedRecord;
       
     } catch (error) {
@@ -191,7 +200,6 @@ class DataManagementService extends EventEmitter {
         // 触发事件
         this.emit('dataDeleted', { type, id, record });
         
-        console.log(`🗑️ 删除数据记录: ${type}/${id}`);
         return { success: true, deletedRecord: record };
       }
       
@@ -283,7 +291,6 @@ class DataManagementService extends EventEmitter {
         }
       }
       
-      console.log(`📦 批量操作完成: ${results.length} 成功, ${errors.length} 失败`);
       
       return {
         success: errors.length === 0,
@@ -312,6 +319,16 @@ class DataManagementService extends EventEmitter {
       
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `${type}_export_${timestamp}.${format}`;
+      
+      /**
+      
+       * switch功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       const filepath = path.join(this.exportDir, filename);
       
       switch (format) {
@@ -331,7 +348,6 @@ class DataManagementService extends EventEmitter {
           throw new Error(`不支持的导出格式: ${format}`);
       }
       
-      console.log(`📤 数据导出完成: ${filename}`);
       
       return {
         filename,
@@ -377,7 +393,6 @@ class DataManagementService extends EventEmitter {
         }
       }
       
-      console.log(`📥 数据导入完成: ${results.length} 成功, ${errors.length} 失败`);
       
       return {
         success: errors.length === 0,
@@ -460,7 +475,6 @@ class DataManagementService extends EventEmitter {
       const infoFile = path.join(backupPath, 'backup-info.json');
       await fs.writeFile(infoFile, JSON.stringify(backupInfo, null, 2));
       
-      console.log(`💾 数据备份完成: ${backupName}`);
       
       return backupInfo;
       
@@ -505,7 +519,6 @@ class DataManagementService extends EventEmitter {
 
   async loadExistingData() {
     // 这里可以从数据库或文件系统加载现有数据
-    console.log('📂 加载现有数据...');
   }
 
   setupPeriodicBackup() {
@@ -532,6 +545,11 @@ class DataManagementService extends EventEmitter {
 
   applyFilters(records, filters) {
     return records.filter(record => {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
       for (const [key, value] of Object.entries(filters)) {
         if (record.data[key] !== value) {
           
@@ -553,6 +571,16 @@ class DataManagementService extends EventEmitter {
   applySort(records, sortConfig) {
     return records.sort((a, b) => {
       const aValue = a.data[sortConfig.field] || a.metadata[sortConfig.field];
+      
+      /**
+      
+       * if功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       const bValue = b.data[sortConfig.field] || b.metadata[sortConfig.field];
       
       if (sortConfig.direction === 'desc') {

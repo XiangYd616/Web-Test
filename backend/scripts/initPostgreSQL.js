@@ -192,14 +192,12 @@ async function initDatabase() {
   const pool = new Pool(dbConfig);
   
   try {
-    console.log('🔗 正在连接数据库...');
     
     // 测试连接
     const client = await pool.connect();
     console.log('✅ 数据库连接成功');
     
     // 创建表
-    console.log('📋 正在创建表...');
     for (const [tableName, sql] of Object.entries(createTables)) {
       try {
         await client.query(sql);
@@ -234,7 +232,6 @@ async function initDatabase() {
           );
           console.log(`✅ 用户 ${user.username} 创建成功`);
         } else {
-          console.log(`ℹ️  用户 ${user.username} 已存在`);
         }
       } catch (error) {
         console.error(`❌ 创建用户 ${user.username} 失败:`, error.message);
@@ -252,7 +249,6 @@ async function initDatabase() {
           );
           console.log(`✅ 配置 ${config.key} 创建成功`);
         } else {
-          console.log(`ℹ️  配置 ${config.key} 已存在`);
         }
       } catch (error) {
         console.error(`❌ 创建配置 ${config.key} 失败:`, error.message);
@@ -260,7 +256,6 @@ async function initDatabase() {
     }
     
     client.release();
-    console.log('🎉 数据库初始化完成！');
     
   } catch (error) {
     console.error('❌ 数据库初始化失败:', error);

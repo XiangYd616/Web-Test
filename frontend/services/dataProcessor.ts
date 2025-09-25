@@ -120,12 +120,28 @@ export interface DataActions<T = any> {
   setLoading: (loading: boolean) => void;
 }
 
+
+/**
+
+ * DataCache类 - 负责处理相关功能
+
+ */
 // ==================== 缓存管理器 ====================
 
 class DataCache {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   private maxSize: number;
   private strategy: 'lru' | 'ttl' | 'fifo';
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   private accessOrder = new Map<string, number>();
 
   constructor(maxSize = 100, strategy: 'lru' | 'ttl' | 'fifo' = 'lru') {

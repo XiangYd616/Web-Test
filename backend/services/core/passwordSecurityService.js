@@ -58,6 +58,12 @@ const WEAK_PATTERNS = [
   /^(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)+/i
 ];
 
+
+/**
+
+ * PasswordSecurityService类 - 负责处理相关功能
+
+ */
 // ==================== 密码安全服务 ====================
 
 class PasswordSecurityService {
@@ -312,6 +318,11 @@ class PasswordSecurityService {
       `, [userId, PASSWORD_CONFIG.preventReuse]);
 
       for (const row of result.rows) {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const isMatch = await this.verifyPassword(newPassword, row.password_hash);
         if (isMatch) {
           
@@ -382,6 +393,16 @@ class PasswordSecurityService {
       );
 
       if (userResult.rows.length > 0) {
+        
+        /**
+        
+         * if功能函数
+        
+         * @param {Object} params - 参数对象
+        
+         * @returns {Promise<Object>} 返回结果
+        
+         */
         const { login_attempts, locked_until } = userResult.rows[0];
         
         if (login_attempts >= PASSWORD_CONFIG.maxLoginAttempts) {
@@ -853,6 +874,16 @@ class PasswordSecurityService {
   }
 }
 
+
+/**
+
+ * 创建新的createPasswordSecurityTables
+
+ * @param {Object} data - 创建数据
+
+ * @returns {Promise<Object>} 创建的对象
+
+ */
 // ==================== 数据库表创建 ====================
 
 const createPasswordSecurityTables = async () => {

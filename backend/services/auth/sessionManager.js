@@ -18,6 +18,12 @@ const SESSION_CONFIG = {
   enableLocationTracking: process.env.ENABLE_LOCATION_TRACKING === 'true'
 };
 
+
+/**
+
+ * SessionManager类 - 负责处理相关功能
+
+ */
 // ==================== 会话管理器 ====================
 
 class SessionManager {
@@ -283,6 +289,16 @@ class SessionManager {
         WHERE user_id = $1 AND is_active = true AND expires_at > NOW()
       `, [userId]);
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const currentCount = parseInt(countResult.rows[0].count);
 
       if (currentCount >= SESSION_CONFIG.maxConcurrentSessions) {
@@ -475,6 +491,16 @@ class SessionManager {
   }
 }
 
+
+/**
+
+ * 创建新的createSessionTable
+
+ * @param {Object} data - 创建数据
+
+ * @returns {Promise<Object>} 创建的对象
+
+ */
 // ==================== 数据库表创建 ====================
 
 const createSessionTable = async () => {

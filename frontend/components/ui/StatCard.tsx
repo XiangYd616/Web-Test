@@ -1,3 +1,10 @@
+/**
+ * StatCard.tsx - React组件
+ * 
+ * 文件路径: frontend\components\ui\StatCard.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { LucideIcon } from 'lucide-react';
 import React from 'react';
 import { cn } from '../../utils/cn';

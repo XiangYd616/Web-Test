@@ -24,7 +24,6 @@ const colors = {
 };
 
 function log(message, color = 'reset') {
-  console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
 function logSection(title) {
@@ -153,8 +152,8 @@ async function startDevelopmentServers() {
     log('🎉 开发环境已启动!', 'green');
     log('', 'reset');
     log('📱 前端地址: http://localhost:5174', 'cyan');
-    log('🔧 后端地址: http://localhost:3001', 'cyan');
-    log('📊 API文档: http://localhost:3001/api-docs', 'cyan');
+    log('🔧 后端地址: http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}', 'cyan');
+    log('📊 API文档: http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api-docs', 'cyan');
     log('', 'reset');
     log('按 Ctrl+C 停止服务器', 'yellow');
   }, 5000);

@@ -1,3 +1,10 @@
+/**
+ * FileUploadSEO.tsx - React组件
+ * 
+ * 文件路径: frontend\components\seo\FileUploadSEO.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { useState, useCallback, useRef } from 'react';
 import { Upload, File, X, CheckCircle, AlertTriangle, Download, Eye, Search, Tag, Globe } from 'lucide-react';
@@ -454,6 +461,11 @@ const FileUploadSEO = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
+                      /**
+                       * if功能函数
+                       * @param {Object} params - 参数对象
+                       * @returns {Promise<Object>} 返回结果
+                       */
                       const value = (e.target as HTMLInputElement).value.trim();
                       if (value) {
                         const newKeywords = value.split(',').map(k => k.trim()).filter(k => k);

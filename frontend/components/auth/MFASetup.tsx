@@ -83,6 +83,11 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
     if (!verificationCode.trim()) return;
 
     try {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const success = await enableTOTP(userId, verificationCode);
       if (success && setupData?.backupCodes) {
         onComplete(setupData.backupCodes);
@@ -247,6 +252,16 @@ const BackupCodesDisplay: React.FC<BackupCodesDisplayProps> = ({
   onDownload,
   onContinue
 }) => {
+
+  /**
+
+   * 获取handleDownload数据
+
+   * @param {string} id - 对象ID
+
+   * @returns {Promise<Object|null>} 获取的数据
+
+   */
   const [downloaded, setDownloaded] = useState(false);
 
   const handleDownload = () => {

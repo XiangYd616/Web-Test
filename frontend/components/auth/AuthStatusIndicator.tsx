@@ -1,3 +1,10 @@
+/**
+ * AuthStatusIndicator.tsx - React组件
+ * 
+ * 文件路径: frontend\components\auth\AuthStatusIndicator.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';

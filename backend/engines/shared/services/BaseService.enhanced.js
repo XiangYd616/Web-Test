@@ -124,6 +124,16 @@ class BaseService {
     }
 
     if (schema && typeof schema.validate === 'function') {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const { error, value } = schema.validate(config);
       if (error) {
         throw this.createError(ErrorCode.CONFIG_INVALID, {
@@ -179,7 +189,6 @@ class BaseService {
 
     // 可以集成到实际的日志系统中
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[${this.name}] ${label}: ${duration}ms (${status})`);
     }
   }
 

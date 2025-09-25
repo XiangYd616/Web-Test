@@ -83,6 +83,16 @@ const DEFAULT_CONFIG: ErrorHandlerConfig = {
 export class ApiErrorHandler {
   private config: ErrorHandlerConfig;
   private retryCount: Map<string, number> = new Map();
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   private errorHistory: Map<string, ErrorContext[]> = new Map();
 
   constructor(config: Partial<ErrorHandlerConfig> = {}) {

@@ -193,6 +193,16 @@ export const DataExporter: React.FC<DataExporterProps> = ({
             if (activeTasks.length > 0) {
                 try {
                     for (const task of activeTasks) {
+
+                        /**
+
+                         * if功能函数
+
+                         * @param {Object} params - 参数对象
+
+                         * @returns {Promise<Object>} 返回结果
+
+                         */
                         const result = await apiCall(`/task/${task.id}/status`);
                         if (result.success) {
                             setExportTasks(prev => prev.map(t =>

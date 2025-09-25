@@ -31,7 +31,7 @@ const seoRateLimiter = rateLimit({
 // 创建axios实例，配置更好的请求头
 const createAxiosInstance = () => {
   return axios.create({
-    timeout: 30000, // 30秒超时
+    timeout: process.env.REQUEST_TIMEOUT || 30000, // 30秒超时
     maxRedirects: 5,
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -98,7 +98,6 @@ router.post('/fetch-page',
         });
       }
 
-      console.log(`📡 开始获取页面: ${cleanedUrl}`);
 
       const axiosInstance = createAxiosInstance();
       const response = await axiosInstance.get(cleanedUrl);
@@ -184,7 +183,6 @@ router.post('/fetch-robots',
       }
 
       const robotsUrl = `${baseUrl}/robots.txt`;
-      console.log(`🤖 获取robots.txt: ${robotsUrl}`);
 
       const axiosInstance = createAxiosInstance();
       const response = await axiosInstance.get(robotsUrl);
@@ -233,7 +231,6 @@ router.post('/fetch-sitemap',
         });
       }
 
-      console.log(`🗺️ 获取sitemap: ${sitemapUrl}`);
 
       const axiosInstance = createAxiosInstance();
       const response = await axiosInstance.get(sitemapUrl);
@@ -417,6 +414,16 @@ router.post('/mobile-analysis',
   cacheMiddleware.apiCache('seo', { ttl: 1800 }), // 30分钟缓存
   asyncHandler(async (req, res) => {
     try {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const { url, html, options = {} } = req.body;
 
       if (!url && !html) {
@@ -489,6 +496,16 @@ router.post('/mobile-analysis',
         const hasInitialScale = /initial-scale=1(\.0)?/i.test(content);
         const hasUserScalable = /user-scalable=no/i.test(content);
         
+        
+        /**
+        
+         * if功能函数
+        
+         * @param {Object} params - 参数对象
+        
+         * @returns {Promise<Object>} 返回结果
+        
+         */
         mobileAnalysis.viewport.isOptimal = hasDeviceWidth && hasInitialScale && !hasUserScalable;
         
         if (!hasDeviceWidth) {
@@ -522,6 +539,16 @@ router.post('/mobile-analysis',
         });
         
         mobileAnalysis.responsive.hasMediaQueries = hasResponsiveIndicators;
+        
+        /**
+        
+         * if功能函数
+        
+         * @param {Object} params - 参数对象
+        
+         * @returns {Promise<Object>} 返回结果
+        
+         */
         mobileAnalysis.responsive.score = hasResponsiveIndicators ? 80 : 40;
         
         if (!hasResponsiveIndicators) {
@@ -540,6 +567,11 @@ router.post('/mobile-analysis',
       mobileAnalysis.touchTargets.appropriateSize = Math.floor(interactiveElements.length * 0.8); // 假设80%合适
       
       if (interactiveElements.length > 0) {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const tooSmallCount = Math.floor(interactiveElements.length * 0.2);
         if (tooSmallCount > 0) {
           mobileAnalysis.touchTargets.issues.push(`约${tooSmallCount}个触摸目标可能过小`);
@@ -567,9 +599,24 @@ router.post('/mobile-analysis',
         }
       });
       
+      
+      /**
+      
+       * if功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       mobileAnalysis.performance.imageOptimization.optimized = optimizedImages;
       
       if (images.length > 0) {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const optimizationRatio = optimizedImages / images.length;
         if (optimizationRatio < 0.5) {
           mobileAnalysis.performance.recommendations.push('优化图片：添加懒加载、使用srcset、添加alt属性');
@@ -729,11 +776,167 @@ function validateSchemaStructure(data) {
 }
 
 /**
+ * SEO综合分析端点
+ * POST /api/seo/analyze
+ */
+router.post('/analyze', 
+  seoRateLimiter,
+  cacheMiddleware.apiCache('seo', { ttl: 1800 }),
+  asyncHandler(async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url) {
+        return res.status(400).json({
+          success: false,
+          error: '需要提供URL参数'
+        });
+      }
+      
+      const cleanedUrl = cleanUrl(url);
+      console.log(`🔍 开始SEO分析: ${cleanedUrl}`);
+      
+      // 获取页面内容
+      const axiosInstance = createAxiosInstance();
+      const response = await axiosInstance.get(cleanedUrl);
+      const $ = cheerio.load(response.data);
+      
+      // SEO分析结果
+      const analysis = {
+        url: cleanedUrl,
+        timestamp: new Date().toISOString(),
+        score: 0,
+        issues: [],
+        recommendations: [],
+        details: {
+          title: {
+            text: $('title').text().trim() || '',
+            length: ($('title').text().trim() || '').length,
+            optimal: false
+          },
+          metaDescription: {
+            text: $('meta[name="description"]').attr('content') || '',
+            length: ($('meta[name="description"]').attr('content') || '').length,
+            optimal: false
+          },
+          headings: {
+            h1: $('h1').length,
+            h2: $('h2').length,
+            h3: $('h3').length,
+            h1Text: $('h1').map((i, el) => $(el).text().trim()).get()
+          },
+          images: {
+            total: $('img').length,
+            withAlt: $('img[alt]').length,
+            withoutAlt: $('img').not('[alt]').length
+          },
+          links: {
+            internal: 0,
+            external: 0,
+            nofollow: $('a[rel*="nofollow"]').length
+          }
+        }
+      };
+      
+      // Title分析
+      if (analysis.details.title.text) {
+        if (analysis.details.title.length >= 30 && analysis.details.title.length <= 60) {
+          analysis.details.title.optimal = true;
+          analysis.score += 20;
+        } else {
+          if (analysis.details.title.length < 30) {
+            analysis.issues.push('Title标签过短，建议30-60个字符');
+          } else {
+            analysis.issues.push('Title标签过长，建议30-60个字符');
+          }
+        }
+      } else {
+        analysis.issues.push('缺少Title标签');
+      }
+      
+      // Meta Description分析
+      if (analysis.details.metaDescription.text) {
+        if (analysis.details.metaDescription.length >= 120 && analysis.details.metaDescription.length <= 160) {
+          analysis.details.metaDescription.optimal = true;
+          analysis.score += 20;
+        } else {
+          analysis.issues.push('Meta Description长度不理想，建议120-160个字符');
+        }
+      } else {
+        analysis.issues.push('缺少Meta Description');
+      }
+      
+      // H1分析
+      if (analysis.details.headings.h1 === 1) {
+        analysis.score += 15;
+      } else if (analysis.details.headings.h1 === 0) {
+        analysis.issues.push('缺少H1标签');
+      } else {
+        analysis.issues.push('多个H1标签，建议只使用一个');
+      }
+      
+      // 图片Alt分析
+      if (analysis.details.images.total > 0) {
+        const altRatio = analysis.details.images.withAlt / analysis.details.images.total;
+        if (altRatio >= 0.9) {
+          analysis.score += 15;
+        } else {
+          analysis.issues.push(`${analysis.details.images.withoutAlt}个图片缺少Alt属性`);
+        }
+      }
+      
+      // 链接分析
+      $('a[href]').each((i, el) => {
+        const href = $(el).attr('href');
+        if (href.startsWith('/') || href.includes(new URL(cleanedUrl).hostname)) {
+          analysis.details.links.internal++;
+        } else if (href.startsWith('http')) {
+          analysis.details.links.external++;
+        }
+      });
+      
+      // 生成建议
+      if (analysis.score < 60) {
+        analysis.recommendations.push('需要优化基本SEO要素');
+      }
+      if (!analysis.details.title.optimal) {
+        analysis.recommendations.push('优化Title标签长度和内容');
+      }
+      if (!analysis.details.metaDescription.optimal) {
+        analysis.recommendations.push('优化Meta Description');
+      }
+      if (analysis.details.images.withoutAlt > 0) {
+        analysis.recommendations.push('为所有图片添加Alt属性');
+      }
+      
+      console.log(`✅ SEO分析完成: ${cleanedUrl}, 评分: ${analysis.score}`);
+      
+      res.json({
+        success: true,
+        data: analysis
+      });
+      
+    } catch (error) {
+      console.error('SEO分析失败:', error.message);
+      res.status(500).json({
+        success: false,
+        error: 'SEO分析失败',
+        details: error.message
+      });
+    }
+  })
+);
+
+/**
  * 健康检查端点
  * GET /api/seo/health
  */
 router.get('/health', (req, res) => {
-  res.success(new Date().toISOString(), 'SEO API服务运行正常');
+  res.json({
+    success: true,
+    message: 'SEO API服务运行正常',
+    timestamp: new Date().toISOString()
+  });
 });
 
 module.exports = router;

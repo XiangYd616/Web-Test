@@ -106,7 +106,6 @@ export class ChromeCompatibilityHelper {
     // 修复颜色渲染
     this.fixColorRendering();
 
-    console.log('Chrome兼容性修复已应用');
   }
 
   /**

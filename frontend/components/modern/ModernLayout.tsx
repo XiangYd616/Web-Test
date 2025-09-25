@@ -1,3 +1,10 @@
+/**
+ * ModernLayout.tsx - React组件
+ * 
+ * 文件路径: frontend\components\modern\ModernLayout.tsx
+ * 创建时间: 2025-09-25
+ */
+
 ﻿import React from 'react';
 import { useState } from 'react';
 import type { FC } from 'react';
@@ -8,6 +15,21 @@ import TopNavbar from './TopNavbar';
 
 const ModernLayout: React.FC = () => {
   const { actualTheme } = useTheme();
+
+
+  /**
+
+
+   * toggleSidebar功能函数
+
+
+   * @param {Object} params - 参数对象
+
+
+   * @returns {Promise<Object>} 返回结果
+
+
+   */
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const toggleSidebar = () => {

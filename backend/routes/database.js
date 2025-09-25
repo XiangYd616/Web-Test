@@ -23,7 +23,6 @@ router.post('/test', authenticateToken, validateTestRequest, async (req, res) =>
     const userId = req.user.id;
     
     // 记录测试开始
-    console.log(`[Database Test] Starting test for ${url} by user ${userId}`);
     
     // 执行测试
     const result = await dbTestEngine.runTest({

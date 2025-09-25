@@ -18,12 +18,11 @@ class SSLAnalyzer {
    */
   async analyze(url) {
     try {
-      console.log(`🔒 开始SSL/TLS分析: ${url}`);
       
       const urlObj = new URL(url);
       
       // 如果不是HTTPS，直接返回
-      if (urlObj.protocol !== 'https:') {
+      if (urlObj.protocol.toLowerCase() !== 'https:') {
         return {
           httpsEnabled: false,
           score: 0,

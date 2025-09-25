@@ -1,3 +1,10 @@
+/**
+ * DataManager.tsx - React组件
+ * 
+ * 文件路径: frontend\components\data\DataManager.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { Activity, Archive, BarChart3, Copy, Database, Download, Edit, Eye, FileText, Filter, HardDrive, RefreshCw, RotateCcw, Search, Settings, Shield, TestTube, Trash2, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { advancedDataManager, DataAnalysisResult, DataQuery, DataRecord } from '../../services/advancedDataService';
@@ -84,6 +91,11 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
     setSelectedRecords(newSelected);
   };
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
       setSelectedRecords(new Set((records || []).map(r => r.id)));

@@ -325,6 +325,16 @@ class HistoryManagementService {
       if (filter.testType) params.append('testType', filter.testType);
       if (filter.status) params.append('status', filter.status);
 
+      
+      /**
+      
+       * if功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       const response = await fetch(`${this.baseUrl}/export?${params}`);
       
       if (format === 'json') {

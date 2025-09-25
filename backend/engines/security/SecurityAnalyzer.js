@@ -10,7 +10,7 @@ const { URL } = require('url');
 class SecurityAnalyzer {
   constructor(options = {}) {
     this.options = {
-      timeout: 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       ...options
     };
   }
@@ -22,7 +22,6 @@ class SecurityAnalyzer {
     const { url } = config;
     
     try {
-      console.log(`🔒 开始安全测试: ${url}`);
       
       const results = {
         url,

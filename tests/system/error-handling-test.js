@@ -24,7 +24,6 @@ const colors = {
 };
 
 function log(color, message) {
-  console.log(`${color}${message}${colors.reset}`);
 }
 
 // 模拟测试服务

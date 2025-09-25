@@ -192,7 +192,6 @@ class StressTestWebSocketHandler {
    * 取消测试会话
    */
   cancelTestSession(testId, reason = '用户取消') {
-    console.log(`🛑 取消压力测试会话: ${testId}`, reason);
     
     const session = this.activeTests.get(testId);
     if (session && session.updateTimer) {
@@ -232,7 +231,6 @@ class StressTestWebSocketHandler {
    * 清理所有会话
    */
   cleanup() {
-    console.log('🧹 清理所有压力测试WebSocket会话');
     
     for (const [testId, session] of this.activeTests.entries()) {
       if (session.updateTimer) {
@@ -248,7 +246,6 @@ class StressTestWebSocketHandler {
    * 模拟测试数据（用于开发测试）
    */
   simulateTestData(testId, duration = 60) {
-    console.log(`🎭 模拟压力测试数据: ${testId}`);
     
     const config = {
       duration: duration,
@@ -264,6 +261,11 @@ class StressTestWebSocketHandler {
     let failedRequests = 0;
 
     const simulationInterval = setInterval(() => {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const session = this.activeTests.get(testId);
       if (!session) {
         clearInterval(simulationInterval);

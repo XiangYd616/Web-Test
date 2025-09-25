@@ -259,8 +259,6 @@ class WorkspaceManager extends EventEmitter {
     this.invitations.set(invitation.token, invitation);
     
     // 发送邀请（这里应该集成邮件服务）
-    console.log(`📧 发送邀请到: ${inviteeEmail}`);
-    console.log(`   邀请链接: /workspace/join/${invitation.token}`);
     
     // 记录活动
     this.logActivity('member_invited', workspaceId, {
@@ -287,6 +285,16 @@ class WorkspaceManager extends EventEmitter {
       throw new Error('邀请已过期');
     }
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const workspace = this.workspaces.get(invitation.workspaceId);
     if (!workspace) {
       throw new Error('工作空间不存在');
@@ -332,11 +340,31 @@ class WorkspaceManager extends EventEmitter {
       throw new Error('工作空间不存在');
     }
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const requester = workspace.members.get(requesterId);
     if (!requester || !requester.permissions.changeRoles) {
       throw new Error('没有更改角色的权限');
     }
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const targetMember = workspace.members.get(targetUserId);
     if (!targetMember) {
       throw new Error('目标成员不存在');
@@ -360,7 +388,6 @@ class WorkspaceManager extends EventEmitter {
       newRole
     });
     
-    console.log(`🔄 更新成员角色: ${targetUserId} -> ${newRole}`);
     
     return targetMember;
   }
@@ -374,6 +401,16 @@ class WorkspaceManager extends EventEmitter {
       throw new Error('工作空间不存在');
     }
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const member = workspace.members.get(userId);
     if (!member || !member.permissions.write) {
       throw new Error('没有创建资源的权限');
@@ -422,7 +459,6 @@ class WorkspaceManager extends EventEmitter {
     // 触发事件
     this.emit('resource:created', workspaceId, resource);
     
-    console.log(`📄 创建资源: ${resource.name} (${resourceType})`);
     
     return resource;
   }
@@ -436,12 +472,32 @@ class WorkspaceManager extends EventEmitter {
       throw new Error('工作空间不存在');
     }
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const member = workspace.members.get(userId);
     if (!member || !member.permissions.write) {
       throw new Error('没有编辑资源的权限');
     }
     
     const resourceStore = workspace.resources[`${resourceType}s`];
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const resource = resourceStore?.get(resourceId);
     if (!resource) {
       throw new Error('资源不存在');
@@ -521,7 +577,6 @@ class WorkspaceManager extends EventEmitter {
       resource.lockedBy = null;
       resource.lockedAt = null;
       
-      console.log(`🔓 释放资源锁: ${resource.name}`);
       
       // 通知其他用户
       this.broadcastToWorkspace(workspaceId, 'resource:unlocked', {
@@ -541,6 +596,16 @@ class WorkspaceManager extends EventEmitter {
       throw new Error('工作空间不存在');
     }
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const member = workspace.members.get(userId);
     if (!member) {
       throw new Error('不是工作空间成员');
@@ -586,7 +651,6 @@ class WorkspaceManager extends EventEmitter {
     // 实时广播
     this.broadcastToWorkspace(workspaceId, 'comment:added', comment);
     
-    console.log(`💬 新评论: ${content.substring(0, 50)}...`);
     
     return comment;
   }
@@ -661,10 +725,19 @@ class WorkspaceManager extends EventEmitter {
     // 通知其他用户
     this.broadcastToWorkspace(workspaceId, 'member:online', { userId });
     
-    console.log(`🟢 用户上线: ${userId} in ${workspaceId}`);
   }
 
   removeConnection(workspaceId, userId) {
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const workspaceConnections = this.activeConnections.get(workspaceId);
     if (workspaceConnections) {
       workspaceConnections.delete(userId);
@@ -686,7 +759,6 @@ class WorkspaceManager extends EventEmitter {
     // 通知其他用户
     this.broadcastToWorkspace(workspaceId, 'member:offline', { userId });
     
-    console.log(`🔴 用户下线: ${userId} from ${workspaceId}`);
   }
 
   getWorkspaceConnections(workspaceId) {
@@ -718,7 +790,6 @@ class WorkspaceManager extends EventEmitter {
    */
   notifyUser(userId, type, data) {
     // 这里应该集成实际的通知服务（邮件、推送等）
-    console.log(`🔔 通知 ${userId}: ${type}`, data);
     
     // 查找用户的所有连接并发送
     for (const [workspaceId, connections] of this.activeConnections) {

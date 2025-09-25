@@ -1,3 +1,10 @@
+/**
+ * Modal.tsx - React组件
+ * 
+ * 文件路径: frontend\components\ui\Modal.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 import { useEffect, useRef } from 'react';
 import type { ReactNode, FC } from 'react';;
@@ -104,6 +111,16 @@ export const Modal: React.FC<ModalProps> = ({
 
       if (focusableElements && focusableElements.length > 0) {
         const firstElement = focusableElements[0] as HTMLElement;
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
         if (event.shiftKey) {

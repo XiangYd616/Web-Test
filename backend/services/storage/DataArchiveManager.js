@@ -45,17 +45,14 @@ class DataArchiveManager {
   initializeScheduler() {
     // 每天凌晨2点执行归档任务
     cron.schedule('0 2 * * *', async () => {
-      console.log('🗄️ 开始执行定时归档任务...');
       await this.runScheduledArchive();
     });
 
     // 每周日凌晨3点执行深度归档
     cron.schedule('0 3 * * 0', async () => {
-      console.log('🗄️ 开始执行深度归档任务...');
       await this.runDeepArchive();
     });
 
-    console.log('📅 数据归档调度器已启动');
   }
 
   /**
@@ -113,14 +110,12 @@ class DataArchiveManager {
    * 归档特定引擎的数据
    */
   async archiveEngineData(engineType, criteria = {}) {
-    console.log(`📦 开始归档 ${engineType} 引擎数据...`);
 
     try {
       // 获取需要归档的数据
       const dataToArchive = await this.getDataToArchive(engineType, criteria);
       
       if (dataToArchive.length === 0) {
-        console.log(`   ℹ️ ${engineType} 引擎没有需要归档的数据`);
         return;
       }
 
@@ -136,7 +131,6 @@ class DataArchiveManager {
       // 更新统计信息
       this.updateStatistics(archiveInfo);
 
-      console.log(`   ✅ ${engineType} 引擎数据归档完成: ${archiveInfo.filename}`);
       
       return archiveInfo;
 
@@ -191,7 +185,6 @@ class DataArchiveManager {
     const mockData = [];
     
     // 模拟查询逻辑
-    console.log(`   🔍 查询 ${engineType} 引擎在 ${criteria.beforeDate} 之前的数据...`);
     
     // 实际实现应该是：
     // const query = `
@@ -302,7 +295,6 @@ class DataArchiveManager {
       // 清理验证临时文件
       await fs.rmdir(tempDir, { recursive: true });
 
-      console.log(`   ✅ 归档文件验证通过: ${archiveInfo.filename}`);
 
     } catch (error) {
       console.error(`   ❌ 归档文件验证失败: ${archiveInfo.filename}`, error);
@@ -317,7 +309,6 @@ class DataArchiveManager {
     // 这里应该从数据库中删除已归档的数据
     // 实际实现应该是批量删除操作
     
-    console.log(`   🗑️ 删除 ${dataToArchive.length} 条已归档的数据...`);
     
     // 实际实现应该是：
     // const testIds = dataToArchive.map(item => item.id);
@@ -339,7 +330,6 @@ class DataArchiveManager {
    * 压缩旧的归档文件
    */
   async compressOldArchives() {
-    console.log('🗜️ 压缩旧的归档文件...');
 
     try {
       const archiveFiles = await fs.readdir(this.config.archivePath);
@@ -354,7 +344,6 @@ class DataArchiveManager {
         await this.compressArchiveFile(archiveFile);
       }
 
-      console.log(`   ✅ 压缩了 ${oldArchives.length} 个旧归档文件`);
 
     } catch (error) {
       console.error('   ❌ 压缩旧归档文件失败:', error);
@@ -374,7 +363,6 @@ class DataArchiveManager {
       await fs.writeFile(compressedPath, compressed);
       await fs.unlink(filePath);
 
-      console.log(`   📦 压缩完成: ${filename}`);
 
     } catch (error) {
       console.error(`   ❌ 压缩失败: ${filename}`, error);
@@ -385,7 +373,6 @@ class DataArchiveManager {
    * 清理临时文件
    */
   async cleanupTempFiles() {
-    console.log('🧹 清理临时文件...');
 
     try {
       const tempFiles = await fs.readdir(this.config.tempPath);
@@ -402,7 +389,6 @@ class DataArchiveManager {
         }
       }
 
-      console.log(`   ✅ 清理了 ${cleanedCount} 个临时文件`);
 
     } catch (error) {
       console.error('   ❌ 清理临时文件失败:', error);
@@ -427,7 +413,6 @@ class DataArchiveManager {
       const reportPath = path.join(this.config.archivePath, 'archive-report.json');
       await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
 
-      console.log(`   ✅ 归档报告已生成: ${reportPath}`);
 
     } catch (error) {
       console.error('   ❌ 生成归档报告失败:', error);
@@ -535,7 +520,6 @@ class DataArchiveManager {
    * 停止归档管理器
    */
   async shutdown() {
-    console.log('🔄 关闭数据归档管理器...');
     this.isRunning = false;
     // 这里可以添加清理逻辑
     console.log('✅ 数据归档管理器已关闭');

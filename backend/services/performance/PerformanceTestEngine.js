@@ -9,6 +9,16 @@ const EventEmitter = require('events');
 const os = require('os');
 const { v4: uuidv4 } = require('uuid');
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 class PerformanceTestEngine extends EventEmitter {
   constructor(options = {}) {
     super();
@@ -151,9 +161,6 @@ class PerformanceTestEngine extends EventEmitter {
     }
     
     console.log(`🚀 开始性能测试: ${test.name}`);
-    console.log(`   类型: ${test.type}`);
-    console.log(`   用户数: ${test.load.users}`);
-    console.log(`   持续时间: ${test.load.duration}ms`);
     
     test.status = 'running';
     test.startTime = Date.now();
@@ -165,7 +172,6 @@ class PerformanceTestEngine extends EventEmitter {
     try {
       // 执行预热
       if (this.options.warmupTime > 0) {
-        console.log(`♨️ 预热阶段 (${this.options.warmupTime}ms)...`);
         await this.warmup(test);
       }
       
@@ -196,7 +202,6 @@ class PerformanceTestEngine extends EventEmitter {
       
       // 执行冷却
       if (this.options.cooldownTime > 0) {
-        console.log(`❄️ 冷却阶段 (${this.options.cooldownTime}ms)...`);
         await this.cooldown(test);
       }
       
@@ -272,7 +277,6 @@ class PerformanceTestEngine extends EventEmitter {
    * 压力测试
    */
   async runStressTest(test) {
-    console.log('💪 执行压力测试...');
     
     let users = test.load.users;
     const duration = test.load.duration;
@@ -286,7 +290,6 @@ class PerformanceTestEngine extends EventEmitter {
         this.spawnVirtualUser(test, users++);
       }
       
-      console.log(`   当前并发用户: ${users}`);
       
       // 检查系统是否崩溃
       const errorRate = this.calculateErrorRate(test);
@@ -306,7 +309,6 @@ class PerformanceTestEngine extends EventEmitter {
    * 峰值测试
    */
   async runSpikeTest(test) {
-    console.log('📈 执行峰值测试...');
     
     const { users, duration } = test.load;
     const spikePattern = [
@@ -318,7 +320,6 @@ class PerformanceTestEngine extends EventEmitter {
     ];
     
     for (const phase of spikePattern) {
-      console.log(`   阶段: ${phase.users} 用户, ${phase.duration}ms`);
       
       // 调整用户数
       await this.adjustVirtualUsers(test, phase.users);
@@ -338,13 +339,11 @@ class PerformanceTestEngine extends EventEmitter {
    * 容量测试
    */
   async runVolumeTest(test) {
-    console.log('📦 执行容量测试...');
     
     const { users, duration } = test.load;
     const dataVolumes = [1, 10, 100, 1000, 10000]; // KB
     
     for (const volume of dataVolumes) {
-      console.log(`   测试数据量: ${volume}KB`);
       
       // 调整请求体大小
       test.target.body = this.generateTestData(volume * 1024);
@@ -389,7 +388,7 @@ class PerformanceTestEngine extends EventEmitter {
               url: test.target.url,
               headers: test.target.headers,
               data: test.target.body,
-              timeout: 30000
+              timeout: process.env.REQUEST_TIMEOUT || 30000
             });
             
             const endTime = Date.now();
@@ -694,44 +693,24 @@ class PerformanceTestEngine extends EventEmitter {
    * 打印报告摘要
    */
   printReportSummary(report) {
-    console.log('\n' + '='.repeat(60));
     console.log('📊 性能测试报告');
-    console.log('='.repeat(60));
-    console.log(`测试名称: ${report.testName}`);
-    console.log(`测试类型: ${report.testType}`);
-    console.log(`执行时间: ${(report.executionTime.duration / 1000).toFixed(2)}秒`);
-    console.log('-'.repeat(60));
     
     const { summary } = report.results;
-    console.log('📈 关键指标:');
-    console.log(`  总请求数: ${summary.totalRequests}`);
-    console.log(`  成功率: ${summary.successRate}`);
-    console.log(`  错误率: ${summary.errorRate}`);
-    console.log(`  平均响应时间: ${summary.responseTime.avg.toFixed(2)}ms`);
-    console.log(`  P95响应时间: ${summary.responseTime.percentiles.p95.toFixed(2)}ms`);
-    console.log(`  P99响应时间: ${summary.responseTime.percentiles.p99.toFixed(2)}ms`);
-    console.log(`  平均吞吐量: ${summary.throughput.avg.toFixed(2)} req/s`);
     
     if (report.assertions) {
-      console.log('-'.repeat(60));
       console.log('✅ 断言结果:');
       report.assertions.results.forEach(assertion => {
         const icon = assertion.passed ? '✓' : '✗';
-        console.log(`  ${icon} ${assertion.message}`);
       });
     }
     
     if (report.recommendations.length > 0) {
-      console.log('-'.repeat(60));
-      console.log('💡 优化建议:');
       report.recommendations.forEach(rec => {
         const severity = rec.severity === 'critical' ? '🔴' : 
                          rec.severity === 'high' ? '🟡' : '🟢';
-        console.log(`  ${severity} ${rec.message}`);
       });
     }
     
-    console.log('='.repeat(60));
   }
 
   /**
@@ -756,6 +735,16 @@ class PerformanceTestEngine extends EventEmitter {
   groupByTimeWindow(data, windowSize) {
     const grouped = {};
     data.forEach(item => {
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const window = Math.floor(item.timestamp / windowSize) * windowSize;
       if (!grouped[window]) {
         grouped[window] = [];
@@ -877,6 +866,16 @@ class PerformanceTestEngine extends EventEmitter {
     const test = this.activeTests.get(testId);
     if (!test) return;
     
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const metrics = this.collectRealtimeMetrics(test);
     if (metrics) {
       if (!this.metrics.has(testId)) {

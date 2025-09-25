@@ -103,6 +103,16 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
 
   const handleNext = () => {
     const stepOrder: WizardStep[] = ['intro', 'benefits', 'setup', 'verify', 'complete'];
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex < stepOrder.length - 1) {
       setCurrentStep(stepOrder[currentIndex + 1]);
@@ -111,6 +121,16 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
 
   const handlePrevious = () => {
     const stepOrder: WizardStep[] = ['intro', 'benefits', 'setup', 'verify', 'complete'];
+
+    /**
+
+     * if功能函数
+
+     * @param {Object} params - 参数对象
+
+     * @returns {Promise<Object>} 返回结果
+
+     */
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex > 0) {
       setCurrentStep(stepOrder[currentIndex - 1]);

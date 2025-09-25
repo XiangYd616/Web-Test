@@ -20,7 +20,6 @@ class HTTPTestCore {
    * 消除在API测试、压力测试等工具中的重复实现
    */
   async testAPIEndpoints(endpoints, config = {}) {
-    console.log(`🔗 测试 ${endpoints.length} 个API端点`);
     
     const results = [];
     const concurrency = config.concurrency || 5;
@@ -129,13 +128,11 @@ class HTTPTestCore {
    * API性能测试 - 统一实现
    */
   async testAPIPerformance(endpoints, config = {}) {
-    console.log(`⚡ 测试API性能: ${endpoints.length} 个端点`);
     
     const performanceResults = [];
     const iterations = config.iterations || 10;
     
     for (const endpoint of endpoints) {
-      console.log(`测试端点性能: ${endpoint.path || endpoint.url}`);
       
       const endpointResults = [];
       
@@ -173,12 +170,10 @@ class HTTPTestCore {
    * API安全测试 - 统一实现
    */
   async testAPISecurity(endpoints, config = {}) {
-    console.log(`🛡️ 测试API安全: ${endpoints.length} 个端点`);
     
     const securityResults = [];
     
     for (const endpoint of endpoints) {
-      console.log(`安全测试端点: ${endpoint.path || endpoint.url}`);
       
       const securityChecks = await Promise.allSettled([
         this.checkAuthenticationSecurity(endpoint, config),
@@ -215,7 +210,6 @@ class HTTPTestCore {
    * 压力测试 - 统一实现
    */
   async executeStressTest(url, config = {}) {
-    console.log(`💪 执行压力测试: ${url}`);
     
     const {
       users = 10,
@@ -289,6 +283,16 @@ class HTTPTestCore {
       const responseTime = performance.now() - startTime;
       
       results.totalRequests++;
+      
+      /**
+      
+       * if功能函数
+      
+       * @param {Object} params - 参数对象
+      
+       * @returns {Promise<Object>} 返回结果
+      
+       */
       results.responseTimeStats.push(responseTime);
       
       if (response.status >= 200 && response.status < 400) {
@@ -319,6 +323,11 @@ class HTTPTestCore {
       method: endpoint.method || 'GET',
       url: endpoint.url || `${config.baseUrl}${endpoint.path}`,
       timeout: config.timeout || 10000,
+      /**
+       * 分析validateStatus数据
+       * @param {Object} options - 分析选项
+       * @returns {Promise<Object>} 分析结果
+       */
       headers: { ...config.headers, ...endpoint.headers },
       validateStatus: () => true
     };
@@ -734,7 +743,6 @@ class HTTPTestCore {
   cleanup() {
     this.activeRequests.clear();
     this.requestHistory = [];
-    console.log('🧹 HTTP测试核心已清理');
   }
 }
 

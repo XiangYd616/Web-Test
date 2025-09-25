@@ -238,7 +238,6 @@ const ReportGenerator: React.FC = () => {
         });
       }, 500);
 
-      console.log('生成报告配置:', values);
     } catch (error) {
       console.error('表单验证失败:', error);
     }

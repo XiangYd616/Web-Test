@@ -1,3 +1,10 @@
+/**
+ * PageLayout.tsx - React组件
+ * 
+ * 文件路径: frontend\components\layout\PageLayout.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import React from 'react';
 
 interface PageLayoutProps {

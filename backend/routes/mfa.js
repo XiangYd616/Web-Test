@@ -237,6 +237,16 @@ router.post('/verify',
 
       const { email, token, trustDevice = false } = req.body;
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const user = await User.findOne({ where: { email } });
       if (!user || !user.mfaEnabled) {
         return res.status(404).json({
@@ -337,6 +347,16 @@ router.post('/verify-backup',
 
       const { email, backupCode, trustDevice = false } = req.body;
 
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const user = await User.findOne({ where: { email } });
       if (!user || !user.mfaEnabled || !user.mfaBackupCodes) {
         return res.status(404).json({

@@ -28,6 +28,12 @@ const documentationEngine = require('../../engines/documentation/DocumentationTe
 const regressionEngine = require('../../engines/regression/RegressionTestEngine');
 const automationEngine = require('../../engines/automation/AutomationTestEngine');
 const clientsEngine = require('../../engines/clients/ClientsTestEngine');
+
+/**
+
+ * TestEngineService类 - 负责处理相关功能
+
+ */
 const servicesEngine = require('../../engines/services/ServicesTestEngine');
 
 class TestEngineService {

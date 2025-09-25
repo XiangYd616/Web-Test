@@ -27,7 +27,7 @@ export interface RealTimeDataState {
 
 // 默认配置
 const DEFAULT_CONFIG: Required<RealTimeDataConfig> = {
-    url: 'ws://localhost:3001',
+    url: 'ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}',
     reconnectInterval: 3000,
     maxReconnectAttempts: 5,
     heartbeatInterval: 30000
@@ -100,11 +100,19 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
             const mockWs = {
                 readyState: WebSocket.OPEN,
                 send: (data: string) => {
-                    console.log('Mock WebSocket send:', data);
                 },
                 close: () => {
-                    console.log('Mock WebSocket close');
                 },
+
+                    /**
+
+                     * if功能函数
+
+                     * @param {Object} params - 参数对象
+
+                     * @returns {Promise<Object>} 返回结果
+
+                     */
                 addEventListener: (event: string, handler: Function) => {
                     if (event === 'open') {
                         setTimeout(() => handler(), 100);
@@ -186,6 +194,16 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
             reconnectAttempts: (state.reconnectAttempts || 0) + 1
         });
 
+
+            /**
+
+             * if功能函数
+
+             * @param {Object} params - 参数对象
+
+             * @returns {Promise<Object>} 返回结果
+
+             */
         reconnectTimeoutRef.current = setTimeout(() => {
             if (mountedRef.current) {
                 connect();
@@ -212,11 +230,9 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
     const subscribe = useCallback((eventType: string, callback: (data: any) => void) => {
         // 在实际实现中，这里会设置事件监听器
         // 现在我们只是模拟订阅
-        console.log(`Subscribed to ${eventType} on channel ${channel}`);
 
         // 返回取消订阅函数
         return () => {
-            console.log(`Unsubscribed from ${eventType} on channel ${channel}`);
         };
     }, [channel]);
 

@@ -586,5 +586,4 @@ test.afterEach(async ({ page }) => {
 });
 
 test.afterAll(async () => {
-  console.log('压力测试E2E测试套件完成');
 });

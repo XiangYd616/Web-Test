@@ -68,7 +68,7 @@ const NetworkTest: React.FC = () => {
   const [config, setConfig] = useState<NetworkConfig>({
     targetUrl: '',
     testType: 'comprehensive',
-    timeout: 30000,
+    timeout: process.env.REQUEST_TIMEOUT || 30000,
     packetCount: 10,
     packetSize: 64,
     includeDNSTest: true,

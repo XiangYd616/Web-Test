@@ -97,7 +97,7 @@ API支持两种认证方式：
   },
   servers: [
     {
-      url: 'http://localhost:3001/api',
+      url: 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api',
       description: '开发环境'
     },
     {
@@ -425,7 +425,7 @@ const apiPaths = {
                   url: 'https://example.com',
                   testType: 'performance',
                   options: {
-                    timeout: 30000,
+                    timeout: process.env.REQUEST_TIMEOUT || 30000,
                     retries: 3
                   }
                 }
@@ -568,7 +568,6 @@ function setupSwaggerDocs(app) {
     res.send(swaggerSpec);
   });
 
-  console.log('📚 API文档已启用: http://localhost:3001/api/docs');
 }
 
 module.exports = {

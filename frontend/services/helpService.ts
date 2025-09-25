@@ -1,3 +1,10 @@
+/**
+ * helpService.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\helpService.ts
+ * 创建时间: 2025-09-25
+ */
+
 interface FAQFeedback {
   faqId: string;
   isHelpful: boolean;

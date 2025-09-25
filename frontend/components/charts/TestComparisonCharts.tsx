@@ -1,3 +1,10 @@
+/**
+ * TestComparisonCharts.tsx - React组件
+ * 
+ * 文件路径: frontend\components\charts\TestComparisonCharts.tsx
+ * 创建时间: 2025-09-25
+ */
+
 
 import React from 'react';
 import { BarChart3, Download, GitCompare, Target, TrendingUp } from 'lucide-react';
@@ -154,6 +161,11 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
       const dataPoint: any = { time: index };
 
       testResults.forEach((test, testIndex) => {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const point = test.timeSeriesData?.[index];
         if (point) {
           dataPoint[`test${testIndex}_responseTime`] = point.responseTime;

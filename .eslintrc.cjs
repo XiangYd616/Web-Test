@@ -65,7 +65,12 @@ module.exports = {
     // TypeScript 相关规则
     '@typescript-eslint/no-unused-vars': [
       'error',
-      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      { 
+        argsIgnorePattern: '^_', 
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+        destructuredArrayIgnorePattern: '^_'
+      },
     ],
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/prefer-const': 'error',
@@ -73,8 +78,11 @@ module.exports = {
     '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
     '@typescript-eslint/consistent-type-imports': [
       'error',
-      { prefer: 'type-imports' },
+      { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
     ],
+    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+    '@typescript-eslint/prefer-nullish-coalescing': 'error',
+    '@typescript-eslint/prefer-optional-chain': 'error',
 
     // 通用规则
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',

@@ -291,6 +291,11 @@ export class RealBackgroundTestManager {
       testProgress.message = message;
       testProgress.status = 'running';
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const callback = this.progressCallbacks.get(testId);
       if (callback) {
         callback(testProgress);
@@ -309,6 +314,11 @@ export class RealBackgroundTestManager {
       testProgress.status = 'completed';
       testProgress.results = results;
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const callback = this.progressCallbacks.get(testId);
       if (callback) {
         callback(testProgress);
@@ -326,6 +336,11 @@ export class RealBackgroundTestManager {
       testProgress.error = error;
       testProgress.message = `测试失败: ${error}`;
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const callback = this.progressCallbacks.get(testId);
       if (callback) {
         callback(testProgress);

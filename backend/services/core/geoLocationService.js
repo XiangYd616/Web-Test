@@ -27,14 +27,11 @@ class GeoLocationService {
    */
   async init() {
     try {
-      console.log('🌍 初始化地理位置服务...');
       
       // 检查本地数据库文件是否存在
       if (fs.existsSync(this.cityDbPath)) {
-        console.log('📍 发现 MaxMind 城市数据库，使用本地查询');
         await this.initMaxMind();
       } else {
-        console.log('🌐 未发现本地数据库，使用 API 查询模式');
         this.useLocalDB = false;
       }
       

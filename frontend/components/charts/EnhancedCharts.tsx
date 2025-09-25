@@ -384,6 +384,16 @@ const EnhancedCharts: React.FC = () => {
           displayColors: true,
           callbacks: {
             label: function(context: TooltipItem<any>) {
+
+              /**
+
+               * if功能函数
+
+               * @param {Object} params - 参数对象
+
+               * @returns {Promise<Object>} 返回结果
+
+               */
               let label = context.dataset.label || '';
               if (label) {
                 label += ': ';

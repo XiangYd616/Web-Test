@@ -130,6 +130,21 @@ router.get('/task/:taskId/status',
             const userId = req.user.id;
             const taskId = req.params.taskId;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await req.exportService.getTaskStatus(taskId, userId);
 
             if (!result.success) {
@@ -180,6 +195,21 @@ router.post('/task/:taskId/cancel',
             const userId = req.user.id;
             const taskId = req.params.taskId;
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const result = await req.exportService.cancelTask(taskId, userId);
 
             if (!result.success) {

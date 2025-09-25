@@ -22,15 +22,16 @@
     /* Linting - 启用严格模式以获得更好的类型安全 */
     "strict": true, // 启用严格模式
     "noImplicitAny": true, // 启用：禁止隐式 any 类型
-    "strictNullChecks": false, // 暂时关闭，需要大量代码修改
+    "strictNullChecks": true, // 启用严格空值检查
     "strictFunctionTypes": true, // 启用：严格函数类型检查
     "strictBindCallApply": true, // 启用：严格的 bind/call/apply 检查
-    "noUnusedLocals": false, // 开发阶段关闭，构建时启用
-    "noUnusedParameters": false, // 开发阶段关闭，构建时启用
+    "noUnusedLocals": true, // 启用未使用变量检查
+    "noUnusedParameters": true, // 启用未使用参数检查
     "noFallthroughCasesInSwitch": true, // 启用：防止 switch 语句穿透
     "noImplicitReturns": true, // 启用：函数必须有明确返回值
-    "noImplicitOverride": false, // 暂时关闭
-    "exactOptionalPropertyTypes": false, // 暂时关闭
+    "noImplicitOverride": true, // 启用重写检查
+    "exactOptionalPropertyTypes": true, // 启用精确可选属性类型
+    "noUncheckedIndexedAccess": true, // 增强数组访问安全性
     /* Path mapping - 基于Context7最佳实践 */
     "baseUrl": ".",
     "paths": {

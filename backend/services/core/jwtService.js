@@ -194,6 +194,21 @@ class JwtService {
                 throw ErrorFactory.token('invalid', '刷新令牌不存在');
             }
 
+
+
+            /**
+
+
+             * if功能函数
+
+
+             * @param {Object} params - 参数对象
+
+
+             * @returns {Promise<Object>} 返回结果
+
+
+             */
             const tokenRecord = tokenResult.rows[0];
 
             if (tokenRecord.is_revoked) {
@@ -339,6 +354,16 @@ class JwtService {
             w: 604800
         };
 
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         const match = expiry.match(/^(\d+)([smhdw])$/);
         if (!match) {
             

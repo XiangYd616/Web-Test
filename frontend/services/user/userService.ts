@@ -1,3 +1,10 @@
+/**
+ * userService.ts - 业务服务层
+ * 
+ * 文件路径: frontend\services\user\userService.ts
+ * 创建时间: 2025-09-25
+ */
+
 import { unifiedApiService } from '../api/baseApiService';
 
 export interface UserProfile {

@@ -101,6 +101,11 @@ class PerformanceAnalyzer {
         if ('PerformanceObserver' in window) {
           try {
             const observer = new PerformanceObserver((list) => {
+                /**
+                 * if功能函数
+                 * @param {Object} params - 参数对象
+                 * @returns {Promise<Object>} 返回结果
+                 */
               for (const entry of list.getEntries()) {
                 if (!entry.hadRecentInput) {
                   clsValue += entry.value;
@@ -141,6 +146,11 @@ class PerformanceAnalyzer {
 
             const observer = new PerformanceObserver((list) => {
               const entries = list.getEntries();
+              /**
+               * if功能函数
+               * @param {Object} params - 参数对象
+               * @returns {Promise<Object>} 返回结果
+               */
               const lastEntry = entries[entries.length - 1];
               if (lastEntry) {
                 lcpValue = lastEntry.startTime;
@@ -324,12 +334,22 @@ class PerformanceAnalyzer {
       };
 
       resources.forEach(resource => {
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const type = this.getResourceType(resource);
         if (!cacheAnalysis.resourceTypes[type]) {
           cacheAnalysis.resourceTypes[type] = { total: 0, cached: 0 };
         }
         cacheAnalysis.resourceTypes[type].total++;
 
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         const isCached = resource.transferSize === 0 && resource.decodedBodySize > 0;
         if (isCached) {
           cacheAnalysis.cached++;

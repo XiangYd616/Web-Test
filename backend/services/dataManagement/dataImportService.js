@@ -314,6 +314,11 @@ class DataImportService extends EventEmitter {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.readFile(filePath);
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const worksheet = workbook.getWorksheet(1); // 读取第一个工作表
       if (!worksheet) {
         throw new Error('Excel文件中没有找到工作表');
@@ -996,10 +1001,25 @@ class DataImportService extends EventEmitter {
       const task = this.importQueue.get(taskId) || this.activeImports.get(taskId);
       if (task) {
         task.status = status;
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         if (progress !== null) task.progress = progress;
         if (additionalData) {
           Object.assign(task, additionalData);
         }
+
+        /**
+
+         * if功能函数
+
+         * @param {Object} params - 参数对象
+
+         * @returns {Promise<Object>} 返回结果
+
+         */
         if (errorMessage) task.errorMessage = errorMessage;
 
         if (status === 'processing' && !task.startedAt) {

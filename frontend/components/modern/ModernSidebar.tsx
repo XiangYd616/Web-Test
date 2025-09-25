@@ -1,3 +1,10 @@
+/**
+ * ModernSidebar.tsx - React组件
+ * 
+ * 文件路径: frontend\components\modern\ModernSidebar.tsx
+ * 创建时间: 2025-09-25
+ */
+
 import { BarChart3, ChevronRight, Code, Database, Eye, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Wifi, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -210,6 +217,11 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
   };
 
   const isGroupActive = (item: SidebarItem) => {
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     if (item.href && isActive(item.href)) return true;
     if (item.children) {
       return item.children.some(child => isActive(child.href));
@@ -218,6 +230,11 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
   };
 
   const isGroupActiveByChild = (item: SidebarItem) => {
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     if (item.href && isActive(item.href)) return false;
     if (item.children) {
       return item.children.some(child => isActive(child.href));
@@ -345,6 +362,16 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
             const isExpanded = isGroupExpanded(item.id);
             const active = isActive(item.href);
             const groupActive = isGroupActive(item);
+
+            /**
+
+             * if功能函数
+
+             * @param {Object} params - 参数对象
+
+             * @returns {Promise<Object>} 返回结果
+
+             */
             const groupActiveByChild = isGroupActiveByChild(item);
 
             if (hasChildren) {

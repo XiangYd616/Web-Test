@@ -69,6 +69,11 @@ class AccessibilityTestEngine {
       includeWarnings: Joi.boolean().default(true)
     });
 
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const { error, value } = schema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);
@@ -331,6 +336,16 @@ class AccessibilityTestEngine {
 
       const hasLabel = id && $(`label[for="${id}"]`).length > 0;
       const hasAriaLabel = $el.attr('aria-label');
+
+      /**
+
+       * if功能函数
+
+       * @param {Object} params - 参数对象
+
+       * @returns {Promise<Object>} 返回结果
+
+       */
       const hasAriaLabelledby = $el.attr('aria-labelledby');
 
       if (hasLabel || hasAriaLabel || hasAriaLabelledby) {

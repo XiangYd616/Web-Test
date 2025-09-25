@@ -81,7 +81,6 @@ function queryPerformanceMiddleware() {
                 }
 
                 const totalDuration = Date.now() - startTime;
-                console.log(`批量查询完成: ${queries.length} 个查询, 总耗时: ${totalDuration}ms`);
 
                 return results;
             } catch (error) {

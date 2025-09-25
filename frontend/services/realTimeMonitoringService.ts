@@ -53,6 +53,16 @@ class RealTimeMonitoringService {
   private _isConnected = false;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
   private listeners: Map<string, Function[]> = new Map();
 
   constructor() {
@@ -64,7 +74,7 @@ class RealTimeMonitoringService {
    * 初始化Socket.IO连接
    */
   private initializeSocket() {
-    const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+    const socketUrl = process.env.REACT_APP_API_URL || process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}';
 
     this.socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
@@ -75,14 +85,12 @@ class RealTimeMonitoringService {
     });
 
     this.socket.on('connect', () => {
-      console.log('🔌 实时监控服务已连接');
       this._isConnected = true;
       this.reconnectAttempts = 0;
       this.emit('connected');
     });
 
     this.socket.on('disconnect', () => {
-      console.log('🔌 实时监控服务已断开');
       this._isConnected = false;
       this.emit('disconnected');
     });
@@ -123,6 +131,11 @@ class RealTimeMonitoringService {
         });
       }
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const storedAlerts = localStorage.getItem('monitoring_alerts');
       if (storedAlerts) {
         this.alerts = JSON.parse(storedAlerts);
@@ -204,8 +217,12 @@ class RealTimeMonitoringService {
       return;
     }
 
-    console.log('🔄 启动轮询模式');
 
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
     const pollInterval = setInterval(async () => {
       if (this._isConnected) {
         clearInterval(pollInterval);
@@ -315,8 +332,18 @@ class RealTimeMonitoringService {
   }
 
   public off(event: string, listener: Function) {
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const eventListeners = this.listeners.get(event);
     if (eventListeners) {
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       const index = eventListeners.indexOf(listener);
       if (index > -1) {
         eventListeners.splice(index, 1);

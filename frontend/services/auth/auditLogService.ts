@@ -118,6 +118,12 @@ export interface AuditConfig {
   complianceMode: 'gdpr' | 'hipaa' | 'sox' | 'custom';
 }
 
+
+/**
+
+ * RiskScorer类 - 负责处理相关功能
+
+ */
 // ==================== 风险评分器 ====================
 
 class RiskScorer {

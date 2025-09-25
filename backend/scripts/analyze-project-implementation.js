@@ -13,7 +13,6 @@ console.log('🔍 开始深度分析项目实现情况...\n');
  * 分析前端页面实现情况
  */
 function analyzeFrontendPages() {
-  console.log('📱 分析前端页面实现...');
   
   const frontendPagesDir = '../frontend/pages';
   const corePages = [
@@ -44,17 +43,14 @@ function analyzeFrontendPages() {
       const quality = analyzePageQuality(content, pageName);
       results.implementationQuality[pageName] = quality;
       
-      console.log(`  ✅ ${pageName} - ${quality.status}`);
       if (quality.issues.length > 0) {
-        quality.issues.forEach(issue => console.log(`    ⚠️  ${issue}`));
+        quality.issues.forEach(issue => );
       }
     } else {
       results.missing.push(pageName);
-      console.log(`  ❌ ${pageName} - 文件不存在`);
     }
   });
   
-  console.log(`\n📊 前端页面: ${results.existing.length}/${corePages.length} 存在\n`);
   return results;
 }
 
@@ -153,17 +149,14 @@ function analyzeBackendRoutes() {
       const endpoints = analyzeRouteEndpoints(content, routeName);
       results.endpointAnalysis[routeName] = endpoints;
       
-      console.log(`  ✅ ${routeName} - ${endpoints.count} 个端点`);
       if (endpoints.issues.length > 0) {
-        endpoints.issues.forEach(issue => console.log(`    ⚠️  ${issue}`));
+        endpoints.issues.forEach(issue => );
       }
     } else {
       results.missing.push(routeName);
-      console.log(`  ❌ ${routeName} - 文件不存在`);
     }
   });
   
-  console.log(`\n📊 后端路由: ${results.existing.length}/${coreRoutes.length} 存在\n`);
   return results;
 }
 
@@ -227,7 +220,6 @@ function analyzeRouteEndpoints(content, routeName) {
  * 分析测试引擎实现情况
  */
 function analyzeTestEngines() {
-  console.log('⚙️ 分析测试引擎实现...');
   
   const enginesDir = './engines';
   const expectedEngines = [
@@ -257,17 +249,14 @@ function analyzeTestEngines() {
       const analysis = analyzeEngineImplementation(content, engineName);
       results.engineAnalysis[engineName] = analysis;
       
-      console.log(`  ✅ ${engineName} - ${analysis.status}`);
       if (analysis.issues.length > 0) {
-        analysis.issues.forEach(issue => console.log(`    ⚠️  ${issue}`));
+        analysis.issues.forEach(issue => );
       }
     } else {
       results.missing.push(engineName);
-      console.log(`  ❌ ${engineName} - 文件不存在`);
     }
   });
   
-  console.log(`\n📊 测试引擎: ${results.existing.length}/${expectedEngines.length} 存在\n`);
   return results;
 }
 
@@ -334,7 +323,6 @@ function analyzeEngineImplementation(content, engineName) {
  * 分析数据库模型和迁移
  */
 function analyzeDatabaseStructure() {
-  console.log('🗄️ 分析数据库结构实现...');
   
   const migrationsDir = './migrations';
   const modelsDir = './database';
@@ -355,10 +343,8 @@ function analyzeDatabaseStructure() {
     const migrationPath = path.join(migrationsDir, migration);
     if (fs.existsSync(migrationPath)) {
       results.migrations.existing.push(migration);
-      console.log(`  ✅ Migration: ${migration}`);
     } else {
       results.migrations.missing.push(migration);
-      console.log(`  ❌ Migration: ${migration} - 不存在`);
     }
   });
   
@@ -368,11 +354,9 @@ function analyzeDatabaseStructure() {
     results.models.existing = modelFiles;
     
     modelFiles.forEach(model => {
-      console.log(`  ✅ Model: ${model}`);
     });
   }
   
-  console.log(`\n📊 数据库: ${results.migrations.existing.length} 迁移, ${results.models.existing.length} 模型\n`);
   return results;
 }
 
@@ -380,7 +364,6 @@ function analyzeDatabaseStructure() {
  * 分析依赖关系和集成
  */
 function analyzeDependenciesAndIntegration() {
-  console.log('🔗 分析依赖关系和集成...');
   
   const results = {
     frontend: { dependencies: {}, issues: [] },
@@ -399,8 +382,6 @@ function analyzeDependenciesAndIntegration() {
       axios: content.dependencies?.axios || 'unknown'
     };
     
-    console.log(`  ✅ Frontend: React ${results.frontend.dependencies.react}`);
-    console.log(`  ✅ Frontend: TypeScript ${results.frontend.dependencies.typescript}`);
   } else {
     results.frontend.issues.push('前端package.json不存在');
   }
@@ -416,8 +397,6 @@ function analyzeDependenciesAndIntegration() {
       bcrypt: content.dependencies?.bcryptjs || content.dependencies?.bcrypt || 'unknown'
     };
     
-    console.log(`  ✅ Backend: Express ${results.backend.dependencies.express}`);
-    console.log(`  ✅ Backend: PostgreSQL ${results.backend.dependencies.postgres}`);
   } else {
     results.backend.issues.push('后端package.json不存在');
   }
@@ -432,14 +411,11 @@ function analyzeDependenciesAndIntegration() {
   integrationChecks.forEach(check => {
     if (fs.existsSync(check.path)) {
       results.integration.strengths.push(check.desc);
-      console.log(`  ✅ 集成: ${check.desc}`);
     } else {
       results.integration.issues.push(`缺少${check.desc}`);
-      console.log(`  ❌ 集成: ${check.desc} - 不存在`);
     }
   });
   
-  console.log(`\n📊 集成状况: ${results.integration.strengths.length} 个集成点正常\n`);
   return results;
 }
 
@@ -447,7 +423,6 @@ function analyzeDependenciesAndIntegration() {
  * 分析安全实现
  */
 function analyzeSecurityImplementation() {
-  console.log('🔐 分析安全实现...');
   
   const results = {
     authentication: { status: 'unknown', features: [] },
@@ -472,27 +447,22 @@ function analyzeSecurityImplementation() {
     }
     
     results.authentication.status = results.authentication.features.length > 0 ? '已实现' : '未实现';
-    console.log(`  ✅ 认证: ${results.authentication.status} (${results.authentication.features.join(', ')})`);
   } else {
     results.issues.push('认证中间件不存在');
-    console.log(`  ❌ 认证: 中间件不存在`);
   }
   
   // 检查OAuth实现
   const oauthRoutes = './routes/oauth.js';
   if (fs.existsSync(oauthRoutes)) {
     results.authentication.features.push('OAuth2登录');
-    console.log(`  ✅ OAuth2: 已实现`);
   }
   
   // 检查安全日志
   const securityLogger = './src/utils/securityLogger.js';
   if (fs.existsSync(securityLogger)) {
     results.dataProtection.features.push('安全日志');
-    console.log(`  ✅ 安全日志: 已实现`);
   }
   
-  console.log(`\n📊 安全功能: ${results.authentication.features.length + results.dataProtection.features.length} 个已实现\n`);
   return results;
 }
 
@@ -500,9 +470,6 @@ function analyzeSecurityImplementation() {
  * 生成实现状况报告
  */
 function generateImplementationReport(analysisResults) {
-  console.log('='.repeat(80));
-  console.log('📋 项目实现状况综合报告');
-  console.log('='.repeat(80));
   
   const {
     frontend,
@@ -514,43 +481,27 @@ function generateImplementationReport(analysisResults) {
   } = analysisResults;
   
   // 前端实现状况
-  console.log('\n🎨 前端实现状况:');
-  console.log(`  - 页面完成度: ${frontend.existing.length}/${frontend.existing.length + frontend.missing.length}`);
   
   const frontendQualityCount = Object.values(frontend.implementationQuality)
     .filter(q => q.status === '完整' || q.status === '基本可用').length;
-  console.log(`  - 实现质量: ${frontendQualityCount}/${frontend.existing.length} 页面质量良好`);
   
   // 后端实现状况  
-  console.log('\n⚙️ 后端实现状况:');
-  console.log(`  - 路由完成度: ${backend.existing.length}/${backend.existing.length + backend.missing.length}`);
   
   const totalEndpoints = Object.values(backend.endpointAnalysis)
     .reduce((sum, analysis) => sum + analysis.count, 0);
-  console.log(`  - API端点总数: ${totalEndpoints}`);
   
   // 测试引擎状况
-  console.log('\n🧪 测试引擎状况:');
-  console.log(`  - 引擎完成度: ${engines.existing.length}/${engines.existing.length + engines.missing.length}`);
   
   const goodEngines = Object.values(engines.engineAnalysis)
     .filter(analysis => analysis.status === '完整实现' || analysis.status === '基本可用').length;
-  console.log(`  - 引擎质量: ${goodEngines}/${engines.existing.length} 引擎实现良好`);
   
   // 数据库状况
-  console.log('\n🗄️ 数据库状况:');
-  console.log(`  - 迁移文件: ${database.migrations.existing.length} 个`);
-  console.log(`  - 数据模型: ${database.models.existing.length} 个`);
   
   // 安全状况
-  console.log('\n🔐 安全实现:');
   const securityFeatureCount = security.authentication.features.length + 
                               security.dataProtection.features.length;
-  console.log(`  - 安全特性: ${securityFeatureCount} 个已实现`);
-  console.log(`  - 认证状态: ${security.authentication.status}`);
   
   // 整体评估
-  console.log('\n📊 整体评估:');
   
   const totalModules = frontend.existing.length + backend.existing.length + engines.existing.length;
   const totalExpected = (frontend.existing.length + frontend.missing.length) + 
@@ -558,27 +509,21 @@ function generateImplementationReport(analysisResults) {
                        (engines.existing.length + engines.missing.length);
   
   const completionRate = Math.round((totalModules / totalExpected) * 100);
-  console.log(`  - 模块完成度: ${completionRate}%`);
   
   const qualityModules = frontendQualityCount + 
                         Object.values(backend.endpointAnalysis).filter(a => a.issues.length <= 1).length +
                         goodEngines;
   const qualityRate = Math.round((qualityModules / totalModules) * 100);
-  console.log(`  - 实现质量: ${qualityRate}%`);
   
   // 建议
-  console.log('\n💡 优化建议:');
   
   if (frontend.missing.length > 0) {
-    console.log(`  - 补充缺失的前端页面: ${frontend.missing.join(', ')}`);
   }
   
   if (backend.missing.length > 0) {
-    console.log(`  - 补充缺失的后端路由: ${backend.missing.join(', ')}`);
   }
   
   if (engines.missing.length > 0) {
-    console.log(`  - 补充缺失的测试引擎: ${engines.missing.join(', ')}`);
   }
   
   // 质量改进建议
@@ -587,16 +532,11 @@ function generateImplementationReport(analysisResults) {
     .map(([name]) => name);
   
   if (lowQualityPages.length > 0) {
-    console.log(`  - 改进页面实现质量: ${lowQualityPages.join(', ')}`);
   }
   
-  console.log('\n🎯 结论:');
   if (completionRate >= 90 && qualityRate >= 80) {
-    console.log('  ✅ 项目实现状况优秀，可以投入使用');
   } else if (completionRate >= 70 && qualityRate >= 60) {
-    console.log('  ⚠️  项目实现状况良好，建议完善后使用');
   } else {
-    console.log('  ❌ 项目实现状况需要改进，建议先完善核心功能');
   }
 }
 
@@ -621,7 +561,6 @@ async function runProjectAnalysis() {
     // 保存分析结果
     const reportPath = './logs/implementation-analysis.json';
     fs.writeFileSync(reportPath, JSON.stringify(analysisResults, null, 2));
-    console.log(`\n📄 详细分析报告已保存到: ${reportPath}`);
     
     process.exit(0);
     

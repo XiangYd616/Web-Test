@@ -296,6 +296,16 @@ class ReportGenerator {
         break;
       case 'performance':
         if (results.metrics) {
+
+          /**
+
+           * if功能函数
+
+           * @param {Object} params - 参数对象
+
+           * @returns {Promise<Object>} 返回结果
+
+           */
           const fcp = results.metrics.FCP?.value;
           if (fcp && fcp > 3000) {
             topIssues.push({

@@ -7,6 +7,16 @@ const WebSocket = require('ws');
 const { v4: uuidv4 } = require('uuid');
 const EventEmitter = require('events');
 
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
 class RealtimeCollaborationServer extends EventEmitter {
   constructor(options = {}) {
     super();
@@ -110,7 +120,6 @@ class RealtimeCollaborationServer extends EventEmitter {
     const clientId = uuidv4();
     const clientIp = req.socket.remoteAddress;
     
-    console.log(`👤 新客户端连接: ${clientId} from ${clientIp}`);
     
     // 初始化客户端
     const client = {
@@ -142,7 +151,6 @@ class RealtimeCollaborationServer extends EventEmitter {
     
     // 处理断开连接
     ws.on('close', (code, reason) => {
-      console.log(`👋 客户端断开: ${clientId} (${code}: ${reason})`);
       this.handleDisconnect(clientId);
     });
     
@@ -170,7 +178,6 @@ class RealtimeCollaborationServer extends EventEmitter {
       const message = JSON.parse(data);
       client.lastActivity = new Date();
       
-      console.log(`📨 收到消息 [${clientId}]: ${message.type}`);
       
       switch (message.type) {
         case this.messageTypes.JOIN_ROOM:
@@ -292,7 +299,6 @@ class RealtimeCollaborationServer extends EventEmitter {
       state: room.state
     });
     
-    console.log(`🚪 ${userName} (${userId}) 加入房间 ${roomId}`);
   }
 
   /**
@@ -347,7 +353,6 @@ class RealtimeCollaborationServer extends EventEmitter {
       }
     }
     
-    console.log(`🚪 ${client.userName} 离开房间 ${roomId}`);
   }
 
   /**
@@ -534,7 +539,6 @@ class RealtimeCollaborationServer extends EventEmitter {
       lockType
     });
     
-    console.log(`🔒 ${client.userName} 锁定资源 ${resourceId}`);
   }
 
   /**
@@ -560,7 +564,6 @@ class RealtimeCollaborationServer extends EventEmitter {
         locked: false
       });
       
-      console.log(`🔓 ${client.userName} 释放资源 ${resourceId}`);
     }
   }
 
@@ -783,7 +786,6 @@ class RealtimeCollaborationServer extends EventEmitter {
    * 停止服务器
    */
   stop() {
-    console.log('🛑 关闭实时协作服务器...');
     
     // 清理心跳
     if (this.heartbeatInterval) {

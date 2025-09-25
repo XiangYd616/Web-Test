@@ -247,6 +247,21 @@ class DatabasePerformanceOptimizer {
             WHERE indexname = $1 AND tablename = $2
         `;
 
+
+
+        /**
+
+
+         * if功能函数
+
+
+         * @param {Object} params - 参数对象
+
+
+         * @returns {Promise<Object>} 返回结果
+
+
+         */
         const existsResult = await this.connectionManager.query(existsQuery, [name, table]);
 
         if (existsResult.rows.length > 0) {

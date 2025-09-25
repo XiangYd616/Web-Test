@@ -123,7 +123,6 @@ class AnalyticsIntegrator extends EventEmitter {
       });
     }
 
-    console.log('📡 事件监听器已设置');
   }
 
   /**
@@ -225,7 +224,6 @@ class AnalyticsIntegrator extends EventEmitter {
    */
   async handleAlert(alert) {
     try {
-      console.log(`🚨 告警处理: ${alert.message}`);
 
       // 转发告警到实时通信服务
       if (this.realtimeService && this.options.alertForwarding) {
@@ -364,7 +362,6 @@ class AnalyticsIntegrator extends EventEmitter {
       this.performDataSync();
     }, this.options.syncInterval);
 
-    console.log(`🔄 数据同步已启动，间隔 ${this.options.syncInterval}ms`);
   }
 
   /**
@@ -384,7 +381,6 @@ class AnalyticsIntegrator extends EventEmitter {
         await this.syncMonitoringData();
       }
 
-      console.log('🔄 数据同步完成');
 
     } catch (error) {
       console.error('数据同步失败:', error);
