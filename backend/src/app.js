@@ -273,6 +273,15 @@ try {
   console.error('⚠️ 简单测试路由应用失败:', error.message);
 }
 
+// 应用定时任务路由
+try {
+  const scheduledTaskRoutes = require('../routes/scheduledTasks.js');
+  app.use('/api/scheduled-tasks', scheduledTaskRoutes);
+  console.log('✅ 定时任务路由已应用: /api/scheduled-tasks');
+} catch (error) {
+  console.error('⚠️ 定时任务路由应用失败:', error.message);
+}
+
 // 应用API映射修复路由（作为后备）
 try {
   const apiMappings = require('../routes/api-mappings.js');
@@ -495,7 +504,8 @@ app.get('/api', (req, res) => {
       data: '/api/data',
       monitoring: '/api/monitoring',
       reports: '/api/reports',
-      integrations: '/api/integrations'
+      integrations: '/api/integrations',
+      scheduledTasks: '/api/scheduled-tasks'
     },
     deprecatedEndpoints: {
       note: '以下端点已废弃，请使用新的统一端点',

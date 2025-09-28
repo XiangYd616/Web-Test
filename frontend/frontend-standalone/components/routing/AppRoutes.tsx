@@ -72,7 +72,7 @@ const APIDocs = lazy(() => import('../../pages/APIDocs'));
 
 // 调度和任务
 const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
-const ScheduledTasks = lazy(() => import('../../pages/ScheduledTasks'));
+const ScheduledTasksPage = lazy(() => import('../../pages/ScheduledTasksPage'));
 
 // 其他功能
 const Settings = lazy(() => import('../../pages/admin/Settings'));
@@ -374,7 +374,7 @@ const AppRoutes: React.FC = () => {
       } />
       <Route path="scheduled-tasks" element={
         <LazyPageWrapper>
-          <ScheduledTasks />
+          <ScheduledTasksPage />
         </LazyPageWrapper>
       } />
 
