@@ -513,49 +513,101 @@ router.post('/forgot-password', asyncHandler(async (req, res) => {
 }));
 
 /**
- * 重置密码
- * POST /api/auth/reset-password
+ * 验证重置令牌
+ * GET /api/auth/validate-reset-token
  */
-router.post('/reset-password', asyncHandler(async (req, res) => {
-  const { token, newPassword, confirmPassword } = req.body;
+router.get('/validate-reset-token', asyncHandler(async (req, res) => {
+  const { token, email } = req.query;
 
-  if (!token || !newPassword || !confirmPassword) {
-
-    return res.validationError([], '所有字段都是必需的');
-  }
-
-  if (newPassword !== confirmPassword) {
-
-    return res.validationError([], '密码确认不匹配');
-  }
-
-  if (newPassword.length < 6) {
-
-    return res.validationError([], '密码长度至少为6个字符');
+  if (!token || !email) {
+    return res.validationError([], '缺少必要参数');
   }
 
   try {
     // 查找有效的重置令牌
     const userResult = await query(
-      'SELECT id, email, username FROM users WHERE reset_token = $1 AND reset_token_expires > NOW() AND is_active = true',
-      [token]
+      'SELECT id, email, username FROM users WHERE reset_token = $1 AND reset_token_expires > NOW() AND email = $2 AND is_active = true',
+      [token, email]
     );
 
     if (userResult.rows.length === 0) {
+      return res.validationError([], '重置链接已过期或无效');
+    }
 
+    // 记录安全事件
+    const user = userResult.rows[0];
+    securityLogger('password_reset_token_validated', {
+      userId: user.id,
+      email: user.email
+    }, req);
+
+    res.success({ valid: true }, '重置令牌有效');
+
+  } catch (error) {
+    console.error('验证重置令牌失败:', error);
+    res.serverError('服务器错误，请稍后重试');
+  }
+}));
+
+/**
+ * 重置密码
+ * POST /api/auth/reset-password
+ */
+router.post('/reset-password', asyncHandler(async (req, res) => {
+  const { token, email, password } = req.body;
+
+  if (!token || !email || !password) {
+    return res.validationError([], '所有字段都是必需的');
+  }
+
+  // 密码强度验证
+  if (password.length < 8) {
+    return res.validationError([], '密码长度至少8个字符');
+  }
+
+  if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+    return res.validationError([], '密码必须包含大小写字母和数字');
+  }
+
+  if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?])/.test(password)) {
+    return res.validationError([], '密码必须包含特殊字符');
+  }
+
+  try {
+    // 查找有效的重置令牌
+    const userResult = await query(
+      'SELECT id, email, username FROM users WHERE reset_token = $1 AND reset_token_expires > NOW() AND email = $2 AND is_active = true',
+      [token, email]
+    );
+
+    if (userResult.rows.length === 0) {
       return res.validationError([], '重置令牌无效或已过期');
     }
 
     const user = userResult.rows[0];
 
     // 加密新密码
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // 更新密码并清除重置令牌
     await query(
       'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL, updated_at = NOW() WHERE id = $2',
       [hashedPassword, user.id]
     );
+
+    // 记录安全事件
+    securityLogger('password_reset_completed', {
+      userId: user.id,
+      email: user.email,
+      username: user.username
+    }, req);
+
+    await recordSecurityEvent(user.id, 'password_reset_completed', {
+      email: user.email,
+      username: user.username,
+      resetMethod: 'email_token'
+    }, req, true, 'medium');
 
     res.success('密码重置成功，请使用新密码登录');
 
