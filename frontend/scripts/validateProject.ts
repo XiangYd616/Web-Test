@@ -21,6 +21,7 @@ const testApiConfig = mergeApiConfig(DEFAULT_API_CONFIG, {
   timeout: 15000
 });
 
+console.log('API配置信息:', {
   baseURL: testApiConfig.baseURL,
   timeout: testApiConfig.timeout,
   cacheEnabled: testApiConfig.cache.enabled,
@@ -28,6 +29,7 @@ const testApiConfig = mergeApiConfig(DEFAULT_API_CONFIG, {
 });
 
 // 验证Auth配置
+console.log('Auth配置信息:', {
   apiBaseUrl: DEFAULT_AUTH_CONFIG.apiBaseUrl,
   environment: DEFAULT_AUTH_CONFIG.environment,
   jwtExpiry: DEFAULT_AUTH_CONFIG.tokens.jwt.accessTokenExpiry,
@@ -37,6 +39,7 @@ const testApiConfig = mergeApiConfig(DEFAULT_API_CONFIG, {
 // 运行配置验证
 const validationResult = validateAllConfigs(testApiConfig, DEFAULT_AUTH_CONFIG);
 
+console.log('验证结果:', {
   apiValid: validationResult.api.valid,
   authValid: validationResult.auth.valid,
   overallValid: validationResult.overall.valid,
@@ -46,12 +49,14 @@ const validationResult = validateAllConfigs(testApiConfig, DEFAULT_AUTH_CONFIG);
 
 // 显示详细报告
 if (validationResult.overall.totalErrors > 0 || validationResult.overall.totalWarnings > 0) {
-  
+  console.log('⚠️  发现配置问题，请检查详细报告');
+  console.log(createValidationReport(validationResult));
 } else {
   console.log('✅ 所有配置验证通过！');
 }
 
 // 测试错误代码
+console.log('错误代码测试:', {
   NETWORK_ERROR: ERROR_CODES.NETWORK_ERROR,
   UNAUTHORIZED: ERROR_CODES.UNAUTHORIZED,
   VALIDATION_FAILED: ERROR_CODES.VALIDATION_FAILED

@@ -1,0 +1,38 @@
+/* 字体和响应式设置 */
+
+/* 基础字体设置 */
+html {
+  /* 优化页面缩放和布局 */
+  font-size: 14px; /* 减小基础字体大小 */
+}
+
+/* 响应式字体大小 - 多屏幕尺寸优化 */
+@media (min-width: 1024px) and (max-width: 1440px) {
+  html {
+    font-size: 13px; /* 小笔记本屏幕 */
+  }
+}
+
+@media (min-width: 1441px) and (max-width: 1920px) {
+  html {
+    font-size: 14px; /* 大笔记本/小台式机屏幕 */
+  }
+}
+
+@media (min-width: 1921px) and (max-width: 2560px) {
+  html {
+    font-size: 15px; /* 27寸显示屏 */
+  }
+}
+
+@media (min-width: 2561px) {
+  html {
+    font-size: 16px; /* 4K及以上超大屏幕 */
+  }
+}
+
+/* 默认body样式 - 使用主题变量 */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}

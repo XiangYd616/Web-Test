@@ -114,13 +114,38 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
       registrationMethod: 'email'
     }, req, true, 'low');
 
+    // 生成邮箱验证token并发送验证邮件
+    try {
+      const crypto = require('crypto');
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+      const verificationExpiry = new Date(Date.now() + 86400000); // 24小时后过期
+
+      // 保存验证token
+      await query(
+        'UPDATE users SET verification_token = $1, verification_expires = $2 WHERE id = $3',
+        [verificationToken, verificationExpiry, user.id]
+      );
+
+      // 模拟发送验证邮件
+      const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(user.email)}`;
+      console.log(`发送注册验证邮件到: ${user.email}`);
+      console.log(`验证链接: ${verificationUrl}`);
+
+      // 这里应该调用邮件服务发送邮件
+      // await sendVerificationEmail(user.email, verificationUrl);
+    } catch (emailError) {
+      console.error('发送验证邮件失败:', emailError);
+      // 不影响注册流程，但记录错误
+    }
+
     return res.success({
       accessToken: tokenPair.accessToken,
       refreshToken: tokenPair.refreshToken,
       tokenType: tokenPair.tokenType,
       expiresIn: tokenPair.expiresIn,
-      user: tokenPair.user
-    }, '注册成功', 201);
+      user: tokenPair.user,
+      emailVerificationRequired: true // 指示需要邮箱验证
+    }, '注册成功，请检查邮箱完成验证', 201);
   } catch (error) {
     console.error('注册错误:', error);
     return res.serverError('注册失败，请稍后重试');

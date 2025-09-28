@@ -63,14 +63,14 @@ const Login: React.FC = () => {
             <Button 
               icon={<GoogleOutlined />} 
               className="w-full"
-              onClick={() => }
+              onClick={() => console.log('Button clicked')}
             >
               使用 Google 登录
             </Button>
             <Button 
               icon={<GithubOutlined />} 
               className="w-full"
-              onClick={() => }
+              onClick={() => console.log('Button clicked')}
             >
               使用 GitHub 登录
             </Button>

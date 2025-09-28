@@ -1,0 +1,144 @@
+/* 重构后的主样式文件 */
+
+/* 统一设计系统 - 优先级最高 */
+@import './styles/unified-design-system.css';
+@import './styles/unified-components.css';
+
+/* 兼容性导入 - 保持向后兼容 */
+@import './styles/theme-config.css';
+@import './styles/design-tokens.css';
+@import './styles/design-system.css';
+
+/* 基础样式导入 */
+@import './styles/base/reset.css';
+@import './styles/base/typography.css';
+@import './styles/base/scrollbar.css';
+
+/* 工具类导入 */
+@import './styles/utilities/helpers.css';
+@import './styles/utilities/animations.css';
+@import './styles/utilities/layout.css';
+
+/* 响应式样式导入 */
+@import './styles/mobile.css';
+
+/* 组件样式导入 */
+@import './styles/components.css';
+@import './styles/progress-bar.css';
+
+/* 基础重置 - 直接在这里定义 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+/* 页面样式导入 - 已迁移到组件库 */
+/* 旧的页面特定CSS已迁移到对应的组件中 */
+
+/* 现有样式导入 - 已迁移到组件库 */
+/* 动态样式和响应式样式已迁移到组件库和工具类中 */
+
+/* Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 测试CSS - 确保样式加载 */
+body {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+/* 基础样式层 - 已迁移到 base/ 目录 */
+@layer base {
+  /* 基础样式已迁移到专用文件 */
+}
+
+/* 组件样式层 - 已迁移到组件库 */
+@layer components {
+  /* 组件样式已迁移到组件库 */
+}
+
+/* 工具样式层 - 保留核心工具类 */
+@layer utilities {
+  /* 核心工具类 - 保留在主文件中 */
+  
+  /* 自定义滚动条样式 */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.5);
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(75, 85, 99, 0.7);
+  }
+
+  /* 侧边栏专用滚动条样式 - 隐藏滚动条 */
+  .sidebar-scrollbar {
+    /* Firefox */
+    scrollbar-width: none;
+    /* IE and Edge */
+    -ms-overflow-style: none;
+  }
+
+  .sidebar-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 可选：如果需要在悬停时显示滚动条，可以使用以下样式 */
+  .sidebar-scrollbar-hover {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+  }
+
+  .sidebar-scrollbar-hover::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar-scrollbar-hover::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-scrollbar-hover::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.3);
+    border-radius: 3px;
+  }
+
+  .sidebar-scrollbar-hover::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.5);
+  }
+
+  /* 进度条样式已统一到progress-bars.css */
+
+  /* 报告和测试相关样式已迁移到对应的组件中 */
+  /*
+   * 原有的样式已迁移到：
+   * - Table组件 (table-header, table-row, table-cell)
+   * - Card组件 (reports-card, test-item)
+   * - Badge组件 (format-tag, test-status)
+   * - 响应式样式已集成到组件库的响应式系统中
+   */
+}
+
+/* 深色主题样式已迁移到组件库内部实现 */

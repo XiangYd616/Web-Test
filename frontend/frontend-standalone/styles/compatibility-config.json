@@ -1,0 +1,170 @@
+{
+  "compatibilityStrategy": {
+    "description": "CSS浏览器兼容性处理策略",
+    "lastUpdated": "2024-12-19",
+    "rules": {
+      "backdrop-filter": {
+        "status": "handled",
+        "strategy": "prefix",
+        "implementation": [
+          "-webkit-backdrop-filter: blur(Xpx);",
+          "backdrop-filter: blur(Xpx);"
+        ],
+        "supportedBrowsers": [
+          "Chrome 76+",
+          "Firefox 70+",
+          "Safari 9+ (with -webkit- prefix)",
+          "iOS Safari 9+ (with -webkit- prefix)",
+          "Edge 79+"
+        ],
+        "files": [
+          "data-management-responsive.css",
+          "data-table.css",
+          "optimized-charts.css",
+          "test-history-responsive.css"
+        ]
+      },
+      "min-width: fit-content": {
+        "status": "handled",
+        "strategy": "fallback",
+        "implementation": [
+          "min-width: -webkit-fill-available; /* Samsung Internet 5.0+ */",
+          "min-width: fit-content; /* 现代浏览器 */"
+        ],
+        "supportedBrowsers": [
+          "Chrome 46+",
+          "Firefox 94+",
+          "Safari 11+",
+          "Samsung Internet 5.0+ (with -webkit-fill-available)",
+          "Edge 79+"
+        ],
+        "files": [
+          "data-management-responsive.css"
+        ]
+      },
+      "scrollbar-width": {
+        "status": "handled",
+        "strategy": "multi-vendor",
+        "implementation": [
+          "scrollbar-width: none; /* Firefox */",
+          "-ms-overflow-style: none; /* IE and Edge */",
+          "::-webkit-scrollbar { display: none; } /* Webkit browsers */"
+        ],
+        "supportedBrowsers": [
+          "Firefox 64+",
+          "IE 10+",
+          "Edge (all versions)",
+          "Chrome (all versions with ::-webkit-scrollbar)",
+          "Safari (all versions with ::-webkit-scrollbar)"
+        ],
+        "files": [
+          "data-management-responsive.css"
+        ]
+      }
+    }
+  },
+  "knownWarnings": {
+    "description": "已知的兼容性警告，这些警告是预期的，因为我们已经实现了正确的兼容性处理",
+    "warnings": [
+      {
+        "property": "scrollbar-width",
+        "message": "'scrollbar-width' is not supported by Chrome < 121, Safari, Safari on iOS, Samsung Internet",
+        "reason": "我们已经为这些浏览器提供了 ::-webkit-scrollbar 替代方案",
+        "action": "无需修复 - 已有完整的兼容性处理"
+      },
+      {
+        "property": "min-width: fit-content",
+        "message": "'min-width: fit-content' is not supported by Samsung Internet",
+        "reason": "我们已经提供了 min-width: -webkit-fill-available 作为回退",
+        "action": "无需修复 - 已有完整的兼容性处理"
+      },
+      {
+        "property": "backdrop-filter",
+        "message": "'backdrop-filter' is not supported by Safari, Safari on iOS",
+        "reason": "我们已经为所有使用位置添加了 -webkit-backdrop-filter 前缀",
+        "action": "无需修复 - 已有完整的兼容性处理"
+      }
+    ]
+  },
+  "testingGuidelines": {
+    "description": "兼容性测试指南",
+    "browsers": [
+      {
+        "name": "Safari",
+        "versions": ["9+", "iOS 9+"],
+        "testItems": [
+          "毛玻璃效果 (backdrop-filter)",
+          "按钮布局",
+          "滚动条隐藏"
+        ]
+      },
+      {
+        "name": "Samsung Internet",
+        "versions": ["5.0+"],
+        "testItems": [
+          "按钮最小宽度 (fit-content)",
+          "滚动条隐藏",
+          "整体布局"
+        ]
+      },
+      {
+        "name": "Chrome",
+        "versions": ["60+"],
+        "testItems": [
+          "所有CSS特性",
+          "性能表现",
+          "动画效果"
+        ]
+      },
+      {
+        "name": "Firefox",
+        "versions": ["55+"],
+        "testItems": [
+          "滚动条隐藏 (scrollbar-width)",
+          "毛玻璃效果",
+          "Grid布局"
+        ]
+      }
+    ]
+  },
+  "automationTools": {
+    "description": "自动化兼容性检查工具",
+    "tools": [
+      {
+        "name": "Autoprefixer",
+        "purpose": "自动添加CSS前缀",
+        "config": "基于 .browserslistrc 配置"
+      },
+      {
+        "name": "check-css-compatibility.js",
+        "purpose": "自定义兼容性检查脚本",
+        "location": "scripts/check-css-compatibility.js"
+      },
+      {
+        "name": "Can I Use",
+        "purpose": "手动检查浏览器支持",
+        "url": "https://caniuse.com"
+      }
+    ]
+  },
+  "maintenanceSchedule": {
+    "description": "兼容性维护计划",
+    "tasks": [
+      {
+        "frequency": "每季度",
+        "task": "更新浏览器支持列表",
+        "action": "检查新版本浏览器支持情况"
+      },
+      {
+        "frequency": "每半年",
+        "task": "清理过时的前缀",
+        "action": "移除不再需要的浏览器前缀"
+      },
+      {
+        "frequency": "每年",
+        "task": "更新兼容性策略",
+        "action": "根据用户浏览器统计调整支持策略"
+      }
+    ]
+  }
+}
