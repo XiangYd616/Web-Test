@@ -10,6 +10,8 @@ const path = require('path');
 const fs = require('fs').promises;
 const { automatedReportingService } = require('../services/reporting/AutomatedReportingService');
 const { performanceBenchmarkService } = require('../services/performance/PerformanceBenchmarkService');
+const EnhancedReportGenerator = require('../services/reporting/EnhancedReportGenerator');
+const { query } = require('../config/database');
 
 const router = express.Router();
 
@@ -561,6 +563,275 @@ router.post('/performance/report', authMiddleware, asyncHandler(async (req, res)
   } catch (error) {
     Logger.error('生成性能报告失败', error, { userId: req.user.id });
     res.serverError('生成性能报告失败');
+  }
+}));
+
+// ==================== 增强报告生成功能 ====================
+
+/**
+ * 生成增强报告
+ * POST /api/reports/enhanced/generate
+ */
+router.post('/enhanced/generate', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const {
+      template = 'technical',
+      format = 'html',
+      title = '测试分析报告',
+      description = '',
+      testIds = [],
+      includeCharts = true,
+      includeRecommendations = true,
+      brandingOptions = {}
+    } = req.body;
+
+    // 验证必填字段
+    if (!title.trim()) {
+      return res.validationError([], '报告标题是必填的');
+    }
+
+    if (!testIds || testIds.length === 0) {
+      return res.validationError([], '至少需要选择一个测试结果');
+    }
+
+    // 获取测试数据
+    const testDataQuery = `
+      SELECT 
+        uuid,
+        type,
+        url,
+        status,
+        config,
+        results,
+        duration_ms,
+        error_message,
+        created_at,
+        started_at,
+        completed_at
+      FROM tests 
+      WHERE uuid = ANY($1) AND user_id = $2
+      ORDER BY created_at DESC
+    `;
+
+    const testResult = await query(testDataQuery, [testIds, req.user.id]);
+    const testData = testResult.rows;
+
+    if (testData.length === 0) {
+      return res.validationError([], '未找到指定的测试数据');
+    }
+
+    // 创建增强报告生成器实例
+    const enhancedGenerator = new EnhancedReportGenerator();
+
+    // 生成报告
+    const reportResult = await enhancedGenerator.generateEnhancedReport(testData, {
+      template,
+      format,
+      title,
+      description,
+      includeCharts,
+      includeRecommendations,
+      brandingOptions: {
+        companyName: brandingOptions.companyName || 'Test-Web Platform',
+        primaryColor: brandingOptions.primaryColor || '#2563eb',
+        secondaryColor: brandingOptions.secondaryColor || '#64748b',
+        includeWatermark: brandingOptions.includeWatermark || false,
+        ...brandingOptions
+      }
+    });
+
+    // 记录报告生成
+    Logger.info('增强报告生成成功', {
+      userId: req.user.id,
+      template,
+      format,
+      testCount: testData.length,
+      filePath: reportResult.filePath
+    });
+
+    // 返回报告信息
+    res.success({
+      reportId: `enhanced_${Date.now()}`,
+      filePath: reportResult.filePath,
+      metadata: reportResult.metadata,
+      analysis: reportResult.analysis,
+      downloadUrl: `/api/reports/enhanced/download/${path.basename(reportResult.filePath)}`,
+      generatedAt: new Date().toISOString()
+    }, '增强报告生成成功');
+
+  } catch (error) {
+    Logger.error('生成增强报告失败', error, { userId: req.user?.id });
+    res.serverError('生成增强报告失败，请稍后重试');
+  }
+}));
+
+/**
+ * 获取增强报告生成器的可用模板
+ * GET /api/reports/enhanced/templates
+ */
+router.get('/enhanced/templates', asyncHandler(async (req, res) => {
+  try {
+    const enhancedGenerator = new EnhancedReportGenerator();
+    const templates = enhancedGenerator.getAvailableTemplates();
+    const formats = enhancedGenerator.getSupportedFormats();
+
+    res.success({
+      templates,
+      formats
+    }, '获取模板列表成功');
+
+  } catch (error) {
+    Logger.error('获取增强报告模板失败', error);
+    res.serverError('获取模板列表失败');
+  }
+}));
+
+/**
+ * 下载增强报告文件
+ * GET /api/reports/enhanced/download/:filename
+ */
+router.get('/enhanced/download/:filename', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { filename } = req.params;
+    const enhancedGenerator = new EnhancedReportGenerator();
+    const filePath = path.join(enhancedGenerator.reportsDir, filename);
+
+    // 检查文件是否存在
+    try {
+      await fs.access(filePath);
+    } catch (error) {
+      return res.notFound('资源', '报告文件不存在或已过期');
+    }
+
+    // 获取文件信息
+    const stats = await fs.stat(filePath);
+    const fileExt = path.extname(filename).toLowerCase();
+    
+    // 设置响应头
+    let contentType = 'application/octet-stream';
+    switch (fileExt) {
+      case '.html':
+        contentType = 'text/html';
+        break;
+      case '.pdf':
+        contentType = 'application/pdf';
+        break;
+      case '.xlsx':
+      case '.xls':
+        contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        break;
+      case '.json':
+        contentType = 'application/json';
+        break;
+    }
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Length', stats.size);
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
+
+    // 流式传输文件
+    const fileStream = require('fs').createReadStream(filePath);
+    fileStream.pipe(res);
+
+    // 记录下载
+    Logger.info('增强报告下载', {
+      filename,
+      fileSize: stats.size,
+      userId: req.user.id
+    });
+
+  } catch (error) {
+    Logger.error('下载增强报告失败', error, { userId: req.user?.id });
+    res.serverError('下载报告失败');
+  }
+}));
+
+/**
+ * 批量生成报告
+ * POST /api/reports/enhanced/batch
+ */
+router.post('/enhanced/batch', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { 
+      reports, // 报告配置数组
+      globalOptions = {} // 全局选项
+    } = req.body;
+
+    if (!reports || !Array.isArray(reports) || reports.length === 0) {
+      return res.validationError([], '请提供报告配置数组');
+    }
+
+    if (reports.length > 10) {
+      return res.validationError([], '单次批量生成报告数量不能超过10个');
+    }
+
+    const enhancedGenerator = new EnhancedReportGenerator();
+    const batchResults = [];
+    const errors = [];
+
+    // 逐个生成报告
+    for (let i = 0; i < reports.length; i++) {
+      const reportConfig = reports[i];
+      try {
+        // 获取测试数据
+        const testDataQuery = `
+          SELECT * FROM tests 
+          WHERE uuid = ANY($1) AND user_id = $2
+          ORDER BY created_at DESC
+        `;
+
+        const testResult = await query(testDataQuery, [reportConfig.testIds, req.user.id]);
+        const testData = testResult.rows;
+
+        if (testData.length > 0) {
+          const result = await enhancedGenerator.generateEnhancedReport(testData, {
+            ...globalOptions,
+            ...reportConfig
+          });
+
+          batchResults.push({
+            index: i,
+            success: true,
+            reportId: `enhanced_batch_${Date.now()}_${i}`,
+            filePath: result.filePath,
+            metadata: result.metadata
+          });
+        } else {
+          errors.push({
+            index: i,
+            error: '未找到指定的测试数据',
+            reportConfig
+          });
+        }
+      } catch (error) {
+        errors.push({
+          index: i,
+          error: error.message,
+          reportConfig
+        });
+      }
+    }
+
+    Logger.info('批量生成增强报告完成', {
+      userId: req.user.id,
+      totalReports: reports.length,
+      successCount: batchResults.length,
+      errorCount: errors.length
+    });
+
+    res.success({
+      summary: {
+        total: reports.length,
+        success: batchResults.length,
+        failed: errors.length
+      },
+      results: batchResults,
+      errors: errors.length > 0 ? errors : undefined
+    }, `批量生成完成，成功 ${batchResults.length} 个，失败 ${errors.length} 个`);
+
+  } catch (error) {
+    Logger.error('批量生成增强报告失败', error, { userId: req.user?.id });
+    res.serverError('批量生成报告失败');
   }
 }));
 
