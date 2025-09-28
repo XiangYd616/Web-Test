@@ -74,6 +74,12 @@ const APIDocs = lazy(() => import('../../pages/APIDocs'));
 const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
 const ScheduledTasksPage = lazy(() => import('../../pages/ScheduledTasksPage'));
 
+// 测试工具
+const TestDataGeneratorPage = lazy(() => import('../../pages/TestDataGeneratorPage'));
+const TestToolsPage = lazy(() => import('../../pages/TestToolsPage'));
+const BatchTestPage = lazy(() => import('../../pages/BatchTestPage'));
+const ProjectDocumentationPage = lazy(() => import('../../pages/ProjectDocumentationPage'));
+
 // 其他功能
 const Settings = lazy(() => import('../../pages/admin/Settings'));
 const Help = lazy(() => import('../../pages/Help'));
@@ -372,11 +378,31 @@ const AppRoutes: React.FC = () => {
           <TestSchedule />
         </LazyPageWrapper>
       } />
-      <Route path="scheduled-tasks" element={
-        <LazyPageWrapper>
-          <ScheduledTasksPage />
-        </LazyPageWrapper>
-      } />
+        <Route path="scheduled-tasks" element={
+          <LazyPageWrapper>
+            <ScheduledTasksPage />
+          </LazyPageWrapper>
+        } />
+        <Route path="test-data-generator" element={
+          <LazyPageWrapper>
+            <TestDataGeneratorPage />
+          </LazyPageWrapper>
+        } />
+        <Route path="test-tools" element={
+          <LazyPageWrapper>
+            <TestToolsPage />
+          </LazyPageWrapper>
+        } />
+        <Route path="batch-test" element={
+          <LazyPageWrapper>
+            <BatchTestPage />
+          </LazyPageWrapper>
+        } />
+        <Route path="project-docs" element={
+          <LazyPageWrapper>
+            <ProjectDocumentationPage />
+          </LazyPageWrapper>
+        } />
 
       {/* 用户设置 - 需要登录 */}
       <Route path="settings" element={
