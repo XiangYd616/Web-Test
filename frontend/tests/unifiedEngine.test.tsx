@@ -11,6 +11,51 @@ import { UnifiedTestExecutor } from '../components/testing/UnifiedTestExecutor';
 // import { ModernUnifiedTestPanel } from '../components/testing/ModernUnifiedTestPanel'; // 已重构到UnifiedTestExecutor
 import { UnifiedTestPage } from '../pages/UnifiedTestPage';
 
+// Mock useUnifiedTestEngine hook
+vi.mock('../hooks/useUnifiedTestEngine', () => ({
+  useUnifiedTestEngine: vi.fn(() => ({
+    // Original properties
+    startTest: vi.fn(),
+    stopTest: vi.fn(),
+    isRunning: false,
+    progress: 0,
+    results: [],
+    currentTest: null,
+    error: null,
+    
+    // Additional properties and methods
+    getStats: vi.fn(() => ({
+      runningTests: 0,
+      completedTests: 0,
+      failedTests: 0,
+      totalTests: 0
+    })),
+    getTestHistory: vi.fn(() => Promise.resolve([])),
+    getTestStatus: vi.fn(() => Promise.resolve(null)),
+    getTestResult: vi.fn(() => Promise.resolve(null)),
+    cancelTest: vi.fn(),
+    cancelAllTests: vi.fn(() => Promise.resolve()),
+    clearCompletedTests: vi.fn(),
+    connectWebSocket: vi.fn(),
+    executeTest: vi.fn(() => Promise.resolve('test-123')),
+    subscribeToTest: vi.fn(),
+    fetchSupportedTypes: vi.fn(),
+    isConnected: true,
+    activeTests: [],
+    testResults: [],
+    supportedTypes: ['performance', 'security', 'api', 'seo', 'stress', 'compatibility'],
+    executingTest: false,
+    engineVersion: '1.0.0'
+  })),
+  useTestResultAnalysis: vi.fn(() => ({
+    totalTests: 0,
+    passedTests: 0,
+    failedTests: 0,
+    averageScore: 0,
+    recommendations: []
+  }))
+}));
+
 // Mock ahooks
 vi.mock('ahooks', () => ({
   useRequest: vi.fn(() => ({

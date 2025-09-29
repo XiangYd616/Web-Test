@@ -46,6 +46,7 @@ export default defineConfig({
       '@config': resolve(__dirname, 'frontend/config'),
       '@styles': resolve(__dirname, 'frontend/styles'),
       '@shared': resolve(__dirname, 'shared'),
+      '@shared/types': resolve(__dirname, 'shared/types'),
       '@backend': resolve(__dirname, 'backend'),
       '@tools': resolve(__dirname, 'tools'),
     },

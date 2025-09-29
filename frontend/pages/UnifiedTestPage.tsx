@@ -170,7 +170,7 @@ export const UnifiedTestPage: React.FC = () => {
           <Card>
             <Statistic
               title="总测试结果"
-              value={stats.totalResults}
+              value={stats.totalTests}
               valueStyle={{ color: '#52c41a' }}
               prefix={<BarChartOutlined />}
             />

@@ -9,6 +9,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { TestConfig, TestResult } from '../types';
 
 export interface UnifiedTestEngine {
+  // Original methods
   startTest: (config: TestConfig) => Promise<void>;
   stopTest: () => void;
   isRunning: boolean;
@@ -16,6 +17,30 @@ export interface UnifiedTestEngine {
   results: TestResult[];
   currentTest: string | null;
   error: string | null;
+  
+  // Additional methods expected by components
+  getStats: () => {
+    runningTests: number;
+    completedTests: number;
+    failedTests: number;
+    totalTests: number;
+  };
+  getTestHistory: (testType?: string) => Promise<TestResult[]>;
+  getTestStatus: (testId: string) => Promise<any>;
+  getTestResult: (testId: string) => Promise<any>;
+  cancelTest: (testId: string) => void;
+  cancelAllTests: () => Promise<void>;
+  clearCompletedTests: () => void;
+  connectWebSocket: () => void;
+  executeTest: (params: any) => Promise<string>;
+  subscribeToTest: (testId: string) => void;
+  fetchSupportedTypes: () => void;
+  isConnected: boolean;
+  activeTests: any[];
+  testResults: TestResult[];
+  supportedTypes: string[];
+  executingTest: boolean;
+  engineVersion?: string;
 }
 
 export const useUnifiedTestEngine = (): UnifiedTestEngine => {
@@ -24,6 +49,11 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
   const [results, setResults] = useState<TestResult[]>([]);
   const [currentTest, setCurrentTest] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isConnected] = useState(true); // Mock connected state
+  const [activeTests] = useState<any[]>([]); // Mock active tests
+  const [testHistory] = useState<TestResult[]>([]); // Mock test history
+  const [supportedTypes] = useState<string[]>(['performance', 'security', 'api', 'seo', 'stress', 'compatibility']); // Mock supported types
+  const [executingTest, setExecutingTest] = useState(false); // Mock executing state
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const startTest = useCallback(async (config: TestConfig) => {
@@ -103,14 +133,136 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
     setCurrentTest(null);
   }, []);
 
+  // Additional method implementations
+  const getStats = useCallback(() => {
+    const completedTests = results.length;
+    const failedTests = results.filter(r => r.status === 'failed').length;
+    const runningTests = isRunning ? 1 : 0;
+    
+    return {
+      runningTests,
+      completedTests,
+      failedTests,
+      totalTests: completedTests + runningTests
+    };
+  }, [results, isRunning]);
+
+  const getTestHistory = useCallback(async (testType?: string) => {
+    // Mock implementation - return filtered test history
+    return testHistory.filter(test => !testType || test.type === testType);
+  }, [testHistory]);
+
+  const getTestStatus = useCallback(async (testId: string) => {
+    // Mock implementation - return test status
+    const test = results.find(r => r.id === testId);
+    if (test) {
+      return {
+        id: testId,
+        progress: 100,
+        status: test.status,
+        currentStep: 'completed'
+      };
+    }
+    return null;
+  }, [results]);
+
+  const cancelTest = useCallback((testId: string) => {
+    // Mock implementation - cancel specific test
+    console.log(`Cancelling test: ${testId}`);
+    if (isRunning) {
+      stopTest();
+    }
+  }, [isRunning, stopTest]);
+
+  const getTestResult = useCallback(async (testId: string) => {
+    // Mock implementation - get specific test result
+    const result = results.find(r => r.id === testId);
+    if (result) {
+      return {
+        testId,
+        testType: result.type,
+        overallScore: result.score,
+        duration: result.details?.duration || 1000,
+        recommendations: {
+          immediate: ['Mock immediate recommendation'],
+          shortTerm: ['Mock short-term recommendation'],
+          longTerm: ['Mock long-term recommendation']
+        }
+      };
+    }
+    return null;
+  }, [results]);
+
+  const cancelAllTests = useCallback(async () => {
+    // Mock implementation - cancel all tests
+    console.log('Cancelling all tests');
+    if (isRunning) {
+      stopTest();
+    }
+  }, [isRunning, stopTest]);
+
+  const clearCompletedTests = useCallback(() => {
+    // Mock implementation - clear completed tests
+    console.log('Clearing completed tests');
+    setResults([]);
+  }, []);
+
+  const connectWebSocket = useCallback(() => {
+    // Mock implementation - connect websocket
+    console.log('Connecting WebSocket');
+  }, []);
+
+  const executeTest = useCallback(async (params: any) => {
+    // Mock implementation - execute test and return test ID
+    setExecutingTest(true);
+    const testId = `test-${Date.now()}`;
+    
+    try {
+      await startTest(params.config || { url: 'https://example.com' });
+      return testId;
+    } finally {
+      setExecutingTest(false);
+    }
+  }, [startTest]);
+
+  const subscribeToTest = useCallback((testId: string) => {
+    // Mock implementation - subscribe to test updates
+    console.log(`Subscribing to test: ${testId}`);
+  }, []);
+
+  const fetchSupportedTypes = useCallback(() => {
+    // Mock implementation - fetch supported types
+    console.log('Fetching supported types');
+  }, []);
+
   return {
+    // Original properties
     startTest,
     stopTest,
     isRunning,
     progress,
     results,
     currentTest,
-    error
+    error,
+    
+    // Additional properties and methods
+    getStats,
+    getTestHistory,
+    getTestStatus,
+    getTestResult,
+    cancelTest,
+    cancelAllTests,
+    clearCompletedTests,
+    connectWebSocket,
+    executeTest,
+    subscribeToTest,
+    fetchSupportedTypes,
+    isConnected,
+    activeTests,
+    testResults: results,
+    supportedTypes,
+    executingTest,
+    engineVersion: '1.0.0'
   };
 };
 

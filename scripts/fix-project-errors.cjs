@@ -171,7 +171,7 @@ class ProjectErrorFixer {
     
     const frontendDirs = [
       'frontend/components',
-      'frontend/frontend-standalone/components'
+    // 已移除重复的frontend-standalone目录
     ].map(dir => path.join(this.rootDir, dir)).filter(dir => fs.existsSync(dir));
 
     if (frontendDirs.length > 1) {

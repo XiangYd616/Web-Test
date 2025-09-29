@@ -54,6 +54,25 @@ const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
 
+// Helper functions
+const getTestTypeLabel = (type: string): string => {
+  const labels: Record<string, string> = {
+    performance: '🚀 性能测试',
+    security: '🔒 安全测试',
+    api: '🔌 API测试',
+    seo: '📊 SEO分析',
+    stress: '⚡ 压力测试',
+    compatibility: '🌍 兼容性测试'
+  };
+  return labels[type] || type;
+};
+
+const getScoreColor = (score: number): string => {
+  if (score >= 80) return '#3f8600';
+  if (score >= 60) return '#faad14';
+  return '#cf1322';
+};
+
 // 扩展的Props接口 - 整合其他组件功能
 interface UnifiedTestExecutorProps {
   className?: string;
@@ -124,7 +143,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const engine = useUnifiedTestEngine();
 
   // 当前选中测试的结果分析
-  const resultAnalysis = useTestResultAnalysis(selectedTestId);
+  const resultAnalysis = useTestResultAnalysis(engine.results);
 
   // 整合的功能方法
 
@@ -784,7 +803,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
             label: (
               <span>
                 <BarChartOutlined />
-                查看结果 ({engine.getStats().totalResults})
+                查看结果 ({engine.getStats().totalTests})
               </span>
             ),
             children: renderTestResults()
@@ -821,22 +840,6 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
 /**
  * 工具函数
  */
-const getTestTypeLabel = (type: string): string => {
-  const labels: Record<string, string> = {
-    performance: '🚀 性能测试',
-    security: '🔒 安全测试',
-    api: '🔌 API测试',
-    stress: '⚡ 压力测试',
-    database: '🗄️ 数据库测试',
-    network: '🌐 网络测试',
-    ux: '👤 用户体验测试',
-    seo: '🔍 SEO测试',
-    compatibility: '🔧 兼容性测试',
-    website: '🌍 网站测试'
-  };
-  return labels[type] || type;
-};
-
 const _getStatusColor = (status: string): string => {
   const colors: Record<string, string> = {
     pending: 'blue',
@@ -857,12 +860,6 @@ const _getStatusText = (status: string): string => {
     cancelled: '已取消'
   };
   return texts[status] || status;
-};
-
-const getScoreColor = (score: number): string => {
-  if (score >= 80) return '#3f8600';
-  if (score >= 60) return '#faad14';
-  return '#cf1322';
 };
 
 export default UnifiedTestExecutor;
