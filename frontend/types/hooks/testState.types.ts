@@ -18,7 +18,7 @@ export interface BaseTestState {
   /** 当前步骤 */
   currentStep: string;
   /** 测试结果 */
-  result: any;
+  result: unknown;
   /** 错误信息 */
   error: string | null;
   /** 是否正在运行 */
@@ -32,7 +32,7 @@ export interface BaseTestState {
 /** 测试操作接口 */
 export interface BaseTestActions {
   /** 开始测试 */
-  startTest: (config: any) => Promise<void>;
+  startTest: (config: unknown) => Promise<void>;
   /** 停止测试 */
   stopTest: () => void;
   /** 重置状态 */
@@ -75,7 +75,7 @@ export interface APIEndpoint {
   /** 请求参数 */
   params?: Record<string, any>;
   /** 请求体 */
-  body?: any;
+  body?: unknown;
   /** 预期状态码 */
   expectedStatus?: number;
   /** 响应验证 */
@@ -107,7 +107,7 @@ export interface ValidationRule {
   /** 验证类型 */
   type: 'required' | 'type' | 'value' | 'range';
   /** 期望值 */
-  expected?: any;
+  expected?: unknown;
   /** 错误消息 */
   message?: string;
 }
@@ -147,7 +147,7 @@ export interface APIEndpointResult {
   /** 状态码 */
   statusCode: number;
   /** 响应数据 */
-  responseData?: any;
+  responseData?: unknown;
   /** 错误信息 */
   error?: string;
   /** 验证结果 */
@@ -161,9 +161,9 @@ export interface ValidationResult {
   /** 是否通过 */
   passed: boolean;
   /** 实际值 */
-  actualValue: any;
+  actualValue: unknown;
   /** 期望值 */
-  expectedValue: any;
+  expectedValue: unknown;
   /** 错误消息 */
   message?: string;
 }
@@ -676,7 +676,7 @@ export interface DatabaseQueryResult {
   /** 影响行数 */
   affectedRows?: number;
   /** 结果数据 */
-  data?: any[];
+  data?: unknown[];
   /** 错误信息 */
   error?: string;
 }

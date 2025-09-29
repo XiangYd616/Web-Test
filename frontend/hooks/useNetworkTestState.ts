@@ -250,7 +250,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
   /**
    * 更新配置
    */
-  const updateLocalConfig = useCallback((updates: any) => {
+  const updateLocalConfig = useCallback((updates: unknown) => {
     setLocalConfig(prev => ({ ...prev, ...updates }));
     setError(null);
   }, []);
@@ -359,13 +359,13 @@ export const useNetworkTestState = (): NetworkTestHook => {
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult: any) => {
+        (testResult: unknown) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError: any) => {
+        (testError: unknown) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -374,7 +374,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
 
       setTestId(newTestId);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || '网络测试启动失败');
       setIsRunning(false);
       setCurrentStep('');
@@ -391,7 +391,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
         abortControllerRef.current?.abort();
         setIsRunning(false);
         setCurrentStep('测试已停止');
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err.message || '停止测试失败');
       }
     }
@@ -415,11 +415,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 添加DNS服务器
    */
   const addDnsServer = useCallback((server: string) => {
-    setLocalConfig((prev: any) => ({
+    setLocalConfig((prev: unknown) => ({
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        dnsServers: [...(prev.dnsConfig?.dnsServers || []), server].filter((s: any, i: number, arr: any[]) => arr.indexOf(s) === i)
+        dnsServers: [...(prev.dnsConfig?.dnsServers || []), server].filter((s: unknown, i: number, arr: unknown[]) => arr.indexOf(s) === i)
       }
     }));
   }, []);
@@ -428,11 +428,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 移除DNS服务器
    */
   const removeDnsServer = useCallback((server: string) => {
-    setLocalConfig((prev: any) => ({
+    setLocalConfig((prev: unknown) => ({
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        dnsServers: (prev.dnsConfig?.dnsServers || []).filter((s: any) => s !== server)
+        dnsServers: (prev.dnsConfig?.dnsServers || []).filter((s: unknown) => s !== server)
       }
     }));
   }, []);
@@ -441,11 +441,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 添加端口
    */
   const addPort = useCallback((port: number) => {
-    setLocalConfig((prev: any) => ({
+    setLocalConfig((prev: unknown) => ({
       ...prev,
       portConfig: {
         ...prev.portConfig,
-        ports: [...(prev.portConfig?.ports || []), port].filter((p: any, i: number, arr: any[]) => arr.indexOf(p) === i).sort((a: number, b: number) => a - b)
+        ports: [...(prev.portConfig?.ports || []), port].filter((p: unknown, i: number, arr: unknown[]) => arr.indexOf(p) === i).sort((a: number, b: number) => a - b)
       }
     }));
   }, []);
@@ -454,11 +454,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 移除端口
    */
   const removePort = useCallback((port: number) => {
-    setLocalConfig((prev: any) => ({
+    setLocalConfig((prev: unknown) => ({
       ...prev,
       portConfig: {
         ...prev.portConfig,
-        ports: (prev.portConfig?.ports || []).filter((p: any) => p !== port)
+        ports: (prev.portConfig?.ports || []).filter((p: unknown) => p !== port)
       }
     }));
   }, []);
@@ -467,11 +467,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 添加记录类型
    */
   const addRecordType = useCallback((type: 'A' | 'AAAA' | 'CNAME' | 'MX' | 'TXT' | 'NS') => {
-    setLocalConfig((prev: any) => ({
+    setLocalConfig((prev: unknown) => ({
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        recordTypes: [...(prev.dnsConfig?.recordTypes || []), type].filter((t: any, i: number, arr: any[]) => arr.indexOf(t) === i)
+        recordTypes: [...(prev.dnsConfig?.recordTypes || []), type].filter((t: unknown, i: number, arr: unknown[]) => arr.indexOf(t) === i)
       }
     }));
   }, []);
@@ -480,11 +480,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 移除记录类型
    */
   const removeRecordType = useCallback((type: 'A' | 'AAAA' | 'CNAME' | 'MX' | 'TXT' | 'NS') => {
-    setLocalConfig((prev: any) => ({
+    setLocalConfig((prev: unknown) => ({
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        recordTypes: (prev.dnsConfig?.recordTypes || []).filter((t: any) => t !== type)
+        recordTypes: (prev.dnsConfig?.recordTypes || []).filter((t: unknown) => t !== type)
       }
     }));
   }, []);
@@ -521,7 +521,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     };
 
     const presetConfig = presets[preset];
-    setLocalConfig((prev: any) => ({
+    setLocalConfig((prev: unknown) => ({
       ...prev,
       ...presetConfig
     }));

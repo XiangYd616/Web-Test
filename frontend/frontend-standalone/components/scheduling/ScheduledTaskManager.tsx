@@ -4,30 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Clock,
-  Plus,
-  Edit,
-  Trash2,
-  Play,
-  Pause,
-  Calendar,
-  Bell,
-  Settings,
-  RefreshCw,
-  CheckCircle,
-  AlertCircle,
-  Eye,
-  Copy,
-  Download,
-  Filter,
-  Search,
-  BarChart3,
-  Target,
-  Mail,
-  Webhook,
-  Timer
-} from 'lucide-react';
+import {Clock, Plus, Edit, Trash2, Play, Pause, Settings, RefreshCw, CheckCircle, Eye, Copy, Search, BarChart3, Target, Mail, Webhook, Timer} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface ScheduledTask {
@@ -67,7 +44,7 @@ interface TaskExecution {
   startTime: Date;
   endTime?: Date;
   status: 'running' | 'completed' | 'failed' | 'cancelled';
-  results?: any;
+  results?: unknown;
   error?: string;
   duration?: number;
 }
@@ -264,7 +241,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
   }, [taskForm, onTaskCreate]);
 
   // 计算下次运行时间
-  const calculateNextRun = (schedule: any): Date => {
+  const calculateNextRun = (schedule: unknown): Date => {
     const now = new Date();
     const next = new Date();
     
@@ -513,7 +490,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e?.target.value)}
                 placeholder="搜索任务..."
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -522,7 +499,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
             {/* 过滤器 */}
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={(e) => setFilterStatus(e?.target.value as any)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">全部状态</option>
@@ -785,7 +762,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
                   <input
                     type="text"
                     value={taskForm.name}
-                    onChange={(e) => setTaskForm(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => setTaskForm(prev => ({ ...prev, name: e?.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="输入任务名称"
                   />
@@ -797,7 +774,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
                   </label>
                   <textarea
                     value={taskForm.description}
-                    onChange={(e) => setTaskForm(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) => setTaskForm(prev => ({ ...prev, description: e?.target.value }))}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="输入任务描述"
@@ -810,7 +787,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
                   </label>
                   <select
                     value={taskForm.testType}
-                    onChange={(e) => setTaskForm(prev => ({ ...prev, testType: e.target.value }))}
+                    onChange={(e) => setTaskForm(prev => ({ ...prev, testType: e?.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     {testTypes.map((type) => (
@@ -835,7 +812,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
                       value={taskForm.schedule.type}
                       onChange={(e) => setTaskForm(prev => ({
                         ...prev,
-                        schedule: { ...prev.schedule, type: e.target.value as any }
+                        schedule: { ...prev.schedule, type: e?.target.value as any }
                       }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
@@ -856,7 +833,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
                       value={taskForm.schedule.time}
                       onChange={(e) => setTaskForm(prev => ({
                         ...prev,
-                        schedule: { ...prev.schedule, time: e.target.value }
+                        schedule: { ...prev.schedule, time: e?.target.value }
                       }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
@@ -875,7 +852,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
                       checked={taskForm.notifications.email}
                       onChange={(e) => setTaskForm(prev => ({
                         ...prev,
-                        notifications: { ...prev.notifications, email: e.target.checked }
+                        notifications: { ...prev.notifications, email: e?.target.checked }
                       }))}
                       className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
@@ -889,7 +866,7 @@ const ScheduledTaskManager: React.FC<ScheduledTaskManagerProps> = ({
                       checked={taskForm.notifications.webhook}
                       onChange={(e) => setTaskForm(prev => ({
                         ...prev,
-                        notifications: { ...prev.notifications, webhook: e.target.checked }
+                        notifications: { ...prev.notifications, webhook: e?.target.checked }
                       }))}
                       className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />

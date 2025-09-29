@@ -40,7 +40,7 @@ export interface ErrorHandlingResult {
   userMessage: string;
   error: ApiError;
   context: ErrorContext;
-  enhancedError?: any; // 来自utils/errorHandler的增强错误
+  enhancedError?: unknown; // 来自utils/errorHandler的增强错误
 }
 
 // 默认配置
@@ -103,18 +103,18 @@ export class ApiErrorHandler {
    * 处理API错误 - 主要入口点
    */
   async handleError(
-    error: any,
+    error: unknown,
     context: Partial<ErrorContext> = {}
   ): Promise<ErrorHandlingResult> {
     const errorContext: ErrorContext = {
-      requestId: context.requestId || this.generateRequestId(),
-      url: context.url,
-      method: context.method,
-      timestamp: context.timestamp || Date.now(),
-      userAgent: context.userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : undefined),
-      userId: context.userId,
-      operation: context.operation,
-      retryCount: this.retryCount.get(context.requestId || '') || 0
+      requestId: context?.requestId || this.generateRequestId(),
+      url: context?.url,
+      method: context?.method,
+      timestamp: context?.timestamp || Date.now(),
+      userAgent: context?.userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : undefined),
+      userId: context?.userId,
+      operation: context?.operation,
+      retryCount: this.retryCount.get(context?.requestId || '') || 0
     };
 
     // 标准化错误
@@ -160,7 +160,7 @@ export class ApiErrorHandler {
     context: Partial<ErrorContext> = {},
     retryConfig?: Partial<RetryConfig>
   ): Promise<T> {
-    const requestId = context.requestId || this.generateRequestId();
+    const requestId = context?.requestId || this.generateRequestId();
     const finalContext = { ...context, requestId };
 
     const retry: RetryConfig = {
@@ -171,7 +171,7 @@ export class ApiErrorHandler {
       jitter: retryConfig?.jitter ?? true
     };
 
-    let lastError: any;
+    let lastError: unknown;
     const maxAttempts = retry.maxRetries + 1;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -204,7 +204,7 @@ export class ApiErrorHandler {
   /**
    * 标准化错误对象
    */
-  private normalizeError(error: any, context: ErrorContext): ApiError {
+  private normalizeError(error: unknown, context: ErrorContext): ApiError {
     // 如果已经是标准化的API错误
     if (error.code && error.message) {
       return {
@@ -267,7 +267,7 @@ export class ApiErrorHandler {
   /**
    * 标准化HTTP错误
    */
-  private normalizeHttpError(error: any, context: ErrorContext): ApiError {
+  private normalizeHttpError(error: unknown, context: ErrorContext): ApiError {
     const status = error.response.status;
     const data = error.response.data;
 
@@ -321,7 +321,7 @@ export class ApiErrorHandler {
   /**
    * 检查是否为网络错误
    */
-  private isNetworkError(error: any): boolean {
+  private isNetworkError(error: unknown): boolean {
     return (
       error.name === 'NetworkError' ||
       error.code === 'NETWORK_ERROR' ||
@@ -334,7 +334,7 @@ export class ApiErrorHandler {
   /**
    * 检查是否为超时错误
    */
-  private isTimeoutError(error: any): boolean {
+  private isTimeoutError(error: unknown): boolean {
     return (
       error.name === 'TimeoutError' ||
       error.code === 'TIMEOUT' ||
@@ -399,7 +399,7 @@ export class ApiErrorHandler {
    * 记录错误历史
    */
   private recordErrorHistory(context: ErrorContext, error: ApiError): void {
-    const key = `${context.userId || 'anonymous'}_${error.code}`;
+    const key = `${context?.userId || 'anonymous'}_${error.code}`;
     const history = this.errorHistory.get(key) || [];
 
     history.push(context);
@@ -427,7 +427,7 @@ export class ApiErrorHandler {
 
     // 在浏览器环境中使用console，在Node.js环境中可以集成专业日志库
     if (typeof window !== 'undefined') {
-      console.error(`[API Error] ${context.requestId}:`, logData);
+      console.error(`[API Error] ${context?.requestId}:`, logData);
     } else {
       // Node.js环境，可以集成Winston等日志库
       console.error(JSON.stringify(logData));
@@ -576,7 +576,7 @@ export const ErrorHandlerUtils = {
   /**
    * 创建标准化的错误对象
    */
-  createError: (code: ErrorCode, message: string, details?: any): ApiError => ({
+  createError: (code: ErrorCode, message: string, details?: unknown): ApiError => ({
     code,
     message,
     details,
@@ -602,7 +602,7 @@ export const ErrorHandlerUtils = {
   /**
    * 从HTTP响应创建错误
    */
-  fromHttpResponse: (response: any): ApiError => {
+  fromHttpResponse: (response: unknown): ApiError => {
     const status = response.status;
     const data = response.data;
 

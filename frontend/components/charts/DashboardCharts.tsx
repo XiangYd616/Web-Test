@@ -49,11 +49,11 @@ const EnhancedDashboardCharts: React.FC<EnhancedDashboardChartsProps> = ({ class
     { label: '错误率', value: 0.8, change: -0.3, trend: 'down' },
   ];
 
-  const getMaxValue = (data: any[], key: string) => {
+  const getMaxValue = (data: unknown[], key: string) => {
     return Math.max(...data.map(item => item[key]));
   };
 
-  const renderMiniChart = (data: any[], dataKey: string, color: string) => {
+  const renderMiniChart = (data: unknown[], dataKey: string, color: string) => {
     const maxValue = getMaxValue(data, dataKey);
     const points = data.map((item, index) => {
       const x = (index / (data.length - 1)) * 100;
@@ -84,7 +84,7 @@ const EnhancedDashboardCharts: React.FC<EnhancedDashboardChartsProps> = ({ class
     );
   };
 
-  const renderBarChart = (data: any[], dataKey: string, color: string) => {
+  const renderBarChart = (data: unknown[], dataKey: string, color: string) => {
     const maxValue = getMaxValue(data, dataKey);
 
     return (

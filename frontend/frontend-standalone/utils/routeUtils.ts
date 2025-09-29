@@ -66,35 +66,35 @@ export const getRouteByPath = (path: string): RouteInfo | undefined => {
   return [...routes, ...publicRoutes].find(route => route.path === path);
 };
 
-export const getRouteName = (path: string): string => {
+export const _getRouteName = (path: string): string => {
   const route = getRouteByPath(path);
   return route?.name || '未知页面';
 };
 
-export const isProtectedRoute = (path: string): boolean => {
+export const _isProtectedRoute = (path: string): boolean => {
   const route = getRouteByPath(path);
-  return route?.requiresAuth === true;
+  return route.requiresAuth === true;
 };
 
-export const isAdminRoute = (path: string): boolean => {
+export const _isAdminRoute = (path: string): boolean => {
   const route = getRouteByPath(path);
-  return route?.requiresAdmin === true;
+  return route.requiresAdmin === true;
 };
 
-export const getNavigationRoutes = (isAuthenticated: boolean, isAdmin: boolean): RouteInfo[] => {
+export const _getNavigationRoutes = (isAuthenticated: boolean, isAdmin: boolean): RouteInfo[] => {
   if (!isAuthenticated) {
     return publicRoutes;
   }
 
   return routes.filter(route => {
-    if (route.requiresAdmin && !isAdmin) {
+    if (route?.requiresAdmin && !isAdmin) {
       return false;
     }
     return true;
   });
 };
 
-export const getBreadcrumbs = (path: string): RouteInfo[] => {
+export const _getBreadcrumbs = (path: string): RouteInfo[] => {
   const breadcrumbs: RouteInfo[] = [];
 
   // 总是包含首页

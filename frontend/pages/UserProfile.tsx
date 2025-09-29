@@ -93,14 +93,14 @@ const UserProfilePage: React.FC = () => {
   const handleCancel = () => {
     if (profile) {
       setFormData({
-        fullName: profile.fullName || '',
-        bio: profile.bio || '',
-        phone: profile.phone || '',
-        location: profile.location || '',
-        website: profile.website || '',
-        github: profile.github || '',
-        twitter: profile.twitter || '',
-        linkedin: profile.linkedin || ''
+        fullName: profile?.fullName || '',
+        bio: profile?.bio || '',
+        phone: profile?.phone || '',
+        location: profile?.location || '',
+        website: profile?.website || '',
+        github: profile?.github || '',
+        twitter: profile?.twitter || '',
+        linkedin: profile?.linkedin || ''
       });
     }
     setIsEditing(false);
@@ -112,12 +112,12 @@ const UserProfilePage: React.FC = () => {
     if (!file) return;
 
     // 验证文件类型和大小
-    if (!file.type.startsWith('image/')) {
+    if (!file?.type.startsWith('image/')) {
       setError('请选择图片文件');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB
+    if (file?.size > 5 * 1024 * 1024) { // 5MB
       setError('图片大小不能超过5MB');
       return;
     }
@@ -274,9 +274,9 @@ const UserProfilePage: React.FC = () => {
               {/* 头像 */}
               <div className="relative">
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center overflow-hidden">
-                  {profile.avatar ? (
+                  {profile?.avatar ? (
                     <img
-                      src={profile.avatar}
+                      src={profile?.avatar}
                       alt="Avatar"
                       className="w-full h-full object-cover"
                     />
@@ -301,7 +301,7 @@ const UserProfilePage: React.FC = () => {
                     )}
                   </button>
 
-                  {profile.avatar && (
+                  {profile?.avatar && (
                     <button
                       onClick={handleDeleteAvatar}
                       disabled={uploadingAvatar}
@@ -328,21 +328,21 @@ const UserProfilePage: React.FC = () => {
               <div>
                 <h1 className={`text-2xl font-bold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
                   }`}>
-                  {profile.fullName || profile.username}
+                  {profile?.fullName || profile?.username}
                 </h1>
                 <p className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-300'}>
-                  @{profile.username}
+                  @{profile?.username}
                 </p>
                 <div className={`flex items-center space-x-4 mt-2 text-sm ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-400'
                   }`}>
                   <div className="flex items-center space-x-1">
                     <Calendar className="w-4 h-4" />
-                    <span>加入于 {new Date(profile.createdAt).toLocaleDateString('zh-CN')}</span>
+                    <span>加入于 {new Date(profile?.createdAt).toLocaleDateString('zh-CN')}</span>
                   </div>
-                  {profile.lastLoginAt && (
+                  {profile?.lastLoginAt && (
                     <div className="flex items-center space-x-1">
                       <Clock className="w-4 h-4" />
-                      <span>最后登录 {new Date(profile.lastLoginAt).toLocaleDateString('zh-CN')}</span>
+                      <span>最后登录 {new Date(profile?.lastLoginAt).toLocaleDateString('zh-CN')}</span>
                     </div>
                   )}
                 </div>
@@ -421,7 +421,7 @@ const UserProfilePage: React.FC = () => {
                     <input
                       type="text"
                       value={formData.fullName || ''}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, fullName: e?.target.value })}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                         ? 'bg-white border-gray-300 text-gray-900'
                         : 'bg-gray-700 border-gray-600 text-white'
@@ -430,7 +430,7 @@ const UserProfilePage: React.FC = () => {
                     />
                   ) : (
                     <p className={actualTheme === 'light' ? 'text-gray-900' : 'text-white'}>
-                      {profile.fullName || '未设置'}
+                      {profile?.fullName || '未设置'}
                     </p>
                   )}
                 </div>
@@ -443,9 +443,9 @@ const UserProfilePage: React.FC = () => {
                   </label>
                   <div className="flex items-center space-x-2">
                     <p className={actualTheme === 'light' ? 'text-gray-900' : 'text-white'}>
-                      {profile.email}
+                      {profile?.email}
                     </p>
-                    {profile.emailVerified ? (
+                    {profile?.emailVerified ? (
                       <div className="flex items-center" title="已验证">
                         <CheckCircle className="w-4 h-4 text-green-500" aria-label="已验证" />
                       </div>
@@ -466,7 +466,7 @@ const UserProfilePage: React.FC = () => {
                   {isEditing ? (
                     <textarea
                       value={formData.bio || ''}
-                      onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, bio: e?.target.value })}
                       rows={3}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                         ? 'bg-white border-gray-300 text-gray-900'
@@ -476,7 +476,7 @@ const UserProfilePage: React.FC = () => {
                     />
                   ) : (
                     <p className={actualTheme === 'light' ? 'text-gray-900' : 'text-white'}>
-                      {profile.bio || '这个人很懒，什么都没有留下...'}
+                      {profile?.bio || '这个人很懒，什么都没有留下...'}
                     </p>
                   )}
                 </div>
@@ -492,7 +492,7 @@ const UserProfilePage: React.FC = () => {
                       <input
                         type="tel"
                         value={formData.phone || ''}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, phone: e?.target.value })}
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                           ? 'bg-white border-gray-300 text-gray-900'
                           : 'bg-gray-700 border-gray-600 text-white'
@@ -501,7 +501,7 @@ const UserProfilePage: React.FC = () => {
                       />
                     ) : (
                       <p className={actualTheme === 'light' ? 'text-gray-900' : 'text-white'}>
-                        {profile.phone || '未设置'}
+                        {profile?.phone || '未设置'}
                       </p>
                     )}
                   </div>
@@ -515,7 +515,7 @@ const UserProfilePage: React.FC = () => {
                       <input
                         type="text"
                         value={formData.location || ''}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, location: e?.target.value })}
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                           ? 'bg-white border-gray-300 text-gray-900'
                           : 'bg-gray-700 border-gray-600 text-white'
@@ -524,7 +524,7 @@ const UserProfilePage: React.FC = () => {
                       />
                     ) : (
                       <p className={actualTheme === 'light' ? 'text-gray-900' : 'text-white'}>
-                        {profile.location || '未设置'}
+                        {profile?.location || '未设置'}
                       </p>
                     )}
                   </div>
@@ -553,7 +553,7 @@ const UserProfilePage: React.FC = () => {
                           <input
                             type="text"
                             value={(formData as any)[key] || ''}
-                            onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, [key]: e?.target.value })}
                             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                               ? 'bg-white border-gray-300 text-gray-900'
                               : 'bg-gray-700 border-gray-600 text-white'
@@ -645,7 +645,7 @@ const UserProfilePage: React.FC = () => {
                   <span className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>
                     邮箱验证
                   </span>
-                  {profile.emailVerified ? (
+                  {profile?.emailVerified ? (
                     <span className="text-green-500 text-sm">已验证</span>
                   ) : (
                     <span className="text-yellow-500 text-sm">未验证</span>
@@ -655,7 +655,7 @@ const UserProfilePage: React.FC = () => {
                   <span className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>
                     双因素认证
                   </span>
-                  {profile.twoFactorEnabled ? (
+                  {profile?.twoFactorEnabled ? (
                     <span className="text-green-500 text-sm">已启用</span>
                   ) : (
                     <span className="text-red-500 text-sm">未启用</span>
@@ -696,7 +696,7 @@ const UserProfilePage: React.FC = () => {
                   <input
                     type="password"
                     value={passwordForm.currentPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e?.target.value })}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                       ? 'bg-white border-gray-300 text-gray-900'
                       : 'bg-gray-700 border-gray-600 text-white'
@@ -714,7 +714,7 @@ const UserProfilePage: React.FC = () => {
                   <input
                     type="password"
                     value={passwordForm.newPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e?.target.value })}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                       ? 'bg-white border-gray-300 text-gray-900'
                       : 'bg-gray-700 border-gray-600 text-white'
@@ -732,7 +732,7 @@ const UserProfilePage: React.FC = () => {
                   <input
                     type="password"
                     value={passwordForm.confirmPassword}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e?.target.value })}
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                       ? 'bg-white border-gray-300 text-gray-900'
                       : 'bg-gray-700 border-gray-600 text-white'

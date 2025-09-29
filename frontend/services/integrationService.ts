@@ -392,7 +392,7 @@ export class IntegrationService {
     return !!token;
   }
 
-  private static getFromCache(key: string): any {
+  private static getFromCache(key: string): unknown {
     const cached = this.cache.get(key);
     if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
       return cached.data;
@@ -400,7 +400,7 @@ export class IntegrationService {
     return null;
   }
 
-  private static setCache(key: string, data: any): void {
+  private static setCache(key: string, data: unknown): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now()

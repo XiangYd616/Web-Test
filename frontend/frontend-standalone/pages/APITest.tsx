@@ -11,7 +11,7 @@ import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngi
 
 // 临时testApiService实现
 const testApiService = {
-  executeApiTest: async (config: any) => ({
+  executeApiTest: async (config: unknown) => ({
     success: true,
     data: {
       id: `api_test_${Date.now()}`,
@@ -129,7 +129,7 @@ const APITest: React.FC = () => {
 
   // 监听后台测试状态变化
   useEffect(() => {
-    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: any) => {
+    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: unknown) => {
       if (testInfo.type === 'api' && testInfo.id === currentTestId) {
         switch (event) {
           case 'testProgress':
@@ -170,7 +170,7 @@ const APITest: React.FC = () => {
 
     // 检查是否有正在运行的API测试
     const runningTests = backgroundTestManager.getRunningTests();
-    const apiTest = runningTests.find((test: any) => test.type === 'api');
+    const apiTest = runningTests.find((test: unknown) => test.type === 'api');
     if (apiTest) {
       setCurrentTestId(apiTest.id);
       setBackgroundTestInfo(apiTest);
@@ -269,7 +269,7 @@ const APITest: React.FC = () => {
           setTestStatus('running');
         },
         // onComplete 回调
-        (result: any) => {
+        (result: unknown) => {
           // 如果API监控没有返回结果，使用后台管理器的结果
           if (!apiProgress || apiProgress.status !== 'completed') {
             setResult(result);
@@ -279,9 +279,9 @@ const APITest: React.FC = () => {
           setCanSwitchPages(true);
 
           // 记录测试完成统计
-          const success = result.success !== false;
-          const score = result.successRate || result.score;
-          const duration = result.totalTime || 30; // 默认30秒
+          const success = result?.success !== false;
+          const score = result?.successRate || result?.score;
+          const duration = result?.totalTime || 30; // 默认30秒
           recordTestCompletion('API测试', success, score, duration);
         },
         // onError 回调
@@ -316,7 +316,7 @@ const APITest: React.FC = () => {
     }
   };
 
-  const handleResumeTest = () => {
+  const _handleResumeTest = () => {
     // 如果有后台测试信息，恢复显示
     if (backgroundTestInfo) {
       setTestStatus(backgroundTestInfo.status === 'running' ? 'running' : 'completed');
@@ -579,14 +579,14 @@ const APITest: React.FC = () => {
   };
 
   // 历史记录处理
-  const handleTestSelect = (test: any) => {
+  const handleTestSelect = (test: unknown) => {
     // 加载历史测试结果
     if (test.results) {
       setResult(test.results);
     }
   };
 
-  const handleTestRerun = (test: any) => {
+  const handleTestRerun = (test: unknown) => {
     // 重新运行历史测试
     if (test.config) {
       setTestConfig(test.config);
@@ -601,25 +601,25 @@ const APITest: React.FC = () => {
     }
 
     const report = {
-      id: result.id,
+      id: result?.id,
       type: 'api' as const,
-      timestamp: result.timestamp,
-      url: result.baseUrl,
+      timestamp: result?.timestamp,
+      url: result?.baseUrl,
       config: testConfig,
       metrics: {
-        overallScore: result.overallScore,
-        totalTests: result.totalTests,
-        passedTests: result.passedTests,
-        failedTests: result.failedTests,
-        averageResponseTime: result.averageResponseTime,
-        performanceMetrics: result.performanceMetrics,
+        overallScore: result?.overallScore,
+        totalTests: result?.totalTests,
+        passedTests: result?.passedTests,
+        failedTests: result?.failedTests,
+        averageResponseTime: result?.averageResponseTime,
+        performanceMetrics: result?.performanceMetrics,
       },
       analysis: {
-        endpointResults: result.endpointResults,
-        securityAnalysis: result.securityAnalysis,
-        reliabilityMetrics: result.reliabilityMetrics,
-        summary: result.summary,
-        recommendations: result.recommendations,
+        endpointResults: result?.endpointResults,
+        securityAnalysis: result?.securityAnalysis,
+        reliabilityMetrics: result?.reliabilityMetrics,
+        summary: result?.summary,
+        recommendations: result?.recommendations,
       },
     };
 
@@ -638,7 +638,7 @@ const APITest: React.FC = () => {
       case 'csv':
         const csvData = [
           ['端点', '方法', '状态', '响应时间', '状态码', '错误数'],
-          ...(result.endpointResults || []).map((ep: any) => [
+          ...(result?.endpointResults || []).map((ep: unknown) => [
             ep.name, ep.method, ep.status, (Math.round(ep.responseTime * 100) / 100).toFixed(2), ep.statusCode, (ep.errors || []).length
           ]),
         ];
@@ -673,17 +673,17 @@ const APITest: React.FC = () => {
           <body>
             <div class="header">
               <h1>API测试报告</h1>
-              <p>测试时间: ${new Date(result.timestamp).toLocaleString()}</p>
-              <p>测试URL: ${result.baseUrl}</p>
+              <p>测试时间: ${new Date(result?.timestamp).toLocaleString()}</p>
+              <p>测试URL: ${result?.baseUrl}</p>
             </div>
             <div class="metrics">
-              <div class="metric">总体评分: ${Math.round(result.overallScore)}</div>
-              <div class="metric">通过测试: ${result.passedTests}</div>
-              <div class="metric">失败测试: ${result.failedTests}</div>
-              <div class="metric">平均响应时间: ${Math.round(result.averageResponseTime)}ms</div>
+              <div class="metric">总体评分: ${Math.round(result?.overallScore)}</div>
+              <div class="metric">通过测试: ${result?.passedTests}</div>
+              <div class="metric">失败测试: ${result?.failedTests}</div>
+              <div class="metric">平均响应时间: ${Math.round(result?.averageResponseTime)}ms</div>
             </div>
             <h2>端点测试结果</h2>
-            ${(result.endpointResults || []).map((ep: any) => `
+            ${(result?.endpointResults || []).map((ep: unknown) => `
               <div class="endpoint ${ep.status}">
                 <strong>${ep.method} ${ep.name}</strong><br>
                 路径: ${ep.path}<br>
@@ -1480,7 +1480,7 @@ const APITest: React.FC = () => {
                               type="text"
                               value={endpoint.expectedStatus.join(', ')}
                               onChange={(e) => updateEndpoint(endpoint.id, {
-                                expectedStatus: e.target.value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n))
+                                expectedStatus: e.target.value.split(',').map(s => parseInt(s?.trim())).filter(n => !isNaN(n))
                               })}
                               placeholder="200, 201, 204"
                               className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1494,7 +1494,7 @@ const APITest: React.FC = () => {
                               type="text"
                               value={endpoint.tags?.join(', ') || ''}
                               onChange={(e) => updateEndpoint(endpoint.id, {
-                                tags: e.target.value.split(',').map(s => s.trim()).filter(s => s)
+                                tags: e.target.value.split(',').map(s => s?.trim()).filter(s => s)
                               })}
                               placeholder="user, api, crud"
                               className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1553,25 +1553,25 @@ const APITest: React.FC = () => {
                     {/* 测试概览 */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                       <div className="text-center p-4 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-400">{Math.round(result.overallScore || 0)}</div>
+                        <div className="text-2xl font-bold text-blue-400">{Math.round(result?.overallScore || 0)}</div>
                         <div className="text-sm text-gray-300">总体评分</div>
                       </div>
                       <div className="text-center p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
-                        <div className="text-2xl font-bold text-green-400">{result.passedTests || 0}</div>
+                        <div className="text-2xl font-bold text-green-400">{result?.passedTests || 0}</div>
                         <div className="text-sm text-gray-300">通过测试</div>
                       </div>
                       <div className="text-center p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-                        <div className="text-2xl font-bold text-red-400">{result.failedTests || 0}</div>
+                        <div className="text-2xl font-bold text-red-400">{result?.failedTests || 0}</div>
                         <div className="text-sm text-gray-300">失败测试</div>
                       </div>
                       <div className="text-center p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-                        <div className="text-2xl font-bold text-yellow-400">{Math.round(result.averageResponseTime || 0)}ms</div>
+                        <div className="text-2xl font-bold text-yellow-400">{Math.round(result?.averageResponseTime || 0)}ms</div>
                         <div className="text-sm text-gray-300">平均响应时间</div>
                       </div>
                     </div>
 
                     {/* 性能分析 */}
-                    {result.performanceMetrics && (
+                    {result?.performanceMetrics && (
                       <div className="bg-gray-700/30 rounded-lg p-6 mb-6">
                         <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
                           <BarChart3 className="w-5 h-5 mr-2 text-green-500" />
@@ -1583,31 +1583,31 @@ const APITest: React.FC = () => {
                             <div className="space-y-2">
                               <div className="flex justify-between items-center">
                                 <span className="text-xs text-gray-400">快速 (&lt;200ms)</span>
-                                <span className="text-green-400">{result.performanceMetrics.responseTimeDistribution?.fast || 0}</span>
+                                <span className="text-green-400">{result?.performanceMetrics.responseTimeDistribution?.fast || 0}</span>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-xs text-gray-400">中等 (200-1000ms)</span>
-                                <span className="text-yellow-400">{result.performanceMetrics.responseTimeDistribution?.medium || 0}</span>
+                                <span className="text-yellow-400">{result?.performanceMetrics.responseTimeDistribution?.medium || 0}</span>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-xs text-gray-400">慢速 (&gt;1000ms)</span>
-                                <span className="text-red-400">{result.performanceMetrics.responseTimeDistribution?.slow || 0}</span>
+                                <span className="text-red-400">{result?.performanceMetrics.responseTimeDistribution?.slow || 0}</span>
                               </div>
                             </div>
                           </div>
                           <div className="bg-gray-700/30 rounded-lg p-4">
                             <div className="text-sm text-gray-300 mb-2">成功率</div>
                             <div className="text-2xl font-bold text-green-400">
-                              {Math.round(result.performanceMetrics.successRate || 0)}%
+                              {Math.round(result?.performanceMetrics.successRate || 0)}%
                             </div>
                             <div className="text-xs text-gray-400">
-                              {result.passedTests || 0} / {result.totalTests || 0} 通过
+                              {result?.passedTests || 0} / {result?.totalTests || 0} 通过
                             </div>
                           </div>
                           <div className="bg-gray-700/30 rounded-lg p-4">
                             <div className="text-sm text-gray-300 mb-2">吞吐量</div>
                             <div className="text-2xl font-bold text-blue-400">
-                              {Math.round(result.performanceMetrics.throughput || 0)}
+                              {Math.round(result?.performanceMetrics.throughput || 0)}
                             </div>
                             <div className="text-xs text-gray-400">请求/秒</div>
                           </div>
@@ -1616,14 +1616,14 @@ const APITest: React.FC = () => {
                     )}
 
                     {/* 安全问题 */}
-                    {result.securityIssues && result.securityIssues.length > 0 && (
+                    {result?.securityIssues && result?.securityIssues.length > 0 && (
                       <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6 mb-6">
                         <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
                           <Shield className="w-5 h-5 mr-2 text-red-500" />
-                          安全问题 ({result.securityIssues.length})
+                          安全问题 ({result?.securityIssues.length})
                         </h4>
                         <div className="space-y-3">
-                          {result.securityIssues.slice(0, 5).map((issue: any, index: number) => (
+                          {result?.securityIssues.slice(0, 5).map((issue: unknown, index: number) => (
                             <div key={index} className="bg-red-500/5 border border-red-500/10 rounded-lg p-4">
                               <div className="flex items-start justify-between mb-2">
                                 <div className="font-medium text-red-400">{issue.type || '安全问题'}</div>
@@ -1649,7 +1649,7 @@ const APITest: React.FC = () => {
                     {/* 端点测试结果 */}
                     <div className="space-y-3">
                       <h4 className="text-lg font-semibold text-white">端点测试结果</h4>
-                      {(result.endpointResults || result.endpoints || []).map((endpoint: any, index: number) => (
+                      {(result?.endpointResults || result?.endpoints || []).map((endpoint: unknown, index: number) => (
                         <div key={index} className={`p-4 rounded-lg border ${endpoint.status === 'pass' ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'
                           }`}>
                           <div className="flex items-center justify-between mb-3">
@@ -1691,7 +1691,7 @@ const APITest: React.FC = () => {
                               <div>
                                 <div className="text-gray-400 mb-1">性能问题</div>
                                 <div className="space-y-1">
-                                  {endpoint.performanceIssues.slice(0, 2).map((issue: any, i: number) => (
+                                  {endpoint.performanceIssues.slice(0, 2).map((issue: unknown, i: number) => (
                                     <div key={i} className="text-yellow-400 text-xs">{typeof issue === 'string' ? issue : (issue.description || issue.message || '性能问题')}</div>
                                   ))}
                                 </div>
@@ -1702,7 +1702,7 @@ const APITest: React.FC = () => {
                               <div>
                                 <div className="text-gray-400 mb-1">安全问题</div>
                                 <div className="space-y-1">
-                                  {endpoint.securityIssues.slice(0, 2).map((issue: any, i: number) => (
+                                  {endpoint.securityIssues.slice(0, 2).map((issue: unknown, i: number) => (
                                     <div key={i} className="text-red-400 text-xs">{typeof issue === 'string' ? issue : (issue.type || issue.message || '安全问题')}</div>
                                   ))}
                                 </div>
@@ -1737,11 +1737,11 @@ const APITest: React.FC = () => {
                     </div>
 
                     {/* 推荐建议 */}
-                    {result.recommendations && result.recommendations.length > 0 && (
+                    {result?.recommendations && result?.recommendations.length > 0 && (
                       <div className="mt-6 p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
                         <h4 className="text-lg font-semibold text-white mb-3">优化建议</h4>
                         <ul className="space-y-2">
-                          {result.recommendations.map((recommendation: string, index: number) => (
+                          {result?.recommendations.map((recommendation: string, index: number) => (
                             <li key={index} className="flex items-start space-x-2 text-sm text-gray-300">
                               <span className="text-purple-400 mt-1">•</span>
                               <span>{recommendation}</span>

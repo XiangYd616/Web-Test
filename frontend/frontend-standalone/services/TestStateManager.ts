@@ -273,7 +273,7 @@ export class TestStateManager {
   /**
    * 完成测试
    */
-  completeTest(result?: any): void {
+  completeTest(result?: unknown): void {
     if (this.state !== TestState.RUNNING) {
       throw new Error(`Cannot complete test from state: ${this.state}`);
     }
@@ -297,10 +297,10 @@ export class TestStateManager {
     this.state = TestState.FAILED;
     this.error = error;
     this.endTime = Date.now();
-    this.progressMessage = `测试失败: ${error.message}`;
+    this.progressMessage = `测试失败: ${error?.message}`;
 
-    this.log(`Test failed: ${error.message}`);
-    this.notifyStateChange(previousState, this.state, error.message, error);
+    this.log(`Test failed: ${error?.message}`);
+    this.notifyStateChange(previousState, this.state, error?.message, error);
   }
 
   /**
@@ -536,4 +536,4 @@ export class TestStateManager {
 }
 
 // 创建单例实例
-export const testStateManager = new TestStateManager();
+export const _testStateManager = new TestStateManager();

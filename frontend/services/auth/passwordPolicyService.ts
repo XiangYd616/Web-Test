@@ -205,7 +205,7 @@ class PasswordAnalyzer {
 
     // 个人信息检查
     if (userInfo) {
-      const personalInfo = [userInfo.email, userInfo.username, userInfo.name]
+      const personalInfo = [userInfo?.email, userInfo?.username, userInfo?.name]
         .filter(Boolean)
         .map(info => info!.toLowerCase());
 
@@ -397,7 +397,7 @@ export class PasswordPolicyService {
 
     // 个人信息检查
     if (this.policy.forbidPersonalInfo && userInfo) {
-      const personalInfo = [userInfo.email, userInfo.username, userInfo.name]
+      const personalInfo = [userInfo?.email, userInfo?.username, userInfo?.name]
         .filter(Boolean)
         .map(info => info!.toLowerCase());
 
@@ -659,7 +659,7 @@ export class PasswordPolicyService {
     if (!userQuestions) return false;
 
     for (const answer of answers) {
-      const question = userQuestions.questions.find((q: any) => q.questionId === answer.questionId);
+      const question = userQuestions.questions.find((q: unknown) => q.questionId === answer.questionId);
       if (!question) return false;
 
       const answerHash = this.hashPassword(answer.answer.toLowerCase().trim());

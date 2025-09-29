@@ -12,7 +12,7 @@ export interface TestTemplate {
   description: string;
   category: 'ecommerce' | 'blog' | 'corporate' | 'saas' | 'portfolio' | 'news' | 'custom';
   testType: 'stress' | 'content' | 'compatibility' | 'api' | 'security' | 'performance' | 'comprehensive';
-  config: any;
+  config: unknown;
   tags: string[];
   isDefault: boolean;
   createdAt: string;
@@ -394,7 +394,7 @@ export class TestTemplateService {
   }
 
   // 验证模板格式
-  private static validateTemplate(template: any): boolean {
+  private static validateTemplate(template: unknown): boolean {
     return (
       template &&
       typeof template.name === 'string' &&

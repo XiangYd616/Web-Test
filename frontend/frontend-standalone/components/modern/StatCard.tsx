@@ -40,7 +40,7 @@ const StatCard: React.FC<StatCardProps> = ({
 
     if (!trend) return null;
 
-    switch (trend.direction) {
+    switch (trend?.direction) {
       case 'up':
         return <TrendingUp className="w-4 h-4" />;
       case 'down':
@@ -53,7 +53,7 @@ const StatCard: React.FC<StatCardProps> = ({
   const getTrendClass = () => {
     if (!trend) return '';
 
-    switch (trend.direction) {
+    switch (trend?.direction) {
       case 'up':
         return 'stat-card-trend-up';
       case 'down':
@@ -99,14 +99,14 @@ const StatCard: React.FC<StatCardProps> = ({
       )}
 
       {trend && (
-        <div className={`stat-card-trend ${getTrendClass()}`} role="text" aria-label={`趋势: ${trend.direction === 'up' ? '上升' : trend.direction === 'down' ? '下降' : '持平'} ${Math.abs(trend.value)}%`}>
+        <div className={`stat-card-trend ${getTrendClass()}`} role="text" aria-label={`趋势: ${trend.direction === 'up' ? '上升' : trend.direction === 'down' ? '下降' : '持平'} ${Math.abs(trend?.value)}%`}>
           {getTrendIcon()}
           <span>
             {trend.direction === 'up' ? '+' : trend.direction === 'down' ? '-' : ''}
-            {Math.abs(trend.value)}%
+            {Math.abs(trend?.value)}%
           </span>
-          {trend.label && (
-            <span className="text-muted ml-1">{trend.label}</span>
+          {trend?.label && (
+            <span className="text-muted ml-1">{trend?.label}</span>
           )}
         </div>
       )}

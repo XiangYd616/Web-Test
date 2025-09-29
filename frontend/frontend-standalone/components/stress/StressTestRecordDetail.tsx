@@ -377,7 +377,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
                 <span className="text-xs text-blue-400">总请求数</span>
               </div>
               <div className="text-lg font-semibold text-blue-400">
-                {metrics.totalRequests?.toLocaleString() || 0}
+                {metrics?.totalRequests?.toLocaleString() || 0}
               </div>
             </div>
 
@@ -387,7 +387,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
                 <span className="text-xs text-green-400">成功请求</span>
               </div>
               <div className="text-lg font-semibold text-green-400">
-                {metrics.successfulRequests?.toLocaleString() || 0}
+                {metrics?.successfulRequests?.toLocaleString() || 0}
               </div>
             </div>
 
@@ -397,7 +397,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
                 <span className="text-xs text-yellow-400">平均响应时间</span>
               </div>
               <div className="text-lg font-semibold text-yellow-400">
-                {metrics.averageResponseTime || 0}ms
+                {metrics?.averageResponseTime || 0}ms
               </div>
             </div>
 
@@ -407,7 +407,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
                 <span className="text-xs text-purple-400">吞吐量</span>
               </div>
               <div className="text-lg font-semibold text-purple-400">
-                {metrics.throughput || metrics.requestsPerSecond || metrics.rps || 0} req/s
+                {metrics?.throughput || metrics?.requestsPerSecond || metrics?.rps || 0} req/s
               </div>
             </div>
           </div>
@@ -417,36 +417,36 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
             <div className="bg-gray-700/20 rounded-lg p-3">
               <div className="text-xs text-gray-400 mb-1">失败请求</div>
               <div className="text-lg font-semibold text-red-400">
-                {metrics.failedRequests || 0}
+                {metrics?.failedRequests || 0}
               </div>
             </div>
 
             <div className="bg-gray-700/20 rounded-lg p-3">
               <div className="text-xs text-gray-400 mb-1">错误率</div>
               <div className="text-lg font-semibold text-red-400">
-                {metrics.errorRate || 0}%
+                {metrics?.errorRate || 0}%
               </div>
             </div>
 
             <div className="bg-gray-700/20 rounded-lg p-3">
               <div className="text-xs text-gray-400 mb-1">最小响应时间</div>
               <div className="text-lg font-semibold text-green-400">
-                {metrics.minResponseTime || 0}ms
+                {metrics?.minResponseTime || 0}ms
               </div>
             </div>
 
             <div className="bg-gray-700/20 rounded-lg p-3">
               <div className="text-xs text-gray-400 mb-1">最大响应时间</div>
               <div className="text-lg font-semibold text-orange-400">
-                {metrics.maxResponseTime || 0}ms
+                {metrics?.maxResponseTime || 0}ms
               </div>
             </div>
 
-            {metrics.p95ResponseTime && (
+            {metrics?.p95ResponseTime && (
               <div className="bg-gray-700/20 rounded-lg p-3">
                 <div className="text-xs text-gray-400 mb-1">P95响应时间</div>
                 <div className="text-lg font-semibold text-purple-400">
-                  {metrics.p95ResponseTime}ms
+                  {metrics?.p95ResponseTime}ms
                 </div>
               </div>
             )}

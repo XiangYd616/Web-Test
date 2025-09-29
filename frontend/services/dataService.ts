@@ -9,7 +9,7 @@
 export interface DataRecord {
   id: string;
   type: 'test' | 'user' | 'report' | 'log' | 'config';
-  data: any;
+  data: unknown;
   metadata: {
     createdAt: string;
     updatedAt: string;
@@ -140,13 +140,13 @@ export interface RestoreOptions {
 export interface BatchOperation {
   type: 'create' | 'update' | 'delete';
   id?: string;
-  data?: any;
-  metadata?: any;
+  data?: unknown;
+  metadata?: unknown;
 }
 
 export class AdvancedDataService {
   private baseUrl: string;
-  private cache: Map<string, { data: any; timestamp: number }>;
+  private cache: Map<string, { data: unknown; timestamp: number }>;
   private cacheTimeout: number;
 
   constructor() {
@@ -176,7 +176,7 @@ export class AdvancedDataService {
   }
 
   // 缓存管理
-  private getFromCache(key: string): any | null {
+  private getFromCache(key: string): unknown | null {
     const cached = this.cache.get(key);
     if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
       return cached.data;
@@ -184,7 +184,7 @@ export class AdvancedDataService {
     return null;
   }
 
-  private setCache(key: string, data: any): void {
+  private setCache(key: string, data: unknown): void {
     this.cache.set(key, { data, timestamp: Date.now() });
   }
 
@@ -200,8 +200,8 @@ export class AdvancedDataService {
         body: JSON.stringify(query),
       });
 
-      this.setCache(cacheKey, result.data);
-      return result.data;
+      this.setCache(cacheKey, result?.data);
+      return result?.data;
     } catch (error) {
       console.error('Failed to query data:', error);
       throw error;
@@ -220,8 +220,8 @@ export class AdvancedDataService {
         body: JSON.stringify({ query }),
       });
 
-      this.setCache(cacheKey, result.data);
-      return result.data;
+      this.setCache(cacheKey, result?.data);
+      return result?.data;
     } catch (error) {
       console.error('Failed to analyze data:', error);
       throw error;
@@ -305,7 +305,7 @@ export class AdvancedDataService {
         body: JSON.stringify({ query }),
       });
 
-      return result.data;
+      return result?.data;
     } catch (error) {
       console.error('Failed to validate data:', error);
       throw error;
@@ -349,12 +349,12 @@ export class AdvancedDataService {
     status: 'pending' | 'running' | 'completed' | 'failed';
     progress: number;
     message?: string;
-    result?: any;
+    result?: unknown;
     error?: string;
   }> {
     try {
       const result = await this.request(`/tasks/${taskId}`);
-      return result.data;
+      return result?.data;
     } catch (error) {
       console.error('Failed to get task status:', error);
       throw error;
@@ -369,8 +369,8 @@ export class AdvancedDataService {
 
     try {
       const result = await this.request('/backups');
-      this.setCache(cacheKey, result.data || []);
-      return result.data || [];
+      this.setCache(cacheKey, result?.data || []);
+      return result?.data || [];
     } catch (error) {
       console.error('Failed to get backups:', error);
       // 返回模拟数据以避免构建错误
@@ -387,7 +387,7 @@ export class AdvancedDataService {
 
       // 清除缓存
       this.cache.delete('backups-list');
-      return result.data;
+      return result?.data;
     } catch (error) {
       console.error('Failed to create backup:', error);
       // 返回模拟备份以避免构建错误
@@ -402,7 +402,7 @@ export class AdvancedDataService {
         body: JSON.stringify(options),
       });
 
-      return result.data;
+      return result?.data;
     } catch (error) {
       console.error('Failed to restore backup:', error);
       // 返回模拟任务ID
@@ -433,7 +433,7 @@ export class AdvancedDataService {
         body: JSON.stringify({ operations }),
       });
 
-      return result.data;
+      return result?.data;
     } catch (error) {
       console.error('Failed to perform batch operation:', error);
       throw error;
@@ -458,9 +458,9 @@ export class AdvancedDataService {
   // 数据分析
   async getAnalytics(timeRange?: { start: string; end: string }): Promise<DataAnalysisResult> {
     try {
-      const params = timeRange ? `?start=${timeRange.start}&end=${timeRange.end}` : '';
+      const params = timeRange ? `?start=${timeRange?.start}&end=${timeRange?.end}` : '';
       const result = await this.request(`/analytics${params}`);
-      return result.data;
+      return result?.data;
     } catch (error) {
       console.error('Failed to get analytics:', error);
       throw error;
@@ -538,7 +538,7 @@ export class AdvancedDataService {
 export const advancedDataService = new AdvancedDataService();
 
 // 兼容性导出（保持向后兼容）
-export const advancedDataManager = advancedDataService;
+export const _advancedDataManager = advancedDataService;
 export { AdvancedDataService as AdvancedDataManager };
 
 export default advancedDataService;

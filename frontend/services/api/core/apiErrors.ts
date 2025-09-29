@@ -8,7 +8,7 @@ export class ApiServiceError extends Error {
     message: string,
     public readonly code: string,
     public readonly status?: number,
-    public readonly details?: any,
+    public readonly details?: unknown,
     public readonly retryable: boolean = false
   ) {
     super(message);
@@ -27,7 +27,7 @@ export class ApiServiceError extends Error {
 
    */
 export class NetworkError extends ApiServiceError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, 'NETWORK_ERROR', undefined, details, true);
     this.name = 'NetworkError';
   }
@@ -61,7 +61,7 @@ export class TimeoutError extends ApiServiceError {
 
    */
 export class ValidationError extends ApiServiceError {
-  constructor(message: string, errors: any[] = []) {
+  constructor(message: string, errors: unknown[] = []) {
     super(message, 'VALIDATION_ERROR', 400, { errors }, false);
     this.name = 'ValidationError';
   }
@@ -129,7 +129,7 @@ export class RateLimitError extends ApiServiceError {
 
    */
 export class ServerError extends ApiServiceError {
-  constructor(message: string, status: number, details?: any) {
+  constructor(message: string, status: number, details?: unknown) {
     super(message, 'SERVER_ERROR', status, details, true);
     this.name = 'ServerError';
   }
@@ -138,14 +138,14 @@ export class ServerError extends ApiServiceError {
 /**
  * 根据HTTP响应创建相应的错误
  */
-export function createErrorFromResponse(response: Response, data: any): ApiServiceError {
+export function createErrorFromResponse(response: Response, data: unknown): ApiServiceError {
   const status = response.status;
   const message = data?.message || data?.error?.message || response.statusText;
 
   switch (status) {
     case 400:
       if (data?.errors) {
-        return new ValidationError(message, data.errors);
+        return new ValidationError(message, data?.errors);
       }
       return new ApiServiceError(message, 'BAD_REQUEST', status, data);
     case 401:
@@ -168,12 +168,12 @@ export function createErrorFromResponse(response: Response, data: any): ApiServi
 /**
  * 处理请求错误
  */
-export function handleRequestError(error: any): ApiServiceError {
+export function handleRequestError(error: unknown): ApiServiceError {
   if (error.name === 'AbortError') {
     return new TimeoutError(10000); // 默认超时时间
   }
 
-  if (error instanceof TypeError && error.message.includes('fetch')) {
+  if (error instanceof TypeError && error?.message.includes('fetch')) {
     return new NetworkError('Network connection failed', error);
   }
 
@@ -182,7 +182,7 @@ export function handleRequestError(error: any): ApiServiceError {
   }
 
   return new ApiServiceError(
-    error.message || 'Unknown error',
+    error?.message || 'Unknown error',
     'UNKNOWN_ERROR',
     undefined,
     error,

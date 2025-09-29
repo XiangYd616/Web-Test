@@ -118,15 +118,15 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   React.useEffect(() => {
     if (isRunning) {
       setChartType('realtime');
-    } else if (testCompleted && testResultData.length > 0) {
+    } else if (testCompleted && testResultData?.length > 0) {
       setChartType('results');
     }
-  }, [isRunning, testCompleted, testResultData.length]);
+  }, [isRunning, testCompleted, testResultData?.length]);
 
   // 数据处理 - 根据密度控制采样
   const processedData = useMemo(() => {
     // 明确区分数据源：实时数据用于实时监控，测试结果数据用于结果视图
-    let sourceData: any[] = [];
+    let sourceData: unknown[] = [];
 
     console.log('📊 EnhancedStressTestCharts 处理数据:', {
       chartType,
@@ -139,14 +139,14 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       testResultDataSample: testResultData?.slice(0, 2)
     });
 
-    if (realTimeData && realTimeData.length > 0) {
+    if (realTimeData && realTimeData?.length > 0) {
       // 使用实时数据（用于实时监控视图）
       sourceData = realTimeData;
       // 只在数据量变化时打印日志
-      if (realTimeData.length % 100 === 0 || realTimeData.length < 10) {
+      if (realTimeData?.length % 100 === 0 || realTimeData?.length < 10) {
         console.log('📊 EnhancedStressTestCharts 使用实时数据:', sourceData.length, '个数据点');
       }
-    } else if (testResultData && testResultData.length > 0) {
+    } else if (testResultData && testResultData?.length > 0) {
       // 使用测试结果数据（用于测试结果视图）
       sourceData = testResultData;
       console.log('📊 EnhancedStressTestCharts 使用测试结果数据:', sourceData.length, '个数据点');
@@ -260,8 +260,8 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   const errorTypeDistribution = useMemo(() => {
     if (!currentMetrics?.errorBreakdown) return [];
 
-    const totalFailedRequests = currentMetrics.failedRequests || 0;
-    return Object.entries(currentMetrics.errorBreakdown).map(([type, count]) => ({
+    const totalFailedRequests = currentMetrics?.failedRequests || 0;
+    return Object.entries(currentMetrics?.errorBreakdown).map(([type, count]) => ({
       name: type,
       value: count,
       percentage: totalFailedRequests > 0 ? (count / totalFailedRequests) * 100 : 0
@@ -269,7 +269,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   }, [currentMetrics]);
 
   // 缩放处理
-  const handleZoom = useCallback((domain: any) => {
+  const _handleZoom = useCallback((domain: unknown) => {
     setZoomDomain(domain);
   }, []);
 
@@ -278,7 +278,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   }, []);
 
   // 🔧 新增：时间格式化函数
-  const formatTimeLabel = useCallback((value: any) => {
+  const formatTimeLabel = useCallback((value: unknown) => {
     if (timeDisplayMode === 'absolute') {
       // 显示实际时间 (HH:MM:SS)
       return new Date(value).toLocaleTimeString('zh-CN', {
@@ -330,7 +330,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           borderRadius: '8px',
           color: '#F9FAFB'
         }}
-        formatter={(value: any, name: string) => {
+        formatter={(value: unknown, name: string) => {
           if (name === 'responseTime') return [`${value}ms`, '响应时间'];
           if (name === 'averageResponseTime') return [`${value.toFixed(3)}ms`, '平均响应时间'];
           if (name === 'throughput') return [`${value.toFixed(1)}`, '吞吐量'];
@@ -354,15 +354,15 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       )}
 
       {/* 测试阶段标注 */}
-      {testPhases.map((phase, index) => (
+      {testPhases?.map((phase, index) => (
         <ReferenceArea
           key={index}
           yAxisId="left"
-          x1={phase.startTime}
-          x2={phase.endTime || Date.now()}
-          fill={phase.color}
+          x1={phase?.startTime}
+          x2={phase?.endTime || Date.now()}
+          fill={phase?.color}
           fillOpacity={0.1}
-          label={phase.name}
+          label={phase?.name}
         />
       ))}
 
@@ -451,7 +451,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
            * @param {Object} params - 参数对象
            * @returns {Promise<Object>} 返回结果
            */
-        formatter={(value: any, name: string) => {
+        formatter={(value: unknown, name: string) => {
           if (name === 'count') {
             const percentage = responseTimeDistribution.find(item => item.count === value)?.percentage || 0;
             return [`${value} 个请求 (${percentage.toFixed(1)}%)`, '请求数量'];
@@ -503,7 +503,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
             数据点: {processedData.length.toLocaleString()}
             {densityControl !== 'high' && (
               <span className="text-gray-500">
-                / {(realTimeData.length + testResultData.length).toLocaleString()}
+                / {(realTimeData?.length + testResultData?.length).toLocaleString()}
               </span>
             )}
           </span>
@@ -538,7 +538,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           <select
             id="chart-density-select"
             value={densityControl}
-            onChange={(e) => setDensityControl(e.target.value as any)}
+            onChange={(e) => setDensityControl(e?.target.value as any)}
             className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm"
             aria-label="选择图表数据密度"
             title="数据密度控制"

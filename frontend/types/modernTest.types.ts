@@ -146,7 +146,7 @@ export interface APIRequest {
   headers?: Record<string, string>;
   body?: {
     type: 'json' | 'form' | 'raw' | 'binary';
-    content: any;
+    content: unknown;
   };
   assertions: APIAssertion[];
   extractors?: APIExtractor[];
@@ -156,7 +156,7 @@ export interface APIAssertion {
   type: 'status' | 'header' | 'body' | 'response-time' | 'json-path' | 'regex';
   target: string;
   operator: 'equals' | 'not-equals' | 'contains' | 'not-contains' | 'greater-than' | 'less-than';
-  value: any;
+  value: unknown;
 }
 
 export interface APIExtractor {

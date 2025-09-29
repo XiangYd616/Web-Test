@@ -4,28 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Users,
-  UserPlus,
-  Search,
-  Filter,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Shield,
-  Lock,
-  Unlock,
-  Mail,
-  Calendar,
-  Settings,
-  Eye,
-  Download,
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock
-} from 'lucide-react';
+import {Users, UserPlus, Search, MoreVertical, Edit, Trash2, Shield, Lock, Unlock, Mail, RefreshCw, AlertTriangle, CheckCircle, XCircle, Clock} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface User {
@@ -287,7 +266,7 @@ const UserManagement: React.FC = () => {
   };
 
   // 检查管理员权限
-  const isAdmin = currentUser?.role === 'admin' || currentUser?.permissions?.includes('admin:access');
+  const isAdmin = currentUser.role === 'admin' || currentUser?.permissions?.includes('admin:access');
 
   if (!isAdmin) {
     return (

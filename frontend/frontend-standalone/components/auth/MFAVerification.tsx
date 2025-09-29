@@ -283,7 +283,7 @@ export const MFAVerification: React.FC<MFAVerificationProps> = ({
               inputMode="numeric"
               maxLength={1}
               value={verificationCode[index] || ''}
-              onChange={(e) => handleTOTPInput(index, e.target.value)}
+              onChange={(e) => handleTOTPInput(index, e?.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               className="w-12 h-12 text-center text-xl font-mono bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               disabled={isVerifying || isLoading}
@@ -364,7 +364,7 @@ export const MFAVerification: React.FC<MFAVerificationProps> = ({
             ref={backupInputRef}
             type={showBackupCode ? "text" : "password"}
             value={backupCode}
-            onChange={(e) => handleBackupCodeInput(e.target.value)}
+            onChange={(e) => handleBackupCodeInput(e?.target.value)}
             placeholder="请输入8位备用码"
             className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pr-12 text-white text-center text-lg font-mono tracking-widest focus:outline-none focus:border-yellow-500"
             maxLength={8}

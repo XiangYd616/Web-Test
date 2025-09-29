@@ -218,7 +218,7 @@ export class UnifiedCacheService {
   /**
    * 判断是否需要压缩
    */
-  private shouldCompress(data: any): boolean {
+  private shouldCompress(data: unknown): boolean {
     const size = JSON.stringify(data).length;
     return size > 10240; // 10KB以上压缩
   }
@@ -226,7 +226,7 @@ export class UnifiedCacheService {
   /**
    * 压缩数据
    */
-  private compress(data: any): string {
+  private compress(data: unknown): string {
     // 简单的JSON压缩 (实际项目中可以使用更好的压缩算法)
     return JSON.stringify(data);
   }

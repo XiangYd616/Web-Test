@@ -19,7 +19,7 @@ export interface TestHistoryRecord {
   startTime: string;
   endTime?: string;
   duration?: number;
-  result?: any;
+  result?: unknown;
   metadata?: Record<string, any>;
 }
 

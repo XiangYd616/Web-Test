@@ -8,21 +8,10 @@ import { jwtDecode } from 'jwt-decode';
 import { DeviceFingerprinter } from './core/deviceFingerprint';
 import { SecureStorageManager } from './core/secureStorage';
 import { PasswordSecurityManager } from './core/passwordSecurity';
-import type { 
-  EnhancedAuthConfig, 
-  PasswordStrength, 
-  SessionInfo, 
-  MFAChallenge, 
-  MFAVerification,
-  IAuthService,
-  JwtPayload,
-  TokenPair,
-  RefreshResult,
-  DeviceInfo
-} from './core/authTypes';
+import type {EnhancedAuthConfig, PasswordStrength, SessionInfo, IAuthService, JwtPayload, TokenPair, RefreshResult} from './core/authTypes';
 
 // 动态导入数据库模块（避免前端构建时的依赖问题）
-let jwt: any, userDao: any;
+let jwt: unknown, userDao: unknown;
 
 async function loadServerModules() {
   if (canUseDatabase && typeof window === 'undefined') {
@@ -38,7 +27,7 @@ async function loadServerModules() {
 }
 
 // 环境检测
-const isElectron = typeof window !== 'undefined' && (window as any).process?.type === 'renderer';
+const isElectron = typeof window !== 'undefined' && (window as any).process.type === 'renderer';
 const isBrowser = typeof window !== 'undefined' && !isElectron;
 const isNode = typeof window === 'undefined';
 
@@ -165,7 +154,7 @@ export class UnifiedAuthService implements IAuthService {
   private isTokenValid(token: string): boolean {
     if (canUseDatabase && jwt) {
       try {
-        const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
+        const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
         jwt.verify(token, secret);
         return true;
       } catch {
@@ -180,8 +169,8 @@ export class UnifiedAuthService implements IAuthService {
   // 生成 JWT token
   private generateToken(user: User): string {
     if (canUseDatabase && jwt) {
-      const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
-      const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
+      const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
+      const expiresIn = process?.env.JWT_EXPIRES_IN || '24h';
 
       return jwt.default?.sign ? jwt.default.sign(
         {
@@ -219,8 +208,8 @@ export class UnifiedAuthService implements IAuthService {
   // 生成刷新 token
   private generateRefreshToken(user: User): string {
     if (canUseDatabase && jwt) {
-      const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
-      const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+      const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
+      const expiresIn = process?.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
       return jwt.default?.sign ? jwt.default.sign(
         {
@@ -601,19 +590,19 @@ export class UnifiedAuthService implements IAuthService {
       // 验证数据
       const errors: Record<string, string> = {};
 
-      if (data.username.length < 3) {
+      if (data?.username.length < 3) {
         errors.username = '用户名至少需要3个字符';
       }
 
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data?.email)) {
         errors.email = '请输入有效的邮箱地址';
       }
 
-      if (data.password.length < 6) {
+      if (data?.password.length < 6) {
         errors.password = '密码至少需要6个字符';
       }
 
-      if (data.password !== data.confirmPassword) {
+      if (data?.password !== data?.confirmPassword) {
         errors.confirmPassword = '两次输入的密码不一致';
       }
 
@@ -630,10 +619,10 @@ export class UnifiedAuthService implements IAuthService {
       if (isNode && userDao) {
         // 在 Node.js 环境中使用数据库
         const createUserData: CreateUserData = {
-          username: data.username,
-          email: data.email,
-          fullName: data.fullName,
-          password: data.password
+          username: data?.username,
+          email: data?.email,
+          fullName: data?.fullName,
+          password: data?.password
         };
 
         newUser = await userDao.createUser(createUserData);
@@ -646,10 +635,10 @@ export class UnifiedAuthService implements IAuthService {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            username: data.username,
-            email: data.email,
-            fullName: data.fullName,
-            password: data.password
+            username: data?.username,
+            email: data?.email,
+            fullName: data?.fullName,
+            password: data?.password
           })
         });
 
@@ -701,7 +690,7 @@ export class UnifiedAuthService implements IAuthService {
         'register_success',
         'auth',
         true,
-        { username: data.username, email: data.email, ...clientInfo }
+        { username: data?.username, email: data?.email, ...clientInfo }
       );
 
       console.log('✅ 用户注册成功:', newUser.username);
@@ -722,7 +711,7 @@ export class UnifiedAuthService implements IAuthService {
         'register_error',
         'auth',
         false,
-        { username: data.username, email: data.email, ...clientInfo },
+        { username: data?.username, email: data?.email, ...clientInfo },
         errorMessage
       );
 
@@ -781,7 +770,7 @@ export class UnifiedAuthService implements IAuthService {
   // 检查用户权限
   hasPermission(permission: string): boolean {
     if (!this.currentUser) return false;
-    return this.currentUser.permissions?.some((p: any) => typeof p === 'string' ? p === permission : p.name === permission) || false;
+    return this.currentUser.permissions?.some((p: unknown) => typeof p === 'string' ? p === permission : p.name === permission) || false;
   }
 
   // 检查用户角色
@@ -834,7 +823,7 @@ export class UnifiedAuthService implements IAuthService {
 
         // 更新用户列表
         const usersList = JSON.parse(localStorage.getItem('test_web_app_users_list') || '[]');
-        const userIndex = usersList.findIndex((u: any) => u.id === updatedUser.id);
+        const userIndex = usersList.findIndex((u: unknown) => u.id === updatedUser.id);
         if (userIndex >= 0) {
           usersList[userIndex] = updatedUser;
           localStorage.setItem('test_web_app_users_list', JSON.stringify(usersList));
@@ -884,7 +873,7 @@ export class UnifiedAuthService implements IAuthService {
 
     try {
       // 验证当前密码
-      const isCurrentPasswordValid = await this.validateCurrentPassword(data.currentPassword);
+      const isCurrentPasswordValid = await this.validateCurrentPassword(data?.currentPassword);
       if (!isCurrentPasswordValid) {
         return {
           success: false,
@@ -894,7 +883,7 @@ export class UnifiedAuthService implements IAuthService {
       }
 
       // 验证新密码
-      if (data.newPassword.length < 6) {
+      if (data?.newPassword.length < 6) {
         return {
           success: false,
           message: '新密码至少需要6个字符',
@@ -902,7 +891,7 @@ export class UnifiedAuthService implements IAuthService {
         };
       }
 
-      if (data.newPassword !== data.confirmPassword) {
+      if (data?.newPassword !== data?.confirmPassword) {
         return {
           success: false,
           message: '两次输入的密码不一致',
@@ -920,7 +909,7 @@ export class UnifiedAuthService implements IAuthService {
       } else {
         // 在浏览器环境中更新本地存储密码
         const passwords = JSON.parse(localStorage.getItem('test_web_app_passwords') || '{}');
-        passwords[this.currentUser.username] = data.newPassword;
+        passwords[this.currentUser.username] = data?.newPassword;
         localStorage.setItem('test_web_app_passwords', JSON.stringify(passwords));
       }
 
@@ -972,7 +961,7 @@ export class UnifiedAuthService implements IAuthService {
   // 刷新 token
   async refreshToken(refreshToken: string): Promise<AuthResponse> {
     try {
-      const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
+      const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const decoded = jwt.verify(refreshToken, secret) as any;
 
       if (decoded.type !== 'refresh') {
@@ -1421,7 +1410,7 @@ export class UnifiedAuthService implements IAuthService {
   /**
    * 触发事件
    */
-  private emit(event: string, data?: any): void {
+  private emit(event: string, data?: unknown): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       listeners.forEach(callback => {
@@ -1557,7 +1546,7 @@ export class UnifiedAuthService implements IAuthService {
 
   // 清除所有认证数据（调试用）
   clearAllAuthData(): void {
-    if (process.env.NODE_ENV !== 'development') {
+    if (process?.env.NODE_ENV !== 'development') {
       console.warn('⚠️ 只能在开发环境中清除认证数据');
       return;
     }
@@ -1584,5 +1573,5 @@ export class UnifiedAuthService implements IAuthService {
 
 // 创建全局统一认证服务实例
 export const unifiedAuthService = new UnifiedAuthService();
-export const authService = unifiedAuthService; // 添加别名导出
+export const _authService = unifiedAuthService; // 添加别名导出
 export default unifiedAuthService; // 导出实例而不是类

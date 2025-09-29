@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { ArrowRight, Plus, Trash2, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
+import {ArrowRight, Trash2, AlertTriangle, Settings} from 'lucide-react';
 
 export interface EndpointDependency {
   id: string;
@@ -124,7 +124,7 @@ export const EndpointDependencyManager: React.FC<EndpointDependencyManagerProps>
     onEndpointsChange(updatedEndpoints);
   }, [endpoints, onEndpointsChange]);
 
-  const addDataMapping = useCallback((endpointId: string, mapping: EndpointDependency['dataMapping'][0]) => {
+  const _addDataMapping = useCallback((endpointId: string, mapping: EndpointDependency['dataMapping'][0]) => {
 
       /**
 

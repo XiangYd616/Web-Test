@@ -4,7 +4,7 @@
  */
 
 import { BaseApiService } from './baseApiService';
-import type { ApiResponse, ApiRequestConfig } from '@shared/types';
+import type {ApiResponse} from '@shared/types';
 
 export interface ApiConfig {
   baseUrl: string;
@@ -45,7 +45,7 @@ export interface TestSession {
   status: string;
   startTime: Date;
   endTime?: Date;
-  results?: any;
+  results?: unknown;
 }
 
 export class UnifiedApiService extends BaseApiService {
@@ -74,11 +74,11 @@ export class UnifiedApiService extends BaseApiService {
     return this.get<T>(url, config);
   }
 
-  public async apiPost<T = any>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
+  public async apiPost<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.post<T>(url, data, config);
   }
 
-  public async apiPut<T = any>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
+  public async apiPut<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.put<T>(url, data, config);
   }
 
@@ -86,7 +86,7 @@ export class UnifiedApiService extends BaseApiService {
     return this.delete<T>(url, config);
   }
 
-  public async apiPatch<T = any>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
+  public async apiPatch<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.patch<T>(url, data, config);
   }
 

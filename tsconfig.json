@@ -9,7 +9,6 @@
     ],
     "module": "ESNext",
     "skipLibCheck": true,
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -19,20 +18,18 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    /* Linting - 启用严格模式以获得更好的类型安全 */
-    "strict": true, // 启用严格模式
-    "noImplicitAny": true, // 启用：禁止隐式 any 类型
-    "strictNullChecks": true, // 启用严格空值检查
-    "strictFunctionTypes": true, // 启用：严格函数类型检查
-    "strictBindCallApply": true, // 启用：严格的 bind/call/apply 检查
-    "noUnusedLocals": true, // 启用未使用变量检查
-    "noUnusedParameters": true, // 启用未使用参数检查
-    "noFallthroughCasesInSwitch": true, // 启用：防止 switch 语句穿透
-    "noImplicitReturns": true, // 启用：函数必须有明确返回值
-    "noImplicitOverride": true, // 启用重写检查
-    "exactOptionalPropertyTypes": true, // 启用精确可选属性类型
-    "noUncheckedIndexedAccess": true, // 增强数组访问安全性
-    /* Path mapping - 基于Context7最佳实践 */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -69,7 +66,7 @@
         "backend/*"
       ],
       "@electron/*": [
-        "electron/*"
+        "tools/electron/*"
       ],
       "@tools/*": [
         "tools/*"

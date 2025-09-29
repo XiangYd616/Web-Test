@@ -83,7 +83,7 @@ export const PreventFlashOnWrongTheme: React.FC<PreventFlashOnWrongThemeProps> =
  * 主题初始化Hook
  * 确保主题在客户端正确初始化
  */
-export const useThemeInitialization = () => {
+export const _useThemeInitialization = () => {
   React.useEffect(() => {
     // 监听系统主题变化
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -93,7 +93,7 @@ export const useThemeInitialization = () => {
       
       // 只有当用户选择跟随系统时才更新
       if (currentTheme === 'system' || !currentTheme) {
-        const newTheme = e.matches ? 'dark' : 'light';
+        const newTheme = e?.matches ? 'dark' : 'light';
         const root = document.documentElement;
         
         root.classList.remove('light', 'dark', 'light-theme', 'dark-theme');
@@ -119,7 +119,7 @@ export const useThemeInitialization = () => {
  * 主题同步Hook
  * 确保React状态与DOM状态同步
  */
-export const useThemeSync = () => {
+export const _useThemeSync = () => {
   const [theme, setTheme] = React.useState<string>('light');
   
   React.useEffect(() => {
@@ -129,7 +129,7 @@ export const useThemeSync = () => {
     
     // 监听主题变化事件
     const handleThemeChange = (e: CustomEvent) => {
-      setTheme(e.detail.theme);
+      setTheme(e?.detail.theme);
     };
     
     window.addEventListener('themechange', handleThemeChange as EventListener);

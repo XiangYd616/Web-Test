@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-09-28T13:39:50.496Z",
+  "errors": [
+    "存在多个组件目录，可能导致混淆",
+    "脚本可能在 Windows 上有问题: fix:all, ci:check"
+  ],
+  "fixesApplied": 0,
+  "summary": {
+    "totalErrors": 2,
+    "criticalErrors": 0
+  }
+}

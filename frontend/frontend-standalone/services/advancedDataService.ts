@@ -13,7 +13,7 @@ export interface DataQuery {
 
 export interface DataRecord {
   id: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface DataAnalysisResult {
@@ -53,4 +53,4 @@ class AdvancedDataManager {
   }
 }
 
-export const advancedDataManager = new AdvancedDataManager();
+export const _advancedDataManager = new AdvancedDataManager();

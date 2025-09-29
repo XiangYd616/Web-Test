@@ -136,7 +136,7 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
 
   // 简单的条形图实现
   if (type === 'bar') {
-    const maxValue = Math.max(...data.map(d => d.value));
+    const maxValue = Math.max(...data?.map(d => d?.value));
 
     return (
       <div
@@ -144,7 +144,7 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
         style={{ height: `${height}px` }}
       >
         <div className="flex items-end justify-between h-full gap-2">
-          {data.map((item, index) => (
+          {data?.map((item, index) => (
             <div key={index} className="flex flex-col items-center flex-1">
               <div
                 className={cn(
@@ -180,7 +180,7 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
     >
       <div className="text-center text-gray-400">
         <div className="mb-2">📊</div>
-        <span className="text-sm">{type.toUpperCase()} 图表</span>
+        <span className="text-sm">{type?.toUpperCase()} 图表</span>
       </div>
     </div>
   );
@@ -220,9 +220,9 @@ export const MetricChart: React.FC<MetricChartProps> = ({
         {value.toLocaleString()}{unit}
       </div>
 
-      {showTrend && trend.length > 0 && (
+      {showTrend && trend?.length > 0 && (
         <div className="h-8 flex items-end gap-1">
-          {trend.slice(-10).map((point, index) => {
+          {trend?.slice(-10).map((point, index) => {
             const maxTrend = Math.max(...trend);
             const height = maxTrend > 0 ? (point / maxTrend) * 100 : 0;
 

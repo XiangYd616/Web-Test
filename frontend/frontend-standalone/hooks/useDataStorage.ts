@@ -9,7 +9,7 @@ export interface TestRecord {
   createdAt: string;
   updatedAt: string;
   duration?: number;
-  result?: any;
+  result?: unknown;
 }
 
 export interface PaginationInfo {

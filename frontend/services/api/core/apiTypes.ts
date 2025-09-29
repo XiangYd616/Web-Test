@@ -13,14 +13,14 @@ export interface ApiResponse<T = any> {
     timestamp?: string;
     requestId?: string;
     version?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
 export interface ApiError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
   retryable?: boolean;
   status?: number;
 }
@@ -83,10 +83,10 @@ export type ResponseInterceptor<T = any> = (response: ApiResponse<T>) => ApiResp
 
 export interface IApiService {
   get<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
-  post<T = any>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>;
-  put<T = any>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>;
+  post<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
+  put<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
   delete<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
-  patch<T = any>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>;
+  patch<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
   
   // 配置方法
   setAuth(authConfig: AuthConfig): void;

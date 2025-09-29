@@ -91,7 +91,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
   // 趋势数据
   const trendData = useMemo(() => {
     return testResults
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .sort((a, b) => new Date(a?.date).getTime() - new Date(b.date).getTime())
       .map((test, index) => ({
         testNumber: index + 1,
         date: new Date(test.date).toLocaleDateString(),
@@ -117,33 +117,33 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
     return [
       {
         metric: '响应时间',
-        current: normalizeValue(currentTest.metrics.averageResponseTime, baseline.metrics.averageResponseTime, true),
+        current: normalizeValue(currentTest?.metrics.averageResponseTime, baseline?.metrics.averageResponseTime, true),
         baseline: 100,
-        threshold: normalizeValue(baseline.thresholds.responseTime.warning, baseline.metrics.averageResponseTime, true)
+        threshold: normalizeValue(baseline?.thresholds.responseTime.warning, baseline?.metrics.averageResponseTime, true)
       },
       {
         metric: '吞吐量',
-        current: normalizeValue(currentTest.metrics.throughput, baseline.metrics.throughput),
+        current: normalizeValue(currentTest?.metrics.throughput, baseline?.metrics.throughput),
         baseline: 100,
-        threshold: normalizeValue(baseline.thresholds.throughput.warning, baseline.metrics.throughput)
+        threshold: normalizeValue(baseline?.thresholds.throughput.warning, baseline?.metrics.throughput)
       },
       {
         metric: '错误率',
-        current: normalizeValue(currentTest.metrics.errorRate, Math.max(baseline.metrics.errorRate, 1), true),
+        current: normalizeValue(currentTest?.metrics.errorRate, Math.max(baseline?.metrics.errorRate, 1), true),
         baseline: 100,
-        threshold: normalizeValue(baseline.thresholds.errorRate.warning, Math.max(baseline.metrics.errorRate, 1), true)
+        threshold: normalizeValue(baseline?.thresholds.errorRate.warning, Math.max(baseline?.metrics.errorRate, 1), true)
       },
       {
         metric: 'P95响应时间',
-        current: normalizeValue(currentTest.metrics.p95ResponseTime, baseline.metrics.p95ResponseTime, true),
+        current: normalizeValue(currentTest?.metrics.p95ResponseTime, baseline?.metrics.p95ResponseTime, true),
         baseline: 100,
         threshold: 100
       },
       {
         metric: '成功率',
         current: normalizeValue(
-          (currentTest.metrics.successfulRequests / currentTest.metrics.totalRequests) * 100,
-          (baseline.metrics.successfulRequests / baseline.metrics.totalRequests) * 100
+          (currentTest?.metrics.successfulRequests / currentTest?.metrics.totalRequests) * 100,
+          (baseline?.metrics.successfulRequests / baseline?.metrics.totalRequests) * 100
         ),
         baseline: 100,
         threshold: 95
@@ -158,7 +158,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
     const maxLength = Math.max(...testResults.map(test => test.timeSeriesData?.length || 0));
 
     return Array.from({ length: maxLength }, (_, index) => {
-      const dataPoint: any = { time: index };
+      const dataPoint: unknown = { time: index };
 
       testResults.forEach((test, testIndex) => {
         /**
@@ -203,7 +203,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
       {showBaseline && baseline && (
         <Line
           type="monotone"
-          dataKey={() => baseline.metrics[selectedMetric as keyof typeof baseline.metrics]}
+          dataKey={selectedMetric}
           stroke="#10B981"
           strokeWidth={2}
           strokeDasharray="5 5"
@@ -373,7 +373,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
               <select
                 id="metric-select"
                 value={selectedMetric}
-                onChange={(e) => setSelectedMetric(e.target.value)}
+                onChange={(e) => setSelectedMetric(e?.target.value)}
                 className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm"
                 aria-label="选择对比指标"
               >
@@ -393,7 +393,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
               <input
                 type="checkbox"
                 checked={showBaseline}
-                onChange={(e) => setShowBaseline(e.target.checked)}
+                onChange={(e) => setShowBaseline(e?.target.checked)}
                 className="rounded"
               />
               显示基线

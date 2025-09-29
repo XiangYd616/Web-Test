@@ -357,7 +357,7 @@ export class RealTimeMonitoringService {
 
   // 检查告警条件
   private checkAlertConditions(target: MonitoringTarget, result: MonitoringResult): void {
-    const recentResults = this.getRecentResults(target.id, 5);
+    const _recentResults = this.getRecentResults(target.id, 5);
 
     // 检查是否需要触发告警
     if (result.status === 'error') {
@@ -449,11 +449,11 @@ export class RealTimeMonitoringService {
       timestamp: new Date().toISOString()
     };
 
-    await fetch(config.config.webhook.url, {
-      method: config.config.webhook.method || 'POST',
+    await fetch(config.config.webhook?.url, {
+      method: config.config.webhook?.method || 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...config.config.webhook.headers
+        ...config.config.webhook?.headers
       },
       body: JSON.stringify(payload)
     });
@@ -477,7 +477,7 @@ export class RealTimeMonitoringService {
       }]
     };
 
-    await fetch(config.config.slack.webhook, {
+    await fetch(config.config.slack?.webhook, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -497,15 +497,15 @@ export class RealTimeMonitoringService {
 
     return {
       totalTargets: targets.length,
-      activeTargets: targets.filter(t => t.enabled).length,
+      activeTargets: targets.filter(t => t?.enabled).length,
       healthyTargets: targets.filter(t => t.status === 'healthy').length,
       warningTargets: targets.filter(t => t.status === 'warning').length,
       criticalTargets: targets.filter(t => t.status === 'critical').length,
       totalChecks: Array.from(this.results.values()).reduce((sum, results) => sum + results.length, 0),
       avgResponseTime: this.calculateAverageResponseTime(),
       overallAvailability: this.calculateOverallAvailability(),
-      activeAlerts: alerts.filter(a => !a.resolved).length,
-      resolvedAlerts: alerts.filter(a => a.resolved).length
+      activeAlerts: alerts.filter(a => !a?.resolved).length,
+      resolvedAlerts: alerts.filter(a => a?.resolved).length
     };
   }
 
@@ -532,7 +532,7 @@ export class RealTimeMonitoringService {
     }
   }
 
-  private emit(event: string, data?: any): void {
+  private emit(event: string, data?: unknown): void {
     /**
      * if功能函数
      * @param {Object} params - 参数对象
@@ -605,7 +605,7 @@ export class RealTimeMonitoringService {
 }
 
 // 创建服务实例并导出
-export const realTimeMonitoring = RealTimeMonitoringService.getInstance();
+export const _realTimeMonitoring = RealTimeMonitoringService.getInstance();
 
 // 类型导出
 export type RealTimeMonitoring = RealTimeMonitoringService;

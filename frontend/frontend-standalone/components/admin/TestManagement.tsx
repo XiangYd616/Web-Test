@@ -205,7 +205,7 @@ const TestManagement: FC = () => {
             <select
               id="test-type-select"
               value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value as any)}
+              onChange={(e) => setSelectedType(e?.target.value as any)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Types</option>
@@ -223,7 +223,7 @@ const TestManagement: FC = () => {
             <select
               id="test-status-select"
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as any)}
+              onChange={(e) => setSelectedStatus(e?.target.value as any)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Status</option>
@@ -240,7 +240,7 @@ const TestManagement: FC = () => {
             <select
               id="date-range-select"
               value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
+              onChange={(e) => setDateRange(e?.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="today">Today</option>

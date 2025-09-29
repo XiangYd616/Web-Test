@@ -4,21 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  Users,
-  Settings,
-  Monitor,
-  Database,
-  Shield,
-  Archive,
-  FileText,
-  Server,
-  Activity,
-  BarChart3,
-  Clock,
-  AlertTriangle,
-  CheckCircle
-} from 'lucide-react';
+import {Users, Settings, Monitor, Database, Shield, FileText, Server, Activity, BarChart3, AlertTriangle, CheckCircle} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import UserManagement from './UserManagement';
 import Settings from './Settings';
@@ -94,7 +80,7 @@ const Admin: React.FC = () => {
   ];
 
   // 检查管理员权限
-  const isAdmin = user?.role === 'admin' || user?.permissions?.includes('admin:access');
+  const isAdmin = user.role === 'admin' || user?.permissions?.includes('admin:access');
 
   if (!isAdmin) {
     return (
@@ -250,14 +236,14 @@ const Admin: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">快速操作</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {adminSections.filter(section => section.id !== 'overview').map((section) => (
+            {adminSections.filter(section => section?.id !== 'overview').map((section) => (
               <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
+                key={section?.id}
+                onClick={() => setActiveSection(section?.id)}
                 className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <section.icon className="h-8 w-8 text-gray-600 mb-2" />
-                <span className="text-sm font-medium text-gray-900">{section.name}</span>
+                {section?.icon && React.createElement(section.icon, { className: "h-8 w-8 text-gray-600 mb-2" })}
+                <span className="text-sm font-medium text-gray-900">{section?.name}</span>
               </button>
             ))}
           </div>
@@ -274,7 +260,7 @@ const Admin: React.FC = () => {
 
     const section = adminSections.find(s => s.id === activeSection);
     if (section?.component) {
-      const Component = section.component;
+      const Component = section?.component;
       return <Component />;
     }
 
@@ -314,16 +300,16 @@ const Admin: React.FC = () => {
             <nav className="-mb-px flex space-x-8">
               {adminSections.map((section) => (
                 <button
-                  key={section.id}
-                  onClick={() => setActiveSection(section.id)}
+                  key={section?.id}
+                  onClick={() => setActiveSection(section?.id)}
                   className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeSection === section.id
+                    activeSection === section?.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  <section.icon className="h-4 w-4 mr-2" />
-                  {section.name}
+                  {section?.icon && React.createElement(section.icon, { className: "h-4 w-4 mr-2" })}
+                  {section?.name}
                 </button>
               ))}
             </nav>

@@ -8,11 +8,11 @@
 
 import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import { SecurityTestConfig, TestProgress as SecurityTestProgress, SecurityTestResult, unifiedSecurityEngine } from '../../services/unifiedSecurityEngine';
+import {SecurityTestConfig, SecurityTestResult, unifiedSecurityEngine} from '../../services/unifiedSecurityEngine';
 import { createCommonErrors, createError } from '../../utils/errorHandler';
 import { URLValidationResult } from '../../utils/urlValidator';
 import { URLInput } from '../ui/URLInput';
-import { EnhancedError, EnhancedErrorDisplay as ErrorDisplay } from './ErrorDisplay';
+import {EnhancedError} from './ErrorDisplay';
 
 interface UnifiedSecurityTestPanelProps {
   onTestStart?: () => void;
@@ -226,7 +226,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   }, [config, isUrlValid, onTestStart, onTestProgress, onTestComplete, onTestError]);
 
   // 停止测试
-  const stopTest = useCallback(() => {
+  const _stopTest = useCallback(() => {
     if (currentTestId) {
       unifiedSecurityEngine.cancelTest(currentTestId);
       setIsRunning(false);
@@ -248,7 +248,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <URLInput
           value={config.url}
-          onChange={(e) => handleUrlChange(e.target.value)}
+          onChange={(e) => handleUrlChange(e?.target.value)}
           onValidationChange={(isValid) => handleUrlValidation(isValid)}
           placeholder="请输入要测试的网站URL，例如：https://example.com"
           disabled={isRunning}

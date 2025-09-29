@@ -40,9 +40,9 @@ export interface InteractiveComponentProps extends BaseComponentProps {
 // 表单组件属性接口
 export interface FormComponentProps extends BaseComponentProps {
     name?: string;
-    value?: any;
-    defaultValue?: any;
-    onChange?: (value: any, event?: React.ChangeEvent) => void;
+    value?: unknown;
+    defaultValue?: unknown;
+    onChange?: (value: unknown, event?: React.ChangeEvent) => void;
     onBlur?: (event: React.FocusEvent) => void;
     onFocus?: (event: React.FocusEvent) => void;
     disabled?: boolean;
@@ -174,7 +174,7 @@ export interface TableColumn<T = any> {
     sortable?: boolean;
     filterable?: boolean;
     fixed?: 'left' | 'right';
-    render?: (value: any, record: T, index: number) => React.ReactNode;
+    render?: (value: unknown, record: T, index: number) => React.ReactNode;
     className?: string;
     headerClassName?: string;
 }
@@ -289,16 +289,16 @@ export interface LoadingProps extends BaseComponentProps {
 // 图表组件属性
 export interface ChartProps extends BaseComponentProps {
     type: 'line' | 'bar' | 'pie' | 'doughnut' | 'area' | 'scatter';
-    data: any;
-    options?: any;
+    data: unknown;
+    options?: unknown;
     width?: number;
     height?: number;
     responsive?: boolean;
     maintainAspectRatio?: boolean;
     loading?: boolean;
     error?: string;
-    onChartReady?: (chart: any) => void;
-    onDataPointClick?: (point: any, event: any) => void;
+    onChartReady?: (chart: unknown) => void;
+    onDataPointClick?: (point: unknown, event: unknown) => void;
 }
 
 // 通知组件属性
@@ -444,7 +444,7 @@ export interface CollapseProps extends BaseComponentProps {
     items: CollapseItem[];
     accordion?: boolean;
     bordered?: boolean;
-    expandIcon?: (panelProps: any) => React.ReactNode;
+    expandIcon?: (panelProps: unknown) => React.ReactNode;
     expandIconPosition?: 'left' | 'right';
     ghost?: boolean;
     size?: Size;
@@ -489,7 +489,7 @@ export interface ValidationRule {
     pattern?: RegExp;
     min?: number;
     max?: number;
-    validator?: (value: any) => boolean | string | Promise<boolean | string>;
+    validator?: (value: unknown) => boolean | string | Promise<boolean | string>;
 }
 
 // 表单字段类型
@@ -497,8 +497,8 @@ export interface FormField {
     name: string;
     label?: string;
     type?: string;
-    value?: any;
-    defaultValue?: any;
+    value?: unknown;
+    defaultValue?: unknown;
     rules?: ValidationRule[];
     dependencies?: string[];
     hidden?: boolean;

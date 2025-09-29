@@ -28,12 +28,12 @@ interface DataType {
   name: string;
   icon: React.ComponentType<{ className?: string }>;
   description: string;
-  generator: (count: number, options?: any) => any[];
+  generator: (count: number, options?: unknown) => any[];
 }
 
 interface GeneratedData {
   type: string;
-  data: any[];
+  data: unknown[];
   count: number;
   timestamp: Date;
 }
@@ -128,7 +128,7 @@ const TestDataGenerator: React.FC = () => {
   ];
 
   // 用户数据生成器
-  function generateUsers(count: number, opts: any = {}) {
+  function generateUsers(count: number, opts: unknown = {}) {
     const users = [];
     const firstNames = ['张', '李', '王', '刘', '陈', '杨', '赵', '黄', '周', '吴'];
     const lastNames = ['伟', '芳', '娜', '敏', '静', '丽', '强', '磊', '军', '洋'];
@@ -139,7 +139,7 @@ const TestDataGenerator: React.FC = () => {
       const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
       const name = firstName + lastName;
       
-      const user: any = {
+      const user: unknown = {
         id: 10000 + i,
         name: name,
         username: `user${1000 + i}`
@@ -170,7 +170,7 @@ const TestDataGenerator: React.FC = () => {
   }
 
   // 邮箱地址生成器
-  function generateEmails(count: number, opts: any = {}) {
+  function generateEmails(count: number, opts: unknown = {}) {
     const emails = [];
     const prefixes = ['user', 'test', 'demo', 'admin', 'info', 'contact'];
     const domains = ['example.com', 'test.org', 'demo.net', 'gmail.com', 'qq.com'];
@@ -187,7 +187,7 @@ const TestDataGenerator: React.FC = () => {
   }
 
   // 电话号码生成器
-  function generatePhones(count: number, opts: any = {}) {
+  function generatePhones(count: number, opts: unknown = {}) {
     const phones = [];
     const prefixes = ['130', '131', '132', '133', '134', '135', '136', '137', '138', '139'];
 
@@ -201,7 +201,7 @@ const TestDataGenerator: React.FC = () => {
   }
 
   // URL生成器
-  function generateUrls(count: number, opts: any = {}) {
+  function generateUrls(count: number, opts: unknown = {}) {
     const urls = [];
     const { includeDomains, includeSubdomains, includeParams, protocols } = opts;
     const domains = includeDomains || ['example.com', 'test.org', 'demo.net'];
@@ -238,7 +238,7 @@ const TestDataGenerator: React.FC = () => {
   }
 
   // 日期生成器
-  function generateDates(count: number, opts: any = {}) {
+  function generateDates(count: number, opts: unknown = {}) {
     const dates = [];
     const now = Date.now();
     const oneDay = 24 * 60 * 60 * 1000;
@@ -259,7 +259,7 @@ const TestDataGenerator: React.FC = () => {
   }
 
   // 数字生成器
-  function generateNumbers(count: number, opts: any = {}) {
+  function generateNumbers(count: number, opts: unknown = {}) {
     const numbers = [];
 
     for (let i = 0; i < count; i++) {
@@ -276,7 +276,7 @@ const TestDataGenerator: React.FC = () => {
   }
 
   // 密码生成器
-  function generatePasswords(count: number, opts: any = {}) {
+  function generatePasswords(count: number, opts: unknown = {}) {
     const passwords = [];
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
 
@@ -298,7 +298,7 @@ const TestDataGenerator: React.FC = () => {
   }
 
   // API数据生成器
-  function generateApiData(count: number, opts: any = {}) {
+  function generateApiData(count: number, opts: unknown = {}) {
     const apiData = [];
     const { methods, includeHeaders, includeBody } = opts;
     const endpoints = ['/users', '/products', '/orders', '/auth/login', '/api/data'];
@@ -307,7 +307,7 @@ const TestDataGenerator: React.FC = () => {
       const method = methods[Math.floor(Math.random() * methods.length)];
       const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
       
-      const request: any = {
+      const request: unknown = {
         method,
         url: `https://api.example.com${endpoint}`,
         id: i + 1
@@ -548,7 +548,7 @@ const TestDataGenerator: React.FC = () => {
                 min="1"
                 max="1000"
                 value={count}
-                onChange={(e) => setCount(Math.min(1000, Math.max(1, parseInt(e.target.value) || 1)))}
+                onChange={(e) => setCount(Math.min(1000, Math.max(1, parseInt(e?.target.value) || 1)))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="text-xs text-gray-500 mt-1">最多1000条</p>

@@ -92,7 +92,7 @@ const PerformanceTest: React.FC = () => {
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
 
   // 测试进度
-  const testProgressHook = useTestProgress();
+  const _testProgressHook = useTestProgress();
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('准备就绪');
 
@@ -121,7 +121,7 @@ const PerformanceTest: React.FC = () => {
 
   // 监听后台测试状态变化
   useEffect(() => {
-    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: any) => {
+    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: unknown) => {
       if (testInfo.type === 'performance' && testInfo.id === currentTestId) {
         switch (event) {
           case 'testProgress':
@@ -206,7 +206,7 @@ const PerformanceTest: React.FC = () => {
       );
 
       setCurrentTestId(testId);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || '启动测试失败');
       setIsRunning(false);
       setCanSwitchPages(true);

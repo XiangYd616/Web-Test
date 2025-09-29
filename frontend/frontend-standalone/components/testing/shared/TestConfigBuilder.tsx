@@ -5,12 +5,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react';
-import { 
-  TestConfigSchema, 
-  TestConfigField, 
-  TestConfigSection,
-  FieldDependency 
-} from '../UniversalTestPage';
+import {TestConfigSchema, TestConfigField, TestConfigSection} from '../UniversalTestPage';
 
 export interface TestConfigBuilderProps {
   config: Record<string, any>;
@@ -31,7 +26,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
   className = ''
 }) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(schema.sections?.filter(s => s.defaultExpanded).map(s => s.title) || [])
+    new Set(schema.sections?.filter(s => s?.defaultExpanded).map(s => s?.title) || [])
   );
 
   // 切换章节展开状态
@@ -48,7 +43,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
   }, []);
 
   // 更新配置值
-  const updateConfig = useCallback((key: string, value: any) => {
+  const updateConfig = useCallback((key: string, value: unknown) => {
     const newConfig = { ...config, [key]: value };
     onChange(newConfig);
   }, [config, onChange]);
@@ -92,7 +87,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
   }, [config, checkFieldDependencies]);
 
   // 渲染字段输入控件
-  const renderFieldInput = (field: TestConfigField, value: any, fieldId: string) => {
+  const renderFieldInput = (field: TestConfigField, value: unknown, fieldId: string) => {
     const baseClasses = "w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400";
     
     switch (field.type) {
@@ -103,7 +98,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
             id={fieldId}
             type={field.type}
             value={value || ''}
-            onChange={(e) => updateConfig(field.key, e.target.value)}
+            onChange={(e) => updateConfig(field.key, e?.target.value)}
             placeholder={field.placeholder}
             disabled={disabled}
             className={baseClasses}
@@ -118,7 +113,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
             id={fieldId}
             type="number"
             value={value || ''}
-            onChange={(e) => updateConfig(field.key, parseInt(e.target.value) || 0)}
+            onChange={(e) => updateConfig(field.key, parseInt(e?.target.value) || 0)}
             placeholder={field.placeholder}
             disabled={disabled}
             className={baseClasses}
@@ -132,7 +127,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
           <select
             id={fieldId}
             value={value || ''}
-            onChange={(e) => updateConfig(field.key, e.target.value)}
+            onChange={(e) => updateConfig(field.key, e?.target.value)}
             disabled={disabled}
             className={baseClasses}
           >
@@ -152,7 +147,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
               id={fieldId}
               type="checkbox"
               checked={value || false}
-              onChange={(e) => updateConfig(field.key, e.target.checked)}
+              onChange={(e) => updateConfig(field.key, e?.target.checked)}
               disabled={disabled}
               className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
             />
@@ -165,7 +160,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
           <textarea
             id={fieldId}
             value={value || ''}
-            onChange={(e) => updateConfig(field.key, e.target.value)}
+            onChange={(e) => updateConfig(field.key, e?.target.value)}
             placeholder={field.placeholder}
             disabled={disabled}
             className={`${baseClasses} h-24 resize-vertical`}
@@ -182,7 +177,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
             id={fieldId}
             type="text"
             value={value || ''}
-            onChange={(e) => updateConfig(field.key, e.target.value)}
+            onChange={(e) => updateConfig(field.key, e?.target.value)}
             placeholder={field.placeholder}
             disabled={disabled}
             className={baseClasses}
@@ -192,7 +187,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
   };
 
   // 渲染数组字段
-  const renderArrayField = (field: TestConfigField, values: any[]) => {
+  const renderArrayField = (field: TestConfigField, values: unknown[]) => {
     const addItem = () => {
       const newValues = [...values, ''];
       updateConfig(field.key, newValues);
@@ -203,7 +198,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
       updateConfig(field.key, newValues);
     };
 
-    const updateItem = (index: number, value: any) => {
+    const updateItem = (index: number, value: unknown) => {
       const newValues = [...values];
       newValues[index] = value;
       updateConfig(field.key, newValues);
@@ -216,7 +211,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
             <input
               type="text"
               value={value}
-              onChange={(e) => updateItem(index, e.target.value)}
+              onChange={(e) => updateItem(index, e?.target.value)}
               placeholder={field.placeholder}
               disabled={disabled}
               className="flex-1 px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"

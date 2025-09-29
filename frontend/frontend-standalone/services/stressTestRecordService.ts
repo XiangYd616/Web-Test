@@ -207,8 +207,8 @@ class StressTestRecordService {
       }
 
       return response;
-    } catch (error: any) {
-      if (retries > 0 && (error.name === 'AbortError' || error.message.includes('fetch'))) {
+    } catch (error: unknown) {
+      if (retries > 0 && (error.name === 'AbortError' || error?.message.includes('fetch'))) {
         console.warn(`请求失败，${this.retryDelay}ms后重试... (剩余重试次数: ${retries})`);
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
         return this.fetchWithRetry(url, options, retries - 1);
@@ -301,9 +301,9 @@ class StressTestRecordService {
       }
 
       return data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('更新测试记录失败:', error);
-      throw new Error(`更新测试记录失败: ${error.message}`);
+      throw new Error(`更新测试记录失败: ${error?.message}`);
     }
   }
 
@@ -335,7 +335,7 @@ class StressTestRecordService {
     id: string,
     error: string,
     failureReason: FailureReason = FailureReason.UNKNOWN_ERROR,
-    errorDetails?: any,
+    errorDetails?: unknown,
     preserveData: boolean = true
   ): Promise<StressTestRecord> {
     try {
@@ -824,10 +824,10 @@ class StressTestRecordService {
     for (const id of ids) {
       try {
         await this.cancelTestRecord(id, reason, cancelReason);
-        results.success.push(id);
+        results?.success.push(id);
       } catch (error) {
         console.error(`取消测试记录 ${id} 失败:`, error);
-        results.failed.push(id);
+        results?.failed.push(id);
       }
     }
 

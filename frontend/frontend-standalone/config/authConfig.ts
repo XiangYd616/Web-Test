@@ -340,7 +340,7 @@ export function mergeAuthConfig(
       passwordSecurity: {
         ...baseConfig.security.passwordSecurity,
         ...overrides.security?.passwordSecurity,
-        policy: { ...baseConfig.security.passwordSecurity.policy, ...overrides.security?.passwordSecurity?.policy }
+        policy: { ...baseConfig.security.passwordSecurity?.policy, ...overrides.security?.passwordSecurity?.policy }
       }
     },
     tokens: {
@@ -411,7 +411,7 @@ export function validateAuthConfig(config: UnifiedAuthConfig): string[] {
     errors.push('最大并发会话数必须大于0');
   }
   
-  if (config.security.passwordSecurity.policy.minLength < 6) {
+  if (config.security.passwordSecurity?.policy.minLength < 6) {
     errors.push('密码最小长度不能少于6位');
   }
   
@@ -438,7 +438,7 @@ export function getFeatureFlags(config: UnifiedAuthConfig) {
     auditLoggingEnabled: config.audit.enabled,
     rateLimitingEnabled: config.rateLimiting.enabled,
     secureStorageEnabled: config.tokens.storage.enableSecureStorage,
-    passwordBreachCheckEnabled: config.security.passwordSecurity.breachCheck
+    passwordBreachCheckEnabled: config.security.passwordSecurity?.breachCheck
   };
 }
 

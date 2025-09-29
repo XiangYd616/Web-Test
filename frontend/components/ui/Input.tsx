@@ -219,7 +219,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
   const [value, setValue] = React.useState(props.value || '');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+    const newValue = e?.target.value;
     setValue(newValue);
     props.onChange?.(e);
   };
@@ -326,7 +326,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(({
       step={step}
       value={value}
       onChange={(e) => {
-        setValue(e.target.value);
+        setValue(e?.target.value);
         props.onChange?.(e);
       }}
       rightIcon={

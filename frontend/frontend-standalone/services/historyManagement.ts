@@ -13,8 +13,8 @@ export interface HistoryRecord {
   startTime: string;
   endTime: string;
   duration: number;
-  results: any;
-  metrics: any;
+  results: unknown;
+  metrics: unknown;
   tags: string[];
   notes: string;
   archived: boolean;
@@ -66,7 +66,7 @@ class HistoryManagementService {
   ): Promise<{
     records: HistoryRecord[];
     total: number;
-    pagination: any;
+    pagination: unknown;
   }> {
     try {
       const params = new URLSearchParams();
@@ -76,8 +76,8 @@ class HistoryManagementService {
       if (filter.search) params.append('search', filter.search);
       if (filter.archived !== undefined) params.append('archived', filter.archived.toString());
       
-      params.append('page', pagination.page.toString());
-      params.append('limit', pagination.limit.toString());
+      params.append('page', pagination?.page.toString());
+      params.append('limit', pagination?.limit.toString());
 
       const response = await fetch(`${this.baseUrl}?${params}`);
       const data = await response.json();

@@ -4,34 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  Form,
-  Select,
-  DatePicker,
-  Button,
-  Steps,
-  Progress,
-  Table,
-  Tag,
-  Space,
-  Alert,
-  Divider,
-  Checkbox,
-  Radio,
-  Input,
-  notification
-} from 'antd';
-import {
-  FileTextOutlined,
-  DownloadOutlined,
-  EyeOutlined,
-  BarChartOutlined,
-  SecurityScanOutlined,
-  ClockCircleOutlined,
-  CheckCircleOutlined,
-  LoadingOutlined
-} from '@ant-design/icons';
+import {Card, Form, Select, DatePicker, Button, Steps, Progress, Table, Tag, Space, Divider, Checkbox, Radio, Input, notification} from 'antd';
+import {FileTextOutlined, DownloadOutlined, EyeOutlined, BarChartOutlined, ClockCircleOutlined, CheckCircleOutlined, LoadingOutlined} from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 
@@ -216,7 +190,7 @@ const ReportGenerator: React.FC = () => {
 
   const handleGenerateReport = async () => {
     try {
-      const values = await form.validateFields();
+      const _values = await form.validateFields();
       setGenerating(true);
       setGenerationProgress(0);
       setCurrentStep(2);
@@ -243,7 +217,7 @@ const ReportGenerator: React.FC = () => {
     }
   };
 
-  const handleDownload = (report: GeneratedReport) => {
+  const _handleDownload = (report: GeneratedReport) => {
     // 模拟下载
     notification.success({
       message: '下载开始',

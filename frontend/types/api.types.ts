@@ -46,7 +46,7 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: any;
+  value?: unknown;
 }
 
 export interface ErrorResponse {
@@ -77,7 +77,7 @@ export interface PaginatedResponse<T = any> {
   message?: string;
   meta: {
     pagination: PaginationInfo;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

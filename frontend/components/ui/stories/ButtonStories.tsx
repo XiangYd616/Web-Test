@@ -3,20 +3,20 @@
 interface Meta<T = any> {
     title: string;
     component: T;
-    parameters?: any;
-    decorators?: any[];
-    argTypes?: any;
+    parameters?: unknown;
+    decorators?: unknown[];
+    argTypes?: unknown;
     tags?: string[];
 }
 
 interface StoryObj<T = any> {
-    args?: any;
-    parameters?: any;
-    render?: (args: any) => any;
+    args?: unknown;
+    parameters?: unknown;
+    render?: (args: unknown) => any;
 }
 
 // Mock action function
-const action = (name: string) => (...args: any[]) => console.log(name, ...args);
+const action = (name: string) => (...args: unknown[]) => console.log(name, ...args);
 
 /**
  * Button组件Storybook文档
@@ -41,7 +41,7 @@ const meta: Meta<typeof Button> = {
         },
     },
     decorators: [
-        (Story: any) => (
+        (Story: unknown) => (
             <ThemeProvider>
                 <div className="p-4">
                     <Story />

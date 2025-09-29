@@ -37,8 +37,8 @@ declare global {
 
   // 扩展RenderingContext接口
   interface RenderingContext {
-    getExtension?(name: string): any;
-    getParameter?(pname: number): any;
+    getExtension?(name: string): unknown;
+    getParameter?(pname: number): unknown;
     getSupportedExtensions?(): string[] | null;
   }
 
@@ -67,8 +67,8 @@ declare global {
     getExtension(extensionName: "WEBGL_depth_texture"): WEBGL_depth_texture | null;
     getExtension(extensionName: "WEBGL_draw_buffers"): WEBGL_draw_buffers | null;
     getExtension(extensionName: "WEBGL_lose_context"): WEBGL_lose_context | null;
-    getExtension(extensionName: string): any;
-    getParameter(pname: number): any;
+    getExtension(extensionName: string): unknown;
+    getParameter(pname: number): unknown;
     getSupportedExtensions(): string[] | null;
   }
 }

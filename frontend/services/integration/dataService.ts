@@ -1,6 +1,6 @@
 // 数据服务
 export class DataService {
-  async saveTestResult(result: any): Promise<string> {
+  async saveTestResult(result: unknown): Promise<string> {
     
     return Date.now().toString();
   }
@@ -25,4 +25,4 @@ export class DataService {
   }
 }
 
-export const dataService = new DataService();
+export const _dataService = new DataService();

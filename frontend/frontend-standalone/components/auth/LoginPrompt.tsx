@@ -9,7 +9,7 @@ import React from 'react';
 import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Lock, User, ArrowRight, Shield, Star, X, LogIn } from 'lucide-react';
+import {Lock, ArrowRight, Shield, Star, X, LogIn} from 'lucide-react';
 
 interface LoginPromptProps {
   isOpen: boolean;
@@ -33,7 +33,7 @@ const LoginPrompt: React.FC<LoginPromptProps> = ({
     navigate('/login');
   };
 
-  const handleRegister = () => {
+  const _handleRegister = () => {
     onClose();
     navigate('/register');
   };

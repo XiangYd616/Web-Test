@@ -73,9 +73,9 @@ export interface SecurityTestConfig extends BaseTestConfig {
 export interface APITestConfig extends BaseTestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   expectedStatus?: number[];
-  schema?: any;
+  schema?: unknown;
   authentication?: {
     type: 'none' | 'basic' | 'bearer' | 'api-key';
     credentials?: Record<string, string>;
@@ -139,7 +139,7 @@ export interface TestMetrics {
   domElements?: number;
 
   // 自定义指标
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TestArtifact {

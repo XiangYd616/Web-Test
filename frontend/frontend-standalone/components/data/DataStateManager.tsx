@@ -17,14 +17,14 @@ export interface DataStateManagerProps {
   // 状态
   state: LoadingState;
   error?: string | null;
-  data?: any;
+  data?: unknown;
   isEmpty?: boolean;
 
   // 自定义渲染
   renderLoading?: () => React.ReactNode;
   renderError?: (error: string, retry?: () => void) => React.ReactNode;
   renderEmpty?: () => React.ReactNode;
-  renderSuccess?: (data: any) => React.ReactNode;
+  renderSuccess?: (data: unknown) => React.ReactNode;
 
   // 操作
   onRetry?: () => void;

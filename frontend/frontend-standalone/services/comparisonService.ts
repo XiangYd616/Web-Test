@@ -103,9 +103,9 @@ class ComparisonService {
    */
   async batchCompareResults(testIds: string[]): Promise<{
     results: TestResult[];
-    comparisons: any[];
+    comparisons: unknown[];
     trends: TrendAnalysis;
-    summary: any;
+    summary: unknown;
   }> {
     try {
       const response = await fetch(`${this.baseUrl}/batch-compare`, {
@@ -182,9 +182,9 @@ class ComparisonService {
   async getComparisonHistory(
     pagination: { page: number; limit: number } = { page: 1, limit: 20 }
   ): Promise<{
-    comparisons: any[];
+    comparisons: unknown[];
     total: number;
-    pagination: any;
+    pagination: unknown;
   }> {
     try {
       const params = new URLSearchParams({

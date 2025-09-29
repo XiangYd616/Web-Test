@@ -6,10 +6,10 @@
 const StressTestEngine = require('../../engines/stress/StressTestEngine');
 // 暂时使用console.log替代Logger
 const Logger = {
-  info: (msg, meta) => ,
+  info: (msg, meta) => console.log(`[INFO] ${msg}`, meta || ''),
   warn: (msg, meta) => console.warn(`[WARN] ${msg}`, meta || ''),
   error: (msg, error, meta) => console.error(`[ERROR] ${msg}`, error || '', meta || ''),
-  debug: (msg, meta) => 
+  debug: (msg, meta) => process.env.NODE_ENV === 'development' ? console.log(`[DEBUG] ${msg}`, meta || '') : undefined
 };
 
 class UserTestManager {

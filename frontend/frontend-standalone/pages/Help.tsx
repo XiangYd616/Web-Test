@@ -381,7 +381,7 @@ const Help: React.FC = () => {
 
   // 反馈提交功能
   const handleFeedbackSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e?.preventDefault();
     setSubmitLoading(true);
 
     try {
@@ -500,7 +500,7 @@ const Help: React.FC = () => {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(e?.target.value)}
               placeholder="搜索帮助文档、常见问题、视频教程..."
               className="w-full pl-12 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -577,7 +577,7 @@ const Help: React.FC = () => {
                 <Filter className="w-4 h-4 text-gray-400" />
                 <select
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  onChange={(e) => setSelectedCategory(e?.target.value)}
                   title="选择分类"
                   className="px-3 py-1 bg-gray-700 border border-gray-600 text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                 >
@@ -647,7 +647,7 @@ const Help: React.FC = () => {
                 <Filter className="w-4 h-4 text-gray-400" />
                 <select
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  onChange={(e) => setSelectedCategory(e?.target.value)}
                   title="选择分类"
                   className="px-3 py-1 bg-gray-700 border border-gray-600 text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                 >
@@ -912,7 +912,7 @@ const Help: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">反馈类型</label>
                   <select
                     value={feedbackData.type}
-                    onChange={(e) => setFeedbackData({ ...feedbackData, type: e.target.value as any })}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, type: e?.target.value as any })}
                     title="选择反馈类型"
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
@@ -929,7 +929,7 @@ const Help: React.FC = () => {
                   <input
                     type="text"
                     value={feedbackData.title}
-                    onChange={(e) => setFeedbackData({ ...feedbackData, title: e.target.value })}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, title: e?.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="请简要描述您的问题或建议"
                     required
@@ -940,7 +940,7 @@ const Help: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">详细描述</label>
                   <textarea
                     value={feedbackData.description}
-                    onChange={(e) => setFeedbackData({ ...feedbackData, description: e.target.value })}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, description: e?.target.value })}
                     rows={4}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="请详细描述您遇到的问题或建议..."
@@ -953,7 +953,7 @@ const Help: React.FC = () => {
                   <input
                     type="email"
                     value={feedbackData.email}
-                    onChange={(e) => setFeedbackData({ ...feedbackData, email: e.target.value })}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, email: e?.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="your@email.com"
                     required
@@ -964,7 +964,7 @@ const Help: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">优先级</label>
                   <select
                     value={feedbackData.priority}
-                    onChange={(e) => setFeedbackData({ ...feedbackData, priority: e.target.value as any })}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, priority: e?.target.value as any })}
                     title="选择优先级"
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                   >

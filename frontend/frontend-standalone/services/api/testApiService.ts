@@ -157,7 +157,7 @@ class TestApiService implements TestApiClient {
       'infrastructure': TestPermissions.ADMIN_ALL_TESTS // 基础设施测试需要管理员权限
     };
     
-    return permissionMap[testType.toLowerCase()] || null;
+    return permissionMap[testType?.toLowerCase()] || null;
   }
 
   // ==================== BaseApiClient 接口实现 ====================
@@ -172,14 +172,14 @@ class TestApiService implements TestApiClient {
   /**
    * 执行POST请求
    */
-  async post<T = any>(url: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  async post<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
     return unifiedApiService.post(url, data, config as any);
   }
 
   /**
    * 执行PUT请求
    */
-  async put<T = any>(url: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  async put<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
     return unifiedApiService.put(url, data, config as any);
   }
 
@@ -201,9 +201,9 @@ class TestApiService implements TestApiClient {
     is_template?: boolean;
   }): Promise<ApiResponse<TestConfiguration[]>> {
     const queryParams = new URLSearchParams();
-    if (params?.test_type) queryParams.append('test_type', params.test_type);
-    if (params?.project_id) queryParams.append('project_id', params.project_id.toString());
-    if (params?.is_template !== undefined) queryParams.append('is_template', params.is_template.toString());
+    if (params?.test_type) queryParams.append('test_type', params?.test_type);
+    if (params?.project_id) queryParams.append('project_id', params?.project_id.toString());
+    if (params?.is_template !== undefined) queryParams.append('is_template', params?.is_template.toString());
 
     const url = `${this.baseUrl}/configurations${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return unifiedApiService.get(url);
@@ -235,32 +235,32 @@ class TestApiService implements TestApiClient {
       }
 
       // 检查测试类型权限
-      const requiredPermission = this.getTestTypePermission(config.testType);
+      const requiredPermission = this.getTestTypePermission(config?.testType);
       if (requiredPermission && !user.isAdmin) {
         const hasPermission = user.permissions.includes(requiredPermission);
         if (!hasPermission) {
           return {
             success: false,
-            error: `权限不足，无法执行${config.testType}测试`,
+            error: `权限不足，无法执行${config?.testType}测试`,
             code: 'PERMISSION_DENIED'
           };
         }
       }
 
       // 记录测试启动日志
-      console.log(`🚀 用户 ${user.email} 启动${config.testType}测试`, {
-        testType: config.testType,
-        target: config.target,
+      console.log(`🚀 用户 ${user.email} 启动${config?.testType}测试`, {
+        testType: config?.testType,
+        target: config?.target,
         userId: user.id,
         timestamp: new Date().toISOString()
       });
 
       // 适配后端API格式
       const backendRequest = {
-        testType: config.testType,
-        url: config.target,
+        testType: config?.testType,
+        url: config?.target,
         config: config,
-        testName: `${config.testType}_test_${Date.now()}`,
+        testName: `${config?.testType}_test_${Date.now()}`,
         userId: user.id,
         userEmail: user.email
       };
@@ -271,7 +271,7 @@ class TestApiService implements TestApiClient {
       if (response.success && response.data) {
         const testExecution: TestExecution = {
           id: response.data.id,
-          testType: config.testType as TestType,
+          testType: config?.testType as TestType,
           status: response.data.status as TestStatus,
           progress: response.data.progress || 0,
           startTime: response.data.started_at || new Date().toISOString(),
@@ -284,7 +284,7 @@ class TestApiService implements TestApiClient {
         // 记录成功日志
         console.log(`✅ 测试启动成功`, {
           testId: testExecution.id,
-          testType: config.testType,
+          testType: config?.testType,
           userId: user.id
         });
 
@@ -333,10 +333,10 @@ class TestApiService implements TestApiClient {
     offset?: number;
   }): Promise<ApiResponse<TestExecutionResponse[]>> {
     const queryParams = new URLSearchParams();
-    if (params?.test_type) queryParams.append('testType', params.test_type);
-    if (params?.status) queryParams.append('status', params.status);
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.offset) queryParams.append('page', Math.floor((params.offset || 0) / (params.limit || 20) + 1).toString());
+    if (params?.test_type) queryParams.append('testType', params?.test_type);
+    if (params?.status) queryParams.append('status', params?.status);
+    if (params?.limit) queryParams.append('limit', params?.limit.toString());
+    if (params?.offset) queryParams.append('page', Math.floor((params?.offset || 0) / (params?.limit || 20) + 1).toString());
 
     const url = `${this.baseUrl}/history${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return unifiedApiService.get(url);
@@ -458,13 +458,13 @@ class TestApiService implements TestApiClient {
    */
   async executeApiTest(config: ApiTestConfig): Promise<ApiResponse<TestExecutionResponse>> {
     return unifiedApiService.post(`${this.baseUrl}/api-test`, {
-      baseUrl: config.endpoints[0]?.url || '',
-      endpoints: config.endpoints,
+      baseUrl: config?.endpoints[0]?.url || '',
+      endpoints: config?.endpoints,
       authentication: null,
       globalHeaders: [],
-      timeout: config.configuration.timeout,
-      retryCount: config.configuration.retry_count,
-      parallelRequests: config.configuration.parallel_requests
+      timeout: config?.configuration.timeout,
+      retryCount: config?.configuration.retry_count,
+      parallelRequests: config?.configuration.parallel_requests
     });
   }
 
@@ -638,14 +638,14 @@ class TestApiService implements TestApiClient {
     return {
       ...result,
       data: {
-        ...result.data,
+        ...result?.data,
         test_type: test_type,
         target_url: target_url,
         created_at: new Date().toISOString(),
-        status: result.data?.status === TestStatus.RUNNING ? 'running' :
-          result.data?.status === TestStatus.COMPLETED ? 'completed' :
-            result.data?.status === TestStatus.FAILED ? 'failed' :
-              result.data?.status === TestStatus.CANCELLED ? 'cancelled' : 'pending'
+        status: result?.data.status === TestStatus.RUNNING ? 'running' :
+          result?.data.status === TestStatus.COMPLETED ? 'completed' :
+            result?.data.status === TestStatus.FAILED ? 'failed' :
+              result?.data.status === TestStatus.CANCELLED ? 'cancelled' : 'pending'
       }
     };
   }
@@ -732,9 +732,9 @@ class TestApiService implements TestApiClient {
     metric?: string;
   }): Promise<ApiResponse<any>> {
     const queryParams = new URLSearchParams();
-    if (params?.test_type) queryParams.append('test_type', params.test_type);
-    if (params?.time_range) queryParams.append('time_range', params.time_range);
-    if (params?.metric) queryParams.append('metric', params.metric);
+    if (params?.test_type) queryParams.append('test_type', params?.test_type);
+    if (params?.time_range) queryParams.append('time_range', params?.time_range);
+    if (params?.metric) queryParams.append('metric', params?.metric);
 
     const url = `${this.baseUrl}/analytics/trends${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return unifiedApiService.get(url);
@@ -820,10 +820,10 @@ class TestApiService implements TestApiClient {
    */
   async getTestHistory(testType?: TestType, limit?: number): Promise<ApiResponse<TestHistory>> {
     const params = new URLSearchParams();
-    if (testType) params.append('testType', testType);
-    if (limit) params.append('limit', limit.toString());
+    if (testType) params?.append('testType', testType);
+    if (limit) params?.append('limit', limit?.toString());
 
-    const url = `${this.baseUrl}/history${params.toString() ? '?' + params.toString() : ''}`;
+    const url = `${this.baseUrl}/history${params?.toString() ? '?' + params?.toString() : ''}`;
 
     /**
 
@@ -869,7 +869,7 @@ class TestApiService implements TestApiClient {
     const testId = response.data.id;
 
     // 启动实时监控
-    this.startRealtimeMonitoring(testId, config.testType as TestType, callbacks);
+    this.startRealtimeMonitoring(testId, config?.testType as TestType, callbacks);
 
     return testId;
   }

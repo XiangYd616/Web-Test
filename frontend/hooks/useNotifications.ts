@@ -42,7 +42,7 @@ export interface NotificationStats {
 const STORAGE_KEY = 'testweb_notifications';
 
 // 模拟通知数据
-const generateMockNotifications = (): NotificationItem[] => {
+const _generateMockNotifications = (): NotificationItem[] => {
   const now = new Date();
   return [
     {
@@ -280,7 +280,7 @@ export const useNotifications = () => {
 
       const result = await response.json();
       if (result.success && result.data) {
-        const apiNotifications = result.data.map((n: any) => ({
+        const apiNotifications = result.data.map((n: unknown) => ({
           ...n,
           createdAt: new Date(n.createdAt || n.created_at)
         }));
@@ -305,7 +305,7 @@ export const useNotifications = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        setNotifications(parsed.map((n: any) => ({
+        setNotifications(parsed.map((n: unknown) => ({
           ...n,
           createdAt: new Date(n.createdAt)
         })));

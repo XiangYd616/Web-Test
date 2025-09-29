@@ -23,15 +23,15 @@ class ProjectApiService {
   /**
    * 获取用户项目列表
    */
-  async getProjects(query?: any): Promise<ProjectListResponse> {
+  async getProjects(query?: unknown): Promise<ProjectListResponse> {
     const queryParams = new URLSearchParams();
 
-    if (query?.page) queryParams.append('page', query.page.toString());
-    if (query?.limit) queryParams.append('limit', query.limit.toString());
-    if (query?.search) queryParams.append('search', query.search);
-    if (query?.status && query.status !== 'all') queryParams.append('status', query.status);
-    if (query?.sort) queryParams.append('sort', query.sort);
-    if (query?.order) queryParams.append('order', query.order);
+    if (query?.page) queryParams.append('page', query?.page.toString());
+    if (query?.limit) queryParams.append('limit', query?.limit.toString());
+    if (query?.search) queryParams.append('search', query?.search);
+    if (query?.status && query?.status !== 'all') queryParams.append('status', query?.status);
+    if (query?.sort) queryParams.append('sort', query?.sort);
+    if (query?.order) queryParams.append('order', query?.order);
 
     const url = `${this.baseUrl}/projects${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return unifiedApiService.get(url);
@@ -221,11 +221,11 @@ class ProjectApiService {
   ): Promise<ApiResponse<any[]>> {
     const queryParams = new URLSearchParams();
 
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.activity_type) queryParams.append('activity_type', params.activity_type);
-    if (params?.date_from) queryParams.append('date_from', params.date_from);
-    if (params?.date_to) queryParams.append('date_to', params.date_to);
+    if (params?.page) queryParams.append('page', params?.page.toString());
+    if (params?.limit) queryParams.append('limit', params?.limit.toString());
+    if (params?.activity_type) queryParams.append('activity_type', params?.activity_type);
+    if (params?.date_from) queryParams.append('date_from', params?.date_from);
+    if (params?.date_to) queryParams.append('date_to', params?.date_to);
 
     const url = `${this.baseUrl}/projects/${projectId}/activity${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return unifiedApiService.get(url);
@@ -285,10 +285,10 @@ class ProjectApiService {
     const queryParams = new URLSearchParams();
     queryParams.append('q', query);
 
-    if (filters?.status) queryParams.append('status', filters.status);
-    if (filters?.created_after) queryParams.append('created_after', filters.created_after);
-    if (filters?.created_before) queryParams.append('created_before', filters.created_before);
-    if (filters?.has_tests !== undefined) queryParams.append('has_tests', filters.has_tests.toString());
+    if (filters?.status) queryParams.append('status', filters?.status);
+    if (filters?.created_after) queryParams.append('created_after', filters?.created_after);
+    if (filters?.created_before) queryParams.append('created_before', filters?.created_before);
+    if (filters?.has_tests !== undefined) queryParams.append('has_tests', filters?.has_tests.toString());
 
     const url = `${this.baseUrl}/projects/search?${queryParams.toString()}`;
     return unifiedApiService.get(url);
@@ -342,5 +342,5 @@ class ProjectApiService {
   }
 }
 
-export const projectApiService = new ProjectApiService();
+export const _projectApiService = new ProjectApiService();
 export default ProjectApiService;

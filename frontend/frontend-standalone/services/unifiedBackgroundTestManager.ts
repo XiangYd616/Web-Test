@@ -16,13 +16,13 @@ import {
 export interface BackgroundTestTask {
   id: string;
   type: TestType;
-  config: any;
+  config: unknown;
   status: TestStatus;
   progress: number;
   currentStep: string;
   startTime: Date;
   endTime?: Date;
-  results?: any;
+  results?: unknown;
   error?: string;
   userId?: string;
   canSwitchPages: boolean;
@@ -35,7 +35,7 @@ export interface TestProgressCallback {
 
 // 测试完成回调
 export interface TestCompletionCallback {
-  (results: any): void;
+  (results: unknown): void;
 }
 
 // 测试错误回调
@@ -74,7 +74,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
    */
   async startBackgroundTest(
     type: TestType,
-    config: any,
+    config: unknown,
     callbacks?: {
       onProgress?: TestProgressCallback;
       onComplete?: TestCompletionCallback;
@@ -98,13 +98,13 @@ class UnifiedBackgroundTestManager extends EventEmitter {
 
     // 注册回调
     if (callbacks?.onProgress) {
-      this.on(`progress:${taskId}`, callbacks.onProgress);
+      this.on(`progress:${taskId}`, callbacks?.onProgress);
     }
     if (callbacks?.onComplete) {
-      this.on(`complete:${taskId}`, callbacks.onComplete);
+      this.on(`complete:${taskId}`, callbacks?.onComplete);
     }
     if (callbacks?.onError) {
-      this.on(`error:${taskId}`, callbacks.onError);
+      this.on(`error:${taskId}`, callbacks?.onError);
     }
 
     // 如果当前运行的任务数量未达到上限，立即执行
@@ -144,7 +144,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
     } catch (error) {
       task.status = TestStatus.FAILED;
       task.endTime = new Date();
-      task.error = error instanceof Error ? error.message : String(error);
+      task.error = error instanceof Error ? error?.message : String(error);
 
       this.emit(`status:${task.id}`, 'failed');
       this.emit(`error:${task.id}`, task.error);
@@ -194,7 +194,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
       '生成报告'
     ];
 
-    const results: any = {
+    const results: unknown = {
       id: task.id,
       timestamp: new Date().toISOString(),
       target: config.target || config.url,
@@ -265,7 +265,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
       '完成分析'
     ];
 
-    const results: any = {
+    const results: unknown = {
       id: task.id,
       timestamp: new Date().toISOString(),
       url: config.url,
@@ -338,7 +338,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
       '生成兼容性报告'
     ];
 
-    const results: any = {
+    const results: unknown = {
       id: task.id,
       timestamp: new Date().toISOString(),
       url: config.url,
@@ -368,7 +368,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
   /**
    * 运行性能测试
    */
-  private async runPerformanceTest(task: BackgroundTestTask, config: any): Promise<any> {
+  private async runPerformanceTest(task: BackgroundTestTask, config: unknown): Promise<any> {
     // 性能测试实现
     const steps = ['分析页面资源', '测试加载速度', '检查优化建议'];
 
@@ -387,7 +387,7 @@ class UnifiedBackgroundTestManager extends EventEmitter {
   /**
    * 运行安全测试
    */
-  private async runSecurityTest(task: BackgroundTestTask, config: any): Promise<any> {
+  private async runSecurityTest(task: BackgroundTestTask, config: unknown): Promise<any> {
     // 安全测试实现
     const steps = ['SSL/TLS检查', '安全头检查', '漏洞扫描'];
 

@@ -14,7 +14,7 @@ import type {
 
 // 临时testApiService实现
 const testApiService = {
-  executeSecurityTest: async (url: string, config: any) => ({
+  executeSecurityTest: async (url: string, config: unknown) => ({
     success: true,
     data: {
       id: `security_test_${Date.now()}`,
@@ -80,11 +80,11 @@ const SecurityTest: React.FC = () => {
   });
 
   // 处理测试选择和重新运行
-  const handleTestSelect = (test: any) => {
+  const _handleTestSelect = (test: unknown) => {
     // 可以在这里加载选中的测试配置
   };
 
-  const handleTestRerun = (test: any) => {
+  const _handleTestRerun = (test: unknown) => {
     // 可以在这里重新运行选中的测试
   };
 
@@ -118,7 +118,7 @@ const SecurityTest: React.FC = () => {
   };
 
   // 停止测试
-  const handleStopTest = async () => {
+  const _handleStopTest = async () => {
     if (currentTestId) {
       try {
         await cancelTest();
@@ -166,7 +166,7 @@ const SecurityTest: React.FC = () => {
     setTestProgress(null);
 
     // 记录测试完成统计
-    recordTestCompletion('安全测试', true, result.overallScore, Math.round(result.duration / 1000));
+    recordTestCompletion('安全测试', true, result?.overallScore, Math.round(result?.duration / 1000));
   };
 
   // 处理测试错误
@@ -177,19 +177,19 @@ const SecurityTest: React.FC = () => {
   };
 
   // 处理测试对比
-  const handleCompareTests = (results: SecurityTestResult[]) => {
+  const _handleCompareTests = (results: SecurityTestResult[]) => {
     setComparisonResults(results);
     setActiveTab('comparison');
   };
 
   // 关闭对比页面
-  const handleCloseComparison = () => {
+  const _handleCloseComparison = () => {
     setActiveTab('history');
     setComparisonResults([]);
   };
 
   // 停止测试
-  const handleTestStop = () => {
+  const _handleTestStop = () => {
     if (currentTestId) {
       setCurrentTestId(null);
       setTestResult(null);

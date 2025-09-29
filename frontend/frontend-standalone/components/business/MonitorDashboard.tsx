@@ -25,16 +25,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 import { useRealTimeData } from '../../hooks/useRealTimeData';
-import {
-    Badge,
-    Button,
-    Card,
-    Input,
-    Modal,
-    Select,
-    Table,
-    type TableColumn
-} from '../ui';
+import {Badge, Button, Card, Input, Modal, Select, Table} from '../ui';
 
 // 本地SelectOption类型定义
 interface LocalSelectOption {
@@ -186,7 +177,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
             // 模拟统计数据
             const mockStats: MonitorStats = {
                 totalTargets: mockTargets.length,
-                activeTargets: mockTargets.filter(t => t.enabled).length,
+                activeTargets: mockTargets.filter(t => t?.enabled).length,
                 onlineTargets: mockTargets.filter(t => t.status === 'online').length,
                 offlineTargets: mockTargets.filter(t => t.status === 'offline').length,
                 warningTargets: mockTargets.filter(t => t.status === 'warning').length,
@@ -219,7 +210,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
     }, [showNotification]);
 
     // 处理实时数据更新
-    const handleRealTimeUpdate = useCallback((data: any) => {
+    const handleRealTimeUpdate = useCallback((data: unknown) => {
         if (data.type === 'target_update') {
             setTargets(prev => prev.map(target =>
                 target.id === data.targetId
@@ -661,34 +652,34 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
                         label="名称"
                         placeholder="输入监控目标名称"
                         value={newTarget.name || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTarget(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTarget(prev => ({ ...prev, name: e?.target.value }))}
                         required
                     />
                     <Input
                         label="URL"
                         placeholder="https://example.com"
                         value={newTarget.url || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTarget(prev => ({ ...prev, url: e.target.value }))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTarget(prev => ({ ...prev, url: e?.target.value }))}
                         required
                     />
                     <Select
                         label="类型"
                         options={monitorTypeOptions}
                         value={newTarget.type || 'website'}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewTarget(prev => ({ ...prev, type: e.target.value as any }))}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewTarget(prev => ({ ...prev, type: e?.target.value as any }))}
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <Select
                             label="检查间隔"
                             options={intervalOptions}
                             value={newTarget.interval?.toString() || '60'}
-                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewTarget(prev => ({ ...prev, interval: parseInt(e.target.value) }))}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setNewTarget(prev => ({ ...prev, interval: parseInt(e?.target.value) }))}
                         />
                         <Input
                             label="超时时间(秒)"
                             type="number"
                             value={newTarget.timeout || 30}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTarget(prev => ({ ...prev, timeout: parseInt(e.target.value) || 30 }))}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTarget(prev => ({ ...prev, timeout: parseInt(e?.target.value) || 30 }))}
                             min={5}
                             max={300}
                         />
@@ -716,13 +707,13 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
                         <Input
                             label="名称"
                             value={selectedTarget.name}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedTarget(prev => prev ? { ...prev, name: e.target.value } : null)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedTarget(prev => prev ? { ...prev, name: e?.target.value } : null)}
                             required
                         />
                         <Input
                             label="URL"
                             value={selectedTarget.url}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedTarget(prev => prev ? { ...prev, url: e.target.value } : null)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedTarget(prev => prev ? { ...prev, url: e?.target.value } : null)}
                             required
                         />
                         <Select
@@ -736,13 +727,13 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
                                 label="检查间隔"
                                 options={intervalOptions}
                                 value={selectedTarget.interval.toString()}
-                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedTarget(prev => prev ? { ...prev, interval: parseInt(e.target.value) } : null)}
+                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedTarget(prev => prev ? { ...prev, interval: parseInt(e?.target.value) } : null)}
                             />
                             <Input
                                 label="超时时间(秒)"
                                 type="number"
                                 value={selectedTarget.timeout}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedTarget(prev => prev ? { ...prev, timeout: parseInt(e.target.value) || 30 } : null)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedTarget(prev => prev ? { ...prev, timeout: parseInt(e?.target.value) || 30 } : null)}
                                 min={5}
                                 max={300}
                             />

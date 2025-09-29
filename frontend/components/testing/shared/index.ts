@@ -1,4 +1,4 @@
-import { TestProgress } from '../../../services/api/testProgressService';
+
 /**
  * 可选的统一测试组件导出
  * 各个测试页面可以选择性使用这些组件，不强制替换现有实现

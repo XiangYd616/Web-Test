@@ -443,7 +443,7 @@ export const securityCheckModule = new SecurityCheckModule();
 export default securityCheckModule;
 
 // 导出React Hook
-export const useSecurityCheck = () => {
+export const _useSecurityCheck = () => {
   const [error, setError] = useState<string | null>(null);
 
   return {

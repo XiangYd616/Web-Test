@@ -38,9 +38,9 @@ const NetworkErrorPrompt: React.FC<NetworkErrorPromptProps> = ({
     error.includes('Failed to fetch') ||
     error.includes('无法访问');
 
-  const is404Error = error.includes('404') || error.includes('页面不存在');
-  const isCORSError = error.includes('CORS') || error.includes('跨域');
-  const isTimeoutError = error.includes('timeout') || error.includes('超时');
+  const _is404Error = error.includes('404') || error.includes('页面不存在');
+  const _isCORSError = error.includes('CORS') || error.includes('跨域');
+  const _isTimeoutError = error.includes('timeout') || error.includes('超时');
   const isAccessError = error.includes('无法访问') || error.includes('Failed to fetch');
 
   // 检查是否包含本地分析建议或者是网络相关错误

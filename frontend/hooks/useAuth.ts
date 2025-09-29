@@ -4,7 +4,6 @@
  */
 
 import { useCallback, useState } from 'react';
-import { type User } from '@contexts/AppContext';
 
 // 登录凭据接口
 export interface LoginCredentials {
@@ -35,10 +34,10 @@ export const useAuth = () => {
   };
 
   const auth = defaultAuthState;
-  const dispatch = (action: any) => { }; // 临时的空 dispatch
+  const dispatch = (action: unknown) => { }; // 临时的空 dispatch
 
   // 验证token
-  const validateToken = async (token: string): Promise<boolean> => {
+  const _validateToken = async (token: string): Promise<boolean> => {
     try {
       const response = await fetch('/api/auth/validate', {
         method: 'POST',

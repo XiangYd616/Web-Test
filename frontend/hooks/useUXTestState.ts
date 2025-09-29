@@ -128,8 +128,8 @@ export interface UseUXTestStateReturn {
   resetTest: () => void;
 
   // 用户场景管理（使用any类型临时解决类型不匹配）
-  addUserScenario: (scenario: any) => void;
-  updateUserScenario: (id: string, updates: any) => void;
+  addUserScenario: (scenario: unknown) => void;
+  updateUserScenario: (id: string, updates: unknown) => void;
   removeUserScenario: (id: string) => void;
 
   // 自定义检查管理
@@ -182,7 +182,7 @@ export const useUXTestState = (): UXTestHook => {
    * 更新配置
    */
   const updateConfig = useCallback((updates: Partial<UXTestConfig>) => {
-    setConfig((prev: any) => ({ ...prev, ...updates }));
+    setConfig((prev: unknown) => ({ ...prev, ...updates }));
     setError(null);
   }, []);
 
@@ -239,7 +239,7 @@ export const useUXTestState = (): UXTestHook => {
     }
 
     // 验证用户场景
-    (extendedConfig.userScenarios || []).forEach((scenario: any, index: number) => {
+    (extendedConfig.userScenarios || []).forEach((scenario: unknown, index: number) => {
       if (!scenario.name) {
         errors.push(`用户场景 ${index + 1}: 请输入场景名称`);
       }
@@ -281,13 +281,13 @@ export const useUXTestState = (): UXTestHook => {
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult: any) => {
+        (testResult: unknown) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError: any) => {
+        (testError: unknown) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -296,7 +296,7 @@ export const useUXTestState = (): UXTestHook => {
 
       setTestId(newTestId);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'UX测试启动失败');
       setIsRunning(false);
       setCurrentStep('');
@@ -313,7 +313,7 @@ export const useUXTestState = (): UXTestHook => {
         abortControllerRef.current?.abort();
         setIsRunning(false);
         setCurrentStep('测试已停止');
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err.message || '停止测试失败');
       }
     }
@@ -336,13 +336,13 @@ export const useUXTestState = (): UXTestHook => {
   /**
    * 添加用户场景
    */
-  const addUserScenario = useCallback((scenario: any) => {
+  const addUserScenario = useCallback((scenario: unknown) => {
     const newScenario = {
       ...scenario,
       id: `scenario_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
     };
 
-    setConfig((prev: any) => ({
+    setConfig((prev: unknown) => ({
       ...prev,
       userScenarios: [...(prev.userScenarios || []), newScenario]
     }));
@@ -351,10 +351,10 @@ export const useUXTestState = (): UXTestHook => {
   /**
    * 更新用户场景
    */
-  const updateUserScenario = useCallback((id: string, updates: any) => {
-    setConfig((prev: any) => ({
+  const updateUserScenario = useCallback((id: string, updates: unknown) => {
+    setConfig((prev: unknown) => ({
       ...prev,
-      userScenarios: (prev.userScenarios || []).map((scenario: any) =>
+      userScenarios: (prev.userScenarios || []).map((scenario: unknown) =>
         scenario.id === id ? { ...scenario, ...updates } : scenario
       )
     }));
@@ -364,9 +364,9 @@ export const useUXTestState = (): UXTestHook => {
    * 移除用户场景
    */
   const removeUserScenario = useCallback((id: string) => {
-    setConfig((prev: any) => ({
+    setConfig((prev: unknown) => ({
       ...prev,
-      userScenarios: (prev.userScenarios || []).filter((scenario: any) => scenario.id !== id)
+      userScenarios: (prev.userScenarios || []).filter((scenario: unknown) => scenario.id !== id)
     }));
   }, []);
 
@@ -374,9 +374,9 @@ export const useUXTestState = (): UXTestHook => {
    * 添加自定义检查
    */
   const addCustomCheck = useCallback((check: string) => {
-    setConfig((prev: any) => ({
+    setConfig((prev: unknown) => ({
       ...prev,
-      customChecks: [...(prev.customChecks || []), check].filter((c: any, i: number, arr: any[]) => arr.indexOf(c) === i)
+      customChecks: [...(prev.customChecks || []), check].filter((c: unknown, i: number, arr: unknown[]) => arr.indexOf(c) === i)
     }));
   }, []);
 
@@ -384,9 +384,9 @@ export const useUXTestState = (): UXTestHook => {
    * 移除自定义检查
    */
   const removeCustomCheck = useCallback((check: string) => {
-    setConfig((prev: any) => ({
+    setConfig((prev: unknown) => ({
       ...prev,
-      customChecks: (prev.customChecks || []).filter((c: any) => c !== check)
+      customChecks: (prev.customChecks || []).filter((c: unknown) => c !== check)
     }));
   }, []);
 
@@ -434,7 +434,7 @@ export const useUXTestState = (): UXTestHook => {
     };
 
     const presetConfig = presets[preset];
-    setConfig((prev: any) => ({
+    setConfig((prev: unknown) => ({
       ...prev,
       ...presetConfig
     }));

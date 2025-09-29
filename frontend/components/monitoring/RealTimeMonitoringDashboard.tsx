@@ -4,27 +4,8 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Cpu,
-  Database,
-  HardDrive,
-  Monitor,
-  RefreshCw,
-  Server,
-  TrendingUp,
-  Users,
-  Wifi,
-  XCircle,
-  Zap,
-  BarChart3,
-  AlertCircle,
-  Settings
-} from 'lucide-react';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import {AlertTriangle, CheckCircle, Clock, Cpu, Database, HardDrive, Monitor, RefreshCw, Wifi, XCircle, AlertCircle, Settings} from 'lucide-react';
+import {Line, Doughnut} from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -178,7 +159,7 @@ const RealTimeMonitoringDashboard: React.FC = () => {
   }, [autoRefresh]);
 
   // 处理实时数据
-  const handleRealtimeData = (data: any) => {
+  const handleRealtimeData = (data: unknown) => {
     switch (data.type) {
       case 'metrics':
         updateMetrics(data.data);
@@ -542,7 +523,7 @@ const RealTimeMonitoringDashboard: React.FC = () => {
   };
 
   // 格式化时间
-  const formatDuration = (ms: number) => {
+  const _formatDuration = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
@@ -624,7 +605,7 @@ const RealTimeMonitoringDashboard: React.FC = () => {
             </div>
             {currentMetrics?.cpu.temperature && (
               <p className="text-xs text-gray-500 mt-2">
-                温度: {currentMetrics.cpu.temperature.toFixed(1)}°C
+                温度: {currentMetrics?.cpu.temperature?.toFixed(1)}°C
               </p>
             )}
           </div>

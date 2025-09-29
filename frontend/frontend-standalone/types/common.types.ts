@@ -193,7 +193,7 @@ export interface FormField<T = any> {
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
-  options?: Array<{ label: string; value: any }>;
+  options?: Array<{ label: string; value: unknown }>;
   validation?: {
     min?: number;
     max?: number;

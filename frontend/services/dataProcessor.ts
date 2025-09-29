@@ -43,7 +43,7 @@ export interface DataProcessorConfig {
   errorHandling?: {
     showNotification: boolean;
     autoRetry: boolean;
-    fallbackData?: any;
+    fallbackData?: unknown;
   };
 }
 
@@ -101,7 +101,7 @@ export interface DataState<T = any> {
 
 export interface DataActions<T = any> {
   // 数据操作
-  load: (params?: any) => Promise<T | null>;
+  load: (params?: unknown) => Promise<T | null>;
   refresh: () => Promise<T | null>;
   retry: () => Promise<T | null>;
   reset: () => void;
@@ -129,7 +129,7 @@ export interface DataActions<T = any> {
 // ==================== 缓存管理器 ====================
 
 class DataCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>();
   private maxSize: number;
   private strategy: 'lru' | 'ttl' | 'fifo';
 
@@ -149,7 +149,7 @@ class DataCache {
     this.strategy = strategy;
   }
 
-  set(key: string, data: any, ttl = 300000): void {
+  set(key: string, data: unknown, ttl = 300000): void {
     // 检查容量
     if (this.cache.size >= this.maxSize) {
       this.evict();
@@ -166,7 +166,7 @@ class DataCache {
     }
   }
 
-  get(key: string): any | null {
+  get(key: string): unknown | null {
     const item = this.cache.get(key);
     if (!item) return null;
 
@@ -214,7 +214,7 @@ class DataCache {
       case 'ttl':
         // 移除最早过期的
         keyToEvict = Array.from(this.cache.entries())
-          .sort(([, a], [, b]) => (a.timestamp + a.ttl) - (b.timestamp + b.ttl))[0][0];
+          .sort(([, a], [, b]) => (a?.timestamp + a?.ttl) - (b.timestamp + b.ttl))[0][0];
         break;
 
       case 'fifo':
@@ -258,7 +258,7 @@ export function useDataProcessor<T = any>(
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 生成缓存键
-  const generateCacheKey = useCallback((params?: any): string => {
+  const generateCacheKey = useCallback((params?: unknown): string => {
     const baseKey = 'data-processor';
     if (!params) return baseKey;
     return `${baseKey}-${JSON.stringify(params)}`;
@@ -322,7 +322,7 @@ export function useDataProcessor<T = any>(
   // 执行请求
   const executeRequest = useCallback(async (
     requestFn: () => Promise<ApiResponse<T>>,
-    params?: any,
+    params?: unknown,
     options: { useCache?: boolean; isRetry?: boolean } = {}
   ): Promise<T | null> => {
     const { useCache = true, isRetry = false } = options;
@@ -368,7 +368,7 @@ export function useDataProcessor<T = any>(
 
       return processResponse(response, cacheKey);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '网络请求失败';
+      const errorMessage = error instanceof Error ? error?.message : '网络请求失败';
 
       updateState({
         state: 'error',

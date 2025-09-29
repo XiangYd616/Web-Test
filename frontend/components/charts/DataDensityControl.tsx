@@ -195,20 +195,20 @@ const DataDensityControl: React.FC<DataDensityControlProps> = ({
                 <div>
                   <div className="text-gray-500">渲染时间</div>
                   <div className="text-white font-medium">
-                    {performanceStats.renderTime.toFixed(1)}ms
+                    {performanceStats?.renderTime.toFixed(1)}ms
                   </div>
                 </div>
                 <div>
                   <div className="text-gray-500">压缩比</div>
                   <div className="text-white font-medium">
-                    {performanceStats.compressionRatio.toFixed(1)}x
+                    {performanceStats?.compressionRatio.toFixed(1)}x
                   </div>
                 </div>
                 <div>
                   <div className="text-gray-500">缓存</div>
-                  <div className={`font-medium ${performanceStats.cacheHit ? 'text-green-400' : 'text-gray-400'
+                  <div className={`font-medium ${performanceStats?.cacheHit ? 'text-green-400' : 'text-gray-400'
                     }`}>
-                    {performanceStats.cacheHit ? '命中' : '未命中'}
+                    {performanceStats?.cacheHit ? '命中' : '未命中'}
                   </div>
                 </div>
               </div>

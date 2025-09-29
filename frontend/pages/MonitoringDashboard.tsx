@@ -43,7 +43,7 @@ const MonitoringDashboard: React.FC = () => {
   const [trends, setTrends] = useState<PerformanceTrend[]>([]);
 
   // 检查管理员权限
-  const isAdmin = user?.role === 'admin' || user?.permissions?.includes('monitoring');
+  const isAdmin = user.role === 'admin' || user?.permissions?.includes('monitoring');
 
   // 获取系统指标
   const fetchMetrics = useCallback(async () => {

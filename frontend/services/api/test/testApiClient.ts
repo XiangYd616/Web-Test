@@ -84,7 +84,7 @@ export class TestApiClient {
 
     // 响应拦截器 - 统一错误处理
     this.api.interceptors.response.use(
-      (response) => response.data,
+      (response) => response?.data,
       (error) => {
         const errorMessage = error.response?.data?.message || error.message || '未知错误';
         console.error('API Error:', errorMessage);
@@ -139,8 +139,8 @@ export class TestApiClient {
       });
 
       // 如果是异步测试，建立WebSocket连接接收进度
-      if (options.async && response.testId) {
-        this.connectWebSocket(response.testId);
+      if (options?.async && response?.testId) {
+        this.connectWebSocket(response?.testId);
       }
 
       return response;
@@ -157,7 +157,7 @@ export class TestApiClient {
       const response = await this.api.post('/test/batch', {
         tests: requests
       });
-      return response.results;
+      return response?.results;
     } catch (error) {
       throw new Error(`批量测试执行失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
@@ -284,11 +284,11 @@ export const runTest = (engineId: string, config: Record<string, any>) => {
   return testApiClient.runTest({ engineId, config });
 };
 
-export const getTestEngines = () => {
+export const _getTestEngines = () => {
   return testApiClient.getAvailableEngines();
 };
 
-export const validateTestConfig = (engineId: string, config: Record<string, any>) => {
+export const _validateTestConfig = (engineId: string, config: Record<string, any>) => {
   return testApiClient.validateConfig(engineId, config);
 };
 

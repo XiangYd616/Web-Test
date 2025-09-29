@@ -18,11 +18,11 @@ export interface ExportType {
 export interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  data: any;
+  data: unknown;
   testType?: 'stress' | 'api' | 'performance';
   testId?: string;
   testName?: string;
-  onExport: (type: string, data: any) => Promise<void>;
+  onExport: (type: string, data: unknown) => Promise<void>;
 }
 
 // 导出类型配置

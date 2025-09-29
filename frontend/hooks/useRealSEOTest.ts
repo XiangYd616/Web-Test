@@ -9,9 +9,9 @@ import { useCallback, useRef, useState } from 'react';
  * @returns {Promise<Object|null>} 获取的数据
 
  */
-import { RealSEOAnalysisEngine as SEOAnalysisEngine, SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
+import {SEOAnalysisResult} from '../services/realSEOAnalysisEngine';
 
-const getPerformanceMetrics = async (url: string, options: any) => {
+const getPerformanceMetrics = async (url: string, options: unknown) => {
 
   return {
     loadTime: Math.random() * 3000 + 1000,
@@ -50,7 +50,7 @@ interface SEOTestProgress {
   isRunning: boolean;
 }
 
-export const useRealSEOTest = () => {
+export const _useRealSEOTest = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState<SEOTestProgress>({
     progress: 0,
@@ -124,7 +124,7 @@ export const useRealSEOTest = () => {
         isRunning: false
       });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('SEO test failed:', err);
       setError(err.message || 'SEO测试失败');
       setProgress({

@@ -79,9 +79,9 @@ export const getStatusText = (status: string): string => {
 };
 
 // 获取状态图标
-export const getStatusIcon = (status: string, className: string = 'w-4 h-4'): React.ReactElement => {
+export const _getStatusIcon = (status: string, className: string = 'w-4 h-4'): React.ReactElement => {
   const config = getStatusConfig(status);
-  const IconComponent = config.icon;
+  const IconComponent = config?.icon;
   const isAnimated = status === 'running';
 
   return React.createElement(IconComponent, {
@@ -94,7 +94,7 @@ export const getStatusStyleClasses = (status: string): string => {
   const config = getStatusConfig(status);
   const isAnimated = status === 'running';
 
-  return `${config.bgColor} ${config.textColor} ${config.borderColor} ${isAnimated ? 'animate-pulse' : ''}`;
+  return `${config?.bgColor} ${config?.textColor} ${config?.borderColor} ${isAnimated ? 'animate-pulse' : ''}`;
 };
 
 // 解析错误信息
@@ -106,7 +106,7 @@ export interface ParsedErrorInfo {
   timestamp?: string;
 }
 
-export const parseErrorMessage = (errorMessage: string | null, status: string): ParsedErrorInfo | null => {
+export const _parseErrorMessage = (errorMessage: string | null, status: string): ParsedErrorInfo | null => {
   if (!errorMessage) return null;
 
   // 取消状态的处理
@@ -143,7 +143,7 @@ export const parseErrorMessage = (errorMessage: string | null, status: string): 
 };
 
 // 计算测试完成度
-export const calculateTestCompletion = (record: any): number => {
+export const calculateTestCompletion = (record: unknown): number => {
   if (!record) return 0;
 
   // 如果测试已完成，返回100%
@@ -175,7 +175,7 @@ export const calculateTestCompletion = (record: any): number => {
 };
 
 // 格式化持续时间
-export const formatDuration = (seconds: number | null | undefined): string => {
+export const _formatDuration = (seconds: number | null | undefined): string => {
   if (!seconds || seconds <= 0) return '-';
 
   if (seconds < 60) {
@@ -196,7 +196,7 @@ export const formatDuration = (seconds: number | null | undefined): string => {
 };
 
 // 格式化日期时间
-export const formatDateTime = (dateString: string | null | undefined): string => {
+export const _formatDateTime = (dateString: string | null | undefined): string => {
   if (!dateString) return '-';
 
   try {
@@ -214,21 +214,21 @@ export const formatDateTime = (dateString: string | null | undefined): string =>
 };
 
 // 获取状态描述
-export const getStatusDescription = (status: string, errorInfo?: ParsedErrorInfo | null): string => {
+export const _getStatusDescription = (status: string, errorInfo?: ParsedErrorInfo | null): string => {
   const config = getStatusConfig(status);
 
   if (errorInfo) {
-    switch (errorInfo.type) {
+    switch (errorInfo?.type) {
       case 'cancel':
-        return `测试被取消：${errorInfo.reason || errorInfo.message}`;
+        return `测试被取消：${errorInfo?.reason || errorInfo?.message}`;
       case 'timeout':
-        return `测试超时：${errorInfo.details || errorInfo.message}`;
+        return `测试超时：${errorInfo?.details || errorInfo?.message}`;
       case 'error':
-        return `测试失败：${errorInfo.message}`;
+        return `测试失败：${errorInfo?.message}`;
       default:
-        return config.description;
+        return config?.description;
     }
   }
 
-  return config.description;
+  return config?.description;
 };

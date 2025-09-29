@@ -73,7 +73,7 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
 
   const handleCopySecret = async () => {
     if (setupData?.secret) {
-      await navigator.clipboard.writeText(setupData.secret);
+      await navigator.clipboard.writeText(setupData?.secret);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -90,7 +90,7 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
        */
       const success = await enableTOTP(userId, verificationCode);
       if (success && setupData?.backupCodes) {
-        onComplete(setupData.backupCodes);
+        onComplete(setupData?.backupCodes);
       }
     } catch (error) {
       console.error('验证TOTP失败:', error);
@@ -123,7 +123,7 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
           <div className="bg-gray-800 rounded-lg p-6 space-y-4">
             <div className="text-center">
               <img
-                src={setupData.qrCodeUrl}
+                src={setupData?.qrCodeUrl}
                 alt="TOTP QR Code"
                 className="mx-auto bg-white p-4 rounded-lg"
               />
@@ -136,7 +136,7 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
               <div className="flex items-center space-x-2">
                 <input
                   type="text"
-                  value={setupData.secret}
+                  value={setupData?.secret}
                   readOnly
                   className="flex-1 bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-300 font-mono text-sm"
                 />
@@ -203,7 +203,7 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
               <input
                 type="text"
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) => setVerificationCode(e?.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white text-center text-2xl font-mono tracking-widest focus:outline-none focus:border-blue-500"
                 maxLength={6}

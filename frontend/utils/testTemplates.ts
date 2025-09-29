@@ -164,19 +164,19 @@ export const stressTestTemplates: TestTemplate[] = [
   }
 ];
 
-export const getTemplateById = (id: string): TestTemplate | undefined => {
+export const _getTemplateById = (id: string): TestTemplate | undefined => {
   return stressTestTemplates.find(template => template.id === id);
 };
 
-export const getTemplatesByCategory = (category: TestTemplate['category']): TestTemplate[] => {
+export const _getTemplatesByCategory = (category: TestTemplate['category']): TestTemplate[] => {
   return stressTestTemplates.filter(template => template.category === category);
 };
 
-export const getTemplatesByDifficulty = (difficulty: TestTemplate['difficulty']): TestTemplate[] => {
+export const _getTemplatesByDifficulty = (difficulty: TestTemplate['difficulty']): TestTemplate[] => {
   return stressTestTemplates.filter(template => template.difficulty === difficulty);
 };
 
-export const searchTemplates = (query: string): TestTemplate[] => {
+export const _searchTemplates = (query: string): TestTemplate[] => {
   const lowercaseQuery = query.toLowerCase();
   return stressTestTemplates.filter(template =>
     template.name.toLowerCase().includes(lowercaseQuery) ||
@@ -185,7 +185,7 @@ export const searchTemplates = (query: string): TestTemplate[] => {
   );
 };
 
-export const getRecommendedTemplates = (userLevel: 'beginner' | 'intermediate' | 'advanced'): TestTemplate[] => {
+export const _getRecommendedTemplates = (userLevel: 'beginner' | 'intermediate' | 'advanced'): TestTemplate[] => {
   const levelOrder = { beginner: 1, intermediate: 2, advanced: 3 };
   const userLevelValue = levelOrder[userLevel];
 
@@ -195,7 +195,7 @@ export const getRecommendedTemplates = (userLevel: 'beginner' | 'intermediate' |
   });
 };
 
-export const getTemplateCategories = (): Array<{ value: TestTemplate['category'], label: string, description: string }> => {
+export const _getTemplateCategories = (): Array<{ value: TestTemplate['category'], label: string, description: string }> => {
   return [
     { value: 'load', label: '负载测试', description: '测试系统在预期负载下的表现' },
     { value: 'stress', label: '压力测试', description: '测试系统在极限负载下的表现' },

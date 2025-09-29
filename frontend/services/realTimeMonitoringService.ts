@@ -160,18 +160,18 @@ class RealTimeMonitoringService {
   /**
    * 处理站点状态更新
    */
-  private handleSiteStatusUpdate(data: any) {
-    const site = this.sites.get(data.siteId);
+  private handleSiteStatusUpdate(data: unknown) {
+    const site = this.sites.get(data?.siteId);
     if (site) {
-      site.status = data.status;
-      site.responseTime = data.responseTime;
-      site.lastCheck = data.timestamp;
+      site.status = data?.status;
+      site.responseTime = data?.responseTime;
+      site.lastCheck = data?.timestamp;
 
-      if (data.metrics) {
-        site.metrics = { ...site.metrics, ...data.metrics };
+      if (data?.metrics) {
+        site.metrics = { ...site.metrics, ...data?.metrics };
       }
 
-      this.sites.set(data.siteId, site);
+      this.sites.set(data?.siteId, site);
       this.saveToStorage();
       this.emit('siteUpdated', site);
     }
@@ -195,13 +195,13 @@ class RealTimeMonitoringService {
   /**
    * 处理指标更新
    */
-  private handleMetricsUpdate(data: any) {
-    const site = this.sites.get(data.siteId);
-    if (site && data.metrics) {
-      site.metrics = { ...site.metrics, ...data.metrics };
-      this.sites.set(data.siteId, site);
+  private handleMetricsUpdate(data: unknown) {
+    const site = this.sites.get(data?.siteId);
+    if (site && data?.metrics) {
+      site.metrics = { ...site.metrics, ...data?.metrics };
+      this.sites.set(data?.siteId, site);
       this.saveToStorage();
-      this.emit('metricsUpdated', { siteId: data.siteId, metrics: data.metrics });
+      this.emit('metricsUpdated', { siteId: data?.siteId, metrics: data?.metrics });
     }
   }
 
@@ -261,8 +261,8 @@ class RealTimeMonitoringService {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.success) {
-          this.updateSitesFromAPI(data.data);
+        if (data?.success) {
+          this.updateSitesFromAPI(data?.data);
         }
       }
     } catch (error) {
@@ -276,9 +276,9 @@ class RealTimeMonitoringService {
   /**
    * 从API数据更新站点信息
    */
-  private updateSitesFromAPI(data: any) {
-    if (data.sites) {
-      data.sites.forEach((siteData: any) => {
+  private updateSitesFromAPI(data: unknown) {
+    if (data?.sites) {
+      data?.sites.forEach((siteData: unknown) => {
         const site: MonitoringSite = {
           id: siteData.id,
           name: siteData.name,
@@ -303,8 +303,8 @@ class RealTimeMonitoringService {
       this.emit('sitesUpdated', Array.from(this.sites.values()));
     }
 
-    if (data.alerts) {
-      this.alerts = data.alerts;
+    if (data?.alerts) {
+      this.alerts = data?.alerts;
       this.saveToStorage();
       this.emit('alertsUpdated', this.alerts);
     }
@@ -313,7 +313,7 @@ class RealTimeMonitoringService {
   /**
    * 事件监听器管理
    */
-  private emit(event: string, data?: any) {
+  private emit(event: string, data?: unknown) {
     const eventListeners = this.listeners.get(event) || [];
     eventListeners.forEach(listener => {
       try {

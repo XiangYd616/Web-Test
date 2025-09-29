@@ -172,14 +172,14 @@ export const StressTestMetrics: React.FC<StressTestMetricsProps> = ({
     : 0;
 
   // 阈值检查
-  const responseTimeWarning = metrics.averageResponseTime > thresholds.responseTime.warning;
-  const responseTimeCritical = metrics.averageResponseTime > thresholds.responseTime.critical;
+  const responseTimeWarning = metrics.averageResponseTime > thresholds?.responseTime.warning;
+  const responseTimeCritical = metrics.averageResponseTime > thresholds?.responseTime.critical;
 
-  const errorRateWarning = errorRate > thresholds.errorRate.warning;
-  const errorRateCritical = errorRate > thresholds.errorRate.critical;
+  const errorRateWarning = errorRate > thresholds?.errorRate.warning;
+  const errorRateCritical = errorRate > thresholds?.errorRate.critical;
 
-  const tpsWarning = metrics.currentTPS < thresholds.tps.warning;
-  const tpsCritical = metrics.currentTPS < thresholds.tps.critical;
+  const tpsWarning = metrics.currentTPS < thresholds?.tps.warning;
+  const tpsCritical = metrics.currentTPS < thresholds?.tps.critical;
 
   const metricsData = [
     {
@@ -250,7 +250,7 @@ export const StressTestMetrics: React.FC<StressTestMetricsProps> = ({
     });
   }
 
-  const allMetrics = [...metricsData, ...advancedMetrics];
+  const _allMetrics = [...metricsData, ...advancedMetrics];
 
   return (
     <div className={className}>

@@ -58,7 +58,7 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: any;
+  value?: unknown;
 }
 
 // ==================== API元数据接口 ====================
@@ -70,7 +70,7 @@ export interface ApiMeta {
   method: string;
   responseTime?: string;
   pagination?: PaginationInfo;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PaginationInfo {

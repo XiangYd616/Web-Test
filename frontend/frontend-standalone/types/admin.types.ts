@@ -148,7 +148,7 @@ export interface TestManagement {
   createdAt: string;
   completedAt?: string;
   duration?: number;
-  result?: any;
+  result?: unknown;
   error?: string;
 }
 
@@ -249,7 +249,7 @@ export interface ActivityLog {
   username?: string;
   action: string;
   resource: string;
-  details: any;
+  details: unknown;
   ipAddress: string;
   userAgent: string;
   timestamp: string;

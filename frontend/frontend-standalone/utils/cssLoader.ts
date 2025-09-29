@@ -75,7 +75,7 @@ const pageCSS: Record<string, string[]> = {
   // 保留映射结构以防需要动态加载特定样式
 };
 
-export const loadPageCSS = async (pageName: string): Promise<void> => {
+export const _loadPageCSS = async (pageName: string): Promise<void> => {
   const cssFiles = pageCSS[pageName];
   if (!cssFiles || cssFiles.length === 0) {
     return;
@@ -88,7 +88,7 @@ export const loadPageCSS = async (pageName: string): Promise<void> => {
   }
 };
 
-export const preloadPageCSS = (pageName: string): void => {
+export const _preloadPageCSS = (pageName: string): void => {
   const cssFiles = pageCSS[pageName];
   if (!cssFiles || cssFiles.length === 0) {
     return;
@@ -102,7 +102,7 @@ const componentCSS: Record<string, string> = {
   // 保留映射结构以防需要动态加载特定样式
 };
 
-export const loadComponentCSS = async (componentName: string): Promise<void> => {
+export const _loadComponentCSS = async (componentName: string): Promise<void> => {
   const cssFile = componentCSS[componentName];
   if (!cssFile) {
     return;
@@ -115,7 +115,7 @@ export const loadComponentCSS = async (componentName: string): Promise<void> => 
   }
 };
 
-export const unloadCSS = (href: string): void => {
+export const _unloadCSS = (href: string): void => {
   const link = document.querySelector(`link[href="${href}"]`);
   if (link) {
     document.head.removeChild(link);
@@ -123,11 +123,11 @@ export const unloadCSS = (href: string): void => {
   }
 };
 
-export const getLoadedCSS = (): string[] => {
+export const _getLoadedCSS = (): string[] => {
   return Array.from(loadedCSS);
 };
 
-export const clearDynamicCSS = (): void => {
+export const _clearDynamicCSS = (): void => {
   loadedCSS.forEach(href => {
     const link = document.querySelector(`link[href="${href}"]`);
     if (link) {
@@ -137,7 +137,7 @@ export const clearDynamicCSS = (): void => {
   loadedCSS.clear();
 };
 
-export const cssLoadingMetrics = {
+export const _cssLoadingMetrics = {
   startTime: 0,
   endTime: 0,
   loadedFiles: 0,

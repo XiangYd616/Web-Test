@@ -9,7 +9,6 @@
 import React from 'react';
 import type { FC } from 'react';
 import { Clock, Users, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
-import { type QueueStats } from '../../services/stressTestQueueManager';
 
 interface StressTestQueueStatusProps {
   queueStats: QueueStats;
@@ -71,7 +70,7 @@ const StressTestQueueStatus: React.FC<StressTestQueueStatusProps> = ({
         </h3>
         {currentQueueId && (
           <div className="text-sm text-gray-400">
-            队列ID: {currentQueueId.slice(-8)}
+            队列ID: {currentQueueId?.slice(-8)}
           </div>
         )}
       </div>

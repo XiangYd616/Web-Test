@@ -50,7 +50,7 @@ export function formatApiResponse<T>(
  * @param error 错误对象
  * @returns 错误处理结果
  */
-export function handleApiError(error: any) {
+export function handleApiError(error: unknown) {
     // 网络错误
     if (error.code === 'NETWORK_ERROR' || !error.response) {
         return {
@@ -159,7 +159,7 @@ export function isApiSuccess<T>(response: ApiResponse<T>): response is ApiRespon
  * @returns 响应数据
  */
 export function extractApiData<T>(response: ApiResponse<T>): T | null {
-    return isApiSuccess(response) ? response.data || null : null;
+    return isApiSuccess(response) ? response?.data || null : null;
 }
 
 /**
@@ -170,7 +170,7 @@ export function extractApiData<T>(response: ApiResponse<T>): T | null {
 export function extractApiError<T>(response: ApiResponse<T>): string | null {
     if (isApiSuccess(response)) return null;
 
-    const error = response.error;
+    const error = response?.error;
     if (typeof error === 'string') {
         return error;
     } else if (error && typeof error === 'object' && 'message' in error) {

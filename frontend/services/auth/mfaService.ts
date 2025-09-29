@@ -122,7 +122,7 @@ class TOTPGenerator {
       (signatureArray[offset + 3] & 0xff)
     ) % 1000000;
 
-    return code.toString().padStart(6, '0');
+    return code?.toString().padStart(6, '0');
   }
 
   /**
@@ -454,7 +454,7 @@ export class MFAService {
     }
 
     const userSetups = await this.getUserMFASetups(userId);
-    const setup = userSetups.find(s => s.method === method && s.isEnabled);
+    const setup = userSetups.find(s => s.method === method && s?.isEnabled);
 
     if (!setup) {
       throw new Error('未找到启用的MFA方法');
@@ -567,19 +567,19 @@ export class MFAService {
     switch (challenge.method) {
       case 'totp':
         const userSetups = await this.getUserMFASetups(challenge.userId);
-        const totpSetup = userSetups.find(s => s.method === 'totp' && s.isEnabled);
+        const totpSetup = userSetups.find(s => s.method === 'totp' && s?.isEnabled);
         if (totpSetup?.secret) {
-          isValid = await TOTPGenerator.verifyTOTP(totpSetup.secret, code);
+          isValid = await TOTPGenerator.verifyTOTP(totpSetup?.secret, code);
         }
 
         // 如果TOTP验证失败，尝试备用码
         if (!isValid && totpSetup?.backupCodes) {
-          const codeIndex = totpSetup.backupCodes.indexOf(code);
+          const codeIndex = totpSetup?.backupCodes.indexOf(code);
           if (codeIndex !== -1) {
             isValid = true;
             backupCodeUsed = true;
             // 移除已使用的备用码
-            totpSetup.backupCodes.splice(codeIndex, 1);
+            totpSetup?.backupCodes.splice(codeIndex, 1);
             await this.saveMFASetup(totpSetup);
           }
         }
@@ -598,7 +598,7 @@ export class MFAService {
 
       // 更新最后使用时间
       const userSetups = await this.getUserMFASetups(challenge.userId);
-      const setup = userSetups.find(s => s.method === challenge.method && s.isEnabled);
+      const setup = userSetups.find(s => s.method === challenge.method && s?.isEnabled);
       if (setup) {
         setup.lastUsed = new Date().toISOString();
         await this.saveMFASetup(setup);
@@ -658,7 +658,7 @@ export class MFAService {
    */
   async regenerateBackupCodes(userId: string): Promise<string[]> {
     const userSetups = await this.getUserMFASetups(userId);
-    const totpSetup = userSetups.find(s => s.method === 'totp' && s.isEnabled);
+    const totpSetup = userSetups.find(s => s.method === 'totp' && s?.isEnabled);
 
     if (!totpSetup) {
       throw new Error('未找到TOTP设置');
@@ -697,7 +697,7 @@ export class MFAService {
     const attempts = this.attemptCounts.get(userId);
     if (!attempts?.lockoutUntil) return false;
 
-    return Date.now() < attempts.lockoutUntil;
+    return Date.now() < attempts?.lockoutUntil;
   }
 
   private lockoutUser(userId: string): void {
@@ -712,12 +712,12 @@ export class MFAService {
   }
 
   private maskPhone(phone: string): string {
-    if (phone.length <= 4) return phone;
-    return phone.slice(0, 3) + '****' + phone.slice(-4);
+    if (phone?.length <= 4) return phone;
+    return phone?.slice(0, 3) + '****' + phone?.slice(-4);
   }
 
   private maskEmail(email: string): string {
-    const [local, domain] = email.split('@');
+    const [local, domain] = email?.split('@');
     if (local.length <= 2) return email;
     return local.slice(0, 2) + '***@' + domain;
   }

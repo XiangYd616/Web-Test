@@ -43,9 +43,9 @@ export interface TestExecution {
   endTime?: string;
   duration?: number;
   progress: number;
-  results?: any;
+  results?: unknown;
   error?: string;
-  config?: any;
+  config?: unknown;
   metadata?: Record<string, any>;
 }
 
@@ -139,7 +139,7 @@ export function getAvailableTestTypes(): TestType[] {
 // 获取启用的测试类型
 export function getEnabledTestTypes(): TestType[] {
   return Object.entries(TEST_TYPE_CONFIG)
-    .filter(([, config]) => config.enabled)
+    .filter(([, config]) => config?.enabled)
     .map(([type]) => type as TestType);
 }
 

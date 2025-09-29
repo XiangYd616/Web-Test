@@ -80,7 +80,7 @@ export const snakeToCamelCase = (str: string): string => {
 /**
  * 将数据库记录转换为前端格式
  */
-export const mapDatabaseToFrontend = <T = any>(dbRecord: any): T => {
+export const mapDatabaseToFrontend = <T = any>(dbRecord: unknown): T => {
   if (!dbRecord || typeof dbRecord !== 'object') {
     return dbRecord;
   }
@@ -89,7 +89,7 @@ export const mapDatabaseToFrontend = <T = any>(dbRecord: any): T => {
     return dbRecord.map(item => mapDatabaseToFrontend(item)) as T;
   }
   
-  const result: any = {};
+  const result: unknown = {};
   
   for (const [key, value] of Object.entries(dbRecord)) {
     const camelKey = snakeToCamelCase(key);
@@ -98,7 +98,7 @@ export const mapDatabaseToFrontend = <T = any>(dbRecord: any): T => {
     if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
       result[camelKey] = mapDatabaseToFrontend(value);
     } else if (Array.isArray(value)) {
-      result[camelKey] = value.map(item => 
+      result[camelKey] = value?.map(item => 
         typeof item === 'object' ? mapDatabaseToFrontend(item) : item
       );
     } else {
@@ -117,7 +117,7 @@ export const mapDatabaseToFrontend = <T = any>(dbRecord: any): T => {
 /**
  * 将前端数据转换为数据库格式
  */
-export const mapFrontendToDatabase = (frontendData: any): any => {
+export const mapFrontendToDatabase = (frontendData: unknown): unknown => {
   if (!frontendData || typeof frontendData !== 'object') {
     return frontendData;
   }
@@ -126,7 +126,7 @@ export const mapFrontendToDatabase = (frontendData: any): any => {
     return frontendData.map(item => mapFrontendToDatabase(item));
   }
   
-  const result: any = {};
+  const result: unknown = {};
   
   for (const [key, value] of Object.entries(frontendData)) {
     const snakeKey = camelToSnakeCase(key);
@@ -135,7 +135,7 @@ export const mapFrontendToDatabase = (frontendData: any): any => {
     if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
       result[snakeKey] = mapFrontendToDatabase(value);
     } else if (Array.isArray(value)) {
-      result[snakeKey] = value.map(item => 
+      result[snakeKey] = value?.map(item => 
         typeof item === 'object' ? mapFrontendToDatabase(item) : item
       );
     } else {
@@ -149,11 +149,11 @@ export const mapFrontendToDatabase = (frontendData: any): any => {
 /**
  * API响应数据转换
  */
-export const transformApiResponse = <T = any>(response: any): T => {
+export const _transformApiResponse = <T = any>(response: unknown): T => {
   if (response?.data) {
     return {
       ...response,
-      data: mapDatabaseToFrontend<T>(response.data)
+      data: mapDatabaseToFrontend<T>(response?.data)
     };
   }
   
@@ -163,24 +163,24 @@ export const transformApiResponse = <T = any>(response: any): T => {
 /**
  * API请求数据转换
  */
-export const transformApiRequest = (requestData: any): any => {
+export const _transformApiRequest = (requestData: unknown): unknown => {
   return mapFrontendToDatabase(requestData);
 };
 
 /**
  * 批量字段转换
  */
-export const batchTransformFields = (
-  data: any[], 
-  transformer: (item: any) => any
-): any[] => {
+export const _batchTransformFields = (
+  data: unknown[], 
+  transformer: (item: unknown) => any
+): unknown[] => {
   return data.map(transformer);
 };
 
 /**
  * 验证字段命名规范
  */
-export const validateFieldNaming = (obj: any, context: 'frontend' | 'database' = 'frontend'): {
+export const _validateFieldNaming = (obj: unknown, context: 'frontend' | 'database' = 'frontend'): {
   valid: boolean;
   errors: string[];
 } => {
@@ -211,7 +211,7 @@ export const validateFieldNaming = (obj: any, context: 'frontend' | 'database' =
     }
   };
   
-  const traverse = (current: any, currentPath: string = '') => {
+  const traverse = (current: unknown, currentPath: string = '') => {
     if (Array.isArray(current)) {
       current.forEach((item, index) => {
         if (typeof item === 'object') {
@@ -240,7 +240,7 @@ export const validateFieldNaming = (obj: any, context: 'frontend' | 'database' =
 /**
  * 字段映射统计
  */
-export const getFieldMappingStats = () => {
+export const _getFieldMappingStats = () => {
   return {
     totalMappings: Object.keys(FIELD_MAPPINGS).length,
     mappings: FIELD_MAPPINGS,
@@ -272,6 +272,6 @@ export const createFieldTransformer = <TInput, TOutput>(): FieldTransformer<TInp
 };
 
 // 导出常用的转换器实例
-export const userTransformer = createFieldTransformer<any, any>();
-export const testTransformer = createFieldTransformer<any, any>();
-export const monitoringTransformer = createFieldTransformer<any, any>();
+export const _userTransformer = createFieldTransformer<any, any>();
+export const _testTransformer = createFieldTransformer<any, any>();
+export const _monitoringTransformer = createFieldTransformer<any, any>();

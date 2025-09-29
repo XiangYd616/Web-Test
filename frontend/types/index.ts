@@ -94,7 +94,7 @@ export interface TestManagerInfo {
   /** 管理器类型 */
   type: string;
   /** 管理器配置 */
-  config: any;
+  config: unknown;
   /** 管理器状态 */
   status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled';
   /** 进度 */
@@ -106,7 +106,7 @@ export interface TestManagerInfo {
   /** 当前步骤 */
   currentStep: string;
   /** 测试结果 */
-  result: any;
+  result: unknown;
   /** 错误信息 */
   error: string | null;
 }
@@ -308,14 +308,14 @@ export interface SecurityTestConfig {
 
 // 测试API客户端接口
 export interface TestApiClient {
-  executeTest(config: any): Promise<any>;
+  executeTest(config: unknown): Promise<any>;
   getTestResult(testId: string): Promise<any>;
   cancelTest(testId: string): Promise<any>;
-  getTestHistory(filters?: any): Promise<any>;
+  getTestHistory(filters?: unknown): Promise<any>;
 }
 
 // 回调函数类型
-export type CompletionCallback = (result: any) => void;
+export type CompletionCallback = (result: unknown) => void;
 export type ProgressCallback = (progress: number, stage: string) => void;
 export type ErrorCallback = (error: Error) => void;
 

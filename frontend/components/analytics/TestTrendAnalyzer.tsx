@@ -4,19 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
-  AlertTriangle, 
-  CheckCircle,
-  Target,
-  Calendar,
-  Filter,
-  Download,
-  Eye,
-  Zap
-} from 'lucide-react';
+import {TrendingUp, TrendingDown, BarChart3, Target, Filter, Eye} from 'lucide-react';
 
 export interface TestMetric {
   testType: string;
@@ -29,7 +17,7 @@ export interface TestMetric {
     environment: string;
     version: string;
     branch: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -86,7 +74,7 @@ interface TestTrendAnalyzerProps {
   metrics: TestMetric[];
   timeRange: '7d' | '30d' | '90d' | '1y';
   testTypes: string[];
-  onInsightAction?: (insight: any) => void;
+  onInsightAction?: (insight: unknown) => void;
 }
 
 export const TestTrendAnalyzer: React.FC<TestTrendAnalyzerProps> = ({
@@ -302,7 +290,7 @@ export const TestTrendAnalyzer: React.FC<TestTrendAnalyzerProps> = ({
     };
   };
 
-  const generateInsights = (metrics: TestMetric[], trend: string, changeRate: number, anomalies: any[]) => {
+  const generateInsights = (metrics: TestMetric[], trend: string, changeRate: number, anomalies: unknown[]) => {
     const insights = [];
 
     if (Math.abs(changeRate) > 10) {
@@ -338,7 +326,7 @@ export const TestTrendAnalyzer: React.FC<TestTrendAnalyzerProps> = ({
     return insights;
   };
 
-  const generateBusinessRecommendations = (metrics: any) => {
+  const generateBusinessRecommendations = (metrics: unknown) => {
     const recommendations = [];
 
     if (metrics.qualityScore < 70) {

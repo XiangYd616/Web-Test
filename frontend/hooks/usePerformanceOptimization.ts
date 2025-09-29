@@ -93,7 +93,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 /**
  * 节流Hook
  */
-export function useThrottle<T extends (...args: any[]) => any>(
+export function useThrottle<T extends (...args: unknown[]) => any>(
   callback: T,
   delay: number
 ): T {
@@ -297,7 +297,7 @@ export function useRenderPerformance(componentName: string) {
 
     // 每100次渲染报告一次平均性能
     if (renderCount.current % 100 === 0) {
-      const avgRenderTime = totalRenderTime.current / renderCount.current;
+      const _avgRenderTime = totalRenderTime.current / renderCount.current;
     }
   });
 

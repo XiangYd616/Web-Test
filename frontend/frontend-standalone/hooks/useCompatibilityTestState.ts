@@ -84,7 +84,7 @@ interface LocalCompatibilityTestResult {
   browserResults: BrowserTestResult[];
   deviceResults: DeviceTestResult[];
   summary: string;
-  details: any;
+  details: unknown;
   duration?: number;
 }
 
@@ -320,13 +320,13 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult: any) => {
+        (testResult: unknown) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError: any) => {
+        (testError: unknown) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -335,7 +335,7 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
 
       setTestId(newTestId);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || '兼容性测试启动失败');
       setIsRunning(false);
       setCurrentStep('');
@@ -352,7 +352,7 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
         abortControllerRef.current?.abort();
         setIsRunning(false);
         setCurrentStep('测试已停止');
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err.message || '停止测试失败');
       }
     }

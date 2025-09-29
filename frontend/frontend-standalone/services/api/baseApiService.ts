@@ -124,7 +124,7 @@ export class BaseApiService {
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        console.warn(`⚠️ API请求失败 (尝试 ${attempt + 1}/${retries + 1}): ${lastError.message}`);
+        console.warn(`⚠️ API请求失败 (尝试 ${attempt + 1}/${retries + 1}): ${lastError?.message}`);
 
         // 如果是最后一次尝试，或者是不可重试的错误，直接抛出
         if (attempt === retries || this.isNonRetryableError(lastError)) {
@@ -166,14 +166,14 @@ export class BaseApiService {
       if (typeof data === 'object' && data !== null) {
         // 直接使用现有对象结构，避免不必要的属性复制
         const result: ApiResponse<T> = {
-          success: response.ok && (data.success !== false),
-          data: data.data || data
+          success: response.ok && (data?.success !== false),
+          data: data?.data || data
         };
 
         // 只在存在时才添加可选属性
-        if (data.error) result.error = data.error;
-        if (data.message) result.message = data.message;
-        if (data.errors) result.errors = data.errors;
+        if (data?.error) result.error = data?.error;
+        if (data?.message) result.message = data?.message;
+        if (data?.errors) result.errors = data?.errors;
 
         return result;
       }
@@ -186,7 +186,7 @@ export class BaseApiService {
     } catch (error) {
       return {
         success: false,
-        error: `响应解析失败: ${error instanceof Error ? error.message : String(error)}`
+        error: `响应解析失败: ${error instanceof Error ? error?.message : String(error)}`
       };
     }
   }
@@ -203,7 +203,7 @@ export class BaseApiService {
       /400/i  // 请求错误
     ];
 
-    return nonRetryablePatterns.some(pattern => pattern.test(error.message));
+    return nonRetryablePatterns.some(pattern => pattern.test(error?.message));
   }
 
   /**
@@ -223,7 +223,7 @@ export class BaseApiService {
   /**
    * 🔧 POST请求
    */
-  protected async post<T = any>(endpoint: string, data?: any, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  protected async post<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
       method: 'POST',
@@ -234,7 +234,7 @@ export class BaseApiService {
   /**
    * 🔧 PUT请求
    */
-  protected async put<T = any>(endpoint: string, data?: any, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  protected async put<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PUT',
@@ -252,7 +252,7 @@ export class BaseApiService {
   /**
    * 🔧 PATCH请求
    */
-  protected async patch<T = any>(endpoint: string, data?: any, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  protected async patch<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PATCH',
@@ -276,6 +276,6 @@ export class BaseApiService {
 }
 
 // 创建统一API服务实例
-export const unifiedApiService = new BaseApiService();
+export const _unifiedApiService = new BaseApiService();
 
 export default BaseApiService;

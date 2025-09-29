@@ -48,7 +48,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
 
   // URL验证函数
   const validateURL = useCallback((url: string) => {
-    if (!url.trim()) {
+    if (!url?.trim()) {
       setIsValid(null);
       setSuggestion('');
       setCorrectedUrl('');
@@ -61,7 +61,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
       let testUrl = url;
       let needsProtocol = false;
 
-      if (!url.match(/^https?:\/\//)) {
+      if (!url?.match(/^https?:\/\//)) {
         testUrl = `https://${url}`;
         needsProtocol = true;
       }
@@ -88,7 +88,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
       setIsValid(false);
       setCorrectedUrl('');
 
-      if (showProtocolSuggestion && !url.match(/^https?:\/\//)) {
+      if (showProtocolSuggestion && !url?.match(/^https?:\/\//)) {
         const suggestedUrl = `https://${url}`;
         setSuggestion(`尝试添加协议: ${suggestedUrl}`);
         setCorrectedUrl(suggestedUrl);

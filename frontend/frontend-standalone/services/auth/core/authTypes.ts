@@ -22,8 +22,8 @@ export interface User {
   avatar?: string;
   role: string;
   status: string;
-  permissions?: any[];
-  preferences?: any;
+  permissions?: unknown[];
+  preferences?: unknown;
   metadata?: Record<string, any>;
   createdAt?: string;
   updatedAt?: string;

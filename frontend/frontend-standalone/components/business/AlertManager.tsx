@@ -33,7 +33,7 @@ interface Alert {
     severity: 'low' | 'medium' | 'high' | 'critical';
     status: 'active' | 'acknowledged' | 'resolved';
     message: string;
-    details: any;
+    details: unknown;
     created_at: string;
     acknowledged_at?: string;
     resolved_at?: string;
@@ -117,8 +117,8 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
             }
 
             const params = new URLSearchParams({
-                page: pagination.page.toString(),
-                limit: pagination.limit.toString(),
+                page: pagination?.page.toString(),
+                limit: pagination?.limit.toString(),
                 status: filters.status,
                 timeRange: filters.timeRange,
                 ...(filters.severity && { severity: filters.severity })
@@ -156,7 +156,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
         } finally {
             setLoading(false);
         }
-    }, [pagination.page, pagination.limit, filters]);
+    }, [pagination?.page, pagination?.limit, filters]);
 
     // 获取告警统计
     const fetchStats = useCallback(async () => {
@@ -392,7 +392,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
     };
 
     // 测试通知配置
-    const testNotification = async (config: any) => {
+    const testNotification = async (config: unknown) => {
         try {
             const response = await fetch('/api/v1/alerts/test-notification', {
                 method: 'POST',
@@ -502,7 +502,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                             <AlertTriangle className="h-8 w-8 text-red-500" />
                             <div className="ml-3">
                                 <p className="text-sm font-medium text-gray-500">严重告警</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.criticalAlerts}</p>
+                                <p className="text-2xl font-bold text-gray-900">{stats?.criticalAlerts}</p>
                             </div>
                         </div>
                     </div>
@@ -511,7 +511,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                             <AlertCircle className="h-8 w-8 text-orange-500" />
                             <div className="ml-3">
                                 <p className="text-sm font-medium text-gray-500">高级告警</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.highAlerts}</p>
+                                <p className="text-2xl font-bold text-gray-900">{stats?.highAlerts}</p>
                             </div>
                         </div>
                     </div>
@@ -520,7 +520,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                             <Bell className="h-8 w-8 text-blue-500" />
                             <div className="ml-3">
                                 <p className="text-sm font-medium text-gray-500">活跃告警</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.activeAlerts}</p>
+                                <p className="text-2xl font-bold text-gray-900">{stats?.activeAlerts}</p>
                             </div>
                         </div>
                     </div>
@@ -529,7 +529,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                             <CheckCircle className="h-8 w-8 text-green-500" />
                             <div className="ml-3">
                                 <p className="text-sm font-medium text-gray-500">已解决</p>
-                                <p className="text-2xl font-bold text-gray-900">{stats.resolvedAlerts}</p>
+                                <p className="text-2xl font-bold text-gray-900">{stats?.resolvedAlerts}</p>
                             </div>
                         </div>
                     </div>
@@ -543,7 +543,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                         <Filter className="h-4 w-4 text-gray-500" />
                         <select
                             value={filters.status}
-                            onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                            onChange={(e) => setFilters(prev => ({ ...prev, status: e?.target.value }))}
                             className="border border-gray-300 rounded px-3 py-1 text-sm"
                         >
                             <option value="active">活跃</option>
@@ -554,7 +554,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
 
                     <select
                         value={filters.severity}
-                        onChange={(e) => setFilters(prev => ({ ...prev, severity: e.target.value }))}
+                        onChange={(e) => setFilters(prev => ({ ...prev, severity: e?.target.value }))}
                         className="border border-gray-300 rounded px-3 py-1 text-sm"
                     >
                         <option value="">所有严重程度</option>
@@ -566,7 +566,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
 
                     <select
                         value={filters.timeRange}
-                        onChange={(e) => setFilters(prev => ({ ...prev, timeRange: e.target.value }))}
+                        onChange={(e) => setFilters(prev => ({ ...prev, timeRange: e?.target.value }))}
                         className="border border-gray-300 rounded px-3 py-1 text-sm"
                     >
                         <option value="1h">最近1小时</option>
@@ -580,7 +580,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                         <Input
                             placeholder="搜索告警..."
                             value={filters.search}
-                            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                            onChange={(e) => setFilters(prev => ({ ...prev, search: e?.target.value }))}
                             className="text-sm"
                         />
                     </div>
@@ -637,7 +637,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                                     <th className="px-6 py-3 text-left">
                                         <input
                                             type="checkbox"
-                                            checked={selectedAlerts.length === alerts.length}
+                                            checked={selectedAlerts.length === alerts?.length}
 
                                                 /**
 
@@ -649,8 +649,8 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
 
                                                  */
                                             onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setSelectedAlerts(alerts.map(alert => alert.id));
+                                                if (e?.target.checked) {
+                                                    setSelectedAlerts(alerts?.map(alert => alert.id));
                                                 } else {
                                                     setSelectedAlerts([]);
                                                 }
@@ -679,7 +679,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {alerts.map((alert) => (
+                                {alerts?.map((alert) => (
                                     <tr key={alert.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4">
                                             <input
@@ -696,7 +696,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
 
                                                      */
                                                 onChange={(e) => {
-                                                    if (e.target.checked) {
+                                                    if (e?.target.checked) {
                                                         setSelectedAlerts(prev => [...prev, alert.id]);
                                                     } else {
                                                         setSelectedAlerts(prev => prev.filter(id => id !== alert.id));
@@ -785,29 +785,29 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
             </div>
 
             {/* 分页 */}
-            {pagination.totalPages > 1 && (
+            {pagination?.totalPages > 1 && (
                 <div className="mt-6 flex items-center justify-between">
                     <div className="text-sm text-gray-700">
-                        显示 {((pagination.page - 1) * pagination.limit) + 1} 到{' '}
-                        {Math.min(pagination.page * pagination.limit, pagination.total)} 条，
-                        共 {pagination.total} 条
+                        显示 {((pagination?.page - 1) * pagination?.limit) + 1} 到{' '}
+                        {Math.min(pagination?.page * pagination?.limit, pagination?.total)} 条，
+                        共 {pagination?.total} 条
                     </div>
                     <div className="flex items-center space-x-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            disabled={pagination.page <= 1}
+                            disabled={pagination?.page <= 1}
                             onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
                         >
                             上一页
                         </Button>
                         <span className="text-sm text-gray-700">
-                            第 {pagination.page} 页，共 {pagination.totalPages} 页
+                            第 {pagination?.page} 页，共 {pagination?.totalPages} 页
                         </span>
                         <Button
                             variant="outline"
                             size="sm"
-                            disabled={pagination.page >= pagination.totalPages}
+                            disabled={pagination?.page >= pagination?.totalPages}
                             onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
                         >
                             下一页
@@ -842,7 +842,7 @@ interface AlertSettingsModalProps {
     rules: AlertRules;
     onSave: (rules: AlertRules) => void;
     onClose: () => void;
-    onTestNotification: (config: any) => void;
+    onTestNotification: (config: unknown) => void;
 }
 
 const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
@@ -869,7 +869,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
     const [formData, setFormData] = useState<AlertRules>(rules);
 
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+        e?.preventDefault();
         onSave(formData);
     };
 
@@ -895,7 +895,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                 type="checkbox"
                                 id="enabled"
                                 checked={formData.enabled}
-                                onChange={(e) => setFormData(prev => ({ ...prev, enabled: e.target.checked }))}
+                                onChange={(e) => setFormData(prev => ({ ...prev, enabled: e?.target.checked }))}
                                 className="rounded border-gray-300"
                             />
                             <label htmlFor="enabled" className="ml-2 text-sm text-gray-700">
@@ -912,7 +912,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                 value={formData.cooldown / 60000}
                                 onChange={(e) => setFormData(prev => ({
                                     ...prev,
-                                    cooldown: parseInt(e.target.value) * 60000
+                                    cooldown: parseInt(e?.target.value) * 60000
                                 }))}
                                 min="1"
                                 max="60"
@@ -934,7 +934,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                 value={formData.thresholds.medium}
                                 onChange={(e) => setFormData(prev => ({
                                     ...prev,
-                                    thresholds: { ...prev.thresholds, medium: parseInt(e.target.value) }
+                                    thresholds: { ...prev.thresholds, medium: parseInt(e?.target.value) }
                                 }))}
                                 min="1"
                                 max="10"
@@ -949,7 +949,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                 value={formData.thresholds.high}
                                 onChange={(e) => setFormData(prev => ({
                                     ...prev,
-                                    thresholds: { ...prev.thresholds, high: parseInt(e.target.value) }
+                                    thresholds: { ...prev.thresholds, high: parseInt(e?.target.value) }
                                 }))}
                                 min="1"
                                 max="10"
@@ -964,7 +964,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                 value={formData.thresholds.critical}
                                 onChange={(e) => setFormData(prev => ({
                                     ...prev,
-                                    thresholds: { ...prev.thresholds, critical: parseInt(e.target.value) }
+                                    thresholds: { ...prev.thresholds, critical: parseInt(e?.target.value) }
                                 }))}
                                 min="1"
                                 max="10"
@@ -984,7 +984,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                 checked={formData.notifications.email}
                                 onChange={(e) => setFormData(prev => ({
                                     ...prev,
-                                    notifications: { ...prev.notifications, email: e.target.checked }
+                                    notifications: { ...prev.notifications, email: e?.target.checked }
                                 }))}
                                 className="rounded border-gray-300"
                             />
@@ -1002,7 +1002,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                     checked={formData.notifications.webhook}
                                     onChange={(e) => setFormData(prev => ({
                                         ...prev,
-                                        notifications: { ...prev.notifications, webhook: e.target.checked }
+                                        notifications: { ...prev.notifications, webhook: e?.target.checked }
                                     }))}
                                     className="rounded border-gray-300"
                                 />
@@ -1017,7 +1017,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                     value={formData.notifications.webhook_url || ''}
                                     onChange={(e) => setFormData(prev => ({
                                         ...prev,
-                                        notifications: { ...prev.notifications, webhook_url: e.target.value }
+                                        notifications: { ...prev.notifications, webhook_url: e?.target.value }
                                     }))}
                                 />
                             )}
@@ -1031,7 +1031,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                     checked={formData.notifications.slack}
                                     onChange={(e) => setFormData(prev => ({
                                         ...prev,
-                                        notifications: { ...prev.notifications, slack: e.target.checked }
+                                        notifications: { ...prev.notifications, slack: e?.target.checked }
                                     }))}
                                     className="rounded border-gray-300"
                                 />
@@ -1046,7 +1046,7 @@ const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                     value={formData.notifications.slack_webhook || ''}
                                     onChange={(e) => setFormData(prev => ({
                                         ...prev,
-                                        notifications: { ...prev.notifications, slack_webhook: e.target.value }
+                                        notifications: { ...prev.notifications, slack_webhook: e?.target.value }
                                     }))}
                                 />
                             )}

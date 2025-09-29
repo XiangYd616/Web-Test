@@ -80,9 +80,9 @@ interface UnifiedTestExecutorProps {
   enableExport?: boolean;
 
   // 扩展回调
-  onTestStarted?: (data: any) => void;
-  onTestProgress?: (data: any) => void;
-  onConfigChange?: (config: any) => void;
+  onTestStarted?: (data: unknown) => void;
+  onTestProgress?: (data: unknown) => void;
+  onConfigChange?: (config: unknown) => void;
 }
 
 /**
@@ -295,7 +295,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   /**
    * 批量操作 - 整合UnifiedTestPanel功能
    */
-  const handleBatchCancel = useCallback(async () => {
+  const _handleBatchCancel = useCallback(async () => {
     try {
       await engine.cancelAllTests();
       console.log('✅ 已取消所有运行中的测试');
@@ -837,7 +837,7 @@ const getTestTypeLabel = (type: string): string => {
   return labels[type] || type;
 };
 
-const getStatusColor = (status: string): string => {
+const _getStatusColor = (status: string): string => {
   const colors: Record<string, string> = {
     pending: 'blue',
     running: 'orange',
@@ -848,7 +848,7 @@ const getStatusColor = (status: string): string => {
   return colors[status] || 'default';
 };
 
-const getStatusText = (status: string): string => {
+const _getStatusText = (status: string): string => {
   const texts: Record<string, string> = {
     pending: '等待中',
     running: '运行中',

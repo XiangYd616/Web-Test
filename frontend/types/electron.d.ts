@@ -7,12 +7,12 @@ declare global {
       getSystemInfo: () => Promise<any>;
 
       // 文件系统操作
-      showSaveDialog: (options: any) => Promise<any>;
-      showOpenDialog: (options: any) => Promise<any>;
-      showMessageBox: (options: any) => Promise<any>;
+      showSaveDialog: (options: unknown) => Promise<any>;
+      showOpenDialog: (options: unknown) => Promise<any>;
+      showMessageBox: (options: unknown) => Promise<any>;
 
       // 菜单事件监听
-      onMenuAction: (callback: (event: string, ...args: any[]) => void) => () => void;
+      onMenuAction: (callback: (event: string, ...args: unknown[]) => void) => () => void;
 
       // 桌面特有功能标识
       isDesktop: boolean;
@@ -21,7 +21,7 @@ declare global {
       // 数据库操作（桌面版专用）
       database: {
         init: () => Promise<any>;
-        query: (sql: string, params?: any[]) => Promise<any>;
+        query: (sql: string, params?: unknown[]) => Promise<any>;
         backup: (backupPath: string) => Promise<any>;
         restore: (backupPath: string) => Promise<any>;
         export: (format: string, exportPath: string) => Promise<any>;
@@ -46,10 +46,10 @@ declare global {
         getSystemUsage: () => Promise<SystemUsage>;
 
         // 事件监听
-        onTestStarted: (callback: (data: any) => void) => () => void;
-        onTestUpdate: (callback: (data: any) => void) => () => void;
-        onTestCompleted: (callback: (data: any) => void) => () => void;
-        onTestError: (callback: (data: any) => void) => () => void;
+        onTestStarted: (callback: (data: unknown) => void) => () => void;
+        onTestUpdate: (callback: (data: unknown) => void) => () => void;
+        onTestCompleted: (callback: (data: unknown) => void) => () => void;
+        onTestError: (callback: (data: unknown) => void) => () => void;
       };
     };
 
@@ -86,7 +86,7 @@ interface LocalStressTestResults {
   minResponseTime: number;
   maxResponseTime: number;
   responseTimes: number[];
-  errors: any[];
+  errors: unknown[];
   startTime: number | null;
   endTime: number | null;
   throughput: number;
@@ -94,7 +94,7 @@ interface LocalStressTestResults {
   errorRate: number;
   duration: number;
   isRunning: boolean;
-  systemInfo: any;
+  systemInfo: unknown;
 }
 
 // 系统使用情况接口

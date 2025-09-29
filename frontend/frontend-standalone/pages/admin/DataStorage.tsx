@@ -24,7 +24,7 @@ interface TestRecord {
   startTime: string;
   endTime?: string;
   duration?: number;
-  results?: any;
+  results?: unknown;
   error?: string;
 }
 
@@ -151,7 +151,7 @@ const DataStorage: React.FC = () => {
       setTestRecords([]);
 
       // 可选：显示错误提示
-      // alert(`加载测试记录失败: ${error.message}`);
+      // alert(`加载测试记录失败: ${error?.message}`);
     } finally {
       setLoading(false);
     }
@@ -182,7 +182,7 @@ const DataStorage: React.FC = () => {
         setTestRecords(prev => prev.filter(record => record.id !== recordId));
 
         // 如果删除的是当前选中的记录，关闭详情模态框
-        if (selectedRecord?.id === recordId) {
+        if (selectedRecord.id === recordId) {
           setSelectedRecord(null);
         }
 
@@ -256,7 +256,7 @@ const DataStorage: React.FC = () => {
 
     // 排序
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: unknown, bValue: unknown;
 
       switch (sortBy) {
         case 'created_at':
@@ -455,7 +455,7 @@ const DataStorage: React.FC = () => {
               </article>
               <article className="bg-gray-700/30 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-blue-400">
-                  {Math.round(testRecords.filter(r => r.overallScore).reduce((sum, r) => sum + (r.overallScore || 0), 0) / testRecords.filter(r => r.overallScore).length) || 0}
+                  {Math.round(testRecords.filter(r => r?.overallScore).reduce((sum, r) => sum + (r?.overallScore || 0), 0) / testRecords.filter(r => r?.overallScore).length) || 0}
                 </div>
                 <div className="text-sm text-gray-400">平均分数</div>
               </article>
@@ -480,7 +480,7 @@ const DataStorage: React.FC = () => {
                       <input
                         type="search"
                         value={filters.searchQuery}
-                        onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
+                        onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e?.target.value }))}
                         placeholder="搜索URL、类型或ID..."
                         className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
@@ -492,7 +492,7 @@ const DataStorage: React.FC = () => {
                     <span className="block text-sm font-medium text-gray-300 mb-2">测试类型</span>
                     <select
                       value={filters.testType}
-                      onChange={(e) => setFilters(prev => ({ ...prev, testType: e.target.value }))}
+                      onChange={(e) => setFilters(prev => ({ ...prev, testType: e?.target.value }))}
                       className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {testTypes.map(type => (
@@ -506,7 +506,7 @@ const DataStorage: React.FC = () => {
                     <span className="block text-sm font-medium text-gray-300 mb-2">状态</span>
                     <select
                       value={filters.status}
-                      onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                      onChange={(e) => setFilters(prev => ({ ...prev, status: e?.target.value }))}
                       className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       aria-label="选择状态"
                       title="选择要筛选的测试状态"
@@ -522,7 +522,7 @@ const DataStorage: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-300 mb-2">时间范围</label>
                     <select
                       value={filters.dateRange}
-                      onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
+                      onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e?.target.value }))}
                       className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       aria-label="选择时间范围"
                       title="选择要筛选的时间范围"
@@ -541,7 +541,7 @@ const DataStorage: React.FC = () => {
                       <span className="text-sm text-gray-300">排序:</span>
                       <select
                         value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
+                        onChange={(e) => setSortBy(e?.target.value as any)}
                         className="px-3 py-1 bg-gray-700/50 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         aria-label="选择排序方式"
                         title="选择数据排序的方式"
@@ -714,24 +714,24 @@ const DataStorage: React.FC = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <span className="text-gray-400">测试ID:</span>
-                        <span className="ml-2 text-white">{selectedRecord.id}</span>
+                        <span className="ml-2 text-white">{selectedRecord?.id}</span>
                       </div>
                       <div>
                         <span className="text-gray-400">测试类型:</span>
-                        <span className="ml-2 text-white">{selectedRecord.testType}</span>
+                        <span className="ml-2 text-white">{selectedRecord?.testType}</span>
                       </div>
                       <div>
                         <span className="text-gray-400">URL:</span>
-                        <span className="ml-2 text-white">{selectedRecord.url}</span>
+                        <span className="ml-2 text-white">{selectedRecord?.url}</span>
                       </div>
                       <div>
                         <span className="text-gray-400">状态:</span>
-                        <span className="ml-2 text-white">{selectedRecord.status}</span>
+                        <span className="ml-2 text-white">{selectedRecord?.status}</span>
                       </div>
-                      {selectedRecord.overallScore && (
+                      {selectedRecord?.overallScore && (
                         <div>
                           <span className="text-gray-400">评分:</span>
-                          <span className="ml-2 text-white">{selectedRecord.overallScore}分</span>
+                          <span className="ml-2 text-white">{selectedRecord?.overallScore}分</span>
                         </div>
                       )}
                     </div>

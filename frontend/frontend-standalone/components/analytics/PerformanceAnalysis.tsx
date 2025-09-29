@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Clock, TrendingUp, TrendingDown, Activity, Zap, AlertCircle, BarChart3 } from 'lucide-react';
+import {Clock, TrendingUp, TrendingDown, Activity, Zap, AlertCircle} from 'lucide-react';
 
 interface PerformanceMetric {
   id: string;
@@ -296,8 +296,8 @@ const PerformanceAnalysis = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Overall Score</p>
-              <p className={`text-2xl font-bold ${getOverallScoreColor(data.summary.overallScore)}`}>
-                {data.summary.overallScore.toFixed(1)}
+              <p className={`text-2xl font-bold ${getOverallScoreColor(data?.summary.overallScore)}`}>
+                {data?.summary.overallScore.toFixed(1)}
               </p>
             </div>
             <Zap className="w-8 h-8 text-purple-500" />
@@ -308,7 +308,7 @@ const PerformanceAnalysis = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Requests</p>
-              <p className="text-2xl font-bold text-gray-900">{data.summary.totalRequests.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">{data?.summary.totalRequests.toLocaleString()}</p>
             </div>
             <Activity className="w-8 h-8 text-blue-500" />
           </div>
@@ -318,7 +318,7 @@ const PerformanceAnalysis = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Avg Response Time</p>
-              <p className="text-2xl font-bold text-yellow-600">{data.summary.avgResponseTime}ms</p>
+              <p className="text-2xl font-bold text-yellow-600">{data?.summary.avgResponseTime}ms</p>
             </div>
             <Clock className="w-8 h-8 text-yellow-500" />
           </div>
@@ -328,7 +328,7 @@ const PerformanceAnalysis = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Error Rate</p>
-              <p className="text-2xl font-bold text-red-600">{data.summary.errorRate}%</p>
+              <p className="text-2xl font-bold text-red-600">{data?.summary.errorRate}%</p>
             </div>
             <AlertCircle className="w-8 h-8 text-red-500" />
           </div>
@@ -338,7 +338,7 @@ const PerformanceAnalysis = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Uptime</p>
-              <p className="text-2xl font-bold text-green-600">{data.summary.uptime}%</p>
+              <p className="text-2xl font-bold text-green-600">{data?.summary.uptime}%</p>
             </div>
             <TrendingUp className="w-8 h-8 text-green-500" />
           </div>
@@ -410,8 +410,8 @@ const PerformanceAnalysis = () => {
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Performance Trends</h3>
         <div className="h-64 flex items-end justify-between space-x-2">
-          {data.trends.map((trend, index) => {
-            const maxResponseTime = Math.max(...data.trends.map(t => t.responseTime));
+          {data?.trends.map((trend, index) => {
+            const maxResponseTime = Math.max(...data?.trends.map(t => t.responseTime));
             const height = (trend.responseTime / maxResponseTime) * 200;
             
             return (

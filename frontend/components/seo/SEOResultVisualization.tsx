@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { BarChart3, PieChart, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Clock, Zap } from 'lucide-react';
+import {BarChart3, TrendingUp, AlertCircle, CheckCircle, Clock} from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
 import { MobileSEOAnalysisResult } from '../../utils/MobileSEODetector';
 import { CoreWebVitalsResult } from '../../utils/CoreWebVitalsAnalyzer';
@@ -531,7 +531,7 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
       )}
 
       {/* 对比视图 */}
-      {activeView === 'comparison' && showComparison && historicalData.length > 0 && (
+      {activeView === 'comparison' && showComparison && historicalData?.length > 0 && (
         <div className="space-y-6">
           <div className="text-center text-gray-600">
             <p>对比功能开发中...</p>
@@ -541,7 +541,7 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
       )}
 
       {/* 趋势视图 */}
-      {activeView === 'trends' && historicalData.length > 0 && (
+      {activeView === 'trends' && historicalData?.length > 0 && (
         <div className="space-y-6">
           <div className="text-center text-gray-600">
             <p>趋势分析功能开发中...</p>

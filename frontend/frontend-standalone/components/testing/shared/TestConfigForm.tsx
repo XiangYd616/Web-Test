@@ -25,7 +25,7 @@ import { TestType } from '../../../types/enums';
 const { Option } = Select;
 
 export interface TestConfigFormProps {
-  form: any;
+  form: unknown;
   selectedTestType: TestType;
   supportedTypes: string[];
   onTestTypeChange: (type: TestType) => void;

@@ -38,11 +38,11 @@ export interface DataOperationConfig {
   enableCache?: boolean;
   cacheKey?: string;
   cacheTTL?: number;
-  onSuccess?: (data: any) => void;
+  onSuccess?: (data: unknown) => void;
   onError?: (error: ApiError) => void;
   onRetry?: (retryCount: number) => void;
-  validateData?: (data: any) => boolean;
-  transformData?: (data: any) => any;
+  validateData?: (data: unknown) => boolean;
+  transformData?: (data: unknown) => any;
 }
 
 // 分页数据状态

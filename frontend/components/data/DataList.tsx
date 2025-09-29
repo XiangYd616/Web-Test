@@ -1,7 +1,7 @@
 
 // DataTable组件Props接口
 interface DataTableProps {
-  columns: Array<{ key: string; title: string; dataIndex?: keyof TestRecord; render?: (value: any, record: TestRecord, index: number) => React.ReactNode; sorter?: boolean; width?: number; }>;
+  columns: Array<{ key: string; title: string; dataIndex?: keyof TestRecord; render?: (value: unknown, record: TestRecord, index: number) => React.ReactNode; sorter?: boolean; width?: number; }>;
   dataSource: TestRecord[];
   loading?: boolean;
   sortBy?: keyof TestRecord;
@@ -51,7 +51,7 @@ const DataList: React.FC<DataListProps> = ({
     return iconMap[type] || <Database className="w-5 h-5" />;
   };
 
-  const getStatusColor = (status: string) => {
+  const _getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'text-green-400';
       case 'failed': return 'text-red-400';
@@ -83,7 +83,7 @@ const DataList: React.FC<DataListProps> = ({
     key: string;
     title: string;
     dataIndex?: keyof T;
-    render?: (value: any, record: T, index: number) => React.ReactNode;
+    render?: (value: unknown, record: T, index: number) => React.ReactNode;
     sorter?: boolean | ((a: T, b: T) => number);
     width?: number;
     align?: 'left' | 'center' | 'right';
@@ -96,7 +96,7 @@ const DataList: React.FC<DataListProps> = ({
       title: '测试类型',
       sorter: true,
       width: 120,
-      render: (value: any, record: TestRecord, index: number) => (
+      render: (value: unknown, record: TestRecord, index: number) => (
         <div className="flex items-center space-x-2">
           {getTestTypeIcon(value)}
           <span className="text-gray-300 capitalize">{value}</span>
@@ -107,7 +107,7 @@ const DataList: React.FC<DataListProps> = ({
       key: 'id',
       title: '测试ID',
       width: 100,
-      render: (value: any) => (
+      render: (value: unknown) => (
         <span className="text-blue-400 font-mono text-xs">
           {value.slice(0, 8)}...
         </span>
@@ -117,7 +117,7 @@ const DataList: React.FC<DataListProps> = ({
       key: 'url',
       title: 'URL',
       width: 200,
-      render: (value: any) => (
+      render: (value: unknown) => (
         <span className="text-gray-300 truncate" title={value}>
           {value || '-'}
         </span>
@@ -128,7 +128,7 @@ const DataList: React.FC<DataListProps> = ({
       title: '状态',
       sorter: true,
       width: 80,
-      render: (value: any) => (
+      render: (value: unknown) => (
         <span className={`px-2 py-1 rounded text-xs font-medium ${value === 'completed' ? 'bg-green-500/20 text-green-400' :
           value === 'failed' ? 'bg-red-500/20 text-red-400' :
             value === 'running' ? 'bg-blue-500/20 text-blue-400' :
@@ -146,7 +146,7 @@ const DataList: React.FC<DataListProps> = ({
       sorter: true,
       width: 80,
       align: 'center',
-      render: (value: any) => (
+      render: (value: unknown) => (
         <span className={`font-semibold ${getScoreColor(value || 0)}`}>
           {value || '-'}
         </span>
@@ -157,7 +157,7 @@ const DataList: React.FC<DataListProps> = ({
       title: '耗时',
       width: 80,
       align: 'center',
-      render: (value: any) => (
+      render: (value: unknown) => (
         <span className="text-gray-400">
           {value ? `${(value / 1000).toFixed(1)}s` : '-'}
         </span>
@@ -168,7 +168,7 @@ const DataList: React.FC<DataListProps> = ({
       title: '创建时间',
       sorter: true,
       width: 140,
-      render: (value: any) => (
+      render: (value: unknown) => (
         <span className="text-gray-400 text-xs">
           {formatDate(value)}
         </span>
@@ -179,7 +179,7 @@ const DataList: React.FC<DataListProps> = ({
       title: '操作',
       width: 120,
       align: 'center',
-      render: (_: any, record: TestRecord) => (
+      render: (_: unknown, record: TestRecord) => (
         <div className="flex items-center justify-center space-x-1">
           <button
             type="button"
@@ -218,7 +218,7 @@ const DataList: React.FC<DataListProps> = ({
     }
   ];
 
-  const handleSort = (key: keyof TestRecord, order: 'asc' | 'desc') => {
+  const _handleSort = (key: keyof TestRecord, order: 'asc' | 'desc') => {
     if (key === 'testType') onSort('type');
     else if (key === 'status') onSort('status');
     else if ((key as string) === 'overallScore') onSort('score');

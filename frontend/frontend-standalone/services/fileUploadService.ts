@@ -160,7 +160,7 @@ class FileUploadService {
         fileSize: file.size,
         fileType: file.type,
         url: '',
-        error: error instanceof Error ? error.message : 'Upload failed'
+        error: error instanceof Error ? error?.message : 'Upload failed'
       };
     }
   }

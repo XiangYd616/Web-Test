@@ -28,43 +28,8 @@ import { Card,
   TableRow,
   CircularProgress } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import {
-  TrendingUp,
-  TrendingDown,
-  TrendingFlat,
-  Refresh,
-  Download,
-  Warning,
-  CheckCircle,
-  Error,
-  Info,
-  Speed,
-  People,
-  Assessment,
-  Memory,
-  Storage,
-  NetworkCheck,
-  Timer,
-  BugReport,
-  Security
-} from '@mui/icons-material';
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar
-} from 'recharts';
+import {TrendingUp, TrendingDown, TrendingFlat, Refresh, Download, Warning, CheckCircle, Error, Speed, People, Assessment, Memory, Timer} from '@mui/icons-material';
+import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell} from 'recharts';
 
 import { useAppState } from '../../hooks/useAppState';
 import { formatBytes, formatDuration, formatNumber } from '../../utils/formatters';
@@ -93,7 +58,7 @@ interface SystemMetrics {
       heapUsed: number;
       heapTotal: number;
     };
-    cpu: any;
+    cpu: unknown;
     cpuPercent: number;
     memoryPercent: number;
     loadAverage: number[];
@@ -220,14 +185,14 @@ const BusinessAnalyticsDashboard: React.FC = () => {
   };
 
   // 鑾峰彇瓒嬪娍鍥炬爣
-  const getTrendIcon = (current: number, previous: number) => {
+  const _getTrendIcon = (current: number, previous: number) => {
     if (current > previous * 1.05) return <TrendingUp color="success" />;
     if (current < previous * 0.95) return <TrendingDown color="error" />;
     return <TrendingFlat color="action" />;
   };
 
   // 鏍煎紡鍖栧浘琛ㄦ暟鎹?
-  const formatChartData = (data: any[]) => {
+  const _formatChartData = (data: unknown[]) => {
     return data.map((item, index) => ({
       time: new Date(item.timestamp).toLocaleTimeString(),
       ...item
@@ -240,7 +205,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
     
     const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1', '#d084d0'];
     
-    return Object.entries(dashboardData.business.business.testTypes).map(([type, count], index) => ({
+    return Object.entries(dashboardData?.business.business?.testTypes).map(([type, count], index) => ({
       name: type,
       value: count,
       color: colors[index % colors.length]
@@ -311,7 +276,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
             <Select
               value={timeRange}
               label="鏃堕棿鑼冨洿"
-              onChange={(e) => setTimeRange(e.target.value)}
+              onChange={(e) => setTimeRange(e?.target.value)}
             >
               <MenuItem value="1h">1灏忔椂</MenuItem>
               <MenuItem value="6h">6灏忔椂</MenuItem>
@@ -340,15 +305,15 @@ const BusinessAnalyticsDashboard: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ p: 2, height: '100%' }}>
             <Box display="flex" alignItems="center" mb={1}>
-              <CheckCircle sx={{ color: getHealthColor(dashboardData.summary.systemHealth), mr: 1 }} />
+              <CheckCircle sx={{ color: getHealthColor(dashboardData?.summary.systemHealth), mr: 1 }} />
               <Typography variant="subtitle2">绯荤粺鍋ュ悍</Typography>
             </Box>
-            <Typography variant="h4" color={getHealthColor(dashboardData.summary.systemHealth)}>
-              {dashboardData.summary.systemHealth === 'healthy' ? '姝ｅ父' :
-               dashboardData.summary.systemHealth === 'warning' ? '璀﹀憡' : '涓ラ噸'}
+            <Typography variant="h4" color={getHealthColor(dashboardData?.summary.systemHealth)}>
+              {dashboardData?.summary.systemHealth === 'healthy' ? '姝ｅ父' :
+               dashboardData?.summary.systemHealth === 'warning' ? '璀﹀憡' : '涓ラ噸'}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              杩愯鏃堕棿: {formatDuration(dashboardData.system?.system?.uptime * 1000 || 0)}
+              杩愯鏃堕棿: {formatDuration(dashboardData?.system?.system?.uptime * 1000 || 0)}
             </Typography>
           </Card>
         </Grid>
@@ -360,10 +325,10 @@ const BusinessAnalyticsDashboard: React.FC = () => {
               <Typography variant="subtitle2">娴嬭瘯鎬绘暟</Typography>
             </Box>
             <Typography variant="h4">
-              {formatNumber(dashboardData.summary.totalTests)}
+              {formatNumber(dashboardData?.summary.totalTests)}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              鎴愬姛鐜? {dashboardData.summary.successRate.toFixed(1)}%
+              鎴愬姛鐜? {dashboardData?.summary.successRate.toFixed(1)}%
             </Typography>
           </Card>
         </Grid>
@@ -375,7 +340,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
               <Typography variant="subtitle2">鍝嶅簲鏃堕棿</Typography>
             </Box>
             <Typography variant="h4">
-              {dashboardData.summary.averageResponseTime}ms
+              {dashboardData?.summary.averageResponseTime}ms
             </Typography>
             <Typography variant="body2" color="textSecondary">
               骞冲潎鍝嶅簲鏃堕棿
@@ -390,7 +355,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
               <Typography variant="subtitle2">娲昏穬鐢ㄦ埛</Typography>
             </Box>
             <Typography variant="h4">
-              {dashboardData.summary.activeUsers}
+              {dashboardData?.summary.activeUsers}
             </Typography>
             <Typography variant="body2" color="textSecondary">
               褰撳墠鍦ㄧ嚎鐢ㄦ埛
@@ -427,18 +392,18 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Box display="flex" justifyContent="space-between" mb={1}>
                   <Typography variant="body2">宸茬敤鍐呭瓨</Typography>
                   <Typography variant="body2">
-                    {dashboardData.system?.system?.memoryPercent.toFixed(1)}%
+                    {dashboardData?.system?.system?.memoryPercent.toFixed(1)}%
                   </Typography>
                 </Box>
                 <LinearProgress 
                   variant="determinate" 
-                  value={dashboardData.system?.system?.memoryPercent || 0}
+                  value={dashboardData?.system?.system?.memoryPercent || 0}
                   sx={{ height: 8, borderRadius: 4 }}
                 />
               </Box>
               <Typography variant="body2" color="textSecondary">
-                {formatBytes(dashboardData.system?.system?.memory?.rss || 0)} / 
-                {formatBytes(dashboardData.system?.system?.totalMemory || 0)}
+                {formatBytes(dashboardData?.system?.system?.memory?.rss || 0)} / 
+                {formatBytes(dashboardData?.system?.system?.totalMemory || 0)}
               </Typography>
             </Card>
           </Grid>
@@ -453,18 +418,18 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Box display="flex" justifyContent="space-between" mb={1}>
                   <Typography variant="body2">CPU璐熻浇</Typography>
                   <Typography variant="body2">
-                    {dashboardData.system?.system?.cpuPercent?.toFixed(1) || 0}%
+                    {dashboardData?.system?.system?.cpuPercent?.toFixed(1) || 0}%
                   </Typography>
                 </Box>
                 <LinearProgress 
                   variant="determinate" 
-                  value={dashboardData.system?.system?.cpuPercent || 0}
-                  color={dashboardData.system?.system?.cpuPercent > 80 ? 'error' : 'primary'}
+                  value={dashboardData?.system?.system?.cpuPercent || 0}
+                  color={dashboardData?.system?.system?.cpuPercent > 80 ? 'error' : 'primary'}
                   sx={{ height: 8, borderRadius: 4 }}
                 />
               </Box>
               <Typography variant="body2" color="textSecondary">
-                璐熻浇骞冲潎鍊? {dashboardData.system?.system?.loadAverage?.[0]?.toFixed(2) || 'N/A'}
+                璐熻浇骞冲潎鍊? {dashboardData?.system?.system?.loadAverage?.[0]?.toFixed(2) || 'N/A'}
               </Typography>
             </Card>
           </Grid>
@@ -523,7 +488,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Grid item xs={12} sm={3}>
                   <Box textAlign="center">
                     <Typography variant="h4" color="primary">
-                      {dashboardData.business?.business?.throughput || 0}
+                      {dashboardData?.business?.business?.throughput || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       姣忓皬鏃舵祴璇曟暟
@@ -533,7 +498,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Grid item xs={12} sm={3}>
                   <Box textAlign="center">
                     <Typography variant="h4" color="error">
-                      {dashboardData.business?.business?.errorRate?.toFixed(1) || 0}%
+                      {dashboardData?.business?.business?.errorRate?.toFixed(1) || 0}%
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       閿欒鐜?
@@ -543,7 +508,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Grid item xs={12} sm={3}>
                   <Box textAlign="center">
                     <Typography variant="h4" color="success.main">
-                      {dashboardData.business?.business?.userSatisfaction?.toFixed(1) || 0}
+                      {dashboardData?.business?.business?.userSatisfaction?.toFixed(1) || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       鐢ㄦ埛婊℃剰搴?
@@ -553,7 +518,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Grid item xs={12} sm={3}>
                   <Box textAlign="center">
                     <Typography variant="h4" color="info.main">
-                      {dashboardData.business?.business?.activeTests || 0}
+                      {dashboardData?.business?.business?.activeTests || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       娲昏穬娴嬭瘯
@@ -576,7 +541,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Grid item xs={6}>
                   <Box textAlign="center">
                     <Typography variant="h3" color="primary">
-                      {dashboardData.user?.users?.activeUsers || 0}
+                      {dashboardData?.user?.users?.activeUsers || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       娲昏穬鐢ㄦ埛
@@ -586,7 +551,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Grid item xs={6}>
                   <Box textAlign="center">
                     <Typography variant="h3" color="success.main">
-                      {dashboardData.user?.users?.newUsers || 0}
+                      {dashboardData?.user?.users?.newUsers || 0}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       鏂板鐢ㄦ埛
@@ -604,7 +569,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Grid item xs={6}>
                   <Box textAlign="center">
                     <Typography variant="h3" color="info.main">
-                      {formatDuration(dashboardData.user?.users?.userSessions?.averageSessionDuration * 1000 || 0)}
+                      {formatDuration(dashboardData?.user?.users?.userSessions?.averageSessionDuration * 1000 || 0)}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       骞冲潎浼氳瘽鏃堕暱
@@ -614,7 +579,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                 <Grid item xs={6}>
                   <Box textAlign="center">
                     <Typography variant="h3" color="warning.main">
-                      {(dashboardData.user?.users?.userSessions?.bounceRate * 100)?.toFixed(1) || 0}%
+                      {(dashboardData?.user?.users?.userSessions?.bounceRate * 100)?.toFixed(1) || 0}%
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       璺冲嚭鐜?
@@ -638,14 +603,14 @@ const BusinessAnalyticsDashboard: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {dashboardData.user?.users?.topUserActions?.map((action, index) => {
-                      const total = dashboardData.user?.users?.topUserActions?.reduce((sum, a) => sum + a.count, 0) || 1;
-                      const percentage = (action.count / total * 100).toFixed(1);
+                    {dashboardData?.user?.users?.topUserActions?.map((action, index) => {
+                      const total = dashboardData?.user?.users?.topUserActions?.reduce((sum, a) => sum + a?.count, 0) || 1;
+                      const percentage = (action?.count / total * 100).toFixed(1);
                       
                       return (
                         <TableRow key={index}>
-                          <TableCell>{action.action}</TableCell>
-                          <TableCell align="right">{formatNumber(action.count)}</TableCell>
+                          <TableCell>{action?.action}</TableCell>
+                          <TableCell align="right">{formatNumber(action?.count)}</TableCell>
                           <TableCell align="right">{percentage}%</TableCell>
                         </TableRow>
                       );
@@ -665,12 +630,12 @@ const BusinessAnalyticsDashboard: React.FC = () => {
             <Card sx={{ p: 2 }}>
               <Typography variant="h6" mb={2}>
                 <Warning sx={{ mr: 1, verticalAlign: 'middle' }} />
-                鏈€鏂板憡璀?({dashboardData.alerts?.length || 0})
+                鏈€鏂板憡璀?({dashboardData?.alerts?.length || 0})
               </Typography>
               
-              {dashboardData.alerts && dashboardData.alerts.length > 0 ? (
+              {dashboardData?.alerts && dashboardData?.alerts.length > 0 ? (
                 <Box>
-                  {dashboardData.alerts.slice(0, 10).map((alert) => (
+                  {dashboardData?.alerts.slice(0, 10).map((alert) => (
                     <Alert
                       key={alert.id}
                       severity={getAlertSeverity(alert.level) as any}
@@ -705,7 +670,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       {/* 搴曢儴鐘舵€佹爮 */}
       <Box mt={4} pt={2} borderTop="1px solid" borderColor="divider">
         <Typography variant="body2" color="textSecondary" align="center">
-          鏈€鍚庢洿鏂? {new Date(dashboardData.summary.lastUpdated).toLocaleString()} |
+          鏈€鍚庢洿鏂? {new Date(dashboardData?.summary.lastUpdated).toLocaleString()} |
           自动刷新: {autoRefresh ? '开启' : '关闭'} |
           鏁版嵁鏉ユ簮: BusinessAnalyticsService
         </Typography>

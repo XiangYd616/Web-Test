@@ -4,26 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  X,
-  Download,
-  FileText,
-  Image,
-  FileSpreadsheet,
-  FileArchive,
-  Settings,
-  Palette,
-  Eye,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Loader,
-  Calendar,
-  Filter,
-  BarChart3,
-  PieChart,
-  TrendingUp
-} from 'lucide-react';
+import {X, Download, FileText, FileSpreadsheet, FileArchive, Eye, CheckCircle, Loader, BarChart3, PieChart, TrendingUp} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface ReportTemplate {
@@ -54,8 +35,8 @@ interface BrandingOptions {
 interface ReportGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  testData: any[];
-  onGenerate: (reportConfig: any) => Promise<void>;
+  testData: unknown[];
+  onGenerate: (reportConfig: unknown) => Promise<void>;
 }
 
 const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
@@ -194,14 +175,14 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
     }
   }, [testData]);
 
-  const handleConfigChange = (key: string, value: any) => {
+  const handleConfigChange = (key: string, value: unknown) => {
     setReportConfig(prev => ({
       ...prev,
       [key]: value
     }));
   };
 
-  const handleBrandingChange = (key: string, value: any) => {
+  const handleBrandingChange = (key: string, value: unknown) => {
     setReportConfig(prev => ({
       ...prev,
       brandingOptions: {
@@ -369,7 +350,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                     <input
                       type="text"
                       value={reportConfig.title}
-                      onChange={(e) => handleConfigChange('title', e.target.value)}
+                      onChange={(e) => handleConfigChange('title', e?.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="输入报告标题"
                     />
@@ -381,7 +362,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                     </label>
                     <textarea
                       value={reportConfig.description}
-                      onChange={(e) => handleConfigChange('description', e.target.value)}
+                      onChange={(e) => handleConfigChange('description', e?.target.value)}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="可选：添加报告描述或目的说明"
@@ -398,7 +379,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                         value={reportConfig.dateRange.start}
                         onChange={(e) => handleConfigChange('dateRange', { 
                           ...reportConfig.dateRange, 
-                          start: e.target.value 
+                          start: e?.target.value 
                         })}
                         className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
@@ -407,7 +388,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                         value={reportConfig.dateRange.end}
                         onChange={(e) => handleConfigChange('dateRange', { 
                           ...reportConfig.dateRange, 
-                          end: e.target.value 
+                          end: e?.target.value 
                         })}
                         className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
@@ -426,7 +407,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                         <input
                           type="checkbox"
                           checked={reportConfig.includeCharts}
-                          onChange={(e) => handleConfigChange('includeCharts', e.target.checked)}
+                          onChange={(e) => handleConfigChange('includeCharts', e?.target.checked)}
                           className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <PieChart className="w-4 h-4 mr-2 text-gray-500" />
@@ -437,7 +418,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                         <input
                           type="checkbox"
                           checked={reportConfig.includeRecommendations}
-                          onChange={(e) => handleConfigChange('includeRecommendations', e.target.checked)}
+                          onChange={(e) => handleConfigChange('includeRecommendations', e?.target.checked)}
                           className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <TrendingUp className="w-4 h-4 mr-2 text-gray-500" />
@@ -448,7 +429,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                         <input
                           type="checkbox"
                           checked={reportConfig.includeDetailedResults}
-                          onChange={(e) => handleConfigChange('includeDetailedResults', e.target.checked)}
+                          onChange={(e) => handleConfigChange('includeDetailedResults', e?.target.checked)}
                           className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <FileText className="w-4 h-4 mr-2 text-gray-500" />
@@ -469,7 +450,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                       <div className="flex justify-between mb-1">
                         <span>测试类型:</span>
                         <span className="font-semibold">
-                          {[...new Set(testData.map(t => t.type || t.engine_type))].length}
+                          {[...new Set(testData.map(t => t?.type || t?.engine_type))].length}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -508,7 +489,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                     <input
                       type="text"
                       value={reportConfig.brandingOptions.companyName}
-                      onChange={(e) => handleBrandingChange('companyName', e.target.value)}
+                      onChange={(e) => handleBrandingChange('companyName', e?.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="输入公司或组织名称"
                     />
@@ -553,7 +534,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                         <input
                           type="color"
                           value={reportConfig.brandingOptions.primaryColor}
-                          onChange={(e) => handleBrandingChange('primaryColor', e.target.value)}
+                          onChange={(e) => handleBrandingChange('primaryColor', e?.target.value)}
                           className="w-full h-10 border border-gray-300 rounded-md"
                         />
                         <span className="text-xs text-gray-500">主色调</span>
@@ -562,7 +543,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                         <input
                           type="color"
                           value={reportConfig.brandingOptions.secondaryColor || '#64748b'}
-                          onChange={(e) => handleBrandingChange('secondaryColor', e.target.value)}
+                          onChange={(e) => handleBrandingChange('secondaryColor', e?.target.value)}
                           className="w-full h-10 border border-gray-300 rounded-md"
                         />
                         <span className="text-xs text-gray-500">辅色调</span>
@@ -582,7 +563,7 @@ const ReportGeneratorModal: React.FC<ReportGeneratorModalProps> = ({
                         <input
                           type="checkbox"
                           checked={reportConfig.brandingOptions.includeWatermark}
-                          onChange={(e) => handleBrandingChange('includeWatermark', e.target.checked)}
+                          onChange={(e) => handleBrandingChange('includeWatermark', e?.target.checked)}
                           className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <span className="text-sm">包含水印</span>

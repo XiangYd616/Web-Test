@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { CheckCircle, AlertTriangle, XCircle, Eye, EyeOff, Code, FileText } from 'lucide-react';
+import {CheckCircle, AlertTriangle, XCircle, Eye, EyeOff, Code} from 'lucide-react';
 
 export interface SchemaRule {
   id: string;
@@ -13,10 +13,10 @@ export interface SchemaRule {
   required: boolean;
   businessRule?: {
     type: 'range' | 'pattern' | 'enum' | 'custom';
-    value: any;
+    value: unknown;
     message: string;
   };
-  format?: string; // e.g., 'email', 'date', 'currency'
+  format?: string; // e?.g., 'email', 'date', 'currency'
   description: string;
 }
 
@@ -30,7 +30,7 @@ export interface ValidationResult {
 
 interface SchemaValidatorProps {
   schema: SchemaRule[];
-  responseData: any;
+  responseData: unknown;
   onSchemaChange?: (schema: SchemaRule[]) => void;
   onValidationComplete?: (results: ValidationResult[]) => void;
   showBusinessRules?: boolean;
@@ -52,7 +52,7 @@ export const SchemaValidator: React.FC<SchemaValidatorProps> = ({
 
     const results: ValidationResult[] = [];
 
-    const validateValue = (rule: SchemaRule, value: any, path: string = rule.field): ValidationResult => {
+    const validateValue = (rule: SchemaRule, value: unknown, path: string = rule.field): ValidationResult => {
       const fieldPath = path || rule.field;
       
       // Check if field exists when required
@@ -126,7 +126,7 @@ export const SchemaValidator: React.FC<SchemaValidatorProps> = ({
       };
     };
 
-    const getNestedValue = (obj: any, path: string) => {
+    const getNestedValue = (obj: unknown, path: string) => {
       return path.split('.').reduce((current, key) => current?.[key], obj);
     };
 
@@ -139,7 +139,7 @@ export const SchemaValidator: React.FC<SchemaValidatorProps> = ({
   }, [schema, responseData]);
 
   // Business rule validation logic
-  const validateBusinessRule = (value: any, rule: SchemaRule['businessRule']): { isValid: boolean; message: string } => {
+  const validateBusinessRule = (value: unknown, rule: SchemaRule['businessRule']): { isValid: boolean; message: string } => {
     if (!rule) return { isValid: true, message: '' };
 
     switch (rule.type) {

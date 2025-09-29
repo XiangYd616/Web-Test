@@ -4,41 +4,8 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Activity,
-  AlertCircle,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Cpu,
-  Database,
-  FileText,
-  Globe,
-  HardDrive,
-  Info,
-  Loader,
-  MoreVertical,
-  Pause,
-  Play,
-  RefreshCw,
-  Settings,
-  Shield,
-  Smartphone,
-  Square,
-  TrendingUp,
-  Users,
-  Wifi,
-  XCircle,
-  Zap,
-  Server,
-  Terminal,
-  Code,
-  GitBranch,
-  Package,
-  Monitor
-} from 'lucide-react';
-import { Line, Bar, Doughnut, Radar } from 'react-chartjs-2';
+import {Activity, AlertCircle, BarChart3, Clock, Globe, Loader, Pause, Play, RefreshCw, Settings, Shield, Square, Wifi, XCircle, Zap, Server, Terminal, Monitor} from 'lucide-react';
+import {Bar, Doughnut} from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -121,7 +88,7 @@ interface TestQueue {
   startedAt?: Date;
   completedAt?: Date;
   estimatedTime?: number;
-  result?: any;
+  result?: unknown;
   error?: string;
 }
 
@@ -482,7 +449,7 @@ const TestEngineStatus: React.FC = () => {
   }, [autoRefresh]);
 
   // 处理WebSocket消息
-  const handleWebSocketMessage = (data: any) => {
+  const handleWebSocketMessage = (data: unknown) => {
     switch (data.type) {
       case 'engine_update':
         updateEngine(data.engineId, data.update);
@@ -614,7 +581,7 @@ const TestEngineStatus: React.FC = () => {
   };
 
   // 保存引擎配置
-  const saveEngineConfig = (engineId: string, config: EngineConfig['settings']) => {
+  const _saveEngineConfig = (engineId: string, config: EngineConfig['settings']) => {
     const newConfig: EngineConfig = { engineId, settings: config };
     setEngineConfigs(prev => new Map(prev).set(engineId, newConfig));
     
@@ -714,7 +681,7 @@ const TestEngineStatus: React.FC = () => {
   };
 
   // 获取健康状态颜色
-  const getHealthColor = (status: TestEngine['health']['status']) => {
+  const _getHealthColor = (status: TestEngine['health']['status']) => {
     switch (status) {
       case 'healthy': return 'text-green-500';
       case 'degraded': return 'text-yellow-500';
@@ -728,16 +695,16 @@ const TestEngineStatus: React.FC = () => {
 
   // 图表数据
   const resourceChartData = {
-    labels: filteredEngines.map(e => e.name),
+    labels: filteredEngines.map(e => e?.name),
     datasets: [
       {
         label: 'CPU使用率 (%)',
-        data: filteredEngines.map(e => e.resources.cpu),
+        data: filteredEngines.map(e => e?.resources.cpu),
         backgroundColor: 'rgba(239, 68, 68, 0.8)',
       },
       {
         label: '内存使用率 (%)',
-        data: filteredEngines.map(e => e.resources.memory),
+        data: filteredEngines.map(e => e?.resources.memory),
         backgroundColor: 'rgba(59, 130, 246, 0.8)',
       }
     ]
@@ -874,12 +841,12 @@ const TestEngineStatus: React.FC = () => {
               type="text"
               placeholder="搜索引擎..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e?.target.value)}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e) => setFilterStatus(e?.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">所有状态</option>

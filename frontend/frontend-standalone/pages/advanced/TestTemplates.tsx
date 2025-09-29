@@ -4,30 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  Plus,
-  Search,
-  Filter,
-  Copy,
-  Edit,
-  Trash2,
-  Play,
-  Star,
-  Clock,
-  User,
-  Tag,
-  FileText,
-  Settings,
-  Download,
-  Upload,
-  BookOpen,
-  Code,
-  Zap,
-  Shield,
-  Globe,
-  Database,
-  MoreVertical
-} from 'lucide-react';
+import {Plus, Search, Copy, Edit, Play, Star, User, Upload, BookOpen, Code, Zap, Shield, Globe, Database, MoreVertical} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface TestTemplate {
@@ -47,13 +24,13 @@ interface TestTemplate {
   lastUsed: string;
   tags: string[];
   configuration: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
   parameters: Array<{
     name: string;
     type: 'string' | 'number' | 'boolean' | 'array' | 'object';
     required: boolean;
-    defaultValue?: any;
+    defaultValue?: unknown;
     description: string;
   }>;
 }
@@ -342,14 +319,14 @@ const TestTemplates: React.FC = () => {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e?.target.value)}
                   placeholder="搜索模板..."
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-64"
                 />
               </div>
               <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => setSelectedCategory(e?.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {categories.map(category => (
@@ -360,7 +337,7 @@ const TestTemplates: React.FC = () => {
               </select>
               <select
                 value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
+                onChange={(e) => setSelectedType(e?.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {types.map(type => (

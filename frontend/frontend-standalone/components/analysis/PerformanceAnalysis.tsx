@@ -7,23 +7,7 @@
 
 import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  Activity, 
-  Clock, 
-  Zap, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
-  CheckCircle, 
-  BarChart3, 
-  RefreshCw,
-  Target,
-  Cpu,
-  HardDrive,
-  Network,
-  Users,
-  Database
-} from 'lucide-react';
+import {Activity, Clock, Zap, TrendingUp, TrendingDown, AlertTriangle, CheckCircle, BarChart3, RefreshCw, Target, Cpu, HardDrive, Users, Database} from 'lucide-react';
 
 interface PerformanceMetric {
   id: string;

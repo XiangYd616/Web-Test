@@ -106,9 +106,9 @@ export const StatCard: React.FC<StatCardProps> = ({
             <div className="flex items-center mt-2 text-xs">
               <span className={cn(
                 'font-medium',
-                trend.isPositive ? 'text-green-400' : 'text-red-400'
+                trend?.isPositive ? 'text-green-400' : 'text-red-400'
               )}>
-                {trend.isPositive ? '+' : ''}{trend.value}%
+                {trend?.isPositive ? '+' : ''}{trend?.value}%
               </span>
               <span className="text-gray-400 ml-1">vs 上期</span>
             </div>

@@ -146,7 +146,7 @@ export interface TestChart {
   id: string;
   title: string;
   type: 'line' | 'bar' | 'pie' | 'area';
-  data: any[];
+  data: unknown[];
   config?: Record<string, any>;
 }
 

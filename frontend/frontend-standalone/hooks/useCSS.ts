@@ -122,7 +122,7 @@ export const usePageCSS = (
   return { loading, loaded, error, load };
 };
 
-export const useComponentCSS = (
+export const _useComponentCSS = (
   componentName: string,
   options: {
     immediate?: boolean;
@@ -171,7 +171,7 @@ export const useComponentCSS = (
   return { loading, loaded, error, load };
 };
 
-export const useRouteCSS = (routeName: string) => {
+export const _useRouteCSS = (routeName: string) => {
   const { loading, loaded, error } = usePageCSS(routeName, {
     immediate: true,
     preload: false

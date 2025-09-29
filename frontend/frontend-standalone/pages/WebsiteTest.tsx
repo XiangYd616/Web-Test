@@ -104,7 +104,7 @@ interface WebsiteTestResult {
 
 const WebsiteTest: React.FC = () => {
   // 认证检查
-  const authCheck = useAuthCheck();
+  const _authCheck = useAuthCheck();
   const { recordTestCompletion } = useUserStats();
 
   // 状态管理
@@ -183,7 +183,7 @@ const WebsiteTest: React.FC = () => {
           updateProgress(progress, step);
         },
         // onComplete
-        (result: any) => {
+        (result: unknown) => {
           // 转换后端结果为前端格式
           const websiteResult: WebsiteTestResult = {
             testId: result.testId || testId,
@@ -318,7 +318,7 @@ const WebsiteTest: React.FC = () => {
   }, [currentTestId, updateProgress]);
 
   // 配置更新处理
-  const handleConfigChange = useCallback((field: keyof WebsiteConfig, value: any) => {
+  const handleConfigChange = useCallback((field: keyof WebsiteConfig, value: unknown) => {
     setConfig(prev => ({
       ...prev,
       [field]: value
@@ -393,7 +393,7 @@ const WebsiteTest: React.FC = () => {
                 <input
                   type="url"
                   value={config.targetUrl}
-                  onChange={(e) => handleConfigChange('targetUrl', e.target.value)}
+                  onChange={(e) => handleConfigChange('targetUrl', e?.target.value)}
                   placeholder="https://www.example.com"
                   className="themed-input w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={isRunning}
@@ -450,7 +450,7 @@ const WebsiteTest: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={config[test.key as keyof WebsiteConfig] as boolean}
-                        onChange={(e) => handleConfigChange(test.key as keyof WebsiteConfig, e.target.checked)}
+                        onChange={(e) => handleConfigChange(test.key as keyof WebsiteConfig, e?.target.checked)}
                         className="mt-1 h-4 w-4 text-blue-600 themed-border-primary rounded focus:ring-blue-500"
                         disabled={isRunning}
                       />
@@ -473,7 +473,7 @@ const WebsiteTest: React.FC = () => {
                 </label>
                 <select
                   value={config.reportFormat}
-                  onChange={(e) => handleConfigChange('reportFormat', e.target.value)}
+                  onChange={(e) => handleConfigChange('reportFormat', e?.target.value)}
                   className="themed-input w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={isRunning}
                   aria-label="选择报告格式"
@@ -591,9 +591,9 @@ const WebsiteTest: React.FC = () => {
                         <span className="text-sm font-medium text-blue-700">性能测试</span>
                         <Zap className="w-5 h-5 text-blue-500" />
                       </div>
-                      <div className="text-lg font-semibold text-blue-900">{result.testResults.performance.score}/100</div>
+                      <div className="text-lg font-semibold text-blue-900">{result.testResults.performance?.score}/100</div>
                       <div className="text-xs text-blue-600 mt-1">
-                        加载时间: {result.testResults.performance.metrics.loadTime}ms
+                        加载时间: {result.testResults.performance?.metrics.loadTime}ms
                       </div>
                     </div>
                   )}
@@ -604,9 +604,9 @@ const WebsiteTest: React.FC = () => {
                         <span className="text-sm font-medium text-green-700">安全性测试</span>
                         <Shield className="w-5 h-5 text-green-500" />
                       </div>
-                      <div className="text-lg font-semibold text-green-900">{result.testResults.security.score}/100</div>
+                      <div className="text-lg font-semibold text-green-900">{result.testResults.security?.score}/100</div>
                       <div className="text-xs text-green-600 mt-1">
-                        {result.testResults.security.vulnerabilities.length} 个安全问题
+                        {result.testResults.security?.vulnerabilities.length} 个安全问题
                       </div>
                     </div>
                   )}
@@ -617,9 +617,9 @@ const WebsiteTest: React.FC = () => {
                         <span className="text-sm font-medium text-purple-700">SEO分析</span>
                         <Search className="w-5 h-5 text-purple-500" />
                       </div>
-                      <div className="text-lg font-semibold text-purple-900">{result.testResults.seo.score}/100</div>
+                      <div className="text-lg font-semibold text-purple-900">{result.testResults.seo?.score}/100</div>
                       <div className="text-xs text-purple-600 mt-1">
-                        {result.testResults.seo.issues.length} 个SEO问题
+                        {result.testResults.seo?.issues.length} 个SEO问题
                       </div>
                     </div>
                   )}
@@ -630,9 +630,9 @@ const WebsiteTest: React.FC = () => {
                         <span className="text-sm font-medium text-orange-700">可访问性</span>
                         <Eye className="w-5 h-5 text-orange-500" />
                       </div>
-                      <div className="text-lg font-semibold text-orange-900">{result.testResults.accessibility.score}/100</div>
+                      <div className="text-lg font-semibold text-orange-900">{result.testResults.accessibility?.score}/100</div>
                       <div className="text-xs text-orange-600 mt-1">
-                        {result.testResults.accessibility.violations.length} 个违规项
+                        {result.testResults.accessibility?.violations.length} 个违规项
                       </div>
                     </div>
                   )}
@@ -643,9 +643,9 @@ const WebsiteTest: React.FC = () => {
                         <span className="text-sm font-medium text-indigo-700">兼容性</span>
                         <Activity className="w-5 h-5 text-indigo-500" />
                       </div>
-                      <div className="text-lg font-semibold text-indigo-900">{result.testResults.compatibility.score}/100</div>
+                      <div className="text-lg font-semibold text-indigo-900">{result.testResults.compatibility?.score}/100</div>
                       <div className="text-xs text-indigo-600 mt-1">
-                        {result.testResults.compatibility.browserSupport.filter(b => b.supported).length} 个浏览器支持
+                        {result.testResults.compatibility?.browserSupport.filter(b => b.supported).length} 个浏览器支持
                       </div>
                     </div>
                   )}
@@ -656,9 +656,9 @@ const WebsiteTest: React.FC = () => {
                         <span className="text-sm font-medium text-pink-700">用户体验</span>
                         <BarChart3 className="w-5 h-5 text-pink-500" />
                       </div>
-                      <div className="text-lg font-semibold text-pink-900">{result.testResults.ux.score}/100</div>
+                      <div className="text-lg font-semibold text-pink-900">{result.testResults.ux?.score}/100</div>
                       <div className="text-xs text-pink-600 mt-1">
-                        {result.testResults.ux.usabilityIssues.length} 个可用性问题
+                        {result.testResults.ux?.usabilityIssues.length} 个可用性问题
                       </div>
                     </div>
                   )}

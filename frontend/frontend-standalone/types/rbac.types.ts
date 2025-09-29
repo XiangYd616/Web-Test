@@ -83,7 +83,7 @@ export interface Permission {
 export interface PermissionCondition {
   field: string;
   operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'nin' | 'contains' | 'regex';
-  value: any;
+  value: unknown;
   description?: string;
 }
 
@@ -209,8 +209,8 @@ export interface PermissionAuditLog {
   action: string;
   resource: ResourceType;
   resourceId?: string;
-  oldValue?: any;
-  newValue?: any;
+  oldValue?: unknown;
+  newValue?: unknown;
   result: 'success' | 'failure' | 'denied';
   reason?: string;
   ipAddress: string;
@@ -229,7 +229,7 @@ export interface RoleAuditLog {
   userId: UUID; // 执行操作的用户
   targetUserId?: UUID; // 被操作的用户（如果是用户角色分配）
   action: 'create' | 'update' | 'delete' | 'assign' | 'revoke';
-  changes: Record<string, { old: any; new: any }>;
+  changes: Record<string, { old: unknown; new: unknown }>;
   reason?: string;
   ipAddress: string;
   userAgent: string;
@@ -277,7 +277,7 @@ export interface RequirePermissionOptions {
   action: PermissionAction;
   resourceIdParam?: string; // 从请求参数中获取资源ID的字段名
   allowOwner?: boolean; // 是否允许资源所有者访问
-  customCheck?: (context: any) => boolean; // 自定义检查函数
+  customCheck?: (context: unknown) => boolean; // 自定义检查函数
 }
 
 /**
@@ -287,7 +287,7 @@ export interface PermissionMiddlewareOptions {
   resource: ResourceType;
   action: PermissionAction;
   optional?: boolean; // 是否为可选权限检查
-  onDenied?: (req: any, res: any, reason: string) => void; // 权限拒绝时的处理函数
+  onDenied?: (req: unknown, res: unknown, reason: string) => void; // 权限拒绝时的处理函数
 }
 
 // ==================== 权限上下文 ====================
@@ -457,7 +457,7 @@ export function roleToDatabase(role: Role): RoleDatabaseFields {
 /**
  * 验证权限条件
  */
-export function validatePermissionCondition(condition: PermissionCondition, context: any): boolean {
+export function validatePermissionCondition(condition: PermissionCondition, context: unknown): boolean {
   const { field, operator, value } = condition;
   const fieldValue = getNestedValue(context, field);
 
@@ -490,7 +490,7 @@ export function validatePermissionCondition(condition: PermissionCondition, cont
 /**
  * 获取嵌套对象的值
  */
-function getNestedValue(obj: any, path: string): any {
+function getNestedValue(obj: unknown, path: string): unknown {
   return path.split('.').reduce((current, key) => current?.[key], obj);
 }
 
@@ -501,7 +501,7 @@ export function isPermissionMatch(
   permission: Permission,
   resource: ResourceType,
   action: PermissionAction,
-  context?: any
+  context?: unknown
 ): boolean {
   // 检查资源和操作是否匹配
   if (permission.resource !== resource || permission.action !== action) {

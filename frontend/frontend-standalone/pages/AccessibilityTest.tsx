@@ -3,29 +3,15 @@
  * 提供网站无障碍性检测功能，包括WCAG标准检查、屏幕阅读器兼容性等
  */
 
-import { 
-  CheckCircle, 
-  Eye, 
-  EyeOff, 
-  Loader, 
-  Play, 
-  RotateCcw, 
-  Settings, 
-  Square, 
-  Users,
-  AlertTriangle,
-  Info,
-  XCircle
-} from 'lucide-react';
+import {CheckCircle, Loader, Play, RotateCcw, Settings, Square, Users, AlertTriangle, Info, XCircle} from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/ui';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
-import { useTestProgress } from '../hooks/useTestProgress';
+
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
-import type { TestType } from '@shared/types';
 
 // 可访问性测试配置接口
 interface AccessibilityTestConfig {
@@ -148,7 +134,7 @@ const AccessibilityTest: React.FC = () => {
 
   // 监听后台测试状态变化
   useEffect(() => {
-    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: any) => {
+    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: unknown) => {
       if (testInfo.type === 'accessibility' && testInfo.id === currentTestId) {
         switch (event) {
           case 'testProgress':
@@ -239,11 +225,11 @@ const AccessibilityTest: React.FC = () => {
             id: `acc_${Date.now()}`,
             url: config.url,
             timestamp: new Date().toISOString(),
-            overallScore: data.data?.score || 85,
+            overallScore: data?.data?.score || 85,
             wcagLevel: config.level,
-            violations: data.data?.violations || [],
-            passes: data.data?.passes || [],
-            statistics: data.data?.statistics || {
+            violations: data?.data?.violations || [],
+            passes: data?.data?.passes || [],
+            statistics: data?.data?.statistics || {
               totalElements: 100,
               violationsCount: 15,
               passesCount: 85,
@@ -252,13 +238,13 @@ const AccessibilityTest: React.FC = () => {
               moderateIssues: 5,
               minorIssues: 5
             },
-            categories: data.data?.categories || {
+            categories: data?.data?.categories || {
               perceivable: 90,
               operable: 85,
               understandable: 88,
               robust: 92
             },
-            recommendations: data.data?.recommendations || [
+            recommendations: data?.data?.recommendations || [
               '添加适当的ARIA标签',
               '改善颜色对比度',
               '为所有图像添加替代文本',
@@ -270,7 +256,7 @@ const AccessibilityTest: React.FC = () => {
           setCanSwitchPages(true);
 
           // 记录统计
-          recordTestCompletion('可访问性测试', true, data.data?.score || 85, 30);
+          recordTestCompletion('可访问性测试', true, data?.data?.score || 85, 30);
         } else {
           setProgress(currentProgress);
           setCurrentStep(getStepMessage(currentProgress));
@@ -312,7 +298,7 @@ const AccessibilityTest: React.FC = () => {
   }, []);
 
   // 获取影响级别的颜色
-  const getImpactColor = (impact: ViolationSeverity): string => {
+  const _getImpactColor = (impact: ViolationSeverity): string => {
     switch (impact) {
       case 'critical': return 'text-red-600';
       case 'serious': return 'text-orange-600';
@@ -323,7 +309,7 @@ const AccessibilityTest: React.FC = () => {
   };
 
   // 获取影响级别的图标
-  const getImpactIcon = (impact: ViolationSeverity) => {
+  const _getImpactIcon = (impact: ViolationSeverity) => {
     switch (impact) {
       case 'critical': return <XCircle className="w-5 h-5 text-red-600" />;
       case 'serious': return <AlertTriangle className="w-5 h-5 text-orange-600" />;

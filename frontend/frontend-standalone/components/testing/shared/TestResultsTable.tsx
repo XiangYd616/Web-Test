@@ -139,7 +139,7 @@ export const TestResultsTable: React.FC<TestResultsTableProps> = ({
     {
       title: '操作',
       key: 'actions',
-      render: (_: any, record: [string, TestResult]) => (
+      render: (_: unknown, record: [string, TestResult]) => (
         <Space>
           <Button
             size="small"

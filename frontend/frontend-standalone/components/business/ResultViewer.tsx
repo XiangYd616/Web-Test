@@ -17,16 +17,7 @@ import {
     TrendingUp
 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import {
-    Badge,
-    Button,
-    Card,
-    Input,
-    Modal,
-    Select,
-    Table,
-    type TableColumn
-} from '../ui';
+import {Badge, Button, Card, Input, Modal, Select, Table} from '../ui';
 import { TestResult } from './TestRunner';
 
 // 本地SelectOption类型定义
@@ -41,8 +32,8 @@ export interface ResultDetails {
     charts: Array<{
         type: 'line' | 'bar' | 'pie' | 'doughnut';
         title: string;
-        data: any;
-        options?: any;
+        data: unknown;
+        options?: unknown;
     }>;
     issues: Array<{
         id: string;
@@ -60,7 +51,7 @@ export interface ResultDetails {
         solution: string;
         estimatedImpact: string;
     }>;
-    rawData?: any;
+    rawData?: unknown;
 }
 
 // 组件属性接口
@@ -111,7 +102,7 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
     const filteredIssues = useMemo(() => {
         if (!details?.issues) return [];
 
-        return details.issues.filter(issue => {
+        return details?.issues.filter(issue => {
             const matchesSeverity = severityFilter === 'all' || issue.severity === severityFilter;
             const matchesCategory = categoryFilter === 'all' || issue.category === categoryFilter;
             const matchesSearch = searchQuery === '' ||
@@ -202,7 +193,7 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
                 <Card className="p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">关键指标</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {Object.entries(details.metrics).map(([key, value]) => (
+                        {Object.entries(details?.metrics).map(([key, value]) => (
                             <div key={key} className="text-center p-4 bg-gray-50 rounded-lg">
                                 <div className="text-2xl font-bold text-gray-900 mb-1">
                                     {typeof value === 'number' ? value.toFixed(1) : value}
@@ -217,12 +208,12 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
             )}
 
             {/* 问题统计 */}
-            {details?.issues && details.issues.length > 0 && (
+            {details?.issues && details?.issues.length > 0 && (
                 <Card className="p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">问题统计</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {['critical', 'high', 'medium', 'low'].map(severity => {
-                            const count = details.issues.filter(issue => issue.severity === severity).length;
+                            const count = details?.issues.filter(issue => issue.severity === severity).length;
                             return (
                                 <div key={severity} className="text-center p-4 bg-gray-50 rounded-lg">
                                     <div className={`text-2xl font-bold mb-1 ${getSeverityColor(severity) === 'red' ? 'text-red-600' :
@@ -304,11 +295,11 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
             </Card>
 
             {/* 图表展示 */}
-            {details?.charts && details.charts.length > 0 && (
+            {details?.charts && details?.charts.length > 0 && (
                 <Card className="p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">数据图表</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {details.charts.map((chart, index) => (
+                        {details?.charts.map((chart, index) => (
                             <div key={index} className="bg-gray-50 p-4 rounded-lg">
                                 <h4 className="font-medium text-gray-900 mb-3">{chart.title}</h4>
                                 <div className="h-64 flex items-center justify-center bg-white rounded border">
@@ -337,7 +328,7 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
                     </div>
                     <div className="bg-gray-50 p-4 rounded-lg">
                         <pre className="text-xs text-gray-600 overflow-x-auto">
-                            {JSON.stringify(details.rawData, null, 2).slice(0, 500)}...
+                            {JSON.stringify(details?.rawData, null, 2).slice(0, 500)}...
                         </pre>
                     </div>
                 </Card>
@@ -403,19 +394,19 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
                         <Select
                             options={severityOptions}
                             value={severityFilter}
-                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSeverityFilter(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSeverityFilter(e?.target.value)}
                             placeholder="筛选严重程度"
                         />
                         <Select
                             options={categoryOptions}
                             value={categoryFilter}
-                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCategoryFilter(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCategoryFilter(e?.target.value)}
                             placeholder="筛选分类"
                         />
                         <Input
                             placeholder="搜索问题..."
                             value={searchQuery}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e?.target.value)}
                             leftIcon={<Filter className="w-4 h-4" />}
                         />
                     </div>

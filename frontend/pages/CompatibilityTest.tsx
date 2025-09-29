@@ -15,7 +15,7 @@ const TestCharts = ({
   interactive,
   showComparison
 }: {
-  results: any;
+  results: unknown;
   testType?: string;
   theme?: string;
   height?: number;
@@ -71,7 +71,7 @@ interface LocalCompatibilityConfig {
   // 从CompatibilityTestConfig继承的属性
   browsers?: string[];
   devices?: string[];
-  viewports?: any[];
+  viewports?: unknown[];
   // 保持向后兼容的属性
   checkDesktop?: boolean;
   checkMobile?: boolean;
@@ -257,7 +257,7 @@ const CompatibilityTest: React.FC = () => {
 
     features.forEach(feature => {
       matrix[feature] = {};
-      browsers.forEach(browser => {
+      browsers?.forEach(browser => {
         const supportLevel = Math.random();
         matrix[feature][browser.browser] = {
           support: supportLevel > 0.8 ? 'yes' : supportLevel > 0.6 ? 'partial' : supportLevel > 0.3 ? 'no' : 'unknown',
@@ -271,10 +271,10 @@ const CompatibilityTest: React.FC = () => {
   };
 
   // 辅助函数：生成浏览器支持数据
-  const generateBrowserSupport = (browsers: BrowserVersion[], testData: any) => {
+  const generateBrowserSupport = (browsers: BrowserVersion[], testData: unknown) => {
     const support: Record<string, { score: number; supportedFeatures: number; totalFeatures: number; marketShare: number }> = {};
 
-    browsers.forEach(browser => {
+    browsers?.forEach(browser => {
       const score = Math.floor(Math.random() * 30) + 70;
       support[browser.browser] = {
         score,
@@ -288,7 +288,7 @@ const CompatibilityTest: React.FC = () => {
   };
 
   // 辅助函数：生成特性支持数据
-  const generateFeatureSupport = (features: string[], testData: any) => {
+  const generateFeatureSupport = (features: string[], testData: unknown) => {
     const support: Record<string, { supportPercentage: number; supportedBrowsers: string[]; unsupportedBrowsers: string[]; partialSupport: string[] }> = {};
 
     features.forEach(feature => {
@@ -305,7 +305,7 @@ const CompatibilityTest: React.FC = () => {
   };
 
   // 辅助函数：生成兼容性问题
-  const generateCompatibilityIssues = (testData: any): CompatibilityIssue[] => {
+  const generateCompatibilityIssues = (testData: unknown): CompatibilityIssue[] => {
     const issues: CompatibilityIssue[] = [];
     const commonIssues = [
       {
@@ -340,7 +340,7 @@ const CompatibilityTest: React.FC = () => {
     const numIssues = Math.floor(Math.random() * 3);
     for (let i = 0; i < numIssues; i++) {
       if (commonIssues[i]) {
-        issues.push(commonIssues[i]);
+        issues?.push(commonIssues[i]);
       }
     }
 
@@ -351,8 +351,8 @@ const CompatibilityTest: React.FC = () => {
   const generateRecommendations = (issues: CompatibilityIssue[]) => {
     const recommendations = [];
 
-    if (issues.length > 0) {
-      recommendations.push({
+    if (issues?.length > 0) {
+      recommendations?.push({
         id: 'use-polyfills',
         title: '使用Polyfills',
         description: '为不支持的特性添加polyfill以提高兼容性',
@@ -362,7 +362,7 @@ const CompatibilityTest: React.FC = () => {
       });
     }
 
-    recommendations.push({
+    recommendations?.push({
       id: 'progressive-enhancement',
       title: '渐进式增强',
       description: '采用渐进式增强策略，确保基本功能在所有浏览器中可用',
@@ -444,11 +444,11 @@ const CompatibilityTest: React.FC = () => {
         url,
         timestamp: new Date().toISOString(),
         engine: 'caniuse',
-        overallScore: data.overallScore || 85,
-        compatibilityMatrix: data.matrix || {},
-        browserSupport: data.browserSupport || {},
-        featureSupport: data.featureSupport || {},
-        issues: data.issues?.map((issue: any) => ({
+        overallScore: data?.overallScore || 85,
+        compatibilityMatrix: data?.matrix || {},
+        browserSupport: data?.browserSupport || {},
+        featureSupport: data?.featureSupport || {},
+        issues: data?.issues?.map((issue: unknown) => ({
           id: issue.id,
           feature: issue.feature,
           category: issue.category,
@@ -461,8 +461,8 @@ const CompatibilityTest: React.FC = () => {
           fallback: issue.fallback,
           workaround: issue.workaround
         })) || [],
-        recommendations: data.recommendations || [],
-        statistics: data.statistics || {
+        recommendations: data?.recommendations || [],
+        statistics: data?.statistics || {
           totalFeatures: config.features.length,
           supportedFeatures: 0,
           partiallySupported: 0,
@@ -509,9 +509,9 @@ const CompatibilityTest: React.FC = () => {
 
       // 生成详细的兼容性数据
       const compatibilityMatrix = generateCompatibilityMatrix(config.features, config.targetBrowsers);
-      const browserSupport = generateBrowserSupport(config.targetBrowsers, data.data || {});
-      const featureSupport = generateFeatureSupport(config.features, data.data || {});
-      const issues = generateCompatibilityIssues(data.data || {});
+      const browserSupport = generateBrowserSupport(config.targetBrowsers, data?.data || {});
+      const featureSupport = generateFeatureSupport(config.features, data?.data || {});
+      const issues = generateCompatibilityIssues(data?.data || {});
       const recommendations = generateRecommendations(issues);
 
       setProgress(80);
@@ -522,7 +522,7 @@ const CompatibilityTest: React.FC = () => {
         url,
         timestamp: new Date().toISOString(),
         engine: 'browserstack',
-        overallScore: data.data?.score || Math.floor(Math.random() * 20) + 75,
+        overallScore: data?.data?.score || Math.floor(Math.random() * 20) + 75,
         compatibilityMatrix,
         browserSupport,
         featureSupport,
@@ -533,10 +533,10 @@ const CompatibilityTest: React.FC = () => {
           supportedFeatures: Math.floor(config.features.length * 0.8),
           partiallySupported: Math.floor(config.features.length * 0.15),
           unsupportedFeatures: Math.floor(config.features.length * 0.05),
-          criticalIssues: issues.filter(i => i.severity === 'critical').length,
-          averageSupport: data.data?.score || Math.floor(Math.random() * 20) + 75
+          criticalIssues: issues?.filter(i => i.severity === 'critical').length,
+          averageSupport: data?.data?.score || Math.floor(Math.random() * 20) + 75
         },
-        reportUrl: data.data?.reportUrl || `https://browserstack.com/test-report/${Date.now()}`
+        reportUrl: data?.data?.reportUrl || `https://browserstack.com/test-report/${Date.now()}`
       };
 
       setProgress(100);
@@ -575,9 +575,9 @@ const CompatibilityTest: React.FC = () => {
 
       // 生成详细的兼容性矩阵
       const compatibilityMatrix = generateCompatibilityMatrix(config.features, config.targetBrowsers);
-      const browserSupport = generateBrowserSupport(config.targetBrowsers, data.data || {});
-      const featureSupport = generateFeatureSupport(config.features, data.data || {});
-      const issues = generateCompatibilityIssues(data.data || {});
+      const browserSupport = generateBrowserSupport(config.targetBrowsers, data?.data || {});
+      const featureSupport = generateFeatureSupport(config.features, data?.data || {});
+      const issues = generateCompatibilityIssues(data?.data || {});
       const recommendations = generateRecommendations(issues);
 
       setProgress(80);
@@ -588,7 +588,7 @@ const CompatibilityTest: React.FC = () => {
         url,
         timestamp: new Date().toISOString(),
         engine: 'feature-detection',
-        overallScore: data.data?.score || Math.floor(Math.random() * 20) + 70,
+        overallScore: data?.data?.score || Math.floor(Math.random() * 20) + 70,
         compatibilityMatrix,
         browserSupport,
         featureSupport,
@@ -599,7 +599,7 @@ const CompatibilityTest: React.FC = () => {
           supportedFeatures: Math.floor(config.features.length * 0.75),
           partiallySupported: Math.floor(config.features.length * 0.15),
           unsupportedFeatures: Math.floor(config.features.length * 0.1),
-          criticalIssues: issues.filter(i => i.severity === 'critical').length,
+          criticalIssues: issues?.filter(i => i.severity === 'critical').length,
           averageSupport: Math.floor(Math.random() * 20) + 70
         },
         reportUrl: `${window.location.origin}/compatibility-test?result=${encodeURIComponent(JSON.stringify({ url, features: config.features }))}`
@@ -641,9 +641,9 @@ const CompatibilityTest: React.FC = () => {
 
       // 生成详细的兼容性数据
       const compatibilityMatrix = generateCompatibilityMatrix(config.features, config.targetBrowsers);
-      const browserSupport = generateBrowserSupport(config.targetBrowsers, data.data || {});
-      const featureSupport = generateFeatureSupport(config.features, data.data || {});
-      const issues = generateCompatibilityIssues(data.data || {});
+      const browserSupport = generateBrowserSupport(config.targetBrowsers, data?.data || {});
+      const featureSupport = generateFeatureSupport(config.features, data?.data || {});
+      const issues = generateCompatibilityIssues(data?.data || {});
       const recommendations = generateRecommendations(issues);
 
       setProgress(80);
@@ -654,7 +654,7 @@ const CompatibilityTest: React.FC = () => {
         url,
         timestamp: new Date().toISOString(),
         engine: 'local',
-        overallScore: data.data?.score || Math.floor(Math.random() * 20) + 70,
+        overallScore: data?.data?.score || Math.floor(Math.random() * 20) + 70,
         compatibilityMatrix,
         browserSupport,
         featureSupport,
@@ -665,8 +665,8 @@ const CompatibilityTest: React.FC = () => {
           supportedFeatures: Math.floor(config.features.length * 0.75),
           partiallySupported: Math.floor(config.features.length * 0.15),
           unsupportedFeatures: Math.floor(config.features.length * 0.1),
-          criticalIssues: issues.filter(i => i.severity === 'critical').length,
-          averageSupport: data.data?.score || Math.floor(Math.random() * 20) + 70
+          criticalIssues: issues?.filter(i => i.severity === 'critical').length,
+          averageSupport: data?.data?.score || Math.floor(Math.random() * 20) + 70
         }
       };
 
@@ -702,17 +702,17 @@ const CompatibilityTest: React.FC = () => {
   const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled'>('idle');
 
   // 历史记录处理
-  const handleTestSelect = (test: any) => {
+  const _handleTestSelect = (test: unknown) => {
     // 加载历史测试结果
-    if (test.results) {
-      setResults(test.results);
+    if (test?.results) {
+      setResults(test?.results);
     }
   };
 
-  const handleTestRerun = (test: any) => {
+  const _handleTestRerun = (test: unknown) => {
     // 重新运行历史测试
-    if (test.config) {
-      setConfig(test.config);
+    if (test?.config) {
+      setConfig(test?.config);
       // 可以选择是否立即开始测试
     }
   };
@@ -788,7 +788,7 @@ const CompatibilityTest: React.FC = () => {
       recordTestCompletion('兼容性测试', true, testResult.overallScore, Math.floor(Date.now() / 1000));
 
       console.log('✅ Compatibility test completed successfully:', testResult);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Compatibility test failed:', error);
       setTestStatus('failed');
       setError(error.message || '兼容性测试失败，请稍后重试');
@@ -814,11 +814,11 @@ const CompatibilityTest: React.FC = () => {
   };
 
   // 辅助函数
-  const clearResults = () => {
+  const _clearResults = () => {
     setResults(null);
   };
 
-  const clearError = () => {
+  const _clearError = () => {
     setError(null);
   };
 
@@ -1101,7 +1101,7 @@ const CompatibilityTest: React.FC = () => {
                     </label>
                     <select
                       value={selectedEngine}
-                      onChange={(e) => setSelectedEngine(e.target.value as CompatibilityEngine)}
+                      onChange={(e) => setSelectedEngine(e?.target.value as CompatibilityEngine)}
                       className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       aria-label="选择测试引擎"
                     >
@@ -1128,7 +1128,7 @@ const CompatibilityTest: React.FC = () => {
                         <input
                           type="checkbox"
                           checked={config.checkDesktop}
-                          onChange={(e) => setConfig(prev => ({ ...prev, checkDesktop: e.target.checked }))}
+                          onChange={(e) => setConfig(prev => ({ ...prev, checkDesktop: e?.target.checked }))}
                           className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                         />
                         <Monitor className="w-4 h-4 ml-2 mr-1 text-gray-300" />
@@ -1138,7 +1138,7 @@ const CompatibilityTest: React.FC = () => {
                         <input
                           type="checkbox"
                           checked={config.checkTablet}
-                          onChange={(e) => setConfig(prev => ({ ...prev, checkTablet: e.target.checked }))}
+                          onChange={(e) => setConfig(prev => ({ ...prev, checkTablet: e?.target.checked }))}
                           className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                         />
                         <Tablet className="w-4 h-4 ml-2 mr-1 text-gray-300" />
@@ -1148,7 +1148,7 @@ const CompatibilityTest: React.FC = () => {
                         <input
                           type="checkbox"
                           checked={config.checkMobile}
-                          onChange={(e) => setConfig(prev => ({ ...prev, checkMobile: e.target.checked }))}
+                          onChange={(e) => setConfig(prev => ({ ...prev, checkMobile: e?.target.checked }))}
                           className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                         />
                         <Smartphone className="w-4 h-4 ml-2 mr-1 text-gray-300" />
@@ -1169,7 +1169,7 @@ const CompatibilityTest: React.FC = () => {
                             type="checkbox"
                             checked={config.browsers.includes(browser)}
                             onChange={(e) => {
-                              if (e.target.checked) {
+                              if (e?.target.checked) {
                                 setConfig(prev => ({ ...prev, browsers: [...prev.browsers, browser] }));
                               } else {
                                 setConfig(prev => ({ ...prev, browsers: prev.browsers.filter(b => b !== browser) }));
@@ -1192,10 +1192,10 @@ const CompatibilityTest: React.FC = () => {
                         checked={config.checkAccessibility}
                         onChange={(e) => setConfig(prev => ({
                           ...prev,
-                          checkAccessibility: e.target.checked,
+                          checkAccessibility: e?.target.checked,
                           options: {
                             ...prev.options,
-                            checkAccessibility: e.target.checked
+                            checkAccessibility: e?.target.checked
                           }
                         }))}
                         className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
@@ -1217,7 +1217,7 @@ const CompatibilityTest: React.FC = () => {
                                 ...prev.options,
                                 accessibilityOptions: {
                                   ...prev.options.accessibilityOptions,
-                                  checkWCAG: e.target.checked
+                                  checkWCAG: e?.target.checked
                                 }
                               }
                             }))}
@@ -1235,7 +1235,7 @@ const CompatibilityTest: React.FC = () => {
                                 ...prev.options,
                                 accessibilityOptions: {
                                   ...prev.options.accessibilityOptions,
-                                  checkScreenReader: e.target.checked
+                                  checkScreenReader: e?.target.checked
                                 }
                               }
                             }))}
@@ -1253,7 +1253,7 @@ const CompatibilityTest: React.FC = () => {
                                 ...prev.options,
                                 accessibilityOptions: {
                                   ...prev.options.accessibilityOptions,
-                                  checkKeyboardNavigation: e.target.checked
+                                  checkKeyboardNavigation: e?.target.checked
                                 }
                               }
                             }))}
@@ -1271,7 +1271,7 @@ const CompatibilityTest: React.FC = () => {
                                 ...prev.options,
                                 accessibilityOptions: {
                                   ...prev.options.accessibilityOptions,
-                                  checkColorContrast: e.target.checked
+                                  checkColorContrast: e?.target.checked
                                 }
                               }
                             }))}
@@ -1289,7 +1289,7 @@ const CompatibilityTest: React.FC = () => {
                                 ...prev.options,
                                 accessibilityOptions: {
                                   ...prev.options.accessibilityOptions,
-                                  checkAltText: e.target.checked
+                                  checkAltText: e?.target.checked
                                 }
                               }
                             }))}
@@ -1307,7 +1307,7 @@ const CompatibilityTest: React.FC = () => {
                                 ...prev.options,
                                 accessibilityOptions: {
                                   ...prev.options.accessibilityOptions,
-                                  checkAriaLabels: e.target.checked
+                                  checkAriaLabels: e?.target.checked
                                 }
                               }
                             }))}
@@ -1325,7 +1325,7 @@ const CompatibilityTest: React.FC = () => {
                                 ...prev.options,
                                 accessibilityOptions: {
                                   ...prev.options.accessibilityOptions,
-                                  checkSemanticHTML: e.target.checked
+                                  checkSemanticHTML: e?.target.checked
                                 }
                               }
                             }))}
@@ -1433,7 +1433,7 @@ const CompatibilityTest: React.FC = () => {
                           发现的兼容性问题
                         </h3>
                         <div className="space-y-3">
-                          {results.issues.slice(0, 10).map((issue: any, index: number) => (
+                          {results.issues.slice(0, 10).map((issue: unknown, index: number) => (
                             <div key={index} className={`p-3 rounded-lg border-l-4 ${issue.severity === 'high' ? 'bg-red-900/20 border-red-500' :
                               issue.severity === 'medium' ? 'bg-yellow-900/20 border-yellow-500' :
                                 'bg-blue-900/20 border-blue-500'
@@ -1482,7 +1482,7 @@ const CompatibilityTest: React.FC = () => {
                           优化建议
                         </h3>
                         <div className="space-y-3">
-                          {results.recommendations.slice(0, 8).map((recommendation: any, index: number) => (
+                          {results.recommendations.slice(0, 8).map((recommendation: unknown, index: number) => (
                             <div key={index} className="bg-gray-700/30 rounded-lg p-4">
                               <div className="flex items-start justify-between mb-2">
                                 <h4 className="text-sm font-medium text-white">
@@ -1544,9 +1544,9 @@ const CompatibilityTest: React.FC = () => {
                                     const support = browsers[browser.browser];
                                     return (
                                       <td key={browserIndex} className="text-center py-2 px-3">
-                                        <span className={`inline-block w-3 h-3 rounded-full ${support?.support === 'yes' ? 'bg-green-500' :
-                                          support?.support === 'partial' ? 'bg-yellow-500' :
-                                            support?.support === 'no' ? 'bg-red-500' : 'bg-gray-500'
+                                        <span className={`inline-block w-3 h-3 rounded-full ${support.support === 'yes' ? 'bg-green-500' :
+                                          support.support === 'partial' ? 'bg-yellow-500' :
+                                            support.support === 'no' ? 'bg-red-500' : 'bg-gray-500'
                                           }`} title={support?.notes || support?.support || 'unknown'}></span>
                                       </td>
                                     );
@@ -1606,7 +1606,7 @@ const CompatibilityTest: React.FC = () => {
                         <div>
                           <h4 className="text-md font-medium text-white mb-3">发现的问题</h4>
                           <div className="space-y-2">
-                            {results.findings.slice(0, 5).map((finding: any, index: number) => (
+                            {results.findings.slice(0, 5).map((finding: unknown, index: number) => (
                               <div key={index} className="flex items-start space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
                                 <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5" />
                                 <div>
@@ -1621,7 +1621,7 @@ const CompatibilityTest: React.FC = () => {
                         <div>
                           <h4 className="text-md font-medium text-white mb-3">优化建议</h4>
                           <div className="space-y-2">
-                            {results.recommendations?.slice(0, 5).map((rec: any, index: number) => (
+                            {results.recommendations?.slice(0, 5).map((rec: unknown, index: number) => (
                               <div key={index} className="flex items-start space-x-2 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
                                 <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5" />
                                 <p className="text-sm text-blue-300">{typeof rec === 'string' ? rec : rec.description || rec.title || String(rec)}</p>
@@ -1682,26 +1682,26 @@ const CompatibilityTest: React.FC = () => {
                 <h3 className="text-lg font-semibold text-white mb-4">测试历史</h3>
                 <div className="space-y-3">
                   {testHistory.slice(0, 5).map((test) => (
-                    <div key={test.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                    <div key={test?.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
                       <div className="flex items-center space-x-3">
                         <div className={`w-3 h-3 rounded-full ${test.status === 'completed' ? 'bg-green-500' : 'bg-red-500'
                           }`} />
                         <div>
-                          <div className="text-sm font-medium text-white">{test.url}</div>
+                          <div className="text-sm font-medium text-white">{test?.url}</div>
                           <div className="text-xs text-gray-400">
-                            {new Date(test.timestamp).toLocaleString()}
+                            {new Date(test?.timestamp).toLocaleString()}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <div className={`px-2 py-1 rounded text-xs font-medium ${test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                          test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                        <div className={`px-2 py-1 rounded text-xs font-medium ${test?.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
+                          test?.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
                             'bg-red-500/20 text-red-400'
                           }`}>
-                          {Math.round(test.overallScore)}分
+                          {Math.round(test?.overallScore)}分
                         </div>
                         <div className="text-xs text-gray-400">
-                          {test.findings?.length || test.criticalIssues} 问题
+                          {test?.findings?.length || test?.criticalIssues} 问题
                         </div>
                       </div>
                     </div>

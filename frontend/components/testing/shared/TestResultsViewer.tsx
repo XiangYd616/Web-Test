@@ -6,11 +6,7 @@
 import React from 'react';
 import { useState } from 'react';
 import type { ReactNode, FC } from 'react';;
-import { 
-  BarChart3, Download, Eye, EyeOff, FileText, Share2, 
-  CheckCircle, XCircle, AlertTriangle, Info, Zap,
-  Clock, Globe, Shield, Activity, TrendingUp
-} from 'lucide-react';
+import {BarChart3, Download, Eye, EyeOff, FileText, Share2, CheckCircle, XCircle, AlertTriangle, Info, Zap, Clock, Globe, Activity, TrendingUp} from 'lucide-react';
 
 // 测试结果接口
 export interface TestResult {
@@ -23,10 +19,10 @@ export interface TestResult {
   endTime: Date;
   duration: number;
   summary?: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
   metrics?: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
   issues?: Array<{
     type: 'error' | 'warning' | 'info';
@@ -35,7 +31,7 @@ export interface TestResult {
     severity?: 'low' | 'medium' | 'high' | 'critical';
   }>;
   recommendations?: string[];
-  rawData?: any;
+  rawData?: unknown;
 }
 
 // 结果展示属性

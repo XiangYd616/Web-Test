@@ -112,7 +112,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
     }
 
     try {
-      const operations = Array.from(selectedRecords).map(id => ({
+      const _operations = Array.from(selectedRecords).map(id => ({
         type: 'delete' as const,
         id
       }));
@@ -254,7 +254,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                       type="search"
                       placeholder="搜索数据..."
                       value={searchTerm}
-                      onChange={(e) => handleSearch(e.target.value)}
+                      onChange={(e) => handleSearch(e?.target.value)}
                       className="pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </label>
@@ -299,7 +299,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                       <select
                         id="data-type-select"
                         value={query.type || 'all'}
-                        onChange={(e) => handleFilterChange({ type: e.target.value === 'all' ? undefined : e.target.value })}
+                        onChange={(e) => handleFilterChange({ type: e?.target.value === 'all' ? undefined : e?.target.value })}
                         className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2"
                         aria-label="选择数据类型"
                       >
@@ -319,7 +319,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                         value={typeof query.sort === 'object' ? query.sort.field : 'created_at'}
                         onChange={(e) => handleFilterChange({
                           sort: {
-                            field: e.target.value,
+                            field: e?.target.value,
                             order: typeof query.sort === 'object' ? query.sort.order : 'desc'
                           }
                         })}
@@ -341,7 +341,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                         onChange={(e) => handleFilterChange({
                           sort: {
                             field: typeof query.sort === 'object' ? query.sort.field : 'createdAt',
-                            order: e.target.value as 'asc' | 'desc'
+                            order: e?.target.value as 'asc' | 'desc'
                           }
                         })}
                         className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2"
@@ -360,7 +360,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                         onChange={(e) => handleFilterChange({
                           pagination: {
                             page: 1,
-                            limit: parseInt(e.target.value)
+                            limit: parseInt(e?.target.value)
                           }
                         })}
                         className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2"
@@ -388,7 +388,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                             id="select-all-checkbox"
                             type="checkbox"
                             checked={(records?.length || 0) > 0 && selectedRecords.size === (records?.length || 0)}
-                            onChange={(e) => handleSelectAll(e.target.checked)}
+                            onChange={(e) => handleSelectAll(e?.target.checked)}
                             className="rounded border-gray-600 bg-gray-700 text-blue-500"
                             aria-label="全选或取消全选所有记录"
                           />
@@ -426,7 +426,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                                 id={`record-checkbox-${record.id}`}
                                 type="checkbox"
                                 checked={selectedRecords.has(record.id)}
-                                onChange={(e) => handleRecordSelect(record.id, e.target.checked)}
+                                onChange={(e) => handleRecordSelect(record.id, e?.target.checked)}
                                 className="rounded border-gray-600 bg-gray-700 text-blue-500"
                                 aria-label={`选择记录 ${record.id}`}
                               />

@@ -4,24 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  Zap,
-  Shield,
-  Globe,
-  Code,
-  BarChart3,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  TrendingUp,
-  Play,
-  Pause,
-  Calendar,
-  Target,
-  Activity,
-  FileText,
-  Settings
-} from 'lucide-react';
+import {Zap, Shield, Globe, Code, BarChart3, Clock, CheckCircle, AlertTriangle, TrendingUp, Play, Calendar, Target, Activity, FileText, Settings} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface TestMetrics {

@@ -4,18 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Zap, 
-  AlertTriangle, 
-  Info, 
-  Download, 
-  Play, 
-  StopCircle,
-  TrendingUp,
-  Users,
-  Clock,
-  AlertCircle
-} from 'lucide-react';
+import {Zap, AlertTriangle, Info, Download, AlertCircle} from 'lucide-react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { UniversalTestPage } from '../components/testing/UniversalTestPage';
 import { stressTestConfig } from '../config/testTypes';
@@ -24,7 +13,7 @@ import { toast } from 'react-hot-toast';
 /**
  * 自定义结果展示组件
  */
-const StressTestResultDisplay: React.FC<{ result: any }> = ({ result }) => {
+const StressTestResultDisplay: React.FC<{ result: unknown }> = ({ result }) => {
   if (!result || !result.summary) return null;
 
   const getPerformanceRating = () => {
@@ -98,7 +87,7 @@ const StressTestResultDisplay: React.FC<{ result: any }> = ({ result }) => {
         <div className="bg-gray-800 rounded-lg p-4 border border-red-700">
           <h3 className="text-lg font-semibold text-red-400 mb-3">错误日志</h3>
           <div className="max-h-40 overflow-y-auto space-y-2">
-            {result.errors.slice(0, 10).map((error: any, index: number) => (
+            {result.errors.slice(0, 10).map((error: unknown, index: number) => (
               <div key={index} className="text-sm text-red-300">
                 [{new Date(error.timestamp).toLocaleTimeString()}] {error.message}
                 {error.statusCode && ` (状态码: ${error.statusCode})`}
@@ -130,7 +119,7 @@ const UnifiedStressTest: React.FC = () => {
   }
 
   // 测试完成回调
-  const handleTestComplete = useCallback((result: any) => {
+  const handleTestComplete = useCallback((result: unknown) => {
     
     // 添加到历史记录
     setTestHistory(prev => [result, ...prev.slice(0, 4)]);
@@ -139,9 +128,9 @@ const UnifiedStressTest: React.FC = () => {
     if (result.summary) {
       const { avgResponseTime, errorRate } = result.summary;
       if (errorRate > 10) {
-        toast.error(`测试完成，但错误率较高: ${errorRate.toFixed(1)}%`);
+        toast.error(`测试完成，但错误率较高: ${errorRate?.toFixed(1)}%`);
       } else if (avgResponseTime > 1000) {
-        toast(`测试完成，响应时间较慢: ${avgResponseTime.toFixed(0)}ms`);
+        toast(`测试完成，响应时间较慢: ${avgResponseTime?.toFixed(0)}ms`);
       } else {
         toast.success('测试完成，性能表现良好');
       }
@@ -149,11 +138,11 @@ const UnifiedStressTest: React.FC = () => {
   }, []);
 
   // 配置变更回调
-  const handleConfigChange = useCallback((config: any) => {
+  const handleConfigChange = useCallback((config: unknown) => {
   }, []);
 
   // 导出测试结果
-  const exportTestResult = (result: any) => {
+  const exportTestResult = (result: unknown) => {
     if (!result) {
       toast.error('没有可导出的测试结果');
       return;

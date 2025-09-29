@@ -25,7 +25,7 @@ export class DataProcessingUtils {
   /**
    * 标准化时间戳
    */
-  static normalizeTimestamp(timestamp: any): string {
+  static normalizeTimestamp(timestamp: unknown): string {
     if (!timestamp) return new Date().toISOString();
 
     if (typeof timestamp === 'string') {
@@ -42,7 +42,7 @@ export class DataProcessingUtils {
   /**
    * 标准化数值
    */
-  static normalizeNumber(value: any, min: number = 0, max: number = Infinity): number {
+  static normalizeNumber(value: unknown, min: number = 0, max: number = Infinity): number {
     const num = parseFloat(value);
     if (isNaN(num)) return 0;
     return Math.max(min, Math.min(max, num));
@@ -51,7 +51,7 @@ export class DataProcessingUtils {
   /**
    * 标准化数据点
    */
-  static normalizeDataPoint(rawPoint: any): TestDataPoint {
+  static normalizeDataPoint(rawPoint: unknown): TestDataPoint {
     return {
       timestamp: this.normalizeTimestamp(rawPoint.timestamp),
       responseTime: this.normalizeNumber(rawPoint.responseTime, 0, 60000),
@@ -67,7 +67,7 @@ export class DataProcessingUtils {
   /**
    * 过滤有效数据
    */
-  static filterValidData(data: any[]): TestDataPoint[] {
+  static filterValidData(data: unknown[]): TestDataPoint[] {
     return data
       .filter(item => item && typeof item === 'object')
       .map(item => this.normalizeDataPoint(item))
@@ -166,8 +166,8 @@ export class DataProcessingUtils {
       };
     }
 
-    const responseTimes = validData.map(d => d.responseTime);
-    const successfulRequests = validData.filter(d => d.success).length;
+    const responseTimes = validData.map(d => d?.responseTime);
+    const successfulRequests = validData.filter(d => d?.success).length;
     const failedRequests = validData.length - successfulRequests;
 
     return {

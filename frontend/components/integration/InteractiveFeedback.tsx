@@ -2,7 +2,7 @@ import React from 'react';
 import { Fragment, useEffect, useState } from 'react';
 import type { ReactNode, ComponentType, FC } from 'react';;
 
-import { Check, Copy, Download, Share2, Heart, ThumbsUp, ThumbsDown, Star, Bookmark, BookmarkCheck, Eye, EyeOff, Volume2, VolumeX, Zap, Sparkles, Target, TrendingUp, Award, Gift } from 'lucide-react';
+import {Check, Copy, Heart, ThumbsUp, Star, BookmarkCheck, Sparkles, Award} from 'lucide-react';
 
 // 按钮状态反馈组件
 export const ButtonFeedback: React.FC<{
@@ -229,7 +229,7 @@ export const ProgressIndicator: React.FC<{
                 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
                 transition-all duration-300
                 ${
-                  completedSteps.includes(index)
+                  completedSteps?.includes(index)
                     ? 'bg-green-500 text-white'
                     : index === currentStep
                     ? 'bg-blue-500 text-white animate-pulse'
@@ -239,7 +239,7 @@ export const ProgressIndicator: React.FC<{
                 }
               `}
             >
-              {completedSteps.includes(index) ? (
+              {completedSteps?.includes(index) ? (
                 <Check className="w-4 h-4" />
               ) : (
                 index + 1
@@ -252,7 +252,7 @@ export const ProgressIndicator: React.FC<{
               className={`
                 flex-1 h-0.5 mx-2 transition-all duration-300
                 ${
-                  index < currentStep || completedSteps.includes(index)
+                  index < currentStep || completedSteps?.includes(index)
                     ? 'bg-blue-500'
                     : 'bg-gray-200'
                 }
@@ -498,7 +498,7 @@ export const FeedbackCollector: React.FC<{
         <label className="block text-sm text-gray-700 mb-2">类型</label>
         <select
           value={type}
-          onChange={(e) => setType(e.target.value)}
+          onChange={(e) => setType(e?.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           title="选择反馈类型"
           aria-label="选择反馈类型"
@@ -514,7 +514,7 @@ export const FeedbackCollector: React.FC<{
         <label className="block text-sm text-gray-700 mb-2">详细说明</label>
         <textarea
           value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          onChange={(e) => setComment(e?.target.value)}
           rows={3}
           placeholder="请描述您的反馈..."
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

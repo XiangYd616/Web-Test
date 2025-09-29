@@ -112,7 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 setupTokenRefresh(expiryTime - currentTime);
               }
 
-              console.log('✅ 从localStorage恢复用户登录状态:', user.email);
+              console.log('✅ 从localStorage恢复用户登录状态:', user?.email);
             } else if (rememberMe && refreshTokenValue) {
               // Token过期但有refresh token，尝试刷新
               try {
@@ -210,7 +210,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('auth_token', data.accessToken);
       localStorage.setItem('refresh_token', data.refreshToken);
       localStorage.setItem('user_data', JSON.stringify(data.user));
-      localStorage.setItem('remember_me', rememberMe.toString());
+      localStorage.setItem('remember_me', rememberMe?.toString());
 
       setUser(data.user);
 
@@ -225,7 +225,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       console.log('✅ 登录成功:', data.user.email);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ 登录失败:', error);
 
       // 解析并设置错误
@@ -310,7 +310,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // 添加缺失的方法
-  const updateProfile = async (data: any) => {
+  const updateProfile = async (data: unknown) => {
     try {
       const token = localStorage.getItem('auth_token');
 
@@ -342,7 +342,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const changePassword = async (data: any) => {
+  const changePassword = async (data: unknown) => {
     try {
       const token = localStorage.getItem('auth_token');
 
@@ -534,11 +534,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const hasRole = (role: string): boolean => {
-    return user?.role === role;
+    return user.role === role;
   };
 
   const hasAnyRole = (roles: string[]): boolean => {
-    return roles.some(role => user?.role === role);
+    return roles.some(role => user.role === role);
   };
 
   const clearError = () => {
@@ -563,7 +563,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     sendEmailVerification,
     verifyEmail,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin',
+    isAdmin: user.role === 'admin',
     error
   };
 

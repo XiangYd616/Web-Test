@@ -3,10 +3,10 @@ import { createElement, useEffect, useState } from 'react';
 import type { FC } from 'react';;
 
 // 延迟导入 Chart.js 以避免初始化问题
-let ChartJS: any;
-let Bar: any;
-let Doughnut: any;
-let Line: any;
+let ChartJS: unknown;
+let Bar: unknown;
+let Doughnut: unknown;
+let Line: unknown;
 
 // 动态导入和注册 Chart.js
 const initializeChartJS = async () => {
@@ -113,8 +113,8 @@ const defaultOptions = {
 };
 
 export interface LineChartProps {
-  data: any;
-  options?: any;
+  data: unknown;
+  options?: unknown;
   height?: number;
   className?: string;
 }
@@ -154,8 +154,8 @@ export const ModernLineChart: React.FC<LineChartProps> = ({
 };
 
 export interface BarChartProps {
-  data: any;
-  options?: any;
+  data: unknown;
+  options?: unknown;
   height?: number;
   className?: string;
 }
@@ -195,8 +195,8 @@ export const ModernBarChart: React.FC<BarChartProps> = ({
 };
 
 export interface DoughnutChartProps {
-  data: any;
-  options?: any;
+  data: unknown;
+  options?: unknown;
   size?: number;
   className?: string;
 }

@@ -89,7 +89,7 @@ export class ExportUtils {
   /**
    * 压力测试数据导出
    */
-  static exportStressTestData(data: any, format: string): void {
+  static exportStressTestData(data: unknown, format: string): void {
     const exportData = {
       type: 'stress-test',
       timestamp: new Date().toISOString(),
@@ -136,7 +136,7 @@ export class ExportUtils {
   /**
    * 性能测试数据导出
    */
-  static exportPerformanceTestData(data: any, format: string): void {
+  static exportPerformanceTestData(data: unknown, format: string): void {
     const exportData = {
       type: 'performance-test',
       timestamp: new Date().toISOString(),
@@ -179,7 +179,7 @@ export class ExportUtils {
   /**
    * API测试数据导出
    */
-  static exportAPITestData(data: any, format: string): void {
+  static exportAPITestData(data: unknown, format: string): void {
     const exportData = {
       type: 'api-test',
       timestamp: new Date().toISOString(),
@@ -221,7 +221,7 @@ export class ExportUtils {
   /**
    * 转换压力测试数据为CSV（增强版）
    */
-  private static convertStressTestToCSV(data: any): string {
+  private static convertStressTestToCSV(data: unknown): string {
     let csvContent = '';
 
     // 添加测试摘要
@@ -258,7 +258,7 @@ export class ExportUtils {
       ];
       csvContent += headers.join(',') + '\n';
 
-      const rows = data.realTimeData.map((point: any) => [
+      const rows = data.realTimeData.map((point: unknown) => [
         new Date(point.timestamp).toLocaleString('zh-CN'),
         point.activeUsers || 0,
         point.responseTime || 0,
@@ -272,7 +272,7 @@ export class ExportUtils {
         point.queueLength || 0
       ]);
 
-      csvContent += rows.map((row: any) => row.join(',')).join('\n');
+      csvContent += rows.map((row: unknown) => row.join(',')).join('\n');
     }
 
     return csvContent;
@@ -281,7 +281,7 @@ export class ExportUtils {
   /**
    * 转换性能测试数据为CSV（增强版）
    */
-  private static convertPerformanceTestToCSV(data: any): string {
+  private static convertPerformanceTestToCSV(data: unknown): string {
     let csvContent = '';
 
     // 添加测试摘要
@@ -327,7 +327,7 @@ export class ExportUtils {
     if (data.recommendations && data.recommendations.length > 0) {
       csvContent += '性能优化建议\n';
       csvContent += '优先级,建议内容,预期收益\n';
-      data.recommendations.forEach((rec: any) => {
+      data.recommendations.forEach((rec: unknown) => {
         csvContent += `${rec.priority || '中'},${rec.title || rec},${rec.impact || '中等'}\n`;
       });
     }
@@ -338,9 +338,9 @@ export class ExportUtils {
   /**
    * 转换API测试数据为CSV
    */
-  private static convertAPITestToCSV(data: any): string {
+  private static convertAPITestToCSV(data: unknown): string {
     const headers = ['端点', '方法', '状态码', '响应时间(ms)', '数据大小(bytes)'];
-    const rows = data.results?.map((result: any) => [
+    const rows = data.results?.map((result: unknown) => [
       data.endpoint,
       data.method,
       result.statusCode,
@@ -348,13 +348,13 @@ export class ExportUtils {
       result.dataSize || 0
     ]) || [];
 
-    return [headers.join(','), ...rows.map((row: any) => row.join(','))].join('\n');
+    return [headers.join(','), ...rows.map((row: unknown) => row.join(','))].join('\n');
   }
 
   /**
    * 生成压力测试HTML报告
    */
-  private static generateStressTestHTML(data: any): string {
+  private static generateStressTestHTML(data: unknown): string {
     const { testConfig, results, metrics } = data;
 
     return `
@@ -448,7 +448,7 @@ export class ExportUtils {
   /**
    * 验证导出数据
    */
-  static validateExportData(data: any, requiredFields: string[]): boolean {
+  static validateExportData(data: unknown, requiredFields: string[]): boolean {
     return requiredFields.every(field => {
       const value = field.split('.').reduce((obj, key) => obj?.[key], data);
       return value !== undefined && value !== null;
@@ -458,7 +458,7 @@ export class ExportUtils {
   /**
    * 统一导出处理器 - 根据导出类型调用相应的方法
    */
-  static async exportByType(exportType: string, data: any): Promise<void> {
+  static async exportByType(exportType: string, data: unknown): Promise<void> {
     const { testType = 'stress', testId, testName } = data;
 
     switch (exportType) {
@@ -478,7 +478,7 @@ export class ExportUtils {
   /**
    * 原始数据导出 - 完整的JSON格式测试记录
    */
-  static exportRawData(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportRawData(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
     const exportData = {
       type: 'raw-data',
       timestamp: new Date().toISOString(),
@@ -513,7 +513,7 @@ export class ExportUtils {
   /**
    * 分析报告导出 - HTML格式报告（增强版）
    */
-  static exportAnalysisReport(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportAnalysisReport(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
     const metrics = data.metrics || {};
     const result = data.result || {};
     const testConfig = data.testConfig || {};
@@ -581,7 +581,7 @@ export class ExportUtils {
             <h1>🚀 ${testName || testType}测试深度分析报告</h1>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
                 <div><strong>测试时间:</strong> ${new Date().toLocaleString('zh-CN')}</div>
-                <div><strong>测试目标:</strong> ${testConfig.url || '未指定'}</div>
+                <div><strong>测试目标:</strong> ${testConfig?.url || '未指定'}</div>
                 <div><strong>测试类型:</strong> ${testType}</div>
                 <div><strong>测试ID:</strong> ${testId || 'N/A'}</div>
             </div>
@@ -593,8 +593,8 @@ export class ExportUtils {
                 <h2>📊 执行摘要</h2>
                 <div class="summary-box">
                     <h3>关键发现</h3>
-                    <p>本次${testType}测试共执行${metrics.totalRequests || 0}个请求，平均响应时间为${metrics.averageResponseTime || 0}ms，
-                    成功率达到${metrics.successRate || 0}%。${(performanceGrade as any).description || ''}</p>
+                    <p>本次${testType}测试共执行${metrics?.totalRequests || 0}个请求，平均响应时间为${metrics?.averageResponseTime || 0}ms，
+                    成功率达到${metrics?.successRate || 0}%。${(performanceGrade as any).description || ''}</p>
                 </div>
             </div>
 
@@ -603,24 +603,24 @@ export class ExportUtils {
                 <h2>📈 性能概览</h2>
                 <div class="metric-grid">
                     <div class="metric-card">
-                        <div class="metric-value">${metrics.averageResponseTime || 0}ms</div>
+                        <div class="metric-value">${metrics?.averageResponseTime || 0}ms</div>
                         <div class="metric-label">平均响应时间</div>
-                        <div class="metric-rating ${this.getRatingClass(this.getPerformanceRating(metrics.averageResponseTime, 'responseTime'))}">${this.getPerformanceRating(metrics.averageResponseTime, 'responseTime')}</div>
+                        <div class="metric-rating ${this.getRatingClass(this.getPerformanceRating(metrics?.averageResponseTime, 'responseTime'))}">${this.getPerformanceRating(metrics?.averageResponseTime, 'responseTime')}</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value">${metrics.throughput || 0}</div>
+                        <div class="metric-value">${metrics?.throughput || 0}</div>
                         <div class="metric-label">吞吐量 (req/s)</div>
-                        <div class="metric-rating ${this.getRatingClass(this.getPerformanceRating(metrics.throughput, 'throughput'))}">${this.getPerformanceRating(metrics.throughput, 'throughput')}</div>
+                        <div class="metric-rating ${this.getRatingClass(this.getPerformanceRating(metrics?.throughput, 'throughput'))}">${this.getPerformanceRating(metrics?.throughput, 'throughput')}</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value">${metrics.errorRate || 0}%</div>
+                        <div class="metric-value">${metrics?.errorRate || 0}%</div>
                         <div class="metric-label">错误率</div>
-                        <div class="metric-rating ${this.getRatingClass(this.getPerformanceRating(metrics.errorRate, 'errorRate'))}">${this.getPerformanceRating(metrics.errorRate, 'errorRate')}</div>
+                        <div class="metric-rating ${this.getRatingClass(this.getPerformanceRating(metrics?.errorRate, 'errorRate'))}">${this.getPerformanceRating(metrics?.errorRate, 'errorRate')}</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value">${metrics.successRate || 0}%</div>
+                        <div class="metric-value">${metrics?.successRate || 0}%</div>
                         <div class="metric-label">成功率</div>
-                        <div class="metric-rating ${this.getRatingClass(this.getPerformanceRating(metrics.successRate, 'successRate'))}">${this.getPerformanceRating(metrics.successRate, 'successRate')}</div>
+                        <div class="metric-rating ${this.getRatingClass(this.getPerformanceRating(metrics?.successRate, 'successRate'))}">${this.getPerformanceRating(metrics?.successRate, 'successRate')}</div>
                     </div>
                 </div>
             </div>
@@ -636,17 +636,17 @@ export class ExportUtils {
             </div>
 
             <!-- 响应时间分布 -->
-            ${metrics.p50ResponseTime ? `
+            ${metrics?.p50ResponseTime ? `
             <div class="section">
                 <h2>⏱️ 响应时间分布分析</h2>
                 <div class="percentile-chart">
                     <h4>百分位数分析</h4>
                     <table>
                         <tr><th>百分位</th><th>响应时间</th><th>评级</th><th>说明</th></tr>
-                        <tr><td>P50 (中位数)</td><td>${metrics.p50ResponseTime}ms</td><td>${this.getPerformanceRating(metrics.p50ResponseTime, 'responseTime')}</td><td>50%的请求响应时间低于此值</td></tr>
-                        <tr><td>P90</td><td>${metrics.p90ResponseTime || 'N/A'}ms</td><td>${this.getPerformanceRating(metrics.p90ResponseTime, 'responseTime')}</td><td>90%的请求响应时间低于此值</td></tr>
-                        <tr><td>P95</td><td>${metrics.p95ResponseTime || 'N/A'}ms</td><td>${this.getPerformanceRating(metrics.p95ResponseTime, 'responseTime')}</td><td>95%的请求响应时间低于此值</td></tr>
-                        <tr><td>P99</td><td>${metrics.p99ResponseTime || 'N/A'}ms</td><td>${this.getPerformanceRating(metrics.p99ResponseTime, 'responseTime')}</td><td>99%的请求响应时间低于此值</td></tr>
+                        <tr><td>P50 (中位数)</td><td>${metrics?.p50ResponseTime}ms</td><td>${this.getPerformanceRating(metrics?.p50ResponseTime, 'responseTime')}</td><td>50%的请求响应时间低于此值</td></tr>
+                        <tr><td>P90</td><td>${metrics?.p90ResponseTime || 'N/A'}ms</td><td>${this.getPerformanceRating(metrics?.p90ResponseTime, 'responseTime')}</td><td>90%的请求响应时间低于此值</td></tr>
+                        <tr><td>P95</td><td>${metrics?.p95ResponseTime || 'N/A'}ms</td><td>${this.getPerformanceRating(metrics?.p95ResponseTime, 'responseTime')}</td><td>95%的请求响应时间低于此值</td></tr>
+                        <tr><td>P99</td><td>${metrics?.p99ResponseTime || 'N/A'}ms</td><td>${this.getPerformanceRating(metrics?.p99ResponseTime, 'responseTime')}</td><td>99%的请求响应时间低于此值</td></tr>
                     </table>
                 </div>
             </div>
@@ -726,12 +726,12 @@ export class ExportUtils {
                         <tr><th>指标</th><th>数值</th><th>评级</th><th>基准值</th><th>状态</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>最小响应时间</td><td>${metrics.minResponseTime || 0}ms</td><td>${this.getPerformanceRating(metrics.minResponseTime, 'responseTime')}</td><td>< 50ms</td><td>✅</td></tr>
-                        <tr><td>最大响应时间</td><td>${metrics.maxResponseTime || 0}ms</td><td>${this.getPerformanceRating(metrics.maxResponseTime, 'responseTime')}</td><td>< 1000ms</td><td>${(metrics.maxResponseTime || 0) > 1000 ? '⚠️' : '✅'}</td></tr>
-                        <tr><td>总请求数</td><td>${metrics.totalRequests || 0}</td><td>-</td><td>-</td><td>✅</td></tr>
-                        <tr><td>成功请求数</td><td>${metrics.successfulRequests || 0}</td><td>-</td><td>-</td><td>✅</td></tr>
-                        <tr><td>失败请求数</td><td>${metrics.failedRequests || 0}</td><td>-</td><td>0</td><td>${(metrics.failedRequests || 0) > 0 ? '⚠️' : '✅'}</td></tr>
-                        <tr><td>并发连接数</td><td>${testConfig.concurrency || 'N/A'}</td><td>-</td><td>-</td><td>✅</td></tr>
+                        <tr><td>最小响应时间</td><td>${metrics?.minResponseTime || 0}ms</td><td>${this.getPerformanceRating(metrics?.minResponseTime, 'responseTime')}</td><td>< 50ms</td><td>✅</td></tr>
+                        <tr><td>最大响应时间</td><td>${metrics?.maxResponseTime || 0}ms</td><td>${this.getPerformanceRating(metrics?.maxResponseTime, 'responseTime')}</td><td>< 1000ms</td><td>${(metrics?.maxResponseTime || 0) > 1000 ? '⚠️' : '✅'}</td></tr>
+                        <tr><td>总请求数</td><td>${metrics?.totalRequests || 0}</td><td>-</td><td>-</td><td>✅</td></tr>
+                        <tr><td>成功请求数</td><td>${metrics?.successfulRequests || 0}</td><td>-</td><td>-</td><td>✅</td></tr>
+                        <tr><td>失败请求数</td><td>${metrics?.failedRequests || 0}</td><td>-</td><td>0</td><td>${(metrics?.failedRequests || 0) > 0 ? '⚠️' : '✅'}</td></tr>
+                        <tr><td>并发连接数</td><td>${testConfig?.concurrency || 'N/A'}</td><td>-</td><td>-</td><td>✅</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -741,16 +741,16 @@ export class ExportUtils {
                 <h2>⚙️ 测试配置</h2>
                 <table>
                     <tbody>
-                        <tr><td><strong>测试URL</strong></td><td>${testConfig.url || '未指定'}</td></tr>
-                        <tr><td><strong>并发用户数</strong></td><td>${testConfig.concurrency || '未指定'}</td></tr>
-                        <tr><td><strong>测试持续时间</strong></td><td>${testConfig.duration || '未指定'}秒</td></tr>
-                        <tr><td><strong>请求方法</strong></td><td>${testConfig.method || 'GET'}</td></tr>
-                        <tr><td><strong>超时设置</strong></td><td>${testConfig.timeout || '30'}秒</td></tr>
-                        <tr><td><strong>测试环境</strong></td><td>${testConfig.environment || '生产环境'}</td></tr>
+                        <tr><td><strong>测试URL</strong></td><td>${testConfig?.url || '未指定'}</td></tr>
+                        <tr><td><strong>并发用户数</strong></td><td>${testConfig?.concurrency || '未指定'}</td></tr>
+                        <tr><td><strong>测试持续时间</strong></td><td>${testConfig?.duration || '未指定'}秒</td></tr>
+                        <tr><td><strong>请求方法</strong></td><td>${testConfig?.method || 'GET'}</td></tr>
+                        <tr><td><strong>超时设置</strong></td><td>${testConfig?.timeout || '30'}秒</td></tr>
+                        <tr><td><strong>测试环境</strong></td><td>${testConfig?.environment || '生产环境'}</td></tr>
                     </tbody>
                 </table>
             </div>
-                    <tr><td>请求方法</td><td>${testConfig.method || 'GET'}</td></tr>
+                    <tr><td>请求方法</td><td>${testConfig?.method || 'GET'}</td></tr>
                 </tbody>
             </table>
 
@@ -769,7 +769,7 @@ export class ExportUtils {
   /**
    * 数据表格导出 - CSV格式（增强版）
    */
-  static exportDataTable(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportDataTable(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
     const metrics = data.metrics || {};
     const realTimeData = data.realTimeData || [];
     const result = data.result || {};
@@ -785,28 +785,28 @@ export class ExportUtils {
     csvContent += `测试ID,${testId || 'N/A'},\n`;
     csvContent += `测试时间,${new Date().toLocaleString('zh-CN')},\n`;
     csvContent += `测试类型,${testType},\n`;
-    csvContent += `测试URL,${testConfig.url || result.url || 'N/A'},\n`;
-    csvContent += `测试持续时间,${testConfig.duration || 'N/A'},秒\n`;
-    csvContent += `并发用户数,${testConfig.concurrency || 'N/A'},\n`;
+    csvContent += `测试URL,${testConfig?.url || result.url || 'N/A'},\n`;
+    csvContent += `测试持续时间,${testConfig?.duration || 'N/A'},秒\n`;
+    csvContent += `并发用户数,${testConfig?.concurrency || 'N/A'},\n`;
     csvContent += `总测试时长,${this.formatDuration(result.totalDuration)},\n`;
     csvContent += '\n';
 
     // 添加核心性能指标
     csvContent += '核心性能指标\n';
     csvContent += '指标名称,数值,单位,评级,基准值\n';
-    csvContent += `平均响应时间,${metrics.averageResponseTime || 0},ms,${this.getPerformanceRating(metrics.averageResponseTime, 'responseTime')},< 200ms\n`;
-    csvContent += `最小响应时间,${metrics.minResponseTime || 0},ms,${this.getPerformanceRating(metrics.minResponseTime, 'responseTime')},\n`;
-    csvContent += `最大响应时间,${metrics.maxResponseTime || 0},ms,${this.getPerformanceRating(metrics.maxResponseTime, 'responseTime')},< 1000ms\n`;
-    csvContent += `P50响应时间,${metrics.p50ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p50ResponseTime, 'responseTime')},< 150ms\n`;
-    csvContent += `P90响应时间,${metrics.p90ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p90ResponseTime, 'responseTime')},< 300ms\n`;
-    csvContent += `P95响应时间,${metrics.p95ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p95ResponseTime, 'responseTime')},< 500ms\n`;
-    csvContent += `P99响应时间,${metrics.p99ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p99ResponseTime, 'responseTime')},< 800ms\n`;
-    csvContent += `吞吐量,${metrics.throughput || 0},req/s,${this.getPerformanceRating(metrics.throughput, 'throughput')},> 100 req/s\n`;
-    csvContent += `总请求数,${metrics.totalRequests || 0},次,,\n`;
-    csvContent += `成功请求数,${metrics.successfulRequests || 0},次,,\n`;
-    csvContent += `失败请求数,${metrics.failedRequests || 0},次,,\n`;
-    csvContent += `成功率,${metrics.successRate || 0},%,${this.getPerformanceRating(metrics.successRate, 'successRate')},> 99%\n`;
-    csvContent += `错误率,${metrics.errorRate || 0},%,${this.getPerformanceRating(metrics.errorRate, 'errorRate')},< 1%\n`;
+    csvContent += `平均响应时间,${metrics?.averageResponseTime || 0},ms,${this.getPerformanceRating(metrics?.averageResponseTime, 'responseTime')},< 200ms\n`;
+    csvContent += `最小响应时间,${metrics?.minResponseTime || 0},ms,${this.getPerformanceRating(metrics?.minResponseTime, 'responseTime')},\n`;
+    csvContent += `最大响应时间,${metrics?.maxResponseTime || 0},ms,${this.getPerformanceRating(metrics?.maxResponseTime, 'responseTime')},< 1000ms\n`;
+    csvContent += `P50响应时间,${metrics?.p50ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics?.p50ResponseTime, 'responseTime')},< 150ms\n`;
+    csvContent += `P90响应时间,${metrics?.p90ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics?.p90ResponseTime, 'responseTime')},< 300ms\n`;
+    csvContent += `P95响应时间,${metrics?.p95ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics?.p95ResponseTime, 'responseTime')},< 500ms\n`;
+    csvContent += `P99响应时间,${metrics?.p99ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics?.p99ResponseTime, 'responseTime')},< 800ms\n`;
+    csvContent += `吞吐量,${metrics?.throughput || 0},req/s,${this.getPerformanceRating(metrics?.throughput, 'throughput')},> 100 req/s\n`;
+    csvContent += `总请求数,${metrics?.totalRequests || 0},次,,\n`;
+    csvContent += `成功请求数,${metrics?.successfulRequests || 0},次,,\n`;
+    csvContent += `失败请求数,${metrics?.failedRequests || 0},次,,\n`;
+    csvContent += `成功率,${metrics?.successRate || 0},%,${this.getPerformanceRating(metrics?.successRate, 'successRate')},> 99%\n`;
+    csvContent += `错误率,${metrics?.errorRate || 0},%,${this.getPerformanceRating(metrics?.errorRate, 'errorRate')},< 1%\n`;
     csvContent += '\n';
 
     // 添加性能分析
@@ -843,7 +843,7 @@ export class ExportUtils {
       csvContent += '实时性能数据\n';
       csvContent += '时间戳,响应时间(ms),吞吐量(req/s),错误率(%),CPU使用率(%),内存使用率(%),活跃连接数,队列长度\n';
 
-      realTimeData.slice(0, 1000).forEach((point: any) => { // 限制数据量
+      realTimeData.slice(0, 1000).forEach((point: unknown) => { // 限制数据量
         csvContent += `${point.timestamp || ''},${point.responseTime || 0},${point.throughput || 0},${point.errorRate || 0},${point.cpuUsage || 0},${point.memoryUsage || 0},${point.activeConnections || 0},${point.queueLength || 0}\n`;
       });
       csvContent += '\n';
@@ -871,7 +871,7 @@ export class ExportUtils {
   /**
    * 分析错误数据
    */
-  static analyzeErrors(errors: any[]): any[] {
+  static analyzeErrors(errors: unknown[]): unknown[] {
     const errorMap = new Map();
 
     errors.forEach(error => {
@@ -908,13 +908,13 @@ export class ExportUtils {
   /**
    * 分析趋势数据
    */
-  static analyzeTrends(data: any[]): any {
+  static analyzeTrends(data: unknown[]): unknown {
     if (data.length < 10) return {};
 
-    const trends: any = {};
+    const trends: unknown = {};
     const metrics = ['responseTime', 'throughput', 'errorRate', 'cpuUsage', 'memoryUsage'];
 
-    metrics.forEach(metric => {
+    metrics?.forEach(metric => {
       const values = data.map(d => d[metric]).filter(v => v !== undefined && v !== null);
       if (values.length < 5) return;
 
@@ -1013,8 +1013,8 @@ export class ExportUtils {
   /**
    * 分析资源加载情况
    */
-  static analyzeResources(resources: any[]): any {
-    const stats: any = {};
+  static analyzeResources(resources: unknown[]): unknown {
+    const stats: unknown = {};
 
     resources.forEach(resource => {
       const type = resource.type || 'other';
@@ -1044,7 +1044,7 @@ export class ExportUtils {
   /**
    * 快速摘要导出 - 简化的JSON格式
    */
-  static exportSummary(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportSummary(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
     const metrics = data.metrics || {};
     const result = data.result || {};
     const testConfig = data.testConfig || {};
@@ -1065,14 +1065,14 @@ export class ExportUtils {
       testName: testName || `${testType}测试`,
       testType,
       summary: {
-        duration: testConfig.duration || 0,
-        totalRequests: metrics.totalRequests || 0,
-        averageResponseTime: metrics.averageResponseTime || 0,
-        maxResponseTime: metrics.maxResponseTime || 0,
-        minResponseTime: metrics.minResponseTime || 0,
-        throughput: metrics.throughput || 0,
-        errorRate: metrics.errorRate || 0,
-        successRate: metrics.successRate || 0
+        duration: testConfig?.duration || 0,
+        totalRequests: metrics?.totalRequests || 0,
+        averageResponseTime: metrics?.averageResponseTime || 0,
+        maxResponseTime: metrics?.maxResponseTime || 0,
+        minResponseTime: metrics?.minResponseTime || 0,
+        throughput: metrics?.throughput || 0,
+        errorRate: metrics?.errorRate || 0,
+        successRate: metrics?.successRate || 0
       },
       performance: {
         grade: performanceGrade.grade,
@@ -1081,10 +1081,10 @@ export class ExportUtils {
         recommendations
       },
       testConfig: {
-        url: testConfig.url,
-        method: testConfig.method || 'GET',
-        concurrency: testConfig.concurrency,
-        duration: testConfig.duration
+        url: testConfig?.url,
+        method: testConfig?.method || 'GET',
+        concurrency: testConfig?.concurrency,
+        duration: testConfig?.duration
       },
       metadata: {
         exportedAt: new Date().toISOString(),
@@ -1105,32 +1105,32 @@ export class ExportUtils {
   /**
    * 计算性能评级
    */
-  private static calculatePerformanceGrade(metrics: any): { grade: string; score: number } {
+  private static calculatePerformanceGrade(metrics: unknown): { grade: string; score: number } {
     let score = 100;
 
     // 响应时间评分 (40%)
-    const avgResponseTime = metrics.averageResponseTime || 0;
+    const avgResponseTime = metrics?.averageResponseTime || 0;
     if (avgResponseTime > 2000) score -= 40;
     else if (avgResponseTime > 1000) score -= 25;
     else if (avgResponseTime > 500) score -= 15;
     else if (avgResponseTime > 200) score -= 5;
 
     // 错误率评分 (30%)
-    const errorRate = metrics.errorRate || 0;
+    const errorRate = metrics?.errorRate || 0;
     if (errorRate > 10) score -= 30;
     else if (errorRate > 5) score -= 20;
     else if (errorRate > 2) score -= 10;
     else if (errorRate > 0.5) score -= 5;
 
     // 吞吐量评分 (20%)
-    const throughput = metrics.throughput || 0;
+    const throughput = metrics?.throughput || 0;
     if (throughput < 10) score -= 20;
     else if (throughput < 50) score -= 10;
     else if (throughput < 100) score -= 5;
 
     // 稳定性评分 (10%)
-    const maxResponseTime = metrics.maxResponseTime || 0;
-    const minResponseTime = metrics.minResponseTime || 0;
+    const maxResponseTime = metrics?.maxResponseTime || 0;
+    const minResponseTime = metrics?.minResponseTime || 0;
     const responseTimeVariance = maxResponseTime - minResponseTime;
     if (responseTimeVariance > 5000) score -= 10;
     else if (responseTimeVariance > 2000) score -= 5;
@@ -1148,23 +1148,23 @@ export class ExportUtils {
   /**
    * 识别性能瓶颈
    */
-  private static identifyBottlenecks(metrics: any): string[] {
+  private static identifyBottlenecks(metrics: unknown): string[] {
     const bottlenecks: string[] = [];
 
-    if ((metrics.averageResponseTime || 0) > 1000) {
+    if ((metrics?.averageResponseTime || 0) > 1000) {
       bottlenecks.push('响应时间较长');
     }
 
-    if ((metrics.errorRate || 0) > 2) {
+    if ((metrics?.errorRate || 0) > 2) {
       bottlenecks.push('错误率偏高');
     }
 
-    if ((metrics.throughput || 0) < 50) {
+    if ((metrics?.throughput || 0) < 50) {
       bottlenecks.push('吞吐量较低');
     }
 
-    const maxResponseTime = metrics.maxResponseTime || 0;
-    const minResponseTime = metrics.minResponseTime || 0;
+    const maxResponseTime = metrics?.maxResponseTime || 0;
+    const minResponseTime = metrics?.minResponseTime || 0;
     if (maxResponseTime - minResponseTime > 2000) {
       bottlenecks.push('响应时间波动较大');
     }
@@ -1175,20 +1175,20 @@ export class ExportUtils {
   /**
    * 生成优化建议
    */
-  private static generateRecommendations(metrics: any, testType: string): string[] {
+  private static generateRecommendations(metrics: unknown, testType: string): string[] {
     const recommendations: string[] = [];
 
-    if ((metrics.averageResponseTime || 0) > 1000) {
+    if ((metrics?.averageResponseTime || 0) > 1000) {
       recommendations.push('优化数据库查询性能');
       recommendations.push('考虑增加缓存机制');
     }
 
-    if ((metrics.errorRate || 0) > 2) {
+    if ((metrics?.errorRate || 0) > 2) {
       recommendations.push('检查错误日志，修复程序bug');
       recommendations.push('增强错误处理和重试机制');
     }
 
-    if ((metrics.throughput || 0) < 50) {
+    if ((metrics?.throughput || 0) < 50) {
       recommendations.push('优化服务器配置');
       recommendations.push('考虑水平扩展');
     }

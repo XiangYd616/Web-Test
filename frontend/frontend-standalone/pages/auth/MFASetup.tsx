@@ -5,24 +5,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { QRCodeSVG as QRCode } from 'qrcode.react';
-import { 
-  Shield, 
-  Smartphone, 
-  Key, 
-  QrCode as QrCodeIcon, 
-  Copy, 
-  CheckCircle, 
-  AlertTriangle,
-  Download,
-  RefreshCw,
-  ArrowLeft,
-  ArrowRight
-} from 'lucide-react';
+
+import {Shield, Smartphone, Key, CheckCircle, RefreshCw} from 'lucide-react';
 import { useAuthCheck } from '../../components/auth/withAuthCheck';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import type { MFASetupResponse, BackupCodes } from '../../types/auth';
 
 interface MFASetupProps {
   onComplete?: (success: boolean) => void;
@@ -90,7 +77,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : '未知错误',
+        error: error instanceof Error ? error?.message : '未知错误',
         isLoading: false
       }));
       toast.error('MFA设置初始化失败');
@@ -133,7 +120,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : '验证失败',
+        error: error instanceof Error ? error?.message : '验证失败',
         isLoading: false
       }));
       toast.error('验证码错误，请重试');
@@ -164,7 +151,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
   };
   
   // 复制到剪贴板
-  const copyToClipboard = (text: string) => {
+  const _copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast.success('已复制到剪贴板');
     }).catch(() => {
@@ -279,7 +266,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
                   value={state.verificationCode}
                   onChange={(e) => setState(prev => ({ 
                     ...prev, 
-                    verificationCode: e.target.value.replace(/\D/g, '').slice(0, 6)
+                    verificationCode: e?.target.value.replace(/\D/g, '').slice(0, 6)
                   }))}
                   placeholder="输入6位验证码"
                   maxLength={6}

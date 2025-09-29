@@ -227,7 +227,7 @@ export interface EvictionStrategy<T = any> {
 export class LRUEvictionStrategy<T = any> implements EvictionStrategy<T> {
   selectForEviction(entries: Map<string, CacheEntry<T>>, targetCount: number): string[] {
     const sortedEntries = Array.from(entries.entries())
-      .sort(([, a], [, b]) => a.lastAccessed - b.lastAccessed);
+      .sort(([, a], [, b]) => a?.lastAccessed - b.lastAccessed);
     
     return sortedEntries.slice(0, targetCount).map(([key]) => key);
   }
@@ -236,7 +236,7 @@ export class LRUEvictionStrategy<T = any> implements EvictionStrategy<T> {
 export class LFUEvictionStrategy<T = any> implements EvictionStrategy<T> {
   selectForEviction(entries: Map<string, CacheEntry<T>>, targetCount: number): string[] {
     const sortedEntries = Array.from(entries.entries())
-      .sort(([, a], [, b]) => a.accessCount - b.accessCount);
+      .sort(([, a], [, b]) => a?.accessCount - b.accessCount);
     
     return sortedEntries.slice(0, targetCount).map(([key]) => key);
   }
@@ -245,7 +245,7 @@ export class LFUEvictionStrategy<T = any> implements EvictionStrategy<T> {
 export class FIFOEvictionStrategy<T = any> implements EvictionStrategy<T> {
   selectForEviction(entries: Map<string, CacheEntry<T>>, targetCount: number): string[] {
     const sortedEntries = Array.from(entries.entries())
-      .sort(([, a], [, b]) => a.timestamp - b.timestamp);
+      .sort(([, a], [, b]) => a?.timestamp - b.timestamp);
     
     return sortedEntries.slice(0, targetCount).map(([key]) => key);
   }
@@ -266,7 +266,7 @@ export class TTLEvictionStrategy<T = any> implements EvictionStrategy<T> {
     const sortedByTTL = Array.from(entries.entries())
       .filter(([key]) => !expiredEntries.includes(key))
       .sort(([, a], [, b]) => {
-        const aTTLRemaining = a.ttl - (now - a.timestamp);
+        const aTTLRemaining = a?.ttl - (now - a?.timestamp);
         const bTTLRemaining = b.ttl - (now - b.timestamp);
         return aTTLRemaining - bTTLRemaining;
       })
@@ -571,7 +571,7 @@ export class CacheManager<T = any> {
 
 // ==================== 缓存装饰器 ====================
 
-export function cached<T extends (...args: any[]) => Promise<ApiResponse<any>>>(
+export function cached<T extends (...args: unknown[]) => Promise<ApiResponse<any>>>(
   cacheManager: CacheManager,
   options: {
     keyGenerator?: (args: Parameters<T>) => string;
@@ -579,7 +579,7 @@ export function cached<T extends (...args: any[]) => Promise<ApiResponse<any>>>(
     condition?: (args: Parameters<T>) => boolean;
   } = {}
 ) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: Parameters<T>) {
@@ -616,7 +616,7 @@ export function cached<T extends (...args: any[]) => Promise<ApiResponse<any>>>(
 
 // ==================== 默认缓存实例 ====================
 
-export const defaultMemoryCache = new CacheManager(
+export const _defaultMemoryCache = new CacheManager(
   new MemoryCacheStorage(),
   {
     namespace: 'memory',
@@ -626,7 +626,7 @@ export const defaultMemoryCache = new CacheManager(
   }
 );
 
-export const defaultLocalStorageCache = new CacheManager(
+export const _defaultLocalStorageCache = new CacheManager(
   new LocalStorageCacheStorage('app-cache'),
   {
     namespace: 'localStorage',

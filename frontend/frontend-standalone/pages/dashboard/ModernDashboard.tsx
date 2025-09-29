@@ -72,7 +72,7 @@ const ModernDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">成功率</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats?.totalTests ? Math.round((stats.totalTests / 100) * 85) : 85}%</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats?.totalTests ? Math.round((stats?.totalTests / 100) * 85) : 85}%</p>
                 <p className="text-xs text-green-600 mt-1">+2.1% 上周</p>
               </div>
             </div>
@@ -87,7 +87,7 @@ const ModernDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">平均响应时间</p>
-                <p className="text-2xl font-semibold text-gray-900">{stats?.totalTests ? Math.round(stats.totalTests * 1.2) : 120}ms</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats?.totalTests ? Math.round(stats?.totalTests * 1.2) : 120}ms</p>
                 <p className="text-xs text-red-600 mt-1">+5ms 昨日</p>
               </div>
             </div>
@@ -185,7 +185,7 @@ const ModernDashboard: React.FC = () => {
               <div className="p-6">
                 {recentTests && recentTests.length > 0 ? (
                   <div className="space-y-4">
-                    {recentTests.slice(0, 5).map((test: any, index: number) => (
+                    {recentTests.slice(0, 5).map((test: unknown, index: number) => (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center">
                           <div className={`w-2 h-2 rounded-full mr-3 ${test.status === 'success' ? 'bg-green-400' :

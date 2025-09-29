@@ -116,18 +116,18 @@ export const EnhancedNotification: React.FC<NotificationProps> = ({
           <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
             {message}
           </p>
-          {actions.length > 0 && (
+          {actions?.length > 0 && (
             <div className="mt-3 flex space-x-2">
-              {actions.map((action, index) => (
+              {actions?.map((action, index) => (
                 <button
                   key={index}
-                  onClick={action.onClick}
+                  onClick={action?.onClick}
                   className={`text-sm px-3 py-1 rounded ${action.variant === 'primary'
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500'
                     }`}
                 >
-                  {action.label}
+                  {action?.label}
                 </button>
               ))}
             </div>
@@ -348,10 +348,10 @@ export const EmptyState: React.FC<{
     </p>
     {action && (
       <button
-        onClick={action.onClick}
+        onClick={action?.onClick}
         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
-        {action.label}
+        {action?.label}
       </button>
     )}
   </div>
@@ -387,19 +387,19 @@ export const useSmartNotification = () => {
     });
   }, []);
 
-  const showSuccess = useCallback((title: string, message: string, options?: any) => {
+  const showSuccess = useCallback((title: string, message: string, options?: unknown) => {
     showNotification('success', title, message, options);
   }, [showNotification]);
 
-  const showError = useCallback((title: string, message: string, options?: any) => {
+  const showError = useCallback((title: string, message: string, options?: unknown) => {
     showNotification('error', title, message, options);
   }, [showNotification]);
 
-  const showWarning = useCallback((title: string, message: string, options?: any) => {
+  const showWarning = useCallback((title: string, message: string, options?: unknown) => {
     showNotification('warning', title, message, options);
   }, [showNotification]);
 
-  const showInfo = useCallback((title: string, message: string, options?: any) => {
+  const showInfo = useCallback((title: string, message: string, options?: unknown) => {
     showNotification('info', title, message, options);
   }, [showNotification]);
 

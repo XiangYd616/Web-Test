@@ -1720,6 +1720,7 @@ router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, r
   const { reason = '用户手动取消', preserveData = true } = req.body;
 
   try {
+    console.log('🚫 用户取消压力测试:', {
       reason,
       preserveData,
       userId: req.user?.id
@@ -1732,6 +1733,7 @@ router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, r
     if (result.success) {
       // 记录取消操作到用户活动日志
       if (req.user?.id) {
+        console.log(`✅ 用户 ${req.user.id} 取消了测试 ${testId}`);
       }
 
       res.json({
@@ -2061,6 +2063,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
     }
 
     // 2. 立即返回响应，然后异步运行压力测试
+    console.log('📊 即将启动异步测试:', {
       url: validatedURL,
       testId: testId,
       hasTestId: !!testId,

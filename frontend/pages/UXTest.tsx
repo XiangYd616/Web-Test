@@ -56,7 +56,7 @@ interface UXTestResult {
 
 const UXTest: React.FC = () => {
   // 认证检查
-  const authCheck = useAuthCheck();
+  const _authCheck = useAuthCheck();
   const { recordTestCompletion } = useUserStats();
 
   // 状态管理
@@ -134,7 +134,7 @@ const UXTest: React.FC = () => {
           updateProgress(progress, step);
         },
         // onComplete
-        (result: any) => {
+        (result: unknown) => {
           // 转换后端结果为前端格式
           const uxResult: UXTestResult = {
             testId: result.testId || testId,
@@ -219,7 +219,7 @@ const UXTest: React.FC = () => {
   }, [currentTestId, updateProgress]);
 
   // 配置更新处理
-  const handleConfigChange = useCallback((field: keyof UXConfig, value: any) => {
+  const handleConfigChange = useCallback((field: keyof UXConfig, value: unknown) => {
     setConfig(prev => ({
       ...prev,
       [field]: value
@@ -235,7 +235,7 @@ const UXTest: React.FC = () => {
   }, []);
 
   // 更新自定义视口
-  const updateCustomViewport = useCallback((index: number, field: 'width' | 'height' | 'name', value: any) => {
+  const updateCustomViewport = useCallback((index: number, field: 'width' | 'height' | 'name', value: unknown) => {
     setConfig(prev => ({
       ...prev,
       customViewports: prev.customViewports.map((viewport, i) =>

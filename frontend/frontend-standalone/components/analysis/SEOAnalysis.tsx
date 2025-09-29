@@ -339,8 +339,8 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
                   </span>
                 </div>
                 <div className="text-xs text-gray-300">
-                  <div>密度: {data.density.toFixed(1)}%</div>
-                  <div>出现: {data.count}次</div>
+                  <div>密度: {data?.density.toFixed(1)}%</div>
+                  <div>出现: {data?.count}次</div>
                 </div>
               </div>
             ))}

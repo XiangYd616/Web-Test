@@ -47,7 +47,7 @@ export interface TestResult {
     endTime?: string;
     duration?: number;
     summary?: string;
-    details?: any;
+    details?: unknown;
     recommendations?: Array<{
         title: string;
         description: string;
@@ -195,7 +195,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                 ...currentTest!,
                 status: 'failed',
                 endTime: new Date().toISOString(),
-                error: error instanceof Error ? error.message : '测试失败'
+                error: error instanceof Error ? error?.message : '测试失败'
             };
 
             setCurrentTest(failedResult);
@@ -286,7 +286,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                 label="测试URL"
                 placeholder="https://example.com"
                 value={config.url}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({ ...prev, url: e.target.value }))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({ ...prev, url: e?.target.value }))}
                 required
                 disabled={isRunning}
             />
@@ -308,7 +308,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                         value={config.options.users || 10}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                             ...prev,
-                            options: { ...prev.options, users: parseInt(e.target.value) || 10 }
+                            options: { ...prev.options, users: parseInt(e?.target.value) || 10 }
                         }))}
                         min={1}
                         max={1000}
@@ -320,7 +320,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                         value={config.options.duration || 30}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                             ...prev,
-                            options: { ...prev.options, duration: parseInt(e.target.value) || 30 }
+                            options: { ...prev.options, duration: parseInt(e?.target.value) || 30 }
                         }))}
                         min={10}
                         max={3600}
@@ -337,7 +337,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                             checked={config.options.checkSSL || false}
                             onChange={(e) => setConfig(prev => ({
                                 ...prev,
-                                options: { ...prev.options, checkSSL: e.target.checked }
+                                options: { ...prev.options, checkSSL: e?.target.checked }
                             }))}
                             disabled={isRunning}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -350,7 +350,7 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
                             checked={config.options.checkHeaders || false}
                             onChange={(e) => setConfig(prev => ({
                                 ...prev,
-                                options: { ...prev.options, checkHeaders: e.target.checked }
+                                options: { ...prev.options, checkHeaders: e?.target.checked }
                             }))}
                             disabled={isRunning}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"

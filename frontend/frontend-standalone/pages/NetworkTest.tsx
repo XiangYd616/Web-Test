@@ -61,7 +61,7 @@ interface NetworkTestResult {
 
 const NetworkTest: React.FC = () => {
   // 认证检查
-  const authCheck = useAuthCheck();
+  const _authCheck = useAuthCheck();
   const { recordTestCompletion } = useUserStats();
 
   // 状态管理
@@ -136,7 +136,7 @@ const NetworkTest: React.FC = () => {
           updateProgress(progress, step);
         },
         // onComplete
-        (result: any) => {
+        (result: unknown) => {
           // 转换后端结果为前端格式
           const networkResult: NetworkTestResult = {
             testId: result.testId || testId,
@@ -216,7 +216,7 @@ const NetworkTest: React.FC = () => {
   }, [currentTestId, updateProgress]);
 
   // 配置更新处理
-  const handleConfigChange = useCallback((field: keyof NetworkConfig, value: any) => {
+  const handleConfigChange = useCallback((field: keyof NetworkConfig, value: unknown) => {
     setConfig(prev => ({
       ...prev,
       [field]: value
@@ -271,7 +271,7 @@ const NetworkTest: React.FC = () => {
                 <input
                   type="text"
                   value={config.targetUrl}
-                  onChange={(e) => handleConfigChange('targetUrl', e.target.value)}
+                  onChange={(e) => handleConfigChange('targetUrl', e?.target.value)}
                   placeholder="www.example.com 或 192.168.1.1"
                   className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
                   disabled={isRunning}
@@ -288,7 +288,7 @@ const NetworkTest: React.FC = () => {
                 </label>
                 <select
                   value={config.testType}
-                  onChange={(e) => handleConfigChange('testType', e.target.value)}
+                  onChange={(e) => handleConfigChange('testType', e?.target.value)}
                   className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   disabled={isRunning}
                 >
@@ -308,7 +308,7 @@ const NetworkTest: React.FC = () => {
                   <input
                     type="number"
                     value={config.timeout}
-                    onChange={(e) => handleConfigChange('timeout', parseInt(e.target.value))}
+                    onChange={(e) => handleConfigChange('timeout', parseInt(e?.target.value))}
                     min="1000"
                     max="60000"
                     step="1000"
@@ -324,7 +324,7 @@ const NetworkTest: React.FC = () => {
                   <input
                     type="number"
                     value={config.packetCount}
-                    onChange={(e) => handleConfigChange('packetCount', parseInt(e.target.value))}
+                    onChange={(e) => handleConfigChange('packetCount', parseInt(e?.target.value))}
                     min="1"
                     max="100"
                     className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
@@ -339,7 +339,7 @@ const NetworkTest: React.FC = () => {
                   <input
                     type="number"
                     value={config.packetSize}
-                    onChange={(e) => handleConfigChange('packetSize', parseInt(e.target.value))}
+                    onChange={(e) => handleConfigChange('packetSize', parseInt(e?.target.value))}
                     min="32"
                     max="1500"
                     className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
@@ -354,7 +354,7 @@ const NetworkTest: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={config.includeDNSTest}
-                    onChange={(e) => handleConfigChange('includeDNSTest', e.target.checked)}
+                    onChange={(e) => handleConfigChange('includeDNSTest', e?.target.checked)}
                     className="mr-2"
                     disabled={isRunning}
                   />
@@ -365,7 +365,7 @@ const NetworkTest: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={config.includePortScan}
-                    onChange={(e) => handleConfigChange('includePortScan', e.target.checked)}
+                    onChange={(e) => handleConfigChange('includePortScan', e?.target.checked)}
                     className="mr-2"
                     disabled={isRunning}
                   />
@@ -388,7 +388,7 @@ const NetworkTest: React.FC = () => {
                     <input
                       type="number"
                       value={port}
-                      onChange={(e) => updateCustomPort(index, parseInt(e.target.value))}
+                      onChange={(e) => updateCustomPort(index, parseInt(e?.target.value))}
                       placeholder="端口号"
                       min="1"
                       max="65535"

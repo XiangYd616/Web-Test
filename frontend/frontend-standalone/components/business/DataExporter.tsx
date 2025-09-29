@@ -75,9 +75,9 @@ export interface ExportTask {
 // 组件属性接口
 export interface DataExporterProps {
     availableData?: {
-        testResults?: any[];
-        monitoringData?: any[];
-        analytics?: any[];
+        testResults?: unknown[];
+        monitoringData?: unknown[];
+        analytics?: unknown[];
     };
     onExport?: (config: ExportConfig) => Promise<ExportTask>;
     className?: string;
@@ -156,7 +156,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || '请求失败');
+            throw new Error(error?.message || '请求失败');
         }
 
         return response.json();
@@ -275,7 +275,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
             }
 
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '创建导出任务失败';
+            const errorMessage = error instanceof Error ? error?.message : '创建导出任务失败';
             showNotification(`导出失败: ${errorMessage}`, 'error');
         } finally {
             setIsExporting(false);
@@ -320,7 +320,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
             showNotification('文件下载成功', 'success');
 
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '下载失败';
+            const errorMessage = error instanceof Error ? error?.message : '下载失败';
             showNotification(`下载失败: ${errorMessage}`, 'error');
         }
     }, [showNotification]);
@@ -339,7 +339,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                 showNotification('任务已取消', 'success');
             }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '取消任务失败';
+            const errorMessage = error instanceof Error ? error?.message : '取消任务失败';
             showNotification(`取消失败: ${errorMessage}`, 'error');
         }
     }, [showNotification]);
@@ -356,11 +356,11 @@ export const DataExporter: React.FC<DataExporterProps> = ({
             });
 
             if (result.success) {
-                setExportTasks(prev => prev.filter(t => t.id !== taskId));
+                setExportTasks(prev => prev.filter(t => t?.id !== taskId));
                 showNotification('任务已删除', 'success');
             }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '删除任务失败';
+            const errorMessage = error instanceof Error ? error?.message : '删除任务失败';
             showNotification(`删除失败: ${errorMessage}`, 'error');
         }
     }, [showNotification]);
@@ -407,13 +407,13 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             label="导出格式"
                             options={formatOptions}
                             value={config.format}
-                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setConfig(prev => ({ ...prev, format: e.target.value as ExportFormat }))}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setConfig(prev => ({ ...prev, format: e?.target.value as ExportFormat }))}
                         />
                         <Select
                             label="数据类型"
                             options={dataTypeOptions}
                             value={config.dataType}
-                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setConfig(prev => ({ ...prev, dataType: e.target.value as ExportDataType }))}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setConfig(prev => ({ ...prev, dataType: e?.target.value as ExportDataType }))}
                         />
                     </div>
 
@@ -425,7 +425,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             value={config.dateRange.start}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                 ...prev,
-                                dateRange: { ...prev.dateRange, start: e.target.value }
+                                dateRange: { ...prev.dateRange, start: e?.target.value }
                             }))}
                         />
                         <Input
@@ -434,7 +434,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             value={config.dateRange.end}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                 ...prev,
-                                dateRange: { ...prev.dateRange, end: e.target.value }
+                                dateRange: { ...prev.dateRange, end: e?.target.value }
                             }))}
                         />
                     </div>
@@ -448,7 +448,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                                     checked={config.options.includeCharts || false}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                         ...prev,
-                                        options: { ...prev.options, includeCharts: e.target.checked }
+                                        options: { ...prev.options, includeCharts: e?.target.checked }
                                     }))}
                                 />
                                 <span className="text-sm text-gray-700">包含图表</span>
@@ -458,7 +458,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                                     checked={config.options.includeRecommendations || false}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                         ...prev,
-                                        options: { ...prev.options, includeRecommendations: e.target.checked }
+                                        options: { ...prev.options, includeRecommendations: e?.target.checked }
                                     }))}
                                 />
                                 <span className="text-sm text-gray-700">包含建议</span>
@@ -468,7 +468,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                                     checked={config.options.includeRawData || false}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                         ...prev,
-                                        options: { ...prev.options, includeRawData: e.target.checked }
+                                        options: { ...prev.options, includeRawData: e?.target.checked }
                                     }))}
                                 />
                                 <span className="text-sm text-gray-700">包含原始数据</span>
@@ -478,7 +478,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                                     checked={config.options.compression || false}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                         ...prev,
-                                        options: { ...prev.options, compression: e.target.checked }
+                                        options: { ...prev.options, compression: e?.target.checked }
                                     }))}
                                 />
                                 <span className="text-sm text-gray-700">压缩文件</span>
@@ -644,7 +644,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                             value={config.options.password || ''}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfig(prev => ({
                                 ...prev,
-                                options: { ...prev.options, password: e.target.value }
+                                options: { ...prev.options, password: e?.target.value }
                             }))}
                         />
                     </div>

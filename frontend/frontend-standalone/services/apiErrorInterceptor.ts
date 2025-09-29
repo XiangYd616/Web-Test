@@ -10,7 +10,7 @@ interface ApiErrorResponse {
   success: boolean;
   message: string;
   code?: string | number;
-  details?: any;
+  details?: unknown;
   timestamp?: string;
 }
 
@@ -58,11 +58,11 @@ class ApiErrorInterceptor {
     );
 
     // 响应拦截器
-    axios.interceptors.response.use(
+    axios.interceptors.response?.use(
       (response) => {
         // 成功响应，清除重试计数
-        if (response.config.metadata?.requestId) {
-          this.retryCount.delete(response.config.metadata.requestId);
+        if (response?.config.metadata?.requestId) {
+          this.retryCount.delete(response?.config.metadata?.requestId);
         }
         return response;
       },
@@ -75,7 +75,7 @@ class ApiErrorInterceptor {
   /**
    * 处理请求错误
    */
-  private async handleRequestError(error: any): Promise<any> {
+  private async handleRequestError(error: unknown): Promise<any> {
     // 创建错误处理实例
     // 使用错误处理函数
     const { useErrorHandler } = await import('./api/errorHandler');
@@ -119,7 +119,7 @@ class ApiErrorInterceptor {
       statusText: error.response?.statusText,
       responseData: errorData,
       duration: error.config?.metadata?.startTime ?
-        Date.now() - error.config.metadata.startTime : undefined
+        Date.now() - error.config.metadata?.startTime : undefined
     });
 
     // 特殊处理某些错误类型
@@ -157,7 +157,7 @@ class ApiErrorInterceptor {
     }
 
     // HTML错误页面
-    if (typeof data === 'string' && data.includes('<html>')) {
+    if (typeof data === 'string' && data?.includes('<html>')) {
       return {
         success: false,
         message: `服务器返回了HTML页面 (${error.response.status})`
@@ -210,7 +210,7 @@ class ApiErrorInterceptor {
   /**
    * 处理特殊错误类型
    */
-  private async handleSpecialErrors(error: AxiosError, standardError: any): Promise<void> {
+  private async handleSpecialErrors(error: AxiosError, standardError: unknown): Promise<void> {
     const status = error.response?.status;
 
     switch (status) {
@@ -315,7 +315,7 @@ class ApiErrorInterceptor {
   /**
    * 获取当前用户信息
    */
-  private getCurrentUser(): any {
+  private getCurrentUser(): unknown {
     try {
       const userStr = localStorage.getItem('current_user');
       return userStr ? JSON.parse(userStr) : null;
@@ -353,7 +353,7 @@ class ApiErrorInterceptor {
 export const apiErrorInterceptor = new ApiErrorInterceptor();
 
 // 便捷方法：手动处理API错误
-export const handleApiError = async (error: AxiosError, context?: Record<string, any>) => {
+export const _handleApiError = async (error: AxiosError, context?: Record<string, any>) => {
   // 创建前端错误处理实例
   const frontendErrorHandler = new (await import('./api/errorHandler')).FrontendErrorHandler();
   return frontendErrorHandler.handleError(error, {

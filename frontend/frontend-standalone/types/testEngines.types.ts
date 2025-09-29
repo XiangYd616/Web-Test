@@ -256,11 +256,11 @@ export interface CSPAnalysis {
 export interface APITestConfig extends BaseTestConfig {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   authentication?: APIAuthentication;
   validateResponse?: boolean;
   expectedStatus?: number;
-  expectedSchema?: any;
+  expectedSchema?: unknown;
   followRedirects?: boolean;
 }
 
@@ -276,7 +276,7 @@ export interface APITestResult extends BaseTestResult {
   responseTime: number;
   responseSize: number;
   headers: Record<string, string>;
-  body: any;
+  body: unknown;
   validations: APIValidation[];
   performance: APIPerformanceMetrics;
 }
@@ -285,8 +285,8 @@ export interface APIValidation {
   type: string;
   passed: boolean;
   message: string;
-  expected?: any;
-  actual?: any;
+  expected?: unknown;
+  actual?: unknown;
 }
 
 export interface APIPerformanceMetrics {
@@ -446,7 +446,7 @@ export interface AccessibilityCheck {
   id: string;
   impact: string;
   message: string;
-  data: any;
+  data: unknown;
 }
 
 export interface AccessibilitySummary {
@@ -471,7 +471,7 @@ export interface StressTestConfig extends BaseTestConfig {
   requestsPerSecond?: number;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   scenarios?: StressTestScenario[];
 }
 
@@ -486,14 +486,14 @@ export interface StressTestStep {
   url: string;
   method: string;
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   thinkTime?: number;
   assertions?: StressTestAssertion[];
 }
 
 export interface StressTestAssertion {
   type: 'status' | 'response_time' | 'body_contains' | 'header_exists';
-  value: any;
+  value: unknown;
   operator?: 'equals' | 'less_than' | 'greater_than' | 'contains';
 }
 

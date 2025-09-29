@@ -36,7 +36,7 @@ export interface ExportTask {
   downloadUrl?: string;
   error?: string;
   options: ExportOptions;
-  data: any;
+  data: unknown;
 }
 
 class UnifiedExportManager {
@@ -48,7 +48,7 @@ class UnifiedExportManager {
    */
   async createExportTask(
     testType: TestType,
-    data: any,
+    data: unknown,
     options: ExportOptions
   ): Promise<string> {
     const taskId = this.generateTaskId();
@@ -115,7 +115,7 @@ class UnifiedExportManager {
 
     } catch (error) {
       task.status = 'failed';
-      task.error = error instanceof Error ? error.message : String(error);
+      task.error = error instanceof Error ? error?.message : String(error);
     }
   }
 
@@ -125,7 +125,7 @@ class UnifiedExportManager {
   private async exportToJSON(task: ExportTask): Promise<string> {
     task.progress = 30;
 
-    const exportData: any = {
+    const exportData: unknown = {
       metadata: {
         testType: task.testType,
         exportedAt: new Date().toISOString(),
@@ -267,11 +267,11 @@ class UnifiedExportManager {
   /**
    * 生成压力测试CSV
    */
-  private generateStressTestCSV(data: any): string {
+  private generateStressTestCSV(data: unknown): string {
     let csv = 'Timestamp,Concurrent Users,Response Time (ms),Success Rate (%),Error Count\n';
 
     if (data.timeline && Array.isArray(data.timeline)) {
-      data.timeline.forEach((point: any) => {
+      data.timeline.forEach((point: unknown) => {
         csv += `${point.timestamp},${point.concurrentUsers || 0},${point.responseTime || 0},${point.successRate || 0},${point.errorCount || 0}\n`;
       });
     }
@@ -282,7 +282,7 @@ class UnifiedExportManager {
   /**
    * 生成网络测试CSV
    */
-  private generateNetworkTestCSV(data: any): string {
+  private generateNetworkTestCSV(data: unknown): string {
     let csv = 'Metric,Value,Unit\n';
 
     if (data.latencyResults) {
@@ -304,7 +304,7 @@ class UnifiedExportManager {
   /**
    * 生成性能测试CSV
    */
-  private generatePerformanceTestCSV(data: any): string {
+  private generatePerformanceTestCSV(data: unknown): string {
     let csv = 'Metric,Value,Unit\n';
 
     if (data.performanceMetrics) {
@@ -319,11 +319,11 @@ class UnifiedExportManager {
   /**
    * 生成安全测试CSV
    */
-  private generateSecurityTestCSV(data: any): string {
+  private generateSecurityTestCSV(data: unknown): string {
     let csv = 'Check,Status,Severity,Description\n';
 
     if (data.securityChecks && Array.isArray(data.securityChecks)) {
-      data.securityChecks.forEach((check: any) => {
+      data.securityChecks.forEach((check: unknown) => {
         csv += `${check.name || ''},${check.status || ''},${check.severity || ''},${check.description || ''}\n`;
       });
     }
@@ -334,11 +334,11 @@ class UnifiedExportManager {
   /**
    * 生成API测试CSV
    */
-  private generateAPITestCSV(data: any): string {
+  private generateAPITestCSV(data: unknown): string {
     let csv = 'Endpoint,Method,Status Code,Response Time (ms),Success\n';
 
     if (data.endpoints && Array.isArray(data.endpoints)) {
-      data.endpoints.forEach((endpoint: any) => {
+      data.endpoints.forEach((endpoint: unknown) => {
         csv += `${endpoint.url || ''},${endpoint.method || ''},${endpoint.statusCode || ''},${endpoint.responseTime || 0},${endpoint.success || false}\n`;
       });
     }
@@ -349,7 +349,7 @@ class UnifiedExportManager {
   /**
    * 生成SEO测试CSV
    */
-  private generateSEOTestCSV(data: any): string {
+  private generateSEOTestCSV(data: unknown): string {
     let csv = 'Category,Score,Issues,Recommendations\n';
 
     if (data.categories) {
@@ -364,7 +364,7 @@ class UnifiedExportManager {
   /**
    * 生成UX测试CSV
    */
-  private generateUXTestCSV(data: any): string {
+  private generateUXTestCSV(data: unknown): string {
     let csv = 'Metric,Value,Unit,Status\n';
 
     if (data.coreWebVitals) {
@@ -379,7 +379,7 @@ class UnifiedExportManager {
   /**
    * 生成兼容性测试CSV
    */
-  private generateCompatibilityTestCSV(data: any): string {
+  private generateCompatibilityTestCSV(data: unknown): string {
     let csv = 'Browser,Version,Compatibility Score,Issues\n';
 
     if (data.browserCompatibility) {
@@ -394,7 +394,7 @@ class UnifiedExportManager {
   /**
    * 生成通用CSV
    */
-  private generateGenericCSV(data: any): string {
+  private generateGenericCSV(data: unknown): string {
     if (Array.isArray(data)) {
       if (data.length === 0) return '';
 
@@ -472,7 +472,7 @@ class UnifiedExportManager {
   /**
    * 生成HTML内容
    */
-  private generateHTMLContent(testType: TestType, data: any): string {
+  private generateHTMLContent(testType: TestType, data: unknown): string {
     switch (testType) {
       case 'network':
         return this.generateNetworkHTML(data);
@@ -488,7 +488,7 @@ class UnifiedExportManager {
   /**
    * 生成网络测试HTML
    */
-  private generateNetworkHTML(data: any): string {
+  private generateNetworkHTML(data: unknown): string {
     let html = '<div class="section"><h2>网络性能指标</h2>';
 
     if (data.latencyResults) {
@@ -528,7 +528,7 @@ class UnifiedExportManager {
   /**
    * 生成性能测试HTML
    */
-  private generatePerformanceHTML(data: any): string {
+  private generatePerformanceHTML(data: unknown): string {
     let html = '<div class="section"><h2>性能指标</h2>';
 
     if (data.performanceMetrics) {
@@ -549,13 +549,13 @@ class UnifiedExportManager {
   /**
    * 生成安全测试HTML
    */
-  private generateSecurityHTML(data: any): string {
+  private generateSecurityHTML(data: unknown): string {
     let html = '<div class="section"><h2>安全检查结果</h2>';
 
     if (data.securityChecks && Array.isArray(data.securityChecks)) {
       html += '<table><thead><tr><th>检查项</th><th>状态</th><th>严重程度</th><th>描述</th></tr></thead><tbody>';
 
-      data.securityChecks.forEach((check: any) => {
+      data.securityChecks.forEach((check: unknown) => {
         const statusClass = check.status === 'pass' ? 'success' : check.status === 'warning' ? 'warning' : 'error';
         html += `
           <tr>
@@ -577,7 +577,7 @@ class UnifiedExportManager {
   /**
    * 生成通用HTML
    */
-  private generateGenericHTML(data: any): string {
+  private generateGenericHTML(data: unknown): string {
     let html = '<div class="section"><h2>测试结果</h2>';
     html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
     html += '</div>';
@@ -587,7 +587,7 @@ class UnifiedExportManager {
   /**
    * 对象转XML
    */
-  private objectToXML(obj: any, indent: string = ''): string {
+  private objectToXML(obj: unknown, indent: string = ''): string {
     let xml = '';
 
     for (const [key, value] of Object.entries(obj)) {
@@ -709,7 +709,7 @@ export const unifiedExportManager = new UnifiedExportManager();
 export default unifiedExportManager;
 
 // 导出React组件使用的Hook
-export const useExportManager = () => {
+export const _useExportManager = () => {
   const [error, setError] = useState<string | null>(null);
 
   return {

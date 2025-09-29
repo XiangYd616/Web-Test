@@ -74,7 +74,7 @@ export class TestResultsCache {
   /**
    * 缓存测试状态
    */
-  public cacheTestStatus(testId: string, status: any): void {
+  public cacheTestStatus(testId: string, status: unknown): void {
     const key = CACHE_KEYS.TEST_STATUS + testId;
     unifiedCacheService.set(key, status, CACHE_TTL.TEST_STATUS);
   }
@@ -82,7 +82,7 @@ export class TestResultsCache {
   /**
    * 获取测试状态
    */
-  public getTestStatus(testId: string): any {
+  public getTestStatus(testId: string): unknown {
     const key = CACHE_KEYS.TEST_STATUS + testId;
     return unifiedCacheService.get(key);
   }
@@ -100,7 +100,7 @@ export class TestResultsCache {
   /**
    * 缓存测试历史
    */
-  public cacheTestHistory(userId: string, history: any[]): void {
+  public cacheTestHistory(userId: string, history: unknown[]): void {
     const key = CACHE_KEYS.TEST_HISTORY + userId;
     unifiedCacheService.set(key, history, CACHE_TTL.TEST_HISTORY);
   }
@@ -108,7 +108,7 @@ export class TestResultsCache {
   /**
    * 获取测试历史
    */
-  public getTestHistory(userId: string): any[] | null {
+  public getTestHistory(userId: string): unknown[] | null {
     const key = CACHE_KEYS.TEST_HISTORY + userId;
     return unifiedCacheService.get<any[]>(key);
   }
@@ -133,7 +133,7 @@ export class TestResultsCache {
   /**
    * 缓存测试统计
    */
-  public cacheTestStats(userId: string, stats: any): void {
+  public cacheTestStats(userId: string, stats: unknown): void {
     const key = CACHE_KEYS.TEST_STATS + userId;
     unifiedCacheService.set(key, stats, CACHE_TTL.TEST_STATS);
   }
@@ -141,7 +141,7 @@ export class TestResultsCache {
   /**
    * 获取测试统计
    */
-  public getTestStats(userId: string): any {
+  public getTestStats(userId: string): unknown {
     const key = CACHE_KEYS.TEST_STATS + userId;
     return unifiedCacheService.get(key);
   }

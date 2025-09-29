@@ -4,29 +4,8 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  Eye,
-  Download,
-  Share2,
-  BarChart3,
-  FileText,
-  Settings,
-  Filter,
-  RefreshCw,
-  Maximize2,
-  ChevronDown,
-  ChevronRight,
-  Info,
-  ExternalLink,
-  Copy
-} from 'lucide-react';
-import { Line, Bar, Doughnut, Radar } from 'react-chartjs-2';
+import {CheckCircle, XCircle, AlertCircle, Clock, Share2, FileText, ChevronDown, ChevronRight, Info, ExternalLink, Copy} from 'lucide-react';
+import {Doughnut, Radar} from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -79,15 +58,15 @@ interface TestResult {
   metrics: Record<string, any>;
   details: TestResultDetail[];
   recommendations: Recommendation[];
-  rawData?: any;
+  rawData?: unknown;
 }
 
 interface TestResultDetail {
   category: string;
   name: string;
   status: 'pass' | 'fail' | 'warning';
-  value: any;
-  expected?: any;
+  value: unknown;
+  expected?: unknown;
   description: string;
   impact: 'low' | 'medium' | 'high' | 'critical';
   suggestion?: string;
@@ -198,11 +177,11 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
       const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
       switch (sortBy) {
         case 'priority':
-          return priorityOrder[b.priority] - priorityOrder[a.priority];
+          return priorityOrder[b.priority] - priorityOrder[a?.priority];
         case 'impact':
-          return b.impact.localeCompare(a.impact);
+          return b.impact.localeCompare(a?.impact);
         case 'category':
-          return a.category.localeCompare(b.category);
+          return a?.category.localeCompare(b.category);
         default:
           return 0;
       }
@@ -433,7 +412,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
             {allowExport && onExport && (
               <div className="relative">
                 <select
-                  onChange={(e) => onExport(e.target.value as 'json' | 'pdf' | 'csv')}
+                  onChange={(e) => onExport(e?.target.value as 'json' | 'pdf' | 'csv')}
                   className="bg-white border border-gray-300 rounded-md px-3 py-2 text-sm"
                 >
                   <option value="">导出格式</option>
@@ -508,7 +487,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
             <div className="flex space-x-2">
               <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => setSelectedCategory(e?.target.value)}
                 className="border border-gray-300 rounded-md px-3 py-1 text-sm"
               >
                 <option value="all">所有分类</option>
@@ -518,7 +497,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
               </select>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'priority' | 'impact' | 'category')}
+                onChange={(e) => setSortBy(e?.target.value as 'priority' | 'impact' | 'category')}
                 className="border border-gray-300 rounded-md px-3 py-1 text-sm"
               >
                 <option value="priority">按优先级</option>

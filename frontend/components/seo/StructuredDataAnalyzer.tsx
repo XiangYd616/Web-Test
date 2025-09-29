@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { AlertCircle, CheckCircle, Code, Database, FileText, Globe, Search, XCircle } from 'lucide-react';
+import {AlertCircle, CheckCircle, Code, Database, XCircle} from 'lucide-react';
 
 // Schema.org types mapping
 const SCHEMA_TYPES = {
@@ -48,7 +48,7 @@ const SCHEMA_TYPES = {
 interface StructuredDataItem {
   type: string;
   format: 'json-ld' | 'microdata' | 'rdfa';
-  data: any;
+  data: unknown;
   element?: HTMLElement;
   issues: Array<{
     severity: 'error' | 'warning' | 'info';
@@ -99,7 +99,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
       const jsonLdElements = targetDom.querySelectorAll('script[type="application/ld+json"]');
       jsonLdElements.forEach((element) => {
         try {
-          const jsonData = JSON.parse(element.textContent || '');
+          const jsonData = JSON.parse(element?.textContent || '');
           const jsonLdItems = Array.isArray(jsonData) ? jsonData : [jsonData];
           
           jsonLdItems.forEach((item) => {
@@ -126,7 +126,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
       // 2. 分析Microdata
       const microdataElements = targetDom.querySelectorAll('[itemscope][itemtype]');
       microdataElements.forEach((element) => {
-        const itemType = element.getAttribute('itemtype') || '';
+        const itemType = element?.getAttribute('itemtype') || '';
         const schemaType = extractSchemaType(itemType);
         
         if (schemaType) {
@@ -143,7 +143,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
       // 3. 分析RDFa (基础支持)
       const rdfaElements = targetDom.querySelectorAll('[typeof]');
       rdfaElements.forEach((element) => {
-        const typeOf = element.getAttribute('typeof') || '';
+        const typeOf = element?.getAttribute('typeof') || '';
         const schemaType = extractSchemaType(typeOf);
         
         if (schemaType) {
@@ -171,7 +171,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
 
   // 验证结构化数据项
   const validateStructuredDataItem = (
-    data: any, 
+    data: unknown, 
     format: 'json-ld' | 'microdata' | 'rdfa',
     element: HTMLElement
   ): StructuredDataItem => {
@@ -255,7 +255,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
   const extractMicrodataProperties = (element: Element): Record<string, any> => {
     const properties: Record<string, any> = {};
     
-    element.querySelectorAll('[itemprop]').forEach(propElement => {
+    element?.querySelectorAll('[itemprop]').forEach(propElement => {
       const prop = propElement.getAttribute('itemprop');
       if (prop) {
         let value = propElement.getAttribute('content') || 
@@ -277,7 +277,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
   const extractRdfaProperties = (element: Element): Record<string, any> => {
     const properties: Record<string, any> = {};
     
-    element.querySelectorAll('[property]').forEach(propElement => {
+    element?.querySelectorAll('[property]').forEach(propElement => {
       const prop = propElement.getAttribute('property');
       if (prop) {
         const value = propElement.getAttribute('content') || 

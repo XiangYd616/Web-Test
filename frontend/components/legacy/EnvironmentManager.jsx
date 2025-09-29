@@ -213,7 +213,7 @@ const EnvironmentManager = () => {
       showMessage('环境已删除', 'success');
       loadEnvironments();
       
-      if (selectedEnvironment?.id === environmentId) {
+      if (selectedEnvironment.id === environmentId) {
         setSelectedEnvironment(null);
       }
     } catch (error) {
@@ -366,7 +366,7 @@ const EnvironmentManager = () => {
           <ListItem
             key={env.id}
             button
-            selected={selectedEnvironment?.id === env.id}
+            selected={selectedEnvironment.id === env.id}
             onClick={() => setSelectedEnvironment(env)}
             secondaryAction={
               <Box>

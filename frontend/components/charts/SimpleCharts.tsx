@@ -50,7 +50,7 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
 
     // 过滤时间范围
     let filteredData = data;
-    if (timeRange !== 'all' && data.length > 0) {
+    if (timeRange !== 'all' && data?.length > 0) {
       const now = Date.now();
       const ranges = {
         '1m': 60 * 1000,
@@ -58,7 +58,7 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
         '15m': 15 * 60 * 1000
       };
       const cutoff = now - ranges[timeRange];
-      filteredData = data.filter(item => {
+      filteredData = data?.filter(item => {
         const timestamp = item.timestamp || new Date(item.time).getTime();
         return timestamp >= cutoff;
       });
@@ -74,7 +74,7 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
 
     // 如果数据被时间范围过滤了，需要计算实际的测试开始时间偏移
     let testStartOffset = 0;
-    if (timeRange !== 'all' && data && data.length > 0) {
+    if (timeRange !== 'all' && data && data?.length > 0) {
       // 原始数据的第一个时间点
       const originalStartTime = data[0].timestamp || new Date(data[0].time).getTime();
       // 过滤后数据相对于原始数据的时间偏移
@@ -328,7 +328,7 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
             <select
               id="chart-type-select"
               value={chartType}
-              onChange={(e) => setChartType(e.target.value as any)}
+              onChange={(e) => setChartType(e?.target.value as any)}
               className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
               aria-label="选择图表类型"
               title="选择图表类型"
@@ -341,7 +341,7 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
             <select
               id="time-range-select"
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as any)}
+              onChange={(e) => setTimeRange(e?.target.value as any)}
               className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
               aria-label="选择时间范围"
               title="选择时间范围"
@@ -439,59 +439,59 @@ export const AdvancedPerformanceChart: React.FC<AdvancedPerformanceChartProps> =
   };
 
   const overviewData = [
-    { name: '性能', score: data.performance, color: getScoreColor(data.performance), target: 90 },
-    { name: 'SEO', score: data.seo, color: getScoreColor(data.seo), target: 85 },
-    { name: '可访问性', score: data.accessibility, color: getScoreColor(data.accessibility), target: 95 },
-    { name: '最佳实践', score: data.bestPractices, color: getScoreColor(data.bestPractices), target: 90 },
-    { name: 'PWA', score: data.pwa || 0, color: getScoreColor(data.pwa || 0), target: 80 },
-    { name: '安全性', score: data.security || 0, color: getScoreColor(data.security || 0), target: 95 },
+    { name: '性能', score: data?.performance, color: getScoreColor(data?.performance), target: 90 },
+    { name: 'SEO', score: data?.seo, color: getScoreColor(data?.seo), target: 85 },
+    { name: '可访问性', score: data?.accessibility, color: getScoreColor(data?.accessibility), target: 95 },
+    { name: '最佳实践', score: data?.bestPractices, color: getScoreColor(data?.bestPractices), target: 90 },
+    { name: 'PWA', score: data?.pwa || 0, color: getScoreColor(data?.pwa || 0), target: 80 },
+    { name: '安全性', score: data?.security || 0, color: getScoreColor(data?.security || 0), target: 95 },
   ];
 
   const coreWebVitalsData = [
     {
       name: 'LCP',
-      value: data.coreWebVitals?.lcp || 0,
-      score: data.coreWebVitals?.lcp <= 2.5 ? 100 : data.coreWebVitals?.lcp <= 4.0 ? 70 : 30,
+      value: data?.coreWebVitals?.lcp || 0,
+      score: data?.coreWebVitals?.lcp <= 2.5 ? 100 : data?.coreWebVitals?.lcp <= 4.0 ? 70 : 30,
       unit: 's',
       threshold: 2.5
     },
     {
       name: 'FID',
-      value: data.coreWebVitals?.fid || 0,
-      score: data.coreWebVitals?.fid <= 100 ? 100 : data.coreWebVitals?.fid <= 300 ? 70 : 30,
+      value: data?.coreWebVitals?.fid || 0,
+      score: data?.coreWebVitals?.fid <= 100 ? 100 : data?.coreWebVitals?.fid <= 300 ? 70 : 30,
       unit: 'ms',
       threshold: 100
     },
     {
       name: 'CLS',
-      value: data.coreWebVitals?.cls || 0,
-      score: data.coreWebVitals?.cls <= 0.1 ? 100 : data.coreWebVitals?.cls <= 0.25 ? 70 : 30,
+      value: data?.coreWebVitals?.cls || 0,
+      score: data?.coreWebVitals?.cls <= 0.1 ? 100 : data?.coreWebVitals?.cls <= 0.25 ? 70 : 30,
       unit: '',
       threshold: 0.1
     },
     {
       name: 'FCP',
-      value: data.coreWebVitals?.fcp || 0,
-      score: data.coreWebVitals?.fcp <= 1.8 ? 100 : data.coreWebVitals?.fcp <= 3.0 ? 70 : 30,
+      value: data?.coreWebVitals?.fcp || 0,
+      score: data?.coreWebVitals?.fcp <= 1.8 ? 100 : data?.coreWebVitals?.fcp <= 3.0 ? 70 : 30,
       unit: 's',
       threshold: 1.8
     },
     {
       name: 'TTFB',
-      value: data.coreWebVitals?.ttfb || 0,
-      score: data.coreWebVitals?.ttfb <= 0.8 ? 100 : data.coreWebVitals?.ttfb <= 1.8 ? 70 : 30,
+      value: data?.coreWebVitals?.ttfb || 0,
+      score: data?.coreWebVitals?.ttfb <= 0.8 ? 100 : data?.coreWebVitals?.ttfb <= 1.8 ? 70 : 30,
       unit: 's',
       threshold: 0.8
     }
   ];
 
   const radarData = [
-    { metric: '性能', score: data.performance, fullMark: 100 },
-    { metric: 'SEO', score: data.seo, fullMark: 100 },
-    { metric: '可访问性', score: data.accessibility, fullMark: 100 },
-    { metric: '最佳实践', score: data.bestPractices, fullMark: 100 },
-    { metric: 'PWA', score: data.pwa || 0, fullMark: 100 },
-    { metric: '安全性', score: data.security || 0, fullMark: 100 }
+    { metric: '性能', score: data?.performance, fullMark: 100 },
+    { metric: 'SEO', score: data?.seo, fullMark: 100 },
+    { metric: '可访问性', score: data?.accessibility, fullMark: 100 },
+    { metric: '最佳实践', score: data?.bestPractices, fullMark: 100 },
+    { metric: 'PWA', score: data?.pwa || 0, fullMark: 100 },
+    { metric: '安全性', score: data?.security || 0, fullMark: 100 }
   ];
 
   const bgColor = theme === 'dark' ? '#1F2937' : '#FFFFFF';
@@ -573,7 +573,7 @@ export const AdvancedPerformanceChart: React.FC<AdvancedPerformanceChartProps> =
         {interactive && (
           <select
             value={viewType}
-            onChange={(e) => setViewType(e.target.value as any)}
+            onChange={(e) => setViewType(e?.target.value as any)}
             className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
             title="选择图表类型"
           >
@@ -776,7 +776,7 @@ export const AdvancedSecurityChart: React.FC<AdvancedSecurityChartProps> = ({
             <Bar dataKey="failed" stackId="a" fill="#EF4444" name="失败" />
             <Line
               type="monotone"
-              dataKey={(data: any) => (data.passed / (data.passed + data.failed + (data.warnings || 0))) * 100}
+              dataKey={(data: unknown) => (data?.passed / (data?.passed + data?.failed + (data?.warnings || 0))) * 100}
               stroke="#3B82F6"
               strokeWidth={2}
               name="通过率 (%)"
@@ -867,7 +867,7 @@ export const AdvancedSecurityChart: React.FC<AdvancedSecurityChartProps> = ({
         {interactive && (
           <select
             value={viewType}
-            onChange={(e) => setViewType(e.target.value as any)}
+            onChange={(e) => setViewType(e?.target.value as any)}
             className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
             title="选择视图类型"
           >
@@ -988,7 +988,7 @@ export const AdvancedPieChart: React.FC<AdvancedPieChartProps> = ({
               outerRadius={100}
               dataKey="value"
               label={showPercentage ? ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%` : undefined}
-              onClick={interactive ? (data: any) => setSelectedSegment(data.name) : undefined}
+              onClick={interactive ? (data: unknown) => setSelectedSegment(data?.name) : undefined}
             >
               {chartData.map((entry, index) => (
                 <Cell
@@ -1031,7 +1031,7 @@ export const AdvancedPieChart: React.FC<AdvancedPieChartProps> = ({
               outerRadius={100}
               dataKey="value"
               label={showPercentage ? ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%` : undefined}
-              onClick={interactive ? (data: any) => setSelectedSegment(data.name) : undefined}
+              onClick={interactive ? (data: unknown) => setSelectedSegment(data?.name) : undefined}
             >
               {chartData.map((entry, index) => (
                 <Cell
@@ -1059,7 +1059,7 @@ export const AdvancedPieChart: React.FC<AdvancedPieChartProps> = ({
         {interactive && (
           <select
             value={currentChartType}
-            onChange={(e) => setCurrentChartType(e.target.value as any)}
+            onChange={(e) => setCurrentChartType(e?.target.value as any)}
             className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
             title="选择图表类型"
           >
@@ -1196,7 +1196,7 @@ export const AdvancedTrendChart: React.FC<AdvancedTrendChartProps> = ({
   };
 
   // 计算趋势统计
-  const values = chartData.map(d => d.value);
+  const values = chartData.map(d => d?.value);
   const avgValue = values.reduce((a, b) => a + b, 0) / values.length;
   const trend = values.length > 1 ? ((values[values.length - 1] - values[0]) / values[0]) * 100 : 0;
   const volatility = Math.sqrt(values.reduce((sum, val) => sum + Math.pow(val - avgValue, 2), 0) / values.length);
@@ -1213,7 +1213,7 @@ export const AdvancedTrendChart: React.FC<AdvancedTrendChartProps> = ({
               平均值: <span className="font-medium">{avgValue.toFixed(1)}</span>
             </div>
             <div className={`text-sm ${trend > 0 ? 'text-green-500' : trend < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-              趋势: <span className="font-medium">{trend > 0 ? '+' : ''}{trend.toFixed(1)}%</span>
+              趋势: <span className="font-medium">{trend > 0 ? '+' : ''}{trend?.toFixed(1)}%</span>
             </div>
             <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
               波动性: <span className="font-medium">{volatility.toFixed(1)}</span>
@@ -1225,7 +1225,7 @@ export const AdvancedTrendChart: React.FC<AdvancedTrendChartProps> = ({
           <div className="flex gap-2">
             <select
               value={selectedTimeRange}
-              onChange={(e) => setSelectedTimeRange(e.target.value as any)}
+              onChange={(e) => setSelectedTimeRange(e?.target.value as any)}
               className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
               title="选择时间范围"
             >
@@ -1395,7 +1395,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
     // 按时间分组数据（每秒一个数据点）
     const groupedData = new Map();
 
-    realTimeData.forEach(point => {
+    realTimeData?.forEach(point => {
       const timeKey = Math.floor(point.timestamp / 1000) * 1000;
       if (!groupedData.has(timeKey)) {
         groupedData.set(timeKey, {
@@ -1424,7 +1424,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
     });
 
     // 优化：转换为图表数据，减少重复计算
-    const sortedGroups = Array.from(groupedData.values()).sort((a, b) => a.timestamp - b.timestamp);
+    const sortedGroups = Array.from(groupedData.values()).sort((a, b) => a?.timestamp - b.timestamp);
     const chartData = [];
 
     for (const group of sortedGroups) {
@@ -1471,19 +1471,19 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div className="bg-gray-800 p-3 rounded-lg">
             <div className="text-sm text-gray-400">总请求数</div>
-            <div className="text-xl font-bold text-white">{metrics.totalRequests}</div>
+            <div className="text-xl font-bold text-white">{metrics?.totalRequests}</div>
           </div>
           <div className="bg-gray-800 p-3 rounded-lg">
             <div className="text-sm text-gray-400">平均响应时间</div>
-            <div className="text-xl font-bold text-blue-400">{metrics.averageResponseTime}ms</div>
+            <div className="text-xl font-bold text-blue-400">{metrics?.averageResponseTime}ms</div>
           </div>
           <div className="bg-gray-800 p-3 rounded-lg">
             <div className="text-sm text-gray-400">错误率</div>
-            <div className="text-xl font-bold text-red-400">{metrics.errorRate}%</div>
+            <div className="text-xl font-bold text-red-400">{metrics?.errorRate}%</div>
           </div>
           <div className="bg-gray-800 p-3 rounded-lg">
             <div className="text-sm text-gray-400">活跃用户</div>
-            <div className="text-xl font-bold text-green-400">{metrics.activeUsers}</div>
+            <div className="text-xl font-bold text-green-400">{metrics?.activeUsers}</div>
           </div>
         </div>
       )}
@@ -1534,38 +1534,38 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
                    * @param {Object} event - 事件对象
                    * @returns {Promise<void>}
                    */
-                const formatters: Record<string, (v: any) => string[]> = {
+                const formatters: Record<string, (v: unknown) => string[]> = {
                   /**
                    * 处理maxResponseTime事件
                    * @param {Object} event - 事件对象
                    * @returns {Promise<void>}
                    */
-                  responseTime: (v: any) => [`${v}ms`, '平均响应时间'],
+                  responseTime: (v: unknown) => [`${v}ms`, '平均响应时间'],
                   /**
                    * throughput功能函数
                    * @param {Object} params - 参数对象
                    * @returns {Promise<Object>} 返回结果
                    */
-                  maxResponseTime: (v: any) => [`${v}ms`, '最大响应时间'],
+                  maxResponseTime: (v: unknown) => [`${v}ms`, '最大响应时间'],
                   /**
                    * successRate功能函数
                    * @param {Object} params - 参数对象
                    * @returns {Promise<Object>} 返回结果
                    */
-                  throughput: (v: any) => [`${v} req/s`, '吞吐量'],
+                  throughput: (v: unknown) => [`${v} req/s`, '吞吐量'],
                   /**
                    * errorRate功能函数
                    * @param {Object} params - 参数对象
                    * @returns {Promise<Object>} 返回结果
                    */
-                  successRate: (v: any) => [`${v}%`, '成功率'],
+                  successRate: (v: unknown) => [`${v}%`, '成功率'],
                   /**
                    * activeUsers功能函数
                    * @param {Object} params - 参数对象
                    * @returns {Promise<Object>} 返回结果
                    */
-                  errorRate: (v: any) => [`${v}%`, '错误率'],
-                  activeUsers: (v: any) => [`${v}`, '活跃用户']
+                  errorRate: (v: unknown) => [`${v}%`, '错误率'],
+                  activeUsers: (v: unknown) => [`${v}`, '活跃用户']
                 };
                 return formatters[name as string] ? formatters[name as string](value) : [value, name];
               }}
@@ -1633,8 +1633,8 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
 };
 
 // 向后兼容的导出
-export const SimpleStressTestChart = AdvancedStressTestChart;
-export const SimplePerformanceChart = AdvancedPerformanceChart;
-export const SimpleSecurityChart = AdvancedSecurityChart;
-export const SimplePieChart = AdvancedPieChart;
-export const SimpleTrendChart = AdvancedTrendChart;
+export const _SimpleStressTestChart = AdvancedStressTestChart;
+export const _SimplePerformanceChart = AdvancedPerformanceChart;
+export const _SimpleSecurityChart = AdvancedSecurityChart;
+export const _SimplePieChart = AdvancedPieChart;
+export const _SimpleTrendChart = AdvancedTrendChart;

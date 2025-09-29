@@ -39,7 +39,7 @@ export interface TestResult {
   testType: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
   progress: number;
-  results?: any;
+  results?: unknown;
   error?: string;
   createdAt: string;
   completedAt?: string;
@@ -142,18 +142,18 @@ class ApiClient {
 
       const response = await fetch(url, {
         ...options,
-        headers: this.createHeaders(options.headers as Record<string, string>),
+        headers: this.createHeaders(options?.headers as Record<string, string>),
         signal: controller.signal
       });
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
+      if (!response?.ok) {
         // 处理HTTP错误
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        let errorMessage = `HTTP ${response?.status}: ${response?.statusText}`;
         
         try {
-          const errorData = await response.json();
+          const errorData = await response?.json();
           errorMessage = errorData.error || errorData.message || errorMessage;
         } catch (e) {
           // 如果无法解析错误响应，使用默认错误消息
@@ -169,13 +169,13 @@ class ApiClient {
         throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const data = await response?.json();
       return data;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 如果是网络错误且还有重试次数，则重试
-      if (attempt < this.retryAttempts && !error.name?.includes('AbortError')) {
-        console.warn(`API请求失败，第${attempt}次重试: ${error.message}`);
+      if (attempt < this.retryAttempts && !error?.name?.includes('AbortError')) {
+        console.warn(`API请求失败，第${attempt}次重试: ${error?.message}`);
         await this.delay(this.retryDelay * attempt);
         return this.makeRequest<T>(endpoint, options, attempt + 1);
       }
@@ -183,7 +183,7 @@ class ApiClient {
       // 返回标准化的错误响应
       return {
         success: false,
-        error: error.message || 'Network request failed',
+        error: error?.message || 'Network request failed',
         message: '网络请求失败'
       };
     }
@@ -221,7 +221,7 @@ class ApiClient {
   /**
    * POST请求
    */
-  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined
@@ -231,7 +231,7 @@ class ApiClient {
   /**
    * PUT请求
    */
-  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async put<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined
@@ -241,7 +241,7 @@ class ApiClient {
   /**
    * PATCH请求
    */
-  async patch<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async patch<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined
@@ -284,15 +284,15 @@ class ApiClient {
 const apiClient = new ApiClient();
 
 // 认证API
-export const authApi = {
+export const _authApi = {
   /**
    * 用户登录
    */
   login: async (credentials: { username: string; password: string; remember?: boolean }) => {
     const response = await apiClient.post<{ token: string; user: User }>('/auth/login', credentials);
     
-    if (response.success && response.data?.token) {
-      apiClient['setAuthToken'](response.data.token, credentials.remember);
+    if (response?.success && response?.data?.token) {
+      apiClient['setAuthToken'](response?.data.token, credentials.remember);
     }
     
     return response;
@@ -325,8 +325,8 @@ export const authApi = {
   refreshToken: async () => {
     const response = await apiClient.post<{ token: string }>('/auth/refresh');
     
-    if (response.success && response.data?.token) {
-      apiClient['setAuthToken'](response.data.token);
+    if (response?.success && response?.data?.token) {
+      apiClient['setAuthToken'](response?.data.token);
     }
     
     return response;
@@ -351,7 +351,7 @@ export const authApi = {
 };
 
 // 测试API
-export const testApi = {
+export const _testApi = {
   /**
    * 启动网站测试
    */
@@ -425,7 +425,7 @@ export const testApi = {
 };
 
 // OAuth API
-export const oauthApi = {
+export const _oauthApi = {
   /**
    * 获取OAuth授权URL
    */
@@ -449,7 +449,7 @@ export const oauthApi = {
 };
 
 // 工具函数
-export const apiUtils = {
+export const _apiUtils = {
   /**
    * 检查是否已认证
    */
@@ -487,17 +487,17 @@ export const apiUtils = {
 };
 
 // 错误处理工具
-export const handleApiError = (error: any): string => {
+export const _handleApiError = (error: unknown): string => {
   if (typeof error === 'string') {
     return error;
   }
   
   if (error?.response?.data?.message) {
-    return error.response.data.message;
+    return error?.response.data?.message;
   }
   
   if (error?.message) {
-    return error.message;
+    return error?.message;
   }
   
   return '发生未知错误';

@@ -7,12 +7,12 @@
 // import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
 // 使用全局的Jest函数
-declare const describe: any;
-declare const it: any;
-declare const expect: any;
-declare const beforeEach: any;
-declare const afterEach: any;
-declare const jest: any;
+declare const describe: unknown;
+declare const it: unknown;
+declare const expect: unknown;
+declare const beforeEach: unknown;
+declare const afterEach: unknown;
+declare const jest: unknown;
 import { unifiedApiService } from '../api/apiService';
 import { projectApiService } from '../api/projectApiService';
 import { testApiService } from '../api/testApiService';
@@ -26,13 +26,13 @@ interface BackendApiResponse<T = any> {
   error?: string | {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
 }
 
 interface AuthResponse {
   success: boolean;
-  user?: any;
+  user?: unknown;
   token?: string;
   message?: string;
 }
@@ -170,7 +170,7 @@ describe('API Integration Tests', () => {
       } as Response);
 
       const credentials = { username: 'testuser', password: 'password' };
-      const response = await unifiedApiService.login(credentials) as BackendApiResponse<{ token: string; user: any }>;
+      const response = await unifiedApiService.login(credentials) as BackendApiResponse<{ token: string; user: unknown }>;
 
       expect(fetch).toHaveBeenCalledWith(
         `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/auth/login`,
@@ -481,8 +481,8 @@ describe('API Integration Tests', () => {
 
       // 验证错误响应结构
       expect(sampleErrorResponse).toHaveProperty('success', false);
-      expect(sampleErrorResponse).toHaveProperty('error.code');
-      expect(sampleErrorResponse).toHaveProperty('error.message');
+      expect(sampleErrorResponse).toHaveProperty('error?.code');
+      expect(sampleErrorResponse).toHaveProperty('error?.message');
       expect(sampleErrorResponse).toHaveProperty('meta.timestamp');
     });
   });

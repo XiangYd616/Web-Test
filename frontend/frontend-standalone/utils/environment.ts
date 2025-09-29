@@ -34,7 +34,7 @@ export const canUseFileSystem = isNode || isElectron;
 
 export const canUsePlaywright = isElectron || (isNode && !isBrowser);
 
-export const isFeatureSupported = (feature: string): boolean => {
+export const _isFeatureSupported = (feature: string): boolean => {
   switch (feature) {
     case 'playwright':
       return canUsePlaywright;
@@ -53,7 +53,7 @@ export const isFeatureSupported = (feature: string): boolean => {
   }
 };
 
-export const getEnvironmentInfo = () => {
+export const _getEnvironmentInfo = () => {
   return {
     isBrowser,
     isNode,

@@ -112,7 +112,7 @@ const TestProgressDisplay: React.FC<TestProgressDisplayProps> = ({
      * @param {Object} params - 参数对象
      * @returns {Promise<Object>} 返回结果
      */
-  const getStatusColor = (stepStatus: string) => {
+  const _getStatusColor = (stepStatus: string) => {
     switch (stepStatus) {
       case 'completed':
         return 'bg-green-500';

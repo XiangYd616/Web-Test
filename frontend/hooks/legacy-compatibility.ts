@@ -97,7 +97,7 @@ export const useSimpleTestEngine = () => {
 export const useTestState = (options: {
   testType: TestType;
   defaultConfig: Record<string, any>;
-  onTestComplete?: (result: any) => void;
+  onTestComplete?: (result: unknown) => void;
   onTestError?: (error: string) => void;
   onConfigChange?: (config: Record<string, any>) => void;
   validateConfig?: (config: Record<string, any>) => { isValid: boolean; errors: string[] };
@@ -113,18 +113,18 @@ export const useTestState = (options: {
       // 等待测试完成
       const checkCompletion = async () => {
         const status = await engine.getTestStatus(testId);
-        if (status?.status === 'completed') {
+        if (status.status === 'completed') {
           const result = await engine.getTestResult(testId);
           options.onTestComplete?.(result);
-        } else if (status?.status === 'failed') {
-          options.onTestError?.(status.error || '测试失败');
+        } else if (status.status === 'failed') {
+          options.onTestError?.(status?.error || '测试失败');
         }
       };
 
       // 轮询检查测试状态
       const interval = setInterval(async () => {
         const status = await engine.getTestStatus(testId);
-        if (status?.status === 'completed' || status?.status === 'failed') {
+        if (status.status === 'completed' || status.status === 'failed') {
           clearInterval(interval);
           await checkCompletion();
         }
@@ -151,7 +151,7 @@ export const useTestState = (options: {
     setConfig: (config: Record<string, any>) => {
       options.onConfigChange?.(config);
     },
-    updateConfig: (key: string, value: any) => {
+    updateConfig: (key: string, value: unknown) => {
       const newConfig = { ...universalState.config, [key]: value };
       options.onConfigChange?.(newConfig);
     },
@@ -223,13 +223,13 @@ export const useUnifiedTestState = (options: {
   enableQueue?: boolean;
   enableWebSocket?: boolean;
   enablePersistence?: boolean;
-  onTestStarted?: (data: any) => void;
-  onTestProgress?: (data: any) => void;
-  onTestCompleted?: (data: any) => void;
-  onTestFailed?: (data: any) => void;
-  onTestCancelled?: (data: any) => void;
-  onTestQueued?: (data: any) => void;
-  onStatusUpdate?: (data: any) => void;
+  onTestStarted?: (data: unknown) => void;
+  onTestProgress?: (data: unknown) => void;
+  onTestCompleted?: (data: unknown) => void;
+  onTestFailed?: (data: unknown) => void;
+  onTestCancelled?: (data: unknown) => void;
+  onTestQueued?: (data: unknown) => void;
+  onStatusUpdate?: (data: unknown) => void;
 }) => {
   // 使用重构后的useTestState
   const testState = useTestStateCore({

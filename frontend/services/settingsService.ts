@@ -26,10 +26,10 @@ api.interceptors.request.use(
 );
 
 // 响应拦截器 - 处理错误
-api.interceptors.response.use(
+api.interceptors.response?.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response.status === 401) {
       // Token过期，清除本地存储并重定向到登录页
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
@@ -44,31 +44,31 @@ export const systemSettingsAPI = {
   // 获取所有系统设置
   getAllSettings: async () => {
     const response = await api.get('/admin/settings');
-    return response.data;
+    return response?.data;
   },
 
   // 获取特定分类的系统设置
   getSettingsByCategory: async (category: string) => {
     const response = await api.get(`/admin/settings/${category}`);
-    return response.data;
+    return response?.data;
   },
 
   // 更新特定分类的系统设置
   updateSettingsByCategory: async (category: string, settings: Record<string, any>) => {
     const response = await api.put(`/admin/settings/${category}`, { settings });
-    return response.data;
+    return response?.data;
   },
 
   // 获取单个系统设置
   getSetting: async (category: string, key: string) => {
     const response = await api.get(`/admin/settings/${category}/${key}`);
-    return response.data;
+    return response?.data;
   },
 
   // 更新单个系统设置
-  updateSetting: async (category: string, key: string, value: any) => {
+  updateSetting: async (category: string, key: string, value: unknown) => {
     const response = await api.put(`/admin/settings/${category}/${key}`, { value });
-    return response.data;
+    return response?.data;
   },
 };
 
@@ -77,50 +77,50 @@ export const userPreferencesAPI = {
   // 获取所有用户偏好
   getAllPreferences: async () => {
     const response = await api.get('/preferences');
-    return response.data;
+    return response?.data;
   },
 
   // 获取特定分类的用户偏好
   getPreferencesByCategory: async (category: string) => {
     const response = await api.get(`/preferences/${category}`);
-    return response.data;
+    return response?.data;
   },
 
   // 更新特定分类的用户偏好
   updatePreferencesByCategory: async (category: string, preferences: Record<string, any>) => {
     const response = await api.put(`/preferences/${category}`, { preferences });
-    return response.data;
+    return response?.data;
   },
 
   // 获取单个用户偏好
   getPreference: async (category: string, key: string) => {
     const response = await api.get(`/preferences/${category}/${key}`);
-    return response.data;
+    return response?.data;
   },
 
   // 更新单个用户偏好
-  updatePreference: async (category: string, key: string, value: any) => {
+  updatePreference: async (category: string, key: string, value: unknown) => {
     const response = await api.put(`/preferences/${category}/${key}`, { value });
-    return response.data;
+    return response?.data;
   },
 
   // 重置用户偏好到默认值
   resetPreferences: async (category?: string) => {
     const url = category ? `/preferences/reset/${category}` : '/preferences/reset';
     const response = await api.post(url);
-    return response.data;
+    return response?.data;
   },
 
   // 导出用户偏好
   exportPreferences: async () => {
     const response = await api.get('/preferences/export/all');
-    return response.data;
+    return response?.data;
   },
 
   // 导入用户偏好
   importPreferences: async (preferences: Record<string, any>) => {
     const response = await api.post('/preferences/import', { preferences });
-    return response.data;
+    return response?.data;
   },
 };
 
@@ -261,90 +261,90 @@ export class SettingsService {
 }
 
 // ==================== 账户设置API ====================
-export const accountAPI = {
+export const _accountAPI = {
   // 更新用户个人信息
-  updateProfile: async (profileData: any) => {
+  updateProfile: async (profileData: unknown) => {
     const response = await api.put('/auth/profile', profileData);
-    return response.data;
+    return response?.data;
   },
 
   // 修改密码
-  changePassword: async (passwordData: any) => {
+  changePassword: async (passwordData: unknown) => {
     const response = await api.put('/auth/change-password', passwordData);
-    return response.data;
+    return response?.data;
   },
 };
 
 // ==================== 系统监控API ====================
-export const monitoringAPI = {
+export const _monitoringAPI = {
   // 获取系统监控数据
   getSystemMonitoring: async () => {
     const response = await api.get('/monitoring/system');
-    return response.data;
+    return response?.data;
   },
 
   // 获取系统健康状态
   getSystemHealth: async () => {
     const response = await api.get('/monitoring/health');
-    return response.data;
+    return response?.data;
   },
 
   // 更新监控设置
-  updateMonitoringSettings: async (settings: any) => {
+  updateMonitoringSettings: async (settings: unknown) => {
     const response = await api.put('/monitoring/settings', { settings });
-    return response.data;
+    return response?.data;
   },
 };
 
 // ==================== 定时任务API ====================
-export const scheduledTasksAPI = {
+export const _scheduledTasksAPI = {
   // 获取定时任务列表
   getTasks: async () => {
     const response = await api.get('/scheduled-tasks');
-    return response.data;
+    return response?.data;
   },
 
   // 创建定时任务
-  createTask: async (taskData: any) => {
+  createTask: async (taskData: unknown) => {
     const response = await api.post('/scheduled-tasks', taskData);
-    return response.data;
+    return response?.data;
   },
 
   // 更新定时任务
-  updateTask: async (taskId: string, updates: any) => {
+  updateTask: async (taskId: string, updates: unknown) => {
     const response = await api.put(`/scheduled-tasks/${taskId}`, updates);
-    return response.data;
+    return response?.data;
   },
 
   // 删除定时任务
   deleteTask: async (taskId: string) => {
     const response = await api.delete(`/scheduled-tasks/${taskId}`);
-    return response.data;
+    return response?.data;
   },
 
   // 手动执行定时任务
   runTask: async (taskId: string) => {
     const response = await api.post(`/scheduled-tasks/${taskId}/run`);
-    return response.data;
+    return response?.data;
   },
 };
 
 // ==================== 系统日志API ====================
-export const systemLogsAPI = {
+export const _systemLogsAPI = {
   // 获取系统日志
-  getLogs: async (params: any = {}) => {
+  getLogs: async (params: unknown = {}) => {
     const response = await api.get('/system-logs', { params });
-    return response.data;
+    return response?.data;
   },
 
   // 清理系统日志
-  cleanLogs: async (conditions: any) => {
+  cleanLogs: async (conditions: unknown) => {
     const response = await api.delete('/system-logs', { data: conditions });
-    return response.data;
+    return response?.data;
   },
 
   // 导出系统日志
-  exportLogs: async (params: any = {}) => {
+  exportLogs: async (params: unknown = {}) => {
     const response = await api.get('/system-logs/export', {
       params,
       responseType: 'blob'
@@ -354,60 +354,60 @@ export const systemLogsAPI = {
 };
 
 // ==================== 备份管理API ====================
-export const backupAPI = {
+export const _backupAPI = {
   // 获取备份列表
   getBackups: async () => {
     const response = await api.get('/backups');
-    return response.data;
+    return response?.data;
   },
 
   // 创建备份
-  createBackup: async (backupData: any) => {
+  createBackup: async (backupData: unknown) => {
     const response = await api.post('/backups', backupData);
-    return response.data;
+    return response?.data;
   },
 
   // 恢复备份
   restoreBackup: async (backupId: string, confirmRestore: boolean = false) => {
     const response = await api.post(`/backups/${backupId}/restore`, { confirmRestore });
-    return response.data;
+    return response?.data;
   },
 };
 
 // ==================== 数据管理API ====================
-export const dataManagementAPI = {
+export const _dataManagementAPI = {
   // 获取导出任务列表
   getExportTasks: async () => {
     const response = await api.get('/data-management/exports');
-    return response.data;
+    return response?.data;
   },
 
   // 获取导入任务列表
   getImportTasks: async () => {
     const response = await api.get('/data-management/imports');
-    return response.data;
+    return response?.data;
   },
 
   // 创建导出任务
-  createExportTask: async (exportData: any) => {
+  createExportTask: async (exportData: unknown) => {
     const response = await api.post('/data-management/exports', exportData);
-    return response.data;
+    return response?.data;
   },
 
   // 创建导入任务
-  createImportTask: async (importData: any) => {
+  createImportTask: async (importData: unknown) => {
     const response = await api.post('/data-management/imports', importData);
-    return response.data;
+    return response?.data;
   },
 
   // 获取数据管理统计
   getStats: async () => {
     const response = await api.get('/data-management/stats');
-    return response.data;
+    return response?.data;
   },
 };
 
 // 创建单例实例
-export const settingsService = new SettingsService();
+export const _settingsService = new SettingsService();
 
 export default SettingsService;

@@ -257,7 +257,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
             {onEdit && (
               <button
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e?.stopPropagation();
                   onEdit(role);
                 }}
                 className="p-1 text-gray-400 hover:text-blue-400 transition-colors"
@@ -269,7 +269,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
             {onDelete && !role.isSystem && (
               <button
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e?.stopPropagation();
                   onDelete(role);
                 }}
                 className="p-1 text-gray-400 hover:text-red-400 transition-colors"
@@ -390,15 +390,15 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
   }, [permissions, searchTerm]);
 
   const handleRoleSelect = (role: Role) => {
-    setSelectedRole(selectedRole?.id === role.id ? null : role);
+    setSelectedRole(selectedRole.id === role.id ? null : role);
   };
 
   const handlePermissionToggle = (permissionId: string) => {
     if (!userPermissions || mode !== 'admin') return;
 
-    const newDirectPermissions = userPermissions.directPermissions.includes(permissionId)
-      ? userPermissions.directPermissions.filter(id => id !== permissionId)
-      : [...userPermissions.directPermissions, permissionId];
+    const newDirectPermissions = userPermissions?.directPermissions.includes(permissionId)
+      ? userPermissions?.directPermissions.filter(id => id !== permissionId)
+      : [...userPermissions?.directPermissions, permissionId];
 
     const updatedPermissions: UserPermissions = {
       ...userPermissions,
@@ -440,7 +440,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e?.target.value)}
               placeholder="搜索角色或权限..."
               className="pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
             />
@@ -490,7 +490,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
                     key={role.id}
                     role={role}
                     permissions={permissions}
-                    isSelected={selectedRole?.id === role.id}
+                    isSelected={selectedRole.id === role.id}
                     onSelect={handleRoleSelect}
                     showActions={mode === 'admin'}
                   />
@@ -525,7 +525,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
                     <button className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                       编辑角色
                     </button>
-                    {!selectedRole.isSystem && (
+                    {!selectedRole?.isSystem && (
                       <button className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
                         删除角色
                       </button>
@@ -540,8 +540,8 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
                     角色权限
                   </label>
                   <PermissionTree
-                    permissions={permissions.filter(p => selectedRole.permissions.includes(p.id))}
-                    selectedPermissions={selectedRole.permissions}
+                    permissions={permissions.filter(p => selectedRole?.permissions.includes(p.id))}
+                    selectedPermissions={selectedRole?.permissions}
                     onPermissionToggle={() => { }}
                     readonly={true}
                   />
@@ -570,7 +570,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
                 <div>
                   <h4 className="text-md font-medium text-gray-300 mb-3">分配的角色</h4>
                   <div className="flex flex-wrap gap-2">
-                    {userPermissions.roles.map(roleId => {
+                    {userPermissions?.roles.map(roleId => {
                       const role = roles.find(r => r.id === roleId);
                       return role ? (
                         <span
@@ -588,7 +588,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
                   <h4 className="text-md font-medium text-gray-300 mb-3">直接权限</h4>
                   <PermissionTree
                     permissions={permissions}
-                    selectedPermissions={userPermissions.directPermissions}
+                    selectedPermissions={userPermissions?.directPermissions}
                     onPermissionToggle={handlePermissionToggle}
                     readonly={mode !== 'admin'}
                   />
@@ -600,20 +600,20 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-400">总权限数:</span>
-                        <span className="ml-2 text-white">{userPermissions.effectivePermissions.length}</span>
+                        <span className="ml-2 text-white">{userPermissions?.effectivePermissions.length}</span>
                       </div>
                       <div>
                         <span className="text-gray-400">直接权限:</span>
-                        <span className="ml-2 text-white">{userPermissions.directPermissions.length}</span>
+                        <span className="ml-2 text-white">{userPermissions?.directPermissions.length}</span>
                       </div>
                       <div>
                         <span className="text-gray-400">角色数量:</span>
-                        <span className="ml-2 text-white">{userPermissions.roles.length}</span>
+                        <span className="ml-2 text-white">{userPermissions?.roles.length}</span>
                       </div>
                       <div>
                         <span className="text-gray-400">最后计算:</span>
                         <span className="ml-2 text-white">
-                          {new Date(userPermissions.lastCalculated).toLocaleString()}
+                          {new Date(userPermissions?.lastCalculated).toLocaleString()}
                         </span>
                       </div>
                     </div>

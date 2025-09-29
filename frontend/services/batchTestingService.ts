@@ -23,7 +23,7 @@ export interface TestConfig {
   id?: string;
   url: string;
   type: string;
-  config: any;
+  config: unknown;
   name?: string;
   description?: string;
 }
@@ -50,7 +50,7 @@ export interface TestResult {
   testType: string;
   url: string;
   success: boolean;
-  results?: any;
+  results?: unknown;
   error?: string;
   startTime: string;
   endTime: string;
@@ -222,7 +222,7 @@ class BatchTestingService {
       createdBy: string;
     }>;
     total: number;
-    pagination: any;
+    pagination: unknown;
   }> {
     try {
       const params = new URLSearchParams();
@@ -381,7 +381,7 @@ class BatchTestingService {
   monitorBatchProgress(
     batchId: string,
     onProgress: (progress: BatchProgress) => void,
-    onComplete: (results: any) => void,
+    onComplete: (results: unknown) => void,
     onError: (error: string) => void
   ): () => void {
     let isMonitoring = true;
@@ -391,7 +391,7 @@ class BatchTestingService {
 
       try {
         const status = await this.getBatchStatus(batchId);
-        onProgress(status.progress);
+        onProgress(status?.progress);
 
         if (status.status === 'completed' || status.status === 'failed') {
           isMonitoring = false;
@@ -403,7 +403,7 @@ class BatchTestingService {
         }
       } catch (error) {
         isMonitoring = false;
-        onError(error instanceof Error ? error.message : '监控失败');
+        onError(error instanceof Error ? error?.message : '监控失败');
       }
     };
 

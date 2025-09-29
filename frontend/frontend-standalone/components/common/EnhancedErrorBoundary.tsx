@@ -70,7 +70,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
       window.Sentry.captureException(error, {
         contexts: {
           react: {
-            componentStack: errorInfo.componentStack
+            componentStack: errorInfo?.componentStack
           }
         }
       });
@@ -84,9 +84,9 @@ class EnhancedErrorBoundary extends Component<Props, State> {
     try {
       const errorLog = {
         timestamp: new Date().toISOString(),
-        message: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
+        message: error?.message,
+        stack: error?.stack,
+        componentStack: errorInfo?.componentStack,
         level: this.props.level || 'component',
         url: window.location.href,
         userAgent: navigator.userAgent
@@ -137,12 +137,12 @@ class EnhancedErrorBoundary extends Component<Props, State> {
     if (!error) return;
 
     const errorDetails = `
-错误信息：${error.message}
+错误信息：${error?.message}
 错误时间：${new Date().toISOString()}
 页面URL：${window.location.href}
 用户代理：${navigator.userAgent}
 错误堆栈：
-${error.stack}
+${error?.stack}
 组件堆栈：
 ${errorInfo?.componentStack || '无'}
     `.trim();
@@ -244,7 +244,7 @@ ${errorInfo?.componentStack || '无'}
                         </button>
                       </div>
                       <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-pre-wrap break-words">
-                        {error.stack}
+                        {error?.stack}
                       </pre>
                       {errorInfo?.componentStack && (
                         <>
@@ -252,7 +252,7 @@ ${errorInfo?.componentStack || '无'}
                             组件堆栈
                           </div>
                           <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-pre-wrap break-words">
-                            {errorInfo.componentStack}
+                            {errorInfo?.componentStack}
                           </pre>
                         </>
                       )}
@@ -354,7 +354,7 @@ export function withEnhancedErrorBoundary<P extends object>(
 declare global {
   interface Window {
     Sentry?: {
-      captureException: (error: Error, context?: any) => void;
+      captureException: (error: Error, context?: unknown) => void;
     };
   }
 }

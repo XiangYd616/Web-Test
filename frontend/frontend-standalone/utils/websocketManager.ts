@@ -20,7 +20,7 @@ export interface WebSocketConfig {
 export interface WebSocketMessage {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   timestamp: number;
   priority?: 'low' | 'normal' | 'high';
   retry?: number;
@@ -47,7 +47,7 @@ export type WebSocketEventType =
   | 'message'
   | 'heartbeat';
 
-export type WebSocketEventListener = (event: any) => void;
+export type WebSocketEventListener = (event: unknown) => void;
 
 /**
  * WebSocket连接管理器
@@ -193,7 +193,7 @@ export class WebSocketManager {
   /**
    * 发送消息
    */
-  public send(type: string, data: any, options: {
+  public send(type: string, data: unknown, options: {
     priority?: 'low' | 'normal' | 'high';
     timeout?: number;
     retry?: boolean;
@@ -302,7 +302,7 @@ export class WebSocketManager {
   /**
    * 处理心跳响应
    */
-  private handlePongMessage(message: any): void {
+  private handlePongMessage(message: unknown): void {
     if (message.timestamp) {
       const latency = Date.now() - message.timestamp;
       this.updateLatency(latency);
@@ -408,9 +408,9 @@ export class WebSocketManager {
     if (this.messageQueue.length >= this.config.messageQueueLimit) {
       this.messageQueue = this.messageQueue
         .sort((a, b) => {
-          const priorityDiff = priorityOrder[a.priority!] - priorityOrder[b.priority!];
+          const priorityDiff = priorityOrder[a?.priority!] - priorityOrder[b.priority!];
           if (priorityDiff !== 0) return priorityDiff;
-          return a.timestamp - b.timestamp;
+          return a?.timestamp - b.timestamp;
         })
         .slice(0, this.config.messageQueueLimit - 1);
     }
@@ -439,7 +439,7 @@ export class WebSocketManager {
   /**
    * 解析二进制消息
    */
-  private parseBinaryMessage(buffer: ArrayBuffer): any {
+  private parseBinaryMessage(buffer: ArrayBuffer): unknown {
     // 这里可以实现自定义的二进制协议解析
     // 例如使用 MessagePack、Protocol Buffers 等
     try {
@@ -488,7 +488,7 @@ export class WebSocketManager {
   /**
    * 触发事件
    */
-  private emit(event: WebSocketEventType, data?: any): void {
+  private emit(event: WebSocketEventType, data?: unknown): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       listeners.forEach(listener => {

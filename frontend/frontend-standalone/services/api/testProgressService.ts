@@ -13,14 +13,14 @@ export interface TestProgress {
   message: string;
   startTime: string;
   endTime?: string;
-  result?: any;
+  result?: unknown;
   error?: string;
 }
 
 // 进度监听器接口
 export interface ProgressListener {
   onProgress: (progress: TestProgress) => void;
-  onComplete: (result: any) => void;
+  onComplete: (result: unknown) => void;
   onError: (error: string) => void;
 }
 
@@ -101,14 +101,14 @@ class TestProgressService {
 
       // 通知所有监听器
       monitor.listeners.forEach(listener => {
-        listener.onProgress(progress);
+        listener?.onProgress(progress);
 
         // 如果测试完成，通知完成或错误
         if (progress.status === 'completed') {
-          listener.onComplete(progress.result);
+          listener?.onComplete(progress.result);
           this.stopMonitoring(testId);
         } else if (progress.status === 'failed') {
-          listener.onError(progress.error || '测试失败');
+          listener?.onError(progress.error || '测试失败');
           this.stopMonitoring(testId);
         }
       });
@@ -124,7 +124,7 @@ class TestProgressService {
       const monitor = this.activeMonitors.get(testId);
       if (monitor) {
         monitor.listeners.forEach(listener => {
-          listener.onError('无法获取测试进度');
+          listener?.onError('无法获取测试进度');
         });
       }
     }

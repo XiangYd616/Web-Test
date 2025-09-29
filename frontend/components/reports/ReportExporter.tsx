@@ -12,8 +12,8 @@ import type { FC } from 'react';;
 import { EnhancedReportGenerator, ExportFormat, ReportConfig, ReportData } from '../../services/reportGeneratorService';
 
 interface ReportExporterProps {
-  testResults: any[];
-  analytics?: any;
+  testResults: unknown[];
+  analytics?: unknown;
   onExport?: (format: ExportFormat, config: ReportConfig) => void;
   className?: string;
 }
@@ -139,7 +139,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
     setConfig(prev => ({ ...prev, ...updates }));
   };
 
-  const updateSection = (sectionId: string, updates: any) => {
+  const updateSection = (sectionId: string, updates: unknown) => {
     setConfig(prev => ({
       ...prev,
       sections: prev.sections.map(section =>
@@ -199,7 +199,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                       name="format"
                       value={format.id}
                       checked={selectedFormat === format.id}
-                      onChange={(e) => setSelectedFormat(e.target.value as ExportFormat)}
+                      onChange={(e) => setSelectedFormat(e?.target.value as ExportFormat)}
                       className="sr-only"
                     />
                     <div className={`p-2 rounded-lg ${format.color} mr-3`}>
@@ -226,7 +226,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                 <input
                   type="text"
                   value={config.title}
-                  onChange={(e) => updateConfig({ title: e.target.value })}
+                  onChange={(e) => updateConfig({ title: e?.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="输入报告标题"
                   aria-label="报告标题"
@@ -240,7 +240,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                 </label>
                 <textarea
                   value={config.description || ''}
-                  onChange={(e) => updateConfig({ description: e.target.value })}
+                  onChange={(e) => updateConfig({ description: e?.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="输入报告描述"
@@ -255,7 +255,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                 </label>
                 <select
                   value={config.template}
-                  onChange={(e) => updateConfig({ template: e.target.value as any })}
+                  onChange={(e) => updateConfig({ template: e?.target.value as any })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   title="选择报告模板"
                   aria-label="选择报告模板"
@@ -277,7 +277,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                   <input
                     type="checkbox"
                     checked={config.includeCharts}
-                    onChange={(e) => updateConfig({ includeCharts: e.target.checked })}
+                    onChange={(e) => updateConfig({ includeCharts: e?.target.checked })}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-2 text-sm text-gray-700">包含图表</span>
@@ -286,7 +286,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                   <input
                     type="checkbox"
                     checked={config.includeRecommendations}
-                    onChange={(e) => updateConfig({ includeRecommendations: e.target.checked })}
+                    onChange={(e) => updateConfig({ includeRecommendations: e?.target.checked })}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-2 text-sm text-gray-700">包含优化建议</span>
@@ -295,7 +295,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                   <input
                     type="checkbox"
                     checked={config.includeRawData}
-                    onChange={(e) => updateConfig({ includeRawData: e.target.checked })}
+                    onChange={(e) => updateConfig({ includeRawData: e?.target.checked })}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-2 text-sm text-gray-700">包含原始数据</span>
@@ -313,7 +313,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                       <input
                         type="checkbox"
                         checked={section.enabled}
-                        onChange={(e) => updateSection(section.id, { enabled: e.target.checked })}
+                        onChange={(e) => updateSection(section.id, { enabled: e?.target.checked })}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         title={`启用/禁用 ${section.title}`}
                         aria-label={`启用/禁用 ${section.title}`}
@@ -324,7 +324,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                       <input
                         type="number"
                         value={section.order}
-                        onChange={(e) => updateSection(section.id, { order: parseInt(e.target.value) })}
+                        onChange={(e) => updateSection(section.id, { order: parseInt(e?.target.value) })}
                         min="1"
                         max="10"
                         className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
@@ -362,7 +362,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                 </div>
 
                 <div className="space-y-4">
-                  {config.sections.filter(s => s.enabled).sort((a, b) => a.order - b.order).map(section => (
+                  {config.sections.filter(s => s?.enabled).sort((a, b) => a.order - b.order).map(section => (
                     <div key={section.id} className="border-l-4 border-blue-500 pl-4">
                       <h5 className="font-medium text-gray-900">{section.title}</h5>
                       <p className="text-sm text-gray-600">
@@ -400,7 +400,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                 <div>
                   <span className="text-blue-700">包含章节:</span>
                   <span className="font-medium ml-2">
-                    {config.sections.filter(s => s.enabled).length}
+                    {config.sections.filter(s => s?.enabled).length}
                   </span>
                 </div>
                 <div>

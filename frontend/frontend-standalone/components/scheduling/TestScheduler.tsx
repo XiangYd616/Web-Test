@@ -4,36 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Calendar,
-  Clock,
-  Play,
-  Pause,
-  Square,
-  Settings,
-  Plus,
-  Edit,
-  Trash2,
-  Copy,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Activity,
-  Users,
-  Target,
-  TrendingUp,
-  BarChart3,
-  Filter,
-  Search,
-  Download,
-  Upload,
-  FileText,
-  Database,
-  Globe,
-  Shield,
-  Zap
-} from 'lucide-react';
+import {Calendar, Play, Pause, Plus, Edit, Trash2, Copy, RefreshCw, CheckCircle, XCircle, Activity, Target, Search, FileText, Database, Globe, Shield, Zap} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format, formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
@@ -82,7 +53,7 @@ interface ExecutionHistory {
   endTime?: Date;
   status: 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout';
   duration?: number;
-  result?: any;
+  result?: unknown;
   error?: string;
   logs?: string[];
 }
@@ -222,8 +193,8 @@ const TestScheduler: React.FC = () => {
     });
 
     // 排序
-    result.sort((a, b) => {
-      let aValue: any, bValue: any;
+    result?.sort((a, b) => {
+      let aValue: unknown, bValue: unknown;
       
       switch (sortBy) {
         case 'name':
@@ -277,7 +248,7 @@ const TestScheduler: React.FC = () => {
           break;
         case 'delete':
           if (confirm('确定要删除这个任务吗？')) {
-            setTasks(prev => prev.filter(t => t.id !== taskId));
+            setTasks(prev => prev.filter(t => t?.id !== taskId));
             toast.success('任务已删除');
           }
           break;
@@ -308,7 +279,7 @@ const TestScheduler: React.FC = () => {
           break;
         case 'delete':
           if (confirm(`确定要删除 ${selectedTasks.size} 个任务吗？`)) {
-            setTasks(prev => prev.filter(t => !selectedTasks.has(t.id)));
+            setTasks(prev => prev.filter(t => !selectedTasks.has(t?.id)));
             setSelectedTasks(new Set());
             toast.success(`已删除 ${selectedTasks.size} 个任务`);
           }
@@ -343,7 +314,7 @@ const TestScheduler: React.FC = () => {
     if (selectedTasks.size === filteredTasks.length) {
       setSelectedTasks(new Set());
     } else {
-      setSelectedTasks(new Set(filteredTasks.map(t => t.id)));
+      setSelectedTasks(new Set(filteredTasks.map(t => t?.id)));
     }
   };
 
@@ -389,14 +360,14 @@ const TestScheduler: React.FC = () => {
                 type="text"
                 placeholder="搜索任务名称或描述..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e?.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e) => setFilterStatus(e?.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">所有状态</option>
@@ -407,7 +378,7 @@ const TestScheduler: React.FC = () => {
             
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e?.target.value as any)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="nextRun">下次执行</option>
@@ -506,7 +477,7 @@ const TestScheduler: React.FC = () => {
                         <input
                           type="checkbox"
                           checked={selectedTasks.has(task.id)}
-                          onChange={(e) => handleSelectTask(task.id, e.target.checked)}
+                          onChange={(e) => handleSelectTask(task.id, e?.target.checked)}
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
                       </td>

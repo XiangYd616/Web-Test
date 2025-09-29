@@ -105,7 +105,7 @@ class UserStatsService {
   }
 
   // 标准化统计数据格式
-  private normalizeStatsData(apiData: any): UserActivityStats {
+  private normalizeStatsData(apiData: unknown): UserActivityStats {
     return {
       totalTests: apiData.total_tests || apiData.totalTests || 0,
       testsToday: apiData.tests_today || apiData.testsToday || 0,
@@ -210,7 +210,7 @@ class UserStatsService {
       metadata: { testType, success, score, duration }
     });
 
-    await this.updateUserStats(userId, stats);
+    this.updateUserStats(userId, stats);
   }
 
   // 记录收藏操作
@@ -277,7 +277,7 @@ class UserStatsService {
       activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
-    await this.updateUserStats(userId, stats);
+    this.updateUserStats(userId, stats);
   }
 
   // 计算月统计
@@ -295,7 +295,7 @@ class UserStatsService {
       activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
-    await this.updateUserStats(userId, stats);
+    this.updateUserStats(userId, stats);
   }
 
   // 重置统计数据
@@ -305,8 +305,8 @@ class UserStatsService {
   }
 
   // 导出统计数据
-  exportUserStats(userId: string): string {
-    const stats = this.getUserStats(userId);
+  async exportUserStats(userId: string): Promise<string> {
+    const stats = await this.getUserStats(userId);
     const activities = this.getRecentActivity(userId);
 
     return JSON.stringify({
@@ -317,7 +317,7 @@ class UserStatsService {
   }
 
   // 导入统计数据
-  importUserStats(userId: string, data: string): boolean {
+  async importUserStats(userId: string, data: string): Promise<boolean> {
     try {
       const imported = JSON.parse(data);
       if (imported.stats) {

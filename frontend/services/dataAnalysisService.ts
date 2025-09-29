@@ -18,9 +18,9 @@ export interface TestRecord {
   start_time: string;
   end_time?: string;
   duration?: number;
-  results?: any;
-  config?: any;
-  scores?: any;
+  results?: unknown;
+  config?: unknown;
+  scores?: unknown;
   recommendations?: string[];
   created_at: string;
 }
@@ -68,7 +68,7 @@ export class DataAnalysisService {
   /**
    * 处理测试数据 - 直接使用数据库字段名，避免不必要的映射
    */
-  async processTestData(testRecords: any[], dateRange: number = 30): Promise<AnalyticsData> {
+  async processTestData(testRecords: unknown[], dateRange: number = 30): Promise<AnalyticsData> {
     try {
       // 直接使用数据库字段，无需转换
       const normalizedRecords = testRecords;
@@ -126,7 +126,7 @@ export class DataAnalysisService {
   /**
    * 分析测试数据 - 使用数据库字段名
    */
-  private analyzeTestData(records: any[]): AnalyticsData {
+  private analyzeTestData(records: unknown[]): AnalyticsData {
     const totalTests = records.length;
     const completedTests = records.filter(r => r.status === 'completed');
     const successRate = totalTests > 0 ? (completedTests.length / totalTests) * 100 : 0;
@@ -165,7 +165,7 @@ export class DataAnalysisService {
 
     // 最近活动
     const recentActivity = records
-      .sort((a, b) => new Date(b.start_time || b.created_at).getTime() - new Date(a.start_time || a.created_at).getTime())
+      .sort((a, b) => new Date(b.start_time || b.created_at).getTime() - new Date(a?.start_time || a?.created_at).getTime())
       .slice(0, 10);
 
     return {
@@ -254,7 +254,7 @@ export class DataAnalysisService {
     records.forEach(record => {
       const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');
       if (trends[date] && record.overall_score !== undefined) {
-        trends[date].scores.push(record.overall_score);
+        trends[date].scores?.push(record.overall_score);
         trends[date].count++;
       }
     });
@@ -281,7 +281,7 @@ export class DataAnalysisService {
         }
         urlStats[record.url].count++;
         if (record.overall_score !== undefined) {
-          urlStats[record.url].scores.push(record.overall_score);
+          urlStats[record.url].scores?.push(record.overall_score);
         }
       }
     });
@@ -294,7 +294,7 @@ export class DataAnalysisService {
           ? stats.scores.reduce((sum, score) => sum + score, 0) / stats.scores.length
           : 0
       }))
-      .sort((a, b) => b.count - a.count)
+      .sort((a, b) => b.count - a?.count)
       .slice(0, 10);
   }
 
@@ -454,7 +454,7 @@ export class DataAnalysisService {
         if (!urlStats[record.url]) {
           urlStats[record.url] = { scores: [], dates: [] };
         }
-        urlStats[record.url].scores.push(record.overall_score);
+        urlStats[record.url].scores?.push(record.overall_score);
         urlStats[record.url].dates.push(record.start_time || record.created_at);
       }
     });
@@ -482,7 +482,7 @@ export class DataAnalysisService {
           trend
         };
       })
-      .sort((a, b) => b.testCount - a.testCount)
+      .sort((a, b) => b.testCount - a?.testCount)
       .slice(0, 10);
   }
 
@@ -674,7 +674,7 @@ export class DataAnalysisService {
       start: string;
       end: string;
     };
-    filters?: any;
+    filters?: unknown;
     includeCharts?: boolean;
     includeRawData?: boolean;
   }): Promise<any> {
@@ -725,12 +725,12 @@ export class DataAnalysisService {
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `report_${taskId}.html`; // 默认文件名
-      document.body.appendChild(a);
-      a.click();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `report_${taskId}.html`; // 默认文件名
+        document.body.appendChild(a);
+        a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {

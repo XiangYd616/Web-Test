@@ -28,7 +28,7 @@ export interface ConfigValidationError {
   /** 错误消息 */
   message: string;
   /** 当前值 */
-  value: any;
+  value: unknown;
   /** 错误类型 */
   type: 'required' | 'type' | 'range' | 'format' | 'dependency';
   /** 严重级别 */
@@ -43,9 +43,9 @@ export interface ConfigValidationWarning {
   /** 警告消息 */
   message: string;
   /** 当前值 */
-  value: any;
+  value: unknown;
   /** 建议值 */
-  suggestedValue?: any;
+  suggestedValue?: unknown;
   /** 建议原因 */
   reason?: string;
 }
@@ -65,8 +65,8 @@ export interface ValidationSummary {
 
 // ==================== 验证规则接口 ====================
 
-export type ValidationRule<T = any> = (value: T, config: any, path: string) => ConfigValidationError | null;
-export type WarningRule<T = any> = (value: T, config: any, path: string) => ConfigValidationWarning | null;
+export type ValidationRule<T = any> = (value: T, config: unknown, path: string) => ConfigValidationError | null;
+export type WarningRule<T = any> = (value: T, config: unknown, path: string) => ConfigValidationWarning | null;
 
 export interface FieldValidator {
   /** 必填验证 */
@@ -80,7 +80,7 @@ export interface FieldValidator {
   /** 正则表达式 */
   pattern?: RegExp;
   /** 枚举值 */
-  enum?: any[];
+  enum?: unknown[];
   /** 自定义验证规则 */
   custom?: ValidationRule[];
   /** 警告规则 */
@@ -142,11 +142,11 @@ const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
       }
     ]
   },
-  'cache.enabled': {
+  'cache?.enabled': {
     required: true,
     type: 'boolean'
   },
-  'cache.maxSize': {
+  'cache?.maxSize': {
     required: true,
     type: 'number',
     min: 10,
@@ -167,17 +167,17 @@ const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
       }
     ]
   },
-  'cache.defaultTtl': {
+  'cache?.defaultTtl': {
     required: true,
     type: 'number',
     min: 1000,
     max: 3600000
   },
-  'retry.enabled': {
+  'retry?.enabled': {
     required: true,
     type: 'boolean'
   },
-  'retry.maxAttempts': {
+  'retry?.maxAttempts': {
     required: true,
     type: 'number',
     min: 1,
@@ -198,7 +198,7 @@ const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
       }
     ]
   },
-  'retry.baseDelay': {
+  'retry?.baseDelay': {
     required: true,
     type: 'number',
     min: 100,
@@ -225,7 +225,7 @@ export function validateApiConfig(config: Partial<UnifiedApiConfig>): Validation
 
   const totalFields = Object.keys(API_CONFIG_SCHEMA).length;
   const errorFields = errors.length;
-  const warningFields = warnings.length;
+  const warningFields = warnings?.length;
   const validFields = totalFields - errorFields;
 
   return {
@@ -253,8 +253,8 @@ function validateApiConfigLogic(
   // 缓存和重试依赖验证
   if (config.cache?.enabled && config.retry?.enabled) {
     if (config.retry.maxAttempts > 3 && config.cache.defaultTtl < 60000) {
-      warnings.push({
-        path: 'cache.defaultTtl',
+      warnings?.push({
+        path: 'cache?.defaultTtl',
         message: '高重试次数配合短缓存时间可能导致频繁的重复请求',
         value: config.cache.defaultTtl,
         suggestedValue: 300000,
@@ -266,7 +266,7 @@ function validateApiConfigLogic(
   // 生产环境特殊验证
   if (config.isProduction) {
     if (config.enableDebugLogging) {
-      warnings.push({
+      warnings?.push({
         path: 'enableDebugLogging',
         message: '生产环境不建议启用调试日志',
         value: true,
@@ -276,8 +276,8 @@ function validateApiConfigLogic(
     }
 
     if (!config.security?.requestSigning?.enabled) {
-      warnings.push({
-        path: 'security.requestSigning.enabled',
+      warnings?.push({
+        path: 'security?.requestSigning.enabled',
         message: '生产环境建议启用请求签名',
         value: false,
         suggestedValue: true,
@@ -296,7 +296,7 @@ const AUTH_CONFIG_SCHEMA: Record<string, FieldValidator> = {
     min: 1,
     pattern: /^https?:\/\/.+/
   },
-  'tokens.jwt.accessTokenExpiry': {
+  'tokens?.jwt.accessTokenExpiry': {
     required: true,
     type: 'number',
     min: 60,
@@ -317,13 +317,13 @@ const AUTH_CONFIG_SCHEMA: Record<string, FieldValidator> = {
       }
     ]
   },
-  'tokens.jwt.refreshTokenExpiry': {
+  'tokens?.jwt.refreshTokenExpiry': {
     required: true,
     type: 'number',
     min: 3600,
     max: 2592000
   },
-  'security.sessionManagement.maxConcurrentSessions': {
+  'security?.sessionManagement.maxConcurrentSessions': {
     required: true,
     type: 'number',
     min: 1,
@@ -365,7 +365,7 @@ export function validateAuthConfig(config: Partial<UnifiedAuthConfig>): Validati
 
   const totalFields = Object.keys(AUTH_CONFIG_SCHEMA).length;
   const errorFields = errors.length;
-  const warningFields = warnings.length;
+  const warningFields = warnings?.length;
   const validFields = totalFields - errorFields;
 
   return {
@@ -396,7 +396,7 @@ function validateAuthConfigLogic(
     
     if (accessTokenExpiry && autoRefreshThreshold && accessTokenExpiry <= autoRefreshThreshold) {
       errors.push({
-        path: 'tokens.jwt.autoRefreshThreshold',
+        path: 'tokens?.jwt.autoRefreshThreshold',
         message: '自动刷新阈值必须小于访问token过期时间',
         value: autoRefreshThreshold,
         type: 'dependency',
@@ -407,7 +407,7 @@ function validateAuthConfigLogic(
 
     if (refreshTokenExpiry && accessTokenExpiry && refreshTokenExpiry <= accessTokenExpiry) {
       errors.push({
-        path: 'tokens.jwt.refreshTokenExpiry',
+        path: 'tokens?.jwt.refreshTokenExpiry',
         message: '刷新token过期时间必须大于访问token过期时间',
         value: refreshTokenExpiry,
         type: 'dependency',
@@ -419,9 +419,9 @@ function validateAuthConfigLogic(
 
   // 安全配置验证
   if (config.environment === 'production') {
-    if (config.security?.mfa?.enabled === false) {
-      warnings.push({
-        path: 'security.mfa.enabled',
+    if (config.security?.mfa.enabled === false) {
+      warnings?.push({
+        path: 'security?.mfa.enabled',
         message: '生产环境建议启用多因素认证',
         value: false,
         suggestedValue: true,
@@ -430,8 +430,8 @@ function validateAuthConfigLogic(
     }
 
     if (!config.tokens?.storage?.encryptTokens) {
-      warnings.push({
-        path: 'tokens.storage.encryptTokens',
+      warnings?.push({
+        path: 'tokens?.storage.encryptTokens',
         message: '生产环境建议加密存储token',
         value: false,
         suggestedValue: true,
@@ -447,7 +447,7 @@ function validateAuthConfigLogic(
  * 验证字段
  */
 function validateFields(
-  config: any,
+  config: unknown,
   schema: Record<string, FieldValidator>,
   errors: ConfigValidationError[],
   warnings: ConfigValidationWarning[]
@@ -544,7 +544,7 @@ function validateFields(
         for (const rule of validator.warnings) {
           const warning = rule(value, config, path);
           if (warning) {
-            warnings.push(warning);
+            warnings?.push(warning);
           }
         }
       }
@@ -555,7 +555,7 @@ function validateFields(
 /**
  * 获取嵌套值
  */
-function getNestedValue(obj: any, path: string): any {
+function getNestedValue(obj: unknown, path: string): unknown {
   return path.split('.').reduce((current, key) => current?.[key], obj);
 }
 

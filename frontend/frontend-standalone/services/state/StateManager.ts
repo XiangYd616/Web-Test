@@ -29,7 +29,7 @@ export interface TestExecution {
   progress: number;
   startTime: Date;
   endTime?: Date;
-  result?: any;
+  result?: unknown;
   error?: string;
   message: string;
 }
@@ -39,7 +39,7 @@ export interface TestResult {
   type: string;
   url: string;
   status: string;
-  result: any;
+  result: unknown;
   startTime: Date;
   endTime: Date;
   duration: number;
@@ -73,8 +73,8 @@ export interface PerformanceMetrics {
   cachedResults: number;
   systemHealth: {
     uptime: number;
-    memory: any;
-    cpu: any;
+    memory: unknown;
+    cpu: unknown;
   };
 }
 
@@ -198,7 +198,7 @@ export interface SystemError {
   level: 'info' | 'warn' | 'error' | 'fatal';
   message: string;
   stack?: string;
-  context?: any;
+  context?: unknown;
   resolved: boolean;
 }
 
@@ -433,7 +433,7 @@ class StateManager {
     }
   }
 
-  private updateTestState(action: string, payload: any): void {
+  private updateTestState(action: string, payload: unknown): void {
     const testState = this.state.test;
 
     switch (action) {
@@ -555,12 +555,12 @@ class StateManager {
         break;
 
       case 'REMOVE_SCHEDULED_TEST':
-        testState.scheduledTests = testState.scheduledTests.filter(t => t.id !== payload.id);
+        testState.scheduledTests = testState.scheduledTests.filter(t => t?.id !== payload.id);
         break;
     }
   }
 
-  private updateUserState(action: string, payload: any): void {
+  private updateUserState(action: string, payload: unknown): void {
     const userState = this.state.user;
 
     switch (action) {
@@ -596,7 +596,7 @@ class StateManager {
     }
   }
 
-  private updateSystemState(action: string, payload: any): void {
+  private updateSystemState(action: string, payload: unknown): void {
     const systemState = this.state.system;
 
     switch (action) {
@@ -634,7 +634,7 @@ class StateManager {
     }
   }
 
-  private updateNotificationState(action: string, payload: any): void {
+  private updateNotificationState(action: string, payload: unknown): void {
     const systemState = this.state.system;
     const uiState = this.state.ui;
 
@@ -657,7 +657,7 @@ class StateManager {
         break;
 
       case 'REMOVE_NOTIFICATION':
-        systemState.notifications = systemState.notifications.filter(n => n.id !== payload.id);
+        systemState.notifications = systemState.notifications.filter(n => n?.id !== payload.id);
         break;
 
       case 'ADD_TOAST':
@@ -670,7 +670,7 @@ class StateManager {
         break;
 
       case 'REMOVE_TOAST':
-        uiState.toasts = uiState.toasts.filter(t => t.id !== payload.id);
+        uiState.toasts = uiState.toasts.filter(t => t?.id !== payload.id);
         break;
     }
   }
@@ -732,8 +732,8 @@ class StateManager {
     }
   }
 
-  private extractPersistableState(): any {
-    const persistable: any = {};
+  private extractPersistableState(): unknown {
+    const persistable: unknown = {};
     
     for (const field of this.persistenceFields) {
 
@@ -765,7 +765,7 @@ class StateManager {
      * @returns {Promise<Object>} 返回结果
 
      */
-  private mergePersistedState(persistedState: any): void {
+  private mergePersistedState(persistedState: unknown): void {
     for (const field of this.persistenceFields) {
 
       /**
@@ -784,11 +784,11 @@ class StateManager {
     }
   }
 
-  private getNestedValue(obj: any, path: string): any {
+  private getNestedValue(obj: unknown, path: string): unknown {
     return path.split('.').reduce((current, key) => current?.[key], obj);
   }
 
-  private setNestedValue(obj: any, path: string, value: any): void {
+  private setNestedValue(obj: unknown, path: string, value: unknown): void {
     const keys = path.split('.');
     const lastKey = keys.pop()!;
     const target = keys.reduce((current, key) => {

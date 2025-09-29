@@ -45,7 +45,7 @@ export interface UserFeedback {
   userAgent: string;
   url: string;
   screenshot?: string;
-  additionalData?: any;
+  additionalData?: unknown;
 }
 
 // 浏览器信息接口
@@ -69,7 +69,7 @@ export interface UsageStats {
   duration: number;
   success: boolean;
   errorMessage?: string;
-  additionalData?: any;
+  additionalData?: unknown;
 }
 
 // 页面性能指标接口
@@ -199,7 +199,7 @@ export class UserFeedbackService {
   /**
    * 报告错误
    */
-  reportError(page: PageType, error: Error, additionalData?: any): void {
+  reportError(page: PageType, error: Error, additionalData?: unknown): void {
     this.submitFeedback({
       type: FeedbackType.BUG_REPORT,
       severity: FeedbackSeverity.HIGH,
@@ -281,7 +281,7 @@ export class UserFeedbackService {
         // 监控 LCP
         const lcpObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          const lastEntry = entries[entries.length - 1];
+          const _lastEntry = entries[entries.length - 1];
         });
         lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
 
@@ -394,4 +394,4 @@ export class UserFeedbackService {
 }
 
 // 导出单例实例
-export const userFeedbackService = UserFeedbackService.getInstance();
+export const _userFeedbackService = UserFeedbackService.getInstance();

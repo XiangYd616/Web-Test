@@ -172,10 +172,10 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
    * @param {Object} params - 参数对象
    * @returns {Promise<Object>} 返回结果
    */
-export const parseAuthError = (error: any): AuthErrorType => {
+export const parseAuthError = (error: unknown): AuthErrorType => {
   if (typeof error === 'string') {
     // 尝试从错误消息中推断错误类型
-    const message = error.toLowerCase();
+    const message = error?.toLowerCase();
 
     if (message.includes('token') && message.includes('missing')) {
       return AuthErrorType.TOKEN_MISSING;
@@ -199,15 +199,15 @@ export const parseAuthError = (error: any): AuthErrorType => {
     return AuthErrorType.SERVER_ERROR;
   }
 
-  if (error?.error && Object.values(AuthErrorType).includes(error.error)) {
-    return error.error;
+  if (error?.error && Object.values(AuthErrorType).includes(error?.error)) {
+    return error?.error;
   }
 
-  if (error?.response?.status === 401) {
+  if (error?.response.status === 401) {
     return AuthErrorType.TOKEN_INVALID;
   }
 
-  if (error?.response?.status === 403) {
+  if (error?.response.status === 403) {
     return AuthErrorType.INSUFFICIENT_PERMISSIONS;
   }
 
@@ -215,19 +215,19 @@ export const parseAuthError = (error: any): AuthErrorType => {
     return AuthErrorType.SERVER_ERROR;
   }
 
-  if (error?.code === 'NETWORK_ERROR' || !navigator.onLine) {
+  if (error.code === 'NETWORK_ERROR' || !navigator.onLine) {
     return AuthErrorType.NETWORK_ERROR;
   }
 
   return AuthErrorType.SERVER_ERROR;
 };
 
-export const getErrorMessage = (error: any): string => {
+export const _getErrorMessage = (error: unknown): string => {
   const errorType = parseAuthError(error);
   return FRIENDLY_MESSAGES[errorType] || '发生了未知错误';
 };
 
-export const shouldRelogin = (error: any): boolean => {
+export const _shouldRelogin = (error: unknown): boolean => {
   const errorType = parseAuthError(error);
   return [
     AuthErrorType.TOKEN_MISSING,

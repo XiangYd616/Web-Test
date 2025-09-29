@@ -1,27 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  Bookmark, 
-  BookmarkPlus, 
-  Search, 
-  Filter, 
-  Trash2, 
-  Edit, 
-  ExternalLink, 
-  Star, 
-  Clock, 
-  Tag, 
-  FolderPlus, 
-  Folder, 
-  Grid, 
-  List, 
-  SortAsc, 
-  SortDesc,
-  MoreVertical,
-  Share2,
-  Download,
-  RefreshCw
-} from 'lucide-react';
+import {Bookmark, BookmarkPlus, Search, Filter, Trash2, ExternalLink, Star, Clock, FolderPlus, Folder, Grid, RefreshCw} from 'lucide-react';
 
 interface BookmarkItem {
   id: string;
@@ -275,17 +254,17 @@ const UserBookmarks: React.FC = () => {
 
                   {categories.map((category) => (
                     <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
+                      key={category?.id}
+                      onClick={() => setSelectedCategory(category?.id)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left ${
-                        selectedCategory === category.id ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-50'
+                        selectedCategory === category?.id ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-50'
                       }`}
                     >
                       <div className="flex items-center space-x-2">
-                        <div className={`w-3 h-3 rounded-full bg-${category.color}-500`}></div>
-                        <span className="text-sm">{category.name}</span>
+                        <div className={`w-3 h-3 rounded-full bg-${category?.color}-500`}></div>
+                        <span className="text-sm">{category?.name}</span>
                       </div>
-                      <span className="text-xs text-gray-500">{category.count}</span>
+                      <span className="text-xs text-gray-500">{category?.count}</span>
                     </button>
                   ))}
                 </div>

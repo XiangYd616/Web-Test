@@ -4,32 +4,8 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Activity,
-  AlertCircle,
-  CheckCircle,
-  Cpu,
-  Database,
-  Globe,
-  HardDrive,
-  MemoryStick as Memory,
-  Network,
-  Server,
-  Wifi,
-  XCircle,
-  Zap,
-  Clock,
-  Users,
-  Shield,
-  Settings,
-  RefreshCw,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Info,
-  Monitor
-} from 'lucide-react';
-import { Line, Doughnut, Bar } from 'react-chartjs-2';
+import {CheckCircle, XCircle, Settings, RefreshCw, AlertTriangle, Info} from 'lucide-react';
+import {Line, Doughnut} from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,

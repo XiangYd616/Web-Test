@@ -24,11 +24,11 @@ export interface DataStateInfo<T = any> {
 }
 
 export interface DataStateOptions {
-  initialData?: any;
+  initialData?: unknown;
   retryLimit?: number;
   autoRetry?: boolean;
   retryDelay?: number;
-  onSuccess?: (data: any) => void;
+  onSuccess?: (data: unknown) => void;
   onError?: (error: ApiError) => void;
   onStateChange?: (state: DataState) => void;
 }
@@ -244,10 +244,10 @@ export function useBatchDataState(
 
   // 计算全局状态
   const states = Object.values(batchInfo.states);
-  batchInfo.allLoading = states.some(s => s.loading);
-  batchInfo.allSuccess = states.every(s => s.success);
-  batchInfo.hasAnyError = states.some(s => s.hasError);
-  batchInfo.completedCount = states.filter(s => s.success || s.hasError).length;
+  batchInfo.allLoading = states.some(s => s?.loading);
+  batchInfo.allSuccess = states.every(s => s?.success);
+  batchInfo.hasAnyError = states.some(s => s?.hasError);
+  batchInfo.completedCount = states.filter(s => s?.success || s?.hasError).length;
 
   /**
 

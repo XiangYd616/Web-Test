@@ -679,4 +679,4 @@ class AdminService {
   }
 }
 
-export const adminService = AdminService.getInstance();
+export const _adminService = AdminService.getInstance();

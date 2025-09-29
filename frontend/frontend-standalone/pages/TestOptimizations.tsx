@@ -15,21 +15,21 @@ import { createTestRunner } from '../utils/testUtils';
 interface PerformanceTestResult {
   id: string;
   score: number;
-  metrics: any;
+  metrics: unknown;
   timestamp: string;
 }
 
 interface TestResult {
   id: string;
   status: string;
-  result: any;
+  result: unknown;
   timestamp: string;
 }
 
 interface UXTestResult {
   id: string;
   score: number;
-  issues: any[];
+  issues: unknown[];
   timestamp: string;
 }
 
@@ -37,7 +37,7 @@ interface TestResults {
   performance: PerformanceTestResult[];
   ux: UXTestResult[];
   api: TestResult[];
-  summary: any;
+  summary: unknown;
 }
 
 const TestOptimizations: React.FC = () => {
@@ -184,7 +184,7 @@ const TestOptimizations: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {currentResults.map((result: any, index: number) => (
+              {currentResults.map((result: unknown, index: number) => (
                 <tr key={index}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                     {result.name || result.metric || result.component}

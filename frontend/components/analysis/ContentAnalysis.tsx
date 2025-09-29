@@ -7,23 +7,7 @@
 
 import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  FileText, 
-  Eye, 
-  Clock, 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  BarChart3, 
-  RefreshCw,
-  Target,
-  Search,
-  Filter,
-  Calendar
-} from 'lucide-react';
+import {FileText, Eye, Clock, TrendingUp, Heart, MessageCircle, Share2, BarChart3, RefreshCw, Target, Search, Filter} from 'lucide-react';
 
 interface ContentItem {
   id: string;

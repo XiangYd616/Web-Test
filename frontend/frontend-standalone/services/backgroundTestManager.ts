@@ -25,14 +25,14 @@ import { unifiedTestService } from './testing/unifiedTestService';
 export interface TestInfo {
   id: string;
   type: TestType;
-  config: any;
+  config: unknown;
   status: TestStatus;
   progress: number;
   startTime: Date;
   endTime?: Date;
   currentStep: string;
-  result: any;
-  error: any;
+  result: unknown;
+  error: unknown;
   canSwitchPages?: boolean;
   onProgress?: ProgressCallback;
   onComplete?: CompletionCallback;
@@ -95,7 +95,7 @@ class BackgroundTestManager {
   /**
    * 适配统一服务状态到本地格式
    */
-  private adaptUnifiedStatus(data: any): TestInfo {
+  private adaptUnifiedStatus(data: unknown): TestInfo {
     return {
       id: data.testId || data.id,
       type: data.testType,
@@ -118,7 +118,7 @@ class BackgroundTestManager {
   // 开始新测试 - 重构为使用统一测试服务
   startTest(
     testType: TestType,
-    config: any,
+    config: unknown,
     onProgress?: ProgressCallback,
     onComplete?: CompletionCallback,
     onError?: ErrorCallback
@@ -585,7 +585,7 @@ class BackgroundTestManager {
   }
 
   // 更新测试进度
-  updateTestProgress(testId: string, progress: number, step: string, metrics?: any): void {
+  updateTestProgress(testId: string, progress: number, step: string, metrics?: unknown): void {
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
       testInfo.progress = progress;
@@ -610,7 +610,7 @@ class BackgroundTestManager {
   }
 
   // 完成测试
-  completeTest(testId: string, result: any): void {
+  completeTest(testId: string, result: unknown): void {
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
       testInfo.status = TestStatus.COMPLETED;

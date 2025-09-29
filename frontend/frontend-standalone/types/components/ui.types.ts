@@ -443,7 +443,7 @@ export interface TableColumn<T = any> {
   /** 是否可排序 */
   sortable?: boolean;
   /** 自定义渲染 */
-  render?: (value: any, record: T, index: number) => ReactNode;
+  render?: (value: unknown, record: T, index: number) => ReactNode;
 }
 
 /** 表格属性 */

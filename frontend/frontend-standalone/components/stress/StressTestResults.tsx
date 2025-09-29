@@ -172,27 +172,27 @@ const StressTestResults: React.FC<StressTestResultsProps> = ({
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <div className="bg-gray-700/50 rounded-lg p-4">
-              <div className="text-2xl font-bold text-blue-400">{currentMetrics.activeUsers}</div>
+              <div className="text-2xl font-bold text-blue-400">{currentMetrics?.activeUsers}</div>
               <div className="text-sm text-gray-400">活跃用户</div>
             </div>
 
             <div className="bg-gray-700/50 rounded-lg p-4">
-              <div className="text-2xl font-bold text-green-400">{currentMetrics.requestsSent}</div>
+              <div className="text-2xl font-bold text-green-400">{currentMetrics?.requestsSent}</div>
               <div className="text-sm text-gray-400">已发送请求</div>
             </div>
 
             <div className="bg-gray-700/50 rounded-lg p-4">
-              <div className="text-2xl font-bold text-purple-400">{currentMetrics.responsesReceived}</div>
+              <div className="text-2xl font-bold text-purple-400">{currentMetrics?.responsesReceived}</div>
               <div className="text-sm text-gray-400">已接收响应</div>
             </div>
 
             <div className="bg-gray-700/50 rounded-lg p-4">
-              <div className="text-2xl font-bold text-yellow-400">{currentMetrics.currentRPS.toFixed(1)}</div>
+              <div className="text-2xl font-bold text-yellow-400">{currentMetrics?.currentRPS.toFixed(1)}</div>
               <div className="text-sm text-gray-400">RPS</div>
             </div>
 
             <div className="bg-gray-700/50 rounded-lg p-4">
-              <div className="text-2xl font-bold text-cyan-400">{currentMetrics.averageResponseTime.toFixed(0)}ms</div>
+              <div className="text-2xl font-bold text-cyan-400">{currentMetrics?.averageResponseTime.toFixed(0)}ms</div>
               <div className="text-sm text-gray-400">平均响应时间</div>
             </div>
           </div>

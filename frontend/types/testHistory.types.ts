@@ -30,7 +30,7 @@ export interface TestSession {
   startTime?: string;
   endTime?: string;
   duration?: number; // 秒
-  config?: any;
+  config?: unknown;
   overallScore?: number;
   grade?: string; // A+, A, B+, B, C+, C, D, F
   totalIssues?: number;
@@ -268,7 +268,7 @@ export interface TestResultDetails {
     headings?: Array<{ level: number; text: string }>;
     images?: Array<{ src: string; alt?: string; issues?: string[] }>;
     links?: Array<{ href: string; text: string; type: 'internal' | 'external' }>;
-    structuredData?: any[];
+    structuredData?: unknown[];
     socialTags?: Record<string, string>;
   };
 

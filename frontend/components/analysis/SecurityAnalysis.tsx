@@ -31,8 +31,8 @@ interface SecurityAnalysisResult {
   recommendations: string[];
   sslInfo?: {
     valid: boolean;
-    subject?: any;
-    issuer?: any;
+    subject?: unknown;
+    issuer?: unknown;
     validFrom?: string;
     validTo?: string;
     protocol?: string;
@@ -289,7 +289,7 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
             {result.sslInfo.subject && (
               <div>
                 <span className="text-gray-400">颁发给:</span>
-                <span className="ml-2 text-white">{result.sslInfo.subject.CN || 'N/A'}</span>
+                <span className="ml-2 text-white">{result.sslInfo.subject?.CN || 'N/A'}</span>
               </div>
             )}
           </div>

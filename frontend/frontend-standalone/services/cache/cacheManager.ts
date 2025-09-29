@@ -567,4 +567,4 @@ export class CacheManager {
 }
 
 // 创建默认实例
-export const cacheManager = new CacheManager();
+export const _cacheManager = new CacheManager();

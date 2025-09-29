@@ -204,7 +204,7 @@ class HelpService {
   }
 
   // 更新用户帮助偏好
-  async updateUserPreferences(preferences: any): Promise<void> {
+  async updateUserPreferences(preferences: unknown): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/preferences`, {
         method: 'PUT',

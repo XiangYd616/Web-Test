@@ -91,7 +91,12 @@ const APP_VERSION = process.env.APP_VERSION || '1.0.0';
 // CORS配置 - 需要在Socket.IO之前定义
 const corsOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-  : ['http://localhost:5174', process.env.BACKEND_URL || 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}', 'http://127.0.0.1:5174', 'http://127.0.0.1:3001'];
+  : [
+      'http://localhost:5174', 
+      process.env.BACKEND_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`, 
+      'http://127.0.0.1:5174', 
+      'http://127.0.0.1:3001'
+    ];
 
 // 创建HTTP服务器和Socket.IO实例
 const server = http.createServer(app);
@@ -741,6 +746,7 @@ function setupWebSocketHandlers(io) {
   });
 
   io.on('connection', (socket) => {
+    console.log('🔗 新的WebSocket连接:', {
       socketId: socket.id,
       remoteAddress: socket.handshake.address,
       userAgent: socket.handshake.headers['user-agent'],
@@ -773,6 +779,7 @@ function setupWebSocketHandlers(io) {
       const currentTest = userTestManager.getUserTestStatus(userId, testId);
 
       if (currentTest) {
+        socket.emit('test-status', {
           testId,
           status: currentTest.status,
           hasData: !!currentTest.data,

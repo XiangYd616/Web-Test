@@ -75,8 +75,8 @@ const Image: React.FC<ImageProps> = ({
         }
 
         // 添加尺寸参数
-        if (width) params.set('w', width.toString());
-        if (height) params.set('h', height.toString());
+        if (width) params.set('w', width?.toString());
+        if (height) params.set('h', height?.toString());
 
         // 如果有参数，添加到URL
         if (params.toString()) {

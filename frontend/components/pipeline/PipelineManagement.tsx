@@ -4,22 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Play, 
-  Pause, 
-  Stop, 
-  Settings, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Clock, 
-  AlertTriangle, 
-  CheckCircle,
-  GitBranch,
-  Bell,
-  Shield,
-  Activity
-} from 'lucide-react';
+import {Play, Settings, Plus, Trash2, Clock, AlertTriangle, CheckCircle, GitBranch, Bell, Shield, Activity} from 'lucide-react';
 import TestOrchestrator, { TestPipeline, TestJob } from '../../services/orchestration/TestOrchestrator';
 
 interface PipelineManagementProps {
@@ -93,7 +78,7 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
     if (window.confirm('Are you sure you want to delete this pipeline?')) {
       TestOrchestrator.deletePipeline(pipelineId);
       loadPipelines();
-      if (selectedPipeline?.id === pipelineId) {
+      if (selectedPipeline.id === pipelineId) {
         setSelectedPipeline(null);
       }
     }
@@ -175,9 +160,9 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
             <div className="max-h-96 overflow-y-auto">
               {pipelines.map(pipeline => (
                 <div
-                  key={pipeline.id}
+                  key={pipeline?.id}
                   className={`p-4 border-b border-gray-700 cursor-pointer hover:bg-gray-700 ${
-                    selectedPipeline?.id === pipeline.id ? 'bg-gray-700' : ''
+                    selectedPipeline.id === pipeline?.id ? 'bg-gray-700' : ''
                   }`}
                   onClick={() => {
                     setSelectedPipeline(pipeline);
@@ -185,12 +170,12 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
                   }}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-medium">{pipeline.name}</span>
+                    <span className="text-white font-medium">{pipeline?.name}</span>
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleExecutePipeline(pipeline.id);
+                          e?.stopPropagation();
+                          handleExecutePipeline(pipeline?.id);
                         }}
                         className="p-1 hover:bg-gray-600 rounded"
                         title="执行流水线"
@@ -199,8 +184,8 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
                       </button>
                       <button
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeletePipeline(pipeline.id);
+                          e?.stopPropagation();
+                          handleDeletePipeline(pipeline?.id);
                         }}
                         className="p-1 hover:bg-gray-600 rounded"
                         title="删除流水线"
@@ -209,16 +194,16 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-400 mb-2">{pipeline.description}</p>
+                  <p className="text-sm text-gray-400 mb-2">{pipeline?.description}</p>
                   <div className="flex items-center space-x-2 text-xs">
-                    <span className="text-gray-500">{pipeline.jobs.length} 个任务</span>
-                    {pipeline.schedule && (
+                    <span className="text-gray-500">{pipeline?.jobs.length} 个任务</span>
+                    {pipeline?.schedule && (
                       <div className="flex items-center space-x-1">
                         <Clock size={12} className="text-blue-400" />
                         <span className="text-blue-400">定时执行</span>
                       </div>
                     )}
-                    {pipeline.notifications.length > 0 && (
+                    {pipeline?.notifications.length > 0 && (
                       <div className="flex items-center space-x-1">
                         <Bell size={12} className="text-purple-400" />
                         <span className="text-purple-400">通知</span>
@@ -237,10 +222,10 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
             <div className="bg-gray-800 rounded-lg border border-gray-700">
               <div className="p-4 border-b border-gray-700">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-white">{selectedPipeline.name}</h3>
+                  <h3 className="text-lg font-medium text-white">{selectedPipeline?.name}</h3>
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => handleExecutePipeline(selectedPipeline.id)}
+                      onClick={() => handleExecutePipeline(selectedPipeline?.id)}
                       className="flex items-center space-x-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
                     >
                       <Play size={14} />
@@ -252,14 +237,14 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
                     </button>
                   </div>
                 </div>
-                <p className="text-sm text-gray-400 mt-1">{selectedPipeline.description}</p>
+                <p className="text-sm text-gray-400 mt-1">{selectedPipeline?.description}</p>
               </div>
 
               {/* Jobs */}
               <div className="p-4">
                 <h4 className="text-md font-medium text-white mb-3">任务流程</h4>
                 <div className="space-y-3">
-                  {selectedPipeline.jobs.map((job, index) => (
+                  {selectedPipeline?.jobs.map((job, index) => (
                     <div key={job.id} className="flex items-center space-x-4">
                       {/* Job Status */}
                       <div className="flex-shrink-0">
@@ -304,7 +289,7 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
                       </div>
 
                       {/* Connection to next job */}
-                      {index < selectedPipeline.jobs.length - 1 && (
+                      {index < selectedPipeline?.jobs.length - 1 && (
                         <div className="flex-shrink-0 w-8 h-0.5 bg-gray-600"></div>
                       )}
                     </div>
@@ -313,11 +298,11 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
               </div>
 
               {/* Quality Gates */}
-              {selectedPipeline.qualityGates.length > 0 && (
+              {selectedPipeline?.qualityGates.length > 0 && (
                 <div className="p-4 border-t border-gray-700">
                   <h4 className="text-md font-medium text-white mb-3">质量门禁</h4>
                   <div className="space-y-2">
-                    {selectedPipeline.qualityGates.map((gate, index) => (
+                    {selectedPipeline?.qualityGates.map((gate, index) => (
                       <div key={index} className="flex items-center justify-between p-2 bg-gray-700 rounded">
                         <div className="flex items-center space-x-2">
                           <Shield size={14} className="text-blue-400" />
@@ -340,11 +325,11 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
               )}
 
               {/* Notifications */}
-              {selectedPipeline.notifications.length > 0 && (
+              {selectedPipeline?.notifications.length > 0 && (
                 <div className="p-4 border-t border-gray-700">
                   <h4 className="text-md font-medium text-white mb-3">通知配置</h4>
                   <div className="space-y-2">
-                    {selectedPipeline.notifications.map((notification, index) => (
+                    {selectedPipeline?.notifications.map((notification, index) => (
                       <div key={index} className="flex items-center justify-between p-2 bg-gray-700 rounded">
                         <div className="flex items-center space-x-2">
                           <Bell size={14} className="text-purple-400" />

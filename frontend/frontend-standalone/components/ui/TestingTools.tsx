@@ -188,9 +188,9 @@ export const TestProgress: React.FC<TestProgressProps> = ({
       </div>
 
       {/* 步骤详情 */}
-      {showDetails && steps.length > 0 && (
+      {showDetails && steps?.length > 0 && (
         <div className="space-y-2">
-          {steps.map((step, index) => (
+          {steps?.map((step, index) => (
             <div
               key={index}
               className={cn(
@@ -303,9 +303,9 @@ export const TestResultSummary: React.FC<TestResultSummaryProps> = ({
       )}
 
       {/* 指标 */}
-      {metrics.length > 0 && (
+      {metrics?.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {metrics.map((metric, index) => (
+          {metrics?.map((metric, index) => (
             <div key={index} className="text-center">
               <div className="text-lg font-bold text-white">
                 {metric.value}{metric.unit || ''}

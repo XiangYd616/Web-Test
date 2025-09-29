@@ -7,7 +7,7 @@ export interface DataTableColumn<T> {
   key: keyof T;
   title: string;
   sortable?: boolean;
-  render?: (value: any, record: T) => React.ReactNode;
+  render?: (value: unknown, record: T) => React.ReactNode;
   width?: string;
   align?: 'left' | 'center' | 'right';
 }
@@ -46,7 +46,7 @@ function DataTableCompat<T extends Record<string, any>>({
     dataIndex: String(col.key),
     align: col.align || 'left',
     sortable: col.sortable || false,
-    render: col.render ? (value: any, record: T, index: number) => {
+    render: col.render ? (value: unknown, record: T, index: number) => {
       return col.render!(value, record);
     } : undefined,
     width: col.width,
@@ -69,7 +69,7 @@ function DataTableCompat<T extends Record<string, any>>({
   }, [sortBy, sortOrder]);
 
   // 处理排序变化
-  const handleSortChange = (field: string | null, order: 'ascend' | 'descend' | null) => {
+  const _handleSortChange = (field: string | null, order: 'ascend' | 'descend' | null) => {
     if (onSort && field && order) {
       const dataTableOrder = order === 'ascend' ? 'asc' : 'desc';
       onSort(field as keyof T, dataTableOrder);

@@ -283,7 +283,7 @@ class UserService {
   }
 
   // 获取用户测试历史
-  async getTestHistory(page = 1, limit = 20): Promise<{ tests: any[], total: number, page: number, totalPages: number }> {
+  async getTestHistory(page = 1, limit = 20): Promise<{ tests: unknown[], total: number, page: number, totalPages: number }> {
     try {
       const response = await unifiedApiService.get(`/api/user/tests?page=${page}&limit=${limit}`);
       if (response.success) {
@@ -310,7 +310,7 @@ class UserService {
   }
 
   // 获取用户通知
-  async getNotifications(page = 1, limit = 20): Promise<{ notifications: any[], total: number, unreadCount: number }> {
+  async getNotifications(page = 1, limit = 20): Promise<{ notifications: unknown[], total: number, unreadCount: number }> {
     try {
       const response = await unifiedApiService.get(`/api/user/notifications?page=${page}&limit=${limit}`);
       if (response.success) {

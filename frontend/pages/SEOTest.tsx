@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap, BarChart3, Database, Download } from 'lucide-react';
+import {AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap, BarChart3, Download} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/ui';
@@ -18,7 +18,7 @@ const FileUploadSEO = ({
 }: {
   onAnalysisComplete: () => void;
   isAnalyzing: boolean;
-  onFileUpload: (files: File[], options: any) => void;
+  onFileUpload: (files: File[], options: unknown) => void;
 }) => (
   <div className="bg-white rounded-lg shadow p-6">
     <h3 className="text-lg font-semibold mb-4">文件上传SEO分析</h3>
@@ -27,7 +27,7 @@ const FileUploadSEO = ({
       type="file"
       multiple
       onChange={(e) => {
-        const files = Array.from(e.target.files || []);
+        const files = Array.from(e?.target.files || []);
         onFileUpload(files, {});
       }}
       className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
@@ -43,8 +43,8 @@ const LocalSEOResults = ({
   results,
   onExport
 }: {
-  result?: any;
-  results?: any;
+  result?: unknown;
+  results?: unknown;
   onExport?: (format: string) => Promise<void>;
 }) => (
   <div className="bg-white rounded-lg shadow p-6">
@@ -92,8 +92,8 @@ const SEOResults = ({
   results,
   onExport
 }: {
-  result?: any;
-  results?: any;
+  result?: unknown;
+  results?: unknown;
   onExport?: (format: string) => Promise<void>;
 }) => (
   <div className="bg-white rounded-lg shadow p-6">
@@ -127,12 +127,12 @@ const useUnifiedSEOTest = () => {
   const [results, setResults] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [advancedResults, setAdvancedResults] = useState<{
-    structuredData?: any;
-    mobileSEO?: any;
-    coreWebVitals?: any;
+    structuredData?: unknown;
+    mobileSEO?: unknown;
+    coreWebVitals?: unknown;
   }>({});
 
-  const startTest = async (config: any) => {
+  const startTest = async (config: unknown) => {
     setIsRunning(true);
     setProgress(0);
     setError(null);
@@ -265,7 +265,7 @@ interface LocalSEOTestConfig extends Partial<SeoTestConfig> {
   checkLocalSEO: boolean;
   checkCompetitorAnalysis: boolean;
   checkKeywordDensity: boolean;
-  [key: string]: any; // 允许动态属性访问
+  [key: string]: unknown; // 允许动态属性访问
 }
 
 const SEOTest: React.FC = () => {
@@ -546,7 +546,7 @@ const SEOTest: React.FC = () => {
       setTestStatus('running');
       console.log(`✅ ${seoTestMode === 'online' ? 'Online' : 'Local'} SEO test started`);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Failed to start SEO test:', err);
 
       // 提供更友好的错误信息
@@ -614,7 +614,7 @@ const SEOTest: React.FC = () => {
   };
 
   // 处理本地文件上传（仅上传，不自动开始分析）
-  const handleLocalFileUpload = (files: File[], options: any) => {
+  const handleLocalFileUpload = (files: File[], options: unknown) => {
     setUploadedFiles(files);
 
     // 更新测试配置
@@ -645,8 +645,8 @@ const SEOTest: React.FC = () => {
         title: `SEO分析报告 - ${testConfig.url}`,
         url: testConfig.url,
         timestamp: new Date().toISOString(),
-        score: results.score,
-        grade: results.grade,
+        score: results?.score,
+        grade: results?.grade,
         results: results
       };
 
@@ -688,7 +688,7 @@ const SEOTest: React.FC = () => {
     }
   };
 
-  const generateHTMLReport = (reportData: any) => {
+  const generateHTMLReport = (reportData: unknown) => {
     return `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -768,11 +768,11 @@ const SEOTest: React.FC = () => {
   };
 
   // 历史记录处理
-  const handleTestSelect = (test: any) => {
+  const _handleTestSelect = (test: unknown) => {
     // 历史测试选择由TestPageLayout处理
   };
 
-  const handleTestRerun = (test: any) => {
+  const _handleTestRerun = (test: unknown) => {
     // 重新运行历史测试
     if (test.config) {
       setTestConfig(test.config);
@@ -1249,7 +1249,7 @@ const SEOTest: React.FC = () => {
                 <input
                   type="text"
                   value={testConfig.keywords}
-                  onChange={(e) => setTestConfig(prev => ({ ...prev, keywords: e.target.value }))}
+                  onChange={(e) => setTestConfig(prev => ({ ...prev, keywords: e?.target.value }))}
                   placeholder="请输入关键词，多个关键词用逗号分隔"
                   disabled={isRunning}
                   className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1633,10 +1633,10 @@ const SEOTest: React.FC = () => {
                           results.grade === 'D' ? 'bg-orange-500/20 text-orange-300' :
                             'bg-red-500/20 text-red-300'
                       }`}>
-                      {results.grade} 级
+                      {results?.grade} 级
                     </div>
                     <div className="text-2xl font-bold text-white">
-                      {results.score}/100
+                      {results?.score}/100
                     </div>
                   </div>
                 </div>

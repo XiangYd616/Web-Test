@@ -8,11 +8,11 @@ import { TestType } from '../../types/enums';
 export interface TestJob {
   id: string;
   type: TestType;
-  config: any;
+  config: unknown;
   priority: 'critical' | 'high' | 'medium' | 'low';
   dependencies: string[]; // IDs of tests this depends on
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-  result?: any;
+  result?: unknown;
   error?: string;
   startTime?: Date;
   endTime?: Date;
@@ -31,11 +31,11 @@ export interface TestPipeline {
   };
   triggers: {
     type: 'manual' | 'schedule' | 'webhook' | 'git' | 'monitor';
-    config: any;
+    config: unknown;
   }[];
   notifications: {
     type: 'email' | 'slack' | 'teams' | 'webhook';
-    config: any;
+    config: unknown;
     events: ('start' | 'complete' | 'fail' | 'warning')[];
   }[];
   qualityGates: {
@@ -54,7 +54,7 @@ export interface TestExecutionContext {
   artifacts: {
     type: 'report' | 'log' | 'screenshot' | 'data';
     path: string;
-    metadata: any;
+    metadata: unknown;
   }[];
 }
 
@@ -346,7 +346,7 @@ class TestOrchestrator {
 
     } catch (error) {
       job.status = 'failed';
-      job.error = error.message;
+      job.error = error?.message;
       job.endTime = new Date();
 
       // Retry if possible
@@ -433,7 +433,7 @@ class TestOrchestrator {
     }
   }
 
-  private extractMetricValue(result: any, metricPath: string): number {
+  private extractMetricValue(result: unknown, metricPath: string): number {
     const parts = metricPath.split('.');
     let value = result;
     
@@ -550,7 +550,7 @@ class TestOrchestrator {
   }
 
   // Get execution metrics
-  getExecutionMetrics(pipelineId?: string): any {
+  getExecutionMetrics(pipelineId?: string): unknown {
     const metrics = {
       totalPipelines: this.pipelines.size,
       runningJobs: this.runningJobs.size,
@@ -581,8 +581,8 @@ class TestOrchestrator {
         metrics.pipelines.push({
           id: pipelineId,
           name: pipeline.name,
-          environment: context.environment,
-          artifacts: context.artifacts.length
+          environment: context?.environment,
+          artifacts: context?.artifacts.length
         });
       }
     }

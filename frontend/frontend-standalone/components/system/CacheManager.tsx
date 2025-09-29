@@ -55,7 +55,7 @@ interface CacheTypeInfo {
   icon: React.ComponentType<any>;
   color: string;
   stats: CacheStats | null;
-  operations: any;
+  operations: unknown;
   isLoading: boolean;
   error: string | null;
 }
@@ -72,8 +72,8 @@ const CacheStatsCard: React.FC<{
   onClear: () => void;
   onRefresh: () => void;
 }> = ({ title, stats, icon: Icon, color, isLoading, error, onClear, onRefresh }) => {
-  const hitRate = stats ? (stats.hitRate > 1 ? stats.hitRate.toFixed(1) : (stats.hitRate * 100).toFixed(1)) : '0.0';
-  const memoryUsage = stats ? (stats.memoryUsage / 1024 / 1024).toFixed(2) : '0.00';
+  const hitRate = stats ? (stats?.hitRate > 1 ? stats?.hitRate.toFixed(1) : (stats?.hitRate * 100).toFixed(1)) : '0.0';
+  const memoryUsage = stats ? (stats?.memoryUsage / 1024 / 1024).toFixed(2) : '0.00';
 
   return (
     <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
@@ -176,14 +176,14 @@ const CacheStatsCard: React.FC<{
           </div>
 
           {/* 操作统计 */}
-          {stats && stats.operations > 0 && (
+          {stats && stats?.operations > 0 && (
             <div className="bg-gray-700/30 rounded-lg p-3">
               <div className="flex items-center space-x-2 mb-2">
                 <Activity className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-400">总操作数</span>
               </div>
               <span className="text-xl font-bold text-white">
-                {stats.operations.toLocaleString()}
+                {stats?.operations.toLocaleString()}
               </span>
             </div>
           )}

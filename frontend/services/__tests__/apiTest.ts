@@ -13,8 +13,8 @@ interface TestResult {
     userId?: string;
     type?: string;
     status: string;
-    config?: any;
-    result: any;
+    config?: unknown;
+    result: unknown;
     timestamp: string;
     createdAt?: string;
     updatedAt?: string;

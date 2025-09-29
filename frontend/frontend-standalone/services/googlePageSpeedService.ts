@@ -102,7 +102,7 @@ class GooglePageSpeedService {
   /**
    * 解析PageSpeed API响应数据
    */
-  private parseMetrics(data: any): PageSpeedMetrics {
+  private parseMetrics(data: unknown): PageSpeedMetrics {
     const lighthouse = data.lighthouseResult;
     const audits = lighthouse?.audits || {};
 
@@ -118,7 +118,7 @@ class GooglePageSpeedService {
 
     // 性能评分
     const performanceScore = lighthouse?.categories?.performance?.score
-      ? Math.round(lighthouse.categories.performance.score * 100)
+      ? Math.round(lighthouse?.categories.performance?.score * 100)
       : null;
 
     // 优化机会
@@ -143,7 +143,7 @@ class GooglePageSpeedService {
   /**
    * 解析优化机会
    */
-  private parseOpportunities(audits: any): PageSpeedMetrics['opportunities'] {
+  private parseOpportunities(audits: unknown): PageSpeedMetrics['opportunities'] {
     const opportunityKeys = [
       'unused-css-rules',
       'unused-javascript',
@@ -171,7 +171,7 @@ class GooglePageSpeedService {
   /**
    * 解析诊断信息
    */
-  private parseDiagnostics(audits: any): PageSpeedMetrics['diagnostics'] {
+  private parseDiagnostics(audits: unknown): PageSpeedMetrics['diagnostics'] {
     const diagnosticKeys = [
       'dom-size',
       'critical-request-chains',
@@ -256,4 +256,4 @@ class GooglePageSpeedService {
   }
 }
 
-export const googlePageSpeedService = new GooglePageSpeedService();
+export const _googlePageSpeedService = new GooglePageSpeedService();

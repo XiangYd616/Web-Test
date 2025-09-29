@@ -4,29 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  Users,
-  Settings,
-  Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Crown,
-  Shield,
-  UserPlus,
-  Mail,
-  Calendar,
-  Briefcase,
-  Target,
-  Star,
-  Eye,
-  CheckCircle,
-  XCircle,
-  Clock,
-  AlertTriangle
-} from 'lucide-react';
+import {Users, Settings, Plus, Search, Filter, MoreVertical, Edit, UserPlus, Mail, Calendar, Briefcase, Eye, CheckCircle, XCircle, Clock, AlertTriangle} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface TeamMember {

@@ -6,9 +6,9 @@
 export interface TestInfo {
   id: string;
   type: string;
-  config: any;
+  config: unknown;
   onProgress?: (progress: number, message: string) => void;
-  onComplete?: (results: any) => void;
+  onComplete?: (results: unknown) => void;
   onError?: (error: Error) => void;
 }
 
@@ -17,7 +17,7 @@ export interface TestProgress {
   progress: number;
   message: string;
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-  results?: any;
+  results?: unknown;
   error?: string;
 }
 
@@ -63,7 +63,7 @@ export class RealBackgroundTestManager {
       }
 
     } catch (error) {
-      this.failTest(testInfo.id, error instanceof Error ? error.message : String(error));
+      this.failTest(testInfo.id, error instanceof Error ? error?.message : String(error));
     }
   }
 
@@ -97,7 +97,7 @@ export class RealBackgroundTestManager {
       }
 
     } catch (error) {
-      this.failTest(testInfo.id, error instanceof Error ? error.message : String(error));
+      this.failTest(testInfo.id, error instanceof Error ? error?.message : String(error));
     }
   }
 
@@ -131,7 +131,7 @@ export class RealBackgroundTestManager {
       }
 
     } catch (error) {
-      this.failTest(testInfo.id, error instanceof Error ? error.message : String(error));
+      this.failTest(testInfo.id, error instanceof Error ? error?.message : String(error));
     }
   }
 
@@ -165,7 +165,7 @@ export class RealBackgroundTestManager {
       }
 
     } catch (error) {
-      this.failTest(testInfo.id, error instanceof Error ? error.message : String(error));
+      this.failTest(testInfo.id, error instanceof Error ? error?.message : String(error));
     }
   }
 
@@ -199,7 +199,7 @@ export class RealBackgroundTestManager {
       }
 
     } catch (error) {
-      this.failTest(testInfo.id, error instanceof Error ? error.message : String(error));
+      this.failTest(testInfo.id, error instanceof Error ? error?.message : String(error));
     }
   }
 
@@ -253,7 +253,7 @@ export class RealBackgroundTestManager {
         attempts++;
 
         if (attempts >= maxAttempts) {
-          throw new Error(`测试状态轮询超时: ${error instanceof Error ? error.message : String(error)}`);
+          throw new Error(`测试状态轮询超时: ${error instanceof Error ? error?.message : String(error)}`);
         }
 
         await new Promise(resolve => setTimeout(resolve, interval));
@@ -306,7 +306,7 @@ export class RealBackgroundTestManager {
   /**
    * 完成测试
    */
-  private completeTest(testId: string, results: any): void {
+  private completeTest(testId: string, results: unknown): void {
     const testProgress = this.activeTests.get(testId);
     if (testProgress) {
       testProgress.progress = 100;
@@ -370,4 +370,4 @@ export class RealBackgroundTestManager {
 }
 
 // 创建全局实例
-export const realBackgroundTestManager = new RealBackgroundTestManager();
+export const _realBackgroundTestManager = new RealBackgroundTestManager();

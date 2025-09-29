@@ -4,43 +4,8 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Brain,
-  Database,
-  Filter,
-  Search,
-  Download,
-  Upload,
-  Settings,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Users,
-  Target,
-  Activity,
-  Zap,
-  Globe,
-  Shield,
-  FileText,
-  PieChart,
-  LineChart,
-  Layers,
-  Maximize2,
-  Eye,
-  Share2,
-  BookOpen,
-  Lightbulb,
-  ArrowRight,
-  Calendar,
-  MapPin,
-  Hash,
-  Percent
-} from 'lucide-react';
-import { Line, Bar, Pie, Doughnut, Scatter, Radar } from 'react-chartjs-2';
+import {BarChart3, TrendingUp, Brain, Download, RefreshCw, AlertCircle, CheckCircle, Target, Activity, FileText, PieChart, Layers, Eye, Share2, Lightbulb} from 'lucide-react';
+import {Line, Doughnut} from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -56,8 +21,7 @@ import {
   Filler
 } from 'chart.js';
 import { toast } from 'react-hot-toast';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import {format, subDays} from 'date-fns';
 
 // 注册Chart.js组件
 ChartJS.register(
@@ -86,7 +50,7 @@ interface AnalysisResult {
   id: string;
   name: string;
   type: 'trend' | 'correlation' | 'anomaly' | 'prediction' | 'segmentation';
-  data: any;
+  data: unknown;
   insights: Insight[];
   confidence: number;
   generatedAt: Date;
@@ -412,7 +376,7 @@ const AdvancedAnalytics: React.FC = () => {
     const a = document.createElement('a');
     a.href = url;
     a.download = `analytics-report-${format(new Date(), 'yyyy-MM-dd')}.json`;
-    a.click();
+    a?.click();
     URL.revokeObjectURL(url);
     
     toast.success('报告已导出');
@@ -486,7 +450,7 @@ const AdvancedAnalytics: React.FC = () => {
           <div className="flex items-center space-x-2">
             <button
               onClick={(e) => {
-                e.stopPropagation();
+                e?.stopPropagation();
                 toast.success('分析已分享');
               }}
               className="p-1 text-gray-400 hover:text-gray-600"
@@ -496,7 +460,7 @@ const AdvancedAnalytics: React.FC = () => {
             </button>
             <button
               onClick={(e) => {
-                e.stopPropagation();
+                e?.stopPropagation();
                 setSelectedAnalysis(analysis);
               }}
               className="p-1 text-gray-400 hover:text-gray-600"
@@ -659,7 +623,7 @@ const AdvancedAnalytics: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">视图模式</label>
               <select 
                 value={viewMode}
-                onChange={(e) => setViewMode(e.target.value as any)}
+                onChange={(e) => setViewMode(e?.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="grid">网格视图</option>
@@ -805,7 +769,7 @@ const AdvancedAnalytics: React.FC = () => {
                                     'bg-green-100 text-green-800'
                                   }`}
                                 >
-                                  {value.toFixed(2)}
+                                  {value?.toFixed(2)}
                                 </div>
                               ))
                             )}

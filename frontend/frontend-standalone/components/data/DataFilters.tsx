@@ -4,32 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Filter,
-  Search,
-  Download,
-  Upload,
-  Trash2,
-  Edit2,
-  Eye,
-  Calendar,
-  ChevronDown,
-  ChevronRight,
-  Check,
-  X,
-  RefreshCw,
-  Database,
-  FileText,
-  Settings,
-  MoreVertical,
-  Copy,
-  Archive,
-  Tag,
-  TrendingUp,
-  Users,
-  AlertCircle,
-  CheckCircle
-} from 'lucide-react';
+import {Filter, Search, Download, Trash2, Edit2, Eye, ChevronDown, RefreshCw, Database, FileText, Settings, MoreVertical, Archive, TrendingUp, CheckCircle} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -55,7 +30,7 @@ interface DataItem {
 interface FilterConfig {
   field: string;
   operator: 'equals' | 'contains' | 'gt' | 'lt' | 'between' | 'in';
-  value: any;
+  value: unknown;
   label?: string;
 }
 
@@ -125,9 +100,9 @@ const DataFilters: React.FC<DataFiltersProps> = ({
   const [data, setData] = useState<DataItem[]>(initialData.length > 0 ? initialData : generateMockData());
 
   // 获取唯一值用于过滤器选项
-  const uniqueTypes = useMemo(() => [...new Set(data.map(item => item.type))], [data]);
-  const uniqueTags = useMemo(() => [...new Set(data.flatMap(item => item.tags))], [data]);
-  const uniqueOwners = useMemo(() => [...new Set(data.map(item => item.owner))], [data]);
+  const uniqueTypes = useMemo(() => [...new Set(data?.map(item => item.type))], [data]);
+  const uniqueTags = useMemo(() => [...new Set(data?.flatMap(item => item.tags))], [data]);
+  const _uniqueOwners = useMemo(() => [...new Set(data?.map(item => item.owner))], [data]);
 
   // 应用过滤器
   const filteredData = useMemo(() => {
@@ -228,7 +203,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
   };
 
   // 添加自定义过滤器
-  const addCustomFilter = () => {
+  const _addCustomFilter = () => {
     const newFilter: FilterConfig = {
       field: 'name',
       operator: 'contains',
@@ -239,7 +214,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
   };
 
   // 删除过滤器
-  const removeFilter = (index: number) => {
+  const _removeFilter = (index: number) => {
     const newFilters = filters.filter((_, i) => i !== index);
     setFilters(newFilters);
   };
@@ -272,7 +247,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
     
     setTimeout(() => {
       const exportData = selectedItems.size > 0
-        ? data.filter(item => selectedItems.has(item.id))
+        ? data?.filter(item => selectedItems.has(item.id))
         : filteredData;
 
       if (format === 'json') {
@@ -301,7 +276,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
     if (data.length === 0) return '';
     
     const headers = Object.keys(data[0]).filter(key => key !== 'metadata').join(',');
-    const rows = data.map(item =>
+    const rows = data?.map(item =>
       Object.entries(item)
         .filter(([key]) => key !== 'metadata')
         .map(([_, value]) => {
@@ -323,7 +298,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
-    a.click();
+    a?.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
@@ -491,7 +466,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => setSearchTerm(e?.target.value)}
               placeholder="搜索数据..."
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -557,7 +532,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
                         type="checkbox"
                         checked={selectedTypes.includes(type)}
                         onChange={(e) => {
-                          if (e.target.checked) {
+                          if (e?.target.checked) {
                             setSelectedTypes([...selectedTypes, type]);
                           } else {
                             setSelectedTypes(selectedTypes.filter(t => t !== type));
@@ -583,7 +558,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
                         type="checkbox"
                         checked={selectedStatuses.includes(status)}
                         onChange={(e) => {
-                          if (e.target.checked) {
+                          if (e?.target.checked) {
                             setSelectedStatuses([...selectedStatuses, status]);
                           } else {
                             setSelectedStatuses(selectedStatuses.filter(s => s !== status));
@@ -611,7 +586,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
                         type="checkbox"
                         checked={selectedTags.includes(tag)}
                         onChange={(e) => {
-                          if (e.target.checked) {
+                          if (e?.target.checked) {
                             setSelectedTags([...selectedTags, tag]);
                           } else {
                             setSelectedTags(selectedTags.filter(t => t !== tag));
@@ -897,7 +872,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
             <select
               value={itemsPerPage}
               onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
+                setItemsPerPage(Number(e?.target.value));
                 setCurrentPage(1);
               }}
               className="ml-2 px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

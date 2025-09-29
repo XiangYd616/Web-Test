@@ -25,7 +25,7 @@ export interface TestResult {
     endTime?: string;
     duration?: number;
     summary?: string;
-    details?: any;
+    details?: unknown;
     recommendations?: Array<{
         title: string;
         description: string;
@@ -80,7 +80,7 @@ export const useTest = () => {
             return result.testId || testId;
 
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '测试启动失败';
+            const errorMessage = error instanceof Error ? error?.message : '测试启动失败';
             dispatch({
                 type: 'TEST_FAIL',
                 payload: { testId: Date.now().toString(), error: errorMessage }
@@ -144,10 +144,10 @@ export const useTest = () => {
     }): Promise<TestResult[]> => {
         try {
             const queryParams = new URLSearchParams();
-            if (filters?.type) queryParams.append('type', filters.type);
-            if (filters?.status) queryParams.append('status', filters.status);
-            if (filters?.limit) queryParams.append('limit', filters.limit.toString());
-            if (filters?.offset) queryParams.append('offset', filters.offset.toString());
+            if (filters?.type) queryParams.append('type', filters?.type);
+            if (filters?.status) queryParams.append('status', filters?.status);
+            if (filters?.limit) queryParams.append('limit', filters?.limit.toString());
+            if (filters?.offset) queryParams.append('offset', filters?.offset.toString());
 
             const response = await fetch(`/api/test/history?${queryParams}`, {
                 headers: {
@@ -160,7 +160,7 @@ export const useTest = () => {
             }
 
             const data = await response.json();
-            return (data.results || []).map((item: any): TestResult => ({
+            return (data.results || []).map((item: unknown): TestResult => ({
                 id: item.id || '',
                 type: item.type || '',
                 status: item.status || 'completed',
@@ -223,7 +223,7 @@ export const useTest = () => {
             }
 
             const data = await response.json();
-            const mappedConfigs: TestConfig[] = (data.configurations || []).map((item: any) => ({
+            const mappedConfigs: TestConfig[] = (data.configurations || []).map((item: unknown) => ({
                 id: item.id,
                 name: item.name || '',
                 type: item.type || '',

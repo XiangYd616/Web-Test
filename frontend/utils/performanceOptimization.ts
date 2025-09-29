@@ -334,7 +334,7 @@ class PerformanceMonitor {
                 let clsValue = 0;
                 const clsObserver = new PerformanceObserver((list) => {
                     const entries = list.getEntries();
-                    entries.forEach((entry: any) => {
+                    entries.forEach((entry: unknown) => {
                         if (!entry.hadRecentInput) {
                             clsValue += entry.value;
                             this.metrics.set('CLS', clsValue);
@@ -451,7 +451,7 @@ class PerformanceMonitor {
 
     public destroy() {
         this.observers.forEach((observer) => {
-            observer.disconnect();
+            observer?.disconnect();
         });
         this.observers = [];
         this.metrics.clear();
@@ -531,14 +531,14 @@ class MemoryManager {
 
 // 缓存管理器
 class FrontendCacheManager {
-    private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map();
+    private cache: Map<string, { data: unknown; timestamp: number; ttl: number }> = new Map();
     private maxSize = 100; // 最大缓存项数
     private defaultTTL = 5 * 60 * 1000; // 5分钟
 
     /**
      * 设置缓存
      */
-    public set(key: string, data: any, ttl: number = this.defaultTTL) {
+    public set(key: string, data: unknown, ttl: number = this.defaultTTL) {
         // 如果缓存已满，删除最旧的项
         if (this.cache.size >= this.maxSize) {
             const oldestKey = this.cache.keys().next().value;
@@ -555,7 +555,7 @@ class FrontendCacheManager {
     /**
      * 获取缓存
      */
-    public get(key: string): any | null {
+    public get(key: string): unknown | null {
         const cached = this.cache.get(key);
 
         if (!cached) {
@@ -642,7 +642,7 @@ export const performanceUtils = {
     /**
      * 防抖函数
      */
-    debounce<T extends (...args: any[]) => any>(
+    debounce<T extends (...args: unknown[]) => any>(
         func: T,
         wait: number
     ): (...args: Parameters<T>) => void {
@@ -656,7 +656,7 @@ export const performanceUtils = {
     /**
      * 节流函数
      */
-    throttle<T extends (...args: any[]) => any>(
+    throttle<T extends (...args: unknown[]) => any>(
         func: T,
         limit: number
     ): (...args: Parameters<T>) => void {

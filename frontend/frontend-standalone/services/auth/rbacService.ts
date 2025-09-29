@@ -4,9 +4,8 @@
  * 版本: v1.0.0
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import {useState, useCallback} from 'react';
 import { defaultMemoryCache } from '../cacheStrategy';
-import type { User, UserRole } from '../../types/common';
 
 // ==================== 类型定义 ====================
 
@@ -27,7 +26,7 @@ export interface Permission {
 export interface PermissionCondition {
   type: 'time' | 'location' | 'device' | 'custom';
   operator: 'equals' | 'not_equals' | 'in' | 'not_in' | 'greater_than' | 'less_than';
-  value: any;
+  value: unknown;
   description: string;
 }
 
@@ -158,7 +157,7 @@ class PermissionCalculator {
     conditions: PermissionCondition[],
     context: Record<string, any>
   ): boolean {
-    return conditions.every(condition => {
+    return conditions?.every(condition => {
       
       /**
       

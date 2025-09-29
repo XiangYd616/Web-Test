@@ -8,7 +8,7 @@ interface JWTPayload {
   sub?: string;
   iat?: number;
   exp?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export class BrowserJWT {
@@ -147,7 +147,7 @@ export class BrowserJWT {
   /**
    * 从Token中提取用户信息
    */
-  public getUserFromToken(token: string): any | null {
+  public getUserFromToken(token: string): unknown | null {
     const parsed = this.parseToken(token);
     if (!parsed || !this.isTokenValid(token)) {
       return null;
@@ -207,7 +207,7 @@ export class BrowserJWT {
   /**
    * 获取Token的详细信息（用于调试）
    */
-  public getTokenInfo(token: string): any {
+  public getTokenInfo(token: string): unknown {
     const parsed = this.parseToken(token);
     if (!parsed) {
       return null;

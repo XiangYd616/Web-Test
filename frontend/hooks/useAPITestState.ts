@@ -37,7 +37,7 @@ interface APITestOperations {
  *
  * 已迁移到新的类型系统，返回 APITestHook 类型
  */
-export const useAPITestState = (): any => {
+export const useAPITestState = (): unknown => {
   // 基础状态
   const [config, setConfig] = useState<APITestConfig>({
     endpoints: [],
@@ -142,13 +142,13 @@ export const useAPITestState = (): any => {
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult: any) => {
+        (testResult: unknown) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError: any) => {
+        (testError: unknown) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -157,7 +157,7 @@ export const useAPITestState = (): any => {
 
       setTestId(newTestId);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'API测试启动失败');
       setIsRunning(false);
       setCurrentStep('');
@@ -174,7 +174,7 @@ export const useAPITestState = (): any => {
         abortControllerRef.current?.abort();
         setIsRunning(false);
         setCurrentStep('测试已停止');
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err.message || '停止测试失败');
       }
     }

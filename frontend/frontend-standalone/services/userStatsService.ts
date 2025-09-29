@@ -105,7 +105,7 @@ class UserStatsService {
   }
 
   // 标准化统计数据格式
-  private normalizeStatsData(apiData: any): UserActivityStats {
+  private normalizeStatsData(apiData: unknown): UserActivityStats {
     return {
       totalTests: apiData.total_tests || apiData.totalTests || 0,
       testsToday: apiData.tests_today || apiData.testsToday || 0,
@@ -200,7 +200,7 @@ class UserStatsService {
 
     // 添加活动记录
     this.addActivity(userId, {
-      id: `test_${Date.now()}`,
+      id: `test_${Date?.now()}`,
       type: success ? 'test_completed' : 'test_failed',
       title: `${testType}${success ? '完成' : '失败'}`,
       description: success
@@ -220,7 +220,7 @@ class UserStatsService {
     if (action === 'add') {
       stats.favoriteTests += 1;
       this.addActivity(userId, {
-        id: `bookmark_${Date.now()}`,
+        id: `bookmark_${Date?.now()}`,
         type: 'bookmark_added',
         title: '添加收藏',
         description: `收藏了 ${itemTitle}`,
@@ -334,4 +334,4 @@ class UserStatsService {
   }
 }
 
-export const userStatsService = new UserStatsService();
+export const _userStatsService = new UserStatsService();

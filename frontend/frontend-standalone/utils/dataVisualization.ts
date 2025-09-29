@@ -10,7 +10,7 @@ export interface DataPoint {
   tps?: number;
   activeUsers?: number;
   errorRate?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface OptimizationConfig {
@@ -235,8 +235,8 @@ class DataVisualizationOptimizer {
   private adjustSamplingForStats(
     originalData: DataPoint[],
     sampledData: DataPoint[],
-    originalStats: any,
-    sampledStats: any
+    originalStats: unknown,
+    sampledStats: unknown
   ): DataPoint[] {
     // 如果采样后的平均值偏差超过5%，进行补偿性采样
     const responseTimeDiff = Math.abs(sampledStats.avgResponseTime - originalStats.avgResponseTime);
@@ -383,5 +383,5 @@ class DataVisualizationOptimizer {
 }
 
 // 导出单例实例
-export const dataVisualizationOptimizer = new DataVisualizationOptimizer();
+export const _dataVisualizationOptimizer = new DataVisualizationOptimizer();
 export default DataVisualizationOptimizer;

@@ -5,7 +5,7 @@ export interface AppError {
   message: string;
   severity: ErrorSeverity;
   timestamp: number;
-  context?: any;
+  context?: unknown;
 }
 
 export const ERROR_CODES = {

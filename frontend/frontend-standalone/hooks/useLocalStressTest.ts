@@ -28,7 +28,7 @@ interface LocalStressTestResults {
   minResponseTime: number;
   maxResponseTime: number;
   responseTimes: number[];
-  errors: any[];
+  errors: unknown[];
   startTime: number | null;
   endTime: number | null;
   throughput: number;
@@ -36,7 +36,7 @@ interface LocalStressTestResults {
   errorRate: number;
   duration: number;
   isRunning: boolean;
-  systemInfo: any;
+  systemInfo: unknown;
 }
 
 interface SystemUsage {
@@ -91,25 +91,25 @@ export const useLocalStressTest = () => {
     const api = window.environment.localStressTest;
 
     // 测试开始事件
-    const cleanupStarted = api.onTestStarted((data: any) => {
+    const cleanupStarted = api.onTestStarted((data: unknown) => {
       setIsRunning(true);
       setError(null);
     });
 
     // 测试更新事件
-    const cleanupUpdate = api.onTestUpdate((data: any) => {
+    const cleanupUpdate = api.onTestUpdate((data: unknown) => {
       setResults(data.results);
     });
 
     // 测试完成事件
-    const cleanupCompleted = api.onTestCompleted((data: any) => {
+    const cleanupCompleted = api.onTestCompleted((data: unknown) => {
       console.log('✅ 本地压力测试完成:', data);
       setIsRunning(false);
       setResults(data.results);
     });
 
     // 测试错误事件
-    const cleanupError = api.onTestError((data: any) => {
+    const cleanupError = api.onTestError((data: unknown) => {
       console.error('❌ 本地压力测试错误:', data);
       setIsRunning(false);
       setError(data.error);
@@ -133,7 +133,7 @@ export const useLocalStressTest = () => {
 
     const updateSystemUsage = async () => {
       try {
-        const usage = await window.environment.localStressTest.getSystemUsage();
+        const usage = await window.environment.localStressTest?.getSystemUsage();
         setSystemUsage(usage);
       } catch (error) {
         console.error('获取系统使用情况失败:', error);
@@ -174,7 +174,7 @@ export const useLocalStressTest = () => {
        * @returns {Promise<Object>} 返回结果
 
        */
-      const result = await window.environment.localStressTest.start(config);
+      const result = await window.environment.localStressTest?.start(config);
 
       if (!result.success) {
         throw new Error(result.error);
@@ -211,7 +211,7 @@ export const useLocalStressTest = () => {
        * @returns {Promise<Object>} 返回结果
 
        */
-      const result = await window.environment.localStressTest.stop();
+      const result = await window.environment.localStressTest?.stop();
 
       if (!result.success) {
         throw new Error(result.error);
@@ -234,7 +234,7 @@ export const useLocalStressTest = () => {
     }
 
     try {
-      const status = await window.environment.localStressTest.getStatus();
+      const status = await window.environment.localStressTest?.getStatus();
       setResults(status);
       setIsRunning(status.isRunning);
       return status;
@@ -251,7 +251,7 @@ export const useLocalStressTest = () => {
     // 基于系统资源推荐配置
     const systemInfo = results?.systemInfo;
     const cpuCores = systemInfo?.cpus || 4;
-    const totalMemoryGB = systemInfo ? Math.round(systemInfo.totalMemory / 1024 / 1024 / 1024) : 8;
+    const _totalMemoryGB = systemInfo ? Math.round(systemInfo?.totalMemory / 1024 / 1024 / 1024) : 8;
 
     // 根据系统资源调整推荐配置
     let recommendedUsers = targetUsers;
@@ -302,8 +302,8 @@ export const useLocalStressTest = () => {
       successRate,
       throughput,
       duration,
-      totalRequests: results.totalRequests,
-      averageResponseTime: results.averageResponseTime
+      totalRequests: results?.totalRequests,
+      averageResponseTime: results?.averageResponseTime
     };
   }, [results]);
 

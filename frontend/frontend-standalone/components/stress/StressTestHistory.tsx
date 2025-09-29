@@ -40,8 +40,8 @@ interface TestRecord {
   updatedAt: string;
   overallScore?: number;
   performanceGrade?: string;
-  config: any;
-  results?: any;
+  config: unknown;
+  results?: unknown;
   errorMessage?: string;
   totalRequests?: number;
   successfulRequests?: number;
@@ -182,8 +182,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
       const data = await requestPromise;
 
-      if (data.success) {
-        const { tests = [], pagination = {} } = data.data;
+      if (data?.success) {
+        const { tests = [], pagination = {} } = data?.data;
         const { total = 0, page = 1 } = pagination;
         setRecords(tests);
         setTotalRecords(total);
@@ -191,7 +191,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         // 🔧 修复：不要用后端返回的pageSize覆盖用户选择的值
         // setPageSize(returnedPageSize); // 移除这行，保持用户选择的pageSize
       } else {
-        console.error('加载测试记录失败:', data.message);
+        console.error('加载测试记录失败:', data?.message);
         setRecords([]);
         setTotalRecords(0);
       }
@@ -329,7 +329,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   // 获取状态图标（使用统一的状态管理）
   const getStatusIcon = (status: string) => {
     const config = getStatusConfig(status);
-    const IconComponent = config.icon;
+    const IconComponent = config?.icon;
     const isAnimated = status === 'running';
 
     return (
@@ -364,14 +364,14 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     // 优先使用 duration
     let seconds = record.duration;
 
-    // 如果没有duration，尝试从results.metrics获取
+    // 如果没有duration，尝试从results?.metrics获取
     if ((!seconds || seconds <= 0) && record.results?.metrics?.duration) {
-      seconds = record.results.metrics.duration;
+      seconds = record.results.metrics?.duration;
     }
 
-    // 如果还是没有，尝试从results.summary获取
+    // 如果还是没有，尝试从results?.summary获取
     if ((!seconds || seconds <= 0) && record.results?.summary?.duration) {
-      seconds = record.results.summary.duration;
+      seconds = record.results.summary?.duration;
     }
 
     // 尝试从results直接获取
@@ -391,7 +391,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       seconds = Math.floor((end - start) / 1000);
     }
 
-    // 🔧 移除：不再使用config.duration作为fallback，因为那是配置的预期时长，不是实际时长
+    // 🔧 移除：不再使用config?.duration作为fallback，因为那是配置的预期时长，不是实际时长
     // 对于已完成但没有实际时长数据的测试，显示"-"更合适
 
     if (!seconds || seconds <= 0) return '-';
@@ -410,14 +410,14 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     // 优先使用 overallScore
     let score = record.overallScore;
 
-    // 如果没有overallScore，尝试从results.metrics获取
+    // 如果没有overallScore，尝试从results?.metrics获取
     if ((!score || score <= 0) && record.results?.metrics?.overallScore) {
-      score = record.results.metrics.overallScore;
+      score = record.results.metrics?.overallScore;
     }
 
-    // 如果还是没有，尝试从results.summary获取
+    // 如果还是没有，尝试从results?.summary获取
     if ((!score || score <= 0) && record.results?.summary?.overallScore) {
-      score = record.results.summary.overallScore;
+      score = record.results.summary?.overallScore;
     }
 
     // 尝试从results直接获取
@@ -495,7 +495,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   const formatNumber = (num?: number) => {
     if (num === undefined || num === null) return '-';
     if (num === 0) return '0';
-    return num.toLocaleString();
+    return num?.toLocaleString();
   };
 
   // 获取总请求数
@@ -505,14 +505,14 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       return record.totalRequests;
     }
 
-    // 尝试从 results.metrics 获取
-    if (record.results?.metrics?.totalRequests !== undefined && record.results.metrics.totalRequests > 0) {
-      return record.results.metrics.totalRequests;
+    // 尝试从 results?.metrics 获取
+    if (record.results?.metrics?.totalRequests !== undefined && record.results.metrics?.totalRequests > 0) {
+      return record.results.metrics?.totalRequests;
     }
 
-    // 尝试从 results.summary 获取
-    if (record.results?.summary?.totalRequests !== undefined && record.results.summary.totalRequests > 0) {
-      return record.results.summary.totalRequests;
+    // 尝试从 results?.summary 获取
+    if (record.results?.summary?.totalRequests !== undefined && record.results.summary?.totalRequests > 0) {
+      return record.results.summary?.totalRequests;
     }
 
     // 尝试从 results 直接获取
@@ -543,14 +543,14 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       return record.averageResponseTime;
     }
 
-    // 尝试从 results.metrics 获取
-    if (record.results?.metrics?.averageResponseTime !== undefined && record.results.metrics.averageResponseTime > 0) {
-      return record.results.metrics.averageResponseTime;
+    // 尝试从 results?.metrics 获取
+    if (record.results?.metrics?.averageResponseTime !== undefined && record.results.metrics?.averageResponseTime > 0) {
+      return record.results.metrics?.averageResponseTime;
     }
 
-    // 尝试从 results.summary 获取
-    if (record.results?.summary?.averageResponseTime !== undefined && record.results.summary.averageResponseTime > 0) {
-      return record.results.summary.averageResponseTime;
+    // 尝试从 results?.summary 获取
+    if (record.results?.summary?.averageResponseTime !== undefined && record.results.summary?.averageResponseTime > 0) {
+      return record.results.summary?.averageResponseTime;
     }
 
     // 尝试从 results 直接获取
@@ -558,12 +558,12 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       return record.results.averageResponseTime;
     }
 
-    // 尝试从 results.avgResponseTime 获取（可能的字段名变体）
+    // 尝试从 results?.avgResponseTime 获取（可能的字段名变体）
     if (record.results?.avgResponseTime !== undefined && record.results.avgResponseTime > 0) {
       return record.results.avgResponseTime;
     }
 
-    // 尝试从 results.responseTime 获取
+    // 尝试从 results?.responseTime 获取
     if (record.results?.responseTime !== undefined && record.results.responseTime > 0) {
       return record.results.responseTime;
     }
@@ -578,14 +578,14 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       return record.errorRate;
     }
 
-    // 尝试从 results.metrics 获取
+    // 尝试从 results?.metrics 获取
     if (record.results?.metrics?.errorRate !== undefined && record.results?.metrics?.errorRate !== null) {
-      return record.results.metrics.errorRate;
+      return record.results.metrics?.errorRate;
     }
 
-    // 尝试从 results.summary 获取
+    // 尝试从 results?.summary 获取
     if (record.results?.summary?.errorRate !== undefined && record.results?.summary?.errorRate !== null) {
-      return record.results.summary.errorRate;
+      return record.results.summary?.errorRate;
     }
 
     // 从失败请求数和总请求数计算
@@ -626,8 +626,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       return;
     }
 
-    const recordsToDelete = records.filter(r => selectedRecords.has(r.id));
-    const recordNames = recordsToDelete.map(r => r.testName);
+    const recordsToDelete = records.filter(r => selectedRecords.has(r?.id));
+    const recordNames = recordsToDelete.map(r => r?.testName);
 
     setDeleteDialog({
       isOpen: true,
@@ -693,11 +693,11 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
       const data = await response.json();
 
-      if (data.success) {
+      if (data?.success) {
         console.log('✅ 测试记录删除成功:', recordId);
 
         // 从本地状态中移除记录
-        setRecords(prev => prev.filter(r => r.id !== recordId));
+        setRecords(prev => prev.filter(r => r?.id !== recordId));
         setSelectedRecords(prev => {
           const newSet = new Set(prev);
           newSet.delete(recordId);
@@ -716,7 +716,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         }
 
       } else {
-        throw new Error(data.message || '删除失败');
+        throw new Error(data?.message || '删除失败');
       }
 
     } catch (error) {
@@ -733,8 +733,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       return;
     }
 
-    const recordsToDelete = records.filter(r => selectedRecords.has(r.id));
-    const recordNames = recordsToDelete.map(r => r.testName).join('、');
+    const recordsToDelete = records.filter(r => selectedRecords.has(r?.id));
+    const recordNames = recordsToDelete.map(r => r?.testName).join('、');
 
     if (!confirm(`确定要删除以下 ${selectedRecords.size} 条测试记录吗？\n\n${recordNames}\n\n此操作无法撤销，删除后将无法恢复这些测试记录的所有数据。`)) {
       return;
@@ -770,24 +770,24 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
       const data = await response.json();
 
-      if (data.success) {
-        const deletedCount = data.data?.deletedCount || selectedRecords.size;
+      if (data?.success) {
+        const deletedCount = data?.data?.deletedCount || selectedRecords.size;
         console.log('✅ 批量删除成功:', { deletedCount, requestedCount: selectedRecords.size });
 
         // 从本地状态中移除记录
-        setRecords(prev => prev.filter(r => !selectedRecords.has(r.id)));
+        setRecords(prev => prev.filter(r => !selectedRecords.has(r?.id)));
         setTotalRecords(prev => Math.max(0, prev - selectedRecords.size));
         setSelectedRecords(new Set());
 
         showToast.success(`成功删除 ${deletedCount} 条记录`);
 
         // 如果当前页没有记录了，且不是第一页，则跳转到上一页
-        const remainingRecords = records.filter(r => !selectedRecords.has(r.id));
+        const remainingRecords = records.filter(r => !selectedRecords.has(r?.id));
         if (remainingRecords.length === 0 && currentPage > 1) {
           setCurrentPage(prev => prev - 1);
         }
       } else {
-        throw new Error(data.error || '批量删除失败');
+        throw new Error(data?.error || '批量删除失败');
       }
 
     } catch (error) {
@@ -804,7 +804,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       setSelectedRecords(new Set());
     } else {
       // 当前未全选，全选
-      setSelectedRecords(new Set(records.map(r => r.id)));
+      setSelectedRecords(new Set(records.map(r => r?.id)));
     }
   };
 
@@ -843,7 +843,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   };
 
   // 处理导出
-  const handleExport = async (exportType: string, data: any) => {
+  const handleExport = async (exportType: string, data: unknown) => {
     try {
       await ExportUtils.exportByType(exportType, data);
       setIsExportModalOpen(false);
@@ -1038,7 +1038,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                   type="text"
                   placeholder="输入测试名称或URL..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e?.target.value)}
                   aria-label="搜索测试记录"
                   title="输入测试名称或URL进行搜索"
                   className="w-full pl-8 pr-4 py-2.5 text-sm border border-gray-600/40 rounded-lg bg-gray-700/50 backdrop-blur-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
@@ -1053,7 +1053,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
               </label>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => setStatusFilter(e?.target.value)}
                 aria-label="筛选测试状态"
                 title="选择要筛选的测试状态"
                 className="w-full pl-4 pr-12 py-2.5 text-sm border border-gray-600/40 rounded-lg bg-gray-700/50 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 appearance-none bg-no-repeat bg-right bg-[length:14px_14px] bg-[position:right_16px_center] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxNCAxNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMuNSA1LjI1TDcgOC43NUwxMC41IDUuMjUiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')]"
@@ -1075,7 +1075,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
               </label>
               <select
                 value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
+                onChange={(e) => setDateFilter(e?.target.value)}
                 aria-label="筛选测试日期"
                 title="选择要筛选的测试日期范围"
                 className="w-full pl-4 pr-12 py-2.5 text-sm border border-gray-600/40 rounded-lg bg-gray-700/50 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 appearance-none bg-no-repeat bg-right bg-[length:14px_14px] bg-[position:right_16px_center] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxNCAxNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMuNSA1LjI1TDcgOC43NUwxMC41IDUuMjUiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')]"
@@ -1095,7 +1095,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
               <div className="flex gap-2">
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'created_at' | 'duration' | 'start_time' | 'status')}
+                  onChange={(e) => setSortBy(e?.target.value as 'created_at' | 'duration' | 'start_time' | 'status')}
                   aria-label="选择排序方式"
                   title="选择测试记录的排序方式"
                   className="flex-1 pl-4 pr-12 py-2.5 text-sm border border-gray-600/40 rounded-lg bg-gray-700/50 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 appearance-none bg-no-repeat bg-right bg-[length:14px_14px] bg-[position:right_16px_center] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxNCAxNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMuNSA1LjI1TDcgOC43NUwxMC41IDUuMjUiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')]"
@@ -1205,7 +1205,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                           {record.config?.proxy?.enabled && (
                             <span
                               className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border bg-purple-100 dark:bg-purple-600/60 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-500/50"
-                              title={`代理: ${record.config.proxy.type?.toUpperCase() || 'HTTP'} - ${record.config.proxy.host}:${record.config.proxy.port || 8080}`}
+                              title={`代理: ${record.config.proxy?.type?.toUpperCase() || 'HTTP'} - ${record.config.proxy?.host}:${record.config.proxy?.port || 8080}`}
                             >
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
@@ -1345,12 +1345,12 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                           borderColor: '#dc2626 !important'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.setProperty('background-color', '#b91c1c', 'important');
-                          e.currentTarget.style.setProperty('border-color', '#b91c1c', 'important');
+                          e?.currentTarget.style.setProperty('background-color', '#b91c1c', 'important');
+                          e?.currentTarget.style.setProperty('border-color', '#b91c1c', 'important');
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.setProperty('background-color', '#dc2626', 'important');
-                          e.currentTarget.style.setProperty('border-color', '#dc2626', 'important');
+                          e?.currentTarget.style.setProperty('background-color', '#dc2626', 'important');
+                          e?.currentTarget.style.setProperty('border-color', '#dc2626', 'important');
                         }}
                         title="删除记录"
                       >
@@ -1375,7 +1375,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                     <select
                       id="pageSize"
                       value={pageSize}
-                      onChange={(e) => changePageSize(Number(e.target.value))}
+                      onChange={(e) => changePageSize(Number(e?.target.value))}
                       className="px-3 py-1.5 text-sm border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px] pagination-select"
                     >
                       <option value={5}>5 条</option>

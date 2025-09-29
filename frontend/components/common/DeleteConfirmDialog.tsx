@@ -38,7 +38,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
      * @returns {Promise<Object>} 返回结果
      */
   const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+    if (e.target === e?.currentTarget) {
       onClose();
     }
   };
@@ -75,13 +75,13 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
           </p>
 
           {/* 显示要删除的项目列表 */}
-          {itemNames.length > 0 && (
+          {itemNames?.length > 0 && (
             <div className="mb-4">
               <p className="text-sm text-gray-400 mb-2">
                 {type === 'batch' ? '将要删除的记录：' : '删除的记录：'}
               </p>
               <div className="bg-gray-900/50 rounded-lg p-3 max-h-32 overflow-y-auto">
-                {itemNames.map((name, index) => (
+                {itemNames?.map((name, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm text-gray-300 py-1">
                     <Trash2 className="w-3 h-3 text-red-400 flex-shrink-0" />
                     <span className="truncate">{name}</span>

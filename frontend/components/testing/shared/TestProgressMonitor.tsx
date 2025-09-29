@@ -27,7 +27,7 @@ const { Title, Text, Paragraph } = Typography;
 
 export interface TestProgressMonitorProps {
   activeTests: Map<string, TestStatusInfo>;
-  realTimeMetrics?: any;
+  realTimeMetrics?: unknown;
   onStopTest: (testId: string) => void;
   onCancelTest: (testId: string) => void;
   className?: string;
@@ -150,7 +150,7 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
                 <Col span={8}>
                   <div className="text-center">
                     <div className="text-lg font-bold text-blue-600">
-                      {realTimeMetrics.currentUsers || 0}
+                      {realTimeMetrics?.currentUsers || 0}
                     </div>
                     <div className="text-xs text-gray-500">当前用户</div>
                   </div>
@@ -158,7 +158,7 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
                 <Col span={8}>
                   <div className="text-center">
                     <div className="text-lg font-bold text-green-600">
-                      {realTimeMetrics.successfulRequests || 0}
+                      {realTimeMetrics?.successfulRequests || 0}
                     </div>
                     <div className="text-xs text-gray-500">成功请求</div>
                   </div>
@@ -166,7 +166,7 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
                 <Col span={8}>
                   <div className="text-center">
                     <div className="text-lg font-bold text-orange-600">
-                      {realTimeMetrics.averageResponseTime || 0}ms
+                      {realTimeMetrics?.averageResponseTime || 0}ms
                     </div>
                     <div className="text-xs text-gray-500">平均响应</div>
                   </div>

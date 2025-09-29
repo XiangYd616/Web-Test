@@ -24,8 +24,8 @@ export interface LegacyPerformanceTestConfig {
 // 兼容旧的测试进度接口
 export interface LegacyTestProgressCallback {
   onProgress: (progress: number, step: string) => void;
-  onComplete: (result: any) => void;
-  onError: (error: any) => void;
+  onComplete: (result: unknown) => void;
+  onError: (error: unknown) => void;
 }
 
 // ==================== 性能测试适配器类 ====================
@@ -60,7 +60,7 @@ export class PerformanceTestAdapter {
 
       // 调用完成回调
       if (callbacks?.onComplete) {
-        callbacks.onComplete(legacyResult);
+        callbacks?.onComplete(legacyResult);
       }
 
       return legacyResult;
@@ -68,7 +68,7 @@ export class PerformanceTestAdapter {
     } catch (error) {
       // 调用错误回调
       if (callbacks?.onError) {
-        callbacks.onError(error);
+        callbacks?.onError(error);
       }
       throw error;
     }
@@ -243,8 +243,8 @@ export class PerformanceTestAdapter {
     callbacks: LegacyTestProgressCallback
   ): (progress: PerformanceTestProgress) => void {
     return (progress: PerformanceTestProgress) => {
-      if (callbacks.onProgress) {
-        callbacks.onProgress(progress.progress, progress.currentStep);
+      if (callbacks?.onProgress) {
+        callbacks?.onProgress(progress.progress, progress.currentStep);
       }
     };
   }
@@ -252,7 +252,7 @@ export class PerformanceTestAdapter {
   /**
    * 转换结果到旧格式
    */
-  public static convertResultToLegacy(result: PerformanceTestResult): any {
+  public static convertResultToLegacy(result: PerformanceTestResult): unknown {
     return {
       score: result.overallScore,
       grade: result.grade,
@@ -301,8 +301,8 @@ export async function getPerformanceMetrics(
   responseTime: number;
   pageSize: number;
   score: number;
-  vitals?: any;
-  mobile?: any;
+  vitals?: unknown;
+  mobile?: unknown;
 }> {
   const config: Partial<UnifiedPerformanceConfig> = {
     level: 'basic',
@@ -331,4 +331,4 @@ export async function getPerformanceMetrics(
 }
 
 // 导出适配器实例
-export const performanceTestAdapter = PerformanceTestAdapter;
+export const _performanceTestAdapter = PerformanceTestAdapter;

@@ -315,20 +315,20 @@ export class CacheStrategyManager {
 // 缓存装饰器工厂
 export function cached(
   dataType: DataType,
-  keyGenerator?: (...args: any[]) => string,
+  keyGenerator?: (...args: unknown[]) => string,
   customConfig?: Partial<CacheStrategyConfig>
 ) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
     const strategy = CacheStrategyManager.getStrategy(dataType);
     const finalConfig = { ...strategy, ...customConfig };
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const cacheKey = keyGenerator ? keyGenerator(...args) : `${propertyName}:${JSON.stringify(args)}`;
 
       // 尝试从缓存获取
       // 临时禁用缓存功能，等待cacheManager实现
-      const cached: any = null; // await cacheManager.get(cacheKey, finalConfig.strategy);
+      const cached: unknown = null; // await cacheManager.get(cacheKey, finalConfig.strategy);
       if (cached !== null) {
         return cached;
       }
@@ -348,7 +348,7 @@ export function cached(
 }
 
 // 导出常用的缓存键生成器实例
-export const CacheKeys = {
+export const _CacheKeys = {
   user: CacheKeyGenerator.user,
   test: CacheKeyGenerator.test,
   api: CacheKeyGenerator.api,

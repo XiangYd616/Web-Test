@@ -59,7 +59,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
   const quickActionsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const isAdmin = user?.role === 'admin';
+  const _isAdmin = user.role === 'admin';
 
   // 快捷操作
   const quickActions: QuickAction[] = [
@@ -219,7 +219,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
   const handleMoreActions = (notification: NotificationItem, e: React.MouseEvent) => {
     e.stopPropagation();
     // 可以在这里添加更多操作菜单
-    const actions = [
+    const _actions = [
       {
         label: '标记为已读', action: () => markAsRead(notification.id)
       },
@@ -793,7 +793,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                   title="用户菜单"
                 >
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    {user?.role === 'admin' ? (
+                    {user.role === 'admin' ? (
                       <Crown className="w-4 h-4 text-white" />
                     ) : (
                       <User className="w-4 h-4 text-white" />

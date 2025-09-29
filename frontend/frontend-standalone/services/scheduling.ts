@@ -9,7 +9,7 @@ export interface ScheduledTask {
   description?: string;
   testType: string;
   url: string;
-  config: any;
+  config: unknown;
   schedule: {
     type: 'once' | 'recurring';
     startTime: string;
@@ -44,7 +44,7 @@ export interface TaskExecution {
   startTime: string;
   endTime?: string;
   duration?: number;
-  results?: any;
+  results?: unknown;
   error?: string;
   triggeredBy: 'schedule' | 'manual';
   retryCount: number;
@@ -73,7 +73,7 @@ class SchedulingService {
   ): Promise<{
     tasks: ScheduledTask[];
     total: number;
-    pagination: any;
+    pagination: unknown;
   }> {
     try {
       const params = new URLSearchParams();
@@ -255,7 +255,7 @@ class SchedulingService {
   ): Promise<{
     executions: TaskExecution[];
     total: number;
-    pagination: any;
+    pagination: unknown;
   }> {
     try {
       const params = new URLSearchParams();

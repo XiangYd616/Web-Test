@@ -5,7 +5,6 @@
  * 创建时间: 2025-09-25
  */
 
-import { format } from 'date-fns';
 
 export interface MonitoringSite {
   id: string;
@@ -110,7 +109,7 @@ class MonitoringService {
    */
   async addSite(siteData: Omit<MonitoringSite, 'id' | 'status' | 'responseTime' | 'uptime' | 'lastCheck' | 'alerts' | 'createdAt'>): Promise<MonitoringSite> {
     const newSite: MonitoringSite = {
-      id: Date.now().toString(),
+      id: Date?.now().toString(),
       status: 'online',
       responseTime: 0,
       uptime: 100,
@@ -175,7 +174,7 @@ class MonitoringService {
    * 检查单个站点状态
    */
   async checkSite(site: MonitoringSite): Promise<MonitoringData> {
-    const startTime = Date.now();
+    const startTime = Date?.now();
 
     try {
       // 使用fetch进行真实的HTTP请求检查
@@ -190,7 +189,7 @@ class MonitoringService {
 
       clearTimeout(timeoutId);
 
-      const responseTime = Date.now() - startTime;
+      const responseTime = Date?.now() - startTime;
       const status = response.status || 200;
 
       const monitoringData: MonitoringData = {
@@ -221,7 +220,7 @@ class MonitoringService {
       return monitoringData;
 
     } catch (error) {
-      const responseTime = Date.now() - startTime;
+      const responseTime = Date?.now() - startTime;
 
       const monitoringData: MonitoringData = {
         timestamp: new Date().toISOString(),
@@ -233,7 +232,7 @@ class MonitoringService {
         connectTime: 0,
         downloadTime: 0,
         responseSize: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error?.message : 'Unknown error'
       };
 
       // 更新站点状态为离线
@@ -261,13 +260,13 @@ class MonitoringService {
 
       // 模拟SSL检查结果
       const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + Math.random() * 365 + 30); // 30-395天后过期
+      expiryDate?.setDate(expiryDate?.getDate() + Math.random() * 365 + 30); // 30-395天后过期
 
-      const daysUntilExpiry = Math.floor((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      const daysUntilExpiry = Math.floor((expiryDate?.getTime() - Date?.now()) / (1000 * 60 * 60 * 24));
 
       return {
         valid: daysUntilExpiry > 0,
-        expiryDate: expiryDate.toISOString(),
+        expiryDate: expiryDate?.toISOString(),
         daysUntilExpiry
       };
     } catch (error) {
@@ -356,7 +355,7 @@ class MonitoringService {
       activeAlerts,
       validCertificates,
       totalChecks: this.monitoringData.length,
-      incidents: this.monitoringData.filter(d => d.status === 0 || d.status >= 400).length
+      incidents: this.monitoringData.filter(d => d.status === 0 || d?.status >= 400).length
     };
   }
 

@@ -271,7 +271,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
         <input
           type={showPassword ? 'text' : 'password'}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(e?.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}

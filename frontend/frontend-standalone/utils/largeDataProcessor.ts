@@ -476,7 +476,7 @@ export class PerformanceMonitor {
     const snapshot: MemoryUsage = {
       used: memory?.usedJSHeapSize || 0,
       total: memory?.totalJSHeapSize || 0,
-      percentage: memory ? (memory.usedJSHeapSize / memory.totalJSHeapSize) * 100 : 0,
+      percentage: memory ? (memory?.usedJSHeapSize / memory?.totalJSHeapSize) * 100 : 0,
       chunks: 0,
       items: 0
     };
@@ -557,7 +557,7 @@ export function processBatches<T, R>(
 /**
  * 内存使用量估算
  */
-export function estimateMemoryUsage(data: any): number {
+export function estimateMemoryUsage(data: unknown): number {
   const json = JSON.stringify(data);
   return new Blob([json]).size;
 }
@@ -590,7 +590,7 @@ export function decompressData<T>(compressed: string): T[] {
 
 // ==================== 默认实例 ====================
 
-export const defaultChunkManager = new DataChunkManager();
+export const _defaultChunkManager = new DataChunkManager();
 export const defaultPerformanceMonitor = new PerformanceMonitor();
 
 // 定期记录内存快照

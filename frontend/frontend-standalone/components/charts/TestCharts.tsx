@@ -71,9 +71,9 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
     const data = [];
 
     // 获取总体评分，支持多种数据结构
-    const overallScore = latestResult.overallScore ||
+    const overallScore = latestResult?.overallScore ||
       (latestResult as any).securityScore ||
-      (latestResult.scores && latestResult.scores.overall) ||
+      (latestResult?.scores && latestResult?.scores.overall) ||
       0;
 
     // 基础分数
@@ -85,7 +85,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
     });
 
     // 处理测试结果中的各种测试类型
-    const tests = latestResult.tests || {};
+    const tests = latestResult?.tests || {};
 
     // 添加各个测试类型的分数
     if (tests.performance) {
@@ -99,8 +99,8 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
     }
 
     // 特殊处理SEO测试 - 支持直接SEO结果和嵌套结构
-    if (tests.seo || (testType === 'seo' && latestResult.scores)) {
-      const seoScore = tests.seo?.score || latestResult.overallScore || 0;
+    if (tests.seo || (testType === 'seo' && latestResult?.scores)) {
+      const seoScore = tests.seo?.score || latestResult?.overallScore || 0;
       data.push({
         name: 'SEO分析',
         score: seoScore,
@@ -109,8 +109,8 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
       });
 
       // 如果是SEO测试类型，添加详细的SEO分数
-      if (testType === 'seo' && latestResult.scores) {
-        const scores = latestResult.scores;
+      if (testType === 'seo' && latestResult?.scores) {
+        const scores = latestResult?.scores;
         data.push(
           { name: '技术SEO', score: Math.round(scores.technical || 0), target: 90, color: currentColors.primary },
           { name: '内容质量', score: Math.round(scores.content || 0), target: 90, color: currentColors.info },
@@ -188,35 +188,35 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
   const coreWebVitalsData = useMemo(() => {
     if (testType !== 'performance' || !latestResult?.metrics) return [];
 
-    const metrics = latestResult.metrics;
+    const metrics = latestResult?.metrics;
     return [
       {
         metric: 'LCP',
-        value: metrics.lcp || 0,
+        value: metrics?.lcp || 0,
         threshold: 2.5,
         unit: 's',
-        score: metrics.lcp <= 2.5 ? 100 : metrics.lcp <= 4.0 ? 70 : 30
+        score: metrics?.lcp <= 2.5 ? 100 : metrics?.lcp <= 4.0 ? 70 : 30
       },
       {
         metric: 'FID',
-        value: metrics.fid || 0,
+        value: metrics?.fid || 0,
         threshold: 100,
         unit: 'ms',
-        score: metrics.fid <= 100 ? 100 : metrics.fid <= 300 ? 70 : 30
+        score: metrics?.fid <= 100 ? 100 : metrics?.fid <= 300 ? 70 : 30
       },
       {
         metric: 'CLS',
-        value: metrics.cls || 0,
+        value: metrics?.cls || 0,
         threshold: 0.1,
         unit: '',
-        score: metrics.cls <= 0.1 ? 100 : metrics.cls <= 0.25 ? 70 : 30
+        score: metrics?.cls <= 0.1 ? 100 : metrics?.cls <= 0.25 ? 70 : 30
       },
       {
         metric: 'FCP',
-        value: metrics.fcp || 0,
+        value: metrics?.fcp || 0,
         threshold: 1.8,
         unit: 's',
-        score: metrics.fcp <= 1.8 ? 100 : metrics.fcp <= 3.0 ? 70 : 30
+        score: metrics?.fcp <= 1.8 ? 100 : metrics?.fcp <= 3.0 ? 70 : 30
       }
     ];
   }, [latestResult, testType]);
@@ -227,7 +227,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
     const findings = latestResult?.findings || (latestResult as any)?.vulnerabilities || latestResult?.issues || [];
     if (!findings || findings.length === 0) return [];
 
-    const severityCount = findings.reduce((acc: Record<string, number>, finding: any) => {
+    const severityCount = findings.reduce((acc: Record<string, number>, finding: unknown) => {
       const severity = finding.severity || finding.level || 'low';
       acc[severity] = (acc[severity] || 0) + 1;
       return acc;
@@ -428,33 +428,33 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
       <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>总体评分</div>
-          <div className={`text-xl font-bold ${(latestResult.overallScore || (latestResult as any).securityScore || 0) >= 90 ? 'text-green-500' :
-            (latestResult.overallScore || (latestResult as any).securityScore || 0) >= 70 ? 'text-yellow-500' : 'text-red-500'
+          <div className={`text-xl font-bold ${(latestResult?.overallScore || (latestResult as any).securityScore || 0) >= 90 ? 'text-green-500' :
+            (latestResult?.overallScore || (latestResult as any).securityScore || 0) >= 70 ? 'text-yellow-500' : 'text-red-500'
             }`}>
-            {Math.round(latestResult.overallScore || (latestResult as any).securityScore || 0)}
+            {Math.round(latestResult?.overallScore || (latestResult as any).securityScore || 0)}
           </div>
         </div>
 
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>测试时长</div>
           <div className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            {latestResult.duration ? latestResult.duration.toFixed(1) : '0.0'}s
+            {latestResult?.duration ? latestResult?.duration.toFixed(1) : '0.0'}s
           </div>
         </div>
 
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>发现问题</div>
-          <div className={`text-xl font-bold ${(latestResult.findings || (latestResult as any).vulnerabilities || []).length === 0 ? 'text-green-500' :
-            (latestResult.findings || (latestResult as any).vulnerabilities || []).length <= 3 ? 'text-yellow-500' : 'text-red-500'
+          <div className={`text-xl font-bold ${(latestResult?.findings || (latestResult as any).vulnerabilities || []).length === 0 ? 'text-green-500' :
+            (latestResult?.findings || (latestResult as any).vulnerabilities || []).length <= 3 ? 'text-yellow-500' : 'text-red-500'
             }`}>
-            {(latestResult.findings || (latestResult as any).vulnerabilities || []).length}
+            {(latestResult?.findings || (latestResult as any).vulnerabilities || []).length}
           </div>
         </div>
 
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>测试引擎</div>
           <div className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            {latestResult.engine}
+            {latestResult?.engine}
           </div>
         </div>
       </div>

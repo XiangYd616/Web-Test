@@ -11,7 +11,7 @@ interface LogContext {
   action?: string;
   userId?: string;
   sessionId?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 class FrontendLogger {
@@ -75,7 +75,7 @@ class FrontendLogger {
   }
 
   // 用户操作日志
-  userAction(action: string, details?: any, context?: LogContext): void {
+  userAction(action: string, details?: unknown, context?: LogContext): void {
     this.info(`User action: ${action}`, {
       ...context,
       action,
@@ -104,7 +104,7 @@ class FrontendLogger {
     });
   }
 
-  private sendToMonitoring(level: string, message: string, data: any): void {
+  private sendToMonitoring(level: string, message: string, data: unknown): void {
     // 在生产环境中实现错误监控
     // 例如发送到 Sentry, LogRocket 等服务
     try {

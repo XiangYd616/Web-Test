@@ -23,7 +23,7 @@ export interface ReportSection {
   type: 'summary' | 'metrics' | 'charts' | 'recommendations' | 'raw-data' | 'custom';
   enabled: boolean;
   order: number;
-  config?: any;
+  config?: unknown;
 }
 
 export interface ReportData {
@@ -35,13 +35,13 @@ export interface ReportData {
   endTime?: string;
   duration?: number;
   overallScore?: number;
-  results: any;
-  metrics?: any;
+  results: unknown;
+  metrics?: unknown;
   recommendations?: string[];
   engine?: string;
-  config?: any;
-  testResults?: any[]; // 兼容旧格式
-  analytics?: any; // 兼容旧格式
+  config?: unknown;
+  testResults?: unknown[]; // 兼容旧格式
+  analytics?: unknown; // 兼容旧格式
   timeRange?: {
     start: string;
     end: string;
@@ -77,7 +77,7 @@ export class ReportGeneratorService {
   async generateReport(data: ReportData, config: ReportConfig): Promise<string> {
     try {
       const reportId = this.generateReportId();
-      const template = this.getTemplate(config.template);
+      const template = this.getTemplate(config?.template);
 
       // 处理数据
       const processedData = this.processReportData(data);
@@ -136,13 +136,13 @@ export class ReportGeneratorService {
   /**
    * 获取报告预览
    */
-  getReportPreview(reportId: string): any | null {
+  getReportPreview(reportId: string): unknown | null {
     const report = this.cache.get(reportId);
     return report ? {
       id: reportId,
       title: report.config.title,
       generatedAt: report.generatedAt,
-      sections: report.config.sections.filter((s: any) => s.enabled).length,
+      sections: report.config.sections.filter((s: unknown) => s?.enabled).length,
       template: report.config.template
     } : null;
   }
@@ -258,7 +258,7 @@ export class ReportGeneratorService {
     });
   }
 
-  private getTemplate(templateId: string): any {
+  private getTemplate(templateId: string): unknown {
     return this.templates.get(templateId) || this.templates.get('professional');
   }
 
@@ -266,7 +266,7 @@ export class ReportGeneratorService {
     return `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private processReportData(data: ReportData): any {
+  private processReportData(data: ReportData): unknown {
     // 处理和标准化报告数据
     return {
       ...data,
@@ -277,11 +277,11 @@ export class ReportGeneratorService {
     };
   }
 
-  private async buildReportContent(data: any, config: ReportConfig, template: any): Promise<string> {
+  private async buildReportContent(data: unknown, config: ReportConfig, template: unknown): Promise<string> {
     // 构建报告内容
-    const sections = config.sections
+    const sections = config?.sections
       .filter(section => section.enabled)
-      .sort((a, b) => a.order - b.order);
+      .sort((a, b) => a?.order - b.order);
 
     let content = '';
     for (const section of sections) {
@@ -291,7 +291,7 @@ export class ReportGeneratorService {
     return content;
   }
 
-  private async buildSection(section: ReportSection, data: any, config: ReportConfig, template: any): Promise<string> {
+  private async buildSection(section: ReportSection, data: unknown, config: ReportConfig, template: unknown): Promise<string> {
     // 构建单个报告部分
     switch (section.type) {
       case 'summary':
@@ -309,27 +309,27 @@ export class ReportGeneratorService {
     }
   }
 
-  private buildSummarySection(data: any, config: ReportConfig, template: any): string {
+  private buildSummarySection(data: unknown, config: ReportConfig, template: unknown): string {
     return `<section class="summary">
       <h2>执行摘要</h2>
-      <p>测试URL: ${data.url}</p>
-      <p>测试时间: ${data.startTime}</p>
-      <p>总体评分: ${data.overallScore || 'N/A'}</p>
+      <p>测试URL: ${data?.url}</p>
+      <p>测试时间: ${data?.startTime}</p>
+      <p>总体评分: ${data?.overallScore || 'N/A'}</p>
     </section>`;
   }
 
-  private buildMetricsSection(data: any, config: ReportConfig, template: any): string {
+  private buildMetricsSection(data: unknown, config: ReportConfig, template: unknown): string {
     return `<section class="metrics">
       <h2>关键指标</h2>
       <div class="metrics-grid">
-        ${Object.entries(data.metrics || {}).map(([key, value]) =>
+        ${Object.entries(data?.metrics || {}).map(([key, value]) =>
       `<div class="metric"><span class="label">${key}</span><span class="value">${value}</span></div>`
     ).join('')}
       </div>
     </section>`;
   }
 
-  private buildChartsSection(data: any, config: ReportConfig, template: any): string {
+  private buildChartsSection(data: unknown, config: ReportConfig, template: unknown): string {
     return `<section class="charts">
       <h2>图表分析</h2>
       <div class="charts-container">
@@ -338,51 +338,51 @@ export class ReportGeneratorService {
     </section>`;
   }
 
-  private buildRecommendationsSection(data: any, config: ReportConfig, template: any): string {
-    const recommendations = data.recommendations || [];
+  private buildRecommendationsSection(data: unknown, config: ReportConfig, template: unknown): string {
+    const recommendations = data?.recommendations || [];
     return `<section class="recommendations">
       <h2>优化建议</h2>
       <ul>
-        ${recommendations.map((rec: string) => `<li>${rec}</li>`).join('')}
+        ${recommendations?.map((rec: string) => `<li>${rec}</li>`).join('')}
       </ul>
     </section>`;
   }
 
-  private buildRawDataSection(data: any, config: ReportConfig, template: any): string {
+  private buildRawDataSection(data: unknown, config: ReportConfig, template: unknown): string {
     return `<section class="raw-data">
       <h2>原始数据</h2>
-      <pre>${JSON.stringify(data.results, null, 2)}</pre>
+      <pre>${JSON.stringify(data?.results, null, 2)}</pre>
     </section>`;
   }
 
-  private generateSummary(data: ReportData): any {
+  private generateSummary(data: ReportData): unknown {
     return {
-      testType: data.testType,
-      url: data.url,
-      duration: data.duration,
-      overallScore: data.overallScore,
-      status: data.endTime ? 'completed' : 'running'
+      testType: data?.testType,
+      url: data?.url,
+      duration: data?.duration,
+      overallScore: data?.overallScore,
+      status: data?.endTime ? 'completed' : 'running'
     };
   }
 
-  private extractMetrics(data: ReportData): any {
+  private extractMetrics(data: ReportData): unknown {
     // 从测试结果中提取关键指标
-    return data.metrics || {};
+    return data?.metrics || {};
   }
 
-  private prepareChartData(data: ReportData): any {
+  private prepareChartData(data: ReportData): unknown {
     // 准备图表数据
-    return data.results || {};
+    return data?.results || {};
   }
 
   // 导出方法（简化版本）
-  private async exportToPDF(report: any, options: ExportOptions): Promise<Blob> {
+  private async exportToPDF(report: unknown, options: ExportOptions): Promise<Blob> {
     // PDF导出逻辑
     const htmlContent = report.content;
     return new Blob([htmlContent], { type: 'application/pdf' });
   }
 
-  private async exportToHTML(report: any, options: ExportOptions): Promise<Blob> {
+  private async exportToHTML(report: unknown, options: ExportOptions): Promise<Blob> {
     const htmlContent = `<!DOCTYPE html>
     <html>
     <head>
@@ -405,12 +405,12 @@ export class ReportGeneratorService {
     return new Blob([htmlContent], { type: 'text/html' });
   }
 
-  private async exportToJSON(report: any, options: ExportOptions): Promise<Blob> {
+  private async exportToJSON(report: unknown, options: ExportOptions): Promise<Blob> {
     const jsonData = JSON.stringify(report.data, null, 2);
     return new Blob([jsonData], { type: 'application/json' });
   }
 
-  private async exportToCSV(report: any, options: ExportOptions): Promise<Blob> {
+  private async exportToCSV(report: unknown, options: ExportOptions): Promise<Blob> {
     // 🔧 修复中文乱码：添加UTF-8 BOM头
     const BOM = '\uFEFF';
     const csvContent = 'CSV export not implemented yet';
@@ -418,13 +418,13 @@ export class ReportGeneratorService {
     return new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8' });
   }
 
-  private async exportToXLSX(report: any, options: ExportOptions): Promise<Blob> {
+  private async exportToXLSX(report: unknown, options: ExportOptions): Promise<Blob> {
     // XLSX导出逻辑
     const xlsxContent = 'XLSX export not implemented yet';
     return new Blob([xlsxContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   }
 
-  private async exportToImage(report: any, options: ExportOptions): Promise<Blob> {
+  private async exportToImage(report: unknown, options: ExportOptions): Promise<Blob> {
     // 图片导出逻辑
     const imageContent = 'Image export not implemented yet';
     return new Blob([imageContent], { type: `image/${options.format}` });
@@ -433,6 +433,6 @@ export class ReportGeneratorService {
 
 // 导出单例实例
 export const reportGeneratorService = new ReportGeneratorService();
-export const EnhancedReportGenerator = reportGeneratorService; // 兼容性导出
+export const _EnhancedReportGenerator = reportGeneratorService; // 兼容性导出
 
 export default reportGeneratorService;

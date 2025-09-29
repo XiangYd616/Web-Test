@@ -55,11 +55,11 @@ export const useNotification = () => {
         const id = generateId();
         const notification: NotificationItem = {
             id,
-            type: config.type || type,
-            title: config.title,
+            type: config?.type || type,
+            title: config?.title,
             message,
-            duration: config.duration ?? DEFAULT_DURATION,
-            closable: config.closable ?? true,
+            duration: config?.duration ?? DEFAULT_DURATION,
+            closable: config?.closable ?? true,
             timestamp: Date.now()
         };
 

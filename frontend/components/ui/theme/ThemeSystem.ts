@@ -187,11 +187,11 @@ export const darkTheme: Theme = {
 };
 
 // 主题工具函数
-export const getTheme = (mode: ThemeMode): Theme => {
+export const _getTheme = (mode: ThemeMode): Theme => {
     return mode === 'light' ? lightTheme : darkTheme;
 };
 
-export const createThemeVariables = (theme: Theme): Record<string, string> => {
+export const _createThemeVariables = (theme: Theme): Record<string, string> => {
     return {
         '--color-primary': theme.colors.primary,
         '--color-primary-hover': theme.colors.primaryHover,
@@ -236,7 +236,7 @@ export const createThemeVariables = (theme: Theme): Record<string, string> => {
 };
 
 // 主题相关的CSS类名生成器
-export const themeClasses = {
+export const _themeClasses = {
     button: {
         primary: 'themed-button-primary',
         secondary: 'themed-button-secondary',

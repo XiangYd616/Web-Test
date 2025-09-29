@@ -27,7 +27,7 @@ const BatchTestPage: React.FC<BatchTestPageProps> = () => {
   const [currentResults, setCurrentResults] = useState<any[]>([]);
 
   // 处理测试完成
-  const handleTestComplete = useCallback((results: any[]) => {
+  const handleTestComplete = useCallback((results: unknown[]) => {
     setCurrentResults(results);
     
     // 添加到历史记录
@@ -46,7 +46,7 @@ const BatchTestPage: React.FC<BatchTestPageProps> = () => {
   }, []);
 
   // 处理测试开始
-  const handleTestStart = useCallback((config: any) => {
+  const handleTestStart = useCallback((config: unknown) => {
     console.log('批量测试开始:', config);
     toast.info(`开始批量测试: ${config.name}`);
   }, []);

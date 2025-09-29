@@ -4,33 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  Book,
-  CheckCircle,
-  Shield,
-  Zap,
-  Users,
-  Database,
-  Clock,
-  BarChart3,
-  Globe,
-  Mail,
-  Settings,
-  FileText,
-  Search,
-  Code,
-  Target,
-  Layers,
-  Key,
-  Bell,
-  Calendar,
-  Tools,
-  Download,
-  GitBranch,
-  Star,
-  ArrowRight,
-  ExternalLink
-} from 'lucide-react';
+import {Book, CheckCircle, Shield, Zap, Database, Clock, BarChart3, Globe, Mail, Settings, FileText, Target, Layers, Key, Bell, Calendar, Tools, GitBranch, Star, ArrowRight} from 'lucide-react';
 
 interface FeatureCategory {
   id: string;

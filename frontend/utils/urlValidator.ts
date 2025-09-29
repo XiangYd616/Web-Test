@@ -52,7 +52,7 @@ const URL_PATTERNS = {
 
 const SECURITY_CHECKS = {
   suspiciousDomains: [
-    'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly',
+    'bit.ly', 'tinyurl.com', 't?.co', 'goo.gl', 'ow.ly',
     'localhost', '127.0.0.1', '0.0.0.0'
   ],
   dangerousProtocols: ['ftp:', 'file:', 'javascript:', 'data:'],
@@ -105,7 +105,7 @@ export function validateUrlFormat(url: string): { isValid: boolean; error?: stri
   } catch (error) {
     return {
       isValid: false,
-      error: error instanceof Error ? error.message : 'URL格式无效'
+      error: error instanceof Error ? error?.message : 'URL格式无效'
     };
   }
 }
@@ -119,22 +119,22 @@ export function performSecurityChecks(urlObj: URL): string[] {
   }
 
   // 检查危险协议
-  if (SECURITY_CHECKS.dangerousProtocols.includes(urlObj.protocol)) {
-    notes.push(`🚨 检测到潜在危险协议: ${urlObj.protocol}`);
+  if (SECURITY_CHECKS.dangerousProtocols.includes(urlObj?.protocol)) {
+    notes.push(`🚨 检测到潜在危险协议: ${urlObj?.protocol}`);
   }
 
   // 检查可疑域名
-  if (SECURITY_CHECKS.suspiciousDomains.includes(urlObj.hostname)) {
-    notes.push(`⚠️ 检测到特殊域名: ${urlObj.hostname}`);
+  if (SECURITY_CHECKS.suspiciousDomains.includes(urlObj?.hostname)) {
+    notes.push(`⚠️ 检测到特殊域名: ${urlObj?.hostname}`);
   }
 
   // 检查端口
-  if (urlObj.port && SECURITY_CHECKS.commonPorts[urlObj.port]) {
-    notes.push(`ℹ️ 端口 ${urlObj.port}: ${SECURITY_CHECKS.commonPorts[urlObj.port]}`);
+  if (urlObj?.port && SECURITY_CHECKS.commonPorts[urlObj?.port]) {
+    notes.push(`ℹ️ 端口 ${urlObj?.port}: ${SECURITY_CHECKS.commonPorts[urlObj?.port]}`);
   }
 
   // 检查IP地址
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(urlObj.hostname)) {
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(urlObj?.hostname)) {
     notes.push('ℹ️ 使用IP地址访问，请确认这是预期的');
   }
 
@@ -160,7 +160,7 @@ export function generateSuggestions(urlObj: URL, options: URLValidationOptions):
   }
 
   // 端口建议
-  if (urlObj.port) {
+  if (urlObj?.port) {
     suggestions.push('指定了端口号，请确认服务在该端口上运行');
   }
 
@@ -213,7 +213,7 @@ export async function validateUrlEnhanced(
     return result;
   }
 
-  if (opts.requireHttps && urlObj.protocol !== 'https:') {
+  if (opts.requireHttps && urlObj?.protocol !== 'https:') {
     result.errors.push('必须使用HTTPS协议');
     return result;
   }
@@ -225,7 +225,7 @@ export async function validateUrlEnhanced(
   }
 
   // IP地址检查
-  if (!opts.allowIP && /^\d+\.\d+\.\d+\.\d+$/.test(urlObj.hostname)) {
+  if (!opts.allowIP && /^\d+\.\d+\.\d+\.\d+$/.test(urlObj?.hostname)) {
     result.errors.push('不允许使用IP地址');
     return result;
   }
@@ -284,7 +284,7 @@ export function validateUrlSync(url: string, options: URLValidationOptions = {})
     return result;
   }
 
-  if (opts.requireHttps && urlObj.protocol !== 'https:') {
+  if (opts.requireHttps && urlObj?.protocol !== 'https:') {
     result.errors.push('必须使用HTTPS协议');
     return result;
   }

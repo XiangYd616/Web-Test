@@ -206,7 +206,7 @@ export interface TestConfig {
   api?: {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     headers?: Record<string, string>;
-    body?: any;
+    body?: unknown;
     expectedStatus?: number[];
     timeout?: number;
   };
@@ -252,7 +252,7 @@ export interface TestConfig {
 export interface TestError {
   type: string;
   message: string;
-  details?: any;
+  details?: unknown;
   severity: 'low' | 'medium' | 'high' | 'critical';
   line?: number;
   column?: number;
@@ -265,7 +265,7 @@ export interface TestError {
 export interface TestWarning {
   type: string;
   message: string;
-  details?: any;
+  details?: unknown;
   suggestion?: string;
 }
 

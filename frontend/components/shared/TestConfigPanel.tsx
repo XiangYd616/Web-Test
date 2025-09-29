@@ -17,7 +17,7 @@ export interface ConfigField {
   min?: number;
   max?: number;
   description?: string;
-  validation?: (value: any) => string | null;
+  validation?: (value: unknown) => string | null;
 }
 
 export interface ConfigSection {
@@ -32,7 +32,7 @@ export interface TestConfigPanelProps {
   title?: string;
   config: Record<string, any>;
   sections: ConfigSection[];
-  onChange: (key: string, value: any) => void;
+  onChange: (key: string, value: unknown) => void;
   disabled?: boolean;
   errors?: string[];
   children?: ReactNode;
@@ -57,7 +57,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
   const renderField = (field: ConfigField) => {
     const value = config[field.key];
     const fieldId = `field-${field.key}`;
-    const hasError = errors.some(error => error.includes(field.label));
+    const hasError = errors?.some(error => error.includes(field.label));
 
     const baseInputClasses = `w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 ${
       hasError ? 'border-red-500' : 'border-gray-600 dark:border-gray-700'
@@ -93,7 +93,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
   };
 
   // 渲染字段输入控件
-  const renderFieldInput = (field: ConfigField, value: any, fieldId: string, baseClasses: string) => {
+  const renderFieldInput = (field: ConfigField, value: unknown, fieldId: string, baseClasses: string) => {
     switch (field.type) {
       case 'text':
       case 'url':
@@ -102,7 +102,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
             id={fieldId}
             type={field.type}
             value={value || ''}
-            onChange={(e) => onChange(field.key, e.target.value)}
+            onChange={(e) => onChange(field.key, e?.target.value)}
             placeholder={field.placeholder}
             disabled={disabled}
             className={baseClasses}
@@ -115,7 +115,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
             id={fieldId}
             type="number"
             value={value || ''}
-            onChange={(e) => onChange(field.key, parseInt(e.target.value) || 0)}
+            onChange={(e) => onChange(field.key, parseInt(e?.target.value) || 0)}
             placeholder={field.placeholder}
             disabled={disabled}
             className={baseClasses}
@@ -129,7 +129,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
           <select
             id={fieldId}
             value={value || ''}
-            onChange={(e) => onChange(field.key, e.target.value)}
+            onChange={(e) => onChange(field.key, e?.target.value)}
             disabled={disabled}
             className={baseClasses}
           >
@@ -149,7 +149,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
               id={fieldId}
               type="checkbox"
               checked={value || false}
-              onChange={(e) => onChange(field.key, e.target.checked)}
+              onChange={(e) => onChange(field.key, e?.target.checked)}
               disabled={disabled}
               className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
             />
@@ -164,7 +164,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
           <textarea
             id={fieldId}
             value={value || ''}
-            onChange={(e) => onChange(field.key, e.target.value)}
+            onChange={(e) => onChange(field.key, e?.target.value)}
             placeholder={field.placeholder}
             disabled={disabled}
             className={`${baseClasses} h-24 resize-vertical`}
@@ -178,7 +178,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
             id={fieldId}
             type="text"
             value={value || ''}
-            onChange={(e) => onChange(field.key, e.target.value)}
+            onChange={(e) => onChange(field.key, e?.target.value)}
             placeholder={field.placeholder}
             disabled={disabled}
             className={baseClasses}
@@ -215,14 +215,14 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
       </div>
 
       {/* 全局错误显示 */}
-      {errors.length > 0 && (
+      {errors?.length > 0 && (
         <div className="mb-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
           <div className="flex items-center space-x-2 text-red-400 mb-2">
             <AlertCircle className="w-4 h-4" />
             <span className="font-medium">配置错误</span>
           </div>
           <ul className="text-red-300 text-sm space-y-1">
-            {errors.map((error, index) => (
+            {errors?.map((error, index) => (
               <li key={index}>• {error}</li>
             ))}
           </ul>

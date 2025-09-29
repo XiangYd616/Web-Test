@@ -52,7 +52,7 @@ export interface APIEndpoint {
   url?: string;
   expectedStatus?: number[];
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   params?: Record<string, any>;
   maxResponseTime?: number;
   expectedContentType?: string;
@@ -209,7 +209,7 @@ export interface EngineState {
 export interface WebSocketMessage {
   type: 'testProgress' | 'testCompleted' | 'testFailed' | 'engineStatus';
   testId?: string;
-  data: any;
+  data: unknown;
   timestamp?: string;
 }
 
@@ -223,8 +223,8 @@ export interface TestTypeInfo {
   core: string;
   methods: string[];
   dependencies: string[];
-  configSchema?: any;
-  examples?: any[];
+  configSchema?: unknown;
+  examples?: unknown[];
   registeredAt: string;
 }
 
@@ -313,8 +313,8 @@ export interface PaginatedResponse<T = any> extends APIResponse<T> {
 export interface ValidationError {
   field: string;
   message: string;
-  value?: any;
-  allowedValues?: any[];
+  value?: unknown;
+  allowedValues?: unknown[];
 }
 
 /**
@@ -385,7 +385,7 @@ export interface UnifiedTestEngineHook {
  * 测试执行Hook返回类型
  */
 export interface TestExecutionHook extends UnifiedTestEngineHook {
-  executeTest: (config: Record<string, any>, options?: any) => Promise<string>;
+  executeTest: (config: Record<string, any>, options?: unknown) => Promise<string>;
   isSupported: boolean;
   testType: TestType;
 }
@@ -420,7 +420,7 @@ export interface UnifiedTestPanelProps {
 export interface TestConfigFormValues {
   testType: TestType;
   url: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // 注意：所有类型已在上面单独导出，无需重复导出

@@ -29,15 +29,15 @@ export interface TestMetric {
 export interface TestResultSection {
   title: string;
   type: 'metrics' | 'table' | 'text' | 'custom';
-  data: any;
-  renderer?: (data: any) => ReactNode;
+  data: unknown;
+  renderer?: (data: unknown) => ReactNode;
   collapsible?: boolean;
   defaultExpanded?: boolean;
 }
 
 export interface TestResultsPanelProps {
   title?: string;
-  result: any;
+  result: unknown;
   sections?: TestResultSection[];
   metrics?: TestMetric[];
   onRetest?: () => void;
@@ -65,7 +65,7 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
   className = ''
 }) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(sections.filter(s => s.defaultExpanded !== false).map(s => s.title))
+    new Set(sections?.filter(s => s?.defaultExpanded !== false).map(s => s?.title))
   );
   const [showRaw, setShowRaw] = useState(false);
 
@@ -118,7 +118,7 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {metrics.map((metric) => (
+        {metrics?.map((metric) => (
           <div key={metric.key} className="themed-bg-secondary rounded-lg p-4 border themed-border-secondary">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-400">{metric.label}</span>
@@ -183,9 +183,9 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
                         </tr>
                       </thead>
                       <tbody>
-                        {section.data.map((row: any, index: number) => (
+                        {section.data.map((row: unknown, index: number) => (
                           <tr key={index} className="border-b themed-border-secondary">
-                            {Object.values(row).map((value: any, cellIndex) => (
+                            {Object.values(row).map((value: unknown, cellIndex) => (
                               <td key={cellIndex} className="py-2 px-3 text-gray-300">
                                 {String(value)}
                               </td>
@@ -283,7 +283,7 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
 
       {/* 结果章节 */}
       <div className="space-y-4">
-        {sections.map(renderSection)}
+        {sections?.map(renderSection)}
       </div>
 
       {/* 自定义内容 */}

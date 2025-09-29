@@ -39,7 +39,7 @@ const RoleDashboardRouter: React.FC = () => {
 
   // 获取用户的最高优先级角色
   const getHighestPriorityRole = () => {
-    if (!user?.roles || user.roles.length === 0) {
+    if (!user?.roles || user?.roles.length === 0) {
       return 'user'; // 默认角色
     }
 
@@ -47,7 +47,7 @@ const RoleDashboardRouter: React.FC = () => {
     let highestRole = 'user';
     let highestPriority = 0;
 
-    user.roles.forEach((role) => {
+    user?.roles.forEach((role) => {
       const priority = ROLE_PRIORITY[role as keyof typeof ROLE_PRIORITY] || 0;
       if (priority > highestPriority) {
         highestPriority = priority;

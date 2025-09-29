@@ -58,7 +58,7 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
         <div className="flex items-center space-x-3">
           <div className="relative">
             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              {user?.role === 'admin' ? (
+              {user.role === 'admin' ? (
                 <Crown className="w-6 h-6 text-white" />
               ) : (
                 <User className="w-6 h-6 text-white" />

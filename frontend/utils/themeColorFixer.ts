@@ -37,7 +37,7 @@ export const colorClassMapping = {
 };
 
 // 需要特殊处理的颜色类
-export const specialColorClasses = {
+export const _specialColorClasses = {
   // 状态颜色保持不变
   'text-red-500': 'text-red-500',
   'text-green-500': 'text-green-500',

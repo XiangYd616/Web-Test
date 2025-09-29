@@ -155,7 +155,7 @@ export const VirtualScroll = <T,>({
 
   // 滚动处理
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const target = e.currentTarget;
+    const target = e?.currentTarget;
     const newScrollTop = target.scrollTop;
     const newScrollLeft = target.scrollLeft;
 

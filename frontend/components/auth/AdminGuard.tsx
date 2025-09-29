@@ -43,7 +43,7 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
   }
 
   // 检查管理员权限
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user.role === 'admin';
   const hasAdminPermission = user?.permissions?.includes('admin:access');
 
   if (!isAdmin && !hasAdminPermission) {

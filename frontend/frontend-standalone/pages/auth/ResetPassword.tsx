@@ -104,7 +104,7 @@ const ResetPassword: React.FC = () => {
     if (!password) {
       return '请输入密码';
     }
-    if (password.length < 8) {
+    if (password?.length < 8) {
       return '密码至少需要8个字符';
     }
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
@@ -142,11 +142,11 @@ const ResetPassword: React.FC = () => {
   // 密码强度指示器
   const getPasswordStrength = (password: string): { score: number; text: string; color: string } => {
     let score = 0;
-    if (password.length >= 8) score++;
+    if (password?.length >= 8) score++;
     if (/(?=.*[a-z])(?=.*[A-Z])/.test(password)) score++;
     if (/(?=.*\d)/.test(password)) score++;
     if (/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(password)) score++;
-    if (password.length >= 12) score++;
+    if (password?.length >= 12) score++;
 
     if (score <= 2) return { score, text: '弱', color: 'text-red-500' };
     if (score <= 3) return { score, text: '中等', color: 'text-yellow-500' };

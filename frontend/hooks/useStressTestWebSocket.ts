@@ -31,7 +31,7 @@ export interface StressTestStatus {
 
 export interface StressTestResult {
   testId: string;
-  results: any;
+  results: unknown;
   success: boolean;
   timestamp: number;
 }
@@ -42,7 +42,7 @@ export interface UseStressTestWebSocketOptions {
   onProgress?: (progress: StressTestProgress) => void;
   onStatusChange?: (status: StressTestStatus) => void;
   onComplete?: (result: StressTestResult) => void;
-  onError?: (error: any) => void;
+  onError?: (error: unknown) => void;
 }
 
 export interface UseStressTestWebSocketReturn {
@@ -84,19 +84,19 @@ export const useStressTestWebSocket = (
 
   // 消息处理器
   const handleProgressMessage = useCallback((message: WebSocketMessage) => {
-    if (message.type === 'test_progress' && message.data) {
+    if (message.type === 'test_progress' && message?.data) {
       const progress: StressTestProgress = {
-        testId: message.testId || '',
-        progress: message.data.progress || 0,
-        currentStep: message.data.currentStep || '',
-        totalSteps: message.data.totalSteps || 0,
-        responseTime: message.data.responseTime || 0,
-        throughput: message.data.throughput || 0,
-        activeUsers: message.data.activeUsers || 0,
-        errorRate: message.data.errorRate || 0,
-        successRate: message.data.successRate || (100 - (message.data.errorRate || 0)),
-        phase: message.data.phase,
-        timestamp: message.timestamp || Date.now()
+        testId: message?.testId || '',
+        progress: message?.data.progress || 0,
+        currentStep: message?.data.currentStep || '',
+        totalSteps: message?.data.totalSteps || 0,
+        responseTime: message?.data.responseTime || 0,
+        throughput: message?.data.throughput || 0,
+        activeUsers: message?.data.activeUsers || 0,
+        errorRate: message?.data.errorRate || 0,
+        successRate: message?.data.successRate || (100 - (message?.data.errorRate || 0)),
+        phase: message?.data.phase,
+        timestamp: message?.timestamp || Date.now()
       };
 
       setLatestProgress(progress);
@@ -110,12 +110,12 @@ export const useStressTestWebSocket = (
      * @returns {Promise<Object>} 返回结果
      */
   const handleStatusMessage = useCallback((message: WebSocketMessage) => {
-    if (message.type === 'test_status_update' && message.data) {
+    if (message.type === 'test_status_update' && message?.data) {
       const status: StressTestStatus = {
-        testId: message.testId || '',
-        status: message.data.status,
-        message: message.data.message,
-        timestamp: message.timestamp || Date.now()
+        testId: message?.testId || '',
+        status: message?.data.status,
+        message: message?.data.message,
+        timestamp: message?.timestamp || Date.now()
       };
 
       setLatestStatus(status);
@@ -129,12 +129,12 @@ export const useStressTestWebSocket = (
      * @returns {Promise<Object>} 返回结果
      */
   const handleCompleteMessage = useCallback((message: WebSocketMessage) => {
-    if (message.type === 'test_completed' && message.data) {
+    if (message.type === 'test_completed' && message?.data) {
       const result: StressTestResult = {
-        testId: message.testId || '',
-        results: message.data.results,
-        success: message.data.success || false,
-        timestamp: message.timestamp || Date.now()
+        testId: message?.testId || '',
+        results: message?.data.results,
+        success: message?.data.success || false,
+        timestamp: message?.timestamp || Date.now()
       };
 
       onComplete?.(result);
@@ -147,8 +147,8 @@ export const useStressTestWebSocket = (
      * @returns {Promise<Object>} 返回结果
      */
   const handleErrorMessage = useCallback((message: WebSocketMessage) => {
-    if (message.type === 'test_error' && message.data) {
-      onError?.(message.data);
+    if (message.type === 'test_error' && message?.data) {
+      onError?.(message?.data);
     }
   }, [onError]);
 

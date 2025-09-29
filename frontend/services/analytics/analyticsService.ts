@@ -67,7 +67,7 @@ export interface AnalyticsInsight {
   title: string;
   description: string;
   impact: string;
-  evidence: any[];
+  evidence: unknown[];
   relatedMetrics: string[];
   confidence: number; // 0-100
 }
@@ -134,10 +134,10 @@ export interface ComparisonData {
   baseline: {
     name: string;
     timestamp: string;
-    metrics: any;
+    metrics: unknown;
   };
   current: {
-    metrics: any;
+    metrics: unknown;
   };
   differences: {
     metric: string;
@@ -152,7 +152,7 @@ export class AdvancedAnalyticsService {
   private static readonly TRENDS_STORAGE_KEY = 'analytics_trends_data';
 
   // 生成高级分析报告
-  static async generateAnalytics(testResult: any): Promise<AnalyticsData> {
+  static async generateAnalytics(testResult: unknown): Promise<AnalyticsData> {
     const analytics: AnalyticsData = {
       testId: testResult.id,
       url: testResult.url,
@@ -173,7 +173,7 @@ export class AdvancedAnalyticsService {
   }
 
   // 提取详细指标
-  private static async extractDetailedMetrics(testResult: any): Promise<DetailedMetrics> {
+  private static async extractDetailedMetrics(testResult: unknown): Promise<DetailedMetrics> {
     return {
       performance: {
         coreWebVitals: this.extractCoreWebVitals(testResult),
@@ -205,7 +205,7 @@ export class AdvancedAnalyticsService {
   }
 
   // 生成智能洞察
-  private static async generateInsights(testResult: any): Promise<AnalyticsInsight[]> {
+  private static async generateInsights(testResult: unknown): Promise<AnalyticsInsight[]> {
     const insights: AnalyticsInsight[] = [];
 
     // 性能洞察
@@ -233,7 +233,7 @@ export class AdvancedAnalyticsService {
   }
 
   // 生成性能洞察
-  private static generatePerformanceInsights(performanceData: any): AnalyticsInsight[] {
+  private static generatePerformanceInsights(performanceData: unknown): AnalyticsInsight[] {
     const insights: AnalyticsInsight[] = [];
 
     // LCP 分析
@@ -274,7 +274,7 @@ export class AdvancedAnalyticsService {
   }
 
   // 生成智能建议
-  private static async generateSmartRecommendations(testResult: any): Promise<SmartRecommendation[]> {
+  private static async generateSmartRecommendations(testResult: unknown): Promise<SmartRecommendation[]> {
     const recommendations: SmartRecommendation[] = [];
 
     // 基于性能数据生成建议
@@ -296,7 +296,7 @@ export class AdvancedAnalyticsService {
   }
 
   // 生成性能建议
-  private static generatePerformanceRecommendations(performanceData: any): SmartRecommendation[] {
+  private static generatePerformanceRecommendations(performanceData: unknown): SmartRecommendation[] {
     const recommendations: SmartRecommendation[] = [];
 
     if (performanceData.largestContentfulPaint > 2500) {
@@ -342,7 +342,7 @@ export class AdvancedAnalyticsService {
   }
 
   // 运行诊断
-  private static async runDiagnostics(testResult: any): Promise<DiagnosticResult[]> {
+  private static async runDiagnostics(testResult: unknown): Promise<DiagnosticResult[]> {
     const diagnostics: DiagnosticResult[] = [];
 
     // 性能诊断
@@ -358,7 +358,7 @@ export class AdvancedAnalyticsService {
   }
 
   // 性能诊断
-  private static runPerformanceDiagnostics(testResult: any): DiagnosticResult[] {
+  private static runPerformanceDiagnostics(testResult: unknown): DiagnosticResult[] {
     const diagnostics: DiagnosticResult[] = [];
 
     // 图片优化诊断
@@ -398,7 +398,7 @@ export class AdvancedAnalyticsService {
   }
 
   // 辅助方法
-  private static extractCoreWebVitals(testResult: any): CoreWebVitals {
+  private static extractCoreWebVitals(testResult: unknown): CoreWebVitals {
     const performance = testResult.metrics?.performance || {};
 
     return {
@@ -542,34 +542,34 @@ export class AdvancedAnalyticsService {
   }
 
   // 其他辅助方法的占位符
-  private static extractLoadingMetrics(testResult: any): LoadingMetrics { return {} as LoadingMetrics; }
-  private static extractInteractivityMetrics(testResult: any): any { return {}; }
-  private static extractVisualStabilityMetrics(testResult: any): any { return {}; }
-  private static extractNetworkMetrics(testResult: any): any { return {}; }
-  private static extractResourceMetrics(testResult: any): any { return {}; }
-  private static analyzePrivacyCompliance(testResult: any): any { return {}; }
-  private static analyzeWCAGCompliance(testResult: any): any { return {}; }
-  private static analyzeAccessibilityBestPractices(testResult: any): any { return {}; }
-  private static analyzeUserExperience(testResult: any): any { return {}; }
-  private static analyzeOnPageSEO(testResult: any): any { return {}; }
-  private static analyzeTechnicalSEO(testResult: any): any { return {}; }
-  private static analyzeContentQuality(testResult: any): any { return {}; }
-  private static analyzeStructuredData(testResult: any): any { return {}; }
-  private static generateSecurityInsights(securityData: any): AnalyticsInsight[] { return []; }
-  private static generateAccessibilityInsights(accessibilityData: any): AnalyticsInsight[] { return []; }
-  private static generateSecurityRecommendations(securityData: any): SmartRecommendation[] { return []; }
-  private static runSecurityDiagnostics(testResult: any): DiagnosticResult[] { return []; }
-  private static runAccessibilityDiagnostics(testResult: any): DiagnosticResult[] { return []; }
-  private static generateComparisons(testResult: any): Promise<ComparisonData[]> { return Promise.resolve([]); }
+  private static extractLoadingMetrics(testResult: unknown): LoadingMetrics { return {} as LoadingMetrics; }
+  private static extractInteractivityMetrics(testResult: unknown): unknown { return {}; }
+  private static extractVisualStabilityMetrics(testResult: unknown): unknown { return {}; }
+  private static extractNetworkMetrics(testResult: unknown): unknown { return {}; }
+  private static extractResourceMetrics(testResult: unknown): unknown { return {}; }
+  private static analyzePrivacyCompliance(testResult: unknown): unknown { return {}; }
+  private static analyzeWCAGCompliance(testResult: unknown): unknown { return {}; }
+  private static analyzeAccessibilityBestPractices(testResult: unknown): unknown { return {}; }
+  private static analyzeUserExperience(testResult: unknown): unknown { return {}; }
+  private static analyzeOnPageSEO(testResult: unknown): unknown { return {}; }
+  private static analyzeTechnicalSEO(testResult: unknown): unknown { return {}; }
+  private static analyzeContentQuality(testResult: unknown): unknown { return {}; }
+  private static analyzeStructuredData(testResult: unknown): unknown { return {}; }
+  private static generateSecurityInsights(securityData: unknown): AnalyticsInsight[] { return []; }
+  private static generateAccessibilityInsights(accessibilityData: unknown): AnalyticsInsight[] { return []; }
+  private static generateSecurityRecommendations(securityData: unknown): SmartRecommendation[] { return []; }
+  private static runSecurityDiagnostics(testResult: unknown): DiagnosticResult[] { return []; }
+  private static runAccessibilityDiagnostics(testResult: unknown): DiagnosticResult[] { return []; }
+  private static generateComparisons(testResult: unknown): Promise<ComparisonData[]> { return Promise.resolve([]); }
 }
 
 // 类型定义的占位符
-interface TrendPattern { type: string; description: string; confidence: number; timeRange: any; }
+interface TrendPattern { type: string; description: string; confidence: number; timeRange: unknown; }
 interface TrendForecast { metric: string; prediction: number; confidence: number; timeframe: string; }
 interface TrendAnomaly { }
 interface CodeExample { language: string; code: string; description: string; }
 interface Resource { title: string; url: string; }
-interface DiagnosticEvidence { type: string; name: string; value: any; }
+interface DiagnosticEvidence { type: string; name: string; value: unknown; }
 interface InteractivityMetrics { }
 interface VisualStabilityMetrics { }
 interface NetworkMetrics { }
@@ -628,7 +628,7 @@ export class LegacyAnalyticsService {
     });
   }
 
-  private static convertToCSV(data: any): string {
+  private static convertToCSV(data: unknown): string {
     let csv = 'Type,Value\n';
     csv += `Total Tests,${data.overview.totalTests}\n`;
     csv += `Success Rate,${data.overview.successRate}\n`;
@@ -639,7 +639,7 @@ export class LegacyAnalyticsService {
 }
 
 // 创建服务实例并导出
-export const analyticsService = LegacyAnalyticsService;
+export const _analyticsService = LegacyAnalyticsService;
 
 // 类型导出
 export type AnalyticsService = typeof LegacyAnalyticsService;

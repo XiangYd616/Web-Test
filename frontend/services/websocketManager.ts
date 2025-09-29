@@ -6,7 +6,7 @@
 export interface WebSocketMessage {
   type: string;
   testId?: string;
-  data?: any;
+  data?: unknown;
   timestamp?: number;
 }
 
@@ -56,7 +56,7 @@ class WebSocketManager {
    */
   public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.ws?.readyState === WebSocket.OPEN) {
+      if (this.ws.readyState === WebSocket.OPEN) {
         resolve();
         return;
       }
@@ -125,7 +125,7 @@ class WebSocketManager {
    * 发送消息
    */
   public send(message: WebSocketMessage): boolean {
-    if (this.ws?.readyState === WebSocket.OPEN) {
+    if (this.ws.readyState === WebSocket.OPEN) {
       try {
         const messageWithTimestamp = {
           ...message,
@@ -261,7 +261,7 @@ class WebSocketManager {
     this.stopHeartbeat();
     
     this.heartbeatInterval = setInterval(() => {
-      if (this.ws?.readyState === WebSocket.OPEN) {
+      if (this.ws.readyState === WebSocket.OPEN) {
         this.send({ type: 'ping' });
       }
     }, this.config.heartbeatInterval);
@@ -279,6 +279,6 @@ class WebSocketManager {
 }
 
 // 创建全局WebSocket管理器实例
-export const websocketManager = new WebSocketManager();
+export const _websocketManager = new WebSocketManager();
 
 export default WebSocketManager;

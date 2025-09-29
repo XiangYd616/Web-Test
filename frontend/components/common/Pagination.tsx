@@ -453,11 +453,11 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
           <span className="text-gray-400">每页</span>
           <select
             value={pageSize}
-            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+            onChange={(e) => handlePageSizeChange(Number(e?.target.value))}
             disabled={disabled}
             className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-300 focus:outline-none focus:border-blue-500 disabled:opacity-50"
           >
-            {pageSizeOptions.map(size => (
+            {pageSizeOptions?.map(size => (
               <option key={size} value={size}>{size}</option>
             ))}
           </select>
@@ -474,7 +474,7 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
             min={1}
             max={totalPages}
             value={jumpValue}
-            onChange={(e) => setJumpValue(e.target.value)}
+            onChange={(e) => setJumpValue(e?.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleQuickJump()}
             disabled={disabled}
             className="w-16 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-300 text-center focus:outline-none focus:border-blue-500 disabled:opacity-50"

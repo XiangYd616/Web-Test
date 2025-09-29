@@ -9,9 +9,9 @@ export interface TestRecord {
     startTime: string;
     endTime?: string;
     actualDuration?: number;
-    results?: any;
-    config?: any;
-    scores?: any;
+    results?: unknown;
+    config?: unknown;
+    scores?: unknown;
     recommendations?: string[];
     savedAt: string;
 }

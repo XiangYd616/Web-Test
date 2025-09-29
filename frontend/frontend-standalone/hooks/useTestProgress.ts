@@ -4,10 +4,10 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { testProgressService, type ProgressListener, type TestProgress } from '../services/api/testProgressService';
+import {testProgressService} from '../services/api/testProgressService';
 export interface UseTestProgressOptions {
   autoStart?: boolean; // 是否自动开始监控
-  onComplete?: (result: any) => void;
+  onComplete?: (result: unknown) => void;
   onError?: (error: string) => void;
   onProgress?: (progress: TestProgress) => void;
 }
@@ -44,7 +44,7 @@ export function useTestProgress(
         setError(null);
         options.onProgress?.(progressData);
       },
-      onComplete: (result: any) => {
+      onComplete: (result: unknown) => {
         setIsMonitoring(false);
         options.onComplete?.(result);
       },
@@ -163,7 +163,7 @@ export function useBatchTestProgress(
         setError(null);
         options.onProgress?.(progressData);
       },
-      onComplete: (result: any) => {
+      onComplete: (result: unknown) => {
         options.onComplete?.(result);
         
         // 检查是否所有测试都完成了

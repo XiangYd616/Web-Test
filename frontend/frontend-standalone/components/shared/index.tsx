@@ -6,17 +6,17 @@ export interface Column {
   key: string;
   title: string;
   dataIndex?: string;
-  render?: (value: any, record: any, index: number) => React.ReactNode;
+  render?: (value: unknown, record: unknown, index: number) => React.ReactNode;
   width?: number | string;
   align?: 'left' | 'center' | 'right';
 }
 
 export interface DataTableProps {
   columns: Column[];
-  dataSource: any[];
+  dataSource: unknown[];
   loading?: boolean;
-  pagination?: any;
-  rowKey?: string | ((record: any) => string);
+  pagination?: unknown;
+  rowKey?: string | ((record: unknown) => string);
 }
 
 export const DataTable: React.FC<DataTableProps> = ({ 
@@ -84,8 +84,8 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend })
           <p className="text-sm text-gray-600">{title}</p>
           <p className="text-2xl font-bold">{value}</p>
           {trend && (
-            <p className={`text-sm ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
+            <p className={`text-sm ${trend?.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+              {trend?.isPositive ? '↑' : '↓'} {Math.abs(trend?.value)}%
             </p>
           )}
         </div>

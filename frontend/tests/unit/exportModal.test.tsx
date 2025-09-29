@@ -9,7 +9,7 @@ vi.mock('../utils/exportUtils', () => ({
   exportByType: vi.fn()
 }));
 
-const mockExportUtils = ExportUtils as jest.Mocked<typeof ExportUtils>;
+const _mockExportUtils = ExportUtils as jest.Mocked<typeof ExportUtils>;
 
 describe('ExportModal', () => {
   const mockData = {

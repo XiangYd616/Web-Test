@@ -239,7 +239,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
               <span>
                 {change.type === 'increase' ? '↗' : change.type === 'decrease' ? '↘' : '→'}
               </span>
-              <span>{Math.abs(change.value)}%</span>
+              <span>{Math.abs(change?.value)}%</span>
             </div>
           )}
         </div>
@@ -480,7 +480,7 @@ export const EnhancementsUsageGuide: React.FC = () => {
         <CodeBlock
           title="API 调用示例"
           language="javascript"
-          code={`const response = await fetch('/api/test', {
+          code={`const _response = await fetch('/api/test', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'

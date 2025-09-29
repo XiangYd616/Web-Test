@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { Download, FileText, Share2, Printer, Eye, Settings, BarChart3, TrendingUp } from 'lucide-react';
+import {Download, FileText, Share2, Eye} from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
 import { MobileSEOAnalysisResult } from '../../utils/MobileSEODetector';
 import { CoreWebVitalsResult } from '../../utils/CoreWebVitalsAnalyzer';
@@ -36,7 +36,7 @@ interface ReportTemplate {
 
 interface SEOReportGeneratorProps {
   reportData: SEOReportData;
-  onReportGenerated?: (format: string, data: any) => void;
+  onReportGenerated?: (format: string, data: unknown) => void;
   onError?: (error: string) => void;
 }
 
@@ -202,7 +202,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
   // 构建报告内容
   const buildReportContent = async (template: ReportTemplate): Promise<any> => {
-    const content: any = {};
+    const content: unknown = {};
 
     for (const section of template.sections) {
       switch (section) {
@@ -378,7 +378,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
   // 生成关键问题部分
   const generateKeyIssuesSection = () => {
-    const keyIssues: any[] = [];
+    const keyIssues: unknown[] = [];
 
     if (reportData.basicSEO) {
       const highImpactIssues = reportData.basicSEO.issues.filter(i => i.impact === 'high');
@@ -390,7 +390,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
   // 生成建议部分
   const generateRecommendationsSection = () => {
-    const recommendations: any[] = [];
+    const recommendations: unknown[] = [];
 
     if (reportData.basicSEO) {
       recommendations.push(...reportData.basicSEO.recommendations.slice(0, 10));
@@ -414,7 +414,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
   // 生成所有问题部分
   const generateIssuesSection = () => {
-    const allIssues: any[] = [];
+    const allIssues: unknown[] = [];
 
     if (reportData.basicSEO) {
       allIssues.push(...reportData.basicSEO.issues);
@@ -446,7 +446,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
   };
 
   // 生成PDF内容（简化实现，实际需要使用PDF库）
-  const generatePDFBlob = async (content: any, template: ReportTemplate): Promise<Blob> => {
+  const generatePDFBlob = async (content: unknown, template: ReportTemplate): Promise<Blob> => {
     // 这里应该使用jsPDF、Puppeteer或类似的PDF生成库
     // 当前返回一个模拟的PDF blob
     const pdfContent = `PDF报告内容 - ${template.name}\n\n${JSON.stringify(content, null, 2)}`;
@@ -454,7 +454,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
   };
 
   // 生成HTML内容
-  const generateHTMLContent = async (content: any, template: ReportTemplate): Promise<string> => {
+  const generateHTMLContent = async (content: unknown, template: ReportTemplate): Promise<string> => {
     const htmlTemplate = `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -504,7 +504,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
         
         ${content.recommendations ? `
         <h2>优化建议</h2>
-        ${content.recommendations.map((rec: any, index: number) => `
+        ${content.recommendations.map((rec: unknown, index: number) => `
             <div class="recommendation">
                 <h4>${rec.title}</h4>
                 <p><strong>优先级:</strong> ${rec.priority === 'high' ? '高' : rec.priority === 'medium' ? '中' : '低'}</p>

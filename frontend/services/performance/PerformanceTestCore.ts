@@ -1004,7 +1004,7 @@ export class PerformanceTestCore {
   /**
    * 估算资源加载时间
    */
-  private estimateResourceLoadTime(resources: any): number {
+  private estimateResourceLoadTime(resources: unknown): number {
     // 基于资源数量估算加载时间
     return resources.images * 100 + resources.scripts * 150 + resources.stylesheets * 80;
   }
@@ -1012,7 +1012,7 @@ export class PerformanceTestCore {
   /**
    * 计算LCP (Largest Contentful Paint)
    */
-  private calculateLCP(pageSize: number, resources: any, dom: Document): number {
+  private calculateLCP(pageSize: number, resources: unknown, dom: Document): number {
     let baseLCP = 1200;
 
     // 页面大小影响
@@ -1096,4 +1096,4 @@ export class PerformanceTestCore {
 }
 
 // 导出单例实例
-export const performanceTestCore = new PerformanceTestCore();
+export const _performanceTestCore = new PerformanceTestCore();

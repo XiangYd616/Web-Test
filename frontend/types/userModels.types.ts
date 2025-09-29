@@ -392,24 +392,24 @@ export function fromDatabaseFields(dbData: UserDatabaseFields): User {
  */
 export function toDatabaseFields(user: User, passwordHash?: string): UserDatabaseFields {
   return {
-    id: user.id,
-    username: user.username,
-    email: user.email,
+    id: user?.id,
+    username: user?.username,
+    email: user?.email,
     password_hash: passwordHash || '', // 需要单独处理
-    first_name: user.profile.firstName,
-    last_name: user.profile.lastName,
-    role: user.role,
-    plan: user.plan,
-    status: user.status,
-    email_verified: user.emailVerified,
-    email_verified_at: user.emailVerifiedAt,
-    last_login: user.lastLoginAt,
-    login_count: user.loginCount,
-    failed_login_attempts: user.loginAttempts,
-    locked_until: user.lockedUntil,
-    preferences: JSON.stringify(user.preferences),
-    metadata: JSON.stringify(user.metadata),
-    created_at: user.createdAt,
-    updated_at: user.updatedAt
+    first_name: user?.profile.firstName,
+    last_name: user?.profile.lastName,
+    role: user?.role,
+    plan: user?.plan,
+    status: user?.status,
+    email_verified: user?.emailVerified,
+    email_verified_at: user?.emailVerifiedAt,
+    last_login: user?.lastLoginAt,
+    login_count: user?.loginCount,
+    failed_login_attempts: user?.loginAttempts,
+    locked_until: user?.lockedUntil,
+    preferences: JSON.stringify(user?.preferences),
+    metadata: JSON.stringify(user?.metadata),
+    created_at: user?.createdAt,
+    updated_at: user?.updatedAt
   };
 }

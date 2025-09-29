@@ -14,7 +14,7 @@ interface ApiResponse<T = any> {
   meta?: {
     timestamp: string;
     requestId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -26,7 +26,7 @@ interface BackendApiResponse<T = any> {
   error?: string | {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
 }
 
@@ -131,7 +131,7 @@ export function createMockUser(overrides: Partial<any> = {}) {
  * 创建模拟的fetch响应
  */
 export function createMockFetchResponse(
-  data: any,
+  data: unknown,
   options: {
     ok?: boolean;
     status?: number;
@@ -227,7 +227,7 @@ export function expectFetchCalledWith(
   options: {
     method?: string;
     headers?: Record<string, string>;
-    body?: any;
+    body?: unknown;
   } = {}
 ) {
   expect(global.fetch).toHaveBeenCalledWith(
@@ -297,7 +297,7 @@ export function generateErrorScenarios() {
 /**
  * 验证项目数据结构
  */
-export function validateProjectData(project: any) {
+export function validateProjectData(project: unknown) {
   expect(project).toHaveProperty('id');
   expect(project).toHaveProperty('name');
   expect(project).toHaveProperty('description');
@@ -311,7 +311,7 @@ export function validateProjectData(project: any) {
 /**
  * 验证测试执行数据结构
  */
-export function validateTestExecutionData(execution: any) {
+export function validateTestExecutionData(execution: unknown) {
   expect(execution).toHaveProperty('id');
   expect(execution).toHaveProperty('test_type');
   expect(execution).toHaveProperty('project_id');
@@ -324,7 +324,7 @@ export function validateTestExecutionData(execution: any) {
 /**
  * 验证用户数据结构
  */
-export function validateUserData(user: any) {
+export function validateUserData(user: unknown) {
   expect(user).toHaveProperty('id');
   expect(user).toHaveProperty('username');
   expect(user).toHaveProperty('email');

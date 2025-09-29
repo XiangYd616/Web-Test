@@ -4,19 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { 
-  Clock, 
-  Settings,
-  Download,
-  Upload,
-  RefreshCw,
-  Info,
-  AlertTriangle,
-  CheckCircle,
-  Calendar,
-  Bell,
-  TrendingUp
-} from 'lucide-react';
+import {Clock, Settings, Download, Upload, RefreshCw, Info, AlertTriangle, CheckCircle, Calendar, TrendingUp} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ScheduledTaskManager from '../components/scheduling/ScheduledTaskManager';
 
@@ -41,7 +29,7 @@ const ScheduledTasksPage: React.FC = () => {
   const [showImportModal, setShowImportModal] = useState(false);
 
   // 处理任务创建
-  const handleTaskCreate = useCallback((task: any) => {
+  const handleTaskCreate = useCallback((task: unknown) => {
     console.log('New task created:', task);
     // 可以在这里处理任务创建后的逻辑，比如发送到后端API
     
@@ -53,7 +41,7 @@ const ScheduledTasksPage: React.FC = () => {
   }, []);
 
   // 处理任务更新
-  const handleTaskUpdate = useCallback((task: any) => {
+  const handleTaskUpdate = useCallback((task: unknown) => {
     console.log('Task updated:', task);
     // 处理任务更新逻辑
   }, []);

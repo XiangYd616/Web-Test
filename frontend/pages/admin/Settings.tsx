@@ -53,7 +53,7 @@ const UnifiedSettings: React.FC = () => {
   const [userPreferences, setUserPreferences] = useState<Record<string, any>>({});
   const [formData, setFormData] = useState<Record<string, any>>({});
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user.role === 'admin';
 
   // 加载数据
   useEffect(() => {
@@ -329,7 +329,7 @@ const PreferencesSettings: React.FC<{
     enableAnimations: true,
     showAdvancedOptions: false,
     autoSaveSettings: true,
-    ...preferences.interface
+    ...preferences?.interface
   });
 
   const [testingPrefs, setTestingPrefs] = useState<TestingPrefs>({
@@ -337,7 +337,7 @@ const PreferencesSettings: React.FC<{
     resultRetentionDays: 30,
     autoStartTests: false,
     showDetailedLogs: false,
-    ...preferences.testing
+    ...preferences?.testing
   });
 
   const handleInterfaceSave = () => {
@@ -379,7 +379,7 @@ const PreferencesSettings: React.FC<{
                 id="theme-select"
                 value={interfacePrefs.theme}
                 onChange={(e) => {
-                  const newTheme = e.target.value as 'light' | 'dark';
+                  const newTheme = e?.target.value as 'light' | 'dark';
                   setInterfacePrefs(prev => ({ ...prev, theme: newTheme }));
                   // 立即应用主题更改
                   setTheme(newTheme);
@@ -396,7 +396,7 @@ const PreferencesSettings: React.FC<{
               <select
                 id="language-select"
                 value={interfacePrefs.language}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, language: e.target.value }))}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, language: e?.target.value }))}
                 className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
                 aria-label="选择界面语言"
               >
@@ -409,7 +409,7 @@ const PreferencesSettings: React.FC<{
               <select
                 id="timezone-select"
                 value={interfacePrefs.timezone}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, timezone: e.target.value }))}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, timezone: e?.target.value }))}
                 className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
                 aria-label="选择时区设置"
               >
@@ -424,7 +424,7 @@ const PreferencesSettings: React.FC<{
               <select
                 id="date-format-select"
                 value={interfacePrefs.dateFormat}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, dateFormat: e.target.value }))}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, dateFormat: e?.target.value }))}
                 className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
                 aria-label="选择日期格式"
               >
@@ -440,7 +440,7 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={interfacePrefs.enableAnimations}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, enableAnimations: e.target.checked }))}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, enableAnimations: e?.target.checked }))}
                 className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="启用动画效果"
               />
@@ -450,7 +450,7 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={interfacePrefs.showAdvancedOptions}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, showAdvancedOptions: e.target.checked }))}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, showAdvancedOptions: e?.target.checked }))}
                 className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="显示高级选项"
               />
@@ -460,7 +460,7 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={interfacePrefs.autoSaveSettings}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, autoSaveSettings: e.target.checked }))}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, autoSaveSettings: e?.target.checked }))}
                 className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="自动保存设置"
               />
@@ -496,7 +496,7 @@ const PreferencesSettings: React.FC<{
                 id="default-timeout-input"
                 type="number"
                 value={testingPrefs.defaultTimeout}
-                onChange={(e) => setTestingPrefs(prev => ({ ...prev, defaultTimeout: parseInt(e.target.value) || 60 }))}
+                onChange={(e) => setTestingPrefs(prev => ({ ...prev, defaultTimeout: parseInt(e?.target.value) || 60 }))}
                 min="10"
                 max="300"
                 aria-label="设置默认测试超时时间"
@@ -509,7 +509,7 @@ const PreferencesSettings: React.FC<{
                 id="retention-days-input"
                 type="number"
                 value={testingPrefs.resultRetentionDays}
-                onChange={(e) => setTestingPrefs(prev => ({ ...prev, resultRetentionDays: parseInt(e.target.value) || 30 }))}
+                onChange={(e) => setTestingPrefs(prev => ({ ...prev, resultRetentionDays: parseInt(e?.target.value) || 30 }))}
                 min="7"
                 max="365"
                 aria-label="设置测试结果保留天数"
@@ -523,7 +523,7 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={testingPrefs.autoStartTests}
-                onChange={(e) => setTestingPrefs(prev => ({ ...prev, autoStartTests: e.target.checked }))}
+                onChange={(e) => setTestingPrefs(prev => ({ ...prev, autoStartTests: e?.target.checked }))}
                 className="w-5 h-5 text-green-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-green-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="自动开始测试"
               />
@@ -533,7 +533,7 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={testingPrefs.showDetailedLogs}
-                onChange={(e) => setTestingPrefs(prev => ({ ...prev, showDetailedLogs: e.target.checked }))}
+                onChange={(e) => setTestingPrefs(prev => ({ ...prev, showDetailedLogs: e?.target.checked }))}
                 className="w-5 h-5 text-green-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-green-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="显示详细日志"
               />
@@ -707,7 +707,7 @@ const AccountSettings: React.FC = () => {
             <label className="block text-sm font-semibold text-gray-300">注册时间</label>
             <input
               type="text"
-              value={userInfo?.createdAt ? new Date(userInfo.createdAt).toLocaleDateString() : ''}
+              value={userInfo?.createdAt ? new Date(userInfo?.createdAt).toLocaleDateString() : ''}
               readOnly
               aria-label="注册时间"
               className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-gray-400 placeholder-gray-400 focus:outline-none transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -784,7 +784,7 @@ const NotificationSettings: React.FC<{
     emailScheduledTasks: false,
     browserPushEnabled: false,
     browserPushResults: false,
-    ...preferences.notifications
+    ...preferences?.notifications
   });
 
   const handleSave = () => {
@@ -815,7 +815,7 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.emailTestComplete}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailTestComplete: e.target.checked }))}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailTestComplete: e?.target.checked }))}
               className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
               aria-label="测试完成通知"
             />
@@ -825,7 +825,7 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.emailSystemAlerts}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailSystemAlerts: e.target.checked }))}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailSystemAlerts: e?.target.checked }))}
               className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
               aria-label="系统告警通知"
             />
@@ -835,7 +835,7 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.emailScheduledTasks}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailScheduledTasks: e.target.checked }))}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailScheduledTasks: e?.target.checked }))}
               className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
               aria-label="定时任务状态通知"
             />
@@ -867,7 +867,7 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.browserPushEnabled}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushEnabled: e.target.checked }))}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushEnabled: e?.target.checked }))}
               className="w-5 h-5 text-purple-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-purple-500/50 focus:ring-2 transition-all duration-200"
               aria-label="启用浏览器推送通知"
             />
@@ -877,7 +877,7 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.browserPushResults}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushResults: e.target.checked }))}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushResults: e?.target.checked }))}
               className="w-5 h-5 text-purple-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-purple-500/50 focus:ring-2 transition-all duration-200"
               aria-label="测试结果推送"
             />

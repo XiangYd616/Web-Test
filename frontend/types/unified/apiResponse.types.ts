@@ -17,7 +17,7 @@ export interface ApiResponse<T = any> {
   meta?: {
     timestamp: string;
     requestId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -116,11 +116,11 @@ export enum ErrorCode {
 export interface ApiError {
   code: ErrorCode;
   message: string;
-  details?: any;
+  details?: unknown;
   timestamp: string;
   retryable?: boolean;
   severity?: 'low' | 'medium' | 'high' | 'critical';
-  context?: any;
+  context?: unknown;
 }
 
 // 基础用户类型
@@ -147,7 +147,7 @@ export interface BaseTestSession {
 export interface BaseSystemConfig {
   id: string;
   key: string;
-  value: any;
+  value: unknown;
   description?: string;
   updatedAt: string;
 }
@@ -158,7 +158,7 @@ export interface BaseAuditLog {
   userId: string;
   action: string;
   resource: string;
-  details?: any;
+  details?: unknown;
   timestamp: string;
 }
 
@@ -190,9 +190,9 @@ export interface UnifiedTestConfig {
 
 // 测试回调接口
 export interface TestCallbacks {
-  onProgress?: (progress: number, step?: string, metrics?: any) => void;
-  onComplete?: (result: any) => void;
-  onError?: (error: any) => void;
+  onProgress?: (progress: number, step?: string, metrics?: unknown) => void;
+  onComplete?: (result: unknown) => void;
+  onError?: (error: unknown) => void;
 }
 
 // 基于Context7最佳实践：移除重复导出语句

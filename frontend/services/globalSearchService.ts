@@ -266,12 +266,12 @@ class GlobalSearchService {
 
     let results = this.searchIndex.filter(item => {
       // 类型过滤
-      if (options?.types && !options.types.includes(item.type)) {
+      if (options?.types && !options?.types.includes(item.type)) {
         return false;
       }
 
       // 分类过滤
-      if (options?.categories && !options.categories.includes(item.category)) {
+      if (options?.categories && !options?.categories.includes(item.category)) {
         return false;
       }
 
@@ -305,11 +305,11 @@ class GlobalSearchService {
     });
 
     // 按相关性排序
-    results.sort((a, b) => b.relevance - a.relevance);
+    results.sort((a, b) => b.relevance - a?.relevance);
 
     // 限制结果数量
     if (options?.limit) {
-      results = results.slice(0, options.limit);
+      results = results.slice(0, options?.limit);
     }
 
     return results;
@@ -362,7 +362,7 @@ class GlobalSearchService {
       { id: 'help', name: '帮助', icon: 'HelpCircle', count: categoryMap.get('帮助') || 0 }
     ];
 
-    return categories.filter(cat => cat.count > 0);
+    return categories?.filter(cat => cat.count > 0);
   }
 
   // 记录搜索历史

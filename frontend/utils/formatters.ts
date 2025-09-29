@@ -326,17 +326,17 @@ export const formatTestType = (testType: string): string => {
  * @param error 错误对象或字符串
  * @returns 用户友好的错误信息
  */
-export const formatError = (error: any): string => {
+export const formatError = (error: unknown): string => {
   if (typeof error === 'string') {
     return error;
   }
 
   if (error?.message) {
-    return error.message;
+    return error?.message;
   }
 
   if (error?.error) {
-    return typeof error.error === 'string' ? error.error : JSON.stringify(error.error);
+    return typeof error.error === 'string' ? error?.error : JSON.stringify(error?.error);
   }
 
   return '发生未知错误';

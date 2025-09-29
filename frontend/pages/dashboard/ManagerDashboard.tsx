@@ -4,27 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  Users,
-  TrendingUp,
-  Calendar,
-  Target,
-  BarChart3,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  Award,
-  FileText,
-  Settings,
-  PieChart,
-  Activity,
-  MessageSquare,
-  Filter,
-  Download,
-  RefreshCw,
-  UserCheck,
-  Briefcase
-} from 'lucide-react';
+import {Users, TrendingUp, Calendar, Target, BarChart3, Clock, CheckCircle, FileText, Settings, MessageSquare, RefreshCw, UserCheck, Briefcase} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface TeamMetrics {
@@ -285,7 +265,7 @@ const ManagerDashboard: React.FC = () => {
           <div className="flex items-center space-x-4">
             <select
               value={selectedTimeRange}
-              onChange={(e) => setSelectedTimeRange(e.target.value)}
+              onChange={(e) => setSelectedTimeRange(e?.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
             >
               <option value="7d">最近7天</option>

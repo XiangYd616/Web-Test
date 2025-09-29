@@ -13,7 +13,7 @@ export interface TableColumn<T = any> {
   align?: 'left' | 'center' | 'right';
   sortable?: boolean;
   filterable?: boolean;
-  render?: (value: any, record: T, index: number) => React.ReactNode;
+  render?: (value: unknown, record: T, index: number) => React.ReactNode;
   className?: string;
 }
 
@@ -106,7 +106,7 @@ export const Table = <T extends Record<string, any>>({
   };
 
   // 处理筛选
-  const handleFilter = (column: TableColumn<T>, value: string) => {
+  const _handleFilter = (column: TableColumn<T>, value: string) => {
     const field = column.dataIndex || column.key;
     setFilters(prev => ({
       ...prev,
@@ -187,16 +187,16 @@ export const Table = <T extends Record<string, any>>({
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 onChange={(e) => {
                   const allKeys = paginatedData.map((record, index) => getRowKey(record, index));
-                  if (e.target.checked) {
-                    rowSelection.onChange?.(allKeys, paginatedData);
+                  if (e?.target.checked) {
+                    rowSelection?.onChange?.(allKeys, paginatedData);
                   } else {
-                    rowSelection.onChange?.([], []);
+                    rowSelection?.onChange?.([], []);
                   }
                 }}
                 checked={
                   paginatedData.length > 0 &&
                   paginatedData.every((record, index) =>
-                    rowSelection.selectedRowKeys?.includes(getRowKey(record, index))
+                    rowSelection?.selectedRowKeys?.includes(getRowKey(record, index))
                   )
                 }
               />
@@ -316,16 +316,16 @@ export const Table = <T extends Record<string, any>>({
                   <input
                     type="checkbox"
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    checked={rowSelection.selectedRowKeys?.includes(key) || false}
-                    disabled={rowSelection.getCheckboxProps?.(record)?.disabled}
+                    checked={rowSelection?.selectedRowKeys?.includes(key) || false}
+                    disabled={rowSelection?.getCheckboxProps?.(record)?.disabled}
                     onChange={(e) => {
-                      const currentSelected = rowSelection.selectedRowKeys || [];
+                      const currentSelected = rowSelection?.selectedRowKeys || [];
                       let newSelected: string[];
                       let newSelectedRows: T[];
 
-                      if (e.target.checked) {
+                      if (e?.target.checked) {
                         newSelected = [...currentSelected, key];
-                        newSelectedRows = [...(rowSelection.selectedRowKeys?.map(k =>
+                        newSelectedRows = [...(rowSelection?.selectedRowKeys?.map(k =>
                           paginatedData.find((r, i) => getRowKey(r, i) === k)
                         ).filter(Boolean) || []), record];
                       } else {
@@ -335,7 +335,7 @@ export const Table = <T extends Record<string, any>>({
                         ).filter(Boolean) as T[];
                       }
 
-                      rowSelection.onChange?.(newSelected, newSelectedRows);
+                      rowSelection?.onChange?.(newSelected, newSelectedRows);
                     }}
                   />
                 </td>
@@ -386,12 +386,12 @@ export const Table = <T extends Record<string, any>>({
 
       {pagination && (
         <TablePagination
-          current={pagination.current}
-          pageSize={pagination.pageSize}
-          total={pagination.total}
-          showSizeChanger={pagination.showSizeChanger}
-          showQuickJumper={pagination.showQuickJumper}
-          onChange={pagination.onChange}
+          current={pagination?.current}
+          pageSize={pagination?.pageSize}
+          total={pagination?.total}
+          showSizeChanger={pagination?.showSizeChanger}
+          showQuickJumper={pagination?.showQuickJumper}
+          onChange={pagination?.onChange}
         />
       )}
     </div>
@@ -453,7 +453,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
             <span className="text-gray-700 dark:text-gray-300">每页显示:</span>
             <select
               value={pageSize}
-              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              onChange={(e) => handlePageSizeChange(Number(e?.target.value))}
               className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]"
             >
               <option value={10} className="dark:bg-gray-700 dark:text-white">10 条</option>
@@ -496,7 +496,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
               className="w-12 px-1 py-1 text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
-                  const page = parseInt((e.target as HTMLInputElement).value);
+                  const page = parseInt((e?.target as HTMLInputElement).value);
                   handlePageChange(page);
                 }
               }}

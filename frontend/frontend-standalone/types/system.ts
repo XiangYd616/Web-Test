@@ -27,7 +27,7 @@ export interface SystemInfo {
 export interface SystemConfig {
   id: string;
   key: string;
-  value: any;
+  value: unknown;
   type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   description?: string;
   category: string;

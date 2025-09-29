@@ -194,7 +194,7 @@ export const getScreenInfo = () => {
   };
 };
 
-export const generateCompatibilityReport = () => {
+export const _generateCompatibilityReport = () => {
   const support = detectCSSSupport();
   const browser = getBrowserInfo();
   const screen = getScreenInfo();
@@ -241,4 +241,4 @@ const generateRecommendations = (support: FeatureSupport, browser: BrowserInfo):
 };
 
 // 导出全局支持状态
-export const browserSupport = detectCSSSupport();
+export const _browserSupport = detectCSSSupport();

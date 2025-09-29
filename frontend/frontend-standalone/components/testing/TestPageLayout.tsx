@@ -26,8 +26,8 @@ interface TestPageLayoutProps {
   onStopTest?: () => void;
 
   // 历史记录处理
-  onTestSelect?: (test: any) => void;
-  onTestRerun?: (test: any) => void;
+  onTestSelect?: (test: unknown) => void;
+  onTestRerun?: (test: unknown) => void;
 
   // 额外控制
   extraControls?: React.ReactNode;
@@ -141,12 +141,12 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   }, []);
 
   // 默认的历史记录处理函数
-  const handleTestSelect = (test: any) => {
+  const handleTestSelect = (test: unknown) => {
     setActiveTab('test');
     onTestSelect?.(test);
   };
 
-  const handleTestRerun = (test: any) => {
+  const handleTestRerun = (test: unknown) => {
     setActiveTab('test');
     onTestRerun?.(test);
   };

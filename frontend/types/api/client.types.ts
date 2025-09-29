@@ -54,7 +54,7 @@ export interface ErrorApiResponse extends BaseApiResponse {
   /** 错误代码 */
   errorCode?: string;
   /** 错误详情 */
-  details?: any;
+  details?: unknown;
 }
 
 /** 统一API响应类型 */
@@ -126,7 +126,7 @@ export interface ApiEndpoint {
   /** 请求参数 */
   params?: Record<string, any>;
   /** 请求体 */
-  body?: any;
+  body?: unknown;
   /** 预期状态码 */
   expectedStatus?: number;
   /** 响应验证规则 */
@@ -156,7 +156,7 @@ export interface ValidationRule {
   /** 验证类型 */
   type: 'required' | 'type' | 'value' | 'range' | 'pattern';
   /** 期望值 */
-  expected?: any;
+  expected?: unknown;
   /** 验证消息 */
   message?: string;
 }
@@ -275,7 +275,7 @@ export interface TestExecution {
   /** 结束时间 */
   endTime?: string;
   /** 测试结果 */
-  result?: any;
+  result?: unknown;
   /** 错误信息 */
   error?: string;
   /** 测试配置 */
@@ -306,7 +306,7 @@ export type ProgressCallback = (
 ) => void;
 
 /** 完成回调函数 */
-export type CompletionCallback = (result: any) => void;
+export type CompletionCallback = (result: unknown) => void;
 
 /** 错误回调函数 */
 export type ErrorCallback = (error: Error) => void;
@@ -329,10 +329,10 @@ export interface BaseApiClient {
   get<T = any>(url: string, config?: ApiRequestConfig): Promise<ApiResponse<T>>;
 
   /** 执行POST请求 */
-  post<T = any>(url: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>>;
+  post<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>>;
 
   /** 执行PUT请求 */
-  put<T = any>(url: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>>;
+  put<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>>;
 
   /** 执行DELETE请求 */
   delete<T = any>(url: string, config?: ApiRequestConfig): Promise<ApiResponse<T>>;

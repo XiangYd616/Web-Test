@@ -36,7 +36,8 @@ const requestLogger = (req, res, next) => {
     // 控制台输出（开发环境）
     if (process.env.NODE_ENV === 'development') {
       const statusColor = getStatusColor(res.statusCode);
-        `${timestamp} ${req.method} ${req.originalUrl} ${statusColor}${res.statusCode}/x1b[0m ${duration}ms`
+      console.log(
+        `${timestamp} ${req.method} ${req.originalUrl} ${statusColor}${res.statusCode}\x1b[0m ${duration}ms`
       );
     }
   });
@@ -66,11 +67,11 @@ const sanitizeBody = (body) => {
  * 获取状态码颜色
  */
 const getStatusColor = (statusCode) => {
-  if (statusCode >= 500) return '/x1b[31m'; // 红色
-  if (statusCode >= 400) return '/x1b[33m'; // 黄色
-  if (statusCode >= 300) return '/x1b[36m'; // 青色
-  if (statusCode >= 200) return '/x1b[32m'; // 绿色
-  return '/x1b[0m'; // 默认
+  if (statusCode >= 500) return '\x1b[31m'; // 红色
+  if (statusCode >= 400) return '\x1b[33m'; // 黄色
+  if (statusCode >= 300) return '\x1b[36m'; // 青色
+  if (statusCode >= 200) return '\x1b[32m'; // 绿色
+  return '\x1b[0m'; // 默认
 };
 
 /**
@@ -78,7 +79,7 @@ const getStatusColor = (statusCode) => {
  */
 const writeLog = (logEntry) => {
   const logPath = path.join(__dirname, '..', 'logs', 'combined.log');
-  const logString = JSON.stringify(logEntry) + '/n';
+  const logString = JSON.stringify(logEntry) + '\n';
 
   fs.appendFile(logPath, logString, (err) => {
     if (err) {
@@ -102,7 +103,7 @@ const securityLogger = (event, details, req) => {
   };
 
   const logPath = path.join(__dirname, '..', 'logs', 'security.log');
-  const logString = JSON.stringify(logEntry) + '/n';
+  const logString = JSON.stringify(logEntry) + '\n';
 
   fs.appendFile(logPath, logString, (err) => {
     if (err) {
@@ -126,7 +127,7 @@ const dbLogger = (query, duration, error = null) => {
   };
 
   const logPath = path.join(__dirname, '..', 'logs', 'database.log');
-  const logString = JSON.stringify(logEntry) + '/n';
+  const logString = JSON.stringify(logEntry) + '\n';
 
   fs.appendFile(logPath, logString, (err) => {
     if (err) {
@@ -160,7 +161,7 @@ const performanceMonitor = (req, res, next) => {
       };
 
       const logPath = path.join(__dirname, '..', 'logs', 'performance.log');
-      fs.appendFile(logPath, JSON.stringify(logEntry) + '/n', () => {});
+      fs.appendFile(logPath, JSON.stringify(logEntry) + '\n', () => {});
     }
   });
 

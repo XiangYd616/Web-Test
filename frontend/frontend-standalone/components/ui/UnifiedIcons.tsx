@@ -3,69 +3,12 @@
  * 为所有测试页面提供一致的图标使用规范，但不强制替换现有图标
  */
 
-import {
-  Activity,
-  AlertCircle,
-  AlertTriangle,
-  ArrowLeft, ArrowRight, ArrowUpDown,
-  // 数据图标
-  BarChart3,
-  Bell,
-  Bookmark,
-  CheckCircle,
-  ChevronDown,
-  // 导航图标
-  ChevronLeft, ChevronRight, ChevronUp,
-  Clock,
-  Copy,
-  Database,
-  Download,
-  Edit,
-  Eye,
-  Filter,
-  Globe,
-  Heart,
-  HelpCircle,
-  // 系统图标
-  Home,
-  // 信息图标
-  Info,
-  Loader,
-  Menu,
-  Minus,
-  Network,
-  PieChart,
-  // 状态图标
-  Play,
-  Plus,
-  RotateCcw,
-  Search,
-  Search as SearchIcon,
-  // 操作图标
-  Settings,
-  Share2,
-  Shield,
-  Smartphone,
-  Square,
-  Star,
-  Target,
-  Trash2,
-  TrendingDown,
-  TrendingUp,
-  Upload,
-  // 工具图标
-  Wrench,
-  X,
-  XCircle,
-  // 测试类型图标
-  Zap,
-  type LucideIcon
-} from 'lucide-react';
+import {Activity, AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, ArrowUpDown, Bell, Bookmark, CheckCircle, ChevronDown, ChevronRight, ChevronUp, Clock, Copy, Database, Download, Edit, Eye, Filter, Globe, Heart, HelpCircle, Loader, Menu, Minus, Network, PieChart, Plus, RotateCcw, Search, Search as SearchIcon, Share2, Shield, Smartphone, Square, Star, Target, Trash2, TrendingDown, TrendingUp, Upload, X, XCircle} from 'lucide-react';
 import React from 'react';
 
 // 替代缺失的图标
 const Sort = ArrowUpDown;
-const Tool = Wrench;
+const _Tool = Wrench;
 
 
 // 图标尺寸类型

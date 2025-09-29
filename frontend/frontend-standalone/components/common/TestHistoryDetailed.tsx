@@ -229,7 +229,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
   };
 
   // 处理过滤
-  const handleFilter = (filterKey: string, filterValue: any) => {
+  const handleFilter = (filterKey: string, filterValue: unknown) => {
     setQuery(prev => ({
       ...prev,
       [filterKey]: filterValue,
@@ -238,7 +238,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
   };
 
   // 处理排序
-  const handleSort = (sortBy: string) => {
+  const _handleSort = (sortBy: string) => {
     setQuery(prev => ({
       ...prev,
       sortBy: sortBy as any,
@@ -271,7 +271,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
   };
 
   // 批量操作
-  const handleBatchAction = async (action: string, options?: any) => {
+  const handleBatchAction = async (action: string, options?: unknown) => {
     if (selectedTests.length === 0) return;
 
     try {
@@ -352,7 +352,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
   // 格式化分数
   const formatScore = (score?: number) => {
     if (score === undefined || score === null) return '-';
-    return `${score.toFixed(1)}`;
+    return `${score?.toFixed(1)}`;
   };
 
   // 格式化日期
@@ -399,7 +399,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
           <article className="test-stat-card">
             <div className="test-stat-content">
               <p className="test-stat-label">总测试数</p>
-              <p className="test-stat-value">{statistics.overview.totalTests}</p>
+              <p className="test-stat-value">{statistics?.overview.totalTests}</p>
             </div>
             <div className="test-stat-icon-wrapper bg-blue-500/20">
               <FileText className="test-stat-icon text-blue-400" />
@@ -410,7 +410,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
             <div className="test-stat-content">
               <p className="test-stat-label">成功率</p>
               <p className="test-stat-value text-green-400">
-                {statistics.overview.successRate ? statistics.overview.successRate.toFixed(1) : '0.0'}%
+                {statistics?.overview.successRate ? statistics?.overview.successRate.toFixed(1) : '0.0'}%
               </p>
             </div>
             <div className="test-stat-icon-wrapper bg-green-500/20">
@@ -422,7 +422,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
             <div className="test-stat-content">
               <p className="test-stat-label">平均分数</p>
               <p className="test-stat-value text-blue-400">
-                {statistics.overview.averageScore ? statistics.overview.averageScore.toFixed(1) : '0.0'}
+                {statistics?.overview.averageScore ? statistics?.overview.averageScore.toFixed(1) : '0.0'}
               </p>
             </div>
             <div className="test-stat-icon-wrapper bg-yellow-500/20">
@@ -434,7 +434,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
             <div className="test-stat-content">
               <p className="test-stat-label">平均耗时</p>
               <p className="test-stat-value text-purple-400">
-                {formatDuration(statistics.overview.averageDuration)}
+                {formatDuration(statistics?.overview.averageDuration)}
               </p>
             </div>
             <div className="test-stat-icon-wrapper bg-purple-500/20">
@@ -457,7 +457,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
                 placeholder="搜索测试名称、URL..."
                 className="test-search-input"
                 value={query.search || ''}
-                onChange={(e) => handleSearch(e.target.value)}
+                onChange={(e) => handleSearch(e?.target.value)}
               />
             </label>
           </div>
@@ -519,7 +519,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
               <select
                 className="test-filter-select"
                 value={query.testType || ''}
-                onChange={(e) => handleFilter('testType', e.target.value || undefined)}
+                onChange={(e) => handleFilter('testType', e?.target.value || undefined)}
               >
                 <option value="">全部类型</option>
                 {filterOptions.availableTypes.map(type => (
@@ -536,7 +536,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
               <select
                 className="test-filter-select"
                 value={query.status || ''}
-                onChange={(e) => handleFilter('status', e.target.value || undefined)}
+                onChange={(e) => handleFilter('status', e?.target.value || undefined)}
               >
                 <option value="">全部状态</option>
                 {filterOptions.availableStatuses.map(status => (
@@ -554,7 +554,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
                 type="date"
                 className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
                 value={query.dateFrom || ''}
-                onChange={(e) => handleFilter('dateFrom', e.target.value || undefined)}
+                onChange={(e) => handleFilter('dateFrom', e?.target.value || undefined)}
               />
             </label>
 
@@ -566,7 +566,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
                 type="date"
                 className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
                 value={query.dateTo || ''}
-                onChange={(e) => handleFilter('dateTo', e.target.value || undefined)}
+                onChange={(e) => handleFilter('dateTo', e?.target.value || undefined)}
               />
             </label>
 
@@ -581,7 +581,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
                 max="100"
                 className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
                 value={(query as any).minScore || ''}
-                onChange={(e) => handleFilter('minScore', e.target.value ? parseFloat(e.target.value) : undefined)}
+                onChange={(e) => handleFilter('minScore', e?.target.value ? parseFloat(e?.target.value) : undefined)}
               />
             </label>
           </fieldset>
@@ -652,7 +652,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
                 <input
                   type="checkbox"
                   checked={selectedTests.length === testHistory.length}
-                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  onChange={(e) => handleSelectAll(e?.target.checked)}
                   className="rounded border-gray-700/40 bg-gray-800/40"
                   aria-label="全选测试记录"
                 />
@@ -671,7 +671,7 @@ const TestHistoryDetailed: React.FC<TestHistoryDetailedProps> = ({ className = '
                       <input
                         type="checkbox"
                         checked={selectedTests.includes(test.id)}
-                        onChange={(e) => handleTestSelect(test.id, e.target.checked)}
+                        onChange={(e) => handleTestSelect(test.id, e?.target.checked)}
                         className="rounded border-gray-700/40 bg-gray-800/40"
                         aria-label={`选择测试 ${test.testName}`}
                       />

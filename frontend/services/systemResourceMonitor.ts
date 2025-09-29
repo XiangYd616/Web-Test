@@ -388,7 +388,7 @@ class SystemResourceMonitor {
 }
 
 // 创建全局实例 - 静默启动监控
-export const systemResourceMonitor = (() => {
+export const _systemResourceMonitor = (() => {
   // 使用普通变量而不是React Hook
   let error: string | null = null;
 
@@ -412,7 +412,7 @@ export const systemResourceMonitor = (() => {
       getCurrentStatus: () => 'healthy' as const,
       canStartNewTest: (testType?: 'stress' | 'regular') => true, // 默认实现总是允许
       getRecommendedMaxConcurrentTests: () => 3,
-      getCurrentResources: (): any => null,
+      getCurrentResources: (): unknown => null,
       addListener: () => () => { },
       startMonitoring: () => { },
       stopMonitoring: () => { },

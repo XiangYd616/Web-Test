@@ -210,7 +210,7 @@ export class VersionControlService {
     } catch (error) {
       const result: MigrationResult<T> = {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? error?.message : String(error),
         duration: Date.now() - startTime
       };
 
@@ -276,7 +276,7 @@ export class VersionControlService {
   /**
    * 获取类型版本信息
    */
-  getTypeVersions(typeName?: string): any {
+  getTypeVersions(typeName?: string): unknown {
     if (typeName) {
       return TypeVersionRegistry.getVersions(typeName);
     }
@@ -289,8 +289,8 @@ export class VersionControlService {
   registerTypeVersion(
     name: string,
     version: string,
-    validator?: (data: any) => boolean,
-    schema?: any
+    validator?: (data: unknown) => boolean,
+    schema?: unknown
   ): void {
     TypeVersionRegistry.register({
       name,
@@ -303,7 +303,7 @@ export class VersionControlService {
   /**
    * 验证数据类型和版本
    */
-  validateData(typeName: string, version: string, data: any): boolean {
+  validateData(typeName: string, version: string, data: unknown): boolean {
     return TypeVersionRegistry.validate(typeName, version, data);
   }
 
@@ -323,7 +323,7 @@ export class VersionControlService {
       allHistory.push(...history);
     }
 
-    return allHistory.sort((a, b) => (b.duration || 0) - (a.duration || 0));
+    return allHistory.sort((a, b) => (b.duration || 0) - (a?.duration || 0));
   }
 
   /**
@@ -333,7 +333,7 @@ export class VersionControlService {
     if (olderThan) {
       const cutoff = Date.now() - olderThan;
       for (const [id, history] of this.migrationHistory.entries()) {
-        const filtered = history.filter(h => (h.duration || 0) > cutoff);
+        const filtered = history.filter(h => (h?.duration || 0) > cutoff);
         if (filtered.length === 0) {
           this.migrationHistory.delete(id);
         } else {
@@ -398,8 +398,8 @@ export class VersionControlService {
   }
 
   private generateRecommendations(
-    apiCheck: any,
-    dataModelCheck: any
+    apiCheck: unknown,
+    dataModelCheck: unknown
   ): string[] {
     const recommendations: string[] = [];
 
@@ -444,12 +444,12 @@ export class VersionControlService {
       'User',
       '1.0.0',
       '1.1.0',
-      (data: any) => ({
+      (data: unknown) => ({
         ...data,
-        preferences: data.preferences || {},
-        profile: data.profile || {}
+        preferences: data?.preferences || {},
+        profile: data?.profile || {}
       }),
-      (data: any) => data && data.preferences && data.profile
+      (data: unknown) => data && data?.preferences && data?.profile
     );
 
     // 示例：测试结果模型迁移
@@ -457,12 +457,12 @@ export class VersionControlService {
       'TestResult',
       '1.0.0',
       '1.1.0',
-      (data: any) => ({
+      (data: unknown) => ({
         ...data,
-        metadata: data.metadata || {},
+        metadata: data?.metadata || {},
         version: '1.1.0'
       }),
-      (data: any) => data && data.metadata
+      (data: unknown) => data && data?.metadata
     );
   }
 }

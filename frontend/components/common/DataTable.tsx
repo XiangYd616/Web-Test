@@ -9,13 +9,13 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { ChevronDown, ChevronUp, SortAsc } from 'lucide-react';
 
-import '../../styles/data-table.css';
+import '../../styles/data-table?.css';
 
 export interface Column<T> {
   key: keyof T;
   title: string;
   sortable?: boolean;
-  render?: (value: any, record: T) => React.ReactNode;
+  render?: (value: unknown, record: T) => React.ReactNode;
   width?: string;
   align?: 'left' | 'center' | 'right';
 }
@@ -144,7 +144,7 @@ function DataTable<T extends Record<string, any>>({
                   tabIndex={column.sortable ? 0 : undefined}
                   onKeyDown={(e) => {
                     if (column.sortable && (e.key === 'Enter' || e.key === ' ')) {
-                      e.preventDefault();
+                      e?.preventDefault();
                       handleSort(column.key);
                     }
                   }}

@@ -3,18 +3,7 @@
  * 统一管理所有测试类型的配置、验证和结果展示规则
  */
 
-import { 
-  Activity, 
-  Database, 
-  Globe, 
-  Search, 
-  Shield, 
-  Users, 
-  Wifi, 
-  Zap,
-  Monitor,
-  Code
-} from 'lucide-react';
+import {Activity, Database, Zap, Code} from 'lucide-react';
 import { TestTypeConfig } from '../components/testing/UniversalTestPage';
 
 /**
@@ -523,13 +512,13 @@ export const testTypeConfigs: Record<string, TestTypeConfig> = {
 /**
  * 获取测试类型配置
  */
-export const getTestTypeConfig = (testTypeId: string): TestTypeConfig | null => {
+export const _getTestTypeConfig = (testTypeId: string): TestTypeConfig | null => {
   return testTypeConfigs[testTypeId] || null;
 };
 
 /**
  * 获取所有测试类型列表
  */
-export const getAllTestTypes = (): TestTypeConfig[] => {
+export const _getAllTestTypes = (): TestTypeConfig[] => {
   return Object.values(testTypeConfigs);
 };

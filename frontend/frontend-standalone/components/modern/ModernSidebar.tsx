@@ -47,7 +47,7 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
   const [clickedItem, setClickedItem] = useState<string | null>(null);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isAdmin = user?.role === 'admin';
+  const _isAdmin = user.role === 'admin';
 
   const sidebarItems: SidebarItem[] = [
     {
@@ -543,11 +543,11 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
             return (
               <>
                 <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-700/50 mb-2">
-                  {hoveredMenuItem.name}
+                  {hoveredMenuItem?.name}
                 </div>
 
                 <div className="space-y-1 px-2">
-                  {hoveredMenuItem.children.map((child) => (
+                  {hoveredMenuItem?.children.map((child) => (
                     <Link
                       key={child.id}
                       to={child.href}

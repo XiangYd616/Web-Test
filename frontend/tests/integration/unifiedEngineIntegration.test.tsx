@@ -222,7 +222,7 @@ describe('统一测试引擎集成测试', () => {
       // Mock 失败的API响应
       (global.fetch as any).mockRejectedValueOnce(new Error('网络错误'));
       
-      const mockOnTestError = vi.fn();
+      const _mockOnTestError = vi.fn();
       
       renderWithProviders(
         <UnifiedTestPage />
@@ -500,7 +500,7 @@ export const integrationTestUtils = {
   /**
    * 模拟WebSocket消息
    */
-  simulateWebSocketMessage(type: string, data: any) {
+  simulateWebSocketMessage(type: string, data: unknown) {
     const mockWS = (global.WebSocket as any).mock.results[0]?.value;
     if (mockWS && mockWS.onmessage) {
       mockWS.onmessage({

@@ -72,7 +72,7 @@ const DotsLoading: React.FC<{ size: LoadingSize; color: string }> = ({ size, col
           className={cn(
             'rounded-full animate-pulse',
             dotSize[size],
-            color.replace('text-', 'bg-')
+            color?.replace('text-', 'bg-')
           )}
           style={{
             animationDelay: `${i * 0.2}s`,
@@ -89,7 +89,7 @@ const PulseLoading: React.FC<{ size: LoadingSize; color: string }> = ({ size, co
   <div className={cn(
     'rounded-full animate-pulse',
     sizeClasses[size],
-    color.replace('text-', 'bg-')
+    color?.replace('text-', 'bg-')
   )} />
 );
 
@@ -120,7 +120,7 @@ const BarsLoading: React.FC<{ size: LoadingSize; color: string }> = ({ size, col
             'animate-pulse',
             barWidth[size],
             barHeight[size],
-            color.replace('text-', 'bg-')
+            color?.replace('text-', 'bg-')
           )}
           style={{
             animationDelay: `${i * 0.15}s`,
@@ -207,7 +207,7 @@ const WaveLoading: React.FC<{ size: LoadingSize; color: string }> = ({ size, col
           className={cn(
             'w-0.5 animate-pulse',
             waveHeight[size],
-            color.replace('text-', 'bg-')
+            color?.replace('text-', 'bg-')
           )}
           style={{
             animationDelay: `${i * 0.1}s`,

@@ -11,7 +11,7 @@ import { Settings, Globe, Clock, Zap, Shield, AlertCircle } from 'lucide-react';
 export interface BaseTestConfig {
   url: string;
   timeout?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // 配置面板属性
@@ -95,7 +95,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
             <input
               type="url"
               value={config.url}
-              onChange={(e) => updateConfig({ url: e.target.value })}
+              onChange={(e) => updateConfig({ url: e?.target.value })}
               placeholder="https://example.com"
               disabled={disabled}
               className={`w-full px-4 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors ${
@@ -136,7 +136,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
               max="300"
               step="10"
               value={(config.timeout || 60) / 1000}
-              onChange={(e) => updateConfig({ timeout: parseInt(e.target.value) * 1000 })}
+              onChange={(e) => updateConfig({ timeout: parseInt(e?.target.value) * 1000 })}
               disabled={disabled}
               className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
             />
@@ -146,7 +146,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
                 min="10"
                 max="300"
                 value={(config.timeout || 60) / 1000}
-                onChange={(e) => updateConfig({ timeout: parseInt(e.target.value) * 1000 })}
+                onChange={(e) => updateConfig({ timeout: parseInt(e?.target.value) * 1000 })}
                 disabled={disabled}
                 className="w-16 px-2 py-1 bg-gray-900/50 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
@@ -182,7 +182,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
                 </label>
                 <select
                   value={config.userAgent || 'default'}
-                  onChange={(e) => updateConfig({ userAgent: e.target.value === 'default' ? undefined : e.target.value })}
+                  onChange={(e) => updateConfig({ userAgent: e?.target.value === 'default' ? undefined : e?.target.value })}
                   disabled={disabled}
                   className="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
@@ -205,7 +205,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
                   min="0"
                   max="5"
                   value={config.retries || 0}
-                  onChange={(e) => updateConfig({ retries: parseInt(e.target.value) })}
+                  onChange={(e) => updateConfig({ retries: parseInt(e?.target.value) })}
                   disabled={disabled}
                   className="w-full px-3 py-2 bg-gray-900/50 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
@@ -224,7 +224,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
                   <input
                     type="checkbox"
                     checked={config.validateSSL !== false}
-                    onChange={(e) => updateConfig({ validateSSL: e.target.checked })}
+                    onChange={(e) => updateConfig({ validateSSL: e?.target.checked })}
                     disabled={disabled}
                     className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
                   />
@@ -235,7 +235,7 @@ export const TestConfigPanel: React.FC<TestConfigPanelProps> = ({
                   <input
                     type="checkbox"
                     checked={config.followRedirects !== false}
-                    onChange={(e) => updateConfig({ followRedirects: e.target.checked })}
+                    onChange={(e) => updateConfig({ followRedirects: e?.target.checked })}
                     disabled={disabled}
                     className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
                   />

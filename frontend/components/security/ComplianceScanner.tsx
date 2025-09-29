@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { Shield, AlertTriangle, CheckCircle, FileText, Lock, Eye, Globe, Database, Users } from 'lucide-react';
+import {Shield, AlertTriangle, FileText, Lock, Eye, Globe, Database, Users} from 'lucide-react';
 
 export interface ComplianceRule {
   id: string;
@@ -189,7 +189,7 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
   // Filter rules based on selected regulations
   const activeRules = useMemo(() => {
     if (selectedRegulations.length === 0) return complianceRules;
-    return complianceRules.filter(rule => selectedRegulations.includes(rule.regulation));
+    return complianceRules.filter(rule => selectedRegulations.includes(rule?.regulation));
   }, [selectedRegulations]);
 
   // Calculate overall compliance score
@@ -215,9 +215,9 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
         metrics.estimatedRemediationCost += activeRules.find(r => r.id === result.ruleId)?.remediation.cost || 0;
         
         const rule = activeRules.find(r => r.id === result.ruleId);
-        if (rule?.businessImpact === 'critical') {
+        if (rule.businessImpact === 'critical') {
           metrics.criticalViolations++;
-          metrics.highRiskRegulations.add(rule.regulation);
+          metrics.highRiskRegulations.add(rule?.regulation);
         }
       }
     });
@@ -236,31 +236,31 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
         const score = isCompliant ? Math.floor(Math.random() * 20) + 80 : Math.floor(Math.random() * 60) + 20;
         
         return {
-          ruleId: rule.id,
+          ruleId: rule?.id,
           status: isCompliant ? 'compliant' : 
                  score > 60 ? 'partially_compliant' : 'non_compliant',
           score,
           findings: isCompliant ? [] : [
             {
               type: 'violation',
-              message: `${rule.title} requirement not met`,
+              message: `${rule?.title} requirement not met`,
               evidence: 'Automated scan detected non-compliance',
               location: targetUrl,
-              severity: rule.businessImpact
+              severity: rule?.businessImpact
             }
           ],
           businessRisk: {
             probabilityOfAudit: rule.businessImpact === 'critical' ? 0.8 : 0.3,
             potentialFine: isCompliant ? 0 : 
-              rule.fineRange.min + Math.random() * (rule.fineRange.max - rule.fineRange.min),
-            reputationImpact: rule.businessImpact as 'high' | 'medium' | 'low',
+              rule?.fineRange.min + Math.random() * (rule?.fineRange.max - rule?.fineRange.min),
+            reputationImpact: rule?.businessImpact as 'high' | 'medium' | 'low',
             operationalImpact: isCompliant ? 'None' : 'Potential service disruption and legal action'
           },
-          recommendedActions: isCompliant ? [] : rule.remediation.steps.map((step, index) => ({
+          recommendedActions: isCompliant ? [] : rule?.remediation.steps.map((step, index) => ({
             priority: index + 1,
             action: step,
-            effort: rule.remediation.effort,
-            timeline: rule.remediation.timeEstimate
+            effort: rule?.remediation.effort,
+            timeline: rule?.remediation.timeEstimate
           }))
         };
       });
@@ -317,7 +317,7 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
         <div className="flex items-center space-x-4">
           <select
             value={activeRegulation}
-            onChange={(e) => setActiveRegulation(e.target.value)}
+            onChange={(e) => setActiveRegulation(e?.target.value)}
             className="bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 text-sm"
           >
             <option value="all">全部法规</option>
@@ -405,7 +405,7 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
                   {[...new Set(activeRules.map(r => r.regulation))].map(reg => {
                     const regResults = results.filter(r => {
                       const rule = activeRules.find(rule => rule.id === r.ruleId);
-                      return rule?.regulation === reg;
+                      return rule.regulation === reg;
                     });
                     const compliantCount = regResults.filter(r => r.status === 'compliant').length;
                     const compliance = regResults.length > 0 ? (compliantCount / regResults.length) * 100 : 0;
@@ -448,7 +448,7 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
             .filter(result => {
               if (activeRegulation === 'all') return true;
               const rule = activeRules.find(r => r.id === result.ruleId);
-              return rule?.regulation === activeRegulation;
+              return rule.regulation === activeRegulation;
             })
             .map((result, index) => {
               const rule = activeRules.find(r => r.id === result.ruleId);
@@ -458,18 +458,18 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
                 <div key={index} className={`bg-gray-800 rounded-lg border p-4 ${getStatusColor(result.status)}`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start space-x-3">
-                      {getRegulationIcon(rule.regulation)}
+                      {getRegulationIcon(rule?.regulation)}
                       <div>
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-white font-medium">{rule.title}</span>
-                          <span className={`text-xs px-2 py-1 rounded ${getImpactColor(rule.businessImpact)}`}>
-                            {rule.businessImpact}
+                          <span className="text-white font-medium">{rule?.title}</span>
+                          <span className={`text-xs px-2 py-1 rounded ${getImpactColor(rule?.businessImpact)}`}>
+                            {rule?.businessImpact}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-400 mb-2">{rule.description}</p>
+                        <p className="text-sm text-gray-400 mb-2">{rule?.description}</p>
                         <div className="flex items-center space-x-4 text-xs text-gray-500">
-                          <span>{rule.regulation}</span>
-                          <span>{rule.requirement}</span>
+                          <span>{rule?.regulation}</span>
+                          <span>{rule?.requirement}</span>
                         </div>
                       </div>
                     </div>

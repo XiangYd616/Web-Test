@@ -13,7 +13,7 @@ declare module 'axios' {
       retryCount?: number;
       operation?: string;
       context?: Record<string, any>;
-      [key: string]: any;
+      [key: string]: unknown;
     };
   }
 
@@ -24,7 +24,7 @@ declare module 'axios' {
       retryCount?: number;
       operation?: string;
       context?: Record<string, any>;
-      [key: string]: any;
+      [key: string]: unknown;
     };
   }
 }

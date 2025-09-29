@@ -4,22 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Shield, 
-  Smartphone, 
-  Key, 
-  QrCode, 
-  Copy, 
-  CheckCircle, 
-  XCircle,
-  AlertTriangle,
-  RefreshCw,
-  Download,
-  Trash2,
-  Plus,
-  Eye,
-  EyeOff
-} from 'lucide-react';
+import {Shield, Smartphone, Key, QrCode, Copy, CheckCircle, XCircle, AlertTriangle, RefreshCw, Trash2, Plus, Eye, EyeOff} from 'lucide-react';
 import QRCode from 'qrcode.react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
@@ -332,7 +317,7 @@ const MFAManagement: React.FC = () => {
                   {setupData && (
                     <div className="bg-white p-4 rounded-lg mb-4">
                       <QRCode 
-                        value={setupData.qrCodeUrl}
+                        value={setupData?.qrCodeUrl}
                         size={200}
                         className="mx-auto"
                       />

@@ -4,20 +4,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { 
-  Globe, 
-  Users, 
-  TrendingUp, 
-  DollarSign, 
-  Target, 
-  AlertTriangle,
-  BarChart3,
-  Smartphone,
-  Monitor,
-  Tablet,
-  CheckCircle,
-  XCircle
-} from 'lucide-react';
+import {Globe, Target, Smartphone, Monitor, Tablet, CheckCircle, XCircle} from 'lucide-react';
 
 export interface BrowserMarketData {
   name: string;
@@ -259,7 +246,7 @@ export const BrowserMarketAnalyzer: React.FC<BrowserMarketAnalyzerProps> = ({
         <div className="flex items-center space-x-4">
           <select
             value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
+            onChange={(e) => setSelectedRegion(e?.target.value)}
             className="bg-gray-700 text-white px-3 py-2 rounded border border-gray-600"
           >
             <option value="global">全球</option>
@@ -270,7 +257,7 @@ export const BrowserMarketAnalyzer: React.FC<BrowserMarketAnalyzerProps> = ({
           
           <select
             value={deviceFilter}
-            onChange={(e) => setDeviceFilter(e.target.value as any)}
+            onChange={(e) => setDeviceFilter(e?.target.value as any)}
             className="bg-gray-700 text-white px-3 py-2 rounded border border-gray-600"
           >
             <option value="all">所有设备</option>
@@ -336,7 +323,7 @@ export const BrowserMarketAnalyzer: React.FC<BrowserMarketAnalyzerProps> = ({
               <h3 className="text-lg font-medium text-white">浏览器市场数据</h3>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e?.target.value as any)}
                 className="bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 text-sm"
               >
                 <option value="marketShare">市场份额</option>

@@ -113,7 +113,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
                                 type="text"
                                 placeholder="搜索测试记录..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => setSearchTerm(e?.target.value)}
                                 className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
                             />
                         </div>

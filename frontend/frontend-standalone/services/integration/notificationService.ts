@@ -4,14 +4,14 @@ export class NotificationService {
     
   }
 
-  async sendTestCompleteNotification(testId: string, results: any): Promise<void> {
+  async sendTestCompleteNotification(testId: string, results: unknown): Promise<void> {
     
   }
 
-  async sendTestFailedNotification(testId: string, error: any): Promise<void> {
+  async sendTestFailedNotification(testId: string, error: unknown): Promise<void> {
     
     console.error(`Test ${testId} failed:`, error);
   }
 }
 
-export const notificationService = new NotificationService();
+export const _notificationService = new NotificationService();

@@ -4,12 +4,7 @@
  * 提供测试历史的列表展示和操作
  */
 
-import {
-  DeleteOutlined,
-  DownloadOutlined,
-  EyeOutlined,
-  HistoryOutlined
-} from '@ant-design/icons';
+import {DeleteOutlined, DownloadOutlined, EyeOutlined} from '@ant-design/icons';
 import {
   Badge,
   Button,
@@ -130,7 +125,7 @@ export const TestHistoryPanel: React.FC<TestHistoryPanelProps> = ({
     {
       title: '操作',
       key: 'actions',
-      render: (_: any, record: TestHistoryItem) => (
+      render: (_: unknown, record: TestHistoryItem) => (
         <Space>
           <Button
             size="small"

@@ -12,7 +12,7 @@ export interface ProxyResponse {
   status: number;
   url: string;
   loadTime: number;
-  data?: any;
+  data?: unknown;
 }
 
 export class ProxyService {
@@ -75,18 +75,18 @@ export class ProxyService {
       // 提供更详细的错误信息
       if (error instanceof Error) {
         // 如果是我们自定义的详细错误信息，直接抛出
-        if (error.message.includes('建议解决方案')) {
+        if (error?.message.includes('建议解决方案')) {
           throw error;
         }
 
-        if (error.message.includes('CORS')) {
+        if (error?.message.includes('CORS')) {
           throw new Error(`跨域访问被阻止：${cleanUrl}
 
 该网站不允许跨域访问。建议：
 • 切换到"本地分析"模式
 • 上传网页HTML文件进行分析
 • 本地分析功能完整，不受网络限制`);
-        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        } else if (error?.message.includes('Failed to fetch') || error?.message.includes('NetworkError')) {
           throw new Error(`网络连接失败：${cleanUrl}
 
 请检查：
@@ -95,14 +95,14 @@ export class ProxyService {
 • 网站是否可访问
 
 建议切换到"本地分析"模式进行离线分析。`);
-        } else if (error.message.includes('404')) {
+        } else if (error?.message.includes('404')) {
           throw new Error(`页面不存在：${cleanUrl}
 
 该页面返回404错误，请：
 • 检查网址拼写是否正确
 • 确认页面是否存在
 • 尝试访问网站首页`);
-        } else if (error.message.includes('timeout') || error.message.includes('aborted')) {
+        } else if (error?.message.includes('timeout') || error?.message.includes('aborted')) {
           throw new Error(`请求超时：${cleanUrl}
 
 网站响应时间过长，建议：
@@ -110,7 +110,7 @@ export class ProxyService {
 • 检查网络连接
 • 切换到"本地分析"模式`);
         } else {
-          throw new Error(`访问失败：${error.message}
+          throw new Error(`访问失败：${error?.message}
 
 建议切换到"本地分析"模式，上传HTML文件进行完整的SEO分析。`);
         }
@@ -191,7 +191,7 @@ export class ProxyService {
       }
 
     } catch (error) {
-      console.warn(`❌ 后端API失败: ${error instanceof Error ? error.message : error}`);
+      console.warn(`❌ 后端API失败: ${error instanceof Error ? error?.message : error}`);
       return null;
     }
   }
@@ -237,11 +237,11 @@ export class ProxyService {
             if (proxyUrl.includes('allorigins')) {
               try {
                 const data = await response.json();
-                if (data.contents) {
+                if (data?.contents) {
                   return {
-                    html: data.contents,
-                    headers: data.headers || {},
-                    status: data.status || 200,
+                    html: data?.contents,
+                    headers: data?.headers || {},
+                    status: data?.status || 200,
                     url: url,
                     loadTime
                   };
@@ -262,11 +262,11 @@ export class ProxyService {
                     url: url,
                     loadTime
                   };
-                } else if (data && data.contents) {
+                } else if (data && data?.contents) {
                   return {
-                    html: data.contents,
-                    headers: data.headers || {},
-                    status: data.status || 200,
+                    html: data?.contents,
+                    headers: data?.headers || {},
+                    status: data?.status || 200,
                     url: url,
                     loadTime
                   };
@@ -309,7 +309,7 @@ export class ProxyService {
         } catch (error) {
           // 只在开发模式下显示代理错误详情，减少控制台噪音
           if (process.env.NODE_ENV === 'development') {
-            console.warn(`代理服务失败 ${proxyUrl}:`, error instanceof Error ? error.message : error);
+            console.warn(`代理服务失败 ${proxyUrl}:`, error instanceof Error ? error?.message : error);
           }
           continue;
         }
@@ -393,7 +393,7 @@ export class ProxyService {
       return {
         accessible: false,
         status: 0,
-        error: error instanceof Error ? error.message : '未知错误'
+        error: error instanceof Error ? error?.message : '未知错误'
       };
     }
   }
@@ -489,7 +489,7 @@ export class ProxyService {
       };
     } catch (error) {
       // 404错误是正常的，不需要记录错误
-      if (error instanceof Error && error.message.includes('404')) {
+      if (error instanceof Error && error?.message.includes('404')) {
         // 静默处理404错误
       } else {
         console.warn(`Failed to fetch sitemap ${sitemapUrl}:`, error);
@@ -538,7 +538,7 @@ export class ProxyService {
       error?: string;
     }
   }> {
-    const results: { [url: string]: any } = {};
+    const results: { [url: string]: unknown } = {};
 
     // 限制并发数量
     const concurrency = 5;
@@ -608,7 +608,7 @@ export class ProxyService {
         largestContentfulPaint: loadTime * 0.6
       };
     } catch (error) {
-      throw new Error(`性能测试失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      throw new Error(`性能测试失败: ${error instanceof Error ? error?.message : '未知错误'}`);
     }
   }
 

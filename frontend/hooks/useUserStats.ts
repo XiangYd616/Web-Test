@@ -16,13 +16,13 @@ export const useUserStats = () => {
     }
 
     try {
-      const userStats = await userStatsService.getUserStats(user.id);
+      const _userStats = await userStatsService.getUserStats(user?.id);
       // 计算周和月统计
-      await userStatsService.calculateWeekStats(user.id);
-      await userStatsService.calculateMonthStats(user.id);
+      await userStatsService.calculateWeekStats(user?.id);
+      await userStatsService.calculateMonthStats(user?.id);
 
       // 重新获取更新后的统计数据
-      const updatedStats = await userStatsService.getUserStats(user.id);
+      const updatedStats = await userStatsService.getUserStats(user?.id);
       setStats(updatedStats);
     } catch (error) {
       console.error('Failed to load user stats:', error);
@@ -51,7 +51,7 @@ export const useUserStats = () => {
   ) => {
     if (!user?.id) return;
 
-    userStatsService.recordTestCompletion(user.id, testType, success, score, duration);
+    userStatsService.recordTestCompletion(user?.id, testType, success, score, duration);
     loadStats(); // 重新加载统计数据
   }, [user?.id, loadStats]);
 
@@ -59,7 +59,7 @@ export const useUserStats = () => {
   const recordBookmarkAction = useCallback((action: 'add' | 'remove', itemTitle: string) => {
     if (!user?.id) return;
 
-    userStatsService.recordBookmarkAction(user.id, action, itemTitle);
+    userStatsService.recordBookmarkAction(user?.id, action, itemTitle);
     loadStats(); // 重新加载统计数据
   }, [user?.id, loadStats]);
 
@@ -73,35 +73,35 @@ export const useUserStats = () => {
       timestamp: new Date().toISOString()
     };
 
-    userStatsService.addActivity(user.id, fullActivity);
+    userStatsService.addActivity(user?.id, fullActivity);
     loadStats(); // 重新加载统计数据
   }, [user?.id, loadStats]);
 
   // 获取最近活动
   const getRecentActivity = useCallback((): ActivityItem[] => {
     if (!user?.id) return [];
-    return userStatsService.getRecentActivity(user.id);
+    return userStatsService.getRecentActivity(user?.id);
   }, [user?.id]);
 
   // 重置统计数据
   const resetStats = useCallback(() => {
     if (!user?.id) return;
 
-    userStatsService.resetUserStats(user.id);
+    userStatsService.resetUserStats(user?.id);
     loadStats(); // 重新加载统计数据
   }, [user?.id, loadStats]);
 
   // 导出统计数据
-  const exportStats = useCallback((): string | null => {
+  const exportStats = useCallback(async (): Promise<string | null> => {
     if (!user?.id) return null;
-    return userStatsService.exportUserStats(user.id);
+    return await userStatsService.exportUserStats(user?.id);
   }, [user?.id]);
 
   // 导入统计数据
-  const importStats = useCallback((data: string): boolean => {
+  const importStats = useCallback(async (data: string): Promise<boolean> => {
     if (!user?.id) return false;
 
-    const success = userStatsService.importUserStats(user.id, data);
+    const success = await userStatsService.importUserStats(user?.id, data);
     if (success) {
       loadStats(); // 重新加载统计数据
     }

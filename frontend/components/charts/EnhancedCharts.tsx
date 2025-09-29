@@ -4,44 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import {
-  Activity,
-  BarChart3,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  Download,
-  Filter,
-  Fullscreen,
-  Grid,
-  Layers,
-  LineChart,
-  Maximize2,
-  Minimize2,
-  MoreVertical,
-  PieChart,
-  RefreshCw,
-  Settings,
-  Share2,
-  TrendingDown,
-  TrendingUp,
-  Upload,
-  ZoomIn,
-  ZoomOut,
-  ArrowUpRight,
-  ArrowDownRight,
-  Clock,
-  DollarSign,
-  Users,
-  Package,
-  Target,
-  Zap,
-  Globe,
-  Database,
-  Cpu,
-  HardDrive,
-  AlertTriangle
-} from 'lucide-react';
+import {BarChart3, ChevronDown, Download, Maximize2, Minimize2, RefreshCw, Settings, ZoomIn, ZoomOut, ArrowUpRight, ArrowDownRight, DollarSign, Users, Target, Zap, Cpu, AlertTriangle} from 'lucide-react';
 import {
   Line,
   Bar,
@@ -102,7 +65,7 @@ interface DataPoint {
   label?: string;
   value?: number;
   category?: string;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 // 数据集定义
@@ -261,7 +224,7 @@ const EnhancedCharts: React.FC = () => {
     for (let i = 0; i < points; i++) {
       current += (Math.random() - 0.5) * 20;
       current = Math.max(0, current);
-      data.push(Math.round(current * 100) / 100);
+      data?.push(Math.round(current * 100) / 100);
     }
     
     return data;
@@ -348,7 +311,7 @@ const EnhancedCharts: React.FC = () => {
   };
 
   // 创建渐变
-  const createGradient = (ctx: CanvasRenderingContext2D, color1: string, color2: string) => {
+  const _createGradient = (ctx: CanvasRenderingContext2D, color1: string, color2: string) => {
     const gradient = ctx.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, color1);
     gradient.addColorStop(1, color2);
@@ -591,14 +554,14 @@ const EnhancedCharts: React.FC = () => {
   };
 
   // 热力图数据
-  const getHeatmapData = () => {
+  const _getHeatmapData = () => {
     const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`);
     const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-    const data: any[] = [];
+    const data: unknown[] = [];
     
     days.forEach((day, dayIndex) => {
       hours.forEach((hour, hourIndex) => {
-        data.push({
+        data?.push({
           x: hourIndex,
           y: dayIndex,
           v: Math.floor(Math.random() * 100)
@@ -738,7 +701,7 @@ const EnhancedCharts: React.FC = () => {
   };
 
   // 添加注释
-  const addAnnotation = (chartId: string, annotation: any) => {
+  const _addAnnotation = (chartId: string, annotation: unknown) => {
     setAnnotations(prev => [...prev, { chartId, ...annotation }]);
     toast.success('注释已添加');
   };
@@ -832,7 +795,7 @@ const EnhancedCharts: React.FC = () => {
   };
 
   // 渲染图表
-  const renderChart = (chartId: string, type: ChartType, data: any, options?: ChartOptions) => {
+  const renderChart = (chartId: string, type: ChartType, data: unknown, options?: ChartOptions) => {
     const ChartComponent = {
       line: Line,
       bar: Bar,
@@ -849,7 +812,7 @@ const EnhancedCharts: React.FC = () => {
     return (
       <div className="chart-container h-full">
         <ChartComponent
-          ref={(ref: any) => chartRefs.current.set(chartId, ref)}
+          ref={(ref: unknown) => chartRefs.current.set(chartId, ref)}
           data={data}
           options={options || getChartOptions(type, theme)}
         />
@@ -875,7 +838,7 @@ const EnhancedCharts: React.FC = () => {
               {/* 时间范围选择 */}
               <select
                 value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+                onChange={(e) => setTimeRange(e?.target.value as TimeRange)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="1h">过去1小时</option>
@@ -890,7 +853,7 @@ const EnhancedCharts: React.FC = () => {
               {/* 主题选择 */}
               <select
                 value={theme}
-                onChange={(e) => setTheme(e.target.value as ChartTheme)}
+                onChange={(e) => setTheme(e?.target.value as ChartTheme)}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="light">浅色主题</option>
@@ -1140,8 +1103,8 @@ const EnhancedCharts: React.FC = () => {
                   ticks: {
                     color: '#6B7280',
                     font: { size: 11 },
-                    callback: function(value: any) {
-                      return '¥' + value.toLocaleString('zh-CN');
+                    callback: function(value: unknown) {
+                      return '¥' + value?.toLocaleString('zh-CN');
                     }
                   },
                   title: {
@@ -1160,7 +1123,7 @@ const EnhancedCharts: React.FC = () => {
                   ticks: {
                     color: '#6B7280',
                     font: { size: 11 },
-                    callback: function(value: any) {
+                    callback: function(value: unknown) {
                       return value + '%';
                     }
                   },
@@ -1196,7 +1159,7 @@ const EnhancedCharts: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">导出格式</label>
                   <select
                     value={exportFormat}
-                    onChange={(e) => setExportFormat(e.target.value as any)}
+                    onChange={(e) => setExportFormat(e?.target.value as any)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="png">PNG图片</option>

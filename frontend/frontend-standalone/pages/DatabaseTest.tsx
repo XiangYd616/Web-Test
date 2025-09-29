@@ -46,7 +46,7 @@ interface DatabaseTestResult {
 
 const DatabaseTest: React.FC = () => {
   // 认证检查
-  const authCheck = useAuthCheck();
+  const _authCheck = useAuthCheck();
   const { recordTestCompletion } = useUserStats();
 
   // 状态管理
@@ -121,7 +121,7 @@ const DatabaseTest: React.FC = () => {
           updateProgress(progress, step);
         },
         // onComplete
-        (result: any) => {
+        (result: unknown) => {
           // 转换后端结果为前端格式
           const databaseResult: DatabaseTestResult = {
             testId: result.testId || testId,
@@ -156,7 +156,7 @@ const DatabaseTest: React.FC = () => {
         },
         // onError
         (error: string | Error) => {
-          const errorMessage = typeof error === 'string' ? error : error.message;
+          const errorMessage = typeof error === 'string' ? error : error?.message;
           setError(errorMessage || '数据库测试失败');
           setIsRunning(false);
           setCurrentTestId(null);
@@ -191,7 +191,7 @@ const DatabaseTest: React.FC = () => {
   }, [currentTestId, updateProgress]);
 
   // 配置更新处理
-  const handleConfigChange = useCallback((field: keyof DatabaseConfig, value: any) => {
+  const handleConfigChange = useCallback((field: keyof DatabaseConfig, value: unknown) => {
     setConfig(prev => ({
       ...prev,
       [field]: value

@@ -4,35 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Upload,
-  Plus,
-  X,
-  Play,
-  Pause,
-  Square,
-  Download,
-  FileText,
-  Globe,
-  Settings,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  BarChart3,
-  Zap,
-  Shield,
-  Search,
-  Filter,
-  Trash2,
-  Edit3,
-  Copy,
-  ExternalLink,
-  Eye,
-  Target,
-  TrendingUp,
-  Loader,
-  RefreshCw
-} from 'lucide-react';
+import {Upload, Plus, X, Play, Pause, Square, FileText, Globe, Settings, BarChart3, Zap, Shield, Search, Trash2, Copy, ExternalLink, Eye, Target, TrendingUp, RefreshCw} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface BatchTestItem {
@@ -42,7 +14,7 @@ interface BatchTestItem {
   priority: 'high' | 'medium' | 'low';
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   progress: number;
-  result?: any;
+  result?: unknown;
   startTime?: Date;
   endTime?: Date;
   duration?: number;
@@ -257,7 +229,7 @@ const BatchTestManager: React.FC<BatchTestManagerProps> = ({
         // 模拟测试结果
         const mockResult = generateMockTestResult(item.testType);
         const endTime = new Date();
-        const duration = endTime.getTime() - (item.startTime?.getTime() || Date.now());
+        const duration = endTime?.getTime() - (item.startTime?.getTime() || Date.now());
 
         updateTestItem(item.id, {
           status: 'completed',
@@ -270,7 +242,7 @@ const BatchTestManager: React.FC<BatchTestManagerProps> = ({
       } catch (error) {
         updateTestItem(item.id, {
           status: 'failed',
-          error: error instanceof Error ? error.message : '测试失败'
+          error: error instanceof Error ? error?.message : '测试失败'
         });
       }
     };
@@ -598,7 +570,7 @@ const BatchTestManager: React.FC<BatchTestManagerProps> = ({
                 </label>
                 <textarea
                   value={bulkUrlText}
-                  onChange={(e) => setBulkUrlText(e.target.value)}
+                  onChange={(e) => setBulkUrlText(e?.target.value)}
                   rows={10}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder={`https://example1.com\nhttps://example2.com\nhttps://example3.com`}
@@ -635,7 +607,7 @@ const BatchTestManager: React.FC<BatchTestManagerProps> = ({
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e?.target.value)}
                   placeholder="搜索URL..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -643,7 +615,7 @@ const BatchTestManager: React.FC<BatchTestManagerProps> = ({
               
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                onChange={(e) => setFilterStatus(e?.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">全部状态</option>
@@ -671,7 +643,7 @@ const BatchTestManager: React.FC<BatchTestManagerProps> = ({
                         checked={selectedItems.has(item.id)}
                         onChange={(e) => {
                           const newSet = new Set(selectedItems);
-                          if (e.target.checked) {
+                          if (e?.target.checked) {
                             newSet.add(item.id);
                           } else {
                             newSet.delete(item.id);
@@ -687,7 +659,7 @@ const BatchTestManager: React.FC<BatchTestManagerProps> = ({
                           <input
                             type="url"
                             value={item.url}
-                            onChange={(e) => updateTestItem(item.id, { url: e.target.value })}
+                            onChange={(e) => updateTestItem(item.id, { url: e?.target.value })}
                             placeholder="输入URL..."
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             disabled={item.status === 'running' || item.status === 'completed'}
@@ -695,7 +667,7 @@ const BatchTestManager: React.FC<BatchTestManagerProps> = ({
                           
                           <select
                             value={item.testType}
-                            onChange={(e) => updateTestItem(item.id, { testType: e.target.value })}
+                            onChange={(e) => updateTestItem(item.id, { testType: e?.target.value })}
                             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             disabled={item.status === 'running' || item.status === 'completed'}
                           >
@@ -708,7 +680,7 @@ const BatchTestManager: React.FC<BatchTestManagerProps> = ({
 
                           <select
                             value={item.priority}
-                            onChange={(e) => updateTestItem(item.id, { priority: e.target.value as any })}
+                            onChange={(e) => updateTestItem(item.id, { priority: e?.target.value as any })}
                             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             disabled={item.status === 'running' || item.status === 'completed'}
                           >

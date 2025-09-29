@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 import { Activity, TrendingUp, Users, Zap, AlertTriangle } from 'lucide-react';
 
 interface RealTimeDataPoint {
@@ -45,7 +45,7 @@ const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
 
   // WebSocket连接管理
   const connectWebSocket = useCallback(() => {
-    if (!testId || wsRef.current?.readyState === WebSocket.OPEN) {
+    if (!testId || wsRef.current.readyState === WebSocket.OPEN) {
       return;
     }
 
@@ -162,12 +162,12 @@ const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
   };
 
   // 自定义Tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: unknown) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
           <p className="text-gray-300 text-sm mb-2">{`时间: ${formatTimeLabel(label)}`}</p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry: unknown, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {`${entry.name}: ${entry.value}${entry.dataKey === 'responseTime' ? 'ms' : 
                 entry.dataKey === 'throughput' ? ' req/s' : 

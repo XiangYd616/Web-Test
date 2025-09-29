@@ -87,9 +87,9 @@ export class SystemService {
 
     try {
       const params = new URLSearchParams();
-      if (filter?.role) params.append('role', filter.role);
-      if (filter?.status) params.append('status', filter.status);
-      if (filter?.search) params.append('search', filter.search);
+      if (filter?.role) params.append('role', filter?.role);
+      if (filter?.status) params.append('status', filter?.status);
+      if (filter?.search) params.append('search', filter?.search);
 
       const response = await fetch(`${this.BASE_URL}/users?${params}`);
       if (!response.ok) throw new Error('Failed to fetch users');
@@ -171,10 +171,10 @@ export class SystemService {
 
     try {
       const params = new URLSearchParams();
-      if (filter?.level) params.append('level', filter.level);
-      if (filter?.category) params.append('category', filter.category);
-      if (filter?.startDate) params.append('startDate', filter.startDate);
-      if (filter?.endDate) params.append('endDate', filter.endDate);
+      if (filter?.level) params.append('level', filter?.level);
+      if (filter?.category) params.append('category', filter?.category);
+      if (filter?.startDate) params.append('startDate', filter?.startDate);
+      if (filter?.endDate) params.append('endDate', filter?.endDate);
 
       const response = await fetch(`${this.BASE_URL}/logs?${params}`);
       if (!response.ok) throw new Error('Failed to fetch logs');
@@ -276,7 +276,7 @@ export class SystemService {
   }
 
   // 缓存管理
-  private static getFromCache(key: string): any {
+  private static getFromCache(key: string): unknown {
     const cached = this.cache.get(key);
     if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
       return cached.data;
@@ -284,7 +284,7 @@ export class SystemService {
     return null;
   }
 
-  private static setCache(key: string, data: any, timeout?: number): void {
+  private static setCache(key: string, data: unknown, timeout?: number): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -651,4 +651,4 @@ export class SystemService {
 }
 
 // 创建单例实例
-export const systemService = new SystemService();
+export const _systemService = new SystemService();

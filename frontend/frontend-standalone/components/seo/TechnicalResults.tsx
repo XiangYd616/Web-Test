@@ -78,9 +78,9 @@ const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
                   '文件不存在或无法访问'
                 )}
               </div>
-              {results.robotsTxt?.issues && results.robotsTxt.issues.length > 0 && (
+              {results.robotsTxt?.issues && results.robotsTxt.issues?.length > 0 && (
                 <div className="text-xs text-red-400 mt-1">
-                  问题: {results.robotsTxt.issues.join(', ')}
+                  问题: {results.robotsTxt.issues?.join(', ')}
                 </div>
               )}
             </div>
@@ -114,9 +114,9 @@ const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
                   ? (results.canonicalTags?.correct ? '配置正确' : '存在但需要优化')
                   : '未发现canonical标签'}
               </div>
-              {results.canonicalTags?.issues && results.canonicalTags.issues.length > 0 && (
+              {results.canonicalTags?.issues && results.canonicalTags.issues?.length > 0 && (
                 <div className="text-xs text-red-400 mt-1">
-                  问题: {results.canonicalTags.issues.join(', ')}
+                  问题: {results.canonicalTags.issues?.join(', ')}
                 </div>
               )}
             </div>
@@ -174,11 +174,11 @@ const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
             </div>
           </div>
 
-          {results.urlStructure.issues && results.urlStructure.issues.length > 0 && (
+          {results.urlStructure.issues && results.urlStructure.issues?.length > 0 && (
             <div className="mt-4">
               <div className="text-sm font-medium text-white mb-2">发现的问题:</div>
               <div className="space-y-1">
-                {results.urlStructure.issues.slice(0, 3).map((issue, index) => (
+                {results.urlStructure.issues?.slice(0, 3).map((issue, index) => (
                   <div key={index} className="text-xs text-red-400 flex items-start">
                     <XCircle className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
                     {issue}
@@ -210,7 +210,7 @@ const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
             </h3>
 
             <div className="space-y-3">
-              {allIssues.slice(0, 5).map((issue: any, index: number) => (
+              {allIssues.slice(0, 5).map((issue: unknown, index: number) => (
                 <div key={index} className="flex items-start space-x-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                   <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
                   <span className="text-sm text-gray-300">{issue}</span>
@@ -235,7 +235,7 @@ const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
           <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-blue-300">
             <strong>技术SEO提示：</strong>
-            确保robots.txt和sitemap.xml文件正确配置，使用canonical标签避免重复内容，
+            确保robots.txt和sitemap?.xml文件正确配置，使用canonical标签避免重复内容，
             保持URL结构简洁友好，这些都是搜索引擎优化的基础要素。
           </div>
         </div>

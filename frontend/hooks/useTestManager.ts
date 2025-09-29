@@ -9,7 +9,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { testApiClient, TestRequest, TestResult, TestProgress } from '../services/api/test/testApiClient';
+import {testApiClient, TestResult, TestProgress} from '../services/api/test/testApiClient';
 
 export interface TestManagerState {
   isLoading: boolean;
@@ -19,7 +19,7 @@ export interface TestManagerState {
 }
 
 export interface TestManagerActions {
-  startTest: (engineId: string, config: any) => Promise<TestResult>;
+  startTest: (engineId: string, config: unknown) => Promise<TestResult>;
   stopTest: (testId: string) => Promise<void>;
   getTestStatus: (testId: string) => Promise<TestProgress | null>;
   getTestHistory: () => Promise<TestResult[]>;
@@ -40,7 +40,7 @@ export function useTestManager(): TestManagerHook {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
 
   // 开始测试 - 调用后端API
-  const startTest = useCallback(async (engineId: string, config: any): Promise<TestResult> => {
+  const startTest = useCallback(async (engineId: string, config: unknown): Promise<TestResult> => {
     setIsLoading(true);
     setError(null);
     

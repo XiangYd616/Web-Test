@@ -342,7 +342,7 @@ export class MobileSEODetector {
       const hasAlt = img.hasAttribute('alt');
       const hasLazyLoading = img.hasAttribute('loading') && img.getAttribute('loading') === 'lazy';
       const hasSrcset = img.hasAttribute('srcset');
-      const hasWebPSupport = this.checkWebPSupport(img);
+      const _hasWebPSupport = this.checkWebPSupport(img);
 
       let imageOptimized = true;
 

@@ -1,6 +1,6 @@
 // 配置服务
 export class ConfigService {
-  private config: any = {};
+  private config: unknown = {};
 
   async getConfig(key?: string): Promise<any> {
     
@@ -10,12 +10,12 @@ export class ConfigService {
     return this.config;
   }
 
-  async setConfig(key: string, value: any): Promise<void> {
+  async setConfig(key: string, value: unknown): Promise<void> {
     
     this.config[key] = value;
   }
 
-  async updateConfig(updates: any): Promise<void> {
+  async updateConfig(updates: unknown): Promise<void> {
     
     this.config = { ...this.config, ...updates };
   }
@@ -26,4 +26,4 @@ export class ConfigService {
   }
 }
 
-export const configService = new ConfigService();
+export const _configService = new ConfigService();

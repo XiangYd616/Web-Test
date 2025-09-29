@@ -284,7 +284,7 @@ class SecurityAnalyzer {
     let hasSecurityWarnings = false;
 
     // 检查新设备
-    const knownDevices = userSessions.map(s => s.deviceInfo.deviceId);
+    const knownDevices = userSessions.map(s => s?.deviceInfo.deviceId);
     if (!knownDevices.includes(sessionData.deviceInfo.deviceId)) {
       isNewDevice = true;
       riskScore += 20;
@@ -293,8 +293,8 @@ class SecurityAnalyzer {
     // 检查新位置
     if (sessionData.locationInfo) {
       const knownLocations = userSessions
-        .filter(s => s.locationInfo)
-        .map(s => `${s.locationInfo!.country}-${s.locationInfo!.region}`);
+        .filter(s => s?.locationInfo)
+        .map(s => `${s?.locationInfo!.country}-${s?.locationInfo!.region}`);
 
       const currentLocation = `${sessionData.locationInfo.country}-${sessionData.locationInfo.region}`;
       if (!knownLocations.includes(currentLocation)) {
@@ -464,7 +464,7 @@ export class SessionManager {
       locationInfo: locationInfo
     });
 
-    return { sessionId, warnings: warnings.length > 0 ? warnings : undefined };
+    return { sessionId, warnings: warnings?.length > 0 ? warnings : undefined };
   }
 
   /**
@@ -616,7 +616,7 @@ export class SessionManager {
           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
         if (oldestSession) {
           await this.terminateSession(oldestSession.id, 'concurrent_limit');
-          warnings.push('已终止最旧的会话');
+          warnings?.push('已终止最旧的会话');
         }
         break;
 
@@ -624,11 +624,11 @@ export class SessionManager {
         for (const session of userSessions) {
           await this.terminateSession(session.id, 'concurrent_limit');
         }
-        warnings.push('已终止所有其他会话');
+        warnings?.push('已终止所有其他会话');
         break;
 
       case 'allow_with_warning':
-        warnings.push('已超过建议的并发会话数');
+        warnings?.push('已超过建议的并发会话数');
         break;
     }
   }

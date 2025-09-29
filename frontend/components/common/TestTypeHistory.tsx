@@ -142,7 +142,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
 
   // 处理重新运行
   const handleRerun = (test: EnhancedTestRecord, e: React.MouseEvent) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     onTestRerun?.(test);
   };
 
@@ -233,7 +233,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
               type="text"
               placeholder="搜索测试名称或URL..."
               value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => handleSearch(e?.target.value)}
               className="search-input"
             />
           </div>

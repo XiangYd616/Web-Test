@@ -4,11 +4,11 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { QRCodeSVG as QRCode } from 'qrcode.react';
+
 import { Alert, Button, Card, Input, Steps, Typography, Space, Divider, Spin } from 'antd';
 import { CheckCircleOutlined, QrcodeOutlined, SafetyOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useAuthCheck } from '../../components/auth/withAuthCheck';
-import type { MFASetupResponse, BackupCodes } from '../../types/auth';
+import type {MFASetupResponse} from '../../types/auth';
 
 const { Title, Paragraph, Text } = Typography;
 const { Step } = Steps;
@@ -82,7 +82,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : '未知错误',
+        error: error instanceof Error ? error?.message : '未知错误',
         isLoading: false
       }));
     }
@@ -125,7 +125,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
     } catch (error) {
       setState(prev => ({
         ...prev,
-        error: error instanceof Error ? error.message : '验证失败',
+        error: error instanceof Error ? error?.message : '验证失败',
         isLoading: false
       }));
     }
@@ -230,7 +230,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
                   value={state.verificationCode}
                   onChange={(e) => setState(prev => ({ 
                     ...prev, 
-                    verificationCode: e.target.value.replace(/\D/g, '').slice(0, 6)
+                    verificationCode: e?.target.value.replace(/\D/g, '').slice(0, 6)
                   }))}
                   placeholder="输入6位验证码"
                   maxLength={6}

@@ -13,8 +13,8 @@ export interface TestInterfaceProps {
   title: string;
   description: string;
   icon: React.ComponentType<any>;
-  defaultConfig: any;
-  onRunTest: (config: any) => Promise<TestResult>;
+  defaultConfig: unknown;
+  onRunTest: (config: unknown) => Promise<TestResult>;
   onCancelTest: () => Promise<void>;
   className?: string;
 }
@@ -137,7 +137,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
           <input
             type="url"
             value={config.url}
-            onChange={(e) => setConfig({ ...config, url: e.target.value })}
+            onChange={(e) => setConfig({ ...config, url: e?.target.value })}
             placeholder="https://example.com"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             disabled={isLoading}
@@ -156,7 +156,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                   id="users-input"
                   type="number"
                   value={config.users || 10}
-                  onChange={(e) => setConfig({ ...config, users: parseInt(e.target.value) })}
+                  onChange={(e) => setConfig({ ...config, users: parseInt(e?.target.value) })}
                   min="1"
                   max="1000"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -172,7 +172,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                   id="duration-input"
                   type="number"
                   value={config.duration || 30}
-                  onChange={(e) => setConfig({ ...config, duration: parseInt(e.target.value) })}
+                  onChange={(e) => setConfig({ ...config, duration: parseInt(e?.target.value) })}
                   min="10"
                   max="3600"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -190,7 +190,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               <input
                 type="checkbox"
                 checked={config.checkSEO || false}
-                onChange={(e) => setConfig({ ...config, checkSEO: e.target.checked })}
+                onChange={(e) => setConfig({ ...config, checkSEO: e?.target.checked })}
                 disabled={isLoading}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
@@ -200,7 +200,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               <input
                 type="checkbox"
                 checked={config.checkAccessibility || false}
-                onChange={(e) => setConfig({ ...config, checkAccessibility: e.target.checked })}
+                onChange={(e) => setConfig({ ...config, checkAccessibility: e?.target.checked })}
                 disabled={isLoading}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
@@ -210,7 +210,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               <input
                 type="checkbox"
                 checked={config.checkPerformance || false}
-                onChange={(e) => setConfig({ ...config, checkPerformance: e.target.checked })}
+                onChange={(e) => setConfig({ ...config, checkPerformance: e?.target.checked })}
                 disabled={isLoading}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />

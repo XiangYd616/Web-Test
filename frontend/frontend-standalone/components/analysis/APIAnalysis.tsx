@@ -7,22 +7,7 @@
 
 import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  Globe, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  Zap, 
-  Database,
-  RefreshCw,
-  BarChart3,
-  Target,
-  Server
-} from 'lucide-react';
+import {Globe, Clock, CheckCircle, XCircle, AlertTriangle, TrendingUp, TrendingDown, Activity, RefreshCw, BarChart3, Target, Server} from 'lucide-react';
 
 interface APIEndpoint {
   id: string;

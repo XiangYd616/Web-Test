@@ -83,17 +83,17 @@ function hasAnyPermission(user: AuthUser, permissions: string[]): boolean {
 /**
  * 认证装饰器 - 用于方法级别的权限控制
  */
-export function requireAuth<T extends (...args: any[]) => Promise<ApiResponse<any>>>(
+export function requireAuth<T extends (...args: unknown[]) => Promise<ApiResponse<any>>>(
   config: AuthConfig = {}
 ) {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]): Promise<ApiResponse<any>> {
+    descriptor.value = async function (...args: unknown[]): Promise<ApiResponse<any>> {
       try {
         // 检查是否需要认证
         if (config.requireAuth !== false) {
@@ -206,7 +206,7 @@ export class PermissionChecker {
 /**
  * 测试权限常量
  */
-export const TestPermissions = {
+export const _TestPermissions = {
   // 基础测试权限
   RUN_PERFORMANCE_TEST: 'test:performance:run',
   RUN_SECURITY_TEST: 'test:security:run',

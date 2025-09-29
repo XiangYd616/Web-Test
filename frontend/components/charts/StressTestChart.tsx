@@ -2,7 +2,7 @@
 import React from 'react';
 import { BarChart3, Download, Settings, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { TestPhase, TestState, type RealTimeMetrics, type TestDataPoint } from '../../services/testStateManager';
+import {TestPhase, TestState} from '../../services/testStateManager';
 
 import '../../styles/optimized-charts.css';
 
@@ -278,7 +278,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
               <input
                 type="checkbox"
                 checked={chartConfig.showResponseTime}
-                onChange={(e) => handleConfigChange({ showResponseTime: e.target.checked })}
+                onChange={(e) => handleConfigChange({ showResponseTime: e?.target.checked })}
                 className="rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500"
               />
               <span className="text-sm text-gray-300">响应时间</span>
@@ -287,7 +287,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
               <input
                 type="checkbox"
                 checked={chartConfig.showThroughput}
-                onChange={(e) => handleConfigChange({ showThroughput: e.target.checked })}
+                onChange={(e) => handleConfigChange({ showThroughput: e?.target.checked })}
                 className="rounded border-gray-600 bg-gray-700 text-green-600 focus:ring-green-500"
               />
               <span className="text-sm text-gray-300">吞吐量</span>
@@ -296,7 +296,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
               <input
                 type="checkbox"
                 checked={chartConfig.showActiveUsers}
-                onChange={(e) => handleConfigChange({ showActiveUsers: e.target.checked })}
+                onChange={(e) => handleConfigChange({ showActiveUsers: e?.target.checked })}
                 className="rounded border-gray-600 bg-gray-700 text-purple-600 focus:ring-purple-500"
               />
               <span className="text-sm text-gray-300">活跃用户</span>
@@ -305,7 +305,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
               <input
                 type="checkbox"
                 checked={chartConfig.showErrorRate}
-                onChange={(e) => handleConfigChange({ showErrorRate: e.target.checked })}
+                onChange={(e) => handleConfigChange({ showErrorRate: e?.target.checked })}
                 className="rounded border-gray-600 bg-gray-700 text-red-600 focus:ring-red-500"
               />
               <span className="text-sm text-gray-300">错误率</span>
@@ -317,7 +317,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
               <select
                 id="timeWindow"
                 value={chartConfig.timeWindow}
-                onChange={(e) => handleConfigChange({ timeWindow: Number(e.target.value) })}
+                onChange={(e) => handleConfigChange({ timeWindow: Number(e?.target.value) })}
                 className="px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm"
                 title="选择图表显示的时间窗口"
               >

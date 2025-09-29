@@ -59,7 +59,7 @@ export const EXPORT_FORMATS: Record<string, ExportFormat> = {
 // 导出数据接口
 export interface ExportData {
   filename?: string;
-  data: any;
+  data: unknown;
   metadata?: {
     title?: string;
     description?: string;
@@ -198,20 +198,20 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
     a.href = url;
     a.download = `${filename}.${formatConfig.extension}`;
     document.body.appendChild(a);
-    a.click();
+    a?.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
   // 转换为CSV格式
-  const convertToCSV = (data: any): string => {
+  const convertToCSV = (data: unknown): string => {
     if (Array.isArray(data)) {
       if (data.length === 0) return '';
 
       const headers = Object.keys(data[0]);
       const csvContent = [
         headers.join(','),
-        ...data.map(row =>
+        ...data?.map(row =>
           headers.map(header => {
             const value = row[header];
             return typeof value === 'string' && value.includes(',')
@@ -265,7 +265,7 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
   };
 
   // 获取可用格式
-  const availableFormats = formats.map(key => EXPORT_FORMATS[key]).filter(Boolean);
+  const availableFormats = formats?.map(key => EXPORT_FORMATS[key]).filter(Boolean);
 
   // 单个按钮模式
   if (!showDropdown || availableFormats.length === 1) {

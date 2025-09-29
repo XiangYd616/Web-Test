@@ -18,7 +18,7 @@ interface TestRecord {
   overallScore?: number;
   duration?: number;
   // 测试类型特定的字段
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface TestPageHistoryProps {
@@ -132,7 +132,7 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
   };
 
   // 处理全选
-  const handleSelectAll = (checked: boolean) => {
+  const _handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedRecords(new Set(records.map(r => r.id)));
     } else {
@@ -246,7 +246,7 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
                   type="text"
                   placeholder="输入测试名称或URL..."
                   value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={(e) => handleSearch(e?.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
                 />
               </div>
@@ -259,7 +259,7 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
               </label>
               <select
                 value={statusFilter}
-                onChange={(e) => handleStatusFilter(e.target.value)}
+                onChange={(e) => handleStatusFilter(e?.target.value)}
                 className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
               >
                 <option value="all">全部状态</option>

@@ -214,7 +214,7 @@ class RiskScorer {
   /**
    * 检查是否为异常位置
    */
-  private static isUnusualLocation(location: any): boolean {
+  private static isUnusualLocation(location: unknown): boolean {
     // 这里应该实现基于历史位置的异常检测
     // 目前简化实现
     return false;
@@ -223,7 +223,7 @@ class RiskScorer {
   /**
    * 检查是否为新设备
    */
-  private static isNewDevice(deviceInfo: any): boolean {
+  private static isNewDevice(deviceInfo: unknown): boolean {
     // 这里应该实现设备指纹识别
     // 目前简化实现
     return false;
@@ -283,7 +283,7 @@ class SecurityEventDetector {
         userId: entry.userId,
         username: entry.username,
         ipAddress: entry.ipAddress,
-        relatedEvents: recentFailures.map(e => e.id),
+        relatedEvents: recentFailures.map(e => e?.id),
         isResolved: false,
         metadata: {
           failureCount: recentFailures.length,
@@ -332,7 +332,7 @@ class SecurityEventDetector {
    */
   private static detectPrivilegeEscalation(entry: AuditLogEntry): SecurityAlert | null {
     // 简化实现，实际应该分析权限变化模式
-    if (entry.details?.newRole === 'admin' || entry.details?.permission?.includes('admin')) {
+    if (entry.details.newRole === 'admin' || entry.details?.permission?.includes('admin')) {
       return {
         id: this.generateAlertId(),
         timestamp: new Date().toISOString(),
@@ -551,7 +551,7 @@ export class AuditLogService {
   async logEvents(events: Array<{
     eventType: AuditEventType;
     details: Record<string, any>;
-    options: any;
+    options: unknown;
   }>): Promise<AuditLogEntry[]> {
     const entries: AuditLogEntry[] = [];
 
@@ -579,70 +579,70 @@ export class AuditLogService {
     if (query.startTime) {
       const startTime = new Date(query.startTime).getTime();
       filteredLogs = filteredLogs.filter(log =>
-        new Date(log.timestamp).getTime() >= startTime
+        new Date(log?.timestamp).getTime() >= startTime
       );
     }
 
     if (query.endTime) {
       const endTime = new Date(query.endTime).getTime();
       filteredLogs = filteredLogs.filter(log =>
-        new Date(log.timestamp).getTime() <= endTime
+        new Date(log?.timestamp).getTime() <= endTime
       );
     }
 
     // 事件类型过滤
     if (query.eventTypes && query.eventTypes.length > 0) {
       filteredLogs = filteredLogs.filter(log =>
-        query.eventTypes!.includes(log.eventType)
+        query.eventTypes!.includes(log?.eventType)
       );
     }
 
     // 严重程度过滤
     if (query.severities && query.severities.length > 0) {
       filteredLogs = filteredLogs.filter(log =>
-        query.severities!.includes(log.severity)
+        query.severities!.includes(log?.severity)
       );
     }
 
     // 状态过滤
     if (query.statuses && query.statuses.length > 0) {
       filteredLogs = filteredLogs.filter(log =>
-        query.statuses!.includes(log.status)
+        query.statuses!.includes(log?.status)
       );
     }
 
     // 用户过滤
     if (query.userIds && query.userIds.length > 0) {
       filteredLogs = filteredLogs.filter(log =>
-        log.userId && query.userIds!.includes(log.userId)
+        log?.userId && query.userIds!.includes(log?.userId)
       );
     }
 
     // IP地址过滤
     if (query.ipAddresses && query.ipAddresses.length > 0) {
       filteredLogs = filteredLogs.filter(log =>
-        query.ipAddresses!.includes(log.ipAddress)
+        query.ipAddresses!.includes(log?.ipAddress)
       );
     }
 
     // 资源过滤
     if (query.resources && query.resources.length > 0) {
       filteredLogs = filteredLogs.filter(log =>
-        log.resource && query.resources!.includes(log.resource)
+        log?.resource && query.resources!.includes(log?.resource)
       );
     }
 
     // 操作过滤
     if (query.actions && query.actions.length > 0) {
       filteredLogs = filteredLogs.filter(log =>
-        log.action && query.actions!.includes(log.action)
+        log?.action && query.actions!.includes(log?.action)
       );
     }
 
     // 标签过滤
     if (query.tags && query.tags.length > 0) {
       filteredLogs = filteredLogs.filter(log =>
-        query.tags!.some(tag => log.tags.includes(tag))
+        query.tags!.some(tag => log?.tags.includes(tag))
       );
     }
 
@@ -650,11 +650,11 @@ export class AuditLogService {
     if (query.searchTerm) {
       const searchTerm = query.searchTerm.toLowerCase();
       filteredLogs = filteredLogs.filter(log =>
-        log.username?.toLowerCase().includes(searchTerm) ||
-        log.ipAddress.includes(searchTerm) ||
-        log.resource?.toLowerCase().includes(searchTerm) ||
-        log.action?.toLowerCase().includes(searchTerm) ||
-        JSON.stringify(log.details).toLowerCase().includes(searchTerm)
+        log?.username?.toLowerCase().includes(searchTerm) ||
+        log?.ipAddress.includes(searchTerm) ||
+        log?.resource?.toLowerCase().includes(searchTerm) ||
+        log?.action?.toLowerCase().includes(searchTerm) ||
+        JSON.stringify(log?.details).toLowerCase().includes(searchTerm)
       );
     }
 
@@ -663,7 +663,7 @@ export class AuditLogService {
     const sortOrder = query.sortOrder || 'desc';
 
     filteredLogs.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: unknown, bValue: unknown;
 
       switch (sortBy) {
         case 'timestamp':
@@ -712,24 +712,24 @@ export class AuditLogService {
     const { logs } = await this.queryLogs(query);
 
     const eventsByType = logs.reduce((acc, log) => {
-      acc[log.eventType] = (acc[log.eventType] || 0) + 1;
+      acc[log?.eventType] = (acc[log?.eventType] || 0) + 1;
       return acc;
     }, {} as Record<AuditEventType, number>);
 
     const eventsBySeverity = logs.reduce((acc, log) => {
-      acc[log.severity] = (acc[log.severity] || 0) + 1;
+      acc[log?.severity] = (acc[log?.severity] || 0) + 1;
       return acc;
     }, {} as Record<AuditSeverity, number>);
 
     const eventsByStatus = logs.reduce((acc, log) => {
-      acc[log.status] = (acc[log.status] || 0) + 1;
+      acc[log?.status] = (acc[log?.status] || 0) + 1;
       return acc;
     }, {} as Record<AuditStatus, number>);
 
     // 用户统计
     const userCounts = logs.reduce((acc, log) => {
-      if (log.userId) {
-        const key = log.userId;
+      if (log?.userId) {
+        const key = log?.userId;
         acc[key] = (acc[key] || 0) + 1;
       }
       return acc;
@@ -749,7 +749,7 @@ export class AuditLogService {
 
     // IP地址统计
     const ipCounts = logs.reduce((acc, log) => {
-      acc[log.ipAddress] = (acc[log.ipAddress] || 0) + 1;
+      acc[log?.ipAddress] = (acc[log?.ipAddress] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
@@ -916,7 +916,7 @@ export class AuditLogService {
     };
   }
 
-  private parseDeviceInfo(userAgent: string): any {
+  private parseDeviceInfo(userAgent: string): unknown {
     // 简化的用户代理解析
     return {
       deviceId: 'unknown',
@@ -928,11 +928,11 @@ export class AuditLogService {
 
   private calculateRiskTrends(logs: AuditLogEntry[]): Array<{ date: string; averageRisk: number; eventCount: number }> {
     const dailyData = logs.reduce((acc, log) => {
-      const date = log.timestamp.split('T')[0];
+      const date = log?.timestamp.split('T')[0];
       if (!acc[date]) {
         acc[date] = { totalRisk: 0, count: 0 };
       }
-      acc[date].totalRisk += log.riskScore || 0;
+      acc[date].totalRisk += log?.riskScore || 0;
       acc[date].count += 1;
       return acc;
     }, {} as Record<string, { totalRisk: number; count: number }>);
@@ -959,7 +959,7 @@ export class AuditLogService {
   private cleanupOldLogs(): void {
     const cutoffTime = Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000);
     this.logs = this.logs.filter(log =>
-      new Date(log.timestamp).getTime() > cutoffTime
+      new Date(log?.timestamp).getTime() > cutoffTime
     );
   }
 }
@@ -974,7 +974,7 @@ export function useAuditLog() {
   const logEvent = useCallback(async (
     eventType: AuditEventType,
     details: Record<string, any>,
-    options: any
+    options: unknown
   ) => {
     setIsLoading(true);
     setError(null);

@@ -19,7 +19,7 @@ interface PerformanceChartProps {
   maxDataPoints?: number;
   samplingStrategy?: 'uniform' | 'adaptive' | 'importance';
   enableOptimization?: boolean;
-  onOptimizationResult?: (result: any) => void;
+  onOptimizationResult?: (result: unknown) => void;
 }
 
 interface PerformanceStats {
@@ -101,7 +101,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   }, [optimizedData.data, dataKey, showAverage]);
 
   // 🔧 改进：优化的时间格式化函数，提高到0.01秒精度
-  const formatTime = useCallback((value: any) => {
+  const formatTime = useCallback((value: unknown) => {
     if (!optimizedData.data.length) return '';
 
     try {
@@ -116,12 +116,12 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
       return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
     } catch {
       const date = new Date(value);
-      return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+      return `${date?.getHours().toString().padStart(2, '0')}:${date?.getMinutes().toString().padStart(2, '0')}`;
     }
   }, [optimizedData.data]);
 
   // 优化的工具提示格式化
-  const formatTooltip = useCallback((value: any, name: string) => {
+  const formatTooltip = useCallback((value: unknown, name: string) => {
     if (name === dataKey) {
       const unit = dataKey === 'responseTime' ? 'ms' :
         dataKey === 'throughput' || dataKey === 'tps' ? '' : '';
@@ -131,7 +131,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   }, [dataKey]);
 
   // 🔧 改进：优化的标签格式化，提高到0.1秒精度
-  const formatLabel = useCallback((value: any) => {
+  const formatLabel = useCallback((value: unknown) => {
     if (!optimizedData.data.length) return '';
 
     try {
@@ -147,7 +147,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
       return `测试时间: ${timeStr}`;
     } catch {
       const date = new Date(value);
-      return `时间: ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+      return `时间: ${date?.getHours().toString().padStart(2, '0')}:${date?.getMinutes().toString().padStart(2, '0')}`;
     }
   }, [optimizedData.data]);
 
@@ -246,7 +246,7 @@ export default React.memo(PerformanceChart);
 
 // 导出性能监控组件
 export const PerformanceMonitor: React.FC<{
-  onStatsUpdate?: (stats: any) => void
+  onStatsUpdate?: (stats: unknown) => void
 }> = ({ onStatsUpdate }) => {
   const [stats, setStats] = useState<any>(null);
 

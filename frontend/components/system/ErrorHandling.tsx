@@ -199,7 +199,7 @@ export const ServerError: React.FC<{
     type: 'server',
     title: '服务器错误',
     message: '服务器遇到了一个错误，无法完成您的请求',
-    code: statusCode.toString(),
+    code: statusCode?.toString(),
     timestamp: new Date().toISOString(),
     severity: 'critical',
     suggestions: [
@@ -398,7 +398,7 @@ export class ErrorBoundary extends React.Component<
   { children: React.ReactNode; fallback?: React.ComponentType<{ error: Error; resetError: () => void }> },
   { hasError: boolean; error: Error | null }
 > {
-  constructor(props: any) {
+  constructor(props: unknown) {
     super(props);
     this.state = { hasError: false, error: null };
   }
@@ -461,7 +461,7 @@ const DefaultErrorFallback: React.FC<{ error: Error; resetError: () => void }> =
 export const useErrorHandler = () => {
   const [error, setError] = React.useState<LocalErrorInfo | null>(null);
 
-  const handleError = (error: any, context?: string) => {
+  const handleError = (error: unknown, context?: string) => {
     let errorInfo: LocalErrorInfo;
 
     if (error.name === 'NetworkError' || error.message?.includes('fetch')) {
@@ -534,7 +534,7 @@ export const useNotifications = () => {
   };
 
   const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications(prev => prev.filter(n => n?.id !== id));
   };
 
   const success = (title: string, message?: string) =>

@@ -10,7 +10,7 @@ export class SecureStorageManager {
   /**
    * 安全存储数据
    */
-  static async setItem(key: string, value: any): Promise<void> {
+  static async setItem(key: string, value: unknown): Promise<void> {
     try {
       const serialized = JSON.stringify(value);
       const encrypted = await this.encrypt(serialized);
@@ -163,7 +163,7 @@ export class SecureStorageManager {
   /**
    * 基础存储方法（非加密）
    */
-  static setItemPlain(key: string, value: any): void {
+  static setItemPlain(key: string, value: unknown): void {
     localStorage.setItem(this.STORAGE_KEY_PREFIX + key, JSON.stringify(value));
   }
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useState, useCallback, useRef } from 'react';
-import { Upload, File, X, CheckCircle, AlertTriangle, Download, Eye, Search, Tag, Globe } from 'lucide-react';
+import {Upload, File, X, CheckCircle, AlertTriangle, Eye, Tag, Globe} from 'lucide-react';
 
 interface UploadedFile {
   id: string;
@@ -51,8 +51,8 @@ const FileUploadSEO = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e?.preventDefault();
+    e?.stopPropagation();
     if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true);
     } else if (e.type === 'dragleave') {
@@ -61,19 +61,19 @@ const FileUploadSEO = () => {
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e?.preventDefault();
+    e?.stopPropagation();
     setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFiles(Array.from(e.dataTransfer.files));
+    if (e?.dataTransfer.files && e?.dataTransfer.files[0]) {
+      handleFiles(Array.from(e?.dataTransfer.files));
     }
   }, []);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    if (e.target.files && e.target.files[0]) {
-      handleFiles(Array.from(e.target.files));
+    e?.preventDefault();
+    if (e?.target.files && e?.target.files[0]) {
+      handleFiles(Array.from(e?.target.files));
     }
   }, []);
 
@@ -85,7 +85,7 @@ const FileUploadSEO = () => {
         // Simulate file upload and SEO analysis
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const seoOptimizedName = optimizeFileName(file.name);
+        const _seoOptimizedName = optimizeFileName(file.name);
         const dimensions = await getImageDimensions(file);
         
         const uploadedFile: UploadedFile = {
@@ -235,7 +235,7 @@ const FileUploadSEO = () => {
 
   const removeFile = (fileId: string) => {
     setFiles(prev => prev.filter(file => file.id !== fileId));
-    if (selectedFile?.id === fileId) {
+    if (selectedFile.id === fileId) {
       setSelectedFile(null);
       setSeoAnalysis(null);
     }
@@ -337,7 +337,7 @@ const FileUploadSEO = () => {
                         <span className="text-xs text-gray-500">{file.type}</span>
                         {file.seoData.dimensions && (
                           <span className="text-xs text-gray-500">
-                            {file.seoData.dimensions.width} × {file.seoData.dimensions.height}
+                            {file.seoData.dimensions?.width} × {file.seoData.dimensions?.height}
                           </span>
                         )}
                       </div>
@@ -356,7 +356,7 @@ const FileUploadSEO = () => {
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
+                        e?.stopPropagation();
                         window.open(file.url, '_blank');
                       }}
                       className="p-2 text-gray-400 hover:text-gray-600"
@@ -365,7 +365,7 @@ const FileUploadSEO = () => {
                     </button>
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
+                        e?.stopPropagation();
                         removeFile(file.id);
                       }}
                       className="p-2 text-gray-400 hover:text-red-600"
@@ -407,8 +407,8 @@ const FileUploadSEO = () => {
                 </label>
                 <input
                   type="text"
-                  value={selectedFile.seoData.title}
-                  onChange={(e) => updateFileSEO(selectedFile.id, { title: e.target.value })}
+                  value={selectedFile?.seoData.title}
+                  onChange={(e) => updateFileSEO(selectedFile?.id, { title: e?.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter SEO-friendly title"
                 />
@@ -420,8 +420,8 @@ const FileUploadSEO = () => {
                 </label>
                 <input
                   type="text"
-                  value={selectedFile.seoData.altText}
-                  onChange={(e) => updateFileSEO(selectedFile.id, { altText: e.target.value })}
+                  value={selectedFile?.seoData.altText}
+                  onChange={(e) => updateFileSEO(selectedFile?.id, { altText: e?.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Describe the image for accessibility"
                 />
@@ -432,8 +432,8 @@ const FileUploadSEO = () => {
                   Description
                 </label>
                 <textarea
-                  value={selectedFile.seoData.description}
-                  onChange={(e) => updateFileSEO(selectedFile.id, { description: e.target.value })}
+                  value={selectedFile?.seoData.description}
+                  onChange={(e) => updateFileSEO(selectedFile?.id, { description: e?.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter detailed description for SEO"
@@ -445,7 +445,7 @@ const FileUploadSEO = () => {
                   Keywords
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {selectedFile.seoData.keywords.map((keyword, index) => (
+                  {selectedFile?.seoData.keywords.map((keyword, index) => (
                     <span
                       key={index}
                       className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
@@ -466,13 +466,13 @@ const FileUploadSEO = () => {
                        * @param {Object} params - 参数对象
                        * @returns {Promise<Object>} 返回结果
                        */
-                      const value = (e.target as HTMLInputElement).value.trim();
+                      const value = (e?.target as HTMLInputElement).value.trim();
                       if (value) {
                         const newKeywords = value.split(',').map(k => k.trim()).filter(k => k);
-                        updateFileSEO(selectedFile.id, { 
-                          keywords: [...selectedFile.seoData.keywords, ...newKeywords] 
+                        updateFileSEO(selectedFile?.id, { 
+                          keywords: [...selectedFile?.seoData.keywords, ...newKeywords] 
                         });
-                        (e.target as HTMLInputElement).value = '';
+                        (e?.target as HTMLInputElement).value = '';
                       }
                     }
                   }}

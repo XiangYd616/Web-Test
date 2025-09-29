@@ -13,7 +13,7 @@ interface Permission {
   resource: string;
   action: string;
   effect?: 'allow' | 'deny';
-  conditions?: any;
+  conditions?: unknown;
 }
 
 interface Role {

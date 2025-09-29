@@ -4,24 +4,7 @@
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Target, 
-  AlertTriangle, 
-  CheckCircle, 
-  Users, 
-  Clock,
-  BarChart3,
-  PieChart,
-  Activity,
-  Shield,
-  Globe,
-  Zap,
-  Eye,
-  Database
-} from 'lucide-react';
+import {TrendingUp, TrendingDown, DollarSign, Target, AlertTriangle, CheckCircle, Users, BarChart3, Activity, Shield, Globe, Zap, Eye, Database} from 'lucide-react';
 
 export interface TestResultSummary {
   testType: 'api' | 'performance' | 'security' | 'compatibility' | 'seo' | 'accessibility' | 'ux' | 'database' | 'network';
@@ -213,7 +196,7 @@ export const BusinessMetricsDashboard: React.FC<BusinessMetricsDashboardProps> =
         <div className="flex items-center space-x-4">
           <select
             value={selectedTimeRange}
-            onChange={(e) => setSelectedTimeRange(e.target.value as any)}
+            onChange={(e) => setSelectedTimeRange(e?.target.value as any)}
             className="bg-gray-700 text-white px-3 py-2 rounded border border-gray-600"
           >
             <option value="1d">过去1天</option>

@@ -55,18 +55,18 @@ class UnifiedTestHistoryService {
   /**
    * 缓存管理
    */
-  private getCacheKey(endpoint: string, params?: any): string {
+  private getCacheKey(endpoint: string, params?: unknown): string {
     return `${endpoint}_${JSON.stringify(params || {})}`;
   }
 
-  private setCache(key: string, data: any): void {
+  private setCache(key: string, data: unknown): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now()
     });
   }
 
-  private getCache(key: string): any | null {
+  private getCache(key: string): unknown | null {
     const cached = this.cache.get(key);
     if (!cached) return null;
 
@@ -96,24 +96,24 @@ class UnifiedTestHistoryService {
     const params = new URLSearchParams();
 
     // 基础查询参数
-    if (query.page) params.append('page', query.page.toString());
-    if (query.limit) params.append('limit', query.limit.toString());
-    if (query.sortBy) params.append('sortBy', query.sortBy);
-    if (query.sortOrder) params.append('sortOrder', query.sortOrder);
+    if (query.page) params?.append('page', query.page.toString());
+    if (query.limit) params?.append('limit', query.limit.toString());
+    if (query.sortBy) params?.append('sortBy', query.sortBy);
+    if (query.sortOrder) params?.append('sortOrder', query.sortOrder);
 
     // 过滤参数
     if (query.testType) {
       if (Array.isArray(query.testType)) {
-        query.testType.forEach((type: any) => params.append('testType', type));
+        query.testType.forEach((type: unknown) => params?.append('testType', type));
       } else {
-        params.append('testType', query.testType);
+        params?.append('testType', query.testType);
       }
     }
 
-    if (query.status) params.append('status', query.status);
-    if (query.search) params.append('search', query.search);
-    if (query.dateFrom) params.append('dateFrom', query.dateFrom);
-    if (query.dateTo) params.append('dateTo', query.dateTo);
+    if (query.status) params?.append('status', query.status);
+    if (query.search) params?.append('search', query.search);
+    if (query.dateFrom) params?.append('dateFrom', query.dateFrom);
+    if (query.dateTo) params?.append('dateTo', query.dateTo);
 
     try {
       const response = await fetch(`${this.baseUrl}?${params}`, {
@@ -143,10 +143,10 @@ class UnifiedTestHistoryService {
     if (cached) return cached;
 
     const params = new URLSearchParams();
-    if (query.page) params.append('page', query.page.toString());
-    if (query.limit) params.append('limit', query.limit.toString());
-    if (query.sortBy) params.append('sortBy', query.sortBy);
-    if (query.sortOrder) params.append('sortOrder', query.sortOrder);
+    if (query.page) params?.append('page', query.page.toString());
+    if (query.limit) params?.append('limit', query.limit.toString());
+    if (query.sortBy) params?.append('sortBy', query.sortBy);
+    if (query.sortOrder) params?.append('sortOrder', query.sortOrder);
 
     try {
       const response = await fetch(`${this.baseUrl}/${testType}?${params}`, {
@@ -201,7 +201,7 @@ class UnifiedTestHistoryService {
     testName: string;
     testType: TestType;
     url?: string;
-    config?: any;
+    config?: unknown;
     environment?: string;
     tags?: string[];
   }): Promise<TestSession> {
@@ -229,7 +229,7 @@ class UnifiedTestHistoryService {
   /**
    * 更新测试状态
    */
-  async updateTestStatus(sessionId: string, status: string, additionalData?: any): Promise<void> {
+  async updateTestStatus(sessionId: string, status: string, additionalData?: unknown): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}/status`, {
         method: 'PATCH',
@@ -252,7 +252,7 @@ class UnifiedTestHistoryService {
   /**
    * 完成测试并保存结果
    */
-  async completeTest(sessionId: string, results: any): Promise<void> {
+  async completeTest(sessionId: string, results: unknown): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}/complete`, {
         method: 'POST',
@@ -374,7 +374,7 @@ class UnifiedTestHistoryService {
    */
   async searchTests(searchQuery: string, filters?: TestHistoryFilters): Promise<TestHistoryResponse> {
     const params = new URLSearchParams();
-    params.append('search', searchQuery);
+    params?.append('search', searchQuery);
 
     if (filters) {
         /**
@@ -385,11 +385,11 @@ class UnifiedTestHistoryService {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
-            value.forEach(v => params.append(key, v.toString()));
+            value.forEach(v => params?.append(key, v.toString()));
           } else if (typeof value === 'object') {
-            params.append(key, JSON.stringify(value));
+            params?.append(key, JSON.stringify(value));
           } else {
-            params.append(key, value.toString());
+            params?.append(key, value.toString());
           }
         }
       });

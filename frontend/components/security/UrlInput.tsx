@@ -62,7 +62,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
       });
 
       setValidationResult(result);
-      onValidationChange?.(result.isValid, result);
+      onValidationChange?.(result?.isValid, result);
       setIsValidating(false);
     }, 100);
   }, [onValidationChange]);
@@ -78,8 +78,8 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
 
   // 自动修复URL
   const handleAutoFix = useCallback(() => {
-    if (validationResult?.correctedUrl && validationResult.correctedUrl !== value) {
-      onChange(validationResult.correctedUrl);
+    if (validationResult?.correctedUrl && validationResult?.correctedUrl !== value) {
+      onChange(validationResult?.correctedUrl);
     }
   }, [validationResult, value, onChange]);
 
@@ -90,8 +90,8 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
 
   // 在浏览器中打开URL
   const handleOpenInBrowser = useCallback(() => {
-    if (validationResult?.isValid && validationResult.correctedUrl) {
-      window.open(validationResult.correctedUrl, '_blank', 'noopener,noreferrer');
+    if (validationResult?.isValid && validationResult?.correctedUrl) {
+      window.open(validationResult?.correctedUrl, '_blank', 'noopener,noreferrer');
     }
   }, [validationResult]);
 
@@ -140,7 +140,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
         <input
           type="url"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(e?.target.value)}
           placeholder={placeholder}
           disabled={disabled}
           className={`enhanced-url-input w-full pl-14 sm:pl-16 pr-16 sm:pr-18 py-2.5 sm:py-3 text-sm bg-gray-700/50 border ${getBorderStyle} rounded-lg text-white placeholder-gray-400 focus:ring-1 focus:ring-current transition-all duration-200 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -148,7 +148,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
 
         <div className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1.5">
           {/* 自动修复按钮 */}
-          {autoFix && validationResult?.autoFixes.length > 0 && validationResult.correctedUrl !== value && (
+          {autoFix && validationResult?.autoFixes.length > 0 && validationResult?.correctedUrl !== value && (
             <button
               type="button"
               onClick={handleAutoFix}
@@ -187,17 +187,17 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
       {validationResult && (
         <div className="space-y-2">
           {/* 自动修复提示 */}
-          {validationResult.autoFixes.length > 0 && (
+          {validationResult?.autoFixes.length > 0 && (
             <div className="flex items-start space-x-2 p-3 bg-yellow-900/20 border border-yellow-800/50 rounded-lg">
               <Zap className="h-4 w-4 text-yellow-400 mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-yellow-300 font-medium">自动修复建议</p>
                 <ul className="text-xs text-yellow-200 mt-1 space-y-1">
-                  {validationResult.autoFixes.map((fix, index) => (
+                  {validationResult?.autoFixes.map((fix, index) => (
                     <li key={index}>• {fix}</li>
                   ))}
                 </ul>
-                {autoFix && validationResult.correctedUrl !== value && (
+                {autoFix && validationResult?.correctedUrl !== value && (
                   <button
                     type="button"
                     onClick={handleAutoFix}
@@ -211,14 +211,14 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
           )}
 
           {/* 错误信息 */}
-          {validationResult.errors.length > 0 && (
+          {validationResult?.errors.length > 0 && (
             <div className="p-3 bg-red-900/20 border border-red-800/50 rounded-lg">
               <div className="flex items-start space-x-2">
                 <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-red-300 font-medium">格式错误</p>
                   <ul className="text-xs text-red-200 mt-1 space-y-1">
-                    {validationResult.errors.map((error, index) => (
+                    {validationResult?.errors.map((error, index) => (
                       <li key={index}>• {error}</li>
                     ))}
                   </ul>
@@ -228,14 +228,14 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
           )}
 
           {/* 安全提示 */}
-          {validationResult.securityNotes.length > 0 && (
+          {validationResult?.securityNotes.length > 0 && (
             <div className="p-3 bg-blue-900/20 border border-blue-800/50 rounded-lg">
               <div className="flex items-start space-x-2">
                 <AlertTriangle className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-blue-300 font-medium">安全提示</p>
                   <ul className="text-xs text-blue-200 mt-1 space-y-1">
-                    {validationResult.securityNotes.map((note, index) => (
+                    {validationResult?.securityNotes.map((note, index) => (
                       <li key={index}>• {note}</li>
                     ))}
                   </ul>
@@ -245,14 +245,14 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
           )}
 
           {/* 建议 */}
-          {validationResult.suggestions.length > 0 && showDetails && (
+          {validationResult?.suggestions.length > 0 && showDetails && (
             <div className="p-3 bg-green-900/20 border border-green-800/50 rounded-lg">
               <div className="flex items-start space-x-2">
                 <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-green-300 font-medium">优化建议</p>
                   <ul className="text-xs text-green-200 mt-1 space-y-1">
-                    {validationResult.suggestions.map((suggestion, index) => (
+                    {validationResult?.suggestions.map((suggestion, index) => (
                       <li key={index}>• {suggestion}</li>
                     ))}
                   </ul>

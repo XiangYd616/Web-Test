@@ -6,7 +6,6 @@
  * 更新时间: 2025-09-26 - 替换Mock实现为真实功能
  */
 
-import { TestResult } from '../types';
 
 export interface SecurityTestConfig {
   url: string;

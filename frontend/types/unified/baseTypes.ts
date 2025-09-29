@@ -19,7 +19,7 @@ export interface ApiResponse<T = any> {
   error?: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
   meta?: {
     timestamp: string;
@@ -39,7 +39,7 @@ export interface ApiErrorResponse extends ApiResponse {
   error: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
 }
 
@@ -87,7 +87,7 @@ export interface ValidationError {
 export interface ApiError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
   timestamp: Timestamp;
 }
 
@@ -118,7 +118,7 @@ export interface BaseTestSession {
 export interface BaseSystemConfig {
   id: ID;
   key: string;
-  value: any;
+  value: unknown;
   description?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -130,7 +130,7 @@ export interface BaseAuditLog {
   userId?: ID;
   action: string;
   resource: string;
-  details?: any;
+  details?: unknown;
   ipAddress?: string;
   userAgent?: string;
   timestamp: Timestamp;

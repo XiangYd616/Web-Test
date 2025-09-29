@@ -14,21 +14,21 @@ type TestStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 import { testApiService } from '../testApiService';
 
 // 回调函数类型定义
-type ProgressCallback = (progress: number, step: string, metrics?: any) => void;
-type CompletionCallback = (result: any) => void;
+type ProgressCallback = (progress: number, step: string, metrics?: unknown) => void;
+type CompletionCallback = (result: unknown) => void;
 type ErrorCallback = (error: Error) => void;
 
 // 测试信息接口（保持与原有一致）
 export interface TestInfo {
   id: string;
   type: string;
-  config: any;
+  config: unknown;
   status: TestStatus;
   progress: number;
   startTime: Date;
   endTime?: Date;
   currentStep: string;
-  result: any;
+  result: unknown;
   error: string | null;
   onProgress?: ProgressCallback;
   onComplete?: CompletionCallback;
@@ -40,7 +40,7 @@ export interface TestInfo {
  * 提供可选的统一API支持，同时保持完全向后兼容
  */
 export class BackgroundTestManagerAdapter {
-  private config: any = {
+  private config: unknown = {
     useUnifiedApi: false, // 默认不使用，保持现有行为
     fallbackToOriginal: true,
     enableWebSocket: true,
@@ -48,7 +48,7 @@ export class BackgroundTestManagerAdapter {
   };
 
   private runningTests = new Map<string, TestInfo>();
-  private listeners = new Set<(event: string, data: any) => void>();
+  private listeners = new Set<(event: string, data: unknown) => void>();
 
   /**
    * 配置适配器
@@ -66,9 +66,9 @@ export class BackgroundTestManagerAdapter {
    */
   startTest(
     testType: string,
-    config: any,
-    onProgress?: (progress: number, step: string, metrics?: any) => void,
-    onComplete?: (result: any) => void,
+    config: unknown,
+    onProgress?: (progress: number, step: string, metrics?: unknown) => void,
+    onComplete?: (result: unknown) => void,
     onError?: (error: Error) => void
   ): string {
     const testId = this.generateTestId();
@@ -112,7 +112,7 @@ export class BackgroundTestManagerAdapter {
 
     if (this.config.useUnifiedApi) {
       // 使用统一API取消测试
-      testApiService.cancelTest(testId, testInfo.type as any).catch((error: any) => {
+      testApiService.cancelTest(testId, testInfo.type as any).catch((error: unknown) => {
         if (this.config.enableLogging) {
           console.warn('统一API取消测试失败:', error);
         }
@@ -147,14 +147,14 @@ export class BackgroundTestManagerAdapter {
   /**
    * 添加事件监听器 - 保持与原有接口完全一致
    */
-  addListener(listener: (event: string, data: any) => void): void {
+  addListener(listener: (event: string, data: unknown) => void): void {
     this.listeners.add(listener);
   }
 
   /**
    * 移除事件监听器 - 保持与原有接口完全一致
    */
-  removeListener(listener: (event: string, data: any) => void): void {
+  removeListener(listener: (event: string, data: unknown) => void): void {
     this.listeners.delete(listener);
   }
 
@@ -192,7 +192,7 @@ export class BackgroundTestManagerAdapter {
         this.handleTestError(testInfo.id, error as Error);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (this.config.fallbackToOriginal) {
         if (this.config.enableLogging) {
           console.warn('统一API执行失败，回退到原始实现:', error);
@@ -237,7 +237,7 @@ export class BackgroundTestManagerAdapter {
           break;
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.handleTestError(testInfo.id, error);
     }
   }
@@ -272,7 +272,7 @@ export class BackgroundTestManagerAdapter {
 
       this.completeTest(testInfo.id, mockResult);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.handleTestError(testInfo.id, error);
     }
   }
@@ -303,7 +303,7 @@ export class BackgroundTestManagerAdapter {
 
       this.completeTest(testInfo.id, mockResult);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.handleTestError(testInfo.id, error);
     }
   }
@@ -356,7 +356,7 @@ export class BackgroundTestManagerAdapter {
   /**
    * 完成测试
    */
-  private completeTest(testId: string, result: any): void {
+  private completeTest(testId: string, result: unknown): void {
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
       testInfo.status = 'completed';
@@ -399,7 +399,7 @@ export class BackgroundTestManagerAdapter {
   /**
    * 通知监听器
    */
-  private notifyListeners(event: string, data: any): void {
+  private notifyListeners(event: string, data: unknown): void {
     this.listeners.forEach(listener => {
       try {
         listener(event, data);
@@ -464,6 +464,6 @@ export class BackgroundTestManagerAdapter {
 export const backgroundTestManagerAdapter = new BackgroundTestManagerAdapter();
 
 // 为了保持完全兼容，也可以直接导出为backgroundTestManager
-export const enhancedBackgroundTestManager = backgroundTestManagerAdapter;
+export const _enhancedBackgroundTestManager = backgroundTestManagerAdapter;
 
 export default backgroundTestManagerAdapter;

@@ -62,7 +62,7 @@ const DisableMFAModal: React.FC<DisableMFAModalProps> = ({
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (verificationCode.length === 6) {
       onConfirm(verificationCode);
     }
@@ -101,7 +101,7 @@ const DisableMFAModal: React.FC<DisableMFAModalProps> = ({
               <input
                 type="text"
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) => setVerificationCode(e?.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white text-center text-xl font-mono tracking-widest focus:outline-none focus:border-red-500"
                 maxLength={6}

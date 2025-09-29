@@ -115,7 +115,7 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
 };
 
 // 测试结果分析 Hook
-export const useTestResultAnalysis = (results: TestResult[]) => {
+export const _useTestResultAnalysis = (results: TestResult[]) => {
   const [analysis, setAnalysis] = useState({
     totalTests: 0,
     passedTests: 0,

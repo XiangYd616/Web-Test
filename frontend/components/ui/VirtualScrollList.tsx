@@ -58,7 +58,7 @@ function VirtualScrollList<T>({
 
     const handleScrollEvent = (e: React.UIEvent<HTMLDivElement>) => {
         handleScroll(e);
-        onScroll?.(e.currentTarget.scrollTop);
+        onScroll?.(e?.currentTarget.scrollTop);
     };
 
     // 渲染可见项目

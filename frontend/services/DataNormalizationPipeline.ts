@@ -81,7 +81,7 @@ export interface RawBackgroundManagerData {
     errorRate: number;
     activeUsers: number;
   };
-  result?: any;
+  result?: unknown;
   error?: string;
 }
 
@@ -207,14 +207,14 @@ export class DataNormalizationPipeline {
       if (rawData.data.realTimeMetrics) {
         const metrics = rawData.data.realTimeMetrics;
         const normalizedMetrics = this.normalizeMetrics({
-          totalRequests: metrics.totalRequests || 0,
-          successfulRequests: metrics.successfulRequests || 0,
-          failedRequests: metrics.failedRequests || 0,
-          averageResponseTime: metrics.lastResponseTime || 0,
-          currentTPS: metrics.totalRequests || 0,
-          peakTPS: metrics.totalRequests || 0,
-          errorRate: (metrics.failedRequests / Math.max(metrics.totalRequests, 1)) * 100,
-          activeUsers: metrics.activeRequests || 0,
+          totalRequests: metrics?.totalRequests || 0,
+          successfulRequests: metrics?.successfulRequests || 0,
+          failedRequests: metrics?.failedRequests || 0,
+          averageResponseTime: metrics?.lastResponseTime || 0,
+          currentTPS: metrics?.totalRequests || 0,
+          peakTPS: metrics?.totalRequests || 0,
+          errorRate: (metrics?.failedRequests / Math.max(metrics?.totalRequests, 1)) * 100,
+          activeUsers: metrics?.activeRequests || 0,
           timestamp: Date.now()
         });
 
@@ -276,7 +276,7 @@ export class DataNormalizationPipeline {
    * 批量处理数据点
    */
   processBatchDataPoints(dataPoints: TestDataPoint[]): TestDataPoint[] {
-    if (!dataPoints.length) return [];
+    if (!dataPoints?.length) return [];
 
     let processedData = [...dataPoints];
 
@@ -301,7 +301,7 @@ export class DataNormalizationPipeline {
   /**
    * 标准化数据点
    */
-  private normalizeDataPoint(rawPoint: any): TestDataPoint {
+  private normalizeDataPoint(rawPoint: unknown): TestDataPoint {
     return {
       timestamp: this.normalizeTimestamp(rawPoint.timestamp),
       responseTime: this.normalizeNumber(rawPoint.responseTime, this.validationRules.responseTime),
@@ -317,7 +317,7 @@ export class DataNormalizationPipeline {
   /**
    * 标准化指标
    */
-  private normalizeMetrics(rawMetrics: any): RealTimeMetrics {
+  private normalizeMetrics(rawMetrics: unknown): RealTimeMetrics {
     return {
       totalRequests: Math.max(0, rawMetrics.totalRequests || 0),
       successfulRequests: Math.max(0, rawMetrics.successfulRequests || 0),
@@ -334,7 +334,7 @@ export class DataNormalizationPipeline {
   /**
    * 标准化数字值
    */
-  private normalizeNumber(value: any, range: { min: number; max: number }): number {
+  private normalizeNumber(value: unknown, range: { min: number; max: number }): number {
     const num = Number(value) || 0;
     return Math.max(range.min, Math.min(range.max, num));
   }
@@ -342,12 +342,12 @@ export class DataNormalizationPipeline {
   /**
    * 标准化时间戳
    */
-  private normalizeTimestamp(timestamp: any): number {
+  private normalizeTimestamp(timestamp: unknown): number {
     const ts = Number(timestamp) || Date.now();
     const now = Date.now();
 
     // 如果时间戳太旧，使用当前时间
-    if (now - ts > this.validationRules.timestamp.maxAge) {
+    if (now - ts > this.validationRules.timestamp?.maxAge) {
       return now;
     }
 
@@ -357,7 +357,7 @@ export class DataNormalizationPipeline {
   /**
    * 标准化测试阶段
    */
-  private normalizePhase(phase: any): TestPhase {
+  private normalizePhase(phase: unknown): TestPhase {
     if (typeof phase !== 'string') return TestPhase.STEADY_STATE;
 
     const phaseMap: Record<string, TestPhase> = {
@@ -380,15 +380,15 @@ export class DataNormalizationPipeline {
    */
   private validateDataPoint(dataPoint: TestDataPoint): boolean {
     return (
-      dataPoint.timestamp > 0 &&
-      dataPoint.responseTime >= this.validationRules.responseTime.min &&
-      dataPoint.responseTime <= this.validationRules.responseTime.max &&
-      dataPoint.activeUsers >= this.validationRules.activeUsers.min &&
-      dataPoint.activeUsers <= this.validationRules.activeUsers.max &&
-      dataPoint.throughput >= this.validationRules.throughput.min &&
-      dataPoint.throughput <= this.validationRules.throughput.max &&
-      dataPoint.errorRate >= this.validationRules.errorRate.min &&
-      dataPoint.errorRate <= this.validationRules.errorRate.max
+      dataPoint?.timestamp > 0 &&
+      dataPoint?.responseTime >= this.validationRules.responseTime.min &&
+      dataPoint?.responseTime <= this.validationRules.responseTime.max &&
+      dataPoint?.activeUsers >= this.validationRules.activeUsers.min &&
+      dataPoint?.activeUsers <= this.validationRules.activeUsers.max &&
+      dataPoint?.throughput >= this.validationRules.throughput.min &&
+      dataPoint?.throughput <= this.validationRules.throughput.max &&
+      dataPoint?.errorRate >= this.validationRules.errorRate.min &&
+      dataPoint?.errorRate <= this.validationRules.errorRate.max
     );
   }
 
@@ -397,15 +397,15 @@ export class DataNormalizationPipeline {
    */
   private validateMetrics(metrics: RealTimeMetrics): boolean {
     return (
-      metrics.totalRequests >= 0 &&
-      metrics.successfulRequests >= 0 &&
-      metrics.failedRequests >= 0 &&
-      metrics.averageResponseTime >= this.validationRules.responseTime.min &&
-      metrics.averageResponseTime <= this.validationRules.responseTime.max &&
-      metrics.currentTPS >= this.validationRules.throughput.min &&
-      metrics.currentTPS <= this.validationRules.throughput.max &&
-      metrics.errorRate >= this.validationRules.errorRate.min &&
-      metrics.errorRate <= this.validationRules.errorRate.max
+      metrics?.totalRequests >= 0 &&
+      metrics?.successfulRequests >= 0 &&
+      metrics?.failedRequests >= 0 &&
+      metrics?.averageResponseTime >= this.validationRules.responseTime.min &&
+      metrics?.averageResponseTime <= this.validationRules.responseTime.max &&
+      metrics?.currentTPS >= this.validationRules.throughput.min &&
+      metrics?.currentTPS <= this.validationRules.throughput.max &&
+      metrics?.errorRate >= this.validationRules.errorRate.min &&
+      metrics?.errorRate <= this.validationRules.errorRate.max
     );
   }
 
@@ -413,15 +413,15 @@ export class DataNormalizationPipeline {
    * 移除异常值
    */
   private removeOutliers(dataPoints: TestDataPoint[]): TestDataPoint[] {
-    if (dataPoints.length < 3) return dataPoints;
+    if (dataPoints?.length < 3) return dataPoints;
 
-    const responseTimes = dataPoints.map(p => p.responseTime);
+    const responseTimes = dataPoints?.map(p => p?.responseTime);
     const mean = responseTimes.reduce((sum, rt) => sum + rt, 0) / responseTimes.length;
     const variance = responseTimes.reduce((sum, rt) => sum + Math.pow(rt - mean, 2), 0) / responseTimes.length;
     const stdDev = Math.sqrt(variance);
     const threshold = this.cleaningOptions.outlierThreshold * stdDev;
 
-    return dataPoints.filter(point =>
+    return dataPoints?.filter(point =>
       Math.abs(point.responseTime - mean) <= threshold
     );
   }
@@ -430,15 +430,15 @@ export class DataNormalizationPipeline {
    * 平滑数据
    */
   private smoothData(dataPoints: TestDataPoint[]): TestDataPoint[] {
-    if (dataPoints.length < this.cleaningOptions.smoothingWindow) return dataPoints;
+    if (dataPoints?.length < this.cleaningOptions.smoothingWindow) return dataPoints;
 
     const smoothed = [...dataPoints];
     const window = this.cleaningOptions.smoothingWindow;
 
     for (let i = window; i < smoothed.length - window; i++) {
       const windowData = smoothed.slice(i - window, i + window + 1);
-      const avgResponseTime = windowData.reduce((sum, p) => sum + p.responseTime, 0) / windowData.length;
-      const avgThroughput = windowData.reduce((sum, p) => sum + p.throughput, 0) / windowData.length;
+      const avgResponseTime = windowData.reduce((sum, p) => sum + p?.responseTime, 0) / windowData.length;
+      const avgThroughput = windowData.reduce((sum, p) => sum + p?.throughput, 0) / windowData.length;
 
       smoothed[i] = {
         ...smoothed[i],
@@ -454,7 +454,7 @@ export class DataNormalizationPipeline {
    * 填充缺失值
    */
   private fillMissingValues(dataPoints: TestDataPoint[]): TestDataPoint[] {
-    if (dataPoints.length < 2) return dataPoints;
+    if (dataPoints?.length < 2) return dataPoints;
 
     const filled = [...dataPoints];
 
@@ -477,7 +477,7 @@ export class DataNormalizationPipeline {
   /**
    * 批量标准化数据点 - 优化性能，减少重复映射
    */
-  private batchNormalizeDataPoints(rawPoints: any[]): TestDataPoint[] {
+  private batchNormalizeDataPoints(rawPoints: unknown[]): TestDataPoint[] {
     const normalizedPoints: TestDataPoint[] = [];
 
     for (const point of rawPoints) {
@@ -514,4 +514,4 @@ export class DataNormalizationPipeline {
 }
 
 // 创建默认实例
-export const dataNormalizationPipeline = new DataNormalizationPipeline();
+export const _dataNormalizationPipeline = new DataNormalizationPipeline();

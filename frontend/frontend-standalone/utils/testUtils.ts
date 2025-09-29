@@ -12,7 +12,7 @@ interface TestResult {
   passed: boolean;
   duration: number;
   error?: string;
-  details?: any;
+  details?: unknown;
 }
 
 // 性能测试结果
@@ -59,7 +59,7 @@ export class TestSuite {
           name,
           passed: false,
           duration,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error?.message : String(error)
         };
       }
     });
@@ -84,9 +84,9 @@ export class TestSuite {
    */
   getSummary() {
     const total = this.results.length;
-    const passed = this.results.filter(r => r.passed).length;
+    const passed = this.results.filter(r => r?.passed).length;
     const failed = total - passed;
-    const totalDuration = this.results.reduce((sum, r) => sum + r.duration, 0);
+    const totalDuration = this.results.reduce((sum, r) => sum + r?.duration, 0);
 
     return {
       total,
@@ -293,7 +293,7 @@ export class UXTester {
 
       const measureFrame = () => {
         const currentTime = performance.now();
-        const frameDuration = currentTime - lastFrameTime;
+        const _frameDuration = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
         frameCount++;
 
@@ -354,7 +354,7 @@ export class APITester {
         name: `API Response: ${url}`,
         passed: false,
         duration,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error?.message : String(error)
       };
     }
   }
@@ -395,7 +395,7 @@ export class APITester {
         duration,
         details: {
           networkError: true,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error?.message : String(error)
         }
       };
     }
@@ -417,7 +417,7 @@ export class TestRunner {
     performance: PerformanceTestResult[];
     ux: UXTestResult[];
     api: TestResult[];
-    summary: any;
+    summary: unknown;
   }> {
 
     try {
@@ -446,15 +446,15 @@ export class TestRunner {
       const summary = {
         performance: {
           total: performanceResults.length,
-          passed: performanceResults.filter(r => r.passed).length
+          passed: performanceResults.filter(r => r?.passed).length
         },
         ux: {
           total: uxResults.length,
-          passed: uxResults.filter(r => r.passed).length
+          passed: uxResults.filter(r => r?.passed).length
         },
         api: {
           total: apiResults.length,
-          passed: apiResults.filter(r => r.passed).length
+          passed: apiResults.filter(r => r?.passed).length
         }
       };
 

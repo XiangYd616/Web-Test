@@ -34,8 +34,8 @@ interface TestRecord {
     updatedAt: string;
     overallScore?: number;
     performanceGrade?: string;
-    config: any;
-    results?: any;
+    config: unknown;
+    results?: unknown;
     errorMessage?: string;
     totalRequests?: number;
     successfulRequests?: number;
@@ -65,7 +65,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
     onTestRerun
 }) => {
     // 路由导航
-    const navigate = useNavigate();
+    const _navigate = useNavigate();
 
     // 认证状态
     const { isAuthenticated } = useAuth();
@@ -245,7 +245,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                 requestCacheRef.current.delete(requestKey);
             }, 5000);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             // 静默处理错误，避免控制台污染
             setRecords([]);
             setTotalRecords(0);
@@ -374,14 +374,14 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
         // 优先使用 duration
         let seconds = record.duration;
 
-        // 如果没有duration，尝试从results.metrics获取
+        // 如果没有duration，尝试从results?.metrics获取
         if ((!seconds || seconds <= 0) && record.results?.metrics?.duration) {
-            seconds = record.results.metrics.duration;
+            seconds = record.results.metrics?.duration;
         }
 
-        // 如果还是没有，尝试从results.summary获取
+        // 如果还是没有，尝试从results?.summary获取
         if ((!seconds || seconds <= 0) && record.results?.summary?.duration) {
-            seconds = record.results.summary.duration;
+            seconds = record.results.summary?.duration;
         }
 
         // 尝试从results直接获取
@@ -412,14 +412,14 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
         // 优先使用 overallScore
         let score = record.overallScore;
 
-        // 如果没有overallScore，尝试从results.metrics获取
+        // 如果没有overallScore，尝试从results?.metrics获取
         if ((!score || score <= 0) && record.results?.metrics?.overallScore) {
-            score = record.results.metrics.overallScore;
+            score = record.results.metrics?.overallScore;
         }
 
-        // 如果还是没有，尝试从results.summary获取
+        // 如果还是没有，尝试从results?.summary获取
         if ((!score || score <= 0) && record.results?.summary?.overallScore) {
-            score = record.results.summary.overallScore;
+            score = record.results.summary?.overallScore;
         }
 
         // 尝试从results直接获取
@@ -467,7 +467,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
         if (selectedRecords.size === records.length) {
             setSelectedRecords(new Set());
         } else {
-            setSelectedRecords(new Set(records.map(r => r.id)));
+            setSelectedRecords(new Set(records.map(r => r?.id)));
         }
     };
 
@@ -499,7 +499,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
             });
 
             if (response.ok) {
-                setRecords(prev => prev.filter(r => r.id !== recordId));
+                setRecords(prev => prev.filter(r => r?.id !== recordId));
                 setSelectedRecords(prev => {
                     const newSet = new Set(prev);
                     newSet.delete(recordId);
@@ -545,7 +545,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
             });
 
             if (response.ok) {
-                setRecords(prev => prev.filter(r => !selectedRecords.has(r.id)));
+                setRecords(prev => prev.filter(r => !selectedRecords.has(r?.id)));
                 setTotalRecords(prev => prev - selectedRecords.size);
                 setSelectedRecords(new Set());
                 try {
@@ -576,8 +576,8 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
             isOpen: true,
             type: 'batch',
             recordNames: records
-                .filter(r => selectedRecords.has(r.id))
-                .map(r => r.testName),
+                .filter(r => selectedRecords.has(r?.id))
+                .map(r => r?.testName),
             isLoading: false
         });
     };
@@ -754,7 +754,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                             <input
                                 type="text"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => setSearchTerm(e?.target.value)}
                                 placeholder={`搜索${getTestTypeName(testType)}记录...`}
                                 className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
@@ -765,7 +765,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                     <div className="flex items-center gap-3">
                         <select
                             value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
+                            onChange={(e) => setStatusFilter(e?.target.value)}
                             className="px-3 py-2 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="all">所有状态</option>
@@ -777,7 +777,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
 
                         <select
                             value={dateFilter}
-                            onChange={(e) => setDateFilter(e.target.value)}
+                            onChange={(e) => setDateFilter(e?.target.value)}
                             className="px-3 py-2 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="all">所有时间</option>
@@ -816,7 +816,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                                 <select
                                     value={`${sortBy}-${sortOrder}`}
                                     onChange={(e) => {
-                                        const [field, order] = e.target.value.split('-');
+                                        const [field, order] = e?.target.value.split('-');
                                         setSortBy(field as any);
                                         setSortOrder(order as any);
                                     }}
@@ -951,7 +951,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                                     <span className="text-sm text-gray-400">每页显示:</span>
                                     <select
                                         value={pageSize}
-                                        onChange={(e) => setPageSize(Number(e.target.value))}
+                                        onChange={(e) => setPageSize(Number(e?.target.value))}
                                         className="px-2 py-1 bg-gray-700/50 border border-gray-600/40 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value={5}>5</option>
@@ -1009,7 +1009,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                 onClose={() => setIsExportModalOpen(false)}
                 data={records}
                 testType={testType as 'stress' | 'api' | 'performance'}
-                onExport={async (type: string, data: any) => {
+                onExport={async (type: string, data: unknown) => {
                     // 导出处理逻辑
                 }}
             />

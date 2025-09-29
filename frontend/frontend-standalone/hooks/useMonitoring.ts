@@ -259,10 +259,10 @@ export const useMonitoring = () => {
     }): Promise<Alert[]> => {
         try {
             const queryParams = new URLSearchParams();
-            if (filters?.resolved !== undefined) queryParams.append('resolved', filters.resolved.toString());
-            if (filters?.severity) queryParams.append('severity', filters.severity);
-            if (filters?.limit) queryParams.append('limit', filters.limit.toString());
-            if (filters?.offset) queryParams.append('offset', filters.offset.toString());
+            if (filters?.resolved !== undefined) queryParams.append('resolved', filters?.resolved.toString());
+            if (filters?.severity) queryParams.append('severity', filters?.severity);
+            if (filters?.limit) queryParams.append('limit', filters?.limit.toString());
+            if (filters?.offset) queryParams.append('offset', filters?.offset.toString());
 
             const response = await fetch(`/api/monitoring/alerts?${queryParams}`, {
                 headers: {
@@ -333,18 +333,18 @@ export const useMonitoring = () => {
 
             return {
                 totalTargets: targets.length,
-                activeTargets: targets.filter(t => t.enabled).length,
+                activeTargets: targets.filter(t => t?.enabled).length,
                 onlineTargets: targets.filter(t => t.status === 'online').length,
                 offlineTargets: targets.filter(t => t.status === 'offline').length,
                 warningTargets: targets.filter(t => t.status === 'warning').length,
                 overallUptime: targets.length > 0
-                    ? targets.reduce((sum, t) => sum + (t.uptime || 0), 0) / targets.length
+                    ? targets.reduce((sum, t) => sum + (t?.uptime || 0), 0) / targets.length
                     : 0,
                 averageResponseTime: targets.length > 0
-                    ? targets.reduce((sum, t) => sum + (t.responseTime || 0), 0) / targets.length
+                    ? targets.reduce((sum, t) => sum + (t?.responseTime || 0), 0) / targets.length
                     : 0,
-                totalChecks: targets.reduce((sum, t) => sum + ((t.uptime || 0) * 100), 0),
-                failedChecks: alerts.filter(a => !a.resolved).length
+                totalChecks: targets.reduce((sum, t) => sum + ((t?.uptime || 0) * 100), 0),
+                failedChecks: alerts?.filter(a => !a.resolved).length
             };
         }
     }, [state.auth.token, monitoring.targets, monitoring.alerts]);
