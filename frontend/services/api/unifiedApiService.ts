@@ -68,6 +68,38 @@ export class UnifiedApiService extends BaseApiService {
   private updateConfig(config: Partial<ApiConfig>) {
     // Update configuration logic
   }
+  
+  // ==================== 扩展的API方法 ====================
+  
+  // 用户认证相关
+  public async login(credentials: { username: string; password: string; remember?: boolean }): Promise<ApiResponse<{ token: string; user: any }>> {
+    return this.apiPost('/auth/login', credentials);
+  }
+  
+  public async register(userData: { username: string; email: string; password: string }): Promise<ApiResponse<{ user: any }>> {
+    return this.apiPost('/auth/register', userData);
+  }
+  
+  public async logout(): Promise<ApiResponse<void>> {
+    return this.apiPost('/auth/logout');
+  }
+  
+  public async refreshToken(): Promise<ApiResponse<{ token: string }>> {
+    return this.apiPost('/auth/refresh');
+  }
+  
+  // 用户信息相关
+  public async getUserProfile(): Promise<ApiResponse<any>> {
+    return this.apiGet('/user/profile');
+  }
+  
+  public async updateUserProfile(data: any): Promise<ApiResponse<any>> {
+    return this.apiPut('/user/profile', data);
+  }
+  
+  public async changePassword(data: { currentPassword: string; newPassword: string }): Promise<ApiResponse<void>> {
+    return this.apiPost('/user/change-password', data);
+  }
 
   // Public wrapper methods that expose protected BaseApiService methods
   public async apiGet<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
@@ -122,6 +154,41 @@ export class UnifiedApiService extends BaseApiService {
   public async getTestStatistics(timeRange?: string): Promise<ApiResponse<any>> {
     const url = timeRange ? `/api/tests/statistics?timeRange=${timeRange}` : '/api/tests/statistics';
     return this.apiGet(url);
+  }
+  
+  // 测试结果相关
+  public async exportTestResult(testId: string, format: 'json' | 'csv' | 'pdf' = 'json'): Promise<ApiResponse<any>> {
+    return this.apiGet(`/api/tests/${testId}/export`, { format });
+  }
+  
+  public async getTestReport(testId: string): Promise<ApiResponse<any>> {
+    return this.apiGet(`/api/tests/${testId}/report`);
+  }
+  
+  public async shareTestResult(testId: string, options?: { email?: string; public?: boolean }): Promise<ApiResponse<{ shareUrl: string }>> {
+    return this.apiPost(`/api/tests/${testId}/share`, options);
+  }
+  
+  // OAuth相关
+  public async getOAuthUrl(provider: string): Promise<ApiResponse<{ url: string }>> {
+    return this.apiGet(`/api/oauth/${provider}/url`);
+  }
+  
+  public async oauthCallback(provider: string, code: string, state?: string): Promise<ApiResponse<{ token: string; user: any }>> {
+    return this.apiPost(`/api/oauth/${provider}/callback`, { code, state });
+  }
+  
+  // 工具方法
+  public isAuthenticated(): boolean {
+    return !!(this as any).getAuthToken?.();
+  }
+  
+  public setToken(token: string, remember = false): void {
+    (this as any).setAuth?.({ token, remember });
+  }
+  
+  public removeToken(): void {
+    (this as any).clearAuth?.();
   }
 }
 

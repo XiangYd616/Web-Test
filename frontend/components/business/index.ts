@@ -7,14 +7,14 @@
 export { default as DataExporter } from './DataExporter';
 export { default as MonitorDashboard } from './MonitorDashboard';
 export { default as ResultViewer } from './ResultViewer';
-export { default as TestRunner } from './TestRunner';
+export { LegacyTestRunner as TestRunner } from './LegacyTestRunner';
 
 // 类型定义导出
 export type {
     TestConfig,
     TestResult,
     TestRunnerProps, TestType
-} from './TestRunner';
+} from './LegacyTestRunner';
 
 export type {
     ResultDetails,

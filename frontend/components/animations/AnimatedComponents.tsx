@@ -3,7 +3,17 @@
  * 提供各种微交互和过渡动画效果
  */
 
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+// TODO: Install framer-motion package
+// import { motion, AnimatePresence, Variants } from 'framer-motion';
+
+// Placeholder types and components for now
+type Variants = Record<string, any>;
+const motion = {
+  div: 'div' as any,
+  span: 'span' as any,
+  button: 'button' as any,
+} as any;
+const AnimatePresence = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 import React, { ReactNode } from 'react';
 
 // ==================== 基础动画配置 ====================

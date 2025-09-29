@@ -1,142 +1,154 @@
 /**
- * 错误处理中间件
- * 统一处理API错误和异常
+ * 统一错误处理导出
+ * 整合所有错误处理功能，提供统一的接口
+ * 替代之前分散在多个文件中的错误处理逻辑
  */
 
+// 导入核心统一错误处理器
+const { 
+  errorMiddleware, 
+  notFoundHandler, 
+  handleError, 
+  ErrorFactory,
+  ErrorCode,
+  ErrorSeverity,
+  asyncHandler
+} = require('./unifiedErrorHandler');
+
+/**
+ * 向后兼容的错误处理器类
+ * 保持与旧代码的兼容性
+ */
 class ErrorHandler {
   /**
-   * 全局错误处理中间件
+   * 全局错误处理中间件（向后兼容）
    */
-  static globalErrorHandler(err, req, res, next) {
-    console.error('全局错误:', err);
-
-    // 默认错误响应
-    let statusCode = 500;
-    let message = '服务器内部错误';
-    let details = null;
-
-    // 根据错误类型设置响应
-    if (err.name === 'ValidationError') {
-      statusCode = 400;
-      message = '请求参数验证失败';
-      details = err.details;
-    } else if (err.name === 'UnauthorizedError') {
-      statusCode = 401;
-      message = '未授权访问';
-    } else if (err.name === 'ForbiddenError') {
-      statusCode = 403;
-      message = '禁止访问';
-    } else if (err.name === 'NotFoundError') {
-      statusCode = 404;
-      message = '资源未找到';
-    } else if (err.name === 'ConflictError') {
-      statusCode = 409;
-      message = '资源冲突';
-    } else if (err.code === 'ENOTFOUND') {
-      statusCode = 400;
-      message = 'URL无法访问';
-    } else if (err.code === 'ECONNREFUSED') {
-      statusCode = 400;
-      message = '连接被拒绝';
-    } else if (err.code === 'ETIMEDOUT') {
-      statusCode = 408;
-      message = '请求超时';
-    }
-
-    // 发送错误响应
-    res.status(statusCode).json({
-      success: false,
-      error: {
-        message,
-        code: err.code || 'INTERNAL_ERROR',
-        details: details || (process.env.NODE_ENV === 'development' ? err.stack : undefined)
-      },
-      timestamp: new Date().toISOString()
-    });
-  }
+  static globalErrorHandler = errorMiddleware;
 
   /**
-   * 异步错误包装器
+   * 异步错误包装器（向后兼容）
    */
-  static asyncWrapper(fn) {
-    return (req, res, next) => {
-      Promise.resolve(fn(req, res, next)).catch(next);
-    };
-  }
+  static asyncWrapper = asyncHandler;
 
   /**
-   * 404错误处理
+   * 404错误处理（向后兼容）
    */
-  static notFoundHandler(req, res) {
-    res.status(404).json({
-      success: false,
-      error: {
-        message: '请求的资源未找到',
-        code: 'NOT_FOUND',
-        path: req.path
-      },
-      timestamp: new Date().toISOString()
-    });
-  }
+  static notFoundHandler = notFoundHandler;
 
   /**
-   * 请求验证错误
+   * 创建验证错误（向后兼容）
    */
   static validationError(message, details = null) {
-    const error = new Error(message);
-    error.name = 'ValidationError';
-    error.details = details;
-    return error;
+    return ErrorFactory.validation(message, details);
   }
 
   /**
-   * 未授权错误
+   * 创建未授权错误（向后兼容）
    */
   static unauthorizedError(message = '未授权访问') {
-    const error = new Error(message);
-    error.name = 'UnauthorizedError';
-    return error;
+    return ErrorFactory.unauthorized(message);
   }
 
   /**
-   * 禁止访问错误
+   * 创建禁止访问错误（向后兼容）
    */
   static forbiddenError(message = '禁止访问') {
-    const error = new Error(message);
-    error.name = 'ForbiddenError';
-    return error;
+    return ErrorFactory.forbidden(message);
   }
 
   /**
-   * 资源未找到错误
+   * 创建资源未找到错误（向后兼容）
    */
   static notFoundError(message = '资源未找到') {
-    const error = new Error(message);
-    error.name = 'NotFoundError';
-    return error;
+    return ErrorFactory.notFound(message);
   }
 
   /**
-   * 资源冲突错误
+   * 创建资源冲突错误（向后兼容）
    */
   static conflictError(message = '资源冲突') {
-    const error = new Error(message);
-    error.name = 'ConflictError';
-    return error;
+    return ErrorFactory.conflict(message);
+  }
+
+  /**
+   * 创建业务逻辑错误（向后兼容）
+   */
+  static businessError(code, message, details = null) {
+    return ErrorFactory.business(code, message, details);
   }
 }
 
 /**
- * 异步处理器包装函数
- * 自动捕获异步函数中的错误并传递给错误处理中间件
+ * API错误类（向后兼容）
+ * 替代原来的 utils/ApiError.js
  */
-const asyncHandler = (fn) => {
+class ApiError extends Error {
+  constructor(message, statusCode = 500, code = null, details = null) {
+    super(message);
+    this.name = 'ApiError';
+    this.statusCode = statusCode;
+    this.code = code || 'API_ERROR';
+    this.details = details;
+    this.timestamp = new Date();
+  }
+
+  // 静态工厂方法
+  static badRequest(message = '请求参数错误', details = null) {
+    return new ApiError(message, 400, ErrorCode.BAD_REQUEST, details);
+  }
+
+  static unauthorized(message = '未授权访问', details = null) {
+    return new ApiError(message, 401, ErrorCode.UNAUTHORIZED, details);
+  }
+
+  static forbidden(message = '禁止访问', details = null) {
+    return new ApiError(message, 403, ErrorCode.FORBIDDEN, details);
+  }
+
+  static notFound(message = '资源不存在', details = null) {
+    return new ApiError(message, 404, ErrorCode.NOT_FOUND, details);
+  }
+
+  static conflict(message = '资源冲突', details = null) {
+    return new ApiError(message, 409, ErrorCode.CONFLICT, details);
+  }
+
+  static validationError(message = '数据验证失败', details = null) {
+    return new ApiError(message, 400, ErrorCode.VALIDATION_ERROR, details);
+  }
+
+  static internal(message = '内部服务器错误', details = null) {
+    return new ApiError(message, 500, ErrorCode.SYSTEM_ERROR, details);
+  }
+}
+
+/**
+ * 简化的异步错误处理器（向后兼容）
+ * 替代原来的 utils/asyncErrorHandler.js
+ */
+const asyncErrorHandler = (fn) => {
   return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
 
+// 导出所有错误处理功能
 module.exports = {
+  // 核心统一接口
+  errorMiddleware,
+  notFoundHandler,
+  handleError,
+  ErrorFactory,
+  ErrorCode,
+  ErrorSeverity,
+  asyncHandler,
+
+  // 向后兼容接口
   ErrorHandler,
-  asyncHandler
+  ApiError,
+  asyncErrorHandler,
+
+  // 别名导出（保持兼容性）
+  globalErrorHandler: errorMiddleware,
+  asyncWrapper: asyncHandler
 };

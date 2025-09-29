@@ -1,6 +1,14 @@
 /**
  * API服务层
  * 统一管理前后端API调用
+ * 
+ * @deprecated 请使用 UnifiedApiService 替代该文件
+ * @see unifiedApiService in services/api/unifiedApiService.ts
+ * 
+ * 迁移指南:
+ * - 将 `import { apiClient } from './services/api'` 改为 `import { unifiedApiService } from './services/api/unifiedApiService'`
+ * - 将 `apiClient.get()` 改为 `unifiedApiService.apiGet()`
+ * - 将 `apiClient.post()` 改为 `unifiedApiService.apiPost()`
  */
 
 // API配置
@@ -502,6 +510,9 @@ export const _handleApiError = (error: unknown): string => {
   
   return '发生未知错误';
 };
+
+// 导出API客户端
+export const api = apiClient;
 
 // 导出默认API客户端
 export default apiClient;

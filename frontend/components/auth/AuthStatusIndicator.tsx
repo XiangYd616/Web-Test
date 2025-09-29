@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -44,7 +43,7 @@ const AuthStatusIndicator: React.FC<AuthStatusIndicatorProps> = ({
             {/* 用户信息 */}
             <div className="flex items-center space-x-3 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
               <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
-                {user.role === 'admin' ? (
+                {user?.role === 'admin' ? (
                   <Crown className="w-4 h-4 text-green-400" />
                 ) : (
                   <UserCheck className="w-4 h-4 text-green-400" />
@@ -55,7 +54,7 @@ const AuthStatusIndicator: React.FC<AuthStatusIndicatorProps> = ({
                   {user?.username || user?.email || '已登录'}
                 </p>
                 <p className="text-xs text-green-400/70">
-                  {user.role === 'admin' ? '管理员' : '用户'}
+                  {user?.role === 'admin' ? '管理员' : '用户'}
                 </p>
               </div>
             </div>
@@ -123,7 +122,7 @@ const AuthStatusIndicator: React.FC<AuthStatusIndicatorProps> = ({
         <div className="flex items-center justify-between p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-              {user.role === 'admin' ? (
+              {user?.role === 'admin' ? (
                 <Crown className="w-5 h-5 text-green-400" />
               ) : (
                 <UserCheck className="w-5 h-5 text-green-400" />
@@ -134,7 +133,7 @@ const AuthStatusIndicator: React.FC<AuthStatusIndicatorProps> = ({
                 {user?.username || user?.email || '已登录用户'}
               </p>
               <p className="text-sm text-green-400/70">
-                {user.role === 'admin' ? '管理员账户' : '普通用户'}
+                {user?.role === 'admin' ? '管理员账户' : '普通用户'}
               </p>
             </div>
           </div>

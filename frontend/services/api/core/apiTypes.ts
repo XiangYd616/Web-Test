@@ -1,29 +1,35 @@
 /**
- * API服务核心类型定义
+ * API服务核心类型定义 - 重构版本
  * 统一的接口定义，支持基础和增强功能
+ * 现在使用标准API响应类型以确保前后端一致性
  */
 
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: ApiError | string;
-  errors?: Record<string, string> | string[];
-  meta?: {
-    timestamp?: string;
-    requestId?: string;
-    version?: string;
-    [key: string]: unknown;
-  };
-}
+// 导入标准API类型
+import {
+  StandardApiResponse,
+  StandardApiError,
+  StandardApiMeta,
+  StandardErrorCode,
+  StandardTestConfig,
+  StandardTestResult,
+  StandardTestProgress,
+  // 向后兼容的别名
+  ApiResponse as LegacyApiResponse,
+  ApiError as LegacyApiError
+} from '../../../shared/types/standardApiTypes';
 
-export interface ApiError {
-  code: string;
-  message: string;
-  details?: unknown;
-  retryable?: boolean;
-  status?: number;
-}
+// 使用标准类型作为主要接口
+export type ApiResponse<T = any> = StandardApiResponse<T>;
+export type ApiError = StandardApiError;
+export type ApiMeta = StandardApiMeta;
+
+// 导出标准错误代码供前端使用
+export { StandardErrorCode as ErrorCode };
+
+// 导出测试相关标准类型
+export type TestConfig = StandardTestConfig;
+export type TestResult = StandardTestResult;
+export type TestProgress = StandardTestProgress;
 
 export interface RequestConfig extends RequestInit {
   timeout?: number;

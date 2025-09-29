@@ -472,8 +472,14 @@ module.exports = {
   jwtService,
   permissionService,
 
-  // 常量（保持向后兼容）
+// 常量（保持向后兼容）
   AuthErrors,
   createAuthError,
-  PERMISSIONS
+  PERMISSIONS,
+  ROLES: {
+    ADMIN: 'admin',
+    USER: 'user',
+    MODERATOR: 'moderator',
+    ANALYST: 'analyst'
+  }
 };

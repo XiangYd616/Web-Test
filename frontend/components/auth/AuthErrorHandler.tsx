@@ -7,7 +7,6 @@
 
 import { AlertTriangle, LogIn, RefreshCw, X } from 'lucide-react';
 import React from 'react';
-import type { FC } from 'react';
 
 export enum AuthErrorType {
   TOKEN_MISSING = 'TOKEN_MISSING',
@@ -222,12 +221,12 @@ export const parseAuthError = (error: unknown): AuthErrorType => {
   return AuthErrorType.SERVER_ERROR;
 };
 
-export const _getErrorMessage = (error: unknown): string => {
+export const getErrorMessage = (error: unknown): string => {
   const errorType = parseAuthError(error);
   return FRIENDLY_MESSAGES[errorType] || '发生了未知错误';
 };
 
-export const _shouldRelogin = (error: unknown): boolean => {
+export const shouldRelogin = (error: unknown): boolean => {
   const errorType = parseAuthError(error);
   return [
     AuthErrorType.TOKEN_MISSING,

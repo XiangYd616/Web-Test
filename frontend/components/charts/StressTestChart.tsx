@@ -2,7 +2,7 @@
 import React from 'react';
 import { BarChart3, Download, Settings, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import {TestPhase, TestState} from '../../services/testStateManager';
+import {TestPhase, TestState} from '../../services/TestStateManager';
 
 import '../../styles/optimized-charts.css';
 

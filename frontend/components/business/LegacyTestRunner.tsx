@@ -1,6 +1,9 @@
 /**
- * 统一测试运行器组件
+ * 统一测试运行器组件 - 旧版本
  * 支持多种测试类型的统一界面和流程管理
+ * 
+ * @deprecated 请使用 UniversalTestComponent 替代，该组件提供更多功能和现代化的界面
+ * @see UniversalTestComponent in components/testing/unified/UniversalTestComponent.tsx
  */
 
 import { Download, History, Play, RefreshCw, Settings, Square } from 'lucide-react';
@@ -80,7 +83,7 @@ const testTypeOptions: LocalSelectOption[] = [
     { value: 'compatibility', label: '兼容性测试' },
 ];
 
-export const TestRunner: React.FC<TestRunnerProps> = ({
+export const LegacyTestRunner: React.FC<TestRunnerProps> = ({
     testType,
     title,
     description,

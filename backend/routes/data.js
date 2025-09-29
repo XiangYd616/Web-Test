@@ -36,9 +36,27 @@ router.post('/:type', asyncHandler(async (req, res) => {
   const { type } = req.params;
   const { data, options = {} } = req.body;
 
-  if (!data) {
-    
-        return res.validationError([], '缺少数据内容');
+  // 输入验证
+  if (!type || typeof type !== 'string' || type.trim() === '') {
+    return res.status(400).json({
+      success: false,
+      message: '请提供有效的数据类型'
+    });
+  }
+
+  // 安全检查：只允许字母、数字和下划线
+  if (!/^[a-zA-Z0-9_-]+$/.test(type)) {
+    return res.status(400).json({
+      success: false,
+      message: '数据类型格式不正确'
+    });
+  }
+
+  if (!data || typeof data !== 'object') {
+    return res.status(400).json({
+      success: false,
+      message: '请提供有效的数据内容'
+    });
   }
 
   try {
@@ -64,6 +82,21 @@ router.post('/:type', asyncHandler(async (req, res) => {
 router.get('/:type/:id', asyncHandler(async (req, res) => {
   const { type, id } = req.params;
   const { fields } = req.query;
+
+  // 输入验证
+  if (!type || !/^[a-zA-Z0-9_-]+$/.test(type)) {
+    return res.status(400).json({
+      success: false,
+      message: '无效的数据类型'
+    });
+  }
+
+  if (!id || !/^[a-zA-Z0-9_-]+$/.test(id)) {
+    return res.status(400).json({
+      success: false,
+      message: '无效的记录ID'
+    });
+  }
 
   try {
     const options = {};
@@ -388,5 +421,311 @@ function getFormatMimeType(format) {
   };
   return mimeTypes[format] || 'application/octet-stream';
 }
+
+// =====================================================
+// 从dataManagement.js合并的功能：高级数据查询和统计分析
+// =====================================================
+
+/**
+ * 高级数据查询
+ * POST /api/data/query
+ */
+router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    console.log('📊 数据查询请求:', JSON.stringify(req.body, null, 2));
+    const { table, type, filters, limit = 100, offset = 0, sortBy = 'created_at', sortOrder = 'desc' } = req.body;
+
+    // 确定要查询的表，优先使用table，然后是type
+    let targetTable = table;
+    if (!targetTable && type) {
+      const typeToTable = {
+        'test': 'test_sessions',
+        'user': 'users',
+        'report': 'test_sessions'
+      };
+      targetTable = typeToTable[type] || 'test_sessions';
+    }
+
+    if (!targetTable) {
+      targetTable = 'test_history';
+    }
+
+    // 验证sortBy字段
+    const validSortFields = ['created_at', 'updated_at', 'start_time', 'end_time', 'status', 'test_type'];
+    const dbSortField = validSortFields.includes(sortBy) ? sortBy : 'created_at';
+
+    // 基本的安全检查
+    const allowedTables = ['test_sessions', 'users', 'test_history'];
+    if (!allowedTables.includes(targetTable)) {
+      return res.status(400).json({
+        success: false,
+        message: '不允许查询此表'
+      });
+    }
+
+    let whereClause = 'WHERE 1=1';
+    const params = [];
+    let paramIndex = 1;
+
+    // 添加用户过滤（确保用户只能查看自己的数据）
+    if (targetTable !== 'users') {
+      whereClause += ` AND user_id = $${paramIndex}`;
+      params.push(req.user.id);
+      paramIndex++;
+      whereClause += ' AND deleted_at IS NULL';
+    }
+
+    // 应用过滤器
+    if (filters && typeof filters === 'object') {
+      for (const [key, value] of Object.entries(filters)) {
+        if (value !== null && value !== undefined && value !== '') {
+          whereClause += ` AND ${key} = $${paramIndex}`;
+          params.push(value);
+          paramIndex++;
+        }
+      }
+    }
+
+    // 获取数据库连接
+    const { query } = require('../config/database');
+
+    // 执行查询
+    const result = await query(
+      `SELECT * FROM ${targetTable} ${whereClause} ORDER BY ${dbSortField} ${sortOrder.toUpperCase()} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+      [...params, limit, offset]
+    );
+
+    // 获取总数
+    const countResult = await query(
+      `SELECT COUNT(*) as total FROM ${targetTable} ${whereClause}`,
+      params
+    );
+
+    const typeMapping = {
+      'test_history': 'test',
+      'users': 'user'
+    };
+
+    const transformedRecords = result.rows.map(row => ({
+      id: row.id,
+      type: typeMapping[targetTable] || 'report',
+      data: row,
+      metadata: {
+        created_at: row.created_at,
+        updated_at: row.updated_at || row.created_at,
+        version: 1
+      },
+      permissions: {
+        owner: req.user.id
+      }
+    }));
+
+    const total = parseInt(countResult.rows[0].total);
+
+    res.json({
+      success: true,
+      data: {
+        records: transformedRecords,
+        pagination: {
+          page: Math.floor(offset / limit) + 1,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('数据查询失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '数据查询失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取分析数据
+ * GET /api/data/analytics
+ */
+router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { query } = require('../config/database');
+
+    // 获取测试历史统计
+    const testStats = await query(
+      `SELECT 
+        COUNT(*) as total_tests,
+        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
+        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
+        AVG(duration) as avg_duration
+       FROM test_history 
+       WHERE user_id = $1`,
+      [req.user.id]
+    );
+
+    // 获取按日期分组的测试数量
+    const dailyStats = await query(
+      `SELECT 
+        DATE(created_at) as date,
+        COUNT(*) as count
+       FROM test_history 
+       WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
+       GROUP BY DATE(created_at)
+       ORDER BY date DESC`,
+      [req.user.id]
+    );
+
+    // 获取按测试类型分组的统计
+    const typeStats = await query(
+      `SELECT 
+        test_type,
+        COUNT(*) as count
+       FROM test_history 
+       WHERE user_id = $1
+       GROUP BY test_type
+       ORDER BY count DESC`,
+      [req.user.id]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        overview: testStats.rows[0],
+        dailyStats: dailyStats.rows,
+        typeStats: typeStats.rows
+      }
+    });
+  } catch (error) {
+    console.error('获取分析数据失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取分析数据失败'
+    });
+  }
+}));
+
+/**
+ * 获取测试历史记录
+ * GET /api/data/test-history
+ */
+router.get('/test-history', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 20,
+      testType,
+      status,
+      startDate,
+      endDate
+    } = req.query;
+
+    const { query } = require('../config/database');
+    const offset = (page - 1) * limit;
+
+    let whereClause = 'WHERE user_id = $1 AND deleted_at IS NULL';
+    let params = [req.user.id];
+    let paramIndex = 2;
+
+    if (testType) {
+      whereClause += ` AND test_type = $${paramIndex}`;
+      params.push(testType);
+      paramIndex++;
+    }
+
+    if (status) {
+      whereClause += ` AND status = $${paramIndex}`;
+      params.push(status);
+      paramIndex++;
+    }
+
+    if (startDate) {
+      whereClause += ` AND created_at >= $${paramIndex}`;
+      params.push(startDate);
+      paramIndex++;
+    }
+
+    if (endDate) {
+      whereClause += ` AND created_at <= $${paramIndex}`;
+      params.push(endDate);
+      paramIndex++;
+    }
+
+    const result = await query(
+      `SELECT * FROM test_history ${whereClause} 
+       ORDER BY created_at DESC 
+       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+      [...params, limit, offset]
+    );
+
+    const countResult = await query(
+      `SELECT COUNT(*) as total FROM test_history ${whereClause}`,
+      params
+    );
+
+    const total = parseInt(countResult.rows[0].total);
+
+    res.json({
+      success: true,
+      data: {
+        records: result.rows,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('获取测试历史失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取测试历史失败'
+    });
+  }
+}));
+
+/**
+ * 批量删除测试记录
+ * DELETE /api/data/test-history/batch
+ */
+router.delete('/test-history/batch', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { testIds } = req.body;
+
+    if (!testIds || !Array.isArray(testIds) || testIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: '请提供有效的测试ID列表'
+      });
+    }
+
+    const { query } = require('../config/database');
+
+    // 软删除测试记录
+    const placeholders = testIds.map((_, index) => `$${index + 2}`).join(',');
+    const result = await query(
+      `UPDATE test_history 
+       SET deleted_at = NOW(), updated_at = NOW() 
+       WHERE id IN (${placeholders}) AND user_id = $1 AND deleted_at IS NULL`,
+      [req.user.id, ...testIds]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        deletedCount: result.rowCount
+      },
+      message: `已成功删除 ${result.rowCount} 条测试记录`
+    });
+  } catch (error) {
+    console.error('批量删除测试记录失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '批量删除测试记录失败'
+    });
+  }
+}));
 
 module.exports = router;

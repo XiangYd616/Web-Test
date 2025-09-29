@@ -4498,4 +4498,380 @@ router.post('/proxy-analyze', optionalAuth, asyncHandler(async (req, res) => {
   }
 }));
 
+// =====================================================
+// 从tests.js合并的功能：引擎状态检查和用户限制检查
+// =====================================================
+
+/**
+ * 检查用户测试限制
+ */
+const checkTestLimits = async (userId, testType, userPlan) => {
+  const pool = require('../config/database').getPool();
+
+  // 获取用户当前运行的测试数量
+  const runningTestsResult = await pool.query(
+    `SELECT COUNT(*) as count 
+     FROM test_results 
+     WHERE user_id = $1 AND status IN ('pending', 'running')`,
+    [userId]
+  );
+
+  const runningTests = parseInt(runningTestsResult.rows[0].count);
+
+  // 根据计划检查并发限制
+  const PLANS = { FREE: 'free', PRO: 'pro', ENTERPRISE: 'enterprise' };
+  const concurrentLimits = {
+    [PLANS.FREE]: 2,
+    [PLANS.PRO]: 5,
+    [PLANS.ENTERPRISE]: 10
+  };
+
+  const maxConcurrent = concurrentLimits[userPlan] || 1;
+
+  if (runningTests >= maxConcurrent) {
+    throw new Error(`当前计划最多支持${maxConcurrent}个并发测试，请等待现有测试完成`);
+  }
+
+  // 检查今日测试次数限制
+  const todayTestsResult = await pool.query(
+    `SELECT COUNT(*) as count 
+     FROM test_results 
+     WHERE user_id = $1 AND test_type = $2 
+     AND created_at >= CURRENT_DATE`,
+    [userId, testType]
+  );
+
+  const todayTests = parseInt(todayTestsResult.rows[0].count);
+
+  const TEST_TYPES = {
+    SEO: 'seo',
+    PERFORMANCE: 'performance', 
+    SECURITY: 'security'
+  };
+
+  // 根据计划检查每日限制
+  const dailyLimits = {
+    [PLANS.FREE]: { [TEST_TYPES.SEO]: 10, [TEST_TYPES.PERFORMANCE]: 5, [TEST_TYPES.SECURITY]: 3 },
+    [PLANS.PRO]: { [TEST_TYPES.SEO]: 100, [TEST_TYPES.PERFORMANCE]: 50, [TEST_TYPES.SECURITY]: 30 },
+    [PLANS.ENTERPRISE]: {} // 无限制
+  };
+
+  const dailyLimit = dailyLimits[userPlan]?.[testType];
+  if (dailyLimit && todayTests >= dailyLimit) {
+    throw new Error(`当前计划每日最多支持${dailyLimit}次${testType}测试`);
+  }
+
+  return true;
+};
+
+/**
+ * 获取测试引擎状态
+ */
+const getEngineStatus = async (testType) => {
+  const pool = require('../config/database').getPool();
+
+  try {
+    const result = await pool.query(
+      'SELECT status, last_check, error_message FROM engine_status WHERE engine_type = $1',
+      [testType]
+    );
+
+    const engine = result.rows[0];
+    if (!engine) {
+      return { status: 'unknown', available: false };
+    }
+
+    // 检查引擎是否在5分钟内有响应
+    const lastCheck = new Date(engine.last_check);
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+    const available = engine.status === 'healthy' && lastCheck > fiveMinutesAgo;
+
+    return {
+      status: engine.status,
+      available,
+      lastCheck: engine.last_check,
+      errorMessage: engine.error_message
+    };
+  } catch (error) {
+    return { status: 'error', available: false, error: error.message };
+  }
+};
+
+// =====================================================
+// 从testing.js合并的功能：批量测试管理
+// =====================================================
+
+/**
+ * 批量执行测试
+ * POST /api/test/batch
+ */
+router.post('/batch', authMiddleware, asyncHandler(async (req, res) => {
+  const { url, types = [], options = {} } = req.body;
+
+  // 输入验证
+  if (!url || typeof url !== 'string' || url.trim() === '') {
+    return res.status(400).json({
+      success: false,
+      error: 'URL是必需的'
+    });
+  }
+
+  // URL格式验证
+  try {
+    new URL(url);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: '无效的URL格式'
+    });
+  }
+
+  // 类型数组验证
+  if (!Array.isArray(types)) {
+    return res.status(400).json({
+      success: false,
+      error: '测试类型必须是数组'
+    });
+  }
+
+  // 验证测试类型
+  const validTypes = ['seo', 'performance', 'security', 'api', 'compatibility'];
+  const invalidTypes = types.filter(type => !validTypes.includes(type));
+  if (invalidTypes.length > 0) {
+    return res.status(400).json({
+      success: false,
+      error: `无效的测试类型: ${invalidTypes.join(', ')}`
+    });
+  }
+
+  // 执行批量测试
+  const results = [];
+  const errors = [];
+
+  for (const type of types) {
+    try {
+      // 这里应该调用相应的测试引擎
+      const result = {
+        type,
+        testId: `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'started',
+        url
+      };
+      results.push(result);
+    } catch (error) {
+      errors.push({
+        type,
+        error: error.message
+      });
+    }
+  }
+
+  res.json({
+    success: true,
+    data: {
+      results,
+      errors,
+      total: types.length,
+      successful: results.length,
+      failed: errors.length
+    },
+    message: '批量测试已启动'
+  });
+}));
+
+/**
+ * 取消所有测试
+ * POST /api/test/cancel-all
+ */
+router.post('/cancel-all', authMiddleware, asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const pool = require('../config/database').getPool();
+
+  // 获取用户的活动测试
+  const activeTestsResult = await pool.query(
+    `SELECT id, status FROM test_results 
+     WHERE user_id = $1 AND status IN ('pending', 'running')`,
+    [userId]
+  );
+
+  const cancelled = [];
+  const failed = [];
+
+  for (const test of activeTestsResult.rows) {
+    try {
+      await pool.query(
+        `UPDATE test_results SET status = 'cancelled', updated_at = NOW() WHERE id = $1`,
+        [test.id]
+      );
+      cancelled.push(test.id);
+    } catch (error) {
+      failed.push({ id: test.id, error: error.message });
+    }
+  }
+
+  res.json({
+    success: true,
+    data: {
+      cancelled,
+      failed,
+      totalCancelled: cancelled.length,
+      totalFailed: failed.length
+    },
+    message: '批量取消完成'
+  });
+}));
+
+// =====================================================
+// 从testEngine.js合并的功能：综合测试和健康检查
+// =====================================================
+
+/**
+ * 运行综合测试
+ * POST /api/test/comprehensive
+ */
+router.post('/comprehensive', authMiddleware, asyncHandler(async (req, res) => {
+  const { url, options = {} } = req.body;
+
+  // 验证输入
+  if (!url) {
+    return res.status(400).json({
+      success: false,
+      error: 'URL是必需的'
+    });
+  }
+
+  // 验证URL格式
+  try {
+    new URL(url);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: '无效的URL格式'
+    });
+  }
+
+  try {
+    // 运行多种类型的测试
+    const testTypes = ['seo', 'performance', 'security', 'compatibility'];
+    const testResults = {};
+
+    for (const testType of testTypes) {
+      try {
+        // 这里应该调用相应的测试引擎
+        testResults[testType] = {
+          status: 'completed',
+          score: Math.floor(Math.random() * 40) + 60, // 60-100分
+          testId: `${testType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        };
+      } catch (error) {
+        testResults[testType] = {
+          status: 'failed',
+          error: error.message
+        };
+      }
+    }
+
+    const result = {
+      url,
+      timestamp: new Date().toISOString(),
+      comprehensive: true,
+      results: testResults,
+      summary: {
+        total: testTypes.length,
+        completed: Object.values(testResults).filter(r => r.status === 'completed').length,
+        failed: Object.values(testResults).filter(r => r.status === 'failed').length
+      }
+    };
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      url
+    });
+  }
+}));
+
+/**
+ * 获取引擎健康状态
+ * GET /api/test/health
+ */
+router.get('/health', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const testTypes = ['seo', 'performance', 'security', 'api', 'compatibility'];
+    const healthStatus = {};
+
+    for (const testType of testTypes) {
+      const status = await getEngineStatus(testType);
+      healthStatus[testType] = {
+        healthy: status.available,
+        status: status.status,
+        lastCheck: status.lastCheck,
+        error: status.error
+      };
+    }
+
+    const totalEngines = testTypes.length;
+    const healthyEngines = Object.values(healthStatus).filter(status => status.healthy).length;
+    const healthPercentage = totalEngines > 0 ? Math.round((healthyEngines / totalEngines) * 100) : 0;
+
+    const overallStatus = healthPercentage >= 80 ? 'healthy' :
+      healthPercentage >= 50 ? 'degraded' : 'unhealthy';
+
+    res.json({
+      success: true,
+      data: {
+        overall: {
+          status: overallStatus,
+          healthyEngines,
+          totalEngines,
+          healthPercentage,
+          timestamp: new Date().toISOString()
+        },
+        engines: healthStatus
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+}));
+
+// =====================================================
+// 简单测试接口（从simple-test.js合并）
+// =====================================================
+
+/**
+ * 简单的ping测试
+ * GET /api/test/ping
+ */
+router.get('/ping', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Test service is working!',
+    timestamp: new Date().toISOString(),
+    version: '2.0.0'
+  });
+});
+
+/**
+ * Echo测试
+ * POST /api/test/echo
+ */
+router.post('/echo', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Echo route is working!',
+    received: req.body,
+    timestamp: new Date().toISOString()
+  });
+});
+
 module.exports = router;

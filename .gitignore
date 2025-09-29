@@ -1,3 +1,7 @@
+# ==========================================
+# Test-Web Project - Optimized .gitignore
+# ==========================================
+
 # Dependencies
 node_modules/
 */node_modules/
@@ -7,217 +11,165 @@ dist/
 dist-electron/
 release/
 build/
+out/
 
 # Environment variables
 .env
 .env.local
+.env.development
 .env.development.local
 .env.test.local
+.env.production
 .env.production.local
-backend/.env
-backend/.env.local
-backend/.env.development.local
-backend/.env.test.local
-backend/.env.production.local
+.env.staging
+backend/.env*
 
-# Logs
+# Logs and runtime data
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
-
-# Runtime data
 pids/
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
+# Test coverage and results
 coverage/
 *.lcov
+test-results/
+playwright-report/
+playwright/.cache/
+.nyc_output/
+test-results.json
+*.test-report.json
 
-# TypeScript cache
+# TypeScript and build cache
 *.tsbuildinfo
+.vite/
+node_modules/.vite/
 
-# Optional npm cache directory
+# Package manager cache
 .npm
-
-# Optional eslint cache
 .eslintcache
 
-# Temporary folders
-tmp/
-temp/
-
-# Editor directories and files
-.vscode/
-.idea/
+# Backup and temporary files
+*.backup
+*.bak
+*.orig
+*.tmp
+*.temp
+*.cache
 *.swp
 *.swo
 *~
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Database files
-*.db
-*.sqlite
-*.sqlite3
-
-# Test coverage
-coverage/
-
-# Playwright
-test-results/
-playwright-report/
-playwright/.cache/
-
-# Local development files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Server logs
-backend/logs/
-backend/runtime/logs/
-
-# Vite cache
-.vite/
-node_modules/.vite/
-
-# Package manager files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# Electron
-out/
-app/
-packages/
-
-# Backup files
-*.backup
-*.bak
-*.orig
-backup-*.sql
-backend/backups/*.sql
-backend/runtime/backups/
-backup/
-
-# IDE specific files
-.vscode/settings.json
-.vscode/launch.json
-.vscode/extensions.json
+# IDE and editor files
+.vscode/
+.idea/
 *.code-workspace
 .kiro
 .augment
 rules
 
+# Operating system files
 # macOS
+.DS_Store
+.DS_Store?
+._*
 .AppleDouble
 .LSOverride
+.Spotlight-V100
+.Trashes
 Icon?
 
 # Windows
 Desktop.ini
 $RECYCLE.BIN/
+ehthumbs.db
+Thumbs.db
 
 # Linux
 .fuse_hidden*
 .directory
 .Trash-*
 
-# Project specific
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Project specific directories
 backend/uploads/
 backend/temp/
 backend/exports/
-backend/runtime/uploads/
-backend/runtime/temp/
-backend/runtime/exports/
-docs/reports/*.html
-scripts/logs/
-
-# Test results and reports
-test-results.json
-*.test-report.json
-test-*.ps1
-test-*.js
-
-# Temporary files
-*.tmp
-*.temp
-*.cache
-
-# Environment overrides
-.env.development
-.env.production
-.env.staging
-
-# WARP temporary files
-WARP.md
+backend/logs/
+backend/runtime/
+backend/backups/
 
 # Archive directories
 scripts/archive/
 scripts/migration/old/
+archive/
 
-# Backup and temporary files
-*.backup.js
-*.old.js
-*.new.js
-*.removed
-*.backup
-*.bak
-*.orig
-*.temp
-*.tmp
-*.swp
-*.swo
-*~
+# Documentation and reports
+docs/reports/*.html
+scripts/logs/
+analysis/temp/
+docs/temp/
 
 # Test artifacts
 test-*.cjs
-*.test-report.json
-test-results/
-test-reports/
-coverage/
-.nyc_output/
+test-*.js
+test-*.ps1
 
-# Development artifacts
-*.log
-*.pid
-*.seed
-*.pid.lock
-*.tgz
-*.tar.gz
+# Report generation files
+*.report.md.tmp
+*报告.md.tmp
 
-# Runtime generated files
+# Modern build tools and platforms
+.turbo/
+.parcel-cache/
+.next/
+.nuxt/
+.output/
+
+# Deployment platforms
+.vercel/
+.netlify/
+.firebase/
+
+# Documentation tools
+.docusaurus/
+storybook-static/
+
+# Package manager lock files (RECOMMENDED: KEEP THESE FILES)
+# Lock files ensure consistent dependency versions across environments
+# Only uncomment if your team specifically decides to exclude them
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# WARP temporary files
+WARP.md
+
+# Additional temporary locations
+tmp/
+temp/
 storage/temp/
 storage/cache/
-logs/
 runtime/
 
-# IDE and system files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
-$RECYCLE.BIN/
+# Project analysis and reports
+*.analysis.md
+*分析报告.md
+PROJECT_*_REPORT.md
+GITIGNORE_ANALYSIS_REPORT.md
+.gitignore.optimized
+.gitignore.backup
 
-# Project specific temp files
-analysis/temp/
-docs/temp/
-backend/temp/
-frontend/temp/
+# Windows path length issue mitigation
+node_modules/**/node_modules/
+**/node_modules/**/node_modules/

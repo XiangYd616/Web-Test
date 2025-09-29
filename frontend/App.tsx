@@ -35,9 +35,11 @@ function App() {
     // 在生产环境中注册Service Worker
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
       navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
+        .then(() => {
+          console.log('Service Worker registered successfully');
         })
         .catch((error) => {
+          console.error('SW registration failed: ', error);
         });
     }
 

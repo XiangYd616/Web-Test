@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactNode, FC } from 'react';
+import type { ReactNode } from 'react';
 import { AlertTriangle, ArrowLeft, Lock, Shield } from 'lucide-react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -43,7 +43,7 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
   }
 
   // 检查管理员权限
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user?.role === 'admin';
   const hasAdminPermission = user?.permissions?.includes('admin:access');
 
   if (!isAdmin && !hasAdminPermission) {

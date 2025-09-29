@@ -37,8 +37,7 @@ class WebSocketService {
       const token = url.searchParams.get('token');
 
       if (!token) {
-
-        console.log('❌ WebSocket连接被拒绝: 缺少token');
+        console.log('❌ WebSocket连接被拒绝: 缺少认证信息');
         return false;
       }
 
@@ -47,7 +46,7 @@ class WebSocketService {
       info.req.user = decoded;
       return true;
     } catch (error) {
-      console.log('❌ WebSocket连接被拒绝: token无效', error.message);
+      console.log('❌ WebSocket连接被拒绝: 认证信息无效');
       return false;
     }
   }

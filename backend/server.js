@@ -26,7 +26,8 @@ const performanceRoutes = require('./routes/performance');
 
 // 导入中间件
 const authMiddleware = require('./middleware/auth');
-const errorHandler = require('./middleware/errorHandler');
+// 导入统一错误处理系统
+const { errorMiddleware, notFoundHandler, handleError, ErrorCode } = require('./middleware/UnifiedErrorHandler');
 const { requestLogger, performanceMonitor, apiStats } = require('./middleware/logger');
 
 // 创建Express应用
@@ -150,18 +151,11 @@ if (NODE_ENV === 'production') {
   }
 }
 
-// 404处理
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: 'Route not found',
-    path: req.originalUrl,
-    method: req.method,
-    timestamp: new Date().toISOString()
-  });
-});
+// 404处理 - 使用统一错误处理
+app.use('*', notFoundHandler);
 
-// 全局错误处理
-app.use(errorHandler);
+// 全局错误处理 - 使用统一错误处理系统
+app.use(errorMiddleware);
 
 // 优雅关闭处理
 const gracefulShutdown = () => {
@@ -194,14 +188,18 @@ const gracefulShutdown = () => {
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
-// 处理未捕获的异常
+// 处理未捕获的异常 - 使用统一错误处理系统
 process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
+  handleError(error, { type: 'uncaughtException', severity: 'CRITICAL' });
   gracefulShutdown();
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  handleError(new Error(`Unhandled Rejection: ${reason}`), { 
+    type: 'unhandledRejection', 
+    severity: 'HIGH',
+    promise: promise 
+  });
   gracefulShutdown();
 });
 

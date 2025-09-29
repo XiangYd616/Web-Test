@@ -1,10 +1,13 @@
 /**
  * 统一API响应格式标准 - JavaScript版本
- * 版本: v2.0.0
+ * 版本: v2.1.0 - 与TypeScript版本同步
  * 创建时间: 2025-08-16
+ * 更新时间: 2024-09-29
  * 
  * 此文件定义了项目中所有API接口必须遵循的统一响应格式
  * 确保前后端API响应格式完全一致
+ * 
+ * 注意: 此文件与standardApiTypes.ts保持同步
  */
 
 // ==================== 错误代码枚举 ====================
@@ -214,6 +217,130 @@ function validatePaginationMeta(pagination) {
   );
 }
 
+// ==================== 工具函数 ====================
+
+/**
+ * 生成请求ID
+ * @returns {string}
+ */
+function generateRequestId() {
+  return `req_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+}
+
+/**
+ * 生成时间戳
+ * @returns {string}
+ */
+function generateTimestamp() {
+  return new Date().toISOString();
+}
+
+/**
+ * 创建成功响应
+ * @param {*} data - 响应数据
+ * @param {Object} meta - 元数据
+ * @returns {Object}
+ */
+function createSuccessResponse(data, meta = {}) {
+  return {
+    success: true,
+    data,
+    meta: {
+      requestId: generateRequestId(),
+      timestamp: generateTimestamp(),
+      ...meta
+    }
+  };
+}
+
+/**
+ * 创建错误响应
+ * @param {string} code - 错误代码
+ * @param {string} message - 错误消息
+ * @param {*} details - 错误详情
+ * @param {Object} meta - 元数据
+ * @returns {Object}
+ */
+function createErrorResponse(code, message, details = null, meta = {}) {
+  return {
+    success: false,
+    error: {
+      code,
+      message: message || StandardErrorMessages[code] || '未知错误',
+      details
+    },
+    meta: {
+      requestId: generateRequestId(),
+      timestamp: generateTimestamp(),
+      ...meta
+    }
+  };
+}
+
+/**
+ * 创建分页响应
+ * @param {Array} data - 数据列表
+ * @param {number} page - 当前页码
+ * @param {number} limit - 每页数量
+ * @param {number} total - 总记录数
+ * @param {Object} meta - 额外元数据
+ * @returns {Object}
+ */
+function createPaginatedResponse(data, page, limit, total, meta = {}) {
+  const totalPages = Math.ceil(total / limit);
+  const hasNext = page < totalPages;
+  const hasPrev = page > 1;
+  
+  return {
+    success: true,
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNext,
+      hasPrev,
+      nextPage: hasNext ? page + 1 : null,
+      prevPage: hasPrev ? page - 1 : null
+    },
+    meta: {
+      requestId: generateRequestId(),
+      timestamp: generateTimestamp(),
+      ...meta
+    }
+  };
+}
+
+// ==================== 测试相关类型定义 ====================
+
+/**
+ * 测试类型枚举
+ */
+const TestType = {
+  PERFORMANCE: 'performance',
+  SECURITY: 'security',
+  SEO: 'seo',
+  API: 'api',
+  STRESS: 'stress',
+  COMPATIBILITY: 'compatibility',
+  ACCESSIBILITY: 'accessibility',
+  UX: 'ux',
+  NETWORK: 'network',
+  DATABASE: 'database'
+};
+
+/**
+ * 测试状态枚举
+ */
+const TestStatus = {
+  PENDING: 'pending',
+  RUNNING: 'running',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled'
+};
+
 // ==================== 导出 ====================
 
 module.exports = {
@@ -221,6 +348,10 @@ module.exports = {
   StandardErrorCode,
   StandardStatusCodeMap,
   StandardErrorMessages,
+  
+  // 测试相关枚举
+  TestType,
+  TestStatus,
 
   // 类型守卫函数
   isStandardApiSuccessResponse,
@@ -230,6 +361,13 @@ module.exports = {
   validateSuccessResponse,
   validateErrorResponse,
   validatePaginationMeta,
+  
+  // 工具函数
+  generateRequestId,
+  generateTimestamp,
+  createSuccessResponse,
+  createErrorResponse,
+  createPaginatedResponse,
 
   // 向后兼容的别名
   ErrorCode: StandardErrorCode,

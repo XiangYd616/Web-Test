@@ -42,9 +42,9 @@ function getSeedPassword(username) {
     return process.env[envKey];
   }
   
-  // 生成随机密码并显示给用户
+  // 生成随机密码
   const password = generateSecurePassword();
-  console.log(`⚠️  生成的密码 for ${username}: ${password}`);
+  console.log(`⚠️  为用户 ${username} 生成了随机密码，请查看环境变量或数据库记录`);
   
   return password;
 }
