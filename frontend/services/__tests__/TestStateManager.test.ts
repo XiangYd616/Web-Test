@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { TestStateManager, TestState, TestPhase } from '../TestStateManager';
-import type { TestConfig, TestDataPoint, RealTimeMetrics } from '../TestStateManager';
+import { TestStateManager, TestState, TestPhase } from '../testStateManagerService';
+import type { TestConfig, TestDataPoint, RealTimeMetrics } from '../testStateManagerService';
 
 // 模拟定时器
 vi.useFakeTimers();

@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 // 临时注释掉不存在的组件导入
 // import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
 // import ImportExport from '../../components/analytics/ImportExport';
-import PerformanceAnalysis from '../../components/analytics/PerformanceAnalysis';
+import UnifiedPerformanceAnalysis from '../../components/analysis/UnifiedPerformanceAnalysis';
 // import RealTimeMonitoring from '../../components/analytics/RealTimeMonitoring';
 import ReportManagement from '../../components/analytics/ReportManagement';
 import { TestResultDisplay } from '../../components/testing';
@@ -676,7 +676,7 @@ const DataStorage: React.FC = () => {
         </section>
 
         <section id="performance-panel" role="tabpanel" aria-labelledby="performance-tab" hidden={activeTab !== 'performance'}>
-          {activeTab === 'performance' && <PerformanceAnalysis />}
+          {activeTab === 'performance' && <UnifiedPerformanceAnalysis />}
         </section>
 
         <section id="monitoring-panel" role="tabpanel" aria-labelledby="monitoring-tab" hidden={activeTab !== 'monitoring'}>

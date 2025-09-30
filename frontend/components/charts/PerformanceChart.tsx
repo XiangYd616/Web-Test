@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { DataPoint, dataVisualizationOptimizer, OptimizationConfig } from '../../utils/dataVisualization';
+import { DataPoint, _dataVisualizationOptimizer, OptimizationConfig } from '../../utils/dataVisualization';
 
 interface PerformanceChartProps {
   data: DataPoint[];
@@ -68,7 +68,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
       performanceThreshold: 50
     };
 
-    const result = dataVisualizationOptimizer.optimizeDataset(data, config);
+    const result = _dataVisualizationOptimizer.optimizeDataset(data, config);
 
     const renderTime = performance.now() - startTime;
     setPerformanceStats({

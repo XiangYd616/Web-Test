@@ -22,19 +22,6 @@ export enum AuthErrorType {
   SERVER_ERROR = 'SERVER_ERROR'
 }
 
-const ERROR_MESSAGES = {
-  [AuthErrorType.TOKEN_MISSING]: '请先登录以访问此功能',
-  [AuthErrorType.TOKEN_INVALID]: '登录状态无效，请重新登录',
-  [AuthErrorType.TOKEN_EXPIRED]: '登录已过期，请重新登录',
-  [AuthErrorType.USER_NOT_FOUND]: '用户不存在或已被删除',
-  [AuthErrorType.USER_INACTIVE]: '账户已被禁用，请联系管理员',
-  [AuthErrorType.INSUFFICIENT_PERMISSIONS]: '权限不足，无法执行此操作',
-  [AuthErrorType.SESSION_EXPIRED]: '会话已过期，请重新登录',
-  [AuthErrorType.LOGIN_FAILED]: '登录失败，请检查用户名和密码',
-  [AuthErrorType.REGISTER_FAILED]: '注册失败，请检查输入信息',
-  [AuthErrorType.NETWORK_ERROR]: '网络连接失败，请检查网络设置',
-  [AuthErrorType.SERVER_ERROR]: '服务器错误，请稍后重试'
-};
 
 const FRIENDLY_MESSAGES = {
   [AuthErrorType.TOKEN_MISSING]: '您需要登录才能使用此功能',
@@ -174,7 +161,7 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
 export const parseAuthError = (error: unknown): AuthErrorType => {
   if (typeof error === 'string') {
     // 尝试从错误消息中推断错误类型
-    const message = error?.toLowerCase();
+    const message = error.toLowerCase();
 
     if (message.includes('token') && message.includes('missing')) {
       return AuthErrorType.TOKEN_MISSING;
@@ -198,23 +185,29 @@ export const parseAuthError = (error: unknown): AuthErrorType => {
     return AuthErrorType.SERVER_ERROR;
   }
 
-  if (error?.error && Object.values(AuthErrorType).includes(error?.error)) {
-    return error?.error;
+  // Type guard for error with 'error' property
+  const errorWithError = error as { error?: string };
+  if (errorWithError?.error && Object.values(AuthErrorType).includes(errorWithError.error as AuthErrorType)) {
+    return errorWithError.error as AuthErrorType;
   }
 
-  if (error?.response.status === 401) {
+  // Type guard for error with 'response' property
+  const errorWithResponse = error as { response?: { status?: number } };
+  if (errorWithResponse?.response?.status === 401) {
     return AuthErrorType.TOKEN_INVALID;
   }
 
-  if (error?.response.status === 403) {
+  if (errorWithResponse?.response?.status === 403) {
     return AuthErrorType.INSUFFICIENT_PERMISSIONS;
   }
 
-  if (error?.response?.status >= 500) {
+  if (errorWithResponse?.response?.status && errorWithResponse.response.status >= 500) {
     return AuthErrorType.SERVER_ERROR;
   }
 
-  if (error.code === 'NETWORK_ERROR' || !navigator.onLine) {
+  // Type guard for error with 'code' property
+  const errorWithCode = error as { code?: string };
+  if (errorWithCode?.code === 'NETWORK_ERROR' || !navigator.onLine) {
     return AuthErrorType.NETWORK_ERROR;
   }
 

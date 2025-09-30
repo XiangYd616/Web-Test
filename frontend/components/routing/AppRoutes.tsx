@@ -1,38 +1,30 @@
-import React, { Suspense, lazy } from 'react';
+﻿import React, { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from '../../pages/Login';
 import Register from '../../pages/Register';
 import { AdminGuard, ProtectedRoute } from '../auth';
-import { ModernLayout } from '../modern';
+import { Layout } from '../layout';
 import { ErrorBoundary, LoadingSpinner } from '../ui';
-;
 
-// 懒加载页面组件
-const ModernDashboard = lazy(() => import('../../pages/dashboard/ModernDashboard'));
+// 鎳掑姞杞介〉闈㈢粍浠?const Dashboard = lazy(() => import('../../pages/dashboard/Dashboard'));
 const WebsiteTest = lazy(() => import('../../pages/WebsiteTest'));
 const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
 const PerformanceTest = lazy(() => import('../../pages/PerformanceTest'));
-const SEOTest = lazy(() => import('../../pages/SEOTest'));
+const SeoTest = lazy(() => import('../../pages/SeoTest'));
 
-// MFA认证相关页面
+// MFA璁よ瘉鐩稿叧椤甸潰
 const MFASetup = lazy(() => import('../../pages/auth/MFASetup'));
 const MFAVerification = lazy(() => import('../../pages/auth/MFAVerification'));
 
-const APITest = lazy(() => import('../../pages/APITest'));
+const ApiTest = lazy(() => import('../../pages/ApiTest'));
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
-// const UnifiedStressTest = lazy(() => import('../../pages/UnifiedStressTest')); // 统一压力测试页面 - 暂时禁用
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
 const AccessibilityTest = lazy(() => import('../../pages/AccessibilityTest'));
-// const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
-const UXTest = lazy(() => import('../../pages/UXTest'));
+const UxTest = lazy(() => import('../../pages/UxTest'));
 const UnifiedTestPage = lazy(() => import('../../pages/UnifiedTestPage'));
 
-// 演示和测试页面
-// URLInputDemo 已删除
-// LocalStressTestDemo 已删除
-
-// 数据管理相关页面
+// 鏁版嵁绠＄悊鐩稿叧椤甸潰
 const DataStorage = lazy(() => import('../../pages/admin/DataStorage'));
 const DataManagement = lazy(() => import('../../pages/DataManagement'));
 const DataCenter = lazy(() => import('../../pages/DataCenter'));
@@ -40,43 +32,36 @@ const Statistics = lazy(() => import('../../pages/Statistics'));
 const Analytics = lazy(() => import('../../pages/analytics'));
 const MonitoringDashboard = lazy(() => import('../../pages/MonitoringDashboard'));
 
-// 报告和历史
-const TestHistory = lazy(() => import('../../pages/TestHistory'));
+// 鎶ュ憡鍜屽巻鍙?const TestHistory = lazy(() => import('../../pages/TestHistory'));
 
 const Reports = lazy(() => import('../../pages/Reports'));
 const TestResultDetail = lazy(() => import('../../pages/TestResultDetail'));
 const SecurityReport = lazy(() => import('../../pages/SecurityReport'));
 
-// 系统管理 - 只保留Admin页面，其他管理功能都在Admin内部
+// 绯荤粺绠＄悊 - 鍙繚鐣橝dmin椤甸潰锛屽叾浠栫鐞嗗姛鑳介兘鍦ˋdmin鍐呴儴
 const Admin = lazy(() => import('../../pages/admin'));
 
-// 用户相关
+// 鐢ㄦ埛鐩稿叧
 const UserProfile = lazy(() => import('../../pages/UserProfile'));
 const UserBookmarks = lazy(() => import('../../pages/UserBookmarks'));
 
-// 测试和优化
-const TestOptimizations = lazy(() => import('../../pages/TestOptimizations'));
+// 娴嬭瘯鍜屼紭鍖?const TestOptimizations = lazy(() => import('../../pages/TestOptimizations'));
 const Notifications = lazy(() => import('../../pages/Notifications'));
 
-// 集成和配置
-const Integrations = lazy(() => import('../../pages/Integrations'));
-const CICDIntegration = lazy(() => import('../../pages/CICDIntegration'));
+// 闆嗘垚鍜岄厤缃?const Integrations = lazy(() => import('../../pages/Integrations'));
+const CicdIntegration = lazy(() => import('../../pages/CicdIntegration'));
 const Webhooks = lazy(() => import('../../pages/Webhooks'));
-const APIKeys = lazy(() => import('../../pages/APIKeys'));
-const APIDocs = lazy(() => import('../../pages/APIDocs'));
+const ApiKeys = lazy(() => import('../../pages/ApiKeys'));
+const ApiDocs = lazy(() => import('../../pages/ApiDocs'));
 
-// 调度和任务
-const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
+// 璋冨害鍜屼换鍔?const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
 const ScheduledTasks = lazy(() => import('../../pages/ScheduledTasks'));
 
-// 其他功能
+// 鍏朵粬鍔熻兘
 const Settings = lazy(() => import('../../pages/admin/Settings'));
 const Help = lazy(() => import('../../pages/Help'));
-// ThemeShowcase 已删除
 const Subscription = lazy(() => import('../../pages/Subscription'));
 const DownloadDesktop = lazy(() => import('../../pages/DownloadDesktop'));
-
-// 演示页面
 
 interface LazyPageWrapperProps {
   children: React.ReactNode;
@@ -84,7 +69,7 @@ interface LazyPageWrapperProps {
 
 const LazyPageWrapper: React.FC<LazyPageWrapperProps> = ({ children }) => (
   <ErrorBoundary>
-    <Suspense fallback={<LoadingSpinner size="lg" text="加载页面..." />}>
+    <Suspense fallback={<LoadingSpinner size="lg" text="鍔犺浇椤甸潰..." />}>
       {children}
     </Suspense>
   </ErrorBoundary>
@@ -93,11 +78,11 @@ const LazyPageWrapper: React.FC<LazyPageWrapperProps> = ({ children }) => (
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      {/* 公开路由 */}
+      {/* 鍏紑璺敱 */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       
-      {/* MFA认证路由 */}
+      {/* MFA璁よ瘉璺敱 */}
       <Route path="/auth/mfa/setup" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -110,12 +95,10 @@ const AppRoutes: React.FC = () => {
           <MFAVerification />
         </LazyPageWrapper>
       } />
-      {/* LoginDemo 路由已移除，因为文件不存在 */}
-      {/* background-test-demo 路由已移除 */}
 
-      {/* 公开路由 - 测试工具页面 */}
-      <Route path="/" element={<ModernLayout />}>
-        {/* 测试工具 - 公开访问，但功能需要登录 */}
+      {/* 鍏紑璺敱 - 娴嬭瘯宸ュ叿椤甸潰 */}
+      <Route path="/" element={<Layout />}>
+        {/* 娴嬭瘯宸ュ叿 - 鍏紑璁块棶锛屼絾鍔熻兘闇€瑕佺櫥褰?*/}
         <Route path="test" element={<Navigate to="/website-test" replace />} />
         <Route path="website-test" element={
           <LazyPageWrapper>
@@ -135,13 +118,13 @@ const AppRoutes: React.FC = () => {
 
         <Route path="seo-test" element={
           <LazyPageWrapper>
-            <SEOTest />
+            <SeoTest />
           </LazyPageWrapper>
         } />
 
         <Route path="api-test" element={
           <LazyPageWrapper>
-            <APITest />
+            <ApiTest />
           </LazyPageWrapper>
         } />
         <Route path="network-test" element={
@@ -169,33 +152,30 @@ const AppRoutes: React.FC = () => {
             <AccessibilityTest />
           </LazyPageWrapper>
         } />
-        {/* Chrome兼容性测试路由暂时禁用，重定向到通用兼容性测试 */}
         <Route path="chrome-compatibility-test" element={
           <Navigate to="/compatibility-test" replace />
         } />
         <Route path="ux-test" element={
           <LazyPageWrapper>
-            <UXTest />
+            <UxTest />
           </LazyPageWrapper>
         } />
 
-        {/* 统一测试引擎 */}
+        {/* 缁熶竴娴嬭瘯寮曟搸 */}
         <Route path="unified-test" element={
           <LazyPageWrapper>
             <UnifiedTestPage />
           </LazyPageWrapper>
         } />
 
-        {/* 测试优化页面 */}
+        {/* 娴嬭瘯浼樺寲椤甸潰 */}
         <Route path="test-optimizations" element={
           <LazyPageWrapper>
             <TestOptimizations />
           </LazyPageWrapper>
         } />
 
-        {/* URLInputDemo 已删除 */}
-
-        {/* 公开的测试历史查看 */}
+        {/* 鍏紑鐨勬祴璇曞巻鍙叉煡鐪?*/}
         <Route path="test-history" element={
           <LazyPageWrapper>
             <TestHistory />
@@ -213,7 +193,7 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         } />
 
-        {/* 公开的帮助和文档 */}
+        {/* 鍏紑鐨勫府鍔╁拰鏂囨。 */}
         <Route path="help" element={
           <LazyPageWrapper>
             <Help />
@@ -224,29 +204,26 @@ const AppRoutes: React.FC = () => {
             <APIDocs />
           </LazyPageWrapper>
         } />
-        {/* ThemeShowcase 已删除 */}
         <Route path="download-desktop" element={
           <LazyPageWrapper>
             <DownloadDesktop />
           </LazyPageWrapper>
         } />
-
-
       </Route>
 
-      {/* 首页重定向到网站测试 */}
+      {/* 棣栭〉閲嶅畾鍚戝埌缃戠珯娴嬭瘯 */}
       <Route index element={<Navigate to="/website-test" replace />} />
 
-      {/* 仪表板 - 需要登录 */}
+      {/* 浠〃鏉?- 闇€瑕佺櫥褰?*/}
       <Route path="dashboard" element={
         <ProtectedRoute>
           <LazyPageWrapper>
-            <ModernDashboard />
+            <Dashboard />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
 
-      {/* 数据管理 - 需要登录 */}
+      {/* 鏁版嵁绠＄悊 - 闇€瑕佺櫥褰?*/}
       <Route path="data-storage" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -284,7 +261,7 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
-      {/* 监控面板 - 管理员可访问 */}
+      {/* 鐩戞帶闈㈡澘 - 绠＄悊鍛樺彲璁块棶 */}
       <Route path="monitoring" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -293,41 +270,53 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 报告管理 - 需要登录 */}
+      {/* 鎶ュ憡绠＄悊 - 闇€瑕佺櫥褰?*/}
       <Route path="reports" element={
-        <LazyPageWrapper>
-          <Reports />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <Reports />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
 
-      {/* 用户相关 - 需要登录 */}
+      {/* 鐢ㄦ埛鐩稿叧 - 闇€瑕佺櫥褰?*/}
       <Route path="profile" element={
-        <LazyPageWrapper>
-          <UserProfile />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <UserProfile />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
       <Route path="bookmarks" element={
-        <LazyPageWrapper>
-          <UserBookmarks />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <UserBookmarks />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
       <Route path="notifications" element={
-        <LazyPageWrapper>
-          <Notifications />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <Notifications />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
 
-      {/* 集成和配置 - 需要登录 */}
+      {/* 闆嗘垚鍜岄厤缃?- 闇€瑕佺櫥褰?*/}
       <Route path="cicd" element={<Navigate to="/cicd-integration" replace />} />
       <Route path="integrations" element={
-        <LazyPageWrapper>
-          <Integrations />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <Integrations />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
       <Route path="cicd-integration" element={
-        <LazyPageWrapper>
-          <CICDIntegration />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <CICDIntegration />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
       <Route path="webhooks" element={
         <ProtectedRoute>
@@ -344,31 +333,39 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 调度和任务 - 需要登录 */}
+      {/* 璋冨害鍜屼换鍔?- 闇€瑕佺櫥褰?*/}
       <Route path="test-schedule" element={
-        <LazyPageWrapper>
-          <TestSchedule />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <TestSchedule />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
       <Route path="scheduled-tasks" element={
-        <LazyPageWrapper>
-          <ScheduledTasks />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <ScheduledTasks />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
 
-      {/* 用户设置 - 需要登录 */}
+      {/* 鐢ㄦ埛璁剧疆 - 闇€瑕佺櫥褰?*/}
       <Route path="settings" element={
-        <LazyPageWrapper>
-          <Settings />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <Settings />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
       <Route path="subscription" element={
-        <LazyPageWrapper>
-          <Subscription />
-        </LazyPageWrapper>
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <Subscription />
+          </LazyPageWrapper>
+        </ProtectedRoute>
       } />
 
-      {/* 系统管理 - 只保留Admin页面，所有管理功能都在Admin内部 */}
+      {/* 绯荤粺绠＄悊 - 鍙繚鐣橝dmin椤甸潰锛屾墍鏈夌鐞嗗姛鑳介兘鍦ˋdmin鍐呴儴 */}
       <Route path="admin" element={
         <AdminGuard>
           <LazyPageWrapper>
@@ -377,7 +374,7 @@ const AppRoutes: React.FC = () => {
         </AdminGuard>
       } />
 
-      {/* 重定向旧的管理员页面到Admin页面 */}
+      {/* 閲嶅畾鍚戞棫鐨勭鐞嗗憳椤甸潰鍒癆dmin椤甸潰 */}
       <Route path="system-status" element={<Navigate to="/admin" replace />} />
       <Route path="system-logs" element={<Navigate to="/admin" replace />} />
       <Route path="backup-management" element={<Navigate to="/admin" replace />} />

@@ -484,7 +484,7 @@ export const MFAManagement: React.FC<MFAManagementProps> = ({
         onClose={() => setShowDisableModal(false)}
         onConfirm={handleDisableMFA}
         isLoading={isLoading}
-        error={error}
+        error={error || undefined}
       />
 
       {/* 备用码管理弹窗 */}

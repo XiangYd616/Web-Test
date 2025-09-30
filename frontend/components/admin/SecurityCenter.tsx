@@ -21,7 +21,7 @@ interface SecurityEvent {
 }
 
 const SecurityCenter: React.FC = () => {
-  const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([
+  const [securityEvents] = useState<SecurityEvent[]>([
     {
       id: '1',
       type: 'failed_login',

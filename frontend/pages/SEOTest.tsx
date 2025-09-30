@@ -6,8 +6,8 @@ import type { } from '../types';
 import StructuredDataAnalyzer from '../components/seo/StructuredDataAnalyzer';
 import SEOResultVisualization from '../components/seo/SEOResultVisualization';
 import SEOReportGenerator from '../components/seo/SEOReportGenerator';
-import MobileSEODetector from '../utils/MobileSEODetector';
-import CoreWebVitalsAnalyzer from '../utils/CoreWebVitalsAnalyzer';
+import MobileSeoDetector from '../utils/mobileSeoDetector';
+import CoreWebVitalsAnalyzer from '../utils/coreWebVitalsAnalyzer';
 // import FileUploadSEO from '../components/seo/FileUploadSEO';
 
 // 临时FileUploadSEO组件实现

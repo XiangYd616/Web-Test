@@ -508,3 +508,16 @@ export {
   useSelector,
   useBusinessState
 };
+
+
+export {
+  useStateType,
+  useTestState,
+  useUserState,
+  useSystemState,
+  useNotificationState,
+  useLoadingState,
+  useModalState,
+  useSelector,
+  useBusinessState
+};

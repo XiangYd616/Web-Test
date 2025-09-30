@@ -123,8 +123,8 @@ export const DataExporter: React.FC<DataExporterProps> = ({
         format: 'json',
         dataType: 'test-results',
         dateRange: {
-            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            end: new Date().toISOString().split('T')[0]
+            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] || '',
+            end: new Date().toISOString().split('T')[0] || ''
         },
         filters: {},
         options: {

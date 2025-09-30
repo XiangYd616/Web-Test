@@ -52,6 +52,7 @@ export interface TestResult {
   environment: string;
   testType: string;
   summary?: TestSummary;
+  score?: number; // Overall test score 0-100
 }
 
 // Test Error Types

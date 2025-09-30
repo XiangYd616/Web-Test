@@ -1,17 +1,17 @@
 /**
- * 基于角色的仪表板路由器
- * 根据用户角色自动导航到对应的专用仪表板
+ * Role-based Dashboard Router
+ * Automatically navigates to the corresponding dashboard based on user role
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePermissions } from '../../hooks/usePermissions';
-import ModernDashboard from './ModernDashboard';
+import Dashboard from './Dashboard';
 import TesterDashboard from './TesterDashboard';
 import ManagerDashboard from './ManagerDashboard';
 import MonitoringDashboard from './MonitoringDashboard';
 
-// 角色优先级映射（数字越高优先级越高）
+// Role priority mapping (higher number = higher priority)
 const ROLE_PRIORITY = {
   admin: 100,
   manager: 80,
@@ -22,28 +22,28 @@ const ROLE_PRIORITY = {
   guest: 10
 };
 
-// 角色到仪表板的映射
+// Role to dashboard mapping
 const ROLE_DASHBOARD_MAP = {
   admin: MonitoringDashboard,
   manager: ManagerDashboard,
   tester: TesterDashboard,
-  moderator: ManagerDashboard, // 版主使用管理者仪表板
-  user: ModernDashboard,
-  viewer: ModernDashboard,
-  guest: ModernDashboard
+  moderator: ManagerDashboard, // Moderators use manager dashboard
+  user: Dashboard,
+  viewer: Dashboard,
+  guest: Dashboard
 };
 
 const RoleDashboardRouter: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const [permissionState, { hasRole }] = usePermissions();
 
-  // 获取用户的最高优先级角色
+  // Get user's highest priority role
   const getHighestPriorityRole = () => {
     if (!user?.roles || user?.roles.length === 0) {
-      return 'user'; // 默认角色
+      return 'user'; // Default role
     }
 
-    // 找到优先级最高的角色
+    // Find the role with highest priority
     let highestRole = 'user';
     let highestPriority = 0;
 
@@ -58,11 +58,11 @@ const RoleDashboardRouter: React.FC = () => {
     return highestRole;
   };
 
-  // 根据角色选择对应的仪表板组件
+  // Select corresponding dashboard component based on role
   const selectDashboardComponent = () => {
     const primaryRole = getHighestPriorityRole();
     
-    // 如果有多个角色，进行额外的权限检查
+    // If user has multiple roles, perform additional permission checks
     if (hasRole('admin')) {
       return MonitoringDashboard;
     } else if (hasRole('manager')) {
@@ -70,25 +70,25 @@ const RoleDashboardRouter: React.FC = () => {
     } else if (hasRole('tester')) {
       return TesterDashboard;
     } else {
-      // 使用角色映射表
-      return ROLE_DASHBOARD_MAP[primaryRole as keyof typeof ROLE_DASHBOARD_MAP] || ModernDashboard;
+      // Use role mapping table
+      return ROLE_DASHBOARD_MAP[primaryRole as keyof typeof ROLE_DASHBOARD_MAP] || Dashboard;
     }
   };
 
-  // 如果正在加载，显示加载状态
+  // Show loading state while authenticating
   if (authLoading || permissionState.loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">加载仪表板...</p>
-          <p className="text-gray-500 text-sm mt-2">正在为您准备个性化工作台</p>
+          <p className="text-gray-600">Loading dashboard...</p>
+          <p className="text-gray-500 text-sm mt-2">Preparing your personalized workspace</p>
         </div>
       </div>
     );
   }
 
-  // 选择并渲染对应的仪表板
+  // Select and render corresponding dashboard
   const DashboardComponent = selectDashboardComponent();
   
   return <DashboardComponent />;

@@ -23,7 +23,7 @@ export interface TestMetric {
 
 export interface TrendAnalysis {
   testType: string;
-  period: '7d' | '30d' | '90d';
+  period: '7d' | '30d' | '90d' | '1y';
   trend: 'improving' | 'declining' | 'stable';
   changeRate: number; // percentage change
   confidenceScore: number; // 0-1

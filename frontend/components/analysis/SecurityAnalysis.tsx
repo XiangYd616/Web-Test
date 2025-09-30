@@ -7,7 +7,6 @@
 
 import { AlertCircle, AlertTriangle, CheckCircle, Eye, Info, Lock, Shield, TrendingDown, TrendingUp, XCircle } from 'lucide-react';
 import React from 'react';
-import type { FC } from 'react';
 
 interface SecurityAnalysisResult {
   securityScore: number;
@@ -31,8 +30,8 @@ interface SecurityAnalysisResult {
   recommendations: string[];
   sslInfo?: {
     valid: boolean;
-    subject?: unknown;
-    issuer?: unknown;
+    subject?: { CN?: string; [key: string]: unknown };
+    issuer?: { CN?: string; [key: string]: unknown };
     validFrom?: string;
     validTo?: string;
     protocol?: string;
@@ -289,7 +288,7 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
             {result.sslInfo.subject && (
               <div>
                 <span className="text-gray-400">颁发给:</span>
-                <span className="ml-2 text-white">{result.sslInfo.subject?.CN || 'N/A'}</span>
+                <span className="ml-2 text-white">{result.sslInfo.subject.CN || 'N/A'}</span>
               </div>
             )}
           </div>

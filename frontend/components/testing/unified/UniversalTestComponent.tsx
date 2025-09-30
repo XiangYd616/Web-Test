@@ -56,13 +56,23 @@ import {
 // 导入统一的Hook和类型
 import { useCoreTestEngine } from '../../../hooks/useCoreTestEngine';
 import { useNotification } from '../../../hooks/useNotification';
-import { TestType } from '../../../types/enums';
 import {
+  TestType,
+  TestTypeEnum,
   TestConfig,
   TestResult,
-  TestProgress,
-  StandardErrorCode
-} from '../../../shared/types/standardApiTypes';
+  BaseTestConfig
+} from '../../../types/api';
+
+// 测试进度接口
+interface TestProgress {
+  percentage: number;
+  currentStep?: string;
+  completedSteps: string[];
+  totalSteps: number;
+  startTime: string;
+  estimatedEndTime?: string;
+}
 
 // 导入子组件
 import { TestConfigForm } from '../shared/TestConfigForm';
@@ -112,16 +122,16 @@ export interface UniversalTestComponentProps {
 
 // 测试类型选项
 const TEST_TYPE_OPTIONS = [
-  { value: TestType.PERFORMANCE, label: '🚀 性能测试', color: '#1890ff' },
-  { value: TestType.SECURITY, label: '🔒 安全测试', color: '#f5222d' },
-  { value: TestType.SEO, label: '📊 SEO分析', color: '#52c41a' },
-  { value: TestType.API, label: '🔌 API测试', color: '#13c2c2' },
-  { value: TestType.STRESS, label: '⚡ 压力测试', color: '#faad14' },
-  { value: TestType.COMPATIBILITY, label: '🌍 兼容性测试', color: '#722ed1' },
-  { value: TestType.ACCESSIBILITY, label: '♿ 可访问性测试', color: '#eb2f96' },
-  { value: TestType.UX, label: '🎨 用户体验测试', color: '#fa8c16' },
-  { value: TestType.NETWORK, label: '🌐 网络测试', color: '#096dd9' },
-  { value: TestType.DATABASE, label: '🗄️ 数据库测试', color: '#389e0d' }
+  { value: TestTypeEnum.PERFORMANCE, label: '🚀 性能测试', color: '#1890ff' },
+  { value: TestTypeEnum.SECURITY, label: '🔒 安全测试', color: '#f5222d' },
+  { value: 'seo', label: '📊 SEO分析', color: '#52c41a' },
+  { value: TestTypeEnum.API, label: '🔌 API测试', color: '#13c2c2' },
+  { value: TestTypeEnum.STRESS, label: '⚡ 压力测试', color: '#faad14' },
+  { value: TestTypeEnum.COMPATIBILITY, label: '🌍 兼容性测试', color: '#722ed1' },
+  { value: TestTypeEnum.ACCESSIBILITY, label: '♿ 可访问性测试', color: '#eb2f96' },
+  { value: TestTypeEnum.UX, label: '🎨 用户体验测试', color: '#fa8c16' },
+  { value: TestTypeEnum.NETWORK, label: '🌐 网络测试', color: '#096dd9' },
+  { value: TestTypeEnum.DATABASE, label: '🗄️ 数据库测试', color: '#389e0d' }
 ];
 
 // 获取测试类型配置
@@ -149,7 +159,7 @@ const getScoreColor = (score: number): string => {
  * 通用测试组件
  */
 export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
-  testType: defaultTestType = TestType.PERFORMANCE,
+  testType: defaultTestType = TestTypeEnum.PERFORMANCE,
   title,
   description,
   icon,

@@ -81,6 +81,13 @@ export interface MonitorDashboardProps {
     className?: string;
 }
 
+// 表格列类型
+interface TableColumn {
+    key: string;
+    title: string;
+    render?: (value: any, record: any) => React.ReactNode;
+}
+
 // 监控类型选项
 const monitorTypeOptions: LocalSelectOption[] = [
     { value: 'website', label: '网站' },
@@ -211,17 +218,20 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
 
     // 处理实时数据更新
     const handleRealTimeUpdate = useCallback((data: unknown) => {
-        if (data.type === 'target_update') {
+        // Type guard for different data types
+        const dataWithType = data as { type?: string; targetId?: string; updates?: Partial<MonitorTarget>; alert?: Alert; stats?: MonitorStats };
+        
+        if (dataWithType.type === 'target_update' && dataWithType.targetId && dataWithType.updates) {
             setTargets(prev => prev.map(target =>
-                target.id === data.targetId
-                    ? { ...target, ...data.updates }
+                target.id === dataWithType.targetId
+                    ? { ...target, ...dataWithType.updates }
                     : target
             ));
-        } else if (data.type === 'new_alert') {
-            setAlerts(prev => [data.alert, ...prev]);
-            showNotification(`新告警: ${data.alert.message}`, 'warning');
-        } else if (data.type === 'stats_update') {
-            setStats(data.stats);
+        } else if (dataWithType.type === 'new_alert' && dataWithType.alert) {
+            setAlerts(prev => [dataWithType.alert!, ...prev]);
+            showNotification(`新告警: ${dataWithType.alert.message}`, 'warning');
+        } else if (dataWithType.type === 'stats_update' && dataWithType.stats) {
+            setStats(dataWithType.stats);
         }
     }, [showNotification]);
 
@@ -387,7 +397,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
         {
             key: 'status',
             title: '状态',
-            render: (_, record) => (
+            render: (_: any, record: MonitorTarget) => (
                 <div className="flex items-center space-x-2">
                     {getStatusIcon(record.status)}
                     <Badge variant={getStatusColor(record.status) as any} size="sm">
@@ -399,7 +409,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
         {
             key: 'name',
             title: '名称',
-            render: (_, record) => (
+            render: (_: any, record: MonitorTarget) => (
                 <div>
                     <div className="font-medium text-gray-900">{record.name}</div>
                     <div className="text-sm text-gray-500">{record.url}</div>
@@ -412,7 +422,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
         {
             key: 'metrics',
             title: '指标',
-            render: (_, record) => (
+            render: (_: any, record: MonitorTarget) => (
                 <div className="text-sm">
                     {record.responseTime && (
                         <div>响应时间: {record.responseTime}ms</div>
@@ -427,7 +437,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
         {
             key: 'actions',
             title: '操作',
-            render: (_, record) => (
+            render: (_: any, record: MonitorTarget) => (
                 <div className="flex items-center space-x-2">
                     <Button
                         variant="ghost"

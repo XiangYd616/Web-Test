@@ -1,11 +1,16 @@
 /**
- * 统一API响应类型定义 (简化版本)
- * 版本: v2.0.0
+ * Unified API Response Types - Legacy File (Deprecated)
+ * 
+ * This file has been consolidated into types/api/index.ts
+ * Please update your imports to use the new consolidated API types.
+ * 
+ * @deprecated Use types/api/index.ts instead
+ * Version: v3.0.0
  */
 
-// 重新导出所有类型
-export * from './apiResponse.types';
+// Re-export all types from the consolidated API types file
+export * from '../api';
 
-// 默认导出
-export type { ApiResponse as default } from './apiResponse.types';
+// Default export for backward compatibility
+export type { ApiResponse as default } from '../api';
 

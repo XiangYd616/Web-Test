@@ -109,7 +109,7 @@ const BackupManagement: React.FC = () => {
     setTimeout(() => {
       const newBackup: BackupRecord = {
         id: Date.now().toString(),
-        name: `manual_backup_${new Date().toISOString().split('T')[0].replace(/-/g, '')}`,
+        name: `manual_backup_${new Date().toISOString().split('T')[0]?.replace(/-/g, '') || new Date().getFullYear() + (new Date().getMonth() + 1).toString().padStart(2, '0') + new Date().getDate().toString().padStart(2, '0')}`,
         type: 'manual',
         size: Math.floor(Math.random() * 50 * 1024 * 1024), // 随机大小
         createdAt: new Date().toLocaleString('zh-CN'),

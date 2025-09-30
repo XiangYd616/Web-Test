@@ -3,7 +3,7 @@
  * 提供数据挖掘、智能分析、机器学习预测和可视化功能
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {BarChart3, TrendingUp, Brain, Download, RefreshCw, AlertCircle, CheckCircle, Target, Activity, FileText, PieChart, Layers, Eye, Share2, Lightbulb} from 'lucide-react';
 import {Line, Doughnut} from 'react-chartjs-2';
 import {
@@ -38,13 +38,6 @@ ChartJS.register(
   Filler
 );
 
-// 数据分析类型定义
-interface AnalysisDataPoint {
-  timestamp: Date;
-  value: number;
-  category: string;
-  metadata?: Record<string, any>;
-}
 
 interface AnalysisResult {
   id: string;
@@ -83,7 +76,7 @@ const AdvancedAnalytics: React.FC = () => {
   // 状态管理
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisResult | null>(null);
-  const [config, setConfig] = useState<AnalysisConfig>({
+  const [config] = useState<AnalysisConfig>({
     dataSource: 'test_results',
     timeRange: {
       start: subDays(new Date(), 30),
@@ -96,7 +89,6 @@ const AdvancedAnalytics: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'detailed' | 'comparison'>('grid');
-  const [selectedInsights, setSelectedInsights] = useState<Set<string>>(new Set());
   
   // 生成模拟分析结果
   const generateMockAnalysisResults = (): AnalysisResult[] => {

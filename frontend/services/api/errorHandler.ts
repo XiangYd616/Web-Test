@@ -4,7 +4,7 @@
  * 版本: v2.0.0 - 完善的错误处理和重试机制
  */
 
-import { ApiError, ErrorCode } from '../../types/unified/apiResponse';
+import { ApiError, ErrorCode } from '../../types/api/index';
 import type { ErrorContext as UtilsErrorContext } from '../../utils/errorHandler';
 
 // 错误处理配置

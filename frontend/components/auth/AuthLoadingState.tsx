@@ -230,7 +230,7 @@ export const CardAuthLoading: React.FC<{
     <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`}>
       <AuthLoadingState
         type={type}
-        message={message}
+        message={message || undefined}
         size="md"
         showIcon={true}
         className="py-8"

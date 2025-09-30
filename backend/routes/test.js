@@ -17,10 +17,10 @@ const { apiCache, dbCache } = require('../middleware/cache.js');
 // 导入测试引擎类
 const APIAnalyzer = require('../engines/api/ApiAnalyzer.js');
 const StressTestEngine = require('../engines/stress/StressTestEngine.js');
-const RealSecurityTestEngine = require('../engines/security/SecurityTestEngine.js'); // 直接导出
+const SecurityTestEngine = require('../engines/security/SecurityTestEngine.js');
 const CompatibilityTestEngine = require('../engines/compatibility/CompatibilityTestEngine.js');
 const UXAnalyzer = require('../engines/api/UXAnalyzer.js');
-const ApiTestEngine = require('../engines/api/ApiTestEngine.js');
+const ApiTestEngine = require('../engines/api/APITestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const userTestManager = require('../services/testing/UserTestManager.js');
@@ -34,13 +34,13 @@ const multer = require('multer');
 const path = require('path');
 
 // 创建测试引擎实例（简化架构）
-const realTestEngine = new APIAnalyzer();
+const apiEngine = new APIAnalyzer();
 // 🔧 重构：移除全局实例，压力测试现在通过UserTestManager管理
-// const realStressTestEngine = createGlobalInstance(); // 已移除
-const realSecurityTestEngine = new RealSecurityTestEngine();
-const realCompatibilityTestEngine = new CompatibilityTestEngine();
-const realUXTestEngine = new UXAnalyzer();
-const realAPITestEngine = new ApiTestEngine();
+// const stressTestEngine = createGlobalInstance(); // 已移除
+const securityEngine = new SecurityTestEngine();
+const compatibilityEngine = new CompatibilityTestEngine();
+const uxEngine = new UXAnalyzer();
+const apiTestEngine = new ApiTestEngine();
 
 // 🔧 统一使用本地TestHistoryService实例
 const testHistoryService = new TestHistoryService(require('../config/database'));
@@ -1593,7 +1593,7 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
   }
 
   try {
-    const testResult = await realTestEngine.runWebsiteTest(url, {
+    const testResult = await apiEngine.runWebsiteTest(url, {
       ...options,
       userId: req.user?.id,
       testType: 'website'
@@ -2289,32 +2289,32 @@ router.post('/security',
         // 根据模块类型执行相应的测试
         switch (module) {
           case 'ssl':
-            testResult = await realSecurityTestEngine.runSSLTest(validatedURL, options);
+            testResult = await securityEngine.runSSLTest(validatedURL, options);
             break;
           case 'headers':
-            testResult = await realSecurityTestEngine.runHeadersTest(validatedURL, options);
+            testResult = await securityEngine.runHeadersTest(validatedURL, options);
             break;
           case 'vulnerabilities':
-            testResult = await realSecurityTestEngine.runVulnerabilityTest(validatedURL, options);
+            testResult = await securityEngine.runVulnerabilityTest(validatedURL, options);
             break;
           case 'cookies':
-            testResult = await realSecurityTestEngine.runCookieTest(validatedURL, options);
+            testResult = await securityEngine.runCookieTest(validatedURL, options);
             break;
           case 'content':
-            testResult = await realSecurityTestEngine.runContentTest(validatedURL, options);
+            testResult = await securityEngine.runContentTest(validatedURL, options);
             break;
           case 'network':
-            testResult = await realSecurityTestEngine.runNetworkTest(validatedURL, options);
+            testResult = await securityEngine.runNetworkTest(validatedURL, options);
             break;
           case 'compliance':
-            testResult = await realSecurityTestEngine.runComplianceTest(validatedURL, options);
+            testResult = await securityEngine.runComplianceTest(validatedURL, options);
             break;
           default:
             throw new Error(`Unknown security test module: ${module}`);
         }
       } else {
         // 传统模式：运行完整的安全测试
-        testResult = await realSecurityTestEngine.runSecurityTest({
+        testResult = await securityEngine.runSecurityTest({
           url: validatedURL,
           checkSSL: options.checkSSL !== false,
           checkHeaders: options.checkHeaders !== false,
@@ -2506,7 +2506,7 @@ router.post('/performance',
       console.log(`🚀 Starting performance test for: ${validatedURL}`);
 
       // 使用现有的网站测试引擎进行性能测试
-      const testResult = await realTestEngine.runEnhancedPerformanceTest(validatedURL, {
+      const testResult = await apiEngine.runEnhancedPerformanceTest(validatedURL, {
         device: config.device || 'desktop',
         location: config.location || 'beijing',
         timeout: config.timeout || 60000,
@@ -2554,7 +2554,7 @@ router.post('/performance/page-speed',
       console.log(`📊 Starting page speed test for: ${validatedURL}`);
 
       // 使用网站测试引擎的性能检测功能
-      const testResult = await realTestEngine.runTest(validatedURL, {
+      const testResult = await apiEngine.runTest(validatedURL, {
         testType: 'performance',
         device,
         timeout,
@@ -2595,7 +2595,7 @@ router.post('/performance/core-web-vitals', optionalAuth, testRateLimiter, valid
   try {
 
     // 使用网站测试引擎进行Core Web Vitals检测
-    const testResult = await realTestEngine.runTest(validatedURL, {
+    const testResult = await apiEngine.runTest(validatedURL, {
       testType: 'performance',
       device,
       checkPageSpeed: true,
@@ -2649,7 +2649,7 @@ router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddlewa
       ...options
     };
 
-    const testResult = await realCompatibilityTestEngine.runCompatibilityTest(validatedURL, enhancedOptions);
+    const testResult = await compatibilityEngine.runCompatibilityTest(validatedURL, enhancedOptions);
 
     // 如果测试成功，生成详细报告
     if (testResult.success && testResult.data) {
@@ -2688,7 +2688,7 @@ router.post('/caniuse', optionalAuth, testRateLimiter, asyncHandler(async (req, 
     console.log(`🔍 Starting Can I Use compatibility test for: ${url}`);
 
     // 真实的Can I Use兼容性分析
-    const realResult = await this.performRealCompatibilityAnalysis(validatedURL, features, browsers);
+    const realResult = await performRealCompatibilityAnalysis(url, features, browsers);
 
     console.log(`✅ Can I Use test completed with score: ${realResult.overallScore}`);
 
@@ -2954,7 +2954,7 @@ router.post('/performance/resources', optionalAuth, testRateLimiter, validateURL
     console.log(`🔍 Starting resource analysis for: ${validatedURL}`);
 
     // 使用网站测试引擎进行资源分析
-    const testResult = await realTestEngine.runTest(validatedURL, {
+    const testResult = await apiEngine.runTest(validatedURL, {
       testType: 'performance',
       checkResourceOptimization: true,
       checkImageOptimization: includeImages,

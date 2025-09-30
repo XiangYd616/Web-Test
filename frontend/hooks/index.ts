@@ -9,14 +9,14 @@ export { useTestManager } from './useTestManager';
 // 🔄 兼容性Hook - 为现有代码提供无缝迁移
 export {
   useSimpleTestEngine, useTestEngine, useTestState, useUnifiedTestState, useUniversalTest
-} from './legacy-compatibility';
+} from './useLegacyCompatibility';
 
 // 📋 专用测试Hook
-export { useAPITestState } from './useAPITestState';
+export { useApiTestState } from './useApiTestState';
 export { useCompatibilityTestState } from './useCompatibilityTestState';
 export { useDatabaseTestState } from './useDatabaseTestState';
 export { useNetworkTestState } from './useNetworkTestState';
-export { useUXTestState } from './useUXTestState';
+export { useUxTestState } from './useUxTestState';
 
 // 🛠️ 工具Hook（保持兼容性）
 export { useTestProgress } from './useTestProgress';

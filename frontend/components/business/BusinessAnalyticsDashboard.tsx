@@ -27,7 +27,7 @@ import { Card,
   TableHead,
   TableRow,
   CircularProgress } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import { Grid } from '@mui/material';
 import {TrendingUp, TrendingDown, TrendingFlat, Refresh, Download, Warning, CheckCircle, Error, Speed, People, Assessment, Memory, Timer} from '@mui/icons-material';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell} from 'recharts';
 
@@ -122,12 +122,12 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       setError(null);
       const response = await fetch('/api/analytics/dashboard', {
         headers: {
-          'Authorization': `Bearer ${state.auth.token}`
+          'Authorization': `Bearer ${state.user.session?.sessionId || ''}`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`鑾峰彇鏁版嵁澶辫触: ${response.statusText}`);
+        throw new Error('鑾峰彇鏁版嵁澶辫触: ' + response.statusText);
       }
 
       const result = await response.json();

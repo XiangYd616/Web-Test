@@ -8,12 +8,12 @@
 import React, { useState, useMemo } from 'react';
 import {BarChart3, TrendingUp, AlertCircle, CheckCircle, Clock} from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
-import { MobileSEOAnalysisResult } from '../../utils/MobileSEODetector';
-import { CoreWebVitalsResult } from '../../utils/CoreWebVitalsAnalyzer';
+import { MobileSeoAnalysisResult } from '../../utils/mobileSeoDetector';
+import { CoreWebVitalsResult } from '../../utils/coreWebVitalsAnalyzer';
 
 interface SEOVisualizationData {
   basicSEO?: SEOAnalysisResult;
-  mobileSEO?: MobileSEOAnalysisResult;
+  mobileSEO?: MobileSeoAnalysisResult;
   coreWebVitals?: CoreWebVitalsResult;
   timestamp: number;
   url: string;

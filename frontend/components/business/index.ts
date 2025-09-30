@@ -7,14 +7,16 @@
 export { default as DataExporter } from './DataExporter';
 export { default as MonitorDashboard } from './MonitorDashboard';
 export { default as ResultViewer } from './ResultViewer';
-export { LegacyTestRunner as TestRunner } from './LegacyTestRunner';
+// Note: LegacyTestRunner has been removed. Use UniversalTestComponent instead.
+// export { LegacyTestRunner as TestRunner } from './LegacyTestRunner';
 
 // 类型定义导出
-export type {
-    TestConfig,
-    TestResult,
-    TestRunnerProps, TestType
-} from './LegacyTestRunner';
+// Note: TestRunner types moved to UniversalTestComponent
+// export type {
+//     TestConfig,
+//     TestResult, 
+//     TestRunnerProps, TestType
+// } from './LegacyTestRunner';
 
 export type {
     ResultDetails,

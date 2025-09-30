@@ -56,7 +56,7 @@ export interface MobilePerformanceResult {
   recommendations: string[];
 }
 
-export interface MobileSEOAnalysisResult {
+export interface MobileSeoAnalysisResult {
   overallScore: number;
   viewport: MobileViewportResult;
   responsive: ResponsiveDesignResult;
@@ -77,7 +77,7 @@ export interface MobileSEOAnalysisResult {
   }>;
 }
 
-export class MobileSEODetector {
+export class MobileSeoDetector {
   private document: Document;
   private cssRules: CSSStyleSheet[] = [];
 
@@ -93,7 +93,7 @@ export class MobileSEODetector {
     includePerformance?: boolean;
     includeCoreWebVitals?: boolean;
     simulateMobileDevice?: boolean;
-  } = {}): Promise<MobileSEOAnalysisResult> {
+  } = {}): Promise<MobileSeoAnalysisResult> {
     const viewport = this.analyzeViewport();
     const responsive = this.analyzeResponsiveDesign();
     const touchTargets = this.analyzeTouchTargets();
@@ -677,9 +677,9 @@ export class MobileSEODetector {
     touchTargets: TouchTargetResult;
     fonts: MobileFontResult;
     performance: MobilePerformanceResult;
-    coreWebVitals?: MobileSEOAnalysisResult['coreWebVitals'];
-  }): MobileSEOAnalysisResult['recommendations'] {
-    const recommendations: MobileSEOAnalysisResult['recommendations'] = [];
+    coreWebVitals?: MobileSeoAnalysisResult['coreWebVitals'];
+  }): MobileSeoAnalysisResult['recommendations'] {
+    const recommendations: MobileSeoAnalysisResult['recommendations'] = [];
 
     // Viewport建议
     if (!results.viewport.isOptimal) {
@@ -745,4 +745,4 @@ export class MobileSEODetector {
   }
 }
 
-export default MobileSEODetector;
+export default MobileSeoDetector;

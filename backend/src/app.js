@@ -22,13 +22,13 @@ const authRoutes = require('../routes/auth.js');
 const testRoutes = require('../routes/test.js');
 const seoRoutes = require('../routes/seo.js');
 // const unifiedSecurityRoutes = require('./routes/unifiedSecurity'); // 已移除
-const userRoutes = require('../routes/user.js');
+const userRoutes = require('../routes/users.js');
 const adminRoutes = require('../routes/admin.js');
 // const dataRoutes = require('./routes/data'); // 已移除，功能合并到 dataManagementRoutes
 
 // 导入中间件
 // const { authMiddleware } = require('../middleware/auth.js'); // 已移除，不再需要
-const dataManagementRoutes = require('../routes/dataManagement.js');
+// const dataManagementRoutes = require('../routes/dataManagement.js'); // 暂时注释，文件缺失
 const testHistoryRoutes = require('../routes/testHistory.js');
 const monitoringRoutes = require('../routes/monitoring.js');
 const reportRoutes = require('../routes/reports.js');
@@ -242,11 +242,11 @@ try {
   console.error('⚠️ SEO路由应用失败:', error.message);
 }
 
-// 应用安全路由（使用简化版本）
+// 应用安全路由
 try {
-  const securityRoutes = require('../routes/security-simple.js');
+  const securityRoutes = require('../routes/security.js');
   app.use('/api/security', securityRoutes);
-  console.log('✅ 简化安全路由已应用: /api/security');
+  console.log('✅ 安全路由已应用: /api/security');
 } catch (error) {
   console.error('⚠️ 安全路由应用失败:', error.message);
 }
@@ -269,32 +269,33 @@ try {
   console.error('⚠️ 测试路由应用失败:', error.message);
 }
 
-// 应用简单测试路由
-try {
-  const simpleTestRoutes = require('../routes/simple-test.js');
-  app.use('/api/simple', simpleTestRoutes);
-  console.log('✅ 简单测试路由已应用: /api/simple');
-} catch (error) {
-  console.error('⚠️ 简单测试路由应用失败:', error.message);
-}
+// 应用简单测试路由（暂时注释，文件缺失）
+// try {
+//   const simpleTestRoutes = require('../routes/simple-test.js');
+//   app.use('/api/simple', simpleTestRoutes);
+//   console.log('✅ 简单测试路由已应用: /api/simple');
+// } catch (error) {
+//   console.error('⚠️ 简单测试路由应用失败:', error.message);
+// }
 
-// 应用定时任务路由
-try {
-  const scheduledTaskRoutes = require('../routes/scheduledTasks.js');
-  app.use('/api/scheduled-tasks', scheduledTaskRoutes);
-  console.log('✅ 定时任务路由已应用: /api/scheduled-tasks');
-} catch (error) {
-  console.error('⚠️ 定时任务路由应用失败:', error.message);
-}
+// 应用定时任务路由（暂时注释，文件缺失）
+// try {
+//   const scheduledTaskRoutes = require('../routes/scheduledTasks.js');
+//   app.use('/api/scheduled-tasks', scheduledTaskRoutes);
+//   console.log('✅ 定时任务路由已应用: /api/scheduled-tasks');
+// } catch (error) {
+//   console.error('⚠️ 定时任务路由应用失败:', error.message);
+// }
 
-// 应用API映射修复路由（作为后备）
-try {
-  const apiMappings = require('../routes/api-mappings.js');
-  app.use('/api', apiMappings);
-  console.log('✅ API映射修复路由已应用');
-} catch (error) {
-  console.error('⚠️ API映射应用失败:', error.message);
-}
+// 注释掉API映射路由，避免重复
+// try {
+//   const apiMappings = require('../routes/api-mappings.js');
+//   app.use('/api', apiMappings);
+//   console.log('✅ API映射修复路由已应用');
+// } catch (error) {
+//   console.error('⚠️ API映射应用失败:', error.message);
+// }
+console.log('✅ 路由已直接应用，不需要API映射文件');
 
 console.log('✅ 所有关键路由已同步应用完成');
 
