@@ -4,7 +4,7 @@
  * 基于统一缓存服务构建
  */
 
-import { unifiedCacheService } from './unifiedCacheService';
+import { unifiedCacheService } from './cacheService';
 import type { TestResult } from '../../types/unifiedEngine.types';
 
 // 测试缓存键前缀
