@@ -1,7 +1,7 @@
-/**
- * RealTimeStressChart.tsx - React组件
+﻿/**
+ * StressChart.tsx - React组件
  * 
- * 文件路径: frontend\components\stress\RealTimeStressChart.tsx
+ * 文件路径: frontend\components\stress\StressChart.tsx
  * 创建时间: 2025-09-25
  */
 
@@ -19,7 +19,7 @@ interface RealTimeDataPoint {
   phase?: string;
 }
 
-interface RealTimeStressChartProps {
+interface StressChartProps {
   testId: string | null;
   isRunning: boolean;
   height?: number;
@@ -28,7 +28,7 @@ interface RealTimeStressChartProps {
   onDataUpdate?: (data: RealTimeDataPoint) => void;
 }
 
-const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
+const StressChart: React.FC<StressChartProps> = ({
   testId,
   isRunning,
   height = 400,
@@ -301,4 +301,4 @@ const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
   );
 };
 
-export default RealTimeStressChart;
+export default StressChart;

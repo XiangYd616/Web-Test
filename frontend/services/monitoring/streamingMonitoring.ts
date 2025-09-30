@@ -1,4 +1,4 @@
-// 实时监控和告警系统
+﻿// 实时监控和告警系统
 export interface MonitoringTarget {
   id: string;
   name: string;
@@ -84,8 +84,8 @@ export interface MonitoringStats {
   resolvedAlerts: number;
 }
 
-export class RealTimeMonitoringService {
-  private static instance: RealTimeMonitoringService;
+export class streamingMonitoringService {
+  private static instance: streamingMonitoringService;
   private targets: Map<string, MonitoringTarget> = new Map();
   private results: Map<string, MonitoringResult[]> = new Map();
   private alerts: Map<string, Alert> = new Map();
@@ -102,11 +102,11 @@ export class RealTimeMonitoringService {
      * @param {Object} params - 参数对象
      * @returns {Promise<Object>} 返回结果
      */
-  public static getInstance(): RealTimeMonitoringService {
-    if (!RealTimeMonitoringService.instance) {
-      RealTimeMonitoringService.instance = new RealTimeMonitoringService();
+  public static getInstance(): streamingMonitoringService {
+    if (!streamingMonitoringService.instance) {
+      streamingMonitoringService.instance = new streamingMonitoringService();
     }
-    return RealTimeMonitoringService.instance;
+    return streamingMonitoringService.instance;
   }
 
   // 添加监控目标
@@ -605,7 +605,7 @@ export class RealTimeMonitoringService {
 }
 
 // 创建服务实例并导出
-export const _realTimeMonitoring = RealTimeMonitoringService.getInstance();
+export const _streamingMonitoring = streamingMonitoringService.getInstance();
 
 // 类型导出
-export type RealTimeMonitoring = RealTimeMonitoringService;
+export type streamingMonitoring = streamingMonitoringService;

@@ -15,5 +15,5 @@ export { default as TestComparisonCharts } from './TestComparisonCharts';
 // } from './SimpleCharts'; // File doesn't exist
 
 // 馃敡 缁熶竴鐨勫浘琛ㄧ粍浠跺埆鍚嶏紝渚夸簬杩佺Щ
-export { default as RealTimeStressChart, default as UnifiedStressTestCharts } from './StressTestCharts';
+export { default as StressChart, default as UnifiedStressTestCharts } from './StressTestCharts';
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useUnifiedSEOTest.ts - 核心功能模块
  * 
  * 文件路径: frontend\hooks\useUnifiedSEOTest.ts
@@ -8,7 +8,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { LocalSEOAnalysisEngine, LocalSEOConfig } from '../services/localSEOAnalysisEngine';
 import { SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
-import { useRealSEOTest } from './useRealSEOTest';
+import { useSEOTest } from './useSEOTest';
 
 export type SEOTestMode = 'online' | 'local';
 
@@ -57,7 +57,7 @@ export const useUnifiedSEOTest = () => {
     error: onlineError,
     startTest: startOnlineTest,
     stopTest: stopOnlineTest
-  } = useRealSEOTest();
+  } = useSEOTest();
 
   // 统一的状态获取
   const isRunning = currentMode === 'online' ? onlineIsRunning : localProgress.isRunning;

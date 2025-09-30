@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+﻿import { useCallback, useRef, useState } from 'react';
 
 /**
 
@@ -50,7 +50,7 @@ interface SEOTestProgress {
   isRunning: boolean;
 }
 
-export const _useRealSEOTest = () => {
+export const _useSEOTest = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState<SEOTestProgress>({
     progress: 0,

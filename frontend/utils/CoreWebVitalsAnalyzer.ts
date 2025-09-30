@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Core Web Vitals Analyzer
  * Mobile-specific Core Web Vitals checking with device simulation
  */
@@ -92,7 +92,7 @@ export class CoreWebVitalsAnalyzer {
   private measurements: Map<string, number[]> = new Map();
 
   constructor(private options: {
-    enableRealTimeMonitoring?: boolean;
+    enablestreamingMonitoring?: boolean;
     simulateSlowNetwork?: boolean;
     targetDevice?: 'mobile' | 'desktop';
   } = {}) {
@@ -689,7 +689,7 @@ export class CoreWebVitalsAnalyzer {
       return;
     }
 
-    if (this.options.enableRealTimeMonitoring) {
+    if (this.options.enablestreamingMonitoring) {
       try {
         this.observer = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {

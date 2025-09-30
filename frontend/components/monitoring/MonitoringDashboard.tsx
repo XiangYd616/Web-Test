@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 实时监控仪表板组件
  * 提供系统性能、测试状态、错误日志的实时监控
  */
@@ -92,7 +92,7 @@ interface ServiceHealth {
   lastCheck: Date;
 }
 
-const RealTimeMonitoringDashboard: React.FC = () => {
+const MonitoringDashboard: React.FC = () => {
   // 状态管理
   const [metrics, setMetrics] = useState<SystemMetrics[]>([]);
   const [currentMetrics, setCurrentMetrics] = useState<SystemMetrics | null>(null);
@@ -898,4 +898,4 @@ const RealTimeMonitoringDashboard: React.FC = () => {
   );
 };
 
-export default RealTimeMonitoringDashboard;
+export default MonitoringDashboard;

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 实时数据Hook
  * 提供WebSocket连接和实时数据更新功能
  */
@@ -34,7 +34,7 @@ const DEFAULT_CONFIG: Required<RealTimeDataConfig> = {
 };
 
 // 实时数据Hook
-export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}) => {
+export const useStreamingData = (channel: string, config: RealTimeDataConfig = {}) => {
     const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
     const [state, setState] = useState<RealTimeDataState>({
@@ -269,4 +269,4 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
     };
 };
 
-export default useRealTimeData;
+export default useStreamingData;
