@@ -1,13 +1,11 @@
 /* 重构后的主样式文件 */
 
 /* 统一设计系统 - 优先级最高 */
-@import './styles/unified-design-system.css';
-@import './styles/unified-components.css';
+@import './styles/design-system.css';
 
 /* 兼容性导入 - 保持向后兼容 */
 @import './styles/theme-config.css';
 @import './styles/design-tokens.css';
-@import './styles/design-system.css';
 
 /* 基础样式导入 */
 @import './styles/base/reset.css';

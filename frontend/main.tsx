@@ -5,7 +5,7 @@ import App from './App.tsx'
 
 import './index.css'
 import './styles/theme-utilities.css'
-import './styles/unified-theme-variables.css'
+import './styles/theme-variables.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

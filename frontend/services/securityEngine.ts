@@ -32,7 +32,7 @@ export interface SecurityScanResult {
   payload?: string;
 }
 
-export class securityEngine {
+export class SecurityEngine {
   private isScanning = false;
   private abortController: AbortController | null = null;
   private readonly apiBaseUrl: string;
@@ -383,7 +383,7 @@ export class securityEngine {
 }
 
 // 导出单例实例
-export const securityEngine = new securityEngine();
+export const securityEngine = new SecurityEngine();
 
 // 默认导出
 export default securityEngine;
