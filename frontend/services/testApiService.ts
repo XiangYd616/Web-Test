@@ -9,10 +9,10 @@
 console.warn('⚠️ 警告: testApiService.ts 已弃用，请使用 apiService');
 
 // 重新导出统一API服务
-import { unifiedApiService } from './api/apiService';
+import { apiService } from './api/apiService';
 import { TestProgress } from '../services/api/testProgressService';
-export { unifiedApiService as testApiService };
-export default unifiedApiService;
+export { apiService as testApiService };
+export default apiService;
 
 // 向后兼容的类型导出
 export type {

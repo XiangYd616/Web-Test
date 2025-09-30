@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 前后端API集成测试
  * 验证API服务与后端接口的兼容性
  * 版本: v1.0.0
@@ -13,7 +13,7 @@ declare const expect: unknown;
 declare const beforeEach: unknown;
 declare const afterEach: unknown;
 declare const jest: unknown;
-import { unifiedApiService } from '../api/apiService';
+import { apiService } from '../api/apiService';
 import { projectApiService } from '../api/projectApiService';
 import { testApiService } from '../api/testApiService';
 
@@ -46,7 +46,7 @@ describe('API Integration Tests', () => {
     jest.clearAllMocks();
 
     // Force remote API usage for testing
-    unifiedApiService.forceRemoteApi(true);
+    apiService.forceRemoteApi(true);
   });
 
   afterEach(() => {
@@ -69,7 +69,7 @@ describe('API Integration Tests', () => {
         json: async () => mockBackendResponse,
       } as Response);
 
-      const response = await unifiedApiService.get('/api/v1/test');
+      const response = await apiService.get('/api/v1/test');
 
       expect(response.success).toBe(true);
       if (response.success) {
@@ -96,7 +96,7 @@ describe('API Integration Tests', () => {
         json: async () => mockBackendErrorResponse,
       } as Response);
 
-      const response = await unifiedApiService.get('/api/v1/test');
+      const response = await apiService.get('/api/v1/test');
 
       expect(response.success).toBe(false);
       if (!response.success) {
@@ -118,7 +118,7 @@ describe('API Integration Tests', () => {
         json: async () => ({ message: 'Not Found' }),
       } as Response);
 
-      const response = await unifiedApiService.get('/api/v1/nonexistent');
+      const response = await apiService.get('/api/v1/nonexistent');
 
       expect(response.success).toBe(false);
       if (!response.success) {
@@ -136,7 +136,7 @@ describe('API Integration Tests', () => {
         new Error('Network error')
       );
 
-      const response = await unifiedApiService.get('/api/v1/test');
+      const response = await apiService.get('/api/v1/test');
 
       expect(response.success).toBe(false);
       if (!response.success) {
@@ -170,7 +170,7 @@ describe('API Integration Tests', () => {
       } as Response);
 
       const credentials = { username: 'testuser', password: 'password' };
-      const response = await unifiedApiService.login(credentials) as BackendApiResponse<{ token: string; user: unknown }>;
+      const response = await apiService.login(credentials) as BackendApiResponse<{ token: string; user: unknown }>;
 
       expect(fetch).toHaveBeenCalledWith(
         `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/auth/login`,
@@ -377,7 +377,7 @@ describe('API Integration Tests', () => {
         json: async () => mockErrorResponse,
       } as Response);
 
-      const response = await unifiedApiService.post('/api/v1/test', {
+      const response = await apiService.post('/api/v1/test', {
         name: '',
         url: 'invalid-url'
       });
@@ -409,7 +409,7 @@ describe('API Integration Tests', () => {
         json: async () => mockErrorResponse,
       } as Response);
 
-      const response = await unifiedApiService.get('/api/v1/protected');
+      const response = await apiService.get('/api/v1/protected');
 
       expect(response.success).toBe(false);
       if (!response.success) {

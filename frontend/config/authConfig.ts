@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一认证服务配置
  * 提供企业级安全功能的配置开关和参数设置
  * 版本: v1.0.0
@@ -99,7 +99,7 @@ export interface AuthRateLimitConfig {
   };
 }
 
-export interface UnifiedAuthConfig {
+export interface AuthConfig {
   // 基础配置
   apiBaseUrl: string;
   environment: 'development' | 'testing' | 'production';
@@ -137,7 +137,7 @@ const DEFAULT_PASSWORD_POLICY: PasswordPolicy = {
   preventReuse: 5
 };
 
-export const DEFAULT_AUTH_CONFIG: UnifiedAuthConfig = {
+export const DEFAULT_AUTH_CONFIG: AuthConfig = {
   apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
   environment: (process.env.NODE_ENV as any) || 'development',
   enableDebugLogging: process.env.NODE_ENV === 'development',
@@ -244,7 +244,7 @@ export const DEFAULT_AUTH_CONFIG: UnifiedAuthConfig = {
 
 // ==================== 环境特定配置 ====================
 
-export const DEVELOPMENT_AUTH_CONFIG: Partial<UnifiedAuthConfig> = {
+export const DEVELOPMENT_AUTH_CONFIG: Partial<AuthConfig> = {
   enableDebugLogging: true,
   security: {
     ...DEFAULT_AUTH_CONFIG.security,
@@ -279,7 +279,7 @@ export const DEVELOPMENT_AUTH_CONFIG: Partial<UnifiedAuthConfig> = {
   }
 };
 
-export const PRODUCTION_AUTH_CONFIG: Partial<UnifiedAuthConfig> = {
+export const PRODUCTION_AUTH_CONFIG: Partial<AuthConfig> = {
   enableDebugLogging: false,
   security: {
     ...DEFAULT_AUTH_CONFIG.security,
@@ -327,9 +327,9 @@ export const PRODUCTION_AUTH_CONFIG: Partial<UnifiedAuthConfig> = {
  * 合并认证配置
  */
 export function mergeAuthConfig(
-  baseConfig: UnifiedAuthConfig = DEFAULT_AUTH_CONFIG,
-  overrides: Partial<UnifiedAuthConfig> = {}
-): UnifiedAuthConfig {
+  baseConfig: AuthConfig = DEFAULT_AUTH_CONFIG,
+  overrides: Partial<AuthConfig> = {}
+): AuthConfig {
   return {
     ...baseConfig,
     ...overrides,
@@ -367,7 +367,7 @@ export function mergeAuthConfig(
 /**
  * 获取环境特定的认证配置
  */
-export function getEnvironmentAuthConfig(): UnifiedAuthConfig {
+export function getEnvironmentAuthConfig(): AuthConfig {
   const baseConfig = DEFAULT_AUTH_CONFIG;
   
   if (process.env.NODE_ENV === 'development') {
@@ -384,7 +384,7 @@ export function getEnvironmentAuthConfig(): UnifiedAuthConfig {
 /**
  * 创建自定义认证配置
  */
-export function createAuthConfig(overrides: Partial<UnifiedAuthConfig>): UnifiedAuthConfig {
+export function createAuthConfig(overrides: Partial<AuthConfig>): AuthConfig {
   const envConfig = getEnvironmentAuthConfig();
   return mergeAuthConfig(envConfig, overrides);
 }
@@ -392,7 +392,7 @@ export function createAuthConfig(overrides: Partial<UnifiedAuthConfig>): Unified
 /**
  * 验证认证配置
  */
-export function validateAuthConfig(config: UnifiedAuthConfig): string[] {
+export function validateAuthConfig(config: AuthConfig): string[] {
   const errors: string[] = [];
   
   if (!config.apiBaseUrl) {
@@ -430,7 +430,7 @@ export function validateAuthConfig(config: UnifiedAuthConfig): string[] {
 /**
  * 获取功能开关状态
  */
-export function getFeatureFlags(config: UnifiedAuthConfig) {
+export function getFeatureFlags(config: AuthConfig) {
   return {
     mfaEnabled: config.security.mfa.enabled,
     deviceFingerprintingEnabled: config.security.deviceFingerprinting.enabled,

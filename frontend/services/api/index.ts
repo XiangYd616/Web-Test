@@ -6,7 +6,7 @@
  */
 
 // 主要API服务导出
-export { unifiedApiService as apiService, default as defaultApiService, UnifiedApiService } from './apiService';
+export { apiService as apiService, default as defaultApiService, apiService } from './apiService';
 
 // 类型导出
 export type {
@@ -14,14 +14,14 @@ export type {
 } from './apiService';
 
 // 向后兼容的导出
-export { unifiedApiService as baseApiService, unifiedApiService as enhancedApiService } from './apiService';
+export { apiService as baseApiService, apiService as enhancedApiService } from './apiService';
 
 // 错误处理相关导出（保持现有功能）
 export * from './errorHandler';
 
 // 默认导出
 // 创建默认实例
-import { UnifiedApiService } from './apiService';
-const unifiedApiService = new UnifiedApiService();
-export default unifiedApiService;
+import { apiService } from './apiService';
+const apiService = new apiService();
+export default apiService;
 

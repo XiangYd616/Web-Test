@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一API服务配置
  * 提供企业级功能的配置开关和参数设置
  * 版本: v1.0.0
@@ -59,7 +59,7 @@ export interface ApiInterceptorConfig {
   };
 }
 
-export interface UnifiedApiConfig {
+export interface ApiConfig {
   baseURL: string;
   timeout: number;
   version: string;
@@ -79,7 +79,7 @@ export interface UnifiedApiConfig {
 
 // ==================== 默认配置 ====================
 
-export const DEFAULT_API_CONFIG: UnifiedApiConfig = {
+export const DEFAULT_API_CONFIG: ApiConfig = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
   timeout: process.env.REQUEST_TIMEOUT || 30000,
   version: 'v3.0',
@@ -146,7 +146,7 @@ export const DEFAULT_API_CONFIG: UnifiedApiConfig = {
 
 // ==================== 环境特定配置 ====================
 
-export const DEVELOPMENT_API_CONFIG: Partial<UnifiedApiConfig> = {
+export const DEVELOPMENT_API_CONFIG: Partial<ApiConfig> = {
   enableDebugLogging: true,
   timeout: 5000, // 开发环境更短的超时时间
   cache: {
@@ -163,7 +163,7 @@ export const DEVELOPMENT_API_CONFIG: Partial<UnifiedApiConfig> = {
   }
 };
 
-export const PRODUCTION_API_CONFIG: Partial<UnifiedApiConfig> = {
+export const PRODUCTION_API_CONFIG: Partial<ApiConfig> = {
   enableDebugLogging: false,
   timeout: process.env.REQUEST_TIMEOUT || 30000,
   cache: {
@@ -193,9 +193,9 @@ export const PRODUCTION_API_CONFIG: Partial<UnifiedApiConfig> = {
  * 合并配置对象
  */
 export function mergeApiConfig(
-  baseConfig: UnifiedApiConfig = DEFAULT_API_CONFIG,
-  overrides: Partial<UnifiedApiConfig> = {}
-): UnifiedApiConfig {
+  baseConfig: ApiConfig = DEFAULT_API_CONFIG,
+  overrides: Partial<ApiConfig> = {}
+): ApiConfig {
   return {
     ...baseConfig,
     ...overrides,
@@ -228,7 +228,7 @@ export function mergeApiConfig(
 /**
  * 获取环境特定的API配置
  */
-export function getEnvironmentApiConfig(): UnifiedApiConfig {
+export function getEnvironmentApiConfig(): ApiConfig {
   const baseConfig = DEFAULT_API_CONFIG;
   
   if (process.env.NODE_ENV === 'development') {
@@ -245,7 +245,7 @@ export function getEnvironmentApiConfig(): UnifiedApiConfig {
 /**
  * 创建自定义API配置
  */
-export function createApiConfig(overrides: Partial<UnifiedApiConfig>): UnifiedApiConfig {
+export function createApiConfig(overrides: Partial<ApiConfig>): ApiConfig {
   const envConfig = getEnvironmentApiConfig();
   return mergeApiConfig(envConfig, overrides);
 }
@@ -255,7 +255,7 @@ export function createApiConfig(overrides: Partial<UnifiedApiConfig>): UnifiedAp
 /**
  * 验证API配置
  */
-export function validateApiConfig(config: UnifiedApiConfig): string[] {
+export function validateApiConfig(config: ApiConfig): string[] {
   const errors: string[] = [];
   
   if (!config.baseURL) {

@@ -1,11 +1,11 @@
-/**
+﻿/**
  * userService.ts - 业务服务层
  * 
  * 文件路径: frontend\services\user\userService.ts
  * 创建时间: 2025-09-25
  */
 
-import { unifiedApiService } from '../api/baseApiService';
+import { apiService } from '../api/baseApiService';
 
 export interface UserProfile {
   id: string;
@@ -112,7 +112,7 @@ class UserService {
   // 获取用户个人资料
   async getProfile(): Promise<UserProfile> {
     try {
-      const response = await unifiedApiService.apiGet('/api/user/profile');
+      const response = await apiService.apiGet('/api/user/profile');
       if (response.success) {
         return response.data.user;
       }
@@ -126,7 +126,7 @@ class UserService {
   // 更新用户个人资料
   async updateProfile(data: UpdateProfileData): Promise<UserProfile> {
     try {
-      const response = await unifiedApiService.apiPut('/api/user/profile', data);
+      const response = await apiService.apiPut('/api/user/profile', data);
       if (response.success) {
         return response.data.user;
       }
@@ -140,7 +140,7 @@ class UserService {
   // 获取用户统计信息
   async getUserStats(): Promise<UserStats> {
     try {
-      const response = await unifiedApiService.apiGet('/api/user/stats');
+      const response = await apiService.apiGet('/api/user/stats');
       if (response.success) {
         return response.data;
       }
@@ -154,7 +154,7 @@ class UserService {
   // 获取用户设置
   async getSettings(): Promise<UserSettings> {
     try {
-      const response = await unifiedApiService.apiGet('/api/user/settings');
+      const response = await apiService.apiGet('/api/user/settings');
       if (response.success) {
         return response.data.settings;
       }
@@ -168,7 +168,7 @@ class UserService {
   // 更新用户设置
   async updateSettings(settings: Partial<UserSettings>): Promise<UserSettings> {
     try {
-      const response = await unifiedApiService.apiPut('/api/user/settings', { settings });
+      const response = await apiService.apiPut('/api/user/settings', { settings });
       if (response.success) {
         return response.data.settings;
       }
@@ -185,7 +185,7 @@ class UserService {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await unifiedApiService.apiPost('/api/user/avatar', formData, {
+      const response = await apiService.apiPost('/api/user/avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -204,7 +204,7 @@ class UserService {
   // 删除用户头像
   async deleteAvatar(): Promise<void> {
     try {
-      const response = await unifiedApiService.apiDelete('/api/user/avatar');
+      const response = await apiService.apiDelete('/api/user/avatar');
       if (!response.success) {
         throw new Error(response.message || '删除头像失败');
       }
@@ -217,7 +217,7 @@ class UserService {
   // 修改密码
   async changePassword(data: ChangePasswordData): Promise<void> {
     try {
-      const response = await unifiedApiService.apiPut('/api/user/password', data);
+      const response = await apiService.apiPut('/api/user/password', data);
       if (!response.success) {
         throw new Error(response.message || '修改密码失败');
       }
@@ -230,7 +230,7 @@ class UserService {
   // 获取用户收藏夹
   async getBookmarks(): Promise<BookmarkItem[]> {
     try {
-      const response = await unifiedApiService.apiGet('/api/user/bookmarks');
+      const response = await apiService.apiGet('/api/user/bookmarks');
       if (response.success) {
         return response.data.bookmarks;
       }
@@ -244,7 +244,7 @@ class UserService {
   // 添加收藏
   async addBookmark(bookmark: Omit<BookmarkItem, 'id' | 'createdAt' | 'visitCount'>): Promise<BookmarkItem> {
     try {
-      const response = await unifiedApiService.apiPost('/api/user/bookmarks', bookmark);
+      const response = await apiService.apiPost('/api/user/bookmarks', bookmark);
       if (response.success) {
         return response.data.bookmark;
       }
@@ -258,7 +258,7 @@ class UserService {
   // 更新收藏
   async updateBookmark(id: string, updates: Partial<BookmarkItem>): Promise<BookmarkItem> {
     try {
-      const response = await unifiedApiService.apiPut(`/api/user/bookmarks/${id}`, updates);
+      const response = await apiService.apiPut(`/api/user/bookmarks/${id}`, updates);
       if (response.success) {
         return response.data.bookmark;
       }
@@ -272,7 +272,7 @@ class UserService {
   // 删除收藏
   async deleteBookmark(id: string): Promise<void> {
     try {
-      const response = await unifiedApiService.delete(`/api/user/bookmarks/${id}`);
+      const response = await apiService.delete(`/api/user/bookmarks/${id}`);
       if (!response.success) {
         throw new Error(response.message || '删除收藏失败');
       }
@@ -285,7 +285,7 @@ class UserService {
   // 获取用户测试历史
   async getTestHistory(page = 1, limit = 20): Promise<{ tests: unknown[], total: number, page: number, totalPages: number }> {
     try {
-      const response = await unifiedApiService.get(`/api/user/tests?page=${page}&limit=${limit}`);
+      const response = await apiService.get(`/api/user/tests?page=${page}&limit=${limit}`);
       if (response.success) {
         return response.data;
       }
@@ -299,7 +299,7 @@ class UserService {
   // 删除测试记录
   async deleteTestResult(id: string): Promise<void> {
     try {
-      const response = await unifiedApiService.delete(`/api/user/tests/${id}`);
+      const response = await apiService.delete(`/api/user/tests/${id}`);
       if (!response.success) {
         throw new Error(response.message || '删除测试记录失败');
       }
@@ -312,7 +312,7 @@ class UserService {
   // 获取用户通知
   async getNotifications(page = 1, limit = 20): Promise<{ notifications: unknown[], total: number, unreadCount: number }> {
     try {
-      const response = await unifiedApiService.get(`/api/user/notifications?page=${page}&limit=${limit}`);
+      const response = await apiService.get(`/api/user/notifications?page=${page}&limit=${limit}`);
       if (response.success) {
         return response.data;
       }
@@ -326,7 +326,7 @@ class UserService {
   // 标记通知为已读
   async markNotificationAsRead(id: string): Promise<void> {
     try {
-      const response = await unifiedApiService.put(`/api/user/notifications/${id}/read`);
+      const response = await apiService.put(`/api/user/notifications/${id}/read`);
       if (!response.success) {
         throw new Error(response.message || '标记通知失败');
       }
@@ -339,7 +339,7 @@ class UserService {
   // 删除通知
   async deleteNotification(id: string): Promise<void> {
     try {
-      const response = await unifiedApiService.delete(`/api/user/notifications/${id}`);
+      const response = await apiService.delete(`/api/user/notifications/${id}`);
       if (!response.success) {
         throw new Error(response.message || '删除通知失败');
       }

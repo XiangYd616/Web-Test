@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🗄️ 统一缓存服务
  * 为测试结果和状态提供缓存和持久化支持
  * 
@@ -45,8 +45,8 @@ export interface CacheStats {
 /**
  * 统一缓存服务类
  */
-export class UnifiedCacheService {
-  private static instance: UnifiedCacheService;
+export class cacheService {
+  private static instance: cacheService;
   private config: CacheConfig;
   private memoryCache = new Map<string, CacheItem>();
   private stats: CacheStats = {
@@ -76,11 +76,11 @@ export class UnifiedCacheService {
   /**
    * 获取单例实例
    */
-  public static getInstance(config?: Partial<CacheConfig>): UnifiedCacheService {
-    if (!UnifiedCacheService.instance) {
-      UnifiedCacheService.instance = new UnifiedCacheService(config);
+  public static getInstance(config?: Partial<CacheConfig>): cacheService {
+    if (!cacheService.instance) {
+      cacheService.instance = new cacheService(config);
     }
-    return UnifiedCacheService.instance;
+    return cacheService.instance;
   }
 
   /**
@@ -366,5 +366,5 @@ export class UnifiedCacheService {
 }
 
 // 导出单例实例
-export const unifiedCacheService = UnifiedCacheService.getInstance();
-export default unifiedCacheService;
+export const cacheService = cacheService.getInstance();
+export default cacheService;

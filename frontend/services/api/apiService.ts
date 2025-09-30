@@ -48,8 +48,8 @@ export interface TestSession {
   results?: unknown;
 }
 
-export class UnifiedApiService extends BaseApiService {
-  private static instance: UnifiedApiService;
+export class ApiService extends BaseApiService {
+  private static instance: ApiService;
   
   constructor(config?: Partial<ApiConfig>) {
     super();
@@ -58,11 +58,11 @@ export class UnifiedApiService extends BaseApiService {
     }
   }
 
-  static getInstance(): UnifiedApiService {
-    if (!UnifiedApiService.instance) {
-      UnifiedApiService.instance = new UnifiedApiService();
+  static getInstance(): ApiService {
+    if (!ApiService.instance) {
+      ApiService.instance = new ApiService();
     }
-    return UnifiedApiService.instance;
+    return ApiService.instance;
   }
 
   private updateConfig(config: Partial<ApiConfig>) {
@@ -193,5 +193,5 @@ export class UnifiedApiService extends BaseApiService {
 }
 
 // Create and export default instance
-export const unifiedApiService = UnifiedApiService.getInstance();
-export default unifiedApiService;
+export const apiService = ApiService.getInstance();
+export default apiService;

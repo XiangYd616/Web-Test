@@ -1,8 +1,8 @@
-/**
+﻿/**
  * API服务层
  * 统一管理前后端API调用
  * 
- * @deprecated 请使用 UnifiedApiService 替代该文件
+ * @deprecated 请使用 ApiService 替代该文件
  * @see apiService in services/api/apiService.ts
  * 
  * 迁移指南:
