@@ -1,4 +1,4 @@
-import { Activity, BarChart3, ChevronDown, ChevronUp, Code, Database, Download, Eye, FileText, Filter, Globe, RefreshCw, Search, Shield, SortAsc, SortDesc, Trash2, TrendingUp, Wifi, Zap } from 'lucide-react';
+﻿import { Activity, BarChart3, ChevronDown, ChevronUp, Code, Database, Download, Eye, FileText, Filter, Globe, RefreshCw, Search, Shield, SortAsc, SortDesc, Trash2, TrendingUp, Wifi, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 ;
@@ -6,14 +6,14 @@ import { useLocation } from 'react-router-dom';
 // import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
 // import ImportExport from '../../components/analytics/ImportExport';
 import UnifiedPerformanceAnalysis from '../../components/analysis/UnifiedPerformanceAnalysis';
-// import RealTimeMonitoring from '../../components/analytics/RealTimeMonitoring';
+// import streamingMonitoring from '../../components/analytics/streamingMonitoring';
 import ReportManagement from '../../components/analytics/ReportManagement';
 import { TestResultDisplay } from '../../components/testing';
 
 // 临时组件替代
 const AnalyticsOverview = () => <div className="p-4 bg-gray-100 rounded">分析概览组件开发中...</div>;
 const ImportExport = () => <div className="p-4 bg-gray-100 rounded">导入导出组件开发中...</div>;
-const RealTimeMonitoring = () => <div className="p-4 bg-gray-100 rounded">实时监控组件开发中...</div>;
+const streamingMonitoring = () => <div className="p-4 bg-gray-100 rounded">实时监控组件开发中...</div>;
 
 interface TestRecord {
   id: string;
@@ -680,7 +680,7 @@ const DataStorage: React.FC = () => {
         </section>
 
         <section id="monitoring-panel" role="tabpanel" aria-labelledby="monitoring-tab" hidden={activeTab !== 'monitoring'}>
-          {activeTab === 'monitoring' && <RealTimeMonitoring />}
+          {activeTab === 'monitoring' && <streamingMonitoring />}
         </section>
 
         <section id="import-export-panel" role="tabpanel" aria-labelledby="import-export-tab" hidden={activeTab !== 'import-export'}>

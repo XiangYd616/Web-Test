@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 监控仪表板组件
  * 集成实时监控功能，提供统一的监控界面
  */
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNotification } from '../../hooks/useNotification';
-import { useRealTimeData } from '../../hooks/useRealTimeData';
+import { useStreamingData } from '../../hooks/useStreamingData';
 import {Badge, Button, Card, Input, Modal, Select, Table} from '../ui';
 
 // 本地SelectOption类型定义
@@ -129,7 +129,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
 
     // 自定义钩子
     const { showNotification } = useNotification();
-    const { data: realTimeData, isConnected } = useRealTimeData('monitoring');
+    const { data: realTimeData, isConnected } = useStreamingData('monitoring');
 
     // 初始化数据
     useEffect(() => {

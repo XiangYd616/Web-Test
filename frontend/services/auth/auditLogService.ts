@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 权限审计日志服务
  * 提供权限操作记录、安全事件监控、审计日志管理
  * 版本: v1.0.0
@@ -104,7 +104,7 @@ export interface SecurityAlert {
 }
 
 export interface AuditConfig {
-  enableRealTimeMonitoring: boolean;
+  enablestreamingMonitoring: boolean;
   retentionDays: number;
   maxLogSize: number; // 最大日志条数
   enableGeoLocation: boolean;
@@ -444,7 +444,7 @@ export class AuditLogService {
 
   constructor(config: Partial<AuditConfig> = {}) {
     this.config = {
-      enableRealTimeMonitoring: true,
+      enablestreamingMonitoring: true,
       retentionDays: 90,
       maxLogSize: 100000,
       enableGeoLocation: true,
@@ -531,7 +531,7 @@ export class AuditLogService {
     await this.cacheLogEntry(entry);
 
     // 安全事件检测
-    if (this.config.enableRealTimeMonitoring) {
+    if (this.config.enablestreamingMonitoring) {
       const securityAlerts = SecurityEventDetector.detectSecurityEvents(entry);
       this.alerts.push(...securityAlerts);
 

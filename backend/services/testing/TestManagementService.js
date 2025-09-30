@@ -6,7 +6,7 @@
 const { v4: uuidv4 } = require('uuid');
 const EventEmitter = require('events');
 const DatabaseService = require('../core/DatabaseService');
-const WebSocketManager = require('../realtime/EnhancedWebSocketManager');
+const WebSocketManager = require('../streaming/EnhancedWebSocketManager');
 const ReportGenerator = require('../reporting/ReportGenerator');
 
 // 引入各个测试引擎

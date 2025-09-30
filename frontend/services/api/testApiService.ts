@@ -869,7 +869,7 @@ class TestApiService implements TestApiClient {
     const testId = response.data.id;
 
     // 启动实时监控
-    this.startRealtimeMonitoring(testId, config?.testType as TestType, callbacks);
+    this.startstreamingMonitoring(testId, config?.testType as TestType, callbacks);
 
     return testId;
   }
@@ -877,7 +877,7 @@ class TestApiService implements TestApiClient {
   /**
    * 启动实时监控（私有方法）
    */
-  private startRealtimeMonitoring(testId: string, testType: TestType, callbacks: TestCallbacks): void {
+  private startstreamingMonitoring(testId: string, testType: TestType, callbacks: TestCallbacks): void {
     const pollInterval = 1000; // 1秒轮询一次
 
     const poll = async () => {

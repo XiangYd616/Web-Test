@@ -4,8 +4,8 @@
  */
 
 // 使用新的增强版WebSocket管理器
-const EnhancedWebSocketManager = require('../services/streaming/EnhancedWebSocketManager');
-const StreamingService = require('../services/streaming/StreamingService');
+const EnhancedWebSocketManager = require('../services/realtime/EnhancedWebSocketManager');
+const RealtimeService = require('../services/realtime/RealtimeService');
 
 class RealtimeConfig {
   constructor() {
@@ -103,7 +103,7 @@ class RealtimeConfig {
       
       // 初始化实时服务（如果存在）
       try {
-        this.realtimeService = new StreamingService(this.websocketManager, cacheManager);
+        this.realtimeService = new RealtimeService(this.websocketManager, cacheManager);
         console.log('✅ 实时服务已初始化');
       } catch (error) {
         console.warn('⚠️ 实时服务初始化失败，使用基本WebSocket功能:', error.message);

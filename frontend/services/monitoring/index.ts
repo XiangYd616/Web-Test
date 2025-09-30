@@ -1,4 +1,4 @@
-
+﻿
 // 核心类型定义
 export interface MonitoringSite {
     id: string;
@@ -76,7 +76,7 @@ export interface MonitoringIncident {
 }
 
 // 统一服务导出
-export { realTimeMonitoring } from './realTimeMonitoring';
+export { streamingMonitoring } from './streamingMonitoring';
 
 // 兼容性导出（逐步迁移）
 export { monitoringService } from '../monitoringService';

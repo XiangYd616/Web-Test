@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一数据状态管理
  * 提供loading、error、success状态的统一管理
  * 版本: v1.0.0
@@ -491,7 +491,7 @@ export interface RealtimeDataState<T = any> extends DataStateInfo<T> {
   syncInterval: number;
 }
 
-export function useRealtimeDataState<T = any>(
+export function useStreamingDataState<T = any>(
   options: DataStateOptions & {
     syncInterval?: number;
     autoSync?: boolean;
