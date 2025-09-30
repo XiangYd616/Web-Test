@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试API服务
  * 统一的测试相关API调用服务
  * 基于后端API规范v1.0实现
@@ -27,7 +27,7 @@ import type {
   TestExecution,
   TestHistory
 } from '@shared/types';
-import { unifiedApiService } from './apiService';
+import { apiService } from './apiService';
 import { requireAuth, TestPermissions, PermissionChecker } from '../auth/authDecorator';
 
 // 本地类型定义已迁移到统一的类型系统
@@ -166,28 +166,28 @@ class TestApiService implements TestApiClient {
    * 执行GET请求
    */
   async get<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return unifiedApiService.get(url, config as any);
+    return apiService.get(url, config as any);
   }
 
   /**
    * 执行POST请求
    */
   async post<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return unifiedApiService.post(url, data, config as any);
+    return apiService.post(url, data, config as any);
   }
 
   /**
    * 执行PUT请求
    */
   async put<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return unifiedApiService.put(url, data, config as any);
+    return apiService.put(url, data, config as any);
   }
 
   /**
    * 执行DELETE请求
    */
   async delete<T = any>(url: string, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return unifiedApiService.delete(url, config as any);
+    return apiService.delete(url, config as any);
   }
 
   // ==================== 测试配置管理 ====================
@@ -206,14 +206,14 @@ class TestApiService implements TestApiClient {
     if (params?.is_template !== undefined) queryParams.append('is_template', params?.is_template.toString());
 
     const url = `${this.baseUrl}/configurations${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return unifiedApiService.get(url);
+    return apiService.get(url);
   }
 
   /**
    * 保存测试配置
    */
   async saveConfiguration(config: TestConfiguration): Promise<ApiResponse<TestConfiguration>> {
-    return unifiedApiService.post(`${this.baseUrl}/configurations`, config);
+    return apiService.post(`${this.baseUrl}/configurations`, config);
   }
 
   // ==================== 测试执行管理 ====================
@@ -265,7 +265,7 @@ class TestApiService implements TestApiClient {
         userEmail: user.email
       };
 
-      const response = await unifiedApiService.post(`${this.baseUrl}/run`, backendRequest);
+      const response = await apiService.post(`${this.baseUrl}/run`, backendRequest);
 
       // 适配返回格式
       if (response.success && response.data) {
@@ -319,7 +319,7 @@ class TestApiService implements TestApiClient {
       testName: `${request.test_type}_test_${Date.now()}`
     };
 
-    return unifiedApiService.post(`${this.baseUrl}/run`, backendRequest);
+    return apiService.post(`${this.baseUrl}/run`, backendRequest);
   }
 
   /**
@@ -339,21 +339,21 @@ class TestApiService implements TestApiClient {
     if (params?.offset) queryParams.append('page', Math.floor((params?.offset || 0) / (params?.limit || 20) + 1).toString());
 
     const url = `${this.baseUrl}/history${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return unifiedApiService.get(url);
+    return apiService.get(url);
   }
 
   /**
    * 获取特定测试执行详情 - 适配后端API
    */
   async getExecutionDetails(id: string): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.get(`${this.baseUrl}/history/${id}`);
+    return apiService.get(`${this.baseUrl}/history/${id}`);
   }
 
   /**
    * 停止正在运行的测试 - 适配后端API
    */
   async stopExecution(id: string): Promise<ApiResponse<{ stopped: boolean }>> {
-    return unifiedApiService.post(`${this.baseUrl}/${id}/stop`);
+    return apiService.post(`${this.baseUrl}/${id}/stop`);
   }
 
   /**
@@ -365,7 +365,7 @@ class TestApiService implements TestApiClient {
     requiredPermissions: [TestPermissions.DELETE_TEST_RESULTS] 
   })
   async deleteExecution(id: string): Promise<ApiResponse<{ deleted: boolean }>> {
-    return unifiedApiService.delete(`${this.baseUrl}/history/${id}`);
+    return apiService.delete(`${this.baseUrl}/history/${id}`);
   }
 
   // ==================== 性能测试 ====================
@@ -382,7 +382,7 @@ class TestApiService implements TestApiClient {
     target_url: string,
     configuration: LocalPerformanceTestConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.post(`${this.baseUrl}/performance`, {
+    return apiService.post(`${this.baseUrl}/performance`, {
       url: target_url,
       device: configuration.device,
       throttling: configuration.network_condition,
@@ -394,7 +394,7 @@ class TestApiService implements TestApiClient {
    * 获取性能测试结果 - 适配后端API
    */
   async getPerformanceResults(execution_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   /**
@@ -404,7 +404,7 @@ class TestApiService implements TestApiClient {
     execution_ids: string[],
     comparison_type: 'trend' | 'benchmark'
   ): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/statistics?timeRange=30`);
+    return apiService.get(`${this.baseUrl}/statistics?timeRange=30`);
   }
 
   // ==================== 安全测试 ====================
@@ -421,7 +421,7 @@ class TestApiService implements TestApiClient {
     target_url: string,
     configuration: LocalSecurityTestConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.post(`${this.baseUrl}/security`, {
+    return apiService.post(`${this.baseUrl}/security`, {
       url: target_url,
       scanDepth: configuration.scan_depth,
       includeSsl: configuration.include_ssl,
@@ -434,21 +434,21 @@ class TestApiService implements TestApiClient {
    * 获取安全测试结果 - 适配后端API
    */
   async getSecurityResults(execution_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/security/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/security/${execution_id}`);
   }
 
   /**
    * 获取安全测试历史
    */
   async getSecurityHistory(): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/security/history`);
+    return apiService.get(`${this.baseUrl}/security/history`);
   }
 
   /**
    * 获取安全测试统计
    */
   async getSecurityStatistics(): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/security/statistics`);
+    return apiService.get(`${this.baseUrl}/security/statistics`);
   }
 
   // ==================== API测试 ====================
@@ -457,7 +457,7 @@ class TestApiService implements TestApiClient {
    * 执行API测试 - 适配后端API
    */
   async executeApiTest(config: ApiTestConfig): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.post(`${this.baseUrl}/api-test`, {
+    return apiService.post(`${this.baseUrl}/api-test`, {
       baseUrl: config?.endpoints[0]?.url || '',
       endpoints: config?.endpoints,
       authentication: null,
@@ -472,7 +472,7 @@ class TestApiService implements TestApiClient {
    * 获取API测试结果 - 适配后端API
    */
   async getApiResults(execution_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   // ==================== 压力测试 ====================
@@ -484,7 +484,7 @@ class TestApiService implements TestApiClient {
     target_url: string,
     configuration: TestApiStressConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.post(`${this.baseUrl}/stress`, {
+    return apiService.post(`${this.baseUrl}/stress`, {
       url: target_url,
       concurrency: configuration.concurrent_users,
       duration: configuration.duration_seconds,
@@ -497,21 +497,21 @@ class TestApiService implements TestApiClient {
    * 获取压力测试结果 - 适配后端API
    */
   async getStressResults(execution_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/stress/status/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/stress/status/${execution_id}`);
   }
 
   /**
    * 取消压力测试
    */
   async cancelStressTest(execution_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.post(`${this.baseUrl}/stress/cancel/${execution_id}`);
+    return apiService.post(`${this.baseUrl}/stress/cancel/${execution_id}`);
   }
 
   /**
    * 获取运行中的压力测试
    */
   async getRunningStressTests(): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/stress/running`);
+    return apiService.get(`${this.baseUrl}/stress/running`);
   }
 
   // ==================== 兼容性测试 ====================
@@ -523,7 +523,7 @@ class TestApiService implements TestApiClient {
     target_url: string,
     configuration: CompatibilityTestConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.post(`${this.baseUrl}/compatibility`, {
+    return apiService.post(`${this.baseUrl}/compatibility`, {
       url: target_url,
       browsers: configuration.browsers,
       devices: configuration.devices,
@@ -536,7 +536,7 @@ class TestApiService implements TestApiClient {
    * 获取兼容性测试结果 - 适配后端API
    */
   async getCompatibilityResults(execution_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   // ==================== SEO测试 ====================
@@ -548,7 +548,7 @@ class TestApiService implements TestApiClient {
     target_url: string,
     configuration: SeoTestConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.post(`${this.baseUrl}/seo`, {
+    return apiService.post(`${this.baseUrl}/seo`, {
       url: target_url,
       depth: configuration.depth,
       includeTechnical: configuration.include_technical,
@@ -561,7 +561,7 @@ class TestApiService implements TestApiClient {
    * 获取SEO测试结果 - 适配后端API
    */
   async getSeoResults(execution_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   // ==================== 用户体验测试 ====================
@@ -573,7 +573,7 @@ class TestApiService implements TestApiClient {
     target_url: string,
     configuration: UxTestConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.post(`${this.baseUrl}/ux`, {
+    return apiService.post(`${this.baseUrl}/ux`, {
       url: target_url,
       accessibilityLevel: configuration.accessibility_level,
       includeUsability: configuration.include_usability,
@@ -586,7 +586,7 @@ class TestApiService implements TestApiClient {
    * 获取UX测试结果 - 适配后端API
    */
   async getUxResults(execution_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   /**
@@ -596,7 +596,7 @@ class TestApiService implements TestApiClient {
     target_url: string,
     level: 'A' | 'AA' | 'AAA' = 'AA'
   ): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.post(`${this.baseUrl}/accessibility`, {
+    return apiService.post(`${this.baseUrl}/accessibility`, {
       url: target_url,
       level,
       categories: []
@@ -612,7 +612,7 @@ class TestApiService implements TestApiClient {
     target_url: string,
     options: Record<string, any> = {}
   ): Promise<ApiResponse<TestExecutionResponse>> {
-    return unifiedApiService.post(`${this.baseUrl}/website`, {
+    return apiService.post(`${this.baseUrl}/website`, {
       url: target_url,
       options
     });
@@ -663,7 +663,7 @@ class TestApiService implements TestApiClient {
     configuration: InfrastructureTestConfig
   ): Promise<ApiResponse<TestExecutionResponse>> {
     // 基础设施测试通常需要特定的端点，这里使用通用测试端点
-    return unifiedApiService.post(`${this.baseUrl}/run`, {
+    return apiService.post(`${this.baseUrl}/run`, {
       testType: 'infrastructure',
       config: configuration
     });
@@ -673,7 +673,7 @@ class TestApiService implements TestApiClient {
    * 获取基础设施测试结果 - 适配后端API
    */
   async getInfrastructureResults(execution_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   // ==================== 报告生成 ====================
@@ -687,7 +687,7 @@ class TestApiService implements TestApiClient {
     format: 'html' | 'pdf' | 'json',
     include_recommendations: boolean = true
   ): Promise<ApiResponse<{ report_id: string; status: string }>> {
-    return unifiedApiService.post(`${this.baseUrl}/reports/generate`, {
+    return apiService.post(`${this.baseUrl}/reports/generate`, {
       execution_ids,
       report_type,
       format,
@@ -699,7 +699,7 @@ class TestApiService implements TestApiClient {
    * 获取生成的报告
    */
   async getReport(report_id: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/reports/${report_id}`);
+    return apiService.get(`${this.baseUrl}/reports/${report_id}`);
   }
 
   /**
@@ -708,7 +708,7 @@ class TestApiService implements TestApiClient {
   async downloadReport(report_id: string): Promise<Response> {
     const response = await fetch(`${process.env.REACT_APP_API_URL || process.env.BACKEND_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`}${this.baseUrl}/reports/${report_id}/download`, {
       headers: {
-        'Authorization': `Bearer ${unifiedApiService.getToken()}`
+        'Authorization': `Bearer ${apiService.getToken()}`
       }
     });
     return response;
@@ -720,7 +720,7 @@ class TestApiService implements TestApiClient {
    * 获取仪表板数据
    */
   async getDashboardData(): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/analytics/dashboard`);
+    return apiService.get(`${this.baseUrl}/analytics/dashboard`);
   }
 
   /**
@@ -737,14 +737,14 @@ class TestApiService implements TestApiClient {
     if (params?.metric) queryParams.append('metric', params?.metric);
 
     const url = `${this.baseUrl}/analytics/trends${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return unifiedApiService.get(url);
+    return apiService.get(url);
   }
 
   /**
    * 获取对比分析数据
    */
   async getComparisonsData(): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/analytics/comparisons`);
+    return apiService.get(`${this.baseUrl}/analytics/comparisons`);
   }
 
   // ==================== 系统管理 ====================
@@ -753,21 +753,21 @@ class TestApiService implements TestApiClient {
    * 系统健康检查
    */
   async checkSystemHealth(): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/system/health`);
+    return apiService.get(`${this.baseUrl}/system/health`);
   }
 
   /**
    * 获取系统性能指标
    */
   async getSystemMetrics(): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/system/metrics`);
+    return apiService.get(`${this.baseUrl}/system/metrics`);
   }
 
   /**
    * 系统维护操作（管理员）
    */
   async performMaintenance(operation: string): Promise<ApiResponse<any>> {
-    return unifiedApiService.post(`${this.baseUrl}/system/maintenance`, { operation });
+    return apiService.post(`${this.baseUrl}/system/maintenance`, { operation });
   }
 
   // ==================== TestApiClient 接口实现 ====================
@@ -776,7 +776,7 @@ class TestApiService implements TestApiClient {
    * 获取测试状态
    */
   async getTestStatus(testId: string, testType: TestType): Promise<ApiResponse<TestExecution>> {
-    const response = await unifiedApiService.get(`${this.baseUrl}/${testType}/status/${testId}`);
+    const response = await apiService.get(`${this.baseUrl}/${testType}/status/${testId}`);
 
     if (response.success && response.data) {
       const testExecution: TestExecution = {
@@ -805,14 +805,14 @@ class TestApiService implements TestApiClient {
    * 取消测试
    */
   async cancelTest(testId: string, testType?: TestType): Promise<ApiResponse<void>> {
-    return unifiedApiService.post(`${this.baseUrl}/${testType}/cancel/${testId}`);
+    return apiService.post(`${this.baseUrl}/${testType}/cancel/${testId}`);
   }
 
   /**
    * 获取测试结果
    */
   async getTestResult(testId: string, testType?: TestType): Promise<ApiResponse<any>> {
-    return unifiedApiService.get(`${this.baseUrl}/${testType}/result/${testId}`);
+    return apiService.get(`${this.baseUrl}/${testType}/result/${testId}`);
   }
 
   /**
@@ -834,7 +834,7 @@ class TestApiService implements TestApiClient {
      * @returns {Promise<Object>} 返回结果
 
      */
-    const response = await unifiedApiService.get(url);
+    const response = await apiService.get(url);
 
     if (response.success && response.data) {
       const testHistory: TestHistory = {

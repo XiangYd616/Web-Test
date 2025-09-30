@@ -1,4 +1,4 @@
-import { ApiResponse } from '@shared/types';
+﻿import { ApiResponse } from '@shared/types';
 
 /**
  * 统一的API服务基类
@@ -276,6 +276,6 @@ export class BaseApiService {
 }
 
 // 创建统一API服务实例
-export const unifiedApiService = new BaseApiService();
+export const apiService = new BaseApiService();
 
 export default BaseApiService;

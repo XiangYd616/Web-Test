@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SecurityTestPanel.tsx - React组件
  * 
  * 文件路径: frontend\components\security\SecurityTestPanel.tsx
@@ -8,7 +8,7 @@
 
 import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import {SecurityTestConfig, SecurityTestResult, unifiedSecurityEngine} from '../../services/unifiedSecurityEngine';
+import {SecurityTestConfig, SecurityTestResult, securityEngine} from '../../services/securityEngine';
 import { createCommonErrors, createError } from '../../utils/errorHandler';
 import { URLValidationResult } from '../../utils/urlValidator';
 import { URLInput } from '../ui/URLInput';
@@ -60,7 +60,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   const [isUrlValid, setIsUrlValid] = useState(false);
 
   // 预设配置
-  const presetConfigs = unifiedSecurityEngine.getPresetConfigs();
+  const presetConfigs = securityEngine.getPresetConfigs();
 
   // 模块配置选项
   const moduleOptions = [
@@ -196,7 +196,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     onTestStart?.();
 
     try {
-      const result = await unifiedSecurityEngine.runSecurityTest(
+      const result = await securityEngine.runSecurityTest(
         config,
         (progressData) => {
           setProgress(progressData as any);
@@ -228,7 +228,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   // 停止测试
   const _stopTest = useCallback(() => {
     if (currentTestId) {
-      unifiedSecurityEngine.cancelTest(currentTestId);
+      securityEngine.cancelTest(currentTestId);
       setIsRunning(false);
       setProgress(null);
       setCurrentTestId(null);

@@ -1,12 +1,12 @@
-/**
+﻿/**
  * 配置验证工具
  * 版本: v1.0.0
  * 
  * 提供API和Auth配置的运行时验证功能
  */
 
-import type { UnifiedApiConfig } from './apiConfig';
-import type { UnifiedAuthConfig } from './authConfig';
+import type { ApiConfig } from './apiConfig';
+import type { AuthConfig } from './authConfig';
 import type { ErrorSeverity } from './errors';
 
 // ==================== 验证结果接口 ====================
@@ -209,7 +209,7 @@ const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
 /**
  * 验证API配置
  */
-export function validateApiConfig(config: Partial<UnifiedApiConfig>): ValidationResult {
+export function validateApiConfig(config: Partial<ApiConfig>): ValidationResult {
   const startTime = Date.now();
   const errors: ConfigValidationError[] = [];
   const warnings: ConfigValidationWarning[] = [];
@@ -246,7 +246,7 @@ export function validateApiConfig(config: Partial<UnifiedApiConfig>): Validation
  * 验证API配置的业务逻辑
  */
 function validateApiConfigLogic(
-  config: Partial<UnifiedApiConfig>,
+  config: Partial<ApiConfig>,
   errors: ConfigValidationError[],
   warnings: ConfigValidationWarning[]
 ): void {
@@ -349,7 +349,7 @@ const AUTH_CONFIG_SCHEMA: Record<string, FieldValidator> = {
 /**
  * 验证Auth配置
  */
-export function validateAuthConfig(config: Partial<UnifiedAuthConfig>): ValidationResult {
+export function validateAuthConfig(config: Partial<AuthConfig>): ValidationResult {
   const startTime = Date.now();
   const errors: ConfigValidationError[] = [];
   const warnings: ConfigValidationWarning[] = [];
@@ -386,7 +386,7 @@ export function validateAuthConfig(config: Partial<UnifiedAuthConfig>): Validati
  * 验证Auth配置的业务逻辑
  */
 function validateAuthConfigLogic(
-  config: Partial<UnifiedAuthConfig>,
+  config: Partial<AuthConfig>,
   errors: ConfigValidationError[],
   warnings: ConfigValidationWarning[]
 ): void {
@@ -565,8 +565,8 @@ function getNestedValue(obj: unknown, path: string): unknown {
  * 验证所有配置
  */
 export function validateAllConfigs(
-  apiConfig: Partial<UnifiedApiConfig>,
-  authConfig: Partial<UnifiedAuthConfig>
+  apiConfig: Partial<ApiConfig>,
+  authConfig: Partial<AuthConfig>
 ): {
   api: ValidationResult;
   auth: ValidationResult;

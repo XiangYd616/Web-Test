@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SecurityTestHistory.tsx - React组件
  * 
  * 文件路径: frontend\components\security\SecurityTestHistory.tsx
@@ -9,7 +9,7 @@
 import React from 'react';
 import { Calendar, ChevronDown, ChevronRight, Clock, Eye, RefreshCw, Search, Shield, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { SecurityTestResult } from '../../services/unifiedSecurityEngine';
+import { SecurityTestResult } from '../../services/securityEngine';
 
 interface SecurityTestHistoryProps {
   onSelectTest?: (result: SecurityTestResult) => void;
