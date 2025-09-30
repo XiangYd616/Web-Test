@@ -1,4 +1,4 @@
-import { Shield, XCircle } from 'lucide-react';
+﻿import { Shield, XCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
@@ -8,7 +8,7 @@ import { useUserStats } from '../hooks/useUserStats';
 import type {
   SecurityTestConfig,
   SecurityTestResult, TestProgress
-} from '../services/unifiedSecurityEngine';
+} from '../services/securityEngine';
 
 // CSS样式已迁移到组件库中
 
