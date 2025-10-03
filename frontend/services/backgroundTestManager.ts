@@ -148,16 +148,16 @@ class BackgroundTestManager {
       const testInfo: TestInfo = {
         id: actualTestId,
         type: testType,
-        config: config,
+        config,
         status: TestStatus.RUNNING,
         progress: 0,
         startTime: new Date(),
         currentStep: '正在初始化测试...',
         result: null,
         error: null,
-        onProgress: onProgress,
-        onComplete: onComplete,
-        onError: onError
+        onProgress,
+        onComplete,
+        onError
       };
 
       this.runningTests.set(actualTestId, testInfo);

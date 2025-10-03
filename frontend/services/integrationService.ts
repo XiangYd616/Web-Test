@@ -269,7 +269,7 @@ export class IntegrationService {
         createdAt: new Date().toISOString(),
         successCount: 0,
         failureCount: 0,
-        timeout: process.env.REQUEST_TIMEOUT || 30000
+        timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000
       };
 
       // 清除缓存
@@ -282,8 +282,7 @@ export class IntegrationService {
     }
   }
 
-  // 第三方集成
-  static async getThirdPartyIntegrations(): Promise<ThirdPartyIntegration[]> {
+  // 第三方集�?  static async getThirdPartyIntegrations(): Promise<ThirdPartyIntegration[]> {
     const cacheKey = 'third-party-integrations';
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
@@ -444,7 +443,7 @@ export class IntegrationService {
         isActive: true,
         usageCount: 3240,
         rateLimit: 1000,
-        description: '用于测试和开发环境'
+        description: '用于测试和开发环�?
       },
       {
         id: '3',
@@ -455,7 +454,7 @@ export class IntegrationService {
         isActive: false,
         usageCount: 890,
         rateLimit: 500,
-        description: '用于持续集成和部署流程'
+        description: '用于持续集成和部署流�?
       }
     ];
   }
@@ -478,7 +477,7 @@ export class IntegrationService {
         lastTriggered: '2025-06-19T09:30:00Z',
         successCount: 1250,
         failureCount: 15,
-        timeout: process.env.REQUEST_TIMEOUT || 30000
+        timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000
       },
       {
         id: '2',
@@ -535,7 +534,7 @@ export class IntegrationService {
         },
         status: 'connected',
         lastSync: '2025-06-19T09:45:00Z',
-        description: '与GitHub Actions集成进行自动化测试',
+        description: '与GitHub Actions集成进行自动化测�?,
         icon: '🐙',
         category: 'cicd'
       },

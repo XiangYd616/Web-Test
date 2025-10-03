@@ -322,7 +322,7 @@ const PreferencesSettings: React.FC<{
   const { theme, setTheme, actualTheme } = useTheme();
 
   const [interfacePrefs, setInterfacePrefs] = useState<InterfacePrefs>({
-    theme: theme,
+    theme,
     language: 'zh-CN',
     timezone: 'Asia/Shanghai',
     dateFormat: 'YYYY-MM-DD',

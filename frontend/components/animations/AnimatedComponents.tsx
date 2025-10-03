@@ -13,7 +13,8 @@ const motion = {
   span: 'span' as any,
   button: 'button' as any,
 } as any;
-const AnimatePresence = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+// Placeholder AnimatePresence component
+// const AnimatePresence = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 import React, { ReactNode } from 'react';
 
 // ==================== 基础动画配置 ====================

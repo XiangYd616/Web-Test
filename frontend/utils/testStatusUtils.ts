@@ -79,7 +79,7 @@ export const getStatusText = (status: string): string => {
 };
 
 // 获取状态图标
-export const _getStatusIcon = (status: string, className: string = 'w-4 h-4'): React.ReactElement => {
+const getStatusIcon = (status: string, className: string = 'w-4 h-4'): React.ReactElement => {
   const config = getStatusConfig(status);
   const IconComponent = config?.icon;
   const isAnimated = status === 'running';
@@ -106,7 +106,7 @@ export interface ParsedErrorInfo {
   timestamp?: string;
 }
 
-export const _parseErrorMessage = (errorMessage: string | null, status: string): ParsedErrorInfo | null => {
+export const parseErrorMessage = (errorMessage: string | null, status: string): ParsedErrorInfo | null => {
   if (!errorMessage) return null;
 
   // 取消状态的处理
@@ -175,7 +175,7 @@ export const calculateTestCompletion = (record: unknown): number => {
 };
 
 // 格式化持续时间
-export const _formatDuration = (seconds: number | null | undefined): string => {
+export const formatDurationInSeconds = (seconds: number | null | undefined): string => {
   if (!seconds || seconds <= 0) return '-';
 
   if (seconds < 60) {
@@ -196,7 +196,7 @@ export const _formatDuration = (seconds: number | null | undefined): string => {
 };
 
 // 格式化日期时间
-export const _formatDateTime = (dateString: string | null | undefined): string => {
+export const formatDateTime = (dateString: string | null | undefined): string => {
   if (!dateString) return '-';
 
   try {
@@ -214,7 +214,7 @@ export const _formatDateTime = (dateString: string | null | undefined): string =
 };
 
 // 获取状态描述
-export const _getStatusDescription = (status: string, errorInfo?: ParsedErrorInfo | null): string => {
+export const getStatusDescription = (status: string, errorInfo?: ParsedErrorInfo | null): string => {
   const config = getStatusConfig(status);
 
   if (errorInfo) {

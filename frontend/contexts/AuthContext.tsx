@@ -183,14 +183,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('🔍 登录响应:', {
         status: response.status,
         ok: response.ok,
-        result: result
+        result
       });
 
       if (!response.ok) {
         console.error('❌ 登录请求失败:', {
           status: response.status,
           statusText: response.statusText,
-          result: result
+          result
         });
         throw new Error(result.message || '登录失败');
       }

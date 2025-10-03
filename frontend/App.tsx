@@ -33,7 +33,7 @@ function App() {
     initializePerformanceOptimization();
 
     // 在生产环境中注册Service Worker
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+    if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
       navigator.serviceWorker.register('/sw.js')
         .then(() => {
           console.log('Service Worker registered successfully');

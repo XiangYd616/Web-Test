@@ -190,7 +190,7 @@ export const useStressTestWebSocket = (
 
     const success = websocketManager.send({
       type: 'subscribe',
-      testId: testId,
+      testId,
       data: { dataType: 'stress_test_progress' }
     });
 
@@ -209,7 +209,7 @@ export const useStressTestWebSocket = (
 
     const success = websocketManager.send({
       type: 'unsubscribe',
-      testId: testId,
+      testId,
       data: { dataType: 'stress_test_progress' }
     });
 

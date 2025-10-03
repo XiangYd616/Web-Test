@@ -424,7 +424,7 @@ class exportManager {
   private async generateReportHTML(task: ExportTask): Promise<string> {
     const data = task.data.results || task.data;
 
-    let html = `
+    const html = `
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>

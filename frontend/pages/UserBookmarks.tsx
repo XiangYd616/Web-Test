@@ -89,7 +89,7 @@ const UserBookmarks: React.FC = () => {
 
   useEffect(() => {
     // Filter and sort bookmarks
-    let filtered = bookmarks.filter(bookmark => {
+    const filtered = bookmarks.filter(bookmark => {
       const matchesSearch = bookmark.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            bookmark.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            bookmark.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));

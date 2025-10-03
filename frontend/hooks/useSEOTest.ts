@@ -1,12 +1,12 @@
-ï»¿import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 /**
 
- * è·å–getPerformanceMetricsæ•°æ®
+ * »ñÈ¡getPerformanceMetricsÊı¾İ
 
- * @param {string} id - å¯¹è±¡ID
+ * @param {string} id - ¶ÔÏóID
 
- * @returns {Promise<Object|null>} è·å–çš„æ•°æ®
+ * @returns {Promise<Object|null>} »ñÈ¡µÄÊı¾İ
 
  */
 import {SEOAnalysisResult} from '../services/realSEOAnalysisEngine';
@@ -50,7 +50,7 @@ interface SEOTestProgress {
   isRunning: boolean;
 }
 
-export const _useSEOTest = () => {
+const useSEOTest = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState<SEOTestProgress>({
     progress: 0,
@@ -61,23 +61,23 @@ export const _useSEOTest = () => {
   const [error, setError] = useState<string | null>(null);
   const seoEngineRef = useRef<SEOAnalysisEngine | null>(null);
 
-  // å¼€å§‹SEOæµ‹è¯•
+  // ¿ªÊ¼SEO²âÊÔ
   const startTest = useCallback(async (config: SEOTestConfig) => {
     try {
       setIsRunning(true);
       setError(null);
       setResults(null);
-      setProgress({ progress: 0, currentStep: 'æ­£åœ¨åˆå§‹åŒ–...', isRunning: true });
+      setProgress({ progress: 0, currentStep: 'ÕıÔÚ³õÊ¼»¯...', isRunning: true });
 
-      // åˆ›å»ºæ–°çš„SEOåˆ†æå¼•æ“å®ä¾‹
+      // ´´½¨ĞÂµÄSEO·ÖÎöÒıÇæÊµÀı
       seoEngineRef.current = new SEOAnalysisEngine();
 
-      // å¦‚æœéœ€è¦æ€§èƒ½æ£€æµ‹ï¼Œå…ˆè·å–æ€§èƒ½æŒ‡æ ‡
+      // Èç¹ûĞèÒªĞÔÄÜ¼ì²â£¬ÏÈ»ñÈ¡ĞÔÄÜÖ¸±ê
       let performanceData = null;
       if (config.checkPerformance) {
         setProgress({
           progress: 10,
-          currentStep: 'è·å–æ€§èƒ½æŒ‡æ ‡...',
+          currentStep: '»ñÈ¡ĞÔÄÜÖ¸±ê...',
           isRunning: true
         });
 
@@ -88,11 +88,11 @@ export const _useSEOTest = () => {
             device: 'both'
           });
         } catch (error) {
-          console.warn('è·å–æ€§èƒ½æŒ‡æ ‡å¤±è´¥ï¼Œç»§ç»­SEOåˆ†æ:', error);
+          console.warn('»ñÈ¡ĞÔÄÜÖ¸±êÊ§°Ü£¬¼ÌĞøSEO·ÖÎö:', error);
         }
       }
 
-      // å¼€å§‹çœŸå®çš„SEOåˆ†æ
+      // ¿ªÊ¼ÕæÊµµÄSEO·ÖÎö
       const analysisResult = await seoEngineRef.current.analyzeSEO(
         config.url,
         {
@@ -100,17 +100,17 @@ export const _useSEOTest = () => {
           checkTechnicalSEO: config.checkTechnicalSEO,
           checkContentQuality: config.checkContentQuality,
           checkAccessibility: config.checkAccessibility,
-          checkPerformance: false, // ä½¿ç”¨å¤–éƒ¨æ€§èƒ½æ•°æ®ï¼Œä¸é‡å¤æ£€æµ‹
+          checkPerformance: false, // Ê¹ÓÃÍâ²¿ĞÔÄÜÊı¾İ£¬²»ÖØ¸´¼ì²â
           checkMobileFriendly: config.checkMobileFriendly,
           checkSocialMedia: config.checkSocialMedia,
           checkStructuredData: config.checkStructuredData,
           checkSecurity: config.checkSecurity,
           depth: config.depth,
-          externalPerformanceData: performanceData // ä¼ å…¥å¤–éƒ¨æ€§èƒ½æ•°æ®
+          externalPerformanceData: performanceData // ´«ÈëÍâ²¿ĞÔÄÜÊı¾İ
         },
         (progressValue: number, step: string) => {
           setProgress({
-            progress: Math.max(progressValue, 20), // ç¡®ä¿è¿›åº¦ä¸å€’é€€
+            progress: Math.max(progressValue, 20), // È·±£½ø¶È²»µ¹ÍË
             currentStep: step,
             isRunning: true
           });
@@ -120,16 +120,16 @@ export const _useSEOTest = () => {
       setResults(analysisResult);
       setProgress({
         progress: 100,
-        currentStep: 'åˆ†æå®Œæˆ',
+        currentStep: '·ÖÎöÍê³É',
         isRunning: false
       });
 
     } catch (err: unknown) {
       console.error('SEO test failed:', err);
-      setError(err.message || 'SEOæµ‹è¯•å¤±è´¥');
+      setError(err.message || 'SEO²âÊÔÊ§°Ü');
       setProgress({
         progress: 0,
-        currentStep: 'æµ‹è¯•å¤±è´¥',
+        currentStep: '²âÊÔÊ§°Ü',
         isRunning: false
       });
     } finally {
@@ -137,7 +137,7 @@ export const _useSEOTest = () => {
     }
   }, []);
 
-  // åœæ­¢æµ‹è¯•
+  // Í£Ö¹²âÊÔ
   const stopTest = useCallback(async () => {
     if (seoEngineRef.current) {
       seoEngineRef.current.stopAnalysis();
@@ -145,12 +145,12 @@ export const _useSEOTest = () => {
     setIsRunning(false);
     setProgress({
       progress: 0,
-      currentStep: 'æµ‹è¯•å·²åœæ­¢',
+      currentStep: '²âÊÔÒÑÍ£Ö¹',
       isRunning: false
     });
   }, []);
 
-  // é‡ç½®æµ‹è¯•
+  // ÖØÖÃ²âÊÔ
   const reset = useCallback(() => {
     setIsRunning(false);
     setProgress({ progress: 0, currentStep: '', isRunning: false });
@@ -161,26 +161,26 @@ export const _useSEOTest = () => {
     }
   }, []);
 
-  // è·å–å½“å‰æ­¥éª¤
+  // »ñÈ¡µ±Ç°²½Öè
   const getCurrentStep = useCallback(() => {
     return progress.currentStep;
   }, [progress.currentStep]);
 
-  // è·å–å®Œæˆçš„æ­¥éª¤æ•°
+  // »ñÈ¡Íê³ÉµÄ²½ÖèÊı
   const getCompletedStepsCount = useCallback(() => {
     return Math.floor(progress.progress / 10);
   }, [progress.progress]);
 
-  // è·å–æ€»æ­¥éª¤æ•°
+  // »ñÈ¡×Ü²½ÖèÊı
   const getTotalStepsCount = useCallback(() => {
-    return 10; // å›ºå®š10ä¸ªæ­¥éª¤
+    return 10; // ¹Ì¶¨10¸ö²½Öè
   }, []);
 
-  // è·å–é¢„ä¼°å‰©ä½™æ—¶é—´
+  // »ñÈ¡Ô¤¹ÀÊ£ÓàÊ±¼ä
   const getEstimatedTimeRemaining = useCallback(() => {
     if (!isRunning || progress.progress >= 100) return 0;
 
-    // ç®€å•ä¼°ç®—ï¼šå‡è®¾æ¯ä¸ªæ­¥éª¤å¹³å‡éœ€è¦10ç§’
+    // ¼òµ¥¹ÀËã£º¼ÙÉèÃ¿¸ö²½ÖèÆ½¾ùĞèÒª10Ãë
     const remainingSteps = (100 - progress.progress) / 10;
     return Math.ceil(remainingSteps * 10);
   }, [isRunning, progress.progress]);

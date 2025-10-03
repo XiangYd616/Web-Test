@@ -209,8 +209,7 @@ export interface UseDataManagementReturn {
   syncConfig: DataSyncConfig | null;
   syncLoading: boolean;
 
-  // 查询和过滤
-  query: DataQuery;
+  // 查询和过�?  query: DataQuery;
   setQuery: (query: DataQuery) => void;
 
   // 数据操作
@@ -236,14 +235,12 @@ export interface UseDataManagementReturn {
   exportData: (format: 'json' | 'csv' | 'xlsx', selectedIds?: string[]) => Promise<void>;
   importData: (file: File, config: unknown) => Promise<{ taskId: string }>;
 
-  // 数据验证和清理
-  validateData: (query?: DataQuery) => Promise<any>;
+  // 数据验证和清�?  validateData: (query?: DataQuery) => Promise<any>;
   cleanupData: (config: unknown) => Promise<{ taskId: string }>;
 }
 
-export const _useDataManagement = (): UseDataManagementReturn => {
-  // 状态管理
-  const [records, setRecords] = useState<DataRecord[]>([]);
+const useDataManagement = (): UseDataManagementReturn => {
+  // 状态管�?  const [records, setRecords] = useState<DataRecord[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -496,8 +493,7 @@ export const _useDataManagement = (): UseDataManagementReturn => {
     }
   }, [loadData]);
 
-  // 数据验证和清理函数
-  const validateData = useCallback(async (validateQuery?: DataQuery): Promise<any> => {
+  // 数据验证和清理函�?  const validateData = useCallback(async (validateQuery?: DataQuery): Promise<any> => {
     try {
       const result = await extendedDataManager.validateData?.(validateQuery) || { isValid: true, errors: [] };
       return result;
@@ -519,8 +515,7 @@ export const _useDataManagement = (): UseDataManagementReturn => {
     }
   }, []);
 
-  // 初始化加载
-  useEffect(() => {
+  // 初始化加�?  useEffect(() => {
     loadData();
   }, [loadData]);
 
@@ -537,8 +532,7 @@ export const _useDataManagement = (): UseDataManagementReturn => {
   }, [loadSyncConfig]);
 
   return {
-    // 数据状态
-    records,
+    // 数据状�?    records,
     totalRecords,
     loading,
     error,
@@ -555,8 +549,7 @@ export const _useDataManagement = (): UseDataManagementReturn => {
     syncConfig,
     syncLoading,
 
-    // 查询状态
-    query,
+    // 查询状�?    query,
     setQuery,
 
     // 数据操作
@@ -582,8 +575,7 @@ export const _useDataManagement = (): UseDataManagementReturn => {
     exportData,
     importData,
 
-    // 数据验证和清理
-    validateData,
+    // 数据验证和清�?    validateData,
     cleanupData
   };
 };

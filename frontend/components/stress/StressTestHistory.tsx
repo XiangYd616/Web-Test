@@ -235,12 +235,12 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     debounceTimerRef.current = setTimeout(() => {
       loadTestRecords({
         page: resetPage ? 1 : currentPage,
-        pageSize: pageSize,
+        pageSize,
         search: searchTerm,
         status: statusFilter,
-        dateFilter: dateFilter,
-        sortBy: sortBy,
-        sortOrder: sortOrder
+        dateFilter,
+        sortBy,
+        sortOrder
       });
     }, isInitialLoadRef.current ? 0 : 800); // 增加防抖时间到800ms
   };
@@ -287,12 +287,12 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
     loadTestRecords({
       page: currentPage,
-      pageSize: pageSize,
+      pageSize,
       search: searchTerm,
       status: statusFilter,
-      dateFilter: dateFilter,
-      sortBy: sortBy,
-      sortOrder: sortOrder
+      dateFilter,
+      sortBy,
+      sortOrder
     });
   };
 

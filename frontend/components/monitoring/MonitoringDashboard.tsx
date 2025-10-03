@@ -523,7 +523,7 @@ const MonitoringDashboard: React.FC = () => {
   };
 
   // 格式化时间
-  const _formatDuration = (ms: number) => {
+  const formatDurationMs = (ms: number) => {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);

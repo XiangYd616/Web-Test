@@ -138,9 +138,9 @@ const DEFAULT_PASSWORD_POLICY: PasswordPolicy = {
 };
 
 export const DEFAULT_AUTH_CONFIG: AuthConfig = {
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || '/api',
-  environment: (process.env.NODE_ENV as any) || 'development',
-  enableDebugLogging: process.env.NODE_ENV === 'development',
+  apiBaseUrl: import.meta.env.VITE_API_URL || '/api',
+  environment: (import.meta.env.MODE as any) || 'development',
+  enableDebugLogging: import.meta.env.DEV,
   
   security: {
     mfa: {
@@ -194,7 +194,7 @@ export const DEFAULT_AUTH_CONFIG: AuthConfig = {
   
   audit: {
     enabled: true,
-    logLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+    logLevel: import.meta.env.DEV ? 'debug' : 'info',
     events: {
       login: true,
       logout: true,

@@ -1,10 +1,10 @@
 /**
- * 统一测试API客户端
+ * 统一测试API客户�?
  * 
  * 这是前端与后端测试引擎交互的唯一接口
- * 前端不执行任何测试逻辑，只负责：
+ * 前端不执行任何测试逻辑，只负责�?
  * 1. 发送测试请求到后端
- * 2. 接收测试进度和结果
+ * 2. 接收测试进度和结�?
  * 3. 处理UI展示
  */
 
@@ -57,7 +57,7 @@ export class TestApiClient {
     this.baseUrl = baseUrl;
     this.api = axios.create({
       baseURL: baseUrl,
-      timeout: process.env.REQUEST_TIMEOUT || 30000,
+      timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -70,7 +70,7 @@ export class TestApiClient {
    * 设置请求和响应拦截器
    */
   private setupInterceptors(): void {
-    // 请求拦截器 - 添加认证token等
+    // 请求拦截�?- 添加认证token�?
     this.api.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('authToken');
@@ -82,7 +82,7 @@ export class TestApiClient {
       (error) => Promise.reject(error)
     );
 
-    // 响应拦截器 - 统一错误处理
+    // 响应拦截�?- 统一错误处理
     this.api.interceptors.response.use(
       (response) => response?.data,
       (error) => {
@@ -171,7 +171,7 @@ export class TestApiClient {
   }
 
   /**
-   * 获取测试状态
+   * 获取测试状�?
    */
   async getTestStatus(testId: string): Promise<TestProgress> {
     return this.api.get(`/test/${testId}/status`);

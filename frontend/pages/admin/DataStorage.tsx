@@ -126,8 +126,8 @@ const DataStorage: React.FC = () => {
 
       // 从后端API加载真实数据（需要认证）
       const response = await fetch(`http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test-history?` + new URLSearchParams({
-        sortBy: sortBy,
-        sortOrder: sortOrder
+        sortBy,
+        sortOrder
       }), {
         headers: getAuthHeaders()
       });

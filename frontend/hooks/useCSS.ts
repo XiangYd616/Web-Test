@@ -98,8 +98,7 @@ export const usePageCSS = (
 
    * @param {string} id - 对象ID
 
-   * @returns {Promise<Object|null>} 获取的数据
-
+   * @returns {Promise<Object|null>} 获取的数�?
    */
   }, [pageName, options.immediate, options.preload]);
 
@@ -122,7 +121,7 @@ export const usePageCSS = (
   return { loading, loaded, error, load };
 };
 
-export const _useComponentCSS = (
+const useComponentCSS = (
   componentName: string,
   options: {
     immediate?: boolean;
@@ -171,7 +170,7 @@ export const _useComponentCSS = (
   return { loading, loaded, error, load };
 };
 
-export const _useRouteCSS = (routeName: string) => {
+const useRouteCSS = (routeName: string) => {
   const { loading, loaded, error } = usePageCSS(routeName, {
     immediate: true,
     preload: false

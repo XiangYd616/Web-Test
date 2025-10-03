@@ -218,8 +218,8 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
     onTestStarted: () => {
       showNotification('测试已启动', 'info');
     },
-    onTestProgress: onTestProgress,
-    onConfigChange: onConfigChange
+    onTestProgress,
+    onConfigChange
   });
 
   // 当前测试类型配置

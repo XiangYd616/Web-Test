@@ -48,7 +48,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   const optimizedData = useMemo(() => {
     if (!enableOptimization || data.length <= maxDataPoints) {
       return {
-        data: data,
+        data,
         originalCount: data.length,
         optimizedCount: data.length,
         compressionRatio: 1,

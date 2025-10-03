@@ -372,7 +372,7 @@ export const storageUtils = {
             const storage = window[type];
             let used = 0;
 
-            for (let key in storage) {
+            for (const key in storage) {
                 if (storage.hasOwnProperty(key)) {
                     used += storage[key].length + key.length;
                 }

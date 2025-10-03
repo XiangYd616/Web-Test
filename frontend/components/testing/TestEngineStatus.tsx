@@ -1,5 +1,5 @@
 /**
- * 测试引擎状态管理组件
+ * 测试引擎状态管理组�?
  * 提供所有测试引擎的状态监控、配置管理和执行控制
  */
 
@@ -110,7 +110,7 @@ interface EngineConfig {
 }
 
 const TestEngineStatus: React.FC = () => {
-  // 状态管理
+  // 状态管�?
   const [engines, setEngines] = useState<TestEngine[]>([]);
   const [testQueue, setTestQueue] = useState<TestQueue[]>([]);
   const [selectedEngine, setSelectedEngine] = useState<TestEngine | null>(null);
@@ -126,7 +126,7 @@ const TestEngineStatus: React.FC = () => {
   const wsRef = useRef<WebSocket | null>(null);
   const refreshIntervalRef = useRef<NodeJS.Timeout>();
 
-  // 初始化测试引擎数据
+  // 初始化测试引擎数�?
   const initializeEngines = (): TestEngine[] => {
     return [
       {
@@ -176,7 +176,7 @@ const TestEngineStatus: React.FC = () => {
         description: 'OWASP标准安全漏洞扫描引擎',
         icon: Shield,
         color: 'text-red-500',
-        capabilities: ['漏洞扫描', 'SQL注入检测', 'XSS检测', 'CSRF检测'],
+        capabilities: ['漏洞扫描', 'SQL注入检�?, 'XSS检�?, 'CSRF检�?],
         config: {
           maxConcurrent: 3,
           timeout: 120000,
@@ -211,13 +211,13 @@ const TestEngineStatus: React.FC = () => {
         type: 'seo',
         status: 'idle',
         version: '1.5.0',
-        description: '搜索引擎优化分析和建议引擎',
+        description: '搜索引擎优化分析和建议引�?,
         icon: Globe,
         color: 'text-blue-500',
-        capabilities: ['元标签分析', '关键词密度', '站点地图检查', '结构化数据'],
+        capabilities: ['元标签分�?, '关键词密�?, '站点地图检�?, '结构化数�?],
         config: {
           maxConcurrent: 10,
-          timeout: process.env.REQUEST_TIMEOUT || 30000,
+          timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
           retryAttempts: 3,
           priority: 3
         },
@@ -290,10 +290,10 @@ const TestEngineStatus: React.FC = () => {
         description: '高并发负载和压力测试引擎',
         icon: BarChart3,
         color: 'text-purple-500',
-        capabilities: ['负载测试', '并发测试', '峰值测试', '持续压力'],
+        capabilities: ['负载测试', '并发测试', '峰值测�?, '持续压力'],
         config: {
           maxConcurrent: 1,
-          timeout: process.env.REQUEST_TIMEOUT || 300000,
+          timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 300000,
           retryAttempts: 1,
           priority: 4
         },
@@ -321,14 +321,14 @@ const TestEngineStatus: React.FC = () => {
       },
       {
         id: 'engine_compatibility',
-        name: '兼容性测试引擎',
+        name: '兼容性测试引�?,
         type: 'compatibility',
         status: 'starting',
         version: '1.3.2',
-        description: '跨浏览器和设备兼容性测试引擎',
+        description: '跨浏览器和设备兼容性测试引�?,
         icon: Monitor,
         color: 'text-indigo-500',
-        capabilities: ['浏览器测试', '设备模拟', '响应式测试', 'PWA检测'],
+        capabilities: ['浏览器测�?, '设备模拟', '响应式测�?, 'PWA检�?],
         config: {
           maxConcurrent: 8,
           timeout: 45000,
@@ -359,7 +359,7 @@ const TestEngineStatus: React.FC = () => {
     ];
   };
 
-  // 初始化测试队列
+  // 初始化测试队�?
   const initializeQueue = (): TestQueue[] => {
     const priorities: ('low' | 'medium' | 'high' | 'critical')[] = ['low', 'medium', 'high', 'critical'];
     const statuses: TestQueue['status'][] = ['queued', 'running', 'completed', 'failed'];
@@ -378,13 +378,13 @@ const TestEngineStatus: React.FC = () => {
     }));
   };
 
-  // 初始化数据
+  // 初始化数�?
   useEffect(() => {
     const initialEngines = initializeEngines();
     setEngines(initialEngines);
     setTestQueue(initializeQueue());
     
-    // 初始化配置
+    // 初始化配�?
     const configs = new Map<string, EngineConfig>();
     initialEngines.forEach(engine => {
       configs.set(engine.id, {
@@ -464,7 +464,7 @@ const TestEngineStatus: React.FC = () => {
     }
   };
 
-  // 更新引擎状态
+  // 更新引擎状�?
   const updateEngine = (engineId: string, update: Partial<TestEngine>) => {
     setEngines(prev => prev.map(engine => 
       engine.id === engineId ? { ...engine, ...update } : engine
@@ -476,7 +476,7 @@ const TestEngineStatus: React.FC = () => {
     setTestQueue(newQueue);
   };
 
-  // 更新引擎健康状态
+  // 更新引擎健康状�?
   const updateEngineHealth = (engineId: string, health: TestEngine['health']) => {
     setEngines(prev => prev.map(engine => 
       engine.id === engineId ? { ...engine, health } : engine
@@ -561,7 +561,7 @@ const TestEngineStatus: React.FC = () => {
         break;
       case 'pause':
         newStatus = 'idle';
-        message = `已暂停${engine.name}`;
+        message = `已暂�?{engine.name}`;
         break;
       default:
         return;
@@ -595,7 +595,7 @@ const TestEngineStatus: React.FC = () => {
       }
     });
 
-    toast.success('配置已保存');
+    toast.success('配置已保�?);
     setShowConfig(false);
   };
 
@@ -603,14 +603,14 @@ const TestEngineStatus: React.FC = () => {
   const clearQueue = (engineId?: string) => {
     if (engineId) {
       setTestQueue(prev => prev.filter(test => test.engineId !== engineId));
-      toast.success('队列已清空');
+      toast.success('队列已清�?);
     } else {
       setTestQueue([]);
       toast.success('所有队列已清空');
     }
   };
 
-  // 筛选引擎
+  // 筛选引�?
   const filteredEngines = engines.filter(engine => {
     const matchesSearch = searchTerm === '' || 
       engine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -643,7 +643,7 @@ const TestEngineStatus: React.FC = () => {
     return { total, running, queued, completed, failed };
   };
 
-  // 获取状态颜色
+  // 获取状态颜�?
   const getStatusColor = (status: TestEngine['status']) => {
     switch (status) {
       case 'running': return 'text-green-500 bg-green-100';
@@ -656,7 +656,7 @@ const TestEngineStatus: React.FC = () => {
     }
   };
 
-  // 获取状态图标
+  // 获取状态图�?
   const getStatusIcon = (status: TestEngine['status']) => {
     switch (status) {
       case 'running': return <Play className="h-4 w-4" />;
@@ -669,7 +669,7 @@ const TestEngineStatus: React.FC = () => {
     }
   };
 
-  // 获取优先级颜色
+  // 获取优先级颜�?
   const getPriorityColor = (priority: TestQueue['priority']) => {
     switch (priority) {
       case 'critical': return 'text-red-600 bg-red-100';
@@ -680,7 +680,7 @@ const TestEngineStatus: React.FC = () => {
     }
   };
 
-  // 获取健康状态颜色
+  // 获取健康状态颜�?
   const _getHealthColor = (status: TestEngine['health']['status']) => {
     switch (status) {
       case 'healthy': return 'text-green-500';
@@ -698,12 +698,12 @@ const TestEngineStatus: React.FC = () => {
     labels: filteredEngines.map(e => e?.name),
     datasets: [
       {
-        label: 'CPU使用率 (%)',
+        label: 'CPU使用�?(%)',
         data: filteredEngines.map(e => e?.resources.cpu),
         backgroundColor: 'rgba(239, 68, 68, 0.8)',
       },
       {
-        label: '内存使用率 (%)',
+        label: '内存使用�?(%)',
         data: filteredEngines.map(e => e?.resources.memory),
         backgroundColor: 'rgba(59, 130, 246, 0.8)',
       }
@@ -711,7 +711,7 @@ const TestEngineStatus: React.FC = () => {
   };
 
   const statusChartData = {
-    labels: ['运行中', '空闲', '错误', '维护'],
+    labels: ['运行�?, '空闲', '错误', '维护'],
     datasets: [{
       data: [stats.running, stats.idle, stats.error, stats.maintenance],
       backgroundColor: [
@@ -734,16 +734,16 @@ const TestEngineStatus: React.FC = () => {
               <Server className="h-8 w-8 text-blue-600" />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">测试引擎管理</h1>
-                <p className="text-sm text-gray-600">监控和管理所有测试引擎的运行状态</p>
+                <p className="text-sm text-gray-600">监控和管理所有测试引擎的运行状�?/p>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* 连接状态 */}
+              {/* 连接状�?*/}
               <div className="flex items-center space-x-2">
                 <Wifi className={`h-5 w-5 ${isConnected ? 'text-green-500' : 'text-red-500'}`} />
                 <span className={`text-sm font-medium ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
-                  {isConnected ? '已连接' : '未连接'}
+                  {isConnected ? '已连�? : '未连�?}
                 </span>
               </div>
 
@@ -806,7 +806,7 @@ const TestEngineStatus: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">运行中</p>
+                <p className="text-sm text-gray-600">运行�?/p>
                 <p className="text-2xl font-bold text-green-600">{stats.running}</p>
               </div>
               <Activity className="h-8 w-8 text-green-500" />
@@ -849,8 +849,8 @@ const TestEngineStatus: React.FC = () => {
               onChange={(e) => setFilterStatus(e?.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">所有状态</option>
-              <option value="running">运行中</option>
+              <option value="all">所有状�?/option>
+              <option value="running">运行�?/option>
               <option value="idle">空闲</option>
               <option value="error">错误</option>
               <option value="maintenance">维护</option>
@@ -886,7 +886,7 @@ const TestEngineStatus: React.FC = () => {
                   {/* 指标 */}
                   <div className="space-y-3 mb-4">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">CPU使用率</span>
+                      <span className="text-gray-600">CPU使用�?/span>
                       <span className="font-medium">{engine.resources.cpu.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -900,7 +900,7 @@ const TestEngineStatus: React.FC = () => {
                     </div>
 
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">内存使用率</span>
+                      <span className="text-gray-600">内存使用�?/span>
                       <span className="font-medium">{engine.resources.memory.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -925,7 +925,7 @@ const TestEngineStatus: React.FC = () => {
                       <p className="font-semibold">{engine.metrics.queueSize}</p>
                     </div>
                     <div className="bg-gray-50 rounded p-2">
-                      <p className="text-gray-600">成功率</p>
+                      <p className="text-gray-600">成功�?/p>
                       <p className="font-semibold">{engine.metrics.successRate}%</p>
                     </div>
                     <div className="bg-gray-50 rounded p-2">
@@ -1017,7 +1017,7 @@ const TestEngineStatus: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">引擎状态分布</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">引擎状态分�?/h3>
             <div className="flex items-center justify-center">
               <div className="w-64">
                 <Doughnut
@@ -1045,7 +1045,7 @@ const TestEngineStatus: React.FC = () => {
                 onClick={() => clearQueue()}
                 className="text-sm text-red-600 hover:text-red-700"
               >
-                清空所有队列
+                清空所有队�?
               </button>
             </div>
           </div>
@@ -1150,15 +1150,15 @@ const TestEngineStatus: React.FC = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        优先级
+                        优先�?
                       </label>
                       <select
                         defaultValue={selectedEngine.config.priority}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="1">高</option>
-                        <option value="2">中</option>
-                        <option value="3">低</option>
+                        <option value="1">�?/option>
+                        <option value="2">�?/option>
+                        <option value="3">�?/option>
                       </select>
                     </div>
                   </div>
@@ -1180,7 +1180,7 @@ const TestEngineStatus: React.FC = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        最大内存 (MB)
+                        最大内�?(MB)
                       </label>
                       <input
                         type="number"
@@ -1211,8 +1211,8 @@ const TestEngineStatus: React.FC = () => {
                   </button>
                   <button
                     onClick={() => {
-                      // 这里应该收集表单数据并保存
-                      toast.success('配置已保存');
+                      // 这里应该收集表单数据并保�?
+                      toast.success('配置已保�?);
                       setShowConfig(false);
                     }}
                     className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"

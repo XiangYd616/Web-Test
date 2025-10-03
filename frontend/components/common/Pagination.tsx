@@ -231,7 +231,7 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
     const half = Math.floor(maxVisiblePages / 2);
 
     let start = Math.max(1, current - half);
-    let end = Math.min(totalPages, start + maxVisiblePages - 1);
+    const end = Math.min(totalPages, start + maxVisiblePages - 1);
 
     // 调整起始位置
     if (end - start + 1 < maxVisiblePages) {

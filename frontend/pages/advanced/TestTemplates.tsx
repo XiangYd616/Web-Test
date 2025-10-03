@@ -61,7 +61,7 @@ const TestTemplates: React.FC = () => {
           description: '标准的Web应用性能测试模板，包括页面加载时间、资源大小、响应时间等核心指标',
           category: 'performance',
           type: 'standard',
-          author: '系统管理员',
+          author: '系统管理�?,
           authorId: 'admin',
           isPublic: true,
           isFavorite: true,
@@ -72,7 +72,7 @@ const TestTemplates: React.FC = () => {
           lastUsed: '2025-09-16T10:30:00Z',
           tags: ['性能', '基准测试', 'Web', '标准'],
           configuration: {
-            timeout: process.env.REQUEST_TIMEOUT || 30000,
+            timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
             retries: 3,
             concurrency: 5,
             metrics: ['loading_time', 'first_contentful_paint', 'largest_contentful_paint']
@@ -89,14 +89,14 @@ const TestTemplates: React.FC = () => {
               type: 'number',
               required: false,
               defaultValue: 60,
-              description: '测试持续时间（秒）'
+              description: '测试持续时间（秒�?
             }
           ]
         },
         {
           id: '2',
           name: 'OWASP安全扫描套件',
-          description: 'OWASP Top 10安全漏洞检测模板，全面检查SQL注入、XSS、CSRF等常见安全问题',
+          description: 'OWASP Top 10安全漏洞检测模板，全面检查SQL注入、XSS、CSRF等常见安全问�?,
           category: 'security',
           type: 'advanced',
           author: '安全团队',
@@ -132,11 +132,11 @@ const TestTemplates: React.FC = () => {
         },
         {
           id: '3',
-          name: 'RESTful API完整性测试',
+          name: 'RESTful API完整性测�?,
           description: '全面的REST API测试模板，涵盖CRUD操作、状态码验证、响应格式检查等',
           category: 'api',
           type: 'standard',
-          author: '开发团队',
+          author: '开发团�?,
           authorId: 'dev-team',
           isPublic: true,
           isFavorite: true,
@@ -171,7 +171,7 @@ const TestTemplates: React.FC = () => {
         },
         {
           id: '4',
-          name: 'SEO综合优化检查',
+          name: 'SEO综合优化检�?,
           description: '全面的SEO检查模板，包括页面标题、元数据、结构化数据、页面速度等SEO要素',
           category: 'seo',
           type: 'custom',
@@ -184,7 +184,7 @@ const TestTemplates: React.FC = () => {
           createdAt: '2024-06-05T00:00:00Z',
           updatedAt: '2024-09-12T00:00:00Z',
           lastUsed: '2025-09-14T14:30:00Z',
-          tags: ['SEO', '优化', '搜索引擎', '自定义'],
+          tags: ['SEO', '优化', '搜索引擎', '自定�?],
           configuration: {
             checkMetaTags: true,
             checkImages: true,
@@ -204,7 +204,7 @@ const TestTemplates: React.FC = () => {
               type: 'boolean',
               required: false,
               defaultValue: false,
-              description: '是否包含子页面'
+              description: '是否包含子页�?
             }
           ]
         }
@@ -217,17 +217,17 @@ const TestTemplates: React.FC = () => {
     loadTemplates();
   }, [user]);
 
-  // 获取分类图标和颜色
+  // 获取分类图标和颜�?
   const getCategoryInfo = (category: string) => {
     const categoryMap = {
       performance: { icon: Zap, color: 'text-yellow-600 bg-yellow-100', label: '性能测试' },
       security: { icon: Shield, color: 'text-red-600 bg-red-100', label: '安全测试' },
       api: { icon: Code, color: 'text-blue-600 bg-blue-100', label: 'API测试' },
       ui: { icon: Globe, color: 'text-green-600 bg-green-100', label: 'UI测试' },
-      compatibility: { icon: Globe, color: 'text-purple-600 bg-purple-100', label: '兼容性测试' },
+      compatibility: { icon: Globe, color: 'text-purple-600 bg-purple-100', label: '兼容性测�? },
       stress: { icon: Zap, color: 'text-orange-600 bg-orange-100', label: '压力测试' },
       seo: { icon: Globe, color: 'text-indigo-600 bg-indigo-100', label: 'SEO测试' },
-      database: { icon: Database, color: 'text-gray-600 bg-gray-100', label: '数据库测试' }
+      database: { icon: Database, color: 'text-gray-600 bg-gray-100', label: '数据库测�? }
     };
     return categoryMap[category as keyof typeof categoryMap] || categoryMap.api;
   };
@@ -269,7 +269,7 @@ const TestTemplates: React.FC = () => {
   const types = [
     { value: 'all', label: '全部类型' },
     { value: 'standard', label: '标准模板' },
-    { value: 'custom', label: '自定义模板' },
+    { value: 'custom', label: '自定义模�? },
     { value: 'advanced', label: '高级模板' }
   ];
 
@@ -350,7 +350,7 @@ const TestTemplates: React.FC = () => {
             
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <span>共 {filteredTemplates.length} 个模板</span>
+                <span>�?{filteredTemplates.length} 个模�?/span>
               </div>
               <div className="flex items-center border border-gray-300 rounded-md">
                 <button
@@ -386,7 +386,7 @@ const TestTemplates: React.FC = () => {
                         <h3 className="text-lg font-medium text-gray-900 mb-1">{template.name}</h3>
                         <div className="flex items-center space-x-2">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium border rounded-full ${getTypeColor(template.type)}`}>
-                            {template.type === 'standard' ? '标准' : template.type === 'custom' ? '自定义' : '高级'}
+                            {template.type === 'standard' ? '标准' : template.type === 'custom' ? '自定�? : '高级'}
                           </span>
                           {template.isFavorite && (
                             <Star className="h-4 w-4 text-yellow-500 fill-current" />
@@ -433,7 +433,7 @@ const TestTemplates: React.FC = () => {
 
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500">
-                      更新于 {new Date(template.updatedAt).toLocaleDateString()}
+                      更新�?{new Date(template.updatedAt).toLocaleDateString()}
                     </span>
                     <div className="flex items-center space-x-2">
                       <button className="p-1 text-gray-600 hover:text-blue-600">
@@ -466,7 +466,7 @@ const TestTemplates: React.FC = () => {
                       分类/类型
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      作者
+                      作�?
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       使用次数
@@ -505,7 +505,7 @@ const TestTemplates: React.FC = () => {
                             </span>
                             <div className="mt-1">
                               <span className={`inline-flex px-2 py-1 text-xs font-medium border rounded-full ${getTypeColor(template.type)}`}>
-                                {template.type === 'standard' ? '标准' : template.type === 'custom' ? '自定义' : '高级'}
+                                {template.type === 'standard' ? '标准' : template.type === 'custom' ? '自定�? : '高级'}
                               </span>
                             </div>
                           </div>
@@ -549,19 +549,19 @@ const TestTemplates: React.FC = () => {
           </div>
         )}
 
-        {/* 空状态 */}
+        {/* 空状�?*/}
         {filteredTemplates.length === 0 && (
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">没有找到匹配的模板</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">没有找到匹配的模�?/h3>
             <p className="text-gray-500 mb-6">
-              尝试调整搜索条件或创建新的测试模板
+              尝试调整搜索条件或创建新的测试模�?
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              创建第一个模板
+              创建第一个模�?
             </button>
           </div>
         )}

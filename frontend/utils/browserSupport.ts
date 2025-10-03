@@ -1,15 +1,13 @@
 import { createElement, useState } from 'react';
 
-// 浏览器信息接口
-interface BrowserInfo {
+// 浏览器信息接�?interface BrowserInfo {
   name: string;
   version: string;
   engine: string;
   platform: string;
 }
 
-// 特性支持状态接口
-interface FeatureSupport {
+// 特性支持状态接�?interface FeatureSupport {
   cssGrid: boolean;
   cssVariables: boolean;
   backdropFilter: boolean;
@@ -72,11 +70,9 @@ export const detectCSSSupport = (): FeatureSupport => {
       // CSS嵌套
       support.cssNesting = CSS.supports('selector(&)', '&:hover');
 
-      // CSS层叠层
-      support.cssLayers = CSS.supports('@layer', 'base');
+      // CSS层叠�?      support.cssLayers = CSS.supports('@layer', 'base');
 
-      // CSS子网格
-      support.cssSubgrid = CSS.supports('grid-template-columns', 'subgrid');
+      // CSS子网�?      support.cssSubgrid = CSS.supports('grid-template-columns', 'subgrid');
 
       // 视口单位
       support.viewportUnits = CSS.supports('width', '100vw');
@@ -100,12 +96,11 @@ export const detectCSSSupport = (): FeatureSupport => {
       support.cssTransitions = CSS.supports('transition', 'all 0.3s');
 
     } catch (error) {
-      console.warn('CSS.supports检测失败:', error);
+      console.warn('CSS.supports检测失�?', error);
     }
   }
 
-  // 图片格式支持检测（异步）
-  detectImageFormats().then(formats => {
+  // 图片格式支持检测（异步�?  detectImageFormats().then(formats => {
     support.webpSupport = formats.webp;
     support.avifSupport = formats.avif;
   });
@@ -131,7 +126,7 @@ const detectImageFormats = async (): Promise<{webp: boolean; avif: boolean}> => 
       avifImage.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A=';
     });
   } catch (error) {
-    console.warn('图片格式检测失败:', error);
+    console.warn('图片格式检测失�?', error);
   }
 
   return formats;
@@ -146,8 +141,7 @@ export const getBrowserInfo = (): BrowserInfo => {
     platform: navigator.platform || 'Unknown'
   };
 
-  // 检测浏览器名称和版本
-  if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+  // 检测浏览器名称和版�?  if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
     browserInfo.name = 'Chrome';
     browserInfo.engine = 'Blink';
     const match = userAgent.match(/Chrome\/(\d+)/);
@@ -194,7 +188,7 @@ export const getScreenInfo = () => {
   };
 };
 
-export const _generateCompatibilityReport = () => {
+const generateCompatibilityReport = () => {
   const support = detectCSSSupport();
   const browser = getBrowserInfo();
   const screen = getScreenInfo();
@@ -214,7 +208,7 @@ const generateRecommendations = (support: FeatureSupport, browser: BrowserInfo):
   const recommendations: string[] = [];
 
   if (!support.cssGrid) {
-    recommendations.push('建议使用Flexbox作为CSS Grid的降级方案');
+    recommendations.push('建议使用Flexbox作为CSS Grid的降级方�?);
   }
 
   if (!support.cssVariables) {
@@ -226,7 +220,7 @@ const generateRecommendations = (support: FeatureSupport, browser: BrowserInfo):
   }
 
   if (!support.flexboxGap) {
-    recommendations.push('建议使用margin模拟Flexbox gap属性');
+    recommendations.push('建议使用margin模拟Flexbox gap属�?);
   }
 
   if (!support.stickyPosition) {
@@ -240,5 +234,4 @@ const generateRecommendations = (support: FeatureSupport, browser: BrowserInfo):
   return recommendations;
 };
 
-// 导出全局支持状态
-export const _browserSupport = detectCSSSupport();
+// 导出全局支持状�?const browserSupport = detectCSSSupport();

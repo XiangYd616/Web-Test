@@ -71,7 +71,7 @@ export interface Theme {
     shadow: ThemeShadow;
 }
 
-// 预定义主题
+// 预定义主�?
 export const lightTheme: Theme = {
     mode: 'light',
     colors: {
@@ -187,11 +187,11 @@ export const darkTheme: Theme = {
 };
 
 // 主题工具函数
-export const _getTheme = (mode: ThemeMode): Theme => {
+const getTheme = (mode: ThemeMode): Theme => {
     return mode === 'light' ? lightTheme : darkTheme;
 };
 
-export const _createThemeVariables = (theme: Theme): Record<string, string> => {
+const createThemeVariables = (theme: Theme): Record<string, string> => {
     return {
         '--color-primary': theme.colors.primary,
         '--color-primary-hover': theme.colors.primaryHover,
@@ -235,8 +235,8 @@ export const _createThemeVariables = (theme: Theme): Record<string, string> => {
     };
 };
 
-// 主题相关的CSS类名生成器
-export const _themeClasses = {
+// 主题相关的CSS类名生成�?
+const themeClasses = {
     button: {
         primary: 'themed-button-primary',
         secondary: 'themed-button-secondary',

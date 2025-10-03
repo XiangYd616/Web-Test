@@ -294,7 +294,7 @@ export const TagBadge: React.FC<TagBadgeProps> = ({
   const customStyle = color ? {
     backgroundColor: `${color}20`,
     borderColor: `${color}40`,
-    color: color
+    color
   } : {};
 
   return (

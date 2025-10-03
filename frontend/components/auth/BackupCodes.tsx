@@ -39,7 +39,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
   const [showCodes, setShowCodes] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [regenerating, setRegenerating] = useState(false);
-  const [downloadReady, setDownloadReady] = useState(false);
+  const [_downloadReady, setDownloadReady] = useState(false);
 
   // 获取备份代码
   const fetchBackupCodes = async () => {
@@ -71,7 +71,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       setCodes(response.data.codes);
       setShowCodes(true);
       setDownloadReady(true);
-      toast.success('已生成新的备份代码');
+      toast.success('已生成新的备份代�?);
     } catch (error) {
       console.error('生成备份代码失败:', error);
       toast.error('生成备份代码失败');
@@ -86,14 +86,13 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       await navigator.clipboard.writeText(code);
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
-      toast.success('代码已复制到剪贴板');
+      toast.success('代码已复制到剪贴�?);
     } catch (error) {
       toast.error('复制失败');
     }
   };
 
-  // 复制所有代码
-  const copyAllCodes = async () => {
+  // 复制所有代�?  const copyAllCodes = async () => {
     const allCodes = codes
       .filter(c => !c.used)
       .map(c => c.code)
@@ -113,7 +112,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       `生成时间: ${new Date().toLocaleString()}\n` +
       `用户: ${user?.email}\n\n` +
       `请将这些代码保存在安全的地方。每个代码只能使用一次。\n\n` +
-      codes.map((c, i) => `${i + 1}. ${c.code}${c.used ? ' (已使用)' : ''}`).join('\n');
+      codes.map((c, i) => `${i + 1}. ${c.code}${c.used ? ' (已使�?' : ''}`).join('\n');
     
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -125,7 +124,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    toast.success('备份代码已下载');
+    toast.success('备份代码已下�?);
   };
 
   useEffect(() => {
@@ -136,18 +135,17 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      {/* 标题和说明 */}
+      {/* 标题和说�?*/}
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
           <Shield className="w-6 h-6 mr-2 text-blue-500" />
           备份代码
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
-          备份代码可在您无法使用常规双因素认证方式时使用。请妥善保管这些代码。
-        </p>
+          备份代码可在您无法使用常规双因素认证方式时使用。请妥善保管这些代码�?        </p>
       </div>
 
-      {/* 状态提示 */}
+      {/* 状态提�?*/}
       {codes.length > 0 && (
         <div className={`mb-4 p-4 rounded-lg ${
           unusedCodesCount < 3 
@@ -163,13 +161,11 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
             <span className={`font-medium ${
               unusedCodesCount < 3 ? 'text-yellow-800' : 'text-blue-800'
             }`}>
-              您还有 {unusedCodesCount} 个未使用的备份代码
-            </span>
+              您还�?{unusedCodesCount} 个未使用的备份代�?            </span>
           </div>
           {unusedCodesCount < 3 && (
             <p className="text-sm text-yellow-700 mt-1">
-              建议生成新的备份代码以确保账户安全
-            </p>
+              建议生成新的备份代码以确保账户安�?            </p>
           )}
         </div>
       )}
@@ -186,13 +182,12 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
             {regenerating ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                生成中...
+                生成�?..
               </>
             ) : (
               <>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                生成新代码
-              </>
+                生成新代�?              </>
             )}
           </button>
         )}
@@ -264,7 +259,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
                     ? 'text-gray-500 line-through'
                     : 'text-gray-900 dark:text-white'
                 }`}>
-                  {showCodes ? code.code : '••••-••••-••••'}
+                  {showCodes ? code.code : '•••�?•••�?•••�?}
                 </code>
                 
                 {!code.used && showCodes && (
@@ -284,7 +279,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
               
               {code.used && code.usedAt && (
                 <p className="text-xs text-gray-500 mt-1">
-                  使用于: {new Date(code.usedAt).toLocaleString()}
+                  使用�? {new Date(code.usedAt).toLocaleString()}
                 </p>
               )}
             </div>
@@ -294,7 +289,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
         <div className="text-center py-8 text-gray-500">
           <Shield className="w-12 h-12 mx-auto mb-3 text-gray-400" />
           <p>尚未生成备份代码</p>
-          <p className="text-sm mt-1">点击"生成新代码"创建备份代码</p>
+          <p className="text-sm mt-1">点击"生成新代�?创建备份代码</p>
         </div>
       )}
 
@@ -305,10 +300,10 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
           安全提示
         </h4>
         <ul className="text-xs text-yellow-700 dark:text-yellow-400 space-y-1">
-          <li>• 每个备份代码只能使用一次</li>
-          <li>• 请将代码保存在安全的地方（如密码管理器）</li>
-          <li>• 不要将代码存储在您的设备上或通过不安全的方式传输</li>
-          <li>• 如果您怀疑代码已泄露，请立即生成新的代码</li>
+          <li>�?每个备份代码只能使用一�?/li>
+          <li>�?请将代码保存在安全的地方（如密码管理器）</li>
+          <li>�?不要将代码存储在您的设备上或通过不安全的方式传输</li>
+          <li>�?如果您怀疑代码已泄露，请立即生成新的代码</li>
         </ul>
       </div>
 

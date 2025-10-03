@@ -81,34 +81,34 @@ export const formatThroughput = (requestsPerSecond: number): string => {
   return `${formatNumber(requestsPerSecond / 1000, 1)}K req/s`;
 };
 
-export const _formatErrorRate = (errors: number, total: number): string => {
+export const formatErrorRate = (errors: number, total: number): string => {
   return formatPercentage(errors, total, 2);
 };
 
-export const _formatUptime = (uptimePercentage: number): string => {
+export const formatUptime = (uptimePercentage: number): string => {
   return `${formatNumber(uptimePercentage, 3)}%`;
 };
 
-export const _formatLatency = (latency: number): string => {
+export const formatLatency = (latency: number): string => {
   return formatResponseTime(latency);
 };
 
-export const _formatBandwidth = (bytesPerSecond: number): string => {
+export const formatBandwidth = (bytesPerSecond: number): string => {
   return `${formatBytes(bytesPerSecond)}/s`;
 };
 
-export const _formatCurrency = (amount: number, currency: string = 'CNY'): string => {
+export const formatCurrency = (amount: number, currency: string = 'CNY'): string => {
   return new Intl.NumberFormat('zh-CN', {
     style: 'currency',
-    currency: currency,
+    currency,
   }).format(amount);
 };
 
-export const _formatDate = (timestamp: number): string => {
+export const formatDate = (timestamp: number): string => {
   return new Date(timestamp).toLocaleString('zh-CN');
 };
 
-export const _formatRelativeTime = (timestamp: number): string => {
+export const formatRelativeTime = (timestamp: number): string => {
   const now = Date.now();
   const diff = now - timestamp;
 
@@ -132,17 +132,17 @@ export const _formatRelativeTime = (timestamp: number): string => {
   return `${seconds}秒前`;
 };
 
-export const _formatRange = (min: number, max: number, unit: string = ''): string => {
+export const formatRange = (min: number, max: number, unit: string = ''): string => {
   return `${formatNumber(min)} - ${formatNumber(max)}${unit}`;
 };
 
-export const _formatConfidenceInterval = (value: number, margin: number, unit: string = ''): string => {
-  const _lower = value - margin;
-  const _upper = value + margin;
+export const formatConfidenceInterval = (value: number, margin: number, unit: string = ''): string => {
+  const lower = value - margin;
+  const upper = value + margin;
   return `${formatNumber(value)}${unit} (±${formatNumber(margin)}${unit})`;
 };
 
-export const _formatGrowthRate = (current: number, previous: number): string => {
+export const formatGrowthRate = (current: number, previous: number): string => {
   if (previous === 0) return 'N/A';
 
   const growth = ((current - previous) / previous) * 100;
@@ -150,7 +150,7 @@ export const _formatGrowthRate = (current: number, previous: number): string => 
   return `${sign}${formatNumber(growth, 1)}%`;
 };
 
-export const _formatMetric = (value: number, type: 'bytes' | 'duration' | 'percentage' | 'number' | 'throughput' | 'score'): string => {
+export const formatMetric = (value: number, type: 'bytes' | 'duration' | 'percentage' | 'number' | 'throughput' | 'score'): string => {
   switch (type) {
     case 'bytes':
       return formatBytes(value);

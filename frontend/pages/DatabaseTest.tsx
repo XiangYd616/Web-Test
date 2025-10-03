@@ -1,7 +1,5 @@
 /**
- * 数据库测试页面
- * 提供完整的数据库连接、性能和安全测试功能
- */
+ * 数据库测试页�? * 提供完整的数据库连接、性能和安全测试功�? */
 
 import { Activity, CheckCircle, Database, Loader, Play, RotateCcw, Settings, Shield, Square, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
@@ -45,15 +43,13 @@ interface DatabaseTestResult {
 }
 
 const DatabaseTest: React.FC = () => {
-  // 认证检查
-  const _authCheck = useAuthCheck();
+  // 认证检�?  const _authCheck = useAuthCheck();
   const { recordTestCompletion } = useUserStats();
 
-  // 状态管理
-  const [config, setConfig] = useState<DatabaseConfig>({
+  // 状态管�?  const [config, setConfig] = useState<DatabaseConfig>({
     connectionString: '',
     testType: 'comprehensive',
-    timeout: process.env.REQUEST_TIMEOUT || 30000,
+    timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
     maxConnections: 10,
     queryTimeout: 5000,
     includePerformanceTests: true,
@@ -76,13 +72,11 @@ const DatabaseTest: React.FC = () => {
     setCurrentStep(step);
   }, []);
 
-  // 清理错误状态
-  const clearError = useCallback(() => {
+  // 清理错误状�?  const clearError = useCallback(() => {
     setError(null);
   }, []);
 
-  // 重置测试状态
-  const resetTest = useCallback(() => {
+  // 重置测试状�?  const resetTest = useCallback(() => {
     setResult(null);
     setError(null);
     setIsRunning(false);
@@ -90,17 +84,16 @@ const DatabaseTest: React.FC = () => {
     updateProgress(0, '准备就绪');
   }, [updateProgress]);
 
-  // 启动数据库测试
-  const startTest = useCallback(async () => {
+  // 启动数据库测�?  const startTest = useCallback(async () => {
     if (!config.connectionString.trim()) {
-      setError('请输入数据库连接字符串');
+      setError('请输入数据库连接字符�?);
       return;
     }
 
     clearError();
     setIsRunning(true);
     setCanSwitchPages(false);
-    updateProgress(0, '准备启动数据库测试...');
+    updateProgress(0, '准备启动数据库测�?..');
 
     try {
       // 使用真实的backgroundTestManager启动测试
@@ -122,8 +115,7 @@ const DatabaseTest: React.FC = () => {
         },
         // onComplete
         (result: unknown) => {
-          // 转换后端结果为前端格式
-          const databaseResult: DatabaseTestResult = {
+          // 转换后端结果为前端格�?          const databaseResult: DatabaseTestResult = {
             testId: result.testId || testId,
             connectionTest: {
               success: result.connectionTest?.success !== false,
@@ -141,7 +133,7 @@ const DatabaseTest: React.FC = () => {
               encryptionStatus: result.securityTests?.encryptionStatus !== false
             } : undefined,
             recommendations: result.recommendations || [
-              '数据库连接测试完成',
+              '数据库连接测试完�?,
               '建议定期监控数据库性能'
             ],
             overallScore: result.overallScore || result.score || 85
@@ -152,12 +144,12 @@ const DatabaseTest: React.FC = () => {
           setCurrentTestId(null);
           setCanSwitchPages(true);
           recordTestCompletion('database', true, databaseResult.overallScore);
-          updateProgress(100, '数据库测试完成');
+          updateProgress(100, '数据库测试完�?);
         },
         // onError
         (error: string | Error) => {
           const errorMessage = typeof error === 'string' ? error : error?.message;
-          setError(errorMessage || '数据库测试失败');
+          setError(errorMessage || '数据库测试失�?);
           setIsRunning(false);
           setCurrentTestId(null);
           setCanSwitchPages(true);
@@ -183,7 +175,7 @@ const DatabaseTest: React.FC = () => {
         setIsRunning(false);
         setCurrentTestId(null);
         setCanSwitchPages(true);
-        updateProgress(0, '测试已停止');
+        updateProgress(0, '测试已停�?);
       } catch (err) {
         console.error('停止测试失败:', err);
       }
@@ -198,24 +190,21 @@ const DatabaseTest: React.FC = () => {
     }));
   }, []);
 
-  // 添加自定义查询
-  const addCustomQuery = useCallback(() => {
+  // 添加自定义查�?  const addCustomQuery = useCallback(() => {
     setConfig(prev => ({
       ...prev,
       customQueries: [...prev.customQueries, '']
     }));
   }, []);
 
-  // 更新自定义查询
-  const updateCustomQuery = useCallback((index: number, query: string) => {
+  // 更新自定义查�?  const updateCustomQuery = useCallback((index: number, query: string) => {
     setConfig(prev => ({
       ...prev,
       customQueries: prev.customQueries.map((q, i) => i === index ? query : q)
     }));
   }, []);
 
-  // 删除自定义查询
-  const removeCustomQuery = useCallback((index: number) => {
+  // 删除自定义查�?  const removeCustomQuery = useCallback((index: number) => {
     setConfig(prev => ({
       ...prev,
       customQueries: prev.customQueries.filter((_, i) => i !== index)
@@ -225,8 +214,8 @@ const DatabaseTest: React.FC = () => {
   return (
     <TestPageLayout
       testType="database"
-      title="数据库测试"
-      description="测试数据库连接、性能和安全性"
+      title="数据库测�?
+      description="测试数据库连接、性能和安全�?
       icon={Database}
       testContent={
         <div className="space-y-6">
@@ -238,7 +227,7 @@ const DatabaseTest: React.FC = () => {
             </h3>
 
             <div className="space-y-4">
-              {/* 连接字符串 */}
+              {/* 连接字符�?*/}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   数据库连接字符串 *
@@ -252,8 +241,7 @@ const DatabaseTest: React.FC = () => {
                   disabled={isRunning}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  支持 PostgreSQL, MySQL, MongoDB 等数据库连接字符串
-                </p>
+                  支持 PostgreSQL, MySQL, MongoDB 等数据库连接字符�?                </p>
               </div>
 
               {/* 测试类型 */}
@@ -351,10 +339,10 @@ const DatabaseTest: React.FC = () => {
             </div>
           </div>
 
-          {/* 自定义查询 */}
+          {/* 自定义查�?*/}
           <div className="themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6">
             <h3 className="text-lg font-semibold themed-text-primary mb-4">
-              自定义查询 (可选)
+              自定义查�?(可�?
             </h3>
 
             <div className="space-y-3">
@@ -397,8 +385,7 @@ const DatabaseTest: React.FC = () => {
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center"
               >
                 <Play className="w-5 h-5 mr-2" />
-                开始测试
-              </button>
+                开始测�?              </button>
             ) : (
               <button
                 onClick={stopTest}
@@ -425,7 +412,7 @@ const DatabaseTest: React.FC = () => {
             <div className="themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6">
               <div className="flex items-center mb-4">
                 <Loader className="w-5 h-5 mr-2 animate-spin text-blue-600" />
-                <h3 className="text-lg font-semibold themed-text-primary">测试进行中</h3>
+                <h3 className="text-lg font-semibold themed-text-primary">测试进行�?/h3>
               </div>
               <ProgressBar value={progress} className="mb-2" />
               <p className="text-sm text-gray-600">{currentStep}</p>
@@ -466,7 +453,7 @@ const DatabaseTest: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">连接状态</span>
+                      <span className="text-sm font-medium text-gray-700">连接状�?/span>
                       {result.connectionTest.success ? (
                         <CheckCircle className="w-5 h-5 text-green-500" />
                       ) : (
@@ -503,10 +490,10 @@ const DatabaseTest: React.FC = () => {
                         <Shield className="w-5 h-5 text-green-500" />
                       </div>
                       <p className="text-lg font-semibold text-gray-900 mt-1">
-                        {result.securityTests.sqlInjectionVulnerability ? '有风险' : '安全'}
+                        {result.securityTests.sqlInjectionVulnerability ? '有风�? : '安全'}
                       </p>
                       <p className="text-sm text-gray-600">
-                        加密状态: {result.securityTests.encryptionStatus ? '已启用' : '未启用'}
+                        加密状�? {result.securityTests.encryptionStatus ? '已启�? : '未启�?}
                       </p>
                     </div>
                   )}

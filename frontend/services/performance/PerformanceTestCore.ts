@@ -495,7 +495,7 @@ export class PerformanceTestCore {
         loadTime: Math.round(responseTime + this.estimateResourceLoadTime(resources)),
         domContentLoaded: Math.round(responseTime * 0.8),
         ttfb: Math.round(responseTime * 0.3),
-        pageSize: pageSize,
+        pageSize,
         requestCount: resources.total,
         responseTime: Math.round(responseTime),
         transferSize: Math.round(pageSize * 0.8) // 估算压缩后大小

@@ -66,7 +66,7 @@ const StressChart: React.FC<StressChartProps> = ({
         // 订阅测试数据
         ws.send(JSON.stringify({
           type: 'subscribe',
-          testId: testId,
+          testId,
           dataType: 'stress_test_progress'
         }));
       };

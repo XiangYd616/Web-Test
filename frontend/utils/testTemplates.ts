@@ -21,7 +21,7 @@ export const stressTestTemplates: TestTemplate[] = [
   {
     id: 'light-load',
     name: '轻量测试',
-    description: '适合初次测试或小型网站的轻量级压力测试',
+    description: '适合初次测试或小型网站的轻量级压力测�?,
     category: 'load',
     config: {
       users: 5,
@@ -33,7 +33,7 @@ export const stressTestTemplates: TestTemplate[] = [
       thinkTime: 1,
       warmupDuration: 0
     },
-    tags: ['初学者', '快速测试', '小型网站'],
+    tags: ['初学�?, '快速测�?, '小型网站'],
     difficulty: 'beginner'
   },
   {
@@ -56,7 +56,7 @@ export const stressTestTemplates: TestTemplate[] = [
   },
   {
     id: 'heavy-load',
-    name: '重负载测试',
+    name: '重负载测�?,
     description: '高强度压力测试，用于测试系统在高负载下的表现',
     category: 'stress',
     config: {
@@ -69,12 +69,12 @@ export const stressTestTemplates: TestTemplate[] = [
       thinkTime: 2,
       warmupDuration: 10
     },
-    tags: ['高负载', '压力测试', '性能极限'],
+    tags: ['高负�?, '压力测试', '性能极限'],
     difficulty: 'advanced'
   },
   {
     id: 'spike-test',
-    name: '峰值测试',
+    name: '峰值测�?,
     description: '模拟突发流量，测试系统应对流量激增的能力',
     category: 'spike',
     config: {
@@ -87,12 +87,12 @@ export const stressTestTemplates: TestTemplate[] = [
       thinkTime: 0,
       warmupDuration: 0
     },
-    tags: ['突发流量', '峰值测试', '弹性测试'],
+    tags: ['突发流量', '峰值测�?, '弹性测�?],
     difficulty: 'advanced'
   },
   {
     id: 'endurance-test',
-    name: '耐久性测试',
+    name: '耐久性测�?,
     description: '长时间运行测试，检查系统的稳定性和内存泄漏',
     category: 'endurance',
     config: {
@@ -105,13 +105,13 @@ export const stressTestTemplates: TestTemplate[] = [
       thinkTime: 3,
       warmupDuration: 15
     },
-    tags: ['长时间测试', '稳定性', '内存泄漏'],
+    tags: ['长时间测�?, '稳定�?, '内存泄漏'],
     difficulty: 'advanced'
   },
   {
     id: 'api-load-test',
     name: 'API负载测试',
-    description: '专门针对API接口的负载测试模板',
+    description: '专门针对API接口的负载测试模�?,
     category: 'load',
     config: {
       users: 30,
@@ -128,7 +128,7 @@ export const stressTestTemplates: TestTemplate[] = [
   },
   {
     id: 'mobile-optimized',
-    name: '移动端优化测试',
+    name: '移动端优化测�?,
     description: '模拟移动设备的网络条件和使用模式',
     category: 'load',
     config: {
@@ -141,12 +141,12 @@ export const stressTestTemplates: TestTemplate[] = [
       thinkTime: 2,
       warmupDuration: 3
     },
-    tags: ['移动端', '慢网络', '用户体验'],
+    tags: ['移动�?, '慢网�?, '用户体验'],
     difficulty: 'intermediate'
   },
   {
     id: 'e-commerce-peak',
-    name: '电商峰值测试',
+    name: '电商峰值测�?,
     description: '模拟电商网站在促销活动期间的高并发场景',
     category: 'spike',
     config: {
@@ -159,24 +159,24 @@ export const stressTestTemplates: TestTemplate[] = [
       thinkTime: 1,
       warmupDuration: 5
     },
-    tags: ['电商', '促销活动', '高并发'],
+    tags: ['电商', '促销活动', '高并�?],
     difficulty: 'advanced'
   }
 ];
 
-export const _getTemplateById = (id: string): TestTemplate | undefined => {
+const getTemplateById = (id: string): TestTemplate | undefined => {
   return stressTestTemplates.find(template => template.id === id);
 };
 
-export const _getTemplatesByCategory = (category: TestTemplate['category']): TestTemplate[] => {
+const getTemplatesByCategory = (category: TestTemplate['category']): TestTemplate[] => {
   return stressTestTemplates.filter(template => template.category === category);
 };
 
-export const _getTemplatesByDifficulty = (difficulty: TestTemplate['difficulty']): TestTemplate[] => {
+const getTemplatesByDifficulty = (difficulty: TestTemplate['difficulty']): TestTemplate[] => {
   return stressTestTemplates.filter(template => template.difficulty === difficulty);
 };
 
-export const _searchTemplates = (query: string): TestTemplate[] => {
+const searchTemplates = (query: string): TestTemplate[] => {
   const lowercaseQuery = query.toLowerCase();
   return stressTestTemplates.filter(template =>
     template.name.toLowerCase().includes(lowercaseQuery) ||
@@ -185,7 +185,7 @@ export const _searchTemplates = (query: string): TestTemplate[] => {
   );
 };
 
-export const _getRecommendedTemplates = (userLevel: 'beginner' | 'intermediate' | 'advanced'): TestTemplate[] => {
+const getRecommendedTemplates = (userLevel: 'beginner' | 'intermediate' | 'advanced'): TestTemplate[] => {
   const levelOrder = { beginner: 1, intermediate: 2, advanced: 3 };
   const userLevelValue = levelOrder[userLevel];
 
@@ -195,12 +195,12 @@ export const _getRecommendedTemplates = (userLevel: 'beginner' | 'intermediate' 
   });
 };
 
-export const _getTemplateCategories = (): Array<{ value: TestTemplate['category'], label: string, description: string }> => {
+const getTemplateCategories = (): Array<{ value: TestTemplate['category'], label: string, description: string }> => {
   return [
-    { value: 'load', label: '负载测试', description: '测试系统在预期负载下的表现' },
-    { value: 'stress', label: '压力测试', description: '测试系统在极限负载下的表现' },
-    { value: 'spike', label: '峰值测试', description: '测试系统应对突发流量的能力' },
-    { value: 'volume', label: '容量测试', description: '测试系统处理大量数据的能力' },
-    { value: 'endurance', label: '耐久性测试', description: '测试系统长时间运行的稳定性' }
+    { value: 'load', label: '负载测试', description: '测试系统在预期负载下的表�? },
+    { value: 'stress', label: '压力测试', description: '测试系统在极限负载下的表�? },
+    { value: 'spike', label: '峰值测�?, description: '测试系统应对突发流量的能�? },
+    { value: 'volume', label: '容量测试', description: '测试系统处理大量数据的能�? },
+    { value: 'endurance', label: '耐久性测�?, description: '测试系统长时间运行的稳定�? }
   ];
 };

@@ -21,7 +21,7 @@ export * from './errorHandler';
 
 // 默认导出
 // 创建默认实例
-import { apiService } from './apiService';
-const apiService = new apiService();
-export default apiService;
+import { ApiService } from './apiService';
+const apiServiceInstance = new ApiService();
+export default apiServiceInstance;
 

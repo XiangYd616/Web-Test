@@ -259,7 +259,7 @@ class TestApiService implements TestApiClient {
       const backendRequest = {
         testType: config?.testType,
         url: config?.target,
-        config: config,
+        config,
         testName: `${config?.testType}_test_${Date.now()}`,
         userId: user.id,
         userEmail: user.email
@@ -278,7 +278,7 @@ class TestApiService implements TestApiClient {
           endTime: response.data.completed_at,
           results: response.data.result,
           error: response.data.error,
-          config: config
+          config
         };
 
         // 记录成功日志
@@ -639,8 +639,8 @@ class TestApiService implements TestApiClient {
       ...result,
       data: {
         ...result?.data,
-        test_type: test_type,
-        target_url: target_url,
+        test_type,
+        target_url,
         created_at: new Date().toISOString(),
         status: result?.data.status === TestStatus.RUNNING ? 'running' :
           result?.data.status === TestStatus.COMPLETED ? 'completed' :
@@ -781,7 +781,7 @@ class TestApiService implements TestApiClient {
     if (response.success && response.data) {
       const testExecution: TestExecution = {
         id: response.data.id || testId,
-        testType: testType,
+        testType,
         status: response.data.status as TestStatus,
         progress: response.data.progress || 0,
         startTime: response.data.started_at || new Date().toISOString(),

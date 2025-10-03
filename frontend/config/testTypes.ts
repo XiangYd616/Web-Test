@@ -12,7 +12,7 @@ import { TestTypeConfig } from '../components/testing/UniversalTestPage';
 export const stressTestConfig: TestTypeConfig = {
   id: 'stress',
   name: '压力测试',
-  description: '测试系统在高负载下的性能表现和稳定性',
+  description: '测试系统在高负载下的性能表现和稳定�?,
   icon: Zap,
   color: 'red',
   defaultConfig: {
@@ -23,7 +23,7 @@ export const stressTestConfig: TestTypeConfig = {
     rampUpTime: 10,
     testType: 'load',
     requestsPerSecond: 100,
-    timeout: process.env.REQUEST_TIMEOUT || 30000,
+    timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
     headers: {},
     body: '',
     enableAdvanced: false,
@@ -67,54 +67,54 @@ export const stressTestConfig: TestTypeConfig = {
         options: [
           { value: 'load', label: '负载测试 - 测试预期负载下的表现' },
           { value: 'stress', label: '压力测试 - 测试系统极限' },
-          { value: 'spike', label: '峰值测试 - 测试突发流量' },
+          { value: 'spike', label: '峰值测�?- 测试突发流量' },
           { value: 'volume', label: '容量测试 - 测试大量数据处理' },
-          { value: 'endurance', label: '耐久测试 - 长时间运行测试' }
+          { value: 'endurance', label: '耐久测试 - 长时间运行测�? }
         ]
       },
       {
         key: 'concurrentUsers',
         type: 'number',
-        label: '并发用户数',
+        label: '并发用户�?,
         required: true,
         min: 1,
         max: 10000,
         validation: [
           { type: 'min', value: 1, message: '并发用户数至少为1' },
-          { type: 'max', value: 10000, message: '并发用户数不能超过10000' }
+          { type: 'max', value: 10000, message: '并发用户数不能超�?0000' }
         ]
       },
       {
         key: 'requestsPerSecond',
         type: 'number',
-        label: '目标RPS (请求/秒)',
+        label: '目标RPS (请求/�?',
         required: true,
         min: 1,
         max: 100000,
         validation: [
-          { type: 'min', value: 1, message: 'RPS至少为1' },
+          { type: 'min', value: 1, message: 'RPS至少�?' },
           { type: 'max', value: 100000, message: 'RPS不能超过100000' }
         ]
       },
       {
         key: 'duration',
         type: 'number',
-        label: '测试时长(秒)',
+        label: '测试时长(�?',
         required: true,
         min: 10,
         max: 3600,
         validation: [
-          { type: 'min', value: 10, message: '测试时长至少10秒' },
+          { type: 'min', value: 10, message: '测试时长至少10�? },
           { type: 'max', value: 3600, message: '测试时长不能超过1小时' }
         ]
       },
       {
         key: 'rampUpTime',
         type: 'number',
-        label: '爬升时间(秒)',
+        label: '爬升时间(�?',
         min: 0,
         max: 300,
-        placeholder: '逐步增加负载的时间'
+        placeholder: '逐步增加负载的时�?
       },
       {
         key: 'timeout',
@@ -151,7 +151,7 @@ export const stressTestConfig: TestTypeConfig = {
       {
         key: 'body',
         type: 'textarea',
-        label: '请求体',
+        label: '请求�?,
         placeholder: '{\n  "key": "value"\n}',
         dependencies: [
           {
@@ -174,7 +174,7 @@ export const stressTestConfig: TestTypeConfig = {
       {
         key: 'followRedirects',
         type: 'checkbox',
-        label: '跟随重定向',
+        label: '跟随重定�?,
         dependencies: [
           {
             field: 'enableAdvanced',
@@ -247,17 +247,17 @@ export const stressTestConfig: TestTypeConfig = {
       },
       {
         key: 'throughput',
-        title: '吞吐量趋势',
+        title: '吞吐量趋�?,
         type: 'chart'
       },
       {
         key: 'errorRate',
-        title: '错误率分析',
+        title: '错误率分�?,
         type: 'chart'
       },
       {
         key: 'concurrentUsers',
-        title: '并发用户数',
+        title: '并发用户�?,
         type: 'chart'
       },
       {
@@ -276,19 +276,19 @@ export const stressTestConfig: TestTypeConfig = {
       {
         key: 'throughputChart',
         type: 'line',
-        title: '吞吐量趋势',
+        title: '吞吐量趋�?,
         dataKey: 'metrics.throughput'
       },
       {
         key: 'errorRateChart',
         type: 'bar',
-        title: '错误率',
+        title: '错误�?,
         dataKey: 'metrics.errorRate'
       },
       {
         key: 'usersChart',
         type: 'area',
-        title: '并发用户数',
+        title: '并发用户�?,
         dataKey: 'metrics.activeUsers'
       }
     ],
@@ -297,12 +297,12 @@ export const stressTestConfig: TestTypeConfig = {
       { key: 'successfulRequests', label: '成功请求', format: 'number', color: 'green' },
       { key: 'failedRequests', label: '失败请求', format: 'number', color: 'red' },
       { key: 'avgResponseTime', label: '平均响应时间', format: 'time', color: 'yellow' },
-      { key: 'minResponseTime', label: '最小响应时间', format: 'time', color: 'green' },
-      { key: 'maxResponseTime', label: '最大响应时间', format: 'time', color: 'red' },
-      { key: 'percentile95', label: '95百分位', format: 'time', color: 'orange' },
-      { key: 'percentile99', label: '99百分位', format: 'time', color: 'red' },
-      { key: 'throughput', label: '吞吐量(req/s)', format: 'number', color: 'purple' },
-      { key: 'errorRate', label: '错误率', format: 'percentage', color: 'red' }
+      { key: 'minResponseTime', label: '最小响应时�?, format: 'time', color: 'green' },
+      { key: 'maxResponseTime', label: '最大响应时�?, format: 'time', color: 'red' },
+      { key: 'percentile95', label: '95百分�?, format: 'time', color: 'orange' },
+      { key: 'percentile99', label: '99百分�?, format: 'time', color: 'red' },
+      { key: 'throughput', label: '吞吐�?req/s)', format: 'number', color: 'purple' },
+      { key: 'errorRate', label: '错误�?, format: 'percentage', color: 'red' }
     ]
   }
 };
@@ -313,7 +313,7 @@ export const stressTestConfig: TestTypeConfig = {
 export const apiTestConfig: TestTypeConfig = {
   id: 'api',
   name: 'API测试',
-  description: '测试API接口的功能、性能和可靠性',
+  description: '测试API接口的功能、性能和可靠�?,
   icon: Code,
   color: 'blue',
   defaultConfig: {
@@ -374,7 +374,7 @@ export const apiTestConfig: TestTypeConfig = {
       },
       {
         key: 'security',
-        title: '安全检查',
+        title: '安全检�?,
         type: 'cards'
       }
     ]
@@ -410,9 +410,9 @@ export const performanceTestConfig: TestTypeConfig = {
         type: 'select',
         label: '设备类型',
         options: [
-          { value: 'desktop', label: '桌面端' },
-          { value: 'mobile', label: '移动端' },
-          { value: 'tablet', label: '平板端' }
+          { value: 'desktop', label: '桌面�? },
+          { value: 'mobile', label: '移动�? },
+          { value: 'tablet', label: '平板�? }
         ]
       },
       {
@@ -420,9 +420,9 @@ export const performanceTestConfig: TestTypeConfig = {
         type: 'select',
         label: '网络条件',
         options: [
-          { value: 'fast-3g', label: '快速3G' },
-          { value: 'slow-3g', label: '慢速3G' },
-          { value: 'no-throttling', label: '无限制' }
+          { value: 'fast-3g', label: '快�?G' },
+          { value: 'slow-3g', label: '慢�?G' },
+          { value: 'no-throttling', label: '无限�? }
         ]
       }
     ]
@@ -436,7 +436,7 @@ export const performanceTestConfig: TestTypeConfig = {
       },
       {
         key: 'timeline',
-        title: '加载时间线',
+        title: '加载时间�?,
         type: 'chart'
       }
     ]
@@ -444,18 +444,17 @@ export const performanceTestConfig: TestTypeConfig = {
 };
 
 /**
- * 数据库测试配置
- */
+ * 数据库测试配�? */
 export const databaseTestConfig: TestTypeConfig = {
   id: 'database',
-  name: '数据库测试',
-  description: '测试数据库连接、性能和安全性',
+  name: '数据库测�?,
+  description: '测试数据库连接、性能和安全�?,
   icon: Database,
   color: 'purple',
   defaultConfig: {
     connectionString: '',
     testType: 'comprehensive',
-    timeout: process.env.REQUEST_TIMEOUT || 30000,
+    timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
     maxConnections: 10,
     includePerformanceTests: true,
     includeSecurityTests: true
@@ -465,7 +464,7 @@ export const databaseTestConfig: TestTypeConfig = {
       {
         key: 'connectionString',
         type: 'text',
-        label: '连接字符串',
+        label: '连接字符�?,
         placeholder: 'postgresql://user:password@host:port/database',
         required: true
       },
@@ -499,8 +498,7 @@ export const databaseTestConfig: TestTypeConfig = {
 };
 
 /**
- * 所有测试类型配置
- */
+ * 所有测试类型配�? */
 export const testTypeConfigs: Record<string, TestTypeConfig> = {
   stress: stressTestConfig,
   api: apiTestConfig,
@@ -512,13 +510,12 @@ export const testTypeConfigs: Record<string, TestTypeConfig> = {
 /**
  * 获取测试类型配置
  */
-export const _getTestTypeConfig = (testTypeId: string): TestTypeConfig | null => {
+const getTestTypeConfig = (testTypeId: string): TestTypeConfig | null => {
   return testTypeConfigs[testTypeId] || null;
 };
 
 /**
- * 获取所有测试类型列表
- */
-export const _getAllTestTypes = (): TestTypeConfig[] => {
+ * 获取所有测试类型列�? */
+const getAllTestTypes = (): TestTypeConfig[] => {
   return Object.values(testTypeConfigs);
 };

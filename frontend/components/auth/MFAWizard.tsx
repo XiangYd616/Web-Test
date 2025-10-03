@@ -45,7 +45,7 @@ interface FeatureItem {
   description: string;
 }
 
-// ==================== 主组件 ====================
+// ==================== 主组�?====================
 
 export const MFAWizard: React.FC<MFAWizardProps> = ({
   userId,
@@ -55,13 +55,13 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
   className = ''
 }) => {
   const [currentStep, setCurrentStep] = useState<WizardStep>('intro');
-  const [setupComplete, setSetupComplete] = useState(false);
+  const [_setupComplete, setSetupComplete] = useState(false);
 
   const steps: Record<WizardStep, { title: string; description: string }> = {
-    intro: { title: '欢迎使用多因素认证', description: '提升账户安全性的重要一步' },
-    benefits: { title: '了解MFA的优势', description: '为什么需要双因素认证' },
-    setup: { title: '设置身份验证器', description: '配置您的验证应用' },
-    verify: { title: '验证设置', description: '确认一切工作正常' },
+    intro: { title: '欢迎使用多因素认�?, description: '提升账户安全性的重要一�? },
+    benefits: { title: '了解MFA的优�?, description: '为什么需要双因素认证' },
+    setup: { title: '设置身份验证�?, description: '配置您的验证应用' },
+    verify: { title: '验证设置', description: '确认一切工作正�? },
     complete: { title: '设置完成', description: '您的账户现在更安全了' }
   };
 
@@ -73,30 +73,30 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
     },
     {
       icon: <Key className="w-8 h-8 text-green-400" />,
-      title: '防止未授权访问',
-      description: '每次登录都需要您的设备生成的唯一验证码'
+      title: '防止未授权访�?,
+      description: '每次登录都需要您的设备生成的唯一验证�?
     },
     {
       icon: <Zap className="w-8 h-8 text-yellow-400" />,
-      title: '快速便捷',
-      description: '使用身份验证器应用只需几秒钟即可完成验证'
+      title: '快速便�?,
+      description: '使用身份验证器应用只需几秒钟即可完成验�?
     }
   ];
 
   const features: FeatureItem[] = [
     {
       icon: <Smartphone className="w-6 h-6 text-blue-400" />,
-      title: '多种身份验证器支持',
-      description: 'Google Authenticator、Microsoft Authenticator、Authy等'
+      title: '多种身份验证器支�?,
+      description: 'Google Authenticator、Microsoft Authenticator、Authy�?
     },
     {
       icon: <Download className="w-6 h-6 text-green-400" />,
-      title: '备用码保护',
+      title: '备用码保�?,
       description: '提供备用恢复代码，防止设备丢失时无法登录'
     },
     {
       icon: <Users className="w-6 h-6 text-purple-400" />,
-      title: '企业级安全',
+      title: '企业级安�?,
       description: '符合行业安全标准，保护企业和个人数据'
     }
   ];
@@ -178,8 +178,8 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
           保护您的 TestWeb 账户
         </h1>
         <p className="text-gray-400 text-lg leading-relaxed">
-          通过启用多因素认证(MFA)，为您的账户添加额外的安全保护层。
-          这只需要几分钟时间，但能大大提高您账户的安全性。
+          通过启用多因素认�?MFA)，为您的账户添加额外的安全保护层�?
+          这只需要几分钟时间，但能大大提高您账户的安全性�?
         </p>
       </div>
 
@@ -187,10 +187,10 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
         <div className="flex items-start space-x-3">
           <ShieldCheck className="w-6 h-6 text-blue-400 mt-0.5" />
           <div className="text-left">
-            <h3 className="font-medium text-blue-200 mb-2">为什么选择MFA？</h3>
+            <h3 className="font-medium text-blue-200 mb-2">为什么选择MFA�?/h3>
             <p className="text-blue-300 text-sm leading-relaxed">
-              根据研究，启用MFA可以阻止99.9%的自动化攻击。即使您的密码被泄露，
-              攻击者仍然无法访问您的账户。
+              根据研究，启用MFA可以阻止99.9%的自动化攻击。即使您的密码被泄露�?
+              攻击者仍然无法访问您的账户�?
             </p>
           </div>
         </div>
@@ -207,7 +207,7 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
           onClick={handleNext}
           className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center"
         >
-          开始设置
+          开始设�?
           <ArrowRight className="w-4 h-4 ml-2" />
         </button>
       </div>
@@ -220,8 +220,8 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
         <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <CheckCircle className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-xl font-semibold text-white mb-2">MFA的主要优势</h2>
-        <p className="text-gray-400">了解多因素认证如何保护您的账户安全</p>
+        <h2 className="text-xl font-semibold text-white mb-2">MFA的主要优�?/h2>
+        <p className="text-gray-400">了解多因素认证如何保护您的账户安�?/p>
       </div>
 
       <div className="space-y-4">
@@ -246,7 +246,7 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
       </div>
 
       <div className="bg-gray-800 rounded-lg p-4">
-        <h3 className="font-medium text-white mb-3">支持的功能</h3>
+        <h3 className="font-medium text-white mb-3">支持的功�?/h3>
         <div className="space-y-3">
           {features.map((feature, index) => (
             <div key={index} className="flex items-center space-x-3">
@@ -268,7 +268,7 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
           className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors flex items-center justify-center"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          上一步
+          上一�?
         </button>
         <button
           onClick={handleNext}
@@ -287,7 +287,7 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
         <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <QrCode className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-xl font-semibold text-white mb-2">设置身份验证器</h2>
+        <h2 className="text-xl font-semibold text-white mb-2">设置身份验证�?/h2>
         <p className="text-gray-400">按照下面的步骤配置您的身份验证器应用</p>
       </div>
 
@@ -304,7 +304,7 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
           className="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors flex items-center"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          返回上一步
+          返回上一�?
         </button>
       </div>
     </div>
@@ -318,11 +318,11 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
       
       <div>
         <h1 className="text-2xl font-bold text-white mb-4">
-          🎉 MFA设置完成！
+          🎉 MFA设置完成�?
         </h1>
         <p className="text-gray-400 text-lg leading-relaxed">
-          恭喜！您已经成功为账户启用了多因素认证。
-          您的 TestWeb 账户现在受到了额外的安全保护。
+          恭喜！您已经成功为账户启用了多因素认证�?
+          您的 TestWeb 账户现在受到了额外的安全保护�?
         </p>
       </div>
 
@@ -339,8 +339,8 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
             <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
               <Key className="w-4 h-4 text-white" />
             </div>
-            <p className="text-green-200 text-sm font-medium">备用码</p>
-            <p className="text-green-300 text-xs">已生成</p>
+            <p className="text-green-200 text-sm font-medium">备用�?/p>
+            <p className="text-green-300 text-xs">已生�?/p>
           </div>
         </div>
       </div>
@@ -351,8 +351,8 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
           <div className="text-left text-sm">
             <h3 className="font-medium text-blue-200 mb-1">下次登录提醒</h3>
             <p className="text-blue-300">
-              下次登录时，系统会要求您输入身份验证器应用中的验证码。
-              请确保您的手机上已安装并设置好了身份验证器应用。
+              下次登录时，系统会要求您输入身份验证器应用中的验证码�?
+              请确保您的手机上已安装并设置好了身份验证器应用�?
             </p>
           </div>
         </div>
@@ -374,7 +374,7 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
             重新设置
           </button>
           <button
-            onClick={() => {/* 这里可以链接到帮助页面 */}}
+            onClick={() => {/* 这里可以链接到帮助页�?*/}}
             className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm"
           >
             查看帮助
@@ -414,7 +414,7 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
           </div>
         )}
 
-        {/* 进度条 */}
+        {/* 进度�?*/}
         {currentStep !== 'intro' && currentStep !== 'complete' && renderProgressBar()}
 
         {/* 当前步骤内容 */}

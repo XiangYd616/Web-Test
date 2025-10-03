@@ -1,6 +1,5 @@
 /**
- * unifiedTestService.ts - 业务服务层
- * 
+ * unifiedTestService.ts - 业务服务�? * 
  * 文件路径: frontend\services\testing\unifiedTestService.ts
  * 创建时间: 2025-09-25
  */
@@ -41,7 +40,7 @@ export class UnifiedTestService {
 
   constructor(config: TestServiceConfig = {
     maxConcurrentTests: 5,
-    timeout: process.env.REQUEST_TIMEOUT || 30000,
+    timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
     retryAttempts: 3
   }) {
     this.config = config;
@@ -74,7 +73,7 @@ export class UnifiedTestService {
      */
   async runTest(testId: string, config: TestConfig): Promise<TestResult> {
     if (this.activeTests.size >= this.config.maxConcurrentTests) {
-      throw new Error('达到最大并发测试数量限制');
+      throw new Error('达到最大并发测试数量限�?);
     }
 
 
@@ -264,7 +263,7 @@ class CompatibilityTestEngine implements TestEngine {
       type: 'compatibility',
       status: 'passed',
       score: Math.floor(Math.random() * 30 + 70),
-      message: '兼容性测试完成',
+      message: '兼容性测试完�?,
       timestamp: Date.now(),
       details: {
         browsers: ['Chrome', 'Firefox', 'Safari', 'Edge'],

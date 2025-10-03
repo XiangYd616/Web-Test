@@ -25,29 +25,26 @@ const TestCharts = ({
   <div className="bg-white rounded-lg shadow p-6" style={{ height: height || 'auto' }}>
     <h3 className="text-lg font-semibold mb-4">测试结果图表 ({testType})</h3>
     <p className="text-gray-600">图表功能开发中... (主题: {theme || 'light'})</p>
-    {showComparison && <p className="text-sm text-blue-600 mt-2">对比模式已启用</p>}
+    {showComparison && <p className="text-sm text-blue-600 mt-2">对比模式已启�?/p>}
   </div>
 );
 
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
 
-// 兼容性测试相关类型定义
-type BrowserType = 'chrome' | 'firefox' | 'safari' | 'edge' | 'ie' | 'opera';
+// 兼容性测试相关类型定�?type BrowserType = 'chrome' | 'firefox' | 'safari' | 'edge' | 'ie' | 'opera';
 type MobileBrowserType = 'ios-safari' | 'android-chrome' | 'samsung-browser' | 'mobile-firefox';
 type DeviceType = 'desktop' | 'mobile' | 'tablet';
 type CompatibilityEngine = 'caniuse' | 'browserstack' | 'local' | 'feature-detection';
 
-// 浏览器版本信息
-interface BrowserVersion {
+// 浏览器版本信�?interface BrowserVersion {
   browser: BrowserType | MobileBrowserType;
   version: string;
   marketShare: number;
   releaseDate: string;
 }
 
-// 特性兼容性信息
-interface FeatureCompatibility {
+// 特性兼容性信�?interface FeatureCompatibility {
   feature: string;
   category: 'css' | 'javascript' | 'html5' | 'api';
   description: string;
@@ -68,12 +65,10 @@ interface LocalCompatibilityConfig {
   targetBrowsers: BrowserVersion[];
   features: string[];
   engines: CompatibilityEngine[];
-  // 从CompatibilityTestConfig继承的属性
-  browsers?: string[];
+  // 从CompatibilityTestConfig继承的属�?  browsers?: string[];
   devices?: string[];
   viewports?: unknown[];
-  // 保持向后兼容的属性
-  checkDesktop?: boolean;
+  // 保持向后兼容的属�?  checkDesktop?: boolean;
   checkMobile?: boolean;
   checkTablet?: boolean;
   checkAccessibility?: boolean;
@@ -87,8 +82,7 @@ interface LocalCompatibilityConfig {
     checkAPIs: boolean;
     checkResponsive: boolean;
     checkAccessibility: boolean;
-    // 可访问性详细配置
-    accessibilityOptions: {
+    // 可访问性详细配�?    accessibilityOptions: {
       checkWCAG: boolean;
       checkScreenReader: boolean;
       checkKeyboardNavigation: boolean;
@@ -103,8 +97,7 @@ interface LocalCompatibilityConfig {
   };
 }
 
-// 兼容性问题
-interface CompatibilityIssue {
+// 兼容性问�?interface CompatibilityIssue {
   id: string;
   feature: string;
   category: 'css' | 'javascript' | 'html5' | 'api';
@@ -122,8 +115,7 @@ interface CompatibilityIssue {
   workaround?: string;
 }
 
-// 兼容性测试结果
-interface CompatibilityResult {
+// 兼容性测试结�?interface CompatibilityResult {
   id: string;
   url: string;
   timestamp: string;
@@ -164,8 +156,7 @@ interface CompatibilityResult {
     averageSupport: number;
   };
   reportUrl?: string;
-  // 向后兼容属性
-  duration?: number;
+  // 向后兼容属�?  duration?: number;
   findings?: Array<{
     type: string;
     description: string;
@@ -185,8 +176,7 @@ interface CompatibilityHistoryItem {
   overallScore: number;
   criticalIssues: number;
   status: 'completed' | 'failed';
-  // 向后兼容属性
-  findings?: Array<{
+  // 向后兼容属�?  findings?: Array<{
     type: string;
     description: string;
     severity: 'low' | 'medium' | 'high';
@@ -195,14 +185,13 @@ interface CompatibilityHistoryItem {
 }
 
 const CompatibilityTest: React.FC = () => {
-  // 登录检查
-  const {
+  // 登录检�?  const {
     isAuthenticated,
     requireLogin,
     LoginPromptComponent
   } = useAuthCheck({
-    feature: "兼容性测试",
-    description: "使用兼容性测试功能"
+    feature: "兼容性测�?,
+    description: "使用兼容性测试功�?
   });
 
   // 用户统计
@@ -219,8 +208,7 @@ const CompatibilityTest: React.FC = () => {
     ],
     features: ['flexbox', 'css-grid', 'es6-modules', 'fetch-api', 'web-components'],
     engines: ['caniuse', 'feature-detection'],
-    // 向后兼容属性
-    checkDesktop: true,
+    // 向后兼容属�?    checkDesktop: true,
     checkMobile: true,
     checkTablet: true,
     checkAccessibility: true,
@@ -235,8 +223,7 @@ const CompatibilityTest: React.FC = () => {
       checkAPIs: true,
       checkResponsive: true,
       checkAccessibility: true,
-      // 可访问性详细配置
-      accessibilityOptions: {
+      // 可访问性详细配�?      accessibilityOptions: {
         checkWCAG: true,
         checkScreenReader: true,
         checkKeyboardNavigation: true,
@@ -247,12 +234,11 @@ const CompatibilityTest: React.FC = () => {
         checkSemanticHTML: true,
       },
       minMarketShare: 1.0,
-      timeout: process.env.REQUEST_TIMEOUT || 300000
+      timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 300000
     }
   });
 
-  // 辅助函数：生成兼容性矩阵
-  const generateCompatibilityMatrix = (features: string[], browsers: BrowserVersion[]) => {
+  // 辅助函数：生成兼容性矩�?  const generateCompatibilityMatrix = (features: string[], browsers: BrowserVersion[]) => {
     const matrix: Record<string, Record<string, { support: 'yes' | 'no' | 'partial' | 'unknown'; version: string; notes?: string }>> = {};
 
     features.forEach(feature => {
@@ -278,8 +264,7 @@ const CompatibilityTest: React.FC = () => {
       const score = Math.floor(Math.random() * 30) + 70;
       support[browser.browser] = {
         score,
-        supportedFeatures: Math.floor(score * 0.01 * 10), // 假设10个特性
-        totalFeatures: 10,
+        supportedFeatures: Math.floor(score * 0.01 * 10), // 假设10个特�?        totalFeatures: 10,
         marketShare: browser.marketShare
       };
     });
@@ -287,8 +272,7 @@ const CompatibilityTest: React.FC = () => {
     return support;
   };
 
-  // 辅助函数：生成特性支持数据
-  const generateFeatureSupport = (features: string[], testData: unknown) => {
+  // 辅助函数：生成特性支持数�?  const generateFeatureSupport = (features: string[], testData: unknown) => {
     const support: Record<string, { supportPercentage: number; supportedBrowsers: string[]; unsupportedBrowsers: string[]; partialSupport: string[] }> = {};
 
     features.forEach(feature => {
@@ -304,8 +288,7 @@ const CompatibilityTest: React.FC = () => {
     return support;
   };
 
-  // 辅助函数：生成兼容性问题
-  const generateCompatibilityIssues = (testData: unknown): CompatibilityIssue[] => {
+  // 辅助函数：生成兼容性问�?  const generateCompatibilityIssues = (testData: unknown): CompatibilityIssue[] => {
     const issues: CompatibilityIssue[] = [];
     const commonIssues = [
       {
@@ -327,7 +310,7 @@ const CompatibilityTest: React.FC = () => {
         category: 'javascript' as const,
         severity: 'medium' as const,
         affectedBrowsers: [{ browser: 'Safari', version: '10', marketShare: 2.1 }],
-        description: 'ES6模块在旧版Safari中支持有限',
+        description: 'ES6模块在旧版Safari中支持有�?,
         impact: '可能导致模块加载失败',
         solution: '使用模块打包工具如Webpack',
         polyfill: 'systemjs',
@@ -336,8 +319,7 @@ const CompatibilityTest: React.FC = () => {
       }
     ];
 
-    // 随机选择一些问题
-    const numIssues = Math.floor(Math.random() * 3);
+    // 随机选择一些问�?    const numIssues = Math.floor(Math.random() * 3);
     for (let i = 0; i < numIssues; i++) {
       if (commonIssues[i]) {
         issues?.push(commonIssues[i]);
@@ -347,15 +329,14 @@ const CompatibilityTest: React.FC = () => {
     return issues;
   };
 
-  // 辅助函数：生成建议
-  const generateRecommendations = (issues: CompatibilityIssue[]) => {
+  // 辅助函数：生成建�?  const generateRecommendations = (issues: CompatibilityIssue[]) => {
     const recommendations = [];
 
     if (issues?.length > 0) {
       recommendations?.push({
         id: 'use-polyfills',
         title: '使用Polyfills',
-        description: '为不支持的特性添加polyfill以提高兼容性',
+        description: '为不支持的特性添加polyfill以提高兼容�?,
         priority: 'high' as const,
         effort: 'medium' as const,
         impact: 'high' as const
@@ -364,8 +345,8 @@ const CompatibilityTest: React.FC = () => {
 
     recommendations?.push({
       id: 'progressive-enhancement',
-      title: '渐进式增强',
-      description: '采用渐进式增强策略，确保基本功能在所有浏览器中可用',
+      title: '渐进式增�?,
+      description: '采用渐进式增强策略，确保基本功能在所有浏览器中可�?,
       priority: 'medium' as const,
       effort: 'high' as const,
       impact: 'high' as const
@@ -374,8 +355,7 @@ const CompatibilityTest: React.FC = () => {
     return recommendations;
   };
 
-  // 兼容性测试状态管理
-  const [isRunning, setIsRunning] = useState(false);
+  // 兼容性测试状态管�?  const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [testPhase, setTestPhase] = useState<'idle' | 'analyzing' | 'testing' | 'completed'>('idle');
@@ -386,8 +366,7 @@ const CompatibilityTest: React.FC = () => {
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0);
 
-  // 真实的兼容性测试引擎集成
-  const runRealCompatibilityTest = useCallback(async (url: string, config: LocalCompatibilityConfig) => {
+  // 真实的兼容性测试引擎集�?  const runRealCompatibilityTest = useCallback(async (url: string, config: LocalCompatibilityConfig) => {
     try {
       console.log('🚀 Starting real compatibility test for:', url, 'with engine:', selectedEngine);
 
@@ -418,9 +397,8 @@ const CompatibilityTest: React.FC = () => {
     }
   }, [selectedEngine]);
 
-  // Can I Use 数据库测试
-  const runCanIUseTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
-    setCurrentStep('正在使用 Can I Use 数据库分析...');
+  // Can I Use 数据库测�?  const runCanIUseTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
+    setCurrentStep('正在使用 Can I Use 数据库分�?..');
     setProgress(20);
 
     try {
@@ -437,7 +415,7 @@ const CompatibilityTest: React.FC = () => {
       const data = await response.json();
 
       setProgress(60);
-      setCurrentStep('正在处理兼容性数据...');
+      setCurrentStep('正在处理兼容性数�?..');
 
       const result: CompatibilityResult = {
         id: `caniuse_${Date.now()}`,
@@ -456,7 +434,7 @@ const CompatibilityTest: React.FC = () => {
           affectedBrowsers: issue.affectedBrowsers || [],
           description: issue.description,
           impact: issue.impact,
-          solution: issue.solution || '请查看相关文档',
+          solution: issue.solution || '请查看相关文�?,
           polyfill: issue.polyfill,
           fallback: issue.fallback,
           workaround: issue.workaround
@@ -481,9 +459,8 @@ const CompatibilityTest: React.FC = () => {
     }
   };
 
-  // BrowserStack 真实浏览器测试
-  const runBrowserStackTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
-    setCurrentStep('正在使用 BrowserStack 进行真实浏览器测试...');
+  // BrowserStack 真实浏览器测�?  const runBrowserStackTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
+    setCurrentStep('正在使用 BrowserStack 进行真实浏览器测�?..');
     setProgress(20);
 
     try {
@@ -505,10 +482,9 @@ const CompatibilityTest: React.FC = () => {
 
       const data = await response.json();
       setProgress(60);
-      setCurrentStep('正在分析真实浏览器测试结果...');
+      setCurrentStep('正在分析真实浏览器测试结�?..');
 
-      // 生成详细的兼容性数据
-      const compatibilityMatrix = generateCompatibilityMatrix(config.features, config.targetBrowsers);
+      // 生成详细的兼容性数�?      const compatibilityMatrix = generateCompatibilityMatrix(config.features, config.targetBrowsers);
       const browserSupport = generateBrowserSupport(config.targetBrowsers, data?.data || {});
       const featureSupport = generateFeatureSupport(config.features, data?.data || {});
       const issues = generateCompatibilityIssues(data?.data || {});
@@ -547,9 +523,8 @@ const CompatibilityTest: React.FC = () => {
     }
   };
 
-  // 特性检测测试
-  const runFeatureDetectionTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
-    setCurrentStep('正在进行特性检测分析...');
+  // 特性检测测�?  const runFeatureDetectionTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
+    setCurrentStep('正在进行特性检测分�?..');
     setProgress(20);
 
     try {
@@ -571,10 +546,9 @@ const CompatibilityTest: React.FC = () => {
 
       const data = await response.json();
       setProgress(60);
-      setCurrentStep('正在分析特性支持情况...');
+      setCurrentStep('正在分析特性支持情�?..');
 
-      // 生成详细的兼容性矩阵
-      const compatibilityMatrix = generateCompatibilityMatrix(config.features, config.targetBrowsers);
+      // 生成详细的兼容性矩�?      const compatibilityMatrix = generateCompatibilityMatrix(config.features, config.targetBrowsers);
       const browserSupport = generateBrowserSupport(config.targetBrowsers, data?.data || {});
       const featureSupport = generateFeatureSupport(config.features, data?.data || {});
       const issues = generateCompatibilityIssues(data?.data || {});
@@ -613,9 +587,8 @@ const CompatibilityTest: React.FC = () => {
     }
   };
 
-  // 本地兼容性测试
-  const runLocalCompatibilityTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
-    setCurrentStep('正在进行本地兼容性分析...');
+  // 本地兼容性测�?  const runLocalCompatibilityTest = async (url: string, config: LocalCompatibilityConfig): Promise<CompatibilityResult> => {
+    setCurrentStep('正在进行本地兼容性分�?..');
     setProgress(20);
 
     try {
@@ -639,8 +612,7 @@ const CompatibilityTest: React.FC = () => {
       setProgress(60);
       setCurrentStep('正在分析本地测试结果...');
 
-      // 生成详细的兼容性数据
-      const compatibilityMatrix = generateCompatibilityMatrix(config.features, config.targetBrowsers);
+      // 生成详细的兼容性数�?      const compatibilityMatrix = generateCompatibilityMatrix(config.features, config.targetBrowsers);
       const browserSupport = generateBrowserSupport(config.targetBrowsers, data?.data || {});
       const featureSupport = generateFeatureSupport(config.features, data?.data || {});
       const issues = generateCompatibilityIssues(data?.data || {});
@@ -698,8 +670,7 @@ const CompatibilityTest: React.FC = () => {
     }
   };
 
-  // 状态管理
-  const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled'>('idle');
+  // 状态管�?  const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled'>('idle');
 
   // 历史记录处理
   const _handleTestSelect = (test: unknown) => {
@@ -713,12 +684,10 @@ const CompatibilityTest: React.FC = () => {
     // 重新运行历史测试
     if (test?.config) {
       setConfig(test?.config);
-      // 可以选择是否立即开始测试
-    }
+      // 可以选择是否立即开始测�?    }
   };
 
-  // 监听测试状态变化
-  useEffect(() => {
+  // 监听测试状态变�?  useEffect(() => {
     if (isRunning) {
       setTestStatus('running');
     } else if (results) {
@@ -728,20 +697,19 @@ const CompatibilityTest: React.FC = () => {
       const success = !error && !!results;
       const score = (results as any)?.overallScore || (results as any)?.compatibility?.score;
       const duration = (results as any)?.duration || 180; // 默认3分钟
-      recordTestCompletion('兼容性测试', success, score, duration);
+      recordTestCompletion('兼容性测�?, success, score, duration);
     } else if (error) {
       setTestStatus('failed');
 
       // 记录测试失败统计
-      recordTestCompletion('兼容性测试', false);
+      recordTestCompletion('兼容性测�?, false);
     } else {
       setTestStatus('idle');
     }
   }, [isRunning, results, error, recordTestCompletion]);
 
   const handleStartTest = async () => {
-    // 检查登录状态
-    if (!requireLogin()) {
+    // 检查登录状�?    if (!requireLogin()) {
       return;
     }
 
@@ -757,23 +725,21 @@ const CompatibilityTest: React.FC = () => {
     setProgress(0);
 
     try {
-      setCurrentStep('正在初始化兼容性测试...');
+      setCurrentStep('正在初始化兼容性测�?..');
       setProgress(10);
 
       // 生成测试ID
       const testId = `test_${Date.now()}`;
       setCurrentTestId(testId);
 
-      // 调用真实的兼容性测试引擎
-      const testResult = await runRealCompatibilityTest(config.url, config);
+      // 调用真实的兼容性测试引�?      const testResult = await runRealCompatibilityTest(config.url, config);
 
       setTestStatus('completed');
       setResults(testResult);
       setProgress(100);
       setCurrentStep('测试完成');
 
-      // 添加到测试历史
-      const historyItem: CompatibilityHistoryItem = {
+      // 添加到测试历�?      const historyItem: CompatibilityHistoryItem = {
         id: testResult.id,
         url: testResult.url,
         timestamp: testResult.timestamp,
@@ -782,20 +748,18 @@ const CompatibilityTest: React.FC = () => {
         criticalIssues: testResult.issues.filter(issue => issue.severity === 'critical').length,
         status: 'completed'
       };
-      setTestHistory(prev => [historyItem, ...prev.slice(0, 9)]); // 保留最近10条记录
-
+      setTestHistory(prev => [historyItem, ...prev.slice(0, 9)]); // 保留最�?0条记�?
       // 记录测试完成
-      recordTestCompletion('兼容性测试', true, testResult.overallScore, Math.floor(Date.now() / 1000));
+      recordTestCompletion('兼容性测�?, true, testResult.overallScore, Math.floor(Date.now() / 1000));
 
-      console.log('✅ Compatibility test completed successfully:', testResult);
+      console.log('�?Compatibility test completed successfully:', testResult);
     } catch (error: unknown) {
-      console.error('❌ Compatibility test failed:', error);
+      console.error('�?Compatibility test failed:', error);
       setTestStatus('failed');
-      setError(error.message || '兼容性测试失败，请稍后重试');
+      setError(error.message || '兼容性测试失败，请稍后重�?);
       setProgress(0);
 
-      // 添加失败记录到历史
-      if (currentTestId) {
+      // 添加失败记录到历�?      if (currentTestId) {
         const failedItem: CompatibilityHistoryItem = {
           id: currentTestId,
           url: config.url,
@@ -883,8 +847,7 @@ const CompatibilityTest: React.FC = () => {
                 <div>
                   <div className="flex items-center space-x-3">
                     <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-100 to-blue-100 bg-clip-text text-transparent">
-                      兼容性测试
-                    </h2>
+                      兼容性测�?                    </h2>
                     <div className="flex items-center space-x-1">
                       <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
@@ -893,7 +856,7 @@ const CompatibilityTest: React.FC = () => {
                   </div>
                   <p className="text-gray-300 text-sm mt-1 flex items-center space-x-2">
                     <Globe className="w-4 h-4 text-purple-400" />
-                    <span>检测网站在不同浏览器和设备上的兼容性</span>
+                    <span>检测网站在不同浏览器和设备上的兼容�?/span>
                   </p>
 
                   {/* 状态指示器 */}
@@ -907,10 +870,10 @@ const CompatibilityTest: React.FC = () => {
                         }`}></div>
                       <span className="text-gray-400">
                         {testStatus === 'running' ? '兼容性检测中' :
-                          testStatus === 'completed' ? '检测完成' :
-                            testStatus === 'failed' ? '检测失败' :
+                          testStatus === 'completed' ? '检测完�? :
+                            testStatus === 'failed' ? '检测失�? :
                               testStatus === 'cancelled' ? '检测已取消' :
-                                '等待开始'}
+                                '等待开�?}
                       </span>
                     </div>
 
@@ -941,7 +904,7 @@ const CompatibilityTest: React.FC = () => {
                       }`}
                   >
                     <Grid className="w-4 h-4" />
-                    <span>开始检测</span>
+                    <span>开始检�?/span>
                   </button>
                 ) : testStatus === 'running' ? (
                   <div className="flex items-center space-x-2">
@@ -964,7 +927,7 @@ const CompatibilityTest: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
                       <CheckCircle className="w-4 h-4 text-green-400" />
-                      <span className="text-sm text-green-300 font-medium">检测完成</span>
+                      <span className="text-sm text-green-300 font-medium">检测完�?/span>
                     </div>
                     <button
                       type="button"
@@ -975,14 +938,14 @@ const CompatibilityTest: React.FC = () => {
                       className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
                     >
                       <Grid className="w-4 h-4" />
-                      <span>重新检测</span>
+                      <span>重新检�?/span>
                     </button>
                   </div>
                 ) : testStatus === 'failed' ? (
                   <div className="flex items-center space-x-2">
                     <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
                       <XCircle className="w-4 h-4 text-red-400" />
-                      <span className="text-sm text-red-300 font-medium">检测失败</span>
+                      <span className="text-sm text-red-300 font-medium">检测失�?/span>
                     </div>
                     <button
                       type="button"
@@ -1031,7 +994,7 @@ const CompatibilityTest: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* 进度条 */}
+                  {/* 进度�?*/}
                   <div className="mb-3">
                     <ProgressBar
                       value={progress}
@@ -1043,7 +1006,7 @@ const CompatibilityTest: React.FC = () => {
 
                   <p className="text-sm text-purple-300">{currentStep}</p>
 
-                  {/* 测试阶段和预计时间 */}
+                  {/* 测试阶段和预计时�?*/}
                   <div className="flex items-center justify-between mt-2 text-xs text-purple-200">
                     <div className="flex items-center space-x-2">
                       <Clock className="w-3 h-3" />
@@ -1051,8 +1014,7 @@ const CompatibilityTest: React.FC = () => {
                     </div>
                     {estimatedTimeRemaining > 0 && (
                       <span>
-                        预计剩余: {Math.ceil(estimatedTimeRemaining / 1000)}秒
-                      </span>
+                        预计剩余: {Math.ceil(estimatedTimeRemaining / 1000)}�?                      </span>
                     )}
                   </div>
                 </div>
@@ -1065,8 +1027,7 @@ const CompatibilityTest: React.FC = () => {
                       <span className="text-sm text-green-300 font-medium">后台运行模式</span>
                     </div>
                     <p className="text-xs text-green-200 mt-1">
-                      测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
-                    </p>
+                      测试正在后台运行，您可以自由切换到其他页面，测试不会中断�?                    </p>
                   </div>
                 )}
               </div>
@@ -1105,15 +1066,15 @@ const CompatibilityTest: React.FC = () => {
                       className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       aria-label="选择测试引擎"
                     >
-                      <option value="caniuse">Can I Use 数据库</option>
+                      <option value="caniuse">Can I Use 数据�?/option>
                       <option value="browserstack">BrowserStack 实时测试</option>
-                      <option value="feature-detection">特性检测引擎</option>
-                      <option value="local">本地兼容性分析</option>
+                      <option value="feature-detection">特性检测引�?/option>
+                      <option value="local">本地兼容性分�?/option>
                     </select>
                     <p className="text-xs text-gray-400 mt-1">
-                      {selectedEngine === 'caniuse' && '基于 Can I Use 数据库进行兼容性分析'}
-                      {selectedEngine === 'browserstack' && '使用 BrowserStack 进行真实浏览器测试'}
-                      {selectedEngine === 'feature-detection' && '通过特性检测分析兼容性'}
+                      {selectedEngine === 'caniuse' && '基于 Can I Use 数据库进行兼容性分�?}
+                      {selectedEngine === 'browserstack' && '使用 BrowserStack 进行真实浏览器测�?}
+                      {selectedEngine === 'feature-detection' && '通过特性检测分析兼容�?}
                       {selectedEngine === 'local' && '本地分析，无需网络连接'}
                     </p>
                   </div>
@@ -1132,7 +1093,7 @@ const CompatibilityTest: React.FC = () => {
                           className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                         />
                         <Monitor className="w-4 h-4 ml-2 mr-1 text-gray-300" />
-                        <span className="text-sm text-gray-300">桌面端</span>
+                        <span className="text-sm text-gray-300">桌面�?/span>
                       </label>
                       <label className="flex items-center">
                         <input
@@ -1142,7 +1103,7 @@ const CompatibilityTest: React.FC = () => {
                           className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                         />
                         <Tablet className="w-4 h-4 ml-2 mr-1 text-gray-300" />
-                        <span className="text-sm text-gray-300">平板端</span>
+                        <span className="text-sm text-gray-300">平板�?/span>
                       </label>
                       <label className="flex items-center">
                         <input
@@ -1152,7 +1113,7 @@ const CompatibilityTest: React.FC = () => {
                           className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                         />
                         <Smartphone className="w-4 h-4 ml-2 mr-1 text-gray-300" />
-                        <span className="text-sm text-gray-300">移动端</span>
+                        <span className="text-sm text-gray-300">移动�?/span>
                       </label>
                     </div>
                   </div>
@@ -1160,8 +1121,7 @@ const CompatibilityTest: React.FC = () => {
                   {/* 浏览器选择 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      浏览器
-                    </label>
+                      浏览�?                    </label>
                     <div className="space-y-2">
                       {['Chrome', 'Firefox', 'Safari', 'Edge'].map(browser => (
                         <label key={browser} className="flex items-center">
@@ -1184,7 +1144,7 @@ const CompatibilityTest: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* 可访问性检查 */}
+                  {/* 可访问性检�?*/}
                   <div>
                     <label className="flex items-center mb-3">
                       <input
@@ -1201,7 +1161,7 @@ const CompatibilityTest: React.FC = () => {
                         className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                       />
                       <Eye className="w-4 h-4 ml-2 mr-1 text-gray-300" />
-                      <span className="text-sm text-gray-300 font-medium">可访问性检查</span>
+                      <span className="text-sm text-gray-300 font-medium">可访问性检�?/span>
                     </label>
 
                     {/* 可访问性详细选项 */}
@@ -1223,7 +1183,7 @@ const CompatibilityTest: React.FC = () => {
                             }))}
                             className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                           />
-                          <span className="ml-2 text-xs text-gray-300">WCAG 2.1 标准检查</span>
+                          <span className="ml-2 text-xs text-gray-300">WCAG 2.1 标准检�?/span>
                         </label>
                         <label className="flex items-center">
                           <input
@@ -1241,7 +1201,7 @@ const CompatibilityTest: React.FC = () => {
                             }))}
                             className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                           />
-                          <span className="ml-2 text-xs text-gray-300">屏幕阅读器兼容性</span>
+                          <span className="ml-2 text-xs text-gray-300">屏幕阅读器兼容�?/span>
                         </label>
                         <label className="flex items-center">
                           <input
@@ -1277,7 +1237,7 @@ const CompatibilityTest: React.FC = () => {
                             }))}
                             className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                           />
-                          <span className="ml-2 text-xs text-gray-300">颜色对比度检查</span>
+                          <span className="ml-2 text-xs text-gray-300">颜色对比度检�?/span>
                         </label>
                         <label className="flex items-center">
                           <input
@@ -1295,7 +1255,7 @@ const CompatibilityTest: React.FC = () => {
                             }))}
                             className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                           />
-                          <span className="ml-2 text-xs text-gray-300">图片Alt文本检查</span>
+                          <span className="ml-2 text-xs text-gray-300">图片Alt文本检�?/span>
                         </label>
                         <label className="flex items-center">
                           <input
@@ -1313,7 +1273,7 @@ const CompatibilityTest: React.FC = () => {
                             }))}
                             className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                           />
-                          <span className="ml-2 text-xs text-gray-300">ARIA标签检查</span>
+                          <span className="ml-2 text-xs text-gray-300">ARIA标签检�?/span>
                         </label>
                         <label className="flex items-center">
                           <input
@@ -1331,7 +1291,7 @@ const CompatibilityTest: React.FC = () => {
                             }))}
                             className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                           />
-                          <span className="ml-2 text-xs text-gray-300">语义化HTML检查</span>
+                          <span className="ml-2 text-xs text-gray-300">语义化HTML检�?/span>
                         </label>
                       </div>
                     )}
@@ -1349,7 +1309,7 @@ const CompatibilityTest: React.FC = () => {
                   <div className="flex items-center justify-center h-64 text-gray-400">
                     <div className="text-center">
                       <Monitor className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-                      <p>点击"开始测试"查看兼容性结果</p>
+                      <p>点击"开始测�?查看兼容性结�?/p>
                     </div>
                   </div>
                 ) : results ? (
@@ -1359,18 +1319,17 @@ const CompatibilityTest: React.FC = () => {
                       <div className={`text-4xl font-bold ${getScoreColor(results.overallScore)}`}>
                         {Math.round(results.overallScore)}
                       </div>
-                      <div className="text-sm text-gray-300 mt-1">总体兼容性评分</div>
+                      <div className="text-sm text-gray-300 mt-1">总体兼容性评�?/div>
                       <div className="text-xs text-gray-400 mt-2">
                         测试时间: {results.duration ? `${results.duration.toFixed(1)}秒` : '未知'}
                       </div>
                     </div>
 
-                    {/* 浏览器兼容性详情 */}
+                    {/* 浏览器兼容性详�?*/}
                     <div className="bg-gray-700/30 rounded-lg p-6">
                       <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                         <Globe className="w-5 h-5 mr-2" />
-                        浏览器兼容性详情
-                      </h3>
+                        浏览器兼容性详�?                      </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {Object.entries((results as any)?.browserCompatibility || {}).map(([browser, score]) => (
                           <div key={browser} className="bg-gray-700/50 rounded-lg p-4">
@@ -1390,12 +1349,11 @@ const CompatibilityTest: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 设备兼容性 */}
+                    {/* 设备兼容�?*/}
                     <div className="bg-gray-700/30 rounded-lg p-6">
                       <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                         <Monitor className="w-5 h-5 mr-2" />
-                        设备兼容性
-                      </h3>
+                        设备兼容�?                      </h3>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {Object.entries((results as any)?.deviceCompatibility || {}).map(([device, score]) => {
                           const DeviceIcon = device === 'desktop' ? Monitor :
@@ -1406,8 +1364,8 @@ const CompatibilityTest: React.FC = () => {
                                 <div className="flex items-center">
                                   <DeviceIcon className="w-4 h-4 mr-2 text-gray-400" />
                                   <span className="text-sm font-medium text-gray-300">
-                                    {device === 'desktop' ? '桌面端' :
-                                      device === 'tablet' ? '平板端' : '移动端'}
+                                    {device === 'desktop' ? '桌面�? :
+                                      device === 'tablet' ? '平板�? : '移动�?}
                                   </span>
                                 </div>
                                 <span className={`text-sm font-bold ${getScoreColor(Number(score))}`}>
@@ -1425,13 +1383,12 @@ const CompatibilityTest: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 兼容性问题 */}
+                    {/* 兼容性问�?*/}
                     {results.issues && results.issues.length > 0 && (
                       <div className="bg-gray-700/30 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                           <AlertTriangle className="w-5 h-5 mr-2 text-yellow-500" />
-                          发现的兼容性问题
-                        </h3>
+                          发现的兼容性问�?                        </h3>
                         <div className="space-y-3">
                           {results.issues.slice(0, 10).map((issue: unknown, index: number) => (
                             <div key={index} className={`p-3 rounded-lg border-l-4 ${issue.severity === 'high' ? 'bg-red-900/20 border-red-500' :
@@ -1504,10 +1461,10 @@ const CompatibilityTest: React.FC = () => {
                               {(recommendation.effort || recommendation.impact) && (
                                 <div className="flex items-center space-x-4 text-xs text-gray-400">
                                   {recommendation.effort && (
-                                    <span>工作量: {recommendation.effort === 'high' ? '高' : recommendation.effort === 'medium' ? '中' : '低'}</span>
+                                    <span>工作�? {recommendation.effort === 'high' ? '�? : recommendation.effort === 'medium' ? '�? : '�?}</span>
                                   )}
                                   {recommendation.impact && (
-                                    <span>影响: {recommendation.impact === 'high' ? '高' : recommendation.impact === 'medium' ? '中' : '低'}</span>
+                                    <span>影响: {recommendation.impact === 'high' ? '�? : recommendation.impact === 'medium' ? '�? : '�?}</span>
                                   )}
                                 </div>
                               )}
@@ -1517,18 +1474,17 @@ const CompatibilityTest: React.FC = () => {
                       </div>
                     )}
 
-                    {/* 兼容性矩阵 */}
+                    {/* 兼容性矩�?*/}
                     {results.compatibilityMatrix && Object.keys(results.compatibilityMatrix).length > 0 && (
                       <div className="bg-gray-700/30 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                           <Grid className="w-5 h-5 mr-2 text-blue-500" />
-                          兼容性矩阵
-                        </h3>
+                          兼容性矩�?                        </h3>
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
                             <thead>
                               <tr className="border-b border-gray-600">
-                                <th className="text-left text-gray-300 py-2 px-3">特性</th>
+                                <th className="text-left text-gray-300 py-2 px-3">特�?/th>
                                 {config.targetBrowsers.slice(0, 5).map((browser, index) => (
                                   <th key={index} className="text-center text-gray-300 py-2 px-3">
                                     {browser.browser} {browser.version}
@@ -1566,7 +1522,7 @@ const CompatibilityTest: React.FC = () => {
                             </div>
                             <div className="flex items-center space-x-1">
                               <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                              <span>不支持</span>
+                              <span>不支�?/span>
                             </div>
                             <div className="flex items-center space-x-1">
                               <span className="w-3 h-3 bg-gray-500 rounded-full"></span>
@@ -1600,11 +1556,11 @@ const CompatibilityTest: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 问题和建议 */}
+                    {/* 问题和建�?*/}
                     {results.findings && results.findings.length > 0 && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <h4 className="text-md font-medium text-white mb-3">发现的问题</h4>
+                          <h4 className="text-md font-medium text-white mb-3">发现的问�?/h4>
                           <div className="space-y-2">
                             {results.findings.slice(0, 5).map((finding: unknown, index: number) => (
                               <div key={index} className="flex items-start space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
@@ -1637,7 +1593,7 @@ const CompatibilityTest: React.FC = () => {
             </div>
           </div>
 
-          {/* 高级兼容性图表 */}
+          {/* 高级兼容性图�?*/}
           {
             results && (
               <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
@@ -1675,7 +1631,7 @@ const CompatibilityTest: React.FC = () => {
             )
           }
 
-          {/* 兼容性测试历史 */}
+          {/* 兼容性测试历�?*/}
           {
             testHistory.length > 0 && (
               <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
@@ -1698,8 +1654,7 @@ const CompatibilityTest: React.FC = () => {
                           test?.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
                             'bg-red-500/20 text-red-400'
                           }`}>
-                          {Math.round(test?.overallScore)}分
-                        </div>
+                          {Math.round(test?.overallScore)}�?                        </div>
                         <div className="text-xs text-gray-400">
                           {test?.findings?.length || test?.criticalIssues} 问题
                         </div>

@@ -647,7 +647,7 @@ const SEOTest: React.FC = () => {
         timestamp: new Date().toISOString(),
         score: results?.score,
         grade: results?.grade,
-        results: results
+        results
       };
 
       // 根据格式导出

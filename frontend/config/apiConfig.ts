@@ -80,8 +80,8 @@ export interface ApiConfig {
 // ==================== 默认配置 ====================
 
 export const DEFAULT_API_CONFIG: ApiConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
-  timeout: process.env.REQUEST_TIMEOUT || 30000,
+  baseURL: import.meta.env.VITE_API_URL || '/api',
+  timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
   version: 'v3.0',
   
   cache: {
@@ -165,7 +165,7 @@ export const DEVELOPMENT_API_CONFIG: Partial<ApiConfig> = {
 
 export const PRODUCTION_API_CONFIG: Partial<ApiConfig> = {
   enableDebugLogging: false,
-  timeout: process.env.REQUEST_TIMEOUT || 30000,
+  timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
   cache: {
     ...DEFAULT_API_CONFIG.cache,
     enabled: true,

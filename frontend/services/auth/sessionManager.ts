@@ -460,8 +460,8 @@ export class SessionManager {
 
     // 记录活动
     this.recordActivity(sessionId, 'session_created', 'auth', {
-      deviceInfo: deviceInfo,
-      locationInfo: locationInfo
+      deviceInfo,
+      locationInfo
     });
 
     return { sessionId, warnings: warnings?.length > 0 ? warnings : undefined };

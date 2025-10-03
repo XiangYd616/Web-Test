@@ -1,9 +1,7 @@
 /**
  * 网络测试专用状态管理Hook
- * 可选的升级方案，NetworkTest.tsx可以选择使用或保持现有实现
- *
- * 已迁移到新的类型系统，使用统一的类型定义
- */
+ * 可选的升级方案，NetworkTest.tsx可以选择使用或保持现有实�? *
+ * 已迁移到新的类型系统，使用统一的类型定�? */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/backgroundTestManager';
@@ -14,9 +12,7 @@ import type {
 } from '../types';
 import { TestStatus } from '@shared/types';
 
-// 所有类型定义已迁移到统一的类型系统
-// 请从 '../types' 导入所需的类型
-
+// 所有类型定义已迁移到统一的类型系�?// 请从 '../types' 导入所需的类�?
 interface NetworkTestConfigLocal {
   // 带宽测试配置
   bandwidthConfig: {
@@ -61,8 +57,7 @@ export interface LocalNetworkTestResult {
     securityScore: number;
   };
 
-  // 连通性结果
-  connectivityResults: {
+  // 连通性结�?  connectivityResults: {
     status: 'success' | 'failed';
     packetsTransmitted: number;
     packetsReceived: number;
@@ -139,8 +134,7 @@ export interface LocalNetworkTestResult {
     pathMTU?: number;
   };
 
-  // 安全检查结果
-  securityResults: {
+  // 安全检查结�?  securityResults: {
     sslStatus: 'secure' | 'insecure' | 'not_applicable';
     openPorts: number[];
     vulnerabilities: Array<{
@@ -154,21 +148,17 @@ export interface LocalNetworkTestResult {
   recommendations: string[];
 }
 
-// Hook状态接口
-export interface UseNetworkTestStateReturn {
-  // 配置状态
-  config: NetworkTestConfig;
+// Hook状态接�?export interface UseNetworkTestStateReturn {
+  // 配置状�?  config: NetworkTestConfig;
   updateConfig: (updates: Partial<NetworkTestConfig>) => void;
   resetConfig: () => void;
 
-  // 测试状态
-  isRunning: boolean;
+  // 测试状�?  isRunning: boolean;
   progress: number;
   currentStep: string;
   testId: string | null;
 
-  // 结果状态
-  result: NetworkTestResult | null;
+  // 结果状�?  result: NetworkTestResult | null;
   error: string | null;
 
   // 操作方法
@@ -193,14 +183,14 @@ export interface UseNetworkTestStateReturn {
 
 /**
  * 网络测试专用状态管理Hook
- * 已迁移到新的类型系统，返回 NetworkTestHook 类型
+ * 已迁移到新的类型系统，返�?NetworkTestHook 类型
  */
 export const useNetworkTestState = (): NetworkTestHook => {
-  // 基础状态 - 使用本地扩展配置
+  // 基础状�?- 使用本地扩展配置
   const [localConfig, setLocalConfig] = useState({
     target: '',
     testType: 'comprehensive',
-    timeout: process.env.REQUEST_TIMEOUT || 30000,
+    timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
     retries: 3,
     interval: 1000,
     duration: 60,
@@ -262,7 +252,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     setLocalConfig({
       target: '',
       testType: 'comprehensive',
-      timeout: process.env.REQUEST_TIMEOUT || 30000,
+      timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
       retries: 3,
       interval: 1000,
       duration: 60,
@@ -307,7 +297,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     const errors: string[] = [];
 
     if (!localConfig.target) {
-      errors.push('请输入目标地址（URL或IP）');
+      errors.push('请输入目标地址（URL或IP�?);
     }
 
     if (localConfig.connectivityConfig?.pingCount < 1 || localConfig.connectivityConfig?.pingCount > 100) {
@@ -319,11 +309,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
     }
 
     if (!localConfig.dnsConfig?.dnsServers || localConfig.dnsConfig.dnsServers.length === 0) {
-      errors.push('请至少添加一个DNS服务器');
+      errors.push('请至少添加一个DNS服务�?);
     }
 
     if (!localConfig.portConfig?.ports || localConfig.portConfig.ports.length === 0) {
-      errors.push('请至少添加一个端口');
+      errors.push('请至少添加一个端�?);
     }
 
     return {
@@ -345,7 +335,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     try {
       setIsRunning(true);
       setProgress(0);
-      setCurrentStep('正在初始化网络测试...');
+      setCurrentStep('正在初始化网络测�?..');
       setError(null);
       setResult(null);
 
@@ -390,7 +380,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
         backgroundTestManager.cancelTest(testId);
         abortControllerRef.current?.abort();
         setIsRunning(false);
-        setCurrentStep('测试已停止');
+        setCurrentStep('测试已停�?);
       } catch (err: unknown) {
         setError(err.message || '停止测试失败');
       }
@@ -412,8 +402,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
   }, []);
 
   /**
-   * 添加DNS服务器
-   */
+   * 添加DNS服务�?   */
   const addDnsServer = useCallback((server: string) => {
     setLocalConfig((prev: unknown) => ({
       ...prev,
@@ -425,8 +414,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
   }, []);
 
   /**
-   * 移除DNS服务器
-   */
+   * 移除DNS服务�?   */
   const removeDnsServer = useCallback((server: string) => {
     setLocalConfig((prev: unknown) => ({
       ...prev,
@@ -534,8 +522,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     };
   }, []);
 
-  // 计算派生状态
-  const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.PENDING));
+  // 计算派生状�?  const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.PENDING));
   const isCompleted = status === 'completed';
   const hasError = status === 'failed';
   const currentPort = localConfig.portConfig?.ports?.[0] || null;

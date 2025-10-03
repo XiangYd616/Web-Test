@@ -242,7 +242,7 @@ export class ProxyService {
                     html: data?.contents,
                     headers: data?.headers || {},
                     status: data?.status || 200,
-                    url: url,
+                    url,
                     loadTime
                   };
                 }
@@ -259,7 +259,7 @@ export class ProxyService {
                     html: data,
                     headers: {},
                     status: 200,
-                    url: url,
+                    url,
                     loadTime
                   };
                 } else if (data && data?.contents) {
@@ -267,7 +267,7 @@ export class ProxyService {
                     html: data?.contents,
                     headers: data?.headers || {},
                     status: data?.status || 200,
-                    url: url,
+                    url,
                     loadTime
                   };
                 }
@@ -279,7 +279,7 @@ export class ProxyService {
                     html,
                     headers: {},
                     status: 200,
-                    url: url,
+                    url,
                     loadTime
                   };
                 }
@@ -300,7 +300,7 @@ export class ProxyService {
                   html,
                   headers,
                   status: response.status,
-                  url: url,
+                  url,
                   loadTime
                 };
               }
@@ -361,7 +361,7 @@ export class ProxyService {
         html,
         headers,
         status: response.status,
-        url: url,
+        url,
         loadTime
       };
     } catch (error) {

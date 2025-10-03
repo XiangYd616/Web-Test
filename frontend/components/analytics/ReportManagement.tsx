@@ -11,13 +11,14 @@ import { useEffect, useState } from 'react';
 import { ReportConfig } from '../../services/reporting';
 import reportService, { Report } from '../../services/reporting/reportService';
 
-interface ReportTemplate {
-  id: string;
-  name: string;
-  description: string;
-  type: 'performance' | 'security' | 'comprehensive';
-  icon: React.ReactNode;
-}
+// Commented out unused interface
+// interface ReportTemplate {
+//   id: string;
+//   name: string;
+//   description: string;
+//   type: 'performance' | 'security' | 'comprehensive';
+//   icon: React.ReactNode;
+// }
 
 const ReportManagement: React.FC = () => {
   const [reports, setReports] = useState<Report[]>([]);
@@ -33,24 +34,19 @@ const ReportManagement: React.FC = () => {
   });
   const [reportName, setReportName] = useState('');
   const [reportFormat, setReportFormat] = useState<'pdf' | 'excel' | 'html'>('pdf');
-  const [loading, setLoading] = useState(true);
 
   const reportTemplates = reportService.getReportTemplates();
 
-  // 初始化数据加载
-  useEffect(() => {
+  // 初始化数据加�?  useEffect(() => {
     loadReports();
   }, []);
 
   const loadReports = async () => {
-    setLoading(true);
     try {
       const reportList = await reportService.getReports();
       setReports(reportList);
     } catch (error) {
       console.error('Failed to load reports:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -81,8 +77,7 @@ const ReportManagement: React.FC = () => {
       });
       setSelectedTemplate('');
 
-      // 定期检查报告状态
-      const checkStatus = setInterval(async () => {
+      // 定期检查报告状�?      const checkStatus = setInterval(async () => {
         const updatedReports = await reportService.getReports();
         setReports(updatedReports);
 
@@ -106,7 +101,7 @@ const ReportManagement: React.FC = () => {
     }
   };
 
-  const downloadReport = async (id: string) => {
+  const _downloadReport = async (id: string) => {
     try {
       await reportService.downloadReport(id);
     } catch (error) {
@@ -170,7 +165,7 @@ const ReportManagement: React.FC = () => {
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm font-medium">已完成</p>
+              <p className="text-gray-400 text-sm font-medium">已完�?/p>
               <p className="text-2xl font-bold text-green-400 mt-1">
                 {reports.filter(r => r.status === 'completed').length}
               </p>
@@ -182,7 +177,7 @@ const ReportManagement: React.FC = () => {
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm font-medium">生成中</p>
+              <p className="text-gray-400 text-sm font-medium">生成�?/p>
               <p className="text-2xl font-bold text-yellow-400 mt-1">
                 {reports.filter(r => r.status === 'generating').length}
               </p>
@@ -194,7 +189,7 @@ const ReportManagement: React.FC = () => {
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm font-medium">总大小</p>
+              <p className="text-gray-400 text-sm font-medium">总大�?/p>
               <p className="text-2xl font-bold text-white mt-1">
                 {reports
                   .filter(r => r.size !== '-')
@@ -214,7 +209,7 @@ const ReportManagement: React.FC = () => {
           <div className="flex items-center space-x-3">
             <button className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
               <Filter className="w-4 h-4" />
-              <span>筛选</span>
+              <span>筛�?/span>
             </button>
           </div>
         </div>
@@ -223,7 +218,7 @@ const ReportManagement: React.FC = () => {
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">暂无报告</h3>
-            <p className="text-gray-400 mb-6">开始生成您的第一个测试报告</p>
+            <p className="text-gray-400 mb-6">开始生成您的第一个测试报�?/p>
             <button
               onClick={() => setShowCreateReport(true)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -238,7 +233,7 @@ const ReportManagement: React.FC = () => {
                 <tr className="border-b border-gray-700">
                   <th className="text-left py-3 px-4 text-gray-300">报告名称</th>
                   <th className="text-left py-3 px-4 text-gray-300">类型</th>
-                  <th className="text-left py-3 px-4 text-gray-300">状态</th>
+                  <th className="text-left py-3 px-4 text-gray-300">状�?/th>
                   <th className="text-left py-3 px-4 text-gray-300">测试数量</th>
                   <th className="text-left py-3 px-4 text-gray-300">大小</th>
                   <th className="text-left py-3 px-4 text-gray-300">创建时间</th>
@@ -266,8 +261,8 @@ const ReportManagement: React.FC = () => {
                       <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
                         {getStatusIcon(report.status)}
                         <span>
-                          {report.status === 'completed' ? '已完成' :
-                            report.status === 'generating' ? '生成中' : '失败'}
+                          {report.status === 'completed' ? '已完�? :
+                            report.status === 'generating' ? '生成�? : '失败'}
                         </span>
                       </span>
                     </td>
@@ -312,7 +307,7 @@ const ReportManagement: React.FC = () => {
       {showCreateReport && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-white mb-6">生成新报告</h3>
+            <h3 className="text-lg font-semibold text-white mb-6">生成新报�?/h3>
 
             {/* 报告模板选择 */}
             <div className="mb-6">
@@ -329,7 +324,7 @@ const ReportManagement: React.FC = () => {
                   >
                     <div className="flex items-center space-x-3 mb-2">
                       <div className="text-blue-400">
-                        {template.type === 'performance' ? '⚡' :
+                        {template.type === 'performance' ? '�? :
                           template.type === 'security' ? '🔒' : '📊'}
                       </div>
                       <h4 className="text-white font-medium">{template.name}</h4>
@@ -378,9 +373,9 @@ const ReportManagement: React.FC = () => {
                     title="选择时间范围"
                     aria-label="选择报告时间范围"
                   >
-                    <option value="7">最近7天</option>
-                    <option value="30">最近30天</option>
-                    <option value="90">最近90天</option>
+                    <option value="7">最�?�?/option>
+                    <option value="30">最�?0�?/option>
+                    <option value="90">最�?0�?/option>
                   </select>
                 </div>
               </div>

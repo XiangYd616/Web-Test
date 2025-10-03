@@ -49,7 +49,7 @@ export const SecurityTestHistory = React.forwardRef<
 
   // 过滤和排序历史记录
   useEffect(() => {
-    let filtered = history.filter(item => {
+    const filtered = history.filter(item => {
       const matchesSearch = item.url.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRisk = filterRisk === 'all' || item.riskLevel === filterRisk;
       return matchesSearch && matchesRisk;

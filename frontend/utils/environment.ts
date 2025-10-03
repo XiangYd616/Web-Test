@@ -2,14 +2,11 @@
 // 检查是否在浏览器环境中
 export const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
 
-// 检查是否在 Node.js 环境中
-export const isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
+// 检查是否在 Node.js 环境�?export const isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
 
-// 检查是否在 Electron 环境中
-export const isElectron = typeof window !== 'undefined' && (window as any).process && (window as any).process.type;
+// 检查是否在 Electron 环境�?export const isElectron = typeof window !== 'undefined' && (window as any).process && (window as any).process.type;
 
-// 检查是否在桌面环境中运行
-export const isDesktopEnvironment = () => {
+// 检查是否在桌面环境中运�?export const isDesktopEnvironment = () => {
   return !!(
     typeof window !== 'undefined' &&
     (
@@ -25,8 +22,7 @@ export const isDesktopEnvironment = () => {
 // 检查是否在开发环境中
 export const isDevelopment = import.meta.env.MODE === 'development';
 
-// 检查是否在生产环境中
-export const isProduction = import.meta.env.MODE === 'production';
+// 检查是否在生产环境�?export const isProduction = import.meta.env.MODE === 'production';
 
 export const canUseDatabase = isNode || isElectron;
 
@@ -34,7 +30,7 @@ export const canUseFileSystem = isNode || isElectron;
 
 export const canUsePlaywright = isElectron || (isNode && !isBrowser);
 
-export const _isFeatureSupported = (feature: string): boolean => {
+const isFeatureSupported = (feature: string): boolean => {
   switch (feature) {
     case 'playwright':
       return canUsePlaywright;
@@ -53,7 +49,7 @@ export const _isFeatureSupported = (feature: string): boolean => {
   }
 };
 
-export const _getEnvironmentInfo = () => {
+const getEnvironmentInfo = () => {
   return {
     isBrowser,
     isNode,

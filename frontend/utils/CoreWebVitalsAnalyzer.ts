@@ -334,7 +334,7 @@ export class CoreWebVitalsAnalyzer {
   private async measureINP(): Promise<number> {
     return new Promise((resolve) => {
       // INP是一个新的实验性指标，可能不被所有浏览器支持
-      let inpValue = 0;
+      const inpValue = 0;
       
       // 这里是简化的INP测量实现
       // 实际应用中应该使用官方的web-vitals库

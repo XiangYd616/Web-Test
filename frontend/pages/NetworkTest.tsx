@@ -1,7 +1,6 @@
 /**
  * 网络测试页面
- * 提供完整的网络连接、延迟、带宽和稳定性测试功能
- */
+ * 提供完整的网络连接、延迟、带宽和稳定性测试功�? */
 
 import { Activity, CheckCircle, Globe, Loader, Play, RotateCcw, Settings, Shield, Square, Wifi, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
@@ -60,15 +59,13 @@ interface NetworkTestResult {
 }
 
 const NetworkTest: React.FC = () => {
-  // 认证检查
-  const _authCheck = useAuthCheck();
+  // 认证检�?  const _authCheck = useAuthCheck();
   const { recordTestCompletion } = useUserStats();
 
-  // 状态管理
-  const [config, setConfig] = useState<NetworkConfig>({
+  // 状态管�?  const [config, setConfig] = useState<NetworkConfig>({
     targetUrl: '',
     testType: 'comprehensive',
-    timeout: process.env.REQUEST_TIMEOUT || 30000,
+    timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
     packetCount: 10,
     packetSize: 64,
     includeDNSTest: true,
@@ -91,13 +88,11 @@ const NetworkTest: React.FC = () => {
     setCurrentStep(step);
   }, []);
 
-  // 清理错误状态
-  const clearError = useCallback(() => {
+  // 清理错误状�?  const clearError = useCallback(() => {
     setError(null);
   }, []);
 
-  // 重置测试状态
-  const resetTest = useCallback(() => {
+  // 重置测试状�?  const resetTest = useCallback(() => {
     setResult(null);
     setError(null);
     setIsRunning(false);
@@ -137,8 +132,7 @@ const NetworkTest: React.FC = () => {
         },
         // onComplete
         (result: unknown) => {
-          // 转换后端结果为前端格式
-          const networkResult: NetworkTestResult = {
+          // 转换后端结果为前端格�?          const networkResult: NetworkTestResult = {
             testId: result.testId || testId,
             pingTest: {
               averageLatency: result.networkMetrics?.latency || result.data?.networkMetrics?.latency || 0,
@@ -208,7 +202,7 @@ const NetworkTest: React.FC = () => {
         setIsRunning(false);
         setCurrentTestId(null);
         setCanSwitchPages(true);
-        updateProgress(0, '测试已停止');
+        updateProgress(0, '测试已停�?);
       } catch (err) {
         console.error('停止测试失败:', err);
       }
@@ -223,24 +217,21 @@ const NetworkTest: React.FC = () => {
     }));
   }, []);
 
-  // 添加自定义端口
-  const addCustomPort = useCallback(() => {
+  // 添加自定义端�?  const addCustomPort = useCallback(() => {
     setConfig(prev => ({
       ...prev,
       customPorts: [...prev.customPorts, 8080]
     }));
   }, []);
 
-  // 更新自定义端口
-  const updateCustomPort = useCallback((index: number, port: number) => {
+  // 更新自定义端�?  const updateCustomPort = useCallback((index: number, port: number) => {
     setConfig(prev => ({
       ...prev,
       customPorts: prev.customPorts.map((p, i) => i === index ? port : p)
     }));
   }, []);
 
-  // 删除自定义端口
-  const removeCustomPort = useCallback((index: number) => {
+  // 删除自定义端�?  const removeCustomPort = useCallback((index: number) => {
     setConfig(prev => ({
       ...prev,
       customPorts: prev.customPorts.filter((_, i) => i !== index)
@@ -251,7 +242,7 @@ const NetworkTest: React.FC = () => {
     <TestPageLayout
       testType="network"
       title="网络测试"
-      description="测试网络连接、延迟、带宽和稳定性"
+      description="测试网络连接、延迟、带宽和稳定�?
       icon={Globe}
       testContent={
         <div className="space-y-6">
@@ -272,7 +263,7 @@ const NetworkTest: React.FC = () => {
                   type="text"
                   value={config.targetUrl}
                   onChange={(e) => handleConfigChange('targetUrl', e?.target.value)}
-                  placeholder="www.example.com 或 192.168.1.1"
+                  placeholder="www.example.com �?192.168.1.1"
                   className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
                   disabled={isRunning}
                 />
@@ -319,8 +310,7 @@ const NetworkTest: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    数据包数量
-                  </label>
+                    数据包数�?                  </label>
                   <input
                     type="number"
                     value={config.packetCount}
@@ -334,7 +324,7 @@ const NetworkTest: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    数据包大小 (bytes)
+                    数据包大�?(bytes)
                   </label>
                   <input
                     type="number"
@@ -375,12 +365,11 @@ const NetworkTest: React.FC = () => {
             </div>
           </div>
 
-          {/* 自定义端口 */}
+          {/* 自定义端�?*/}
           {config.includePortScan && (
             <div className="themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6">
               <h3 className="text-lg font-semibold themed-text-primary mb-4">
-                自定义端口扫描
-              </h3>
+                自定义端口扫�?              </h3>
 
               <div className="space-y-3">
                 {config.customPorts.map((port, index) => (
@@ -389,7 +378,7 @@ const NetworkTest: React.FC = () => {
                       type="number"
                       value={port}
                       onChange={(e) => updateCustomPort(index, parseInt(e?.target.value))}
-                      placeholder="端口号"
+                      placeholder="端口�?
                       min="1"
                       max="65535"
                       className="flex-1 px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
@@ -425,8 +414,7 @@ const NetworkTest: React.FC = () => {
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center"
               >
                 <Play className="w-5 h-5 mr-2" />
-                开始测试
-              </button>
+                开始测�?              </button>
             ) : (
               <button
                 onClick={stopTest}
@@ -453,7 +441,7 @@ const NetworkTest: React.FC = () => {
             <div className="themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6">
               <div className="flex items-center mb-4">
                 <Loader className="w-5 h-5 mr-2 animate-spin text-blue-600" />
-                <h3 className="text-lg font-semibold themed-text-primary">测试进行中</h3>
+                <h3 className="text-lg font-semibold themed-text-primary">测试进行�?/h3>
               </div>
               <ProgressBar value={progress} className="mb-2" />
               <p className="text-sm text-gray-600">{currentStep}</p>
@@ -507,7 +495,7 @@ const NetworkTest: React.FC = () => {
 
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">丢包率</span>
+                      <span className="text-sm font-medium text-gray-700">丢包�?/span>
                       <Activity className="w-5 h-5 text-orange-500" />
                     </div>
                     <p className="text-lg font-semibold text-gray-900 mt-1">
@@ -556,7 +544,7 @@ const NetworkTest: React.FC = () => {
                           </p>
                         </div>
                         <div>
-                          <span className="text-sm font-medium text-gray-700">DNS服务器</span>
+                          <span className="text-sm font-medium text-gray-700">DNS服务�?/span>
                           <p className="text-sm text-gray-600">
                             {result.dnsTest.servers.join(', ')}
                           </p>
@@ -573,12 +561,11 @@ const NetworkTest: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="bg-green-50 rounded-lg p-4">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-green-700">开放端口</span>
+                          <span className="text-sm font-medium text-green-700">开放端�?/span>
                           <CheckCircle className="w-5 h-5 text-green-500" />
                         </div>
                         <p className="text-lg font-semibold text-green-900 mt-1">
-                          {result.portScan.openPorts.length}个
-                        </p>
+                          {result.portScan.openPorts.length}�?                        </p>
                         <p className="text-sm text-green-600">
                           {result.portScan.openPorts.join(', ')}
                         </p>
@@ -590,8 +577,7 @@ const NetworkTest: React.FC = () => {
                           <div className="w-5 h-5 rounded-full bg-red-500" />
                         </div>
                         <p className="text-lg font-semibold text-red-900 mt-1">
-                          {result.portScan.closedPorts.length}个
-                        </p>
+                          {result.portScan.closedPorts.length}�?                        </p>
                         <p className="text-sm text-red-600">
                           {result.portScan.closedPorts.join(', ')}
                         </p>
@@ -603,8 +589,7 @@ const NetworkTest: React.FC = () => {
                           <Shield className="w-5 h-5 text-yellow-500" />
                         </div>
                         <p className="text-lg font-semibold text-yellow-900 mt-1">
-                          {result.portScan.filteredPorts.length}个
-                        </p>
+                          {result.portScan.filteredPorts.length}�?                        </p>
                         <p className="text-sm text-yellow-600">
                           {result.portScan.filteredPorts.join(', ')}
                         </p>

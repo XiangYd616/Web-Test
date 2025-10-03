@@ -275,13 +275,13 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
         debounceTimerRef.current = setTimeout(() => {
             loadTestRecords({
                 page: resetPage ? 1 : currentPage,
-                pageSize: pageSize,
+                pageSize,
                 search: searchTerm,
                 status: statusFilter,
-                dateFilter: dateFilter,
-                sortBy: sortBy,
-                sortOrder: sortOrder,
-                testType: testType
+                dateFilter,
+                sortBy,
+                sortOrder,
+                testType
             });
         }, isInitialLoadRef.current ? 0 : 800);
     };
@@ -316,13 +316,13 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
 
         loadTestRecords({
             page: currentPage,
-            pageSize: pageSize,
+            pageSize,
             search: searchTerm,
             status: statusFilter,
-            dateFilter: dateFilter,
-            sortBy: sortBy,
-            sortOrder: sortOrder,
-            testType: testType
+            dateFilter,
+            sortBy,
+            sortOrder,
+            testType
         });
     };
 

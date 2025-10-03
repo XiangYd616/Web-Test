@@ -1,5 +1,5 @@
 /**
- * 自动化测试调度组件
+ * 自动化测试调度组�?
  * 提供定时任务管理、批量测试调度和执行监控功能
  */
 
@@ -62,7 +62,7 @@ interface ExecutionHistory {
 type BatchAction = 'start' | 'pause' | 'delete' | 'duplicate' | 'export';
 
 const TestScheduler: React.FC = () => {
-  // 状态管理
+  // 状态管�?
   const [tasks, setTasks] = useState<ScheduledTask[]>([]);
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [executions, setExecutions] = useState<ExecutionHistory[]>([]);
@@ -89,7 +89,7 @@ const TestScheduler: React.FC = () => {
       return {
         id: `task_${i + 1}`,
         name: `${getTestTypeName(testType)}定时任务_${i + 1}`,
-        description: `自动化${getTestTypeName(testType)}测试，每天执行一次`,
+        description: `自动�?{getTestTypeName(testType)}测试，每天执行一次`,
         testType,
         schedule: {
           type: 'recurring',
@@ -101,7 +101,7 @@ const TestScheduler: React.FC = () => {
         config: {
           targets: [`https://example${i + 1}.com`],
           parameters: {},
-          timeout: process.env.REQUEST_TIMEOUT || 300000,
+          timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 300000,
           retryAttempts: 3,
           notifications: {
             onSuccess: false,
@@ -116,7 +116,7 @@ const TestScheduler: React.FC = () => {
           avgDuration: Math.floor(Math.random() * 180) + 30,
           lastResult: Math.random() > 0.2 ? 'success' : 'failure'
         },
-        createdBy: '管理员',
+        createdBy: '管理�?,
         createdAt: new Date(Date.now() - Math.random() * 60 * 24 * 60 * 60 * 1000),
         updatedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
       };
@@ -131,7 +131,7 @@ const TestScheduler: React.FC = () => {
       seo: 'SEO',
       api: 'API',
       stress: '压力',
-      compatibility: '兼容性'
+      compatibility: '兼容�?
     };
     return names[type as keyof typeof names] || type;
   };
@@ -149,7 +149,7 @@ const TestScheduler: React.FC = () => {
     return icons[type as keyof typeof icons] || FileText;
   };
 
-  // 获取状态颜色
+  // 获取状态颜�?
   const getStatusColor = (status: string) => {
     const colors = {
       active: 'text-green-600 bg-green-100',
@@ -170,15 +170,15 @@ const TestScheduler: React.FC = () => {
     return colors[result as keyof typeof colors] || 'text-gray-600';
   };
 
-  // 初始化数据
+  // 初始化数�?
   useEffect(() => {
     setTasks(generateMockTasks());
   }, []);
 
-  // 过滤和排序任务
+  // 过滤和排序任�?
   const filteredTasks = React.useMemo(() => {
-    let result = tasks.filter(task => {
-      // 状态过滤
+    const result = tasks.filter(task => {
+      // 状态过�?
       if (filterStatus !== 'all' && task.status !== filterStatus) {
         return false;
       }
@@ -232,24 +232,24 @@ const TestScheduler: React.FC = () => {
     try {
       switch (action) {
         case 'start':
-          toast.success('任务已启动');
+          toast.success('任务已启�?);
           break;
         case 'pause':
-          toast.success('任务已暂停');
+          toast.success('任务已暂�?);
           break;
         case 'stop':
-          toast.success('任务已停止');
+          toast.success('任务已停�?);
           break;
         case 'run_now':
-          toast.success('任务立即执行中...');
+          toast.success('任务立即执行�?..');
           break;
         case 'duplicate':
-          toast.success('任务已复制');
+          toast.success('任务已复�?);
           break;
         case 'delete':
-          if (confirm('确定要删除这个任务吗？')) {
+          if (confirm('确定要删除这个任务吗�?)) {
             setTasks(prev => prev.filter(t => t?.id !== taskId));
-            toast.success('任务已删除');
+            toast.success('任务已删�?);
           }
           break;
       }
@@ -272,23 +272,23 @@ const TestScheduler: React.FC = () => {
     try {
       switch (action) {
         case 'start':
-          toast.success(`已启动 ${selectedTasks.size} 个任务`);
+          toast.success(`已启�?${selectedTasks.size} 个任务`);
           break;
         case 'pause':
-          toast.success(`已暂停 ${selectedTasks.size} 个任务`);
+          toast.success(`已暂�?${selectedTasks.size} 个任务`);
           break;
         case 'delete':
-          if (confirm(`确定要删除 ${selectedTasks.size} 个任务吗？`)) {
+          if (confirm(`确定要删�?${selectedTasks.size} 个任务吗？`)) {
             setTasks(prev => prev.filter(t => !selectedTasks.has(t?.id)));
             setSelectedTasks(new Set());
-            toast.success(`已删除 ${selectedTasks.size} 个任务`);
+            toast.success(`已删�?${selectedTasks.size} 个任务`);
           }
           break;
         case 'duplicate':
-          toast.success(`已复制 ${selectedTasks.size} 个任务`);
+          toast.success(`已复�?${selectedTasks.size} 个任务`);
           break;
         case 'export':
-          toast.success('任务数据已导出');
+          toast.success('任务数据已导�?);
           break;
       }
     } catch (error) {
@@ -309,7 +309,7 @@ const TestScheduler: React.FC = () => {
     setSelectedTasks(newSelected);
   };
 
-  // 全选/取消全选
+  // 全�?取消全�?
   const handleSelectAll = () => {
     if (selectedTasks.size === filteredTasks.length) {
       setSelectedTasks(new Set());
@@ -327,7 +327,7 @@ const TestScheduler: React.FC = () => {
             <div className="flex items-center space-x-3">
               <Calendar className="h-8 w-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">测试调度器</h1>
+                <h1 className="text-2xl font-bold text-gray-900">测试调度�?/h1>
                 <p className="text-sm text-gray-600">管理自动化测试任务和调度</p>
               </div>
             </div>
@@ -358,7 +358,7 @@ const TestScheduler: React.FC = () => {
               <Search className="h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="搜索任务名称或描述..."
+                placeholder="搜索任务名称或描�?.."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e?.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -370,10 +370,10 @@ const TestScheduler: React.FC = () => {
               onChange={(e) => setFilterStatus(e?.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">所有状态</option>
-              <option value="active">运行中</option>
-              <option value="paused">已暂停</option>
-              <option value="disabled">已禁用</option>
+              <option value="all">所有状�?/option>
+              <option value="active">运行�?/option>
+              <option value="paused">已暂�?/option>
+              <option value="disabled">已禁�?/option>
             </select>
             
             <select
@@ -384,7 +384,7 @@ const TestScheduler: React.FC = () => {
               <option value="nextRun">下次执行</option>
               <option value="name">任务名称</option>
               <option value="lastRun">上次执行</option>
-              <option value="successRate">成功率</option>
+              <option value="successRate">成功�?/option>
             </select>
             
             <button
@@ -396,7 +396,7 @@ const TestScheduler: React.FC = () => {
             
             {selectedTasks.size > 0 && (
               <div className="flex items-center space-x-2 ml-auto">
-                <span className="text-sm text-gray-600">已选择 {selectedTasks.size} 个任务</span>
+                <span className="text-sm text-gray-600">已选择 {selectedTasks.size} 个任�?/span>
                 <button
                   onClick={() => handleBatchAction('start')}
                   className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
@@ -435,7 +435,7 @@ const TestScheduler: React.FC = () => {
                   onChange={handleSelectAll}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <label className="text-sm text-gray-600">全选</label>
+                <label className="text-sm text-gray-600">全�?/label>
               </div>
             </div>
           </div>
@@ -454,7 +454,7 @@ const TestScheduler: React.FC = () => {
                     类型
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    状态
+                    状�?
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     调度
@@ -487,7 +487,7 @@ const TestScheduler: React.FC = () => {
                           <div className="text-sm font-medium text-gray-900">{task.name}</div>
                           <div className="text-sm text-gray-500">{task.description}</div>
                           <div className="text-xs text-gray-400 mt-1">
-                            创建于 {format(task.createdAt, 'yyyy-MM-dd HH:mm', { locale: zhCN })}
+                            创建�?{format(task.createdAt, 'yyyy-MM-dd HH:mm', { locale: zhCN })}
                           </div>
                         </div>
                       </td>
@@ -506,9 +506,9 @@ const TestScheduler: React.FC = () => {
                           {task.status === 'active' && <CheckCircle className="h-3 w-3 mr-1" />}
                           {task.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
                           {task.status === 'disabled' && <XCircle className="h-3 w-3 mr-1" />}
-                          {task.status === 'active' ? '运行中' :
-                           task.status === 'paused' ? '已暂停' :
-                           task.status === 'disabled' ? '已禁用' : '未知'}
+                          {task.status === 'active' ? '运行�? :
+                           task.status === 'paused' ? '已暂�? :
+                           task.status === 'disabled' ? '已禁�? : '未知'}
                         </span>
                       </td>
                       
@@ -522,7 +522,7 @@ const TestScheduler: React.FC = () => {
                               </div>
                             </>
                           ) : (
-                            <span className="text-gray-400">未设置</span>
+                            <span className="text-gray-400">未设�?/span>
                           )}
                         </div>
                       </td>
@@ -530,15 +530,15 @@ const TestScheduler: React.FC = () => {
                       <td className="px-6 py-4">
                         <div className="text-sm">
                           <div className="text-gray-900">
-                            成功率: <span className={getResultColor(task.stats.lastResult)}>
+                            成功�? <span className={getResultColor(task.stats.lastResult)}>
                               {task.stats.successRate}%
                             </span>
                           </div>
                           <div className="text-gray-500">
-                            总执行: {task.stats.totalRuns} 次
+                            总执�? {task.stats.totalRuns} �?
                           </div>
                           <div className="text-gray-500">
-                            平均耗时: {Math.floor(task.stats.avgDuration / 60)}分{task.stats.avgDuration % 60}秒
+                            平均耗时: {Math.floor(task.stats.avgDuration / 60)}分{task.stats.avgDuration % 60}�?
                           </div>
                         </div>
                       </td>
@@ -608,7 +608,7 @@ const TestScheduler: React.FC = () => {
               <Calendar className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">暂无调度任务</h3>
               <p className="mt-1 text-sm text-gray-500">
-                {searchTerm || filterStatus !== 'all' ? '没有符合条件的任务' : '开始创建你的第一个调度任务吧'}
+                {searchTerm || filterStatus !== 'all' ? '没有符合条件的任�? : '开始创建你的第一个调度任务吧'}
               </p>
             </div>
           )}
@@ -620,7 +620,7 @@ const TestScheduler: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
             <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
-            <span>操作处理中...</span>
+            <span>操作处理�?..</span>
           </div>
         </div>
       )}

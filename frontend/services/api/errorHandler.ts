@@ -309,7 +309,7 @@ export class ApiErrorHandler {
       details: {
         status,
         statusText: error.response.statusText,
-        data: data,
+        data,
         headers: error.response.headers
       },
       context,

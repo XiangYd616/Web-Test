@@ -73,9 +73,9 @@ class GooglePageSpeedService {
    */
   private async fetchPageSpeedData(url: string, strategy: 'desktop' | 'mobile') {
     const params = new URLSearchParams({
-      url: url,
+      url,
       key: this.API_KEY!,
-      strategy: strategy,
+      strategy,
       category: 'performance',
       locale: 'zh_CN'
     });

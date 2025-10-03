@@ -1,7 +1,6 @@
 /**
  * 防止主题闪烁组件
- * 基于 Remix Themes 的最佳实践
- */
+ * 基于 Remix Themes 的最佳实�? */
 
 import React from 'react';
 
@@ -13,8 +12,7 @@ interface PreventFlashOnWrongThemeProps {
 }
 
 /**
- * 防止主题闪烁的内联脚本
- * 这个脚本会在页面加载时立即执行，避免闪烁
+ * 防止主题闪烁的内联脚�? * 这个脚本会在页面加载时立即执行，避免闪烁
  */
 const themeScript = `
 (function() {
@@ -24,8 +22,7 @@ const themeScript = `
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     const actualTheme = theme === 'system' || !theme ? systemTheme : theme;
     
-    // 立即应用主题类
-    const root = document.documentElement;
+    // 立即应用主题�?    const root = document.documentElement;
     root.classList.remove('light', 'dark', 'light-theme', 'dark-theme');
     root.classList.add(actualTheme, actualTheme + '-theme');
     root.setAttribute('data-theme', actualTheme);
@@ -81,9 +78,8 @@ export const PreventFlashOnWrongTheme: React.FC<PreventFlashOnWrongThemeProps> =
 
 /**
  * 主题初始化Hook
- * 确保主题在客户端正确初始化
- */
-export const _useThemeInitialization = () => {
+ * 确保主题在客户端正确初始�? */
+const useThemeInitialization = () => {
   React.useEffect(() => {
     // 监听系统主题变化
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -117,9 +113,8 @@ export const _useThemeInitialization = () => {
 
 /**
  * 主题同步Hook
- * 确保React状态与DOM状态同步
- */
-export const _useThemeSync = () => {
+ * 确保React状态与DOM状态同�? */
+const useThemeSync = () => {
   const [theme, setTheme] = React.useState<string>('light');
   
   React.useEffect(() => {

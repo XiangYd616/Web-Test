@@ -76,16 +76,16 @@ export class BackgroundTestManagerAdapter {
     const testInfo: TestInfo = {
       id: testId,
       type: testType,
-      config: config,
+      config,
       status: 'pending',
       progress: 0,
       startTime: new Date(),
       currentStep: '正在初始化测试...',
       result: null,
       error: null,
-      onProgress: onProgress,
-      onComplete: onComplete,
-      onError: onError
+      onProgress,
+      onComplete,
+      onError
     };
 
     this.runningTests.set(testId, testInfo);

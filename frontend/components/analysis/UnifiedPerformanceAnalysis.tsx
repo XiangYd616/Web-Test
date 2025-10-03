@@ -18,7 +18,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Clock, TrendingUp, TrendingDown, Activity, Zap, AlertCircle,
   AlertTriangle, CheckCircle, BarChart3, RefreshCw, Target, 
-  Cpu, HardDrive, Users, Database
+  Cpu, HardDrive, Users
 } from 'lucide-react';
 
 interface PerformanceMetric {
