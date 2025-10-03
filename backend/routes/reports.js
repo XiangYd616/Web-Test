@@ -10,7 +10,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const { automatedReportingService } = require('../services/reporting/AutomatedReportingService');
 const { performanceBenchmarkService } = require('../services/performance/PerformanceBenchmarkService');
-const EnhancedReportGenerator = require('../services/reporting/EnhancedReportGenerator');
+const ReportGenerator = require('../services/reporting/ReportGenerator');
 const { query } = require('../config/database');
 
 const router = express.Router();
@@ -620,11 +620,11 @@ router.post('/enhanced/generate', authMiddleware, asyncHandler(async (req, res) 
       return res.validationError([], '未找到指定的测试数据');
     }
 
-    // 创建增强报告生成器实例
-    const enhancedGenerator = new EnhancedReportGenerator();
+    // 创建报告生成器实例
+    const reportGenerator = new ReportGenerator();
 
     // 生成报告
-    const reportResult = await enhancedGenerator.generateEnhancedReport(testData, {
+    const reportResult = await reportGenerator.generateEnhancedReport(testData, {
       template,
       format,
       title,
@@ -671,9 +671,9 @@ router.post('/enhanced/generate', authMiddleware, asyncHandler(async (req, res) 
  */
 router.get('/enhanced/templates', asyncHandler(async (req, res) => {
   try {
-    const enhancedGenerator = new EnhancedReportGenerator();
-    const templates = enhancedGenerator.getAvailableTemplates();
-    const formats = enhancedGenerator.getSupportedFormats();
+    const reportGenerator = new ReportGenerator();
+    const templates = reportGenerator.getAvailableTemplates();
+    const formats = reportGenerator.getSupportedFormats();
 
     res.success({
       templates,
@@ -693,8 +693,8 @@ router.get('/enhanced/templates', asyncHandler(async (req, res) => {
 router.get('/enhanced/download/:filename', authMiddleware, asyncHandler(async (req, res) => {
   try {
     const { filename } = req.params;
-    const enhancedGenerator = new EnhancedReportGenerator();
-    const filePath = path.join(enhancedGenerator.reportsDir, filename);
+    const reportGenerator = new ReportGenerator();
+    const filePath = path.join(reportGenerator.reportsDir, filename);
 
     // 检查文件是否存在
     try {
@@ -765,7 +765,7 @@ router.post('/enhanced/batch', authMiddleware, asyncHandler(async (req, res) => 
       return res.validationError([], '单次批量生成报告数量不能超过10个');
     }
 
-    const enhancedGenerator = new EnhancedReportGenerator();
+    const reportGenerator = new ReportGenerator();
     const batchResults = [];
     const errors = [];
 
@@ -784,7 +784,7 @@ router.post('/enhanced/batch', authMiddleware, asyncHandler(async (req, res) => 
         const testData = testResult.rows;
 
         if (testData.length > 0) {
-          const result = await enhancedGenerator.generateEnhancedReport(testData, {
+          const result = await reportGenerator.generateEnhancedReport(testData, {
             ...globalOptions,
             ...reportConfig
           });

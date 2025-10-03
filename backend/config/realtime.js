@@ -3,8 +3,8 @@
  * 管理WebSocket连接、实时服务等 - 使用增强版WebSocket管理器
  */
 
-// 使用新的增强版WebSocket管理器
-const EnhancedWebSocketManager = require('../services/streaming/EnhancedWebSocketManager');
+// WebSocket管理器
+const WebSocketManager = require('../services/streaming/WebSocketManager');
 const StreamingService = require('../services/streaming/StreamingService');
 
 class RealtimeConfig {
@@ -97,8 +97,8 @@ class RealtimeConfig {
         return this.getServices();
       }
       
-      // 初始化增强版WebSocket管理器
-      this.websocketManager = new EnhancedWebSocketManager(server, this.config.websocket);
+      // 初始化WebSocket管理器
+      this.websocketManager = new WebSocketManager(server, this.config.websocket);
       await this.websocketManager.initialize();
       
       // 初始化实时服务（如果存在）

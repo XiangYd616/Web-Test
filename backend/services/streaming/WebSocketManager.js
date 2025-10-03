@@ -1,562 +1,593 @@
 /**
- * WebSocket管理器
- * 增强版WebSocket连接管理，支持认证、房间、订阅等功能
+ * 增强版WebSocket管理器
+ * 集成前端websocketManager功能到后端，提供统一的WebSocket管理和优化
+ * 版本: v1.0.0
  */
 
-const WebSocket = require('ws');
-const jwt = require('jsonwebtoken');
+const { Server } = require('socket.io');
+const Redis = require('ioredis');
 const EventEmitter = require('events');
 
-class WebSocketManager extends EventEmitter {
-  constructor(options = {}) {
+
+  /**
+
+   * 处理constructor事件
+
+   * @param {Object} event - 事件对象
+
+   * @returns {Promise<void>}
+
+   */
+class EnhancedWebSocketManager extends EventEmitter {
+  constructor(server, options = {}) {
     super();
     
-    this.connections = new Map(); // 存储所有连接
-    this.userConnections = new Map(); // 用户ID到连接的映射
-    this.rooms = new Map(); // 房间管理
-    this.subscriptions = new Map(); // 订阅管理
+    this.server = server;
+    this.io = null;
+    this.redisClient = null;
+    this.connections = new Map();
+    this.rooms = new Map();
+    this.messageQueues = new Map();
+    this.heartbeatInterval = null;
+    this.reconnectionAttempts = new Map();
     
+    // 配置选项
     this.config = {
-      port: options.port || 8080,
-      path: options.path || '/ws',
-      maxConnections: options.maxConnections || 1000,
-      heartbeatInterval: options.heartbeatInterval || 30000,
-      connectionTimeout: options.connectionTimeout || 60000,
-      maxMessageSize: options.maxMessageSize || 1024 * 1024, // 1MB
-      enableCompression: options.enableCompression !== false,
-      ...options
+      // Socket.IO配置
+      socketIO: {
+        cors: {
+          origin: process.env.CORS_ORIGINS?.split(',') || ["http://localhost:5174", "http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}"],
+          methods: ["GET", "POST"],
+          credentials: true
+        },
+        pingTimeout: 60000,
+        pingInterval: 25000,
+        maxHttpBufferSize: 1e6,
+        transports: ['websocket', 'polling'],
+        allowEIO3: true,
+        ...options.socketIO
+      },
+      
+      // 连接管理配置
+      connection: {
+        maxConnections: 10000,
+        maxConnectionsPerUser: 10,
+        maxRoomsPerUser: 50,
+        connectionTimeout: 30000,
+        idleTimeout: 300000, // 5分钟空闲超时
+        ...options.connection
+      },
+      
+      // 重连配置
+      reconnection: {
+        maxAttempts: 5,
+        baseDelay: 1000,
+        maxDelay: 30000,
+        backoffFactor: 2,
+        ...options.reconnection
+      },
+      
+      // 心跳配置
+      heartbeat: {
+        interval: 30000, // 30秒心跳间隔
+        timeout: 10000,  // 10秒心跳超时
+        ...options.heartbeat
+      },
+      
+      // 消息队列配置
+      messageQueue: {
+        maxSize: 1000,
+        batchSize: 10,
+        processInterval: 100,
+        priority: {
+          high: 1,
+          normal: 5,
+          low: 10
+        },
+        ...options.messageQueue
+      },
+      
+      // 性能配置
+      performance: {
+        enableCompression: true,
+        enableBatching: true,
+        batchDelay: 50,
+        maxBatchSize: 100,
+        enableStatistics: true,
+        ...options.performance
+      },
+      
+      // Redis配置
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT) || 6379,
+        password: process.env.REDIS_PASSWORD,
+        db: 2, // 使用数据库2存储WebSocket数据
+        keyPrefix: 'testweb:ws:',
+        ...options.redis
+      }
     };
     
-    this.messageHandlers = new Map();
-    this.middlewares = [];
+    // 统计数据
+    this.stats = {
+      connections: {
+        total: 0,
+        active: 0,
+        peak: 0
+      },
+      messages: {
+        sent: 0,
+        received: 0,
+        queued: 0,
+        failed: 0
+      },
+      performance: {
+        avgResponseTime: 0,
+        lastHeartbeat: null,
+        reconnections: 0
+      }
+    };
     
-    // 注册默认消息处理器
-    this.registerDefaultHandlers();
+    // 监听器映射
+    this.listeners = new Map();
     
-    // 启动心跳检测
-    this.startHeartbeat();
+    this.isInitialized = false;
   }
 
   /**
-   * 初始化WebSocket服务器
+   * 初始化WebSocket管理器
    */
-  async initialize(server) {
+  async initialize() {
     try {
-      this.wss = new WebSocket.Server({
-        server,
-        path: this.config.path,
-        perMessageDeflate: this.config.enableCompression,
-        maxPayload: this.config.maxMessageSize,
-        clientTracking: false // 我们自己管理连接
-      });
-
-      this.wss.on('connection', (ws, req) => {
-        this.handleConnection(ws, req);
-      });
-
-      this.wss.on('error', (error) => {
-        console.error('WebSocket服务器错误:', error);
-        this.emit('server_error', error);
-      });
-
-      console.log(`✅ WebSocket服务器已启动: ${this.config.path}`);
-      this.emit('server_started', { path: this.config.path });
+      console.log('🚀 初始化增强版WebSocket管理器...');
       
-      return true;
+      if (this.isInitialized) {
+        console.warn('WebSocket管理器已经初始化');
+        return;
+      }
+      
+      // 初始化Redis连接
+      await this.initializeRedis();
+      
+      // 初始化Socket.IO
+      await this.initializeSocketIO();
+      
+      // 设置事件监听器
+      this.setupEventListeners();
+      
+      // 启动心跳检测
+      this.startHeartbeat();
+      
+      // 启动消息队列处理器
+      this.startMessageQueueProcessor();
+      
+      // 启动清理任务
+      this.startCleanupTasks();
+      
+      this.isInitialized = true;
+      console.log('✅ 增强版WebSocket管理器初始化完成');
+      
     } catch (error) {
-      console.error('初始化WebSocket服务器失败:', error);
+      console.error('❌ WebSocket管理器初始化失败:', error);
       throw error;
     }
   }
 
   /**
+   * 初始化Redis连接
+   */
+  async initializeRedis() {
+    try {
+      this.redisClient = new Redis({
+        ...this.config.redis,
+        lazyConnect: true,
+        retryDelayOnFailover: 100,
+        maxRetriesPerRequest: 3
+      });
+      
+      this.redisClient.on('connect', () => {
+        console.log('✅ Redis连接建立 (WebSocket)');
+      });
+      
+      this.redisClient.on('error', (error) => {
+        console.error('❌ Redis连接错误 (WebSocket):', error);
+      });
+      
+      await this.redisClient.connect();
+      
+    } catch (error) {
+      console.warn('⚠️ Redis连接失败，使用内存模式:', error.message);
+      this.redisClient = null;
+    }
+  }
+
+  /**
+   * 初始化Socket.IO
+   */
+  async initializeSocketIO() {
+    this.io = new Server(this.server, this.config.socketIO);
+    
+    // 中间件：连接验证和限制
+    this.io.use((socket, next) => {
+      try {
+        // 检查连接数限制
+        if (this.stats.connections.active >= this.config.connection.maxConnections) {
+          return next(new Error('服务器连接数已达上限'));
+        }
+        
+        // 用户连接数限制
+        const userId = socket.handshake.auth?.userId;
+        if (userId) {
+          const userConnections = Array.from(this.connections.values())
+            .filter(conn => conn.userId === userId).length;
+          
+          if (userConnections >= this.config.connection.maxConnectionsPerUser) {
+            return next(new Error('用户连接数已达上限'));
+          }
+        }
+        
+        next();
+      } catch (error) {
+        next(new Error('连接验证失败'));
+      }
+    });
+    
+    // 连接事件处理
+    this.io.on('connection', (socket) => {
+      this.handleConnection(socket);
+    });
+    
+    console.log('✅ Socket.IO服务器已初始化');
+  }
+
+  /**
    * 处理新连接
    */
-  async handleConnection(ws, req) {
-    // 检查连接数限制
-    if (this.connections.size >= this.config.maxConnections) {
-      ws.close(1013, 'Server overloaded');
-      return;
-    }
-
-    const connectionId = this.generateConnectionId();
-    const clientIP = this.getClientIP(req);
-    
-    const connection = {
-      id: connectionId,
-      ws,
-      ip: clientIP,
-      userAgent: req.headers['user-agent'],
+  handleConnection(socket) {
+    const connectionInfo = {
+      id: socket.id,
+      userId: socket.handshake.auth?.userId,
+      userAgent: socket.handshake.headers['user-agent'],
+      ip: socket.handshake.address,
       connectedAt: new Date(),
-      lastHeartbeat: new Date(),
       lastActivity: new Date(),
-      user: null,
-      authenticated: false,
       rooms: new Set(),
-      subscriptions: new Set(),
-      messageCount: 0,
-      bytesReceived: 0,
-      bytesSent: 0
+      messageQueue: [],
+      heartbeatCount: 0
     };
-
-    // 存储连接
-    this.connections.set(connectionId, connection);
-
-
-    // 设置消息处理
-    ws.on('message', async (data) => {
-      await this.handleMessage(connectionId, data);
-    });
-
-    // 设置关闭处理
-    ws.on('close', (code, reason) => {
-      this.handleDisconnection(connectionId, code, reason);
-    });
-
-    // 设置错误处理
-    ws.on('error', (error) => {
-      console.error(`连接 ${connectionId} 错误:`, error);
-      this.handleConnectionError(connectionId, error);
-    });
-
-    // 发送欢迎消息
-    this.sendToConnection(connectionId, {
-      type: 'welcome',
-      data: {
-        connectionId,
-        serverTime: new Date().toISOString(),
-        heartbeatInterval: this.config.heartbeatInterval,
-        features: {
-          rooms: true,
-          subscriptions: true,
-          authentication: true,
-          compression: this.config.enableCompression
-        }
+    
+    this.connections.set(socket.id, connectionInfo);
+    this.updateConnectionStats('connect');
+    
+    
+    // 设置连接事件监听器
+    this.setupConnectionListeners(socket, connectionInfo);
+    
+    // 发送连接确认
+    socket.emit('connection:confirmed', {
+      socketId: socket.id,
+      config: {
+        heartbeatInterval: this.config.heartbeat.interval,
+        reconnectionConfig: this.config.reconnection
       }
     });
-
-    this.emit('connection_opened', { connectionId, connection });
+    
+    // 触发连接事件
+    this.emit('connection', socket, connectionInfo);
   }
 
   /**
-   * 处理消息
+   * 设置连接事件监听器
    */
-  async handleMessage(connectionId, data) {
-    const connection = this.connections.get(connectionId);
-    if (!connection) return;
+  setupConnectionListeners(socket, connectionInfo) {
+    // 断开连接
+    socket.on('disconnect', (reason) => {
+      this.handleDisconnection(socket, connectionInfo, reason);
+    });
+    
+    // 心跳响应
+    socket.on('heartbeat:pong', (data) => {
+      this.handleHeartbeatPong(socket, connectionInfo, data);
+    });
+    
+    // 加入房间
+    socket.on('room:join', (roomId, callback) => {
+      this.handleRoomJoin(socket, connectionInfo, roomId, callback);
+    });
+    
+    // 离开房间
+    socket.on('room:leave', (roomId, callback) => {
+      this.handleRoomLeave(socket, connectionInfo, roomId, callback);
+    });
+    
+    // 消息发送
+    socket.on('message:send', (data, callback) => {
+      this.handleMessageSend(socket, connectionInfo, data, callback);
+    });
+    
+    // 订阅事件
+    socket.on('subscribe', (eventName, callback) => {
+      this.handleSubscribe(socket, connectionInfo, eventName, callback);
+    });
+    
+    // 取消订阅
+    socket.on('unsubscribe', (eventName, callback) => {
+      this.handleUnsubscribe(socket, connectionInfo, eventName, callback);
+    });
+    
+    // 更新活动时间
+    socket.onAny(() => {
+      connectionInfo.lastActivity = new Date();
+    });
+  }
 
+  /**
+   * 处理断开连接
+   */
+  handleDisconnection(socket, connectionInfo, reason) {
+    
+    // 清理连接数据
+    this.connections.delete(socket.id);
+    this.updateConnectionStats('disconnect');
+    
+    // 清理房间数据
+    connectionInfo.rooms.forEach(roomId => {
+      this.leaveRoom(socket.id, roomId);
+    });
+    
+    // 清理消息队列
+    this.messageQueues.delete(socket.id);
+    
+    // 清理重连尝试记录
+    this.reconnectionAttempts.delete(socket.id);
+    
+    // 触发断开连接事件
+    this.emit('disconnection', socket, connectionInfo, reason);
+  }
+
+  /**
+   * 处理心跳响应
+   */
+  handleHeartbeatPong(socket, connectionInfo, data) {
+    connectionInfo.heartbeatCount++;
+    connectionInfo.lastActivity = new Date();
+    
+    if (data && data.timestamp) {
+      const responseTime = Date.now() - data.timestamp;
+      this.updatePerformanceStats(responseTime);
+    }
+  }
+
+  /**
+   * 处理房间加入
+   */
+  async handleRoomJoin(socket, connectionInfo, roomId, callback) {
     try {
-      // 更新连接统计
-      connection.lastActivity = new Date();
-      connection.messageCount++;
-      connection.bytesReceived += data.length;
-
-      // 检查消息大小
-      if (data.length > this.config.maxMessageSize) {
-        this.sendError(connectionId, 'Message too large', null);
+      // 检查房间数量限制
+      if (connectionInfo.rooms.size >= this.config.connection.maxRoomsPerUser) {
+        const error = new Error('用户房间数量已达上限');
+        if (callback) callback({ success: false, error: error.message });
         return;
       }
-
-      const message = JSON.parse(data.toString());
-      const { type, data: messageData, id: messageId } = message;
-
-
-      // 应用中间件
-      for (const middleware of this.middlewares) {
-        const result = await middleware(connection, message);
-        if (result === false) {
-          return; // 中间件阻止了消息处理
-        }
+      
+      // 加入房间
+      socket.join(roomId);
+      connectionInfo.rooms.add(roomId);
+      
+      // 更新房间统计
+      if (!this.rooms.has(roomId)) {
+        this.rooms.set(roomId, { members: new Set(), createdAt: new Date() });
       }
-
-      // 处理消息
-      const handler = this.messageHandlers.get(type);
-      if (handler) {
-        await handler.call(this, connectionId, messageData, messageId);
-      } else {
-        this.sendError(connectionId, `Unknown message type: ${type}`, messageId);
+      this.rooms.get(roomId).members.add(socket.id);
+      
+      // 保存到Redis
+      if (this.redisClient) {
+        await this.redisClient.sadd(`room:${roomId}:members`, socket.id);
+        await this.redisClient.hset(`connection:${socket.id}:rooms`, roomId, Date.now());
       }
-
-      this.emit('message_received', { connectionId, type, data: messageData });
+      
+      
+      if (callback) callback({ success: true, roomId });
+      this.emit('room:joined', socket, roomId);
+      
     } catch (error) {
-      console.error(`处理消息失败 ${connectionId}:`, error);
-      this.sendError(connectionId, 'Invalid message format', message?.id);
+      console.error(`房间加入失败: ${error.message}`);
+      if (callback) callback({ success: false, error: error.message });
     }
   }
 
   /**
-   * 注册默认消息处理器
+   * 处理房间离开
    */
-  registerDefaultHandlers() {
-    // 认证处理器
-    this.messageHandlers.set('auth', async (connectionId, data, messageId) => {
-      await this.handleAuthentication(connectionId, data, messageId);
-    });
+  async handleRoomLeave(socket, connectionInfo, roomId, callback) {
+    try {
+      // 离开房间
+      socket.leave(roomId);
+      connectionInfo.rooms.delete(roomId);
+      
+      // 更新房间统计
+      if (this.rooms.has(roomId)) {
+        this.rooms.get(roomId).members.delete(socket.id);
+        
+        // 如果房间空了，删除房间记录
+        if (this.rooms.get(roomId).members.size === 0) {
+          this.rooms.delete(roomId);
+        }
+      }
+      
+      // 从Redis删除
+      if (this.redisClient) {
+        await this.redisClient.srem(`room:${roomId}:members`, socket.id);
+        await this.redisClient.hdel(`connection:${socket.id}:rooms`, roomId);
+      }
+      
+      
+      if (callback) callback({ success: true, roomId });
+      this.emit('room:left', socket, roomId);
+      
+    } catch (error) {
+      console.error(`房间离开失败: ${error.message}`);
+      if (callback) callback({ success: false, error: error.message });
+    }
+  }
 
-    // 心跳处理器
-    this.messageHandlers.set('ping', async (connectionId, data, messageId) => {
-      const connection = this.connections.get(connectionId);
-      if (connection) {
-        connection.lastHeartbeat = new Date();
-        this.sendToConnection(connectionId, {
-          type: 'pong',
-          data: { serverTime: new Date().toISOString() },
-          id: messageId
+  /**
+   * 处理消息发送
+   */
+  handleMessageSend(socket, connectionInfo, data, callback) {
+    try {
+      const message = {
+        id: this.generateMessageId(),
+        from: socket.id,
+        userId: connectionInfo.userId,
+        timestamp: Date.now(),
+        ...data
+      };
+      
+      // 添加到消息队列
+      this.queueMessage(message);
+      
+      this.stats.messages.received++;
+      
+      if (callback) callback({ success: true, messageId: message.id });
+      this.emit('message:received', socket, message);
+      
+    } catch (error) {
+      console.error(`消息发送失败: ${error.message}`);
+      if (callback) callback({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * 发送消息到指定连接
+   */
+  sendToSocket(socketId, event, data, options = {}) {
+    const socket = this.io.sockets.sockets.get(socketId);
+    if (!socket) {
+      return false;
+    }
+    
+    const message = {
+      id: this.generateMessageId(),
+      event,
+      data,
+      timestamp: Date.now(),
+      priority: options.priority || 'normal'
+    };
+    
+    if (options.queue) {
+      this.queueMessage(message, socketId);
+    } else {
+      socket.emit(event, data);
+      this.stats.messages.sent++;
+    }
+    
+    return true;
+  }
+
+  /**
+   * 发送消息到房间
+   */
+  sendToRoom(roomId, event, data, options = {}) {
+    const message = {
+      id: this.generateMessageId(),
+      event,
+      data,
+      timestamp: Date.now(),
+      priority: options.priority || 'normal'
+    };
+    
+    if (options.queue) {
+      // 队列模式：添加到房间成员的队列中
+      const room = this.rooms.get(roomId);
+      if (room) {
+        room.members.forEach(socketId => {
+          this.queueMessage(message, socketId);
         });
       }
-    });
-
-    // 订阅处理器
-    this.messageHandlers.set('subscribe', async (connectionId, data, messageId) => {
-      await this.handleSubscribe(connectionId, data, messageId);
-    });
-
-    // 取消订阅处理器
-    this.messageHandlers.set('unsubscribe', async (connectionId, data, messageId) => {
-      await this.handleUnsubscribe(connectionId, data, messageId);
-    });
-
-    // 加入房间处理器
-    this.messageHandlers.set('join_room', async (connectionId, data, messageId) => {
-      await this.handleJoinRoom(connectionId, data, messageId);
-    });
-
-    // 离开房间处理器
-    this.messageHandlers.set('leave_room', async (connectionId, data, messageId) => {
-      await this.handleLeaveRoom(connectionId, data, messageId);
-    });
-
-    // 房间消息处理器
-    this.messageHandlers.set('room_message', async (connectionId, data, messageId) => {
-      await this.handleRoomMessage(connectionId, data, messageId);
-    });
-
-    // 获取在线用户处理器
-    this.messageHandlers.set('get_online_users', async (connectionId, data, messageId) => {
-      await this.handleGetOnlineUsers(connectionId, data, messageId);
-    });
-  }
-
-  /**
-   * 处理认证
-   */
-  async handleAuthentication(connectionId, data, messageId) {
-    const connection = this.connections.get(connectionId);
-    if (!connection) return;
-
-    try {
-      const { token } = data;
-      
-      if (!token) {
-        return this.sendError(connectionId, 'Missing authentication token', messageId);
-      }
-
-      // 验证JWT令牌
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret');
-      
-      // 更新连接信息
-      connection.user = decoded;
-      connection.authenticated = true;
-
-      // 建立用户连接映射
-      if (!this.userConnections.has(decoded.id)) {
-        this.userConnections.set(decoded.id, new Set());
-      }
-      this.userConnections.get(decoded.id).add(connectionId);
-
-      this.sendToConnection(connectionId, {
-        type: 'auth_success',
-        data: {
-          user: {
-            id: decoded.id,
-            username: decoded.username,
-            email: decoded.email,
-            role: decoded.role
-          },
-          permissions: decoded.permissions || [],
-          authenticatedAt: new Date().toISOString()
-        },
-        id: messageId
-      });
-
-      this.emit('user_authenticated', { connectionId, user: decoded });
-    } catch (error) {
-      console.error(`认证失败 ${connectionId}:`, error);
-      this.sendError(connectionId, 'Authentication failed', messageId);
-    }
-  }
-
-  /**
-   * 处理订阅
-   */
-  async handleSubscribe(connectionId, data, messageId) {
-    const connection = this.connections.get(connectionId);
-    if (!connection) return;
-
-    const { channel, filters = {} } = data;
-    
-    if (!channel) {
-      return this.sendError(connectionId, 'Missing channel name', messageId);
-    }
-
-    // 添加订阅
-    if (!this.subscriptions.has(channel)) {
-      this.subscriptions.set(channel, new Map());
-    }
-    
-    this.subscriptions.get(channel).set(connectionId, {
-      connectionId,
-      userId: connection.user?.id,
-      filters,
-      subscribedAt: new Date()
-    });
-
-    connection.subscriptions.add(channel);
-
-    this.sendToConnection(connectionId, {
-      type: 'subscribed',
-      data: { channel, filters },
-      id: messageId
-    });
-
-    this.emit('channel_subscribed', { connectionId, channel, filters });
-  }
-
-  /**
-   * 处理取消订阅
-   */
-  async handleUnsubscribe(connectionId, data, messageId) {
-    const connection = this.connections.get(connectionId);
-    if (!connection) return;
-
-    const { channel } = data;
-    
-    if (!channel) {
-      return this.sendError(connectionId, 'Missing channel name', messageId);
-    }
-
-    // 移除订阅
-    if (this.subscriptions.has(channel)) {
-      this.subscriptions.get(channel).delete(connectionId);
-      
-      // 如果频道没有订阅者，删除频道
-      if (this.subscriptions.get(channel).size === 0) {
-        this.subscriptions.delete(channel);
+    } else {
+      // 直接发送
+      this.io.to(roomId).emit(event, data);
+      const room = this.rooms.get(roomId);
+      if (room) {
+        this.stats.messages.sent += room.members.size;
       }
     }
-
-    connection.subscriptions.delete(channel);
-
-    this.sendToConnection(connectionId, {
-      type: 'unsubscribed',
-      data: { channel },
-      id: messageId
-    });
-
-    this.emit('channel_unsubscribed', { connectionId, channel });
+    
+    return true;
   }
 
   /**
-   * 处理加入房间
+   * 广播消息
    */
-  async handleJoinRoom(connectionId, data, messageId) {
-    const connection = this.connections.get(connectionId);
-    if (!connection) return;
-
-    const { room, password } = data;
+  broadcast(event, data, options = {}) {
+    const message = {
+      id: this.generateMessageId(),
+      event,
+      data,
+      timestamp: Date.now(),
+      priority: options.priority || 'normal'
+    };
     
-    if (!room) {
-      return this.sendError(connectionId, 'Missing room name', messageId);
-    }
-
-    // 创建房间（如果不存在）
-    if (!this.rooms.has(room)) {
-      this.rooms.set(room, {
-        name: room,
-        password: password,
-        members: new Set(),
-        createdAt: new Date(),
-        lastActivity: new Date(),
-        messageHistory: []
-      });
-    }
-
-    const roomData = this.rooms.get(room);
-    
-    // 检查密码（如果房间有密码）
-    if (roomData.password && roomData.password !== password) {
-      return this.sendError(connectionId, 'Invalid room password', messageId);
-    }
-
-    // 添加成员
-    roomData.members.add(connectionId);
-    roomData.lastActivity = new Date();
-    connection.rooms.add(room);
-
-    // 获取房间成员信息
-    const members = Array.from(roomData.members).map(connId => {
-      const conn = this.connections.get(connId);
-      return {
-        connectionId: connId,
-        user: conn?.user ? {
-          id: conn.user.id,
-          username: conn.user.username
-        } : null,
-        joinedAt: conn?.connectedAt
-      };
-    }).filter(member => member.user); // 只返回已认证的用户
-
-    this.sendToConnection(connectionId, {
-      type: 'room_joined',
-      data: {
-        room,
-        members: members,
-        memberCount: roomData.members.size,
-        recentMessages: roomData.messageHistory.slice(-10) // 返回最近10条消息
-      },
-      id: messageId
-    });
-
-    // 通知房间其他成员
-    this.broadcastToRoom(room, {
-      type: 'user_joined_room',
-      data: {
-        room,
-        user: connection.user ? {
-          id: connection.user.id,
-          username: connection.user.username
-        } : null,
-        memberCount: roomData.members.size,
-        timestamp: new Date().toISOString()
-      }
-    }, [connectionId]);
-
-    this.emit('room_joined', { connectionId, room, memberCount: roomData.members.size });
-  }
-
-  /**
-   * 处理离开房间
-   */
-  async handleLeaveRoom(connectionId, data, messageId) {
-    const connection = this.connections.get(connectionId);
-    if (!connection) return;
-
-    const { room } = data;
-    
-    if (!room) {
-      return this.sendError(connectionId, 'Missing room name', messageId);
-    }
-
-    if (!this.rooms.has(room)) {
-      return this.sendError(connectionId, 'Room not found', messageId);
-    }
-
-    const roomData = this.rooms.get(room);
-    
-    // 移除成员
-    roomData.members.delete(connectionId);
-    roomData.lastActivity = new Date();
-    connection.rooms.delete(room);
-
-    this.sendToConnection(connectionId, {
-      type: 'room_left',
-      data: { room },
-      id: messageId
-    });
-
-    // 通知房间其他成员
-    if (roomData.members.size > 0) {
-      this.broadcastToRoom(room, {
-        type: 'user_left_room',
-        data: {
-          room,
-          user: connection.user ? {
-            id: connection.user.id,
-            username: connection.user.username
-          } : null,
-          memberCount: roomData.members.size,
-          timestamp: new Date().toISOString()
-        }
+    if (options.queue) {
+      // 队列模式：添加到所有连接的队列中
+      this.connections.forEach((_, socketId) => {
+        this.queueMessage(message, socketId);
       });
     } else {
-      // 如果房间为空，删除房间
-      this.rooms.delete(room);
+      // 直接广播
+      this.io.emit(event, data);
+      this.stats.messages.sent += this.connections.size;
     }
-
-    this.emit('room_left', { connectionId, room, memberCount: roomData.members.size });
+    
+    return true;
   }
 
   /**
-   * 处理房间消息
+   * 消息队列管理
    */
-  async handleRoomMessage(connectionId, data, messageId) {
-    const connection = this.connections.get(connectionId);
-    if (!connection) return;
-
-    const { room, message, type = 'text' } = data;
-
-    if (!room || !message) {
-      return this.sendError(connectionId, 'Missing room or message', messageId);
-    }
-
-    if (!connection.rooms.has(room)) {
-      return this.sendError(connectionId, 'Not a member of this room', messageId);
-    }
-
-    if (!this.rooms.has(room)) {
-      return this.sendError(connectionId, 'Room not found', messageId);
-    }
-
-    const roomData = this.rooms.get(room);
-    
-    const messageData = {
-      id: this.generateMessageId(),
-      type,
-      content: message,
-      sender: connection.user ? {
-        id: connection.user.id,
-        username: connection.user.username
-      } : null,
-      timestamp: new Date().toISOString()
-    };
-
-    // 保存消息历史
-    roomData.messageHistory.push(messageData);
-    if (roomData.messageHistory.length > 100) {
-      roomData.messageHistory = roomData.messageHistory.slice(-100); // 只保留最近100条消息
-    }
-    
-    roomData.lastActivity = new Date();
-
-    // 广播消息到房间
-    this.broadcastToRoom(room, {
-      type: 'room_message',
-      data: {
-        room,
-        message: messageData
+  queueMessage(message, socketId = null) {
+    if (socketId) {
+      // 发送到特定socket
+      if (!this.messageQueues.has(socketId)) {
+        this.messageQueues.set(socketId, []);
       }
-    });
-
-    this.sendToConnection(connectionId, {
-      type: 'message_sent',
-      data: { room, messageId: messageData.id },
-      id: messageId
-    });
-
-    this.emit('room_message_sent', { connectionId, room, message: messageData });
+      
+      const queue = this.messageQueues.get(socketId);
+      if (queue.length >= this.config.messageQueue.maxSize) {
+        queue.shift(); // 移除最老的消息
+      }
+      
+      queue.push(message);
+      this.stats.messages.queued++;
+    } else {
+      // 广播到所有连接
+      this.connections.forEach((_, id) => {
+        this.queueMessage(message, id);
+      });
+    }
   }
 
   /**
-   * 处理获取在线用户
+   * 启动消息队列处理器
    */
-  async handleGetOnlineUsers(connectionId, data, messageId) {
-    const connection = this.connections.get(connectionId);
-    if (!connection || !connection.authenticated) {
-      return this.sendError(connectionId, 'Authentication required', messageId);
-    }
+  startMessageQueueProcessor() {
+    setInterval(() => {
+      this.processMessageQueues();
+    }, this.config.messageQueue.processInterval);
+  }
 
-    const onlineUsers = [];
+  /**
+   * 处理消息队列
+   */
+  processMessageQueues() {
+    const priorities = Object.entries(this.config.messageQueue.priority)
+      .sort(([,a], [,b]) => a - b)
+      .map(([priority]) => priority);
     
+    this.messageQueues.forEach((queue, socketId) => {
+      if (queue.length === 0) return;
+      
 
       /**
 
@@ -567,325 +598,190 @@ class WebSocketManager extends EventEmitter {
        * @returns {Promise<Object>} 返回结果
 
        */
-    for (const [userId, connections] of this.userConnections.entries()) {
-      if (connections.size > 0) {
-        // 获取用户的第一个连接来获取用户信息
-        const firstConnectionId = connections.values().next().value;
-        const userConnection = this.connections.get(firstConnectionId);
-        
-        if (userConnection && userConnection.user) {
-          onlineUsers.push({
-            id: userConnection.user.id,
-            username: userConnection.user.username,
-            role: userConnection.user.role,
-            connectedAt: userConnection.connectedAt,
-            lastActivity: userConnection.lastActivity,
-            connectionCount: connections.size
-          });
-        }
+      const socket = this.io.sockets.sockets.get(socketId);
+      if (!socket) {
+        // 清理已断开连接的队列
+        this.messageQueues.delete(socketId);
+        return;
       }
-    }
-
-    this.sendToConnection(connectionId, {
-      type: 'online_users',
-      data: {
-        users: onlineUsers,
-        totalCount: onlineUsers.length,
-        timestamp: new Date().toISOString()
-      },
-      id: messageId
+      
+      // 按优先级排序
+      queue.sort((a, b) => {
+        const aPriority = this.config.messageQueue.priority[a.priority] || 5;
+        const bPriority = this.config.messageQueue.priority[b.priority] || 5;
+        return aPriority - bPriority;
+      });
+      
+      // 批量发送消息
+      const batch = queue.splice(0, this.config.messageQueue.batchSize);
+      
+      if (this.config.performance.enableBatching && batch.length > 1) {
+        // 批量发送
+        socket.emit('message:batch', batch);
+        this.stats.messages.sent += batch.length;
+      } else {
+        // 单独发送
+        batch.forEach(message => {
+          socket.emit(message.event, message.data);
+          this.stats.messages.sent++;
+        });
+      }
     });
-  }
-
-  /**
-   * 处理连接断开
-   */
-  handleDisconnection(connectionId, code, reason) {
-    const connection = this.connections.get(connectionId);
-    if (!connection) return;
-
-
-    // 从用户连接映射中移除
-    if (connection.user) {
-      const userConnections = this.userConnections.get(connection.user.id);
-      if (userConnections) {
-        userConnections.delete(connectionId);
-        if (userConnections.size === 0) {
-          this.userConnections.delete(connection.user.id);
-        }
-      }
-    }
-
-    // 从所有房间移除
-    for (const room of connection.rooms) {
-      const roomData = this.rooms.get(room);
-      if (roomData) {
-        roomData.members.delete(connectionId);
-        
-        // 通知房间其他成员
-        if (roomData.members.size > 0) {
-          this.broadcastToRoom(room, {
-            type: 'user_disconnected',
-            data: {
-              room,
-              user: connection.user ? {
-                id: connection.user.id,
-                username: connection.user.username
-              } : null,
-              memberCount: roomData.members.size,
-              timestamp: new Date().toISOString()
-            }
-          });
-        } else {
-          // 删除空房间
-          this.rooms.delete(room);
-        }
-      }
-    }
-
-    // 从所有订阅中移除
-    for (const channel of connection.subscriptions) {
-      const channelSubs = this.subscriptions.get(channel);
-      if (channelSubs) {
-        channelSubs.delete(connectionId);
-        if (channelSubs.size === 0) {
-          this.subscriptions.delete(channel);
-        }
-      }
-    }
-
-    // 移除连接
-    this.connections.delete(connectionId);
-
-    this.emit('connection_closed', { connectionId, code, reason });
-  }
-
-  /**
-   * 处理连接错误
-   */
-  handleConnectionError(connectionId, error) {
-    console.error(`连接错误 ${connectionId}:`, error);
-    this.emit('connection_error', { connectionId, error });
-  }
-
-  /**
-   * 发送消息给特定连接
-   */
-  sendToConnection(connectionId, message) {
-    const connection = this.connections.get(connectionId);
-    if (!connection || connection.ws.readyState !== WebSocket.OPEN) {
-      return false;
-    }
-
-    try {
-      const data = JSON.stringify(message);
-      connection.ws.send(data);
-      connection.bytesSent += data.length;
-      return true;
-    } catch (error) {
-      console.error(`发送消息失败 ${connectionId}:`, error);
-      return false;
-    }
-  }
-
-  /**
-   * 发送错误消息
-   */
-  sendError(connectionId, message, messageId = null) {
-    this.sendToConnection(connectionId, {
-      type: 'error',
-      data: { message },
-      id: messageId
-    });
-  }
-
-  /**
-   * 发送消息给用户的所有连接
-   */
-  sendToUser(userId, message) {
-    const userConnections = this.userConnections.get(userId);
-    if (!userConnections) return 0;
-
-    let sentCount = 0;
-    for (const connectionId of userConnections) {
-      if (this.sendToConnection(connectionId, message)) {
-        sentCount++;
-      }
-    }
-    return sentCount;
-  }
-
-  /**
-   * 广播消息到房间
-   */
-  broadcastToRoom(room, message, excludeConnections = []) {
-    const roomData = this.rooms.get(room);
-    if (!roomData) return 0;
-
-    let sentCount = 0;
-    for (const connectionId of roomData.members) {
-      if (!excludeConnections.includes(connectionId)) {
-        if (this.sendToConnection(connectionId, message)) {
-          sentCount++;
-        }
-      }
-    }
-    return sentCount;
-  }
-
-  /**
-   * 广播消息到频道订阅者
-   */
-  broadcastToChannel(channel, message, filters = {}) {
-    const channelSubs = this.subscriptions.get(channel);
-    if (!channelSubs) return 0;
-
-    let sentCount = 0;
-    for (const [connectionId, subscription] of channelSubs) {
-      // 应用过滤器
-      if (this.matchesFilters(message, subscription.filters)) {
-        if (this.sendToConnection(connectionId, message)) {
-          sentCount++;
-        }
-      }
-    }
-    return sentCount;
-  }
-
-  /**
-   * 广播消息给所有连接
-   */
-  broadcastToAll(message, excludeConnections = []) {
-    let sentCount = 0;
-    for (const connectionId of this.connections.keys()) {
-      if (!excludeConnections.includes(connectionId)) {
-        if (this.sendToConnection(connectionId, message)) {
-          sentCount++;
-        }
-      }
-    }
-    return sentCount;
-  }
-
-  /**
-   * 检查消息是否匹配过滤器
-   */
-  matchesFilters(message, filters) {
-    if (!filters || Object.keys(filters).length === 0) return true;
-
-    for (const [key, value] of Object.entries(filters)) {
-      const messageValue = this.getNestedValue(message, key);
-      if (messageValue !== value) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * 获取嵌套值
-   */
-  getNestedValue(obj, path) {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
   }
 
   /**
    * 启动心跳检测
    */
   startHeartbeat() {
+    this.heartbeatInterval = setInterval(() => {
+      this.performHeartbeat();
+    }, this.config.heartbeat.interval);
+  }
+
+  /**
+   * 执行心跳检测
+   */
+  performHeartbeat() {
+    const now = Date.now();
+    const timeout = this.config.heartbeat.timeout;
+    
+    this.connections.forEach((connectionInfo, socketId) => {
+      const socket = this.io.sockets.sockets.get(socketId);
+      if (!socket) return;
+      
+      // 发送心跳ping
+      socket.emit('heartbeat:ping', { timestamp: now });
+      
+      // 检查上次活动时间
+      const lastActivity = connectionInfo.lastActivity.getTime();
+      if (now - lastActivity > this.config.connection.idleTimeout) {
+        socket.disconnect(true);
+      }
+    });
+    
+    this.stats.performance.lastHeartbeat = new Date();
+  }
+
+  /**
+   * 启动清理任务
+   */
+  startCleanupTasks() {
+    // 每10分钟执行一次清理
     setInterval(() => {
-      this.performHeartbeatCheck();
-    }, this.config.heartbeatInterval);
+      this.performCleanup();
+    }, 10 * 60 * 1000);
   }
 
   /**
-   * 执行心跳检查
+   * 执行清理任务
    */
-  performHeartbeatCheck() {
-    const now = new Date();
-    const timeout = this.config.connectionTimeout;
-    const staleConnections = [];
-
-    for (const [connectionId, connection] of this.connections) {
-      // 检查最后活动时间
-      if (now - connection.lastActivity > timeout) {
-        staleConnections.push(connectionId);
-      } else if (now - connection.lastHeartbeat > this.config.heartbeatInterval) {
-        // 发送心跳
-        this.sendToConnection(connectionId, {
-          type: 'ping',
-          data: { serverTime: now.toISOString() }
-        });
+  async performCleanup() {
+    try {
+      
+      // 清理断开的连接
+      const connectedSockets = new Set(this.io.sockets.sockets.keys());
+      this.connections.forEach((connectionInfo, socketId) => {
+        if (!connectedSockets.has(socketId)) {
+          this.connections.delete(socketId);
+          this.messageQueues.delete(socketId);
+        }
+      });
+      
+      // 清理空房间
+      this.rooms.forEach((roomInfo, roomId) => {
+        if (roomInfo.members.size === 0) {
+          this.rooms.delete(roomId);
+        }
+      });
+      
+      // 清理Redis中的过期数据
+      if (this.redisClient) {
+        await this.cleanupRedisData();
       }
+      
+      console.log('✅ WebSocket清理任务完成');
+      
+    } catch (error) {
+      console.error('❌ WebSocket清理任务失败:', error);
     }
+  }
 
-    // 断开无响应的连接
-    for (const connectionId of staleConnections) {
-      const connection = this.connections.get(connectionId);
-      if (connection && connection.ws) {
-        connection.ws.close(1001, 'Connection timeout');
+  /**
+   * 清理Redis数据
+   */
+  async cleanupRedisData() {
+    try {
+      const pattern = `${this.config.redis.keyPrefix}*`;
+      const keys = await this.redisClient.keys(pattern);
+      
+      // 删除断开连接的相关数据
+      const connectedSockets = new Set(this.io.sockets.sockets.keys());
+      const keysToDelete = [];
+      
+      for (const key of keys) {
+        if (key.includes('connection:')) {
+          const socketId = key.split(':')[2];
+          if (!connectedSockets.has(socketId)) {
+            keysToDelete.push(key);
+          }
+        }
       }
-    }
-
-    if (staleConnections.length > 0) {
-    }
-  }
-
-  /**
-   * 添加中间件
-   */
-  use(middleware) {
-    if (typeof middleware === 'function') {
-      this.middlewares.push(middleware);
+      
+      if (keysToDelete.length > 0) {
+        await this.redisClient.del(...keysToDelete);
+      }
+      
+    } catch (error) {
+      console.error('Redis清理失败:', error);
     }
   }
 
   /**
-   * 注册消息处理器
+   * 设置全局事件监听器
    */
-  registerHandler(type, handler) {
-    this.messageHandlers.set(type, handler);
+  setupEventListeners() {
+    // 监听进程退出
+    process.on('SIGINT', () => this.shutdown());
+    process.on('SIGTERM', () => this.shutdown());
+    
+    // 监听未捕获的异常
+    process.on('uncaughtException', (error) => {
+      console.error('WebSocket管理器未捕获异常:', error);
+    });
+    
+    process.on('unhandledRejection', (reason) => {
+      console.error('WebSocket管理器未处理的Promise拒绝:', reason);
+    });
   }
 
   /**
-   * 获取统计信息
+   * 更新连接统计
    */
-  getStats() {
-    const now = new Date();
-    const activeConnections = Array.from(this.connections.values()).filter(
-      conn => now - conn.lastActivity < this.config.connectionTimeout
-    );
-
-    return {
-      totalConnections: this.connections.size,
-      activeConnections: activeConnections.length,
-      authenticatedConnections: activeConnections.filter(conn => conn.authenticated).length,
-      totalRooms: this.rooms.size,
-      totalSubscriptions: this.subscriptions.size,
-      totalUsers: this.userConnections.size,
-      messageCount: Array.from(this.connections.values()).reduce((sum, conn) => sum + conn.messageCount, 0),
-      bytesReceived: Array.from(this.connections.values()).reduce((sum, conn) => sum + conn.bytesReceived, 0),
-      bytesSent: Array.from(this.connections.values()).reduce((sum, conn) => sum + conn.bytesSent, 0),
-      uptime: process.uptime(),
-      timestamp: now.toISOString()
-    };
+  updateConnectionStats(action) {
+    switch (action) {
+      case 'connect':
+        this.stats.connections.total++;
+        this.stats.connections.active++;
+        if (this.stats.connections.active > this.stats.connections.peak) {
+          this.stats.connections.peak = this.stats.connections.active;
+        }
+        break;
+      case 'disconnect':
+        this.stats.connections.active--;
+        break;
+    }
   }
 
   /**
-   * 获取客户端IP
+   * 更新性能统计
    */
-  getClientIP(req) {
-    return req.headers['x-forwarded-for']?.split(',')[0] || 
-           req.headers['x-real-ip'] || 
-           req.socket.remoteAddress || 
-           'unknown';
-  }
-
-  /**
-   * 生成连接ID
-   */
-  generateConnectionId() {
-    return `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  updatePerformanceStats(responseTime) {
+    if (this.stats.performance.avgResponseTime === 0) {
+      this.stats.performance.avgResponseTime = responseTime;
+    } else {
+      this.stats.performance.avgResponseTime = 
+        (this.stats.performance.avgResponseTime * 0.9) + (responseTime * 0.1);
+    }
   }
 
   /**
@@ -896,42 +792,112 @@ class WebSocketManager extends EventEmitter {
   }
 
   /**
-   * 优雅关闭
+   * 获取统计信息
+   */
+  getStats() {
+    return {
+      ...this.stats,
+      rooms: {
+        total: this.rooms.size,
+        details: Array.from(this.rooms.entries()).map(([roomId, info]) => ({
+          roomId,
+          members: info.members.size,
+          createdAt: info.createdAt
+        }))
+      },
+      queues: {
+        total: this.messageQueues.size,
+        totalMessages: Array.from(this.messageQueues.values())
+          .reduce((sum, queue) => sum + queue.length, 0)
+      },
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
+   * 健康检查
+   */
+  async healthCheck() {
+    try {
+      const health = {
+        status: 'healthy',
+        services: {
+          socketIO: this.io ? 'running' : 'stopped',
+          redis: this.redisClient ? 'connected' : 'disconnected',
+          heartbeat: this.heartbeatInterval ? 'running' : 'stopped'
+        },
+        connections: this.stats.connections.active,
+        rooms: this.rooms.size,
+        messageQueues: this.messageQueues.size,
+        lastHeartbeat: this.stats.performance.lastHeartbeat,
+        timestamp: new Date().toISOString()
+      };
+      
+      // 检查服务状态
+      if (!this.io || !this.heartbeatInterval) {
+        health.status = 'degraded';
+      }
+      
+      return health;
+      
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * 关闭WebSocket管理器
    */
   async shutdown() {
-    
-    // 通知所有客户端
-    this.broadcastToAll({
-      type: 'server_shutdown',
-      data: {
-        message: '服务器正在关闭，连接将被断开',
-        timestamp: new Date().toISOString()
+    try {
+      
+      // 停止心跳
+      if (this.heartbeatInterval) {
+        clearInterval(this.heartbeatInterval);
+        this.heartbeatInterval = null;
       }
-    });
-
-    // 等待消息发送完成
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // 关闭所有连接
-    for (const [connectionId, connection] of this.connections) {
-      if (connection.ws.readyState === WebSocket.OPEN) {
-        connection.ws.close(1001, 'Server shutting down');
+      
+      // 关闭所有连接
+      if (this.io) {
+        this.io.close();
       }
+      
+      // 关闭Redis连接
+      if (this.redisClient) {
+        await this.redisClient.disconnect();
+      }
+      
+      // 清理数据
+      this.connections.clear();
+      this.rooms.clear();
+      this.messageQueues.clear();
+      this.reconnectionAttempts.clear();
+      
+      this.isInitialized = false;
+      console.log('✅ 增强版WebSocket管理器已关闭');
+      
+    } catch (error) {
+      console.error('❌ 关闭WebSocket管理器失败:', error);
     }
+  }
 
-    // 关闭WebSocket服务器
-    if (this.wss) {
-      this.wss.close();
-    }
+  /**
+   * 获取Socket.IO实例
+   */
+  getIO() {
+    return this.io;
+  }
 
-    // 清理数据
-    this.connections.clear();
-    this.userConnections.clear();
-    this.rooms.clear();
-    this.subscriptions.clear();
-
-    console.log('✅ WebSocket服务已关闭');
+  /**
+   * 检查是否已初始化
+   */
+  isReady() {
+    return this.isInitialized && this.io;
   }
 }
 
-module.exports = WebSocketManager;
+module.exports = EnhancedWebSocketManager;
