@@ -10,7 +10,7 @@ let Line: unknown;
 
 // 动态导入和注册 Chart.js
 const initializeChartJS = async () => {
-  if (ChartJS) return; // 已经初始�?
+  if (ChartJS) return; // 已经初始化
   try {
     const chartModule = await import('chart.js');
     const reactChartModule = await import('react-chartjs-2');
@@ -140,7 +140,7 @@ export const ModernLineChart: React.FC<LineChartProps> = ({
     return (
       <div className={`modern-chart-container ${className}`} style={{ height }}>
         <div className="flex items-center justify-center h-full text-gray-500">
-          加载图表�?..
+          加载图表中...
         </div>
       </div>
     );
@@ -181,7 +181,7 @@ export const ModernBarChart: React.FC<BarChartProps> = ({
     return (
       <div className={`modern-chart-container ${className}`} style={{ height }}>
         <div className="flex items-center justify-center h-full text-gray-500">
-          加载图表�?..
+          加载图表中...
         </div>
       </div>
     );
@@ -256,7 +256,7 @@ export const ModernDoughnutChart: React.FC<DoughnutChartProps> = ({
     return (
       <div className={`modern-chart-container ${className}`} style={{ height: size, width: size }}>
         <div className="flex items-center justify-center h-full text-gray-500">
-          加载图表�?..
+          加载图表中...
         </div>
       </div>
     );

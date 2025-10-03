@@ -4,7 +4,7 @@ import type { ReactElement, ComponentType, FC } from 'react';;
 import { LucideIcon, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
-// CSS样式已迁移到组件库和主题配置�?
+// CSS样式已迁移到组件库和主题配置
 export interface StatCardProps {
   title: string;
   value: string | number;

@@ -100,9 +100,10 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 全局键盘快捷�?  useEffect(() => {
+  // 全局键盘快捷键
+  useEffect(() => {
   const handleKeyDown = (event: KeyboardEvent) => {
-    // Ctrl+K �?Cmd+K 打开搜索
+    // Ctrl+K 或 Cmd+K 打开搜索
     if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
       event.preventDefault();
       const searchInput = document.querySelector('input[placeholder*="搜索"]') as HTMLInputElement;
@@ -202,7 +203,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     }
     if (notification.actionUrl) {
       setShowNotifications(false);
-      // 跳转到相应页�?      window.location.href = notification.actionUrl;
+      // 跳转到相应页面
+      window.location.href = notification.actionUrl;
     }
   };
 
@@ -227,7 +229,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
       { label: '查看详情', action: () => notification.actionUrl && (window.location.href = notification.actionUrl) }
     ];
 
-    // 简单的确认对话框实�?    const actionText = notification.read ? '删除此通知�? : '标记为已读并删除�?;
+    // 简单的确认对话框实现
+    const actionText = notification.read ? '删除此通知' : '标记为已读并删除';
     if (confirm("确认执行此操作？")) {
       deleteNotification(notification.id);
     }
@@ -308,7 +311,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
       : 'bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50'
       }`}>
       <div className="flex items-center justify-between">
-        {/* 左侧：Logo和导航控�?*/}
+        {/* 左侧：Logo和导航控制 */}
         <div className="flex items-center space-x-4">
           <button
             type="button"
@@ -370,7 +373,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                   (e.target as HTMLInputElement).blur();
                 }
               }}
-              placeholder="搜索测试、报告、设�?.."
+              placeholder="搜索测试、报告、设置..."
               className={`w-full pl-10 pr-4 py-2 text-sm transition-all duration-200 ${actualTheme === 'light'
                 ? `bg-gray-50 border text-gray-900 placeholder-gray-500 ${showSearchDropdown
                   ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-white'
@@ -397,7 +400,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
             )}
           </div>
 
-          {/* 搜索下拉�?*/}
+          {/* 搜索下拉框 */}
           {showSearchDropdown && (
             <div className="absolute top-full left-0 right-0 bg-gray-700/95 backdrop-blur-xl border border-blue-500 border-t-0 rounded-b-lg shadow-2xl z-[9999] max-h-96 overflow-hidden">
               {searchQuery.trim() ? (
@@ -406,7 +409,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                   {isSearching ? (
                     <div className="p-4 text-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                      <p className="text-sm text-gray-400">搜索�?..</p>
+                      <p className="text-sm text-gray-400">搜索中...</p>
                     </div>
                   ) : searchResults.length > 0 ? (
                     <div className="py-2">
@@ -503,7 +506,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                     </div>
                     <div className="grid grid-cols-2 gap-1">
                       {['网站测试', '安全检测', 'API测试', '实时监控', '系统设置', '帮助文档'].map((suggestion, index) => (
-                        < button
+                        <button
                           key={index}
                           type="button"
                           onClick={() => {
@@ -525,7 +528,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                 <div className="flex items-center justify-between text-xs text-gray-500">
                   <div className="flex items-center space-x-3">
                     <span>↑↓ 导航</span>
-                    <span>�?选择</span>
+                    <span>↵ 选择</span>
                     <span>ESC 关闭</span>
                   </div>
                   <span>Ctrl+K 快速搜索</span>
@@ -606,7 +609,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                     </div>
                   </div>
 
-                  {/* 筛选按�?*/}
+                  {/* 筛选按钮 */}
                   <div className="flex items-center space-x-2">
                     <button
                       type="button"
@@ -753,7 +756,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                       className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
                       onClick={() => setShowNotifications(false)}
                     >
-                      查看全部通知 �?                    </Link>
+                      查看全部通知
+                    </Link>
                     <button
                       type="button"
                       className="text-sm text-gray-400 hover:text-gray-300 transition-colors"
@@ -782,7 +786,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
             <HelpCircle className="w-5 h-5" />
           </Link>
 
-          {/* 用户菜单或登录按�?*/}
+          {/* 用户菜单或登录按钮 */}
           {
             isAuthenticated ? (
               <div className="relative" ref={userMenuRef}>

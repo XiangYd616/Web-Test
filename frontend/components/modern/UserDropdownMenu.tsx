@@ -76,7 +76,8 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
               {isAdmin && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-yellow-500/20 text-yellow-600 border border-yellow-500/30">
                   <Crown className="w-3 h-3 mr-1" />
-                  管理�?                </span>
+                  管理员
+                </span>
               )}
             </div>
             <p className={`text-xs truncate ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'
@@ -127,7 +128,8 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
               </div>
               <div className={`text-xs ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'
                 }`}>
-                收藏�?              </div>
+                收藏数
+              </div>
             </div>
             <div>
               <div className={`text-lg font-bold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
@@ -143,7 +145,7 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
         )}
       </div>
 
-      {/* 菜单�?*/}
+      {/* 菜单项 */}
       <div className="p-2">
         {/* 个人资料 */}
         <Link
@@ -164,12 +166,13 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
             <span className="text-sm font-medium">个人资料</span>
             <p className={`text-xs ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-500'
               }`}>
-              查看和编辑个人信�?            </p>
+              查看和编辑个人信息
+            </p>
           </div>
           <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
 
-        {/* 收藏�?*/}
+        {/* 收藏夹 */}
         <Link
           to="/bookmarks"
           className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${actualTheme === 'light'
@@ -213,7 +216,8 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
             <span className="text-sm font-medium">设置</span>
             <p className={`text-xs ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-500'
               }`}>
-              偏好设置和配�?            </p>
+              偏好设置和配置
+            </p>
           </div>
           <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
@@ -237,12 +241,13 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
             <span className="text-sm font-medium">帮助中心</span>
             <p className={`text-xs ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-500'
               }`}>
-              使用指南和常见问�?            </p>
+              使用指南和常见问题
+            </p>
           </div>
           <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
         </Link>
 
-        {/* 管理员菜�?*/}
+        {/* 管理员菜单 */}
         {isAdmin && (
           <>
             <div className={`my-2 border-t ${actualTheme === 'light' ? 'border-gray-200' : 'border-gray-700'
@@ -265,7 +270,8 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
                 <span className="text-sm font-medium">后台管理</span>
                 <p className={`text-xs ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-500'
                   }`}>
-                  系统管理和配�?                </p>
+                  系统管理和配置
+                </p>
               </div>
               <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
@@ -300,7 +306,7 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
         </div>
       </div>
 
-      {/* 退出登�?*/}
+      {/* 退出登录 */}
       <div className={`p-2 border-t ${actualTheme === 'light' ? 'border-gray-200' : 'border-gray-700'
         }`}>
         <button

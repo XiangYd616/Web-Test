@@ -300,7 +300,8 @@ router.put('/configuration',
 
 /**
  * GET /api/storage/engines/:engineType/policy
- * 获取特定引擎的存储策�? */
+ * 获取特定引擎的存储策略
+ */
 router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
   try {
     const { engineType } = req.params;
@@ -355,7 +356,8 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
 
 /**
  * PUT /api/storage/engines/:engineType/policy
- * 更新特定引擎的存储策�? */
+ * 更新特定引擎的存储策略
+ */
 router.put('/engines/:engineType/policy',
   authMiddleware,
   [

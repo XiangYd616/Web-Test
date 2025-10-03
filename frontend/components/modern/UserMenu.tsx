@@ -76,7 +76,8 @@ const UserMenu: React.FC = () => {
             {isAdmin && (
               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-600/20 text-purple-400 mt-1">
                 <Shield className="w-3 h-3 mr-1" />
-                管理�?              </span>
+                管理员
+              </span>
             )}
           </div>
 
@@ -116,7 +117,8 @@ const UserMenu: React.FC = () => {
               className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              退出登�?            </button>
+              退出登录
+            </button>
           </div>
         </div>
       )}
