@@ -7,7 +7,7 @@
 const WebSocketManager = require('../services/streaming/WebSocketManager');
 const StreamingService = require('../services/streaming/StreamingService');
 
-class RealtimeConfig {
+class WebSocketConfig {
   constructor() {
     this.websocketManager = null;
     this.realtimeService = null;
@@ -405,7 +405,6 @@ class RealtimeConfig {
   }
 }
 
-// 创建单例实例
-const realtimeConfig = new RealtimeConfig();
+// 导出单例实例
 
-module.exports = realtimeConfig;
+module.exports = new WebSocketConfig();

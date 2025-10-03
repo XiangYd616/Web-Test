@@ -4,12 +4,12 @@
  */
 
 const WorkspaceManager = require('../services/collaboration/WorkspaceManager');
-const RealtimeCollaborationServer = require('../services/collaboration/RealtimeCollaborationServer');
+const CollaborationServer = require('../services/collaboration/CollaborationServer');
 const WebSocket = require('ws');
 
 // 初始化管理器
 const workspaceManager = new WorkspaceManager();
-const collaborationServer = new RealtimeCollaborationServer({ port: 8080 });
+const collaborationServer = new CollaborationServer({ port: 8080 });
 
 /**
  * 示例1: 创建和管理工作空间

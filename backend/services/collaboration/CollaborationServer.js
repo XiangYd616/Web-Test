@@ -17,7 +17,7 @@ const EventEmitter = require('events');
    * @returns {Promise<void>}
 
    */
-class RealtimeCollaborationServer extends EventEmitter {
+class CollaborationServer extends EventEmitter {
   constructor(options = {}) {
     super();
     
@@ -813,4 +813,4 @@ class RealtimeCollaborationServer extends EventEmitter {
   }
 }
 
-module.exports = RealtimeCollaborationServer;
+module.exports = CollaborationServer;

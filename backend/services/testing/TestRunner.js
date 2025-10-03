@@ -13,7 +13,7 @@ const SecurityTestEngine = require('../../engines/security/SecurityTestEngine');
 const SeoTestEngine = require('../../engines/seo/SEOTestEngine');
 const UxTestEngine = require('../../engines/ux/UXTestEngine');
 
-class RealtimeTestRunner extends EventEmitter {
+class TestRunner extends EventEmitter {
   constructor(io) {
     super();
     this.io = io;
@@ -540,4 +540,4 @@ class RealtimeTestRunner extends EventEmitter {
   }
 }
 
-module.exports = RealtimeTestRunner;
+module.exports = TestRunner;

@@ -70,8 +70,8 @@ const {
   createSecurityHeadersMiddleware
 } = require('../api/middleware/staticOptimization.js');
 
-// 导入实时通信系统
-const realtimeConfig = require('../config/realtime.js');
+// 导入WebSocket通信系统
+const websocketConfig = require('../config/websocket.js');
 
 // 导入Redis服务
 // // // const redisConnection = require('../services/redis/connection.js'); // 已删除 // 已删除 // 已移除，使用CacheService
@@ -412,11 +412,11 @@ app.post('/cache/flush', async (req, res) => {
   }
 });
 
-// 实时通信统计端点
+// WebSocket通信统计端点
 app.get('/realtime/stats', async (req, res) => {
   try {
-    if (realtimeConfig.isReady()) {
-      const stats = realtimeConfig.getFullStats();
+    if (websocketConfig.isReady()) {
+      const stats = websocketConfig.getFullStats();
       res.json({
         success: true,
         data: stats
@@ -435,10 +435,10 @@ app.get('/realtime/stats', async (req, res) => {
   }
 });
 
-// 实时通信健康检查端点
+// WebSocket通信健康检查端点
 app.get('/realtime/health', async (req, res) => {
   try {
-    const health = await realtimeConfig.healthCheck();
+    const health = await websocketConfig.healthCheck();
     const statusCode = health.status === 'healthy' ? 200 : 503;
 
     res.status(statusCode).json({
