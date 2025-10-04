@@ -1,0 +1,58 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.ts text eol=lf encoding=utf-8
+*.tsx text eol=lf encoding=utf-8
+*.js text eol=lf encoding=utf-8
+*.jsx text eol=lf encoding=utf-8
+*.json text eol=lf encoding=utf-8
+*.css text eol=lf encoding=utf-8
+*.scss text eol=lf encoding=utf-8
+*.html text eol=lf encoding=utf-8
+
+# Documentation
+*.md text eol=lf encoding=utf-8
+*.txt text eol=lf encoding=utf-8
+
+# Configuration files
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+.editorconfig text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+
+# Scripts
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Windows scripts
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.flv binary
+*.fla binary
+*.swf binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+*.pyc binary
+*.pdf binary
+*.db binary
+
