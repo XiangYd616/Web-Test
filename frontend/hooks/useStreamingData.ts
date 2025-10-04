@@ -18,7 +18,7 @@ export interface RealTimeDataConfig {
 
 // 实时数据Hook状态
 export interface RealTimeDataState {
-    data: unknown;
+    data: any;
     isConnected: boolean;
     connectionStatus: ConnectionStatus;
     error: string | null;
@@ -212,7 +212,7 @@ export const useStreamingData = (channel: string, config: RealTimeDataConfig = {
     }, [state.reconnectAttempts, finalConfig.maxReconnectAttempts, finalConfig.reconnectInterval, updateState, connect]);
 
     // 发送数据
-    const sendData = useCallback((data: unknown) => {
+    const sendData = useCallback((data: any) => {
         if (wsRef.current.readyState === WebSocket.OPEN) {
             const message = {
                 type: 'client_message',
@@ -227,7 +227,7 @@ export const useStreamingData = (channel: string, config: RealTimeDataConfig = {
     }, [channel]);
 
     // 订阅特定事件
-    const subscribe = useCallback((eventType: string, callback: (data: unknown) => void) => {
+    const subscribe = useCallback((eventType: string, callback: (data: any) => void) => {
         // 在实际实现中，这里会设置事件监听器
         // 现在我们只是模拟订阅
 

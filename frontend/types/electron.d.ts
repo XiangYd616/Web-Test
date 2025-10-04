@@ -1,4 +1,4 @@
-// Electron API类型声明
+﻿// Electron API类型声明
 declare global {
   interface Window {
     electronAPI?: {
@@ -7,9 +7,9 @@ declare global {
       getSystemInfo: () => Promise<any>;
 
       // 文件系统操作
-      showSaveDialog: (options: unknown) => Promise<any>;
-      showOpenDialog: (options: unknown) => Promise<any>;
-      showMessageBox: (options: unknown) => Promise<any>;
+      showSaveDialog: (options: any) => Promise<any>;
+      showOpenDialog: (options: any) => Promise<any>;
+      showMessageBox: (options: any) => Promise<any>;
 
       // 菜单事件监听
       onMenuAction: (callback: (event: string, ...args: unknown[]) => void) => () => void;
@@ -46,10 +46,10 @@ declare global {
         getSystemUsage: () => Promise<SystemUsage>;
 
         // 事件监听
-        onTestStarted: (callback: (data: unknown) => void) => () => void;
-        onTestUpdate: (callback: (data: unknown) => void) => () => void;
-        onTestCompleted: (callback: (data: unknown) => void) => () => void;
-        onTestError: (callback: (data: unknown) => void) => () => void;
+        onTestStarted: (callback: (data: any) => void) => () => void;
+        onTestUpdate: (callback: (data: any) => void) => () => void;
+        onTestCompleted: (callback: (data: any) => void) => () => void;
+        onTestError: (callback: (data: any) => void) => () => void;
       };
     };
 
@@ -94,7 +94,7 @@ interface LocalStressTestResults {
   errorRate: number;
   duration: number;
   isRunning: boolean;
-  systemInfo: unknown;
+  systemInfo: any;
 }
 
 // 系统使用情况接口

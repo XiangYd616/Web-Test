@@ -1,4 +1,4 @@
-// 现代化测试类型定义
+﻿// 现代化测试类型定义
 
 export interface TestSuite {
   id: string;
@@ -146,7 +146,7 @@ export interface APIRequest {
   headers?: Record<string, string>;
   body?: {
     type: 'json' | 'form' | 'raw' | 'binary';
-    content: unknown;
+    content: any;
   };
   assertions: APIAssertion[];
   extractors?: APIExtractor[];
@@ -156,7 +156,7 @@ export interface APIAssertion {
   type: 'status' | 'header' | 'body' | 'response-time' | 'json-path' | 'regex';
   target: string;
   operator: 'equals' | 'not-equals' | 'contains' | 'not-contains' | 'greater-than' | 'less-than';
-  value: unknown;
+  value: any;
 }
 
 export interface APIExtractor {

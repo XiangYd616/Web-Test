@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一数据模型定义
  * 前后端共享的核心数据模型，确保类型一致性
  * 版本: v2.1.0 - 完善统一数据模型定义
@@ -81,7 +81,7 @@ export interface TestConfig {
   api?: {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     headers?: Record<string, string>;
-    body?: unknown;
+    body?: any;
     expectedStatus?: number[];
     timeout?: number;
   };
@@ -132,7 +132,7 @@ export interface TestResult {
   // 测试配置
   type: string;
   url: string;
-  config: unknown;
+  config: any;
 
   // 执行状态
   status: string;
@@ -141,12 +141,12 @@ export interface TestResult {
   duration?: number; // 毫秒
 
   // 结果数据
-  results: unknown; // 具体结果数据，根据测试类型而定
+  results: any; // 具体结果数据，根据测试类型而定
   metrics: Record<string, number>; // 性能指标
   errors: Array<{
     type: string;
     message: string;
-    details?: unknown;
+    details?: any;
   }>;
 
   // 元数据
@@ -294,7 +294,7 @@ export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryData
 /**
  * 验证测试配置
  */
-export function validateTestConfig(type: string, config: unknown): { isValid: boolean; errors: string[] } {
+export function validateTestConfig(type: string, config: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   switch (type) {

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useLocalStressTest.ts - 核心功能模块
  * 
  * 文件路径: frontend\hooks\useLocalStressTest.ts
@@ -36,7 +36,7 @@ interface LocalStressTestResults {
   errorRate: number;
   duration: number;
   isRunning: boolean;
-  systemInfo: unknown;
+  systemInfo: any;
 }
 
 interface SystemUsage {
@@ -91,25 +91,25 @@ export const useLocalStressTest = () => {
     const api = window.environment.localStressTest;
 
     // 测试开始事件
-    const cleanupStarted = api.onTestStarted((data: unknown) => {
+    const cleanupStarted = api.onTestStarted((data: any) => {
       setIsRunning(true);
       setError(null);
     });
 
     // 测试更新事件
-    const cleanupUpdate = api.onTestUpdate((data: unknown) => {
+    const cleanupUpdate = api.onTestUpdate((data: any) => {
       setResults(data.results);
     });
 
     // 测试完成事件
-    const cleanupCompleted = api.onTestCompleted((data: unknown) => {
+    const cleanupCompleted = api.onTestCompleted((data: any) => {
       console.log('✅ 本地压力测试完成:', data);
       setIsRunning(false);
       setResults(data.results);
     });
 
     // 测试错误事件
-    const cleanupError = api.onTestError((data: unknown) => {
+    const cleanupError = api.onTestError((data: any) => {
       console.error('❌ 本地压力测试错误:', data);
       setIsRunning(false);
       setError(data.error);

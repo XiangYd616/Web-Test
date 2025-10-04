@@ -1,4 +1,4 @@
-/**
+﻿/**
  * proxyService.ts - 业务服务层
  * 
  * 文件路径: frontend\services\proxyService.ts
@@ -12,7 +12,7 @@ export interface ProxyResponse {
   status: number;
   url: string;
   loadTime: number;
-  data?: unknown;
+  data?: any;
 }
 
 export class ProxyService {

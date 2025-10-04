@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 认证相关的自定义Hook
  * 基于全局状态管理的认证功能
  */
@@ -34,7 +34,7 @@ export const useAuth = () => {
   };
 
   const auth = defaultAuthState;
-  const dispatch = (action: unknown) => { }; // 临时的空 dispatch
+  const dispatch = (action: any) => { }; // 临时的空 dispatch
 
   // 验证token
   const _validateToken = async (token: string): Promise<boolean> => {

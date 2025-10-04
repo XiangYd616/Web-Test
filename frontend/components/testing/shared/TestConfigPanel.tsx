@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 可选的统一测试配置面板
  * 各个测试页面可以选择使用，不强制替换现有实现
  */
@@ -11,7 +11,7 @@ import { Settings, Globe, Clock, Zap, Shield, AlertCircle } from 'lucide-react';
 export interface BaseTestConfig {
   url: string;
   timeout?: number;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 // 配置面板属性

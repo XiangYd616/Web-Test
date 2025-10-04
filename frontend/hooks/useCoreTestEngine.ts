@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 核心测试引擎Hook - 统一重构版本
  * 
  * 整合功能：
@@ -33,7 +33,7 @@ export interface TestConfig {
   options: Record<string, any>;
   engineId?: string;
   timeout?: number;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 // 统一的测试结果接口
@@ -51,7 +51,7 @@ export interface UnifiedTestResult extends TestResult {
     duration?: number;
     url?: string;
     config?: Record<string, any>;
-    [key: string]: unknown;
+    [key: string]: any;
   };
 }
 
@@ -91,12 +91,12 @@ export interface CoreTestEngineOptions {
   onTestComplete?: (result: UnifiedTestResult) => void;
   onTestError?: (error: string) => void;
   onConfigChange?: (config: TestConfig) => void;
-  onTestStarted?: (data: unknown) => void;
+  onTestStarted?: (data: any) => void;
   onTestProgress?: (data: TestProgress) => void;
-  onTestFailed?: (data: unknown) => void;
-  onTestCancelled?: (data: unknown) => void;
-  onTestQueued?: (data: unknown) => void;
-  onStatusUpdate?: (data: unknown) => void;
+  onTestFailed?: (data: any) => void;
+  onTestCancelled?: (data: any) => void;
+  onTestQueued?: (data: any) => void;
+  onStatusUpdate?: (data: any) => void;
   
   // 验证函数
   validateConfig?: (config: TestConfig) => { isValid: boolean; errors: string[] };
@@ -120,7 +120,7 @@ export interface CoreTestEngineReturn {
   isConfigValid: boolean;
   configErrors: string[];
   setConfig: (config: TestConfig) => void;
-  updateConfig: (key: string, value: unknown) => void;
+  updateConfig: (key: string, value: any) => void;
   
   // 测试控制
   startTest: (customConfig?: TestConfig) => Promise<string>;
@@ -310,7 +310,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   }, [onConfigChange]);
 
   // 更新单个配置项
-  const updateConfig = useCallback((key: string, value: unknown) => {
+  const updateConfig = useCallback((key: string, value: any) => {
     setState(prev => {
       const newConfig = {
         ...prev.config,
@@ -338,7 +338,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
         }));
         onTestProgress?.(progressData);
       },
-      onComplete: (result: unknown) => {
+      onComplete: (result: any) => {
         setIsMonitoring(false);
         setState(prev => ({
           ...prev,

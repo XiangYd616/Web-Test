@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一错误处理类型定义
  * 版本: v1.0.0
  * 
@@ -32,7 +32,7 @@ export interface AppError {
   /** 错误类别 */
   category: ErrorCategory;
   /** 错误详细信息 */
-  details?: unknown;
+  details?: any;
   /** 错误发生时间戳 */
   timestamp: number;
   /** 错误堆栈信息 */
@@ -72,14 +72,14 @@ export interface ValidationError extends AppError {
   /** 验证失败的字段路径 */
   fieldPath?: string;
   /** 验证失败的值 */
-  value?: unknown;
+  value?: any;
   /** 验证规则 */
   rule?: string;
   /** 所有验证错误 */
   errors?: Array<{
     field: string;
     message: string;
-    value?: unknown;
+    value?: any;
   }>;
 }
 

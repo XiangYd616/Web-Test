@@ -1,4 +1,4 @@
-// CacheStats接口定义 - 与cacheStrategy.ts保持一致
+﻿// CacheStats接口定义 - 与cacheStrategy.ts保持一致
 interface CacheStats {
   totalEntries: number;
   totalSize: number;
@@ -55,7 +55,7 @@ interface CacheTypeInfo {
   icon: React.ComponentType<any>;
   color: string;
   stats: CacheStats | null;
-  operations: unknown;
+  operations: any;
   isLoading: boolean;
   error: string | null;
 }

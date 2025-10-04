@@ -159,7 +159,7 @@ const MonitoringDashboard: React.FC = () => {
   }, [autoRefresh]);
 
   // 处理实时数据
-  const handleRealtimeData = (data: unknown) => {
+  const handleRealtimeData = (data: any) => {
     switch (data.type) {
       case 'metrics':
         updateMetrics(data.data);

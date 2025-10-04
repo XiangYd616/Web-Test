@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LoginPrompt.tsx - React组件
  * 
  * 文件路径: frontend\components\auth\LoginPrompt.tsx
@@ -20,7 +20,7 @@ interface LoginPromptProps {
 const LoginPrompt: React.FC<LoginPromptProps> = ({
   isOpen,
   onClose,
-  _feature = "此功?,
+  // _feature = "此功能", // Commented out - invalid property
   description = "使用高级测试功能"
 }) => {
   const navigate = useNavigate();
@@ -56,16 +56,17 @@ const LoginPrompt: React.FC<LoginPromptProps> = ({
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600/20 rounded-full mb-4">
             <Lock className="w-8 h-8 text-blue-400" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">需要登?/h2>
+          <h2 className="text-2xl font-bold text-white mb-2">需要登录</h2>
           <p className="text-gray-300">
-            {description}需要登录账?          </p>
+            {description}需要登录账户
+          </p>
         </div>
 
         {/* 功能说明 */}
         <div className="bg-gray-700/30 rounded-lg p-4 mb-6">
           <div className="flex items-center space-x-3 mb-3">
             <Shield className="w-5 h-5 text-green-400" />
-            <span className="text-white font-medium">登录后您可以?/span>
+            <span className="text-white font-medium">登录后您可以：</span>
           </div>
           <ul className="space-y-2 text-sm text-gray-300">
             <li className="flex items-center space-x-2">
@@ -74,15 +75,15 @@ const LoginPrompt: React.FC<LoginPromptProps> = ({
             </li>
             <li className="flex items-center space-x-2">
               <Star className="w-4 h-4 text-yellow-400" />
-              <span>保存和查看测试历史记?/span>
+              <span>保存和查看测试历史记录</span>
             </li>
             <li className="flex items-center space-x-2">
               <Star className="w-4 h-4 text-yellow-400" />
-              <span>个性化设置和偏好配?/span>
+              <span>个性化设置和偏好配置</span>
             </li>
             <li className="flex items-center space-x-2">
               <Star className="w-4 h-4 text-yellow-400" />
-              <span>高级数据管理和分?/span>
+              <span>高级数据管理和分析</span>
             </li>
           </ul>
         </div>
@@ -103,7 +104,8 @@ const LoginPrompt: React.FC<LoginPromptProps> = ({
         {/* 底部说明 */}
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-400">
-            已有账户可直接登录，新用户可快速注?          </p>
+            已有账户可直接登录，新用户可快速注册
+          </p>
         </div>
       </div>
     </div>

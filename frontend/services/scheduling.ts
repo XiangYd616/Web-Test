@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 调度管理服务
  * 提供测试任务调度、定时执行、批量管理功能
  */
@@ -9,7 +9,7 @@ export interface ScheduledTask {
   description?: string;
   testType: string;
   url: string;
-  config: unknown;
+  config: any;
   schedule: {
     type: 'once' | 'recurring';
     startTime: string;
@@ -44,7 +44,7 @@ export interface TaskExecution {
   startTime: string;
   endTime?: string;
   duration?: number;
-  results?: unknown;
+  results?: any;
   error?: string;
   triggeredBy: 'schedule' | 'manual';
   retryCount: number;
@@ -73,7 +73,7 @@ class SchedulingService {
   ): Promise<{
     tasks: ScheduledTask[];
     total: number;
-    pagination: unknown;
+    pagination: any;
   }> {
     try {
       const params = new URLSearchParams();
@@ -255,7 +255,7 @@ class SchedulingService {
   ): Promise<{
     executions: TaskExecution[];
     total: number;
-    pagination: unknown;
+    pagination: any;
   }> {
     try {
       const params = new URLSearchParams();

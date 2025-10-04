@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PerformanceChart.tsx - React组件
  * 
  * 文件路径: frontend\components\charts\PerformanceChart.tsx
@@ -19,7 +19,7 @@ interface PerformanceChartProps {
   maxDataPoints?: number;
   samplingStrategy?: 'uniform' | 'adaptive' | 'importance';
   enableOptimization?: boolean;
-  onOptimizationResult?: (result: unknown) => void;
+  onOptimizationResult?: (result: any) => void;
 }
 
 interface PerformanceStats {
@@ -101,7 +101,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   }, [optimizedData.data, dataKey, showAverage]);
 
   // 🔧 改进：优化的时间格式化函数，提高到0.01秒精度
-  const formatTime = useCallback((value: unknown) => {
+  const formatTime = useCallback((value: any) => {
     if (!optimizedData.data.length) return '';
 
     try {
@@ -131,7 +131,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   }, [dataKey]);
 
   // 🔧 改进：优化的标签格式化，提高到0.1秒精度
-  const formatLabel = useCallback((value: unknown) => {
+  const formatLabel = useCallback((value: any) => {
     if (!optimizedData.data.length) return '';
 
     try {
@@ -246,7 +246,7 @@ export default React.memo(PerformanceChart);
 
 // 导出性能监控组件
 export const PerformanceMonitor: React.FC<{
-  onStatsUpdate?: (stats: unknown) => void
+  onStatsUpdate?: (stats: any) => void
 }> = ({ onStatsUpdate }) => {
   const [stats, setStats] = useState<any>(null);
 

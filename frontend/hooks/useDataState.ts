@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 数据加载状态管理Hook
  * 标准化数据加载状态管理（loading、error、success、empty状态）
  * 版本: v2.0.0
@@ -38,11 +38,11 @@ export interface DataOperationConfig {
   enableCache?: boolean;
   cacheKey?: string;
   cacheTTL?: number;
-  onSuccess?: (data: unknown) => void;
+  onSuccess?: (data: any) => void;
   onError?: (error: ApiError) => void;
   onRetry?: (retryCount: number) => void;
-  validateData?: (data: unknown) => boolean;
-  transformData?: (data: unknown) => any;
+  validateData?: (data: any) => boolean;
+  transformData?: (data: any) => any;
 }
 
 // 分页数据状态

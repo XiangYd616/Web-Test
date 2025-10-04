@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 共享测试结果展示组件
  * 为各个独立测试页面提供统一的结果展示基础设施
  */
@@ -29,15 +29,15 @@ export interface TestMetric {
 export interface TestResultSection {
   title: string;
   type: 'metrics' | 'table' | 'text' | 'custom';
-  data: unknown;
-  renderer?: (data: unknown) => ReactNode;
+  data: any;
+  renderer?: (data: any) => ReactNode;
   collapsible?: boolean;
   defaultExpanded?: boolean;
 }
 
 export interface TestResultsPanelProps {
   title?: string;
-  result: unknown;
+  result: any;
   sections?: TestResultSection[];
   metrics?: TestMetric[];
   onRetest?: () => void;

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useStressTestWebSocket.ts - 核心功能模块
  * 
  * 文件路径: frontend\hooks\useStressTestWebSocket.ts
@@ -31,7 +31,7 @@ export interface StressTestStatus {
 
 export interface StressTestResult {
   testId: string;
-  results: unknown;
+  results: any;
   success: boolean;
   timestamp: number;
 }
@@ -42,7 +42,7 @@ export interface UseStressTestWebSocketOptions {
   onProgress?: (progress: StressTestProgress) => void;
   onStatusChange?: (status: StressTestStatus) => void;
   onComplete?: (result: StressTestResult) => void;
-  onError?: (error: unknown) => void;
+  onError?: (error: any) => void;
 }
 
 export interface UseStressTestWebSocketReturn {

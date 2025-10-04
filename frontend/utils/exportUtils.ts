@@ -1,4 +1,4 @@
-// 导出工具类
+﻿// 导出工具类
 export class ExportUtils {
   /**
    * 生成文件名
@@ -89,7 +89,7 @@ export class ExportUtils {
   /**
    * 压力测试数据导出
    */
-  static exportStressTestData(data: unknown, format: string): void {
+  static exportStressTestData(data: any, format: string): void {
     const exportData = {
       type: 'stress-test',
       timestamp: new Date().toISOString(),
@@ -136,7 +136,7 @@ export class ExportUtils {
   /**
    * 性能测试数据导出
    */
-  static exportPerformanceTestData(data: unknown, format: string): void {
+  static exportPerformanceTestData(data: any, format: string): void {
     const exportData = {
       type: 'performance-test',
       timestamp: new Date().toISOString(),
@@ -179,7 +179,7 @@ export class ExportUtils {
   /**
    * API测试数据导出
    */
-  static exportAPITestData(data: unknown, format: string): void {
+  static exportAPITestData(data: any, format: string): void {
     const exportData = {
       type: 'api-test',
       timestamp: new Date().toISOString(),
@@ -221,7 +221,7 @@ export class ExportUtils {
   /**
    * 转换压力测试数据为CSV（增强版）
    */
-  private static convertStressTestToCSV(data: unknown): string {
+  private static convertStressTestToCSV(data: any): string {
     let csvContent = '';
 
     // 添加测试摘要
@@ -258,7 +258,7 @@ export class ExportUtils {
       ];
       csvContent += headers.join(',') + '\n';
 
-      const rows = data.realTimeData.map((point: unknown) => [
+      const rows = data.realTimeData.map((point: any) => [
         new Date(point.timestamp).toLocaleString('zh-CN'),
         point.activeUsers || 0,
         point.responseTime || 0,
@@ -272,7 +272,7 @@ export class ExportUtils {
         point.queueLength || 0
       ]);
 
-      csvContent += rows.map((row: unknown) => row.join(',')).join('\n');
+      csvContent += rows.map((row: any) => row.join(',')).join('\n');
     }
 
     return csvContent;
@@ -281,7 +281,7 @@ export class ExportUtils {
   /**
    * 转换性能测试数据为CSV（增强版）
    */
-  private static convertPerformanceTestToCSV(data: unknown): string {
+  private static convertPerformanceTestToCSV(data: any): string {
     let csvContent = '';
 
     // 添加测试摘要
@@ -327,7 +327,7 @@ export class ExportUtils {
     if (data.recommendations && data.recommendations.length > 0) {
       csvContent += '性能优化建议\n';
       csvContent += '优先级,建议内容,预期收益\n';
-      data.recommendations.forEach((rec: unknown) => {
+      data.recommendations.forEach((rec: any) => {
         csvContent += `${rec.priority || '中'},${rec.title || rec},${rec.impact || '中等'}\n`;
       });
     }
@@ -338,9 +338,9 @@ export class ExportUtils {
   /**
    * 转换API测试数据为CSV
    */
-  private static convertAPITestToCSV(data: unknown): string {
+  private static convertAPITestToCSV(data: any): string {
     const headers = ['端点', '方法', '状态码', '响应时间(ms)', '数据大小(bytes)'];
-    const rows = data.results?.map((result: unknown) => [
+    const rows = data.results?.map((result: any) => [
       data.endpoint,
       data.method,
       result.statusCode,
@@ -348,13 +348,13 @@ export class ExportUtils {
       result.dataSize || 0
     ]) || [];
 
-    return [headers.join(','), ...rows.map((row: unknown) => row.join(','))].join('\n');
+    return [headers.join(','), ...rows.map((row: any) => row.join(','))].join('\n');
   }
 
   /**
    * 生成压力测试HTML报告
    */
-  private static generateStressTestHTML(data: unknown): string {
+  private static generateStressTestHTML(data: any): string {
     const { testConfig, results, metrics } = data;
 
     return `
@@ -458,7 +458,7 @@ export class ExportUtils {
   /**
    * 统一导出处理器 - 根据导出类型调用相应的方法
    */
-  static async exportByType(exportType: string, data: unknown): Promise<void> {
+  static async exportByType(exportType: string, data: any): Promise<void> {
     const { testType = 'stress', testId, testName } = data;
 
     switch (exportType) {
@@ -843,7 +843,7 @@ export class ExportUtils {
       csvContent += '实时性能数据\n';
       csvContent += '时间戳,响应时间(ms),吞吐量(req/s),错误率(%),CPU使用率(%),内存使用率(%),活跃连接数,队列长度\n';
 
-      realTimeData.slice(0, 1000).forEach((point: unknown) => { // 限制数据量
+      realTimeData.slice(0, 1000).forEach((point: any) => { // 限制数据量
         csvContent += `${point.timestamp || ''},${point.responseTime || 0},${point.throughput || 0},${point.errorRate || 0},${point.cpuUsage || 0},${point.memoryUsage || 0},${point.activeConnections || 0},${point.queueLength || 0}\n`;
       });
       csvContent += '\n';
@@ -911,7 +911,7 @@ export class ExportUtils {
   static analyzeTrends(data: unknown[]): unknown {
     if (data.length < 10) return {};
 
-    const trends: unknown = {};
+    const trends: any = {};
     const metrics = ['responseTime', 'throughput', 'errorRate', 'cpuUsage', 'memoryUsage'];
 
     metrics?.forEach(metric => {
@@ -1014,7 +1014,7 @@ export class ExportUtils {
    * 分析资源加载情况
    */
   static analyzeResources(resources: unknown[]): unknown {
-    const stats: unknown = {};
+    const stats: any = {};
 
     resources.forEach(resource => {
       const type = resource.type || 'other';
@@ -1105,7 +1105,7 @@ export class ExportUtils {
   /**
    * 计算性能评级
    */
-  private static calculatePerformanceGrade(metrics: unknown): { grade: string; score: number } {
+  private static calculatePerformanceGrade(metrics: any): { grade: string; score: number } {
     let score = 100;
 
     // 响应时间评分 (40%)
@@ -1148,7 +1148,7 @@ export class ExportUtils {
   /**
    * 识别性能瓶颈
    */
-  private static identifyBottlenecks(metrics: unknown): string[] {
+  private static identifyBottlenecks(metrics: any): string[] {
     const bottlenecks: string[] = [];
 
     if ((metrics?.averageResponseTime || 0) > 1000) {

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * StressTestHistory.tsx - React组件
  * 
  * 文件路径: frontend\components\stress\StressTestHistory.tsx
@@ -26,6 +26,7 @@ import StressTestDetailModal from './StressTestDetailModal';
 import '../../styles/pagination.css';
 import './StatusLabel.css';
 import './StressTestHistory.css';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 
 interface TestRecord {
   id: string;
@@ -40,8 +41,8 @@ interface TestRecord {
   updatedAt: string;
   overallScore?: number;
   performanceGrade?: string;
-  config: unknown;
-  results?: unknown;
+  config: any;
+  results?: any;
   errorMessage?: string;
   totalRequests?: number;
   successfulRequests?: number;
@@ -843,7 +844,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   };
 
   // 处理导出
-  const handleExport = async (exportType: string, data: unknown) => {
+  const handleExport = async (exportType: string, data: any) => {
     try {
       await ExportUtils.exportByType(exportType, data);
       setIsExportModalOpen(false);

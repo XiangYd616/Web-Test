@@ -1,4 +1,4 @@
-
+﻿
 import { CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PERFORMANCE_CONFIG_PRESETS, PerformanceIssue, PerformanceRecommendation, PerformanceTestCallback, PerformanceTestOptions, PerformanceTestProgress, PerformanceTestResult, ResourceAnalysis, UnifiedPerformanceConfig } from '../../types/performance.types';
 
 export class PerformanceTestCore {
@@ -1004,7 +1004,7 @@ export class PerformanceTestCore {
   /**
    * 估算资源加载时间
    */
-  private estimateResourceLoadTime(resources: unknown): number {
+  private estimateResourceLoadTime(resources: any): number {
     // 基于资源数量估算加载时间
     return resources.images * 100 + resources.scripts * 150 + resources.stylesheets * 80;
   }

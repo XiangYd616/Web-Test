@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Activity, AlertCircle, CheckCircle, Pause, Play, XCircle } from 'lucide-react';
 import { createElement } from 'react';
 import type { ReactElement, ComponentType } from 'react';;
@@ -143,7 +143,7 @@ export const parseErrorMessage = (errorMessage: string | null, status: string): 
 };
 
 // 计算测试完成度
-export const calculateTestCompletion = (record: unknown): number => {
+export const calculateTestCompletion = (record: any): number => {
   if (!record) return 0;
 
   // 如果测试已完成，返回100%

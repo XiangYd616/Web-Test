@@ -1,4 +1,4 @@
-
+﻿
 import React from 'react';
 import { useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -227,7 +227,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
     const findings = latestResult?.findings || (latestResult as any)?.vulnerabilities || latestResult?.issues || [];
     if (!findings || findings.length === 0) return [];
 
-    const severityCount = findings.reduce((acc: Record<string, number>, finding: unknown) => {
+    const severityCount = findings.reduce((acc: Record<string, number>, finding: any) => {
       const severity = finding.severity || finding.level || 'low';
       acc[severity] = (acc[severity] || 0) + 1;
       return acc;

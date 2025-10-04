@@ -24,7 +24,7 @@ interface TestRecord {
   startTime: string;
   endTime?: string;
   duration?: number;
-  results?: unknown;
+  results?: any;
   error?: string;
 }
 
@@ -256,7 +256,7 @@ const DataStorage: React.FC = () => {
 
     // 排序
     filtered.sort((a, b) => {
-      let aValue: unknown, bValue: unknown;
+      let aValue: unknown, bValue: any;
 
       switch (sortBy) {
         case 'created_at':

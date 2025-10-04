@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 权限管理Hook
  * 提供前端权限检查和管理功能
  * 版本: v2.0.0
@@ -13,7 +13,7 @@ interface Permission {
   resource: string;
   action: string;
   effect?: 'allow' | 'deny';
-  conditions?: unknown;
+  conditions?: any;
 }
 
 interface Role {

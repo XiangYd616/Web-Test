@@ -1,4 +1,4 @@
-
+﻿
 interface JWTHeader {
   alg: string;
   typ: string;
@@ -8,7 +8,7 @@ interface JWTPayload {
   sub?: string;
   iat?: number;
   exp?: number;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export class BrowserJWT {

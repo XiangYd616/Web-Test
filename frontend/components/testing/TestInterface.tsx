@@ -1,4 +1,4 @@
-import { Clock, Play, Square, Target } from 'lucide-react';
+﻿import { Clock, Play, Square, Target } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { TestResult } from '../../services/testing/unifiedTestEngine';
 // import { TestType } from '@shared/types'; // 暂时禁用
@@ -13,8 +13,8 @@ export interface TestInterfaceProps {
   title: string;
   description: string;
   icon: React.ComponentType<any>;
-  defaultConfig: unknown;
-  onRunTest: (config: unknown) => Promise<TestResult>;
+  defaultConfig: any;
+  onRunTest: (config: any) => Promise<TestResult>;
   onCancelTest: () => Promise<void>;
   className?: string;
 }

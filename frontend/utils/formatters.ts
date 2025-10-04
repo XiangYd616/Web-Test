@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 格式化工具函数
  * 提供数据格式化、数字处理、时间转换等实用功能
  */
@@ -326,7 +326,7 @@ export const formatTestType = (testType: string): string => {
  * @param error 错误对象或字符串
  * @returns 用户友好的错误信息
  */
-export const formatError = (error: unknown): string => {
+export const formatError = (error: any): string => {
   if (typeof error === 'string') {
     return error;
   }

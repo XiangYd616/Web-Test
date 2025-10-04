@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 大数据量处理优化工具
  * 提供数据分片、懒加载、内存管理等功能
  * 版本: v1.0.0
@@ -557,7 +557,7 @@ export function processBatches<T, R>(
 /**
  * 内存使用量估算
  */
-export function estimateMemoryUsage(data: unknown): number {
+export function estimateMemoryUsage(data: any): number {
   const json = JSON.stringify(data);
   return new Blob([json]).size;
 }

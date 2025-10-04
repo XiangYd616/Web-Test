@@ -1,4 +1,4 @@
-// 数据存储Hook
+﻿// 数据存储Hook
 import { useState, useEffect } from 'react';
 
 export interface TestRecord {
@@ -9,7 +9,7 @@ export interface TestRecord {
   createdAt: string;
   updatedAt: string;
   duration?: number;
-  result?: unknown;
+  result?: any;
 }
 
 export interface PaginationInfo {

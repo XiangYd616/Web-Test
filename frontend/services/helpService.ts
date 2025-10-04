@@ -1,4 +1,4 @@
-/**
+﻿/**
  * helpService.ts - 业务服务层
  * 
  * 文件路径: frontend\services\helpService.ts
@@ -204,7 +204,7 @@ class HelpService {
   }
 
   // 更新用户帮助偏好
-  async updateUserPreferences(preferences: unknown): Promise<void> {
+  async updateUserPreferences(preferences: any): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/preferences`, {
         method: 'PUT',

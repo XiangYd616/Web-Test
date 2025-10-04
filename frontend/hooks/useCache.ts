@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 缓存管理Hook
  * 提供统一的前端缓存操作接口
  * 版本: v2.0.0 - 整合新的缓存管理系统
@@ -9,22 +9,22 @@ import type { CacheStats } from '../services/cacheStrategy';
 
 // 定义兼容的CacheManager接口
 interface CacheManager<T = any> {
-  get(key: string, params?: unknown): Promise<T | null>;
+  get(key: string, params?: any): Promise<T | null>;
   set(key: string, value: T, params?: unknown, ttl?: number): Promise<void>;
-  delete(key: string, params?: unknown): Promise<boolean>;
+  delete(key: string, params?: any): Promise<boolean>;
   clear(): Promise<void>;
-  has(key: string, params?: unknown): Promise<boolean>;
+  has(key: string, params?: any): Promise<boolean>;
   getStats(): Promise<CacheStats>;
   invalidatePattern?(pattern: string): Promise<number>;
 }
 
 // 临时的缓存实现
 const defaultMemoryCache: CacheManager<any> = {
-  get: async (key: string, params?: unknown) => null,
+  get: async (key: string, params?: any) => null,
   set: async (key: string, value: unknown, params?: unknown, ttl?: number) => { },
-  delete: async (key: string, params?: unknown) => false,
+  delete: async (key: string, params?: any) => false,
   clear: async () => { },
-  has: async (key: string, params?: unknown) => false,
+  has: async (key: string, params?: any) => false,
   invalidatePattern: async (pattern: string) => 0,
   getStats: async (): Promise<CacheStats> => ({
     totalEntries: 0,
@@ -41,7 +41,7 @@ const defaultMemoryCache: CacheManager<any> = {
 const defaultLocalStorageCache = defaultMemoryCache;
 
 const CacheFactory = {
-  createHybridCache: (options: unknown) => defaultMemoryCache
+  createHybridCache: (options: any) => defaultMemoryCache
 };
 
 // 临时类型定义
@@ -78,9 +78,9 @@ export interface UseCacheOptions {
   namespace?: string;
   ttl?: number;
   enableStats?: boolean;
-  onCacheHit?: (key: string, data: unknown) => void;
+  onCacheHit?: (key: string, data: any) => void;
   onCacheMiss?: (key: string) => void;
-  onCacheSet?: (key: string, data: unknown) => void;
+  onCacheSet?: (key: string, data: any) => void;
   onCacheDelete?: (key: string) => void;
 }
 
@@ -658,7 +658,7 @@ export function useSmartUserCache(userId: string) {
     return profileCache.get(key);
   }, [userId, profileCache]);
 
-  const setProfile = useCallback(async (profile: unknown) => {
+  const setProfile = useCallback(async (profile: any) => {
     const key = CacheKeys.user(userId + ':profile');
     return profileCache.set(key, profile);
   }, [userId, profileCache]);
@@ -668,7 +668,7 @@ export function useSmartUserCache(userId: string) {
     return preferencesCache.get(key);
   }, [userId, preferencesCache]);
 
-  const setPreferences = useCallback(async (preferences: unknown) => {
+  const setPreferences = useCallback(async (preferences: any) => {
     const key = CacheKeys.user(userId + ':preferences');
     return preferencesCache.set(key, preferences);
   }, [userId, preferencesCache]);

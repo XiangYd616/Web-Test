@@ -1,4 +1,4 @@
-// 基础类型定义
+﻿// 基础类型定义
 export type Timestamp = string | Date | number;
 export type UUID = string;
 export type ID = string | number;
@@ -19,7 +19,7 @@ export interface ApiResponse<T = any> {
   error?: {
     code: string;
     message: string;
-    details?: unknown;
+    details?: any;
   };
   meta?: {
     timestamp: string;
@@ -39,7 +39,7 @@ export interface ApiErrorResponse extends ApiResponse {
   error: {
     code: string;
     message: string;
-    details?: unknown;
+    details?: any;
   };
 }
 
@@ -87,7 +87,7 @@ export interface ValidationError {
 export interface ApiError {
   code: string;
   message: string;
-  details?: unknown;
+  details?: any;
   timestamp: Timestamp;
 }
 
@@ -118,7 +118,7 @@ export interface BaseTestSession {
 export interface BaseSystemConfig {
   id: ID;
   key: string;
-  value: unknown;
+  value: any;
   description?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -130,7 +130,7 @@ export interface BaseAuditLog {
   userId?: ID;
   action: string;
   resource: string;
-  details?: unknown;
+  details?: any;
   ipAddress?: string;
   userAgent?: string;
   timestamp: Timestamp;

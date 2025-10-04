@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useStressTestRecord.ts - 核心功能模块
  * 
  * 文件路径: frontend\hooks\useStressTestRecord.ts
@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {stressTestQueueManager} from '../services/stressTestQueueManager';
 
 import {stressTestRecordService} from '../services/stressTestRecordService';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 
 export interface UseStressTestRecordOptions {
   autoLoad?: boolean;
@@ -70,7 +71,7 @@ export interface UseStressTestRecordReturn {
   // 实时更新
   startRecording: (testData: Partial<StressTestRecord>) => Promise<string>;
   updateProgress: (id: string, progress: number, phase?: string) => Promise<void>;
-  addRealTimeData: (id: string, dataPoint: unknown) => Promise<void>;
+  addRealTimeData: (id: string, dataPoint: any) => Promise<void>;
 }
 
 export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): UseStressTestRecordReturn => {
@@ -155,7 +156,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       setCurrentRecord(record);
 
       return record;
-    } catch (err: unknown) {
+    } catch (err: any) {
       const errorMessage = `创建测试记录失败: ${err.message}`;
       setError(errorMessage);
       console.error('创建测试记录失败:', err);
@@ -194,7 +195,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return updatedRecord;
-    } catch (err: unknown) {
+    } catch (err: any) {
       const errorMessage = `更新测试记录失败: ${err.message}`;
       setError(errorMessage);
       console.error('更新测试记录失败:', err);
@@ -224,7 +225,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return completedRecord;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     }
@@ -246,7 +247,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return failedRecord;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     }
@@ -268,7 +269,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return cancelledRecord;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     }
@@ -290,7 +291,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return waitingRecord;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     }
@@ -312,7 +313,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return runningRecord;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     }
@@ -334,7 +335,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return interruptedRecord;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     }
@@ -356,7 +357,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return resumedRecord;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     }
@@ -389,7 +390,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         maxRetries: 3,
         onProgress: (progress: number, message: string) => {
         },
-        onComplete: (result: unknown) => {
+        onComplete: (result: any) => {
           setCurrentQueueId(null);
           // 记录刷新将通过队列事件监听器处理
         },
@@ -404,7 +405,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       // 队列统计将通过事件监听器自动更新
 
       return queueId;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     } finally {
@@ -425,7 +426,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       // 队列统计和记录刷新将通过事件监听器自动处理
 
       return success;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     }
@@ -457,7 +458,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return success;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       return false;
     }
@@ -476,7 +477,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
       setRecords(response.data.tests);
       setPagination(response.data.pagination);
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       setRecords([]);
     } finally {
@@ -491,7 +492,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       const record = await stressTestRecordService.getTestRecord(id);
       setCurrentRecord(record);
       return record;
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message);
       throw err;
     }
@@ -549,7 +550,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         startTime: new Date().toISOString()
       });
       return record.id;
-    } catch (error: unknown) {
+    } catch (error: any) {
       // 如果服务器记录创建失败，回退到本地记录
       console.warn('⚠️ 服务器记录创建失败，回退到本地记录:', error.message);
 
@@ -594,7 +595,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [updateRecord]);
 
   // 添加实时数据 - 优化版本，使用缓存和批量更新
-  const addRealTimeData = useCallback(async (id: string, dataPoint: unknown): Promise<void> => {
+  const addRealTimeData = useCallback(async (id: string, dataPoint: any): Promise<void> => {
     try {
       // 获取记录，如果找不到则尝试从服务器获取
       let record = records.find(r => r.id === id) || currentRecord;
@@ -645,7 +646,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         }
       }, 1000); // 1秒批量更新一次
 
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('添加实时数据失败:', err);
       setError(`添加实时数据失败: ${err.message}`);
     }
@@ -665,7 +666,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     setQueueStats(stats);
 
     // 添加队列事件监听
-    const removeListener = stressTestQueueManager.addListener((event: string, data: unknown) => {
+    const removeListener = stressTestQueueManager.addListener((event: string, data: any) => {
 
       // 更新队列统计
       const newStats = stressTestQueueManager.getQueueStats();

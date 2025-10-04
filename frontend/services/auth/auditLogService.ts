@@ -214,7 +214,7 @@ class RiskScorer {
   /**
    * 检查是否为异常位置
    */
-  private static isUnusualLocation(location: unknown): boolean {
+  private static isUnusualLocation(location: any): boolean {
     // 这里应该实现基于历史位置的异常检测
     // 目前简化实现
     return false;
@@ -223,7 +223,7 @@ class RiskScorer {
   /**
    * 检查是否为新设备
    */
-  private static isNewDevice(deviceInfo: unknown): boolean {
+  private static isNewDevice(deviceInfo: any): boolean {
     // 这里应该实现设备指纹识别
     // 目前简化实现
     return false;
@@ -551,7 +551,7 @@ export class AuditLogService {
   async logEvents(events: Array<{
     eventType: AuditEventType;
     details: Record<string, any>;
-    options: unknown;
+    options: any;
   }>): Promise<AuditLogEntry[]> {
     const entries: AuditLogEntry[] = [];
 
@@ -663,7 +663,7 @@ export class AuditLogService {
     const sortOrder = query.sortOrder || 'desc';
 
     filteredLogs.sort((a, b) => {
-      let aValue: unknown, bValue: unknown;
+      let aValue: unknown, bValue: any;
 
       switch (sortBy) {
         case 'timestamp':
@@ -974,8 +974,7 @@ export function useAuditLog() {
   const logEvent = useCallback(async (
     eventType: AuditEventType,
     details: Record<string, any>,
-    options: unknown
-  ) => {
+    options: any) => {
     setIsLoading(true);
     setError(null);
 

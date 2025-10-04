@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 用户体验测试页面
  * 提供完整的网站可用性、可访问性和用户体验测试功能
  */
@@ -134,7 +134,7 @@ const UXTest: React.FC = () => {
           updateProgress(progress, step);
         },
         // onComplete
-        (result: unknown) => {
+        (result: any) => {
           // 转换后端结果为前端格式
           const uxResult: UXTestResult = {
             testId: result.testId || testId,
@@ -219,7 +219,7 @@ const UXTest: React.FC = () => {
   }, [currentTestId, updateProgress]);
 
   // 配置更新处理
-  const handleConfigChange = useCallback((field: keyof UXConfig, value: unknown) => {
+  const handleConfigChange = useCallback((field: keyof UXConfig, value: any) => {
     setConfig(prev => ({
       ...prev,
       [field]: value
@@ -235,7 +235,7 @@ const UXTest: React.FC = () => {
   }, []);
 
   // 更新自定义视口
-  const updateCustomViewport = useCallback((index: number, field: 'width' | 'height' | 'name', value: unknown) => {
+  const updateCustomViewport = useCallback((index: number, field: 'width' | 'height' | 'name', value: any) => {
     setConfig(prev => ({
       ...prev,
       customViewports: prev.customViewports.map((viewport, i) =>

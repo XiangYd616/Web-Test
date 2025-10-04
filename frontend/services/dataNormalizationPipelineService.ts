@@ -1,4 +1,4 @@
-
+﻿
 import { RealTimeMetrics, TestDataPoint, TestPhase } from './testStateManagerService';
 
 // 原始数据源接口
@@ -81,7 +81,7 @@ export interface RawBackgroundManagerData {
     errorRate: number;
     activeUsers: number;
   };
-  result?: unknown;
+  result?: any;
   error?: string;
 }
 
@@ -301,7 +301,7 @@ export class DataNormalizationPipeline {
   /**
    * 标准化数据点
    */
-  private normalizeDataPoint(rawPoint: unknown): TestDataPoint {
+  private normalizeDataPoint(rawPoint: any): TestDataPoint {
     return {
       timestamp: this.normalizeTimestamp(rawPoint.timestamp),
       responseTime: this.normalizeNumber(rawPoint.responseTime, this.validationRules.responseTime),
@@ -317,7 +317,7 @@ export class DataNormalizationPipeline {
   /**
    * 标准化指标
    */
-  private normalizeMetrics(rawMetrics: unknown): RealTimeMetrics {
+  private normalizeMetrics(rawMetrics: any): RealTimeMetrics {
     return {
       totalRequests: Math.max(0, rawMetrics.totalRequests || 0),
       successfulRequests: Math.max(0, rawMetrics.successfulRequests || 0),
@@ -342,7 +342,7 @@ export class DataNormalizationPipeline {
   /**
    * 标准化时间戳
    */
-  private normalizeTimestamp(timestamp: unknown): number {
+  private normalizeTimestamp(timestamp: any): number {
     const ts = Number(timestamp) || Date.now();
     const now = Date.now();
 
@@ -357,7 +357,7 @@ export class DataNormalizationPipeline {
   /**
    * 标准化测试阶段
    */
-  private normalizePhase(phase: unknown): TestPhase {
+  private normalizePhase(phase: any): TestPhase {
     if (typeof phase !== 'string') return TestPhase.STEADY_STATE;
 
     const phaseMap: Record<string, TestPhase> = {

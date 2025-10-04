@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TestComparisonCharts.tsx - React组件
  * 
  * 文件路径: frontend\components\charts\TestComparisonCharts.tsx
@@ -158,7 +158,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
     const maxLength = Math.max(...testResults.map(test => test.timeSeriesData?.length || 0));
 
     return Array.from({ length: maxLength }, (_, index) => {
-      const dataPoint: unknown = { time: index };
+      const dataPoint: any = { time: index };
 
       testResults.forEach((test, testIndex) => {
         /**

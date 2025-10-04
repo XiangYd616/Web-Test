@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试相关的自定义Hook
  * 基于全局状态管理的测试功能
  */
@@ -25,7 +25,7 @@ export interface TestResult {
     endTime?: string;
     duration?: number;
     summary?: string;
-    details?: unknown;
+    details?: any;
     recommendations?: Array<{
         title: string;
         description: string;
@@ -160,7 +160,7 @@ export const useTest = () => {
             }
 
             const data = await response.json();
-            return (data.results || []).map((item: unknown): TestResult => ({
+            return (data.results || []).map((item: any): TestResult => ({
                 id: item.id || '',
                 type: item.type || '',
                 status: item.status || 'completed',
@@ -223,7 +223,7 @@ export const useTest = () => {
             }
 
             const data = await response.json();
-            const mappedConfigs: TestConfig[] = (data.configurations || []).map((item: unknown) => ({
+            const mappedConfigs: TestConfig[] = (data.configurations || []).map((item: any) => ({
                 id: item.id,
                 name: item.name || '',
                 type: item.type || '',

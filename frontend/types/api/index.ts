@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Unified API Types - Consolidated API Type Definitions
  * 
  * This file consolidates all API-related types from scattered files into a single
@@ -30,7 +30,7 @@ export interface ApiResponse<T = any> {
   meta?: {
     timestamp: string;
     requestId?: string;
-    [key: string]: unknown;
+    [key: string]: any;
   };
 }
 
@@ -83,11 +83,11 @@ export enum ErrorCode {
 export interface ApiError {
   code: ErrorCode;
   message: string;
-  details?: unknown;
+  details?: any;
   timestamp: string;
   retryable?: boolean;
   severity?: 'low' | 'medium' | 'high' | 'critical';
-  context?: unknown;
+  context?: any;
   suggestions?: string[];
 }
 
@@ -95,7 +95,7 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: unknown;
+  value?: any;
 }
 
 // ==================== Request Configuration Types ====================
@@ -407,7 +407,7 @@ export interface ApiEndpoint {
   method: HttpMethod;
   path: string;
   params?: Record<string, any>;
-  body?: unknown;
+  body?: any;
   expectedStatus?: number;
   validation?: ValidationRule[];
 }
@@ -415,7 +415,7 @@ export interface ApiEndpoint {
 export interface ValidationRule {
   field: string;
   type: 'required' | 'type' | 'value' | 'range' | 'pattern';
-  expected?: unknown;
+  expected?: any;
   message?: string;
 }
 
@@ -478,7 +478,7 @@ export interface BaseTestSession {
 export interface BaseSystemConfig {
   id: string;
   key: string;
-  value: unknown;
+  value: any;
   description?: string;
   updatedAt: string;
 }
@@ -488,7 +488,7 @@ export interface BaseAuditLog {
   userId: string;
   action: string;
   resource: string;
-  details?: unknown;
+  details?: any;
   timestamp: string;
 }
 
@@ -503,9 +503,9 @@ export interface UnifiedTestConfig {
 }
 
 export interface TestCallbacks {
-  onProgress?: (progress: number, step?: string, metrics?: unknown) => void;
-  onComplete?: (result: unknown) => void;
-  onError?: (error: unknown) => void;
+  onProgress?: (progress: number, step?: string, metrics?: any) => void;
+  onComplete?: (result: any) => void;
+  onError?: (error: any) => void;
 }
 
 // ==================== Legacy Support Types ====================
@@ -528,7 +528,7 @@ export function isErrorResponse(response: ApiResponse<any>): response is ApiErro
   return response.success === false;
 }
 
-export function isApiError(error: unknown): error is ApiError {
+export function isApiError(error: any): error is ApiError {
   return typeof error === 'object' && error !== null && 'code' in error && 'message' in error;
 }
 

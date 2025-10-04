@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 数据筛选和管理组件
  * 提供高级数据筛选、导出、批量操作功能
  */
@@ -30,7 +30,7 @@ interface DataItem {
 interface FilterConfig {
   field: string;
   operator: 'equals' | 'contains' | 'gt' | 'lt' | 'between' | 'in';
-  value: unknown;
+  value: any;
   label?: string;
 }
 

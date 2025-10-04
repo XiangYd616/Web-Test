@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ChevronDown, Download, FileText, Image, Table } from 'lucide-react';
 import { useState } from 'react';
 
@@ -59,7 +59,7 @@ export const EXPORT_FORMATS: Record<string, ExportFormat> = {
 // 导出数据接口
 export interface ExportData {
   filename?: string;
-  data: unknown;
+  data: any;
   metadata?: {
     title?: string;
     description?: string;
@@ -204,7 +204,7 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
   };
 
   // 转换为CSV格式
-  const convertToCSV = (data: unknown): string => {
+  const convertToCSV = (data: any): string => {
     if (Array.isArray(data)) {
       if (data.length === 0) return '';
 

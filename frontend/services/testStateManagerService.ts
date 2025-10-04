@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TestStateManager.ts - 业务服务层
  * 
  * 文件路径: frontend\services\TestStateManager.ts
@@ -273,7 +273,7 @@ export class TestStateManager {
   /**
    * 完成测试
    */
-  completeTest(result?: unknown): void {
+  completeTest(result?: any): void {
     if (this.state !== TestState.RUNNING) {
       throw new Error(`Cannot complete test from state: ${this.state}`);
     }

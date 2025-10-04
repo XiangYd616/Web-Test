@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一测试结果展示组件
  * 支持多种测试类型的结果可视化和分析
  */
@@ -32,8 +32,8 @@ export interface ResultDetails {
     charts: Array<{
         type: 'line' | 'bar' | 'pie' | 'doughnut';
         title: string;
-        data: unknown;
-        options?: unknown;
+        data: any;
+        options?: any;
     }>;
     issues: Array<{
         id: string;
@@ -51,7 +51,7 @@ export interface ResultDetails {
         solution: string;
         estimatedImpact: string;
     }>;
-    rawData?: unknown;
+    rawData?: any;
 }
 
 // 组件属性接口

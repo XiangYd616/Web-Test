@@ -24,11 +24,11 @@ export interface DataStateInfo<T = any> {
 }
 
 export interface DataStateOptions {
-  initialData?: unknown;
+  initialData?: any;
   retryLimit?: number;
   autoRetry?: boolean;
   retryDelay?: number;
-  onSuccess?: (data: unknown) => void;
+  onSuccess?: (data: any) => void;
   onError?: (error: ApiError) => void;
   onStateChange?: (state: DataState) => void;
 }

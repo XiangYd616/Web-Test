@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 网站综合测试页面
  * 提供完整的网站性能、安全性、SEO、可访问性等综合测试功能
  */
@@ -183,7 +183,7 @@ const WebsiteTest: React.FC = () => {
           updateProgress(progress, step);
         },
         // onComplete
-        (result: unknown) => {
+        (result: any) => {
           // 转换后端结果为前端格式
           const websiteResult: WebsiteTestResult = {
             testId: result.testId || testId,
@@ -318,7 +318,7 @@ const WebsiteTest: React.FC = () => {
   }, [currentTestId, updateProgress]);
 
   // 配置更新处理
-  const handleConfigChange = useCallback((field: keyof WebsiteConfig, value: unknown) => {
+  const handleConfigChange = useCallback((field: keyof WebsiteConfig, value: any) => {
     setConfig(prev => ({
       ...prev,
       [field]: value

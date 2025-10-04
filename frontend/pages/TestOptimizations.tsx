@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 优化测试页面
  * 展示和测试所有的性能优化和用户体验改进
  */
@@ -15,14 +15,14 @@ import { createTestRunner } from '../utils/testUtils';
 interface PerformanceTestResult {
   id: string;
   score: number;
-  metrics: unknown;
+  metrics: any;
   timestamp: string;
 }
 
 interface TestResult {
   id: string;
   status: string;
-  result: unknown;
+  result: any;
   timestamp: string;
 }
 
@@ -37,7 +37,7 @@ interface TestResults {
   performance: PerformanceTestResult[];
   ux: UXTestResult[];
   api: TestResult[];
-  summary: unknown;
+  summary: any;
 }
 
 const TestOptimizations: React.FC = () => {

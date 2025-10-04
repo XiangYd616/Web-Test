@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 性能测试页面
  * 提供完整的网站性能测试功能，包括Core Web Vitals、Lighthouse审计等
  */
@@ -121,7 +121,7 @@ const PerformanceTest: React.FC = () => {
 
   // 监听后台测试状态变化
   useEffect(() => {
-    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: unknown) => {
+    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: any) => {
       if (testInfo.type === 'performance' && testInfo.id === currentTestId) {
         switch (event) {
           case 'testProgress':
@@ -206,7 +206,7 @@ const PerformanceTest: React.FC = () => {
       );
 
       setCurrentTestId(testId);
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message || '启动测试失败');
       setIsRunning(false);
       setCanSwitchPages(true);

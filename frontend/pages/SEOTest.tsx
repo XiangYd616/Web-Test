@@ -1,4 +1,4 @@
-import {AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap, BarChart3, Download} from 'lucide-react';
+﻿import {AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap, BarChart3, Download} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/ui';
@@ -8,6 +8,7 @@ import SEOResultVisualization from '../components/seo/SEOResultVisualization';
 import SEOReportGenerator from '../components/seo/SEOReportGenerator';
 import MobileSeoDetector from '../utils/mobileSeoDetector';
 import CoreWebVitalsAnalyzer from '../utils/coreWebVitalsAnalyzer';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 // import FileUploadSEO from '../components/seo/FileUploadSEO';
 
 // 临时FileUploadSEO组件实现
@@ -18,7 +19,7 @@ const FileUploadSEO = ({
 }: {
   onAnalysisComplete: () => void;
   isAnalyzing: boolean;
-  onFileUpload: (files: File[], options: unknown) => void;
+  onFileUpload: (files: File[], options: any) => void;
 }) => (
   <div className="bg-white rounded-lg shadow p-6">
     <h3 className="text-lg font-semibold mb-4">文件上传SEO分析</h3>
@@ -43,8 +44,8 @@ const LocalSEOResults = ({
   results,
   onExport
 }: {
-  result?: unknown;
-  results?: unknown;
+  result?: any;
+  results?: any;
   onExport?: (format: string) => Promise<void>;
 }) => (
   <div className="bg-white rounded-lg shadow p-6">
@@ -92,8 +93,8 @@ const SEOResults = ({
   results,
   onExport
 }: {
-  result?: unknown;
-  results?: unknown;
+  result?: any;
+  results?: any;
   onExport?: (format: string) => Promise<void>;
 }) => (
   <div className="bg-white rounded-lg shadow p-6">
@@ -127,12 +128,12 @@ const useUnifiedSEOTest = () => {
   const [results, setResults] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [advancedResults, setAdvancedResults] = useState<{
-    structuredData?: unknown;
-    mobileSEO?: unknown;
-    coreWebVitals?: unknown;
+    structuredData?: any;
+    mobileSEO?: any;
+    coreWebVitals?: any;
   }>({});
 
-  const startTest = async (config: unknown) => {
+  const startTest = async (config: any) => {
     setIsRunning(true);
     setProgress(0);
     setError(null);
@@ -265,7 +266,7 @@ interface LocalSEOTestConfig extends Partial<SeoTestConfig> {
   checkLocalSEO: boolean;
   checkCompetitorAnalysis: boolean;
   checkKeywordDensity: boolean;
-  [key: string]: unknown; // 允许动态属性访问
+  [key: string]: any; // 允许动态属性访问
 }
 
 const SEOTest: React.FC = () => {
@@ -546,7 +547,7 @@ const SEOTest: React.FC = () => {
       setTestStatus('running');
       console.log(`✅ ${seoTestMode === 'online' ? 'Online' : 'Local'} SEO test started`);
 
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('❌ Failed to start SEO test:', err);
 
       // 提供更友好的错误信息
@@ -614,7 +615,7 @@ const SEOTest: React.FC = () => {
   };
 
   // 处理本地文件上传（仅上传，不自动开始分析）
-  const handleLocalFileUpload = (files: File[], options: unknown) => {
+  const handleLocalFileUpload = (files: File[], options: any) => {
     setUploadedFiles(files);
 
     // 更新测试配置
@@ -688,7 +689,7 @@ const SEOTest: React.FC = () => {
     }
   };
 
-  const generateHTMLReport = (reportData: unknown) => {
+  const generateHTMLReport = (reportData: any) => {
     return `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -768,11 +769,11 @@ const SEOTest: React.FC = () => {
   };
 
   // 历史记录处理
-  const _handleTestSelect = (test: unknown) => {
+  const _handleTestSelect = (test: any) => {
     // 历史测试选择由TestPageLayout处理
   };
 
-  const _handleTestRerun = (test: unknown) => {
+  const _handleTestRerun = (test: any) => {
     // 重新运行历史测试
     if (test.config) {
       setTestConfig(test.config);

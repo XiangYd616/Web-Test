@@ -1,6 +1,7 @@
-/**
+﻿/**
  * 批量测试服务
- * 提供批量测试创建、执行、监控功�? */
+ * 提供批量测试创建、执行、监控功能
+ */
 
 export interface BatchTest {
   id: string;
@@ -22,7 +23,7 @@ export interface TestConfig {
   id?: string;
   url: string;
   type: string;
-  config: unknown;
+  config: any;
   name?: string;
   description?: string;
 }
@@ -49,7 +50,7 @@ export interface TestResult {
   testType: string;
   url: string;
   success: boolean;
-  results?: unknown;
+  results?: any;
   error?: string;
   startTime: string;
   endTime: string;
@@ -126,7 +127,8 @@ class BatchTestingService {
   }
 
   /**
-   * 获取批量测试状�?   */
+   * 获取批量测试状态
+   */
   async getBatchStatus(batchId: string): Promise<{
     id: string;
     name: string;
@@ -142,12 +144,12 @@ class BatchTestingService {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || '获取批量测试状态失�?);
+        throw new Error(data.error || '获取批量测试状态失败');
       }
 
       return data.data;
     } catch (error) {
-      console.error('获取批量测试状态失�?', error);
+      console.error('获取批量测试状态失败:', error);
       throw error;
     }
   }
@@ -220,7 +222,7 @@ class BatchTestingService {
       createdBy: string;
     }>;
     total: number;
-    pagination: unknown;
+    pagination: any;
   }> {
     try {
       const params = new URLSearchParams();
@@ -379,7 +381,7 @@ class BatchTestingService {
   monitorBatchProgress(
     batchId: string,
     onProgress: (progress: BatchProgress) => void,
-    onComplete: (results: unknown) => void,
+    onComplete: (results: any) => void,
     onError: (error: string) => void
   ): () => void {
     let isMonitoring = true;
@@ -397,7 +399,8 @@ class BatchTestingService {
           onComplete(results);
         } else if (status.status === 'running') {
           // 继续监控
-          setTimeout(checkProgress, 2000); // �?秒检查一�?        }
+          setTimeout(checkProgress, 2000); // 每2秒检查一次
+        }
       } catch (error) {
         isMonitoring = false;
         onError(error instanceof Error ? error?.message : '监控失败');
@@ -406,7 +409,8 @@ class BatchTestingService {
 
     checkProgress();
 
-    // 返回停止监控的函�?    return () => {
+    // 返回停止监控的函数
+    return () => {
       isMonitoring = false;
     };
   }
@@ -447,12 +451,12 @@ class BatchTestingService {
        */
     if (batchData.config.execution.mode === 'parallel') {
       if (!batchData.config.execution.concurrency || batchData.config.execution.concurrency < 1) {
-        errors.push('并行模式需要指定有效的并发�?);
+        errors.push('并行模式需要指定有效的并发数');
       }
     }
 
     if (batchData.config.timeout < 1000) {
-      errors.push('超时时间不能少于1�?);
+      errors.push('超时时间不能少于1秒');
     }
 
     return {
@@ -470,7 +474,7 @@ class BatchTestingService {
         mode: 'sequential',
         concurrency: 3
       },
-      timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 300000, // 5分钟
+      timeout: process.env.REQUEST_TIMEOUT || 300000, // 5分钟
       retries: 0,
       stopOnFailure: false
     };
@@ -484,14 +488,16 @@ class BatchTestingService {
   }
 
   /**
-   * 计算成功�?   */
+   * 计算成功率
+   */
   calculateSuccessRate(completed: number, failed: number): number {
     const total = completed + failed;
     return total > 0 ? Math.round((completed / total) * 100) : 0;
   }
 
   /**
-   * 格式化持续时�?   */
+   * 格式化持续时间
+   */
   formatDuration(milliseconds: number): string {
     const seconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -507,14 +513,15 @@ class BatchTestingService {
   }
 
   /**
-   * 获取状态显示文�?   */
+   * 获取状态显示文本
+   */
   getStatusText(status: string): string {
     const statusMap: Record<string, string> = {
-      pending: '等待�?,
-      running: '运行�?,
-      completed: '已完�?,
+      pending: '等待中',
+      running: '运行中',
+      completed: '已完成',
       failed: '失败',
-      cancelled: '已取�?
+      cancelled: '已取消'
     };
 
     return statusMap[status] || status;

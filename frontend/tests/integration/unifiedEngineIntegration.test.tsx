@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🧪 统一测试引擎集成测试
  * 验证统一测试引擎的完整集成功能
  */
@@ -500,7 +500,7 @@ export const integrationTestUtils = {
   /**
    * 模拟WebSocket消息
    */
-  simulateWebSocketMessage(type: string, data: unknown) {
+  simulateWebSocketMessage(type: string, data: any) {
     const mockWS = (global.WebSocket as any).mock.results[0]?.value;
     if (mockWS && mockWS.onmessage) {
       mockWS.onmessage({

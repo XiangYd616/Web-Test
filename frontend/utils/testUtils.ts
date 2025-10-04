@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试工具集
  * 提供前端测试、性能测试、用户体验测试等工具
  */
@@ -12,7 +12,7 @@ interface TestResult {
   passed: boolean;
   duration: number;
   error?: string;
-  details?: unknown;
+  details?: any;
 }
 
 // 性能测试结果
@@ -417,7 +417,7 @@ export class TestRunner {
     performance: PerformanceTestResult[];
     ux: UXTestResult[];
     api: TestResult[];
-    summary: unknown;
+    summary: any;
   }> {
 
     try {

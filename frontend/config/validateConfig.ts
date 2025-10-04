@@ -28,7 +28,7 @@ export interface ConfigValidationError {
   /** 错误消息 */
   message: string;
   /** 当前值 */
-  value: unknown;
+  value: any;
   /** 错误类型 */
   type: 'required' | 'type' | 'range' | 'format' | 'dependency';
   /** 严重级别 */
@@ -43,9 +43,9 @@ export interface ConfigValidationWarning {
   /** 警告消息 */
   message: string;
   /** 当前值 */
-  value: unknown;
+  value: any;
   /** 建议值 */
-  suggestedValue?: unknown;
+  suggestedValue?: any;
   /** 建议原因 */
   reason?: string;
 }

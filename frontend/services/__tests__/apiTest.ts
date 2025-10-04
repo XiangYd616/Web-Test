@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API服务集成测试
  */
 
@@ -13,8 +13,8 @@ interface TestResult {
     userId?: string;
     type?: string;
     status: string;
-    config?: unknown;
-    result: unknown;
+    config?: any;
+    result: any;
     timestamp: string;
     createdAt?: string;
     updatedAt?: string;

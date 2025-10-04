@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试管理器 Hook
  * 
  * 职责：
@@ -19,7 +19,7 @@ export interface TestManagerState {
 }
 
 export interface TestManagerActions {
-  startTest: (engineId: string, config: unknown) => Promise<TestResult>;
+  startTest: (engineId: string, config: any) => Promise<TestResult>;
   stopTest: (testId: string) => Promise<void>;
   getTestStatus: (testId: string) => Promise<TestProgress | null>;
   getTestHistory: () => Promise<TestResult[]>;
@@ -40,7 +40,7 @@ export function useTestManager(): TestManagerHook {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
 
   // 开始测试 - 调用后端API
-  const startTest = useCallback(async (engineId: string, config: unknown): Promise<TestResult> => {
+  const startTest = useCallback(async (engineId: string, config: any): Promise<TestResult> => {
     setIsLoading(true);
     setError(null);
     

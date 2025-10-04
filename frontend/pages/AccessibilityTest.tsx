@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 可访问性测试页面
  * 提供网站无障碍性检测功能，包括WCAG标准检查、屏幕阅读器兼容性等
  */
@@ -134,7 +134,7 @@ const AccessibilityTest: React.FC = () => {
 
   // 监听后台测试状态变化
   useEffect(() => {
-    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: unknown) => {
+    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: any) => {
       if (testInfo.type === 'accessibility' && testInfo.id === currentTestId) {
         switch (event) {
           case 'testProgress':

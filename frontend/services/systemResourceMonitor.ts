@@ -1,4 +1,4 @@
-// 移除React Hook导入，这是一个服务文件，不应该使用React Hook
+﻿// 移除React Hook导入，这是一个服务文件，不应该使用React Hook
 
 export interface SystemResources {
   cpu: {
@@ -412,7 +412,7 @@ export const _systemResourceMonitor = (() => {
       getCurrentStatus: () => 'healthy' as const,
       canStartNewTest: (testType?: 'stress' | 'regular') => true, // 默认实现总是允许
       getRecommendedMaxConcurrentTests: () => 3,
-      getCurrentResources: (): unknown => null,
+      getCurrentResources: (): any => null,
       addListener: () => () => { },
       startMonitoring: () => { },
       stopMonitoring: () => { },

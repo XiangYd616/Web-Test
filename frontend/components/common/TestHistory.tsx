@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一的测试历史组件
  * 基于StressTestHistory.tsx的实现，支持所有测试类型
  */
@@ -34,8 +34,8 @@ interface TestRecord {
     updatedAt: string;
     overallScore?: number;
     performanceGrade?: string;
-    config: unknown;
-    results?: unknown;
+    config: any;
+    results?: any;
     errorMessage?: string;
     totalRequests?: number;
     successfulRequests?: number;
@@ -245,7 +245,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                 requestCacheRef.current.delete(requestKey);
             }, 5000);
 
-        } catch (error: unknown) {
+        } catch (error: any) {
             // 静默处理错误，避免控制台污染
             setRecords([]);
             setTotalRecords(0);
@@ -1009,7 +1009,7 @@ const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
                 onClose={() => setIsExportModalOpen(false)}
                 data={records}
                 testType={testType as 'stress' | 'api' | 'performance'}
-                onExport={async (type: string, data: unknown) => {
+                onExport={async (type: string, data: any) => {
                     // 导出处理逻辑
                 }}
             />

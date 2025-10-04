@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试结果展示组件
  * 用于统一展示各种测试结果，支持多种视图模式和详细分析
  */
@@ -58,15 +58,15 @@ interface TestResult {
   metrics: Record<string, any>;
   details: TestResultDetail[];
   recommendations: Recommendation[];
-  rawData?: unknown;
+  rawData?: any;
 }
 
 interface TestResultDetail {
   category: string;
   name: string;
   status: 'pass' | 'fail' | 'warning';
-  value: unknown;
-  expected?: unknown;
+  value: any;
+  expected?: any;
   description: string;
   impact: 'low' | 'medium' | 'high' | 'critical';
   suggestion?: string;

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 增强用户体验组件
  * 提供更好的交互反馈、错误处理和用户引导
  */
@@ -387,19 +387,19 @@ export const useSmartNotification = () => {
     });
   }, []);
 
-  const showSuccess = useCallback((title: string, message: string, options?: unknown) => {
+  const showSuccess = useCallback((title: string, message: string, options?: any) => {
     showNotification('success', title, message, options);
   }, [showNotification]);
 
-  const showError = useCallback((title: string, message: string, options?: unknown) => {
+  const showError = useCallback((title: string, message: string, options?: any) => {
     showNotification('error', title, message, options);
   }, [showNotification]);
 
-  const showWarning = useCallback((title: string, message: string, options?: unknown) => {
+  const showWarning = useCallback((title: string, message: string, options?: any) => {
     showNotification('warning', title, message, options);
   }, [showNotification]);
 
-  const showInfo = useCallback((title: string, message: string, options?: unknown) => {
+  const showInfo = useCallback((title: string, message: string, options?: any) => {
     showNotification('info', title, message, options);
   }, [showNotification]);
 

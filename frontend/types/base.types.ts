@@ -1,4 +1,4 @@
-// 基础组件类型定义
+﻿// 基础组件类型定义
 export interface BaseComponentProps {
   className?: string;
   'data-testid'?: string;
@@ -10,8 +10,8 @@ export type ComponentColor = 'primary' | 'secondary' | 'success' | 'warning' | '
 export type ComponentVariant = 'filled' | 'outlined' | 'text' | 'ghost';
 
 // 回调函数类型
-export type ProgressCallback = (progress: number, step: string, metrics?: unknown) => void;
-export type CompletionCallback = (result: unknown) => void;
+export type ProgressCallback = (progress: number, step: string, metrics?: any) => void;
+export type CompletionCallback = (result: any) => void;
 export type ErrorCallback = (error: string | Error) => void;
 
 // 统一测试配置类型
@@ -20,5 +20,5 @@ export interface UnifiedTestConfig {
   url?: string;
   timeout?: number;
   retries?: number;
-  [key: string]: unknown;
+  [key: string]: any;
 }

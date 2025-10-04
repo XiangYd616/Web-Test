@@ -1,4 +1,4 @@
-// 共享组件导出
+﻿// 共享组件导出
 import React from 'react';
 
 // 基础表格组件
@@ -15,8 +15,8 @@ export interface DataTableProps {
   columns: Column[];
   dataSource: unknown[];
   loading?: boolean;
-  pagination?: unknown;
-  rowKey?: string | ((record: unknown) => string);
+  pagination?: any;
+  rowKey?: string | ((record: any) => string);
 }
 
 export const DataTable: React.FC<DataTableProps> = ({ 

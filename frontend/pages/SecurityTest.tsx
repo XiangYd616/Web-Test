@@ -14,7 +14,7 @@ import type {
 
 // 临时testApiService实现
 const testApiService = {
-  executeSecurityTest: async (url: string, config: unknown) => ({
+  executeSecurityTest: async (url: string, config: any) => ({
     success: true,
     data: {
       id: `security_test_${Date.now()}`,
@@ -80,11 +80,11 @@ const SecurityTest: React.FC = () => {
   });
 
   // 处理测试选择和重新运行
-  const _handleTestSelect = (test: unknown) => {
+  const _handleTestSelect = (test: any) => {
     // 可以在这里加载选中的测试配置
   };
 
-  const _handleTestRerun = (test: unknown) => {
+  const _handleTestRerun = (test: any) => {
     // 可以在这里重新运行选中的测试
   };
 

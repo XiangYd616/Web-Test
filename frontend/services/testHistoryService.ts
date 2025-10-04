@@ -55,11 +55,11 @@ class testHistoryService {
   /**
    * 缓存管理
    */
-  private getCacheKey(endpoint: string, params?: unknown): string {
+  private getCacheKey(endpoint: string, params?: any): string {
     return `${endpoint}_${JSON.stringify(params || {})}`;
   }
 
-  private setCache(key: string, data: unknown): void {
+  private setCache(key: string, data: any): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now()
@@ -104,7 +104,7 @@ class testHistoryService {
     // 过滤参数
     if (query.testType) {
       if (Array.isArray(query.testType)) {
-        query.testType.forEach((type: unknown) => params?.append('testType', type));
+        query.testType.forEach((type: any) => params?.append('testType', type));
       } else {
         params?.append('testType', query.testType);
       }
@@ -201,7 +201,7 @@ class testHistoryService {
     testName: string;
     testType: TestType;
     url?: string;
-    config?: unknown;
+    config?: any;
     environment?: string;
     tags?: string[];
   }): Promise<TestSession> {
@@ -229,7 +229,7 @@ class testHistoryService {
   /**
    * 更新测试状态
    */
-  async updateTestStatus(sessionId: string, status: string, additionalData?: unknown): Promise<void> {
+  async updateTestStatus(sessionId: string, status: string, additionalData?: any): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}/status`, {
         method: 'PATCH',
@@ -252,7 +252,7 @@ class testHistoryService {
   /**
    * 完成测试并保存结果
    */
-  async completeTest(sessionId: string, results: unknown): Promise<void> {
+  async completeTest(sessionId: string, results: any): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}/complete`, {
         method: 'POST',

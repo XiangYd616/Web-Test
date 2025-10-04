@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 比较工具服务
  * 提供测试结果比较、性能对比、趋势分析功能
  */
@@ -105,7 +105,7 @@ class ComparisonService {
     results: TestResult[];
     comparisons: unknown[];
     trends: TrendAnalysis;
-    summary: unknown;
+    summary: any;
   }> {
     try {
       const response = await fetch(`${this.baseUrl}/batch-compare`, {
@@ -184,7 +184,7 @@ class ComparisonService {
   ): Promise<{
     comparisons: unknown[];
     total: number;
-    pagination: unknown;
+    pagination: any;
   }> {
     try {
       const params = new URLSearchParams({

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 /**
  * 字段命名转换工具
  * 统一前后端字段命名的转换逻辑
@@ -80,7 +80,7 @@ export const snakeToCamelCase = (str: string): string => {
 /**
  * 将数据库记录转换为前端格式
  */
-export const mapDatabaseToFrontend = <T = any>(dbRecord: unknown): T => {
+export const mapDatabaseToFrontend = <T = any>(dbRecord: any): T => {
   if (!dbRecord || typeof dbRecord !== 'object') {
     return dbRecord;
   }
@@ -89,7 +89,7 @@ export const mapDatabaseToFrontend = <T = any>(dbRecord: unknown): T => {
     return dbRecord.map(item => mapDatabaseToFrontend(item)) as T;
   }
   
-  const result: unknown = {};
+  const result: any = {};
   
   for (const [key, value] of Object.entries(dbRecord)) {
     const camelKey = snakeToCamelCase(key);
@@ -117,7 +117,7 @@ export const mapDatabaseToFrontend = <T = any>(dbRecord: unknown): T => {
 /**
  * 将前端数据转换为数据库格式
  */
-export const mapFrontendToDatabase = (frontendData: unknown): unknown => {
+export const mapFrontendToDatabase = (frontendData: any): any => {
   if (!frontendData || typeof frontendData !== 'object') {
     return frontendData;
   }
@@ -126,7 +126,7 @@ export const mapFrontendToDatabase = (frontendData: unknown): unknown => {
     return frontendData.map(item => mapFrontendToDatabase(item));
   }
   
-  const result: unknown = {};
+  const result: any = {};
   
   for (const [key, value] of Object.entries(frontendData)) {
     const snakeKey = camelToSnakeCase(key);
@@ -149,7 +149,7 @@ export const mapFrontendToDatabase = (frontendData: unknown): unknown => {
 /**
  * API响应数据转换
  */
-export const _transformApiResponse = <T = any>(response: unknown): T => {
+export const _transformApiResponse = <T = any>(response: any): T => {
   if (response?.data) {
     return {
       ...response,
@@ -163,7 +163,7 @@ export const _transformApiResponse = <T = any>(response: unknown): T => {
 /**
  * API请求数据转换
  */
-export const _transformApiRequest = (requestData: unknown): unknown => {
+export const _transformApiRequest = (requestData: any): any => {
   return mapFrontendToDatabase(requestData);
 };
 
@@ -172,7 +172,7 @@ export const _transformApiRequest = (requestData: unknown): unknown => {
  */
 export const _batchTransformFields = (
   data: unknown[], 
-  transformer: (item: unknown) => any
+  transformer: (item: any) => any
 ): unknown[] => {
   return data.map(transformer);
 };

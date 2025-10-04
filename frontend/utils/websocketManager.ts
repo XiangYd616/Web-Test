@@ -1,4 +1,4 @@
-/**
+﻿/**
  * WebSocket 连接管理和优化工具
  * 提供连接管理、重连机制、消息队列、性能监控等功能
  */
@@ -20,7 +20,7 @@ export interface WebSocketConfig {
 export interface WebSocketMessage {
   id: string;
   type: string;
-  data: unknown;
+  data: any;
   timestamp: number;
   priority?: 'low' | 'normal' | 'high';
   retry?: number;
@@ -47,7 +47,7 @@ export type WebSocketEventType =
   | 'message'
   | 'heartbeat';
 
-export type WebSocketEventListener = (event: unknown) => void;
+export type WebSocketEventListener = (event: any) => void;
 
 /**
  * WebSocket连接管理器
@@ -302,7 +302,7 @@ export class WebSocketManager {
   /**
    * 处理心跳响应
    */
-  private handlePongMessage(message: unknown): void {
+  private handlePongMessage(message: any): void {
     if (message.timestamp) {
       const latency = Date.now() - message.timestamp;
       this.updateLatency(latency);
@@ -488,7 +488,7 @@ export class WebSocketManager {
   /**
    * 触发事件
    */
-  private emit(event: WebSocketEventType, data?: unknown): void {
+  private emit(event: WebSocketEventType, data?: any): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       listeners.forEach(listener => {

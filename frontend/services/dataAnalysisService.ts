@@ -1,4 +1,4 @@
-/**
+﻿/**
  * dataAnalysisService.ts - 业务服务层
  * 
  * 文件路径: frontend\services\dataAnalysisService.ts
@@ -18,9 +18,9 @@ export interface TestRecord {
   start_time: string;
   end_time?: string;
   duration?: number;
-  results?: unknown;
-  config?: unknown;
-  scores?: unknown;
+  results?: any;
+  config?: any;
+  scores?: any;
   recommendations?: string[];
   created_at: string;
 }
@@ -674,7 +674,7 @@ export class DataAnalysisService {
       start: string;
       end: string;
     };
-    filters?: unknown;
+    filters?: any;
     includeCharts?: boolean;
     includeRawData?: boolean;
   }): Promise<any> {

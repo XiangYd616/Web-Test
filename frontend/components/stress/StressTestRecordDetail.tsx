@@ -1,4 +1,4 @@
-/**
+﻿/**
  * StressTestRecordDetail.tsx - React组件
  * 
  * 文件路径: frontend\components\stress\StressTestRecordDetail.tsx
@@ -31,7 +31,7 @@ interface ProcessedMetrics {
   maxResponseTime: number;
   throughput: number;
   errorRate: number;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 interface ProcessedData {
@@ -92,7 +92,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
         : {};
 
       // 安全的数值转换
-      const safeNumber = (value: unknown): number => {
+      const safeNumber = (value: any): number => {
         if (typeof value === 'number' && !isNaN(value)) {
           return value;
         }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * RBAC权限管理类型定义
  * 基于角色的访问控制模型
  * 版本: v2.0.0
@@ -83,7 +83,7 @@ export interface Permission {
 export interface PermissionCondition {
   field: string;
   operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'nin' | 'contains' | 'regex';
-  value: unknown;
+  value: any;
   description?: string;
 }
 
@@ -209,8 +209,8 @@ export interface PermissionAuditLog {
   action: string;
   resource: ResourceType;
   resourceId?: string;
-  oldValue?: unknown;
-  newValue?: unknown;
+  oldValue?: any;
+  newValue?: any;
   result: 'success' | 'failure' | 'denied';
   reason?: string;
   ipAddress: string;
@@ -229,7 +229,7 @@ export interface RoleAuditLog {
   userId: UUID; // 执行操作的用户
   targetUserId?: UUID; // 被操作的用户（如果是用户角色分配）
   action: 'create' | 'update' | 'delete' | 'assign' | 'revoke';
-  changes: Record<string, { old: unknown; new: unknown }>;
+  changes: Record<string, { old: any; new: unknown }>;
   reason?: string;
   ipAddress: string;
   userAgent: string;
@@ -277,7 +277,7 @@ export interface RequirePermissionOptions {
   action: PermissionAction;
   resourceIdParam?: string; // 从请求参数中获取资源ID的字段名
   allowOwner?: boolean; // 是否允许资源所有者访问
-  customCheck?: (context: unknown) => boolean; // 自定义检查函数
+  customCheck?: (context: any) => boolean; // 自定义检查函数
 }
 
 /**
@@ -457,7 +457,7 @@ export function roleToDatabase(role: Role): RoleDatabaseFields {
 /**
  * 验证权限条件
  */
-export function validatePermissionCondition(condition: PermissionCondition, context: unknown): boolean {
+export function validatePermissionCondition(condition: PermissionCondition, context: any): boolean {
   const { field, operator, value } = condition;
   const fieldValue = getNestedValue(context, field);
 
@@ -501,8 +501,7 @@ export function isPermissionMatch(
   permission: Permission,
   resource: ResourceType,
   action: PermissionAction,
-  context?: unknown
-): boolean {
+  context?: any): boolean {
   // 检查资源和操作是否匹配
   if (permission.resource !== resource || permission.action !== action) {
     return false;

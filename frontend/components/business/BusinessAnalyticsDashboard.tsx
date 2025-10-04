@@ -58,7 +58,7 @@ interface SystemMetrics {
       heapUsed: number;
       heapTotal: number;
     };
-    cpu: unknown;
+    cpu: any;
     cpuPercent: number;
     memoryPercent: number;
     loadAverage: number[];

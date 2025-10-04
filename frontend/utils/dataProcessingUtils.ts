@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一的数据处理工具类
  * 整合项目中重复的数据处理逻辑
  */
@@ -25,7 +25,7 @@ export class DataProcessingUtils {
   /**
    * 标准化时间戳
    */
-  static normalizeTimestamp(timestamp: unknown): string {
+  static normalizeTimestamp(timestamp: any): string {
     if (!timestamp) return new Date().toISOString();
 
     if (typeof timestamp === 'string') {
@@ -51,7 +51,7 @@ export class DataProcessingUtils {
   /**
    * 标准化数据点
    */
-  static normalizeDataPoint(rawPoint: unknown): TestDataPoint {
+  static normalizeDataPoint(rawPoint: any): TestDataPoint {
     return {
       timestamp: this.normalizeTimestamp(rawPoint.timestamp),
       responseTime: this.normalizeNumber(rawPoint.responseTime, 0, 60000),

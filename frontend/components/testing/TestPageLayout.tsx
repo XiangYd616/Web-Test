@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react';
+﻿import { LucideIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import TestHistory from '../common/TestHistory';
@@ -26,8 +26,8 @@ interface TestPageLayoutProps {
   onStopTest?: () => void;
 
   // 历史记录处理
-  onTestSelect?: (test: unknown) => void;
-  onTestRerun?: (test: unknown) => void;
+  onTestSelect?: (test: any) => void;
+  onTestRerun?: (test: any) => void;
 
   // 额外控制
   extraControls?: React.ReactNode;
@@ -141,12 +141,12 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   }, []);
 
   // 默认的历史记录处理函数
-  const handleTestSelect = (test: unknown) => {
+  const handleTestSelect = (test: any) => {
     setActiveTab('test');
     onTestSelect?.(test);
   };
 
-  const handleTestRerun = (test: unknown) => {
+  const handleTestRerun = (test: any) => {
     setActiveTab('test');
     onTestRerun?.(test);
   };

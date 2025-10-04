@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试引擎统一类型定义
  * 为所有测试引擎提供一致的接口和数据结构
  * 版本: v1.0.0
@@ -256,11 +256,11 @@ export interface CSPAnalysis {
 export interface APITestConfig extends BaseTestConfig {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
   headers?: Record<string, string>;
-  body?: unknown;
+  body?: any;
   authentication?: APIAuthentication;
   validateResponse?: boolean;
   expectedStatus?: number;
-  expectedSchema?: unknown;
+  expectedSchema?: any;
   followRedirects?: boolean;
 }
 
@@ -276,7 +276,7 @@ export interface APITestResult extends BaseTestResult {
   responseTime: number;
   responseSize: number;
   headers: Record<string, string>;
-  body: unknown;
+  body: any;
   validations: APIValidation[];
   performance: APIPerformanceMetrics;
 }
@@ -285,8 +285,8 @@ export interface APIValidation {
   type: string;
   passed: boolean;
   message: string;
-  expected?: unknown;
-  actual?: unknown;
+  expected?: any;
+  actual?: any;
 }
 
 export interface APIPerformanceMetrics {
@@ -446,7 +446,7 @@ export interface AccessibilityCheck {
   id: string;
   impact: string;
   message: string;
-  data: unknown;
+  data: any;
 }
 
 export interface AccessibilitySummary {
@@ -471,7 +471,7 @@ export interface StressTestConfig extends BaseTestConfig {
   requestsPerSecond?: number;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string>;
-  body?: unknown;
+  body?: any;
   scenarios?: StressTestScenario[];
 }
 
@@ -486,14 +486,14 @@ export interface StressTestStep {
   url: string;
   method: string;
   headers?: Record<string, string>;
-  body?: unknown;
+  body?: any;
   thinkTime?: number;
   assertions?: StressTestAssertion[];
 }
 
 export interface StressTestAssertion {
   type: 'status' | 'response_time' | 'body_contains' | 'header_exists';
-  value: unknown;
+  value: any;
   operator?: 'equals' | 'less_than' | 'greater_than' | 'contains';
 }
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 告警管理组件
  * 提供告警查看、管理和配置功能
  */
@@ -33,7 +33,7 @@ interface Alert {
     severity: 'low' | 'medium' | 'high' | 'critical';
     status: 'active' | 'acknowledged' | 'resolved';
     message: string;
-    details: unknown;
+    details: any;
     created_at: string;
     acknowledged_at?: string;
     resolved_at?: string;
@@ -392,7 +392,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
     };
 
     // 测试通知配置
-    const testNotification = async (config: unknown) => {
+    const testNotification = async (config: any) => {
         try {
             const response = await fetch('/api/v1/alerts/test-notification', {
                 method: 'POST',
@@ -842,7 +842,7 @@ interface AlertSettingsModalProps {
     rules: AlertRules;
     onSave: (rules: AlertRules) => void;
     onClose: () => void;
-    onTestNotification: (config: unknown) => void;
+    onTestNotification: (config: any) => void;
 }
 
 const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({

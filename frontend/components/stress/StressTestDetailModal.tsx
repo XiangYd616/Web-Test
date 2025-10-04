@@ -1,4 +1,4 @@
-/**
+﻿/**
  * StressTestDetailModal.tsx - React组件
  * 
  * 文件路径: frontend\components\stress\StressTestDetailModal.tsx
@@ -15,9 +15,10 @@ import ExportUtils from '../../utils/exportUtils';
 import ExportModal from '../common/ExportModal';
 
 import './StressTestDetailModal.css';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 
 interface StressTestDetailModalProps {
-  record: unknown;
+  record: any;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -32,7 +33,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
   const navigate = useNavigate();
 
   // 统一的错误率计算函数
-  const calculateErrorRate = (record: unknown, metrics: unknown = {}) => {
+  const calculateErrorRate = (record: unknown, metrics: any = {}) => {
     if (!record) return 0;
 
     // 优先使用已计算的错误率
@@ -67,7 +68,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
     return configs[status as keyof typeof configs] || configs.pending;
   };
 
-  const calculateTestCompletion = (record: unknown) => {
+  const calculateTestCompletion = (record: any) => {
     /**
      * if功能函数
      * @param {Object} params - 参数对象
@@ -157,7 +158,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
   };
 
   // 🔧 修复：使用与历史记录页面相同的持续时间计算逻辑
-  const formatDuration = (record: unknown) => {
+  const formatDuration = (record: any) => {
     // 对于运行中的测试，不显示时长
     if (record.status === 'running' || record.status === 'pending') {
       return '-';
@@ -247,7 +248,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
   }, []);
 
   // 处理导出
-  const handleExport = React.useCallback(async (exportType: string, data: unknown) => {
+  const handleExport = React.useCallback(async (exportType: string, data: any) => {
     try {
       await ExportUtils.exportByType(exportType, data);
       setIsExportModalOpen(false);

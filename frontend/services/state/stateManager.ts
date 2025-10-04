@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一状态管理系统
  * 基于观察者模式，管理测试状态、用户会话、系统配置等
  */
@@ -29,7 +29,7 @@ export interface TestExecution {
   progress: number;
   startTime: Date;
   endTime?: Date;
-  result?: unknown;
+  result?: any;
   error?: string;
   message: string;
 }
@@ -39,7 +39,7 @@ export interface TestResult {
   type: string;
   url: string;
   status: string;
-  result: unknown;
+  result: any;
   startTime: Date;
   endTime: Date;
   duration: number;
@@ -73,8 +73,8 @@ export interface PerformanceMetrics {
   cachedResults: number;
   systemHealth: {
     uptime: number;
-    memory: unknown;
-    cpu: unknown;
+    memory: any;
+    cpu: any;
   };
 }
 
@@ -198,7 +198,7 @@ export interface SystemError {
   level: 'info' | 'warn' | 'error' | 'fatal';
   message: string;
   stack?: string;
-  context?: unknown;
+  context?: any;
   resolved: boolean;
 }
 
@@ -433,7 +433,7 @@ class StateManager {
     }
   }
 
-  private updateTestState(action: string, payload: unknown): void {
+  private updateTestState(action: string, payload: any): void {
     const testState = this.state.test;
 
     switch (action) {
@@ -560,7 +560,7 @@ class StateManager {
     }
   }
 
-  private updateUserState(action: string, payload: unknown): void {
+  private updateUserState(action: string, payload: any): void {
     const userState = this.state.user;
 
     switch (action) {
@@ -596,7 +596,7 @@ class StateManager {
     }
   }
 
-  private updateSystemState(action: string, payload: unknown): void {
+  private updateSystemState(action: string, payload: any): void {
     const systemState = this.state.system;
 
     switch (action) {
@@ -634,7 +634,7 @@ class StateManager {
     }
   }
 
-  private updateNotificationState(action: string, payload: unknown): void {
+  private updateNotificationState(action: string, payload: any): void {
     const systemState = this.state.system;
     const uiState = this.state.ui;
 
@@ -733,7 +733,7 @@ class StateManager {
   }
 
   private extractPersistableState(): unknown {
-    const persistable: unknown = {};
+    const persistable: any = {};
     
     for (const field of this.persistenceFields) {
 
@@ -765,7 +765,7 @@ class StateManager {
      * @returns {Promise<Object>} 返回结果
 
      */
-  private mergePersistedState(persistedState: unknown): void {
+  private mergePersistedState(persistedState: any): void {
     for (const field of this.persistenceFields) {
 
       /**
@@ -788,7 +788,7 @@ class StateManager {
     return path.split('.').reduce((current, key) => current?.[key], obj);
   }
 
-  private setNestedValue(obj: unknown, path: string, value: unknown): void {
+  private setNestedValue(obj: unknown, path: string, value: any): void {
     const keys = path.split('.');
     const lastKey = keys.pop()!;
     const target = keys.reduce((current, key) => {

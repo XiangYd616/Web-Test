@@ -13,14 +13,14 @@ export interface TestProgress {
   message: string;
   startTime: string;
   endTime?: string;
-  result?: unknown;
+  result?: any;
   error?: string;
 }
 
 // 进度监听器接口
 export interface ProgressListener {
   onProgress: (progress: TestProgress) => void;
-  onComplete: (result: unknown) => void;
+  onComplete: (result: any) => void;
   onError: (error: string) => void;
 }
 

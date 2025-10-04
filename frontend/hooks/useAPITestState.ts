@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API测试专用状态管理Hook
  * 可选的升级方案，APITest.tsx可以选择使用或保持现有实现
  *
@@ -37,7 +37,7 @@ interface APITestOperations {
  *
  * 已迁移到新的类型系统，返回 APITestHook 类型
  */
-export const useAPITestState = (): unknown => {
+export const useAPITestState = (): any => {
   // 基础状态
   const [config, setConfig] = useState<APITestConfig>({
     endpoints: [],
@@ -142,13 +142,13 @@ export const useAPITestState = (): unknown => {
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult: unknown) => {
+        (testResult: any) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError: unknown) => {
+        (testError: any) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -157,7 +157,7 @@ export const useAPITestState = (): unknown => {
 
       setTestId(newTestId);
 
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message || 'API测试启动失败');
       setIsRunning(false);
       setCurrentStep('');
@@ -174,7 +174,7 @@ export const useAPITestState = (): unknown => {
         abortControllerRef.current?.abort();
         setIsRunning(false);
         setCurrentStep('测试已停止');
-      } catch (err: unknown) {
+      } catch (err: any) {
         setError(err.message || '停止测试失败');
       }
     }

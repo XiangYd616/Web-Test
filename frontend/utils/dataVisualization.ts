@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 数据可视化优化工具
  * 解决大量数据点导致的性能问题
  */
@@ -10,7 +10,7 @@ export interface DataPoint {
   tps?: number;
   activeUsers?: number;
   errorRate?: number;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface OptimizationConfig {
@@ -236,8 +236,7 @@ class DataVisualizationOptimizer {
     originalData: DataPoint[],
     sampledData: DataPoint[],
     originalStats: unknown,
-    sampledStats: unknown
-  ): DataPoint[] {
+    sampledStats: any): DataPoint[] {
     // 如果采样后的平均值偏差超过5%，进行补偿性采样
     const responseTimeDiff = Math.abs(sampledStats.avgResponseTime - originalStats.avgResponseTime);
     const responseTimeThreshold = originalStats.avgResponseTime * 0.05; // 5%阈值

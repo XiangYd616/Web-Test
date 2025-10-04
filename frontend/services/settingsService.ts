@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`;
 
@@ -66,7 +66,7 @@ export const systemSettingsAPI = {
   },
 
   // 更新单个系统设置
-  updateSetting: async (category: string, key: string, value: unknown) => {
+  updateSetting: async (category: string, key: string, value: any) => {
     const response = await api.put(`/admin/settings/${category}/${key}`, { value });
     return response?.data;
   },
@@ -99,7 +99,7 @@ export const userPreferencesAPI = {
   },
 
   // 更新单个用户偏好
-  updatePreference: async (category: string, key: string, value: unknown) => {
+  updatePreference: async (category: string, key: string, value: any) => {
     const response = await api.put(`/preferences/${category}/${key}`, { value });
     return response?.data;
   },
@@ -263,13 +263,13 @@ export class SettingsService {
 // ==================== 账户设置API ====================
 export const _accountAPI = {
   // 更新用户个人信息
-  updateProfile: async (profileData: unknown) => {
+  updateProfile: async (profileData: any) => {
     const response = await api.put('/auth/profile', profileData);
     return response?.data;
   },
 
   // 修改密码
-  changePassword: async (passwordData: unknown) => {
+  changePassword: async (passwordData: any) => {
     const response = await api.put('/auth/change-password', passwordData);
     return response?.data;
   },
@@ -290,7 +290,7 @@ export const _monitoringAPI = {
   },
 
   // 更新监控设置
-  updateMonitoringSettings: async (settings: unknown) => {
+  updateMonitoringSettings: async (settings: any) => {
     const response = await api.put('/monitoring/settings', { settings });
     return response?.data;
   },
@@ -305,13 +305,13 @@ export const _scheduledTasksAPI = {
   },
 
   // 创建定时任务
-  createTask: async (taskData: unknown) => {
+  createTask: async (taskData: any) => {
     const response = await api.post('/scheduled-tasks', taskData);
     return response?.data;
   },
 
   // 更新定时任务
-  updateTask: async (taskId: string, updates: unknown) => {
+  updateTask: async (taskId: string, updates: any) => {
     const response = await api.put(`/scheduled-tasks/${taskId}`, updates);
     return response?.data;
   },
@@ -332,19 +332,19 @@ export const _scheduledTasksAPI = {
 // ==================== 系统日志API ====================
 export const _systemLogsAPI = {
   // 获取系统日志
-  getLogs: async (params: unknown = {}) => {
+  getLogs: async (params: any = {}) => {
     const response = await api.get('/system-logs', { params });
     return response?.data;
   },
 
   // 清理系统日志
-  cleanLogs: async (conditions: unknown) => {
+  cleanLogs: async (conditions: any) => {
     const response = await api.delete('/system-logs', { data: conditions });
     return response?.data;
   },
 
   // 导出系统日志
-  exportLogs: async (params: unknown = {}) => {
+  exportLogs: async (params: any = {}) => {
     const response = await api.get('/system-logs/export', {
       params,
       responseType: 'blob'
@@ -362,7 +362,7 @@ export const _backupAPI = {
   },
 
   // 创建备份
-  createBackup: async (backupData: unknown) => {
+  createBackup: async (backupData: any) => {
     const response = await api.post('/backups', backupData);
     return response?.data;
   },
@@ -389,13 +389,13 @@ export const _dataManagementAPI = {
   },
 
   // 创建导出任务
-  createExportTask: async (exportData: unknown) => {
+  createExportTask: async (exportData: any) => {
     const response = await api.post('/data-management/exports', exportData);
     return response?.data;
   },
 
   // 创建导入任务
-  createImportTask: async (importData: unknown) => {
+  createImportTask: async (importData: any) => {
     const response = await api.post('/data-management/imports', importData);
     return response?.data;
   },

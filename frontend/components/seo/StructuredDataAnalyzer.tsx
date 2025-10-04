@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+﻿import React, { useState, useCallback } from 'react';
 import {AlertCircle, CheckCircle, Code, Database, XCircle} from 'lucide-react';
 
 // Schema.org types mapping
@@ -48,7 +48,7 @@ const SCHEMA_TYPES = {
 interface StructuredDataItem {
   type: string;
   format: 'json-ld' | 'microdata' | 'rdfa';
-  data: unknown;
+  data: any;
   element?: HTMLElement;
   issues: Array<{
     severity: 'error' | 'warning' | 'info';

@@ -1,11 +1,11 @@
-export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
+﻿export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
 
 export interface AppError {
   code: string;
   message: string;
   severity: ErrorSeverity;
   timestamp: number;
-  context?: unknown;
+  context?: any;
 }
 
 export const ERROR_CODES = {

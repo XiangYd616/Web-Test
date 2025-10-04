@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 通用测试页面组件
  * 解决各测试工具重复耦合问题的核心组件
  */
@@ -48,14 +48,14 @@ export interface TestConfigSection {
 
 export interface ValidationRule {
   type: 'required' | 'min' | 'max' | 'pattern' | 'custom';
-  value?: unknown;
+  value?: any;
   message: string;
   validator?: (value: unknown, config: Record<string, any>) => boolean;
 }
 
 export interface FieldDependency {
   field: string;
-  value: unknown;
+  value: any;
   action: 'show' | 'hide' | 'enable' | 'disable';
 }
 
@@ -69,7 +69,7 @@ export interface ResultSection {
   key: string;
   title: string;
   type: 'table' | 'cards' | 'text' | 'chart' | 'custom';
-  renderer?: (data: unknown) => ReactNode;
+  renderer?: (data: any) => ReactNode;
 }
 
 export interface ChartConfig {
@@ -89,8 +89,8 @@ export interface MetricConfig {
 export interface UniversalTestPageProps {
   testType: TestTypeConfig;
   className?: string;
-  onTestComplete?: (result: unknown) => void;
-  onConfigChange?: (config: unknown) => void;
+  onTestComplete?: (result: any) => void;
+  onConfigChange?: (config: any) => void;
   customActions?: ReactNode;
   showHistory?: boolean;
 }
@@ -122,14 +122,14 @@ export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
   } = useUniversalTest(testType.id, testType.defaultConfig);
 
   // 处理配置变更
-  const handleConfigChange = (newConfig: unknown) => {
+  const handleConfigChange = (newConfig: any) => {
     // 使用updateConfig方法更新整个配置对象
     updateConfig(newConfig);
     onConfigChange?.(newConfig);
   };
 
   // 处理测试完成
-  const _handleTestComplete = (testResult: unknown) => {
+  const _handleTestComplete = (testResult: any) => {
     onTestComplete?.(testResult);
   };
 

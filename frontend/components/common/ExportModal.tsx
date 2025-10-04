@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { BarChart3, Database, Download, Grid, X, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -18,11 +18,11 @@ export interface ExportType {
 export interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  data: unknown;
+  data: any;
   testType?: 'stress' | 'api' | 'performance';
   testId?: string;
   testName?: string;
-  onExport: (type: string, data: unknown) => Promise<void>;
+  onExport: (type: string, data: any) => Promise<void>;
 }
 
 // 导出类型配置

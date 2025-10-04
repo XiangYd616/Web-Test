@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 共享测试配置面板组件
  * 为各个独立测试页面提供通用的配置界面基础设施
  * 支持自定义字段和验证规则
@@ -17,7 +17,7 @@ export interface ConfigField {
   min?: number;
   max?: number;
   description?: string;
-  validation?: (value: unknown) => string | null;
+  validation?: (value: any) => string | null;
 }
 
 export interface ConfigSection {
@@ -32,7 +32,7 @@ export interface TestConfigPanelProps {
   title?: string;
   config: Record<string, any>;
   sections: ConfigSection[];
-  onChange: (key: string, value: unknown) => void;
+  onChange: (key: string, value: any) => void;
   disabled?: boolean;
   errors?: string[];
   children?: ReactNode;

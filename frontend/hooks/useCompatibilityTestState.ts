@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 兼容性测试专用状态管理Hook
  * 可选的升级方案，CompatibilityTest.tsx可以选择使用或保持现有实现
  *
@@ -84,7 +84,7 @@ interface LocalCompatibilityTestResult {
   browserResults: BrowserTestResult[];
   deviceResults: DeviceTestResult[];
   summary: string;
-  details: unknown;
+  details: any;
   duration?: number;
 }
 
@@ -320,13 +320,13 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult: unknown) => {
+        (testResult: any) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError: unknown) => {
+        (testError: any) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -335,7 +335,7 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
 
       setTestId(newTestId);
 
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message || '兼容性测试启动失败');
       setIsRunning(false);
       setCurrentStep('');
@@ -352,7 +352,7 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
         abortControllerRef.current?.abort();
         setIsRunning(false);
         setCurrentStep('测试已停止');
-      } catch (err: unknown) {
+      } catch (err: any) {
         setError(err.message || '停止测试失败');
       }
     }

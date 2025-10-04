@@ -217,7 +217,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
     }, [showNotification]);
 
     // 处理实时数据更新
-    const handleRealTimeUpdate = useCallback((data: unknown) => {
+    const handleRealTimeUpdate = useCallback((data: any) => {
         // Type guard for different data types
         const dataWithType = data as { type?: string; targetId?: string; updates?: Partial<MonitorTarget>; alert?: Alert; stats?: MonitorStats };
         

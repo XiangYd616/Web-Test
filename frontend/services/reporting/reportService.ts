@@ -1,4 +1,4 @@
-/**
+﻿/**
  * reportService.ts - 业务服务层
  * 
  * 文件路径: frontend\services\reporting\reportService.ts
@@ -48,7 +48,7 @@ export interface ReportSection {
   title: string;
   type: 'summary' | 'chart' | 'table' | 'text' | 'recommendations';
   required: boolean;
-  config?: unknown;
+  config?: any;
 }
 
 class ReportService {
@@ -379,7 +379,7 @@ class ReportService {
                     </tr>
                 </thead>
                 <tbody>
-                    ${analyticsData.topUrls.slice(0, 10).map((url: unknown) => `
+                    ${analyticsData.topUrls.slice(0, 10).map((url: any) => `
                         <tr>
                             <td>${url.url}</td>
                             <td>${url.count}</td>
@@ -443,7 +443,7 @@ class ReportService {
     csv += `在线站点,${monitoringStats.onlineSites}/${monitoringStats.totalSites}\n\n`;
 
     csv += 'URL,测试次数,平均分数\n';
-    analyticsData.topUrls.forEach((url: unknown) => {
+    analyticsData.topUrls.forEach((url: any) => {
       csv += `${url.url},${url.count},${url.avgScore.toFixed(1)}\n`;
     });
 

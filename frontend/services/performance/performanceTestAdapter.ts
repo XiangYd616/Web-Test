@@ -1,4 +1,4 @@
-
+﻿
 import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, UnifiedPerformanceConfig } from '../../types/performance.types';
 import { performanceTestCore } from './performanceTestCore';
 
@@ -24,8 +24,8 @@ export interface LegacyPerformanceTestConfig {
 // 兼容旧的测试进度接口
 export interface LegacyTestProgressCallback {
   onProgress: (progress: number, step: string) => void;
-  onComplete: (result: unknown) => void;
-  onError: (error: unknown) => void;
+  onComplete: (result: any) => void;
+  onError: (error: any) => void;
 }
 
 // ==================== 性能测试适配器类 ====================
@@ -301,8 +301,8 @@ export async function getPerformanceMetrics(
   responseTime: number;
   pageSize: number;
   score: number;
-  vitals?: unknown;
-  mobile?: unknown;
+  vitals?: any;
+  mobile?: any;
 }> {
   const config: Partial<UnifiedPerformanceConfig> = {
     level: 'basic',

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试进度监控Hook
  * 提供简化的测试进度监控功能
  */
@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {testProgressService} from '../services/api/testProgressService';
 export interface UseTestProgressOptions {
   autoStart?: boolean; // 是否自动开始监控
-  onComplete?: (result: unknown) => void;
+  onComplete?: (result: any) => void;
   onError?: (error: string) => void;
   onProgress?: (progress: TestProgress) => void;
 }
@@ -44,7 +44,7 @@ export function useTestProgress(
         setError(null);
         options.onProgress?.(progressData);
       },
-      onComplete: (result: unknown) => {
+      onComplete: (result: any) => {
         setIsMonitoring(false);
         options.onComplete?.(result);
       },
@@ -163,7 +163,7 @@ export function useBatchTestProgress(
         setError(null);
         options.onProgress?.(progressData);
       },
-      onComplete: (result: unknown) => {
+      onComplete: (result: any) => {
         options.onComplete?.(result);
         
         // 检查是否所有测试都完成了

@@ -1,4 +1,4 @@
-
+﻿
 export interface PageSpeedMetrics {
   // Core Web Vitals
   lcp: number | null;  // Largest Contentful Paint
@@ -102,7 +102,7 @@ class GooglePageSpeedService {
   /**
    * 解析PageSpeed API响应数据
    */
-  private parseMetrics(data: unknown): PageSpeedMetrics {
+  private parseMetrics(data: any): PageSpeedMetrics {
     const lighthouse = data.lighthouseResult;
     const audits = lighthouse?.audits || {};
 
@@ -143,7 +143,7 @@ class GooglePageSpeedService {
   /**
    * 解析优化机会
    */
-  private parseOpportunities(audits: unknown): PageSpeedMetrics['opportunities'] {
+  private parseOpportunities(audits: any): PageSpeedMetrics['opportunities'] {
     const opportunityKeys = [
       'unused-css-rules',
       'unused-javascript',
@@ -171,7 +171,7 @@ class GooglePageSpeedService {
   /**
    * 解析诊断信息
    */
-  private parseDiagnostics(audits: unknown): PageSpeedMetrics['diagnostics'] {
+  private parseDiagnostics(audits: any): PageSpeedMetrics['diagnostics'] {
     const diagnosticKeys = [
       'dom-size',
       'critical-request-chains',

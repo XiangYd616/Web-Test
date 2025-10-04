@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 压力测试引擎单元测试
  * 测试压力测试功能的核心逻辑和边界情况
  */
@@ -11,7 +11,7 @@ interface StressTestConfig {
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string>;
-  body?: unknown;
+  body?: any;
   concurrency: number;
   duration: number;
   rampUp: number;

@@ -162,7 +162,7 @@ const StressChart: React.FC<StressChartProps> = ({
   };
 
   // 自定义Tooltip
-  const CustomTooltip = ({ active, payload, label }: unknown) => {
+  const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">

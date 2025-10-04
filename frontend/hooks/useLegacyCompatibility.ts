@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🔄 Hook兼容性层
  * 为重构后的Hook提供向后兼容性
  * 确保现有代码无需修改即可使用新的统一Hook
@@ -8,6 +8,7 @@ import { useCallback } from 'react';
 import { TestType } from '../types/enums';
 import { useTestState as useTestStateCore } from './useTestState';
 import { useUnifiedTestEngine } from './useUnifiedTestEngine';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 
 /**
  * useTestEngine兼容性Hook
@@ -97,7 +98,7 @@ export const useSimpleTestEngine = () => {
 export const useTestState = (options: {
   testType: TestType;
   defaultConfig: Record<string, any>;
-  onTestComplete?: (result: unknown) => void;
+  onTestComplete?: (result: any) => void;
   onTestError?: (error: string) => void;
   onConfigChange?: (config: Record<string, any>) => void;
   validateConfig?: (config: Record<string, any>) => { isValid: boolean; errors: string[] };
@@ -151,7 +152,7 @@ export const useTestState = (options: {
     setConfig: (config: Record<string, any>) => {
       options.onConfigChange?.(config);
     },
-    updateConfig: (key: string, value: unknown) => {
+    updateConfig: (key: string, value: any) => {
       const newConfig = { ...universalState.config, [key]: value };
       options.onConfigChange?.(newConfig);
     },
@@ -223,13 +224,13 @@ export const useUnifiedTestState = (options: {
   enableQueue?: boolean;
   enableWebSocket?: boolean;
   enablePersistence?: boolean;
-  onTestStarted?: (data: unknown) => void;
-  onTestProgress?: (data: unknown) => void;
-  onTestCompleted?: (data: unknown) => void;
-  onTestFailed?: (data: unknown) => void;
-  onTestCancelled?: (data: unknown) => void;
-  onTestQueued?: (data: unknown) => void;
-  onStatusUpdate?: (data: unknown) => void;
+  onTestStarted?: (data: any) => void;
+  onTestProgress?: (data: any) => void;
+  onTestCompleted?: (data: any) => void;
+  onTestFailed?: (data: any) => void;
+  onTestCancelled?: (data: any) => void;
+  onTestQueued?: (data: any) => void;
+  onStatusUpdate?: (data: any) => void;
 }) => {
   // 使用重构后的useTestState
   const testState = useTestStateCore({

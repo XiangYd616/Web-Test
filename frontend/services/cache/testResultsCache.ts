@@ -74,7 +74,7 @@ export class TestResultsCache {
   /**
    * 缓存测试状态
    */
-  public cacheTestStatus(testId: string, status: unknown): void {
+  public cacheTestStatus(testId: string, status: any): void {
     const key = CACHE_KEYS.TEST_STATUS + testId;
     cacheService.set(key, status, CACHE_TTL.TEST_STATUS);
   }
@@ -133,7 +133,7 @@ export class TestResultsCache {
   /**
    * 缓存测试统计
    */
-  public cacheTestStats(userId: string, stats: unknown): void {
+  public cacheTestStats(userId: string, stats: any): void {
     const key = CACHE_KEYS.TEST_STATS + userId;
     cacheService.set(key, stats, CACHE_TTL.TEST_STATS);
   }

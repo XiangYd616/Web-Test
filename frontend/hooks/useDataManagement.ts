@@ -1,18 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
+﻿import { useCallback, useEffect, useState } from 'react';
 // 临时类型定义，直到advancedDataService实现完成
 interface DataBackup {
   id: string;
   name: string;
   timestamp: string;
   size: number;
-  data: unknown;
+  data: any;
 }
 
 interface DataQuery {
   id?: string;
   query?: string;
-  filters?: unknown;
-  sort?: unknown;
+  filters?: any;
+  sort?: any;
   limit?: number;
   pagination?: {
     page: number;
@@ -23,14 +23,14 @@ interface DataQuery {
 interface DataRecord {
   id: string;
   type?: string;
-  data: unknown;
+  data: any;
   timestamp: string;
-  metadata?: unknown;
+  metadata?: any;
 }
 
 // 临时的数据管理器实现
 const advancedDataManager = {
-  backup: async (data: unknown): Promise<DataBackup> => {
+  backup: async (data: any): Promise<DataBackup> => {
     return {
       id: `backup_${Date.now()}`,
       name: 'Backup',
@@ -54,7 +54,7 @@ const advancedDataManager = {
   batchOperation: async (operation: string, data: unknown[]): Promise<any> => {
     return { success: true, processed: data?.length };
   },
-  createBackup: async (name: string, data: unknown): Promise<DataBackup> => {
+  createBackup: async (name: string, data: any): Promise<DataBackup> => {
     return {
       id: `backup_${Date.now()}`,
       name,
@@ -100,7 +100,7 @@ const extendedDataManager = {
 
     return config;
   },
-  createRecord: async (type: string, data: unknown, metadata?: unknown): Promise<DataRecord> => {
+  createRecord: async (type: string, data: unknown, metadata?: any): Promise<DataRecord> => {
 
     const validType = ['test', 'user', 'report', 'log', 'config'].includes(type) ? type as any : 'test';
     return {
@@ -118,7 +118,7 @@ const extendedDataManager = {
       }
     };
   },
-  updateRecord: async (id: string, data: unknown, metadata?: unknown): Promise<DataRecord> => {
+  updateRecord: async (id: string, data: unknown, metadata?: any): Promise<DataRecord> => {
 
     return {
       id,
@@ -139,15 +139,15 @@ const extendedDataManager = {
 
     return true;
   },
-  queryData: async (query: unknown): Promise<{ data: unknown[], total: number }> => {
+  queryData: async (query: any): Promise<{ data: unknown[], total: number }> => {
 
     return { data: [], total: 0 };
   },
-  importData: async (file: File, config: unknown): Promise<{ taskId: string }> => {
+  importData: async (file: File, config: any): Promise<{ taskId: string }> => {
 
     return { taskId: 'temp-' + Date.now() };
   },
-  validateData: async (query: unknown): Promise<{ isValid: boolean, errors: unknown[] }> => {
+  validateData: async (query: any): Promise<{ isValid: boolean, errors: unknown[] }> => {
 
     return { isValid: true, errors: [] };
   }
@@ -186,7 +186,7 @@ interface DataSyncConfig {
     id: string;
     name: string;
     type: 'database' | 'api' | 'file';
-    config: unknown;
+    config: any;
   }>;
 }
 
@@ -209,7 +209,8 @@ export interface UseDataManagementReturn {
   syncConfig: DataSyncConfig | null;
   syncLoading: boolean;
 
-  // 查询和过�?  query: DataQuery;
+  // 查询和过滤
+  query: DataQuery;
   setQuery: (query: DataQuery) => void;
 
   // 数据操作
@@ -218,14 +219,14 @@ export interface UseDataManagementReturn {
   loadBackups: () => Promise<void>;
   loadSyncConfig: () => Promise<void>;
 
-  createRecord: (type: string, data: unknown, metadata?: unknown) => Promise<DataRecord>;
-  updateRecord: (id: string, data: unknown, metadata?: unknown) => Promise<DataRecord>;
+  createRecord: (type: string, data: unknown, metadata?: any) => Promise<DataRecord>;
+  updateRecord: (id: string, data: unknown, metadata?: any) => Promise<DataRecord>;
   deleteRecord: (id: string) => Promise<boolean>;
   batchDelete: (ids: string[]) => Promise<void>;
 
   // 备份操作
-  createBackup: (config: unknown) => Promise<DataBackup>;
-  restoreBackup: (backupId: string, options?: unknown) => Promise<{ taskId: string }>;
+  createBackup: (config: any) => Promise<DataBackup>;
+  restoreBackup: (backupId: string, options?: any) => Promise<{ taskId: string }>;
 
   // 同步操作
   updateSyncConfig: (config: Partial<DataSyncConfig>) => Promise<DataSyncConfig>;
@@ -233,14 +234,16 @@ export interface UseDataManagementReturn {
 
   // 导入导出
   exportData: (format: 'json' | 'csv' | 'xlsx', selectedIds?: string[]) => Promise<void>;
-  importData: (file: File, config: unknown) => Promise<{ taskId: string }>;
+  importData: (file: File, config: any) => Promise<{ taskId: string }>;
 
-  // 数据验证和清�?  validateData: (query?: DataQuery) => Promise<any>;
-  cleanupData: (config: unknown) => Promise<{ taskId: string }>;
+  // 数据验证和清理
+  validateData: (query?: DataQuery) => Promise<any>;
+  cleanupData: (config: any) => Promise<{ taskId: string }>;
 }
 
-const useDataManagement = (): UseDataManagementReturn => {
-  // 状态管�?  const [records, setRecords] = useState<DataRecord[]>([]);
+export const _useDataManagement = (): UseDataManagementReturn => {
+  // 状态管理
+  const [records, setRecords] = useState<DataRecord[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -338,7 +341,7 @@ const useDataManagement = (): UseDataManagementReturn => {
   }, []);
 
   // 数据操作函数
-  const createRecord = useCallback(async (type: string, data: unknown, metadata?: unknown): Promise<DataRecord> => {
+  const createRecord = useCallback(async (type: string, data: unknown, metadata?: any): Promise<DataRecord> => {
     try {
       const record = await extendedDataManager.createRecord(type, data, metadata);
       await loadData(); // 重新加载数据
@@ -350,7 +353,7 @@ const useDataManagement = (): UseDataManagementReturn => {
     }
   }, [loadData]);
 
-  const updateRecord = useCallback(async (id: string, data: unknown, metadata?: unknown): Promise<DataRecord> => {
+  const updateRecord = useCallback(async (id: string, data: unknown, metadata?: any): Promise<DataRecord> => {
     try {
       const record = await extendedDataManager.updateRecord(id, data, metadata);
       await loadData(); // 重新加载数据
@@ -398,7 +401,7 @@ const useDataManagement = (): UseDataManagementReturn => {
   }, [loadData]);
 
   // 备份操作函数
-  const createBackup = useCallback(async (config: unknown): Promise<DataBackup> => {
+  const createBackup = useCallback(async (config: any): Promise<DataBackup> => {
     try {
       const backup = await advancedDataManager.createBackup('Manual Backup', config);
       await loadBackups(); // 重新加载备份列表
@@ -410,7 +413,7 @@ const useDataManagement = (): UseDataManagementReturn => {
     }
   }, [loadBackups]);
 
-  const restoreBackup = useCallback(async (backupId: string, options?: unknown): Promise<{ taskId: string }> => {
+  const restoreBackup = useCallback(async (backupId: string, options?: any): Promise<{ taskId: string }> => {
     try {
       const result = await advancedDataManager.restoreBackup(backupId);
       // 如果有选项，可以在这里处理
@@ -481,7 +484,7 @@ const useDataManagement = (): UseDataManagementReturn => {
     }
   }, [query]);
 
-  const importData = useCallback(async (file: File, config: unknown): Promise<{ taskId: string }> => {
+  const importData = useCallback(async (file: File, config: any): Promise<{ taskId: string }> => {
     try {
       const result = await extendedDataManager.importData?.(file, config) || { taskId: 'temp-' + Date.now() };
       await loadData(); // 重新加载数据
@@ -493,7 +496,8 @@ const useDataManagement = (): UseDataManagementReturn => {
     }
   }, [loadData]);
 
-  // 数据验证和清理函�?  const validateData = useCallback(async (validateQuery?: DataQuery): Promise<any> => {
+  // 数据验证和清理函数
+  const validateData = useCallback(async (validateQuery?: DataQuery): Promise<any> => {
     try {
       const result = await extendedDataManager.validateData?.(validateQuery) || { isValid: true, errors: [] };
       return result;
@@ -504,7 +508,7 @@ const useDataManagement = (): UseDataManagementReturn => {
     }
   }, []);
 
-  const cleanupData = useCallback(async (config: unknown): Promise<{ taskId: string }> => {
+  const cleanupData = useCallback(async (config: any): Promise<{ taskId: string }> => {
     try {
       const result = await advancedDataManager.cleanupData();
       return result;
@@ -515,7 +519,8 @@ const useDataManagement = (): UseDataManagementReturn => {
     }
   }, []);
 
-  // 初始化加�?  useEffect(() => {
+  // 初始化加载
+  useEffect(() => {
     loadData();
   }, [loadData]);
 
@@ -532,7 +537,8 @@ const useDataManagement = (): UseDataManagementReturn => {
   }, [loadSyncConfig]);
 
   return {
-    // 数据状�?    records,
+    // 数据状态
+    records,
     totalRecords,
     loading,
     error,
@@ -549,7 +555,8 @@ const useDataManagement = (): UseDataManagementReturn => {
     syncConfig,
     syncLoading,
 
-    // 查询状�?    query,
+    // 查询状态
+    query,
     setQuery,
 
     // 数据操作
@@ -575,7 +582,8 @@ const useDataManagement = (): UseDataManagementReturn => {
     exportData,
     importData,
 
-    // 数据验证和清�?    validateData,
+    // 数据验证和清理
+    validateData,
     cleanupData
   };
 };

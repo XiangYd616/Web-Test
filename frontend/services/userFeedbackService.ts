@@ -1,4 +1,4 @@
-
+﻿
 // 反馈类型枚举
 export enum FeedbackType {
   BUG_REPORT = 'bug_report',
@@ -45,7 +45,7 @@ export interface UserFeedback {
   userAgent: string;
   url: string;
   screenshot?: string;
-  additionalData?: unknown;
+  additionalData?: any;
 }
 
 // 浏览器信息接口
@@ -69,7 +69,7 @@ export interface UsageStats {
   duration: number;
   success: boolean;
   errorMessage?: string;
-  additionalData?: unknown;
+  additionalData?: any;
 }
 
 // 页面性能指标接口
@@ -199,7 +199,7 @@ export class UserFeedbackService {
   /**
    * 报告错误
    */
-  reportError(page: PageType, error: Error, additionalData?: unknown): void {
+  reportError(page: PageType, error: Error, additionalData?: any): void {
     this.submitFeedback({
       type: FeedbackType.BUG_REPORT,
       severity: FeedbackSeverity.HIGH,

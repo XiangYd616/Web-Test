@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一API服务 - 整合所有API服务功能
  * 版本: v2.0.0
  */
@@ -45,7 +45,7 @@ export interface TestSession {
   status: string;
   startTime: Date;
   endTime?: Date;
-  results?: unknown;
+  results?: any;
 }
 
 export class ApiService extends BaseApiService {

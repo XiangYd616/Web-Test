@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API错误处理模块
  * 从enhancedApiService提取的专业错误类型
  */
@@ -27,7 +27,7 @@ export class ApiServiceError extends Error {
 
    */
 export class NetworkError extends ApiServiceError {
-  constructor(message: string, details?: unknown) {
+  constructor(message: string, details?: any) {
     super(message, 'NETWORK_ERROR', undefined, details, true);
     this.name = 'NetworkError';
   }
@@ -129,7 +129,7 @@ export class RateLimitError extends ApiServiceError {
 
    */
 export class ServerError extends ApiServiceError {
-  constructor(message: string, status: number, details?: unknown) {
+  constructor(message: string, status: number, details?: any) {
     super(message, 'SERVER_ERROR', status, details, true);
     this.name = 'ServerError';
   }
@@ -138,7 +138,7 @@ export class ServerError extends ApiServiceError {
 /**
  * 根据HTTP响应创建相应的错误
  */
-export function createErrorFromResponse(response: Response, data: unknown): ApiServiceError {
+export function createErrorFromResponse(response: Response, data: any): ApiServiceError {
   const status = response.status;
   const message = data?.message || data?.error?.message || response.statusText;
 
@@ -168,7 +168,7 @@ export function createErrorFromResponse(response: Response, data: unknown): ApiS
 /**
  * 处理请求错误
  */
-export function handleRequestError(error: unknown): ApiServiceError {
+export function handleRequestError(error: any): ApiServiceError {
   if (error.name === 'AbortError') {
     return new TimeoutError(10000); // 默认超时时间
   }

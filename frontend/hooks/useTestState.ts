@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一测试状态管理Hook - 重构优化版本
  * 整合了useTestState和useUnifiedTestState的功能
  * 为各个独立测试页面提供共享的基础状态管理逻辑
@@ -17,7 +17,7 @@ import { TestType } from '../types/enums';
 import { useUserStats } from './useUserStats';
 
 export interface TestConfig {
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface TestState {
@@ -25,7 +25,7 @@ export interface TestState {
   isRunning: boolean;
   progress: number;
   currentStep: string;
-  result: unknown;
+  result: any;
   error: string | null;
   testId: string | null;
   startTime: number | null;
@@ -34,7 +34,7 @@ export interface TestState {
 
 export interface TestActions {
   setConfig: (config: TestConfig) => void;
-  updateConfig: (key: string, value: unknown) => void;
+  updateConfig: (key: string, value: any) => void;
   startTest: (customConfig?: TestConfig) => Promise<void>;
   stopTest: () => void;
   resetTest: () => void;
@@ -47,7 +47,7 @@ export interface UseTestStateOptions {
   defaultConfig: TestConfig;
 
   // 基础回调
-  onTestComplete?: (result: unknown) => void;
+  onTestComplete?: (result: any) => void;
   onTestError?: (error: string) => void;
   onConfigChange?: (config: TestConfig) => void;
   validateConfig?: (config: TestConfig) => { isValid: boolean; errors: string[] };
@@ -60,12 +60,12 @@ export interface UseTestStateOptions {
   enablePersistence?: boolean;
 
   // 扩展回调
-  onTestStarted?: (data: unknown) => void;
-  onTestProgress?: (data: unknown) => void;
-  onTestFailed?: (data: unknown) => void;
-  onTestCancelled?: (data: unknown) => void;
-  onTestQueued?: (data: unknown) => void;
-  onStatusUpdate?: (data: unknown) => void;
+  onTestStarted?: (data: any) => void;
+  onTestProgress?: (data: any) => void;
+  onTestFailed?: (data: any) => void;
+  onTestCancelled?: (data: any) => void;
+  onTestQueued?: (data: any) => void;
+  onStatusUpdate?: (data: any) => void;
 }
 
 // 扩展的返回接口 - 整合两个Hook的功能
@@ -171,7 +171,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
   }, [onConfigChange]);
 
   // 更新单个配置项
-  const updateConfig = useCallback((key: string, value: unknown) => {
+  const updateConfig = useCallback((key: string, value: any) => {
     setState(prev => {
       const newConfig = {
         ...prev.config,
@@ -226,7 +226,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
           }));
         },
         // 完成回调
-        (result: unknown) => {
+        (result: any) => {
           setState(prev => ({
             ...prev,
             isRunning: false,

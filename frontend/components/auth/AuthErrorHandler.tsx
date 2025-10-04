@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AuthErrorHandler.tsx - React组件
  * 
  * 文件路径: frontend\components\auth\AuthErrorHandler.tsx
@@ -158,7 +158,7 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
    * @param {Object} params - 参数对象
    * @returns {Promise<Object>} 返回结果
    */
-export const parseAuthError = (error: unknown): AuthErrorType => {
+export const parseAuthError = (error: any): AuthErrorType => {
   if (typeof error === 'string') {
     // 尝试从错误消息中推断错误类型
     const message = error.toLowerCase();
@@ -214,12 +214,12 @@ export const parseAuthError = (error: unknown): AuthErrorType => {
   return AuthErrorType.SERVER_ERROR;
 };
 
-export const getErrorMessage = (error: unknown): string => {
+export const getErrorMessage = (error: any): string => {
   const errorType = parseAuthError(error);
   return FRIENDLY_MESSAGES[errorType] || '发生了未知错误';
 };
 
-export const shouldRelogin = (error: unknown): boolean => {
+export const shouldRelogin = (error: any): boolean => {
   const errorType = parseAuthError(error);
   return [
     AuthErrorType.TOKEN_MISSING,

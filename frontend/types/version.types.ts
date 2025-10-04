@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 数据模型版本控制
  * 管理前后端数据模型的版本兼容性
  * 版本: v1.0.0
@@ -298,8 +298,8 @@ export class ApiVersionNegotiator {
 export interface TypeVersionInfo {
   name: string;
   version: string;
-  schema?: unknown;
-  validator?: (data: unknown) => boolean;
+  schema?: any;
+  validator?: (data: any) => boolean;
 }
 
 export class TypeVersionRegistry {
@@ -322,7 +322,7 @@ export class TypeVersionRegistry {
   /**
    * 验证数据类型和版本
    */
-  static validate(name: string, version: string, data: unknown): boolean {
+  static validate(name: string, version: string, data: any): boolean {
     const info = this.get(name, version);
     if (!info) {
       return false;
@@ -543,7 +543,7 @@ export const _autoMigrationSystem = new AutoMigrationSystem();
 TypeVersionRegistry.register({
   name: 'User',
   version: '1.0.0',
-  validator: (data: unknown) => {
+  validator: (data: any) => {
     return data && typeof data.id === 'string' && typeof data.email === 'string';
   }
 });
@@ -551,7 +551,7 @@ TypeVersionRegistry.register({
 TypeVersionRegistry.register({
   name: 'TestResult',
   version: '1.0.0',
-  validator: (data: unknown) => {
+  validator: (data: any) => {
     return data && typeof data.id === 'string' && typeof data.testType === 'string';
   }
 });
@@ -559,7 +559,7 @@ TypeVersionRegistry.register({
 TypeVersionRegistry.register({
   name: 'ApiResponse',
   version: '1.0.0',
-  validator: (data: unknown) => {
+  validator: (data: any) => {
     return data && typeof data.success === 'boolean';
   }
 });

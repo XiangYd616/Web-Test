@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 认证核心类型定义
  * 统一的认证接口，支持基础和企业级功能
  */
@@ -23,7 +23,7 @@ export interface User {
   role: string;
   status: string;
   permissions?: unknown[];
-  preferences?: unknown;
+  preferences?: any;
   metadata?: Record<string, any>;
   createdAt?: string;
   updatedAt?: string;

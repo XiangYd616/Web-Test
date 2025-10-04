@@ -1,4 +1,4 @@
-// 本地ErrorInfo接口，避免与React.ErrorInfo冲突
+﻿// 本地ErrorInfo接口，避免与React.ErrorInfo冲突
 interface LocalErrorInfo {
   type: string;
   message: string;
@@ -398,7 +398,7 @@ export class ErrorBoundary extends React.Component<
   { children: React.ReactNode; fallback?: React.ComponentType<{ error: Error; resetError: () => void }> },
   { hasError: boolean; error: Error | null }
 > {
-  constructor(props: unknown) {
+  constructor(props: any) {
     super(props);
     this.state = { hasError: false, error: null };
   }

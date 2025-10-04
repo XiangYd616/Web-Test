@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 增强的错误边界组件
  * @description 提供全面的错误捕获、报告和恢复机制
  */
@@ -354,7 +354,7 @@ export function withEnhancedErrorBoundary<P extends object>(
 declare global {
   interface Window {
     Sentry?: {
-      captureException: (error: Error, context?: unknown) => void;
+      captureException: (error: Error, context?: any) => void;
     };
   }
 }

@@ -7,12 +7,12 @@
 // import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
 // 使用全局的Jest函数
-declare const describe: unknown;
-declare const it: unknown;
-declare const expect: unknown;
-declare const beforeEach: unknown;
-declare const afterEach: unknown;
-declare const jest: unknown;
+declare const describe: any;
+declare const it: any;
+declare const expect: any;
+declare const beforeEach: any;
+declare const afterEach: any;
+declare const jest: any;
 import { apiService } from '../api/apiService';
 import { projectApiService } from '../api/projectApiService';
 import { testApiService } from '../api/testApiService';
@@ -26,13 +26,13 @@ interface BackendApiResponse<T = any> {
   error?: string | {
     code: string;
     message: string;
-    details?: unknown;
+    details?: any;
   };
 }
 
 interface AuthResponse {
   success: boolean;
-  user?: unknown;
+  user?: any;
   token?: string;
   message?: string;
 }

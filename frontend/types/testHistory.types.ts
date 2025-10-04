@@ -1,4 +1,4 @@
-
+﻿
 // TestType 和 TestStatus 已迁移到统一类型系统
 // 请从 '../types' 或 '../types/unified/testTypes' 导入
 import type { TestStatus, TestStatusType, TestType } from './unified/testTypes';
@@ -30,7 +30,7 @@ export interface TestSession {
   startTime?: string;
   endTime?: string;
   duration?: number; // 秒
-  config?: unknown;
+  config?: any;
   overallScore?: number;
   grade?: string; // A+, A, B+, B, C+, C, D, F
   totalIssues?: number;

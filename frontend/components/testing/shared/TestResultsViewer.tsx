@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 可选的统一测试结果展示组件
  * 各个测试页面可以选择使用，不强制替换现有实现
  */
@@ -19,10 +19,10 @@ export interface TestResult {
   endTime: Date;
   duration: number;
   summary?: {
-    [key: string]: unknown;
+    [key: string]: any;
   };
   metrics?: {
-    [key: string]: unknown;
+    [key: string]: any;
   };
   issues?: Array<{
     type: 'error' | 'warning' | 'info';
@@ -31,7 +31,7 @@ export interface TestResult {
     severity?: 'low' | 'medium' | 'high' | 'critical';
   }>;
   recommendations?: string[];
-  rawData?: unknown;
+  rawData?: any;
 }
 
 // 结果展示属性

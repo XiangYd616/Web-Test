@@ -1,4 +1,4 @@
-/**
+﻿/**
  * dataService.ts - 业务服务层
  * 
  * 文件路径: frontend\services\dataService.ts
@@ -9,7 +9,7 @@
 export interface DataRecord {
   id: string;
   type: 'test' | 'user' | 'report' | 'log' | 'config';
-  data: unknown;
+  data: any;
   metadata: {
     createdAt: string;
     updatedAt: string;
@@ -140,13 +140,13 @@ export interface RestoreOptions {
 export interface BatchOperation {
   type: 'create' | 'update' | 'delete';
   id?: string;
-  data?: unknown;
-  metadata?: unknown;
+  data?: any;
+  metadata?: any;
 }
 
 export class AdvancedDataService {
   private baseUrl: string;
-  private cache: Map<string, { data: unknown; timestamp: number }>;
+  private cache: Map<string, { data: any; timestamp: number }>;
   private cacheTimeout: number;
 
   constructor() {
@@ -184,7 +184,7 @@ export class AdvancedDataService {
     return null;
   }
 
-  private setCache(key: string, data: unknown): void {
+  private setCache(key: string, data: any): void {
     this.cache.set(key, { data, timestamp: Date.now() });
   }
 
@@ -349,7 +349,7 @@ export class AdvancedDataService {
     status: 'pending' | 'running' | 'completed' | 'failed';
     progress: number;
     message?: string;
-    result?: unknown;
+    result?: any;
     error?: string;
   }> {
     try {

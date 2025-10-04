@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🔧 测试配置表单组件
  * 从UnifiedTestExecutor中提取的专用配置表单
  * 支持所有测试类型的配置
@@ -25,7 +25,7 @@ import { TestType } from '../../../types/enums';
 const { Option } = Select;
 
 export interface TestConfigFormProps {
-  form: unknown;
+  form: any;
   selectedTestType: TestType;
   supportedTypes: string[];
   onTestTypeChange: (type: TestType) => void;

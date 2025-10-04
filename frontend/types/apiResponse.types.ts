@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一API响应格式定义
  * 确保前后端API响应格式完全一致
  * 版本: v1.0.0
@@ -58,7 +58,7 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: unknown;
+  value?: any;
 }
 
 // ==================== API元数据接口 ====================
@@ -70,7 +70,7 @@ export interface ApiMeta {
   method: string;
   responseTime?: string;
   pagination?: PaginationInfo;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 export interface PaginationInfo {

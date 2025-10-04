@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 数据库测试专用状态管理Hook
  * 可选的升级方案，DatabaseTest.tsx可以选择使用或保持现有实现
  *
@@ -57,7 +57,7 @@ interface ExtendedDatabaseTestConfig extends DatabaseTestConfig {
     id: string;
     name: string;
     query: string;
-    expectedResult?: unknown;
+    expectedResult?: any;
     timeout?: number;
   }>;
 }
@@ -180,7 +180,7 @@ interface DatabaseTestResultLocal {
     duration: number;
     rowCount?: number;
     error?: string;
-    result?: unknown;
+    result?: any;
   }>;
 
   recommendations: string[];
@@ -394,7 +394,7 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
         setError(response.message || '连接测试失败');
         return false;
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message || '连接测试失败');
       return false;
     }
@@ -427,13 +427,13 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult: unknown) => {
+        (testResult: any) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError: unknown) => {
+        (testError: any) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -442,7 +442,7 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
 
       setTestId(newTestId);
 
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message || '数据库测试启动失败');
       setIsRunning(false);
       setCurrentStep('');
@@ -459,7 +459,7 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
         abortControllerRef.current?.abort();
         setIsRunning(false);
         setCurrentStep('测试已停止');
-      } catch (err: unknown) {
+      } catch (err: any) {
         setError(err.message || '停止测试失败');
       }
     }

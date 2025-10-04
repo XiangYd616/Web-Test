@@ -47,7 +47,7 @@ export interface TestResult {
   testType: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
   progress: number;
-  results?: unknown;
+  results?: any;
   error?: string;
   createdAt: string;
   completedAt?: string;
@@ -180,7 +180,7 @@ class ApiClient {
       const data = await response?.json();
       return data;
 
-    } catch (error: unknown) {
+    } catch (error: any) {
       // 如果是网络错误且还有重试次数，则重试
       if (attempt < this.retryAttempts && !error?.name?.includes('AbortError')) {
         console.warn(`API请求失败，第${attempt}次重试: ${error?.message}`);
@@ -229,7 +229,7 @@ class ApiClient {
   /**
    * POST请求
    */
-  async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined
@@ -239,7 +239,7 @@ class ApiClient {
   /**
    * PUT请求
    */
-  async put<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined
@@ -249,7 +249,7 @@ class ApiClient {
   /**
    * PATCH请求
    */
-  async patch<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+  async patch<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined
@@ -495,7 +495,7 @@ export const _apiUtils = {
 };
 
 // 错误处理工具
-export const _handleApiError = (error: unknown): string => {
+export const _handleApiError = (error: any): string => {
   if (typeof error === 'string') {
     return error;
   }

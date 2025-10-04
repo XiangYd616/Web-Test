@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 版本控制集成服务
  * 统一管理数据模型版本、迁移、兼容性检查
  * 版本: v1.0.0
@@ -289,9 +289,8 @@ export class VersionControlService {
   registerTypeVersion(
     name: string,
     version: string,
-    validator?: (data: unknown) => boolean,
-    schema?: unknown
-  ): void {
+    validator?: (data: any) => boolean,
+    schema?: any): void {
     TypeVersionRegistry.register({
       name,
       version,
@@ -303,7 +302,7 @@ export class VersionControlService {
   /**
    * 验证数据类型和版本
    */
-  validateData(typeName: string, version: string, data: unknown): boolean {
+  validateData(typeName: string, version: string, data: any): boolean {
     return TypeVersionRegistry.validate(typeName, version, data);
   }
 
@@ -399,8 +398,7 @@ export class VersionControlService {
 
   private generateRecommendations(
     apiCheck: unknown,
-    dataModelCheck: unknown
-  ): string[] {
+    dataModelCheck: any): string[] {
     const recommendations: string[] = [];
 
     if (!apiCheck.compatible) {
@@ -444,12 +442,12 @@ export class VersionControlService {
       'User',
       '1.0.0',
       '1.1.0',
-      (data: unknown) => ({
+      (data: any) => ({
         ...data,
         preferences: data?.preferences || {},
         profile: data?.profile || {}
       }),
-      (data: unknown) => data && data?.preferences && data?.profile
+      (data: any) => data && data?.preferences && data?.profile
     );
 
     // 示例：测试结果模型迁移
@@ -457,12 +455,12 @@ export class VersionControlService {
       'TestResult',
       '1.0.0',
       '1.1.0',
-      (data: unknown) => ({
+      (data: any) => ({
         ...data,
         metadata: data?.metadata || {},
         version: '1.1.0'
       }),
-      (data: unknown) => data && data?.metadata
+      (data: any) => data && data?.metadata
     );
   }
 }

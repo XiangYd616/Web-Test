@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Unified Test Orchestrator
  * Central system for coordinating and managing all test types
  */
@@ -8,11 +8,11 @@ import { TestType } from '../../types/enums';
 export interface TestJob {
   id: string;
   type: TestType;
-  config: unknown;
+  config: any;
   priority: 'critical' | 'high' | 'medium' | 'low';
   dependencies: string[]; // IDs of tests this depends on
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-  result?: unknown;
+  result?: any;
   error?: string;
   startTime?: Date;
   endTime?: Date;
@@ -31,11 +31,11 @@ export interface TestPipeline {
   };
   triggers: {
     type: 'manual' | 'schedule' | 'webhook' | 'git' | 'monitor';
-    config: unknown;
+    config: any;
   }[];
   notifications: {
     type: 'email' | 'slack' | 'teams' | 'webhook';
-    config: unknown;
+    config: any;
     events: ('start' | 'complete' | 'fail' | 'warning')[];
   }[];
   qualityGates: {
@@ -54,7 +54,7 @@ export interface TestExecutionContext {
   artifacts: {
     type: 'report' | 'log' | 'screenshot' | 'data';
     path: string;
-    metadata: unknown;
+    metadata: any;
   }[];
 }
 

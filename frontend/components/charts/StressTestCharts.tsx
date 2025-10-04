@@ -1,4 +1,4 @@
-/**
+﻿/**
  * StressTestCharts.tsx - React组件
  * 
  * 文件路径: frontend\components\charts\StressTestCharts.tsx
@@ -269,7 +269,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   }, [currentMetrics]);
 
   // 缩放处理
-  const _handleZoom = useCallback((domain: unknown) => {
+  const _handleZoom = useCallback((domain: any) => {
     setZoomDomain(domain);
   }, []);
 
@@ -278,7 +278,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   }, []);
 
   // 🔧 新增：时间格式化函数
-  const formatTimeLabel = useCallback((value: unknown) => {
+  const formatTimeLabel = useCallback((value: any) => {
     if (timeDisplayMode === 'absolute') {
       // 显示实际时间 (HH:MM:SS)
       return new Date(value).toLocaleTimeString('zh-CN', {

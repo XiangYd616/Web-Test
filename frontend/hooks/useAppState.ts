@@ -1,4 +1,4 @@
-/**
+﻿/**
  * React Hooks for App State Management
  * 提供基于状态管理器的React Hooks
  */
@@ -76,7 +76,7 @@ export function useTestState() {
       dispatch('UPDATE_TEST_PROGRESS', { id, progress, message });
     },
     
-    completeTest: (id: string, result: unknown) => {
+    completeTest: (id: string, result: any) => {
       dispatch('COMPLETE_TEST', { id, result });
     },
     
@@ -96,15 +96,15 @@ export function useTestState() {
       dispatch('UPDATE_ENGINES', engines);
     },
     
-    updatePerformance: (metrics: unknown) => {
+    updatePerformance: (metrics: any) => {
       dispatch('UPDATE_PERFORMANCE', metrics);
     },
     
-    addScheduledTest: (test: unknown) => {
+    addScheduledTest: (test: any) => {
       dispatch('ADD_SCHEDULED_TEST', test);
     },
     
-    updateScheduledTest: (id: string, updates: unknown) => {
+    updateScheduledTest: (id: string, updates: any) => {
       dispatch('UPDATE_SCHEDULED_TEST', { id, ...updates });
     },
     
@@ -128,7 +128,7 @@ export function useUserState() {
   const userState = useMemo(() => state.user, [state.user]);
 
   const actions = useMemo(() => ({
-    login: (user: unknown, permissions: string[] = [], session: unknown = null) => {
+    login: (user: unknown, permissions: string[] = [], session: any = null) => {
       dispatch('LOGIN', { user, permissions, session });
     },
     
@@ -136,15 +136,15 @@ export function useUserState() {
       dispatch('LOGOUT', {});
     },
     
-    updateUser: (updates: unknown) => {
+    updateUser: (updates: any) => {
       dispatch('UPDATE_USER', updates);
     },
     
-    updatePreferences: (preferences: unknown) => {
+    updatePreferences: (preferences: any) => {
       dispatch('UPDATE_PREFERENCES', preferences);
     },
     
-    updateSession: (session: unknown) => {
+    updateSession: (session: any) => {
       dispatch('UPDATE_SESSION', session);
     }
   }), [dispatch]);
@@ -164,15 +164,15 @@ export function useSystemState() {
   const systemState = useMemo(() => state.system, [state.system]);
 
   const actions = useMemo(() => ({
-    updateConfig: (config: unknown) => {
+    updateConfig: (config: any) => {
       dispatch('UPDATE_CONFIG', config);
     },
     
-    updateHealth: (health: unknown) => {
+    updateHealth: (health: any) => {
       dispatch('UPDATE_HEALTH', health);
     },
     
-    addError: (error: unknown) => {
+    addError: (error: any) => {
       dispatch('ADD_ERROR', error);
     },
     
@@ -180,7 +180,7 @@ export function useSystemState() {
       dispatch('RESOLVE_ERROR', { id });
     },
     
-    updateMaintenance: (maintenance: unknown) => {
+    updateMaintenance: (maintenance: any) => {
       dispatch('UPDATE_MAINTENANCE', maintenance);
     }
   }), [dispatch]);
@@ -201,7 +201,7 @@ export function useNotificationState() {
   const toasts = useMemo(() => state.ui.toasts, [state.ui.toasts]);
 
   const actions = useMemo(() => ({
-    addNotification: (notification: unknown) => {
+    addNotification: (notification: any) => {
       dispatch('ADD_NOTIFICATION', notification);
     },
     
@@ -213,7 +213,7 @@ export function useNotificationState() {
       dispatch('REMOVE_NOTIFICATION', { id });
     },
     
-    addToast: (toast: unknown) => {
+    addToast: (toast: any) => {
       dispatch('ADD_TOAST', toast);
     },
     
@@ -268,7 +268,7 @@ export function useLoadingState() {
 export function useModalState() {
   const { state } = useAppState();
 
-  const openModal = useCallback((modalId: string, data?: unknown) => {
+  const openModal = useCallback((modalId: string, data?: any) => {
     const modalMap = new Map(state.ui.modals);
     modalMap.set(modalId, { open: true, data });
     
@@ -294,7 +294,7 @@ export function useModalState() {
     return state.ui.modals.get(modalId)?.open || false;
   }, [state.ui.modals]);
 
-  const getModalData = useCallback((modalId: string): unknown => {
+  const getModalData = useCallback((modalId: string): any => {
     return state.ui.modals.get(modalId)?.data;
   }, [state.ui.modals]);
 
@@ -340,7 +340,7 @@ export function useBusinessState() {
 
   // 组合业务逻辑
   const businessActions = useMemo(() => ({
-    async runTest(testType: string, url: string, options: unknown = {}) {
+    async runTest(testType: string, url: string, options: any = {}) {
       const testId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
       try {
@@ -367,7 +367,7 @@ export function useBusinessState() {
         });
 
         return result;
-      } catch (error: unknown) {
+      } catch (error: any) {
         testActions.failTest(testId, error.message);
         notificationActions.addToast({
           type: 'error',
@@ -409,7 +409,7 @@ export function useBusinessState() {
         });
 
         return { user, token, permissions };
-      } catch (error: unknown) {
+      } catch (error: any) {
         notificationActions.addToast({
           type: 'error',
           message: error.message
@@ -428,7 +428,7 @@ export function useBusinessState() {
       });
     },
 
-    scheduleTest(testConfig: unknown, scheduleOptions: unknown) {
+    scheduleTest(testConfig: unknown, scheduleOptions: any) {
       const scheduledTest = {
         id: `scheduled-${Date.now()}`,
         ...testConfig,
@@ -443,7 +443,7 @@ export function useBusinessState() {
       });
     },
 
-    showTestResult(testId: string, result: unknown) {
+    showTestResult(testId: string, result: any) {
       openModal('testResult', { testId, result });
     },
 

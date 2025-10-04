@@ -1,4 +1,4 @@
-
+﻿
 // 核心类型定义
 export interface TestRecord {
     id: string;
@@ -9,9 +9,9 @@ export interface TestRecord {
     startTime: string;
     endTime?: string;
     actualDuration?: number;
-    results?: unknown;
-    config?: unknown;
-    scores?: unknown;
+    results?: any;
+    config?: any;
+    scores?: any;
     recommendations?: string[];
     savedAt: string;
 }

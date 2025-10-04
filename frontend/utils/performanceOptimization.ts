@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 前端性能优化工具集
  * 提供图片懒加载、资源预加载、性能监控等功能
  */
@@ -334,7 +334,7 @@ class PerformanceMonitor {
                 let clsValue = 0;
                 const clsObserver = new PerformanceObserver((list) => {
                     const entries = list.getEntries();
-                    entries.forEach((entry: unknown) => {
+                    entries.forEach((entry: any) => {
                         if (!entry.hadRecentInput) {
                             clsValue += entry.value;
                             this.metrics.set('CLS', clsValue);
@@ -531,7 +531,7 @@ class MemoryManager {
 
 // 缓存管理器
 class FrontendCacheManager {
-    private cache: Map<string, { data: unknown; timestamp: number; ttl: number }> = new Map();
+    private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map();
     private maxSize = 100; // 最大缓存项数
     private defaultTTL = 5 * 60 * 1000; // 5分钟
 

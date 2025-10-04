@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 密码策略和安全验证服务
  * 提供密码强度检查、安全问题、账户锁定等功能
  * 版本: v1.0.0
@@ -659,7 +659,7 @@ export class PasswordPolicyService {
     if (!userQuestions) return false;
 
     for (const answer of answers) {
-      const question = userQuestions.questions.find((q: unknown) => q.questionId === answer.questionId);
+      const question = userQuestions.questions.find((q: any) => q.questionId === answer.questionId);
       if (!question) return false;
 
       const answerHash = this.hashPassword(answer.answer.toLowerCase().trim());

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * UI组件库的TypeScript类型定义
  */
 
@@ -40,8 +40,8 @@ export interface InteractiveComponentProps extends BaseComponentProps {
 // 表单组件属性接口
 export interface FormComponentProps extends BaseComponentProps {
     name?: string;
-    value?: unknown;
-    defaultValue?: unknown;
+    value?: any;
+    defaultValue?: any;
     onChange?: (value: unknown, event?: React.ChangeEvent) => void;
     onBlur?: (event: React.FocusEvent) => void;
     onFocus?: (event: React.FocusEvent) => void;
@@ -289,16 +289,16 @@ export interface LoadingProps extends BaseComponentProps {
 // 图表组件属性
 export interface ChartProps extends BaseComponentProps {
     type: 'line' | 'bar' | 'pie' | 'doughnut' | 'area' | 'scatter';
-    data: unknown;
-    options?: unknown;
+    data: any;
+    options?: any;
     width?: number;
     height?: number;
     responsive?: boolean;
     maintainAspectRatio?: boolean;
     loading?: boolean;
     error?: string;
-    onChartReady?: (chart: unknown) => void;
-    onDataPointClick?: (point: unknown, event: unknown) => void;
+    onChartReady?: (chart: any) => void;
+    onDataPointClick?: (point: unknown, event: any) => void;
 }
 
 // 通知组件属性
@@ -444,7 +444,7 @@ export interface CollapseProps extends BaseComponentProps {
     items: CollapseItem[];
     accordion?: boolean;
     bordered?: boolean;
-    expandIcon?: (panelProps: unknown) => React.ReactNode;
+    expandIcon?: (panelProps: any) => React.ReactNode;
     expandIconPosition?: 'left' | 'right';
     ghost?: boolean;
     size?: Size;
@@ -489,7 +489,7 @@ export interface ValidationRule {
     pattern?: RegExp;
     min?: number;
     max?: number;
-    validator?: (value: unknown) => boolean | string | Promise<boolean | string>;
+    validator?: (value: any) => boolean | string | Promise<boolean | string>;
 }
 
 // 表单字段类型
@@ -497,8 +497,8 @@ export interface FormField {
     name: string;
     label?: string;
     type?: string;
-    value?: unknown;
-    defaultValue?: unknown;
+    value?: any;
+    defaultValue?: any;
     rules?: ValidationRule[];
     dependencies?: string[];
     hidden?: boolean;

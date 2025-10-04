@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一数据加载状态管理组件
  * 标准化loading、error、success、empty状态的显示
  * 版本: v2.0.0
@@ -17,14 +17,14 @@ export interface DataStateManagerProps {
   // 状态
   state: LoadingState;
   error?: string | null;
-  data?: unknown;
+  data?: any;
   isEmpty?: boolean;
 
   // 自定义渲染
   renderLoading?: () => React.ReactNode;
   renderError?: (error: string, retry?: () => void) => React.ReactNode;
   renderEmpty?: () => React.ReactNode;
-  renderSuccess?: (data: unknown) => React.ReactNode;
+  renderSuccess?: (data: any) => React.ReactNode;
 
   // 操作
   onRetry?: () => void;

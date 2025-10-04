@@ -1,4 +1,4 @@
-
+﻿
 // 取消原因枚举
 export enum CancelReason {
   USER_CANCELLED = 'user_cancelled',
@@ -207,7 +207,7 @@ class StressTestRecordService {
       }
 
       return response;
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (retries > 0 && (error.name === 'AbortError' || error?.message.includes('fetch'))) {
         console.warn(`请求失败，${this.retryDelay}ms后重试... (剩余重试次数: ${retries})`);
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
@@ -301,7 +301,7 @@ class StressTestRecordService {
       }
 
       return data.data;
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('更新测试记录失败:', error);
       throw new Error(`更新测试记录失败: ${error?.message}`);
     }

@@ -532,7 +532,7 @@ export class streamingMonitoringService {
     }
   }
 
-  private emit(event: string, data?: unknown): void {
+  private emit(event: string, data?: any): void {
     /**
      * if功能函数
      * @param {Object} params - 参数对象

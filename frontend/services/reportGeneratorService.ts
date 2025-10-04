@@ -1,4 +1,4 @@
-// 增强的报告生成和导出服务
+﻿// 增强的报告生成和导出服务
 export interface ReportConfig {
   title: string;
   description?: string;
@@ -23,7 +23,7 @@ export interface ReportSection {
   type: 'summary' | 'metrics' | 'charts' | 'recommendations' | 'raw-data' | 'custom';
   enabled: boolean;
   order: number;
-  config?: unknown;
+  config?: any;
 }
 
 export interface ReportData {
@@ -35,13 +35,13 @@ export interface ReportData {
   endTime?: string;
   duration?: number;
   overallScore?: number;
-  results: unknown;
-  metrics?: unknown;
+  results: any;
+  metrics?: any;
   recommendations?: string[];
   engine?: string;
-  config?: unknown;
+  config?: any;
   testResults?: unknown[]; // 兼容旧格式
-  analytics?: unknown; // 兼容旧格式
+  analytics?: any; // 兼容旧格式
   timeRange?: {
     start: string;
     end: string;
@@ -142,7 +142,7 @@ export class ReportGeneratorService {
       id: reportId,
       title: report.config.title,
       generatedAt: report.generatedAt,
-      sections: report.config.sections.filter((s: unknown) => s?.enabled).length,
+      sections: report.config.sections.filter((s: any) => s?.enabled).length,
       template: report.config.template
     } : null;
   }
@@ -277,7 +277,7 @@ export class ReportGeneratorService {
     };
   }
 
-  private async buildReportContent(data: unknown, config: ReportConfig, template: unknown): Promise<string> {
+  private async buildReportContent(data: unknown, config: ReportConfig, template: any): Promise<string> {
     // 构建报告内容
     const sections = config?.sections
       .filter(section => section.enabled)
@@ -291,7 +291,7 @@ export class ReportGeneratorService {
     return content;
   }
 
-  private async buildSection(section: ReportSection, data: unknown, config: ReportConfig, template: unknown): Promise<string> {
+  private async buildSection(section: ReportSection, data: unknown, config: ReportConfig, template: any): Promise<string> {
     // 构建单个报告部分
     switch (section.type) {
       case 'summary':
@@ -309,7 +309,7 @@ export class ReportGeneratorService {
     }
   }
 
-  private buildSummarySection(data: unknown, config: ReportConfig, template: unknown): string {
+  private buildSummarySection(data: unknown, config: ReportConfig, template: any): string {
     return `<section class="summary">
       <h2>执行摘要</h2>
       <p>测试URL: ${data?.url}</p>
@@ -318,7 +318,7 @@ export class ReportGeneratorService {
     </section>`;
   }
 
-  private buildMetricsSection(data: unknown, config: ReportConfig, template: unknown): string {
+  private buildMetricsSection(data: unknown, config: ReportConfig, template: any): string {
     return `<section class="metrics">
       <h2>关键指标</h2>
       <div class="metrics-grid">
@@ -329,7 +329,7 @@ export class ReportGeneratorService {
     </section>`;
   }
 
-  private buildChartsSection(data: unknown, config: ReportConfig, template: unknown): string {
+  private buildChartsSection(data: unknown, config: ReportConfig, template: any): string {
     return `<section class="charts">
       <h2>图表分析</h2>
       <div class="charts-container">
@@ -338,7 +338,7 @@ export class ReportGeneratorService {
     </section>`;
   }
 
-  private buildRecommendationsSection(data: unknown, config: ReportConfig, template: unknown): string {
+  private buildRecommendationsSection(data: unknown, config: ReportConfig, template: any): string {
     const recommendations = data?.recommendations || [];
     return `<section class="recommendations">
       <h2>优化建议</h2>
@@ -348,7 +348,7 @@ export class ReportGeneratorService {
     </section>`;
   }
 
-  private buildRawDataSection(data: unknown, config: ReportConfig, template: unknown): string {
+  private buildRawDataSection(data: unknown, config: ReportConfig, template: any): string {
     return `<section class="raw-data">
       <h2>原始数据</h2>
       <pre>${JSON.stringify(data?.results, null, 2)}</pre>

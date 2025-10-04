@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一前端数据处理器
  * 整合API错误处理、数据缓存、分页和加载状态管理
  * 版本: v2.0.0
@@ -43,7 +43,7 @@ export interface DataProcessorConfig {
   errorHandling?: {
     showNotification: boolean;
     autoRetry: boolean;
-    fallbackData?: unknown;
+    fallbackData?: any;
   };
 }
 
@@ -101,7 +101,7 @@ export interface DataState<T = any> {
 
 export interface DataActions<T = any> {
   // 数据操作
-  load: (params?: unknown) => Promise<T | null>;
+  load: (params?: any) => Promise<T | null>;
   refresh: () => Promise<T | null>;
   retry: () => Promise<T | null>;
   reset: () => void;
@@ -129,7 +129,7 @@ export interface DataActions<T = any> {
 // ==================== 缓存管理器 ====================
 
 class DataCache {
-  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>();
+  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   private maxSize: number;
   private strategy: 'lru' | 'ttl' | 'fifo';
 
@@ -258,7 +258,7 @@ export function useDataProcessor<T = any>(
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 生成缓存键
-  const generateCacheKey = useCallback((params?: unknown): string => {
+  const generateCacheKey = useCallback((params?: any): string => {
     const baseKey = 'data-processor';
     if (!params) return baseKey;
     return `${baseKey}-${JSON.stringify(params)}`;

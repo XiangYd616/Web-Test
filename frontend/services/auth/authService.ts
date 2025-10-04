@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from '../../types/enums';
+﻿import { UserRole, UserStatus } from '../../types/enums';
 import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
 import { browserJwt } from '@utils/browserJwt';
 import { canUseDatabase } from '@utils/environment';
@@ -11,7 +11,7 @@ import { PasswordSecurityManager } from './core/passwordSecurity';
 import type {EnhancedAuthConfig, PasswordStrength, SessionInfo, IAuthService, JwtPayload, TokenPair, RefreshResult} from './core/authTypes';
 
 // 动态导入数据库模块（避免前端构建时的依赖问题）
-let jwt: unknown, userDao: unknown;
+let jwt: unknown, userDao: any;
 
 async function loadServerModules() {
   if (canUseDatabase && typeof window === 'undefined') {
@@ -448,7 +448,7 @@ export class UnifiedAuthService implements IAuthService {
         refreshToken,
         message: '登录成功'
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('❌ 用户登录失败:', error);
 
       const errorMessage = error instanceof Error ? error.message : '未知错误';
@@ -702,7 +702,7 @@ export class UnifiedAuthService implements IAuthService {
         refreshToken,
         message: '注册成功'
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('❌ 用户注册失败:', error);
 
       const errorMessage = error instanceof Error ? error.message : '未知错误';
@@ -770,7 +770,7 @@ export class UnifiedAuthService implements IAuthService {
   // 检查用户权限
   hasPermission(permission: string): boolean {
     if (!this.currentUser) return false;
-    return this.currentUser.permissions?.some((p: unknown) => typeof p === 'string' ? p === permission : p.name === permission) || false;
+    return this.currentUser.permissions?.some((p: any) => typeof p === 'string' ? p === permission : p.name === permission) || false;
   }
 
   // 检查用户角色
@@ -823,7 +823,7 @@ export class UnifiedAuthService implements IAuthService {
 
         // 更新用户列表
         const usersList = JSON.parse(localStorage.getItem('test_web_app_users_list') || '[]');
-        const userIndex = usersList.findIndex((u: unknown) => u.id === updatedUser.id);
+        const userIndex = usersList.findIndex((u: any) => u.id === updatedUser.id);
         if (userIndex >= 0) {
           usersList[userIndex] = updatedUser;
           localStorage.setItem('test_web_app_users_list', JSON.stringify(usersList));
@@ -846,7 +846,7 @@ export class UnifiedAuthService implements IAuthService {
         user: updatedUser,
         message: '个人信息更新成功'
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('❌ 更新用户信息失败:', error);
 
       await this.logActivity(
@@ -925,7 +925,7 @@ export class UnifiedAuthService implements IAuthService {
         success: true,
         message: '密码修改成功'
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('❌ 修改密码失败:', error);
 
       await this.logActivity(
@@ -1009,7 +1009,7 @@ export class UnifiedAuthService implements IAuthService {
         refreshToken: newRefreshToken,
         message: '令牌刷新成功'
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('❌ 刷新令牌失败:', error);
 
       return {
@@ -1410,7 +1410,7 @@ export class UnifiedAuthService implements IAuthService {
   /**
    * 触发事件
    */
-  private emit(event: string, data?: unknown): void {
+  private emit(event: string, data?: any): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       listeners.forEach(callback => {
@@ -1538,7 +1538,7 @@ export class UnifiedAuthService implements IAuthService {
       // 这里需要从浏览器环境获取数据，实际实现时需要考虑如何获取
       // 暂时返回成功状态
       return { success: true, message: '数据迁移完成', migrated: 0 };
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('❌ 数据迁移失败:', error);
       return { success: false, message: error instanceof Error ? error.message : '未知错误', migrated: 0 };
     }

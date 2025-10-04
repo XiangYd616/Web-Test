@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import type { ReactNode, FC } from 'react';
 import toast, { Toaster, ToastOptions } from 'react-hot-toast';
 
@@ -68,7 +68,7 @@ export const showToast = {
     messages: {
       loading: string;
       success: string | ((data: T) => string);
-      error: string | ((error: unknown) => string);
+      error: string | ((error: any) => string);
     },
     options?: ToastOptions
   ) => {

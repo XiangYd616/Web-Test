@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import type { TestType } from '../types';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 
 // 导出格式枚举
 export type ExportFormat = 'json' | 'csv' | 'pdf' | 'html' | 'xml';
@@ -36,7 +37,7 @@ export interface ExportTask {
   downloadUrl?: string;
   error?: string;
   options: ExportOptions;
-  data: unknown;
+  data: any;
 }
 
 class exportManager {
@@ -125,7 +126,7 @@ class exportManager {
   private async exportToJSON(task: ExportTask): Promise<string> {
     task.progress = 30;
 
-    const exportData: unknown = {
+    const exportData: any = {
       metadata: {
         testType: task.testType,
         exportedAt: new Date().toISOString(),
@@ -267,11 +268,11 @@ class exportManager {
   /**
    * 生成压力测试CSV
    */
-  private generateStressTestCSV(data: unknown): string {
+  private generateStressTestCSV(data: any): string {
     let csv = 'Timestamp,Concurrent Users,Response Time (ms),Success Rate (%),Error Count\n';
 
     if (data.timeline && Array.isArray(data.timeline)) {
-      data.timeline.forEach((point: unknown) => {
+      data.timeline.forEach((point: any) => {
         csv += `${point.timestamp},${point.concurrentUsers || 0},${point.responseTime || 0},${point.successRate || 0},${point.errorCount || 0}\n`;
       });
     }
@@ -282,7 +283,7 @@ class exportManager {
   /**
    * 生成网络测试CSV
    */
-  private generateNetworkTestCSV(data: unknown): string {
+  private generateNetworkTestCSV(data: any): string {
     let csv = 'Metric,Value,Unit\n';
 
     if (data.latencyResults) {
@@ -304,7 +305,7 @@ class exportManager {
   /**
    * 生成性能测试CSV
    */
-  private generatePerformanceTestCSV(data: unknown): string {
+  private generatePerformanceTestCSV(data: any): string {
     let csv = 'Metric,Value,Unit\n';
 
     if (data.performanceMetrics) {
@@ -319,11 +320,11 @@ class exportManager {
   /**
    * 生成安全测试CSV
    */
-  private generateSecurityTestCSV(data: unknown): string {
+  private generateSecurityTestCSV(data: any): string {
     let csv = 'Check,Status,Severity,Description\n';
 
     if (data.securityChecks && Array.isArray(data.securityChecks)) {
-      data.securityChecks.forEach((check: unknown) => {
+      data.securityChecks.forEach((check: any) => {
         csv += `${check.name || ''},${check.status || ''},${check.severity || ''},${check.description || ''}\n`;
       });
     }
@@ -334,11 +335,11 @@ class exportManager {
   /**
    * 生成API测试CSV
    */
-  private generateAPITestCSV(data: unknown): string {
+  private generateAPITestCSV(data: any): string {
     let csv = 'Endpoint,Method,Status Code,Response Time (ms),Success\n';
 
     if (data.endpoints && Array.isArray(data.endpoints)) {
-      data.endpoints.forEach((endpoint: unknown) => {
+      data.endpoints.forEach((endpoint: any) => {
         csv += `${endpoint.url || ''},${endpoint.method || ''},${endpoint.statusCode || ''},${endpoint.responseTime || 0},${endpoint.success || false}\n`;
       });
     }
@@ -349,7 +350,7 @@ class exportManager {
   /**
    * 生成SEO测试CSV
    */
-  private generateSEOTestCSV(data: unknown): string {
+  private generateSEOTestCSV(data: any): string {
     let csv = 'Category,Score,Issues,Recommendations\n';
 
     if (data.categories) {
@@ -364,7 +365,7 @@ class exportManager {
   /**
    * 生成UX测试CSV
    */
-  private generateUXTestCSV(data: unknown): string {
+  private generateUXTestCSV(data: any): string {
     let csv = 'Metric,Value,Unit,Status\n';
 
     if (data.coreWebVitals) {
@@ -379,7 +380,7 @@ class exportManager {
   /**
    * 生成兼容性测试CSV
    */
-  private generateCompatibilityTestCSV(data: unknown): string {
+  private generateCompatibilityTestCSV(data: any): string {
     let csv = 'Browser,Version,Compatibility Score,Issues\n';
 
     if (data.browserCompatibility) {
@@ -394,7 +395,7 @@ class exportManager {
   /**
    * 生成通用CSV
    */
-  private generateGenericCSV(data: unknown): string {
+  private generateGenericCSV(data: any): string {
     if (Array.isArray(data)) {
       if (data.length === 0) return '';
 
@@ -472,7 +473,7 @@ class exportManager {
   /**
    * 生成HTML内容
    */
-  private generateHTMLContent(testType: TestType, data: unknown): string {
+  private generateHTMLContent(testType: TestType, data: any): string {
     switch (testType) {
       case 'network':
         return this.generateNetworkHTML(data);
@@ -488,7 +489,7 @@ class exportManager {
   /**
    * 生成网络测试HTML
    */
-  private generateNetworkHTML(data: unknown): string {
+  private generateNetworkHTML(data: any): string {
     let html = '<div class="section"><h2>网络性能指标</h2>';
 
     if (data.latencyResults) {
@@ -528,7 +529,7 @@ class exportManager {
   /**
    * 生成性能测试HTML
    */
-  private generatePerformanceHTML(data: unknown): string {
+  private generatePerformanceHTML(data: any): string {
     let html = '<div class="section"><h2>性能指标</h2>';
 
     if (data.performanceMetrics) {
@@ -549,13 +550,13 @@ class exportManager {
   /**
    * 生成安全测试HTML
    */
-  private generateSecurityHTML(data: unknown): string {
+  private generateSecurityHTML(data: any): string {
     let html = '<div class="section"><h2>安全检查结果</h2>';
 
     if (data.securityChecks && Array.isArray(data.securityChecks)) {
       html += '<table><thead><tr><th>检查项</th><th>状态</th><th>严重程度</th><th>描述</th></tr></thead><tbody>';
 
-      data.securityChecks.forEach((check: unknown) => {
+      data.securityChecks.forEach((check: any) => {
         const statusClass = check.status === 'pass' ? 'success' : check.status === 'warning' ? 'warning' : 'error';
         html += `
           <tr>
@@ -577,7 +578,7 @@ class exportManager {
   /**
    * 生成通用HTML
    */
-  private generateGenericHTML(data: unknown): string {
+  private generateGenericHTML(data: any): string {
     let html = '<div class="section"><h2>测试结果</h2>';
     html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
     html += '</div>';

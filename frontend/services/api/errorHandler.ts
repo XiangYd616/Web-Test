@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一API错误处理服务
  * 提供重试机制、用户友好的错误提示和错误分析功能
  * 版本: v2.0.0 - 完善的错误处理和重试机制
@@ -40,7 +40,7 @@ export interface ErrorHandlingResult {
   userMessage: string;
   error: ApiError;
   context: ErrorContext;
-  enhancedError?: unknown; // 来自utils/errorHandler的增强错误
+  enhancedError?: any; // 来自utils/errorHandler的增强错误
 }
 
 // 默认配置
@@ -171,7 +171,7 @@ export class ApiErrorHandler {
       jitter: retryConfig?.jitter ?? true
     };
 
-    let lastError: unknown;
+    let lastError: any;
     const maxAttempts = retry.maxRetries + 1;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -321,7 +321,7 @@ export class ApiErrorHandler {
   /**
    * 检查是否为网络错误
    */
-  private isNetworkError(error: unknown): boolean {
+  private isNetworkError(error: any): boolean {
     return (
       error.name === 'NetworkError' ||
       error.code === 'NETWORK_ERROR' ||
@@ -334,7 +334,7 @@ export class ApiErrorHandler {
   /**
    * 检查是否为超时错误
    */
-  private isTimeoutError(error: unknown): boolean {
+  private isTimeoutError(error: any): boolean {
     return (
       error.name === 'TimeoutError' ||
       error.code === 'TIMEOUT' ||
@@ -576,7 +576,7 @@ export const ErrorHandlerUtils = {
   /**
    * 创建标准化的错误对象
    */
-  createError: (code: ErrorCode, message: string, details?: unknown): ApiError => ({
+  createError: (code: ErrorCode, message: string, details?: any): ApiError => ({
     code,
     message,
     details,
@@ -602,7 +602,7 @@ export const ErrorHandlerUtils = {
   /**
    * 从HTTP响应创建错误
    */
-  fromHttpResponse: (response: unknown): ApiError => {
+  fromHttpResponse: (response: any): ApiError => {
     const status = response.status;
     const data = response.data;
 

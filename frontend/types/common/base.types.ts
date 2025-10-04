@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 基础类型定义
  * 项目中使用的通用基础类型
  */
@@ -124,11 +124,11 @@ export interface ValidationRule {
   /** 规则类型 */
   type: ValidationRuleType;
   /** 规则值 */
-  value?: unknown;
+  value?: any;
   /** 错误消息 */
   message: string;
   /** 自定义验证函数 */
-  validator?: (value: unknown) => boolean | Promise<boolean>;
+  validator?: (value: any) => boolean | Promise<boolean>;
 }
 
 /** 表单字段配置 */
@@ -140,7 +140,7 @@ export interface FormFieldConfig {
   /** 字段类型 */
   type: FormFieldType;
   /** 默认值 */
-  defaultValue?: unknown;
+  defaultValue?: any;
   /** 占位符 */
   placeholder?: string;
   /** 是否必填 */
@@ -284,7 +284,7 @@ export interface ConfigItem {
   /** 配置键 */
   key: string;
   /** 配置值 */
-  value: unknown;
+  value: any;
   /** 值类型 */
   type: ConfigValueType;
   /** 配置标签 */
@@ -292,7 +292,7 @@ export interface ConfigItem {
   /** 配置描述 */
   description?: string;
   /** 默认值 */
-  defaultValue?: unknown;
+  defaultValue?: any;
   /** 是否必填 */
   required?: boolean;
   /** 验证规则 */
@@ -412,7 +412,7 @@ export interface SearchCondition {
   /** 操作符 */
   operator: SearchOperator;
   /** 值 */
-  value: unknown;
+  value: any;
   /** 逻辑连接符 */
   logic?: 'and' | 'or';
 }
@@ -525,10 +525,10 @@ export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, 
 export type ValueOf<T> = T[keyof T];
 
 /** 函数参数类型 */
-export type Parameters<T extends (...args: unknown) => any> = T extends (...args: infer P) => any ? P : never;
+export type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P : never;
 
 /** 函数返回类型 */
-export type ReturnType<T extends (...args: unknown) => any> = T extends (...args: unknown) => infer R ? R : unknown;
+export type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R : any;
 
 /** Promise解包 */
 export type Awaited<T> = T extends Promise<infer U> ? U : T;

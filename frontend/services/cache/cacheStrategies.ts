@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 缓存策略配置
  * 为不同类型的数据定义最优的缓存策略
  * 版本: v1.0.0
@@ -328,7 +328,7 @@ export function cached(
 
       // 尝试从缓存获取
       // 临时禁用缓存功能，等待cacheManager实现
-      const cached: unknown = null; // await cacheManager.get(cacheKey, finalConfig.strategy);
+      const cached: any = null; // await cacheManager.get(cacheKey, finalConfig.strategy);
       if (cached !== null) {
         return cached;
       }

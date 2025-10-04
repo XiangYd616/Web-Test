@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试配置构建器
  * 动态生成测试配置界面，解决配置UI重复的问题
  */
@@ -43,7 +43,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
   }, []);
 
   // 更新配置值
-  const updateConfig = useCallback((key: string, value: unknown) => {
+  const updateConfig = useCallback((key: string, value: any) => {
     const newConfig = { ...config, [key]: value };
     onChange(newConfig);
   }, [config, onChange]);
@@ -198,7 +198,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
       updateConfig(field.key, newValues);
     };
 
-    const updateItem = (index: number, value: unknown) => {
+    const updateItem = (index: number, value: any) => {
       const newValues = [...values];
       newValues[index] = value;
       updateConfig(field.key, newValues);

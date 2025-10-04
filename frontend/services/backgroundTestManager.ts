@@ -1,4 +1,4 @@
-
+﻿
 /**
  * 后台测试管理器 - 重构优化版本
  * 现在内部使用统一测试服务，保持向后兼容性
@@ -25,14 +25,14 @@ import { unifiedTestService } from './testing/unifiedTestService';
 export interface TestInfo {
   id: string;
   type: TestType;
-  config: unknown;
+  config: any;
   status: TestStatus;
   progress: number;
   startTime: Date;
   endTime?: Date;
   currentStep: string;
-  result: unknown;
-  error: unknown;
+  result: any;
+  error: any;
   canSwitchPages?: boolean;
   onProgress?: ProgressCallback;
   onComplete?: CompletionCallback;
@@ -95,7 +95,7 @@ class BackgroundTestManager {
   /**
    * 适配统一服务状态到本地格式
    */
-  private adaptUnifiedStatus(data: unknown): TestInfo {
+  private adaptUnifiedStatus(data: any): TestInfo {
     return {
       id: data.testId || data.id,
       type: data.testType,
@@ -585,7 +585,7 @@ class BackgroundTestManager {
   }
 
   // 更新测试进度
-  updateTestProgress(testId: string, progress: number, step: string, metrics?: unknown): void {
+  updateTestProgress(testId: string, progress: number, step: string, metrics?: any): void {
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
       testInfo.progress = progress;
@@ -610,7 +610,7 @@ class BackgroundTestManager {
   }
 
   // 完成测试
-  completeTest(testId: string, result: unknown): void {
+  completeTest(testId: string, result: any): void {
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
       testInfo.status = TestStatus.COMPLETED;

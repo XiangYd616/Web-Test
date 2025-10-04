@@ -1,4 +1,4 @@
-// 管理员相关类型定义
+﻿// 管理员相关类型定义
 
 import type { User } from './user.types';
 
@@ -148,7 +148,7 @@ export interface TestManagement {
   createdAt: string;
   completedAt?: string;
   duration?: number;
-  result?: unknown;
+  result?: any;
   error?: string;
 }
 
@@ -249,7 +249,7 @@ export interface ActivityLog {
   username?: string;
   action: string;
   resource: string;
-  details: unknown;
+  details: any;
   ipAddress: string;
   userAgent: string;
   timestamp: string;

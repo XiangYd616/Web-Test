@@ -1,7 +1,9 @@
-/**
+﻿/**
  * 网络测试专用状态管理Hook
- * 可选的升级方案，NetworkTest.tsx可以选择使用或保持现有实�? *
- * 已迁移到新的类型系统，使用统一的类型定�? */
+ * 可选的升级方案，NetworkTest.tsx可以选择使用或保持现有实现
+ *
+ * 已迁移到新的类型系统，使用统一的类型定义
+ */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/backgroundTestManager';
@@ -12,7 +14,9 @@ import type {
 } from '../types';
 import { TestStatus } from '@shared/types';
 
-// 所有类型定义已迁移到统一的类型系�?// 请从 '../types' 导入所需的类�?
+// 所有类型定义已迁移到统一的类型系统
+// 请从 '../types' 导入所需的类型
+
 interface NetworkTestConfigLocal {
   // 带宽测试配置
   bandwidthConfig: {
@@ -57,7 +61,8 @@ export interface LocalNetworkTestResult {
     securityScore: number;
   };
 
-  // 连通性结�?  connectivityResults: {
+  // 连通性结果
+  connectivityResults: {
     status: 'success' | 'failed';
     packetsTransmitted: number;
     packetsReceived: number;
@@ -134,7 +139,8 @@ export interface LocalNetworkTestResult {
     pathMTU?: number;
   };
 
-  // 安全检查结�?  securityResults: {
+  // 安全检查结果
+  securityResults: {
     sslStatus: 'secure' | 'insecure' | 'not_applicable';
     openPorts: number[];
     vulnerabilities: Array<{
@@ -148,17 +154,21 @@ export interface LocalNetworkTestResult {
   recommendations: string[];
 }
 
-// Hook状态接�?export interface UseNetworkTestStateReturn {
-  // 配置状�?  config: NetworkTestConfig;
+// Hook状态接口
+export interface UseNetworkTestStateReturn {
+  // 配置状态
+  config: NetworkTestConfig;
   updateConfig: (updates: Partial<NetworkTestConfig>) => void;
   resetConfig: () => void;
 
-  // 测试状�?  isRunning: boolean;
+  // 测试状态
+  isRunning: boolean;
   progress: number;
   currentStep: string;
   testId: string | null;
 
-  // 结果状�?  result: NetworkTestResult | null;
+  // 结果状态
+  result: NetworkTestResult | null;
   error: string | null;
 
   // 操作方法
@@ -183,14 +193,14 @@ export interface LocalNetworkTestResult {
 
 /**
  * 网络测试专用状态管理Hook
- * 已迁移到新的类型系统，返�?NetworkTestHook 类型
+ * 已迁移到新的类型系统，返回 NetworkTestHook 类型
  */
 export const useNetworkTestState = (): NetworkTestHook => {
-  // 基础状�?- 使用本地扩展配置
+  // 基础状态 - 使用本地扩展配置
   const [localConfig, setLocalConfig] = useState({
     target: '',
     testType: 'comprehensive',
-    timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
+    timeout: process.env.REQUEST_TIMEOUT || 30000,
     retries: 3,
     interval: 1000,
     duration: 60,
@@ -240,7 +250,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
   /**
    * 更新配置
    */
-  const updateLocalConfig = useCallback((updates: unknown) => {
+  const updateLocalConfig = useCallback((updates: any) => {
     setLocalConfig(prev => ({ ...prev, ...updates }));
     setError(null);
   }, []);
@@ -252,7 +262,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     setLocalConfig({
       target: '',
       testType: 'comprehensive',
-      timeout: Number(import.meta.env.VITE_REQUEST_TIMEOUT) || 30000,
+      timeout: process.env.REQUEST_TIMEOUT || 30000,
       retries: 3,
       interval: 1000,
       duration: 60,
@@ -297,7 +307,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     const errors: string[] = [];
 
     if (!localConfig.target) {
-      errors.push('请输入目标地址（URL或IP�?);
+      errors.push('请输入目标地址（URL或IP）');
     }
 
     if (localConfig.connectivityConfig?.pingCount < 1 || localConfig.connectivityConfig?.pingCount > 100) {
@@ -309,11 +319,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
     }
 
     if (!localConfig.dnsConfig?.dnsServers || localConfig.dnsConfig.dnsServers.length === 0) {
-      errors.push('请至少添加一个DNS服务�?);
+      errors.push('请至少添加一个DNS服务器');
     }
 
     if (!localConfig.portConfig?.ports || localConfig.portConfig.ports.length === 0) {
-      errors.push('请至少添加一个端�?);
+      errors.push('请至少添加一个端口');
     }
 
     return {
@@ -335,7 +345,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     try {
       setIsRunning(true);
       setProgress(0);
-      setCurrentStep('正在初始化网络测�?..');
+      setCurrentStep('正在初始化网络测试...');
       setError(null);
       setResult(null);
 
@@ -349,13 +359,13 @@ export const useNetworkTestState = (): NetworkTestHook => {
           setProgress(progress);
           setCurrentStep(step);
         },
-        (testResult: unknown) => {
+        (testResult: any) => {
           setResult(testResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError: unknown) => {
+        (testError: any) => {
           setError(testError.message);
           setIsRunning(false);
           setCurrentStep('测试失败');
@@ -364,7 +374,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
 
       setTestId(newTestId);
 
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err.message || '网络测试启动失败');
       setIsRunning(false);
       setCurrentStep('');
@@ -380,8 +390,8 @@ export const useNetworkTestState = (): NetworkTestHook => {
         backgroundTestManager.cancelTest(testId);
         abortControllerRef.current?.abort();
         setIsRunning(false);
-        setCurrentStep('测试已停�?);
-      } catch (err: unknown) {
+        setCurrentStep('测试已停止');
+      } catch (err: any) {
         setError(err.message || '停止测试失败');
       }
     }
@@ -402,9 +412,10 @@ export const useNetworkTestState = (): NetworkTestHook => {
   }, []);
 
   /**
-   * 添加DNS服务�?   */
+   * 添加DNS服务器
+   */
   const addDnsServer = useCallback((server: string) => {
-    setLocalConfig((prev: unknown) => ({
+    setLocalConfig((prev: any) => ({
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
@@ -414,13 +425,14 @@ export const useNetworkTestState = (): NetworkTestHook => {
   }, []);
 
   /**
-   * 移除DNS服务�?   */
+   * 移除DNS服务器
+   */
   const removeDnsServer = useCallback((server: string) => {
-    setLocalConfig((prev: unknown) => ({
+    setLocalConfig((prev: any) => ({
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        dnsServers: (prev.dnsConfig?.dnsServers || []).filter((s: unknown) => s !== server)
+        dnsServers: (prev.dnsConfig?.dnsServers || []).filter((s: any) => s !== server)
       }
     }));
   }, []);
@@ -429,7 +441,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 添加端口
    */
   const addPort = useCallback((port: number) => {
-    setLocalConfig((prev: unknown) => ({
+    setLocalConfig((prev: any) => ({
       ...prev,
       portConfig: {
         ...prev.portConfig,
@@ -442,11 +454,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 移除端口
    */
   const removePort = useCallback((port: number) => {
-    setLocalConfig((prev: unknown) => ({
+    setLocalConfig((prev: any) => ({
       ...prev,
       portConfig: {
         ...prev.portConfig,
-        ports: (prev.portConfig?.ports || []).filter((p: unknown) => p !== port)
+        ports: (prev.portConfig?.ports || []).filter((p: any) => p !== port)
       }
     }));
   }, []);
@@ -455,7 +467,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 添加记录类型
    */
   const addRecordType = useCallback((type: 'A' | 'AAAA' | 'CNAME' | 'MX' | 'TXT' | 'NS') => {
-    setLocalConfig((prev: unknown) => ({
+    setLocalConfig((prev: any) => ({
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
@@ -468,11 +480,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
    * 移除记录类型
    */
   const removeRecordType = useCallback((type: 'A' | 'AAAA' | 'CNAME' | 'MX' | 'TXT' | 'NS') => {
-    setLocalConfig((prev: unknown) => ({
+    setLocalConfig((prev: any) => ({
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        recordTypes: (prev.dnsConfig?.recordTypes || []).filter((t: unknown) => t !== type)
+        recordTypes: (prev.dnsConfig?.recordTypes || []).filter((t: any) => t !== type)
       }
     }));
   }, []);
@@ -509,7 +521,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     };
 
     const presetConfig = presets[preset];
-    setLocalConfig((prev: unknown) => ({
+    setLocalConfig((prev: any) => ({
       ...prev,
       ...presetConfig
     }));
@@ -522,7 +534,8 @@ export const useNetworkTestState = (): NetworkTestHook => {
     };
   }, []);
 
-  // 计算派生状�?  const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.PENDING));
+  // 计算派生状态
+  const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.PENDING));
   const isCompleted = status === 'completed';
   const hasError = status === 'failed';
   const currentPort = localConfig.portConfig?.ports?.[0] || null;

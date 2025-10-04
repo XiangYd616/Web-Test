@@ -102,19 +102,18 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
 
   // 全局键盘快捷键
   useEffect(() => {
-  const handleKeyDown = (event: KeyboardEvent) => {
-    // Ctrl+K 或 Cmd+K 打开搜索
-    if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-      event.preventDefault();
-      const searchInput = document.querySelector('input[placeholder*="搜索"]') as HTMLInputElement;
-      if (searchInput) {
-        searchInput.focus();
-        setShowSearchDropdown(true);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+K 或 Cmd+K 打开搜索
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        const searchInput = document.querySelector('input[placeholder*="搜索"]') as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+          setShowSearchDropdown(true);
+        }
       }
-    }
-  };
+    };
 
-  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);

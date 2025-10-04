@@ -1,18 +1,18 @@
-
+﻿
 // Mock Storybook types for development
 interface Meta<T = any> {
     title: string;
     component: T;
-    parameters?: unknown;
+    parameters?: any;
     decorators?: unknown[];
-    argTypes?: unknown;
+    argTypes?: any;
     tags?: string[];
 }
 
 interface StoryObj<T = any> {
-    args?: unknown;
-    parameters?: unknown;
-    render?: (args: unknown) => any;
+    args?: any;
+    parameters?: any;
+    render?: (args: any) => any;
 }
 
 // Mock action function
@@ -41,7 +41,7 @@ const meta: Meta<typeof Button> = {
         },
     },
     decorators: [
-        (Story: unknown) => (
+        (Story: any) => (
             <ThemeProvider>
                 <div className="p-4">
                     <Story />

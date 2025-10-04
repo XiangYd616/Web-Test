@@ -23,7 +23,7 @@ class ProjectApiService {
   /**
    * 获取用户项目列表
    */
-  async getProjects(query?: unknown): Promise<ProjectListResponse> {
+  async getProjects(query?: any): Promise<ProjectListResponse> {
     const queryParams = new URLSearchParams();
 
     if (query?.page) queryParams.append('page', query?.page.toString());

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🎯 统一测试引擎执行器组件 - 重构优化版本
  * 整合了UnifiedTestPanel、ModernUnifiedTestPanel、ModernTestRunner的功能
  * 提供完整的测试执行、监控和结果展示功能
@@ -99,9 +99,9 @@ interface UnifiedTestExecutorProps {
   enableExport?: boolean;
 
   // 扩展回调
-  onTestStarted?: (data: unknown) => void;
-  onTestProgress?: (data: unknown) => void;
-  onConfigChange?: (config: unknown) => void;
+  onTestStarted?: (data: any) => void;
+  onTestProgress?: (data: any) => void;
+  onConfigChange?: (config: any) => void;
 }
 
 /**

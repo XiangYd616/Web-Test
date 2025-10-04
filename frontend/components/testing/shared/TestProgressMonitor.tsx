@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 📊 测试进度监控组件
  * 从UnifiedTestExecutor中提取的专用进度监控
  * 提供实时测试进度和状态监控
@@ -27,7 +27,7 @@ const { Title, Text, Paragraph } = Typography;
 
 export interface TestProgressMonitorProps {
   activeTests: Map<string, TestStatusInfo>;
-  realTimeMetrics?: unknown;
+  realTimeMetrics?: any;
   onStopTest: (testId: string) => void;
   onCancelTest: (testId: string) => void;
   className?: string;

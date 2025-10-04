@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Test Trend Analyzer
  * Advanced analytics for test results with predictive insights and anomaly detection
  */
@@ -17,7 +17,7 @@ export interface TestMetric {
     environment: string;
     version: string;
     branch: string;
-    [key: string]: unknown;
+    [key: string]: any;
   };
 }
 
@@ -74,7 +74,7 @@ interface TestTrendAnalyzerProps {
   metrics: TestMetric[];
   timeRange: '7d' | '30d' | '90d' | '1y';
   testTypes: string[];
-  onInsightAction?: (insight: unknown) => void;
+  onInsightAction?: (insight: any) => void;
 }
 
 export const TestTrendAnalyzer: React.FC<TestTrendAnalyzerProps> = ({
@@ -326,7 +326,7 @@ export const TestTrendAnalyzer: React.FC<TestTrendAnalyzerProps> = ({
     return insights;
   };
 
-  const generateBusinessRecommendations = (metrics: unknown) => {
+  const generateBusinessRecommendations = (metrics: any) => {
     const recommendations = [];
 
     if (metrics.qualityScore < 70) {

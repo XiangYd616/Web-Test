@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Axios类型扩展
  * 版本: v2.0.0
  */
@@ -13,7 +13,7 @@ declare module 'axios' {
       retryCount?: number;
       operation?: string;
       context?: Record<string, any>;
-      [key: string]: unknown;
+      [key: string]: any;
     };
   }
 
@@ -24,7 +24,7 @@ declare module 'axios' {
       retryCount?: number;
       operation?: string;
       context?: Record<string, any>;
-      [key: string]: unknown;
+      [key: string]: any;
     };
   }
 }

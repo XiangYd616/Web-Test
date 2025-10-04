@@ -1,4 +1,4 @@
-// 用户统计数据服务
+﻿// 用户统计数据服务
 
 export interface UserActivityStats {
   totalTests: number;
@@ -105,7 +105,7 @@ class UserStatsService {
   }
 
   // 标准化统计数据格式
-  private normalizeStatsData(apiData: unknown): UserActivityStats {
+  private normalizeStatsData(apiData: any): UserActivityStats {
     return {
       totalTests: apiData.total_tests || apiData.totalTests || 0,
       testsToday: apiData.tests_today || apiData.testsToday || 0,

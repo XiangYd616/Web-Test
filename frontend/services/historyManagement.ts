@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 历史管理服务
  * 提供测试历史的管理、查询、分析功能
  */
@@ -13,8 +13,8 @@ export interface HistoryRecord {
   startTime: string;
   endTime: string;
   duration: number;
-  results: unknown;
-  metrics: unknown;
+  results: any;
+  metrics: any;
   tags: string[];
   notes: string;
   archived: boolean;
@@ -66,7 +66,7 @@ class HistoryManagementService {
   ): Promise<{
     records: HistoryRecord[];
     total: number;
-    pagination: unknown;
+    pagination: any;
   }> {
     try {
       const params = new URLSearchParams();

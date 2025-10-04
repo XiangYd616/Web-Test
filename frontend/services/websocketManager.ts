@@ -1,4 +1,4 @@
-/**
+﻿/**
  * WebSocket管理器
  * 提供统一的WebSocket连接管理和消息处理
  */
@@ -6,7 +6,7 @@
 export interface WebSocketMessage {
   type: string;
   testId?: string;
-  data?: unknown;
+  data?: any;
   timestamp?: number;
 }
 

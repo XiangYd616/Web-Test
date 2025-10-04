@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API错误拦截器
  * 统一处理所有API请求的错误响应
  */
@@ -10,7 +10,7 @@ interface ApiErrorResponse {
   success: boolean;
   message: string;
   code?: string | number;
-  details?: unknown;
+  details?: any;
   timestamp?: string;
 }
 
@@ -77,7 +77,7 @@ class ApiErrorInterceptor {
   /**
    * 处理请求错误
    */
-  private async handleRequestError(error: unknown): Promise<any> {
+  private async handleRequestError(error: any): Promise<any> {
     // 创建错误处理实例
     // 使用错误处理函数
     const { useErrorHandler } = await import('./api/errorHandler');
@@ -212,7 +212,7 @@ class ApiErrorInterceptor {
   /**
    * 处理特殊错误类型
    */
-  private async handleSpecialErrors(error: AxiosError, standardError: unknown): Promise<void> {
+  private async handleSpecialErrors(error: AxiosError, standardError: any): Promise<void> {
     const status = error.response?.status;
 
     switch (status) {

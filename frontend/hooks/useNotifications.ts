@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useNotifications.ts - 核心功能模块
  * 
  * 文件路径: frontend\hooks\useNotifications.ts
@@ -280,7 +280,7 @@ export const useNotifications = () => {
 
       const result = await response.json();
       if (result.success && result.data) {
-        const apiNotifications = result.data.map((n: unknown) => ({
+        const apiNotifications = result.data.map((n: any) => ({
           ...n,
           createdAt: new Date(n.createdAt || n.created_at)
         }));
@@ -305,7 +305,7 @@ export const useNotifications = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        setNotifications(parsed.map((n: unknown) => ({
+        setNotifications(parsed.map((n: any) => ({
           ...n,
           createdAt: new Date(n.createdAt)
         })));

@@ -1,3 +1,5 @@
+﻿import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+
 /**
  * Vitest 测试环境设置文件
  * 配置全局测试环境和模拟对象

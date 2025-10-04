@@ -1,6 +1,10 @@
-/**
+﻿/**
  * Real-time Schema Validator
- * Provides schema validation with business rule enforcement for API responses
+ * Provides schema validatio
+// Type helper
+const asAny = (x: any) => x;
+
+n with business rule enforcement for API responses
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
@@ -13,7 +17,7 @@ export interface SchemaRule {
   required: boolean;
   businessRule?: {
     type: 'range' | 'pattern' | 'enum' | 'custom';
-    value: unknown;
+    value: any;
     message: string;
   };
   format?: string; // e?.g., 'email', 'date', 'currency'
@@ -30,7 +34,7 @@ export interface ValidationResult {
 
 interface SchemaValidatorProps {
   schema: SchemaRule[];
-  responseData: unknown;
+  responseData: any;
   onSchemaChange?: (schema: SchemaRule[]) => void;
   onValidationComplete?: (results: ValidationResult[]) => void;
   showBusinessRules?: boolean;
@@ -290,7 +294,7 @@ export const SchemaValidator: React.FC<SchemaValidatorProps> = ({
               <span className="text-sm text-gray-400">响应数据</span>
             </div>
             <pre className="text-xs text-gray-300 overflow-auto max-h-40">
-              {JSON.stringify(responseData, null, 2)}
+              {JSON.stringify(responseData, null, String(2))}
             </pre>
           </div>
         )}

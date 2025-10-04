@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SEOReportGenerator.tsx - React组件
  * 
  * 文件路径: frontend\components\seo\SEOReportGenerator.tsx
@@ -10,6 +10,7 @@ import {Download, FileText, Share2, Eye} from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
 import { MobileSeoAnalysisResult } from '../../utils/mobileSeoDetector';
 import { CoreWebVitalsResult } from '../../utils/coreWebVitalsAnalyzer';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 
 interface SEOReportData {
   basicSEO?: SEOAnalysisResult;
@@ -36,7 +37,7 @@ interface ReportTemplate {
 
 interface SEOReportGeneratorProps {
   reportData: SEOReportData;
-  onReportGenerated?: (format: string, data: unknown) => void;
+  onReportGenerated?: (format: string, data: any) => void;
   onError?: (error: string) => void;
 }
 
@@ -202,7 +203,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
   // 构建报告内容
   const buildReportContent = async (template: ReportTemplate): Promise<any> => {
-    const content: unknown = {};
+    const content: any = {};
 
     for (const section of template.sections) {
       switch (section) {

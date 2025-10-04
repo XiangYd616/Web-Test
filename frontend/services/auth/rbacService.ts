@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 基于角色的访问控制(RBAC)服务
  * 提供角色管理、权限控制、继承机制
  * 版本: v1.0.0
@@ -26,7 +26,7 @@ export interface Permission {
 export interface PermissionCondition {
   type: 'time' | 'location' | 'device' | 'custom';
   operator: 'equals' | 'not_equals' | 'in' | 'not_in' | 'greater_than' | 'less_than';
-  value: unknown;
+  value: any;
   description: string;
 }
 

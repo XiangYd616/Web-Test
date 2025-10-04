@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API工具函数
  * 提供API响应格式化、错误处理和查询字符串构建等功能
  */
@@ -50,7 +50,7 @@ export function formatApiResponse<T>(
  * @param error 错误对象
  * @returns 错误处理结果
  */
-export function handleApiError(error: unknown) {
+export function handleApiError(error: any) {
     // 网络错误
     if (error.code === 'NETWORK_ERROR' || !error.response) {
         return {

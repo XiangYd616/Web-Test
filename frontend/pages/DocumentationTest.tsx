@@ -1,4 +1,4 @@
-import { BarChart3, CheckCircle, Clock, Code, Database, Download, Eye, EyeOff, FileText, Globe, History, Key, Loader, Lock, Play, Plus, RotateCcw, Settings, Shield, Square, Trash2, XCircle, Zap } from 'lucide-react';
+﻿import { BarChart3, CheckCircle, Clock, Code, Database, Download, Eye, EyeOff, FileText, Globe, History, Key, Loader, Lock, Play, Plus, RotateCcw, Settings, Shield, Square, Trash2, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/ui';
@@ -8,10 +8,11 @@ import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 
 // 临时testApiService实现
 const testApiService = {
-  executeApiTest: async (config: unknown) => ({
+  executeApiTest: async (config: any) => ({
     success: true,
     data: {
       id: `api_test_${Date.now()}`,
@@ -129,7 +130,7 @@ const APITest: React.FC = () => {
 
   // 监听后台测试状态变化
   useEffect(() => {
-    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: unknown) => {
+    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: any) => {
       if (testInfo.type === 'api' && testInfo.id === currentTestId) {
         switch (event) {
           case 'testProgress':
@@ -170,7 +171,7 @@ const APITest: React.FC = () => {
 
     // 检查是否有正在运行的文档生成
     const runningTests = backgroundTestManager.getRunningTests();
-    const apiTest = runningTests.find((test: unknown) => test.type === 'api');
+    const apiTest = runningTests.find((test: any) => test.type === 'api');
     if (apiTest) {
       setCurrentTestId(apiTest.id);
       setBackgroundTestInfo(apiTest);
@@ -269,7 +270,7 @@ const APITest: React.FC = () => {
           setTestStatus('running');
         },
         // onComplete 回调
-        (result: unknown) => {
+        (result: any) => {
           // 如果API监控没有返回结果，使用后台管理器的结果
           if (!apiProgress || apiProgress.status !== 'completed') {
             setResult(result);
@@ -579,14 +580,14 @@ const APITest: React.FC = () => {
   };
 
   // 历史记录处理
-  const handleTestSelect = (test: unknown) => {
+  const handleTestSelect = (test: any) => {
     // 加载历史测试结果
     if (test.results) {
       setResult(test.results);
     }
   };
 
-  const handleTestRerun = (test: unknown) => {
+  const handleTestRerun = (test: any) => {
     // 重新运行历史测试
     if (test.config) {
       setTestConfig(test.config);
@@ -638,7 +639,7 @@ const APITest: React.FC = () => {
       case 'csv':
         const csvData = [
           ['端点', '方法', '状态', '响应时间', '状态码', '错误数'],
-          ...(result?.endpointResults || []).map((ep: unknown) => [
+          ...(result?.endpointResults || []).map((ep: any) => [
             ep.name, ep.method, ep.status, (Math.round(ep.responseTime * 100) / 100).toFixed(2), ep.statusCode, (ep.errors || []).length
           ]),
         ];
@@ -683,7 +684,7 @@ const APITest: React.FC = () => {
               <div class="metric">平均响应时间: ${Math.round(result?.averageResponseTime)}ms</div>
             </div>
             <h2>端点测试结果</h2>
-            ${(result?.endpointResults || []).map((ep: unknown) => `
+            ${(result?.endpointResults || []).map((ep: any) => `
               <div class="endpoint ${ep.status}">
                 <strong>${ep.method} ${ep.name}</strong><br>
                 路径: ${ep.path}<br>

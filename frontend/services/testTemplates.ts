@@ -1,4 +1,4 @@
-/**
+﻿/**
  * testTemplates.ts - 业务服务层
  * 
  * 文件路径: frontend\services\testTemplates.ts
@@ -12,7 +12,7 @@ export interface TestTemplate {
   description: string;
   category: 'ecommerce' | 'blog' | 'corporate' | 'saas' | 'portfolio' | 'news' | 'custom';
   testType: 'stress' | 'content' | 'compatibility' | 'api' | 'security' | 'performance' | 'comprehensive';
-  config: unknown;
+  config: any;
   tags: string[];
   isDefault: boolean;
   createdAt: string;
@@ -394,7 +394,7 @@ export class TestTemplateService {
   }
 
   // 验证模板格式
-  private static validateTemplate(template: unknown): boolean {
+  private static validateTemplate(template: any): boolean {
     return (
       template &&
       typeof template.name === 'string' &&

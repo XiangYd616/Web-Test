@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一压力测试页面
  * 提供完整的压力测试功能，包括实时监控、结果分析和报告导出
  */
@@ -119,7 +119,7 @@ const UnifiedStressTest: React.FC = () => {
   }
 
   // 测试完成回调
-  const handleTestComplete = useCallback((result: unknown) => {
+  const handleTestComplete = useCallback((result: any) => {
     
     // 添加到历史记录
     setTestHistory(prev => [result, ...prev.slice(0, 4)]);
@@ -138,11 +138,11 @@ const UnifiedStressTest: React.FC = () => {
   }, []);
 
   // 配置变更回调
-  const handleConfigChange = useCallback((config: unknown) => {
+  const handleConfigChange = useCallback((config: any) => {
   }, []);
 
   // 导出测试结果
-  const exportTestResult = (result: unknown) => {
+  const exportTestResult = (result: any) => {
     if (!result) {
       toast.error('没有可导出的测试结果');
       return;

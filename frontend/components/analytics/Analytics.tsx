@@ -1,7 +1,11 @@
-/**
+﻿/**
  * 高级数据分析组件
  * 提供数据挖掘、智能分析、机器学习预测和可视化功能
  */
+
+// Type helper
+const asAny = (x: any) => x;
+
 
 import React, { useState, useEffect } from 'react';
 import {BarChart3, TrendingUp, Brain, Download, RefreshCw, AlertCircle, CheckCircle, Target, Activity, FileText, PieChart, Layers, Eye, Share2, Lightbulb} from 'lucide-react';
@@ -43,7 +47,7 @@ interface AnalysisResult {
   id: string;
   name: string;
   type: 'trend' | 'correlation' | 'anomaly' | 'prediction' | 'segmentation';
-  data: unknown;
+  data: any;
   insights: Insight[];
   confidence: number;
   generatedAt: Date;

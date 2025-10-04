@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ReportExporter.tsx - React组件
  * 
  * 文件路径: frontend\components\reports\ReportExporter.tsx
@@ -13,7 +13,7 @@ import { EnhancedReportGenerator, ExportFormat, ReportConfig, ReportData } from 
 
 interface ReportExporterProps {
   testResults: unknown[];
-  analytics?: unknown;
+  analytics?: any;
   onExport?: (format: ExportFormat, config: ReportConfig) => void;
   className?: string;
 }
@@ -139,7 +139,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
     setConfig(prev => ({ ...prev, ...updates }));
   };
 
-  const updateSection = (sectionId: string, updates: unknown) => {
+  const updateSection = (sectionId: string, updates: any) => {
     setConfig(prev => ({
       ...prev,
       sections: prev.sections.map(section =>

@@ -1,4 +1,4 @@
-
+﻿
 export enum LogLevel {
   ERROR = 0,
   WARN = 1,
@@ -11,7 +11,7 @@ interface LogContext {
   action?: string;
   userId?: string;
   sessionId?: string;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 class FrontendLogger {
@@ -104,7 +104,7 @@ class FrontendLogger {
     });
   }
 
-  private sendToMonitoring(level: string, message: string, data: unknown): void {
+  private sendToMonitoring(level: string, message: string, data: any): void {
     // 在生产环境中实现错误监控
     // 例如发送到 Sentry, LogRocket 等服务
     try {

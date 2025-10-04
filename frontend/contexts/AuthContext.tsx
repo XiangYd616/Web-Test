@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode, FC } from 'react';;
 import { parseAuthError } from '../components/auth/AuthErrorHandler';
@@ -225,7 +225,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       console.log('✅ 登录成功:', data.user.email);
 
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('❌ 登录失败:', error);
 
       // 解析并设置错误
@@ -310,7 +310,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // 添加缺失的方法
-  const updateProfile = async (data: unknown) => {
+  const updateProfile = async (data: any) => {
     try {
       const token = localStorage.getItem('auth_token');
 
@@ -342,7 +342,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const changePassword = async (data: unknown) => {
+  const changePassword = async (data: any) => {
     try {
       const token = localStorage.getItem('auth_token');
 

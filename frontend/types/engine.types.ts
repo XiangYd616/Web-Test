@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🧠 统一测试引擎类型定义
  * 基于TypeScript最佳实践，为统一测试引擎提供完整的类型支持
  */
@@ -52,7 +52,7 @@ export interface APIEndpoint {
   url?: string;
   expectedStatus?: number[];
   headers?: Record<string, string>;
-  body?: unknown;
+  body?: any;
   params?: Record<string, any>;
   maxResponseTime?: number;
   expectedContentType?: string;
@@ -209,7 +209,7 @@ export interface EngineState {
 export interface WebSocketMessage {
   type: 'testProgress' | 'testCompleted' | 'testFailed' | 'engineStatus';
   testId?: string;
-  data: unknown;
+  data: any;
   timestamp?: string;
 }
 
@@ -223,7 +223,7 @@ export interface TestTypeInfo {
   core: string;
   methods: string[];
   dependencies: string[];
-  configSchema?: unknown;
+  configSchema?: any;
   examples?: unknown[];
   registeredAt: string;
 }
@@ -313,7 +313,7 @@ export interface PaginatedResponse<T = any> extends APIResponse<T> {
 export interface ValidationError {
   field: string;
   message: string;
-  value?: unknown;
+  value?: any;
   allowedValues?: unknown[];
 }
 
@@ -385,7 +385,7 @@ export interface UnifiedTestEngineHook {
  * 测试执行Hook返回类型
  */
 export interface TestExecutionHook extends UnifiedTestEngineHook {
-  executeTest: (config: Record<string, any>, options?: unknown) => Promise<string>;
+  executeTest: (config: Record<string, any>, options?: any) => Promise<string>;
   isSupported: boolean;
   testType: TestType;
 }
@@ -420,7 +420,7 @@ export interface UnifiedTestPanelProps {
 export interface TestConfigFormValues {
   testType: TestType;
   url: string;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
 // 注意：所有类型已在上面单独导出，无需重复导出
