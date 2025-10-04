@@ -399,7 +399,7 @@ export class MobileSeoDetector {
   /**
    * 分析Core Web Vitals（移动端）
    */
-  private async analyzeCoreWebVitals(): Promise<MobileSEOAnalysisResult['coreWebVitals']> {
+  private async analyzeCoreWebVitals(): Promise<any> {
     // 这里应该集成真实的Core Web Vitals测量
     // 目前返回模拟数据，实际应用中需要使用web-vitals库或类似工具
     

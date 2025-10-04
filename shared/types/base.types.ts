@@ -392,7 +392,7 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 /**
  * 必需键类型
  */
-export type Required<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+export type RequiredKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
 /**
  * 深度只读类型

@@ -4,7 +4,8 @@
  * 版本: v1.0.0
  */
 
-import { defaultMemoryCache } from '../services/cacheStrategy';
+// @ts-ignore - 导入缓存服务
+import { _defaultMemoryCache as defaultMemoryCache } from '../services/cacheStrategy';
 
 // ==================== 类型定义 ====================
 

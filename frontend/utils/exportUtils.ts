@@ -769,7 +769,7 @@ export class ExportUtils {
   /**
    * 数据表格导出 - CSV格式（增强版）
    */
-  static exportDataTable(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportDataTable(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
     const metrics = data.metrics || {};
     const realTimeData = data.realTimeData || [];
     const result = data.result || {};
@@ -871,7 +871,7 @@ export class ExportUtils {
   /**
    * 分析错误数据
    */
-  static analyzeErrors(errors: unknown[]): unknown[] {
+  static analyzeErrors(errors: any[]): any[] {
     const errorMap = new Map();
 
     errors.forEach(error => {
@@ -908,7 +908,7 @@ export class ExportUtils {
   /**
    * 分析趋势数据
    */
-  static analyzeTrends(data: unknown[]): unknown {
+  static analyzeTrends(data: any[]): any {
     if (data.length < 10) return {};
 
     const trends: any = {};
@@ -1013,7 +1013,7 @@ export class ExportUtils {
   /**
    * 分析资源加载情况
    */
-  static analyzeResources(resources: unknown[]): unknown {
+  static analyzeResources(resources: any[]): any {
     const stats: any = {};
 
     resources.forEach(resource => {
@@ -1044,7 +1044,7 @@ export class ExportUtils {
   /**
    * 快速摘要导出 - 简化的JSON格式
    */
-  static exportSummary(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportSummary(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
     const metrics = data.metrics || {};
     const result = data.result || {};
     const testConfig = data.testConfig || {};
@@ -1175,7 +1175,7 @@ export class ExportUtils {
   /**
    * 生成优化建议
    */
-  private static generateRecommendations(metrics: unknown, testType: string): string[] {
+  private static generateRecommendations(metrics: any, testType: string): string[] {
     const recommendations: string[] = [];
 
     if ((metrics?.averageResponseTime || 0) > 1000) {
