@@ -1,0 +1,280 @@
+﻿PROJECT STRUCTURE ANALYSIS REPORT
+Generated: 2025-10-05 02:06:01
+===============================================
+
+BACKUP AND TEMPORARY FILES (42 files, 0.54 MB):
+
+Damaged Files (9):
+frontend\components\analytics\ReportManagement.tsx.damaged2
+frontend\components\modern\TopNavbar.tsx.damaged-backup
+frontend\components\monitoring\TestEngineStatus.tsx.damaged2
+frontend\hooks\useDataManagement.ts.damaged-backup
+frontend\hooks\useNetworkTestState.ts.damaged-backup
+frontend\services\batchTestingService.ts.damaged-backup
+frontend\services\testing\unifiedTestService.ts.damaged-backup
+frontend\utils\browserSupport.ts.damaged-backup
+frontend\utils\routeUtils.ts.damaged-backup
+
+
+Temporary Fix Files (26):
+frontend\components\auth\BackupCodes.tsx.pre-fix-backup
+frontend\components\auth\LoginPrompt.tsx.pre-fix-backup
+frontend\components\modern\TopNavbar.tsx.before-encoding-fix2
+frontend\components\modern\TopNavbar.tsx.current-broken
+frontend\components\modern\TopNavbar.tsx.final-fix
+frontend\hooks\useDataManagement.ts.before-encoding-fix2
+frontend\hooks\useDataManagement.ts.final-fix
+frontend\hooks\useNetworkTestState.ts.before-encoding-fix2
+frontend\hooks\useNetworkTestState.ts.before-fix3
+frontend\hooks\useNetworkTestState.ts.final-fix
+frontend\services\batchTestingService.ts.before-encoding-fix2
+frontend\services\batchTestingService.ts.pre-fix-backup
+frontend\utils\browserSupport.ts.pre-fix-backup
+frontend\utils\environment.ts.before-fix
+frontend\utils\routeUtils.ts.pre-fix-backup
+node_modules\@typescript-eslint\eslint-plugin\dist\rules\no-use-before-define.d.ts
+node_modules\@typescript-eslint\eslint-plugin\dist\rules\no-use-before-define.js
+node_modules\eslint\lib\rules\newline-before-return.js
+node_modules\eslint\lib\rules\no-this-before-super.js
+node_modules\eslint\lib\rules\no-use-before-define.js
+node_modules\eslint\lib\rules\no-whitespace-before-property.js
+node_modules\eslint\lib\rules\space-before-blocks.js
+node_modules\eslint\lib\rules\space-before-function-paren.js
+node_modules\eslint-plugin-react\lib\rules\jsx-space-before-closing.d.ts
+node_modules\eslint-plugin-react\lib\rules\jsx-space-before-closing.d.ts.map
+node_modules\eslint-plugin-react\lib\rules\jsx-space-before-closing.js
+
+
+Phase Backups (3):
+frontend\components\auth\MFAWizard.tsx.phase4-backup
+frontend\components\scheduling\TestScheduler.tsx.phase4-backup
+frontend\pages\advanced\TestTemplates.tsx.phase4-backup
+
+
+Binary Backups (1):
+frontend\utils\testTemplates.ts.binary-backup
+
+
+DUPLICATE FILES (27 groups):
+
+index.ts (appears 50 times):
+  - frontend\components\admin\index.ts
+  - frontend\components\analysis\index.ts
+  - frontend\components\analytics\index.ts
+  - frontend\components\animations\index.ts
+  - frontend\components\api\index.ts
+  - frontend\components\auth\index.ts
+  - frontend\components\business\index.ts
+  - frontend\components\charts\index.ts
+  - frontend\components\common\index.ts
+  - frontend\components\compatibility\index.ts
+  - frontend\components\data\index.ts
+  - frontend\components\integration\index.ts
+  - frontend\components\layout\index.ts
+  - frontend\components\modern\index.ts
+  - frontend\components\monitoring\index.ts
+  - frontend\components\performance\index.ts
+  - frontend\components\pipeline\index.ts
+  - frontend\components\reports\index.ts
+  - frontend\components\routing\index.ts
+  - frontend\components\search\index.ts
+  - frontend\components\shared\index.ts
+  - frontend\components\system\index.ts
+  - frontend\components\testing\shared\index.ts
+  - frontend\components\testing\index.ts
+  - frontend\components\ui\types\index.ts
+  - frontend\components\ui\index.ts
+  - frontend\hooks\index.ts
+  - frontend\pages\admin\index.ts
+  - frontend\pages\advanced\index.ts
+  - frontend\pages\analytics\index.ts
+  - frontend\pages\auth\index.ts
+  - frontend\pages\dashboard\index.ts
+  - frontend\pages\integration\index.ts
+  - frontend\pages\misc\index.ts
+  - frontend\pages\scheduling\index.ts
+  - frontend\pages\team\index.ts
+  - frontend\pages\testing\index.ts
+  - frontend\pages\user\index.ts
+  - frontend\services\admin\index.ts
+  - frontend\services\analytics\index.ts
+  - frontend\services\api\test\index.ts
+  - frontend\services\api\index.ts
+  - frontend\services\auth\index.ts
+  - frontend\services\help\index.ts
+  - frontend\services\integration\index.ts
+  - frontend\services\monitoring\index.ts
+  - frontend\services\reporting\index.ts
+  - frontend\services\user\index.ts
+  - frontend\types\api\index.ts
+  - frontend\types\index.ts
+
+
+MFAManagement.tsx (appears 2 times):
+  - frontend\components\auth\MFAManagement.tsx
+  - frontend\pages\auth\MFAManagement.tsx
+
+
+MFASetup.tsx (appears 2 times):
+  - frontend\components\auth\MFASetup.tsx
+  - frontend\pages\auth\MFASetup.tsx
+
+
+MFAVerification.tsx (appears 2 times):
+  - frontend\components\auth\MFAVerification.tsx
+  - frontend\pages\auth\MFAVerification.tsx
+
+
+Chart.tsx (appears 2 times):
+  - frontend\components\charts\Chart.tsx
+  - frontend\components\ui\Chart.tsx
+
+
+ErrorBoundary.tsx (appears 2 times):
+  - frontend\components\common\ErrorBoundary.tsx
+  - frontend\components\ui\ErrorBoundary.tsx
+
+
+Layout.tsx (appears 2 times):
+  - frontend\components\common\Layout.tsx
+  - frontend\components\layout\Layout.tsx
+
+
+TestHistory.tsx (appears 2 times):
+  - frontend\components\common\TestHistory.tsx
+  - frontend\pages\TestHistory.tsx
+
+
+DataManagement.tsx (appears 2 times):
+  - frontend\components\data\DataManagement.tsx
+  - frontend\pages\DataManagement.tsx
+
+
+StatCard.tsx (appears 2 times):
+  - frontend\components\modern\StatCard.tsx
+  - frontend\components\ui\StatCard.tsx
+
+
+MonitoringDashboard.tsx (appears 3 times):
+  - frontend\components\monitoring\MonitoringDashboard.tsx
+  - frontend\pages\dashboard\MonitoringDashboard.tsx
+  - frontend\pages\MonitoringDashboard.tsx
+
+
+TestEngineStatus.tsx (appears 2 times):
+  - frontend\components\monitoring\TestEngineStatus.tsx
+  - frontend\components\testing\TestEngineStatus.tsx
+
+
+UrlInput.tsx (appears 2 times):
+  - frontend\components\security\UrlInput.tsx
+  - frontend\components\ui\URLInput.tsx
+
+
+index.tsx (appears 2 times):
+  - frontend\components\shared\index.tsx
+  - frontend\pages\index.tsx
+
+
+TestConfigPanel.tsx (appears 2 times):
+  - frontend\components\shared\TestConfigPanel.tsx
+  - frontend\components\testing\shared\TestConfigPanel.tsx
+
+
+errorHandler.ts (appears 2 times):
+  - frontend\services\api\errorHandler.ts
+  - frontend\utils\errorHandler.ts
+
+
+testApiService.ts (appears 2 times):
+  - frontend\services\api\testApiService.ts
+  - frontend\services\testApiService.ts
+
+
+dataService.ts (appears 2 times):
+  - frontend\services\integration\dataService.ts
+  - frontend\services\dataService.ts
+
+
+user.ts (appears 2 times):
+  - frontend\services\types\user.ts
+  - frontend\types\user.ts
+
+
+dataProcessor.ts (appears 2 times):
+  - frontend\services\unified\dataProcessor.ts
+  - frontend\services\dataProcessor.ts
+
+
+testUtils.ts (appears 2 times):
+  - frontend\services\__tests__\testUtils.ts
+  - frontend\utils\testUtils.ts
+
+
+testTemplates.ts (appears 2 times):
+  - frontend\services\testTemplates.ts
+  - frontend\utils\testTemplates.ts
+
+
+websocketManager.ts (appears 2 times):
+  - frontend\services\websocketManager.ts
+  - frontend\utils\websocketManager.ts
+
+
+setup.ts (appears 2 times):
+  - frontend\tests\setup\setup.ts
+  - frontend\tests\setup.ts
+
+
+base.types.ts (appears 2 times):
+  - frontend\types\common\base.types.ts
+  - frontend\types\base.types.ts
+
+
+apiResponse.types.ts (appears 2 times):
+  - frontend\types\unified\apiResponse.types.ts
+  - frontend\types\apiResponse.types.ts
+
+
+models.types.ts (appears 2 times):
+  - frontend\types\unified\models.types.ts
+  - frontend\types\models.types.ts
+
+
+
+NAMING CONVENTION ISSUES (1 files):
+- frontend\components\auth\withAuthCheck.tsx (current: withAuthCheck)
+
+
+LARGE FILES (>100KB):
+- $relPath ($sizeMB KB)
+- $relPath ($sizeMB KB)
+- $relPath ($sizeMB KB)
+- $relPath ($sizeMB KB)
+- $relPath ($sizeMB KB)
+
+
+===============================================
+RECOMMENDED CLEANUP ACTIONS:
+
+1. Safe to delete immediately:
+   - All .damaged* files
+   - All .pre-fix-backup files
+   - All .before-* files  
+   - All .final-fix files
+   - All .current-broken files
+   - All .binary-backup files
+
+2. Review before deleting:
+   - Phase backup files (.phase*-backup)
+   - Regular backup files (.backup)
+
+3. Duplicate files:
+   - Keep files in standard directories (components, hooks, pages)
+   - Delete files in non-standard locations
+
+4. Naming conventions:
+   - Rename component files to use PascalCase
+   - Ensure hooks start with 'use'
+
+===============================================
