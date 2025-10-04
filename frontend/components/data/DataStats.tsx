@@ -2,7 +2,7 @@
 import { PaginationInfo, TestRecord } from '@/hooks/useDataStorage';
 import { BarChart3, CheckCircle, Database, XCircle } from 'lucide-react';
 import React from 'react';
-import StatCard from '../modern/StatCard'; // 使用支持subtitle的StatCard
+import StatCard from '../ui/StatCard'; // 使用支持subtitle的StatCard
 
 interface DataStatsProps {
   records: TestRecord[];

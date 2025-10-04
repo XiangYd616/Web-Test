@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { stateManager, StateEventType, StateEvent, AppState } from '../services/state/StateManager';
+import { stateManager, StateEventType, StateEvent, AppState } from '../services/state/stateManager';
 
 /**
  * 使用应用状态的主Hook

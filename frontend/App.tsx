@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 // 路由和组件导入
 import AppRoutes from './components/routing/AppRoutes';
 import BackgroundTestNotifications from './components/system/BackgroundTestNotifications';
-import ErrorBoundary from './components/ui/ErrorBoundary';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // 上下文提供者导入
 import { AppProvider } from './contexts/AppContext';

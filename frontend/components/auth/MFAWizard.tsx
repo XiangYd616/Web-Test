@@ -19,7 +19,7 @@ import {
   Users,
   Zap
 } from 'lucide-react';
-import { MFASetup } from './MFASetup';
+import MFASetup from '../../pages/auth/MFASetup';
 
 // ==================== 类型定义 ====================
 

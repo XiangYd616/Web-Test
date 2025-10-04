@@ -11,15 +11,15 @@ export { default as AuthErrorHandler } from './AuthErrorHandler';
 export { default as AuthLoadingState } from './AuthLoadingState';
 export { default as AuthStatusIndicator } from './AuthStatusIndicator';
 export { default as LoginPrompt } from './LoginPrompt';
-export { default as MFASetup } from './MFASetup';
-export { default as MFAManagement } from './MFAManagement';
-export { default as MFAVerification } from './MFAVerification';
+export { default as MFASetup } from '../../pages/auth/MFASetup';
+export { default as MFAManagement } from '../../pages/auth/MFAManagement';
+export { default as MFAVerification } from '../../pages/auth/MFAVerification';
 export { default as MFAWizard } from './MFAWizard';
 export { default as PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 export { default as PermissionManager } from './PermissionManager';
 export { default as ProtectedFeature } from './ProtectedFeature';
 export { default as ProtectedRoute } from './ProtectedRoute';
-export { default as withAuthCheck } from './withAuthCheck';
+export { default as WithAuthCheck } from './WithAuthCheck';
 // 错误处理工具
 export {
     AuthErrorType, getErrorMessage, parseAuthError, shouldRelogin
