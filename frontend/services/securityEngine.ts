@@ -15,6 +15,7 @@ export interface SecurityTestConfig {
   timeout: number;
   userAgent?: string;
   authHeaders?: Record<string, string>;
+  modules?: string[];
 }
 
 export interface SecurityScanResult {
@@ -379,6 +380,50 @@ export class SecurityEngine {
 
   isRunning(): boolean {
     return this.isScanning;
+  }
+
+  // 获取预设配置
+  getPresetConfigs(): Record<string, SecurityTestConfig> {
+    return {
+      basic: {
+        url: '',
+        depth: 2,
+        includeSubdomains: false,
+        testTypes: ['xss_scan', 'security_headers'],
+        timeout: 30000,
+        modules: ['xss', 'headers']
+      },
+      comprehensive: {
+        url: '',
+        depth: 5,
+        includeSubdomains: true,
+        testTypes: ['xss_scan', 'security_headers', 'sql_injection', 'ssl_tls_check'],
+        timeout: 60000,
+        modules: ['xss', 'headers', 'sql', 'ssl']
+      },
+      advanced: {
+        url: '',
+        depth: 10,
+        includeSubdomains: true,
+        testTypes: ['xss_scan', 'security_headers', 'sql_injection', 'ssl_tls_check', 'directory_traversal', 'info_disclosure'],
+        timeout: 120000,
+        modules: ['xss', 'headers', 'sql', 'ssl', 'directory', 'info']
+      }
+    };
+  }
+
+  // 运行安全测试（别名方法）
+  async runSecurityTest(
+    config: SecurityTestConfig,
+    onProgress?: (progress: number) => void,
+    onResult?: (result: SecurityScanResult) => void
+  ): Promise<SecurityScanResult[]> {
+    return this.startScan(config, onProgress, onResult);
+  }
+
+  // 取消测试（别名方法）
+  cancelTest(): void {
+    this.stopScan();
   }
 }
 

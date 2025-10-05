@@ -10,6 +10,7 @@ export interface SEOAnalysisResult {
     severity: 'low' | 'medium' | 'high';
     message: string;
     fix?: string;
+    impact?: string;
   }>;
   recommendations: string[];
   performance?: {
@@ -21,6 +22,24 @@ export interface SEOAnalysisResult {
     canonical: boolean;
     robots: boolean;
     sitemap: boolean;
+  };
+  contentQuality?: {
+    readability?: number;
+    keywordDensity?: number;
+    headingStructure?: boolean;
+    imageOptimization?: number;
+    internalLinks?: number;
+    externalLinks?: number;
+    contentLength?: number;
+  };
+  accessibility?: {
+    score?: number;
+    issues?: string[];
+  };
+  structuredData?: {
+    present?: boolean;
+    types?: string[];
+    errors?: string[];
   };
 }
 

@@ -126,4 +126,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   );
 };
 
+// Export types
+export type { StatCardProps };
+
 export default StatCard;
