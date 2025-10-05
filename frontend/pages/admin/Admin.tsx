@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 管理员主页面 - 统一管理面板
  * 集成系统监控、用户管理、设置管理等管理员功能
  */
@@ -9,7 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import UserManagement from './UserManagement';
 import Settings from './Settings';
 import DataStorage from './DataStorage';
-import MonitoringDashboard from '../MonitoringDashboard';
+import MonitoringDashboard from '../dashboard/MonitoringDashboard';
 
 interface AdminSection {
   id: string;

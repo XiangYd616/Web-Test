@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+﻿import React, { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from '../../pages/Login';
 import Register from '../../pages/Register';
@@ -6,7 +6,7 @@ import { AdminGuard, ProtectedRoute } from '../auth';
 import { Layout } from '../layout';
 import { ErrorBoundary, LoadingSpinner } from '../ui';
 
-// 懒加载页面组�?const Dashboard = lazy(() => import('../../pages/dashboard/Dashboard'));
+// 懒加载页面组�?const Dashboard = lazy(() => import('../../pages/dashboard/Dashboard'));
 const WebsiteTest = lazy(() => import('../../pages/WebsiteTest'));
 const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
 const PerformanceTest = lazy(() => import('../../pages/PerformanceTest'));
@@ -30,9 +30,9 @@ const DataManagement = lazy(() => import('../../pages/DataManagement'));
 const DataCenter = lazy(() => import('../../pages/DataCenter'));
 const Statistics = lazy(() => import('../../pages/Statistics'));
 const Analytics = lazy(() => import('../../pages/analytics'));
-const MonitoringDashboard = lazy(() => import('../../pages/MonitoringDashboard'));
+const MonitoringDashboard = lazy(() => import('../../pages/dashboard/MonitoringDashboard'));
 
-// 报告和历�?const TestHistory = lazy(() => import('../../pages/TestHistory'));
+// 报告和历�?const TestHistory = lazy(() => import('../../pages/TestHistory'));
 
 const Reports = lazy(() => import('../../pages/Reports'));
 const TestResultDetail = lazy(() => import('../../pages/TestResultDetail'));
@@ -45,16 +45,16 @@ const Admin = lazy(() => import('../../pages/admin'));
 const UserProfile = lazy(() => import('../../pages/UserProfile'));
 const UserBookmarks = lazy(() => import('../../pages/UserBookmarks'));
 
-// 测试和优�?const TestOptimizations = lazy(() => import('../../pages/TestOptimizations'));
+// 测试和优�?const TestOptimizations = lazy(() => import('../../pages/TestOptimizations'));
 const Notifications = lazy(() => import('../../pages/Notifications'));
 
-// 集成和配�?const Integrations = lazy(() => import('../../pages/Integrations'));
+// 集成和配�?const Integrations = lazy(() => import('../../pages/Integrations'));
 const CICDIntegration = lazy(() => import('../../pages/CicdIntegration'));
 const Webhooks = lazy(() => import('../../pages/Webhooks'));
 const ApiKeys = lazy(() => import('../../pages/ApiKeys'));
 const ApiDocs = lazy(() => import('../../pages/ApiDocs'));
 
-// 调度和任�?const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
+// 调度和任�?const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
 const ScheduledTasks = lazy(() => import('../../pages/ScheduledTasks'));
 
 // 其他功能
@@ -98,7 +98,7 @@ const AppRoutes: React.FC = () => {
 
       {/* 公开路由 - 测试工具页面 */}
       <Route path="/" element={<Layout />}>
-        {/* 测试工具 - 公开访问，但功能需要登�?*/}
+        {/* 测试工具 - 公开访问，但功能需要登�?*/}
         <Route path="test" element={<Navigate to="/website-test" replace />} />
         <Route path="website-test" element={
           <LazyPageWrapper>
@@ -175,7 +175,7 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         } />
 
-        {/* 公开的测试历史查�?*/}
+        {/* 公开的测试历史查�?*/}
         <Route path="test-history" element={
           <LazyPageWrapper>
             <TestHistory />
@@ -214,7 +214,7 @@ const AppRoutes: React.FC = () => {
       {/* 首页重定向到网站测试 */}
       <Route index element={<Navigate to="/website-test" replace />} />
 
-      {/* 仪表�?- 需要登�?*/}
+      {/* 仪表�?- 需要登�?*/}
       <Route path="dashboard" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -223,7 +223,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 数据管理 - 需要登�?*/}
+      {/* 数据管理 - 需要登�?*/}
       <Route path="data-storage" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -270,7 +270,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 报告管理 - 需要登�?*/}
+      {/* 报告管理 - 需要登�?*/}
       <Route path="reports" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -279,7 +279,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 用户相关 - 需要登�?*/}
+      {/* 用户相关 - 需要登�?*/}
       <Route path="profile" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -302,7 +302,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 集成和配�?- 需要登�?*/}
+      {/* 集成和配�?- 需要登�?*/}
       <Route path="cicd" element={<Navigate to="/cicd-integration" replace />} />
       <Route path="integrations" element={
         <ProtectedRoute>
@@ -333,7 +333,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 调度和任�?- 需要登�?*/}
+      {/* 调度和任�?- 需要登�?*/}
       <Route path="test-schedule" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -349,7 +349,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 用户设置 - 需要登�?*/}
+      {/* 用户设置 - 需要登�?*/}
       <Route path="settings" element={
         <ProtectedRoute>
           <LazyPageWrapper>
