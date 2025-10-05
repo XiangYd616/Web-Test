@@ -152,8 +152,10 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    */
   const loadTestHistory = useCallback(async () => {
     try {
-      const history = await engine.getTestHistory(selectedTestType);
-      setTestHistory(history);
+      const history = await engine.getTestHistory?.(selectedTestType);
+      if (history) {
+        setTestHistory(history);
+      }
     } catch (error) {
       console.error('加载测试历史失败:', error);
     }
@@ -164,8 +166,10 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    */
   const loadTestStatistics = useCallback(async () => {
     try {
-      const stats = engine.getStats();
-      setTestStatistics(stats);
+      const stats = engine.getStats?.();
+      if (stats) {
+        setTestStatistics(stats);
+      }
     } catch (error) {
       console.error('加载测试统计失败:', error);
     }
@@ -184,7 +188,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
          * @param {Object} params - 参数对象
          * @returns {Promise<Object>} 返回结果
          */
-        const status = await engine.getTestStatus(testId);
+        const status = await engine.getTestStatus?.(testId);
         if (status) {
           setRealTimeMetrics({
             progress: status.progress,
@@ -240,7 +244,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
       // 合并默认配置
       const finalConfig = { ...defaultConfig, ...values };
 
-      const testId = await engine.executeTest({
+      const testId = await engine.executeTest?.({
         testType: selectedTestType,
         config: finalConfig,
         options: {
@@ -248,6 +252,10 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
           tags: [selectedTestType, 'unified-engine', 'web-ui']
         }
       });
+
+      if (!testId) {
+        throw new Error('测试启动失败');
+      }
 
       console.log(`🚀 测试已启动: ${testId}`);
 
@@ -287,7 +295,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
     if (!enableExport) return;
 
     try {
-      const result = await engine.getTestResult(testId);
+      const result = await engine.getTestResult?.(testId);
       if (result) {
         // 创建下载链接
         const dataStr = format === 'json' ?
@@ -355,11 +363,11 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
                 onChange={setSelectedTestType}
                 loading={false}
               >
-                {engine.supportedTypes.map(type => (
+                {engine.supportedTypes?.map(type => (
                   <Option key={type} value={type}>
                     {getTestTypeLabel(type)}
                   </Option>
-                ))}
+                )) || []}
               </Select>
             </Form.Item>
           </Col>

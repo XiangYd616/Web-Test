@@ -176,14 +176,14 @@ const CacheStatsCard: React.FC<{
           </div>
 
           {/* 操作统计 */}
-          {stats && stats?.operations > 0 && (
+          {stats && stats.operations && stats.operations > 0 && (
             <div className="bg-gray-700/30 rounded-lg p-3">
               <div className="flex items-center space-x-2 mb-2">
                 <Activity className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-400">总操作数</span>
               </div>
               <span className="text-xl font-bold text-white">
-                {stats?.operations.toLocaleString()}
+                {stats.operations.toLocaleString()}
               </span>
             </div>
           )}
@@ -317,10 +317,10 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
   // 计算总体统计
   const totalStats = cacheTypes.reduce((acc, cache) => {
     if (cache.stats) {
-      acc.hits += cache.stats.hits;
-      acc.misses += cache.stats.misses;
-      acc.size += cache.stats.size;
-      acc.memoryUsage += cache.stats.memoryUsage;
+      acc.hits += cache.stats.hits || 0;
+      acc.misses += cache.stats.misses || 0;
+      acc.size += cache.stats.size || 0;
+      acc.memoryUsage += cache.stats.memoryUsage || 0;
       acc.operations += cache.stats.operations || 0;
     }
     return acc;

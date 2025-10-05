@@ -341,7 +341,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
   // 生成内容质量部分
   const generateContentQualitySection = () => {
-    if (!reportData.basicSEO) return null;
+    if (!reportData.basicSEO || !reportData.basicSEO.contentQuality) return null;
 
     return {
       score: reportData.basicSEO.contentQuality.score,

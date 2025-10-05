@@ -62,6 +62,17 @@ export interface SecurityTestProgress extends TestProgress {
   securityScore?: number;
   vulnerabilities?: any[];
   threatLevel?: string;
+  phase?: 'initializing' | 'scanning' | 'analyzing' | 'reporting' | string;
+  currentModule?: string;
+  currentCheck?: string;
+  progress?: number;
+  estimatedTimeRemaining?: number;
+  statistics?: {
+    totalChecks?: number;
+    passedChecks?: number;
+    failedChecks?: number;
+    warningChecks?: number;
+  };
 }
 
 export interface TestMetrics extends FlexibleObject {
@@ -172,6 +183,13 @@ export interface QueueStats extends FlexibleObject {
   failed: number;
   total?: number;
   avgWaitTime?: number;
+  totalQueued?: number;
+  totalRunning?: number;
+  totalCompleted?: number;
+  totalFailed?: number;
+  averageExecutionTime?: number;
+  nextInQueue?: any;
+  runningTests?: any[];
 }
 
 export interface RealTimeMetrics extends FlexibleObject {
