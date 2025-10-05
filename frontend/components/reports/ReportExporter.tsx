@@ -12,7 +12,7 @@ import type { FC } from 'react';;
 import { EnhancedReportGenerator, ExportFormat, ReportConfig, ReportData } from '../../services/reportGeneratorService';
 
 interface ReportExporterProps {
-  testResults: unknown[];
+  testResults: any[];
   analytics?: any;
   onExport?: (format: ExportFormat, config: ReportConfig) => void;
   className?: string;

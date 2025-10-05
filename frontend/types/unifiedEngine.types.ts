@@ -41,3 +41,34 @@ export interface TestProgress extends FlexibleObject {
   message?: string;
   timestamp: number;
 }
+
+export interface UnifiedTestConfig extends TestConfig {
+  id?: string;
+  name?: string;
+  description?: string;
+  priority?: 'low' | 'medium' | 'high';
+  tags?: string[];
+}
+
+export interface UnifiedTestResult extends TestResult {
+  id: string;
+  testId: string;
+  type: string;
+  status: string;
+  startTime: Date;
+  endTime?: Date;
+  duration?: number;
+  results?: any;
+  metrics?: Record<string, any>;
+  score?: number;
+  grade?: string;
+  summary?: string;
+  errors?: string[];
+  recommendations?: Array<{
+    category: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    title: string;
+    description: string;
+    action: string;
+  }>;
+}

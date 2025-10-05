@@ -13,7 +13,7 @@ import { toast } from 'react-hot-toast';
 /**
  * 自定义结果展示组件
  */
-const StressTestResultDisplay: React.FC<{ result: unknown }> = ({ result }) => {
+const StressTestResultDisplay: React.FC<{ result: any }> = ({ result }) => {
   if (!result || !result.summary) return null;
 
   const getPerformanceRating = () => {

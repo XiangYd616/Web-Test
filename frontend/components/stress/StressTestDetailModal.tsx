@@ -33,7 +33,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
   const navigate = useNavigate();
 
   // 统一的错误率计算函数
-  const calculateErrorRate = (record: unknown, metrics: any = {}) => {
+  const calculateErrorRate = (record: any, metrics: any = {}) => {
     if (!record) return 0;
 
     // 优先使用已计算的错误率

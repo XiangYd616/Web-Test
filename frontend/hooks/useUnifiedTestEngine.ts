@@ -32,6 +32,12 @@ export interface UseUnifiedTestEngineReturn {
   executingTest?: any;
   testResults?: any[];
   results?: any[];
+  // Legacy compatibility methods
+  getTestProgress?: () => number;
+  runLegacyTest?: (config: any) => Promise<any>;
+  resetEngine?: () => void;
+  runSimpleTest?: (config: any) => Promise<any>;
+  getUniversalState?: () => any;
 }
 
 export const useUnifiedTestEngine = (): UseUnifiedTestEngineReturn => {
