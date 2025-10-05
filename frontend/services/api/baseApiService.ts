@@ -273,6 +273,34 @@ export class BaseApiService {
   async getVersion(): Promise<ApiResponse<{ version: string; build: string }>> {
     return this.get('/version');
   }
+
+  /**
+   * 🔧 公共GET方法（别名）
+   */
+  async apiGet<T = any>(endpoint: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+    return this.get<T>(endpoint, config);
+  }
+
+  /**
+   * 🔧 公共POST方法（别名）
+   */
+  async apiPost<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+    return this.post<T>(endpoint, data, config);
+  }
+
+  /**
+   * 🔧 公共PUT方法（别名）
+   */
+  async apiPut<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+    return this.put<T>(endpoint, data, config);
+  }
+
+  /**
+   * 🔧 公共DELETE方法（别名）
+   */
+  async apiDelete<T = any>(endpoint: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+    return this.delete<T>(endpoint, config);
+  }
 }
 
 // 创建统一API服务实例

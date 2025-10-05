@@ -19,7 +19,20 @@ import {
 } from '../../../shared/types/standardApiTypes';
 
 // 使用标准类型作为主要接口
-export type ApiResponse<T = any> = StandardApiResponse<T>;
+// 添加向后兼容的扩展，包含所有可能的属性
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string | StandardApiError;
+  errors?: string[];
+  message?: string;
+  meta?: StandardApiMeta;
+  pagination?: any;
+  timestamp?: string;
+  requestId?: string;
+  [key: string]: any;
+}
+
 export type ApiError = StandardApiError;
 export type ApiMeta = StandardApiMeta;
 

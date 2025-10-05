@@ -237,6 +237,7 @@ export interface AuthContextType {
   // 状态
   user: User | null;
   isLoading: boolean;
+  loading?: boolean; // 别名，向后兼容
   isAuthenticated: boolean;
   isAdmin: boolean;
   error: string | null;
