@@ -24,6 +24,7 @@ export interface SEOAnalysisResult {
     sitemap: boolean;
   };
   contentQuality?: {
+    score?: number;
     readability?: number;
     keywordDensity?: number;
     headingStructure?: boolean;
@@ -31,15 +32,38 @@ export interface SEOAnalysisResult {
     internalLinks?: number;
     externalLinks?: number;
     contentLength?: number;
+    titleTag?: string;
+    metaDescription?: string;
+    headings?: any;
+    content?: any;
+    images?: any;
+    links?: any;
   };
   accessibility?: {
     score?: number;
     issues?: string[];
   };
   structuredData?: {
+    score?: number;
     present?: boolean;
     types?: string[];
     errors?: string[];
+    schemas?: any[];
+    jsonLd?: any;
+    microdata?: any;
+    issues?: string[];
+  };
+  metadata?: {
+    title?: string;
+    description?: string;
+    keywords?: string[];
+    [key: string]: any;
+  };
+  socialMedia?: {
+    score?: number;
+    ogTags?: any;
+    twitterCards?: any;
+    [key: string]: any;
   };
 }
 

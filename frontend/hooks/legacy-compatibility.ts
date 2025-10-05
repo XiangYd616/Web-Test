@@ -14,17 +14,19 @@ export const useUniversalTest = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [config, setConfig] = useState<any>(null);
 
-  const runTest = async (config: any) => {
+  const runTest = async (testConfig: any) => {
     setIsRunning(true);
     setError(null);
+    setConfig(testConfig);
     try {
       // Simulate test execution
       await new Promise(resolve => setTimeout(resolve, 1000));
       const testResult: TestResult = {
         id: Math.random().toString(36),
-        testId: config.id || 'test-1',
-        type: config.type || 'performance',
+        testId: testConfig.id || 'test-1',
+        type: testConfig.type || 'performance',
         status: 'completed',
         startTime: new Date(),
         endTime: new Date(),
@@ -47,12 +49,14 @@ export const useUniversalTest = () => {
     setIsRunning(false);
     setResult(null);
     setError(null);
+    setConfig(null);
   };
 
   return {
     isRunning,
     result,
     error,
+    config,
     runTest,
     cancelTest,
     reset,

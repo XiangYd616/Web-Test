@@ -38,6 +38,11 @@ interface TechnicalSEOResult {
     https: boolean;
     issues?: string[];
   };
+  hreflang?: {
+    present?: boolean;
+    correct?: boolean;
+    issues?: string[];
+  };
 }
 
 interface TechnicalResultsProps {

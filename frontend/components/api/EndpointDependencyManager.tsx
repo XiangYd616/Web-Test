@@ -124,17 +124,8 @@ export const EndpointDependencyManager: React.FC<EndpointDependencyManagerProps>
     onEndpointsChange(updatedEndpoints);
   }, [endpoints, onEndpointsChange]);
 
-  const _addDataMapping = useCallback((endpointId: string, mapping: EndpointDependency['dataMapping'][0]) => {
-
-      /**
-
-       * if功能函数
-
-       * @param {Object} params - 参数对象
-
-       * @returns {Promise<Object>} 返回结果
-
-       */
+  const _addDataMapping = useCallback((endpointId: string, mapping: NonNullable<EndpointDependency['dataMapping']>[0]) => {
+    // 添加数据映射
     const updatedEndpoints = endpoints.map(endpoint => {
       if (endpoint.id === endpointId) {
         return {
