@@ -4,7 +4,7 @@
  */
 
 // 导出共享组件
-export { TestConfigPanel } from './TestConfigPanel';
+// export { TestConfigPanel } from './TestConfigPanel'; // 文件不存在
 export { TestProgressBar } from './TestProgressBar';
 export { TestResultsPanel } from './TestResultsPanel';
 
@@ -12,11 +12,11 @@ export { TestResultsPanel } from './TestResultsPanel';
 export { DataTable } from './index.tsx';
 
 // 导出类型定义
-export type {
-  ConfigField,
-  ConfigSection,
-  TestConfigPanelProps
-} from './TestConfigPanel';
+// export type {
+//   ConfigField,
+//   ConfigSection,
+//   TestConfigPanelProps
+// } from './TestConfigPanel'; // 文件不存在
 
 export type {
   TestProgressBarProps

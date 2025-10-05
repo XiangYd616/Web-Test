@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { ReactNode } from 'react';
 import { Loader2, Shield, User, Key, Mail, RefreshCw } from 'lucide-react';
 
 export enum AuthLoadingType {

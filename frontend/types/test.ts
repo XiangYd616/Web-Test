@@ -42,6 +42,31 @@ export interface TestResult {
   results?: any;
   errors?: string[];
   metrics?: Record<string, any>;
+  // 新增属性
+  score?: number;
+  grade?: string;
+  summary?: string;
+  testType?: TestType;
+  recommendations?: Array<{
+    category: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    title: string;
+    description: string;
+    action: string;
+    solution?: string; // 新增
+  }>;
+  details?: Record<string, any>;
+  // 更多属性
+  overallScore?: number;
+  timestamp?: string | Date;
+  tests?: Record<string, any>;
+  findings?: any[];
+  issues?: any[];
+  engine?: string;
+  scores?: {
+    overall?: number;
+    [key: string]: any;
+  };
 }
 
 export interface TestRecord {

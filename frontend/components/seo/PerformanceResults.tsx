@@ -7,8 +7,31 @@
 
 import { AlertTriangle, CheckCircle, Info, Lightbulb, TrendingUp, XCircle, Zap } from 'lucide-react';
 import React from 'react';
-import type { FC } from 'react';
-import { PerformanceResult } from '../../services/realSEOAnalysisEngine';
+
+// 本地类型定义
+interface PerformanceResult {
+  score: number;
+  loadTime: number;
+  firstContentfulPaint: number;
+  largestContentfulPaint: number;
+  firstInputDelay: number;
+  cumulativeLayoutShift: number;
+  pageSize: number;
+  requests: number;
+  webVitalsAssessment: {
+    lcp: 'good' | 'needs-improvement' | 'poor';
+    fid: 'good' | 'needs-improvement' | 'poor';
+    cls: 'good' | 'needs-improvement' | 'poor';
+  };
+  opportunities?: Array<{
+    title: string;
+    description: string;
+    impact: 'high' | 'medium' | 'low';
+    savings?: number;
+  }>;
+  issues?: string[];
+  pageSpeedData?: any;
+}
 
 interface PerformanceResultsProps {
   results: PerformanceResult;

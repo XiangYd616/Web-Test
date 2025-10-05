@@ -7,8 +7,38 @@
 
 import { AlertTriangle, CheckCircle, FileText, Info, Link, Search, XCircle } from 'lucide-react';
 import React from 'react';
-import type { FC } from 'react';
-import { TechnicalSEOResult } from '../../services/realSEOAnalysisEngine';
+
+// 本地类型定义
+interface TechnicalSEOResult {
+  score: number;
+  robotsTxt?: {
+    exists: boolean;
+    accessible: boolean;
+    issues?: string[];
+  };
+  sitemap?: {
+    exists: boolean;
+    accessible: boolean;
+    urls?: number;
+    issues?: string[];
+  };
+  canonicalTags?: {
+    present: boolean;
+    correct: boolean;
+    issues?: string[];
+  };
+  metaRobots?: {
+    present: boolean;
+    content?: string;
+    issues?: string[];
+  };
+  urlStructure?: {
+    score: number;
+    friendly: boolean;
+    https: boolean;
+    issues?: string[];
+  };
+}
 
 interface TechnicalResultsProps {
   results: TechnicalSEOResult;

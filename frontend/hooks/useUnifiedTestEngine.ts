@@ -13,6 +13,25 @@ export interface UseUnifiedTestEngineReturn {
   runTest: (config: UnifiedTestConfig) => Promise<void>;
   cancelTest: () => Promise<void>;
   reset: () => void;
+  // 新增的方法和属性
+  getStats?: () => any;
+  fetchSupportedTypes?: () => Promise<void>;
+  isConnected?: boolean;
+  engineVersion?: string;
+  supportedTypes?: string[];
+  activeTests?: Map<string, any>;
+  lastError?: Error | null;
+  getTestHistory?: () => any[];
+  getTestStatus?: (testId: string) => any;
+  connectWebSocket?: () => void;
+  executeTest?: (config: any) => Promise<any>;
+  subscribeToTest?: (testId: string, callback: (data: any) => void) => void;
+  getTestResult?: (testId: string) => Promise<any>;
+  clearCompletedTests?: () => void;
+  cancelAllTests?: () => Promise<void>;
+  executingTest?: any;
+  testResults?: any[];
+  results?: any[];
 }
 
 export const useUnifiedTestEngine = (): UseUnifiedTestEngineReturn => {

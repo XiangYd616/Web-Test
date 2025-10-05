@@ -470,3 +470,5 @@ export const PerformanceBudgetManager: React.FC<PerformanceBudgetManagerProps> =
     </div>
   );
 };
+
+export default PerformanceBudgetManager;

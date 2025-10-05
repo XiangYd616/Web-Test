@@ -503,3 +503,5 @@ export const BrowserMarketAnalyzer: React.FC<BrowserMarketAnalyzerProps> = ({
     </div>
   );
 };
+
+export default BrowserMarketAnalyzer;
