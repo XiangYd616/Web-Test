@@ -635,19 +635,20 @@ class TestApiService implements TestApiClient {
     });
 
     // 转换为TestExecutionResponse格式
+    const responseData = result.success && result.data ? result.data : {};
     return {
       ...result,
       data: {
-        ...result?.data,
+        ...responseData,
         test_type,
         target_url,
         created_at: new Date().toISOString(),
-        status: result?.data.status === TestStatus.RUNNING ? 'running' :
-          result?.data.status === TestStatus.COMPLETED ? 'completed' :
-            result?.data.status === TestStatus.FAILED ? 'failed' :
-              result?.data.status === TestStatus.CANCELLED ? 'cancelled' : 'pending'
+        status: (responseData as any)?.status === TestStatus.RUNNING ? 'running' :
+          (responseData as any)?.status === TestStatus.COMPLETED ? 'completed' :
+            (responseData as any)?.status === TestStatus.FAILED ? 'failed' :
+              (responseData as any)?.status === TestStatus.CANCELLED ? 'cancelled' : 'pending'
       }
-    };
+    } as ApiResponse<TestExecutionResponse>;
   }
 
   // ==================== 用户体验测试 ====================

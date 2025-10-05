@@ -97,7 +97,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({
       if (!acc[permission.category]) {
         acc[permission.category] = [];
       }
-      acc[permission.category].push(permission);
+      acc[permission.category]!.push(permission);
       return acc;
     }, {} as Record<string, Permission[]>);
 
@@ -390,7 +390,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
   }, [permissions, searchTerm]);
 
   const handleRoleSelect = (role: Role) => {
-    setSelectedRole(selectedRole.id === role.id ? null : role);
+    setSelectedRole(selectedRole?.id === role.id ? null : role);
   };
 
   const handlePermissionToggle = (permissionId: string) => {
@@ -490,7 +490,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
                     key={role.id}
                     role={role}
                     permissions={permissions}
-                    isSelected={selectedRole.id === role.id}
+                    isSelected={selectedRole?.id === role.id}
                     onSelect={handleRoleSelect}
                     showActions={mode === 'admin'}
                   />

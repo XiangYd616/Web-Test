@@ -26,9 +26,9 @@ import { Card,
   TableContainer,
   TableHead,
   TableRow,
-  CircularProgress } from '@mui/material';
-import { Grid } from '@mui/material';
-import {TrendingUp, TrendingDown, TrendingFlat, Refresh, Download, Warning, CheckCircle, Error, Speed, People, Assessment, Memory, Timer} from '@mui/icons-material';
+  CircularProgress,
+  Grid } from '@mui/material';
+import {TrendingUp, TrendingDown, TrendingFlat, Refresh, Download, Warning, CheckCircle, Error as ErrorIcon, Speed, People, Assessment, Memory, Timer} from '@mui/icons-material';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell} from 'recharts';
 
 import { useAppState } from '../../hooks/useAppState';
@@ -127,14 +127,14 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('鑾峰彇鏁版嵁澶辫触: ' + response.statusText);
+        throw new globalThis.Error('鑾峰彇鏁版嵁澶辫触: ' + response.statusText);
       }
 
       const result = await response.json();
       if (result.success) {
         setDashboardData(result.data);
       } else {
-        throw new Error(result.error || '鑾峰彇鏁版嵁澶辫触');
+        throw new globalThis.Error(result.error || '鑾峰彇鏁版嵁澶辫触');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '鑾峰彇鏁版嵁澶辫触');
@@ -144,7 +144,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
     }
   };
 
-  // 鍒濆鍖栧拰鑷姩鍒锋柊
+  // 鍒濆鍖栧拰鑷姩鍒锋柊
   useEffect(() => {
     fetchDashboardData();
 
@@ -153,6 +153,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       setRefreshInterval(interval);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [autoRefresh]);
 
   // 娓呯悊瀹氭椂鍣?
@@ -191,11 +192,11 @@ const BusinessAnalyticsDashboard: React.FC = () => {
     return <TrendingFlat color="action" />;
   };
 
-  // 鏍煎紡鍖栧浘琛ㄦ暟鎹?
+  // 鍖栧拰鑷姩鑾姣锹鍒澶鐱陿
   const _formatChartData = (data: unknown[]) => {
     return data.map((item, index) => ({
-      time: new Date(item.timestamp).toLocaleTimeString(),
-      ...item
+      time: new Date((item as any).timestamp).toLocaleTimeString(),
+      ...item as any
     }));
   };
 

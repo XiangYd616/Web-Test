@@ -165,16 +165,16 @@ export const DataStateManager: React.FC<DataStateManagerProps> = ({
       case 'loading':
         return renderLoading ?
           renderLoading() :
-          <DefaultLoadingComponent text={loadingText} className={loadingClassName} />;
+          <DefaultLoadingComponent text={loadingText} {...(loadingClassName && { className: loadingClassName })} />;
 
       case 'error':
         return renderError ?
           renderError(error || '未知错误', onRetry) :
           <DefaultErrorComponent
             error={error || '未知错误'}
-            onRetry={onRetry}
+            {...(onRetry && { onRetry })}
             showRetryButton={showRetryButton}
-            className={errorClassName}
+            {...(errorClassName && { className: errorClassName })}
           />;
 
       case 'success':
@@ -182,7 +182,7 @@ export const DataStateManager: React.FC<DataStateManagerProps> = ({
         if (isEmpty || (Array.isArray(data) && data.length === 0) || (!data && data !== 0)) {
           return renderEmpty ?
             renderEmpty() :
-            <DefaultEmptyComponent text={emptyText} className={emptyClassName} />;
+            <DefaultEmptyComponent text={emptyText} {...(emptyClassName && { className: emptyClassName })} />;
         }
 
         // 渲染成功状态

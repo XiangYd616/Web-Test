@@ -607,9 +607,9 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   }, []);
 
   // 计算派生状态
-  const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.PENDING));
-  const isCompleted = status === 'completed';
-  const hasError = status === 'failed';
+  const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.IDLE));
+  const isCompleted = status === TestStatus.COMPLETED;
+  const hasError = status === TestStatus.FAILED;
   const currentQuery = config.customQueries.length > 0 ? config.customQueries[0]?.name || null : null;
 
   return {

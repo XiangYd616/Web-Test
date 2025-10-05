@@ -264,6 +264,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
       const interval = setInterval(loadPerformanceData, refreshInterval);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [autoRefresh, refreshInterval, loadPerformanceData]);
 
   const filteredMetrics = data?.metrics.filter(metric => 

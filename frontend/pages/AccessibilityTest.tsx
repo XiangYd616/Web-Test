@@ -5,7 +5,7 @@
 
 import {CheckCircle, Loader, Play, RotateCcw, Settings, Square, Users, AlertTriangle, Info, XCircle} from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { URLInput } from '../components/ui';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';

@@ -105,7 +105,9 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
     if (!optimizedData.data.length) return '';
 
     try {
-      const startTime = new Date(optimizedData.data[0].timestamp).getTime();
+      const firstDataPoint = optimizedData.data[0];
+      if (!firstDataPoint) return '';
+      const startTime = new Date(firstDataPoint.timestamp).getTime();
       const currentTime = new Date(value).getTime();
       const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
@@ -135,7 +137,9 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
     if (!optimizedData.data.length) return '';
 
     try {
-      const startTime = new Date(optimizedData.data[0].timestamp).getTime();
+      const firstDataPoint = optimizedData.data[0];
+      if (!firstDataPoint) return '';
+      const startTime = new Date(firstDataPoint.timestamp).getTime();
       const currentTime = new Date(value).getTime();
       const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
@@ -252,8 +256,8 @@ export const PerformanceMonitor: React.FC<{
 
   useEffect(() => {
     const updateStats = () => {
-      const perfMetrics = dataVisualizationOptimizer.getPerformanceMetrics();
-      const cacheStats = dataVisualizationOptimizer.getCacheStats();
+      const perfMetrics = _dataVisualizationOptimizer.getPerformanceMetrics();
+      const cacheStats = _dataVisualizationOptimizer.getCacheStats();
 
       const combinedStats = {
         ...perfMetrics,

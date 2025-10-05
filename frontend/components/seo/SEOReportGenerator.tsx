@@ -307,9 +307,9 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
     if (reportData.basicSEO) {
       scores.overall = reportData.basicSEO.score;
-      scores.technical = reportData.basicSEO.technicalSEO.score;
-      scores.content = reportData.basicSEO.contentQuality.score;
-      scores.accessibility = reportData.basicSEO.accessibility.score;
+      scores.technical = reportData.basicSEO.technicalSEO?.score || 0;
+      scores.content = reportData.basicSEO.contentQuality?.score || 0;
+      scores.accessibility = reportData.basicSEO.accessibility?.score || 0;
     }
 
     if (reportData.mobileSEO) {
@@ -361,7 +361,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
   // 生成结构化数据部分
   const generateStructuredDataSection = () => {
-    if (!reportData.basicSEO) return null;
+    if (!reportData.basicSEO || !reportData.basicSEO.structuredData) return null;
 
     return {
       score: reportData.basicSEO.structuredData.score,
@@ -485,32 +485,32 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
         <p><strong>测试时间:</strong> ${new Date(reportData.timestamp).toLocaleString('zh-CN')}</p>
         <p><strong>报告模板:</strong> ${template.name}</p>
         
-        ${content.summary ? `
+        ${(content as any).summary ? `
         <h2>执行摘要</h2>
         <div class="summary-grid">
             <div class="summary-card">
-                <div class="score">${content.summary.overallScore}</div>
+                <div class="score">${(content as any).summary.overallScore}</div>
                 <div>总体评分</div>
             </div>
             <div class="summary-card">
-                <div class="score">${content.summary.totalIssues}</div>
+                <div class="score">${(content as any).summary.totalIssues}</div>
                 <div>发现问题</div>
             </div>
             <div class="summary-card">
-                <div class="score">${content.summary.criticalIssues}</div>
+                <div class="score">${(content as any).summary.criticalIssues}</div>
                 <div>关键问题</div>
             </div>
         </div>
         ` : ''}
         
-        ${content.recommendations ? `
+        ${(content as any).recommendations ? `
         <h2>优化建议</h2>
-        ${content.recommendations.map((rec: unknown, index: number) => `
+        ${(content as any).recommendations.map((rec: any, index: number) => `
             <div class="recommendation">
-                <h4>${rec.title}</h4>
-                <p><strong>优先级:</strong> ${rec.priority === 'high' ? '高' : rec.priority === 'medium' ? '中' : '低'}</p>
-                <p><strong>说明:</strong> ${rec.description}</p>
-                <p><strong>实施方案:</strong> ${rec.implementation || rec.action}</p>
+                <h4>${rec?.title || ''}</h4>
+                <p><strong>优先级:</strong> ${rec?.priority === 'high' ? '高' : rec?.priority === 'medium' ? '中' : '低'}</p>
+                <p><strong>说明:</strong> ${rec?.description || ''}</p>
+                <p><strong>实施方案:</strong> ${rec?.implementation || rec?.action || ''}</p>
             </div>
         `).join('')}
         ` : ''}
@@ -693,7 +693,7 @@ ${JSON.stringify(content, null, 2)}
         
         <div className="text-center p-3 bg-purple-50 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">
-            {reportData.basicSEO?.structuredData.schemas.length || 0}
+            {reportData.basicSEO?.structuredData?.schemas?.length || 0}
           </div>
           <div className="text-sm text-purple-600">结构化数据</div>
         </div>

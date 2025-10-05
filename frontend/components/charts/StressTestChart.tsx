@@ -2,7 +2,7 @@
 import React from 'react';
 import { BarChart3, Download, Settings, TrendingUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import {TestPhase, TestState} from '../../services/testStateManagerService';
+import {TestPhase, TestState, TestDataPoint, RealTimeMetrics} from '../../services/testStateManagerService';
 
 import '../../styles/optimized-charts.css';
 
@@ -141,17 +141,20 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
       right: generateYAxisLabels(scales.throughput.min, scales.throughput.max)
     };
 
-    // 生成时间标签（减少标签数量避免重叠）
+    // 生成时间标签(减少标签数量避免重叠)
     const timeLabels = [];
     const labelStep = Math.max(1, Math.floor(filteredData.length / 8)); // 最多8个时间标签
     for (let i = 0; i < filteredData.length; i += labelStep) {
-      timeLabels.push(
-        new Date(filteredData[i].timestamp).toLocaleTimeString('zh-CN', {
-          hour12: false,
-          minute: '2-digit',
-          second: '2-digit'
-        })
-      );
+      const dataPoint = filteredData[i];
+      if (dataPoint) {
+        timeLabels.push(
+          new Date(dataPoint.timestamp).toLocaleTimeString('zh-CN', {
+            hour12: false,
+            minute: '2-digit',
+            second: '2-digit'
+          })
+        );
+      }
     }
 
     // 转换数据点，使用独立的归一化

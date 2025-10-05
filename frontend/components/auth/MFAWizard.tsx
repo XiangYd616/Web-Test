@@ -115,7 +115,10 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
      */
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex < stepOrder.length - 1) {
-      setCurrentStep(stepOrder[currentIndex + 1]);
+      const nextStep = stepOrder[currentIndex + 1];
+      if (nextStep) {
+        setCurrentStep(nextStep);
+      }
     }
   };
 
@@ -133,7 +136,10 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
      */
     const currentIndex = stepOrder.indexOf(currentStep);
     if (currentIndex > 0) {
-      setCurrentStep(stepOrder[currentIndex - 1]);
+      const prevStep = stepOrder[currentIndex - 1];
+      if (prevStep) {
+        setCurrentStep(prevStep);
+      }
     }
   };
 
@@ -292,10 +298,8 @@ export const MFAWizard: React.FC<MFAWizardProps> = ({
       </div>
 
       <MFASetup
-        userId={userId}
-        userEmail={userEmail}
-        onSetupComplete={handleSetupComplete}
-        onClose={() => setCurrentStep('benefits')}
+        onComplete={handleSetupComplete}
+        onCancel={() => setCurrentStep('benefits')}
       />
 
       <div className="flex justify-center">

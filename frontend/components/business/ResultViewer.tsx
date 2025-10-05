@@ -17,7 +17,7 @@ import {
     TrendingUp
 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import {Badge, Button, Card, Input, Modal, Select, Table} from '../ui';
+import {Badge, Button, Card, Input, Modal, Select, Table, TableColumn} from '../ui';
 import { TestResult } from '../../types/test';
 
 // 本地SelectOption类型定义

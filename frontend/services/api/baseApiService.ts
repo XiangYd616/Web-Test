@@ -117,9 +117,10 @@ export class BaseApiService {
           console.log(`✅ API请求成功: ${method} ${url}`);
           return responseData;
         } else {
-          const errorMessage = typeof responseData.error === 'string'
-            ? responseData.error
-            : responseData.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+          const errorData = 'error' in responseData ? responseData.error : undefined;
+          const errorMessage = typeof errorData === 'string'
+            ? errorData
+            : (typeof errorData === 'object' && errorData && 'message' in errorData) ? (errorData as any).message : `HTTP ${response.status}: ${response.statusText}`;
           throw new Error(errorMessage);
         }
       } catch (error) {
@@ -171,9 +172,9 @@ export class BaseApiService {
         };
 
         // 只在存在时才添加可选属性
-        if (data?.error) result.error = data?.error;
-        if (data?.message) result.message = data?.message;
-        if (data?.errors) result.errors = data?.errors;
+        if (data?.error !== undefined) (result as any).error = data?.error;
+        if (data?.message) (result as any).message = data?.message;
+        if (data?.errors) (result as any).errors = data?.errors;
 
         return result;
       }
@@ -216,14 +217,14 @@ export class BaseApiService {
   /**
    * 🔧 GET请求
    */
-  protected async get<T = any>(endpoint: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+  public async get<T = any>(endpoint: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...config, method: 'GET' });
   }
 
   /**
    * 🔧 POST请求
    */
-  protected async post<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  public async post<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
       method: 'POST',
@@ -234,7 +235,7 @@ export class BaseApiService {
   /**
    * 🔧 PUT请求
    */
-  protected async put<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  public async put<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PUT',
@@ -245,14 +246,14 @@ export class BaseApiService {
   /**
    * 🔧 DELETE请求
    */
-  protected async delete<T = any>(endpoint: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+  public async delete<T = any>(endpoint: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...config, method: 'DELETE' });
   }
 
   /**
    * 🔧 PATCH请求
    */
-  protected async patch<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  public async patch<T = any>(endpoint: string, data?: unknown, config?: Omit<RequestConfig, 'method'>): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PATCH',

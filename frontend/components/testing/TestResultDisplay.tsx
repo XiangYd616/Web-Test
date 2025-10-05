@@ -142,6 +142,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
   // 分组详情
   const groupedDetails = useMemo(() => {
     const groups: Record<string, TestResultDetail[]> = {};
+    if (!primaryResult?.details) return groups;
     primaryResult.details.forEach(detail => {
       if (!groups[detail.category]) {
         groups[detail.category] = [];
@@ -149,7 +150,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
       groups[detail.category].push(detail);
     });
     return groups;
-  }, [primaryResult.details]);
+  }, [primaryResult?.details]);
 
   // 筛选推荐
   const filteredRecommendations = useMemo(() => {
@@ -286,7 +287,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
 
   // 渲染摘要卡片
   const renderSummaryCards = () => {
-    const { summary } = primaryResult;
+    const summary = primaryResult?.summary || { total: 0, passed: 0, warnings: 0, failed: 0 };
     const cards = [
       { label: '总计', value: summary.total, color: 'blue', icon: FileText },
       { label: '通过', value: summary.passed, color: 'green', icon: CheckCircle },

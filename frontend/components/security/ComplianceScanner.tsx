@@ -215,9 +215,9 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
         metrics.estimatedRemediationCost += activeRules.find(r => r.id === result.ruleId)?.remediation.cost || 0;
         
         const rule = activeRules.find(r => r.id === result.ruleId);
-        if (rule.businessImpact === 'critical') {
+        if (rule && rule.businessImpact === 'critical') {
           metrics.criticalViolations++;
-          metrics.highRiskRegulations.add(rule?.regulation);
+          metrics.highRiskRegulations.add(rule.regulation);
         }
       }
     });
@@ -405,7 +405,7 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
                   {[...new Set(activeRules.map(r => r.regulation))].map(reg => {
                     const regResults = results.filter(r => {
                       const rule = activeRules.find(rule => rule.id === r.ruleId);
-                      return rule.regulation === reg;
+                      return rule && rule.regulation === reg;
                     });
                     const compliantCount = regResults.filter(r => r.status === 'compliant').length;
                     const compliance = regResults.length > 0 ? (compliantCount / regResults.length) * 100 : 0;
@@ -448,7 +448,7 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
             .filter(result => {
               if (activeRegulation === 'all') return true;
               const rule = activeRules.find(r => r.id === result.ruleId);
-              return rule.regulation === activeRegulation;
+              return rule && rule.regulation === activeRegulation;
             })
             .map((result, index) => {
               const rule = activeRules.find(r => r.id === result.ruleId);

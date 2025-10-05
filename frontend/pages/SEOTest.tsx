@@ -1,6 +1,6 @@
 ﻿import {AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap, BarChart3, Download} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { URLInput } from '../components/ui';
 import type { } from '../types';
 import StructuredDataAnalyzer from '../components/seo/StructuredDataAnalyzer';

@@ -55,7 +55,17 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
 
   // 使用统一测试引擎Hook
   const engine = useUnifiedTestEngine();
-  const stats = engine.getStats();
+  const stats = engine.getStats?.() || {
+    totalActiveTests: 0,
+    runningTests: 0,
+    completedTests: 0,
+    failedTests: 0,
+    performance: {
+      successRate: 0,
+      errorRate: 0,
+      averageExecutionTime: 0
+    }
+  };
 
   /**
    * 手动刷新
@@ -144,7 +154,7 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
         <Col span={6}>
           <Statistic
             title="支持类型"
-            value={engine.supportedTypes.length}
+            value={engine.supportedTypes?.length || 0}
             suffix="种"
             valueStyle={{ color: '#52c41a' }}
             prefix={<ThunderboltOutlined />}
@@ -274,7 +284,7 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
       className="mb-4"
     >
       <Space wrap>
-        {engine.supportedTypes.map(type => (
+        {engine.supportedTypes?.map(type => (
           <Tag
             key={type}
             color="blue"
@@ -282,10 +292,10 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
           >
             {getTestTypeLabel(type)}
           </Tag>
-        ))}
+        )) || []}
       </Space>
 
-      {engine.supportedTypes.length === 0 && (
+      {(!engine.supportedTypes || engine.supportedTypes.length === 0) && (
         <Text type="secondary">暂无支持的测试类型</Text>
       )}
     </Card>
@@ -295,7 +305,7 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
    * 渲染活跃测试列表
    */
   const renderActiveTests = () => {
-    const activeTestsArray = Array.from(engine.activeTests.values())
+    const activeTestsArray = Array.from(engine.activeTests?.values() || [])
       .filter(test => test.status === 'running' || test.status === 'pending');
 
     return (

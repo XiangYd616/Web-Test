@@ -178,7 +178,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
 
     // 🔧 修复：过滤有效的响应时间数据
     const responseTimes = processedData
-      .map(d => d.responseTime)
+      .map(d => (d as any).responseTime)
       .filter(time => typeof time === 'number' && !isNaN(time) && time > 0)
       .sort((a, b) => a - b);
 
@@ -240,10 +240,10 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     responseTimes.forEach(time => {
       const binIndex = distribution.findIndex(bin => time >= bin.min && time < bin.max);
       if (binIndex !== -1) {
-        distribution[binIndex].count++;
-      } else if (time >= distribution[distribution.length - 1].min) {
+        distribution[binIndex]!.count++;
+      } else if (time >= distribution[distribution.length - 1]!.min) {
         // 处理最后一个区间（包含上边界）
-        distribution[distribution.length - 1].count++;
+        distribution[distribution.length - 1]!.count++;
       }
     });
 
@@ -290,7 +290,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     } else {
       // 🔧 改进：显示相对时间，提高到0.01秒精度 (M:SS.CC)
       if (processedData.length > 0) {
-        const startTime = new Date(processedData[0].timestamp).getTime();
+        const startTime = new Date((processedData[0] as any).timestamp).getTime();
         const currentTime = new Date(value).getTime();
         const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
@@ -332,10 +332,10 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
         }}
         formatter={(value: unknown, name: string) => {
           if (name === 'responseTime') return [`${value}ms`, '响应时间'];
-          if (name === 'averageResponseTime') return [`${value.toFixed(3)}ms`, '平均响应时间'];
-          if (name === 'throughput') return [`${value.toFixed(1)}`, '吞吐量'];
+          if (name === 'averageResponseTime') return [`${(value as number).toFixed(3)}ms`, '平均响应时间'];
+          if (name === 'throughput') return [`${(value as number).toFixed(1)}`, '吞吐量'];
           if (name === 'activeUsers') return [`${value}`, '活跃用户'];
-          return [value, name];
+          return [value as string, name];
         }}
         labelFormatter={(value) => {
           const timeLabel = formatTimeLabel(value);

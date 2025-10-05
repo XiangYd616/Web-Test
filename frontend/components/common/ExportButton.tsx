@@ -270,6 +270,8 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
   // 单个按钮模式
   if (!showDropdown || availableFormats.length === 1) {
     const format = availableFormats[0] || EXPORT_FORMATS[defaultFormat];
+    if (!format) return null;
+    
     const IconComponent = format.icon;
 
     return (
@@ -315,7 +317,8 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
           <div className="py-1">
-            {availableFormats.map((format) => {
+            {availableFormats.filter(Boolean).map((format) => {
+              if (!format) return null;
               const IconComponent = format.icon;
               return (
                 <button

@@ -62,7 +62,7 @@ export const useAPITestState = (): any => {
    * 更新配置
    */
   const updateConfig = useCallback((updates: Partial<APITestConfig>) => {
-    setConfig(prev => ({ ...prev, ...updates }));
+    setConfig((prev: APITestConfig) => ({ ...prev, ...updates }));
     setError(null); // 清除之前的错误
   }, []);
 
@@ -95,7 +95,7 @@ export const useAPITestState = (): any => {
     }
 
     // 验证端点
-    config.endpoints.forEach((endpoint, index) => {
+    config.endpoints.forEach((endpoint: APIEndpoint, index: number) => {
       if (!endpoint.name) {
         errors.push(`端点 ${index + 1}: 请输入端点名称`);
       }
@@ -203,7 +203,7 @@ export const useAPITestState = (): any => {
       id: `endpoint_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
     };
 
-    setConfig(prev => ({
+    setConfig((prev: APITestConfig) => ({
       ...prev,
       endpoints: [...prev.endpoints, newEndpoint]
     }));
@@ -213,9 +213,9 @@ export const useAPITestState = (): any => {
    * 更新端点
    */
   const updateEndpoint = useCallback((id: string, updates: Partial<APIEndpoint>) => {
-    setConfig(prev => ({
+    setConfig((prev: APITestConfig) => ({
       ...prev,
-      endpoints: prev.endpoints.map(endpoint =>
+      endpoints: prev.endpoints.map((endpoint: APIEndpoint) =>
         endpoint.id === id ? { ...endpoint, ...updates } : endpoint
       )
     }));
@@ -225,9 +225,9 @@ export const useAPITestState = (): any => {
    * 移除端点
    */
   const removeEndpoint = useCallback((id: string) => {
-    setConfig(prev => ({
+    setConfig((prev: APITestConfig) => ({
       ...prev,
-      endpoints: prev.endpoints.filter(endpoint => endpoint.id !== id)
+      endpoints: prev.endpoints.filter((endpoint: APIEndpoint) => endpoint.id !== id)
     }));
   }, []);
 
@@ -235,7 +235,7 @@ export const useAPITestState = (): any => {
    * 复制端点
    */
   const duplicateEndpoint = useCallback((id: string) => {
-    const endpoint = config.endpoints.find(ep => ep.id === id);
+    const endpoint = config.endpoints.find((ep: APIEndpoint) => ep.id === id);
     if (endpoint) {
       const duplicated = {
         ...endpoint,
@@ -243,7 +243,7 @@ export const useAPITestState = (): any => {
         name: `${endpoint.name} (副本)`
       };
 
-      setConfig(prev => ({
+      setConfig((prev: APITestConfig) => ({
         ...prev,
         endpoints: [...prev.endpoints, duplicated]
       }));
@@ -259,7 +259,7 @@ export const useAPITestState = (): any => {
       id: `endpoint_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
     }));
 
-    setConfig(prev => ({
+    setConfig((prev: APITestConfig) => ({
       ...prev,
       endpoints: [...prev.endpoints, ...newEndpoints]
     }));

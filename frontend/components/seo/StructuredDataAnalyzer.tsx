@@ -171,11 +171,11 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
 
   // 验证结构化数据项
   const validateStructuredDataItem = (
-    data: unknown, 
+    data: any, 
     format: 'json-ld' | 'microdata' | 'rdfa',
     element: HTMLElement
   ): StructuredDataItem => {
-    const type = data['@type'] || 'Unknown';
+    const type = data?.['@type'] || 'Unknown';
     const schema = SCHEMA_TYPES[type as keyof typeof SCHEMA_TYPES];
     const issues: StructuredDataItem['issues'] = [];
     let score = 100;
@@ -189,7 +189,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
     } else {
       // 检查必需字段
       schema.required.forEach(field => {
-        if (!data[field]) {
+        if (!data?.[field]) {
           issues.push({
             severity: 'error',
             message: `缺少必需字段: ${field}`,
@@ -201,7 +201,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
 
       // 检查推荐字段
       schema.recommended.forEach(field => {
-        if (!data[field]) {
+        if (!data?.[field]) {
           issues.push({
             severity: 'warning',
             message: `建议添加字段: ${field}`,
@@ -213,7 +213,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
 
       // 特殊验证规则
       if (type === 'Organization' || type === 'LocalBusiness') {
-        if (data.logo && !isValidImageUrl(data.logo)) {
+        if (data?.logo && !isValidImageUrl(data.logo)) {
           issues.push({
             severity: 'warning',
             message: 'logo字段应该是有效的图片URL',
@@ -224,7 +224,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
       }
 
       if (type === 'Article') {
-        if (data.author && typeof data.author === 'string') {
+        if (data?.author && typeof data.author === 'string') {
           issues.push({
             severity: 'info',
             message: 'author字段建议使用Person或Organization对象',

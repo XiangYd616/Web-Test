@@ -301,10 +301,10 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
       {(value || isFocused) && (
         <PasswordStrengthIndicator
           password={value}
-          userInfo={userInfo || undefined}
-          userId={userId || undefined}
+          {...(userInfo && { userInfo })}
+          {...(userId && { userId })}
           showDetails={showDetails}
-          onValidationChange={onValidationChange || undefined}
+          {...(onValidationChange && { onValidationChange })}
         />
       )}
     </div>

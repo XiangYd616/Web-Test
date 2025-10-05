@@ -148,7 +148,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
 
         <div className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1.5">
           {/* 自动修复按钮 */}
-          {autoFix && validationResult?.autoFixes.length > 0 && validationResult?.correctedUrl !== value && (
+          {autoFix && validationResult?.autoFixes && validationResult.autoFixes.length > 0 && validationResult?.correctedUrl !== value && (
             <button
               type="button"
               onClick={handleAutoFix}
@@ -211,7 +211,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
           )}
 
           {/* 错误信息 */}
-          {validationResult?.errors.length > 0 && (
+          {validationResult?.errors && validationResult.errors.length > 0 && (
             <div className="p-3 bg-red-900/20 border border-red-800/50 rounded-lg">
               <div className="flex items-start space-x-2">
                 <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />

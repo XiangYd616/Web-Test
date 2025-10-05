@@ -1,18 +1,42 @@
-/**
- * SecurityTestPanel.tsx - React×é¼þ
+ï»¿/**
+ * SecurityTestPanel.tsx - Reactï¿½ï¿½ï¿½
  * 
- * ÎÄ¼þÂ·¾¶: frontend\components\security\SecurityTestPanel.tsx
- * ´´½¨Ê±¼ä: 2025-09-25
+ * ï¿½Ä¼ï¿½Â·ï¿½ï¿½: frontend\components\security\SecurityTestPanel.tsx
+ * ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½: 2025-09-25
  */
 
 
 import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import {SecurityTestConfig, SecurityTestResult, securityEngine} from '../../services/securityEngine';
+import {SecurityTestConfig, SecurityScanResult, securityEngine} from '../../services/securityEngine';
 import { createCommonErrors, createError } from '../../utils/errorHandler';
 import { URLValidationResult } from '../../utils/urlValidator';
 import { URLInput } from '../ui/URLInput';
 import {EnhancedError} from './ErrorDisplay';
+
+// Local type definitions
+interface SecurityTestProgress {
+  percentage: number;
+  currentStep?: string;
+  message?: string;
+  securityScore?: number;
+  vulnerabilities?: SecurityScanResult[];
+  threatLevel?: string;
+}
+
+interface SecurityTestResult {
+  id: string;
+  url: string;
+  timestamp: string;
+  overallScore: number;
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  grade: string;
+  duration: number;
+  findings: SecurityScanResult[];
+}
+
+
+
 
 interface UnifiedSecurityTestPanelProps {
   onTestStart?: () => void;
@@ -33,7 +57,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   onTestComplete,
   onTestError
 }, ref) => {
-  // ×´Ì¬¹ÜÀí
+  // ×´Ì¬ï¿½ï¿½ï¿½ï¿½
   const [config, setConfig] = useState<SecurityTestConfig>({
     url: '',
     depth: 'standard',
@@ -59,84 +83,84 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   const [urlValidation, setUrlValidation] = useState<URLValidationResult | null>(null);
   const [isUrlValid, setIsUrlValid] = useState(false);
 
-  // Ô¤ÉèÅäÖÃ
+  // Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
   const presetConfigs = securityEngine.getPresetConfigs();
 
-  // Ä£¿éÅäÖÃÑ¡Ïî
+  // Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
   const moduleOptions = [
     {
       key: 'ssl',
-      name: 'SSL/TLS °²È«',
+      name: 'SSL/TLS ï¿½ï¿½È«',
       icon: <Lock className="h-5 w-5" />,
-      description: '¼ì²éSSLÖ¤Êé¡¢Ð­ÒéºÍ¼ÓÃÜÅäÖÃ',
+      description: 'ï¿½ï¿½ï¿½SSLÖ¤ï¿½é¡¢Ð­ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½',
       color: 'text-green-400',
       bgColor: 'bg-gradient-to-br from-green-500/20 to-green-600/30',
       borderColor: 'border-green-400/50'
     },
     {
       key: 'headers',
-      name: '°²È«Í·¼ì²é',
+      name: 'ï¿½ï¿½È«Í·ï¿½ï¿½ï¿½',
       icon: <Shield className="h-5 w-5" />,
-      description: '·ÖÎöHTTP°²È«Í·ºÍCSPÅäÖÃ',
+      description: 'ï¿½ï¿½ï¿½ï¿½HTTPï¿½ï¿½È«Í·ï¿½ï¿½CSPï¿½ï¿½ï¿½ï¿½',
       color: 'text-blue-400',
       bgColor: 'bg-gradient-to-br from-blue-500/20 to-blue-600/30',
       borderColor: 'border-blue-400/50'
     },
     {
       key: 'vulnerabilities',
-      name: 'Â©¶´É¨Ãè',
+      name: 'Â©ï¿½ï¿½É¨ï¿½ï¿½',
       icon: <Target className="h-5 w-5" />,
-      description: '¼ì²âXSS¡¢SQL×¢ÈëµÈ³£¼ûÂ©¶´',
+      description: 'ï¿½ï¿½ï¿½XSSï¿½ï¿½SQL×¢ï¿½ï¿½È³ï¿½ï¿½ï¿½Â©ï¿½ï¿½',
       color: 'text-red-400',
       bgColor: 'bg-gradient-to-br from-red-500/20 to-red-600/30',
       borderColor: 'border-red-400/50'
     },
     {
       key: 'cookies',
-      name: 'Cookie °²È«',
+      name: 'Cookie ï¿½ï¿½È«',
       icon: <Eye className="h-5 w-5" />,
-      description: '¼ì²éCookie°²È«ÊôÐÔÅäÖÃ',
+      description: 'ï¿½ï¿½ï¿½Cookieï¿½ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½',
       color: 'text-purple-400',
       bgColor: 'bg-gradient-to-br from-purple-500/20 to-purple-600/30',
       borderColor: 'border-purple-400/50'
     },
     {
       key: 'content',
-      name: 'ÄÚÈÝ°²È«',
+      name: 'ï¿½ï¿½ï¿½Ý°ï¿½È«',
       icon: <FileText className="h-5 w-5" />,
-      description: '¼ì²é»ìºÏÄÚÈÝºÍÃô¸ÐÐÅÏ¢Ð¹Â¶',
+      description: 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢Ð¹Â¶',
       color: 'text-orange-400',
       bgColor: 'bg-gradient-to-br from-orange-500/20 to-orange-600/30',
       borderColor: 'border-orange-400/50'
     },
     {
       key: 'network',
-      name: 'ÍøÂç°²È«',
+      name: 'ï¿½ï¿½ï¿½ç°²È«',
       icon: <Network className="h-5 w-5" />,
-      description: '¼ì²éDNSÅäÖÃºÍÍøÂç·þÎñ',
+      description: 'ï¿½ï¿½ï¿½DNSï¿½ï¿½ï¿½Ãºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½',
       color: 'text-indigo-400',
       bgColor: 'bg-gradient-to-br from-indigo-500/20 to-indigo-600/30',
       borderColor: 'border-indigo-400/50'
     },
     {
       key: 'compliance',
-      name: 'ºÏ¹æ¼ì²é',
+      name: 'ï¿½Ï¹ï¿½ï¿½ï¿½',
       icon: <Award className="h-5 w-5" />,
-      description: '¼ì²éOWASP¡¢NISTµÈ±ê×¼ºÏ¹æÐÔ',
+      description: 'ï¿½ï¿½ï¿½OWASPï¿½ï¿½NISTï¿½È±ï¿½×¼ï¿½Ï¹ï¿½ï¿½ï¿½',
       color: 'text-teal-400',
       bgColor: 'bg-gradient-to-br from-teal-500/20 to-teal-600/30',
       borderColor: 'border-teal-400/50'
     }
   ];
 
-  // ´¦ÀíURL±ä»¯
+  // ï¿½ï¿½ï¿½ï¿½URLï¿½ä»¯
   const handleUrlChange = useCallback((url: string) => {
     setConfig(prev => ({ ...prev, url }));
     setError(null);
     setEnhancedError(null);
   }, []);
 
-  // ´¦ÀíURLÑéÖ¤½á¹û
+  // ï¿½ï¿½ï¿½ï¿½URLï¿½ï¿½Ö¤ï¿½ï¿½ï¿½
   const handleUrlValidation = useCallback((isValid: boolean, result?: URLValidationResult) => {
     setIsUrlValid(isValid);
     setUrlValidation(result || null);
@@ -149,33 +173,37 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     }
   }, [config.url]);
 
-  // Ó¦ÓÃÔ¤ÉèÅäÖÃ
+  // Ó¦ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
   const applyPreset = useCallback((presetName: string) => {
     const preset = presetConfigs[presetName];
     if (preset) {
       setConfig(prev => ({
         ...prev,
         ...preset,
-        url: prev.url // ±£³Öµ±Ç°URL
+        url: prev.url // ï¿½ï¿½ï¿½Öµï¿½Ç°URL
       }));
     }
   }, [presetConfigs]);
 
-  // ÇÐ»»Ä£¿éÆôÓÃ×´Ì¬
+  // åˆ‡æ¢æ¨¡å—å¯ç”¨çŠ¶æ€
   const toggleModule = useCallback((moduleKey: string) => {
-    setConfig(prev => ({
-      ...prev,
-      modules: {
-        ...prev.modules,
-        [moduleKey]: {
-          ...prev.modules[moduleKey as keyof typeof prev.modules],
-          enabled: !prev.modules[moduleKey as keyof typeof prev.modules]?.enabled
+    setConfig(prev => {
+      const modules = prev.modules || {};
+      const currentModule = modules[moduleKey as keyof typeof modules];
+      return {
+        ...prev,
+        modules: {
+          ...modules,
+          [moduleKey]: {
+            ...currentModule,
+            enabled: !currentModule?.enabled
+          }
         }
-      }
-    }));
+      };
+    });
   }, []);
 
-  // ÔËÐÐ²âÊÔ
+  // ï¿½ï¿½ï¿½Ð²ï¿½ï¿½ï¿½
   const runTest = useCallback(async () => {
     if (!config.url) {
       const urlError = createCommonErrors.invalidUrl();
@@ -206,9 +234,9 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
 
       onTestComplete?.(result);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '²âÊÔÊ§°Ü';
+      const errorMessage = err instanceof Error ? err.message : 'ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½';
 
-      // ´´½¨ÔöÇ¿´íÎó
+      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½ï¿½ï¿½
       const enhancedErr = createError(err instanceof Error ? err : new Error(errorMessage), {
         url: config.url,
         operation: 'security_test',
@@ -225,7 +253,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     }
   }, [config, isUrlValid, onTestStart, onTestProgress, onTestComplete, onTestError]);
 
-  // Í£Ö¹²âÊÔ
+  // Í£Ö¹ï¿½ï¿½ï¿½ï¿½
   const _stopTest = useCallback(() => {
     if (currentTestId) {
       securityEngine.cancelTest(currentTestId);
@@ -235,7 +263,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     }
   }, [currentTestId]);
 
-  // ±©Â¶¸ø¸¸×é¼þµÄ·½·¨
+  // ï¿½ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½
   useImperativeHandle(ref, () => ({
     startTest: runTest,
     canStartTest: () => !!config.url && isUrlValid && !isRunning,
@@ -244,13 +272,13 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
 
   return (
     <div className="unified-security-test-panel space-y-3 fade-in-up compact-layout">
-      {/* URL ÊäÈë - ÔöÇ¿°æ */}
+      {/* URL ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½Ç¿ï¿½ï¿½ */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <URLInput
           value={config.url}
           onChange={(e) => handleUrlChange(e?.target.value)}
           onValidationChange={(isValid) => handleUrlValidation(isValid)}
-          placeholder="ÇëÊäÈëÒª²âÊÔµÄÍøÕ¾URL£¬ÀýÈç£ºhttps://example.com"
+          placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½Õ¾URLï¿½ï¿½ï¿½ï¿½ï¿½ç£ºhttps://example.com"
           disabled={isRunning}
           enableValidation={true}
           showProtocolSuggestion={true}
@@ -258,11 +286,11 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
         />
       </div>
 
-      {/* ¿ìËÙÔ¤Éè - ÔöÇ¿¿É¶ÁÐÔ */}
+      {/* ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ - ï¿½ï¿½Ç¿ï¿½É¶ï¿½ï¿½ï¿½ */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <h3 className="text-base font-bold text-white mb-3 flex items-center">
           <Zap className="h-4 w-4 mr-2 text-yellow-400" />
-          ¿ìËÙÔ¤Éè
+          ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {Object.entries(presetConfigs).map(([key, preset]) => (
@@ -275,35 +303,36 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1 sm:gap-0">
                 <span className="font-bold text-white text-sm">
-                  {key === 'quick' ? '? ¿ìËÙÉ¨Ãè' :
-                    key === 'standard' ? '??? ±ê×¼É¨Ãè' :
-                      '?? È«ÃæÉ¨Ãè'}
+                  {key === 'quick' ? '? ï¿½ï¿½ï¿½ï¿½É¨ï¿½ï¿½' :
+                    key === 'standard' ? '??? ï¿½ï¿½×¼É¨ï¿½ï¿½' :
+                      '?? È«ï¿½ï¿½É¨ï¿½ï¿½'}
                 </span>
                 <div className="text-xs text-gray-300 font-medium bg-gray-600/50 px-2 py-0.5 rounded">
-                  {key === 'quick' ? '1-2·ÖÖÓ' :
-                    key === 'standard' ? '3-5·ÖÖÓ' :
-                      '5-10·ÖÖÓ'}
+                  {key === 'quick' ? '1-2ï¿½ï¿½ï¿½ï¿½' :
+                    key === 'standard' ? '3-5ï¿½ï¿½ï¿½ï¿½' :
+                      '5-10ï¿½ï¿½ï¿½ï¿½'}
                 </div>
               </div>
               <p className="text-xs text-gray-300 leading-relaxed">
-                {key === 'quick' ? '»ù´¡°²È«¼ì²é£¬¿ìËÙ·¢ÏÖÖ÷ÒªÎÊÌâ' :
-                  key === 'standard' ? 'È«Ãæ°²È«¼ì²â£¬Æ½ºâËÙ¶ÈºÍÉî¶È' :
-                    'Éî¶È°²È«·ÖÎö£¬°üº¬ËùÓÐ¼ì²âÄ£¿é'}
+                {key === 'quick' ? 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½é£¬ï¿½ï¿½ï¿½Ù·ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½' :
+                  key === 'standard' ? 'È«ï¿½æ°²È«ï¿½ï¿½â£¬Æ½ï¿½ï¿½ï¿½Ù¶Èºï¿½ï¿½ï¿½ï¿½' :
+                    'ï¿½ï¿½È°ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¼ï¿½ï¿½Ä£ï¿½ï¿½'}
               </p>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Ä£¿éÅäÖÃ - ÔöÇ¿¿É¶ÁÐÔ */}
+      {/* Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½Ç¿ï¿½É¶ï¿½ï¿½ï¿½ */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <h3 className="text-base font-bold text-white mb-3 flex items-center">
           <Settings className="h-4 w-4 mr-2 text-gray-300" />
-          ¼ì²âÄ£¿éÅäÖÃ
+          ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {moduleOptions.map((module) => {
-            const isEnabled = config.modules[module.key as keyof typeof config.modules]?.enabled;
+            const modules = config.modules || {};
+            const isEnabled = modules[module.key as keyof typeof modules]?.enabled;
             return (
               <div
                 key={module.key}
@@ -316,7 +345,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
                   }`}
                 onClick={() => !isRunning && toggleModule(module.key)}
               >
-                {/* Ñ¡ÖÐ×´Ì¬Ö¸Ê¾Ìõ */}
+                {/* Ñ¡ï¿½ï¿½×´Ì¬Ö¸Ê¾ï¿½ï¿½ */}
                 {isEnabled && (
                   <div className={`absolute top-0 left-0 right-0 h-1 bg-current rounded-t-xl opacity-80`}></div>
                 )}
@@ -352,7 +381,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
         </div>
       </div>
 
-      {/* ½ø¶ÈÏÔÊ¾ - ÔöÇ¿¿É¶ÁÐÔ */}
+      {/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ - ï¿½ï¿½Ç¿ï¿½É¶ï¿½ï¿½ï¿½ */}
       {progress && (
         <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-4 sm:gap-0">
@@ -360,11 +389,11 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
               <div className="animate-spin h-6 w-6 sm:h-7 sm:w-7 border-3 border-blue-500 border-t-transparent rounded-full flex-shrink-0"></div>
               <div className="min-w-0">
                 <span className="text-base sm:text-lg font-bold text-white block mb-1">
-                  {progress.phase === 'initializing' ? '?? ³õÊ¼»¯ÖÐ' :
-                    progress.phase === 'scanning' ? '?? É¨ÃèÖÐ' :
-                      progress.phase === 'analyzing' ? '?? ·ÖÎöÖÐ' :
-                        progress.phase === 'reporting' ? '?? Éú³É±¨¸æ' :
-                          '? Íê³É'}
+                  {progress.phase === 'initializing' ? '?? ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½' :
+                    progress.phase === 'scanning' ? '?? É¨ï¿½ï¿½ï¿½ï¿½' :
+                      progress.phase === 'analyzing' ? '?? ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½' :
+                        progress.phase === 'reporting' ? '?? ï¿½ï¿½ï¿½É±ï¿½ï¿½ï¿½' :
+                          '? ï¿½ï¿½ï¿½'}
                 </span>
                 <p className="text-sm text-gray-300 font-medium">
                   {progress.currentModule} - {progress.currentCheck}
@@ -377,7 +406,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
               </div>
               {progress.estimatedTimeRemaining && (
                 <div className="text-sm text-gray-300 font-medium">
-                  Ê£Óà {Math.round(progress.estimatedTimeRemaining / 1000)} Ãë
+                  Ê£ï¿½ï¿½ {Math.round(progress.estimatedTimeRemaining / 1000)} ï¿½ï¿½
                 </div>
               )}
             </div>
@@ -398,32 +427,32 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
                 <div className="text-lg sm:text-xl font-bold text-white mb-1">
                   {progress.statistics.totalChecks || 0}
                 </div>
-                <div className="text-sm text-gray-300 font-medium">×Ü¼ì²éÏî</div>
+                <div className="text-sm text-gray-300 font-medium">ï¿½Ü¼ï¿½ï¿½ï¿½ï¿½</div>
               </div>
               <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-green-400 mb-1">
                   {progress.statistics.passedChecks || 0}
                 </div>
-                <div className="text-sm text-gray-300 font-medium">Í¨¹ý</div>
+                <div className="text-sm text-gray-300 font-medium">Í¨ï¿½ï¿½</div>
               </div>
               <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-red-400 mb-1">
                   {progress.statistics.failedChecks || 0}
                 </div>
-                <div className="text-sm text-gray-300 font-medium">Ê§°Ü</div>
+                <div className="text-sm text-gray-300 font-medium">Ê§ï¿½ï¿½</div>
               </div>
               <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-yellow-400 mb-1">
                   {progress.statistics.warningChecks || 0}
                 </div>
-                <div className="text-sm text-gray-300 font-medium">¾¯¸æ</div>
+                <div className="text-sm text-gray-300 font-medium">ï¿½ï¿½ï¿½ï¿½</div>
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* ÔöÇ¿´íÎóÏÔÊ¾ */}
+      {/* ï¿½ï¿½Ç¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ */}
       {enhancedError && (
         <ErrorDisplay
           error={enhancedError}
@@ -435,13 +464,13 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
         />
       )}
 
-      {/* ¼òµ¥´íÎóÏÔÊ¾£¨Ïòºó¼æÈÝ£© */}
+      {/* ï¿½òµ¥´ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ */}
       {error && !enhancedError && (
         <div className="bg-red-900/20 border border-red-800/50 rounded-xl p-3 sm:p-4">
           <div className="flex items-start">
             <AlertTriangle className="h-5 w-5 text-red-400 mr-3 flex-shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <h4 className="font-semibold text-red-400 text-sm sm:text-base">²âÊÔÊ§°Ü</h4>
+              <h4 className="font-semibold text-red-400 text-sm sm:text-base">ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½</h4>
               <p className="text-xs sm:text-sm text-red-300 mt-1 break-words">{error}</p>
             </div>
           </div>
@@ -453,3 +482,6 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
 });
 
 SecurityTestPanel.displayName = 'SecurityTestPanel';
+
+
+

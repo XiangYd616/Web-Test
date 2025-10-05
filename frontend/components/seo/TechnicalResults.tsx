@@ -159,7 +159,7 @@ const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
 
           {/* meta robots */}
           <div className="flex items-start space-x-3 p-3 bg-gray-700/30 rounded-lg">
-            {getStatusIcon(results.metaRobots?.present, results.metaRobots?.issues?.length > 0)}
+            {getStatusIcon(results.metaRobots?.present, (results.metaRobots?.issues && results.metaRobots.issues.length > 0) || false)}
             <div className="flex-1">
               <div className="font-medium text-white">Meta Robots</div>
               <div className="text-sm text-gray-400 mt-1">
@@ -245,10 +245,10 @@ const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
             </h3>
 
             <div className="space-y-3">
-              {allIssues.slice(0, 5).map((issue: unknown, index: number) => (
+              {allIssues.slice(0, 5).map((issue: any, index: number) => (
                 <div key={index} className="flex items-start space-x-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                   <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-300">{issue}</span>
+                  <span className="text-sm text-gray-300">{String(issue)}</span>
                 </div>
               ))}
 

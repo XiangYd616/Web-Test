@@ -97,13 +97,11 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
           <input
             id={fieldId}
             type={field.type}
-            value={value || ''}
+            value={typeof value === 'string' || typeof value === 'number' ? value : ''}
             onChange={(e) => updateConfig(field.key, e?.target.value)}
             placeholder={field.placeholder}
             disabled={disabled}
             className={baseClasses}
-            min={field.min}
-            max={field.max}
           />
         );
 
@@ -112,7 +110,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
           <input
             id={fieldId}
             type="number"
-            value={value || ''}
+            value={typeof value === 'number' ? value : (typeof value === 'string' ? value : '')}
             onChange={(e) => updateConfig(field.key, parseInt(e?.target.value) || 0)}
             placeholder={field.placeholder}
             disabled={disabled}
@@ -126,7 +124,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
         return (
           <select
             id={fieldId}
-            value={value || ''}
+            value={typeof value === 'string' || typeof value === 'number' ? value : ''}
             onChange={(e) => updateConfig(field.key, e?.target.value)}
             disabled={disabled}
             className={baseClasses}
@@ -146,7 +144,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
             <input
               id={fieldId}
               type="checkbox"
-              checked={value || false}
+              checked={typeof value === 'boolean' ? value : false}
               onChange={(e) => updateConfig(field.key, e?.target.checked)}
               disabled={disabled}
               className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
@@ -159,7 +157,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
         return (
           <textarea
             id={fieldId}
-            value={value || ''}
+            value={typeof value === 'string' || typeof value === 'number' ? value : ''}
             onChange={(e) => updateConfig(field.key, e?.target.value)}
             placeholder={field.placeholder}
             disabled={disabled}
@@ -176,7 +174,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
           <input
             id={fieldId}
             type="text"
-            value={value || ''}
+            value={typeof value === 'string' || typeof value === 'number' ? value : ''}
             onChange={(e) => updateConfig(field.key, e?.target.value)}
             placeholder={field.placeholder}
             disabled={disabled}
@@ -210,7 +208,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
           <div key={index} className="flex space-x-2">
             <input
               type="text"
-              value={value}
+              value={typeof value === 'string' || typeof value === 'number' ? value : ''}
               onChange={(e) => updateItem(index, e?.target.value)}
               placeholder={field.placeholder}
               disabled={disabled}

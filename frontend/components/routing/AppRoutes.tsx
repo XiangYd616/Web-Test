@@ -31,9 +31,8 @@ const DataCenter = lazy(() => import('../../pages/DataCenter'));
 const Statistics = lazy(() => import('../../pages/Statistics'));
 const Analytics = lazy(() => import('../../pages/analytics'));
 const MonitoringDashboard = lazy(() => import('../../pages/dashboard/MonitoringDashboard'));
-
-// 报告和历�?const TestHistory = lazy(() => import('../../pages/TestHistory'));
-
+// 报告和历史
+// const TestHistory = lazy(() => import('../../pages/TestHistory'));
 const Reports = lazy(() => import('../../pages/Reports'));
 const TestResultDetail = lazy(() => import('../../pages/TestResultDetail'));
 const SecurityReport = lazy(() => import('../../pages/SecurityReport'));
@@ -45,16 +44,18 @@ const Admin = lazy(() => import('../../pages/admin'));
 const UserProfile = lazy(() => import('../../pages/UserProfile'));
 const UserBookmarks = lazy(() => import('../../pages/UserBookmarks'));
 
-// 测试和优�?const TestOptimizations = lazy(() => import('../../pages/TestOptimizations'));
+// 测试和优化
+// const TestOptimizations = lazy(() => import('../../pages/TestOptimizations'));
 const Notifications = lazy(() => import('../../pages/Notifications'));
 
-// 集成和配�?const Integrations = lazy(() => import('../../pages/Integrations'));
+// 集成和配置
+// const Integrations = lazy(() => import('../../pages/Integrations'));
 const CICDIntegration = lazy(() => import('../../pages/CicdIntegration'));
 const Webhooks = lazy(() => import('../../pages/Webhooks'));
-const ApiKeys = lazy(() => import('../../pages/ApiKeys'));
-const ApiDocs = lazy(() => import('../../pages/ApiDocs'));
-
-// 调度和任�?const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
+// const ApiKeys = lazy(() => import('../../pages/ApiKeys'));
+// const ApiDocs = lazy(() => import('../../pages/ApiDocs'));
+// 调度和任务
+// const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
 const ScheduledTasks = lazy(() => import('../../pages/ScheduledTasks'));
 
 // 其他功能
@@ -171,14 +172,13 @@ const AppRoutes: React.FC = () => {
         {/* 测试优化页面 */}
         <Route path="test-optimizations" element={
           <LazyPageWrapper>
-            <TestOptimizations />
+            <UnifiedTestPage />
           </LazyPageWrapper>
         } />
-
-        {/* 公开的测试历史查�?*/}
+        {/* 公开的测试历史查看 */}
         <Route path="test-history" element={
           <LazyPageWrapper>
-            <TestHistory />
+            <DataCenter />
           </LazyPageWrapper>
         } />
 
@@ -201,7 +201,7 @@ const AppRoutes: React.FC = () => {
         } />
         <Route path="api-docs" element={
           <LazyPageWrapper>
-            <APIDocs />
+            <Help />
           </LazyPageWrapper>
         } />
         <Route path="download-desktop" element={
@@ -218,7 +218,7 @@ const AppRoutes: React.FC = () => {
       <Route path="dashboard" element={
         <ProtectedRoute>
           <LazyPageWrapper>
-            <Dashboard />
+            <MonitoringDashboard />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
@@ -307,7 +307,7 @@ const AppRoutes: React.FC = () => {
       <Route path="integrations" element={
         <ProtectedRoute>
           <LazyPageWrapper>
-            <Integrations />
+            <CICDIntegration />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
@@ -328,7 +328,7 @@ const AppRoutes: React.FC = () => {
       <Route path="api-keys" element={
         <ProtectedRoute>
           <LazyPageWrapper>
-            <APIKeys />
+            <Settings />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
@@ -337,7 +337,7 @@ const AppRoutes: React.FC = () => {
       <Route path="test-schedule" element={
         <ProtectedRoute>
           <LazyPageWrapper>
-            <TestSchedule />
+            <ScheduledTasks />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />

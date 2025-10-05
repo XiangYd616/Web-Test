@@ -5,7 +5,7 @@
 
 import { Activity, CheckCircle, Loader, Monitor, Play, RotateCcw, Settings, Smartphone, Square } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { URLInput } from '../components/ui';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';

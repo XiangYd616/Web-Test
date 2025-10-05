@@ -220,11 +220,11 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
     
     if (data.basicSEO) {
       scores.push(
-        { label: '技术SEO', value: data.basicSEO.technicalSEO.score, color: '#3b82f6' },
-        { label: '内容质量', value: data.basicSEO.contentQuality.score, color: '#10b981' },
-        { label: '可访问性', value: data.basicSEO.accessibility.score, color: '#f59e0b' },
-        { label: '社交媒体', value: data.basicSEO.socialMedia.score, color: '#8b5cf6' },
-        { label: '结构化数据', value: data.basicSEO.structuredData.score, color: '#ef4444' }
+        { label: '技术SEO', value: data.basicSEO.technicalSEO?.score || 0, color: '#3b82f6' },
+        { label: '内容质量', value: data.basicSEO.contentQuality?.score || 0, color: '#10b981' },
+        { label: '可访问性', value: data.basicSEO.accessibility?.score || 0, color: '#f59e0b' },
+        { label: '社交媒体', value: data.basicSEO.socialMedia?.score || 0, color: '#8b5cf6' },
+        { label: '结构化数据', value: data.basicSEO.structuredData?.score || 0, color: '#ef4444' }
       );
     }
     
@@ -241,11 +241,11 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
     
     if (data.basicSEO) {
       radarScores.push(
-        { label: '技术', value: data.basicSEO.technicalSEO.score },
-        { label: '内容', value: data.basicSEO.contentQuality.score },
-        { label: '可访问', value: data.basicSEO.accessibility.score },
-        { label: '社交', value: data.basicSEO.socialMedia.score },
-        { label: '结构化', value: data.basicSEO.structuredData.score }
+        { label: '技术', value: data.basicSEO.technicalSEO?.score || 0 },
+        { label: '内容', value: data.basicSEO.contentQuality?.score || 0 },
+        { label: '可访问', value: data.basicSEO.accessibility?.score || 0 },
+        { label: '社交', value: data.basicSEO.socialMedia?.score || 0 },
+        { label: '结构化', value: data.basicSEO.structuredData?.score || 0 }
       );
     }
     

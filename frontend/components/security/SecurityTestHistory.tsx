@@ -9,7 +9,18 @@
 import React from 'react';
 import { Calendar, ChevronDown, ChevronRight, Clock, Eye, RefreshCw, Search, Shield, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
-import { SecurityTestResult } from '../../services/securityEngine';
+import { SecurityScanResult } from '../../services/securityEngine';
+
+// Extended type for test history with additional metadata
+interface SecurityTestResult extends Omit<SecurityScanResult, 'id'> {
+  id: string;
+  timestamp: string;
+  overallScore: number;
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  grade: string;
+  duration: number;
+  findings: SecurityScanResult[];
+}
 
 interface SecurityTestHistoryProps {
   onSelectTest?: (result: SecurityTestResult) => void;

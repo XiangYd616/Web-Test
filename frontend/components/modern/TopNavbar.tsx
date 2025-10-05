@@ -59,7 +59,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
   const quickActionsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const _isAdmin = user.role === 'admin';
+  const _isAdmin = user?.role === 'admin';
 
   // 快捷操作
   const quickActions: QuickAction[] = [

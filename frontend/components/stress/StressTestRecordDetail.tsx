@@ -17,7 +17,7 @@ import {
   TrendingUp, 
   Users, 
   XCircle, 
-  Zap 
+  Zap, Globe, Settings 
 } from 'lucide-react';
 import type { StressTestRecord } from '../../services/stressTestRecordService';
 
@@ -469,3 +469,5 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
 };
 
 export default StressTestRecordDetail;
+
+

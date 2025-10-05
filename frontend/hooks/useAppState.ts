@@ -496,28 +496,4 @@ export function useBusinessState() {
 }
 
 // 导出所有hooks
-export {
-  useAppState as default,
-  useStateType,
-  useTestState,
-  useUserState,
-  useSystemState,
-  useNotificationState,
-  useLoadingState,
-  useModalState,
-  useSelector,
-  useBusinessState
-};
-
-
-export {
-  useStateType,
-  useTestState,
-  useUserState,
-  useSystemState,
-  useNotificationState,
-  useLoadingState,
-  useModalState,
-  useSelector,
-  useBusinessState
-};
+export default useAppState;

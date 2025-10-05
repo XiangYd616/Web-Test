@@ -5,7 +5,7 @@
 
 import { Activity, BarChart3, CheckCircle, Eye, Globe, Loader, Play, RotateCcw, Search, Settings, Shield, Square, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { useAuthCheck } from '@components/auth/withAuthCheck';
+import { useAuthCheck } from '@components/auth/WithAuthCheck';
 import TestPageLayout from '@components/testing/TestPageLayout';
 import { ProgressBar } from '@components/ui/ProgressBar';
 import { useUserStats } from '@hooks/useUserStats';

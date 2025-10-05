@@ -201,7 +201,7 @@ export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
           <button
             type="button"
             onClick={() => startTest(config)}
-            disabled={isRunning || !validateConfig(config).isValid}
+            disabled={isRunning || !validateConfig(config)?.isValid}
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
           >
             <testType.icon className="w-4 h-4" />

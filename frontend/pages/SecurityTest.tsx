@@ -1,6 +1,6 @@
 ﻿import { Shield, XCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { useTestProgress } from '../hooks/useTestProgress';

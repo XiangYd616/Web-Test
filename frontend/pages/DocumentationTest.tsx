@@ -1,6 +1,6 @@
 ﻿import { BarChart3, CheckCircle, Clock, Code, Database, Download, Eye, EyeOff, FileText, Globe, History, Key, Loader, Lock, Play, Plus, RotateCcw, Settings, Shield, Square, Trash2, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { URLInput } from '../components/ui';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';

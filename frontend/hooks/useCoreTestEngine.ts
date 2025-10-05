@@ -38,6 +38,8 @@ export interface TestConfig {
 
 // 统一的测试结果接口
 export interface UnifiedTestResult extends TestResult {
+  id: string;
+  type: string;
   testId?: string;
   testType?: string;
   overallScore?: number;
@@ -51,6 +53,7 @@ export interface UnifiedTestResult extends TestResult {
     duration?: number;
     url?: string;
     config?: Record<string, any>;
+    engineId?: string;
     [key: string]: any;
   };
 }

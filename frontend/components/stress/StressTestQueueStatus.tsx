@@ -1,4 +1,4 @@
-/**
+﻿/**
  * StressTestQueueStatus.tsx - React组件
  * 
  * 文件路径: frontend\components\stress\StressTestQueueStatus.tsx
@@ -9,6 +9,15 @@
 import React from 'react';
 import type { FC } from 'react';
 import { Clock, Users, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+
+interface QueueStats {
+  pending: number;
+  running: number;
+  completed: number;
+  failed: number;
+  totalCapacity: number;
+  averageWaitTime: number;
+}
 
 interface StressTestQueueStatusProps {
   queueStats: QueueStats;
@@ -192,3 +201,4 @@ const StressTestQueueStatus: React.FC<StressTestQueueStatusProps> = ({
 };
 
 export default StressTestQueueStatus;
+

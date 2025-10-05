@@ -33,42 +33,43 @@ const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) =
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="数据统计概览">
       <StatCard
-        title="总记录数"
+        title={`总记录数 (当前页: ${currentPageStats.total})`}
         value={pagination.total}
-        subtitle={`当前页: ${currentPageStats.total}`}
-        icon={<Database />}
-        color="bg-blue-500/20"
-        loading={loading}
+        icon={Database}
+        color="blue"
       />
 
       <StatCard
-        title="成功测试"
+        title={`成功测试 (成功率: ${successRate}%)`}
         value={currentPageStats.completed}
-        subtitle={`成功率: ${successRate}%`}
-        change={parseFloat(successRate) > 80 ? 5.2 : -2.1}
-        icon={<CheckCircle />}
-        color="bg-green-500/20"
-        loading={loading}
+        icon={CheckCircle}
+        color="green"
+        trend={{
+          value: parseFloat(successRate) > 80 ? 5.2 : -2.1,
+          isPositive: parseFloat(successRate) > 80
+        }}
       />
 
       <StatCard
-        title="失败测试"
+        title={`失败测试 (失败率: ${(100 - parseFloat(successRate)).toFixed(1)}%)`}
         value={currentPageStats.failed}
-        subtitle={`失败率: ${(100 - parseFloat(successRate)).toFixed(1)}%`}
-        change={currentPageStats.failed > currentPageStats.completed ? 3.1 : -1.5}
-        icon={<XCircle />}
-        color="bg-red-500/20"
-        loading={loading}
+        icon={XCircle}
+        color="red"
+        trend={{
+          value: currentPageStats.failed > currentPageStats.completed ? 3.1 : -1.5,
+          isPositive: currentPageStats.failed <= currentPageStats.completed
+        }}
       />
 
       <StatCard
-        title="平均分数"
+        title="平均分数 (当前页平均)"
         value={currentPageStats.avgScore}
-        subtitle="当前页平均"
-        change={currentPageStats.avgScore > 70 ? 8.3 : -3.7}
-        icon={<BarChart3 />}
-        color="bg-purple-500/20"
-        loading={loading}
+        icon={BarChart3}
+        color="purple"
+        trend={{
+          value: currentPageStats.avgScore > 70 ? 8.3 : -3.7,
+          isPositive: currentPageStats.avgScore > 70
+        }}
       />
     </section>
   );

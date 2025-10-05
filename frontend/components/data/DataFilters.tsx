@@ -151,9 +151,9 @@ const DataFilters: React.FC<DataFiltersProps> = ({
           case 'contains':
             return String(value).toLowerCase().includes(String(filter.value).toLowerCase());
           case 'gt':
-            return value > filter.value;
+            return value !== undefined && filter.value !== undefined && value > filter.value;
           case 'lt':
-            return value < filter.value;
+            return value !== undefined && filter.value !== undefined && value < filter.value;
           default:
             return true;
         }
@@ -166,6 +166,8 @@ const DataFilters: React.FC<DataFiltersProps> = ({
       const bValue = b[sortConfig.field as keyof DataItem];
       
       if (aValue === bValue) return 0;
+      if (aValue === undefined) return 1;
+      if (bValue === undefined) return -1;
       
       const comparison = aValue > bValue ? 1 : -1;
       return sortConfig.direction === 'asc' ? comparison : -comparison;

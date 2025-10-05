@@ -616,7 +616,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                         {getTypeIcon(type)}
                       </div>
                       <p className="text-sm text-gray-400 capitalize">{type}</p>
-                      <p className="text-lg font-bold text-white">{count.toLocaleString()}</p>
+                      <p className="text-lg font-bold text-white">{(count as number).toLocaleString()}</p>
                     </div>
                   ))}
                 </div>
