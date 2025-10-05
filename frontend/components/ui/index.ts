@@ -14,7 +14,7 @@ export { ThemeSelector, ThemeSwitch, default as ThemeToggle } from './ThemeToggl
 export * from './types';
 
 // 基础UI组件
-export { default as ErrorBoundary } from './ErrorBoundary';
+export { default as ErrorBoundary } from '../common/ErrorBoundary';
 export { default as LoadingStates } from './LoadingStates';
 
 // 增强UI组件
@@ -136,7 +136,7 @@ export {
     ChartContainer,
     MetricChart,
     SimpleChart
-} from './Chart';
+} from '../charts/Chart';
 export type { ChartProps } from './types';
 
 // 测试工具组件
