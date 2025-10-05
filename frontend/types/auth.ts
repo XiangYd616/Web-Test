@@ -25,6 +25,7 @@ export interface MFASetupResponse {
   secret?: string;
   qrCode?: string;
   backupCodes?: string[];
+  manualEntryKey?: string;
 }
 
 export interface MFAVerificationResponse {

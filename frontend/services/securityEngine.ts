@@ -7,15 +7,22 @@
  */
 
 
+export interface SecurityModuleConfig {
+  enabled: boolean;
+  [key: string]: any;
+}
+
 export interface SecurityTestConfig {
   url: string;
-  depth: number;
-  includeSubdomains: boolean;
-  testTypes: string[];
+  depth?: number | string;
+  includeSubdomains?: boolean;
+  testTypes?: string[];
   timeout: number;
   userAgent?: string;
   authHeaders?: Record<string, string>;
-  modules?: string[];
+  modules?: string[] | Record<string, SecurityModuleConfig>;
+  concurrent?: boolean;
+  retries?: number;
 }
 
 export interface SecurityScanResult {
