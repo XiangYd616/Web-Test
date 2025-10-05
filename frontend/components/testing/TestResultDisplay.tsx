@@ -131,12 +131,12 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
 
   // 计算总体评分
   const overallScore = useMemo(() => {
-    if (resultList.length === 1) {
+    if (resultList.length === 1 && primaryResult) {
       return (primaryResult.score / primaryResult.maxScore) * 100;
     }
     const totalScore = resultList.reduce((sum, result) => sum + result.score, 0);
     const totalMaxScore = resultList.reduce((sum, result) => sum + result.maxScore, 0);
-    return (totalScore / totalMaxScore) * 100;
+    return totalMaxScore > 0 ? (totalScore / totalMaxScore) * 100 : 0;
   }, [resultList, primaryResult]);
 
   // 分组详情
@@ -150,10 +150,11 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
       groups[detail.category].push(detail);
     });
     return groups;
-  }, [primaryResult?.details]);
+  }, [primaryResult]);
 
   // 筛选推荐
   const filteredRecommendations = useMemo(() => {
+    if (!primaryResult || !primaryResult.recommendations) return [];
     let filtered = [...primaryResult.recommendations];
     
     if (selectedCategory !== 'all') {
@@ -178,18 +179,18 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
       const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
       switch (sortBy) {
         case 'priority':
-          return priorityOrder[b.priority] - priorityOrder[a?.priority];
+          return priorityOrder[b.priority] - priorityOrder[a.priority];
         case 'impact':
-          return b.impact.localeCompare(a?.impact);
+          return b.impact.localeCompare(a.impact);
         case 'category':
-          return a?.category.localeCompare(b.category);
+          return a.category.localeCompare(b.category);
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [primaryResult.recommendations, selectedCategory, filterLevel, sortBy]);
+  }, [primaryResult, selectedCategory, filterLevel, sortBy]);
 
   // 切换展开状态
   const toggleSection = (section: string) => {
@@ -249,6 +250,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
 
   // 渲染指标图表
   const renderMetricsChart = () => {
+    if (!primaryResult || !primaryResult.metrics) return null;
     const metrics = primaryResult.metrics;
     const labels = Object.keys(metrics);
     const values = Object.values(metrics).map(v => typeof v === 'number' ? v : 0);

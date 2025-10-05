@@ -189,7 +189,7 @@ class DeviceDetector {
       return { name: 'Android', version: match ? match[1] : 'Unknown' };
     } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
       const match = userAgent.match(/OS (\d+_?\d*)/);
-      return { name: 'iOS', version: match ? match[1].replace('_', '.') : 'Unknown' };
+      return { name: 'iOS', version: match?.[1]?.replace('_', '.') || 'Unknown' };
     }
 
     return { name: 'Unknown', version: 'Unknown' };
@@ -205,7 +205,7 @@ class DeviceDetector {
 
   private static getMacVersion(userAgent: string): string {
     const match = userAgent.match(/Mac OS X (\d+_?\d+_?\d*)/);
-    return match ? match[1].replace(/_/g, '.') : 'Unknown';
+    return match?.[1]?.replace(/_/g, '.') || 'Unknown';
   }
 }
 
@@ -284,7 +284,7 @@ class SecurityAnalyzer {
     let hasSecurityWarnings = false;
 
     // 检查新设备
-    const knownDevices = userSessions.map(s => s?.deviceInfo.deviceId);
+    const knownDevices = userSessions.map(s => s?.deviceInfo?.deviceId).filter(Boolean);
     if (!knownDevices.includes(sessionData.deviceInfo.deviceId)) {
       isNewDevice = true;
       riskScore += 20;
@@ -294,7 +294,7 @@ class SecurityAnalyzer {
     if (sessionData.locationInfo) {
       const knownLocations = userSessions
         .filter(s => s?.locationInfo)
-        .map(s => `${s?.locationInfo!.country}-${s?.locationInfo!.region}`);
+        .map(s => `${s?.locationInfo?.country}-${s?.locationInfo?.region}`);
 
       const currentLocation = `${sessionData.locationInfo.country}-${sessionData.locationInfo.region}`;
       if (!knownLocations.includes(currentLocation)) {

@@ -122,7 +122,7 @@ class TOTPGenerator {
       (signatureArray[offset + 3] & 0xff)
     ) % 1000000;
 
-    return code?.toString().padStart(6, '0');
+    return code.toString().padStart(6, '0');
   }
 
   /**

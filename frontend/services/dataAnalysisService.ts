@@ -254,7 +254,9 @@ export class DataAnalysisService {
     records.forEach(record => {
       const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');
       if (trends[date] && record.overall_score !== undefined) {
-        trends[date].scores?.push(record.overall_score);
+        if (trends[date].scores) {
+          trends[date].scores.push(record.overall_score);
+        }
         trends[date].count++;
       }
     });
@@ -280,8 +282,8 @@ export class DataAnalysisService {
           urlStats[record.url] = { count: 0, scores: [] };
         }
         urlStats[record.url].count++;
-        if (record.overall_score !== undefined) {
-          urlStats[record.url].scores?.push(record.overall_score);
+        if (record.overall_score !== undefined && urlStats[record.url].scores) {
+          urlStats[record.url].scores.push(record.overall_score);
         }
       }
     });
@@ -294,7 +296,7 @@ export class DataAnalysisService {
           ? stats.scores.reduce((sum, score) => sum + score, 0) / stats.scores.length
           : 0
       }))
-      .sort((a, b) => b.count - a?.count)
+      .sort((a, b) => b.count - a.count)
       .slice(0, 10);
   }
 
@@ -454,7 +456,9 @@ export class DataAnalysisService {
         if (!urlStats[record.url]) {
           urlStats[record.url] = { scores: [], dates: [] };
         }
-        urlStats[record.url].scores?.push(record.overall_score);
+        if (urlStats[record.url].scores) {
+          urlStats[record.url].scores.push(record.overall_score);
+        }
         urlStats[record.url].dates.push(record.start_time || record.created_at);
       }
     });
@@ -482,7 +486,7 @@ export class DataAnalysisService {
           trend
         };
       })
-      .sort((a, b) => b.testCount - a?.testCount)
+      .sort((a, b) => b.testCount - a.testCount)
       .slice(0, 10);
   }
 

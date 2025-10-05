@@ -712,17 +712,23 @@ export class AuditLogService {
     const { logs } = await this.queryLogs(query);
 
     const eventsByType = logs.reduce((acc, log) => {
-      acc[log?.eventType] = (acc[log?.eventType] || 0) + 1;
+      if (log?.eventType) {
+        acc[log.eventType] = (acc[log.eventType] || 0) + 1;
+      }
       return acc;
     }, {} as Record<AuditEventType, number>);
 
     const eventsBySeverity = logs.reduce((acc, log) => {
-      acc[log?.severity] = (acc[log?.severity] || 0) + 1;
+      if (log?.severity) {
+        acc[log.severity] = (acc[log.severity] || 0) + 1;
+      }
       return acc;
     }, {} as Record<AuditSeverity, number>);
 
     const eventsByStatus = logs.reduce((acc, log) => {
-      acc[log?.status] = (acc[log?.status] || 0) + 1;
+      if (log?.status) {
+        acc[log.status] = (acc[log.status] || 0) + 1;
+      }
       return acc;
     }, {} as Record<AuditStatus, number>);
 
@@ -749,7 +755,9 @@ export class AuditLogService {
 
     // IP地址统计
     const ipCounts = logs.reduce((acc, log) => {
-      acc[log?.ipAddress] = (acc[log?.ipAddress] || 0) + 1;
+      if (log?.ipAddress) {
+        acc[log.ipAddress] = (acc[log.ipAddress] || 0) + 1;
+      }
       return acc;
     }, {} as Record<string, number>);
 

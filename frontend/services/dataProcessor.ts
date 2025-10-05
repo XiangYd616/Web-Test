@@ -214,7 +214,7 @@ class DataCache {
       case 'ttl':
         // 移除最早过期的
         keyToEvict = Array.from(this.cache.entries())
-          .sort(([, a], [, b]) => (a?.timestamp + a?.ttl) - (b.timestamp + b.ttl))[0][0];
+          .sort(([, a], [, b]) => ((a?.timestamp || 0) + (a?.ttl || 0)) - ((b?.timestamp || 0) + (b?.ttl || 0)))[0][0];
         break;
 
       case 'fifo':
