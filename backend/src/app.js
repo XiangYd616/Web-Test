@@ -21,24 +21,15 @@ const { configManager } = require('./ConfigManager.js');
 const authRoutes = require('../routes/auth.js');
 const testRoutes = require('../routes/test.js');
 const seoRoutes = require('../routes/seo.js');
-// const unifiedSecurityRoutes = require('./routes/unifiedSecurity'); // 已移除
 const userRoutes = require('../routes/users.js');
 const adminRoutes = require('../routes/admin.js');
-// const dataRoutes = require('./routes/data'); // 已移除，功能合并到 dataManagementRoutes
-
-// 导入中间件
-// const { authMiddleware } = require('../middleware/auth.js'); // 已移除，不再需要
-// const dataManagementRoutes = require('../routes/dataManagement.js'); // 暂时注释，文件缺失
 const testHistoryRoutes = require('../routes/testHistory.js');
 const monitoringRoutes = require('../routes/monitoring.js');
 const reportRoutes = require('../routes/reports.js');
 const integrationRoutes = require('../routes/integrations.js');
-// // // // // const cacheRoutes = require('../config/cache.js'); // 已删除 // 已删除 // 已删除 // 已删除 // 已移除，使用CacheService
 const errorRoutes = require('../routes/errors.js');
 const performanceRoutes = require('../routes/performance.js');
 const filesRoutes = require('../routes/files.js');
-// const performanceTestRoutes = require('../routes/performanceTestRoutes.js'); // 暂时注释，文件缺失
-// const unifiedTestRoutes = require('../routes/unifiedTest.js'); // 暂时注释，文件缺失
 
 // 导入中间件
 const { ErrorHandler } = require('../middleware/errorHandler.js');
@@ -54,14 +45,8 @@ const {
 
 // 导入数据库连接
 const { connectDB, testConnection } = require('../config/database.js');
-// 注意：这些服务文件已被删除，需要使用替代方案
-// const databaseService = require('../services/database/databaseService');
-// const webSocketService = require('../services/webSocketService');
-// const testQueueService = require('../services/queue/queueService');
 
 // 导入缓存和性能优化系统
-// // // // // const cacheConfig = require('../config/cache.js'); // 已删除 // 已删除 // 已删除 // 已删除 // 已移除，使用CacheService
-// // // // // const CacheManager = require('../services/cache/CacheManager.js'); // 已删除 // 已删除 // 已删除 // 已删除 // 已移除，使用CacheService
 const { createCacheMiddleware } = require('../middleware/cacheMiddleware.js');
 const {
   createCompressionMiddleware,
@@ -73,11 +58,7 @@ const {
 // 导入WebSocket通信系统
 const websocketConfig = require('../config/websocket.js');
 
-// 导入Redis服务
-// // // const redisConnection = require('../services/redis/connection.js'); // 已删除 // 已删除 // 已移除，使用CacheService
 const cacheMonitoring = require('../routes/monitoring.js');
-
-// 导入测试历史服务将在启动时动态加载
 
 const app = express();
 const http = require('http');
@@ -108,8 +89,6 @@ const io = new Server(server, {
   }
 });
 
-// 初始化WebSocket服务 - 已删除，需要使用替代方案
-// webSocketService.initialize(server);
 
 // 确保必要的目录存在
 const ensureDirectories = () => {
@@ -189,8 +168,6 @@ app.use(requestLogger);
 // 速率限制
 app.use(rateLimiter);
 
-// 安全中间件
-// app.use(securityMiddleware); // 暂时注释掉，因为TS模块导入问题
 
 // 静态文件服务
 app.use('/exports', express.static(path.join(__dirname, 'exports')));
