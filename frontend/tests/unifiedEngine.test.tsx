@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🧪 统一测试引擎测试套件
  * 验证统一测试引擎的所有功能组件
  */
@@ -275,7 +275,7 @@ describe('统一测试引擎组件测试', () => {
       fireEvent.click(startButton);
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith('/api/unified-engine/execute', {
+        expect(global.fetch).toHaveBeenCalledWith('/unified-engine/execute', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

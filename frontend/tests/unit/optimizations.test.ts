@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 优化功能单元测试
  * 测试性能优化、用户体验组件和测试工具
  */
@@ -221,7 +221,7 @@ describe('测试工具套件', () => {
         headers: new Map([['content-type', 'application/json']])
       });
 
-      const result = await apiTester.testAPIResponse('/api/test');
+      const result = await apiTester.testAPIResponse('/test');
 
       expect(result.passed).toBe(true);
       expect(result.name).toBe('API Response: /api/test');
@@ -237,7 +237,7 @@ describe('测试工具套件', () => {
         headers: new Map()
       });
 
-      const result = await apiTester.testAPIResponse('/api/nonexistent');
+      const result = await apiTester.testAPIResponse('/nonexistent');
 
       expect(result.passed).toBe(false);
       expect(result.error).toContain('HTTP 404');
@@ -246,7 +246,7 @@ describe('测试工具套件', () => {
     it('应该能够测试网络错误', async () => {
       mockFetch.mockRejectedValue(new Error('Network error'));
 
-      const result = await apiTester.testAPIResponse('/api/test');
+      const result = await apiTester.testAPIResponse('/test');
 
       expect(result.passed).toBe(false);
       expect(result.error).toBe('Network error');
@@ -260,7 +260,7 @@ describe('测试工具套件', () => {
         headers: new Map()
       });
 
-      const result = await apiTester.testErrorHandling('/api/test');
+      const result = await apiTester.testErrorHandling('/test');
 
       expect(result.passed).toBe(true); // Error response is expected
       expect(result.details?.expectedError).toBe(true);
@@ -358,7 +358,7 @@ describe('集成测试', () => {
       });
 
       const tester = new APITester();
-      const result = await tester.testAPIResponse('/api/health');
+      const result = await tester.testAPIResponse('/health');
       expect(result.passed).toBe(true);
     });
 

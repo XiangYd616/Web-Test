@@ -201,7 +201,7 @@ describe('统一测试引擎集成测试', () => {
       // 4. 验证API调用
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith(
-          '/api/unified-engine/execute',
+          '/unified-engine/execute',
           expect.objectContaining({
             method: 'POST',
             headers: {
@@ -487,7 +487,7 @@ export const integrationTestUtils = {
     // 3. 等待API调用
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
-        '/api/unified-engine/execute',
+        '/unified-engine/execute',
         expect.objectContaining({
           method: 'POST'
         })
