@@ -1,9 +1,8 @@
-﻿import { LucideIcon } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import TestHistory from '../common/TestHistory';
 import TestHeader from './TestHeader';
-;
 
 interface TestPageLayoutProps {
   // 页面基本信息

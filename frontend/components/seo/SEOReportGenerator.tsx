@@ -307,7 +307,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
     if (reportData.basicSEO) {
       scores.overall = reportData.basicSEO.score;
-      scores.technical = reportData.basicSEO.technicalSEO?.score || 0;
+      scores.technical = reportData.basicSEO.technical?.score || 0;
       scores.content = reportData.basicSEO.contentQuality?.score || 0;
       scores.accessibility = reportData.basicSEO.accessibility?.score || 0;
     }
@@ -327,15 +327,13 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
   // 生成技术SEO部分
   const generateTechnicalSEOSection = () => {
-    if (!reportData.basicSEO) return null;
+    if (!reportData.basicSEO || !reportData.basicSEO.technical) return null;
 
     return {
-      score: reportData.basicSEO.technicalSEO.score,
-      robotsTxt: reportData.basicSEO.technicalSEO.robotsTxt,
-      sitemap: reportData.basicSEO.technicalSEO.sitemap,
-      canonicalTags: reportData.basicSEO.technicalSEO.canonicalTags,
-      metaRobots: reportData.basicSEO.technicalSEO.metaRobots,
-      urlStructure: reportData.basicSEO.technicalSEO.urlStructure
+      score: 0,
+      robots: reportData.basicSEO.technical.robots,
+      sitemap: reportData.basicSEO.technical.sitemap,
+      canonical: reportData.basicSEO.technical.canonical
     };
   };
 

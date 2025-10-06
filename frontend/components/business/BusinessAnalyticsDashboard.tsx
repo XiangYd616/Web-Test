@@ -4,30 +4,8 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, 
-  Typography, 
-  Box, 
-  Chip, 
-  LinearProgress, 
-  Alert, 
-  Tabs, 
-  Tab, 
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  IconButton,
-  Tooltip,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  Grid } from '@mui/material';
+import { Grid } from '../ui/GridWrapper';
+import { Card, Typography, Box, Chip, LinearProgress, Alert, Tabs, Tab, Button, Select, MenuItem, FormControl, InputLabel, IconButton, Tooltip, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
 import {TrendingUp, TrendingDown, TrendingFlat, Refresh, Download, Warning, CheckCircle, Error as ErrorIcon, Speed, People, Assessment, Memory, Timer} from '@mui/icons-material';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell} from 'recharts';
 
