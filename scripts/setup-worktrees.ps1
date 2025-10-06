@@ -40,32 +40,32 @@ Write-Host ""
 # 定义工作树配置
 $worktrees = @(
     @{
-        Name = "Test-Web-frontend"
-        Branch = "feature/frontend-ui-dev"
-        Description = "前端UI开发"
-        Port = "5174"
-        Command = "npm run frontend"
+        Name = 'Test-Web-frontend'
+        Branch = 'feature/frontend-ui-dev'
+        Description = 'Frontend UI Development'
+        Port = '5174'
+        Command = 'npm run frontend'
     },
     @{
-        Name = "Test-Web-backend"
-        Branch = "feature/backend-api-dev"
-        Description = "后端API开发"
-        Port = "3001"
-        Command = "npm run backend:dev"
+        Name = 'Test-Web-backend'
+        Branch = 'feature/backend-api-dev'
+        Description = 'Backend API Development'
+        Port = '3001'
+        Command = 'npm run backend:dev'
     },
     @{
-        Name = "Test-Web-electron"
-        Branch = "feature/electron-integration"
-        Description = "Electron集成"
-        Port = "-"
-        Command = "npm run electron:dev"
+        Name = 'Test-Web-electron'
+        Branch = 'feature/electron-integration'
+        Description = 'Electron Integration'
+        Port = '-'
+        Command = 'npm run electron:dev'
     },
     @{
-        Name = "Test-Web-testing"
-        Branch = "test/integration-testing"
-        Description = "测试与维护"
-        Port = "-"
-        Command = "npm run test:watch"
+        Name = 'Test-Web-testing'
+        Branch = 'test/integration-testing'
+        Description = 'Testing and Maintenance'
+        Port = '-'
+        Command = 'npm run test:watch'
     }
 )
 
