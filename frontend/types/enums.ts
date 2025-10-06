@@ -57,7 +57,26 @@ export {};
 
 
 // Test Type as both enum and type
-export type TestType = 
+export enum TestType {
+  STRESS = 'stress',
+  PERFORMANCE = 'performance',
+  API = 'api',
+  SECURITY = 'security',
+  SEO = 'seo',
+  ACCESSIBILITY = 'accessibility',
+  CONTENT = 'content',
+  INFRASTRUCTURE = 'infrastructure',
+  DOCUMENTATION = 'documentation',
+  UX = 'ux',
+  INTEGRATION = 'integration',
+  NETWORK = 'network',
+  COMPATIBILITY = 'compatibility',
+  DATABASE = 'database',
+  WEBSITE = 'website',
+}
+
+// Export as type alias as well for compatibility
+export type TestTypeValue = 
   | 'stress'
   | 'performance'
   | 'api'
@@ -68,7 +87,11 @@ export type TestType =
   | 'infrastructure'
   | 'documentation'
   | 'ux'
-  | 'integration';
+  | 'integration'
+  | 'network'
+  | 'compatibility'
+  | 'database'
+  | 'website';
 
 export enum TestPriority {
   LOW = 'low',

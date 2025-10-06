@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
-[![Yarn](https://img.shields.io/badge/yarn-1.22+-blue.svg)](https://yarnpkg.com/)
+[![npm](https://img.shields.io/badge/npm-%3E%3D9.0.0-blue.svg)](https://www.npmjs.com/)
 [![React](https://img.shields.io/badge/react-18.x-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com)
@@ -46,17 +46,17 @@
 
 ```bash
 # 安装依赖
-yarn install
+npm install
 
 # 启动完整项目（前后端）
-yarn dev
+npm run dev
 ```
 
 ### 📱 仅前端开发
 
 ```bash
 # 仅启动前端开发服务器
-yarn frontend
+npm run frontend
 ```
 
 访问: http://localhost:5174
@@ -66,7 +66,7 @@ yarn frontend
 ```bash
 # 进入后端目录并启动
 cd backend
-yarn dev
+npm run dev
 ```
 
 访问: http://localhost:3001
@@ -94,24 +94,33 @@ node scripts/script-manager.cjs cleanup     # 项目清理
 node scripts/script-manager.cjs status      # 项目状态
 ```
 
-### 📦 yarn脚本
+### 📦 npm 脚本
 
 ```bash
-# 开发脚本（推荐使用 -safe 版本）
-yarn dev-safe        # 安全开发模式 ⭐
-yarn build-safe      # 安全构建模式 ⭐
-yarn type-ignore     # 智能类型检查 ⭐
+# 开发脚本
+npm run dev          # 启动前后端开发服务器
+npm run frontend     # 仅启动前端
+npm run backend:dev  # 仅启动后端
+
+# 构建和检查
+npm run build        # 生产构建
+npm run build:check  # 类型检查 + 构建
+npm run type-check   # TypeScript 类型检查
+
+# 测试
+npm run test         # 运行单元测试
+npm run test:ui      # 测试界面
+npm run e2e          # E2E 测试
 
 # 代码质量
-yarn lint           # ESLint检查
-yarn lint:fix       # 自动修复
-yarn format         # 代码格式化
-yarn test           # 运行测试
+npm run lint         # ESLint 检查
+npm run lint:fix     # 自动修复
+npm run format       # 代码格式化
 
 # 项目维护
-yarn clean          # 清理构建文件
-yarn cleanup        # 深度清理
-yarn deps:update    # 更新依赖
+npm run clean        # 清理构建文件
+npm run clean:all    # 深度清理
+npm run deps:update  # 更新依赖
 ```
 
 ## 🛠️ 技术栈
@@ -199,15 +208,16 @@ Test-Web/
 ## 🚨 故障排除
 
 ### 常见问题
-- **连接被拒绝**: 使用 `yarn dev-safe` 而不是 `yarn dev`
-- **类型错误过多**: 使用 `yarn type-ignore` 查看关键错误
-- **构建失败**: 使用 `yarn build-safe` 安全构建
+- **连接被拒绝**: 检查端口 3001 和 5174 是否被占用
+- **类型错误过多**: 运行 `npm run type-check` 查看详细错误
+- **构建失败**: 运行 `npm run build:check` 先检查类型
 
 ### 快速修复
 ```bash
 # 完全重置
-yarn clean:all
-node scripts/script-manager.cjs dev
+npm run clean:all
+npm install
+npm run dev
 ```
 
 ## 📄 许可证

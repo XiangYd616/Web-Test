@@ -212,14 +212,16 @@ try {
   console.warn('⚠️ 错误处理系统导入失败:', error.message);
 }
 
-// 同步应用所有关键路由（必须在404处理器之前）
-console.log('🔧 开始同步应用关键路由...');
+// ==========================================================================
+// 新路由架构：移除 /api 前缀，按资源类型组织
+// ==========================================================================
+console.log('🔧 开始应用新路由架构（无 /api 前缀）...');
 
 // 应用认证路由
 try {
   const authRoutes = require('../routes/auth.js');
-  app.use('/api/auth', authRoutes);
-  console.log('✅ 认证路由已应用: /api/auth');
+  app.use('/auth', authRoutes);  // ✨ 新路径：/auth
+  console.log('✅ 认证路由已应用: /auth');
 } catch (error) {
   console.error('⚠️ 认证路由应用失败:', error.message);
 }
@@ -227,8 +229,8 @@ try {
 // 应用系统路由
 try {
   const systemRoutes = require('../routes/system.js');
-  app.use('/api/system', systemRoutes);
-  console.log('✅ 系统路由已应用: /api/system');
+  app.use('/system', systemRoutes);  // ✨ 新路径：/system
+  console.log('✅ 系统路由已应用: /system');
 } catch (error) {
   console.error('⚠️ 系统路由应用失败:', error.message);
 }
@@ -236,8 +238,8 @@ try {
 // 应用SEO路由
 try {
   const seoRoutes = require('../routes/seo.js');
-  app.use('/api/seo', seoRoutes);
-  console.log('✅ SEO路由已应用: /api/seo');
+  app.use('/seo', seoRoutes);  // ✨ 新路径：/seo
+  console.log('✅ SEO路由已应用: /seo');
 } catch (error) {
   console.error('⚠️ SEO路由应用失败:', error.message);
 }
@@ -245,59 +247,112 @@ try {
 // 应用安全路由
 try {
   const securityRoutes = require('../routes/security.js');
-  app.use('/api/security', securityRoutes);
-  console.log('✅ 安全路由已应用: /api/security');
+  app.use('/security', securityRoutes);  // ✨ 新路径：/security
+  console.log('✅ 安全路由已应用: /security');
 } catch (error) {
   console.error('⚠️ 安全路由应用失败:', error.message);
 }
 
-// 应用引擎状态路由
+// 应用引擎管理路由（新增）
 try {
-  const engineStatusRoutes = require('../routes/engineStatus.js');
-  app.use('/api/engines', engineStatusRoutes);
-  console.log('✅ 引擎状态路由已应用: /api/engines');
+  const enginesRoutes = require('../routes/engines/index.js');
+  app.use('/engines', enginesRoutes);  // ✨ 新路径：/engines
+  console.log('✅ 引擎管理路由已应用: /engines');
 } catch (error) {
-  console.error('⚠️ 引擎状态路由应用失败:', error.message);
+  console.error('⚠️ 引擎管理路由应用失败:', error.message);
 }
 
-// 应用测试路由
+// 应用测试路由（重构）
 try {
-  const testRoutes = require('../routes/test.js');
-  app.use('/api/test', testRoutes);
-  console.log('✅ 测试路由已应用: /api/test');
+  const testsRoutes = require('../routes/tests/index.js');
+  app.use('/tests', testsRoutes);  // ✨ 新路径：/tests (复数)
+  console.log('✅ 测试路由已应用: /tests');
 } catch (error) {
   console.error('⚠️ 测试路由应用失败:', error.message);
 }
 
-// 应用简单测试路由（暂时注释，文件缺失）
-// try {
-//   const simpleTestRoutes = require('../routes/simple-test.js');
-//   app.use('/api/simple', simpleTestRoutes);
-//   console.log('✅ 简单测试路由已应用: /api/simple');
-// } catch (error) {
-//   console.error('⚠️ 简单测试路由应用失败:', error.message);
-// }
+// 应用用户管理路由
+try {
+  const usersRoutes = require('../routes/users.js');
+  app.use('/users', usersRoutes);  // ✨ 新路径：/users
+  console.log('✅ 用户管理路由已应用: /users');
+} catch (error) {
+  console.error('⚠️ 用户管理路由应用失败:', error.message);
+}
 
-// 应用定时任务路由（暂时注释，文件缺失）
-// try {
-//   const scheduledTaskRoutes = require('../routes/scheduledTasks.js');
-//   app.use('/api/scheduled-tasks', scheduledTaskRoutes);
-//   console.log('✅ 定时任务路由已应用: /api/scheduled-tasks');
-// } catch (error) {
-//   console.error('⚠️ 定时任务路由应用失败:', error.message);
-// }
+// 应用管理员路由
+try {
+  const adminRoutes = require('../routes/admin.js');
+  app.use('/admin', adminRoutes);  // ✨ 新路径：/admin
+  console.log('✅ 管理员路由已应用: /admin');
+} catch (error) {
+  console.error('⚠️ 管理员路由应用失败:', error.message);
+}
 
-// 注释掉API映射路由，避免重复
-// try {
-//   const apiMappings = require('../routes/api-mappings.js');
-//   app.use('/api', apiMappings);
-//   console.log('✅ API映射修复路由已应用');
-// } catch (error) {
-//   console.error('⚠️ API映射应用失败:', error.message);
-// }
-console.log('✅ 路由已直接应用，不需要API映射文件');
+// 应用报告路由
+try {
+  const reportsRoutes = require('../routes/reports.js');
+  app.use('/reports', reportsRoutes);  // ✨ 新路径：/reports
+  console.log('✅ 报告路由已应用: /reports');
+} catch (error) {
+  console.error('⚠️ 报告路由应用失败:', error.message);
+}
 
-console.log('✅ 所有关键路由已同步应用完成');
+// 应用监控路由
+try {
+  const monitoringRoutes = require('../routes/monitoring.js');
+  app.use('/monitoring', monitoringRoutes);  // ✨ 新路径：/monitoring
+  console.log('✅ 监控路由已应用: /monitoring');
+} catch (error) {
+  console.error('⚠️ 监控路由应用失败:', error.message);
+}
+
+// 应用错误管理路由
+try {
+  const errorManagementRoutes = require('../routes/errorManagement.js');
+  app.use('/error-management', errorManagementRoutes);  // ✨ 新路径：/error-management
+  console.log('✅ 错误管理路由已应用: /error-management');
+} catch (error) {
+  console.error('⚠️ 错误管理路由应用失败:', error.message);
+}
+
+// 应用存储管理路由
+try {
+  const storageManagementRoutes = require('../routes/storageManagement.js');
+  app.use('/storage', storageManagementRoutes);  // ✨ 新路径：/storage
+  console.log('✅ 存储管理路由已应用: /storage');
+} catch (error) {
+  console.error('⚠️ 存储管理路由应用失败:', error.message);
+}
+
+// 应用网络测试路由
+try {
+  const networkRoutes = require('../routes/network.js');
+  app.use('/network', networkRoutes);  // ✨ 新路径：/network
+  console.log('✅ 网络测试路由已应用: /network');
+} catch (error) {
+  console.error('⚠️ 网络测试路由应用失败:', error.message);
+}
+
+// 应用调度器路由
+try {
+  const schedulerRoutes = require('../routes/scheduler.js');
+  app.use('/scheduler', schedulerRoutes);  // ✨ 新路径：/scheduler
+  console.log('✅ 调度器路由已应用: /scheduler');
+} catch (error) {
+  console.error('⚠️ 调度器路由应用失败:', error.message);
+}
+
+// 应用批量测试路由
+try {
+  const batchRoutes = require('../routes/batch.js');
+  app.use('/batch', batchRoutes);  // ✨ 新路径：/batch
+  console.log('✅ 批量测试路由已应用: /batch');
+} catch (error) {
+  console.error('⚠️ 批量测试路由应用失败:', error.message);
+}
+
+console.log('✅ 所有路由已应用完成（新架构，无 /api 前缀）');
 
 // 健康检查端点
 app.get('/health', async (req, res) => {
@@ -492,38 +547,57 @@ app.post('/realtime/notify', async (req, res) => {
   }
 });
 
-// API文档路由
-app.get('/api', (req, res) => {
+// ==========================================================================
+// API文档路由（新架构）
+// ==========================================================================
+
+// 根路径概览
+app.get('/', (req, res) => {
   res.json({
     name: `${APP_NAME} API`,
     version: APP_VERSION,
-    description: '网站测试工具API',
+    description: '网站测试工具API - RESTful架构',
     environment: process.env.NODE_ENV || 'development',
-    endpoints: {
-      auth: '/api/auth',
-      test: '/api/test',
-      performance: '/api/test/performance',
-      seo: '/api/seo',
-      seoUnified: '/api/test/seo',
-      user: '/api/user',
-      admin: '/api/admin',
-      data: '/api/data',
-      monitoring: '/api/monitoring',
-      reports: '/api/reports',
-      integrations: '/api/integrations',
-      scheduledTasks: '/api/scheduled-tasks'
-    },
-    deprecatedEndpoints: {
-      note: '以下端点已废弃，请使用新的统一端点',
-      removed: [
-        '/api/tests (使用 /api/test)',
-        '/api/test-engines (功能已整合)',
-        '/api/test-history (使用 /api/test/history)',
-        '/api/preferences (使用 /api/user/preferences)',
-        '/api/unified-security (已移除)'
+    architecture: {
+      version: '2.0',
+      principles: [
+        'RESTful 设计原则',
+        '按资源类型组织',
+        '语义化URL路径',
+        '模块化路由结构'
       ]
     },
-    documentation: '/api/docs',
+    endpoints: {
+      auth: '/auth',                      // 认证授权
+      users: '/users',                    // 用户管理
+      admin: '/admin',                    // 管理功能
+      system: '/system',                  // 系统管理
+      seo: '/seo',                        // SEO分析
+      security: '/security',              // 安全测试
+      tests: '/tests',                    // 测试集合
+      engines: '/engines',                // 引擎管理
+      monitoring: '/monitoring',          // 系统监控
+      reports: '/reports',                // 报告生成
+      errorManagement: '/error-management', // 错误管理 ⭐
+      storage: '/storage',                // 存储管理 ⭐
+      network: '/network',                // 网络测试 ⭐
+      scheduler: '/scheduler',            // 任务调度 ⭐
+      batch: '/batch',                    // 批量测试 ⭐
+      health: '/health',                  // 健康检查
+      cache: '/cache/stats',              // 缓存状态
+      realtime: '/realtime/stats'         // 实时通信
+    },
+    features: {
+      tests: {
+        description: '多种测试类型',
+        types: ['SEO', 'Security', 'Stress', 'Compatibility', 'API']
+      },
+      engines: {
+        description: '测试引擎管理',
+        supported: ['K6', 'Lighthouse']
+      }
+    },
+    documentation: '/docs',
     health: '/health'
   });
 });
