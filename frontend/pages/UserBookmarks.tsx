@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import {Bookmark, BookmarkPlus, Search, Filter, Trash2, ExternalLink, Star, Clock, FolderPlus, Folder, Grid, RefreshCw} from 'lucide-react';
 
@@ -61,7 +61,7 @@ const UserBookmarks: React.FC = () => {
         createdAt: '2024-01-15T10:00:00Z',
         lastAccessed: '2024-01-20T14:30:00Z',
         accessCount: 25,
-        thumbnail: '/api/placeholder/300/200'
+        thumbnail: '/placeholder/300/200'
       },
       {
         id: '2',
@@ -74,7 +74,7 @@ const UserBookmarks: React.FC = () => {
         createdAt: '2024-01-14T09:15:00Z',
         lastAccessed: '2024-01-19T16:45:00Z',
         accessCount: 18,
-        thumbnail: '/api/placeholder/300/200'
+        thumbnail: '/placeholder/300/200'
       }
     ];
 

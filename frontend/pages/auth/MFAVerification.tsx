@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MFA验证页面组件
  * 用于登录时验证双因素认证码
  */
@@ -84,7 +84,7 @@ const MFAVerification: React.FC<MFAVerificationProps> = ({
     setState(prev => ({ ...prev, isLoading: true, error: undefined }));
 
     try {
-      const response = await fetch('/api/auth/mfa/verify', {
+      const response = await fetch('/auth/mfa/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -153,7 +153,7 @@ const MFAVerification: React.FC<MFAVerificationProps> = ({
     setState(prev => ({ ...prev, isLoading: true, error: undefined }));
 
     try {
-      const response = await fetch('/api/auth/mfa/verify-backup', {
+      const response = await fetch('/auth/mfa/verify-backup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

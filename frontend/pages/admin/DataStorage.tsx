@@ -125,7 +125,7 @@ const DataStorage: React.FC = () => {
     try {
 
       // 从后端API加载真实数据（需要认证）
-      const response = await fetch(`http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test-history?` + new URLSearchParams({
+      const response = await fetch(`http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/test-history?` + new URLSearchParams({
         sortBy,
         sortOrder
       }), {
@@ -165,7 +165,7 @@ const DataStorage: React.FC = () => {
 
     try {
 
-      const response = await fetch(`http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test-history/${recordId}`, {
+      const response = await fetch(`http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/test-history/${recordId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });

@@ -192,7 +192,7 @@ const AccessibilityTest: React.FC = () => {
       setCanSwitchPages(false);
 
       // 调用后端API
-      const response = await fetch('/api/test/accessibility', {
+      const response = await fetch('/test/accessibility', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

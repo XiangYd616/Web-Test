@@ -56,7 +56,7 @@ const APITest: React.FC = () => {
         id: '1',
         name: '获取用户列表',
         method: 'GET',
-        path: '/api/users',
+        path: '/users',
         expectedStatus: [200],
         description: '获取所有用户信息',
         priority: 'medium',
@@ -337,7 +337,7 @@ const APITest: React.FC = () => {
       id: Date.now().toString(),
       name: '新端点',
       method: 'GET',
-      path: '/api/endpoint',
+      path: '/endpoint',
       expectedStatus: [200],
       description: '',
       priority: 'medium',
@@ -355,7 +355,7 @@ const APITest: React.FC = () => {
         id: Date.now().toString(),
         name: '获取用户列表',
         method: 'GET',
-        path: '/api/users',
+        path: '/users',
         expectedStatus: [200],
         description: '获取所有用户信息',
         priority: 'high',
@@ -365,7 +365,7 @@ const APITest: React.FC = () => {
         id: (Date.now() + 1).toString(),
         name: '创建用户',
         method: 'POST',
-        path: '/api/users',
+        path: '/users',
         expectedStatus: [201],
         description: '创建新用户',
         priority: 'high',
@@ -375,7 +375,7 @@ const APITest: React.FC = () => {
         id: (Date.now() + 2).toString(),
         name: '获取用户详情',
         method: 'GET',
-        path: '/api/users/{id}',
+        path: '/users/{id}',
         expectedStatus: [200],
         description: '根据ID获取用户详情',
         priority: 'medium',
@@ -385,7 +385,7 @@ const APITest: React.FC = () => {
         id: (Date.now() + 3).toString(),
         name: '更新用户',
         method: 'PUT',
-        path: '/api/users/{id}',
+        path: '/users/{id}',
         expectedStatus: [200],
         description: '更新用户信息',
         priority: 'medium',
@@ -395,7 +395,7 @@ const APITest: React.FC = () => {
         id: (Date.now() + 4).toString(),
         name: '删除用户',
         method: 'DELETE',
-        path: '/api/users/{id}',
+        path: '/users/{id}',
         expectedStatus: [204],
         description: '删除用户',
         priority: 'low',
@@ -489,7 +489,7 @@ const APITest: React.FC = () => {
             id: Date.now().toString(),
             name: '商品列表',
             method: 'GET' as const,
-            path: '/api/products',
+            path: '/products',
             expectedStatus: [200],
             description: '获取商品列表',
             priority: 'high' as const,
@@ -499,7 +499,7 @@ const APITest: React.FC = () => {
             id: (Date.now() + 1).toString(),
             name: '购物车',
             method: 'GET' as const,
-            path: '/api/cart',
+            path: '/cart',
             expectedStatus: [200],
             description: '获取购物车内容',
             priority: 'high' as const,
@@ -509,7 +509,7 @@ const APITest: React.FC = () => {
             id: (Date.now() + 2).toString(),
             name: '创建订单',
             method: 'POST' as const,
-            path: '/api/orders',
+            path: '/orders',
             expectedStatus: [201],
             description: '创建新订单',
             priority: 'high' as const,
@@ -1411,7 +1411,7 @@ const APITest: React.FC = () => {
                               type="text"
                               value={endpoint.path}
                               onChange={(e) => updateEndpoint(endpoint.id, { path: e.target.value })}
-                              placeholder="/api/endpoint"
+                              placeholder="/endpoint"
                               className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>

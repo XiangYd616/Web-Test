@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {Zap, AlertTriangle, Info, Download, AlertCircle} from 'lucide-react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
-import { UniversalTestPage } from '../components/testing/UniversalTestPage';
+import { TestPage } from '../components/testing/TestPage';
 import { stressTestConfig } from '../config/testTypes';
 import { toast } from 'react-hot-toast';
 
@@ -185,7 +185,7 @@ const UnifiedStressTest: React.FC = () => {
         </div>
 
         {/* 主测试界面 */}
-        <UniversalTestPage
+        <TestPage
           testType={stressTestConfig}
           onTestComplete={handleTestComplete}
           onConfigChange={handleConfigChange}

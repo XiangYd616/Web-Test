@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MFA设置页面组件
  * 用于设置双因素认证，包括生成二维码、验证TOTP等功能
  */
@@ -57,7 +57,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
     setState(prev => ({ ...prev, isLoading: true, error: undefined }));
     
     try {
-      const response = await fetch('/api/auth/mfa/setup', {
+      const response = await fetch('/auth/mfa/setup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
     setState(prev => ({ ...prev, isLoading: true, error: undefined }));
 
     try {
-      const response = await fetch('/api/auth/mfa/verify-setup', {
+      const response = await fetch('/auth/mfa/verify-setup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

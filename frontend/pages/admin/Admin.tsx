@@ -80,7 +80,7 @@ const Admin: React.FC = () => {
   ];
 
   // 检查管理员权限
-  const isAdmin = user.role === 'admin' || user?.permissions?.includes('admin:access');
+  const isAdmin = user?.role === 'admin' || user?.permissions?.includes('admin:access');
 
   if (!isAdmin) {
     return (

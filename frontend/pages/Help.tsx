@@ -1,4 +1,4 @@
-import { BarChart3, Book, ChevronRight, Clock, Code, Download, FileText, Filter, HelpCircle, Mail, MessageCircle, Phone, Play, Search, Send, Shield, Tag, ThumbsDown, ThumbsUp, Users, Video, Zap } from 'lucide-react';
+﻿import { BarChart3, Book, ChevronRight, Clock, Code, Download, FileText, Filter, HelpCircle, Mail, MessageCircle, Phone, Play, Search, Send, Shield, Tag, ThumbsDown, ThumbsUp, Users, Video, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { helpService } from '../services/helpService';
@@ -222,7 +222,7 @@ const Help: React.FC = () => {
       title: '快速开始 - 5分钟上手指南',
       description: '从注册到完成第一次测试的完整流程演示',
       duration: '5:32',
-      thumbnail: '/api/placeholder/320/180',
+      thumbnail: '/placeholder/320/180',
       videoUrl: 'https://example.com/videos/getting-started',
       category: 'getting-started',
       views: 1250
@@ -232,7 +232,7 @@ const Help: React.FC = () => {
       title: '性能测试深度解析',
       description: '详细讲解性能测试指标和优化建议',
       duration: '12:45',
-      thumbnail: '/api/placeholder/320/180',
+      thumbnail: '/placeholder/320/180',
       videoUrl: 'https://example.com/videos/performance-testing',
       category: 'testing',
       views: 890
@@ -242,7 +242,7 @@ const Help: React.FC = () => {
       title: '安全扫描功能详解',
       description: '如何使用安全扫描功能发现和修复漏洞',
       duration: '8:20',
-      thumbnail: '/api/placeholder/320/180',
+      thumbnail: '/placeholder/320/180',
       videoUrl: 'https://example.com/videos/security-scanning',
       category: 'testing',
       views: 675
@@ -252,7 +252,7 @@ const Help: React.FC = () => {
       title: 'API集成开发指南',
       description: '如何将Test Web App API集成到您的项目中',
       duration: '15:10',
-      thumbnail: '/api/placeholder/320/180',
+      thumbnail: '/placeholder/320/180',
       videoUrl: 'https://example.com/videos/api-integration',
       category: 'api',
       views: 432

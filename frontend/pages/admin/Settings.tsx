@@ -53,7 +53,7 @@ const UnifiedSettings: React.FC = () => {
   const [userPreferences, setUserPreferences] = useState<Record<string, any>>({});
   const [formData, setFormData] = useState<Record<string, any>>({});
 
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user?.role === 'admin';
 
   // 加载数据
   useEffect(() => {
