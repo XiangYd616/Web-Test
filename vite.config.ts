@@ -52,6 +52,7 @@ export default defineConfig({
     },
   },
   root: 'frontend',
+  publicDir: resolve(__dirname, 'public'),
   server: {
     port: parseInt(process.env.VITE_DEV_PORT || '5174'),
     host: true,
@@ -82,7 +83,9 @@ export default defineConfig({
       }
     },
     // 添加中间件来处理SPA路由
-    middlewareMode: false
+    middlewareMode: false,
+    // 确保SPA回退正常工作
+    historyApiFallback: true
   },
   preview: {
     port: parseInt(process.env.VITE_DEV_PORT || '5174'),
