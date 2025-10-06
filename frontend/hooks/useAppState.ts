@@ -348,7 +348,7 @@ export function useBusinessState() {
         testActions.startTest({ id: testId, type: testType, url });
 
         // 模拟API调用
-        const response = await fetch('/api/tests', {
+        const response = await fetch('/tests', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ testType, url, options })
@@ -383,7 +383,7 @@ export function useBusinessState() {
       try {
         setLoading('auth', true);
         
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch('/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(credentials)

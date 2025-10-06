@@ -60,7 +60,7 @@ export interface ScheduleFilter {
 }
 
 class SchedulingService {
-  private baseUrl = '/api/scheduling';
+  private baseUrl = '/scheduling';
   private cache = new Map<string, any>();
   private cacheTimeout = 2 * 60 * 1000; // 2分钟缓存
 

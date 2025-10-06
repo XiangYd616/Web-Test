@@ -124,58 +124,58 @@ export class ApiService extends BaseApiService {
 
   // Test-specific methods
   public async startTest(config: TestConfig): Promise<ApiResponse<TestSession>> {
-    return this.apiPost<TestSession>('/api/tests/start', config);
+    return this.apiPost<TestSession>('/tests/start', config);
   }
 
   public async getTestProgress(testId: string): Promise<ApiResponse<TestProgress>> {
-    return this.apiGet<TestProgress>(`/api/tests/${testId}/progress`);
+    return this.apiGet<TestProgress>(`/tests/${testId}/progress`);
   }
 
   public async getTestResult(testId: string): Promise<ApiResponse<any>> {
-    return this.apiGet(`/api/tests/${testId}/result`);
+    return this.apiGet(`/tests/${testId}/result`);
   }
 
   public async cancelTest(testId: string): Promise<ApiResponse<void>> {
-    return this.apiPost(`/api/tests/${testId}/cancel`);
+    return this.apiPost(`/tests/${testId}/cancel`);
   }
 
   public async stopTest(testId: string): Promise<ApiResponse<void>> {
-    return this.apiPost(`/api/tests/${testId}/stop`);
+    return this.apiPost(`/tests/${testId}/stop`);
   }
 
   public async getTestHistory(testId: string): Promise<ApiResponse<any[]>> {
-    return this.apiGet(`/api/tests/${testId}/history`);
+    return this.apiGet(`/tests/${testId}/history`);
   }
 
   public async getQueueStatus(): Promise<ApiResponse<any>> {
-    return this.apiGet('/api/tests/queue/status');
+    return this.apiGet('/tests/queue/status');
   }
 
   public async getTestStatistics(timeRange?: string): Promise<ApiResponse<any>> {
-    const url = timeRange ? `/api/tests/statistics?timeRange=${timeRange}` : '/api/tests/statistics';
+    const url = timeRange ? `/tests/statistics?timeRange=${timeRange}` : '/tests/statistics';
     return this.apiGet(url);
   }
   
   // 测试结果相关
   public async exportTestResult(testId: string, format: 'json' | 'csv' | 'pdf' = 'json'): Promise<ApiResponse<any>> {
-    return this.apiGet(`/api/tests/${testId}/export`, { format });
+    return this.apiGet(`/tests/${testId}/export`, { format });
   }
   
   public async getTestReport(testId: string): Promise<ApiResponse<any>> {
-    return this.apiGet(`/api/tests/${testId}/report`);
+    return this.apiGet(`/tests/${testId}/report`);
   }
   
   public async shareTestResult(testId: string, options?: { email?: string; public?: boolean }): Promise<ApiResponse<{ shareUrl: string }>> {
-    return this.apiPost(`/api/tests/${testId}/share`, options);
+    return this.apiPost(`/tests/${testId}/share`, options);
   }
   
   // OAuth相关
   public async getOAuthUrl(provider: string): Promise<ApiResponse<{ url: string }>> {
-    return this.apiGet(`/api/oauth/${provider}/url`);
+    return this.apiGet(`/oauth/${provider}/url`);
   }
   
   public async oauthCallback(provider: string, code: string, state?: string): Promise<ApiResponse<{ token: string; user: any }>> {
-    return this.apiPost(`/api/oauth/${provider}/callback`, { code, state });
+    return this.apiPost(`/oauth/${provider}/callback`, { code, state });
   }
   
   // 工具方法

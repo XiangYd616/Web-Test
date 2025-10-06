@@ -85,7 +85,7 @@ export const useSimpleTestEngine = () => {
     },
     exportTestResults: async (testId: string, format: string) => {
       return {
-        data: { downloadUrl: `/api/test/${testId}/export?format=${format}` }
+        data: { downloadUrl: `/test/${testId}/export?format=${format}` }
       };
     }
   };

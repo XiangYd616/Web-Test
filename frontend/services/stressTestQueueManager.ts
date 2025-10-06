@@ -348,7 +348,7 @@ class StressTestQueueManager {
     try {
 
       // 调用后端压力测试API
-      const response = await fetch('/api/test/stress', {
+      const response = await fetch('/test/stress', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

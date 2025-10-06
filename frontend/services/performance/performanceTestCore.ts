@@ -3,7 +3,7 @@ import { CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PE
 
 export class PerformanceTestCore {
   private activeTests = new Map<string, any>();
-  private readonly apiBaseUrl = '/api/test';
+  private readonly apiBaseUrl = '/test';
 
   /**
    * 运行性能测试

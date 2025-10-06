@@ -264,7 +264,7 @@ export const useNotifications = () => {
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
 
     try {
-      const response = await fetch('/api/user/notifications', {
+      const response = await fetch('/user/notifications', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

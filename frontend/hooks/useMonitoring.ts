@@ -59,7 +59,7 @@ export const useMonitoring = () => {
     // 开始监控
     const startMonitoring = useCallback(async (): Promise<void> => {
         try {
-            const response = await fetch('/api/monitoring/start', {
+            const response = await fetch('/monitoring/start', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
@@ -85,7 +85,7 @@ export const useMonitoring = () => {
     // 停止监控
     const stopMonitoring = useCallback(async (): Promise<void> => {
         try {
-            const response = await fetch('/api/monitoring/stop', {
+            const response = await fetch('/monitoring/stop', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
@@ -111,7 +111,7 @@ export const useMonitoring = () => {
     // 添加监控目标
     const addTarget = useCallback(async (target: Omit<MonitoringTarget, 'id' | 'status'>): Promise<void> => {
         try {
-            const response = await fetch('/api/monitoring/targets', {
+            const response = await fetch('/monitoring/targets', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ export const useMonitoring = () => {
     // 更新监控目标
     const updateTarget = useCallback(async (targetId: string, updates: Partial<MonitoringTarget>): Promise<void> => {
         try {
-            const response = await fetch(`/api/monitoring/targets/${targetId}`, {
+            const response = await fetch(`/monitoring/targets/${targetId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ export const useMonitoring = () => {
     // 删除监控目标
     const removeTarget = useCallback(async (targetId: string): Promise<void> => {
         try {
-            const response = await fetch(`/api/monitoring/targets/${targetId}`, {
+            const response = await fetch(`/monitoring/targets/${targetId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
@@ -197,7 +197,7 @@ export const useMonitoring = () => {
     // 手动检查目标
     const checkTarget = useCallback(async (targetId: string): Promise<void> => {
         try {
-            const response = await fetch(`/api/monitoring/targets/${targetId}/check`, {
+            const response = await fetch(`/monitoring/targets/${targetId}/check`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
@@ -231,7 +231,7 @@ export const useMonitoring = () => {
     // 获取监控目标列表
     const getTargets = useCallback(async (): Promise<MonitoringTarget[]> => {
         try {
-            const response = await fetch('/api/monitoring/targets', {
+            const response = await fetch('/monitoring/targets', {
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
                 }
@@ -264,7 +264,7 @@ export const useMonitoring = () => {
             if (filters?.limit) queryParams.append('limit', filters?.limit.toString());
             if (filters?.offset) queryParams.append('offset', filters?.offset.toString());
 
-            const response = await fetch(`/api/monitoring/alerts?${queryParams}`, {
+            const response = await fetch(`/monitoring/alerts?${queryParams}`, {
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
                 }
@@ -286,7 +286,7 @@ export const useMonitoring = () => {
     // 解决告警
     const resolveAlert = useCallback(async (alertId: string): Promise<void> => {
         try {
-            const response = await fetch(`/api/monitoring/alerts/${alertId}/resolve`, {
+            const response = await fetch(`/monitoring/alerts/${alertId}/resolve`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
@@ -311,7 +311,7 @@ export const useMonitoring = () => {
     // 获取监控统计
     const getStats = useCallback(async (): Promise<MonitoringStats> => {
         try {
-            const response = await fetch('/api/monitoring/stats', {
+            const response = await fetch('/monitoring/stats', {
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
                 }
@@ -376,7 +376,7 @@ export const useMonitoring = () => {
     // 获取目标详情
     const getTargetDetails = useCallback(async (targetId: string): Promise<MonitoringTarget | null> => {
         try {
-            const response = await fetch(`/api/monitoring/targets/${targetId}`, {
+            const response = await fetch(`/monitoring/targets/${targetId}`, {
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
                 }
@@ -399,7 +399,7 @@ export const useMonitoring = () => {
     // 批量操作目标
     const batchUpdateTargets = useCallback(async (targetIds: string[], updates: Partial<MonitoringTarget>): Promise<void> => {
         try {
-            const response = await fetch('/api/monitoring/targets/batch', {
+            const response = await fetch('/monitoring/targets/batch', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

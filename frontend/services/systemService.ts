@@ -1,4 +1,4 @@
-// 系统管理服务 - 真实API实现
+﻿// 系统管理服务 - 真实API实现
 
 import type {
   MaintenanceInfo,
@@ -15,7 +15,7 @@ type User = any;
 type UserFilter = any;
 
 export class SystemService {
-  private static readonly BASE_URL = '/api/system';
+  private static readonly BASE_URL = '/system';
   private static cache = new Map<string, any>();
   private static cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 

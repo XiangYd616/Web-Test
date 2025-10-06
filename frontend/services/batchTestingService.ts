@@ -67,7 +67,7 @@ export interface BatchSummary {
 }
 
 class BatchTestingService {
-  private baseUrl = '/api/batch-testing';
+  private baseUrl = '/batch-testing';
   private cache = new Map<string, any>();
   private cacheTimeout = 2 * 60 * 1000; // 2分钟缓存
 

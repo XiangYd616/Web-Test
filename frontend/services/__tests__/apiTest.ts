@@ -66,7 +66,7 @@ describe('API服务集成测试', () => {
             });
 
             expect(mockFetch).toHaveBeenCalledWith(
-                expect.stringContaining('/api/auth/login'),
+                expect.stringContaining('/auth/login'),
                 expect.objectContaining({
                     method: 'POST',
                     body: JSON.stringify({
@@ -267,7 +267,7 @@ describe('API服务集成测试', () => {
 
             // 获取调用参数
             const [url, options] = mockFetch.mock.calls[0];
-            expect(url).toContain('/api/auth/login');
+            expect(url).toContain('/auth/login');
             expect(options.method).toBe('POST');
         });
     });

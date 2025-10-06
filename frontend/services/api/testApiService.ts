@@ -140,7 +140,7 @@ export interface InfrastructureTestConfig {
 }
 
 class TestApiService implements TestApiClient {
-  private baseUrl = '/api/test'; // 修正为实际的后端API路径
+  private baseUrl = '/test'; // 修正为实际的后端API路径
 
   /**
    * 获取测试类型对应的权限

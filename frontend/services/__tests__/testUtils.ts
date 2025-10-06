@@ -161,7 +161,7 @@ export function createMockFetchResponse(
     bodyUsed: false,
     redirected: false,
     type: 'basic',
-    url: `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/test`
+    url: `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/v1/test`
   } as Response;
 }
 

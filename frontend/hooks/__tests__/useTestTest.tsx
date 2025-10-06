@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useTest Hook 单元测试
  */
 
@@ -157,7 +157,7 @@ describe('useTest', () => {
             });
 
             expect(fetch).toHaveBeenCalledWith(
-                '/api/test/test-123/cancel',
+                '/test/test-123/cancel',
                 expect.objectContaining({
                     method: 'POST'
                 })
@@ -239,7 +239,7 @@ describe('useTest', () => {
             });
 
             expect(fetch).toHaveBeenCalledWith(
-                '/api/test/history?type=stress&status=completed&limit=10',
+                '/test/history?type=stress&status=completed&limit=10',
                 expect.any(Object)
             );
         });
@@ -324,7 +324,7 @@ describe('useTest', () => {
 
             expect(blob).toBe(mockBlob);
             expect(fetch).toHaveBeenCalledWith(
-                '/api/test/test-123/export?format=json',
+                '/test/test-123/export?format=json',
                 expect.any(Object)
             );
         });

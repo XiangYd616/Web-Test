@@ -186,7 +186,7 @@ class SystemResourceMonitor {
    */
   private async fetchResourcesFromAPI(): Promise<SystemResources> {
     try {
-      const response = await fetch(`http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/system/resources`, {
+      const response = await fetch(`http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/system/resources`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }

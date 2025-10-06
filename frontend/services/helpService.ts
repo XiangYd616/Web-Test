@@ -35,7 +35,7 @@ interface DownloadRequest {
 }
 
 class HelpService {
-  private baseUrl = '/api/help';
+  private baseUrl = '/help';
 
   // 搜索帮助内容
   async searchContent(query: string): Promise<SearchResult[]> {

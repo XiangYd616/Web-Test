@@ -163,12 +163,12 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
       // 调用API获取用户权限和角色
       const [permissionsResponse, rolesResponse] = await Promise.all([
-        fetch('/api/auth/permissions', {
+        fetch('/auth/permissions', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
           }
         }),
-        fetch('/api/auth/roles', {
+        fetch('/auth/roles', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
           }
@@ -234,7 +234,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       }
 
       // 调用服务器进行详细权限检查
-      const response = await fetch('/api/auth/check-permission', {
+      const response = await fetch('/auth/check-permission', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -295,7 +295,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       }
 
       // 调用服务器进行批量权限检查
-      const response = await fetch('/api/auth/check-batch-permissions', {
+      const response = await fetch('/auth/check-batch-permissions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -68,7 +68,7 @@ export interface Recommendation {
 }
 
 class ComparisonService {
-  private baseUrl = '/api/comparison';
+  private baseUrl = '/comparison';
   private cache = new Map<string, any>();
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 

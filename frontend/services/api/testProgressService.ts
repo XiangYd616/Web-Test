@@ -30,7 +30,7 @@ class TestProgressService {
     listeners: ProgressListener[];
   }>();
 
-  private baseUrl = '/api/test';
+  private baseUrl = '/test';
 
   /**
    * 开始监控测试进度

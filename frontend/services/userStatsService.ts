@@ -81,7 +81,7 @@ class UserStatsService {
         throw new Error('No auth token available');
       }
 
-      const response = await fetch(`/api/user/stats/${userId}`, {
+      const response = await fetch(`/user/stats/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

@@ -43,8 +43,8 @@ export const useAdminAuth = (): AdminAuthState => {
     }
 
     // 检查用户是否有管理员权限
-    const hasAdminRole = user.role === 'admin';
-    const hasAdminPermission = user.permissions?.includes('admin:access') || false;
+    const hasAdminRole = user?.role === 'admin';
+    const hasAdminPermission = user?.permissions?.includes('admin:access') || false;
 
     if (!hasAdminRole && !hasAdminPermission) {
       setAdminState({

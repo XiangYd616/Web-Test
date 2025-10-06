@@ -176,7 +176,7 @@ export interface TestRecordResponse {
 }
 
 class StressTestRecordService {
-  private baseUrl = '/api/test';
+  private baseUrl = '/test';
   private maxRetries = 3;
   private retryDelay = 1000; // 1秒
 

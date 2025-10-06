@@ -1,4 +1,4 @@
-// 后台管理服务 - 真实API实现
+﻿// 后台管理服务 - 真实API实现
 
 import type {
   ActivityFilter,
@@ -25,7 +25,7 @@ import type { CreateUserData, UpdateUserData, User } from '../types/user.types';
 
 class AdminService {
   private static instance: AdminService;
-  private baseURL = '/api/admin';
+  private baseURL = '/admin';
 
   private constructor() { }
 

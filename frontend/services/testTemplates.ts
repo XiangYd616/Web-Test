@@ -163,10 +163,10 @@ export const DEFAULT_TEMPLATES: TestTemplate[] = [
       rampUpTime: 120,
       scenarios: ['login', 'dashboard', 'api_calls', 'data_processing'],
       apiEndpoints: [
-        { path: '/api/auth/login', method: 'POST', weight: 10 },
-        { path: '/api/dashboard', method: 'GET', weight: 30 },
-        { path: '/api/data', method: 'GET', weight: 40 },
-        { path: '/api/analytics', method: 'GET', weight: 20 }
+        { path: '/auth/login', method: 'POST', weight: 10 },
+        { path: '/dashboard', method: 'GET', weight: 30 },
+        { path: '/data', method: 'GET', weight: 40 },
+        { path: '/analytics', method: 'GET', weight: 20 }
       ],
       thresholds: {
         responseTime: 500,

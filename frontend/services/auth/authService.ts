@@ -295,7 +295,7 @@ export class UnifiedAuthService implements IAuthService {
         // 在浏览器环境中通过API验证
         try {
 
-          const response = await fetch('/api/auth/login', {
+          const response = await fetch('/auth/login', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -479,7 +479,7 @@ export class UnifiedAuthService implements IAuthService {
     // 浏览器环境下通过 API 验证用户
     try {
 
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -629,7 +629,7 @@ export class UnifiedAuthService implements IAuthService {
       } else {
         // 浏览器环境通过 API 注册
 
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -69,7 +69,7 @@ describe('API Integration Tests', () => {
         json: async () => mockBackendResponse,
       } as Response);
 
-      const response = await apiService.get('/api/v1/test');
+      const response = await apiService.get('/v1/test');
 
       expect(response.success).toBe(true);
       if (response.success) {
@@ -96,7 +96,7 @@ describe('API Integration Tests', () => {
         json: async () => mockBackendErrorResponse,
       } as Response);
 
-      const response = await apiService.get('/api/v1/test');
+      const response = await apiService.get('/v1/test');
 
       expect(response.success).toBe(false);
       if (!response.success) {
@@ -118,7 +118,7 @@ describe('API Integration Tests', () => {
         json: async () => ({ message: 'Not Found' }),
       } as Response);
 
-      const response = await apiService.get('/api/v1/nonexistent');
+      const response = await apiService.get('/v1/nonexistent');
 
       expect(response.success).toBe(false);
       if (!response.success) {
@@ -136,7 +136,7 @@ describe('API Integration Tests', () => {
         new Error('Network error')
       );
 
-      const response = await apiService.get('/api/v1/test');
+      const response = await apiService.get('/v1/test');
 
       expect(response.success).toBe(false);
       if (!response.success) {
@@ -173,7 +173,7 @@ describe('API Integration Tests', () => {
       const response = await apiService.login(credentials) as BackendApiResponse<{ token: string; user: unknown }>;
 
       expect(fetch).toHaveBeenCalledWith(
-        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/auth/login`,
+        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/v1/auth/login`,
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -224,7 +224,7 @@ describe('API Integration Tests', () => {
       );
 
       expect(fetch).toHaveBeenCalledWith(
-        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/tests/performance/execute`,
+        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/v1/tests/performance/execute`,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({
@@ -260,7 +260,7 @@ describe('API Integration Tests', () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/configurations?test_type=performance&project_id=123&is_template=false`,
+        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/v1/configurations?test_type=performance&project_id=123&is_template=false`,
         expect.objectContaining({
           method: 'GET'
         })
@@ -300,7 +300,7 @@ describe('API Integration Tests', () => {
       const response = await projectApiService.createProject(projectData);
 
       expect(fetch).toHaveBeenCalledWith(
-        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/projects`,
+        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/v1/projects`,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify(projectData)
@@ -342,7 +342,7 @@ describe('API Integration Tests', () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/projects?page=1&limit=10&search=test&status=active&sort=name&order=asc`,
+        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/v1/projects?page=1&limit=10&search=test&status=active&sort=name&order=asc`,
         expect.objectContaining({
           method: 'GET'
         })
@@ -377,7 +377,7 @@ describe('API Integration Tests', () => {
         json: async () => mockErrorResponse,
       } as Response);
 
-      const response = await apiService.post('/api/v1/test', {
+      const response = await apiService.post('/v1/test', {
         name: '',
         url: 'invalid-url'
       });
@@ -409,7 +409,7 @@ describe('API Integration Tests', () => {
         json: async () => mockErrorResponse,
       } as Response);
 
-      const response = await apiService.get('/api/v1/protected');
+      const response = await apiService.get('/v1/protected');
 
       expect(response.success).toBe(false);
       if (!response.success) {
@@ -428,14 +428,14 @@ describe('API Integration Tests', () => {
     it('should validate API endpoint paths match backend specification', () => {
       // 验证关键API路径是否符合后端规范
       const expectedPaths = [
-        '/api/v1/auth/login',
-        '/api/v1/auth/register',
-        '/api/v1/projects',
-        '/api/v1/tests/execute',
-        '/api/v1/tests/performance/execute',
-        '/api/v1/tests/security/execute',
-        '/api/v1/reports/generate',
-        '/api/v1/system/health'
+        '/v1/auth/login',
+        '/v1/auth/register',
+        '/v1/projects',
+        '/v1/tests/execute',
+        '/v1/tests/performance/execute',
+        '/v1/tests/security/execute',
+        '/v1/reports/generate',
+        '/v1/system/health'
       ];
 
       // 这里可以添加更多的路径验证逻辑
@@ -453,7 +453,7 @@ describe('API Integration Tests', () => {
         meta: {
           timestamp: '2024-01-01T00:00:00Z',
           requestId: 'req-123',
-          path: '/api/v1/test',
+          path: '/v1/test',
           method: 'GET'
         }
       };
@@ -468,7 +468,7 @@ describe('API Integration Tests', () => {
         meta: {
           timestamp: '2024-01-01T00:00:00Z',
           requestId: 'req-123',
-          path: '/api/v1/test',
+          path: '/v1/test',
           method: 'GET'
         }
       };

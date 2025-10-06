@@ -39,7 +39,7 @@ export const useAuth = () => {
   // 验证token
   const _validateToken = async (token: string): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/validate', {
+      const response = await fetch('/auth/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ export const useAuth = () => {
     try {
       dispatch({ type: 'AUTH_LOGIN_START' });
 
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -108,7 +108,7 @@ export const useAuth = () => {
         throw new Error('密码确认不匹配');
       }
 
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch('/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -147,7 +147,7 @@ export const useAuth = () => {
     try {
       // 调用服务器登出接口
       if (auth.token) {
-        await fetch('/api/auth/logout', {
+        await fetch('/auth/logout', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${auth.token}`
@@ -177,7 +177,7 @@ export const useAuth = () => {
 
       dispatch({ type: 'UI_SET_LOADING', payload: { key: 'auth', loading: true } });
 
-      const response = await fetch('/api/auth/profile', {
+      const response = await fetch('/auth/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -225,7 +225,7 @@ export const useAuth = () => {
 
       dispatch({ type: 'UI_SET_LOADING', payload: { key: 'auth', loading: true } });
 
-      const response = await fetch('/api/auth/change-password', {
+      const response = await fetch('/auth/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

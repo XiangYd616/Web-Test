@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 真实的文件上传服务
  * 支持多种文件类型的上传和管理
  */
@@ -43,7 +43,7 @@ export interface FileMetadata {
 }
 
 class FileUploadService {
-  private readonly API_BASE = '/api/files';
+  private readonly API_BASE = '/files';
   private readonly DEFAULT_CONFIG: UploadConfig = {
     maxSize: 10 * 1024 * 1024, // 10MB
     allowedTypes: [

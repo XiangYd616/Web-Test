@@ -157,7 +157,7 @@ export class ProxyService {
 
       // 后端API地址
       const backendUrl = process.env.REACT_APP_API_URL || process.env.BACKEND_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`;
-      const apiEndpoint = `${backendUrl}/api/seo/fetch-page`;
+      const apiEndpoint = `${backendUrl}/seo/fetch-page`;
 
 
       const response = await fetch(apiEndpoint, {
@@ -409,7 +409,7 @@ export class ProxyService {
     try {
       // 首先尝试后端API
       const backendUrl = process.env.REACT_APP_API_URL || process.env.BACKEND_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`;
-      const apiEndpoint = `${backendUrl}/api/seo/fetch-robots`;
+      const apiEndpoint = `${backendUrl}/seo/fetch-robots`;
 
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -457,7 +457,7 @@ export class ProxyService {
     try {
       // 首先尝试后端API
       const backendUrl = process.env.REACT_APP_API_URL || process.env.BACKEND_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`;
-      const apiEndpoint = `${backendUrl}/api/seo/fetch-sitemap`;
+      const apiEndpoint = `${backendUrl}/seo/fetch-sitemap`;
 
       const response = await fetch(apiEndpoint, {
         method: 'POST',

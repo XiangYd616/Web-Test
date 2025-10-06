@@ -62,7 +62,7 @@ export const useTest = () => {
             dispatch({ type: 'UI_SET_LOADING', payload: { key: 'test', loading: true } });
 
             // 模拟测试执行
-            const response = await fetch('/api/test/start', {
+            const response = await fetch('/test/start', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ export const useTest = () => {
         try {
             // 调用API取消测试
             if (state.auth.token) {
-                await fetch(`/api/test/${testId}/cancel`, {
+                await fetch(`/test/${testId}/cancel`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${state.auth.token}`
@@ -149,7 +149,7 @@ export const useTest = () => {
             if (filters?.limit) queryParams.append('limit', filters?.limit.toString());
             if (filters?.offset) queryParams.append('offset', filters?.offset.toString());
 
-            const response = await fetch(`/api/test/history?${queryParams}`, {
+            const response = await fetch(`/test/history?${queryParams}`, {
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
                 }
@@ -183,7 +183,7 @@ export const useTest = () => {
     // 保存测试配置
     const saveConfiguration = useCallback(async (config: TestConfig): Promise<void> => {
         try {
-            const response = await fetch('/api/test/configurations', {
+            const response = await fetch('/test/configurations', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -212,7 +212,7 @@ export const useTest = () => {
     // 获取测试配置
     const getConfigurations = useCallback(async (): Promise<TestConfig[]> => {
         try {
-            const response = await fetch('/api/test/configurations', {
+            const response = await fetch('/test/configurations', {
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
                 }
@@ -241,7 +241,7 @@ export const useTest = () => {
     // 删除测试配置
     const deleteConfiguration = useCallback(async (configId: string): Promise<void> => {
         try {
-            const response = await fetch(`/api/test/configurations/${configId}`, {
+            const response = await fetch(`/test/configurations/${configId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
@@ -264,7 +264,7 @@ export const useTest = () => {
     // 获取测试详情
     const getTestDetails = useCallback(async (testId: string): Promise<TestResult | null> => {
         try {
-            const response = await fetch(`/api/test/${testId}`, {
+            const response = await fetch(`/test/${testId}`, {
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
                 }
@@ -311,7 +311,7 @@ export const useTest = () => {
     // 导出测试结果
     const exportTestResult = useCallback(async (testId: string, format: 'json' | 'pdf' | 'csv'): Promise<Blob> => {
         try {
-            const response = await fetch(`/api/test/${testId}/export?format=${format}`, {
+            const response = await fetch(`/test/${testId}/export?format=${format}`, {
                 headers: {
                     'Authorization': `Bearer ${state.auth.token}`
                 }

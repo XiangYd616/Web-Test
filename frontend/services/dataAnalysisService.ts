@@ -584,7 +584,7 @@ export class DataAnalysisService {
    */
   async getRealTimeAnalysis(): Promise<any> {
     try {
-      const response = await fetch('/api/data-management/stats');
+      const response = await fetch('/data-management/stats');
       if (!response.ok) {
         throw new Error('获取实时数据失败');
       }
@@ -600,7 +600,7 @@ export class DataAnalysisService {
    */
   async getMonitoringAnalysis(): Promise<any> {
     try {
-      const response = await fetch('/api/monitoring/stats');
+      const response = await fetch('/monitoring/stats');
       if (!response.ok) {
         throw new Error('获取监控数据失败');
       }
@@ -620,7 +620,7 @@ export class DataAnalysisService {
     includeSettings?: boolean;
   }): Promise<any> {
     try {
-      const response = await fetch('/api/data-management/backup', {
+      const response = await fetch('/data-management/backup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -647,7 +647,7 @@ export class DataAnalysisService {
     dataTypes?: string[];
   }): Promise<any> {
     try {
-      const response = await fetch('/api/data-management/cleanup', {
+      const response = await fetch('/data-management/cleanup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -683,7 +683,7 @@ export class DataAnalysisService {
     includeRawData?: boolean;
   }): Promise<any> {
     try {
-      const response = await fetch('/api/reports/generate', {
+      const response = await fetch('/reports/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -707,7 +707,7 @@ export class DataAnalysisService {
    */
   async getReportTasks(): Promise<any> {
     try {
-      const response = await fetch('/api/reports/tasks');
+      const response = await fetch('/reports/tasks');
       if (!response.ok) {
         throw new Error('获取报告任务失败');
       }
@@ -723,7 +723,7 @@ export class DataAnalysisService {
    */
   async downloadReport(taskId: string): Promise<void> {
     try {
-      const response = await fetch(`/api/reports/tasks/${taskId}/download`);
+      const response = await fetch(`/reports/tasks/${taskId}/download`);
       if (!response.ok) {
         throw new Error('下载报告失败');
       }
@@ -767,7 +767,7 @@ export class DataAnalysisService {
     headers?: { [key: string]: string };
   }): Promise<any> {
     try {
-      const response = await fetch('/api/monitoring/sites', {
+      const response = await fetch('/monitoring/sites', {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(config),
@@ -789,7 +789,7 @@ export class DataAnalysisService {
    */
   async getMonitoringSites(): Promise<any> {
     try {
-      const response = await fetch('/api/monitoring/sites', {
+      const response = await fetch('/monitoring/sites', {
         headers: this.getAuthHeaders()
       });
       if (!response.ok) {
@@ -807,7 +807,7 @@ export class DataAnalysisService {
    */
   async getMonitoringRealTimeData(): Promise<any> {
     try {
-      const response = await fetch('/api/monitoring/realtime', {
+      const response = await fetch('/monitoring/realtime', {
         headers: this.getAuthHeaders()
       });
       if (!response.ok) {

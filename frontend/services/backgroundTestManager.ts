@@ -502,7 +502,7 @@ class BackgroundTestManager {
     this.updateTestProgress(testInfo.id, 10, '🔍 正在连接数据库...');
 
     try {
-      const response = await fetch('/api/test/database', {
+      const response = await fetch('/test/database', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -757,7 +757,7 @@ class BackgroundTestManager {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        const response = await fetch(`/api/test-status/${backendTestId}`);
+        const response = await fetch(`/test-status/${backendTestId}`);
         const data = await response.json();
 
         if (data.status === 'completed') {

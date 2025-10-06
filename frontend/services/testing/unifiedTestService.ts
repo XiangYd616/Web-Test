@@ -19,9 +19,13 @@ export interface TestServiceConfig {
   retryAttempts: number;
 }
 
+export type UnifiedTestEvent = 'testStarted' | 'testProgress' | 'testCompleted' | 'testFailed' | 'testCancelled';
+export type UnifiedTestEventListener = (data: any) => void;
+
 export class UnifiedTestService {
   private engines: Map<string, TestEngine> = new Map();
   private config: TestServiceConfig;
+  private eventListeners: Map<UnifiedTestEvent, Set<UnifiedTestEventListener>> = new Map();
 
 
   /**
@@ -108,20 +112,17 @@ export class UnifiedTestService {
   }
 
   cancelTest(testId: string): void {
-
-    /**
-
-     * if功能函数
-
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
-
-     */
     const controller = this.activeTests.get(testId);
     if (controller) {
       controller.abort();
       this.activeTests.delete(testId);
+      
+      // 触发取消事件
+      this.emit('testCancelled', {
+        testId,
+        status: 'cancelled',
+        endTime: new Date()
+      });
     }
   }
 
@@ -133,6 +134,78 @@ export class UnifiedTestService {
     return new Promise((_, reject) => {
       setTimeout(() => reject(new Error('测试超时')), this.config.timeout);
     });
+  }
+
+  // 事件监听器方法
+  on(event: UnifiedTestEvent, listener: UnifiedTestEventListener): void {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, new Set());
+    }
+    this.eventListeners.get(event)!.add(listener);
+  }
+
+  off(event: UnifiedTestEvent, listener: UnifiedTestEventListener): void {
+    const listeners = this.eventListeners.get(event);
+    if (listeners) {
+      listeners.delete(listener);
+    }
+  }
+
+  private emit(event: UnifiedTestEvent, data: any): void {
+    const listeners = this.eventListeners.get(event);
+    if (listeners) {
+      listeners.forEach(listener => {
+        try {
+          listener(data);
+        } catch (error) {
+          console.error(`事件监听器错误 [${event}]:`, error);
+        }
+      });
+    }
+  }
+
+  // 添加 startTest 方法（如果不存在）
+  async startTest(config: any, callbacks?: any): Promise<string> {
+    const testId = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // 发送开始事件
+    this.emit('testStarted', {
+      testId,
+      testType: config.testType,
+      status: 'running',
+      progress: 0,
+      startTime: new Date()
+    });
+
+    // 异步执行测试
+    this.runTest(testId, config)
+      .then(result => {
+        this.emit('testCompleted', {
+          testId,
+          testType: config.testType,
+          status: 'completed',
+          progress: 100,
+          result,
+          endTime: new Date()
+        });
+        if (callbacks?.onComplete) {
+          callbacks.onComplete(result);
+        }
+      })
+      .catch(error => {
+        this.emit('testFailed', {
+          testId,
+          testType: config.testType,
+          status: 'failed',
+          error: error.message,
+          endTime: new Date()
+        });
+        if (callbacks?.onError) {
+          callbacks.onError(error);
+        }
+      });
+
+    return testId;
   }
 }
 

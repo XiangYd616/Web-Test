@@ -16,7 +16,7 @@ import { ApiResponse } from '@shared/types';
 import { apiService } from './apiService';
 
 class ProjectApiService {
-  private baseUrl = '/api/v1';
+  private baseUrl = '/v1';
 
   // ==================== 项目管理 ====================
 
