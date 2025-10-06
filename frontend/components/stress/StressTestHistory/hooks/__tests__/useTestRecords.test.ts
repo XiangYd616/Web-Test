@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useTestRecords Hook - Unit Tests
  * 
  * Tests for the useTestRecords custom hook that manages test records
@@ -117,7 +117,7 @@ describe('useTestRecords', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/test/history'),
+        expect.stringContaining('/test/history'),
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'Bearer test-token',

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 报告生成器组件
  * 提供多种报告生成功能：测试报告、性能分析、安全评估等
  */
@@ -99,7 +99,7 @@ const ReportGenerator: React.FC = () => {
         progress: 100,
         createdAt: '2024-12-15 10:30:00',
         fileSize: '2.5MB',
-        downloadUrl: '/api/reports/download/1'
+        downloadUrl: '/reports/download/1'
       },
       {
         id: '2',
@@ -109,7 +109,7 @@ const ReportGenerator: React.FC = () => {
         progress: 100,
         createdAt: '2024-12-14 16:45:00',
         fileSize: '1.8MB',
-        downloadUrl: '/api/reports/download/2'
+        downloadUrl: '/reports/download/2'
       },
       {
         id: '3',

@@ -22,7 +22,6 @@ const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
 const AccessibilityTest = lazy(() => import('../../pages/AccessibilityTest'));
 const UXTest = lazy(() => import('../../pages/UxTest'));
-const UnifiedTestPage = lazy(() => import('../../pages/UnifiedTestPage'));
 
 // 数据管理相关页面
 const DataStorage = lazy(() => import('../../pages/admin/DataStorage'));
@@ -159,20 +158,6 @@ const AppRoutes: React.FC = () => {
         <Route path="ux-test" element={
           <LazyPageWrapper>
             <UXTest />
-          </LazyPageWrapper>
-        } />
-
-        {/* 统一测试引擎 */}
-        <Route path="unified-test" element={
-          <LazyPageWrapper>
-            <UnifiedTestPage />
-          </LazyPageWrapper>
-        } />
-
-        {/* 测试优化页面 */}
-        <Route path="test-optimizations" element={
-          <LazyPageWrapper>
-            <UnifiedTestPage />
           </LazyPageWrapper>
         } />
         {/* 公开的测试历史查看 */}

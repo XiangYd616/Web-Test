@@ -521,7 +521,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
     "id": "test1",
     "name": "获取用户信息",
     "method": "GET",
-    "path": "/api/users/1"
+    "path": "/users/1"
   }
 ]`}
             />

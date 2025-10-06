@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 数据导出组件
  * 支持多格式数据导出功能
  */
@@ -145,7 +145,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
     // API调用函数
     const apiCall = async (endpoint: string, options: RequestInit = {}) => {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/v1/data-export${endpoint}`, {
+        const response = await fetch(`/v1/data-export${endpoint}`, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
     const handleDownload = useCallback(async (task: ExportTask) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`/api/v1/data-export/task/${task.id}/download`, {
+            const response = await fetch(`/v1/data-export/task/${task.id}/download`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

@@ -133,11 +133,20 @@ export type { StatusIndicatorProps } from './types';
 
 // 图表组件
 export {
-    ChartContainer,
-    MetricChart,
-    SimpleChart
+    ModernLineChart,
+    ModernBarChart,
+    ModernDoughnutChart,
+    ProgressRing,
+    MiniLineChart,
+    chartColors
 } from '../charts/Chart';
-export type { ChartProps } from './types';
+export type { 
+    LineChartProps, 
+    BarChartProps, 
+    DoughnutChartProps,
+    ProgressRingProps,
+    MiniChartProps 
+} from '../charts/Chart';
 
 // 测试工具组件
 export {

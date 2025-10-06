@@ -30,97 +30,91 @@ const Navigation: React.FC = () => {
 
   const testingTools: NavigationItem[] = [
     {
-      name: 'Website Test',
+      name: '网站测试',
       href: '/website-test',
       icon: Zap,
-      description: 'Comprehensive website testing platform'
+      description: '全面的网站测试平台'
     },
     {
-      name: 'SEO Test',
+      name: 'SEO测试',
       href: '/seo-test',
       icon: Search,
-      description: 'Search engine optimization analysis'
+      description: '搜索引擎优化分析'
     },
     {
-      name: 'Security Test',
+      name: '安全测试',
       href: '/security-test',
       icon: Shield,
-      description: 'Security vulnerability scanning'
+      description: '安全漏洞扫描'
     },
     {
-      name: 'Performance Test',
+      name: '性能测试',
       href: '/performance-test',
       icon: Gauge,
-      description: 'Website performance analysis'
+      description: '网站性能分析'
     },
     {
-      name: 'Compatibility Test',
+      name: '兼容性测试',
       href: '/compatibility-test',
       icon: Globe,
-      description: 'Cross-browser compatibility testing'
+      description: '跨浏览器兼容性测试'
     },
     {
-      name: 'API Test',
+      name: 'API测试',
       href: '/api-test',
       icon: Code,
-      description: 'RESTful API endpoint testing'
+      description: 'RESTful API 接口测试'
     },
     {
-      name: 'User Experience Test',
+      name: '用户体验测试',
       href: '/ux-test',
       icon: Eye,
-      description: 'Core Web Vitals analysis'
+      description: '核心网站指标分析'
     },
     {
-      name: 'Database Test',
+      name: '数据库测试',
       href: '/database-test',
       icon: Database,
-      description: 'Database performance and integrity testing'
+      description: '数据库性能和完整性测试'
     },
     {
-      name: 'Network Test',
+      name: '网络测试',
       href: '/network-test',
       icon: Wifi,
-      description: 'Network latency and bandwidth testing'
+      description: '网络延迟和带宽测试'
     },
     {
-      name: 'Real-time Monitoring',
+      name: '实时监控',
       href: '/dashboard',
       icon: Monitor,
-      description: '24/7 website monitoring'
+      description: '24/7 网站监控'
     },
     {
-      name: 'Test Scheduler',
+      name: '测试调度',
       href: '/test-schedule',
       icon: Calendar,
-      description: 'Scheduled and batch test management'
-    },
-    {
-      name: 'Unified Test Engine',
-      href: '/unified-test',
-      icon: Zap,
-      description: 'Integrated multi-tool testing platform'
+      description: '计划和批量测试管理'
     }
   ];
 
   const mainNavigation: NavigationItem[] = [
     {
-      name: 'Dashboard',
+      name: '仪表盘',
       href: '/',
       icon: Monitor
     },
     {
-      name: 'Classic Dashboard',
+      name: '经典仪表盘',
       href: '/dashboard',
       icon: BarChart3
     },
     {
-      name: 'Test History',
+      name: '测试历史',
       href: '/history',
       icon: FileText
     },
     {
-      name: 'Help Center',
+      name: '帮助中心',
       href: '/help',
       icon: HelpCircle
     }
@@ -164,35 +158,37 @@ const Navigation: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 page-optimized responsive-nav">
-      <div className="responsive-container">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">TestWeb</span>
-            </Link>
-          </div>
+    <nav className="bg-gray-900 shadow-lg border-b border-gray-800 sticky top-0 z-50 backdrop-blur-sm">
+      <div className="flex items-center h-16">
+        {/* Logo - 固定宽度与侧边栏对齐 */}
+        <div className="w-64 flex-shrink-0 px-4 border-r border-gray-800">
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-xl font-bold text-white">TestWeb</span>
+          </Link>
+        </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
+        {/* Navigation Container */}
+        <div className="flex-1 flex justify-between items-center px-6">
+
+          {/* Desktop Navigation - 左侧主导航 */}
+          <div className="hidden md:flex items-center space-x-4">
             {/* Main navigation */}
             {mainNavigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActivePath(item.href)
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActivePath(item.href)
+                  ? 'text-blue-400 bg-blue-600/20 border border-blue-500/30'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-800'
                   }`}
               >
                 <item.icon className="w-4 h-4" />
                 <span>{item.name}</span>
                 {item.badge && (
-                  <span className="ml-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                  <span className="ml-1 px-2 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-medium rounded-full">
                     {item.badge}
                   </span>
                 )}
@@ -206,26 +202,26 @@ const Navigation: React.FC = () => {
                   e.stopPropagation();
                   setIsTestMenuOpen(!isTestMenuOpen);
                 }}
-                className="flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                className="flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all duration-200"
               >
                 <Zap className="w-4 h-4" />
-                <span>Testing Tools</span>
+                <span>测试工具</span>
                 <ChevronDown className={`w-4 h-4 transition-transform ${isTestMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isTestMenuOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 py-2 max-h-96 overflow-y-auto">
+                <div className="absolute right-0 mt-2 w-72 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 py-2 max-h-96 overflow-y-auto custom-scrollbar">
                   {testingTools.map((tool) => (
                     <Link
                       key={tool.name}
                       to={tool.href}
-                      className="flex items-start px-4 py-3 hover:bg-gray-50 transition-colors"
+                      className="flex items-start px-4 py-3 hover:bg-gray-700 transition-colors"
                     >
-                      <tool.icon className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
+                      <tool.icon className="w-5 h-5 text-blue-400 mr-3 mt-0.5" />
                       <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">{tool.name}</div>
+                        <div className="text-sm font-medium text-white">{tool.name}</div>
                         {tool.description && (
-                          <div className="text-xs text-gray-500 mt-0.5">{tool.description}</div>
+                          <div className="text-xs text-gray-400 mt-0.5">{tool.description}</div>
                         )}
                       </div>
                     </Link>
@@ -241,7 +237,7 @@ const Navigation: React.FC = () => {
                   e.stopPropagation();
                   setIsUserMenuOpen(!isUserMenuOpen);
                 }}
-                className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-all duration-200"
               >
                 <User className="w-5 h-5" />
                 <span>{user?.username || 'User'}</span>
@@ -249,67 +245,67 @@ const Navigation: React.FC = () => {
               </button>
 
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 py-2">
                   <Link
                     to="/settings"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    className="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
                   >
                     <Settings className="w-4 h-4 mr-3" />
-                    Settings
+                    设置
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    className="w-full flex items-center px-4 py-2 text-sm text-red-400 hover:bg-red-900/30 transition-colors"
                   >
                     <LogOut className="w-4 h-4 mr-3" />
-                    Logout
+                    退出登录
                   </button>
                 </div>
               )}
             </div>
 
             {/* Notifications */}
-            <button className="relative p-2 text-gray-400 hover:text-gray-600">
+            <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
               <Bell className="w-5 h-5" />
               {notifications > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
               )}
-            </button>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-            >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile menu */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
-            <div className="space-y-1">
-              {mainNavigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center space-x-2 px-4 py-2 text-base font-medium rounded-lg ${
-                    isActivePath(item.href)
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Mobile menu button */}
+        <div className="md:hidden pr-4">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile menu */}
+      {isOpen && (
+        <div className="md:hidden py-4 border-t border-gray-800 px-4">
+          <div className="space-y-1">
+            {mainNavigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center space-x-2 px-4 py-2 text-base font-medium rounded-lg transition-colors ${
+                  isActivePath(item.href)
+                    ? 'text-blue-400 bg-blue-600/20 border-l-2 border-blue-500'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.name}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

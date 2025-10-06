@@ -44,8 +44,8 @@ export interface TestProgress {
   phase?: string;
 }
 
-// 统一的测试头部组件
-interface TestHeaderProps {
+// 统一的测试头部组件（旧版，已弃用，请使用 TestHeader.tsx 中的新组件）
+interface LegacyTestHeaderProps {
   title: string;
   description: string;
   icon: React.ReactNode;
@@ -56,7 +56,7 @@ interface TestHeaderProps {
   isRunning?: boolean;
 }
 
-export const TestHeader: React.FC<TestHeaderProps> = ({
+export const LegacyTestHeader: React.FC<LegacyTestHeaderProps> = ({
   title,
   description,
   icon,

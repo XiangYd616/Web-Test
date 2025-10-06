@@ -5,7 +5,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react';
-import {TestConfigSchema, TestConfigField, TestConfigSection} from '../UniversalTestPage';
+import {TestConfigSchema, TestConfigField, TestConfigSection} from '../TestPage';
 
 export interface TestConfigBuilderProps {
   config: Record<string, any>;

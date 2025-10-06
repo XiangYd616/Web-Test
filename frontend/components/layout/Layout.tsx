@@ -1,48 +1,58 @@
 ﻿/**
  * Layout.tsx - Modern Layout Wrapper
  * 
- * This component provides a modern layout wrapper that uses the unified layout system
- * from components/common/Layout.tsx. It serves as the main application layout with
- * modern styling and responsive design.
+ * This component provides a modern layout wrapper with navigation and sidebar.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { PageLayout, PageLayoutProps } from '../common/Layout';
+import Navigation from '../navigation/Navigation';
+import Sidebar from './Sidebar';
 
-interface ModernLayoutProps extends Omit<PageLayoutProps, 'children'> {
+interface ModernLayoutProps {
   showHeader?: boolean;
   showFooter?: boolean;
+  showSidebar?: boolean;
 }
 
 const Layout: React.FC<ModernLayoutProps> = ({
-  showHeader = false,
+  showHeader = true,
   showFooter = false,
-  background = 'default',
-  maxWidth = 'full',
-  ...props
+  showSidebar = true
 }) => {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   return (
-    <PageLayout
-      background={background}
-      maxWidth={maxWidth}
-      className="min-h-screen"
-      {...props}
-    >
-      {/* Main Content Area */}
-      <div className="flex-1">
-        <Outlet />
+    <div className="min-h-screen bg-gray-900 flex flex-col">
+      {/* Top Navigation */}
+      {showHeader && <Navigation />}
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        {showSidebar && (
+          <Sidebar 
+            collapsed={sidebarCollapsed} 
+            onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
+        )}
+        
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto bg-gray-800/50">
+          <div className="p-6 max-w-[1920px] mx-auto">
+            <Outlet />
+          </div>
+        </main>
       </div>
       
       {/* Optional Footer */}
       {showFooter && (
-        <footer className="mt-auto py-6 border-t border-gray-200">
-          <div className="text-center text-sm text-gray-600">
-            漏 2024 Test-Web Platform. All rights reserved.
+        <footer className="py-6 border-t border-gray-800 bg-gray-900">
+          <div className="text-center text-sm text-gray-400">
+            © 2024 Test-Web Platform. All rights reserved.
           </div>
         </footer>
       )}
-    </PageLayout>
+    </div>
   );
 };
 

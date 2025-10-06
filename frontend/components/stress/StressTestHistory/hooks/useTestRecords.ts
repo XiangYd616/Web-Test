@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useTestRecords Hook - 管理测试记录的加载和状态
  * 
  * 文件路径: frontend/components/stress/StressTestHistory/hooks/useTestRecords.ts
@@ -71,7 +71,7 @@ export const useTestRecords = (): UseTestRecordsReturn => {
       if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
       // 创建请求Promise
-      const requestPromise = fetch(`/api/test/history?${queryParams.toString()}`, {
+      const requestPromise = fetch(`/test/history?${queryParams.toString()}`, {
         headers: {
           ...(localStorage.getItem('auth_token') ? {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`

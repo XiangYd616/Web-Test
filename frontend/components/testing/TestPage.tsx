@@ -86,7 +86,7 @@ export interface MetricConfig {
   color?: string;
 }
 
-export interface UniversalTestPageProps {
+export interface TestPageProps {
   testType: TestTypeConfig;
   className?: string;
   onTestComplete?: (result: any) => void;
@@ -99,7 +99,7 @@ export interface UniversalTestPageProps {
  * 通用测试页面组件
  * 提供统一的测试页面结构和功能
  */
-export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
+export const TestPage: React.FC<TestPageProps> = ({
   testType,
   className = '',
   onTestComplete,
@@ -232,4 +232,4 @@ export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
   );
 };
 
-export default UniversalTestPage;
+export default TestPage;

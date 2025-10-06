@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Settings } from 'lucide-react';
-import { TestConfigSchema } from '../UniversalTestPage';
+import { TestConfigSchema } from '../TestPage';
 import { TestConfigBuilder } from './TestConfigBuilder';
 
 export interface UniversalConfigPanelProps {

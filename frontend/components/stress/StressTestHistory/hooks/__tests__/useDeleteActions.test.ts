@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useDeleteActions Hook - Unit Tests
  * 
  * Tests for the useDeleteActions custom hook that manages delete operations
@@ -210,7 +210,7 @@ describe('useDeleteActions', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/test/history/1',
+        '/test/history/1',
         expect.objectContaining({
           method: 'DELETE',
           headers: expect.objectContaining({
@@ -334,7 +334,7 @@ describe('useDeleteActions', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/test/history/batch',
+        '/test/history/batch',
         expect.objectContaining({
           method: 'DELETE',
           body: JSON.stringify({ sessionIds: ['1', '2'] }),

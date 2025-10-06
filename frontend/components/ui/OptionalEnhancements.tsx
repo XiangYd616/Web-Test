@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 可选的UI增强组件
  * 为现有测试页面提供可选的UI增强功能，不强制替换现有实现
  */
@@ -480,7 +480,7 @@ export const EnhancementsUsageGuide: React.FC = () => {
         <CodeBlock
           title="API 调用示例"
           language="javascript"
-          code={`const _response = await fetch('/api/test', {
+          code={`const _response = await fetch('/test', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'

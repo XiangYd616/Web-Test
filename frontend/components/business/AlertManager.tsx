@@ -127,7 +127,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-            const response = await fetch(`/api/v1/alerts?${params}`, {
+            const response = await fetch(`/v1/alerts?${params}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
@@ -180,7 +180,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-            const response = await fetch(`/api/v1/alerts/stats?timeRange=${filters.timeRange}`, {
+            const response = await fetch(`/v1/alerts/stats?timeRange=${filters.timeRange}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
@@ -239,7 +239,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-            const response = await fetch('/api/v1/alerts/rules', {
+            const response = await fetch('/v1/alerts/rules', {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
@@ -279,7 +279,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
     // 确认告警
     const acknowledgeAlert = async (alertId: string) => {
         try {
-            const response = await fetch(`/api/v1/alerts/${alertId}/acknowledge`, {
+            const response = await fetch(`/v1/alerts/${alertId}/acknowledge`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -300,7 +300,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
     // 解决告警
     const resolveAlert = async (alertId: string) => {
         try {
-            const response = await fetch(`/api/v1/alerts/${alertId}/resolve`, {
+            const response = await fetch(`/v1/alerts/${alertId}/resolve`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -321,7 +321,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
     // 删除告警
     const deleteAlert = async (alertId: string) => {
         try {
-            const response = await fetch(`/api/v1/alerts/${alertId}`, {
+            const response = await fetch(`/v1/alerts/${alertId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -344,7 +344,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
         if (selectedAlerts.length === 0) return;
 
         try {
-            const response = await fetch('/api/v1/alerts/batch', {
+            const response = await fetch('/v1/alerts/batch', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -371,7 +371,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
     // 更新告警规则
     const updateAlertRules = async (rules: AlertRules) => {
         try {
-            const response = await fetch('/api/v1/alerts/rules', {
+            const response = await fetch('/v1/alerts/rules', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -394,7 +394,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
     // 测试通知配置
     const testNotification = async (config: any) => {
         try {
-            const response = await fetch('/api/v1/alerts/test-notification', {
+            const response = await fetch('/v1/alerts/test-notification', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1090,7 +1090,7 @@ const AlertDetailsModal: React.FC<AlertDetailsModalProps> = ({ alertId, onClose 
     useEffect(() => {
         const fetchAlertDetails = async () => {
             try {
-                const response = await fetch(`/api/v1/alerts/${alertId}`, {
+                const response = await fetch(`/v1/alerts/${alertId}`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }

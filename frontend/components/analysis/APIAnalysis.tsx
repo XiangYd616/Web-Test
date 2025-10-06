@@ -1,4 +1,4 @@
-/**
+﻿/**
  * APIAnalysis.tsx - React组件
  * 
  * 文件路径: frontend\components\analysis\APIAnalysis.tsx
@@ -54,7 +54,7 @@ const APIAnalysis: React.FC = () => {
       {
         id: '1',
         name: 'User Authentication',
-        url: '/api/auth/login',
+        url: '/auth/login',
         method: 'POST',
         status: 'healthy',
         responseTime: 120,
@@ -66,7 +66,7 @@ const APIAnalysis: React.FC = () => {
       {
         id: '2',
         name: 'Get User Profile',
-        url: '/api/users/profile',
+        url: '/users/profile',
         method: 'GET',
         status: 'healthy',
         responseTime: 85,
@@ -78,7 +78,7 @@ const APIAnalysis: React.FC = () => {
       {
         id: '3',
         name: 'Create Test',
-        url: '/api/tests',
+        url: '/tests',
         method: 'POST',
         status: 'warning',
         responseTime: 350,
@@ -90,7 +90,7 @@ const APIAnalysis: React.FC = () => {
       {
         id: '4',
         name: 'Get Test Results',
-        url: '/api/tests/results',
+        url: '/tests/results',
         method: 'GET',
         status: 'error',
         responseTime: 1200,
@@ -102,7 +102,7 @@ const APIAnalysis: React.FC = () => {
       {
         id: '5',
         name: 'Update Settings',
-        url: '/api/settings',
+        url: '/settings',
         method: 'PUT',
         status: 'healthy',
         responseTime: 95,

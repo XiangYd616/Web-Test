@@ -71,8 +71,8 @@ const UserMenu: React.FC = () => {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg py-1 z-50 border border-gray-700">
           <div className="px-4 py-2 border-b border-gray-700">
-            <p className="text-sm font-medium text-white">{user.username}</p>
-            <p className="text-sm text-gray-400">{user.email}</p>
+            <p className="text-sm font-medium text-white">{user?.username}</p>
+            <p className="text-sm text-gray-400">{user?.email}</p>
             {isAdmin && (
               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-600/20 text-purple-400 mt-1">
                 <Shield className="w-3 h-3 mr-1" />

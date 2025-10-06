@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useDeleteActions Hook - 管理删除操作逻辑
  * 
  * 文件路径: frontend/components/stress/StressTestHistory/hooks/useDeleteActions.ts
@@ -74,7 +74,7 @@ export const useDeleteActions = ({
     const recordToDelete = records.find(r => r.id === recordId);
     const recordName = recordToDelete ? recordToDelete.testName : '测试记录';
 
-    const response = await fetch(`/api/test/history/${recordId}`, {
+    const response = await fetch(`/test/history/${recordId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export const useDeleteActions = ({
       throw new Error('请先选择要删除的记录');
     }
 
-    const response = await fetch('/api/test/history/batch', {
+    const response = await fetch('/test/history/batch', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

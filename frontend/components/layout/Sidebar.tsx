@@ -46,121 +46,114 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
   const [clickedItem, setClickedItem] = useState<string | null>(null);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const _isAdmin = user.role === 'admin';
+  const _isAdmin = user?.role === 'admin';
 
   const sidebarItems: SidebarItem[] = [
     {
       id: 'dashboard',
-      name: 'Dashboard',
+      name: '仪表盘',
       icon: Home,
       href: '/'
     },
     {
       id: 'testing',
-      name: 'Testing Tools',
+      name: '测试工具',
       icon: TestTube,
       href: '#',
       children: [
         {
           id: 'website-test',
-          name: 'Website Test',
+          name: '网站测试',
           icon: Globe,
           href: '/website-test'
         },
         {
           id: 'stress-test',
-          name: 'Stress Test',
+          name: '压力测试',
           icon: Zap,
           href: '/stress-test'
         },
         {
           id: 'seo-test',
-          name: 'SEO Test',
+          name: 'SEO测试',
           icon: Search,
           href: '/seo-test'
         },
         {
           id: 'security-test',
-          name: 'Security Test',
+          name: '安全测试',
           icon: Shield,
           href: '/security-test',
-          badge: 'NEW'
+          badge: '新功能'
         },
         {
           id: 'performance-test',
-          name: 'Performance Test',
+          name: '性能测试',
           icon: Monitor,
           href: '/performance-test',
-          badge: 'NEW'
+          badge: '新功能'
         },
         {
           id: 'compatibility-test',
-          name: 'Compatibility Test',
+          name: '兼容性测试',
           icon: Monitor,
           href: '/compatibility-test'
         },
         {
           id: 'accessibility-test',
-          name: 'Accessibility Test',
+          name: '可访问性测试',
           icon: Eye,
           href: '/accessibility-test',
-          badge: 'NEW'
+          badge: '新功能'
         },
         {
           id: 'api-test',
-          name: 'API Test',
+          name: 'API测试',
           icon: Code,
           href: '/api-test'
         },
         {
           id: 'network-test',
-          name: 'Network Test',
+          name: '网络测试',
           icon: Wifi,
           href: '/network-test'
         },
         {
           id: 'database-test',
-          name: 'Database Test',
+          name: '数据库测试',
           icon: Database,
           href: '/database-test'
         },
         {
           id: 'ux-test',
-          name: 'UX Test',
+          name: '用户体验测试',
           icon: Eye,
           href: '/ux-test'
-        },
-        {
-          id: 'unified-test',
-          name: 'Unified Test Engine',
-          icon: TestTube,
-          href: '/unified-test',
-          badge: 'NEW'
         }
       ]
     },
     {
       id: 'data',
-      name: 'Data Management',
+      name: '数据管理',
       icon: Database,
       href: '#',
       children: [
         {
           id: 'test-history',
-          name: 'Test History',
+          name: '测试历史',
           icon: TestTube,
           href: '/test-history',
           badge: 'v2.0'
         },
         {
           id: 'statistics',
-          name: 'Statistics & Analytics',
+          name: '统计分析',
           icon: BarChart3,
           href: '/statistics'
         },
         {
           id: 'data-center',
-          name: 'Data Center',
+          name: '数据中心',
           icon: Database,
           href: '/data-center'
         }
@@ -168,19 +161,19 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
     },
     {
       id: 'integration',
-      name: 'Integration Settings',
+      name: '集成设置',
       icon: Package,
       href: '#',
       children: [
         {
           id: 'cicd',
-          name: 'CI/CD Integration',
+          name: 'CI/CD集成',
           icon: GitBranch,
           href: '/cicd'
         },
         {
           id: 'api-keys',
-          name: 'API Keys',
+          name: 'API密钥',
           icon: Key,
           href: '/api-keys'
         },
@@ -192,7 +185,7 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
         },
         {
           id: 'integrations',
-          name: 'Third-party Integrations',
+          name: '第三方集成',
           icon: Package,
           href: '/integrations'
         }
@@ -200,7 +193,7 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
     },
     {
       id: 'settings',
-      name: 'Settings',
+      name: '设置',
       icon: Settings,
       href: '/settings'
     }
@@ -234,7 +227,7 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
   }, []);
 
   return (
-    <div className={`sidebar bg-white border-r border-gray-200 transition-all duration-300 ${
+    <div className={`sidebar bg-gray-900 border-r border-gray-800 transition-all duration-300 overflow-y-auto sidebar-scrollbar h-full flex-shrink-0 ${
       collapsed ? 'w-16' : 'w-64'
     }`}>
       <div className="p-4">
@@ -245,15 +238,15 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
                 <div>
                   <button
                     onClick={() => toggleGroup(item.id)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100"
+                    className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors duration-200"
                   >
-                    <div className="flex items-center">
-                      <item.icon className="w-5 h-5 mr-3" />
-                      {!collapsed && <span>{item.name}</span>}
+                    <div className="flex items-center flex-1 min-w-0">
+                      <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                      {!collapsed && <span className="truncate">{item.name}</span>}
                     </div>
                     {!collapsed && (
                       <ChevronRight
-                        className={`w-4 h-4 transition-transform ${
+                        className={`w-4 h-4 transition-transform flex-shrink-0 ml-2 ${
                           expandedGroups.includes(item.id) ? 'rotate-90' : ''
                         }`}
                       />
@@ -265,16 +258,16 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
                         <Link
                           key={child.id}
                           to={child.href}
-                          className={`flex items-center px-3 py-2 text-sm rounded-lg ${
+                          className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-200 group ${
                             isActivePath(child.href)
-                              ? 'bg-blue-50 text-blue-600 font-medium'
-                              : 'text-gray-700 hover:bg-gray-100'
+                              ? 'bg-blue-600/20 text-blue-400 font-medium border-l-2 border-blue-500'
+                              : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                           }`}
                         >
-                          <child.icon className="w-4 h-4 mr-3" />
-                          <span>{child.name}</span>
+                          <child.icon className="w-4 h-4 mr-3 flex-shrink-0" />
+                          <span className="truncate flex-1">{child.name}</span>
                           {child.badge && (
-                            <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600">
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 flex-shrink-0 whitespace-nowrap">
                               {child.badge}
                             </span>
                           )}
@@ -286,14 +279,14 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
               ) : (
                 <Link
                   to={item.href}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
+                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                     isActivePath(item.href)
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-blue-600/20 text-blue-400 border-l-2 border-blue-500'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                   }`}
                 >
-                  <item.icon className="w-5 h-5 mr-3" />
-                  {!collapsed && <span>{item.name}</span>}
+                  <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                  {!collapsed && <span className="truncate">{item.name}</span>}
                 </Link>
               )}
             </div>

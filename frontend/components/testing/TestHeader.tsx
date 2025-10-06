@@ -172,5 +172,3 @@ export const TestHeader: React.FC<TestHeaderProps> = ({
     </div>
   );
 };
-
-export default TestHeader;

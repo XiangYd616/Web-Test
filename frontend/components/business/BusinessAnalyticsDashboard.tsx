@@ -98,7 +98,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setError(null);
-      const response = await fetch('/api/analytics/dashboard', {
+      const response = await fetch('/analytics/dashboard', {
         headers: {
           'Authorization': `Bearer ${state.user.session?.sessionId || ''}`
         }
