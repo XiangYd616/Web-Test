@@ -436,7 +436,7 @@ export class TestRunner {
       const apiResults: TestResult[] = [];
 
       // 测试健康检查端点
-      const healthTest = await this.apiTester.testAPIResponse('/api/health');
+      const healthTest = await this.apiTester.testAPIResponse('/health');
       apiResults.push(healthTest);
 
       // 测试错误处理

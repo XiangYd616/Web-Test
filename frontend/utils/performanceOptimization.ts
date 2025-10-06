@@ -431,7 +431,7 @@ class PerformanceMonitor {
         const coreVitals = this.getCoreWebVitals();
 
         try {
-            await fetch('/api/v1/analytics/performance', {
+            await fetch('/v1/analytics/performance', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
