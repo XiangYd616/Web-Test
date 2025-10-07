@@ -1,6 +1,7 @@
-﻿import {AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap, BarChart3, Download} from 'lucide-react';
+import {AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap, BarChart3, Download} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { URLInput } from '../components/ui';
 import type { } from '../types';
 import StructuredDataAnalyzer from '../components/seo/StructuredDataAnalyzer';
@@ -769,285 +770,43 @@ const SEOTest: React.FC = () => {
   };
 
   // 历史记录处理
-  const _handleTestSelect = (test: any) => {
-    // 历史测试选择由TestPageLayout处理
-  };
-
-  const _handleTestRerun = (test: any) => {
-    // 重新运行历史测试
+  const handleTestSelect = (test: any) => {
     if (test.config) {
       setTestConfig(test.config);
-      // 可以选择是否立即开始测试
     }
   };
 
-  // 移除强制登录检查，允许未登录用户查看页面
-  // 在使用功能时才提示登录
+  const handleTestRerun = (test: any) => {
+    if (test.config) {
+      setTestConfig(test.config);
+      // 可以选择是否立即开始测试
+      handleStartTest();
+    }
+  };
+
+  // 转换 testStatus 为 TestPageLayout 所需的状态
+  const testPageStatus = testStatus === 'running' || testStatus === 'starting' ? 'running' as const :
+                         testStatus === 'completed' ? 'completed' as const :
+                         testStatus === 'failed' ? 'failed' as const :
+                         'idle' as const;
+
+  const advancedResults = useUnifiedSEOTest().advancedResults || {};
 
   return (
-    <div className="space-y-4 dark-page-scrollbar">
-      <div className="space-y-6">
-        {/* 美化的页面标题和控制 - 统一设计风格 */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl">
-          {/* 背景装饰 */}
-          <div className="absolute inset-0 bg-gradient-to-r from-green-600/5 via-blue-600/5 to-purple-600/5"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-green-500/10 to-transparent rounded-full blur-2xl"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-full blur-xl"></div>
-
-          {/* 内容区域 */}
-          <div className="relative p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              {/* 标题区域 */}
-              <div className="flex items-center space-x-4">
-                {/* 图标装饰 */}
-                <div className="relative">
-                  <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Search className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800 animate-pulse"></div>
-                </div>
-
-                {/* 标题文字 */}
-                <div>
-                  <div className="flex items-center space-x-3">
-                    <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-green-100 to-blue-100 bg-clip-text text-transparent">
-                      SEO 综合分析
-                    </h2>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
-                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse [animation-delay:0.4s]"></div>
-                    </div>
-                  </div>
-                  <p className="text-gray-300 text-sm mt-1 flex items-center space-x-2">
-                    <Globe className="w-4 h-4 text-green-400" />
-                    <span>全面分析网站SEO状况，发现关键问题和优化机会</span>
-                  </p>
-
-                  {/* 状态指示器 */}
-                  <div className="flex items-center space-x-4 mt-2">
-                    <div className="flex items-center space-x-2 text-xs">
-                      <div className={`w-2 h-2 rounded-full ${testStatus === 'running' ? 'bg-green-500 animate-pulse' :
-                        testStatus === 'completed' ? 'bg-blue-500' :
-                          testStatus === 'failed' ? 'bg-red-500' :
-                            testStatus === 'cancelled' ? 'bg-yellow-500' :
-                              'bg-gray-500'
-                        }`}></div>
-                      <span className="text-gray-400">
-                        {testStatus === 'running' ? '分析进行中' :
-                          testStatus === 'completed' ? '分析完成' :
-                            testStatus === 'failed' ? '分析失败' :
-                              testStatus === 'cancelled' ? '分析已取消' :
-                                '等待开始'}
-                      </span>
-                    </div>
-
-                    {testConfig.url && (
-                      <div className="flex items-center space-x-2 text-xs">
-                        <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
-                        <span className="text-gray-400 truncate max-w-48">
-                          目标: {testConfig.url}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* 测试控制按钮 */}
-              <div className="flex items-center space-x-2">
-                {testStatus === 'idle' ? (
-                  <button
-                    type="button"
-                    onClick={handleStartTest}
-                    disabled={!testConfig.url}
-                    className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!testConfig.url
-                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                      : isAuthenticated
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                      }`}
-                  >
-                    <Search className="w-4 h-4" />
-                    <span>开始分析</span>
-                  </button>
-                ) : testStatus === 'running' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
-                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-xs text-green-300 font-medium">
-                        分析进行中
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleStopTest}
-                      className="px-3 py-1.5 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs bg-red-600 hover:bg-red-700"
-                    >
-                      <Square className="w-3 h-3" />
-                      <span>停止</span>
-                    </button>
-                  </div>
-                ) : testStatus === 'completed' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                      <CheckCircle className="w-4 h-4 text-green-400" />
-                      <span className="text-sm text-green-300 font-medium">分析完成</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTestStatus('idle');
-                        setError('');
-                      }}
-                      className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                    >
-                      <Search className="w-4 h-4" />
-                      <span>重新分析</span>
-                    </button>
-                  </div>
-                ) : testStatus === 'failed' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                      <XCircle className="w-4 h-4 text-red-400" />
-                      <span className="text-sm text-red-300 font-medium">分析失败</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTestStatus('idle');
-                        setError('');
-                      }}
-                      className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                    >
-                      <Search className="w-4 h-4" />
-                      <span>重试</span>
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 测试内容区域 */}
+    <TestPageLayout
+      testType="seo"
+      title="SEO 综合分析"
+      description="全面分析网站SEO状况，发现关键问题和优化机会"
+      icon={Search}
+      testStatus={testPageStatus}
+      isTestDisabled={seoTestMode === 'online' ? !testConfig.url : uploadedFiles.length === 0}
+      onStartTest={handleStartTest}
+      onStopTest={handleStopTest}
+      onTestSelect={handleTestSelect}
+      onTestRerun={handleTestRerun}
+      additionalComponents={<>{!isAuthenticated && LoginPromptComponent}</>}
+      testContent={
         <div className="space-y-6">
-          {/* 测试模式选择 */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-3">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-              <div>
-
-                <div className="flex items-center space-x-2">
-
-                  {/* 测试状态和控制按钮 */}
-                  <div className="flex items-center space-x-2">
-                    {testStatus === 'idle' ? (
-                      <button
-                        type="button"
-                        onClick={handleStartTest}
-                        disabled={
-                          seoTestMode === 'online'
-                            ? !testConfig.url
-                            : uploadedFiles.length === 0
-                        }
-                        className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${(seoTestMode === 'online' ? !testConfig.url : uploadedFiles.length === 0)
-                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-700 text-white'
-                          }`}
-                      >
-                        <Search className="w-4 h-4" />
-                        <span>
-                          {seoTestMode === 'online' ? '开始分析' : '开始本地分析'}
-                        </span>
-                      </button>
-                    ) : testStatus === 'starting' ? (
-                      <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
-                        <Loader className="w-3 h-3 animate-spin text-blue-400" />
-                        <span className="text-xs text-blue-300 font-medium">正在启动...</span>
-                      </div>
-                    ) : testStatus === 'running' || isRunning ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
-                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                          <span className="text-xs text-green-300 font-medium">分析中</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleStopTest}
-                          className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
-                        >
-                          <Square className="w-3 h-3" />
-                          <span>停止</span>
-                        </button>
-                      </div>
-                    ) : testStatus === 'completed' ? (
-                      <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
-                        <CheckCircle className="w-3 h-3 text-green-400" />
-                        <span className="text-xs text-green-300 font-medium">分析完成</span>
-                      </div>
-                    ) : testStatus === 'failed' ? (
-                      <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 rounded-md">
-                        <XCircle className="w-3 h-3 text-red-400" />
-                        <span className="text-xs text-red-300 font-medium">分析失败</span>
-                      </div>
-                    ) : null}
-
-                    {/* 完成状态操作按钮 - 独立区域 */}
-                    {testStatus === 'completed' && (
-                      <div className="flex items-center space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setError('');
-                            setTestStatus('idle');
-                          }}
-                          className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 transition-colors font-medium"
-                        >
-                          新测试
-                        </button>
-                        {seoTestMode === 'online' && (
-                          <button
-                            type="button"
-                            onClick={handleSwitchToLocalAnalysis}
-                            className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg text-green-300 transition-colors font-medium"
-                          >
-                            切换本地分析
-                          </button>
-                        )}
-                      </div>
-                    )}
-
-                    {/* 失败状态操作按钮 - 独立区域 */}
-                    {testStatus === 'failed' && (
-                      <div className="flex items-center space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setError('');
-                            setTestStatus('idle');
-                            handleStartTest();
-                          }}
-                          className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 transition-colors font-medium"
-                        >
-                          重新测试
-                        </button>
-                        {seoTestMode === 'online' && (
-                          <button
-                            type="button"
-                            onClick={handleSwitchToLocalAnalysis}
-                            className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg text-green-300 transition-colors font-medium"
-                          >
-                            切换本地分析
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* 新增标签页导航 */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
             <div className="flex items-center justify-between mb-4">
@@ -1721,8 +1480,8 @@ const SEOTest: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      }
+    />
   );
 };
 

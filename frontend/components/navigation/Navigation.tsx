@@ -18,7 +18,12 @@ interface NavigationItem {
   badge?: string;
 }
 
-const Navigation: React.FC = () => {
+interface NavigationProps {
+  sidebarCollapsed?: boolean;
+  onSidebarToggle?: () => void;
+}
+
+const Navigation: React.FC<NavigationProps> = ({ sidebarCollapsed = false, onSidebarToggle }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isTestMenuOpen, setIsTestMenuOpen] = useState(false);
@@ -160,14 +165,37 @@ const Navigation: React.FC = () => {
   return (
     <nav className="bg-gray-900 shadow-lg border-b border-gray-800 sticky top-0 z-50 backdrop-blur-sm">
       <div className="flex items-center h-16">
-        {/* Logo - 固定宽度与侧边栏对齐 */}
-        <div className="w-64 flex-shrink-0 px-4 border-r border-gray-800">
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold text-white">TestWeb</span>
-          </Link>
+        {/* Logo - 动态宽度与侧边栏对齐 */}
+        <div className={`flex-shrink-0 border-r border-gray-800 transition-all duration-300 ${
+          sidebarCollapsed ? 'w-16' : 'w-64'
+        }`}>
+          <div className="flex items-center justify-between h-16 px-4">
+            {sidebarCollapsed ? (
+              <button
+                onClick={onSidebarToggle}
+                className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                title="展开侧边栏"
+              >
+                <Zap className="w-6 h-6 text-white" />
+              </button>
+            ) : (
+              <>
+                <Link to="/" className="flex items-center space-x-3 group">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                    <Zap className="w-6 h-6 text-white" />
+                  </div>
+                  <span className="text-xl font-bold text-white whitespace-nowrap">TestWeb</span>
+                </Link>
+                <button
+                  onClick={onSidebarToggle}
+                  className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors duration-200"
+                  title="收起侧边栏"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Navigation Container */}

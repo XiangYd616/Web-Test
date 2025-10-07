@@ -14,7 +14,7 @@ declare const beforeEach: any;
 declare const afterEach: any;
 declare const jest: any;
 import { apiService } from '../api/apiService';
-import { projectApiService } from '../api/projectApiService';
+import { _projectApiService } from '../api/projectApiService';
 import { testApiService } from '../api/testApiService';
 
 // 临时类型定义
@@ -297,7 +297,7 @@ describe('API Integration Tests', () => {
         target_url: 'https://example.com'
       };
 
-      const response = await projectApiService.createProject(projectData);
+      const response = await _projectApiService.createProject(projectData);
 
       expect(fetch).toHaveBeenCalledWith(
         `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/v1/projects`,
@@ -332,7 +332,7 @@ describe('API Integration Tests', () => {
         json: async () => mockResponse,
       } as Response);
 
-      const response = await projectApiService.getProjects({
+      const response = await _projectApiService.getProjects({
         page: 1,
         limit: 10,
         search: 'test',

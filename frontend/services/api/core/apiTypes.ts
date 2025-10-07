@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API服务核心类型定义 - 重构版本
  * 统一的接口定义，支持基础和增强功能
  * 现在使用标准API响应类型以确保前后端一致性
@@ -16,7 +16,7 @@ import {
   // 向后兼容的别名
   ApiResponse as LegacyApiResponse,
   ApiError as LegacyApiError
-} from '../../../shared/types/standardApiTypes';
+} from '@shared/types/standardApiTypes';
 
 // 使用标准类型作为主要接口
 // 添加向后兼容的扩展，包含所有可能的属性

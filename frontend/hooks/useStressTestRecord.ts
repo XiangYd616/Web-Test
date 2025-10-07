@@ -10,7 +10,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {stressTestQueueManager} from '../services/stressTestQueueManager';
 
 import {stressTestRecordService} from '../services/stressTestRecordService';
-import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
+import type { 
+  StressTestRecord, 
+  TestProgress, 
+  TestMetrics, 
+  TestResults,
+  TestRecordQuery,
+  QueueStats
+} from '../types/common';
 
 export interface UseStressTestRecordOptions {
   autoLoad?: boolean;
@@ -103,11 +110,15 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
   // 队列状态管理
   const [queueStats, setQueueStats] = useState<QueueStats>({
+    pending: 0,
+    running: 0,
+    completed: 0,
+    failed: 0,
     totalQueued: 0,
     totalRunning: 0,
     totalCompleted: 0,
     totalFailed: 0,
-    averageWaitTime: 0,
+    avgWaitTime: 0,
     averageExecutionTime: 0,
     queueLength: 0,
     runningTests: [],
@@ -663,14 +674,27 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   useEffect(() => {
     // 初始化队列统计
     const stats = stressTestQueueManager.getQueueStats();
-    setQueueStats(stats);
+    // Cast to our QueueStats type with required properties
+    setQueueStats({
+      pending: 0,
+      running: stats.totalRunning,
+      completed: stats.totalCompleted,
+      failed: stats.totalFailed,
+      ...stats
+    });
 
     // 添加队列事件监听
     const removeListener = stressTestQueueManager.addListener((event: string, data: any) => {
 
       // 更新队列统计
       const newStats = stressTestQueueManager.getQueueStats();
-      setQueueStats(newStats);
+      setQueueStats({
+        pending: 0,
+        running: newStats.totalRunning,
+        completed: newStats.totalCompleted,
+        failed: newStats.totalFailed,
+        ...newStats
+      });
 
       // 根据事件类型更新本地状态
       if (event === 'testCompleted' || event === 'testFailed' || event === 'testCancelled') {

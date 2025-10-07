@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 会话管理系统
  * 提供并发登录控制、会话监控、安全管理
  * 版本: v1.0.0
@@ -6,7 +6,7 @@
 
 import type { UserSession } from '../../types/auth.types';
 import type { User } from '../../types/user';
-import { defaultMemoryCache } from '../cacheStrategy';
+import { _defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
 
@@ -511,7 +511,7 @@ export class SessionManager {
     this.activeSessions.delete(sessionId);
 
     // 清理缓存
-    await defaultMemoryCache.delete(`session_${sessionId}`);
+    await _defaultMemoryCache.delete(`session_${sessionId}`);
   }
 
   /**
@@ -684,7 +684,7 @@ export class SessionManager {
 
   private async persistSession(session: SessionData): Promise<void> {
     // 缓存会话数据
-    await defaultMemoryCache.set(`session_${session.id}`, session, undefined, this.config.sessionTimeout);
+    await _defaultMemoryCache.set(`session_${session.id}`, session, undefined, this.config.sessionTimeout);
   }
 
   private startHeartbeat(sessionId: string): void {

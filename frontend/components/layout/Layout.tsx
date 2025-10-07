@@ -25,7 +25,12 @@ const Layout: React.FC<ModernLayoutProps> = ({
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
       {/* Top Navigation */}
-      {showHeader && <Navigation />}
+      {showHeader && (
+        <Navigation 
+          sidebarCollapsed={sidebarCollapsed} 
+          onSidebarToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+      )}
       
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
@@ -36,8 +41,10 @@ const Layout: React.FC<ModernLayoutProps> = ({
           />
         )}
         
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-gray-800/50">
+        {/* Main Content Area - 添加左边距为侧边栏腾出空间 */}
+        <main className={`flex-1 overflow-y-auto bg-gray-800/50 transition-all duration-300 ${
+          showSidebar ? (sidebarCollapsed ? 'ml-16' : 'ml-64') : 'ml-0'
+        }`}>
           <div className="p-6 max-w-[1920px] mx-auto">
             <Outlet />
           </div>

@@ -6,7 +6,7 @@ import { TestHeader } from './TestHeader';
 
 interface TestPageLayoutProps {
   // 页面基本信息
-  testType: 'stress' | 'security' | 'api' | 'performance' | 'compatibility' | 'seo' | 'accessibility' | 'website' | 'network' | 'ux' | 'database';
+  testType?: 'stress' | 'security' | 'api' | 'performance' | 'compatibility' | 'seo' | 'accessibility' | 'website' | 'network' | 'ux' | 'database';
   title: string;
   description: string;
   icon: LucideIcon;
@@ -15,14 +15,19 @@ interface TestPageLayoutProps {
   primaryColor?: 'blue' | 'green' | 'purple' | 'red' | 'yellow' | 'indigo' | 'pink' | 'orange';
   secondaryColor?: 'blue' | 'green' | 'purple' | 'red' | 'yellow' | 'indigo' | 'pink' | 'orange';
 
-  // 测试内容
-  testContent: React.ReactNode;
+  // 测试内容 - 支持两种方式
+  testContent?: React.ReactNode;
+  children?: React.ReactNode;
 
   // 测试控制
   testStatus?: 'idle' | 'running' | 'completed' | 'failed';
   isTestDisabled?: boolean;
   onStartTest?: () => void;
   onStopTest?: () => void;
+
+  // 标签页控制
+  activeTab?: 'test' | 'history';
+  onTabChange?: (tab: 'test' | 'history') => void;
 
   // 历史记录处理
   onTestSelect?: (test: any) => void;
@@ -43,17 +48,20 @@ interface TestPageLayoutProps {
 }
 
 export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
-  testType,
+  testType = 'compatibility',
   title,
   description,
   icon,
   primaryColor,
   secondaryColor,
   testContent,
+  children,
   testStatus = 'idle',
   isTestDisabled = false,
   onStartTest,
   onStopTest,
+  activeTab: externalActiveTab,
+  onTabChange: externalOnTabChange,
   onTestSelect,
   onTestRerun,
   extraControls,
@@ -90,7 +98,7 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   const storageKey = `unified-test-page-${testType}-active-tab`;
 
   // 标签页状态（支持状态持久化）
-  const [activeTab, setActiveTab] = useState<'test' | 'history'>(() => {
+  const [internalActiveTab, setInternalActiveTab] = useState<'test' | 'history'>(() => {
     try {
       const saved = localStorage.getItem(storageKey);
       return (saved as 'test' | 'history') || 'test';
@@ -98,6 +106,10 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
       return 'test';
     }
   });
+
+  // 使用外部控制的 tab 或内部状态
+  const activeTab = externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
+  const setActiveTab = externalOnTabChange || setInternalActiveTab;
 
   // 处理从其他页面导航过来时的标签页状态
   useEffect(() => {
@@ -151,8 +163,15 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   };
 
   const handleTabChange = (tab: 'test' | 'history') => {
-    setActiveTab(tab);
+    if (externalOnTabChange) {
+      externalOnTabChange(tab);
+    } else {
+      setInternalActiveTab(tab);
+    }
   };
+
+  // 获取测试内容（支持 testContent 和 children 两种方式）
+  const content = children || testContent;
 
   return (
     <div className={`space-y-4 dark-page-scrollbar ${className}`}>
@@ -183,7 +202,7 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
             : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
             }`}
         >
-          {testContent}
+          {content}
         </div>
 
         {/* 历史标签页内容 */}

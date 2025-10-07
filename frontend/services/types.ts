@@ -3,9 +3,10 @@
  * 版本: v2.0.0
  */
 
-// 重新导出所有类型，避免重复导出
-export * from '../types/api';
-export * from '@shared/types';
+// 注释：由于 '../types/api' 和 '@shared/types' 导出相同的类型，我们只导出一个来源
+// 如需使用这些类型，请直接从 '@/types' 导入
+// export type * from '../types/api';
+// export type * from '@shared/types';
 
 // 选择性导出以避免与unified/models的冲突
 export type {

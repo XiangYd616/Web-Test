@@ -10,8 +10,9 @@
  * - 导出数据
  */
 
-import { FileText, RefreshCw, Search, Filter, Download, Trash2, Eye } from 'lucide-react';
-import React, { useState, useMemo, useCallback } from 'react';
+import { FileText, RefreshCw, Search, Filter, Download, Trash2, Eye, AlertCircle } from 'lucide-react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import testHistoryService from '../../../services/testHistoryService';
 
 export interface TestHistoryItem {
   id: string;
@@ -47,32 +48,61 @@ const TestHistory: React.FC<TestHistoryProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'score' | 'duration'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [tests, setTests] = useState<TestHistoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 20;
 
-  // 模拟数据 - 实际应该从 API 获取
-  const [tests] = useState<TestHistoryItem[]>([
-    {
-      id: '1',
-      testType: 'performance',
-      name: '性能测试 - 首页',
-      url: 'https://example.com',
-      status: 'passed',
-      score: 95,
-      startTime: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-      endTime: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
-      duration: 5 * 60 * 1000,
-    },
-    {
-      id: '2',
-      testType: 'security',
-      name: '安全扫描',
-      url: 'https://example.com',
-      status: 'passed',
-      score: 88,
-      startTime: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-      endTime: new Date(Date.now() - 1000 * 60 * 50).toISOString(),
-      duration: 10 * 60 * 1000,
-    },
-  ]);
+  // 从 API 获取测试历史数据
+  useEffect(() => {
+    loadTestHistory();
+  }, [testType, currentPage]);
+
+  const loadTestHistory = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const query = {
+        page: currentPage,
+        limit: pageSize,
+        sortBy: sortBy === 'date' ? 'startTime' : sortBy,
+        sortOrder,
+        testType: testType === 'all' ? undefined : testType,
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        search: searchTerm || undefined,
+      };
+
+      const response: any = testType === 'all' 
+        ? await testHistoryService.getAllTestHistory(query)
+        : await testHistoryService.getTestHistoryByType(testType as any, query);
+      
+      // 转换 API 响应数据为组件所需格式
+      const testItems: TestHistoryItem[] = (response.data || []).map((item: any) => ({
+        id: item.sessionId || item.id,
+        testType: item.testType,
+        name: item.testName || item.name,
+        url: item.targetUrl || item.url,
+        status: item.status,
+        score: item.score,
+        startTime: item.startTime,
+        endTime: item.endTime,
+        duration: item.duration,
+        results: item.results,
+      }));
+      
+      setTests(testItems);
+      setTotalCount(response.pagination?.total || testItems.length);
+    } catch (err) {
+      console.error('加载测试历史失败:', err);
+      setError('加载测试历史失败，请稍后重试');
+      setTests([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 过滤和排序测试记录
   const filteredTests = useMemo(() => {
@@ -134,6 +164,28 @@ const TestHistory: React.FC<TestHistoryProps> = ({
     }
   }, [onTestDelete]);
 
+  const handleExport = async () => {
+    try {
+      const blob = await testHistoryService.exportTestHistory({
+        format: 'json',
+        includeDetails: true,
+        testTypes: testType === 'all' ? undefined : [testType as any],
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `test-history-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('导出失败:', err);
+      alert('导出失败，请稍后重试');
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'passed': return 'text-green-600 bg-green-50';
@@ -180,6 +232,43 @@ const TestHistory: React.FC<TestHistoryProps> = ({
     });
   };
 
+  // 重新加载数据（用于过滤/搜索改变时）
+  useEffect(() => {
+    if (currentPage === 1) {
+      loadTestHistory();
+    } else {
+      setCurrentPage(1);
+    }
+  }, [statusFilter, searchTerm, sortBy, sortOrder]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-blue-600" />
+          <p className="text-gray-600 dark:text-gray-400">加载中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <AlertCircle className="w-8 h-8 mx-auto mb-2 text-red-600" />
+          <p className="text-red-600 dark:text-red-400">{error}</p>
+          <button
+            onClick={loadTestHistory}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            重试
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* 头部 */}
@@ -191,7 +280,10 @@ const TestHistory: React.FC<TestHistoryProps> = ({
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">{description}</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <button 
+          onClick={handleExport}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
           <Download className="w-4 h-4" />
           导出记录
         </button>
@@ -317,10 +409,26 @@ const TestHistory: React.FC<TestHistoryProps> = ({
       {filteredTests.length > 0 && (
         <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            共 {filteredTests.length} 条记录
+            共 {totalCount} 条记录，当前第 {currentPage} 页
           </div>
           <div className="flex items-center gap-2">
-            {/* 分页控件将在后续添加 */}
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              上一页
+            </button>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {currentPage} / {Math.ceil(totalCount / pageSize)}
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => p + 1)}
+              disabled={currentPage >= Math.ceil(totalCount / pageSize)}
+              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              下一页
+            </button>
           </div>
         </div>
       )}

@@ -5,7 +5,7 @@
  * Created: 2025-09-25
  */
 
-import { BarChart3, ChevronRight, Code, Database, Eye, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Wifi, Zap } from 'lucide-react';
+import { BarChart3, ChevronLeft, ChevronRight, Code, Database, Eye, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Wifi, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -227,21 +227,32 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
   }, []);
 
   return (
-    <div className={`sidebar bg-gray-900 border-r border-gray-800 transition-all duration-300 overflow-y-auto sidebar-scrollbar h-full flex-shrink-0 ${
-      collapsed ? 'w-16' : 'w-64'
+    <div className={`sidebar bg-gray-900 border-r transition-all duration-300 flex flex-col fixed top-16 left-0 bottom-0 z-20 ${
+      collapsed ? 'w-16 border-gray-800/30' : 'w-64 border-gray-800'
     }`}>
-      <div className="p-4">
-        <nav className="space-y-1">
+      {/* 侧边栏内容区域 - 可滚动 */}
+      <div className="flex-1 overflow-y-auto sidebar-scrollbar">
+        <div className={collapsed ? 'py-4 px-2' : 'p-4'}>
+          <nav className={collapsed ? 'space-y-2' : 'space-y-1'}>
           {sidebarItems.map(item => (
             <div key={item.id}>
               {item.children ? (
                 <div>
                   <button
-                    onClick={() => toggleGroup(item.id)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors duration-200"
+                    onClick={() => collapsed ? null : toggleGroup(item.id)}
+                    className={`w-full flex items-center rounded-lg transition-all duration-200 ${
+                      collapsed 
+                        ? 'justify-center p-3 hover:bg-gray-800/50' 
+                        : 'justify-between px-3 py-2 hover:bg-gray-800'
+                    } text-sm font-medium text-gray-300 hover:text-white`}
+                    title={collapsed ? item.name : undefined}
                   >
-                    <div className="flex items-center flex-1 min-w-0">
-                      <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                    <div className={`flex items-center ${
+                      collapsed ? '' : 'flex-1 min-w-0'
+                    }`}>
+                      <item.icon className={`w-5 h-5 flex-shrink-0 ${
+                        collapsed ? '' : 'mr-3'
+                      }`} />
                       {!collapsed && <span className="truncate">{item.name}</span>}
                     </div>
                     {!collapsed && (
@@ -258,10 +269,10 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
                         <Link
                           key={child.id}
                           to={child.href}
-                          className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors duration-200 group ${
+                          className={`flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 group ${
                             isActivePath(child.href)
-                              ? 'bg-blue-600/20 text-blue-400 font-medium border-l-2 border-blue-500'
-                              : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                              ? 'bg-blue-600/20 text-blue-400 font-medium border-l-2 border-blue-500 shadow-sm'
+                              : 'text-gray-400 hover:bg-gray-800 hover:text-white hover:translate-x-0.5'
                           }`}
                         >
                           <child.icon className="w-4 h-4 mr-3 flex-shrink-0" />
@@ -279,19 +290,27 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
               ) : (
                 <Link
                   to={item.href}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                  className={`flex items-center text-sm font-medium rounded-lg transition-all duration-200 ${
+                    collapsed 
+                      ? 'justify-center p-3' 
+                      : 'px-3 py-2'
+                  } ${
                     isActivePath(item.href)
-                      ? 'bg-blue-600/20 text-blue-400 border-l-2 border-blue-500'
+                      ? 'bg-blue-600/20 text-blue-400 ' + (collapsed ? 'ring-2 ring-blue-500/50' : 'border-l-2 border-blue-500')
                       : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                   }`}
+                  title={collapsed ? item.name : undefined}
                 >
-                  <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                  <item.icon className={`w-5 h-5 flex-shrink-0 ${
+                    collapsed ? '' : 'mr-3'
+                  }`} />
                   {!collapsed && <span className="truncate">{item.name}</span>}
                 </Link>
               )}
             </div>
           ))}
-        </nav>
+          </nav>
+        </div>
       </div>
     </div>
   );

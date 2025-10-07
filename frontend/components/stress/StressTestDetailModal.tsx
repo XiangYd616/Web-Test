@@ -15,7 +15,7 @@ import ExportUtils from '../../utils/exportUtils';
 import ExportModal from '../common/ExportModal';
 
 import './StressTestDetailModal.css';
-import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../../types';
 
 interface StressTestDetailModalProps {
   record: any;

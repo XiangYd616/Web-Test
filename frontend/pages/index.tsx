@@ -1,9 +1,5 @@
-import {Activity, Globe, Shield, Zap, Monitor, Network, BarChart3, ArrowRight, CheckCircle, TrendingUp, Clock, Users} from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-
+import { Activity, Globe, Shield, Zap, Monitor, Network, BarChart3, ArrowRight, CheckCircle, TrendingUp, Clock, Users } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 const HomePage = () => {
@@ -11,10 +7,10 @@ const HomePage = () => {
 
   const testCategories = [
     {
-      title: '性能测试（增强版）',
-      description: '使用Lighthouse进行全面的性能分析，包括Core Web Vitals指标',
+      title: '性能测试',
+      description: '全面分析网站性能，包括Core Web Vitals、Lighthouse审计等关键指标',
       icon: Zap,
-      href: '/EnhancedPerformanceTest',
+      href: '/performance-test',
       color: 'from-green-500 to-emerald-600',
       features: ['Core Web Vitals分析', 'Lighthouse集成', '性能评分', '优化建议'],
       badge: '新功能'
@@ -23,7 +19,7 @@ const HomePage = () => {
       title: 'SEO测试',
       description: '深度SEO分析，优化搜索引擎排名',
       icon: Globe,
-      href: '/SEOTest',
+      href: '/seo-test',
       color: 'from-blue-500 to-indigo-600',
       features: ['关键词分析', '元标签检查', '站点地图验证', '结构化数据']
     },
@@ -31,7 +27,7 @@ const HomePage = () => {
       title: '安全测试',
       description: '全面的安全漏洞扫描和风险评估',
       icon: Shield,
-      href: '/SecurityTest',
+      href: '/security-test',
       color: 'from-red-500 to-rose-600',
       features: ['漏洞扫描', 'SSL检查', 'CSP验证', '安全头检测']
     },
@@ -39,7 +35,7 @@ const HomePage = () => {
       title: '兼容性测试',
       description: '跨浏览器和设备的兼容性检测',
       icon: Monitor,
-      href: '/CompatibilityTest',
+      href: '/compatibility-test',
       color: 'from-purple-500 to-violet-600',
       features: ['浏览器兼容', '响应式设计', '移动端适配', 'PWA支持']
     },
@@ -47,7 +43,7 @@ const HomePage = () => {
       title: 'API测试',
       description: '接口功能、性能和安全性测试',
       icon: Network,
-      href: '/APITest',
+      href: '/api-test',
       color: 'from-orange-500 to-amber-600',
       features: ['接口调试', '批量测试', '性能监控', '文档生成']
     },
@@ -55,7 +51,7 @@ const HomePage = () => {
       title: '压力测试',
       description: '模拟高并发场景，测试系统承载能力',
       icon: BarChart3,
-      href: '/UnifiedStressTest',
+      href: '/stress-test',
       color: 'from-cyan-500 to-teal-600',
       features: ['并发测试', '负载测试', '实时监控', '性能报告']
     }
@@ -83,7 +79,7 @@ const HomePage = () => {
               帮助您构建更快、更安全、更可靠的Web应用
             </p>
             <div className="flex justify-center space-x-4">
-              <Link to="/EnhancedPerformanceTest"
+              <Link to="/performance-test"
                 className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 开始测试
@@ -151,7 +147,7 @@ const HomePage = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                   {category.title}
                 </h3>
-                <p className="text-gray-600 text-sm mb-4">
+                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                   {category.description}
                 </p>
                 
@@ -188,7 +184,7 @@ const HomePage = () => {
           <p className="text-lg text-blue-100 mb-8">
             立即开始使用我们的增强版性能测试工具，获得详细的Core Web Vitals分析
           </p>
-          <Link to="/EnhancedPerformanceTest"
+          <Link to="/performance-test"
             className="inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg font-medium hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             立即体验增强版性能测试

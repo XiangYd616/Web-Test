@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { defaultMemoryCache } from '../cacheStrategy';
+import { _defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
 
@@ -955,7 +955,7 @@ export class AuditLogService {
   }
 
   private async cacheLogEntry(entry: AuditLogEntry): Promise<void> {
-    await defaultMemoryCache.set(`audit_log_${entry.id}`, entry, undefined, 24 * 60 * 60 * 1000);
+    await _defaultMemoryCache.set(`audit_log_${entry.id}`, entry, undefined, 24 * 60 * 60 * 1000);
   }
 
   private startCleanupTimer(): void {

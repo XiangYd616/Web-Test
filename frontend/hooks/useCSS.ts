@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useCSS.ts - 核心功能模块
  * 
  * 文件路径: frontend\hooks\useCSS.ts
@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS } from '../utils/cssLoader';
+import { loadCSS, _loadPageCSS as loadPageCSS, _loadComponentCSS as loadComponentCSS, _preloadPageCSS as preloadPageCSS } from '../utils/cssLoader';
 
 export const useCSS = (
   cssPath: string,
@@ -98,7 +98,7 @@ export const usePageCSS = (
 
    * @param {string} id - 对象ID
 
-   * @returns {Promise<Object|null>} 获取的数�?
+   * @returns {Promise<Object|null>} 获取的数�?
    */
   }, [pageName, options.immediate, options.preload]);
 

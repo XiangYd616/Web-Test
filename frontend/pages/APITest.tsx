@@ -9,6 +9,7 @@ import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
 import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
+import type { ExtendedAPITestResult, ExtendedEndpointResult, SecurityIssue, PerformanceIssue, getIssueDescription } from '../types/apiTestExtended.types';
 
 // 临时testApiService实现
 const testApiService = {
@@ -76,7 +77,7 @@ const APITest: React.FC = () => {
     generateDocumentation: false,
   });
 
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ExtendedAPITestResult | null>(null);
   const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
   const [testProgress, setTestProgress] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -721,110 +722,6 @@ const APITest: React.FC = () => {
       onStopTest={handleStopTest}
       testContent={
         <>
-          {/* 页面标题 */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 space-y-4 lg:space-y-0">
-              <div className="flex items-center space-x-3">
-                <Code className="w-8 h-8 text-blue-400" />
-                <div>
-                  <h1 className="text-2xl font-bold text-white">API 接口测试</h1>
-                  <p className="text-gray-300">测试 RESTful API 的功能、性能和可靠性</p>
-                </div>
-              </div>
-
-              {/* 测试控制按钮 */}
-              <div className="flex justify-end">
-                {testStatus === 'idle' ? (
-                  <button
-                    type="button"
-                    onClick={handleStartTest}
-                    disabled={!testConfig.baseUrl || testConfig.endpoints.length === 0}
-                    className={`btn btn-md flex items-center space-x-2 ${!testConfig.baseUrl || testConfig.endpoints.length === 0
-                      ? 'btn-disabled opacity-50 cursor-not-allowed'
-                      : isAuthenticated
-                        ? 'btn-primary hover:btn-primary-dark'
-                        : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
-                      }`}
-                  >
-                    {isAuthenticated ? (
-                      <Play className="w-4 h-4" />
-                    ) : (
-                      <Lock className="w-4 h-4" />
-                    )}
-                    <span>开始测试</span>
-                  </button>
-                ) : testStatus === 'starting' ? (
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                    <Loader className="w-4 h-4 animate-spin text-blue-400" />
-                    <span className="text-sm text-blue-300 font-medium">正在启动...</span>
-                  </div>
-                ) : testStatus === 'running' ? (
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-sm text-green-300 font-medium">后台运行中</span>
-                      {backgroundTestInfo && (
-                        <span className="text-xs text-green-200">
-                          {Math.round(backgroundTestInfo.progress || 0)}%
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleStopTest}
-                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center space-x-2"
-                    >
-                      <Square className="w-4 h-4" />
-                      <span>停止</span>
-                    </button>
-                    {canSwitchPages && (
-                      <div className="flex items-center space-x-2 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                        <Clock className="w-4 h-4 text-blue-400" />
-                        <span className="text-xs text-blue-300">可切换页面</span>
-                      </div>
-                    )}
-                  </div>
-                ) : testStatus === 'completed' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                      <CheckCircle className="w-4 h-4 text-green-400" />
-                      <span className="text-sm text-green-300 font-medium">测试完成</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTestStatus('idle');
-                        setTestProgress('');
-                        setResult(null);
-                      }}
-                      className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>重新测试</span>
-                    </button>
-                  </div>
-                ) : testStatus === 'failed' ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                      <XCircle className="w-4 h-4 text-red-400" />
-                      <span className="text-sm text-red-300 font-medium">测试失败</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTestStatus('idle');
-                        setTestProgress('');
-                        setError('');
-                      }}
-                      className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>重试</span>
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            </div>
 
             {/* 详细进度显示 */}
             {(testProgress || backgroundTestInfo) && (
@@ -895,7 +792,6 @@ const APITest: React.FC = () => {
                 <p className="text-sm text-red-300">{error}</p>
               </div>
             )}
-          </div>
 
           {/* 主标签页导航 */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50">
@@ -1052,7 +948,7 @@ const APITest: React.FC = () => {
                         type="button"
                         onClick={() => setActiveTab(key as any)}
                         className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === key
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-gradient-to-r from-green-500 to-blue-600 text-white'
                           : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
                           }`}
                       >
@@ -1288,7 +1184,7 @@ const APITest: React.FC = () => {
                         <button
                           type="button"
                           onClick={addGlobalHeader}
-                          className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                          className="px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg transition-colors flex items-center space-x-2"
                         >
                           <Plus className="w-4 h-4" />
                           <span>添加请求头</span>
@@ -1363,7 +1259,7 @@ const APITest: React.FC = () => {
                       <button
                         type="button"
                         onClick={addCommonEndpoints}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                        className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg transition-colors flex items-center space-x-2"
                       >
                         <Plus className="w-4 h-4" />
                         <span>添加常用端点</span>
@@ -1371,7 +1267,7 @@ const APITest: React.FC = () => {
                       <button
                         type="button"
                         onClick={addEndpoint}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                        className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg transition-colors flex items-center space-x-2"
                       >
                         <Plus className="w-4 h-4" />
                         <span>添加端点</span>
@@ -1624,21 +1520,21 @@ const APITest: React.FC = () => {
                           安全问题 ({result?.securityIssues.length})
                         </h4>
                         <div className="space-y-3">
-                          {result?.securityIssues.slice(0, 5).map((issue: unknown, index: number) => (
+                          {result?.securityIssues.slice(0, 5).map((issue: SecurityIssue | string, index: number) => (
                             <div key={index} className="bg-red-500/5 border border-red-500/10 rounded-lg p-4">
                               <div className="flex items-start justify-between mb-2">
-                                <div className="font-medium text-red-400">{issue.type || '安全问题'}</div>
-                                <span className={`text-xs px-2 py-1 rounded ${issue.severity === 'high' ? 'bg-red-600 text-white' :
-                                  issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
+                                <div className="font-medium text-red-400">{typeof issue === 'string' ? '安全问题' : (issue.type || '安全问题')}</div>
+                                <span className={`text-xs px-2 py-1 rounded ${typeof issue === 'object' && issue.severity === 'high' ? 'bg-red-600 text-white' :
+                                  typeof issue === 'object' && issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
                                     'bg-blue-600 text-white'
                                   }`}>
-                                  {issue.severity === 'high' ? '高危' : issue.severity === 'medium' ? '中危' : '低危'}
+                                  {typeof issue === 'object' && issue.severity === 'high' ? '高危' : typeof issue === 'object' && issue.severity === 'medium' ? '中危' : '低危'}
                                 </span>
                               </div>
                               <div className="text-sm text-gray-300">{typeof issue === 'string' ? issue : (issue.description || issue.message || '安全问题')}</div>
-                              {issue.recommendation && (
+                              {typeof issue === 'object' && issue.recommendation && (
                                 <div className="text-xs text-gray-400 mt-2">
-                                  建议: {issue.recommendation}
+                                  建议: {typeof issue === 'object' ? issue.recommendation : ''}
                                 </div>
                               )}
                             </div>
@@ -1650,7 +1546,7 @@ const APITest: React.FC = () => {
                     {/* 端点测试结果 */}
                     <div className="space-y-3">
                       <h4 className="text-lg font-semibold text-white">端点测试结果</h4>
-                      {(result?.endpointResults || result?.endpoints || []).map((endpoint: unknown, index: number) => (
+                      {(result?.endpointResults || result?.endpoints || []).map((endpoint: ExtendedEndpointResult, index: number) => (
                         <div key={index} className={`p-4 rounded-lg border ${endpoint.status === 'pass' ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'
                           }`}>
                           <div className="flex items-center justify-between mb-3">
@@ -1692,7 +1588,7 @@ const APITest: React.FC = () => {
                               <div>
                                 <div className="text-gray-400 mb-1">性能问题</div>
                                 <div className="space-y-1">
-                                  {endpoint.performanceIssues.slice(0, 2).map((issue: unknown, i: number) => (
+                                  {endpoint.performanceIssues.slice(0, 2).map((issue: PerformanceIssue | string, i: number) => (
                                     <div key={i} className="text-yellow-400 text-xs">{typeof issue === 'string' ? issue : (issue.description || issue.message || '性能问题')}</div>
                                   ))}
                                 </div>
@@ -1703,7 +1599,7 @@ const APITest: React.FC = () => {
                               <div>
                                 <div className="text-gray-400 mb-1">安全问题</div>
                                 <div className="space-y-1">
-                                  {endpoint.securityIssues.slice(0, 2).map((issue: unknown, i: number) => (
+                                  {endpoint.securityIssues.slice(0, 2).map((issue: SecurityIssue | string, i: number) => (
                                     <div key={i} className="text-red-400 text-xs">{typeof issue === 'string' ? issue : (issue.type || issue.message || '安全问题')}</div>
                                   ))}
                                 </div>

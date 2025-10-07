@@ -43,9 +43,12 @@ export type {
 
 // 重新导出API响应类型（仅导出存在的类型）
 export type {
-  ApiError, ApiErrorResponse, ApiResponse, ApiSuccessResponse, ErrorCode, PaginatedResponse,
+  ApiError, ApiErrorResponse, ApiResponse, ApiSuccessResponse, PaginatedResponse,
   PaginationInfo, QueryParams, RequestConfig, ValidationError
-} from './apiResponse';
+} from './apiResponse.types';
+
+// Re-export ErrorCode as value (enum)
+export { ErrorCode } from './apiResponse.types';
 
 // 注释掉不存在的类型导入
 // ApiMeta, ApiResponseUtils, AuthConfig, CreatedResponse, ErrorResponseMethods,

@@ -89,9 +89,9 @@ export const TestHeader: React.FC<TestHeaderProps> = ({
   return (
     <div className={`relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl ${className}`}>
       {/* 背景装饰 */}
-      <div className={`absolute inset-0 bg-gradient-to-r ${primary.bg} via-${secondary.bg} to-${primary.bg}`}></div>
-      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl ${primary.bg} to-transparent rounded-full blur-2xl`}></div>
-      <div className={`absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr ${secondary.bg} to-transparent rounded-full blur-xl`}></div>
+      <div className="absolute inset-0 opacity-10"></div>
+      <div className={`absolute top-0 right-0 w-32 h-32 ${primary.bg} to-transparent rounded-full blur-2xl`}></div>
+      <div className={`absolute bottom-0 left-0 w-24 h-24 ${secondary.bg} to-transparent rounded-full blur-xl`}></div>
 
       {/* 内容区域 */}
       <div className="relative p-6">
@@ -109,7 +109,7 @@ export const TestHeader: React.FC<TestHeaderProps> = ({
             {/* 标题文字 */}
             <div>
               <div className="flex items-center space-x-3">
-                <h2 className={`text-2xl font-bold bg-gradient-to-r from-white via-${primaryColor}-100 to-${secondaryColor}-100 bg-clip-text text-transparent`}>
+                <h2 className="text-2xl font-bold text-white">
                   {title}
                 </h2>
                 <div className="flex items-center space-x-1">

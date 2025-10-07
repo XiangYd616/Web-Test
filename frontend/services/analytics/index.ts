@@ -89,7 +89,7 @@ export interface SmartRecommendation {
 }
 
 // 统一服务导出
-export { analyticsService } from './analyticsService';
+export { AnalyticsService } from './AnalyticsService';
 
 // 兼容性导出（逐步迁移）
 export { dataAnalysisService } from '../dataAnalysisService';

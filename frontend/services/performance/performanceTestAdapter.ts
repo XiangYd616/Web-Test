@@ -1,6 +1,6 @@
 ﻿
 import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, UnifiedPerformanceConfig } from '../../types/performance.types';
-import { performanceTestCore } from './performanceTestCore';
+import { PerformanceTestCore } from './PerformanceTestCore';
 
 // ==================== 兼容性接口定义 ====================
 
@@ -46,7 +46,7 @@ export class PerformanceTestAdapter {
       const onProgress = callbacks ? this.convertProgressCallback(callbacks) : undefined;
 
       // 执行性能测试
-      const result = await performanceTestCore.runPerformanceTest(
+      const result = await PerformanceTestCore.runPerformanceTest(
         config.url,
         unifiedConfig,
         {
@@ -97,7 +97,7 @@ export class PerformanceTestAdapter {
       mobilePerformance: options.device !== 'desktop'
     };
 
-    const result = await performanceTestCore.runPerformanceTest(url, config);
+    const result = await PerformanceTestCore.runPerformanceTest(url, config);
 
     // 转换为网站测试期望的格式
     return {
@@ -147,7 +147,7 @@ export class PerformanceTestAdapter {
       mobilePerformance: options.checkMobile || false
     };
 
-    const result = await performanceTestCore.runPerformanceTest(url, config);
+    const result = await PerformanceTestCore.runPerformanceTest(url, config);
 
     // 转换为SEO测试期望的格式
     return {
@@ -195,7 +195,7 @@ export class PerformanceTestAdapter {
       retries: options.retries || 1
     };
 
-    const result = await performanceTestCore.runPerformanceTest(url, config);
+    const result = await PerformanceTestCore.runPerformanceTest(url, config);
 
     // 转换为API测试期望的格式
     return {
@@ -285,7 +285,7 @@ export async function quickPerformanceTest(
   level: 'basic' | 'standard' | 'comprehensive' = 'standard'
 ): Promise<any> {
   const config = PERFORMANCE_CONFIG_PRESETS[level];
-  const result = await performanceTestCore.runPerformanceTest(url, config);
+  const result = await PerformanceTestCore.runPerformanceTest(url, config);
   return PerformanceTestAdapter.convertResultToLegacy(result);
 }
 
@@ -318,7 +318,7 @@ export async function getPerformanceMetrics(
     cssOptimization: false
   };
 
-  const result = await performanceTestCore.runPerformanceTest(url, config);
+  const result = await PerformanceTestCore.runPerformanceTest(url, config);
 
   return {
     loadTime: result.pageSpeed?.loadTime || 0,

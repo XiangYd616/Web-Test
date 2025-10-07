@@ -5,7 +5,7 @@
  */
 
 import {useState, useCallback} from 'react';
-import { defaultMemoryCache } from '../cacheStrategy';
+import { _defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
 
@@ -239,7 +239,7 @@ export class RBACService {
     let permission = this.permissions.get(permissionId);
     
     if (!permission) {
-      permission = await defaultMemoryCache.get(`permission_${permissionId}`);
+      permission = await _defaultMemoryCache.get(`permission_${permissionId}`);
       if (permission) {
         this.permissions.set(permissionId, permission);
       }
@@ -298,7 +298,7 @@ export class RBACService {
     let role = this.roles.get(roleId);
     
     if (!role) {
-      role = await defaultMemoryCache.get(`role_${roleId}`);
+      role = await _defaultMemoryCache.get(`role_${roleId}`);
       if (role) {
         this.roles.set(roleId, role);
       }
@@ -346,7 +346,7 @@ export class RBACService {
 
     this.roles.delete(roleId);
     this.roleHierarchies.delete(roleId);
-    await defaultMemoryCache.delete(`role_${roleId}`);
+    await _defaultMemoryCache.delete(`role_${roleId}`);
 
     // 从所有用户中移除此角色
     for (const [userId, userPerms] of this.userPermissions.entries()) {
@@ -581,7 +581,7 @@ export class RBACService {
     let userPerms = this.userPermissions.get(userId);
     
     if (!userPerms) {
-      userPerms = await defaultMemoryCache.get(`user_permissions_${userId}`);
+      userPerms = await _defaultMemoryCache.get(`user_permissions_${userId}`);
       if (userPerms) {
         this.userPermissions.set(userId, userPerms);
       }
@@ -750,15 +750,15 @@ export class RBACService {
   }
 
   private async cachePermission(permission: Permission): Promise<void> {
-    await defaultMemoryCache.set(`permission_${permission.id}`, permission, undefined, 24 * 60 * 60 * 1000);
+    await _defaultMemoryCache.set(`permission_${permission.id}`, permission, undefined, 24 * 60 * 60 * 1000);
   }
 
   private async cacheRole(role: Role): Promise<void> {
-    await defaultMemoryCache.set(`role_${role.id}`, role, undefined, 24 * 60 * 60 * 1000);
+    await _defaultMemoryCache.set(`role_${role.id}`, role, undefined, 24 * 60 * 60 * 1000);
   }
 
   private async cacheUserPermissions(userPerms: UserPermissions): Promise<void> {
-    await defaultMemoryCache.set(`user_permissions_${userPerms.userId}`, userPerms, undefined, 60 * 60 * 1000);
+    await _defaultMemoryCache.set(`user_permissions_${userPerms.userId}`, userPerms, undefined, 60 * 60 * 1000);
   }
 }
 

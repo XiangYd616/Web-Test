@@ -12,7 +12,7 @@ export {
 } from './useLegacyCompatibility';
 
 // 📋 专用测试Hook
-export { useApiTestState } from './useApiTestState';
+export { useAPITestState } from './useApiTestState';
 export { useCompatibilityTestState } from './useCompatibilityTestState';
 export { useDatabaseTestState } from './useDatabaseTestState';
 export { useNetworkTestState } from './useNetworkTestState';

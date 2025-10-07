@@ -7,7 +7,7 @@ import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
 import type {
   SecurityTestConfig,
-  SecurityTestResult, TestProgress
+  SecurityScanResult, TestProgress
 } from '../services/securityEngine';
 
 // CSS样式已迁移到组件库中
@@ -56,7 +56,7 @@ const SecurityTest: React.FC = () => {
   const [testResult, setTestResult] = useState<any>(null);
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'test' | 'history' | 'comparison'>('test');
-  const [comparisonResults, setComparisonResults] = useState<SecurityTestResult[]>([]);
+  const [comparisonResults, setComparisonResults] = useState<SecurityScanResult[]>([]);
   const testPanelRef = useRef<any>(null);
 
   // 使用测试进度监控Hook
@@ -160,7 +160,7 @@ const SecurityTest: React.FC = () => {
   };
 
   // 处理测试完成
-  const handleTestComplete = (result: SecurityTestResult) => {
+  const handleTestComplete = (result: SecurityScanResult) => {
     setTestResult(result);
     setIsTestRunning(false);
     setTestProgress(null);
@@ -177,7 +177,7 @@ const SecurityTest: React.FC = () => {
   };
 
   // 处理测试对比
-  const _handleCompareTests = (results: SecurityTestResult[]) => {
+  const _handleCompareTests = (results: SecurityScanResult[]) => {
     setComparisonResults(results);
     setActiveTab('comparison');
   };

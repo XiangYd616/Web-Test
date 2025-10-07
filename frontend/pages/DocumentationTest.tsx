@@ -9,6 +9,7 @@ import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
 import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
+import type { ExtendedAPITestResult, ExtendedEndpointResult, SecurityIssue, PerformanceIssue } from '../types/apiTestExtended.types';
 
 // 临时testApiService实现
 const testApiService = {
@@ -76,7 +77,7 @@ const APITest: React.FC = () => {
     generateDocumentation: false,
   });
 
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<ExtendedAPITestResult | null>(null);
   const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
   const [testProgress, setTestProgress] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -1624,21 +1625,21 @@ const APITest: React.FC = () => {
                           安全问题 ({result?.securityIssues.length})
                         </h4>
                         <div className="space-y-3">
-                          {result?.securityIssues.slice(0, 5).map((issue: unknown, index: number) => (
+                          {result?.securityIssues.slice(0, 5).map((issue: SecurityIssue | string, index: number) => (
                             <div key={index} className="bg-red-500/5 border border-red-500/10 rounded-lg p-4">
                               <div className="flex items-start justify-between mb-2">
-                                <div className="font-medium text-red-400">{issue.type || '安全问题'}</div>
-                                <span className={`text-xs px-2 py-1 rounded ${issue.severity === 'high' ? 'bg-red-600 text-white' :
-                                  issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
+                                <div className="font-medium text-red-400">{typeof issue === 'string' ? '安全问题' : (issue.type || '安全问题')}</div>
+                                <span className={`text-xs px-2 py-1 rounded ${typeof issue === 'object' && issue.severity === 'high' ? 'bg-red-600 text-white' :
+                                  typeof issue === 'object' && issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
                                     'bg-blue-600 text-white'
                                   }`}>
-                                  {issue.severity === 'high' ? '高危' : issue.severity === 'medium' ? '中危' : '低危'}
+                                  {typeof issue === 'object' && issue.severity === 'high' ? '高危' : typeof issue === 'object' && issue.severity === 'medium' ? '中危' : '低危'}
                                 </span>
                               </div>
                               <div className="text-sm text-gray-300">{typeof issue === 'string' ? issue : (issue.description || issue.message || '安全问题')}</div>
-                              {issue.recommendation && (
+                              {typeof issue === 'object' && issue.recommendation && (
                                 <div className="text-xs text-gray-400 mt-2">
-                                  建议: {issue.recommendation}
+                                  建议: {typeof issue === 'object' ? issue.recommendation : ''}
                                 </div>
                               )}
                             </div>
@@ -1650,7 +1651,7 @@ const APITest: React.FC = () => {
                     {/* 端点测试结果 */}
                     <div className="space-y-3">
                       <h4 className="text-lg font-semibold text-white">端点测试结果</h4>
-                      {(result?.endpointResults || result?.endpoints || []).map((endpoint: unknown, index: number) => (
+                      {(result?.endpointResults || result?.endpoints || []).map((endpoint: ExtendedEndpointResult, index: number) => (
                         <div key={index} className={`p-4 rounded-lg border ${endpoint.status === 'pass' ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'
                           }`}>
                           <div className="flex items-center justify-between mb-3">
@@ -1692,7 +1693,7 @@ const APITest: React.FC = () => {
                               <div>
                                 <div className="text-gray-400 mb-1">性能问题</div>
                                 <div className="space-y-1">
-                                  {endpoint.performanceIssues.slice(0, 2).map((issue: unknown, i: number) => (
+                                  {endpoint.performanceIssues.slice(0, 2).map((issue: PerformanceIssue | string, i: number) => (
                                     <div key={i} className="text-yellow-400 text-xs">{typeof issue === 'string' ? issue : (issue.description || issue.message || '性能问题')}</div>
                                   ))}
                                 </div>
@@ -1703,7 +1704,7 @@ const APITest: React.FC = () => {
                               <div>
                                 <div className="text-gray-400 mb-1">安全问题</div>
                                 <div className="space-y-1">
-                                  {endpoint.securityIssues.slice(0, 2).map((issue: unknown, i: number) => (
+                                  {endpoint.securityIssues.slice(0, 2).map((issue: SecurityIssue | string, i: number) => (
                                     <div key={i} className="text-red-400 text-xs">{typeof issue === 'string' ? issue : (issue.type || issue.message || '安全问题')}</div>
                                   ))}
                                 </div>

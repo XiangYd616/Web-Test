@@ -53,10 +53,15 @@ export enum UserPlan {
 // ==================== 测试相关枚举 ====================
 
 /**
- * 测试类型枚举 - 已迁移到统一类型系统
- * 请从 '../types/unified/testTypes' 导入 TestType 和 TestTypeEnum
+ * 测试类型定义 - 已迁移到统一类型系统
+ * 注意：TestType 是类型联合，不是enum，不能作为值使用
  */
-import { TestType } from './unified/testTypes';
+import type { TestType } from './unified/testTypes';
+import { TEST_TYPE_CONFIG, isValidTestType as isValidTestTypeFromUnified } from './unified/testTypes';
+
+// Re-export TestType and related functions
+export type { TestType } from './unified/testTypes';
+export { TEST_TYPE_CONFIG } from './unified/testTypes';
 
 /**
  * 测试状态枚举 - 与数据库约束保持一致
@@ -155,9 +160,10 @@ export function isValidUserPlan(plan: string): plan is UserPlan {
 
 /**
  * 验证测试类型是否有效
+ * 使用 unified/testTypes 中的实现
  */
 export function isValidTestType(type: string): type is TestType {
-  return Object.values(TestType).includes(type as TestType);
+  return isValidTestTypeFromUnified(type);
 }
 
 /**
@@ -213,18 +219,11 @@ export function getUserRoleDisplayName(role: UserRole): string {
 
 /**
  * 获取测试类型的显示名称（中文）
+ * 使用 unified/testTypes 中的配置
  */
 export function getTestTypeDisplayName(type: TestType): string {
-  const typeNames = {
-    [TestType.SEO]: 'SEO优化',
-    [TestType.PERFORMANCE]: '性能测试',
-    [TestType.SECURITY]: '安全测试',
-    [TestType.API]: 'API测试',
-    [TestType.COMPATIBILITY]: '兼容性测试',
-    // [TestType.ACCESSIBILITY]: '可访问性测试', // ACCESSIBILITY不存在于TestType枚举中
-    [TestType.STRESS]: '压力测试'
-  };
-  return typeNames[type as keyof typeof typeNames] || type;
+  const config = TEST_TYPE_CONFIG[type];
+  return config?.displayName || type;
 }
 
 /**

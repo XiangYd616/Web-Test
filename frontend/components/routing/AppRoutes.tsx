@@ -16,12 +16,12 @@ const SEOTest = lazy(() => import('../../pages/SeoTest'));
 const MFASetup = lazy(() => import('../../pages/auth/MFASetup'));
 const MFAVerification = lazy(() => import('../../pages/auth/MFAVerification'));
 
-const ApiTest = lazy(() => import('../../pages/ApiTest'));
+const ApiTest = lazy(() => import('../../pages/APITest'));
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
 const AccessibilityTest = lazy(() => import('../../pages/AccessibilityTest'));
-const UXTest = lazy(() => import('../../pages/UxTest'));
+const UXTest = lazy(() => import('../../pages/UXTest'));
 
 // 数据管理相关页面
 const DataStorage = lazy(() => import('../../pages/admin/DataStorage'));

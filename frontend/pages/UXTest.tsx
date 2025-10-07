@@ -258,6 +258,10 @@ const UXTest: React.FC = () => {
       title="用户体验测试"
       description="测试网站可用性、可访问性和用户体验"
       icon={Users}
+      testStatus={isRunning ? 'running' : result ? 'completed' : error ? 'failed' : 'idle'}
+      isTestDisabled={!config.targetUrl.trim()}
+      onStartTest={startTest}
+      onStopTest={stopTest}
       testContent={
         <div className="space-y-6">
           {/* 配置区域 */}
@@ -422,30 +426,9 @@ const UXTest: React.FC = () => {
             </div>
           )}
 
-          {/* 控制按钮 */}
-          <div className="flex justify-center space-x-4">
-            {!isRunning ? (
-              <button
-                type="button"
-                onClick={startTest}
-                disabled={!config.targetUrl.trim()}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center"
-              >
-                <Play className="w-5 h-5 mr-2" />
-                开始测试
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={stopTest}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center"
-              >
-                <Square className="w-5 h-5 mr-2" />
-                停止测试
-              </button>
-            )}
-
-            {(result || error) && (
+          {/* 额外控制按钮 - 仅保留重置按钮 */}
+          {(result || error) && !isRunning && (
+            <div className="flex justify-center">
               <button
                 type="button"
                 onClick={resetTest}
@@ -454,8 +437,8 @@ const UXTest: React.FC = () => {
                 <RotateCcw className="w-5 h-5 mr-2" />
                 重新测试
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* 进度显示 */}
           {isRunning && (

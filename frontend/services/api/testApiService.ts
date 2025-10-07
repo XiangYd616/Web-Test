@@ -8,27 +8,24 @@
  */
 
 import type {
-  TestApiClient
-} from '../../types';
-import type {
-  ApiResponse
-} from '@shared/types';
-import type {
+  ApiClient,
+  ApiResponse,
   ApiRequestConfig,
   RequestConfig,
   TestCallbacks,
   UnifiedTestConfig
-} from '@shared/types';
-import type {
-  TestType,
-  TestStatus
-} from '@shared/types';
+} from '../../types/api';
 import type {
   TestExecution,
+  TestType,
+  TestStatus
+} from '../../types/unified/testTypes';
+import type {
   TestHistory
-} from '@shared/types';
+} from '../../types';
 import { apiService } from './apiService';
-import { requireAuth, TestPermissions, PermissionChecker } from '../auth/authDecorator';
+import { requireAuth, _TestPermissions, PermissionChecker } from '../auth/authDecorator';
+import { transformTestResult } from './transformers/testResultTransformer';
 
 // 本地类型定义已迁移到统一的类型系统
 // 请从 '../../types' 导入所需的类型
@@ -139,7 +136,7 @@ export interface InfrastructureTestConfig {
   };
 }
 
-class TestApiService implements TestApiClient {
+class TestApiService implements ApiClient {
   private baseUrl = '/test'; // 修正为实际的后端API路径
 
   /**
@@ -147,14 +144,14 @@ class TestApiService implements TestApiClient {
    */
   private getTestTypePermission(testType: string): string | null {
     const permissionMap: Record<string, string> = {
-      'performance': TestPermissions.RUN_PERFORMANCE_TEST,
-      'security': TestPermissions.RUN_SECURITY_TEST,
-      'api': TestPermissions.RUN_API_TEST,
-      'stress': TestPermissions.RUN_STRESS_TEST,
-      'compatibility': TestPermissions.RUN_COMPATIBILITY_TEST,
-      'seo': TestPermissions.RUN_SEO_TEST,
-      'website': TestPermissions.RUN_PERFORMANCE_TEST, // 网站测试使用性能测试权限
-      'infrastructure': TestPermissions.ADMIN_ALL_TESTS // 基础设施测试需要管理员权限
+      'performance': _TestPermissions.RUN_PERFORMANCE_TEST,
+      'security': _TestPermissions.RUN_SECURITY_TEST,
+      'api': _TestPermissions.RUN_API_TEST,
+      'stress': _TestPermissions.RUN_STRESS_TEST,
+      'compatibility': _TestPermissions.RUN_COMPATIBILITY_TEST,
+      'seo': _TestPermissions.RUN_SEO_TEST,
+      'website': _TestPermissions.RUN_PERFORMANCE_TEST, // 网站测试使用性能测试权限
+      'infrastructure': _TestPermissions.ADMIN_ALL_TESTS // 基础设施测试需要管理员权限
     };
     
     return permissionMap[testType?.toLowerCase()] || null;
@@ -229,8 +226,7 @@ class TestApiService implements TestApiClient {
       if (!user) {
         return {
           success: false,
-          error: '请先登录后再执行测试',
-          code: 'AUTH_REQUIRED'
+          error: '请先登录后再执行测试'
         };
       }
 
@@ -241,8 +237,7 @@ class TestApiService implements TestApiClient {
         if (!hasPermission) {
           return {
             success: false,
-            error: `权限不足，无法执行${config?.testType}测试`,
-            code: 'PERMISSION_DENIED'
+            error: `权限不足，无法执行${config?.testType}测试`
           };
         }
       }
@@ -301,8 +296,7 @@ class TestApiService implements TestApiClient {
       console.error('❌ 测试执行失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '测试执行失败',
-        code: 'EXECUTION_ERROR'
+        error: error instanceof Error ? error.message : '测试执行失败'
       };
     }
   }
@@ -362,7 +356,7 @@ class TestApiService implements TestApiClient {
    */
   @requireAuth({ 
     requireAuth: true, 
-    requiredPermissions: [TestPermissions.DELETE_TEST_RESULTS] 
+    requiredPermissions: [_TestPermissions.DELETE_TEST_RESULTS] 
   })
   async deleteExecution(id: string): Promise<ApiResponse<{ deleted: boolean }>> {
     return apiService.delete(`${this.baseUrl}/history/${id}`);
@@ -376,7 +370,7 @@ class TestApiService implements TestApiClient {
    */
   @requireAuth({ 
     requireAuth: true, 
-    requiredPermissions: [TestPermissions.RUN_PERFORMANCE_TEST] 
+    requiredPermissions: [_TestPermissions.RUN_PERFORMANCE_TEST] 
   })
   async executePerformanceTest(
     target_url: string,
@@ -415,7 +409,7 @@ class TestApiService implements TestApiClient {
    */
   @requireAuth({ 
     requireAuth: true, 
-    requiredPermissions: [TestPermissions.RUN_SECURITY_TEST] 
+    requiredPermissions: [_TestPermissions.RUN_SECURITY_TEST] 
   })
   async executeSecurityTest(
     target_url: string,
@@ -707,9 +701,10 @@ class TestApiService implements TestApiClient {
    * 下载报告文件
    */
   async downloadReport(report_id: string): Promise<Response> {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     const response = await fetch(`${process.env.REACT_APP_API_URL || process.env.BACKEND_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`}${this.baseUrl}/reports/${report_id}/download`, {
       headers: {
-        'Authorization': `Bearer ${apiService.getToken()}`
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
     return response;
@@ -771,7 +766,7 @@ class TestApiService implements TestApiClient {
     return apiService.post(`${this.baseUrl}/system/maintenance`, { operation });
   }
 
-  // ==================== TestApiClient 接口实现 ====================
+  // ==================== ApiClient 接口实现 ====================
 
   /**
    * 获取测试状态
@@ -839,7 +834,7 @@ class TestApiService implements TestApiClient {
 
     if (response.success && response.data) {
       const testHistory: TestHistory = {
-        tests: response.data.tests || [],
+        records: response.data.records || response.data.tests || [],
         total: response.data.total || 0,
         page: response.data.page || 1,
         pageSize: response.data.pageSize || limit || 10,

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 项目配置验证脚本
  * 用于验证项目配置和路径别名是否正确工作
  * 版本: v1.0.0
@@ -7,7 +7,7 @@
 import { DEFAULT_API_CONFIG, mergeApiConfig } from '@config/apiConfig';
 import { DEFAULT_AUTH_CONFIG } from '@config/authConfig';
 import { validateAllConfigs, createValidationReport } from '@config/validateConfig';
-import { ERROR_CODES } from '@types/errors';
+import { ERROR_CODES } from '@types/errors.types';
 
 console.log('🔍 开始项目配置验证...\n');
 

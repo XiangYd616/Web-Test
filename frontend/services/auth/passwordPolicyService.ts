@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import { defaultMemoryCache } from '../cacheStrategy';
+import { _defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
 
@@ -551,7 +551,7 @@ export class PasswordPolicyService {
     this.accountLocks.set(userId, lockInfo);
 
     // 缓存锁定信息
-    defaultMemoryCache.set(`account_lock_${userId}`, lockInfo, undefined, duration * 1000);
+    _defaultMemoryCache.set(`account_lock_${userId}`, lockInfo, undefined, duration * 1000);
   }
 
   /**
@@ -559,7 +559,7 @@ export class PasswordPolicyService {
    */
   unlockAccount(userId: string): void {
     this.accountLocks.delete(userId);
-    defaultMemoryCache.delete(`account_lock_${userId}`);
+    _defaultMemoryCache.delete(`account_lock_${userId}`);
   }
 
   /**
@@ -571,7 +571,7 @@ export class PasswordPolicyService {
 
     // 如果内存中没有，检查缓存
     if (!lockInfo) {
-      lockInfo = await defaultMemoryCache.get(`account_lock_${userId}`);
+      lockInfo = await _defaultMemoryCache.get(`account_lock_${userId}`);
     }
 
     if (!lockInfo) return null;
@@ -643,7 +643,7 @@ export class PasswordPolicyService {
     this.userSecurityQuestions.set(userId, userQuestions);
 
     // 缓存用户安全问题
-    await defaultMemoryCache.set(`security_questions_${userId}`, userQuestions, undefined, 24 * 60 * 60 * 1000);
+    await _defaultMemoryCache.set(`security_questions_${userId}`, userQuestions, undefined, 24 * 60 * 60 * 1000);
   }
 
   /**
@@ -654,7 +654,7 @@ export class PasswordPolicyService {
     answers: Array<{ questionId: string; answer: string }>
   ): Promise<boolean> {
     const userQuestions = this.userSecurityQuestions.get(userId) ||
-      await defaultMemoryCache.get(`security_questions_${userId}`);
+      await _defaultMemoryCache.get(`security_questions_${userId}`);
 
     if (!userQuestions) return false;
 

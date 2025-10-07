@@ -347,6 +347,10 @@ const PerformanceTest: React.FC = () => {
       title="性能测试"
       description="全面分析网站性能，包括Core Web Vitals、Lighthouse审计等关键指标"
       icon={Activity}
+      testStatus={isRunning ? 'running' : result ? 'completed' : error ? 'failed' : 'idle'}
+      isTestDisabled={!config.url}
+      onStartTest={handleStartTest}
+      onStopTest={handleStopTest}
       testContent={
         <div className="space-y-6">
           {/* 未登录提示 */}
@@ -361,54 +365,19 @@ const PerformanceTest: React.FC = () => {
             {renderConfigPanel()}
           </div>
 
-          {/* 控制按钮 */}
-          <div className="flex items-center justify-between">
+          {/* 额外控制按钮 - 仅保留重置按钮 */}
+          {!isRunning && (result || error) && (
             <div className="flex items-center space-x-4">
-              {isRunning && (
-                <button
-                  type="button"
-                  onClick={handleStopTest}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium flex items-center space-x-2 transition-all"
-                >
-                  <Square className="w-4 h-4" />
-                  <span>停止测试</span>
-                </button>
-              )}
-
               <button
                 type="button"
-                onClick={handleStartTest}
-                disabled={isRunning || !config.url}
-                className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-all ${isRunning || !config.url
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  }`}
+                onClick={handleResetTest}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium flex items-center space-x-2 transition-all"
               >
-                {isRunning ? (
-                  <>
-                    <Loader className="w-4 h-4 animate-spin" />
-                    <span>测试进行中...</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" />
-                    <span>开始测试</span>
-                  </>
-                )}
+                <RotateCcw className="w-4 h-4" />
+                <span>重新测试</span>
               </button>
-
-              {!isRunning && (result || error) && (
-                <button
-                  type="button"
-                  onClick={handleResetTest}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium flex items-center space-x-2 transition-all"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>重新测试</span>
-                </button>
-              )}
             </div>
-          </div>
+          )}
 
           {/* 进度显示 */}
           {isRunning && (

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试API导出
  * 统一的测试相关API接口
  */
@@ -8,8 +8,8 @@ export {
   TestApiClient,
   testApiClient,
   runTest,
-  getTestEngines,
-  validateTestConfig
+  _getTestEngines,
+  _validateTestConfig
 } from './testApiClient';
 
 // 导出类型定义

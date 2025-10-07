@@ -13,10 +13,14 @@ export interface TestSession {
 export interface TestHistoryQuery {
   page?: number;
   pageSize?: number;
-  testType?: string;
+  limit?: number; // Alias for pageSize
+  testType?: string | string[];
   status?: string;
   dateFrom?: string | number;
   dateTo?: string | number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
 }
 
 export interface TestHistoryResponse {

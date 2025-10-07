@@ -9,15 +9,7 @@
 import React from 'react';
 import type { FC } from 'react';
 import { Clock, Users, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
-
-interface QueueStats {
-  pending: number;
-  running: number;
-  completed: number;
-  failed: number;
-  totalCapacity: number;
-  averageWaitTime: number;
-}
+import type { QueueStats } from '../../types/common';
 
 interface StressTestQueueStatusProps {
   queueStats: QueueStats;
@@ -141,7 +133,7 @@ const StressTestQueueStatus: React.FC<StressTestQueueStatusProps> = ({
       </div>
 
       {/* 下一个测试 */}
-      {queueStats.nextInQueue && (
+      {queueStats?.nextInQueue && (
         <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -161,11 +153,11 @@ const StressTestQueueStatus: React.FC<StressTestQueueStatusProps> = ({
       )}
 
       {/* 正在运行的测试 */}
-      {queueStats.runningTests.length > 0 && (
+      {(queueStats?.runningTests?.length ?? 0) > 0 && (
         <div className="mt-4">
           <h4 className="text-sm font-medium text-gray-400 mb-2">正在执行的测试</h4>
           <div className="space-y-2">
-            {queueStats.runningTests.slice(0, 3).map((test) => (
+            {(queueStats?.runningTests ?? []).slice(0, 3).map((test: any) => (
               <div key={test.id} className="flex items-center justify-between p-2 bg-gray-700/30 rounded-lg">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-white truncate">{test.testName}</div>
@@ -179,7 +171,7 @@ const StressTestQueueStatus: React.FC<StressTestQueueStatusProps> = ({
                 </div>
               </div>
             ))}
-            {queueStats.runningTests.length > 3 && (
+            {(queueStats?.runningTests?.length ?? 0) > 3 && (
               <div className="text-center text-sm text-gray-400">
                 还有 {queueStats.runningTests.length - 3} 个测试正在执行...
               </div>
@@ -189,7 +181,7 @@ const StressTestQueueStatus: React.FC<StressTestQueueStatusProps> = ({
       )}
 
       {/* 空队列状态 */}
-      {queueStats.queueLength === 0 && queueStats.totalRunning === 0 && (
+      {(queueStats.pending === 0 && queueStats.running === 0) && (
         <div className="text-center py-6">
           <Users className="w-12 h-12 text-gray-500 mx-auto mb-2" />
           <div className="text-gray-400">当前没有测试在队列中</div>

@@ -12,7 +12,7 @@ import type {
 import {
   ApiVersionNegotiator,
   AutoMigrationSystem,
-  autoMigrationSystem,
+  AutoMigrationSystem,
   CompatibilityChecker,
   DATA_MODEL_VERSION,
   TypeVersionRegistry,
@@ -20,7 +20,7 @@ import {
   VersionChecker,
   VersionedDataWrapper
 } from '../types/version.types';
-import { defaultMemoryCache } from './cacheStrategy';
+import { _defaultMemoryCache } from './cacheStrategy';
 
 // ==================== 版本控制配置 ====================
 
@@ -77,7 +77,7 @@ export class VersionControlService {
       ...config
     };
 
-    this.migrationSystem = autoMigrationSystem;
+    this.migrationSystem = AutoMigrationSystem;
     this.setupDefaultMigrations();
   }
 
@@ -110,7 +110,7 @@ export class VersionControlService {
        * @param {Object} params - 参数对象
        * @returns {Promise<Object>} 返回结果
        */
-      const cached = await defaultMemoryCache.get(cacheKey);
+      const cached = await _defaultMemoryCache.get(cacheKey);
       if (cached) {
         return cached;
       }
@@ -143,7 +143,7 @@ export class VersionControlService {
     };
 
     if (this.config.enableVersionCache) {
-      await defaultMemoryCache.set(cacheKey, report, undefined, this.config.cacheTimeout);
+      await _defaultMemoryCache.set(cacheKey, report, undefined, this.config.cacheTimeout);
     }
 
     return report;

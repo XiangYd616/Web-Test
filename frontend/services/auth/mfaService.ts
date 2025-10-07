@@ -1,11 +1,11 @@
-/**
+﻿/**
  * 多因素认证(MFA)服务
  * 支持TOTP、短信、邮件、备用码等多种认证方式
  * 版本: v1.0.0
  */
 
 import { useCallback, useState } from 'react';
-import { defaultMemoryCache } from '../cacheStrategy';
+import { _defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
 
@@ -293,7 +293,7 @@ export class MFAService {
     const backupCodes = CodeGenerator.generateBackupCodes(this.config.backupCodesCount);
 
     // 临时存储，等待验证后正式启用
-    await defaultMemoryCache.set(
+    await _defaultMemoryCache.set(
       `totp_setup_${userId}`,
       { secret, backupCodes },
       undefined,
@@ -312,7 +312,7 @@ export class MFAService {
    * 验证并启用TOTP
    */
   async enableTOTP(userId: string, token: string): Promise<{ success: boolean; backupCodes?: string[] }> {
-    const setupData = await defaultMemoryCache.get(`totp_setup_${userId}`);
+    const setupData = await _defaultMemoryCache.get(`totp_setup_${userId}`);
     if (!setupData) {
       return { success: false };
     }
@@ -338,7 +338,7 @@ export class MFAService {
     };
 
     await this.saveMFASetup(setup);
-    await defaultMemoryCache.delete(`totp_setup_${userId}`);
+    await _defaultMemoryCache.delete(`totp_setup_${userId}`);
 
     return { success: true, backupCodes: setupData.backupCodes };
   }
@@ -628,7 +628,7 @@ export class MFAService {
    */
   async getUserMFASetups(userId: string): Promise<MFASetup[]> {
     // 从缓存或数据库获取
-    const cached = await defaultMemoryCache.get(`mfa_setups_${userId}`);
+    const cached = await _defaultMemoryCache.get(`mfa_setups_${userId}`);
     if (cached) {
       return cached;
     }
@@ -690,7 +690,7 @@ export class MFAService {
     this.userSetups.set(setup.userId, userSetups);
 
     // 缓存
-    await defaultMemoryCache.set(`mfa_setups_${setup.userId}`, userSetups, undefined, 3600000);
+    await _defaultMemoryCache.set(`mfa_setups_${setup.userId}`, userSetups, undefined, 3600000);
   }
 
   private isUserLockedOut(userId: string): boolean {

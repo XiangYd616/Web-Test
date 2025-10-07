@@ -164,10 +164,15 @@ export function getTestStatusInfo(status: TestStatus): TestStatusInfo {
 export interface TestExecution {
   id: string;
   type: TestType;
+  testType?: TestType; // Alias for type for backward compatibility
   status: TestStatus;
-  startTime?: number;
-  endTime?: number;
+  progress?: number;
+  startTime?: number | string;
+  endTime?: number | string;
   result?: any;
+  results?: any; // Alias for result
+  error?: string;
+  config?: any;
 }
 
 export interface TestHistory {
