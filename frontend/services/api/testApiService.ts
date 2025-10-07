@@ -163,28 +163,28 @@ class TestApiService implements ApiClient {
    * 执行GET请求
    */
   async get<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return apiService.get(url, config as any);
+    return apiService.get(url, config as any) as Promise<ApiResponse<T>>;
   }
 
   /**
    * 执行POST请求
    */
   async post<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return apiService.post(url, data, config as any);
+    return apiService.post(url, data, config as any) as Promise<ApiResponse<T>>;
   }
 
   /**
    * 执行PUT请求
    */
   async put<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return apiService.put(url, data, config as any);
+    return apiService.put(url, data, config as any) as Promise<ApiResponse<T>>;
   }
 
   /**
    * 执行DELETE请求
    */
   async delete<T = any>(url: string, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return apiService.delete(url, config as any);
+    return apiService.delete(url, config as any) as Promise<ApiResponse<T>>;
   }
 
   // ==================== 测试配置管理 ====================
@@ -203,14 +203,14 @@ class TestApiService implements ApiClient {
     if (params?.is_template !== undefined) queryParams.append('is_template', params?.is_template.toString());
 
     const url = `${this.baseUrl}/configurations${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return apiService.get(url);
+    return apiService.get(url) as Promise<ApiResponse<TestConfiguration[]>>;
   }
 
   /**
    * 保存测试配置
    */
   async saveConfiguration(config: TestConfiguration): Promise<ApiResponse<TestConfiguration>> {
-    return apiService.post(`${this.baseUrl}/configurations`, config);
+    return apiService.post(`${this.baseUrl}/configurations`, config) as Promise<ApiResponse<TestConfiguration>>;
   }
 
   // ==================== 测试执行管理 ====================
@@ -313,7 +313,7 @@ class TestApiService implements ApiClient {
       testName: `${request.test_type}_test_${Date.now()}`
     };
 
-    return apiService.post(`${this.baseUrl}/run`, backendRequest);
+    return apiService.post(`${this.baseUrl}/run`, backendRequest) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
@@ -333,21 +333,21 @@ class TestApiService implements ApiClient {
     if (params?.offset) queryParams.append('page', Math.floor((params?.offset || 0) / (params?.limit || 20) + 1).toString());
 
     const url = `${this.baseUrl}/history${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return apiService.get(url);
+    return apiService.get(url) as Promise<ApiResponse<TestExecutionResponse[]>>;
   }
 
   /**
    * 获取特定测试执行详情 - 适配后端API
    */
   async getExecutionDetails(id: string): Promise<ApiResponse<TestExecutionResponse>> {
-    return apiService.get(`${this.baseUrl}/history/${id}`);
+    return apiService.get(`${this.baseUrl}/history/${id}`) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
    * 停止正在运行的测试 - 适配后端API
    */
   async stopExecution(id: string): Promise<ApiResponse<{ stopped: boolean }>> {
-    return apiService.post(`${this.baseUrl}/${id}/stop`);
+    return apiService.post(`${this.baseUrl}/${id}/stop`) as Promise<ApiResponse<{ stopped: boolean }>>;
   }
 
   /**
@@ -359,7 +359,7 @@ class TestApiService implements ApiClient {
     requiredPermissions: [_TestPermissions.DELETE_TEST_RESULTS] 
   })
   async deleteExecution(id: string): Promise<ApiResponse<{ deleted: boolean }>> {
-    return apiService.delete(`${this.baseUrl}/history/${id}`);
+    return apiService.delete(`${this.baseUrl}/history/${id}`) as Promise<ApiResponse<{ deleted: boolean }>>;
   }
 
   // ==================== 性能测试 ====================
@@ -381,14 +381,14 @@ class TestApiService implements ApiClient {
       device: configuration.device,
       throttling: configuration.network_condition,
       ...configuration
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
    * 获取性能测试结果 - 适配后端API
    */
   async getPerformanceResults(execution_id: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`) as Promise<ApiResponse<any>>;
   }
 
   /**
@@ -398,7 +398,7 @@ class TestApiService implements ApiClient {
     execution_ids: string[],
     comparison_type: 'trend' | 'benchmark'
   ): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/statistics?timeRange=30`);
+    return apiService.get(`${this.baseUrl}/statistics?timeRange=30`) as Promise<ApiResponse<any>>;
   }
 
   // ==================== 安全测试 ====================
@@ -421,28 +421,28 @@ class TestApiService implements ApiClient {
       includeSsl: configuration.include_ssl,
       includeHeaders: configuration.include_headers,
       customChecks: configuration.custom_checks
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
    * 获取安全测试结果 - 适配后端API
    */
   async getSecurityResults(execution_id: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/security/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/security/${execution_id}`) as Promise<ApiResponse<any>>;
   }
 
   /**
    * 获取安全测试历史
    */
   async getSecurityHistory(): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/security/history`);
+    return apiService.get(`${this.baseUrl}/security/history`) as Promise<ApiResponse<any>>;
   }
 
   /**
    * 获取安全测试统计
    */
   async getSecurityStatistics(): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/security/statistics`);
+    return apiService.get(`${this.baseUrl}/security/statistics`) as Promise<ApiResponse<any>>;
   }
 
   // ==================== API测试 ====================
@@ -459,14 +459,14 @@ class TestApiService implements ApiClient {
       timeout: config?.configuration.timeout,
       retryCount: config?.configuration.retry_count,
       parallelRequests: config?.configuration.parallel_requests
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
    * 获取API测试结果 - 适配后端API
    */
   async getApiResults(execution_id: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`) as Promise<ApiResponse<any>>;
   }
 
   // ==================== 压力测试 ====================
@@ -484,28 +484,28 @@ class TestApiService implements ApiClient {
       duration: configuration.duration_seconds,
       rampUp: configuration.ramp_up_time,
       testScenarios: configuration.test_scenarios
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
    * 获取压力测试结果 - 适配后端API
    */
   async getStressResults(execution_id: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/stress/status/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/stress/status/${execution_id}`) as Promise<ApiResponse<any>>;
   }
 
   /**
    * 取消压力测试
    */
   async cancelStressTest(execution_id: string): Promise<ApiResponse<any>> {
-    return apiService.post(`${this.baseUrl}/stress/cancel/${execution_id}`);
+    return apiService.post(`${this.baseUrl}/stress/cancel/${execution_id}`) as Promise<ApiResponse<any>>;
   }
 
   /**
    * 获取运行中的压力测试
    */
   async getRunningStressTests(): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/stress/running`);
+    return apiService.get(`${this.baseUrl}/stress/running`) as Promise<ApiResponse<any>>;
   }
 
   // ==================== 兼容性测试 ====================
@@ -523,14 +523,14 @@ class TestApiService implements ApiClient {
       devices: configuration.devices,
       features: configuration.features_to_test,
       screenshotComparison: configuration.screenshot_comparison
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
    * 获取兼容性测试结果 - 适配后端API
    */
   async getCompatibilityResults(execution_id: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`) as Promise<ApiResponse<any>>;
   }
 
   // ==================== SEO测试 ====================
@@ -548,14 +548,14 @@ class TestApiService implements ApiClient {
       includeTechnical: configuration.include_technical,
       includeContent: configuration.include_content,
       competitorUrls: configuration.competitor_urls
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
    * 获取SEO测试结果 - 适配后端API
    */
   async getSeoResults(execution_id: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`) as Promise<ApiResponse<any>>;
   }
 
   // ==================== 用户体验测试 ====================
@@ -573,14 +573,14 @@ class TestApiService implements ApiClient {
       includeUsability: configuration.include_usability,
       includeMobile: configuration.include_mobile,
       customChecks: configuration.custom_checks
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
    * 获取UX测试结果 - 适配后端API
    */
   async getUxResults(execution_id: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`) as Promise<ApiResponse<any>>;
   }
 
   /**
@@ -594,7 +594,7 @@ class TestApiService implements ApiClient {
       url: target_url,
       level,
       categories: []
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   // ==================== 网站综合测试 ====================
@@ -609,7 +609,7 @@ class TestApiService implements ApiClient {
     return apiService.post(`${this.baseUrl}/website`, {
       url: target_url,
       options
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   // ==================== 通用测试方法 ====================
@@ -661,14 +661,14 @@ class TestApiService implements ApiClient {
     return apiService.post(`${this.baseUrl}/run`, {
       testType: 'infrastructure',
       config: configuration
-    });
+    }) as Promise<ApiResponse<TestExecutionResponse>>;
   }
 
   /**
    * 获取基础设施测试结果 - 适配后端API
    */
   async getInfrastructureResults(execution_id: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`) as Promise<ApiResponse<any>>;
   }
 
   // ==================== 报告生成 ====================
@@ -687,14 +687,14 @@ class TestApiService implements ApiClient {
       report_type,
       format,
       include_recommendations
-    });
+    }) as Promise<ApiResponse<{ report_id: string; status: string }>>;
   }
 
   /**
    * 获取生成的报告
    */
   async getReport(report_id: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/reports/${report_id}`);
+    return apiService.get(`${this.baseUrl}/reports/${report_id}`) as Promise<ApiResponse<any>>;
   }
 
   /**
