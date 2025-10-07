@@ -252,7 +252,7 @@ export class PerformanceTestAdapter {
   /**
    * 转换结果到旧格式
    */
-  public static convertResultToLegacy(result: PerformanceTestResult): unknown {
+  public static convertResultToLegacy(result: PerformanceTestResult): any {
     return {
       score: result.overallScore,
       grade: result.grade,

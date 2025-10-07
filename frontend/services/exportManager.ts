@@ -49,7 +49,7 @@ class exportManager {
    */
   async createExportTask(
     testType: TestType,
-    data: unknown,
+    data: any,
     options: ExportOptions
   ): Promise<string> {
     const taskId = this.generateTaskId();
@@ -588,7 +588,7 @@ class exportManager {
   /**
    * 对象转XML
    */
-  private objectToXML(obj: unknown, indent: string = ''): string {
+  private objectToXML(obj: any, indent: string = ''): string {
     let xml = '';
 
     for (const [key, value] of Object.entries(obj)) {
