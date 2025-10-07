@@ -543,18 +543,18 @@ export class AdvancedAnalyticsService {
 
   // 其他辅助方法的占位符
   private static extractLoadingMetrics(testResult: any): LoadingMetrics { return {} as LoadingMetrics; }
-  private static extractInteractivityMetrics(testResult: any): unknown { return {}; }
-  private static extractVisualStabilityMetrics(testResult: any): unknown { return {}; }
-  private static extractNetworkMetrics(testResult: any): unknown { return {}; }
-  private static extractResourceMetrics(testResult: any): unknown { return {}; }
-  private static analyzePrivacyCompliance(testResult: any): unknown { return {}; }
-  private static analyzeWCAGCompliance(testResult: any): unknown { return {}; }
-  private static analyzeAccessibilityBestPractices(testResult: any): unknown { return {}; }
-  private static analyzeUserExperience(testResult: any): unknown { return {}; }
-  private static analyzeOnPageSEO(testResult: any): unknown { return {}; }
-  private static analyzeTechnicalSEO(testResult: any): unknown { return {}; }
-  private static analyzeContentQuality(testResult: any): unknown { return {}; }
-  private static analyzeStructuredData(testResult: any): unknown { return {}; }
+  private static extractInteractivityMetrics(testResult: any): InteractivityMetrics { return {} as InteractivityMetrics; }
+  private static extractVisualStabilityMetrics(testResult: any): VisualStabilityMetrics { return {} as VisualStabilityMetrics; }
+  private static extractNetworkMetrics(testResult: any): NetworkMetrics { return {} as NetworkMetrics; }
+  private static extractResourceMetrics(testResult: any): ResourceMetrics { return {} as ResourceMetrics; }
+  private static analyzePrivacyCompliance(testResult: any): PrivacyCompliance { return {} as PrivacyCompliance; }
+  private static analyzeWCAGCompliance(testResult: any): WCAGCompliance { return {} as WCAGCompliance; }
+  private static analyzeAccessibilityBestPractices(testResult: any): AccessibilityBestPractices { return {} as AccessibilityBestPractices; }
+  private static analyzeUserExperience(testResult: any): UserExperienceMetrics { return {} as UserExperienceMetrics; }
+  private static analyzeOnPageSEO(testResult: any): OnPageSEO { return {} as OnPageSEO; }
+  private static analyzeTechnicalSEO(testResult: any): TechnicalSEO { return {} as TechnicalSEO; }
+  private static analyzeContentQuality(testResult: any): ContentQuality { return {} as ContentQuality; }
+  private static analyzeStructuredData(testResult: any): StructuredData { return {} as StructuredData; }
   private static generateSecurityInsights(securityData: any): AnalyticsInsight[] { return []; }
   private static generateAccessibilityInsights(accessibilityData: any): AnalyticsInsight[] { return []; }
   private static generateSecurityRecommendations(securityData: any): SmartRecommendation[] { return []; }

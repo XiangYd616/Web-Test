@@ -34,28 +34,28 @@ class ProjectApiService {
     if (query?.order) queryParams.append('order', query?.order);
 
     const url = `${this.baseUrl}/projects${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return apiService.get(url);
+    return apiService.get(url) as Promise<ProjectListResponse>;
   }
 
   /**
    * 创建新项目
    */
   async createProject(projectData: CreateProjectRequest): Promise<ProjectResponse> {
-    return apiService.post(`${this.baseUrl}/projects`, projectData);
+    return apiService.post(`${this.baseUrl}/projects`, projectData) as Promise<ProjectResponse>;
   }
 
   /**
    * 获取特定项目详情
    */
   async getProject(projectId: string): Promise<ProjectResponse> {
-    return apiService.get(`${this.baseUrl}/projects/${projectId}`);
+    return apiService.get(`${this.baseUrl}/projects/${projectId}`) as Promise<ProjectResponse>;
   }
 
   /**
    * 更新项目信息
    */
   async updateProject(projectId: string, updates: UpdateProjectRequest): Promise<ProjectResponse> {
-    return apiService.put(`${this.baseUrl}/projects/${projectId}`, updates);
+    return apiService.put(`${this.baseUrl}/projects/${projectId}`, updates) as Promise<ProjectResponse>;
   }
 
   /**
@@ -72,7 +72,7 @@ class ProjectApiService {
     const url = projectId
       ? `${this.baseUrl}/projects/${projectId}/stats`
       : `${this.baseUrl}/projects/stats`;
-    return apiService.get(url);
+    return apiService.get(url) as Promise<ProjectStatsResponse>;
   }
 
   /**
@@ -81,7 +81,7 @@ class ProjectApiService {
   async archiveProject(projectId: string): Promise<ProjectResponse> {
     return apiService.put(`${this.baseUrl}/projects/${projectId}`, {
       status: 'archived'
-    });
+    }) as Promise<ProjectResponse>;
   }
 
   /**
@@ -90,7 +90,7 @@ class ProjectApiService {
   async restoreProject(projectId: string): Promise<ProjectResponse> {
     return apiService.put(`${this.baseUrl}/projects/${projectId}`, {
       status: 'active'
-    });
+    }) as Promise<ProjectResponse>;
   }
 
   /**
@@ -104,7 +104,7 @@ class ProjectApiService {
     return apiService.post(`${this.baseUrl}/projects/${projectId}/duplicate`, {
       name: newName,
       include_tests: includeTests
-    });
+    }) as Promise<ProjectResponse>;
   }
 
   /**
@@ -132,7 +132,7 @@ class ProjectApiService {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
-    });
+    }) as Promise<ProjectResponse>;
   }
 
   // ==================== 项目设置管理 ====================
@@ -251,7 +251,7 @@ class ProjectApiService {
       target_url: string;
     }
   ): Promise<ProjectResponse> {
-    return apiService.post(`${this.baseUrl}/projects/templates/${templateId}/create`, projectData);
+    return apiService.post(`${this.baseUrl}/projects/templates/${templateId}/create`, projectData) as Promise<ProjectResponse>;
   }
 
   /**
@@ -291,7 +291,7 @@ class ProjectApiService {
     if (filters?.has_tests !== undefined) queryParams.append('has_tests', filters?.has_tests.toString());
 
     const url = `${this.baseUrl}/projects/search?${queryParams.toString()}`;
-    return apiService.get(url);
+    return apiService.get(url) as Promise<ProjectListResponse>;
   }
 
   /**
@@ -305,7 +305,7 @@ class ProjectApiService {
    * 按标签获取项目
    */
   async getProjectsByTag(tag: string): Promise<ProjectListResponse> {
-    return apiService.get(`${this.baseUrl}/projects/by-tag/${encodeURIComponent(tag)}`);
+    return apiService.get(`${this.baseUrl}/projects/by-tag/${encodeURIComponent(tag)}`) as Promise<ProjectListResponse>;
   }
 
   // ==================== 批量操作 ====================
