@@ -623,7 +623,7 @@ class TestApiService implements ApiClient {
     configuration: Record<string, any> = {}
   ): Promise<ApiResponse<TestExecutionResponse>> {
     const result = await this.executeTest({
-      testType: test_type,
+      testType: test_type as TestType,
       target: target_url,
       options: configuration
     });
@@ -716,7 +716,7 @@ class TestApiService implements ApiClient {
    * 获取仪表板数据
    */
   async getDashboardData(): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/analytics/dashboard`);
+    return apiService.get(`${this.baseUrl}/analytics/dashboard`) as Promise<ApiResponse<any>>;
   }
 
   /**
@@ -733,14 +733,14 @@ class TestApiService implements ApiClient {
     if (params?.metric) queryParams.append('metric', params?.metric);
 
     const url = `${this.baseUrl}/analytics/trends${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return apiService.get(url);
+    return apiService.get(url) as Promise<ApiResponse<any>>;
   }
 
   /**
    * 获取对比分析数据
    */
   async getComparisonsData(): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/analytics/comparisons`);
+    return apiService.get(`${this.baseUrl}/analytics/comparisons`) as Promise<ApiResponse<any>>;
   }
 
   // ==================== 系统管理 ====================
@@ -749,21 +749,21 @@ class TestApiService implements ApiClient {
    * 系统健康检查
    */
   async checkSystemHealth(): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/system/health`);
+    return apiService.get(`${this.baseUrl}/system/health`) as Promise<ApiResponse<any>>;
   }
 
   /**
    * 获取系统性能指标
    */
   async getSystemMetrics(): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/system/metrics`);
+    return apiService.get(`${this.baseUrl}/system/metrics`) as Promise<ApiResponse<any>>;
   }
 
   /**
    * 系统维护操作（管理员）
    */
   async performMaintenance(operation: string): Promise<ApiResponse<any>> {
-    return apiService.post(`${this.baseUrl}/system/maintenance`, { operation });
+    return apiService.post(`${this.baseUrl}/system/maintenance`, { operation }) as Promise<ApiResponse<any>>;
   }
 
   // ==================== ApiClient 接口实现 ====================
@@ -801,14 +801,14 @@ class TestApiService implements ApiClient {
    * 取消测试
    */
   async cancelTest(testId: string, testType?: TestType): Promise<ApiResponse<void>> {
-    return apiService.post(`${this.baseUrl}/${testType}/cancel/${testId}`);
+    return apiService.post(`${this.baseUrl}/${testType}/cancel/${testId}`) as Promise<ApiResponse<void>>;
   }
 
   /**
    * 获取测试结果
    */
   async getTestResult(testId: string, testType?: TestType): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/${testType}/result/${testId}`);
+    return apiService.get(`${this.baseUrl}/${testType}/result/${testId}`) as Promise<ApiResponse<any>>;
   }
 
   /**

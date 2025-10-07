@@ -125,22 +125,22 @@ export type AppAction =
     | { type: 'AUTH_CLEAR_ERROR' }
 
     // 测试相关
-    | { type: 'TEST_START'; payload: { test: unknown } }
+    | { type: 'TEST_START'; payload: { test: TestState['activeTests'][number] } }
     | { type: 'TEST_UPDATE_PROGRESS'; payload: { testId: string; progress: number } }
-    | { type: 'TEST_COMPLETE'; payload: { testId: string; result: unknown } }
+    | { type: 'TEST_COMPLETE'; payload: { testId: string; result: TestState['history'][number] } }
     | { type: 'TEST_FAIL'; payload: { testId: string; error: string } }
     | { type: 'TEST_CANCEL'; payload: { testId: string } }
-    | { type: 'TEST_ADD_TO_HISTORY'; payload: { result: unknown } }
-    | { type: 'TEST_SAVE_CONFIGURATION'; payload: { config: unknown } }
+    | { type: 'TEST_ADD_TO_HISTORY'; payload: { result: TestState['history'][number] } }
+    | { type: 'TEST_SAVE_CONFIGURATION'; payload: { config: TestState['configurations'][number] } }
     | { type: 'TEST_CLEAR_ERROR' }
 
     // 监控相关
     | { type: 'MONITORING_START' }
     | { type: 'MONITORING_STOP' }
-    | { type: 'MONITORING_ADD_TARGET'; payload: { target: unknown } }
-    | { type: 'MONITORING_UPDATE_TARGET'; payload: { targetId: string; updates: unknown } }
+    | { type: 'MONITORING_ADD_TARGET'; payload: { target: MonitoringState['targets'][number] } }
+    | { type: 'MONITORING_UPDATE_TARGET'; payload: { targetId: string; updates: Partial<MonitoringState['targets'][number]> } }
     | { type: 'MONITORING_REMOVE_TARGET'; payload: { targetId: string } }
-    | { type: 'MONITORING_ADD_ALERT'; payload: { alert: unknown } }
+    | { type: 'MONITORING_ADD_ALERT'; payload: { alert: MonitoringState['alerts'][number] } }
     | { type: 'MONITORING_RESOLVE_ALERT'; payload: { alertId: string } }
     | { type: 'MONITORING_SET_CONNECTION'; payload: { isConnected: boolean } }
     | { type: 'MONITORING_SET_ERROR'; payload: { error: string | null } }
@@ -148,7 +148,7 @@ export type AppAction =
     // UI相关
     | { type: 'UI_SET_THEME'; payload: { theme: 'light' | 'dark' } }
     | { type: 'UI_TOGGLE_SIDEBAR' }
-    | { type: 'UI_ADD_NOTIFICATION'; payload: { notification: unknown } }
+    | { type: 'UI_ADD_NOTIFICATION'; payload: { notification: UIState['notifications'][number] } }
     | { type: 'UI_REMOVE_NOTIFICATION'; payload: { notificationId: string } }
     | { type: 'UI_MARK_NOTIFICATION_READ'; payload: { notificationId: string } }
     | { type: 'UI_SET_LOADING'; payload: { key: keyof UIState['loading']; loading: boolean } }
