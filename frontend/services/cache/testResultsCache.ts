@@ -7,6 +7,9 @@
 import { cacheService } from './cacheService';
 import type { TestResult } from '../../types/unifiedEngine.types';
 
+// 获取 cacheService 实例
+const cache = cache.getInstance();
+
 // 测试缓存键前缀
 const CACHE_KEYS = {
   TEST_RESULT: 'test_result_',
@@ -50,7 +53,7 @@ export class TestResultsCache {
    */
   public cacheTestResult(testId: string, result: TestResult): void {
     const key = CACHE_KEYS.TEST_RESULT + testId;
-    cacheService.set(key, result, CACHE_TTL.TEST_RESULT);
+    cache.set(key, result, CACHE_TTL.TEST_RESULT);
   }
 
   /**
@@ -58,7 +61,7 @@ export class TestResultsCache {
    */
   public getTestResult(testId: string): TestResult | null {
     const key = CACHE_KEYS.TEST_RESULT + testId;
-    return cacheService.get<TestResult>(key);
+    return cache.get<TestResult>(key);
   }
 
   /**
@@ -66,7 +69,7 @@ export class TestResultsCache {
    */
   public deleteTestResult(testId: string): boolean {
     const key = CACHE_KEYS.TEST_RESULT + testId;
-    return cacheService.delete(key);
+    return cache.delete(key);
   }
 
   // ==================== 测试状态缓存 ====================
@@ -76,7 +79,7 @@ export class TestResultsCache {
    */
   public cacheTestStatus(testId: string, status: any): void {
     const key = CACHE_KEYS.TEST_STATUS + testId;
-    cacheService.set(key, status, CACHE_TTL.TEST_STATUS);
+    cache.set(key, status, CACHE_TTL.TEST_STATUS);
   }
 
   /**
@@ -84,7 +87,7 @@ export class TestResultsCache {
    */
   public getTestStatus(testId: string): unknown {
     const key = CACHE_KEYS.TEST_STATUS + testId;
-    return cacheService.get(key);
+    return cache.get(key);
   }
 
   /**
@@ -92,7 +95,7 @@ export class TestResultsCache {
    */
   public deleteTestStatus(testId: string): boolean {
     const key = CACHE_KEYS.TEST_STATUS + testId;
-    return cacheService.delete(key);
+    return cache.delete(key);
   }
 
   // ==================== 测试历史缓存 ====================
@@ -102,7 +105,7 @@ export class TestResultsCache {
    */
   public cacheTestHistory(userId: string, history: unknown[]): void {
     const key = CACHE_KEYS.TEST_HISTORY + userId;
-    cacheService.set(key, history, CACHE_TTL.TEST_HISTORY);
+    cache.set(key, history, CACHE_TTL.TEST_HISTORY);
   }
 
   /**
@@ -110,7 +113,7 @@ export class TestResultsCache {
    */
   public getTestHistory(userId: string): unknown[] | null {
     const key = CACHE_KEYS.TEST_HISTORY + userId;
-    return cacheService.get<any[]>(key);
+    return cache.get<any[]>(key);
   }
 
   /**
@@ -135,7 +138,7 @@ export class TestResultsCache {
    */
   public cacheTestStats(userId: string, stats: any): void {
     const key = CACHE_KEYS.TEST_STATS + userId;
-    cacheService.set(key, stats, CACHE_TTL.TEST_STATS);
+    cache.set(key, stats, CACHE_TTL.TEST_STATS);
   }
 
   /**
@@ -143,7 +146,7 @@ export class TestResultsCache {
    */
   public getTestStats(userId: string): unknown {
     const key = CACHE_KEYS.TEST_STATS + userId;
-    return cacheService.get(key);
+    return cache.get(key);
   }
 
   // ==================== 用户测试缓存 ====================
@@ -153,7 +156,7 @@ export class TestResultsCache {
    */
   public cacheUserTests(userId: string, tests: string[]): void {
     const key = CACHE_KEYS.USER_TESTS + userId;
-    cacheService.set(key, tests, CACHE_TTL.USER_TESTS);
+    cache.set(key, tests, CACHE_TTL.USER_TESTS);
   }
 
   /**
@@ -161,7 +164,7 @@ export class TestResultsCache {
    */
   public getUserTests(userId: string): string[] | null {
     const key = CACHE_KEYS.USER_TESTS + userId;
-    return cacheService.get<string[]>(key);
+    return cache.get<string[]>(key);
   }
 
   /**
@@ -214,7 +217,7 @@ export class TestResultsCache {
    * 清理特定类型的缓存
    */
   public clearTestCache(type: 'results' | 'status' | 'history' | 'stats' | 'all'): void {
-    const keys = cacheService.keys();
+    const keys = cache.keys();
     
     const prefixMap = {
       results: CACHE_KEYS.TEST_RESULT,
@@ -228,7 +231,7 @@ export class TestResultsCache {
     
     keys.forEach(key => {
       if (type === 'all' || key.startsWith(prefix)) {
-        cacheService.delete(key);
+        cache.delete(key);
       }
     });
   }
@@ -244,7 +247,7 @@ export class TestResultsCache {
     testStats: number;
     userTests: number;
   } {
-    const keys = cacheService.keys();
+    const keys = cache.keys();
     
     return {
       totalItems: keys.length,
