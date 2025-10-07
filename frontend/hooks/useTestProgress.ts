@@ -4,7 +4,9 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {testProgressService} from '../services/api/testProgressService';
+import { testProgressService } from '../services/api/testProgressService';
+import type { TestProgress, ProgressListener } from '@/types';
+
 export interface UseTestProgressOptions {
   autoStart?: boolean; // 是否自动开始监控
   onComplete?: (result: any) => void;

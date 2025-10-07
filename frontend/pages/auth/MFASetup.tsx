@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { Alert, Button, Card, Input, Steps, Typography, Space, Divider, Spin } from 'antd';
+import { Alert, Button, Card, Input, Steps, Typography, Space, Divider, Spin, QRCode } from 'antd';
 import { CheckCircleOutlined, QrcodeOutlined, SafetyOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useAuthCheck } from '../../components/auth/WithAuthCheck';
 import type {MFASetupResponse} from '../../types/auth';

@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useState } from 'react';
+import type { User } from '@/types';
 
 // 登录凭据接口
 export interface LoginCredentials {

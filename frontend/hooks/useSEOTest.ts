@@ -1,15 +1,11 @@
-﻿import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { SEOAnalysisResult, SEOAnalysisEngine } from '../services/realSEOAnalysisEngine';
 
 /**
-
- * ��ȡgetPerformanceMetrics����
-
- * @param {string} id - ����ID
-
- * @returns {Promise<Object|null>} ��ȡ������
-
+ * 获取性能指标函数
+ * @param {string} url - URL地址
+ * @returns {Promise<Object|null>} 性能数据
  */
-import {SEOAnalysisResult} from '../services/realSEOAnalysisEngine';
 
 const getPerformanceMetrics = async (url: string, options: any) => {
 
