@@ -713,10 +713,10 @@ const startServer = async () => {
       setupWebSocketHandlers(io);
       console.log('✅ WebSocket事件处理器已设置');
 
-      // 设置统一测试引擎WebSocket处理
-      const { getUnifiedEngineWSHandler } = require('../websocket/unifiedEngineHandler.js');
-      global.unifiedEngineWSHandler = getUnifiedEngineWSHandler();
-      console.log('✅ 统一测试引擎WebSocket处理器已设置');
+      // TODO: 设置统一测试引擎WebSocket处理 (模块暂时不可用)
+      // const { getUnifiedEngineWSHandler } = require('../websocket/unifiedEngineHandler.js');
+      // global.unifiedEngineWSHandler = getUnifiedEngineWSHandler();
+      // console.log('✅ 统一测试引擎WebSocket处理器已设置');
     } catch (wsError) {
       console.warn('⚠️ WebSocket事件处理器设置失败，继续启动:', wsError.message);
     }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 增强的Swagger API文档配置
  * @description 提供完整的API文档，包含详细的请求/响应示例
  */
@@ -556,14 +556,13 @@ const swaggerUiOptions = {
  */
 function setupSwaggerDocs(app) {
   // Swagger UI
-  app.use(
-    '/api/docs',
+  app.use('/docs',
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec, swaggerUiOptions)
   );
 
   // JSON格式的API规范
-  app.get('/api/docs.json', (req, res) => {
+  app.get('/docs.json', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
   });

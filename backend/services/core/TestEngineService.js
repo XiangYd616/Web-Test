@@ -1032,4 +1032,3 @@ module.exports = {
   TestEngineService,
   testEngineService
 };
-};

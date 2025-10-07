@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Test-Web Platform Backend Server
  * 网站测试平台后端服务器
  */
@@ -111,7 +111,7 @@ app.get('/health', (req, res) => {
 });
 
 // API信息端点
-app.get('/api/info', (req, res) => {
+app.get('/info', (req, res) => {
   res.json({
     name: 'Test-Web Platform API',
     version: process.env.npm_package_version || '1.0.0',
@@ -130,13 +130,13 @@ app.get('/api/info', (req, res) => {
 });
 
 // API路由
-app.use('/api/auth', authRoutes);
-app.use('/api/oauth', oauthRoutes);
-app.use('/api/test', testRoutes);
-app.use('/api/tests', testsRoutes);
-app.use('/api/seo', seoRoutes);
-app.use('/api/security', securityRoutes);
-app.use('/api/performance', performanceRoutes);
+app.use('/auth', authRoutes);
+app.use('/oauth', oauthRoutes);
+app.use('/test', testRoutes);
+app.use('/tests', testsRoutes);
+app.use('/seo', seoRoutes);
+app.use('/security', securityRoutes);
+app.use('/performance', performanceRoutes);
 
 // 静态文件服务（如果需要）
 if (NODE_ENV === 'production') {

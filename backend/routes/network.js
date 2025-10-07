@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const NetworkTestEngine = require('../engines/network/NetworkTestEngine');
-const { validateTestRequest } = require('../middleware/validation');
+// const { validateTestRequest } = require('../middleware/validation'); // 移除不存在的中间件
 
 // 创建测试引擎实例
 const networkTestEngine = new NetworkTestEngine();
@@ -17,7 +17,7 @@ const networkTestEngine = new NetworkTestEngine();
  * @desc 执行网络测试
  * @access Private
  */
-router.post('/test', authenticateToken, validateTestRequest, async (req, res) => {
+router.post('/test', authenticateToken, async (req, res) => {
   try {
     const { url, config } = req.body;
     const userId = req.user.id;

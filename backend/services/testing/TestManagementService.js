@@ -5,7 +5,7 @@
 
 const { v4: uuidv4 } = require('uuid');
 const EventEmitter = require('events');
-const DatabaseService = require('../core/DatabaseService');
+const { query } = require('../../config/database');
 const WebSocketManager = require('../streaming/EnhancedWebSocketManager');
 const ReportGenerator = require('../reporting/ReportGenerator');
 
@@ -21,7 +21,7 @@ const DatabaseTestEngine = require('../../engines/database/DatabaseTestEngine');
 /**
 
 
- * TestManagementService类 - 负责处理相关功能
+ * TestManagementService�?- 负责处理相关功能
 
 
  */
@@ -51,7 +51,7 @@ class TestManagementService extends EventEmitter {
   }
 
   /**
-   * 初始化所有测试引擎
+   * 初始化所有测试引�?
    */
   initializeEngines() {
     const engineConfigs = [
@@ -60,7 +60,7 @@ class TestManagementService extends EventEmitter {
       { id: 'seo', name: 'SEO测试引擎', class: SEOTestEngine },
       { id: 'api', name: 'API测试引擎', class: APITestEngine },
       { id: 'stress', name: '压力测试引擎', class: StressTestEngine },
-      { id: 'database', name: '数据库测试引擎', class: DatabaseTestEngine },
+      { id: 'database', name: '数据库测试引�?, class: DatabaseTestEngine },
       { id: 'network', name: '网络测试引擎', class: NetworkTestEngine }
     ];
 
@@ -89,11 +89,10 @@ class TestManagementService extends EventEmitter {
   }
 
   /**
-   * 初始化服务
+   * 初始化服�?
    */
   async initialize(dbConfig, wsManager) {
-    this.db = new DatabaseService(dbConfig);
-    await this.db.initialize();
+    // 直接使用数据库查询函数，不需要初始化
     this.wsManager = wsManager;
     
     // 恢复未完成的测试
@@ -130,7 +129,7 @@ class TestManagementService extends EventEmitter {
     };
 
     // 保存到数据库
-    const result = await this.db.query(
+    const result = await query(
       `INSERT INTO test_history 
        (test_id, user_id, engine_type, engine_name, test_name, test_url, test_config, status, progress, priority)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
@@ -143,7 +142,7 @@ class TestManagementService extends EventEmitter {
 
     const test = result.rows[0];
     
-    // 添加到队列
+    // 添加到队�?
     this.testQueue.set(testId, test);
     
     // 触发测试执行
@@ -176,20 +175,20 @@ class TestManagementService extends EventEmitter {
       throw new Error(`Engine ${test.engine_type} not available`);
     }
 
-    // 更新测试状态
+    // 更新测试状�?
     await this.updateTestStatus(testId, 'running', 0);
     this.activeTests.set(testId, test);
     this.testQueue.delete(testId);
 
-    // 更新引擎状态
+    // 更新引擎状�?
     engine.status = 'running';
     engine.metrics.activeTests++;
 
-    // 广播状态更新
+    // 广播状态更�?
     this.broadcastTestUpdate(testId, {
       status: 'running',
       progress: 0,
-      message: '测试开始执行'
+      message: '测试开始执�?
     });
 
     try {
@@ -237,10 +236,10 @@ class TestManagementService extends EventEmitter {
    * 处理测试队列
    */
   async processTestQueue() {
-    // 获取可用的引擎
+    // 获取可用的引�?
     for (const [engineType, engine] of this.engines) {
       if (engine.status === 'idle' && engine.metrics.activeTests < 5) {
-        // 查找该引擎类型的待处理测试
+        // 查找该引擎类型的待处理测�?
         const pendingTest = Array.from(this.testQueue.values())
           .find(test => test.engine_type === engineType && test.status === 'pending');
         
@@ -295,7 +294,7 @@ class TestManagementService extends EventEmitter {
       paramIndex++;
     }
 
-    // 排序和分页
+    // 排序和分�?
     query += ` ORDER BY th.created_at DESC`;
     
     if (filters.limit) {
@@ -309,7 +308,7 @@ class TestManagementService extends EventEmitter {
       params.push(filters.offset);
     }
 
-    const result = await this.db.query(query, params);
+    const result = await query(query, params);
     
     return {
       tests: result.rows,
@@ -358,7 +357,7 @@ class TestManagementService extends EventEmitter {
 
     
      */
-    const result = await this.db.query(query, [testId, userId]);
+    const result = await query(query, [testId, userId]);
     
     if (result.rows.length === 0) {
       return null;
@@ -395,13 +394,13 @@ class TestManagementService extends EventEmitter {
       GROUP BY engine_type
     `;
 
-    const result = await this.db.query(query, [userId]);
+    const result = await query(query, [userId]);
     
     return result.rows;
   }
 
   /**
-   * 更新测试状态
+   * 更新测试状�?
    */
   async updateTestStatus(testId, status, progress = null) {
     let query = `UPDATE test_history SET status = $2`;
@@ -422,9 +421,9 @@ class TestManagementService extends EventEmitter {
 
     query += ` WHERE test_id = $1 RETURNING *`;
     
-    const result = await this.db.query(query, params);
+    const result = await query(query, params);
     
-    // 广播状态更新
+    // 广播状态更�?
     this.broadcastTestUpdate(testId, {
       status,
       progress,
@@ -438,11 +437,11 @@ class TestManagementService extends EventEmitter {
    * 保存测试结果
    */
   async saveTestResult(testId, result, executionTime) {
-    // 计算分数和等级
+    // 计算分数和等�?
     const { score, grade } = this.calculateScoreAndGrade(result);
     
     // 更新主表
-    await this.db.query(
+    await query(
       `UPDATE test_history 
        SET status = 'completed',
            progress = 100,
@@ -459,7 +458,7 @@ class TestManagementService extends EventEmitter {
     // 保存详细指标
     if (result.metrics) {
       for (const [metricName, metricData] of Object.entries(result.metrics)) {
-        await this.db.query(
+        await query(
           `INSERT INTO test_result_details 
            (test_history_id, metric_name, metric_value, metric_unit, 
             metric_type, passed, severity, recommendation)
@@ -477,7 +476,7 @@ class TestManagementService extends EventEmitter {
    * 保存测试错误
    */
   async saveTestError(testId, error) {
-    await this.db.query(
+    await query(
       `UPDATE test_history 
        SET status = 'failed',
            errors = $2,
@@ -495,7 +494,7 @@ class TestManagementService extends EventEmitter {
    * 保存测试报告
    */
   async saveTestReport(testId, report) {
-    await this.db.query(
+    await query(
       `INSERT INTO test_reports 
        (test_history_id, report_type, format, report_data, file_path)
        SELECT id, $2, $3, $4, $5
@@ -505,7 +504,7 @@ class TestManagementService extends EventEmitter {
   }
 
   /**
-   * 计算分数和等级
+   * 计算分数和等�?
    */
   calculateScoreAndGrade(result) {
     let score = 0;
@@ -514,7 +513,7 @@ class TestManagementService extends EventEmitter {
     if (result.score !== undefined) {
       score = result.score;
     } else if (result.metrics) {
-      // 基于通过的指标计算分数
+      // 基于通过的指标计算分�?
       const metrics = Object.values(result.metrics);
       const passed = metrics.filter(m => m.passed).length;
       score = Math.round((passed / metrics.length) * 100);
@@ -560,7 +559,7 @@ class TestManagementService extends EventEmitter {
   broadcastTestUpdate(testId, data) {
     // 使用全局Socket.IO实例广播
     if (global.io) {
-      // 广播到特定测试房间
+      // 广播到特定测试房�?
       global.io.to(`test-${testId}`).emit('test-update', {
         testId,
         ...data,
@@ -575,7 +574,7 @@ class TestManagementService extends EventEmitter {
       });
     }
     
-    // 使用传入的WebSocket管理器
+    // 使用传入的WebSocket管理�?
     if (this.wsManager && this.wsManager.emit) {
       this.wsManager.emit('test-update', {
         testId,
@@ -634,7 +633,7 @@ class TestManagementService extends EventEmitter {
    * 恢复未完成的测试
    */
   async recoverPendingTests() {
-    const result = await this.db.query(
+    const result = await query(
       `UPDATE test_history 
        SET status = 'failed', 
            errors = jsonb_build_array(jsonb_build_object(
@@ -650,7 +649,7 @@ class TestManagementService extends EventEmitter {
   }
 
   /**
-   * 获取引擎状态
+   * 获取引擎状�?
    */
   getEngineStatus() {
     const status = {};
@@ -679,7 +678,7 @@ class TestManagementService extends EventEmitter {
       throw new Error('Cannot cancel completed test');
     }
 
-    // 如果测试正在运行，尝试停止
+    // 如果测试正在运行，尝试停�?
     if (this.activeTests.has(testId)) {
       const engine = this.engines.get(test.engine_type);
       if (engine && engine.instance.cancel) {
@@ -691,7 +690,7 @@ class TestManagementService extends EventEmitter {
     // 从队列中移除
     this.testQueue.delete(testId);
 
-    // 更新状态
+    // 更新状�?
     await this.updateTestStatus(testId, 'cancelled');
 
     return { success: true, message: 'Test cancelled successfully' };
@@ -701,13 +700,13 @@ class TestManagementService extends EventEmitter {
    * 重新运行测试
    */
   async rerunTest(testId, userId) {
-    // 获取原测试配置
+    // 获取原测试配�?
     const originalTest = await this.getTestDetails(testId, userId);
     if (!originalTest) {
       throw new Error('Test not found or access denied');
     }
 
-    // 创建新测试
+    // 创建新测�?
     return await this.createTest(userId, originalTest.engine_type, originalTest.test_config);
   }
 
@@ -715,7 +714,7 @@ class TestManagementService extends EventEmitter {
    * 清理资源
    */
   async cleanup() {
-    // 取消所有活动测试
+    // 取消所有活动测�?
     for (const testId of this.activeTests.keys()) {
       try {
         await this.cancelTest(testId);
@@ -724,7 +723,7 @@ class TestManagementService extends EventEmitter {
       }
     }
 
-    // 关闭数据库连接
+    // 关闭数据库连�?
     if (this.db) {
       await this.db.close();
     }

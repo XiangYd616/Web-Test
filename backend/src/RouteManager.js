@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一路由管理器 - 修复API路由架构问题
  * 整合RouteManager和RouteManager的功能，提供统一的路由管理
  */
@@ -528,7 +528,7 @@ class RouteManager {
     if (!this.config.enableErrorHandling) return;
 
     // 404处理
-    this.app.use('/api/*', (req, res) => {
+    this.app.use('/*', (req, res) => {
       res.status(404).json({
         success: false,
         error: 'API endpoint not found',
@@ -574,7 +574,7 @@ class RouteManager {
     });
 
     // 路由状态端点
-    this.app.get('/api/routes/status', (req, res) => {
+    this.app.get('/routes/status', (req, res) => {
       res.json({
         success: true,
         data: {

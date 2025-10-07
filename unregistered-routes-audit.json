@@ -237,7 +237,7 @@
         "hasRouter": true,
         "hasImports": 5
       },
-      "description": "* K6引擎管理路由\r\n * 路径: /engines/k6/*",
+      "description": "* K6引擎管理路由\n * 路径: /engines/k6/*",
       "decision": "keep",
       "reason": "引擎子路由，已由 engines/index.js 管理",
       "priority": "info"
@@ -252,25 +252,16 @@
         "hasRouter": true,
         "hasImports": 6
       },
-      "description": "* Lighthouse引擎管理路由\r\n * 路径: /engines/lighthouse/*",
+      "description": "* Lighthouse引擎管理路由\n * 路径: /engines/lighthouse/*",
       "decision": "keep",
       "reason": "引擎子路由，已由 engines/index.js 管理",
       "priority": "info"
     },
     {
       "filename": "engineStatus.js",
-      "exists": true,
-      "stats": {
-        "lines": 348,
-        "routes": 4,
-        "hasExport": true,
-        "hasRouter": true,
-        "hasImports": 3
-      },
-      "description": "* 测试引擎状态API\n * 提供所有测试引擎的健康状态和统计信息",
+      "exists": false,
       "decision": "delete",
-      "reason": "功能与现有路由重复",
-      "priority": "medium"
+      "reason": "文件不存在"
     },
     {
       "filename": "environments.js",
@@ -424,18 +415,9 @@
     },
     {
       "filename": "stress.js",
-      "exists": true,
-      "stats": {
-        "lines": 573,
-        "routes": 6,
-        "hasExport": true,
-        "hasRouter": true,
-        "hasImports": 6
-      },
-      "description": "* 压力测试API路由\r\n * 提供压力测试的启动、停止、监控等接口",
+      "exists": false,
       "decision": "delete",
-      "reason": "功能与现有路由重复",
-      "priority": "medium"
+      "reason": "文件不存在"
     },
     {
       "filename": "ux.js",
@@ -716,33 +698,15 @@
     "delete": [
       {
         "filename": "engineStatus.js",
-        "exists": true,
-        "stats": {
-          "lines": 348,
-          "routes": 4,
-          "hasExport": true,
-          "hasRouter": true,
-          "hasImports": 3
-        },
-        "description": "* 测试引擎状态API\n * 提供所有测试引擎的健康状态和统计信息",
+        "exists": false,
         "decision": "delete",
-        "reason": "功能与现有路由重复",
-        "priority": "medium"
+        "reason": "文件不存在"
       },
       {
         "filename": "stress.js",
-        "exists": true,
-        "stats": {
-          "lines": 573,
-          "routes": 6,
-          "hasExport": true,
-          "hasRouter": true,
-          "hasImports": 6
-        },
-        "description": "* 压力测试API路由\r\n * 提供压力测试的启动、停止、监控等接口",
+        "exists": false,
         "decision": "delete",
-        "reason": "功能与现有路由重复",
-        "priority": "medium"
+        "reason": "文件不存在"
       }
     ],
     "keep": [
@@ -876,7 +840,7 @@
           "hasRouter": true,
           "hasImports": 5
         },
-        "description": "* K6引擎管理路由\r\n * 路径: /engines/k6/*",
+        "description": "* K6引擎管理路由\n * 路径: /engines/k6/*",
         "decision": "keep",
         "reason": "引擎子路由，已由 engines/index.js 管理",
         "priority": "info"
@@ -891,7 +855,7 @@
           "hasRouter": true,
           "hasImports": 6
         },
-        "description": "* Lighthouse引擎管理路由\r\n * 路径: /engines/lighthouse/*",
+        "description": "* Lighthouse引擎管理路由\n * 路径: /engines/lighthouse/*",
         "decision": "keep",
         "reason": "引擎子路由，已由 engines/index.js 管理",
         "priority": "info"

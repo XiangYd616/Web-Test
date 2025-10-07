@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SEO测试后端API服务
  * 解决前端CORS跨域访问问题
  */
@@ -32,7 +32,7 @@ const limiter = rateLimit({
     error: '请求过于频繁，请稍后再试'
   }
 });
-app.use('/api/', limiter);
+app.use('/', limiter);
 
 // 创建axios实例，配置更好的请求头
 const createAxiosInstance = () => {
@@ -81,7 +81,7 @@ const cleanUrl = (url) => {
 };
 
 // 获取网页内容的主要API端点
-app.post('/api/seo/fetch-page', async (req, res) => {
+app.post('/seo/fetch-page', async (req, res) => {
   const startTime = Date.now();
   
   try {
@@ -168,7 +168,7 @@ app.post('/api/seo/fetch-page', async (req, res) => {
 });
 
 // 获取robots.txt
-app.post('/api/seo/fetch-robots', async (req, res) => {
+app.post('/seo/fetch-robots', async (req, res) => {
   try {
     const { baseUrl } = req.body;
     
@@ -209,7 +209,7 @@ app.post('/api/seo/fetch-robots', async (req, res) => {
 });
 
 // 获取sitemap
-app.post('/api/seo/fetch-sitemap', async (req, res) => {
+app.post('/seo/fetch-sitemap', async (req, res) => {
   try {
     const { sitemapUrl } = req.body;
     
@@ -263,7 +263,7 @@ app.post('/api/seo/fetch-sitemap', async (req, res) => {
 });
 
 // 健康检查端点
-app.get('/api/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({
     success: true,
     message: 'SEO API服务运行正常',
