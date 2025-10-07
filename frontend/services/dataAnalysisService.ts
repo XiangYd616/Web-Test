@@ -68,7 +68,7 @@ export class DataAnalysisService {
   /**
    * 处理测试数据 - 直接使用数据库字段名，避免不必要的映射
    */
-  async processTestData(testRecords: unknown[], dateRange: number = 30): Promise<AnalyticsData> {
+  async processTestData(testRecords: any[], dateRange: number = 30): Promise<AnalyticsData> {
     try {
       // 直接使用数据库字段，无需转换
       const normalizedRecords = testRecords;
@@ -126,7 +126,7 @@ export class DataAnalysisService {
   /**
    * 分析测试数据 - 使用数据库字段名
    */
-  private analyzeTestData(records: unknown[]): AnalyticsData {
+  private analyzeTestData(records: any[]): AnalyticsData {
     const totalTests = records.length;
     const completedTests = records.filter(r => r.status === 'completed');
     const successRate = totalTests > 0 ? (completedTests.length / totalTests) * 100 : 0;

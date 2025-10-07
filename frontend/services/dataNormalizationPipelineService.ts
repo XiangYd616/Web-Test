@@ -334,7 +334,7 @@ export class DataNormalizationPipeline {
   /**
    * 标准化数字值
    */
-  private normalizeNumber(value: unknown, range: { min: number; max: number }): number {
+  private normalizeNumber(value: any, range: { min: number; max: number }): number {
     const num = Number(value) || 0;
     return Math.max(range.min, Math.min(range.max, num));
   }
@@ -477,7 +477,7 @@ export class DataNormalizationPipeline {
   /**
    * 批量标准化数据点 - 优化性能，减少重复映射
    */
-  private batchNormalizeDataPoints(rawPoints: unknown[]): TestDataPoint[] {
+  private batchNormalizeDataPoints(rawPoints: any[]): TestDataPoint[] {
     const normalizedPoints: TestDataPoint[] = [];
 
     for (const point of rawPoints) {

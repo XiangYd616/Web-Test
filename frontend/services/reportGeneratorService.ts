@@ -40,7 +40,7 @@ export interface ReportData {
   recommendations?: string[];
   engine?: string;
   config?: any;
-  testResults?: unknown[]; // 兼容旧格式
+  testResults?: any[]; // 兼容旧格式
   analytics?: any; // 兼容旧格式
   timeRange?: {
     start: string;
@@ -136,7 +136,7 @@ export class ReportGeneratorService {
   /**
    * 获取报告预览
    */
-  getReportPreview(reportId: string): unknown | null {
+  getReportPreview(reportId: string): any | null {
     const report = this.cache.get(reportId);
     return report ? {
       id: reportId,
@@ -258,7 +258,7 @@ export class ReportGeneratorService {
     });
   }
 
-  private getTemplate(templateId: string): unknown {
+  private getTemplate(templateId: string): any {
     return this.templates.get(templateId) || this.templates.get('professional');
   }
 
@@ -266,7 +266,7 @@ export class ReportGeneratorService {
     return `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private processReportData(data: ReportData): unknown {
+  private processReportData(data: ReportData): any {
     // 处理和标准化报告数据
     return {
       ...data,
@@ -277,7 +277,7 @@ export class ReportGeneratorService {
     };
   }
 
-  private async buildReportContent(data: unknown, config: ReportConfig, template: any): Promise<string> {
+  private async buildReportContent(data: any, config: ReportConfig, template: any): Promise<string> {
     // 构建报告内容
     const sections = config?.sections
       .filter(section => section.enabled)
@@ -291,7 +291,7 @@ export class ReportGeneratorService {
     return content;
   }
 
-  private async buildSection(section: ReportSection, data: unknown, config: ReportConfig, template: any): Promise<string> {
+  private async buildSection(section: ReportSection, data: any, config: ReportConfig, template: any): Promise<string> {
     // 构建单个报告部分
     switch (section.type) {
       case 'summary':
@@ -309,7 +309,7 @@ export class ReportGeneratorService {
     }
   }
 
-  private buildSummarySection(data: unknown, config: ReportConfig, template: any): string {
+  private buildSummarySection(data: any, config: ReportConfig, template: any): string {
     return `<section class="summary">
       <h2>执行摘要</h2>
       <p>测试URL: ${data?.url}</p>
@@ -318,7 +318,7 @@ export class ReportGeneratorService {
     </section>`;
   }
 
-  private buildMetricsSection(data: unknown, config: ReportConfig, template: any): string {
+  private buildMetricsSection(data: any, config: ReportConfig, template: any): string {
     return `<section class="metrics">
       <h2>关键指标</h2>
       <div class="metrics-grid">
@@ -329,7 +329,7 @@ export class ReportGeneratorService {
     </section>`;
   }
 
-  private buildChartsSection(data: unknown, config: ReportConfig, template: any): string {
+  private buildChartsSection(data: any, config: ReportConfig, template: any): string {
     return `<section class="charts">
       <h2>图表分析</h2>
       <div class="charts-container">
@@ -338,7 +338,7 @@ export class ReportGeneratorService {
     </section>`;
   }
 
-  private buildRecommendationsSection(data: unknown, config: ReportConfig, template: any): string {
+  private buildRecommendationsSection(data: any, config: ReportConfig, template: any): string {
     const recommendations = data?.recommendations || [];
     return `<section class="recommendations">
       <h2>优化建议</h2>
@@ -348,14 +348,14 @@ export class ReportGeneratorService {
     </section>`;
   }
 
-  private buildRawDataSection(data: unknown, config: ReportConfig, template: any): string {
+  private buildRawDataSection(data: any, config: ReportConfig, template: any): string {
     return `<section class="raw-data">
       <h2>原始数据</h2>
       <pre>${JSON.stringify(data?.results, null, 2)}</pre>
     </section>`;
   }
 
-  private generateSummary(data: ReportData): unknown {
+  private generateSummary(data: ReportData): any {
     return {
       testType: data?.testType,
       url: data?.url,
@@ -365,24 +365,24 @@ export class ReportGeneratorService {
     };
   }
 
-  private extractMetrics(data: ReportData): unknown {
+  private extractMetrics(data: ReportData): any {
     // 从测试结果中提取关键指标
     return data?.metrics || {};
   }
 
-  private prepareChartData(data: ReportData): unknown {
+  private prepareChartData(data: ReportData): any {
     // 准备图表数据
     return data?.results || {};
   }
 
   // 导出方法（简化版本）
-  private async exportToPDF(report: unknown, options: ExportOptions): Promise<Blob> {
+  private async exportToPDF(report: any, options: ExportOptions): Promise<Blob> {
     // PDF导出逻辑
     const htmlContent = report.content;
     return new Blob([htmlContent], { type: 'application/pdf' });
   }
 
-  private async exportToHTML(report: unknown, options: ExportOptions): Promise<Blob> {
+  private async exportToHTML(report: any, options: ExportOptions): Promise<Blob> {
     const htmlContent = `<!DOCTYPE html>
     <html>
     <head>
@@ -405,12 +405,12 @@ export class ReportGeneratorService {
     return new Blob([htmlContent], { type: 'text/html' });
   }
 
-  private async exportToJSON(report: unknown, options: ExportOptions): Promise<Blob> {
+  private async exportToJSON(report: any, options: ExportOptions): Promise<Blob> {
     const jsonData = JSON.stringify(report.data, null, 2);
     return new Blob([jsonData], { type: 'application/json' });
   }
 
-  private async exportToCSV(report: unknown, options: ExportOptions): Promise<Blob> {
+  private async exportToCSV(report: any, options: ExportOptions): Promise<Blob> {
     // 🔧 修复中文乱码：添加UTF-8 BOM头
     const BOM = '\uFEFF';
     const csvContent = 'CSV export not implemented yet';
@@ -418,13 +418,13 @@ export class ReportGeneratorService {
     return new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8' });
   }
 
-  private async exportToXLSX(report: unknown, options: ExportOptions): Promise<Blob> {
+  private async exportToXLSX(report: any, options: ExportOptions): Promise<Blob> {
     // XLSX导出逻辑
     const xlsxContent = 'XLSX export not implemented yet';
     return new Blob([xlsxContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   }
 
-  private async exportToImage(report: unknown, options: ExportOptions): Promise<Blob> {
+  private async exportToImage(report: any, options: ExportOptions): Promise<Blob> {
     // 图片导出逻辑
     const imageContent = 'Image export not implemented yet';
     return new Blob([imageContent], { type: `image/${options.format}` });

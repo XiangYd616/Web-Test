@@ -448,7 +448,7 @@ export class ExportUtils {
   /**
    * 验证导出数据
    */
-  static validateExportData(data: unknown, requiredFields: string[]): boolean {
+  static validateExportData(data: any, requiredFields: string[]): boolean {
     return requiredFields.every(field => {
       const value = field.split('.').reduce((obj, key) => obj?.[key], data);
       return value !== undefined && value !== null;
@@ -478,7 +478,7 @@ export class ExportUtils {
   /**
    * 原始数据导出 - 完整的JSON格式测试记录
    */
-  static exportRawData(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportRawData(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
     const exportData = {
       type: 'raw-data',
       timestamp: new Date().toISOString(),
@@ -513,7 +513,7 @@ export class ExportUtils {
   /**
    * 分析报告导出 - HTML格式报告（增强版）
    */
-  static exportAnalysisReport(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportAnalysisReport(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
     const metrics = data.metrics || {};
     const result = data.result || {};
     const testConfig = data.testConfig || {};

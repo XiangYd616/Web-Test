@@ -285,7 +285,7 @@ class ReportService {
   /**
    * 私有方法：生成HTML报告
    */
-  private generateHTMLReport(report: Report, analyticsData: unknown, monitoringStats: unknown, template: ReportTemplate): string {
+  private generateHTMLReport(report: Report, analyticsData: any, monitoringStats: any, template: ReportTemplate): string {
     const currentDate = format(new Date(), 'yyyy年MM月dd日');
 
     return `
@@ -421,7 +421,7 @@ class ReportService {
   /**
    * 私有方法：生成PDF报告（模拟）
    */
-  private generatePDFReport(report: Report, analyticsData: unknown, monitoringStats: unknown, template: ReportTemplate): string {
+  private generatePDFReport(report: Report, analyticsData: any, monitoringStats: any, template: ReportTemplate): string {
     // 在真实环境中，这里会使用PDF生成库如puppeteer或jsPDF
     // 现在返回HTML内容，实际应用中会转换为PDF
     return this.generateHTMLReport(report, analyticsData, monitoringStats, template);
@@ -430,7 +430,7 @@ class ReportService {
   /**
    * 私有方法：生成Excel报告（模拟）
    */
-  private generateExcelReport(report: Report, analyticsData: unknown, monitoringStats: unknown, template: ReportTemplate): string {
+  private generateExcelReport(report: Report, analyticsData: any, monitoringStats: any, template: ReportTemplate): string {
     // 在真实环境中，这里会使用Excel生成库如SheetJS
     // 现在返回CSV格式的数据
     let csv = '报告名称,生成时间,数据范围\n';
