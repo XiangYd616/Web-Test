@@ -1,5 +1,4 @@
-﻿import { UserRole, UserStatus } from '../../types/enums';
-import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
+import { UserRole, UserStatus, AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/auth.types';
 import { browserJwt } from '@utils/browserJwt';
 import { canUseDatabase } from '@utils/environment';
 import { jwtDecode } from 'jwt-decode';
@@ -11,13 +10,20 @@ import { PasswordSecurityManager } from './core/passwordSecurity';
 import type {EnhancedAuthConfig, PasswordStrength, SessionInfo, IAuthService, JwtPayload, TokenPair, RefreshResult} from './core/authTypes';
 
 // 动态导入数据库模块（避免前端构建时的依赖问题）
-let jwt: unknown, userDao: any;
+interface JwtModule {
+  sign: (payload: any, secret: string, options?: any) => string;
+  verify: (token: string, secret: string) => any;
+  decode: (token: string) => any;
+  default?: JwtModule;
+}
+
+let jwt: JwtModule | undefined, userDao: any;
 
 async function loadServerModules() {
   if (canUseDatabase && typeof window === 'undefined') {
     try {
       // 只在Node.js环境中动态导入
-      jwt = await import('jsonwebtoken');
+      jwt = await import('jsonwebtoken') as any as JwtModule;
       const userDaoModule = await import('../dao/userDao');
       userDao = userDaoModule.userDao;
     } catch (error) {
@@ -520,12 +526,16 @@ export class UnifiedAuthService implements IAuthService {
         id: '00000000-0000-0000-0000-000000000001',
         username: 'admin',
         email: 'admin@testweb.com',
-        fullName: '系统管理员',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
         role: UserRole.ADMIN,
         status: UserStatus.ACTIVE,
         permissions: [],
+        profile: {
+          fullName: '系统管理员',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+          timezone: 'Asia/Shanghai'
+        },
         preferences: this.getDefaultPreferences(),
+        emailVerified: true,
         metadata: {},
         createdAt: '2025-01-01T00:00:00Z',
         updatedAt: new Date().toISOString(),
@@ -534,12 +544,16 @@ export class UnifiedAuthService implements IAuthService {
         id: '00000000-0000-0000-0000-000000000002',
         username: 'manager',
         email: 'manager@testweb.com',
-        fullName: '项目经理',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=manager',
         role: UserRole.MANAGER,
         status: UserStatus.ACTIVE,
         permissions: [],
+        profile: {
+          fullName: '项目经理',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=manager',
+          timezone: 'Asia/Shanghai'
+        },
         preferences: this.getDefaultPreferences(),
+        emailVerified: true,
         metadata: {},
         createdAt: '2025-01-01T00:00:00Z',
         updatedAt: new Date().toISOString(),
@@ -548,12 +562,16 @@ export class UnifiedAuthService implements IAuthService {
         id: '00000000-0000-0000-0000-000000000003',
         username: 'tester',
         email: 'tester@testweb.com',
-        fullName: '测试工程师',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tester',
         role: UserRole.TESTER,
         status: UserStatus.ACTIVE,
         permissions: [],
+        profile: {
+          fullName: '测试工程师',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tester',
+          timezone: 'Asia/Shanghai'
+        },
         preferences: this.getDefaultPreferences(),
+        emailVerified: true,
         metadata: {},
         createdAt: '2025-01-01T00:00:00Z',
         updatedAt: new Date().toISOString(),
@@ -564,21 +582,28 @@ export class UnifiedAuthService implements IAuthService {
   }
 
   // 获取默认用户偏好设置
-  private getDefaultPreferences(): import('../types/user').UserPreferences {
+  private getDefaultPreferences(): import('../../types/auth.types').UserPreferences {
     return {
       theme: 'light' as const,
       language: 'zh-CN',
       timezone: 'Asia/Shanghai',
+      dateFormat: 'YYYY-MM-DD',
+      timeFormat: '24h',
       notifications: {
         email: true,
         sms: false,
         push: false,
-        browser: true
+        browser: true,
+        testComplete: true,
+        testFailed: true,
+        weeklyReport: false,
+        securityAlert: true
       },
       dashboard: {
+        defaultView: 'overview',
         layout: 'grid',
         widgets: ['overview', 'recent-tests'],
-        defaultView: 'overview'
+        refreshInterval: 300000
       }
     };
   }
@@ -958,8 +983,19 @@ export class UnifiedAuthService implements IAuthService {
     }
   }
 
-  // 刷新 token
-  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+  // 刷新 token - 实现 IAuthService 接口
+  async refreshToken(): Promise<boolean> {
+    const refreshToken = this.getRefreshTokenFromPair();
+    if (!refreshToken) {
+      return false;
+    }
+    
+    const result = await this.refreshTokenLegacy(refreshToken);
+    return result.success;
+  }
+  
+  // 刷新 token - 旧版本兼容方法
+  async refreshTokenLegacy(refreshToken: string): Promise<AuthResponse> {
     try {
       const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const decoded = jwt.verify(refreshToken, secret) as any;
@@ -1439,21 +1475,6 @@ export class UnifiedAuthService implements IAuthService {
         }
       }
     }, 60000); // 每分钟检查一次
-  }
-
-  /**
-   * 检查token是否即将过期
-   */
-  private isTokenExpiringSoon(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expirationTime = payload.exp * 1000;
-      const now = Date.now();
-      const timeUntilExpiry = expirationTime - now;
-      return timeUntilExpiry < 5 * 60 * 1000; // 5分钟内过期
-    } catch {
-      return true;
-    }
   }
 
   /**

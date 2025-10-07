@@ -2,7 +2,7 @@
  * ui.types.ts - UI类型定义
  */
 
-export type ThemeMode = 'light' | 'dark' | 'auto';
+// ThemeMode is defined in theme.types.ts
 
 export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 

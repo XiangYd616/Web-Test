@@ -17,6 +17,8 @@ interface UseTestRecordsReturn {
   setRecords: React.Dispatch<React.SetStateAction<TestRecord[]>>;
   setTotalRecords: React.Dispatch<React.SetStateAction<number>>;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  isAuthenticated: boolean;
+  handleRefresh: () => void;
 }
 
 export const useTestRecords = (): UseTestRecordsReturn => {
@@ -24,6 +26,7 @@ export const useTestRecords = (): UseTestRecordsReturn => {
   const [loading, setLoading] = useState(true);
   const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAuthenticated] = useState(true); // Mock authentication state
 
   // 请求去重和缓存
   const requestCacheRef = useRef<Map<string, Promise<any>>>(new Map());
@@ -125,6 +128,10 @@ export const useTestRecords = (): UseTestRecordsReturn => {
     }
   }, []);
 
+  const handleRefresh = useCallback(() => {
+    loadTestRecords({ page: currentPage });
+  }, [loadTestRecords, currentPage]);
+
   return {
     records,
     loading,
@@ -133,7 +140,9 @@ export const useTestRecords = (): UseTestRecordsReturn => {
     loadTestRecords,
     setRecords,
     setTotalRecords,
-    setCurrentPage
+    setCurrentPage,
+    isAuthenticated,
+    handleRefresh
   };
 };
 

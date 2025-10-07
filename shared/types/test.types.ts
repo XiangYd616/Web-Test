@@ -31,19 +31,5 @@ export interface TestConfig {
   retries?: number;
 }
 
-export interface TestResult {
-  id: string;
-  testId: string;
-  type: TestType;
-  status: TestStatus;
-  startTime: Date;
-  endTime?: Date;
-  duration?: number;
-  results?: any;
-  errors?: string[];
-  metrics?: Record<string, any>;
-  score?: number;
-  grade?: string;
-  summary?: string;
-}
+// Removed TestResult - use the more comprehensive version from testResult.types.ts instead
 

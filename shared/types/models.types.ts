@@ -9,30 +9,27 @@ export interface BaseModel {
   deletedAt?: Date;
 }
 
-export interface PaginationParams {
+export interface ModelPaginationParams {
   page: number;
   pageSize: number;
   total?: number;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: PaginationParams;
-  total: number;
-}
+// Removed PaginatedResponse - use the version from api.types.ts instead
+// to avoid type conflicts
 
-export interface SortParams {
+export interface ModelSortParams {
   field: string;
   order: 'asc' | 'desc';
 }
 
-export interface FilterParams {
+export interface ModelFilterParams {
   [key: string]: any;
 }
 
-export interface QueryParams {
-  pagination?: PaginationParams;
-  sort?: SortParams;
-  filters?: FilterParams;
+export interface ModelQueryParams {
+  pagination?: ModelPaginationParams;
+  sort?: ModelSortParams;
+  filters?: ModelFilterParams;
 }
 

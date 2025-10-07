@@ -8,14 +8,15 @@
 // =============================================================================
 // 基础类型
 // =============================================================================
-export * from './base.types';
-export * from './common.types';
+export type * from './base.types';
+// Re-export only unique types from common.types to avoid conflicts with base.types
+export type { FlexibleObject, Email, URL, APIResponse, APIError } from './common.types';
 
 // =============================================================================
 // API 相关类型
 // =============================================================================
-export * from './api.types';
-export * from './apiResponse.types';
+export type * from './api.types';
+export type * from './apiResponse.types';
 
 // =============================================================================
 // 测试相关类型
@@ -58,43 +59,43 @@ export enum TestPriority {
   CRITICAL = 'critical'
 }
 
-export * from './test.types';
-export * from './testEngine.types';
-export * from './testResult.types';
-export * from './testHistory.types';
+export type * from './test.types';
+export type * from './testEngine.types';
+export type * from './testResult.types';
+export type * from './testHistory.types';
 
 // =============================================================================
 // 认证和用户类型
 // =============================================================================
-export * from './auth.types';
-export * from './user.types';
-export * from './rbac.types';
+export type * from './auth.types';
+export type * from './user.types';
+export type * from './rbac.types';
 
 // =============================================================================
 // 业务模型类型
 // =============================================================================
-export * from './models.types';
-export * from './dataModels.types';
-export * from './project.types';
+export type * from './models.types';
+export type * from './dataModels.types';
+export type * from './project.types';
 
 // =============================================================================
 // 系统和管理类型
 // =============================================================================
-export * from './system.types';
-export * from './admin.types';
-export * from './performance.types';
+export type * from './system.types';
+export type * from './admin.types';
+export type * from './performance.types';
 
 // =============================================================================
 // UI 和组件类型
 // =============================================================================
-export * from './ui.types';
-export * from './theme.types';
+export type * from './ui.types';
+export type * from './theme.types';
 
 // =============================================================================
 // 版本和兼容性类型
 // =============================================================================
-export * from './version.types';
-export * from './compatibility.types';
+export type * from './version.types';
+export type * from './compatibility.types';
 
 // =============================================================================
 // 工具类型

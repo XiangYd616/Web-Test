@@ -124,47 +124,12 @@ export interface TestOptions {
   };
 }
 
-export interface TestResult {
-  testId: string;
-  testType: TestType;
-  status: TestStatus;
-  url: string;
-  startTime: string;
-  endTime?: string;
-  duration?: number;
-  score?: number;
-  results?: any;
-  error?: string;
-  recommendations?: string[];
-}
-
-export interface TestProgress {
-  testId: string;
-  progress: number;
-  stage: string;
-  message: string;
-  timestamp: string;
-}
+// Removed TestResult and TestProgress - use types from test.types.ts and testEngine.types.ts instead
+// to avoid type conflicts with more specific test type definitions
 
 // ==================== 用户相关类型 ====================
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: UserRole;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastLoginAt?: string;
-  settings?: UserSettings;
-}
-
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  VIEWER = 'viewer'
-}
+// Removed User, UserRole, UserSettings - use types from user.types.ts and rbac.types.ts instead
+// to avoid type conflicts
 
 export interface UserSettings {
   theme?: 'light' | 'dark' | 'auto';
@@ -190,25 +155,8 @@ export interface AuthToken {
   tokenType: string;
 }
 
-export interface AuthResponse extends ApiResponse<{
-  user: User;
-  token: AuthToken;
-}> {}
+// Removed AuthResponse - use type from auth.types.ts instead to avoid conflicts
 
 // ==================== 分页和过滤 ====================
-
-export interface PaginationParams {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface FilterParams {
-  search?: string;
-  status?: string;
-  type?: string;
-  startDate?: string;
-  endDate?: string;
-  [key: string]: any;
-}
+// Removed PaginationParams and FilterParams - use types from base.types.ts instead
+// to avoid duplication

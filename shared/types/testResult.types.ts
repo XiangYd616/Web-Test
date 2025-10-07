@@ -41,5 +41,12 @@ export interface TestResult {
     description: string;
     action: string;
   }>;
+  // Additional commonly used fields
+  message?: string;
+  timestamp?: number;
+  details?: any;
+  url?: string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 

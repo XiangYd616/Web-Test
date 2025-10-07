@@ -240,17 +240,8 @@ export interface CompositeTestResult extends BaseTestResult {
 
 /**
  * 测试历史记录
+ * Removed - use TestHistoryRecord from testHistory.types.ts instead to avoid conflicts
  */
-export interface TestHistoryRecord {
-  id: string;
-  timestamp: Date;
-  engineType: TestEngineType;
-  config: BaseTestConfig;
-  result: BaseTestResult;
-  userId?: string;
-  tags?: string[];
-  notes?: string;
-}
 
 /**
  * 测试比较结果（用于回归测试）

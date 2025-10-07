@@ -220,7 +220,7 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
     
     if (data.basicSEO) {
       scores.push(
-        { label: '技术SEO', value: data.basicSEO.technicalSEO?.score || 0, color: '#3b82f6' },
+        { label: '技术SEO', value: 0, color: '#3b82f6' }, // technical is boolean, not scored
         { label: '内容质量', value: data.basicSEO.contentQuality?.score || 0, color: '#10b981' },
         { label: '可访问性', value: data.basicSEO.accessibility?.score || 0, color: '#f59e0b' },
         { label: '社交媒体', value: data.basicSEO.socialMedia?.score || 0, color: '#8b5cf6' },
@@ -241,7 +241,7 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
     
     if (data.basicSEO) {
       radarScores.push(
-        { label: '技术', value: data.basicSEO.technicalSEO?.score || 0 },
+        { label: '技术', value: 0 }, // technical is boolean, not scored
         { label: '内容', value: data.basicSEO.contentQuality?.score || 0 },
         { label: '可访问', value: data.basicSEO.accessibility?.score || 0 },
         { label: '社交', value: data.basicSEO.socialMedia?.score || 0 },
@@ -489,18 +489,18 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
                     <span>Robots.txt</span>
                     <span className={`font-semibold ${
-                      data.basicSEO.technicalSEO.robotsTxt.exists ? 'text-green-600' : 'text-red-600'
+                      data.basicSEO.technical.robots ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {data.basicSEO.technicalSEO.robotsTxt.exists ? '存在' : '缺失'}
+                      {data.basicSEO.technical.robots ? '存在' : '缺失'}
                     </span>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
                     <span>Sitemap</span>
                     <span className={`font-semibold ${
-                      data.basicSEO.technicalSEO.sitemap.exists ? 'text-green-600' : 'text-red-600'
+                      data.basicSEO.technical.sitemap ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {data.basicSEO.technicalSEO.sitemap.exists ? '存在' : '缺失'}
+                      {data.basicSEO.technical.sitemap ? '存在' : '缺失'}
                     </span>
                   </div>
                 </div>
@@ -509,18 +509,16 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
                     <span>Canonical标签</span>
                     <span className={`font-semibold ${
-                      data.basicSEO.technicalSEO.canonicalTags.present ? 'text-green-600' : 'text-red-600'
+                      data.basicSEO.technical.canonical ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {data.basicSEO.technicalSEO.canonicalTags.present ? '存在' : '缺失'}
+                      {data.basicSEO.technical.canonical ? '存在' : '缺失'}
                     </span>
                   </div>
                   
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
                     <span>HTTPS</span>
-                    <span className={`font-semibold ${
-                      data.basicSEO.technicalSEO.urlStructure.https ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {data.basicSEO.technicalSEO.urlStructure.https ? '启用' : '未启用'}
+                    <span className="font-semibold text-gray-600">
+                      N/A
                     </span>
                   </div>
                 </div>

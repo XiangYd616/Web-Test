@@ -1,4 +1,5 @@
-﻿
+import type { StressTestRecord } from '../types/common';
+
 // 取消原因枚举
 export enum CancelReason {
   USER_CANCELLED = 'user_cancelled',
@@ -23,127 +24,8 @@ export enum FailureReason {
   UNKNOWN_ERROR = 'unknown_error'
 }
 
-export interface StressTestRecord {
-  id: string;
-  testName: string;
-  url: string;
-  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api';
-  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled';
-
-  // 时间信息
-  startTime: string;
-  endTime?: string;
-  createdAt: string;
-  updatedAt?: string;
-  completedAt?: string;
-  savedAt?: string;
-
-  // 状态相关
-  error?: string;
-  waitingReason?: string;
-  progress?: number;
-  currentPhase?: string;
-  cancelReason?: CancelReason;
-  failureReason?: FailureReason;
-  interruptedAt?: string;
-  interruptReason?: string;
-  resumedAt?: string;
-
-  // 队列相关信息
-  queuedAt?: string;
-  queuePosition?: number;
-  estimatedWaitTime?: number;
-
-  config: {
-    users: number;
-    duration: number;
-    rampUpTime: number;
-    testType: 'gradual' | 'spike' | 'constant' | 'step';
-    method: string;
-    timeout: number;
-    thinkTime: number;
-    warmupDuration?: number;
-    cooldownDuration?: number;
-    headers?: Record<string, string>;
-    body?: string;
-    proxy?: {
-      enabled: boolean;
-      type?: string;
-      host?: string;
-      port?: number;
-      username?: string;
-      password?: string;
-    };
-  };
-
-  results?: {
-    metrics: {
-      totalRequests: number;
-      successfulRequests: number;
-      failedRequests: number;
-      averageResponseTime: number;
-      minResponseTime: number;
-      maxResponseTime: number;
-      p50ResponseTime?: number;
-      p90ResponseTime?: number;
-      p95ResponseTime?: number;
-      p99ResponseTime?: number;
-      throughput: number;
-      requestsPerSecond: number;
-      rps: number;
-      errorRate: number;
-      currentTPS?: number;
-      peakTPS?: number;
-      dataReceived?: number;
-      dataSent?: number;
-      connectionTime?: number;
-      dnsTime?: number;
-    };
-    realTimeData?: Array<{
-      timestamp: number;
-      responseTime: number;
-      throughput: number;
-      activeUsers: number;
-      errors: number;
-      errorRate: number;
-      phase: string;
-      connectionTime?: number;
-      dnsTime?: number;
-    }>;
-    errorBreakdown?: Record<string, number>;
-    phases?: Array<{
-      name: string;
-      startTime: number;
-      endTime: number;
-      users: number;
-      duration: number;
-    }>;
-  };
-
-  // 评分和建议
-  overallScore?: number;
-  performanceGrade?: 'A' | 'B' | 'C' | 'D' | 'F';
-  recommendations?: Array<{
-    category: string;
-    priority: 'high' | 'medium' | 'low';
-    title: string;
-    description: string;
-    impact: string;
-  }>;
-
-  // 元数据
-  testId?: string;
-  userId?: string;
-  actualDuration?: number;
-
-  // 标签和分类
-  tags?: string[];
-  category?: string;
-  environment?: 'development' | 'staging' | 'production';
-
-  // 警告信息
-  warnings?: string[];
-}
+// Use the unified StressTestRecord type from types/common
+export type { StressTestRecord } from '../types/common';
 
 export interface TestRecordQuery {
   page?: number;

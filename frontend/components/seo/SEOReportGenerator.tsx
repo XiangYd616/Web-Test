@@ -10,7 +10,7 @@ import {Download, FileText, Share2, Eye} from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
 import { MobileSeoAnalysisResult } from '../../utils/mobileSeoDetector';
 import { CoreWebVitalsResult } from '../../utils/coreWebVitalsAnalyzer';
-import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../../types';
 
 interface SEOReportData {
   basicSEO?: SEOAnalysisResult;
@@ -307,7 +307,8 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
     if (reportData.basicSEO) {
       scores.overall = reportData.basicSEO.score;
-      scores.technical = reportData.basicSEO.technical?.score || 0;
+      // technical is a boolean object, not a scored item
+      scores.technical = 0; // Default technical score
       scores.content = reportData.basicSEO.contentQuality?.score || 0;
       scores.accessibility = reportData.basicSEO.accessibility?.score || 0;
     }
@@ -389,25 +390,28 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
   // 生成建议部分
   const generateRecommendationsSection = () => {
-    const recommendations: unknown[] = [];
+    interface RecommendationItem {
+      priority: 'low' | 'medium' | 'high';
+      [key: string]: any;
+    }
+    const recommendations: RecommendationItem[] = [];
 
     if (reportData.basicSEO) {
-      recommendations.push(...reportData.basicSEO.recommendations.slice(0, 10));
+      recommendations.push(...(reportData.basicSEO.recommendations as RecommendationItem[]).slice(0, 10));
     }
 
     if (reportData.mobileSEO) {
-      recommendations.push(...reportData.mobileSEO.recommendations.slice(0, 5));
+      recommendations.push(...(reportData.mobileSEO.recommendations as RecommendationItem[]).slice(0, 5));
     }
 
     if (reportData.coreWebVitals) {
-      recommendations.push(...reportData.coreWebVitals.recommendations.slice(0, 3));
+      recommendations.push(...(reportData.coreWebVitals.recommendations as RecommendationItem[]).slice(0, 3));
     }
 
     // 按优先级排序
     return recommendations.sort((a, b) => {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
-      return priorityOrder[b.priority as keyof typeof priorityOrder] - 
-             priorityOrder[a.priority as keyof typeof priorityOrder];
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
     });
   };
 

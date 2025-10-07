@@ -464,7 +464,20 @@ export const useErrorHandler = () => {
   const handleError = (error: unknown, context?: string) => {
     let errorInfo: LocalErrorInfo;
 
-    if (error.name === 'NetworkError' || error.message?.includes('fetch')) {
+    // Type guard to check if error is an object with specific properties
+    const isErrorWithName = (err: unknown): err is { name: string; message?: string } => {
+      return typeof err === 'object' && err !== null && 'name' in err;
+    };
+
+    const isErrorWithStatus = (err: unknown): err is { status: number } => {
+      return typeof err === 'object' && err !== null && 'status' in err;
+    };
+
+    const isErrorWithMessage = (err: unknown): err is { message: string } => {
+      return typeof err === 'object' && err !== null && 'message' in err;
+    };
+
+    if (isErrorWithName(error) && (error.name === 'NetworkError' || error.message?.includes('fetch'))) {
       errorInfo = {
         type: 'network',
         title: '网络错误',
@@ -473,7 +486,7 @@ export const useErrorHandler = () => {
         timestamp: new Date().toISOString(),
         severity: 'high'
       };
-    } else if (error.status === 404) {
+    } else if (isErrorWithStatus(error) && error.status === 404) {
       errorInfo = {
         type: 'not-found',
         title: '资源未找到',
@@ -482,16 +495,16 @@ export const useErrorHandler = () => {
         timestamp: new Date().toISOString(),
         severity: 'medium'
       };
-    } else if (error.status >= 500) {
+    } else if (isErrorWithStatus(error) && error.status >= 500) {
       errorInfo = {
         type: 'server',
         title: '服务器错误',
         message: '服务器遇到了一个错误',
-        code: error.status,
+        code: error.status.toString(),
         timestamp: new Date().toISOString(),
         severity: 'critical'
       };
-    } else if (error.status === 403) {
+    } else if (isErrorWithStatus(error) && error.status === 403) {
       errorInfo = {
         type: 'permission',
         title: '权限不足',
@@ -503,7 +516,7 @@ export const useErrorHandler = () => {
       errorInfo = {
         type: 'unknown',
         title: '未知错误',
-        message: error.message || '发生了一个未知错误',
+        message: isErrorWithMessage(error) ? error.message : '发生了一个未知错误',
         details: context ? `在${context}时发生错误` : undefined,
         timestamp: new Date().toISOString(),
         severity: 'medium'

@@ -36,7 +36,7 @@ export interface ExportOptions {
   testTypes?: TestType[];
 }
 
-class testHistoryService {
+class TestHistoryService {
   private baseUrl = '/test-history';
   private cache = new Map<string, any>();
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
@@ -91,7 +91,7 @@ class testHistoryService {
   async getAllTestHistory(query: TestHistoryQuery = {}): Promise<TestHistoryResponse> {
     const cacheKey = this.getCacheKey('all-history', query);
     const cached = this.getCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as TestHistoryResponse;
 
     const params = new URLSearchParams();
 
@@ -112,8 +112,8 @@ class testHistoryService {
 
     if (query.status) params?.append('status', query.status);
     if (query.search) params?.append('search', query.search);
-    if (query.dateFrom) params?.append('dateFrom', query.dateFrom);
-    if (query.dateTo) params?.append('dateTo', query.dateTo);
+    if (query.dateFrom) params?.append('dateFrom', query.dateFrom.toString());
+    if (query.dateTo) params?.append('dateTo', query.dateTo.toString());
 
     try {
       const response = await fetch(`${this.baseUrl}?${params}`, {
@@ -140,7 +140,7 @@ class testHistoryService {
   async getTestHistoryByType(testType: TestType, query: TestHistoryQuery = {}): Promise<TestHistoryResponse> {
     const cacheKey = this.getCacheKey(`${testType}-history`, query);
     const cached = this.getCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as TestHistoryResponse;
 
     const params = new URLSearchParams();
     if (query.page) params?.append('page', query.page.toString());
@@ -173,7 +173,7 @@ class testHistoryService {
   async getTestDetail(sessionId: string): Promise<TestSession> {
     const cacheKey = this.getCacheKey('test-detail', { sessionId });
     const cached = this.getCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as TestSession;
 
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}`, {
@@ -325,7 +325,7 @@ class testHistoryService {
   async getTestStatistics(): Promise<TestStatistics> {
     const cacheKey = this.getCacheKey('statistics');
     const cached = this.getCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as TestStatistics;
 
     try {
       const response = await fetch(`${this.baseUrl}/statistics`, {
@@ -414,5 +414,6 @@ class testHistoryService {
 }
 
 // 导出单例实例
-export const testHistoryService = new testHistoryService();
-export default testHistoryService;
+const testHistoryServiceInstance = new TestHistoryService();
+export { testHistoryServiceInstance as testHistoryService };
+export default testHistoryServiceInstance;
