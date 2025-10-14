@@ -128,7 +128,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
 
     // 生成Y轴标签
     const generateYAxisLabels = (min: number, max: number, steps: number = 5) => {
-      const labels = [];
+      const labels: string[] = [];
       for (let i = 0; i <= steps; i++) {
         const value = min + (max - min) * (i / steps);
         labels.push(value.toFixed(value < 10 ? 1 : 0));
@@ -142,7 +142,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
     };
 
     // 生成时间标签(减少标签数量避免重叠)
-    const timeLabels = [];
+    const timeLabels: string[] = [];
     const labelStep = Math.max(1, Math.floor(filteredData.length / 8)); // 最多8个时间标签
     for (let i = 0; i < filteredData.length; i += labelStep) {
       const dataPoint = filteredData[i];
