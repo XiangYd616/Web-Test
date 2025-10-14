@@ -1,15 +1,15 @@
-/**
+﻿/**
  * 性能指标服务
  * 统一性能指标收集和分析，消除多个引擎中的重复性能分析代码
  */
 
-import BaseService from './BaseService.js';
-import https from 'https';
-import http from 'http';
-import { URL } from 'url';
-import { performance } from 'perf_hooks';
-import dns from 'dns';
-import { promisify } from 'util';
+const BaseService = require('./BaseService.js');
+const https = require('https');
+const http = require('http');
+const { URL } = require('url');
+const { performance } = require('perf_hooks');
+const dns = require('dns');
+const { promisify } = require('util');
 
 
   /**
@@ -696,4 +696,5 @@ class PerformanceMetricsService extends BaseService {
   }
 }
 
-export default PerformanceMetricsService;
+module.exports = PerformanceMetricsService;
+

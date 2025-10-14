@@ -1027,7 +1027,10 @@ class TestEngineService extends EventEmitter {
   }
 }
 
-// 导出服务类和常量
+// 创建单例实例
+const testEngineService = new TestEngineService();
+
+// 导出服务类和实例
 module.exports = {
   TestEngineService,
   testEngineService

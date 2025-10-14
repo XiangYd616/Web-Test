@@ -1,9 +1,9 @@
-/**
+﻿/**
  * HTML解析服务
  * 统一HTML解析逻辑，消除多个引擎中的重复解析代码
  */
 
-import BaseService from './BaseService.js';
+const BaseService = require('./BaseService.js');
 
 class HTMLParsingService extends BaseService {
   constructor() {
@@ -530,4 +530,5 @@ class HTMLParsingService extends BaseService {
   }
 }
 
-export default HTMLParsingService;
+module.exports = HTMLParsingService;
+

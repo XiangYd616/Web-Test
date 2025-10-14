@@ -85,6 +85,34 @@ class StressTestEngine {
     }
     console.log('✅ 压力测试引擎清理完成');
   }
+
+  /**
+   * 清理所有测试房间
+   */
+  async cleanupAllTestRooms() {
+    try {
+      // 如果analyzer有清理房间的方法，调用它
+      if (this.analyzer && typeof this.analyzer.cleanupAllTestRooms === 'function') {
+        await this.analyzer.cleanupAllTestRooms();
+      }
+      
+      // 如果有WebSocket实例，清理所有房间
+      if (this.io) {
+        const rooms = Array.from(this.io.sockets.adapter.rooms.keys());
+        for (const room of rooms) {
+          if (room.startsWith('stress-test-')) {
+            this.io.socketsLeave(room);
+          }
+        }
+      }
+      
+      console.log('✅ 所有测试房间已清理');
+      return { success: true, message: '所有测试房间已清理' };
+    } catch (error) {
+      console.warn('⚠️ 清理测试房间时出现警告:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 module.exports = StressTestEngine;

@@ -441,6 +441,7 @@ const hashToken = (token) => {
 module.exports = {
   // 核心中间件
   authMiddleware,
+  authenticateToken: authMiddleware, // 别名，保持向后兼容
   optionalAuth,
   adminAuth,
   requireRole,
