@@ -238,7 +238,14 @@ export const StressTestMetrics: React.FC<StressTestMetricsProps> = ({
   ];
 
   // 如果有高级指标，添加更多卡片
-  const advancedMetrics = [];
+  const advancedMetrics: Array<{
+    title: string;
+    value: number;
+    unit: string;
+    icon: React.ComponentType<any>;
+    color: string;
+    description: string;
+  }> = [];
   if (metrics.p99ResponseTime) {
     advancedMetrics.push({
       title: 'P99响应时间',
