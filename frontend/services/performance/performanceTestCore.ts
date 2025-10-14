@@ -702,7 +702,7 @@ export class PerformanceTestCore {
       };
 
       const score = Object.values(features).filter(Boolean).length * 10;
-      const recommendations = [];
+      const recommendations: string[] = [];
 
       if (!features.serviceWorker) {
         recommendations.push('考虑实现Service Worker以提升缓存和离线体验');
@@ -779,7 +779,7 @@ export class PerformanceTestCore {
         optimization.security.score * 0.1
       );
 
-      const recommendations = [];
+      const recommendations: string[] = [];
       if (!optimization.compression.enabled) {
         recommendations.push('启用Gzip或Brotli压缩以减少传输大小');
       }
@@ -832,7 +832,7 @@ export class PerformanceTestCore {
       const totalServices = Object.values(thirdPartyServices).flat().length;
       const impactScore = Math.max(0, 100 - totalServices * 5);
 
-      const recommendations = [];
+      const recommendations: string[] = [];
       if (totalServices > 10) {
         recommendations.push('第三方服务过多，考虑减少或延迟加载');
       }
