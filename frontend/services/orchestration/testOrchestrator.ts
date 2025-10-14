@@ -555,7 +555,12 @@ class TestOrchestrator {
       totalPipelines: this.pipelines.size,
       runningJobs: this.runningJobs.size,
       queuedJobs: this.jobQueue.length,
-      pipelines: []
+      pipelines: [] as Array<{
+        id: string;
+        name: string;
+        environment: 'development' | 'staging' | 'production';
+        artifacts: number;
+      }>
     };
 
     if (pipelineId) {

@@ -503,7 +503,12 @@ export class DataAnalysisService {
     };
 
     // 生成示例性能分数趋势
-    const performanceScores = [];
+    const performanceScores: Array<{
+      date: string;
+      performance: number;
+      seo: number;
+      accessibility: number;
+    }> = [];
     for (let i = 29; i >= 0; i--) {
       const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
       performanceScores.push({

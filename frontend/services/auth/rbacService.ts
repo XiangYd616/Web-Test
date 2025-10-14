@@ -379,7 +379,7 @@ export class RBACService {
     }
 
     // 验证角色是否存在且有效
-    const validRoleIds = [];
+    const validRoleIds: string[] = [];
     for (const roleId of roleIds) {
       const role = await this.getRole(roleId);
       if (role && role.isActive) {
