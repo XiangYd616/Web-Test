@@ -15,7 +15,7 @@
     "name": "Test Web App Team",
     "email": "1823170057@qq.com"
   },
-  "main": "electron/main.js",
+  "main": "tools/electron/main.js",
   "homepage": "./",
   "scripts": {
     "_comment_main": "🚀 主要启动命令",
