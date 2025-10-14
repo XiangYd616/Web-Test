@@ -102,16 +102,6 @@ class ApiTestEngine {
       
       if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
         const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
-
-        /**
-
-         * if功能函数
-
-         * @param {Object} params - 参数对象
-
-         * @returns {Promise<Object>} 返回结果
-
-         */
         requestOptions.headers['Content-Length'] = Buffer.byteLength(bodyStr);
         if (!requestOptions.headers['Content-Type']) {
           requestOptions.headers['Content-Type'] = 'application/json';
@@ -432,33 +422,17 @@ class ApiTestEngine {
       recommendations.push(`${summary.failed} 个端点测试失败，建议检查服务器状态`);
     }
     
-
-    /**
-
-     * if功能函数
-
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
-
-     */
-    const avgTime = parseInt(summary.averageResponseTime);
-    if (avgTime > 1000) {
+    // 安全地解析平均响应时间,移除'ms'后缀
+    const avgTimeStr = String(summary.averageResponseTime || '0').replace(/ms$/i, '').trim();
+    const avgTime = parseInt(avgTimeStr, 10);
+    if (!isNaN(avgTime) && avgTime > 1000) {
       recommendations.push(`平均响应时间较长 (${summary.averageResponseTime})，建议优化性能`);
     }
     
-
-    /**
-
-     * if功能函数
-
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
-
-     */
-    const successRate = parseInt(summary.successRate);
-    if (successRate < 95) {
+    // 安全地解析成功率,移除'%'后缀
+    const successRateStr = String(summary.successRate || '100').replace(/%$/i, '').trim();
+    const successRate = parseInt(successRateStr, 10);
+    if (!isNaN(successRate) && successRate < 95) {
       recommendations.push(`成功率较低 (${summary.successRate})，建议检查失败的端点`);
     }
     

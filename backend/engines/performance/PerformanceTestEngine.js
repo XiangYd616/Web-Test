@@ -3,8 +3,8 @@
  * 使用共享服务，避免代码重复
  */
 
-import PerformanceMetricsService from '../shared/services/PerformanceMetricsService.js';
-import HTMLParsingService from '../shared/services/HTMLParsingService.js';
+const PerformanceMetricsService = require('../shared/services/PerformanceMetricsService.js');
+const HTMLParsingService = require('../shared/services/HTMLParsingService.js');
 
 class PerformanceTestEngine {
   constructor() {
@@ -89,21 +89,6 @@ class PerformanceTestEngine {
         cacheControl: 'no-cache'
       };
       
-
-      
-      /**
-
-      
-       * if功能函数
-
-      
-       * @param {Object} params - 参数对象
-
-      
-       * @returns {Promise<Object>} 返回结果
-
-      
-       */
       const metricsResult = await this.metricsService.collectMetrics(url, metricsOptions);
       
       if (!metricsResult.success) {
@@ -113,28 +98,16 @@ class PerformanceTestEngine {
       // 分析HTML资源（如果获取了HTML内容）
       let resourceAnalysis = null;
       
-      if (includeResources && fetchHtml && metricsResult.data.basicTiming.rawResults[0]?.content) {
-        const htmlContent = metricsResult.data.basicTiming.rawResults[0].content;
+      if (includeResources && fetchHtml) {
+        // 使用深度可选链安全访问嵌套属性
+        const rawResults = metricsResult.data?.basicTiming?.rawResults;
+        const htmlContent = rawResults?.[0]?.content;
         
         if (htmlContent) {
-
-          
-          /**
-
-          
-           * if功能函数
-
-          
-           * @param {Object} params - 参数对象
-
-          
-           * @returns {Promise<Object>} 返回结果
-
-          
-           */
           const parseResult = this.htmlService.parseHTML(htmlContent);
           
-          if (parseResult.success) {
+          // 验证parseResult的完整性
+          if (parseResult?.success && parseResult.$) {
             resourceAnalysis = {
               resources: this.analyzeResources(parseResult.$),
               contentAnalysis: this.analyzeContent(parseResult.$, url)
@@ -423,8 +396,8 @@ class PerformanceTestEngine {
         });
       }
       
-      // 资源建议
-      if (results.resources && results.resources.counts.total > 30) {
+      // 资源建议 - 使用可选链防止错误
+      if (results.resources?.counts?.total > 30) {
         recommendations.push({
           type: 'resource-optimization',
           priority: 'medium',
@@ -449,4 +422,4 @@ class PerformanceTestEngine {
   }
 }
 
-export default PerformanceTestEngine;
+module.exports = PerformanceTestEngine;

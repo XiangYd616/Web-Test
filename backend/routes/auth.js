@@ -37,16 +37,6 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
   if (!username) errors.push({ field: 'username', message: '用户名是必填的' });
   if (!email) errors.push({ field: 'email', message: '邮箱是必填的' });
   if (!password) errors.push({ field: 'password', message: '密码是必填的' });
-
-  /**
-
-   * if功能函数
-
-   * @param {Object} params - 参数对象
-
-   * @returns {Promise<Object>} 返回结果
-
-   */
   if (!confirmPassword) errors.push({ field: 'confirmPassword', message: '确认密码是必填的' });
 
   if (password && confirmPassword && password !== confirmPassword) {

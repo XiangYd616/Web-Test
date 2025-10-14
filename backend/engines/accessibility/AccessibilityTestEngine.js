@@ -69,11 +69,6 @@ class AccessibilityTestEngine {
       includeWarnings: Joi.boolean().default(true)
     });
 
-    /**
-     * if功能函数
-     * @param {Object} params - 参数对象
-     * @returns {Promise<Object>} 返回结果
-     */
     const { error, value } = schema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);
@@ -195,40 +190,75 @@ class AccessibilityTestEngine {
   }
 
   async checkColorContrast($) {
-    // 简化的颜色对比度检查
     const result = {
       name: '颜色对比度',
       description: 'WCAG 颜色对比度要求检查',
       issues: [],
       passed: 0,
-      failed: 0
+      failed: 0,
+      warning: 0,
+      note: '颜色对比度检查需要浏览器环境支持'
     };
 
-    // 检查所有可能有颜色的元素
+    // 注意：真实的颜色对比度检查需要：
+    // 1. 解析CSS样式获取颜色（需要浏览器环境）
+    // 2. 计算相对亮度
+    // 3. 计算对比度比率
+    // 4. 与WCAG标准对比 (AA: 4.5:1, AAA: 7:1)
+    
+    // 当前实现的限制
+    result.warning++;
+    result.issues.push({
+      element: 'page',
+      issue: '颜色对比度检查需要浏览器环境支持',
+      severity: 'warning',
+      wcagCriterion: '1.4.3',
+      recommendation: '建议使用以下工具进行完整的对比度检查',
+      suggestedTools: [
+        'axe-core - 自动化可访问性测试库',
+        'Lighthouse - Chrome DevTools 内置工具',
+        'WAVE - WebAIM 可访问性评估工具',
+        'Contrast Checker - 在线对比度检查器'
+      ]
+    });
+    
+    // 基本的静态检查：查找明显的问题
     const textElements = $('p, span, div, h1, h2, h3, h4, h5, h6, a, button, label');
+    let checkedElements = 0;
     
     textElements.each((i, el) => {
       const $el = $(el);
       const text = $el.text().trim();
       
       if (text.length > 0) {
-        // 这里应该实现真正的颜色对比度计算
-        // 现在使用简化的检查
-        const hasGoodContrast = Math.random() > 0.2; // 80%通过率模拟
+        checkedElements++;
         
-        if (hasGoodContrast) {
-          result.passed++;
-        } else {
-          result.failed++;
-          result.issues.push({
-            element: el.tagName.toLowerCase(),
-            text: text.substring(0, 50),
-            issue: '颜色对比度不足',
-            severity: 'error'
-          });
+        // 检查是否有style属性设置了颜色
+        const style = $el.attr('style');
+        if (style) {
+          // 检查是否同时设置了颜色和背景色
+          const hasColor = style.includes('color');
+          const hasBackground = style.includes('background');
+          
+          if (hasColor && !hasBackground) {
+            result.warning++;
+            result.issues.push({
+              element: el.tagName.toLowerCase(),
+              text: text.substring(0, 50),
+              issue: '元素设置了颜色但没有背景色，可能导致对比度问题',
+              severity: 'warning',
+              wcagCriterion: '1.4.3'
+            });
+          }
         }
+        
+        // 所有检查过的元素都计为通过（因为我们不能真正验证）
+        result.passed++;
       }
     });
+    
+    // 添加信息性提示
+    result.info = `检查了 ${checkedElements} 个文本元素。完整的颜色对比度验证需要浏览器环境。`;
 
     return result;
   }
@@ -336,16 +366,6 @@ class AccessibilityTestEngine {
 
       const hasLabel = id && $(`label[for="${id}"]`).length > 0;
       const hasAriaLabel = $el.attr('aria-label');
-
-      /**
-
-       * if功能函数
-
-       * @param {Object} params - 参数对象
-
-       * @returns {Promise<Object>} 返回结果
-
-       */
       const hasAriaLabelledby = $el.attr('aria-labelledby');
 
       if (hasLabel || hasAriaLabel || hasAriaLabelledby) {

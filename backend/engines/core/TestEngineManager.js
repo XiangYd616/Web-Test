@@ -48,16 +48,17 @@ class TestEngineManager extends EventEmitter {
    */
   async registerEngines() {
     const engineConfigs = [
-      { name: 'website', path: '../api/apiTestEngine', enabled: true },
-      { name: 'security', path: '../security/SecurityTestEngine', enabled: true },
-      { name: 'performance', path: '../core/PerformanceTestCore', enabled: true },
+      { name: 'website', path: '../website/WebsiteTestEngine', enabled: true },
+      { name: 'security', path: '../security/SecurityAnalyzer', enabled: true },
+      { name: 'performance', path: '../performance/PerformanceTestEngine', enabled: true },
       { name: 'seo', path: '../seo/SEOTestEngine', enabled: true },
-      { name: 'api', path: '../api/APIAnalyzer', enabled: true },
+      { name: 'api', path: '../api/APITestEngine', enabled: true },
       { name: 'network', path: '../network/NetworkTestEngine', enabled: true },
       { name: 'database', path: '../database/DatabaseTestEngine', enabled: true },
-      { name: 'compatibility', path: '../compatibility/CompatibilityAnalyzer', enabled: true },
+      { name: 'compatibility', path: '../compatibility/CompatibilityTestEngine', enabled: true },
       { name: 'accessibility', path: '../accessibility/AccessibilityTestEngine', enabled: true },
-      { name: 'ux', path: '../api/UXAnalyzer', enabled: true }
+      { name: 'ux', path: '../ux/UXTestEngine', enabled: true },
+      { name: 'stress', path: '../stress/StressTestEngine', enabled: true }
     ];
 
     for (const config of engineConfigs) {

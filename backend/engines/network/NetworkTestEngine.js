@@ -283,34 +283,9 @@ class NetworkTestEngine {
     try {
       const urlObj = new URL(url);
       const hostname = urlObj.hostname;
-
-
-      /**
-
-
-       * for功能函数
-
-
-       * @param {Object} params - 参数对象
-
-
-       * @returns {Promise<Object>} 返回结果
-
-
-       */
       const commonPorts = [80, 443, 22, 21, 25, 53];
 
       for (const port of commonPorts) {
-
-        /**
-
-         * if功能函数
-
-         * @param {Object} params - 参数对象
-
-         * @returns {Promise<Object>} 返回结果
-
-         */
         const isOpen = await this.testPort(hostname, port);
         if (isOpen) {
           result.openPorts.push(port);
@@ -519,7 +494,9 @@ class NetworkTestEngine {
       scoreCount += 0.25;
     }
     
-    const overallScore = scoreCount > 0 ? Math.round(totalScore / scoreCount) : 50;
+    // 避免除零,如果没有有效评分则返回0而不是50
+    // scoreCount是累加的权重(总和为1.0),totalScore已经按权重计算
+    const overallScore = scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0;
     
     return {
       overallScore,

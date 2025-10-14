@@ -108,16 +108,6 @@ class CompatibilityTestEngine {
       generateReport: Joi.boolean().default(true)
     });
 
-
-    /**
-
-     * if功能函数
-
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
-
-     */
     const { error, value } = schema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);
@@ -266,20 +256,218 @@ class CompatibilityTestEngine {
       await page.goto(config.url, { waitUntil: 'networkidle', timeout: config.timeout });
       const loadTime = Date.now() - startTime;
       
-      // 基本测试：页面是否加载成功
+      // 测试1：页面是否加载成功
       const title = await page.title();
-      testResults.tests.push({
+      const pageLoadTest = {
         type: 'page-load',
         passed: !!title,
         data: { title, loadTime }
-      });
-
+      };
+      testResults.tests.push(pageLoadTest);
       if (title) {
         testResults.passed++;
       } else {
         testResults.failed++;
         testResults.issues.push('页面标题获取失败');
       }
+
+      // 测试2：JavaScript错误检测
+      const jsErrors = [];
+      page.on('pageerror', error => {
+        jsErrors.push(error.message);
+      });
+      page.on('console', msg => {
+        if (msg.type() === 'error') {
+          jsErrors.push(msg.text());
+        }
+      });
+      
+      // 等待一段时间以捕获任何JavaScript错误
+      await page.waitForTimeout(2000);
+      
+      const jsTest = {
+        type: 'javascript-errors',
+        passed: jsErrors.length === 0,
+        data: { errorCount: jsErrors.length, errors: jsErrors.slice(0, 5) }
+      };
+      testResults.tests.push(jsTest);
+      if (jsErrors.length === 0) {
+        testResults.passed++;
+      } else {
+        testResults.failed++;
+        testResults.issues.push(`检测到 ${jsErrors.length} 个JavaScript错误`);
+      }
+
+      // 测试3：CSS加载检测
+      const cssTest = await page.evaluate(() => {
+        const stylesheets = document.styleSheets;
+        let totalRules = 0;
+        let failedSheets = 0;
+        
+        for (let i = 0; i < stylesheets.length; i++) {
+          try {
+            const rules = stylesheets[i].cssRules || stylesheets[i].rules;
+            totalRules += rules ? rules.length : 0;
+          } catch (e) {
+            failedSheets++;
+          }
+        }
+        
+        return {
+          totalSheets: stylesheets.length,
+          totalRules,
+          failedSheets,
+          passed: failedSheets === 0 && totalRules > 0
+        };
+      });
+      
+      testResults.tests.push({
+        type: 'css-loading',
+        passed: cssTest.passed,
+        data: cssTest
+      });
+      if (cssTest.passed) {
+        testResults.passed++;
+      } else {
+        testResults.failed++;
+        testResults.issues.push('CSS样式表加载或解析失败');
+      }
+
+      // 测试4：响应式布局检测
+      const layoutTest = await page.evaluate(() => {
+        const body = document.body;
+        const hasOverflow = body.scrollWidth > window.innerWidth;
+        const viewportMeta = document.querySelector('meta[name="viewport"]');
+        
+        return {
+          hasViewportMeta: !!viewportMeta,
+          viewportContent: viewportMeta ? viewportMeta.getAttribute('content') : null,
+          hasHorizontalOverflow: hasOverflow,
+          bodyWidth: body.scrollWidth,
+          windowWidth: window.innerWidth,
+          passed: !!viewportMeta && !hasOverflow
+        };
+      });
+      
+      testResults.tests.push({
+        type: 'responsive-layout',
+        passed: layoutTest.passed,
+        data: layoutTest
+      });
+      if (layoutTest.passed) {
+        testResults.passed++;
+      } else {
+        testResults.failed++;
+        if (!layoutTest.hasViewportMeta) {
+          testResults.issues.push('缺少viewport meta标签');
+        }
+        if (layoutTest.hasHorizontalOverflow) {
+          testResults.issues.push('检测到水平滚动条，可能存在布局问题');
+        }
+      }
+
+      // 测试5：图片加载检测
+      const imageTest = await page.evaluate(() => {
+        const images = document.querySelectorAll('img');
+        let loaded = 0;
+        let broken = 0;
+        
+        images.forEach(img => {
+          if (img.complete && img.naturalWidth > 0) {
+            loaded++;
+          } else if (img.complete && img.naturalWidth === 0) {
+            broken++;
+          }
+        });
+        
+        return {
+          totalImages: images.length,
+          loaded,
+          broken,
+          passed: broken === 0 || images.length === 0
+        };
+      });
+      
+      testResults.tests.push({
+        type: 'image-loading',
+        passed: imageTest.passed,
+        data: imageTest
+      });
+      if (imageTest.passed) {
+        testResults.passed++;
+      } else {
+        testResults.failed++;
+        testResults.issues.push(`${imageTest.broken} 张图片加载失败`);
+      }
+
+      // 测试6：字体加载检测
+      const fontTest = await page.evaluate(() => {
+        if (!document.fonts) {
+          return { supported: false, passed: true };
+        }
+        
+        const fonts = Array.from(document.fonts);
+        const loadedFonts = fonts.filter(font => font.status === 'loaded');
+        const failedFonts = fonts.filter(font => font.status === 'error');
+        
+        return {
+          supported: true,
+          totalFonts: fonts.length,
+          loaded: loadedFonts.length,
+          failed: failedFonts.length,
+          passed: failedFonts.length === 0
+        };
+      });
+      
+      testResults.tests.push({
+        type: 'font-loading',
+        passed: fontTest.passed,
+        data: fontTest
+      });
+      if (fontTest.passed) {
+        testResults.passed++;
+      } else {
+        testResults.failed++;
+        testResults.issues.push(`${fontTest.failed} 个字体加载失败`);
+      }
+
+      // 测试7：交互元素可用性检测
+      const interactivityTest = await page.evaluate(() => {
+        const buttons = document.querySelectorAll('button, [role="button"]');
+        const links = document.querySelectorAll('a[href]');
+        const inputs = document.querySelectorAll('input, textarea, select');
+        
+        let disabledButtons = 0;
+        buttons.forEach(btn => {
+          if (btn.disabled || btn.hasAttribute('disabled')) {
+            disabledButtons++;
+          }
+        });
+        
+        let brokenLinks = 0;
+        links.forEach(link => {
+          const href = link.getAttribute('href');
+          if (!href || href === '#' || href === 'javascript:void(0)') {
+            brokenLinks++;
+          }
+        });
+        
+        return {
+          buttons: buttons.length,
+          disabledButtons,
+          links: links.length,
+          brokenLinks,
+          inputs: inputs.length,
+          passed: true // 这是信息性测试
+        };
+      });
+      
+      testResults.tests.push({
+        type: 'interactivity',
+        passed: interactivityTest.passed,
+        data: interactivityTest
+      });
+      testResults.passed++;
 
       return testResults;
     } finally {
@@ -294,16 +482,6 @@ class CompatibilityTestEngine {
     let testCount = 0;
     
     Object.values(results.browserResults).forEach(browserResult => {
-
-        /**
-
-         * if功能函数
-
-         * @param {Object} params - 参数对象
-
-         * @returns {Promise<Object>} 返回结果
-
-         */
       Object.values(browserResult.devices).forEach(deviceResult => {
         if (deviceResult.tests.length > 0) {
           const deviceScore = (deviceResult.passed / deviceResult.tests.length) * 100;

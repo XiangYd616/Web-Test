@@ -36,11 +36,6 @@ class UxTestEngine {
       })).default([])
     });
 
-    /**
-     * if功能函数
-     * @param {Object} params - 参数对象
-     * @returns {Promise<Object>} 返回结果
-     */
     const { error, value } = schema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);
@@ -110,7 +105,8 @@ class UxTestEngine {
       this.activeTests.set(testId, {
         status: 'running',
         progress: 0,
-        startTime: Date.now()
+        startTime: Date.now(),
+        browser: null  // 存储浏览器实例引用以便后续清理
       });
 
       this.updateTestProgress(testId, 5, '启动浏览器');
@@ -120,6 +116,13 @@ class UxTestEngine {
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
       });
+      
+      // 保存浏览器实例引用以便后续清理
+      const currentTest = this.activeTests.get(testId);
+      if (currentTest) {
+        currentTest.browser = browser;
+        this.activeTests.set(testId, currentTest);
+      }
 
       const page = await browser.newPage();
 
@@ -260,16 +263,6 @@ class UxTestEngine {
 
       for (const link of links) {
         const text = await link.evaluate(el => el.textContent.trim());
-
-        /**
-
-         * if功能函数
-
-         * @param {Object} params - 参数对象
-
-         * @returns {Promise<Object>} 返回结果
-
-         */
         const ariaLabel = await link.getAttribute('aria-label');
 
         if (text || ariaLabel) {
@@ -407,6 +400,247 @@ class UxTestEngine {
       return {
         status: 'failed',
         message: `可用性检查失败: ${error.message}`,
+        score: 0,
+        details: { error: error.message }
+      };
+    }
+  }
+
+  /**
+   * 检查移动端可用性
+   */
+  async checkMobileUsability(page) {
+    try {
+      const results = {
+        viewport: { hasViewportMeta: false, content: '' },
+        touchTargets: { adequate: 0, tooSmall: 0 },
+        textSize: { adequate: 0, tooSmall: 0 },
+        horizontalScroll: false,
+        score: 0,
+        issues: []
+      };
+
+      // 检查viewport meta标签
+      const viewportMeta = await page.$('meta[name="viewport"]');
+      results.viewport.hasViewportMeta = !!viewportMeta;
+      
+      if (viewportMeta) {
+        results.viewport.content = await viewportMeta.evaluate(el => el.getAttribute('content'));
+      } else {
+        results.issues.push('缺少viewport meta标签');
+      }
+
+      // 检查水平滚动
+      results.horizontalScroll = await page.evaluate(() => {
+        return document.documentElement.scrollWidth > window.innerWidth;
+      });
+      
+      if (results.horizontalScroll) {
+        results.issues.push('检测到水平滚动，可能影响移动体验');
+      }
+
+      // 检查触摸目标大小（按钮、链接等）
+      const touchTargets = await page.evaluate(() => {
+        const elements = document.querySelectorAll('button, a, input[type="button"], input[type="submit"]');
+        const results = { adequate: 0, tooSmall: 0 };
+        
+        elements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          const size = Math.min(rect.width, rect.height);
+          
+          // 最小触摸目标建议为48x48px
+          if (size >= 44) {
+            results.adequate++;
+          } else {
+            results.tooSmall++;
+          }
+        });
+        
+        return results;
+      });
+      
+      results.touchTargets = touchTargets;
+      if (touchTargets.tooSmall > 0) {
+        results.issues.push(`${touchTargets.tooSmall} 个触摸目标过小，建议最小44x44px`);
+      }
+
+      // 检查文本大小
+      const textSize = await page.evaluate(() => {
+        const elements = document.querySelectorAll('p, span, div, li, td, th');
+        const results = { adequate: 0, tooSmall: 0 };
+        
+        elements.forEach(el => {
+          const fontSize = parseFloat(window.getComputedStyle(el).fontSize);
+          
+          // 移动端最小字体建议为16px
+          if (fontSize >= 14) {
+            results.adequate++;
+          } else {
+            results.tooSmall++;
+          }
+        });
+        
+        return results;
+      });
+      
+      results.textSize = textSize;
+      if (textSize.tooSmall > 0) {
+        results.issues.push(`${textSize.tooSmall} 个文本元素字体过小`);
+      }
+
+      // 计算移动端可用性评分
+      let score = 100;
+      
+      if (!results.viewport.hasViewportMeta) score -= 30;
+      if (results.horizontalScroll) score -= 20;
+      if (touchTargets.tooSmall > 0) {
+        const ratio = touchTargets.tooSmall / (touchTargets.adequate + touchTargets.tooSmall);
+        score -= ratio * 30;
+      }
+      if (textSize.tooSmall > 0) {
+        const ratio = textSize.tooSmall / (textSize.adequate + textSize.tooSmall);
+        score -= ratio * 20;
+      }
+      
+      results.score = Math.max(0, Math.round(score));
+
+      return {
+        status: results.score >= 80 ? 'passed' : results.score >= 60 ? 'warning' : 'failed',
+        message: `移动端可用性评分: ${results.score}%`,
+        score: results.score,
+        details: results
+      };
+
+    } catch (error) {
+      return {
+        status: 'failed',
+        message: `移动端可用性检查失败: ${error.message}`,
+        score: 0,
+        details: { error: error.message }
+      };
+    }
+  }
+
+  /**
+   * 检查表单可用性
+   */
+  async checkForms(page) {
+    try {
+      const results = {
+        totalForms: 0,
+        totalFields: 0,
+        fieldsWithLabels: 0,
+        fieldsWithPlaceholders: 0,
+        fieldsWithValidation: 0,
+        formsWithSubmit: 0,
+        score: 0,
+        issues: []
+      };
+
+      // 检查表单数量
+      const forms = await page.$$('form');
+      results.totalForms = forms.length;
+
+      if (results.totalForms === 0) {
+        return {
+          status: 'passed',
+          message: '页面上没有表单',
+          score: 100,
+          details: results
+        };
+      }
+
+      // 检查每个表单
+      for (const form of forms) {
+        // 检查是否有提交按钮
+        const hasSubmit = await form.evaluate(f => {
+          return f.querySelector('button[type="submit"], input[type="submit"]') !== null;
+        });
+        
+        if (hasSubmit) {
+          results.formsWithSubmit++;
+        } else {
+          results.issues.push('表单缺少提交按钮');
+        }
+        
+        // 检查表单字段
+        const fields = await form.$$('input:not([type="hidden"]):not([type="submit"]), textarea, select');
+        results.totalFields += fields.length;
+        
+        for (const field of fields) {
+          const fieldInfo = await field.evaluate(f => {
+            const id = f.getAttribute('id');
+            const name = f.getAttribute('name');
+            const hasLabel = id && document.querySelector(`label[for="${id}"]`) !== null;
+            const hasPlaceholder = f.getAttribute('placeholder') !== null;
+            const hasRequired = f.hasAttribute('required');
+            const hasPattern = f.hasAttribute('pattern');
+            const hasMinLength = f.hasAttribute('minlength');
+            const hasMaxLength = f.hasAttribute('maxlength');
+            
+            return {
+              hasLabel,
+              hasPlaceholder,
+              hasValidation: hasRequired || hasPattern || hasMinLength || hasMaxLength
+            };
+          });
+          
+          if (fieldInfo.hasLabel) results.fieldsWithLabels++;
+          if (fieldInfo.hasPlaceholder) results.fieldsWithPlaceholders++;
+          if (fieldInfo.hasValidation) results.fieldsWithValidation++;
+        }
+      }
+
+      // 计算表单可用性评分
+      let score = 0;
+      
+      // 标签覆盖率评分 (40分)
+      if (results.totalFields > 0) {
+        const labelCoverage = (results.fieldsWithLabels / results.totalFields) * 100;
+        score += (labelCoverage / 100) * 40;
+      }
+      
+      // 占位符评分 (20分)
+      if (results.totalFields > 0) {
+        const placeholderCoverage = (results.fieldsWithPlaceholders / results.totalFields) * 100;
+        score += (placeholderCoverage / 100) * 20;
+      }
+      
+      // 验证评分 (20分)
+      if (results.totalFields > 0) {
+        const validationCoverage = (results.fieldsWithValidation / results.totalFields) * 100;
+        score += (validationCoverage / 100) * 20;
+      }
+      
+      // 提交按钮评分 (20分)
+      if (results.totalForms > 0) {
+        const submitCoverage = (results.formsWithSubmit / results.totalForms) * 100;
+        score += (submitCoverage / 100) * 20;
+      }
+      
+      results.score = Math.round(score);
+
+      // 生成问题报告
+      if (results.fieldsWithLabels < results.totalFields) {
+        const missing = results.totalFields - results.fieldsWithLabels;
+        results.issues.push(`${missing} 个字段缺少标签`);
+      }
+      
+      if (results.fieldsWithValidation < results.totalFields * 0.5) {
+        results.issues.push('表单字段缺少验证规则');
+      }
+
+      return {
+        status: results.score >= 80 ? 'passed' : results.score >= 60 ? 'warning' : 'failed',
+        message: `表单可用性评分: ${results.score}%`,
+        score: results.score,
+        details: results
+      };
+
+    } catch (error) {
+      return {
+        status: 'failed',
+        message: `表单检查失败: ${error.message}`,
         score: 0,
         details: { error: error.message }
       };
@@ -553,12 +787,25 @@ class UxTestEngine {
    */
   async stopTest(testId) {
     const test = this.activeTests.get(testId);
-    if (test && test.status === 'running') {
-      
+    if (test) {
+      // 如果测试正在运行，尝试关闭浏览器实例
+      if (test.status === 'running') {
+        // 关闭与此测试相关的浏览器实例（如果存储了）
+        if (test.browser) {
+          try {
+            await test.browser.close();
+            console.log(`测试 ${testId}: 浏览器实例已关闭`);
+          } catch (error) {
+            console.warn(`关闭浏览器实例失败: ${error.message}`);
+          }
+        }
+        
         test.status = 'cancelled';
-      this.activeTests.set(testId, test);
-      return true;
+        test.cancelledAt = Date.now();
+        this.activeTests.set(testId, test);
+        return true;
       }
+    }
     return false;
   }
 }

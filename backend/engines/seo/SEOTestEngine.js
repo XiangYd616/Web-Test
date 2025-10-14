@@ -15,6 +15,19 @@ class SeoTestEngine {
   }
 
   /**
+   * 更新测试进度
+   */
+  updateTestProgress(testId, progress, message) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      test.progress = progress;
+      test.message = message;
+      test.lastUpdate = Date.now();
+      this.activeTests.set(testId, test);
+    }
+  }
+
+  /**
    * 验证配置
    */
   validateConfig(config) {
@@ -375,18 +388,6 @@ class SeoTestEngine {
       },
       issues
     };
-  }
-
-  /**
-   * 更新测试进度
-   */
-  updateTestProgress(testId, progress, message) {
-    const test = this.activeTests.get(testId);
-    if (test) {
-      test.progress = progress;
-      test.message = message;
-      this.activeTests.set(testId, test);
-    }
   }
 
   /**
