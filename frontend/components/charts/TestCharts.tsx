@@ -68,7 +68,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
   const overviewData = useMemo(() => {
     if (!latestResult) return [];
 
-    const data = [];
+    const data: Array<{ name: string; score: number; target: number; color: string }> = [];
 
     // 获取总体评分，支持多种数据结构
     const overallScore = latestResult?.overallScore ||
@@ -247,7 +247,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
 
     return resultsArray.slice(0, 10).reverse().map((result, index) => ({
       test: `测试 ${index + 1}`,
-      timestamp: new Date(result.timestamp).toLocaleDateString(),
+      timestamp: new Date(result.timestamp || Date.now()).toLocaleDateString(),
       overallScore: result.overallScore || 0,
       duration: result.duration || 0,
       findings: (result.findings || result.issues || []).length
