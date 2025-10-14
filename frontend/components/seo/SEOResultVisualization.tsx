@@ -216,7 +216,7 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
 
   // 计算总体评分数据
   const overviewScores = useMemo(() => {
-    const scores = [];
+    const scores: Array<{ label: string; value: number; color: string }> = [];
     
     if (data.basicSEO) {
       scores.push(
@@ -237,7 +237,7 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
 
   // 计算雷达图数据
   const radarData = useMemo(() => {
-    const radarScores = [];
+    const radarScores: Array<{ label: string; value: number }> = [];
     
     if (data.basicSEO) {
       radarScores.push(

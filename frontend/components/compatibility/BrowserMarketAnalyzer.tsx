@@ -134,7 +134,7 @@ export const BrowserMarketAnalyzer: React.FC<BrowserMarketAnalyzerProps> = ({
       totalRevenueAtRisk,
       averageConversionImpact,
       totalFixCost,
-      estimatedFixTime,
+      estimatedFixTime: totalFixTime,
       roi,
       prioritizedIssues,
       recommendations
@@ -142,8 +142,20 @@ export const BrowserMarketAnalyzer: React.FC<BrowserMarketAnalyzerProps> = ({
   }, [compatibilityIssues, filteredMarketData]);
 
   // Generate business recommendations
-  const generateRecommendations = (browsers: BrowserMarketData[], issues: CompatibilityIssue[]) => {
-    const recommendations = [];
+  const generateRecommendations = (browsers: BrowserMarketData[], issues: CompatibilityIssue[]): Array<{
+    priority: 'immediate' | 'short-term' | 'long-term';
+    action: string;
+    impact: string;
+    cost: number;
+    benefit: number;
+  }> => {
+    const recommendations: Array<{
+      priority: 'immediate' | 'short-term' | 'long-term';
+      action: string;
+      impact: string;
+      cost: number;
+      benefit: number;
+    }> = [];
 
     // Critical browser support
     const criticalBrowsers = browsers.filter(b => 
