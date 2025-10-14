@@ -131,7 +131,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
 
   // 确定右侧图标
   const getRightIcon = () => {
-    const icons = [];
+    const icons: React.ReactElement[] = [];
 
     // 验证状态图标
     if (enableValidation && isValid !== null) {
