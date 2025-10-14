@@ -226,7 +226,7 @@ export const TestTrendAnalyzer: React.FC<TestTrendAnalyzerProps> = ({
 
   // Helper functions
   const generatePossibleCauses = (metric: TestMetric, mean: number): string[] => {
-    const causes = [];
+    const causes: string[] = [];
     if (metric.score < mean * 0.8) {
       causes.push('Performance regression');
       causes.push('Code quality issues');
@@ -291,7 +291,12 @@ export const TestTrendAnalyzer: React.FC<TestTrendAnalyzerProps> = ({
   };
 
   const generateInsights = (metrics: TestMetric[], trend: string, changeRate: number, anomalies: unknown[]) => {
-    const insights = [];
+    const insights: Array<{
+      type: 'improvement' | 'regression' | 'pattern' | 'recommendation';
+      message: string;
+      confidence: number;
+      actionItems: string[];
+    }> = [];
 
     if (Math.abs(changeRate) > 10) {
       insights.push({
@@ -327,7 +332,13 @@ export const TestTrendAnalyzer: React.FC<TestTrendAnalyzerProps> = ({
   };
 
   const generateBusinessRecommendations = (metrics: any) => {
-    const recommendations = [];
+    const recommendations: Array<{
+      priority: 'critical' | 'high' | 'medium' | 'low';
+      impact: string;
+      effort: string;
+      roi: number;
+      description: string;
+    }> = [];
 
     if (metrics.qualityScore < 70) {
       recommendations.push({
