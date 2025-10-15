@@ -1,58 +1,114 @@
 /**
- * 统一日志工具
+ * 统一日志工具 - Winston实现
  *
  * 提供标准化的日志输出格式和级别控制
  */
 
-// 日志级别配置
-const LOG_LEVELS = {
-  ERROR: 0,
-  WARN: 1,
-  INFO: 2,
-  DEBUG: 3
-};
+const winston = require('winston');
+const DailyRotateFile = require('winston-daily-rotate-file');
+const path = require('path');
+const fs = require('fs');
 
-// 当前日志级别
-const CURRENT_LOG_LEVEL = process.env.NODE_ENV === 'production'
-  ? LOG_LEVELS.INFO
-  : LOG_LEVELS.DEBUG;
-
-/**
- * 格式化日志消息
- */
-function formatLogMessage(level, message, meta = {}) {
-  const timestamp = new Date().toISOString();
-  let logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
-
-  // 添加元数据
-  if (meta && Object.keys(meta).length > 0) {
-    logMessage += ` ${JSON.stringify(meta)}`;
-  }
-
-  return logMessage;
+// 确保日志目录存在
+const logDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
 }
 
+// 自定义日志格式
+const customFormat = winston.format.combine(
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.errors({ stack: true }),
+  winston.format.printf(({ timestamp, level, message, stack, ...meta }) => {
+    let log = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+    
+    // 添加元数据
+    const metaKeys = Object.keys(meta);
+    if (metaKeys.length > 0 && metaKeys[0] !== 'Symbol(level)') {
+      log += ` ${JSON.stringify(meta)}`;
+    }
+    
+    // 添加错误堆栈
+    if (stack) {
+      log += `\n${stack}`;
+    }
+    
+    return log;
+  })
+);
+
+// 创建Winston logger实例
+const winstonLogger = winston.createLogger({
+  level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
+  format: customFormat,
+  transports: [
+    // 错误日志 - 每天轮转
+    new DailyRotateFile({
+      filename: path.join(logDir, 'error-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      level: 'error',
+      maxFiles: '14d',
+      maxSize: '20m',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      )
+    }),
+    
+    // 综合日志 - 每天轮转
+    new DailyRotateFile({
+      filename: path.join(logDir, 'combined-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '14d',
+      maxSize: '20m',
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      )
+    }),
+    
+    // 控制台输出 - 开发环境使用
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        customFormat
+      )
+    })
+  ],
+  
+  // 异常处理
+  exceptionHandlers: [
+    new DailyRotateFile({
+      filename: path.join(logDir, 'exceptions-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '14d'
+    })
+  ],
+  
+  // 未捕获的Promise拒绝
+  rejectionHandlers: [
+    new DailyRotateFile({
+      filename: path.join(logDir, 'rejections-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '14d'
+    })
+  ]
+});
+
 /**
- * 统一日志工具类
+ * 统一日志工具类 - 包装Winston
  */
 class Logger {
   /**
    * 错误日志
    */
   static error(message, error = null, meta = {}) {
-    if (CURRENT_LOG_LEVEL >= LOG_LEVELS.ERROR) {
-      let logMessage = formatLogMessage('error', message, meta);
-
-      if (error instanceof Error) {
-        logMessage += `/nError: ${error.message}`;
-        if (error.stack) {
-          logMessage += `/nStack: ${error.stack}`;
-        }
-      } else if (error) {
-        logMessage += `/nError: ${JSON.stringify(error)}`;
-      }
-
-      console.error(logMessage);
+    if (error instanceof Error) {
+      winstonLogger.error(message, { ...meta, error: error.message, stack: error.stack });
+    } else if (error) {
+      winstonLogger.error(message, { ...meta, error });
+    } else {
+      winstonLogger.error(message, meta);
     }
   }
 
@@ -60,26 +116,21 @@ class Logger {
    * 警告日志
    */
   static warn(message, meta = {}) {
-    if (CURRENT_LOG_LEVEL >= LOG_LEVELS.WARN) {
-      console.warn(formatLogMessage('warn', message, meta));
-    }
+    winstonLogger.warn(message, meta);
   }
 
   /**
    * 信息日志
    */
   static info(message, meta = {}) {
-    if (CURRENT_LOG_LEVEL >= LOG_LEVELS.INFO) {
-      console.info(formatLogMessage('info', message, meta));
-    }
+    winstonLogger.info(message, meta);
   }
 
   /**
    * 调试日志
    */
   static debug(message, meta = {}) {
-    if (CURRENT_LOG_LEVEL >= LOG_LEVELS.DEBUG) {
-    }
+    winstonLogger.debug(message, meta);
   }
 
   /**
@@ -162,11 +213,18 @@ class Logger {
    * 清理旧日志文件
    */
   static cleanup() {
-    // Winston会自动处理日志轮转，这里可以添加额外的清理逻辑
+    // Winston会自动处理日志轮转
     this.info('日志清理完成');
+  }
+  
+  /**
+   * 获取Winston实例(用于高级配置)
+   */
+  static getWinstonInstance() {
+    return winstonLogger;
   }
 }
 
 // 导出日志工具
 module.exports = Logger;
-module.exports.LOG_LEVELS = LOG_LEVELS;
+module.exports.winstonLogger = winstonLogger;

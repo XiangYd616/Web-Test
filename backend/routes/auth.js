@@ -15,6 +15,8 @@ const {
 const { loginRateLimiter, registerRateLimiter } = require('../middleware/rateLimiter');
 const { ErrorHandler, asyncHandler } = require('../middleware/errorHandler');
 const { securityLogger } = require('../middleware/logger');
+const logger = require('../utils/logger');
+const emailService = require('../services/email/EmailService');
 
 const router = express.Router();
 
@@ -116,15 +118,20 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
         [verificationToken, verificationExpiry, user.id]
       );
 
-      // 模拟发送验证邮件
-      const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(user.email)}`;
-      console.log(`发送注册验证邮件到: ${user.email}`);
-      console.log(`验证链接: ${verificationUrl}`);
+      // 发送验证邮件
+      const emailResult = await emailService.sendEmailVerification(
+        user.email,
+        verificationToken,
+        user.username
+      );
 
-      // 这里应该调用邮件服务发送邮件
-      // await sendVerificationEmail(user.email, verificationUrl);
+      if (emailResult.success) {
+        logger.info('注册验证邮件发送成功', { email: user.email, messageId: emailResult.messageId });
+      } else {
+        logger.warn('注册验证邮件发送失败，但不影响注册流程', { email: user.email, error: emailResult.error });
+      }
     } catch (emailError) {
-      console.error('发送验证邮件失败:', emailError);
+      logger.error('发送验证邮件失败:', emailError);
       // 不影响注册流程，但记录错误
     }
 
@@ -137,7 +144,7 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
       emailVerificationRequired: true // 指示需要邮箱验证
     }, '注册成功，请检查邮箱完成验证', 201);
   } catch (error) {
-    console.error('注册错误:', error);
+    logger.error('注册错误:', error);
     return res.serverError('注册失败，请稍后重试');
   }
 }));
@@ -218,20 +225,39 @@ router.post('/login', loginRateLimiter, asyncHandler(async (req, res) => {
     // 验证密码
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
-      // 增加失败登录次数
-      const newFailedAttempts = (user.failed_login_attempts || 0) + 1;
-      let lockUntil = null;
+      // 🔒 使用数据库原子操作防止竞态条件
+      // 在一个查询中完成：检查锁定状态 + 增加失败次数 + 设置锁定
+      const updateResult = await query(`
+        UPDATE users 
+        SET 
+          failed_login_attempts = CASE 
+            WHEN locked_until IS NOT NULL AND locked_until > NOW() THEN failed_login_attempts
+            ELSE failed_login_attempts + 1
+          END,
+          locked_until = CASE 
+            WHEN locked_until IS NOT NULL AND locked_until > NOW() THEN locked_until
+            WHEN failed_login_attempts + 1 >= 5 THEN NOW() + INTERVAL '30 minutes'
+            ELSE locked_until
+          END,
+          updated_at = NOW()
+        WHERE id = $1
+        RETURNING id, failed_login_attempts, locked_until
+      `, [user.id]);
 
-      // 如果失败次数达到5次，锁定账户30分钟
-      if (newFailedAttempts >= 5) {
-        lockUntil = new Date();
-        lockUntil.setMinutes(lockUntil.getMinutes() + 30);
+      const updatedUser = updateResult.rows[0];
+      const newFailedAttempts = updatedUser.failed_login_attempts;
+      const lockUntil = updatedUser.locked_until;
+
+      // 如果账户在更新过程中被锁定（并发请求可能导致）
+      if (lockUntil && new Date(lockUntil) > new Date()) {
+        await recordSecurityEvent(user.id, 'login_failed', {
+          email,
+          reason: 'account_locked_on_update',
+          failedAttempts: newFailedAttempts
+        }, req, false, 'high');
+        
+        return res.forbidden('账户已被锁定，请稍后重试');
       }
-
-      await query(
-        'UPDATE users SET failed_login_attempts = $1, locked_until = $2, updated_at = NOW() WHERE id = $3',
-        [newFailedAttempts, lockUntil, user.id]
-      );
 
       securityLogger('login_failed', {
         userId: user.id,
@@ -283,7 +309,7 @@ router.post('/login', loginRateLimiter, asyncHandler(async (req, res) => {
       user: tokenPair.user
     }, '登录成功');
   } catch (error) {
-    console.error('登录错误:', error);
+    logger.error('登录错误:', error);
     return res.serverError('登录失败，请稍后重试');
   }
 }));
@@ -347,7 +373,7 @@ router.post('/verify', asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Token验证失败:', error);
+    logger.error('Token验证失败:', error);
     res.serverError('Token验证过程中发生错误');
   }
 }));
@@ -383,7 +409,7 @@ router.get('/me', authMiddleware, asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取用户信息错误:', error);
+    logger.error('获取用户信息错误:', error);
     res.serverError('获取用户信息失败');
   }
 }));
@@ -474,7 +500,7 @@ router.put('/change-password', authMiddleware, asyncHandler(async (req, res) => 
 
     res.success('密码修改成功');
   } catch (error) {
-    console.error('修改密码错误:', error);
+    logger.error('修改密码错误:', error);
     res.serverError('修改密码失败，请稍后重试');
   }
 }));
@@ -517,12 +543,23 @@ router.post('/forgot-password', asyncHandler(async (req, res) => {
       [resetToken, resetTokenExpiry, user.id]
     );
 
-    // TODO: 发送重置密码邮件
+    // 发送重置密码邮件
+    const emailResult = await emailService.sendPasswordReset(
+      user.email,
+      resetToken,
+      user.username
+    );
+
+    if (emailResult.success) {
+      logger.info('密码重置邮件发送成功', { email: user.email, messageId: emailResult.messageId });
+    } else {
+      logger.warn('密码重置邮件发送失败', { email: user.email, error: emailResult.error });
+    }
 
     res.success('如果该邮箱地址存在，我们已发送重置密码的邮件');
 
   } catch (error) {
-    console.error('密码重置请求失败:', error);
+    logger.error('密码重置请求失败:', error);
     res.serverError('服务器错误，请稍后重试');
   }
 }));
@@ -559,7 +596,7 @@ router.get('/validate-reset-token', asyncHandler(async (req, res) => {
     res.success({ valid: true }, '重置令牌有效');
 
   } catch (error) {
-    console.error('验证重置令牌失败:', error);
+    logger.error('验证重置令牌失败:', error);
     res.serverError('服务器错误，请稍后重试');
   }
 }));
@@ -627,7 +664,7 @@ router.post('/reset-password', asyncHandler(async (req, res) => {
     res.success('密码重置成功，请使用新密码登录');
 
   } catch (error) {
-    console.error('密码重置失败:', error);
+    logger.error('密码重置失败:', error);
     res.serverError('服务器错误，请稍后重试');
   }
 }));
@@ -656,12 +693,22 @@ router.post('/send-verification', authMiddleware, asyncHandler(async (req, res) 
       [verificationToken, verificationExpiry, user.id]
     );
 
-    // TODO: 发送验证邮件
+    // 发送验证邮件
+    const emailResult = await emailService.sendEmailVerification(
+      user.email,
+      verificationToken,
+      user.username
+    );
+
+    if (!emailResult.success) {
+      logger.error('验证邮件发送失败', { email: user.email, error: emailResult.error });
+      return res.serverError('发送验证邮件失败，请稍后重试');
+    }
 
     res.success('验证邮件已发送，请检查您的邮箱');
 
   } catch (error) {
-    console.error('发送验证邮件失败:', error);
+    logger.error('发送验证邮件失败:', error);
     res.serverError('服务器错误，请稍后重试');
   }
 }));
@@ -701,7 +748,7 @@ router.post('/verify-email', asyncHandler(async (req, res) => {
     res.success('邮箱验证成功');
 
   } catch (error) {
-    console.error('邮箱验证失败:', error);
+    logger.error('邮箱验证失败:', error);
     res.serverError('服务器错误，请稍后重试');
   }
 }));
