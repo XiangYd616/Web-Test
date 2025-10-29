@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { Download, Eye, Pause, Trash2 } from 'lucide-react';
@@ -70,7 +71,7 @@ const TestManagement: FC = () => {
         setTests(mockTests);
         setLoading(false);
       } catch (error) {
-        console.error('Failed to fetch tests:', error);
+        Logger.error('Failed to fetch tests:', error);
         setLoading(false);
       }
     };

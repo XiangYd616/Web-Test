@@ -11,6 +11,7 @@
  * - 优化的性能和用户体验
  */
 
+import Logger from '@/utils/logger';
 import {
   BarChartOutlined,
   CheckCircleOutlined,
@@ -157,7 +158,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
         setTestHistory(history);
       }
     } catch (error) {
-      console.error('加载测试历史失败:', error);
+      Logger.error('加载测试历史失败:', error);
     }
   }, [engine, selectedTestType]);
 
@@ -171,7 +172,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
         setTestStatistics(stats);
       }
     } catch (error) {
-      console.error('加载测试统计失败:', error);
+      Logger.error('加载测试统计失败:', error);
     }
   }, [engine]);
 
@@ -197,7 +198,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
           });
         }
       } catch (error) {
-        console.error('获取实时指标失败:', error);
+        Logger.error('获取实时指标失败:', error);
       }
     }, 1000);
 
@@ -257,7 +258,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
         throw new Error('测试启动失败');
       }
 
-      console.log(`🚀 测试已启动: ${testId}`);
+      Logger.debug(`🚀 测试已启动: ${testId}`);
 
       // 触发回调
       onTestStarted?.({ testId, config: finalConfig });
@@ -275,7 +276,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
       }
 
     } catch (error) {
-      console.error('测试执行失败:', error);
+      Logger.error('测试执行失败:', error);
       onTestError?.(error as Error);
     }
   }, [form, engine, selectedTestType, defaultConfig, onTestError, onTestStarted, onConfigChange, enableRealTimeMetrics, startRealTimeMetrics]);
@@ -314,7 +315,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('导出测试结果失败:', error);
+      Logger.error('导出测试结果失败:', error);
       onTestError?.(error as Error);
     }
   }, [engine, enableExport, onTestError]);
@@ -325,9 +326,9 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const _handleBatchCancel = useCallback(async () => {
     try {
       await engine.cancelAllTests();
-      console.log('✅ 已取消所有运行中的测试');
+      Logger.debug('✅ 已取消所有运行中的测试');
     } catch (error) {
-      console.error('批量取消失败:', error);
+      Logger.error('批量取消失败:', error);
       onTestError?.(error as Error);
     }
   }, [engine, onTestError]);
@@ -335,7 +336,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const handleClearHistory = useCallback(() => {
     engine.clearCompletedTests();
     setTestHistory([]);
-    console.log('✅ 已清理测试历史');
+    Logger.debug('✅ 已清理测试历史');
   }, [engine]);
 
   /**

@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * proxyService.ts - 业务服务层
  * 
@@ -70,7 +72,7 @@ export class ProxyService {
       }
 
     } catch (error) {
-      console.warn('Fetch page failed:', error);
+      Logger.warn('Fetch page failed:', error);
 
       // 提供更详细的错误信息
       if (error instanceof Error) {
@@ -177,7 +179,7 @@ export class ProxyService {
 
       if (result.success && result.data) {
         const loadTime = Date.now() - startTime;
-        console.log(`✅ 后端API成功: ${url} (${loadTime}ms)`);
+        Logger.debug(`✅ 后端API成功: ${url} (${loadTime}ms)`);
 
         return {
           html: result.data.html,
@@ -191,7 +193,7 @@ export class ProxyService {
       }
 
     } catch (error) {
-      console.warn(`❌ 后端API失败: ${error instanceof Error ? error?.message : error}`);
+      Logger.warn(`❌ 后端API失败: ${error instanceof Error ? error?.message : error}`);
       return null;
     }
   }
@@ -247,7 +249,7 @@ export class ProxyService {
                   };
                 }
               } catch (jsonError) {
-                console.warn('Failed to parse allorigins response:', jsonError);
+                Logger.warn('Failed to parse allorigins response:', jsonError);
                 continue;
               }
             } else if (proxyUrl.includes('codetabs')) {
@@ -309,19 +311,19 @@ export class ProxyService {
         } catch (error) {
           // 只在开发模式下显示代理错误详情，减少控制台噪音
           if (process.env.NODE_ENV === 'development') {
-            console.warn(`代理服务失败 ${proxyUrl}:`, error instanceof Error ? error?.message : error);
+            Logger.warn(`代理服务失败 ${proxyUrl}:`, error instanceof Error ? error?.message : error);
           }
           continue;
         }
       }
 
       // 所有代理都失败了
-      console.warn('All proxy services failed for URL:', url);
+      Logger.warn('All proxy services failed for URL:', url);
 
       // 返回null，让调用者决定如何处理
       return null;
     } catch (error) {
-      console.warn('Proxy service error:', error);
+      Logger.warn('Proxy service error:', error);
 
       // 返回null，让调用者决定如何处理
       return null;
@@ -492,7 +494,7 @@ export class ProxyService {
       if (error instanceof Error && error?.message.includes('404')) {
         // 静默处理404错误
       } else {
-        console.warn(`Failed to fetch sitemap ${sitemapUrl}:`, error);
+        Logger.warn(`Failed to fetch sitemap ${sitemapUrl}:`, error);
       }
 
       return {
@@ -522,7 +524,7 @@ export class ProxyService {
         });
       }
     } catch (error) {
-      console.warn('Failed to parse sitemap URLs:', error);
+      Logger.warn('Failed to parse sitemap URLs:', error);
     }
 
     return urls;

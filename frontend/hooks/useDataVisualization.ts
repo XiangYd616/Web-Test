@@ -3,6 +3,7 @@
  * 提供数据管理、实时更新、缓存等功能
  */
 
+import Logger from '@/utils/logger';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 // ==================== 类型定义 ====================
@@ -243,7 +244,7 @@ export const useDataVisualization = (
       };
       localStorage.setItem(`chart_data_${cacheKey}`, JSON.stringify(cacheData));
     } catch (error) {
-      console.warn('Failed to save chart data to cache:', error);
+      Logger.warn('Failed to save chart data to cache:', error);
     }
   }, [cacheKey, autoSave]);
 
@@ -261,7 +262,7 @@ export const useDataVisualization = (
         }
       }
     } catch (error) {
-      console.warn('Failed to load chart data from cache:', error);
+      Logger.warn('Failed to load chart data from cache:', error);
     }
     return false;
   }, [cacheKey]);

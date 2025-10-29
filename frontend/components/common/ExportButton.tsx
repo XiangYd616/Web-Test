@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import Logger from '@/utils/logger';
 import { ChevronDown, Download, FileText, Image, Table } from 'lucide-react';
 import { useState } from 'react';
 
@@ -139,7 +140,7 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
 
       onExportComplete?.(format, true);
     } catch (error) {
-      console.error('Export failed:', error);
+      Logger.error('Export failed:', error);
       onExportComplete?.(format, false);
     } finally {
       setIsExporting(false);

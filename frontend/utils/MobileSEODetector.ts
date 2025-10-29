@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 /**
  * Mobile SEO Detection Utility
  * Comprehensive mobile SEO checker for validating mobile optimization
@@ -450,7 +452,7 @@ export class MobileSeoDetector {
         }
       }
     } catch (error) {
-      console.warn('无法访问CSS规则:', error);
+      Logger.warn('无法访问CSS规则:', error);
     }
   }
 

@@ -7,6 +7,7 @@
  * 更新: 2025-09-26 - 集成权限控制和认证检查
  */
 
+import Logger from '@/utils/logger';
 import type {
   TestApiClient
 } from '../../types';
@@ -248,7 +249,7 @@ class TestApiService implements TestApiClient {
       }
 
       // 记录测试启动日志
-      console.log(`🚀 用户 ${user.email} 启动${config?.testType}测试`, {
+      Logger.debug(`🚀 用户 ${user.email} 启动${config?.testType}测试`, {
         testType: config?.testType,
         target: config?.target,
         userId: user.id,
@@ -282,7 +283,7 @@ class TestApiService implements TestApiClient {
         };
 
         // 记录成功日志
-        console.log(`✅ 测试启动成功`, {
+        Logger.debug(`✅ 测试启动成功`, {
           testId: testExecution.id,
           testType: config?.testType,
           userId: user.id
@@ -298,7 +299,7 @@ class TestApiService implements TestApiClient {
       return response as ApiResponse<TestExecution>;
 
     } catch (error) {
-      console.error('❌ 测试执行失败:', error);
+      Logger.error('❌ 测试执行失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '测试执行失败',

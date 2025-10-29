@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import { BarChart3, Book, ChevronRight, Clock, Code, Download, FileText, Filter, HelpCircle, Mail, MessageCircle, Phone, Play, Search, Send, Shield, Tag, ThumbsDown, ThumbsUp, Users, Video, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -320,7 +321,7 @@ const Help: React.FC = () => {
         const terms = await helpService.getPopularSearchTerms();
         setPopularTerms(terms);
       } catch (error) {
-        console.error('加载热门搜索词失败:', error);
+        Logger.error('加载热门搜索词失败:', error);
       }
     };
     loadPopularTerms();
@@ -336,7 +337,7 @@ const Help: React.FC = () => {
           const results = await helpService.searchContent(searchQuery);
           setSearchResults(results);
         } catch (error) {
-          console.error('搜索失败:', error);
+          Logger.error('搜索失败:', error);
           // 降级到本地搜索
           const localResults = [
             ...faqs.filter(faq =>
@@ -399,7 +400,7 @@ const Help: React.FC = () => {
         priority: 'medium'
       });
     } catch (error) {
-      console.error('提交反馈失败:', error);
+      Logger.error('提交反馈失败:', error);
       alert('提交失败，请稍后重试。');
     } finally {
       setSubmitLoading(false);
@@ -420,7 +421,7 @@ const Help: React.FC = () => {
       // 更新本地FAQ统计（可选）
       // 这里可以重新获取FAQ统计数据
     } catch (error) {
-      console.error('反馈提交失败:', error);
+      Logger.error('反馈提交失败:', error);
       alert('反馈提交失败，请稍后重试。');
     }
   };
@@ -445,7 +446,7 @@ const Help: React.FC = () => {
 
       // 可以显示下载成功提示
     } catch (error) {
-      console.error('下载失败:', error);
+      Logger.error('下载失败:', error);
       alert('下载失败，请稍后重试。');
     }
   };
@@ -457,7 +458,7 @@ const Help: React.FC = () => {
       // 这里可以打开视频播放器或跳转到视频页面
       window.open(video.videoUrl, '_blank');
     } catch (error) {
-      console.error('记录视频观看失败:', error);
+      Logger.error('记录视频观看失败:', error);
       // 即使记录失败也允许观看视频
       window.open(video.videoUrl, '_blank');
     }

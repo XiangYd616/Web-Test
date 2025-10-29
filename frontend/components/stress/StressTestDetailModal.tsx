@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Copy, Download, ExternalLink, Settings, TrendingUp, Users, X, XCircle, Zap } from 'lucide-react';
 import React from 'react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
@@ -253,7 +254,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
       await ExportUtils.exportByType(exportType, data);
       setIsExportModalOpen(false);
     } catch (error) {
-      console.error('导出失败:', error);
+      Logger.error('导出失败:', error);
       alert('导出失败，请重试');
     }
   }, []);

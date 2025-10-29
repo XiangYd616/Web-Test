@@ -5,6 +5,7 @@
  * 配置全局测试环境和模拟对象
  */
 
+import Logger from '@/utils/logger';
 import '@testing-library/jest-dom';
 import { expect, afterEach, beforeAll, afterAll } from 'vitest';
 import { cleanup } from '@testing-library/react';
@@ -154,11 +155,11 @@ afterAll(() => {
 
 // 全局错误处理
 window.addEventListener('error', (event) => {
-  console.error('Global error in test:', event.error);
+  Logger.error('Global error in test:', event.error);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection in test:', event.reason);
+  Logger.error('Unhandled promise rejection in test:', event.reason);
 });
 
 // 导出测试工具函数

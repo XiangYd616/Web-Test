@@ -3,6 +3,7 @@
  * 统一处理所有API请求的错误响应
  */
 
+import Logger from '@/utils/logger';
 import axios, { AxiosError } from 'axios';
 
 // API错误响应接口
@@ -266,7 +267,7 @@ class ApiErrorInterceptor {
    */
   private handleForbidden(error: AxiosError): void {
     // 记录权限问题，可能需要联系管理员
-    console.warn('Access forbidden:', {
+    Logger.warn('Access forbidden:', {
       url: error.config?.url,
       user: this.getCurrentUser(),
       timestamp: new Date().toISOString()
@@ -282,7 +283,7 @@ class ApiErrorInterceptor {
     const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 60000;
 
     // 实施退避策略
-    console.warn(`Rate limited. Retry after ${waitTime}ms`);
+    Logger.warn(`Rate limited. Retry after ${waitTime}ms`);
   }
 
   /**
@@ -290,7 +291,7 @@ class ApiErrorInterceptor {
    */
   private handleServerError(error: AxiosError): void {
     // 记录服务器错误，可能需要降级处理
-    console.error('Server error:', {
+    Logger.error('Server error:', {
       status: error.response?.status,
       url: error.config?.url,
       timestamp: new Date().toISOString()

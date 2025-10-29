@@ -16,7 +16,7 @@ interface StoryObj<T = any> {
 }
 
 // Mock action function
-const action = (name: string) => (...args: unknown[]) => console.log(name, ...args);
+const action = (name: string) => (...args: unknown[]) => Logger.debug(name, ...args);
 
 /**
  * Input组件Storybook文档
@@ -24,6 +24,7 @@ const action = (name: string) => (...args: unknown[]) => console.log(name, ...ar
 
 // import { action } from '@storybook/addon-actions'; // Storybook未安装
 // import type { Meta, StoryObj } from '@storybook/react'; // Storybook未安装
+import Logger from '@/utils/logger';
 import { Lock, Mail, Phone, Search, User } from 'lucide-react';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
 import { Input, NumberInput, PasswordInput, SearchInput, Select, Textarea } from '../Input';

@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { format } from 'date-fns';
 import { dataAnalysisService } from '../analytics';
 import { monitoringService } from '../monitoring';
@@ -150,7 +151,7 @@ class ReportService {
         return this.reports;
       }
     } catch (error) {
-      console.warn('Backend not available, using local data:', error);
+      Logger.warn('Backend not available, using local data:', error);
     }
 
     return this.getLocalReports();
@@ -170,7 +171,7 @@ class ReportService {
         return;
       }
     } catch (error) {
-      console.warn('Backend not available, using local storage:', error);
+      Logger.warn('Backend not available, using local storage:', error);
     }
 
     this.reports = this.reports.filter(report => report.id !== reportId);
@@ -199,7 +200,7 @@ class ReportService {
         return;
       }
     } catch (error) {
-      console.warn('Backend not available, generating local download:', error);
+      Logger.warn('Backend not available, generating local download:', error);
     }
 
     // 本地生成下载
@@ -243,7 +244,7 @@ class ReportService {
       }
 
     } catch (error) {
-      console.error('Error generating report:', error);
+      Logger.error('Error generating report:', error);
 
       // 更新为失败状态
       const reportIndex = this.reports.findIndex(r => r.id === report.id);
@@ -496,7 +497,7 @@ class ReportService {
         return this.reports;
       }
     } catch (error) {
-      console.error('Error loading local reports:', error);
+      Logger.error('Error loading local reports:', error);
     }
     return [];
   }
@@ -508,7 +509,7 @@ class ReportService {
     try {
       localStorage.setItem('generated_reports', JSON.stringify(this.reports));
     } catch (error) {
-      console.error('Error saving local reports:', error);
+      Logger.error('Error saving local reports:', error);
     }
   }
 }

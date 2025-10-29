@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿// 增强的报告生成和导出服务
 export interface ReportConfig {
   title: string;
@@ -95,7 +97,7 @@ export class ReportGeneratorService {
 
       return reportId;
     } catch (error) {
-      console.error('Failed to generate report:', error);
+      Logger.error('Failed to generate report:', error);
       throw error;
     }
   }
@@ -128,7 +130,7 @@ export class ReportGeneratorService {
           throw new Error(`Unsupported export format: ${options.format}`);
       }
     } catch (error) {
-      console.error('Failed to export report:', error);
+      Logger.error('Failed to export report:', error);
       throw error;
     }
   }

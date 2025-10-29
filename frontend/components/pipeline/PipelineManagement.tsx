@@ -3,6 +3,7 @@
  * Visual interface for creating and managing test pipelines
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import {Play, Settings, Plus, Trash2, Clock, AlertTriangle, CheckCircle, GitBranch, Bell, Shield, Activity} from 'lucide-react';
 import TestOrchestrator, { TestPipeline, TestJob } from '../../services/orchestration/testOrchestrator';
@@ -57,7 +58,7 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
       loadPipelines();
       setShowCreateModal(false);
     } catch (error) {
-      console.error('Failed to create pipeline:', error);
+      Logger.error('Failed to create pipeline:', error);
     } finally {
       setIsCreatingPipeline(false);
     }
@@ -70,7 +71,7 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
       });
       loadExecutionMetrics();
     } catch (error) {
-      console.error('Failed to execute pipeline:', error);
+      Logger.error('Failed to execute pipeline:', error);
     }
   }, [loadExecutionMetrics]);
 

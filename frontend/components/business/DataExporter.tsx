@@ -3,6 +3,7 @@
  * 支持多格式数据导出功能
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import {
     AlertCircle,
@@ -171,7 +172,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                 setExportTasks(result.data);
             }
         } catch (error) {
-            console.error('加载导出任务失败:', error);
+            Logger.error('加载导出任务失败:', error);
             showNotification('加载导出任务失败', 'error');
         } finally {
             setIsLoading(false);
@@ -211,7 +212,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
                         }
                     }
                 } catch (error) {
-                    console.error('更新任务状态失败:', error);
+                    Logger.error('更新任务状态失败:', error);
                 }
             }
         }, 2000);

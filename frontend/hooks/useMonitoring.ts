@@ -3,6 +3,7 @@
  * 基于全局状态管理的监控功能
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
 
@@ -137,7 +138,7 @@ export const useMonitoring = () => {
             });
 
         } catch (error) {
-            console.error('Add target error:', error);
+            Logger.error('Add target error:', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);
@@ -164,7 +165,7 @@ export const useMonitoring = () => {
             });
 
         } catch (error) {
-            console.error('Update target error:', error);
+            Logger.error('Update target error:', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);
@@ -189,7 +190,7 @@ export const useMonitoring = () => {
             });
 
         } catch (error) {
-            console.error('Remove target error:', error);
+            Logger.error('Remove target error:', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);
@@ -223,7 +224,7 @@ export const useMonitoring = () => {
             });
 
         } catch (error) {
-            console.error('Check target error:', error);
+            Logger.error('Check target error:', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);
@@ -245,7 +246,7 @@ export const useMonitoring = () => {
             return data.targets || (monitoring.targets as MonitoringTarget[]);
 
         } catch (error) {
-            console.error('Get targets error:', error);
+            Logger.error('Get targets error:', error);
             return monitoring.targets as MonitoringTarget[];
         }
     }, [state.auth.token, monitoring.targets]);
@@ -278,7 +279,7 @@ export const useMonitoring = () => {
             return data.alerts || monitoring.alerts;
 
         } catch (error) {
-            console.error('Get alerts error:', error);
+            Logger.error('Get alerts error:', error);
             return monitoring.alerts as Alert[];
         }
     }, [state.auth.token, monitoring.alerts]);
@@ -303,7 +304,7 @@ export const useMonitoring = () => {
             });
 
         } catch (error) {
-            console.error('Resolve alert error:', error);
+            Logger.error('Resolve alert error:', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);
@@ -325,7 +326,7 @@ export const useMonitoring = () => {
             return data.stats;
 
         } catch (error) {
-            console.error('Get stats error:', error);
+            Logger.error('Get stats error:', error);
 
             // 返回基于当前状态的统计
             const targets = monitoring.targets;
@@ -390,7 +391,7 @@ export const useMonitoring = () => {
             return data.target;
 
         } catch (error) {
-            console.error('Get target details error:', error);
+            Logger.error('Get target details error:', error);
             const target = (monitoring.targets as MonitoringTarget[]).find(t => t.id === targetId);
             return target || null;
         }
@@ -421,7 +422,7 @@ export const useMonitoring = () => {
             });
 
         } catch (error) {
-            console.error('Batch update targets error:', error);
+            Logger.error('Batch update targets error:', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);

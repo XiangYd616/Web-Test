@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface LocalStressTestConfig {
@@ -74,10 +75,10 @@ export const useLocalStressTest = () => {
         window.environment?.localStressTest &&
         typeof window.environment.localStressTest.start === 'function') {
         setIsAvailable(true);
-        console.log('🚀 本地压力测试功能可用');
+        Logger.debug('🚀 本地压力测试功能可用');
       } else {
         setIsAvailable(false);
-        console.log('⚠️ 本地压力测试功能仅在桌面应用中可用');
+        Logger.debug('⚠️ 本地压力测试功能仅在桌面应用中可用');
       }
     };
 
@@ -103,14 +104,14 @@ export const useLocalStressTest = () => {
 
     // 测试完成事件
     const cleanupCompleted = api.onTestCompleted((data: any) => {
-      console.log('✅ 本地压力测试完成:', data);
+      Logger.debug('✅ 本地压力测试完成:', data);
       setIsRunning(false);
       setResults(data.results);
     });
 
     // 测试错误事件
     const cleanupError = api.onTestError((data: any) => {
-      console.error('❌ 本地压力测试错误:', data);
+      Logger.error('❌ 本地压力测试错误:', data);
       setIsRunning(false);
       setError(data.error);
     });
@@ -136,7 +137,7 @@ export const useLocalStressTest = () => {
         const usage = await window.environment.localStressTest?.getSystemUsage();
         setSystemUsage(usage);
       } catch (error) {
-        console.error('获取系统使用情况失败:', error);
+        Logger.error('获取系统使用情况失败:', error);
       }
     };
 
@@ -162,7 +163,7 @@ export const useLocalStressTest = () => {
 
     try {
       setError(null);
-      console.log('🚀 启动本地压力测试:', config);
+      Logger.debug('🚀 启动本地压力测试:', config);
 
 
       /**
@@ -239,7 +240,7 @@ export const useLocalStressTest = () => {
       setIsRunning(status.isRunning);
       return status;
     } catch (error) {
-      console.error('获取测试状态失败:', error);
+      Logger.error('获取测试状态失败:', error);
       return null;
     }
   }, [isAvailable]);
@@ -259,7 +260,7 @@ export const useLocalStressTest = () => {
     let thinkTime = 1;
 
     if (targetUsers > cpuCores * 500) {
-      console.warn(`⚠️ 目标用户数 ${targetUsers} 可能超出系统能力，推荐最大 ${cpuCores * 500} 用户`);
+      Logger.warn(`⚠️ 目标用户数 ${targetUsers} 可能超出系统能力，推荐最大 ${cpuCores * 500} 用户`);
       recommendedUsers = cpuCores * 500;
     }
 

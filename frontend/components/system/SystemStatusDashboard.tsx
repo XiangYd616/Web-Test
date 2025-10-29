@@ -3,6 +3,7 @@
  * 提供系统健康状态、服务监控、资源使用情况的实时视图
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useEffect, useMemo } from 'react';
 import {CheckCircle, XCircle, Settings, RefreshCw, AlertTriangle, Info} from 'lucide-react';
 import {Line, Doughnut} from 'react-chartjs-2';
@@ -305,7 +306,7 @@ const SystemStatusDashboard: React.FC<SystemStatusDashboardProps> = ({
         setPerformanceHistory(generateMockPerformanceHistory());
         setLastUpdate(new Date());
       } catch (error) {
-        console.error('加载系统状态失败:', error);
+        Logger.error('加载系统状态失败:', error);
       } finally {
         setIsLoading(false);
       }

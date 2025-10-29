@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * 批量测试服务
  * 提供批量测试创建、执行、监控功能
@@ -98,7 +100,7 @@ class BatchTestingService {
       this.clearCache();
       return data.data;
     } catch (error) {
-      console.error('创建批量测试失败:', error);
+      Logger.error('创建批量测试失败:', error);
       throw error;
     }
   }
@@ -121,7 +123,7 @@ class BatchTestingService {
       this.clearCache();
       return data.data;
     } catch (error) {
-      console.error('执行批量测试失败:', error);
+      Logger.error('执行批量测试失败:', error);
       throw error;
     }
   }
@@ -149,7 +151,7 @@ class BatchTestingService {
 
       return data.data;
     } catch (error) {
-      console.error('获取批量测试状态失败:', error);
+      Logger.error('获取批量测试状态失败:', error);
       throw error;
     }
   }
@@ -177,7 +179,7 @@ class BatchTestingService {
 
       return data.data;
     } catch (error) {
-      console.error('获取批量测试结果失败:', error);
+      Logger.error('获取批量测试结果失败:', error);
       throw error;
     }
   }
@@ -199,7 +201,7 @@ class BatchTestingService {
 
       this.clearCache();
     } catch (error) {
-      console.error('取消批量测试失败:', error);
+      Logger.error('取消批量测试失败:', error);
       throw error;
     }
   }
@@ -240,7 +242,7 @@ class BatchTestingService {
 
       return data.data;
     } catch (error) {
-      console.error('获取批量测试列表失败:', error);
+      Logger.error('获取批量测试列表失败:', error);
       throw error;
     }
   }
@@ -262,7 +264,7 @@ class BatchTestingService {
 
       this.clearCache();
     } catch (error) {
-      console.error('删除批量测试失败:', error);
+      Logger.error('删除批量测试失败:', error);
       throw error;
     }
   }
@@ -289,7 +291,7 @@ class BatchTestingService {
       this.clearCache();
       return data.data;
     } catch (error) {
-      console.error('复制批量测试失败:', error);
+      Logger.error('复制批量测试失败:', error);
       throw error;
     }
   }
@@ -324,7 +326,7 @@ class BatchTestingService {
         return url;
       }
     } catch (error) {
-      console.error('导出批量测试结果失败:', error);
+      Logger.error('导出批量测试结果失败:', error);
       throw error;
     }
   }
@@ -370,7 +372,7 @@ class BatchTestingService {
 
       return statistics;
     } catch (error) {
-      console.error('获取统计信息失败:', error);
+      Logger.error('获取统计信息失败:', error);
       throw error;
     }
   }

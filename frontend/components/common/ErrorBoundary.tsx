@@ -3,6 +3,7 @@
  * @description 提供全面的错误捕获、报告和恢复机制
  */
 
+import Logger from '@/utils/logger';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, Bug, ChevronDown, ChevronUp, Copy, CheckCircle } from 'lucide-react';
 
@@ -52,7 +53,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
     const { onError, reportToSentry } = this.props;
     
     // 记录错误到控制台
-    console.error('错误边界捕获到错误:', error, errorInfo);
+    Logger.error('错误边界捕获到错误:', error, errorInfo);
     
     // 更新错误计数
     this.setState(prevState => ({
@@ -100,7 +101,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
       
       localStorage.setItem('errorLogs', JSON.stringify(updatedLogs));
     } catch (e) {
-      console.warn('无法存储错误日志:', e);
+      Logger.warn('无法存储错误日志:', e);
     }
   };
 
@@ -153,7 +154,7 @@ ${errorInfo?.componentStack || '无'}
         this.setState({ copied: false });
       }, 2000);
     }).catch(err => {
-      console.error('复制失败:', err);
+      Logger.error('复制失败:', err);
     });
   };
 

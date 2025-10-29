@@ -1,5 +1,6 @@
 // 后台管理服务 - 真实API实现
 
+import Logger from '@/utils/logger';
 import type {
   ActivityFilter,
   ActivityLog,
@@ -89,7 +90,7 @@ class AdminService {
 
       return result.data;
     } catch (error) {
-      console.error(`API请求失败 [${endpoint}]:`, error);
+      Logger.error(`API请求失败 [${endpoint}]:`, error);
       throw error;
     }
   }
@@ -145,7 +146,7 @@ class AdminService {
         pagination: result.pagination
       };
     } catch (error) {
-      console.error('获取用户列表失败:', error);
+      Logger.error('获取用户列表失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '获取用户列表失败'
@@ -180,7 +181,7 @@ class AdminService {
         message: result.message || '用户创建成功'
       };
     } catch (error) {
-      console.error('创建用户失败:', error);
+      Logger.error('创建用户失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '创建用户失败'
@@ -215,7 +216,7 @@ class AdminService {
         message: result.message || '用户更新成功'
       };
     } catch (error) {
-      console.error('更新用户失败:', error);
+      Logger.error('更新用户失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '更新用户失败'
@@ -247,7 +248,7 @@ class AdminService {
         message: result.message || '用户删除成功'
       };
     } catch (error) {
-      console.error('删除用户失败:', error);
+      Logger.error('删除用户失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '删除用户失败'
@@ -281,7 +282,7 @@ class AdminService {
         message: result.message || '批量操作完成'
       };
     } catch (error) {
-      console.error('批量用户操作失败:', error);
+      Logger.error('批量用户操作失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '批量操作失败'
@@ -327,7 +328,7 @@ class AdminService {
         pagination: result.pagination
       };
     } catch (error) {
-      console.error('获取测试列表失败:', error);
+      Logger.error('获取测试列表失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '获取测试列表失败'
@@ -359,7 +360,7 @@ class AdminService {
         message: result.message || '测试已取消'
       };
     } catch (error) {
-      console.error('取消测试失败:', error);
+      Logger.error('取消测试失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '取消测试失败'
@@ -406,7 +407,7 @@ class AdminService {
         pagination: result.pagination
       };
     } catch (error) {
-      console.error('获取活动日志失败:', error);
+      Logger.error('获取活动日志失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '获取活动日志失败'
@@ -439,7 +440,7 @@ class AdminService {
         data: result.data
       };
     } catch (error) {
-      console.error('获取系统配置失败:', error);
+      Logger.error('获取系统配置失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '获取系统配置失败'
@@ -473,7 +474,7 @@ class AdminService {
         message: result.message || '系统配置更新成功'
       };
     } catch (error) {
-      console.error('更新系统配置失败:', error);
+      Logger.error('更新系统配置失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '更新系统配置失败'
@@ -506,7 +507,7 @@ class AdminService {
         data: result.data
       };
     } catch (error) {
-      console.error('获取备份列表失败:', error);
+      Logger.error('获取备份列表失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '获取备份列表失败'
@@ -540,7 +541,7 @@ class AdminService {
         message: result.message || '备份创建成功'
       };
     } catch (error) {
-      console.error('创建备份失败:', error);
+      Logger.error('创建备份失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '创建备份失败'
@@ -572,7 +573,7 @@ class AdminService {
         message: result.message || '备份删除成功'
       };
     } catch (error) {
-      console.error('删除备份失败:', error);
+      Logger.error('删除备份失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '删除备份失败'
@@ -604,7 +605,7 @@ class AdminService {
         message: result.message || '备份恢复成功'
       };
     } catch (error) {
-      console.error('恢复备份失败:', error);
+      Logger.error('恢复备份失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '恢复备份失败'
@@ -637,7 +638,7 @@ class AdminService {
         data: result.data
       };
     } catch (error) {
-      console.error('获取权限组失败:', error);
+      Logger.error('获取权限组失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '获取权限组失败'
@@ -670,7 +671,7 @@ class AdminService {
         data: result.data
       };
     } catch (error) {
-      console.error('获取数据库健康状态失败:', error);
+      Logger.error('获取数据库健康状态失败:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : '获取数据库健康状态失败'

@@ -3,6 +3,7 @@
  * 基于主从表设计，提供统一的测试历史管理功能
  */
 
+import Logger from '@/utils/logger';
 import type {
   BatchOperationResult,
   TestHistoryQuery,
@@ -129,7 +130,7 @@ class testHistoryService {
       return data;
 
     } catch (error) {
-      console.error('获取测试历史失败:', error);
+      Logger.error('获取测试历史失败:', error);
       throw error;
     }
   }
@@ -162,7 +163,7 @@ class testHistoryService {
       return data;
 
     } catch (error) {
-      console.error(`获取${testType}测试历史失败:`, error);
+      Logger.error(`获取${testType}测试历史失败:`, error);
       throw error;
     }
   }
@@ -189,7 +190,7 @@ class testHistoryService {
       return data;
 
     } catch (error) {
-      console.error('获取测试详情失败:', error);
+      Logger.error('获取测试详情失败:', error);
       throw error;
     }
   }
@@ -221,7 +222,7 @@ class testHistoryService {
       return data;
 
     } catch (error) {
-      console.error('创建测试会话失败:', error);
+      Logger.error('创建测试会话失败:', error);
       throw error;
     }
   }
@@ -244,7 +245,7 @@ class testHistoryService {
       this.clearCache();
 
     } catch (error) {
-      console.error('更新测试状态失败:', error);
+      Logger.error('更新测试状态失败:', error);
       throw error;
     }
   }
@@ -267,7 +268,7 @@ class testHistoryService {
       this.clearCache();
 
     } catch (error) {
-      console.error('完成测试失败:', error);
+      Logger.error('完成测试失败:', error);
       throw error;
     }
   }
@@ -289,7 +290,7 @@ class testHistoryService {
       this.clearCache();
 
     } catch (error) {
-      console.error('删除测试失败:', error);
+      Logger.error('删除测试失败:', error);
       throw error;
     }
   }
@@ -314,7 +315,7 @@ class testHistoryService {
       return result;
 
     } catch (error) {
-      console.error('批量删除失败:', error);
+      Logger.error('批量删除失败:', error);
       throw error;
     }
   }
@@ -341,7 +342,7 @@ class testHistoryService {
       return data;
 
     } catch (error) {
-      console.error('获取统计信息失败:', error);
+      Logger.error('获取统计信息失败:', error);
       throw error;
     }
   }
@@ -364,7 +365,7 @@ class testHistoryService {
       return await response.blob();
 
     } catch (error) {
-      console.error('导出测试历史失败:', error);
+      Logger.error('导出测试历史失败:', error);
       throw error;
     }
   }
@@ -407,7 +408,7 @@ class testHistoryService {
       return await response.json();
 
     } catch (error) {
-      console.error('搜索测试历史失败:', error);
+      Logger.error('搜索测试历史失败:', error);
       throw error;
     }
   }

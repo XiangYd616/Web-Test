@@ -8,6 +8,7 @@
  * - 不包含任何测试执行逻辑
  */
 
+import Logger from '@/utils/logger';
 import { useState, useCallback } from 'react';
 import {testApiClient, TestResult, TestProgress} from '../services/api/test/testApiClient';
 
@@ -92,7 +93,7 @@ export function useTestManager(): TestManagerHook {
       const status = await testApiClient.getTestStatus(testId);
       return status;
     } catch (err) {
-      console.error('获取测试状态失败:', err);
+      Logger.error('获取测试状态失败:', err);
       return null;
     }
   }, []);

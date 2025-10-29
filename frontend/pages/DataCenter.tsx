@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import {
   AlertCircle,
   Archive,
@@ -59,7 +60,7 @@ const DataCenter: React.FC = () => {
         lastBackup: '2025-08-28 08:00:00'
       });
     } catch (error) {
-      console.error('加载数据统计失败:', error);
+      Logger.error('加载数据统计失败:', error);
     } finally {
       setLoading(false);
     }
@@ -95,7 +96,7 @@ const DataCenter: React.FC = () => {
         }
       ]);
     } catch (error) {
-      console.error('加载备份历史失败:', error);
+      Logger.error('加载备份历史失败:', error);
     }
   };
 
@@ -117,7 +118,7 @@ const DataCenter: React.FC = () => {
       setBackups(prev => [newBackup, ...prev]);
       await loadDataStats(); // 刷新统计
     } catch (error) {
-      console.error('创建备份失败:', error);
+      Logger.error('创建备份失败:', error);
     } finally {
       setIsBackingUp(false);
     }
@@ -135,7 +136,7 @@ const DataCenter: React.FC = () => {
       link.download = `test-data-export-${Date.now()}.json`;
       link.click();
     } catch (error) {
-      console.error('导出数据失败:', error);
+      Logger.error('导出数据失败:', error);
     }
   };
 

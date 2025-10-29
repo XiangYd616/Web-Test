@@ -6,6 +6,7 @@
  */
 
 
+import Logger from '@/utils/logger';
 import { RotateCcw } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -128,7 +129,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     // 明确区分数据源：实时数据用于实时监控，测试结果数据用于结果视图
     let sourceData: unknown[] = [];
 
-    console.log('📊 EnhancedStressTestCharts 处理数据:', {
+    Logger.debug('📊 EnhancedStressTestCharts 处理数据:', {
       chartType,
       realTimeDataLength: realTimeData?.length || 0,
       testResultDataLength: testResultData?.length || 0,
@@ -144,19 +145,19 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       sourceData = realTimeData;
       // 只在数据量变化时打印日志
       if (realTimeData?.length % 100 === 0 || realTimeData?.length < 10) {
-        console.log('📊 EnhancedStressTestCharts 使用实时数据:', sourceData.length, '个数据点');
+        Logger.debug('📊 EnhancedStressTestCharts 使用实时数据:', sourceData.length, '个数据点');
       }
     } else if (testResultData && testResultData?.length > 0) {
       // 使用测试结果数据（用于测试结果视图）
       sourceData = testResultData;
-      console.log('📊 EnhancedStressTestCharts 使用测试结果数据:', sourceData.length, '个数据点');
+      Logger.debug('📊 EnhancedStressTestCharts 使用测试结果数据:', sourceData.length, '个数据点');
     } else {
       // 减少空数据警告的频率，只在组件首次渲染时打印
-      console.log('⚠️ EnhancedStressTestCharts: 没有可用数据');
+      Logger.debug('⚠️ EnhancedStressTestCharts: 没有可用数据');
     }
 
     if (!sourceData || sourceData.length === 0) {
-      console.log('❌ EnhancedStressTestCharts: 返回空数据');
+      Logger.debug('❌ EnhancedStressTestCharts: 返回空数据');
       return [];
     }
 
@@ -166,7 +167,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
 
     // 只在数据量变化时打印处理结果
     if (filtered.length % 50 === 0 || filtered.length < 10) {
-      console.log('📊 EnhancedStressTestCharts 处理后数据:', filtered.length, '个数据点', filtered.slice(0, 2));
+      Logger.debug('📊 EnhancedStressTestCharts 处理后数据:', filtered.length, '个数据点', filtered.slice(0, 2));
     }
 
     return filtered;

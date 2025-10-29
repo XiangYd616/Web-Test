@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿// 实时监控和告警系统
 export interface MonitoringTarget {
   id: string;
@@ -409,7 +411,7 @@ export class streamingMonitoringService {
       try {
         await this.sendNotification(notification, alert, target);
       } catch (error) {
-        console.error('Failed to send notification:', error);
+        Logger.error('Failed to send notification:', error);
       }
     }
   }
@@ -432,7 +434,7 @@ export class streamingMonitoringService {
 
   // 邮件通知（模拟实现）
   private async sendEmailNotification(config: NotificationConfig, alert: Alert, target: MonitoringTarget): Promise<void> {
-    console.log('Email notification:', {
+    Logger.debug('Email notification:', {
       to: config.config.email?.recipients,
       subject: `[${alert.severity.toUpperCase()}] ${alert.title}`,
       body: `目标: ${target.name}\nURL: ${target.url}\n消息: ${alert.message}\n时间: ${alert.timestamp}`
@@ -571,7 +573,7 @@ export class streamingMonitoringService {
       localStorage.setItem('monitoring_targets', JSON.stringify(Array.from(this.targets.entries())));
       localStorage.setItem('monitoring_alerts', JSON.stringify(Array.from(this.alerts.entries())));
     } catch (error) {
-      console.error('Failed to save monitoring data:', error);
+      Logger.error('Failed to save monitoring data:', error);
     }
   }
 
@@ -599,7 +601,7 @@ export class streamingMonitoringService {
         this.alerts = new Map(entries);
       }
     } catch (error) {
-      console.error('Failed to load monitoring data:', error);
+      Logger.error('Failed to load monitoring data:', error);
     }
   }
 }

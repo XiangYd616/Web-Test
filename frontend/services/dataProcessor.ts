@@ -4,6 +4,7 @@
  * 版本: v2.0.0
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   ApiErrorResponse,
@@ -311,7 +312,7 @@ export function useDataProcessor<T = any>(
 
       // 显示错误通知
       if (finalConfig.errorHandling?.showNotification) {
-        console.error('API Error:', errorMessage);
+        Logger.error('API Error:', errorMessage);
         // 这里可以集成通知系统
       }
 

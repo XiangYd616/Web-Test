@@ -3,6 +3,7 @@
  * 提供完整的网站性能、安全性、SEO、可访问性等综合测试功能
  */
 
+import Logger from '@/utils/logger';
 import { Activity, BarChart3, CheckCircle, Eye, Globe, Loader, Play, RotateCcw, Search, Settings, Shield, Square, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
@@ -312,7 +313,7 @@ const WebsiteTest: React.FC = () => {
         setCanSwitchPages(true);
         updateProgress(0, '测试已停止');
       } catch (err) {
-        console.error('停止测试失败:', err);
+        Logger.error('停止测试失败:', err);
       }
     }
   }, [currentTestId, updateProgress]);

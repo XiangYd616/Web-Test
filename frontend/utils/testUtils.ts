@@ -3,6 +3,7 @@
  * 提供前端测试、性能测试、用户体验测试等工具
  */
 
+import Logger from '@/utils/logger';
 import { useState } from 'react';
 import { errorService } from '../services/errorService';
 
@@ -422,7 +423,7 @@ export class TestRunner {
 
     try {
       // 性能测试
-      console.log('📊 运行性能测试...');
+      Logger.debug('📊 运行性能测试...');
       const performanceResults = await this.performanceTester.testPageLoad();
       const memoryResult = this.performanceTester.testMemoryUsage();
       if (memoryResult) {
@@ -458,7 +459,7 @@ export class TestRunner {
         }
       };
 
-      console.log('✅ 测试套件运行完成');
+      Logger.debug('✅ 测试套件运行完成');
 
       return {
         performance: performanceResults,
@@ -468,7 +469,7 @@ export class TestRunner {
       };
 
     } catch (error) {
-      console.error('❌ 测试套件运行失败:', error);
+      Logger.error('❌ 测试套件运行失败:', error);
       errorService.handleError(error as Error);
       throw error;
     }

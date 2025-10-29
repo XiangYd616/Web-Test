@@ -1,4 +1,5 @@
 ﻿import { Activity, BarChart3, ChevronDown, ChevronUp, Code, Database, Download, Eye, FileText, Filter, Globe, RefreshCw, Search, Shield, SortAsc, SortDesc, Trash2, TrendingUp, Wifi, Zap } from 'lucide-react';
+import Logger from '@/utils/logger';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 ;
@@ -139,13 +140,13 @@ const DataStorage: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-        console.log(`✅ Loaded ${data.data.length} test records from backend`);
+        Logger.debug(`✅ Loaded ${data.data.length} test records from backend`);
         setTestRecords(data.data);
       } else {
         throw new Error(data.error || 'Failed to load test records');
       }
     } catch (error) {
-      console.error('❌ Failed to load test records:', error);
+      Logger.error('❌ Failed to load test records:', error);
 
       // 如果后端加载失败，显示空数据而不是模拟数据
       setTestRecords([]);
@@ -177,7 +178,7 @@ const DataStorage: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-        console.log('✅ Test record deleted successfully');
+        Logger.debug('✅ Test record deleted successfully');
         // 从本地状态中移除记录
         setTestRecords(prev => prev.filter(record => record.id !== recordId));
 
@@ -191,7 +192,7 @@ const DataStorage: React.FC = () => {
         throw new Error(data.message || 'Failed to delete test record');
       }
     } catch (error) {
-      console.error('❌ Failed to delete test record:', error);
+      Logger.error('❌ Failed to delete test record:', error);
       alert('删除测试记录失败，请稍后重试。');
     }
   };

@@ -3,6 +3,7 @@
  * 集成实时监控功能，提供统一的监控界面
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import {
     Activity,
@@ -211,7 +212,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
             setAlerts(mockAlerts);
 
         } catch (error) {
-            console.error('Failed to load monitoring data:', error);
+            Logger.error('Failed to load monitoring data:', error);
             showNotification('加载监控数据失败', 'error');
         }
     }, [showNotification]);

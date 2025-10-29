@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import { useCallback, useRef, useState } from 'react';
 import { SEOAnalysisResult, SEOAnalysisEngine } from '../services/realSEOAnalysisEngine';
 
@@ -86,7 +87,7 @@ const useSEOTest = () => {
             device: 'both'
           });
         } catch (error) {
-          console.warn('获取性能指标失败,继续SEO分析:', error);
+          Logger.warn('获取性能指标失败,继续SEO分析:', error);
         }
       }
 
@@ -123,7 +124,7 @@ const useSEOTest = () => {
       });
 
     } catch (err: any) {
-      console.error('SEO test failed:', err);
+      Logger.error('SEO test failed:', err);
       setError(err.message || 'SEO测试失败');
       setProgress({
         progress: 0,

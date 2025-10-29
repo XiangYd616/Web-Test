@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 
 export interface SecurityConfig {
   // 路由安全
@@ -216,7 +218,7 @@ export class SecurityConfigUtils {
     if (process.env.NODE_ENV === 'development') {
       Object.assign(currentSecurityConfig, updates);
     } else {
-      console.warn('Cannot update security config in production environment');
+      Logger.warn('Cannot update security config in production environment');
     }
   }
 }

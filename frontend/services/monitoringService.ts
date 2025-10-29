@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 /**
  * monitoringService.ts - 业务服务层
  * 
@@ -99,7 +101,7 @@ class MonitoringService {
         return this.getLocalSites();
       }
     } catch (error) {
-      console.warn('Backend not available, using local data:', error);
+      Logger.warn('Backend not available, using local data:', error);
       return this.getLocalSites();
     }
   }
@@ -133,7 +135,7 @@ class MonitoringService {
         return data.data;
       }
     } catch (error) {
-      console.warn('Backend not available, using local storage:', error);
+      Logger.warn('Backend not available, using local storage:', error);
     }
 
     // 本地存储
@@ -162,7 +164,7 @@ class MonitoringService {
         return;
       }
     } catch (error) {
-      console.warn('Backend not available, using local storage:', error);
+      Logger.warn('Backend not available, using local storage:', error);
     }
 
     // 本地删除
@@ -298,7 +300,7 @@ class MonitoringService {
             });
           }
         } catch (error) {
-          console.error(`Error checking site ${site.url}:`, error);
+          Logger.error(`Error checking site ${site.url}:`, error);
         }
 
         // 避免同时发送太多请求
@@ -416,7 +418,7 @@ class MonitoringService {
    * 私有方法：触发告警
    */
   private triggerAlert(alert: AlertRule, site: MonitoringSite, data: MonitoringData): void {
-    console.warn(`Alert triggered: ${alert.name} for site ${site.name}`, {
+    Logger.warn(`Alert triggered: ${alert.name} for site ${site.name}`, {
       alert,
       site,
       data
@@ -440,7 +442,7 @@ class MonitoringService {
         return this.sites;
       }
     } catch (error) {
-      console.error('Error loading local sites:', error);
+      Logger.error('Error loading local sites:', error);
     }
 
     // 默认示例站点
@@ -478,7 +480,7 @@ class MonitoringService {
     try {
       localStorage.setItem('monitoring_sites', JSON.stringify(this.sites));
     } catch (error) {
-      console.error('Error saving local sites:', error);
+      Logger.error('Error saving local sites:', error);
     }
   }
 }

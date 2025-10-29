@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { Activity, Archive, BarChart3, Copy, Database, Download, Edit, Eye, FileText, Filter, HardDrive, RefreshCw, RotateCcw, Search, Settings, Shield, TestTube, Trash2, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
@@ -97,7 +98,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
       const result = await advancedDataManager.queryData(query);
       setRecords(result || []);
     } catch (error) {
-      console.error('Failed to load data:', error);
+      Logger.error('Failed to load data:', error);
       setRecords([]); // 确保在错误时设置为空数组
     } finally {
       setLoading(false);
@@ -109,7 +110,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
       const analyticsData = await advancedDataManager.getAnalytics(query);
       setAnalytics(analyticsData);
     } catch (error) {
-      console.error('Failed to load analytics:', error);
+      Logger.error('Failed to load analytics:', error);
     }
   };
 
@@ -173,7 +174,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
       setSelectedRecords(new Set());
       loadData();
     } catch (error) {
-      console.error('Failed to delete records:', error);
+      Logger.error('Failed to delete records:', error);
       alert('删除失败，请稍后重试');
     }
   };
@@ -196,7 +197,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to export data:', error);
+      Logger.error('Failed to export data:', error);
       alert('导出失败，请稍后重试');
     }
   };

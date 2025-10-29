@@ -1,4 +1,5 @@
 ﻿import { UserRole, UserStatus } from '../../types/enums';
+import Logger from '@/utils/logger';
 import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
 import { browserJwt } from '@utils/browserJwt';
 import { canUseDatabase } from '@utils/environment';
@@ -21,7 +22,7 @@ async function loadServerModules() {
       const userDaoModule = await import('../dao/userDao');
       userDao = userDaoModule.userDao;
     } catch (error) {
-      console.warn('数据库模块不可用，将使用浏览器模式');
+      Logger.warn('数据库模块不可用，将使用浏览器模式');
     }
   }
 }
@@ -101,7 +102,7 @@ export class UnifiedAuthService implements IAuthService {
       try {
         this.deviceFingerprint = await DeviceFingerprinter.generateFingerprint();
       } catch (error) {
-        console.warn('设备指纹生成失败:', error);
+        Logger.warn('设备指纹生成失败:', error);
       }
     }
     
@@ -132,12 +133,12 @@ export class UnifiedAuthService implements IAuthService {
             if (this.isTokenValid(token)) {
               this.currentUser = user;
               this.notifyAuthListeners(user);
-              console.log('✅ 用户状态已恢复:', user.username);
+              Logger.debug('✅ 用户状态已恢复:', user.username);
             } else {
               this.logout();
             }
           } catch (error) {
-            console.error('❌ 解析用户数据失败:', error);
+            Logger.error('❌ 解析用户数据失败:', error);
             this.logout();
           }
         }
@@ -145,7 +146,7 @@ export class UnifiedAuthService implements IAuthService {
 
       this.isInitialized = true;
     } catch (error) {
-      console.error('❌ 初始化认证状态失败:', error);
+      Logger.error('❌ 初始化认证状态失败:', error);
       this.isInitialized = true;
     }
   }
@@ -262,7 +263,7 @@ export class UnifiedAuthService implements IAuthService {
         });
       } else {
         // 在浏览器环境中记录到控制台
-        console.log('📊 用户活动:', {
+        Logger.debug('📊 用户活动:', {
           userId,
           action,
           resource,
@@ -273,7 +274,7 @@ export class UnifiedAuthService implements IAuthService {
         });
       }
     } catch (error) {
-      console.error('❌ 记录用户活动失败:', error);
+      Logger.error('❌ 记录用户活动失败:', error);
     }
   }
 
@@ -313,14 +314,14 @@ export class UnifiedAuthService implements IAuthService {
             user = result.data.user;
             serverToken = result.data.token;
             isValidPassword = true;
-            console.log('✅ API登录成功:', user.username);
+            Logger.debug('✅ API登录成功:', user.username);
           } else {
-            console.log('❌ API登录失败:', result.error || result.message);
+            Logger.debug('❌ API登录失败:', result.error || result.message);
             user = null;
             isValidPassword = false;
           }
         } catch (error) {
-          console.error('❌ API登录错误:', error);
+          Logger.error('❌ API登录错误:', error);
           // 如果API失败，尝试本地验证（系统用户）
           user = await this.validateUserLocally(credentials.email, credentials.password);
           isValidPassword = user !== null;
@@ -439,7 +440,7 @@ export class UnifiedAuthService implements IAuthService {
         { email: credentials.email, rememberMe: credentials.rememberMe, ...clientInfo }
       );
 
-      console.log('✅ 用户登录成功:', user.username);
+      Logger.debug('✅ 用户登录成功:', user.username);
 
       return {
         success: true,
@@ -449,7 +450,7 @@ export class UnifiedAuthService implements IAuthService {
         message: '登录成功'
       };
     } catch (error: any) {
-      console.error('❌ 用户登录失败:', error);
+      Logger.error('❌ 用户登录失败:', error);
 
       const errorMessage = error instanceof Error ? error.message : '未知错误';
       await this.logActivity(
@@ -494,7 +495,7 @@ export class UnifiedAuthService implements IAuthService {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        console.log('❌ API登录失败:', result.error || result.message);
+        Logger.debug('❌ API登录失败:', result.error || result.message);
         return null;
       }
 
@@ -502,13 +503,13 @@ export class UnifiedAuthService implements IAuthService {
       const user = result.data.user;
       const serverToken = result.data.token;
 
-      console.log('✅ API验证成功:', user.username);
+      Logger.debug('✅ API验证成功:', user.username);
 
       // 保存服务器返回的token（这里不保存，在上层处理）
       // 返回用户信息供上层使用
       return user;
     } catch (error) {
-      console.error('❌ API验证失败:', error);
+      Logger.error('❌ API验证失败:', error);
       return null;
     }
   }
@@ -658,7 +659,7 @@ export class UnifiedAuthService implements IAuthService {
           localStorage.setItem(this.USER_KEY, JSON.stringify(newUser));
         }
 
-        console.log('✅ API注册成功:', newUser.username);
+        Logger.debug('✅ API注册成功:', newUser.username);
 
         this.currentUser = newUser;
         this.notifyAuthListeners(newUser);
@@ -693,7 +694,7 @@ export class UnifiedAuthService implements IAuthService {
         { username: data?.username, email: data?.email, ...clientInfo }
       );
 
-      console.log('✅ 用户注册成功:', newUser.username);
+      Logger.debug('✅ 用户注册成功:', newUser.username);
 
       return {
         success: true,
@@ -703,7 +704,7 @@ export class UnifiedAuthService implements IAuthService {
         message: '注册成功'
       };
     } catch (error: any) {
-      console.error('❌ 用户注册失败:', error);
+      Logger.error('❌ 用户注册失败:', error);
 
       const errorMessage = error instanceof Error ? error.message : '未知错误';
       await this.logActivity(
@@ -751,9 +752,9 @@ export class UnifiedAuthService implements IAuthService {
       this.currentUser = null;
       this.notifyAuthListeners(null);
 
-      console.log('✅ 用户登出成功');
+      Logger.debug('✅ 用户登出成功');
     } catch (error) {
-      console.error('❌ 用户登出失败:', error);
+      Logger.error('❌ 用户登出失败:', error);
     }
   }
 
@@ -847,7 +848,7 @@ export class UnifiedAuthService implements IAuthService {
         message: '个人信息更新成功'
       };
     } catch (error: any) {
-      console.error('❌ 更新用户信息失败:', error);
+      Logger.error('❌ 更新用户信息失败:', error);
 
       await this.logActivity(
         this.currentUser.id,
@@ -926,7 +927,7 @@ export class UnifiedAuthService implements IAuthService {
         message: '密码修改成功'
       };
     } catch (error: any) {
-      console.error('❌ 修改密码失败:', error);
+      Logger.error('❌ 修改密码失败:', error);
 
       await this.logActivity(
         this.currentUser.id,
@@ -1010,7 +1011,7 @@ export class UnifiedAuthService implements IAuthService {
         message: '令牌刷新成功'
       };
     } catch (error: any) {
-      console.error('❌ 刷新令牌失败:', error);
+      Logger.error('❌ 刷新令牌失败:', error);
 
       return {
         success: false,
@@ -1061,7 +1062,7 @@ export class UnifiedAuthService implements IAuthService {
         this.scheduleTokenRefresh();
       }
     } catch (error) {
-      console.error('加载存储的tokens失败:', error);
+      Logger.error('加载存储的tokens失败:', error);
     }
   }
 
@@ -1210,7 +1211,7 @@ export class UnifiedAuthService implements IAuthService {
         user: result.user
       };
     } catch (error) {
-      console.error('Token刷新失败:', error);
+      Logger.error('Token刷新失败:', error);
 
       // 清除无效的tokens
       await this.clearTokenPair();
@@ -1333,7 +1334,7 @@ export class UnifiedAuthService implements IAuthService {
       const result = await response.json();
       return result.success ? result.sessions : [];
     } catch (error) {
-      console.error('获取活跃会话失败:', error);
+      Logger.error('获取活跃会话失败:', error);
       return [];
     }
   }
@@ -1356,7 +1357,7 @@ export class UnifiedAuthService implements IAuthService {
       const result = await response.json();
       return result.success;
     } catch (error) {
-      console.error('终止会话失败:', error);
+      Logger.error('终止会话失败:', error);
       return false;
     }
   }
@@ -1379,7 +1380,7 @@ export class UnifiedAuthService implements IAuthService {
       const result = await response.json();
       return result.success;
     } catch (error) {
-      console.error('终止其他会话失败:', error);
+      Logger.error('终止其他会话失败:', error);
       return false;
     }
   }
@@ -1417,7 +1418,7 @@ export class UnifiedAuthService implements IAuthService {
         try {
           callback(data);
         } catch (error) {
-          console.error(`事件监听器执行错误 (${event}):`, error);
+          Logger.error(`事件监听器执行错误 (${event}):`, error);
         }
       });
     }
@@ -1464,7 +1465,7 @@ export class UnifiedAuthService implements IAuthService {
       try {
         await SecureStorageManager.setItem(key, value);
       } catch (error) {
-        console.warn('安全存储失败，使用普通存储:', error);
+        Logger.warn('安全存储失败，使用普通存储:', error);
         localStorage.setItem(key, value);
       }
     } else {
@@ -1480,7 +1481,7 @@ export class UnifiedAuthService implements IAuthService {
       try {
         return await SecureStorageManager.getItem<string>(key);
       } catch (error) {
-        console.warn('安全获取失败，使用普通存储:', error);
+        Logger.warn('安全获取失败，使用普通存储:', error);
         return localStorage.getItem(key);
       }
     } else {
@@ -1539,7 +1540,7 @@ export class UnifiedAuthService implements IAuthService {
       // 暂时返回成功状态
       return { success: true, message: '数据迁移完成', migrated: 0 };
     } catch (error: any) {
-      console.error('❌ 数据迁移失败:', error);
+      Logger.error('❌ 数据迁移失败:', error);
       return { success: false, message: error instanceof Error ? error.message : '未知错误', migrated: 0 };
     }
   }
@@ -1547,7 +1548,7 @@ export class UnifiedAuthService implements IAuthService {
   // 清除所有认证数据（调试用）
   clearAllAuthData(): void {
     if (process?.env.NODE_ENV !== 'development') {
-      console.warn('⚠️ 只能在开发环境中清除认证数据');
+      Logger.warn('⚠️ 只能在开发环境中清除认证数据');
       return;
     }
 
@@ -1566,7 +1567,7 @@ export class UnifiedAuthService implements IAuthService {
       this.notifyAuthListeners(null);
 
     } catch (error) {
-      console.error('❌ 清除认证数据失败:', error);
+      Logger.error('❌ 清除认证数据失败:', error);
     }
   }
 }

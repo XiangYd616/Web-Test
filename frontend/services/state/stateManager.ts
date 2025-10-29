@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * 统一状态管理系统
  * 基于观察者模式，管理测试状态、用户会话、系统配置等
@@ -681,7 +683,7 @@ class StateManager {
       try {
         listener(this.state, event);
       } catch (error) {
-        console.error('State listener error:', error);
+        Logger.error('State listener error:', error);
       }
     });
 
@@ -690,7 +692,7 @@ class StateManager {
       try {
         listener(this.state, event);
       } catch (error) {
-        console.error('Global state listener error:', error);
+        Logger.error('Global state listener error:', error);
       }
     });
   }
@@ -706,7 +708,7 @@ class StateManager {
       const stateToPersist = this.extractPersistableState();
       localStorage.setItem(this.persistenceKey, JSON.stringify(stateToPersist));
     } catch (error) {
-      console.warn('Failed to persist state:', error);
+      Logger.warn('Failed to persist state:', error);
     }
   }
 
@@ -728,7 +730,7 @@ class StateManager {
         this.mergePersistedState(parsed);
       }
     } catch (error) {
-      console.warn('Failed to load persisted state:', error);
+      Logger.warn('Failed to load persisted state:', error);
     }
   }
 

@@ -11,6 +11,7 @@
 // 使用字符串字面量类型替代
 type TestStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 // import { unifiedTestApiClient } from '../unifiedTestApiService';
+import Logger from '@/utils/logger';
 import { testApiService } from '../testApiService';
 
 // 回调函数类型定义
@@ -57,7 +58,7 @@ export class BackgroundTestManagerAdapter {
     this.config = { ...this.config, ...config };
 
     if (this.config.enableLogging) {
-      console.log('🔧 BackgroundTestManager适配器配置:', this.config);
+      Logger.debug('🔧 BackgroundTestManager适配器配置:', this.config);
     }
   }
 
@@ -114,7 +115,7 @@ export class BackgroundTestManagerAdapter {
       // 使用统一API取消测试
       testApiService.cancelTest(testId, testInfo.type as any).catch((error: any) => {
         if (this.config.enableLogging) {
-          console.warn('统一API取消测试失败:', error);
+          Logger.warn('统一API取消测试失败:', error);
         }
       });
     }
@@ -195,7 +196,7 @@ export class BackgroundTestManagerAdapter {
     } catch (error: any) {
       if (this.config.fallbackToOriginal) {
         if (this.config.enableLogging) {
-          console.warn('统一API执行失败，回退到原始实现:', error);
+          Logger.warn('统一API执行失败，回退到原始实现:', error);
         }
         this.executeTestWithOriginalApi(testInfo);
       } else {
@@ -405,7 +406,7 @@ export class BackgroundTestManagerAdapter {
         listener(event, data);
       } catch (error) {
         if (this.config.enableLogging) {
-          console.error('监听器执行错误:', error);
+          Logger.error('监听器执行错误:', error);
         }
       }
     });

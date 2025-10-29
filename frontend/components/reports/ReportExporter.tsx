@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import { AlertCircle, CheckCircle, Download, Eye, FileText, Layout, Loader, Settings, Table } from 'lucide-react';
 import { createElement, useState } from 'react';
@@ -128,7 +129,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
       onExport?.(selectedFormat, config);
       setIsOpen(false);
     } catch (error) {
-      console.error('报告生成失败:', error);
+      Logger.error('报告生成失败:', error);
       alert('报告生成失败，请重试');
     } finally {
       setIsGenerating(false);

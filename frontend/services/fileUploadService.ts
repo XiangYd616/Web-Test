@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 /**
  * 真实的文件上传服务
  * 支持多种文件类型的上传和管理
@@ -220,7 +222,7 @@ class FileUploadService {
         throw new Error(result.error || 'Failed to fetch files');
       }
     } catch (error) {
-      console.error('Failed to fetch files:', error);
+      Logger.error('Failed to fetch files:', error);
       return {
         files: [],
         total: 0,
@@ -247,7 +249,7 @@ class FileUploadService {
       const result = await response.json();
       return result.success;
     } catch (error) {
-      console.error('Failed to delete file:', error);
+      Logger.error('Failed to delete file:', error);
       return false;
     }
   }
@@ -270,7 +272,7 @@ class FileUploadService {
       const result = await response.json();
       return result.success;
     } catch (error) {
-      console.error('Failed to update file metadata:', error);
+      Logger.error('Failed to update file metadata:', error);
       return false;
     }
   }
@@ -291,7 +293,7 @@ class FileUploadService {
       const result = await response.json();
       return result.success ? result.data.url : null;
     } catch (error) {
-      console.error('Failed to get download URL:', error);
+      Logger.error('Failed to get download URL:', error);
       return null;
     }
   }

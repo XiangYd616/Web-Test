@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * TestStateManager.ts - 业务服务层
  * 
@@ -458,7 +460,7 @@ export class TestStateManager {
       try {
         listener(event);
       } catch (err) {
-        console.error('Error in state change listener:', err);
+        Logger.error('Error in state change listener:', err);
       }
     });
   }
@@ -468,7 +470,7 @@ export class TestStateManager {
       try {
         listener(dataPoint);
       } catch (err) {
-        console.error('Error in data update listener:', err);
+        Logger.error('Error in data update listener:', err);
       }
     });
   }
@@ -478,7 +480,7 @@ export class TestStateManager {
       try {
         listener(metrics);
       } catch (err) {
-        console.error('Error in metrics update listener:', err);
+        Logger.error('Error in metrics update listener:', err);
       }
     });
   }

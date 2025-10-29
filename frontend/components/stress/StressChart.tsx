@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 import { Activity, TrendingUp, Users, Zap, AlertTriangle } from 'lucide-react';
@@ -99,7 +100,7 @@ const StressChart: React.FC<StressChartProps> = ({
             onDataUpdate?.(dataPoint);
           }
         } catch (error) {
-          console.error('WebSocket消息解析错误:', error);
+          Logger.error('WebSocket消息解析错误:', error);
         }
       };
 
@@ -115,12 +116,12 @@ const StressChart: React.FC<StressChartProps> = ({
       };
 
       ws.onerror = (error) => {
-        console.error('WebSocket连接错误:', error);
+        Logger.error('WebSocket连接错误:', error);
         setConnectionStatus('disconnected');
       };
 
     } catch (error) {
-      console.error('WebSocket连接失败:', error);
+      Logger.error('WebSocket连接失败:', error);
       setConnectionStatus('disconnected');
     }
   }, [testId, isRunning, maxDataPoints, onDataUpdate]);

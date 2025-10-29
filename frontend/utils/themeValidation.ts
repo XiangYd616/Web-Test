@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 /**
  * 主题验证工具
  * 用于验证主题颜色是否正确应用
@@ -197,13 +199,13 @@ export async function logThemeReport(): Promise<void> {
   const report = generateThemeReport();
   const validation = await report.themeValidation;
 
-  console.log('📊 颜色问题统计:', report.colorIssues.summary);
-  console.log('✅ 主题验证结果:', validation);
+  Logger.debug('📊 颜色问题统计:', report.colorIssues.summary);
+  Logger.debug('✅ 主题验证结果:', validation);
 
   if (report.colorIssues.summary.elementsWithIssues > 0) {
     console.group('🔍 发现的问题元素:');
     report.colorIssues.elements.slice(0, 5).forEach((item, index) => {
-      console.log(`Element ${index + 1}:`, {
+      Logger.debug(`Element ${index + 1}:`, {
         hardcodedClasses: item.hardcodedClasses,
         suggestions: item.suggestions
       });

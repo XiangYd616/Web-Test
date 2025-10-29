@@ -4,6 +4,7 @@
  * 版本: v1.0.0
  */
 
+import Logger from '@/utils/logger';
 import type { UserSession } from '../../types/auth.types';
 import type { User } from '../../types/user';
 import { defaultMemoryCache } from '../cacheStrategy';
@@ -237,7 +238,7 @@ class LocationDetector {
         locationInfo.isp = data.org;
       }
     } catch (error) {
-      console.warn('获取位置信息失败:', error);
+      Logger.warn('获取位置信息失败:', error);
     }
 
     // 检测VPN/Tor（简化实现）

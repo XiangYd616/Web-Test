@@ -1,5 +1,6 @@
 // 系统管理服务 - 真实API实现
 
+import Logger from '@/utils/logger';
 import type {
   MaintenanceInfo,
   SystemConfig,
@@ -33,7 +34,7 @@ export class SystemService {
       this.setCache(cacheKey, data);
       return data;
     } catch (error) {
-      console.error('Failed to fetch system stats:', error);
+      Logger.error('Failed to fetch system stats:', error);
       // 返回模拟数据作为后备
       return this.getMockSystemStats();
     }
@@ -53,7 +54,7 @@ export class SystemService {
       this.setCache(cacheKey, data);
       return data;
     } catch (error) {
-      console.error('Failed to fetch system config:', error);
+      Logger.error('Failed to fetch system config:', error);
       return this.getMockSystemConfig();
     }
   }
@@ -74,7 +75,7 @@ export class SystemService {
       // 清除缓存
       this.clearCache('system-config');
     } catch (error) {
-      console.error('Failed to update system config:', error);
+      Logger.error('Failed to update system config:', error);
       throw error;
     }
   }
@@ -98,7 +99,7 @@ export class SystemService {
       this.setCache(cacheKey, data);
       return data;
     } catch (error) {
-      console.error('Failed to fetch users:', error);
+      Logger.error('Failed to fetch users:', error);
       return this.getMockUsers();
     }
   }
@@ -120,7 +121,7 @@ export class SystemService {
       this.clearCachePattern('users-');
       return user;
     } catch (error) {
-      console.error('Failed to create user:', error);
+      Logger.error('Failed to create user:', error);
       throw error;
     }
   }
@@ -142,7 +143,7 @@ export class SystemService {
       this.clearCachePattern('users-');
       return user;
     } catch (error) {
-      console.error('Failed to update user:', error);
+      Logger.error('Failed to update user:', error);
       throw error;
     }
   }
@@ -158,7 +159,7 @@ export class SystemService {
 
       this.clearCachePattern('users-');
     } catch (error) {
-      console.error('Failed to delete user:', error);
+      Logger.error('Failed to delete user:', error);
       throw error;
     }
   }
@@ -183,7 +184,7 @@ export class SystemService {
       this.setCache(cacheKey, data, 60000); // 1分钟缓存
       return data;
     } catch (error) {
-      console.error('Failed to fetch logs:', error);
+      Logger.error('Failed to fetch logs:', error);
       return this.getMockLogs();
     }
   }
@@ -196,7 +197,7 @@ export class SystemService {
 
       return await response.json();
     } catch (error) {
-      console.error('Failed to fetch system health:', error);
+      Logger.error('Failed to fetch system health:', error);
       return this.getMockSystemHealth();
     }
   }
@@ -212,7 +213,7 @@ export class SystemService {
 
       return await response.json();
     } catch (error) {
-      console.error('Failed to create backup:', error);
+      Logger.error('Failed to create backup:', error);
       throw error;
     }
   }
@@ -225,7 +226,7 @@ export class SystemService {
 
       return await response.json();
     } catch (error) {
-      console.error('Failed to fetch backups:', error);
+      Logger.error('Failed to fetch backups:', error);
       return this.getMockBackups();
     }
   }
@@ -239,7 +240,7 @@ export class SystemService {
 
       if (!response.ok) throw new Error('Failed to restore backup');
     } catch (error) {
-      console.error('Failed to restore backup:', error);
+      Logger.error('Failed to restore backup:', error);
       throw error;
     }
   }
@@ -252,7 +253,7 @@ export class SystemService {
 
       return await response.json();
     } catch (error) {
-      console.error('Failed to fetch maintenance info:', error);
+      Logger.error('Failed to fetch maintenance info:', error);
       return this.getMockMaintenanceInfo();
     }
   }
@@ -270,7 +271,7 @@ export class SystemService {
 
       if (!response.ok) throw new Error('Failed to set maintenance mode');
     } catch (error) {
-      console.error('Failed to set maintenance mode:', error);
+      Logger.error('Failed to set maintenance mode:', error);
       throw error;
     }
   }

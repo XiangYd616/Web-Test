@@ -6,6 +6,7 @@
  */
 
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import { Calendar, ChevronDown, ChevronRight, Clock, Eye, RefreshCw, Search, Shield, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
@@ -106,7 +107,7 @@ export const SecurityTestHistory = React.forwardRef<
         setHistory(parsed);
       }
     } catch (error) {
-      console.error('加载安全测试历史失败:', error);
+      Logger.error('加载安全测试历史失败:', error);
     } finally {
       setIsLoading(false);
     }

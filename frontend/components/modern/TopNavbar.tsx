@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import { Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -141,7 +142,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
         setSearchResults(results);
         setSelectedSearchIndex(-1);
       } catch (error) {
-        console.error('Search failed:', error);
+        Logger.error('Search failed:', error);
         setSearchResults([]);
       } finally {
         setIsSearching(false);

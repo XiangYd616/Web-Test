@@ -4,6 +4,7 @@
  */
 
 // React相关导入
+import Logger from '@/utils/logger';
 import { useEffect } from 'react';
 
 // 路由和组件导入
@@ -36,10 +37,10 @@ function App() {
     if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
       navigator.serviceWorker.register('/sw.js')
         .then(() => {
-          console.log('Service Worker registered successfully');
+          Logger.debug('Service Worker registered successfully');
         })
         .catch((error) => {
-          console.error('SW registration failed: ', error);
+          Logger.error('SW registration failed: ', error);
         });
     }
 

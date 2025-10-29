@@ -3,6 +3,7 @@
  * 基于全局状态管理的认证功能
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useState } from 'react';
 
 // 登录凭据接口
@@ -49,7 +50,7 @@ export const useAuth = () => {
 
       return response.ok;
     } catch (error) {
-      console.error('Token validation error:', error);
+      Logger.error('Token validation error:', error);
       return false;
     }
   };
@@ -155,7 +156,7 @@ export const useAuth = () => {
         });
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      Logger.error('Logout error:', error);
     } finally {
       // 清除本地存储
       localStorage.removeItem('authToken');

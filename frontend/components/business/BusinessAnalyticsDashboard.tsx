@@ -3,6 +3,7 @@
  * 鏄剧ず绯荤粺鐩戞帶銆佷笟鍔℃寚鏍囥€佺敤鎴疯涓虹瓑鍒嗘瀽鏁版嵁
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Grid } from '../ui/GridWrapper';
 import { Card, Typography, Box, Chip, LinearProgress, Alert, Tabs, Tab, Button, Select, MenuItem, FormControl, InputLabel, IconButton, Tooltip, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
@@ -116,7 +117,7 @@ const BusinessAnalyticsDashboard: React.FC = () => {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : '鑾峰彇鏁版嵁澶辫触');
-      console.error('鑾峰彇浠〃鏉挎暟鎹け璐?', err);
+      Logger.error('鑾峰彇浠〃鏉挎暟鎹け璐?', err);
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,7 @@
  * @deprecated 建议使用 unifiedTestService 或通过 serviceCompatibility 导入
  */
 
+import Logger from '@/utils/logger';
 import type {
   CompletionCallback,
   ErrorCallback,
@@ -779,7 +780,7 @@ class BackgroundTestManager {
           await new Promise(resolve => setTimeout(resolve, pollInterval));
         }
       } catch (error) {
-        console.error(`轮询测试状态失败 (尝试 ${attempt + 1}/${maxAttempts}):`, error);
+        Logger.error(`轮询测试状态失败 (尝试 ${attempt + 1}/${maxAttempts}):`, error);
 
         if (attempt === maxAttempts - 1) {
           // 最后一次尝试失败，抛出错误
@@ -801,7 +802,7 @@ class BackgroundTestManager {
       try {
         listener(event, data);
       } catch (error) {
-        console.error('Error in test listener:', error);
+        Logger.error('Error in test listener:', error);
       }
     });
   }
@@ -815,7 +816,7 @@ class BackgroundTestManager {
       };
       localStorage.setItem('backgroundTestManager', JSON.stringify(data));
     } catch (error) {
-      console.error('Failed to save test manager state:', error);
+      Logger.error('Failed to save test manager state:', error);
     }
   }
 
@@ -829,7 +830,7 @@ class BackgroundTestManager {
         this.testCounter = parsed.testCounter || 0;
       }
     } catch (error) {
-      console.error('Failed to load test manager state:', error);
+      Logger.error('Failed to load test manager state:', error);
     }
   }
 

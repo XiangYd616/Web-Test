@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿import { useCallback, useEffect, useState } from 'react';
 // 临时类型定义，直到advancedDataService实现完成
 interface DataBackup {
@@ -280,7 +282,7 @@ export const _useDataManagement = (): UseDataManagementReturn => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '加载数据失败';
       setError(errorMessage);
-      console.error('Failed to load data:', err);
+      Logger.error('Failed to load data:', err);
     } finally {
       setLoading(false);
     }
@@ -293,7 +295,7 @@ export const _useDataManagement = (): UseDataManagementReturn => {
       const analyticsData = await advancedDataManager.getAnalytics();
       setAnalytics(analyticsData);
     } catch (err) {
-      console.error('Failed to load analytics:', err);
+      Logger.error('Failed to load analytics:', err);
     } finally {
       setAnalyticsLoading(false);
     }
@@ -306,7 +308,7 @@ export const _useDataManagement = (): UseDataManagementReturn => {
       const backupList = await advancedDataManager.getBackups();
       setBackups(backupList);
     } catch (err) {
-      console.error('Failed to load backups:', err);
+      Logger.error('Failed to load backups:', err);
     } finally {
       setBackupsLoading(false);
     }
@@ -319,7 +321,7 @@ export const _useDataManagement = (): UseDataManagementReturn => {
       const config = await extendedDataManager.getSyncConfig();
       setSyncConfig(config);
     } catch (err) {
-      console.error('Failed to load sync config:', err);
+      Logger.error('Failed to load sync config:', err);
       // 设置默认配置
       setSyncConfig({
         id: 'default',

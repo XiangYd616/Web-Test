@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * 调度管理服务
  * 提供测试任务调度、定时执行、批量管理功能
@@ -99,7 +101,7 @@ class SchedulingService {
         pagination: data.data.pagination
       };
     } catch (error) {
-      console.error('获取调度任务失败:', error);
+      Logger.error('获取调度任务失败:', error);
       throw error;
     }
   }
@@ -126,7 +128,7 @@ class SchedulingService {
       this.clearCache();
       return data.data;
     } catch (error) {
-      console.error('创建调度任务失败:', error);
+      Logger.error('创建调度任务失败:', error);
       throw error;
     }
   }
@@ -153,7 +155,7 @@ class SchedulingService {
       this.clearCache();
       return data.data;
     } catch (error) {
-      console.error('更新调度任务失败:', error);
+      Logger.error('更新调度任务失败:', error);
       throw error;
     }
   }
@@ -175,7 +177,7 @@ class SchedulingService {
 
       this.clearCache();
     } catch (error) {
-      console.error('删除调度任务失败:', error);
+      Logger.error('删除调度任务失败:', error);
       throw error;
     }
   }
@@ -197,7 +199,7 @@ class SchedulingService {
 
       this.clearCache();
     } catch (error) {
-      console.error('启动调度任务失败:', error);
+      Logger.error('启动调度任务失败:', error);
       throw error;
     }
   }
@@ -219,7 +221,7 @@ class SchedulingService {
 
       this.clearCache();
     } catch (error) {
-      console.error('暂停调度任务失败:', error);
+      Logger.error('暂停调度任务失败:', error);
       throw error;
     }
   }
@@ -241,7 +243,7 @@ class SchedulingService {
 
       return data.data;
     } catch (error) {
-      console.error('执行调度任务失败:', error);
+      Logger.error('执行调度任务失败:', error);
       throw error;
     }
   }
@@ -277,7 +279,7 @@ class SchedulingService {
         pagination: data.data.pagination
       };
     } catch (error) {
-      console.error('获取执行历史失败:', error);
+      Logger.error('获取执行历史失败:', error);
       throw error;
     }
   }
@@ -297,7 +299,7 @@ class SchedulingService {
         throw new Error(data.message || '取消执行失败');
       }
     } catch (error) {
-      console.error('取消执行失败:', error);
+      Logger.error('取消执行失败:', error);
       throw error;
     }
   }
@@ -341,7 +343,7 @@ class SchedulingService {
 
       return statistics;
     } catch (error) {
-      console.error('获取统计信息失败:', error);
+      Logger.error('获取统计信息失败:', error);
       throw error;
     }
   }
@@ -366,7 +368,7 @@ class SchedulingService {
       const data = await response.json();
       return data.success ? data.data : { valid: false, error: data.message };
     } catch (error) {
-      console.error('验证Cron表达式失败:', error);
+      Logger.error('验证Cron表达式失败:', error);
       return { valid: false, error: '验证失败' };
     }
   }

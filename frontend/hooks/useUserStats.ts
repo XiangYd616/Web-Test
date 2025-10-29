@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityItem, UserActivityStats, userStatsService } from '../services/userStatsService';
 import { useAuth } from './useAuth';
@@ -25,7 +26,7 @@ export const useUserStats = () => {
       const updatedStats = await userStatsService.getUserStats(user?.id);
       setStats(updatedStats);
     } catch (error) {
-      console.error('Failed to load user stats:', error);
+      Logger.error('Failed to load user stats:', error);
       setStats(null);
     } finally {
       setLoading(false);

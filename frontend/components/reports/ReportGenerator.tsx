@@ -3,6 +3,7 @@
  * 提供多种报告生成功能：测试报告、性能分析、安全评估等
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useEffect } from 'react';
 import {Card, Form, Select, DatePicker, Button, Steps, Progress, Table, Tag, Space, Divider, Checkbox, Radio, Input, notification} from 'antd';
 import {FileTextOutlined, DownloadOutlined, EyeOutlined, BarChartOutlined, ClockCircleOutlined, CheckCircleOutlined, LoadingOutlined} from '@ant-design/icons';
@@ -213,7 +214,7 @@ const ReportGenerator: React.FC = () => {
       }, 500);
 
     } catch (error) {
-      console.error('表单验证失败:', error);
+      Logger.error('表单验证失败:', error);
     }
   };
 

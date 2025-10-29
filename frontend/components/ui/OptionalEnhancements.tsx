@@ -3,6 +3,7 @@
  * 为现有测试页面提供可选的UI增强功能，不强制替换现有实现
  */
 
+import Logger from '@/utils/logger';
 import { Check, ChevronDown, ChevronUp, Copy, ExternalLink, Maximize2, Minimize2 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActionIcon, UnifiedIcon } from './UnifiedIcons';
@@ -151,7 +152,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('复制失败:', error);
+      Logger.error('复制失败:', error);
     }
   };
 
@@ -522,19 +523,19 @@ export const EnhancementsUsageGuide: React.FC = () => {
           <QuickAction
             label="开始测试"
             icon={ActionIcon}
-            onClick={() => console.log('Button clicked')}
+            onClick={() => Logger.debug('Button clicked')}
             variant="primary"
           />
           <QuickAction
             label="导出结果"
             icon={ActionIcon}
-            onClick={() => console.log('Button clicked')}
+            onClick={() => Logger.debug('Button clicked')}
             variant="secondary"
           />
           <QuickAction
             label="分享"
             icon={ActionIcon}
-            onClick={() => console.log('Button clicked')}
+            onClick={() => Logger.debug('Button clicked')}
             variant="ghost"
           />
         </div>

@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { websocketManager, ConnectionStatus, WebSocketMessage } from '../services/websocketManager';
 
@@ -173,7 +174,7 @@ export const useStressTestWebSocket = (
     try {
       await websocketManager.connect();
     } catch (error) {
-      console.error('WebSocket连接失败:', error);
+      Logger.error('WebSocket连接失败:', error);
       onError?.(error);
     }
   }, [onError]);
@@ -197,7 +198,7 @@ export const useStressTestWebSocket = (
     if (success) {
       subscribedTestsRef.current.add(testId);
     } else {
-      console.warn(`❌ 订阅测试失败: ${testId}`);
+      Logger.warn(`❌ 订阅测试失败: ${testId}`);
     }
   }, []);
 
@@ -216,7 +217,7 @@ export const useStressTestWebSocket = (
     if (success) {
       subscribedTestsRef.current.delete(testId);
     } else {
-      console.warn(`❌ 取消订阅测试失败: ${testId}`);
+      Logger.warn(`❌ 取消订阅测试失败: ${testId}`);
     }
   }, []);
 

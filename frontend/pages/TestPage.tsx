@@ -3,6 +3,7 @@
  * 展示统一测试引擎的完整功能
  */
 
+import Logger from '@/utils/logger';
 import {
   BarChartOutlined, ClockCircleOutlined,
   ExperimentOutlined,
@@ -49,14 +50,14 @@ export const UnifiedTestPage: React.FC = () => {
    * 处理测试完成
    */
   const handleTestComplete = (testId: string, result: TestResult) => {
-    console.log(`✅ 测试完成: ${testId}`, result);
+    Logger.debug(`✅ 测试完成: ${testId}`, result);
 
     // 显示成功通知
     if (result.overallScore >= 80) {
     } else if (result.overallScore >= 60) {
-      console.log('⚠️ 测试结果良好，有改进空间');
+      Logger.debug('⚠️ 测试结果良好，有改进空间');
     } else {
-      console.log('❌ 测试结果需要优化');
+      Logger.debug('❌ 测试结果需要优化');
     }
   };
 
@@ -64,7 +65,7 @@ export const UnifiedTestPage: React.FC = () => {
    * 处理测试错误
    */
   const handleTestError = (error: Error) => {
-    console.error('❌ 测试执行失败:', error);
+    Logger.error('❌ 测试执行失败:', error);
   };
 
   /**

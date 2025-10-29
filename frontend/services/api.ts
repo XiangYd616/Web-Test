@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * API服务层
  * 统一管理前后端API调用
@@ -183,7 +185,7 @@ class ApiClient {
     } catch (error: any) {
       // 如果是网络错误且还有重试次数，则重试
       if (attempt < this.retryAttempts && !error?.name?.includes('AbortError')) {
-        console.warn(`API请求失败，第${attempt}次重试: ${error?.message}`);
+        Logger.warn(`API请求失败，第${attempt}次重试: ${error?.message}`);
         await this.delay(this.retryDelay * attempt);
         return this.makeRequest<T>(endpoint, options, attempt + 1);
       }

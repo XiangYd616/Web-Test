@@ -4,6 +4,7 @@
  * 版本: v2.0.0
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { unifiedAuthService } from '../services/auth/authService';
 // 临时类型定义，直到rbac模块实现完成
@@ -261,7 +262,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
       return result;
     } catch (error) {
-      console.error('权限检查失败:', error);
+      Logger.error('权限检查失败:', error);
       return false;
     }
   }, [state.permissions, permissionCache]);
@@ -330,7 +331,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
       return results;
     } catch (error) {
-      console.error('批量权限检查失败:', error);
+      Logger.error('批量权限检查失败:', error);
       // 返回所有权限为false的结果
       const results: Record<string, boolean> = {};
       checks.forEach(check => {

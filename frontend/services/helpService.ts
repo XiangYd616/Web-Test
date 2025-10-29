@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * helpService.ts - 业务服务层
  * 
@@ -53,7 +55,7 @@ class HelpService {
 
       return await response.json();
     } catch (error) {
-      console.error('搜索内容失败:', error);
+      Logger.error('搜索内容失败:', error);
       throw error;
     }
   }
@@ -73,7 +75,7 @@ class HelpService {
         throw new Error('反馈提交失败');
       }
     } catch (error) {
-      console.error('提交FAQ反馈失败:', error);
+      Logger.error('提交FAQ反馈失败:', error);
       throw error;
     }
   }
@@ -93,7 +95,7 @@ class HelpService {
         throw new Error('反馈提交失败');
       }
     } catch (error) {
-      console.error('提交反馈失败:', error);
+      Logger.error('提交反馈失败:', error);
       throw error;
     }
   }
@@ -116,7 +118,7 @@ class HelpService {
       const result = await response.json();
       return result.downloadUrl;
     } catch (error) {
-      console.error('记录下载失败:', error);
+      Logger.error('记录下载失败:', error);
       throw error;
     }
   }
@@ -137,7 +139,7 @@ class HelpService {
 
       return await response.json();
     } catch (error) {
-      console.error('获取FAQ统计失败:', error);
+      Logger.error('获取FAQ统计失败:', error);
       throw error;
     }
   }
@@ -156,7 +158,7 @@ class HelpService {
         throw new Error('记录视频观看失败');
       }
     } catch (error) {
-      console.error('记录视频观看失败:', error);
+      Logger.error('记录视频观看失败:', error);
       throw error;
     }
   }
@@ -177,7 +179,7 @@ class HelpService {
 
       return await response.json();
     } catch (error) {
-      console.error('获取热门搜索失败:', error);
+      Logger.error('获取热门搜索失败:', error);
       return [];
     }
   }
@@ -198,7 +200,7 @@ class HelpService {
 
       return await response.json();
     } catch (error) {
-      console.error('获取用户偏好失败:', error);
+      Logger.error('获取用户偏好失败:', error);
       return {};
     }
   }
@@ -218,7 +220,7 @@ class HelpService {
         throw new Error('更新用户偏好失败');
       }
     } catch (error) {
-      console.error('更新用户偏好失败:', error);
+      Logger.error('更新用户偏好失败:', error);
       throw error;
     }
   }

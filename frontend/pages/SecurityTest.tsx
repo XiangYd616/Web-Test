@@ -1,4 +1,5 @@
 ﻿import { Shield, XCircle } from 'lucide-react';
+import Logger from '@/utils/logger';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
@@ -75,7 +76,7 @@ const SecurityTest: React.FC = () => {
       recordTestCompletion('安全测试', true, result?.overallScore || 0, result?.duration || 180);
     },
     onError: (error) => {
-      console.error('安全测试失败:', error);
+      Logger.error('安全测试失败:', error);
     }
   });
 
@@ -91,7 +92,7 @@ const SecurityTest: React.FC = () => {
   // 开始测试的处理函数
   const handleStartTest = async () => {
     if (!testUrl) {
-      console.warn('请输入要测试的URL');
+      Logger.warn('请输入要测试的URL');
       return;
     }
 
@@ -113,7 +114,7 @@ const SecurityTest: React.FC = () => {
       }
 
     } catch (error) {
-      console.error('安全测试失败:', error);
+      Logger.error('安全测试失败:', error);
     }
   };
 
@@ -124,7 +125,7 @@ const SecurityTest: React.FC = () => {
         await cancelTest();
         setCurrentTestId(null);
       } catch (error) {
-        console.error('停止安全测试失败:', error);
+        Logger.error('停止安全测试失败:', error);
       }
     }
   };
