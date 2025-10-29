@@ -87,10 +87,10 @@ const StressTestResultDisplay: React.FC<{ result: any }> = ({ result }) => {
         <div className="bg-gray-800 rounded-lg p-4 border border-red-700">
           <h3 className="text-lg font-semibold text-red-400 mb-3">错误日志</h3>
           <div className="max-h-40 overflow-y-auto space-y-2">
-            {result.errors.slice(0, 10).map((error: unknown, index: number) => (
+            {result.errors.slice(0, 10).map((error: any, index: number) => (
               <div key={index} className="text-sm text-red-300">
-                [{new Date(error.timestamp).toLocaleTimeString()}] {error.message}
-                {error.statusCode && ` (状态码: ${error.statusCode})`}
+                [{new Date(error?.timestamp).toLocaleTimeString()}] {error?.message}
+                {error?.statusCode && ` (状态码: ${error.statusCode})`}
               </div>
             ))}
             {result.errors.length > 10 && (

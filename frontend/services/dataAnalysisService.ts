@@ -72,11 +72,11 @@ export class DataAnalysisService {
   async processTestData(testRecords: unknown[], dateRange: number = 30): Promise<AnalyticsData> {
     try {
       // 直接使用数据库字段，无需转换
-      const normalizedRecords = testRecords;
+      const normalizedRecords = testRecords as any[];
 
       // 过滤指定时间范围内的数据
       const cutoffDate = subDays(new Date(), dateRange);
-      const filteredRecords = normalizedRecords.filter(record =>
+      const filteredRecords = normalizedRecords.filter((record: any) =>
         new Date(record.start_time || record.created_at) >= cutoffDate
       );
 
@@ -128,46 +128,47 @@ export class DataAnalysisService {
    * 分析测试数据 - 使用数据库字段名
    */
   private analyzeTestData(records: unknown[]): AnalyticsData {
-    const totalTests = records.length;
-    const completedTests = records.filter(r => r.status === 'completed');
+    const typedRecords = records as any[];
+    const totalTests = typedRecords.length;
+    const completedTests = typedRecords.filter((r: any) => r.status === 'completed');
     const successRate = totalTests > 0 ? (completedTests.length / totalTests) * 100 : 0;
 
     // 计算平均分数
-    const scoredTests = records.filter(r => r.overall_score !== undefined);
+    const scoredTests = typedRecords.filter((r: any) => r.overall_score !== undefined);
     const averageScore = scoredTests.length > 0
-      ? scoredTests.reduce((sum, r) => sum + (r.overall_score || 0), 0) / scoredTests.length
+      ? scoredTests.reduce((sum: number, r: any) => sum + (r.overall_score || 0), 0) / scoredTests.length
       : 0;
 
     // 按类型统计
     const testsByType: { [key: string]: number } = {};
-    records.forEach(record => {
+    typedRecords.forEach((record: any) => {
       const type = record.test_type || 'unknown';
       testsByType[type] = (testsByType[type] || 0) + 1;
     });
 
     // 按状态统计
     const testsByStatus: { [key: string]: number } = {};
-    records.forEach(record => {
+    typedRecords.forEach((record: any) => {
       const status = record.status || 'unknown';
       testsByStatus[status] = (testsByStatus[status] || 0) + 1;
     });
 
     // 每日测试统计
-    const dailyTests = this.getDailyTestStats(records);
+    const dailyTests = this.getDailyTestStats(typedRecords as any);
 
     // 分数分布
-    const scoreDistribution = this.getScoreDistribution(records);
+    const scoreDistribution = this.getScoreDistribution(typedRecords as any);
 
     // 性能趋势
-    const performanceTrends = this.getPerformanceTrends(records);
+    const performanceTrends = this.getPerformanceTrends(typedRecords as any);
 
-    // 热门URL
-    const topUrls = this.getTopUrls(records);
+    // 热闬URL
+    const topUrls = this.getTopUrls(typedRecords as any);
 
     // 最近活动
-    const recentActivity = records
-      .sort((a, b) => new Date(b.start_time || b.created_at).getTime() - new Date(a?.start_time || a?.created_at).getTime())
-      .slice(0, 10);
+    const recentActivity = typedRecords
+      .sort((a: any, b: any) => new Date(b.start_time || b.created_at).getTime() - new Date(a?.start_time || a?.created_at).getTime())
+      .slice(0, 10) as any;
 
     return {
       totalTests,

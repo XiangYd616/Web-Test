@@ -12,7 +12,7 @@ import {SecurityTestConfig, SecurityScanResult, securityEngine} from '../../serv
 import { createCommonErrors, createError } from '../../utils/errorHandler';
 import { URLValidationResult } from '../../utils/urlValidator';
 import { URLInput } from '../ui/URLInput';
-import {EnhancedError} from './ErrorDisplay';
+import {EnhancedError, ErrorDisplay} from './ErrorDisplay';
 import type { SecurityTestProgress } from '../../types/common';
 
 interface SecurityTestResult {

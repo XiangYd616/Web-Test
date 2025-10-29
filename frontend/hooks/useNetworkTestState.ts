@@ -200,7 +200,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
   const [localConfig, setLocalConfig] = useState({
     target: '',
     testType: 'comprehensive',
-    timeout: process.env.REQUEST_TIMEOUT || 30000,
+    timeout: Number(process.env.REQUEST_TIMEOUT) || 30000,
     retries: 3,
     interval: 1000,
     duration: 60,
@@ -262,7 +262,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     setLocalConfig({
       target: '',
       testType: 'comprehensive',
-      timeout: process.env.REQUEST_TIMEOUT || 30000,
+      timeout: Number(process.env.REQUEST_TIMEOUT) || 30000,
       retries: 3,
       interval: 1000,
       duration: 60,
@@ -550,49 +550,11 @@ export const useNetworkTestState = (): NetworkTestHook => {
   };
 
   return {
-    // ==================== BaseTestState ====================
-    status,
-    progress,
-    currentStep,
-    result: result as unknown as NetworkTestResult | null,
+    runTest: startTest,
+    loading: isRunning,
     error,
-    isRunning,
-    isCompleted,
-    hasError,
-
-    // ==================== NetworkTestState ====================
-    config: adaptedConfig,
-    currentPort,
-
-    // ==================== BaseTestActions ====================
-    startTest: (config: NetworkTestConfig) => startTest(),
-    stopTest,
-    reset: resetTest,
-    clearError: () => setError(null),
-
-    /**
-     * 更新updateConfig数据
-     * @param {string} id - 对象ID
-     * @param {Object} data - 更新数据
-     * @returns {Promise<Object>} 更新后的对象
-     */
-    // ==================== NetworkTestActions ====================
-    updateConfig: (updates: Partial<NetworkTestConfig>) => {
-      // 适配更新格式
-      const adaptedUpdates = {
-        target: updates.host || localConfig.target,
-        timeout: updates.timeout || localConfig.timeout,
-        retries: updates.retries || localConfig.retries,
-        portConfig: {
-          ...localConfig.portConfig,
-          ports: updates.ports || localConfig.portConfig?.ports || []
-        }
-      };
-      updateLocalConfig(adaptedUpdates);
-    },
-
-    // 注意：validateConfig等方法不属于NetworkTestHook接口
-    // 如果需要这些方法，请使用扩展的返回类型
+    result: result as unknown as NetworkTestResult,
+    status
   };
 };
 

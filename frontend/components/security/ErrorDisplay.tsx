@@ -292,4 +292,7 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
   );
 };
 
+// Export aliases for backward compatibility
+export const ErrorDisplay = EnhancedErrorDisplay;
+
 export default EnhancedErrorDisplay;

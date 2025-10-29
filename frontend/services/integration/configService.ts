@@ -27,3 +27,4 @@ export class ConfigService {
 }
 
 export const _configService = new ConfigService();
+export const configService = _configService;

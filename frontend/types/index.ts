@@ -83,6 +83,7 @@ export interface DatabaseTestHook {
   loading: boolean;
   error?: string | null;
   result?: DatabaseTestResult;
+  status?: string;
 }
 
 export interface NetworkTestHook {
@@ -90,6 +91,7 @@ export interface NetworkTestHook {
   loading: boolean;
   error?: string | null;
   result?: NetworkTestResult;
+  status?: string;
 }
 
 export interface APIEndpoint {

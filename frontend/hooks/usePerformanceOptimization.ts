@@ -130,7 +130,7 @@ export function useFrontendCache<T>(key: string, fetcher: () => Promise<T>, ttl?
     // 先尝试从缓存获取
     const cached = frontendCache.get(key);
     if (cached) {
-      setData(cached);
+      setData(cached as T);
       return;
     }
 

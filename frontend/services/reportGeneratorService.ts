@@ -312,19 +312,21 @@ export class ReportGeneratorService {
   }
 
   private buildSummarySection(data: unknown, config: ReportConfig, template: any): string {
+    const d = data as any;
     return `<section class="summary">
       <h2>执行摘要</h2>
-      <p>测试URL: ${data?.url}</p>
-      <p>测试时间: ${data?.startTime}</p>
-      <p>总体评分: ${data?.overallScore || 'N/A'}</p>
+      <p>测试URL: ${d?.url}</p>
+      <p>测试时间: ${d?.startTime}</p>
+      <p>总体评分: ${d?.overallScore || 'N/A'}</p>
     </section>`;
   }
 
   private buildMetricsSection(data: unknown, config: ReportConfig, template: any): string {
+    const d = data as any;
     return `<section class="metrics">
       <h2>关键指标</h2>
       <div class="metrics-grid">
-        ${Object.entries(data?.metrics || {}).map(([key, value]) =>
+        ${Object.entries(d?.metrics || {}).map(([key, value]) =>
       `<div class="metric"><span class="label">${key}</span><span class="value">${value}</span></div>`
     ).join('')}
       </div>
@@ -341,7 +343,8 @@ export class ReportGeneratorService {
   }
 
   private buildRecommendationsSection(data: unknown, config: ReportConfig, template: any): string {
-    const recommendations = data?.recommendations || [];
+    const d = data as any;
+    const recommendations = d?.recommendations || [];
     return `<section class="recommendations">
       <h2>优化建议</h2>
       <ul>
@@ -351,9 +354,10 @@ export class ReportGeneratorService {
   }
 
   private buildRawDataSection(data: unknown, config: ReportConfig, template: any): string {
+    const d = data as any;
     return `<section class="raw-data">
       <h2>原始数据</h2>
-      <pre>${JSON.stringify(data?.results, null, 2)}</pre>
+      <pre>${JSON.stringify(d?.results, null, 2)}</pre>
     </section>`;
   }
 
@@ -380,15 +384,17 @@ export class ReportGeneratorService {
   // 导出方法（简化版本）
   private async exportToPDF(report: unknown, options: ExportOptions): Promise<Blob> {
     // PDF导出逻辑
-    const htmlContent = report.content;
+    const r = report as any;
+    const htmlContent = r.content;
     return new Blob([htmlContent], { type: 'application/pdf' });
   }
 
   private async exportToHTML(report: unknown, options: ExportOptions): Promise<Blob> {
+    const r = report as any;
     const htmlContent = `<!DOCTYPE html>
     <html>
     <head>
-      <title>${report.config.title}</title>
+      <title>${r.config.title}</title>
       <style>
         body { font-family: Inter, sans-serif; margin: 40px; }
         .summary, .metrics, .charts, .recommendations { margin-bottom: 30px; }
@@ -400,7 +406,7 @@ export class ReportGeneratorService {
       </style>
     </head>
     <body>
-      ${report.content}
+      ${r.content}
     </body>
     </html>`;
 
@@ -408,7 +414,8 @@ export class ReportGeneratorService {
   }
 
   private async exportToJSON(report: unknown, options: ExportOptions): Promise<Blob> {
-    const jsonData = JSON.stringify(report.data, null, 2);
+    const r = report as any;
+    const jsonData = JSON.stringify(r.data, null, 2);
     return new Blob([jsonData], { type: 'application/json' });
   }
 

@@ -42,6 +42,9 @@ export interface SecurityScanResult {
   payload?: string;
 }
 
+// 别名以兼容不同的命名约定
+export type SecurityTestResult = SecurityScanResult;
+
 export class SecurityEngine {
   private isScanning = false;
   private abortController: AbortController | null = null;

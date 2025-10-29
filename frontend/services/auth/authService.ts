@@ -314,9 +314,9 @@ export class UnifiedAuthService implements IAuthService {
             user = result.data.user;
             serverToken = result.data.token;
             isValidPassword = true;
-            Logger.debug('✅ API登录成功:', user.username);
+            Logger.debug('✅ API登录成功', { username: user.username });
           } else {
-            Logger.debug('❌ API登录失败:', result.error || result.message);
+            Logger.debug('❌ API登录失败', { error: result.error || result.message });
             user = null;
             isValidPassword = false;
           }
@@ -963,7 +963,7 @@ export class UnifiedAuthService implements IAuthService {
   async refreshToken(refreshToken: string): Promise<AuthResponse> {
     try {
       const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
-      const decoded = jwt.verify(refreshToken, secret) as any;
+      const decoded = (jwt as any).verify(refreshToken, secret) as any;
 
       if (decoded.type !== 'refresh') {
         throw new Error('无效的刷新令牌');
@@ -1574,5 +1574,6 @@ export class UnifiedAuthService implements IAuthService {
 
 // 创建全局统一认证服务实例
 export const unifiedAuthService = new UnifiedAuthService();
+export const authService = unifiedAuthService; // 主要导出
 export const _authService = unifiedAuthService; // 添加别名导出
 export default unifiedAuthService; // 导出实例而不是类

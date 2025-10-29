@@ -63,13 +63,14 @@ export const useUnifiedTestEngine = (): UseUnifiedTestEngineReturn => {
         id: testId,
         testId,
         type: config.type,
-        status: TestStatus.Completed,
+        status: TestStatus.COMPLETED,
         startTime: new Date(),
         endTime: new Date(),
         duration: 2000,
         results: {},
         metrics: {},
-        score: 85
+        score: 85,
+        timestamp: Date.now()
       };
       
       setResult(testResult);

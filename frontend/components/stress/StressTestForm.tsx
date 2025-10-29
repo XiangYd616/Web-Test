@@ -29,8 +29,8 @@ const StressTestForm: React.FC<StressTestFormProps> = ({
   isRunning,
   error
 }) => {
-  const handleUrlChange = (url: string) => {
-    onConfigChange({ ...config, url });
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onConfigChange({ ...config, url: e.target.value });
   };
 
   const handleUsersChange = (users: number) => {

@@ -680,4 +680,5 @@ class AdminService {
   }
 }
 
-export const _adminService = AdminService.getInstance();
+export const adminService = AdminService.getInstance();
+export const _adminService = adminService; // Alias for backward compatibility

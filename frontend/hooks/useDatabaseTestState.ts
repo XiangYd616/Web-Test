@@ -613,34 +613,11 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   const currentQuery = config.customQueries.length > 0 ? config.customQueries[0]?.name || null : null;
 
   return {
-    // ==================== BaseTestState ====================
-    status,
-    progress,
-    currentStep,
-    result,
+    runTest: startTest,
+    loading: isRunning,
     error,
-    isRunning,
-    isCompleted,
-    hasError,
-
-    // ==================== DatabaseTestState ====================
-    config,
-    currentQuery,
-
-    // ==================== BaseTestActions ====================
-    startTest: (config: DatabaseTestConfig) => startTest(),
-    stopTest,
-    reset: resetTest,
-    clearError: () => setError(null),
-
-    // ==================== DatabaseTestActions ====================
-    updateConfig,
-    addQuery: addCustomQuery,
-    removeQuery: removeCustomQuery,
-    updateQuery: updateCustomQuery,
-
-    // 注意：resetConfig, testConnection, loadPreset等方法不属于DatabaseTestHook接口
-    // 如果需要这些方法，请使用UseDatabaseTestStateReturn接口
+    result,
+    status
   };
 };
 

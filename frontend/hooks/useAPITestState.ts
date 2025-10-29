@@ -212,8 +212,11 @@ export const useAPITestState = (): any => {
    */
   const addEndpoint = useCallback((endpoint: Omit<APIEndpoint, 'id'>) => {
     const newEndpoint: APIEndpoint = {
-      ...endpoint,
-      id: `endpoint_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
+      id: `endpoint_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+      name: endpoint.name,
+      url: endpoint.url,
+      method: endpoint.method,
+      ...endpoint
     };
 
     setConfig((prev: APITestConfig) => ({

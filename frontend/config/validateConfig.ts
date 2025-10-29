@@ -482,8 +482,8 @@ function validateFields(
 
       // 范围验证
       if (validator.min !== undefined) {
-        const actualLength = typeof value === 'string' || Array.isArray(value) ? value.length : value;
-        if (actualLength < validator.min) {
+        const actualLength = typeof value === 'string' || Array.isArray(value) ? value.length : (typeof value === 'number' ? value : 0);
+        if (typeof actualLength === 'number' && actualLength < validator.min) {
           errors.push({
             path,
             message: `字段 ${path} 值过小，最小值为 ${validator.min}`,
@@ -495,8 +495,8 @@ function validateFields(
       }
 
       if (validator.max !== undefined) {
-        const actualLength = typeof value === 'string' || Array.isArray(value) ? value.length : value;
-        if (actualLength > validator.max) {
+        const actualLength = typeof value === 'string' || Array.isArray(value) ? value.length : (typeof value === 'number' ? value : 0);
+        if (typeof actualLength === 'number' && actualLength > validator.max) {
           errors.push({
             path,
             message: `字段 ${path} 值过大，最大值为 ${validator.max}`,

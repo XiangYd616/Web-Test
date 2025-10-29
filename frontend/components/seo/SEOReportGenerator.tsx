@@ -407,8 +407,9 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
     // 按优先级排序
     return recommendations.sort((a, b) => {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
-      return priorityOrder[b.priority as keyof typeof priorityOrder] - 
-             priorityOrder[a.priority as keyof typeof priorityOrder];
+      const aPriority = (a as any)?.priority as keyof typeof priorityOrder || 'low';
+      const bPriority = (b as any)?.priority as keyof typeof priorityOrder || 'low';
+      return (priorityOrder[bPriority] || 1) - (priorityOrder[aPriority] || 1);
     });
   };
 

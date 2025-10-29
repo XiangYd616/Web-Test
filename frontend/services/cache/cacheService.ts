@@ -47,8 +47,8 @@ export interface CacheStats {
 /**
  * 统一缓存服务类
  */
-export class cacheService {
-  private static instance: cacheService;
+export class CacheService {
+  private static instance: CacheService;
   private config: CacheConfig;
   private memoryCache = new Map<string, CacheItem>();
   private stats: CacheStats = {
@@ -78,11 +78,11 @@ export class cacheService {
   /**
    * 获取单例实例
    */
-  public static getInstance(config?: Partial<CacheConfig>): cacheService {
-    if (!cacheService.instance) {
-      cacheService.instance = new cacheService(config);
+  public static getInstance(config?: Partial<CacheConfig>): CacheService {
+    if (!CacheService.instance) {
+      CacheService.instance = new CacheService(config);
     }
-    return cacheService.instance;
+    return CacheService.instance;
   }
 
   /**
@@ -368,5 +368,5 @@ export class cacheService {
 }
 
 // 导出单例实例
-export const cacheService = cacheService.getInstance();
+export const cacheService = CacheService.getInstance();
 export default cacheService;

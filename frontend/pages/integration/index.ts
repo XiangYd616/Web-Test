@@ -2,7 +2,7 @@
 // 从父目录导出集成相关页面
 export { default as ApiDocs } from '../ApiDocs';
 export { default as ApiKeys } from '../ApiKeys';
-export { default as CicdIntegration } from '../CicdIntegration';
+export { default as CicdIntegration } from '../CICDIntegration';
 export { default as Integrations } from '../Integrations';
 export { default as Webhooks } from '../Webhooks';
 

@@ -6,12 +6,12 @@
  */
 
 
-import Logger from '@/utils/logger';
+import Logger from '../utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {stressTestQueueManager} from '../services/stressTestQueueManager';
-
 import {stressTestRecordService} from '../services/stressTestRecordService';
-import type { StressTestRecord, TestProgress, TestMetrics, TestResults, TestRecordQuery, QueueStats } from '../types/common';
+import type { StressTestRecord, TestRecordQuery } from '../services/stressTestRecordService';
+import type { TestProgress, TestMetrics, TestResults, QueueStats } from '../types/common';
 
 export interface UseStressTestRecordOptions {
   autoLoad?: boolean;
@@ -104,11 +104,16 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
   // 队列状态管理
   const [queueStats, setQueueStats] = useState<QueueStats>({
+    pending: 0,
+    running: 0,
+    completed: 0,
+    failed: 0,
+    total: 0,
+    avgWaitTime: 0,
     totalQueued: 0,
     totalRunning: 0,
     totalCompleted: 0,
     totalFailed: 0,
-    averageWaitTime: 0,
     averageExecutionTime: 0,
     queueLength: 0,
     runningTests: [],
@@ -511,7 +516,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     if (!authToken) {
       // 如果没有认证令牌，生成一个本地ID并跳过服务器记录
       const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      Logger.warn('⚠️ 未登录用户，跳过服务器记录创建，使用本地ID:', localId);
+      Logger.warn('⚠️ 未登录用户，跳过服务器记录创建，使用本地ID', { localId });
 
       // 创建本地记录
       const localRecord: StressTestRecord = {
@@ -553,7 +558,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       return record.id;
     } catch (error: any) {
       // 如果服务器记录创建失败，回退到本地记录
-      Logger.warn('⚠️ 服务器记录创建失败，回退到本地记录:', error.message);
+      Logger.warn('⚠️ 服务器记录创建失败，回退到本地记录', { errorMessage: error.message });
 
       const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const localRecord: StressTestRecord = {
@@ -609,7 +614,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
             return exists ? prev : [record!, ...prev];
           });
         } catch (err) {
-          Logger.warn(`无法获取测试记录 ${id}，跳过实时数据更新:`, err);
+          Logger.warn(`无法获取测试记录 ${id}，跳过实时数据更新`, { id, error: err });
           return;
         }
       }
@@ -664,14 +669,14 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   useEffect(() => {
     // 初始化队列统计
     const stats = stressTestQueueManager.getQueueStats();
-    setQueueStats(stats);
+    setQueueStats(prev => ({ ...prev, ...stats }));
 
     // 添加队列事件监听
     const removeListener = stressTestQueueManager.addListener((event: string, data: any) => {
 
       // 更新队列统计
       const newStats = stressTestQueueManager.getQueueStats();
-      setQueueStats(newStats);
+      setQueueStats(prev => ({ ...prev, ...newStats }));
 
       // 根据事件类型更新本地状态
       if (event === 'testCompleted' || event === 'testFailed' || event === 'testCancelled') {

@@ -277,7 +277,7 @@ export const useDataManagement = (): UseDataManagementReturn => {
 
     try {
       const result = await extendedDataManager.queryData(query);
-      setRecords(result.data);
+      setRecords(result.data as DataRecord[]);
       setTotalRecords(result.total);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '加载数据失败';

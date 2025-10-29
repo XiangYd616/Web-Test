@@ -40,7 +40,7 @@ export interface ExportTask {
   data: any;
 }
 
-class exportManager {
+class ExportManager {
   private tasks: Map<string, ExportTask> = new Map();
   private maxConcurrentExports = 3;
 
@@ -705,7 +705,7 @@ class exportManager {
 }
 
 // 创建单例实例
-export const exportManager = new exportManager();
+export const exportManager = new ExportManager();
 
 export default exportManager;
 

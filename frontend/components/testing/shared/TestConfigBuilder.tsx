@@ -167,7 +167,7 @@ export const TestConfigBuilder: React.FC<TestConfigBuilderProps> = ({
         );
 
       case 'array':
-        return renderArrayField(field, value || []);
+        return renderArrayField(field, Array.isArray(value) ? value : []);
 
       default:
         return (

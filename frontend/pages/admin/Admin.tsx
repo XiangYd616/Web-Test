@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import {Users, Settings, Monitor, Database, Shield, FileText, Server, Activity, BarChart3, AlertTriangle, CheckCircle} from 'lucide-react';
+import {Users, Settings as SettingsIcon, Monitor, Database, Shield, FileText, Server, Activity, BarChart3, AlertTriangle, CheckCircle} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import UserManagement from './UserManagement';
 import Settings from './Settings';
@@ -48,7 +48,7 @@ const Admin: React.FC = () => {
     {
       id: 'settings',
       name: '系统设置',
-      icon: Settings,
+      icon: SettingsIcon,
       description: '系统配置和偏好设置',
       component: Settings
     },

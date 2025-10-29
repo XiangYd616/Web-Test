@@ -306,14 +306,15 @@ export class ApiErrorHandler {
       retryable: status >= 500
     };
 
+    const err = error as any;
     return {
       code: errorInfo.code,
       message: errorInfo.message,
       details: {
         status,
-        statusText: error.response.statusText,
+        statusText: err.response?.statusText,
         data,
-        headers: error.response.headers
+        headers: err.response?.headers
       },
       context,
       timestamp: new Date().toISOString(),

@@ -3,7 +3,7 @@
  * 版本: v2.0.0
  */
 
-import { BaseApiService } from './baseApiService';
+import { BaseApiService, RequestConfig } from './baseApiService';
 import type {ApiResponse} from '@shared/types';
 
 export interface ApiConfig {
@@ -20,12 +20,7 @@ export interface AuthConfig {
   tokenType: string;
 }
 
-export interface RequestConfig extends RequestInit {
-  timeout?: number;
-  retries?: number;
-  skipAuth?: boolean;
-  cache?: boolean;
-}
+// RequestConfig 已在 baseApiService 中定义，这里不需要重复定义
 
 export interface TestConfig {
   testId: string;
@@ -158,7 +153,7 @@ export class ApiService extends BaseApiService {
   
   // 测试结果相关
   public async exportTestResult(testId: string, format: 'json' | 'csv' | 'pdf' = 'json'): Promise<ApiResponse<any>> {
-    return this.apiGet(`/api/tests/${testId}/export`, { format });
+    return this.apiGet(`/api/tests/${testId}/export?format=${format}`);
   }
   
   public async getTestReport(testId: string): Promise<ApiResponse<any>> {

@@ -6,7 +6,7 @@
  */
 
 // 主要API服务导出
-export { apiService as apiService, default as defaultApiService, apiService } from './apiService';
+export { apiService, default as defaultApiService } from './apiService';
 
 // 类型导出
 export type {

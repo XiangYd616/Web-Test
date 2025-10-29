@@ -452,12 +452,12 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
            * @param {Object} params - 参数对象
            * @returns {Promise<Object>} 返回结果
            */
-        formatter={(value: unknown, name: string) => {
+        formatter={(value: unknown, name: string): [string, string] => {
           if (name === 'count') {
             const percentage = responseTimeDistribution.find(item => item.count === value)?.percentage || 0;
             return [`${value} 个请求 (${percentage.toFixed(1)}%)`, '请求数量'];
           }
-          return [value, name];
+          return [String(value), name];
         }}
         labelFormatter={(label) => `响应时间范围: ${label}`}
       />

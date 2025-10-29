@@ -165,6 +165,9 @@ export interface APIError extends FlexibleObject {
   details?: any;
 }
 
+// Alias for compatibility
+export type ApiError = APIError;
+
 // ============================================
 // Progress and Queue Types
 // ============================================

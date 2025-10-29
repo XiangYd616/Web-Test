@@ -707,10 +707,9 @@ const APITest: React.FC = () => {
         document.body.appendChild(htmlLink);
         htmlLink.click();
         document.body.removeChild(htmlLink);
-        break;
-      }
         URL.revokeObjectURL(htmlUrl);
         break;
+      }
     }
   };
 

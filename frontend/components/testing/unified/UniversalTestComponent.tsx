@@ -196,7 +196,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
 
   // 使用核心测试引擎Hook
   const engine = useCoreTestEngine({
-    testType: selectedTestType,
+    testType: selectedTestType as any,
     defaultConfig: {
       name: `${getTestTypeConfig(selectedTestType).label}`,
       type: selectedTestType,
@@ -210,7 +210,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
     enableWebSocket,
     onTestComplete: (result) => {
       showNotification('测试完成', 'success');
-      onTestComplete?.(result);
+      onTestComplete?.(result as any);
     },
     onTestError: (error) => {
       showNotification(`测试失败: ${error}`, 'error');
@@ -219,8 +219,8 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
     onTestStarted: () => {
       showNotification('测试已启动', 'info');
     },
-    onTestProgress,
-    onConfigChange
+    onTestProgress: onTestProgress as any,
+    onConfigChange: onConfigChange as any
   });
 
   // 当前测试类型配置
@@ -238,7 +238,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
   // 处理配置变更
   const handleConfigChange = useCallback(() => {
     const values = form.getFieldsValue();
-    const newConfig: TestConfig = {
+    const newConfig: any = {
       name: `${currentTestTypeConfig.label} - ${new Date().toLocaleString()}`,
       type: selectedTestType,
       url: values.url || '',
@@ -258,7 +258,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       await form.validateFields();
       const values = form.getFieldsValue();
       
-      const testConfig: TestConfig = {
+      const testConfig: any = {
         name: `${currentTestTypeConfig.label} - ${new Date().toLocaleString()}`,
         type: selectedTestType,
         url: values.url,
@@ -271,7 +271,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       onTestStart?.(testConfig);
       await engine.startTest(testConfig);
       setActiveTab('progress');
-    } catch (error) {
+    } catch (error: any) {
       if (error.errorFields) {
         showNotification('请检查表单配置', 'warning');
       } else {
@@ -385,9 +385,16 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         {/* 高级选项 */}
         {showAdvancedOptions && (
           <TestConfigForm
-            testType={selectedTestType}
             form={form}
-            onChange={handleConfigChange}
+            selectedTestType={selectedTestType as any}
+            supportedTypes={engine.supportedTypes}
+            onTestTypeChange={setSelectedTestType as any}
+            onExecuteTest={handleStartTest}
+            onRefreshEngine={() => engine.connectWebSocket()}
+            onClearHistory={() => engine.clearResults()}
+            isExecuting={engine.isRunning}
+            isConnected={engine.isConnected}
+            completedTestsCount={engine.getStats().completedTests}
           />
         )}
       </Form>
@@ -466,14 +473,25 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       );
     }
 
+    // Convert activeTests to Map for TestProgressMonitor
+    const activeTestsMap = new Map();
+    (engine.activeTests || []).forEach((test: any) => {
+      if (test?.testId) {
+        activeTestsMap.set(test.testId, {
+          testId: test.testId,
+          status: test.status || 'running',
+          progress: test.progress || engine.progress || 0,
+          currentStep: test.currentStep || engine.state.currentStep || ''
+        });
+      }
+    });
+    
     return (
       <TestProgressMonitor
-        isRunning={engine.isRunning}
-        progress={engine.progress}
-        currentStep={engine.currentTest}
-        testId={engine.state.testId}
-        enableRealTime={showRealTimeMetrics}
-        onCancel={() => engine.stopTest()}
+        activeTests={activeTestsMap}
+        realTimeMetrics={null}
+        onStopTest={(testId) => engine.stopTest(testId)}
+        onCancelTest={(testId) => engine.cancelTest(testId)}
       />
     );
   };
@@ -642,9 +660,15 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
               />
             </Card>
           </Col>
-        </Row>
+      </Row>
         
-        {showStats && <TestStatsPanel stats={stats} />}
+        {showStats && <TestStatsPanel stats={{
+          totalActiveTests: stats.totalTests,
+          runningTests: stats.runningTests,
+          completedTests: stats.completedTests,
+          failedTests: stats.failedTests,
+          totalResults: stats.totalTests
+        }} />}
       </div>
     );
   };
@@ -736,10 +760,16 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         ]}
       >
         <TestConfigForm
-          testType={selectedTestType}
           form={form}
-          onChange={handleConfigChange}
-          showAdvanced
+          selectedTestType={selectedTestType as any}
+          supportedTypes={engine.supportedTypes}
+          onTestTypeChange={setSelectedTestType as any}
+          onExecuteTest={handleStartTest}
+          onRefreshEngine={() => engine.connectWebSocket()}
+          onClearHistory={() => engine.clearResults()}
+          isExecuting={engine.isRunning}
+          isConnected={engine.isConnected}
+          completedTestsCount={engine.getStats().completedTests}
         />
       </Modal>
 
@@ -752,8 +782,8 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         onClose={() => setShowHistoryDrawer(false)}
       >
         <TestHistoryPanel
-          testType={selectedTestType}
-          onViewResult={handleViewResult}
+          testType={selectedTestType as any}
+          onViewResult={(result: any) => handleViewResult(result)}
           onRetryTest={(config: any) => engine.startTest(config)}
         />
       </Drawer>

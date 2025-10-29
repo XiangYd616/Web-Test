@@ -616,7 +616,7 @@ export function cached<T extends (...args: unknown[]) => Promise<ApiResponse<any
 
 // ==================== 默认缓存实例 ====================
 
-export const _defaultMemoryCache = new CacheManager(
+export const defaultMemoryCache = new CacheManager(
   new MemoryCacheStorage(),
   {
     namespace: 'memory',
@@ -625,8 +625,9 @@ export const _defaultMemoryCache = new CacheManager(
     strategy: 'lru'
   }
 );
+export const _defaultMemoryCache = defaultMemoryCache; // Alias
 
-export const _defaultLocalStorageCache = new CacheManager(
+export const defaultLocalStorageCache = new CacheManager(
   new LocalStorageCacheStorage('app-cache'),
   {
     namespace: 'localStorage',
@@ -636,6 +637,7 @@ export const _defaultLocalStorageCache = new CacheManager(
     persistToDisk: true
   }
 );
+export const _defaultLocalStorageCache = defaultLocalStorageCache; // Alias
 
 // ==================== 缓存工厂 ====================
 

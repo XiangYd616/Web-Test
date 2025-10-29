@@ -542,14 +542,22 @@ const UserManagement: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
                           {user.emailVerified ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" title="邮箱已验证" />
+                            <span title="邮箱已验证">
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            </span>
                           ) : (
-                            <XCircle className="h-4 w-4 text-red-500" title="邮箱未验证" />
+                            <span title="邮箱未验证">
+                              <XCircle className="h-4 w-4 text-red-500" />
+                            </span>
                           )}
                           {user.twoFactorEnabled ? (
-                            <Shield className="h-4 w-4 text-blue-500" title="已启用2FA" />
+                            <span title="已启用2FA">
+                              <Shield className="h-4 w-4 text-blue-500" />
+                            </span>
                           ) : (
-                            <Shield className="h-4 w-4 text-gray-400" title="未启用2FA" />
+                            <span title="未启用2FA">
+                              <Shield className="h-4 w-4 text-gray-400" />
+                            </span>
                           )}
                         </div>
                       </td>

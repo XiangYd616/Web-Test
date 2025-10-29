@@ -161,13 +161,13 @@ const SecurityTest: React.FC = () => {
   };
 
   // 处理测试完成
-  const handleTestComplete = (result: SecurityTestResult) => {
+  const handleTestComplete = (result: any) => {
     setTestResult(result);
     setIsTestRunning(false);
     setTestProgress(null);
 
     // 记录测试完成统计
-    recordTestCompletion('安全测试', true, result?.overallScore, Math.round(result?.duration / 1000));
+    recordTestCompletion('安全测试', true, result?.overallScore || 0, Math.round((result?.duration || 0) / 1000));
   };
 
   // 处理测试错误
@@ -178,7 +178,7 @@ const SecurityTest: React.FC = () => {
   };
 
   // 处理测试对比
-  const _handleCompareTests = (results: SecurityTestResult[]) => {
+  const _handleCompareTests = (results: any[]) => {
     setComparisonResults(results);
     setActiveTab('comparison');
   };

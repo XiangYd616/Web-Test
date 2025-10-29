@@ -115,8 +115,8 @@ export const userDao = {
       updatedAt: new Date().toISOString(),
       lastLoginAt: null,
       profile: {
-        firstName: userData.firstName || '',
-        lastName: userData.lastName || '',
+        firstName: (userData as any).firstName || '',
+        lastName: (userData as any).lastName || '',
         bio: ''
       },
       preferences: {
@@ -156,11 +156,11 @@ export const userDao = {
       updatedAt: new Date().toISOString(),
       profile: {
         ...user.profile,
-        ...updateData.profile
+        ...(updateData as any).profile
       },
       preferences: {
         ...user.preferences,
-        ...updateData.preferences
+        ...(updateData as any).preferences
       }
     };
 

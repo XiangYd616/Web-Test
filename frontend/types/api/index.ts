@@ -200,21 +200,12 @@ export interface ApiConfig {
 // ==================== Test API Types ====================
 
 // Import test-specific types from unified type system
-export type TestType = 'website' | 'api' | 'performance' | 'security' | 'ux' | 'compatibility' | 'stress' | 'accessibility' | 'network' | 'database';
+// Use the standard TestType from enums.ts
+import { TestType as EnumTestType, TestTypeValue } from '../enums';
 
-// TestType enum for component usage
-export enum TestTypeEnum {
-  WEBSITE = 'website',
-  API = 'api',
-  PERFORMANCE = 'performance',
-  SECURITY = 'security', 
-  UX = 'ux',
-  COMPATIBILITY = 'compatibility',
-  STRESS = 'stress',
-  ACCESSIBILITY = 'accessibility',
-  NETWORK = 'network',
-  DATABASE = 'database'
-}
+// Re-export for compatibility - use enum values as the canonical type
+export type TestType = TestTypeValue | EnumTestType;
+export { EnumTestType as TestTypeEnum };
 export type TestStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout';
 export type DeviceType = 'desktop' | 'mobile' | 'tablet';
 export type NetworkCondition = 'fast-3g' | 'slow-3g' | '4g' | 'wifi' | 'offline' | 'no-throttling';

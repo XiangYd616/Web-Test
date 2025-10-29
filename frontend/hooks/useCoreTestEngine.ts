@@ -38,18 +38,26 @@ export interface TestConfig {
 }
 
 // 统一的测试结果接口
-export interface UnifiedTestResult extends TestResult {
+export interface UnifiedTestResult {
   id: string;
+  testId: string;
+  engineId: string;
   type: string;
-  testId?: string;
   testType?: string;
+  status: 'success' | 'failure' | 'partial';
+  score?: number;
   overallScore?: number;
-  duration?: number;
-  recommendations?: {
+  results: Record<string, any>;
+  errors?: string[];
+  warnings?: string[];
+  recommendations?: string[] | {
     immediate?: string[];
     shortTerm?: string[];
     longTerm?: string[];
   };
+  timestamp: string;
+  duration: number;
+  url?: string;
   details?: {
     duration?: number;
     url?: string;
@@ -352,7 +360,12 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
         }));
         if (result) {
           setResults(prev => [...prev, result as UnifiedTestResult]);
-          recordTestCompletion(testType || 'unknown');
+          recordTestCompletion(
+            testType || 'unknown', 
+            result.status === 'success',
+            result.score,
+            result.duration
+          );
         }
         onTestComplete?.(result as UnifiedTestResult);
       },
@@ -423,11 +436,9 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
       }
 
       // 调用API启动测试
-      let result: UnifiedTestResult;
-      
       if (testConfig.engineId) {
         // 使用testApiClient
-        result = await testApiClient.runTest({
+        const testResult = await testApiClient.runTest({
           engineId: testConfig.engineId,
           config: testConfig,
           options: {
@@ -435,9 +446,12 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
             timeout: testConfig.timeout || defaultTimeout
           }
         });
+        // 转换为UnifiedTestResult格式（如果需要）
+        Logger.debug('Test API result', { testResult });
       } else {
         // 使用backgroundTestManager
-        result = await backgroundTestManager.startTest(testConfig);
+        const resultTestId = await backgroundTestManager.startTest(testConfig);
+        Logger.debug('Background test started', { resultTestId });
       }
 
       // 添加到活跃测试列表
@@ -566,7 +580,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   // 获取统计信息
   const getStats = useCallback(() => {
     const completedTests = results.length;
-    const failedTests = results.filter(r => r.status === 'failed').length;
+    const failedTests = results.filter(r => r.status === 'failure').length;
     const runningTests = activeTests.length;
     
     return {
@@ -626,7 +640,11 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
       
       // 如果本地没有，尝试从API获取
       const apiResult = await testApiClient.getTestStatus(testId);
-      return apiResult as UnifiedTestResult;
+      if (!apiResult) {
+        return null;
+      }
+      // 只有当结果包含必需字段时才返回
+      return apiResult as unknown as UnifiedTestResult;
     } catch (error) {
       Logger.error('获取测试结果失败:', error);
       return null;
@@ -682,7 +700,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   const deleteConfiguration = useCallback(async (configId: string): Promise<void> => {
     try {
       // 这里应该调用实际的API删除配置
-      Logger.debug('删除配置:', configId);
+      Logger.debug('删除配置', { configId });
     } catch (error) {
       Logger.error('删除配置失败:', error);
       throw error;

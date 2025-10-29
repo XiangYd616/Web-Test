@@ -13,7 +13,7 @@ export function useAppState() {
   const [state, setState] = useState<AppState>(stateManager.getState());
 
   useEffect(() => {
-    const unsubscribe = stateManager.subscribe('all', (newState: AppState) => {
+    const unsubscribe = stateManager.subscribe('all' as any, (newState: AppState) => {
       setState(newState);
     });
 
@@ -42,7 +42,7 @@ export function useStateType<T = any>(type: StateEventType | 'all') {
   const [state, setState] = useState<AppState>(stateManager.getState());
 
   useEffect(() => {
-    const unsubscribe = stateManager.subscribe(type, (newState: AppState) => {
+    const unsubscribe = stateManager.subscribe(type as StateEventType, (newState: AppState) => {
       setState(newState);
     });
 
@@ -50,7 +50,9 @@ export function useStateType<T = any>(type: StateEventType | 'all') {
   }, [type]);
 
   const dispatch = useCallback((action: string, payload: T) => {
-    stateManager.dispatch({ type, action, payload });
+    if (type !== 'all') {
+      stateManager.dispatch({ type: type as StateEventType, action, payload });
+    }
   }, [type]);
 
   return {
@@ -431,9 +433,9 @@ export function useBusinessState() {
     scheduleTest(testConfig: unknown, scheduleOptions: any) {
       const scheduledTest = {
         id: `scheduled-${Date.now()}`,
-        ...testConfig,
-        ...scheduleOptions,
-        status: 'scheduled'
+        ...(testConfig as any),
+        ...(scheduleOptions as any),
+        status: 'scheduled' as const
       };
       
       testActions.addScheduledTest(scheduledTest);

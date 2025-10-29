@@ -123,13 +123,13 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   }, [optimizedData.data]);
 
   // 优化的工具提示格式化
-  const formatTooltip = useCallback((value: unknown, name: string) => {
+  const formatTooltip = useCallback((value: unknown, name: string): [string, string] => {
     if (name === dataKey) {
       const unit = dataKey === 'responseTime' ? 'ms' :
         dataKey === 'throughput' || dataKey === 'tps' ? '' : '';
       return [`${typeof value === 'number' ? value.toFixed(3) : value}${unit}`, name];
     }
-    return [value, name];
+    return [String(value), name];
   }, [dataKey]);
 
   // 🔧 改进：优化的标签格式化，提高到0.1秒精度

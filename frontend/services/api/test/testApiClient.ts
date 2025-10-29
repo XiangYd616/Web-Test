@@ -134,7 +134,7 @@ export class TestApiClient {
     
     try {
       // 发送测试请求到后端
-      const response = await this.api.post(`/test/${engineId}/run`, {
+      const response: any = await this.api.post(`/test/${engineId}/run`, {
         config,
         options
       });
@@ -155,10 +155,10 @@ export class TestApiClient {
    */
   async runBatchTests(requests: TestRequest[]): Promise<TestResult[]> {
     try {
-      const response = await this.api.post('/test/batch', {
+      const response: any = await this.api.post('/test/batch', {
         tests: requests
       });
-      return response?.results;
+      return response?.results || [];
     } catch (error) {
       throw new Error(`批量测试执行失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
@@ -285,11 +285,11 @@ export const runTest = (engineId: string, config: Record<string, any>) => {
   return testApiClient.runTest({ engineId, config });
 };
 
-export const _getTestEngines = () => {
+export const getTestEngines = () => {
   return testApiClient.getAvailableEngines();
 };
 
-export const _validateTestConfig = (engineId: string, config: Record<string, any>) => {
+export const validateTestConfig = (engineId: string, config: Record<string, any>) => {
   return testApiClient.validateConfig(engineId, config);
 };
 

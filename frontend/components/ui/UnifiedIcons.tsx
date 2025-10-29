@@ -4,16 +4,40 @@ import { LucideIcon, CheckCircle, XCircle, Clock, AlertCircle, Play } from 'luci
 
 export interface IconProps {
   className?: string;
-  size?: number;
+  size?: number | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  color?: 'current' | 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'muted';
+  animated?: boolean;
 }
+
+// 尺寸映射
+const sizeMap: Record<string, number> = {
+  'sm': 16,
+  'md': 20,
+  'lg': 24,
+  'xl': 32,
+  '2xl': 40
+};
+
+// 颜色映射
+const colorMap: Record<string, string> = {
+  'current': '',
+  'primary': 'text-blue-500',
+  'secondary': 'text-gray-400',
+  'success': 'text-green-500',
+  'error': 'text-red-500',
+  'warning': 'text-yellow-500',
+  'muted': 'text-gray-500'
+};
 
 // TestStatusIcon component
 export const TestStatusIcon: React.FC<{ status: string } & IconProps> = ({ 
   status, 
   className = '',
-  size = 20 
+  size = 20,
+  animated = false
 }) => {
-  const iconProps = { className, size };
+  const numericSize = typeof size === 'string' ? sizeMap[size] || 20 : size;
+  const iconProps = { className: `${animated ? 'animate-spin' : ''} ${className}`, size: numericSize };
   
   switch (status) {
     case 'completed':
@@ -26,7 +50,9 @@ export const TestStatusIcon: React.FC<{ status: string } & IconProps> = ({
     case 'running':
       return <Play {...iconProps} className={`text-blue-500 ${className}`} />;
     case 'pending':
+    case 'warning':
       return <Clock {...iconProps} className={`text-yellow-500 ${className}`} />;
+    case 'idle':
     default:
       return <AlertCircle {...iconProps} className={`text-gray-500 ${className}`} />;
   }
@@ -36,9 +62,12 @@ export const TestStatusIcon: React.FC<{ status: string } & IconProps> = ({
 export const UnifiedIcon: React.FC<{ icon: LucideIcon } & IconProps> = ({ 
   icon: Icon, 
   className = '',
-  size = 20 
+  size = 20,
+  color = 'current'
 }) => {
-  return <Icon className={className} size={size} />;
+  const numericSize = typeof size === 'string' ? sizeMap[size] || 20 : size;
+  const colorClass = colorMap[color] || '';
+  return <Icon className={`${colorClass} ${className}`} size={numericSize} />;
 };
 
 // ActionIcon component

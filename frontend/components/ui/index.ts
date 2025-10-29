@@ -19,11 +19,12 @@ export { Input } from './Input';
 export { Modal } from './Modal';
 export { ProgressBar } from './ProgressBar';
 export { Select } from './Select';
+export type { SelectOption, SelectProps } from './Select';
 export { Table } from './Table';
 export type { TableColumn } from './Table';
-export { LoadingSpinner } from './LoadingSpinner';
+export { default as LoadingSpinner, SimpleLoadingSpinner, InlineLoadingSpinner } from './LoadingSpinner';
 export { URLInput } from './URLInput';
-export { ThemeToggle } from './ThemeToggle';
+export { default as ThemeToggle, ThemeSelector, ThemeSwitch } from './ThemeToggle';
 export { ErrorBoundary } from '../system/ErrorHandling';
 
 // 娴嬭瘯宸ュ叿缁勪欢

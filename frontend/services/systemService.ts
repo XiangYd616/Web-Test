@@ -652,4 +652,5 @@ export class SystemService {
 }
 
 // 创建单例实例
-export const _systemService = new SystemService();
+export const systemService = new SystemService();
+export const _systemService = systemService; // Alias for backward compatibility

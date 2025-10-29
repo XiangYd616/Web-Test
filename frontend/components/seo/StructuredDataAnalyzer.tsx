@@ -259,9 +259,10 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
     element?.querySelectorAll('[itemprop]').forEach(propElement => {
       const prop = propElement.getAttribute('itemprop');
       if (prop) {
-        let value = propElement.getAttribute('content') || 
-                   propElement.getAttribute('href') || 
-                   propElement.textContent?.trim();
+        let value: string | Record<string, any> | null | undefined = 
+          propElement.getAttribute('content') || 
+          propElement.getAttribute('href') || 
+          propElement.textContent?.trim();
         
         if (propElement.hasAttribute('itemscope')) {
           value = extractMicrodataProperties(propElement);

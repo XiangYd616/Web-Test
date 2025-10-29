@@ -11,7 +11,7 @@ export interface APIResponse<T = any> {
   timestamp?: number;
 }
 
-export interface PaginatedAPIResponse<T = any> extends APIResponse<T> {
+export interface PaginatedAPIResponse<T = any> extends Omit<APIResponse<T>, 'data'> {
   data: T[];
   pagination: {
     page: number;

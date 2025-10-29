@@ -20,11 +20,11 @@ export const useTestEngine = () => {
   return {
     // 状态
     isRunning: engine.executingTest,
-    progress: engine.getTestProgress(Array.from(engine.activeTests.keys())[0] || ''),
-    stage: engine.activeTests.size > 0 ?
+    progress: engine.getTestProgress?.() || 0,
+    stage: engine.activeTests?.size > 0 ?
       Array.from(engine.activeTests.values())[0].currentStep : '准备中',
     error: engine.lastError?.message || null,
-    currentTest: engine.activeTests.size > 0 ? {
+    currentTest: engine.activeTests?.size > 0 ? {
       id: Array.from(engine.activeTests.keys())[0],
       testType: 'unknown', // TestStatusInfo没有type字段，使用默认值
       status: Array.from(engine.activeTests.values())[0].status as any,
@@ -34,13 +34,13 @@ export const useTestEngine = () => {
     // 方法
     runTest: engine.runLegacyTest,
     cancelTest: async () => {
-      const testId = Array.from(engine.activeTests.keys())[0];
+      const testId = Array.from(engine.activeTests?.keys() || [])[0];
       if (testId) {
-        await engine.cancelTest(testId);
+        await engine.cancelTest?.();
       }
     },
     resetEngine: engine.resetEngine,
-    getTestHistory: engine.getTestHistory
+    getTestHistory: () => engine.getTestHistory?.()
   };
 };
 
@@ -61,11 +61,11 @@ export const useSimpleTestEngine = () => {
 
     // 方法
     runTest: engine.runSimpleTest,
-    stopTest: async (testId: string) => {
-      await engine.cancelTest(testId);
+    stopTest: async () => {
+      await engine.cancelTest?.();
     },
     getTestStatus: engine.getTestStatus,
-    getTestHistory: engine.getTestHistory,
+    getTestHistory: () => engine.getTestHistory?.(),
     checkEngineStatus: async () => {
       await engine.fetchSupportedTypes();
       return {
@@ -109,23 +109,23 @@ export const useTestState = (options: {
   const startTest = useCallback(async (customConfig?: Record<string, any>) => {
     try {
       const config = customConfig || options.defaultConfig;
-      const testId = await engine.runSimpleTest(options.testType, config);
+      const testId = await engine.runSimpleTest?.({ testType: options.testType, ...config });
 
       // 等待测试完成
       const checkCompletion = async () => {
-        const status = await engine.getTestStatus(testId);
-        if (status.status === 'completed') {
-          const result = await engine.getTestResult(testId);
+        const status = await engine.getTestStatus?.(testId);
+        if (status?.status === 'completed') {
+          const result = await engine.getTestResult?.(testId);
           options.onTestComplete?.(result);
-        } else if (status.status === 'failed') {
+        } else if (status?.status === 'failed') {
           options.onTestError?.(status?.error || '测试失败');
         }
       };
 
       // 轮询检查测试状态
       const interval = setInterval(async () => {
-        const status = await engine.getTestStatus(testId);
-        if (status.status === 'completed' || status.status === 'failed') {
+        const status = await engine.getTestStatus?.(testId);
+        if (status?.status === 'completed' || status?.status === 'failed') {
           clearInterval(interval);
           await checkCompletion();
         }
@@ -158,8 +158,8 @@ export const useTestState = (options: {
     },
     startTest,
     stopTest: async () => {
-      if (universalState.testId) {
-        await engine.cancelTest(universalState.testId);
+      if (universalState?.testId) {
+        await engine.cancelTest?.();
       }
     },
     resetTest: engine.resetEngine,
@@ -190,12 +190,12 @@ export const useUniversalTest = (testType: string, defaultConfig: Record<string,
     // 操作
     startTest: async (config?: Record<string, any>) => {
       const finalConfig = config || defaultConfig;
-      return await engine.runSimpleTest(testType, finalConfig);
+      return await engine.runSimpleTest?.({ testType, ...finalConfig });
     },
 
     stopTest: async () => {
-      if (universalState.testId) {
-        await engine.cancelTest(universalState.testId);
+      if (universalState?.testId) {
+        await engine.cancelTest?.();
       }
     },
 

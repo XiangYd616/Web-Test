@@ -90,9 +90,13 @@ export const useUniversalTest = () => {
     setConfig({ ...config, ...newConfig });
   };
 
-  const validateConfig = (testConfig?: any): boolean => {
+  const validateConfig = (testConfig?: any): { isValid: boolean; errors?: string[] } => {
     const configToValidate = testConfig || config;
-    return !!configToValidate && !!configToValidate.type;
+    const isValid = !!configToValidate && !!configToValidate.type;
+    return {
+      isValid,
+      errors: isValid ? [] : ['Invalid configuration']
+    };
   };
 
   return {

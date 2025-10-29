@@ -76,21 +76,29 @@ class BackgroundTestManager {
    * 设置统一服务监听器
    */
   private setupUnifiedServiceListeners(): void {
-    unifiedTestService.on('testStarted', (data) => {
-      this.notifyListeners('testStarted', this.adaptUnifiedStatus(data));
-    });
+    // Note: unifiedTestService may not have 'on' method
+    // Using try-catch to prevent errors if method doesn't exist
+    try {
+      if (typeof (unifiedTestService as any).on === 'function') {
+        (unifiedTestService as any).on('testStarted', (data: any) => {
+          this.notifyListeners('testStarted', this.adaptUnifiedStatus(data));
+        });
 
-    unifiedTestService.on('testProgress', (data) => {
-      this.notifyListeners('testProgress', this.adaptUnifiedStatus(data));
-    });
+        (unifiedTestService as any).on('testProgress', (data: any) => {
+          this.notifyListeners('testProgress', this.adaptUnifiedStatus(data));
+        });
 
-    unifiedTestService.on('testCompleted', (data) => {
-      this.notifyListeners('testCompleted', this.adaptUnifiedStatus(data));
-    });
+        (unifiedTestService as any).on('testCompleted', (data: any) => {
+          this.notifyListeners('testCompleted', this.adaptUnifiedStatus(data));
+        });
 
-    unifiedTestService.on('testFailed', (data) => {
-      this.notifyListeners('testFailed', this.adaptUnifiedStatus(data));
-    });
+        (unifiedTestService as any).on('testFailed', (data: any) => {
+          this.notifyListeners('testFailed', this.adaptUnifiedStatus(data));
+        });
+      }
+    } catch (error) {
+      Logger.warn('Failed to setup unified service listeners:', error);
+    }
   }
 
   /**
@@ -125,9 +133,10 @@ class BackgroundTestManager {
     onError?: ErrorCallback
   ): string {
     // 转换为统一测试配置
+    const configObj = config as any;
     const unifiedConfig: UnifiedTestConfig = {
       testType,
-      targetUrl: config.url || config.targetUrl,
+      targetUrl: configObj?.url || configObj?.targetUrl || '',
       configuration: config
     };
 

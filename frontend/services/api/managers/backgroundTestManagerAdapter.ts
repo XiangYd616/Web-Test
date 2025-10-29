@@ -15,7 +15,9 @@ import Logger from '@/utils/logger';
 import { testApiService } from '../testApiService';
 
 // 回调函数类型定义
-type ProgressCallback = (progress: number, step: string, metrics?: any) => void;
+import type { TestProgress } from '../../../types/common';
+
+type ProgressCallback = (progress: number | TestProgress, step?: string, metrics?: any) => void;
 type CompletionCallback = (result: any) => void;
 type ErrorCallback = (error: Error) => void;
 

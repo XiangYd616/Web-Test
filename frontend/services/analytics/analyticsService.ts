@@ -642,6 +642,7 @@ export class LegacyAnalyticsService {
 
 // 创建服务实例并导出
 export const _analyticsService = LegacyAnalyticsService;
+export const analyticsService = LegacyAnalyticsService;
 
 // 类型导出
 export type AnalyticsService = typeof LegacyAnalyticsService;

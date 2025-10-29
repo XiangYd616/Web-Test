@@ -482,15 +482,16 @@ export class DataNormalizationPipeline {
     const normalizedPoints: TestDataPoint[] = [];
 
     for (const point of rawPoints) {
+      const p = point as any;
       const normalizedPoint = this.normalizeDataPoint({
-        timestamp: point.timestamp || Date.now(),
-        responseTime: point.responseTime || 0,
-        activeUsers: point.activeUsers || 0,
-        throughput: point.throughput || point.rps || 0,
-        errorRate: point.success === false ? 100 : 0,
-        status: point.success === false ? 500 : 200,
-        success: point.success ?? true,
-        phase: this.normalizePhase(point.phase)
+        timestamp: p.timestamp || Date.now(),
+        responseTime: p.responseTime || 0,
+        activeUsers: p.activeUsers || 0,
+        throughput: p.throughput || p.rps || 0,
+        errorRate: p.success === false ? 100 : 0,
+        status: p.success === false ? 500 : 200,
+        success: p.success ?? true,
+        phase: this.normalizePhase(p.phase)
       });
 
       if (this.validateDataPoint(normalizedPoint)) {

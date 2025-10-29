@@ -26,3 +26,4 @@ export class DataService {
 }
 
 export const _dataService = new DataService();
+export const dataService = _dataService;

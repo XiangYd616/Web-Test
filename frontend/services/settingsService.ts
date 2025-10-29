@@ -410,6 +410,7 @@ export const _dataManagementAPI = {
 };
 
 // 创建单例实例
-export const _settingsService = new SettingsService();
+export const settingsService = new SettingsService();
+export const _settingsService = settingsService; // Alias for backward compatibility
 
 export default SettingsService;

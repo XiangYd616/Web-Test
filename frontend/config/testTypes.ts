@@ -104,3 +104,9 @@ export const getEnabledTestTypes = (): TestTypeConfig[] => {
   return Object.values(TEST_TYPES).filter(config => config.enabled);
 };
 
+// Export individual test configs for convenience
+export const stressTestConfig = TEST_TYPES.stress;
+export const performanceTestConfig = TEST_TYPES.performance;
+export const securityTestConfig = TEST_TYPES.security;
+export const apiTestConfig = TEST_TYPES.api;
+

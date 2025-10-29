@@ -7,7 +7,7 @@
 
 import Logger from '@/utils/logger';
 import React, { useState, useCallback, useRef } from 'react';
-import { TestConfig, TestResult } from '../types';
+import { TestConfig, TestResult, TestType } from '../types';
 
 export interface UnifiedTestEngine {
   // Original methods
@@ -102,11 +102,14 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
         // 添加模拟结果
         const result: TestResult = {
           id: `test-${i}`,
-          type: testSteps[i],
-          status: Math.random() > 0.2 ? 'passed' : 'failed',
+          testId: `test-${i}`,
+          type: 'performance' as TestType,
+          status: Math.random() > 0.2 ? 'completed' : 'failed',
           score: Math.floor(Math.random() * 40 + 60),
-          message: `${testSteps[i]}完成`,
-          timestamp: Date.now(),
+          startTime: new Date(),
+          endTime: new Date(),
+          duration: Math.floor(Math.random() * 1000 + 500),
+          summary: `${testSteps[i]}完成`,
           details: {
             duration: Math.floor(Math.random() * 1000 + 500),
             url: config.url || 'https://example.com'
@@ -137,7 +140,7 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
   // Additional method implementations
   const getStats = useCallback(() => {
     const completedTests = results.length;
-    const failedTests = results.filter(r => r.status === 'failed').length;
+    const failedTests = results.filter(r => r.status === 'failed' || r.status === 'cancelled').length;
     const runningTests = isRunning ? 1 : 0;
     
     return {
@@ -290,9 +293,9 @@ export const useTestResultAnalysis = (results: TestResult[]) => {
     }
 
     const totalTests = results.length;
-    const passedTests = results.filter(r => r.status === 'passed').length;
-    const failedTests = totalTests - passedTests;
-    const averageScore = results.reduce((acc, r) => acc + r.score, 0) / totalTests;
+    const passedTests = results.filter(r => r.status === 'completed').length;
+    const failedTests = results.filter(r => r.status === 'failed').length;
+    const averageScore = results.reduce((acc, r) => acc + (r.score || 0), 0) / totalTests;
     
     const recommendations: string[] = [];
     if (averageScore < 60) {

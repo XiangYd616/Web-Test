@@ -4,13 +4,29 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  createSuccessResponse,
-  createErrorResponse,
-  isApiSuccessResponse,
-  isApiErrorResponse
-} from '@shared/types';
 import apiClient, { _authApi, _testApi, _apiUtils } from '../api';
+
+// Helper functions for creating responses
+const createSuccessResponse = <T>(data: T) => ({
+  success: true as const,
+  data
+});
+
+const createErrorResponse = (message: string, code?: string) => ({
+  success: false as const,
+  error: message,
+  code
+});
+
+const isApiSuccessResponse = <T>(response: any): response is { success: true; data: T } => {
+  return response && response.success === true && 'data' in response;
+};
+
+const isApiErrorResponse = (response: any): response is { success: false; error: string } => {
+  return response && response.success === false && 'error' in response;
+};
+
+type ApiResponse<T> = { success: true; data: T } | { success: false; error: string };
 
 // Mock fetch
 const mockFetch = vi.fn();

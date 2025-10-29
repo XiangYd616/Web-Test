@@ -325,7 +325,7 @@ const AccessibilityTest: React.FC = () => {
     <div className="space-y-4">
       <URLInput
         value={config.url}
-        onChange={(url) => setConfig({ ...config, url })}
+        onChange={(e) => setConfig({ ...config, url: typeof e === 'string' ? e : e.target.value })}
         placeholder="输入要测试的网站URL"
         disabled={isRunning}
       />
@@ -392,10 +392,11 @@ const AccessibilityTest: React.FC = () => {
 
   return (
     <TestPageLayout
+      testType="accessibility"
       title="可访问性测试"
       description="检测网站的无障碍性，确保所有用户都能访问您的内容"
-      icon={<Users className="w-6 h-6" />}
-      content={
+      icon={Users}
+      testContent={
         <div className="space-y-6">
           {/* 未登录提示 */}
           {!isAuthenticated && <>{LoginPromptComponent}</>}

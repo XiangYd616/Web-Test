@@ -153,7 +153,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    */
   const loadTestHistory = useCallback(async () => {
     try {
-      const history = await engine.getTestHistory?.(selectedTestType);
+      const history = await engine.getTestHistory?.();
       if (history) {
         setTestHistory(history);
       }
@@ -268,7 +268,9 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
       setActiveTab('monitor');
 
       // 订阅测试更新
-      engine.subscribeToTest(testId);
+      engine.subscribeToTest?.(testId, (data) => {
+        onTestProgress?.(data);
+      });
 
       // 启动实时监控
       if (enableRealTimeMetrics) {
@@ -628,8 +630,8 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
       <TestProgressMonitor
         activeTests={engine.activeTests}
         realTimeMetrics={realTimeMetrics}
-        onStopTest={(testId: string) => engine.cancelTest(testId)}
-        onCancelTest={(testId: string) => engine.cancelTest(testId)}
+        onStopTest={() => engine.cancelTest()}
+        onCancelTest={() => engine.cancelTest()}
         className="mb-4"
       />
     );
@@ -673,9 +675,17 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    * 渲染测试结果列表 - 使用专用子组件
    */
   const renderTestResults = () => {
+    // Convert array to Map for TestResultsTable
+    const testResultsMap = new Map<string, TestResult>();
+    (engine.testResults || []).forEach((result: any) => {
+      if (result.testId) {
+        testResultsMap.set(result.testId, result);
+      }
+    });
+    
     return (
       <TestResultsTable
-        testResults={engine.testResults}
+        testResults={testResultsMap}
         onViewResult={handleViewResult}
         onDownloadResult={enableExport ? (result: TestResult) => downloadResult(result) : undefined}
         enableExport={enableExport}

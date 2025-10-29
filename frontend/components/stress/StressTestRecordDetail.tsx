@@ -344,19 +344,19 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-400">并发用户:</span>
-              <span className="text-white">{config.users}</span>
+              <span className="text-white">{String(config.users || 'N/A')}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">测试类型:</span>
-              <span className="text-white">{config.testType}</span>
+              <span className="text-white">{String(config.testType || 'N/A')}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">请求方法:</span>
-              <span className="text-white">{config.method}</span>
+              <span className="text-white">{String(config.method || 'GET')}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">超时时间:</span>
-              <span className="text-white">{config.timeout}秒</span>
+              <span className="text-white">{String(config.timeout || 30)}秒</span>
             </div>
           </div>
         </div>

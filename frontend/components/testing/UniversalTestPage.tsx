@@ -170,7 +170,7 @@ export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
           </pre>
           <button
             type="button"
-            onClick={() => startTest(config)}
+            onClick={startTest}
             className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition-colors"
           >
             重新测试
@@ -184,7 +184,7 @@ export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
           <div className="flex items-center space-x-2 text-red-400 mb-2">
             <span className="font-medium">测试失败</span>
           </div>
-          <p className="text-red-300 text-sm">{error}</p>
+          <p className="text-red-300 text-sm">{error.message || String(error)}</p>
         </div>
       )}
 
@@ -200,8 +200,8 @@ export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
         <div className="flex space-x-3">
           <button
             type="button"
-            onClick={() => startTest(config)}
-            disabled={isRunning || !validateConfig(config)?.isValid}
+            onClick={startTest}
+            disabled={isRunning || !validateConfig(config).isValid}
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
           >
             <testType.icon className="w-4 h-4" />

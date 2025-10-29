@@ -5,6 +5,7 @@
 
 import Logger from '@/utils/logger';
 import { useCallback, useState } from 'react';
+import type { User } from '../types/common';
 
 // 登录凭据接口
 export interface LoginCredentials {
