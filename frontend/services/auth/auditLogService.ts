@@ -4,6 +4,7 @@
  * 版本: v1.0.0
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useState } from 'react';
 import { defaultMemoryCache } from '../cacheStrategy';
 
@@ -862,7 +863,7 @@ export class AuditLogService {
         try {
           listener(entry);
         } catch (error) {
-          console.error('事件监听器执行失败:', error);
+          Logger.error('事件监听器执行失败:', error);
         }
       });
     }

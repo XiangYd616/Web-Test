@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { apiService } from '../api/baseApiService';
 
 export interface UserProfile {
@@ -118,7 +119,7 @@ class UserService {
       }
       throw new Error(response.message || '获取用户资料失败');
     } catch (error) {
-      console.error('获取用户资料失败:', error);
+      Logger.error('获取用户资料失败:', error);
       throw error;
     }
   }
@@ -132,7 +133,7 @@ class UserService {
       }
       throw new Error(response.message || '更新用户资料失败');
     } catch (error) {
-      console.error('更新用户资料失败:', error);
+      Logger.error('更新用户资料失败:', error);
       throw error;
     }
   }
@@ -146,7 +147,7 @@ class UserService {
       }
       throw new Error(response.message || '获取用户统计失败');
     } catch (error) {
-      console.error('获取用户统计失败:', error);
+      Logger.error('获取用户统计失败:', error);
       throw error;
     }
   }
@@ -160,7 +161,7 @@ class UserService {
       }
       throw new Error(response.message || '获取用户设置失败');
     } catch (error) {
-      console.error('获取用户设置失败:', error);
+      Logger.error('获取用户设置失败:', error);
       throw error;
     }
   }
@@ -174,7 +175,7 @@ class UserService {
       }
       throw new Error(response.message || '更新用户设置失败');
     } catch (error) {
-      console.error('更新用户设置失败:', error);
+      Logger.error('更新用户设置失败:', error);
       throw error;
     }
   }
@@ -196,7 +197,7 @@ class UserService {
       }
       throw new Error(response.message || '上传头像失败');
     } catch (error) {
-      console.error('上传头像失败:', error);
+      Logger.error('上传头像失败:', error);
       throw error;
     }
   }
@@ -209,7 +210,7 @@ class UserService {
         throw new Error(response.message || '删除头像失败');
       }
     } catch (error) {
-      console.error('删除头像失败:', error);
+      Logger.error('删除头像失败:', error);
       throw error;
     }
   }
@@ -222,7 +223,7 @@ class UserService {
         throw new Error(response.message || '修改密码失败');
       }
     } catch (error) {
-      console.error('修改密码失败:', error);
+      Logger.error('修改密码失败:', error);
       throw error;
     }
   }
@@ -236,7 +237,7 @@ class UserService {
       }
       throw new Error(response.message || '获取收藏夹失败');
     } catch (error) {
-      console.error('获取收藏夹失败:', error);
+      Logger.error('获取收藏夹失败:', error);
       throw error;
     }
   }
@@ -250,7 +251,7 @@ class UserService {
       }
       throw new Error(response.message || '添加收藏失败');
     } catch (error) {
-      console.error('添加收藏失败:', error);
+      Logger.error('添加收藏失败:', error);
       throw error;
     }
   }
@@ -264,7 +265,7 @@ class UserService {
       }
       throw new Error(response.message || '更新收藏失败');
     } catch (error) {
-      console.error('更新收藏失败:', error);
+      Logger.error('更新收藏失败:', error);
       throw error;
     }
   }
@@ -277,7 +278,7 @@ class UserService {
         throw new Error(response.message || '删除收藏失败');
       }
     } catch (error) {
-      console.error('删除收藏失败:', error);
+      Logger.error('删除收藏失败:', error);
       throw error;
     }
   }
@@ -291,7 +292,7 @@ class UserService {
       }
       throw new Error(response.message || '获取测试历史失败');
     } catch (error) {
-      console.error('获取测试历史失败:', error);
+      Logger.error('获取测试历史失败:', error);
       throw error;
     }
   }
@@ -304,7 +305,7 @@ class UserService {
         throw new Error(response.message || '删除测试记录失败');
       }
     } catch (error) {
-      console.error('删除测试记录失败:', error);
+      Logger.error('删除测试记录失败:', error);
       throw error;
     }
   }
@@ -318,7 +319,7 @@ class UserService {
       }
       throw new Error(response.message || '获取通知失败');
     } catch (error) {
-      console.error('获取通知失败:', error);
+      Logger.error('获取通知失败:', error);
       throw error;
     }
   }
@@ -331,7 +332,7 @@ class UserService {
         throw new Error(response.message || '标记通知失败');
       }
     } catch (error) {
-      console.error('标记通知失败:', error);
+      Logger.error('标记通知失败:', error);
       throw error;
     }
   }
@@ -344,7 +345,7 @@ class UserService {
         throw new Error(response.message || '删除通知失败');
       }
     } catch (error) {
-      console.error('删除通知失败:', error);
+      Logger.error('删除通知失败:', error);
       throw error;
     }
   }

@@ -3,6 +3,7 @@
  * Central system for coordinating and managing all test types
  */
 
+import Logger from '@/utils/logger';
 import { TestType } from '../../types/enums';
 
 export interface TestJob {
@@ -425,7 +426,7 @@ class TestOrchestrator {
             job.status = 'failed';
             break;
           case 'warn':
-            console.warn(`Quality gate warning: ${gate.metric} ${gate.operator} ${gate.value}`);
+            Logger.warn(`Quality gate warning: ${gate.metric} ${gate.operator} ${gate.value}`);
             await this.sendNotification(pipeline, 'warning', this.executionContexts.get(pipelineId));
             break;
         }

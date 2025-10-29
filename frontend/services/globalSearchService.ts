@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 // 全局搜索服务
 export interface SearchResult {
   id: string;
@@ -372,7 +374,7 @@ class GlobalSearchService {
       const newHistory = [query, ...history.filter(h => h !== query)].slice(0, 10);
       localStorage.setItem('search_history', JSON.stringify(newHistory));
     } catch (error) {
-      console.error('Failed to record search history:', error);
+      Logger.error('Failed to record search history:', error);
     }
   }
 
@@ -382,7 +384,7 @@ class GlobalSearchService {
       const history = localStorage.getItem('search_history');
       return history ? JSON.parse(history) : [];
     } catch (error) {
-      console.error('Failed to get search history:', error);
+      Logger.error('Failed to get search history:', error);
       return [];
     }
   }
@@ -392,7 +394,7 @@ class GlobalSearchService {
     try {
       localStorage.removeItem('search_history');
     } catch (error) {
-      console.error('Failed to clear search history:', error);
+      Logger.error('Failed to clear search history:', error);
     }
   }
 }

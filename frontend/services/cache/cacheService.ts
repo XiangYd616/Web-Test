@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * 🗄️ 统一缓存服务
  * 为测试结果和状态提供缓存和持久化支持
@@ -332,7 +334,7 @@ export class cacheService {
 
       localStorage.setItem('unifiedCache', JSON.stringify(data));
     } catch (error) {
-      console.warn('保存缓存到localStorage失败:', error);
+      Logger.warn('保存缓存到localStorage失败:', error);
     }
   }
 
@@ -360,7 +362,7 @@ export class cacheService {
         }
       }
     } catch (error) {
-      console.warn('从localStorage加载缓存失败:', error);
+      Logger.warn('从localStorage加载缓存失败:', error);
     }
   }
 }

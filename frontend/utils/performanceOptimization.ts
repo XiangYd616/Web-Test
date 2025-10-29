@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * 前端性能优化工具集
  * 提供图片懒加载、资源预加载、性能监控等功能
@@ -116,10 +118,10 @@ class ResourcePreloader {
                 if (exists) {
                     this.preloadResourceDirect(url, type);
                 } else {
-                    console.warn(`Critical resource not found: ${url}`);
+                    Logger.warn(`Critical resource not found: ${url}`);
                 }
             } catch (error) {
-                console.warn(`Failed to check resource: ${url}`, error);
+                Logger.warn(`Failed to check resource: ${url}`, error);
             }
         });
 
@@ -171,7 +173,7 @@ class ResourcePreloader {
         // 检查资源是否存在
         this.checkResourceExists(url).then((exists) => {
             if (!exists) {
-                console.warn(`Resource not found, skipping preload: ${url}`);
+                Logger.warn(`Resource not found, skipping preload: ${url}`);
                 return;
             }
 
@@ -283,7 +285,7 @@ class PerformanceMonitor {
                 navObserver.observe({ entryTypes: ['navigation'] });
                 this.observers.push(navObserver);
             } catch (e) {
-                console.warn('Navigation timing observer not supported');
+                Logger.warn('Navigation timing observer not supported');
             }
 
             // 监控资源加载性能
@@ -299,7 +301,7 @@ class PerformanceMonitor {
                 resourceObserver.observe({ entryTypes: ['resource'] });
                 this.observers.push(resourceObserver);
             } catch (e) {
-                console.warn('Resource timing observer not supported');
+                Logger.warn('Resource timing observer not supported');
             }
 
             // 监控最大内容绘制 (LCP)
@@ -312,7 +314,7 @@ class PerformanceMonitor {
                 lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
                 this.observers.push(lcpObserver);
             } catch (e) {
-                console.warn('LCP observer not supported');
+                Logger.warn('LCP observer not supported');
             }
 
             // 监控首次输入延迟 (FID)
@@ -326,7 +328,7 @@ class PerformanceMonitor {
                 fidObserver.observe({ entryTypes: ['first-input'] });
                 this.observers.push(fidObserver);
             } catch (e) {
-                console.warn('FID observer not supported');
+                Logger.warn('FID observer not supported');
             }
 
             // 监控累积布局偏移 (CLS)
@@ -344,7 +346,7 @@ class PerformanceMonitor {
                 clsObserver.observe({ entryTypes: ['layout-shift'] });
                 this.observers.push(clsObserver);
             } catch (e) {
-                console.warn('CLS observer not supported');
+                Logger.warn('CLS observer not supported');
             }
         }
     }
@@ -445,7 +447,7 @@ class PerformanceMonitor {
                 })
             });
         } catch (error) {
-            console.warn('Failed to send performance metrics:', error);
+            Logger.warn('Failed to send performance metrics:', error);
         }
     }
 
@@ -493,7 +495,7 @@ class MemoryManager {
             try {
                 task();
             } catch (error) {
-                console.warn('Cleanup task failed:', error);
+                Logger.warn('Cleanup task failed:', error);
             }
         });
 

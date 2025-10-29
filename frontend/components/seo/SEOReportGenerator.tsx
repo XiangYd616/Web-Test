@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useCallback } from 'react';
 import {Download, FileText, Share2, Eye} from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
@@ -106,7 +107,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       onReportGenerated?.('pdf', reportContent);
       
     } catch (error) {
-      console.error('PDF报告生成失败:', error);
+      Logger.error('PDF报告生成失败:', error);
       onError?.(error instanceof Error ? error.message : 'PDF生成失败');
     } finally {
       setIsGenerating(false);
@@ -160,7 +161,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       onReportGenerated?.('json', jsonReport);
       
     } catch (error) {
-      console.error('JSON报告生成失败:', error);
+      Logger.error('JSON报告生成失败:', error);
       onError?.(error instanceof Error ? error.message : 'JSON生成失败');
     } finally {
       setIsGenerating(false);
@@ -194,7 +195,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       onReportGenerated?.('html', htmlContent);
       
     } catch (error) {
-      console.error('HTML报告生成失败:', error);
+      Logger.error('HTML报告生成失败:', error);
       onError?.(error instanceof Error ? error.message : 'HTML生成失败');
     } finally {
       setIsGenerating(false);

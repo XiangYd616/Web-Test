@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import { useState, useCallback, useRef } from 'react';
 import {Upload, File, X, CheckCircle, AlertTriangle, Eye, Tag, Globe} from 'lucide-react';
@@ -109,7 +110,7 @@ const FileUploadSEO = () => {
         setFiles(prev => [...prev, uploadedFile]);
       }
     } catch (error) {
-      console.error('Upload failed:', error);
+      Logger.error('Upload failed:', error);
     } finally {
       setUploading(false);
     }

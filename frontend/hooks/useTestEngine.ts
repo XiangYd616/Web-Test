@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useCallback, useRef } from 'react';
 import { TestConfig, TestResult } from '../types';
 
@@ -168,7 +169,7 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
 
   const cancelTest = useCallback((testId: string) => {
     // Mock implementation - cancel specific test
-    console.log(`Cancelling test: ${testId}`);
+    Logger.debug(`Cancelling test: ${testId}`);
     if (isRunning) {
       stopTest();
     }
@@ -195,7 +196,7 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
 
   const cancelAllTests = useCallback(async () => {
     // Mock implementation - cancel all tests
-    console.log('Cancelling all tests');
+    Logger.debug('Cancelling all tests');
     if (isRunning) {
       stopTest();
     }
@@ -203,13 +204,13 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
 
   const clearCompletedTests = useCallback(() => {
     // Mock implementation - clear completed tests
-    console.log('Clearing completed tests');
+    Logger.debug('Clearing completed tests');
     setResults([]);
   }, []);
 
   const connectWebSocket = useCallback(() => {
     // Mock implementation - connect websocket
-    console.log('Connecting WebSocket');
+    Logger.debug('Connecting WebSocket');
   }, []);
 
   const executeTest = useCallback(async (params: any) => {
@@ -227,12 +228,12 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
 
   const subscribeToTest = useCallback((testId: string) => {
     // Mock implementation - subscribe to test updates
-    console.log(`Subscribing to test: ${testId}`);
+    Logger.debug(`Subscribing to test: ${testId}`);
   }, []);
 
   const fetchSupportedTypes = useCallback(() => {
     // Mock implementation - fetch supported types
-    console.log('Fetching supported types');
+    Logger.debug('Fetching supported types');
   }, []);
 
   return {

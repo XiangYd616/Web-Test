@@ -3,6 +3,7 @@
  * 提供用户列表、角色管理、权限分配等管理功能
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import {Users, UserPlus, Search, MoreVertical, Edit, Trash2, Shield, Lock, Unlock, Mail, RefreshCw, AlertTriangle, CheckCircle, XCircle, Clock} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -144,7 +145,7 @@ const UserManagement: React.FC = () => {
         totalPages: Math.ceil(mockUsers.length / prev.pageSize)
       }));
     } catch (error) {
-      console.error('Failed to load users:', error);
+      Logger.error('Failed to load users:', error);
     } finally {
       setLoading(false);
     }

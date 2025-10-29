@@ -1,4 +1,5 @@
 ﻿import React, { useState, useCallback } from 'react';
+import Logger from '@/utils/logger';
 import {AlertCircle, CheckCircle, Code, Database, XCircle} from 'lucide-react';
 
 // Schema.org types mapping
@@ -163,7 +164,7 @@ export const StructuredDataAnalyzer: React.FC<StructuredDataAnalyzerProps> = ({
       onAnalysisComplete?.(result);
 
     } catch (error) {
-      console.error('Structured data analysis failed:', error);
+      Logger.error('Structured data analysis failed:', error);
     } finally {
       setIsAnalyzing(false);
     }

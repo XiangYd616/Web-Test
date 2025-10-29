@@ -6,6 +6,7 @@
  */
 
 
+import Logger from '@/utils/logger';
 import { format, subDays } from 'date-fns';
 import { createElement } from 'react';
 
@@ -81,7 +82,7 @@ export class DataAnalysisService {
 
       return this.analyzeTestData(filteredRecords);
     } catch (error) {
-      console.error('Error processing test data:', error);
+      Logger.error('Error processing test data:', error);
       throw error;
     }
   }
@@ -118,7 +119,7 @@ export class DataAnalysisService {
 
       return this.analyzeTestData(filteredRecords);
     } catch (error) {
-      console.error('Failed to get analytics data:', error);
+      Logger.error('Failed to get analytics data:', error);
       throw error;
     }
   }
@@ -309,7 +310,7 @@ export class DataAnalysisService {
       const data = await response.json();
 
       if (!data.success) {
-        console.warn('Backend not available, using sample data');
+        Logger.warn('Backend not available, using sample data');
         return this.generateSamplePerformanceData();
       }
 
@@ -322,7 +323,7 @@ export class DataAnalysisService {
 
       return this.analyzePerformanceData(websiteTests);
     } catch (error) {
-      console.error('Failed to get performance analysis, using sample data:', error);
+      Logger.error('Failed to get performance analysis, using sample data:', error);
       return this.generateSamplePerformanceData();
     }
   }
@@ -590,7 +591,7 @@ export class DataAnalysisService {
       }
       return await response.json();
     } catch (error) {
-      console.error('获取实时数据分析失败:', error);
+      Logger.error('获取实时数据分析失败:', error);
       throw error;
     }
   }
@@ -606,7 +607,7 @@ export class DataAnalysisService {
       }
       return await response.json();
     } catch (error) {
-      console.error('获取监控数据分析失败:', error);
+      Logger.error('获取监控数据分析失败:', error);
       throw error;
     }
   }
@@ -634,7 +635,7 @@ export class DataAnalysisService {
 
       return await response.json();
     } catch (error) {
-      console.error('创建数据备份失败:', error);
+      Logger.error('创建数据备份失败:', error);
       throw error;
     }
   }
@@ -661,7 +662,7 @@ export class DataAnalysisService {
 
       return await response.json();
     } catch (error) {
-      console.error('数据清理失败:', error);
+      Logger.error('数据清理失败:', error);
       throw error;
     }
   }
@@ -697,7 +698,7 @@ export class DataAnalysisService {
 
       return await response.json();
     } catch (error) {
-      console.error('生成报告失败:', error);
+      Logger.error('生成报告失败:', error);
       throw error;
     }
   }
@@ -713,7 +714,7 @@ export class DataAnalysisService {
       }
       return await response.json();
     } catch (error) {
-      console.error('获取报告任务失败:', error);
+      Logger.error('获取报告任务失败:', error);
       throw error;
     }
   }
@@ -738,7 +739,7 @@ export class DataAnalysisService {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('下载报告失败:', error);
+      Logger.error('下载报告失败:', error);
       throw error;
     }
   }
@@ -779,7 +780,7 @@ export class DataAnalysisService {
 
       return await response.json();
     } catch (error) {
-      console.error('添加监控站点失败:', error);
+      Logger.error('添加监控站点失败:', error);
       throw error;
     }
   }
@@ -797,7 +798,7 @@ export class DataAnalysisService {
       }
       return await response.json();
     } catch (error) {
-      console.error('获取监控站点失败:', error);
+      Logger.error('获取监控站点失败:', error);
       throw error;
     }
   }
@@ -815,7 +816,7 @@ export class DataAnalysisService {
       }
       return await response.json();
     } catch (error) {
-      console.error('获取监控实时数据失败:', error);
+      Logger.error('获取监控实时数据失败:', error);
       throw error;
     }
   }

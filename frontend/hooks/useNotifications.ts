@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useEffect, useState } from 'react';
 
 export interface NotificationItem {
@@ -172,13 +173,13 @@ export const useNotifications = () => {
             const { timestamp, isHealthy } = JSON.parse(lastHealthCheck);
             if (now - timestamp < 5 * 60 * 1000) { // 5分钟缓存
               if (!isHealthy) {
-                console.debug('Backend server not available (cached), using local storage for notifications');
+                Logger.debug('Backend server not available (cached), using local storage for notifications');
                 loadNotificationsFromStorage();
                 setLoading(false);
                 return;
               } else {
                 // 缓存显示后端健康，但我们知道服务器实际上不可用，直接使用本地存储
-                console.debug('Backend server available (cached), but using local storage for notifications');
+                Logger.debug('Backend server available (cached), but using local storage for notifications');
                 loadNotificationsFromStorage();
                 setLoading(false);
                 return;
@@ -187,7 +188,7 @@ export const useNotifications = () => {
           }
 
           // 跳过健康检查，直接使用本地存储（开发模式下后端通常不可用）
-          console.debug('Skipping backend health check, using local storage for notifications');
+          Logger.debug('Skipping backend health check, using local storage for notifications');
 
           // 缓存健康检查结果为不可用
           localStorage.setItem(healthCheckKey, JSON.stringify({
@@ -219,7 +220,7 @@ export const useNotifications = () => {
           } catch (healthError) {
             // 缓存失败结果
             localStorage.setItem(healthCheckKey, JSON.stringify({ timestamp: now, isHealthy: false }));
-            console.debug('Backend server not running, using local storage for notifications');
+            Logger.debug('Backend server not running, using local storage for notifications');
             loadNotificationsFromStorage();
             setLoading(false);
             return;
@@ -235,7 +236,7 @@ export const useNotifications = () => {
           try {
             await fetchNotificationsFromAPI();
           } catch (error) {
-            console.debug('Failed to fetch notifications from API, using local storage:', error);
+            Logger.debug('Failed to fetch notifications from API, using local storage:', error);
             loadNotificationsFromStorage();
           } finally {
             setLoading(false);
@@ -243,7 +244,7 @@ export const useNotifications = () => {
         }
       } catch (error) {
         // 处理整个函数的意外错误
-        console.debug('Unexpected error in notification loading:', error);
+        Logger.debug('Unexpected error in notification loading:', error);
         loadNotificationsFromStorage();
         setLoading(false);
       }
@@ -314,7 +315,7 @@ export const useNotifications = () => {
         setNotifications([]);
       }
     } catch (error) {
-      console.error('Failed to load notifications from storage:', error);
+      Logger.error('Failed to load notifications from storage:', error);
       setNotifications([]);
     }
   };
@@ -324,7 +325,7 @@ export const useNotifications = () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newNotifications));
     } catch (error) {
-      console.error('Failed to save notifications:', error);
+      Logger.error('Failed to save notifications:', error);
     }
   }, []);
 

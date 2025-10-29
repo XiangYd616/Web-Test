@@ -3,6 +3,7 @@
  * Provides enterprise-grade compliance scanning for GDPR, HIPAA, SOX, PCI-DSS and other regulations
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useMemo, useCallback } from 'react';
 import {Shield, AlertTriangle, FileText, Lock, Eye, Globe, Database, Users} from 'lucide-react';
 
@@ -271,7 +272,7 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
       setResults(mockResults);
       onScanComplete?.(mockResults);
     } catch (error) {
-      console.error('Compliance scan failed:', error);
+      Logger.error('Compliance scan failed:', error);
     } finally {
       setIsScanning(false);
     }

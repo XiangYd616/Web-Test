@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import { useEffect, useState } from 'react';
 import type { ReactNode, FC } from 'react';;
@@ -75,7 +76,7 @@ const SystemHealthCheck: React.FC<SystemHealthCheckProps> = ({ className = '' })
         setMetrics(healthMetrics);
         setLastUpdate(new Date());
       } catch (error) {
-        console.error('健康检查失败:', error);
+        Logger.error('健康检查失败:', error);
       } finally {
         setLoading(false);
       }

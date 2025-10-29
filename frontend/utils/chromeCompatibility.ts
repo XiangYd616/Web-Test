@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import { createElement } from 'react';
 
 export class ChromeCompatibilityHelper {
@@ -282,7 +283,7 @@ export class ChromeCompatibilityHelper {
     const compatibility = this.detectCompatibilityIssues();
 
     if (compatibility.needsFixes) {
-      console.warn('检测到浏览器兼容性问题:', compatibility.issues);
+      Logger.warn('检测到浏览器兼容性问题:', compatibility.issues);
     }
 
     return compatibility;

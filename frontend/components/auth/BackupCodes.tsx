@@ -3,6 +3,7 @@
  * 管理和显示双因素认证备份代码
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useEffect } from 'react';
 import { Copy, Download, RefreshCw, Shield, AlertTriangle, Check, Eye, EyeOff } from 'lucide-react';
 import { api } from '../../services/api';
@@ -10,10 +11,10 @@ import { useAuth } from '../../contexts/AuthContext';
 // TODO: Install react-toastify package
 // import { toast } from 'react-toastify';
 const toast = {
-  success: (message: string) => console.log('Success:', message),
-  error: (message: string) => console.error('Error:', message),
-  info: (message: string) => console.info('Info:', message),
-  warning: (message: string) => console.warn('Warning:', message),
+  success: (message: string) => Logger.debug('Success:', message),
+  error: (message: string) => Logger.error('Error:', message),
+  info: (message: string) => Logger.info('Info:', message),
+  warning: (message: string) => Logger.warn('Warning:', message),
 };
 
 interface BackupCode {
@@ -49,7 +50,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       setCodes((response.data as any).codes);
       setDownloadReady((response.data as any).codes.length > 0);
     } catch (error) {
-      console.error('获取备份代码失败:', error);
+      Logger.error('获取备份代码失败:', error);
       toast.error('获取备份代码失败');
     } finally {
       setLoading(false);
@@ -73,7 +74,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       setDownloadReady(true);
       toast.success('已生成新的备份代码');
     } catch (error) {
-      console.error('生成备份代码失败:', error);
+      Logger.error('生成备份代码失败:', error);
       toast.error('生成备份代码失败');
     } finally {
       setRegenerating(false);

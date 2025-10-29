@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿import { ApiResponse } from '@shared/types';
 
 /**
@@ -114,7 +116,7 @@ export class BaseApiService {
         const responseData = await this.parseResponse<T>(response);
 
         if (response.ok) {
-          console.log(`✅ API请求成功: ${method} ${url}`);
+          Logger.debug(`✅ API请求成功: ${method} ${url}`);
           return responseData;
         } else {
           const errorData = 'error' in responseData ? responseData.error : undefined;
@@ -125,7 +127,7 @@ export class BaseApiService {
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        console.warn(`⚠️ API请求失败 (尝试 ${attempt + 1}/${retries + 1}): ${lastError?.message}`);
+        Logger.warn(`⚠️ API请求失败 (尝试 ${attempt + 1}/${retries + 1}): ${lastError?.message}`);
 
         // 如果是最后一次尝试，或者是不可重试的错误，直接抛出
         if (attempt === retries || this.isNonRetryableError(lastError)) {
@@ -139,7 +141,7 @@ export class BaseApiService {
       }
     }
 
-    console.error(`❌ API请求最终失败: ${method} ${url}`, lastError);
+    Logger.error(`❌ API请求最终失败: ${method} ${url}`, lastError);
     return {
       success: false,
       error: lastError?.message || 'API请求失败'

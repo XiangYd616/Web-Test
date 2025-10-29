@@ -6,22 +6,23 @@ import { AdminGuard, ProtectedRoute } from '../auth';
 import { Layout } from '../layout';
 import { ErrorBoundary, LoadingSpinner } from '../ui';
 
-// 懒加载页面组�?const Dashboard = lazy(() => import('../../pages/dashboard/Dashboard'));
+// 懒加载页面组件
+const Dashboard = lazy(() => import('../../pages/dashboard/Dashboard'));
 const WebsiteTest = lazy(() => import('../../pages/WebsiteTest'));
 const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
 const PerformanceTest = lazy(() => import('../../pages/PerformanceTest'));
-const SEOTest = lazy(() => import('../../pages/SeoTest'));
+const SEOTest = lazy(() => import('../../pages/SEOTest'));
 
 // MFA认证相关页面
 const MFASetup = lazy(() => import('../../pages/auth/MFASetup'));
 const MFAVerification = lazy(() => import('../../pages/auth/MFAVerification'));
 
-const ApiTest = lazy(() => import('../../pages/ApiTest'));
+const APITest = lazy(() => import('../../pages/APITest'));
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
 const AccessibilityTest = lazy(() => import('../../pages/AccessibilityTest'));
-const UXTest = lazy(() => import('../../pages/UxTest'));
+const UXTest = lazy(() => import('../../pages/UXTest'));
 const UnifiedTestPage = lazy(() => import('../../pages/UnifiedTestPage'));
 
 // 数据管理相关页面
@@ -50,7 +51,7 @@ const Notifications = lazy(() => import('../../pages/Notifications'));
 
 // 集成和配置
 // const Integrations = lazy(() => import('../../pages/Integrations'));
-const CICDIntegration = lazy(() => import('../../pages/CicdIntegration'));
+const CICDIntegration = lazy(() => import('../../pages/CICDIntegration'));
 const Webhooks = lazy(() => import('../../pages/Webhooks'));
 // const ApiKeys = lazy(() => import('../../pages/ApiKeys'));
 // const ApiDocs = lazy(() => import('../../pages/ApiDocs'));
@@ -99,7 +100,7 @@ const AppRoutes: React.FC = () => {
 
       {/* 公开路由 - 测试工具页面 */}
       <Route path="/" element={<Layout />}>
-        {/* 测试工具 - 公开访问，但功能需要登�?*/}
+        {/* 测试工具 - 公开访问,但功能需要登录 */}
         <Route path="test" element={<Navigate to="/website-test" replace />} />
         <Route path="website-test" element={
           <LazyPageWrapper>
@@ -125,7 +126,7 @@ const AppRoutes: React.FC = () => {
 
         <Route path="api-test" element={
           <LazyPageWrapper>
-            <ApiTest />
+            <APITest />
           </LazyPageWrapper>
         } />
         <Route path="network-test" element={
@@ -214,7 +215,7 @@ const AppRoutes: React.FC = () => {
       {/* 首页重定向到网站测试 */}
       <Route index element={<Navigate to="/website-test" replace />} />
 
-      {/* 仪表�?- 需要登�?*/}
+      {/* 仪表板 - 需要登录 */}
       <Route path="dashboard" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -223,7 +224,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 数据管理 - 需要登�?*/}
+      {/* 数据管理 - 需要登录 */}
       <Route path="data-storage" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -270,7 +271,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 报告管理 - 需要登�?*/}
+      {/* 报告管理 - 需要登录 */}
       <Route path="reports" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -279,7 +280,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 用户相关 - 需要登�?*/}
+      {/* 用户相关 - 需要登录 */}
       <Route path="profile" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -302,7 +303,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 集成和配�?- 需要登�?*/}
+      {/* 集成和配置 - 需要登录 */}
       <Route path="cicd" element={<Navigate to="/cicd-integration" replace />} />
       <Route path="integrations" element={
         <ProtectedRoute>
@@ -333,7 +334,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 调度和任�?- 需要登�?*/}
+      {/* 调度和任务 - 需要登录 */}
       <Route path="test-schedule" element={
         <ProtectedRoute>
           <LazyPageWrapper>
@@ -349,7 +350,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
 
-      {/* 用户设置 - 需要登�?*/}
+      {/* 用户设置 - 需要登录 */}
       <Route path="settings" element={
         <ProtectedRoute>
           <LazyPageWrapper>

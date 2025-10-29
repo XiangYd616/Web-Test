@@ -2,6 +2,7 @@
  * 性能优化相关的React Hook
  */
 
+import Logger from '@/utils/logger';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   frontendCache,
@@ -292,7 +293,7 @@ export function useRenderPerformance(componentName: string) {
 
     // 如果渲染时间过长，发出警告
     if (renderTime > 16) { // 超过一帧的时间
-      console.warn(`Component ${componentName} render took ${renderTime.toFixed(2)}ms`);
+      Logger.warn(`Component ${componentName} render took ${renderTime.toFixed(2)}ms`);
     }
 
     // 每100次渲染报告一次平均性能

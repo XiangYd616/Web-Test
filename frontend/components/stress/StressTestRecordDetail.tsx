@@ -6,6 +6,7 @@
  * 更新时间: 2025-09-26 - 修复类型安全和结构问题
  */
 
+import Logger from '@/utils/logger';
 import React, { useMemo, useState, useCallback } from 'react';
 import { 
   Activity, 
@@ -130,7 +131,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
       };
       
     } catch (err) {
-      console.error('数据处理错误:', err);
+      Logger.error('数据处理错误:', err);
       setError(err instanceof Error ? err.message : '数据处理失败');
       return {
         config: {},
@@ -158,7 +159,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
     try {
       return new Date(timestamp).toLocaleString('zh-CN');
     } catch (err) {
-      console.warn('时间格式化失败:', err);
+      Logger.warn('时间格式化失败:', err);
       setError('时间格式化错误');
       return 'N/A';
     }

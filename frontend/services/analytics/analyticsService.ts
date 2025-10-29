@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿// 高级分析服务
 export interface AnalyticsData {
   testId: string;
@@ -485,7 +487,7 @@ export class AdvancedAnalyticsService {
 
       localStorage.setItem(this.ANALYTICS_STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
-      console.error('Failed to save analytics data:', error);
+      Logger.error('Failed to save analytics data:', error);
     }
   }
 

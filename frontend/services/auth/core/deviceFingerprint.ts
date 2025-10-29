@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 /**
  * 设备指纹模块
  * 从enhancedAuthManager提取的设备指纹功能
@@ -117,7 +119,7 @@ export class DeviceFingerprinter {
         fingerprint
       };
     } catch (error) {
-      console.warn('生成设备指纹失败:', error);
+      Logger.warn('生成设备指纹失败:', error);
       return {
         deviceId,
         userAgent: navigator.userAgent,

@@ -3,6 +3,7 @@
  * 基于全局状态管理的测试功能
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useState } from 'react';
 import { useAppContext } from '../contexts/AppContext';
 
@@ -126,7 +127,7 @@ export const useTest = () => {
             });
 
         } catch (error) {
-            console.error('Cancel test error:', error);
+            Logger.error('Cancel test error:', error);
             // 即使API调用失败，也要取消本地状态
             dispatch({
                 type: 'TEST_CANCEL',
@@ -175,7 +176,7 @@ export const useTest = () => {
             }));
 
         } catch (error) {
-            console.error('Get test history error:', error);
+            Logger.error('Get test history error:', error);
             return test.history as TestResult[];
         }
     }, [state.auth.token, test.history]);
@@ -204,7 +205,7 @@ export const useTest = () => {
             });
 
         } catch (error) {
-            console.error('Save configuration error:', error);
+            Logger.error('Save configuration error:', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);
@@ -233,7 +234,7 @@ export const useTest = () => {
             return mappedConfigs;
 
         } catch (error) {
-            console.error('Get configurations error:', error);
+            Logger.error('Get configurations error:', error);
             return test.configurations as unknown as TestConfig[];
         }
     }, [state.auth.token, test.configurations]);
@@ -256,7 +257,7 @@ export const useTest = () => {
             // 这里可以添加删除配置的action
 
         } catch (error) {
-            console.error('Delete configuration error:', error);
+            Logger.error('Delete configuration error:', error);
             throw error;
         }
     }, [state.auth.token]);
@@ -278,7 +279,7 @@ export const useTest = () => {
             return data.result;
 
         } catch (error) {
-            console.error('Get test details error:', error);
+            Logger.error('Get test details error:', error);
             return null;
         }
     }, [state.auth.token]);
@@ -303,7 +304,7 @@ export const useTest = () => {
             return await startTest(config);
 
         } catch (error) {
-            console.error('Retry test error:', error);
+            Logger.error('Retry test error:', error);
             throw error;
         }
     }, [getTestDetails, startTest]);
@@ -324,7 +325,7 @@ export const useTest = () => {
             return await response.blob();
 
         } catch (error) {
-            console.error('Export test result error:', error);
+            Logger.error('Export test result error:', error);
             throw error;
         }
     }, [state.auth.token]);

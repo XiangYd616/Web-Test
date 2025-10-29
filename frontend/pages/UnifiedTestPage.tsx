@@ -7,6 +7,7 @@
  * TODO: Implement full unified test functionality
  */
 
+import Logger from '@/utils/logger';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,14 +36,14 @@ const UnifiedTestPage: React.FC = () => {
     
     try {
       // TODO: Implement actual test execution
-      console.log('Starting test with config:', testConfig);
+      Logger.debug('Starting test with config:', testConfig);
       
       // Simulate test execution
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       alert('测试完成！');
     } catch (error) {
-      console.error('Test execution failed:', error);
+      Logger.error('Test execution failed:', error);
       alert('测试失败，请查看控制台');
     } finally {
       setIsRunning(false);

@@ -1,4 +1,5 @@
 ﻿import { BarChart3, CheckCircle, Clock, Code, Database, Download, Eye, EyeOff, FileText, Globe, History, Key, Loader, Lock, Play, Plus, RotateCcw, Settings, Shield, Square, Trash2, XCircle, Zap } from 'lucide-react';
+import Logger from '@/utils/logger';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { URLInput } from '../components/ui';
@@ -112,17 +113,17 @@ const APITest: React.FC = () => {
     error: apiProgressError
   } = useTestProgress(currentTestId || undefined, {
     onProgress: (progressData) => {
-      console.log('📊 文档生成进度:', progressData);
+      Logger.debug('📊 文档生成进度:', progressData);
       setTestProgress(progressData.message);
     },
     onComplete: (result) => {
-      console.log('✅ 文档生成完成:', result);
+      Logger.debug('✅ 文档生成完成:', result);
       setResult(result);
       setTestStatus('completed');
       recordTestCompletion('文档生成', true, result?.score || 0, result?.duration || 30);
     },
     onError: (error) => {
-      console.error('❌ 文档生成失败:', error);
+      Logger.error('❌ 文档生成失败:', error);
       setError(error);
       setTestStatus('failed');
     }
@@ -298,7 +299,7 @@ const APITest: React.FC = () => {
       setCanSwitchPages(true); // 允许切换页面
       setTestStatus('running');
     } catch (error) {
-      console.error('文档生成启动失败:', error);
+      Logger.error('文档生成启动失败:', error);
       setError(error instanceof Error ? error.message : '启动测试失败');
       setTestStatus('failed');
       setCanSwitchPages(true);

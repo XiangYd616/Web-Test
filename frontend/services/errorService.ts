@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 // 错误服务
 export interface ErrorInfo {
   type: string;
@@ -38,7 +40,7 @@ export class ErrorService {
   }
   
   public logError(error: Error | ErrorInfo): void {
-    console.error('Error logged:', error);
+    Logger.error('Error logged:', error);
   }
 }
 

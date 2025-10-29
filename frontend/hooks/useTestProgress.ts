@@ -3,6 +3,7 @@
  * 提供简化的测试进度监控功能
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {testProgressService} from '../services/api/testProgressService';
 export interface UseTestProgressOptions {
@@ -89,7 +90,7 @@ export function useTestProgress(
       await testProgressService.cancelTest(currentTestId.current);
       stopMonitoring();
     } catch (error) {
-      console.error('取消测试失败:', error);
+      Logger.error('取消测试失败:', error);
       setError('取消测试失败');
     }
   }, [stopMonitoring]);
@@ -102,7 +103,7 @@ export function useTestProgress(
       await testProgressService.stopTest(currentTestId.current);
       stopMonitoring();
     } catch (error) {
-      console.error('停止测试失败:', error);
+      Logger.error('停止测试失败:', error);
       setError('停止测试失败');
     }
   }, [stopMonitoring]);

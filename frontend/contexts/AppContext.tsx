@@ -3,6 +3,7 @@
  * 使用React Context + useReducer实现统一的状态管理
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import { createContext, useContext, useEffect, useReducer } from 'react';
 import type { ReactNode, FC } from 'react';;
@@ -570,7 +571,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
                     }
                 }
             } catch (error) {
-                console.error('Failed to load saved state:', error);
+                Logger.error('Failed to load saved state:', error);
             }
         }
     }, []);

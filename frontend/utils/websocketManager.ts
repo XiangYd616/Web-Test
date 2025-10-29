@@ -3,6 +3,7 @@
  * 提供连接管理、重连机制、消息队列、性能监控等功能
  */
 
+import Logger from '@/utils/logger';
 import { toast } from 'react-hot-toast';
 
 export interface WebSocketConfig {
@@ -261,7 +262,7 @@ export class WebSocketManager {
         // 处理二进制消息
         message = this.parseBinaryMessage(event.data);
       } else {
-        console.warn('Unsupported message format:', typeof event.data);
+        Logger.warn('Unsupported message format:', typeof event.data);
         return;
       }
 
@@ -286,7 +287,7 @@ export class WebSocketManager {
     } catch (error) {
       this.stats.errors++;
       this.stats.lastError = error instanceof Error ? error.message : 'Message parsing error';
-      console.error('Error handling WebSocket message:', error);
+      Logger.error('Error handling WebSocket message:', error);
     }
   }
 
@@ -333,7 +334,7 @@ export class WebSocketManager {
         this.send('ping', { timestamp: Date.now() })
           .catch(() => {
             // 心跳失败，可能连接有问题
-            console.warn('Heartbeat failed');
+            Logger.warn('Heartbeat failed');
           });
       }
     }, this.config.heartbeatInterval);
@@ -374,7 +375,7 @@ export class WebSocketManager {
       try {
         await this.connect();
       } catch (error) {
-        console.error('Reconnection failed:', error);
+        Logger.error('Reconnection failed:', error);
         this.isReconnecting = false;
         
         if (this.stats.reconnectAttempts < this.config.reconnectAttempts) {
@@ -425,7 +426,7 @@ export class WebSocketManager {
     while (this.messageQueue.length > 0 && this.isConnected()) {
       const message = this.messageQueue.shift()!;
       this.sendMessage(message).catch(error => {
-        console.error('Failed to send queued message:', error);
+        Logger.error('Failed to send queued message:', error);
         
         // 如果允许重试
         if (message.retry && message.retry > 0) {
@@ -495,7 +496,7 @@ export class WebSocketManager {
         try {
           listener(data);
         } catch (error) {
-          console.error(`Error in WebSocket event listener for ${event}:`, error);
+          Logger.error(`Error in WebSocket event listener for ${event}:`, error);
         }
       });
     }
@@ -621,7 +622,7 @@ export function useWebSocket(url: string, config?: Partial<WebSocketConfig>) {
     manager.on('error', handleStatsUpdate);
 
     // 自动连接
-    manager.connect().catch(console.error);
+    manager.connect().catch((error) => Logger.error('WebSocket connection failed', error));
 
     return () => {
       manager.off('connected', handleConnect);

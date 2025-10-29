@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * WebSocket管理器
  * 提供统一的WebSocket连接管理和消息处理
@@ -87,13 +89,13 @@ class WebSocketManager {
         };
 
         this.ws.onerror = (error) => {
-          console.error('WebSocket连接错误:', error);
+          Logger.error('WebSocket连接错误:', error);
           this.setConnectionStatus('disconnected');
           reject(error);
         };
 
       } catch (error) {
-        console.error('WebSocket连接失败:', error);
+        Logger.error('WebSocket连接失败:', error);
         this.setConnectionStatus('disconnected');
         reject(error);
       }
@@ -134,7 +136,7 @@ class WebSocketManager {
         this.ws.send(JSON.stringify(messageWithTimestamp));
         return true;
       } catch (error) {
-        console.error('发送WebSocket消息失败:', error);
+        Logger.error('发送WebSocket消息失败:', error);
         return false;
       }
     }
@@ -204,13 +206,13 @@ class WebSocketManager {
           try {
             handler(message);
           } catch (error) {
-            console.error(`消息处理器错误 (${message.type}):`, error);
+            Logger.error(`消息处理器错误 (${message.type}):`, error);
           }
         });
       }
 
     } catch (error) {
-      console.error('WebSocket消息解析错误:', error);
+      Logger.error('WebSocket消息解析错误:', error);
     }
   }
 
@@ -224,7 +226,7 @@ class WebSocketManager {
         try {
           listener(status);
         } catch (error) {
-          console.error('状态监听器错误:', error);
+          Logger.error('状态监听器错误:', error);
         }
       });
     }
@@ -247,7 +249,7 @@ class WebSocketManager {
       this.connect().catch(() => {
         // 重连失败，继续尝试或放弃
         if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
-          console.error('❌ WebSocket重连失败，已达到最大重试次数');
+          Logger.error('❌ WebSocket重连失败，已达到最大重试次数');
           this.setConnectionStatus('disconnected');
         }
       });

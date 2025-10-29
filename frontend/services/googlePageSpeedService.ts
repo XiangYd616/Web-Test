@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿
 export interface PageSpeedMetrics {
   // Core Web Vitals
@@ -63,7 +65,7 @@ class GooglePageSpeedService {
         timestamp: Date.now()
       };
     } catch (error) {
-      console.warn('PageSpeed API failed, using mock data:', error);
+      Logger.warn('PageSpeed API failed, using mock data:', error);
       return this.getMockData(url);
     }
   }

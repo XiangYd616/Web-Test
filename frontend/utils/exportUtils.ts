@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿// 导出工具类
 export class ExportUtils {
   /**
@@ -429,7 +431,7 @@ export class ExportUtils {
       await navigator.clipboard.writeText(text);
       return true;
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      Logger.error('Failed to copy to clipboard:', error);
       return false;
     }
   }

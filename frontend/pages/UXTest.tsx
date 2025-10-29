@@ -3,6 +3,7 @@
  * 提供完整的网站可用性、可访问性和用户体验测试功能
  */
 
+import Logger from '@/utils/logger';
 import { CheckCircle, Eye, Loader, MousePointer, Play, RotateCcw, Settings, Smartphone, Square, Users, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
@@ -213,7 +214,7 @@ const UXTest: React.FC = () => {
         setCanSwitchPages(true);
         updateProgress(0, '测试已停止');
       } catch (err) {
-        console.error('停止测试失败:', err);
+        Logger.error('停止测试失败:', err);
       }
     }
   }, [currentTestId, updateProgress]);

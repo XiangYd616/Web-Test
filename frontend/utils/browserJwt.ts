@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿
 interface JWTHeader {
   alg: string;
@@ -83,7 +85,7 @@ export class BrowserJWT {
 
       return { header, payload, signature };
     } catch (error) {
-      console.error('JWT解析失败:', error);
+      Logger.error('JWT解析失败:', error);
       return null;
     }
   }

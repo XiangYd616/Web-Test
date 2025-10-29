@@ -3,6 +3,7 @@
  * 提供实时测试进度更新和状态监控
  */
 
+import Logger from '@/utils/logger';
 import { apiService } from './baseApiService';
 import type { ApiResponse } from '@shared/types';
 // 测试进度接口
@@ -114,7 +115,7 @@ class TestProgressService {
       });
 
     } catch (error) {
-      console.error('检查测试进度失败:', error);
+      Logger.error('检查测试进度失败:', error);
       
       /**
        * if功能函数
@@ -144,7 +145,7 @@ class TestProgressService {
       // 如果历史记录中没有，尝试从实时状态获取
       return await apiService.apiGet(`${this.baseUrl}/${testId}/status`);
     } catch (error) {
-      console.error('获取测试状态失败:', error);
+      Logger.error('获取测试状态失败:', error);
       return {
         success: false,
         data: null,
@@ -160,7 +161,7 @@ class TestProgressService {
     try {
       return await apiService.apiGet(`${this.baseUrl}/${testId}/result`);
     } catch (error) {
-      console.error('获取测试结果失败:', error);
+      Logger.error('获取测试结果失败:', error);
       return {
         success: false,
         data: null,
@@ -181,7 +182,7 @@ class TestProgressService {
       
       return response;
     } catch (error) {
-      console.error('取消测试失败:', error);
+      Logger.error('取消测试失败:', error);
       return {
         success: false,
         data: null,
@@ -202,7 +203,7 @@ class TestProgressService {
       
       return response;
     } catch (error) {
-      console.error('停止测试失败:', error);
+      Logger.error('停止测试失败:', error);
       return {
         success: false,
         data: null,
@@ -244,7 +245,7 @@ class TestProgressService {
     try {
       return await apiService.apiGet(`${this.baseUrl}/queue/status`);
     } catch (error) {
-      console.error('获取队列状态失败:', error);
+      Logger.error('获取队列状态失败:', error);
       return {
         success: false,
         data: { queueLength: 0, runningTests: 0, estimatedWaitTime: 0 },
@@ -260,7 +261,7 @@ class TestProgressService {
     try {
       return await apiService.apiGet(`${this.baseUrl}/statistics?timeRange=${timeRange}`);
     } catch (error) {
-      console.error('获取测试统计失败:', error);
+      Logger.error('获取测试统计失败:', error);
       return {
         success: false,
         data: null,

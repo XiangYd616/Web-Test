@@ -5,6 +5,7 @@
  * Created: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { BarChart3, Bell, Calendar, ChevronDown, Code, Database, Eye, FileText, Gauge, Globe, HelpCircle, LogOut, Menu, Monitor, Search, Settings, Shield, User, Wifi, X, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -131,7 +132,7 @@ const Navigation: React.FC = () => {
       logout();
       navigate('/');
     } catch (error) {
-      console.error('Logout failed:', error);
+      Logger.error('Logout failed:', error);
     }
   };
 

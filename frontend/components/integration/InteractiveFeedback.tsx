@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import React from 'react';
 import { Fragment, useEffect, useState } from 'react';
 import type { ReactNode, ComponentType, FC } from 'react';;
@@ -131,7 +132,7 @@ export const CopyToClipboard: React.FC<{
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('复制失败:', err);
+      Logger.error('复制失败:', err);
     }
   };
 

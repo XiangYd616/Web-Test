@@ -4,6 +4,7 @@
  * 版本: v2.0.0
  */
 
+import Logger from '@/utils/logger';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { apiErrorHandler } from '../services/api/errorHandler';
 import type { ApiError } from '@shared/types';
@@ -203,12 +204,12 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
   // 重试函数
   const retry = useCallback(async (): Promise<T | null> => {
     if (!lastFetcherRef.current) {
-      console.warn('No fetcher available for retry');
+      Logger.warn('No fetcher available for retry');
       return null;
     }
 
     if (state.retryCount >= finalConfig.maxRetries) {
-      console.warn('Maximum retry attempts reached');
+      Logger.warn('Maximum retry attempts reached');
       return null;
     }
 
@@ -364,7 +365,7 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
 
       return newData;
     } catch (error) {
-      console.error('Load more failed:', error);
+      Logger.error('Load more failed:', error);
       return null;
     } finally {
       setLoadingMore(false);

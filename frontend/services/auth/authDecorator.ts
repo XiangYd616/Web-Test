@@ -3,6 +3,7 @@
  * 确保测试API调用具有适当的认证和权限检查
  */
 
+import Logger from '@/utils/logger';
 import type { ApiResponse } from '@shared/types';
 
 export interface AuthConfig {
@@ -55,7 +56,7 @@ function getCurrentUser(): AuthUser | null {
       isAdmin: user.role === 'admin' || user.role === 'super_admin'
     };
   } catch (error) {
-    console.error('获取用户信息失败:', error);
+    Logger.error('获取用户信息失败:', error);
     return null;
   }
 }
@@ -135,7 +136,7 @@ export function requireAuth<T extends (...args: unknown[]) => Promise<ApiRespons
         return await originalMethod.apply(this, args);
         
       } catch (error) {
-        console.error(`认证装饰器错误 [${propertyKey}]:`, error);
+        Logger.error(`认证装饰器错误 [${propertyKey}]:`, error);
         
         if (error instanceof AuthenticationError) {
           return {

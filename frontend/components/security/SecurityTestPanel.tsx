@@ -1,8 +1,8 @@
-﻿/**
- * SecurityTestPanel.tsx - React���
+/**
+ * SecurityTestPanel.tsx - React组件
  * 
- * �ļ�·��: frontend\components\security\SecurityTestPanel.tsx
- * ����ʱ��: 2025-09-25
+ * 文件路径: frontend\components\security\SecurityTestPanel.tsx
+ * 创建时间: 2025-09-25
  */
 
 
@@ -57,7 +57,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   onTestComplete,
   onTestError
 }, ref) => {
-  // ״̬����
+  // 状态管理
   const [config, setConfig] = useState<SecurityTestConfig>({
     url: '',
     depth: 'standard',
@@ -83,84 +83,84 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   const [urlValidation, setUrlValidation] = useState<URLValidationResult | null>(null);
   const [isUrlValid, setIsUrlValid] = useState(false);
 
-  // Ԥ������
+  // 预设配置
   const presetConfigs = securityEngine.getPresetConfigs();
 
-  // ģ������ѡ��
+  // 模块配置选项
   const moduleOptions = [
     {
       key: 'ssl',
-      name: 'SSL/TLS ��ȫ',
+      name: 'SSL/TLS 安全',
       icon: <Lock className="h-5 w-5" />,
-      description: '���SSL֤�顢Э��ͼ�������',
+      description: '检测SSL证书、协议和加密套件',
       color: 'text-green-400',
       bgColor: 'bg-gradient-to-br from-green-500/20 to-green-600/30',
       borderColor: 'border-green-400/50'
     },
     {
       key: 'headers',
-      name: '��ȫͷ���',
+      name: '安全头检测',
       icon: <Shield className="h-5 w-5" />,
-      description: '����HTTP��ȫͷ��CSP����',
+      description: '检查HTTP安全头和CSP策略',
       color: 'text-blue-400',
       bgColor: 'bg-gradient-to-br from-blue-500/20 to-blue-600/30',
       borderColor: 'border-blue-400/50'
     },
     {
       key: 'vulnerabilities',
-      name: '©��ɨ��',
+      name: '漏洞扫描',
       icon: <Target className="h-5 w-5" />,
-      description: '���XSS��SQLע��ȳ���©��',
+      description: '检测XSS、SQL注入等常见漏洞',
       color: 'text-red-400',
       bgColor: 'bg-gradient-to-br from-red-500/20 to-red-600/30',
       borderColor: 'border-red-400/50'
     },
     {
       key: 'cookies',
-      name: 'Cookie ��ȫ',
+      name: 'Cookie 安全',
       icon: <Eye className="h-5 w-5" />,
-      description: '���Cookie��ȫ��������',
+      description: '检查Cookie安全属性配置',
       color: 'text-purple-400',
       bgColor: 'bg-gradient-to-br from-purple-500/20 to-purple-600/30',
       borderColor: 'border-purple-400/50'
     },
     {
       key: 'content',
-      name: '���ݰ�ȫ',
+      name: '内容安全',
       icon: <FileText className="h-5 w-5" />,
-      description: '��������ݺ������Ϣй¶',
+      description: '检查混合内容和敏感信息泄露',
       color: 'text-orange-400',
       bgColor: 'bg-gradient-to-br from-orange-500/20 to-orange-600/30',
       borderColor: 'border-orange-400/50'
     },
     {
       key: 'network',
-      name: '���簲ȫ',
+      name: '网络安全',
       icon: <Network className="h-5 w-5" />,
-      description: '���DNS���ú��������',
+      description: '检测DNS配置和网络攻击',
       color: 'text-indigo-400',
       bgColor: 'bg-gradient-to-br from-indigo-500/20 to-indigo-600/30',
       borderColor: 'border-indigo-400/50'
     },
     {
       key: 'compliance',
-      name: '�Ϲ���',
+      name: '合规检查',
       icon: <Award className="h-5 w-5" />,
-      description: '���OWASP��NIST�ȱ�׼�Ϲ���',
+      description: '检查OWASP、NIST等标准合规性',
       color: 'text-teal-400',
       bgColor: 'bg-gradient-to-br from-teal-500/20 to-teal-600/30',
       borderColor: 'border-teal-400/50'
     }
   ];
 
-  // ����URL�仯
+  // 处理URL变化
   const handleUrlChange = useCallback((url: string) => {
     setConfig(prev => ({ ...prev, url }));
     setError(null);
     setEnhancedError(null);
   }, []);
 
-  // ����URL��֤���
+  // 处理URL验证结果
   const handleUrlValidation = useCallback((isValid: boolean, result?: URLValidationResult) => {
     setIsUrlValid(isValid);
     setUrlValidation(result || null);
@@ -173,14 +173,14 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     }
   }, [config.url]);
 
-  // Ӧ��Ԥ������
+  // 应用预设配置
   const applyPreset = useCallback((presetName: string) => {
     const preset = presetConfigs[presetName];
     if (preset) {
       setConfig(prev => ({
         ...prev,
         ...preset,
-        url: prev.url // ���ֵ�ǰURL
+        url: prev.url // 保持当前URL
       }));
     }
   }, [presetConfigs]);
@@ -203,7 +203,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     });
   }, []);
 
-  // ���в���
+  // 运行测试
   const runTest = useCallback(async () => {
     if (!config.url) {
       const urlError = createCommonErrors.invalidUrl();
@@ -234,9 +234,9 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
 
       onTestComplete?.(result);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '����ʧ��';
+      const errorMessage = err instanceof Error ? err.message : '测试失败';
 
-      // ������ǿ����
+      // 创建增强错误
       const enhancedErr = createError(err instanceof Error ? err : new Error(errorMessage), {
         url: config.url,
         operation: 'security_test',
@@ -253,7 +253,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     }
   }, [config, isUrlValid, onTestStart, onTestProgress, onTestComplete, onTestError]);
 
-  // ֹͣ����
+  // 停止测试
   const _stopTest = useCallback(() => {
     if (currentTestId) {
       securityEngine.cancelTest(currentTestId);
@@ -263,7 +263,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     }
   }, [currentTestId]);
 
-  // ��¶��������ķ���
+  // 暴露给父组件的方法
   useImperativeHandle(ref, () => ({
     startTest: runTest,
     canStartTest: () => !!config.url && isUrlValid && !isRunning,
@@ -272,13 +272,13 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
 
   return (
     <div className="unified-security-test-panel space-y-3 fade-in-up compact-layout">
-      {/* URL ���� - ��ǿ�� */}
+      {/* URL 输入 - 增强版 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <URLInput
           value={config.url}
           onChange={(e) => handleUrlChange(e?.target.value)}
           onValidationChange={(isValid) => handleUrlValidation(isValid)}
-          placeholder="������Ҫ���Ե���վURL�����磺https://example.com"
+          placeholder="请输入要测试的网站URL,例如:https://example.com"
           disabled={isRunning}
           enableValidation={true}
           showProtocolSuggestion={true}
@@ -286,11 +286,11 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
         />
       </div>
 
-      {/* ����Ԥ�� - ��ǿ�ɶ��� */}
+      {/* 测试预设 - 增强可读性 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <h3 className="text-base font-bold text-white mb-3 flex items-center">
           <Zap className="h-4 w-4 mr-2 text-yellow-400" />
-          ����Ԥ��
+          测试预设
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {Object.entries(presetConfigs).map(([key, preset]) => (
@@ -303,31 +303,31 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1 sm:gap-0">
                 <span className="font-bold text-white text-sm">
-                  {key === 'quick' ? '? ����ɨ��' :
-                    key === 'standard' ? '??? ��׼ɨ��' :
-                      '?? ȫ��ɨ��'}
+                  {key === 'quick' ? '⚡ 快速扫描' :
+                    key === 'standard' ? '🔍 标准扫描' :
+                      '🛡️ 全面扫描'}
                 </span>
                 <div className="text-xs text-gray-300 font-medium bg-gray-600/50 px-2 py-0.5 rounded">
-                  {key === 'quick' ? '1-2����' :
-                    key === 'standard' ? '3-5����' :
-                      '5-10����'}
+                  {key === 'quick' ? '1-2分钟' :
+                    key === 'standard' ? '3-5分钟' :
+                      '5-10分钟'}
                 </div>
               </div>
               <p className="text-xs text-gray-300 leading-relaxed">
-                {key === 'quick' ? '������ȫ��飬���ٷ�����Ҫ����' :
-                  key === 'standard' ? 'ȫ�氲ȫ��⣬ƽ���ٶȺ����' :
-                    '��Ȱ�ȫ�������������м��ģ��'}
+                {key === 'quick' ? '基础安全检测,快速发现主要问题' :
+                  key === 'standard' ? '全面安全检测,平衡速度和精度' :
+                    '深度安全分析,启用所有检测模块'}
               </p>
             </button>
           ))}
         </div>
       </div>
 
-      {/* ģ������ - ��ǿ�ɶ��� */}
+      {/* 模块配置 - 增强可读性 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <h3 className="text-base font-bold text-white mb-3 flex items-center">
           <Settings className="h-4 w-4 mr-2 text-gray-300" />
-          ���ģ������
+          检测模块配置
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {moduleOptions.map((module) => {
@@ -345,7 +345,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
                   }`}
                 onClick={() => !isRunning && toggleModule(module.key)}
               >
-                {/* ѡ��״ָ̬ʾ�� */}
+                {/* 选中状态指示器 */}
                 {isEnabled && (
                   <div className={`absolute top-0 left-0 right-0 h-1 bg-current rounded-t-xl opacity-80`}></div>
                 )}
@@ -381,7 +381,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
         </div>
       </div>
 
-      {/* ������ʾ - ��ǿ�ɶ��� */}
+      {/* 进度显示 - 增强可读性 */}
       {progress && (
         <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-4 sm:gap-0">
@@ -389,11 +389,11 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
               <div className="animate-spin h-6 w-6 sm:h-7 sm:w-7 border-3 border-blue-500 border-t-transparent rounded-full flex-shrink-0"></div>
               <div className="min-w-0">
                 <span className="text-base sm:text-lg font-bold text-white block mb-1">
-                  {progress.phase === 'initializing' ? '?? ��ʼ����' :
-                    progress.phase === 'scanning' ? '?? ɨ����' :
-                      progress.phase === 'analyzing' ? '?? ������' :
-                        progress.phase === 'reporting' ? '?? ���ɱ���' :
-                          '? ���'}
+                  {progress.phase === 'initializing' ? '🔧 初始化中' :
+                    progress.phase === 'scanning' ? '🔍 扫描中' :
+                      progress.phase === 'analyzing' ? '📊 分析中' :
+                        progress.phase === 'reporting' ? '📝 生成报告' :
+                          '⚙ 处理中'}
                 </span>
                 <p className="text-sm text-gray-300 font-medium">
                   {progress.currentModule} - {progress.currentCheck}
@@ -406,7 +406,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
               </div>
               {progress.estimatedTimeRemaining && (
                 <div className="text-sm text-gray-300 font-medium">
-                  ʣ�� {Math.round(progress.estimatedTimeRemaining / 1000)} ��
+                  剩余 {Math.round(progress.estimatedTimeRemaining / 1000)} 秒
                 </div>
               )}
             </div>
@@ -427,32 +427,32 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
                 <div className="text-lg sm:text-xl font-bold text-white mb-1">
                   {progress.statistics.totalChecks || 0}
                 </div>
-                <div className="text-sm text-gray-300 font-medium">�ܼ����</div>
+                <div className="text-sm text-gray-300 font-medium">总检查项</div>
               </div>
               <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-green-400 mb-1">
                   {progress.statistics.passedChecks || 0}
                 </div>
-                <div className="text-sm text-gray-300 font-medium">ͨ��</div>
+                <div className="text-sm text-gray-300 font-medium">通过</div>
               </div>
               <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-red-400 mb-1">
                   {progress.statistics.failedChecks || 0}
                 </div>
-                <div className="text-sm text-gray-300 font-medium">ʧ��</div>
+                <div className="text-sm text-gray-300 font-medium">失败</div>
               </div>
               <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-yellow-400 mb-1">
                   {progress.statistics.warningChecks || 0}
                 </div>
-                <div className="text-sm text-gray-300 font-medium">����</div>
+                <div className="text-sm text-gray-300 font-medium">警告</div>
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* ��ǿ������ʾ */}
+      {/* 增强错误显示 */}
       {enhancedError && (
         <ErrorDisplay
           error={enhancedError}
@@ -464,13 +464,13 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
         />
       )}
 
-      {/* �򵥴�����ʾ�������ݣ� */}
+      {/* 简单错误显示(备用) */}
       {error && !enhancedError && (
         <div className="bg-red-900/20 border border-red-800/50 rounded-xl p-3 sm:p-4">
           <div className="flex items-start">
             <AlertTriangle className="h-5 w-5 text-red-400 mr-3 flex-shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <h4 className="font-semibold text-red-400 text-sm sm:text-base">����ʧ��</h4>
+              <h4 className="font-semibold text-red-400 text-sm sm:text-base">测试失败</h4>
               <p className="text-xs sm:text-sm text-red-300 mt-1 break-words">{error}</p>
             </div>
           </div>

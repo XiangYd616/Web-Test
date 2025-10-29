@@ -4,6 +4,7 @@
  * 版本: v1.0.0
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import {
   AlertTriangle,
@@ -368,7 +369,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
         setUserPermissions(userPerms);
       }
     } catch (error) {
-      console.error('加载权限数据失败:', error);
+      Logger.error('加载权限数据失败:', error);
     }
   };
 

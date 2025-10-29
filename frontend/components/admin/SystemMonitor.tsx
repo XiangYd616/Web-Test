@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import { Activity, Cpu, Database, HardDrive, MemoryStick } from 'lucide-react';
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
@@ -47,7 +48,7 @@ const SystemMonitor: FC = () => {
         });
         setLoading(false);
       } catch (error) {
-        console.error('Failed to fetch system data:', error);
+        Logger.error('Failed to fetch system data:', error);
         setLoading(false);
       }
     };

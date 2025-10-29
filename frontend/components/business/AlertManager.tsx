@@ -3,6 +3,7 @@
  * 提供告警查看、管理和配置功能
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import {
     AlertCircle,
@@ -151,7 +152,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
             // 静默处理错误，使用空数据
             setAlerts([]);
             if (err instanceof Error && err.name !== 'AbortError') {
-                console.info('告警数据获取失败，使用空数据');
+                Logger.info('告警数据获取失败，使用空数据');
             }
         } finally {
             setLoading(false);
@@ -208,7 +209,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                 timeRange: '24h'
             });
             if (err instanceof Error && err.name !== 'AbortError') {
-                console.info('告警统计获取失败，使用默认数据');
+                Logger.info('告警统计获取失败，使用默认数据');
             }
         }
     }, [filters.timeRange]);
@@ -271,7 +272,7 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
                 cooldown: 300
             });
             if (err instanceof Error && err.name !== 'AbortError') {
-                console.info('告警规则获取失败，使用空数据');
+                Logger.info('告警规则获取失败，使用空数据');
             }
         }
     }, []);
@@ -1103,7 +1104,7 @@ const AlertDetailsModal: React.FC<AlertDetailsModalProps> = ({ alertId, onClose 
                 const data = await response.json();
                 setAlert(data.data);
             } catch (err) {
-                console.error('获取告警详情失败:', err);
+                Logger.error('获取告警详情失败:', err);
             } finally {
                 setLoading(false);
             }

@@ -14,6 +14,7 @@
  * - Refresh and run analysis capabilities
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Clock, TrendingUp, TrendingDown, Activity, Zap, AlertCircle,
@@ -224,7 +225,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
       
       setData(mockData);
     } catch (error) {
-      console.error('Failed to fetch performance data:', error);
+      Logger.error('Failed to fetch performance data:', error);
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import Logger from '@/utils/logger';
 import { BarChart3, Database, Download, Grid, X, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -91,7 +92,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         testName
       });
     } catch (error) {
-      console.error('导出失败:', error);
+      Logger.error('导出失败:', error);
       alert('导出失败，请重试');
     } finally {
       setExportingType(null);

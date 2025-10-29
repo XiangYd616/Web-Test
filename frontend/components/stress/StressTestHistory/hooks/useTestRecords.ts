@@ -5,6 +5,7 @@
  * 创建时间: 2025-10-05
  */
 
+import Logger from '@/utils/logger';
 import { useState, useRef, useCallback } from 'react';
 import type { TestRecord, LoadTestRecordsParams } from '../types';
 
@@ -98,7 +99,7 @@ export const useTestRecords = (): UseTestRecordsReturn => {
         setTotalRecords(total);
         setCurrentPage(page);
       } else {
-        console.error('加载测试记录失败:', data?.message);
+        Logger.error('加载测试记录失败:', data?.message);
         setRecords([]);
         setTotalRecords(0);
       }
@@ -109,7 +110,7 @@ export const useTestRecords = (): UseTestRecordsReturn => {
       }, 5000);
 
     } catch (error) {
-      console.error('加载测试记录失败:', {
+      Logger.error('加载测试记录失败:', {
         error,
         errorType: typeof error,
         errorMessage: error instanceof Error ? error.message : String(error),

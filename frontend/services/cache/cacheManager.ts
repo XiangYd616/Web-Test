@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 /**
  * 统一缓存管理服务
  * 提供本地存储、内存缓存和失效机制的完整解决方案
@@ -112,7 +114,7 @@ export class CacheManager {
         finalValue = await this.compress(serialized);
         compressed = true;
       } catch (error) {
-        console.warn('Compression failed, using uncompressed data:', error);
+        Logger.warn('Compression failed, using uncompressed data:', error);
       }
     }
 
@@ -223,7 +225,7 @@ export class CacheManager {
       try {
         finalValue = await this.decompress(cacheItem.value);
       } catch (error) {
-        console.error('Decompression failed:', error);
+        Logger.error('Decompression failed:', error);
         await this.delete(key);
         return null;
       }
@@ -232,7 +234,7 @@ export class CacheManager {
     try {
       return JSON.parse(finalValue) as T;
     } catch (error) {
-      console.error('JSON parse failed:', error);
+      Logger.error('JSON parse failed:', error);
       await this.delete(key);
       return null;
     }
@@ -320,7 +322,7 @@ export class CacheManager {
       const storageKey = `cache_${key}`;
       localStorage.setItem(storageKey, JSON.stringify(item));
     } catch (error) {
-      console.warn('Failed to set localStorage cache:', error);
+      Logger.warn('Failed to set localStorage cache:', error);
     }
   }
 
@@ -349,7 +351,7 @@ export class CacheManager {
         return null;
       }
     } catch (error) {
-      console.warn('Failed to get localStorage cache:', error);
+      Logger.warn('Failed to get localStorage cache:', error);
       this.stats.storageMisses++;
       return null;
     }
@@ -367,7 +369,7 @@ export class CacheManager {
       localStorage.removeItem(storageKey);
       return existed;
     } catch (error) {
-      console.warn('Failed to delete localStorage cache:', error);
+      Logger.warn('Failed to delete localStorage cache:', error);
       return false;
     }
   }
@@ -489,7 +491,7 @@ export class CacheManager {
         
         return new TextDecoder().decode(decompressed);
       } catch (error) {
-        console.warn('Gzip decompression failed, trying base64:', error);
+        Logger.warn('Gzip decompression failed, trying base64:', error);
       }
     }
     

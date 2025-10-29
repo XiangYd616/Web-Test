@@ -4,6 +4,7 @@
  * 版本: v1.0.0
  */
 
+import Logger from '@/utils/logger';
 import {useState, useCallback} from 'react';
 import { defaultMemoryCache } from '../cacheStrategy';
 
@@ -789,7 +790,7 @@ export function useRBAC() {
     try {
       return await rbacService.hasRole(userId, roleId);
     } catch (err) {
-      console.error('角色检查失败:', err);
+      Logger.error('角色检查失败:', err);
       return false;
     }
   }, [rbacService]);

@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import React from 'react';
 import { AlertTriangle, Archive, Bell, CheckCircle, Clock, Database, Download, FileText, Globe, Info, Lock, Mail, Monitor, Pause, Play, RefreshCw, RotateCcw, Server, Settings, Settings as SettingsIcon, Shield, Trash2, Upload, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -74,7 +75,7 @@ const UnifiedSettings: React.FC = () => {
         setFormData(preferences);
       }
     } catch (error) {
-      console.error('Failed to load data:', error);
+      Logger.error('Failed to load data:', error);
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 3000);
     } finally {
@@ -100,7 +101,7 @@ const UnifiedSettings: React.FC = () => {
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      Logger.error('Failed to save settings:', error);
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 3000);
     }
@@ -615,11 +616,11 @@ const AccountSettings: React.FC = () => {
           }
         } else {
           // 如果API调用失败，使用useAuth中的用户信息
-          console.warn('Failed to fetch user info from API, using auth context data');
+          Logger.warn('Failed to fetch user info from API, using auth context data');
           setUserInfo(user);
         }
       } catch (error) {
-        console.error('Failed to load user info:', error);
+        Logger.error('Failed to load user info:', error);
         // 使用模拟数据作为后备
         setUserInfo({
           username: 'testuser',

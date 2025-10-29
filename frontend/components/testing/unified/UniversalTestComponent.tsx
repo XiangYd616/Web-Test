@@ -15,6 +15,7 @@
  * - 保持向后兼容性
  */
 
+import Logger from '@/utils/logger';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   Card,
@@ -274,7 +275,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       if (error.errorFields) {
         showNotification('请检查表单配置', 'warning');
       } else {
-        console.error('启动测试失败:', error);
+        Logger.error('启动测试失败:', error);
       }
     }
   }, [form, selectedTestType, currentTestTypeConfig, engine, onTestStart, showNotification]);
@@ -285,7 +286,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       await engine.stopTest();
       showNotification('测试已停止', 'info');
     } catch (error) {
-      console.error('停止测试失败:', error);
+      Logger.error('停止测试失败:', error);
     }
   }, [engine, showNotification]);
 
@@ -294,7 +295,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
     try {
       await handleStartTest();
     } catch (error) {
-      console.error('重试测试失败:', error);
+      Logger.error('重试测试失败:', error);
     }
   }, [handleStartTest]);
 
@@ -313,7 +314,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       showNotification('结果导出成功', 'success');
     } catch (error) {
       showNotification('导出失败', 'error');
-      console.error('导出结果失败:', error);
+      Logger.error('导出结果失败:', error);
     }
   }, [engine, showNotification]);
 

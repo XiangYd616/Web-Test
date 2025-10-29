@@ -4,6 +4,7 @@
  * 版本: v1.0.0
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import {
   ChevronLeft,
@@ -156,7 +157,7 @@ export function usePagination(options: UsePaginationOptions = {}) {
             preloadedPages: new Set([...prev.preloadedPages, page])
           }));
         } catch (error) {
-          console.warn(`预加载页面 ${page} 失败:`, error);
+          Logger.warn(`预加载页面 ${page} 失败:`, error);
         }
       }
 

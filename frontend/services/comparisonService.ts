@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * 比较工具服务
  * 提供测试结果比较、性能对比、趋势分析功能
@@ -93,7 +95,7 @@ class ComparisonService {
 
       return data.data;
     } catch (error) {
-      console.error('比较测试结果失败:', error);
+      Logger.error('比较测试结果失败:', error);
       throw error;
     }
   }
@@ -124,7 +126,7 @@ class ComparisonService {
 
       return data.data;
     } catch (error) {
-      console.error('批量比较测试结果失败:', error);
+      Logger.error('批量比较测试结果失败:', error);
       throw error;
     }
   }
@@ -171,7 +173,7 @@ class ComparisonService {
 
       return trends;
     } catch (error) {
-      console.error('性能趋势分析失败:', error);
+      Logger.error('性能趋势分析失败:', error);
       throw error;
     }
   }
@@ -201,7 +203,7 @@ class ComparisonService {
 
       return data.data;
     } catch (error) {
-      console.error('获取比较历史失败:', error);
+      Logger.error('获取比较历史失败:', error);
       throw error;
     }
   }
@@ -234,7 +236,7 @@ class ComparisonService {
 
       return data.data;
     } catch (error) {
-      console.error('保存比较结果失败:', error);
+      Logger.error('保存比较结果失败:', error);
       throw error;
     }
   }
@@ -257,7 +259,7 @@ class ComparisonService {
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('删除比较结果失败:', error);
+      Logger.error('删除比较结果失败:', error);
       throw error;
     }
   }
@@ -292,7 +294,7 @@ class ComparisonService {
         return url;
       }
     } catch (error) {
-      console.error('导出比较结果失败:', error);
+      Logger.error('导出比较结果失败:', error);
       throw error;
     }
   }
@@ -339,7 +341,7 @@ class ComparisonService {
 
       return stats;
     } catch (error) {
-      console.error('获取统计信息失败:', error);
+      Logger.error('获取统计信息失败:', error);
       throw error;
     }
   }
@@ -372,7 +374,7 @@ class ComparisonService {
 
       return data.data.reportUrl;
     } catch (error) {
-      console.error('生成比较报告失败:', error);
+      Logger.error('生成比较报告失败:', error);
       throw error;
     }
   }

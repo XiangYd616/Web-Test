@@ -4,6 +4,7 @@
  * 版本: v2.0.0 - 整合新的缓存管理系统
  */
 
+import Logger from '@/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CacheStats } from '../services/cacheStrategy';
 
@@ -376,7 +377,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
               await cacheManager.set(key, data, params);
             }
           } catch (error) {
-            console.warn(`Failed to preload cache key: ${key}`, error);
+            Logger.warn(`Failed to preload cache key: ${key}`, error);
           }
         });
 
@@ -614,7 +615,7 @@ export function useAdvancedCache<T = any>(config: {
 export function useSmartApiCache<T = any>(endpoint: string, params?: Record<string, any>) {
   const cache = useAdvancedCache<T>({
     dataType: DataType.API_RESPONSES,
-    onError: (error) => console.error('Smart API cache error:', error)
+    onError: (error) => Logger.error('Smart API cache error:', error)
   });
 
   const cacheKey = CacheKeys.api(endpoint + (params ? JSON.stringify(params) : ''));
@@ -645,12 +646,12 @@ export function useSmartApiCache<T = any>(endpoint: string, params?: Record<stri
 export function useSmartUserCache(userId: string) {
   const profileCache = useAdvancedCache<any>({
     dataType: DataType.USER_PROFILE,
-    onError: (error) => console.error('User profile cache error:', error)
+    onError: (error) => Logger.error('User profile cache error:', error)
   });
 
   const preferencesCache = useAdvancedCache<any>({
     dataType: DataType.USER_PREFERENCES,
-    onError: (error) => console.error('User preferences cache error:', error)
+    onError: (error) => Logger.error('User preferences cache error:', error)
   });
 
   const getProfile = useCallback(async () => {

@@ -4,6 +4,7 @@
  * 版本: v2.0.0 - 完善的错误处理和重试机制
  */
 
+import Logger from '@/utils/logger';
 import { ApiError, ErrorCode } from '../../types/api/index';
 import type { ErrorContext as UtilsErrorContext } from '../../utils/errorHandler';
 
@@ -427,10 +428,10 @@ export class ApiErrorHandler {
 
     // 在浏览器环境中使用console，在Node.js环境中可以集成专业日志库
     if (typeof window !== 'undefined') {
-      console.error(`[API Error] ${context?.requestId}:`, logData);
+      Logger.error(`[API Error] ${context?.requestId}:`, logData);
     } else {
       // Node.js环境，可以集成Winston等日志库
-      console.error(JSON.stringify(logData));
+      Logger.error(JSON.stringify(logData));
     }
   }
 

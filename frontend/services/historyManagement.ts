@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * 历史管理服务
  * 提供测试历史的管理、查询、分析功能
@@ -92,7 +94,7 @@ class HistoryManagementService {
         pagination: data.data.pagination
       };
     } catch (error) {
-      console.error('获取历史记录失败:', error);
+      Logger.error('获取历史记录失败:', error);
       throw error;
     }
   }
@@ -111,7 +113,7 @@ class HistoryManagementService {
 
       return data.data;
     } catch (error) {
-      console.error('获取历史记录详情失败:', error);
+      Logger.error('获取历史记录详情失败:', error);
       throw error;
     }
   }
@@ -134,7 +136,7 @@ class HistoryManagementService {
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('删除历史记录失败:', error);
+      Logger.error('删除历史记录失败:', error);
       throw error;
     }
   }
@@ -161,7 +163,7 @@ class HistoryManagementService {
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('批量删除历史记录失败:', error);
+      Logger.error('批量删除历史记录失败:', error);
       throw error;
     }
   }
@@ -184,7 +186,7 @@ class HistoryManagementService {
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('归档历史记录失败:', error);
+      Logger.error('归档历史记录失败:', error);
       throw error;
     }
   }
@@ -211,7 +213,7 @@ class HistoryManagementService {
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('更新备注失败:', error);
+      Logger.error('更新备注失败:', error);
       throw error;
     }
   }
@@ -238,7 +240,7 @@ class HistoryManagementService {
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('添加标签失败:', error);
+      Logger.error('添加标签失败:', error);
       throw error;
     }
   }
@@ -261,7 +263,7 @@ class HistoryManagementService {
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('移除标签失败:', error);
+      Logger.error('移除标签失败:', error);
       throw error;
     }
   }
@@ -306,7 +308,7 @@ class HistoryManagementService {
 
       return analytics;
     } catch (error) {
-      console.error('获取分析数据失败:', error);
+      Logger.error('获取分析数据失败:', error);
       throw error;
     }
   }
@@ -346,7 +348,7 @@ class HistoryManagementService {
         return url;
       }
     } catch (error) {
-      console.error('导出历史记录失败:', error);
+      Logger.error('导出历史记录失败:', error);
       throw error;
     }
   }
@@ -372,7 +374,7 @@ class HistoryManagementService {
 
       return data.data || [];
     } catch (error) {
-      console.error('获取常用标签失败:', error);
+      Logger.error('获取常用标签失败:', error);
       return [];
     }
   }

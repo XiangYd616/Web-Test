@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`;
@@ -154,7 +156,7 @@ export class SettingsService {
 
       return result.data;
     } catch (error) {
-      console.error('Failed to get system settings:', error);
+      Logger.error('Failed to get system settings:', error);
       throw error;
     }
   }
@@ -169,7 +171,7 @@ export class SettingsService {
 
       return result.data;
     } catch (error) {
-      console.error('Failed to update system settings:', error);
+      Logger.error('Failed to update system settings:', error);
       throw error;
     }
   }
@@ -191,7 +193,7 @@ export class SettingsService {
 
       return result.data;
     } catch (error) {
-      console.error('Failed to get user preferences:', error);
+      Logger.error('Failed to get user preferences:', error);
       throw error;
     }
   }
@@ -206,7 +208,7 @@ export class SettingsService {
 
       return result.data;
     } catch (error) {
-      console.error('Failed to update user preferences:', error);
+      Logger.error('Failed to update user preferences:', error);
       throw error;
     }
   }
@@ -244,7 +246,7 @@ export class SettingsService {
 
       return publicSettings;
     } catch (error) {
-      console.error('Failed to get public settings:', error);
+      Logger.error('Failed to get public settings:', error);
       // 返回默认设置
       return {
         general: {

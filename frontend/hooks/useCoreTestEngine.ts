@@ -17,6 +17,7 @@
  * 文件路径: frontend/hooks/useCoreTestEngine.ts
  */
 
+import Logger from '@/utils/logger';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { testApiClient, TestResult, TestProgress } from '../services/api/test/testApiClient';
 import { testProgressService } from '../services/api/testProgressService';
@@ -481,7 +482,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
         try {
           await testApiClient.stopTest(targetTestId);
         } catch (apiError) {
-          console.warn('API停止测试失败:', apiError);
+          Logger.warn('API停止测试失败:', apiError);
         }
       }
 
@@ -499,7 +500,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
       onTestCancelled?.({ testId: targetTestId });
 
     } catch (error) {
-      console.error('停止测试失败:', error);
+      Logger.error('停止测试失败:', error);
       // 即使API调用失败，也要更新本地状态
       setState(prev => ({
         ...prev,
@@ -600,7 +601,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
       setTestHistory(filteredHistory);
       return filteredHistory;
     } catch (error) {
-      console.error('获取测试历史失败:', error);
+      Logger.error('获取测试历史失败:', error);
       return testHistory;
     }
   }, [testHistory]);
@@ -610,7 +611,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
     try {
       return await testApiClient.getTestStatus(testId);
     } catch (error) {
-      console.error('获取测试状态失败:', error);
+      Logger.error('获取测试状态失败:', error);
       return null;
     }
   }, []);
@@ -627,7 +628,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
       const apiResult = await testApiClient.getTestStatus(testId);
       return apiResult as UnifiedTestResult;
     } catch (error) {
-      console.error('获取测试结果失败:', error);
+      Logger.error('获取测试结果失败:', error);
       return null;
     }
   }, [results]);
@@ -661,7 +662,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
       // 这里应该调用实际的API
       return [];
     } catch (error) {
-      console.error('获取配置列表失败:', error);
+      Logger.error('获取配置列表失败:', error);
       return [];
     }
   }, []);
@@ -670,9 +671,9 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   const saveConfiguration = useCallback(async (config: TestConfig): Promise<void> => {
     try {
       // 这里应该调用实际的API保存配置
-      console.log('保存配置:', config);
+      Logger.debug('保存配置:', config);
     } catch (error) {
-      console.error('保存配置失败:', error);
+      Logger.error('保存配置失败:', error);
       throw error;
     }
   }, []);
@@ -681,9 +682,9 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   const deleteConfiguration = useCallback(async (configId: string): Promise<void> => {
     try {
       // 这里应该调用实际的API删除配置
-      console.log('删除配置:', configId);
+      Logger.debug('删除配置:', configId);
     } catch (error) {
-      console.error('删除配置失败:', error);
+      Logger.error('删除配置失败:', error);
       throw error;
     }
   }, []);
@@ -716,7 +717,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
       
       return new Blob([content], { type: mimeType });
     } catch (error) {
-      console.error('导出测试结果失败:', error);
+      Logger.error('导出测试结果失败:', error);
       throw error;
     }
   }, [getTestResult]);
@@ -772,7 +773,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
         'network', 'database', 'ux', 'accessibility'
       ]);
     } catch (error) {
-      console.error('获取支持的测试类型失败:', error);
+      Logger.error('获取支持的测试类型失败:', error);
     }
   }, []);
 

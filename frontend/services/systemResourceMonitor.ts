@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿// 移除React Hook导入，这是一个服务文件，不应该使用React Hook
 
 export interface SystemResources {
@@ -83,7 +85,7 @@ class SystemResourceMonitor {
     if (this.isMonitoring) return;
 
     this.isMonitoring = true;
-    // console.log('🔍 开始系统资源监控...'); // 静默启动
+    // Logger.debug('🔍 开始系统资源监控...'); // 静默启动
 
     // 立即获取一次资源信息
     this.updateResources();
@@ -124,7 +126,7 @@ class SystemResourceMonitor {
           try {
             listener(mockResources, status);
           } catch (error) {
-            console.warn('Resource listener error:', error);
+            Logger.warn('Resource listener error:', error);
           }
         });
         return;
@@ -141,12 +143,12 @@ class SystemResourceMonitor {
         try {
           listener(resources, status);
         } catch (error) {
-          console.error('资源监控监听器错误:', error);
+          Logger.error('资源监控监听器错误:', error);
         }
       });
 
     } catch (error) {
-      console.error('更新系统资源信息失败:', error);
+      Logger.error('更新系统资源信息失败:', error);
     }
   }
 
@@ -201,7 +203,7 @@ class SystemResourceMonitor {
 
     } catch (error) {
       // 如果API不可用，返回模拟数据
-      // console.warn('无法获取真实资源信息，使用模拟数据:', error); // 静默处理
+      // Logger.warn('无法获取真实资源信息，使用模拟数据:', error); // 静默处理
       return this.getMockResourcesV2();
     }
   }
@@ -405,7 +407,7 @@ export const _systemResourceMonitor = (() => {
     return instance;
   } catch (err) {
     error = err instanceof Error ? err.message : String(err);
-    console.warn('⚠️ 系统资源监控器初始化失败:', err);
+    Logger.warn('⚠️ 系统资源监控器初始化失败:', err);
 
     // 返回一个安全的默认实现
     return {

@@ -5,6 +5,7 @@
  * 创建时间: 2025-10-05
  */
 
+import Logger from '@/utils/logger';
 import { useState, useCallback } from 'react';
 import ExportUtils from '../../../../utils/exportUtils';
 import type { TestRecord } from '../types';
@@ -46,7 +47,7 @@ export const useExport = (): UseExportReturn => {
       await exportUtils.exportByType(exportType, data);
       closeExportModal();
     } catch (error) {
-      console.error('导出失败:', error);
+      Logger.error('导出失败:', error);
       throw error;
     }
   }, [closeExportModal]);

@@ -5,6 +5,7 @@
  * 创建时间: 2025-09-25
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 import { Activity, ArrowRight, BarChart3, Bell, Book, Clock, Code, Download, Globe, HelpCircle, Home, Key, Lock, Monitor, Play, Search, Settings, Shield, TestTube, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -99,7 +100,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose, initialQue
         setResults(searchResults);
         setSelectedIndex(-1);
       } catch (error) {
-        console.error('Search failed:', error);
+        Logger.error('Search failed:', error);
         setResults([]);
       } finally {
         setIsSearching(false);

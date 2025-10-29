@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import React from 'react';
 import { AlertCircle, Calendar, Camera, CheckCircle, Clock, Edit, Github, Globe, Key, Linkedin, Loader, Save, Trash2, Twitter, User, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -58,7 +59,7 @@ const UserProfilePage: React.FC = () => {
           linkedin: profileData.linkedin || ''
         });
       } catch (error) {
-        console.error('Failed to fetch profile:', error);
+        Logger.error('Failed to fetch profile:', error);
         setError('获取用户资料失败，请刷新页面重试');
       } finally {
         setLoading(false);
@@ -83,7 +84,7 @@ const UserProfilePage: React.FC = () => {
       setSuccess('个人资料已更新！');
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error('Failed to save profile:', error);
+      Logger.error('Failed to save profile:', error);
       setError('保存失败，请重试');
     } finally {
       setSaving(false);
@@ -134,7 +135,7 @@ const UserProfilePage: React.FC = () => {
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch (error) {
-      console.error('Failed to upload avatar:', error);
+      Logger.error('Failed to upload avatar:', error);
       setError('上传头像失败，请重试');
     } finally {
       setUploadingAvatar(false);
@@ -153,7 +154,7 @@ const UserProfilePage: React.FC = () => {
       setSuccess('头像已删除！');
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error('Failed to delete avatar:', error);
+      Logger.error('Failed to delete avatar:', error);
       setError('删除头像失败，请重试');
     } finally {
       setUploadingAvatar(false);
@@ -185,7 +186,7 @@ const UserProfilePage: React.FC = () => {
       setSuccess('密码已更新！');
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error('Failed to change password:', error);
+      Logger.error('Failed to change password:', error);
       setError('修改密码失败，请检查当前密码是否正确');
     } finally {
       setSaving(false);

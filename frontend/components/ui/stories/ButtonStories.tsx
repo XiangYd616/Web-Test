@@ -16,12 +16,13 @@ interface StoryObj<T = any> {
 }
 
 // Mock action function
-const action = (name: string) => (...args: unknown[]) => console.log(name, ...args);
+const action = (name: string) => (...args: unknown[]) => Logger.debug(name, ...args);
 
 /**
  * Button组件Storybook文档
  */
 
+import Logger from '@/utils/logger';
 import React from 'react';
 // import { action } from '@storybook/addon-actions'; // Storybook未安装
 // import type { Meta, StoryObj } from '@storybook/react'; // Storybook未安装

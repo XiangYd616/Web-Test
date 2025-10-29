@@ -6,6 +6,7 @@
  */
 
 
+import Logger from '@/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {stressTestQueueManager} from '../services/stressTestQueueManager';
 
@@ -159,7 +160,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     } catch (err: any) {
       const errorMessage = `创建测试记录失败: ${err.message}`;
       setError(errorMessage);
-      console.error('创建测试记录失败:', err);
+      Logger.error('创建测试记录失败:', err);
       throw new Error(errorMessage);
     } finally {
       setOperationStates(prev => ({ ...prev, creating: false }));
@@ -198,7 +199,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     } catch (err: any) {
       const errorMessage = `更新测试记录失败: ${err.message}`;
       setError(errorMessage);
-      console.error('更新测试记录失败:', err);
+      Logger.error('更新测试记录失败:', err);
       throw new Error(errorMessage);
     } finally {
       setOperationStates(prev => ({ ...prev, updating: false }));
@@ -395,7 +396,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
           // 记录刷新将通过队列事件监听器处理
         },
         onError: (error: Error) => {
-          console.error('队列测试失败:', error);
+          Logger.error('队列测试失败:', error);
           setCurrentQueueId(null);
           // 记录刷新将通过队列事件监听器处理
         }
@@ -510,7 +511,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     if (!authToken) {
       // 如果没有认证令牌，生成一个本地ID并跳过服务器记录
       const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      console.warn('⚠️ 未登录用户，跳过服务器记录创建，使用本地ID:', localId);
+      Logger.warn('⚠️ 未登录用户，跳过服务器记录创建，使用本地ID:', localId);
 
       // 创建本地记录
       const localRecord: StressTestRecord = {
@@ -552,7 +553,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       return record.id;
     } catch (error: any) {
       // 如果服务器记录创建失败，回退到本地记录
-      console.warn('⚠️ 服务器记录创建失败，回退到本地记录:', error.message);
+      Logger.warn('⚠️ 服务器记录创建失败，回退到本地记录:', error.message);
 
       const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const localRecord: StressTestRecord = {
@@ -608,7 +609,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
             return exists ? prev : [record!, ...prev];
           });
         } catch (err) {
-          console.warn(`无法获取测试记录 ${id}，跳过实时数据更新:`, err);
+          Logger.warn(`无法获取测试记录 ${id}，跳过实时数据更新:`, err);
           return;
         }
       }
@@ -642,12 +643,12 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
           // 清空缓存
           realTimeDataCache.current.delete(id);
         } catch (err) {
-          console.error('批量更新实时数据失败:', err);
+          Logger.error('批量更新实时数据失败:', err);
         }
       }, 1000); // 1秒批量更新一次
 
     } catch (err: any) {
-      console.error('添加实时数据失败:', err);
+      Logger.error('添加实时数据失败:', err);
       setError(`添加实时数据失败: ${err.message}`);
     }
   }, [records, currentRecord, updateRecord]);

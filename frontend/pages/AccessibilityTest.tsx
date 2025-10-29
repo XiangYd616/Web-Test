@@ -3,6 +3,7 @@
  * 提供网站无障碍性检测功能，包括WCAG标准检查、屏幕阅读器兼容性等
  */
 
+import Logger from '@/utils/logger';
 import {CheckCircle, Loader, Play, RotateCcw, Settings, Square, Users, AlertTriangle, Info, XCircle} from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
@@ -264,7 +265,7 @@ const AccessibilityTest: React.FC = () => {
       }, 500);
 
     } catch (error) {
-      console.error('测试失败:', error);
+      Logger.error('测试失败:', error);
       setError(error instanceof Error ? error.message : '测试失败');
       setIsRunning(false);
       setCanSwitchPages(true);

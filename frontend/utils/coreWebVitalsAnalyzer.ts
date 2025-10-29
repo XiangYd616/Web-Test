@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿/**
  * Core Web Vitals Analyzer
  * Mobile-specific Core Web Vitals checking with device simulation
@@ -178,7 +180,7 @@ export class CoreWebVitalsAnalyzer {
         metrics.ttfb = this.simulateMetric('ttfb');
       }
     } catch (error) {
-      console.error('Error collecting Core Web Vitals metrics:', error);
+      Logger.error('Error collecting Core Web Vitals metrics:', error);
     }
 
     return metrics;
@@ -700,7 +702,7 @@ export class CoreWebVitalsAnalyzer {
         // 监听各种性能条目
         this.observer.observe({ entryTypes: ['paint', 'largest-contentful-paint', 'layout-shift', 'first-input'] });
       } catch (error) {
-        console.warn('Failed to initialize PerformanceObserver:', error);
+        Logger.warn('Failed to initialize PerformanceObserver:', error);
       }
     }
   }

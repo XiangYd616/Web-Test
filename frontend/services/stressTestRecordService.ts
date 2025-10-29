@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿
 // 取消原因枚举
 export enum CancelReason {
@@ -209,7 +211,7 @@ class StressTestRecordService {
       return response;
     } catch (error: any) {
       if (retries > 0 && (error.name === 'AbortError' || error?.message.includes('fetch'))) {
-        console.warn(`请求失败，${this.retryDelay}ms后重试... (剩余重试次数: ${retries})`);
+        Logger.warn(`请求失败，${this.retryDelay}ms后重试... (剩余重试次数: ${retries})`);
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
         return this.fetchWithRetry(url, options, retries - 1);
       }
@@ -269,7 +271,7 @@ class StressTestRecordService {
 
       return record;
     } catch (error) {
-      console.error('创建测试记录失败:', error);
+      Logger.error('创建测试记录失败:', error);
       throw error;
     }
   }
@@ -302,7 +304,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error: any) {
-      console.error('更新测试记录失败:', error);
+      Logger.error('更新测试记录失败:', error);
       throw new Error(`更新测试记录失败: ${error?.message}`);
     }
   }
@@ -323,7 +325,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('完成测试记录失败:', error);
+      Logger.error('完成测试记录失败:', error);
       throw error;
     }
   }
@@ -345,7 +347,7 @@ class StressTestRecordService {
         try {
           currentRecord = await this.getTestRecord(id);
         } catch (err) {
-          console.warn('获取当前记录失败，继续失败操作:', err);
+          Logger.warn('获取当前记录失败，继续失败操作:', err);
         }
       }
 
@@ -389,7 +391,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error) {
-      console.error('标记测试失败失败:', error);
+      Logger.error('标记测试失败失败:', error);
       throw error;
     }
   }
@@ -410,7 +412,7 @@ class StressTestRecordService {
         try {
           currentRecord = await this.getTestRecord(id);
         } catch (error) {
-          console.warn('获取当前记录失败，继续取消操作:', error);
+          Logger.warn('获取当前记录失败，继续取消操作:', error);
         }
       }
 
@@ -474,7 +476,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error) {
-      console.error('取消测试记录失败:', error);
+      Logger.error('取消测试记录失败:', error);
       throw error;
     }
   }
@@ -492,7 +494,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('设置测试准备状态失败:', error);
+      Logger.error('设置测试准备状态失败:', error);
       throw error;
     }
   }
@@ -511,7 +513,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('从准备状态开始测试失败:', error);
+      Logger.error('从准备状态开始测试失败:', error);
       throw error;
     }
   }
@@ -531,7 +533,7 @@ class StressTestRecordService {
         try {
           currentRecord = await this.getTestRecord(id);
         } catch (err) {
-          console.warn('获取当前记录失败，继续超时操作:', err);
+          Logger.warn('获取当前记录失败，继续超时操作:', err);
         }
       }
 
@@ -552,7 +554,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('标记测试超时失败:', error);
+      Logger.error('标记测试超时失败:', error);
       throw error;
     }
   }
@@ -576,7 +578,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('中断测试记录失败:', error);
+      Logger.error('中断测试记录失败:', error);
       throw error;
     }
   }
@@ -595,7 +597,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('恢复测试记录失败:', error);
+      Logger.error('恢复测试记录失败:', error);
       throw error;
     }
   }
@@ -628,7 +630,7 @@ class StressTestRecordService {
 
       return data;
     } catch (error) {
-      console.error('查询测试记录失败:', error);
+      Logger.error('查询测试记录失败:', error);
       throw error;
     }
   }
@@ -664,7 +666,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error) {
-      console.error('获取测试记录失败:', error);
+      Logger.error('获取测试记录失败:', error);
       throw error;
     }
   }
@@ -686,7 +688,7 @@ class StressTestRecordService {
       const data = await response.json();
       return data.success;
     } catch (error) {
-      console.error('删除测试记录失败:', error);
+      Logger.error('删除测试记录失败:', error);
       return false;
     }
   }
@@ -796,7 +798,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('更新测试记录失败:', error);
+      Logger.error('更新测试记录失败:', error);
       throw error;
     }
   }
@@ -826,7 +828,7 @@ class StressTestRecordService {
         await this.cancelTestRecord(id, reason, cancelReason);
         results?.success.push(id);
       } catch (error) {
-        console.error(`取消测试记录 ${id} 失败:`, error);
+        Logger.error(`取消测试记录 ${id} 失败:`, error);
         results?.failed.push(id);
       }
     }
@@ -857,7 +859,7 @@ class StressTestRecordService {
 
       return data.data.cleanedCount || 0;
     } catch (error) {
-      console.error('清理过期等待记录失败:', error);
+      Logger.error('清理过期等待记录失败:', error);
       throw error;
     }
   }
@@ -896,7 +898,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error) {
-      console.error('获取测试记录统计失败:', error);
+      Logger.error('获取测试记录统计失败:', error);
       throw error;
     }
   }
@@ -936,7 +938,7 @@ class StressTestRecordService {
 
       return await response.blob();
     } catch (error) {
-      console.error('导出测试记录失败:', error);
+      Logger.error('导出测试记录失败:', error);
       throw error;
     }
   }
@@ -949,7 +951,7 @@ class StressTestRecordService {
       const stored = localStorage.getItem('stress_test_records');
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.error('获取本地记录失败:', error);
+      Logger.error('获取本地记录失败:', error);
       return [];
     }
   }
@@ -961,7 +963,7 @@ class StressTestRecordService {
     try {
       localStorage.setItem('stress_test_records', JSON.stringify(records));
     } catch (error) {
-      console.error('保存本地记录失败:', error);
+      Logger.error('保存本地记录失败:', error);
     }
   }
 }

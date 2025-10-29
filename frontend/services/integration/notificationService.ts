@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 ﻿// 通知服务
 export class NotificationService {
   async sendNotification(message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info'): Promise<void> {
@@ -10,7 +12,7 @@ export class NotificationService {
 
   async sendTestFailedNotification(testId: string, error: any): Promise<void> {
     
-    console.error(`Test ${testId} failed:`, error);
+    Logger.error(`Test ${testId} failed:`, error);
   }
 }
 

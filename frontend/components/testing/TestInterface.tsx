@@ -1,4 +1,5 @@
 ﻿import { Clock, Play, Square, Target } from 'lucide-react';
+import Logger from '@/utils/logger';
 import React, { useCallback, useState } from 'react';
 import { TestResult } from '../../services/testing/unifiedTestEngine';
 // import { TestType } from '@shared/types'; // 暂时禁用
@@ -83,7 +84,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
       setLoadingError('测试已取消');
       success('测试取消', '测试已成功取消');
     } catch (err) {
-      console.error('取消测试失败:', err);
+      Logger.error('取消测试失败:', err);
       handleError(err, '取消测试');
     }
 

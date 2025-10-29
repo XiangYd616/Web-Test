@@ -1,4 +1,5 @@
 ﻿
+import Logger from '@/utils/logger';
 import { RealTimeMetrics, TestDataPoint, TestPhase } from './testStateManagerService';
 
 // 原始数据源接口
@@ -175,7 +176,7 @@ export class DataNormalizationPipeline {
         }
       }
     } catch (error) {
-      console.error('Error processing WebSocket data:', error);
+      Logger.error('Error processing WebSocket data:', error);
     }
 
     return result;
@@ -223,7 +224,7 @@ export class DataNormalizationPipeline {
         }
       }
     } catch (error) {
-      console.error('Error processing API data:', error);
+      Logger.error('Error processing API data:', error);
     }
 
     return result;
@@ -266,7 +267,7 @@ export class DataNormalizationPipeline {
         }
       }
     } catch (error) {
-      console.error('Error processing background manager data:', error);
+      Logger.error('Error processing background manager data:', error);
     }
 
     return result;

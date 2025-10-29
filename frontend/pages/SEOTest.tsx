@@ -1,4 +1,5 @@
 ﻿import {AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap, BarChart3, Download} from 'lucide-react';
+import Logger from '@/utils/logger';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { URLInput } from '../components/ui';
@@ -545,10 +546,10 @@ const SEOTest: React.FC = () => {
       }
 
       setTestStatus('running');
-      console.log(`✅ ${seoTestMode === 'online' ? 'Online' : 'Local'} SEO test started`);
+      Logger.debug(`✅ ${seoTestMode === 'online' ? 'Online' : 'Local'} SEO test started`);
 
     } catch (err: any) {
-      console.error('❌ Failed to start SEO test:', err);
+      Logger.error('❌ Failed to start SEO test:', err);
 
       // 提供更友好的错误信息
       let errorMessage = 'SEO分析启动失败';
@@ -580,9 +581,9 @@ const SEOTest: React.FC = () => {
       await stopUnifiedTest();
       setTestStatus('idle');
       setError('');
-      console.log('✅ SEO test stopped');
+      Logger.debug('✅ SEO test stopped');
     } catch (err) {
-      console.error('Failed to stop test:', err);
+      Logger.error('Failed to stop test:', err);
     }
   };
 
@@ -681,10 +682,10 @@ const SEOTest: React.FC = () => {
           URL.revokeObjectURL(jsonUrl);
           break;
         default:
-          console.warn('不支持的导出格式:', format);
+          Logger.warn('不支持的导出格式:', format);
       }
     } catch (error) {
-      console.error('导出报告失败:', error);
+      Logger.error('导出报告失败:', error);
       setError('导出报告失败，请重试');
     }
   };
@@ -1714,7 +1715,7 @@ const SEOTest: React.FC = () => {
                 onReportGenerated={(format, data) => {
                 }}
                 onError={(error) => {
-                  console.error('报告生成错误:', error);
+                  Logger.error('报告生成错误:', error);
                   setError(`报告生成失败: ${error}`);
                 }}
               />

@@ -5,6 +5,7 @@
  * 创建时间: 2025-10-05
  */
 
+import Logger from '@/utils/logger';
 import { useState, useCallback } from 'react';
 import { showToast } from '../../../common/Toast';
 import type { TestRecord, DeleteDialogState } from '../types';
@@ -161,7 +162,7 @@ export const useDeleteActions = ({
       }
       closeDeleteDialog();
     } catch (error) {
-      console.error('删除操作失败:', error);
+      Logger.error('删除操作失败:', error);
       const errorMessage = error instanceof Error ? error.message : '删除失败，请稍后重试';
       showToast.error(`删除失败: ${errorMessage}`);
     } finally {

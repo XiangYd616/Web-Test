@@ -1,3 +1,4 @@
+import Logger from '@/utils/logger';
 import React from 'react';
 
 // 延迟导入 Chart.js 以避免初始化问题
@@ -32,7 +33,7 @@ const initializeChartJS = async () => {
       chartModule.Filler
     );
   } catch (error) {
-    console.error('Failed to initialize Chart.js:', error);
+    Logger.error('Failed to initialize Chart.js:', error);
   }
 };
 

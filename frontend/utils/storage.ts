@@ -1,3 +1,5 @@
+import Logger from '@/utils/logger';
+
 /**
  * 状态持久化和缓存工具
  * 提供localStorage、sessionStorage和内存缓存的统一接口
@@ -40,7 +42,7 @@ export class StorageManager {
                     return window.localStorage;
             }
         } catch (error) {
-            console.warn('Storage not available, falling back to memory cache');
+            Logger.warn('Storage not available, falling back to memory cache');
             return null;
         }
     }
@@ -70,7 +72,7 @@ export class StorageManager {
 
             return true;
         } catch (error) {
-            console.error('Storage set error:', error);
+            Logger.error('Storage set error:', error);
             return false;
         }
     }
@@ -106,7 +108,7 @@ export class StorageManager {
 
             return item.value;
         } catch (error) {
-            console.error('Storage get error:', error);
+            Logger.error('Storage get error:', error);
             return defaultValue;
         }
     }
@@ -125,7 +127,7 @@ export class StorageManager {
 
             return true;
         } catch (error) {
-            console.error('Storage remove error:', error);
+            Logger.error('Storage remove error:', error);
             return false;
         }
     }
@@ -154,7 +156,7 @@ export class StorageManager {
 
             return true;
         } catch (error) {
-            console.error('Storage clear error:', error);
+            Logger.error('Storage clear error:', error);
             return false;
         }
     }
@@ -175,7 +177,7 @@ export class StorageManager {
                     .map(key => key.substring(this.prefix.length));
             }
         } catch (error) {
-            console.error('Storage keys error:', error);
+            Logger.error('Storage keys error:', error);
             return [];
         }
     }
@@ -212,7 +214,7 @@ export class StorageManager {
                 return size;
             }
         } catch (error) {
-            console.error('Storage size error:', error);
+            Logger.error('Storage size error:', error);
             return 0;
         }
     }
@@ -277,7 +279,7 @@ export class CacheManager {
             });
             return true;
         } catch (error) {
-            console.error('Cache setMultiple error:', error);
+            Logger.error('Cache setMultiple error:', error);
             return false;
         }
     }
