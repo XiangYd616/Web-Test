@@ -782,14 +782,14 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         onClose={() => setShowHistoryDrawer(false)}
       >
         <TestHistoryPanel
-          testHistory={engine.results.map(r => ({
+          testHistory={engine.results.map((r: any) => ({
             id: r.id,
             testType: r.type,
             status: r.status,
             score: r.score,
-            startTime: r.startTime instanceof Date ? r.startTime.toISOString() : new Date().toISOString(),
+            startTime: r.startTime instanceof Date ? r.startTime.toISOString() : (r.startTime || new Date().toISOString()),
             duration: r.duration,
-            url: (r as any).url || ''
+            url: r.url || ''
           }))}
           onViewResult={(testId: string) => {
             const result = engine.results.find(r => r.id === testId);
@@ -822,12 +822,12 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       >
         {selectedResult && (
           <TestResultsViewer result={{
-            ...selectedResult,
-            testType: selectedResult.type,
+            ...(selectedResult as any),
+            testType: (selectedResult as any).type,
             url: (selectedResult as any).url || '',
-            startTime: selectedResult.startTime instanceof Date ? selectedResult.startTime : new Date(),
-            endTime: selectedResult.endTime instanceof Date ? selectedResult.endTime : new Date(),
-            duration: selectedResult.duration || 0,
+            startTime: (selectedResult as any).startTime instanceof Date ? (selectedResult as any).startTime : new Date(),
+            endTime: (selectedResult as any).endTime instanceof Date ? (selectedResult as any).endTime : new Date(),
+            duration: (selectedResult as any).duration || 0,
           } as any} />
         )}
       </Modal>

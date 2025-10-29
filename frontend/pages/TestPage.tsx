@@ -28,7 +28,7 @@ import {
   Typography
 } from 'antd';
 import React, { useState } from 'react';
-import { UnifiedTestExecutor } from '../components/testing/UnifiedTestExecutor';
+import UnifiedTestExecutor from '../components/testing/UnifiedTestExecutor';
 import { useUnifiedTestEngine } from '../hooks/useUnifiedTestEngine';
 import type { TestResult } from '../types/unifiedEngine.types';
 

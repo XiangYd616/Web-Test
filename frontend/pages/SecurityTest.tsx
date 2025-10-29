@@ -8,8 +8,9 @@ import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
 import type {
   SecurityTestConfig,
-  SecurityTestResult, TestProgress
+  SecurityTestResult
 } from '../services/securityEngine';
+import type { TestProgress } from '../types/unifiedEngine.types';
 
 // CSS样式已迁移到组件库中
 
