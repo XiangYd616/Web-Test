@@ -1,13 +1,11 @@
 ﻿import { useCallback, useRef, useState } from 'react';
-
 /**
-
- * ��ȡgetPerformanceMetrics����
-
- * @param {string} id - ����ID
-
- * @returns {Promise<Object|null>} ��ȡ������
-
+ * 获取性能指标函数
+ * 
+ * @param {string} url - 网站URL
+ * @param {any} options - 配置选项
+ * @returns {Promise<Object>} 性能指标数据
+ */
  */
 import {SEOAnalysisResult} from '../services/realSEOAnalysisEngine';
 
@@ -61,23 +59,23 @@ const useSEOTest = () => {
   const [error, setError] = useState<string | null>(null);
   const seoEngineRef = useRef<SEOAnalysisEngine | null>(null);
 
-  // ��ʼSEO����
+  // 开始SEO测试
   const startTest = useCallback(async (config: SEOTestConfig) => {
     try {
       setIsRunning(true);
       setError(null);
       setResults(null);
-      setProgress({ progress: 0, currentStep: '���ڳ�ʼ��...', isRunning: true });
+      setProgress({ progress: 0, currentStep: '正在初始化...', isRunning: true });
 
-      // �����µ�SEO��������ʵ��
+      // 创建新的SEO分析引擎实例
       seoEngineRef.current = new SEOAnalysisEngine();
 
-      // �����Ҫ���ܼ�⣬�Ȼ�ȡ����ָ��
+      // 如果需要性能检测,先获取性能指标
       let performanceData = null;
       if (config.checkPerformance) {
         setProgress({
           progress: 10,
-          currentStep: '��ȡ����ָ��...',
+          currentStep: '获取性能指标...',
           isRunning: true
         });
 
@@ -88,11 +86,11 @@ const useSEOTest = () => {
             device: 'both'
           });
         } catch (error) {
-          console.warn('��ȡ����ָ��ʧ�ܣ�����SEO����:', error);
+          console.warn('获取性能指标失败,继续SEO分析:', error);
         }
       }
 
-      // ��ʼ��ʵ��SEO����
+      // 开始真实的SEO分析
       const analysisResult = await seoEngineRef.current.analyzeSEO(
         config.url,
         {
@@ -100,17 +98,17 @@ const useSEOTest = () => {
           checkTechnicalSEO: config.checkTechnicalSEO,
           checkContentQuality: config.checkContentQuality,
           checkAccessibility: config.checkAccessibility,
-          checkPerformance: false, // ʹ���ⲿ�������ݣ����ظ����
+          checkPerformance: false, // 使用外部性能数据,不重复检测
           checkMobileFriendly: config.checkMobileFriendly,
           checkSocialMedia: config.checkSocialMedia,
           checkStructuredData: config.checkStructuredData,
           checkSecurity: config.checkSecurity,
           depth: config.depth,
-          externalPerformanceData: performanceData // �����ⲿ��������
+          externalPerformanceData: performanceData // 传入外部性能数据
         },
         (progressValue: number, step: string) => {
           setProgress({
-            progress: Math.max(progressValue, 20), // ȷ�����Ȳ�����
+            progress: Math.max(progressValue, 20), // 确保进度不倒退
             currentStep: step,
             isRunning: true
           });
@@ -120,16 +118,16 @@ const useSEOTest = () => {
       setResults(analysisResult);
       setProgress({
         progress: 100,
-        currentStep: '�������',
+        currentStep: '分析完成',
         isRunning: false
       });
 
     } catch (err: any) {
       console.error('SEO test failed:', err);
-      setError(err.message || 'SEO����ʧ��');
+      setError(err.message || 'SEO测试失败');
       setProgress({
         progress: 0,
-        currentStep: '����ʧ��',
+        currentStep: '测试失败',
         isRunning: false
       });
     } finally {
@@ -137,7 +135,7 @@ const useSEOTest = () => {
     }
   }, []);
 
-  // ֹͣ����
+  // 停止测试
   const stopTest = useCallback(async () => {
     if (seoEngineRef.current) {
       seoEngineRef.current.stopAnalysis();
@@ -145,12 +143,12 @@ const useSEOTest = () => {
     setIsRunning(false);
     setProgress({
       progress: 0,
-      currentStep: '������ֹͣ',
+      currentStep: '测试已停止',
       isRunning: false
     });
   }, []);
 
-  // ���ò���
+  // 重置测试
   const reset = useCallback(() => {
     setIsRunning(false);
     setProgress({ progress: 0, currentStep: '', isRunning: false });
@@ -161,26 +159,26 @@ const useSEOTest = () => {
     }
   }, []);
 
-  // ��ȡ��ǰ����
+  // 获取当前步骤
   const getCurrentStep = useCallback(() => {
     return progress.currentStep;
   }, [progress.currentStep]);
 
-  // ��ȡ��ɵĲ�����
+  // 获取完成的步骤数
   const getCompletedStepsCount = useCallback(() => {
     return Math.floor(progress.progress / 10);
   }, [progress.progress]);
 
-  // ��ȡ�ܲ�����
+  // 获取总步骤数
   const getTotalStepsCount = useCallback(() => {
-    return 10; // �̶�10������
+    return 10; // 固定10个步骤
   }, []);
 
-  // ��ȡԤ��ʣ��ʱ��
+  // 获取预计剩余时间
   const getEstimatedTimeRemaining = useCallback(() => {
     if (!isRunning || progress.progress >= 100) return 0;
 
-    // �򵥹��㣺����ÿ������ƽ����Ҫ10��
+    // 简单估算:假设每个步骤平均需要10秒
     const remainingSteps = (100 - progress.progress) / 10;
     return Math.ceil(remainingSteps * 10);
   }, [isRunning, progress.progress]);
