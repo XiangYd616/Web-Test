@@ -11,10 +11,10 @@ import { useAuth } from '../../contexts/AuthContext';
 // TODO: Install react-toastify package
 // import { toast } from 'react-toastify';
 const toast = {
-  success: (message: string) => Logger.debug('Success:', message),
-  error: (message: string) => Logger.error('Error:', message),
-  info: (message: string) => Logger.info('Info:', message),
-  warning: (message: string) => Logger.warn('Warning:', message),
+  success: (message: string) => Logger.debug(`Success: ${message}`),
+  error: (message: string) => Logger.error(`Error: ${message}`),
+  info: (message: string) => Logger.info(`Info: ${message}`),
+  warning: (message: string) => Logger.warn(`Warning: ${message}`),
 };
 
 interface BackupCode {
