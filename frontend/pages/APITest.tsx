@@ -1075,7 +1075,7 @@ const APITest: React.FC = () => {
                         </label>
                         <URLInput
                           value={testConfig.baseUrl}
-                          onChange={(url: any) => setTestConfig(prev => ({ ...prev, baseUrl: url }))}
+                          onChange={(e) => setTestConfig(prev => ({ ...prev, baseUrl: e.target.value }))}
                           placeholder="https://api.example.com"
                           enableReachabilityCheck={false}
                         />

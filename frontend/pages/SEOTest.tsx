@@ -1208,9 +1208,9 @@ const SEOTest: React.FC = () => {
                     网站URL
                   </label>
                   <div className="url-input-container">
-                    <URLInput
+                  <URLInput
                       value={testConfig.url}
-                      onChange={(url) => setTestConfig(prev => ({ ...prev, url }))}
+                      onChange={(e) => setTestConfig(prev => ({ ...prev, url: e.target.value }))}
                       placeholder="请输入要分析的网站URL，例如：https://example.com"
                       disabled={isRunning}
                       className="url-input-full-width"
@@ -1683,8 +1683,8 @@ const SEOTest: React.FC = () => {
               <SEOResultVisualization
                 data={{
                   basicSEO: results,
-                  mobileSEO: advancedResults.mobileSEO,
-                  coreWebVitals: advancedResults.coreWebVitals,
+                  mobileSEO: (results as any)?.mobileSEO || {},
+                  coreWebVitals: (results as any)?.coreWebVitals || {},
                   timestamp: Date.now(),
                   url: testConfig.url || '本地文件'
                 }}
@@ -1700,13 +1700,13 @@ const SEOTest: React.FC = () => {
               <SEOReportGenerator
                 reportData={{
                   basicSEO: results,
-                  mobileSEO: advancedResults.mobileSEO,
-                  coreWebVitals: advancedResults.coreWebVitals,
+                  mobileSEO: (results as any)?.mobileSEO || {},
+                  coreWebVitals: (results as any)?.coreWebVitals || {},
                   timestamp: Date.now(),
                   url: testConfig.url || '本地文件',
                   testConfiguration: {
-                    mode: seoTestMode,
-                    depth: testConfig.mode,
+                    mode: seoTestMode as any,
+                    depth: testConfig.mode as any,
                     includeStructuredData: testConfig.checkStructuredData,
                     includeMobileSEO: testConfig.checkMobileFriendly,
                     includeCoreWebVitals: testConfig.checkCoreWebVitals
@@ -1715,7 +1715,7 @@ const SEOTest: React.FC = () => {
                 onReportGenerated={(format, data) => {
                 }}
                 onError={(error) => {
-                  Logger.error('报告生成错误:', error);
+                  Logger.error('报告生成错误:', error as any);
                   setError(`报告生成失败: ${error}`);
                 }}
               />
