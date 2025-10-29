@@ -81,14 +81,14 @@ export interface DatabaseTestResult {
 export interface DatabaseTestHook {
   runTest: () => Promise<void>;
   loading: boolean;
-  error?: Error | null;
+  error?: string | null;
   result?: DatabaseTestResult;
 }
 
 export interface NetworkTestHook {
   runTest: () => Promise<void>;
   loading: boolean;
-  error?: Error | null;
+  error?: string | null;
   result?: NetworkTestResult;
 }
 
