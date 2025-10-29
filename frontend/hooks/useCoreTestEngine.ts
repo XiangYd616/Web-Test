@@ -450,7 +450,23 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
         Logger.debug('Test API result', { testResult });
       } else {
         // 使用backgroundTestManager
-        const resultTestId = await backgroundTestManager.startTest(testConfig);
+        const resultTestId = backgroundTestManager.startTest(
+          testConfig.type as any,
+          testConfig,
+          (progress) => {
+            setCurrentProgress(progress as any);
+            onTestProgress?.(progress as any);
+          },
+          (result) => {
+            setResults(prev => [...prev, result as any]);
+            onTestComplete?.(result as any);
+          },
+          (error) => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            setState(prev => ({ ...prev, error: errorMessage }));
+            onTestError?.(errorMessage);
+          }
+        );
         Logger.debug('Background test started', { resultTestId });
       }
 

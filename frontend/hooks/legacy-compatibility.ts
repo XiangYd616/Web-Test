@@ -10,11 +10,11 @@ export const useLegacyCompatibility = () => {
 };
 
 // Universal test hook
-export const useUniversalTest = () => {
+export const useUniversalTest = (testTypeId?: string, defaultConfig?: any) => {
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [config, setConfig] = useState<any>(null);
+  const [config, setConfig] = useState<any>(defaultConfig || null);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
 
