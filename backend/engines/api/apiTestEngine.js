@@ -91,7 +91,7 @@ class ApiTestEngine {
         hostname: urlObj.hostname,
         port: urlObj.port || (isHttps ? 443 : 80),
         path: urlObj.pathname + urlObj.search,
-        method: method,
+        method,
         headers: {
           'User-Agent': this.options.userAgent,
           'Accept': 'application/json, text/plain, */*',

@@ -626,7 +626,7 @@ const APITest: React.FC = () => {
     };
 
     switch (format) {
-      case 'json':
+      case 'json': {
         const jsonBlob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
         const jsonUrl = URL.createObjectURL(jsonBlob);
         const jsonLink = document.createElement('a');
@@ -637,7 +637,8 @@ const APITest: React.FC = () => {
         document.body.removeChild(jsonLink);
         URL.revokeObjectURL(jsonUrl);
         break;
-      case 'csv':
+      }
+      case 'csv': {
         const csvData = [
           ['端点', '方法', '状态', '响应时间', '状态码', '错误数'],
           ...(result?.endpointResults || []).map((ep: any) => [
@@ -656,7 +657,8 @@ const APITest: React.FC = () => {
         document.body.removeChild(csvLink);
         URL.revokeObjectURL(csvUrl);
         break;
-      case 'html':
+      }
+      case 'html': {
         const htmlContent = `
           <!DOCTYPE html>
           <html>
@@ -707,6 +709,7 @@ const APITest: React.FC = () => {
         document.body.removeChild(htmlLink);
         URL.revokeObjectURL(htmlUrl);
         break;
+      }
     }
   };
 
@@ -1072,7 +1075,7 @@ const APITest: React.FC = () => {
                         </label>
                         <URLInput
                           value={testConfig.baseUrl}
-                          onChange={(url) => setTestConfig(prev => ({ ...prev, baseUrl: url }))}
+                          onChange={(url: any) => setTestConfig(prev => ({ ...prev, baseUrl: url }))}
                           placeholder="https://api.example.com"
                           enableReachabilityCheck={false}
                         />
@@ -1381,7 +1384,7 @@ const APITest: React.FC = () => {
                   </div>
 
                   <div className="space-y-4">
-                    {testConfig.endpoints.map((endpoint) => (
+                    {testConfig.endpoints.map((endpoint: any) => (
                       <div key={endpoint.id} className="p-4 bg-gray-700/30 rounded-lg border border-gray-600/50">
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
                           <div className="md:col-span-2">
@@ -1625,7 +1628,7 @@ const APITest: React.FC = () => {
                           安全问题 ({result?.securityIssues.length})
                         </h4>
                         <div className="space-y-3">
-                          {result?.securityIssues.slice(0, 5).map((issue: unknown, index: number) => (
+                          {result?.securityIssues.slice(0, 5).map((issue: any, index: number) => (
                             <div key={index} className="bg-red-500/5 border border-red-500/10 rounded-lg p-4">
                               <div className="flex items-start justify-between mb-2">
                                 <div className="font-medium text-red-400">{issue.type || '安全问题'}</div>
@@ -1651,7 +1654,7 @@ const APITest: React.FC = () => {
                     {/* 端点测试结果 */}
                     <div className="space-y-3">
                       <h4 className="text-lg font-semibold text-white">端点测试结果</h4>
-                      {(result?.endpointResults || result?.endpoints || []).map((endpoint: unknown, index: number) => (
+                      {(result?.endpointResults || result?.endpoints || []).map((endpoint: any, index: number) => (
                         <div key={index} className={`p-4 rounded-lg border ${endpoint.status === 'pass' ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'
                           }`}>
                           <div className="flex items-center justify-between mb-3">
@@ -1693,7 +1696,7 @@ const APITest: React.FC = () => {
                               <div>
                                 <div className="text-gray-400 mb-1">性能问题</div>
                                 <div className="space-y-1">
-                                  {endpoint.performanceIssues.slice(0, 2).map((issue: unknown, i: number) => (
+                                  {endpoint.performanceIssues.slice(0, 2).map((issue: any, i: number) => (
                                     <div key={i} className="text-yellow-400 text-xs">{typeof issue === 'string' ? issue : (issue.description || issue.message || '性能问题')}</div>
                                   ))}
                                 </div>
@@ -1704,7 +1707,7 @@ const APITest: React.FC = () => {
                               <div>
                                 <div className="text-gray-400 mb-1">安全问题</div>
                                 <div className="space-y-1">
-                                  {endpoint.securityIssues.slice(0, 2).map((issue: unknown, i: number) => (
+                                  {endpoint.securityIssues.slice(0, 2).map((issue: any, i: number) => (
                                     <div key={i} className="text-red-400 text-xs">{typeof issue === 'string' ? issue : (issue.type || issue.message || '安全问题')}</div>
                                   ))}
                                 </div>
@@ -1765,3 +1768,5 @@ const APITest: React.FC = () => {
 };
 
 export default APITest;
+
+

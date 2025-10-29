@@ -160,7 +160,7 @@ class HTTPEngine {
       statusText: response.statusText,
       headers: this.processResponseHeaders(response.headers),
       data: response.data,
-      duration: duration,
+      duration,
       size: this.calculateResponseSize(response),
       timing: this.extractTimingInfo(response),
       certificates: this.extractCertificateInfo(response),
@@ -204,7 +204,7 @@ class HTTPEngine {
       error: true,
       message: error.message,
       code: error.code,
-      duration: duration,
+      duration,
       timestamp: new Date().toISOString()
     };
 

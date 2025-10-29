@@ -174,7 +174,7 @@ class SlackAlertChannel extends AlertChannel {
       channel: this.channel,
       username: this.username,
       attachments: [{
-        color: color,
+        color,
         title: alert.title,
         text: alert.message,
         fields: [

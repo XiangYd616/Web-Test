@@ -13,8 +13,6 @@ import { Input, NumberInput, PasswordInput, SearchInput, Select, Textarea } from
 
 // 测试工具函数
 const renderWithTheme = (component: React.ReactElement) => {
-  const [error, setError] = useState<string | null>(null);
-
     return render(
         <ThemeProvider>
             {component}

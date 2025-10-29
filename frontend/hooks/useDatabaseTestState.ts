@@ -13,7 +13,7 @@ import type {
   DatabaseTestHook,
   DatabaseTestResult
 } from '../types';
-import { TestStatus } from '@shared/types';
+import { TestStatus } from '../types/enums';
 
 // 扩展数据库测试配置类型，兼容统一类型系统
 interface ExtendedDatabaseTestConfig extends DatabaseTestConfig {
@@ -502,10 +502,10 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   const updateCustomQuery = useCallback((id: string, updates: Partial<DatabaseQuery>) => {
     setConfig(prev => ({
       ...prev,
-      testQueries: (prev.testQueries || []).map(query =>
+      testQueries: (prev.testQueries || []).map((query: DatabaseQuery) =>
         query.id === id ? { ...query, ...updates } : query
       ),
-      customQueries: (prev.customQueries || []).map(query =>
+      customQueries: (prev.customQueries || []).map((query: any) =>
         query.id === id ? {
           ...query,
           name: updates.name || query.name,
@@ -521,8 +521,8 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   const removeCustomQuery = useCallback((id: string) => {
     setConfig(prev => ({
       ...prev,
-      testQueries: (prev.testQueries || []).filter(query => query.id !== id),
-      customQueries: (prev.customQueries || []).filter(query => query.id !== id)
+      testQueries: (prev.testQueries || []).filter((query: DatabaseQuery) => query.id !== id),
+      customQueries: (prev.customQueries || []).filter((query: any) => query.id !== id)
     }));
   }, []);
 

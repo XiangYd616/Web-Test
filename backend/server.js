@@ -48,7 +48,7 @@ app.use(compression());
 
 // CORS配置
 app.use(cors({
-  origin: function (origin, callback) {
+  origin (origin, callback) {
     // 在开发环境允许所有源，生产环境使用配置的源
     if (NODE_ENV === 'development') {
       callback(null, true);
@@ -198,7 +198,7 @@ process.on('unhandledRejection', (reason, promise) => {
   handleError(new Error(`Unhandled Rejection: ${reason}`), { 
     type: 'unhandledRejection', 
     severity: 'HIGH',
-    promise: promise 
+    promise 
   });
   gracefulShutdown();
 });

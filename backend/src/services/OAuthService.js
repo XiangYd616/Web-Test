@@ -74,7 +74,7 @@ class OAuthService {
       redirect_uri: config.redirectUri,
       scope: config.scope,
       response_type: 'code',
-      state: state,
+      state,
       access_type: 'offline', // Google需要
       prompt: 'consent' // 强制显示授权页面
     });
@@ -163,7 +163,7 @@ class OAuthService {
     const params = {
       client_id: config.clientId,
       client_secret: config.clientSecret,
-      code: code,
+      code,
       redirect_uri: config.redirectUri
     };
 
@@ -213,12 +213,12 @@ class OAuthService {
     const response = await axios.get(config.userInfoUrl, { headers });
     const userData = response.data;
 
-    let userInfo = {
+    const userInfo = {
       providerId: userData.id?.toString() || userData.sub,
       email: userData.email,
       name: userData.name || userData.login,
       avatar: userData.picture || userData.avatar_url,
-      provider: provider
+      provider
     };
 
     // GitHub特殊处理 - 可能需要单独获取邮箱
@@ -319,7 +319,7 @@ class OAuthService {
         await logSecurityEvent(user.id, 'user_registered_via_oauth', {
           provider,
           email: userInfo.email,
-          username: username
+          username
         });
       } else {
         throw new Error('不允许通过OAuth注册新账户，请联系管理员');

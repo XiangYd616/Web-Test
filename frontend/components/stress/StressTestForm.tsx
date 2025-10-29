@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Globe, Users, Clock, Zap } from 'lucide-react';
-import { URLInput } from '../testing';
+import { URLInput } from '../ui';
 
 interface StressTestConfig {
   url: string;

@@ -323,7 +323,7 @@ const validateConfigOnly = (testType, config) => {
   return {
     isValid: !error,
     error: error ? error.details : null,
-    value: value
+    value
   };
 };
 

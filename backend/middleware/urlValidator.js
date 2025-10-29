@@ -72,7 +72,7 @@ async function checkDNSResolution(hostname, timeout = 5000) {
 
     return {
       resolvable: true,
-      addresses: addresses
+      addresses
     };
   } catch (error) {
     try {
@@ -80,7 +80,7 @@ async function checkDNSResolution(hostname, timeout = 5000) {
       const addresses = await dns.resolve6(hostname);
       return {
         resolvable: true,
-        addresses: addresses
+        addresses
       };
     } catch (error2) {
       return {
@@ -278,9 +278,9 @@ function validateAPIURLMiddleware(options = {}) {
       testUrl = baseUrl;
       testOptions = {
         ...config,
-        endpoints: endpoints,
-        authentication: authentication,
-        globalHeaders: globalHeaders
+        endpoints,
+        authentication,
+        globalHeaders
       };
     }
 

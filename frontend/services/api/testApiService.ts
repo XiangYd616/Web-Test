@@ -20,10 +20,8 @@ import type {
   TestCallbacks,
   UnifiedTestConfig
 } from '@shared/types';
-import type {
-  TestType,
-  TestStatus
-} from '@shared/types';
+import { TestType, TestStatus } from '../types/enums';
+import type { TestTypeValue } from '@shared/types';
 import type {
   TestExecution,
   TestHistory

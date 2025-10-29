@@ -41,7 +41,7 @@ export class UnifiedTestService {
 
   constructor(config: TestServiceConfig = {
     maxConcurrentTests: 5,
-    timeout: process.env.REQUEST_TIMEOUT || 30000,
+    timeout: (process.env.REQUEST_TIMEOUT as any) || 30000,
     retryAttempts: 3
   }) {
     this.config = config;
@@ -147,11 +147,11 @@ class WebsiteTestEngine implements TestEngine {
     
     return {
       id: `website-${Date.now()}`,
-      type: 'website',
-      status: 'passed',
+      type: 'website' as any,
+      status: 'passed' as any,
       score: Math.floor(Math.random() * 40 + 60),
       message: '网站测试完成',
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       details: {
         url: config.url,
         responseTime: Math.floor(Math.random() * 1000 + 200),
@@ -170,11 +170,11 @@ class SecurityTestEngine implements TestEngine {
     
     return {
       id: `security-${Date.now()}`,
-      type: 'security',
-      status: Math.random() > 0.3 ? 'passed' : 'failed',
+      type: 'security' as any,
+      status: (Math.random() > 0.3 ? 'passed' : 'failed') as any,
       score: Math.floor(Math.random() * 30 + 50),
       message: '安全扫描完成',
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       details: {
         vulnerabilities: Math.floor(Math.random() * 5),
         riskLevel: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)]
@@ -192,11 +192,11 @@ class PerformanceTestEngine implements TestEngine {
     
     return {
       id: `performance-${Date.now()}`,
-      type: 'performance',
-      status: 'passed',
+      type: 'performance' as any,
+      status: 'passed' as any,
       score: Math.floor(Math.random() * 50 + 40),
       message: '性能测试完成',
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       details: {
         loadTime: Math.floor(Math.random() * 2000 + 500),
         firstContentfulPaint: Math.floor(Math.random() * 1500 + 300),
@@ -215,11 +215,11 @@ class SEOTestEngine implements TestEngine {
     
     return {
       id: `seo-${Date.now()}`,
-      type: 'seo',
-      status: 'passed',
+      type: 'seo' as any,
+      status: 'passed' as any,
       score: Math.floor(Math.random() * 40 + 50),
       message: 'SEO分析完成',
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       details: {
         metaTags: Math.floor(Math.random() * 10 + 5),
         headings: Math.floor(Math.random() * 20 + 10),
@@ -238,11 +238,11 @@ class APITestEngine implements TestEngine {
     
     return {
       id: `api-${Date.now()}`,
-      type: 'api',
-      status: Math.random() > 0.2 ? 'passed' : 'failed',
+      type: 'api' as any,
+      status: (Math.random() > 0.2 ? 'passed' : 'failed') as any,
       score: Math.floor(Math.random() * 50 + 40),
       message: 'API测试完成',
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       details: {
         endpoints: Math.floor(Math.random() * 10 + 3),
         responseTime: Math.floor(Math.random() * 500 + 100),
@@ -261,11 +261,11 @@ class CompatibilityTestEngine implements TestEngine {
     
     return {
       id: `compatibility-${Date.now()}`,
-      type: 'compatibility',
-      status: 'passed',
+      type: 'compatibility' as any,
+      status: 'passed' as any,
       score: Math.floor(Math.random() * 30 + 70),
       message: '兼容性测试完成',
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       details: {
         browsers: ['Chrome', 'Firefox', 'Safari', 'Edge'],
         compatibility: Math.floor(Math.random() * 20 + 80)

@@ -36,7 +36,7 @@ class MockSecurityTestEngine {
 
     // 模拟分析过程
     const results = {
-      url: url,
+      url,
       timestamp: new Date(),
       overallScore: 0,
       issues: [],
@@ -183,7 +183,7 @@ class MockSecurityTestEngine {
 
     return {
       present: detectedHeaders,
-      missing: missing,
+      missing,
       score: ((requiredHeaders.length - missing.length) / requiredHeaders.length) * 100
     };
   }
@@ -221,7 +221,7 @@ class MockSecurityTestEngine {
     return {
       total: cookies.length,
       secure: cookies.length - insecure.length,
-      insecure: insecure
+      insecure
     };
   }
 
@@ -238,7 +238,7 @@ class MockSecurityTestEngine {
     const vulnerable = Math.random() > 0.7;
 
     return {
-      vulnerable: vulnerable,
+      vulnerable,
       tested: testPayloads.length,
       details: vulnerable ? {
         payload: testPayloads[0],
@@ -261,7 +261,7 @@ class MockSecurityTestEngine {
     const vulnerable = Math.random() > 0.8;
 
     return {
-      vulnerable: vulnerable,
+      vulnerable,
       tested: testPayloads.length,
       details: vulnerable ? {
         payload: testPayloads[0],

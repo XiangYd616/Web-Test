@@ -28,7 +28,7 @@ const logger = winston.createLogger({
 // 配置multer用于文件上传
 const storage = multer.memoryStorage();
 const upload = multer({
-    storage: storage,
+    storage,
     limits: {
         fileSize: 50 * 1024 * 1024, // 50MB
         files: 1

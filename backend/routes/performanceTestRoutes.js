@@ -20,7 +20,7 @@ try {
 const generateMockPerformanceResult = (url) => {
   return {
     success: true,
-    url: url,
+    url,
     timestamp: new Date().toISOString(),
     metrics: {
       loadTime: Math.random() * 3000 + 500, // 500-3500ms

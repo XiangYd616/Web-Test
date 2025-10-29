@@ -140,7 +140,7 @@ app.use(helmet({
 console.log('🔧 CORS允许的源:', corsOrigins);
 
 app.use(cors({
-  origin: function (origin, callback) {
+  origin (origin, callback) {
     // 允许没有origin的请求（比如移动应用）
     if (!origin) return callback(null, true);
 
@@ -361,7 +361,7 @@ app.get('/health', async (req, res) => {
     await testConnection();
 
     // 检查测试引擎状态
-    let engineHealth = { status: 'not_initialized' };
+    const engineHealth = { status: 'not_initialized' };
     // testEngineManager 已禁用，直接返回默认状态
 
     res.json({

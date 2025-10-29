@@ -543,7 +543,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         title: '操作',
         key: 'actions',
         width: 150,
-        render: (_, record: TestResult) => (
+        render: (_: any, record: TestResult) => (
           <Space size="small">
             <Tooltip title="查看详情">
               <Button
@@ -754,7 +754,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         <TestHistoryPanel
           testType={selectedTestType}
           onViewResult={handleViewResult}
-          onRetryTest={(config) => engine.startTest(config)}
+          onRetryTest={(config: any) => engine.startTest(config)}
         />
       </Drawer>
 

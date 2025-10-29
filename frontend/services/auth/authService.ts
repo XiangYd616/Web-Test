@@ -156,7 +156,7 @@ export class UnifiedAuthService implements IAuthService {
     if (canUseDatabase && jwt) {
       try {
         const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
-        jwt.verify(token, secret);
+        (jwt as any).verify(token, secret);
         return true;
       } catch {
         return false;
@@ -173,7 +173,7 @@ export class UnifiedAuthService implements IAuthService {
       const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process?.env.JWT_EXPIRES_IN || '24h';
 
-      return jwt.default?.sign ? jwt.default.sign(
+      return (jwt as any).default?.sign ? (jwt as any).default.sign(
         {
           sub: user.id,
           username: user.username,
@@ -183,7 +183,7 @@ export class UnifiedAuthService implements IAuthService {
         },
         secret,
         { expiresIn }
-      ) : jwt.sign(
+      ) : (jwt as any).sign(
         {
           sub: user.id,
           username: user.username,
@@ -212,7 +212,7 @@ export class UnifiedAuthService implements IAuthService {
       const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process?.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
-      return jwt.default?.sign ? jwt.default.sign(
+      return (jwt as any).default?.sign ? (jwt as any).default.sign(
         {
           sub: user.id,
           type: 'refresh',
@@ -220,7 +220,7 @@ export class UnifiedAuthService implements IAuthService {
         },
         secret,
         { expiresIn }
-      ) : jwt.sign(
+      ) : (jwt as any).sign(
         {
           sub: user.id,
           type: 'refresh',

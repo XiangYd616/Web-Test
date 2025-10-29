@@ -13,16 +13,7 @@ import { createCommonErrors, createError } from '../../utils/errorHandler';
 import { URLValidationResult } from '../../utils/urlValidator';
 import { URLInput } from '../ui/URLInput';
 import {EnhancedError} from './ErrorDisplay';
-
-// Local type definitions
-interface SecurityTestProgress {
-  percentage: number;
-  currentStep?: string;
-  message?: string;
-  securityScore?: number;
-  vulnerabilities?: SecurityScanResult[];
-  threatLevel?: string;
-}
+import type { SecurityTestProgress } from '../../types/common';
 
 interface SecurityTestResult {
   id: string;
@@ -190,16 +181,19 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
     setConfig(prev => {
       const modules = prev.modules || {};
       const currentModule = modules[moduleKey as keyof typeof modules];
-      return {
-        ...prev,
-        modules: {
-          ...modules,
-          [moduleKey]: {
-            ...currentModule,
-            enabled: !currentModule?.enabled
+      if (typeof currentModule === 'object' && currentModule !== null && 'enabled' in currentModule) {
+        return {
+          ...prev,
+          modules: {
+            ...modules,
+            [moduleKey]: {
+              ...currentModule,
+              enabled: !currentModule.enabled
+            }
           }
-        }
-      };
+        };
+      }
+      return prev;
     });
   }, []);
 
@@ -232,7 +226,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
         }
       );
 
-      onTestComplete?.(result);
+      onTestComplete?.(result as any);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '测试失败';
 
@@ -256,7 +250,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   // 停止测试
   const _stopTest = useCallback(() => {
     if (currentTestId) {
-      securityEngine.cancelTest(currentTestId);
+      securityEngine.cancelTest();
       setIsRunning(false);
       setProgress(null);
       setCurrentTestId(null);
@@ -332,7 +326,8 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {moduleOptions.map((module) => {
             const modules = config.modules || {};
-            const isEnabled = modules[module.key as keyof typeof modules]?.enabled;
+            const moduleConfig = modules[module.key as keyof typeof modules];
+            const isEnabled = typeof moduleConfig === 'object' && moduleConfig !== null && 'enabled' in moduleConfig ? moduleConfig.enabled : false;
             return (
               <div
                 key={module.key}

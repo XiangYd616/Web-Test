@@ -7,7 +7,7 @@
 import Logger from '@/utils/logger';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { apiErrorHandler } from '../services/api/errorHandler';
-import type { ApiError } from '@shared/types';
+import type { APIError } from '@shared/types';
 
 // 数据状态枚举
 export enum DataStatus {
@@ -23,7 +23,7 @@ export interface DataState<T = any> {
   data: T | null;
   status: DataStatus;
   loading: boolean;
-  error: ApiError | null;
+  error: APIError | null;
   isEmpty: boolean;
   isSuccess: boolean;
   isError: boolean;
@@ -84,7 +84,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
     retry: () => Promise<T | null>;
     reset: () => void;
     setData: (data: T | null) => void;
-    setError: (error: ApiError | null) => void;
+    setError: (error: APIError | null) => void;
     setLoading: (loading: boolean) => void;
   }
 ] {
@@ -252,7 +252,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
   }, [updateState]);
 
   // 手动设置错误
-  const setError = useCallback((error: ApiError | null) => {
+  const setError = useCallback((error: APIError | null) => {
     updateState({
       status: error ? DataStatus.ERROR : DataStatus.IDLE,
       error
@@ -452,3 +452,4 @@ export function useAsyncData<T = any>(
 }
 
 export default useDataState;
+

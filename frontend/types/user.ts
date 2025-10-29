@@ -37,10 +37,12 @@ export interface RegisterData {
   email: string;
   password: string;
   confirmPassword?: string;
+  fullName?: string;
 }
 
 export interface ChangePasswordData {
-  oldPassword: string;
+  oldPassword?: string;
+  currentPassword?: string;
   newPassword: string;
   confirmPassword?: string;
 }
@@ -57,6 +59,7 @@ export interface UpdateUserData {
   email?: string;
   role?: string;
   status?: string;
+  preferences?: any;
 }
 
 export interface UserQuery {
@@ -72,6 +75,15 @@ export interface UserStats {
   active: number;
   inactive: number;
   [key: string]: any;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message?: string;
+  user?: User;
+  token?: string;
+  refreshToken?: string;
+  errors?: Record<string, string>;
 }
 
 export {};

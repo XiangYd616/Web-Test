@@ -1063,7 +1063,7 @@ class SecurityTestEngine {
    */
   calculateSecurityScore(analyses) {
     let totalScore = 0;
-    let weights = {
+    const weights = {
       ssl: 0.3,
       headers: 0.25,
       vulnerabilities: 0.25,

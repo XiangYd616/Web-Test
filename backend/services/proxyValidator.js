@@ -109,7 +109,7 @@ class ProxyValidator {
       }, this.timeout);
 
       const response = await fetch(testUrl, {
-        agent: agent,
+        agent,
         signal: controller.signal,
         headers: {
           'User-Agent': 'Proxy-Validator/1.0'

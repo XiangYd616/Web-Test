@@ -180,28 +180,28 @@ export class AdvancedAnalyticsService {
       performance: {
         coreWebVitals: this.extractCoreWebVitals(testResult),
         loadingMetrics: this.extractLoadingMetrics(testResult),
-        interactivityMetrics: this.extractInteractivityMetrics(testResult),
-        visualStabilityMetrics: this.extractVisualStabilityMetrics(testResult),
-        networkMetrics: this.extractNetworkMetrics(testResult),
-        resourceMetrics: this.extractResourceMetrics(testResult)
+        interactivityMetrics: this.extractInteractivityMetrics(testResult) as any,
+        visualStabilityMetrics: this.extractVisualStabilityMetrics(testResult) as any,
+        networkMetrics: this.extractNetworkMetrics(testResult) as any,
+        resourceMetrics: this.extractResourceMetrics(testResult) as any
       },
       security: {
         vulnerabilities: testResult.security?.vulnerabilities || [],
         securityHeaders: testResult.security?.headers || {},
         certificateInfo: testResult.security?.certificate || {},
-        privacyCompliance: this.analyzePrivacyCompliance(testResult)
+        privacyCompliance: this.analyzePrivacyCompliance(testResult) as any
       },
       accessibility: {
-        wcagCompliance: this.analyzeWCAGCompliance(testResult),
+        wcagCompliance: this.analyzeWCAGCompliance(testResult) as any,
         violations: testResult.accessibility?.violations || [],
-        bestPractices: this.analyzeAccessibilityBestPractices(testResult),
-        userExperience: this.analyzeUserExperience(testResult)
+        bestPractices: this.analyzeAccessibilityBestPractices(testResult) as any,
+        userExperience: this.analyzeUserExperience(testResult) as any
       },
       seo: {
-        onPageSEO: this.analyzeOnPageSEO(testResult),
-        technicalSEO: this.analyzeTechnicalSEO(testResult),
-        contentQuality: this.analyzeContentQuality(testResult),
-        structuredData: this.analyzeStructuredData(testResult)
+        onPageSEO: this.analyzeOnPageSEO(testResult) as any,
+        technicalSEO: this.analyzeTechnicalSEO(testResult) as any,
+        contentQuality: this.analyzeContentQuality(testResult) as any,
+        structuredData: this.analyzeStructuredData(testResult) as any
       }
     };
   }

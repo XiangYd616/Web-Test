@@ -41,7 +41,7 @@ import {
   Typography
 } from 'antd';
 import React, { useCallback, useState } from 'react';
-import { useTestResultAnalysis, useUnifiedTestEngine } from '../../hooks/useUnifiedTestEngine';
+import { useUnifiedTestEngine } from '../../hooks/useUnifiedTestEngine';
 import { TestPriority, TestType } from '../../types/enums';
 import type { TestResult } from '../../types/unifiedEngine.types';
 
@@ -144,7 +144,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const engine = useUnifiedTestEngine();
 
   // 当前选中测试的结果分析
-  const resultAnalysis = useTestResultAnalysis(engine.results);
+  // Removed useTestResultAnalysis - not exported from module
 
   // 整合的功能方法
 
@@ -687,77 +687,71 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   /**
    * 渲染结果详情模态框
    */
-  const renderResultModal = () => (
-    <Modal
-      title="📊 测试结果详情"
-      open={showResultModal}
-      onCancel={() => setShowResultModal(false)}
-      width={800}
-      footer={[
-        <Button key="download" icon={<DownloadOutlined />}>
-          下载报告
-        </Button>,
-        <Button key="close" onClick={() => setShowResultModal(false)}>
-          关闭
-        </Button>
-      ]}
-    >
-      {resultAnalysis.hasResult && resultAnalysis.result && (
-        <div>
-          <Row gutter={16} className="mb-4">
-            <Col span={8}>
-              <Statistic
-                title="总体评分"
-                value={resultAnalysis.result.overallScore}
-                suffix="分"
-                valueStyle={{
-                  color: getScoreColor(resultAnalysis.result.overallScore),
-                  fontSize: '24px'
-                }}
-              />
-            </Col>
-            <Col span={8}>
-              <Statistic
-                title="测试时长"
-                value={(resultAnalysis.result.duration / 1000).toFixed(1)}
-                suffix="秒"
-              />
-            </Col>
-            <Col span={8}>
-              <Statistic
-                title="建议数量"
-                value={resultAnalysis.analysis?.recommendationCount.total || 0}
-                suffix="条"
-              />
-            </Col>
-          </Row>
+  const renderResultModal = () => {
+    const selectedResult = engine.testResults.find((r: any) => r.testId === selectedTestId);
+    
+    return (
+      <Modal
+        title="📊 测试结果详情"
+        open={showResultModal}
+        onCancel={() => setShowResultModal(false)}
+        width={800}
+        footer={[
+          <Button key="download" icon={<DownloadOutlined />}>
+            下载报告
+          </Button>,
+          <Button key="close" onClick={() => setShowResultModal(false)}>
+            关闭
+          </Button>
+        ]}
+      >
+        {selectedResult && (
+          <div>
+            <Row gutter={16} className="mb-4">
+              <Col span={8}>
+                <Statistic
+                  title="总体评分"
+                  value={selectedResult.overallScore || 0}
+                  suffix="分"
+                  valueStyle={{
+                    color: getScoreColor(selectedResult.overallScore || 0),
+                    fontSize: '24px'
+                  }}
+                />
+              </Col>
+              <Col span={8}>
+                <Statistic
+                  title="测试时长"
+                  value={(selectedResult.duration / 1000 || 0).toFixed(1)}
+                  suffix="秒"
+                />
+              </Col>
+              <Col span={8}>
+                <Statistic
+                  title="建议数量"
+                  value={selectedResult.recommendations?.length || 0}
+                  suffix="条"
+                />
+              </Col>
+            </Row>
 
-          {resultAnalysis.analysis?.hasRecommendations && (
-            <div>
-              <Title level={5}>🎯 优化建议</Title>
-              <Timeline>
-                {resultAnalysis.result.recommendations.immediate.map((rec, index) => (
-                  <Timeline.Item key={index} color="red">
-                    <Text strong>立即处理:</Text> {rec}
-                  </Timeline.Item>
-                ))}
-                {resultAnalysis.result.recommendations.shortTerm.map((rec, index) => (
-                  <Timeline.Item key={index} color="orange">
-                    <Text strong>短期优化:</Text> {rec}
-                  </Timeline.Item>
-                ))}
-                {resultAnalysis.result.recommendations.longTerm.map((rec, index) => (
-                  <Timeline.Item key={index} color="blue">
-                    <Text strong>长期规划:</Text> {rec}
-                  </Timeline.Item>
-                ))}
-              </Timeline>
-            </div>
-          )}
-        </div>
-      )}
-    </Modal>
-  );
+            {selectedResult.recommendations && selectedResult.recommendations.length > 0 && (
+              <div>
+                <Title level={5}>🎯 优化建议</Title>
+                <Timeline>
+                  {selectedResult.recommendations.map((rec: any, index: number) => (
+                    <Timeline.Item key={index} color={rec.priority === 'high' ? 'red' : rec.priority === 'medium' ? 'orange' : 'blue'}>
+                      <Text strong>{rec.title}:</Text> {rec.description}
+                    </Timeline.Item>
+                  ))}
+                </Timeline>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+    );
+  };
 
   /**
    * 下载测试结果
@@ -872,3 +866,4 @@ const _getStatusText = (status: string): string => {
 };
 
 export default UnifiedTestExecutor;
+

@@ -1,12 +1,12 @@
-/**
- * useCSS.ts - 核心功能模块
+﻿/**
+ * useCSS.ts - 鏍稿績鍔熻兘妯″潡
  * 
- * 文件路径: frontend\hooks\useCSS.ts
- * 创建时间: 2025-09-25
+ * 鏂囦欢璺緞: frontend\hooks\useCSS.ts
+ * 鍒涘缓鏃堕棿: 2025-09-25
  */
 
 import { useEffect, useState } from 'react';
-import { loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS } from '../utils/cssLoader';
+import { loadCSS, _loadPageCSS as loadPageCSS, _loadComponentCSS as loadComponentCSS, _preloadPageCSS as preloadPageCSS } from '../utils/cssLoader';
 
 export const useCSS = (
   cssPath: string,
@@ -94,11 +94,11 @@ export const usePageCSS = (
 
   /**
 
-   * 获取load数据
+   * 鑾峰彇load鏁版嵁
 
-   * @param {string} id - 对象ID
+   * @param {string} id - 瀵硅薄ID
 
-   * @returns {Promise<Object|null>} 获取的数�?
+   * @returns {Promise<Object|null>} 鑾峰彇鐨勬暟鎹?
    */
   }, [pageName, options.immediate, options.preload]);
 
@@ -178,3 +178,4 @@ const useRouteCSS = (routeName: string) => {
 
   return { loading, loaded, error };
 };
+

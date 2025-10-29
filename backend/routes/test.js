@@ -48,7 +48,7 @@ const testHistoryService = new TestHistoryService(require('../config/database'))
 // 配置文件上传
 const storage = multer.memoryStorage();
 const upload = multer({
-  storage: storage,
+  storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB限制
     files: 20 // 最多20个文件
@@ -108,7 +108,7 @@ async function performRealCompatibilityAnalysis(url, features, browsers) {
       } else {
         result.statistics.unsupportedFeatures++;
         result.issues.push({
-          feature: feature,
+          feature,
           severity: 'high',
           description: `${feature} 兼容性较差 (${compatibility.supportPercentage}%)`
         });
@@ -196,11 +196,11 @@ async function analyzeFeatureCompatibility(feature, html, browsers) {
   }
 
   return {
-    supportPercentage: supportPercentage,
+    supportPercentage,
     supportedBrowsers: browsers.filter(b => Math.random() > 0.1), // 大部分浏览器支持
     unsupportedBrowsers: browsers.filter(b => Math.random() > 0.9), // 少数不支持
     partialSupport: browsers.filter(b => Math.random() > 0.8), // 部分支持
-    isUsed: isUsed
+    isUsed
   };
 }
 
@@ -224,7 +224,7 @@ async function analyzeBrowserCompatibility(browser, features, html) {
 
   return {
     score: baseScore,
-    supportedFeatures: supportedFeatures,
+    supportedFeatures,
     totalFeatures: features.length,
     marketShare: browser.marketShare || 15
   };
@@ -348,7 +348,7 @@ function validateStressTestConfig(config) {
  */
 router.get('/k6/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'k6',
       available: false,
       version: 'unknown',
@@ -401,7 +401,7 @@ router.post('/k6/install', authMiddleware, adminAuth, asyncHandler(async (req, r
  */
 router.get('/lighthouse/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'lighthouse',
       available: false,
       version: 'unknown',
@@ -476,7 +476,7 @@ router.post('/lighthouse/run', authMiddleware, asyncHandler(async (req, res) => 
  */
 router.get('/playwright/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'playwright',
       available: false,
       version: 'unknown',
@@ -558,7 +558,7 @@ router.get('/status', asyncHandler(async (req, res) => {
 
   for (const engine of engines) {
     try {
-      let engineStatus = {
+      const engineStatus = {
         name: engine,
         available: false,
         version: 'unknown',
@@ -863,7 +863,7 @@ async function handleTestHistory(req, res) {
     const result = await testHistoryService.getTestHistory(req.user?.id, type, {
       page: parseInt(page),
       limit: parseInt(actualLimit),
-      status: status,
+      status,
       sortBy: sortField,
       sortOrder: sortDirection.toUpperCase()
     });
@@ -1270,7 +1270,7 @@ router.get('/history/:recordId', optionalAuth, asyncHandler(async (req, res) => 
 
   try {
     let whereClause = 'WHERE id = $1';
-    let params = [recordId];
+    const params = [recordId];
 
     // 如果用户已登录，只显示该用户的记录；否则显示公开记录
     if (req.user?.id) {
@@ -1477,7 +1477,7 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
         overview: testStats.rows[0],
         dailyStats: dailyStats.rows,
         typeStats: typeStats.rows,
-        timeRange: timeRange
+        timeRange
       }
     });
   } catch (error) {
@@ -1673,7 +1673,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
                   errorRate: testRecord.error_rate || 0,
                   activeUsers: 0
                 },
-                realTimeData: realTimeData,
+                realTimeData,
                 results: testRecord.results ?
                   (typeof testRecord.results === 'string' ?
                     JSON.parse(testRecord.results) : testRecord.results) : {},
@@ -1998,9 +1998,9 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
   try {
     console.log('🚀 收到压力测试请求:', {
       url: validatedURL,
-      testId: testId,
-      providedTestId: providedTestId,
-      recordId: recordId,
+      testId,
+      providedTestId,
+      recordId,
       hasPreGeneratedTestId: !!providedTestId,
       hasRecordId: !!recordId,
       testIdAndRecordIdSeparate: testId !== recordId
@@ -2065,7 +2065,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
     // 2. 立即返回响应，然后异步运行压力测试
     console.log('📊 即将启动异步测试:', {
       url: validatedURL,
-      testId: testId,
+      testId,
       hasTestId: !!testId,
       userId: req.user?.id,
       recordId: testRecordId,
@@ -2076,9 +2076,9 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
     res.json({
       success: true,
       message: '压力测试已启动',
-      testId: testId,
+      testId,
       data: {
-        testId: testId,
+        testId,
         status: 'starting',
         url: validatedURL,
         config: testConfig,
@@ -2096,7 +2096,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
 
         const testResult = await testEngine.runStressTest(validatedURL, {
           ...testConfig,
-          testId: testId, // 传递预生成的testId
+          testId, // 传递预生成的testId
           userId: req.user?.id,
           recordId: testRecordId // 传递数据库记录ID
         });
@@ -2175,9 +2175,9 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
                 currentPhase: responseData.currentPhase
               },
               overallScore: Math.round(responseData.overallScore || 0),
-              totalRequests: totalRequests,
-              successfulRequests: successfulRequests,
-              failedRequests: failedRequests
+              totalRequests,
+              successfulRequests,
+              failedRequests
             });
 
             // 广播测试完成状态到测试历史页面
@@ -2204,7 +2204,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
         // ✅ 异步执行完成，通过WebSocket通知前端测试完成
         if (global.io) {
           global.io.to(`stress-test-${testId}`).emit('stress-test-complete', {
-            testId: testId,
+            testId,
             success: true,
             data: responseData,
             metrics: responseData.metrics || {},
@@ -2220,7 +2220,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
         // 通过WebSocket通知前端测试失败
         if (global.io) {
           global.io.to(`stress-test-${testId}`).emit('stress-test-error', {
-            testId: testId,
+            testId,
             success: false,
             message: '压力测试失败',
             error: error.message
@@ -2235,7 +2235,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
               endTime: new Date().toISOString(),
               results: {
                 error: error.message,
-                testId: testId
+                testId
               }
             });
 
@@ -3797,7 +3797,7 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/k6/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'k6',
       available: false,
       version: 'unknown',
@@ -3835,7 +3835,7 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
  */
 router.get('/lighthouse/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'lighthouse',
       available: false,
       version: 'unknown',
@@ -3866,7 +3866,7 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
  */
 router.get('/playwright/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'playwright',
       available: false,
       version: 'unknown',
@@ -3899,7 +3899,7 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
   const { engine } = req.params;
 
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: engine,
       available: false,
       version: 'unknown',
@@ -4098,7 +4098,7 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
     // 通过代理发送请求获取出口IP
     const response = await fetch(testUrl, {
       method: 'GET',
-      agent: agent,
+      agent,
       signal: controller.signal,
       headers: {
         'User-Agent': 'Test-Web-Proxy-Latency-Test/1.0',
@@ -4164,17 +4164,17 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
     const responseResult = {
       success: true,
       message: '代理延迟测试成功',
-      exitIp: exitIp, // 代理出口IP
+      exitIp, // 代理出口IP
       location: locationInfo, // 出口IP地理位置信息
-      proxyResponseTime: proxyResponseTime, // 通过代理访问的响应时间
-      networkLatency: networkLatency, // 到出口IP的网络延迟（主要指标）
+      proxyResponseTime, // 通过代理访问的响应时间
+      networkLatency, // 到出口IP的网络延迟（主要指标）
       latency: networkLatency || proxyResponseTime, // 优先显示网络延迟
       proxyConfig: {
         host: proxy.host,
         port: proxyPort,
         type: proxyType
       },
-      testUrl: testUrl,
+      testUrl,
       timestamp: new Date().toISOString(),
       totalTestTime: totalTime
     };
@@ -4288,7 +4288,7 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
     // 发送测试请求
     const response = await fetch(testUrl, {
       method: 'GET',
-      agent: agent,
+      agent,
       signal: controller.signal,
       headers: {
         'User-Agent': 'Test-Web-Proxy-Test/1.0',
@@ -4352,16 +4352,16 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
     const responseData = {
       success: true,
       message: '代理连接测试成功',
-      proxyIp: proxyIp, // 实际的出口IP
+      proxyIp, // 实际的出口IP
       location: locationInfo, // 地理位置信息（辅助显示，不影响延迟）
       responseTime: networkLatency || responseTime, // 优先显示网络延迟
-      networkLatency: networkLatency, // 到代理IP的网络延迟（主要指标）
+      networkLatency, // 到代理IP的网络延迟（主要指标）
       proxyConfig: {
         host: proxy.host,
         port: proxyPort,
         type: proxyType
       },
-      testUrl: testUrl,
+      testUrl,
       timestamp: new Date().toISOString()
     };
 
@@ -4437,7 +4437,7 @@ router.post('/geo-update', optionalAuth, asyncHandler(async (req, res) => {
     const success = await geoUpdateService.triggerUpdate();
 
     res.json({
-      success: success,
+      success,
       message: success ? '数据库更新成功' : '数据库更新失败',
       timestamp: new Date().toISOString()
     });

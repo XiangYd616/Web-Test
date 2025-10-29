@@ -350,14 +350,14 @@ router.post('/meta/validate', async (req, res) => {
         validationResults.push({
           key,
           valid: true,
-          value: value
+          value
         });
       } catch (error) {
         validationResults.push({
           key,
           valid: false,
           error: error.message,
-          value: value
+          value
         });
       }
     }

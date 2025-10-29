@@ -1,156 +1,44 @@
-import { TestProgress } from '../../services/api/testProgressService';
+﻿import { TestProgress } from '../../services/api/testProgressService';
 
 /**
- * UI组件库统一导出
- * 提供完整的组件库功能，包括基础组件、主题系统和类型定义
+ * UI缁勪欢搴撶粺涓€瀵煎嚭
+ * 鎻愪緵瀹屾暣鐨勭粍浠跺簱鍔熻兘锛屽寘鎷熀纭€缁勪欢銆佷富棰樼郴缁熷拰绫诲瀷瀹氫箟
  */
 
 // 主题系统
 export * from './theme/ThemeSystem';
-export { default as ThemeProvider } from './ThemeProvider';
-export { ThemeSelector, ThemeSwitch, default as ThemeToggle } from './ThemeToggle';
-
-// 类型定义
-export * from './types';
-
-// 基础UI组件
-export { default as ErrorBoundary } from '../common/ErrorBoundary';
-export { default as LoadingStates } from './LoadingStates';
-
-// 增强UI组件
-export { InlineLoadingSpinner, default as LoadingSpinner, SimpleLoadingSpinner } from './LoadingSpinner';
-export { default as NotificationSystem } from './NotificationSystem';
-
-// 按钮组件
-export {
-    Button,
-    DeleteButton,
-    GhostButton,
-    IconButton,
-    OutlineButton,
-    PrimaryButton,
-    SecondaryButton
-} from './Button';
-export type { ButtonProps } from './types';
-
-// 输入组件
-export {
-    Input,
-    NumberInput,
-    PasswordInput,
-    SearchInput,
-    Select,
-    Textarea
-} from './Input';
-export type {
-    InputProps, SelectOption, SelectProps, TextareaProps
-} from './types';
-
-// 复选框组件
-export {
-    Checkbox,
-    SimpleCheckbox
-} from './Checkbox';
-export type { CheckboxProps } from './types';
-
-// 卡片组件
-export {
-    Card,
-    CardBody,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-    SimpleCard
-} from './Card';
-export type { CardProps } from './types';
-
-// 模态框组件
-export {
-    ConfirmModal,
-    Modal,
-    ModalBody,
-    ModalFooter,
-    ModalHeader
-} from './Modal';
-export type { ModalProps } from './types';
-
-// 表格组件
-export { Table } from './Table';
-export type {
-    TableColumn, TablePagination, TableProps,
-    TableRowSelection
-} from './types';
-
-// URL输入组件
-export { URLInput } from './URLInput';
-
-// 徽章组件
-export {
-    Badge,
-    DotBadge,
-    NumberBadge,
-    ProgressBadge,
-    StatusBadge,
-    TagBadge
-} from './Badge';
-export type { BadgeProps } from './types';
-
-// 统计卡片组件
-export { StatCard } from './StatCard';
-
-// 加载组件
-export {
-    ButtonLoading,
-    CardLoading,
-    InlineLoading,
-    Loading,
-    PageLoading,
-    SkeletonLoading,
-    TableLoading
-} from './Loading';
-export type {
-    LoadingProps,
-    LoadingSize,
-    LoadingType
-} from './Loading';
-
-// 进度条组件
-export {
-    CircularProgressBar,
-    ProgressBar,
-    SteppedProgressBar
-} from './ProgressBar';
-export type { ProgressProps } from './types';
-
-// 状态指示器组件
-export {
-    ConnectionStatusIndicator,
-    StatusIndicator,
-    TestStatusIndicator
-} from './StatusIndicator';
-export type { StatusIndicatorProps } from './types';
-
-// 图表组件
-export {
-    ChartContainer,
-    MetricChart,
-    SimpleChart
-} from '../charts/Chart';
+// Chart components removed - no longer exported from Chart module
 export type { ChartProps } from './types';
 
-// 测试工具组件
+// 基础UI组件
+export { Badge, StatusBadge, NumberBadge, DotBadge } from './Badge';
+export { Button } from './Button';
+export { Card } from './Card';
+export { Checkbox } from './Checkbox';
+export { Input } from './Input';
+export { Modal } from './Modal';
+export { ProgressBar } from './ProgressBar';
+export { Select } from './Select';
+export { Table } from './Table';
+export type { TableColumn } from './Table';
+export { LoadingSpinner } from './LoadingSpinner';
+export { URLInput } from './URLInput';
+export { ThemeToggle } from './ThemeToggle';
+export { ErrorBoundary } from '../system/ErrorHandling';
+
+// 娴嬭瘯宸ュ叿缁勪欢
 export {
     TestingToolbar, TestProgress,
     TestResultSummary
 } from './TestingTools';
 
-// 工具函数
+// 宸ュ叿鍑芥暟
 export { cn } from '../../utils/cn';
 
-// 常用类型别名
+// 甯哥敤绫诲瀷鍒悕
 export type {
     Alignment, BaseComponentProps, BlurHandler, ChangeHandler,
     ClickHandler, ComponentState, EventHandler, FocusHandler, FormComponentProps, InteractiveComponentProps, KeyboardHandler, Position, ResponsiveValue, Size, Status, ThemeMode, Variant
 } from './types';
+
 

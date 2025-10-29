@@ -6,6 +6,25 @@
 import Logger from '@/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {testProgressService} from '../services/api/testProgressService';
+
+// Type definitions
+export interface TestProgress {
+  id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  progress: number;
+  currentStep: string;
+  startTime?: number;
+  endTime?: number;
+  result?: any;
+  error?: string;
+}
+
+export interface ProgressListener {
+  onProgress: (progress: TestProgress) => void;
+  onComplete: (result: any) => void;
+  onError: (error: string) => void;
+}
+
 export interface UseTestProgressOptions {
   autoStart?: boolean; // 是否自动开始监控
   onComplete?: (result: any) => void;

@@ -168,7 +168,7 @@ const StressChart: React.FC<StressChartProps> = ({
       return (
         <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
           <p className="text-gray-300 text-sm mb-2">{`时间: ${formatTimeLabel(label)}`}</p>
-          {payload.map((entry: unknown, index: number) => (
+          {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {`${entry.name}: ${entry.value}${entry.dataKey === 'responseTime' ? 'ms' : 
                 entry.dataKey === 'throughput' ? ' req/s' : 

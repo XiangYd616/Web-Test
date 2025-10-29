@@ -373,7 +373,7 @@ class WebSocketManager extends EventEmitter {
     if (!this.rooms.has(room)) {
       this.rooms.set(room, {
         name: room,
-        password: password,
+        password,
         members: new Set(),
         createdAt: new Date(),
         lastActivity: new Date(),
@@ -410,7 +410,7 @@ class WebSocketManager extends EventEmitter {
       type: 'room_joined',
       data: {
         room,
-        members: members,
+        members,
         memberCount: roomData.members.size,
         recentMessages: roomData.messageHistory.slice(-10) // 返回最近10条消息
       },

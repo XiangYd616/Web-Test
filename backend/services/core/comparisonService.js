@@ -180,7 +180,7 @@ class ComparisonService {
         comparison.metrics[metric] = {
           before: value1,
           after: value2,
-          change: change,
+          change,
           changeType: this.getChangeType(metric, change)
         };
 

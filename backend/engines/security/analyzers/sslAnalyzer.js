@@ -108,7 +108,7 @@ class SSLAnalyzer {
     return new Promise((resolve, reject) => {
       const options = {
         host: hostname,
-        port: port,
+        port,
         method: 'GET',
         rejectUnauthorized: false
       };
@@ -143,7 +143,7 @@ class SSLAnalyzer {
     return new Promise((resolve, reject) => {
       const socket = tls.connect({
         host: hostname,
-        port: port,
+        port,
         rejectUnauthorized: false
       }, () => {
         const info = {

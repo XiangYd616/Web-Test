@@ -110,7 +110,7 @@ function formatError(error) {
   if (typeof error === 'string') {
     return {
       success: false,
-      error: error,
+      error,
       timestamp: new Date().toISOString()
     };
   }

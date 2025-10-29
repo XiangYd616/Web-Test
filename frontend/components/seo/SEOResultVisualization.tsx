@@ -8,7 +8,7 @@
 import React, { useState, useMemo } from 'react';
 import {BarChart3, TrendingUp, AlertCircle, CheckCircle, Clock} from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
-import { MobileSeoAnalysisResult } from '../../utils/mobileSeoDetector';
+import { MobileSeoAnalysisResult } from '../../utils/MobileSEODetector';
 import { CoreWebVitalsResult } from '../../utils/coreWebVitalsAnalyzer';
 
 interface SEOVisualizationData {

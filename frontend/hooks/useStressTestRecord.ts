@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {stressTestQueueManager} from '../services/stressTestQueueManager';
 
 import {stressTestRecordService} from '../services/stressTestRecordService';
-import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults, TestRecordQuery, QueueStats } from '../types/common';
 
 export interface UseStressTestRecordOptions {
   autoLoad?: boolean;

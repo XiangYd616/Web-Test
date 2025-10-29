@@ -9,9 +9,9 @@ import Logger from '@/utils/logger';
 import React, { useState, useCallback } from 'react';
 import {Download, FileText, Share2, Eye} from 'lucide-react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
-import { MobileSeoAnalysisResult } from '../../utils/mobileSeoDetector';
+import { MobileSeoAnalysisResult } from '../../utils/MobileSEODetector';
 import { CoreWebVitalsResult } from '../../utils/coreWebVitalsAnalyzer';
-import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
+import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../../types/common';
 
 interface SEOReportData {
   basicSEO?: SEOAnalysisResult;
@@ -308,9 +308,9 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
     if (reportData.basicSEO) {
       scores.overall = reportData.basicSEO.score;
-      scores.technical = reportData.basicSEO.technical?.score || 0;
+      scores.technical = (reportData.basicSEO.technical as any)?.score || 0;
       scores.content = reportData.basicSEO.contentQuality?.score || 0;
-      scores.accessibility = reportData.basicSEO.accessibility?.score || 0;
+      scores.accessibility = (reportData.basicSEO.accessibility as any)?.score || 0;
     }
 
     if (reportData.mobileSEO) {

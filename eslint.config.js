@@ -31,11 +31,10 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
-        project: ['./tsconfig.json', './tsconfig.node.json'],
-        tsconfigRootDir: import.meta.dirname,
       },
       globals: {
         ...globals.browser,
+        ...globals.node,
         ...globals.es2020,
       },
     },
@@ -76,6 +75,7 @@ export default [
       'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       'no-unused-vars': 'off', // 使用 @typescript-eslint/no-unused-vars 代替
+      'no-undef': 'off', // TypeScript 已处理
       'prefer-const': 'error',
       'no-var': 'error',
       'object-shorthand': 'error',

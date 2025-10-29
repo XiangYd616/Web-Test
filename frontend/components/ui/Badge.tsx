@@ -249,8 +249,6 @@ export const ProgressBadge: React.FC<ProgressBadgeProps> = ({
 
   // 根据进度自动选择颜色
   const getVariant = () => {
-    const [error, setError] = useState<string | null>(null);
-
     if (variant !== 'primary') return variant;
     if (percentage >= 80) return 'success';
     if (percentage >= 60) return 'warning';

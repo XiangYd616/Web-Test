@@ -1388,7 +1388,7 @@ class MonitoringService extends EventEmitter {
       `;
 
             const params = [userId];
-            let paramIndex = 2;
+            const paramIndex = 2;
 
             if (severity) {
                 // 添加严重程度过滤

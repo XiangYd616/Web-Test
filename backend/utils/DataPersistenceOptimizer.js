@@ -174,7 +174,7 @@ class DataPersistenceOptimizer {
         code: ErrorCode.FILE_ERROR,
         component: 'DataPersistenceOptimizer',
         method: 'read',
-        key: key
+        key
       });
     }
   }
@@ -229,7 +229,7 @@ class DataPersistenceOptimizer {
         code: ErrorCode.FILE_ERROR,
         component: 'DataPersistenceOptimizer',
         method: 'write',
-        key: key
+        key
       });
     }
   }
@@ -257,7 +257,7 @@ class DataPersistenceOptimizer {
         code: ErrorCode.FILE_ERROR,
         component: 'DataPersistenceOptimizer',
         method: 'delete',
-        key: key
+        key
       });
     }
   }
@@ -325,7 +325,7 @@ class DataPersistenceOptimizer {
     }
     
     this.cache.set(key, {
-      data: data,
+      data,
       timestamp: now
     });
     this.cacheAccessTimes.set(key, now);
@@ -661,7 +661,7 @@ class DataPersistenceOptimizer {
       (this.stats.cacheHits / this.stats.totalReads * 100).toFixed(2) : 0;
     
     return {
-      uptime: uptime,
+      uptime,
       cacheSize: this.cache.size,
       cacheHitRate: `${cacheHitRate}%`,
       writeQueueSize: this.writeQueue.length,

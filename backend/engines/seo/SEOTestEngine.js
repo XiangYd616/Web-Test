@@ -847,7 +847,7 @@ class SeoTestEngine {
     return {
       all: recommendations,
       actionable: actionableItems,
-      quickWins: quickWins,
+      quickWins,
       summary: {
         total: recommendations.length,
         critical: recommendations.filter(r => r.priority === 'critical').length,

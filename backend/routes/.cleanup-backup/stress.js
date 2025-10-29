@@ -202,7 +202,7 @@ router.get('/status/:testId',
           return res.json({
             success: true,
             status: 'completed',
-            result: result
+            result
           });
         }
         

@@ -624,7 +624,7 @@ router.get('/test-history', authMiddleware, asyncHandler(async (req, res) => {
     const offset = (page - 1) * limit;
 
     let whereClause = 'WHERE user_id = $1 AND deleted_at IS NULL';
-    let params = [req.user.id];
+    const params = [req.user.id];
     let paramIndex = 2;
 
     if (testType) {

@@ -15,7 +15,7 @@ const router = express.Router();
  */
 router.get('/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'lighthouse',
       available: false,
       version: 'unknown',

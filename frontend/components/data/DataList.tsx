@@ -98,8 +98,8 @@ const DataList: React.FC<DataListProps> = ({
       width: 120,
       render: (value: unknown, record: TestRecord, index: number) => (
         <div className="flex items-center space-x-2">
-          {getTestTypeIcon(value)}
-          <span className="text-gray-300 capitalize">{value}</span>
+          {getTestTypeIcon(value as string)}
+          <span className="text-gray-300 capitalize">{value as string}</span>
         </div>
       )
     },
@@ -227,7 +227,7 @@ const DataList: React.FC<DataListProps> = ({
 
   return (
     <DataTable
-      columns={columns}
+      columns={columns as any}
       dataSource={records}
       loading={loading}
       rowKey="id"

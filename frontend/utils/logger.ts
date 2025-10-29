@@ -1,5 +1,3 @@
-import Logger from '@/utils/logger';
-
 ﻿
 export enum LogLevel {
   ERROR = 0,
@@ -8,7 +6,7 @@ export enum LogLevel {
   DEBUG = 3
 }
 
-interface LogContext {
+export interface LogContext {
   component?: string;
   action?: string;
   userId?: string;
@@ -43,17 +41,17 @@ class FrontendLogger {
     return level <= this.logLevel;
   }
 
-  error(message: string, error?: Error | any, context?: LogContext): void {
+  error(message: string, error?: unknown, context?: LogContext): void {
     if (!this.shouldLog(LogLevel.ERROR)) return;
 
     const formattedMessage = this.formatMessage('error', message, context);
 
     if (error instanceof Error) {
-      Logger.error(formattedMessage, error);
+      console.error(formattedMessage, error);
     } else if (error) {
-      Logger.error(formattedMessage, error);
+      console.error(formattedMessage, error);
     } else {
-      Logger.error(formattedMessage);
+      console.error(formattedMessage);
     }
 
     // 在生产环境中，可以发送错误到监控服务
@@ -64,12 +62,12 @@ class FrontendLogger {
 
   warn(message: string, context?: LogContext): void {
     if (!this.shouldLog(LogLevel.WARN)) return;
-    Logger.warn(this.formatMessage('warn', message, context));
+    console.warn(this.formatMessage('warn', message, context));
   }
 
   info(message: string, context?: LogContext): void {
     if (!this.shouldLog(LogLevel.INFO)) return;
-    Logger.info(this.formatMessage('info', message, context));
+    console.info(this.formatMessage('info', message, context));
   }
 
   debug(message: string, context?: LogContext): void {

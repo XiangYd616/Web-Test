@@ -139,7 +139,7 @@ class EngineMonitor extends EventEmitter {
    */
   async checkEngineHealth(name, config) {
     const startTime = Date.now();
-    let healthData = {
+    const healthData = {
       name,
       timestamp: new Date().toISOString(),
       status: 'unknown',

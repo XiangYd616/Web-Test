@@ -257,7 +257,7 @@ const DataStorage: React.FC = () => {
 
     // 排序
     filtered.sort((a, b) => {
-      let aValue: unknown, bValue: any;
+      let aValue: any, bValue: any;
 
       switch (sortBy) {
         case 'created_at':

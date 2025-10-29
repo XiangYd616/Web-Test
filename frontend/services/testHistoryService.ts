@@ -98,9 +98,9 @@ class testHistoryService {
 
     // 基础查询参数
     if (query.page) params?.append('page', query.page.toString());
-    if (query.limit) params?.append('limit', query.limit.toString());
-    if (query.sortBy) params?.append('sortBy', query.sortBy);
-    if (query.sortOrder) params?.append('sortOrder', query.sortOrder);
+    if (query.pageSize) params?.append('limit', query.pageSize.toString());
+    if ((query as any).sortBy) params?.append('sortBy', (query as any).sortBy);
+    if ((query as any).sortOrder) params?.append('sortOrder', (query as any).sortOrder);
 
     // 过滤参数
     if (query.testType) {
@@ -145,9 +145,9 @@ class testHistoryService {
 
     const params = new URLSearchParams();
     if (query.page) params?.append('page', query.page.toString());
-    if (query.limit) params?.append('limit', query.limit.toString());
-    if (query.sortBy) params?.append('sortBy', query.sortBy);
-    if (query.sortOrder) params?.append('sortOrder', query.sortOrder);
+    if (query.pageSize) params?.append('limit', query.pageSize.toString());
+    if ((query as any).sortBy) params?.append('sortBy', (query as any).sortBy);
+    if ((query as any).sortOrder) params?.append('sortOrder', (query as any).sortOrder);
 
     try {
       const response = await fetch(`${this.baseUrl}/${testType}?${params}`, {

@@ -8,10 +8,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type {
-  APIEndpoint,
-  APITestConfig,
-  APITestResult
+  APIEndpoint
 } from '../types';
+
+// Use TestConfig and TestResult as base types
+import type { TestConfig, TestResult } from '../types';
+
+type APITestConfig = TestConfig & {
+  endpoints: APIEndpoint[];
+  timeout?: number;
+  retries?: number;
+  authentication?: {
+    type: 'none' | 'basic' | 'bearer' | 'oauth';
+    credentials?: any;
+  };
+};
+
+type APITestResult = TestResult;
 
 // 注意：现在使用统一的类型定义，从 ../types 导入
 // 本地接口定义已迁移到 frontend/types/hooks/testState.types.ts

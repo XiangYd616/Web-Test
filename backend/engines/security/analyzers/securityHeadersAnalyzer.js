@@ -40,7 +40,7 @@ class SecurityHeadersAnalyzer {
       
       const results = {
         url,
-        headers: headers,
+        headers,
         analysis: {},
         vulnerabilities: [],
         score: 0,

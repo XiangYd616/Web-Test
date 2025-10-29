@@ -14,9 +14,9 @@ export type URL = string;
 // ==================== 测试相关枚举定义 ====================
 
 /**
- * 测试类型和状态枚举 - 已迁移到统一类型系统
+ * 测试类型和状态枚举 - 使用枚举定义而非类型别名
  */
-import { TestStatus, TestType } from './unified/testTypes';
+import { TestStatus, TestType } from './enums';
 
 /**
  * 测试优先级枚举

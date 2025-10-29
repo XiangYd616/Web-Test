@@ -179,7 +179,7 @@ class LoadGenerator {
     // 峰值负载阶段
     await this.runLoadPhase({
       ...config,
-      concurrency: concurrency,
+      concurrency,
       duration: spikeDuration
     }, onProgress);
     

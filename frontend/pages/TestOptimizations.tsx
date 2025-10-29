@@ -184,7 +184,7 @@ const TestOptimizations: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {currentResults.map((result: unknown, index: number) => (
+              {currentResults.map((result: any, index: number) => (
                 <tr key={index}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                     {result.name || result.metric || result.component}

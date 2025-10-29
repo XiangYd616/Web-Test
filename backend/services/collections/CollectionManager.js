@@ -346,7 +346,7 @@ class CollectionManager {
             name: item.name,
             path: requestPath,
             request: resolvedRequest,
-            response: response,
+            response,
             success: response.success !== false,
             duration: response.duration,
             timestamp: new Date().toISOString()

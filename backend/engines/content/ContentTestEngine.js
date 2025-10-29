@@ -479,7 +479,7 @@ class ContentTestEngine {
           securityIssues: links.externalWithoutNoopener
         },
         content: {
-          wordCount: wordCount,
+          wordCount,
           isAdequate: wordCount >= config.minWordCount
         },
         score: finalScore,

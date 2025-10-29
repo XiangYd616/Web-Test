@@ -248,7 +248,7 @@ const MFADemo: React.FC = () => {
             </div>
             <MFAVerification
               userEmail={demoUser.email}
-              onVerificationSuccess={(method) => 
+              onVerificationSuccess={(method: any) => 
                 alert(`验证成功！使用方法: ${method === 'totp' ? '身份验证器' : '备用码'}`)
               }
               onCancel={handleBackToOverview}

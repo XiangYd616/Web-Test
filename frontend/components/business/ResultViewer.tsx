@@ -342,35 +342,35 @@ export const ResultViewer: React.FC<ResultViewerProps> = ({
             {
                 key: 'severity',
                 title: '严重程度',
-                render: (value) => (
-                    <Badge variant={getSeverityColor(value) as any} size="sm">
-                        {value}
+                render: (value: any) => (
+                    <Badge variant={getSeverityColor(value as string) as any} size="sm">
+                        {value as string}
                     </Badge>
                 )
             },
             {
                 key: 'title',
                 title: '问题标题',
-                render: (value, record) => (
+                render: (value: any, record: any) => (
                     <div>
-                        <div className="font-medium text-gray-900">{value}</div>
-                        <div className="text-sm text-gray-500">{record.category}</div>
+                        <div className="font-medium text-gray-900">{value as React.ReactNode}</div>
+                        <div className="text-sm text-gray-500">{(record as any).category}</div>
                     </div>
                 )
             },
             {
                 key: 'description',
                 title: '描述',
-                render: (value) => (
-                    <div className="max-w-xs truncate" title={value}>
-                        {value}
+                render: (value: any) => (
+                    <div className="max-w-xs truncate" title={value as string | undefined}>
+                        {value as React.ReactNode}
                     </div>
                 )
             },
             {
                 key: 'actions',
                 title: '操作',
-                render: (_, record) => (
+                render: (_: any, record: any) => (
                     <Button
                         variant="ghost"
                         size="sm"

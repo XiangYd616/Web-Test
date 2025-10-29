@@ -243,7 +243,7 @@ export interface UseDataManagementReturn {
   cleanupData: (config: any) => Promise<{ taskId: string }>;
 }
 
-export const _useDataManagement = (): UseDataManagementReturn => {
+export const useDataManagement = (): UseDataManagementReturn => {
   // 状态管理
   const [records, setRecords] = useState<DataRecord[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);

@@ -7,7 +7,7 @@ import type { } from '../types';
 import StructuredDataAnalyzer from '../components/seo/StructuredDataAnalyzer';
 import SEOResultVisualization from '../components/seo/SEOResultVisualization';
 import SEOReportGenerator from '../components/seo/SEOReportGenerator';
-import MobileSeoDetector from '../utils/mobileSeoDetector';
+import MobileSeoDetector from '../utils/MobileSEODetector';
 import CoreWebVitalsAnalyzer from '../utils/coreWebVitalsAnalyzer';
 import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 // import FileUploadSEO from '../components/seo/FileUploadSEO';

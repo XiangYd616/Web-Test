@@ -1,4 +1,4 @@
-import { TestStatus, TestType } from '../../frontend/types/unified/testTypes';
+import { TestStatus, TestType } from '../../frontend/types/enums';
 
 /**
  * 统一类型定义 - 前后端共享

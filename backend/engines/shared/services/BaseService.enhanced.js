@@ -165,7 +165,7 @@ class BaseService {
         // 通过错误处理器处理
         throw await this.errorHandler.handleError(error, {
           operation: label,
-          duration: duration
+          duration
         });
       }
     };

@@ -116,8 +116,8 @@ router.post('/setup',
         success: true,
         message: 'MFA设置初始化成功',
         secretKey: secret.base32,
-        qrCodeUrl: qrCodeUrl,
-        backupCodes: backupCodes, // 注意：生产环境中应该只返回一次
+        qrCodeUrl,
+        backupCodes, // 注意：生产环境中应该只返回一次
         manualEntryKey: secret.base32
       });
 
@@ -177,7 +177,7 @@ router.post('/verify-setup',
       const verified = speakeasy.totp.verify({
         secret: tempData.secret,
         encoding: 'base32',
-        token: token,
+        token,
         window: 2 // 允许时间窗口误差
       });
 
@@ -259,7 +259,7 @@ router.post('/verify',
       const verified = speakeasy.totp.verify({
         secret: user.mfaSecret,
         encoding: 'base32',
-        token: token,
+        token,
         window: 2
       });
 
@@ -494,7 +494,7 @@ router.post('/disable',
         const verified = speakeasy.totp.verify({
           secret: user.mfaSecret,
           encoding: 'base32',
-          token: token,
+          token,
           window: 2
         });
 
@@ -617,7 +617,7 @@ router.post('/regenerate-backup-codes',
       const verified = speakeasy.totp.verify({
         secret: user.mfaSecret,
         encoding: 'base32',
-        token: token,
+        token,
         window: 2
       });
 

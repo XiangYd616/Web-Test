@@ -630,7 +630,7 @@ class AccessibilityService {
 
             if (text && text.length > 0) {
               elements.push({
-                selector: selector,
+                selector,
                 text: text.substring(0, 100), // 限制文本长度
                 foreground: computedStyle.color,
                 background: computedStyle.backgroundColor,
@@ -714,11 +714,11 @@ class AccessibilityService {
 
           imageElements.push({
             src: img.src,
-            alt: alt,
+            alt,
             hasAlt: alt !== null,
             altEmpty: alt === '',
-            role: role,
-            ariaLabel: ariaLabel,
+            role,
+            ariaLabel,
             decorative: role === 'presentation' || role === 'none' || alt === '',
             visible: rect.width > 0 && rect.height > 0,
             width: rect.width,
@@ -778,7 +778,7 @@ class AccessibilityService {
             id: form.id,
             action: form.action,
             method: form.method,
-            inputs: inputs,
+            inputs,
             hasSubmitButton: !!form.querySelector('button[type="submit"], input[type="submit"]')
           });
         });

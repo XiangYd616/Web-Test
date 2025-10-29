@@ -397,8 +397,8 @@ class TestScriptEngine {
       },
 
       // 实用工具
-      _: _,  // Lodash
-      moment: moment,  // Moment.js
+      _,  // Lodash
+      moment,  // Moment.js
       CryptoJS: {
         MD5: (message) => crypto.createHash('md5').update(message).digest('hex'),
         SHA1: (message) => crypto.createHash('sha1').update(message).digest('hex'),
@@ -418,36 +418,36 @@ class TestScriptEngine {
       atob: (str) => Buffer.from(str, 'base64').toString(),
       
       // JSON 操作
-      JSON: JSON,
+      JSON,
       
       // 数学函数
-      Math: Math,
+      Math,
       
       // 日期
-      Date: Date,
+      Date,
       
       // 正则表达式
-      RegExp: RegExp,
+      RegExp,
       
       // 数组和对象
-      Array: Array,
-      Object: Object,
+      Array,
+      Object,
       
       // 字符串
-      String: String,
+      String,
       
       // 数字
-      Number: Number,
+      Number,
       
       // 布尔
-      Boolean: Boolean,
+      Boolean,
       
       // 错误
-      Error: Error,
+      Error,
       
       // 超时函数
-      setTimeout: setTimeout,
-      clearTimeout: clearTimeout,
+      setTimeout,
+      clearTimeout,
       
       // 自定义断言
       chai: {

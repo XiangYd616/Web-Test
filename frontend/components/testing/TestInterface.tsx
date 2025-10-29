@@ -2,8 +2,7 @@
 import Logger from '@/utils/logger';
 import React, { useCallback, useState } from 'react';
 import { TestResult } from '../../services/testing/unifiedTestEngine';
-// import { TestType } from '@shared/types'; // 暂时禁用
-type TestType = 'website' | 'security' | 'performance' | 'seo' | 'api' | 'network' | 'database' | 'compatibility' | 'accessibility' | 'ux';
+import { TestType } from '../../types/enums';
 import { ButtonFeedback } from '../integration/InteractiveFeedback';
 import { ErrorDisplay, useErrorHandler, useNotifications } from '../system/ErrorHandling';
 import { SmartLoader, useLoadingState } from '../ui/LoadingStates';

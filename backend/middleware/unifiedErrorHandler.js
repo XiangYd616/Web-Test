@@ -328,7 +328,7 @@ const handleNetworkError = (error, context = {}) => backendErrorHandler.handleNe
 const ErrorHandler = {
   handle: errorMiddleware,
   asyncWrapper: asyncHandler,
-  notFoundHandler: notFoundHandler
+  notFoundHandler
 };
 
 module.exports = {

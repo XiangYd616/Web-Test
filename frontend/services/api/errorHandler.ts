@@ -206,23 +206,24 @@ export class ApiErrorHandler {
    * 标准化错误对象
    */
   private normalizeError(error: unknown, context: ErrorContext): ApiError {
+    const err = error as any;
     // 如果已经是标准化的API错误
-    if (error.code && error.message) {
+    if (err.code && err.message) {
       return {
-        ...error,
-        context: { ...error.context, ...context }
+        ...err,
+        context: { ...err.context, ...context }
       } as ApiError;
     }
 
     // 网络相关错误
-    if (this.isNetworkError(error)) {
+    if (this.isNetworkError(err)) {
       return {
         code: ErrorCode.NETWORK_ERROR,
         message: '网络连接失败',
         details: {
-          originalError: error.message,
-          type: error.name,
-          stack: error.stack
+          originalError: err.message,
+          type: err.name,
+          stack: err.stack
         },
         context,
         timestamp: new Date().toISOString(),
@@ -231,13 +232,13 @@ export class ApiErrorHandler {
     }
 
     // 超时错误
-    if (this.isTimeoutError(error)) {
+    if (this.isTimeoutError(err)) {
       return {
         code: ErrorCode.TIMEOUT_ERROR,
         message: '请求超时',
         details: {
-          timeout: error.timeout,
-          originalError: error.message
+          timeout: err.timeout,
+          originalError: err.message
         },
         context,
         timestamp: new Date().toISOString(),
@@ -246,18 +247,18 @@ export class ApiErrorHandler {
     }
 
     // HTTP响应错误
-    if (error.response) {
-      return this.normalizeHttpError(error, context);
+    if (err.response) {
+      return this.normalizeHttpError(err, context);
     }
 
     // 默认未知错误
     return {
       code: ErrorCode.UNKNOWN_ERROR,
-      message: error.message || '未知错误',
+      message: err.message || '未知错误',
       details: {
-        originalError: error,
-        type: error.name,
-        stack: error.stack
+        originalError: err,
+        type: err.name,
+        stack: err.stack
       },
       context,
       timestamp: new Date().toISOString(),
@@ -269,8 +270,9 @@ export class ApiErrorHandler {
    * 标准化HTTP错误
    */
   private normalizeHttpError(error: unknown, context: ErrorContext): ApiError {
-    const status = error.response.status;
-    const data = error.response.data;
+    const err = error as any;
+    const status = err.response.status;
+    const data = err.response.data;
 
     // 如果响应包含标准化的错误格式
     if (data && data.error && data.error.code) {

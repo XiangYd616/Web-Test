@@ -155,7 +155,7 @@ class NetworkTestEngine {
    */
   async testSingleTarget(target) {
     const targetResult = {
-      target: target,
+      target,
       reachable: false,
       responseTime: null,
       error: null
@@ -229,7 +229,7 @@ class NetworkTestEngine {
     const result = {
       name: 'HTTP性能测试',
       status: 'passed',
-      url: url,
+      url,
       responseTime: 0,
       statusCode: null,
       contentLength: 0

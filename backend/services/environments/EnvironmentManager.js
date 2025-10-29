@@ -373,7 +373,7 @@ class EnvironmentManager {
     return await this.createEnvironment({
       name: postmanEnv.name || 'Imported Environment',
       description: 'Imported from Postman',
-      variables: variables
+      variables
     });
   }
 

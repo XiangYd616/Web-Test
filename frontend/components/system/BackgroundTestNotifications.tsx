@@ -27,8 +27,6 @@ const BackgroundTestNotifications: React.FC = () => {
   const { notifications, deleteNotification } = useNotifications();
 
   const getNotificationColor = (type: string) => {
-  const [error, setError] = useState<string | null>(null);
-
     const colors = {
       success: 'bg-green-600/90 border-green-500/50',
       error: 'bg-red-600/90 border-red-500/50',

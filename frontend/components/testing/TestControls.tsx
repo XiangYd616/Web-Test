@@ -130,10 +130,6 @@ export const TestControls: React.FC<TestControlsProps> = ({
 
   // 处理开始测试
   const handleStartTest = () => {
-  const [canStartTest, setCanStartTest] = useState(false);
-
-  const [error, setError] = useState<string | null>(null);
-
     if (!isAuthenticated) {
       onRequireLogin();
       return;

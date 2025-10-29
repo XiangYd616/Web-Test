@@ -53,10 +53,9 @@ export enum UserPlan {
 // ==================== 测试相关枚举 ====================
 
 /**
- * 测试类型枚举 - 已迁移到统一类型系统
- * 请从 '../types/unified/testTypes' 导入 TestType 和 TestTypeEnum
+ * 测试类型枚举 - 导出从enums.ts的枚举定义
  */
-import { TestType } from './unified/testTypes';
+export { TestType } from './enums';
 
 /**
  * 测试状态枚举 - 与数据库约束保持一致

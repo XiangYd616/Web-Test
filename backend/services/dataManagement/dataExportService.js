@@ -525,7 +525,7 @@ class DataExportService extends EventEmitter {
           filters: config.filters || {},
           dateRange: config.dateRange || {}
         },
-        data: data
+        data
       };
 
       const jsonString = JSON.stringify(jsonData, null, 2);
@@ -973,7 +973,7 @@ class DataExportService extends EventEmitter {
         // 获取列名
         const columns = Object.keys(data[0]).map(key => ({
           header: key,
-          key: key,
+          key,
           width: 15
         }));
 

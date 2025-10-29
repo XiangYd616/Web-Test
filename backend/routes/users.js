@@ -423,8 +423,8 @@ router.get('/', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
   const dbQuery = getDbQuery();
 
   // 构建查询条件
-  let whereConditions = [];
-  let queryParams = [];
+  const whereConditions = [];
+  const queryParams = [];
   let paramIndex = 1;
 
   if (search) {
@@ -474,7 +474,7 @@ router.get('/', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
-        total: total,
+        total,
         pages: Math.ceil(total / limit)
       }
     },

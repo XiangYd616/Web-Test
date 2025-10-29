@@ -34,7 +34,7 @@ const REPORT_FORMATS = {
 };
 
 // 模拟数据库存储
-let reports = [
+const reports = [
   {
     id: '1',
     name: '网站性能报告 - 2025年1月',

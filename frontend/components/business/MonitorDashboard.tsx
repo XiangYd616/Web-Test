@@ -731,7 +731,7 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
                             label="类型"
                             options={monitorTypeOptions}
                             value={selectedTarget.type}
-                            onChange={(value) => setSelectedTarget(prev => prev ? { ...prev, type: value as any } : null)}
+                            onChange={(value: any) => setSelectedTarget(prev => prev ? { ...prev, type: value as any } : null)}
                         />
                         <div className="grid grid-cols-2 gap-4">
                             <Select

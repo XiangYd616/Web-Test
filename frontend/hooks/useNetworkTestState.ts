@@ -12,7 +12,7 @@ import type {
   NetworkTestHook,
   NetworkTestResult
 } from '../types';
-import { TestStatus } from '@shared/types';
+import { TestStatus } from '../types/enums';
 
 // 所有类型定义已迁移到统一的类型系统
 // 请从 '../types' 导入所需的类型

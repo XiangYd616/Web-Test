@@ -464,8 +464,9 @@ export const useErrorHandler = () => {
 
   const handleError = (error: unknown, context?: string) => {
     let errorInfo: LocalErrorInfo;
+    const err = error as any;
 
-    if (error.name === 'NetworkError' || error.message?.includes('fetch')) {
+    if (err?.name === 'NetworkError' || err?.message?.includes('fetch')) {
       errorInfo = {
         type: 'network',
         title: '网络错误',
@@ -474,7 +475,7 @@ export const useErrorHandler = () => {
         timestamp: new Date().toISOString(),
         severity: 'high'
       };
-    } else if (error.status === 404) {
+    } else if (err?.status === 404) {
       errorInfo = {
         type: 'not-found',
         title: '资源未找到',
@@ -483,16 +484,16 @@ export const useErrorHandler = () => {
         timestamp: new Date().toISOString(),
         severity: 'medium'
       };
-    } else if (error.status >= 500) {
+    } else if (err?.status >= 500) {
       errorInfo = {
         type: 'server',
         title: '服务器错误',
         message: '服务器遇到了一个错误',
-        code: error.status,
+        code: err.status,
         timestamp: new Date().toISOString(),
         severity: 'critical'
       };
-    } else if (error.status === 403) {
+    } else if (err?.status === 403) {
       errorInfo = {
         type: 'permission',
         title: '权限不足',
@@ -504,7 +505,7 @@ export const useErrorHandler = () => {
       errorInfo = {
         type: 'unknown',
         title: '未知错误',
-        message: error.message || '发生了一个未知错误',
+        message: err?.message || '发生了一个未知错误',
         details: context ? `在${context}时发生错误` : undefined,
         timestamp: new Date().toISOString(),
         severity: 'medium'

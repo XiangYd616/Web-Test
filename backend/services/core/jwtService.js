@@ -299,7 +299,7 @@ class JwtService {
     async cleanupExpiredTokens(userId = null) {
         try {
             let queryText = 'DELETE FROM refresh_tokens WHERE expires_at < NOW()';
-            let params = [];
+            const params = [];
 
             if (userId) {
                 queryText += ' AND user_id = $1';

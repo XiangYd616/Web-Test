@@ -134,7 +134,7 @@ router.get('/', authMiddleware, asyncHandler(async (req, res) => {
 
   try {
     let whereClause = 'WHERE user_id = $1';
-    let params = [req.user.id];
+    const params = [req.user.id];
 
     if (type) {
       whereClause += ` AND file_type LIKE $${params.length + 1}`;

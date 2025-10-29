@@ -17,6 +17,24 @@ interface QueueStats {
   failed: number;
   totalCapacity: number;
   averageWaitTime: number;
+  // Additional properties used in component
+  totalQueued: number;
+  totalRunning: number;
+  totalCompleted: number;
+  totalFailed: number;
+  averageExecutionTime: number;
+  queueLength: number;
+  nextInQueue?: {
+    testName: string;
+    status: string;
+    id?: string;
+  };
+  runningTests: Array<{
+    id: string;
+    testName: string;
+    url: string;
+    status: string;
+  }>;
 }
 
 interface StressTestQueueStatusProps {

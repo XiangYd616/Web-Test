@@ -322,7 +322,7 @@ class DataVisualizationService {
             ...baseOptions.plugins,
             tooltip: {
               callbacks: {
-                label: function(context) {
+                label(context) {
                   const data = context.parsed;
                   return `${context.label}: ${data} (${context.dataset.data[context.dataIndex]}%)`;
                 }

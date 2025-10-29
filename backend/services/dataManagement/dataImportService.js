@@ -604,7 +604,7 @@ class DataImportService extends EventEmitter {
    */
   async validateRowByDataType(row, dataType, rowNumber) {
     const errors = [];
-    let processedData = { ...row };
+    const processedData = { ...row };
 
     switch (dataType) {
       case 'test-results':

@@ -164,3 +164,43 @@ export interface ErrorResponse extends BaseApiResponse {
 }
 
 export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse;
+
+// Additional API types
+export interface ApiRequestConfig {
+  timeout?: number;
+  retries?: number;
+  headers?: Record<string, string>;
+  params?: Record<string, any>;
+}
+
+export interface RequestConfig extends ApiRequestConfig {
+  method?: string;
+  baseURL?: string;
+  url?: string;
+  data?: any;
+}
+
+export interface TestCallbacks {
+  onProgress?: (progress: number, stage: string) => void;
+  onComplete?: (result: any) => void;
+  onError?: (error: Error) => void;
+}
+
+export interface UnifiedTestConfig {
+  testType: string;
+  target: string;
+  options?: any;
+  callbacks?: TestCallbacks;
+}
+
+export type TestTypeValue = string;
+
+export interface TestExecution {
+  id: string;
+  testType: string;
+  status: string;
+  startTime: string;
+  endTime?: string;
+  result?: any;
+  error?: string;
+}

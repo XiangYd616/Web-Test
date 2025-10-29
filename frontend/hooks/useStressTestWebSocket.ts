@@ -7,7 +7,7 @@
 
 import Logger from '@/utils/logger';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { websocketManager, ConnectionStatus, WebSocketMessage } from '../services/websocketManager';
+import { _websocketManager as websocketManager, ConnectionStatus, WebSocketMessage } from '../services/websocketManager';
 
 export interface StressTestProgress {
   testId: string;
@@ -271,3 +271,4 @@ export const useStressTestWebSocket = (
 };
 
 export default useStressTestWebSocket;
+
