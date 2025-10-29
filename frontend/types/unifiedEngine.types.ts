@@ -58,6 +58,7 @@ export interface UnifiedTestResult extends TestResult {
   startTime: Date;
   endTime?: Date;
   duration?: number;
+  url?: string;
   results?: any;
   metrics?: Record<string, any>;
   score?: number;

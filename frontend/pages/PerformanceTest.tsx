@@ -236,7 +236,7 @@ const PerformanceTest: React.FC = () => {
     <div className="space-y-6">
       <URLInput
         value={config.url}
-        onChange={(url) => setConfig(prev => ({ ...prev, url }))}
+        onChange={(e) => setConfig(prev => ({ ...prev, url: e.target.value }))}
         placeholder="请输入要测试的网站URL"
         disabled={isRunning}
       />

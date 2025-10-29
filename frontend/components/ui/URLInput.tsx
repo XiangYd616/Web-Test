@@ -25,6 +25,8 @@ interface URLInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
   showAutoFix?: boolean;
   /** 自定义类名 */
   className?: string;
+  /** 是否启用可达性检查 (待实现) */
+  enableReachabilityCheck?: boolean;
 }
 
 export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({

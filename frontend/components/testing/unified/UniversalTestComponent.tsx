@@ -787,13 +787,13 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
             testType: r.type,
             status: r.status,
             score: r.score,
-            startTime: r.startTime?.toString() || new Date().toISOString(),
+            startTime: r.startTime instanceof Date ? r.startTime.toISOString() : new Date().toISOString(),
             duration: r.duration,
-            url: r.url
+            url: (r as any).url || ''
           }))}
           onViewResult={(testId: string) => {
             const result = engine.results.find(r => r.id === testId);
-            if (result) handleViewResult(result);
+            if (result) handleViewResult(result as any);
           }}
           enableExport={enableExport}
         />
@@ -821,7 +821,14 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         ].filter(Boolean)}
       >
         {selectedResult && (
-          <TestResultsViewer result={selectedResult} />
+          <TestResultsViewer result={{
+            ...selectedResult,
+            testType: selectedResult.type,
+            url: (selectedResult as any).url || '',
+            startTime: selectedResult.startTime instanceof Date ? selectedResult.startTime : new Date(),
+            endTime: selectedResult.endTime instanceof Date ? selectedResult.endTime : new Date(),
+            duration: selectedResult.duration || 0,
+          } as any} />
         )}
       </Modal>
     </div>
