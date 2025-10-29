@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 
 // 引入性能测试引擎（使用try-catch处理可能的模块缺失）
@@ -11,7 +12,7 @@ let PerformanceTestCore;
 try {
   PerformanceTestCore = require('../engines/core/PerformanceTestCore');
 } catch (error) {
-  console.warn('⚠️ PerformanceTestCore模块未找到，使用模拟实现');
+  logger.warn('⚠️ PerformanceTestCore模块未找到，使用模拟实现');
 }
 
 /**
@@ -94,7 +95,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    console.log('🚀 开始性能测试:', testUrl);
+    logger.info('🚀 开始性能测试:', testUrl);
 
     let result;
 
@@ -115,12 +116,12 @@ router.post('/', async (req, res) => {
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
-    console.log('✅ 性能测试完成');
+    logger.info('✅ 性能测试完成');
 
     res.json(result);
 
   } catch (error) {
-    console.error('❌ 性能测试失败:', error);
+    logger.error('❌ 性能测试失败:', error);
 
     res.status(500).json({
       success: false,
@@ -268,7 +269,7 @@ router.post('/batch', async (req, res) => {
       });
     }
 
-    console.log(`🚀 开始批量性能测试，共 ${urls.length} 个URL`);
+    logger.info(`🚀 开始批量性能测试，共 ${urls.length} 个URL`);
 
     const results = [];
     
@@ -301,7 +302,7 @@ router.post('/batch', async (req, res) => {
       }
     }
 
-    console.log('✅ 批量性能测试完成');
+    logger.info('✅ 批量性能测试完成');
 
     res.json({
       success: true,
@@ -312,7 +313,7 @@ router.post('/batch', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ 批量性能测试失败:', error);
+    logger.error('❌ 批量性能测试失败:', error);
 
     res.status(500).json({
       success: false,

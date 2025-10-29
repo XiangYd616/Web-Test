@@ -501,6 +501,7 @@ module.exports = {
   connectDB,
   testConnection,
   getPool,
+  createPool,
   query,
   closeConnection,
   transaction,

@@ -1,0 +1,42 @@
+# Test-Web Backend Development Dockerfile
+# 支持热重载和调试
+
+ARG NODE_VERSION=20-alpine
+
+FROM node:${NODE_VERSION}
+
+# 安装开发工具和依赖
+RUN apk add --no-cache \
+    git \
+    wget \
+    curl \
+    postgresql-client \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    && rm -rf /var/cache/apk/*
+
+# Puppeteer 环境变量
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+WORKDIR /app
+
+# 复制 package files
+COPY backend/package*.json ./backend/
+COPY shared/package*.json ./shared/
+COPY package*.json ./
+
+# 安装所有依赖 (包括devDependencies)
+RUN cd backend && npm install && \
+    cd ../shared && npm install
+
+# 暴露端口
+EXPOSE 3001
+
+# 启动开发服务器 (使用nodemon)
+CMD ["npm", "run", "--prefix", "backend", "dev"]
+

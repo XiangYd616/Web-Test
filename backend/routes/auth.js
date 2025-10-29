@@ -20,11 +20,11 @@ const emailService = require('../services/email/EmailService');
 
 const router = express.Router();
 
-// MFA和OAuth功能暂时禁用，避免模块缺失错误
-// const mfaRoutes = require('../src/routes/mfa');
-// const oauthRoutes = require('./oauth');
-// router.use('/mfa', mfaRoutes);
-// router.use('/oauth', oauthRoutes);
+// 启用MFA和OAuth功能
+const mfaRoutes = require('./mfa');
+const oauthRoutes = require('./oauth');
+router.use('/mfa', mfaRoutes);
+router.use('/oauth', oauthRoutes);
 
 /**
  * 用户注册

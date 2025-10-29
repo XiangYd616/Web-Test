@@ -8,6 +8,7 @@ const router = express.Router();
 const { asyncHandler } = require('../middleware/errorHandler');
 const { authMiddleware } = require('../middleware/auth');
 const testEngineService = require('../services/core/TestEngineService');
+const logger = require('../utils/logger');
 
 // 应用认证中间件
 router.use(authMiddleware);
@@ -45,7 +46,7 @@ router.post('/schedule', asyncHandler(async (req, res) => {
 
     res.success(result, '测试调度成功');
   } catch (error) {
-    console.error('调度测试失败:', error);
+    logger.error('调度测试失败:', error);
     res.serverError(error.message);
   }
 }));
@@ -83,7 +84,7 @@ router.get('/scheduled', asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取调度测试失败:', error);
+    logger.error('获取调度测试失败:', error);
     res.serverError('获取调度测试失败');
   }
 }));
@@ -104,7 +105,7 @@ router.delete('/scheduled/:testId', asyncHandler(async (req, res) => {
       res.notFound('resource', result.message);
     }
   } catch (error) {
-    console.error('取消调度测试失败:', error);
+    logger.error('取消调度测试失败:', error);
     res.serverError('取消调度测试失败');
   }
 }));
@@ -151,7 +152,7 @@ router.post('/batch', asyncHandler(async (req, res) => {
       user: req.user.id
     }, '批量测试执行完成');
   } catch (error) {
-    console.error('批量测试执行失败:', error);
+    logger.error('批量测试执行失败:', error);
     res.serverError(error.message);
   }
 }));
@@ -170,7 +171,7 @@ router.get('/metrics', asyncHandler(async (req, res) => {
       user: req.user.id
     });
   } catch (error) {
-    console.error('获取性能指标失败:', error);
+    logger.error('获取性能指标失败:', error);
     res.serverError('获取性能指标失败');
   }
 }));
@@ -189,7 +190,7 @@ router.get('/health', asyncHandler(async (req, res) => {
       overallHealth: Object.values(healthStatus).every(engine => engine.healthy) ? 'healthy' : 'degraded'
     });
   } catch (error) {
-    console.error('获取引擎健康状态失败:', error);
+    logger.error('获取引擎健康状态失败:', error);
     res.serverError('获取引擎健康状态失败');
   }
 }));
@@ -206,7 +207,7 @@ router.delete('/cache', asyncHandler(async (req, res) => {
     
     res.success(result, `清理了${result.cleared}条缓存记录`);
   } catch (error) {
-    console.error('清理缓存失败:', error);
+    logger.error('清理缓存失败:', error);
     res.serverError('清理缓存失败');
   }
 }));
@@ -295,7 +296,7 @@ router.get('/statistics', asyncHandler(async (req, res) => {
       generatedAt: new Date().toISOString()
     });
   } catch (error) {
-    console.error('获取统计数据失败:', error);
+    logger.error('获取统计数据失败:', error);
     res.serverError('获取统计数据失败');
   }
 }));
@@ -310,7 +311,7 @@ router.post('/process', asyncHandler(async (req, res) => {
     
     res.success(result, '调度任务处理完成');
   } catch (error) {
-    console.error('处理调度任务失败:', error);
+    logger.error('处理调度任务失败:', error);
     res.serverError('处理调度任务失败');
   }
 }));

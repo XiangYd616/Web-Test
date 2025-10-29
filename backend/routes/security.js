@@ -8,6 +8,7 @@ const router = express.Router();
 const asyncHandler = require('../middleware/asyncHandler');
 const { authMiddleware } = require('../middleware/auth');
 const SecurityAnalyzer = require('../engines/security/SecurityAnalyzer');
+const logger = require('../utils/logger');
 
 // 创建安全引擎实例
 // 注意: 不再全局应用认证中间件，以支持部分接口无需认证访问
@@ -15,7 +16,7 @@ let securityEngine;
 try {
   securityEngine = new SecurityAnalyzer();
 } catch (error) {
-  console.warn('⚠️ 无法初始化安全引擎, 使用模拟实现:', error.message);
+  logger.warn('⚠️ 无法初始化安全引擎, 使用模拟实现:', error.message);
   // 使用模拟安全引擎
   securityEngine = {
     executeTest: async (config, options) => {
@@ -72,12 +73,12 @@ router.post('/advanced-test', authMiddleware, asyncHandler(async (req, res) => {
     });
 
     // 记录测试结果到数据库（这里应该实际保存到数据库）
-    console.log(`✅ 高级安全测试完成: ${url}, 评分: ${result.summary.securityScore}`);
+    logger.info(`✅ 高级安全测试完成: ${url}, 评分: ${result.summary.securityScore}`);
 
     res.success(result);
 
   } catch (error) {
-    console.error('高级安全测试失败:', error);
+    logger.error('高级安全测试失败:', error);
     res.serverError('安全测试失败');
   }
 }));
@@ -117,7 +118,7 @@ router.post('/quick-check', asyncHandler(async (req, res) => {
     });
 
   } catch (error) {
-    console.error('快速安全检查失败:', error);
+    logger.error('快速安全检查失败:', error);
     res.serverError('快速安全检查失败');
   }
 }));
@@ -156,7 +157,7 @@ router.get('/test-history', authMiddleware, asyncHandler(async (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取安全测试历史失败:', error);
+    logger.error('获取安全测试历史失败:', error);
     res.serverError('获取测试历史失败');
   }
 }));
@@ -235,7 +236,7 @@ router.get('/test/:testId', authMiddleware, asyncHandler(async (req, res) => {
     res.success(mockTestDetail);
 
   } catch (error) {
-    console.error('获取安全测试详情失败:', error);
+    logger.error('获取安全测试详情失败:', error);
     res.serverError('获取测试详情失败');
   }
 }));
@@ -279,7 +280,7 @@ router.get('/statistics', asyncHandler(async (req, res) => {
     res.success(mockStatistics);
 
   } catch (error) {
-    console.error('获取安全统计信息失败:', error);
+    logger.error('获取安全统计信息失败:', error);
     res.serverError('获取统计信息失败');
   }
 }));
@@ -328,7 +329,7 @@ router.post('/export-report', asyncHandler(async (req, res) => {
     }
 
   } catch (error) {
-    console.error('导出安全报告失败:', error);
+    logger.error('导出安全报告失败:', error);
     res.serverError('导出报告失败');
   }
 }));
@@ -380,7 +381,7 @@ router.get('/recommendations', asyncHandler(async (req, res) => {
     res.success(result);
 
   } catch (error) {
-    console.error('获取安全建议失败:', error);
+    logger.error('获取安全建议失败:', error);
     res.serverError('获取安全建议失败');
   }
 }));

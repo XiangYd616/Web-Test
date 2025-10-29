@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const DatabaseTestEngine = require('../engines/database/DatabaseTestEngine');
+const logger = require('../utils/logger');
 const { validateTestRequest } = require('../middleware/validation');
 
 // 创建测试引擎实例
@@ -37,7 +38,7 @@ router.post('/test', authenticateToken, validateTestRequest, async (req, res) =>
       message: '数据库测试完成'
     });
   } catch (error) {
-    console.error('[Database Test Error]:', error);
+    logger.error('[Database Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -75,7 +76,7 @@ router.post('/connection-test', authenticateToken, async (req, res) => {
       data: connectionResult
     });
   } catch (error) {
-    console.error('[Database Connection Test Error]:', error);
+    logger.error('[Database Connection Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -115,7 +116,7 @@ router.post('/query-performance', authenticateToken, async (req, res) => {
       message: '查询性能测试完成'
     });
   } catch (error) {
-    console.error('[Query Performance Test Error]:', error);
+    logger.error('[Query Performance Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -155,7 +156,7 @@ router.post('/load-test', authenticateToken, async (req, res) => {
       message: '数据库负载测试完成'
     });
   } catch (error) {
-    console.error('[Database Load Test Error]:', error);
+    logger.error('[Database Load Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -188,7 +189,7 @@ router.get('/test-history', authenticateToken, async (req, res) => {
       data: history
     });
   } catch (error) {
-    console.error('[Get Test History Error]:', error);
+    logger.error('[Get Test History Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -228,7 +229,7 @@ router.post('/optimize-suggestions', authenticateToken, async (req, res) => {
       message: '优化建议生成完成'
     });
   } catch (error) {
-    console.error('[Get Optimization Suggestions Error]:', error);
+    logger.error('[Get Optimization Suggestions Error]:', error);
     res.status(500).json({
       success: false,
       error: {

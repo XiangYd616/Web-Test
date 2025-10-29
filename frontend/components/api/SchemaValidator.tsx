@@ -95,7 +95,7 @@ export const SchemaValidator: React.FC<SchemaValidatorProps> = ({
 
       // Format validation
       if (rule.format && rule.type === 'string') {
-        const formatValid = validateFormat(value, rule.format);
+        const formatValid = validateFormat(value as string, rule.format);
         if (!formatValid) {
           return {
             field: fieldPath,
@@ -131,7 +131,7 @@ export const SchemaValidator: React.FC<SchemaValidatorProps> = ({
     };
 
     const getNestedValue = (obj: unknown, path: string) => {
-      return path.split('.').reduce((current, key) => current?.[key], obj);
+      return path.split('.').reduce((current: any, key) => current?.[key], obj as any);
     };
 
     for (const rule of schema) {

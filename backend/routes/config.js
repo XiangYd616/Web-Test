@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const { configCenter } = require('../config/ConfigCenter');
 const { ServiceError, ErrorTypes } = require('../utils/errorHandler');
 
@@ -23,7 +24,7 @@ router.get('/', async (req, res) => {
       status: configCenter.getStatus()
     }, '获取配置成功');
   } catch (error) {
-    console.error('获取配置失败:', error);
+    logger.error('获取配置失败:', error);
     res.error('获取配置失败', 500, error.message);
   }
 });
@@ -50,7 +51,7 @@ router.get('/:key', async (req, res) => {
       schema
     }, '获取配置项成功');
   } catch (error) {
-    console.error('获取配置项失败:', error);
+    logger.error('获取配置项失败:', error);
     res.error('获取配置项失败', 500, error.message);
   }
 });
@@ -93,7 +94,7 @@ router.put('/:key', async (req, res) => {
     }, '配置更新成功');
     
   } catch (error) {
-    console.error('更新配置失败:', error);
+    logger.error('更新配置失败:', error);
     res.error('更新配置失败', 400, error.message);
   }
 });
@@ -154,7 +155,7 @@ router.put('/', async (req, res) => {
     }, '批量配置更新完成');
     
   } catch (error) {
-    console.error('批量更新配置失败:', error);
+    logger.error('批量更新配置失败:', error);
     res.error('批量更新配置失败', 500, error.message);
   }
 });
@@ -181,7 +182,7 @@ router.get('/meta/schema', async (req, res) => {
       totalConfigs: Object.keys(schema).length
     }, '获取配置模式成功');
   } catch (error) {
-    console.error('获取配置模式失败:', error);
+    logger.error('获取配置模式失败:', error);
     res.error('获取配置模式失败', 500, error.message);
   }
 });
@@ -215,7 +216,7 @@ router.get('/meta/history', async (req, res) => {
       key: key || 'all'
     }, '获取配置历史成功');
   } catch (error) {
-    console.error('获取配置历史失败:', error);
+    logger.error('获取配置历史失败:', error);
     res.error('获取配置历史失败', 500, error.message);
   }
 });
@@ -243,7 +244,7 @@ router.post('/meta/rollback', async (req, res) => {
     }, '配置回滚成功');
     
   } catch (error) {
-    console.error('配置回滚失败:', error);
+    logger.error('配置回滚失败:', error);
     res.error('配置回滚失败', 400, error.message);
   }
 });
@@ -304,7 +305,7 @@ router.post('/meta/reset', async (req, res) => {
     }
     
   } catch (error) {
-    console.error('配置重置失败:', error);
+    logger.error('配置重置失败:', error);
     res.error('配置重置失败', 500, error.message);
   }
 });
@@ -324,7 +325,7 @@ router.get('/meta/status', async (req, res) => {
       timestamp: new Date().toISOString()
     }, '获取配置状态成功');
   } catch (error) {
-    console.error('获取配置状态失败:', error);
+    logger.error('获取配置状态失败:', error);
     res.error('获取配置状态失败', 500, error.message);
   }
 });
@@ -373,7 +374,7 @@ router.post('/meta/validate', async (req, res) => {
     }, '配置验证完成');
     
   } catch (error) {
-    console.error('配置验证失败:', error);
+    logger.error('配置验证失败:', error);
     res.error('配置验证失败', 500, error.message);
   }
 });
@@ -407,7 +408,7 @@ router.get('/meta/export', async (req, res) => {
     }
     
   } catch (error) {
-    console.error('配置导出失败:', error);
+    logger.error('配置导出失败:', error);
     res.error('配置导出失败', 500, error.message);
   }
 });
@@ -476,7 +477,7 @@ router.post('/meta/import', async (req, res) => {
     }, '配置导入完成');
     
   } catch (error) {
-    console.error('配置导入失败:', error);
+    logger.error('配置导入失败:', error);
     res.error('配置导入失败', 500, error.message);
   }
 });

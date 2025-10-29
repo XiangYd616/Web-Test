@@ -18,25 +18,12 @@ const StressTestEngine = require('../../engines/stress/StressTestEngine');
 const DatabaseTestEngine = require('../../engines/database/DatabaseTestEngine');
 
 
-/**
-
-
- * TestManagementService类 - 负责处理相关功能
-
-
- */
 const NetworkTestEngine = require('../../engines/network/NetworkTestEngine');
 
-
-  /**
-
-   * 处理constructor事件
-
-   * @param {Object} event - 事件对象
-
-   * @returns {Promise<void>}
-
-   */
+/**
+ * 测试管理服务类
+ * 负责统一管理测试引擎、执行队列、测试历史和报告生成
+ */
 class TestManagementService extends EventEmitter {
   constructor() {
     super();
@@ -160,6 +147,8 @@ class TestManagementService extends EventEmitter {
 
   /**
    * 执行测试
+   * @param {string} testId - 测试ID
+   * @returns {Promise<Object>} 测试结果
    */
   async executeTest(testId) {
     const test = this.testQueue.get(testId);
@@ -167,16 +156,6 @@ class TestManagementService extends EventEmitter {
       throw new Error(`Test ${testId} not found in queue`);
     }
 
-
-    /**
-
-     * if功能函数
-
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
-
-     */
     const engine = this.engines.get(test.engine_type);
     if (!engine || !engine.instance) {
       throw new Error(`Engine ${test.engine_type} not available`);
@@ -241,12 +220,12 @@ class TestManagementService extends EventEmitter {
 
   /**
    * 处理测试队列
+   * 遗历所有引擎，查找并执行待处理的测试任务
    */
   async processTestQueue() {
-    // 获取可用的引�?
     for (const [engineType, engine] of this.engines) {
       if (engine.status === 'idle' && engine.metrics.activeTests < 5) {
-        // 查找该引擎类型的待处理测�?
+        // 查找该引擎类型的待处理测试
         const pendingTest = Array.from(this.testQueue.values())
           .find(test => test.engine_type === engineType && test.status === 'pending');
         

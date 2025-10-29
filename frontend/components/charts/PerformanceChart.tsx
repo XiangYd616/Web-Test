@@ -127,9 +127,9 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
     if (name === dataKey) {
       const unit = dataKey === 'responseTime' ? 'ms' :
         dataKey === 'throughput' || dataKey === 'tps' ? '' : '';
-      return [`${typeof value === 'number' ? value.toFixed(3) : value}${unit}`, name];
+      return [`${typeof value === 'number' ? value.toFixed(3) : String(value)}${unit}`, name] as [React.ReactNode, string];
     }
-    return [value, name];
+    return [String(value), name] as [React.ReactNode, string];
   }, [dataKey]);
 
   // 🔧 改进：优化的标签格式化，提高到0.1秒精度

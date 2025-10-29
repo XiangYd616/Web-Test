@@ -19,8 +19,8 @@ import {
 } from '../types/enums';
 
 // 导入统一测试服务
-import type { UnifiedTestCallbacks, UnifiedTestConfig } from './testing/unifiedTestService';
-import { unifiedTestService } from './testing/unifiedTestService';
+import type { UnifiedTestCallbacks, UnifiedTestConfig } from './testing/testService';
+import { unifiedTestService } from './testing/testService';
 
 export interface TestInfo {
   id: string;

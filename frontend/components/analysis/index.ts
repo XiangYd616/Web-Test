@@ -6,11 +6,11 @@
  */
 
 
-export { default as ApiAnalysis } from './ApiAnalysis';
+export { default as ApiAnalysis } from './APIAnalysis';
 export { default as ContentAnalysis } from './ContentAnalysis';
 export { default as UnifiedPerformanceAnalysis } from './UnifiedPerformanceAnalysis';
 // Legacy alias for backward compatibility
 export { default as PerformanceAnalysis } from './UnifiedPerformanceAnalysis';
 export { default as SecurityAnalysis } from './SecurityAnalysis';
-export { default as SeoAnalysis } from './SeoAnalysis';
+export { default as SeoAnalysis } from './SEOAnalysis';
 

@@ -10,6 +10,7 @@ const { ErrorHandler, asyncHandler } = require('../middleware/errorHandler');
 const { loginRateLimiter } = require('../middleware/rateLimiter');
 const { securityLogger } = require('../middleware/logger');
 const oauthService = require('../src/services/OAuthService');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -30,7 +31,7 @@ router.get('/providers', (req, res) => {
       message: '获取OAuth提供商列表成功'
     });
   } catch (error) {
-    console.error('获取OAuth提供商失败:', error);
+    logger.error('获取OAuth提供商失败:', error);
     res.status(500).json({
       success: false,
       error: '获取提供商列表失败'
@@ -79,7 +80,7 @@ router.get('/:provider/authorize', loginRateLimiter, asyncHandler(async (req, re
     });
     
   } catch (error) {
-    console.error(`OAuth授权URL生成失败[${provider}]:`, error);
+    logger.error(`OAuth授权URL生成失败[${provider}]:`, error);
     res.status(400).json({
       success: false,
       error: error.message || `${provider}授权配置错误`
@@ -155,7 +156,7 @@ router.get('/:provider/callback', loginRateLimiter, asyncHandler(async (req, res
     });
     
   } catch (error) {
-    console.error(`OAuth回调处理失败[${provider}]:`, error);
+    logger.error(`OAuth回调处理失败[${provider}]:`, error);
     
     securityLogger('oauth_callback_failed', {
       provider,
@@ -188,7 +189,7 @@ router.get('/accounts', authMiddleware, asyncHandler(async (req, res) => {
     });
     
   } catch (error) {
-    console.error('获取OAuth账户失败:', error);
+    logger.error('获取OAuth账户失败:', error);
     res.status(500).json({
       success: false,
       error: '获取OAuth账户失败'
@@ -253,7 +254,7 @@ router.post('/:provider/link', authMiddleware, loginRateLimiter, asyncHandler(as
     });
     
   } catch (error) {
-    console.error(`OAuth账户关联失败[${provider}]:`, error);
+    logger.error(`OAuth账户关联失败[${provider}]:`, error);
     
     securityLogger('oauth_link_failed', {
       provider,
@@ -325,7 +326,7 @@ router.delete('/:provider/unlink', authMiddleware, asyncHandler(async (req, res)
     });
     
   } catch (error) {
-    console.error(`OAuth账户解绑失败[${provider}]:`, error);
+    logger.error(`OAuth账户解绑失败[${provider}]:`, error);
     
     securityLogger('oauth_unlink_failed', {
       provider,
@@ -378,7 +379,7 @@ router.get('/config/status', authMiddleware, asyncHandler(async (req, res) => {
     });
     
   } catch (error) {
-    console.error('获取OAuth配置状态失败:', error);
+    logger.error('获取OAuth配置状态失败:', error);
     res.status(500).json({
       success: false,
       error: '获取配置状态失败'
@@ -390,7 +391,7 @@ router.get('/config/status', authMiddleware, asyncHandler(async (req, res) => {
  * 错误处理中间件
  */
 router.use((error, req, res, next) => {
-  console.error('OAuth路由错误:', error);
+  logger.error('OAuth路由错误:', error);
   
   if (error.name === 'ValidationError') {
     return res.status(400).json({

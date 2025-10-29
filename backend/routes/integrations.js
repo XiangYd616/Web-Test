@@ -23,7 +23,7 @@ const INTEGRATION_TYPES = {
 };
 
 // 模拟数据库存储
-let integrations = [
+const integrations = [
   {
     id: '1',
     name: 'Slack通知',

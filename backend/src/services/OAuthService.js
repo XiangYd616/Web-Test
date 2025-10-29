@@ -213,7 +213,7 @@ class OAuthService {
     const response = await axios.get(config.userInfoUrl, { headers });
     const userData = response.data;
 
-    let userInfo = {
+    const userInfo = {
       providerId: userData.id?.toString() || userData.sub,
       email: userData.email,
       name: userData.name || userData.login,

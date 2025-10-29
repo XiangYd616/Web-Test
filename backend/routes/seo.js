@@ -8,6 +8,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const rateLimit = require('express-rate-limit');
 const cacheMiddleware = require('../middleware/cache.js');
+const logger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -104,7 +105,7 @@ router.post('/fetch-page',
 
       const loadTime = Date.now() - startTime;
 
-      console.log(`✅ 成功获取页面: ${cleanedUrl} (${loadTime}ms)`);
+      logger.info(`✅ 成功获取页面: ${cleanedUrl} (${loadTime}ms)`);
 
       // 返回页面数据
       res.json({
@@ -122,7 +123,7 @@ router.post('/fetch-page',
     } catch (error) {
       const loadTime = Date.now() - startTime;
 
-      console.error(`❌ 获取页面失败:`, error.message);
+      logger.error(`❌ 获取页面失败:`, error.message);
 
       // 根据错误类型返回不同的错误信息
       let errorMessage = '获取页面内容失败';
@@ -198,7 +199,7 @@ router.post('/fetch-robots',
       });
 
     } catch (error) {
-      console.log(`❌ robots.txt获取失败:`, error.message);
+      logger.error(`❌ robots.txt获取失败:`, error.message);
 
       res.json({
         success: true,
@@ -259,7 +260,7 @@ router.post('/fetch-sitemap',
       });
 
     } catch (error) {
-      console.log(`❌ sitemap获取失败:`, error.message);
+      logger.error(`❌ sitemap获取失败:`, error.message);
 
       res.json({
         success: true,
@@ -396,7 +397,7 @@ router.post('/validate-structured-data',
       });
 
     } catch (error) {
-      console.error('结构化数据验证失败:', error.message);
+      logger.error('结构化数据验证失败:', error.message);
       res.status(500).json({
         success: false,
         error: '结构化数据验证失败',
@@ -644,7 +645,7 @@ router.post('/mobile-analysis',
       });
 
     } catch (error) {
-      console.error('移动SEO分析失败:', error.message);
+      logger.error('移动SEO分析失败:', error.message);
       res.status(500).json({
         success: false,
         error: '移动SEO分析失败',
@@ -740,7 +741,7 @@ router.post('/core-web-vitals',
       });
 
     } catch (error) {
-      console.error('Core Web Vitals分析失败:', error.message);
+      logger.error('Core Web Vitals分析失败:', error.message);
       res.status(500).json({
         success: false,
         error: 'Core Web Vitals分析失败',
@@ -794,7 +795,7 @@ router.post('/analyze',
       }
       
       const cleanedUrl = cleanUrl(url);
-      console.log(`🔍 开始SEO分析: ${cleanedUrl}`);
+      logger.info(`🔍 开始SEO分析: ${cleanedUrl}`);
       
       // 获取页面内容
       const axiosInstance = createAxiosInstance();
@@ -909,7 +910,7 @@ router.post('/analyze',
         analysis.recommendations.push('为所有图片添加Alt属性');
       }
       
-      console.log(`✅ SEO分析完成: ${cleanedUrl}, 评分: ${analysis.score}`);
+      logger.info(`✅ SEO分析完成: ${cleanedUrl}, 评分: ${analysis.score}`);
       
       res.json({
         success: true,
@@ -917,7 +918,7 @@ router.post('/analyze',
       });
       
     } catch (error) {
-      console.error('SEO分析失败:', error.message);
+      logger.error('SEO分析失败:', error.message);
       res.status(500).json({
         success: false,
         error: 'SEO分析失败',

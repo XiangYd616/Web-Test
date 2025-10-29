@@ -1,0 +1,1966 @@
+﻿
+> testweb-api-server@1.0.0 test
+> jest --config jest.config.js tests/mfa.test.js
+
+[2025-10-16 15:55:42] [[33MWARN[39M] 閭欢鏈嶅姟鏈厤缃? 缂哄皯SMTP閰嶇疆鐜鍙橀噺
+  console.log
+    [INFO] 鐢ㄦ埛娴嬭瘯绠＄悊鍣ㄥ垵濮嬪寲瀹屾垚
+
+      at Object.log [as info] (services/testing/UserTestManager.js:9:32)
+
+  console.log
+    鉁?鍦扮悊浣嶇疆鏈嶅姟鍒濆鍖栧畬鎴?
+      at GeoLocationService.log [as init] (services/core/geoLocationService.js:39:15)
+
+  console.log
+    鈿狅笍  鏈缃?MAXMIND_LICENSE_KEY锛屽湴鐞嗕綅缃嚜鍔ㄦ洿鏂板凡绂佺敤
+
+      at GeoUpdateService.log [as init] (services/core/geoUpdateService.js:40:17)
+
+  console.log
+    馃И 寮€濮嬭繍琛屾祴璇?..
+
+      at Object.log (tests/setup.js:109:11)
+
+  console.warn
+    [SECURITY] user_registered: { userId: 11, username: 'mfatestuser', email: 'mfa-test@example.com' }
+
+    [0m [90m 112 |[39m   })[33m;[39m
+     [90m 113 |[39m
+    [31m[1m>[22m[39m[90m 114 |[39m   console[33m.[39mwarn([32m`[SECURITY] ${event}:`[39m[33m,[39m details)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 115 |[39m }[33m;[39m
+     [90m 116 |[39m
+     [90m 117 |[39m [90m/**[39m[0m
+
+      at warn (middleware/logger.js:114:11)
+      at securityLogger (routes/auth.js:96:5)
+
+[2025-10-16 15:55:43] [[33MWARN[39M] 閭欢鏈嶅姟涓嶅彲鐢?璺宠繃鍙戦€侀偖浠?{"to":"mfa-test@example.com","subject":"楠岃瘉鎮ㄧ殑閭 - TestWeb"}
+[2025-10-16 15:55:43] [[33MWARN[39M] 娉ㄥ唽楠岃瘉閭欢鍙戦€佸け璐ワ紝浣嗕笉褰卞搷娉ㄥ唽娴佺▼ {"email":"mfa-test@example.com"}
+  console.warn
+    [SECURITY] login_success: { userId: 11, username: 'mfatestuser', email: 'mfa-test@example.com' }
+
+    [0m [90m 112 |[39m   })[33m;[39m
+     [90m 113 |[39m
+    [31m[1m>[22m[39m[90m 114 |[39m   console[33m.[39mwarn([32m`[SECURITY] ${event}:`[39m[33m,[39m details)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 115 |[39m }[33m;[39m
+     [90m 116 |[39m
+     [90m 117 |[39m [90m/**[39m[0m
+
+      at warn (middleware/logger.js:114:11)
+      at securityLogger (routes/auth.js:292:5)
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.warn
+    [SECURITY] user_registered: {
+      userId: 12,
+      username: 'mfaloginuser',
+      email: 'mfa-login-test@example.com'
+    }
+
+    [0m [90m 112 |[39m   })[33m;[39m
+     [90m 113 |[39m
+    [31m[1m>[22m[39m[90m 114 |[39m   console[33m.[39mwarn([32m`[SECURITY] ${event}:`[39m[33m,[39m details)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 115 |[39m }[33m;[39m
+     [90m 116 |[39m
+     [90m 117 |[39m [90m/**[39m[0m
+
+      at warn (middleware/logger.js:114:11)
+      at securityLogger (routes/auth.js:96:5)
+
+[2025-10-16 15:55:44] [[33MWARN[39M] 閭欢鏈嶅姟涓嶅彲鐢?璺宠繃鍙戦€侀偖浠?{"to":"mfa-login-test@example.com","subject":"楠岃瘉鎮ㄧ殑閭 - TestWeb"}
+[2025-10-16 15:55:44] [[33MWARN[39M] 娉ㄥ唽楠岃瘉閭欢鍙戦€佸け璐ワ紝浣嗕笉褰卞搷娉ㄥ唽娴佺▼ {"email":"mfa-login-test@example.com"}
+  console.warn
+    [SECURITY] login_success: { userId: 11, username: 'mfatestuser', email: 'mfa-test@example.com' }
+
+    [0m [90m 112 |[39m   })[33m;[39m
+     [90m 113 |[39m
+    [31m[1m>[22m[39m[90m 114 |[39m   console[33m.[39mwarn([32m`[SECURITY] ${event}:`[39m[33m,[39m details)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 115 |[39m }[33m;[39m
+     [90m 116 |[39m
+     [90m 117 |[39m [90m/**[39m[0m
+
+      at warn (middleware/logger.js:114:11)
+      at securityLogger (routes/auth.js:292:5)
+
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.warn
+    [SECURITY] login_success: { userId: 11, username: 'mfatestuser', email: 'mfa-test@example.com' }
+
+    [0m [90m 112 |[39m   })[33m;[39m
+     [90m 113 |[39m
+    [31m[1m>[22m[39m[90m 114 |[39m   console[33m.[39mwarn([32m`[SECURITY] ${event}:`[39m[33m,[39m details)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 115 |[39m }[33m;[39m
+     [90m 116 |[39m
+     [90m 117 |[39m [90m/**[39m[0m
+
+      at warn (middleware/logger.js:114:11)
+      at securityLogger (routes/auth.js:292:5)
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+  console.warn
+    [SECURITY] user_registered: { userId: 13, username: 'nomfauser', email: 'nomfa@example.com' }
+
+    [0m [90m 112 |[39m   })[33m;[39m
+     [90m 113 |[39m
+    [31m[1m>[22m[39m[90m 114 |[39m   console[33m.[39mwarn([32m`[SECURITY] ${event}:`[39m[33m,[39m details)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 115 |[39m }[33m;[39m
+     [90m 116 |[39m
+     [90m 117 |[39m [90m/**[39m[0m
+
+      at warn (middleware/logger.js:114:11)
+      at securityLogger (routes/auth.js:96:5)
+
+[2025-10-16 15:55:44] [[33MWARN[39M] 閭欢鏈嶅姟涓嶅彲鐢?璺宠繃鍙戦€侀偖浠?{"to":"nomfa@example.com","subject":"楠岃瘉鎮ㄧ殑閭 - TestWeb"}
+[2025-10-16 15:55:44] [[33MWARN[39M] 娉ㄥ唽楠岃瘉閭欢鍙戦€佸け璐ワ紝浣嗕笉褰卞搷娉ㄥ唽娴佺▼ {"email":"nomfa@example.com"}
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+[2025-10-16 15:55:44] [[31MERROR[39M] MFA verify error: {"error":"瀛楁 \"settings\" 涓嶅瓨鍦?}
+Error: 
+    at Query.run (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\postgres\query.js:76:25)
+    at D:\myproject\Test-Web-backend\node_modules\sequelize\src\sequelize.js:650:28
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at PostgresQueryInterface.select (D:\myproject\Test-Web-backend\node_modules\sequelize\src\dialects\abstract\query-interface.js:1001:12)
+    at Function.findAll (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1824:21)
+    at Function.findOne (D:\myproject\Test-Web-backend\node_modules\sequelize\src\model.js:1998:12)
+    at D:\myproject\Test-Web-backend\backend\routes\mfa.js:251:20
+  console.error
+    璁よ瘉涓棿浠堕敊璇? TypeError: Cannot read properties of undefined (reading 'token')
+        at JwtService.token [as verifyAccessToken] (D:\myproject\Test-Web-backend\backend\services\core\jwtService.js:143:36)
+        at verifyAccessToken (D:\myproject\Test-Web-backend\backend\middleware\auth.js:51:32)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:149:13)
+        at Route.dispatch (D:\myproject\Test-Web-backend\node_modules\express\lib\router\route.js:119:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:284:15
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at Function.handle (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:175:3)
+        at router (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:47:12)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:201:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:168:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\logger.js:45:3)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at next (D:\myproject\Test-Web-backend\backend\middleware\responseFormatter.js:291:5)
+        at Layer.handle [as handle_request] (D:\myproject\Test-Web-backend\node_modules\express\lib\router\layer.js:95:5)
+        at trim_prefix (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:328:13)
+        at D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:286:9
+        at Function.process_params (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:346:12)
+        at next (D:\myproject\Test-Web-backend\node_modules\express\lib\router\index.js:280:10)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:807:7
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at D:\myproject\Test-Web-backend\node_modules\express-rate-limit\dist\index.cjs:691:5
+
+    [0m [90m 87 |[39m     next()[33m;[39m
+     [90m 88 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 89 |[39m     console[33m.[39merror([32m'璁よ瘉涓棿浠堕敊璇?'[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 90 |[39m
+     [90m 91 |[39m     [36mif[39m (error[33m.[39mcode [33m===[39m [33mErrorCodes[39m[33m.[39m[33mTOKEN_EXPIRED[39m) {
+     [90m 92 |[39m       [0m
+
+      at error (middleware/auth.js:89:13)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at next (../node_modules/express/lib/router/route.js:149:13)
+      at Route.dispatch (../node_modules/express/lib/router/route.js:119:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at ../node_modules/express/lib/router/index.js:284:15
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (../node_modules/express/lib/router/index.js:175:3)
+      at router (../node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:201:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:168:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/logger.js:45:3)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at next (middleware/responseFormatter.js:291:5)
+      at Layer.handle [as handle_request] (../node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (../node_modules/express/lib/router/index.js:328:13)
+      at ../node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (../node_modules/express/lib/router/index.js:346:12)
+      at next (../node_modules/express/lib/router/index.js:280:10)
+      at ../node_modules/express-rate-limit/dist/index.cjs:807:7
+      at ../node_modules/express-rate-limit/dist/index.cjs:691:5
+
+  console.log
+    
+    鉁?鎵€鏈夋祴璇曞畬鎴?
+
+      at Object.log (tests/setup.js:113:11)
+
+node.exe : FAIL tests/mfa.test.js
+所在位置 D:\node\npm.ps1:29 字符: 3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAIL tests/mfa.test.js:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  MFA Authentication Tests
+    MFA Setup Flow
+      脳 搴旇鎴愬姛鍒濆鍖朚FA璁剧疆 (24 ms)
+      脳 鍒濆鍖朚FA鏃舵彁渚涢敊璇瘑鐮佸簲璇ュけ璐?(8 ms)
+      鈭?鏈璇佺敤鎴蜂笉鑳藉垵濮嬪寲MFA (4 ms)
+      脳 搴旇鎴愬姛楠岃瘉TOTP骞跺畬鎴怣FA璁剧疆 (10 ms)
+      脳 楠岃瘉鏃犳晥鐨凾OTP鐮佸簲璇ュけ璐?(8 ms)
+    MFA Status and Management
+      脳 搴旇杩斿洖姝ｇ‘鐨凪FA鐘舵€?(8 ms)
+      脳 搴旇鎴愬姛閲嶆柊鐢熸垚澶囩敤鐮?(10 ms)
+    MFA Login Flow
+      脳 鍚敤MFA鐨勭敤鎴风櫥褰曞簲璇ヨ姹備簩娆￠獙璇?(63 ms)
+      脳 搴旇浣跨敤鏈夋晥TOTP鐮佹垚鍔熷畬鎴怣FA楠岃瘉 (184 ms)
+      脳 浣跨敤鏃犳晥TOTP鐮佸簲璇ラ獙璇佸け璐?(5 ms)
+      脳 搴旇浣跨敤澶囩敤鐮佹垚鍔熷畬鎴怣FA楠岃瘉 (1 ms)
+      脳 閲嶅浣跨敤宸茬敤鐨勫鐢ㄧ爜搴旇澶辫触 (1 ms)
+      脳 淇′换璁惧鍚庡簲璇ヨ褰曡澶囦俊鎭?(7 ms)
+    MFA Disable Flow
+      脳 搴旇鎴愬姛绂佺敤MFA (6 ms)
+      脳 绂佺敤MFA鍚庣姸鎬佸簲璇ユ纭洿鏂?(6 ms)
+      脳 绂佺敤MFA鍚庣櫥褰曚笉鍐嶉渶瑕佷簩娆￠獙璇?(66 ms)
+      脳 浣跨敤閿欒瀵嗙爜绂佺敤MFA搴旇澶辫触 (22 ms)
+    Security Tests
+      鈭?MFA瀵嗛挜搴旇姝ｇ‘鍔犲瘑瀛樺偍
+      鈭?澶囩敤鐮佸簲璇ュ搱甯屽悗瀛樺偍 (1 ms)
+      鈭?搴旇闄愬埗TOTP楠岃瘉澶辫触娆℃暟 (25 ms)
+      脳 TOTP搴旇鍦ㄦ椂闂寸獥鍙ｅ唴鏈夋晥 (4 ms)
+    Edge Cases
+      脳 涓嶅瓨鍦ㄧ殑鐢ㄦ埛涓嶈兘杩涜MFA楠岃瘉 (3 ms)
+      脳 鏈惎鐢∕FA鐨勭敤鎴蜂笉鑳借繘琛孧FA楠岃瘉 (69 ms)
+      鈭?绌虹殑TOTP鐮佸簲璇ヨ鎷掔粷 (2 ms)
+      脳 鏍煎紡閿欒鐨凾OTP鐮佸簲璇ヨ鎷掔粷 (3 ms)
+      脳 鎵€鏈夊鐢ㄧ爜鐢ㄥ畬鍚庡簲璇ユ彁绀洪噸鏂扮敓鎴?(6 ms)
+
+  鈼?MFA Authentication Tests 鈥?MFA Setup Flow 鈥?搴旇鎴愬姛鍒濆鍖朚FA璁剧疆
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 67 |[39m         })[33m;[39m
+     [90m 68 |[39m
+    [31m[1m>[22m[39m[90m 69 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                          [31m[1m^[22m[39m
+     [90m 70 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 71 |[39m       expect(res[33m.[39mbody)[33m.[39mtoHaveProperty([32m'secretKey'[39m)[33m;[39m
+     [90m 72 |[39m       expect(res[33m.[39mbody)[33m.[39mtoHaveProperty([32m'qrCodeUrl'[39m)[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:69:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Setup Flow 鈥?鍒濆鍖朚FA鏃舵彁渚涢敊璇瘑鐮佸簲璇ュけ璐?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 500
+
+    [0m [90m 88 |[39m         })[33m;[39m
+     [90m 89 |[39m
+    [31m[1m>[22m[39m[90m 90 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m401[39m)[33m;[39m
+     [90m    |[39m                          [31m[1m^[22m[39m
+     [90m 91 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 92 |[39m       expect(res[33m.[39mbody[33m.[39mmessage)[33m.[39mtoContain([32m'瀵嗙爜'[39m)[33m;[39m
+     [90m 93 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:90:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Setup Flow 鈥?搴旇鎴愬姛楠岃瘉TOTP骞跺畬鎴怣FA璁剧疆
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 115 |[39m         [33m.[39msend({ token })[33m;[39m
+     [90m 116 |[39m
+    [31m[1m>[22m[39m[90m 117 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 118 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 119 |[39m       expect(res[33m.[39mbody[33m.[39mmessage)[33m.[39mtoContain([32m'MFA璁剧疆瀹屾垚'[39m)[33m;[39m
+     [90m 120 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:117:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Setup Flow 鈥?楠岃瘉鏃犳晥鐨凾OTP鐮佸簲璇ュけ璐?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 500
+
+    [0m [90m 126 |[39m         [33m.[39msend({ token[33m:[39m [32m'000000'[39m })[33m;[39m
+     [90m 127 |[39m
+    [31m[1m>[22m[39m[90m 128 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m400[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 129 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 130 |[39m     })[33m;[39m
+     [90m 131 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:128:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Status and Management 鈥?搴旇杩斿洖姝ｇ‘鐨凪FA鐘舵€?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 137 |[39m         [33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer ${accessToken}`[39m)[33m;[39m
+     [90m 138 |[39m
+    [31m[1m>[22m[39m[90m 139 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 140 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 141 |[39m       expect(res[33m.[39mbody[33m.[39mdata[33m.[39mmfaEnabled)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 142 |[39m       expect(res[33m.[39mbody[33m.[39mdata)[33m.[39mtoHaveProperty([32m'backupCodesRemaining'[39m)[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:139:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Status and Management 鈥?搴旇鎴愬姛閲嶆柊鐢熸垚澶囩敤鐮?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 158 |[39m         })[33m;[39m
+     [90m 159 |[39m
+    [31m[1m>[22m[39m[90m 160 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 161 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 162 |[39m       expect(res[33m.[39mbody[33m.[39mbackupCodes)[33m.[39mtoBeInstanceOf([33mArray[39m)[33m;[39m
+     [90m 163 |[39m       expect(res[33m.[39mbody[33m.[39mbackupCodes[33m.[39mlength)[33m.[39mtoBeGreaterThanOrEqual([35m8[39m)[33m;[39
+m[0m
+
+      at Object.toBe (tests/mfa.test.js:160:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?鍚敤MFA鐨勭敤鎴风櫥褰曞簲璇ヨ姹備簩娆￠獙璇?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: undefined
+
+    [0m [90m 201 |[39m
+     [90m 202 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 203 |[39m       expect(res[33m.[39mbody[33m.[39mrequireMfa)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m     |[39m                                   [31m[1m^[22m[39m
+     [90m 204 |[39m       expect(res[33m.[39mbody[33m.[39mmessage)[33m.[39mtoContain([32m'MFA'[39m)[33m;[39m
+     [90m 205 |[39m     })[33m;[39m
+     [90m 206 |[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:203:35)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?搴旇浣跨敤鏈夋晥TOTP鐮佹垚鍔熷畬鎴怣FA楠岃瘉
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 220 |[39m         })[33m;[39m
+     [90m 221 |[39m
+    [31m[1m>[22m[39m[90m 222 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 223 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 224 |[39m       expect(res[33m.[39mbody)[33m.[39mtoHaveProperty([32m'accessToken'[39m)[33m;[39m
+     [90m 225 |[39m       expect(res[33m.[39mbody)[33m.[39mtoHaveProperty([32m'refreshToken'[39m)[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:222:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?浣跨敤鏃犳晥TOTP鐮佸簲璇ラ獙璇佸け璐?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 500
+
+    [0m [90m 236 |[39m         })[33m;[39m
+     [90m 237 |[39m
+    [31m[1m>[22m[39m[90m 238 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m401[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 239 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 240 |[39m     })[33m;[39m
+     [90m 241 |[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:238:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?搴旇浣跨敤澶囩敤鐮佹垚鍔熷畬鎴怣FA楠岃瘉
+
+    TypeError: Cannot read properties of undefined (reading '0')
+
+    [0m [90m 242 |[39m     test([32m'搴旇浣跨敤澶囩敤鐮佹垚鍔熷畬鎴怣FA楠岃瘉'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m 243 |[39m       [90m// 浣跨敤绗竴涓鐢ㄧ爜[39m
+    [31m[1m>[22m[39m[90m 244 |[39m       [36mconst[39m backupCode [33m=[39m backupCodes[[35m0[39m][33m;[39m
+     [90m     |[39m                                     [31m[1m^[22m[39m
+     [90m 245 |[39m
+     [90m 246 |[39m       [36mconst[39m res [33m=[39m [36mawait[39m request(app)
+     [90m 247 |[39m         [33m.[39mpost([32m'/api/auth/mfa/verify-backup'[39m)[0m
+
+      at Object.<anonymous> (tests/mfa.test.js:244:37)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?閲嶅浣跨敤宸茬敤鐨勫鐢ㄧ爜搴旇澶辫触
+
+    TypeError: Cannot read properties of undefined (reading '0')
+
+    [0m [90m 260 |[39m     test([32m'閲嶅浣跨敤宸茬敤鐨勫鐢ㄧ爜搴旇澶辫触'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m 261 |[39m       [90m// 鍐嶆浣跨敤鐩稿悓鐨勫鐢ㄧ爜[39m
+    [31m[1m>[22m[39m[90m 262 |[39m       [36mconst[39m backupCode [33m=[39m backupCodes[[35m0[39m][33m;[39m
+     [90m     |[39m                                     [31m[1m^[22m[39m
+     [90m 263 |[39m
+     [90m 264 |[39m       [36mconst[39m res [33m=[39m [36mawait[39m request(app)
+     [90m 265 |[39m         [33m.[39mpost([32m'/api/auth/mfa/verify-backup'[39m)[0m
+
+      at Object.<anonymous> (tests/mfa.test.js:262:37)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?淇′换璁惧鍚庡簲璇ヨ褰曡澶囦俊鎭?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 289 |[39m         })[33m;[39m
+     [90m 290 |[39m
+    [31m[1m>[22m[39m[90m 291 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 292 |[39m       expect(res[33m.[39mbody[33m.[39mtrustedDevice)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 293 |[39m     })[33m;[39m
+     [90m 294 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:291:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Disable Flow 鈥?搴旇鎴愬姛绂佺敤MFA
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 310 |[39m         })[33m;[39m
+     [90m 311 |[39m
+    [31m[1m>[22m[39m[90m 312 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 313 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 314 |[39m       expect(res[33m.[39mbody[33m.[39mmessage)[33m.[39mtoContain([32m'绂佺敤'[39m)[33m;[39m
+     [90m 315 |[39m     })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:312:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Disable Flow 鈥?绂佺敤MFA鍚庣姸鎬佸簲璇ユ纭洿鏂?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 320 |[39m         [33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer ${accessToken}`[39m)[33m;[39m
+     [90m 321 |[39m
+    [31m[1m>[22m[39m[90m 322 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 323 |[39m       expect(res[33m.[39mbody[33m.[39mdata[33m.[39mmfaEnabled)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 324 |[39m     })[33m;[39m
+     [90m 325 |[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:322:26)
+
+  鈼?MFA Authentication Tests 鈥?MFA Disable Flow 鈥?绂佺敤MFA鍚庣櫥褰曚笉鍐嶉渶瑕佷簩娆￠獙璇?
+    expect(received).toHaveProperty(path)
+
+    Expected path: "accessToken"
+    Received path: []
+
+    Received value: {"data": {"accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjExLCJ1c2VybmFtZSI6Im1mYXRlc3R1c2VyIiwiZW1haWwiOiJtZm
+EtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJ1c2VyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc2MDYwMTM0NCwiZXhwIjoxNzYwNjA0OTQ0LCJhdWQiOiJ0ZXN0d2ViLXVzZXJzIiwiaXNzIjo
+idGVzdHdlYi1hcHAifQ.geu2HooTLg32KQYFYR-WEFr5p7TFtD0u6su556sAFtk", "expiresIn": 3600, "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW
+QiOjExLCJ0eXBlIjoicmVmcmVzaCIsImp0aSI6IjllMTZiMzFkLWZhZWUtNDRlNy1hMDg1LWY0NDZlOTJlNDY4NiIsImlhdCI6MTc2MDYwMTM0NCwiZXhwIjoxNzYxMjA2MTQ0LCJhdWQiOiJ0ZXN
+0d2ViLXVzZXJzIiwiaXNzIjoidGVzdHdlYi1hcHAifQ.mEmesMXtngGyRtWq7YjrTQFhffM3YR60xcY4R36ZDWc", "tokenType": "Bearer", "user": {"email": "mfa-test@example.
+com", "id": 11, "isActive": true, "role": "user", "username": "mfatestuser"}}, "message": "鐧诲綍鎴愬姛", "meta": {"duration": 62, "method": "POST", "path"
+: "/api/auth/login", "requestId": "req_1760601344372_dnpioel6b", "timestamp": "2025-10-16T07:55:44.434Z", "version": "2.0.0"}, "success": true}
+
+    [0m [90m 334 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m 335 |[39m       expect(res[33m.[39mbody[33m.[39mrequireMfa)[33m.[39mtoBeUndefined()[33m;[39m
+    [31m[1m>[22m[39m[90m 336 |[39m       expect(res[33m.[39mbody)[33m.[39mtoHaveProperty([32m'accessToken'[39m)[33m;[39m
+     [90m     |[39m                        [31m[1m^[22m[39m
+     [90m 337 |[39m     })[33m;[39m
+     [90m 338 |[39m
+     [90m 339 |[39m     test([32m'浣跨敤閿欒瀵嗙爜绂佺敤MFA搴旇澶辫触'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.toHaveProperty (tests/mfa.test.js:336:24)
+
+  鈼?MFA Authentication Tests 鈥?MFA Disable Flow 鈥?浣跨敤閿欒瀵嗙爜绂佺敤MFA搴旇澶辫触
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 401
+    Received: 500
+
+    [0m [90m 363 |[39m         })[33m;[39m
+     [90m 364 |[39m
+    [31m[1m>[22m[39m[90m 365 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m401[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 366 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 367 |[39m     })[33m;[39m
+     [90m 368 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:365:26)
+
+  鈼?MFA Authentication Tests 鈥?Security Tests 鈥?TOTP搴旇鍦ㄦ椂闂寸獥鍙ｅ唴鏈夋晥
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 441 |[39m         })[33m;[39m
+     [90m 442 |[39m
+    [31m[1m>[22m[39m[90m 443 |[39m       expect(res1[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                           [31m[1m^[22m[39m
+     [90m 444 |[39m
+     [90m 445 |[39m       [90m// 娴嬭瘯鍓嶄竴涓椂闂寸獥鍙ｇ殑token (搴旇涔熻兘閫氳繃)[39m
+     [90m 446 |[39m       [36mconst[39m previousToken [33m=[39m speakeasy[33m.[39mtotp({[0m
+
+      at Object.toBe (tests/mfa.test.js:443:27)
+
+  鈼?MFA Authentication Tests 鈥?Edge Cases 鈥?涓嶅瓨鍦ㄧ殑鐢ㄦ埛涓嶈兘杩涜MFA楠岃瘉
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 404
+    Received: 500
+
+    [0m [90m 481 |[39m         })[33m;[39m
+     [90m 482 |[39m
+    [31m[1m>[22m[39m[90m 483 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m404[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 484 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 485 |[39m     })[33m;[39m
+     [90m 486 |[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:483:26)
+
+  鈼?MFA Authentication Tests 鈥?Edge Cases 鈥?鏈惎鐢∕FA鐨勭敤鎴蜂笉鑳借繘琛孧FA楠岃瘉
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 500
+
+    [0m [90m 506 |[39m         })[33m;[39m
+     [90m 507 |[39m
+    [31m[1m>[22m[39m[90m 508 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m400[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 509 |[39m       expect(res[33m.[39mbody[33m.[39mmessage)[33m.[39mtoContain([32m'鏈惎鐢?[39m)[33m;[39m
+     [90m 510 |[39m     })[33m;[39m
+     [90m 511 |[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:508:26)
+
+  鈼?MFA Authentication Tests 鈥?Edge Cases 鈥?鏍煎紡閿欒鐨凾OTP鐮佸簲璇ヨ鎷掔粷
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 500
+
+    [0m [90m 532 |[39m         })[33m;[39m
+     [90m 533 |[39m
+    [31m[1m>[22m[39m[90m 534 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m400[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m 535 |[39m       expect(res[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 536 |[39m     })[33m;[39m
+     [90m 537 |[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:534:26)
+
+  鈼?MFA Authentication Tests 鈥?Edge Cases 鈥?鎵€鏈夊鐢ㄧ爜鐢ㄥ畬鍚庡簲璇ユ彁绀洪噸鏂扮敓鎴?
+    TypeError: Cannot read properties of undefined (reading 'backupCodesRemaining')
+
+    [0m [90m 545 |[39m         [33m.[39m[36mset[39m([32m'Authorization'[39m[33m,[39m [32m`Bearer ${accessToken}`[39m)[33m;[39m
+     [90m 546 |[39m
+    [31m[1m>[22m[39m[90m 547 |[39m       [36mconst[39m remaining [33m=[39m statusRes[33m.[39mbody[33m.[39mdata[33m.[39mbackupCodesRem
+aining[33m;[39m
+     [90m     |[39m                                             [31m[1m^[22m[39m
+     [90m 548 |[39m       
+     [90m 549 |[39m       [36mif[39m (remaining [33m===[39m [35m0[39m) {
+     [90m 550 |[39m         [90m// 灏濊瘯浣跨敤澶囩敤鐮佸簲璇ユ彁绀洪噸鏂扮敓鎴?[39m[0m
+
+      at Object.backupCodesRemaining (tests/mfa.test.js:547:45)
+
+Test Suites: 1 failed, 1 total
+Tests:       21 failed, 5 passed, 26 total
+Snapshots:   0 total
+Time:        3.449 s, estimated 4 s
+Ran all test suites matching /tests\\mfa.test.js/i.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to tr
+oubleshoot this issue.
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path D:\myproject\Test-Web-backend\backend
+npm error workspace testweb-api-server@1.0.0
+npm error location D:\myproject\Test-Web-backend\backend
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c jest --config jest.config.js tests/mfa.test.js

@@ -338,7 +338,7 @@ app.get('/health', async (req, res) => {
     await testConnection();
 
     // 检查测试引擎状态
-    let engineHealth = { status: 'not_initialized' };
+    const engineHealth = { status: 'not_initialized' };
     // testEngineManager 已禁用，直接返回默认状态
 
     res.json({

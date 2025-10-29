@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const logger = require('../utils/logger');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { authMiddleware } = require('../middleware/auth');
 const { dataManagementService } = require('../services/data/DataManagementService');
@@ -71,7 +72,7 @@ router.post('/:type', asyncHandler(async (req, res) => {
       message: '数据创建成功'
     });
   } catch (error) {
-    console.error('创建数据失败:', error);
+    logger.error('创建数据失败:', error);
     res.serverError('创建数据失败');
   }
 }));
@@ -108,7 +109,7 @@ router.get('/:type/:id', asyncHandler(async (req, res) => {
 
     res.success(record);
   } catch (error) {
-    console.error('读取数据失败:', error);
+    logger.error('读取数据失败:', error);
     const statusCode = error.message.includes('不存在') ? 404 : 500;
     res.status(statusCode).json({
       success: false,
@@ -138,7 +139,7 @@ router.put('/:type/:id', asyncHandler(async (req, res) => {
 
     res.success(record);
   } catch (error) {
-    console.error('更新数据失败:', error);
+    logger.error('更新数据失败:', error);
     const statusCode = error.message.includes('不存在') ? 404 : 500;
     res.status(statusCode).json({
       success: false,
@@ -163,7 +164,7 @@ router.delete('/:type/:id', asyncHandler(async (req, res) => {
 
     res.success(result);
   } catch (error) {
-    console.error('删除数据失败:', error);
+    logger.error('删除数据失败:', error);
     const statusCode = error.message.includes('不存在') ? 404 : 500;
     res.status(statusCode).json({
       success: false,
@@ -203,7 +204,7 @@ router.get('/:type', asyncHandler(async (req, res) => {
 
     res.success(result);
   } catch (error) {
-    console.error('查询数据失败:', error);
+    logger.error('查询数据失败:', error);
     res.serverError('查询数据失败');
   }
 }));
@@ -233,7 +234,7 @@ router.post('/batch', asyncHandler(async (req, res) => {
       message: `批量操作完成: ${result.summary.successful} 成功, ${result.summary.failed} 失败`
     });
   } catch (error) {
-    console.error('批量操作失败:', error);
+    logger.error('批量操作失败:', error);
     res.serverError('批量操作失败');
   }
 }));
@@ -253,7 +254,7 @@ router.post('/:type/export', asyncHandler(async (req, res) => {
 
     res.success(result);
   } catch (error) {
-    console.error('数据导出失败:', error);
+    logger.error('数据导出失败:', error);
     res.serverError('数据导出失败');
   }
 }));
@@ -281,7 +282,7 @@ router.post('/:type/import', upload.single('file'), asyncHandler(async (req, res
       message: `数据导入完成: ${result.imported} 成功, ${result.failed} 失败`
     });
   } catch (error) {
-    console.error('数据导入失败:', error);
+    logger.error('数据导入失败:', error);
     res.serverError('数据导入失败');
   }
 }));
@@ -307,7 +308,7 @@ router.get('/:type/statistics', asyncHandler(async (req, res) => {
 
     res.success(statistics);
   } catch (error) {
-    console.error('获取统计信息失败:', error);
+    logger.error('获取统计信息失败:', error);
     res.serverError('获取统计信息失败');
   }
 }));
@@ -326,7 +327,7 @@ router.post('/backup', asyncHandler(async (req, res) => {
 
     res.success(backupInfo);
   } catch (error) {
-    console.error('创建备份失败:', error);
+    logger.error('创建备份失败:', error);
     res.serverError('创建备份失败');
   }
 }));
@@ -345,7 +346,7 @@ router.get('/types', asyncHandler(async (req, res) => {
 
     res.success(typeInfo);
   } catch (error) {
-    console.error('获取数据类型失败:', error);
+    logger.error('获取数据类型失败:', error);
     res.serverError('获取数据类型失败');
   }
 }));
@@ -363,7 +364,7 @@ router.get('/export-formats', asyncHandler(async (req, res) => {
 
     res.success(formats);
   } catch (error) {
-    console.error('获取导出格式失败:', error);
+    logger.error('获取导出格式失败:', error);
     res.serverError('获取导出格式失败');
   }
 }));
@@ -432,7 +433,7 @@ function getFormatMimeType(format) {
  */
 router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
   try {
-    console.log('📊 数据查询请求:', JSON.stringify(req.body, null, 2));
+    logger.info('📊 数据查询请求:', JSON.stringify(req.body, null, 2));
     const { table, type, filters, limit = 100, offset = 0, sortBy = 'created_at', sortOrder = 'desc' } = req.body;
 
     // 确定要查询的表，优先使用table，然后是type
@@ -535,7 +536,7 @@ router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('数据查询失败:', error);
+    logger.error('数据查询失败:', error);
     res.status(500).json({
       success: false,
       message: '数据查询失败',
@@ -597,7 +598,7 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取分析数据失败:', error);
+    logger.error('获取分析数据失败:', error);
     res.status(500).json({
       success: false,
       message: '获取分析数据失败'
@@ -624,7 +625,7 @@ router.get('/test-history', authMiddleware, asyncHandler(async (req, res) => {
     const offset = (page - 1) * limit;
 
     let whereClause = 'WHERE user_id = $1 AND deleted_at IS NULL';
-    let params = [req.user.id];
+    const params = [req.user.id];
     let paramIndex = 2;
 
     if (testType) {
@@ -678,7 +679,7 @@ router.get('/test-history', authMiddleware, asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取测试历史失败:', error);
+    logger.error('获取测试历史失败:', error);
     res.status(500).json({
       success: false,
       message: '获取测试历史失败'
@@ -720,7 +721,7 @@ router.delete('/test-history/batch', authMiddleware, asyncHandler(async (req, re
       message: `已成功删除 ${result.rowCount} 条测试记录`
     });
   } catch (error) {
-    console.error('批量删除测试记录失败:', error);
+    logger.error('批量删除测试记录失败:', error);
     res.status(500).json({
       success: false,
       message: '批量删除测试记录失败'

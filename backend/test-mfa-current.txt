@@ -1,0 +1,603 @@
+﻿
+> testweb-api-server@1.0.0 test
+> jest --config jest.config.js tests/mfa.test.js
+
+[2025-10-16 14:36:39] [[33MWARN[39M] 閭欢鏈嶅姟鏈厤缃? 缂哄皯SMTP閰嶇疆鐜鍙橀噺
+  console.log
+    [INFO] 鐢ㄦ埛娴嬭瘯绠＄悊鍣ㄥ垵濮嬪寲瀹屾垚
+
+      at Object.log [as info] (services/testing/UserTestManager.js:9:32)
+
+  console.log
+    鉁?鍦扮悊浣嶇疆鏈嶅姟鍒濆鍖栧畬鎴?
+      at GeoLocationService.log [as init] (services/core/geoLocationService.js:39:15)
+
+  console.log
+    鈿狅笍  鏈缃?MAXMIND_LICENSE_KEY锛屽湴鐞嗕綅缃嚜鍔ㄦ洿鏂板凡绂佺敤
+
+      at GeoUpdateService.log [as init] (services/core/geoUpdateService.js:40:17)
+
+  console.log
+    馃И 寮€濮嬭繍琛屾祴璇?..
+
+      at Object.log (tests/setup.js:109:11)
+
+  console.warn
+    [SECURITY] user_registered: { userId: 4, username: 'mfatestuser', email: 'mfa-test@example.com' }
+
+    [0m [90m 112 |[39m   })[33m;[39m
+     [90m 113 |[39m
+    [31m[1m>[22m[39m[90m 114 |[39m   console[33m.[39mwarn([32m`[SECURITY] ${event}:`[39m[33m,[39m details)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 115 |[39m }[33m;[39m
+     [90m 116 |[39m
+     [90m 117 |[39m [90m/**[39m[0m
+
+      at warn (middleware/logger.js:114:11)
+      at securityLogger (routes/auth.js:96:5)
+
+  console.error
+    鉂?SQL鏌ヨ閿欒: {
+      text: 'UPDATE users SET verification_token = $1, verification_expires = $2 WHERE id = $3',
+      error: '鍏崇郴 "users" 鐨?"verification_token" 瀛楁涓嶅瓨鍦?
+    }
+
+    [0m [90m 182 |[39m     [36mreturn[39m result[33m;[39m
+     [90m 183 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 184 |[39m     console[33m.[39merror([32m'鉂?SQL鏌ヨ閿欒:'[39m[33m,[39m { text[33m,[39m error[33m:[39m error[33m.[39mmessage })[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 185 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 186 |[39m   }
+     [90m 187 |[39m }[33m;[39m[0m
+
+      at error (config/database.js:184:13)
+      at routes/auth.js:116:7
+
+[2025-10-16 14:36:41] [[31MERROR[39M] 鍙戦€侀獙璇侀偖浠跺け璐? {"error":"鍏崇郴 \"users\" 鐨?\"verification_token\" 瀛楁涓嶅瓨鍦?}
+error: 鍏崇郴 "users" 鐨?"verification_token" 瀛楁涓嶅瓨鍦?    at D:\myproject\Test-Web-backend\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at query (D:\myproject\Test-Web-backend\backend\config\database.js:175:20)
+    at D:\myproject\Test-Web-backend\backend\routes\auth.js:116:7
+  console.error
+    鉂?SQL鏌ヨ閿欒: {
+      text: 'SELECT id, username, email, password_hash, role, is_active, last_login, failed_login_attempts, locked_until FROM users WHERE email = $1',
+      error: '瀛楁 "locked_until" 涓嶅瓨鍦?
+    }
+
+    [0m [90m 182 |[39m     [36mreturn[39m result[33m;[39m
+     [90m 183 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 184 |[39m     console[33m.[39merror([32m'鉂?SQL鏌ヨ閿欒:'[39m[33m,[39m { text[33m,[39m error[33m:[39m error[33m.[39mmessage })[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 185 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 186 |[39m   }
+     [90m 187 |[39m }[33m;[39m[0m
+
+      at error (config/database.js:184:13)
+      at routes/auth.js:171:20
+
+[2025-10-16 14:36:41] [[31MERROR[39M] 鐧诲綍閿欒: {"error":"瀛楁 \"locked_until\" 涓嶅瓨鍦?}
+error: 瀛楁 "locked_until" 涓嶅瓨鍦?    at D:\myproject\Test-Web-backend\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at query (D:\myproject\Test-Web-backend\backend\config\database.js:175:20)
+    at D:\myproject\Test-Web-backend\backend\routes\auth.js:171:20
+  console.warn
+    [SECURITY] user_registered: {
+      userId: 5,
+      username: 'mfaloginuser',
+      email: 'mfa-login-test@example.com'
+    }
+
+    [0m [90m 112 |[39m   })[33m;[39m
+     [90m 113 |[39m
+    [31m[1m>[22m[39m[90m 114 |[39m   console[33m.[39mwarn([32m`[SECURITY] ${event}:`[39m[33m,[39m details)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m 115 |[39m }[33m;[39m
+     [90m 116 |[39m
+     [90m 117 |[39m [90m/**[39m[0m
+
+      at warn (middleware/logger.js:114:11)
+      at securityLogger (routes/auth.js:96:5)
+
+  console.error
+    鉂?SQL鏌ヨ閿欒: {
+      text: 'UPDATE users SET verification_token = $1, verification_expires = $2 WHERE id = $3',
+      error: '鍏崇郴 "users" 鐨?"verification_token" 瀛楁涓嶅瓨鍦?
+    }
+
+    [0m [90m 182 |[39m     [36mreturn[39m result[33m;[39m
+     [90m 183 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 184 |[39m     console[33m.[39merror([32m'鉂?SQL鏌ヨ閿欒:'[39m[33m,[39m { text[33m,[39m error[33m:[39m error[33m.[39mmessage })[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 185 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 186 |[39m   }
+     [90m 187 |[39m }[33m;[39m[0m
+
+      at error (config/database.js:184:13)
+      at routes/auth.js:116:7
+
+[2025-10-16 14:36:41] [[31MERROR[39M] 鍙戦€侀獙璇侀偖浠跺け璐? {"error":"鍏崇郴 \"users\" 鐨?\"verification_token\" 瀛楁涓嶅瓨鍦?}
+error: 鍏崇郴 "users" 鐨?"verification_token" 瀛楁涓嶅瓨鍦?    at D:\myproject\Test-Web-backend\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at query (D:\myproject\Test-Web-backend\backend\config\database.js:175:20)
+    at D:\myproject\Test-Web-backend\backend\routes\auth.js:116:7
+  console.log
+    
+    鉁?鎵€鏈夋祴璇曞畬鎴?
+
+      at Object.log (tests/setup.js:113:11)
+
+node.exe : FAIL tests/mfa.test.js
+所在位置 D:\node\npm.ps1:29 字符: 3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAIL tests/mfa.test.js:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  MFA Authentication Tests
+    MFA Setup Flow
+      脳 搴旇鎴愬姛鍒濆鍖朚FA璁剧疆 (1 ms)
+      脳 鍒濆鍖朚FA鏃舵彁渚涢敊璇瘑鐮佸簲璇ュけ璐?      脳 鏈璇佺敤鎴蜂笉鑳藉垵濮嬪寲MFA
+      脳 搴旇鎴愬姛楠岃瘉TOTP骞跺畬鎴怣FA璁剧疆
+      脳 楠岃瘉鏃犳晥鐨凾OTP鐮佸簲璇ュけ璐?    MFA Status and Management
+      脳 搴旇杩斿洖姝ｇ‘鐨凪FA鐘舵€?      脳 搴旇鎴愬姛閲嶆柊鐢熸垚澶囩敤鐮?    MFA Login Flow
+      脳 鍚敤MFA鐨勭敤鎴风櫥褰曞簲璇ヨ姹備簩娆￠獙璇?      脳 搴旇浣跨敤鏈夋晥TOTP鐮佹垚鍔熷畬鎴怣FA楠岃瘉
+      脳 浣跨敤鏃犳晥TOTP鐮佸簲璇ラ獙璇佸け璐?      脳 搴旇浣跨敤澶囩敤鐮佹垚鍔熷畬鎴怣FA楠岃瘉
+      脳 閲嶅浣跨敤宸茬敤鐨勫鐢ㄧ爜搴旇澶辫触
+      脳 淇′换璁惧鍚庡簲璇ヨ褰曡澶囦俊鎭?    MFA Disable Flow
+      脳 搴旇鎴愬姛绂佺敤MFA
+      脳 绂佺敤MFA鍚庣姸鎬佸簲璇ユ纭洿鏂?      脳 绂佺敤MFA鍚庣櫥褰曚笉鍐嶉渶瑕佷簩娆￠獙璇?      脳 浣跨敤閿欒瀵嗙爜绂佺敤MFA搴旇澶辫触
+    Security Tests
+      脳 MFA瀵嗛挜搴旇姝ｇ‘鍔犲瘑瀛樺偍
+      脳 澶囩敤鐮佸簲璇ュ搱甯屽悗瀛樺偍
+      脳 搴旇闄愬埗TOTP楠岃瘉澶辫触娆℃暟
+      脳 TOTP搴旇鍦ㄦ椂闂寸獥鍙ｅ唴鏈夋晥
+    Edge Cases
+      脳 涓嶅瓨鍦ㄧ殑鐢ㄦ埛涓嶈兘杩涜MFA楠岃瘉
+      脳 鏈惎鐢∕FA鐨勭敤鎴蜂笉鑳借繘琛孧FA楠岃瘉
+      脳 绌虹殑TOTP鐮佸簲璇ヨ鎷掔粷
+      脳 鏍煎紡閿欒鐨凾OTP鐮佸簲璇ヨ鎷掔粷
+      脳 鎵€鏈夊鐢ㄧ爜鐢ㄥ畬鍚庡簲璇ユ彁绀洪噸鏂扮敓鎴?
+  鈼?MFA Authentication Tests 鈥?MFA Setup Flow 鈥?搴旇鎴愬姛鍒濆鍖朚FA璁剧疆
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Setup Flow 鈥?鍒濆鍖朚FA鏃舵彁渚涢敊璇瘑鐮佸簲璇ュけ璐?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Setup Flow 鈥?鏈璇佺敤鎴蜂笉鑳藉垵濮嬪寲MFA
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Setup Flow 鈥?搴旇鎴愬姛楠岃瘉TOTP骞跺畬鎴怣FA璁剧疆
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Setup Flow 鈥?楠岃瘉鏃犳晥鐨凾OTP鐮佸簲璇ュけ璐?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Status and Management 鈥?搴旇杩斿洖姝ｇ‘鐨凪FA鐘舵€?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Status and Management 鈥?搴旇鎴愬姛閲嶆柊鐢熸垚澶囩敤鐮?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?鍚敤MFA鐨勭敤鎴风櫥褰曞簲璇ヨ姹備簩娆￠獙璇?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?搴旇浣跨敤鏈夋晥TOTP鐮佹垚鍔熷畬鎴怣FA楠岃瘉
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?浣跨敤鏃犳晥TOTP鐮佸簲璇ラ獙璇佸け璐?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?搴旇浣跨敤澶囩敤鐮佹垚鍔熷畬鎴怣FA楠岃瘉
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?閲嶅浣跨敤宸茬敤鐨勫鐢ㄧ爜搴旇澶辫触
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Login Flow 鈥?淇′换璁惧鍚庡簲璇ヨ褰曡澶囦俊鎭?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Disable Flow 鈥?搴旇鎴愬姛绂佺敤MFA
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Disable Flow 鈥?绂佺敤MFA鍚庣姸鎬佸簲璇ユ纭洿鏂?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Disable Flow 鈥?绂佺敤MFA鍚庣櫥褰曚笉鍐嶉渶瑕佷簩娆￠獙璇?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?MFA Disable Flow 鈥?浣跨敤閿欒瀵嗙爜绂佺敤MFA搴旇澶辫触
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?Security Tests 鈥?MFA瀵嗛挜搴旇姝ｇ‘鍔犲瘑瀛樺偍
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?Security Tests 鈥?澶囩敤鐮佸簲璇ュ搱甯屽悗瀛樺偍
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?Security Tests 鈥?搴旇闄愬埗TOTP楠岃瘉澶辫触娆℃暟
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?Security Tests 鈥?TOTP搴旇鍦ㄦ椂闂寸獥鍙ｅ唴鏈夋晥
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?Edge Cases 鈥?涓嶅瓨鍦ㄧ殑鐢ㄦ埛涓嶈兘杩涜MFA楠岃瘉
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?Edge Cases 鈥?鏈惎鐢∕FA鐨勭敤鎴蜂笉鑳借繘琛孧FA楠岃瘉
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?Edge Cases 鈥?绌虹殑TOTP鐮佸簲璇ヨ鎷掔粷
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?Edge Cases 鈥?鏍煎紡閿欒鐨凾OTP鐮佸簲璇ヨ鎷掔粷
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+  鈼?MFA Authentication Tests 鈥?Edge Cases 鈥?鎵€鏈夊鐢ㄧ爜鐢ㄥ畬鍚庡簲璇ユ彁绀洪噸鏂扮敓鎴?
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+    [0m [90m 47 |[39m       })[33m;[39m
+     [90m 48 |[39m
+    [31m[1m>[22m[39m[90m 49 |[39m     expect(loginRes[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m    |[39m                             [31m[1m^[22m[39m
+     [90m 50 |[39m     testUser [33m=[39m loginRes[33m.[39mbody[33m.[39muser[33m;[39m
+     [90m 51 |[39m     accessToken [33m=[39m loginRes[33m.[39mbody[33m.[39maccessToken[33m;[39m
+     [90m 52 |[39m   })[33m;[39m[0m
+
+      at Object.toBe (tests/mfa.test.js:49:29)
+
+Test Suites: 1 failed, 1 total
+Tests:       26 failed, 26 total
+Snapshots:   0 total
+Time:        3.429 s, estimated 4 s
+Ran all test suites matching /tests\\mfa.test.js/i.
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path D:\myproject\Test-Web-backend\backend
+npm error workspace testweb-api-server@1.0.0
+npm error location D:\myproject\Test-Web-backend\backend
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c jest --config jest.config.js tests/mfa.test.js

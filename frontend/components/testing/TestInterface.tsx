@@ -1,6 +1,6 @@
 ﻿import { Clock, Play, Square, Target } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { TestResult } from '../../services/testing/unifiedTestEngine';
+import { TestResult } from '../../services/testing/testEngine';
 // import { TestType } from '@shared/types'; // 暂时禁用
 type TestType = 'website' | 'security' | 'performance' | 'seo' | 'api' | 'network' | 'database' | 'compatibility' | 'accessibility' | 'ux';
 import { ButtonFeedback } from '../integration/InteractiveFeedback';

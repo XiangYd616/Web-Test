@@ -5,10 +5,8 @@
  */
 
 const crypto = require('crypto');
-// const speakeasy = require('speakeasy');
-// const QRCode = require('qrcode');
-// 注意：需要安装这些依赖包
-// npm install speakeasy qrcode
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const { getPool } = require('../../config/database.js');
 const Logger = require('../../utils/logger.js');
 const emailService = require('../email/emailService');

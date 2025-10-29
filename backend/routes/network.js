@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const NetworkTestEngine = require('../engines/network/NetworkTestEngine');
+const logger = require('../utils/logger');
 // const { validateTestRequest } = require('../middleware/validation'); // 移除不存在的中间件
 
 // 创建测试引擎实例
@@ -37,7 +38,7 @@ router.post('/test', authenticateToken, async (req, res) => {
       message: '网络测试完成'
     });
   } catch (error) {
-    console.error('[Network Test Error]:', error);
+    logger.error('[Network Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -75,7 +76,7 @@ router.post('/ping', authenticateToken, async (req, res) => {
       data: pingResult
     });
   } catch (error) {
-    console.error('[Ping Test Error]:', error);
+    logger.error('[Ping Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -114,7 +115,7 @@ router.post('/traceroute', authenticateToken, async (req, res) => {
       message: '路由跟踪完成'
     });
   } catch (error) {
-    console.error('[Traceroute Test Error]:', error);
+    logger.error('[Traceroute Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -146,7 +147,7 @@ router.post('/bandwidth', authenticateToken, async (req, res) => {
       message: '带宽测试完成'
     });
   } catch (error) {
-    console.error('[Bandwidth Test Error]:', error);
+    logger.error('[Bandwidth Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -184,7 +185,7 @@ router.post('/dns', authenticateToken, async (req, res) => {
       data: dnsResult
     });
   } catch (error) {
-    console.error('[DNS Test Error]:', error);
+    logger.error('[DNS Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -224,7 +225,7 @@ router.post('/port-scan', authenticateToken, async (req, res) => {
       message: '端口扫描完成'
     });
   } catch (error) {
-    console.error('[Port Scan Error]:', error);
+    logger.error('[Port Scan Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -263,7 +264,7 @@ router.post('/latency', authenticateToken, async (req, res) => {
       message: '延迟测试完成'
     });
   } catch (error) {
-    console.error('[Latency Test Error]:', error);
+    logger.error('[Latency Test Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -297,7 +298,7 @@ router.get('/test-history', authenticateToken, async (req, res) => {
       data: history
     });
   } catch (error) {
-    console.error('[Get Test History Error]:', error);
+    logger.error('[Get Test History Error]:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -336,7 +337,7 @@ router.post('/diagnose', authenticateToken, async (req, res) => {
       message: '网络诊断完成'
     });
   } catch (error) {
-    console.error('[Network Diagnosis Error]:', error);
+    logger.error('[Network Diagnosis Error]:', error);
     res.status(500).json({
       success: false,
       error: {

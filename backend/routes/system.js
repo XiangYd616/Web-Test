@@ -112,8 +112,8 @@ router.get('/config', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) =>
   const { category, includePrivate = false } = req.query;
   const pool = getPool();
 
-  let whereConditions = [];
-  let queryParams = [];
+  const whereConditions = [];
+  const queryParams = [];
   let paramIndex = 1;
 
   if (category) {

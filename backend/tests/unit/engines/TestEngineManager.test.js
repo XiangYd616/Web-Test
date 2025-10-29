@@ -136,10 +136,16 @@ describe('测试引擎管理器', () => {
 
       async stop() {
         for (const [name, engine] of this.engines) {
-          if (typeof engine.stop === 'function') {
-            await engine.stop();
+          try {
+            if (typeof engine.stop === 'function') {
+              await engine.stop();
+            }
+            engine.status = 'stopped';
+          } catch (error) {
+            // 优雅地处理引擎停止失败，但继续停止其他引擎
+            engine.status = 'error';
+            console.warn(`Engine ${name} stop failed:`, error.message);
           }
-          engine.status = 'stopped';
         }
         this.status = 'stopped';
         this.initialized = false;
@@ -387,15 +393,20 @@ describe('测试引擎管理器', () => {
       const faultyEngine = {
         name: 'faulty',
         status: 'ready',
-        stop: jest.fn().mockRejectedValue(new Error('停止失败'))
+        stop: jest.fn().mockImplementation(async () => {
+          throw new Error('Stop failed');
+        })
       };
       
       manager.registerEngine('faulty', faultyEngine);
       await manager.initialize();
       
-      // 不应该抛出错误，应该优雅处理
-      await expect(manager.stop()).resolves.not.toThrow();
+      // 应该优雅处理引擎停止错误，并仍然完成管理器停止
+      await manager.stop();
+      
       expect(manager.status).toBe('stopped');
+      // faultyEngine 应该处于 error 状态
+      expect(faultyEngine.status).toBe('error');
     });
   });
 

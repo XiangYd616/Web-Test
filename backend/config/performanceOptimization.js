@@ -453,7 +453,7 @@ class EnhancedCacheService {
    */
   async serialize(data, compress = false) {
     try {
-      let serialized = JSON.stringify(data);
+      const serialized = JSON.stringify(data);
       
       if (compress && serialized.length > 1024) {
         const zlib = require('zlib');

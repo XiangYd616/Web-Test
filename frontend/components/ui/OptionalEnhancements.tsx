@@ -5,7 +5,7 @@
 
 import { Check, ChevronDown, ChevronUp, Copy, ExternalLink, Maximize2, Minimize2 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActionIcon, UnifiedIcon } from './UnifiedIcons';
+import { ActionIcon, UnifiedIcon } from './Icons';
 
 // 可折叠面板属性
 export interface CollapsiblePanelProps {

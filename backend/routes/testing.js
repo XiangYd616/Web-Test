@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 
 let testManagementService = null;
@@ -14,7 +15,7 @@ let testManagementService = null;
  */
 const setTestManagementService = (service) => {
   testManagementService = service;
-  console.log('✅ 测试管理服务已设置到路由');
+  logger.info('✅ 测试管理服务已设置到路由');
 };
 
 /**
@@ -48,7 +49,7 @@ router.get('/', checkServiceInitialized, async (req, res) => {
       data: tests
     });
   } catch (error) {
-    console.error('获取测试列表失败:', error);
+    logger.error('获取测试列表失败:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -79,7 +80,7 @@ router.post('/', checkServiceInitialized, async (req, res) => {
       message: '测试创建成功'
     });
   } catch (error) {
-    console.error('创建测试失败:', error);
+    logger.error('创建测试失败:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -107,7 +108,7 @@ router.get('/:id', checkServiceInitialized, async (req, res) => {
       data: test
     });
   } catch (error) {
-    console.error('获取测试详情失败:', error);
+    logger.error('获取测试详情失败:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -138,7 +139,7 @@ router.put('/:id', checkServiceInitialized, async (req, res) => {
       message: '测试更新成功'
     });
   } catch (error) {
-    console.error('更新测试失败:', error);
+    logger.error('更新测试失败:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -166,7 +167,7 @@ router.delete('/:id', checkServiceInitialized, async (req, res) => {
       message: '测试删除成功'
     });
   } catch (error) {
-    console.error('删除测试失败:', error);
+    logger.error('删除测试失败:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -187,7 +188,7 @@ router.post('/:id/start', checkServiceInitialized, async (req, res) => {
       message: '测试启动成功'
     });
   } catch (error) {
-    console.error('启动测试失败:', error);
+    logger.error('启动测试失败:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -208,7 +209,7 @@ router.post('/:id/stop', checkServiceInitialized, async (req, res) => {
       message: '测试停止成功'
     });
   } catch (error) {
-    console.error('停止测试失败:', error);
+    logger.error('停止测试失败:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -236,7 +237,7 @@ router.get('/:id/results', checkServiceInitialized, async (req, res) => {
       data: results
     });
   } catch (error) {
-    console.error('获取测试结果失败:', error);
+    logger.error('获取测试结果失败:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -255,7 +256,7 @@ router.get('/stats/overview', checkServiceInitialized, async (req, res) => {
       data: stats
     });
   } catch (error) {
-    console.error('获取测试统计失败:', error);
+    logger.error('获取测试统计失败:', error);
     res.status(500).json({
       success: false,
       error: error.message,

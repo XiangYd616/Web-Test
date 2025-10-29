@@ -14,9 +14,10 @@ const { query, validationResult } = require('express-validator');
 let testHistoryService;
 try {
   const dbModule = require('../config/database.js');
+const logger = require('../utils/logger');
   testHistoryService = new TestHistoryService(dbModule);
 } catch (error) {
-  console.error('初始化TestHistoryService失败:', error);
+  logger.error('初始化TestHistoryService失败:', error);
 }
 
 /**
@@ -107,7 +108,7 @@ router.get('/',
       res.json(result);
 
     } catch (error) {
-      console.error('获取测试历史失败:', error);
+      logger.error('获取测试历史失败:', error);
       res.status(500).json({
         success: false,
         error: '获取测试历史失败',
@@ -155,7 +156,7 @@ router.get('/:testId',
       res.json(result);
 
     } catch (error) {
-      console.error('获取测试详情失败:', error);
+      logger.error('获取测试详情失败:', error);
       res.status(500).json({
         success: false,
         error: '获取测试详情失败',
@@ -198,7 +199,7 @@ router.delete('/:testId',
       res.json(result);
 
     } catch (error) {
-      console.error('删除测试记录失败:', error);
+      logger.error('删除测试记录失败:', error);
       res.status(500).json({
         success: false,
         error: '删除测试记录失败',
@@ -251,7 +252,7 @@ router.post('/batch-delete',
       res.json(result);
 
     } catch (error) {
-      console.error('批量删除测试记录失败:', error);
+      logger.error('批量删除测试记录失败:', error);
       res.status(500).json({
         success: false,
         error: '批量删除测试记录失败',
@@ -353,7 +354,7 @@ router.get('/export',
       }
 
     } catch (error) {
-      console.error('导出测试历史失败:', error);
+      logger.error('导出测试历史失败:', error);
       res.status(500).json({
         success: false,
         error: '导出测试历史失败',

@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const { unifiedErrorHandler } = require('../utils/errorHandler');
 const { errorLogAggregator } = require('../utils/ErrorLogAggregator');
 const { errorMonitoringSystem } = require('../utils/ErrorMonitoringSystem');
@@ -45,7 +46,7 @@ router.get('/stats', async (req, res) => {
     }, '获取错误统计成功');
     
   } catch (error) {
-    console.error('获取错误统计失败:', error);
+    logger.error('获取错误统计失败:', error);
     res.error('获取错误统计失败', 500, error.message);
   }
 });
@@ -103,7 +104,7 @@ router.get('/logs', async (req, res) => {
     }, '搜索错误日志成功');
     
   } catch (error) {
-    console.error('搜索错误日志失败:', error);
+    logger.error('搜索错误日志失败:', error);
     res.error('搜索错误日志失败', 500, error.message);
   }
 });
@@ -147,7 +148,7 @@ router.get('/alerts', async (req, res) => {
     }, '获取告警历史成功');
     
   } catch (error) {
-    console.error('获取告警历史失败:', error);
+    logger.error('获取告警历史失败:', error);
     res.error('获取告警历史失败', 500, error.message);
   }
 });
@@ -172,7 +173,7 @@ router.post('/test-alerts', async (req, res) => {
     }, '告警通道测试完成');
     
   } catch (error) {
-    console.error('测试告警通道失败:', error);
+    logger.error('测试告警通道失败:', error);
     res.error('测试告警通道失败', 500, error.message);
   }
 });
@@ -212,7 +213,7 @@ router.post('/send-alert', async (req, res) => {
     }, '手动告警发送成功');
     
   } catch (error) {
-    console.error('发送手动告警失败:', error);
+    logger.error('发送手动告警失败:', error);
     res.error('发送手动告警失败', 500, error.message);
   }
 });
@@ -238,7 +239,7 @@ router.get('/status', async (req, res) => {
     res.success(status, '获取系统状态成功');
     
   } catch (error) {
-    console.error('获取系统状态失败:', error);
+    logger.error('获取系统状态失败:', error);
     res.error('获取系统状态失败', 500, error.message);
   }
 });
@@ -273,7 +274,7 @@ router.post('/alert-rules', async (req, res) => {
     }, '告警规则创建成功');
     
   } catch (error) {
-    console.error('创建告警规则失败:', error);
+    logger.error('创建告警规则失败:', error);
     res.error('创建告警规则失败', 400, error.message);
   }
 });
@@ -351,7 +352,7 @@ router.get('/export', async (req, res) => {
     }
     
   } catch (error) {
-    console.error('导出错误报告失败:', error);
+    logger.error('导出错误报告失败:', error);
     res.error('导出错误报告失败', 500, error.message);
   }
 });
@@ -378,7 +379,7 @@ router.post('/cleanup', async (req, res) => {
     }, '日志清理任务已启动');
     
   } catch (error) {
-    console.error('清理日志失败:', error);
+    logger.error('清理日志失败:', error);
     res.error('清理日志失败', 500, error.message);
   }
 });
@@ -411,7 +412,7 @@ router.get('/trends', async (req, res) => {
     res.success(trends, '获取错误趋势成功');
     
   } catch (error) {
-    console.error('获取错误趋势失败:', error);
+    logger.error('获取错误趋势失败:', error);
     res.error('获取错误趋势失败', 500, error.message);
   }
 });

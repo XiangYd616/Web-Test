@@ -26,6 +26,7 @@ const performanceRoutes = require('./routes/performance');
 
 // 导入中间件
 const authMiddleware = require('./middleware/auth');
+const { responseFormatter, errorResponseFormatter } = require('./middleware/responseFormatter');
 // 导入统一错误处理系统
 const { errorMiddleware, notFoundHandler, handleError, ErrorCode } = require('./middleware/UnifiedErrorHandler');
 const { requestLogger, performanceMonitor, apiStats } = require('./middleware/logger');
@@ -94,6 +95,9 @@ const limiter = rateLimit({
 
 app.use('/api', limiter);
 
+// 自定义响应格式化中间件
+app.use(responseFormatter);
+
 // 自定义日志中间件
 app.use(requestLogger);
 app.use(performanceMonitor);
@@ -130,13 +134,13 @@ app.get('/info', (req, res) => {
 });
 
 // API路由
-app.use('/auth', authRoutes);
-app.use('/oauth', oauthRoutes);
-app.use('/test', testRoutes);
-app.use('/tests', testsRoutes);
-app.use('/seo', seoRoutes);
-app.use('/security', securityRoutes);
-app.use('/performance', performanceRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/oauth', oauthRoutes);
+app.use('/api/test', testRoutes);
+app.use('/api/tests', testsRoutes);
+app.use('/api/seo', seoRoutes);
+app.use('/api/security', securityRoutes);
+app.use('/api/performance', performanceRoutes);
 
 // 静态文件服务（如果需要）
 if (NODE_ENV === 'production') {
@@ -256,9 +260,9 @@ if (require.main === module) {
   // 直接运行时启动服务器
   startServer().then(s => { server = s; });
 } else {
-  // 被require时导出启动函数
-  module.exports = { app, startServer };
+  // 被require时导出app（用于测试）
+  module.exports = app;
+  module.exports.app = app;
+  module.exports.startServer = startServer;
+  module.exports.getServer = () => server;
 }
-
-// 导出服务器实例
-module.exports.getServer = () => server;

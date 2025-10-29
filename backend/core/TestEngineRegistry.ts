@@ -19,6 +19,78 @@ import {
 } from '../../shared/types/testEngine.types';
 
 /**
+ * 并发限制器 - 控制同时运行的测试数量
+ */
+class ConcurrencyLimiter {
+  private maxConcurrent: number;
+  private running: number = 0;
+  private queue: Array<{
+    task: () => Promise<any>;
+    resolve: (value: any) => void;
+    reject: (error: any) => void;
+  }> = [];
+
+  constructor(maxConcurrent: number = 5) {
+    this.maxConcurrent = maxConcurrent;
+  }
+
+  async execute<T>(task: () => Promise<T>): Promise<T> {
+    // 如果达到并发上限，加入队列等待
+    if (this.running >= this.maxConcurrent) {
+      return new Promise<T>((resolve, reject) => {
+        this.queue.push({ task, resolve, reject });
+      });
+    }
+
+    // 执行任务
+    this.running++;
+    try {
+      const result = await task();
+      return result;
+    } finally {
+      this.running--;
+      // 处理队列中的下一个任务
+      this.processQueue();
+    }
+  }
+
+  private processQueue(): void {
+    if (this.queue.length > 0 && this.running < this.maxConcurrent) {
+      const { task, resolve, reject } = this.queue.shift()!;
+      this.running++;
+      
+      task()
+        .then(result => {
+          resolve(result);
+        })
+        .catch(error => {
+          reject(error);
+        })
+        .finally(() => {
+          this.running--;
+          this.processQueue();
+        });
+    }
+  }
+
+  getStatus() {
+    return {
+      running: this.running,
+      queued: this.queue.length,
+      maxConcurrent: this.maxConcurrent
+    };
+  }
+
+  setMaxConcurrent(max: number): void {
+    this.maxConcurrent = max;
+    // 尝试处理队列中的任务
+    while (this.running < this.maxConcurrent && this.queue.length > 0) {
+      this.processQueue();
+    }
+  }
+}
+
+/**
  * 测试引擎注册器单例类
  */
 export class TestEngineRegistry {
@@ -26,6 +98,7 @@ export class TestEngineRegistry {
   private engines: Map<TestEngineType, TestEngineRegistration> = new Map();
   private runningTests: Map<string, TestProgress> = new Map();
   private initialized: boolean = false;
+  private concurrencyLimiter: ConcurrencyLimiter;
 
   /**
    * 获取注册器实例（单例模式）
@@ -41,6 +114,8 @@ export class TestEngineRegistry {
    * 私有构造函数，确保单例
    */
   private constructor() {
+    // 初始化并发限制器，默认最多同时运行5个测试
+    this.concurrencyLimiter = new ConcurrencyLimiter(5);
   }
 
   /**
@@ -322,8 +397,14 @@ export class TestEngineRegistry {
 
       // 限制并发数
       if (options.maxConcurrent) {
-        // TODO: 实现并发限制逻辑
-        await Promise.all(promises);
+        // 使用并发限制器执行任务
+        const limiter = new ConcurrencyLimiter(options.maxConcurrent);
+        const limitedPromises = promises.map(promise => 
+          limiter.execute(() => promise)
+        );
+        await Promise.all(limitedPromises);
+        
+        console.log(`✅ 并发限制: 最多 ${options.maxConcurrent} 个并发测试`);
       } else {
         await Promise.all(promises);
       }

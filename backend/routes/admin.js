@@ -3,6 +3,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const { query } = require('../config/database');
 const { authMiddleware, adminAuth } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
@@ -33,7 +34,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取系统统计失败:', error);
+    logger.error('获取系统统计失败:', error);
     res.serverError('获取系统统计失败');
   }
 }));
@@ -86,7 +87,7 @@ router.get('/users', asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取用户列表失败:', error);
+    logger.error('获取用户列表失败:', error);
     res.serverError('获取用户列表失败');
   }
 }));
@@ -117,7 +118,7 @@ router.put('/users/:userId/status', asyncHandler(async (req, res) => {
 
     res.success(result.rows[0], '用户状态更新成功');
   } catch (error) {
-    console.error('更新用户状态失败:', error);
+    logger.error('更新用户状态失败:', error);
     res.serverError('更新用户状态失败');
   }
 }));
@@ -170,7 +171,7 @@ router.get('/logs', asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取系统日志失败:', error);
+    logger.error('获取系统日志失败:', error);
     res.serverError('获取系统日志失败');
   }
 }));
@@ -262,7 +263,7 @@ router.get('/test-history', asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取测试历史失败:', error);
+    logger.error('获取测试历史失败:', error);
     res.serverError('获取测试历史失败');
   }
 }));

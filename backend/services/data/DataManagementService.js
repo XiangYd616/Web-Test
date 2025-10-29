@@ -186,19 +186,31 @@ class DataManagementService extends EventEmitter {
       const record = await this.readData(type, id);
       
       if (options.softDelete) {
+        // ✅ 软删除：保留数据，只添加删除标记
+        const updatedRecord = {
+          ...record,
+          metadata: {
+            ...record.metadata,
+            deletedAt: new Date().toISOString(),
+            deletedBy: options.userId,
+            deleted: true
+          }
+        };
         
-        // 软删除：标记为已删除
-        return await this.updateData(type, id, {
-      }, {
-          ...options,
-          metadata: { deletedAt: new Date().toISOString(), deletedBy: options.userId }
-        });
+        // 直接更新存储，避免调用updateData导致数据被空对象覆盖
+        this.dataStore.get(type).set(id, updatedRecord);
+        
+        // 触发事件
+        this.emit('dataDeleted', { type, id, record: updatedRecord, soft: true });
+        
+        return { success: true, deletedRecord: updatedRecord };
+        
       } else {
         // 硬删除：直接移除
         this.dataStore.get(type).delete(id);
         
         // 触发事件
-        this.emit('dataDeleted', { type, id, record });
+        this.emit('dataDeleted', { type, id, record, soft: false });
         
         return { success: true, deletedRecord: record };
       }
@@ -249,7 +261,7 @@ class DataManagementService extends EventEmitter {
         total,
         page: options.page || 1,
         limit: options.limit || total,
-        totalPages: options.limit ? Math.ceil(total / options.limit) : 1
+        totalPages: (options.limit && options.limit > 0) ? Math.ceil(total / options.limit) : 1
       };
       
     } catch (error) {

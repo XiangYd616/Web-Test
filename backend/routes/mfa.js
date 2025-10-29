@@ -9,13 +9,14 @@ const QRCode = require('qrcode');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { query, transaction } = require('../../config/database');
-const { models } = require('../../database/sequelize');
+const logger = require('../utils/logger');
+const { query, transaction } = require('../config/database');
+const { models } = require('../database/sequelize');
 const { User } = models;
 const { logSecurityEvent } = require('../utils/securityLogger');
 
 // 导入认证中间件 - 从正确路径导入
-const { authMiddleware } = require('../../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 // 使用正确的中间件名称
 const authenticateToken = authMiddleware;
 const { body, validationResult } = require('express-validator');
@@ -64,7 +65,7 @@ router.post('/setup',
       }
 
       // 验证当前密码
-      const passwordMatch = await bcrypt.compare(password, user.password);
+      const passwordMatch = await bcrypt.compare(password, user.password_hash);
       if (!passwordMatch) {
         await logSecurityEvent(userId, 'mfa_setup_failed', { reason: 'invalid_password' });
         return res.status(401).json({
@@ -122,7 +123,7 @@ router.post('/setup',
       });
 
     } catch (error) {
-      console.error('MFA setup error:', error);
+      logger.error('MFA setup error:', error);
       res.status(500).json({
         success: false,
         message: '服务器错误，请稍后再试'
@@ -205,7 +206,7 @@ router.post('/verify-setup',
       });
 
     } catch (error) {
-      console.error('MFA verify setup error:', error);
+      logger.error('MFA verify setup error:', error);
       res.status(500).json({
         success: false,
         message: '服务器错误，请稍后再试'
@@ -315,7 +316,7 @@ router.post('/verify',
       });
 
     } catch (error) {
-      console.error('MFA verify error:', error);
+      logger.error('MFA verify error:', error);
       res.status(500).json({
         success: false,
         message: '服务器错误，请稍后再试'
@@ -431,7 +432,7 @@ router.post('/verify-backup',
       });
 
     } catch (error) {
-      console.error('Backup code verify error:', error);
+      logger.error('Backup code verify error:', error);
       res.status(500).json({
         success: false,
         message: '服务器错误，请稍后再试'
@@ -523,7 +524,7 @@ router.post('/disable',
       });
 
     } catch (error) {
-      console.error('MFA disable error:', error);
+      logger.error('MFA disable error:', error);
       res.status(500).json({
         success: false,
         message: '服务器错误，请稍后再试'
@@ -564,7 +565,7 @@ router.get('/status', authenticateToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('MFA status error:', error);
+    logger.error('MFA status error:', error);
     res.status(500).json({
       success: false,
       message: '服务器错误，请稍后再试'
@@ -647,7 +648,7 @@ router.post('/regenerate-backup-codes',
       });
 
     } catch (error) {
-      console.error('Regenerate backup codes error:', error);
+      logger.error('Regenerate backup codes error:', error);
       res.status(500).json({
         success: false,
         message: '服务器错误，请稍后再试'

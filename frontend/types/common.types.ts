@@ -8,7 +8,7 @@
 import type { Timestamp } from './unified/apiResponse.types';
 
 // 重新导出统一类型
-export * from '../../shared/types/unifiedTypes';
+export * from '../../shared/types/sharedTypes';
 
 // 导出基础类型
 export type { Timestamp };

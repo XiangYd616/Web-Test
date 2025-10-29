@@ -27,8 +27,8 @@ class TestHistoryService {
     } = options;
 
     const offset = (page - 1) * limit;
-    let whereConditions = ['deleted_at IS NULL'];
-    let params = [];
+    const whereConditions = ['deleted_at IS NULL'];
+    const params = [];
     let paramIndex = 1;
 
     // 如果有用户ID，添加用户过滤条件

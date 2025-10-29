@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const { asyncHandler } = require('../middleware/errorHandler');
 const { authMiddleware } = require('../middleware/auth');
@@ -298,7 +299,7 @@ async function executeBatchTest(operation) {
         
         
       } catch (error) {
-        console.error('测试任务执行失败:', error);
+        logger.error('测试任务执行失败:', error);
         operation.failedItems++;
         completed++;
         operation.completedItems = completed;
@@ -344,7 +345,7 @@ async function executeBatchTest(operation) {
     }
     
   } catch (error) {
-    console.error('批量测试执行失败:', error);
+    logger.error('批量测试执行失败:', error);
     operation.status = 'failed';
     operation.error = error.message;
     operation.endTime = new Date().toISOString();
@@ -383,7 +384,7 @@ async function executeBatchExport(operation) {
     }
     
   } catch (error) {
-    console.error('批量导出执行失败:', error);
+    logger.error('批量导出执行失败:', error);
     operation.status = 'failed';
     operation.error = error.message;
     operation.endTime = new Date().toISOString();
@@ -421,7 +422,7 @@ async function executeBatchDelete(operation) {
     }
     
   } catch (error) {
-    console.error('批量删除执行失败:', error);
+    logger.error('批量删除执行失败:', error);
     operation.status = 'failed';
     operation.error = error.message;
     operation.endTime = new Date().toISOString();

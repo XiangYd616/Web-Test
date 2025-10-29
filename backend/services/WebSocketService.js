@@ -5,6 +5,7 @@
 
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 const { v4: uuidv4 } = require('uuid');
 
 class WebSocketService {
@@ -37,7 +38,7 @@ class WebSocketService {
       const token = url.searchParams.get('token');
 
       if (!token) {
-        console.log('❌ WebSocket连接被拒绝: 缺少认证信息');
+        logger.info('❌ WebSocket连接被拒绝: 缺少认证信息');
         return false;
       }
 
@@ -46,7 +47,7 @@ class WebSocketService {
       info.req.user = decoded;
       return true;
     } catch (error) {
-      console.log('❌ WebSocket连接被拒绝: 认证信息无效');
+      logger.info('❌ WebSocket连接被拒绝: 认证信息无效');
       return false;
     }
   }
@@ -70,7 +71,7 @@ class WebSocketService {
 
     this.clients.set(clientId, clientInfo);
 
-    console.log(`✅ 用户 ${user.email} 已连接 WebSocket (${clientId})`);
+    logger.info(`✅ 用户 ${user.email} 已连接 WebSocket (${clientId})`);
 
     // 发送连接确认
     this.sendToClient(clientId, {
@@ -129,10 +130,10 @@ class WebSocketService {
           break;
 
         default:
-          console.log(`⚠️ 未知消息类型: ${message.type}`);
+          logger.info(`⚠️ 未知消息类型: ${message.type}`);
       }
     } catch (error) {
-      console.error('❌ 处理WebSocket消息失败:', error);
+      logger.error('❌ 处理WebSocket消息失败:', error);
       this.sendToClient(clientId, {
         type: 'error',
         message: '消息处理失败',
@@ -244,14 +245,14 @@ class WebSocketService {
     // 移除客户端
     this.clients.delete(clientId);
 
-    console.log(`❌ 客户端 ${clientId} 已断开连接`);
+    logger.info(`❌ 客户端 ${clientId} 已断开连接`);
   }
 
   /**
    * 处理连接错误
    */
   handleError(clientId, error) {
-    console.error(`❌ WebSocket错误 (${clientId}):`, error);
+    logger.error(`❌ WebSocket错误 (${clientId}):`, error);
   }
 
   /**
@@ -271,7 +272,7 @@ class WebSocketService {
       }));
       return true;
     } catch (error) {
-      console.error(`❌ 发送消息失败 (${clientId}):`, error);
+      logger.error(`❌ 发送消息失败 (${clientId}):`, error);
       return false;
     }
   }
@@ -299,7 +300,7 @@ class WebSocketService {
     };
 
     this.broadcastToSubscribers(`test:${testId}`, progressMessage);
-    console.log(`📊 广播测试进度: ${testId} - ${progress}%`);
+    logger.info(`📊 广播测试进度: ${testId} - ${progress}%`);
   }
 
   /**
@@ -331,7 +332,7 @@ class WebSocketService {
     };
 
     this.broadcastToSubscribers(`test:${testId}`, completionMessage);
-    console.log(`✅ 广播测试完成: ${testId}`);
+    logger.info(`✅ 广播测试完成: ${testId}`);
   }
 
   /**
@@ -350,7 +351,7 @@ class WebSocketService {
     };
 
     this.broadcastToSubscribers(`test:${testId}`, errorMessage);
-    console.log(`❌ 广播测试错误: ${testId} - ${error.message || error}`);
+    logger.error(`❌ 广播测试错误: ${testId} - ${error.message || error}`);
   }
 
   /**

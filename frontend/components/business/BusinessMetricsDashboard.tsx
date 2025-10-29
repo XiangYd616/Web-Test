@@ -72,7 +72,7 @@ export const BusinessMetricsDashboard: React.FC<BusinessMetricsDashboardProps> =
   const businessHealthScore = useMemo(() => {
     if (testResults.length === 0) return 0;
 
-    const weights = {
+    const weights: Partial<Record<TestResultSummary['testType'], number>> = {
       performance: 0.25,
       security: 0.20,
       api: 0.15,

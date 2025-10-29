@@ -5,8 +5,7 @@
 
 import { AlertTriangle, CheckCircle, Info, Loader, X, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { TestStatusIcon, UnifiedIcon } from './UnifiedIcons';
-;
+import { TestStatusIcon, UnifiedIcon } from './Icons';
 
 // 反馈类型
 export type FeedbackType = 'success' | 'error' | 'warning' | 'info' | 'loading';

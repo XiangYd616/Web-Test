@@ -12,7 +12,7 @@
  * - frontend/services/api/apiErrorHandler.ts
  */
 
-import type { ApiErrorResponse, ApiMeta } from '../types/unifiedTypes';
+import type { ApiErrorResponse, ApiMeta } from '../types/sharedTypes';
 
 // ==================== 错误代码枚举 ====================
 

@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const { storageService } = require('../services/storage/StorageService');
 const { authMiddleware, optionalAuth } = require('../middleware/auth');
@@ -28,7 +29,7 @@ router.get('/status', optionalAuth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取存储状态失败', error);
+    logger.error('获取存储状态失败', error);
     res.status(500).json({
       success: false,
       error: '获取存储状态失败',
@@ -51,7 +52,7 @@ router.get('/statistics', optionalAuth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取存储统计失败:', error);
+    logger.error('获取存储统计失败:', error);
     res.status(500).json({
       success: false,
       error: '获取存储统计失败',
@@ -92,7 +93,7 @@ router.post('/archive',
       });
 
     } catch (error) {
-      console.error('手动归档失败:', error);
+      logger.error('手动归档失败:', error);
       res.status(500).json({
         success: false,
         error: '数据归档失败',
@@ -143,7 +144,7 @@ router.post('/cleanup',
       });
 
     } catch (error) {
-      console.error('手动清理失败:', error);
+      logger.error('手动清理失败:', error);
       res.status(500).json({
         success: false,
         error: '数据清理失败',
@@ -200,7 +201,7 @@ router.post('/maintenance',
       });
 
     } catch (error) {
-      console.error('存储维护失败:', error);
+      logger.error('存储维护失败:', error);
       res.status(500).json({
         success: false,
         error: '存储维护失败',
@@ -233,7 +234,7 @@ router.get('/configuration', authMiddleware, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取存储配置失败:', error);
+    logger.error('获取存储配置失败:', error);
     res.status(500).json({
       success: false,
       error: '获取存储配置失败',
@@ -288,7 +289,7 @@ router.put('/configuration',
       });
 
     } catch (error) {
-      console.error('更新存储配置失败:', error);
+      logger.error('更新存储配置失败:', error);
       res.status(500).json({
         success: false,
         error: '更新存储配置失败',
@@ -345,7 +346,7 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取引擎策略失败:', error);
+    logger.error('获取引擎策略失败:', error);
     res.status(500).json({
       success: false,
       error: '获取引擎策略失败',
@@ -408,7 +409,7 @@ router.put('/engines/:engineType/policy',
       });
 
     } catch (error) {
-      console.error('更新引擎策略失败:', error);
+      logger.error('更新引擎策略失败:', error);
       res.status(500).json({
         success: false,
         error: '更新引擎策略失败',
@@ -450,7 +451,7 @@ router.get('/usage', optionalAuth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取存储使用情况失败:', error);
+    logger.error('获取存储使用情况失败:', error);
     res.status(500).json({
       success: false,
       error: '获取存储使用情况失败',

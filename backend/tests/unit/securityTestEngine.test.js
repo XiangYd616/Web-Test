@@ -3,8 +3,6 @@
  * 测试安全扫描功能的核心逻辑
  */
 
-const { describe, it, expect, beforeEach, afterEach, jest } = require('@jest/globals');
-
 // 模拟安全测试引擎
 class MockSecurityTestEngine {
   constructor() {
@@ -207,7 +205,7 @@ class MockSecurityTestEngine {
       }
     ];
 
-    const insecure = cookies.filter(cookie => {
+    const insecure = cookies.map(cookie => {
       const issues = [];
       if (!cookie.secure) issues.push('未设置Secure标志');
       if (!cookie.httpOnly && cookie.name.toLowerCase().includes('session')) {
@@ -215,7 +213,10 @@ class MockSecurityTestEngine {
       }
       if (cookie.sameSite === 'None') issues.push('SameSite设置过于宽松');
       
-      return issues.length > 0 ? { ...cookie, issues } : null;
+      if (issues.length > 0) {
+        return { ...cookie, issues };
+      }
+      return null;
     }).filter(Boolean);
 
     return {

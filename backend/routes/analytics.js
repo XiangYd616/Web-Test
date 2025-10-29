@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const { asyncHandler } = require('../middleware/errorHandler');
 const { authMiddleware } = require('../middleware/auth');
@@ -26,7 +27,7 @@ router.post('/trend', asyncHandler(async (req, res) => {
     
     res.success(result);
   } catch (error) {
-    console.error('趋势分析失败:', error);
+    logger.error('趋势分析失败:', error);
     res.serverError('趋势分析失败');
   }
 }));
@@ -46,7 +47,7 @@ router.post('/compare', asyncHandler(async (req, res) => {
     
     res.success(result);
   } catch (error) {
-    console.error('对比分析失败:', error);
+    logger.error('对比分析失败:', error);
     res.serverError('对比分析失败');
   }
 }));
@@ -62,7 +63,7 @@ router.post('/performance', asyncHandler(async (req, res) => {
     
     res.success(result);
   } catch (error) {
-    console.error('性能分析失败:', error);
+    logger.error('性能分析失败:', error);
     res.serverError('性能分析失败');
   }
 }));
@@ -83,7 +84,7 @@ router.post('/insights', asyncHandler(async (req, res) => {
     
     res.success(result);
   } catch (error) {
-    console.error('洞察分析失败:', error);
+    logger.error('洞察分析失败:', error);
     res.serverError('洞察分析失败');
   }
 }));

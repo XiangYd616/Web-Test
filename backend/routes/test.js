@@ -13,6 +13,10 @@ const { testRateLimiter, historyRateLimiter } = require('../middleware/rateLimit
 const { asyncHandler } = require('../middleware/errorHandler');
 const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
 const { apiCache, dbCache } = require('../middleware/cache.js');
+const { validateRequestBody, validateURL } = require('../middleware/validateRequest');
+
+// 导入测试队列服务(已导出为单例)
+const testQueueService = require('../services/queue/TestQueueService');
 
 // 导入测试引擎类
 const APIAnalyzer = require('../engines/api/ApiAnalyzer.js');
@@ -24,9 +28,8 @@ const ApiTestEngine = require('../engines/api/APITestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const userTestManager = require('../services/testing/UserTestManager.js');
-// 注意：这些服务文件已被删除，需要使用替代方案
+// 注意：部分服务已删除，使用新的TestQueueService替代
 // const databaseService = require('../services/database/databaseService');
-// const testQueueService = require('../services/queue/queueService');
 // // // // // // // const smartCacheService = require('../services/smartCacheService'); // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
 // const enhancedTestHistoryService = require('../services/testing/testHistoryService'); // 已移除，功能迁移到 dataManagement
 
@@ -133,7 +136,7 @@ async function performRealCompatibilityAnalysis(url, features, browsers) {
     return result;
 
   } catch (error) {
-    console.error('兼容性分析失败:', error);
+    logger.error('兼容性分析失败:', error);
     return {
       overallScore: 0,
       matrix: {},
@@ -195,11 +198,53 @@ async function analyzeFeatureCompatibility(feature, html, browsers) {
     }
   }
 
+  // ✅ 使用确定性算法代替随机数，基于浏览器版本和特性支持数据
+  const compatibilityMatrix = {
+    'flexbox': { Chrome: 29, Firefox: 28, Safari: 9, Edge: 12, IE: 11 },
+    'grid': { Chrome: 57, Firefox: 52, Safari: 10.1, Edge: 16, IE: null },
+    'css-variables': { Chrome: 49, Firefox: 31, Safari: 9.1, Edge: 15, IE: null },
+    'webp': { Chrome: 32, Firefox: 65, Safari: 14, Edge: 18, IE: null },
+    'service-worker': { Chrome: 40, Firefox: 44, Safari: 11.1, Edge: 17, IE: null },
+    'web-components': { Chrome: 54, Firefox: 63, Safari: 10.1, Edge: 79, IE: null },
+    'es6-modules': { Chrome: 61, Firefox: 60, Safari: 10.1, Edge: 16, IE: null },
+    'async-await': { Chrome: 55, Firefox: 52, Safari: 10.1, Edge: 15, IE: null }
+  };
+
+  const minVersions = compatibilityMatrix[feature] || {};
+  
+  const categorizedBrowsers = {
+    supported: [],
+    unsupported: [],
+    partial: []
+  };
+
+  browsers.forEach(browser => {
+    const browserName = browser.browser.split(' ')[0]; // 获取浏览器名称
+    const browserVersion = parseFloat(browser.version || 0);
+    const minVersion = minVersions[browserName];
+
+    if (minVersion === null || minVersion === undefined) {
+      // 没有数据，假设现代浏览器支持
+      if (['Chrome', 'Firefox', 'Safari', 'Edge'].includes(browserName) && browserVersion >= 60) {
+        categorizedBrowsers.supported.push(browser);
+      } else {
+        categorizedBrowsers.unsupported.push(browser);
+      }
+    } else if (browserVersion >= minVersion) {
+      categorizedBrowsers.supported.push(browser);
+    } else if (browserVersion >= minVersion * 0.9) {
+      // 接近最低版本，部分支持
+      categorizedBrowsers.partial.push(browser);
+    } else {
+      categorizedBrowsers.unsupported.push(browser);
+    }
+  });
+
   return {
     supportPercentage: supportPercentage,
-    supportedBrowsers: browsers.filter(b => Math.random() > 0.1), // 大部分浏览器支持
-    unsupportedBrowsers: browsers.filter(b => Math.random() > 0.9), // 少数不支持
-    partialSupport: browsers.filter(b => Math.random() > 0.8), // 部分支持
+    supportedBrowsers: categorizedBrowsers.supported,
+    unsupportedBrowsers: categorizedBrowsers.unsupported,
+    partialSupport: categorizedBrowsers.partial,
     isUsed: isUsed
   };
 }
@@ -348,7 +393,7 @@ function validateStressTestConfig(config) {
  */
 router.get('/k6/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'k6',
       available: false,
       version: 'unknown',
@@ -375,24 +420,26 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
 
     res.success(engineStatus);
   } catch (error) {
-    console.error('K6 status check failed:', error);
+    logger.error('K6 status check failed:', error);
     res.serverError('K6状态检查失败');
   }
 }));
 
 /**
- * K6 引擎安装
- * POST /api/test-engines/k6/install
+ * K6 安装指南
+ * POST /api/test-engines/k6/installation-guide
  */
-router.post('/k6/install', authMiddleware, adminAuth, asyncHandler(async (req, res) => {
-  try {
-    // 模拟安装过程
-
-    res.success('https://k6.io/docs/getting-started/installation/', 'K6安装请求已提交，请手动安装K6');
-  } catch (error) {
-    console.error('K6 installation failed:', error);
-    res.serverError('K6安装失败');
-  }
+router.get('/k6/installation-guide', asyncHandler(async (req, res) => {
+  res.success({
+    guide: 'https://k6.io/docs/getting-started/installation/',
+    message: 'K6需要手动安装',
+    instructions: {
+      windows: 'winget install k6 --source winget',
+      mac: 'brew install k6',
+      linux: 'sudo apt-get install k6 或 sudo yum install k6'
+    },
+    requiresManualInstallation: true
+  });
 }));
 
 /**
@@ -401,7 +448,7 @@ router.post('/k6/install', authMiddleware, adminAuth, asyncHandler(async (req, r
  */
 router.get('/lighthouse/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'lighthouse',
       available: false,
       version: 'unknown',
@@ -421,7 +468,7 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
 
     res.success(engineStatus);
   } catch (error) {
-    console.error('Lighthouse status check failed:', error);
+    logger.error('Lighthouse status check failed:', error);
     res.serverError('Lighthouse状态检查失败');
   }
 }));
@@ -435,7 +482,7 @@ router.post('/lighthouse/install', authMiddleware, adminAuth, asyncHandler(async
 
     res.success(require('lighthouse/package.json').version, 'Lighthouse已包含在项目依赖中');
   } catch (error) {
-    console.error('Lighthouse installation check failed:', error);
+    logger.error('Lighthouse installation check failed:', error);
     res.serverError('Lighthouse安装检查失败');
   }
 }));
@@ -444,31 +491,42 @@ router.post('/lighthouse/install', authMiddleware, adminAuth, asyncHandler(async
  * Lighthouse 引擎运行
  * POST /api/test-engines/lighthouse/run
  */
-router.post('/lighthouse/run', authMiddleware, asyncHandler(async (req, res) => {
-  const { url, device = 'desktop', categories = ['performance'] } = req.body;
+router.post('/lighthouse/run', 
+  authMiddleware, 
+  validateRequestBody(['url']),
+  asyncHandler(async (req, res) => {
+    const { url, device = 'desktop', categories = ['performance'] } = req.body;
 
-  try {
+    try {
+      logger.info(`🚀 Running Lighthouse test for: ${url}`);
 
-    // 模拟Lighthouse运行结果
-    const mockResult = {
-      lhr: {
-        categories: {
-          performance: { score: Math.random() * 0.3 + 0.7 }
-        },
-        audits: {
-          'largest-contentful-paint': { numericValue: Math.random() * 2000 + 1000 },
-          'max-potential-fid': { numericValue: Math.random() * 100 + 50 },
-          'cumulative-layout-shift': { numericValue: Math.random() * 0.2 }
-        }
+      // 使用真实的 Lighthouse 服务
+      const LighthouseService = require('../services/testing/LighthouseService');
+      const lighthouseService = new LighthouseService();
+
+      const result = await lighthouseService.runTest(url, {
+        device,
+        categories
+      });
+
+      if (result.success) {
+        logger.info(`✅ Lighthouse test completed successfully`);
+        res.success(result.data, 'Lighthouse测试完成');
+      } else {
+        logger.error('Lighthouse test failed:', result.error);
+        res.error(
+          result.error.code || 'LIGHTHOUSE_TEST_FAILED',
+          result.error.message || 'Lighthouse测试失败',
+          500
+        );
       }
-    };
 
-    res.success(mockResult);
-  } catch (error) {
-    console.error('Lighthouse run failed:', error);
-    res.serverError('Lighthouse运行失败');
+    } catch (error) {
+      logger.error('Lighthouse run failed:', error);
+      res.serverError('Lighthouse运行失败');
+    }
   }
-}));
+));
 
 /**
  * Playwright 引擎状态检查
@@ -476,7 +534,7 @@ router.post('/lighthouse/run', authMiddleware, asyncHandler(async (req, res) => 
  */
 router.get('/playwright/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'playwright',
       available: false,
       version: 'unknown',
@@ -496,7 +554,7 @@ router.get('/playwright/status', asyncHandler(async (req, res) => {
 
     res.success(engineStatus);
   } catch (error) {
-    console.error('Playwright status check failed:', error);
+    logger.error('Playwright status check failed:', error);
     res.serverError('Playwright状态检查失败');
   }
 }));
@@ -510,7 +568,7 @@ router.post('/playwright/install', authMiddleware, adminAuth, asyncHandler(async
 
     res.success(require('playwright/package.json').version, 'Playwright已包含在项目依赖中');
   } catch (error) {
-    console.error('Playwright installation check failed:', error);
+    logger.error('Playwright installation check failed:', error);
     res.serverError('Playwright安装检查失败');
   }
 }));
@@ -519,34 +577,43 @@ router.post('/playwright/install', authMiddleware, adminAuth, asyncHandler(async
  * Playwright 引擎运行
  * POST /api/test-engines/playwright/run
  */
-router.post('/playwright/run', authMiddleware, asyncHandler(async (req, res) => {
-  const { url, browsers = ['chromium'], tests = ['basic'], viewport } = req.body;
+router.post('/playwright/run', 
+  authMiddleware,
+  validateRequestBody(['url']),
+  asyncHandler(async (req, res) => {
+    const { url, browsers = ['chromium'], tests = ['basic'], viewport } = req.body;
 
-  try {
+    try {
+      logger.info(`🚀 Running Playwright test for: ${url}`);
 
-    // 模拟Playwright运行结果
-    const mockResult = {
-      url,
-      browsers,
-      tests,
-      results: {
-        loadTime: Math.random() * 3000 + 1000,
-        screenshots: [`screenshot-${Date.now()}.png`],
-        errors: [],
-        performance: {
-          lcp: Math.random() * 2000 + 1000,
-          fid: Math.random() * 100 + 50,
-          cls: Math.random() * 0.2
-        }
+      // 使用真实的 Playwright 服务
+      const PlaywrightService = require('../services/testing/PlaywrightService');
+      const playwrightService = new PlaywrightService();
+
+      const result = await playwrightService.runTest(url, {
+        browsers,
+        tests,
+        viewport
+      });
+
+      if (result.success) {
+        logger.info(`✅ Playwright test completed successfully`);
+        res.success(result.data, 'Playwright测试完成');
+      } else {
+        logger.error('Playwright test failed:', result.error);
+        res.error(
+          result.error.code || 'PLAYWRIGHT_TEST_FAILED',
+          result.error.message || 'Playwright测试失败',
+          500
+        );
       }
-    };
 
-    res.success(mockResult);
-  } catch (error) {
-    console.error('Playwright run failed:', error);
-    res.serverError('Playwright运行失败');
+    } catch (error) {
+      logger.error('Playwright run failed:', error);
+      res.serverError('Playwright运行失败');
+    }
   }
-}));
+));
 
 /**
  * 获取所有测试引擎状态
@@ -558,7 +625,7 @@ router.get('/status', asyncHandler(async (req, res) => {
 
   for (const engine of engines) {
     try {
-      let engineStatus = {
+      const engineStatus = {
         name: engine,
         available: false,
         version: 'unknown',
@@ -572,11 +639,6 @@ router.get('/status', asyncHandler(async (req, res) => {
             const { promisify } = require('util');
             const execAsync = promisify(exec);
 
-            /**
-             * if功能函数
-             * @param {Object} params - 参数对象
-             * @returns {Promise<Object>} 返回结果
-             */
             const { stdout } = await execAsync('k6 version');
             if (stdout) {
               engineStatus.available = true;
@@ -658,41 +720,12 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 /**
- * 获取测试历史记录 (新版本 - 使用数据库)
+ * 获取测试历史记录 (使用TestHistoryService)
  * GET /api/test/history
  */
 router.get('/history', optionalAuth, historyRateLimiter, asyncHandler(async (req, res) => {
-  try {
-    const {
-      page = 1,
-      limit = 20,
-      testType,
-      status,
-      startDate,
-      endDate
-    } = req.query;
-
-    // 获取测试历史
-    const result = await databaseService.getTestHistory({
-      page: parseInt(page),
-      limit: parseInt(limit),
-      testType,
-      status,
-      userId: req.user?.id,
-      startDate,
-      endDate
-    });
-
-    res.success(result.data);
-
-  } catch (error) {
-    console.error('获取测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '获取测试历史失败',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
+  // 直接路由到handleTestHistory函数
+  return handleTestHistory(req, res);
 }));
 
 /**
@@ -722,23 +755,27 @@ router.get('/history/enhanced', authMiddleware, asyncHandler(async (req, res) =>
 router.get('/statistics', optionalAuth, asyncHandler(async (req, res) => {
   try {
     const { timeRange = 30 } = req.query;
-    const days = parseInt(timeRange);
+    const days = parseInt(timeRange) || 30;
+    
+    // 验证 days 在合理范围内
+    if (days < 1 || days > 365) {
+      return res.status(400).json({
+        success: false,
+        error: 'timeRange 必须在 1-365 天之间'
+      });
+    }
 
-    let whereClause = '';
-    const params = [];
-    let paramIndex = 1;
-
-    // 时间范围条件
-    whereClause += `WHERE created_at >= NOW() - INTERVAL '${days} days'`;
+    const params = [days];
+    const paramIndex = 2;
+    let userFilter = '';
 
     // 如果用户已登录，只统计该用户的记录
     if (req.user?.id) {
-      whereClause += ` AND user_id = $${paramIndex}`;
+      userFilter = ` AND user_id = $${paramIndex}`;
       params.push(req.user.id);
-      paramIndex++;
     }
 
-    // 获取统计数据
+    // 获取统计数据 - 使用参数化查询
     const statsResult = await query(`
       SELECT
         COUNT(*) as total_tests,
@@ -750,8 +787,9 @@ router.get('/statistics', optionalAuth, asyncHandler(async (req, res) => {
         COUNT(CASE WHEN test_type = 'seo' THEN 1 END) as seo_tests,
         AVG(duration) as avg_duration,
         AVG(overall_score) as avg_score
-      FROM test_sessions
-      ${whereClause}
+      FROM test_history
+      WHERE created_at >= NOW() - ($1 || ' days')::INTERVAL
+      ${userFilter}
     `, params);
 
     const stats = statsResult.rows[0];
@@ -772,7 +810,7 @@ router.get('/statistics', optionalAuth, asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取测试统计信息失败:', error);
+    logger.error('获取测试统计信息失败:', error);
     res.serverError('获取统计信息失败');
   }
 }));
@@ -883,7 +921,7 @@ async function handleTestHistory(req, res) {
       }
     });
   } catch (error) {
-    console.error('获取测试历史失败:', error);
+    logger.error('获取测试历史失败:', error);
     res.serverError('获取测试历史失败');
   }
 }
@@ -904,52 +942,44 @@ router.post('/run', authMiddleware, testRateLimiter, asyncHandler(async (req, re
   }
 
   try {
-    console.log(`🚀 启动${testType}测试: ${url}`);
+    logger.info(`🚀 启动${testType}测试: ${url}`);
 
     // 生成测试ID
     const testId = `${testType}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-    // 创建测试记录 - 已删除服务，需要使用替代方案
-    // await databaseService.createTest({
-    //   testId,
-    //   testType,
-    //   testName,
-    //   url,
-    //   config,
-    //   userId: req.user?.id
-    // });
+    // 添加到测试队列
+    const jobData = {
+      testId,
+      testType,
+      testName: testName || `${testType}测试`,
+      url,
+      config,
+      userId: req.user?.id,
+      priority: req.body.priority || 0
+    };
 
-    // 添加到测试队列 - 已删除服务，需要使用替代方案
-    // const queueResult = await testQueueService.addTestToQueue({
-    //   testId,
-    //   testType,
-    //   url,
-    //   config,
-    //   userId: req.user?.id
-    // }, req.body.priority || 0);
-
-    // 临时返回成功响应
-    const queueResult = { queuePosition: 0, estimatedWaitTime: 0 };
+    const queueResult = await testQueueService.enqueue(jobData);
 
     res.json({
       success: true,
       testId,
-      queuePosition: queueResult.queuePosition,
+      jobId: queueResult.jobId,
+      queuePosition: queueResult.position,
       estimatedWaitTime: queueResult.estimatedWaitTime,
-      message: queueResult.queuePosition > 0
-        ? `测试已加入队列，排队位置: ${queueResult.queuePosition}`
+      message: queueResult.position > 0
+        ? `测试已加入队列，排队位置: ${queueResult.position}`
         : '测试已开始执行'
     });
 
   } catch (error) {
-    console.error(`❌ ${testType}测试启动失败:`, error);
+    logger.error(`❌ ${testType}测试启动失败:`, error);
 
-    // 更新测试状态为失败 - 已删除服务，需要使用替代方案
+    // 更新测试队列状态为失败
     if (testId) {
       try {
-        // await databaseService.updateTestStatus(testId, 'failed', 100, error.message);
+        await testQueueService.updateJobStatus(testId, 'failed', { errorMessage: error.message });
       } catch (dbError) {
-        console.error('更新测试状态失败:', dbError);
+        logger.error('更新测试状态失败:', dbError);
       }
     }
 
@@ -967,18 +997,12 @@ router.post('/run', authMiddleware, testRateLimiter, asyncHandler(async (req, re
  */
 router.get('/queue/status', optionalAuth, asyncHandler(async (req, res) => {
   try {
-    // const queueStatus = testQueueService.getQueueStatus();
-    // 临时返回空队列状态
-    const queueStatus = {
-      queueLength: 0,
-      runningTests: 0,
-      completedTests: 0,
-      failedTests: 0
-    };
+    const userId = req.user?.id;
+    const queueStatus = await testQueueService.getQueueStatus(userId);
 
     res.success(queueStatus);
   } catch (error) {
-    console.error('获取队列状态失败:', error);
+    logger.error('获取队列状态失败:', error);
     res.status(500).json({
       success: false,
       error: '获取队列状态失败'
@@ -994,16 +1018,97 @@ router.post('/:testId/cancel', authMiddleware, asyncHandler(async (req, res) => 
   const { testId } = req.params;
 
   try {
-    // await testQueueService.cancelTest(testId);
-    // 临时返回成功响应
+    const result = await testQueueService.cancelJob(testId);
+    
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
 
     res.success('测试已取消');
   } catch (error) {
-    console.error('取消测试失败:', error);
+    logger.error('取消测试失败:', error);
     res.status(500).json({
       success: false,
       error: '取消测试失败'
     });
+  }
+}));
+
+/**
+ * 获取队列中的任务列表
+ * GET /api/test/queue/jobs
+ */
+router.get('/queue/jobs', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const { status, limit = 20, offset = 0 } = req.query;
+    const userId = req.user?.id;
+    
+    const jobs = await testQueueService.getJobs(userId, {
+      status,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+
+    res.success(jobs);
+  } catch (error) {
+    logger.error('获取队列任务失败:', error);
+    res.serverError('获取队列任务失败');
+  }
+}));
+
+/**
+ * 获取单个任务详情
+ * GET /api/test/queue/jobs/:jobId
+ */
+router.get('/queue/jobs/:jobId', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const job = await testQueueService.getJobDetails(jobId);
+    
+    if (!job) {
+      return res.notFound('资源', '任务不存在');
+    }
+
+    res.success(job);
+  } catch (error) {
+    logger.error('获取任务详情失败:', error);
+    res.serverError('获取任务详情失败');
+  }
+}));
+
+/**
+ * 重试失败的任务
+ * POST /api/test/queue/jobs/:jobId/retry
+ */
+router.post('/queue/jobs/:jobId/retry', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const result = await testQueueService.retryJob(jobId);
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    res.success('任务已重新加入队列');
+  } catch (error) {
+    logger.error('重试任务失败:', error);
+    res.serverError('重试任务失败');
+  }
+}));
+
+/**
+ * 清理已完成的任务
+ * DELETE /api/test/queue/cleanup
+ */
+router.delete('/queue/cleanup', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { olderThan = 24 } = req.query; // 默认24小时
+    const result = await testQueueService.cleanupCompletedJobs(parseInt(olderThan));
+    
+    res.success(`已清理 ${result.cleaned} 个已完成任务`);
+  } catch (error) {
+    logger.error('清理任务失败:', error);
+    res.serverError('清理任务失败');
   }
 }));
 
@@ -1014,68 +1119,47 @@ router.post('/:testId/cancel', authMiddleware, asyncHandler(async (req, res) => 
 
 */
 
+// ==================== 缓存相关端点已移除 ====================
+// smartCacheService 已被删除，相关端点不再可用
+// 如需缓存功能，请实现新的 CacheService
+
 /**
- * 获取缓存统计
+ * 获取缓存统计 - 已弃用
  * GET /api/test/cache/stats
+ * @deprecated smartCacheService 已被删除
  */
 router.get('/cache/stats', optionalAuth, asyncHandler(async (req, res) => {
-  try {
-    const stats = smartCacheService.getStats();
-
-    res.success(stats);
-  } catch (error) {
-    console.error('获取缓存统计失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '获取缓存统计失败'
-    });
-  }
+  res.status(501).json({
+    success: false,
+    error: 'FEATURE_NOT_IMPLEMENTED',
+    message: '缓存统计功能暂不可用，smartCacheService 已被移除'
+  });
 }));
 
 /**
- * 清空缓存
+ * 清空缓存 - 已弃用
  * POST /api/test/cache/flush
+ * @deprecated smartCacheService 已被删除
  */
 router.post('/cache/flush', authMiddleware, asyncHandler(async (req, res) => {
-  try {
-    await smartCacheService.flush();
-
-    res.success('缓存已清空');
-  } catch (error) {
-    console.error('清空缓存失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '清空缓存失败'
-    });
-  }
+  res.status(501).json({
+    success: false,
+    error: 'FEATURE_NOT_IMPLEMENTED',
+    message: '清空缓存功能暂不可用，smartCacheService 已被移除'
+  });
 }));
 
 /**
- * 缓存失效
+ * 缓存失效 - 已弃用
  * POST /api/test/cache/invalidate
+ * @deprecated smartCacheService 已被删除
  */
 router.post('/cache/invalidate', authMiddleware, asyncHandler(async (req, res) => {
-  const { event, data } = req.body;
-
-  if (!event) {
-
-    return res.status(400).json({
-      success: false,
-      error: '缺少必需参数: event'
-    });
-  }
-
-  try {
-    const invalidatedCount = await smartCacheService.invalidate(event, data);
-
-    res.success(null, '已失效 ${invalidatedCount} 条缓存记录');
-  } catch (error) {
-    console.error('缓存失效失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '缓存失效失败'
-    });
-  }
+  res.status(501).json({
+    success: false,
+    error: 'FEATURE_NOT_IMPLEMENTED',
+    message: '缓存失效功能暂不可用，smartCacheService 已被移除'
+  });
 }));
 
 /**
@@ -1086,18 +1170,21 @@ router.get('/:testId/status', optionalAuth, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
-    // 从数据库获取测试状态
-    const testStatus = await databaseService.getTestStatus(testId);
+    // 使用TestHistoryService获取测试状态
+    const result = await query(
+      'SELECT id, status, start_time, end_time, duration FROM test_history WHERE id = $1',
+      [testId]
+    );
 
-    res.success(testStatus);
+    if (result.rows.length === 0) {
+      return res.notFound('资源', '测试不存在');
+    }
+
+    res.success(result.rows[0]);
 
   } catch (error) {
-    console.error('获取测试状态失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '获取测试状态失败',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    logger.error('获取测试状态失败:', error);
+    res.serverError('获取测试状态失败');
   }
 }));
 
@@ -1109,26 +1196,18 @@ router.get('/:testId/result', optionalAuth, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
-    // 从数据库获取测试结果
-    const testResult = await databaseService.getTestResult(testId);
+    // 使用TestHistoryService获取测试结果
+    const result = await testHistoryService.getTestDetails(testId, req.user?.id);
 
-    if (!testResult) {
-
-      return res.status(404).json({
-        success: false,
-        error: '测试结果不存在或已过期'
-      });
+    if (!result.success) {
+      return res.notFound('资源', '测试结果不存在或已过期');
     }
 
-    res.success(testResult);
+    res.success(result.data);
 
   } catch (error) {
-    console.error('获取测试结果失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '获取测试结果失败',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    logger.error('获取测试结果失败:', error);
+    res.serverError('获取测试结果失败');
   }
 }));
 
@@ -1140,78 +1219,31 @@ router.post('/:testId/stop', authMiddleware, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
-    // 更新测试状态为已停止
-    await databaseService.updateTestStatus(testId, 'stopped', null, '测试已被用户停止');
+    // 使用直接SQL更新测试状态
+    const result = await query(
+      `UPDATE test_history 
+       SET status = 'stopped', 
+           end_time = CURRENT_TIMESTAMP, 
+           updated_at = CURRENT_TIMESTAMP,
+           error_message = $2
+       WHERE id = $1 AND user_id = $3`,
+      [testId, '测试已被用户停止', req.user.id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.notFound('资源', '测试不存在或无权限');
+    }
 
     res.success('测试已停止');
 
   } catch (error) {
-    console.error('停止测试失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '停止测试失败',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    logger.error('停止测试失败:', error);
+    res.serverError('停止测试失败');
   }
 }));
 
-/**
- * 获取配置模板
- * GET /api/test/config/templates
- */
-router.get('/config/templates', optionalAuth, asyncHandler(async (req, res) => {
-  const { testType } = req.query;
-
-  try {
-    // 从数据库获取配置模板
-    const templates = await databaseService.getConfigTemplates(testType);
-
-    res.success(templates);
-
-  } catch (error) {
-    console.error('获取配置模板失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '获取配置模板失败'
-    });
-  }
-}));
-
-/**
- * 保存配置模板
- * POST /api/test/config/templates
- */
-router.post('/config/templates', authMiddleware, asyncHandler(async (req, res) => {
-  const { name, testType, config, description } = req.body;
-
-  if (!name || !testType || !config) {
-
-    return res.status(400).json({
-      success: false,
-      error: '缺少必需参数: name, testType, config'
-    });
-  }
-
-  try {
-    // 保存配置模板到数据库
-    const template = await databaseService.saveConfigTemplate({
-      name,
-      testType,
-      config,
-      description,
-      userId: req.user?.id
-    });
-
-    res.success(template);
-
-  } catch (error) {
-    console.error('保存配置模板失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '保存配置模板失败'
-    });
-  }
-}));
+// 配置模板功能已移除 - databaseService不再可用
+// 如需此功能，请创建专门的ConfigTemplateService
 
 /**
  * 创建测试记录
@@ -1228,7 +1260,7 @@ router.post('/history', authMiddleware, asyncHandler(async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('创建测试记录失败:', error);
+    logger.error('创建测试记录失败:', error);
     res.serverError('创建测试记录失败');
   }
 }));
@@ -1243,12 +1275,11 @@ router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
   try {
     // 验证记录所有权
     const existingRecord = await query(
-      'SELECT id FROM test_sessions WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
+      'SELECT id FROM test_history WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
       [recordId, req.user.id]
     );
 
     if (existingRecord.rows.length === 0) {
-
       return res.notFound('资源', '记录不存在或无权限访问');
     }
 
@@ -1256,7 +1287,7 @@ router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
 
     res.json(result);
   } catch (error) {
-    console.error('更新测试记录失败:', error);
+    logger.error('更新测试记录失败:', error);
     res.serverError('更新测试记录失败');
   }
 }));
@@ -1270,7 +1301,7 @@ router.get('/history/:recordId', optionalAuth, asyncHandler(async (req, res) => 
 
   try {
     let whereClause = 'WHERE id = $1';
-    let params = [recordId];
+    const params = [recordId];
 
     // 如果用户已登录，只显示该用户的记录；否则显示公开记录
     if (req.user?.id) {
@@ -1293,7 +1324,7 @@ router.get('/history/:recordId', optionalAuth, asyncHandler(async (req, res) => 
 
     res.success(testHistoryService.formatTestRecord(result.rows[0]));
   } catch (error) {
-    console.error('获取测试记录失败:', error);
+    logger.error('获取测试记录失败:', error);
     res.serverError('获取测试记录失败');
   }
 }));
@@ -1309,7 +1340,7 @@ router.post('/history/:recordId/start', authMiddleware, asyncHandler(async (req,
     const result = await testHistoryService.startTest(recordId, req.user.id);
     res.json(result);
   } catch (error) {
-    console.error('开始测试失败:', error);
+    logger.error('开始测试失败:', error);
     res.serverError('开始测试失败');
   }
 }));
@@ -1325,7 +1356,7 @@ router.post('/history/:recordId/progress', authMiddleware, asyncHandler(async (r
     const result = await testHistoryService.updateTestProgress(recordId, req.body);
     res.json(result);
   } catch (error) {
-    console.error('更新测试进度失败:', error);
+    logger.error('更新测试进度失败:', error);
     res.serverError('更新测试进度失败');
   }
 }));
@@ -1341,7 +1372,7 @@ router.post('/history/:recordId/complete', authMiddleware, asyncHandler(async (r
     const result = await testHistoryService.completeTest(recordId, req.body, req.user.id);
     res.json(result);
   } catch (error) {
-    console.error('完成测试失败:', error);
+    logger.error('完成测试失败:', error);
     res.serverError('完成测试失败');
   }
 }));
@@ -1358,7 +1389,7 @@ router.post('/history/:recordId/fail', authMiddleware, asyncHandler(async (req, 
     const result = await testHistoryService.failTest(recordId, errorMessage, errorDetails, req.user.id);
     res.json(result);
   } catch (error) {
-    console.error('标记测试失败失败:', error);
+    logger.error('标记测试失败失败:', error);
     res.serverError('标记测试失败失败');
   }
 }));
@@ -1375,7 +1406,7 @@ router.post('/history/:recordId/cancel', authMiddleware, asyncHandler(async (req
     const result = await testHistoryService.cancelTest(recordId, reason || '用户取消', req.user.id);
     res.json(result);
   } catch (error) {
-    console.error('取消测试失败:', error);
+    logger.error('取消测试失败:', error);
     res.serverError('取消测试失败');
   }
 }));
@@ -1391,7 +1422,7 @@ router.get('/history/:recordId/progress', authMiddleware, asyncHandler(async (re
     const result = await testHistoryService.getTestProgress(recordId, req.user.id);
     res.json(result);
   } catch (error) {
-    console.error('获取测试进度失败:', error);
+    logger.error('获取测试进度失败:', error);
     res.serverError('获取测试进度失败');
   }
 }));
@@ -1405,18 +1436,17 @@ router.delete('/history/:recordId', authMiddleware, asyncHandler(async (req, res
 
   try {
     const result = await query(
-      'UPDATE test_sessions SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
+      'UPDATE test_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
       [recordId, req.user.id]
     );
 
     if (result.rowCount === 0) {
-
       return res.notFound('资源', '测试记录不存在');
     }
 
     res.success('测试记录已删除');
   } catch (error) {
-    console.error('删除测试记录失败:', error);
+    logger.error('删除测试记录失败:', error);
     res.serverError('删除测试记录失败');
   }
 }));
@@ -1432,10 +1462,18 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
     // 解析时间范围
     let days = 30;
     if (timeRange.endsWith('d')) {
-      days = parseInt(timeRange.replace('d', ''));
+      days = parseInt(timeRange.replace('d', '')) || 30;
+    }
+    
+    // 验证 days 在合理范围内
+    if (days < 1 || days > 365) {
+      return res.status(400).json({
+        success: false,
+        error: 'timeRange 必须在 1-365 天之间'
+      });
     }
 
-    // 获取测试历史统计
+    // 获取测试历史统计 - 使用参数化查询
     const testStats = await query(
       `SELECT
         COUNT(*) as total_tests,
@@ -1443,8 +1481,8 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
         COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
         AVG(duration) as avg_duration
        FROM test_history
-       WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '${days} days'`,
-      [req.user.id]
+       WHERE user_id = $1 AND created_at >= NOW() - ($2 || ' days')::INTERVAL`,
+      [req.user.id, days]
     );
 
     // 获取按日期分组的测试数量
@@ -1453,10 +1491,10 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
         DATE(created_at) as date,
         COUNT(*) as count
        FROM test_history
-       WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '${days} days'
+       WHERE user_id = $1 AND created_at >= NOW() - ($2 || ' days')::INTERVAL
        GROUP BY DATE(created_at)
        ORDER BY date DESC`,
-      [req.user.id]
+      [req.user.id, days]
     );
 
     // 获取按测试类型分组的统计
@@ -1465,10 +1503,10 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
         test_type,
         COUNT(*) as count
        FROM test_history
-       WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '${days} days'
+       WHERE user_id = $1 AND created_at >= NOW() - ($2 || ' days')::INTERVAL
        GROUP BY test_type
        ORDER BY count DESC`,
-      [req.user.id]
+      [req.user.id, days]
     );
 
     res.json({
@@ -1481,7 +1519,7 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取测试分析数据失败:', error);
+    logger.error('获取测试分析数据失败:', error);
     res.serverError('获取测试分析数据失败');
   }
 }));
@@ -1500,7 +1538,7 @@ router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
          COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days') as tests_last_30_days,
          test_type,
          COUNT(*) as count
-       FROM test_sessions
+       FROM test_history
        WHERE user_id = $1 AND deleted_at IS NULL
        GROUP BY test_type`,
       [req.user.id]
@@ -1512,7 +1550,7 @@ router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
          COUNT(*) FILTER (WHERE status = 'completed') as successful_tests,
          COUNT(*) FILTER (WHERE status = 'failed') as failed_tests,
          COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days') as tests_last_30_days
-       FROM test_sessions
+       FROM test_history
        WHERE user_id = $1 AND deleted_at IS NULL`,
       [req.user.id]
     );
@@ -1542,7 +1580,7 @@ router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取测试统计失败:', error);
+    logger.error('获取测试统计失败:', error);
     res.serverError('获取测试统计失败');
   }
 }));
@@ -1568,7 +1606,7 @@ router.get('/:testId', authMiddleware, asyncHandler(async (req, res) => {
 
     res.success(result.data);
   } catch (error) {
-    console.error('获取测试结果失败:', error);
+    logger.error('获取测试结果失败:', error);
     res.serverError('获取测试结果失败');
   }
 }));
@@ -1600,7 +1638,7 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
     });
 
     // 检查测试结果结构并正确返回
-    console.log('🔍 API returning test result:', JSON.stringify(testResult, null, 2));
+    logger.info('🔍 API returning test result:', JSON.stringify(testResult, null, 2));
 
     if (testResult.success && testResult.data) {
       res.success(testResult.data);
@@ -1608,7 +1646,7 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
       res.success(testResult);
     }
   } catch (error) {
-    console.error('网站测试失败:', error);
+    logger.error('网站测试失败:', error);
     res.serverError('网站测试失败');
   }
 }));
@@ -1649,7 +1687,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
         if (historyResult.rows.length > 0) {
 
           const testRecord = historyResult.rows[0];
-          console.log('📊 从测试历史获取结果:', testRecord.id, testRecord.status);
+          logger.info('📊 从测试历史获取结果:', testRecord.id, testRecord.status);
 
           // 如果测试已完成，返回真实的测试结果
           if (testRecord.status === 'completed') {
@@ -1685,7 +1723,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
           }
         }
       } catch (historyError) {
-        console.error('查询测试历史失败:', historyError);
+        logger.error('查询测试历史失败:', historyError);
       }
 
       // 如果没有找到历史记录，返回404而不是默认完成状态
@@ -1706,7 +1744,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
       progress: status.progress || 0
     });
   } catch (error) {
-    console.error('获取压力测试状态失败:', error);
+    logger.error('获取压力测试状态失败:', error);
     res.serverError('获取测试状态失败');
   }
 }));
@@ -1733,7 +1771,7 @@ router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, r
     if (result.success) {
       // 记录取消操作到用户活动日志
       if (req.user?.id) {
-        console.log(`✅ 用户 ${req.user.id} 取消了测试 ${testId}`);
+        logger.info(`✅ 用户 ${req.user.id} 取消了测试 ${testId}`);
       }
 
       res.json({
@@ -1752,7 +1790,7 @@ router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, r
       });
     }
   } catch (error) {
-    console.error('取消压力测试失败:', error);
+    logger.error('取消压力测试失败:', error);
     res.serverError('取消测试失败');
   }
 }));
@@ -1779,7 +1817,7 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
       });
     }
   } catch (error) {
-    console.error('停止压力测试失败:', error);
+    logger.error('停止压力测试失败:', error);
     res.serverError('停止测试失败');
   }
 }));
@@ -1790,14 +1828,14 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
  */
 router.get('/stress/running', optionalAuth, asyncHandler(async (req, res) => {
   try {
-    console.log('📊 获取用户运行中的压力测试');
+    logger.info('📊 获取用户运行中的压力测试');
 
     // 🔧 重构：获取用户测试管理器的统计信息
     const stats = userTestManager.getStats();
     const runningTests = []; // 简化实现，不返回具体测试列表
     const runningCount = stats.totalTests;
 
-    console.log(`📊 当前运行中的测试数量: ${runningCount}`);
+    logger.info(`📊 当前运行中的测试数量: ${runningCount}`);
 
     res.json({
       success: true,
@@ -1808,7 +1846,7 @@ router.get('/stress/running', optionalAuth, asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取运行中测试失败:', error);
+    logger.error('获取运行中测试失败:', error);
     res.serverError('获取运行中测试失败');
   }
 }));
@@ -1836,7 +1874,7 @@ router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('强制清理测试失败:', error);
+    logger.error('强制清理测试失败:', error);
     res.serverError('强制清理失败');
   }
 }));
@@ -2030,7 +2068,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
             status: 'running',
             config: testConfig
           });
-          console.log('✅ 测试记录已更新为运行中状态:', recordId, '配置:', testConfig);
+          logger.info('✅ 测试记录已更新为运行中状态:', recordId, '配置:', testConfig);
         } else {
           // 如果没有记录ID，创建新记录
           const testRecord = await testHistoryService.createTestRecord({
@@ -2042,7 +2080,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
             config: testConfig
           });
           testRecordId = testRecord.data.id;
-          console.log('✅ 测试记录已创建(运行中状态):', testRecordId, '配置:', testConfig);
+          logger.info('✅ 测试记录已创建(运行中状态):', testRecordId, '配置:', testConfig);
         }
 
         // 广播测试记录状态更新到测试历史页面
@@ -2057,7 +2095,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
           });
         }
       } catch (dbError) {
-        console.error('❌ 处理测试记录失败:', dbError);
+        logger.error('❌ 处理测试记录失败:', dbError);
         // 继续执行测试，不因记录失败而中断
       }
     }
@@ -2089,7 +2127,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
     // ✅ 异步执行压力测试，不阻塞响应
     setImmediate(async () => {
       try {
-        console.log('🚀 异步执行压力测试:', testId);
+        logger.info('🚀 异步执行压力测试:', testId);
 
         // 🔧 重构：使用用户测试管理器创建测试实例
         const testEngine = userTestManager.createUserTest(req.user?.id, testId);
@@ -2124,12 +2162,12 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
               performanceScore: detailedReport.performance?.score
             });
           } catch (reportError) {
-            console.error('❌ 生成详细报告失败:', reportError);
+            logger.error('❌ 生成详细报告失败:', reportError);
             // 继续使用原始数据，不因报告生成失败而中断
           }
         }
 
-        console.log('✅ 异步压力测试完成:', testId);
+        logger.info('✅ 异步压力测试完成:', testId);
 
         // 3. 更新测试记录为完成状态
         if (req.user?.id && testRecordId && responseData) {
@@ -2159,7 +2197,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
               });
             }
 
-            console.log(`📊 设置测试记录状态: ${responseData.status} -> ${finalStatus}`);
+            logger.info(`📊 设置测试记录状态: ${responseData.status} -> ${finalStatus}`);
 
             await testHistoryService.updateTestRecord(testRecordId, {
               status: finalStatus,
@@ -2195,9 +2233,9 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
               });
             }
 
-            console.log('✅ 测试记录已更新为完成状态');
+            logger.info('✅ 测试记录已更新为完成状态');
           } catch (dbError) {
-            console.error('❌ 更新测试记录失败:', dbError);
+            logger.error('❌ 更新测试记录失败:', dbError);
           }
         }
 
@@ -2213,9 +2251,9 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
           });
         }
 
-        console.log('✅ 异步压力测试完成并通知前端:', testId);
+        logger.info('✅ 异步压力测试完成并通知前端:', testId);
       } catch (error) {
-        console.error('❌ 异步压力测试失败:', error);
+        logger.error('❌ 异步压力测试失败:', error);
 
         // 通过WebSocket通知前端测试失败
         if (global.io) {
@@ -2253,13 +2291,13 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
               });
             }
           } catch (dbError) {
-            console.error('❌ 更新失败测试记录失败:', dbError);
+            logger.error('❌ 更新失败测试记录失败:', dbError);
           }
         }
       }
     });
   } catch (error) {
-    console.error('❌ 压力测试API处理失败:', error);
+    logger.error('❌ 压力测试API处理失败:', error);
     res.serverError('压力测试启动失败');
   }
 }));
@@ -2284,7 +2322,7 @@ router.post('/security',
 
       // 如果指定了模块，执行单个模块测试（统一安全引擎模式）
       if (module) {
-        console.log(`🔍 Running ${module} security test for ${validatedURL}`);
+        logger.info(`🔍 Running ${module} security test for ${validatedURL}`);
 
         // 根据模块类型执行相应的测试
         switch (module) {
@@ -2325,13 +2363,13 @@ router.post('/security',
         });
       }
 
-      console.log(`✅ Security test completed for ${module || 'full'} with score:`, testResult.score || testResult.securityScore);
+      logger.info(`✅ Security test completed for ${module || 'full'} with score:`, testResult.score || testResult.securityScore);
 
       // 保存测试结果到数据库
       try {
         await securityTestStorage.saveSecurityTestResult(testResult, req.user?.id);
       } catch (saveError) {
-        console.error('⚠️ Failed to save security test result:', saveError.message);
+        logger.error('⚠️ Failed to save security test result:', saveError.message);
         // 不影响主要响应，只记录错误
       }
 
@@ -2342,7 +2380,7 @@ router.post('/security',
       };
       res.json(response);
     } catch (error) {
-      console.error('安全测试失败:', error);
+      logger.error('安全测试失败:', error);
       res.serverError('安全测试失败');
     }
   }));
@@ -2380,7 +2418,7 @@ router.get('/security/history',
 
       res.json(result);
     } catch (error) {
-      console.error('获取安全测试历史失败:', error);
+      logger.error('获取安全测试历史失败:', error);
       res.serverError('获取安全测试历史失败');
     }
   }));
@@ -2396,7 +2434,7 @@ router.get('/security/statistics', optionalAuth, asyncHandler(async (req, res) =
 
     res.json(result);
   } catch (error) {
-    console.error('获取安全测试统计失败:', error);
+    logger.error('获取安全测试统计失败:', error);
     res.serverError('获取安全测试统计失败');
   }
 }));
@@ -2417,7 +2455,7 @@ router.get('/security/:testId', optionalAuth, asyncHandler(async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('获取安全测试结果失败:', error);
+    logger.error('获取安全测试结果失败:', error);
     res.serverError('获取安全测试结果失败');
   }
 }));
@@ -2438,7 +2476,7 @@ router.delete('/security/:testId', optionalAuth, asyncHandler(async (req, res) =
 
     res.json(result);
   } catch (error) {
-    console.error('删除安全测试结果失败:', error);
+    logger.error('删除安全测试结果失败:', error);
     res.serverError('删除安全测试结果失败');
   }
 }));
@@ -2503,7 +2541,7 @@ router.post('/performance',
     const validatedURL = req.validatedURL.url.toString();
 
     try {
-      console.log(`🚀 Starting performance test for: ${validatedURL}`);
+      logger.info(`🚀 Starting performance test for: ${validatedURL}`);
 
       // 使用现有的网站测试引擎进行性能测试
       const testResult = await apiEngine.runEnhancedPerformanceTest(validatedURL, {
@@ -2520,7 +2558,7 @@ router.post('/performance',
         level: config.level || 'standard'
       });
 
-      console.log(`✅ Performance test completed for ${validatedURL} with score:`, testResult.score);
+      logger.info(`✅ Performance test completed for ${validatedURL} with score:`, testResult.score);
 
       // 确保返回成功状态
       const response = {
@@ -2530,7 +2568,7 @@ router.post('/performance',
       res.json(response);
 
     } catch (error) {
-      console.error('❌ Performance test failed:', error);
+      logger.error('❌ Performance test failed:', error);
       res.serverError('性能测试失败');
     }
   }));
@@ -2551,7 +2589,7 @@ router.post('/performance/page-speed',
     const validatedURL = req.validatedURL.url.toString();
 
     try {
-      console.log(`📊 Starting page speed test for: ${validatedURL}`);
+      logger.info(`📊 Starting page speed test for: ${validatedURL}`);
 
       // 使用网站测试引擎的性能检测功能
       const testResult = await apiEngine.runTest(validatedURL, {
@@ -2577,7 +2615,7 @@ router.post('/performance/page-speed',
       res.success(pageSpeedMetrics);
 
     } catch (error) {
-      console.error('❌ Page speed test failed:', error);
+      logger.error('❌ Page speed test failed:', error);
       res.serverError('页面速度检测失败');
     }
   }));
@@ -2617,7 +2655,7 @@ router.post('/performance/core-web-vitals', optionalAuth, testRateLimiter, valid
     res.success(coreWebVitals);
 
   } catch (error) {
-    console.error('❌ Core Web Vitals test failed:', error);
+    logger.error('❌ Core Web Vitals test failed:', error);
     res.serverError('Core Web Vitals检测失败');
   }
 }));
@@ -2662,7 +2700,7 @@ router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddlewa
       // 将详细报告添加到结果中
       testResult.data.detailedReport = detailedReport;
 
-      console.log(`✅ Enhanced compatibility test completed with detailed report`);
+      logger.info(`✅ Enhanced compatibility test completed with detailed report`);
     }
 
     // 确保返回成功状态
@@ -2672,7 +2710,7 @@ router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddlewa
     };
     res.json(response);
   } catch (error) {
-    console.error('兼容性测试失败:', error);
+    logger.error('兼容性测试失败:', error);
     res.serverError('兼容性测试失败');
   }
 }));
@@ -2685,223 +2723,192 @@ router.post('/caniuse', optionalAuth, testRateLimiter, asyncHandler(async (req, 
   const { url, features = [], browsers = [] } = req.body;
 
   try {
-    console.log(`🔍 Starting Can I Use compatibility test for: ${url}`);
+    logger.info(`🔍 Starting Can I Use compatibility test for: ${url}`);
 
     // 真实的Can I Use兼容性分析
     const realResult = await performRealCompatibilityAnalysis(url, features, browsers);
 
-    console.log(`✅ Can I Use test completed with score: ${realResult.overallScore}`);
+    logger.info(`✅ Can I Use test completed with score: ${realResult.overallScore}`);
 
     res.success(realResult);
   } catch (error) {
-    console.error('Can I Use测试失败:', error);
+    logger.error('Can I Use测试失败:', error);
     res.serverError('Can I Use测试失败');
   }
 }));
 
 /**
- * BrowserStack 兼容性测试
+ * BrowserStack 兼容性测试 (MVP - 功能开发中)
  * POST /api/test/browserstack
+ * @deprecated 此功能尚未完成，当前返回模拟数据用于开发测试
  */
-router.post('/browserstack', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, browsers = [], features = [] } = req.body;
+router.post('/browserstack', 
+  optionalAuth, 
+  testRateLimiter, 
+  validateRequestBody(['url']),
+  asyncHandler(async (req, res) => {
+    const { url, browsers = [], features = [] } = req.body;
 
-  try {
-    console.log(`🔍 Starting BrowserStack compatibility test for: ${url}`);
+    logger.warn('⚠️ BrowserStack功能尚未实现，返回模拟数据');
 
-    // 模拟BrowserStack测试结果
-    const mockResult = {
-      score: Math.floor(Math.random() * 30) + 70,
-      matrix: {},
-      browserSupport: {},
-      featureSupport: {},
-      issues: [],
-      recommendations: [],
-      statistics: {
-        totalFeatures: features.length,
-        supportedFeatures: Math.floor(features.length * 0.85),
-        partiallySupported: Math.floor(features.length * 0.1),
-        unsupportedFeatures: Math.floor(features.length * 0.05),
-        criticalIssues: Math.floor(Math.random() * 2),
-        averageSupport: Math.floor(Math.random() * 30) + 70
-      },
-      reportUrl: `https://browserstack.com/test-report/${Date.now()}`
-    };
+    // 在生产环境中禁用模拟数据
+    if (process.env.NODE_ENV === 'production') {
+      return res.error('FEATURE_NOT_IMPLEMENTED', 
+        'BrowserStack集成需要企业版订阅，请联系管理员', 
+        402); // Payment Required
+    }
 
-    console.log(`✅ BrowserStack test completed with score: ${mockResult.score}`);
-
-    res.success(mockResult);
-  } catch (error) {
-    console.error('BrowserStack测试失败:', error);
-    res.serverError('BrowserStack测试失败');
-  }
-}));
-
-/**
- * 特性检测兼容性测试
- * POST /api/test/feature-detection
- */
-router.post('/feature-detection', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, features = [], browsers = [], options = {} } = req.body;
-
-  try {
-    console.log(`🔍 Starting feature detection compatibility test for: ${url}`);
-
-    // 模拟特性检测结果
-    const featureDetectionResults = {};
-    const browserCompatibility = {};
-    const detectedIssues = [];
-    const recommendations = [];
-
-    // 为每个特性生成检测结果
-    features.forEach(feature => {
-      featureDetectionResults[feature] = {
-        supported: Math.random() > 0.2, // 80%的特性被支持
-        supportLevel: Math.random() > 0.5 ? 'full' : 'partial',
-        polyfillAvailable: Math.random() > 0.3,
-        fallbackRequired: Math.random() > 0.7,
-        browserSupport: {}
+    try {
+      const mockResult = {
+        _meta: {
+          isMock: true,
+          message: '这是模拟数据，仅用于前端开发测试',
+          implementation: 'mvp',
+          requiresEnterpriseSubscription: true
+        },
+        score: 85,  // 固定值
+        matrix: {},
+        browserSupport: {},
+        featureSupport: {},
+        issues: [],
+        recommendations: [
+          {
+            id: 'enterprise-feature',
+            title: 'BrowserStack集成需要企业版',
+            description: '此功能需要BrowserStack API凭据和企业版订阅',
+            priority: 'high'
+          }
+        ],
+        statistics: {
+          totalFeatures: features.length,
+          supportedFeatures: Math.floor(features.length * 0.85),
+          partiallySupported: Math.floor(features.length * 0.1),
+          unsupportedFeatures: Math.floor(features.length * 0.05),
+          criticalIssues: 0,
+          averageSupport: 85
+        },
+        reportUrl: null  // 模拟环境无真实报告
       };
 
-      // 为每个浏览器生成特性支持情况
-      browsers.forEach(browser => {
-        const supportChance = Math.random();
-        featureDetectionResults[feature].browserSupport[browser.browser] = {
-          supported: supportChance > 0.15,
-          version: browser.version,
-          notes: supportChance < 0.15 ? '需要polyfill' : supportChance < 0.5 ? '部分支持' : '完全支持'
+      res.success(mockResult, 'MVP模拟数据 - 需要BrowserStack订阅');
+    } catch (error) {
+      logger.error('BrowserStack测试失败:', error);
+      res.serverError('BrowserStack测试失败');
+    }
+  }
+));
+
+/**
+ * 特性检测兼容性测试 (MVP - 功能开发中)
+ * POST /api/test/feature-detection
+ * @deprecated 此功能尚未完成，当前返回模拟数据用于开发测试
+ */
+router.post('/feature-detection', 
+  optionalAuth, 
+  testRateLimiter, 
+  validateRequestBody(['url']),
+  asyncHandler(async (req, res) => {
+    const { url, features = [], browsers = [] } = req.body;
+
+    logger.warn('⚠️ 特性检测功能尚未实现，返回模拟数据');
+
+    // 生产环境禁用
+    if (process.env.NODE_ENV === 'production') {
+      return res.error('FEATURE_NOT_IMPLEMENTED', 
+        '特性检测集成功能正在开发中，暂时不可用', 
+        501);
+    }
+
+    try {
+      // 使用固定值代替随机数
+      const featureDetectionResults = {};
+      const browserCompatibility = {};
+      const recommendations = [];
+
+      // 为每个特性生成固定的检测结果
+      features.forEach((feature, index) => {
+        // 使用index生成确定性结果，而非随机数
+        const supportPercentage = 85 - (index % 3) * 5; // 85%, 80%, 75% 循环
+        
+        featureDetectionResults[feature] = {
+          supported: supportPercentage >= 80,
+          supportLevel: supportPercentage >= 85 ? 'full' : 'partial',
+          polyfillAvailable: true,
+          fallbackRequired: supportPercentage < 80,
+          browserSupport: {}
+        };
+
+        // 为每个浏览器生成特性支持情况
+        browsers.forEach((browser, bIndex) => {
+          const browserSupport = bIndex < 3; // 前3个浏览器支持
+          featureDetectionResults[feature].browserSupport[browser.browser] = {
+            supported: browserSupport,
+            version: browser.version,
+            notes: browserSupport ? '完全支持' : '需要polyfill'
+          };
+        });
+      });
+
+      // 生成浏览器兼容性总结
+      browsers.forEach((browser, bIndex) => {
+        const supportedFeatures = features.filter((feature, fIndex) =>
+          fIndex % 4 !== 3 // 75%的特性支持
+        ).length;
+
+        browserCompatibility[browser.browser] = {
+          score: Math.floor((supportedFeatures / (features.length || 1)) * 100),
+          supportedFeatures,
+          totalFeatures: features.length,
+          marketShare: browser.marketShare || 15,  // 固定值
+          version: browser.version
         };
       });
-    });
 
-    // 生成浏览器兼容性总结
-    browsers.forEach(browser => {
-      const supportedFeatures = features.filter(feature =>
-        featureDetectionResults[feature]?.browserSupport[browser.browser]?.supported
-      ).length;
+      const overallScore = features.length > 0 
+        ? Math.floor(features.filter((f, i) => i % 4 !== 3).length / features.length * 100)
+        : 85;
 
-      browserCompatibility[browser.browser] = {
-        score: Math.floor((supportedFeatures / features.length) * 100),
-        supportedFeatures,
-        totalFeatures: features.length,
-        marketShare: browser.marketShare || Math.random() * 20,
-        version: browser.version
+      const mockResult = {
+        _meta: {
+          isMock: true,
+          message: '这是模拟数据，仅用于前端开发测试',
+          implementation: 'mvp',
+          realImplementationRequired: true,
+          note: '真实实现需要集成caniuse数据库或Modernizr API'
+        },
+        score: overallScore,
+        featureDetection: featureDetectionResults,
+        browserCompatibility,
+        matrix: featureDetectionResults,
+        browserSupport: browserCompatibility,
+        featureSupport: featureDetectionResults,
+        issues: [],
+        recommendations: [
+          {
+            id: 'use-real-feature-detection',
+            title: '集成真实的特性检测',
+            description: '建议集成caniuse-api或Modernizr进行真实的特性检测',
+            priority: 'high'
+          }
+        ],
+        statistics: {
+          totalFeatures: features.length,
+          supportedFeatures: features.filter((f, i) => i % 4 !== 3).length,
+          partiallySupported: Math.floor(features.length * 0.1),
+          unsupportedFeatures: Math.floor(features.length * 0.15),
+          criticalIssues: 0,
+          averageSupport: overallScore
+        }
       };
-    });
 
-    // 生成兼容性问题
-    const unsupportedFeatures = features.filter(feature =>
-      !featureDetectionResults[feature]?.supported
-    );
-
-    unsupportedFeatures.forEach(feature => {
-      detectedIssues.push({
-        id: `${feature}-compatibility`,
-        feature,
-        category: feature.includes('css') ? 'css' : feature.includes('js') || feature.includes('es6') ? 'javascript' : 'html5',
-        severity: Math.random() > 0.5 ? 'high' : 'medium',
-        description: `${feature} 在某些浏览器中不被支持`,
-        impact: '可能影响功能正常使用',
-        solution: `考虑使用 ${feature} 的polyfill或替代方案`,
-        polyfill: `${feature}-polyfill`,
-        workaround: '使用特性检测并提供回退方案'
-      });
-    });
-
-    // 生成建议
-    if (detectedIssues.length > 0) {
-      recommendations.push({
-        id: 'feature-detection-strategy',
-        title: '实施特性检测策略',
-        description: '使用Modernizr等工具进行特性检测，并为不支持的特性提供回退方案',
-        priority: 'high',
-        effort: 'medium',
-        impact: 'high'
-      });
+      res.success(mockResult, 'MVP模拟数据 - 需要集成caniuse API');
+    } catch (error) {
+      logger.error('特性检测测试失败:', error);
+      res.serverError('特性检测测试失败');
     }
-
-    if (unsupportedFeatures.length > features.length * 0.3) {
-      recommendations.push({
-        id: 'polyfill-strategy',
-        title: '使用Polyfill库',
-        description: '集成core-js等polyfill库来支持现代JavaScript特性',
-        priority: 'high',
-        effort: 'low',
-        impact: 'high'
-      });
-    }
-
-    const overallScore = Math.floor(
-      Object.values(browserCompatibility).reduce((sum, browser) => sum + browser.score, 0) /
-      Object.keys(browserCompatibility).length
-    );
-
-    const mockResult = {
-      score: overallScore,
-      featureDetection: featureDetectionResults,
-      browserCompatibility,
-      matrix: featureDetectionResults,
-      browserSupport: browserCompatibility,
-      featureSupport: featureDetectionResults,
-      issues: detectedIssues,
-      recommendations,
-      statistics: {
-        totalFeatures: features.length,
-        supportedFeatures: features.filter(f => featureDetectionResults[f]?.supported).length,
-        partiallySupported: features.filter(f =>
-          featureDetectionResults[f]?.supportLevel === 'partial'
-        ).length,
-        unsupportedFeatures: unsupportedFeatures.length,
-        criticalIssues: detectedIssues.filter(i => i.severity === 'critical').length,
-        averageSupport: overallScore
-      }
-    };
-
-    console.log(`✅ Feature detection test completed with score: ${mockResult.score}`);
-
-    res.success(mockResult);
-  } catch (error) {
-    console.error('特性检测测试失败:', error);
-    res.serverError('特性检测测试失败');
   }
-}));
+));
 
-/**
- * 特性检测测试
- * POST /api/test/feature-detection
- */
-router.post('/feature-detection', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, features = [], options = {} } = req.body;
-
-  try {
-    console.log(`🔍 Starting feature detection test for: ${url}`);
-
-    // 模拟特性检测结果
-    const mockResult = {
-      score: Math.floor(Math.random() * 25) + 75,
-      matrix: {},
-      browserSupport: {},
-      featureSupport: {},
-      issues: [],
-      recommendations: [],
-      statistics: {
-        totalFeatures: features.length,
-        supportedFeatures: Math.floor(features.length * 0.9),
-        partiallySupported: Math.floor(features.length * 0.05),
-        unsupportedFeatures: Math.floor(features.length * 0.05),
-        criticalIssues: 0,
-        averageSupport: Math.floor(Math.random() * 25) + 75
-      }
-    };
-
-    console.log(`✅ Feature detection test completed with score: ${mockResult.score}`);
-
-    res.success(mockResult);
-  } catch (error) {
-    console.error('特性检测测试失败:', error);
-    res.serverError('特性检测测试失败');
-  }
-}));
 
 /**
  * 本地兼容性测试
@@ -2911,7 +2918,7 @@ router.post('/local-compatibility', optionalAuth, testRateLimiter, asyncHandler(
   const { url, features = [], browsers = [], timeout = 30000 } = req.body;
 
   try {
-    console.log(`🔍 Starting local compatibility test for: ${url}`);
+    logger.info(`🔍 Starting local compatibility test for: ${url}`);
 
     // 模拟本地兼容性测试结果
     const mockResult = {
@@ -2931,11 +2938,11 @@ router.post('/local-compatibility', optionalAuth, testRateLimiter, asyncHandler(
       }
     };
 
-    console.log(`✅ Local compatibility test completed with score: ${mockResult.score}`);
+    logger.info(`✅ Local compatibility test completed with score: ${mockResult.score}`);
 
     res.success(mockResult);
   } catch (error) {
-    console.error('本地兼容性测试失败:', error);
+    logger.error('本地兼容性测试失败:', error);
     res.serverError('本地兼容性测试失败');
   }
 }));
@@ -2951,7 +2958,7 @@ router.post('/performance/resources', optionalAuth, testRateLimiter, validateURL
   const validatedURL = req.validatedURL.url.toString();
 
   try {
-    console.log(`🔍 Starting resource analysis for: ${validatedURL}`);
+    logger.info(`🔍 Starting resource analysis for: ${validatedURL}`);
 
     // 使用网站测试引擎进行资源分析
     const testResult = await apiEngine.runTest(validatedURL, {
@@ -2992,7 +2999,7 @@ router.post('/performance/resources', optionalAuth, testRateLimiter, validateURL
     res.success(resourceAnalysis);
 
   } catch (error) {
-    console.error('❌ Resource analysis failed:', error);
+    logger.error('❌ Resource analysis failed:', error);
     res.serverError('资源分析失败');
   }
 }));
@@ -3035,7 +3042,7 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
 
     // 插入主表数据
     const sessionInsertQuery = `
-      INSERT INTO test_sessions (
+      INSERT INTO test_history (
         id, user_id, test_name, test_type, url, status, start_time, end_time, duration,
         overall_score, grade, config, environment, tags, description, created_at, updated_at
       ) VALUES (
@@ -3119,12 +3126,12 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
 
     await query(performanceInsertQuery, performanceValues);
 
-    console.log(`✅ Performance test result saved:`, sessionId);
+    logger.info(`✅ Performance test result saved:`, sessionId);
 
     res.success(sessionId, '性能测试结果已保存');
 
   } catch (error) {
-    console.error('❌ Failed to save performance test result:', error);
+    logger.error('❌ Failed to save performance test result:', error);
     res.serverError('保存性能测试结果失败');
   }
 }));
@@ -3138,7 +3145,7 @@ router.post('/pagespeed', optionalAuth, testRateLimiter, validateURLMiddleware()
   const validatedURL = req.validatedURL.url.toString();
 
   try {
-    console.log(`🚀 Starting Google PageSpeed test for: ${validatedURL}`);
+    logger.info(`🚀 Starting Google PageSpeed test for: ${validatedURL}`);
 
     // 模拟Google PageSpeed Insights结果
     const mockResult = {
@@ -3169,11 +3176,11 @@ router.post('/pagespeed', optionalAuth, testRateLimiter, validateURLMiddleware()
       }
     };
 
-    console.log(`✅ PageSpeed test completed with score: ${mockResult.desktop.performanceScore}`);
+    logger.info(`✅ PageSpeed test completed with score: ${mockResult.desktop.performanceScore}`);
 
     res.success(mockResult);
   } catch (error) {
-    console.error('PageSpeed测试失败:', error);
+    logger.error('PageSpeed测试失败:', error);
     res.serverError('PageSpeed测试失败');
   }
 }));
@@ -3186,7 +3193,7 @@ router.post('/gtmetrix', optionalAuth, testRateLimiter, asyncHandler(async (req,
   const { url, device = 'desktop', location = 'vancouver' } = req.body;
 
   try {
-    console.log(`🚀 Starting GTmetrix test for: ${url}`);
+    logger.info(`🚀 Starting GTmetrix test for: ${url}`);
 
     // 模拟GTmetrix测试结果
     const mockResult = {
@@ -3223,11 +3230,11 @@ router.post('/gtmetrix', optionalAuth, testRateLimiter, asyncHandler(async (req,
       reportUrl: `https://gtmetrix.com/reports/${Date.now()}`
     };
 
-    console.log(`✅ GTmetrix test completed with performance score: ${mockResult.scores.performance}`);
+    logger.info(`✅ GTmetrix test completed with performance score: ${mockResult.scores.performance}`);
 
     res.success(mockResult);
   } catch (error) {
-    console.error('GTmetrix测试失败:', error);
+    logger.error('GTmetrix测试失败:', error);
     res.serverError('GTmetrix测试失败');
   }
 }));
@@ -3240,7 +3247,7 @@ router.post('/webpagetest', optionalAuth, testRateLimiter, asyncHandler(async (r
   const { url, device = 'desktop', location = 'Dulles', runs = 1 } = req.body;
 
   try {
-    console.log(`🚀 Starting WebPageTest for: ${url}`);
+    logger.info(`🚀 Starting WebPageTest for: ${url}`);
 
     // 模拟WebPageTest结果
     const mockResult = {
@@ -3266,11 +3273,11 @@ router.post('/webpagetest', optionalAuth, testRateLimiter, asyncHandler(async (r
       reportUrl: `https://webpagetest.org/result/${Date.now()}`
     };
 
-    console.log(`✅ WebPageTest completed with score: ${mockResult.score}`);
+    logger.info(`✅ WebPageTest completed with score: ${mockResult.score}`);
 
     res.success(mockResult);
   } catch (error) {
-    console.error('WebPageTest测试失败:', error);
+    logger.error('WebPageTest测试失败:', error);
     res.serverError('WebPageTest测试失败');
   }
 }));
@@ -3283,7 +3290,7 @@ router.post('/lighthouse', optionalAuth, testRateLimiter, asyncHandler(async (re
   const { url, device = 'desktop', throttling = 'none' } = req.body;
 
   try {
-    console.log(`🚀 Starting Lighthouse test for: ${url}`);
+    logger.info(`🚀 Starting Lighthouse test for: ${url}`);
 
     // 模拟Lighthouse结果
     const mockResult = {
@@ -3334,11 +3341,11 @@ router.post('/lighthouse', optionalAuth, testRateLimiter, asyncHandler(async (re
       reportUrl: `https://lighthouse-report.com/${Date.now()}`
     };
 
-    console.log(`✅ Lighthouse test completed with score: ${mockResult.lhr.categories.performance.score}`);
+    logger.info(`✅ Lighthouse test completed with score: ${mockResult.lhr.categories.performance.score}`);
 
     res.success(mockResult);
   } catch (error) {
-    console.error('Lighthouse测试失败:', error);
+    logger.error('Lighthouse测试失败:', error);
     res.serverError('Lighthouse测试失败');
   }
 }));
@@ -3351,7 +3358,7 @@ router.post('/local-performance', optionalAuth, testRateLimiter, asyncHandler(as
   const { url, device = 'desktop', timeout = 30000 } = req.body;
 
   try {
-    console.log(`🚀 Starting local performance test for: ${url}`);
+    logger.info(`🚀 Starting local performance test for: ${url}`);
 
     // 模拟本地性能测试结果
     const mockResult = {
@@ -3376,11 +3383,11 @@ router.post('/local-performance', optionalAuth, testRateLimiter, asyncHandler(as
       diagnostics: []
     };
 
-    console.log(`✅ Local performance test completed with score: ${mockResult.score}`);
+    logger.info(`✅ Local performance test completed with score: ${mockResult.score}`);
 
     res.success(mockResult);
   } catch (error) {
-    console.error('本地性能测试失败:', error);
+    logger.error('本地性能测试失败:', error);
     res.serverError('本地性能测试失败');
   }
 }));
@@ -3411,7 +3418,7 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
 
     res.success(testResult);
   } catch (error) {
-    console.error('用户体验测试失败:', error);
+    logger.error('用户体验测试失败:', error);
     res.serverError('用户体验测试失败');
   }
 }));
@@ -3480,7 +3487,7 @@ router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyn
   const validatedURL = req.validatedURL.url.toString();
 
   try {
-    console.log(`🔍 Starting SEO test for: ${validatedURL}`);
+    logger.info(`🔍 Starting SEO test for: ${validatedURL}`);
 
     // 重定向到现有的SEO API
     const seoResponse = await fetch(`${req.protocol}://${req.get('host')}/api/seo/analyze`, {
@@ -3500,7 +3507,7 @@ router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyn
     res.success(seoResult);
 
   } catch (error) {
-    console.error('❌ SEO test failed:', error);
+    logger.error('❌ SEO test failed:', error);
     res.serverError('SEO测试失败');
   }
 }));
@@ -3530,7 +3537,7 @@ router.post('/accessibility', optionalAuth, testRateLimiter, validateURLMiddlewa
     res.success(accessibilityResult.data);
 
   } catch (error) {
-    console.error('❌ Accessibility test failed:', error);
+    logger.error('❌ Accessibility test failed:', error);
     res.status(500).json({
       success: false,
       error: error.message || '无障碍测试失败'
@@ -3570,7 +3577,7 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
   }
 
   try {
-    console.log(`📊 Testing ${endpoints.length} endpoints`);
+    logger.info(`📊 Testing ${endpoints.length} endpoints`);
 
     // 准备测试配置
     const testConfig = {
@@ -3607,7 +3614,7 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
     };
     res.json(response);
   } catch (error) {
-    console.error('API测试失败:', error);
+    logger.error('API测试失败:', error);
     res.serverError('API测试失败');
   }
 }));
@@ -3654,7 +3661,7 @@ router.post('/content', optionalAuth, testRateLimiter, asyncHandler(async (req, 
     
     res.success(result);
   } catch (error) {
-    console.error('内容测试失败:', error);
+    logger.error('内容测试失败:', error);
     res.serverError('内容测试失败');
   }
 }));
@@ -3703,7 +3710,7 @@ router.post('/network', optionalAuth, testRateLimiter, asyncHandler(async (req, 
     
     res.success(result);
   } catch (error) {
-    console.error('网络测试失败:', error);
+    logger.error('网络测试失败:', error);
     res.serverError('网络测试失败');
   }
 }));
@@ -3758,7 +3765,7 @@ router.post('/infrastructure', optionalAuth, testRateLimiter, asyncHandler(async
     
     res.success(result);
   } catch (error) {
-    console.error('基础设施测试失败:', error);
+    logger.error('基础设施测试失败:', error);
     res.serverError('基础设施测试失败');
   }
 }));
@@ -3773,18 +3780,17 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
   try {
     // 使用软删除方式删除测试记录
     const result = await query(
-      'UPDATE test_sessions SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
+      'UPDATE test_history SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
       [testId, req.user.id]
     );
 
     if (result.rowCount === 0) {
-
       return res.notFound('资源', '测试结果不存在');
     }
 
     res.success('测试结果已删除');
   } catch (error) {
-    console.error('删除测试结果失败:', error);
+    logger.error('删除测试结果失败:', error);
     res.serverError('删除测试结果失败');
   }
 }));
@@ -3797,7 +3803,7 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/k6/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'k6',
       available: false,
       version: 'unknown',
@@ -3824,7 +3830,7 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
 
     res.success(engineStatus);
   } catch (error) {
-    console.error('K6 status check failed:', error);
+    logger.error('K6 status check failed:', error);
     res.serverError('K6状态检查失败');
   }
 }));
@@ -3835,7 +3841,7 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
  */
 router.get('/lighthouse/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'lighthouse',
       available: false,
       version: 'unknown',
@@ -3855,7 +3861,7 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
 
     res.success(engineStatus);
   } catch (error) {
-    console.error('Lighthouse status check failed:', error);
+    logger.error('Lighthouse status check failed:', error);
     res.serverError('Lighthouse状态检查失败');
   }
 }));
@@ -3866,7 +3872,7 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
  */
 router.get('/playwright/status', asyncHandler(async (req, res) => {
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: 'playwright',
       available: false,
       version: 'unknown',
@@ -3886,7 +3892,7 @@ router.get('/playwright/status', asyncHandler(async (req, res) => {
 
     res.success(engineStatus);
   } catch (error) {
-    console.error('Playwright status check failed:', error);
+    logger.error('Playwright status check failed:', error);
     res.serverError('Playwright状态检查失败');
   }
 }));
@@ -3899,7 +3905,7 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
   const { engine } = req.params;
 
   try {
-    let engineStatus = {
+    const engineStatus = {
       name: engine,
       available: false,
       version: 'unknown',
@@ -3969,7 +3975,7 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
     res.success(engineStatus);
 
   } catch (error) {
-    console.error(`获取${engine}引擎状态失败:`, error);
+    logger.error(`获取${engine}引擎状态失败:`, error);
     res.serverError('获取${engine}引擎状态失败');
   }
 }));
@@ -4121,7 +4127,7 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
       exitIp = responseData.origin;
     }
 
-    console.log(`✅ 通过代理获取到出口IP: ${exitIp}`);
+    logger.info(`✅ 通过代理获取到出口IP: ${exitIp}`);
 
     // 获取出口IP的地理位置信息
     let locationInfo = null;
@@ -4131,7 +4137,7 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
         if (locationInfo) {
         }
       } catch (geoError) {
-        console.warn('获取出口IP地理位置信息失败:', geoError.message);
+        logger.warn('获取出口IP地理位置信息失败:', geoError.message);
       }
     }
 
@@ -4139,7 +4145,7 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
     let networkLatency = null;
     if (exitIp && exitIp !== '未知') {
       try {
-        console.log(`🔍 测试到出口IP ${exitIp} 的网络延迟...`);
+        logger.info(`🔍 测试到出口IP ${exitIp} 的网络延迟...`);
         const ping = require('ping');
         const pingResult = await ping.promise.probe(exitIp, {
           timeout: 5,
@@ -4150,12 +4156,12 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
           // 处理不同平台的ping结果
           const avgTime = pingResult.avg || pingResult.time || pingResult.min;
           networkLatency = Math.round(parseFloat(avgTime) || 0);
-          console.log(`📊 到出口IP的网络延迟: ${networkLatency}ms`);
+          logger.info(`📊 到出口IP的网络延迟: ${networkLatency}ms`);
         } else {
-          console.log(`⚠️ 无法ping通出口IP ${exitIp}`);
+          logger.info(`⚠️ 无法ping通出口IP ${exitIp}`);
         }
       } catch (pingError) {
-        console.warn('ping测试失败:', pingError.message);
+        logger.warn('ping测试失败:', pingError.message);
       }
     }
 
@@ -4183,7 +4189,7 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
 
   } catch (error) {
     const totalTime = Date.now() - startTime;
-    console.error('❌ 代理延迟测试失败:', error);
+    logger.error('❌ 代理延迟测试失败:', error);
 
     let errorMessage = '代理延迟测试失败';
     let errorCode = 'PROXY_LATENCY_TEST_FAILED';
@@ -4313,7 +4319,7 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       proxyIp = testResponseData.origin;
     }
 
-    console.log(`✅ 代理连接测试成功: ${proxy.host}:${proxyPort}, 获取到代理IP: ${proxyIp}`);
+    logger.info(`✅ 代理连接测试成功: ${proxy.host}:${proxyPort}, 获取到代理IP: ${proxyIp}`);
 
     // 查询IP地理位置信息（本地数据库查询，很快）
     let locationInfo = null;
@@ -4323,7 +4329,7 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
         if (locationInfo) {
         }
       } catch (geoError) {
-        console.warn('获取IP地理位置信息失败:', geoError.message);
+        logger.warn('获取IP地理位置信息失败:', geoError.message);
       }
     }
 
@@ -4331,8 +4337,9 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
     let networkLatency = null;
     if (proxyIp && proxyIp !== '未知') {
       try {
-        console.log(`🔍 测试到代理IP ${proxyIp} 的网络延迟...`);
+        logger.info(`🔍 测试到代理IP ${proxyIp} 的网络延迟...`);
         const ping = require('ping');
+const logger = require('../utils/logger');
         const pingResult = await ping.promise.probe(proxyIp, {
           timeout: 3,
           extra: ['-c', '3'] // ping 3次取平均值
@@ -4340,12 +4347,12 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
 
         if (pingResult.alive) {
           networkLatency = Math.round(parseFloat(pingResult.avg));
-          console.log(`📊 网络延迟: ${networkLatency}ms`);
+          logger.info(`📊 网络延迟: ${networkLatency}ms`);
         } else {
-          console.log(`⚠️ 无法ping通代理IP ${proxyIp}`);
+          logger.info(`⚠️ 无法ping通代理IP ${proxyIp}`);
         }
       } catch (pingError) {
-        console.warn('ping测试失败:', pingError.message);
+        logger.warn('ping测试失败:', pingError.message);
       }
     }
 
@@ -4368,7 +4375,7 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
     res.json(responseData);
 
   } catch (error) {
-    console.error('❌ 代理连接测试失败:', error);
+    logger.error('❌ 代理连接测试失败:', error);
 
     let errorMessage = '代理连接失败';
     let errorCode = error.code || 'PROXY_TEST_FAILED';
@@ -4442,7 +4449,7 @@ router.post('/geo-update', optionalAuth, asyncHandler(async (req, res) => {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('手动更新失败:', error);
+    logger.error('手动更新失败:', error);
     res.serverError('更新过程中发生错误');
   }
 }));
@@ -4467,7 +4474,7 @@ router.put('/geo-config', optionalAuth, asyncHandler(async (req, res) => {
 
     res.success(status, '配置更新成功');
   } catch (error) {
-    console.error('配置更新失败:', error);
+    logger.error('配置更新失败:', error);
     res.serverError('配置更新失败');
   }
 }));
@@ -4485,7 +4492,7 @@ router.post('/proxy-analyze', optionalAuth, asyncHandler(async (req, res) => {
       return res.validationError([], '缺少代理配置信息');
     }
 
-    console.log('🔍 开始分析代理配置:', `${proxy.host}:${proxy.port}`);
+    logger.info('🔍 开始分析代理配置:', `${proxy.host}:${proxy.port}`);
 
     const validator = new ProxyValidator();
     const analysis = await validator.analyzeProxy(proxy);
@@ -4493,7 +4500,7 @@ router.post('/proxy-analyze', optionalAuth, asyncHandler(async (req, res) => {
     res.success(analysis, '代理分析完成');
 
   } catch (error) {
-    console.error('代理分析失败:', error);
+    logger.error('代理分析失败:', error);
     res.serverError('代理分析失败');
   }
 }));

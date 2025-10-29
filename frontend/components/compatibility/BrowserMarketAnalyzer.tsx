@@ -134,7 +134,7 @@ export const BrowserMarketAnalyzer: React.FC<BrowserMarketAnalyzerProps> = ({
       totalRevenueAtRisk,
       averageConversionImpact,
       totalFixCost,
-      estimatedFixTime,
+      estimatedFixTime: totalFixTime,
       roi,
       prioritizedIssues,
       recommendations

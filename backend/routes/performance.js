@@ -137,7 +137,7 @@ router.post('/test', asyncHandler(async (req, res) => {
 router.delete('/cleanup', asyncHandler(async (req, res) => {
   const { type } = req.query;
 
-  let cleaned = [];
+  const cleaned = [];
 
   if (!type || type === 'cache') {
     cacheMiddleware.clearAllCache();

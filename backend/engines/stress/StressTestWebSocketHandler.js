@@ -105,7 +105,7 @@ class StressTestWebSocketHandler {
 
     // 计算当前步骤
     let currentStep = '准备中';
-    let totalSteps = 4;
+    const totalSteps = 4;
     
     if (progress < 10) {
       currentStep = '初始化连接';

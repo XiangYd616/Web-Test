@@ -7,6 +7,7 @@ const fetch = require('node-fetch');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const { HttpProxyAgent } = require('http-proxy-agent');
 const AbortController = require('abort-controller');
+const logger = require('../utils/logger');
 
 class ProxyValidator {
   constructor() {
@@ -208,7 +209,7 @@ class ProxyValidator {
    * 完整的代理分析
    */
   async analyzeProxy(proxyConfig) {
-    console.log('🔍 开始代理分析...');
+    logger.info('🔍 开始代理分析...');
 
     const validation = await this.validateProxy(proxyConfig);
     const recommendation = this.getRecommendedTestMode(proxyConfig);
@@ -223,7 +224,7 @@ class ProxyValidator {
       }
     };
 
-    console.log('📊 代理分析完成:', analysis.summary);
+    logger.info('📊 代理分析完成:', analysis.summary);
     return analysis;
   }
 }

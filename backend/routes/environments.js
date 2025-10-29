@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const EnvironmentManager = require('../services/environments/EnvironmentManager');
+const logger = require('../utils/logger');
 
 // 初始化环境管理器
 let environmentManager;
@@ -15,7 +16,7 @@ try {
     encryptionKey: process.env.ENVIRONMENT_ENCRYPTION_KEY
   });
 } catch (error) {
-  console.error('环境管理器初始化失败:', error);
+  logger.error('环境管理器初始化失败:', error);
 }
 
 /**
@@ -537,7 +538,7 @@ router.get('/history/variables', async (req, res) => {
  * 错误处理中间件
  */
 router.use((err, req, res, next) => {
-  console.error('环境管理API错误:', err);
+  logger.error('环境管理API错误:', err);
   res.status(500).json({
     success: false,
     error: '内部服务器错误',
