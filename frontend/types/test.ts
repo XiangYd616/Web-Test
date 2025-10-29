@@ -67,6 +67,10 @@ export interface TestResult {
     overall?: number;
     [key: string]: any;
   };
+  // 历史记录相关属性
+  createdAt?: Date;
+  updatedAt?: Date;
+  url?: string;
 }
 
 export interface TestRecord {

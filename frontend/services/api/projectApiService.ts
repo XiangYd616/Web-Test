@@ -23,7 +23,7 @@ class ProjectApiService {
   /**
    * 获取用户项目列表
    */
-  async getProjects(query?: any): Promise<ProjectListResponse> {
+  async getProjects(query?: any): Promise<ApiResponse<ProjectListResponse>> {
     const queryParams = new URLSearchParams();
 
     if (query?.page) queryParams.append('page', query?.page.toString());
@@ -34,28 +34,28 @@ class ProjectApiService {
     if (query?.order) queryParams.append('order', query?.order);
 
     const url = `${this.baseUrl}/projects${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return apiService.get(url);
+    return apiService.get<ProjectListResponse>(url);
   }
 
   /**
    * 创建新项目
    */
-  async createProject(projectData: CreateProjectRequest): Promise<ProjectResponse> {
-    return apiService.post(`${this.baseUrl}/projects`, projectData);
+  async createProject(projectData: CreateProjectRequest): Promise<ApiResponse<ProjectResponse>> {
+    return apiService.post<ProjectResponse>(`${this.baseUrl}/projects`, projectData);
   }
 
   /**
    * 获取特定项目详情
    */
-  async getProject(projectId: string): Promise<ProjectResponse> {
-    return apiService.get(`${this.baseUrl}/projects/${projectId}`);
+  async getProject(projectId: string): Promise<ApiResponse<ProjectResponse>> {
+    return apiService.get<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`);
   }
 
   /**
    * 更新项目信息
    */
-  async updateProject(projectId: string, updates: UpdateProjectRequest): Promise<ProjectResponse> {
-    return apiService.put(`${this.baseUrl}/projects/${projectId}`, updates);
+  async updateProject(projectId: string, updates: UpdateProjectRequest): Promise<ApiResponse<ProjectResponse>> {
+    return apiService.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, updates);
   }
 
   /**
@@ -68,18 +68,18 @@ class ProjectApiService {
   /**
    * 获取项目统计信息
    */
-  async getProjectStats(projectId?: string): Promise<ProjectStatsResponse> {
+  async getProjectStats(projectId?: string): Promise<ApiResponse<ProjectStatsResponse>> {
     const url = projectId
       ? `${this.baseUrl}/projects/${projectId}/stats`
       : `${this.baseUrl}/projects/stats`;
-    return apiService.get(url);
+    return apiService.get<ProjectStatsResponse>(url);
   }
 
   /**
    * 归档项目
    */
-  async archiveProject(projectId: string): Promise<ProjectResponse> {
-    return apiService.put(`${this.baseUrl}/projects/${projectId}`, {
+  async archiveProject(projectId: string): Promise<ApiResponse<ProjectResponse>> {
+    return apiService.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, {
       status: 'archived'
     });
   }
@@ -87,8 +87,8 @@ class ProjectApiService {
   /**
    * 恢复已归档的项目
    */
-  async restoreProject(projectId: string): Promise<ProjectResponse> {
-    return apiService.put(`${this.baseUrl}/projects/${projectId}`, {
+  async restoreProject(projectId: string): Promise<ApiResponse<ProjectResponse>> {
+    return apiService.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, {
       status: 'active'
     });
   }
@@ -100,8 +100,8 @@ class ProjectApiService {
     projectId: string,
     newName: string,
     includeTests: boolean = true
-  ): Promise<ProjectResponse> {
-    return apiService.post(`${this.baseUrl}/projects/${projectId}/duplicate`, {
+  ): Promise<ApiResponse<ProjectResponse>> {
+    return apiService.post<ProjectResponse>(`${this.baseUrl}/projects/${projectId}/duplicate`, {
       name: newName,
       include_tests: includeTests
     });
@@ -124,11 +124,11 @@ class ProjectApiService {
   /**
    * 导入项目数据
    */
-  async importProject(file: File): Promise<ProjectResponse> {
+  async importProject(file: File): Promise<ApiResponse<ProjectResponse>> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return apiService.post(`${this.baseUrl}/projects/import`, formData, {
+    return apiService.post<ProjectResponse>(`${this.baseUrl}/projects/import`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

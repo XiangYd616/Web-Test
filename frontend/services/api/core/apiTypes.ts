@@ -44,10 +44,10 @@ export type TestConfig = StandardTestConfig;
 export type TestResult = StandardTestResult;
 export type TestProgress = StandardTestProgress;
 
-export interface RequestConfig extends RequestInit {
+export interface RequestConfig extends Omit<RequestInit, 'cache'> {
   timeout?: number;
   retries?: number;
-  cache?: boolean;
+  cache?: boolean | RequestCache;
   retryDelay?: number;
   metadata?: Record<string, any>;
 }

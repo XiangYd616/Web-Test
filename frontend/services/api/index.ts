@@ -10,8 +10,11 @@ export { apiService, default as defaultApiService } from './apiService';
 
 // 类型导出
 export type {
-    ApiConfig, AuthConfig, RequestConfig, TestConfig, TestProgress, TestSession
+    ApiConfig, AuthConfig, TestConfig, TestProgress, TestSession
 } from './apiService';
+
+// RequestConfig 从 baseApiService 导出
+export type { RequestConfig } from './baseApiService';
 
 // 向后兼容的导出
 export { apiService as baseApiService, apiService as enhancedApiService } from './apiService';

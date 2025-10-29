@@ -782,9 +782,20 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         onClose={() => setShowHistoryDrawer(false)}
       >
         <TestHistoryPanel
-          testType={selectedTestType as any}
-          onViewResult={(result: any) => handleViewResult(result)}
-          onRetryTest={(config: any) => engine.startTest(config)}
+          testHistory={engine.results.map(r => ({
+            id: r.id,
+            testType: r.type,
+            status: r.status,
+            score: r.score,
+            startTime: r.startTime?.toString() || new Date().toISOString(),
+            duration: r.duration,
+            url: r.url
+          }))}
+          onViewResult={(testId: string) => {
+            const result = engine.results.find(r => r.id === testId);
+            if (result) handleViewResult(result);
+          }}
+          enableExport={enableExport}
         />
       </Drawer>
 
