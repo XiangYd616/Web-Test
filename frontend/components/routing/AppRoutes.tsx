@@ -11,18 +11,18 @@ const Dashboard = lazy(() => import('../../pages/dashboard/Dashboard'));
 const WebsiteTest = lazy(() => import('../../pages/WebsiteTest'));
 const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
 const PerformanceTest = lazy(() => import('../../pages/PerformanceTest'));
-const SEOTest = lazy(() => import('../../pages/SeoTest'));
+const SEOTest = lazy(() => import('../../pages/SEOTest'));
 
 // MFA认证相关页面
 const MFASetup = lazy(() => import('../../pages/auth/MFASetup'));
 const MFAVerification = lazy(() => import('../../pages/auth/MFAVerification'));
 
-const ApiTest = lazy(() => import('../../pages/ApiTest'));
+const APITest = lazy(() => import('../../pages/APITest'));
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
 const AccessibilityTest = lazy(() => import('../../pages/AccessibilityTest'));
-const UXTest = lazy(() => import('../../pages/UxTest'));
+const UXTest = lazy(() => import('../../pages/UXTest'));
 const UnifiedTestPage = lazy(() => import('../../pages/UnifiedTestPage'));
 
 // 数据管理相关页面
@@ -51,7 +51,7 @@ const Notifications = lazy(() => import('../../pages/Notifications'));
 
 // 集成和配置
 // const Integrations = lazy(() => import('../../pages/Integrations'));
-const CICDIntegration = lazy(() => import('../../pages/CicdIntegration'));
+const CICDIntegration = lazy(() => import('../../pages/CICDIntegration'));
 const Webhooks = lazy(() => import('../../pages/Webhooks'));
 // const ApiKeys = lazy(() => import('../../pages/ApiKeys'));
 // const ApiDocs = lazy(() => import('../../pages/ApiDocs'));
@@ -126,7 +126,7 @@ const AppRoutes: React.FC = () => {
 
         <Route path="api-test" element={
           <LazyPageWrapper>
-            <ApiTest />
+            <APITest />
           </LazyPageWrapper>
         } />
         <Route path="network-test" element={

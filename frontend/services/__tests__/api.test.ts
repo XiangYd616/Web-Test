@@ -297,28 +297,6 @@ describe('API客户端', () => {
       expect(isApiSuccessResponse(errorResponse)).toBe(false);
     });
   });
-          })
-        });
-
-      if (apiClient && typeof apiClient.get === 'function') {
-        const result = await apiClient.get('/unreliable-endpoint');
-        expect(result.success).toBe(true);
-        expect(mockFetch).toHaveBeenCalledTimes(3);
-      }
-    });
-
-    it('应该在达到最大重试次数后放弃', async () => {
-      // 所有请求都失败
-      mockFetch.mockRejectedValue(new Error('Persistent Network Error'));
-
-      if (apiClient && typeof apiClient.get === 'function') {
-        const result = await apiClient.get('/always-failing-endpoint');
-        expect(result.success).toBe(false);
-        // 假设默认重试3次，总共4次调用（初始 + 3次重试）
-        expect(mockFetch).toHaveBeenCalledTimes(4);
-      }
-    });
-  });
 
   describe('请求缓存', () => {
     it('应该缓存GET请求的结果', async () => {

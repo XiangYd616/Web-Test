@@ -68,6 +68,25 @@ export interface SEOAnalysisResult {
 }
 
 export class RealSEOAnalysisEngine {
+  private stopped = false;
+
+  async analyzeSEO(
+    url: string,
+    options?: any,
+    onProgress?: (progress: number, step: string) => void
+  ): Promise<SEOAnalysisResult> {
+    this.stopped = false;
+    // TODO: 实现真实的 SEO 分析逻辑
+    if (onProgress) {
+      onProgress(50, '分析中...');
+    }
+    return {
+      score: 75,
+      issues: [],
+      recommendations: []
+    };
+  }
+
   async analyze(url: string): Promise<SEOAnalysisResult> {
     // TODO: 实现真实的 SEO 分析逻辑
     return {
@@ -85,7 +104,13 @@ export class RealSEOAnalysisEngine {
       recommendations: []
     };
   }
+
+  stopAnalysis() {
+    this.stopped = true;
+  }
 }
 
+// 导出类型别名以保持兼容性
+export { RealSEOAnalysisEngine as SEOAnalysisEngine };
 export const seoAnalysisEngine = new RealSEOAnalysisEngine();
 

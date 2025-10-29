@@ -1,4 +1,6 @@
-﻿import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { SEOAnalysisResult, SEOAnalysisEngine } from '../services/realSEOAnalysisEngine';
+
 /**
  * 获取性能指标函数
  * 
@@ -6,8 +8,6 @@
  * @param {any} options - 配置选项
  * @returns {Promise<Object>} 性能指标数据
  */
- */
-import {SEOAnalysisResult} from '../services/realSEOAnalysisEngine';
 
 const getPerformanceMetrics = async (url: string, options: any) => {
 

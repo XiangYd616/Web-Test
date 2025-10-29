@@ -1,8 +1,5 @@
 import {Activity, Globe, Shield, Zap, Monitor, Network, BarChart3, ArrowRight, CheckCircle, TrendingUp, Clock, Users} from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 

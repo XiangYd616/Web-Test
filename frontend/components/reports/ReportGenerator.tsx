@@ -294,10 +294,10 @@ const ReportGenerator: React.FC = () => {
                       <div>
                         <span className="text-xs text-gray-500">包含: </span>
                         {template.sections.slice(0, 2).map(section => (
-                          <Tag key={section} size="small">{section}</Tag>
+                          <Tag key={section} className="text-xs">{section}</Tag>
                         ))}
                         {template.sections.length > 2 && (
-                          <Tag size="small">+{template.sections.length - 2}</Tag>
+                          <Tag className="text-xs">+{template.sections.length - 2}</Tag>
                         )}
                       </div>
                     </Card>
