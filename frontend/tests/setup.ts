@@ -1,15 +1,13 @@
-﻿import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+﻿import { vi, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import * as matchers from '@testing-library/jest-dom/matchers';
+import '@testing-library/jest-dom';
+import Logger from '@/utils/logger';
 
 /**
  * Vitest 测试环境设置文件
  * 配置全局测试环境和模拟对象
  */
-
-import Logger from '@/utils/logger';
-import '@testing-library/jest-dom';
-import { expect, afterEach, beforeAll, afterAll } from 'vitest';
-import { cleanup } from '@testing-library/react';
-import * as matchers from '@testing-library/jest-dom/matchers';
 
 // 扩展expect匹配器
 expect.extend(matchers);
@@ -108,7 +106,8 @@ beforeAll(() => {
   global.fetch = vi.fn();
 
   // 模拟WebSocket
-  global.WebSocket = vi.fn().mockImplementation(() => ({
+  global.WebSocket = vi.fn().mockImplementation((url: string) => ({
+    url,
     close: vi.fn(),
     send: vi.fn(),
     addEventListener: vi.fn(),
@@ -118,7 +117,16 @@ beforeAll(() => {
     OPEN: 1,
     CLOSING: 2,
     CLOSED: 3,
-  }));
+    onopen: null,
+    onclose: null,
+    onerror: null,
+    onmessage: null,
+    binaryType: 'blob' as BinaryType,
+    bufferedAmount: 0,
+    extensions: '',
+    protocol: '',
+    dispatchEvent: vi.fn(),
+  })) as any;
 
   // 模拟console方法以避免测试输出噪音
   vi.spyOn(console, 'log').mockImplementation(() => {});
