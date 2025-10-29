@@ -30,7 +30,7 @@ export const GridContainer: React.FC<GridContainerProps> = ({ children, ...props
  * Grid Item 包装组件
  * 替代原有的 <Grid item xs={12}>
  */
-export interface GridItemProps extends Omit<MuiGridProps, 'container' | 'item'> {
+export interface GridItemProps extends Omit<MuiGridProps, 'container' | 'item' | 'xs' | 'sm' | 'md' | 'lg' | 'xl'> {
   children: React.ReactNode;
   // 响应式尺寸
   xs?: number | 'auto' | boolean;
@@ -68,7 +68,7 @@ export const GridItem: React.FC<GridItemProps> = ({
  * 兼容旧代码的 Grid 组件
  * 自动检测是否为 container 或 item
  */
-export interface CompatibleGridProps extends MuiGridProps {
+export interface CompatibleGridProps extends Omit<MuiGridProps, 'xs' | 'sm' | 'md' | 'lg' | 'xl'> {
   children: React.ReactNode;
   container?: boolean;
   item?: boolean;

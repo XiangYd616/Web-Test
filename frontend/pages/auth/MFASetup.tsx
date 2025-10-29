@@ -49,7 +49,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
 
   // 检查登录状态
   if (!requireLogin()) {
-    return <LoginPromptComponent />;
+    return LoginPromptComponent ? <LoginPromptComponent /> : null;
   }
 
   // 第一步：初始化MFA设置
@@ -205,7 +205,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
               {state.qrCodeUrl && (
                 <div className="text-center">
                   <div className="inline-block p-4 bg-white border rounded-lg">
-                    <QRCode value={state.qrCodeUrl} size={200} />
+                    <img src={state.qrCodeUrl} alt="QR Code" width={200} height={200} />
                   </div>
                 </div>
               )}

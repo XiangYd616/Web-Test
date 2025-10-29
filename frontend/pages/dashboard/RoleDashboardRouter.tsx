@@ -39,23 +39,12 @@ const RoleDashboardRouter: React.FC = () => {
 
   // Get user's highest priority role
   const getHighestPriorityRole = () => {
-    if (!user?.roles || user?.roles.length === 0) {
+    if (!user?.role) {
       return 'user'; // Default role
     }
 
-    // Find the role with highest priority
-    let highestRole = 'user';
-    let highestPriority = 0;
-
-    user?.roles.forEach((role) => {
-      const priority = ROLE_PRIORITY[role as keyof typeof ROLE_PRIORITY] || 0;
-      if (priority > highestPriority) {
-        highestPriority = priority;
-        highestRole = role;
-      }
-    });
-
-    return highestRole;
+    // User has a single role
+    return user.role;
   };
 
   // Select corresponding dashboard component based on role

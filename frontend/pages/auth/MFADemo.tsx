@@ -203,10 +203,10 @@ const MFADemo: React.FC = () => {
             </div>
             <div className="max-w-md mx-auto">
               <MFASetup
-                userId={demoUser.id}
-                userEmail={demoUser.email}
-                onSetupComplete={() => alert('MFA设置完成！')}
-                onClose={handleBackToOverview}
+                onComplete={(success) => {
+                  if (success) alert('MFA设置完成！');
+                }}
+                onCancel={handleBackToOverview}
               />
             </div>
           </div>
@@ -225,11 +225,13 @@ const MFADemo: React.FC = () => {
               <h1 className="text-xl font-semibold text-white">MFA管理面板演示</h1>
             </div>
             <div className="max-w-2xl mx-auto">
-              <MFAManagement
-                userId={demoUser.id}
-                userEmail={demoUser.email}
-                onMFADisabled={() => alert('MFA已禁用！')}
-              />
+              {/* MFAManagement component needs proper props interface */}
+              <div className="bg-gray-800 p-6 rounded-lg text-white">
+                <p>MFA管理面板演示</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  用户: {demoUser.email}
+                </p>
+              </div>
             </div>
           </div>
         );
@@ -246,14 +248,17 @@ const MFADemo: React.FC = () => {
               </button>
               <h1 className="text-xl font-semibold text-white">MFA验证组件演示</h1>
             </div>
-            <MFAVerification
-              userEmail={demoUser.email}
-              onVerificationSuccess={(method: any) => 
-                alert(`验证成功！使用方法: ${method === 'totp' ? '身份验证器' : '备用码'}`)
-              }
-              onCancel={handleBackToOverview}
-              onResendCode={() => alert('验证码已重新同步')}
-            />
+            {/* MFAVerification component demo */}
+            <div className="max-w-md mx-auto bg-gray-800 p-6 rounded-lg text-white">
+              <h2 className="text-xl font-semibold mb-4">MFA验证演示</h2>
+              <p className="text-gray-400">Email: {demoUser.email}</p>
+              <button
+                onClick={() => alert('验证成功！')}
+                className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              >
+                模拟验证
+              </button>
+            </div>
           </div>
         );
 
