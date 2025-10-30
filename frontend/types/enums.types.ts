@@ -1,29 +1,38 @@
-/**
+﻿/**
  * 统一枚举定义
  * 确保前后端枚举值完全一致，解决数据模型差异问题
- * 版本: v2.0.0 - 基于差异分析报告的修复版�? * 创建时间: 2024-08-08
+ * 版本: v2.0.0 - 基于差异分析报告的修复版本
+ * 创建时间: 2024-08-08
  * 更新时间: 2024-08-08
  */
 
 // ==================== 用户相关枚举 ====================
 
 /**
- * 用户角色枚举 - 与数据库约束保持一�? * 
- * 修复问题：解决前端定�?个角色但数据库只支持3个角色的不匹配问�? * 
- * 数据库约束需要更新为�? * CHECK (role IN ('user', 'admin', 'moderator', 'tester', 'manager'))
+ * 用户角色枚举 - 与数据库约束保持一致
+ * 
+ * 修复问题：解决前端定义5个角色但数据库只支持3个角色的不匹配问题
+ * 
+ * 数据库约束需要更新为：
+ * CHECK (role IN ('user', 'admin', 'moderator', 'tester', 'manager'))
  * 
  * 注意：如果需要添加新角色，必须同时更新：
- * 1. 此枚举定�? * 2. 数据库约�? * 3. 后端模型验证
+ * 1. 此枚举定义
+ * 2. 数据库约束
+ * 3. 后端模型验证
  * 4. 权限系统配置
  */
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
   MODERATOR = 'moderator',
-  TESTER = 'tester',        // 需要添加到数据库约�?  MANAGER = 'manager'       // 需要添加到数据库约�?}
+  TESTER = 'tester',        // 需要添加到数据库约束
+  MANAGER = 'manager'       // 需要添加到数据库约束
+}
 
 /**
- * 用户状态枚�?- 与数据库约束保持一�? * 状态：�?已统一
+ * 用户状态枚举 - 与数据库约束保持一致
+ * 状态：✅ 已统一
  */
 export enum UserStatus {
   ACTIVE = 'active',
@@ -32,7 +41,8 @@ export enum UserStatus {
 }
 
 /**
- * 用户计划枚举 - 与数据库约束保持一�? * 状态：�?已统一
+ * 用户计划枚举 - 与数据库约束保持一致
+ * 状态：✅ 已统一
  */
 export enum UserPlan {
   FREE = 'free',
@@ -43,12 +53,15 @@ export enum UserPlan {
 // ==================== 测试相关枚举 ====================
 
 /**
- * 测试类型枚举 - 导出仍enums.ts的枚举定�? */
+ * 测试类型枚举 - 导出仍enums.ts的枚举定义
+ */
 export type { TestType, TestTypeValue } from './enums';
 
 /**
- * 测试状态枚�?- 与数据库约束保持一�? * 
- * 修复问题：统一多个不同的状态定义版�? * 
+ * 测试状态枚举 - 与数据库约束保持一致
+ * 
+ * 修复问题：统一多个不同的状态定义版本
+ * 
  * 数据库约束：
  * CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled'))
  */
@@ -61,12 +74,22 @@ export enum TestStatus {
 }
 
 /**
- * 测试等级枚举 - 基于评分的等级划�? */
+ * 测试等级枚举 - 基于评分的等级划分
+ */
 export enum TestGrade {
-  A_PLUS = 'A+',    // 95-100�?  A = 'A',          // 90-94�?  B_PLUS = 'B+',    // 85-89�?  B = 'B',          // 80-84�?  C_PLUS = 'C+',    // 75-79�?  C = 'C',          // 70-74�?  D = 'D',          // 60-69�?  F = 'F'           // 0-59�?}
+  A_PLUS = 'A+',    // 95-100分
+  A = 'A',          // 90-94分
+  B_PLUS = 'B+',    // 85-89分
+  B = 'B',          // 80-84分
+  C_PLUS = 'C+',    // 75-79分
+  C = 'C',          // 70-74分
+  D = 'D',          // 60-69分
+  F = 'F'           // 0-59分
+}
 
 /**
- * 测试优先级枚�? */
+ * 测试优先级枚举
+ */
 export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
@@ -116,7 +139,8 @@ export function isValidUserRole(role: string): role is UserRole {
 }
 
 /**
- * 验证用户状态是否有�? */
+ * 验证用户状态是否有效
+ */
 export function isValidUserStatus(status: string): status is UserStatus {
   return Object.values(UserStatus).includes(status as UserStatus);
 }
@@ -136,7 +160,8 @@ export function isValidTestType(type: string): type is TestTypeValue {
 }
 
 /**
- * 验证测试状态是否有�? */
+ * 验证测试状态是否有效
+ */
 export function isValidTestStatus(status: string): status is TestStatus {
   return Object.values(TestStatus).includes(status as TestStatus);
 }
@@ -149,7 +174,8 @@ export function isValidTestGrade(grade: string): grade is TestGrade {
 }
 
 /**
- * 验证测试优先级是否有�? */
+ * 验证测试优先级是否有效
+ */
 export function isValidTestPriority(priority: string): priority is TestPriority {
   return Object.values(TestPriority).includes(priority as TestPriority);
 }
@@ -171,28 +197,30 @@ export function scoreToGrade(score: number): TestGrade {
 }
 
 /**
- * 获取角色的显示名称（中文�? */
+ * 获取角色的显示名称（中文）
+ */
 export function getUserRoleDisplayName(role: UserRole): string {
   const roleNames = {
-    [UserRole.USER]: '普通用�?,
-    [UserRole.ADMIN]: '管理�?,
+    [UserRole.USER]: '普通用户',
+    [UserRole.ADMIN]: '管理员',
     [UserRole.MODERATOR]: '版主',
-    [UserRole.TESTER]: '测试�?,
+    [UserRole.TESTER]: '测试员',
     [UserRole.MANAGER]: '经理'
   };
   return roleNames[role] || role;
 }
 
 /**
- * 获取测试类型的显示名称（中文�? */
+ * 获取测试类型的显示名称（中文）
+ */
 export function getTestTypeDisplayName(type: TestTypeValue): string {
   const typeNames: Record<string, string> = {
     'seo': 'SEO优化',
     'performance': '性能测试',
     'security': '安全测试',
     'api': 'API测试',
-    'compatibility': '兼容性测�?,
-    'accessibility': '可访问性测�?,
+    'compatibility': '兼容性测试',
+    'accessibility': '可访问性测试',
     'stress': '压力测试'
   };
   return typeNames[type] || type;
@@ -203,21 +231,23 @@ export function getTestTypeDisplayName(type: TestTypeValue): string {
  */
 export function getTestStatusDisplayName(status: TestStatus): string {
   const statusNames = {
-    [TestStatus.PENDING]: '等待�?,
-    [TestStatus.RUNNING]: '运行�?,
-    [TestStatus.COMPLETED]: '已完�?,
+    [TestStatus.PENDING]: '等待中',
+    [TestStatus.RUNNING]: '运行中',
+    [TestStatus.COMPLETED]: '已完成',
     [TestStatus.FAILED]: '失败',
-    [TestStatus.CANCELLED]: '已取�?
+    [TestStatus.CANCELLED]: '已取消'
   };
   return statusNames[status] || status;
 }
 
-// ==================== 导出所有枚�?====================
+// ==================== 导出所有枚举 ====================
 
 // ==================== 枚举导出说明 ====================
-// 基于Context7最佳实践：所有enum定义已通过export关键字导�?// 无需额外的导出语句，避免重复导出冲突
+// 基于Context7最佳实践：所有enum定义已通过export关键字导出
+// 无需额外的导出语句，避免重复导出冲突
 
-// 所有枚举已通过以下方式导出�?// - export enum TestType { ... }
+// 所有枚举已通过以下方式导出：
+// - export enum TestType { ... }
 // - export enum TestStatus { ... }
 // - export enum UserRole { ... }
 // - 等等...
