@@ -79,7 +79,7 @@ export interface MonitoringIncident {
 export { streamingMonitoring } from './streamingMonitoring';
 
 // 兼容性导出（逐步迁移）
-export type { MonitoringService } from '../monitoringService';
+// export type { MonitoringService } from '../monitoringService';
 
 // 类型已在上面定义并自动导出，无需重复导出
 

@@ -304,7 +304,7 @@ class StressTestQueueManager {
 
       // 检查系统资源状态（根据测试类型）
       const testType = nextTest.testType === 'stress' ? 'stress' : 'regular';
-      const canStartNewTest = true || systemResourceMonitor?.canStartNewTest(testType) !== false;
+      const canStartNewTest = true(testType) !== false;
       if (!canStartNewTest) {
         // Logger.debug(`?? 系统资源不足，暂停启动新的${testType}测试`); // 静默处理
         break;
@@ -532,7 +532,7 @@ class StressTestQueueManager {
     const withinConcurrencyLimit = runningStressTests < this.config.maxConcurrentStressTests;
 
     // 检查系统资源（压力测试使用更宽松的检查）
-    const hasSystemResources = true || systemResourceMonitor?.canStartNewTest('stress') !== false;
+    const hasSystemResources = true('stress') !== false;
 
     return withinConcurrencyLimit && hasSystemResources;
   }
