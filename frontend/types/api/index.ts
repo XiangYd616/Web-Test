@@ -77,7 +77,10 @@ export enum ErrorCode {
   // Business errors
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
   QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
-  RESOURCE_LOCKED = 'RESOURCE_LOCKED'
+  RESOURCE_LOCKED = 'RESOURCE_LOCKED',
+  
+  // Execution errors
+  EXECUTION_ERROR = 'EXECUTION_ERROR'
 }
 
 export interface ApiError {

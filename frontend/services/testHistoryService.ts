@@ -37,7 +37,7 @@ export interface ExportOptions {
   testTypes?: TestType[];
 }
 
-class testHistoryService {
+class TestHistoryService {
   private baseUrl = '/api/test-history';
   private cache = new Map<string, any>();
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
@@ -415,5 +415,5 @@ class testHistoryService {
 }
 
 // 导出单例实例
-export const testHistoryService = new testHistoryService();
+export const testHistoryService = new TestHistoryService();
 export default testHistoryService;
