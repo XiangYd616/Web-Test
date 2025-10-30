@@ -1,6 +1,6 @@
-ï»¿/**
- * WebSocket è¿æ¥ç®¡ç†å’Œä¼˜åŒ–å·¥å…·
- * æä¾›è¿æ¥ç®¡ç†ã€é‡è¿æœºåˆ¶ã€æ¶ˆæ¯é˜Ÿåˆ—ã€æ€§èƒ½ç›‘æ§ç­‰åŠŸèƒ½
+/**
+ * WebSocket Á¬½Ó¹ÜÀíºÍÓÅ»¯¹¤¾ß
+ * Ìá¹©Á¬½Ó¹ÜÀí¡¢ÖØÁ¬»úÖÆ¡¢ÏûÏ¢¶ÓÁĞ¡¢ĞÔÄÜ¼à¿ØµÈ¹¦ÄÜ
  */
 
 import Logger from '@/utils/logger';
@@ -51,7 +51,7 @@ export type WebSocketEventType =
 export type WebSocketEventListener = (event: any) => void;
 
 /**
- * WebSocketè¿æ¥ç®¡ç†å™¨
+ * WebSocketÁ¬½Ó¹ÜÀíÆ÷
  */
 export class WebSocketManager {
   private ws: WebSocket | null = null;
@@ -92,7 +92,7 @@ export class WebSocketManager {
   }
 
   /**
-   * å»ºç«‹WebSocketè¿æ¥
+   * ½¨Á¢WebSocketÁ¬½Ó
    */
   public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -100,16 +100,16 @@ export class WebSocketManager {
         this.connectionStartTime = Date.now();
         this.emit('connecting', { url: this.config.url });
 
-        // åˆ›å»ºWebSocketè¿æ¥
+        // ´´½¨WebSocketÁ¬½Ó
         this.ws = new WebSocket(this.config.url, this.config.protocols);
 
-        // å¯ç”¨å‹ç¼©ï¼ˆå¦‚æœæ”¯æŒï¼‰
+        // ÆôÓÃÑ¹Ëõ£¨Èç¹ûÖ§³Ö£©
         if (this.config.enableCompression) {
-          // æ³¨æ„ï¼šæµè§ˆå™¨çš„WebSocket APIä¸ç›´æ¥æ”¯æŒè®¾ç½®å‹ç¼©ï¼Œè¿™é€šå¸¸ç”±æµè§ˆå™¨è‡ªåŠ¨å¤„ç†
-          // è¿™é‡Œåªæ˜¯ä½œä¸ºé…ç½®å‚æ•°ï¼Œå®é™…å‹ç¼©ç”±æµè§ˆå™¨å’ŒæœåŠ¡å™¨åå•†
+          // ×¢Òâ£ºä¯ÀÀÆ÷µÄWebSocket API²»Ö±½ÓÖ§³ÖÉèÖÃÑ¹Ëõ£¬ÕâÍ¨³£ÓÉä¯ÀÀÆ÷×Ô¶¯´¦Àí
+          // ÕâÀïÖ»ÊÇ×÷ÎªÅäÖÃ²ÎÊı£¬Êµ¼ÊÑ¹ËõÓÉä¯ÀÀÆ÷ºÍ·şÎñÆ÷Ğ­ÉÌ
         }
 
-        // è¿æ¥æˆåŠŸ
+        // Á¬½Ó³É¹¦
         this.ws.onopen = () => {
           this.stats.connected = true;
           this.stats.connectionTime = Date.now() - this.connectionStartTime;
@@ -120,21 +120,21 @@ export class WebSocketManager {
             connectionTime: this.stats.connectionTime
           });
 
-          // å¤„ç†æ’é˜Ÿçš„æ¶ˆæ¯
+          // ´¦ÀíÅÅ¶ÓµÄÏûÏ¢
           this.processMessageQueue();
 
-          // å¯åŠ¨å¿ƒè·³
+          // Æô¶¯ĞÄÌø
           this.startHeartbeat();
 
           resolve();
         };
 
-        // æ¥æ”¶æ¶ˆæ¯
+        // ½ÓÊÕÏûÏ¢
         this.ws.onmessage = (event) => {
           this.handleMessage(event);
         };
 
-        // è¿æ¥é”™è¯¯
+        // Á¬½Ó´íÎó
         this.ws.onerror = (event) => {
           this.stats.errors++;
           this.stats.lastError = 'Connection error';
@@ -142,7 +142,7 @@ export class WebSocketManager {
           reject(new Error('WebSocket connection error'));
         };
 
-        // è¿æ¥å…³é—­
+        // Á¬½Ó¹Ø±Õ
         this.ws.onclose = (event) => {
           this.stats.connected = false;
           this.stopHeartbeat();
@@ -153,13 +153,13 @@ export class WebSocketManager {
             wasClean: event.wasClean
           });
 
-          // è‡ªåŠ¨é‡è¿
+          // ×Ô¶¯ÖØÁ¬
           if (this.shouldReconnect && !this.isReconnecting) {
             this.scheduleReconnect();
           }
         };
 
-        // è¿æ¥è¶…æ—¶å¤„ç†
+        // Á¬½Ó³¬Ê±´¦Àí
         setTimeout(() => {
           if (!this.stats.connected) {
             this.ws?.close();
@@ -176,7 +176,7 @@ export class WebSocketManager {
   }
 
   /**
-   * æ–­å¼€è¿æ¥
+   * ¶Ï¿ªÁ¬½Ó
    */
   public disconnect(): void {
     this.shouldReconnect = false;
@@ -192,7 +192,7 @@ export class WebSocketManager {
   }
 
   /**
-   * å‘é€æ¶ˆæ¯
+   * ·¢ËÍÏûÏ¢
    */
   public send(type: string, data: unknown, options: {
     priority?: 'low' | 'normal' | 'high';
@@ -212,14 +212,14 @@ export class WebSocketManager {
   }
 
   /**
-   * å‘é€æ¶ˆæ¯ï¼ˆå†…éƒ¨ï¼‰
+   * ·¢ËÍÏûÏ¢£¨ÄÚ²¿£©
    */
   private sendMessage(message: WebSocketMessage, timeout?: number): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.isConnected()) {
-        // å¦‚æœæœªè¿æ¥ï¼Œå°†æ¶ˆæ¯åŠ å…¥é˜Ÿåˆ—
+        // Èç¹ûÎ´Á¬½Ó£¬½«ÏûÏ¢¼ÓÈë¶ÓÁĞ
         this.queueMessage(message);
-        resolve(); // å‡è®¾ç¨åä¼šå‘é€
+        resolve(); // ¼ÙÉèÉÔºó»á·¢ËÍ
         return;
       }
 
@@ -230,7 +230,7 @@ export class WebSocketManager {
         this.stats.messagesSent++;
         this.stats.bytesTransferred += payload.length;
 
-        // å¦‚æœéœ€è¦ç¡®è®¤ï¼Œæ·»åŠ åˆ°å¾…ç¡®è®¤æ¶ˆæ¯
+        // Èç¹ûĞèÒªÈ·ÈÏ£¬Ìí¼Óµ½´ıÈ·ÈÏÏûÏ¢
         if (timeout) {
           this.pendingMessages.set(message.id, message);
           setTimeout(() => {
@@ -250,7 +250,7 @@ export class WebSocketManager {
   }
 
   /**
-   * å¤„ç†æ¥æ”¶åˆ°çš„æ¶ˆæ¯
+   * ´¦Àí½ÓÊÕµ½µÄÏûÏ¢
    */
   private handleMessage(event: MessageEvent): void {
     try {
@@ -259,7 +259,7 @@ export class WebSocketManager {
       if (typeof event.data === 'string') {
         message = JSON.parse(event.data);
       } else if (this.config.enableBinaryMessages && event.data instanceof ArrayBuffer) {
-        // å¤„ç†äºŒè¿›åˆ¶æ¶ˆæ¯
+        // ´¦Àí¶ş½øÖÆÏûÏ¢
         message = this.parseBinaryMessage(event.data);
       } else {
         Logger.warn('Unsupported message format:', typeof event.data);
@@ -269,19 +269,19 @@ export class WebSocketManager {
       this.stats.messagesReceived++;
       this.stats.bytesTransferred += (typeof event.data === 'string' ? event.data.length : event.data.byteLength) || 0;
 
-      // å¤„ç†ç¡®è®¤æ¶ˆæ¯
+      // ´¦ÀíÈ·ÈÏÏûÏ¢
       if (message.type === 'ack' && message.messageId) {
         this.handleAckMessage(message.messageId);
         return;
       }
 
-      // å¤„ç†å¿ƒè·³å“åº”
+      // ´¦ÀíĞÄÌøÏìÓ¦
       if (message.type === 'pong') {
         this.handlePongMessage(message);
         return;
       }
 
-      // è§¦å‘æ¶ˆæ¯äº‹ä»¶
+      // ´¥·¢ÏûÏ¢ÊÂ¼ş
       this.emit('message', message);
 
     } catch (error) {
@@ -292,7 +292,7 @@ export class WebSocketManager {
   }
 
   /**
-   * å¤„ç†ç¡®è®¤æ¶ˆæ¯
+   * ´¦ÀíÈ·ÈÏÏûÏ¢
    */
   private handleAckMessage(messageId: string): void {
     if (this.pendingMessages.has(messageId)) {
@@ -301,7 +301,7 @@ export class WebSocketManager {
   }
 
   /**
-   * å¤„ç†å¿ƒè·³å“åº”
+   * ´¦ÀíĞÄÌøÏìÓ¦
    */
   private handlePongMessage(message: any): void {
     if (message.timestamp) {
@@ -312,19 +312,19 @@ export class WebSocketManager {
   }
 
   /**
-   * æ›´æ–°å»¶è¿Ÿç»Ÿè®¡
+   * ¸üĞÂÑÓ³ÙÍ³¼Æ
    */
   private updateLatency(latency: number): void {
     if (this.stats.averageLatency === 0) {
       this.stats.averageLatency = latency;
     } else {
-      // ä½¿ç”¨æŒ‡æ•°ç§»åŠ¨å¹³å‡
+      // Ê¹ÓÃÖ¸ÊıÒÆ¶¯Æ½¾ù
       this.stats.averageLatency = this.stats.averageLatency * 0.9 + latency * 0.1;
     }
   }
 
   /**
-   * å¯åŠ¨å¿ƒè·³
+   * Æô¶¯ĞÄÌø
    */
   private startHeartbeat(): void {
     this.stopHeartbeat();
@@ -333,15 +333,15 @@ export class WebSocketManager {
       if (this.isConnected()) {
         this.send('ping', { timestamp: Date.now() })
           .catch(() => {
-            // å¿ƒè·³å¤±è´¥ï¼Œå¯èƒ½è¿æ¥æœ‰é—®é¢˜
-            Logger.warn('Heartbeat failed');
+            // ĞÄÌøÊ§°Ü£¬¿ÉÄÜÁ¬½ÓÓĞÎÊÌâ
+            Logger.warn('Heartbeat failed', {} as any);
           });
       }
     }, this.config.heartbeatInterval);
   }
 
   /**
-   * åœæ­¢å¿ƒè·³
+   * Í£Ö¹ĞÄÌø
    */
   private stopHeartbeat(): void {
     if (this.heartbeatTimer) {
@@ -351,7 +351,7 @@ export class WebSocketManager {
   }
 
   /**
-   * å®‰æ’é‡è¿
+   * °²ÅÅÖØÁ¬
    */
   private scheduleReconnect(): void {
     if (this.isReconnecting || this.stats.reconnectAttempts >= this.config.reconnectAttempts) {
@@ -363,7 +363,7 @@ export class WebSocketManager {
 
     const delay = Math.min(
       this.config.reconnectInterval * Math.pow(2, this.stats.reconnectAttempts - 1),
-      30000 // æœ€å¤§30ç§’
+      30000 // ×î´ó30Ãë
     );
 
     this.emit('reconnecting', {
@@ -382,14 +382,14 @@ export class WebSocketManager {
           this.scheduleReconnect();
         } else {
           this.emit('error', new Error('Max reconnection attempts reached'));
-          toast.error('è¿æ¥å¤±è´¥ï¼Œå·²è¾¾åˆ°æœ€å¤§é‡è¯•æ¬¡æ•°');
+          toast.error('Á¬½ÓÊ§°Ü£¬ÒÑ´ïµ½×î´óÖØÊÔ´ÎÊı');
         }
       }
     }, delay);
   }
 
   /**
-   * æ¸…é™¤é‡è¿å®šæ—¶å™¨
+   * Çå³ıÖØÁ¬¶¨Ê±Æ÷
    */
   private clearReconnectTimer(): void {
     if (this.reconnectTimer) {
@@ -399,13 +399,13 @@ export class WebSocketManager {
   }
 
   /**
-   * å°†æ¶ˆæ¯åŠ å…¥é˜Ÿåˆ—
+   * ½«ÏûÏ¢¼ÓÈë¶ÓÁĞ
    */
   private queueMessage(message: WebSocketMessage): void {
-    // æŒ‰ä¼˜å…ˆçº§æ’åº
+    // °´ÓÅÏÈ¼¶ÅÅĞò
     const priorityOrder = { high: 0, normal: 1, low: 2 };
     
-    // å¦‚æœé˜Ÿåˆ—å·²æ»¡ï¼Œåˆ é™¤ä½ä¼˜å…ˆçº§çš„æ—§æ¶ˆæ¯
+    // Èç¹û¶ÓÁĞÒÑÂú£¬É¾³ıµÍÓÅÏÈ¼¶µÄ¾ÉÏûÏ¢
     if (this.messageQueue.length >= this.config.messageQueueLimit) {
       this.messageQueue = this.messageQueue
         .sort((a, b) => {
@@ -420,7 +420,7 @@ export class WebSocketManager {
   }
 
   /**
-   * å¤„ç†æ¶ˆæ¯é˜Ÿåˆ—
+   * ´¦ÀíÏûÏ¢¶ÓÁĞ
    */
   private processMessageQueue(): void {
     while (this.messageQueue.length > 0 && this.isConnected()) {
@@ -428,7 +428,7 @@ export class WebSocketManager {
       this.sendMessage(message).catch(error => {
         Logger.error('Failed to send queued message:', error);
         
-        // å¦‚æœå…è®¸é‡è¯•
+        // Èç¹ûÔÊĞíÖØÊÔ
         if (message.retry && message.retry > 0) {
           message.retry--;
           this.queueMessage(message);
@@ -438,11 +438,11 @@ export class WebSocketManager {
   }
 
   /**
-   * è§£æäºŒè¿›åˆ¶æ¶ˆæ¯
+   * ½âÎö¶ş½øÖÆÏûÏ¢
    */
   private parseBinaryMessage(buffer: ArrayBuffer): unknown {
-    // è¿™é‡Œå¯ä»¥å®ç°è‡ªå®šä¹‰çš„äºŒè¿›åˆ¶åè®®è§£æ
-    // ä¾‹å¦‚ä½¿ç”¨ MessagePackã€Protocol Buffers ç­‰
+    // ÕâÀï¿ÉÒÔÊµÏÖ×Ô¶¨ÒåµÄ¶ş½øÖÆĞ­Òé½âÎö
+    // ÀıÈçÊ¹ÓÃ MessagePack¡¢Protocol Buffers µÈ
     try {
       const decoder = new TextDecoder();
       const text = decoder.decode(buffer);
@@ -453,21 +453,21 @@ export class WebSocketManager {
   }
 
   /**
-   * ç”Ÿæˆæ¶ˆæ¯ID
+   * Éú³ÉÏûÏ¢ID
    */
   private generateMessageId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
-   * æ£€æŸ¥è¿æ¥çŠ¶æ€
+   * ¼ì²éÁ¬½Ó×´Ì¬
    */
   public isConnected(): boolean {
     return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
   }
 
   /**
-   * æ·»åŠ äº‹ä»¶ç›‘å¬å™¨
+   * Ìí¼ÓÊÂ¼ş¼àÌıÆ÷
    */
   public on(event: WebSocketEventType, listener: WebSocketEventListener): void {
     if (!this.eventListeners.has(event)) {
@@ -477,7 +477,7 @@ export class WebSocketManager {
   }
 
   /**
-   * ç§»é™¤äº‹ä»¶ç›‘å¬å™¨
+   * ÒÆ³ıÊÂ¼ş¼àÌıÆ÷
    */
   public off(event: WebSocketEventType, listener: WebSocketEventListener): void {
     const listeners = this.eventListeners.get(event);
@@ -487,7 +487,7 @@ export class WebSocketManager {
   }
 
   /**
-   * è§¦å‘äº‹ä»¶
+   * ´¥·¢ÊÂ¼ş
    */
   private emit(event: WebSocketEventType, data?: any): void {
     const listeners = this.eventListeners.get(event);
@@ -503,14 +503,14 @@ export class WebSocketManager {
   }
 
   /**
-   * è·å–è¿æ¥ç»Ÿè®¡ä¿¡æ¯
+   * »ñÈ¡Á¬½ÓÍ³¼ÆĞÅÏ¢
    */
   public getStats(): WebSocketStats {
     return { ...this.stats };
   }
 
   /**
-   * é‡ç½®ç»Ÿè®¡ä¿¡æ¯
+   * ÖØÖÃÍ³¼ÆĞÅÏ¢
    */
   public resetStats(): void {
     this.stats = {
@@ -526,7 +526,7 @@ export class WebSocketManager {
   }
 
   /**
-   * è·å–è¿æ¥çŠ¶æ€ä¿¡æ¯
+   * »ñÈ¡Á¬½Ó×´Ì¬ĞÅÏ¢
    */
   public getConnectionInfo(): {
     state: string;
@@ -552,7 +552,7 @@ export class WebSocketManager {
   }
 
   /**
-   * è·å–è¿æ¥çŠ¶æ€å­—ç¬¦ä¸²
+   * »ñÈ¡Á¬½Ó×´Ì¬×Ö·û´®
    */
   private getReadyState(): string {
     if (!this.ws) return 'disconnected';
@@ -567,7 +567,7 @@ export class WebSocketManager {
   }
 
   /**
-   * æ¸…ç†èµ„æº
+   * ÇåÀí×ÊÔ´
    */
   public destroy(): void {
     this.shouldReconnect = false;
@@ -581,14 +581,14 @@ export class WebSocketManager {
 }
 
 /**
- * WebSocketç®¡ç†å™¨å·¥å‚å‡½æ•°
+ * WebSocket¹ÜÀíÆ÷¹¤³§º¯Êı
  */
 export function createWebSocketManager(config: WebSocketConfig): WebSocketManager {
   return new WebSocketManager(config);
 }
 
 /**
- * é»˜è®¤WebSocketé…ç½®
+ * Ä¬ÈÏWebSocketÅäÖÃ
  */
 export const defaultWebSocketConfig: Partial<WebSocketConfig> = {
   reconnectAttempts: 5,
@@ -621,7 +621,7 @@ export function useWebSocket(url: string, config?: Partial<WebSocketConfig>) {
     manager.on('message', handleStatsUpdate);
     manager.on('error', handleStatsUpdate);
 
-    // è‡ªåŠ¨è¿æ¥
+    // ×Ô¶¯Á¬½Ó
     manager.connect().catch((error) => Logger.error('WebSocket connection failed', error));
 
     return () => {
@@ -643,5 +643,5 @@ export function useWebSocket(url: string, config?: Partial<WebSocketConfig>) {
   };
 }
 
-// éœ€è¦å¯¼å…¥Reactä»¥ç”¨äºHook
+// ĞèÒªµ¼ÈëReactÒÔÓÃÓÚHook
 import React from 'react';

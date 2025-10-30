@@ -1,6 +1,6 @@
-ï»¿/**
- * ç»Ÿä¸€çš„æ•°æ®å¤„ç†å·¥å…·ç±»
- * æ•´åˆé¡¹ç›®ä¸­é‡å¤çš„æ•°æ®å¤„ç†é€»è¾‘
+/**
+ * Í³Ò»µÄÊı¾İ´¦Àí¹¤¾ßÀà
+ * ÕûºÏÏîÄ¿ÖĞÖØ¸´µÄÊı¾İ´¦ÀíÂß¼­
  */
 
 export interface TestDataPoint {
@@ -23,7 +23,7 @@ export interface ResponseTimeDistribution {
 
 export class DataProcessingUtils {
   /**
-   * æ ‡å‡†åŒ–æ—¶é—´æˆ³
+   * ±ê×¼»¯Ê±¼ä´Á
    */
   static normalizeTimestamp(timestamp: any): string {
     if (!timestamp) return new Date().toISOString();
@@ -40,16 +40,16 @@ export class DataProcessingUtils {
   }
 
   /**
-   * æ ‡å‡†åŒ–æ•°å€¼
+   * ±ê×¼»¯ÊıÖµ
    */
   static normalizeNumber(value: unknown, min: number = 0, max: number = Infinity): number {
-    const num = parseFloat(value);
+    const num = parseFloat(value as string);
     if (isNaN(num)) return 0;
     return Math.max(min, Math.min(max, num));
   }
 
   /**
-   * æ ‡å‡†åŒ–æ•°æ®ç‚¹
+   * ±ê×¼»¯Êı¾İµã
    */
   static normalizeDataPoint(rawPoint: any): TestDataPoint {
     return {
@@ -65,7 +65,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * è¿‡æ»¤æœ‰æ•ˆæ•°æ®
+   * ¹ıÂËÓĞĞ§Êı¾İ
    */
   static filterValidData(data: unknown[]): TestDataPoint[] {
     return data
@@ -75,7 +75,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * è®¡ç®—å“åº”æ—¶é—´åˆ†å¸ƒ
+   * ¼ÆËãÏìÓ¦Ê±¼ä·Ö²¼
    */
   static calculateResponseTimeDistribution(data: TestDataPoint[]): ResponseTimeDistribution[] {
     const validData = data.filter(item => item.responseTime > 0);
@@ -149,7 +149,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * è®¡ç®—åŸºç¡€ç»Ÿè®¡æŒ‡æ ‡
+   * ¼ÆËã»ù´¡Í³¼ÆÖ¸±ê
    */
   static calculateBasicMetrics(data: TestDataPoint[]) {
     const validData = this.filterValidData(data);
@@ -182,7 +182,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * æ•°æ®é‡‡æ · - å‡å°‘æ•°æ®ç‚¹æ•°é‡
+   * Êı¾İ²ÉÑù - ¼õÉÙÊı¾İµãÊıÁ¿
    */
   static sampleData(data: TestDataPoint[], maxPoints: number = 1000): TestDataPoint[] {
     if (data.length <= maxPoints) return data;
@@ -192,7 +192,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * æ—¶é—´çª—å£èšåˆ
+   * Ê±¼ä´°¿Ú¾ÛºÏ
    */
   static aggregateByTimeWindow(data: TestDataPoint[], windowMs: number = 5000): TestDataPoint[] {
     if (data.length === 0) return [];
@@ -235,7 +235,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * ğŸ”§ æ–°å¢ï¼šæ‰¹é‡å¤„ç†æ•°æ®ç‚¹ï¼ˆæ•´åˆè‡ªDataNormalizationPipelineï¼‰
+   * ?? ĞÂÔö£ºÅúÁ¿´¦ÀíÊı¾İµã£¨ÕûºÏ×ÔDataNormalizationPipeline£©
    */
   static processBatchDataPoints(dataPoints: TestDataPoint[], options?: {
     removeOutliers?: boolean;
@@ -255,17 +255,17 @@ export class DataProcessingUtils {
 
     let processedData = [...dataPoints];
 
-    // ç§»é™¤å¼‚å¸¸å€¼
+    // ÒÆ³ıÒì³£Öµ
     if (defaultOptions.removeOutliers) {
       processedData = this.removeOutliers(processedData, defaultOptions.outlierThreshold);
     }
 
-    // å¹³æ»‘å¤„ç†
+    // Æ½»¬´¦Àí
     if (defaultOptions.smoothingWindow > 1) {
       processedData = this.smoothData(processedData, defaultOptions.smoothingWindow);
     }
 
-    // å¡«å……ç¼ºå¤±å€¼
+    // Ìî³äÈ±Ê§Öµ
     if (defaultOptions.fillMissingValues) {
       processedData = this.fillMissingValues(processedData);
     }
@@ -274,7 +274,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * ğŸ”§ æ–°å¢ï¼šç§»é™¤å¼‚å¸¸å€¼
+   * ?? ĞÂÔö£ºÒÆ³ıÒì³£Öµ
    */
   static removeOutliers(dataPoints: TestDataPoint[], threshold: number = 3): TestDataPoint[] {
     if (dataPoints.length < 3) return dataPoints;
@@ -291,7 +291,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * ğŸ”§ æ–°å¢ï¼šæ•°æ®å¹³æ»‘å¤„ç†
+   * ?? ĞÂÔö£ºÊı¾İÆ½»¬´¦Àí
    */
   static smoothData(dataPoints: TestDataPoint[], windowSize: number = 5): TestDataPoint[] {
     if (dataPoints.length < windowSize) return dataPoints;
@@ -315,7 +315,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * ğŸ”§ æ–°å¢ï¼šå¡«å……ç¼ºå¤±å€¼
+   * ?? ĞÂÔö£ºÌî³äÈ±Ê§Öµ
    */
   static fillMissingValues(dataPoints: TestDataPoint[]): TestDataPoint[] {
     if (dataPoints.length < 2) return dataPoints;
@@ -326,7 +326,7 @@ export class DataProcessingUtils {
       const current = filled[i];
       const previous = filled[i - 1];
 
-      // å¦‚æœå½“å‰æ•°æ®ç‚¹çš„å€¼ä¸º0æˆ–å¼‚å¸¸ï¼Œä½¿ç”¨å‰ä¸€ä¸ªå€¼
+      // Èç¹ûµ±Ç°Êı¾İµãµÄÖµÎª0»òÒì³££¬Ê¹ÓÃÇ°Ò»¸öÖµ
       if (current.responseTime === 0 && previous.responseTime > 0) {
         current.responseTime = previous.responseTime;
       }
@@ -339,7 +339,7 @@ export class DataProcessingUtils {
   }
 
   /**
-   * ğŸ”§ æ–°å¢ï¼šéªŒè¯æ•°æ®ç‚¹
+   * ?? ĞÂÔö£ºÑéÖ¤Êı¾İµã
    */
   static validateDataPoint(dataPoint: TestDataPoint): boolean {
     return (

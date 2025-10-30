@@ -1,5 +1,5 @@
-﻿// Project-related types
-export { Project, ProjectType, ProjectStatus } from './unified/models';
+// Project-related types
+export type { Project, ProjectType, ProjectStatus } from './unified/models';
 export type {
   CreateProjectRequest,
   UpdateProjectRequest,
