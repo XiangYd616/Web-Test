@@ -72,15 +72,15 @@ export interface ProjectListQuery {
 
 export interface ProjectResponse extends ApiResponse<Project> { }
 
-export interface ProjectListResponse extends ApiResponse<{
+export type ProjectListResponse = ApiResponse<{
   projects: Project[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
-}> { }
+}>;
 
-export interface ProjectStatsResponse extends ApiResponse<{
+export type ProjectStatsResponse = ApiResponse<{
   total_projects: number;
   active_projects: number;
   total_tests: number;
@@ -88,7 +88,7 @@ export interface ProjectStatsResponse extends ApiResponse<{
   failed_tests: number;
   average_response_time: number;
   last_test_date?: Timestamp;
-}> { }
+}>;
 
 // ==================== 测试配置类型 ====================
 

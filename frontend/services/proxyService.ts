@@ -539,8 +539,8 @@ export class ProxyService {
       status: number;
       error?: string;
     }
-  }> {
-    const results: { [url: string]: unknown } = {};
+    }> {
+    const results: { [url: string]: { accessible: boolean; status: number; error?: string } } = {} as any;
 
     // 限制并发数量
     const concurrency = 5;

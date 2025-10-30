@@ -49,8 +49,8 @@ export const GridItem: React.FC<GridItemProps> = ({
   xl,
   ...props 
 }) => {
-  // @ts-ignore - MUI Grid item props compatibility
   return (
+    // @ts-ignore - MUI Grid item props compatibility
     <MuiGrid 
       {...props}
       size={{ xs, sm, md, lg, xl }}
@@ -95,8 +95,8 @@ export const Grid: React.FC<CompatibleGridProps> = ({
   }
   
   if (item) {
-    // @ts-ignore - MUI Grid item props compatibility
     return (
+      // @ts-ignore - MUI Grid item props compatibility
       <MuiGrid 
         {...props}
         size={{ xs, sm, md, lg, xl }}
