@@ -151,14 +151,14 @@ class BackgroundTestManager {
       onError
     };
 
-    // 使用统一测试服务执行
-    const testPromise = unifiedTestService.startTest(unifiedConfig, callbacks);
-
     // 为了保持同步接口兼容性，我们需要立即返回一个ID
     const testId = this.generateTestId();
 
-    // 异步处理实际的测试ID映射
-    testPromise.then(actualTestId => {
+    // 尝试使用统一测试服务执行（如果可用）
+    if (typeof (unifiedTestService as any).startTest === 'function') {
+      const testPromise = (unifiedTestService as any).startTest(unifiedConfig, callbacks);
+      // 异步处理实际的测试ID映射
+      testPromise.then((actualTestId: string) => {
       // 更新本地映射
       const testInfo: TestInfo = {
         id: actualTestId,
@@ -175,9 +175,34 @@ class BackgroundTestManager {
         onError
       };
 
-      this.runningTests.set(actualTestId, testInfo);
+        this.runningTests.set(actualTestId, testInfo);
+        this.notifyListeners('testStarted', testInfo);
+      }).catch((error: Error) => {
+        Logger.error('Unified test service failed:', error);
+        if (onError) onError(error);
+      });
+    } else {
+      // Fallback: 直接创建测试信息
+      const testInfo: TestInfo = {
+        id: testId,
+        type: testType,
+        config,
+        status: TestStatus.RUNNING,
+        progress: 0,
+        startTime: new Date(),
+        currentStep: '正在初始化测试...',
+        result: null,
+        error: null,
+        onProgress,
+        onComplete,
+        onError
+      };
+      this.runningTests.set(testId, testInfo);
       this.notifyListeners('testStarted', testInfo);
-    });
+      
+      // 异步执行测试
+      this.executeTest(testInfo);
+    }
 
     return testId;
   }

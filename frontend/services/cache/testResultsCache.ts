@@ -4,10 +4,9 @@
  * 基于统一缓存服务构建
  */
 
-import { cacheService as CacheServiceClass } from './cacheService';
+import { cacheService } from './cacheService';
 
-// Get singleton instance
-const cacheService = CacheServiceClass.getInstance();
+// Use imported singleton instance
 import type { TestResult } from '../../types/unifiedEngine.types';
 
 // 测试缓存键前缀
