@@ -52,6 +52,7 @@ export interface CreateUserData {
   email: string;
   password: string;
   role?: string;
+  fullName?: string;
 }
 
 export interface UpdateUserData {
