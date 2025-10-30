@@ -70,7 +70,7 @@ export interface ProjectListQuery {
 
 // ==================== 项目响应类型 ====================
 
-export interface ProjectResponse extends ApiResponse<Project> { }
+export type ProjectResponse = ApiResponse<Project>;
 
 export type ProjectListResponse = ApiResponse<{
   projects: Project[];
