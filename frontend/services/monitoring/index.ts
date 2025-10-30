@@ -76,6 +76,7 @@ export interface MonitoringIncident {
 }
 
 // 统一服务导出
+export type { StreamingMonitoring } from './streamingMonitoring';
 export { streamingMonitoring } from './streamingMonitoring';
 
 // 兼容性导出（逐步迁移）
