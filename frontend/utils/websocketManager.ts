@@ -262,7 +262,7 @@ export class WebSocketManager {
         // 处理二进制消息
         message = this.parseBinaryMessage(event.data);
       } else {
-        Logger.warn('Unsupported message format:', typeof event.data);
+        Logger.warn('Unsupported message format', { type: typeof event.data } as any);
         return;
       }
 

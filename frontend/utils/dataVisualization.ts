@@ -1,6 +1,6 @@
-ï»¿/**
- * æ•°æ®å¯è§†åŒ–ä¼˜åŒ–å·¥å…·
- * è§£å†³å¤§é‡æ•°æ®ç‚¹å¯¼è‡´çš„æ€§èƒ½é—®é¢˜
+/**
+ * Êı¾İ¿ÉÊÓ»¯ÓÅ»¯¹¤¾ß
+ * ½â¾ö´óÁ¿Êı¾İµãµ¼ÖÂµÄĞÔÄÜÎÊÌâ
  */
 
 export interface DataPoint {
@@ -40,7 +40,7 @@ class DataVisualizationOptimizer {
   };
 
   /**
-   * ä¼˜åŒ–æ•°æ®é›†ä»¥æå‡æ¸²æŸ“æ€§èƒ½
+   * ÓÅ»¯Êı¾İ¼¯ÒÔÌáÉıäÖÈ¾ĞÔÄÜ
    */
   optimizeDataset(
     data: DataPoint[],
@@ -57,17 +57,17 @@ class DataVisualizationOptimizer {
       ...config
     };
 
-    // ç”Ÿæˆç¼“å­˜é”®
+    // Éú³É»º´æ¼ü
     const cacheKey = this.generateCacheKey(data, finalConfig);
 
-    // æ£€æŸ¥ç¼“å­˜
+    // ¼ì²é»º´æ
     if (finalConfig.enableCaching && this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey)!;
       this.performanceMetrics.cacheHits++;
       return { ...cached, cacheHit: true };
     }
 
-    // å¦‚æœæ•°æ®é‡å°äºé˜ˆå€¼ï¼Œç›´æ¥è¿”å›
+    // Èç¹ûÊı¾İÁ¿Ğ¡ÓÚãĞÖµ£¬Ö±½Ó·µ»Ø
     if (data.length <= finalConfig.maxDataPoints) {
       const result: OptimizationResult = {
         data: [...data],
@@ -80,7 +80,7 @@ class DataVisualizationOptimizer {
       return result;
     }
 
-    // æ‰§è¡Œæ•°æ®ä¼˜åŒ–
+    // Ö´ĞĞÊı¾İÓÅ»¯
     let optimizedData: DataPoint[];
 
     switch (finalConfig.samplingStrategy) {
@@ -108,13 +108,13 @@ class DataVisualizationOptimizer {
       cacheHit: false
     };
 
-    // ç¼“å­˜ç»“æœ
+    // »º´æ½á¹û
     if (finalConfig.enableCaching) {
       this.cache.set(cacheKey, result);
       this.performanceMetrics.cacheMisses++;
     }
 
-    // æ›´æ–°æ€§èƒ½æŒ‡æ ‡
+    // ¸üĞÂĞÔÄÜÖ¸±ê
     this.performanceMetrics.totalProcessingTime += processingTime;
     this.updateAverageCompressionRatio(result.compressionRatio);
 
@@ -122,7 +122,7 @@ class DataVisualizationOptimizer {
   }
 
   /**
-   * å‡åŒ€é‡‡æ ·
+   * ¾ùÔÈ²ÉÑù
    */
   private uniformSampling(data: DataPoint[], maxPoints: number): DataPoint[] {
     if (data.length <= maxPoints) return data;
@@ -139,32 +139,32 @@ class DataVisualizationOptimizer {
   }
 
   /**
-   * è‡ªé€‚åº”é‡‡æ · - ä¿ç•™é‡è¦æ•°æ®ç‚¹ï¼ŒåŒæ—¶ä¿æŒç»Ÿè®¡ç‰¹æ€§
+   * ×ÔÊÊÓ¦²ÉÑù - ±£ÁôÖØÒªÊı¾İµã£¬Í¬Ê±±£³ÖÍ³¼ÆÌØĞÔ
    */
   private adaptiveSampling(data: DataPoint[], config: OptimizationConfig): DataPoint[] {
     if (data.length <= config.maxDataPoints) return data;
 
-    // è®¡ç®—åŸå§‹æ•°æ®çš„ç»Ÿè®¡ä¿¡æ¯
+    // ¼ÆËãÔ­Ê¼Êı¾İµÄÍ³¼ÆĞÅÏ¢
     const originalStats = this.calculateDataStats(data);
 
     const step = data.length / config.maxDataPoints;
 
-    // è®¡ç®—æ•°æ®å˜åŒ–ç‡æ¥ç¡®å®šé‡è¦æ€§
+    // ¼ÆËãÊı¾İ±ä»¯ÂÊÀ´È·¶¨ÖØÒªĞÔ
     const importanceScores = this.calculateImportanceScores(data);
 
-    // æ ¹æ®é‡è¦æ€§å’Œå‡åŒ€åˆ†å¸ƒé€‰æ‹©æ•°æ®ç‚¹
+    // ¸ù¾İÖØÒªĞÔºÍ¾ùÔÈ·Ö²¼Ñ¡ÔñÊı¾İµã
     const selectedIndices = new Set<number>();
     selectedIndices.add(0);
     selectedIndices.add(data.length - 1);
 
-    // å‡åŒ€é‡‡æ ·åŸºç¡€ç‚¹ï¼ˆå 70%ï¼‰
+    // ¾ùÔÈ²ÉÑù»ù´¡µã£¨Õ¼70%£©
     const uniformCount = Math.floor(config.maxDataPoints * 0.7);
     for (let i = 1; i < uniformCount - 1; i++) {
       const index = Math.floor(i * step);
       selectedIndices.add(index);
     }
 
-    // å¦‚æœå¯ç”¨å…³é”®ç‚¹ä¿ç•™ï¼Œæ·»åŠ é«˜é‡è¦æ€§ç‚¹ï¼ˆå 30%ï¼‰
+    // Èç¹ûÆôÓÃ¹Ø¼üµã±£Áô£¬Ìí¼Ó¸ßÖØÒªĞÔµã£¨Õ¼30%£©
     if (config.preserveKeyPoints) {
       const importanceCount = config.maxDataPoints - uniformCount;
       const sortedByImportance = importanceScores
@@ -175,11 +175,11 @@ class DataVisualizationOptimizer {
       sortedByImportance.forEach(item => selectedIndices.add(item.index));
     }
 
-    // è½¬æ¢ä¸ºæ’åºæ•°ç»„å¹¶æå–æ•°æ®
+    // ×ª»»ÎªÅÅĞòÊı×é²¢ÌáÈ¡Êı¾İ
     const sortedIndices = Array.from(selectedIndices).sort((a, b) => a - b);
     const sampledData = sortedIndices.map(index => data[index]);
 
-    // éªŒè¯å¹¶è°ƒæ•´é‡‡æ ·ç»“æœä»¥ä¿æŒç»Ÿè®¡ç‰¹æ€§
+    // ÑéÖ¤²¢µ÷Õû²ÉÑù½á¹ûÒÔ±£³ÖÍ³¼ÆÌØĞÔ
     const sampledStats = this.calculateDataStats(sampledData);
     const adjustedData = this.adjustSamplingForStats(data, sampledData, originalStats, sampledStats);
 
@@ -187,22 +187,22 @@ class DataVisualizationOptimizer {
   }
 
   /**
-   * é‡è¦æ€§é‡‡æ · - åŸºäºæ•°æ®ç‰¹å¾çš„æ™ºèƒ½é‡‡æ ·
+   * ÖØÒªĞÔ²ÉÑù - »ùÓÚÊı¾İÌØÕ÷µÄÖÇÄÜ²ÉÑù
    */
   private importanceSampling(data: DataPoint[], config: OptimizationConfig): DataPoint[] {
     const importanceScores = this.calculateImportanceScores(data);
 
-    // åˆ›å»ºåŠ æƒé‡‡æ ·
+    // ´´½¨¼ÓÈ¨²ÉÑù
     const weightedData = data.map((point, index) => ({
       point,
       importance: importanceScores[index],
       index
     }));
 
-    // æŒ‰é‡è¦æ€§æ’åº
+    // °´ÖØÒªĞÔÅÅĞò
     weightedData.sort((a, b) => b.importance - a.importance);
 
-    // é€‰æ‹©æœ€é‡è¦çš„ç‚¹ï¼Œä½†ä¿æŒæ—¶é—´é¡ºåº
+    // Ñ¡Ôñ×îÖØÒªµÄµã£¬µ«±£³ÖÊ±¼äË³Ğò
     const selectedData = weightedData
       .slice(0, config.maxDataPoints)
       .sort((a, b) => a.index - b.index)
@@ -212,7 +212,7 @@ class DataVisualizationOptimizer {
   }
 
   /**
-   * è®¡ç®—æ•°æ®ç»Ÿè®¡ä¿¡æ¯
+   * ¼ÆËãÊı¾İÍ³¼ÆĞÅÏ¢
    */
   private calculateDataStats(data: DataPoint[]) {
     if (data.length === 0) return { avgResponseTime: 0, avgThroughput: 0, count: 0 };
@@ -230,41 +230,41 @@ class DataVisualizationOptimizer {
   }
 
   /**
-   * è°ƒæ•´é‡‡æ ·ç»“æœä»¥ä¿æŒç»Ÿè®¡ç‰¹æ€§
+   * µ÷Õû²ÉÑù½á¹ûÒÔ±£³ÖÍ³¼ÆÌØĞÔ
    */
   private adjustSamplingForStats(
     originalData: DataPoint[],
     sampledData: DataPoint[],
     originalStats: unknown,
     sampledStats: any): DataPoint[] {
-    // å¦‚æœé‡‡æ ·åçš„å¹³å‡å€¼åå·®è¶…è¿‡5%ï¼Œè¿›è¡Œè¡¥å¿æ€§é‡‡æ ·
-    const responseTimeDiff = Math.abs(sampledStats.avgResponseTime - originalStats.avgResponseTime);
-    const responseTimeThreshold = originalStats.avgResponseTime * 0.05; // 5%é˜ˆå€¼
+    // Èç¹û²ÉÑùºóµÄÆ½¾ùÖµÆ«²î³¬¹ı5%£¬½øĞĞ²¹³¥ĞÔ²ÉÑù
+    const responseTimeDiff = Math.abs((sampledStats as any).avgResponseTime - (originalStats as any).avgResponseTime);
+    const responseTimeThreshold = (originalStats as any).avgResponseTime * 0.05; // 5%ãĞÖµ
 
     if (responseTimeDiff > responseTimeThreshold && originalData.length > sampledData.length) {
-      // æ‰¾åˆ°è¢«é—æ¼çš„ä¸­ç­‰å“åº”æ—¶é—´æ•°æ®ç‚¹
+      // ÕÒµ½±»ÒÅÂ©µÄÖĞµÈÏìÓ¦Ê±¼äÊı¾İµã
       const sampledIndices = new Set(sampledData.map((_, i) => {
-        // æ‰¾åˆ°åŸå§‹æ•°æ®ä¸­å¯¹åº”çš„ç´¢å¼•
+        // ÕÒµ½Ô­Ê¼Êı¾İÖĞ¶ÔÓ¦µÄË÷Òı
         return originalData.findIndex(orig =>
           orig.timestamp === sampledData[i].timestamp
         );
       }));
 
-      // å¯»æ‰¾æ¥è¿‘å¹³å‡å€¼çš„æ•°æ®ç‚¹è¿›è¡Œè¡¥å……
-      const targetResponseTime = originalStats.avgResponseTime;
+      // Ñ°ÕÒ½Ó½üÆ½¾ùÖµµÄÊı¾İµã½øĞĞ²¹³ä
+      const targetResponseTime = (originalStats as any).avgResponseTime;
       const candidates = originalData
         .map((point, index) => ({ point, index, diff: Math.abs((point.responseTime || 0) - targetResponseTime) }))
         .filter(item => !sampledIndices.has(item.index))
         .sort((a, b) => a.diff - b.diff)
-        .slice(0, Math.min(10, Math.floor(sampledData.length * 0.1))); // æœ€å¤šè¡¥å……10%
+        .slice(0, Math.min(10, Math.floor(sampledData.length * 0.1))); // ×î¶à²¹³ä10%
 
-      // æ·»åŠ è¿™äº›è¡¥å¿ç‚¹
+      // Ìí¼ÓÕâĞ©²¹³¥µã
       const compensatedData = [...sampledData];
       candidates.forEach(candidate => {
         compensatedData.push(candidate.point);
       });
 
-      // æŒ‰æ—¶é—´æˆ³é‡æ–°æ’åº
+      // °´Ê±¼ä´ÁÖØĞÂÅÅĞò
       compensatedData.sort((a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       );
@@ -276,7 +276,7 @@ class DataVisualizationOptimizer {
   }
 
   /**
-   * è®¡ç®—æ•°æ®ç‚¹é‡è¦æ€§åˆ†æ•°
+   * ¼ÆËãÊı¾İµãÖØÒªĞÔ·ÖÊı
    */
   private calculateImportanceScores(data: DataPoint[]): number[] {
     const scores: number[] = new Array(data.length).fill(0);
@@ -286,32 +286,32 @@ class DataVisualizationOptimizer {
       const curr = data[i];
       const next = data[i + 1];
 
-      // è®¡ç®—å“åº”æ—¶é—´å˜åŒ–ç‡
+      // ¼ÆËãÏìÓ¦Ê±¼ä±ä»¯ÂÊ
       const responseTimeChange = Math.abs(
         (curr.responseTime || 0) - (prev.responseTime || 0)
       ) + Math.abs(
         (next.responseTime || 0) - (curr.responseTime || 0)
       );
 
-      // è®¡ç®—ååé‡å˜åŒ–ç‡
+      // ¼ÆËãÍÌÍÂÁ¿±ä»¯ÂÊ
       const throughputChange = Math.abs(
         (curr.throughput || curr.tps || 0) - (prev.throughput || prev.tps || 0)
       ) + Math.abs(
         (next.throughput || next.tps || 0) - (curr.throughput || curr.tps || 0)
       );
 
-      // è®¡ç®—é”™è¯¯ç‡å˜åŒ–
+      // ¼ÆËã´íÎóÂÊ±ä»¯
       const errorRateChange = Math.abs(
         (curr.errorRate || 0) - (prev.errorRate || 0)
       ) + Math.abs(
         (next.errorRate || 0) - (curr.errorRate || 0)
       );
 
-      // ç»¼åˆé‡è¦æ€§åˆ†æ•°
+      // ×ÛºÏÖØÒªĞÔ·ÖÊı
       scores[i] = responseTimeChange * 0.4 + throughputChange * 0.4 + errorRateChange * 0.2;
     }
 
-    // è¾¹ç•Œç‚¹è®¾ä¸ºé«˜é‡è¦æ€§
+    // ±ß½çµãÉèÎª¸ßÖØÒªĞÔ
     scores[0] = Math.max(...scores) * 1.5;
     scores[scores.length - 1] = Math.max(...scores) * 1.5;
 
@@ -319,7 +319,7 @@ class DataVisualizationOptimizer {
   }
 
   /**
-   * ç”Ÿæˆç¼“å­˜é”®
+   * Éú³É»º´æ¼ü
    */
   private generateCacheKey(data: DataPoint[], config: OptimizationConfig): string {
     const dataHash = this.simpleHash(JSON.stringify({
@@ -334,20 +334,20 @@ class DataVisualizationOptimizer {
   }
 
   /**
-   * ç®€å•å“ˆå¸Œå‡½æ•°
+   * ¼òµ¥¹şÏ£º¯Êı
    */
   private simpleHash(str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // è½¬æ¢ä¸º32ä½æ•´æ•°
+      hash = hash & hash; // ×ª»»Îª32Î»ÕûÊı
     }
     return hash.toString(36);
   }
 
   /**
-   * æ›´æ–°å¹³å‡å‹ç¼©æ¯”
+   * ¸üĞÂÆ½¾ùÑ¹Ëõ±È
    */
   private updateAverageCompressionRatio(newRatio: number): void {
     const totalOperations = this.performanceMetrics.cacheHits + this.performanceMetrics.cacheMisses;
@@ -356,21 +356,21 @@ class DataVisualizationOptimizer {
   }
 
   /**
-   * è·å–æ€§èƒ½æŒ‡æ ‡
+   * »ñÈ¡ĞÔÄÜÖ¸±ê
    */
   getPerformanceMetrics() {
     return { ...this.performanceMetrics };
   }
 
   /**
-   * æ¸…ç†ç¼“å­˜
+   * ÇåÀí»º´æ
    */
   clearCache(): void {
     this.cache.clear();
   }
 
   /**
-   * è·å–ç¼“å­˜ç»Ÿè®¡
+   * »ñÈ¡»º´æÍ³¼Æ
    */
   getCacheStats() {
     return {
@@ -381,6 +381,6 @@ class DataVisualizationOptimizer {
   }
 }
 
-// å¯¼å‡ºå•ä¾‹å®ä¾‹
+// µ¼³öµ¥ÀıÊµÀı
 export const _dataVisualizationOptimizer = new DataVisualizationOptimizer();
 export default DataVisualizationOptimizer;

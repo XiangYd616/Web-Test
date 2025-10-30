@@ -76,6 +76,7 @@ export interface MonitoringIncident {
 }
 
 // 统一服务导出
+// @ts-ignore - isolatedModules re-export
 export { streamingMonitoring } from './streamingMonitoring';
 
 // 兼容性导出（逐步迁移）
