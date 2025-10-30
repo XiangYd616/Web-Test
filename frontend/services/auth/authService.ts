@@ -1442,20 +1442,6 @@ export class UnifiedAuthService implements IAuthService {
     }, 60000); // 每分钟检查一次
   }
 
-  /**
-   * 检查token是否即将过期
-   */
-  private isTokenExpiringSoon(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expirationTime = payload.exp * 1000;
-      const now = Date.now();
-      const timeUntilExpiry = expirationTime - now;
-      return timeUntilExpiry < 5 * 60 * 1000; // 5分钟内过期
-    } catch {
-      return true;
-    }
-  }
 
   /**
    * 安全存储token

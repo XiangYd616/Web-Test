@@ -697,9 +697,10 @@ class TestApiService implements TestApiClient {
    * 下载报告文件
    */
   async downloadReport(report_id: string): Promise<Response> {
+    const token = localStorage.getItem('auth_token') || '';
     const response = await fetch(`${process.env.REACT_APP_API_URL || process.env.BACKEND_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`}${this.baseUrl}/reports/${report_id}/download`, {
       headers: {
-        'Authorization': `Bearer ${apiService.getToken()}`
+        'Authorization': `Bearer ${token}`
       }
     });
     return response;
@@ -772,6 +773,7 @@ class TestApiService implements TestApiClient {
     if (response.success && response.data) {
       const testExecution: TestExecution = {
         id: response.data.id || testId,
+        type: testType,
         testType,
         status: response.data.status as TestStatus,
         progress: response.data.progress || 0,

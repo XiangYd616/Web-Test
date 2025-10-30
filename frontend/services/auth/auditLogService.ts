@@ -513,7 +513,12 @@ export class AuditLogService {
     }
 
     // 获取设备信息
-    entry.deviceInfo = this.parseDeviceInfo(options.userAgent);
+    entry.deviceInfo = this.parseDeviceInfo(options.userAgent) || {
+      deviceId: 'unknown',
+      platform: 'unknown',
+      browser: 'unknown',
+      os: 'unknown'
+    };
 
     // 计算风险分数
     if (this.config.enableRiskScoring) {
