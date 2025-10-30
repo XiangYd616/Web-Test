@@ -1,5 +1,5 @@
-ï»¿
-// æ ¸å¿ƒç±»å‹å®šä¹‰
+
+// ºËĞÄÀàĞÍ¶¨Òå
 export interface MonitoringSite {
     id: string;
     name: string;
@@ -55,7 +55,7 @@ export interface AlertConfig {
         webhook: boolean;
         sms: boolean;
     };
-    cooldown: number; // åˆ†é’Ÿ
+    cooldown: number; // ·ÖÖÓ
     createdAt: string;
 }
 
@@ -75,11 +75,11 @@ export interface MonitoringIncident {
     resolution?: string;
 }
 
-// ç»Ÿä¸€æœåŠ¡å¯¼å‡º
+// Í³Ò»·şÎñµ¼³ö
 export { streamingMonitoring } from './streamingMonitoring';
 
-// å…¼å®¹æ€§å¯¼å‡ºï¼ˆé€æ­¥è¿ç§»ï¼‰
-export { monitoringService } from '../monitoringService';
+// ¼æÈİĞÔµ¼³ö£¨Öğ²½Ç¨ÒÆ£©
+export type { MonitoringService } from '../monitoringService';
 
-// ç±»å‹å·²åœ¨ä¸Šé¢å®šä¹‰å¹¶è‡ªåŠ¨å¯¼å‡ºï¼Œæ— éœ€é‡å¤å¯¼å‡º
+// ÀàĞÍÒÑÔÚÉÏÃæ¶¨Òå²¢×Ô¶¯µ¼³ö£¬ÎŞĞèÖØ¸´µ¼³ö
 

@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ApiError } from '../types/api.types';
 import type { ApiResponse } from '../types/api';
+import { ErrorCode } from '../types/api';
 
 // ==================== 状态类型定义 ====================
 
@@ -125,7 +126,7 @@ export function useDataState<T = any>(
       }
     } catch (err) {
       const apiError: ApiError = err instanceof Error ? {
-        code: 'EXECUTION_ERROR',
+        code: ErrorCode.EXECUTION_ERROR,
         message: err.message,
         timestamp: new Date().toISOString()
       } : err as ApiError;

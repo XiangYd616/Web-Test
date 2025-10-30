@@ -1,4 +1,4 @@
-ï»¿/**
+/**
  * Unified Test Orchestrator
  * Central system for coordinating and managing all test types
  */
@@ -102,7 +102,7 @@ class TestOrchestrator {
           config: { endpoints: 'all' },
           priority: 'critical',
           dependencies: [],
-          status: 'pending',
+          status: 'pending' as const,
           retryCount: 0,
           maxRetries: 3
         },
@@ -112,7 +112,7 @@ class TestOrchestrator {
           config: { depth: 'full' },
           priority: 'critical',
           dependencies: ['api-test'],
-          status: 'pending',
+          status: 'pending' as const,
           retryCount: 0,
           maxRetries: 2
         },
@@ -122,7 +122,7 @@ class TestOrchestrator {
           config: { load: 'medium' },
           priority: 'high',
           dependencies: ['api-test'],
-          status: 'pending',
+          status: 'pending' as const,
           retryCount: 0,
           maxRetries: 2
         }
@@ -170,7 +170,7 @@ class TestOrchestrator {
           config: { endpoints: 'health' },
           priority: 'high',
           dependencies: [],
-          status: 'pending',
+          status: 'pending' as const,
           retryCount: 0,
           maxRetries: 5
         },
@@ -180,7 +180,7 @@ class TestOrchestrator {
           config: { type: 'synthetic' },
           priority: 'medium',
           dependencies: [],
-          status: 'pending',
+          status: 'pending' as const,
           retryCount: 0,
           maxRetries: 3
         }
@@ -224,11 +224,11 @@ class TestOrchestrator {
 
     /**
 
-     * ifåŠŸèƒ½å‡½æ•°
+     * if¹¦ÄÜº¯Êı
 
-     * @param {Object} params - å‚æ•°å¯¹è±¡
+     * @param {Object} params - ²ÎÊı¶ÔÏó
 
-     * @returns {Promise<Object>} è¿”å›ç»“æœ
+     * @returns {Promise<Object>} ·µ»Ø½á¹û
 
      */
     const pipeline = this.pipelines.get(pipelineId);
@@ -288,11 +288,11 @@ class TestOrchestrator {
 
     /**
 
-     * whileåŠŸèƒ½å‡½æ•°
+     * while¹¦ÄÜº¯Êı
 
-     * @param {Object} params - å‚æ•°å¯¹è±¡
+     * @param {Object} params - ²ÎÊı¶ÔÏó
 
-     * @returns {Promise<Object>} è¿”å›ç»“æœ
+     * @returns {Promise<Object>} ·µ»Ø½á¹û
 
      */
   private async processQueue(pipelineId: string): Promise<void> {
@@ -387,13 +387,13 @@ class TestOrchestrator {
     /**
 
 
-     * foråŠŸèƒ½å‡½æ•°
+     * for¹¦ÄÜº¯Êı
 
 
-     * @param {Object} params - å‚æ•°å¯¹è±¡
+     * @param {Object} params - ²ÎÊı¶ÔÏó
 
 
-     * @returns {Promise<Object>} è¿”å›ç»“æœ
+     * @returns {Promise<Object>} ·µ»Ø½á¹û
 
 
      */
@@ -406,13 +406,13 @@ class TestOrchestrator {
       /**
 
 
-       * ifåŠŸèƒ½å‡½æ•°
+       * if¹¦ÄÜº¯Êı
 
 
-       * @param {Object} params - å‚æ•°å¯¹è±¡
+       * @param {Object} params - ²ÎÊı¶ÔÏó
 
 
-       * @returns {Promise<Object>} è¿”å›ç»“æœ
+       * @returns {Promise<Object>} ·µ»Ø½á¹û
 
 
        */
@@ -448,11 +448,11 @@ class TestOrchestrator {
 
     /**
 
-     * switchåŠŸèƒ½å‡½æ•°
+     * switch¹¦ÄÜº¯Êı
 
-     * @param {Object} params - å‚æ•°å¯¹è±¡
+     * @param {Object} params - ²ÎÊı¶ÔÏó
 
-     * @returns {Promise<Object>} è¿”å›ç»“æœ
+     * @returns {Promise<Object>} ·µ»Ø½á¹û
 
      */
   private evaluateGate(value: number, operator: string, threshold: number): boolean {
@@ -512,7 +512,7 @@ class TestOrchestrator {
         description: 'Full regression testing suite',
         jobs: [
           { type: TestType.API, priority: 'high' },
-          { type: TestType.UI, priority: 'medium' },
+          { type: 'ui' as any, priority: 'medium' },
           { type: TestType.PERFORMANCE, priority: 'medium' },
           { type: TestType.SECURITY, priority: 'high' }
         ]
@@ -538,7 +538,7 @@ class TestOrchestrator {
         config: {},
         priority: jobConfig.priority,
         dependencies: index > 0 ? [`job-${index - 1}`] : [],
-        status: 'pending',
+        status: 'pending' as const,
         retryCount: 0,
         maxRetries: 3
       })),
@@ -566,13 +566,13 @@ class TestOrchestrator {
       /**
 
       
-       * ifåŠŸèƒ½å‡½æ•°
+       * if¹¦ÄÜº¯Êı
 
       
-       * @param {Object} params - å‚æ•°å¯¹è±¡
+       * @param {Object} params - ²ÎÊı¶ÔÏó
 
       
-       * @returns {Promise<Object>} è¿”å›ç»“æœ
+       * @returns {Promise<Object>} ·µ»Ø½á¹û
 
       
        */

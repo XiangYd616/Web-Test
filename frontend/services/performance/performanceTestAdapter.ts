@@ -1,12 +1,12 @@
-ï»¿
+
 import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, UnifiedPerformanceConfig } from '../../types/performance.types';
 import { PerformanceTestCore } from './performanceTestCore';
 
-const performanceTestCore = PerformanceTestCore.getInstance();
+const performanceTestCore = new PerformanceTestCore();
 
-// ==================== å…¼å®¹æ€§æ¥å£å®šä¹‰ ====================
+// ==================== ¼æÈİĞÔ½Ó¿Ú¶¨Òå ====================
 
-// å…¼å®¹æ—§çš„æ€§èƒ½æµ‹è¯•é…ç½®æ¥å£
+// ¼æÈİ¾ÉµÄĞÔÄÜ²âÊÔÅäÖÃ½Ó¿Ú
 export interface LegacyPerformanceTestConfig {
   url: string;
   mode: 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
@@ -23,31 +23,31 @@ export interface LegacyPerformanceTestConfig {
   device: 'desktop' | 'mobile' | 'both';
 }
 
-// å…¼å®¹æ—§çš„æµ‹è¯•è¿›åº¦æ¥å£
+// ¼æÈİ¾ÉµÄ²âÊÔ½ø¶È½Ó¿Ú
 export interface LegacyTestProgressCallback {
   onProgress: (progress: number, step: string) => void;
   onComplete: (result: any) => void;
   onError: (error: any) => void;
 }
 
-// ==================== æ€§èƒ½æµ‹è¯•é€‚é…å™¨ç±» ====================
+// ==================== ĞÔÄÜ²âÊÔÊÊÅäÆ÷Àà ====================
 
 export class PerformanceTestAdapter {
   /**
-   * é€‚é…æ—§çš„æ€§èƒ½æµ‹è¯•æ¥å£
+   * ÊÊÅä¾ÉµÄĞÔÄÜ²âÊÔ½Ó¿Ú
    */
   static async runLegacyPerformanceTest(
     config: LegacyPerformanceTestConfig,
     callbacks?: LegacyTestProgressCallback
   ): Promise<any> {
     try {
-      // è½¬æ¢é…ç½®æ ¼å¼
+      // ×ª»»ÅäÖÃ¸ñÊ½
       const unifiedConfig = this.convertLegacyConfig(config);
 
-      // è½¬æ¢è¿›åº¦å›è°ƒ
+      // ×ª»»½ø¶È»Øµ÷
       const onProgress = callbacks ? this.convertProgressCallback(callbacks) : undefined;
 
-      // æ‰§è¡Œæ€§èƒ½æµ‹è¯•
+      // Ö´ĞĞĞÔÄÜ²âÊÔ
       const result = await performanceTestCore.runPerformanceTest(
         config.url,
         unifiedConfig,
@@ -57,10 +57,10 @@ export class PerformanceTestAdapter {
         }
       );
 
-      // è½¬æ¢ç»“æœæ ¼å¼ä»¥å…¼å®¹æ—§æ¥å£
+      // ×ª»»½á¹û¸ñÊ½ÒÔ¼æÈİ¾É½Ó¿Ú
       const legacyResult = this.convertResultToLegacy(result);
 
-      // è°ƒç”¨å®Œæˆå›è°ƒ
+      // µ÷ÓÃÍê³É»Øµ÷
       if (callbacks?.onComplete) {
         callbacks?.onComplete(legacyResult);
       }
@@ -68,7 +68,7 @@ export class PerformanceTestAdapter {
       return legacyResult;
 
     } catch (error) {
-      // è°ƒç”¨é”™è¯¯å›è°ƒ
+      // µ÷ÓÃ´íÎó»Øµ÷
       if (callbacks?.onError) {
         callbacks?.onError(error);
       }
@@ -77,7 +77,7 @@ export class PerformanceTestAdapter {
   }
 
   /**
-   * é€‚é…ç½‘ç«™æµ‹è¯•ä¸­çš„æ€§èƒ½æ£€æµ‹
+   * ÊÊÅäÍøÕ¾²âÊÔÖĞµÄĞÔÄÜ¼ì²â
    */
   static async runWebsitePerformanceTest(
     url: string,
@@ -101,7 +101,7 @@ export class PerformanceTestAdapter {
 
     const result = await performanceTestCore.runPerformanceTest(url, config);
 
-    // è½¬æ¢ä¸ºç½‘ç«™æµ‹è¯•æœŸæœ›çš„æ ¼å¼
+    // ×ª»»ÎªÍøÕ¾²âÊÔÆÚÍûµÄ¸ñÊ½
     return {
       performance: {
         score: result.overallScore,
@@ -128,7 +128,7 @@ export class PerformanceTestAdapter {
   }
 
   /**
-   * é€‚é…SEOæµ‹è¯•ä¸­çš„æ€§èƒ½æ£€æµ‹
+   * ÊÊÅäSEO²âÊÔÖĞµÄĞÔÄÜ¼ì²â
    */
   static async runSEOPerformanceTest(
     url: string,
@@ -138,11 +138,11 @@ export class PerformanceTestAdapter {
     } = {}
   ): Promise<any> {
     const config: Partial<UnifiedPerformanceConfig> = {
-      level: 'basic', // SEOæµ‹è¯•ä½¿ç”¨åŸºç¡€æ€§èƒ½æ£€æµ‹
+      level: 'basic', // SEO²âÊÔÊ¹ÓÃ»ù´¡ĞÔÄÜ¼ì²â
       device: options.device || 'desktop',
       pageSpeed: true,
       coreWebVitals: true,
-      resourceOptimization: false, // SEOæµ‹è¯•ä¸éœ€è¦è¯¦ç»†çš„èµ„æºåˆ†æ
+      resourceOptimization: false, // SEO²âÊÔ²»ĞèÒªÏêÏ¸µÄ×ÊÔ´·ÖÎö
       caching: false,
       compression: false,
       imageOptimization: false,
@@ -151,7 +151,7 @@ export class PerformanceTestAdapter {
 
     const result = await performanceTestCore.runPerformanceTest(url, config);
 
-    // è½¬æ¢ä¸ºSEOæµ‹è¯•æœŸæœ›çš„æ ¼å¼
+    // ×ª»»ÎªSEO²âÊÔÆÚÍûµÄ¸ñÊ½
     return {
       score: result.overallScore,
       metrics: {
@@ -174,7 +174,7 @@ export class PerformanceTestAdapter {
   }
 
   /**
-   * é€‚é…APIæµ‹è¯•ä¸­çš„æ€§èƒ½æ£€æµ‹
+   * ÊÊÅäAPI²âÊÔÖĞµÄĞÔÄÜ¼ì²â
    */
   static async runAPIPerformanceTest(
     url: string,
@@ -187,7 +187,7 @@ export class PerformanceTestAdapter {
       level: 'basic',
       device: 'desktop',
       pageSpeed: true,
-      coreWebVitals: false, // APIæµ‹è¯•ä¸éœ€è¦Core Web Vitals
+      coreWebVitals: false, // API²âÊÔ²»ĞèÒªCore Web Vitals
       resourceOptimization: false,
       caching: false,
       compression: false,
@@ -199,7 +199,7 @@ export class PerformanceTestAdapter {
 
     const result = await performanceTestCore.runPerformanceTest(url, config);
 
-    // è½¬æ¢ä¸ºAPIæµ‹è¯•æœŸæœ›çš„æ ¼å¼
+    // ×ª»»ÎªAPI²âÊÔÆÚÍûµÄ¸ñÊ½
     return {
       responseTime: result.pageSpeed?.responseTime || 0,
       loadTime: result.pageSpeed?.loadTime || 0,
@@ -215,10 +215,10 @@ export class PerformanceTestAdapter {
     };
   }
 
-  // ==================== ç§æœ‰è½¬æ¢æ–¹æ³• ====================
+  // ==================== Ë½ÓĞ×ª»»·½·¨ ====================
 
   /**
-   * è½¬æ¢æ—§é…ç½®åˆ°æ–°é…ç½®
+   * ×ª»»¾ÉÅäÖÃµ½ĞÂÅäÖÃ
    */
   private static convertLegacyConfig(legacy: LegacyPerformanceTestConfig): Partial<UnifiedPerformanceConfig> {
     return {
@@ -239,7 +239,7 @@ export class PerformanceTestAdapter {
   }
 
   /**
-   * è½¬æ¢è¿›åº¦å›è°ƒ
+   * ×ª»»½ø¶È»Øµ÷
    */
   private static convertProgressCallback(
     callbacks: LegacyTestProgressCallback
@@ -252,7 +252,7 @@ export class PerformanceTestAdapter {
   }
 
   /**
-   * è½¬æ¢ç»“æœåˆ°æ—§æ ¼å¼
+   * ×ª»»½á¹ûµ½¾É¸ñÊ½
    */
   public static convertResultToLegacy(result: PerformanceTestResult): unknown {
     return {
@@ -280,7 +280,7 @@ export class PerformanceTestAdapter {
   }
 }
 
-// ==================== ä¾¿æ·å¯¼å‡ºå‡½æ•° ====================
+// ==================== ±ã½İµ¼³öº¯Êı ====================
 
 export async function quickPerformanceTest(
   url: string,
@@ -332,5 +332,5 @@ export async function getPerformanceMetrics(
   };
 }
 
-// å¯¼å‡ºé€‚é…å™¨å®ä¾‹
+// µ¼³öÊÊÅäÆ÷ÊµÀı
 export const _performanceTestAdapter = PerformanceTestAdapter;

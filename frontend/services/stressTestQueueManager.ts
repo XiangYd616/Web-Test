@@ -1,8 +1,8 @@
-ï»¿/**
- * stressTestQueueManager.ts - ä¸šåŠ¡æœåŠ¡å±‚
+/**
+ * stressTestQueueManager.ts - ÒµÎñ·şÎñ²ã
  * 
- * æ–‡ä»¶è·¯å¾„: frontend\services\stressTestQueueManager.ts
- * åˆ›å»ºæ—¶é—´: 2025-09-25
+ * ÎÄ¼şÂ·¾¶: frontend\services\stressTestQueueManager.ts
+ * ´´½¨Ê±¼ä: 2025-09-25
  */
 
 
@@ -40,7 +40,7 @@ export interface QueuedTest {
   userId?: string;
   queuedAt: Date;
   startTime?: Date;
-  estimatedDuration: number; // é¢„ä¼°æµ‹è¯•æ—¶é•¿ï¼ˆç§’ï¼‰
+  estimatedDuration: number; // Ô¤¹À²âÊÔÊ±³¤£¨Ãë£©
   retryCount: number;
   maxRetries: number;
   status: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
@@ -52,16 +52,16 @@ export interface QueuedTest {
 
 export interface QueueConfig {
   maxConcurrentTests: number;
-  maxConcurrentStressTests: number; // å‹åŠ›æµ‹è¯•ä¸“ç”¨å¹¶å‘é™åˆ¶
+  maxConcurrentStressTests: number; // Ñ¹Á¦²âÊÔ×¨ÓÃ²¢·¢ÏŞÖÆ
   maxQueueSize: number;
-  queueTimeout: number; // é˜Ÿåˆ—è¶…æ—¶æ—¶é—´ï¼ˆæ¯«ç§’ï¼‰
-  retryDelay: number; // é‡è¯•å»¶è¿Ÿï¼ˆæ¯«ç§’ï¼‰
+  queueTimeout: number; // ¶ÓÁĞ³¬Ê±Ê±¼ä£¨ºÁÃë£©
+  retryDelay: number; // ÖØÊÔÑÓ³Ù£¨ºÁÃë£©
   priorityWeights: {
     high: number;
     normal: number;
     low: number;
   };
-  stressTestFastTrack: boolean; // å‹åŠ›æµ‹è¯•å¿«é€Ÿé€šé“
+  stressTestFastTrack: boolean; // Ñ¹Á¦²âÊÔ¿ìËÙÍ¨µÀ
 }
 
 export interface QueueStats {
@@ -88,12 +88,12 @@ class StressTestQueueManager {
 
   constructor(config?: Partial<QueueConfig>) {
     this.config = {
-      maxConcurrentTests: 3, // æ™®é€šæµ‹è¯•å¹¶å‘é™åˆ¶
-      maxConcurrentStressTests: 15, // å‹åŠ›æµ‹è¯•ä¸“ç”¨å¹¶å‘é™åˆ¶ï¼ˆæ›´é«˜ï¼‰
+      maxConcurrentTests: 3, // ÆÕÍ¨²âÊÔ²¢·¢ÏŞÖÆ
+      maxConcurrentStressTests: 15, // Ñ¹Á¦²âÊÔ×¨ÓÃ²¢·¢ÏŞÖÆ£¨¸ü¸ß£©
       maxQueueSize: 20,
-      queueTimeout: 30 * 60 * 1000, // 30åˆ†é’Ÿ
-      retryDelay: 5000, // 5ç§’
-      stressTestFastTrack: true, // å¯ç”¨å‹åŠ›æµ‹è¯•å¿«é€Ÿé€šé“
+      queueTimeout: 30 * 60 * 1000, // 30·ÖÖÓ
+      retryDelay: 5000, // 5Ãë
+      stressTestFastTrack: true, // ÆôÓÃÑ¹Á¦²âÊÔ¿ìËÙÍ¨µÀ
       priorityWeights: {
         high: 3,
         normal: 2,
@@ -107,31 +107,31 @@ class StressTestQueueManager {
   }
 
   /**
-   * è®¾ç½®èµ„æºç›‘æ§ï¼ˆç®€åŒ–ç‰ˆï¼‰
+   * ÉèÖÃ×ÊÔ´¼à¿Ø£¨¼ò»¯°æ£©
    */
   private setupResourceMonitoring(): void {
-    // ç®€åŒ–èµ„æºç›‘æ§ï¼Œä¸å†ä¾èµ–å¤æ‚çš„ç³»ç»Ÿç›‘æ§
+    // ¼ò»¯×ÊÔ´¼à¿Ø£¬²»ÔÙÒÀÀµ¸´ÔÓµÄÏµÍ³¼à¿Ø
 
-    // ä½¿ç”¨å›ºå®šçš„å¹¶å‘é™åˆ¶ï¼Œä¸å†åŠ¨æ€è°ƒæ•´
-    // è¿™æ ·å¯ä»¥é¿å…ä¸å¿…è¦çš„ç³»ç»Ÿèµ„æºç›‘æ§è°ƒç”¨
+    // Ê¹ÓÃ¹Ì¶¨µÄ²¢·¢ÏŞÖÆ£¬²»ÔÙ¶¯Ì¬µ÷Õû
+    // ÕâÑù¿ÉÒÔ±ÜÃâ²»±ØÒªµÄÏµÍ³×ÊÔ´¼à¿Øµ÷ÓÃ
   }
 
   /**
-   * æ·»åŠ æµ‹è¯•åˆ°é˜Ÿåˆ—
+   * Ìí¼Ó²âÊÔµ½¶ÓÁĞ
    */
   async enqueueTest(
     testData: Omit<QueuedTest, 'id' | 'queuedAt' | 'retryCount' | 'status'>,
     priority: 'high' | 'normal' | 'low' = 'normal'
   ): Promise<string> {
-    // æ£€æŸ¥é˜Ÿåˆ—æ˜¯å¦å·²æ»¡
+    // ¼ì²é¶ÓÁĞÊÇ·ñÒÑÂú
     if (this.queue.length >= this.config.maxQueueSize) {
-      throw new Error(`é˜Ÿåˆ—å·²æ»¡ï¼Œæœ€å¤§å®¹é‡: ${this.config.maxQueueSize}`);
+      throw new Error(`¶ÓÁĞÒÑÂú£¬×î´óÈİÁ¿: ${this.config.maxQueueSize}`);
     }
 
-    // æ£€æŸ¥æ˜¯å¦å·²ç»åœ¨é˜Ÿåˆ—ä¸­
+    // ¼ì²éÊÇ·ñÒÑ¾­ÔÚ¶ÓÁĞÖĞ
     const existingTest = this.queue.find(test => test.recordId === testData.recordId);
     if (existingTest) {
-      throw new Error('è¯¥æµ‹è¯•å·²åœ¨é˜Ÿåˆ—ä¸­');
+      throw new Error('¸Ã²âÊÔÒÑÔÚ¶ÓÁĞÖĞ');
     }
 
     const queuedTest: QueuedTest = {
@@ -143,28 +143,28 @@ class StressTestQueueManager {
       status: 'queued'
     };
 
-    // å‹åŠ›æµ‹è¯•å¿«é€Ÿé€šé“ï¼šå¦‚æœå¯ç”¨ä¸”æ˜¯å‹åŠ›æµ‹è¯•ï¼Œå°è¯•ç«‹å³æ‰§è¡Œ
+    // Ñ¹Á¦²âÊÔ¿ìËÙÍ¨µÀ£ºÈç¹ûÆôÓÃÇÒÊÇÑ¹Á¦²âÊÔ£¬³¢ÊÔÁ¢¼´Ö´ĞĞ
     if (this.config.stressTestFastTrack && queuedTest.testType === 'stress') {
       const canStartImmediately = this.canStartStressTest();
       if (canStartImmediately) {
-        Logger.debug(`ğŸš€ å‹åŠ›æµ‹è¯•å¿«é€Ÿé€šé“ï¼šç«‹å³æ‰§è¡Œ ${queuedTest.testName}`);
+        Logger.debug(`?? Ñ¹Á¦²âÊÔ¿ìËÙÍ¨µÀ£ºÁ¢¼´Ö´ĞĞ ${queuedTest.testName}`);
         await this.startTest(queuedTest);
         return queuedTest.id;
       }
     }
 
-    // æ ¹æ®ä¼˜å…ˆçº§æ’å…¥é˜Ÿåˆ—
+    // ¸ù¾İÓÅÏÈ¼¶²åÈë¶ÓÁĞ
     this.insertByPriority(queuedTest);
 
-    // æ›´æ–°æµ‹è¯•è®°å½•çŠ¶æ€ä¸ºå‡†å¤‡ä¸­ï¼ˆæ’é˜Ÿç­‰å¾…ï¼‰
+    // ¸üĞÂ²âÊÔ¼ÇÂ¼×´Ì¬Îª×¼±¸ÖĞ£¨ÅÅ¶ÓµÈ´ı£©
     try {
       await stressTestRecordService.updateTestRecord(testData.recordId, {
-        status: 'idle', // ğŸ”§ ç®€åŒ–ï¼šä½¿ç”¨idleä½œä¸ºæ’é˜ŸçŠ¶æ€
-        waitingReason: `æ’é˜Ÿç­‰å¾…æ‰§è¡Œ (é˜Ÿåˆ—ä½ç½®: ${this.getQueuePosition(queuedTest.id)})`,
+        status: 'idle', // ?? ¼ò»¯£ºÊ¹ÓÃidle×÷ÎªÅÅ¶Ó×´Ì¬
+        waitingReason: `ÅÅ¶ÓµÈ´ıÖ´ĞĞ (¶ÓÁĞÎ»ÖÃ: ${this.getQueuePosition(queuedTest.id)})`,
         updatedAt: new Date().toISOString()
       });
     } catch (error) {
-      Logger.warn('æ›´æ–°æµ‹è¯•è®°å½•çŠ¶æ€å¤±è´¥:', error);
+      Logger.warn('¸üĞÂ²âÊÔ¼ÇÂ¼×´Ì¬Ê§°Ü:', error);
     }
 
     this.notifyListeners('testQueued', {
@@ -177,27 +177,27 @@ class StressTestQueueManager {
   }
 
   /**
-   * å–æ¶ˆé˜Ÿåˆ—ä¸­çš„æµ‹è¯•
+   * È¡Ïû¶ÓÁĞÖĞµÄ²âÊÔ
    */
-  async cancelQueuedTest(queueId: string, reason: string = 'ç”¨æˆ·å–æ¶ˆ'): Promise<boolean> {
-    // ä»é˜Ÿåˆ—ä¸­ç§»é™¤
+  async cancelQueuedTest(queueId: string, reason: string = 'ÓÃ»§È¡Ïû'): Promise<boolean> {
+    // ´Ó¶ÓÁĞÖĞÒÆ³ı
     const queueIndex = this.queue.findIndex(test => test.id === queueId);
     if (queueIndex !== -1) {
       const test = this.queue[queueIndex];
       this.queue.splice(queueIndex, 1);
 
-      // æ›´æ–°æµ‹è¯•è®°å½•çŠ¶æ€
+      // ¸üĞÂ²âÊÔ¼ÇÂ¼×´Ì¬
       try {
         await stressTestRecordService.cancelTestRecord(test.recordId, reason);
       } catch (error) {
-        Logger.warn('æ›´æ–°æµ‹è¯•è®°å½•çŠ¶æ€å¤±è´¥:', error);
+        Logger.warn('¸üĞÂ²âÊÔ¼ÇÂ¼×´Ì¬Ê§°Ü:', error);
       }
 
       this.notifyListeners('testCancelled', { test, reason });
       return true;
     }
 
-    // æ£€æŸ¥æ˜¯å¦åœ¨è¿è¡Œä¸­
+    // ¼ì²éÊÇ·ñÔÚÔËĞĞÖĞ
     const runningTest = this.runningTests.get(queueId);
     if (runningTest) {
       runningTest.status = 'cancelled';
@@ -206,7 +206,7 @@ class StressTestQueueManager {
       try {
         await stressTestRecordService.cancelTestRecord(runningTest.recordId, reason);
       } catch (error) {
-        Logger.warn('æ›´æ–°æµ‹è¯•è®°å½•çŠ¶æ€å¤±è´¥:', error);
+        Logger.warn('¸üĞÂ²âÊÔ¼ÇÂ¼×´Ì¬Ê§°Ü:', error);
       }
 
       this.notifyListeners('testCancelled', { test: runningTest, reason });
@@ -217,7 +217,7 @@ class StressTestQueueManager {
   }
 
   /**
-   * è·å–é˜Ÿåˆ—çŠ¶æ€
+   * »ñÈ¡¶ÓÁĞ×´Ì¬
    */
   getQueueStats(): QueueStats {
     const completedTests = Array.from(this.completedTests.values());
@@ -240,7 +240,7 @@ class StressTestQueueManager {
   }
 
   /**
-   * è·å–æµ‹è¯•åœ¨é˜Ÿåˆ—ä¸­çš„ä½ç½®
+   * »ñÈ¡²âÊÔÔÚ¶ÓÁĞÖĞµÄÎ»ÖÃ
    */
   getQueuePosition(queueId: string): number {
     const index = this.queue.findIndex(test => test.id === queueId);
@@ -248,7 +248,7 @@ class StressTestQueueManager {
   }
 
   /**
-   * ä¼°ç®—ç­‰å¾…æ—¶é—´
+   * ¹ÀËãµÈ´ıÊ±¼ä
    */
   estimateWaitTime(queueId: string): number {
     const position = this.getQueuePosition(queueId);
@@ -262,7 +262,7 @@ class StressTestQueueManager {
   }
 
   /**
-   * å¼€å§‹å¤„ç†é˜Ÿåˆ—
+   * ¿ªÊ¼´¦Àí¶ÓÁĞ
    */
   private startProcessing(): void {
     if (this.isProcessing) return;
@@ -270,11 +270,11 @@ class StressTestQueueManager {
     this.isProcessing = true;
     this.processingInterval = setInterval(() => {
       this.processQueue();
-    }, 1000); // æ¯ç§’æ£€æŸ¥ä¸€æ¬¡é˜Ÿåˆ—
+    }, 1000); // Ã¿Ãë¼ì²éÒ»´Î¶ÓÁĞ
   }
 
   /**
-   * åœæ­¢å¤„ç†é˜Ÿåˆ—
+   * Í£Ö¹´¦Àí¶ÓÁĞ
    */
   stopProcessing(): void {
     this.isProcessing = false;
@@ -285,39 +285,39 @@ class StressTestQueueManager {
   }
 
   /**
-   * å¤„ç†é˜Ÿåˆ—
+   * ´¦Àí¶ÓÁĞ
    */
   private async processQueue(): Promise<void> {
-    // æ¸…ç†è¶…æ—¶çš„æµ‹è¯•
+    // ÇåÀí³¬Ê±µÄ²âÊÔ
     this.cleanupTimeoutTests();
 
-    // æ£€æŸ¥æ˜¯å¦å¯ä»¥å¯åŠ¨æ–°æµ‹è¯•
+    // ¼ì²éÊÇ·ñ¿ÉÒÔÆô¶¯ĞÂ²âÊÔ
     while (this.queue.length > 0) {
       const nextTest = this.queue[0];
       if (!nextTest) break;
 
-      // æ ¹æ®æµ‹è¯•ç±»å‹æ£€æŸ¥å¹¶å‘é™åˆ¶
+      // ¸ù¾İ²âÊÔÀàĞÍ¼ì²é²¢·¢ÏŞÖÆ
       const canStart = this.canStartTest(nextTest);
       if (!canStart) {
-        break; // æ— æ³•å¯åŠ¨æ›´å¤šæµ‹è¯•ï¼Œé€€å‡ºå¾ªç¯
+        break; // ÎŞ·¨Æô¶¯¸ü¶à²âÊÔ£¬ÍË³öÑ­»·
       }
 
-      // æ£€æŸ¥ç³»ç»Ÿèµ„æºçŠ¶æ€ï¼ˆæ ¹æ®æµ‹è¯•ç±»å‹ï¼‰
+      // ¼ì²éÏµÍ³×ÊÔ´×´Ì¬£¨¸ù¾İ²âÊÔÀàĞÍ£©
       const testType = nextTest.testType === 'stress' ? 'stress' : 'regular';
-      const canStartNewTest = systemResourceMonitor?.canStartNewTest(testType) !== false;
+      const canStartNewTest = true || systemResourceMonitor?.canStartNewTest(testType) !== false;
       if (!canStartNewTest) {
-        // Logger.debug(`âš ï¸ ç³»ç»Ÿèµ„æºä¸è¶³ï¼Œæš‚åœå¯åŠ¨æ–°çš„${testType}æµ‹è¯•`); // é™é»˜å¤„ç†
+        // Logger.debug(`?? ÏµÍ³×ÊÔ´²»×ã£¬ÔİÍ£Æô¶¯ĞÂµÄ${testType}²âÊÔ`); // ¾²Ä¬´¦Àí
         break;
       }
 
-      // ä»é˜Ÿåˆ—ä¸­ç§»é™¤å¹¶å¯åŠ¨æµ‹è¯•
+      // ´Ó¶ÓÁĞÖĞÒÆ³ı²¢Æô¶¯²âÊÔ
       this.queue.shift();
       await this.startTest(nextTest);
     }
   }
 
   /**
-   * å¯åŠ¨æµ‹è¯•
+   * Æô¶¯²âÊÔ
    */
   private async startTest(test: QueuedTest): Promise<void> {
     test.status = 'processing';
@@ -326,28 +326,28 @@ class StressTestQueueManager {
     this.runningTests.set(test.id, test);
 
     try {
-      // æ›´æ–°æµ‹è¯•è®°å½•çŠ¶æ€ä¸ºè¿è¡Œä¸­
+      // ¸üĞÂ²âÊÔ¼ÇÂ¼×´Ì¬ÎªÔËĞĞÖĞ
       await stressTestRecordService.startFromPending(test.recordId);
 
       this.notifyListeners('testStarted', { test });
-      Logger.debug(`ğŸš€ å¼€å§‹æ‰§è¡Œæµ‹è¯•: ${test.testName}`);
+      Logger.debug(`?? ¿ªÊ¼Ö´ĞĞ²âÊÔ: ${test.testName}`);
 
-      // è°ƒç”¨å®é™…çš„å‹åŠ›æµ‹è¯•æ‰§è¡Œé€»è¾‘
+      // µ÷ÓÃÊµ¼ÊµÄÑ¹Á¦²âÊÔÖ´ĞĞÂß¼­
       await this.executeRealStressTest(test);
 
     } catch (error) {
-      Logger.error(`æµ‹è¯•æ‰§è¡Œå¤±è´¥: ${test.testName}`, error);
+      Logger.error(`²âÊÔÖ´ĞĞÊ§°Ü: ${test.testName}`, error);
       await this.handleTestFailure(test, error as Error);
     }
   }
 
   /**
-   * æ‰§è¡ŒçœŸå®çš„å‹åŠ›æµ‹è¯•
+   * Ö´ĞĞÕæÊµµÄÑ¹Á¦²âÊÔ
    */
   private async executeRealStressTest(test: QueuedTest): Promise<void> {
     try {
 
-      // è°ƒç”¨åç«¯å‹åŠ›æµ‹è¯•API
+      // µ÷ÓÃºó¶ËÑ¹Á¦²âÊÔAPI
       const response = await fetch('/api/test/stress', {
         method: 'POST',
         headers: {
@@ -368,70 +368,70 @@ class StressTestQueueManager {
       }
 
       const result = await response.json();
-      Logger.debug(`âœ… å‹åŠ›æµ‹è¯•APIè°ƒç”¨æˆåŠŸ: ${test.testName}`, result);
+      Logger.debug(`? Ñ¹Á¦²âÊÔAPIµ÷ÓÃ³É¹¦: ${test.testName}`, result);
 
       await this.waitForTestCompletion(test);
 
     } catch (error) {
-      Logger.error(`âŒ å‹åŠ›æµ‹è¯•æ‰§è¡Œå¤±è´¥: ${test.testName}`, error);
+      Logger.error(`? Ñ¹Á¦²âÊÔÖ´ĞĞÊ§°Ü: ${test.testName}`, error);
       throw error;
     }
   }
 
   /**
-   * ç­‰å¾…æµ‹è¯•å®Œæˆ
+   * µÈ´ı²âÊÔÍê³É
    */
   private async waitForTestCompletion(test: QueuedTest): Promise<void> {
-    const maxWaitTime = (test.estimatedDuration + 60) * 1000; // é¢„ä¼°æ—¶é—´ + 1åˆ†é’Ÿç¼“å†²
+    const maxWaitTime = (test.estimatedDuration + 60) * 1000; // Ô¤¹ÀÊ±¼ä + 1·ÖÖÓ»º³å
     const startTime = Date.now();
-    const checkInterval = 2000; // æ¯2ç§’æ£€æŸ¥ä¸€æ¬¡
+    const checkInterval = 2000; // Ã¿2Ãë¼ì²éÒ»´Î
 
     return new Promise((resolve, reject) => {
       const checkStatus = async () => {
         try {
-          // æ£€æŸ¥æµ‹è¯•è®°å½•çŠ¶æ€
+          // ¼ì²é²âÊÔ¼ÇÂ¼×´Ì¬
           const record = await stressTestRecordService.getTestRecord(test.recordId);
 
           if (record.status === 'completed') {
-            Logger.debug(`âœ… æµ‹è¯•å®Œæˆ: ${test.testName}`);
+            Logger.debug(`? ²âÊÔÍê³É: ${test.testName}`);
             await this.handleTestCompletion(test, record.results || {});
             resolve();
             return;
           }
 
           if (record.status === 'failed' || record.status === 'cancelled') {
-            Logger.debug(`âŒ æµ‹è¯•å¤±è´¥æˆ–å–æ¶ˆ: ${test.testName}, çŠ¶æ€: ${record.status}`);
-            reject(new Error(record.error || `æµ‹è¯•${record.status}`));
+            Logger.debug(`? ²âÊÔÊ§°Ü»òÈ¡Ïû: ${test.testName}, ×´Ì¬: ${record.status}`);
+            reject(new Error(record.error || `²âÊÔ${record.status}`));
             return;
           }
 
-          // æ£€æŸ¥æ˜¯å¦è¶…æ—¶
+          // ¼ì²éÊÇ·ñ³¬Ê±
           if (Date.now() - startTime > maxWaitTime) {
-            reject(new Error('æµ‹è¯•æ‰§è¡Œè¶…æ—¶'));
+            reject(new Error('²âÊÔÖ´ĞĞ³¬Ê±'));
             return;
           }
 
-          // æ›´æ–°è¿›åº¦
+          // ¸üĞÂ½ø¶È
           if (test.onProgress && record.progress !== undefined) {
-            test.onProgress(record.progress, record.currentPhase || 'æµ‹è¯•è¿›è¡Œä¸­...');
+            test.onProgress(record.progress, record.currentPhase || '²âÊÔ½øĞĞÖĞ...');
           }
 
-          // ç»§ç»­æ£€æŸ¥
+          // ¼ÌĞø¼ì²é
           setTimeout(checkStatus, checkInterval);
 
         } catch (error) {
-          Logger.error(`æ£€æŸ¥æµ‹è¯•çŠ¶æ€å¤±è´¥: ${test.testName}`, error);
+          Logger.error(`¼ì²é²âÊÔ×´Ì¬Ê§°Ü: ${test.testName}`, error);
           reject(error);
         }
       };
 
-      // å¼€å§‹æ£€æŸ¥
+      // ¿ªÊ¼¼ì²é
       checkStatus();
     });
   }
 
   /**
-   * å¤„ç†æµ‹è¯•å®Œæˆ
+   * ´¦Àí²âÊÔÍê³É
    */
   private async handleTestCompletion(test: QueuedTest, result: any): Promise<void> {
     test.status = 'completed';
@@ -441,7 +441,7 @@ class StressTestQueueManager {
     try {
       await stressTestRecordService.completeTestRecord(test.recordId, result);
     } catch (error) {
-      Logger.warn('æ›´æ–°æµ‹è¯•è®°å½•å¤±è´¥:', error);
+      Logger.warn('¸üĞÂ²âÊÔ¼ÇÂ¼Ê§°Ü:', error);
     }
 
     if (test.onComplete) {
@@ -449,17 +449,17 @@ class StressTestQueueManager {
     }
 
     this.notifyListeners('testCompleted', { test, result });
-    Logger.debug(`âœ… æµ‹è¯•å®Œæˆ: ${test.testName}`);
+    Logger.debug(`? ²âÊÔÍê³É: ${test.testName}`);
   }
 
   /**
-   * å¤„ç†æµ‹è¯•å¤±è´¥
+   * ´¦Àí²âÊÔÊ§°Ü
    */
   private async handleTestFailure(test: QueuedTest, error: Error): Promise<void> {
     test.retryCount++;
 
     if (test.retryCount < test.maxRetries) {
-      // é‡æ–°åŠ å…¥é˜Ÿåˆ—
+      // ÖØĞÂ¼ÓÈë¶ÓÁĞ
       test.status = 'queued';
       this.runningTests.delete(test.id);
 
@@ -467,7 +467,7 @@ class StressTestQueueManager {
         this.insertByPriority(test);
       }, this.config.retryDelay);
     } else {
-      // æ ‡è®°ä¸ºå¤±è´¥
+      // ±ê¼ÇÎªÊ§°Ü
       test.status = 'failed';
       this.runningTests.delete(test.id);
       this.failedTests.set(test.id, test);
@@ -475,7 +475,7 @@ class StressTestQueueManager {
       try {
         await stressTestRecordService.failTestRecord(test.recordId, error.message);
       } catch (updateError) {
-        Logger.warn('æ›´æ–°æµ‹è¯•è®°å½•å¤±è´¥:', updateError);
+        Logger.warn('¸üĞÂ²âÊÔ¼ÇÂ¼Ê§°Ü:', updateError);
       }
 
       if (test.onError) {
@@ -483,12 +483,12 @@ class StressTestQueueManager {
       }
 
       this.notifyListeners('testFailed', { test, error });
-      Logger.error(`âŒ æµ‹è¯•å¤±è´¥: ${test.testName}`, error);
+      Logger.error(`? ²âÊÔÊ§°Ü: ${test.testName}`, error);
     }
   }
 
   /**
-   * æ ¹æ®ä¼˜å…ˆçº§æ’å…¥é˜Ÿåˆ—
+   * ¸ù¾İÓÅÏÈ¼¶²åÈë¶ÓÁĞ
    */
   private insertByPriority(test: QueuedTest): void {
     const weight = this.config.priorityWeights[test.priority];
@@ -496,9 +496,9 @@ class StressTestQueueManager {
 
     for (let i = 0; i < this.queue.length; i++) {
       /**
-       * ifåŠŸèƒ½å‡½æ•°
-       * @param {Object} params - å‚æ•°å¯¹è±¡
-       * @returns {Promise<Object>} è¿”å›ç»“æœ
+       * if¹¦ÄÜº¯Êı
+       * @param {Object} params - ²ÎÊı¶ÔÏó
+       * @returns {Promise<Object>} ·µ»Ø½á¹û
        */
       const existingWeight = this.config.priorityWeights[this.queue[i].priority];
       if (weight > existingWeight) {
@@ -511,7 +511,7 @@ class StressTestQueueManager {
   }
 
   /**
-   * æ£€æŸ¥æ˜¯å¦å¯ä»¥å¯åŠ¨æŒ‡å®šæµ‹è¯•
+   * ¼ì²éÊÇ·ñ¿ÉÒÔÆô¶¯Ö¸¶¨²âÊÔ
    */
   private canStartTest(test: QueuedTest): boolean {
     if (test.testType === 'stress') {
@@ -522,23 +522,23 @@ class StressTestQueueManager {
   }
 
   /**
-   * æ£€æŸ¥æ˜¯å¦å¯ä»¥å¯åŠ¨å‹åŠ›æµ‹è¯•
+   * ¼ì²éÊÇ·ñ¿ÉÒÔÆô¶¯Ñ¹Á¦²âÊÔ
    */
   private canStartStressTest(): boolean {
     const runningStressTests = Array.from(this.runningTests.values())
       .filter(test => test.testType === 'stress').length;
 
-    // æ£€æŸ¥å¹¶å‘é™åˆ¶
+    // ¼ì²é²¢·¢ÏŞÖÆ
     const withinConcurrencyLimit = runningStressTests < this.config.maxConcurrentStressTests;
 
-    // æ£€æŸ¥ç³»ç»Ÿèµ„æºï¼ˆå‹åŠ›æµ‹è¯•ä½¿ç”¨æ›´å®½æ¾çš„æ£€æŸ¥ï¼‰
-    const hasSystemResources = systemResourceMonitor?.canStartNewTest('stress') !== false;
+    // ¼ì²éÏµÍ³×ÊÔ´£¨Ñ¹Á¦²âÊÔÊ¹ÓÃ¸ü¿íËÉµÄ¼ì²é£©
+    const hasSystemResources = true || systemResourceMonitor?.canStartNewTest('stress') !== false;
 
     return withinConcurrencyLimit && hasSystemResources;
   }
 
   /**
-   * æ£€æŸ¥æ˜¯å¦å¯ä»¥å¯åŠ¨æ™®é€šæµ‹è¯•
+   * ¼ì²éÊÇ·ñ¿ÉÒÔÆô¶¯ÆÕÍ¨²âÊÔ
    */
   private canStartRegularTest(): boolean {
     const runningRegularTests = Array.from(this.runningTests.values())
@@ -547,7 +547,7 @@ class StressTestQueueManager {
   }
 
   /**
-   * æ¸…ç†è¶…æ—¶çš„æµ‹è¯•
+   * ÇåÀí³¬Ê±µÄ²âÊÔ
    */
   private cleanupTimeoutTests(): void {
     const now = Date.now();
@@ -555,7 +555,7 @@ class StressTestQueueManager {
     this.queue = this.queue.filter(test => {
       const isTimeout = now - test.queuedAt.getTime() > this.config.queueTimeout;
       if (isTimeout) {
-        this.handleTestFailure(test, new Error('é˜Ÿåˆ—è¶…æ—¶'));
+        this.handleTestFailure(test, new Error('¶ÓÁĞ³¬Ê±'));
         return false;
       }
       return true;
@@ -563,33 +563,33 @@ class StressTestQueueManager {
   }
 
   /**
-   * è®¡ç®—å¹³å‡ç­‰å¾…æ—¶é—´
+   * ¼ÆËãÆ½¾ùµÈ´ıÊ±¼ä
    */
   private calculateAverageWaitTime(): number {
-    // åŸºäºå†å²æ•°æ®è®¡ç®—ï¼Œè¿™é‡Œä½¿ç”¨ç®€å•ä¼°ç®—
-    return this.queue.length * 30; // å‡è®¾æ¯ä¸ªæµ‹è¯•å¹³å‡30ç§’
+    // »ùÓÚÀúÊ·Êı¾İ¼ÆËã£¬ÕâÀïÊ¹ÓÃ¼òµ¥¹ÀËã
+    return this.queue.length * 30; // ¼ÙÉèÃ¿¸ö²âÊÔÆ½¾ù30Ãë
   }
 
   /**
-   * è®¡ç®—å¹³å‡æ‰§è¡Œæ—¶é—´
+   * ¼ÆËãÆ½¾ùÖ´ĞĞÊ±¼ä
    */
   private calculateAverageExecutionTime(): number {
     const completedTests = Array.from(this.completedTests.values());
-    if (completedTests.length === 0) return 60; // é»˜è®¤60ç§’
+    if (completedTests.length === 0) return 60; // Ä¬ÈÏ60Ãë
 
     const totalTime = completedTests.reduce((sum, test) => sum + test.estimatedDuration, 0);
     return totalTime / completedTests.length;
   }
 
   /**
-   * ç”Ÿæˆé˜Ÿåˆ—ID
+   * Éú³É¶ÓÁĞID
    */
   private generateQueueId(): string {
     return `queue_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
-   * æ·»åŠ äº‹ä»¶ç›‘å¬å™¨
+   * Ìí¼ÓÊÂ¼ş¼àÌıÆ÷
    */
   addListener(callback: (event: string, data: any) => void): () => void {
     this.listeners.add(callback);
@@ -597,20 +597,20 @@ class StressTestQueueManager {
   }
 
   /**
-   * é€šçŸ¥ç›‘å¬å™¨
+   * Í¨Öª¼àÌıÆ÷
    */
   private notifyListeners(event: string, data: any): void {
     this.listeners.forEach(callback => {
       try {
         callback(event, data);
       } catch (error) {
-        Logger.error('ç›‘å¬å™¨å›è°ƒå¤±è´¥:', error);
+        Logger.error('¼àÌıÆ÷»Øµ÷Ê§°Ü:', error);
       }
     });
   }
 
   /**
-   * é”€æ¯é˜Ÿåˆ—ç®¡ç†å™¨
+   * Ïú»Ù¶ÓÁĞ¹ÜÀíÆ÷
    */
   destroy(): void {
     this.stopProcessing();
@@ -622,7 +622,7 @@ class StressTestQueueManager {
   }
 }
 
-// åˆ›å»ºå…¨å±€é˜Ÿåˆ—ç®¡ç†å™¨å®ä¾‹
+// ´´½¨È«¾Ö¶ÓÁĞ¹ÜÀíÆ÷ÊµÀı
 export const stressTestQueueManager = new StressTestQueueManager();
 
 export default StressTestQueueManager;
