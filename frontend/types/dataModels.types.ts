@@ -354,6 +354,7 @@ export interface TestResult {
   
   // 详细信息
   summary?: string;
+  message?: string;                // 测试消息或错误信息
   metrics?: TestMetrics;
   errors?: TestError[];
   warnings?: TestWarning[];

@@ -164,7 +164,7 @@ const HomePage = () => {
                 
                 {/* Action */}
                 <Link
-                  href={category.href}
+                  to={category.href}
                   className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-sm group-hover:translate-x-1 transition-transform"
                 >
                   开始测试

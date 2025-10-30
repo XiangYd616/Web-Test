@@ -710,34 +710,32 @@ const DataStorage: React.FC = () => {
                   </button>
                 </div>
 
-                <TestResultDisplay results={selectedRecord?.results || {}}>
-                  <div className="p-4 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-gray-400">测试ID:</span>
-                        <span className="ml-2 text-white">{selectedRecord?.id}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">测试类型:</span>
-                        <span className="ml-2 text-white">{selectedRecord?.testType}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">URL:</span>
-                        <span className="ml-2 text-white">{selectedRecord?.url}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">状态:</span>
-                        <span className="ml-2 text-white">{selectedRecord?.status}</span>
-                      </div>
-                      {selectedRecord?.overallScore && (
-                        <div>
-                          <span className="text-gray-400">评分:</span>
-                          <span className="ml-2 text-white">{selectedRecord?.overallScore}分</span>
-                        </div>
-                      )}
+                <div className="p-4 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-gray-400">测试ID:</span>
+                      <span className="ml-2 text-white">{selectedRecord?.id}</span>
                     </div>
+                    <div>
+                      <span className="text-gray-400">测试类型:</span>
+                      <span className="ml-2 text-white">{selectedRecord?.testType}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">URL:</span>
+                      <span className="ml-2 text-white">{selectedRecord?.url}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">状态:</span>
+                      <span className="ml-2 text-white">{selectedRecord?.status}</span>
+                    </div>
+                    {selectedRecord?.overallScore && (
+                      <div>
+                        <span className="text-gray-400">评分:</span>
+                        <span className="ml-2 text-white">{selectedRecord?.overallScore}分</span>
+                      </div>
+                    )}
                   </div>
-                </TestResultDisplay>
+                </div>
               </header>
             </article>
           </div>

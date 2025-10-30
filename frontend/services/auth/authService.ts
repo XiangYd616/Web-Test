@@ -279,7 +279,8 @@ export class UnifiedAuthService implements IAuthService {
   }
 
   // 用户登录
-  async login(credentials: LoginCredentials, clientInfo?: Record<string, any>): Promise<AuthResponse> {
+  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    const clientInfo = undefined;
     try {
 
       let user: User | null = null;
@@ -585,7 +586,8 @@ export class UnifiedAuthService implements IAuthService {
   }
 
   // 用户注册
-  async register(data: RegisterData, clientInfo?: Record<string, any>): Promise<AuthResponse> {
+  async register(data: RegisterData): Promise<AuthResponse> {
+    const clientInfo = undefined;
     try {
 
       // 验证数据
@@ -960,7 +962,16 @@ export class UnifiedAuthService implements IAuthService {
   }
 
   // 刷新 token
-  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+  async refreshToken(): Promise<boolean> {
+    const refreshToken = (isBrowser || isElectron) ? localStorage.getItem(this.REFRESH_TOKEN_KEY) : null;
+    if (!refreshToken) return false;
+    
+    const result = await this.refreshTokenInternal(refreshToken);
+    return result.success;
+  }
+  
+  // 内部刷新token方法
+  private async refreshTokenInternal(refreshToken: string): Promise<AuthResponse> {
     try {
       const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const decoded = (jwt as any).verify(refreshToken, secret) as any;

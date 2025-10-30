@@ -8,7 +8,6 @@
 
 import Logger from '@/utils/logger';
 import { stressTestRecordService } from './stressTestRecordService';
-import { systemResourceMonitor } from './systemResourceMonitor';
 
 export interface QueuedTest {
   id: string;

@@ -12,7 +12,6 @@ import type {
 import {
   ApiVersionNegotiator,
   AutoMigrationSystem,
-  autoMigrationSystem,
   CompatibilityChecker,
   DATA_MODEL_VERSION,
   TypeVersionRegistry,
@@ -20,6 +19,8 @@ import {
   VersionChecker,
   VersionedDataWrapper
 } from '../types/version.types';
+
+const autoMigrationSystem = new AutoMigrationSystem();
 import { defaultMemoryCache } from './cacheStrategy';
 
 // ==================== 版本控制配置 ====================

@@ -1,6 +1,8 @@
 ﻿
 import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, UnifiedPerformanceConfig } from '../../types/performance.types';
-import { performanceTestCore } from './performanceTestCore';
+import { PerformanceTestCore } from './performanceTestCore';
+
+const performanceTestCore = PerformanceTestCore.getInstance();
 
 // ==================== 兼容性接口定义 ====================
 
