@@ -12,7 +12,7 @@ import { ProgressBar } from '../components/ui/ProgressBar';
 import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
-import type { TestType } from '@shared/types';
+import { TestType } from '../types/enums';
 
 // 性能测试配置接口
 interface PerformanceTestConfig {

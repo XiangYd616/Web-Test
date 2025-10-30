@@ -53,9 +53,9 @@ export enum UserPlan {
 // ==================== 测试相关枚举 ====================
 
 /**
- * 测试类型枚举 - 导出从enums.ts的枚举定义
+ * 测试类型枚举 - 导出仍enums.ts的枚举定义
  */
-export { TestType } from './enums';
+export { TestType, TestTypeValue } from './enums';
 
 /**
  * 测试状态枚举 - 与数据库约束保持一致
@@ -155,8 +155,8 @@ export function isValidUserPlan(plan: string): plan is UserPlan {
 /**
  * 验证测试类型是否有效
  */
-export function isValidTestType(type: string): type is TestType {
-  return Object.values(TestType).includes(type as TestType);
+export function isValidTestType(type: string): type is TestTypeValue {
+  return Object.values(TestType).includes(type as any);
 }
 
 /**
@@ -213,17 +213,17 @@ export function getUserRoleDisplayName(role: UserRole): string {
 /**
  * 获取测试类型的显示名称（中文）
  */
-export function getTestTypeDisplayName(type: TestType): string {
-  const typeNames = {
-    [TestType.SEO]: 'SEO优化',
-    [TestType.PERFORMANCE]: '性能测试',
-    [TestType.SECURITY]: '安全测试',
-    [TestType.API]: 'API测试',
-    [TestType.COMPATIBILITY]: '兼容性测试',
-    // [TestType.ACCESSIBILITY]: '可访问性测试', // ACCESSIBILITY不存在于TestType枚举中
-    [TestType.STRESS]: '压力测试'
+export function getTestTypeDisplayName(type: TestTypeValue): string {
+  const typeNames: Record<string, string> = {
+    'seo': 'SEO优化',
+    'performance': '性能测试',
+    'security': '安全测试',
+    'api': 'API测试',
+    'compatibility': '兼容性测试',
+    'accessibility': '可访问性测试',
+    'stress': '压力测试'
   };
-  return typeNames[type as keyof typeof typeNames] || type;
+  return typeNames[type] || type;
 }
 
 /**

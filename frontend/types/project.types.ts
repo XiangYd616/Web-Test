@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import type { ApiResponse, Timestamp, UUID } from './unified/apiResponse';
+import type { ApiResponse, Timestamp, UUID } from './apiResponse.types';
 
 // ==================== 项目基础类型 ====================
 

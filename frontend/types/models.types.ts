@@ -45,7 +45,7 @@ export type {
 export type {
   ApiError, ApiErrorResponse, ApiResponse, ApiSuccessResponse, ErrorCode, PaginatedResponse,
   PaginationInfo, QueryParams, RequestConfig, ValidationError
-} from './apiResponse';
+} from './apiResponse.types';
 
 // 注释掉不存在的类型导入
 // ApiMeta, ApiResponseUtils, AuthConfig, CreatedResponse, ErrorResponseMethods,

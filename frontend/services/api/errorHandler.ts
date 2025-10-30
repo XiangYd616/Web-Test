@@ -129,7 +129,7 @@ export class ApiErrorHandler {
 
     // 创建增强错误信息
     const enhancedError = {
-      ...error,
+      ...(typeof error === 'object' && error !== null ? error : { error }),
       url: errorContext.url,
       operation: errorContext.operation,
       userAgent: errorContext.userAgent,
@@ -306,7 +306,6 @@ export class ApiErrorHandler {
       retryable: status >= 500
     };
 
-    const err = error as any;
     return {
       code: errorInfo.code,
       message: errorInfo.message,

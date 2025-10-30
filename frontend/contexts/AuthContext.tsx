@@ -535,11 +535,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const hasRole = (role: string): boolean => {
-    return user.role === role;
+    return user?.role === role;
   };
 
   const hasAnyRole = (roles: string[]): boolean => {
-    return roles.some(role => user.role === role);
+    return roles.some(role => user?.role === role);
   };
 
   const clearError = () => {

@@ -7,6 +7,21 @@
 
 import Logger from '@/utils/logger';
 import { apiService } from '../api/baseApiService';
+import type { ApiResponse } from '@/types/api';
+
+// 辅助函数：从 ApiResponse 中提取错误消息
+function getErrorMessage(response: ApiResponse<any>, defaultMessage: string): string {
+  if (!response.success) {
+    // Type narrowing: response is now ApiErrorResponse
+    const error = response.error;
+    if (typeof error === 'string') {
+      return error;
+    } else if (typeof error === 'object' && error && 'message' in error) {
+      return (error as any).message;
+    }
+  }
+  return defaultMessage;
+}
 
 export interface UserProfile {
   id: string;
@@ -117,7 +132,7 @@ class UserService {
       if (response.success) {
         return response.data.user;
       }
-      throw new Error(response.message || '获取用户资料失败');
+      throw new Error(getErrorMessage(response, '获取用户资料失败'));
     } catch (error) {
       Logger.error('获取用户资料失败:', error);
       throw error;
@@ -131,7 +146,7 @@ class UserService {
       if (response.success) {
         return response.data.user;
       }
-      throw new Error(response.message || '更新用户资料失败');
+      throw new Error(getErrorMessage(response, '更新用户资料失败'));
     } catch (error) {
       Logger.error('更新用户资料失败:', error);
       throw error;
@@ -145,7 +160,7 @@ class UserService {
       if (response.success) {
         return response.data;
       }
-      throw new Error(response.message || '获取用户统计失败');
+      throw new Error(getErrorMessage(response, '获取用户统计失败'));
     } catch (error) {
       Logger.error('获取用户统计失败:', error);
       throw error;
@@ -159,7 +174,7 @@ class UserService {
       if (response.success) {
         return response.data.settings;
       }
-      throw new Error(response.message || '获取用户设置失败');
+      throw new Error(getErrorMessage(response, '获取用户设置失败'));
     } catch (error) {
       Logger.error('获取用户设置失败:', error);
       throw error;
@@ -173,7 +188,7 @@ class UserService {
       if (response.success) {
         return response.data.settings;
       }
-      throw new Error(response.message || '更新用户设置失败');
+      throw new Error(getErrorMessage(response, '更新用户设置失败'));
     } catch (error) {
       Logger.error('更新用户设置失败:', error);
       throw error;
@@ -195,7 +210,7 @@ class UserService {
       if (response.success) {
         return response.data.avatarUrl;
       }
-      throw new Error(response.message || '上传头像失败');
+      throw new Error(getErrorMessage(response, '上传头像失败'));
     } catch (error) {
       Logger.error('上传头像失败:', error);
       throw error;
@@ -235,7 +250,7 @@ class UserService {
       if (response.success) {
         return response.data.bookmarks;
       }
-      throw new Error(response.message || '获取收藏夹失败');
+      throw new Error(getErrorMessage(response, '获取收藏夹失败'));
     } catch (error) {
       Logger.error('获取收藏夹失败:', error);
       throw error;
@@ -249,7 +264,7 @@ class UserService {
       if (response.success) {
         return response.data.bookmark;
       }
-      throw new Error(response.message || '添加收藏失败');
+      throw new Error(getErrorMessage(response, '添加收藏失败'));
     } catch (error) {
       Logger.error('添加收藏失败:', error);
       throw error;
@@ -263,7 +278,7 @@ class UserService {
       if (response.success) {
         return response.data.bookmark;
       }
-      throw new Error(response.message || '更新收藏失败');
+      throw new Error(getErrorMessage(response, '更新收藏失败'));
     } catch (error) {
       Logger.error('更新收藏失败:', error);
       throw error;
@@ -275,7 +290,7 @@ class UserService {
     try {
       const response = await apiService.delete(`/api/user/bookmarks/${id}`);
       if (!response.success) {
-        throw new Error(response.message || '删除收藏失败');
+        throw new Error(getErrorMessage(response, '删除收藏失败'));
       }
     } catch (error) {
       Logger.error('删除收藏失败:', error);
@@ -290,7 +305,7 @@ class UserService {
       if (response.success) {
         return response.data;
       }
-      throw new Error(response.message || '获取测试历史失败');
+      throw new Error(getErrorMessage(response, '获取测试历史失败'));
     } catch (error) {
       Logger.error('获取测试历史失败:', error);
       throw error;
@@ -302,7 +317,7 @@ class UserService {
     try {
       const response = await apiService.delete(`/api/user/tests/${id}`);
       if (!response.success) {
-        throw new Error(response.message || '删除测试记录失败');
+        throw new Error(getErrorMessage(response, '删除测试记录失败'));
       }
     } catch (error) {
       Logger.error('删除测试记录失败:', error);
@@ -317,7 +332,7 @@ class UserService {
       if (response.success) {
         return response.data;
       }
-      throw new Error(response.message || '获取通知失败');
+      throw new Error(getErrorMessage(response, '获取通知失败'));
     } catch (error) {
       Logger.error('获取通知失败:', error);
       throw error;
@@ -329,7 +344,7 @@ class UserService {
     try {
       const response = await apiService.put(`/api/user/notifications/${id}/read`);
       if (!response.success) {
-        throw new Error(response.message || '标记通知失败');
+        throw new Error(getErrorMessage(response, '标记通知失败'));
       }
     } catch (error) {
       Logger.error('标记通知失败:', error);
@@ -342,7 +357,7 @@ class UserService {
     try {
       const response = await apiService.delete(`/api/user/notifications/${id}`);
       if (!response.success) {
-        throw new Error(response.message || '删除通知失败');
+        throw new Error(getErrorMessage(response, '删除通知失败'));
       }
     } catch (error) {
       Logger.error('删除通知失败:', error);

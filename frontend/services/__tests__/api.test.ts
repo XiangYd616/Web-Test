@@ -5,6 +5,8 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import apiClient, { _authApi, _testApi, _apiUtils } from '../api';
+import type { ApiSuccessResponse, ApiErrorResponse } from '../../types/apiResponse.types';
+import { isApiSuccessResponse as isStandardApiSuccessResponse, isApiErrorResponse as isStandardApiErrorResponse, createSuccessResponse as createStandardSuccessResponse, createErrorResponse as createStandardErrorResponse } from '../../types/apiResponse.types';
 
 // Helper functions for creating responses
 const createSuccessResponse = <T>(data: T) => ({
@@ -329,9 +331,9 @@ describe('API客户端', () => {
 
       if (apiClient && typeof apiClient.get === 'function') {
         // 第一次请求
-        const result1 = await apiClient.get('/cacheable-endpoint', {}, true);
+        const result1 = await apiClient.get('/cacheable-endpoint', { cache: true });
         // 第二次请求（应该从缓存返回）
-        const result2 = await apiClient.get('/cacheable-endpoint', {}, true);
+        const result2 = await apiClient.get('/cacheable-endpoint', { cache: true });
 
         expect(result1).toEqual(mockResponse);
         expect(result2).toEqual(mockResponse);
@@ -435,80 +437,98 @@ describe('API客户端', () => {
 
 describe('API工具函数', () => {
   describe('类型守卫', () => {
-    it('isApiSuccessResponse应该正确识别成功响应', async () => {
-      const { isApiSuccessResponse } = await import('@shared/types');
-      
-      const successResponse: ApiResponse = {
+    it('isApiSuccessResponse应该正确识别成功响应', () => {
+      const successResponse: ApiSuccessResponse<{ test: boolean }> = {
         success: true,
+        message: 'Success',
         data: { test: true },
-        timestamp: new Date().toISOString()
+        meta: {
+          timestamp: new Date().toISOString(),
+          requestId: '',
+          path: '',
+          method: ''
+        }
       };
 
-      const errorResponse: ApiResponse = {
+      const errorResponse: ApiErrorResponse = {
         success: false,
         error: {
           code: 'ERROR',
-          message: 'Test error'
+          message: 'Test error',
+          retryable: false,
+          timestamp: new Date().toISOString()
         },
-        timestamp: new Date().toISOString()
+        meta: {
+          timestamp: new Date().toISOString(),
+          requestId: '',
+          path: '',
+          method: ''
+        }
       };
 
-      expect(isApiSuccessResponse(successResponse)).toBe(true);
-      expect(isApiSuccessResponse(errorResponse)).toBe(false);
+      expect(isStandardApiSuccessResponse(successResponse)).toBe(true);
+      expect(isStandardApiSuccessResponse(errorResponse)).toBe(false);
     });
 
-    it('isApiErrorResponse应该正确识别错误响应', async () => {
-      const { isApiErrorResponse } = await import('@shared/types');
-      
-      const successResponse: ApiResponse = {
+    it('isApiErrorResponse应该正确识别错误响应', () => {
+      const successResponse: ApiSuccessResponse<{ test: boolean }> = {
         success: true,
+        message: 'Success',
         data: { test: true },
-        timestamp: new Date().toISOString()
+        meta: {
+          timestamp: new Date().toISOString(),
+          requestId: '',
+          path: '',
+          method: ''
+        }
       };
 
-      const errorResponse: ApiResponse = {
+      const errorResponse: ApiErrorResponse = {
         success: false,
         error: {
           code: 'ERROR',
-          message: 'Test error'
+          message: 'Test error',
+          retryable: false,
+          timestamp: new Date().toISOString()
         },
-        timestamp: new Date().toISOString()
+        meta: {
+          timestamp: new Date().toISOString(),
+          requestId: '',
+          path: '',
+          method: ''
+        }
       };
 
-      expect(isApiErrorResponse(errorResponse)).toBe(true);
-      expect(isApiErrorResponse(successResponse)).toBe(false);
+      expect(isStandardApiErrorResponse(errorResponse)).toBe(true);
+      expect(isStandardApiErrorResponse(successResponse)).toBe(false);
     });
   });
 
   describe('响应创建函数', () => {
-    it('createSuccessResponse应该创建正确的成功响应', async () => {
-      const { createSuccessResponse } = await import('@shared/types');
-      
+    it('createSuccessResponse应该创建正确的成功响应', () => {
       const data = { id: 1, name: 'test' };
       const message = 'Success';
       
-      const response = createSuccessResponse(data, message);
+      const response = createStandardSuccessResponse(data, message);
       
       expect(response.success).toBe(true);
       expect(response.data).toEqual(data);
       expect(response.message).toBe(message);
-      expect(response.timestamp).toBeDefined();
+      expect(response.meta.timestamp).toBeDefined();
     });
 
-    it('createErrorResponse应该创建正确的错误响应', async () => {
-      const { createErrorResponse } = await import('@shared/types');
-      
+    it('createErrorResponse应该创建正确的错误响应', () => {
       const code = 'TEST_ERROR';
       const message = 'Test error message';
       const details = { field: 'testField' };
       
-      const response = createErrorResponse(code, message, details);
+      const response = createStandardErrorResponse(code, message, details);
       
       expect(response.success).toBe(false);
       expect(response.error.code).toBe(code);
       expect(response.error.message).toBe(message);
       expect(response.error.details).toEqual(details);
-      expect(response.timestamp).toBeDefined();
+      expect(response.meta.timestamp).toBeDefined();
     });
   });
 });

@@ -1,14 +1,14 @@
-ï»¿/**
- * ç»Ÿä¸€æ•°æ®çŠ¶æ€ç®¡ç†
- * æä¾›loadingã€errorã€successçŠ¶æ€çš„ç»Ÿä¸€ç®¡ç†
- * ç‰ˆæœ¬: v1.0.0
+/**
+ * Í³Ò»Êı¾İ×´Ì¬¹ÜÀí
+ * Ìá¹©loading¡¢error¡¢success×´Ì¬µÄÍ³Ò»¹ÜÀí
+ * °æ±¾: v1.0.0
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ApiError } from '../types/api.types';
-import type { ApiResponse } from '@shared/types';
+import type { ApiResponse } from '../types/api';
 
-// ==================== çŠ¶æ€ç±»å‹å®šä¹‰ ====================
+// ==================== ×´Ì¬ÀàĞÍ¶¨Òå ====================
 
 export type DataState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -37,7 +37,7 @@ export interface AsyncOperation<T = any> {
   (): Promise<ApiResponse<T>>;
 }
 
-// ==================== æ•°æ®çŠ¶æ€ç®¡ç†Hook ====================
+// ==================== Êı¾İ×´Ì¬¹ÜÀíHook ====================
 
 export function useDataState<T = any>(
   options: DataStateOptions = {}
@@ -70,7 +70,7 @@ export function useDataState<T = any>(
   const lastOperationRef = useRef<AsyncOperation<T> | null>(null);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // è®¡ç®—æ´¾ç”ŸçŠ¶æ€
+  // ¼ÆËãÅÉÉú×´Ì¬
   const stateInfo: DataStateInfo<T> = {
     state,
     data,
@@ -82,12 +82,12 @@ export function useDataState<T = any>(
     retryCount
   };
 
-  // çŠ¶æ€å˜åŒ–å›è°ƒ
+  // ×´Ì¬±ä»¯»Øµ÷
   useEffect(() => {
     onStateChange?.(state);
   }, [state, onStateChange]);
 
-  // æ¸…ç†å®šæ—¶å™¨
+  // ÇåÀí¶¨Ê±Æ÷
   useEffect(() => {
     return () => {
       if (retryTimeoutRef.current) {
@@ -96,7 +96,7 @@ export function useDataState<T = any>(
     };
   }, []);
 
-  // æ‰§è¡Œå¼‚æ­¥æ“ä½œ
+  // Ö´ĞĞÒì²½²Ù×÷
   const execute = useCallback(async (operation: AsyncOperation<T>): Promise<T | null> => {
     lastOperationRef.current = operation;
     setState('loading');
@@ -134,19 +134,19 @@ export function useDataState<T = any>(
       setState('error');
       onError?.(apiError);
 
-      // è‡ªåŠ¨é‡è¯•é€»è¾‘
+      // ×Ô¶¯ÖØÊÔÂß¼­
       if (autoRetry && retryCount < retryLimit && apiError.retryable !== false) {
         setRetryCount(prev => prev + 1);
         retryTimeoutRef.current = setTimeout(() => {
           execute(operation);
-        }, retryDelay * Math.pow(2, retryCount)); // æŒ‡æ•°é€€é¿
+        }, retryDelay * Math.pow(2, retryCount)); // Ö¸ÊıÍË±Ü
       }
 
       return null;
     }
   }, [autoRetry, retryCount, retryLimit, retryDelay, onSuccess, onError]);
 
-  // é‡è¯•æ“ä½œ
+  // ÖØÊÔ²Ù×÷
   const retry = useCallback(async (): Promise<T | null> => {
     if (lastOperationRef.current) {
       setRetryCount(prev => prev + 1);
@@ -155,7 +155,7 @@ export function useDataState<T = any>(
     return null;
   }, [execute]);
 
-  // é‡ç½®çŠ¶æ€
+  // ÖØÖÃ×´Ì¬
   const reset = useCallback(() => {
     setState('idle');
     setData(initialData);
@@ -170,7 +170,7 @@ export function useDataState<T = any>(
     }
   }, [initialData]);
 
-  // æ‰‹åŠ¨è®¾ç½®æ•°æ®
+  // ÊÖ¶¯ÉèÖÃÊı¾İ
   const setDataManually = useCallback((newData: T) => {
     setData(newData);
     setState('success');
@@ -178,7 +178,7 @@ export function useDataState<T = any>(
     setError(null);
   }, []);
 
-  // æ‰‹åŠ¨è®¾ç½®é”™è¯¯
+  // ÊÖ¶¯ÉèÖÃ´íÎó
   const setErrorManually = useCallback((newError: ApiError) => {
     setError(newError);
     setState('error');
@@ -197,7 +197,7 @@ export function useDataState<T = any>(
   ];
 }
 
-// ==================== æ‰¹é‡æ•°æ®çŠ¶æ€ç®¡ç† ====================
+// ==================== ÅúÁ¿Êı¾İ×´Ì¬¹ÜÀí ====================
 
 export interface BatchDataStateInfo {
   states: Record<string, DataStateInfo>;
@@ -228,7 +228,7 @@ export function useBatchDataState(
     return acc;
   }, {} as Record<string, ReturnType<typeof useDataState>>);
 
-  // è®¡ç®—æ‰¹é‡çŠ¶æ€ä¿¡æ¯
+  // ¼ÆËãÅúÁ¿×´Ì¬ĞÅÏ¢
   const batchInfo: BatchDataStateInfo = {
     states: Object.fromEntries(
       Object.entries(stateHooks).map(([key, [stateInfo]]) => [key, stateInfo])
@@ -242,7 +242,7 @@ export function useBatchDataState(
     progress: 0
   };
 
-  // è®¡ç®—å…¨å±€çŠ¶æ€
+  // ¼ÆËãÈ«¾Ö×´Ì¬
   const states = Object.values(batchInfo.states);
   batchInfo.allLoading = states.some(s => s?.loading);
   batchInfo.allSuccess = states.every(s => s?.success);
@@ -251,11 +251,11 @@ export function useBatchDataState(
 
   /**
 
-   * ifåŠŸèƒ½å‡½æ•°
+   * if¹¦ÄÜº¯Êı
 
-   * @param {Object} params - å‚æ•°å¯¹è±¡
+   * @param {Object} params - ²ÎÊı¶ÔÏó
 
-   * @returns {Promise<Object>} è¿”å›ç»“æœ
+   * @returns {Promise<Object>} ·µ»Ø½á¹û
 
    */
   batchInfo.progress = batchInfo.completedCount / batchInfo.totalCount;
@@ -270,7 +270,7 @@ export function useBatchDataState(
     batchInfo.globalState = 'idle';
   }
 
-  // æ‰§è¡Œå•ä¸ªæ“ä½œ
+  // Ö´ĞĞµ¥¸ö²Ù×÷
   const execute = useCallback(async (key: string, operation: AsyncOperation) => {
     const stateHook = stateHooks[key];
     if (stateHook) {
@@ -279,7 +279,7 @@ export function useBatchDataState(
     return null;
   }, [stateHooks]);
 
-  // æ‰§è¡Œæ‰€æœ‰æ“ä½œ
+  // Ö´ĞĞËùÓĞ²Ù×÷
   const executeAll = useCallback(async (operations: Record<string, AsyncOperation>) => {
     const results: Record<string, any> = {};
 
@@ -293,7 +293,7 @@ export function useBatchDataState(
     return results;
   }, [execute]);
 
-  // é‡è¯•å•ä¸ªæ“ä½œ
+  // ÖØÊÔµ¥¸ö²Ù×÷
   const retry = useCallback(async (key: string) => {
     const stateHook = stateHooks[key];
     if (stateHook) {
@@ -302,7 +302,7 @@ export function useBatchDataState(
     return null;
   }, [stateHooks]);
 
-  // é‡è¯•æ‰€æœ‰å¤±è´¥çš„æ“ä½œ
+  // ÖØÊÔËùÓĞÊ§°ÜµÄ²Ù×÷
   const retryAll = useCallback(async () => {
     const results: Record<string, any> = {};
 
@@ -318,7 +318,7 @@ export function useBatchDataState(
     return results;
   }, [stateHooks]);
 
-  // é‡ç½®çŠ¶æ€
+  // ÖØÖÃ×´Ì¬
   const reset = useCallback((key?: string) => {
     if (key) {
       const stateHook = stateHooks[key];
@@ -344,7 +344,7 @@ export function useBatchDataState(
   ];
 }
 
-// ==================== åˆ†é¡µæ•°æ®çŠ¶æ€ç®¡ç† ====================
+// ==================== ·ÖÒ³Êı¾İ×´Ì¬¹ÜÀí ====================
 
 export interface PaginatedDataState<T = any> extends DataStateInfo<T[]> {
   page: number;
@@ -380,7 +380,7 @@ export function usePaginatedDataState<T = any>(
 
   const lastOperationRef = useRef<AsyncOperation<T[]> | null>(null);
 
-  // è®¡ç®—åˆ†é¡µä¿¡æ¯
+  // ¼ÆËã·ÖÒ³ĞÅÏ¢
   const totalPages = Math.ceil(total / limit);
   const hasNext = page < totalPages;
   const hasPrev = page > 1;
@@ -396,7 +396,7 @@ export function usePaginatedDataState<T = any>(
     isLoadingMore
   };
 
-  // åŠ è½½æŒ‡å®šé¡µé¢
+  // ¼ÓÔØÖ¸¶¨Ò³Ãæ
   const loadPage = useCallback(async (
     operation: AsyncOperation<T[]>,
     targetPage: number,
@@ -410,17 +410,17 @@ export function usePaginatedDataState<T = any>(
 
     const result = await dataActions.execute(operation);
 
-    // å‡è®¾APIå“åº”åŒ…å«åˆ†é¡µä¿¡æ¯
-    // å®é™…å®ç°ä¸­éœ€è¦æ ¹æ®APIå“åº”æ ¼å¼è°ƒæ•´
+    // ¼ÙÉèAPIÏìÓ¦°üº¬·ÖÒ³ĞÅÏ¢
+    // Êµ¼ÊÊµÏÖÖĞĞèÒª¸ù¾İAPIÏìÓ¦¸ñÊ½µ÷Õû
     if (result && Array.isArray(result)) {
-      // è¿™é‡Œåº”è¯¥ä»APIå“åº”çš„metaä¿¡æ¯ä¸­è·å–total
+      // ÕâÀïÓ¦¸Ã´ÓAPIÏìÓ¦µÄmetaĞÅÏ¢ÖĞ»ñÈ¡total
       // setTotal(response.meta.pagination.total);
     }
 
     return result;
   }, [dataActions]);
 
-  // åŠ è½½æ›´å¤šæ•°æ®
+  // ¼ÓÔØ¸ü¶àÊı¾İ
   const loadMore = useCallback(async (operation: AsyncOperation<T[]>): Promise<T[] | null> => {
     if (!hasNext || isLoadingMore) {
       return null;
@@ -433,17 +433,17 @@ export function usePaginatedDataState<T = any>(
 
       /**
 
-       * ifåŠŸèƒ½å‡½æ•°
+       * if¹¦ÄÜº¯Êı
 
-       * @param {Object} params - å‚æ•°å¯¹è±¡
+       * @param {Object} params - ²ÎÊı¶ÔÏó
 
-       * @returns {Promise<Object>} è¿”å›ç»“æœ
+       * @returns {Promise<Object>} ·µ»Ø½á¹û
 
        */
       const result = await loadPage(operation, nextPage);
 
       if (result && dataState.data) {
-        // åˆå¹¶æ•°æ®
+        // ºÏ²¢Êı¾İ
         const mergedData = [...dataState.data, ...result];
         dataActions.setData(mergedData);
       }
@@ -454,7 +454,7 @@ export function usePaginatedDataState<T = any>(
     }
   }, [hasNext, isLoadingMore, page, loadPage, dataState.data, dataActions]);
 
-  // åˆ·æ–°å½“å‰é¡µ
+  // Ë¢ĞÂµ±Ç°Ò³
   const refresh = useCallback(async (): Promise<T[] | null> => {
     if (lastOperationRef.current) {
       return loadPage(lastOperationRef.current, page, limit);
@@ -462,7 +462,7 @@ export function usePaginatedDataState<T = any>(
     return null;
   }, [loadPage, page, limit]);
 
-  // é‡ç½®çŠ¶æ€
+  // ÖØÖÃ×´Ì¬
   const reset = useCallback(() => {
     dataActions.reset();
     setPage(initialPage);
@@ -483,7 +483,7 @@ export function usePaginatedDataState<T = any>(
   ];
 }
 
-// ==================== å®æ—¶æ•°æ®çŠ¶æ€ç®¡ç† ====================
+// ==================== ÊµÊ±Êı¾İ×´Ì¬¹ÜÀí ====================
 
 export interface RealtimeDataState<T = any> extends DataStateInfo<T> {
   isConnected: boolean;
@@ -521,7 +521,7 @@ export function useStreamingDataState<T = any>(
     syncInterval
   };
 
-  // åŒæ­¥æ•°æ®
+  // Í¬²½Êı¾İ
   const sync = useCallback(async (): Promise<T | null> => {
     if (currentOperationRef.current) {
       const result = await dataActions.execute(currentOperationRef.current);
@@ -533,21 +533,21 @@ export function useStreamingDataState<T = any>(
     return null;
   }, [dataActions]);
 
-  // å¼€å§‹åŒæ­¥
+  // ¿ªÊ¼Í¬²½
   const startSync = useCallback((operation: AsyncOperation<T>) => {
     currentOperationRef.current = operation;
     setIsConnected(true);
 
-    // ç«‹å³æ‰§è¡Œä¸€æ¬¡
+    // Á¢¼´Ö´ĞĞÒ»´Î
     if (autoSync) {
       sync();
     }
 
-    // è®¾ç½®å®šæ—¶åŒæ­¥
+    // ÉèÖÃ¶¨Ê±Í¬²½
     syncIntervalRef.current = setInterval(sync, syncInterval);
   }, [sync, syncInterval, autoSync]);
 
-  // åœæ­¢åŒæ­¥
+  // Í£Ö¹Í¬²½
   const stopSync = useCallback(() => {
     setIsConnected(false);
     if (syncIntervalRef.current) {
@@ -556,7 +556,7 @@ export function useStreamingDataState<T = any>(
     }
   }, []);
 
-  // é‡ç½®çŠ¶æ€
+  // ÖØÖÃ×´Ì¬
   const reset = useCallback(() => {
     stopSync();
     dataActions.reset();
@@ -564,7 +564,7 @@ export function useStreamingDataState<T = any>(
     currentOperationRef.current = null;
   }, [stopSync, dataActions]);
 
-  // æ¸…ç†
+  // ÇåÀí
   useEffect(() => {
     return () => {
       stopSync();
@@ -582,7 +582,7 @@ export function useStreamingDataState<T = any>(
   ];
 }
 
-// ==================== å¯¼å‡ºé»˜è®¤é…ç½® ====================
+// ==================== µ¼³öÄ¬ÈÏÅäÖÃ ====================
 
 export const DEFAULT_DATA_STATE_OPTIONS: DataStateOptions = {
   retryLimit: 3,

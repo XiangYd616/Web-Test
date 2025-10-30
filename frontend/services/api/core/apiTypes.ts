@@ -5,18 +5,13 @@
  */
 
 // 导入标准API类型
-import {
-  StandardApiResponse,
-  StandardApiError,
-  StandardApiMeta,
-  StandardErrorCode,
-  StandardTestConfig,
-  StandardTestResult,
-  StandardTestProgress,
-  // 向后兼容的别名
-  ApiResponse as LegacyApiResponse,
-  ApiError as LegacyApiError
-} from '../../../shared/types/standardApiTypes';
+import type {
+  ApiSuccessResponse,
+  ApiErrorResponse,
+  ApiMeta as ApiMetaType,
+  ApiError as StandardApiError
+} from '../../../types/apiResponse.types';
+import { ErrorCode as StandardErrorCode } from '../../../types/api/index';
 
 // 使用标准类型作为主要接口
 // 添加向后兼容的扩展，包含所有可能的属性
@@ -26,7 +21,7 @@ export interface ApiResponse<T = any> {
   error?: string | StandardApiError;
   errors?: string[];
   message?: string;
-  meta?: StandardApiMeta;
+  meta?: ApiMetaType;
   pagination?: any;
   timestamp?: string;
   requestId?: string;
@@ -34,15 +29,10 @@ export interface ApiResponse<T = any> {
 }
 
 export type ApiError = StandardApiError;
-export type ApiMeta = StandardApiMeta;
+export type ApiMeta = ApiMetaType;
 
 // 导出标准错误代码供前端使用
 export { StandardErrorCode as ErrorCode };
-
-// 导出测试相关标准类型
-export type TestConfig = StandardTestConfig;
-export type TestResult = StandardTestResult;
-export type TestProgress = StandardTestProgress;
 
 export interface RequestConfig extends Omit<RequestInit, 'cache'> {
   timeout?: number;

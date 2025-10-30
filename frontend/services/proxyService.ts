@@ -318,7 +318,7 @@ export class ProxyService {
       }
 
       // 所有代理都失败了
-      Logger.warn('All proxy services failed for URL:', url);
+      Logger.warn('All proxy services failed for URL:', { url });
 
       // 返回null，让调用者决定如何处理
       return null;

@@ -476,7 +476,7 @@ class BatchTestingService {
         mode: 'sequential',
         concurrency: 3
       },
-      timeout: process.env.REQUEST_TIMEOUT || 300000, // 5分钟
+      timeout: Number(process.env.REQUEST_TIMEOUT) || 300000, // 5分钟
       retries: 0,
       stopOnFailure: false
     };

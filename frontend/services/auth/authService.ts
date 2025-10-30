@@ -1,8 +1,8 @@
-﻿import { UserRole, UserStatus } from '../../types/enums';
+import { UserRole, UserStatus } from '../../types/enums';
 import Logger from '@/utils/logger';
 import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
-import { browserJwt } from '@utils/browserJwt';
-import { canUseDatabase } from '@utils/environment';
+import { browserJwt } from '../../utils/browserJwt';
+import { canUseDatabase } from '../../utils/environment';
 import { jwtDecode } from 'jwt-decode';
 
 // 导入企业级功能模块
@@ -440,7 +440,7 @@ export class UnifiedAuthService implements IAuthService {
         { email: credentials.email, rememberMe: credentials.rememberMe, ...clientInfo }
       );
 
-      Logger.debug('✅ 用户登录成功:', user.username);
+      Logger.debug('✅ 用户登录成功', { username: user.username });
 
       return {
         success: true,
@@ -659,7 +659,7 @@ export class UnifiedAuthService implements IAuthService {
           localStorage.setItem(this.USER_KEY, JSON.stringify(newUser));
         }
 
-        Logger.debug('✅ API注册成功:', newUser.username);
+        Logger.debug('✅ API注册成功', { username: newUser.username });
 
         this.currentUser = newUser;
         this.notifyAuthListeners(newUser);
@@ -694,7 +694,7 @@ export class UnifiedAuthService implements IAuthService {
         { username: data?.username, email: data?.email, ...clientInfo }
       );
 
-      Logger.debug('✅ 用户注册成功:', newUser.username);
+      Logger.debug('✅ 用户注册成功', { username: newUser.username });
 
       return {
         success: true,

@@ -1,6 +1,6 @@
 import Logger from '@/utils/logger';
 
-﻿import { ApiResponse } from '@shared/types';
+import type { ApiResponse } from '@/types/api';
 
 /**
  * 统一的API服务基类

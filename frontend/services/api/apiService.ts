@@ -4,7 +4,7 @@
  */
 
 import { BaseApiService, RequestConfig } from './baseApiService';
-import type {ApiResponse} from '@shared/types';
+import type { ApiResponse } from '@/types/api';
 
 export interface ApiConfig {
   baseUrl: string;

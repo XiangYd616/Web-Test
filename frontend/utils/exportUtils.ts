@@ -481,6 +481,7 @@ export class ExportUtils {
    * 原始数据导出 - 完整的JSON格式测试记录
    */
   static exportRawData(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
+    const testData = data as any;
     const exportData = {
       type: 'raw-data',
       timestamp: new Date().toISOString(),
@@ -488,13 +489,13 @@ export class ExportUtils {
       testName: testName || `${testType}测试`,
       testType,
       fullData: {
-        testConfig: data.testConfig || {},
-        result: data.result || {},
-        metrics: data.metrics || {},
-        realTimeData: data.realTimeData || [],
-        logs: data.logs || [],
-        errors: data.errors || [],
-        rawResponse: data.rawResponse || null
+        testConfig: testData.testConfig || {},
+        result: testData.result || {},
+        metrics: testData.metrics || {},
+        realTimeData: testData.realTimeData || [],
+        logs: testData.logs || [],
+        errors: testData.errors || [],
+        rawResponse: testData.rawResponse || null
       },
       metadata: {
         exportedAt: new Date().toISOString(),
@@ -516,10 +517,11 @@ export class ExportUtils {
    * 分析报告导出 - HTML格式报告（增强版）
    */
   static exportAnalysisReport(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
-    const metrics = data.metrics || {};
-    const result = data.result || {};
-    const testConfig = data.testConfig || {};
-    const realTimeData = data.realTimeData || [];
+    const testData = data as any;
+    const metrics = testData.metrics || {};
+    const result = testData.result || {};
+    const testConfig = testData.testConfig || {};
+    const realTimeData = testData.realTimeData || [];
 
     // 生成性能评级
     const performanceGrade = this.calculatePerformanceGrade(metrics);
@@ -534,7 +536,7 @@ export class ExportUtils {
     const trends = realTimeData.length > 10 ? this.analyzeTrends(realTimeData) : {};
 
     // 错误分析
-    const errorAnalysis = data.errors ? this.analyzeErrors(data.errors) : [];
+    const errorAnalysis = testData.errors ? this.analyzeErrors(testData.errors) : [];
 
     const htmlContent = `
 <!DOCTYPE html>

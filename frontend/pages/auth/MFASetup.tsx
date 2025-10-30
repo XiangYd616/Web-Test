@@ -49,7 +49,7 @@ const MFASetup: React.FC<MFASetupProps> = ({ onComplete, onCancel }) => {
 
   // 检查登录状态
   if (!requireLogin()) {
-    return LoginPromptComponent ? <LoginPromptComponent /> : null;
+    return LoginPromptComponent;
   }
 
   // 第一步：初始化MFA设置

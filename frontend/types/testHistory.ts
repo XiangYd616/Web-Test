@@ -17,6 +17,7 @@ export interface TestHistoryQuery {
   status?: string;
   dateFrom?: string | number;
   dateTo?: string | number;
+  search?: string;
 }
 
 export interface TestHistoryResponse {

@@ -252,7 +252,12 @@ export function useTestQueue() {
       if (response.success) {
         setQueueStatus(response.data);
       } else {
-        setError(response.message || '获取队列状态失败');
+        const errorMsg = response.error 
+          ? (typeof response.error === 'object' && 'message' in response.error 
+            ? (response.error as any).message 
+            : String(response.error))
+          : '获取队列状态失败';
+        setError(errorMsg);
       }
     } catch (error) {
       setError('获取队列状态失败');
@@ -300,7 +305,12 @@ export function useTestStatistics(timeRange: number = 30) {
       if (response.success) {
         setStatistics(response.data);
       } else {
-        setError(response.message || '获取统计信息失败');
+        const errorMsg = response.error 
+          ? (typeof response.error === 'object' && 'message' in response.error 
+            ? (response.error as any).message 
+            : String(response.error))
+          : '获取统计信息失败';
+        setError(errorMsg);
       }
     } catch (error) {
       setError('获取统计信息失败');

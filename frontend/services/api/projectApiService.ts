@@ -1,7 +1,7 @@
-ï»¿/**
- * é¡¹ç›®ç®¡ç†APIæœåŠ¡
- * åŸºäºåç«¯APIè§„èŒƒå®ç°å®Œæ•´çš„é¡¹ç›®ç®¡ç†åŠŸèƒ½
- * ç‰ˆæœ¬: v1.0.0
+/**
+ * ÏîÄ¿¹ÜÀíAPI·şÎñ
+ * »ùÓÚºó¶ËAPI¹æ·¶ÊµÏÖÍêÕûµÄÏîÄ¿¹ÜÀí¹¦ÄÜ
+ * °æ±¾: v1.0.0
  */
 
 import type {
@@ -12,16 +12,16 @@ import type {
   ProjectStatsResponse,
   UpdateProjectRequest
 } from '../../types/project';
-import { ApiResponse } from '@shared/types';
+import type { ApiResponse } from '../../types/api';
 import { apiService } from './apiService';
 
 class ProjectApiService {
   private baseUrl = '/api/v1';
 
-  // ==================== é¡¹ç›®ç®¡ç† ====================
+  // ==================== ÏîÄ¿¹ÜÀí ====================
 
   /**
-   * è·å–ç”¨æˆ·é¡¹ç›®åˆ—è¡¨
+   * »ñÈ¡ÓÃ»§ÏîÄ¿ÁĞ±í
    */
   async getProjects(query?: any): Promise<ApiResponse<ProjectListResponse>> {
     const queryParams = new URLSearchParams();
@@ -38,35 +38,35 @@ class ProjectApiService {
   }
 
   /**
-   * åˆ›å»ºæ–°é¡¹ç›®
+   * ´´½¨ĞÂÏîÄ¿
    */
   async createProject(projectData: CreateProjectRequest): Promise<ApiResponse<ProjectResponse>> {
     return apiService.post<ProjectResponse>(`${this.baseUrl}/projects`, projectData);
   }
 
   /**
-   * è·å–ç‰¹å®šé¡¹ç›®è¯¦æƒ…
+   * »ñÈ¡ÌØ¶¨ÏîÄ¿ÏêÇé
    */
   async getProject(projectId: string): Promise<ApiResponse<ProjectResponse>> {
     return apiService.get<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`);
   }
 
   /**
-   * æ›´æ–°é¡¹ç›®ä¿¡æ¯
+   * ¸üĞÂÏîÄ¿ĞÅÏ¢
    */
   async updateProject(projectId: string, updates: UpdateProjectRequest): Promise<ApiResponse<ProjectResponse>> {
     return apiService.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, updates);
   }
 
   /**
-   * åˆ é™¤é¡¹ç›®
+   * É¾³ıÏîÄ¿
    */
   async deleteProject(projectId: string): Promise<ApiResponse<{ deleted: boolean }>> {
     return apiService.delete(`${this.baseUrl}/projects/${projectId}`);
   }
 
   /**
-   * è·å–é¡¹ç›®ç»Ÿè®¡ä¿¡æ¯
+   * »ñÈ¡ÏîÄ¿Í³¼ÆĞÅÏ¢
    */
   async getProjectStats(projectId?: string): Promise<ApiResponse<ProjectStatsResponse>> {
     const url = projectId
@@ -76,7 +76,7 @@ class ProjectApiService {
   }
 
   /**
-   * å½’æ¡£é¡¹ç›®
+   * ¹éµµÏîÄ¿
    */
   async archiveProject(projectId: string): Promise<ApiResponse<ProjectResponse>> {
     return apiService.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, {
@@ -85,7 +85,7 @@ class ProjectApiService {
   }
 
   /**
-   * æ¢å¤å·²å½’æ¡£çš„é¡¹ç›®
+   * »Ö¸´ÒÑ¹éµµµÄÏîÄ¿
    */
   async restoreProject(projectId: string): Promise<ApiResponse<ProjectResponse>> {
     return apiService.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, {
@@ -94,7 +94,7 @@ class ProjectApiService {
   }
 
   /**
-   * å¤åˆ¶é¡¹ç›®
+   * ¸´ÖÆÏîÄ¿
    */
   async duplicateProject(
     projectId: string,
@@ -108,7 +108,7 @@ class ProjectApiService {
   }
 
   /**
-   * å¯¼å‡ºé¡¹ç›®æ•°æ®
+   * µ¼³öÏîÄ¿Êı¾İ
    */
   async exportProject(
     projectId: string,
@@ -122,7 +122,7 @@ class ProjectApiService {
   }
 
   /**
-   * å¯¼å…¥é¡¹ç›®æ•°æ®
+   * µ¼ÈëÏîÄ¿Êı¾İ
    */
   async importProject(file: File): Promise<ApiResponse<ProjectResponse>> {
     const formData = new FormData();
@@ -135,17 +135,17 @@ class ProjectApiService {
     });
   }
 
-  // ==================== é¡¹ç›®è®¾ç½®ç®¡ç† ====================
+  // ==================== ÏîÄ¿ÉèÖÃ¹ÜÀí ====================
 
   /**
-   * è·å–é¡¹ç›®è®¾ç½®
+   * »ñÈ¡ÏîÄ¿ÉèÖÃ
    */
   async getProjectSettings(projectId: string): Promise<ApiResponse<any>> {
     return apiService.get(`${this.baseUrl}/projects/${projectId}/settings`);
   }
 
   /**
-   * æ›´æ–°é¡¹ç›®è®¾ç½®
+   * ¸üĞÂÏîÄ¿ÉèÖÃ
    */
   async updateProjectSettings(
     projectId: string,
@@ -155,23 +155,23 @@ class ProjectApiService {
   }
 
   /**
-   * é‡ç½®é¡¹ç›®è®¾ç½®ä¸ºé»˜è®¤å€¼
+   * ÖØÖÃÏîÄ¿ÉèÖÃÎªÄ¬ÈÏÖµ
    */
   async resetProjectSettings(projectId: string): Promise<ApiResponse<any>> {
     return apiService.post(`${this.baseUrl}/projects/${projectId}/settings/reset`);
   }
 
-  // ==================== é¡¹ç›®æˆå‘˜ç®¡ç† ====================
+  // ==================== ÏîÄ¿³ÉÔ±¹ÜÀí ====================
 
   /**
-   * è·å–é¡¹ç›®æˆå‘˜åˆ—è¡¨
+   * »ñÈ¡ÏîÄ¿³ÉÔ±ÁĞ±í
    */
   async getProjectMembers(projectId: string): Promise<ApiResponse<any[]>> {
     return apiService.get(`${this.baseUrl}/projects/${projectId}/members`);
   }
 
   /**
-   * æ·»åŠ é¡¹ç›®æˆå‘˜
+   * Ìí¼ÓÏîÄ¿³ÉÔ±
    */
   async addProjectMember(
     projectId: string,
@@ -185,7 +185,7 @@ class ProjectApiService {
   }
 
   /**
-   * æ›´æ–°æˆå‘˜è§’è‰²
+   * ¸üĞÂ³ÉÔ±½ÇÉ«
    */
   async updateMemberRole(
     projectId: string,
@@ -198,16 +198,16 @@ class ProjectApiService {
   }
 
   /**
-   * ç§»é™¤é¡¹ç›®æˆå‘˜
+   * ÒÆ³ıÏîÄ¿³ÉÔ±
    */
   async removeMember(projectId: string, userId: string): Promise<ApiResponse<{ removed: boolean }>> {
     return apiService.delete(`${this.baseUrl}/projects/${projectId}/members/${userId}`);
   }
 
-  // ==================== é¡¹ç›®æ´»åŠ¨æ—¥å¿— ====================
+  // ==================== ÏîÄ¿»î¶¯ÈÕÖ¾ ====================
 
   /**
-   * è·å–é¡¹ç›®æ´»åŠ¨æ—¥å¿—
+   * »ñÈ¡ÏîÄ¿»î¶¯ÈÕÖ¾
    */
   async getProjectActivity(
     projectId: string,
@@ -231,17 +231,17 @@ class ProjectApiService {
     return apiService.get(url);
   }
 
-  // ==================== é¡¹ç›®æ¨¡æ¿ç®¡ç† ====================
+  // ==================== ÏîÄ¿Ä£°å¹ÜÀí ====================
 
   /**
-   * è·å–é¡¹ç›®æ¨¡æ¿åˆ—è¡¨
+   * »ñÈ¡ÏîÄ¿Ä£°åÁĞ±í
    */
   async getProjectTemplates(): Promise<ApiResponse<Project[]>> {
     return apiService.get(`${this.baseUrl}/projects/templates`);
   }
 
   /**
-   * ä»æ¨¡æ¿åˆ›å»ºé¡¹ç›®
+   * ´ÓÄ£°å´´½¨ÏîÄ¿
    */
   async createFromTemplate(
     templateId: string,
@@ -250,12 +250,12 @@ class ProjectApiService {
       description: string;
       target_url: string;
     }
-  ): Promise<ProjectResponse> {
+  ): Promise<ApiResponse<ProjectResponse>> {
     return apiService.post(`${this.baseUrl}/projects/templates/${templateId}/create`, projectData);
   }
 
   /**
-   * å°†é¡¹ç›®ä¿å­˜ä¸ºæ¨¡æ¿
+   * ½«ÏîÄ¿±£´æÎªÄ£°å
    */
   async saveAsTemplate(
     projectId: string,
@@ -268,10 +268,10 @@ class ProjectApiService {
     return apiService.post(`${this.baseUrl}/projects/${projectId}/save-as-template`, templateData);
   }
 
-  // ==================== é¡¹ç›®æœç´¢å’Œè¿‡æ»¤ ====================
+  // ==================== ÏîÄ¿ËÑË÷ºÍ¹ıÂË ====================
 
   /**
-   * æœç´¢é¡¹ç›®
+   * ËÑË÷ÏîÄ¿
    */
   async searchProjects(
     query: string,
@@ -281,7 +281,7 @@ class ProjectApiService {
       created_before?: string;
       has_tests?: boolean;
     }
-  ): Promise<ProjectListResponse> {
+  ): Promise<ApiResponse<ProjectListResponse>> {
     const queryParams = new URLSearchParams();
     queryParams.append('q', query);
 
@@ -295,23 +295,23 @@ class ProjectApiService {
   }
 
   /**
-   * è·å–é¡¹ç›®æ ‡ç­¾åˆ—è¡¨
+   * »ñÈ¡ÏîÄ¿±êÇ©ÁĞ±í
    */
   async getProjectTags(): Promise<ApiResponse<string[]>> {
     return apiService.get(`${this.baseUrl}/projects/tags`);
   }
 
   /**
-   * æŒ‰æ ‡ç­¾è·å–é¡¹ç›®
+   * °´±êÇ©»ñÈ¡ÏîÄ¿
    */
-  async getProjectsByTag(tag: string): Promise<ProjectListResponse> {
+  async getProjectsByTag(tag: string): Promise<ApiResponse<ProjectListResponse>> {
     return apiService.get(`${this.baseUrl}/projects/by-tag/${encodeURIComponent(tag)}`);
   }
 
-  // ==================== æ‰¹é‡æ“ä½œ ====================
+  // ==================== ÅúÁ¿²Ù×÷ ====================
 
   /**
-   * æ‰¹é‡åˆ é™¤é¡¹ç›®
+   * ÅúÁ¿É¾³ıÏîÄ¿
    */
   async bulkDeleteProjects(projectIds: string[]): Promise<ApiResponse<{ deleted_count: number }>> {
     return apiService.post(`${this.baseUrl}/projects/bulk-delete`, {
@@ -320,7 +320,7 @@ class ProjectApiService {
   }
 
   /**
-   * æ‰¹é‡å½’æ¡£é¡¹ç›®
+   * ÅúÁ¿¹éµµÏîÄ¿
    */
   async bulkArchiveProjects(projectIds: string[]): Promise<ApiResponse<{ archived_count: number }>> {
     return apiService.post(`${this.baseUrl}/projects/bulk-archive`, {
@@ -329,7 +329,7 @@ class ProjectApiService {
   }
 
   /**
-   * æ‰¹é‡æ›´æ–°é¡¹ç›®çŠ¶æ€
+   * ÅúÁ¿¸üĞÂÏîÄ¿×´Ì¬
    */
   async bulkUpdateStatus(
     projectIds: string[],

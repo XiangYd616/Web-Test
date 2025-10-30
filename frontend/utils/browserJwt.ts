@@ -203,7 +203,7 @@ export class BrowserJWT {
    */
   public isGuestToken(token: string): boolean {
     const user = this.getUserFromToken(token);
-    return user && user.isGuest === true;
+    return user && (user as any).isGuest === true;
   }
 
   /**

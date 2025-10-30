@@ -493,41 +493,33 @@ export class SystemService {
     return [
       {
         id: '1',
-        timestamp: '2025-06-19T10:30:00Z',
-        level: 'INFO' as any,
+        timestamp: Date.now(),
+        level: 'info',
         service: 'auth',
-        // category: 'auth', // 临时注释，等待SystemLog接口完善
         message: '用户登录成功',
-        // details: { userId: '1', ip: '192.168.1.100' }, // 临时注释，等待SystemLog接口完善
         userId: '1',
       },
       {
         id: '2',
-        timestamp: '2025-06-19T10:25:00Z',
-        level: 'WARNING' as any,
+        timestamp: Date.now(),
+        level: 'warning',
         service: 'test',
-        // category: 'test', // 临时注释，等待SystemLog接口完善
         message: '测试执行超时',
-        // details: { testId: 'test_123', timeout: 60000 }, // 临时注释，等待SystemLog接口完善
         userId: '2',
       },
       {
         id: '3',
-        timestamp: '2025-06-19T10:20:00Z',
-        level: 'ERROR' as any,
+        timestamp: Date.now(),
+        level: 'error',
         service: 'system',
-        // category: 'system', // 临时注释，等待SystemLog接口完善
         message: '数据库连接失败',
-        // details: { error: 'Connection timeout', retries: 3 }, // 临时注释，等待SystemLog接口完善
       },
       {
         id: '4',
-        timestamp: '2025-06-19T10:15:00Z',
-        level: 'INFO' as any,
+        timestamp: Date.now(),
+        level: 'info',
         service: 'admin',
-        // category: 'admin', // 临时注释，等待SystemLog接口完善
         message: '系统配置更新',
-        // details: { section: 'testing', changes: ['maxConcurrentTests'] }, // 临时注释，等待SystemLog接口完善
         userId: '1',
       },
     ];

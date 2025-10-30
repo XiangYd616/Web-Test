@@ -3,9 +3,8 @@
  * 版本: v2.0.0
  */
 
-// 重新导出所有类型，避免重复导出
+// 重新导出所有类型，使用统一的 API 类型
 export * from '../types/api';
-export * from '@shared/types';
 
 // 选择性导出以避免与unified/models的冲突
 export type {

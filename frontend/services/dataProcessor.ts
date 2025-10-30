@@ -302,7 +302,9 @@ export function useDataProcessor<T = any>(
       const errorResponse = response as ApiErrorResponse;
       const errorMessage = typeof errorResponse.error === 'string'
         ? errorResponse.error
-        : errorResponse.error?.message || '请求失败';
+        : (errorResponse.error && typeof errorResponse.error === 'object' && 'message' in errorResponse.error) 
+          ? (errorResponse.error as any).message 
+          : '请求失败';
 
       updateState({
         state: 'error',
@@ -340,12 +342,12 @@ export function useDataProcessor<T = any>(
       if (cachedData) {
         updateState({
           state: 'success',
-          data: cachedData,
+          data: cachedData as T,
           error: null,
           cacheHit: true,
           lastUpdated: new Date().toISOString()
         });
-        return cachedData;
+        return cachedData as T;
       }
     }
 
@@ -443,7 +445,7 @@ export function useDataProcessor<T = any>(
 
     loadPage: async (page: number) => {
       if (!lastRequestRef.current) return null;
-      const params = { page, limit: state.pagination?.limit || finalConfig.pagination?.defaultPageSize };
+      const params = { page, limit: (state.pagination as any)?.limit || finalConfig.pagination?.defaultPageSize };
       return executeRequest(lastRequestRef.current, params);
     },
 

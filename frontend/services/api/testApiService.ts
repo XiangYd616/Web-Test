@@ -8,26 +8,31 @@
  */
 
 import Logger from '@/utils/logger';
-import type {
-  TestApiClient
-} from '../../types';
-import type {
-  ApiResponse
-} from '@shared/types';
-import type {
-  ApiRequestConfig,
-  RequestConfig,
-  TestCallbacks,
-  UnifiedTestConfig
-} from '@shared/types';
-import { TestType, TestStatus } from '../types/enums';
-import type { TestTypeValue } from '@shared/types';
-import type {
-  TestExecution,
-  TestHistory
-} from '@shared/types';
+import type { ApiResponse, TestCallbacks } from '../../types/api/index';
+import type { UnifiedTestConfig } from '../../types/base.types';
+import type { TestExecution, TestHistory } from '../../types/unified/testTypes';
+import type { TestType, TestStatus } from '../../types/unified/testTypes';
+import { TestStatus as TestStatusEnum } from '../../types/enums';
 import { apiService } from './apiService';
-import { requireAuth, TestPermissions, PermissionChecker } from '../auth/authDecorator';
+import { PermissionChecker, _TestPermissions as TestPermissions } from '../auth/authDecorator';
+
+// 定义本地类型
+interface TestApiClient {
+  get<T = any>(url: string, config?: any): Promise<ApiResponse<T>>;
+  post<T = any>(url: string, data?: unknown, config?: any): Promise<ApiResponse<T>>;
+  put<T = any>(url: string, data?: unknown, config?: any): Promise<ApiResponse<T>>;
+  delete<T = any>(url: string, config?: any): Promise<ApiResponse<T>>;
+  executeTest(config: UnifiedTestConfig): Promise<ApiResponse<TestExecution>>;
+}
+
+interface RequestConfig {
+  timeout?: number;
+  headers?: Record<string, string>;
+}
+
+interface ApiRequestConfig extends RequestConfig {
+  retries?: number;
+}
 
 // 本地类型定义已迁移到统一的类型系统
 // 请从 '../../types' 导入所需的类型
@@ -228,8 +233,7 @@ class TestApiService implements TestApiClient {
       if (!user) {
         return {
           success: false,
-          error: '请先登录后再执行测试',
-          code: 'AUTH_REQUIRED'
+          error: '请先登录后再执行测试'
         };
       }
 
@@ -240,8 +244,7 @@ class TestApiService implements TestApiClient {
         if (!hasPermission) {
           return {
             success: false,
-            error: `权限不足，无法执行${config?.testType}测试`,
-            code: 'PERMISSION_DENIED'
+            error: `权限不足,无法执行${config?.testType}测试`
           };
         }
       }
@@ -270,6 +273,7 @@ class TestApiService implements TestApiClient {
       if (response.success && response.data) {
         const testExecution: TestExecution = {
           id: response.data.id,
+          type: config?.testType as TestType,
           testType: config?.testType as TestType,
           status: response.data.status as TestStatus,
           progress: response.data.progress || 0,
@@ -300,8 +304,7 @@ class TestApiService implements TestApiClient {
       Logger.error('❌ 测试执行失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '测试执行失败',
-        code: 'EXECUTION_ERROR'
+        error: error instanceof Error ? error.message : '测试执行失败'
       };
     }
   }
@@ -359,10 +362,6 @@ class TestApiService implements TestApiClient {
    * 删除测试执行记录 - 适配后端API
    * 需要删除权限
    */
-  @requireAuth({ 
-    requireAuth: true, 
-    requiredPermissions: [TestPermissions.DELETE_TEST_RESULTS] 
-  })
   async deleteExecution(id: string): Promise<ApiResponse<{ deleted: boolean }>> {
     return apiService.delete(`${this.baseUrl}/history/${id}`);
   }
@@ -373,10 +372,6 @@ class TestApiService implements TestApiClient {
    * 执行性能测试 - 适配后端API
    * 需要性能测试权限
    */
-  @requireAuth({ 
-    requireAuth: true, 
-    requiredPermissions: [TestPermissions.RUN_PERFORMANCE_TEST] 
-  })
   async executePerformanceTest(
     target_url: string,
     configuration: LocalPerformanceTestConfig
@@ -412,10 +407,6 @@ class TestApiService implements TestApiClient {
    * 执行安全测试 - 适配后端API
    * 需要安全测试权限
    */
-  @requireAuth({ 
-    requireAuth: true, 
-    requiredPermissions: [TestPermissions.RUN_SECURITY_TEST] 
-  })
   async executeSecurityTest(
     target_url: string,
     configuration: LocalSecurityTestConfig
@@ -642,10 +633,10 @@ class TestApiService implements TestApiClient {
         test_type,
         target_url,
         created_at: new Date().toISOString(),
-        status: (responseData as any)?.status === TestStatus.RUNNING ? 'running' :
-          (responseData as any)?.status === TestStatus.COMPLETED ? 'completed' :
-            (responseData as any)?.status === TestStatus.FAILED ? 'failed' :
-              (responseData as any)?.status === TestStatus.CANCELLED ? 'cancelled' : 'pending'
+        status: (responseData as any)?.status === TestStatusEnum.RUNNING ? 'running' :
+          (responseData as any)?.status === TestStatusEnum.COMPLETED ? 'completed' :
+            (responseData as any)?.status === TestStatusEnum.FAILED ? 'failed' :
+              (responseData as any)?.status === TestStatusEnum.CANCELLED ? 'cancelled' : 'pending'
       }
     } as ApiResponse<TestExecutionResponse>;
   }

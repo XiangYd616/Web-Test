@@ -20,8 +20,12 @@ import {
 } from '../types/enums';
 
 // 导入统一测试服务
-import type { UnifiedTestCallbacks, UnifiedTestConfig } from './testing/unifiedTestService';
+import type { UnifiedTestConfig } from '../types/base.types';
+import type { TestCallbacks } from '../types/api/index';
 import { unifiedTestService } from './testing/unifiedTestService';
+
+// 为了兼容性创建别名
+type UnifiedTestCallbacks = TestCallbacks;
 
 export interface TestInfo {
   id: string;
@@ -135,9 +139,10 @@ class BackgroundTestManager {
     // 转换为统一测试配置
     const configObj = config as any;
     const unifiedConfig: UnifiedTestConfig = {
-      testType,
-      targetUrl: configObj?.url || configObj?.targetUrl || '',
-      configuration: config
+      testType: testType as any,
+      url: configObj?.url || configObj?.targetUrl || '',
+      timeout: configObj?.timeout,
+      retries: configObj?.retries
     };
 
     const callbacks: UnifiedTestCallbacks = {

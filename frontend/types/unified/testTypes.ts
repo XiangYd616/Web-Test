@@ -168,11 +168,20 @@ export interface TestExecution {
   startTime?: number;
   endTime?: number;
   result?: any;
+  progress?: number;
+  error?: string;
+  config?: any;
+  testType?: TestType;
+  results?: any;
 }
 
 export interface TestHistory {
-  executions: TestExecution[];
+  executions?: TestExecution[];
+  tests?: any[];
   total: number;
+  page?: number;
+  pageSize?: number;
+  hasMore?: boolean;
 }
 
 export {};

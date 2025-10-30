@@ -105,18 +105,16 @@ export function requireAuth<T extends (...args: unknown[]) => Promise<ApiRespons
             if (!config.allowGuest) {
               return {
                 success: false,
-                error: '请先登录后再执行此操作',
-                code: 'AUTH_REQUIRED'
-              };
+                error: '请先登录后再执行此操作'
+              } as ApiResponse<any>;
             }
           } else {
             // 检查管理员权限
             if (config.requireAdmin && !user.isAdmin) {
               return {
                 success: false,
-                error: '此操作需要管理员权限',
-                code: 'ADMIN_REQUIRED'
-              };
+                error: '此操作需要管理员权限'
+              } as ApiResponse<any>;
             }
 
             // 检查特定权限
@@ -124,9 +122,8 @@ export function requireAuth<T extends (...args: unknown[]) => Promise<ApiRespons
               if (!hasAnyPermission(user, config.requiredPermissions)) {
                 return {
                   success: false,
-                  error: '权限不足，无法执行此操作',
-                  code: 'PERMISSION_DENIED'
-                };
+                  error: '权限不足，无法执行此操作'
+                } as ApiResponse<any>;
               }
             }
           }
@@ -141,17 +138,15 @@ export function requireAuth<T extends (...args: unknown[]) => Promise<ApiRespons
         if (error instanceof AuthenticationError) {
           return {
             success: false,
-            error: error.message,
-            code: 'AUTH_ERROR'
-          };
+            error: error.message
+          } as ApiResponse<any>;
         }
         
         if (error instanceof AuthorizationError) {
           return {
             success: false,
-            error: error.message,
-            code: 'AUTH_DENIED'
-          };
+            error: error.message
+          } as ApiResponse<any>;
         }
         
         // 重新抛出其他错误

@@ -1020,7 +1020,7 @@ export class PerformanceTestCore {
     baseLCP += pageSize / 10000;
 
     // 图片影响
-    baseLCP += resources.images * 80;
+    baseLCP += (resources as any).images * 80;
 
     // 检查大图片
     const largeImages = dom.querySelectorAll('img[width], img[height]');
@@ -1036,7 +1036,7 @@ export class PerformanceTestCore {
     const hasWebP = Array.from(dom.querySelectorAll('img')).some(img =>
       img.getAttribute('src')?.includes('.webp')
     );
-    if (!hasWebP && resources.images > 3) {
+    if (!hasWebP && (resources as any).images > 3) {
       baseLCP += 300;
     }
 

@@ -682,7 +682,7 @@ const SEOTest: React.FC = () => {
           URL.revokeObjectURL(jsonUrl);
           break;
         default:
-          Logger.warn('不支持的导出格式:', format);
+          Logger.warn('不支持的导出格式', { format });
       }
     } catch (error) {
       Logger.error('导出报告失败:', error);

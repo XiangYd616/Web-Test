@@ -113,8 +113,9 @@ class ApiErrorInterceptor {
 
     // 创建标准化错误
     // 创建前端错误处理实例
-    const frontendErrorHandler = new (await import('./api/errorHandler')).FrontendErrorHandler();
-    const standardError = frontendErrorHandler.handleError(error, {
+    const { useErrorHandler } = await import('./api/errorHandler');
+    const errorHandler = useErrorHandler();
+    const standardError = errorHandler.handleError(error, {
       phase: 'response',
       url,
       method,
@@ -358,8 +359,9 @@ export const apiErrorInterceptor = new ApiErrorInterceptor();
 // 便捷方法：手动处理API错误
 export const _handleApiError = async (error: AxiosError, context?: Record<string, any>) => {
   // 创建前端错误处理实例
-  const frontendErrorHandler = new (await import('./api/errorHandler')).FrontendErrorHandler();
-  return frontendErrorHandler.handleError(error, {
+  const { useErrorHandler } = await import('./api/errorHandler');
+  const errorHandler = useErrorHandler();
+  return errorHandler.handleError(error, {
     ...context,
     phase: 'processing',
     url: error.config?.url,

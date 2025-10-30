@@ -14,8 +14,14 @@ declare const beforeEach: any;
 declare const afterEach: any;
 declare const jest: any;
 import { apiService } from '../api/apiService';
-import { projectApiService } from '../api/projectApiService';
+import { _projectApiService as projectApiService } from '../api/projectApiService';
 import { testApiService } from '../api/testApiService';
+import type { ApiResponse, ApiErrorResponse } from '../../types/api';
+
+// Type guard helper
+function isApiErrorResponse(response: ApiResponse<any>): response is ApiErrorResponse {
+  return !response.success;
+}
 
 // 临时类型定义
 interface BackendApiResponse<T = any> {
@@ -44,9 +50,6 @@ describe('API Integration Tests', () => {
   beforeEach(() => {
     // Reset all mocks before each test
     jest.clearAllMocks();
-
-    // Force remote API usage for testing
-    apiService.forceRemoteApi(true);
   });
 
   afterEach(() => {
@@ -99,14 +102,14 @@ describe('API Integration Tests', () => {
       const response = await apiService.get('/api/v1/test');
 
       expect(response.success).toBe(false);
-      if (!response.success) {
-        if (typeof response.error === 'object' && response.error !== null) {
-          expect(response.error.code).toBe('VALIDATION_ERROR');
-          expect(response.error.message).toBe('参数验证失败');
-          expect(response.error.details).toEqual({ field: 'name', message: '名称不能为空' });
+      if (isApiErrorResponse(response)) {
+        if (typeof response.error === 'object' && response.error !== null && 'code' in response.error) {
+          expect((response.error as any).code).toBe('VALIDATION_ERROR');
+          expect((response.error as any).message).toBe('参数验证失败');
+          expect((response.error as any).details).toEqual({ field: 'name', message: '名称不能为空' });
         } else {
           // 如果error是字符串，则检查字符串内容
-          expect(response.error).toContain('VALIDATION_ERROR');
+          expect(String(response.error)).toContain('VALIDATION_ERROR');
         }
       }
     });
@@ -121,12 +124,12 @@ describe('API Integration Tests', () => {
       const response = await apiService.get('/api/v1/nonexistent');
 
       expect(response.success).toBe(false);
-      if (!response.success) {
-        if (typeof response.error === 'object' && response.error !== null) {
-          expect(response.error.code).toBe('NOT_FOUND');
-          expect(response.error.details?.httpStatus).toBe(404);
+      if (isApiErrorResponse(response)) {
+        if (typeof response.error === 'object' && response.error !== null && 'code' in response.error) {
+          expect((response.error as any).code).toBe('NOT_FOUND');
+          expect((response.error as any).details?.httpStatus).toBe(404);
         } else {
-          expect(response.error).toContain('NOT_FOUND');
+          expect(String(response.error)).toContain('NOT_FOUND');
         }
       }
     });
@@ -139,12 +142,12 @@ describe('API Integration Tests', () => {
       const response = await apiService.get('/api/v1/test');
 
       expect(response.success).toBe(false);
-      if (!response.success) {
-        if (typeof response.error === 'object' && response.error !== null) {
-          expect(response.error.code).toBe('NETWORK_ERROR');
-          expect(response.error.message).toBe('Network error');
+      if (isApiErrorResponse(response)) {
+        if (typeof response.error === 'object' && response.error !== null && 'code' in response.error) {
+          expect((response.error as any).code).toBe('NETWORK_ERROR');
+          expect((response.error as any).message).toBe('Network error');
         } else {
-          expect(response.error).toContain('NETWORK_ERROR');
+          expect(String(response.error)).toContain('NETWORK_ERROR');
         }
       }
     });
@@ -185,7 +188,7 @@ describe('API Integration Tests', () => {
 
       expect(response.success).toBe(true);
       if (response.success && response.data) {
-        expect(response.data.user?.id).toBe('123');
+        expect((response.data.user as any)?.id).toBe('123');
         expect(response.data.token).toBe('jwt-token');
       }
     });

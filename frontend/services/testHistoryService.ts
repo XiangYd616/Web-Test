@@ -92,7 +92,7 @@ class testHistoryService {
   async getAllTestHistory(query: TestHistoryQuery = {}): Promise<TestHistoryResponse> {
     const cacheKey = this.getCacheKey('all-history', query);
     const cached = this.getCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as TestHistoryResponse;
 
     const params = new URLSearchParams();
 
@@ -113,8 +113,8 @@ class testHistoryService {
 
     if (query.status) params?.append('status', query.status);
     if (query.search) params?.append('search', query.search);
-    if (query.dateFrom) params?.append('dateFrom', query.dateFrom);
-    if (query.dateTo) params?.append('dateTo', query.dateTo);
+    if (query.dateFrom) params?.append('dateFrom', String(query.dateFrom));
+    if (query.dateTo) params?.append('dateTo', String(query.dateTo));
 
     try {
       const response = await fetch(`${this.baseUrl}?${params}`, {
@@ -141,7 +141,7 @@ class testHistoryService {
   async getTestHistoryByType(testType: TestType, query: TestHistoryQuery = {}): Promise<TestHistoryResponse> {
     const cacheKey = this.getCacheKey(`${testType}-history`, query);
     const cached = this.getCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as TestHistoryResponse;
 
     const params = new URLSearchParams();
     if (query.page) params?.append('page', query.page.toString());
@@ -174,7 +174,7 @@ class testHistoryService {
   async getTestDetail(sessionId: string): Promise<TestSession> {
     const cacheKey = this.getCacheKey('test-detail', { sessionId });
     const cached = this.getCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as TestSession;
 
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}`, {
