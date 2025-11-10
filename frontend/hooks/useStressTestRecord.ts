@@ -196,7 +196,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         return newRecords;
       });
 
-      if (currentRecord.id === id) {
+      if (currentRecord?.id === id) {
         setCurrentRecord(updatedRecord);
       }
 
@@ -226,7 +226,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         record.id === id ? completedRecord : record
       ));
 
-      if (currentRecord.id === id) {
+      if (currentRecord?.id === id) {
         setCurrentRecord(completedRecord);
       }
 
@@ -248,7 +248,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         record.id === id ? failedRecord : record
       ));
 
-      if (currentRecord.id === id) {
+      if (currentRecord?.id === id) {
         setCurrentRecord(failedRecord);
       }
 
@@ -270,7 +270,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         record.id === id ? cancelledRecord : record
       ));
 
-      if (currentRecord.id === id) {
+      if (currentRecord?.id === id) {
         setCurrentRecord(cancelledRecord);
       }
 
@@ -292,7 +292,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         record.id === id ? waitingRecord : record
       ));
 
-      if (currentRecord.id === id) {
+      if (currentRecord?.id === id) {
         setCurrentRecord(waitingRecord);
       }
 
@@ -314,7 +314,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         record.id === id ? runningRecord : record
       ));
 
-      if (currentRecord.id === id) {
+      if (currentRecord?.id === id) {
         setCurrentRecord(runningRecord);
       }
 
@@ -336,7 +336,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         record.id === id ? interruptedRecord : record
       ));
 
-      if (currentRecord.id === id) {
+      if (currentRecord?.id === id) {
         setCurrentRecord(interruptedRecord);
       }
 
@@ -358,7 +358,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         record.id === id ? resumedRecord : record
       ));
 
-      if (currentRecord.id === id) {
+      if (currentRecord?.id === id) {
         setCurrentRecord(resumedRecord);
       }
 
@@ -458,7 +458,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         // 更新本地状态
         setRecords(prev => prev.filter(record => record.id !== id));
 
-        if (currentRecord.id === id) {
+        if (currentRecord?.id === id) {
           setCurrentRecord(null);
         }
       }

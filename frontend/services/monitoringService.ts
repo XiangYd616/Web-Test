@@ -101,7 +101,7 @@ class MonitoringService {
         return this.getLocalSites();
       }
     } catch (error) {
-      Logger.warn('Backend not available, using local data:', error);
+      Logger.warn('Backend not available, using local data:', { error: String(error) });
       return this.getLocalSites();
     }
   }
@@ -135,7 +135,7 @@ class MonitoringService {
         return data.data;
       }
     } catch (error) {
-      Logger.warn('Backend not available, using local storage:', error);
+      Logger.warn('Backend not available, using local storage:', { error: String(error) });
     }
 
     // 本地存储
@@ -164,7 +164,7 @@ class MonitoringService {
         return;
       }
     } catch (error) {
-      Logger.warn('Backend not available, using local storage:', error);
+      Logger.warn('Backend not available, using local storage:', { error: String(error) });
     }
 
     // 本地删除

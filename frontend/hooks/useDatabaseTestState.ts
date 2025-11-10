@@ -351,23 +351,23 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   const validateConfig = useCallback((): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
-    if (!config.connectionConfig.host) {
+    if (!config.connectionConfig?.host) {
       errors.push('请输入数据库主机地址');
     }
 
-    if (!config.connectionConfig.database) {
+    if (!config.connectionConfig?.database) {
       errors.push('请输入数据库名称');
     }
 
-    if (!config.connectionConfig.username) {
+    if (!config.connectionConfig?.username) {
       errors.push('请输入用户名');
     }
 
-    if (config.connectionConfig.port < 1 || config.connectionConfig.port > 65535) {
+    if (config.connectionConfig?.port && (config.connectionConfig.port < 1 || config.connectionConfig.port > 65535)) {
       errors.push('端口号应在1-65535之间');
     }
 
-    if (config.testTypes.length === 0) {
+    if (!config.testTypes || config.testTypes.length === 0) {
       errors.push('请至少选择一种测试类型');
     }
 
@@ -610,7 +610,7 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.IDLE));
   const isCompleted = status === TestStatus.COMPLETED;
   const hasError = status === TestStatus.FAILED;
-  const currentQuery = config.customQueries.length > 0 ? config.customQueries[0]?.name || null : null;
+  const currentQuery = (config.customQueries && config.customQueries.length > 0) ? config.customQueries[0]?.name || null : null;
 
   return {
     runTest: startTest,

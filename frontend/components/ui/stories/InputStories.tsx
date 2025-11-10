@@ -16,7 +16,7 @@ interface StoryObj<T = any> {
 }
 
 // Mock action function
-const action = (name: string) => (...args: unknown[]) => Logger.debug(name, ...args);
+const action = (name: string) => (...args: unknown[]) => Logger.debug(name, { args: args.map(String) });
 
 /**
  * Input组件Storybook文档

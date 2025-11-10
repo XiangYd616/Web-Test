@@ -134,8 +134,8 @@ export const useLocalStressTest = () => {
 
     const updateSystemUsage = async () => {
       try {
-        const usage = await window.environment.localStressTest?.getSystemUsage();
-        setSystemUsage(usage);
+        const usage = await window.environment?.localStressTest?.getSystemUsage();
+        setSystemUsage(usage ?? null);
       } catch (error) {
         Logger.error('获取系统使用情况失败:', error);
       }

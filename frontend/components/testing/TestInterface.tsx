@@ -156,7 +156,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                   id="users-input"
                   type="number"
                   value={config.users || 10}
-                  onChange={(e) => setConfig({ ...config, users: parseInt(e?.target.value) })}
+                  onChange={(e) => setConfig({ ...config, users: parseInt(e?.target.value) || 10 })}
                   min="1"
                   max="1000"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -172,7 +172,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                   id="duration-input"
                   type="number"
                   value={config.duration || 30}
-                  onChange={(e) => setConfig({ ...config, duration: parseInt(e?.target.value) })}
+                  onChange={(e) => setConfig({ ...config, duration: parseInt(e?.target.value) || 30 })}
                   min="10"
                   max="3600"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -228,16 +228,16 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
     return (
       <div className="space-y-6">
         {/* 总体评分 */}
-        <div className={`p-6 rounded-xl border-2 ${getScoreBgColor(result.score)}`}>
+        <div className={`p-6 rounded-xl border-2 ${getScoreBgColor(result.score ?? 0)}`}>
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">总体评分</h3>
               <p className="text-sm text-gray-600">{result.summary}</p>
             </div>
             <div className="text-right">
-              <div className={`text-4xl font-bold ${getScoreColor(result.score)}`}>
-                {result.score}
-              </div>
+            <div className={`text-4xl font-bold ${getScoreColor(result.score ?? 0)}`}>
+              {result.score ?? 0}
+            </div>
               <div className="text-sm text-gray-500">满分 100</div>
             </div>
           </div>
@@ -251,7 +251,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               <span className="text-sm font-medium text-gray-700">测试时长</span>
             </div>
             <p className="text-xl font-bold text-gray-900 mt-1">
-              {(result.duration / 1000).toFixed(1)}s
+              {((result.duration ?? 0) / 1000).toFixed(1)}s
             </p>
           </div>
           <div className="bg-white p-4 rounded-lg border border-gray-200">

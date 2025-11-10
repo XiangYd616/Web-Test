@@ -73,12 +73,12 @@ export const _getRouteName = (path: string): string => {
 
 export const _isProtectedRoute = (path: string): boolean => {
   const route = getRouteByPath(path);
-  return route.requiresAuth === true;
+  return route?.requiresAuth === true;
 };
 
 export const _isAdminRoute = (path: string): boolean => {
   const route = getRouteByPath(path);
-  return route.requiresAdmin === true;
+  return route?.requiresAdmin === true;
 };
 
 export const _getNavigationRoutes = (isAuthenticated: boolean, isAdmin: boolean): RouteInfo[] => {

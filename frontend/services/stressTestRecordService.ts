@@ -1,4 +1,4 @@
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 
 ﻿
 // 取消原因枚举
@@ -271,7 +271,7 @@ class StressTestRecordService {
 
       return record;
     } catch (error) {
-      Logger.error('创建测试记录失败:', error);
+      Logger.error('创建测试记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -304,7 +304,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error: any) {
-      Logger.error('更新测试记录失败:', error);
+      Logger.error('更新测试记录失败:', { error: String(error) });
       throw new Error(`更新测试记录失败: ${error?.message}`);
     }
   }
@@ -325,7 +325,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      Logger.error('完成测试记录失败:', error);
+      Logger.error('完成测试记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -347,7 +347,7 @@ class StressTestRecordService {
         try {
           currentRecord = await this.getTestRecord(id);
         } catch (err) {
-          Logger.warn('获取当前记录失败，继续失败操作:', err);
+          Logger.warn('获取当前记录失败，继续失败操作:', { error: String(err) });
         }
       }
 
@@ -391,7 +391,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error) {
-      Logger.error('标记测试失败失败:', error);
+      Logger.error('标记测试失败失败:', { error: String(error) });
       throw error;
     }
   }
@@ -412,7 +412,7 @@ class StressTestRecordService {
         try {
           currentRecord = await this.getTestRecord(id);
         } catch (error) {
-          Logger.warn('获取当前记录失败，继续取消操作:', error);
+          Logger.warn('获取当前记录失败，继续取消操作:', { error: String(error) });
         }
       }
 
@@ -476,7 +476,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error) {
-      Logger.error('取消测试记录失败:', error);
+      Logger.error('取消测试记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -494,7 +494,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      Logger.error('设置测试准备状态失败:', error);
+      Logger.error('设置测试准备状态失败:', { error: String(error) });
       throw error;
     }
   }
@@ -513,7 +513,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      Logger.error('从准备状态开始测试失败:', error);
+      Logger.error('从准备状态开始测试失败:', { error: String(error) });
       throw error;
     }
   }
@@ -533,7 +533,7 @@ class StressTestRecordService {
         try {
           currentRecord = await this.getTestRecord(id);
         } catch (err) {
-          Logger.warn('获取当前记录失败，继续超时操作:', err);
+          Logger.warn('获取当前记录失败，继续超时操作:', { error: String(err) });
         }
       }
 
@@ -554,7 +554,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      Logger.error('标记测试超时失败:', error);
+      Logger.error('标记测试超时失败:', { error: String(error) });
       throw error;
     }
   }
@@ -578,7 +578,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      Logger.error('中断测试记录失败:', error);
+      Logger.error('中断测试记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -597,7 +597,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      Logger.error('恢复测试记录失败:', error);
+      Logger.error('恢复测试记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -630,7 +630,7 @@ class StressTestRecordService {
 
       return data;
     } catch (error) {
-      Logger.error('查询测试记录失败:', error);
+      Logger.error('查询测试记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -666,7 +666,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error) {
-      Logger.error('获取测试记录失败:', error);
+      Logger.error('获取测试记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -688,7 +688,7 @@ class StressTestRecordService {
       const data = await response.json();
       return data.success;
     } catch (error) {
-      Logger.error('删除测试记录失败:', error);
+      Logger.error('删除测试记录失败:', { error: String(error) });
       return false;
     }
   }
@@ -798,7 +798,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      Logger.error('更新测试记录失败:', error);
+      Logger.error('更新测试记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -828,7 +828,7 @@ class StressTestRecordService {
         await this.cancelTestRecord(id, reason, cancelReason);
         results?.success.push(id);
       } catch (error) {
-        Logger.error(`取消测试记录 ${id} 失败:`, error);
+        Logger.error(`取消测试记录 ${id} 失败:`, { error: String(error) });
         results?.failed.push(id);
       }
     }
@@ -859,7 +859,7 @@ class StressTestRecordService {
 
       return data.data.cleanedCount || 0;
     } catch (error) {
-      Logger.error('清理过期等待记录失败:', error);
+      Logger.error('清理过期等待记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -898,7 +898,7 @@ class StressTestRecordService {
 
       return data.data;
     } catch (error) {
-      Logger.error('获取测试记录统计失败:', error);
+      Logger.error('获取测试记录统计失败:', { error: String(error) });
       throw error;
     }
   }
@@ -938,7 +938,7 @@ class StressTestRecordService {
 
       return await response.blob();
     } catch (error) {
-      Logger.error('导出测试记录失败:', error);
+      Logger.error('导出测试记录失败:', { error: String(error) });
       throw error;
     }
   }
@@ -951,7 +951,7 @@ class StressTestRecordService {
       const stored = localStorage.getItem('stress_test_records');
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      Logger.error('获取本地记录失败:', error);
+      Logger.error('获取本地记录失败:', { error: String(error) });
       return [];
     }
   }
@@ -963,7 +963,7 @@ class StressTestRecordService {
     try {
       localStorage.setItem('stress_test_records', JSON.stringify(records));
     } catch (error) {
-      Logger.error('保存本地记录失败:', error);
+      Logger.error('保存本地记录失败:', { error: String(error) });
     }
   }
 }

@@ -123,7 +123,7 @@ export const UnifiedTestPage: React.FC = () => {
    * 渲染引擎概览
    */
   const renderEngineOverview = () => {
-    const stats = engine.getStats();
+    const stats = engine.getStats?.() ?? { runningTests: 0, totalTests: 0, successTests: 0, failedTests: 0 };
 
     return (
       <Row gutter={16} className="mb-6">
@@ -149,7 +149,7 @@ export const UnifiedTestPage: React.FC = () => {
           <Card>
             <Statistic
               title="支持的测试类型"
-              value={engine.supportedTypes.length}
+              value={engine.supportedTypes?.length ?? 0}
               valueStyle={{ color: '#1890ff' }}
               prefix={<SettingOutlined />}
             />

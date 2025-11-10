@@ -87,7 +87,7 @@ const useSEOTest = () => {
             device: 'both'
           });
         } catch (error) {
-          Logger.warn('获取性能指标失败,继续SEO分析:', error);
+          Logger.warn('获取性能指标失败,继续 SEO分析:', { error: String(error) });
         }
       }
 

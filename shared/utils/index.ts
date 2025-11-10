@@ -4,11 +4,10 @@
  */
 
 // 导出字符串处理工具
-export * from './string.utils';
+// 避免重复导出，只导出默认导出
 export { default as stringUtils } from './string.utils';
 
 // 导出集合处理工具
-export * from './collection.utils';
 export { default as collectionUtils } from './collection.utils';
 
 // 整合导出常用工具函数

@@ -119,7 +119,7 @@ export class DeviceFingerprinter {
         fingerprint
       };
     } catch (error) {
-      Logger.warn('生成设备指纹失败:', error);
+      Logger.warn('生成设备指纹失败:', { error: String(error) });
       return {
         deviceId,
         userAgent: navigator.userAgent,

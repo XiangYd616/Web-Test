@@ -78,7 +78,7 @@ describe('API Integration Tests', () => {
       if (response.success) {
         expect(response.data).toEqual({ id: '123', name: 'Test Project' });
         expect(response.message).toBe('操作成功');
-        expect(response.meta.timestamp).toBe('2024-01-01T00:00:00Z');
+        expect(response.meta?.timestamp).toBe('2024-01-01T00:00:00Z');
       }
     });
 

@@ -1,4 +1,4 @@
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 import { createElement, useState } from 'react';
 
 // 浏览器信息接口
@@ -101,7 +101,7 @@ export const detectCSSSupport = (): FeatureSupport => {
       support.cssTransitions = CSS.supports('transition', 'all 0.3s');
 
     } catch (error) {
-      Logger.warn('CSS.supports检测失败:', error);
+      Logger.warn('CSS.supports检测失败:', { error: String(error) });
     }
   }
 
@@ -132,7 +132,7 @@ const detectImageFormats = async (): Promise<{webp: boolean; avif: boolean}> => 
       avifImage.src = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgABogQEAwgMg8f8D///8WfhwB8+ErK42A=';
     });
   } catch (error) {
-    Logger.warn('图片格式检测失败:', error);
+    Logger.warn('图片格式检测失败:', { error: String(error) });
   }
 
   return formats;

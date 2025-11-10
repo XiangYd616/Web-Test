@@ -236,7 +236,7 @@ export const useNotifications = () => {
           try {
             await fetchNotificationsFromAPI();
           } catch (error) {
-            Logger.debug('Failed to fetch notifications from API, using local storage:', error);
+            Logger.debug('Failed to fetch notifications from API, using local storage:', { error: String(error) });
             loadNotificationsFromStorage();
           } finally {
             setLoading(false);
@@ -244,7 +244,7 @@ export const useNotifications = () => {
         }
       } catch (error) {
         // 处理整个函数的意外错误
-        Logger.debug('Unexpected error in notification loading:', error);
+        Logger.debug('Unexpected error in notification loading:', { error: String(error) });
         loadNotificationsFromStorage();
         setLoading(false);
       }

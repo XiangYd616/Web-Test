@@ -147,12 +147,14 @@ class WebsiteTestEngine implements TestEngine {
     
     return {
       id: `website-${Date.now()}`,
+      testId: `website-${Date.now()}`,
       type: 'website' as any,
       status: 'passed' as any,
+      startTime: new Date(),
+      endTime: new Date(),
       score: Math.floor(Math.random() * 40 + 60),
-      message: '网站测试完成',
-      timestamp: new Date().toISOString(),
-      details: {
+      summary: '网站测试完成',
+      results: {
         url: config.url,
         responseTime: Math.floor(Math.random() * 1000 + 200),
         statusCode: 200
@@ -170,12 +172,14 @@ class SecurityTestEngine implements TestEngine {
     
     return {
       id: `security-${Date.now()}`,
+      testId: `security-${Date.now()}`,
       type: 'security' as any,
       status: (Math.random() > 0.3 ? 'passed' : 'failed') as any,
+      startTime: new Date(),
+      endTime: new Date(),
       score: Math.floor(Math.random() * 30 + 50),
-      message: '安全扫描完成',
-      timestamp: new Date().toISOString(),
-      details: {
+      summary: '安全扫描完成',
+      results: {
         vulnerabilities: Math.floor(Math.random() * 5),
         riskLevel: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)]
       }
@@ -192,12 +196,14 @@ class PerformanceTestEngine implements TestEngine {
     
     return {
       id: `performance-${Date.now()}`,
+      testId: `performance-${Date.now()}`,
       type: 'performance' as any,
       status: 'passed' as any,
+      startTime: new Date(),
+      endTime: new Date(),
       score: Math.floor(Math.random() * 50 + 40),
-      message: '性能测试完成',
-      timestamp: new Date().toISOString(),
-      details: {
+      summary: '性能测试完成',
+      results: {
         loadTime: Math.floor(Math.random() * 2000 + 500),
         firstContentfulPaint: Math.floor(Math.random() * 1500 + 300),
         largestContentfulPaint: Math.floor(Math.random() * 3000 + 800)
@@ -215,12 +221,14 @@ class SEOTestEngine implements TestEngine {
     
     return {
       id: `seo-${Date.now()}`,
+      testId: `seo-${Date.now()}`,
       type: 'seo' as any,
       status: 'passed' as any,
+      startTime: new Date(),
+      endTime: new Date(),
       score: Math.floor(Math.random() * 40 + 50),
-      message: 'SEO分析完成',
-      timestamp: new Date().toISOString(),
-      details: {
+      summary: 'SEO分析完成',
+      results: {
         metaTags: Math.floor(Math.random() * 10 + 5),
         headings: Math.floor(Math.random() * 20 + 10),
         images: Math.floor(Math.random() * 30 + 15)
@@ -238,16 +246,18 @@ class APITestEngine implements TestEngine {
     
     return {
       id: `api-${Date.now()}`,
+      testId: `api-${Date.now()}`,
       type: 'api' as any,
       status: (Math.random() > 0.2 ? 'passed' : 'failed') as any,
+      startTime: new Date(),
+      endTime: new Date(),
       score: Math.floor(Math.random() * 50 + 40),
-      message: 'API测试完成',
-      timestamp: new Date().toISOString(),
-      details: {
+      summary: 'API测试完成',
+      results: {
         endpoints: Math.floor(Math.random() * 10 + 3),
-        responseTime: Math.floor(Math.random() * 500 + 100),
-        errors: Math.floor(Math.random() * 3)
-      }
+        responseTime: Math.floor(Math.random() * 500 + 100)
+      },
+      errors: Array(Math.floor(Math.random() * 3)).fill('').map((_, i) => `Error ${i + 1}`)
     };
   }
 }
@@ -261,12 +271,14 @@ class CompatibilityTestEngine implements TestEngine {
     
     return {
       id: `compatibility-${Date.now()}`,
+      testId: `compatibility-${Date.now()}`,
       type: 'compatibility' as any,
       status: 'passed' as any,
+      startTime: new Date(),
+      endTime: new Date(),
       score: Math.floor(Math.random() * 30 + 70),
-      message: '兼容性测试完成',
-      timestamp: new Date().toISOString(),
-      details: {
+      summary: '兼容性测试完成',
+      results: {
         browsers: ['Chrome', 'Firefox', 'Safari', 'Edge'],
         compatibility: Math.floor(Math.random() * 20 + 80)
       }

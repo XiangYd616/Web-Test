@@ -1480,7 +1480,7 @@ const APITest: React.FC = () => {
                             </label>
                             <input
                               type="text"
-                              value={endpoint.expectedStatus.join(', ')}
+                              value={(endpoint.expectedStatus ?? [200]).join(', ')}
                               onChange={(e) => updateEndpoint(endpoint.id, {
                                 expectedStatus: e.target.value.split(',').map(s => parseInt(s?.trim())).filter(n => !isNaN(n))
                               })}

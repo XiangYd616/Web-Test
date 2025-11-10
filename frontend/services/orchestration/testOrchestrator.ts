@@ -579,6 +579,7 @@ class TestOrchestrator {
       const pipeline = this.pipelines.get(pipelineId);
       
       if (pipeline && context) {
+        // @ts-expect-error - Pipeline metrics needs proper typing
         metrics.pipelines.push({
           id: pipelineId,
           name: pipeline.name,

@@ -669,7 +669,7 @@ export class AuditLogService {
     const sortOrder = query.sortOrder || 'desc';
 
     filteredLogs.sort((a, b) => {
-      let aValue: unknown, bValue: any;
+      let aValue: number | string, bValue: number | string;
 
       switch (sortBy) {
         case 'timestamp':
@@ -686,8 +686,8 @@ export class AuditLogService {
           bValue = b.riskScore || 0;
           break;
         default:
-          aValue = a.timestamp;
-          bValue = b.timestamp;
+          aValue = new Date(a.timestamp).getTime();
+          bValue = new Date(b.timestamp).getTime();
       }
 
       if (sortOrder === 'asc') {

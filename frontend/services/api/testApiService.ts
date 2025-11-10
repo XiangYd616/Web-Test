@@ -814,7 +814,7 @@ class TestApiService implements TestApiClient {
   async getTestHistory(testType?: TestType, limit?: number): Promise<ApiResponse<TestHistory>> {
     const params = new URLSearchParams();
     if (testType) params?.append('testType', testType);
-    if (limit) params?.append('limit', limit?.toString());
+    if (limit !== undefined) params?.append('limit', limit.toString());
 
     const url = `${this.baseUrl}/history${params?.toString() ? '?' + params?.toString() : ''}`;
 
@@ -891,7 +891,7 @@ class TestApiService implements TestApiClient {
           const execution = statusResponse.data;
 
           // 调用进度回调
-          if (callbacks.onProgress) {
+          if (callbacks.onProgress && execution.progress !== undefined) {
             callbacks.onProgress(execution.progress);
           }
 

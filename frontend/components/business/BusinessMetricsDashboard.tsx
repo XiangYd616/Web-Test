@@ -86,7 +86,7 @@ export const BusinessMetricsDashboard: React.FC<BusinessMetricsDashboardProps> =
     let totalWeight = 0;
 
     testResults.forEach(result => {
-      const weight = weights[result.testType] || 0.05;
+      const weight = weights[result.testType as keyof typeof weights] || 0.05;
       totalScore += result.score * weight;
       totalWeight += weight;
     });
@@ -160,7 +160,7 @@ export const BusinessMetricsDashboard: React.FC<BusinessMetricsDashboardProps> =
       database: <Database size={16} />,
       network: <Activity size={16} />
     };
-    return iconMap[testType] || <BarChart3 size={16} />;
+    return iconMap[testType as keyof typeof iconMap] || <BarChart3 size={16} />;
   };
 
   const getHealthScoreColor = (score: number) => {

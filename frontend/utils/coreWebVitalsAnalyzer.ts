@@ -1,4 +1,4 @@
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 
 ﻿/**
  * Core Web Vitals Analyzer
@@ -180,7 +180,7 @@ export class CoreWebVitalsAnalyzer {
         metrics.ttfb = this.simulateMetric('ttfb');
       }
     } catch (error) {
-      Logger.error('Error collecting Core Web Vitals metrics:', error);
+      Logger.error('Error collecting Core Web Vitals metrics:', { error: String(error) });
     }
 
     return metrics;
@@ -702,7 +702,7 @@ export class CoreWebVitalsAnalyzer {
         // 监听各种性能条目
         this.observer.observe({ entryTypes: ['paint', 'largest-contentful-paint', 'layout-shift', 'first-input'] });
       } catch (error) {
-        Logger.warn('Failed to initialize PerformanceObserver:', error);
+        Logger.warn('Failed to initialize PerformanceObserver:', { error: String(error) });
       }
     }
   }

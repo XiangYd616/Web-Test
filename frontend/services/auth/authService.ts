@@ -102,7 +102,7 @@ export class UnifiedAuthService implements IAuthService {
       try {
         this.deviceFingerprint = await DeviceFingerprinter.generateFingerprint();
       } catch (error) {
-        Logger.warn('设备指纹生成失败:', error);
+        Logger.warn('设备指纹生成失败:', { error: String(error) });
       }
     }
     
@@ -138,7 +138,7 @@ export class UnifiedAuthService implements IAuthService {
               this.logout();
             }
           } catch (error) {
-            Logger.error('❌ 解析用户数据失败:', error);
+            Logger.error('❗ 解析用户数据失败:', { error: String(error) });
             this.logout();
           }
         }
@@ -146,7 +146,7 @@ export class UnifiedAuthService implements IAuthService {
 
       this.isInitialized = true;
     } catch (error) {
-      Logger.error('❌ 初始化认证状态失败:', error);
+      Logger.error('❗ 初始化认证状态失败:', { error: String(error) });
       this.isInitialized = true;
     }
   }
@@ -322,9 +322,9 @@ export class UnifiedAuthService implements IAuthService {
             isValidPassword = false;
           }
         } catch (error) {
-          Logger.error('❌ API登录错误:', error);
+          Logger.error('❗ API登录错误:', error);
           // 如果API失败，尝试本地验证（系统用户）
-          user = await this.validateUserLocally(credentials.email, credentials.password);
+          user = await this.validateUserLocally(credentials.email ?? '', credentials.password);
           isValidPassword = user !== null;
         }
       }
@@ -876,7 +876,7 @@ export class UnifiedAuthService implements IAuthService {
 
     try {
       // 验证当前密码
-      const isCurrentPasswordValid = await this.validateCurrentPassword(data?.currentPassword);
+      const isCurrentPasswordValid = await this.validateCurrentPassword(data?.currentPassword ?? '');
       if (!isCurrentPasswordValid) {
         return {
           success: false,
@@ -1056,7 +1056,7 @@ export class UnifiedAuthService implements IAuthService {
     
     try {
       if (this.enhancedConfig.enableSecureStorage) {
-        this.currentTokenPair = await SecureStorageManager.getItem<TokenPair>('token_pair');
+        this.currentTokenPair = await SecureStorageManager.getItem<TokenPair>('token_pair') ?? undefined;
       } else {
         /**
          * if功能函数
@@ -1368,7 +1368,7 @@ export class UnifiedAuthService implements IAuthService {
       const result = await response.json();
       return result.success;
     } catch (error) {
-      Logger.error('终止会话失败:', error);
+      Logger.error('终止会话失败:', { error: String(error) });
       return false;
     }
   }
@@ -1391,7 +1391,7 @@ export class UnifiedAuthService implements IAuthService {
       const result = await response.json();
       return result.success;
     } catch (error) {
-      Logger.error('终止其他会话失败:', error);
+      Logger.error('终止其他会话失败:', { error: String(error) });
       return false;
     }
   }
@@ -1429,7 +1429,7 @@ export class UnifiedAuthService implements IAuthService {
         try {
           callback(data);
         } catch (error) {
-          Logger.error(`事件监听器执行错误 (${event}):`, error);
+          Logger.error(`事件监听器执行错误 (${event}):`, { error: String(error) });
         }
       });
     }
@@ -1462,7 +1462,7 @@ export class UnifiedAuthService implements IAuthService {
       try {
         await SecureStorageManager.setItem(key, value);
       } catch (error) {
-        Logger.warn('安全存储失败，使用普通存储:', error);
+        Logger.warn('安全存储失败，使用普通存储:', { error: String(error) });
         localStorage.setItem(key, value);
       }
     } else {
@@ -1478,7 +1478,7 @@ export class UnifiedAuthService implements IAuthService {
       try {
         return await SecureStorageManager.getItem<string>(key);
       } catch (error) {
-        Logger.warn('安全获取失败，使用普通存储:', error);
+        Logger.warn('安全获取失败，使用普通存储:', { error: String(error) });
         return localStorage.getItem(key);
       }
     } else {
@@ -1537,7 +1537,7 @@ export class UnifiedAuthService implements IAuthService {
       // 暂时返回成功状态
       return { success: true, message: '数据迁移完成', migrated: 0 };
     } catch (error: any) {
-      Logger.error('❌ 数据迁移失败:', error);
+      Logger.error('❗ 数据迁移失败:', { error: String(error) });
       return { success: false, message: error instanceof Error ? error.message : '未知错误', migrated: 0 };
     }
   }

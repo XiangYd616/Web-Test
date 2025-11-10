@@ -411,25 +411,31 @@ export function useDataProcessor<T = any>(
 
   // 操作函数
   const actions: DataActions<T> = {
-    load: (params) => {
+    load: async (params) => {
       if (!lastRequestRef.current) {
         throw new Error('No request function provided');
       }
-      return executeRequest(lastRequestRef.current, params);
+      const result = await executeRequest(lastRequestRef.current, params);
+      if (!result) throw new Error('Request returned null');
+      return result;
     },
 
-    refresh: () => {
+    refresh: async () => {
       if (!lastRequestRef.current) {
         throw new Error('No request function provided');
       }
-      return executeRequest(lastRequestRef.current, undefined, { useCache: false });
+      const result = await executeRequest(lastRequestRef.current, undefined, { useCache: false });
+      if (!result) throw new Error('Request returned null');
+      return result;
     },
 
-    retry: () => {
+    retry: async () => {
       if (!lastRequestRef.current) {
         throw new Error('No request function provided');
       }
-      return executeRequest(lastRequestRef.current, undefined, { useCache: false, isRetry: true });
+      const result = await executeRequest(lastRequestRef.current, undefined, { useCache: false, isRetry: true });
+      if (!result) throw new Error('Request returned null');
+      return result;
     },
 
     reset: () => {
@@ -446,13 +452,17 @@ export function useDataProcessor<T = any>(
     loadPage: async (page: number) => {
       if (!lastRequestRef.current) return null;
       const params = { page, limit: (state.pagination as any)?.limit || finalConfig.pagination?.defaultPageSize };
-      return executeRequest(lastRequestRef.current, params);
+      const result = await executeRequest(lastRequestRef.current, params);
+      if (!result) throw new Error('Request returned null');
+      return result;
     },
 
     changePageSize: async (size: number) => {
       if (!lastRequestRef.current) return null;
       const params = { page: 1, limit: size };
-      return executeRequest(lastRequestRef.current, params);
+      const result = await executeRequest(lastRequestRef.current, params);
+      if (!result) throw new Error('Request returned null');
+      return result;
     },
 
     clearCache: () => {

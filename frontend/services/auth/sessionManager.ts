@@ -238,7 +238,7 @@ class LocationDetector {
         locationInfo.isp = data.org;
       }
     } catch (error) {
-      Logger.warn('获取位置信息失败:', error);
+      Logger.warn('获取位置信息失败:', { error: String(error) });
     }
 
     // 检测VPN/Tor（简化实现）

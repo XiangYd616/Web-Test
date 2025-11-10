@@ -24,7 +24,6 @@ export function formatApiResponse<T>(
             error: {
                 code: ErrorCode.UNKNOWN_ERROR,
                 message: error.message,
-                timestamp,
             },
             meta: {
                 timestamp,

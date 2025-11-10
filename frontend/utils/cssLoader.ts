@@ -1,4 +1,4 @@
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 import { createElement } from 'react';
 
 // 已加载的CSS文件缓存
@@ -85,7 +85,7 @@ export const _loadPageCSS = async (pageName: string): Promise<void> => {
   try {
     await Promise.all(cssFiles.map(href => loadCSS(href)));
   } catch (error) {
-    Logger.warn(`Failed to load CSS for page: ${pageName}`, error);
+    Logger.warn(`Failed to load CSS for page: ${pageName}`, { error: String(error) });
   }
 };
 
@@ -112,7 +112,7 @@ export const _loadComponentCSS = async (componentName: string): Promise<void> =>
   try {
     await loadCSS(cssFile);
   } catch (error) {
-    Logger.warn(`Failed to load CSS for component: ${componentName}`, error);
+    Logger.warn(`Failed to load CSS for component: ${componentName}`, { error: String(error) });
   }
 };
 

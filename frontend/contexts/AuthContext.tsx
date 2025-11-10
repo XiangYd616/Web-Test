@@ -564,7 +564,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     sendEmailVerification,
     verifyEmail,
     isAuthenticated: !!user,
-    isAdmin: user.role === 'admin',
+    isAdmin: user?.role === 'admin',
     error
   };
 

@@ -283,7 +283,7 @@ export const useCompatibilityTestState = (): UseCompatibilityTestStateReturn => 
       errors.push('请至少选择一个设备类型');
     }
 
-    if (config.testViewports.length === 0) {
+    if (!config.testViewports || config.testViewports.length === 0) {
       errors.push('请至少添加一个测试视口');
     }
 

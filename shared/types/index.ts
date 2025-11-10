@@ -9,13 +9,36 @@
 // 基础类型
 // =============================================================================
 export * from './base.types';
-export * from './common.types';
+// common.types 已包含在 base.types 中，避免重复导出
+// export * from './common.types';
 
 // =============================================================================
 // API 相关类型
 // =============================================================================
-export * from './api.types';
-export * from './apiResponse.types';
+// 显式导出 api.types，排除与 base.types 冲突的类型
+export type {
+  ApiResponse,
+  PaginatedResponse as ApiPaginatedResponse,
+  ErrorResponse,
+  ApiRequest,
+  TestRequest,
+  ErrorCode,
+  TestType as ApiTestType,
+  TestStatus as ApiTestStatus,
+  TestOptions,
+  TestResult as ApiTestResult,
+  TestProgress as ApiTestProgress,
+  User,
+  UserRole,
+  UserSettings,
+  AuthCredentials,
+  AuthToken,
+  AuthResponse,
+  PaginationParams as ApiPaginationParams,
+  FilterParams as ApiFilterParams
+} from './api.types';
+// apiResponse.types 已包含在 api.types 中
+// export * from './apiResponse.types';
 
 // =============================================================================
 // 测试相关类型
@@ -58,23 +81,45 @@ export enum TestPriority {
   CRITICAL = 'critical'
 }
 
-export * from './test.types';
-export * from './testEngine.types';
-export * from './testResult.types';
+// 显式导出 test.types，排除与 index.ts 中已定义的 TestType 和 TestStatus
+export type {
+  TestConfig
+} from './test.types';
+
+// testResult.types 已包含在 test.types 中
+// export * from './testResult.types';
+
+// 先导出 testHistory.types
 export * from './testHistory.types';
+
+// 再导出 testEngine.types
+// 注意: testEngine.types 也定义了 TestHistoryRecord，但会被 testHistory.types 的定义覆盖
+// 这是预期的行为，因为 testHistory.types 的定义更通用
+// 如果需要 testEngine 特定的 TestHistoryRecord，请直接从 './testEngine.types' 导入
+export * from './testEngine.types';
 
 // =============================================================================
 // 认证和用户类型
 // =============================================================================
 export * from './auth.types';
-export * from './user.types';
+// user.types 已包含在 auth.types 中
+// export * from './user.types';
 export * from './rbac.types';
 
 // =============================================================================
 // 业务模型类型
 // =============================================================================
-export * from './models.types';
-export * from './dataModels.types';
+// models.types 和 dataModels.types 有重复，只导出 models.types
+// 显式导出 models.types，排除与 base.types 冲突的类型
+export type {
+  BaseModel,
+  PaginationParams as ModelsPaginationParams,
+  PaginatedResponse as ModelsPaginatedResponse,
+  SortParams as ModelsSortParams,
+  FilterParams as ModelsFilterParams,
+  QueryParams as ModelsQueryParams
+} from './models.types';
+// export * from './dataModels.types';
 export * from './project.types';
 
 // =============================================================================
@@ -88,7 +133,8 @@ export * from './performance.types';
 // UI 和组件类型
 // =============================================================================
 export * from './ui.types';
-export * from './theme.types';
+// theme.types 已包含在 ui.types 中
+// export * from './theme.types';
 
 // =============================================================================
 // 版本和兼容性类型

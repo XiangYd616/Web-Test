@@ -131,7 +131,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
       };
       
     } catch (err) {
-      Logger.error('数据处理错误:', err);
+      Logger.error('数据处理错误:', { error: String(err) });
       setError(err instanceof Error ? err.message : '数据处理失败');
       return {
         config: {},
@@ -159,7 +159,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
     try {
       return new Date(timestamp).toLocaleString('zh-CN');
     } catch (err) {
-      Logger.warn('时间格式化失败:', err);
+      Logger.warn('时间格式化失败:', { error: String(err) });
       setError('时间格式化错误');
       return 'N/A';
     }

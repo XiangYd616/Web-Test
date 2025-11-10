@@ -21,14 +21,14 @@ export const useTestEngine = () => {
     // 状态
     isRunning: engine.executingTest,
     progress: engine.getTestProgress?.() || 0,
-    stage: engine.activeTests?.size > 0 ?
-      Array.from(engine.activeTests.values())[0].currentStep : '准备中',
+    stage: (engine.activeTests?.size ?? 0) > 0 ?
+      Array.from(engine.activeTests?.values() ?? [])[0].currentStep : '准备中',
     error: engine.lastError?.message || null,
-    currentTest: engine.activeTests?.size > 0 ? {
-      id: Array.from(engine.activeTests.keys())[0],
+    currentTest: (engine.activeTests?.size ?? 0) > 0 ? {
+      id: Array.from(engine.activeTests?.keys() ?? [])[0],
       testType: 'unknown', // TestStatusInfo没有type字段，使用默认值
-      status: Array.from(engine.activeTests.values())[0].status as any,
-      startTime: new Date(Array.from(engine.activeTests.values())[0].startTime).toISOString()
+      status: Array.from(engine.activeTests?.values() ?? [])[0].status as any,
+      startTime: new Date(Array.from(engine.activeTests?.values() ?? [])[0].startTime).toISOString()
     } : null,
 
     // 方法
@@ -69,7 +69,7 @@ export const useSimpleTestEngine = () => {
     checkEngineStatus: async () => {
       await engine.fetchSupportedTypes();
       return {
-        data: engine.supportedTypes.reduce((acc, type) => {
+        data: engine.supportedTypes?.reduce((acc, type) => {
           acc[type] = true;
           return acc;
         }, {} as Record<string, boolean>)
@@ -77,7 +77,7 @@ export const useSimpleTestEngine = () => {
     },
     getEngineCapabilities: async () => {
       return {
-        data: engine.supportedTypes.reduce((acc, type) => {
+        data: engine.supportedTypes?.reduce((acc, type) => {
           acc[type] = ['load', 'stress', 'performance'];
           return acc;
         }, {} as Record<string, string[]>)
@@ -104,7 +104,7 @@ export const useTestState = (options: {
   validateConfig?: (config: Record<string, any>) => { isValid: boolean; errors: string[] };
 }) => {
   const engine = useUnifiedTestEngine();
-  const universalState = engine.getUniversalState();
+  const universalState = engine.getUniversalState?.();
 
   const startTest = useCallback(async (customConfig?: Record<string, any>) => {
     try {
@@ -181,7 +181,7 @@ export const useTestState = (options: {
  */
 export const useUniversalTest = (testType: string, defaultConfig: Record<string, any>) => {
   const engine = useUnifiedTestEngine();
-  const universalState = engine.getUniversalState();
+  const universalState = engine.getUniversalState?.();
 
   return {
     // 状态

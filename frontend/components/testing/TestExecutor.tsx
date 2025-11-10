@@ -222,7 +222,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
 
     // 连接WebSocket
     if (enableWebSocket) {
-      engine.connectWebSocket();
+      engine.connectWebSocket?.();
     }
   }, [form, defaultConfig, showHistory, showStats, enableWebSocket, engine, loadTestHistory, loadTestStatistics]);
 
@@ -327,7 +327,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    */
   const _handleBatchCancel = useCallback(async () => {
     try {
-      await engine.cancelAllTests();
+      await engine.cancelAllTests?.();
       Logger.debug('✅ 已取消所有运行中的测试');
     } catch (error) {
       Logger.error('批量取消失败:', error);
@@ -336,7 +336,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   }, [engine, onTestError]);
 
   const handleClearHistory = useCallback(() => {
-    engine.clearCompletedTests();
+    engine.clearCompletedTests?.();
     setTestHistory([]);
     Logger.debug('✅ 已清理测试历史');
   }, [engine]);
@@ -411,7 +411,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
 
             <Button
               icon={<ReloadOutlined />}
-              onClick={() => engine.fetchSupportedTypes()}
+              onClick={() => engine.fetchSupportedTypes?.()}
               loading={false}
             >
               刷新引擎
@@ -419,8 +419,8 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
 
             <Button
               icon={<DeleteOutlined />}
-              onClick={() => engine.clearCompletedTests()}
-              disabled={engine.getStats().completedTests === 0}
+              onClick={() => engine.clearCompletedTests?.()}
+              disabled={engine.getStats?.().completedTests === 0}
             >
               清理历史
             </Button>
@@ -564,7 +564,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    * 渲染引擎状态
    */
   const renderEngineStatus = () => {
-    const stats = engine.getStats();
+    const stats = engine.getStats?.() || { runningTests: 0, completedTests: 0, failedTests: 0, totalTests: 0 };
 
     return (
       <Card title="🚀 引擎状态" className="mb-4">
@@ -643,7 +643,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const renderStatsPanel = () => {
     if (!showStats) return null;
 
-    const stats = engine.getStats();
+    const stats = engine.getStats?.() || { runningTests: 0, completedTests: 0, failedTests: 0, totalTests: 0 };
 
     return (
       <TestStatsPanel
@@ -677,7 +677,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const renderTestResults = () => {
     // Convert array to Map for TestResultsTable
     const testResultsMap = new Map<string, TestResult>();
-    (engine.testResults || []).forEach((result: any) => {
+    ((engine.testResults ?? []) as any[]).forEach((result: any) => {
       if (result.testId) {
         testResultsMap.set(result.testId, result);
       }
@@ -698,7 +698,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    * 渲染结果详情模态框
    */
   const renderResultModal = () => {
-    const selectedResult = engine.testResults.find((r: any) => r.testId === selectedTestId);
+    const selectedResult = (engine.testResults ?? []).find((r: any) => r.testId === selectedTestId);
     
     return (
       <Modal
@@ -806,7 +806,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
             label: (
               <span>
                 <ClockCircleOutlined />
-                监控进度 ({engine.getStats().runningTests})
+                监控进度 ({engine.getStats?.().runningTests ?? 0})
               </span>
             ),
             children: renderTestMonitor()
@@ -816,7 +816,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
             label: (
               <span>
                 <BarChartOutlined />
-                查看结果 ({engine.getStats().totalTests})
+                查看结果 ({engine.getStats?.().totalTests ?? 0})
               </span>
             ),
             children: renderTestResults()

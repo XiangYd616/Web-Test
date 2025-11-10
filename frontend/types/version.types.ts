@@ -228,8 +228,10 @@ export class VersionedDataWrapper<T = any> {
       this.version,
       { ...this.data, ...newData },
       {
-        ...this.metadata,
-        updatedAt: new Date().toISOString()
+        createdAt: this.metadata?.createdAt ?? new Date().toISOString(),
+        source: this.metadata?.source ?? 'client',
+        updatedAt: new Date().toISOString(),
+        checksum: this.metadata?.checksum
       }
     );
   }

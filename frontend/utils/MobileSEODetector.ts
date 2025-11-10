@@ -1,4 +1,4 @@
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 
 /**
  * Mobile SEO Detection Utility
@@ -452,7 +452,7 @@ export class MobileSeoDetector {
         }
       }
     } catch (error) {
-      Logger.warn('无法访问CSS规则:', error);
+      Logger.warn('无法访问CSS规则:', { error: String(error) });
     }
   }
 

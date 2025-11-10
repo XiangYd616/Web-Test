@@ -47,12 +47,12 @@ export const DataTable: React.FC<DataTableProps> = ({
             </tr>
           ) : (
             dataSource.map((record, index) => (
-              <tr key={typeof rowKey === 'function' ? rowKey(record) : record[rowKey]}>
+              <tr key={typeof rowKey === 'function' ? rowKey(record) : (record as any)[rowKey]}>
                 {columns.map(col => (
                   <td key={col.key} className="border border-gray-300 p-2">
                     {col.render 
-                      ? col.render(record[col.dataIndex || col.key], record, index)
-                      : record[col.dataIndex || col.key]
+                      ? col.render((record as any)[col.dataIndex || col.key], record, index)
+                      : (record as any)[col.dataIndex || col.key]
                     }
                   </td>
                 ))}

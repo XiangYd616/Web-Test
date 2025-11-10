@@ -239,9 +239,10 @@ export interface CompositeTestResult extends BaseTestResult {
 }
 
 /**
- * 测试历史记录
+ * 引擎测试历史记录
+ * (注意: 为避免与 testHistory.types 中的 TestHistoryRecord 冲突，改名为 EngineHistoryRecord)
  */
-export interface TestHistoryRecord {
+export interface EngineHistoryRecord {
   id: string;
   timestamp: Date;
   engineType: TestEngineType;

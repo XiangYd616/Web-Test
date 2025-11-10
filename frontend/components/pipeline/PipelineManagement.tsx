@@ -79,7 +79,7 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
     if (window.confirm('Are you sure you want to delete this pipeline?')) {
       TestOrchestrator.deletePipeline(pipelineId);
       loadPipelines();
-      if (selectedPipeline.id === pipelineId) {
+      if (selectedPipeline?.id === pipelineId) {
         setSelectedPipeline(null);
       }
     }
@@ -163,7 +163,7 @@ export const PipelineManagement: React.FC<PipelineManagementProps> = ({
                 <div
                   key={pipeline?.id}
                   className={`p-4 border-b border-gray-700 cursor-pointer hover:bg-gray-700 ${
-                    selectedPipeline.id === pipeline?.id ? 'bg-gray-700' : ''
+                    selectedPipeline?.id === pipeline?.id ? 'bg-gray-700' : ''
                   }`}
                   onClick={() => {
                     setSelectedPipeline(pipeline);

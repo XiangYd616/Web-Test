@@ -169,6 +169,7 @@ PROJECT_*_REPORT.md
 GITIGNORE_ANALYSIS_REPORT.md
 .gitignore.optimized
 .gitignore.backup
+version-report.json
 
 # Windows path length issue mitigation
 node_modules/**/node_modules/

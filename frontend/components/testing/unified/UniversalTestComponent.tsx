@@ -527,7 +527,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         width: 100,
         render: (status: string) => (
           <Badge
-            color={STATUS_COLORS[status] || '#8c8c8c'}
+            color={STATUS_COLORS[status as keyof typeof STATUS_COLORS] || '#8c8c8c'}
             text={status}
           />
         )

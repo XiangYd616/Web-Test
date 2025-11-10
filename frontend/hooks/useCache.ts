@@ -317,7 +317,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
         updateState({ isLoading: true, error: null, lastOperation: 'invalidatePattern' });
 
         const cacheManager = getCacheManager();
-        let count = await cacheManager.invalidatePattern(pattern);
+        let count = await cacheManager.invalidatePattern?.(pattern) ?? 0;
 
         // 如果是混合缓存，同时失效localStorage
         if (cacheType === 'hybrid') {
@@ -377,7 +377,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
               await cacheManager.set(key, data, params);
             }
           } catch (error) {
-            Logger.warn(`Failed to preload cache key: ${key}`, error);
+            Logger.warn(`Failed to preload cache key: ${key}`, { error: String(error) });
           }
         });
 
