@@ -24,6 +24,7 @@ const ApiTestEngine = require('../engines/api/APITestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const userTestManager = require('../services/testing/UserTestManager.js');
+const testBusinessService = require('../services/testing/TestBusinessService.js');
 // 注意：这些服务文件已被删除，需要使用替代方案
 // const databaseService = require('../services/database/databaseService');
 // const testQueueService = require('../services/queue/queueService');
@@ -66,6 +67,146 @@ const upload = multer({
 });
 
 const router = express.Router();
+
+// ==================== 新架构: 业务服务端点 ====================
+
+/**
+ * 创建并启动测试(统一入口)
+ * POST /api/test/create-and-start
+ * 
+ * 职责:
+ * - 完整的业务验证(格式+业务规则)
+ * - 权限和配额检查
+ * - 创建并启动测试
+ */
+router.post('/create-and-start', authMiddleware, testRateLimiter, asyncHandler(async (req, res) => {
+  try {
+    const config = req.body;
+    const user = {
+      userId: req.user.id,
+      role: req.user.role || 'free'
+    };
+
+    console.log(`📋 收到创建测试请求: ${config.testType || 'load'} - ${config.url}`);
+
+    // 调用业务服务处理完整流程
+    const result = await testBusinessService.createAndStartTest(config, user);
+
+    // 成功响应
+    res.json({
+      success: true,
+      data: result,
+      message: '测试创建并启动成功'
+    });
+
+  } catch (error) {
+    console.error('❌ 创建并启动测试失败:', error);
+
+    // 处理验证错误
+    if (error.code === 'VALIDATION_ERROR') {
+      return res.status(400).json({
+        success: false,
+        error: '测试配置验证失败',
+        details: error.details
+      });
+    }
+
+    // 处理权限错误
+    if (error.message.includes('未授权')) {
+      return res.status(401).json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    // 其他错误
+    res.status(500).json({
+      success: false,
+      error: error.message || '创建并启动测试失败',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+}));
+
+/**
+ * 获取业务规则配置
+ * GET /api/test/business-rules
+ * 
+ * 用于前端获取验证规则,展示给用户
+ */
+router.get('/business-rules', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const rules = testBusinessService.getBusinessRules();
+    
+    res.json({
+      success: true,
+      data: rules
+    });
+  } catch (error) {
+    console.error('获取业务规则失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取业务规则失败'
+    });
+  }
+}));
+
+/**
+ * 获取用户配额信息
+ * GET /api/test/quota
+ * 
+ * 返回用户的配额和使用情况
+ */
+router.get('/quota', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const user = {
+      userId: req.user.id,
+      role: req.user.role || 'free'
+    };
+
+    const quotaInfo = await testBusinessService.getUserQuotaInfo(user);
+    
+    res.json({
+      success: true,
+      data: quotaInfo
+    });
+  } catch (error) {
+    console.error('获取用户配额失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取用户配额失败'
+    });
+  }
+}));
+
+/**
+ * 验证测试配置(不创建测试)
+ * POST /api/test/validate
+ * 
+ * 用于前端提交前验证配置是否有效
+ */
+router.post('/validate', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const config = req.body;
+    const user = {
+      userId: req.user.id,
+      role: req.user.role || 'free'
+    };
+
+    const validation = await testBusinessService.validateTestConfig(config, user);
+    
+    res.json({
+      success: true,
+      data: validation
+    });
+  } catch (error) {
+    console.error('验证测试配置失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '验证测试配置失败'
+    });
+  }
+}));
 
 // ==================== 真实分析方法 ====================
 
