@@ -12,6 +12,13 @@
 const { query } = require('../../config/database');
 const UserTestManager = require('./UserTestManager');
 const TestHistoryService = require('./TestHistoryService');
+const {
+  ValidationError,
+  QuotaExceededError,
+  UnauthorizedError,
+  NotFoundError,
+  PermissionError
+} = require('../../utils/errors');
 
 /**
  * 业务规则配置
@@ -329,19 +336,13 @@ class TestBusinessService {
   async createAndStartTest(config, user) {
     // 1. 验证权限
     if (!user || !user.userId) {
-      throw new Error('未授权:用户未登录');
+      throw new UnauthorizedError();
     }
 
     // 2. 完整验证(格式+业务规则)
     const validation = await this.validateTestConfig(config, user);
     if (!validation.isValid) {
-      const error = new Error('测试配置验证失败');
-      error.code = 'VALIDATION_ERROR';
-      error.details = {
-        errors: validation.errors,
-        warnings: validation.warnings
-      };
-      throw error;
+      throw new ValidationError(validation.errors, validation.warnings);
     }
 
     // 3. 规范化配置
@@ -432,7 +433,7 @@ class TestBusinessService {
       // 1. 检查权限
       const hasPermission = await this.checkTestPermission(testId, user.userId);
       if (!hasPermission) {
-        throw new Error('无权限启动此测试');
+        throw new PermissionError('start', 'test');
       }
 
       // 2. 获取测试配置
@@ -442,7 +443,7 @@ class TestBusinessService {
       );
 
       if (result.rows.length === 0) {
-        throw new Error('测试不存在');
+        throw new NotFoundError('测试', testId);
       }
 
       const testData = result.rows[0];
