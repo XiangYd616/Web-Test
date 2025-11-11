@@ -379,8 +379,28 @@ class TestBusinessService {
    */
   async createTest(config, user) {
     try {
-      // 调用UserTestManager创建测试
-      const testId = await this.userTestManager.createTest(user.userId, config);
+      // 1. 生成testId
+      const testId = this.generateTestId(config.testType);
+
+      // 2. 保存到数据库
+      await query(`
+        INSERT INTO test_history (
+          test_id, 
+          user_id, 
+          test_type, 
+          url,
+          status, 
+          config, 
+          created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      `, [
+        testId,
+        user.userId,
+        config.testType || 'load',
+        config.url,
+        'pending',
+        JSON.stringify(config)
+      ]);
 
       return {
         testId,
@@ -396,18 +416,62 @@ class TestBusinessService {
   }
 
   /**
+   * 生成测试ID
+   */
+  generateTestId(testType = 'load') {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 9);
+    return `${testType}_${timestamp}_${random}`;
+  }
+
+  /**
    * 启动测试
    */
   async startTest(testId, user) {
     try {
-      // 检查权限
+      // 1. 检查权限
       const hasPermission = await this.checkTestPermission(testId, user.userId);
       if (!hasPermission) {
         throw new Error('无权限启动此测试');
       }
 
-      // 调用UserTestManager启动测试
-      await this.userTestManager.startTest(user.userId, testId);
+      // 2. 获取测试配置
+      const result = await query(
+        'SELECT config, test_type, url FROM test_history WHERE test_id = $1',
+        [testId]
+      );
+
+      if (result.rows.length === 0) {
+        throw new Error('测试不存在');
+      }
+
+      const testData = result.rows[0];
+      const config = typeof testData.config === 'string' 
+        ? JSON.parse(testData.config) 
+        : testData.config;
+
+      // 3. 更新测试状态为running
+      await query(
+        'UPDATE test_history SET status = $1, started_at = NOW() WHERE test_id = $2',
+        ['running', testId]
+      );
+
+      // 4. 创建测试引擎实例
+      const testEngine = this.userTestManager.createUserTest(user.userId, testId);
+
+      // 5. 异步执行测试(不阻塞响应)
+      setImmediate(async () => {
+        try {
+          await testEngine.executeTest(config);
+        } catch (error) {
+          console.error(`测试执行失败: ${testId}`, error);
+          // 更新测试状态为失败
+          await query(
+            'UPDATE test_history SET status = $1, error_message = $2, completed_at = NOW() WHERE test_id = $3',
+            ['failed', error.message, testId]
+          );
+        }
+      });
 
       return {
         testId,
@@ -466,7 +530,19 @@ class TestBusinessService {
    */
   async getUserQuotaInfo(user) {
     const quota = this.getUserQuota(user);
-    const runningTests = await this.userTestManager.getRunningTestCount(user.userId);
+    
+    // 获取运行中的测试数量
+    let runningTests = 0;
+    try {
+      const result = await query(
+        "SELECT COUNT(*) as count FROM test_history WHERE user_id = $1 AND status = 'running'",
+        [user.userId]
+      );
+      runningTests = parseInt(result.rows[0]?.count || 0);
+    } catch (error) {
+      console.error('获取运行测试数量失败:', error);
+    }
+
     const todayTests = await this.getTodayTestCount(user.userId);
 
     return {
@@ -481,6 +557,89 @@ class TestBusinessService {
         todayTests: quota.maxTestsPerDay > 0 ? quota.maxTestsPerDay - todayTests : -1
       }
     };
+  }
+
+  /**
+   * 保存测试结果
+   */
+  async saveTestResults(userId, testId, results) {
+    try {
+      // 计算总体评分
+      const overallScore = this.calculateOverallScore(results);
+      
+      // 计算测试时长
+      const durationResult = await query(
+        'SELECT started_at FROM test_history WHERE test_id = $1',
+        [testId]
+      );
+      
+      let duration = 0;
+      if (durationResult.rows.length > 0 && durationResult.rows[0].started_at) {
+        const startTime = new Date(durationResult.rows[0].started_at);
+        duration = Math.floor((Date.now() - startTime.getTime()) / 1000);
+      }
+
+      // 更新测试记录
+      await query(`
+        UPDATE test_history 
+        SET 
+          status = 'completed',
+          results = $1,
+          completed_at = NOW(),
+          duration = $2,
+          overall_score = $3
+        WHERE test_id = $4 AND user_id = $5
+      `, [
+        JSON.stringify(results),
+        duration,
+        overallScore,
+        testId,
+        userId
+      ]);
+
+      console.log(`✅ 测试结果已保存: ${testId}`);
+      return true;
+    } catch (error) {
+      console.error('保存测试结果失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 计算总体评分
+   */
+  calculateOverallScore(results) {
+    if (!results) return 0;
+
+    // 如果结果中已有评分
+    if (results.overallScore !== undefined) {
+      return results.overallScore;
+    }
+
+    // 根据不同指标计算评分
+    if (results.metrics) {
+      const metrics = results.metrics;
+      
+      // 计算成功率
+      const successRate = metrics.totalRequests > 0
+        ? ((metrics.totalRequests - (metrics.failedRequests || 0)) / metrics.totalRequests) * 100
+        : 0;
+
+      // 计算性能得分(基于响应时间)
+      let performanceScore = 100;
+      if (metrics.avgResponseTime) {
+        if (metrics.avgResponseTime < 100) performanceScore = 100;
+        else if (metrics.avgResponseTime < 500) performanceScore = 80;
+        else if (metrics.avgResponseTime < 1000) performanceScore = 60;
+        else if (metrics.avgResponseTime < 2000) performanceScore = 40;
+        else performanceScore = 20;
+      }
+
+      // 综合评分
+      return Math.round((successRate * 0.7 + performanceScore * 0.3));
+    }
+
+    return 50; // 默认评分
   }
 }
 
