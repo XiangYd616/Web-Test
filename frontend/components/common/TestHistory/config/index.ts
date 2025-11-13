@@ -9,6 +9,10 @@ import seoTestConfig from './seoTestConfig';
 import apiTestConfig from './apiTestConfig';
 import performanceTestConfig from './performanceTestConfig';
 import securityTestConfig from './securityTestConfig';
+import accessibilityTestConfig from './accessibilityTestConfig';
+import compatibilityTestConfig from './compatibilityTestConfig';
+import databaseTestConfig from './databaseTestConfig';
+import networkTestConfig from './networkTestConfig';
 
 /**
  * 配置映射表
@@ -20,11 +24,10 @@ export const configMap: Record<string, TestHistoryConfig> = {
   api: apiTestConfig,
   performance: performanceTestConfig,
   security: securityTestConfig,
-  // 其他配置将在后续添加
-  // accessibility: accessibilityTestConfig,
-  // compatibility: compatibilityTestConfig,
-  // database: databaseTestConfig,
-  // network: networkTestConfig,
+  accessibility: accessibilityTestConfig,
+  compatibility: compatibilityTestConfig,
+  database: databaseTestConfig,
+  network: networkTestConfig,
 };
 
 /**
@@ -60,6 +63,10 @@ export {
   apiTestConfig,
   performanceTestConfig,
   securityTestConfig,
+  accessibilityTestConfig,
+  compatibilityTestConfig,
+  databaseTestConfig,
+  networkTestConfig,
 };
 
 // 默认导出配置映射
