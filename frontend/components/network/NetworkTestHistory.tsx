@@ -6,27 +6,29 @@
  */
 
 import React, { forwardRef } from 'react';
-import TestHistory from '../common/TestHistory';
-import type { TestHistoryItem } from '../common/TestHistory';
+import { TestHistory } from '../common/TestHistory/TestHistory';
+import { networkTestConfig } from '../common/TestHistory/config';
+import type { TestRecord } from '../common/TestHistory/types';
 
 interface NetworkTestHistoryProps {
-  onSelectTest?: (test: TestHistoryItem) => void;
-  onTestRerun?: (test: TestHistoryItem) => void;
+  onSelectTest?: (test: TestRecord) => void;
+  onTestRerun?: (test: TestRecord) => void;
   onTestDelete?: (testId: string) => void;
+  className?: string;
 }
 
 /**
  * NetworkTestHistory - 网络测试历史记录组件
- * 使用通用 TestHistory 组件，传入 testType="network"
+ * 使用配置驡动的 TestHistory 组件
  */
 export const NetworkTestHistory = forwardRef<any, NetworkTestHistoryProps>(
-  (props, ref) => {
+  ({ onSelectTest, onTestRerun, onTestDelete, className }, ref) => {
     return (
       <TestHistory
-        testType="network"
-        title="网络测试历史"
-        description="查看和管理网络测试记录"
-        {...props}
+        config={networkTestConfig}
+        onRecordClick={onSelectTest}
+        onRecordDelete={onTestDelete}
+        className={className}
       />
     );
   }

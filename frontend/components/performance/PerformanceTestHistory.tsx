@@ -6,27 +6,29 @@
  */
 
 import React, { forwardRef } from 'react';
-import TestHistory from '../common/TestHistory';
-import type { TestHistoryItem } from '../common/TestHistory';
+import { TestHistory } from '../common/TestHistory/TestHistory';
+import { performanceTestConfig } from '../common/TestHistory/config';
+import type { TestRecord } from '../common/TestHistory/types';
 
 interface PerformanceTestHistoryProps {
-  onSelectTest?: (test: TestHistoryItem) => void;
-  onTestRerun?: (test: TestHistoryItem) => void;
+  onSelectTest?: (test: TestRecord) => void;
+  onTestRerun?: (test: TestRecord) => void;
   onTestDelete?: (testId: string) => void;
+  className?: string;
 }
 
 /**
  * PerformanceTestHistory - 性能测试历史记录组件
- * 使用通用 TestHistory 组件，传入 testType="performance"
+ * 使用配置驱动的 TestHistory 组件
  */
 export const PerformanceTestHistory = forwardRef<any, PerformanceTestHistoryProps>(
-  (props, ref) => {
+  ({ onSelectTest, onTestRerun, onTestDelete, className }, ref) => {
     return (
       <TestHistory
-        testType="performance"
-        title="性能测试历史"
-        description="查看和管理性能测试记录"
-        {...props}
+        config={performanceTestConfig}
+        onRecordClick={onSelectTest}
+        onRecordDelete={onTestDelete}
+        className={className}
       />
     );
   }

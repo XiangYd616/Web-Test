@@ -6,27 +6,29 @@
  */
 
 import React, { forwardRef } from 'react';
-import TestHistory from '../common/TestHistory';
-import type { TestHistoryItem } from '../common/TestHistory';
+import { TestHistory } from '../common/TestHistory/TestHistory';
+import { compatibilityTestConfig } from '../common/TestHistory/config';
+import type { TestRecord } from '../common/TestHistory/types';
 
 interface CompatibilityTestHistoryProps {
-  onSelectTest?: (test: TestHistoryItem) => void;
-  onTestRerun?: (test: TestHistoryItem) => void;
+  onSelectTest?: (test: TestRecord) => void;
+  onTestRerun?: (test: TestRecord) => void;
   onTestDelete?: (testId: string) => void;
+  className?: string;
 }
 
 /**
  * CompatibilityTestHistory - 兼容性测试历史记录组件
- * 使用通用 TestHistory 组件，传入 testType="compatibility"
+ * 使用配置驱动的 TestHistory 组件
  */
 export const CompatibilityTestHistory = forwardRef<any, CompatibilityTestHistoryProps>(
-  (props, ref) => {
+  ({ onSelectTest, onTestRerun, onTestDelete, className }, ref) => {
     return (
       <TestHistory
-        testType="compatibility"
-        title="兼容性测试历史"
-        description="查看和管理兼容性测试记录"
-        {...props}
+        config={compatibilityTestConfig}
+        onRecordClick={onSelectTest}
+        onRecordDelete={onTestDelete}
+        className={className}
       />
     );
   }
