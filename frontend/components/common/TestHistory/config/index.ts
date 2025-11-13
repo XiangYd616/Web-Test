@@ -6,6 +6,9 @@
 import { TestHistoryConfig } from '../types';
 import stressTestConfig from './stressTestConfig';
 import seoTestConfig from './seoTestConfig';
+import apiTestConfig from './apiTestConfig';
+import performanceTestConfig from './performanceTestConfig';
+import securityTestConfig from './securityTestConfig';
 
 /**
  * 配置映射表
@@ -14,11 +17,14 @@ import seoTestConfig from './seoTestConfig';
 export const configMap: Record<string, TestHistoryConfig> = {
   stress: stressTestConfig,
   seo: seoTestConfig,
+  api: apiTestConfig,
+  performance: performanceTestConfig,
+  security: securityTestConfig,
   // 其他配置将在后续添加
-  // api: apiTestConfig,
-  // performance: performanceTestConfig,
-  // security: securityTestConfig,
-  // website: websiteTestConfig,
+  // accessibility: accessibilityTestConfig,
+  // compatibility: compatibilityTestConfig,
+  // database: databaseTestConfig,
+  // network: networkTestConfig,
 };
 
 /**
@@ -48,7 +54,13 @@ export function getSupportedTestTypes(): string[] {
 }
 
 // 导出配置
-export { stressTestConfig, seoTestConfig };
+export { 
+  stressTestConfig, 
+  seoTestConfig,
+  apiTestConfig,
+  performanceTestConfig,
+  securityTestConfig,
+};
 
 // 默认导出配置映射
 export default configMap;
