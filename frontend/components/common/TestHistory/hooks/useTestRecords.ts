@@ -20,7 +20,16 @@ interface UseTestRecordsReturn {
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const useTestRecords = (): UseTestRecordsReturn => {
+/**
+ * useTestRecords Hook 参数
+ */
+interface UseTestRecordsOptions {
+  apiEndpoint?: string;  // API端点路径
+}
+
+export const useTestRecords = (options: UseTestRecordsOptions = {}): UseTestRecordsReturn => {
+  const { apiEndpoint = '/api/test/history' } = options;
+  
   const [records, setRecords] = useState<TestRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -62,7 +71,6 @@ export const useTestRecords = (): UseTestRecordsReturn => {
 
       // 构建查询参数
       const queryParams = new URLSearchParams();
-      queryParams.append('type', 'stress');
       if (params.page) queryParams.append('page', params.page.toString());
       if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
       if (params.search) queryParams.append('search', params.search);
@@ -72,7 +80,7 @@ export const useTestRecords = (): UseTestRecordsReturn => {
       if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
       // 创建请求Promise
-      const requestPromise = fetch(`/api/test/history?${queryParams.toString()}`, {
+      const requestPromise = fetch(`${apiEndpoint}?${queryParams.toString()}`, {
         headers: {
           ...(localStorage.getItem('auth_token') ? {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
@@ -124,7 +132,7 @@ export const useTestRecords = (): UseTestRecordsReturn => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [apiEndpoint]);
 
   return {
     records,
