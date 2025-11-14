@@ -35,11 +35,14 @@ import { useExport } from './hooks/useExport';
 import { HistoryHeader } from './components/HistoryHeader';
 import { FilterBar } from './components/FilterBar';
 import { EmptyState } from './components/EmptyState';
+import { ResponsiveTable } from './components/ResponsiveTable';
+import { useCommonMediaQueries } from './hooks/useResponsive';
+import { useFocusTrap, useAriaLiveAnnouncer, useHighContrast, useReducedMotion, generateAriaLabel } from './hooks/useAccessibility';
 
 /**
  * 状态徽章组件
  */
-const StatusBadge: React.FC<{ status: string; formatter?: (status: string) => string }> = ({ 
+const StatusBadge: React.FC<{ status: string; formatter?: (status: string) => string }> = React.memo(({ 
   status, 
   formatter 
 }) => {
@@ -60,7 +63,7 @@ const StatusBadge: React.FC<{ status: string; formatter?: (status: string) => st
       {displayText}
     </span>
   );
-};
+});
 
 /**
  * 表格行组件
@@ -74,7 +77,7 @@ const TableRow: React.FC<{
   onDelete: (id: string) => void;
   customActions?: any[];
   formatters?: any;
-}> = ({ 
+}> = React.memo(({ 
   record, 
   columns, 
   isSelected, 
@@ -185,7 +188,7 @@ const TableRow: React.FC<{
       </td>
     </tr>
   );
-};
+});
 
 /**
  * 删除确认对话框组件
@@ -194,16 +197,26 @@ const DeleteDialog: React.FC<{
   state: DeleteDialogState;
   onConfirm: () => void;
   onCancel: () => void;
-}> = ({ state, onConfirm, onCancel }) => {
+  focusTrapRef?: React.RefObject<HTMLDivElement>;
+}> = ({ state, onConfirm, onCancel, focusTrapRef }) => {
   if (!state.isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 border border-gray-700">
-        <h3 className="text-lg font-semibold text-white mb-2">
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-dialog-description"
+    >
+      <div 
+        ref={focusTrapRef}
+        className="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 border border-gray-700"
+      >
+        <h3 id="delete-dialog-title" className="text-lg font-semibold text-white mb-2">
           确认删除
         </h3>
-        <p className="text-gray-300 mb-6">
+        <p id="delete-dialog-description" className="text-gray-300 mb-6">
           {state.type === 'single' 
             ? `确定要删除测试记录 "${state.recordName}" 吗?` 
             : `确定要删除选中的 ${state.recordNames?.length || 0} 条测试记录吗?`}
@@ -263,7 +276,16 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
   } = useFilters();
   const { currentPage, pageSize, totalPages, startRecord, endRecord, goToPage, changePageSize } = usePagination(totalRecords, config.defaultPageSize || 10);
   const { selectedIds, isSelected, selectAll, toggleSelect, clearSelection } = useSelection();
-  const { exportToJson, exportToCsv } = useExport(config.testType);
+const { exportToJson, exportToCsv } = useExport(config.testType);
+
+  // 响应式状态
+  const { isMobile, isTablet } = useCommonMediaQueries();
+
+  // 无障碍支持
+  const { announcement, announce } = useAriaLiveAnnouncer();
+  const { isHighContrast } = useHighContrast();
+  const { prefersReducedMotion } = useReducedMotion();
+  const dialogFocusTrapRef = useFocusTrap(deleteDialogState.isOpen);
   
   // 删除对话框状态
   const [deleteDialogState, setDeleteDialogState] = useState<DeleteDialogState>({
@@ -361,6 +383,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
         // 更新本地状态
         setRecords(prev => prev.filter(r => r.id !== deleteDialogState.recordId));
         Logger.info('成功删除测试记录');
+        announce('成功删除测试记录');
       } else if (deleteDialogState.type === 'batch') {
         // 批量删除
         if (onBatchDelete) {
@@ -385,6 +408,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
         setRecords(prev => prev.filter(r => !selectedIds.includes(r.id)));
         clearSelection();
         Logger.info(`成功删除 ${selectedIds.length} 条测试记录`);
+        announce(`成功删除 ${selectedIds.length} 条测试记录`);
       }
 
       // 关闭对话框
@@ -408,11 +432,12 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
   const handleExport = useCallback(async (format: 'json' | 'csv') => {
     try {
       if (format === 'json') {
-        await exportToJson(records);
+      await exportToJson(records);
       } else {
         await exportToCsv(records, config.columns);
       }
       Logger.info(`成功导出 ${format.toUpperCase()} 格式数据`);
+      announce(`成功导出 ${format.toUpperCase()} 格式数据`);
     } catch (error) {
       Logger.error('导出失败:', error);
       alert('导出失败,请重试');
@@ -425,7 +450,11 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
   const features = config.features || {};
 
   return (
-    <div className={`test-history-container ${className}`}>
+    <div 
+      className={`test-history-container ${className}`}
+      role="region"
+      aria-label={`${config.title || '测试历史'}记录列表`}
+    >
       {/* 头部 */}
       <HistoryHeader
         loading={loading}
@@ -484,70 +513,32 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
           </div>
         )}
 
-        {/* 表格 */}
+{/* 表格 */}
         {showEmptyState ? (
           <EmptyState hasFilters={hasFilters} />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-700/30 border-b border-gray-700/50">
-                <tr>
-                  <th className="px-4 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={records.length > 0 && selectedIds.length === records.length}
-                      onChange={() => selectAll(records.map(r => r.id))}
-                      className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-blue-500 focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
-                      aria-label="全选"
-                    />
-                  </th>
-                  {config.columns.map((column) => (
-                    <th
-                      key={column.key}
-                      className={`px-4 py-3 text-sm font-medium text-gray-300 ${
-                        column.align === 'right' ? 'text-right' :
-                        column.align === 'center' ? 'text-center' :
-                        'text-left'
-                      }`}
-                      style={{ width: column.width }}
-                    >
-                      {column.title}
-                    </th>
-                  ))}
-                  <th className="px-4 py-3 text-right text-sm font-medium text-gray-300">
-                    操作
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700/30">
-                {loading ? (
-                  <tr>
-                    <td colSpan={config.columns.length + 2} className="px-4 py-12 text-center">
-                      <div className="inline-flex items-center gap-3 text-gray-400">
-                        <div className="w-5 h-5 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
-                        <span>加载中...</span>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  records.map((record) => (
-                    <TableRow
-                      key={record.id}
-                      record={record}
-                      columns={config.columns}
-                      isSelected={isSelected(record.id)}
-                      onSelect={toggleSelect}
-                      onView={handleViewDetails}
-                      onDelete={handleDeleteSingle}
-                      customActions={config.customActions}
-                      formatters={config.formatters}
-                    />
-                  ))
-                )}
-              </tbody>
-            </table>
+        ) : loading ? (
+          <div className="px-4 py-12 text-center">
+            <div className="inline-flex items-center gap-3 text-gray-400">
+              <div className="w-5 h-5 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
+              <span>加载中...</span>
+            </div>
           </div>
-        )}
+        ) : (
+          <ResponsiveTable
+            records={records}
+            columns={config.columns}
+            selectedIds={selectedIds}
+            isMobile={features.responsive !== false && isMobile}
+            isTablet={features.responsive !== false && isTablet}
+            onSelectAll={(ids) => selectAll(ids)}
+            onToggleSelect={toggleSelect}
+            onView={handleViewDetails}
+            onDelete={handleDeleteSingle}
+            formatters={config.formatters}
+            customActions={config.customActions}
+            StatusBadge={StatusBadge}
+          />
+        )
 
         {/* 分页 */}
         {!showEmptyState && totalPages > 1 && (
@@ -589,11 +580,22 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
         )}
       </div>
 
+      {/* ARIA实时通知 */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement}
+      </div>
+
       {/* 删除确认对话框 */}
       <DeleteDialog
         state={deleteDialogState}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+        focusTrapRef={dialogFocusTrapRef}
       />
     </div>
   );

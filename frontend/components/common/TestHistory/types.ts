@@ -79,6 +79,9 @@ export interface ColumnConfig {
   filterable?: boolean;                            // 是否可筛选
   align?: 'left' | 'center' | 'right';            // 对齐方式
   formatter?: (value: any, record?: TestRecord) => string | React.ReactNode;  // 格式化器
+  hideOnMobile?: boolean;                          // 移动端是否隐藏 (Phase 5)
+  hideOnTablet?: boolean;                          // 平板端是否隐藏 (Phase 5)
+  priority?: number;                               // 响应式显示优先级 (Phase 5)
 }
 
 /**
@@ -125,6 +128,8 @@ export interface FeaturesConfig {
   rerun?: boolean;                   // 是否启用重新运行
   search?: boolean;                  // 是否启用搜索
   advancedFilter?: boolean;          // 是否启用高级筛选
+  responsive?: boolean;              // 是否启用响应式布局 (Phase 5)
+  touchOptimized?: boolean;          // 是否启用触摸优化 (Phase 5)
 }
 
 /**
