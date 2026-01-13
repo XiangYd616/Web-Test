@@ -78,27 +78,6 @@ npm run dev
 
 ## 📋 常用命令
 
-### 🛠️ 脚本管理工具（推荐）
-
-```bash
-# 查看所有可用命令
-node scripts/script-manager.cjs help
-
-# 开发相关
-node scripts/script-manager.cjs dev          # 启动前端（安全模式）
-node scripts/script-manager.cjs fullstack   # 启动前后端
-node scripts/script-manager.cjs build       # 构建项目
-
-# 代码质量
-node scripts/script-manager.cjs check       # 完整代码检查
-node scripts/script-manager.cjs lint        # 代码规范检查
-node scripts/script-manager.cjs format      # 代码格式化
-
-# 项目维护
-node scripts/script-manager.cjs cleanup     # 项目清理
-node scripts/script-manager.cjs status      # 项目状态
-```
-
 ### 📦 npm 脚本
 
 ```bash
@@ -175,12 +154,6 @@ Test-Web/
 │   │   └── utils/           # 工具函数
 │   └── package.json         # 前端依赖
 ├── 🔧 backend/              # Node.js后端服务
-├── 📜 scripts/              # 项目脚本（已整理）
-│   ├── core/               # 核心脚本
-│   ├── deployment/         # 部署脚本
-│   ├── development/        # 开发脚本
-│   ├── maintenance/        # 维护脚本
-│   └── utils/              # 工具脚本
 └── 📚 docs/                # 项目文档
 ```
 
@@ -238,5 +211,3 @@ MIT License
 ---
 
 **🎉 项目已完全配置好，可以直接开始开发！**
-
-推荐使用：`node scripts/script-manager.cjs dev` 🚀

@@ -12,12 +12,14 @@
 ### 安装步骤
 
 1. **克隆项目**
+
    ```bash
    git clone https://github.com/your-org/test-web-platform.git
    cd test-web-platform
    ```
 
 2. **安装依赖**
+
    ```bash
    npm install
    cd backend && npm install
@@ -25,10 +27,11 @@
    ```
 
 3. **启动服务**
+
    ```bash
    # 启动后端服务
    cd backend && npm run dev
-   
+
    # 启动前端服务 (新终端)
    cd frontend && npm run dev
    ```
@@ -44,28 +47,30 @@
 **适用场景**: REST API端点测试、接口性能验证、认证测试
 
 **基础用法**:
+
 ```javascript
 const config = {
   url: 'https://api.example.com/users',
   method: 'GET',
-  timeout: 10000
+  timeout: 10000,
 };
 
 const result = await apiEngine.runApiTest(config);
 ```
 
 **高级用法**:
+
 ```javascript
 const config = {
   url: 'https://api.example.com/users',
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer your-token'
+    Authorization: 'Bearer your-token',
   },
   body: JSON.stringify({
     name: 'John Doe',
-    email: 'john@example.com'
+    email: 'john@example.com',
   }),
   validation: {
     statusCode: 201,
@@ -74,14 +79,15 @@ const config = {
       type: 'object',
       properties: {
         id: { type: 'number' },
-        name: { type: 'string' }
-      }
-    }
-  }
+        name: { type: 'string' },
+      },
+    },
+  },
 };
 ```
 
 **最佳实践**:
+
 - 设置合理的超时时间 (API测试建议10-30秒)
 - 使用环境变量管理敏感信息 (API密钥、token)
 - 为不同环境配置不同的基础URL
@@ -92,31 +98,34 @@ const config = {
 **适用场景**: 网站性能评估、Core Web Vitals测量、移动端性能优化
 
 **基础用法**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
   categories: ['performance'],
-  device: 'desktop'
+  device: 'desktop',
 };
 
 const result = await performanceEngine.runPerformanceTest(config);
 ```
 
 **移动端测试**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
   categories: ['performance', 'accessibility'],
   device: 'mobile',
   throttling: {
-    rttMs: 150,        // 3G网络延迟
+    rttMs: 150, // 3G网络延迟
     throughputKbps: 1600, // 3G网络速度
-    cpuSlowdownMultiplier: 4 // CPU减速4倍
-  }
+    cpuSlowdownMultiplier: 4, // CPU减速4倍
+  },
 };
 ```
 
 **最佳实践**:
+
 - 在不同网络条件下测试 (WiFi, 3G, 4G)
 - 同时测试桌面和移动端性能
 - 关注Core Web Vitals指标 (LCP, FID, CLS)
@@ -127,25 +136,28 @@ const config = {
 **适用场景**: SSL证书检查、安全头部验证、基础漏洞扫描
 
 **基础用法**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
-  checks: ['ssl', 'headers']
+  checks: ['ssl', 'headers'],
 };
 
 const result = await securityEngine.runSecurityTest(config);
 ```
 
 **全面安全检查**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
   checks: ['ssl', 'headers', 'vulnerabilities', 'cookies', 'redirects'],
-  maxRedirects: 3
+  maxRedirects: 3,
 };
 ```
 
 **最佳实践**:
+
 - 定期检查SSL证书过期时间
 - 验证所有安全头部配置
 - 监控重定向链安全性
@@ -156,24 +168,35 @@ const config = {
 **适用场景**: 搜索引擎优化检查、Meta标签验证、结构化数据测试
 
 **基础用法**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
-  checks: ['meta', 'headings', 'images']
+  checks: ['meta', 'headings', 'images'],
 };
 
 const result = await seoEngine.runSeoTest(config);
 ```
 
 **全面SEO审计**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
-  checks: ['meta', 'headings', 'images', 'links', 'structured-data', 'robots', 'sitemap']
+  checks: [
+    'meta',
+    'headings',
+    'images',
+    'links',
+    'structured-data',
+    'robots',
+    'sitemap',
+  ],
 };
 ```
 
 **最佳实践**:
+
 - 确保每个页面都有唯一的title和description
 - 使用合理的标题层次结构 (H1-H6)
 - 为所有图片添加alt属性
@@ -184,28 +207,31 @@ const config = {
 **适用场景**: 负载测试、并发性能验证、系统容量规划
 
 **基础负载测试**:
+
 ```javascript
 const config = {
   url: 'https://api.example.com/endpoint',
-  concurrency: 10,    // 10个并发用户
-  requests: 100,      // 总共100个请求
-  timeout: 30000
+  concurrency: 10, // 10个并发用户
+  requests: 100, // 总共100个请求
+  timeout: 30000,
 };
 
 const result = await stressEngine.runStressTest(config);
 ```
 
 **时间基础测试**:
+
 ```javascript
 const config = {
   url: 'https://api.example.com/endpoint',
-  concurrency: 20,    // 20个并发用户
-  duration: 60,       // 持续60秒
-  rampUp: 10         // 10秒内逐步增加到最大并发
+  concurrency: 20, // 20个并发用户
+  duration: 60, // 持续60秒
+  rampUp: 10, // 10秒内逐步增加到最大并发
 };
 ```
 
 **最佳实践**:
+
 - 从小并发数开始，逐步增加
 - 监控服务器资源使用情况
 - 测试不同类型的请求 (GET, POST, PUT)
@@ -216,25 +242,28 @@ const config = {
 **适用场景**: 服务器健康检查、网络连接验证、DNS解析测试
 
 **基础用法**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
-  checks: ['connectivity', 'dns', 'ssl']
+  checks: ['connectivity', 'dns', 'ssl'],
 };
 
 const result = await infrastructureEngine.runInfrastructureTest(config);
 ```
 
 **端口扫描**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
   checks: ['connectivity', 'ports'],
-  ports: [80, 443, 8080, 3000]
+  ports: [80, 443, 8080, 3000],
 };
 ```
 
 **最佳实践**:
+
 - 定期检查关键服务端口状态
 - 监控DNS解析性能
 - 验证SSL证书配置
@@ -245,17 +274,19 @@ const config = {
 **适用场景**: 可访问性审计、用户体验评估、交互功能测试
 
 **可访问性测试**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
   checks: ['accessibility'],
-  device: 'desktop'
+  device: 'desktop',
 };
 
 const result = await uxEngine.runUxTest(config);
 ```
 
 **交互测试**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
@@ -263,12 +294,13 @@ const config = {
   interactions: [
     { type: 'click', selector: '.menu-button' },
     { type: 'type', selector: 'input[name="search"]', value: 'test' },
-    { type: 'scroll', selector: '.content' }
-  ]
+    { type: 'scroll', selector: '.content' },
+  ],
 };
 ```
 
 **最佳实践**:
+
 - 确保键盘导航功能完整
 - 验证屏幕阅读器兼容性
 - 测试不同设备尺寸的用户体验
@@ -279,29 +311,32 @@ const config = {
 **适用场景**: 跨浏览器兼容性验证、响应式设计测试、功能兼容性检查
 
 **多浏览器测试**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
   browsers: ['chromium', 'firefox', 'webkit'],
   devices: ['desktop', 'mobile'],
-  checks: ['rendering', 'javascript']
+  checks: ['rendering', 'javascript'],
 };
 
 const result = await compatibilityEngine.runCompatibilityTest(config);
 ```
 
 **响应式测试**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
   browsers: ['chromium'],
   devices: ['desktop', 'tablet', 'mobile'],
   checks: ['rendering', 'responsive'],
-  screenshots: true
+  screenshots: true,
 };
 ```
 
 **最佳实践**:
+
 - 测试主流浏览器 (Chrome, Firefox, Safari)
 - 验证移动端和桌面端兼容性
 - 检查JavaScript功能在不同浏览器中的表现
@@ -312,28 +347,31 @@ const config = {
 **适用场景**: 整体网站健康检查、多页面分析、综合质量评估
 
 **基础健康检查**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
   checks: ['health', 'seo'],
-  maxPages: 5
+  maxPages: 5,
 };
 
 const result = await websiteEngine.runWebsiteTest(config);
 ```
 
 **全面网站审计**:
+
 ```javascript
 const config = {
   url: 'https://example.com',
   checks: ['health', 'seo', 'performance', 'security', 'accessibility'],
-  depth: 2,              // 检查2层深度的页面
-  maxPages: 20,          // 最多检查20个页面
-  followExternalLinks: false
+  depth: 2, // 检查2层深度的页面
+  maxPages: 20, // 最多检查20个页面
+  followExternalLinks: false,
 };
 ```
 
 **最佳实践**:
+
 - 定期进行全站健康检查
 - 监控关键页面的质量指标
 - 分析页面间的链接关系
@@ -415,27 +453,27 @@ module.exports = {
   api: {
     development: {
       timeout: 10000,
-      retries: 3
+      retries: 3,
     },
     production: {
       timeout: 30000,
-      retries: 1
-    }
+      retries: 1,
+    },
   },
-  
+
   // 性能测试模板
   performance: {
     desktop: {
       device: 'desktop',
       categories: ['performance', 'seo'],
-      throttling: { rttMs: 40, throughputKbps: 10240 }
+      throttling: { rttMs: 40, throughputKbps: 10240 },
     },
     mobile: {
       device: 'mobile',
       categories: ['performance', 'accessibility'],
-      throttling: { rttMs: 150, throughputKbps: 1600 }
-    }
-  }
+      throttling: { rttMs: 150, throughputKbps: 1600 },
+    },
+  },
 };
 ```
 
@@ -457,18 +495,18 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         run: |
           npm install
           cd backend && npm install
-      
+
       - name: Run API tests
         run: cd backend && npm run test:api
-      
+
       - name: Run performance tests
         run: cd backend && npm run test:performance
-      
+
       - name: Generate reports
         run: cd backend && npm run test:report
 ```
@@ -478,19 +516,18 @@ jobs:
 使用 cron 作业定期执行测试：
 
 ```javascript
-// scripts/scheduled-tests.js
 const cron = require('node-cron');
 
 // 每天凌晨2点执行全面测试
 cron.schedule('0 2 * * *', async () => {
   console.log('开始定时测试...');
-  
+
   const tests = [
     { engine: 'performance', config: { url: 'https://example.com' } },
     { engine: 'security', config: { url: 'https://example.com' } },
-    { engine: 'seo', config: { url: 'https://example.com' } }
+    { engine: 'seo', config: { url: 'https://example.com' } },
   ];
-  
+
   for (const test of tests) {
     try {
       const result = await runTest(test.engine, test.config);
@@ -511,7 +548,7 @@ cron.schedule('0 2 * * *', async () => {
 const testMetrics = {
   startTime: Date.now(),
   memoryUsage: process.memoryUsage(),
-  cpuUsage: process.cpuUsage()
+  cpuUsage: process.cpuUsage(),
 };
 
 // 测试完成后记录指标
@@ -519,7 +556,7 @@ const endMetrics = {
   endTime: Date.now(),
   duration: Date.now() - testMetrics.startTime,
   memoryUsage: process.memoryUsage(),
-  cpuUsage: process.cpuUsage(testMetrics.cpuUsage)
+  cpuUsage: process.cpuUsage(testMetrics.cpuUsage),
 };
 ```
 
@@ -527,7 +564,7 @@ const endMetrics = {
 
 ```javascript
 // 生成HTML报告
-const generateReport = (results) => {
+const generateReport = results => {
   const html = `
     <!DOCTYPE html>
     <html>
@@ -550,7 +587,7 @@ const generateReport = (results) => {
     </body>
     </html>
   `;
-  
+
   return html;
 };
 ```
@@ -560,20 +597,22 @@ const generateReport = (results) => {
 ### 常见问题
 
 1. **Chrome启动失败**
+
    ```bash
    # 安装Chrome依赖
    sudo apt-get install -y gconf-service libasound2 libatk1.0-0 libc6 libcairo2
-   
+
    # 设置Chrome路径
    export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
    ```
 
 2. **内存不足**
+
    ```javascript
    // 限制并发数
    const config = {
-     maxConcurrentTests: 2,  // 减少并发数
-     timeout: 60000          // 增加超时时间
+     maxConcurrentTests: 2, // 减少并发数
+     timeout: 60000, // 增加超时时间
    };
    ```
 
@@ -583,7 +622,7 @@ const generateReport = (results) => {
    const config = {
      timeout: 60000,
      retries: 3,
-     retryDelay: 5000
+     retryDelay: 5000,
    };
    ```
 
@@ -609,15 +648,15 @@ class CustomTestEngine {
   constructor() {
     this.name = 'custom';
   }
-  
+
   validateConfig(config) {
     // 配置验证逻辑
   }
-  
+
   async checkAvailability() {
     // 可用性检查逻辑
   }
-  
+
   async runCustomTest(config) {
     // 自定义测试逻辑
   }
@@ -640,10 +679,10 @@ const pipeline = [
   validateResults,
   transformResults,
   saveResults,
-  sendNotifications
+  sendNotifications,
 ];
 
-const processResults = async (results) => {
+const processResults = async results => {
   for (const processor of pipeline) {
     results = await processor(results);
   }
@@ -680,4 +719,4 @@ const processResults = async (results) => {
 
 ---
 
-*使用指南版本: 1.0.0 | 最后更新: 2024-01-01*
+_使用指南版本: 1.0.0 | 最后更新: 2024-01-01_

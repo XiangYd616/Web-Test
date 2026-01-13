@@ -5,7 +5,9 @@
 ## 🎯 概述
 
 OAuth2集成已完成以下功能：
-- ✅ 数据库表创建 (`user_oauth_accounts`, `oauth_applications`, `oauth_sessions`)
+
+- ✅ 数据库表创建 (`user_oauth_accounts`, `oauth_applications`,
+  `oauth_sessions`)
 - ✅ 后端API路由 (`/api/auth/oauth/*`)
 - ✅ 安全状态验证和会话管理
 - ✅ 用户账户自动创建和关联
@@ -15,16 +17,19 @@ OAuth2集成已完成以下功能：
 ## 📋 可用的API端点
 
 ### 基础功能
+
 - `GET /api/auth/oauth/providers` - 获取可用的OAuth提供商
 - `GET /api/auth/oauth/{provider}/authorize` - 生成授权URL
 - `GET /api/auth/oauth/{provider}/callback` - 处理OAuth回调
 
 ### 用户管理
+
 - `GET /api/auth/oauth/accounts` - 获取用户关联的OAuth账户
 - `POST /api/auth/oauth/{provider}/link` - 关联OAuth账户到当前用户
 - `DELETE /api/auth/oauth/{provider}/unlink` - 解绑OAuth账户
 
 ### 管理功能
+
 - `GET /api/auth/oauth/config/status` - 获取OAuth配置状态（仅管理员）
 
 ## ⚙️ 配置OAuth提供商
@@ -51,12 +56,14 @@ GOOGLE_REDIRECT_URI=http://localhost:3001/api/auth/oauth/google/callback
 
 ### 3. GitHub OAuth2 配置
 
-1. 访问 [GitHub Settings > Developer settings](https://github.com/settings/developers)
+1. 访问
+   [GitHub Settings > Developer settings](https://github.com/settings/developers)
 2. 点击 "New OAuth App"
 3. 填写应用信息：
    - Application name: `Test-Web App`
    - Homepage URL: `http://localhost:5174`
-   - Authorization callback URL: `http://localhost:3001/api/auth/oauth/github/callback`
+   - Authorization callback URL:
+     `http://localhost:3001/api/auth/oauth/github/callback`
 
 ```env
 GITHUB_CLIENT_ID=your_github_client_id_here
@@ -110,18 +117,6 @@ OAUTH_SESSION_DURATION=86400         # 会话持续时间（秒）
 
 ## 🧪 测试OAuth配置
 
-配置完成后，运行测试脚本验证设置：
-
-```bash
-cd backend
-node scripts/test-oauth.js
-```
-
-成功的测试应该显示：
-```
-🎉 所有测试通过! OAuth2集成准备就绪
-```
-
 ## 🔐 安全注意事项
 
 1. **密钥保护**：
@@ -151,6 +146,7 @@ node scripts/test-oauth.js
 ## 📞 支持
 
 如果遇到问题，请检查：
+
 1. 环境变量是否正确设置
 2. OAuth应用配置是否匹配
 3. 防火墙是否阻止回调请求
@@ -162,7 +158,7 @@ node scripts/test-oauth.js
 
 - [ ] 复制 `.env.oauth.example` 到 `.env.oauth`
 - [ ] 配置Google OAuth2凭据
-- [ ] 配置GitHub OAuth2凭据  
+- [ ] 配置GitHub OAuth2凭据
 - [ ] 配置Microsoft OAuth2凭据
 - [ ] 配置Discord OAuth2凭据
 - [ ] 设置安全密钥
