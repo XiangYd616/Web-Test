@@ -1,9 +1,9 @@
 /**
  * TestHistory - 配置驱动的通用测试历史记录组件
- * 
+ *
  * 文件路径: frontend/components/common/TestHistory/TestHistory.tsx
  * 创建时间: 2025-11-13
- * 
+ *
  * 功能特性:
  * - 配置驱动:通过传入配置对象控制所有行为
  * - 完全可复用:支持所有测试类型(stress, seo, api, performance等)
@@ -11,59 +11,58 @@
  * - 丰富功能:分页、筛选、排序、批量操作、导出等
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
-import { Trash2, Eye, Download, FileJson, FileSpreadsheet } from 'lucide-react';
 import Logger from '@/utils/logger';
+import { Eye, FileJson, FileSpreadsheet, Trash2 } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 // 导入类型定义
-import type { 
-  TestHistoryProps, 
-  TestRecord,
-  DeleteDialogState,
-  ColumnConfig 
-} from './types';
+import type { ColumnConfig, DeleteDialogState, TestHistoryProps, TestRecord } from './types';
 
 // 导入hooks
-import { useTestRecords } from './hooks/useTestRecords';
+import { useExport } from './hooks/useExport';
 import { useFilters } from './hooks/useFilters';
 import { usePagination } from './hooks/usePagination';
 import { useSelection } from './hooks/useSelection';
-import { useDeleteActions } from './hooks/useDeleteActions';
-import { useExport } from './hooks/useExport';
+import { useTestRecords } from './hooks/useTestRecords';
 
 // 导入子组件
-import { HistoryHeader } from './components/HistoryHeader';
-import { FilterBar } from './components/FilterBar';
 import { EmptyState } from './components/EmptyState';
+import { FilterBar } from './components/FilterBar';
+import { HistoryHeader } from './components/HistoryHeader';
 import { ResponsiveTable } from './components/ResponsiveTable';
+import {
+  useAriaLiveAnnouncer,
+  useFocusTrap,
+  useHighContrast,
+  useReducedMotion,
+} from './hooks/useAccessibility';
 import { useCommonMediaQueries } from './hooks/useResponsive';
-import { useFocusTrap, useAriaLiveAnnouncer, useHighContrast, useReducedMotion, generateAriaLabel } from './hooks/useAccessibility';
 
 /**
  * 状态徽章组件
  */
-const StatusBadge: React.FC<{ status: string; formatter?: (status: string) => string }> = React.memo(({ 
-  status, 
-  formatter 
-}) => {
-  const statusColors: Record<string, string> = {
-    idle: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
-    starting: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    running: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    completed: 'bg-green-500/20 text-green-300 border-green-500/30',
-    failed: 'bg-red-500/20 text-red-300 border-red-500/30',
-    cancelled: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-  };
+const StatusBadge: React.FC<{ status: string; formatter?: (status: string) => string }> =
+  React.memo(({ status, formatter }) => {
+    const statusColors: Record<string, string> = {
+      idle: 'bg-gray-500/20 text-gray-300 border-gray-500/30',
+      starting: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+      running: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+      completed: 'bg-green-500/20 text-green-300 border-green-500/30',
+      failed: 'bg-red-500/20 text-red-300 border-red-500/30',
+      cancelled: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+    };
 
-  const colorClass = statusColors[status] || 'bg-gray-500/20 text-gray-300 border-gray-500/30';
-  const displayText = formatter ? formatter(status) : status;
+    const colorClass = statusColors[status] || 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+    const displayText = formatter ? formatter(status) : status;
 
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${colorClass}`}>
-      {displayText}
-    </span>
-  );
-});
+    return (
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${colorClass}`}
+      >
+        {displayText}
+      </span>
+    );
+  });
 
 /**
  * 表格行组件
@@ -77,118 +76,123 @@ const TableRow: React.FC<{
   onDelete: (id: string) => void;
   customActions?: any[];
   formatters?: any;
-}> = React.memo(({ 
-  record, 
-  columns, 
-  isSelected, 
-  onSelect, 
-  onView, 
-  onDelete,
-  customActions = [],
-  formatters = {}
-}) => {
-  return (
-    <tr className="hover:bg-gray-700/30 transition-colors duration-150">
-      {/* 复选框列 */}
-      <td className="px-4 py-3 whitespace-nowrap">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={() => onSelect(record.id)}
-          className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-blue-500 focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
-          aria-label={`选择 ${record.testName || record.id}`}
-        />
-      </td>
+}> = React.memo(
+  ({
+    record,
+    columns,
+    isSelected,
+    onSelect,
+    onView,
+    onDelete,
+    customActions = [],
+    formatters = {},
+  }) => {
+    return (
+      <tr className="hover:bg-gray-700/30 transition-colors duration-150">
+        {/* 复选框列 */}
+        <td className="px-4 py-3 whitespace-nowrap">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onSelect(record.id)}
+            className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-blue-500 focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
+            aria-label={`选择 ${record.testName || record.id}`}
+          />
+        </td>
 
-      {/* 数据列 */}
-      {columns.map((column) => {
-        const value = (record as any)[column.key];
-        let displayValue: React.ReactNode = value;
+        {/* 数据列 */}
+        {columns.map(column => {
+          const value = (record as any)[column.key];
+          let displayValue: React.ReactNode = value;
 
-        // 应用列级格式化器
-        if (column.formatter) {
-          displayValue = column.formatter(value, record);
-        }
-        // 应用全局格式化器
-        else if (formatters[column.key]) {
-          displayValue = formatters[column.key](value);
-        }
-        // 特殊处理status列
-        else if (column.key === 'status') {
-          displayValue = <StatusBadge status={value} formatter={formatters.status} />;
-        }
-        // 默认显示
-        else if (value === null || value === undefined) {
-          displayValue = '-';
-        }
+          // 应用列级格式化器
+          if (column.formatter) {
+            displayValue = column.formatter(value, record);
+          }
+          // 应用全局格式化器
+          else if (formatters[column.key]) {
+            displayValue = formatters[column.key](value);
+          }
+          // 特殊处理status列
+          else if (column.key === 'status') {
+            displayValue = <StatusBadge status={value} formatter={formatters.status} />;
+          }
+          // 默认显示
+          else if (value === null || value === undefined) {
+            displayValue = '-';
+          }
 
-        const alignClass = column.align === 'right' ? 'text-right' : 
-                          column.align === 'center' ? 'text-center' : 
-                          'text-left';
+          const alignClass =
+            column.align === 'right'
+              ? 'text-right'
+              : column.align === 'center'
+                ? 'text-center'
+                : 'text-left';
 
-        return (
-          <td 
-            key={column.key} 
-            className={`px-4 py-3 text-sm text-gray-300 ${alignClass}`}
-            style={{ width: column.width }}
-          >
-            {displayValue}
-          </td>
-        );
-      })}
+          return (
+            <td
+              key={column.key}
+              className={`px-4 py-3 text-sm text-gray-300 ${alignClass}`}
+              style={{ width: column.width }}
+            >
+              {displayValue}
+            </td>
+          );
+        })}
 
-      {/* 操作列 */}
-      <td className="px-4 py-3 whitespace-nowrap text-right">
-        <div className="flex items-center justify-end gap-2">
-          {/* 查看详情 */}
-          <button
-            onClick={() => onView(record)}
-            className="p-1.5 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded transition-colors"
-            title="查看详情"
-            aria-label={`查看 ${record.testName || record.id} 的详情`}
-          >
-            <Eye className="w-4 h-4" />
-          </button>
+        {/* 操作列 */}
+        <td className="px-4 py-3 whitespace-nowrap text-right">
+          <div className="flex items-center justify-end gap-2">
+            {/* 查看详情 */}
+            <button
+              onClick={() => onView(record)}
+              className="p-1.5 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded transition-colors"
+              title="查看详情"
+              aria-label={`查看 ${record.testName || record.id} 的详情`}
+            >
+              <Eye className="w-4 h-4" />
+            </button>
 
-          {/* 自定义操作 */}
-          {customActions.map((action) => {
-            const isVisible = !action.visible || action.visible(record);
-            const isDisabled = action.disabled && action.disabled(record);
-            
-            if (!isVisible) return null;
+            {/* 自定义操作 */}
+            {customActions.map(action => {
+              const isVisible = !action.visible || action.visible(record);
+              const isDisabled = action.disabled && action.disabled(record);
 
-            return (
-              <button
-                key={action.key}
-                onClick={() => action.onClick(record)}
-                disabled={isDisabled}
-                className={`p-1.5 rounded transition-colors ${
-                  isDisabled 
-                    ? 'text-gray-500 cursor-not-allowed' 
-                    : 'text-gray-400 hover:text-gray-300 hover:bg-gray-600/30'
-                }`}
-                title={action.label}
-                aria-label={`${action.label}: ${record.testName || record.id}`}
-              >
-                {action.icon || action.label}
-              </button>
-            );
-          })}
+              if (!isVisible) return null;
 
-          {/* 删除 */}
-          <button
-            onClick={() => onDelete(record.id)}
-            className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
-            title="删除"
-            aria-label={`删除 ${record.testName || record.id}`}
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-});
+              return (
+                <button
+                  key={action.key}
+                  onClick={() => action.onClick(record)}
+                  disabled={isDisabled}
+                  className={`p-1.5 rounded transition-colors ${
+                    isDisabled
+                      ? 'text-gray-500 cursor-not-allowed'
+                      : 'text-gray-400 hover:text-gray-300 hover:bg-gray-600/30'
+                  }`}
+                  title={action.label}
+                  aria-label={`${action.label}: ${record.testName || record.id}`}
+                >
+                  {action.icon || action.label}
+                </button>
+              );
+            })}
+
+            {/* 删除 */}
+            <button
+              onClick={() => onDelete(record.id)}
+              className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
+              title="删除"
+              aria-label={`删除 ${record.testName || record.id}`}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  }
+);
 
 /**
  * 删除确认对话框组件
@@ -202,14 +206,14 @@ const DeleteDialog: React.FC<{
   if (!state.isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
       role="dialog"
       aria-modal="true"
       aria-labelledby="delete-dialog-title"
       aria-describedby="delete-dialog-description"
     >
-      <div 
+      <div
         ref={focusTrapRef}
         className="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 border border-gray-700"
       >
@@ -217,8 +221,8 @@ const DeleteDialog: React.FC<{
           确认删除
         </h3>
         <p id="delete-dialog-description" className="text-gray-300 mb-6">
-          {state.type === 'single' 
-            ? `确定要删除测试记录 "${state.recordName}" 吗?` 
+          {state.type === 'single'
+            ? `确定要删除测试记录 "${state.recordName}" 吗?`
             : `确定要删除选中的 ${state.recordNames?.length || 0} 条测试记录吗?`}
           <br />
           <span className="text-sm text-gray-400 mt-2 block">此操作无法撤销</span>
@@ -260,7 +264,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
 }) => {
   // ===== Hooks =====
   const { records, loading, totalRecords, loadTestRecords, setRecords } = useTestRecords({
-    apiEndpoint: config.apiEndpoint
+    apiEndpoint: config.apiEndpoint,
   });
   const {
     searchTerm,
@@ -274,9 +278,10 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
     setSortBy,
     toggleSortOrder,
   } = useFilters();
-  const { currentPage, pageSize, totalPages, startRecord, endRecord, goToPage, changePageSize } = usePagination(totalRecords, config.defaultPageSize || 10);
+  const { currentPage, pageSize, totalPages, startRecord, endRecord, goToPage, changePageSize } =
+    usePagination(totalRecords, config.defaultPageSize || 10);
   const { selectedIds, isSelected, selectAll, toggleSelect, clearSelection } = useSelection();
-const { exportToJson, exportToCsv } = useExport(config.testType);
+  const { exportToJson, exportToCsv } = useExport(config.testType);
 
   // 响应式状态
   const { isMobile, isTablet } = useCommonMediaQueries();
@@ -286,7 +291,7 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
   const { isHighContrast } = useHighContrast();
   const { prefersReducedMotion } = useReducedMotion();
   const dialogFocusTrapRef = useFocusTrap(deleteDialogState.isOpen);
-  
+
   // 删除对话框状态
   const [deleteDialogState, setDeleteDialogState] = useState<DeleteDialogState>({
     isOpen: false,
@@ -306,10 +311,19 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
       sortOrder,
       ...additionalFilters,
     });
-  }, [currentPage, pageSize, searchTerm, statusFilter, dateFilter, sortBy, sortOrder, additionalFilters]);
+  }, [
+    currentPage,
+    pageSize,
+    searchTerm,
+    statusFilter,
+    dateFilter,
+    sortBy,
+    sortOrder,
+    additionalFilters,
+  ]);
 
   // ===== 事件处理 =====
-  
+
   // 刷新数据
   const handleRefresh = useCallback(() => {
     loadTestRecords({
@@ -322,30 +336,45 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
       sortOrder,
       ...additionalFilters,
     });
-  }, [currentPage, pageSize, searchTerm, statusFilter, dateFilter, sortBy, sortOrder, additionalFilters]);
+  }, [
+    currentPage,
+    pageSize,
+    searchTerm,
+    statusFilter,
+    dateFilter,
+    sortBy,
+    sortOrder,
+    additionalFilters,
+  ]);
 
   // 查看详情
-  const handleViewDetails = useCallback((record: TestRecord) => {
-    if (onRecordClick) {
-      onRecordClick(record);
-    } else {
-      // 默认行为:导航到详情页
-      const detailPath = `/testing/${config.testType}/detail/${record.id}`;
-      window.location.href = detailPath;
-    }
-  }, [onRecordClick, config.testType]);
+  const handleViewDetails = useCallback(
+    (record: TestRecord) => {
+      if (onRecordClick) {
+        onRecordClick(record);
+      } else {
+        // 默认行为:导航到详情页
+        const detailPath = `/testing/${config.testType}/detail/${record.id}`;
+        window.location.href = detailPath;
+      }
+    },
+    [onRecordClick, config.testType]
+  );
 
   // 单个删除
-  const handleDeleteSingle = useCallback(async (id: string) => {
-    const record = records.find(r => r.id === id);
-    setDeleteDialogState({
-      isOpen: true,
-      type: 'single',
-      recordId: id,
-      recordName: record?.testName || record?.id || '',
-      isLoading: false,
-    });
-  }, [records]);
+  const handleDeleteSingle = useCallback(
+    async (id: string) => {
+      const record = records.find(r => r.id === id);
+      setDeleteDialogState({
+        isOpen: true,
+        type: 'single',
+        recordId: id,
+        recordName: record?.testName || record?.id || '',
+        isLoading: false,
+      });
+    },
+    [records]
+  );
 
   // 批量删除
   const handleBatchDelete = useCallback(() => {
@@ -372,14 +401,16 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
           const response = await fetch(`${config.apiEndpoint}/${deleteDialogState.recordId}`, {
             method: 'DELETE',
             headers: {
-              ...(localStorage.getItem('auth_token') ? {
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-              } : {})
+              ...(localStorage.getItem('auth_token')
+                ? {
+                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+                  }
+                : {}),
             },
           });
           if (!response.ok) throw new Error('删除失败');
         }
-        
+
         // 更新本地状态
         setRecords(prev => prev.filter(r => r.id !== deleteDialogState.recordId));
         Logger.info('成功删除测试记录');
@@ -395,15 +426,17 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
               fetch(`${config.apiEndpoint}/${id}`, {
                 method: 'DELETE',
                 headers: {
-                  ...(localStorage.getItem('auth_token') ? {
-                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                  } : {})
+                  ...(localStorage.getItem('auth_token')
+                    ? {
+                        Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+                      }
+                    : {}),
                 },
               })
             )
           );
         }
-        
+
         // 更新本地状态
         setRecords(prev => prev.filter(r => !selectedIds.includes(r.id)));
         clearSelection();
@@ -413,7 +446,7 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
 
       // 关闭对话框
       setDeleteDialogState({ isOpen: false, type: 'single', isLoading: false });
-      
+
       // 刷新数据
       handleRefresh();
     } catch (error) {
@@ -421,7 +454,14 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
       setDeleteDialogState(prev => ({ ...prev, isLoading: false }));
       alert('删除失败,请重试');
     }
-  }, [deleteDialogState, onRecordDelete, onBatchDelete, selectedIds, config.apiEndpoint, handleRefresh]);
+  }, [
+    deleteDialogState,
+    onRecordDelete,
+    onBatchDelete,
+    selectedIds,
+    config.apiEndpoint,
+    handleRefresh,
+  ]);
 
   // 取消删除
   const cancelDelete = useCallback(() => {
@@ -429,20 +469,23 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
   }, []);
 
   // 导出数据
-  const handleExport = useCallback(async (format: 'json' | 'csv') => {
-    try {
-      if (format === 'json') {
-      await exportToJson(records);
-      } else {
-        await exportToCsv(records, config.columns);
+  const handleExport = useCallback(
+    async (format: 'json' | 'csv') => {
+      try {
+        if (format === 'json') {
+          await exportToJson(records);
+        } else {
+          await exportToCsv(records, config.columns);
+        }
+        Logger.info(`成功导出 ${format.toUpperCase()} 格式数据`);
+        announce(`成功导出 ${format.toUpperCase()} 格式数据`);
+      } catch (error) {
+        Logger.error('导出失败:', error);
+        alert('导出失败,请重试');
       }
-      Logger.info(`成功导出 ${format.toUpperCase()} 格式数据`);
-      announce(`成功导出 ${format.toUpperCase()} 格式数据`);
-    } catch (error) {
-      Logger.error('导出失败:', error);
-      alert('导出失败,请重试');
-    }
-  }, [records, config.columns, exportToJson, exportToCsv]);
+    },
+    [records, config.columns, exportToJson, exportToCsv]
+  );
 
   // ===== 渲染 =====
   const hasFilters = searchTerm || statusFilter !== 'all' || dateFilter !== 'all';
@@ -450,7 +493,7 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
   const features = config.features || {};
 
   return (
-    <div 
+    <div
       className={`test-history-container ${className}`}
       role="region"
       aria-label={`${config.title || '测试历史'}记录列表`}
@@ -513,7 +556,7 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
           </div>
         )}
 
-{/* 表格 */}
+        {/* 表格 */}
         {showEmptyState ? (
           <EmptyState hasFilters={hasFilters} />
         ) : loading ? (
@@ -530,7 +573,7 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
             selectedIds={selectedIds}
             isMobile={features.responsive !== false && isMobile}
             isTablet={features.responsive !== false && isTablet}
-            onSelectAll={(ids) => selectAll(ids)}
+            onSelectAll={ids => selectAll(ids)}
             onToggleSelect={toggleSelect}
             onView={handleViewDetails}
             onDelete={handleDeleteSingle}
@@ -538,7 +581,7 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
             customActions={config.customActions}
             StatusBadge={StatusBadge}
           />
-        )
+        )}
 
         {/* 分页 */}
         {!showEmptyState && totalPages > 1 && (
@@ -547,11 +590,13 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
               <span className="text-sm text-gray-400">每页显示</span>
               <select
                 value={pageSize}
-                onChange={(e) => changePageSize(Number(e.target.value))}
+                onChange={e => changePageSize(Number(e.target.value))}
                 className="px-3 py-1.5 text-sm bg-gray-700/50 border border-gray-600/40 rounded-lg text-white focus:ring-2 focus:ring-blue-500/50"
               >
-                {(config.pageSizeOptions || [10, 20, 50, 100]).map((size) => (
-                  <option key={size} value={size}>{size}</option>
+                {(config.pageSizeOptions || [10, 20, 50, 100]).map(size => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
                 ))}
               </select>
               <span className="text-sm text-gray-400">条</span>
@@ -581,12 +626,7 @@ const { exportToJson, exportToCsv } = useExport(config.testType);
       </div>
 
       {/* ARIA实时通知 */}
-      <div
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        className="sr-only"
-      >
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
         {announcement}
       </div>
 
