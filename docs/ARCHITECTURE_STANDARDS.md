@@ -3,6 +3,7 @@
 ## 目标
 
 建立统一的代码架构,解决以下问题:
+
 - API服务多处定义,缺乏统一管理
 - 业务逻辑分散在组件中
 - 路由管理不规范
@@ -118,7 +119,7 @@ class ApiClient {
     this.instance = axios.create({
       baseURL: API_CONFIG.baseURL,
       timeout: API_CONFIG.timeout,
-      headers: API_CONFIG.headers
+      headers: API_CONFIG.headers,
     });
 
     setupInterceptors(this.instance);
@@ -129,12 +130,20 @@ class ApiClient {
     return response.data;
   }
 
-  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async post<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
     const response = await this.instance.post<T>(url, data, config);
     return response.data;
   }
 
-  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async put<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
     const response = await this.instance.put<T>(url, data, config);
     return response.data;
   }
@@ -409,18 +418,10 @@ router.get('/', auth, testController.getAll);
 router.get('/:id', auth, testController.getById);
 
 // 创建资源
-router.post('/', 
-  auth, 
-  validate(testSchemas.create), 
-  testController.create
-);
+router.post('/', auth, validate(testSchemas.create), testController.create);
 
 // 更新资源
-router.put('/:id', 
-  auth, 
-  validate(testSchemas.update), 
-  testController.update
-);
+router.put('/:id', auth, validate(testSchemas.update), testController.update);
 
 // 删除资源
 router.delete('/:id', auth, testController.delete);
@@ -450,9 +451,9 @@ class TestController {
       const result = await testService.getAll({
         page: parseInt(page),
         limit: parseInt(limit),
-        status
+        status,
       });
-      
+
       return ApiResponse.success(res, result);
     } catch (error) {
       next(error);
@@ -466,7 +467,7 @@ class TestController {
     try {
       const { id } = req.params;
       const test = await testService.getById(id);
-      
+
       return ApiResponse.success(res, test);
     } catch (error) {
       next(error);
@@ -479,7 +480,7 @@ class TestController {
   async create(req, res, next) {
     try {
       const test = await testService.create(req.body);
-      
+
       return ApiResponse.created(res, test);
     } catch (error) {
       next(error);
@@ -503,17 +504,17 @@ class TestService {
    */
   async getAll(options) {
     const { page, limit, status } = options;
-    
+
     // 业务逻辑
     const filters = {};
     if (status) filters.status = status;
-    
+
     const tests = await testRepository.findAll(filters, {
       page,
       limit,
-      sort: { createdAt: -1 }
+      sort: { createdAt: -1 },
     });
-    
+
     return tests;
   }
 
@@ -523,13 +524,13 @@ class TestService {
   async create(data) {
     // 1. 验证
     this.validate(data);
-    
+
     // 2. 创建测试
     const test = await testRepository.create(data);
-    
+
     // 3. 触发异步任务
     await this.startTestAsync(test.id);
-    
+
     return test;
   }
 
@@ -540,7 +541,7 @@ class TestService {
     if (!this.isValidUrl(data.url)) {
       throw new ValidationError('Invalid URL format');
     }
-    
+
     if (data.concurrent && data.concurrent > 1000) {
       throw new ValidationError('Concurrent limit exceeded');
     }
@@ -678,25 +679,22 @@ DELETE /api/batch/tests        # 批量删除测试
 ## 检查清单
 
 ### API层
+
 - [ ] 只有一个API客户端
 - [ ] 所有请求通过客户端
 - [ ] 统一的错误处理
 - [ ] 统一的认证处理
 
 ### 业务层
+
 - [ ] Service包含所有业务逻辑
 - [ ] Repository负责数据访问
 - [ ] 组件不直接调用API
 - [ ] 使用自定义Hooks
 
 ### 代码质量
+
 - [ ] TypeScript类型完整
 - [ ] 单元测试覆盖
 - [ ] 代码注释清晰
 - [ ] 遵循命名规范
-
-## 相关文档
-
-- [TypeScript规范](./TYPESCRIPT_STANDARDS.md)
-- [测试规范](./TESTING_STANDARDS.md)
-- [性能优化指南](./PERFORMANCE_GUIDE.md)
