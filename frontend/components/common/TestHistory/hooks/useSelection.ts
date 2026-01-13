@@ -1,15 +1,19 @@
 ﻿/**
  * useSelection Hook - 管理记录的选择状态
- * 
+ *
  * 文件路径: frontend/components/common/TestHistory/hooks/useSelection.ts
  * 创建时间: 2025-10-05
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { TestRecord } from '../types';
 
 interface UseSelectionReturn {
   selectedRecords: Set<string>;
+  selectedIds: string[];
+  isSelected: (id: string) => boolean;
+  selectAll: () => void;
+  toggleSelect: (recordId: string) => void;
   toggleSelectAll: () => void;
   toggleSelectRecord: (recordId: string) => void;
   clearSelection: () => void;
@@ -52,12 +56,25 @@ export const useSelection = (records: TestRecord[]): UseSelectionReturn => {
     setSelectedRecords(new Set());
   }, []);
 
+  // 检查是否选中
+  const isSelected = useCallback(
+    (id: string) => {
+      return selectedRecords.has(id);
+    },
+    [selectedRecords]
+  );
+
+  // 获取选中的 ID 数组
+  const selectedIds = Array.from(selectedRecords);
+
   return {
     selectedRecords,
+    selectedIds,
+    isSelected,
+    selectAll: toggleSelectAll,
+    toggleSelect: toggleSelectRecord,
     toggleSelectAll,
     toggleSelectRecord,
-    clearSelection
+    clearSelection,
   };
 };
-
-
