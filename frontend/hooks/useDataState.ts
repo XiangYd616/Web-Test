@@ -7,7 +7,6 @@
 import Logger from '@/utils/logger';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { apiErrorHandler } from '../services/api/errorHandler';
-import type { ApiError } from '@shared/types';
 
 // 数据状态枚举
 export enum DataStatus {
@@ -15,7 +14,7 @@ export enum DataStatus {
   LOADING = 'loading',
   SUCCESS = 'success',
   ERROR = 'error',
-  EMPTY = 'empty'
+  EMPTY = 'empty',
 }
 
 // 数据状态接口
@@ -23,7 +22,7 @@ export interface DataState<T = any> {
   data: T | null;
   status: DataStatus;
   loading: boolean;
-  error: ApiError | null;
+  error: any | null;
   isEmpty: boolean;
   isSuccess: boolean;
   isError: boolean;
@@ -67,26 +66,28 @@ const DEFAULT_CONFIG: Required<DataOperationConfig> = {
   enableCache: false,
   cacheKey: '',
   cacheTTL: 300,
-  onSuccess: () => { },
-  onError: () => { },
-  onRetry: () => { },
+  onSuccess: () => {},
+  onError: () => {},
+  onRetry: () => {},
   validateData: () => true,
-  transformData: (data) => data
+  transformData: data => data,
 };
 
 /**
  * 基础数据状态管理Hook
  */
-export function useDataState<T = any>(config: DataOperationConfig = {}): [
+export function useDataState<T = any>(
+  config: DataOperationConfig = {}
+): [
   DataState<T>,
   {
     execute: (fetcher: () => Promise<T>) => Promise<T | null>;
     retry: () => Promise<T | null>;
     reset: () => void;
     setData: (data: T | null) => void;
-    setError: (error: ApiError | null) => void;
+    setError: (error: any | null) => void;
     setLoading: (loading: boolean) => void;
-  }
+  },
 ] {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
@@ -100,7 +101,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
     isSuccess: false,
     isError: false,
     lastUpdated: null,
-    retryCount: 0
+    retryCount: 0,
   });
 
   // 保存最后的fetcher函数用于重试
@@ -123,83 +124,87 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
   }, []);
 
   // 执行数据获取
-  const execute = useCallback(async (fetcher: () => Promise<T>): Promise<T | null> => {
-    // 取消之前的请求
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    // 创建新的AbortController
-    abortControllerRef.current = new AbortController();
-
-    // 保存fetcher用于重试
-    lastFetcherRef.current = fetcher;
-
-    // 设置加载状态
-    updateState({
-      status: DataStatus.LOADING,
-      error: null
-    });
-
-    try {
-      // 执行数据获取
-      const result = await apiErrorHandler.executeWithRetry(
-        fetcher,
-        {
-          requestId: finalConfig.cacheKey || `data_${Date.now()}`,
-          operation: 'data_fetch'
-        },
-        {
-          maxRetries: finalConfig.maxRetries,
-          baseDelay: finalConfig.retryDelay,
-          exponentialBackoff: true
-        }
-      );
-
-      // 验证数据
-      if (!finalConfig.validateData(result)) {
-        throw new Error('Data validation failed');
+  const execute = useCallback(
+    async (fetcher: () => Promise<T>): Promise<T | null> => {
+      // 取消之前的请求
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
 
-      // 转换数据
-      const transformedData = finalConfig.transformData(result);
+      // 创建新的AbortController
+      abortControllerRef.current = new AbortController();
 
-      // 检查是否为空
-      const isEmpty = transformedData == null ||
-        (Array.isArray(transformedData) && transformedData.length === 0) ||
-        (typeof transformedData === 'object' && Object.keys(transformedData).length === 0);
+      // 保存fetcher用于重试
+      lastFetcherRef.current = fetcher;
 
-      // 更新状态
+      // 设置加载状态
       updateState({
-        data: transformedData,
-        status: isEmpty ? DataStatus.EMPTY : DataStatus.SUCCESS,
-        lastUpdated: new Date(),
-        retryCount: 0
+        status: DataStatus.LOADING,
+        error: null,
       });
 
-      // 调用成功回调
-      finalConfig.onSuccess(transformedData);
+      try {
+        // 执行数据获取
+        const result = await apiErrorHandler.executeWithRetry(
+          fetcher,
+          {
+            requestId: finalConfig.cacheKey || `data_${Date.now()}`,
+            operation: 'data_fetch',
+          },
+          {
+            maxRetries: finalConfig.maxRetries,
+            baseDelay: finalConfig.retryDelay,
+            exponentialBackoff: true,
+          }
+        );
 
-      return transformedData;
-    } catch (error) {
-      // 处理错误
-      const { error: apiError } = await apiErrorHandler.handleError(error, {
-        requestId: finalConfig.cacheKey || `data_${Date.now()}`,
-        operation: 'data_fetch'
-      });
+        // 验证数据
+        if (!finalConfig.validateData(result)) {
+          throw new Error('Data validation failed');
+        }
 
-      updateState({
-        status: DataStatus.ERROR,
-        error: apiError,
-        retryCount: state.retryCount + 1
-      });
+        // 转换数据
+        const transformedData = finalConfig.transformData(result);
 
-      // 调用错误回调
-      finalConfig.onError(apiError);
+        // 检查是否为空
+        const isEmpty =
+          transformedData == null ||
+          (Array.isArray(transformedData) && transformedData.length === 0) ||
+          (typeof transformedData === 'object' && Object.keys(transformedData).length === 0);
 
-      return null;
-    }
-  }, [finalConfig, updateState, state.retryCount]);
+        // 更新状态
+        updateState({
+          data: transformedData,
+          status: isEmpty ? DataStatus.EMPTY : DataStatus.SUCCESS,
+          lastUpdated: new Date(),
+          retryCount: 0,
+        });
+
+        // 调用成功回调
+        finalConfig.onSuccess(transformedData);
+
+        return transformedData;
+      } catch (error) {
+        // 处理错误
+        const { error: apiError } = await apiErrorHandler.handleError(error, {
+          requestId: finalConfig.cacheKey || `data_${Date.now()}`,
+          operation: 'data_fetch',
+        });
+
+        updateState({
+          status: DataStatus.ERROR,
+          error: apiError,
+          retryCount: state.retryCount + 1,
+        });
+
+        // 调用错误回调
+        finalConfig.onError(apiError);
+
+        return null;
+      }
+    },
+    [finalConfig, updateState, state.retryCount]
+  );
 
   // 重试函数
   const retry = useCallback(async (): Promise<T | null> => {
@@ -231,40 +236,50 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       status: DataStatus.IDLE,
       error: null,
       lastUpdated: null,
-      retryCount: 0
+      retryCount: 0,
     });
 
     lastFetcherRef.current = null;
   }, [updateState]);
 
   // 手动设置数据
-  const setData = useCallback((data: T | null) => {
-    const isEmpty = data == null ||
-      (Array.isArray(data) && data.length === 0) ||
-      (typeof data === 'object' && Object.keys(data).length === 0);
+  const setData = useCallback(
+    (data: T | null) => {
+      const isEmpty =
+        data == null ||
+        (Array.isArray(data) && data.length === 0) ||
+        (typeof data === 'object' && Object.keys(data).length === 0);
 
-    updateState({
-      data,
-      status: isEmpty ? DataStatus.EMPTY : DataStatus.SUCCESS,
-      error: null,
-      lastUpdated: new Date()
-    });
-  }, [updateState]);
+      updateState({
+        data,
+        status: isEmpty ? DataStatus.EMPTY : DataStatus.SUCCESS,
+        error: null,
+        lastUpdated: new Date(),
+      });
+    },
+    [updateState]
+  );
 
   // 手动设置错误
-  const setError = useCallback((error: ApiError | null) => {
-    updateState({
-      status: error ? DataStatus.ERROR : DataStatus.IDLE,
-      error
-    });
-  }, [updateState]);
+  const setError = useCallback(
+    (error: StandardApiError | null) => {
+      updateState({
+        status: error ? DataStatus.ERROR : DataStatus.IDLE,
+        error,
+      });
+    },
+    [updateState]
+  );
 
   // 手动设置加载状态
-  const setLoading = useCallback((loading: boolean) => {
-    updateState({
-      status: loading ? DataStatus.LOADING : DataStatus.IDLE
-    });
-  }, [updateState]);
+  const setLoading = useCallback(
+    (loading: boolean) => {
+      updateState({
+        status: loading ? DataStatus.LOADING : DataStatus.IDLE,
+      });
+    },
+    [updateState]
+  );
 
   // 清理函数
   useEffect(() => {
@@ -283,24 +298,28 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       reset,
       setData,
       setError,
-      setLoading
-    }
+      setLoading,
+    },
   ];
 }
 
 /**
  * 分页数据状态管理Hook
  */
-export function usePaginatedDataState<T = any>(config: DataOperationConfig = {}): [
+export function usePaginatedDataState<T = any>(
+  config: DataOperationConfig = {}
+): [
   PaginatedDataState<T>,
   {
-    execute: (fetcher: (page: number, limit: number) => Promise<{ data: T[]; total: number }>) => Promise<T[] | null>;
+    execute: (
+      fetcher: (page: number, limit: number) => Promise<{ data: T[]; total: number }>
+    ) => Promise<T[] | null>;
     loadMore: () => Promise<T[] | null>;
     refresh: () => Promise<T[] | null>;
     reset: () => void;
     setPage: (page: number) => void;
     setLimit: (limit: number) => void;
-  }
+  },
 ] {
   const [baseState, baseActions] = useDataState<T[]>(config);
 
@@ -310,11 +329,13 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
     total: 0,
     totalPages: 0,
     hasNext: false,
-    hasPrev: false
+    hasPrev: false,
   });
 
   const [loadingMore, setLoadingMore] = useState(false);
-  const lastFetcherRef = useRef<((page: number, limit: number) => Promise<{ data: T[]; total: number }>) | null>(null);
+  const lastFetcherRef = useRef<
+    ((page: number, limit: number) => Promise<{ data: T[]; total: number }>) | null
+  >(null);
 
   // 更新分页信息
   const updatePagination = useCallback((total: number, page: number, limit: number) => {
@@ -325,24 +346,27 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
       total,
       totalPages,
       hasNext: page < totalPages,
-      hasPrev: page > 1
+      hasPrev: page > 1,
     });
   }, []);
 
   // 执行分页数据获取
-  const execute = useCallback(async (
-    fetcher: (page: number, limit: number) => Promise<{ data: T[]; total: number }>
-  ): Promise<T[] | null> => {
-    lastFetcherRef.current = fetcher;
+  const execute = useCallback(
+    async (
+      fetcher: (page: number, limit: number) => Promise<{ data: T[]; total: number }>
+    ): Promise<T[] | null> => {
+      lastFetcherRef.current = fetcher;
 
-    const result = await baseActions.execute(async () => {
-      const response = await fetcher(paginationState.page, paginationState.limit);
-      updatePagination(response.total, paginationState.page, paginationState.limit);
-      return response.data;
-    });
+      const result = await baseActions.execute(async () => {
+        const response = await fetcher(paginationState.page, paginationState.limit);
+        updatePagination(response.total, paginationState.page, paginationState.limit);
+        return response.data;
+      });
 
-    return result;
-  }, [baseActions, paginationState.page, paginationState.limit, updatePagination]);
+      return result;
+    },
+    [baseActions, paginationState.page, paginationState.limit, updatePagination]
+  );
 
   // 加载更多数据
   const loadMore = useCallback(async (): Promise<T[] | null> => {
@@ -393,7 +417,7 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
       total: 0,
       totalPages: 0,
       hasNext: false,
-      hasPrev: false
+      hasPrev: false,
     });
     setLoadingMore(false);
     lastFetcherRef.current = null;
@@ -413,7 +437,7 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
   const combinedState: PaginatedDataState<T> = {
     ...baseState,
     pagination: paginationState,
-    loadingMore
+    loadingMore,
   };
 
   return [
@@ -424,8 +448,8 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
       refresh,
       reset,
       setPage,
-      setLimit
-    }
+      setLimit,
+    },
   ];
 }
 
@@ -447,9 +471,8 @@ export function useAsyncData<T = any>(
   return {
     ...state,
     retry: actions.retry,
-    refresh: () => actions.execute(fetcher)
+    refresh: () => actions.execute(fetcher),
   };
 }
 
 export default useDataState;
-
