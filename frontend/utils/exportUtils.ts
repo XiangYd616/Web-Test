@@ -1,6 +1,5 @@
-import Logger from '@/utils/logger';
+import Logger from '@/utils/logger'; // 导出工具类
 
-﻿// 导出工具类
 export class ExportUtils {
   /**
    * 生成文件名
@@ -74,9 +73,8 @@ export class ExportUtils {
    * 创建并下载文件
    */
   static downloadFile(content: string | Blob, filename: string, mimeType?: string): void {
-    const blob = content instanceof Blob
-      ? content
-      : new Blob([content], { type: mimeType || 'text/plain' });
+    const blob =
+      content instanceof Blob ? content : new Blob([content], { type: mimeType || 'text/plain' });
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -102,19 +100,15 @@ export class ExportUtils {
       metadata: {
         exportedAt: new Date().toISOString(),
         version: '2.1.0',
-        format
-      }
+        format,
+      },
     };
 
     const filename = this.generateFilename('stress-test', format);
 
     switch (format) {
       case 'json':
-        this.downloadFile(
-          JSON.stringify(exportData, null, 2),
-          filename,
-          'application/json'
-        );
+        this.downloadFile(JSON.stringify(exportData, null, 2), filename, 'application/json');
         break;
 
       case 'csv':
@@ -150,19 +144,15 @@ export class ExportUtils {
       metadata: {
         exportedAt: new Date().toISOString(),
         version: '2.1.0',
-        format
-      }
+        format,
+      },
     };
 
     const filename = this.generateFilename('performance-test', format);
 
     switch (format) {
       case 'json':
-        this.downloadFile(
-          JSON.stringify(exportData, null, 2),
-          filename,
-          'application/json'
-        );
+        this.downloadFile(JSON.stringify(exportData, null, 2), filename, 'application/json');
         break;
 
       case 'csv':
@@ -192,19 +182,15 @@ export class ExportUtils {
       metadata: {
         exportedAt: new Date().toISOString(),
         version: '2.1.0',
-        format
-      }
+        format,
+      },
     };
 
     const filename = this.generateFilename('api-test', format);
 
     switch (format) {
       case 'json':
-        this.downloadFile(
-          JSON.stringify(exportData, null, 2),
-          filename,
-          'application/json'
-        );
+        this.downloadFile(JSON.stringify(exportData, null, 2), filename, 'application/json');
         break;
 
       case 'csv':
@@ -256,7 +242,7 @@ export class ExportUtils {
         'CPU使用率(%)',
         '内存使用率(%)',
         '活跃连接数',
-        '队列长度'
+        '队列长度',
       ];
       csvContent += headers.join(',') + '\n';
 
@@ -265,13 +251,13 @@ export class ExportUtils {
         point.activeUsers || 0,
         point.responseTime || 0,
         point.throughput || 0,
-        ((point.errors || 0) / (point.requests || 1) * 100).toFixed(2),
+        (((point.errors || 0) / (point.requests || 1)) * 100).toFixed(2),
         point.successCount || 0,
         point.errorCount || 0,
         point.cpuUsage || 0,
         point.memoryUsage || 0,
         point.activeConnections || 0,
-        point.queueLength || 0
+        point.queueLength || 0,
       ]);
 
       csvContent += rows.map((row: any) => row.join(',')).join('\n');
@@ -342,13 +328,14 @@ export class ExportUtils {
    */
   private static convertAPITestToCSV(data: any): string {
     const headers = ['端点', '方法', '状态码', '响应时间(ms)', '数据大小(bytes)'];
-    const rows = data.results?.map((result: any) => [
-      data.endpoint,
-      data.method,
-      result.statusCode,
-      result.responseTime,
-      result.dataSize || 0
-    ]) || [];
+    const rows =
+      data.results?.map((result: any) => [
+        data.endpoint,
+        data.method,
+        result.statusCode,
+        result.responseTime,
+        result.dataSize || 0,
+      ]) || [];
 
     return [headers.join(','), ...rows.map((row: any) => row.join(','))].join('\n');
   }
@@ -452,7 +439,7 @@ export class ExportUtils {
    */
   static validateExportData(data: unknown, requiredFields: string[]): boolean {
     return requiredFields.every(field => {
-      const value = field.split('.').reduce((obj, key) => obj?.[key], data);
+      const value = field.split('.').reduce((obj: any, key: string) => obj?.[key], data);
       return value !== undefined && value !== null;
     });
   }
@@ -480,7 +467,12 @@ export class ExportUtils {
   /**
    * 原始数据导出 - 完整的JSON格式测试记录
    */
-  static exportRawData(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportRawData(
+    data: unknown,
+    testType: string = 'stress',
+    testId?: string,
+    testName?: string
+  ): void {
     const testData = data as any;
     const exportData = {
       type: 'raw-data',
@@ -495,28 +487,29 @@ export class ExportUtils {
         realTimeData: testData.realTimeData || [],
         logs: testData.logs || [],
         errors: testData.errors || [],
-        rawResponse: testData.rawResponse || null
+        rawResponse: testData.rawResponse || null,
       },
       metadata: {
         exportedAt: new Date().toISOString(),
         version: '2.1.0',
         format: 'json',
-        description: '完整的原始测试数据，包含所有详细信息'
-      }
+        description: '完整的原始测试数据，包含所有详细信息',
+      },
     };
 
     const filename = this.generateFilename(`raw-data-${testName || testType}`, 'json');
-    this.downloadFile(
-      JSON.stringify(exportData, null, 2),
-      filename,
-      'application/json'
-    );
+    this.downloadFile(JSON.stringify(exportData, null, 2), filename, 'application/json');
   }
 
   /**
    * 分析报告导出 - HTML格式报告（增强版）
    */
-  static exportAnalysisReport(data: unknown, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportAnalysisReport(
+    data: unknown,
+    testType: string = 'stress',
+    testId?: string,
+    testName?: string
+  ): void {
     const testData = data as any;
     const metrics = testData.metrics || {};
     const result = testData.result || {};
@@ -640,7 +633,9 @@ export class ExportUtils {
             </div>
 
             <!-- 响应时间分布 -->
-            ${metrics?.p50ResponseTime ? `
+            ${
+              metrics?.p50ResponseTime
+                ? `
             <div class="section">
                 <h2>⏱️ 响应时间分布分析</h2>
                 <div class="percentile-chart">
@@ -654,39 +649,59 @@ export class ExportUtils {
                     </table>
                 </div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
 
             <div class="section">
                 <h2>🔍 性能瓶颈分析</h2>
-                ${bottlenecks.length > 0 ? bottlenecks.map(bottleneck => `
+                ${
+                  bottlenecks.length > 0
+                    ? bottlenecks
+                        .map(
+                          bottleneck => `
                     <div class="bottleneck-item">
                         <h4>⚠️ ${(bottleneck as any).type || bottleneck}</h4>
                         <p>${(bottleneck as any).description || bottleneck}</p>
                         <p><strong>影响程度:</strong> ${(bottleneck as any).severity || '中等'}</p>
                         <p><strong>建议措施:</strong> ${(bottleneck as any).suggestion || '需要进一步分析'}</p>
                     </div>
-                `).join('') : '<p>✅ 未发现明显的性能瓶颈</p>'}
+                `
+                        )
+                        .join('')
+                    : '<p>✅ 未发现明显的性能瓶颈</p>'
+                }
             </div>
 
             <!-- 趋势分析 -->
-            ${Object.keys(trends).length > 0 ? `
+            ${
+              Object.keys(trends).length > 0
+                ? `
             <div class="section">
                 <h2>📈 性能趋势分析</h2>
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                    ${Object.entries(trends).map(([metric, trend]: [string, any]) => `
+                    ${Object.entries(trends)
+                      .map(
+                        ([metric, trend]: [string, any]) => `
                         <div class="trend-item">
                             <span><strong>${this.getMetricDisplayName(metric)}:</strong></span>
                             <span class="trend-${trend.direction === '上升' ? 'up' : trend.direction === '下降' ? 'down' : 'stable'}">
                                 ${trend.direction} (${trend.changeRate}%) - ${trend.stability}
                             </span>
                         </div>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                 </div>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
 
             <!-- 错误分析 -->
-            ${errorAnalysis.length > 0 ? `
+            ${
+              errorAnalysis.length > 0
+                ? `
             <div class="section">
                 <h2>🚨 错误分析</h2>
                 <table>
@@ -694,7 +709,9 @@ export class ExportUtils {
                         <tr><th>错误类型</th><th>错误代码</th><th>发生次数</th><th>错误率</th><th>首次出现</th><th>最后出现</th></tr>
                     </thead>
                     <tbody>
-                        ${errorAnalysis.map(error => `
+                        ${errorAnalysis
+                          .map(
+                            error => `
                             <tr class="${error.rate > 10 ? 'error-critical' : error.rate > 5 ? 'error-warning' : 'error-info'}">
                                 <td>${error.type}</td>
                                 <td>${error.code}</td>
@@ -703,23 +720,31 @@ export class ExportUtils {
                                 <td>${error.firstOccurrence}</td>
                                 <td>${error.lastOccurrence}</td>
                             </tr>
-                        `).join('')}
+                        `
+                          )
+                          .join('')}
                     </tbody>
                 </table>
             </div>
-            ` : ''}
+            `
+                : ''
+            }
 
             <!-- 优化建议 -->
             <div class="section">
                 <h2>🎯 优化建议</h2>
-                ${recommendations.map((rec, index) => `
+                ${recommendations
+                  .map(
+                    (rec, index) => `
                     <div class="recommendation-item">
                         <h4>${index + 1}. ${(rec as any).title || rec}</h4>
                         <p>${(rec as any).description || rec}</p>
                         ${(rec as any).priority ? `<p><strong>优先级:</strong> ${(rec as any).priority}</p>` : ''}
                         ${(rec as any).impact ? `<p><strong>预期影响:</strong> ${(rec as any).impact}</p>` : ''}
                     </div>
-                `).join('')}
+                `
+                  )
+                  .join('')}
             </div>
 
             <!-- 详细指标 -->
@@ -773,7 +798,12 @@ export class ExportUtils {
   /**
    * 数据表格导出 - CSV格式（增强版）
    */
-  static exportDataTable(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportDataTable(
+    data: any,
+    testType: string = 'stress',
+    testId?: string,
+    testName?: string
+  ): void {
     const metrics = data.metrics || {};
     const realTimeData = data.realTimeData || [];
     const result = data.result || {};
@@ -845,9 +875,11 @@ export class ExportUtils {
     // 添加实时数据（如果有）
     if (realTimeData.length > 0) {
       csvContent += '实时性能数据\n';
-      csvContent += '时间戳,响应时间(ms),吞吐量(req/s),错误率(%),CPU使用率(%),内存使用率(%),活跃连接数,队列长度\n';
+      csvContent +=
+        '时间戳,响应时间(ms),吞吐量(req/s),错误率(%),CPU使用率(%),内存使用率(%),活跃连接数,队列长度\n';
 
-      realTimeData.slice(0, 1000).forEach((point: any) => { // 限制数据量
+      realTimeData.slice(0, 1000).forEach((point: any) => {
+        // 限制数据量
         csvContent += `${point.timestamp || ''},${point.responseTime || 0},${point.throughput || 0},${point.errorRate || 0},${point.cpuUsage || 0},${point.memoryUsage || 0},${point.activeConnections || 0},${point.queueLength || 0}\n`;
       });
       csvContent += '\n';
@@ -886,7 +918,7 @@ export class ExportUtils {
           code: error.code || 'N/A',
           count: 0,
           firstOccurrence: error.timestamp,
-          lastOccurrence: error.timestamp
+          lastOccurrence: error.timestamp,
         });
       }
 
@@ -905,7 +937,7 @@ export class ExportUtils {
       ...error,
       rate: ((error.count / totalErrors) * 100).toFixed(2),
       firstOccurrence: new Date(error.firstOccurrence).toLocaleString('zh-CN'),
-      lastOccurrence: new Date(error.lastOccurrence).toLocaleString('zh-CN')
+      lastOccurrence: new Date(error.lastOccurrence).toLocaleString('zh-CN'),
     }));
   }
 
@@ -929,7 +961,7 @@ export class ExportUtils {
       const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
       const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
 
-      const changeRate = ((secondAvg - firstAvg) / firstAvg * 100).toFixed(2);
+      const changeRate = (((secondAvg - firstAvg) / firstAvg) * 100).toFixed(2);
       const direction = secondAvg > firstAvg ? '上升' : secondAvg < firstAvg ? '下降' : '稳定';
 
       // 计算稳定性（变异系数）
@@ -947,7 +979,7 @@ export class ExportUtils {
       trends[metric] = {
         direction,
         changeRate,
-        stability
+        stability,
       };
     });
 
@@ -959,12 +991,17 @@ export class ExportUtils {
    */
   static getRatingClass(rating: string): string {
     switch (rating) {
-      case '优秀': return 'rating-excellent';
-      case '良好': return 'rating-good';
-      case '一般': return 'rating-average';
+      case '优秀':
+        return 'rating-excellent';
+      case '良好':
+        return 'rating-good';
+      case '一般':
+        return 'rating-average';
       case '较差':
-      case '很差': return 'rating-poor';
-      default: return 'rating-average';
+      case '很差':
+        return 'rating-poor';
+      default:
+        return 'rating-average';
     }
   }
 
@@ -973,11 +1010,11 @@ export class ExportUtils {
    */
   static getMetricDisplayName(metric: string): string {
     const displayNames: { [key: string]: string } = {
-      'responseTime': '响应时间',
-      'throughput': '吞吐量',
-      'errorRate': '错误率',
-      'cpuUsage': 'CPU使用率',
-      'memoryUsage': '内存使用率'
+      responseTime: '响应时间',
+      throughput: '吞吐量',
+      errorRate: '错误率',
+      cpuUsage: 'CPU使用率',
+      memoryUsage: '内存使用率',
     };
     return displayNames[metric] || metric;
   }
@@ -1026,7 +1063,7 @@ export class ExportUtils {
         stats[type] = {
           count: 0,
           totalSize: 0,
-          loadTimes: []
+          loadTimes: [],
         };
       }
 
@@ -1038,7 +1075,8 @@ export class ExportUtils {
     // 计算平均值和最大值
     Object.keys(stats).forEach(type => {
       const loadTimes = stats[type].loadTimes;
-      stats[type].avgLoadTime = loadTimes.reduce((a: number, b: number) => a + b, 0) / loadTimes.length;
+      stats[type].avgLoadTime =
+        loadTimes.reduce((a: number, b: number) => a + b, 0) / loadTimes.length;
       stats[type].maxLoadTime = Math.max(...loadTimes);
     });
 
@@ -1048,7 +1086,12 @@ export class ExportUtils {
   /**
    * 快速摘要导出 - 简化的JSON格式
    */
-  static exportSummary(data: any, testType: string = 'stress', testId?: string, testName?: string): void {
+  static exportSummary(
+    data: any,
+    testType: string = 'stress',
+    testId?: string,
+    testName?: string
+  ): void {
     const metrics = data.metrics || {};
     const result = data.result || {};
     const testConfig = data.testConfig || {};
@@ -1076,34 +1119,30 @@ export class ExportUtils {
         minResponseTime: metrics?.minResponseTime || 0,
         throughput: metrics?.throughput || 0,
         errorRate: metrics?.errorRate || 0,
-        successRate: metrics?.successRate || 0
+        successRate: metrics?.successRate || 0,
       },
       performance: {
         grade: performanceGrade.grade,
         score: performanceGrade.score,
         bottlenecks,
-        recommendations
+        recommendations,
       },
       testConfig: {
         url: testConfig?.url,
         method: testConfig?.method || 'GET',
         concurrency: testConfig?.concurrency,
-        duration: testConfig?.duration
+        duration: testConfig?.duration,
       },
       metadata: {
         exportedAt: new Date().toISOString(),
         version: '2.1.0',
         format: 'json',
-        description: '关键指标的快速摘要'
-      }
+        description: '关键指标的快速摘要',
+      },
     };
 
     const filename = this.generateFilename(`summary-${testName || testType}`, 'json');
-    this.downloadFile(
-      JSON.stringify(summaryData, null, 2),
-      filename,
-      'application/json'
-    );
+    this.downloadFile(JSON.stringify(summaryData, null, 2), filename, 'application/json');
   }
 
   /**
