@@ -1,6 +1,4 @@
-﻿import Logger from '@/utils/logger';
-
-﻿/**
+﻿import Logger from '@/utils/logger'; /**
  * Core Web Vitals Analyzer
  * Mobile-specific Core Web Vitals checking with device simulation
  */
@@ -20,6 +18,7 @@ export interface CoreWebVitalsThresholds {
   cls: { good: number; needsImprovement: number };
   fcp: { good: number; needsImprovement: number };
   ttfb: { good: number; needsImprovement: number };
+  inp?: { good: number; needsImprovement: number };
 }
 
 export interface CoreWebVitalsMeasurement {
@@ -62,7 +61,7 @@ export class CoreWebVitalsAnalyzer {
     fid: { good: 100, needsImprovement: 300 },
     cls: { good: 0.1, needsImprovement: 0.25 },
     fcp: { good: 1800, needsImprovement: 3000 },
-    ttfb: { good: 800, needsImprovement: 1800 }
+    ttfb: { good: 800, needsImprovement: 1800 },
   };
 
   // Mobile device profiles for simulation
@@ -72,32 +71,34 @@ export class CoreWebVitalsAnalyzer {
       userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
       viewport: { width: 390, height: 844 },
       devicePixelRatio: 3,
-      networkSpeed: '4G'
+      networkSpeed: '4G',
     },
     {
       name: 'Samsung Galaxy S21',
       userAgent: 'Mozilla/5.0 (Linux; Android 11; SM-G991B) AppleWebKit/537.36',
       viewport: { width: 384, height: 854 },
       devicePixelRatio: 2.75,
-      networkSpeed: '4G'
+      networkSpeed: '4G',
     },
     {
       name: 'Pixel 6',
       userAgent: 'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36',
       viewport: { width: 412, height: 915 },
       devicePixelRatio: 2.625,
-      networkSpeed: '5G'
-    }
+      networkSpeed: '5G',
+    },
   ];
 
   private observer: PerformanceObserver | null = null;
   private measurements: Map<string, number[]> = new Map();
 
-  constructor(private options: {
-    enablestreamingMonitoring?: boolean;
-    simulateSlowNetwork?: boolean;
-    targetDevice?: 'mobile' | 'desktop';
-  } = {}) {
+  constructor(
+    private options: {
+      enablestreamingMonitoring?: boolean;
+      simulateSlowNetwork?: boolean;
+      targetDevice?: 'mobile' | 'desktop';
+    } = {}
+  ) {
     this.initializePerformanceObserver();
   }
 
@@ -107,16 +108,16 @@ export class CoreWebVitalsAnalyzer {
   async analyzeCoreWebVitals(url?: string): Promise<CoreWebVitalsResult> {
     // 收集性能指标
     const metrics = await this.collectMetrics(url);
-    
+
     // 分析每个指标
     const measurements = this.analyzeMeasurements(metrics);
-    
+
     // 检测移动端特定问题
     const mobileIssues = await this.detectMobileSpecificIssues();
-    
+
     // 生成优化建议
     const recommendations = this.generateRecommendations(measurements, mobileIssues);
-    
+
     // 计算总体评级
     const overallRating = this.calculateOverallRating(measurements);
 
@@ -132,7 +133,7 @@ export class CoreWebVitalsAnalyzer {
       measurements,
       mobileSpecificIssues: mobileIssues,
       recommendations,
-      deviceSimulation
+      deviceSimulation,
     };
   }
 
@@ -145,7 +146,7 @@ export class CoreWebVitalsAnalyzer {
       fid: 0,
       cls: 0,
       fcp: 0,
-      ttfb: 0
+      ttfb: 0,
     };
 
     try {
@@ -153,24 +154,23 @@ export class CoreWebVitalsAnalyzer {
       if (typeof window !== 'undefined' && window.performance) {
         // LCP - Largest Contentful Paint
         metrics.lcp = await this.measureLCP();
-        
+
         // FID - First Input Delay
         metrics.fid = await this.measureFID();
-        
+
         // CLS - Cumulative Layout Shift
         metrics.cls = await this.measureCLS();
-        
+
         // FCP - First Contentful Paint
         metrics.fcp = await this.measureFCP();
-        
+
         // TTFB - Time to First Byte
         metrics.ttfb = await this.measureTTFB();
 
         // INP - Interaction to Next Paint (experimental)
         try {
           metrics.inp = await this.measureINP();
-        } catch (error) {
-        }
+        } catch (error) {}
       } else {
         // 模拟数据（用于服务器端或测试环境）
         metrics.lcp = this.simulateMetric('lcp');
@@ -190,13 +190,13 @@ export class CoreWebVitalsAnalyzer {
    * 测量LCP (Largest Contentful Paint)
    */
   private async measureLCP(): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let lcpValue = 0;
-      
-      const observer = new PerformanceObserver((list) => {
+
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1] as PerformanceEntry;
-        
+
         if (lastEntry) {
           lcpValue = lastEntry.startTime;
         }
@@ -204,7 +204,7 @@ export class CoreWebVitalsAnalyzer {
 
       try {
         observer.observe({ type: 'largest-contentful-paint', buffered: true });
-        
+
         // 设置超时，确保Promise能够resolve
         setTimeout(() => {
           observer.disconnect();
@@ -220,10 +220,10 @@ export class CoreWebVitalsAnalyzer {
    * 测量FID (First Input Delay)
    */
   private async measureFID(): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let fidValue = 0;
-      
-      const observer = new PerformanceObserver((list) => {
+
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
         for (const entry of entries) {
           if (entry.name === 'first-input') {
@@ -236,7 +236,7 @@ export class CoreWebVitalsAnalyzer {
 
       try {
         observer.observe({ type: 'first-input', buffered: true });
-        
+
         setTimeout(() => {
           observer.disconnect();
           resolve(fidValue || this.simulateMetric('fid'));
@@ -251,10 +251,10 @@ export class CoreWebVitalsAnalyzer {
    * 测量CLS (Cumulative Layout Shift)
    */
   private async measureCLS(): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let clsValue = 0;
-      
-      const observer = new PerformanceObserver((list) => {
+
+      const observer = new PerformanceObserver(list => {
         for (const entry of list.getEntries()) {
           const layoutShiftEntry = entry as any;
           if (!layoutShiftEntry.hadRecentInput) {
@@ -265,7 +265,7 @@ export class CoreWebVitalsAnalyzer {
 
       try {
         observer.observe({ type: 'layout-shift', buffered: true });
-        
+
         setTimeout(() => {
           observer.disconnect();
           resolve(clsValue || this.simulateMetric('cls'));
@@ -280,15 +280,15 @@ export class CoreWebVitalsAnalyzer {
    * 测量FCP (First Contentful Paint)
    */
   private async measureFCP(): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const paintEntries = performance.getEntriesByType('paint');
       const fcpEntry = paintEntries.find(entry => entry.name === 'first-contentful-paint');
-      
+
       if (fcpEntry) {
         resolve(fcpEntry.startTime);
       } else {
         // 使用PerformanceObserver监听
-        const observer = new PerformanceObserver((list) => {
+        const observer = new PerformanceObserver(list => {
           const entries = list.getEntries();
           const fcp = entries.find(entry => entry.name === 'first-contentful-paint');
           if (fcp) {
@@ -314,7 +314,7 @@ export class CoreWebVitalsAnalyzer {
    * 测量TTFB (Time to First Byte)
    */
   private async measureTTFB(): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       try {
         const navigationEntries = performance.getEntriesByType('navigation');
         if (navigationEntries.length > 0) {
@@ -334,13 +334,13 @@ export class CoreWebVitalsAnalyzer {
    * 测量INP (Interaction to Next Paint) - 实验性指标
    */
   private async measureINP(): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       // INP是一个新的实验性指标，可能不被所有浏览器支持
       const inpValue = 0;
-      
+
       // 这里是简化的INP测量实现
       // 实际应用中应该使用官方的web-vitals库
-      
+
       setTimeout(() => {
         resolve(inpValue || this.simulateMetric('inp'));
       }, 2000);
@@ -357,7 +357,7 @@ export class CoreWebVitalsAnalyzer {
       cls: { min: 0.05, max: 0.4 },
       fcp: { min: 1000, max: 4000 },
       ttfb: { min: 200, max: 2000 },
-      inp: { min: 100, max: 500 }
+      inp: { min: 100, max: 500 },
     };
 
     const range = baseValues[metric];
@@ -375,7 +375,7 @@ export class CoreWebVitalsAnalyzer {
       metric: 'lcp',
       value: metrics.lcp,
       rating: this.getRating('lcp', metrics.lcp),
-      recommendations: this.getLCPRecommendations(metrics.lcp)
+      recommendations: this.getLCPRecommendations(metrics.lcp),
     });
 
     // 分析FID
@@ -383,7 +383,7 @@ export class CoreWebVitalsAnalyzer {
       metric: 'fid',
       value: metrics.fid,
       rating: this.getRating('fid', metrics.fid),
-      recommendations: this.getFIDRecommendations(metrics.fid)
+      recommendations: this.getFIDRecommendations(metrics.fid),
     });
 
     // 分析CLS
@@ -391,7 +391,7 @@ export class CoreWebVitalsAnalyzer {
       metric: 'cls',
       value: metrics.cls,
       rating: this.getRating('cls', metrics.cls),
-      recommendations: this.getCLSRecommendations(metrics.cls)
+      recommendations: this.getCLSRecommendations(metrics.cls),
     });
 
     // 分析FCP
@@ -399,7 +399,7 @@ export class CoreWebVitalsAnalyzer {
       metric: 'fcp',
       value: metrics.fcp,
       rating: this.getRating('fcp', metrics.fcp),
-      recommendations: this.getFCPRecommendations(metrics.fcp)
+      recommendations: this.getFCPRecommendations(metrics.fcp),
     });
 
     // 分析TTFB
@@ -407,7 +407,7 @@ export class CoreWebVitalsAnalyzer {
       metric: 'ttfb',
       value: metrics.ttfb,
       rating: this.getRating('ttfb', metrics.ttfb),
-      recommendations: this.getTTFBRecommendations(metrics.ttfb)
+      recommendations: this.getTTFBRecommendations(metrics.ttfb),
     });
 
     return measurements;
@@ -416,9 +416,12 @@ export class CoreWebVitalsAnalyzer {
   /**
    * 获取指标评级
    */
-  private getRating(metric: keyof CoreWebVitalsMetrics, value: number): 'good' | 'needs-improvement' | 'poor' {
+  private getRating(
+    metric: keyof CoreWebVitalsMetrics,
+    value: number
+  ): 'good' | 'needs-improvement' | 'poor' {
     const threshold = this.mobileThresholds[metric];
-    
+
     if (value <= threshold.good) {
       return 'good';
     } else if (value <= threshold.needsImprovement) {
@@ -541,7 +544,7 @@ export class CoreWebVitalsAnalyzer {
           type: 'performance',
           message: '检测到慢速网络连接',
           impact: 'high',
-          solution: '针对慢速网络优化资源加载，使用更激进的压缩和缓存策略'
+          solution: '针对慢速网络优化资源加载，使用更激进的压缩和缓存策略',
         });
       }
     }
@@ -552,7 +555,7 @@ export class CoreWebVitalsAnalyzer {
         type: 'performance',
         message: '设备内存较低',
         impact: 'medium',
-        solution: '减少JavaScript包大小，实施代码拆分，避免内存泄漏'
+        solution: '减少JavaScript包大小，实施代码拆分，避免内存泄漏',
       });
     }
 
@@ -562,7 +565,7 @@ export class CoreWebVitalsAnalyzer {
         type: 'performance',
         message: '设备CPU核心较少',
         impact: 'medium',
-        solution: '避免CPU密集型操作，使用Web Workers卸载主线程'
+        solution: '避免CPU密集型操作，使用Web Workers卸载主线程',
       });
     }
 
@@ -575,7 +578,7 @@ export class CoreWebVitalsAnalyzer {
             type: 'usability',
             message: '设备电量较低',
             impact: 'low',
-            solution: '减少动画和高耗能功能，提供节能模式'
+            solution: '减少动画和高耗能功能，提供节能模式',
           });
         }
       } catch (error) {
@@ -596,17 +599,23 @@ export class CoreWebVitalsAnalyzer {
     // 这里提供模拟数据作为示例
     for (const device of this.mobileDevices) {
       const simulatedMetrics = {
-        lcp: this.simulateMetric('lcp') * (device.networkSpeed === '5G' ? 0.7 : device.networkSpeed === '4G' ? 0.9 : 1.2),
+        lcp:
+          this.simulateMetric('lcp') *
+          (device.networkSpeed === '5G' ? 0.7 : device.networkSpeed === '4G' ? 0.9 : 1.2),
         fid: this.simulateMetric('fid'),
         cls: this.simulateMetric('cls'),
-        fcp: this.simulateMetric('fcp') * (device.networkSpeed === '5G' ? 0.6 : device.networkSpeed === '4G' ? 0.8 : 1.1),
-        ttfb: this.simulateMetric('ttfb') * (device.networkSpeed === '5G' ? 0.5 : device.networkSpeed === '4G' ? 0.7 : 1.0)
+        fcp:
+          this.simulateMetric('fcp') *
+          (device.networkSpeed === '5G' ? 0.6 : device.networkSpeed === '4G' ? 0.8 : 1.1),
+        ttfb:
+          this.simulateMetric('ttfb') *
+          (device.networkSpeed === '5G' ? 0.5 : device.networkSpeed === '4G' ? 0.7 : 1.0),
       };
 
       simulations.push({
         device: device.name,
         networkSpeed: device.networkSpeed,
-        results: simulatedMetrics
+        results: simulatedMetrics,
       });
     }
 
@@ -633,7 +642,7 @@ export class CoreWebVitalsAnalyzer {
         title: '立即优化关键性能指标',
         description: `${poorMetrics.map(m => m.metric.toUpperCase()).join(', ')} 指标需要紧急优化`,
         implementation: '按优先级实施相应的优化建议',
-        expectedImpact: '显著提升用户体验和搜索排名'
+        expectedImpact: '显著提升用户体验和搜索排名',
       });
     }
 
@@ -644,7 +653,7 @@ export class CoreWebVitalsAnalyzer {
         title: '持续优化性能指标',
         description: `${needsImprovementMetrics.map(m => m.metric.toUpperCase()).join(', ')} 指标有改善空间`,
         implementation: '制定阶段性优化计划',
-        expectedImpact: '进一步提升用户满意度'
+        expectedImpact: '进一步提升用户满意度',
       });
     }
 
@@ -657,7 +666,7 @@ export class CoreWebVitalsAnalyzer {
         title: '解决移动端关键问题',
         description: '针对移动设备特有的性能限制进行优化',
         implementation: highImpactIssues.map(issue => issue.solution).join('; '),
-        expectedImpact: '提升移动端用户体验'
+        expectedImpact: '提升移动端用户体验',
       });
     }
 
@@ -667,10 +676,12 @@ export class CoreWebVitalsAnalyzer {
   /**
    * 计算总体评级
    */
-  private calculateOverallRating(measurements: CoreWebVitalsMeasurement[]): 'good' | 'needs-improvement' | 'poor' {
+  private calculateOverallRating(
+    measurements: CoreWebVitalsMeasurement[]
+  ): 'good' | 'needs-improvement' | 'poor' {
     // Core Web Vitals的三个核心指标
     const coreMetrics = measurements.filter(m => ['lcp', 'fid', 'cls'].includes(m.metric));
-    
+
     const goodCount = coreMetrics.filter(m => m.rating === 'good').length;
     const poorCount = coreMetrics.filter(m => m.rating === 'poor').length;
 
@@ -693,14 +704,16 @@ export class CoreWebVitalsAnalyzer {
 
     if (this.options.enablestreamingMonitoring) {
       try {
-        this.observer = new PerformanceObserver((list) => {
+        this.observer = new PerformanceObserver(list => {
           for (const entry of list.getEntries()) {
             this.recordMeasurement(entry.name, entry.startTime || (entry as any).value || 0);
           }
         });
 
         // 监听各种性能条目
-        this.observer.observe({ entryTypes: ['paint', 'largest-contentful-paint', 'layout-shift', 'first-input'] });
+        this.observer.observe({
+          entryTypes: ['paint', 'largest-contentful-paint', 'layout-shift', 'first-input'],
+        });
       } catch (error) {
         Logger.warn('Failed to initialize PerformanceObserver:', { error: String(error) });
       }
