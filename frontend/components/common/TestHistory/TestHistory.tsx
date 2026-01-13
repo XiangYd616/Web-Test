@@ -286,18 +286,18 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
   // 响应式状态
   const { isMobile, isTablet } = useCommonMediaQueries();
 
-  // 无障碍支持
-  const { announcement, announce } = useAriaLiveAnnouncer();
-  const { isHighContrast } = useHighContrast();
-  const { prefersReducedMotion } = useReducedMotion();
-  const dialogFocusTrapRef = useFocusTrap(deleteDialogState.isOpen);
-
   // 删除对话框状态
   const [deleteDialogState, setDeleteDialogState] = useState<DeleteDialogState>({
     isOpen: false,
     type: 'single',
     isLoading: false,
   });
+
+  // 无障碍支持
+  const { announcement, announce } = useAriaLiveAnnouncer();
+  const { isHighContrast } = useHighContrast();
+  const { prefersReducedMotion } = useReducedMotion();
+  const dialogFocusTrapRef = useFocusTrap(deleteDialogState.isOpen);
 
   // ===== 数据加载 =====
   useEffect(() => {
@@ -422,7 +422,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
         } else {
           // 默认批量删除逻辑
           await Promise.all(
-            selectedIds.map(id =>
+            selectedIds.map((id: string) =>
               fetch(`${config.apiEndpoint}/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -559,7 +559,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
         {/* 表格 */}
         {showEmptyState ? (
           <EmptyState hasFilters={hasFilters} />
-        ) : loading ? (
+        ) : loading === true || loading === 'true' ? (
           <div className="px-4 py-12 text-center">
             <div className="inline-flex items-center gap-3 text-gray-400">
               <div className="w-5 h-5 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
