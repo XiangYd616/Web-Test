@@ -30,7 +30,7 @@ const {
   generateRequestId,
   createStandardMeta,
   createPaginationMeta
-} = require('../../shared/utils/apiResponseBuilder.js');
+} = require('../../shared/utils/apiResponseBuilder');
 
 // 向后兼容的函数别名
 const getStatusCode = getHttpStatusCode;

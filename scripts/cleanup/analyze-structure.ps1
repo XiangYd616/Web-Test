@@ -168,7 +168,8 @@ Write-Host "文件类型统计:" -ForegroundColor Yellow
 $sortedTypes = $analysis.Summary.FileTypes.GetEnumerator() | Sort-Object { $_.Value.Count } -Descending
 foreach ($type in $sortedTypes) {
     $ext = if ($type.Key) { $type.Key } else { "(无扩展名)" }
-    Write-Host "  $ext : $($type.Value.Count) 个文件 ($([math]::Round($type.Value.Size / 1KB, 2)) KB)" -ForegroundColor White
+    $sizeKB = [math]::Round($type.Value.Size / 1KB, 2)
+    Write-Host "  $ext : $($type.Value.Count) 个文件 ($sizeKB KB)" -ForegroundColor White
 }
 
 Write-Host ""
