@@ -262,7 +262,7 @@ export function useDataState<T = any>(
 
   // 手动设置错误
   const setError = useCallback(
-    (error: StandardApiError | null) => {
+    (error: any | null) => {
       updateState({
         status: error ? DataStatus.ERROR : DataStatus.IDLE,
         error,
