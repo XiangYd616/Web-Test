@@ -1,6 +1,6 @@
 /**
  * 统一类型系统 - 主入口文件
- * 
+ *
  * 本文件作为整个项目类型定义的统一入口，
  * 避免类型定义分散和重复的问题
  */
@@ -17,26 +17,28 @@ export * from './base.types';
 // =============================================================================
 // 显式导出 api.types，排除与 base.types 冲突的类型
 export type {
-  ApiResponse,
+  FilterParams as ApiFilterParams,
   PaginatedResponse as ApiPaginatedResponse,
-  ErrorResponse,
+  PaginationParams as ApiPaginationParams,
   ApiRequest,
-  TestRequest,
-  ErrorCode,
-  TestType as ApiTestType,
-  TestStatus as ApiTestStatus,
-  TestOptions,
-  TestResult as ApiTestResult,
+  ApiResponse,
   TestProgress as ApiTestProgress,
+  TestResult as ApiTestResult,
+  AuthCredentials,
+  AuthResponse,
+  AuthToken,
+  ErrorResponse,
+  TestOptions,
+  TestRequest,
   User,
   UserRole,
   UserSettings,
-  AuthCredentials,
-  AuthToken,
-  AuthResponse,
-  PaginationParams as ApiPaginationParams,
-  FilterParams as ApiFilterParams
 } from './api.types';
+
+// ErrorCode 是 enum，需要作为值导出（不能用 export type）
+export { ErrorCode } from './api.types';
+
+// TestType 和 TestStatus 在本文件中重新定义（第 48-74 行），不从 api.types 导出
 // apiResponse.types 已包含在 api.types 中
 // export * from './apiResponse.types';
 
@@ -59,7 +61,7 @@ export enum TestType {
   STRESS = 'stress',
   CONTENT = 'content',
   INFRASTRUCTURE = 'infrastructure',
-  DOCUMENTATION = 'documentation'
+  DOCUMENTATION = 'documentation',
 }
 
 // 测试状态枚举
@@ -70,7 +72,7 @@ export enum TestStatus {
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
-  TIMEOUT = 'timeout'
+  TIMEOUT = 'timeout',
 }
 
 // 测试优先级
@@ -78,13 +80,11 @@ export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 // 显式导出 test.types，排除与 index.ts 中已定义的 TestType 和 TestStatus
-export type {
-  TestConfig
-} from './test.types';
+export type { TestConfig } from './test.types';
 
 // testResult.types 已包含在 test.types 中
 // export * from './testResult.types';
@@ -113,11 +113,11 @@ export * from './rbac.types';
 // 显式导出 models.types，排除与 base.types 冲突的类型
 export type {
   BaseModel,
-  PaginationParams as ModelsPaginationParams,
-  PaginatedResponse as ModelsPaginatedResponse,
-  SortParams as ModelsSortParams,
   FilterParams as ModelsFilterParams,
-  QueryParams as ModelsQueryParams
+  PaginatedResponse as ModelsPaginatedResponse,
+  PaginationParams as ModelsPaginationParams,
+  QueryParams as ModelsQueryParams,
+  SortParams as ModelsSortParams,
 } from './models.types';
 // export * from './dataModels.types';
 export * from './project.types';
@@ -125,9 +125,9 @@ export * from './project.types';
 // =============================================================================
 // 系统和管理类型
 // =============================================================================
-export * from './system.types';
 export * from './admin.types';
 export * from './performance.types';
+export * from './system.types';
 
 // =============================================================================
 // UI 和组件类型
@@ -139,8 +139,8 @@ export * from './ui.types';
 // =============================================================================
 // 版本和兼容性类型
 // =============================================================================
-export * from './version.types';
 export * from './compatibility.types';
+export * from './version.types';
 
 // =============================================================================
 // 工具类型
@@ -156,10 +156,9 @@ export type EmptyObject = Record<string, never>;
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
-export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = 
-  Pick<T, Exclude<keyof T, Keys>> & 
+export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
   {
-    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>
+    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
   }[Keys];
 
 /**
@@ -187,6 +186,7 @@ export interface PaginatedData<T> {
 
 /**
  * API 响应基础类型
+ * 注意：ApiResponse 和 ErrorResponse 已从 api.types 导出，此处不再重复定义
  */
 export interface BaseApiResponse {
   success: boolean;
@@ -200,16 +200,18 @@ export interface SuccessResponse<T = any> extends BaseApiResponse {
   data: T;
 }
 
-export interface ErrorResponse extends BaseApiResponse {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-    details?: any;
-  };
-}
-
-export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse;
+// ErrorResponse 和 ApiResponse 已在第 20-22 行从 api.types 导出
+// 此处注释掉重复定义以避免冲突
+// export interface ErrorResponse extends BaseApiResponse {
+//   success: false;
+//   error: {
+//     code: string;
+//     message: string;
+//     details?: any;
+//   };
+// }
+//
+// export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse;
 
 // Additional API types
 export interface ApiRequestConfig {
