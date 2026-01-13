@@ -3,13 +3,25 @@
  * 集成系统监控、用户管理、设置管理等管理员功能
  */
 
+import {
+  Activity,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle,
+  Database,
+  FileText,
+  Monitor,
+  Server,
+  Settings as SettingsIcon,
+  Shield,
+  Users,
+} from 'lucide-react';
 import React, { useState } from 'react';
-import {Users, Settings as SettingsIcon, Monitor, Database, Shield, FileText, Server, Activity, BarChart3, AlertTriangle, CheckCircle} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import UserManagement from './UserManagement';
-import Settings from './Settings';
-import DataStorage from './DataStorage';
 import MonitoringDashboard from '../dashboard/MonitoringDashboard';
+import DataStorage from './DataStorage';
+import Settings from './Settings';
+import UserManagement from './UserManagement';
 
 interface AdminSection {
   id: string;
@@ -29,58 +41,58 @@ const Admin: React.FC = () => {
       id: 'overview',
       name: '系统概览',
       icon: BarChart3,
-      description: '系统状态和关键指标概览'
+      description: '系统状态和关键指标概览',
     },
     {
       id: 'users',
       name: '用户管理',
       icon: Users,
       description: '管理系统用户、角色和权限',
-      component: UserManagement
+      component: UserManagement,
     },
     {
       id: 'monitoring',
       name: '系统监控',
       icon: Monitor,
       description: '实时系统监控和性能分析',
-      component: MonitoringDashboard
+      component: MonitoringDashboard,
     },
     {
       id: 'settings',
       name: '系统设置',
       icon: SettingsIcon,
       description: '系统配置和偏好设置',
-      component: Settings
+      component: Settings,
     },
     {
       id: 'data',
       name: '数据管理',
       icon: Database,
       description: '数据备份、恢复和存储管理',
-      component: DataStorage
+      component: DataStorage,
     },
     {
       id: 'security',
       name: '安全中心',
       icon: Shield,
-      description: '安全配置和权限管理'
+      description: '安全配置和权限管理',
     },
     {
       id: 'logs',
       name: '系统日志',
       icon: FileText,
-      description: '查看和分析系统日志'
+      description: '查看和分析系统日志',
     },
     {
       id: 'maintenance',
       name: '系统维护',
       icon: Server,
-      description: '系统维护和性能优化'
-    }
+      description: '系统维护和性能优化',
+    },
   ];
 
   // 检查管理员权限
-  const isAdmin = user.role === 'admin' || user?.permissions?.includes('admin:access');
+  const isAdmin = user?.role === 'admin' || user?.permissions?.includes('admin:access');
 
   if (!isAdmin) {
     return (
@@ -102,7 +114,7 @@ const Admin: React.FC = () => {
       testsToday: 234,
       systemHealth: 'excellent',
       uptime: '99.9%',
-      avgResponseTime: '120ms'
+      avgResponseTime: '120ms',
     };
 
     return (
@@ -236,16 +248,19 @@ const Admin: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">快速操作</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {adminSections.filter(section => section?.id !== 'overview').map((section) => (
-              <button
-                key={section?.id}
-                onClick={() => setActiveSection(section?.id)}
-                className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                {section?.icon && React.createElement(section.icon, { className: "h-8 w-8 text-gray-600 mb-2" })}
-                <span className="text-sm font-medium text-gray-900">{section?.name}</span>
-              </button>
-            ))}
+            {adminSections
+              .filter(section => section?.id !== 'overview')
+              .map(section => (
+                <button
+                  key={section?.id}
+                  onClick={() => setActiveSection(section?.id)}
+                  className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  {section?.icon &&
+                    React.createElement(section.icon, { className: 'h-8 w-8 text-gray-600 mb-2' })}
+                  <span className="text-sm font-medium text-gray-900">{section?.name}</span>
+                </button>
+              ))}
           </div>
         </div>
       </div>
@@ -268,11 +283,10 @@ const Admin: React.FC = () => {
     return (
       <div className="bg-white rounded-lg shadow p-12 text-center">
         <div className="mx-auto h-16 w-16 text-gray-400 mb-4">
-          {adminSections.find(s => s.id === activeSection)?.icon && 
+          {adminSections.find(s => s.id === activeSection)?.icon &&
             React.createElement(adminSections.find(s => s.id === activeSection)!.icon, {
-              className: "h-16 w-16"
-            })
-          }
+              className: 'h-16 w-16',
+            })}
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">
           {adminSections.find(s => s.id === activeSection)?.name}
@@ -298,7 +312,7 @@ const Admin: React.FC = () => {
         <div className="mb-8">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
-              {adminSections.map((section) => (
+              {adminSections.map(section => (
                 <button
                   key={section?.id}
                   onClick={() => setActiveSection(section?.id)}
@@ -308,7 +322,8 @@ const Admin: React.FC = () => {
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  {section?.icon && React.createElement(section.icon, { className: "h-4 w-4 mr-2" })}
+                  {section?.icon &&
+                    React.createElement(section.icon, { className: 'h-4 w-4 mr-2' })}
                   {section?.name}
                 </button>
               ))}
@@ -317,9 +332,7 @@ const Admin: React.FC = () => {
         </div>
 
         {/* 活动内容 */}
-        <div>
-          {renderActiveSection()}
-        </div>
+        <div>{renderActiveSection()}</div>
       </div>
     </div>
   );
