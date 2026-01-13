@@ -1,12 +1,12 @@
 /**
  * SecurityTestHistory.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\security\SecurityTestHistory.tsx
  * 创建时间: 2025-09-25
  * 重构: 使用通用 TestHistory 组件
  */
 
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { TestHistory } from '../common/TestHistory/TestHistory';
 import { securityTestConfig } from '../common/TestHistory/config';
 import type { TestRecord } from '../common/TestHistory/types';
@@ -15,7 +15,7 @@ import type { TestRecord } from '../common/TestHistory/types';
 interface SecurityTestHistoryProps {
   onSelectTest?: (test: TestRecord) => void;
   onTestRerun?: (test: TestRecord) => void;
-  onTestDelete?: (testId: string) => void;
+  onTestDelete?: (testId: string) => Promise<void>;
   className?: string;
 }
 
@@ -39,4 +39,3 @@ export const SecurityTestHistory = forwardRef<any, SecurityTestHistoryProps>(
 SecurityTestHistory.displayName = 'SecurityTestHistory';
 
 export default SecurityTestHistory;
-

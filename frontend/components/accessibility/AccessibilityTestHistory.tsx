@@ -1,11 +1,11 @@
 /**
  * AccessibilityTestHistory.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\accessibility\AccessibilityTestHistory.tsx
  * 创建时间: 2025-10-29
  */
 
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { TestHistory } from '../common/TestHistory/TestHistory';
 import { accessibilityTestConfig } from '../common/TestHistory/config';
 import type { TestRecord } from '../common/TestHistory/types';
@@ -13,7 +13,7 @@ import type { TestRecord } from '../common/TestHistory/types';
 interface AccessibilityTestHistoryProps {
   onSelectTest?: (test: TestRecord) => void;
   onTestRerun?: (test: TestRecord) => void;
-  onTestDelete?: (testId: string) => void;
+  onTestDelete?: (testId: string) => Promise<void>;
   className?: string;
 }
 
@@ -37,4 +37,3 @@ export const AccessibilityTestHistory = forwardRef<any, AccessibilityTestHistory
 AccessibilityTestHistory.displayName = 'AccessibilityTestHistory';
 
 export default AccessibilityTestHistory;
-

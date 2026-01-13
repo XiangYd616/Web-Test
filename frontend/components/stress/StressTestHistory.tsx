@@ -1,12 +1,12 @@
 /**
  * StressTestHistory.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\stress\StressTestHistory.tsx
  * 创建时间: 2025-09-25
  * 重构: 2025-11-13 - 迁移到配置驱动的TestHistory组件
  */
 
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { TestHistory } from '../common/TestHistory/TestHistory';
 import { stressTestConfig } from '../common/TestHistory/config';
 import type { TestRecord } from '../common/TestHistory/types';
@@ -15,7 +15,7 @@ import type { TestRecord } from '../common/TestHistory/types';
 interface StressTestHistoryProps {
   onSelectTest?: (test: TestRecord) => void;
   onTestRerun?: (test: TestRecord) => void;
-  onTestDelete?: (testId: string) => void;
+  onTestDelete?: (testId: string) => Promise<void>;
   className?: string;
 }
 
@@ -39,4 +39,3 @@ export const StressTestHistory = forwardRef<any, StressTestHistoryProps>(
 StressTestHistory.displayName = 'StressTestHistory';
 
 export default StressTestHistory;
-
