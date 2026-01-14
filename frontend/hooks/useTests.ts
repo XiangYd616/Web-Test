@@ -5,11 +5,21 @@
 
 import {
   TestConfig,
-  TestQueryParams,
-  TestResult,
+  TestExecution as TestResult,
 } from '@/services/api/repositories/testRepository';
-import { testService } from '@/services/testing/testService';
+import { UnifiedTestService } from '@/services/testing/testService';
 import { useCallback, useEffect, useState } from 'react';
+
+// 创建testService实例
+const testService = new UnifiedTestService();
+
+// 定义TestQueryParams类型
+interface TestQueryParams {
+  page?: number;
+  limit?: number;
+  testType?: string;
+  status?: string;
+}
 
 /**
  * Hook返回值接口
