@@ -29,9 +29,9 @@ import {
   Typography,
 } from 'antd';
 import React, { useState } from 'react';
-import UnifiedTestExecutor from '../components/testing/UnifiedTestExecutor';
-import { useUnifiedTestEngine } from '../hooks/useUnifiedTestEngine';
-import type { TestResult } from '../types/unifiedEngine.types';
+import UnifiedTestExecutor from '../components/testing/TestExecutor';
+import { useTestEngine as useUnifiedTestEngine } from '../hooks/useTestEngine';
+import type { TestResult } from '../types/engine.types';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;

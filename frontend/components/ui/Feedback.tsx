@@ -5,14 +5,18 @@
 
 import { AlertTriangle, CheckCircle, Info, Loader, X, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { TestStatusIcon, UnifiedIcon } from './UnifiedIcons';
-;
-
+import { TestStatusIcon, UnifiedIcon } from './Icons';
 // 反馈类型
 export type FeedbackType = 'success' | 'error' | 'warning' | 'info' | 'loading';
 
 // 反馈位置
-export type FeedbackPosition = 'top' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+export type FeedbackPosition =
+  | 'top'
+  | 'bottom'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right';
 
 // 反馈大小
 export type FeedbackSize = 'sm' | 'md' | 'lg';
@@ -66,7 +70,7 @@ export const FeedbackCard: React.FC<BaseFeedbackProps> = ({
   className = '',
   onClose,
   closable = false,
-  icon = true
+  icon = true,
 }) => {
   // 类型样式映射
   const typeStyles = {
@@ -74,7 +78,7 @@ export const FeedbackCard: React.FC<BaseFeedbackProps> = ({
     error: 'bg-red-500/10 border-red-500/20 text-red-400',
     warning: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400',
     info: 'bg-blue-500/10 border-blue-500/20 text-blue-400',
-    loading: 'bg-gray-500/10 border-gray-500/20 text-gray-400'
+    loading: 'bg-gray-500/10 border-gray-500/20 text-gray-400',
   };
 
   // 图标映射
@@ -83,26 +87,28 @@ export const FeedbackCard: React.FC<BaseFeedbackProps> = ({
     error: XCircle,
     warning: AlertTriangle,
     info: Info,
-    loading: Loader
+    loading: Loader,
   };
 
   // 尺寸样式
   const sizeStyles = {
     sm: 'p-3 text-sm',
     md: 'p-4 text-base',
-    lg: 'p-6 text-lg'
+    lg: 'p-6 text-lg',
   };
 
   const IconComponent = iconMap[type];
 
   return (
-    <div className={`
+    <div
+      className={`
       ${typeStyles[type]}
       ${sizeStyles[size]}
       ${className}
       border rounded-xl backdrop-blur-sm
       transition-all duration-300 ease-in-out
-    `}>
+    `}
+    >
       <div className="flex items-start space-x-3">
         {/* 图标 */}
         {icon && (
@@ -118,9 +124,7 @@ export const FeedbackCard: React.FC<BaseFeedbackProps> = ({
 
         {/* 内容 */}
         <div className="flex-1 min-w-0">
-          {title && (
-            <h4 className="font-semibold mb-1">{title}</h4>
-          )}
+          {title && <h4 className="font-semibold mb-1">{title}</h4>}
           <p className="opacity-90">{message}</p>
         </div>
 
@@ -166,28 +170,26 @@ export const Notification: React.FC<NotificationProps> = ({
 
   // 位置样式
   const positionStyles = {
-    'top': 'top-4 left-1/2 transform -translate-x-1/2',
-    'bottom': 'bottom-4 left-1/2 transform -translate-x-1/2',
+    top: 'top-4 left-1/2 transform -translate-x-1/2',
+    bottom: 'bottom-4 left-1/2 transform -translate-x-1/2',
     'top-left': 'top-4 left-4',
     'top-right': 'top-4 right-4',
     'bottom-left': 'bottom-4 left-4',
-    'bottom-right': 'bottom-4 right-4'
+    'bottom-right': 'bottom-4 right-4',
   };
 
   if (!visible) return null;
 
   return (
-    <div className={`
+    <div
+      className={`
       fixed z-50 max-w-md
       ${positionStyles[position]}
       transition-all duration-300 ease-in-out
       ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}
-    `}>
-      <FeedbackCard
-        {...feedbackProps}
-        closable={true}
-        onClose={() => setVisible(false)}
-      />
+    `}
+    >
+      <FeedbackCard {...feedbackProps} closable={true} onClose={() => setVisible(false)} />
     </div>
   );
 };
@@ -200,7 +202,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   text,
   size = 'md',
   showIcon = true,
-  className = ''
+  className = '',
 }) => {
   // 状态样式映射
   const statusStyles = {
@@ -208,30 +210,40 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     loading: 'text-blue-400',
     success: 'text-green-400',
     error: 'text-red-400',
-    warning: 'text-yellow-400'
+    warning: 'text-yellow-400',
   };
 
   // 尺寸样式
   const sizeStyles = {
     sm: 'text-sm',
     md: 'text-base',
-    lg: 'text-lg'
+    lg: 'text-lg',
   };
 
   return (
-    <div className={`
+    <div
+      className={`
       flex items-center space-x-2
       ${statusStyles[status]}
       ${sizeStyles[size]}
       ${className}
-    `}>
+    `}
+    >
       {showIcon && (
         <TestStatusIcon
-          status={status === 'loading' ? 'running' :
-            status === 'idle' ? 'idle' :
-              status === 'success' ? 'completed' :
-                status === 'error' ? 'failed' :
-                  status === 'warning' ? 'warning' : 'idle'}
+          status={
+            status === 'loading'
+              ? 'running'
+              : status === 'idle'
+                ? 'idle'
+                : status === 'success'
+                  ? 'completed'
+                  : status === 'error'
+                    ? 'failed'
+                    : status === 'warning'
+                      ? 'warning'
+                      : 'idle'
+          }
           size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
           animated={status === 'loading'}
         />
@@ -250,20 +262,20 @@ export const ProgressFeedback: React.FC<ProgressFeedbackProps> = ({
   currentStep,
   showPercentage = true,
   size = 'md',
-  className = ''
+  className = '',
 }) => {
   // 状态颜色映射
   const statusColors = {
     running: 'bg-blue-500',
     completed: 'bg-green-500',
-    failed: 'bg-red-500'
+    failed: 'bg-red-500',
   };
 
   // 尺寸样式
   const sizeStyles = {
     sm: { height: 'h-1', text: 'text-xs' },
     md: { height: 'h-2', text: 'text-sm' },
-    lg: { height: 'h-3', text: 'text-base' }
+    lg: { height: 'h-3', text: 'text-base' },
   };
 
   const styles = sizeStyles[size];
@@ -280,9 +292,7 @@ export const ProgressFeedback: React.FC<ProgressFeedbackProps> = ({
           />
         </div>
         {showPercentage && (
-          <span className={`font-medium ${styles.text}`}>
-            {Math.round(progress)}%
-          </span>
+          <span className={`font-medium ${styles.text}`}>{Math.round(progress)}%</span>
         )}
       </div>
 
@@ -307,28 +317,26 @@ export const LoadingFeedback: React.FC<{
   message?: string;
   size?: FeedbackSize;
   className?: string;
-}> = ({
-  message = '加载中...',
-  size = 'md',
-  className = ''
-}) => {
-    return (
-      <div className={`flex items-center justify-center space-x-3 ${className}`}>
-        <UnifiedIcon
-          icon={Loader}
-          size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
-          color="primary"
-          className="animate-spin"
-        />
-        <span className={`
+}> = ({ message = '加载中...', size = 'md', className = '' }) => {
+  return (
+    <div className={`flex items-center justify-center space-x-3 ${className}`}>
+      <UnifiedIcon
+        icon={Loader}
+        size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
+        color="primary"
+        className="animate-spin"
+      />
+      <span
+        className={`
         ${size === 'sm' ? 'text-sm' : size === 'lg' ? 'text-lg' : 'text-base'}
         text-gray-300
-      `}>
-          {message}
-        </span>
-      </div>
-    );
-  };
+      `}
+      >
+        {message}
+      </span>
+    </div>
+  );
+};
 
 /**
  * 空状态组件
@@ -339,35 +347,20 @@ export const EmptyState: React.FC<{
   action?: React.ReactNode;
   icon?: React.ComponentType<any>;
   className?: string;
-}> = ({
-  title,
-  description,
-  action,
-  icon: Icon,
-  className = ''
-}) => {
-    return (
-      <div className={`text-center py-12 ${className}`}>
-        {Icon && (
-          <div className="mb-4">
-            <UnifiedIcon
-              icon={Icon as any}
-              size="2xl"
-              color="muted"
-              className="mx-auto"
-            />
-          </div>
-        )}
-        <h3 className="text-lg font-medium text-gray-300 mb-2">{title}</h3>
-        {description && (
-          <p className="text-gray-500 mb-6 max-w-md mx-auto">{description}</p>
-        )}
-        {action && (
-          <div>{action}</div>
-        )}
-      </div>
-    );
-  };
+}> = ({ title, description, action, icon: Icon, className = '' }) => {
+  return (
+    <div className={`text-center py-12 ${className}`}>
+      {Icon && (
+        <div className="mb-4">
+          <UnifiedIcon icon={Icon as any} size="2xl" color="muted" className="mx-auto" />
+        </div>
+      )}
+      <h3 className="text-lg font-medium text-gray-300 mb-2">{title}</h3>
+      {description && <p className="text-gray-500 mb-6 max-w-md mx-auto">{description}</p>}
+      {action && <div>{action}</div>}
+    </div>
+  );
+};
 
 /**
  * 反馈使用示例组件（用于文档）
@@ -407,21 +400,9 @@ export const FeedbackUsageGuide: React.FC = () => {
       <div>
         <h3 className="text-lg font-semibold mb-4">进度反馈</h3>
         <div className="space-y-4">
-          <ProgressFeedback
-            progress={65}
-            status="running"
-            currentStep="正在分析性能指标..."
-          />
-          <ProgressFeedback
-            progress={100}
-            status="completed"
-            currentStep="测试完成"
-          />
-          <ProgressFeedback
-            progress={45}
-            status="failed"
-            currentStep="连接失败"
-          />
+          <ProgressFeedback progress={65} status="running" currentStep="正在分析性能指标..." />
+          <ProgressFeedback progress={100} status="completed" currentStep="测试完成" />
+          <ProgressFeedback progress={45} status="failed" currentStep="连接失败" />
         </div>
       </div>
 

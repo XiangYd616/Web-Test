@@ -3,9 +3,13 @@
  * 封装测试相关的状态管理和业务逻辑
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { testService } from '@/services/business';
-import { TestResult, TestConfig, TestQueryParams } from '@/services/repository/testRepository';
+import {
+  TestConfig,
+  TestQueryParams,
+  TestResult,
+} from '@/services/api/repositories/testRepository';
+import { testService } from '@/services/testing/testService';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Hook返回值接口
@@ -15,7 +19,7 @@ export interface UseTestsReturn {
   tests: TestResult[];
   loading: boolean;
   error: Error | null;
-  
+
   // 操作方法
   loadTests: (params?: TestQueryParams) => Promise<void>;
   createTest: (config: TestConfig) => Promise<TestResult>;
@@ -39,16 +43,16 @@ export interface UseTestsOptions {
 
 /**
  * useTests Hook
- * 
+ *
  * @example
  * ```tsx
  * function TestPage() {
  *   const { tests, loading, createAndStart } = useTests({ autoLoad: true });
- *   
+ *
  *   const handleCreate = async () => {
  *     await createAndStart({ url: 'https://example.com' });
  *   };
- *   
+ *
  *   if (loading) return <Loading />;
  *   return <TestList tests={tests} onCreate={handleCreate} />;
  * }
@@ -67,7 +71,7 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
   const loadTests = useCallback(async (params?: TestQueryParams) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const data = await testService.getAll(params);
       setTests(data);
@@ -85,7 +89,7 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
    */
   const createTest = useCallback(async (config: TestConfig): Promise<TestResult> => {
     setError(null);
-    
+
     try {
       const test = await testService.create(config);
       setTests(prev => [test, ...prev]);
@@ -102,7 +106,7 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
    */
   const createAndStart = useCallback(async (config: TestConfig): Promise<TestResult> => {
     setError(null);
-    
+
     try {
       const test = await testService.createAndStart(config);
       setTests(prev => [test, ...prev]);
@@ -119,15 +123,13 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
    */
   const startTest = useCallback(async (testId: string): Promise<TestResult> => {
     setError(null);
-    
+
     try {
       const test = await testService.start(testId);
-      
+
       // 更新列表中的测试状态
-      setTests(prev => prev.map(t => 
-        t.testId === testId ? test : t
-      ));
-      
+      setTests(prev => prev.map(t => (t.testId === testId ? test : t)));
+
       return test;
     } catch (err) {
       const error = err as Error;
@@ -141,15 +143,13 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
    */
   const stopTest = useCallback(async (testId: string): Promise<TestResult> => {
     setError(null);
-    
+
     try {
       const test = await testService.stop(testId);
-      
+
       // 更新列表中的测试状态
-      setTests(prev => prev.map(t => 
-        t.testId === testId ? test : t
-      ));
-      
+      setTests(prev => prev.map(t => (t.testId === testId ? test : t)));
+
       return test;
     } catch (err) {
       const error = err as Error;
@@ -163,10 +163,10 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
    */
   const deleteTest = useCallback(async (testId: string): Promise<void> => {
     setError(null);
-    
+
     try {
       await testService.delete(testId);
-      
+
       // 从列表中移除
       setTests(prev => prev.filter(t => t.testId !== testId));
     } catch (err) {
@@ -181,10 +181,10 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
    */
   const deleteMultiple = useCallback(async (testIds: string[]): Promise<void> => {
     setError(null);
-    
+
     try {
       await testService.deleteMultiple(testIds);
-      
+
       // 从列表中移除
       setTests(prev => prev.filter(t => !testIds.includes(t.testId)));
     } catch (err) {
@@ -199,15 +199,13 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
    */
   const retryTest = useCallback(async (testId: string): Promise<TestResult> => {
     setError(null);
-    
+
     try {
       const test = await testService.retry(testId);
-      
+
       // 更新列表中的测试
-      setTests(prev => prev.map(t => 
-        t.testId === testId ? test : t
-      ));
-      
+      setTests(prev => prev.map(t => (t.testId === testId ? test : t)));
+
       return test;
     } catch (err) {
       const error = err as Error;
@@ -250,7 +248,7 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     deleteMultiple,
     retryTest,
     refreshTests,
-    clearError
+    clearError,
   };
 }
 

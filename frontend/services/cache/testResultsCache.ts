@@ -7,7 +7,7 @@
 import { cacheService } from './cacheService';
 
 // Use imported singleton instance
-import type { TestResult } from '../../types/unifiedEngine.types';
+import type { TestResult } from '../../types/engine.types';
 
 // 测试缓存键前缀
 const CACHE_KEYS = {
@@ -15,16 +15,16 @@ const CACHE_KEYS = {
   TEST_STATUS: 'test_status_',
   TEST_HISTORY: 'test_history_',
   TEST_STATS: 'test_stats_',
-  USER_TESTS: 'user_tests_'
+  USER_TESTS: 'user_tests_',
 } as const;
 
 // 缓存TTL配置 (毫秒)
 const CACHE_TTL = {
   TEST_RESULT: 24 * 60 * 60 * 1000, // 24小时
-  TEST_STATUS: 5 * 60 * 1000,       // 5分钟
-  TEST_HISTORY: 60 * 60 * 1000,     // 1小时
-  TEST_STATS: 10 * 60 * 1000,       // 10分钟
-  USER_TESTS: 30 * 60 * 1000        // 30分钟
+  TEST_STATUS: 5 * 60 * 1000, // 5分钟
+  TEST_HISTORY: 60 * 60 * 1000, // 1小时
+  TEST_STATS: 10 * 60 * 1000, // 10分钟
+  USER_TESTS: 30 * 60 * 1000, // 30分钟
 } as const;
 
 /**
@@ -121,12 +121,12 @@ export class TestResultsCache {
   public addToTestHistory(userId: string, testResult: TestResult): void {
     const history = this.getTestHistory(userId) || [];
     history.unshift(testResult);
-    
+
     // 限制历史记录数量
     if (history.length > 100) {
       history.splice(100);
     }
-    
+
     this.cacheTestHistory(userId, history);
   }
 
@@ -173,12 +173,12 @@ export class TestResultsCache {
     const tests = this.getUserTests(userId) || [];
     if (!tests.includes(testId)) {
       tests.unshift(testId);
-      
+
       // 限制测试数量
       if (tests.length > 50) {
         tests.splice(50);
       }
-      
+
       this.cacheUserTests(userId, tests);
     }
   }
@@ -199,14 +199,14 @@ export class TestResultsCache {
    */
   public batchGetResults(testIds: string[]): Map<string, TestResult> {
     const results = new Map<string, TestResult>();
-    
+
     for (const testId of testIds) {
       const result = this.getTestResult(testId);
       if (result) {
         results.set(testId, result);
       }
     }
-    
+
     return results;
   }
 
@@ -217,17 +217,17 @@ export class TestResultsCache {
    */
   public clearTestCache(type: 'results' | 'status' | 'history' | 'stats' | 'all'): void {
     const keys = cacheService.keys();
-    
+
     const prefixMap = {
       results: CACHE_KEYS.TEST_RESULT,
       status: CACHE_KEYS.TEST_STATUS,
       history: CACHE_KEYS.TEST_HISTORY,
       stats: CACHE_KEYS.TEST_STATS,
-      all: ''
+      all: '',
     };
-    
+
     const prefix = prefixMap[type];
-    
+
     keys.forEach(key => {
       if (type === 'all' || key.startsWith(prefix)) {
         cacheService.delete(key);
@@ -247,14 +247,14 @@ export class TestResultsCache {
     userTests: number;
   } {
     const keys = cacheService.keys();
-    
+
     return {
       totalItems: keys.length,
       testResults: keys.filter(k => k.startsWith(CACHE_KEYS.TEST_RESULT)).length,
       testStatus: keys.filter(k => k.startsWith(CACHE_KEYS.TEST_STATUS)).length,
       testHistory: keys.filter(k => k.startsWith(CACHE_KEYS.TEST_HISTORY)).length,
       testStats: keys.filter(k => k.startsWith(CACHE_KEYS.TEST_STATS)).length,
-      userTests: keys.filter(k => k.startsWith(CACHE_KEYS.USER_TESTS)).length
+      userTests: keys.filter(k => k.startsWith(CACHE_KEYS.USER_TESTS)).length,
     };
   }
 }

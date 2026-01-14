@@ -1,5 +1,4 @@
-﻿
-/**
+﻿/**
  * 后台测试管理器 - 重构优化版本
  * 现在内部使用统一测试服务，保持向后兼容性
  * 已迁移到新的类型系统，使用统一的类型定义
@@ -8,21 +7,14 @@
  */
 
 import Logger from '@/utils/logger';
-import type {
-  CompletionCallback,
-  ErrorCallback,
-  ProgressCallback
-} from '../types/base.types';
+import type { CompletionCallback, ErrorCallback, ProgressCallback } from '../types/base.types';
 
-import {
-  TestStatus,
-  TestType
-} from '../types/enums';
+import { TestStatus, TestType } from '../types/enums';
 
 // 导入统一测试服务
-import type { UnifiedTestConfig } from '../types/base.types';
 import type { TestCallbacks } from '../types/api/index';
-import { unifiedTestService } from './testing/unifiedTestService';
+import type { UnifiedTestConfig } from '../types/base.types';
+import { unifiedTestService } from './testing/testService';
 
 // 为了兼容性创建别名
 type UnifiedTestCallbacks = TestCallbacks;
@@ -44,7 +36,12 @@ export interface TestInfo {
   onError?: ErrorCallback;
 }
 
-export type TestEvent = 'testStarted' | 'testProgress' | 'testCompleted' | 'testFailed' | 'testCancelled';
+export type TestEvent =
+  | 'testStarted'
+  | 'testProgress'
+  | 'testCompleted'
+  | 'testFailed'
+  | 'testCancelled';
 
 export type TestListener = (event: TestEvent, data: TestInfo) => void;
 
@@ -63,7 +60,9 @@ class BackgroundTestManager {
    * @returns {Promise<void>}
 
    */
-  private apiBaseUrl = import.meta.env.VITE_API_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`;
+  private apiBaseUrl =
+    import.meta.env.VITE_API_URL ||
+    `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`;
 
   constructor() {
     // 从localStorage恢复状态
@@ -119,7 +118,7 @@ class BackgroundTestManager {
       endTime: data.endTime,
       currentStep: data.step || data.currentStep || '',
       result: data.result,
-      error: data.error
+      error: data.error,
     };
   }
 
@@ -142,13 +141,13 @@ class BackgroundTestManager {
       testType: testType as any,
       url: configObj?.url || configObj?.targetUrl || '',
       timeout: configObj?.timeout,
-      retries: configObj?.retries
+      retries: configObj?.retries,
     };
 
     const callbacks: UnifiedTestCallbacks = {
       onProgress,
       onComplete,
-      onError
+      onError,
     };
 
     // 为了保持同步接口兼容性，我们需要立即返回一个ID
@@ -158,29 +157,31 @@ class BackgroundTestManager {
     if (typeof (unifiedTestService as any).startTest === 'function') {
       const testPromise = (unifiedTestService as any).startTest(unifiedConfig, callbacks);
       // 异步处理实际的测试ID映射
-      testPromise.then((actualTestId: string) => {
-      // 更新本地映射
-      const testInfo: TestInfo = {
-        id: actualTestId,
-        type: testType,
-        config,
-        status: TestStatus.RUNNING,
-        progress: 0,
-        startTime: new Date(),
-        currentStep: '正在初始化测试...',
-        result: null,
-        error: null,
-        onProgress,
-        onComplete,
-        onError
-      };
+      testPromise
+        .then((actualTestId: string) => {
+          // 更新本地映射
+          const testInfo: TestInfo = {
+            id: actualTestId,
+            type: testType,
+            config,
+            status: TestStatus.RUNNING,
+            progress: 0,
+            startTime: new Date(),
+            currentStep: '正在初始化测试...',
+            result: null,
+            error: null,
+            onProgress,
+            onComplete,
+            onError,
+          };
 
-        this.runningTests.set(actualTestId, testInfo);
-        this.notifyListeners('testStarted', testInfo);
-      }).catch((error: Error) => {
-        Logger.error('Unified test service failed:', { error: String(error) });
-        if (onError) onError(error);
-      });
+          this.runningTests.set(actualTestId, testInfo);
+          this.notifyListeners('testStarted', testInfo);
+        })
+        .catch((error: Error) => {
+          Logger.error('Unified test service failed:', { error: String(error) });
+          if (onError) onError(error);
+        });
     } else {
       // Fallback: 直接创建测试信息
       const testInfo: TestInfo = {
@@ -195,11 +196,11 @@ class BackgroundTestManager {
         error: null,
         onProgress,
         onComplete,
-        onError
+        onError,
       };
       this.runningTests.set(testId, testInfo);
       this.notifyListeners('testStarted', testInfo);
-      
+
       // 异步执行测试
       this.executeTest(testInfo);
     }
@@ -221,7 +222,6 @@ class BackgroundTestManager {
 
       this.runningTests.delete(testId);
       this.completedTests.set(testId, testInfo);
-
 
       /**
 
@@ -293,9 +293,9 @@ class BackgroundTestManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
 
       if (!response.ok) {
@@ -334,9 +334,9 @@ class BackgroundTestManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
 
       if (!response.ok) {
@@ -374,9 +374,9 @@ class BackgroundTestManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
 
       if (!response.ok) {
@@ -391,7 +391,7 @@ class BackgroundTestManager {
         '🛡️ 正在扫描安全漏洞...',
         '🔐 正在验证HTTPS配置...',
         '🚨 正在检查恶意软件...',
-        '📋 正在生成安全报告...'
+        '📋 正在生成安全报告...',
       ]);
 
       const data = await response.json();
@@ -409,7 +409,10 @@ class BackgroundTestManager {
   // 执行SEO测试
   private async executeSEOTest(testInfo: TestInfo): Promise<void> {
     // SEO测试现在使用前端实现，不再需要后端API
-    this.handleTestError(testInfo.id, new Error('SEO测试已迁移到专用的SEO测试页面，请使用SEO测试功能'));
+    this.handleTestError(
+      testInfo.id,
+      new Error('SEO测试已迁移到专用的SEO测试页面，请使用SEO测试功能')
+    );
   }
 
   // 执行API测试
@@ -423,9 +426,9 @@ class BackgroundTestManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
 
       if (!response.ok) {
@@ -440,7 +443,7 @@ class BackgroundTestManager {
         '📊 正在验证响应数据...',
         '⚡ 正在测试响应时间...',
         '🔒 正在检查API安全性...',
-        '📈 正在生成测试报告...'
+        '📈 正在生成测试报告...',
       ]);
 
       const data = await response.json();
@@ -466,9 +469,9 @@ class BackgroundTestManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
 
       if (!response.ok) {
@@ -506,9 +509,9 @@ class BackgroundTestManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
 
       if (!response.ok) {
@@ -546,9 +549,9 @@ class BackgroundTestManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
 
       if (!response.ok) {
@@ -558,7 +561,6 @@ class BackgroundTestManager {
       this.updateTestProgress(testInfo.id, 50, '📊 正在分析数据库性能...');
 
       const data = await response.json();
-
 
       /**
 
@@ -592,9 +594,9 @@ class BackgroundTestManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify(config),
       });
 
       if (!response.ok) {
@@ -609,7 +611,7 @@ class BackgroundTestManager {
         '📊 正在收集性能指标...',
         '⚡ 正在分析响应时间...',
         '🔍 正在检测瓶颈...',
-        '📈 正在生成压力测试报告...'
+        '📈 正在生成压力测试报告...',
       ]);
 
       const data = await response.json();
@@ -630,7 +632,6 @@ class BackgroundTestManager {
     if (testInfo) {
       testInfo.progress = progress;
       testInfo.currentStep = step;
-
 
       /**
 
@@ -662,7 +663,6 @@ class BackgroundTestManager {
       this.runningTests.delete(testId);
       this.completedTests.set(testId, testInfo);
 
-
       /**
 
        * if功能函数
@@ -692,7 +692,6 @@ class BackgroundTestManager {
       this.runningTests.delete(testId);
       this.completedTests.set(testId, testInfo);
 
-
       /**
 
        * if功能函数
@@ -718,7 +717,6 @@ class BackgroundTestManager {
     steps: string[],
     stepDuration: number = 2000
   ): Promise<void> {
-
     /**
 
      * for功能函数
@@ -731,7 +729,7 @@ class BackgroundTestManager {
     const progressIncrement = (endProgress - startProgress) / steps.length;
 
     for (let i = 0; i < steps.length; i++) {
-      const currentProgress = startProgress + (progressIncrement * (i + 1));
+      const currentProgress = startProgress + progressIncrement * (i + 1);
 
       /**
 
@@ -791,7 +789,11 @@ class BackgroundTestManager {
   }
 
   // 轮询测试状态
-  private async pollTestStatus(testId: string, backendTestId: string, testType: string): Promise<void> {
+  private async pollTestStatus(
+    testId: string,
+    backendTestId: string,
+    testType: string
+  ): Promise<void> {
     const maxAttempts = 60; // 最多轮询60次（5分钟）
     const pollInterval = 5000; // 每5秒轮询一次
 
@@ -809,7 +811,7 @@ class BackgroundTestManager {
           throw new Error(data.message || `${testType}测试失败`);
         } else if (data.status === 'running' || data.status === 'pending') {
           // 测试仍在进行中，更新进度
-          const progress = Math.min(90, 30 + (attempt * 2)); // 从30%开始，最多到90%
+          const progress = Math.min(90, 30 + attempt * 2); // 从30%开始，最多到90%
           this.updateTestProgress(testId, progress, `🔄 ${testType}测试进行中...`);
 
           // 等待下次轮询
@@ -851,7 +853,7 @@ class BackgroundTestManager {
     try {
       const data = {
         completedTests: Array.from(this.completedTests.entries()),
-        testCounter: this.testCounter
+        testCounter: this.testCounter,
       };
       localStorage.setItem('backgroundTestManager', JSON.stringify(data));
     } catch (error) {

@@ -1,13 +1,11 @@
-﻿import { Clock, Play, Square, Target } from 'lucide-react';
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
+import { Clock, Play, Square, Target } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { TestResult } from '../../services/testing/unifiedTestEngine';
+import { TestResult } from '../../services/testing/testEngine';
 import { TestType } from '../../types/enums';
 import { ButtonFeedback } from '../integration/InteractiveFeedback';
 import { ErrorDisplay, useErrorHandler, useNotifications } from '../system/ErrorHandling';
 import { SmartLoader, useLoadingState } from '../ui/LoadingStates';
-;
-
 export interface TestInterfaceProps {
   testType: TestType;
   title: string;
@@ -27,19 +25,28 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   defaultConfig,
   onRunTest,
   onCancelTest,
-  className = ''
+  className = '',
 }) => {
   const [config, setConfig] = useState(defaultConfig);
   const [result, setResult] = useState<TestResult | null>(null);
-  const { isLoading, progress, stage, error, startLoading, updateProgress, finishLoading, setLoadingError } = useLoadingState();
+  const {
+    isLoading,
+    progress,
+    stage,
+    error,
+    startLoading,
+    updateProgress,
+    finishLoading,
+    setLoadingError,
+  } = useLoadingState();
   const { error: handledError, handleError, clearError } = useErrorHandler();
   const { success, error: notifyError } = useNotifications();
 
-    /**
-     * if功能函数
-     * @param {Object} params - 参数对象
-     * @returns {Promise<Object>} 返回结果
-     */
+  /**
+   * if功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
   const handleStartTest = useCallback(async () => {
     if (!config.url) {
       notifyError('输入错误', '请输入有效的URL');
@@ -56,7 +63,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
       { progress: 30, stage: '建立连接' },
       { progress: 50, stage: '执行测试' },
       { progress: 80, stage: '分析结果' },
-      { progress: 100, stage: '生成报告' }
+      { progress: 100, stage: '生成报告' },
     ];
 
     try {
@@ -75,7 +82,18 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
       handleError(err, '执行测试');
       notifyError('测试失败', errorMessage);
     }
-  }, [config, onRunTest, startLoading, updateProgress, finishLoading, setLoadingError, handleError, clearError, success, notifyError]);
+  }, [
+    config,
+    onRunTest,
+    startLoading,
+    updateProgress,
+    finishLoading,
+    setLoadingError,
+    handleError,
+    clearError,
+    success,
+    notifyError,
+  ]);
 
   const handleCancelTest = useCallback(async () => {
     try {
@@ -87,7 +105,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
       handleError(err, '取消测试');
     }
 
-  /**
+    /**
 
    * 获取getScoreColor数据
 
@@ -112,18 +130,23 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
     return 'bg-red-50 border-red-200';
   };
 
-    /**
-     * switch功能函数
-     * @param {Object} params - 参数对象
-     * @returns {Promise<Object>} 返回结果
-     */
+  /**
+   * switch功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'critical':
+        return 'bg-red-100 text-red-800';
+      case 'high':
+        return 'bg-orange-100 text-orange-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -131,13 +154,11 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            测试URL
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">测试URL</label>
           <input
             type="url"
             value={config.url}
-            onChange={(e) => setConfig({ ...config, url: e?.target.value })}
+            onChange={e => setConfig({ ...config, url: e?.target.value })}
             placeholder="https://example.com"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             disabled={isLoading}
@@ -149,14 +170,17 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="users-input" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="users-input"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   并发用户数
                 </label>
                 <input
                   id="users-input"
                   type="number"
                   value={config.users || 10}
-                  onChange={(e) => setConfig({ ...config, users: parseInt(e?.target.value) || 10 })}
+                  onChange={e => setConfig({ ...config, users: parseInt(e?.target.value) || 10 })}
                   min="1"
                   max="1000"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -165,14 +189,19 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                 />
               </div>
               <div>
-                <label htmlFor="duration-input" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="duration-input"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   测试时长 (秒)
                 </label>
                 <input
                   id="duration-input"
                   type="number"
                   value={config.duration || 30}
-                  onChange={(e) => setConfig({ ...config, duration: parseInt(e?.target.value) || 30 })}
+                  onChange={e =>
+                    setConfig({ ...config, duration: parseInt(e?.target.value) || 30 })
+                  }
                   min="10"
                   max="3600"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -190,7 +219,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               <input
                 type="checkbox"
                 checked={config.checkSEO || false}
-                onChange={(e) => setConfig({ ...config, checkSEO: e?.target.checked })}
+                onChange={e => setConfig({ ...config, checkSEO: e?.target.checked })}
                 disabled={isLoading}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
@@ -200,7 +229,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               <input
                 type="checkbox"
                 checked={config.checkAccessibility || false}
-                onChange={(e) => setConfig({ ...config, checkAccessibility: e?.target.checked })}
+                onChange={e => setConfig({ ...config, checkAccessibility: e?.target.checked })}
                 disabled={isLoading}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
@@ -210,7 +239,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               <input
                 type="checkbox"
                 checked={config.checkPerformance || false}
-                onChange={(e) => setConfig({ ...config, checkPerformance: e?.target.checked })}
+                onChange={e => setConfig({ ...config, checkPerformance: e?.target.checked })}
                 disabled={isLoading}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
@@ -235,9 +264,9 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
               <p className="text-sm text-gray-600">{result.summary}</p>
             </div>
             <div className="text-right">
-            <div className={`text-4xl font-bold ${getScoreColor(result.score ?? 0)}`}>
-              {result.score ?? 0}
-            </div>
+              <div className={`text-4xl font-bold ${getScoreColor(result.score ?? 0)}`}>
+                {result.score ?? 0}
+              </div>
               <div className="text-sm text-gray-500">满分 100</div>
             </div>
           </div>
@@ -276,7 +305,9 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
                         <h4 className="font-medium text-gray-900">{rec.title}</h4>
-                        <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(rec.priority)}`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(rec.priority)}`}
+                        >
                           {rec.priority}
                         </span>
                       </div>
@@ -317,12 +348,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
                 开始测试
               </ButtonFeedback>
             ) : (
-              <ButtonFeedback
-                onClick={handleCancelTest}
-                variant="danger"
-                size="lg"
-                loading={false}
-              >
+              <ButtonFeedback onClick={handleCancelTest} variant="danger" size="lg" loading={false}>
                 <Square className="w-5 h-5 mr-2" />
                 停止测试
               </ButtonFeedback>
@@ -339,11 +365,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
       {/* 错误信息 */}
       {handledError && (
-        <ErrorDisplay
-          error={handledError}
-          onRetry={handleStartTest}
-          className="mb-6"
-        />
+        <ErrorDisplay error={handledError} onRetry={handleStartTest} className="mb-6" />
       )}
 
       {/* 进度显示 */}

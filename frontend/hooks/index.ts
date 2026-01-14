@@ -23,8 +23,8 @@ export { useNetworkTestState } from './useNetworkTestState';
 export { useUxTestState } from './useUxTestState';
 
 // 🛠️ 工具Hook（保持兼容性）
+// export { useSEOTest as useUnifiedSEOTest } from './useSEOTest'; // TODO: 文件不存在，需要检查
 export { useTestProgress } from './useTestProgress';
-export { useUnifiedSEOTest } from './useUnifiedSEOTest';
 export { useUserStats } from './useUserStats';
 
 // 导出类型定义 - 从统一类型系统导入

@@ -26,7 +26,7 @@ import { useLocation } from 'react-router-dom';
 // 临时注释掉不存在的组件导入
 // import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
 // import ImportExport from '../../components/analytics/ImportExport';
-import UnifiedPerformanceAnalysis from '../../components/analysis/UnifiedPerformanceAnalysis';
+import UnifiedPerformanceAnalysis from '../../components/analysis/PerformanceAnalysis';
 // import streamingMonitoring from '../../components/analytics/streamingMonitoring';
 import ReportManagement from '../../components/analytics/ReportManagement';
 

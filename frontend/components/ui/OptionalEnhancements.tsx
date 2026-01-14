@@ -4,9 +4,17 @@
  */
 
 import Logger from '@/utils/logger';
-import { Check, ChevronDown, ChevronUp, Copy, ExternalLink, Maximize2, Minimize2 } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  ExternalLink,
+  Maximize2,
+  Minimize2,
+} from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActionIcon, UnifiedIcon } from './UnifiedIcons';
+import { ActionIcon, UnifiedIcon } from './Icons';
 
 // 可折叠面板属性
 export interface CollapsiblePanelProps {
@@ -74,9 +82,8 @@ export const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
   className = '',
   headerClassName = '',
   contentClassName = '',
-  onToggle
+  onToggle,
 }) => {
-
   /**
 
    * 处理handleToggle事件
@@ -95,7 +102,9 @@ export const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
   };
 
   return (
-    <div className={`bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden ${className}`}>
+    <div
+      className={`bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden ${className}`}
+    >
       {/* 头部 */}
       <button
         type="button"
@@ -107,9 +116,7 @@ export const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
         `}
       >
         <div className="flex items-center space-x-3">
-          {Icon && (
-            <UnifiedIcon icon={Icon as any} size="md" color="primary" />
-          )}
+          {Icon && <UnifiedIcon icon={Icon as any} size="md" color="primary" />}
           <h3 className="text-lg font-medium text-white">{title}</h3>
         </div>
         <UnifiedIcon
@@ -121,13 +128,13 @@ export const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
       </button>
 
       {/* 内容 */}
-      <div className={`
+      <div
+        className={`
         transition-all duration-300 ease-in-out overflow-hidden
         ${expanded ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}
-      `}>
-        <div className={`px-6 pb-6 ${contentClassName}`}>
-          {children}
-        </div>
+      `}
+      >
+        <div className={`px-6 pb-6 ${contentClassName}`}>{children}</div>
       </div>
     </div>
   );
@@ -142,7 +149,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   title,
   copyable = true,
   maxHeight = '400px',
-  className = ''
+  className = '',
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -161,9 +168,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
       {/* 头部 */}
       {(title || copyable) && (
         <div className="flex items-center justify-between px-4 py-3 bg-gray-800/50 border-b border-gray-700">
-          {title && (
-            <span className="text-sm font-medium text-gray-300">{title}</span>
-          )}
+          {title && <span className="text-sm font-medium text-gray-300">{title}</span>}
           {copyable && (
             <button
               type="button"
@@ -183,10 +188,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
 
       {/* 代码内容 */}
       <div className="relative">
-        <pre
-          className="p-4 text-sm text-gray-300 overflow-auto font-mono"
-          style={{ maxHeight }}
-        >
+        <pre className="p-4 text-sm text-gray-300 overflow-auto font-mono" style={{ maxHeight }}>
           <code className={`language-${language}`}>{code}</code>
         </pre>
       </div>
@@ -203,14 +205,14 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   change,
   icon: Icon,
   color = 'primary',
-  className = ''
+  className = '',
 }) => {
   const colorStyles = {
     primary: 'border-blue-500/20 bg-blue-500/5',
     success: 'border-green-500/20 bg-green-500/5',
     warning: 'border-yellow-500/20 bg-yellow-500/5',
     error: 'border-red-500/20 bg-red-500/5',
-    info: 'border-cyan-500/20 bg-cyan-500/5'
+    info: 'border-cyan-500/20 bg-cyan-500/5',
   };
 
   const iconColors = {
@@ -218,25 +220,34 @@ export const StatsCard: React.FC<StatsCardProps> = ({
     success: 'text-green-400',
     warning: 'text-yellow-400',
     error: 'text-red-400',
-    info: 'text-cyan-400'
+    info: 'text-cyan-400',
   };
 
   return (
-    <div className={`
+    <div
+      className={`
       p-6 rounded-xl border backdrop-blur-sm
       ${colorStyles[color]}
       ${className}
-    `}>
+    `}
+    >
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-400 mb-1">{title}</p>
           <p className="text-2xl font-bold text-white">{value}</p>
           {change && (
-            <div className={`
+            <div
+              className={`
               flex items-center space-x-1 mt-2 text-sm
-              ${change.type === 'increase' ? 'text-green-400' :
-                change.type === 'decrease' ? 'text-red-400' : 'text-gray-400'}
-            `}>
+              ${
+                change.type === 'increase'
+                  ? 'text-green-400'
+                  : change.type === 'decrease'
+                    ? 'text-red-400'
+                    : 'text-gray-400'
+              }
+            `}
+            >
               <span>
                 {change.type === 'increase' ? '↗' : change.type === 'decrease' ? '↘' : '→'}
               </span>
@@ -265,18 +276,18 @@ export const QuickAction: React.FC<QuickActionProps> = ({
   loading = false,
   variant = 'secondary',
   size = 'md',
-  className = ''
+  className = '',
 }) => {
   const variantStyles = {
     primary: 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600',
     secondary: 'bg-gray-700 hover:bg-gray-600 text-gray-300 border-gray-600',
-    ghost: 'bg-transparent hover:bg-gray-700/50 text-gray-400 border-gray-600'
+    ghost: 'bg-transparent hover:bg-gray-700/50 text-gray-400 border-gray-600',
   };
 
   const sizeStyles = {
     sm: 'px-3 py-2 text-sm',
     md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg'
+    lg: 'px-6 py-3 text-lg',
   };
 
   return (
@@ -311,7 +322,7 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({
   children,
   enabled = false,
   onToggle,
-  className = ''
+  className = '',
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -333,11 +344,11 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({
   };
 
   useEffect(() => {
-      /**
-       * if功能函数
-       * @param {Object} params - 参数对象
-       * @returns {Promise<Object>} 返回结果
-       */
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isFullscreen) {
         toggleFullscreen();
@@ -378,17 +389,11 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({
           className="absolute top-4 right-4 z-10 p-2 bg-gray-800/80 hover:bg-gray-700/80 rounded-lg transition-colors"
           title={isFullscreen ? '退出全屏' : '进入全屏'}
         >
-          <UnifiedIcon
-            icon={isFullscreen ? Minimize2 : Maximize2}
-            size="md"
-            color="secondary"
-          />
+          <UnifiedIcon icon={isFullscreen ? Minimize2 : Maximize2} size="md" color="secondary" />
         </button>
 
         {/* 内容 */}
-        <div className={isFullscreen ? 'h-full overflow-auto p-6' : ''}>
-          {children}
-        </div>
+        <div className={isFullscreen ? 'h-full overflow-auto p-6' : ''}>{children}</div>
       </div>
 
       {/* 全屏遮罩 */}
@@ -429,13 +434,9 @@ export const LinkPreview: React.FC<{
     >
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          {title && (
-            <h4 className="font-medium text-white mb-1 truncate">{title}</h4>
-          )}
+          {title && <h4 className="font-medium text-white mb-1 truncate">{title}</h4>}
           <p className="text-sm text-gray-400 truncate">{url}</p>
-          {description && (
-            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{description}</p>
-          )}
+          {description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{description}</p>}
         </div>
         <UnifiedIcon
           icon={ExternalLink}
@@ -461,10 +462,7 @@ export const EnhancementsUsageGuide: React.FC = () => {
       {/* 可折叠面板示例 */}
       <div>
         <h3 className="text-lg font-semibold mb-4">可折叠面板</h3>
-        <CollapsiblePanel
-          title="高级配置选项"
-          defaultExpanded={false}
-        >
+        <CollapsiblePanel title="高级配置选项" defaultExpanded={false}>
           <div className="space-y-4">
             <p className="text-gray-300">这里是可折叠的内容区域</p>
             <div className="grid grid-cols-2 gap-4">
