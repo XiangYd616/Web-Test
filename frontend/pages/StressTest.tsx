@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 统一压力测试页面
  * 提供完整的压力测试功能，包括实时监控、结果分析和报告导出
  */
@@ -181,7 +181,7 @@ const UnifiedStressTest: React.FC = () => {
         </div>
 
         {/* 主测试界面 */}
-        <UniversalTestPage
+        <ComprehensiveTestPage
           testType={stressTestConfig as any}
           onTestComplete={handleTestComplete}
           onConfigChange={handleConfigChange}

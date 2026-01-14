@@ -77,7 +77,7 @@ const { Option } = Select;
 const { TabPane } = Tabs;
 
 // 组件属性接口
-export interface UniversalTestComponentProps {
+export interface TestComponentProps {
   // 基础配置
   testType?: TestType;
   title?: string;
@@ -149,7 +149,7 @@ const getScoreColor = (score: number): string => {
 /**
  * 通用测试组件
  */
-export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
+export const TestComponent: React.FC<TestComponentProps> = ({
   testType: defaultTestType = TestTypeEnum.PERFORMANCE,
   title,
   description,
@@ -823,4 +823,4 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
   );
 };
 
-export default UniversalTestComponent;
+export default TestComponent;

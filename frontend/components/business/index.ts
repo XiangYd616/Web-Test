@@ -11,7 +11,7 @@ export { default as ResultViewer } from './ResultViewer';
 // export { LegacyTestRunner as TestRunner } from './LegacyTestRunner';
 
 // 类型定义导出
-// Note: TestRunner types moved to UniversalTestComponent
+// Note: TestRunner types moved to TestComponent
 // export type {
 //     TestConfig,
 //     TestResult, 
