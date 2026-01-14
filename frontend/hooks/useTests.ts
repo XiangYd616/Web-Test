@@ -155,10 +155,11 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     setError(null);
 
     try {
-      const test = await testService.stop(testId);
+      await testRepository.stopTest(testId);
+      const test = await testRepository.getTestStatus(testId);
 
       // 更新列表中的测试状态
-      setTests(prev => prev.map(t => (t.testId === testId ? test : t)));
+      setTests(prev => prev.map(t => (t.id === testId ? test : t)));
 
       return test;
     } catch (err) {
