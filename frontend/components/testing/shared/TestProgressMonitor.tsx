@@ -4,24 +4,10 @@
  * 提供实时测试进度和状态监控
  */
 
-import {
-  LoadingOutlined,
-  StopOutlined
-} from '@ant-design/icons';
-import {
-  Button,
-  Card,
-  Col,
-  Empty,
-  Progress,
-  Row,
-  Space,
-  Tag,
-  Timeline,
-  Typography
-} from 'antd';
+import { LoadingOutlined, StopOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Empty, Progress, Row, Space, Tag, Timeline, Typography } from 'antd';
 import React from 'react';
-import type { TestStatusInfo } from '../../../types/unifiedEngine.types';
+import type { TestStatusInfo } from '../../../types/engine.types';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -42,7 +28,7 @@ const getStatusColor = (status: string): string => {
     running: 'orange',
     completed: 'green',
     failed: 'red',
-    cancelled: 'gray'
+    cancelled: 'gray',
   };
   return colors[status] || 'default';
 };
@@ -56,7 +42,7 @@ const getStatusText = (status: string): string => {
     running: '运行中',
     completed: '已完成',
     failed: '失败',
-    cancelled: '已取消'
+    cancelled: '已取消',
   };
   return texts[status] || status;
 };
@@ -69,7 +55,7 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
   realTimeMetrics,
   onStopTest,
   onCancelTest,
-  className = ''
+  className = '',
 }) => {
   const activeTestsArray = Array.from(activeTests.values());
   const runningTests = activeTestsArray.filter(test => test.status === 'running');
@@ -77,10 +63,7 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
   if (activeTestsArray.length === 0) {
     return (
       <Card title="📊 测试监控" className={`mb-4 ${className}`}>
-        <Empty
-          description="暂无运行中的测试"
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        />
+        <Empty description="暂无运行中的测试" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       </Card>
     );
   }
@@ -94,12 +77,8 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
               <div>
                 <div className="flex items-center space-x-2 mb-1">
                   <Text strong>{test.testId.substring(0, 8)}...</Text>
-                  <Tag color={getStatusColor(test.status)}>
-                    {getStatusText(test.status)}
-                  </Tag>
-                  <Tag color="blue">
-                    {(test as any).testType || 'Unknown'}
-                  </Tag>
+                  <Tag color={getStatusColor(test.status)}>{getStatusText(test.status)}</Tag>
+                  <Tag color="blue">{(test as any).testType || 'Unknown'}</Tag>
                 </div>
                 <Text type="secondary" className="text-sm">
                   {test.currentStep}
@@ -117,10 +96,7 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
                     >
                       停止
                     </Button>
-                    <Button
-                      size="small"
-                      onClick={() => onCancelTest(test.testId)}
-                    >
+                    <Button size="small" onClick={() => onCancelTest(test.testId)}>
                       取消
                     </Button>
                   </>
@@ -139,7 +115,7 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
                 status={test.status === 'failed' ? 'exception' : 'active'}
                 strokeColor={{
                   '0%': '#108ee9',
-                  '100%': '#87d068'
+                  '100%': '#87d068',
                 }}
               />
             </div>
@@ -182,13 +158,13 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
                   items={[
                     {
                       color: 'green',
-                      children: '测试初始化完成'
+                      children: '测试初始化完成',
                     },
                     {
                       color: 'blue',
                       children: test.currentStep,
-                      dot: test.status === 'running' ? <LoadingOutlined /> : undefined
-                    }
+                      dot: test.status === 'running' ? <LoadingOutlined /> : undefined,
+                    },
                   ]}
                 />
               </div>
@@ -208,9 +184,7 @@ export const TestProgressMonitor: React.FC<TestProgressMonitorProps> = ({
             >
               停止所有测试
             </Button>
-            <Button
-              onClick={() => runningTests.forEach(test => onCancelTest(test.testId))}
-            >
+            <Button onClick={() => runningTests.forEach(test => onCancelTest(test.testId))}>
               取消所有测试
             </Button>
           </Space>

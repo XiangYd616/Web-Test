@@ -43,8 +43,8 @@ import {
 } from 'antd';
 import React, { useCallback, useState } from 'react';
 import { useUnifiedTestEngine } from '../../hooks/useTestEngine';
+import type { TestResult } from '../../types/engine.types';
 import { TestPriority, TestType } from '../../types/enums';
-import type { TestResult } from '../../types/unifiedEngine.types';
 
 // 导入专用子组件
 import { TestHistoryPanel } from './shared/TestHistoryPanel';

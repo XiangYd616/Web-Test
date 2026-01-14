@@ -4,22 +4,10 @@
  * 提供测试结果的列表展示和操作
  */
 
-import {
-  DownloadOutlined,
-  EyeOutlined
-} from '@ant-design/icons';
-import {
-  Badge,
-  Button,
-  Card,
-  Empty,
-  Space,
-  Table,
-  Tag,
-  Typography
-} from 'antd';
+import { DownloadOutlined, EyeOutlined } from '@ant-design/icons';
+import { Badge, Button, Card, Empty, Space, Table, Tag, Typography } from 'antd';
 import React from 'react';
-import type { TestResult } from '../../../types/unifiedEngine.types';
+import type { TestResult } from '../../../types/engine.types';
 
 const { Text } = Typography;
 
@@ -49,7 +37,7 @@ const getStatusColor = (status: string): string => {
     running: 'orange',
     completed: 'green',
     failed: 'red',
-    cancelled: 'gray'
+    cancelled: 'gray',
   };
   return colors[status] || 'default';
 };
@@ -63,7 +51,7 @@ const getStatusText = (status: string): string => {
     running: '运行中',
     completed: '已完成',
     failed: '失败',
-    cancelled: '已取消'
+    cancelled: '已取消',
   };
   return texts[status] || status;
 };
@@ -76,7 +64,7 @@ export const TestResultsTable: React.FC<TestResultsTableProps> = ({
   onViewResult,
   onDownloadResult,
   enableExport = true,
-  className = ''
+  className = '',
 }) => {
   const resultsArray = Array.from(testResults.entries());
 
@@ -90,15 +78,13 @@ export const TestResultsTable: React.FC<TestResultsTableProps> = ({
         <Text code copyable={{ text: testId }}>
           {testId.substring(0, 8)}...
         </Text>
-      )
+      ),
     },
     {
       title: '类型',
       dataIndex: '1',
       key: 'testType',
-      render: (result: TestResult) => (
-        <Tag color="blue">{result.testType}</Tag>
-      )
+      render: (result: TestResult) => <Tag color="blue">{result.testType}</Tag>,
     },
     {
       title: '状态',
@@ -106,46 +92,35 @@ export const TestResultsTable: React.FC<TestResultsTableProps> = ({
       key: 'status',
       render: (result: TestResult) => {
         const status = (result as any).status || 'completed';
-        return (
-          <Badge
-            status={getStatusColor(status) as any}
-            text={getStatusText(status)}
-          />
-        );
-      }
+        return <Badge status={getStatusColor(status) as any} text={getStatusText(status)} />;
+      },
     },
     {
       title: '分数',
       dataIndex: '1',
       key: 'score',
       render: (result: TestResult) => (
-        <span style={{ color: getScoreColor(result.overallScore) }}>
-          {result.overallScore}/100
-        </span>
-      )
+        <span style={{ color: getScoreColor(result.overallScore) }}>{result.overallScore}/100</span>
+      ),
     },
     {
       title: '时长',
       dataIndex: '1',
       key: 'duration',
-      render: (result: TestResult) => `${((result.duration ?? 0) / 1000).toFixed(1)}s`
+      render: (result: TestResult) => `${((result.duration ?? 0) / 1000).toFixed(1)}s`,
     },
     {
       title: '完成时间',
       dataIndex: '1',
       key: 'timestamp',
-      render: (result: TestResult) => new Date(result.timestamp).toLocaleString()
+      render: (result: TestResult) => new Date(result.timestamp).toLocaleString(),
     },
     {
       title: '操作',
       key: 'actions',
       render: (_: unknown, record: [string, TestResult]) => (
         <Space>
-          <Button
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => onViewResult(record[0])}
-          >
+          <Button size="small" icon={<EyeOutlined />} onClick={() => onViewResult(record[0])}>
             查看
           </Button>
           {enableExport && onDownloadResult && (
@@ -158,17 +133,14 @@ export const TestResultsTable: React.FC<TestResultsTableProps> = ({
             </Button>
           )}
         </Space>
-      )
-    }
+      ),
+    },
   ];
 
   if (resultsArray.length === 0) {
     return (
       <Card title="📋 测试结果" className={`mb-4 ${className}`}>
-        <Empty
-          description="暂无测试结果"
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        />
+        <Empty description="暂无测试结果" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       </Card>
     );
   }
@@ -183,10 +155,10 @@ export const TestResultsTable: React.FC<TestResultsTableProps> = ({
           pageSize: 10,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total) => `共 ${total} 条结果`
+          showTotal: total => `共 ${total} 条结果`,
         }}
         locale={{
-          emptyText: <Empty description="暂无测试结果" />
+          emptyText: <Empty description="暂无测试结果" />,
         }}
       />
 
@@ -194,9 +166,7 @@ export const TestResultsTable: React.FC<TestResultsTableProps> = ({
       <div className="mt-4 p-4 bg-gray-50 rounded-lg">
         <div className="grid grid-cols-4 gap-4 text-center">
           <div>
-            <div className="text-lg font-bold text-blue-600">
-              {resultsArray.length}
-            </div>
+            <div className="text-lg font-bold text-blue-600">{resultsArray.length}</div>
             <div className="text-sm text-gray-500">总测试数</div>
           </div>
           <div>
@@ -213,10 +183,12 @@ export const TestResultsTable: React.FC<TestResultsTableProps> = ({
           </div>
           <div>
             <div className="text-lg font-bold text-orange-600">
-              {resultsArray.length > 0 ?
-                (resultsArray.reduce((sum, [, result]) => sum + result.overallScore, 0) / resultsArray.length).toFixed(1) :
-                '0'
-              }
+              {resultsArray.length > 0
+                ? (
+                    resultsArray.reduce((sum, [, result]) => sum + result.overallScore, 0) /
+                    resultsArray.length
+                  ).toFixed(1)
+                : '0'}
             </div>
             <div className="text-sm text-gray-500">平均分数</div>
           </div>
