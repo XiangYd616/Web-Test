@@ -33,7 +33,7 @@ import {
   Typography,
 } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useUnifiedTestEngine } from '../../hooks/useTestEngine';
+import { useTestEngine } from '../../hooks/useTestEngine';
 
 const { Title, Text } = Typography;
 
@@ -55,7 +55,7 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
   const [lastRefresh, setLastRefresh] = useState(Date.now());
 
   // 使用统一测试引擎Hook
-  const engine = useUnifiedTestEngine();
+  const engine = useTestEngine();
   const stats = engine.getStats?.() || {
     totalActiveTests: 0,
     runningTests: 0,

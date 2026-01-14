@@ -30,7 +30,7 @@ import {
 } from 'antd';
 import React, { useState } from 'react';
 import UnifiedTestExecutor from '../components/testing/TestExecutor';
-import { useTestEngine as useUnifiedTestEngine } from '../hooks/useTestEngine';
+import { useTestEngine } from '../hooks/useTestEngine';
 import type { TestResult } from '../types/engine.types';
 
 const { Content } = Layout;
@@ -45,7 +45,7 @@ export const UnifiedTestPage: React.FC = () => {
   const [showHelp, setShowHelp] = useState(false);
 
   // 使用统一测试引擎Hook
-  const engine = useUnifiedTestEngine();
+  const engine = useTestEngine();
 
   /**
    * 处理测试完成

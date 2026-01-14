@@ -1,15 +1,15 @@
 /**
- * useUnifiedTestEngine.ts - 核心功能模块
- * 
- * 文件路径: frontend\hooks\useUnifiedTestEngine.ts
+ * useTestEngine.ts - 核心功能模块
+ *
+ * 文件路径: frontend\hooks\useTestEngine.ts
  * 创建时间: 2025-09-25
  */
 
 import Logger from '@/utils/logger';
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { TestConfig, TestResult, TestType } from '../types';
 
-export interface UnifiedTestEngine {
+export interface TestEngine {
   // Original methods
   startTest: (config: TestConfig) => Promise<void>;
   stopTest: () => void;
@@ -18,7 +18,7 @@ export interface UnifiedTestEngine {
   results: TestResult[];
   currentTest: string | null;
   error: string | null;
-  
+
   // Additional methods expected by components
   getStats: () => {
     runningTests: number;
@@ -44,7 +44,7 @@ export interface UnifiedTestEngine {
   engineVersion?: string;
 }
 
-export const useUnifiedTestEngine = (): UnifiedTestEngine => {
+export const useTestEngine = (): TestEngine => {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<TestResult[]>([]);
@@ -53,7 +53,14 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
   const [isConnected] = useState(true); // Mock connected state
   const [activeTests] = useState<any[]>([]); // Mock active tests
   const [testHistory] = useState<TestResult[]>([]); // Mock test history
-  const [supportedTypes] = useState<string[]>(['performance', 'security', 'api', 'seo', 'stress', 'compatibility']); // Mock supported types
+  const [supportedTypes] = useState<string[]>([
+    'performance',
+    'security',
+    'api',
+    'seo',
+    'stress',
+    'compatibility',
+  ]); // Mock supported types
   const [executingTest, setExecutingTest] = useState(false); // Mock executing state
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -64,10 +71,10 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
       setResults([]);
       setError(null);
       setCurrentTest('正在初始化...');
-      
+
       // 创建中止控制器
       abortControllerRef.current = new AbortController();
-      
+
       // 模拟测试过程
       const testSteps = [
         '网站连通性测试',
@@ -75,11 +82,10 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
         '安全性扫描',
         'SEO分析',
         'API测试',
-        '生成报告'
+        '生成报告',
       ];
 
-
-        /**
+      /**
 
          * if功能函数
 
@@ -92,13 +98,13 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
         if (abortControllerRef.current?.signal.aborted) {
           throw new Error('测试已被取消');
         }
-        
+
         setCurrentTest(testSteps[i]);
-        setProgress((i + 1) / testSteps.length * 100);
-        
+        setProgress(((i + 1) / testSteps.length) * 100);
+
         // 模拟测试延迟
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // 添加模拟结果
         const result: TestResult = {
           id: `test-${i}`,
@@ -112,13 +118,13 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
           summary: `${testSteps[i]}完成`,
           details: {
             duration: Math.floor(Math.random() * 1000 + 500),
-            url: config.url || 'https://example.com'
-          }
+            url: config.url || 'https://example.com',
+          },
         };
-        
+
         setResults(prev => [...prev, result]);
       }
-      
+
       setCurrentTest('测试完成');
     } catch (err) {
       setError(err instanceof Error ? err.message : '测试过程中发生错误');
@@ -140,62 +146,76 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
   // Additional method implementations
   const getStats = useCallback(() => {
     const completedTests = results.length;
-    const failedTests = results.filter(r => r.status === 'failed' || r.status === 'cancelled').length;
+    const failedTests = results.filter(
+      r => r.status === 'failed' || r.status === 'cancelled'
+    ).length;
     const runningTests = isRunning ? 1 : 0;
-    
+
     return {
       runningTests,
       completedTests,
       failedTests,
-      totalTests: completedTests + runningTests
+      totalTests: completedTests + runningTests,
     };
   }, [results, isRunning]);
 
-  const getTestHistory = useCallback(async (testType?: string) => {
-    // Mock implementation - return filtered test history
-    return testHistory.filter(test => !testType || test.type === testType);
-  }, [testHistory]);
+  const getTestHistory = useCallback(
+    async (testType?: string) => {
+      // Mock implementation - return filtered test history
+      return testHistory.filter(test => !testType || test.type === testType);
+    },
+    [testHistory]
+  );
 
-  const getTestStatus = useCallback(async (testId: string) => {
-    // Mock implementation - return test status
-    const test = results.find(r => r.id === testId);
-    if (test) {
-      return {
-        id: testId,
-        progress: 100,
-        status: test.status,
-        currentStep: 'completed'
-      };
-    }
-    return null;
-  }, [results]);
+  const getTestStatus = useCallback(
+    async (testId: string) => {
+      // Mock implementation - return test status
+      const test = results.find(r => r.id === testId);
+      if (test) {
+        return {
+          id: testId,
+          progress: 100,
+          status: test.status,
+          currentStep: 'completed',
+        };
+      }
+      return null;
+    },
+    [results]
+  );
 
-  const cancelTest = useCallback((testId: string) => {
-    // Mock implementation - cancel specific test
-    Logger.debug(`Cancelling test: ${testId}`);
-    if (isRunning) {
-      stopTest();
-    }
-  }, [isRunning, stopTest]);
+  const cancelTest = useCallback(
+    (testId: string) => {
+      // Mock implementation - cancel specific test
+      Logger.debug(`Cancelling test: ${testId}`);
+      if (isRunning) {
+        stopTest();
+      }
+    },
+    [isRunning, stopTest]
+  );
 
-  const getTestResult = useCallback(async (testId: string) => {
-    // Mock implementation - get specific test result
-    const result = results.find(r => r.id === testId);
-    if (result) {
-      return {
-        testId,
-        testType: result.type,
-        overallScore: result.score,
-        duration: result.details?.duration || 1000,
-        recommendations: {
-          immediate: ['Mock immediate recommendation'],
-          shortTerm: ['Mock short-term recommendation'],
-          longTerm: ['Mock long-term recommendation']
-        }
-      };
-    }
-    return null;
-  }, [results]);
+  const getTestResult = useCallback(
+    async (testId: string) => {
+      // Mock implementation - get specific test result
+      const result = results.find(r => r.id === testId);
+      if (result) {
+        return {
+          testId,
+          testType: result.type,
+          overallScore: result.score,
+          duration: result.details?.duration || 1000,
+          recommendations: {
+            immediate: ['Mock immediate recommendation'],
+            shortTerm: ['Mock short-term recommendation'],
+            longTerm: ['Mock long-term recommendation'],
+          },
+        };
+      }
+      return null;
+    },
+    [results]
+  );
 
   const cancelAllTests = useCallback(async () => {
     // Mock implementation - cancel all tests
@@ -216,18 +236,21 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
     Logger.debug('Connecting WebSocket');
   }, []);
 
-  const executeTest = useCallback(async (params: any) => {
-    // Mock implementation - execute test and return test ID
-    setExecutingTest(true);
-    const testId = `test-${Date.now()}`;
-    
-    try {
-      await startTest(params.config || { url: 'https://example.com' });
-      return testId;
-    } finally {
-      setExecutingTest(false);
-    }
-  }, [startTest]);
+  const executeTest = useCallback(
+    async (params: any) => {
+      // Mock implementation - execute test and return test ID
+      setExecutingTest(true);
+      const testId = `test-${Date.now()}`;
+
+      try {
+        await startTest(params.config || { url: 'https://example.com' });
+        return testId;
+      } finally {
+        setExecutingTest(false);
+      }
+    },
+    [startTest]
+  );
 
   const subscribeToTest = useCallback((testId: string) => {
     // Mock implementation - subscribe to test updates
@@ -248,7 +271,7 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
     results,
     currentTest,
     error,
-    
+
     // Additional properties and methods
     getStats,
     getTestHistory,
@@ -266,7 +289,7 @@ export const useUnifiedTestEngine = (): UnifiedTestEngine => {
     testResults: results,
     supportedTypes,
     executingTest,
-    engineVersion: '1.0.0'
+    engineVersion: '1.0.0',
   };
 };
 
@@ -277,7 +300,7 @@ export const useTestResultAnalysis = (results: TestResult[]) => {
     passedTests: 0,
     failedTests: 0,
     averageScore: 0,
-    recommendations: [] as string[]
+    recommendations: [] as string[],
   });
 
   React.useEffect(() => {
@@ -287,7 +310,7 @@ export const useTestResultAnalysis = (results: TestResult[]) => {
         passedTests: 0,
         failedTests: 0,
         averageScore: 0,
-        recommendations: []
+        recommendations: [],
       });
       return;
     }
@@ -296,7 +319,7 @@ export const useTestResultAnalysis = (results: TestResult[]) => {
     const passedTests = results.filter(r => r.status === 'completed').length;
     const failedTests = results.filter(r => r.status === 'failed').length;
     const averageScore = results.reduce((acc, r) => acc + (r.score || 0), 0) / totalTests;
-    
+
     const recommendations: string[] = [];
     if (averageScore < 60) {
       recommendations.push('整体测试分数偏低，建议优化网站性能');
@@ -307,17 +330,17 @@ export const useTestResultAnalysis = (results: TestResult[]) => {
     if (results.some(r => r.type === 'security' && r.status === 'failed')) {
       recommendations.push('发现安全问题，建议立即修复');
     }
-    
+
     setAnalysis({
       totalTests,
       passedTests,
       failedTests,
       averageScore,
-      recommendations
+      recommendations,
     });
   }, [results]);
 
   return analysis;
 };
 
-export default useUnifiedTestEngine;
+export default useTestEngine;

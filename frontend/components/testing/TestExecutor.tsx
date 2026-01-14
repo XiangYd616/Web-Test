@@ -42,7 +42,7 @@ import {
   Typography,
 } from 'antd';
 import React, { useCallback, useState } from 'react';
-import { useUnifiedTestEngine } from '../../hooks/useTestEngine';
+import { useTestEngine } from '../../hooks/useTestEngine';
 import type { TestResult } from '../../types/engine.types';
 import { TestPriority, TestType } from '../../types/enums';
 
@@ -142,7 +142,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const [realTimeMetrics, setRealTimeMetrics] = useState<any>(null);
 
   // 使用统一测试引擎Hook
-  const engine = useUnifiedTestEngine();
+  const engine = useTestEngine();
 
   // 当前选中测试的结果分析
   // Removed useTestResultAnalysis - not exported from module

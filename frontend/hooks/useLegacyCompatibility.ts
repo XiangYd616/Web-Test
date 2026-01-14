@@ -6,15 +6,15 @@
 
 import { useCallback } from 'react';
 import { TestType } from '../types/enums';
-import { useTestEngine as useUnifiedTestEngine } from './useTestEngine';
+import { useTestEngine } from './useTestEngine';
 import { useTestState as useTestStateCore } from './useTestState';
 
 /**
  * useTestEngine兼容性Hook
- * @deprecated 请使用 useUnifiedTestEngine 替代
+ * @deprecated 请使用 useTestEngine 替代
  */
-export const useTestEngine = () => {
-  const engine = useUnifiedTestEngine();
+export const useTestEngineCompat = () => {
+  const engine = useTestEngine();
 
   return {
     // 状态
@@ -52,10 +52,10 @@ export const useTestEngine = () => {
 
 /**
  * useSimpleTestEngine兼容性Hook
- * @deprecated 请使用 useUnifiedTestEngine 替代
+ * @deprecated 请使用 useTestEngine 替代
  */
 export const useSimpleTestEngine = () => {
-  const engine = useUnifiedTestEngine();
+  const engine = useTestEngine();
 
   return {
     // 状态
@@ -105,23 +105,23 @@ export const useSimpleTestEngine = () => {
 
 /**
  * useTestState兼容性Hook
- * @deprecated 请使用 useUnifiedTestEngine 替代
+ * @deprecated 请使用 useTestEngine 替代
  */
 export const useTestState = (options: {
   testType: TestType;
-  defaultConfig: Record<string, any>;
+  initialConfig?: Record<string, any>;
+  autoStart?: boolean;
   onTestComplete?: (result: any) => void;
-  onTestError?: (error: string) => void;
   onConfigChange?: (config: Record<string, any>) => void;
   validateConfig?: (config: Record<string, any>) => { isValid: boolean; errors: string[] };
 }) => {
-  const engine = useUnifiedTestEngine();
+  const engine = useTestEngine();
   const universalState = engine.getUniversalState?.();
 
   const startTest = useCallback(
     async (customConfig?: Record<string, any>) => {
       try {
-        const config = customConfig || options.defaultConfig;
+        const config = customConfig || options.initialConfig;
         const testId = await engine.runSimpleTest?.({ testType: options.testType, ...config });
 
         // 等待测试完成
@@ -193,10 +193,10 @@ export const useTestState = (options: {
 
 /**
  * useUniversalTest兼容性Hook
- * @deprecated 请使用 useUnifiedTestEngine 替代
+ * @deprecated 请使用 useTestEngine 替代
  */
 export const useUniversalTest = (testType: string, defaultConfig: Record<string, any>) => {
-  const engine = useUnifiedTestEngine();
+  const engine = useTestEngine();
   const universalState = engine.getUniversalState?.();
 
   return {
