@@ -1,6 +1,6 @@
 /**
- * 🔌 统一测试引擎WebSocket处理器
- * 为统一测试引擎提供实时状态更新和通信
+ * 🔌 测试引擎WebSocket处理器
+ * 为测试引擎提供实时状态更新和通信
  */
 
 const winston = require('winston');
@@ -13,10 +13,10 @@ const logger = winston.createLogger({
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
-  defaultMeta: { service: 'unified-engine-ws' },
+  defaultMeta: { service: 'engine-ws' },
   transports: [
     new winston.transports.File({ 
-      filename: 'backend/logs/unified-engine-ws.log',
+      filename: 'backend/logs/engine-ws.log',
       maxsize: 5242880, // 5MB
       maxFiles: 5
     }),
@@ -28,9 +28,9 @@ const logger = winston.createLogger({
 });
 
 /**
- * 统一测试引擎WebSocket处理器类
+ * 测试引擎WebSocket处理器类
  */
-class UnifiedEngineWebSocketHandler {
+class EngineWebSocketHandler {
   constructor() {
     this.clients = new Map(); // 存储客户端连接
     this.testSubscriptions = new Map(); // 存储测试订阅关系
@@ -63,7 +63,7 @@ class UnifiedEngineWebSocketHandler {
       subscribedTests: new Set()
     });
 
-    logger.info(`🔌 新的统一引擎WebSocket连接: ${clientId} (用户: ${userId})`);
+    logger.info(`🔌 新的引擎WebSocket连接: ${clientId} (用户: ${userId})`);
 
     // 发送欢迎消息和引擎状态
     this.sendToClient(clientId, {
@@ -482,26 +482,26 @@ const getUnifiedEngineWSHandler = () => {
  */
 const broadcastTestEvent = {
   progress: (testId, progress) => {
-    unifiedEngineWSHandler.broadcastTestProgress(testId, progress);
+    engineWSHandler.broadcastTestProgress(testId, progress);
   },
   
   completed: (testId, result) => {
-    unifiedEngineWSHandler.broadcastTestCompleted(testId, result);
+    engineWSHandler.broadcastTestCompleted(testId, result);
   },
   
   failed: (testId, error) => {
-    unifiedEngineWSHandler.broadcastTestFailed(testId, error);
+    engineWSHandler.broadcastTestFailed(testId, error);
   },
   
   engineStatus: (updates) => {
-    unifiedEngineWSHandler.updateEngineStatus(updates);
+    engineWSHandler.updateEngineStatus(updates);
   }
 };
 
 module.exports = {
-  UnifiedEngineWebSocketHandler,
-  createUnifiedEngineWebSocketMiddleware,
-  getUnifiedEngineWSHandler,
+  EngineWebSocketHandler,
+  createEngineWebSocketMiddleware,
+  getEngineWSHandler,
   broadcastTestEvent,
-  unifiedEngineWSHandler
+  engineWSHandler
 };

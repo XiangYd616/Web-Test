@@ -1,17 +1,17 @@
 /**
- * 🔍 统一测试引擎API文档定义
- * 基于OpenAPI 3.0规范，为统一测试引擎提供完整的API文档
+ * 🔍 测试引擎API文档定义
+ * 基于OpenAPI 3.0规范，为测试引擎提供完整的API文档
  */
 
 /**
- * 统一测试引擎API文档配置
+ * 测试引擎API文档配置
  */
-const unifiedEngineAPIDoc = {
+const engineAPIDoc = {
   openapi: '3.0.0',
   info: {
-    title: '统一测试引擎API',
+    title: '测试引擎API',
     version: '1.0.0',
-    description: '集成多种测试工具的统一测试执行和结果分析平台',
+    description: '集成多种测试工具的测试执行和结果分析平台',
     contact: {
       name: 'Test-Web团队',
       email: 'support@test-web.com'
@@ -19,11 +19,11 @@ const unifiedEngineAPIDoc = {
   },
   servers: [
     {
-      url: 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/unified-engine',
+      url: 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/engine',
       description: '开发环境'
     },
     {
-      url: 'https://api.test-web.com/unified-engine',
+      url: 'https://api.test-web.com/engine',
       description: '生产环境'
     }
   ],
@@ -31,7 +31,7 @@ const unifiedEngineAPIDoc = {
     '/test-types': {
       get: {
         summary: '获取支持的测试类型',
-        description: '返回统一测试引擎支持的所有测试类型及其配置信息',
+        description: '返回测试引擎支持的所有测试类型及其配置信息',
         tags: ['测试类型'],
         responses: {
           200: {
@@ -657,14 +657,14 @@ curl -X POST http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BAC
     `,
     getStatus: `
 # 获取测试状态
-curl -X GET http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/unified-engine/status/your-test-id \\
+curl -X GET http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/engine/status/your-test-id \\
   -H "Authorization: Bearer your-jwt-token"
     `
   }
 };
 
 module.exports = {
-  unifiedEngineAPIDoc,
+  engineAPIDoc,
   configExamples,
   webSocketEvents,
   errorCodes,
