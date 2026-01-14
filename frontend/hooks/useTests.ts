@@ -212,10 +212,16 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     setError(null);
 
     try {
-      const test = await testService.retry(testId);
+      // 获取原测试配置并重新执行
+      const oldTest = await testRepository.getTestStatus(testId);
+      const config: TestConfig = {
+        testType: oldTest.testType,
+        target: '', // 需要从原测试中获取URL
+      };
+      const test = await testRepository.executeTest(config);
 
       // 更新列表中的测试
-      setTests(prev => prev.map(t => (t.testId === testId ? test : t)));
+      setTests(prev => prev.map(t => (t.id === testId ? test : t)));
 
       return test;
     } catch (err) {

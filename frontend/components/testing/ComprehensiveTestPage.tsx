@@ -6,7 +6,7 @@
 import { LucideIcon } from 'lucide-react';
 import React, { ReactNode } from 'react';
 import { useUniversalTest } from '../../hooks/legacy-compatibility';
-import { UniversalConfigPanel } from './shared/UniversalConfigPanel';
+import { TestConfigPanel as UniversalConfigPanel } from './shared/TestConfigPanel';
 
 export interface TestTypeConfig {
   id: string;
@@ -105,7 +105,7 @@ export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
   onTestComplete,
   onConfigChange,
   customActions,
-  showHistory = true
+  showHistory = true,
 }) => {
   const {
     config,
@@ -118,7 +118,7 @@ export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
     startTest,
     stopTest,
     resetTest,
-    validateConfig
+    validateConfig,
   } = useUniversalTest(testType.id, testType.defaultConfig);
 
   // 处理配置变更
@@ -189,11 +189,7 @@ export const UniversalTestPage: React.FC<UniversalTestPageProps> = ({
       )}
 
       {/* 自定义操作 */}
-      {customActions && (
-        <div className="themed-bg-card rounded-lg p-4">
-          {customActions}
-        </div>
-      )}
+      {customActions && <div className="themed-bg-card rounded-lg p-4">{customActions}</div>}
 
       {/* 测试操作按钮 */}
       <div className="themed-bg-card rounded-lg border themed-border-primary p-4">

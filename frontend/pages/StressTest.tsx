@@ -7,7 +7,7 @@ import { AlertCircle, AlertTriangle, Download, Info, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
-import { UniversalTestPage } from '../components/testing/UniversalTestPage';
+import { UniversalTestPage } from '../components/testing/ComprehensiveTestPage';
 import { stressTestConfig } from '../config/testTypes';
 
 /**
