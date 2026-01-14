@@ -3,10 +3,10 @@
  * 测试UnifiedAuthService的所有核心功能
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { UnifiedAuthService } from '../authService';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserRole, UserStatus } from '../../../types/enums';
-import type { LoginCredentials, RegisterData, User } from '../../../types/user';
+import type { LoginCredentials, RegisterData } from '../../../types/unified/models';
+import { UnifiedAuthService } from '../authService';
 
 // Mock dependencies
 vi.mock('@/utils/logger', () => ({
@@ -14,41 +14,47 @@ vi.mock('@/utils/logger', () => ({
     debug: vi.fn(),
     info: vi.fn(),
     warn: vi.fn(),
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }));
 
 vi.mock('../../utils/browserJwt', () => ({
   browserJwt: {
     isTokenValid: vi.fn(() => true),
-    createToken: vi.fn((payload) => `mock.jwt.${JSON.stringify(payload)}`),
-    decodeToken: vi.fn((token) => {
+    createToken: vi.fn(payload => `mock.jwt.${JSON.stringify(payload)}`),
+    decodeToken: vi.fn(token => {
       const parts = token.split('.');
       return parts.length >= 2 ? JSON.parse(parts[2]) : null;
-    })
-  }
+    }),
+  },
 }));
 
 vi.mock('../../utils/environment', () => ({
-  canUseDatabase: false
+  canUseDatabase: false,
 }));
 
 vi.mock('jwt-decode', () => ({
   jwtDecode: vi.fn((token: string) => {
     const parts = token.split('.');
     return parts.length >= 2 ? JSON.parse(parts[2]) : null;
-  })
+  }),
 }));
 
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
-  
+
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; }
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
   };
 })();
 
@@ -60,22 +66,22 @@ global.fetch = vi.fn();
 
 describe('UnifiedAuthService - 认证服务', () => {
   let authService: UnifiedAuthService;
-  
+
   beforeEach(() => {
     // 清理localStorage
     localStorageMock.clear();
-    
+
     // 重置fetch mock
     vi.clearAllMocks();
-    
+
     // 创建新的authService实例
     authService = new UnifiedAuthService({
       enableDeviceFingerprinting: false,
       enableSecureStorage: false,
-      enableSessionTracking: false
+      enableSessionTracking: false,
     });
   });
-  
+
   afterEach(() => {
     // 清理
     authService.destroy();
@@ -85,14 +91,14 @@ describe('UnifiedAuthService - 认证服务', () => {
     const validCredentials: LoginCredentials = {
       email: 'test@example.com',
       password: 'password123',
-      rememberMe: false
+      rememberMe: false,
     };
 
     it('应该成功登录系统管理员', async () => {
       const credentials: LoginCredentials = {
         email: 'admin',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       };
 
       const response = await authService.login(credentials);
@@ -111,7 +117,7 @@ describe('UnifiedAuthService - 认证服务', () => {
         username: 'testuser',
         email: 'test@example.com',
         role: UserRole.TESTER,
-        status: UserStatus.ACTIVE
+        status: UserStatus.ACTIVE,
       };
 
       (global.fetch as any).mockResolvedValueOnce({
@@ -120,9 +126,9 @@ describe('UnifiedAuthService - 认证服务', () => {
           success: true,
           data: {
             user: mockUser,
-            token: 'server.jwt.token'
-          }
-        })
+            token: 'server.jwt.token',
+          },
+        }),
       });
 
       const response = await authService.login(validCredentials);
@@ -137,8 +143,8 @@ describe('UnifiedAuthService - 认证服务', () => {
           body: JSON.stringify({
             email: validCredentials.email,
             identifier: validCredentials.email,
-            password: validCredentials.password
-          })
+            password: validCredentials.password,
+          }),
         })
       );
     });
@@ -147,15 +153,15 @@ describe('UnifiedAuthService - 认证服务', () => {
       const invalidCredentials: LoginCredentials = {
         email: 'wrong@example.com',
         password: 'wrongpassword',
-        rememberMe: false
+        rememberMe: false,
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: false,
         json: async () => ({
           success: false,
-          error: '用户名或密码错误'
-        })
+          error: '用户名或密码错误',
+        }),
       });
 
       const response = await authService.login(invalidCredentials);
@@ -171,7 +177,7 @@ describe('UnifiedAuthService - 认证服务', () => {
         username: 'disabled',
         email: 'disabled@example.com',
         role: UserRole.TESTER,
-        status: 'inactive' // 被禁用的状态
+        status: 'inactive', // 被禁用的状态
       };
 
       (global.fetch as any).mockResolvedValueOnce({
@@ -180,9 +186,9 @@ describe('UnifiedAuthService - 认证服务', () => {
           success: true,
           data: {
             user: mockUser,
-            token: 'server.jwt.token'
-          }
-        })
+            token: 'server.jwt.token',
+          },
+        }),
       });
 
       const response = await authService.login(validCredentials);
@@ -198,7 +204,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       const credentials: LoginCredentials = {
         email: 'admin',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       };
 
       const response = await authService.login(credentials);
@@ -209,7 +215,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       const credentials: LoginCredentials = {
         email: 'admin',
         password: 'password123',
-        rememberMe: true
+        rememberMe: true,
       };
 
       await authService.login(credentials);
@@ -225,7 +231,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       email: 'newuser@example.com',
       fullName: 'New User',
       password: 'password123',
-      confirmPassword: 'password123'
+      confirmPassword: 'password123',
     };
 
     it('应该成功注册新用户', async () => {
@@ -234,7 +240,7 @@ describe('UnifiedAuthService - 认证服务', () => {
         username: validRegisterData.username,
         email: validRegisterData.email,
         role: UserRole.TESTER,
-        status: UserStatus.ACTIVE
+        status: UserStatus.ACTIVE,
       };
 
       (global.fetch as any).mockResolvedValueOnce({
@@ -243,9 +249,9 @@ describe('UnifiedAuthService - 认证服务', () => {
           success: true,
           data: {
             user: mockUser,
-            token: 'new.jwt.token'
-          }
-        })
+            token: 'new.jwt.token',
+          },
+        }),
       });
 
       const response = await authService.register(validRegisterData);
@@ -258,7 +264,7 @@ describe('UnifiedAuthService - 认证服务', () => {
     it('应该验证用户名长度', async () => {
       const invalidData: RegisterData = {
         ...validRegisterData,
-        username: 'ab' // 少于3个字符
+        username: 'ab', // 少于3个字符
       };
 
       const response = await authService.register(invalidData);
@@ -270,7 +276,7 @@ describe('UnifiedAuthService - 认证服务', () => {
     it('应该验证邮箱格式', async () => {
       const invalidData: RegisterData = {
         ...validRegisterData,
-        email: 'invalid-email'
+        email: 'invalid-email',
       };
 
       const response = await authService.register(invalidData);
@@ -283,7 +289,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       const invalidData: RegisterData = {
         ...validRegisterData,
         password: '12345', // 少于6个字符
-        confirmPassword: '12345'
+        confirmPassword: '12345',
       };
 
       const response = await authService.register(invalidData);
@@ -296,7 +302,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       const invalidData: RegisterData = {
         ...validRegisterData,
         password: 'password123',
-        confirmPassword: 'different'
+        confirmPassword: 'different',
       };
 
       const response = await authService.register(invalidData);
@@ -310,8 +316,8 @@ describe('UnifiedAuthService - 认证服务', () => {
         ok: false,
         json: async () => ({
           success: false,
-          error: '用户已存在'
-        })
+          error: '用户已存在',
+        }),
       });
 
       const response = await authService.register(validRegisterData);
@@ -327,7 +333,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       const credentials: LoginCredentials = {
         email: 'admin',
         password: 'password123',
-        rememberMe: true
+        rememberMe: true,
       };
       await authService.login(credentials);
     });
@@ -360,7 +366,7 @@ describe('UnifiedAuthService - 认证服务', () => {
 
     it('应该从token中获取用户信息', () => {
       const userInfo = authService.getUserFromToken();
-      
+
       if (userInfo) {
         expect(userInfo.username).toBe('admin');
         expect(userInfo.email).toBe('admin@testweb.com');
@@ -380,7 +386,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       await authService.login({
         email: 'admin',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       });
 
       const currentUser = authService.getCurrentUser();
@@ -394,7 +400,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       await authService.login({
         email: 'admin',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       });
 
       expect(authService.isAuthenticated()).toBe(true);
@@ -404,7 +410,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       await authService.login({
         email: 'admin',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       });
 
       expect(authService.hasRole(UserRole.ADMIN)).toBe(true);
@@ -417,7 +423,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       await authService.login({
         email: 'admin',
         password: 'password123',
-        rememberMe: true
+        rememberMe: true,
       });
     });
 
@@ -447,13 +453,11 @@ describe('UnifiedAuthService - 认证服务', () => {
       await authService.login({
         email: 'admin',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       });
 
       expect(listener).toHaveBeenCalled();
-      expect(listener).toHaveBeenCalledWith(
-        expect.objectContaining({ username: 'admin' })
-      );
+      expect(listener).toHaveBeenCalledWith(expect.objectContaining({ username: 'admin' }));
 
       unsubscribe();
     });
@@ -461,13 +465,13 @@ describe('UnifiedAuthService - 认证服务', () => {
     it('应该正确取消监听', async () => {
       const listener = vi.fn();
       const unsubscribe = authService.onAuthStateChange(listener);
-      
+
       unsubscribe();
-      
+
       await authService.login({
         email: 'admin',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       });
 
       // 取消监听后不应该被调用
@@ -481,7 +485,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       await authService.login({
         email: 'admin',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       });
     });
 
@@ -533,7 +537,7 @@ describe('UnifiedAuthService - 认证服务', () => {
 
     it('应该更新增强配置', () => {
       authService.updateEnhancedConfig({
-        accessTokenExpiry: 1800
+        accessTokenExpiry: 1800,
       });
 
       const config = authService.getEnhancedConfig();
@@ -543,17 +547,15 @@ describe('UnifiedAuthService - 认证服务', () => {
 
   describe('10. 错误处理', () => {
     it('应该处理网络超时', async () => {
-      (global.fetch as any).mockImplementationOnce(() => 
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('timeout')), 100)
-        )
+      (global.fetch as any).mockImplementationOnce(
+        () => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 100))
       );
 
       // 系统用户fallback应该工作
       const response = await authService.login({
         email: 'admin',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       });
 
       expect(response.success).toBe(true);
@@ -565,14 +567,14 @@ describe('UnifiedAuthService - 认证服务', () => {
         status: 500,
         json: async () => ({
           success: false,
-          error: '服务器错误'
-        })
+          error: '服务器错误',
+        }),
       });
 
       const response = await authService.login({
         email: 'test@example.com',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       });
 
       expect(response.success).toBe(false);

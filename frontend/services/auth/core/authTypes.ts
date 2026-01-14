@@ -3,32 +3,18 @@
  * 统一的认证接口，支持基础和企业级功能
  */
 
-export interface AuthResponse {
-  success: boolean;
-  user?: User;
-  token?: string;
-  refreshToken?: string;
-  message?: string;
-  errors?: Record<string, string> | string[];
-  requireMFA?: boolean;
-  mfaChallenge?: MFAChallenge;
-}
+import type {
+  AuthResponse as BaseAuthResponse,
+  LoginCredentials as BaseLoginCredentials,
+  RegisterData as BaseRegisterData,
+  User as BaseUser,
+} from '../../../types/unified/models';
 
-export interface User {
-  id?: string;
-  username: string;
-  email: string;
-  fullName?: string;
-  avatar?: string;
-  role: string;
-  status: string;
-  permissions?: unknown[];
-  preferences?: any;
-  metadata?: Record<string, any>;
-  createdAt?: string;
-  updatedAt?: string;
-  lockedUntil?: string;
-}
+// 使用统一的类型
+export type User = BaseUser;
+export type AuthResponse = BaseAuthResponse;
+export type LoginCredentials = BaseLoginCredentials;
+export type RegisterData = BaseRegisterData;
 
 // 企业级认证配置
 export interface EnhancedAuthConfig {
@@ -158,10 +144,10 @@ export interface IAuthService {
   logout(): void | Promise<void>;
   getCurrentUser(): User | null | Promise<User | null>;
   isAuthenticated(): boolean | Promise<boolean>;
-  
+
   // Token管理
   refreshToken?(): Promise<boolean>;
-  
+
   // 企业级功能（可选）
   verifyMFA?(verification: MFAVerification): Promise<AuthResponse>;
   requestMFAChallenge?(type: 'sms' | 'email'): Promise<{ success: boolean; message: string }>;
@@ -170,17 +156,6 @@ export interface IAuthService {
   validatePasswordStrength?(password: string): PasswordStrength;
 }
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
-  deviceInfo?: DeviceInfo;
-}
-
-export interface RegisterData {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  fullName?: string;
-}
+// LoginCredentials 和 RegisterData 已从 unified/models 导入
+// 如需扩展，可以使用交叉类型：
+// export type LoginCredentials = BaseLoginCredentials & { deviceInfo?: DeviceInfo };
