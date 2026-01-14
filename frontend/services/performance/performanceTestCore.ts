@@ -128,7 +128,7 @@ export class PerformanceTestCore {
         completedChecks++;
 
       } catch (error) {
-        Logger.warn(`性能检测 ${check} 失败:`, error);
+        Logger.warn(`性能检测 ${check} 失败:`, { error: String(error) });
         // 继续执行其他检测
       }
     }
@@ -209,7 +209,7 @@ export class PerformanceTestCore {
       return data.success ? data.data : this.getDefaultPageSpeedMetrics(url);
 
     } catch (error) {
-      Logger.warn('页面速度检测失败，使用客户端分析:', error);
+      Logger.warn('页面速度检测失败，使用客户端分析:', { error: String(error) });
       return await this.getDefaultPageSpeedMetrics(url);
     }
   }
@@ -234,14 +234,14 @@ export class PerformanceTestCore {
           }
         }
       } catch (apiError) {
-        Logger.warn('API调用失败，使用客户端分析:', apiError);
+        Logger.warn('API调用失败，使用客户端分析:', { error: String(apiError) });
       }
 
       // API失败时使用客户端真实分析
       return await this.getDefaultCoreWebVitals(url);
 
     } catch (error) {
-      Logger.warn('Core Web Vitals检测完全失败:', error);
+      Logger.warn('Core Web Vitals检测完全失败:', { error: String(error) });
       // 最后的回退方案
       return {
         lcp: 2500,
@@ -274,7 +274,7 @@ export class PerformanceTestCore {
       return data.success ? data.data : this.getDefaultResourceAnalysis();
 
     } catch (error) {
-      Logger.warn('资源分析失败，使用模拟数据:', error);
+      Logger.warn('资源分析失败，使用模拟数据:', { error: String(error) });
       return this.getDefaultResourceAnalysis();
     }
   }
@@ -502,7 +502,7 @@ export class PerformanceTestCore {
         transferSize: Math.round(pageSize * 0.8) // 估算压缩后大小
       };
     } catch (error) {
-      Logger.warn('Failed to measure real page speed, using estimated values:', error);
+      Logger.warn('Failed to measure real page speed, using estimated values:', { error: String(error) });
       return {
         loadTime: 2500,
         domContentLoaded: 1800,
@@ -541,7 +541,7 @@ export class PerformanceTestCore {
         tti: Math.round(lcp * 1.5)
       };
     } catch (error) {
-      Logger.warn('Failed to measure real Core Web Vitals, using estimated values:', error);
+      Logger.warn('Failed to measure real Core Web Vitals, using estimated values:', { error: String(error) });
       return {
         lcp: 2400,
         fid: 120,
@@ -675,7 +675,7 @@ export class PerformanceTestCore {
         body: JSON.stringify({ result, userId })
       });
     } catch (error) {
-      Logger.warn('保存性能测试结果失败:', error);
+      Logger.warn('保存性能测试结果失败:', { error: String(error) });
     }
   }
 
@@ -726,7 +726,7 @@ export class PerformanceTestCore {
       };
 
     } catch (error) {
-      Logger.warn('现代Web功能检查失败:', error);
+      Logger.warn('现代Web功能检查失败:', { error: String(error) });
       return {
         score: 0,
         features: {},
@@ -802,7 +802,7 @@ export class PerformanceTestCore {
       };
 
     } catch (error) {
-      Logger.warn('网络优化分析失败:', error);
+      Logger.warn('网络优化分析失败:', { error: String(error) });
       return {
         score: 0,
         optimization: {},
@@ -853,7 +853,7 @@ export class PerformanceTestCore {
       };
 
     } catch (error) {
-      Logger.warn('第三方影响分析失败:', error);
+      Logger.warn('第三方影响分析失败:', { error: String(error) });
       return {
         score: 0,
         services: {},

@@ -151,7 +151,7 @@ class ReportService {
         return this.reports;
       }
     } catch (error) {
-      Logger.warn('Backend not available, using local data:', error);
+      Logger.warn('Backend not available, using local data:', { error: String(error) });
     }
 
     return this.getLocalReports();
@@ -171,7 +171,7 @@ class ReportService {
         return;
       }
     } catch (error) {
-      Logger.warn('Backend not available, using local storage:', error);
+      Logger.warn('Backend not available, using local storage:', { error: String(error) });
     }
 
     this.reports = this.reports.filter(report => report.id !== reportId);
@@ -200,7 +200,7 @@ class ReportService {
         return;
       }
     } catch (error) {
-      Logger.warn('Backend not available, generating local download:', error);
+      Logger.warn('Backend not available, generating local download:', { error: String(error) });
     }
 
     // 本地生成下载
@@ -244,7 +244,7 @@ class ReportService {
       }
 
     } catch (error) {
-      Logger.error('Error generating report:', error);
+      Logger.error('Error generating report:', { error: String(error) });
 
       // 更新为失败状态
       const reportIndex = this.reports.findIndex(r => r.id === report.id);

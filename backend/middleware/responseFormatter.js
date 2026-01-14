@@ -21,7 +21,7 @@ const {
     generateRequestId,
     getHttpStatusCode,
     createPaginationMeta
-} = require('../../shared/utils/apiResponseBuilder.js');
+} = require('../../shared/utils/apiResponseBuilder');
 
 const {
     StandardErrorCode

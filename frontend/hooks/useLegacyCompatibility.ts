@@ -8,7 +8,6 @@ import { useCallback } from 'react';
 import { TestType } from '../types/enums';
 import { useTestState as useTestStateCore } from './useTestState';
 import { useUnifiedTestEngine } from './useUnifiedTestEngine';
-import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 
 /**
  * useTestEngine兼容性Hook
@@ -21,15 +20,22 @@ export const useTestEngine = () => {
     // 状态
     isRunning: engine.executingTest,
     progress: engine.getTestProgress?.() || 0,
-    stage: engine.activeTests?.size > 0 ?
-      Array.from(engine.activeTests.values())[0].currentStep : '准备中',
+    stage:
+      (engine.activeTests?.size ?? 0) > 0
+        ? Array.from(engine.activeTests?.values() ?? [])[0].currentStep
+        : '准备中',
     error: engine.lastError?.message || null,
-    currentTest: engine.activeTests?.size > 0 ? {
-      id: Array.from(engine.activeTests.keys())[0],
-      testType: 'unknown', // TestStatusInfo没有type字段，使用默认值
-      status: Array.from(engine.activeTests.values())[0].status as any,
-      startTime: new Date(Array.from(engine.activeTests.values())[0].startTime).toISOString()
-    } : null,
+    currentTest:
+      (engine.activeTests?.size ?? 0) > 0
+        ? {
+            id: Array.from(engine.activeTests?.keys() ?? [])[0],
+            testType: 'unknown', // TestStatusInfo没有type字段，使用默认值
+            status: Array.from(engine.activeTests?.values() ?? [])[0].status as any,
+            startTime: new Date(
+              Array.from(engine.activeTests?.values() ?? [])[0].startTime
+            ).toISOString(),
+          }
+        : null,
 
     // 方法
     runTest: engine.runLegacyTest,
@@ -40,7 +46,7 @@ export const useTestEngine = () => {
       }
     },
     resetEngine: engine.resetEngine,
-    getTestHistory: () => engine.getTestHistory?.()
+    getTestHistory: () => engine.getTestHistory?.(),
   };
 };
 
@@ -67,27 +73,33 @@ export const useSimpleTestEngine = () => {
     getTestStatus: engine.getTestStatus,
     getTestHistory: () => engine.getTestHistory?.(),
     checkEngineStatus: async () => {
-      await engine.fetchSupportedTypes();
+      await engine.fetchSupportedTypes?.();
       return {
-        data: engine.supportedTypes.reduce((acc, type) => {
-          acc[type] = true;
-          return acc;
-        }, {} as Record<string, boolean>)
+        data: engine.supportedTypes?.reduce(
+          (acc, type) => {
+            acc[type] = true;
+            return acc;
+          },
+          {} as Record<string, boolean>
+        ),
       };
     },
     getEngineCapabilities: async () => {
       return {
-        data: engine.supportedTypes.reduce((acc, type) => {
-          acc[type] = ['load', 'stress', 'performance'];
-          return acc;
-        }, {} as Record<string, string[]>)
+        data: engine.supportedTypes?.reduce(
+          (acc, type) => {
+            acc[type] = ['load', 'stress', 'performance'];
+            return acc;
+          },
+          {} as Record<string, string[]>
+        ),
       };
     },
     exportTestResults: async (testId: string, format: string) => {
       return {
-        data: { downloadUrl: `/api/test/${testId}/export?format=${format}` }
+        data: { downloadUrl: `/api/test/${testId}/export?format=${format}` },
       };
-    }
+    },
   };
 };
 
@@ -104,37 +116,39 @@ export const useTestState = (options: {
   validateConfig?: (config: Record<string, any>) => { isValid: boolean; errors: string[] };
 }) => {
   const engine = useUnifiedTestEngine();
-  const universalState = engine.getUniversalState();
+  const universalState = engine.getUniversalState?.();
 
-  const startTest = useCallback(async (customConfig?: Record<string, any>) => {
-    try {
-      const config = customConfig || options.defaultConfig;
-      const testId = await engine.runSimpleTest?.({ testType: options.testType, ...config });
+  const startTest = useCallback(
+    async (customConfig?: Record<string, any>) => {
+      try {
+        const config = customConfig || options.defaultConfig;
+        const testId = await engine.runSimpleTest?.({ testType: options.testType, ...config });
 
-      // 等待测试完成
-      const checkCompletion = async () => {
-        const status = await engine.getTestStatus?.(testId);
-        if (status?.status === 'completed') {
-          const result = await engine.getTestResult?.(testId);
-          options.onTestComplete?.(result);
-        } else if (status?.status === 'failed') {
-          options.onTestError?.(status?.error || '测试失败');
-        }
-      };
+        // 等待测试完成
+        const checkCompletion = async () => {
+          const status = await engine.getTestStatus?.(testId);
+          if (status?.status === 'completed') {
+            const result = await engine.getTestResult?.(testId);
+            options.onTestComplete?.(result);
+          } else if (status?.status === 'failed') {
+            options.onTestError?.(status?.error || '测试失败');
+          }
+        };
 
-      // 轮询检查测试状态
-      const interval = setInterval(async () => {
-        const status = await engine.getTestStatus?.(testId);
-        if (status?.status === 'completed' || status?.status === 'failed') {
-          clearInterval(interval);
-          await checkCompletion();
-        }
-      }, 1000);
-
-    } catch (error) {
-      options.onTestError?.(error instanceof Error ? error.message : '测试启动失败');
-    }
-  }, [engine, options]);
+        // 轮询检查测试状态
+        const interval = setInterval(async () => {
+          const status = await engine.getTestStatus?.(testId);
+          if (status?.status === 'completed' || status?.status === 'failed') {
+            clearInterval(interval);
+            await checkCompletion();
+          }
+        }, 1000);
+      } catch (error) {
+        options.onTestError?.(error instanceof Error ? error.message : '测试启动失败');
+      }
+    },
+    [engine, options]
+  );
 
   return {
     // 状态
@@ -170,8 +184,10 @@ export const useTestState = (options: {
     // 验证
     isConfigValid: true,
     configErrors: [] as string[],
-    testDuration: universalState.endTime && universalState.startTime ?
-      universalState.endTime - universalState.startTime : null
+    testDuration:
+      universalState.endTime && universalState.startTime
+        ? universalState.endTime - universalState.startTime
+        : null,
   };
 };
 
@@ -181,7 +197,7 @@ export const useTestState = (options: {
  */
 export const useUniversalTest = (testType: string, defaultConfig: Record<string, any>) => {
   const engine = useUnifiedTestEngine();
-  const universalState = engine.getUniversalState();
+  const universalState = engine.getUniversalState?.();
 
   return {
     // 状态
@@ -209,7 +225,7 @@ export const useUniversalTest = (testType: string, defaultConfig: Record<string,
     // 验证
     validateConfig: (config: Record<string, any>) => {
       return { isValid: true, errors: [] as string[] };
-    }
+    },
   };
 };
 
@@ -247,7 +263,7 @@ export const useUnifiedTestState = (options: {
     onTestError: options.onTestFailed,
     onTestCancelled: options.onTestCancelled,
     onTestQueued: options.onTestQueued,
-    onStatusUpdate: options.onStatusUpdate
+    onStatusUpdate: options.onStatusUpdate,
   });
 
   return {
@@ -270,6 +286,6 @@ export const useUnifiedTestState = (options: {
     },
     stopTest: testState.stopTest,
     reset: testState.resetTest,
-    getState: testState.getState
+    getState: testState.getState,
   };
 };

@@ -1,8 +1,8 @@
-﻿import { vi, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
-import { cleanup } from '@testing-library/react';
-import * as matchers from '@testing-library/jest-dom/matchers';
+﻿import Logger from '@/utils/logger';
 import '@testing-library/jest-dom';
-import Logger from '@/utils/logger';
+import * as matchers from '@testing-library/jest-dom/matchers';
+import { cleanup } from '@testing-library/react';
+import { afterAll, afterEach, beforeAll, expect, vi } from 'vitest';
 
 /**
  * Vitest 测试环境设置文件
@@ -24,9 +24,9 @@ beforeAll(() => {
       env: {
         NODE_ENV: 'test',
         VITE_DEV_PORT: '5174',
-        REACT_APP_API_URL: 'http://localhost:3001/api'
-      }
-    }
+        REACT_APP_API_URL: 'http://localhost:3001/api',
+      },
+    },
   });
 
   // 模拟localStorage
@@ -37,7 +37,7 @@ beforeAll(() => {
     clear: vi.fn(),
   };
   Object.defineProperty(window, 'localStorage', {
-    value: localStorageMock
+    value: localStorageMock,
   });
 
   // 模拟sessionStorage
@@ -48,7 +48,7 @@ beforeAll(() => {
     clear: vi.fn(),
   };
   Object.defineProperty(window, 'sessionStorage', {
-    value: sessionStorageMock
+    value: sessionStorageMock,
   });
 
   // 模拟window.location
@@ -141,19 +141,42 @@ beforeAll(() => {
       measure: vi.fn(),
       getEntriesByType: vi.fn(() => []),
       getEntriesByName: vi.fn(() => []),
-    }
+    },
   });
 
   // 模拟requestAnimationFrame
-  global.requestAnimationFrame = vi.fn((cb) => setTimeout(cb, 16));
+  global.requestAnimationFrame = vi.fn((cb: FrameRequestCallback) =>
+    setTimeout(() => cb(Date.now()), 16)
+  ) as unknown as (callback: FrameRequestCallback) => number;
   global.cancelAnimationFrame = vi.fn();
 
   // 模拟URL构造函数
-  global.URL = class URL {
-    constructor(url: string, base?: string) {
-      return new window.URL(url, base);
+  global.URL = Object.assign(
+    class URL {
+      constructor(url: string, base?: string) {
+        return new window.URL(url, base);
+      }
+    },
+    {
+      canParse: (url: string | URL, base?: string | URL) => {
+        try {
+          new window.URL(url as string, base as string);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      createObjectURL: (obj: Blob | MediaSource) => 'blob:mock-url',
+      parse: (url: string | URL, base?: string | URL) => {
+        try {
+          return new window.URL(url as string, base as string);
+        } catch {
+          return null;
+        }
+      },
+      revokeObjectURL: (url: string) => {},
     }
-  };
+  ) as any;
 });
 
 // 全局测试清理
@@ -162,11 +185,11 @@ afterAll(() => {
 });
 
 // 全局错误处理
-window.addEventListener('error', (event) => {
+window.addEventListener('error', event => {
   Logger.error('Global error in test:', event.error);
 });
 
-window.addEventListener('unhandledrejection', (event) => {
+window.addEventListener('unhandledrejection', event => {
   Logger.error('Unhandled promise rejection in test:', event.reason);
 });
 
@@ -176,7 +199,7 @@ export const createMockApiResponse = <T>(data: T, success = true) => {
     success,
     data: success ? data : undefined,
     error: success ? undefined : { code: 'TEST_ERROR', message: 'Test error' },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 };
 
@@ -190,7 +213,7 @@ export const createMockUser = () => ({
   profile: {
     firstName: 'Test',
     lastName: 'User',
-    timezone: 'UTC'
+    timezone: 'UTC',
   },
   preferences: {
     theme: 'light' as const,
@@ -206,8 +229,8 @@ export const createMockUser = () => ({
       testComplete: true,
       testFailed: true,
       weeklyReport: false,
-      securityAlert: true
-    }
+      securityAlert: true,
+    },
   },
   emailVerified: true,
   createdAt: new Date().toISOString(),

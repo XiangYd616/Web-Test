@@ -66,7 +66,7 @@ export const useNotification = () => {
         setNotifications(prev => [notification, ...prev]);
 
         // 自动隐藏
-        if (notification.duration > 0) {
+        if (notification.duration && notification.duration > 0) {
             setTimeout(() => {
                 hideNotification(id);
             }, notification.duration);

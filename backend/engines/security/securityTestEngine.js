@@ -1,6 +1,11 @@
 /**
  * 安全测试引擎
  * 提供真实的安全扫描、SSL检测、头部分析、漏洞检测等功能
+ * 
+ * 增强功能:
+ * - WebSocket实时进度通知
+ * - 告警系统集成
+ * - 测试ID支持
  */
 
 const https = require('https');
@@ -8,17 +13,28 @@ const http = require('http');
 const { URL } = require('url');
 const crypto = require('crypto');
 const tls = require('tls');
+const { emitTestProgress, emitTestComplete, emitTestError } = require('../../websocket/testEvents');
+const { getAlertManager } = require('../../alert/AlertManager');
+const Logger = require('../../utils/logger');
 
 class SecurityTestEngine {
   constructor(options = {}) {
     this.name = 'security';
-    this.version = '2.0.0';
-    this.description = '安全测试引擎';
+    this.version = '3.0.0';
+    this.description = '安全测试引擎 - 支持实时通知和告警';
     this.options = {
       timeout: process.env.REQUEST_TIMEOUT || 30000,
-      userAgent: 'Security-Scanner/2.0.0',
+      userAgent: 'Security-Scanner/3.0.0',
       ...options
     };
+    
+    // 初始化告警管理器
+    this.alertManager = null;
+    try {
+      this.alertManager = getAlertManager();
+    } catch (error) {
+      Logger.warn('告警管理器未初始化:', error.message);
+    }
   }
 
   /**
@@ -41,28 +57,68 @@ class SecurityTestEngine {
    * 执行安全测试
    */
   async executeTest(config) {
+    const testId = config.testId || `security-${Date.now()}`;
+    const { url = 'https://example.com' } = config;
+    
     try {
-      const { url = 'https://example.com' } = config;
+      Logger.info(`🚀 开始安全测试: ${testId} - ${url}`);
       
+      // 发送测试开始事件
+      emitTestProgress(testId, {
+        stage: 'started',
+        progress: 0,
+        message: '安全扫描开始',
+        url
+      });
       
-      const results = await this.performSecurityScan(url);
+      const results = await this.performSecurityScan(url, { testId });
       
-      return {
+      const finalResult = {
         engine: this.name,
         version: this.version,
         success: true,
+        testId,
         results,
         timestamp: new Date().toISOString()
       };
+      
+      // 发送完成事件
+      emitTestComplete(testId, finalResult);
+      
+      Logger.info(`✅ 安全测试完成: ${testId}`);
+      
+      return finalResult;
+      
     } catch (error) {
-      console.error(`❌ 安全测试失败: ${error.message}`);
-      return {
+      Logger.error(`❌ 安全测试失败: ${testId}`, error);
+      
+      const errorResult = {
         engine: this.name,
         version: this.version,
         success: false,
+        testId,
+        url,
         error: error.message,
         timestamp: new Date().toISOString()
       };
+      
+      // 发送错误事件
+      emitTestError(testId, {
+        error: error.message,
+        stack: error.stack
+      });
+      
+      // 触发错误告警
+      if (this.alertManager) {
+        await this.alertManager.checkAlert('TEST_FAILURE', {
+          testId,
+          testType: 'security',
+          url,
+          error: error.message
+        });
+      }
+      
+      return errorResult;
     }
   }
 
@@ -72,9 +128,19 @@ class SecurityTestEngine {
   async performSecurityScan(url, options = {}) {
     const startTime = Date.now();
     const urlObj = new URL(url);
+    const testId = options.testId;
     
     try {
-      console.log(`🔍 开始全面安全扫描: ${url}`);
+      Logger.info(`🔍 开始全面安全扫描: ${url}`);
+      
+      // 发送进度: SSL分析
+      if (testId) {
+        emitTestProgress(testId, {
+          stage: 'running',
+          progress: 10,
+          message: '分析SSL/TLS配置...'
+        });
+      }
       
       // 初始化漏洞分析器
       const XSSAnalyzer = require('./analyzers/XSSAnalyzer');
@@ -91,6 +157,15 @@ class SecurityTestEngine {
         this.testAccessControl(url)
       ]);
       
+      // 发送进度: 基础检查完成
+      if (testId) {
+        emitTestProgress(testId, {
+          stage: 'running',
+          progress: 40,
+          message: 'SSL和安全头部分析完成'
+        });
+      }
+      
       // 深度漏洞扫描（需要浏览器环境）
       let vulnerabilityAnalysis = {
         xss: { vulnerabilities: [], summary: { totalTests: 0, riskLevel: 'low' } },
@@ -99,7 +174,15 @@ class SecurityTestEngine {
       };
       
       if (options.enableDeepScan && options.page) {
-        console.log('🔍 开始深度漏洞扫描...');
+        Logger.info('🔍 开始深度漏洞扫描...');
+        
+        if (testId) {
+          emitTestProgress(testId, {
+            stage: 'running',
+            progress: 50,
+            message: '执行深度漏洞扫描...'
+          });
+        }
         
         try {
           // XSS漏洞检测
@@ -118,11 +201,29 @@ class SecurityTestEngine {
           console.warn('⚠️ 深度扫描部分失败:', deepScanError.message);
         }
       } else {
-        console.log('🔍 执行快速安全扫描...');
+        Logger.info('🔍 执行快速安全扫描...');
+        
+        if (testId) {
+          emitTestProgress(testId, {
+            stage: 'running',
+            progress: 50,
+            message: '执行快速漏洞扫描...'
+          });
+        }
+        
         vulnerabilityAnalysis = await this.performQuickVulnerabilityScan(url);
       }
       
       const endTime = Date.now();
+      
+      // 发送进度: 分析结果
+      if (testId) {
+        emitTestProgress(testId, {
+          stage: 'analyzing',
+          progress: 80,
+          message: '分析安全测试结果...'
+        });
+      }
       
       // 计算总体安全评分（增强版）
       const overallScore = this.calculateEnhancedSecurityScore({
@@ -172,12 +273,72 @@ class SecurityTestEngine {
         threatIntelligence: this.generateThreatIntelligence(vulnerabilityAnalysis)
       };
       
-      console.log(`✅ 安全扫描完成，评分: ${overallScore}/100`);
+      // 检查告警条件
+      if (this.alertManager && testId) {
+        await this._checkSecurityAlerts(testId, url, results);
+      }
+      
+      Logger.info(`✅ 安全扫描完成，评分: ${overallScore}/100`);
       return results;
       
     } catch (error) {
-      console.error('❌ 安全扫描失败:', error);
+      Logger.error('❌ 安全扫描失败:', error);
       throw error;
+    }
+  }
+  
+  /**
+   * 检查安全告警条件
+   * @private
+   */
+  async _checkSecurityAlerts(testId, url, results) {
+    try {
+      // 检查安全评分告警
+      if (results.overallScore < 60) {
+        await this.alertManager.checkAlert('SECURITY_SCORE_LOW', {
+          testId,
+          url,
+          score: results.overallScore,
+          threshold: 60,
+          securityLevel: results.summary.securityLevel
+        });
+      }
+      
+      // 检查关键漏洞
+      if (results.summary.criticalVulnerabilities > 0) {
+        await this.alertManager.checkAlert('CRITICAL_VULNERABILITIES', {
+          testId,
+          url,
+          count: results.summary.criticalVulnerabilities,
+          vulnerabilities: results.details.vulnerabilities
+        });
+      }
+      
+      // 检查SSL问题
+      if (!results.details.ssl.enabled) {
+        await this.alertManager.checkAlert('HTTPS_NOT_ENABLED', {
+          testId,
+          url,
+          message: '未启用HTTPS加密'
+        });
+      }
+      
+      // 检查缺少安全头部
+      const criticalHeadersMissing = results.details.headers.missingHeaders?.filter(
+        h => h.importance === 'high'
+      ).length || 0;
+      
+      if (criticalHeadersMissing > 0) {
+        await this.alertManager.checkAlert('SECURITY_HEADERS_MISSING', {
+          testId,
+          url,
+          count: criticalHeadersMissing,
+          headers: results.details.headers.missingHeaders
+        });
+      }
+      
+    } catch (error) {
+      Logger.warn('安全告警检查失败:', error.message);
     }
   }
 

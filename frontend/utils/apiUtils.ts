@@ -13,36 +13,26 @@ import { ErrorCode } from '@shared/types';
  * @returns 格式化后的API响应
  */
 export function formatApiResponse<T>(
-    data: T | null = null,
-    error: Error | null = null
+  data: T | null = null,
+  error: Error | null = null
 ): ApiResponse<T> {
-    const timestamp = new Date().toISOString();
+  const timestamp = new Date().toISOString();
 
-    if (error) {
-        return {
-            success: false,
-            error: {
-                code: ErrorCode.UNKNOWN_ERROR,
-                message: error.message,
-                timestamp,
-            },
-            meta: {
-                timestamp,
-                requestId: generateRequestId(),
-                version: '1.0.0',
-            },
-        };
-    }
-
+  if (error) {
     return {
-        success: true,
-        data: data || undefined,
-        meta: {
-            timestamp,
-            requestId: generateRequestId(),
-            version: '1.0.0',
-        },
+      success: false,
+      error: error.message,
+      message: error.message,
+      code: ErrorCode.UNKNOWN_ERROR,
+      timestamp,
     };
+  }
+
+  return {
+    success: true,
+    data: data || undefined,
+    timestamp,
+  };
 }
 
 /**
@@ -51,68 +41,68 @@ export function formatApiResponse<T>(
  * @returns 错误处理结果
  */
 export function handleApiError(error: any) {
-    // 网络错误
-    if (error.code === 'NETWORK_ERROR' || !error.response) {
-        return {
-            type: 'network',
-            message: '网络连接失败，请检查网络设置',
-            canRetry: true,
-        };
-    }
-
-    const status = error.response?.status;
-
-    // 认证错误
-    if (status === 401) {
-        return {
-            type: 'auth',
-            message: '登录已过期，请重新登录',
-            canRetry: false,
-        };
-    }
-
-    // 权限错误
-    if (status === 403) {
-        return {
-            type: 'permission',
-            message: '没有权限执行此操作',
-            canRetry: false,
-        };
-    }
-
-    // 资源不存在
-    if (status === 404) {
-        return {
-            type: 'notFound',
-            message: '请求的资源不存在',
-            canRetry: false,
-        };
-    }
-
-    // 请求错误
-    if (status >= 400 && status < 500) {
-        return {
-            type: 'client',
-            message: error.response?.data?.message || '请求参数错误',
-            canRetry: false,
-        };
-    }
-
-    // 服务器错误
-    if (status >= 500) {
-        return {
-            type: 'server',
-            message: '服务器错误，请稍后重试',
-            canRetry: true,
-        };
-    }
-
-    // 未知错误
+  // 网络错误
+  if (error.code === 'NETWORK_ERROR' || !error.response) {
     return {
-        type: 'unknown',
-        message: error.message || '未知错误',
-        canRetry: true,
+      type: 'network',
+      message: '网络连接失败，请检查网络设置',
+      canRetry: true,
     };
+  }
+
+  const status = error.response?.status;
+
+  // 认证错误
+  if (status === 401) {
+    return {
+      type: 'auth',
+      message: '登录已过期，请重新登录',
+      canRetry: false,
+    };
+  }
+
+  // 权限错误
+  if (status === 403) {
+    return {
+      type: 'permission',
+      message: '没有权限执行此操作',
+      canRetry: false,
+    };
+  }
+
+  // 资源不存在
+  if (status === 404) {
+    return {
+      type: 'notFound',
+      message: '请求的资源不存在',
+      canRetry: false,
+    };
+  }
+
+  // 请求错误
+  if (status >= 400 && status < 500) {
+    return {
+      type: 'client',
+      message: error.response?.data?.message || '请求参数错误',
+      canRetry: false,
+    };
+  }
+
+  // 服务器错误
+  if (status >= 500) {
+    return {
+      type: 'server',
+      message: '服务器错误，请稍后重试',
+      canRetry: true,
+    };
+  }
+
+  // 未知错误
+  return {
+    type: 'unknown',
+    message: error.message || '未知错误',
+    canRetry: true,
+  };
 }
 
 /**
@@ -121,19 +111,19 @@ export function handleApiError(error: any) {
  * @returns 查询字符串
  */
 export function buildQueryString(params: Record<string, any>): string {
-    const searchParams = new URLSearchParams();
+  const searchParams = new URLSearchParams();
 
-    Object.entries(params).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-            if (Array.isArray(value)) {
-                searchParams.append(key, value.join(','));
-            } else {
-                searchParams.append(key, String(value));
-            }
-        }
-    });
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== '') {
+      if (Array.isArray(value)) {
+        searchParams.append(key, value.join(','));
+      } else {
+        searchParams.append(key, String(value));
+      }
+    }
+  });
 
-    return searchParams.toString();
+  return searchParams.toString();
 }
 
 /**
@@ -141,7 +131,7 @@ export function buildQueryString(params: Record<string, any>): string {
  * @returns 唯一的请求ID
  */
 function generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
 /**
@@ -149,8 +139,10 @@ function generateRequestId(): string {
  * @param response API响应
  * @returns 是否成功
  */
-export function isApiSuccess<T>(response: ApiResponse<T>): response is ApiResponse<T> & { success: true } {
-    return response.success === true;
+export function isApiSuccess<T>(
+  response: ApiResponse<T>
+): response is ApiResponse<T> & { success: true } {
+  return response.success === true;
 }
 
 /**
@@ -159,7 +151,7 @@ export function isApiSuccess<T>(response: ApiResponse<T>): response is ApiRespon
  * @returns 响应数据
  */
 export function extractApiData<T>(response: ApiResponse<T>): T | null {
-    return isApiSuccess(response) ? response?.data || null : null;
+  return isApiSuccess(response) ? response?.data || null : null;
 }
 
 /**
@@ -168,13 +160,14 @@ export function extractApiData<T>(response: ApiResponse<T>): T | null {
  * @returns 错误信息
  */
 export function extractApiError<T>(response: ApiResponse<T>): string | null {
-    if (isApiSuccess(response)) return null;
+  if (isApiSuccess(response)) return null;
 
-    const error = response?.error;
-    if (typeof error === 'string') {
-        return error;
-    } else if (error && typeof error === 'object' && 'message' in error) {
-        return error.message || '未知错误';
-    }
-    return '未知错误';
+  const error = response?.error;
+  if (typeof error === 'string') {
+    return error;
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    const errorObj = error as { message?: string };
+    return errorObj.message || '未知错误';
+  }
+  return '未知错误';
 }

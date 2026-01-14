@@ -1,10 +1,12 @@
 /**
  * 简化的缓存中间件
- * 使用CacheService提供基础缓存功能
+ * 使用内存缓存提供基础缓存功能
  */
 
 const crypto = require('crypto');
-// // // // // // const smartCacheService = require('../services/smartCacheService'); // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
+
+// 简单的内存缓存存储
+const cache = new Map();
 
 /**
  * 创建缓存中间件
@@ -29,13 +31,12 @@ function createCacheMiddleware(options = {}) {
             const cacheKey = generateCacheKey(req);
             
             // 尝试从缓存获取
-            const cachedResponse = await smartCacheService.get(cacheKey, 'api_response');
+            const cached = cache.get(cacheKey);
             
-            if (cachedResponse) {
-                
-        res.set('X-Cache', 'HIT');
-                return res.json(cachedResponse);
-      }
+            if (cached && Date.now() - cached.timestamp < config.ttl * 1000) {
+                res.set('X-Cache', 'HIT');
+                return res.json(cached.data);
+            }
 
             // 设置缓存未命中标记
             res.set('X-Cache', 'MISS');
@@ -46,7 +47,13 @@ function createCacheMiddleware(options = {}) {
                 // 只缓存成功的响应
                 if (res.statusCode >= 200 && res.statusCode < 300 && 
                     !config.excludeStatus.includes(res.statusCode)) {
-                    smartCacheService.set(cacheKey, data, 'api_response', config.ttl);
+                    cache.set(cacheKey, {
+                        data,
+                        timestamp: Date.now()
+                    });
+                    
+                    // 清理过期缓存
+                    cleanExpiredCache(config.ttl);
                 }
                 return originalJson.call(this, data);
             };
@@ -57,6 +64,20 @@ function createCacheMiddleware(options = {}) {
             next();
         }
     };
+}
+
+/**
+ * 清理过期缓存
+ */
+function cleanExpiredCache(ttl) {
+    const now = Date.now();
+    const maxAge = (ttl || 900) * 1000; // 默认15分钟
+    
+    for (const [key, value] of cache.entries()) {
+        if (now - value.timestamp > maxAge) {
+            cache.delete(key);
+        }
+    }
 }
 
 /**

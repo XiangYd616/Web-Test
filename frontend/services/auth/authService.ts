@@ -1,15 +1,24 @@
-import { UserRole, UserStatus } from '../../types/enums';
 import Logger from '@/utils/logger';
-import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
+import { jwtDecode } from 'jwt-decode';
+import { UserRole, UserStatus } from '../../types/enums';
+import { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/unified/models';
+import type { ChangePasswordData, CreateUserData, UpdateUserData } from '../../types/user';
 import { browserJwt } from '../../utils/browserJwt';
 import { canUseDatabase } from '../../utils/environment';
-import { jwtDecode } from 'jwt-decode';
 
 // 导入企业级功能模块
+import type {
+  EnhancedAuthConfig,
+  IAuthService,
+  JwtPayload,
+  PasswordStrength,
+  RefreshResult,
+  SessionInfo,
+  TokenPair,
+} from './core/authTypes';
 import { DeviceFingerprinter } from './core/deviceFingerprint';
-import { SecureStorageManager } from './core/secureStorage';
 import { PasswordSecurityManager } from './core/passwordSecurity';
-import type {EnhancedAuthConfig, PasswordStrength, SessionInfo, IAuthService, JwtPayload, TokenPair, RefreshResult} from './core/authTypes';
+import { SecureStorageManager } from './core/secureStorage';
 
 // 动态导入数据库模块（避免前端构建时的依赖问题）
 let jwt: unknown, userDao: any;
@@ -40,7 +49,7 @@ export class UnifiedAuthService implements IAuthService {
   private currentUser: User | null = null;
   private authListeners: ((user: User | null) => void)[] = [];
   private isInitialized = false;
-  
+
   // 企业级功能配置
   private enhancedConfig: Partial<EnhancedAuthConfig>;
   private deviceFingerprint?: string;
@@ -48,7 +57,7 @@ export class UnifiedAuthService implements IAuthService {
   private refreshTimer?: NodeJS.Timeout;
   private sessionCheckTimer?: NodeJS.Timeout;
   private eventListeners: Map<string, Function[]> = new Map();
-  
+
   // JWT管理
   private currentTokenPair?: TokenPair;
   private activeSessions = new Map<string, SessionInfo>();
@@ -66,16 +75,16 @@ export class UnifiedAuthService implements IAuthService {
       maxConcurrentSessions: 5,
       passwordPolicy: PasswordSecurityManager.DEFAULT_POLICY,
       apiBaseUrl: '/api',
-      ...enhancedConfig
+      ...enhancedConfig,
     };
-    
+
     // 初始化设备ID
     this.deviceId = this.generateDeviceId();
-    
+
     this.initializeAuth();
     this.initializeEnhancedFeatures();
   }
-  
+
   /**
    * 生成设备ID
    */
@@ -102,15 +111,15 @@ export class UnifiedAuthService implements IAuthService {
       try {
         this.deviceFingerprint = await DeviceFingerprinter.generateFingerprint();
       } catch (error) {
-        Logger.warn('设备指纹生成失败:', error);
+        Logger.warn('设备指纹生成失败:', { error: String(error) });
       }
     }
-    
+
     // 启动会话监控
     if (this.enhancedConfig.enableSessionTracking) {
       this.startSessionMonitoring();
     }
-    
+
     // 加载存储的token
     await this.loadStoredTokens();
   }
@@ -138,7 +147,7 @@ export class UnifiedAuthService implements IAuthService {
               this.logout();
             }
           } catch (error) {
-            Logger.error('❌ 解析用户数据失败:', error);
+            Logger.error('❗ 解析用户数据失败:', { error: String(error) });
             this.logout();
           }
         }
@@ -146,7 +155,7 @@ export class UnifiedAuthService implements IAuthService {
 
       this.isInitialized = true;
     } catch (error) {
-      Logger.error('❌ 初始化认证状态失败:', error);
+      Logger.error('❗ 初始化认证状态失败:', { error: String(error) });
       this.isInitialized = true;
     }
   }
@@ -155,7 +164,8 @@ export class UnifiedAuthService implements IAuthService {
   private isTokenValid(token: string): boolean {
     if (canUseDatabase && jwt) {
       try {
-        const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
+        const secret =
+          process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
         (jwt as any).verify(token, secret);
         return true;
       } catch {
@@ -173,27 +183,29 @@ export class UnifiedAuthService implements IAuthService {
       const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process?.env.JWT_EXPIRES_IN || '24h';
 
-      return (jwt as any).default?.sign ? (jwt as any).default.sign(
-        {
-          sub: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          iat: Math.floor(Date.now() / 1000),
-        },
-        secret,
-        { expiresIn }
-      ) : (jwt as any).sign(
-        {
-          sub: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          iat: Math.floor(Date.now() / 1000),
-        },
-        secret,
-        { expiresIn }
-      );
+      return (jwt as any).default?.sign
+        ? (jwt as any).default.sign(
+            {
+              sub: user.id,
+              username: user.username,
+              email: user.email,
+              role: user.role,
+              iat: Math.floor(Date.now() / 1000),
+            },
+            secret,
+            { expiresIn }
+          )
+        : (jwt as any).sign(
+            {
+              sub: user.id,
+              username: user.username,
+              email: user.email,
+              role: user.role,
+              iat: Math.floor(Date.now() / 1000),
+            },
+            secret,
+            { expiresIn }
+          );
     } else {
       // 浏览器环境使用简化的 JWT 生成
       return browserJwt.createToken({
@@ -201,7 +213,7 @@ export class UnifiedAuthService implements IAuthService {
         username: user.username,
         email: user.email,
         role: user.role,
-        exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24小时过期
+        exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24小时过期
       });
     }
   }
@@ -212,29 +224,31 @@ export class UnifiedAuthService implements IAuthService {
       const secret = process?.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process?.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
-      return (jwt as any).default?.sign ? (jwt as any).default.sign(
-        {
-          sub: user.id,
-          type: 'refresh',
-          iat: Math.floor(Date.now() / 1000),
-        },
-        secret,
-        { expiresIn }
-      ) : (jwt as any).sign(
-        {
-          sub: user.id,
-          type: 'refresh',
-          iat: Math.floor(Date.now() / 1000),
-        },
-        secret,
-        { expiresIn }
-      );
+      return (jwt as any).default?.sign
+        ? (jwt as any).default.sign(
+            {
+              sub: user.id,
+              type: 'refresh',
+              iat: Math.floor(Date.now() / 1000),
+            },
+            secret,
+            { expiresIn }
+          )
+        : (jwt as any).sign(
+            {
+              sub: user.id,
+              type: 'refresh',
+              iat: Math.floor(Date.now() / 1000),
+            },
+            secret,
+            { expiresIn }
+          );
     } else {
       // 浏览器环境使用简化的刷新 token 生成
       return browserJwt.createToken({
         sub: user.id?.toString(),
         type: 'refresh',
-        exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7天过期
+        exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7天过期
       });
     }
   }
@@ -270,7 +284,7 @@ export class UnifiedAuthService implements IAuthService {
           success,
           details,
           errorMessage,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     } catch (error) {
@@ -282,7 +296,6 @@ export class UnifiedAuthService implements IAuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const clientInfo = undefined;
     try {
-
       let user: User | null = null;
       let isValidPassword = false;
 
@@ -296,7 +309,6 @@ export class UnifiedAuthService implements IAuthService {
       } else {
         // 在浏览器环境中通过API验证
         try {
-
           const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: {
@@ -305,8 +317,8 @@ export class UnifiedAuthService implements IAuthService {
             body: JSON.stringify({
               email: credentials.email,
               identifier: credentials.email, // 兼容完整版后端
-              password: credentials.password
-            })
+              password: credentials.password,
+            }),
           });
 
           const result = await response.json();
@@ -315,16 +327,16 @@ export class UnifiedAuthService implements IAuthService {
             user = result.data.user;
             serverToken = result.data.token;
             isValidPassword = true;
-            Logger.debug('✅ API登录成功', { username: user.username });
+            Logger.debug('✅ API登录成功', { username: user?.username });
           } else {
             Logger.debug('❌ API登录失败', { error: result.error || result.message });
             user = null;
             isValidPassword = false;
           }
         } catch (error) {
-          Logger.error('❌ API登录错误:', error);
+          Logger.error('❗ API登录错误:', error);
           // 如果API失败，尝试本地验证（系统用户）
-          user = await this.validateUserLocally(credentials.email, credentials.password);
+          user = await this.validateUserLocally(credentials.email ?? '', credentials.password);
           isValidPassword = user !== null;
         }
       }
@@ -335,7 +347,7 @@ export class UnifiedAuthService implements IAuthService {
           'login_failed',
           'auth',
           false,
-          { email: credentials.email, ...clientInfo },
+          { email: credentials.email, ...(clientInfo || {}) },
           '用户名或密码错误'
         );
 
@@ -347,7 +359,7 @@ export class UnifiedAuthService implements IAuthService {
         return {
           success: false,
           message: '用户名或密码错误',
-          errors: { username: '用户名或密码错误' }
+          errors: { username: '用户名或密码错误' },
         };
       }
 
@@ -358,14 +370,14 @@ export class UnifiedAuthService implements IAuthService {
           'login_blocked',
           'auth',
           false,
-          { email: credentials.email, status: user.status, ...clientInfo },
+          { email: credentials.email, status: user.status, ...(clientInfo || {}) },
           '账户已被禁用'
         );
 
         return {
           success: false,
           message: '账户已被禁用，请联系管理员',
-          errors: { username: '账户已被禁用' }
+          errors: { username: '账户已被禁用' },
         };
       }
 
@@ -376,14 +388,14 @@ export class UnifiedAuthService implements IAuthService {
           'login_locked',
           'auth',
           false,
-          { email: credentials.email, lockedUntil: user.lockedUntil, ...clientInfo },
+          { email: credentials.email, lockedUntil: user.lockedUntil, ...(clientInfo || {}) },
           '账户已被锁定'
         );
 
         return {
           success: false,
           message: '账户已被锁定，请稍后再试',
-          errors: { username: '账户已被锁定' }
+          errors: { username: '账户已被锁定' },
         };
       }
 
@@ -400,15 +412,15 @@ export class UnifiedAuthService implements IAuthService {
         token = this.generateToken(user);
         refreshToken = this.generateRefreshToken(user);
       }
-      
+
       // 创建token对用于企业级管理
       const tokenPair: TokenPair = {
         accessToken: token,
         refreshToken,
         expiresAt: Date.now() + (this.enhancedConfig.accessTokenExpiry || 900) * 1000,
-        issuedAt: Date.now()
+        issuedAt: Date.now(),
       };
-      
+
       await this.setTokenPair(tokenPair);
 
       // 更新最后登录时间
@@ -433,13 +445,11 @@ export class UnifiedAuthService implements IAuthService {
       this.currentUser = user;
       this.notifyAuthListeners(user);
 
-      await this.logActivity(
-        user.id,
-        'login_success',
-        'auth',
-        true,
-        { email: credentials.email, rememberMe: credentials.rememberMe, ...clientInfo }
-      );
+      await this.logActivity(user.id, 'login_success', 'auth', true, {
+        email: credentials.email,
+        rememberMe: credentials.rememberMe,
+        ...(clientInfo || {}),
+      });
 
       Logger.debug('✅ 用户登录成功', { username: user.username });
 
@@ -448,7 +458,7 @@ export class UnifiedAuthService implements IAuthService {
         user,
         token,
         refreshToken,
-        message: '登录成功'
+        message: '登录成功',
       };
     } catch (error: any) {
       Logger.error('❌ 用户登录失败:', error);
@@ -459,19 +469,22 @@ export class UnifiedAuthService implements IAuthService {
         'login_error',
         'auth',
         false,
-        { email: credentials.email, ...clientInfo },
+        { email: credentials.email, ...(clientInfo || {}) },
         errorMessage
       );
 
       return {
         success: false,
-        message: '登录失败，请稍后重试'
+        message: '登录失败，请稍后重试',
       };
     }
   }
 
   // 本地用户验证（浏览器环境兼容）
-  private async validateUserLocally(emailOrUsername: string, password: string): Promise<User | null> {
+  private async validateUserLocally(
+    emailOrUsername: string,
+    password: string
+  ): Promise<User | null> {
     // 检查系统用户（支持用户名登录）
     const systemUsers = ['admin', 'manager', 'tester'];
     if (systemUsers.includes(emailOrUsername) && password === 'password123') {
@@ -480,7 +493,6 @@ export class UnifiedAuthService implements IAuthService {
 
     // 浏览器环境下通过 API 验证用户
     try {
-
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -489,8 +501,8 @@ export class UnifiedAuthService implements IAuthService {
         body: JSON.stringify({
           email: emailOrUsername,
           identifier: emailOrUsername, // 兼容完整版后端
-          password
-        })
+          password,
+        }),
       });
 
       const result = await response.json();
@@ -522,13 +534,15 @@ export class UnifiedAuthService implements IAuthService {
         id: '00000000-0000-0000-0000-000000000001',
         username: 'admin',
         email: 'admin@testweb.com',
-        fullName: '系统管理员',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
         role: UserRole.ADMIN,
         status: UserStatus.ACTIVE,
         permissions: [],
+        profile: {
+          fullName: '系统管理员',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+        },
         preferences: this.getDefaultPreferences(),
-        metadata: {},
+        emailVerified: true,
         createdAt: '2025-01-01T00:00:00Z',
         updatedAt: new Date().toISOString(),
       },
@@ -536,13 +550,15 @@ export class UnifiedAuthService implements IAuthService {
         id: '00000000-0000-0000-0000-000000000002',
         username: 'manager',
         email: 'manager@testweb.com',
-        fullName: '项目经理',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=manager',
         role: UserRole.MANAGER,
         status: UserStatus.ACTIVE,
         permissions: [],
+        profile: {
+          fullName: '项目经理',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=manager',
+        },
         preferences: this.getDefaultPreferences(),
-        metadata: {},
+        emailVerified: true,
         createdAt: '2025-01-01T00:00:00Z',
         updatedAt: new Date().toISOString(),
       },
@@ -550,13 +566,15 @@ export class UnifiedAuthService implements IAuthService {
         id: '00000000-0000-0000-0000-000000000003',
         username: 'tester',
         email: 'tester@testweb.com',
-        fullName: '测试工程师',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tester',
         role: UserRole.TESTER,
         status: UserStatus.ACTIVE,
         permissions: [],
+        profile: {
+          fullName: '测试工程师',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tester',
+        },
         preferences: this.getDefaultPreferences(),
-        metadata: {},
+        emailVerified: true,
         createdAt: '2025-01-01T00:00:00Z',
         updatedAt: new Date().toISOString(),
       },
@@ -575,13 +593,13 @@ export class UnifiedAuthService implements IAuthService {
         email: true,
         sms: false,
         push: false,
-        browser: true
+        browser: true,
       },
       dashboard: {
         layout: 'grid',
         widgets: ['overview', 'recent-tests'],
-        defaultView: 'overview'
-      }
+        defaultView: 'overview',
+      },
     };
   }
 
@@ -589,7 +607,6 @@ export class UnifiedAuthService implements IAuthService {
   async register(data: RegisterData): Promise<AuthResponse> {
     const clientInfo = undefined;
     try {
-
       // 验证数据
       const errors: Record<string, string> = {};
 
@@ -613,7 +630,7 @@ export class UnifiedAuthService implements IAuthService {
         return {
           success: false,
           message: '注册信息有误',
-          errors
+          errors,
         };
       }
 
@@ -625,7 +642,7 @@ export class UnifiedAuthService implements IAuthService {
           username: data?.username,
           email: data?.email,
           fullName: data?.fullName,
-          password: data?.password
+          password: data?.password,
         };
 
         newUser = await userDao.createUser(createUserData);
@@ -641,8 +658,8 @@ export class UnifiedAuthService implements IAuthService {
             username: data?.username,
             email: data?.email,
             fullName: data?.fullName,
-            password: data?.password
-          })
+            password: data?.password,
+          }),
         });
 
         const result = await response.json();
@@ -670,7 +687,7 @@ export class UnifiedAuthService implements IAuthService {
           success: true,
           user: newUser,
           token: serverToken,
-          message: '注册成功'
+          message: '注册成功',
         };
       }
 
@@ -688,13 +705,11 @@ export class UnifiedAuthService implements IAuthService {
       this.currentUser = newUser;
       this.notifyAuthListeners(newUser);
 
-      await this.logActivity(
-        newUser.id,
-        'register_success',
-        'auth',
-        true,
-        { username: data?.username, email: data?.email, ...clientInfo }
-      );
+      await this.logActivity(newUser.id, 'register_success', 'auth', true, {
+        username: data?.username,
+        email: data?.email,
+        ...(clientInfo || {}),
+      });
 
       Logger.debug('✅ 用户注册成功', { username: newUser.username });
 
@@ -703,7 +718,7 @@ export class UnifiedAuthService implements IAuthService {
         user: newUser,
         token,
         refreshToken,
-        message: '注册成功'
+        message: '注册成功',
       };
     } catch (error: any) {
       Logger.error('❌ 用户注册失败:', error);
@@ -714,13 +729,13 @@ export class UnifiedAuthService implements IAuthService {
         'register_error',
         'auth',
         false,
-        { username: data?.username, email: data?.email, ...clientInfo },
+        { username: data?.username, email: data?.email, ...(clientInfo || {}) },
         errorMessage
       );
 
       return {
         success: false,
-        message: errorMessage || '注册失败，请稍后重试'
+        message: errorMessage || '注册失败，请稍后重试',
       };
     }
   }
@@ -729,13 +744,9 @@ export class UnifiedAuthService implements IAuthService {
   async logout(): Promise<void> {
     try {
       if (this.currentUser) {
-        await this.logActivity(
-          this.currentUser.id,
-          'logout',
-          'auth',
-          true,
-          { username: this.currentUser.username }
-        );
+        await this.logActivity(this.currentUser.id, 'logout', 'auth', true, {
+          username: this.currentUser.username,
+        });
       }
 
       // 清除本地存储
@@ -747,7 +758,7 @@ export class UnifiedAuthService implements IAuthService {
         sessionStorage.removeItem(this.USER_KEY);
         sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
       }
-      
+
       // 清理企业级JWT资源
       await this.clearTokenPair();
 
@@ -773,7 +784,11 @@ export class UnifiedAuthService implements IAuthService {
   // 检查用户权限
   hasPermission(permission: string): boolean {
     if (!this.currentUser) return false;
-    return this.currentUser.permissions?.some((p: any) => typeof p === 'string' ? p === permission : p.name === permission) || false;
+    return (
+      this.currentUser.permissions?.some((p: any) =>
+        typeof p === 'string' ? p === permission : p.name === permission
+      ) || false
+    );
   }
 
   // 检查用户角色
@@ -818,7 +833,7 @@ export class UnifiedAuthService implements IAuthService {
           ...this.currentUser,
           ...updates,
           preferences: { ...this.currentUser.preferences, ...updates.preferences },
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         };
 
         // 更新本地存储
@@ -836,18 +851,14 @@ export class UnifiedAuthService implements IAuthService {
       this.currentUser = updatedUser;
       this.notifyAuthListeners(updatedUser);
 
-      await this.logActivity(
-        updatedUser.id,
-        'profile_update',
-        'user',
-        true,
-        { updates: Object.keys(updates) }
-      );
+      await this.logActivity(updatedUser.id, 'profile_update', 'user', true, {
+        updates: Object.keys(updates),
+      });
 
       return {
         success: true,
         user: updatedUser,
-        message: '个人信息更新成功'
+        message: '个人信息更新成功',
       };
     } catch (error: any) {
       Logger.error('❌ 更新用户信息失败:', error);
@@ -863,7 +874,7 @@ export class UnifiedAuthService implements IAuthService {
 
       return {
         success: false,
-        message: error instanceof Error ? error.message : '更新失败，请稍后重试'
+        message: error instanceof Error ? error.message : '更新失败，请稍后重试',
       };
     }
   }
@@ -876,12 +887,14 @@ export class UnifiedAuthService implements IAuthService {
 
     try {
       // 验证当前密码
-      const isCurrentPasswordValid = await this.validateCurrentPassword(data?.currentPassword);
+      const isCurrentPasswordValid = await this.validateCurrentPassword(
+        data?.currentPassword ?? ''
+      );
       if (!isCurrentPasswordValid) {
         return {
           success: false,
           message: '当前密码错误',
-          errors: { currentPassword: '当前密码错误' }
+          errors: { currentPassword: '当前密码错误' },
         };
       }
 
@@ -890,7 +903,7 @@ export class UnifiedAuthService implements IAuthService {
         return {
           success: false,
           message: '新密码至少需要6个字符',
-          errors: { newPassword: '新密码至少需要6个字符' }
+          errors: { newPassword: '新密码至少需要6个字符' },
         };
       }
 
@@ -898,7 +911,7 @@ export class UnifiedAuthService implements IAuthService {
         return {
           success: false,
           message: '两次输入的密码不一致',
-          errors: { confirmPassword: '两次输入的密码不一致' }
+          errors: { confirmPassword: '两次输入的密码不一致' },
         };
       }
 
@@ -906,7 +919,7 @@ export class UnifiedAuthService implements IAuthService {
         // 在 Node.js 环境中，通过 API 调用更新密码
         // 注意：密码哈希应该在后端处理
         await userDao.updateUser(this.currentUser.id, {
-          metadata: { ...this.currentUser.metadata, passwordUpdatedAt: new Date().toISOString() }
+          metadata: { ...this.currentUser.metadata, passwordUpdatedAt: new Date().toISOString() },
         });
         // 注意：实际的密码更新需要在 userDao 中添加专门的方法
       } else {
@@ -916,17 +929,13 @@ export class UnifiedAuthService implements IAuthService {
         localStorage.setItem('test_web_app_passwords', JSON.stringify(passwords));
       }
 
-      await this.logActivity(
-        this.currentUser.id,
-        'password_change',
-        'auth',
-        true,
-        { username: this.currentUser.username }
-      );
+      await this.logActivity(this.currentUser.id, 'password_change', 'auth', true, {
+        username: this.currentUser.username,
+      });
 
       return {
         success: true,
-        message: '密码修改成功'
+        message: '密码修改成功',
       };
     } catch (error: any) {
       Logger.error('❌ 修改密码失败:', error);
@@ -942,7 +951,7 @@ export class UnifiedAuthService implements IAuthService {
 
       return {
         success: false,
-        message: '密码修改失败，请稍后重试'
+        message: '密码修改失败，请稍后重试',
       };
     }
   }
@@ -963,13 +972,14 @@ export class UnifiedAuthService implements IAuthService {
 
   // 刷新 token
   async refreshToken(): Promise<boolean> {
-    const refreshToken = (isBrowser || isElectron) ? localStorage.getItem(this.REFRESH_TOKEN_KEY) : null;
+    const refreshToken =
+      isBrowser || isElectron ? localStorage.getItem(this.REFRESH_TOKEN_KEY) : null;
     if (!refreshToken) return false;
-    
+
     const result = await this.refreshTokenInternal(refreshToken);
     return result.success;
   }
-  
+
   // 内部刷新token方法
   private async refreshTokenInternal(refreshToken: string): Promise<AuthResponse> {
     try {
@@ -1006,27 +1016,21 @@ export class UnifiedAuthService implements IAuthService {
         localStorage.setItem(this.REFRESH_TOKEN_KEY, newRefreshToken);
       }
 
-      await this.logActivity(
-        user.id,
-        'token_refresh',
-        'auth',
-        true,
-        { username: user.username }
-      );
+      await this.logActivity(user.id, 'token_refresh', 'auth', true, { username: user.username });
 
       return {
         success: true,
         user,
         token: newToken,
         refreshToken: newRefreshToken,
-        message: '令牌刷新成功'
+        message: '令牌刷新成功',
       };
     } catch (error: any) {
       Logger.error('❌ 刷新令牌失败:', error);
 
       return {
         success: false,
-        message: '令牌刷新失败，请重新登录'
+        message: '令牌刷新失败，请重新登录',
       };
     }
   }
@@ -1042,7 +1046,7 @@ export class UnifiedAuthService implements IAuthService {
       isElectron,
       isBrowser,
       isNode,
-      hasDatabase: isNode
+      hasDatabase: isNode,
     };
   }
 
@@ -1053,10 +1057,11 @@ export class UnifiedAuthService implements IAuthService {
    */
   private async loadStoredTokens(): Promise<void> {
     if (typeof window === 'undefined') return;
-    
+
     try {
       if (this.enhancedConfig.enableSecureStorage) {
-        this.currentTokenPair = await SecureStorageManager.getItem<TokenPair>('token_pair');
+        this.currentTokenPair =
+          (await SecureStorageManager.getItem<TokenPair>('token_pair')) ?? undefined;
       } else {
         /**
          * if功能函数
@@ -1167,7 +1172,7 @@ export class UnifiedAuthService implements IAuthService {
     if (!decoded) return;
 
     const expiryTime = decoded.exp * 1000;
-    const refreshTime = expiryTime - (this.enhancedConfig.autoRefreshThreshold! * 1000);
+    const refreshTime = expiryTime - this.enhancedConfig.autoRefreshThreshold! * 1000;
     const delay = Math.max(0, refreshTime - Date.now());
 
     this.refreshTimer = setTimeout(() => {
@@ -1184,7 +1189,7 @@ export class UnifiedAuthService implements IAuthService {
       return {
         success: false,
         error: '没有刷新token',
-        requiresReauth: true
+        requiresReauth: true,
       };
     }
 
@@ -1192,13 +1197,13 @@ export class UnifiedAuthService implements IAuthService {
       const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/refresh`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           refreshToken,
           deviceId: this.deviceId,
-          fingerprint: this.deviceFingerprint
-        })
+          fingerprint: this.deviceFingerprint,
+        }),
       });
 
       const result = await response.json();
@@ -1210,8 +1215,8 @@ export class UnifiedAuthService implements IAuthService {
       const newTokens: TokenPair = {
         accessToken: result.token || result.accessToken,
         refreshToken: result.refreshToken,
-        expiresAt: Date.now() + (this.enhancedConfig.accessTokenExpiry! * 1000),
-        issuedAt: Date.now()
+        expiresAt: Date.now() + this.enhancedConfig.accessTokenExpiry! * 1000,
+        issuedAt: Date.now(),
       };
 
       await this.setTokenPair(newTokens);
@@ -1219,7 +1224,7 @@ export class UnifiedAuthService implements IAuthService {
       return {
         success: true,
         tokens: newTokens,
-        user: result.user
+        user: result.user,
       };
     } catch (error) {
       Logger.error('Token刷新失败:', error);
@@ -1230,7 +1235,7 @@ export class UnifiedAuthService implements IAuthService {
       return {
         success: false,
         error: error instanceof Error ? error.message : '刷新失败',
-        requiresReauth: true
+        requiresReauth: true,
       };
     }
   }
@@ -1281,7 +1286,7 @@ export class UnifiedAuthService implements IAuthService {
       id: decoded.sub,
       username: decoded.username,
       email: decoded.email,
-      role: decoded.role as any
+      role: decoded.role as any,
     };
   }
 
@@ -1300,7 +1305,7 @@ export class UnifiedAuthService implements IAuthService {
    */
   validatePasswordStrength(password: string): PasswordStrength {
     return PasswordSecurityManager.validatePasswordStrength(
-      password, 
+      password,
       this.enhancedConfig.passwordPolicy || PasswordSecurityManager.DEFAULT_POLICY
     );
   }
@@ -1338,8 +1343,8 @@ export class UnifiedAuthService implements IAuthService {
 
       const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/sessions`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const result = await response.json();
@@ -1361,14 +1366,14 @@ export class UnifiedAuthService implements IAuthService {
       const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/sessions/${sessionId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const result = await response.json();
       return result.success;
     } catch (error) {
-      Logger.error('终止会话失败:', error);
+      Logger.error('终止会话失败:', { error: String(error) });
       return false;
     }
   }
@@ -1381,17 +1386,20 @@ export class UnifiedAuthService implements IAuthService {
       const token = this.getAccessToken();
       if (!token) return false;
 
-      const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/sessions/terminate-others`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const response = await fetch(
+        `${this.enhancedConfig.apiBaseUrl}/auth/sessions/terminate-others`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       const result = await response.json();
       return result.success;
     } catch (error) {
-      Logger.error('终止其他会话失败:', error);
+      Logger.error('终止其他会话失败:', { error: String(error) });
       return false;
     }
   }
@@ -1429,7 +1437,7 @@ export class UnifiedAuthService implements IAuthService {
         try {
           callback(data);
         } catch (error) {
-          Logger.error(`事件监听器执行错误 (${event}):`, error);
+          Logger.error(`事件监听器执行错误 (${event}):`, { error: String(error) });
         }
       });
     }
@@ -1453,7 +1461,6 @@ export class UnifiedAuthService implements IAuthService {
     }, 60000); // 每分钟检查一次
   }
 
-
   /**
    * 安全存储token
    */
@@ -1462,7 +1469,7 @@ export class UnifiedAuthService implements IAuthService {
       try {
         await SecureStorageManager.setItem(key, value);
       } catch (error) {
-        Logger.warn('安全存储失败，使用普通存储:', error);
+        Logger.warn('安全存储失败，使用普通存储:', { error: String(error) });
         localStorage.setItem(key, value);
       }
     } else {
@@ -1478,7 +1485,7 @@ export class UnifiedAuthService implements IAuthService {
       try {
         return await SecureStorageManager.getItem<string>(key);
       } catch (error) {
-        Logger.warn('安全获取失败，使用普通存储:', error);
+        Logger.warn('安全获取失败，使用普通存储:', { error: String(error) });
         return localStorage.getItem(key);
       }
     } else {
@@ -1517,28 +1524,35 @@ export class UnifiedAuthService implements IAuthService {
     if (this.sessionCheckTimer) {
       clearInterval(this.sessionCheckTimer);
     }
-    
+
     // 清理JWT资源
     await this.clearTokenPair();
-    
+
     this.eventListeners.clear();
     this.activeSessions.clear();
   }
 
   // 数据迁移：从本地存储迁移到数据库
-  async migrateLocalDataToDatabase(): Promise<{ success: boolean; message: string; migrated: number }> {
+  async migrateLocalDataToDatabase(): Promise<{
+    success: boolean;
+    message: string;
+    migrated: number;
+  }> {
     if (!isNode) {
       return { success: false, message: '只能在 Node.js 环境中执行数据迁移', migrated: 0 };
     }
 
     try {
-
       // 这里需要从浏览器环境获取数据，实际实现时需要考虑如何获取
       // 暂时返回成功状态
       return { success: true, message: '数据迁移完成', migrated: 0 };
     } catch (error: any) {
-      Logger.error('❌ 数据迁移失败:', error);
-      return { success: false, message: error instanceof Error ? error.message : '未知错误', migrated: 0 };
+      Logger.error('❗ 数据迁移失败:', { error: String(error) });
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : '未知错误',
+        migrated: 0,
+      };
     }
   }
 
@@ -1562,7 +1576,6 @@ export class UnifiedAuthService implements IAuthService {
 
       this.currentUser = null;
       this.notifyAuthListeners(null);
-
     } catch (error) {
       Logger.error('❌ 清除认证数据失败:', error);
     }

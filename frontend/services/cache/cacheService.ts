@@ -334,7 +334,7 @@ export class CacheService {
 
       localStorage.setItem('unifiedCache', JSON.stringify(data));
     } catch (error) {
-      Logger.warn('保存缓存到localStorage失败:', error);
+      Logger.warn('保存缓存到localStorage失败:', { error: String(error) });
     }
   }
 
@@ -362,7 +362,7 @@ export class CacheService {
         }
       }
     } catch (error) {
-      Logger.warn('从localStorage加载缓存失败:', error);
+      Logger.warn('从localStorage加载缓存失败:', { error: String(error) });
     }
   }
 }

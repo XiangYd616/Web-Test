@@ -41,12 +41,18 @@ export interface User extends FlexibleObject {
   id: string;
   username: string;
   email: string;
-  role?: string;
-  status?: string;
-  createdAt?: string | number;
-  updatedAt?: string | number;
-  profile?: UserProfile;
-  preferences?: UserPreferences;
+  role: string; // 改为必需字段，与 auth.types.ts 保持一致
+  status: string; // 改为必需字段
+  permissions: string[]; // 新增必需字段
+  profile: UserProfile; // 改为必需字段
+  preferences: UserPreferences; // 改为必需字段
+  emailVerified: boolean; // 新增字段
+  createdAt: string; // 改为必需字段，统一为 string 类型
+  updatedAt: string; // 改为必需字段，统一为 string 类型
+  lastLoginAt?: string; // 新增可选字段
+  twoFactorEnabled?: boolean; // 新增可选字段
+  testCount?: number; // 新增可选字段
+  metadata?: Record<string, any>; // 新增可选字段
 }
 
 export interface UserProfile extends FlexibleObject {
@@ -75,6 +81,7 @@ export interface RegisterData {
   email: string;
   password: string;
   confirmPassword?: string;
+  fullName?: string;
 }
 
 export interface AuthResponse extends FlexibleObject {

@@ -65,7 +65,7 @@ class GooglePageSpeedService {
         timestamp: Date.now()
       };
     } catch (error) {
-      Logger.warn('PageSpeed API failed, using mock data:', error);
+      Logger.warn('PageSpeed API failed, using mock data:', { error: String(error) });
       return this.getMockData(url);
     }
   }

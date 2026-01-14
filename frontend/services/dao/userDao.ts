@@ -4,7 +4,8 @@
  */
 
 import { UserRole, UserStatus } from '../../types/enums';
-import { CreateUserData, UpdateUserData, User } from '../../types/user';
+import type { User } from '../../types/unified/models';
+import type { CreateUserData, UpdateUserData } from '../../types/user';
 
 // 模拟用户数据存储
 const users: User[] = [
@@ -15,13 +16,15 @@ const users: User[] = [
     password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'admin123'
     role: UserRole.ADMIN,
     status: UserStatus.ACTIVE,
+    permissions: [],
+    emailVerified: true,
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
-    lastLoginAt: null,
+    lastLoginAt: undefined,
     profile: {
       firstName: 'Admin',
       lastName: 'User',
-      bio: 'System Administrator'
+      bio: 'System Administrator',
     },
     preferences: {
       theme: 'light',
@@ -31,13 +34,13 @@ const users: User[] = [
         email: true,
         push: true,
         sms: false,
-        browser: true
+        browser: true,
       },
       dashboard: {
         layout: 'grid',
-        widgets: ['overview', 'recent-tests']
-      }
-    }
+        widgets: ['overview', 'recent-tests'],
+      },
+    },
   },
   {
     id: '2',
@@ -46,13 +49,15 @@ const users: User[] = [
     password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'test123'
     role: UserRole.USER,
     status: UserStatus.ACTIVE,
+    permissions: [],
+    emailVerified: true,
     createdAt: '2024-01-02T00:00:00.000Z',
     updatedAt: '2024-01-02T00:00:00.000Z',
-    lastLoginAt: null,
+    lastLoginAt: undefined,
     profile: {
       firstName: 'Test',
       lastName: 'User',
-      bio: 'Test User Account'
+      bio: 'Test User Account',
     },
     preferences: {
       theme: 'light',
@@ -62,14 +67,14 @@ const users: User[] = [
         email: true,
         push: false,
         sms: false,
-        browser: false
+        browser: false,
       },
       dashboard: {
         layout: 'list',
-        widgets: ['recent-tests']
-      }
-    }
-  }
+        widgets: ['recent-tests'],
+      },
+    },
+  },
 ];
 
 /**
@@ -111,13 +116,15 @@ export const userDao = {
       password: userData.password,
       role: userData.role || UserRole.USER,
       status: UserStatus.ACTIVE,
+      permissions: [],
+      emailVerified: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      lastLoginAt: null,
+      lastLoginAt: undefined,
       profile: {
         firstName: (userData as any).firstName || '',
         lastName: (userData as any).lastName || '',
-        bio: ''
+        bio: '',
       },
       preferences: {
         theme: 'light',
@@ -127,13 +134,13 @@ export const userDao = {
           email: true,
           push: true,
           sms: false,
-          browser: true
+          browser: true,
         },
         dashboard: {
           layout: 'grid',
-          widgets: ['overview']
-        }
-      }
+          widgets: ['overview'],
+        },
+      },
     };
 
     users.push(newUser);
@@ -156,12 +163,12 @@ export const userDao = {
       updatedAt: new Date().toISOString(),
       profile: {
         ...user.profile,
-        ...(updateData as any).profile
+        ...(updateData as any).profile,
       },
       preferences: {
         ...user.preferences,
-        ...(updateData as any).preferences
-      }
+        ...(updateData as any).preferences,
+      },
     };
 
     users[userIndex] = updatedUser;
@@ -203,7 +210,7 @@ export const userDao = {
    * 验证用户凭据
    */
   async validateCredentials(username: string, password: string): Promise<User | null> {
-    const user = await this.findByUsername(username) || await this.findByEmail(username);
+    const user = (await this.findByUsername(username)) || (await this.findByEmail(username));
     if (!user || !user.isActive) {
       return null;
     }
@@ -236,7 +243,10 @@ export const userDao = {
   /**
    * 分页查询用户
    */
-  async findWithPagination(page: number = 1, limit: number = 10): Promise<{
+  async findWithPagination(
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{
     users: User[];
     total: number;
     page: number;
@@ -252,7 +262,7 @@ export const userDao = {
       total: users.length,
       page,
       limit,
-      totalPages: Math.ceil(users.length / limit)
+      totalPages: Math.ceil(users.length / limit),
     };
   },
 
@@ -261,11 +271,12 @@ export const userDao = {
    */
   async search(query: string): Promise<User[]> {
     const lowercaseQuery = query.toLowerCase();
-    return users.filter(user =>
-      user.username.toLowerCase().includes(lowercaseQuery) ||
-      user.email.toLowerCase().includes(lowercaseQuery) ||
-      user.profile.firstName?.toLowerCase().includes(lowercaseQuery) ||
-      user.profile.lastName?.toLowerCase().includes(lowercaseQuery)
+    return users.filter(
+      user =>
+        user.username.toLowerCase().includes(lowercaseQuery) ||
+        user.email.toLowerCase().includes(lowercaseQuery) ||
+        user.profile.firstName?.toLowerCase().includes(lowercaseQuery) ||
+        user.profile.lastName?.toLowerCase().includes(lowercaseQuery)
     );
   },
 
@@ -299,7 +310,7 @@ export const userDao = {
     }
 
     return updatedCount;
-  }
+  },
 };
 
 export default userDao;

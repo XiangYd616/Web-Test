@@ -397,11 +397,11 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
             </div>
             <div className="text-left sm:text-right">
               <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-1">
-                {Math.round(progress.progress)}%
+                {Math.round(progress.progress ?? 0)}%
               </div>
               {progress.estimatedTimeRemaining && (
                 <div className="text-sm text-gray-300 font-medium">
-                  剩余 {Math.round(progress.estimatedTimeRemaining / 1000)} 秒
+                  剩余 {Math.round((progress.estimatedTimeRemaining ?? 0) / 1000)} 秒
                 </div>
               )}
             </div>
@@ -410,7 +410,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
           <div className="w-full bg-gray-700 rounded-full h-2">
             <div
               className="h-2 bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-full transition-all duration-300"
-              style={{ width: `${Math.min(progress.progress, 100)}%` }}
+              style={{ width: `${Math.min(progress.progress ?? 0, 100)}%` }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/40 to-transparent animate-pulse"></div>
             </div>

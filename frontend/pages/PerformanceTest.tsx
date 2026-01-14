@@ -3,11 +3,21 @@
  * 提供完整的网站性能测试功能，包括Core Web Vitals、Lighthouse审计等
  */
 
-import { Activity, CheckCircle, Loader, Monitor, Play, RotateCcw, Settings, Smartphone, Square } from 'lucide-react';
+import {
+  Activity,
+  CheckCircle,
+  Loader,
+  Monitor,
+  Play,
+  RotateCcw,
+  Settings,
+  Smartphone,
+  Square,
+} from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
-import { URLInput } from '../components/ui';
 import TestPageLayout from '../components/testing/TestPageLayout';
+import { URLInput } from '../components/ui';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
@@ -62,13 +72,9 @@ interface PerformanceTestResult {
 
 const PerformanceTest: React.FC = () => {
   // 登录检查
-  const {
-    isAuthenticated,
-    requireLogin,
-    LoginPromptComponent
-  } = useAuthCheck({
-    feature: "性能测试",
-    description: "使用性能测试功能"
+  const { isAuthenticated, requireLogin, LoginPromptComponent } = useAuthCheck({
+    feature: '性能测试',
+    description: '使用性能测试功能',
   });
 
   // 用户统计
@@ -82,7 +88,7 @@ const PerformanceTest: React.FC = () => {
     includeScreenshots: true,
     lighthouseCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
     customMetrics: [],
-    testType: 'performance'
+    testType: 'performance',
   });
 
   // 测试状态
@@ -182,9 +188,9 @@ const PerformanceTest: React.FC = () => {
       const testId = backgroundTestManager.startTest(
         'performance' as TestType,
         config,
-        (progress: number, step: string) => {
+        (progress: number, step?: string) => {
           setProgress(progress);
-          setCurrentStep(step);
+          if (step) setCurrentStep(step);
         },
         (result: PerformanceTestResult) => {
           setResult(result);
@@ -236,31 +242,30 @@ const PerformanceTest: React.FC = () => {
     <div className="space-y-6">
       <URLInput
         value={config.url}
-        onChange={(e) => setConfig(prev => ({ ...prev, url: e.target.value }))}
+        onChange={e => setConfig(prev => ({ ...prev, url: e.target.value }))}
         placeholder="请输入要测试的网站URL"
         disabled={isRunning}
       />
 
       {/* 设备选择 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          测试设备
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">测试设备</label>
         <div className="grid grid-cols-3 gap-3">
           {[
             { value: 'desktop', label: '桌面端', icon: Monitor },
             { value: 'mobile', label: '移动端', icon: Smartphone },
-            { value: 'tablet', label: '平板端', icon: Monitor }
+            { value: 'tablet', label: '平板端', icon: Monitor },
           ].map(({ value, label, icon: Icon }) => (
             <button
               key={value}
               type="button"
               onClick={() => setConfig(prev => ({ ...prev, device: value as any }))}
               disabled={isRunning}
-              className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center space-y-2 ${config.device === value
-                ? 'border-blue-500 themed-bg-tertiary themed-text-primary ring-2 ring-blue-500/20'
-                : 'themed-border-primary hover:themed-border-secondary themed-text-secondary hover:themed-bg-secondary'
-                } ${isRunning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              className={`p-3 rounded-lg border-2 transition-all flex flex-col items-center space-y-2 ${
+                config.device === value
+                  ? 'border-blue-500 themed-bg-tertiary themed-text-primary ring-2 ring-blue-500/20'
+                  : 'themed-border-primary hover:themed-border-secondary themed-text-secondary hover:themed-bg-secondary'
+              } ${isRunning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               <Icon className="w-5 h-5" />
               <span className="text-sm font-medium">{label}</span>
@@ -271,12 +276,10 @@ const PerformanceTest: React.FC = () => {
 
       {/* 网络条件 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          网络条件
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">网络条件</label>
         <select
           value={config.networkCondition}
-          onChange={(e) => setConfig(prev => ({ ...prev, networkCondition: e.target.value as any }))}
+          onChange={e => setConfig(prev => ({ ...prev, networkCondition: e.target.value as any }))}
           disabled={isRunning}
           className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
         >
@@ -289,30 +292,28 @@ const PerformanceTest: React.FC = () => {
 
       {/* Lighthouse类别 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Lighthouse测试类别
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Lighthouse测试类别</label>
         <div className="space-y-2">
           {[
             { value: 'performance', label: '性能' },
             { value: 'accessibility', label: '可访问性' },
             { value: 'best-practices', label: '最佳实践' },
-            { value: 'seo', label: 'SEO' }
+            { value: 'seo', label: 'SEO' },
           ].map(({ value, label }) => (
             <label key={value} className="flex items-center">
               <input
                 type="checkbox"
                 checked={config.lighthouseCategories.includes(value)}
-                onChange={(e) => {
+                onChange={e => {
                   if (e.target.checked) {
                     setConfig(prev => ({
                       ...prev,
-                      lighthouseCategories: [...prev.lighthouseCategories, value]
+                      lighthouseCategories: [...prev.lighthouseCategories, value],
                     }));
                   } else {
                     setConfig(prev => ({
                       ...prev,
-                      lighthouseCategories: prev.lighthouseCategories.filter(c => c !== value)
+                      lighthouseCategories: prev.lighthouseCategories.filter(c => c !== value),
                     }));
                   }
                 }}
@@ -331,7 +332,7 @@ const PerformanceTest: React.FC = () => {
           <input
             type="checkbox"
             checked={config.includeScreenshots}
-            onChange={(e) => setConfig(prev => ({ ...prev, includeScreenshots: e.target.checked }))}
+            onChange={e => setConfig(prev => ({ ...prev, includeScreenshots: e.target.checked }))}
             disabled={isRunning}
             className="mr-2"
           />
@@ -379,10 +380,11 @@ const PerformanceTest: React.FC = () => {
                 type="button"
                 onClick={handleStartTest}
                 disabled={isRunning || !config.url}
-                className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-all ${isRunning || !config.url
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  }`}
+                className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-all ${
+                  isRunning || !config.url
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
               >
                 {isRunning ? (
                   <>
@@ -428,7 +430,11 @@ const PerformanceTest: React.FC = () => {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div className="ml-3">
@@ -453,7 +459,9 @@ const PerformanceTest: React.FC = () => {
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700">总体评分</span>
-                  <span className="text-2xl font-bold text-blue-600">{result.overallScore}/100</span>
+                  <span className="text-2xl font-bold text-blue-600">
+                    {result.overallScore}/100
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div
@@ -468,15 +476,21 @@ const PerformanceTest: React.FC = () => {
                 <h4 className="text-md font-semibold text-gray-900 mb-3">Core Web Vitals</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{result.coreWebVitals.lcp}s</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {result.coreWebVitals.lcp}s
+                    </div>
                     <div className="text-sm text-gray-600">LCP</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{result.coreWebVitals.fid}ms</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {result.coreWebVitals.fid}ms
+                    </div>
                     <div className="text-sm text-gray-600">FID</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">{result.coreWebVitals.cls}</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {result.coreWebVitals.cls}
+                    </div>
                     <div className="text-sm text-gray-600">CLS</div>
                   </div>
                 </div>

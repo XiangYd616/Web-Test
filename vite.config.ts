@@ -8,30 +8,31 @@ export default defineConfig({
   plugins: [
     react({
       // 优化JSX运行时
-      jsxRuntime: 'automatic'
-    })
+      jsxRuntime: 'automatic',
+    }),
   ],
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' },
     // 移除console.log在生产环境
-    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : []
+    drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
   },
   css: {
     // CSS模块化配置
     modules: {
       localsConvention: 'camelCase',
-      generateScopedName: process.env.NODE_ENV === 'production'
-        ? '[hash:base64:5]'
-        : '[name]__[local]__[hash:base64:5]'
+      generateScopedName:
+        process.env.NODE_ENV === 'production'
+          ? '[hash:base64:5]'
+          : '[name]__[local]__[hash:base64:5]',
     },
     // PostCSS配置 - 使用外部postcss.config.js
     postcss: './postcss.config.js',
     // CSS预处理器配置
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "@/styles/variables.scss";`
-      }
-    }
+        additionalData: `@import "@/styles/variables.scss";`,
+      },
+    },
   },
   resolve: {
     alias: {
@@ -65,7 +66,8 @@ export default defineConfig({
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       // 修复CSP指令名称
-      'Content-Security-Policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' ws: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
+      'Content-Security-Policy':
+        "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' ws: wss:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
     },
     proxy: {
       // 代理API请求到后端服务器 - 只代理真正的API路径
@@ -78,16 +80,16 @@ export default defineConfig({
       '/proxy': {
         target: 'http://1.95.9.20:8067',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/proxy/, ''),
-      }
+        rewrite: path => path.replace(/^\/proxy/, ''),
+      },
     },
     // 添加中间件来处理SPA路由
-    middlewareMode: false
+    middlewareMode: false,
   },
   preview: {
     port: parseInt(process.env.VITE_DEV_PORT || '5174'),
     host: true,
-    cors: true
+    cors: true,
   },
   build: {
     outDir: 'dist',
@@ -104,20 +106,16 @@ export default defineConfig({
     // Chunk大小警告限制 - 更严格
     chunkSizeWarningLimit: 300,
     rollupOptions: {
-      external: [
-        'electron',
-        'sqlite3',
-        'pg-native',
-        'crypto',
-        'jsonwebtoken',
-        'jwa',
-        'jws'
-      ],
+      external: ['electron', 'sqlite3', 'pg-native', 'crypto', 'jsonwebtoken', 'jwa', 'jws'],
       output: {
         // 优化的代码分割策略
-        manualChunks: (id) => {
+        manualChunks: id => {
           // React核心库
-          if (id.includes('react') && !id.includes('react-router') && !id.includes('react-chartjs')) {
+          if (
+            id.includes('react') &&
+            !id.includes('react-router') &&
+            !id.includes('react-chartjs')
+          ) {
             return 'react-vendor';
           }
 
@@ -186,23 +184,32 @@ export default defineConfig({
           }
 
           // 管理和设置页面
-          if (id.includes('/pages/') && (
-            id.includes('Admin') || id.includes('Settings') || id.includes('Management')
-          )) {
+          if (
+            id.includes('/pages/') &&
+            (id.includes('Admin') || id.includes('Settings') || id.includes('Management'))
+          ) {
             return 'admin-pages';
           }
 
           // 用户相关页面
-          if (id.includes('/pages/') && (
-            id.includes('Login') || id.includes('Register') || id.includes('Profile') || id.includes('User')
-          )) {
+          if (
+            id.includes('/pages/') &&
+            (id.includes('Login') ||
+              id.includes('Register') ||
+              id.includes('Profile') ||
+              id.includes('User'))
+          ) {
             return 'auth-pages';
           }
 
           // 报告和分析页面
-          if (id.includes('/pages/') && (
-            id.includes('Report') || id.includes('Analytics') || id.includes('Statistics') || id.includes('Dashboard')
-          )) {
+          if (
+            id.includes('/pages/') &&
+            (id.includes('Report') ||
+              id.includes('Analytics') ||
+              id.includes('Statistics') ||
+              id.includes('Dashboard'))
+          ) {
             return 'analytics-pages';
           }
 
@@ -242,7 +249,7 @@ export default defineConfig({
         // 资源文件命名
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
-        assetFileNames: (assetInfo) => {
+        assetFileNames: assetInfo => {
           const info = assetInfo.name?.split('.') || [];
           const extType = info[info.length - 1];
           if (/\.(css)$/.test(assetInfo.name || '')) {
@@ -257,23 +264,15 @@ export default defineConfig({
           return 'assets/[ext]/[name]-[hash].[ext]';
         },
         globals: {
-          'electron': 'electron',
-          'sqlite3': 'sqlite3',
-          'pg-native': 'pg-native'
-        }
-      }
+          electron: 'electron',
+          sqlite3: 'sqlite3',
+          'pg-native': 'pg-native',
+        },
+      },
     },
   },
   optimizeDeps: {
-    exclude: [
-      'electron',
-      'sqlite3',
-      'pg-native',
-      'crypto',
-      'jsonwebtoken',
-      'jwa',
-      'jws'
-    ],
+    exclude: ['electron', 'sqlite3', 'pg-native', 'crypto', 'jsonwebtoken', 'jwa', 'jws'],
   },
   define: {
     global: 'globalThis',
@@ -288,7 +287,7 @@ export default defineConfig({
       } else {
         return { relative: true };
       }
-    }
+    },
   },
   // Vitest测试配置
   test: {
@@ -298,9 +297,9 @@ export default defineConfig({
     include: [
       'frontend/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
       'backend/tests/**/*.{test,spec}.{js,ts}',
-      'tests/**/*.{test,spec}.{js,ts}'
+      'tests/**/*.{test,spec}.{js,ts}',
     ],
-    exclude: [...configDefaults.exclude, 'e2e/*', 'tools/**/*'],
+    exclude: [...configDefaults.exclude, 'tools/e2e/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -312,16 +311,16 @@ export default defineConfig({
         '**/coverage/**',
         '**/dist/**',
         '**/.{idea,git,cache,output,temp}/**',
-        '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*'
+        '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
       ],
       thresholds: {
         global: {
           branches: 75,
           functions: 75,
           lines: 75,
-          statements: 75
-        }
-      }
-    }
-  }
-})
+          statements: 75,
+        },
+      },
+    },
+  },
+});

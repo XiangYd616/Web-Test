@@ -24,6 +24,7 @@ const ApiTestEngine = require('../engines/api/APITestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const userTestManager = require('../services/testing/UserTestManager.js');
+const testBusinessService = require('../services/testing/TestBusinessService.js');
 // 注意：这些服务文件已被删除，需要使用替代方案
 // const databaseService = require('../services/database/databaseService');
 // const testQueueService = require('../services/queue/queueService');
@@ -66,6 +67,372 @@ const upload = multer({
 });
 
 const router = express.Router();
+
+// ==================== 新架构: 业务服务端点 ====================
+
+/**
+ * 创建并启动测试(统一入口)
+ * POST /api/test/create-and-start
+ * 
+ * 职责:
+ * - 完整的业务验证(格式+业务规则)
+ * - 权限和配额检查
+ * - 创建并启动测试
+ */
+router.post('/create-and-start', authMiddleware, testRateLimiter, asyncHandler(async (req, res) => {
+  try {
+    const config = req.body;
+    const user = {
+      userId: req.user.id,
+      role: req.user.role || 'free'
+    };
+
+    console.log(`📋 收到创建测试请求: ${config.testType || 'load'} - ${config.url}`);
+
+    // 调用业务服务处理完整流程
+    const result = await testBusinessService.createAndStartTest(config, user);
+
+    // 成功响应
+    res.json({
+      success: true,
+      data: result,
+      message: '测试创建并启动成功'
+    });
+
+  } catch (error) {
+    console.error('❌ 创建并启动测试失败:', error);
+
+    // 处理验证错误
+    if (error.code === 'VALIDATION_ERROR') {
+      return res.status(400).json({
+        success: false,
+        error: '测试配置验证失败',
+        details: error.details
+      });
+    }
+
+    // 处理权限错误
+    if (error.message.includes('未授权')) {
+      return res.status(401).json({
+        success: false,
+        error: error.message
+      });
+    }
+
+    // 其他错误
+    res.status(500).json({
+      success: false,
+      error: error.message || '创建并启动测试失败',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+}));
+
+/**
+ * 获取业务规则配置
+ * GET /api/test/business-rules
+ * 
+ * 用于前端获取验证规则,展示给用户
+ */
+router.get('/business-rules', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const rules = testBusinessService.getBusinessRules();
+    
+    res.json({
+      success: true,
+      data: rules
+    });
+  } catch (error) {
+    console.error('获取业务规则失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取业务规则失败'
+    });
+  }
+}));
+
+/**
+ * 获取用户配额信息
+ * GET /api/test/quota
+ * 
+ * 返回用户的配额和使用情况
+ */
+router.get('/quota', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const user = {
+      userId: req.user.id,
+      role: req.user.role || 'free'
+    };
+
+    const quotaInfo = await testBusinessService.getUserQuotaInfo(user);
+    
+    res.json({
+      success: true,
+      data: quotaInfo
+    });
+  } catch (error) {
+    console.error('获取用户配额失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取用户配额失败'
+    });
+  }
+}));
+
+/**
+ * 验证测试配置(不创建测试)
+ * POST /api/test/validate
+ * 
+ * 用于前端提交前验证配置是否有效
+ */
+router.post('/validate', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const config = req.body;
+    const user = {
+      userId: req.user.id,
+      role: req.user.role || 'free'
+    };
+
+    const validation = await testBusinessService.validateTestConfig(config, user);
+    
+    res.json({
+      success: true,
+      data: validation
+    });
+  } catch (error) {
+    console.error('验证测试配置失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '验证测试配置失败'
+    });
+  }
+}));
+
+/**
+ * 获取单个测试详情
+ * GET /api/test/:testId
+ */
+router.get('/:testId', authMiddleware, asyncHandler(async (req, res) => {
+  const { testId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // 检查权限
+    const result = await query(
+      'SELECT * FROM test_history WHERE test_id = $1 AND user_id = $2',
+      [testId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: '测试不存在或无权访问'
+      });
+    }
+
+    const test = result.rows[0];
+    
+    // 解析JSON字段
+    if (typeof test.config === 'string') {
+      test.config = JSON.parse(test.config);
+    }
+    if (typeof test.results === 'string') {
+      test.results = JSON.parse(test.results);
+    }
+
+    res.json({
+      success: true,
+      data: test
+    });
+  } catch (error) {
+    console.error('获取测试详情失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取测试详情失败'
+    });
+  }
+}));
+
+/**
+ * 更新测试配置
+ * PUT /api/test/:testId
+ * 
+ * 只能更新pending状态的测试
+ */
+router.put('/:testId', authMiddleware, asyncHandler(async (req, res) => {
+  const { testId } = req.params;
+  const updates = req.body;
+  const userId = req.user.id;
+
+  try {
+    // 检查测试状态
+    const checkResult = await query(
+      'SELECT status FROM test_history WHERE test_id = $1 AND user_id = $2',
+      [testId, userId]
+    );
+
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: '测试不存在'
+      });
+    }
+
+    if (checkResult.rows[0].status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        error: '只能更新未开始的测试'
+      });
+    }
+
+    // 更新测试
+    const updateFields = [];
+    const params = [];
+    let paramIndex = 1;
+
+    if (updates.config) {
+      updateFields.push(`config = $${paramIndex}`);
+      params.push(JSON.stringify(updates.config));
+      paramIndex++;
+    }
+
+    if (updates.url) {
+      updateFields.push(`url = $${paramIndex}`);
+      params.push(updates.url);
+      paramIndex++;
+    }
+
+    if (updates.testType) {
+      updateFields.push(`test_type = $${paramIndex}`);
+      params.push(updates.testType);
+      paramIndex++;
+    }
+
+    updateFields.push('updated_at = NOW()');
+    params.push(testId);
+    params.push(userId);
+
+    if (updateFields.length > 1) {
+      await query(
+        `UPDATE test_history SET ${updateFields.join(', ')} WHERE test_id = $${paramIndex} AND user_id = $${paramIndex + 1}`,
+        params
+      );
+    }
+
+    res.json({
+      success: true,
+      message: '测试更新成功'
+    });
+  } catch (error) {
+    console.error('更新测试失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '更新测试失败'
+    });
+  }
+}));
+
+/**
+ * 批量删除测试
+ * POST /api/test/batch-delete
+ */
+router.post('/batch-delete', authMiddleware, asyncHandler(async (req, res) => {
+  const { ids } = req.body;
+  const userId = req.user.id;
+
+  try {
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: '请选择要删除的测试'
+      });
+    }
+
+    // 删除属于当前用户的测试
+    const result = await query(
+      'DELETE FROM test_history WHERE test_id = ANY($1) AND user_id = $2 RETURNING test_id',
+      [ids, userId]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        deleted: result.rows.length,
+        ids: result.rows.map(r => r.test_id)
+      },
+      message: `成功删除${result.rows.length}个测试`
+    });
+  } catch (error) {
+    console.error('批量删除测试失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '批量删除测试失败'
+    });
+  }
+}));
+
+/**
+ * 获取测试结果
+ * GET /api/test/:testId/results
+ */
+router.get('/:testId/results', authMiddleware, asyncHandler(async (req, res) => {
+  const { testId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // 检查权限并获取结果
+    const result = await query(
+      'SELECT results, status, overall_score, duration FROM test_history WHERE test_id = $1 AND user_id = $2',
+      [testId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: '测试不存在或无权访问'
+      });
+    }
+
+    const test = result.rows[0];
+
+    // 如果测试还没完成
+    if (test.status !== 'completed' && test.status !== 'failed') {
+      return res.json({
+        success: true,
+        data: {
+          status: test.status,
+          message: '测试还在进行中'
+        }
+      });
+    }
+
+    // 解析结果
+    let results = test.results;
+    if (typeof results === 'string') {
+      try {
+        results = JSON.parse(results);
+      } catch (e) {
+        console.error('解析测试结果失败:', e);
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        status: test.status,
+        results,
+        overallScore: test.overall_score,
+        duration: test.duration
+      }
+    });
+  } catch (error) {
+    console.error('获取测试结果失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取测试结果失败'
+    });
+  }
+}));
 
 // ==================== 真实分析方法 ====================
 

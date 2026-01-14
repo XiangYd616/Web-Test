@@ -4,8 +4,24 @@
  */
 
 import Logger from '@/utils/logger';
-import React, { useState, useEffect, useCallback } from 'react';
-import {Users, UserPlus, Search, MoreVertical, Edit, Trash2, Shield, Lock, Unlock, Mail, RefreshCw, AlertTriangle, CheckCircle, XCircle, Clock} from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Edit,
+  Lock,
+  Mail,
+  MoreVertical,
+  RefreshCw,
+  Search,
+  Shield,
+  Trash2,
+  Unlock,
+  UserPlus,
+  Users,
+  XCircle,
+} from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface User {
@@ -47,14 +63,14 @@ const UserManagement: React.FC = () => {
     status: 'all',
     searchTerm: '',
     emailVerified: null,
-    twoFactorEnabled: null
+    twoFactorEnabled: null,
   });
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
     pageSize: 20,
     totalPages: 1,
-    totalUsers: 0
+    totalUsers: 0,
   });
 
   // 模拟用户数据
@@ -71,7 +87,7 @@ const UserManagement: React.FC = () => {
       createdAt: '2025-01-01T00:00:00Z',
       testCount: 150,
       emailVerified: true,
-      twoFactorEnabled: true
+      twoFactorEnabled: true,
     },
     {
       id: '2',
@@ -85,7 +101,7 @@ const UserManagement: React.FC = () => {
       createdAt: '2025-02-15T00:00:00Z',
       testCount: 89,
       emailVerified: true,
-      twoFactorEnabled: false
+      twoFactorEnabled: false,
     },
     {
       id: '3',
@@ -99,7 +115,7 @@ const UserManagement: React.FC = () => {
       createdAt: '2025-01-20T00:00:00Z',
       testCount: 45,
       emailVerified: true,
-      twoFactorEnabled: true
+      twoFactorEnabled: true,
     },
     {
       id: '4',
@@ -113,7 +129,7 @@ const UserManagement: React.FC = () => {
       createdAt: '2025-03-01T00:00:00Z',
       testCount: 23,
       emailVerified: true,
-      twoFactorEnabled: false
+      twoFactorEnabled: false,
     },
     {
       id: '5',
@@ -127,8 +143,8 @@ const UserManagement: React.FC = () => {
       createdAt: '2025-04-10T00:00:00Z',
       testCount: 5,
       emailVerified: false,
-      twoFactorEnabled: false
-    }
+      twoFactorEnabled: false,
+    },
   ];
 
   // 加载用户数据
@@ -137,12 +153,12 @@ const UserManagement: React.FC = () => {
     try {
       // 模拟API调用
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       setUsers(mockUsers);
       setPagination(prev => ({
         ...prev,
         totalUsers: mockUsers.length,
-        totalPages: Math.ceil(mockUsers.length / prev.pageSize)
+        totalPages: Math.ceil(mockUsers.length / prev.pageSize),
       }));
     } catch (error) {
       Logger.error('Failed to load users:', error);
@@ -168,10 +184,11 @@ const UserManagement: React.FC = () => {
     // 按搜索词过滤
     if (filters.searchTerm) {
       const searchLower = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter(user =>
-        user.username.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower) ||
-        user.fullName.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(
+        user =>
+          user.username.toLowerCase().includes(searchLower) ||
+          user.email.toLowerCase().includes(searchLower) ||
+          user.fullName.toLowerCase().includes(searchLower)
       );
     }
 
@@ -203,7 +220,7 @@ const UserManagement: React.FC = () => {
       manager: 'bg-purple-100 text-purple-800',
       tester: 'bg-blue-100 text-blue-800',
       user: 'bg-green-100 text-green-800',
-      viewer: 'bg-gray-100 text-gray-800'
+      viewer: 'bg-gray-100 text-gray-800',
     };
     return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -240,22 +257,20 @@ const UserManagement: React.FC = () => {
   };
 
   const handleToggleUserStatus = async (userId: string, newStatus: string) => {
-    setUsers(prev => prev.map(u => 
-      u.id === userId ? { ...u, status: newStatus as any } : u
-    ));
+    setUsers(prev => prev.map(u => (u.id === userId ? { ...u, status: newStatus as any } : u)));
   };
 
   const handleBulkAction = async (action: string) => {
     switch (action) {
       case 'activate':
-        setUsers(prev => prev.map(u => 
-          selectedUsers.includes(u.id) ? { ...u, status: 'active' as any } : u
-        ));
+        setUsers(prev =>
+          prev.map(u => (selectedUsers.includes(u.id) ? { ...u, status: 'active' as any } : u))
+        );
         break;
       case 'deactivate':
-        setUsers(prev => prev.map(u => 
-          selectedUsers.includes(u.id) ? { ...u, status: 'inactive' as any } : u
-        ));
+        setUsers(prev =>
+          prev.map(u => (selectedUsers.includes(u.id) ? { ...u, status: 'inactive' as any } : u))
+        );
         break;
       case 'delete':
         if (window.confirm(`确定要删除选中的 ${selectedUsers.length} 个用户吗？`)) {
@@ -267,7 +282,8 @@ const UserManagement: React.FC = () => {
   };
 
   // 检查管理员权限
-  const isAdmin = currentUser.role === 'admin' || currentUser?.permissions?.includes('admin:access');
+  const isAdmin =
+    currentUser?.role === 'admin' || currentUser?.permissions?.includes('admin:access');
 
   if (!isAdmin) {
     return (
@@ -377,7 +393,7 @@ const UserManagement: React.FC = () => {
                   <input
                     type="text"
                     value={filters.searchTerm}
-                    onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+                    onChange={e => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
                     placeholder="搜索用户名、邮箱或姓名"
                     className="block w-80 pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -386,7 +402,7 @@ const UserManagement: React.FC = () => {
                 {/* 角色过滤 */}
                 <select
                   value={filters.role}
-                  onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value }))}
+                  onChange={e => setFilters(prev => ({ ...prev, role: e.target.value }))}
                   className="block w-32 px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">所有角色</option>
@@ -400,7 +416,7 @@ const UserManagement: React.FC = () => {
                 {/* 状态过滤 */}
                 <select
                   value={filters.status}
-                  onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                  onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
                   className="block w-32 px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="all">所有状态</option>
@@ -457,7 +473,7 @@ const UserManagement: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={selectedUsers.length === filteredUsers.length}
-                        onChange={(e) => {
+                        onChange={e => {
                           if (e.target.checked) {
                             setSelectedUsers(filteredUsers.map(u => u.id));
                           } else {
@@ -491,13 +507,13 @@ const UserManagement: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredUsers.map((user) => (
+                  {filteredUsers.map(user => (
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <input
                           type="checkbox"
                           checked={selectedUsers.includes(user.id)}
-                          onChange={(e) => {
+                          onChange={e => {
                             if (e.target.checked) {
                               setSelectedUsers(prev => [...prev, user.id]);
                             } else {
@@ -523,21 +539,27 @@ const UserManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}
+                        >
                           {user.role}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           {getStatusIcon(user.status)}
-                          <span className="ml-2 text-sm text-gray-900 capitalize">{user.status}</span>
+                          <span className="ml-2 text-sm text-gray-900 capitalize">
+                            {user.status}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {user.testCount}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : '从未登录'}
+                        {user.lastLoginAt
+                          ? new Date(user.lastLoginAt).toLocaleDateString()
+                          : '从未登录'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-2">
@@ -564,7 +586,9 @@ const UserManagement: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="relative">
                           <button
-                            onClick={() => setActionMenuOpen(actionMenuOpen === user.id ? null : user.id)}
+                            onClick={() =>
+                              setActionMenuOpen(actionMenuOpen === user.id ? null : user.id)
+                            }
                             className="text-gray-400 hover:text-gray-600"
                           >
                             <MoreVertical className="h-5 w-5" />
@@ -580,7 +604,12 @@ const UserManagement: React.FC = () => {
                                   编辑用户
                                 </button>
                                 <button
-                                  onClick={() => handleToggleUserStatus(user.id, user.status === 'active' ? 'inactive' : 'active')}
+                                  onClick={() =>
+                                    handleToggleUserStatus(
+                                      user.id,
+                                      user.status === 'active' ? 'inactive' : 'active'
+                                    )
+                                  }
                                   className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                 >
                                   {user.status === 'active' ? (
@@ -629,12 +658,17 @@ const UserManagement: React.FC = () => {
             <div>
               <p className="text-sm text-gray-700">
                 显示第 <span className="font-medium">1</span> 到{' '}
-                <span className="font-medium">{Math.min(pagination.pageSize, filteredUsers.length)}</span>{' '}
+                <span className="font-medium">
+                  {Math.min(pagination.pageSize, filteredUsers.length)}
+                </span>{' '}
                 项，共 <span className="font-medium">{filteredUsers.length}</span> 项结果
               </p>
             </div>
             <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <nav
+                className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                aria-label="Pagination"
+              >
                 <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                   上一页
                 </button>

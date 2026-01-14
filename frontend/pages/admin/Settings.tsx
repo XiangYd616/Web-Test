@@ -1,12 +1,34 @@
 import Logger from '@/utils/logger';
-import React from 'react';
-import { AlertTriangle, Archive, Bell, CheckCircle, Clock, Database, Download, FileText, Globe, Info, Lock, Mail, Monitor, Pause, Play, RefreshCw, RotateCcw, Server, Settings, Settings as SettingsIcon, Shield, Trash2, Upload, User } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { ComponentType, FC } from 'react';;
+import {
+  AlertTriangle,
+  Archive,
+  Bell,
+  CheckCircle,
+  Clock,
+  Database,
+  Download,
+  FileText,
+  Globe,
+  Info,
+  Lock,
+  Mail,
+  Monitor,
+  Pause,
+  Play,
+  RefreshCw,
+  RotateCcw,
+  Server,
+  Settings,
+  Settings as SettingsIcon,
+  Shield,
+  Trash2,
+  Upload,
+  User,
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { SettingsService } from '../../services/settingsService';
-
 import BackupManagement from '../../components/admin/BackupManagement';
 import SecurityCenter from '../../components/admin/SecurityCenter';
 import SystemSettings from '../../components/admin/SystemSettings';
@@ -54,7 +76,7 @@ const UnifiedSettings: React.FC = () => {
   const [userPreferences, setUserPreferences] = useState<Record<string, any>>({});
   const [formData, setFormData] = useState<Record<string, any>>({});
 
-  const isAdmin = user.role === 'admin';
+  const isAdmin = user?.role === 'admin';
 
   // 加载数据
   useEffect(() => {
@@ -64,7 +86,18 @@ const UnifiedSettings: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      if (isAdmin && ['general', 'security', 'monitoring', 'scheduled', 'logs', 'backup', 'maintenance'].includes(activeTab)) {
+      if (
+        isAdmin &&
+        [
+          'general',
+          'security',
+          'monitoring',
+          'scheduled',
+          'logs',
+          'backup',
+          'maintenance',
+        ].includes(activeTab)
+      ) {
         // 加载系统设置
         const settings = await SettingsService.getSystemSettings();
         setSystemSettings(settings);
@@ -88,7 +121,12 @@ const UnifiedSettings: React.FC = () => {
     try {
       setSaveStatus('idle');
 
-      if (isAdmin && ['general', 'testing', 'monitoring', 'security', 'notifications', 'backup'].includes(category)) {
+      if (
+        isAdmin &&
+        ['general', 'testing', 'monitoring', 'security', 'notifications', 'backup'].includes(
+          category
+        )
+      ) {
         // 保存系统设置
         await SettingsService.updateSystemSettings(category, data);
         setSystemSettings(prev => ({ ...prev, [category]: data }));
@@ -113,69 +151,69 @@ const UnifiedSettings: React.FC = () => {
       id: 'preferences',
       name: '个人偏好',
       icon: User,
-      description: '个人界面和使用偏好设置'
+      description: '个人界面和使用偏好设置',
     },
     {
       id: 'account',
       name: '账户设置',
       icon: Shield,
-      description: '个人账户信息和密码管理'
+      description: '个人账户信息和密码管理',
     },
     {
       id: 'notifications',
       name: '通知设置',
       icon: Bell,
-      description: '邮件、短信和推送通知配置'
+      description: '邮件、短信和推送通知配置',
     },
     {
       id: 'general',
       name: '系统配置',
       icon: Globe,
       description: '网站基本信息和系统级配置',
-      adminOnly: true
+      adminOnly: true,
     },
     {
       id: 'security',
       name: '安全设置',
       icon: Shield,
       description: '密码策略、登录安全和访问控制',
-      adminOnly: true
+      adminOnly: true,
     },
     {
       id: 'monitoring',
       name: '系统监控',
       icon: Monitor,
       description: '性能监控、告警设置和系统状态',
-      adminOnly: true
+      adminOnly: true,
     },
     {
       id: 'scheduled',
       name: '定时任务',
       icon: Clock,
       description: '自动化任务调度和执行管理',
-      adminOnly: true
+      adminOnly: true,
     },
     {
       id: 'logs',
       name: '系统日志',
       icon: FileText,
       description: '系统日志查看、搜索和管理',
-      adminOnly: true
+      adminOnly: true,
     },
     {
       id: 'backup',
       name: '备份管理',
       icon: Archive,
       description: '数据备份、恢复和存储管理',
-      adminOnly: true
+      adminOnly: true,
     },
     {
       id: 'maintenance',
       name: '系统维护',
       icon: Server,
       description: '系统维护、更新和性能优化',
-      adminOnly: true
-    }
+      adminOnly: true,
+    },
   ];
 
   // 过滤标签页（非管理员用户只能看到部分标签）
@@ -212,12 +250,18 @@ const UnifiedSettings: React.FC = () => {
       case 'maintenance':
         return <MaintenanceSettings />;
       default:
-        return isAdmin ? <GeneralSettings settings={systemSettings} onSave={saveSettings} /> : <PreferencesSettings preferences={userPreferences} onSave={saveSettings} />;
+        return isAdmin ? (
+          <GeneralSettings settings={systemSettings} onSave={saveSettings} />
+        ) : (
+          <PreferencesSettings preferences={userPreferences} onSave={saveSettings} />
+        );
     }
   };
 
   return (
-    <div className={`min-h-screen p-6 theme-transition ${actualTheme === 'light' ? 'light-theme-wrapper' : 'dark-theme-wrapper'}`}>
+    <div
+      className={`min-h-screen p-6 theme-transition ${actualTheme === 'light' ? 'light-theme-wrapper' : 'dark-theme-wrapper'}`}
+    >
       <div className="max-w-7xl mx-auto">
         {/* 页面标题 */}
         <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl border border-gray-700/60 p-8 mb-8 shadow-2xl">
@@ -236,10 +280,13 @@ const UnifiedSettings: React.FC = () => {
 
             {/* 保存状态指示器 */}
             {saveStatus !== 'idle' && (
-              <div className={`flex items-center space-x-3 px-4 py-3 rounded-xl backdrop-blur-sm transition-all duration-300 ${saveStatus === 'success'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20'
-                : 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-lg shadow-red-500/20'
-                }`}>
+              <div
+                className={`flex items-center space-x-3 px-4 py-3 rounded-xl backdrop-blur-sm transition-all duration-300 ${
+                  saveStatus === 'success'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20'
+                    : 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-lg shadow-red-500/20'
+                }`}
+              >
                 {saveStatus === 'success' ? (
                   <CheckCircle className="w-5 h-5" />
                 ) : (
@@ -258,22 +305,26 @@ const UnifiedSettings: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-gray-800/60 backdrop-blur-xl rounded-2xl border border-gray-700/60 p-6 shadow-2xl">
               <nav className="space-y-3">
-                {visibleTabs.map((tab) => {
+                {visibleTabs.map(tab => {
                   const Icon = tab.icon;
                   return (
                     <button
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id)}
-                      className={`group w-full flex items-start space-x-4 px-4 py-4 rounded-xl text-left transition-all duration-300 ${activeTab === tab.id
-                        ? 'bg-gradient-to-r from-blue-600/30 to-purple-600/20 text-blue-300 border border-blue-500/40 shadow-lg shadow-blue-500/20 transform scale-[1.02]'
-                        : 'text-gray-300 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-600/30 hover:text-white border border-transparent hover:border-gray-600/50 hover:shadow-lg hover:transform hover:scale-[1.01]'
-                        }`}
+                      className={`group w-full flex items-start space-x-4 px-4 py-4 rounded-xl text-left transition-all duration-300 ${
+                        activeTab === tab.id
+                          ? 'bg-gradient-to-r from-blue-600/30 to-purple-600/20 text-blue-300 border border-blue-500/40 shadow-lg shadow-blue-500/20 transform scale-[1.02]'
+                          : 'text-gray-300 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-600/30 hover:text-white border border-transparent hover:border-gray-600/50 hover:shadow-lg hover:transform hover:scale-[1.01]'
+                      }`}
                     >
-                      <div className={`p-2 rounded-lg transition-all duration-300 ${activeTab === tab.id
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : 'bg-gray-700/50 text-gray-400 group-hover:bg-gray-600/50 group-hover:text-gray-300'
-                        }`}>
+                      <div
+                        className={`p-2 rounded-lg transition-all duration-300 ${
+                          activeTab === tab.id
+                            ? 'bg-blue-500/20 text-blue-400'
+                            : 'bg-gray-700/50 text-gray-400 group-hover:bg-gray-600/50 group-hover:text-gray-300'
+                        }`}
+                      >
                         <Icon className="w-5 h-5 flex-shrink-0" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -330,7 +381,7 @@ const PreferencesSettings: React.FC<{
     enableAnimations: true,
     showAdvancedOptions: false,
     autoSaveSettings: true,
-    ...preferences?.interface
+    ...preferences?.interface,
   });
 
   const [testingPrefs, setTestingPrefs] = useState<TestingPrefs>({
@@ -338,7 +389,7 @@ const PreferencesSettings: React.FC<{
     resultRetentionDays: 30,
     autoStartTests: false,
     showDetailedLogs: false,
-    ...preferences?.testing
+    ...preferences?.testing,
   });
 
   const handleInterfaceSave = () => {
@@ -375,11 +426,13 @@ const PreferencesSettings: React.FC<{
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label htmlFor="theme-select" className="block text-sm font-semibold text-gray-300">主题模式</label>
+              <label htmlFor="theme-select" className="block text-sm font-semibold text-gray-300">
+                主题模式
+              </label>
               <select
                 id="theme-select"
                 value={interfacePrefs.theme}
-                onChange={(e) => {
+                onChange={e => {
                   const newTheme = e?.target.value as 'light' | 'dark';
                   setInterfacePrefs(prev => ({ ...prev, theme: newTheme }));
                   // 立即应用主题更改
@@ -393,11 +446,16 @@ const PreferencesSettings: React.FC<{
               </select>
             </div>
             <div className="space-y-2">
-              <label htmlFor="language-select" className="block text-sm font-semibold text-gray-300">语言</label>
+              <label
+                htmlFor="language-select"
+                className="block text-sm font-semibold text-gray-300"
+              >
+                语言
+              </label>
               <select
                 id="language-select"
                 value={interfacePrefs.language}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, language: e?.target.value }))}
+                onChange={e => setInterfacePrefs(prev => ({ ...prev, language: e?.target.value }))}
                 className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
                 aria-label="选择界面语言"
               >
@@ -406,11 +464,16 @@ const PreferencesSettings: React.FC<{
               </select>
             </div>
             <div className="space-y-2">
-              <label htmlFor="timezone-select" className="block text-sm font-semibold text-gray-300">时区</label>
+              <label
+                htmlFor="timezone-select"
+                className="block text-sm font-semibold text-gray-300"
+              >
+                时区
+              </label>
               <select
                 id="timezone-select"
                 value={interfacePrefs.timezone}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, timezone: e?.target.value }))}
+                onChange={e => setInterfacePrefs(prev => ({ ...prev, timezone: e?.target.value }))}
                 className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
                 aria-label="选择时区设置"
               >
@@ -421,11 +484,18 @@ const PreferencesSettings: React.FC<{
               </select>
             </div>
             <div className="space-y-2">
-              <label htmlFor="date-format-select" className="block text-sm font-semibold text-gray-300">日期格式</label>
+              <label
+                htmlFor="date-format-select"
+                className="block text-sm font-semibold text-gray-300"
+              >
+                日期格式
+              </label>
               <select
                 id="date-format-select"
                 value={interfacePrefs.dateFormat}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, dateFormat: e?.target.value }))}
+                onChange={e =>
+                  setInterfacePrefs(prev => ({ ...prev, dateFormat: e?.target.value }))
+                }
                 className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
                 aria-label="选择日期格式"
               >
@@ -441,7 +511,9 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={interfacePrefs.enableAnimations}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, enableAnimations: e?.target.checked }))}
+                onChange={e =>
+                  setInterfacePrefs(prev => ({ ...prev, enableAnimations: e?.target.checked }))
+                }
                 className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="启用动画效果"
               />
@@ -451,7 +523,9 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={interfacePrefs.showAdvancedOptions}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, showAdvancedOptions: e?.target.checked }))}
+                onChange={e =>
+                  setInterfacePrefs(prev => ({ ...prev, showAdvancedOptions: e?.target.checked }))
+                }
                 className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="显示高级选项"
               />
@@ -461,7 +535,9 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={interfacePrefs.autoSaveSettings}
-                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, autoSaveSettings: e?.target.checked }))}
+                onChange={e =>
+                  setInterfacePrefs(prev => ({ ...prev, autoSaveSettings: e?.target.checked }))
+                }
                 className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="自动保存设置"
               />
@@ -492,12 +568,22 @@ const PreferencesSettings: React.FC<{
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label htmlFor="default-timeout-input" className="block text-sm font-semibold text-gray-300">默认测试超时 (秒)</label>
+              <label
+                htmlFor="default-timeout-input"
+                className="block text-sm font-semibold text-gray-300"
+              >
+                默认测试超时 (秒)
+              </label>
               <input
                 id="default-timeout-input"
                 type="number"
                 value={testingPrefs.defaultTimeout}
-                onChange={(e) => setTestingPrefs(prev => ({ ...prev, defaultTimeout: parseInt(e?.target.value) || 60 }))}
+                onChange={e =>
+                  setTestingPrefs(prev => ({
+                    ...prev,
+                    defaultTimeout: parseInt(e?.target.value) || 60,
+                  }))
+                }
                 min="10"
                 max="300"
                 aria-label="设置默认测试超时时间"
@@ -505,12 +591,22 @@ const PreferencesSettings: React.FC<{
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="retention-days-input" className="block text-sm font-semibold text-gray-300">结果保留天数</label>
+              <label
+                htmlFor="retention-days-input"
+                className="block text-sm font-semibold text-gray-300"
+              >
+                结果保留天数
+              </label>
               <input
                 id="retention-days-input"
                 type="number"
                 value={testingPrefs.resultRetentionDays}
-                onChange={(e) => setTestingPrefs(prev => ({ ...prev, resultRetentionDays: parseInt(e?.target.value) || 30 }))}
+                onChange={e =>
+                  setTestingPrefs(prev => ({
+                    ...prev,
+                    resultRetentionDays: parseInt(e?.target.value) || 30,
+                  }))
+                }
                 min="7"
                 max="365"
                 aria-label="设置测试结果保留天数"
@@ -524,7 +620,9 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={testingPrefs.autoStartTests}
-                onChange={(e) => setTestingPrefs(prev => ({ ...prev, autoStartTests: e?.target.checked }))}
+                onChange={e =>
+                  setTestingPrefs(prev => ({ ...prev, autoStartTests: e?.target.checked }))
+                }
                 className="w-5 h-5 text-green-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-green-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="自动开始测试"
               />
@@ -534,7 +632,9 @@ const PreferencesSettings: React.FC<{
               <input
                 type="checkbox"
                 checked={testingPrefs.showDetailedLogs}
-                onChange={(e) => setTestingPrefs(prev => ({ ...prev, showDetailedLogs: e?.target.checked }))}
+                onChange={e =>
+                  setTestingPrefs(prev => ({ ...prev, showDetailedLogs: e?.target.checked }))
+                }
                 className="w-5 h-5 text-green-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-green-500/50 focus:ring-2 transition-all duration-200"
                 aria-label="显示详细日志"
               />
@@ -599,11 +699,13 @@ const AccountSettings: React.FC = () => {
         }
 
         // 如果useAuth中没有用户信息，尝试从API获取
-        const API_BASE_URL = import.meta.env.VITE_API_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`;
+        const API_BASE_URL =
+          import.meta.env.VITE_API_URL ||
+          `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`;
         const response = await fetch(`${API_BASE_URL}/auth/me`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token') || localStorage.getItem('test_web_app_token') || localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem('auth_token') || localStorage.getItem('test_web_app_token') || localStorage.getItem('token')}`,
+          },
         });
 
         if (response.ok) {
@@ -626,7 +728,7 @@ const AccountSettings: React.FC = () => {
           username: 'testuser',
           email: 'user@example.com',
           role: 'admin',
-          createdAt: '2024-01-01T00:00:00Z'
+          createdAt: '2024-01-01T00:00:00Z',
         });
       } finally {
         setLoading(false);
@@ -689,7 +791,7 @@ const AccountSettings: React.FC = () => {
             <input
               type="email"
               value={userInfo?.email || ''}
-              onChange={() => { }} // 只读，但允许选择文本
+              onChange={() => {}} // 只读，但允许选择文本
               aria-label="邮箱地址"
               className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 hover:border-gray-500/60"
             />
@@ -785,7 +887,7 @@ const NotificationSettings: React.FC<{
     emailScheduledTasks: false,
     browserPushEnabled: false,
     browserPushResults: false,
-    ...preferences?.notifications
+    ...preferences?.notifications,
   });
 
   const handleSave = () => {
@@ -816,7 +918,9 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.emailTestComplete}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailTestComplete: e?.target.checked }))}
+              onChange={e =>
+                setNotificationPrefs(prev => ({ ...prev, emailTestComplete: e?.target.checked }))
+              }
               className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
               aria-label="测试完成通知"
             />
@@ -826,7 +930,9 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.emailSystemAlerts}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailSystemAlerts: e?.target.checked }))}
+              onChange={e =>
+                setNotificationPrefs(prev => ({ ...prev, emailSystemAlerts: e?.target.checked }))
+              }
               className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
               aria-label="系统告警通知"
             />
@@ -836,7 +942,9 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.emailScheduledTasks}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailScheduledTasks: e?.target.checked }))}
+              onChange={e =>
+                setNotificationPrefs(prev => ({ ...prev, emailScheduledTasks: e?.target.checked }))
+              }
               className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
               aria-label="定时任务状态通知"
             />
@@ -868,7 +976,9 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.browserPushEnabled}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushEnabled: e?.target.checked }))}
+              onChange={e =>
+                setNotificationPrefs(prev => ({ ...prev, browserPushEnabled: e?.target.checked }))
+              }
               className="w-5 h-5 text-purple-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-purple-500/50 focus:ring-2 transition-all duration-200"
               aria-label="启用浏览器推送通知"
             />
@@ -878,7 +988,9 @@ const NotificationSettings: React.FC<{
             <input
               type="checkbox"
               checked={notificationPrefs.browserPushResults}
-              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushResults: e?.target.checked }))}
+              onChange={e =>
+                setNotificationPrefs(prev => ({ ...prev, browserPushResults: e?.target.checked }))
+              }
               className="w-5 h-5 text-purple-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-purple-500/50 focus:ring-2 transition-all duration-200"
               aria-label="测试结果推送"
             />
@@ -909,7 +1021,12 @@ const MonitoringSettings: React.FC = () => (
       <h4 className="text-white font-medium mb-4">监控配置</h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="monitor-interval-input" className="block text-sm font-medium text-gray-300 mb-2">监控间隔 (秒)</label>
+          <label
+            htmlFor="monitor-interval-input"
+            className="block text-sm font-medium text-gray-300 mb-2"
+          >
+            监控间隔 (秒)
+          </label>
           <input
             id="monitor-interval-input"
             type="number"
@@ -919,7 +1036,12 @@ const MonitoringSettings: React.FC = () => (
           />
         </div>
         <div>
-          <label htmlFor="alert-threshold-input" className="block text-sm font-medium text-gray-300 mb-2">告警阈值 (%)</label>
+          <label
+            htmlFor="alert-threshold-input"
+            className="block text-sm font-medium text-gray-300 mb-2"
+          >
+            告警阈值 (%)
+          </label>
           <input
             id="alert-threshold-input"
             type="number"
@@ -1008,7 +1130,12 @@ const LogsSettings: React.FC = () => (
       <h4 className="text-white font-medium mb-4">日志配置</h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="log-level-select" className="block text-sm font-medium text-gray-300 mb-2">日志级别</label>
+          <label
+            htmlFor="log-level-select"
+            className="block text-sm font-medium text-gray-300 mb-2"
+          >
+            日志级别
+          </label>
           <select
             id="log-level-select"
             className="w-full px-3 py-2 bg-gray-600/50 border border-gray-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1021,7 +1148,12 @@ const LogsSettings: React.FC = () => (
           </select>
         </div>
         <div>
-          <label htmlFor="log-retention-input" className="block text-sm font-medium text-gray-300 mb-2">保留天数</label>
+          <label
+            htmlFor="log-retention-input"
+            className="block text-sm font-medium text-gray-300 mb-2"
+          >
+            保留天数
+          </label>
           <input
             id="log-retention-input"
             type="number"

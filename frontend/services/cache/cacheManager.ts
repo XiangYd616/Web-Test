@@ -114,7 +114,7 @@ export class CacheManager {
         finalValue = await this.compress(serialized);
         compressed = true;
       } catch (error) {
-        Logger.warn('Compression failed, using uncompressed data:', error);
+        Logger.warn('Compression failed, using uncompressed data:', { error: String(error) });
       }
     }
 
@@ -322,7 +322,7 @@ export class CacheManager {
       const storageKey = `cache_${key}`;
       localStorage.setItem(storageKey, JSON.stringify(item));
     } catch (error) {
-      Logger.warn('Failed to set localStorage cache:', error);
+      Logger.warn('Failed to set localStorage cache:', { error: String(error) });
     }
   }
 
@@ -351,7 +351,7 @@ export class CacheManager {
         return null;
       }
     } catch (error) {
-      Logger.warn('Failed to get localStorage cache:', error);
+      Logger.warn('Failed to get localStorage cache:', { error: String(error) });
       this.stats.storageMisses++;
       return null;
     }
@@ -369,7 +369,7 @@ export class CacheManager {
       localStorage.removeItem(storageKey);
       return existed;
     } catch (error) {
-      Logger.warn('Failed to delete localStorage cache:', error);
+      Logger.warn('Failed to delete localStorage cache:', { error: String(error) });
       return false;
     }
   }
@@ -491,7 +491,7 @@ export class CacheManager {
         
         return new TextDecoder().decode(decompressed);
       } catch (error) {
-        Logger.warn('Gzip decompression failed, trying base64:', error);
+        Logger.warn('Gzip decompression failed, trying base64:', { error: String(error) });
       }
     }
     

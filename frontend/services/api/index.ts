@@ -1,30 +1,25 @@
-﻿/**
- * API服务统一导出 - 重构版本
- * 版本: v2.0.0
+/**
+ * API服务统一导出 - 新架构版本
+ * 版本: v3.0.0
  *
- * 统一导出所有API服务，解决重复文件问题
+ * 统一使用新的client.ts作为唯一API客户端
  */
 
-// 主要API服务导出
-export { apiService, default as defaultApiService } from './apiService';
+// 主要API客户端导出
+export { apiClient, ApiClient } from './client';
+export type { ApiResponse, PaginatedResponse, ApiClientConfig } from './client';
 
-// 类型导出
-export type {
-    ApiConfig, AuthConfig, TestConfig, TestProgress, TestSession
-} from './apiService';
+// 拦截器相关导出
+export { setupInterceptors, getAuthToken, removeAuthToken } from './interceptors';
 
-// RequestConfig 从 baseApiService 导出
-export type { RequestConfig } from './baseApiService';
-
-// 向后兼容的导出
-export { apiService as baseApiService, apiService as enhancedApiService } from './apiService';
+// 向后兼容 - 保留旧的导出名称
+export { apiClient as apiService } from './client';
+export { apiClient as baseApiService } from './client';
+export { apiClient as enhancedApiService } from './client';
 
 // 错误处理相关导出（保持现有功能）
 export * from './errorHandler';
 
 // 默认导出
-// 创建默认实例
-import { ApiService } from './apiService';
-const apiServiceInstance = new ApiService();
-export default apiServiceInstance;
+export { apiClient as default } from './client';
 

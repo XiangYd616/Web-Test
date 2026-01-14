@@ -5,12 +5,13 @@
 
 import Logger from '@/utils/logger';
 import {
-  BarChartOutlined, ClockCircleOutlined,
+  BarChartOutlined,
+  ClockCircleOutlined,
   ExperimentOutlined,
   HomeOutlined,
   QuestionCircleOutlined,
   ReloadOutlined,
-  SettingOutlined
+  SettingOutlined,
 } from '@ant-design/icons';
 import {
   Alert,
@@ -25,7 +26,7 @@ import {
   Statistic,
   Tabs,
   Tooltip,
-  Typography
+  Typography,
 } from 'antd';
 import React, { useState } from 'react';
 import UnifiedTestExecutor from '../components/testing/UnifiedTestExecutor';
@@ -97,10 +98,7 @@ export const UnifiedTestPage: React.FC = () => {
 
         <Space>
           <Tooltip title="查看帮助文档">
-            <Button
-              icon={<QuestionCircleOutlined />}
-              onClick={() => setShowHelp(!showHelp)}
-            >
+            <Button icon={<QuestionCircleOutlined />} onClick={() => setShowHelp(!showHelp)}>
               帮助
             </Button>
           </Tooltip>
@@ -108,7 +106,7 @@ export const UnifiedTestPage: React.FC = () => {
           <Tooltip title="刷新引擎状态">
             <Button
               icon={<ReloadOutlined />}
-              onClick={() => engine.fetchSupportedTypes()}
+              onClick={() => engine.fetchSupportedTypes?.()}
               loading={false}
             >
               刷新
@@ -123,7 +121,12 @@ export const UnifiedTestPage: React.FC = () => {
    * 渲染引擎概览
    */
   const renderEngineOverview = () => {
-    const stats = engine.getStats();
+    const stats = engine.getStats?.() ?? {
+      runningTests: 0,
+      totalTests: 0,
+      successTests: 0,
+      failedTests: 0,
+    };
 
     return (
       <Row gutter={16} className="mb-6">
@@ -134,13 +137,9 @@ export const UnifiedTestPage: React.FC = () => {
               value={engine.isConnected ? '在线' : '离线'}
               valueStyle={{
                 color: engine.isConnected ? '#3f8600' : '#cf1322',
-                fontSize: '18px'
+                fontSize: '18px',
               }}
-              prefix={
-                <Badge
-                  status={engine.isConnected ? 'success' : 'error'}
-                />
-              }
+              prefix={<Badge status={engine.isConnected ? 'success' : 'error'} />}
             />
           </Card>
         </Col>
@@ -149,7 +148,7 @@ export const UnifiedTestPage: React.FC = () => {
           <Card>
             <Statistic
               title="支持的测试类型"
-              value={engine.supportedTypes.length}
+              value={engine.supportedTypes?.length ?? 0}
               valueStyle={{ color: '#1890ff' }}
               prefix={<SettingOutlined />}
             />
@@ -184,7 +183,7 @@ export const UnifiedTestPage: React.FC = () => {
   /**
    * 渲染帮助信息
    */
-  const renderHelpInfo = () => (
+  const renderHelpInfo = () =>
     showHelp && (
       <Alert
         message="统一测试引擎使用指南"
@@ -194,12 +193,24 @@ export const UnifiedTestPage: React.FC = () => {
               <Text strong>支持的测试类型:</Text>
             </Paragraph>
             <ul>
-              <li><Text code>performance</Text> - 网站性能测试，包括Core Web Vitals</li>
-              <li><Text code>security</Text> - 安全漏洞扫描和SSL检查</li>
-              <li><Text code>api</Text> - API端点测试和文档生成</li>
-              <li><Text code>stress</Text> - 压力测试和负载测试</li>
-              <li><Text code>database</Text> - 数据库连接和性能测试</li>
-              <li><Text code>network</Text> - 网络连通性和延迟测试</li>
+              <li>
+                <Text code>performance</Text> - 网站性能测试，包括Core Web Vitals
+              </li>
+              <li>
+                <Text code>security</Text> - 安全漏洞扫描和SSL检查
+              </li>
+              <li>
+                <Text code>api</Text> - API端点测试和文档生成
+              </li>
+              <li>
+                <Text code>stress</Text> - 压力测试和负载测试
+              </li>
+              <li>
+                <Text code>database</Text> - 数据库连接和性能测试
+              </li>
+              <li>
+                <Text code>network</Text> - 网络连通性和延迟测试
+              </li>
             </ul>
             <Paragraph>
               <Text strong>使用步骤:</Text>
@@ -218,8 +229,7 @@ export const UnifiedTestPage: React.FC = () => {
         onClose={() => setShowHelp(false)}
         className="mb-4"
       />
-    )
-  );
+    );
 
   return (
     <Layout>
@@ -246,7 +256,7 @@ export const UnifiedTestPage: React.FC = () => {
                   onTestComplete={handleTestComplete}
                   onTestError={handleTestError}
                 />
-              )
+              ),
             },
             {
               key: 'panel',
@@ -269,8 +279,8 @@ export const UnifiedTestPage: React.FC = () => {
                   enableRealTimeMetrics={true}
                   enableExport={true}
                 />
-              )
-            }
+              ),
+            },
           ]}
         />
 
@@ -294,10 +304,7 @@ export const UnifiedTestPage: React.FC = () => {
             type="warning"
             showIcon
             action={
-              <Button
-                size="small"
-                onClick={() => engine.connectWebSocket()}
-              >
+              <Button size="small" onClick={() => engine.connectWebSocket?.()}>
                 重新连接
               </Button>
             }

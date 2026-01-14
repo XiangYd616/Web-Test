@@ -101,7 +101,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
       
       localStorage.setItem('errorLogs', JSON.stringify(updatedLogs));
     } catch (e) {
-      Logger.warn('无法存储错误日志:', e);
+      Logger.warn('无法存储错误日志:', { error: String(e) });
     }
   };
 
@@ -154,7 +154,7 @@ ${errorInfo?.componentStack || '无'}
         this.setState({ copied: false });
       }, 2000);
     }).catch(err => {
-      Logger.error('复制失败:', err);
+      Logger.error('复制失败:', { error: String(err) });
     });
   };
 

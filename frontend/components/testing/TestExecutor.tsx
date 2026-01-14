@@ -22,7 +22,7 @@ import {
   HistoryOutlined,
   PlayCircleOutlined,
   ReloadOutlined,
-  SettingOutlined
+  SettingOutlined,
 } from '@ant-design/icons';
 import {
   Badge,
@@ -30,7 +30,8 @@ import {
   Card,
   Col,
   Divider,
-  Form, Input,
+  Form,
+  Input,
   Modal,
   Row,
   Select,
@@ -38,7 +39,7 @@ import {
   Statistic,
   Tabs,
   Timeline,
-  Typography
+  Typography,
 } from 'antd';
 import React, { useCallback, useState } from 'react';
 import { useUnifiedTestEngine } from '../../hooks/useUnifiedTestEngine';
@@ -63,7 +64,7 @@ const getTestTypeLabel = (type: string): string => {
     api: '🔌 API测试',
     seo: '📊 SEO分析',
     stress: '⚡ 压力测试',
-    compatibility: '🌍 兼容性测试'
+    compatibility: '🌍 兼容性测试',
   };
   return labels[type] || type;
 };
@@ -125,7 +126,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   onTestError,
   onTestStarted,
   onTestProgress,
-  onConfigChange
+  onConfigChange,
 }) => {
   const [form] = Form.useForm();
   const [selectedTestType, setSelectedTestType] = useState<TestType>(
@@ -179,31 +180,34 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   /**
    * 启动实时指标监控 - 整合ModernTestRunner功能
    */
-  const startRealTimeMetrics = useCallback((testId: string) => {
-    if (!enableRealTimeMetrics) return () => { };
+  const startRealTimeMetrics = useCallback(
+    (testId: string) => {
+      if (!enableRealTimeMetrics) return () => {};
 
-    const interval = setInterval(async () => {
-      try {
-        /**
-         * if功能函数
-         * @param {Object} params - 参数对象
-         * @returns {Promise<Object>} 返回结果
-         */
-        const status = await engine.getTestStatus?.(testId);
-        if (status) {
-          setRealTimeMetrics({
-            progress: status.progress,
-            currentStep: status.currentStep,
-            timestamp: Date.now()
-          });
+      const interval = setInterval(async () => {
+        try {
+          /**
+           * if功能函数
+           * @param {Object} params - 参数对象
+           * @returns {Promise<Object>} 返回结果
+           */
+          const status = await engine.getTestStatus?.(testId);
+          if (status) {
+            setRealTimeMetrics({
+              progress: status.progress,
+              currentStep: status.currentStep,
+              timestamp: Date.now(),
+            });
+          }
+        } catch (error) {
+          Logger.error('获取实时指标失败:', error);
         }
-      } catch (error) {
-        Logger.error('获取实时指标失败:', error);
-      }
-    }, 1000);
+      }, 1000);
 
-    return () => clearInterval(interval);
-  }, [engine, enableRealTimeMetrics]);
+      return () => clearInterval(interval);
+    },
+    [engine, enableRealTimeMetrics]
+  );
 
   // 组件初始化 - 整合其他组件的初始化逻辑
   React.useEffect(() => {
@@ -222,9 +226,18 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
 
     // 连接WebSocket
     if (enableWebSocket) {
-      engine.connectWebSocket();
+      engine.connectWebSocket?.();
     }
-  }, [form, defaultConfig, showHistory, showStats, enableWebSocket, engine, loadTestHistory, loadTestStatistics]);
+  }, [
+    form,
+    defaultConfig,
+    showHistory,
+    showStats,
+    enableWebSocket,
+    engine,
+    loadTestHistory,
+    loadTestStatistics,
+  ]);
 
   // 监听测试进度更新
   React.useEffect(() => {
@@ -250,8 +263,8 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
         config: finalConfig,
         options: {
           priority: TestPriority.MEDIUM,
-          tags: [selectedTestType, 'unified-engine', 'web-ui']
-        }
+          tags: [selectedTestType, 'unified-engine', 'web-ui'],
+        },
       });
 
       if (!testId) {
@@ -268,7 +281,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
       setActiveTab('monitor');
 
       // 订阅测试更新
-      engine.subscribeToTest?.(testId, (data) => {
+      engine.subscribeToTest?.(testId, data => {
         onTestProgress?.(data);
       });
 
@@ -276,12 +289,21 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
       if (enableRealTimeMetrics) {
         startRealTimeMetrics(testId);
       }
-
     } catch (error) {
       Logger.error('测试执行失败:', error);
       onTestError?.(error as Error);
     }
-  }, [form, engine, selectedTestType, defaultConfig, onTestError, onTestStarted, onConfigChange, enableRealTimeMetrics, startRealTimeMetrics]);
+  }, [
+    form,
+    engine,
+    selectedTestType,
+    defaultConfig,
+    onTestError,
+    onTestStarted,
+    onConfigChange,
+    enableRealTimeMetrics,
+    startRealTimeMetrics,
+  ]);
 
   /**
    * 查看测试结果
@@ -294,40 +316,46 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   /**
    * 导出测试结果 - 整合ModernTestRunner功能
    */
-  const handleExportResult = useCallback(async (testId: string, format: 'json' | 'csv' | 'pdf') => {
-    if (!enableExport) return;
+  const handleExportResult = useCallback(
+    async (testId: string, format: 'json' | 'csv' | 'pdf') => {
+      if (!enableExport) return;
 
-    try {
-      const result = await engine.getTestResult?.(testId);
-      if (result) {
-        // 创建下载链接
-        const dataStr = format === 'json' ?
-          JSON.stringify(result, null, 2) :
-          `测试ID,测试类型,分数,持续时间\n${testId},${result.testType},${result.overallScore},${result.duration}`;
+      try {
+        const result = await engine.getTestResult?.(testId);
+        if (result) {
+          // 创建下载链接
+          const dataStr =
+            format === 'json'
+              ? JSON.stringify(result, null, 2)
+              : `测试ID,测试类型,分数,持续时间\n${testId},${result.testType},${result.overallScore},${result.duration}`;
 
-        const dataBlob = new Blob([dataStr], { type: format === 'json' ? 'application/json' : 'text/csv' });
-        const url = URL.createObjectURL(dataBlob);
+          const dataBlob = new Blob([dataStr], {
+            type: format === 'json' ? 'application/json' : 'text/csv',
+          });
+          const url = URL.createObjectURL(dataBlob);
 
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `test-result-${testId}.${format}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `test-result-${testId}.${format}`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
+      } catch (error) {
+        Logger.error('导出测试结果失败:', error);
+        onTestError?.(error as Error);
       }
-    } catch (error) {
-      Logger.error('导出测试结果失败:', error);
-      onTestError?.(error as Error);
-    }
-  }, [engine, enableExport, onTestError]);
+    },
+    [engine, enableExport, onTestError]
+  );
 
   /**
    * 批量操作 - 整合UnifiedTestPanel功能
    */
   const _handleBatchCancel = useCallback(async () => {
     try {
-      await engine.cancelAllTests();
+      await engine.cancelAllTests?.();
       Logger.debug('✅ 已取消所有运行中的测试');
     } catch (error) {
       Logger.error('批量取消失败:', error);
@@ -336,7 +364,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   }, [engine, onTestError]);
 
   const handleClearHistory = useCallback(() => {
-    engine.clearCompletedTests();
+    engine.clearCompletedTests?.();
     setTestHistory([]);
     Logger.debug('✅ 已清理测试历史');
   }, [engine]);
@@ -351,7 +379,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
         layout="vertical"
         initialValues={{
           url: 'https://example.com',
-          testType: selectedTestType
+          testType: selectedTestType,
         }}
       >
         <Row gutter={16}>
@@ -361,11 +389,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
               name="testType"
               rules={[{ required: true, message: '请选择测试类型' }]}
             >
-              <Select
-                value={selectedTestType}
-                onChange={setSelectedTestType}
-                loading={false}
-              >
+              <Select value={selectedTestType} onChange={setSelectedTestType} loading={false}>
                 {engine.supportedTypes?.map(type => (
                   <Option key={type} value={type}>
                     {getTestTypeLabel(type)}
@@ -381,13 +405,10 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
               name="url"
               rules={[
                 { required: true, message: '请输入目标URL' },
-                { type: 'url', message: '请输入有效的URL' }
+                { type: 'url', message: '请输入有效的URL' },
               ]}
             >
-              <Input
-                placeholder="https://example.com"
-                prefix="🌐"
-              />
+              <Input placeholder="https://example.com" prefix="🌐" />
             </Form.Item>
           </Col>
         </Row>
@@ -411,7 +432,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
 
             <Button
               icon={<ReloadOutlined />}
-              onClick={() => engine.fetchSupportedTypes()}
+              onClick={() => engine.fetchSupportedTypes?.()}
               loading={false}
             >
               刷新引擎
@@ -419,8 +440,8 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
 
             <Button
               icon={<DeleteOutlined />}
-              onClick={() => engine.clearCompletedTests()}
-              disabled={engine.getStats().completedTests === 0}
+              onClick={() => engine.clearCompletedTests?.()}
+              disabled={engine.getStats?.().completedTests === 0}
             >
               清理历史
             </Button>
@@ -476,13 +497,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
                 name="users"
                 rules={[{ required: true, message: '请输入并发用户数' }]}
               >
-                <Input
-                  type="number"
-                  min={1}
-                  max={1000}
-                  placeholder="100"
-                  addonAfter="用户"
-                />
+                <Input type="number" min={1} max={1000} placeholder="100" addonAfter="用户" />
               </Form.Item>
             </Col>
             <Col span={8}>
@@ -491,13 +506,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
                 name="duration"
                 rules={[{ required: true, message: '请输入测试时长' }]}
               >
-                <Input
-                  type="number"
-                  min={10}
-                  max={3600}
-                  placeholder="300"
-                  addonAfter="秒"
-                />
+                <Input type="number" min={10} max={3600} placeholder="300" addonAfter="秒" />
               </Form.Item>
             </Col>
             <Col span={8}>
@@ -564,7 +573,12 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    * 渲染引擎状态
    */
   const renderEngineStatus = () => {
-    const stats = engine.getStats();
+    const stats = engine.getStats?.() || {
+      runningTests: 0,
+      completedTests: 0,
+      failedTests: 0,
+      totalTests: 0,
+    };
 
     return (
       <Card title="🚀 引擎状态" className="mb-4">
@@ -575,13 +589,9 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
               value={engine.isConnected ? '已连接' : '未连接'}
               valueStyle={{
                 color: engine.isConnected ? '#3f8600' : '#cf1322',
-                fontSize: '16px'
+                fontSize: '16px',
               }}
-              prefix={
-                <Badge
-                  status={engine.isConnected ? 'success' : 'error'}
-                />
-              }
+              prefix={<Badge status={engine.isConnected ? 'success' : 'error'} />}
             />
           </Col>
 
@@ -628,7 +638,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const renderTestMonitor = () => {
     return (
       <TestProgressMonitor
-        activeTests={engine.activeTests}
+        activeTests={engine.activeTests || new Map()}
         realTimeMetrics={realTimeMetrics}
         onStopTest={() => engine.cancelTest()}
         onCancelTest={() => engine.cancelTest()}
@@ -643,14 +653,14 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const renderStatsPanel = () => {
     if (!showStats) return null;
 
-    const stats = engine.getStats();
+    const stats = engine.getStats?.() || {
+      runningTests: 0,
+      completedTests: 0,
+      failedTests: 0,
+      totalTests: 0,
+    };
 
-    return (
-      <TestStatsPanel
-        stats={stats}
-        className="mb-4"
-      />
-    );
+    return <TestStatsPanel stats={stats} className="mb-4" />;
   };
 
   /**
@@ -677,12 +687,12 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   const renderTestResults = () => {
     // Convert array to Map for TestResultsTable
     const testResultsMap = new Map<string, TestResult>();
-    (engine.testResults || []).forEach((result: any) => {
+    ((engine.testResults ?? []) as any[]).forEach((result: any) => {
       if (result.testId) {
         testResultsMap.set(result.testId, result);
       }
     });
-    
+
     return (
       <TestResultsTable
         testResults={testResultsMap}
@@ -698,8 +708,8 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    * 渲染结果详情模态框
    */
   const renderResultModal = () => {
-    const selectedResult = engine.testResults.find((r: any) => r.testId === selectedTestId);
-    
+    const selectedResult = (engine.testResults ?? []).find((r: any) => r.testId === selectedTestId);
+
     return (
       <Modal
         title="📊 测试结果详情"
@@ -712,7 +722,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
           </Button>,
           <Button key="close" onClick={() => setShowResultModal(false)}>
             关闭
-          </Button>
+          </Button>,
         ]}
       >
         {selectedResult && (
@@ -725,7 +735,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
                   suffix="分"
                   valueStyle={{
                     color: getScoreColor(selectedResult.overallScore || 0),
-                    fontSize: '24px'
+                    fontSize: '24px',
                   }}
                 />
               </Col>
@@ -750,7 +760,16 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
                 <Title level={5}>🎯 优化建议</Title>
                 <Timeline>
                   {selectedResult.recommendations.map((rec: any, index: number) => (
-                    <Timeline.Item key={index} color={rec.priority === 'high' ? 'red' : rec.priority === 'medium' ? 'orange' : 'blue'}>
+                    <Timeline.Item
+                      key={index}
+                      color={
+                        rec.priority === 'high'
+                          ? 'red'
+                          : rec.priority === 'medium'
+                            ? 'orange'
+                            : 'blue'
+                      }
+                    >
                       <Text strong>{rec.title}:</Text> {rec.description}
                     </Timeline.Item>
                   ))}
@@ -799,49 +818,57 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
                 配置测试
               </span>
             ),
-            children: renderConfigForm()
+            children: renderConfigForm(),
           },
           {
             key: 'monitor',
             label: (
               <span>
                 <ClockCircleOutlined />
-                监控进度 ({engine.getStats().runningTests})
+                监控进度 ({engine.getStats?.().runningTests ?? 0})
               </span>
             ),
-            children: renderTestMonitor()
+            children: renderTestMonitor(),
           },
           {
             key: 'results',
             label: (
               <span>
                 <BarChartOutlined />
-                查看结果 ({engine.getStats().totalTests})
+                查看结果 ({engine.getStats?.().totalTests ?? 0})
               </span>
             ),
-            children: renderTestResults()
+            children: renderTestResults(),
           },
           // 整合的新标签页
-          ...(showStats ? [{
-            key: 'stats',
-            label: (
-              <span>
-                <BarChartOutlined />
-                统计信息
-              </span>
-            ),
-            children: renderStatsPanel()
-          }] : []),
-          ...(showHistory ? [{
-            key: 'history',
-            label: (
-              <span>
-                <HistoryOutlined />
-                测试历史
-              </span>
-            ),
-            children: renderHistoryPanel()
-          }] : [])
+          ...(showStats
+            ? [
+                {
+                  key: 'stats',
+                  label: (
+                    <span>
+                      <BarChartOutlined />
+                      统计信息
+                    </span>
+                  ),
+                  children: renderStatsPanel(),
+                },
+              ]
+            : []),
+          ...(showHistory
+            ? [
+                {
+                  key: 'history',
+                  label: (
+                    <span>
+                      <HistoryOutlined />
+                      测试历史
+                    </span>
+                  ),
+                  children: renderHistoryPanel(),
+                },
+              ]
+            : []),
         ]}
       />
 
@@ -859,7 +886,7 @@ const _getStatusColor = (status: string): string => {
     running: 'orange',
     completed: 'green',
     failed: 'red',
-    cancelled: 'gray'
+    cancelled: 'gray',
   };
   return colors[status] || 'default';
 };
@@ -870,10 +897,9 @@ const _getStatusText = (status: string): string => {
     running: '运行中',
     completed: '已完成',
     failed: '失败',
-    cancelled: '已取消'
+    cancelled: '已取消',
   };
   return texts[status] || status;
 };
 
 export default UnifiedTestExecutor;
-

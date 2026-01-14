@@ -512,7 +512,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
         try {
           await testApiClient.stopTest(targetTestId);
         } catch (apiError) {
-          Logger.warn('API停止测试失败:', apiError);
+          Logger.warn('API停止测试失败:', { error: String(apiError) });
         }
       }
 

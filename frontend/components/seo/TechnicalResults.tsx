@@ -159,12 +159,12 @@ const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
 
           {/* meta robots */}
           <div className="flex items-start space-x-3 p-3 bg-gray-700/30 rounded-lg">
-            {getStatusIcon(results.metaRobots?.present, (results.metaRobots?.issues && results.metaRobots.issues.length > 0) || false)}
+            {getStatusIcon(results.metaRobots?.present, (results.metaRobots?.issues && (results.metaRobots.issues?.length ?? 0) > 0) || false)}
             <div className="flex-1">
               <div className="font-medium text-white">Meta Robots</div>
               <div className="text-sm text-gray-400 mt-1">
                 {results.metaRobots?.present
-                  ? (results.metaRobots?.issues?.length > 0 ? '存在但有问题' : '配置正确')
+                  ? ((results.metaRobots?.issues?.length ?? 0) > 0 ? '存在但有问题' : '配置正确')
                   : '未发现meta robots标签'}
               </div>
               {results.metaRobots?.content && (

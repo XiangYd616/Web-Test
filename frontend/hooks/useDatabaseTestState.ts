@@ -8,11 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { testApiService } from '../services/api/testApiService';
 import backgroundTestManager from '../services/backgroundTestManager';
-import type {
-  DatabaseTestConfig,
-  DatabaseTestHook,
-  DatabaseTestResult
-} from '../types';
+import type { DatabaseTestConfig, DatabaseTestHook, DatabaseTestResult } from '../types';
 import { TestStatus } from '../types/enums';
 
 // 扩展数据库测试配置类型，兼容统一类型系统
@@ -245,34 +241,34 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
       username: '',
       password: '',
       ssl: false,
-      connectionTimeout: 10000
+      connectionTimeout: 10000,
     },
     testTypes: ['connection', 'performance'],
     performanceConfig: {
       queryTimeout: 30000,
       maxConnections: 10,
       testDuration: 60,
-      queryComplexity: 'medium'
+      queryComplexity: 'medium',
     },
     integrityConfig: {
       checkConstraints: true,
       checkIndexes: true,
       checkForeignKeys: true,
-      validateData: true
+      validateData: true,
     },
     loadTestConfig: {
       concurrentConnections: 5,
       operationsPerSecond: 10,
       testDuration: 60,
-      operationTypes: ['select', 'insert']
+      operationTypes: ['select', 'insert'],
     },
     securityConfig: {
       checkPermissions: true,
       checkEncryption: true,
       checkAuthentication: true,
-      scanVulnerabilities: false
+      scanVulnerabilities: false,
     },
-    customQueries: []
+    customQueries: [],
   });
 
   const [isRunning, setIsRunning] = useState(false);
@@ -314,34 +310,34 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
         username: '',
         password: '',
         ssl: false,
-        connectionTimeout: 10000
+        connectionTimeout: 10000,
       },
       testTypes: ['connection', 'performance'],
       performanceConfig: {
         queryTimeout: 30000,
         maxConnections: 10,
         testDuration: 60,
-        queryComplexity: 'medium'
+        queryComplexity: 'medium',
       },
       integrityConfig: {
         checkConstraints: true,
         checkIndexes: true,
         checkForeignKeys: true,
-        validateData: true
+        validateData: true,
       },
       loadTestConfig: {
         concurrentConnections: 5,
         operationsPerSecond: 10,
         testDuration: 60,
-        operationTypes: ['select', 'insert']
+        operationTypes: ['select', 'insert'],
       },
       securityConfig: {
         checkPermissions: true,
         checkEncryption: true,
         checkAuthentication: true,
-        scanVulnerabilities: false
+        scanVulnerabilities: false,
       },
-      customQueries: []
+      customQueries: [],
     });
   }, []);
 
@@ -351,29 +347,32 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   const validateConfig = useCallback((): { isValid: boolean; errors: string[] } => {
     const errors: string[] = [];
 
-    if (!config.connectionConfig.host) {
+    if (!config.connectionConfig?.host) {
       errors.push('请输入数据库主机地址');
     }
 
-    if (!config.connectionConfig.database) {
+    if (!config.connectionConfig?.database) {
       errors.push('请输入数据库名称');
     }
 
-    if (!config.connectionConfig.username) {
+    if (!config.connectionConfig?.username) {
       errors.push('请输入用户名');
     }
 
-    if (config.connectionConfig.port < 1 || config.connectionConfig.port > 65535) {
+    if (
+      config.connectionConfig?.port &&
+      (config.connectionConfig.port < 1 || config.connectionConfig.port > 65535)
+    ) {
       errors.push('端口号应在1-65535之间');
     }
 
-    if (config.testTypes.length === 0) {
+    if (!config.testTypes || config.testTypes.length === 0) {
       errors.push('请至少选择一种测试类型');
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }, [config]);
 
@@ -385,7 +384,9 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
       setCurrentStep('正在测试数据库连接...');
 
       // 这里应该调用实际的连接测试API
-      const response = await (testApiService as any).testDatabaseConnection(config.connectionConfig);
+      const response = await (testApiService as any).testDatabaseConnection(
+        config.connectionConfig
+      );
 
       if (response.success) {
         setCurrentStep('连接测试成功');
@@ -423,9 +424,9 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
       const newTestId = backgroundTestManager.startTest(
         'database' as any,
         config,
-        (progress: number, step: string) => {
+        (progress: number, step?: string) => {
           setProgress(progress);
-          setCurrentStep(step);
+          if (step) setCurrentStep(step);
         },
         (testResult: any) => {
           setResult(testResult);
@@ -441,7 +442,6 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
       );
 
       setTestId(newTestId);
-
     } catch (err: any) {
       setError(err.message || '数据库测试启动失败');
       setIsRunning(false);
@@ -486,13 +486,16 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
     setConfig(prev => ({
       ...prev,
       testQueries: [...(prev.testQueries || []), query],
-      customQueries: [...(prev.customQueries || []), {
-        id: query.id,
-        name: query.name,
-        query: query.sql,
-        expectedResult: undefined,
-        timeout: undefined
-      }]
+      customQueries: [
+        ...(prev.customQueries || []),
+        {
+          id: query.id,
+          name: query.name,
+          query: query.sql,
+          expectedResult: undefined,
+          timeout: undefined,
+        },
+      ],
     }));
   }, []);
 
@@ -506,12 +509,14 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
         query.id === id ? { ...query, ...updates } : query
       ),
       customQueries: (prev.customQueries || []).map((query: any) =>
-        query.id === id ? {
-          ...query,
-          name: updates.name || query.name,
-          query: updates.sql || query.query
-        } : query
-      )
+        query.id === id
+          ? {
+              ...query,
+              name: updates.name || query.name,
+              query: updates.sql || query.query,
+            }
+          : query
+      ),
     }));
   }, []);
 
@@ -522,82 +527,88 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
     setConfig(prev => ({
       ...prev,
       testQueries: (prev.testQueries || []).filter((query: DatabaseQuery) => query.id !== id),
-      customQueries: (prev.customQueries || []).filter((query: any) => query.id !== id)
+      customQueries: (prev.customQueries || []).filter((query: any) => query.id !== id),
     }));
   }, []);
 
   /**
    * 加载预设配置
    */
-  const loadPreset = useCallback((preset: 'basic' | 'comprehensive' | 'performance' | 'security') => {
-    const presets: Record<string, Partial<ExtendedDatabaseTestConfig>> = {
-      basic: {
-        testTypes: ['connection', 'performance'] as const
-      },
-      comprehensive: {
-        testTypes: ['connection', 'performance', 'integrity', 'security'] as const,
-        performanceConfig: {
-          queryTimeout: 60000,
-          maxConnections: 20,
-          testDuration: 120,
-          queryComplexity: 'complex' as const
-        }
-      },
-      performance: {
-        testTypes: ['connection', 'performance', 'load'] as const,
-        performanceConfig: {
-          queryTimeout: 30000,
-          maxConnections: 50,
-          testDuration: 300,
-          queryComplexity: 'complex' as const
+  const loadPreset = useCallback(
+    (preset: 'basic' | 'comprehensive' | 'performance' | 'security') => {
+      const presets: Record<string, Partial<ExtendedDatabaseTestConfig>> = {
+        basic: {
+          testTypes: ['connection', 'performance'] as const,
         },
-        loadTestConfig: {
-          concurrentConnections: 20,
-          operationsPerSecond: 100,
-          testDuration: 300,
-          operationTypes: ['select', 'insert', 'update', 'delete'] as const
-        }
-      },
-      security: {
-        testTypes: ['connection', 'security'] as const,
-        securityConfig: {
-          checkPermissions: true,
-          checkEncryption: true,
-          checkAuthentication: true,
-          scanVulnerabilities: true
-        }
-      }
-    };
+        comprehensive: {
+          testTypes: ['connection', 'performance', 'integrity', 'security'] as const,
+          performanceConfig: {
+            queryTimeout: 60000,
+            maxConnections: 20,
+            testDuration: 120,
+            queryComplexity: 'complex' as const,
+          },
+        },
+        performance: {
+          testTypes: ['connection', 'performance', 'load'] as const,
+          performanceConfig: {
+            queryTimeout: 30000,
+            maxConnections: 50,
+            testDuration: 300,
+            queryComplexity: 'complex' as const,
+          },
+          loadTestConfig: {
+            concurrentConnections: 20,
+            operationsPerSecond: 100,
+            testDuration: 300,
+            operationTypes: ['select', 'insert', 'update', 'delete'] as const,
+          },
+        },
+        security: {
+          testTypes: ['connection', 'security'] as const,
+          securityConfig: {
+            checkPermissions: true,
+            checkEncryption: true,
+            checkAuthentication: true,
+            scanVulnerabilities: true,
+          },
+        },
+      };
 
-    const presetConfig = presets[preset];
-    setConfig(prev => ({
-      ...prev,
-      ...presetConfig
-    }));
-  }, []);
+      const presetConfig = presets[preset];
+      setConfig(prev => ({
+        ...prev,
+        ...presetConfig,
+      }));
+    },
+    []
+  );
 
   /**
    * 加载数据库类型预设
    */
-  const loadDatabasePreset = useCallback((dbType: 'mysql' | 'postgresql' | 'mongodb' | 'redis' | 'sqlite') => {
-    const dbPresets = {
-      mysql: { port: 3306 },
-      postgresql: { port: 5432 },
-      mongodb: { port: 27017 },
-      redis: { port: 6379 },
-      sqlite: { port: 0, host: 'local' }
-    };
+  const loadDatabasePreset = useCallback(
+    (dbType: 'mysql' | 'postgresql' | 'mongodb' | 'redis' | 'sqlite') => {
+      const dbPresets = {
+        mysql: { port: 3306 },
+        postgresql: { port: 5432 },
+        mongodb: { port: 27017 },
+        redis: { port: 6379 },
+        sqlite: { port: 0, host: 'local' },
+      };
 
-    const preset = dbPresets[dbType];
-    setConfig(prev => ({
-      ...prev,
-      connectionConfig: {
-        ...prev.connectionConfig,
-        type: dbType,
-        ...preset
-      }
-    }));
-  }, []);
+      const preset = dbPresets[dbType];
+      setConfig(prev => ({
+        ...prev,
+        connectionConfig: {
+          ...prev.connectionConfig,
+          type: dbType,
+          ...preset,
+        },
+      }));
+    },
+    []
+  );
 
   // 清理资源
   useEffect(() => {
@@ -607,17 +618,26 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
   }, []);
 
   // 计算派生状态
-  const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.IDLE));
+  const status = isRunning
+    ? TestStatus.RUNNING
+    : result
+      ? TestStatus.COMPLETED
+      : error
+        ? TestStatus.FAILED
+        : TestStatus.IDLE;
   const isCompleted = status === TestStatus.COMPLETED;
   const hasError = status === TestStatus.FAILED;
-  const currentQuery = config.customQueries.length > 0 ? config.customQueries[0]?.name || null : null;
+  const currentQuery =
+    config.customQueries && config.customQueries.length > 0
+      ? config.customQueries[0]?.name || null
+      : null;
 
   return {
     runTest: startTest,
     loading: isRunning,
     error,
-    result,
-    status
+    result: result ?? undefined,
+    status,
   };
 };
 

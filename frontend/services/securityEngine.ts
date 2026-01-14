@@ -98,7 +98,7 @@ export class SecurityEngine {
           });
           
         } catch (stepError) {
-          Logger.warn(`安全检查步骤失败: ${step.displayName}`, stepError);
+          Logger.warn(`安全检查步骤失败: ${step.displayName}`, { error: String(stepError) });
           // 继续执行其他步骤
         }
         
@@ -209,7 +209,7 @@ export class SecurityEngine {
       }
       
     } catch (error) {
-      Logger.warn('安全头检查失败:', error);
+      Logger.warn('安全头检查失败:', { error: String(error) });
     }
     
     return results;
@@ -261,7 +261,7 @@ export class SecurityEngine {
       }
       
     } catch (error) {
-      Logger.warn('XSS扫描失败:', error);
+      Logger.warn('XSS扫描失败:', { error: String(error) });
     }
     
     return results;
@@ -311,7 +311,7 @@ export class SecurityEngine {
       }
       
     } catch (error) {
-      Logger.warn('SQL注入检测失败:', error);
+      Logger.warn('SQL注入检测失败:', { error: String(error) });
     }
     
     return results;

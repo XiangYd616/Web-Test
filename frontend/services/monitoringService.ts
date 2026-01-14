@@ -2,11 +2,10 @@ import Logger from '@/utils/logger';
 
 /**
  * monitoringService.ts - 业务服务层
- * 
+ *
  * 文件路径: frontend\services\monitoringService.ts
  * 创建时间: 2025-09-25
  */
-
 
 export interface MonitoringSite {
   id: string;
@@ -79,7 +78,7 @@ class MonitoringService {
     const token = localStorage.getItem('auth_token');
     return {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+      ...(token && { Authorization: `Bearer ${token}` }),
     };
   }
 
@@ -89,7 +88,7 @@ class MonitoringService {
   async getSites(): Promise<MonitoringSite[]> {
     try {
       const response = await fetch(`${this.baseUrl}/monitoring/sites`, {
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
       const data = await response.json();
 
@@ -101,7 +100,7 @@ class MonitoringService {
         return this.getLocalSites();
       }
     } catch (error) {
-      Logger.warn('Backend not available, using local data:', error);
+      Logger.warn('Backend not available, using local data:', { error: String(error) });
       return this.getLocalSites();
     }
   }
@@ -109,7 +108,12 @@ class MonitoringService {
   /**
    * 添加监控站点
    */
-  async addSite(siteData: Omit<MonitoringSite, 'id' | 'status' | 'responseTime' | 'uptime' | 'lastCheck' | 'alerts' | 'createdAt'>): Promise<MonitoringSite> {
+  async addSite(
+    siteData: Omit<
+      MonitoringSite,
+      'id' | 'status' | 'responseTime' | 'uptime' | 'lastCheck' | 'alerts' | 'createdAt'
+    >
+  ): Promise<MonitoringSite> {
     const newSite: MonitoringSite = {
       id: Date?.now().toString(),
       status: 'online',
@@ -118,15 +122,15 @@ class MonitoringService {
       lastCheck: new Date().toISOString(),
       alerts: 0,
       createdAt: new Date().toISOString(),
-      enabled: true,
-      ...siteData
+      ...siteData,
+      enabled: siteData.enabled ?? true,
     };
 
     try {
       const response = await fetch(`${this.baseUrl}/monitoring/sites`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSite)
+        body: JSON.stringify(newSite),
       });
 
       const data = await response.json();
@@ -135,7 +139,7 @@ class MonitoringService {
         return data.data;
       }
     } catch (error) {
-      Logger.warn('Backend not available, using local storage:', error);
+      Logger.warn('Backend not available, using local storage:', { error: String(error) });
     }
 
     // 本地存储
@@ -156,7 +160,7 @@ class MonitoringService {
   async removeSite(siteId: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/monitoring/sites/${siteId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (response.ok) {
@@ -164,7 +168,7 @@ class MonitoringService {
         return;
       }
     } catch (error) {
-      Logger.warn('Backend not available, using local storage:', error);
+      Logger.warn('Backend not available, using local storage:', { error: String(error) });
     }
 
     // 本地删除
@@ -186,7 +190,7 @@ class MonitoringService {
       const response = await fetch(site.url, {
         method: 'HEAD',
         signal: controller.signal,
-        mode: 'no-cors' // 避免CORS问题
+        mode: 'no-cors', // 避免CORS问题
       });
 
       clearTimeout(timeoutId);
@@ -203,7 +207,7 @@ class MonitoringService {
         dnsTime: Math.random() * 50 + 10, // 模拟DNS时间
         connectTime: Math.random() * 100 + 20, // 模拟连接时间
         downloadTime: responseTime - 30, // 估算下载时间
-        responseSize: Math.random() * 1000 + 500 // 模拟响应大小
+        responseSize: Math.random() * 1000 + 500, // 模拟响应大小
       };
 
       // 更新站点状态
@@ -211,7 +215,7 @@ class MonitoringService {
         status: status >= 200 && status < 400 ? 'online' : 'offline',
         responseTime,
         lastCheck: monitoringData.timestamp,
-        httpStatus: status
+        httpStatus: status,
       });
 
       this.monitoringData.push(monitoringData);
@@ -220,7 +224,6 @@ class MonitoringService {
       this.checkAlerts(site, monitoringData);
 
       return monitoringData;
-
     } catch (error) {
       const responseTime = Date?.now() - startTime;
 
@@ -234,7 +237,7 @@ class MonitoringService {
         connectTime: 0,
         downloadTime: 0,
         responseSize: 0,
-        error: error instanceof Error ? error?.message : 'Unknown error'
+        error: error instanceof Error ? error?.message : 'Unknown error',
       };
 
       // 更新站点状态为离线
@@ -242,7 +245,7 @@ class MonitoringService {
         status: 'offline',
         responseTime,
         lastCheck: monitoringData.timestamp,
-        alerts: (this.sites.find(s => s.id === site.id)?.alerts || 0) + 1
+        alerts: (this.sites.find(s => s.id === site.id)?.alerts || 0) + 1,
       });
 
       this.monitoringData.push(monitoringData);
@@ -254,7 +257,9 @@ class MonitoringService {
   /**
    * 检查SSL证书
    */
-  async checkSSLCertificate(url: string): Promise<{ valid: boolean; expiryDate?: string; daysUntilExpiry?: number }> {
+  async checkSSLCertificate(
+    url: string
+  ): Promise<{ valid: boolean; expiryDate?: string; daysUntilExpiry?: number }> {
     try {
       // 在真实环境中，这需要后端服务来检查SSL证书
       // 这里提供一个模拟实现
@@ -264,12 +269,14 @@ class MonitoringService {
       const expiryDate = new Date();
       expiryDate?.setDate(expiryDate?.getDate() + Math.random() * 365 + 30); // 30-395天后过期
 
-      const daysUntilExpiry = Math.floor((expiryDate?.getTime() - Date?.now()) / (1000 * 60 * 60 * 24));
+      const daysUntilExpiry = Math.floor(
+        (expiryDate?.getTime() - Date?.now()) / (1000 * 60 * 60 * 24)
+      );
 
       return {
         valid: daysUntilExpiry > 0,
         expiryDate: expiryDate?.toISOString(),
-        daysUntilExpiry
+        daysUntilExpiry,
       };
     } catch (error) {
       return { valid: false };
@@ -292,11 +299,12 @@ class MonitoringService {
           await this.checkSite(site);
 
           // 检查SSL证书（每小时检查一次）
-          if (Math.random() < 0.1) { // 10%概率检查SSL
+          if (Math.random() < 0.1) {
+            // 10%概率检查SSL
             const sslInfo = await this.checkSSLCertificate(site.url);
             this.updateSiteStatus(site.id, {
               certificateValid: sslInfo.valid,
-              sslExpiry: sslInfo.expiryDate
+              sslExpiry: sslInfo.expiryDate,
             });
           }
         } catch (error) {
@@ -340,12 +348,12 @@ class MonitoringService {
   getMonitoringStats(): MonitoringStats {
     const totalSites = this.sites.length;
     const onlineSites = this.sites.filter(site => site.status === 'online').length;
-    const avgResponseTime = totalSites > 0
-      ? this.sites.reduce((sum, site) => sum + site.responseTime, 0) / totalSites
-      : 0;
-    const totalUptime = totalSites > 0
-      ? this.sites.reduce((sum, site) => sum + site.uptime, 0) / totalSites
-      : 0;
+    const avgResponseTime =
+      totalSites > 0
+        ? this.sites.reduce((sum, site) => sum + site.responseTime, 0) / totalSites
+        : 0;
+    const totalUptime =
+      totalSites > 0 ? this.sites.reduce((sum, site) => sum + site.uptime, 0) / totalSites : 0;
     const activeAlerts = this.sites.reduce((sum, site) => sum + site.alerts, 0);
     const validCertificates = this.sites.filter(site => site.certificateValid).length;
 
@@ -357,7 +365,7 @@ class MonitoringService {
       activeAlerts,
       validCertificates,
       totalChecks: this.monitoringData.length,
-      incidents: this.monitoringData.filter(d => d.status === 0 || d?.status >= 400).length
+      incidents: this.monitoringData.filter(d => d.status === 0 || d?.status >= 400).length,
     };
   }
 
@@ -376,9 +384,7 @@ class MonitoringService {
    * 私有方法：检查告警规则
    */
   private checkAlerts(site: MonitoringSite, data: MonitoringData): void {
-    const siteAlerts = this.alertRules.filter(rule =>
-      rule.siteId === site.id && rule.enabled
-    );
+    const siteAlerts = this.alertRules.filter(rule => rule.siteId === site.id && rule.enabled);
 
     for (const alert of siteAlerts) {
       let shouldAlert = false;
@@ -406,11 +412,16 @@ class MonitoringService {
    */
   private evaluateCondition(value: number, operator: string, threshold: number): boolean {
     switch (operator) {
-      case '>': return value > threshold;
-      case '<': return value < threshold;
-      case '=': return value === threshold;
-      case '!=': return value !== threshold;
-      default: return false;
+      case '>':
+        return value > threshold;
+      case '<':
+        return value < threshold;
+      case '=':
+        return value === threshold;
+      case '!=':
+        return value !== threshold;
+      default:
+        return false;
     }
   }
 
@@ -421,13 +432,13 @@ class MonitoringService {
     Logger.warn(`Alert triggered: ${alert.name} for site ${site.name}`, {
       alert,
       site,
-      data
+      data,
     });
 
     // 在真实环境中，这里会发送邮件、短信或webhook通知
     // 现在只是增加告警计数
     this.updateSiteStatus(site.id, {
-      alerts: site.alerts + 1
+      alerts: site.alerts + 1,
     });
   }
 
@@ -465,8 +476,8 @@ class MonitoringService {
         connectTime: 45,
         downloadTime: 63,
         createdAt: new Date().toISOString(),
-        enabled: true
-      }
+        enabled: true,
+      },
     ];
 
     this.saveLocalSites();

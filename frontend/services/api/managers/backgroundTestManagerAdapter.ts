@@ -1,7 +1,7 @@
 ﻿/**
  * backgroundTestManager适配器
  * 提供可选的统一API调用支持，保持与现有backgroundTestManager的完全兼容
- * 
+ *
  * 文件已移动到 services/api/managers/ 目录以符合项目结构规范
  */
 
@@ -14,10 +14,8 @@ type TestStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 import Logger from '@/utils/logger';
 import { testApiService } from '../testApiService';
 
-// 回调函数类型定义
-import type { TestProgress } from '../../../types/common';
-
-type ProgressCallback = (progress: number | TestProgress, step?: string, metrics?: any) => void;
+// 回调函数类型定义 - 使用本地定义以匹配实际使用
+type ProgressCallback = (progress: number, step: string, metrics?: any) => void;
 type CompletionCallback = (result: any) => void;
 type ErrorCallback = (error: Error) => void;
 
@@ -47,7 +45,7 @@ export class BackgroundTestManagerAdapter {
     useUnifiedApi: false, // 默认不使用，保持现有行为
     fallbackToOriginal: true,
     enableWebSocket: true,
-    enableLogging: false
+    enableLogging: false,
   };
 
   private runningTests = new Map<string, TestInfo>();
@@ -88,7 +86,7 @@ export class BackgroundTestManagerAdapter {
       error: null,
       onProgress,
       onComplete,
-      onError
+      onError,
     };
 
     this.runningTests.set(testId, testInfo);
@@ -185,7 +183,7 @@ export class BackgroundTestManagerAdapter {
       try {
         const result = await testApiService.executeTest({
           testType: testInfo.type,
-          ...testInfo.config
+          ...testInfo.config,
         });
 
         // 模拟进度回调
@@ -194,7 +192,6 @@ export class BackgroundTestManagerAdapter {
       } catch (error) {
         this.handleTestError(testInfo.id, error as Error);
       }
-
     } catch (error: any) {
       if (this.config.fallbackToOriginal) {
         if (this.config.enableLogging) {
@@ -239,7 +236,6 @@ export class BackgroundTestManagerAdapter {
           this.executeOriginalGenericTest(testInfo);
           break;
       }
-
     } catch (error: any) {
       this.handleTestError(testInfo.id, error);
     }
@@ -260,7 +256,7 @@ export class BackgroundTestManagerAdapter {
         '📱 正在检查移动端性能...',
         '🖼️ 正在优化图片资源...',
         '⚡ 正在分析Core Web Vitals...',
-        '📈 正在生成性能报告...'
+        '📈 正在生成性能报告...',
       ]);
 
       // 模拟结果
@@ -270,11 +266,10 @@ export class BackgroundTestManagerAdapter {
         first_contentful_paint: 1.2,
         largest_contentful_paint: 2.1,
         cumulative_layout_shift: 0.05,
-        recommendations: ['优化图片压缩', '启用浏览器缓存', '减少JavaScript执行时间']
+        recommendations: ['优化图片压缩', '启用浏览器缓存', '减少JavaScript执行时间'],
       };
 
       this.completeTest(testInfo.id, mockResult);
-
     } catch (error: any) {
       this.handleTestError(testInfo.id, error);
     }
@@ -293,7 +288,7 @@ export class BackgroundTestManagerAdapter {
         '📊 正在验证响应数据...',
         '⚡ 正在测试响应时间...',
         '🔒 正在检查API安全性...',
-        '📈 正在生成测试报告...'
+        '📈 正在生成测试报告...',
       ]);
 
       const mockResult = {
@@ -301,11 +296,10 @@ export class BackgroundTestManagerAdapter {
         passed_endpoints: config.endpoints?.length || 1,
         failed_endpoints: 0,
         average_response_time: 150,
-        success_rate: 100
+        success_rate: 100,
       };
 
       this.completeTest(testInfo.id, mockResult);
-
     } catch (error: any) {
       this.handleTestError(testInfo.id, error);
     }
@@ -320,7 +314,6 @@ export class BackgroundTestManagerAdapter {
     endProgress: number,
     steps: string[]
   ): Promise<void> {
-
     /**
 
      * for功能函数
@@ -333,7 +326,7 @@ export class BackgroundTestManagerAdapter {
     const progressStep = (endProgress - startProgress) / steps.length;
 
     for (let i = 0; i < steps.length; i++) {
-      const progress = startProgress + (progressStep * (i + 1));
+      const progress = startProgress + progressStep * (i + 1);
       this.updateTestProgress(testId, progress, steps[i]);
 
       // 模拟处理时间
@@ -427,7 +420,7 @@ export class BackgroundTestManagerAdapter {
       '🔍 正在扫描安全漏洞...',
       '🛡️ 正在检查SSL配置...',
       '🔐 正在验证认证机制...',
-      '📊 正在生成安全报告...'
+      '📊 正在生成安全报告...',
     ]);
     this.completeTest(testInfo.id, { security_score: 82, vulnerabilities_found: 2 });
   }
@@ -437,7 +430,7 @@ export class BackgroundTestManagerAdapter {
       '⚡ 正在测试性能指标...',
       '🔍 正在分析SEO优化...',
       '🔒 正在检查安全配置...',
-      '📊 正在生成综合报告...'
+      '📊 正在生成综合报告...',
     ]);
     this.completeTest(testInfo.id, { overall_score: 78, performance_score: 85 });
   }
@@ -447,7 +440,7 @@ export class BackgroundTestManagerAdapter {
       '🔗 正在建立数据库连接...',
       '📊 正在分析数据库性能...',
       '🔍 正在检查数据完整性...',
-      '📈 正在生成测试报告...'
+      '📈 正在生成测试报告...',
     ]);
     this.completeTest(testInfo.id, { connection_status: 'success', response_time: 45 });
   }
@@ -457,7 +450,7 @@ export class BackgroundTestManagerAdapter {
       '🚀 正在初始化测试环境...',
       '📊 正在收集测试数据...',
       '🔍 正在分析测试结果...',
-      '📈 正在生成测试报告...'
+      '📈 正在生成测试报告...',
     ]);
     this.completeTest(testInfo.id, { test_type: testInfo.type, status: 'completed', score: 75 });
   }

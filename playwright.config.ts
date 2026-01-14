@@ -7,7 +7,7 @@ import baseConfig from './config/testing/playwright.config';
  */
 export default defineConfig({
   ...baseConfig,
-  
+
   // 项目级设置可以在此覆盖
-  // 例如：testDir: './e2e'
+  // 例如：testDir: './tools/e2e/e2e'
 });
