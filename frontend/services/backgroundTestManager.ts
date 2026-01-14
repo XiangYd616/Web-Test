@@ -7,15 +7,17 @@
  */
 
 import Logger from '@/utils/logger';
-import type { CompletionCallback, ErrorCallback, ProgressCallback } from '../types/base.types';
+import type {
+  CompletionCallback,
+  ErrorCallback,
+  ProgressCallback,
+  TestServiceConfig,
+} from '../types/base.types';
 
 import { TestStatus, TestType } from '../types/enums';
 
 // 导入测试服务
-import type { TestCallbacks } from '../types/api/index';
-
-// 为了兼容性创建别名
-type TestCallbacks = TestCallbacks;
+import testService from './testing/testService';
 
 export interface TestInfo {
   id: string;
@@ -42,6 +44,12 @@ export type TestEvent =
   | 'testCancelled';
 
 export type TestListener = (event: TestEvent, data: TestInfo) => void;
+
+type TestCallbacks = {
+  onProgress?: ProgressCallback;
+  onComplete?: CompletionCallback;
+  onError?: ErrorCallback;
+};
 
 class BackgroundTestManager {
   private runningTests = new Map<string, TestInfo>();
@@ -70,42 +78,42 @@ class BackgroundTestManager {
     setInterval(() => this.saveToStorage(), 5000);
 
     // 监听统一测试服务的事件
-    this.setupUnifiedServiceListeners();
+    this.setupServiceListeners();
   }
 
   /**
    * 设置统一服务监听器
    */
-  private setupUnifiedServiceListeners(): void {
+  private setupServiceListeners(): void {
     // Note: unifiedTestService may not have 'on' method
     // Using try-catch to prevent errors if method doesn't exist
     try {
-      if (typeof (unifiedTestService as any).on === 'function') {
-        (unifiedTestService as any).on('testStarted', (data: any) => {
-          this.notifyListeners('testStarted', this.adaptUnifiedStatus(data));
+      if (typeof (testService as any).on === 'function') {
+        (testService as any).on('testStarted', (data: any) => {
+          this.notifyListeners('testStarted', this.adaptServiceStatus(data));
         });
 
-        (unifiedTestService as any).on('testProgress', (data: any) => {
-          this.notifyListeners('testProgress', this.adaptUnifiedStatus(data));
+        (testService as any).on('testProgress', (data: any) => {
+          this.notifyListeners('testProgress', this.adaptServiceStatus(data));
         });
 
-        (unifiedTestService as any).on('testCompleted', (data: any) => {
-          this.notifyListeners('testCompleted', this.adaptUnifiedStatus(data));
+        (testService as any).on('testCompleted', (data: any) => {
+          this.notifyListeners('testCompleted', this.adaptServiceStatus(data));
         });
 
-        (unifiedTestService as any).on('testFailed', (data: any) => {
-          this.notifyListeners('testFailed', this.adaptUnifiedStatus(data));
+        (testService as any).on('testFailed', (data: any) => {
+          this.notifyListeners('testFailed', this.adaptServiceStatus(data));
         });
       }
     } catch (error) {
-      Logger.warn('Failed to setup unified service listeners:', { error: String(error) });
+      Logger.warn('Failed to setup test service listeners:', { error: String(error) });
     }
   }
 
   /**
    * 适配统一服务状态到本地格式
    */
-  private adaptUnifiedStatus(data: any): TestInfo {
+  private adaptServiceStatus(data: any): TestInfo {
     return {
       id: data.testId || data.id,
       type: data.testType,
@@ -135,14 +143,14 @@ class BackgroundTestManager {
   ): string {
     // 转换为统一测试配置
     const configObj = config as any;
-    const unifiedConfig: UnifiedTestConfig = {
+    const serviceConfig: TestServiceConfig = {
       testType: testType as any,
       url: configObj?.url || configObj?.targetUrl || '',
       timeout: configObj?.timeout,
       retries: configObj?.retries,
     };
 
-    const callbacks: UnifiedTestCallbacks = {
+    const callbacks: TestCallbacks = {
       onProgress,
       onComplete,
       onError,
@@ -152,8 +160,8 @@ class BackgroundTestManager {
     const testId = this.generateTestId();
 
     // 尝试使用统一测试服务执行（如果可用）
-    if (typeof (unifiedTestService as any).startTest === 'function') {
-      const testPromise = (unifiedTestService as any).startTest(unifiedConfig, callbacks);
+    if (typeof (testService as any).startTest === 'function') {
+      const testPromise = (testService as any).startTest(serviceConfig, callbacks);
       // 异步处理实际的测试ID映射
       testPromise
         .then((actualTestId: string) => {
@@ -177,7 +185,7 @@ class BackgroundTestManager {
           this.notifyListeners('testStarted', testInfo);
         })
         .catch((error: Error) => {
-          Logger.error('Unified test service failed:', { error: String(error) });
+          Logger.error('Test service failed:', { error: String(error) });
           if (onError) onError(error);
         });
     } else {
@@ -209,7 +217,7 @@ class BackgroundTestManager {
   // 取消测试 - 重构为使用统一测试服务
   cancelTest(testId: string): void {
     // 委托给统一测试服务
-    unifiedTestService.cancelTest(testId);
+    (testService as any).cancelTest(testId);
 
     // 更新本地状态
     const testInfo = this.runningTests.get(testId);
@@ -643,7 +651,7 @@ class BackgroundTestManager {
       this.notifyListeners('testProgress', testInfo);
 
       if (testInfo.onProgress) {
-        testInfo.onProgress(progress, step);
+        testInfo.onProgress(progress, step, metrics);
       }
     }
   }

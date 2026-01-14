@@ -7,7 +7,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
-const { handleError, ErrorCode } = require('../middleware/UnifiedErrorHandler');
+const { handleError, ErrorCode } = require('../middleware/errorHandler');
 
 class DataPersistenceOptimizer {
   constructor(options = {}) {

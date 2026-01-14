@@ -1,15 +1,15 @@
 ﻿/**
- * Unified API Types - Consolidated API Type Definitions
- * 
+ * API Types - Consolidated API Type Definitions
+ *
  * This file consolidates all API-related types from scattered files into a single
  * source of truth. It replaces:
  * - types/api.ts
- * - types/api.types.ts  
+ * - types/api.types.ts
  * - types/apiResponse.ts
- * - types/unified/apiResponse.ts
- * - types/unified/apiResponse.types.ts
+ * - types/compat/apiResponse.ts
+ * - types/compat/apiResponse.types.ts
  * - types/api/client.types.ts
- * 
+ *
  * Version: v3.0.0
  */
 
@@ -21,7 +21,7 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 
 
 // ==================== Core API Response Types ====================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -30,11 +30,11 @@ export interface ApiResponse<T = any> {
   meta?: {
     timestamp: string;
     requestId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
-export interface ApiSuccessResponse<T = any> extends ApiResponse<T> {
+export interface ApiSuccessResponse<T = unknown> extends ApiResponse<T> {
   success: true;
   data: T;
 }
@@ -78,19 +78,19 @@ export enum ErrorCode {
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
   QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
   RESOURCE_LOCKED = 'RESOURCE_LOCKED',
-  
+
   // Execution errors
-  EXECUTION_ERROR = 'EXECUTION_ERROR'
+  EXECUTION_ERROR = 'EXECUTION_ERROR',
 }
 
 export interface ApiError {
   code: ErrorCode;
   message: string;
-  details?: any;
+  details?: unknown;
   timestamp: string;
   retryable?: boolean;
   severity?: 'low' | 'medium' | 'high' | 'critical';
-  context?: any;
+  context?: unknown;
   suggestions?: string[];
 }
 
@@ -98,15 +98,15 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: any;
+  value?: unknown;
 }
 
 // ==================== Request Configuration Types ====================
 
 export interface RequestHeaders {
   'Content-Type'?: string;
-  'Authorization'?: string;
-  'Accept'?: string;
+  Authorization?: string;
+  Accept?: string;
   [key: string]: string | undefined;
 }
 
@@ -155,13 +155,13 @@ export interface AuthConfig {
 
 // ==================== Pagination and Query Types ====================
 
-export interface QueryParams {
-  page?: number;
-  limit?: number;
+export interface PaginationParams {
+  page: number;
+  limit: number;
   sort?: string;
   order?: 'asc' | 'desc';
   search?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 export interface PaginationInfo {
@@ -173,22 +173,20 @@ export interface PaginationInfo {
   hasPrev: boolean;
 }
 
-export interface PaginatedResponse<T = any> extends ApiSuccessResponse<T[]> {
+export interface PaginatedResponse<T = unknown> extends ApiSuccessResponse<T[]> {
   pagination: PaginationInfo;
 }
 
-export interface PaginatedRequest extends QueryParams {
-  // Inherits all query parameters
-}
+export type PaginatedRequest = PaginationParams;
 
 // ==================== API Client Interface ====================
 
 export interface ApiClient {
-  get<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
-  post<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
-  put<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
-  delete<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
-  patch<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
+  get<T = unknown>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
+  post<T = unknown>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
+  put<T = unknown>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
+  delete<T = unknown>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
+  patch<T = unknown>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
 }
 
 export interface ApiConfig {
@@ -227,7 +225,7 @@ export interface BaseTestConfig {
 export interface TestConfig extends BaseTestConfig {
   name?: string;
   description?: string;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
   advanced?: {
     concurrent?: boolean;
     maxRetries?: number;
@@ -251,13 +249,13 @@ export interface TestResult {
   score?: number;
   grade?: string;
   summary?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   metrics?: {
     duration: number;
     responseTime?: number;
     throughput?: number;
     errorRate?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   recommendations?: Array<{
     category: string;
@@ -284,15 +282,15 @@ export interface TestStartRequest {
   config?: BaseTestConfig;
   priority?: 'low' | 'medium' | 'high' | 'critical';
   tags?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
-export interface TestStartResponse extends ApiSuccessResponse<{
+export type TestStartResponse = ApiSuccessResponse<{
   testId: UUID;
   sessionId: UUID;
   status: TestStatus;
   estimatedDuration?: number;
-}> {}
+}>;
 
 export interface TestStatusRequest {
   testId: UUID;
@@ -300,7 +298,7 @@ export interface TestStatusRequest {
   includeMetrics?: boolean;
 }
 
-export interface TestStatusResponse extends ApiSuccessResponse<{
+export type TestStatusResponse = ApiSuccessResponse<{
   testId: UUID;
   status: TestStatus;
   progress: number;
@@ -308,9 +306,9 @@ export interface TestStatusResponse extends ApiSuccessResponse<{
   startTime: Timestamp;
   endTime?: Timestamp;
   duration?: number;
-  metrics?: Record<string, any>;
+  metrics?: Record<string, unknown>;
   error?: string;
-}> {}
+}>;
 
 export interface TestResultRequest {
   testId: UUID;
@@ -318,11 +316,11 @@ export interface TestResultRequest {
   includeRawData?: boolean;
 }
 
-export interface TestResultResponse extends ApiSuccessResponse<{
+export type TestResultResponse = ApiSuccessResponse<{
   testId: UUID;
   testType: TestType;
   status: TestStatus;
-  result: Record<string, any>;
+  result: Record<string, unknown>;
   summary?: string;
   score?: number;
   grade?: string;
@@ -333,22 +331,22 @@ export interface TestResultResponse extends ApiSuccessResponse<{
     description: string;
     action: string;
   }>;
-}> {}
+}>;
 
 export interface TestCancelRequest {
   testId: UUID;
   reason?: string;
 }
 
-export interface TestCancelResponse extends ApiSuccessResponse<{
+export type TestCancelResponse = ApiSuccessResponse<{
   testId: UUID;
   status: TestStatus;
   cancelled: boolean;
-}> {}
+}>;
 
 // ==================== Test History API Types ====================
 
-export interface TestHistoryQuery extends QueryParams {
+export interface TestHistoryQuery extends PaginationParams {
   testType?: TestType | TestType[];
   status?: TestStatus | TestStatus[];
   dateFrom?: string;
@@ -400,8 +398,8 @@ export interface ApiEndpoint {
   name: string;
   method: HttpMethod;
   path: string;
-  params?: Record<string, any>;
-  body?: any;
+  params?: Record<string, unknown>;
+  body?: unknown;
   expectedStatus?: number;
   validation?: ValidationRule[];
 }
@@ -409,7 +407,7 @@ export interface ApiEndpoint {
 export interface ValidationRule {
   field: string;
   type: 'required' | 'type' | 'value' | 'range' | 'pattern';
-  expected?: any;
+  expected?: unknown;
   message?: string;
 }
 
@@ -472,34 +470,34 @@ export interface BaseTestSession {
 export interface BaseSystemConfig {
   id: string;
   key: string;
-  value: any;
+  value: unknown;
   description?: string;
   updatedAt: string;
 }
 
-export interface BaseAuditLog {
+export interface AuditLog {
   id: string;
   userId: string;
   action: string;
   resource: string;
-  details?: any;
+  details?: unknown;
   timestamp: string;
 }
 
 // ==================== Unified Test Configuration ====================
 
-export interface UnifiedTestConfig {
+export interface TestRunConfig {
   testType: TestType;
   target: string;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
   timeout?: number;
   retries?: number;
 }
 
 export interface TestCallbacks {
-  onProgress?: (progress: number, step?: string, metrics?: any) => void;
-  onComplete?: (result: any) => void;
-  onError?: (error: any) => void;
+  onProgress?: (progress: number, step?: string, metrics?: unknown) => void;
+  onComplete?: (result: unknown) => void;
+  onError?: (error: unknown) => void;
 }
 
 // ==================== Legacy Support Types ====================
@@ -518,18 +516,21 @@ export function isSuccessResponse<T>(response: ApiResponse<T>): response is ApiS
   return response.success === true;
 }
 
-export function isErrorResponse(response: ApiResponse<any>): response is ApiErrorResponse {
+export function isErrorResponse(response: ApiResponse<unknown>): response is ApiErrorResponse {
   return response.success === false;
 }
 
-export function isApiError(error: any): error is ApiError {
+export function isApiError(error: unknown): error is ApiError {
   return typeof error === 'object' && error !== null && 'code' in error && 'message' in error;
 }
 
 // ==================== Utility Types ====================
 
-export type ApiMethod<T = any> = (config?: RequestConfig) => Promise<ApiResponse<T>>;
-export type ApiMethodWithData<T = any, D = any> = (data: D, config?: RequestConfig) => Promise<ApiResponse<T>>;
+export type ApiMethod<T = unknown> = (config?: RequestConfig) => Promise<ApiResponse<T>>;
+export type ApiMethodWithData<T = unknown, D = unknown> = (
+  data: D,
+  config?: RequestConfig
+) => Promise<ApiResponse<T>>;
 
 export interface ApiEndpoints {
   [key: string]: {

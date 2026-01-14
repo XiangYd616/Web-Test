@@ -5,7 +5,7 @@
 
 import { AlertTriangle, CheckCircle, Info, Loader, X, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { TestStatusIcon, UnifiedIcon } from './Icons';
+import { Icon as AppIcon, TestStatusIcon } from './Icons';
 // 反馈类型
 export type FeedbackType = 'success' | 'error' | 'warning' | 'info' | 'loading';
 
@@ -113,7 +113,7 @@ export const FeedbackCard: React.FC<BaseFeedbackProps> = ({
         {/* 图标 */}
         {icon && (
           <div className="flex-shrink-0 mt-0.5">
-            <UnifiedIcon
+            <AppIcon
               icon={IconComponent}
               size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
               color="current"
@@ -135,7 +135,7 @@ export const FeedbackCard: React.FC<BaseFeedbackProps> = ({
             className="flex-shrink-0 p-1 hover:bg-white/10 rounded-lg transition-colors"
             aria-label="关闭"
           >
-            <UnifiedIcon icon={X} size="sm" color="current" />
+            <AppIcon icon={X} size="sm" color="current" />
           </button>
         )}
       </div>
@@ -320,7 +320,7 @@ export const LoadingFeedback: React.FC<{
 }> = ({ message = '加载中...', size = 'md', className = '' }) => {
   return (
     <div className={`flex items-center justify-center space-x-3 ${className}`}>
-      <UnifiedIcon
+      <AppIcon
         icon={Loader}
         size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
         color="primary"
@@ -347,12 +347,12 @@ export const EmptyState: React.FC<{
   action?: React.ReactNode;
   icon?: React.ComponentType<any>;
   className?: string;
-}> = ({ title, description, action, icon: Icon, className = '' }) => {
+}> = ({ title, description, action, icon: EmptyIcon, className = '' }) => {
   return (
     <div className={`text-center py-12 ${className}`}>
-      {Icon && (
+      {EmptyIcon && (
         <div className="mb-4">
-          <UnifiedIcon icon={Icon as any} size="2xl" color="muted" className="mx-auto" />
+          <AppIcon icon={EmptyIcon as any} size="2xl" color="muted" className="mx-auto" />
         </div>
       )}
       <h3 className="text-lg font-medium text-gray-300 mb-2">{title}</h3>

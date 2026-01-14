@@ -43,7 +43,7 @@ module.exports = {
   },
 
   // 统一错误处理中间件
-  unifiedErrorHandler: errorMiddleware,
+  errorHandler: errorMiddleware,
 
   // 其他导出
   ErrorHandler,

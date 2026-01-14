@@ -169,7 +169,7 @@ const RETRYABLE_ERRORS = new Set([
 
 // ==================== 统一错误处理器类 ====================
 
-export class UnifiedErrorHandler {
+export class ErrorHandler {
   private config: ErrorHandlerConfig;
   private errorHistory: StandardError[] = [];
   private retryAttempts = new Map<string, number>();
@@ -321,7 +321,7 @@ export class UnifiedErrorHandler {
    * 记录错误日志
    */
   private logError(error: StandardError): void {
-    const logLevel = this.config.logLevel;
+    const _logLevel = this.config.logLevel;
     const logMessage = `[${error.severity.toUpperCase()}] ${error.code}: ${error.message}`;
 
     if (typeof console !== 'undefined') {
@@ -365,7 +365,7 @@ export class UnifiedErrorHandler {
   /**
    * 报告错误到外部系统
    */
-  private async reportError(error: StandardError, context: ErrorContext): Promise<void> {
+  private async reportError(_error: StandardError, _context: ErrorContext): Promise<void> {
     try {
       // 这里可以集成错误报告服务
     } catch (reportError) {
@@ -439,15 +439,14 @@ export class UnifiedErrorHandler {
 
 // ==================== 默认实例和便捷方法 ====================
 
-export const unifiedErrorHandler = new UnifiedErrorHandler();
+export const errorHandler = new ErrorHandler();
 
 export const handleError = (error: any, context?: ErrorContext) =>
-  unifiedErrorHandler.handleError(error, context);
+  errorHandler.handleError(error, context);
 
 export const createApiError = (code: ErrorCode, message?: string, context?: ErrorContext) => {
   const error = new Error(message || ERROR_MESSAGES[code]);
   (error as any).code = code;
-  return unifiedErrorHandler.handleError(error, context);
+  return errorHandler.handleError(error, context);
 };
-
-export default unifiedErrorHandler;
+export default errorHandler;

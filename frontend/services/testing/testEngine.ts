@@ -17,4 +17,5 @@ export class TestEngineClass {
   }
 }
 
-export default UnifiedTestEngine;
+const TestEngine = TestEngineClass;
+export default TestEngine;

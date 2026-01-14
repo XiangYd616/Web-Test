@@ -111,7 +111,7 @@ const registerRateLimiter = rateLimit({
  * 统一测试引擎速率限制
  * 基于express-rate-limit最佳实践，支持动态限制和用户角色
  */
-const unifiedEngineRateLimiter = rateLimit({
+const testEngineRateLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5分钟窗口
   limit: async (req) => {
     // 根据用户类型和测试类型动态设置限制
@@ -167,7 +167,7 @@ const unifiedEngineRateLimiter = rateLimit({
     const userId = req.user?.id || 'anonymous';
     const ip = req.ip || req.connection.remoteAddress;
     const testType = req.body?.testType || 'general';
-    return `unified:${testType}:${userId}:${ip}`;
+    return `engine:${testType}:${userId}:${ip}`;
   },
   skip: (req) => {
     // 管理员和健康检查跳过限制
@@ -181,7 +181,7 @@ const unifiedEngineRateLimiter = rateLimit({
     const testType = req.body?.testType || 'unknown';
     const userRole = req.user?.role || 'guest';
 
-    securityLogger('unified_engine_rate_limit_exceeded', {
+    securityLogger('test_engine_rate_limit_exceeded', {
       ip: req.ip,
       url: req.originalUrl,
       user: req.user ? req.user.id : 'anonymous',
@@ -359,7 +359,7 @@ module.exports = {
   loginRateLimiter,
   registerRateLimiter,
   testRateLimiter,
-  unifiedEngineRateLimiter, // 新增：统一测试引擎专用速率限制
+  testEngineRateLimiter, // 新增：测试引擎专用速率限制
   uploadRateLimiter,
   historyRateLimiter,
   dynamicRateLimiter,

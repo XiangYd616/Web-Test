@@ -5,13 +5,11 @@
  */
 
 // 导入标准API类型
-import type {
-  ApiSuccessResponse,
-  ApiErrorResponse,
-  ApiMeta as ApiMetaType,
-  ApiError as StandardApiError
-} from '../../../types/apiResponse.types';
 import { ErrorCode as StandardErrorCode } from '../../../types/api/index';
+import type {
+  ApiMeta as ApiMetaType,
+  ApiError as StandardApiError,
+} from '../../../types/apiResponse.types';
 
 // 使用标准类型作为主要接口
 // 添加向后兼容的扩展，包含所有可能的属性
@@ -53,7 +51,7 @@ export interface AuthConfig {
 }
 
 // 企业级配置（可选）
-export interface EnhancedApiConfig {
+export interface ApiConfig {
   baseURL: string;
   timeout: number;
   retries: number;
@@ -88,7 +86,9 @@ export interface ApiMetrics {
 
 // 拦截器类型
 export type RequestInterceptor = (config: RequestConfig) => RequestConfig | Promise<RequestConfig>;
-export type ResponseInterceptor<T = any> = (response: ApiResponse<T>) => ApiResponse<T> | Promise<ApiResponse<T>>;
+export type ResponseInterceptor<T = any> = (
+  response: ApiResponse<T>
+) => ApiResponse<T> | Promise<ApiResponse<T>>;
 
 export interface IApiService {
   get<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
@@ -96,10 +96,10 @@ export interface IApiService {
   put<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
   delete<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
   patch<T = any>(url: string, data?: unknown, config?: RequestConfig): Promise<ApiResponse<T>>;
-  
+
   // 配置方法
   setAuth(authConfig: AuthConfig): void;
-  
+
   // 可选的企业级功能
   addRequestInterceptor?(interceptor: RequestInterceptor): void;
   addResponseInterceptor?(interceptor: ResponseInterceptor): void;

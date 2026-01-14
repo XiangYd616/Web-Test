@@ -14,7 +14,7 @@ import {
   Minimize2,
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActionIcon, UnifiedIcon } from './Icons';
+import { ActionIcon, Icon as AppIcon } from './Icons';
 
 // 可折叠面板属性
 export interface CollapsiblePanelProps {
@@ -78,7 +78,7 @@ export const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
   title,
   children,
   defaultExpanded = false,
-  icon: Icon,
+  icon: PanelIcon,
   className = '',
   headerClassName = '',
   contentClassName = '',
@@ -116,10 +116,10 @@ export const CollapsiblePanel: React.FC<CollapsiblePanelProps> = ({
         `}
       >
         <div className="flex items-center space-x-3">
-          {Icon && <UnifiedIcon icon={Icon as any} size="md" color="primary" />}
+          {PanelIcon && <AppIcon icon={PanelIcon as any} size="md" color="primary" />}
           <h3 className="text-lg font-medium text-white">{title}</h3>
         </div>
-        <UnifiedIcon
+        <AppIcon
           icon={expanded ? ChevronUp : ChevronDown}
           size="md"
           color="secondary"
@@ -175,7 +175,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
               onClick={handleCopy}
               className="flex items-center space-x-2 px-3 py-1 text-sm text-gray-400 hover:text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors"
             >
-              <UnifiedIcon
+              <AppIcon
                 icon={copied ? Check : Copy}
                 size="sm"
                 color={copied ? 'success' : 'current'}
@@ -203,7 +203,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   title,
   value,
   change,
-  icon: Icon,
+  icon: StatIcon,
   color = 'primary',
   className = '',
 }) => {
@@ -255,9 +255,9 @@ export const StatsCard: React.FC<StatsCardProps> = ({
             </div>
           )}
         </div>
-        {Icon && (
+        {StatIcon && (
           <div className={`p-3 rounded-lg bg-gray-800/50 ${iconColors[color]}`}>
-            <UnifiedIcon icon={Icon as any} size="lg" color="current" />
+            <AppIcon icon={StatIcon as any} size="lg" color="current" />
           </div>
         )}
       </div>
@@ -270,7 +270,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
  */
 export const QuickAction: React.FC<QuickActionProps> = ({
   label,
-  icon: Icon,
+  icon: ActionIconComponent,
   onClick,
   disabled = false,
   loading = false,
@@ -304,8 +304,8 @@ export const QuickAction: React.FC<QuickActionProps> = ({
         ${className}
       `}
     >
-      <UnifiedIcon
-        icon={Icon as any}
+      <AppIcon
+        icon={ActionIconComponent as any}
         size={size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md'}
         color="current"
         className={loading ? 'animate-spin' : ''}
@@ -389,7 +389,7 @@ export const FullscreenWrapper: React.FC<FullscreenWrapperProps> = ({
           className="absolute top-4 right-4 z-10 p-2 bg-gray-800/80 hover:bg-gray-700/80 rounded-lg transition-colors"
           title={isFullscreen ? '退出全屏' : '进入全屏'}
         >
-          <UnifiedIcon icon={isFullscreen ? Minimize2 : Maximize2} size="md" color="secondary" />
+          <AppIcon icon={isFullscreen ? Minimize2 : Maximize2} size="md" color="secondary" />
         </button>
 
         {/* 内容 */}
@@ -438,12 +438,7 @@ export const LinkPreview: React.FC<{
           <p className="text-sm text-gray-400 truncate">{url}</p>
           {description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{description}</p>}
         </div>
-        <UnifiedIcon
-          icon={ExternalLink}
-          size="md"
-          color="secondary"
-          className="ml-3 flex-shrink-0"
-        />
+        <AppIcon icon={ExternalLink} size="md" color="secondary" className="ml-3 flex-shrink-0" />
       </div>
     </button>
   );

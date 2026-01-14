@@ -5,14 +5,11 @@
  */
 
 // 重新导出的用户类型定义
-export type {
-  AuthResponse,
-  LoginCredentials,
-  RegisterData,
-  User,
-  UserPreferences,
-  UserProfile,
-} from '../../types/auth/models';
+export type { AuthResponse, LoginCredentials, RegisterData } from '../../types/auth.types';
+
+import type { User, UserPreferences, UserProfile } from '../../types/auth.types';
+
+export type { User, UserPreferences, UserProfile };
 
 // 从枚举中导入用户相关枚举
 export { UserRole } from '../../types/enums';

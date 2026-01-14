@@ -11,7 +11,7 @@ import type {
   ApiResponse,
   ApiSuccessResponse,
   PaginationInfo,
-} from '../types/auth/models';
+} from '../types/apiResponse.types';
 
 // ==================== 数据处理配置 ====================
 

@@ -145,8 +145,11 @@ class StorageService {
       const archiveStats = this.archiveManager.getStatistics();
       const cleanupStats = this.cleanupManager.getStatistics();
 
+      const stats = this.statistics;
+
       return {
-        unified: this.statistics,
+        stats,
+        unified: stats,
         storage: storageStats,
         archive: archiveStats,
         cleanup: cleanupStats,

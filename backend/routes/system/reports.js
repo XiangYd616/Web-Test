@@ -566,13 +566,13 @@ router.post('/performance/report', authMiddleware, asyncHandler(async (req, res)
   }
 }));
 
-// ==================== 增强报告生成功能 ====================
+// ==================== 分析报告生成功能 ====================
 
 /**
- * 生成增强报告
- * POST /api/reports/enhanced/generate
+ * 生成分析报告
+ * POST /api/reports/analysis/generate
  */
-router.post('/enhanced/generate', authMiddleware, asyncHandler(async (req, res) => {
+router.post('/analysis/generate', authMiddleware, asyncHandler(async (req, res) => {
   try {
     const {
       template = 'technical',
@@ -624,7 +624,7 @@ router.post('/enhanced/generate', authMiddleware, asyncHandler(async (req, res) 
     const reportGenerator = new ReportGenerator();
 
     // 生成报告
-    const reportResult = await reportGenerator.generateEnhancedReport(testData, {
+    const reportResult = await reportGenerator.generateReport(testData, {
       template,
       format,
       title,
@@ -641,7 +641,7 @@ router.post('/enhanced/generate', authMiddleware, asyncHandler(async (req, res) 
     });
 
     // 记录报告生成
-    Logger.info('增强报告生成成功', {
+    Logger.info('分析报告生成成功', {
       userId: req.user.id,
       template,
       format,
@@ -651,25 +651,25 @@ router.post('/enhanced/generate', authMiddleware, asyncHandler(async (req, res) 
 
     // 返回报告信息
     res.success({
-      reportId: `enhanced_${Date.now()}`,
+      reportId: `analysis_${Date.now()}`,
       filePath: reportResult.filePath,
       metadata: reportResult.metadata,
       analysis: reportResult.analysis,
-      downloadUrl: `/api/reports/enhanced/download/${path.basename(reportResult.filePath)}`,
+      downloadUrl: `/api/reports/analysis/download/${path.basename(reportResult.filePath)}`,
       generatedAt: new Date().toISOString()
-    }, '增强报告生成成功');
+    }, '分析报告生成成功');
 
   } catch (error) {
-    Logger.error('生成增强报告失败', error, { userId: req.user?.id });
-    res.serverError('生成增强报告失败，请稍后重试');
+    Logger.error('生成分析报告失败', error, { userId: req.user?.id });
+    res.serverError('生成分析报告失败，请稍后重试');
   }
 }));
 
 /**
- * 获取增强报告生成器的可用模板
- * GET /api/reports/enhanced/templates
+ * 获取分析报告生成器的可用模板
+ * GET /api/reports/analysis/templates
  */
-router.get('/enhanced/templates', asyncHandler(async (req, res) => {
+router.get('/analysis/templates', asyncHandler(async (req, res) => {
   try {
     const reportGenerator = new ReportGenerator();
     const templates = reportGenerator.getAvailableTemplates();
@@ -681,16 +681,16 @@ router.get('/enhanced/templates', asyncHandler(async (req, res) => {
     }, '获取模板列表成功');
 
   } catch (error) {
-    Logger.error('获取增强报告模板失败', error);
+    Logger.error('获取分析报告模板失败', error);
     res.serverError('获取模板列表失败');
   }
 }));
 
 /**
- * 下载增强报告文件
- * GET /api/reports/enhanced/download/:filename
+ * 下载分析报告文件
+ * GET /api/reports/analysis/download/:filename
  */
-router.get('/enhanced/download/:filename', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/analysis/download/:filename', authMiddleware, asyncHandler(async (req, res) => {
   try {
     const { filename } = req.params;
     const reportGenerator = new ReportGenerator();
@@ -699,7 +699,7 @@ router.get('/enhanced/download/:filename', authMiddleware, asyncHandler(async (r
     // 检查文件是否存在
     try {
       await fs.access(filePath);
-    } catch (error) {
+    } catch {
       return res.notFound('资源', '报告文件不存在或已过期');
     }
 
@@ -734,23 +734,23 @@ router.get('/enhanced/download/:filename', authMiddleware, asyncHandler(async (r
     fileStream.pipe(res);
 
     // 记录下载
-    Logger.info('增强报告下载', {
+    Logger.info('分析报告下载', {
       filename,
       fileSize: stats.size,
       userId: req.user.id
     });
 
   } catch (error) {
-    Logger.error('下载增强报告失败', error, { userId: req.user?.id });
+    Logger.error('下载分析报告失败', error, { userId: req.user?.id });
     res.serverError('下载报告失败');
   }
 }));
 
 /**
  * 批量生成报告
- * POST /api/reports/enhanced/batch
+ * POST /api/reports/analysis/batch
  */
-router.post('/enhanced/batch', authMiddleware, asyncHandler(async (req, res) => {
+router.post('/analysis/batch', authMiddleware, asyncHandler(async (req, res) => {
   try {
     const { 
       reports, // 报告配置数组
@@ -784,7 +784,7 @@ router.post('/enhanced/batch', authMiddleware, asyncHandler(async (req, res) => 
         const testData = testResult.rows;
 
         if (testData.length > 0) {
-          const result = await reportGenerator.generateEnhancedReport(testData, {
+          const result = await reportGenerator.generateReport(testData, {
             ...globalOptions,
             ...reportConfig
           });
@@ -792,7 +792,7 @@ router.post('/enhanced/batch', authMiddleware, asyncHandler(async (req, res) => 
           batchResults.push({
             index: i,
             success: true,
-            reportId: `enhanced_batch_${Date.now()}_${i}`,
+            reportId: `analysis_batch_${Date.now()}_${i}`,
             filePath: result.filePath,
             metadata: result.metadata
           });
@@ -812,7 +812,7 @@ router.post('/enhanced/batch', authMiddleware, asyncHandler(async (req, res) => 
       }
     }
 
-    Logger.info('批量生成增强报告完成', {
+    Logger.info('批量生成分析报告完成', {
       userId: req.user.id,
       totalReports: reports.length,
       successCount: batchResults.length,
@@ -830,7 +830,7 @@ router.post('/enhanced/batch', authMiddleware, asyncHandler(async (req, res) => 
     }, `批量生成完成，成功 ${batchResults.length} 个，失败 ${errors.length} 个`);
 
   } catch (error) {
-    Logger.error('批量生成增强报告失败', error, { userId: req.user?.id });
+    Logger.error('批量生成分析报告失败', error, { userId: req.user?.id });
     res.serverError('批量生成报告失败');
   }
 }));

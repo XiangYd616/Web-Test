@@ -1,9 +1,9 @@
 ﻿/**
- * 测试状态Hook相关类型定义
+ * 测试状态管理Hook类型定义
  * 统一管理所有测试状态管理Hook的类型
  */
 
-import { TestStatus } from '../unified/testTypes';
+import { TestStatus } from '../enums';
 
 // ==================== 基础测试状态类型 ====================
 

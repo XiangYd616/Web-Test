@@ -62,17 +62,13 @@ interface SEOTestResult {
   };
 }
 
-interface EnhancedSEOAnalysisProps {
+interface SEOAnalysisProps {
   results: SEOTestResult;
   onExportReport: (format: 'pdf' | 'html' | 'json' | 'csv') => void;
   onShareResults: () => void;
 }
 
-const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
-  results,
-  onExportReport,
-  onShareResults
-}) => {
+const SEOAnalysis: React.FC<SEOAnalysisProps> = ({ results, onExportReport, onShareResults }) => {
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-400';
     if (score >= 60) return 'text-yellow-400';
@@ -99,11 +95,11 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
     }
   };
 
-    /**
-     * switch功能函数
-     * @param {Object} params - 参数对象
-     * @returns {Promise<Object>} 返回结果
-     */
+  /**
+   * switch功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
   const getRecommendationIcon = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -125,7 +121,7 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
     mobile: '移动友好',
     social: '社交媒体',
     coreWebVitals: 'Core Web Vitals',
-    pageExperience: '页面体验'
+    pageExperience: '页面体验',
   };
 
   return (
@@ -167,19 +163,18 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
           <div className="text-center">
             <div className="relative w-32 h-32 mx-auto mb-4">
               <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="50" stroke="#374151" strokeWidth="8" fill="none" />
                 <circle
                   cx="60"
                   cy="60"
                   r="50"
-                  stroke="#374151"
-                  strokeWidth="8"
-                  fill="none"
-                />
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="50"
-                  stroke={results.overallScore >= 80 ? "#10B981" : results.overallScore >= 60 ? "#F59E0B" : "#EF4444"}
+                  stroke={
+                    results.overallScore >= 80
+                      ? '#10B981'
+                      : results.overallScore >= 60
+                        ? '#F59E0B'
+                        : '#EF4444'
+                  }
                   strokeWidth="8"
                   fill="none"
                   strokeDasharray={`${(results.overallScore / 100) * 314} 314`}
@@ -196,9 +191,7 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
             <div className={`text-lg font-semibold ${getScoreColor(results.overallScore)}`}>
               {results.scoreGrade || 'N/A'}
             </div>
-            <div className="text-sm text-gray-300">
-              {results.scoreDescription || '评分等级'}
-            </div>
+            <div className="text-sm text-gray-300">{results.scoreDescription || '评分等级'}</div>
           </div>
 
           <div className="space-y-3">
@@ -238,11 +231,15 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-300">优化建议</span>
-                <span className="text-white">{Array.isArray(results.recommendations) ? results.recommendations.length : 0}条</span>
+                <span className="text-white">
+                  {Array.isArray(results.recommendations) ? results.recommendations.length : 0}条
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-300">页面大小</span>
-                <span className="text-white">{Math.round((results.metadata?.pageSize || 0) / 1024)}KB</span>
+                <span className="text-white">
+                  {Math.round((results.metadata?.pageSize || 0) / 1024)}KB
+                </span>
               </div>
             </div>
           </div>
@@ -250,7 +247,8 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
       </div>
 
       {/* 问题和建议 */}
-      {((results.issues && results.issues.length > 0) || (Array.isArray(results.recommendations) && results.recommendations.length > 0)) && (
+      {((results.issues && results.issues.length > 0) ||
+        (Array.isArray(results.recommendations) && results.recommendations.length > 0)) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 发现的问题 */}
           {results.issues && results.issues.length > 0 && (
@@ -258,10 +256,16 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
               <h3 className="text-lg font-semibold text-white mb-4">发现的问题</h3>
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {results.issues.slice(0, 10).map((issue, index) => (
-                  <div key={index} className={`p-3 rounded-lg border-l-4 ${issue.severity === 'critical' || issue.severity === 'high' ? 'bg-red-500/10 border-red-500' :
-                    issue.severity === 'medium' ? 'bg-yellow-500/10 border-yellow-500' :
-                      'bg-blue-500/10 border-blue-500'
-                    }`}>
+                  <div
+                    key={index}
+                    className={`p-3 rounded-lg border-l-4 ${
+                      issue.severity === 'critical' || issue.severity === 'high'
+                        ? 'bg-red-500/10 border-red-500'
+                        : issue.severity === 'medium'
+                          ? 'bg-yellow-500/10 border-yellow-500'
+                          : 'bg-blue-500/10 border-blue-500'
+                    }`}
+                  >
                     <div className="flex items-start space-x-2">
                       {getIssueIcon(issue.severity)}
                       <div className="flex-1">
@@ -285,17 +289,26 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
                 {results.recommendations.slice(0, 8).map((rec, index) => {
                   if (typeof rec === 'string') {
                     return (
-                      <div key={index} className="p-3 rounded-lg border-l-4 bg-blue-500/10 border-blue-500">
+                      <div
+                        key={index}
+                        className="p-3 rounded-lg border-l-4 bg-blue-500/10 border-blue-500"
+                      >
                         <p className="text-sm text-white">{rec}</p>
                       </div>
                     );
                   }
 
                   return (
-                    <div key={index} className={`p-3 rounded-lg border-l-4 ${rec.priority === 'high' ? 'bg-red-500/10 border-red-500' :
-                      rec.priority === 'medium' ? 'bg-yellow-500/10 border-yellow-500' :
-                        'bg-green-500/10 border-green-500'
-                      }`}>
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border-l-4 ${
+                        rec.priority === 'high'
+                          ? 'bg-red-500/10 border-red-500'
+                          : rec.priority === 'medium'
+                            ? 'bg-yellow-500/10 border-yellow-500'
+                            : 'bg-green-500/10 border-green-500'
+                      }`}
+                    >
                       <div className="flex items-start space-x-2">
                         {getRecommendationIcon(rec.priority)}
                         <div className="flex-1">
@@ -328,14 +341,24 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
               <div key={keyword} className="bg-gray-700/50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-white">{keyword}</span>
-                  <span className={`text-xs px-2 py-1 rounded ${data.status === 'optimal' ? 'bg-green-500/20 text-green-400' :
-                    data.status === 'high' ? 'bg-red-500/20 text-red-400' :
-                      data.status === 'low' ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-gray-500/20 text-gray-400'
-                    }`}>
-                    {data.status === 'optimal' ? '最佳' :
-                      data.status === 'high' ? '过高' :
-                        data.status === 'low' ? '偏低' : '缺失'}
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      data.status === 'optimal'
+                        ? 'bg-green-500/20 text-green-400'
+                        : data.status === 'high'
+                          ? 'bg-red-500/20 text-red-400'
+                          : data.status === 'low'
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-gray-500/20 text-gray-400'
+                    }`}
+                  >
+                    {data.status === 'optimal'
+                      ? '最佳'
+                      : data.status === 'high'
+                        ? '过高'
+                        : data.status === 'low'
+                          ? '偏低'
+                          : '缺失'}
                   </span>
                 </div>
                 <div className="text-xs text-gray-300">
@@ -351,4 +374,4 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
   );
 };
 
-export default EnhancedSEOAnalysis;
+export default SEOAnalysis;

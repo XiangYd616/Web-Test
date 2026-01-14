@@ -1,7 +1,6 @@
-
 // ==================== 性能配置接口 ====================
 
-export interface UnifiedPerformanceConfig {
+export interface PerformanceConfig {
   /** 检测级别 */
   level: 'basic' | 'standard' | 'comprehensive';
 
@@ -190,7 +189,7 @@ export interface PerformanceTestResult {
   timestamp: number;
 
   /** 测试配置 */
-  config: UnifiedPerformanceConfig;
+  config: PerformanceConfig;
 
   /** 总体评分 (0-100) */
   overallScore: number;
@@ -305,7 +304,14 @@ export interface PerformanceIssue {
 
 export interface PerformanceTestProgress {
   /** 当前阶段 */
-  phase: 'initializing' | 'analyzing' | 'measuring' | 'optimizing' | 'reporting' | 'completed' | 'failed';
+  phase:
+    | 'initializing'
+    | 'analyzing'
+    | 'measuring'
+    | 'optimizing'
+    | 'reporting'
+    | 'completed'
+    | 'failed';
 
   /** 进度百分比 (0-100) */
   progress: number;
@@ -332,7 +338,7 @@ export interface PerformanceTestProgress {
 
 // ==================== 预设配置模板 ====================
 
-export const PERFORMANCE_CONFIG_PRESETS: Record<string, UnifiedPerformanceConfig> = {
+export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
   basic: {
     level: 'basic',
     pageSpeed: true,
@@ -346,7 +352,7 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, UnifiedPerformanceConfig
     mobilePerformance: false,
     device: 'desktop',
     timeout: 30,
-    retries: 1
+    retries: 1,
   },
 
   standard: {
@@ -362,7 +368,7 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, UnifiedPerformanceConfig
     mobilePerformance: true,
     device: 'both',
     timeout: 60,
-    retries: 2
+    retries: 2,
   },
 
   comprehensive: {
@@ -378,8 +384,8 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, UnifiedPerformanceConfig
     mobilePerformance: true,
     device: 'both',
     timeout: 120,
-    retries: 3
-  }
+    retries: 3,
+  },
 };
 
 // ==================== 工具函数类型 ====================

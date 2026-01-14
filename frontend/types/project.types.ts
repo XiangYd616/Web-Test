@@ -106,9 +106,7 @@ export interface TestConfiguration {
   description?: string;
 }
 
-// TestType 已迁移到统一类型系统
-// 请从 '../types' 或 '../types/unified/testTypes' 导入
-import type { TestType } from './unified/testTypes';
+import type { TestType } from './enums';
 
 export interface CreateTestConfigRequest {
   test_type: TestType;
@@ -348,12 +346,15 @@ export interface ComparisonData {
 export interface SystemHealth {
   status: 'healthy' | 'warning' | 'critical';
   uptime: number;
-  services: Record<string, {
-    status: 'healthy' | 'warning' | 'critical';
-    response_time: number;
-    last_check: Timestamp;
-    error_count: number;
-  }>;
+  services: Record<
+    string,
+    {
+      status: 'healthy' | 'warning' | 'critical';
+      response_time: number;
+      last_check: Timestamp;
+      error_count: number;
+    }
+  >;
   resources: {
     cpu_usage: number;
     memory_usage: number;
@@ -383,11 +384,14 @@ export interface SystemMetrics {
     total_tests: number;
     tests_today: number;
   };
-  services: Record<string, {
-    status: string;
-    response_time: number;
-    last_check: Timestamp;
-  }>;
+  services: Record<
+    string,
+    {
+      status: string;
+      response_time: number;
+      last_check: Timestamp;
+    }
+  >;
 }
 
 // ==================== 类型导出说明 ====================
@@ -399,4 +403,3 @@ export interface SystemMetrics {
 // - export interface ProjectSettings { ... }
 // - export interface TestConfiguration { ... }
 // - 等等...
-

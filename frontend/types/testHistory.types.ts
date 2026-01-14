@@ -1,20 +1,20 @@
-﻿
-// TestType 和 TestStatus 已迁移到统一类型系统
-// 请从 '../types' 或 '../types/unified/testTypes' 导入
-import type { TestStatus, TestStatusType, TestType } from './unified/testTypes';
+﻿// TestType 和 TestStatus 已迁移到统一类型系统
+// 请从 './enums' 导入
+import type { TestStatus, TestType } from './enums';
+type TestStatusType = TestStatus;
 
 export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export enum TestEnvironment {
   DEVELOPMENT = 'development',
   STAGING = 'staging',
   PRODUCTION = 'production',
-  LOCAL = 'local'
+  LOCAL = 'local',
 }
 
 // 新增：主从表设计相关类型
@@ -326,7 +326,7 @@ export interface TestMetadata {
 }
 
 // 增强的测试记录接口
-export interface EnhancedTestRecord {
+export interface TestHistoryRecord {
   // 基础信息
   id: string;
   testName: string;
@@ -347,7 +347,12 @@ export interface EnhancedTestRecord {
   userName?: string;
 
   // 配置信息
-  config: BaseTestConfig | PerformanceTestConfig | SecurityTestConfig | SEOTestConfig | StressTestConfig;
+  config:
+    | BaseTestConfig
+    | PerformanceTestConfig
+    | SecurityTestConfig
+    | SEOTestConfig
+    | StressTestConfig;
 
   // 结果信息
   overallScore?: number;
@@ -400,11 +405,11 @@ export interface EnhancedTestRecord {
 //   page?: number;
 //   limit?: number;
 //   offset?: number;
-// 
+//
 //   // 搜索
 //   search?: string;
 //   searchFields?: string[]; // 搜索字段
-// 
+//
 //   // 过滤
 //   testType?: TestType | TestType[];
 //   status?: TestStatus | TestStatus[];
@@ -413,21 +418,21 @@ export interface EnhancedTestRecord {
 //   tags?: string[];
 //   category?: string;
 //   userId?: string;
-// 
+//
 //   // 时间范围
 //   dateFrom?: string;
 //   dateTo?: string;
 //   createdAfter?: string;
 //   createdBefore?: string;
-// 
+//
 //   // 分数范围
 //   minScore?: number;
 //   maxScore?: number;
-// 
+//
 //   // 排序
 //   sortBy?: 'createdAt' | 'startTime' | 'endTime' | 'duration' | 'overallScore' | 'testName' | 'status';
 //   sortOrder?: 'asc' | 'desc';
-// 
+//
 //   // 包含关联数据
 //   includeResults?: boolean;
 //   includeConfig?: boolean;
@@ -440,7 +445,7 @@ export interface EnhancedTestRecord {
 // export interface TestHistoryResponse {
 //   success: boolean;
 //   data: {
-//     tests: EnhancedTestRecord[];
+//     tests: TestHistoryRecord[];
 //     pagination: {
 //       page: number;
 //       limit: number;
@@ -531,27 +536,5 @@ export interface BatchOperation {
     tags?: string[];
     category?: string;
     exportOptions?: ExportOptions;
-  };
-}
-
-export interface TestComparison {
-  baseTest: EnhancedTestRecord;
-  compareTests: EnhancedTestRecord[];
-  metrics: {
-    scoreComparison: Array<{
-      testId: string;
-      testName: string;
-      score: number;
-      difference: number;
-      percentageChange: number;
-    }>;
-    performanceComparison?: Array<{
-      metric: string;
-      values: Array<{
-        testId: string;
-        value: number;
-        difference: number;
-      }>;
-    }>;
   };
 }

@@ -1,7 +1,6 @@
-﻿import React from 'react';
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 import { ChevronDown, Download, FileText, Image, Table } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 // 导出格式配置
 export interface ExportFormat {
@@ -21,7 +20,7 @@ export const EXPORT_FORMATS: Record<string, ExportFormat> = {
     icon: FileText,
     description: '结构化数据格式',
     extension: 'json',
-    mimeType: 'application/json'
+    mimeType: 'application/json',
   },
   csv: {
     key: 'csv',
@@ -29,7 +28,7 @@ export const EXPORT_FORMATS: Record<string, ExportFormat> = {
     icon: Table,
     description: '表格数据格式',
     extension: 'csv',
-    mimeType: 'text/csv'
+    mimeType: 'text/csv',
   },
   html: {
     key: 'html',
@@ -37,7 +36,7 @@ export const EXPORT_FORMATS: Record<string, ExportFormat> = {
     icon: FileText,
     description: '网页报告格式',
     extension: 'html',
-    mimeType: 'text/html'
+    mimeType: 'text/html',
   },
   pdf: {
     key: 'pdf',
@@ -45,7 +44,7 @@ export const EXPORT_FORMATS: Record<string, ExportFormat> = {
     icon: FileText,
     description: '便携文档格式',
     extension: 'pdf',
-    mimeType: 'application/pdf'
+    mimeType: 'application/pdf',
   },
   png: {
     key: 'png',
@@ -53,8 +52,8 @@ export const EXPORT_FORMATS: Record<string, ExportFormat> = {
     icon: Image,
     description: '图片格式',
     extension: 'png',
-    mimeType: 'image/png'
-  }
+    mimeType: 'image/png',
+  },
 };
 
 // 导出数据接口
@@ -70,7 +69,7 @@ export interface ExportData {
 }
 
 // 组件属性接口
-export interface UnifiedExportButtonProps {
+export interface ExportButtonProps {
   data: ExportData;
   formats?: string[]; // 支持的格式列表
   onExport?: (format: string, data: ExportData) => void;
@@ -86,7 +85,7 @@ export interface UnifiedExportButtonProps {
 }
 
 // 统一导出按钮组件
-export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
+export const ExportButton: React.FC<ExportButtonProps> = ({
   data,
   formats = ['json', 'csv'],
   onExport,
@@ -98,7 +97,7 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
   disabled = false,
   loading = false,
   showDropdown = true,
-  defaultFormat = 'json'
+  defaultFormat = 'json',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -107,19 +106,19 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
   const sizeClasses = {
     sm: 'px-2 py-1 text-xs',
     md: 'px-3 py-2 text-sm',
-    lg: 'px-4 py-3 text-base'
+    lg: 'px-4 py-3 text-base',
   };
 
   const variantClasses = {
     primary: 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600',
     secondary: 'bg-gray-600 hover:bg-gray-700 text-white border-gray-600',
-    outline: 'border border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white'
+    outline: 'border border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white',
   };
 
   const iconSizes = {
     sm: 'w-3 h-3',
     md: 'w-4 h-4',
-    lg: 'w-5 h-5'
+    lg: 'w-5 h-5',
   };
 
   // 处理导出
@@ -170,14 +169,18 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
 
     switch (format) {
       case 'json':
-        content = JSON.stringify({
-          ...exportData.data,
-          metadata: {
-            exportedAt: new Date().toISOString(),
-            format: 'json',
-            ...exportData.metadata
-          }
-        }, null, 2);
+        content = JSON.stringify(
+          {
+            ...exportData.data,
+            metadata: {
+              exportedAt: new Date().toISOString(),
+              format: 'json',
+              ...exportData.metadata,
+            },
+          },
+          null,
+          2
+        );
         break;
 
       case 'csv':
@@ -212,14 +215,14 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
       const headers = Object.keys(data[0]);
       const csvContent = [
         headers.join(','),
-        ...data?.map(row =>
-          headers.map(header => {
-            const value = row[header];
-            return typeof value === 'string' && value.includes(',')
-              ? `"${value}"`
-              : value;
-          }).join(',')
-        )
+        ...data.map(row =>
+          headers
+            .map(header => {
+              const value = row[header];
+              return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
+            })
+            .join(',')
+        ),
       ].join('\n');
 
       return csvContent;
@@ -272,7 +275,7 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
   if (!showDropdown || availableFormats.length === 1) {
     const format = availableFormats[0] || EXPORT_FORMATS[defaultFormat];
     if (!format) return null;
-    
+
     const IconComponent = format.icon;
 
     return (
@@ -288,7 +291,9 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
         title={`导出${format.label}格式`}
       >
         {isExporting ? (
-          <div className={`animate-spin rounded-full border-2 border-current border-t-transparent ${iconSizes[size]}`} />
+          <div
+            className={`animate-spin rounded-full border-2 border-current border-t-transparent ${iconSizes[size]}`}
+          />
         ) : (
           <IconComponent className={iconSizes[size]} />
         )}
@@ -312,13 +317,15 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
       >
         <Download className={iconSizes[size]} />
         <span>{isExporting ? '导出中...' : '导出数据'}</span>
-        <ChevronDown className={`${iconSizes[size]} transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`${iconSizes[size]} transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
           <div className="py-1">
-            {availableFormats.filter(Boolean).map((format) => {
+            {availableFormats.filter(Boolean).map(format => {
               if (!format) return null;
               const IconComponent = format.icon;
               return (
@@ -341,14 +348,9 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
       )}
 
       {/* 点击外部关闭下拉菜单 */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />}
     </div>
   );
 };
 
-export default UnifiedExportButton;
+export default ExportButton;

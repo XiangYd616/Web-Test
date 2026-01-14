@@ -3,26 +3,26 @@
  * 整合RouteManager和RouteManager的功能，提供统一的路由管理
  */
 
-const express = require('express');
-const path = require('path');
+const _express = require('express');
+const _path = require('path');
 
 // 安全导入依赖，如果不存在则使用默认实现
-let ServiceError, ErrorTypes, ApiResponse;
+let _ServiceError, _ErrorTypes, _ApiResponse;
 
 try {
   const errorHandler = require('../utils/errorHandler');
-  ServiceError = errorHandler.ServiceError;
-  ErrorTypes = errorHandler.ErrorTypes;
-} catch (error) {
+  _ServiceError = errorHandler.ServiceError;
+  _ErrorTypes = errorHandler.ErrorTypes;
+} catch {
   // 默认错误处理实现
-  ServiceError = class extends Error {
+  _ServiceError = class extends Error {
     constructor(message, type = 'INTERNAL_ERROR', details = null) {
       super(message);
       this.type = type;
       this.details = details;
     }
   };
-  ErrorTypes = {
+  _ErrorTypes = {
     VALIDATION_ERROR: 'VALIDATION_ERROR',
     NOT_FOUND_ERROR: 'NOT_FOUND_ERROR',
     INTERNAL_ERROR: 'INTERNAL_ERROR'
@@ -30,10 +30,10 @@ try {
 }
 
 try {
-  ApiResponse = require('../utils/ApiResponse');
-} catch (error) {
+  _ApiResponse = require('../utils/ApiResponse');
+} catch {
   // 默认API响应实现
-  ApiResponse = {
+  _ApiResponse = {
     middleware: () => (req, res, next) => next()
   };
 }
@@ -83,7 +83,7 @@ class RouteManager {
   async initialize() {
     if (this.isInitialized) return;
 
-    console.log('🚀 Initializing Unified Route Manager...');
+    console.log('🚀 Initializing Route Manager...');
 
     // 1. 设置全局中间件
     this.setupGlobalMiddleware();
@@ -98,7 +98,7 @@ class RouteManager {
     this.setupDocumentationRoutes();
 
     this.isInitialized = true;
-    console.log('✅ Unified Route Manager initialized');
+    console.log('✅ Route Manager initialized');
   }
 
   /**
@@ -463,8 +463,8 @@ class RouteManager {
       });
     }
 
-    let successCount = 0;
-    let errorCount = 0;
+    let routeRegisterSuccessCount = 0;
+    let routeRegisterErrorCount = 0;
 
     for (const config of routeConfigs) {
       try {
@@ -478,13 +478,17 @@ class RouteManager {
         });
 
         if (success) {
-          successCount++;
+          routeRegisterSuccessCount++;
         }
       } catch (error) {
         console.error(`❌ Failed to register route ${config.path}:`, error.message);
-        errorCount++;
+        routeRegisterErrorCount++;
       }
     }
+
+    console.log(
+      `✅ Route modules loaded: success=${routeRegisterSuccessCount}, failed=${routeRegisterErrorCount}`
+    );
 
   }
 
@@ -518,6 +522,8 @@ class RouteManager {
       }
     }
 
+    console.log(`✅ Routes applied: ${appliedCount}/${sortedRoutes.length}`);
+
     this.logRoutesSummary();
   }
 
@@ -539,7 +545,7 @@ class RouteManager {
     });
 
     // 全局错误处理
-    this.app.use('/api', (error, req, res, next) => {
+    this.app.use('/api', (error, req, res, _next) => {
       console.error('API Error:', error);
 
       const statusCode = error.statusCode || error.status || 500;
@@ -664,7 +670,7 @@ class RouteManager {
 
   getEndpointsList() {
     const endpoints = {};
-    for (const [path, route] of this.routes) {
+    for (const [_path, route] of this.routes) {
       endpoints[route.group] = endpoints[route.group] || [];
       endpoints[route.group].push({
         path: route.path,
@@ -681,6 +687,7 @@ class RouteManager {
     }
 
     for (const [group, count] of Object.entries(groupCounts)) {
+      console.log(`📌 Route group: ${group} (${count})`);
     }
   }
 

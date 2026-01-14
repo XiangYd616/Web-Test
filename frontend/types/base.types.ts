@@ -15,7 +15,7 @@ export type CompletionCallback = (result: any) => void;
 export type ErrorCallback = (error: string | Error) => void;
 
 // 统一测试配置类型
-export interface UnifiedTestConfig {
+export interface TestServiceConfig {
   testType: string;
   url?: string;
   timeout?: number;

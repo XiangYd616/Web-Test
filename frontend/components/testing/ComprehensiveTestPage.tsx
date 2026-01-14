@@ -5,8 +5,8 @@
 
 import { LucideIcon } from 'lucide-react';
 import React, { ReactNode } from 'react';
-import { useUniversalTest } from '../../hooks/legacy-compatibility';
-import { TestConfigPanel as UniversalConfigPanel } from './shared/TestConfigPanel';
+import { useBridgeTest } from '../../hooks/compatibilityBridge';
+import { TestConfigPanel as ConfigPanel } from './shared/TestConfigPanel';
 
 export interface TestTypeConfig {
   id: string;
@@ -14,7 +14,7 @@ export interface TestTypeConfig {
   description: string;
   icon: LucideIcon;
   color: string;
-  defaultConfig: Record<string, any>;
+  defaultConfig: Record<string, unknown>;
   configSchema: TestConfigSchema;
   resultSchema: TestResultSchema;
 }
@@ -48,14 +48,14 @@ export interface TestConfigSection {
 
 export interface ValidationRule {
   type: 'required' | 'min' | 'max' | 'pattern' | 'custom';
-  value?: any;
+  value?: unknown;
   message: string;
-  validator?: (value: unknown, config: Record<string, any>) => boolean;
+  validator?: (value: unknown, config: Record<string, unknown>) => boolean;
 }
 
 export interface FieldDependency {
   field: string;
-  value: any;
+  value: unknown;
   action: 'show' | 'hide' | 'enable' | 'disable';
 }
 
@@ -69,7 +69,7 @@ export interface ResultSection {
   key: string;
   title: string;
   type: 'table' | 'cards' | 'text' | 'chart' | 'custom';
-  renderer?: (data: any) => ReactNode;
+  renderer?: (data: unknown) => ReactNode;
 }
 
 export interface ChartConfig {
@@ -89,8 +89,8 @@ export interface MetricConfig {
 export interface ComprehensiveTestPageProps {
   testType: TestTypeConfig;
   className?: string;
-  onTestComplete?: (result: any) => void;
-  onConfigChange?: (config: any) => void;
+  onTestComplete?: (result: unknown) => void;
+  onConfigChange?: (config: unknown) => void;
   customActions?: ReactNode;
   showHistory?: boolean;
 }
@@ -102,44 +102,39 @@ export interface ComprehensiveTestPageProps {
 export const ComprehensiveTestPage: React.FC<ComprehensiveTestPageProps> = ({
   testType,
   className = '',
-  onTestComplete,
   onConfigChange,
   customActions,
-  showHistory = true,
 }) => {
+  const TestIcon = testType.icon;
+
   const {
-    config,
-    updateConfig,
+    testId,
     isRunning,
     progress,
     currentStep,
     result,
     error,
+    config,
+    updateConfig,
     startTest,
     stopTest,
     resetTest,
     validateConfig,
-  } = useUniversalTest(testType.id, testType.defaultConfig);
+  } = useBridgeTest(testType.id, testType.defaultConfig);
 
   // 处理配置变更
-  const handleConfigChange = (newConfig: any) => {
+  const handleConfigChange = (newConfig: unknown) => {
     // 使用updateConfig方法更新整个配置对象
-    updateConfig(newConfig);
+    updateConfig(newConfig as Record<string, unknown>);
     onConfigChange?.(newConfig);
-  };
-
-  // 处理测试完成
-  const _handleTestComplete = (testResult: any) => {
-    onTestComplete?.(testResult);
   };
 
   return (
     <div className={`space-y-6 ${className}`}>
       {/* 测试配置面板 */}
-      <UniversalConfigPanel
+      <ConfigPanel
         config={config}
-        schema={testType.configSchema}
-        onChange={handleConfigChange}
+        onConfigChange={handleConfigChange}
         disabled={isRunning}
         testType={testType.id}
       />
@@ -170,7 +165,7 @@ export const ComprehensiveTestPage: React.FC<ComprehensiveTestPageProps> = ({
           </pre>
           <button
             type="button"
-            onClick={startTest}
+            onClick={() => startTest(config)}
             className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition-colors"
           >
             重新测试
@@ -196,11 +191,11 @@ export const ComprehensiveTestPage: React.FC<ComprehensiveTestPageProps> = ({
         <div className="flex space-x-3">
           <button
             type="button"
-            onClick={startTest}
+            onClick={() => startTest(config)}
             disabled={isRunning || !validateConfig(config).isValid}
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
           >
-            <testType.icon className="w-4 h-4" />
+            <TestIcon className="w-4 h-4" />
             <span>{isRunning ? '测试中...' : '开始测试'}</span>
           </button>
 

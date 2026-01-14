@@ -1,11 +1,22 @@
 /**
  * SecurityAnalysis.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\analysis\SecurityAnalysis.tsx
  * 创建时间: 2025-09-25
  */
 
-import { AlertCircle, AlertTriangle, CheckCircle, Eye, Info, Lock, Shield, TrendingDown, TrendingUp, XCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle,
+  Eye,
+  Info,
+  Lock,
+  Shield,
+  TrendingDown,
+  TrendingUp,
+  XCircle,
+} from 'lucide-react';
 import React from 'react';
 
 interface SecurityAnalysisResult {
@@ -58,16 +69,16 @@ interface SecurityAnalysisResult {
   };
 }
 
-interface EnhancedSecurityAnalysisProps {
+interface SecurityAnalysisProps {
   result: SecurityAnalysisResult;
 }
 
-  /**
-   * 获取getScoreColor数据
-   * @param {string} id - 对象ID
-   * @returns {Promise<Object|null>} 获取的数据
-   */
-export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> = ({ result }) => {
+/**
+ * 获取getScoreColor数据
+ * @param {string} id - 对象ID
+ * @returns {Promise<Object|null>} 获取的数据
+ */
+export const SecurityAnalysis: React.FC<SecurityAnalysisProps> = ({ result }) => {
   const getScoreColor = (score: number) => {
     if (score >= 85) return 'text-green-400 bg-green-500/20 border-green-500/30';
     if (score >= 70) return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
@@ -83,65 +94,89 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'low': return 'text-green-400 bg-green-500/20';
-      case 'medium': return 'text-yellow-400 bg-yellow-500/20';
-      case 'high': return 'text-red-400 bg-red-500/20';
-      default: return 'text-gray-400 bg-gray-500/20';
+      case 'low':
+        return 'text-green-400 bg-green-500/20';
+      case 'medium':
+        return 'text-yellow-400 bg-yellow-500/20';
+      case 'high':
+        return 'text-red-400 bg-red-500/20';
+      default:
+        return 'text-gray-400 bg-gray-500/20';
     }
   };
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'critical':
-      case 'high': return <XCircle className="w-4 h-4 text-red-400" />;
-      case 'medium': return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
-      case 'low': return <AlertCircle className="w-4 h-4 text-blue-400" />;
-      case 'info': return <Info className="w-4 h-4 text-gray-400" />;
+      case 'high':
+        return <XCircle className="w-4 h-4 text-red-400" />;
+      case 'medium':
+        return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
+      case 'low':
+        return <AlertCircle className="w-4 h-4 text-blue-400" />;
+      case 'info':
+        return <Info className="w-4 h-4 text-gray-400" />;
       // 兼容中文值
-      case '高': return <XCircle className="w-4 h-4 text-red-400" />;
-      case '中': return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
-      case '低': return <AlertCircle className="w-4 h-4 text-blue-400" />;
-      case '信息': return <Info className="w-4 h-4 text-gray-400" />;
-      default: return <Info className="w-4 h-4 text-gray-400" />;
+      case '高':
+        return <XCircle className="w-4 h-4 text-red-400" />;
+      case '中':
+        return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
+      case '低':
+        return <AlertCircle className="w-4 h-4 text-blue-400" />;
+      case '信息':
+        return <Info className="w-4 h-4 text-gray-400" />;
+      default:
+        return <Info className="w-4 h-4 text-gray-400" />;
     }
   };
 
-    /**
-     * switch功能函数
-     * @param {Object} params - 参数对象
-     * @returns {Promise<Object>} 返回结果
-     */
+  /**
+   * switch功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'critical':
-      case 'high': return 'border-red-500/30 bg-red-500/10';
-      case 'medium': return 'border-yellow-500/30 bg-yellow-500/10';
-      case 'low': return 'border-blue-500/30 bg-blue-500/10';
-      case 'info': return 'border-gray-500/30 bg-gray-500/10';
+      case 'high':
+        return 'border-red-500/30 bg-red-500/10';
+      case 'medium':
+        return 'border-yellow-500/30 bg-yellow-500/10';
+      case 'low':
+        return 'border-blue-500/30 bg-blue-500/10';
+      case 'info':
+        return 'border-gray-500/30 bg-gray-500/10';
       // 兼容中文值
-      case '高': return 'border-red-500/30 bg-red-500/10';
-      case '中': return 'border-yellow-500/30 bg-yellow-500/10';
-      case '低': return 'border-blue-500/30 bg-blue-500/10';
-      case '信息': return 'border-gray-500/30 bg-gray-500/10';
-      default: return 'border-gray-500/30 bg-gray-500/10';
+      case '高':
+        return 'border-red-500/30 bg-red-500/10';
+      case '中':
+        return 'border-yellow-500/30 bg-yellow-500/10';
+      case '低':
+        return 'border-blue-500/30 bg-blue-500/10';
+      case '信息':
+        return 'border-gray-500/30 bg-gray-500/10';
+      default:
+        return 'border-gray-500/30 bg-gray-500/10';
     }
   };
 
   const getSeverityText = (severity: string) => {
     const textMap: { [key: string]: string } = {
-      'critical': '严重',
-      'high': '高',
-      'medium': '中',
-      'low': '低',
-      'info': '信息'
+      critical: '严重',
+      high: '高',
+      medium: '中',
+      low: '低',
+      info: '信息',
     };
     return textMap[severity] || severity;
   };
 
   const getCheckIcon = (passed: boolean) => {
-    return passed ?
-      <CheckCircle className="w-4 h-4 text-green-400" /> :
-      <XCircle className="w-4 h-4 text-red-400" />;
+    return passed ? (
+      <CheckCircle className="w-4 h-4 text-green-400" />
+    ) : (
+      <XCircle className="w-4 h-4 text-red-400" />
+    );
   };
 
   return (
@@ -157,7 +192,9 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* 总体评分 */}
-          <div className={`text-center p-4 rounded-lg border ${getScoreColor(result.securityScore)}`}>
+          <div
+            className={`text-center p-4 rounded-lg border ${getScoreColor(result.securityScore)}`}
+          >
             <div className="flex items-center justify-center mb-2">
               {getScoreIcon(result.securityScore)}
               <span className="ml-2 text-3xl font-bold">{result.securityScore}</span>
@@ -166,7 +203,9 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
           </div>
 
           {/* 风险等级 */}
-          <div className={`text-center p-4 rounded-lg border border-gray-600/50 ${getRiskColor(result.overallRisk)}`}>
+          <div
+            className={`text-center p-4 rounded-lg border border-gray-600/50 ${getRiskColor(result.overallRisk)}`}
+          >
             <div className="flex items-center justify-center mb-2">
               <AlertTriangle className="w-6 h-6" />
               <span className="ml-2 text-lg font-semibold capitalize">{result.overallRisk}</span>
@@ -178,7 +217,9 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
           <div className="text-center p-4 rounded-lg border border-gray-600/50 bg-gray-700/30">
             <div className="flex items-center justify-center mb-2">
               <Eye className="w-6 h-6 text-purple-400" />
-              <span className="ml-2 text-3xl font-bold text-white">{result.vulnerabilities.length}</span>
+              <span className="ml-2 text-3xl font-bold text-white">
+                {result.vulnerabilities.length}
+              </span>
             </div>
             <div className="text-sm text-gray-300">发现问题</div>
           </div>
@@ -222,12 +263,17 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
           <h4 className="text-lg font-semibold text-white mb-4">发现的安全问题</h4>
           <div className="space-y-3">
             {result.vulnerabilities.map((vuln, index) => (
-              <div key={index} className={`flex items-start space-x-3 p-4 border rounded-lg ${getSeverityColor(vuln.severity)}`}>
+              <div
+                key={index}
+                className={`flex items-start space-x-3 p-4 border rounded-lg ${getSeverityColor(vuln.severity)}`}
+              >
                 {getSeverityIcon(vuln.severity)}
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium text-white">{vuln.type}</span>
-                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getSeverityColor(vuln.severity)}`}>
+                    <span
+                      className={`px-2 py-0.5 text-xs font-medium rounded-full ${getSeverityColor(vuln.severity)}`}
+                    >
                       {getSeverityText(vuln.severity)}
                     </span>
                   </div>
@@ -248,7 +294,10 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
           <h4 className="text-lg font-semibold text-white mb-4">安全建议</h4>
           <div className="space-y-3">
             {result.recommendations.map((recommendation, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
+              <div
+                key={index}
+                className="flex items-start space-x-3 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg"
+              >
                 <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
                 <span className="text-sm text-blue-300">{recommendation}</span>
               </div>
@@ -275,7 +324,8 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
               <div>
                 <span className="text-gray-400">有效期:</span>
                 <span className="ml-2 text-white">
-                  {new Date(result.sslInfo.validFrom).toLocaleDateString()} - {new Date(result.sslInfo.validTo!).toLocaleDateString()}
+                  {new Date(result.sslInfo.validFrom).toLocaleDateString()} -{' '}
+                  {new Date(result.sslInfo.validTo!).toLocaleDateString()}
                 </span>
               </div>
             )}
@@ -298,4 +348,4 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
   );
 };
 
-export default EnhancedSecurityAnalysis;
+export default SecurityAnalysis;

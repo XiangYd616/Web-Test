@@ -1,16 +1,31 @@
 ﻿/**
  * StressTestCharts.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\charts\StressTestCharts.tsx
  * 创建时间: 2025-09-25
  */
-
 
 import Logger from '@/utils/logger';
 import { RotateCcw } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Bar,
+  BarChart,
+  Brush,
+  CartesianGrid,
+  Cell,
+  ComposedChart,
+  Legend,
+  Line,
+  Pie,
+  PieChart,
+  ReferenceArea,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface TestPhase {
   name: string;
@@ -21,7 +36,7 @@ interface TestPhase {
 }
 
 // 增强的实时数据接口
-interface EnhancedRealTimeData {
+interface RealTimeData {
   timestamp: number;
   responseTime: number;
   status: number;
@@ -55,9 +70,9 @@ interface BaselineData {
 }
 
 // 主组件属性
-interface EnhancedStressTestChartsProps {
+interface StressTestChartsProps {
   // 实时数据（测试进行中）
-  realTimeData?: EnhancedRealTimeData[];
+  realTimeData?: RealTimeData[];
 
   testResultData?: TestResultData[];
 
@@ -94,7 +109,7 @@ interface EnhancedStressTestChartsProps {
   };
 }
 
-export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> = ({
+export const StressTestCharts: React.FC<StressTestChartsProps> = ({
   realTimeData = [],
   testResultData = [],
   isRunning,
@@ -105,12 +120,19 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   enableZoom = true,
   dataPointDensity = 'medium',
   showAdvancedMetrics = true,
-  currentMetrics
+  currentMetrics,
 }) => {
   // 状态管理
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'activeUsers', 'errorRate']);
-  const [chartType, setChartType] = useState<'realtime' | 'results' | 'comparison' | 'distribution'>('realtime');
-  const [zoomDomain, setZoomDomain] = useState<{ left?: number, right?: number }>({});
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>([
+    'responseTime',
+    'throughput',
+    'activeUsers',
+    'errorRate',
+  ]);
+  const [chartType, setChartType] = useState<
+    'realtime' | 'results' | 'comparison' | 'distribution'
+  >('realtime');
+  const [zoomDomain, setZoomDomain] = useState<{ left?: number; right?: number }>({});
   const [showErrorBreakdown, setShowErrorBreakdown] = useState(false);
   const [densityControl, setDensityControl] = useState(dataPointDensity);
   const [timeDisplayMode, setTimeDisplayMode] = useState<'relative' | 'absolute'>('relative');
@@ -129,7 +151,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     // 明确区分数据源：实时数据用于实时监控，测试结果数据用于结果视图
     let sourceData: unknown[] = [];
 
-    Logger.debug('📊 EnhancedStressTestCharts 处理数据:', {
+    Logger.debug('📊 StressTestCharts 处理数据:', {
       chartType,
       realTimeDataLength: realTimeData?.length || 0,
       testResultDataLength: testResultData?.length || 0,
@@ -137,7 +159,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       isRunning,
       testCompleted,
       realTimeDataSample: realTimeData?.slice(0, 2),
-      testResultDataSample: testResultData?.slice(0, 2)
+      testResultDataSample: testResultData?.slice(0, 2),
     });
 
     if (realTimeData && realTimeData?.length > 0) {
@@ -145,19 +167,19 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       sourceData = realTimeData;
       // 只在数据量变化时打印日志
       if (realTimeData?.length % 100 === 0 || realTimeData?.length < 10) {
-        Logger.debug(`📊 EnhancedStressTestCharts 使用实时数据: ${sourceData.length} 个数据点`);
+        Logger.debug(`📊 StressTestCharts 使用实时数据: ${sourceData.length} 个数据点`);
       }
     } else if (testResultData && testResultData?.length > 0) {
       // 使用测试结果数据（用于测试结果视图）
       sourceData = testResultData;
-      Logger.debug(`📊 EnhancedStressTestCharts 使用测试结果数据: ${sourceData.length} 个数据点`);
+      Logger.debug(`📊 StressTestCharts 使用测试结果数据: ${sourceData.length} 个数据点`);
     } else {
       // 减少空数据警告的频率，只在组件首次渲染时打印
-      Logger.debug('⚠️ EnhancedStressTestCharts: 没有可用数据');
+      Logger.debug('⚠️ StressTestCharts: 没有可用数据');
     }
 
     if (!sourceData || sourceData.length === 0) {
-      Logger.debug('❌ EnhancedStressTestCharts: 返回空数据');
+      Logger.debug('❌ StressTestCharts: 返回空数据');
       return [];
     }
 
@@ -167,7 +189,9 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
 
     // 只在数据量变化时打印处理结果
     if (filtered.length % 50 === 0 || filtered.length < 10) {
-      Logger.debug(`📊 EnhancedStressTestCharts 处理后数据: ${filtered.length} 个数据点`, { sample: filtered.slice(0, 2) });
+      Logger.debug(`📊 StressTestCharts 处理后数据: ${filtered.length} 个数据点`, {
+        sample: filtered.slice(0, 2),
+      });
     }
 
     return filtered;
@@ -198,7 +222,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
         { min: 10, max: 20, label: '10-20ms' },
         { min: 20, max: 30, label: '20-30ms' },
         { min: 30, max: 50, label: '30-50ms' },
-        { min: 50, max: 100, label: '50-100ms' }
+        { min: 50, max: 100, label: '50-100ms' },
       ];
     } else if (max <= 500) {
       // 响应时间在500ms以内，使用50ms间隔
@@ -207,7 +231,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
         { min: 50, max: 100, label: '50-100ms' },
         { min: 100, max: 200, label: '100-200ms' },
         { min: 200, max: 300, label: '200-300ms' },
-        { min: 300, max: 500, label: '300-500ms' }
+        { min: 300, max: 500, label: '300-500ms' },
       ];
     } else if (max <= 2000) {
       // 响应时间在2秒以内，使用200ms间隔
@@ -216,7 +240,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
         { min: 100, max: 300, label: '100-300ms' },
         { min: 300, max: 500, label: '300-500ms' },
         { min: 500, max: 1000, label: '500ms-1s' },
-        { min: 1000, max: 2000, label: '1-2s' }
+        { min: 1000, max: 2000, label: '1-2s' },
       ];
     } else {
       // 响应时间超过2秒，使用更大间隔
@@ -225,7 +249,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
         { min: 500, max: 1000, label: '500ms-1s' },
         { min: 1000, max: 2000, label: '1-2s' },
         { min: 2000, max: 5000, label: '2-5s' },
-        { min: 5000, max: Infinity, label: '5s+' }
+        { min: 5000, max: Infinity, label: '5s+' },
       ];
     }
 
@@ -235,7 +259,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       count: 0,
       percentage: 0,
       min: bin.min,
-      max: bin.max
+      max: bin.max,
     }));
 
     responseTimes.forEach(time => {
@@ -265,7 +289,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     return Object.entries(currentMetrics?.errorBreakdown).map(([type, count]) => ({
       name: type,
       value: count,
-      percentage: totalFailedRequests > 0 ? (count / totalFailedRequests) * 100 : 0
+      percentage: totalFailedRequests > 0 ? (count / totalFailedRequests) * 100 : 0,
     }));
   }, [currentMetrics]);
 
@@ -279,31 +303,36 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   }, []);
 
   // 🔧 新增：时间格式化函数
-  const formatTimeLabel = useCallback((value: any) => {
-    if (timeDisplayMode === 'absolute') {
-      // 显示实际时间 (HH:MM:SS)
-      return new Date(value).toLocaleTimeString('zh-CN', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-    } else {
-      // 🔧 改进：显示相对时间，提高到0.01秒精度 (M:SS.CC)
-      if (processedData.length > 0) {
-        const startTime = new Date((processedData[0] as any).timestamp).getTime();
-        const currentTime = new Date(value).getTime();
-        const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
+  const formatTimeLabel = useCallback(
+    (value: any) => {
+      if (timeDisplayMode === 'absolute') {
+        // 显示实际时间 (HH:MM:SS)
+        return new Date(value).toLocaleTimeString('zh-CN', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+      } else {
+        // 🔧 改进：显示相对时间，提高到0.01秒精度 (M:SS.CC)
+        if (processedData.length > 0) {
+          const startTime = new Date((processedData[0] as any).timestamp).getTime();
+          const currentTime = new Date(value).getTime();
+          const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
-        const minutes = Math.floor(elapsedSeconds / 60);
-        const seconds = Math.floor(elapsedSeconds % 60);
-        const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
+          const minutes = Math.floor(elapsedSeconds / 60);
+          const seconds = Math.floor(elapsedSeconds % 60);
+          const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
 
-        return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
+          return minutes > 0
+            ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`
+            : `${seconds}.${ms.toString().padStart(2, '0')}`;
+        }
+        return new Date(value).toLocaleTimeString();
       }
-      return new Date(value).toLocaleTimeString();
-    }
-  }, [timeDisplayMode, processedData]);
+    },
+    [timeDisplayMode, processedData]
+  );
 
   // 渲染实时监控图表
   const renderRealTimeChart = () => (
@@ -318,7 +347,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           value: timeDisplayMode === 'absolute' ? '实际时间' : '测试时间 (分:秒)',
           position: 'insideBottom',
           offset: -5,
-          style: { textAnchor: 'middle', fill: '#9CA3AF' }
+          style: { textAnchor: 'middle', fill: '#9CA3AF' },
         }}
       />
       <YAxis yAxisId="left" stroke="#9CA3AF" fontSize={12} />
@@ -329,16 +358,17 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           backgroundColor: '#1F2937',
           border: '1px solid #374151',
           borderRadius: '8px',
-          color: '#F9FAFB'
+          color: '#F9FAFB',
         }}
         formatter={(value: unknown, name: string) => {
           if (name === 'responseTime') return [`${value}ms`, '响应时间'];
-          if (name === 'averageResponseTime') return [`${(value as number).toFixed(3)}ms`, '平均响应时间'];
+          if (name === 'averageResponseTime')
+            return [`${(value as number).toFixed(3)}ms`, '平均响应时间'];
           if (name === 'throughput') return [`${(value as number).toFixed(1)}`, '吞吐量'];
           if (name === 'activeUsers') return [`${value}`, '活跃用户'];
           return [value as string, name];
         }}
-        labelFormatter={(value) => {
+        labelFormatter={value => {
           const timeLabel = formatTimeLabel(value);
           return timeDisplayMode === 'absolute' ? `时间: ${timeLabel}` : `测试时间: ${timeLabel}`;
         }}
@@ -346,12 +376,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       <Legend />
 
       {enableZoom && (
-        <Brush
-          dataKey="timestamp"
-          height={30}
-          stroke="#3B82F6"
-          tickFormatter={formatTimeLabel}
-        />
+        <Brush dataKey="timestamp" height={30} stroke="#3B82F6" tickFormatter={formatTimeLabel} />
       )}
 
       {/* 测试阶段标注 */}
@@ -438,35 +463,36 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       <YAxis
         stroke="#9CA3AF"
         fontSize={12}
-        label={{ value: '请求数量', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#9CA3AF' } }}
+        label={{
+          value: '请求数量',
+          angle: -90,
+          position: 'insideLeft',
+          style: { textAnchor: 'middle', fill: '#9CA3AF' },
+        }}
       />
       <Tooltip
         contentStyle={{
           backgroundColor: '#1F2937',
           border: '1px solid #374151',
           borderRadius: '8px',
-          color: '#F9FAFB'
+          color: '#F9FAFB',
         }}
-          /**
-           * if功能函数
-           * @param {Object} params - 参数对象
-           * @returns {Promise<Object>} 返回结果
-           */
+        /**
+         * if功能函数
+         * @param {Object} params - 参数对象
+         * @returns {Promise<Object>} 返回结果
+         */
         formatter={(value: unknown, name: string): [string, string] => {
           if (name === 'count') {
-            const percentage = responseTimeDistribution.find(item => item.count === value)?.percentage || 0;
+            const percentage =
+              responseTimeDistribution.find(item => item.count === value)?.percentage || 0;
             return [`${value} 个请求 (${percentage.toFixed(1)}%)`, '请求数量'];
           }
           return [String(value), name];
         }}
-        labelFormatter={(label) => `响应时间范围: ${label}`}
+        labelFormatter={label => `响应时间范围: ${label}`}
       />
-      <Bar
-        dataKey="count"
-        fill="#3B82F6"
-        name="count"
-        radius={[2, 2, 0, 0]}
-      />
+      <Bar dataKey="count" fill="#3B82F6" name="count" radius={[2, 2, 0, 0]} />
     </BarChart>
   );
 
@@ -518,7 +544,9 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           {/* 🔧 新增：时间显示模式切换按钮 */}
           <button
             type="button"
-            onClick={() => setTimeDisplayMode(timeDisplayMode === 'relative' ? 'absolute' : 'relative')}
+            onClick={() =>
+              setTimeDisplayMode(timeDisplayMode === 'relative' ? 'absolute' : 'relative')
+            }
             className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600 flex items-center gap-1"
             title={timeDisplayMode === 'relative' ? '切换到实际时间' : '切换到相对时间'}
           >
@@ -539,7 +567,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           <select
             id="chart-density-select"
             value={densityControl}
-            onChange={(e) => setDensityControl(e?.target.value as any)}
+            onChange={e => setDensityControl(e?.target.value as any)}
             className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm"
             aria-label="选择图表数据密度"
             title="数据密度控制"
@@ -552,7 +580,10 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       </div>
 
       {/* 图表区域 */}
-      <div className="bg-gray-800/50 rounded-lg p-4" style={{ height: `${height}px`, minHeight: '400px' }}>
+      <div
+        className="bg-gray-800/50 rounded-lg p-4"
+        style={{ height: `${height}px`, minHeight: '400px' }}
+      >
         {processedData.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             <div className="text-center">
@@ -595,4 +626,4 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   );
 };
 
-export default EnhancedStressTestCharts;
+export default StressTestCharts;

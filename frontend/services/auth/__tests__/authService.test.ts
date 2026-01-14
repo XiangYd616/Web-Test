@@ -4,8 +4,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { LoginCredentials, RegisterData } from '../../../types/auth/models';
+import type { LoginCredentials, RegisterData } from '../../../types/auth.types';
 import { UserRole, UserStatus } from '../../../types/enums';
+import { AuthService } from '../authService';
 
 // Mock dependencies
 vi.mock('@/utils/logger', () => ({
@@ -63,8 +64,8 @@ Object.defineProperty(window, 'sessionStorage', { value: localStorageMock });
 // Mock fetch
 global.fetch = vi.fn();
 
-describe('UnifiedAuthService - 认证服务', () => {
-  let authService: UnifiedAuthService;
+describe('AuthService - 认证服务', () => {
+  let authService: AuthService;
 
   beforeEach(() => {
     // 清理localStorage
@@ -74,7 +75,7 @@ describe('UnifiedAuthService - 认证服务', () => {
     vi.clearAllMocks();
 
     // 创建新的authService实例
-    authService = new UnifiedAuthService({
+    authService = new AuthService({
       enableDeviceFingerprinting: false,
       enableSecureStorage: false,
       enableSessionTracking: false,
@@ -231,6 +232,7 @@ describe('UnifiedAuthService - 认证服务', () => {
       fullName: 'New User',
       password: 'password123',
       confirmPassword: 'password123',
+      acceptTerms: true,
     };
 
     it('应该成功注册新用户', async () => {
@@ -527,7 +529,7 @@ describe('UnifiedAuthService - 认证服务', () => {
 
   describe('9. 企业级功能', () => {
     it('应该获取增强配置', () => {
-      const config = authService.getEnhancedConfig();
+      const config = authService.getServiceConfig();
 
       expect(config).toHaveProperty('enableDeviceFingerprinting');
       expect(config).toHaveProperty('enableSecureStorage');
@@ -535,11 +537,11 @@ describe('UnifiedAuthService - 认证服务', () => {
     });
 
     it('应该更新增强配置', () => {
-      authService.updateEnhancedConfig({
+      authService.updateServiceConfig({
         accessTokenExpiry: 1800,
       });
 
-      const config = authService.getEnhancedConfig();
+      const config = authService.getServiceConfig();
       expect(config.accessTokenExpiry).toBe(1800);
     });
   });

@@ -342,7 +342,7 @@ export interface RateLimitResponse extends APIResponse {
 /**
  * Hook返回类型
  */
-export interface UnifiedTestEngineHook {
+export interface TestEngineHook {
   // 引擎状态
   engineState: EngineState;
   isConnected: boolean;
@@ -384,7 +384,7 @@ export interface UnifiedTestEngineHook {
 /**
  * 测试执行Hook返回类型
  */
-export interface TestExecutionHook extends UnifiedTestEngineHook {
+export interface TestExecutionHook extends TestEngineHook {
   executeTest: (config: Record<string, any>, options?: any) => Promise<string>;
   isSupported: boolean;
   testType: TestType;
@@ -403,7 +403,7 @@ export interface TestResultAnalysisHook {
 /**
  * 组件Props类型
  */
-export interface UnifiedTestPanelProps {
+export interface TestPanelProps {
   testType?: TestType;
   defaultConfig?: Partial<TestConfig>;
   onTestComplete?: (testId: string, result: TestResult) => void;
@@ -421,30 +421,4 @@ export interface TestConfigFormValues {
   testType: TestType;
   url: string;
   [key: string]: any;
-}
-
-// 注意：所有类型已在上面单独导出，无需重复导出
-// 基于Context7 TypeScript最佳实践，避免重复导出冲突
-
-// 补充缺失的Hook类型定义
-export interface UnifiedTestEngineHook {
-  activeTests: Map<string, TestStatusInfo>;
-  engineState: EngineState;
-  executeTest: (config: TestExecutionRequest) => Promise<string>;
-  getTestStatus: (testId: string) => Promise<TestStatusInfo | null>;
-  cancelTest: (testId: string) => Promise<boolean>;
-  getStats: () => EngineStats;
-}
-
-export interface TestExecutionHook {
-  execute: (config: TestExecutionRequest) => Promise<string>;
-  cancel: (testId: string) => Promise<boolean>;
-  getStatus: (testId: string) => Promise<TestStatusInfo | null>;
-}
-
-export interface TestResultAnalysisHook {
-  analysis: TestResultAnalysis | null;
-  loading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
 }

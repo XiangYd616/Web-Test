@@ -1,9 +1,11 @@
 // Project-related types
-export type { Project, ProjectType, ProjectStatus } from './unified/models';
 export type {
   CreateProjectRequest,
-  UpdateProjectRequest,
-  ProjectResponse,
+  Project,
   ProjectListResponse,
-  ProjectStatsResponse
-} from './unified/models';
+  ProjectResponse,
+  ProjectStatsResponse,
+  ProjectStatus,
+  ProjectType,
+  UpdateProjectRequest,
+} from './compat/models';

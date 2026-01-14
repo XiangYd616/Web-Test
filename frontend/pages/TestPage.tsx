@@ -29,7 +29,7 @@ import {
   Typography,
 } from 'antd';
 import React, { useState } from 'react';
-import UnifiedTestExecutor from '../components/testing/TestExecutor';
+import TestExecutor from '../components/testing/TestExecutor';
 import { useTestEngine } from '../hooks/useTestEngine';
 import type { TestResult } from '../types/engine.types';
 
@@ -40,7 +40,7 @@ const { TabPane } = Tabs;
 /**
  * 统一测试引擎页面组件
  */
-export const UnifiedTestPage: React.FC = () => {
+export const TestPageComponent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('executor');
   const [showHelp, setShowHelp] = useState(false);
 
@@ -55,6 +55,7 @@ export const UnifiedTestPage: React.FC = () => {
 
     // 显示成功通知
     if (result.overallScore >= 80) {
+      Logger.debug('✅ 测试结果优秀');
     } else if (result.overallScore >= 60) {
       Logger.debug('⚠️ 测试结果良好，有改进空间');
     } else {
@@ -89,7 +90,7 @@ export const UnifiedTestPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <Title level={2} className="mb-2">
-            🧠 统一测试引擎
+            统一测试引擎
           </Title>
           <Paragraph className="text-gray-600 mb-0">
             集成多种测试工具，提供统一的测试执行和结果分析平台
@@ -217,9 +218,9 @@ export const UnifiedTestPage: React.FC = () => {
             </Paragraph>
             <ol>
               <li>选择测试类型并配置参数</li>
-              <li>点击"开始测试"执行测试</li>
-              <li>在"监控进度"标签页查看实时进度</li>
-              <li>在"查看结果"标签页分析测试结果</li>
+              <li>点击&quot;开始测试&quot;执行测试</li>
+              <li>在&quot;监控进度&quot;标签页查看实时进度</li>
+              <li>在&quot;查看结果&quot;标签页分析测试结果</li>
             </ol>
           </div>
         }
@@ -252,10 +253,7 @@ export const UnifiedTestPage: React.FC = () => {
                 </span>
               ),
               children: (
-                <UnifiedTestExecutor
-                  onTestComplete={handleTestComplete}
-                  onTestError={handleTestError}
-                />
+                <TestExecutor onTestComplete={handleTestComplete} onTestError={handleTestError} />
               ),
             },
             {
@@ -267,7 +265,7 @@ export const UnifiedTestPage: React.FC = () => {
                 </span>
               ),
               children: (
-                <UnifiedTestExecutor
+                <TestExecutor
                   onTestComplete={handleTestComplete}
                   onTestError={handleTestError}
                   showHistory={true}
@@ -285,10 +283,10 @@ export const UnifiedTestPage: React.FC = () => {
         />
 
         {/* 错误提示 */}
-        {engine.lastError && (
+        {engine.error && (
           <Alert
             message="引擎错误"
-            description={engine.lastError.message}
+            description={engine.error}
             type="error"
             showIcon
             closable
@@ -316,4 +314,5 @@ export const UnifiedTestPage: React.FC = () => {
   );
 };
 
-export default UnifiedTestPage;
+export const TestPage = TestPageComponent;
+export default TestPage;

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 统一压力测试页面
  * 提供完整的压力测试功能，包括实时监控、结果分析和报告导出
  */
@@ -7,7 +7,7 @@ import { AlertCircle, AlertTriangle, Download, Info, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
-import { UniversalTestPage } from '../components/testing/ComprehensiveTestPage';
+import ComprehensiveTestPage from '../components/testing/ComprehensiveTestPage';
 import { stressTestConfig } from '../config/testTypes';
 
 /**
@@ -108,7 +108,7 @@ const StressTestResultDisplay: React.FC<{ result: any }> = ({ result }) => {
 /**
  * 统一压力测试页面组件
  */
-const UnifiedStressTest: React.FC = () => {
+const StressTest: React.FC = () => {
   const authCheck = useAuthCheck();
   const [testHistory, setTestHistory] = useState<any[]>([]);
   const [showHelp, setShowHelp] = useState(false);
@@ -303,4 +303,4 @@ const UnifiedStressTest: React.FC = () => {
   );
 };
 
-export default UnifiedStressTest;
+export default StressTest;

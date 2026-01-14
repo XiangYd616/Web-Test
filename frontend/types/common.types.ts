@@ -5,7 +5,7 @@
  */
 
 // 导入基础类型
-import type { Timestamp } from './unified/apiResponse.types';
+import type { Timestamp } from './compat/apiResponse.types';
 
 // 重新导出共享类型
 export * from '../../shared/types/shared.types';
@@ -87,11 +87,11 @@ export interface DEFAULT_USER_PREFERENCES {
 }
 
 // 测试相关类型 - 已迁移到统一类型系统
-import type { TestType } from './unified/testTypes';
+import type { TestType } from './enums';
 
 export interface TestConfig {
   url: string;
-  type: TestType;
+  testType: TestType;
   duration?: number;
   concurrency?: number;
   options?: Record<string, any>;

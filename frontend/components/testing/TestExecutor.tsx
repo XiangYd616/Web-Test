@@ -43,7 +43,7 @@ import {
 } from 'antd';
 import React, { useCallback, useState } from 'react';
 import { useTestEngine } from '../../hooks/useTestEngine';
-import type { TestResult } from '../../types/engine.types';
+import type { TestResult, TestStatusInfo } from '../../types/engine.types';
 import { TestPriority, TestType } from '../../types/enums';
 
 // 导入专用子组件
@@ -76,7 +76,7 @@ const getScoreColor = (score: number): string => {
 };
 
 // 扩展的Props接口 - 整合其他组件功能
-interface UnifiedTestExecutorProps {
+interface TestExecutorProps {
   className?: string;
 
   // 基础回调
@@ -109,7 +109,7 @@ interface UnifiedTestExecutorProps {
 /**
  * 统一测试引擎执行器组件
  */
-export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
+export const TestExecutorComponent: React.FC<TestExecutorProps> = ({
   className = '',
   testType: defaultTestType,
   defaultConfig = {},
@@ -263,7 +263,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
         config: finalConfig,
         options: {
           priority: TestPriority.MEDIUM,
-          tags: [selectedTestType, 'unified-engine', 'web-ui'],
+          tags: [selectedTestType, 'test-engine', 'web-ui'],
         },
       });
 
@@ -281,9 +281,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
       setActiveTab('monitor');
 
       // 订阅测试更新
-      engine.subscribeToTest?.(testId, data => {
-        onTestProgress?.(data);
-      });
+      engine.subscribeToTest?.(testId);
 
       // 启动实时监控
       if (enableRealTimeMetrics) {
@@ -636,12 +634,17 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
    * 渲染测试监控 - 使用专用子组件
    */
   const renderTestMonitor = () => {
+    const activeTestsMap: Map<string, TestStatusInfo> =
+      engine.activeTests instanceof Map
+        ? (engine.activeTests as Map<string, TestStatusInfo>)
+        : new Map<string, TestStatusInfo>();
+
     return (
       <TestProgressMonitor
-        activeTests={engine.activeTests || new Map()}
+        activeTests={activeTestsMap}
         realTimeMetrics={realTimeMetrics}
-        onStopTest={() => engine.cancelTest()}
-        onCancelTest={() => engine.cancelTest()}
+        onStopTest={(testId: string) => engine.cancelTest(testId)}
+        onCancelTest={(testId: string) => engine.cancelTest(testId)}
         className="mb-4"
       />
     );
@@ -660,7 +663,18 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
       totalTests: 0,
     };
 
-    return <TestStatsPanel stats={stats} className="mb-4" />;
+    return (
+      <TestStatsPanel
+        stats={{
+          totalActiveTests: stats.totalTests,
+          runningTests: stats.runningTests,
+          completedTests: stats.completedTests,
+          failedTests: stats.failedTests,
+          totalResults: stats.completedTests,
+        }}
+        className="mb-4"
+      />
+    );
   };
 
   /**
@@ -742,7 +756,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
               <Col span={8}>
                 <Statistic
                   title="测试时长"
-                  value={(selectedResult.duration / 1000 || 0).toFixed(1)}
+                  value={((selectedResult.duration ?? 0) / 1000 || 0).toFixed(1)}
                   suffix="秒"
                 />
               </Col>
@@ -797,7 +811,7 @@ export const UnifiedTestExecutor: React.FC<UnifiedTestExecutorProps> = ({
   }, []);
 
   return (
-    <div className={`unified-test-executor ${className}`}>
+    <div className={`test-executor ${className}`}>
       {renderEngineStatus()}
 
       {/* 整合的统计面板 */}
@@ -902,4 +916,5 @@ const _getStatusText = (status: string): string => {
   return texts[status] || status;
 };
 
-export default UnifiedTestExecutor;
+export const TestExecutor = TestExecutorComponent;
+export default TestExecutor;

@@ -8,27 +8,27 @@ export * from '../types/api';
 
 // Explicitly export commonly used types for convenience
 export type {
+  ApiError,
+  ApiErrorResponse,
+  ApiRequestConfig,
   ApiResponse,
   ApiSuccessResponse,
-  ApiErrorResponse,
-  ApiError,
-  ValidationError,
-  RequestConfig,
-  ApiRequestConfig,
-  RequestHeaders,
   AuthConfig,
-  QueryParams,
-  PaginationInfo,
+  BaseTestConfig,
+  HttpMethod,
   PaginatedResponse,
+  PaginationInfo,
+  RequestConfig,
+  RequestHeaders,
   TestConfig,
   TestResult,
   TestStatus,
   TestType,
-  BaseTestConfig,
-  HttpMethod,
   Timestamp,
-  UUID
+  UUID,
+  ValidationError,
 } from '../types/api';
 
-export { ErrorCode, TestTypeEnum } from '../types/api';
+export type { QueryParams } from '../types/apiResponse.types';
 
+export { ErrorCode, TestTypeEnum } from '../types/api';

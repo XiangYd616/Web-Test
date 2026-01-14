@@ -6,7 +6,7 @@
 
 import Logger from '@/utils/logger';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { unifiedAuthService } from '../services/auth/authService';
+import { authService } from '../services/auth/authService';
 // 临时类型定义，直到rbac模块实现完成
 interface Permission {
   id: string;
@@ -57,13 +57,19 @@ export interface PermissionState {
 }
 
 export interface PermissionActions {
-  checkPermission: (resource: ResourceType, action: PermissionAction, resourceId?: string) => Promise<boolean>;
+  checkPermission: (
+    resource: ResourceType,
+    action: PermissionAction,
+    resourceId?: string
+  ) => Promise<boolean>;
   /**
    * hasRole功能函数
    * @param {Object} params - 参数对象
    * @returns {Promise<Object>} 返回结果
    */
-  checkBatchPermissions: (checks: Array<{ resource: ResourceType; action: PermissionAction; resourceId?: string }>) => Promise<Record<string, boolean>>;
+  checkBatchPermissions: (
+    checks: Array<{ resource: ResourceType; action: PermissionAction; resourceId?: string }>
+  ) => Promise<Record<string, boolean>>;
   hasRole: (roleName: string) => boolean;
   hasAnyRole: (roleNames: string[]) => boolean;
   hasAllRoles: (roleNames: string[]) => boolean;
@@ -77,14 +83,15 @@ class PermissionCache {
   private cache = new Map<string, { result: boolean; timestamp: number }>();
   private expiry: number;
 
-  constructor(expiry = 300000) { // 5分钟默认过期时间
+  constructor(expiry = 300000) {
+    // 5分钟默认过期时间
     this.expiry = expiry;
   }
 
   set(key: string, result: boolean): void {
     this.cache.set(key, {
       result,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -104,15 +111,28 @@ class PermissionCache {
     this.cache.clear();
   }
 
-  private generateKey(resource: ResourceType, action: PermissionAction, resourceId?: string): string {
+  private generateKey(
+    resource: ResourceType,
+    action: PermissionAction,
+    resourceId?: string
+  ): string {
     return `${resource}:${action}:${resourceId || 'null'}`;
   }
 
-  getCachedPermission(resource: ResourceType, action: PermissionAction, resourceId?: string): boolean | null {
+  getCachedPermission(
+    resource: ResourceType,
+    action: PermissionAction,
+    resourceId?: string
+  ): boolean | null {
     return this.get(this.generateKey(resource, action, resourceId));
   }
 
-  setCachedPermission(resource: ResourceType, action: PermissionAction, resourceId: string | undefined, result: boolean): void {
+  setCachedPermission(
+    resource: ResourceType,
+    action: PermissionAction,
+    resourceId: string | undefined,
+    result: boolean
+  ): void {
     this.set(this.generateKey(resource, action, resourceId), result);
   }
 }
@@ -122,12 +142,14 @@ const globalPermissionCache = new PermissionCache();
 
 // ==================== 权限管理Hook ====================
 
-export function usePermissions(options: UsePermissionsOptions = {}): [PermissionState, PermissionActions] {
+export function usePermissions(
+  options: UsePermissionsOptions = {}
+): [PermissionState, PermissionActions] {
   const {
     autoRefresh = false,
     refreshInterval = 300000, // 5分钟
     enableCache = true,
-    cacheExpiry = 300000
+    cacheExpiry = 300000,
   } = options;
 
   // 状态管理
@@ -136,12 +158,12 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
     roles: [],
     loading: true,
     error: null,
-    lastUpdated: null
+    lastUpdated: null,
   });
 
   // 权限缓存
-  const permissionCache = useMemo(() =>
-    enableCache ? new PermissionCache(cacheExpiry) : null,
+  const permissionCache = useMemo(
+    () => (enableCache ? new PermissionCache(cacheExpiry) : null),
     [enableCache, cacheExpiry]
   );
 
@@ -150,14 +172,14 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
-      const user = unifiedAuthService.getCurrentUser();
+      const user = authService.getCurrentUser();
       if (!user) {
         setState(prev => ({
           ...prev,
           loading: false,
           error: '用户未认证',
           permissions: [],
-          roles: []
+          roles: [],
         }));
         return;
       }
@@ -166,14 +188,14 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       const [permissionsResponse, rolesResponse] = await Promise.all([
         fetch('/api/auth/permissions', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
-          }
+            Authorization: `Bearer ${localStorage.getItem('auth_access_token') || ''}`,
+          },
         }),
         fetch('/api/auth/roles', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
-          }
-        })
+            Authorization: `Bearer ${localStorage.getItem('auth_access_token') || ''}`,
+          },
+        }),
       ]);
 
       if (!permissionsResponse.ok || !rolesResponse.ok) {
@@ -188,7 +210,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
         roles: rolesData.success ? rolesData.data : [],
         loading: false,
         error: null,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       });
 
       // 清除权限缓存（因为权限可能已更新）
@@ -199,163 +221,183 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       setState(prev => ({
         ...prev,
         loading: false,
-        error: error instanceof Error ? error.message : '获取权限信息失败'
+        error: error instanceof Error ? error.message : '获取权限信息失败',
       }));
     }
   }, [permissionCache]);
 
   // 检查单个权限
-  const checkPermission = useCallback(async (
-    resource: ResourceType,
-    action: PermissionAction,
-    resourceId?: string
-  ): Promise<boolean> => {
-    try {
-      // 检查缓存
-      if (permissionCache) {
-        const cached = permissionCache.getCachedPermission(resource, action, resourceId);
-        if (cached !== null) {
-          return cached;
-        }
-      }
-
-      // 本地权限检查（基于已获取的权限列表）
-      const hasLocalPermission = state.permissions.some(permission =>
-        permission.resource === resource &&
-        permission.action === action &&
-        permission.effect === 'allow'
-      );
-
-      // 如果本地检查通过，直接返回
-      if (hasLocalPermission) {
+  const checkPermission = useCallback(
+    async (
+      resource: ResourceType,
+      action: PermissionAction,
+      resourceId?: string
+    ): Promise<boolean> => {
+      try {
+        // 检查缓存
         if (permissionCache) {
-          permissionCache.setCachedPermission(resource, action, resourceId, true);
+          const cached = permissionCache.getCachedPermission(resource, action, resourceId);
+          if (cached !== null) {
+            return cached;
+          }
         }
-        return true;
+
+        // 本地权限检查（基于已获取的权限列表）
+        const hasLocalPermission = state.permissions.some(
+          permission =>
+            permission.resource === resource &&
+            permission.action === action &&
+            permission.effect === 'allow'
+        );
+
+        // 如果本地检查通过，直接返回
+        if (hasLocalPermission) {
+          if (permissionCache) {
+            permissionCache.setCachedPermission(resource, action, resourceId, true);
+          }
+          return true;
+        }
+
+        // 调用服务器进行详细权限检查
+        const response = await fetch('/api/auth/check-permission', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('auth_access_token') || ''}`,
+          },
+          body: JSON.stringify({
+            resource,
+            action,
+            resourceId,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('权限检查请求失败');
+        }
+
+        const data = await response.json();
+        const result = data.success && data.data.allowed;
+
+        // 缓存结果
+        if (permissionCache) {
+          permissionCache.setCachedPermission(resource, action, resourceId, result);
+        }
+
+        return result;
+      } catch (error) {
+        Logger.error('权限检查失败:', error);
+        return false;
       }
-
-      // 调用服务器进行详细权限检查
-      const response = await fetch('/api/auth/check-permission', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
-        },
-        body: JSON.stringify({
-          resource,
-          action,
-          resourceId
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('权限检查请求失败');
-      }
-
-      const data = await response.json();
-      const result = data.success && data.data.allowed;
-
-      // 缓存结果
-      if (permissionCache) {
-        permissionCache.setCachedPermission(resource, action, resourceId, result);
-      }
-
-      return result;
-    } catch (error) {
-      Logger.error('权限检查失败:', error);
-      return false;
-    }
-  }, [state.permissions, permissionCache]);
+    },
+    [state.permissions, permissionCache]
+  );
 
   // 批量权限检查
-  const checkBatchPermissions = useCallback(async (
-    checks: Array<{ resource: ResourceType; action: PermissionAction; resourceId?: string }>
-  ): Promise<Record<string, boolean>> => {
-    try {
-      const results: Record<string, boolean> = {};
-      const uncachedChecks: typeof checks = [];
+  const checkBatchPermissions = useCallback(
+    async (
+      checks: Array<{ resource: ResourceType; action: PermissionAction; resourceId?: string }>
+    ): Promise<Record<string, boolean>> => {
+      try {
+        const results: Record<string, boolean> = {};
+        const uncachedChecks: typeof checks = [];
 
-      // 检查缓存
-      for (const check of checks) {
-        const key = `${check.resource}:${check.action}:${check.resourceId || 'null'}`;
+        // 检查缓存
+        for (const check of checks) {
+          const key = `${check.resource}:${check.action}:${check.resourceId || 'null'}`;
 
-        if (permissionCache) {
-          const cached = permissionCache.getCachedPermission(check.resource, check.action, check.resourceId);
-          if (cached !== null) {
-            results[key] = cached;
-            continue;
+          if (permissionCache) {
+            const cached = permissionCache.getCachedPermission(
+              check.resource,
+              check.action,
+              check.resourceId
+            );
+            if (cached !== null) {
+              results[key] = cached;
+              continue;
+            }
           }
+
+          uncachedChecks.push(check);
         }
 
-        uncachedChecks.push(check);
-      }
+        // 如果所有权限都已缓存，直接返回
+        if (uncachedChecks.length === 0) {
+          return results;
+        }
 
-      // 如果所有权限都已缓存，直接返回
-      if (uncachedChecks.length === 0) {
+        // 调用服务器进行批量权限检查
+        const response = await fetch('/api/auth/check-batch-permissions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('auth_access_token') || ''}`,
+          },
+          body: JSON.stringify({ checks: uncachedChecks }),
+        });
+
+        if (!response.ok) {
+          throw new Error('批量权限检查请求失败');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          // 合并结果并缓存
+          Object.entries(data.data.results).forEach(([key, result]: [string, any]) => {
+            results[key] = result.allowed;
+
+            // 缓存结果
+            if (permissionCache) {
+              const [resource, action, resourceId] = key.split(':');
+              permissionCache.setCachedPermission(
+                resource as ResourceType,
+                action as PermissionAction,
+                resourceId === 'null' ? undefined : resourceId,
+                result.allowed
+              );
+            }
+          });
+        }
+
+        return results;
+      } catch (error) {
+        Logger.error('批量权限检查失败:', error);
+        // 返回所有权限为false的结果
+        const results: Record<string, boolean> = {};
+        checks.forEach(check => {
+          const key = `${check.resource}:${check.action}:${check.resourceId || 'null'}`;
+          results[key] = false;
+        });
         return results;
       }
-
-      // 调用服务器进行批量权限检查
-      const response = await fetch('/api/auth/check-batch-permissions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_access_token') || ''}`
-        },
-        body: JSON.stringify({ checks: uncachedChecks })
-      });
-
-      if (!response.ok) {
-        throw new Error('批量权限检查请求失败');
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        // 合并结果并缓存
-        Object.entries(data.data.results).forEach(([key, result]: [string, any]) => {
-          results[key] = result.allowed;
-
-          // 缓存结果
-          if (permissionCache) {
-            const [resource, action, resourceId] = key.split(':');
-            permissionCache.setCachedPermission(
-              resource as ResourceType,
-              action as PermissionAction,
-              resourceId === 'null' ? undefined : resourceId,
-              result.allowed
-            );
-          }
-        });
-      }
-
-      return results;
-    } catch (error) {
-      Logger.error('批量权限检查失败:', error);
-      // 返回所有权限为false的结果
-      const results: Record<string, boolean> = {};
-      checks.forEach(check => {
-        const key = `${check.resource}:${check.action}:${check.resourceId || 'null'}`;
-        results[key] = false;
-      });
-      return results;
-    }
-  }, [permissionCache]);
+    },
+    [permissionCache]
+  );
 
   // 检查角色
-  const hasRole = useCallback((roleName: string): boolean => {
-    return state.roles.some(role => role.name === roleName && role.isActive);
-  }, [state.roles]);
+  const hasRole = useCallback(
+    (roleName: string): boolean => {
+      return state.roles.some(role => role.name === roleName && role.isActive);
+    },
+    [state.roles]
+  );
 
   // 检查是否有任一角色
-  const hasAnyRole = useCallback((roleNames: string[]): boolean => {
-    return roleNames.some(roleName => hasRole(roleName));
-  }, [hasRole]);
+  const hasAnyRole = useCallback(
+    (roleNames: string[]): boolean => {
+      return roleNames.some(roleName => hasRole(roleName));
+    },
+    [hasRole]
+  );
 
   // 检查是否有所有角色
-  const hasAllRoles = useCallback((roleNames: string[]): boolean => {
-    return roleNames.every(roleName => hasRole(roleName));
-  }, [hasRole]);
+  const hasAllRoles = useCallback(
+    (roleNames: string[]): boolean => {
+      return roleNames.every(roleName => hasRole(roleName));
+    },
+    [hasRole]
+  );
 
   // 刷新权限
   const refreshPermissions = useCallback(async () => {
@@ -413,7 +455,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
     hasAnyRole,
     hasAllRoles,
     refreshPermissions,
-    clearCache
+    clearCache,
   };
 
   return [state, actions];
@@ -436,10 +478,11 @@ export function usePermissionCheck(
     if (loading) return;
 
     // 本地权限检查
-    const localCheck = permissions.some(permission =>
-      permission.resource === resource &&
-      permission.action === action &&
-      permission.effect === 'allow'
+    const localCheck = permissions.some(
+      permission =>
+        permission.resource === resource &&
+        permission.action === action &&
+        permission.effect === 'allow'
     );
 
     setHasPermission(localCheck);
@@ -450,7 +493,7 @@ export function usePermissionCheck(
     loading,
     isAllowed: hasPermission === true,
     isDenied: hasPermission === false,
-    isChecking: hasPermission === null || loading
+    isChecking: hasPermission === null || loading,
   };
 }
 
@@ -475,7 +518,7 @@ export function useRoleCheck(roleNames: string | string[]) {
     loading,
     isAllowed: hasRole === true,
     isDenied: hasRole === false,
-    isChecking: hasRole === null || loading
+    isChecking: hasRole === null || loading,
   };
 }
 

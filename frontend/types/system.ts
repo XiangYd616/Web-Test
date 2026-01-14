@@ -1,5 +1,5 @@
 // System-related types
-export type { SystemStatus, LogLevel, SystemLog, MaintenanceInfo } from './unified/models';
+export type { LogLevel, MaintenanceInfo, SystemLog, SystemStatus } from './compat/models';
 
 export interface SystemConfig {
   version: string;

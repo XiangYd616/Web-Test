@@ -1,16 +1,24 @@
 /**
  * ErrorDisplay.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\security\ErrorDisplay.tsx
  * 创建时间: 2025-09-25
  */
 
-
-import React from 'react';
-import { useState } from 'react';
-import type { ReactNode, FC } from 'react';;
-
-import { AlertTriangle, ChevronDown, ChevronRight, ExternalLink, HelpCircle, RefreshCw, X, Zap, Shield, Globe, Clock } from 'lucide-react';
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  ExternalLink,
+  Globe,
+  HelpCircle,
+  RefreshCw,
+  Shield,
+  X,
+  Zap,
+} from 'lucide-react';
+import React, { useState } from 'react';
 
 export interface ErrorSolution {
   title: string;
@@ -24,7 +32,7 @@ export interface ErrorSolution {
   }>;
 }
 
-export interface EnhancedError {
+export interface AppError {
   type: 'network' | 'validation' | 'security' | 'timeout' | 'server' | 'unknown';
   title: string;
   message: string;
@@ -38,8 +46,8 @@ export interface EnhancedError {
   }>;
 }
 
-interface EnhancedErrorDisplayProps {
-  error: EnhancedError;
+interface ErrorDisplayProps {
+  error: AppError;
   onDismiss?: () => void;
   onRetry?: () => void;
   className?: string;
@@ -51,7 +59,7 @@ const ERROR_ICONS = {
   security: <Shield className="h-5 w-5" />,
   timeout: <Clock className="h-5 w-5" />,
   server: <AlertTriangle className="h-5 w-5" />,
-  unknown: <HelpCircle className="h-5 w-5" />
+  unknown: <HelpCircle className="h-5 w-5" />,
 };
 
 const ERROR_COLORS = {
@@ -59,51 +67,51 @@ const ERROR_COLORS = {
     bg: 'bg-blue-900/20',
     border: 'border-blue-800/50',
     text: 'text-blue-400',
-    icon: 'text-blue-400'
+    icon: 'text-blue-400',
   },
   validation: {
     bg: 'bg-yellow-900/20',
     border: 'border-yellow-800/50',
     text: 'text-yellow-400',
-    icon: 'text-yellow-400'
+    icon: 'text-yellow-400',
   },
   security: {
     bg: 'bg-red-900/20',
     border: 'border-red-800/50',
     text: 'text-red-400',
-    icon: 'text-red-400'
+    icon: 'text-red-400',
   },
   timeout: {
     bg: 'bg-orange-900/20',
     border: 'border-orange-800/50',
     text: 'text-orange-400',
-    icon: 'text-orange-400'
+    icon: 'text-orange-400',
   },
   server: {
     bg: 'bg-purple-900/20',
     border: 'border-purple-800/50',
     text: 'text-purple-400',
-    icon: 'text-purple-400'
+    icon: 'text-purple-400',
   },
   unknown: {
     bg: 'bg-gray-900/20',
     border: 'border-gray-800/50',
     text: 'text-gray-400',
-    icon: 'text-gray-400'
-  }
+    icon: 'text-gray-400',
+  },
 };
 
 const DIFFICULTY_LABELS = {
   easy: { label: '简单', color: 'text-green-400', time: '1-2分钟' },
   medium: { label: '中等', color: 'text-yellow-400', time: '5-10分钟' },
-  hard: { label: '困难', color: 'text-red-400', time: '15-30分钟' }
+  hard: { label: '困难', color: 'text-red-400', time: '15-30分钟' },
 };
 
-export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
+export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   error,
   onDismiss,
   onRetry,
-  className = ''
+  className = '',
 }) => {
   const [expandedSolution, setExpandedSolution] = useState<number | null>(0);
   const [showDetails, setShowDetails] = useState(false);
@@ -120,16 +128,10 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
       {/* 错误头部 */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start space-x-3 min-w-0 flex-1">
-          <div className={`${colors.icon} flex-shrink-0 mt-0.5`}>
-            {icon}
-          </div>
+          <div className={`${colors.icon} flex-shrink-0 mt-0.5`}>{icon}</div>
           <div className="min-w-0 flex-1">
-            <h4 className={`font-semibold ${colors.text} text-sm sm:text-base`}>
-              {error.title}
-            </h4>
-            <p className="text-xs sm:text-sm text-gray-300 mt-1 break-words">
-              {error.message}
-            </p>
+            <h4 className={`font-semibold ${colors.text} text-sm sm:text-base`}>{error.title}</h4>
+            <p className="text-xs sm:text-sm text-gray-300 mt-1 break-words">{error.message}</p>
             {error.code && (
               <div className="mt-2">
                 <span className="inline-flex items-center px-2 py-1 rounded text-xs font-mono bg-gray-700/50 text-gray-300">
@@ -172,7 +174,11 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
             onClick={() => setShowDetails(!showDetails)}
             className="flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors"
           >
-            {showDetails ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            {showDetails ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
             <span>查看详细信息</span>
           </button>
           {showDetails && (
@@ -225,23 +231,21 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3 min-w-0 flex-1">
-                        {isExpanded ? <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" /> : <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />}
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                        )}
                         <div className="min-w-0 flex-1">
-                          <span className="font-medium text-white text-sm">
-                            {solution.title}
-                          </span>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {solution.description}
-                          </p>
+                          <span className="font-medium text-white text-sm">{solution.title}</span>
+                          <p className="text-xs text-gray-400 mt-1">{solution.description}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
                         <span className={`text-xs ${difficulty.color} font-medium`}>
                           {difficulty.label}
                         </span>
-                        <span className="text-xs text-gray-500">
-                          {solution.estimatedTime}
-                        </span>
+                        <span className="text-xs text-gray-500">{solution.estimatedTime}</span>
                       </div>
                     </div>
                   </button>
@@ -291,8 +295,4 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
     </div>
   );
 };
-
-// Export aliases for backward compatibility
-export const ErrorDisplay = EnhancedErrorDisplay;
-
-export default EnhancedErrorDisplay;
+export default ErrorDisplay;

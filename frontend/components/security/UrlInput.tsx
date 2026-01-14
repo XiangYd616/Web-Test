@@ -1,17 +1,23 @@
 /**
  * UrlInput.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\security\UrlInput.tsx
  * 创建时间: 2025-09-25
  */
 
-
-import React from 'react';
-import { AlertTriangle, CheckCircle, ExternalLink, Globe, HelpCircle, RefreshCw, Zap } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  ExternalLink,
+  Globe,
+  HelpCircle,
+  RefreshCw,
+  Zap,
+} from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { URLValidationResult, validateUrlSync } from '../../utils/urlValidator';
 
-interface EnhancedUrlInputProps {
+interface UrlInputProps {
   value: string;
   onChange: (value: string) => void;
   onValidationChange?: (isValid: boolean, result?: URLValidationResult) => void;
@@ -26,10 +32,10 @@ const COMMON_EXAMPLES = [
   'https://www.example.com',
   'https://github.com',
   'https://www.google.com',
-  'http://localhost:3000'
+  'http://localhost:3000',
 ];
 
-export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
+export const UrlInput: React.FC<UrlInputProps> = ({
   value,
   onChange,
   onValidationChange,
@@ -37,35 +43,38 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
   disabled = false,
   className = '',
   showSuggestions = true,
-  autoFix = true
+  autoFix = true,
 }) => {
   const [validationResult, setValidationResult] = useState<URLValidationResult | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
 
   // 实时验证
-  const validateInput = useCallback((url: string) => {
-    if (!url.trim()) {
-      setValidationResult(null);
-      onValidationChange?.(false);
-      return;
-    }
+  const validateInput = useCallback(
+    (url: string) => {
+      if (!url.trim()) {
+        setValidationResult(null);
+        onValidationChange?.(false);
+        return;
+      }
 
-    setIsValidating(true);
+      setIsValidating(true);
 
-    // 使用setTimeout模拟异步验证，避免阻塞UI
-    setTimeout(() => {
-      const result = validateUrlSync(url, {
-        allowHttp: true,
-        allowLocalhost: true,
-        allowIP: true
-      });
+      // 使用setTimeout模拟异步验证，避免阻塞UI
+      setTimeout(() => {
+        const result = validateUrlSync(url, {
+          allowHttp: true,
+          allowLocalhost: true,
+          allowIP: true,
+        });
 
-      setValidationResult(result);
-      onValidationChange?.(result?.isValid, result);
-      setIsValidating(false);
-    }, 100);
-  }, [onValidationChange]);
+        setValidationResult(result);
+        onValidationChange?.(result?.isValid, result);
+        setIsValidating(false);
+      }, 100);
+    },
+    [onValidationChange]
+  );
 
   // 防抖验证
   useEffect(() => {
@@ -84,9 +93,12 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
   }, [validationResult, value, onChange]);
 
   // 应用示例URL
-  const handleApplyExample = useCallback((example: string) => {
-    onChange(example);
-  }, [onChange]);
+  const handleApplyExample = useCallback(
+    (example: string) => {
+      onChange(example);
+    },
+    [onChange]
+  );
 
   // 在浏览器中打开URL
   const handleOpenInBrowser = useCallback(() => {
@@ -140,24 +152,27 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
         <input
           type="url"
           value={value}
-          onChange={(e) => onChange(e?.target.value)}
+          onChange={e => onChange(e?.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          className={`enhanced-url-input w-full pl-14 sm:pl-16 pr-16 sm:pr-18 py-2.5 sm:py-3 text-sm bg-gray-700/50 border ${getBorderStyle} rounded-lg text-white placeholder-gray-400 focus:ring-1 focus:ring-current transition-all duration-200 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`url-input w-full pl-14 sm:pl-16 pr-16 sm:pr-18 py-2.5 sm:py-3 text-sm bg-gray-700/50 border ${getBorderStyle} rounded-lg text-white placeholder-gray-400 focus:ring-1 focus:ring-current transition-all duration-200 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
 
         <div className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1.5">
           {/* 自动修复按钮 */}
-          {autoFix && validationResult?.autoFixes && validationResult.autoFixes.length > 0 && validationResult?.correctedUrl !== value && (
-            <button
-              type="button"
-              onClick={handleAutoFix}
-              className="p-1 hover:bg-gray-600/50 rounded transition-colors"
-              title="自动修复URL"
-            >
-              <Zap className="h-4 w-4 text-yellow-400" />
-            </button>
-          )}
+          {autoFix &&
+            validationResult?.autoFixes &&
+            validationResult.autoFixes.length > 0 &&
+            validationResult?.correctedUrl !== value && (
+              <button
+                type="button"
+                onClick={handleAutoFix}
+                className="p-1 hover:bg-gray-600/50 rounded transition-colors"
+                title="自动修复URL"
+              >
+                <Zap className="h-4 w-4 text-yellow-400" />
+              </button>
+            )}
 
           {/* 在浏览器中打开 */}
           {validationResult?.isValid && (
@@ -284,9 +299,4 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
     </div>
   );
 };
-
-export default EnhancedUrlInput;
-
-// 为了兼容性，也导出为 UrlInput
-export { EnhancedUrlInput as UrlInput };
-
+export default UrlInput;

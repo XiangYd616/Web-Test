@@ -5,8 +5,7 @@
  */
 
 import Logger from '@/utils/logger';
-import type { UserSession } from '../../types/auth.types';
-import type { User } from '../../types/auth/models';
+import type { User } from '../../types/auth.types';
 import { defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
@@ -620,14 +619,16 @@ export class SessionManager {
         throw new Error('已达到最大并发会话数限制');
 
       case 'terminate_oldest':
-        const oldestSession = userSessions.sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        )[0];
-        if (oldestSession) {
-          await this.terminateSession(oldestSession.id, 'concurrent_limit');
-          warnings?.push('已终止最旧的会话');
+        {
+          const oldestSession = userSessions.sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          )[0];
+          if (oldestSession) {
+            await this.terminateSession(oldestSession.id, 'concurrent_limit');
+            warnings?.push('已终止最旧的会话');
+          }
+          break;
         }
-        break;
 
       case 'terminate_all_others':
         for (const session of userSessions) {

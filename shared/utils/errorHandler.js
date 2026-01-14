@@ -146,7 +146,7 @@ const HTTP_STATUS_CODES = {
 
 // ==================== 核心统一错误处理类 ====================
 
-class UnifiedErrorHandler {
+class ErrorHandler {
   constructor(config = {}) {
     this.config = {
       enableLogging: config.enableLogging !== false,
@@ -229,7 +229,7 @@ class UnifiedErrorHandler {
       this.handleError(new Error(`Unhandled Rejection: ${reason}`), {
         type: 'unhandledRejection',
         severity: ErrorSeverity.HIGH,
-        promise: promise
+        promise
       });
     });
 
@@ -281,9 +281,9 @@ class UnifiedErrorHandler {
     const errorId = this.generateErrorId();
 
     // 基本错误信息
-    let standardError = {
+    const standardError = {
       id: errorId,
-      timestamp: timestamp,
+      timestamp,
       message: error.message || '未知错误',
       code: context.code || this.detectErrorCode(error),
       severity: context.severity || this.detectErrorSeverity(error),
@@ -473,7 +473,7 @@ class UnifiedErrorHandler {
   /**
    * 记录错误日志
    */
-  logError(error, context) {
+  logError(error, _context) {
     const logEntry = {
       timestamp: error.timestamp.toISOString(),
       level: this.config.logLevel,
@@ -504,7 +504,7 @@ class UnifiedErrorHandler {
   /**
    * 控制台日志输出
    */
-  logToConsole(error, logEntry) {
+  logToConsole(error, _logEntry) {
     const severityIcons = {
       [ErrorSeverity.LOW]: '💡',
       [ErrorSeverity.MEDIUM]: '⚠️',
@@ -544,7 +544,7 @@ class UnifiedErrorHandler {
   /**
    * 错误报告（发送到外部服务）
    */
-  reportError(error, context) {
+  reportError(error, _context) {
     // 这里可以集成第三方错误报告服务
     // 如 Sentry, Bugsnag, LogRocket 等
     console.log('📢 错误已报告:', {
@@ -629,7 +629,7 @@ class UnifiedErrorHandler {
       severity: ErrorSeverity.CRITICAL,
       type: 'FallbackError',
       message: '错误处理器内部错误',
-      originalError: originalError,
+      originalError,
       context: {},
       metadata: {
         service: this.config.serviceName,
@@ -680,7 +680,7 @@ class UnifiedErrorHandler {
 // ==================== 导出 ====================
 
 module.exports = {
-  UnifiedErrorHandler,
+  ErrorHandler,
   ErrorCode,
   ErrorSeverity,
   HTTP_STATUS_CODES

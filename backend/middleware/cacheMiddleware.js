@@ -1,4 +1,4 @@
-/**
+windsurf.cascadeCommandsAllowList/**
  * 简化的缓存中间件
  * 使用内存缓存提供基础缓存功能
  */

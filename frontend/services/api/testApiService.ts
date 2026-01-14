@@ -8,10 +8,9 @@
  */
 
 import Logger from '@/utils/logger';
-import type { ApiResponse, TestCallbacks } from '../../types/api/index';
-import type { TestConfig } from '../../types/base.types';
+import type { ApiResponse, TestCallbacks, TestRunConfig } from '../../types/api/index';
+import type { TestExecution, TestHistory, TestStatus } from '../../types/compat/testTypes';
 import { TestStatus as TestStatusEnum } from '../../types/enums';
-import type { TestExecution, TestHistory, TestStatus, TestType } from '../../types/test/testTypes';
 import { PermissionChecker, _TestPermissions as TestPermissions } from '../auth/authDecorator';
 import { apiService } from './apiService';
 
@@ -21,7 +20,7 @@ interface TestApiClient {
   post<T = any>(url: string, data?: unknown, config?: any): Promise<ApiResponse<T>>;
   put<T = any>(url: string, data?: unknown, config?: any): Promise<ApiResponse<T>>;
   delete<T = any>(url: string, config?: any): Promise<ApiResponse<T>>;
-  executeTest(config: TestConfig): Promise<ApiResponse<TestExecution>>;
+  executeTest(config: TestRunConfig): Promise<ApiResponse<TestExecution>>;
 }
 
 interface RequestConfig {
@@ -81,7 +80,7 @@ export interface LocalSecurityTestConfig {
 }
 
 // API测试配置
-export interface ApiTestConfig {
+export interface ApiRequestTestConfig {
   endpoints: Array<{
     url: string;
     method: string;
@@ -234,7 +233,7 @@ class TestApiService implements TestApiClient {
    * 执行测试 - 实现TestApiClient接口
    * 根据测试类型动态检查权限
    */
-  async executeTest(config: UnifiedTestConfig): Promise<ApiResponse<TestExecution>> {
+  async executeTest(config: TestRunConfig): Promise<ApiResponse<TestExecution>> {
     try {
       // 根据测试类型检查相应权限
       const user = PermissionChecker.getCurrentUser();
@@ -281,8 +280,8 @@ class TestApiService implements TestApiClient {
       if (response.success && response.data) {
         const testExecution: TestExecution = {
           id: response.data.id,
-          type: config?.testType as TestType,
-          testType: config?.testType as TestType,
+          type: config?.testType as unknown as TestExecution['type'],
+          testType: config?.testType as unknown as TestExecution['testType'],
           status: response.data.status as TestStatus,
           progress: response.data.progress || 0,
           startTime: response.data.started_at || new Date().toISOString(),
@@ -458,7 +457,7 @@ class TestApiService implements TestApiClient {
   /**
    * 执行API测试 - 适配后端API
    */
-  async executeApiTest(config: ApiTestConfig): Promise<ApiResponse<TestExecutionResponse>> {
+  async executeApiTest(config: ApiRequestTestConfig): Promise<ApiResponse<TestExecutionResponse>> {
     return apiService.post(`${this.baseUrl}/api-test`, {
       baseUrl: config?.endpoints[0]?.url || '',
       endpoints: config?.endpoints,
@@ -631,7 +630,7 @@ class TestApiService implements TestApiClient {
     configuration: Record<string, any> = {}
   ): Promise<ApiResponse<TestExecutionResponse>> {
     const result = await this.executeTest({
-      testType: test_type,
+      testType: test_type as TestRunConfig['testType'],
       target: target_url,
       options: configuration,
     });
@@ -786,14 +785,14 @@ class TestApiService implements TestApiClient {
   /**
    * 获取测试状态
    */
-  async getTestStatus(testId: string, testType: TestType): Promise<ApiResponse<TestExecution>> {
+  async getTestStatus(testId: string, testType: string): Promise<ApiResponse<TestExecution>> {
     const response = await apiService.get(`${this.baseUrl}/${testType}/status/${testId}`);
 
     if (response.success && response.data) {
       const testExecution: TestExecution = {
         id: response.data.id || testId,
-        type: testType,
-        testType,
+        type: testType as unknown as TestExecution['type'],
+        testType: testType as unknown as TestExecution['testType'],
         status: response.data.status as TestStatus,
         progress: response.data.progress || 0,
         startTime: response.data.started_at || new Date().toISOString(),
@@ -816,21 +815,21 @@ class TestApiService implements TestApiClient {
   /**
    * 取消测试
    */
-  async cancelTest(testId: string, testType?: TestType): Promise<ApiResponse<void>> {
+  async cancelTest(testId: string, testType?: string): Promise<ApiResponse<void>> {
     return apiService.post(`${this.baseUrl}/${testType}/cancel/${testId}`);
   }
 
   /**
    * 获取测试结果
    */
-  async getTestResult(testId: string, testType?: TestType): Promise<ApiResponse<any>> {
+  async getTestResult(testId: string, testType?: string): Promise<ApiResponse<any>> {
     return apiService.get(`${this.baseUrl}/${testType}/result/${testId}`);
   }
 
   /**
    * 获取测试历史
    */
-  async getTestHistory(testType?: TestType, limit?: number): Promise<ApiResponse<TestHistory>> {
+  async getTestHistory(testType?: string, limit?: number): Promise<ApiResponse<TestHistory>> {
     const params = new URLSearchParams();
     if (testType) params?.append('testType', testType);
     if (limit !== undefined) params?.append('limit', limit.toString());
@@ -870,7 +869,7 @@ class TestApiService implements TestApiClient {
   /**
    * 启动实时测试
    */
-  async startRealtimeTest(config: UnifiedTestConfig, callbacks: TestCallbacks): Promise<string> {
+  async startRealtimeTest(config: TestRunConfig, callbacks: TestCallbacks): Promise<string> {
     // 启动测试并获取测试ID
     const response = await this.executeTest(config);
 
@@ -881,7 +880,7 @@ class TestApiService implements TestApiClient {
     const testId = response.data.id;
 
     // 启动实时监控
-    this.startstreamingMonitoring(testId, config?.testType as TestType, callbacks);
+    this.startstreamingMonitoring(testId, config?.testType, callbacks);
 
     return testId;
   }
@@ -891,7 +890,7 @@ class TestApiService implements TestApiClient {
    */
   private startstreamingMonitoring(
     testId: string,
-    testType: TestType,
+    testType: string,
     callbacks: TestCallbacks
   ): void {
     const pollInterval = 1000; // 1秒轮询一次

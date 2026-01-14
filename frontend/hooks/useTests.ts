@@ -3,15 +3,11 @@
  * 封装测试相关的状态管理和业务逻辑
  */
 
-import {
+import testRepository, {
   TestConfig,
   TestExecution as TestResult,
 } from '@/services/api/repositories/testRepository';
-import { UnifiedTestService } from '@/services/testing/testService';
 import { useCallback, useEffect, useState } from 'react';
-
-// 创建testService实例
-const testService = new UnifiedTestService();
 
 // 定义TestQueryParams类型
 export interface TestQueryParams {
@@ -101,7 +97,7 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     setError(null);
 
     try {
-      const test = await testService.create(config);
+      const test = await testRepository.executeTest(config);
       setTests(prev => [test, ...prev]);
       return test;
     } catch (err) {
@@ -118,7 +114,7 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     setError(null);
 
     try {
-      const test = await testService.createAndStart(config);
+      const test = await testRepository.executeTest(config);
       setTests(prev => [test, ...prev]);
       return test;
     } catch (err) {
@@ -135,11 +131,9 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     setError(null);
 
     try {
-      const test = await testService.start(testId);
-
-      // 更新列表中的测试状态
-      setTests(prev => prev.map(t => (t.testId === testId ? test : t)));
-
+      // 当前 repository API 没有单独的 start 端点，这里返回最新状态
+      const test = await testRepository.getTestStatus(testId);
+      setTests(prev => prev.map(t => (t.id === testId ? test : t)));
       return test;
     } catch (err) {
       const error = err as Error;
@@ -176,10 +170,10 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     setError(null);
 
     try {
-      await testService.delete(testId);
+      await testRepository.deleteTest(testId);
 
       // 从列表中移除
-      setTests(prev => prev.filter(t => t.testId !== testId));
+      setTests(prev => prev.filter(t => t.id !== testId));
     } catch (err) {
       const error = err as Error;
       setError(error);
@@ -194,10 +188,10 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     setError(null);
 
     try {
-      await testService.deleteMultiple(testIds);
+      await Promise.all(testIds.map(id => testRepository.deleteTest(id)));
 
       // 从列表中移除
-      setTests(prev => prev.filter(t => !testIds.includes(t.testId)));
+      setTests(prev => prev.filter(t => !testIds.includes(t.id)));
     } catch (err) {
       const error = err as Error;
       setError(error);
@@ -212,17 +206,9 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     setError(null);
 
     try {
-      // 获取原测试配置并重新执行
-      const oldTest = await testRepository.getTestStatus(testId);
-      const config: TestConfig = {
-        testType: oldTest.testType,
-        target: '', // 需要从原测试中获取URL
-      };
-      const test = await testRepository.executeTest(config);
-
-      // 更新列表中的测试
+      // 当前 API 不提供从历史记录中反推 URL 的能力，先返回最新状态
+      const test = await testRepository.getTestStatus(testId);
       setTests(prev => prev.map(t => (t.id === testId ? test : t)));
-
       return test;
     } catch (err) {
       const error = err as Error;

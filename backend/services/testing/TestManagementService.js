@@ -6,15 +6,15 @@
 const { v4: uuidv4 } = require('uuid');
 const EventEmitter = require('events');
 const DatabaseService = require('../core/DatabaseService');
-const WebSocketManager = require('../streaming/EnhancedWebSocketManager');
+const WebSocketManager = require('../streaming/WebSocketManager');
 const ReportGenerator = require('../reporting/ReportGenerator');
 
 // 引入各个测试引擎
 const PerformanceTestEngine = require('../../engines/performance/PerformanceTestEngine');
 const SecurityTestEngine = require('../../engines/security/SecurityTestEngine');
 const SEOTestEngine = require('../../engines/seo/SEOTestEngine');
-const APITestEngine = require('../../engines/api/APITestEngine');
-const StressTestEngine = require('../../engines/stress/StressTestEngine');
+const APITestEngine = require('../../engines/api/apiTestEngine');
+const StressTestEngine = require('../../engines/stress/stressTestEngine');
 const DatabaseTestEngine = require('../../engines/database/DatabaseTestEngine');
 
 

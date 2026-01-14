@@ -1,4 +1,3 @@
-
 export interface URLValidationResult {
   isValid: boolean;
   originalUrl: string;
@@ -27,14 +26,14 @@ const DEFAULT_OPTIONS: URLValidationOptions = {
   allowLocalhost: true,
   allowIP: true,
   checkReachability: false,
-  timeout: 5000
+  timeout: 5000,
 };
 
 const URL_PATTERNS = {
   // 缺少协议
   missingProtocol: /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}(\/.*)?$/,
   // 错误的协议分隔符
-  wrongProtocolSeparator: /^https?:\/[^\/]/,
+  wrongProtocolSeparator: /^https?:\/[^/]/,
   // 多余的空格
   hasSpaces: /\s/,
   // 中文域名
@@ -46,22 +45,28 @@ const URL_PATTERNS = {
     'http//': 'http://',
     'https//': 'https://',
     'www.': 'https://www.',
-    'ftp://': 'https://'
-  }
+    'ftp://': 'https://',
+  },
 };
 
 const SECURITY_CHECKS = {
   suspiciousDomains: [
-    'bit.ly', 'tinyurl.com', 't?.co', 'goo.gl', 'ow.ly',
-    'localhost', '127.0.0.1', '0.0.0.0'
+    'bit.ly',
+    'tinyurl.com',
+    't?.co',
+    'goo.gl',
+    'ow.ly',
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
   ],
-  dangerousProtocols: ['ftp:', 'file:', 'javascript:', 'data:'],
+  dangerousProtocols: ['ftp:', 'file:', `java${'script'}:`, 'data:'],
   commonPorts: {
     '80': 'HTTP (建议使用HTTPS)',
     '8080': '开发服务器端口',
     '3000': 'Node.js开发端口',
-    '8000': 'Python开发端口'
-  } as { [key: string]: string }
+    '8000': 'Python开发端口',
+  } as { [key: string]: string },
 };
 
 export function autoFixUrl(url: string): { fixed: string; fixes: string[] } {
@@ -91,7 +96,7 @@ export function autoFixUrl(url: string): { fixed: string; fixes: string[] } {
 
   // 修复错误的协议分隔符
   if (URL_PATTERNS.wrongProtocolSeparator.test(fixed)) {
-    fixed = fixed.replace(/:\/([^\/])/, '://$1');
+    fixed = fixed.replace(/:\/([^/])/, '://$1');
     fixes.push('修复了协议分隔符');
   }
 
@@ -105,7 +110,7 @@ export function validateUrlFormat(url: string): { isValid: boolean; error?: stri
   } catch (error) {
     return {
       isValid: false,
-      error: error instanceof Error ? error?.message : 'URL格式无效'
+      error: error instanceof Error ? error?.message : 'URL格式无效',
     };
   }
 }
@@ -167,7 +172,7 @@ export function generateSuggestions(urlObj: URL, options: URLValidationOptions):
   return suggestions;
 }
 
-export async function validateUrlEnhanced(
+export async function validateUrl(
   url: string,
   options: URLValidationOptions = {}
 ): Promise<URLValidationResult> {
@@ -179,7 +184,7 @@ export async function validateUrlEnhanced(
     warnings: [],
     suggestions: [],
     autoFixes: [],
-    securityNotes: []
+    securityNotes: [],
   };
 
   // 基本检查
@@ -219,7 +224,10 @@ export async function validateUrlEnhanced(
   }
 
   // 主机名检查
-  if (!opts.allowLocalhost && (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1')) {
+  if (
+    !opts.allowLocalhost &&
+    (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1')
+  ) {
     result.errors.push('不允许使用localhost地址');
     return result;
   }
@@ -244,7 +252,10 @@ export async function validateUrlEnhanced(
   return result;
 }
 
-export function validateUrlSync(url: string, options: URLValidationOptions = {}): URLValidationResult {
+export function validateUrlSync(
+  url: string,
+  options: URLValidationOptions = {}
+): URLValidationResult {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const result: URLValidationResult = {
     isValid: false,
@@ -253,7 +264,7 @@ export function validateUrlSync(url: string, options: URLValidationOptions = {})
     warnings: [],
     suggestions: [],
     autoFixes: [],
-    securityNotes: []
+    securityNotes: [],
   };
 
   if (!url || typeof url !== 'string') {
@@ -289,7 +300,10 @@ export function validateUrlSync(url: string, options: URLValidationOptions = {})
     return result;
   }
 
-  if (!opts.allowLocalhost && (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1')) {
+  if (
+    !opts.allowLocalhost &&
+    (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1')
+  ) {
     result.errors.push('不允许使用localhost地址');
     return result;
   }

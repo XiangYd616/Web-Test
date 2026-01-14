@@ -45,7 +45,7 @@ export interface ErrorHandlingResult {
   userMessage: string;
   error: ApiError;
   context: ErrorContext;
-  enhancedError?: any; // 来自utils/errorHandler的增强错误
+  errorDetails?: any; // 来自utils/errorHandler的增强错误
 }
 
 // 默认配置
@@ -133,7 +133,7 @@ export class ApiErrorHandler {
     const shouldRetry = this.shouldRetryRequest(apiError.code, errorContext.requestId);
 
     // 创建增强错误信息
-    const enhancedError = {
+    const errorDetails = {
       ...(typeof error === 'object' && error !== null ? error : { error }),
       url: errorContext.url,
       operation: errorContext.operation,
@@ -154,7 +154,7 @@ export class ApiErrorHandler {
       userMessage,
       error: apiError,
       context: errorContext,
-      enhancedError,
+      errorDetails,
     };
   }
 
@@ -625,7 +625,12 @@ export const ErrorHandlerUtils = {
    */
   formatErrorForDisplay: (error: ApiError): string => {
     const userMessage = apiErrorHandler.getUserFriendlyMessage(error.code);
-    return `${userMessage}${error.details?.status ? ` (${error.details.status})` : ''}`;
+    const status =
+      error.details && typeof error.details === 'object' && 'status' in (error.details as object)
+        ? (error.details as { status?: unknown }).status
+        : undefined;
+
+    return `${userMessage}${status ? ` (${String(status)})` : ''}`;
   },
 
   /**

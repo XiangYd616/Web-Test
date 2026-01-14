@@ -8,7 +8,7 @@ import type {
   LoginCredentials as BaseLoginCredentials,
   RegisterData as BaseRegisterData,
   User as BaseUser,
-} from '../../../types/auth/models';
+} from '../../../types/auth.types';
 
 // 使用类型
 export type User = BaseUser;
@@ -17,7 +17,7 @@ export type LoginCredentials = BaseLoginCredentials;
 export type RegisterData = BaseRegisterData;
 
 // 企业级认证配置
-export interface EnhancedAuthConfig {
+export interface AuthServiceConfig {
   // Token配置
   accessTokenExpiry: number; // 访问token过期时间（秒）
   refreshTokenExpiry: number; // 刷新token过期时间（秒）

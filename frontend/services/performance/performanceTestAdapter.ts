@@ -1,5 +1,6 @@
 import {
   PERFORMANCE_CONFIG_PRESETS,
+  PerformanceConfig,
   PerformanceTestProgress,
   PerformanceTestResult,
 } from '../../types/performance.types';
@@ -45,13 +46,13 @@ export class PerformanceTestAdapter {
   ): Promise<any> {
     try {
       // 转换配置格式
-      const config = this.convertLegacyConfig(config);
+      const convertedConfig = this.convertLegacyConfig(config);
 
       // 转换进度回调
       const onProgress = callbacks ? this.convertProgressCallback(callbacks) : undefined;
 
       // 执行性能测试
-      const result = await performanceTestCore.runPerformanceTest(config.url, config, {
+      const result = await performanceTestCore.runPerformanceTest(config.url, convertedConfig, {
         onProgress,
         saveResults: true,
       });
@@ -85,7 +86,7 @@ export class PerformanceTestAdapter {
       includeAccessibility?: boolean;
     } = {}
   ): Promise<any> {
-    const config: Partial<UnifiedPerformanceConfig> = {
+    const config: Partial<PerformanceConfig> = {
       level: options.level || 'standard',
       device: options.device || 'desktop',
       pageSpeed: true,
@@ -135,7 +136,7 @@ export class PerformanceTestAdapter {
       checkMobile?: boolean;
     } = {}
   ): Promise<any> {
-    const config: Partial<UnifiedPerformanceConfig> = {
+    const config: Partial<PerformanceConfig> = {
       level: 'basic', // SEO测试使用基础性能检测
       device: options.device || 'desktop',
       pageSpeed: true,
@@ -181,7 +182,7 @@ export class PerformanceTestAdapter {
       retries?: number;
     } = {}
   ): Promise<any> {
-    const config: Partial<UnifiedPerformanceConfig> = {
+    const config: Partial<PerformanceConfig> = {
       level: 'basic',
       device: 'desktop',
       pageSpeed: true,
@@ -220,7 +221,7 @@ export class PerformanceTestAdapter {
    */
   private static convertLegacyConfig(
     legacy: LegacyPerformanceTestConfig
-  ): Partial<UnifiedPerformanceConfig> {
+  ): Partial<PerformanceConfig> {
     return {
       level: legacy.mode === 'lighthouse' ? 'comprehensive' : legacy.mode,
       pageSpeed: legacy.checkPageSpeed,
@@ -306,7 +307,7 @@ export async function getPerformanceMetrics(
   vitals?: any;
   mobile?: any;
 }> {
-  const config: Partial<UnifiedPerformanceConfig> = {
+  const config: Partial<PerformanceConfig> = {
     level: 'basic',
     pageSpeed: true,
     coreWebVitals: options.includeVitals || false,

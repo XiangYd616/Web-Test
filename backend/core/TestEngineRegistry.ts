@@ -1,21 +1,21 @@
 /**
  * 测试引擎注册器 - 插件管理核心
- * 
+ *
  * 负责管理所有测试引擎插件的注册、执行和协调
  */
 
 import {
-  ITestEngine,
-  TestEngineType,
-  TestEngineRegistration,
   BaseTestConfig,
   BaseTestResult,
-  TestProgress,
-  TestExecutionOptions,
   CompositeTestConfig,
   CompositeTestResult,
+  ITestEngine,
+  TestEngineRegistration,
+  TestEngineType,
+  TestExecutionOptions,
+  TestProgress,
   TestStatus,
-  ValidationResult
+  ValidationResult,
 } from '../../shared/types/testEngine.types';
 
 /**
@@ -40,8 +40,7 @@ export class TestEngineRegistry {
   /**
    * 私有构造函数，确保单例
    */
-  private constructor() {
-  }
+  private constructor() {}
 
   /**
    * 初始化注册器
@@ -53,7 +52,7 @@ export class TestEngineRegistry {
     }
 
     console.log('🚀 开始初始化测试引擎注册器...');
-    
+
     // 初始化所有已注册的引擎
     for (const [type, registration] of this.engines) {
       if (registration.enabled) {
@@ -80,7 +79,7 @@ export class TestEngineRegistry {
       priority?: number;
       enabled?: boolean;
       dependencies?: TestEngineType[];
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     } = {}
   ): void {
     const registration: TestEngineRegistration = {
@@ -88,7 +87,7 @@ export class TestEngineRegistry {
       priority: options.priority || 0,
       enabled: options.enabled !== false,
       dependencies: options.dependencies,
-      metadata: options.metadata
+      metadata: options.metadata,
     };
 
     // 验证依赖关系
@@ -137,7 +136,7 @@ export class TestEngineRegistry {
     type: TestEngineType;
     name: string;
     enabled: boolean;
-    capabilities: any;
+    capabilities: unknown;
   }> {
     const available = [];
     for (const [type, registration] of this.engines) {
@@ -146,7 +145,7 @@ export class TestEngineRegistry {
           type,
           name: registration.engine.name,
           enabled: registration.enabled,
-          capabilities: registration.engine.capabilities
+          capabilities: registration.engine.capabilities,
         });
       }
     }
@@ -163,7 +162,7 @@ export class TestEngineRegistry {
         isValid: false,
         errors: [`测试引擎 ${type} 未注册`],
         warnings: [],
-        suggestions: []
+        suggestions: [],
       };
     }
 
@@ -172,21 +171,19 @@ export class TestEngineRegistry {
         isValid: false,
         errors: [`测试引擎 ${type} 已禁用`],
         warnings: [],
-        suggestions: ['请联系管理员启用此测试引擎']
+        suggestions: ['请联系管理员启用此测试引擎'],
       };
     }
 
     // 检查依赖
     if (registration.dependencies) {
-      const missingDeps = registration.dependencies.filter(
-        dep => !this.engines.get(dep)?.enabled
-      );
+      const missingDeps = registration.dependencies.filter(dep => !this.engines.get(dep)?.enabled);
       if (missingDeps.length > 0) {
         return {
           isValid: false,
           errors: [`缺少依赖的测试引擎: ${missingDeps.join(', ')}`],
           warnings: [],
-          suggestions: ['请先启用依赖的测试引擎']
+          suggestions: ['请先启用依赖的测试引擎'],
         };
       }
     }
@@ -211,7 +208,10 @@ export class TestEngineRegistry {
       throw new Error(`配置验证失败: ${validation.errors.join(', ')}`);
     }
 
-    const registration = this.engines.get(type)!;
+    const registration = this.engines.get(type);
+    if (!registration) {
+      throw new Error(`测试引擎 ${type} 未注册`);
+    }
     const engine = registration.engine;
 
     // 生成测试ID
@@ -223,7 +223,7 @@ export class TestEngineRegistry {
       progress: 0,
       currentStep: '准备测试环境',
       startTime: new Date(),
-      messages: []
+      messages: [],
     };
 
     this.runningTests.set(testId, progress);
@@ -255,7 +255,6 @@ export class TestEngineRegistry {
 
       console.log(`✅ 测试引擎 ${type} 执行成功`);
       return result;
-
     } catch (error) {
       // 错误处理
       if (engine.lifecycle?.onError) {
@@ -277,7 +276,6 @@ export class TestEngineRegistry {
     config: CompositeTestConfig,
     options: TestExecutionOptions = {}
   ): Promise<CompositeTestResult> {
-
     const startTime = new Date();
     const results = new Map<TestEngineType, BaseTestResult>();
     const errors: Array<{ engine: TestEngineType; error: Error }> = [];
@@ -285,22 +283,18 @@ export class TestEngineRegistry {
     // 根据是否并行执行选择策略
     if (options.parallel) {
       // 并行执行
-      const promises = config.engines.map(async (engineType) => {
+      const promises = config.engines.map(async engineType => {
         try {
           const engineConfig = {
             ...config,
-            ...(config.engineConfigs?.[engineType] || {})
+            ...(config.engineConfigs?.[engineType] || {}),
           };
 
-          const result = await this.execute(
-            engineType,
-            engineConfig,
-            (progress) => {
-              if (options.progressCallback) {
-                options.progressCallback(engineType, progress);
-              }
+          const result = await this.execute(engineType, engineConfig, progress => {
+            if (options.progressCallback) {
+              options.progressCallback(engineType, progress);
             }
-          );
+          });
 
           results.set(engineType, result);
 
@@ -309,7 +303,7 @@ export class TestEngineRegistry {
           }
         } catch (error) {
           errors.push({ engine: engineType, error: error as Error });
-          
+
           if (options.errorCallback) {
             options.errorCallback(engineType, error as Error);
           }
@@ -333,18 +327,14 @@ export class TestEngineRegistry {
         try {
           const engineConfig = {
             ...config,
-            ...(config.engineConfigs?.[engineType] || {})
+            ...(config.engineConfigs?.[engineType] || {}),
           };
 
-          const result = await this.execute(
-            engineType,
-            engineConfig,
-            (progress) => {
-              if (options.progressCallback) {
-                options.progressCallback(engineType, progress);
-              }
+          const result = await this.execute(engineType, engineConfig, progress => {
+            if (options.progressCallback) {
+              options.progressCallback(engineType, progress);
             }
-          );
+          });
 
           results.set(engineType, result);
 
@@ -353,7 +343,7 @@ export class TestEngineRegistry {
           }
         } catch (error) {
           errors.push({ engine: engineType, error: error as Error });
-          
+
           if (options.errorCallback) {
             options.errorCallback(engineType, error as Error);
           }
@@ -386,16 +376,20 @@ export class TestEngineRegistry {
           criticalIssues.push({
             engine: engineType,
             issue: error,
-            severity: 'high' as const
+            severity: 'high' as const,
           });
         }
       }
     }
 
     // 构建组合测试结果
+    const compositeEngineType = config.engines.includes(TestEngineType.INFRASTRUCTURE)
+      ? TestEngineType.INFRASTRUCTURE
+      : TestEngineType.WEBSITE;
+
     const compositeResult: CompositeTestResult = {
       testId: `composite_${Date.now()}`,
-      engineType: TestEngineType.UNIFIED,
+      engineType: compositeEngineType,
       status: errors.length === 0 ? TestStatus.COMPLETED : TestStatus.FAILED,
       score: overallScore,
       startTime,
@@ -407,8 +401,8 @@ export class TestEngineRegistry {
         results: Object.fromEntries(results),
         errors: errors.map(e => ({
           engine: e.engine,
-          message: e.error.message
-        }))
+          message: e.error.message,
+        })),
       },
       engineResults: results,
       successCount,
@@ -418,7 +412,7 @@ export class TestEngineRegistry {
       criticalIssues,
       errors: errors.map(e => `${e.engine}: ${e.error.message}`),
       warnings: [],
-      recommendations: []
+      recommendations: [],
     };
 
     console.log(`✅ 组合测试完成: ${successCount}/${config.engines.length} 成功`);
@@ -435,7 +429,7 @@ export class TestEngineRegistry {
     }
 
     // 查找对应的引擎并取消
-    for (const [type, registration] of this.engines) {
+    for (const [_type, registration] of this.engines) {
       try {
         await registration.engine.cancel(testId);
         console.log(`✅ 已取消测试: ${testId}`);
@@ -461,7 +455,7 @@ export class TestEngineRegistry {
   public getRunningTests(): Array<{ testId: string; progress: TestProgress }> {
     return Array.from(this.runningTests.entries()).map(([testId, progress]) => ({
       testId,
-      progress
+      progress,
     }));
   }
 
@@ -469,7 +463,6 @@ export class TestEngineRegistry {
    * 清理所有资源
    */
   public async cleanup(): Promise<void> {
-
     // 取消所有运行中的测试
     for (const testId of this.runningTests.keys()) {
       try {
@@ -508,12 +501,12 @@ export class TestEngineRegistry {
     engineTypes: TestEngineType[];
   } {
     const enabledEngines = Array.from(this.engines.values()).filter(r => r.enabled).length;
-    
+
     return {
       totalEngines: this.engines.size,
       enabledEngines,
       runningTests: this.runningTests.size,
-      engineTypes: Array.from(this.engines.keys())
+      engineTypes: Array.from(this.engines.keys()),
     };
   }
 }

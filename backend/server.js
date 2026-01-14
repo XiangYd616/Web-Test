@@ -30,7 +30,7 @@ const comparisonRoutes = require('./routes/comparison');
 // 导入中间件
 const authMiddleware = require('./middleware/auth');
 // 导入统一错误处理系统
-const { errorMiddleware, notFoundHandler, handleError, ErrorCode } = require('./middleware/UnifiedErrorHandler');
+const { errorMiddleware, notFoundHandler, handleError, ErrorCode } = require('./middleware/errorHandler');
 const { requestLogger, performanceMonitor, apiStats } = require('./middleware/logger');
 
 // 创建Express应用

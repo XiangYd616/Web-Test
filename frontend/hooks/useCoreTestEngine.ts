@@ -1,25 +1,25 @@
 ﻿/**
  * 核心测试引擎Hook - 统一重构版本
- * 
+ *
  * 整合功能：
  * - useTest.ts 的测试管理功能
- * - useTestManager.ts 的API调用功能  
+ * - useTestManager.ts 的API调用功能
  * - useUnifiedTestEngine.ts 的统一引擎功能
  * - useTestState.ts 的状态管理功能
  * - useTestProgress.ts 的进度监控功能
- * 
+ *
  * 设计目标：
  * - 消除代码重复
  * - 提供统一的测试接口
  * - 支持所有测试类型
  * - 保持向后兼容性
- * 
+ *
  * 文件路径: frontend/hooks/useCoreTestEngine.ts
  */
 
 import Logger from '@/utils/logger';
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { testApiClient, TestResult, TestProgress } from '../services/api/test/testApiClient';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { testApiClient, TestProgress } from '../services/api/test/testApiClient';
 import { testProgressService } from '../services/api/testProgressService';
 import backgroundTestManager from '../services/backgroundTestManager';
 import { TestType } from '../types/enums';
@@ -38,7 +38,7 @@ export interface TestConfig {
 }
 
 // 统一的测试结果接口
-export interface UnifiedTestResult {
+export interface CoreTestResult {
   id: string;
   testId: string;
   engineId: string;
@@ -50,11 +50,13 @@ export interface UnifiedTestResult {
   results: Record<string, any>;
   errors?: string[];
   warnings?: string[];
-  recommendations?: string[] | {
-    immediate?: string[];
-    shortTerm?: string[];
-    longTerm?: string[];
-  };
+  recommendations?:
+    | string[]
+    | {
+        immediate?: string[];
+        shortTerm?: string[];
+        longTerm?: string[];
+      };
   timestamp: string;
   duration: number;
   url?: string;
@@ -73,7 +75,7 @@ export interface TestState {
   isRunning: boolean;
   progress: number;
   currentStep: string;
-  result: UnifiedTestResult | null;
+  result: CoreTestResult | null;
   error: string | null;
   testId: string | null;
   startTime: number | null;
@@ -100,7 +102,7 @@ export interface CoreTestEngineOptions {
   autoStart?: boolean;
 
   // 回调函数
-  onTestComplete?: (result: UnifiedTestResult) => void;
+  onTestComplete?: (result: CoreTestResult) => void;
   onTestError?: (error: string) => void;
   onConfigChange?: (config: TestConfig) => void;
   onTestStarted?: (data: any) => void;
@@ -109,7 +111,7 @@ export interface CoreTestEngineOptions {
   onTestCancelled?: (data: any) => void;
   onTestQueued?: (data: any) => void;
   onStatusUpdate?: (data: any) => void;
-  
+
   // 验证函数
   validateConfig?: (config: TestConfig) => { isValid: boolean; errors: string[] };
 }
@@ -121,19 +123,19 @@ export interface CoreTestEngineReturn {
   isLoading: boolean;
   isRunning: boolean;
   progress: number;
-  results: UnifiedTestResult[];
+  results: CoreTestResult[];
   activeTests: any[];
-  testHistory: UnifiedTestResult[];
+  testHistory: CoreTestResult[];
   currentTest: string | null;
   error: string | null;
-  
+
   // 配置管理
   config: TestConfig;
   isConfigValid: boolean;
   configErrors: string[];
   setConfig: (config: TestConfig) => void;
   updateConfig: (key: string, value: any) => void;
-  
+
   // 测试控制
   startTest: (customConfig?: TestConfig) => Promise<string>;
   stopTest: (testId?: string) => Promise<void>;
@@ -141,13 +143,13 @@ export interface CoreTestEngineReturn {
   cancelAllTests: () => Promise<void>;
   resetTest: () => void;
   retryTest: (testId: string) => Promise<string>;
-  
+
   // 进度监控
   currentProgress: TestProgress | null;
   isMonitoring: boolean;
   startMonitoring: (testId: string) => void;
   stopMonitoring: () => void;
-  
+
   // 队列管理
   recordId: string | null;
   phase: string;
@@ -155,7 +157,7 @@ export interface CoreTestEngineReturn {
   queueStats: QueueStats;
   isQueued: boolean;
   canStartTest: boolean;
-  
+
   // 数据获取
   getStats: () => {
     runningTests: number;
@@ -163,19 +165,19 @@ export interface CoreTestEngineReturn {
     failedTests: number;
     totalTests: number;
   };
-  getTestHistory: (filters?: any) => Promise<UnifiedTestResult[]>;
+  getTestHistory: (filters?: any) => Promise<CoreTestResult[]>;
   getTestStatus: (testId: string) => Promise<any>;
-  getTestResult: (testId: string) => Promise<UnifiedTestResult | null>;
-  getTestDetails: (testId: string) => Promise<UnifiedTestResult | null>;
+  getTestResult: (testId: string) => Promise<CoreTestResult | null>;
+  getTestDetails: (testId: string) => Promise<CoreTestResult | null>;
   getConfigurations: () => Promise<TestConfig[]>;
-  
+
   // 配置管理
   saveConfiguration: (config: TestConfig) => Promise<void>;
   deleteConfiguration: (configId: string) => Promise<void>;
-  
+
   // 导出功能
   exportTestResult: (testId: string, format: 'json' | 'pdf' | 'csv') => Promise<Blob>;
-  
+
   // 状态工具
   getState: () => TestState;
   clearError: () => void;
@@ -183,21 +185,21 @@ export interface CoreTestEngineReturn {
   clearCompletedTests: () => void;
   hasRunningTests: () => boolean;
   getActiveTest: (testId: string) => any;
-  
+
   // 连接状态
   isConnected: boolean;
   connectWebSocket: () => void;
   disconnectWebSocket: () => void;
-  
+
   // 测试类型支持
   supportedTypes: string[];
   fetchSupportedTypes: () => Promise<void>;
-  
+
   // 执行相关
   executingTest: boolean;
   executeTest: (params: any) => Promise<string>;
   subscribeToTest: (testId: string) => void;
-  
+
   // 版本信息
   engineVersion?: string;
 }
@@ -225,11 +227,11 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
     onTestCancelled,
     onTestQueued,
     onStatusUpdate,
-    validateConfig
+    validateConfig,
   } = options;
 
   const { recordTestCompletion } = useUserStats();
-  
+
   // Refs
   const abortControllerRef = useRef<AbortController | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -246,19 +248,19 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
     error: null,
     testId: null,
     startTime: null,
-    endTime: null
+    endTime: null,
   });
 
   // UI状态
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<UnifiedTestResult[]>([]);
-  const [testHistory, setTestHistory] = useState<UnifiedTestResult[]>([]);
+  const [results, setResults] = useState<CoreTestResult[]>([]);
+  const [testHistory, setTestHistory] = useState<CoreTestResult[]>([]);
   const [activeTests, setActiveTests] = useState<any[]>([]);
-  
+
   // 进度监控状态
   const [currentProgress, setCurrentProgress] = useState<TestProgress | null>(null);
   const [isMonitoring, setIsMonitoring] = useState(false);
-  
+
   // 队列管理状态
   const [queueState, setQueueState] = useState({
     recordId: null as string | null,
@@ -268,10 +270,10 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
       totalRunning: 0,
       totalQueued: 0,
       maxConcurrent: maxConcurrentTests,
-      estimatedWaitTime: 0
+      estimatedWaitTime: 0,
     } as QueueStats,
     isQueued: false,
-    canStartTest: true
+    canStartTest: true,
   });
 
   // 配置验证状态
@@ -283,8 +285,16 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   // 连接状态
   const [isConnected, setIsConnected] = useState(true);
   const [supportedTypes, setSupportedTypes] = useState<string[]>([
-    'performance', 'security', 'api', 'seo', 'stress', 'compatibility',
-    'network', 'database', 'ux', 'accessibility'
+    'performance',
+    'security',
+    'api',
+    'seo',
+    'stress',
+    'compatibility',
+    'network',
+    'database',
+    'ux',
+    'accessibility',
   ]);
   const [executingTest, setExecutingTest] = useState(false);
 
@@ -312,30 +322,36 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   }, [state.config, validateConfig]);
 
   // 设置配置
-  const setConfig = useCallback((config: TestConfig) => {
-    setState(prev => ({
-      ...prev,
-      config: { ...config },
-      error: null
-    }));
-    onConfigChange?.(config);
-  }, [onConfigChange]);
+  const setConfig = useCallback(
+    (config: TestConfig) => {
+      setState(prev => ({
+        ...prev,
+        config: { ...config },
+        error: null,
+      }));
+      onConfigChange?.(config);
+    },
+    [onConfigChange]
+  );
 
   // 更新单个配置项
-  const updateConfig = useCallback((key: string, value: any) => {
-    setState(prev => {
-      const newConfig = {
-        ...prev.config,
-        [key]: value
-      };
-      onConfigChange?.(newConfig);
-      return {
-        ...prev,
-        config: newConfig,
-        error: null
-      };
-    });
-  }, [onConfigChange]);
+  const updateConfig = useCallback(
+    (key: string, value: any) => {
+      setState(prev => {
+        const newConfig = {
+          ...prev.config,
+          [key]: value,
+        };
+        onConfigChange?.(newConfig);
+        return {
+          ...prev,
+          config: newConfig,
+          error: null,
+        };
+      });
+    },
+    [onConfigChange]
+  );
 
   // 创建进度监听器
   const createProgressListener = useCallback(() => {
@@ -346,7 +362,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
           ...prev,
           progress: progressData.progress || 0,
           currentStep: progressData.currentStep || '',
-          error: null
+          error: null,
         }));
         onTestProgress?.(progressData);
       },
@@ -356,18 +372,18 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
           ...prev,
           isRunning: false,
           endTime: Date.now(),
-          result: result as UnifiedTestResult
+          result: result as CoreTestResult,
         }));
         if (result) {
-          setResults(prev => [...prev, result as UnifiedTestResult]);
+          setResults(prev => [...prev, result as CoreTestResult]);
           recordTestCompletion(
-            testType || 'unknown', 
+            testType || 'unknown',
             result.status === 'success',
             result.score,
             result.duration
           );
         }
-        onTestComplete?.(result as UnifiedTestResult);
+        onTestComplete?.(result as CoreTestResult);
       },
       onError: (errorMessage: string) => {
         setIsMonitoring(false);
@@ -375,176 +391,196 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
           ...prev,
           isRunning: false,
           error: errorMessage,
-          endTime: Date.now()
+          endTime: Date.now(),
         }));
         onTestError?.(errorMessage);
-      }
+      },
     };
   }, [testType, recordTestCompletion, onTestProgress, onTestComplete, onTestError]);
 
   // 开始测试 - 整合所有启动逻辑
-  const startTest = useCallback(async (customConfig?: TestConfig): Promise<string> => {
-    const testConfig = customConfig || state.config;
+  const startTest = useCallback(
+    async (customConfig?: TestConfig): Promise<string> => {
+      const testConfig = customConfig || state.config;
 
-    // 验证配置
-    if (validateConfig) {
-      const validation = validateConfig(testConfig);
-      if (!validation.isValid) {
-        const errorMessage = `配置验证失败: ${validation.errors.join(', ')}`;
-        setState(prev => ({ ...prev, error: errorMessage }));
-        onTestError?.(errorMessage);
-        throw new Error(errorMessage);
-      }
-    }
-
-    // 检查队列状态
-    if (!queueState.canStartTest) {
-      throw new Error('当前无法启动新测试，请等待队列空闲');
-    }
-
-    setIsLoading(true);
-    setExecutingTest(true);
-    
-    try {
-      // 生成测试ID
-      const testId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      // 更新状态
-      setState(prev => ({
-        ...prev,
-        isRunning: true,
-        progress: 0,
-        currentStep: '正在初始化测试...',
-        error: null,
-        testId,
-        startTime: Date.now(),
-        endTime: null,
-        result: null
-      }));
-
-      // 创建中止控制器
-      abortControllerRef.current = new AbortController();
-      
-      onTestStarted?.({ testId, config: testConfig });
-
-      // 启动进度监控
-      if (enableWebSocket) {
-        currentTestIdRef.current = testId;
-        listenerRef.current = createProgressListener();
-        testProgressService.startMonitoring(testId, listenerRef.current);
-        setIsMonitoring(true);
-      }
-
-      // 调用API启动测试
-      if (testConfig.engineId) {
-        // 使用testApiClient
-        const testResult = await testApiClient.runTest({
-          engineId: testConfig.engineId,
-          config: testConfig,
-          options: {
-            async: true,
-            timeout: testConfig.timeout || defaultTimeout
-          }
-        });
-        // 转换为UnifiedTestResult格式（如果需要）
-        Logger.debug('Test API result', { testResult });
-      } else {
-        // 使用backgroundTestManager
-        const resultTestId = backgroundTestManager.startTest(
-          testConfig.type as any,
-          testConfig,
-          (progress) => {
-            setCurrentProgress(progress as any);
-            onTestProgress?.(progress as any);
-          },
-          (result) => {
-            setResults(prev => [...prev, result as any]);
-            onTestComplete?.(result as any);
-          },
-          (error) => {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            setState(prev => ({ ...prev, error: errorMessage }));
-            onTestError?.(errorMessage);
-          }
-        );
-        Logger.debug('Background test started', { resultTestId });
-      }
-
-      // 添加到活跃测试列表
-      setActiveTests(prev => [...prev, { id: testId, config: testConfig, startTime: Date.now() }]);
-
-      return testId;
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '测试启动失败';
-      setState(prev => ({
-        ...prev,
-        isRunning: false,
-        error: errorMessage,
-        endTime: Date.now()
-      }));
-      onTestError?.(errorMessage);
-      throw error;
-    } finally {
-      setIsLoading(false);
-      setExecutingTest(false);
-    }
-  }, [state.config, validateConfig, queueState.canStartTest, enableWebSocket, createProgressListener, defaultTimeout, onTestStarted, onTestError, testType]);
-
-  // 停止测试
-  const stopTest = useCallback(async (testId?: string): Promise<void> => {
-    const targetTestId = testId || state.testId;
-    
-    try {
-      // 中止本地操作
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      // 停止进度监控
-      if (isMonitoring && currentTestIdRef.current && listenerRef.current) {
-        testProgressService.stopMonitoring(currentTestIdRef.current, listenerRef.current);
-        setIsMonitoring(false);
-      }
-
-      // 调用API停止测试
-      if (targetTestId) {
-        try {
-          await testApiClient.stopTest(targetTestId);
-        } catch (apiError) {
-          Logger.warn('API停止测试失败:', { error: String(apiError) });
+      // 验证配置
+      if (validateConfig) {
+        const validation = validateConfig(testConfig);
+        if (!validation.isValid) {
+          const errorMessage = `配置验证失败: ${validation.errors.join(', ')}`;
+          setState(prev => ({ ...prev, error: errorMessage }));
+          onTestError?.(errorMessage);
+          throw new Error(errorMessage);
         }
       }
 
-      // 更新状态
-      setState(prev => ({
-        ...prev,
-        isRunning: false,
-        currentStep: '测试已停止',
-        endTime: Date.now()
-      }));
+      // 检查队列状态
+      if (!queueState.canStartTest) {
+        throw new Error('当前无法启动新测试，请等待队列空闲');
+      }
 
-      // 从活跃测试列表中移除
-      setActiveTests(prev => prev.filter(test => test.id !== targetTestId));
+      setIsLoading(true);
+      setExecutingTest(true);
 
-      onTestCancelled?.({ testId: targetTestId });
+      try {
+        // 生成测试ID
+        const testId = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    } catch (error) {
-      Logger.error('停止测试失败:', error);
-      // 即使API调用失败，也要更新本地状态
-      setState(prev => ({
-        ...prev,
-        isRunning: false,
-        currentStep: '测试已停止',
-        endTime: Date.now()
-      }));
-    }
-  }, [state.testId, isMonitoring, onTestCancelled]);
+        // 更新状态
+        setState(prev => ({
+          ...prev,
+          isRunning: true,
+          progress: 0,
+          currentStep: '正在初始化测试...',
+          error: null,
+          testId,
+          startTime: Date.now(),
+          endTime: null,
+          result: null,
+        }));
+
+        // 创建中止控制器
+        abortControllerRef.current = new AbortController();
+
+        onTestStarted?.({ testId, config: testConfig });
+
+        // 启动进度监控
+        if (enableWebSocket) {
+          currentTestIdRef.current = testId;
+          listenerRef.current = createProgressListener();
+          testProgressService.startMonitoring(testId, listenerRef.current);
+          setIsMonitoring(true);
+        }
+
+        // 调用API启动测试
+        if (testConfig.engineId) {
+          // 使用testApiClient
+          const testResult = await testApiClient.runTest({
+            engineId: testConfig.engineId,
+            config: testConfig,
+            options: {
+              async: true,
+              timeout: testConfig.timeout || defaultTimeout,
+            },
+          });
+          // 转换为UnifiedTestResult格式（如果需要）
+          Logger.debug('Test API result', { testResult });
+        } else {
+          // 使用backgroundTestManager
+          const resultTestId = backgroundTestManager.startTest(
+            testConfig.type as any,
+            testConfig,
+            progress => {
+              setCurrentProgress(progress as any);
+              onTestProgress?.(progress as any);
+            },
+            result => {
+              setResults(prev => [...prev, result as any]);
+              onTestComplete?.(result as any);
+            },
+            error => {
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              setState(prev => ({ ...prev, error: errorMessage }));
+              onTestError?.(errorMessage);
+            }
+          );
+          Logger.debug('Background test started', { resultTestId });
+        }
+
+        // 添加到活跃测试列表
+        setActiveTests(prev => [
+          ...prev,
+          { id: testId, config: testConfig, startTime: Date.now() },
+        ]);
+
+        return testId;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : '测试启动失败';
+        setState(prev => ({
+          ...prev,
+          isRunning: false,
+          error: errorMessage,
+          endTime: Date.now(),
+        }));
+        onTestError?.(errorMessage);
+        throw error;
+      } finally {
+        setIsLoading(false);
+        setExecutingTest(false);
+      }
+    },
+    [
+      state.config,
+      validateConfig,
+      queueState.canStartTest,
+      enableWebSocket,
+      createProgressListener,
+      defaultTimeout,
+      onTestStarted,
+      onTestError,
+      testType,
+    ]
+  );
+
+  // 停止测试
+  const stopTest = useCallback(
+    async (testId?: string): Promise<void> => {
+      const targetTestId = testId || state.testId;
+
+      try {
+        // 中止本地操作
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
+
+        // 停止进度监控
+        if (isMonitoring && currentTestIdRef.current && listenerRef.current) {
+          testProgressService.stopMonitoring(currentTestIdRef.current, listenerRef.current);
+          setIsMonitoring(false);
+        }
+
+        // 调用API停止测试
+        if (targetTestId) {
+          try {
+            await testApiClient.stopTest(targetTestId);
+          } catch (apiError) {
+            Logger.warn('API停止测试失败:', { error: String(apiError) });
+          }
+        }
+
+        // 更新状态
+        setState(prev => ({
+          ...prev,
+          isRunning: false,
+          currentStep: '测试已停止',
+          endTime: Date.now(),
+        }));
+
+        // 从活跃测试列表中移除
+        setActiveTests(prev => prev.filter(test => test.id !== targetTestId));
+
+        onTestCancelled?.({ testId: targetTestId });
+      } catch (error) {
+        Logger.error('停止测试失败:', error);
+        // 即使API调用失败，也要更新本地状态
+        setState(prev => ({
+          ...prev,
+          isRunning: false,
+          currentStep: '测试已停止',
+          endTime: Date.now(),
+        }));
+      }
+    },
+    [state.testId, isMonitoring, onTestCancelled]
+  );
 
   // 取消测试 (别名)
-  const cancelTest = useCallback(async (testId: string): Promise<void> => {
-    await stopTest(testId);
-  }, [stopTest]);
+  const cancelTest = useCallback(
+    async (testId: string): Promise<void> => {
+      await stopTest(testId);
+    },
+    [stopTest]
+  );
 
   // 取消所有测试
   const cancelAllTests = useCallback(async (): Promise<void> => {
@@ -564,24 +600,27 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
       error: null,
       testId: null,
       startTime: null,
-      endTime: null
+      endTime: null,
     }));
     setResults([]);
     setCurrentProgress(null);
   }, []);
 
   // 开始进度监控
-  const startMonitoring = useCallback((testId: string) => {
-    if (currentTestIdRef.current && listenerRef.current) {
-      testProgressService.stopMonitoring(currentTestIdRef.current, listenerRef.current);
-    }
+  const startMonitoring = useCallback(
+    (testId: string) => {
+      if (currentTestIdRef.current && listenerRef.current) {
+        testProgressService.stopMonitoring(currentTestIdRef.current, listenerRef.current);
+      }
 
-    currentTestIdRef.current = testId;
-    listenerRef.current = createProgressListener();
-    
-    testProgressService.startMonitoring(testId, listenerRef.current);
-    setIsMonitoring(true);
-  }, [createProgressListener]);
+      currentTestIdRef.current = testId;
+      listenerRef.current = createProgressListener();
+
+      testProgressService.startMonitoring(testId, listenerRef.current);
+      setIsMonitoring(true);
+    },
+    [createProgressListener]
+  );
 
   // 停止进度监控
   const stopMonitoring = useCallback(() => {
@@ -598,43 +637,46 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
     const completedTests = results.length;
     const failedTests = results.filter(r => r.status === 'failure').length;
     const runningTests = activeTests.length;
-    
+
     return {
       runningTests,
       completedTests,
       failedTests,
-      totalTests: completedTests + runningTests
+      totalTests: completedTests + runningTests,
     };
   }, [results, activeTests]);
 
   // 获取测试历史
-  const getTestHistory = useCallback(async (filters?: {
-    type?: string;
-    status?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<UnifiedTestResult[]> => {
-    try {
-      const history = await testApiClient.getTestHistory();
-      let filteredHistory = history as UnifiedTestResult[];
+  const getTestHistory = useCallback(
+    async (filters?: {
+      type?: string;
+      status?: string;
+      limit?: number;
+      offset?: number;
+    }): Promise<CoreTestResult[]> => {
+      try {
+        const history = await testApiClient.getTestHistory();
+        let filteredHistory = history as CoreTestResult[];
 
-      if (filters?.type) {
-        filteredHistory = filteredHistory.filter(test => test.type === filters.type);
-      }
-      if (filters?.status) {
-        filteredHistory = filteredHistory.filter(test => test.status === filters.status);
-      }
-      if (filters?.limit) {
-        filteredHistory = filteredHistory.slice(0, filters.limit);
-      }
+        if (filters?.type) {
+          filteredHistory = filteredHistory.filter(test => test.type === filters.type);
+        }
+        if (filters?.status) {
+          filteredHistory = filteredHistory.filter(test => test.status === filters.status);
+        }
+        if (filters?.limit) {
+          filteredHistory = filteredHistory.slice(0, filters.limit);
+        }
 
-      setTestHistory(filteredHistory);
-      return filteredHistory;
-    } catch (error) {
-      Logger.error('获取测试历史失败:', error);
-      return testHistory;
-    }
-  }, [testHistory]);
+        setTestHistory(filteredHistory);
+        return filteredHistory;
+      } catch (error) {
+        Logger.error('获取测试历史失败:', error);
+        return testHistory;
+      }
+    },
+    [testHistory]
+  );
 
   // 获取测试状态
   const getTestStatus = useCallback(async (testId: string) => {
@@ -647,58 +689,62 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   }, []);
 
   // 获取测试结果
-  const getTestResult = useCallback(async (testId: string): Promise<UnifiedTestResult | null> => {
-    try {
-      const result = results.find(r => r.id === testId);
-      if (result) {
-        return result;
-      }
-      
-      // 如果本地没有，尝试从API获取
-      const apiResult = await testApiClient.getTestStatus(testId);
-      if (!apiResult) {
+  const getTestResult = useCallback(
+    async (testId: string): Promise<CoreTestResult | null> => {
+      try {
+        const result = results.find(r => r.id === testId);
+        if (result) {
+          return result;
+        }
+
+        // 如果本地没有，尝试从API获取
+        const apiResult = await testApiClient.getTestStatus(testId);
+        if (!apiResult) {
+          return null;
+        }
+        // 只有当结果包含必需字段时才返回
+        return apiResult as unknown as CoreTestResult;
+      } catch (error) {
+        Logger.error('获取测试结果失败:', error);
         return null;
       }
-      // 只有当结果包含必需字段时才返回
-      return apiResult as unknown as UnifiedTestResult;
-    } catch (error) {
-      Logger.error('获取测试结果失败:', error);
-      return null;
-    }
-  }, [results]);
+    },
+    [results]
+  );
 
   // 获取测试详情 (别名)
-  const getTestDetails = useCallback(async (testId: string): Promise<UnifiedTestResult | null> => {
-    return await getTestResult(testId);
-  }, [getTestResult]);
+  const getTestDetails = useCallback(
+    async (testId: string): Promise<CoreTestResult | null> => {
+      return await getTestResult(testId);
+    },
+    [getTestResult]
+  );
 
   // 重试测试
-  const retryTest = useCallback(async (testId: string): Promise<string> => {
-    const testDetails = await getTestDetails(testId);
-    if (!testDetails) {
-      throw new Error('无法获取测试配置');
-    }
+  const retryTest = useCallback(
+    async (testId: string): Promise<string> => {
+      const testDetails = await getTestDetails(testId);
+      if (!testDetails) {
+        throw new Error('无法获取测试配置');
+      }
 
-    const config: TestConfig = {
-      name: `重试-${testDetails.type}`,
-      type: testDetails.type,
-      url: testDetails.details?.url || '',
-      options: testDetails.details?.config || {},
-      engineId: testDetails.details?.engineId
-    };
+      const config: TestConfig = {
+        name: `重试-${testDetails.type}`,
+        type: testDetails.type,
+        url: testDetails.details?.url || '',
+        options: testDetails.details?.config || {},
+        engineId: testDetails.details?.engineId,
+      };
 
-    return await startTest(config);
-  }, [getTestDetails, startTest]);
+      return await startTest(config);
+    },
+    [getTestDetails, startTest]
+  );
 
   // 获取配置列表
   const getConfigurations = useCallback(async (): Promise<TestConfig[]> => {
-    try {
-      // 这里应该调用实际的API
-      return [];
-    } catch (error) {
-      Logger.error('获取配置列表失败:', error);
-      return [];
-    }
+    // 这里应该调用实际的API
+    return [];
   }, []);
 
   // 保存配置
@@ -724,37 +770,40 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   }, []);
 
   // 导出测试结果
-  const exportTestResult = useCallback(async (testId: string, format: 'json' | 'pdf' | 'csv'): Promise<Blob> => {
-    try {
-      // 这里应该调用实际的导出API
-      const result = await getTestResult(testId);
-      if (!result) {
-        throw new Error('测试结果不存在');
+  const exportTestResult = useCallback(
+    async (testId: string, format: 'json' | 'pdf' | 'csv'): Promise<Blob> => {
+      try {
+        // 这里应该调用实际的导出API
+        const result = await getTestResult(testId);
+        if (!result) {
+          throw new Error('测试结果不存在');
+        }
+
+        let content: string;
+        let mimeType: string;
+
+        switch (format) {
+          case 'json':
+            content = JSON.stringify(result, null, 2);
+            mimeType = 'application/json';
+            break;
+          case 'csv':
+            // 简单的CSV导出
+            content = `ID,Type,Status,Score,Timestamp\n${result.id},${result.type},${result.status},${result.score || ''},${result.timestamp}`;
+            mimeType = 'text/csv';
+            break;
+          default:
+            throw new Error('不支持的导出格式');
+        }
+
+        return new Blob([content], { type: mimeType });
+      } catch (error) {
+        Logger.error('导出测试结果失败:', error);
+        throw error;
       }
-      
-      let content: string;
-      let mimeType: string;
-      
-      switch (format) {
-        case 'json':
-          content = JSON.stringify(result, null, 2);
-          mimeType = 'application/json';
-          break;
-        case 'csv':
-          // 简单的CSV导出
-          content = `ID,Type,Status,Score,Timestamp\n${result.id},${result.type},${result.status},${result.score || ''},${result.timestamp}`;
-          mimeType = 'text/csv';
-          break;
-        default:
-          throw new Error('不支持的导出格式');
-      }
-      
-      return new Blob([content], { type: mimeType });
-    } catch (error) {
-      Logger.error('导出测试结果失败:', error);
-      throw error;
-    }
-  }, [getTestResult]);
+    },
+    [getTestResult]
+  );
 
   // 清除错误
   const clearError = useCallback(() => {
@@ -770,10 +819,12 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
 
   // 清除已完成的测试
   const clearCompletedTests = useCallback(() => {
-    setActiveTests(prev => prev.filter(test => {
-      // 这里可以添加更多逻辑来判断测试是否完成
-      return state.isRunning && test.id === state.testId;
-    }));
+    setActiveTests(prev =>
+      prev.filter(test => {
+        // 这里可以添加更多逻辑来判断测试是否完成
+        return state.isRunning && test.id === state.testId;
+      })
+    );
   }, [state.isRunning, state.testId]);
 
   // 检查是否有正在运行的测试
@@ -782,9 +833,12 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   }, [activeTests.length, state.isRunning]);
 
   // 获取活跃测试
-  const getActiveTest = useCallback((testId: string) => {
-    return activeTests.find(test => test.id === testId);
-  }, [activeTests]);
+  const getActiveTest = useCallback(
+    (testId: string) => {
+      return activeTests.find(test => test.id === testId);
+    },
+    [activeTests]
+  );
 
   // WebSocket连接管理
   const connectWebSocket = useCallback(() => {
@@ -803,8 +857,16 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
     try {
       // 这里应该从API获取支持的测试类型
       setSupportedTypes([
-        'performance', 'security', 'api', 'seo', 'stress', 'compatibility',
-        'network', 'database', 'ux', 'accessibility'
+        'performance',
+        'security',
+        'api',
+        'seo',
+        'stress',
+        'compatibility',
+        'network',
+        'database',
+        'ux',
+        'accessibility',
       ]);
     } catch (error) {
       Logger.error('获取支持的测试类型失败:', error);
@@ -812,14 +874,20 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   }, []);
 
   // 执行测试 (别名)
-  const executeTest = useCallback(async (params: any): Promise<string> => {
-    return await startTest(params.config || params);
-  }, [startTest]);
+  const executeTest = useCallback(
+    async (params: any): Promise<string> => {
+      return await startTest(params.config || params);
+    },
+    [startTest]
+  );
 
   // 订阅测试 (别名)
-  const subscribeToTest = useCallback((testId: string) => {
-    startMonitoring(testId);
-  }, [startMonitoring]);
+  const subscribeToTest = useCallback(
+    (testId: string) => {
+      startMonitoring(testId);
+    },
+    [startMonitoring]
+  );
 
   // 获取当前状态
   const getState = useCallback(() => {
@@ -827,11 +895,12 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
   }, [state]);
 
   // 计算测试持续时间
-  const testDuration = state.startTime && state.endTime 
-    ? state.endTime - state.startTime 
-    : state.startTime 
-    ? Date.now() - state.startTime 
-    : null;
+  const testDuration =
+    state.startTime && state.endTime
+      ? state.endTime - state.startTime
+      : state.startTime
+        ? Date.now() - state.startTime
+        : null;
 
   return {
     // 基础状态
@@ -912,7 +981,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
     subscribeToTest,
 
     // 版本信息
-    engineVersion: '2.0.0'
+    engineVersion: '2.0.0',
   };
 };
 

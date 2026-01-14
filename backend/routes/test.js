@@ -11,16 +11,16 @@ const { query } = require('../config/database');
 const { authMiddleware, optionalAuth, adminAuth } = require('../middleware/auth');
 const { testRateLimiter, historyRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
-const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
+const { validateURLMiddleware, validateAPIURLMiddleware: _validateAPIURLMiddleware } = require('../middleware/urlValidator');
 const { apiCache, dbCache } = require('../middleware/cache.js');
 
 // 导入测试引擎类
 const APIAnalyzer = require('../engines/api/ApiAnalyzer.js');
-const StressTestEngine = require('../engines/stress/StressTestEngine.js');
+const _StressTestEngine = require('../engines/stress/stressTestEngine.js');
 const SecurityTestEngine = require('../engines/security/SecurityTestEngine.js');
 const CompatibilityTestEngine = require('../engines/compatibility/CompatibilityTestEngine.js');
 const UXAnalyzer = require('../engines/api/UXAnalyzer.js');
-const ApiTestEngine = require('../engines/api/APITestEngine.js');
+const ApiTestEngine = require('../engines/api/apiTestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const userTestManager = require('../services/testing/UserTestManager.js');
@@ -40,15 +40,15 @@ const apiEngine = new APIAnalyzer();
 // const stressTestEngine = createGlobalInstance(); // 已移除
 const securityEngine = new SecurityTestEngine();
 const compatibilityEngine = new CompatibilityTestEngine();
-const uxEngine = new UXAnalyzer();
-const apiTestEngine = new ApiTestEngine();
+const _uxEngine = new UXAnalyzer();
+const _apiTestEngine = new ApiTestEngine();
 
 // 🔧 统一使用本地TestHistoryService实例
 const testHistoryService = new TestHistoryService(require('../config/database'));
 
 // 配置文件上传
 const storage = multer.memoryStorage();
-const upload = multer({
+const _upload = multer({
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB限制
@@ -564,9 +564,9 @@ async function analyzeFeatureCompatibility(feature, html, browsers) {
 
   return {
     supportPercentage,
-    supportedBrowsers: browsers.filter(b => Math.random() > 0.1), // 大部分浏览器支持
-    unsupportedBrowsers: browsers.filter(b => Math.random() > 0.9), // 少数不支持
-    partialSupport: browsers.filter(b => Math.random() > 0.8), // 部分支持
+    supportedBrowsers: browsers.filter(_b => Math.random() > 0.1), // 大部分浏览器支持
+    unsupportedBrowsers: browsers.filter(_b => Math.random() > 0.9), // 少数不支持
+    partialSupport: browsers.filter(_b => Math.random() > 0.8), // 部分支持
     isUsed
   };
 }
@@ -574,7 +574,7 @@ async function analyzeFeatureCompatibility(feature, html, browsers) {
 /**
  * 分析浏览器兼容性
  */
-async function analyzeBrowserCompatibility(browser, features, html) {
+async function analyzeBrowserCompatibility(browser, features, _html) {
   // 基于浏览器类型和版本计算支持分数
   let baseScore = 85;
 
@@ -735,7 +735,7 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
         engineStatus.version = stdout.trim().split(' ')[1] || 'unknown';
         engineStatus.status = 'ready';
       }
-    } catch (error) {
+    } catch {
       engineStatus.status = 'not_installed';
       engineStatus.error = 'K6 not found in PATH';
     }
@@ -777,11 +777,11 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
     };
 
     try {
-      const lighthouse = require('lighthouse');
+      require('lighthouse');
       engineStatus.available = true;
       engineStatus.version = require('lighthouse/package.json').version;
       engineStatus.status = 'ready';
-    } catch (error) {
+    } catch {
       engineStatus.status = 'not_installed';
       engineStatus.error = 'Lighthouse not installed';
     }
@@ -812,12 +812,13 @@ router.post('/lighthouse/install', authMiddleware, adminAuth, asyncHandler(async
  * POST /api/test-engines/lighthouse/run
  */
 router.post('/lighthouse/run', authMiddleware, asyncHandler(async (req, res) => {
-  const { url, device = 'desktop', categories = ['performance'] } = req.body;
+  const { url, device: _device = 'desktop', categories: _categories = ['performance'] } = req.body;
 
   try {
 
     // 模拟Lighthouse运行结果
     const mockResult = {
+      url,
       lhr: {
         categories: {
           performance: { score: Math.random() * 0.3 + 0.7 }
@@ -852,11 +853,11 @@ router.get('/playwright/status', asyncHandler(async (req, res) => {
     };
 
     try {
-      const playwright = require('playwright');
+      require('playwright');
       engineStatus.available = true;
       engineStatus.version = require('playwright/package.json').version;
       engineStatus.status = 'ready';
-    } catch (error) {
+    } catch {
       engineStatus.status = 'not_installed';
       engineStatus.error = 'Playwright not installed';
     }
@@ -887,7 +888,7 @@ router.post('/playwright/install', authMiddleware, adminAuth, asyncHandler(async
  * POST /api/test-engines/playwright/run
  */
 router.post('/playwright/run', authMiddleware, asyncHandler(async (req, res) => {
-  const { url, browsers = ['chromium'], tests = ['basic'], viewport } = req.body;
+  const { url, browsers = ['chromium'], tests = ['basic'], viewport: _viewport } = req.body;
 
   try {
 
@@ -950,40 +951,40 @@ router.get('/status', asyncHandler(async (req, res) => {
               engineStatus.version = stdout.trim().split(' ')[1] || 'unknown';
               engineStatus.status = 'ready';
             }
-          } catch (error) {
+          } catch {
             engineStatus.status = 'not_installed';
           }
           break;
 
         case 'lighthouse':
           try {
-            const lighthouse = require('lighthouse');
+            require('lighthouse');
             engineStatus.available = true;
             engineStatus.version = require('lighthouse/package.json').version;
             engineStatus.status = 'ready';
-          } catch (error) {
+          } catch {
             engineStatus.status = 'not_installed';
           }
           break;
 
         case 'playwright':
           try {
-            const { chromium } = require('playwright');
+            require('playwright');
             engineStatus.available = true;
             engineStatus.version = require('playwright/package.json').version;
             engineStatus.status = 'ready';
-          } catch (error) {
+          } catch {
             engineStatus.status = 'not_installed';
           }
           break;
 
         case 'puppeteer':
           try {
-            const puppeteer = require('puppeteer');
+            require('puppeteer');
             engineStatus.available = true;
             engineStatus.version = require('puppeteer/package.json').version;
             engineStatus.status = 'ready';
-          } catch (error) {
+          } catch {
             engineStatus.status = 'not_installed';
           }
           break;
@@ -1068,18 +1069,6 @@ router.get('/history', optionalAuth, historyRateLimiter, asyncHandler(async (req
  */
 router.get('/history/legacy', optionalAuth, historyRateLimiter, asyncHandler(async (req, res) => {
   return handleTestHistory(req, res);
-}));
-
-/**
- * 获取增强的测试历史记录 - 已迁移
- * 请使用 /api/data-management/test-history
- */
-router.get('/history/enhanced', authMiddleware, asyncHandler(async (req, res) => {
-  res.status(301).json({
-    success: false,
-    message: '此接口已迁移，请使用 /api/data-management/test-history',
-    redirectTo: '/api/data-management/test-history'
-  });
 }));
 
 /**
@@ -1178,17 +1167,17 @@ async function handleTestHistory(req, res) {
   // 🔧 修复：支持前端发送的pageSize参数，同时兼容limit参数
   const { page = 1, limit, pageSize, type, status, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
   const actualLimit = pageSize || limit || 10; // 优先使用pageSize，然后是limit，最后默认10
-  const offset = (page - 1) * actualLimit;
+  const _offset = (page - 1) * actualLimit;
 
-  let whereClause = '';
-  const params = [];
-  let paramIndex = 1;
+  let _whereClause = '';
+  const _params = [];
+  let _paramIndex = 1;
 
   // 如果用户已登录，只显示该用户的记录；未登录用户返回空结果
   if (req.user?.id) {
-    whereClause = 'WHERE user_id = $1';
-    params.push(req.user.id);
-    paramIndex = 2;
+    _whereClause = 'WHERE user_id = $1';
+    _params.push(req.user.id);
+    _paramIndex = 2;
   } else {
     // 未登录用户不能查看任何测试历史记录（隐私保护）
     return res.json({
@@ -1209,15 +1198,15 @@ async function handleTestHistory(req, res) {
   }
 
   if (type) {
-    whereClause += ` AND test_type = $${paramIndex}`;
-    params.push(type);
-    paramIndex++;
+    _whereClause += ` AND test_type = $${_paramIndex}`;
+    _params.push(type);
+    _paramIndex++;
   }
 
   if (status) {
-    whereClause += ` AND status = $${paramIndex}`;
-    params.push(status);
-    paramIndex++;
+    _whereClause += ` AND status = $${_paramIndex}`;
+    _params.push(status);
+    _paramIndex++;
   }
 
   // 处理排序
@@ -1260,7 +1249,7 @@ async function handleTestHistory(req, res) {
  * POST /api/test/run
  */
 router.post('/run', authMiddleware, testRateLimiter, asyncHandler(async (req, res) => {
-  const { testType, url, config = {}, testName } = req.body;
+  const { testType, url, config: _config = {}, testName: _testName } = req.body;
 
   if (!testType || !url) {
 
@@ -1358,7 +1347,7 @@ router.get('/queue/status', optionalAuth, asyncHandler(async (req, res) => {
  * POST /api/test/:testId/cancel
  */
 router.post('/:testId/cancel', authMiddleware, asyncHandler(async (req, res) => {
-  const { testId } = req.params;
+  const { testId: _testId } = req.params;
 
   try {
     // await testQueueService.cancelTest(testId);
@@ -1435,7 +1424,7 @@ router.post('/cache/invalidate', authMiddleware, asyncHandler(async (req, res) =
   try {
     const invalidatedCount = await smartCacheService.invalidate(event, data);
 
-    res.success(null, '已失效 ${invalidatedCount} 条缓存记录');
+    res.success(null, `已失效 ${invalidatedCount} 条缓存记录`);
   } catch (error) {
     console.error('缓存失效失败:', error);
     res.status(500).json({
@@ -1955,7 +1944,7 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
   try {
     // 验证URL格式
     new URL(url);
-  } catch (error) {
+  } catch {
     return res.validationError([], '无效的URL格式');
   }
 
@@ -2272,7 +2261,7 @@ router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
  */
 router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
   const {
-    url,
+    url: _url,
     testId: providedTestId,
     recordId,
     // 直接从请求体中提取配置参数
@@ -2290,6 +2279,17 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
   // URL验证已由中间件完成，可以直接使用验证后的URL
   const validatedURL = req.validatedURL.url.toString();
   let testRecordId = recordId; // 使用前端传递的记录ID
+
+  // 检查用户测试限制（合并自旧 tests.js）
+  try {
+    const userPlan = req.user?.plan || req.user?.subscription?.plan || 'free';
+    await checkTestLimits(req.user.id, 'stress', userPlan);
+  } catch (error) {
+    return res.status(429).json({
+      success: false,
+      error: error.message || '测试限制检查失败'
+    });
+  }
 
   // 🔧 修复：如果前端没有提供testId，自动生成一个
   const testId = providedTestId || `stress_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -2641,7 +2641,7 @@ router.post('/security',
   validateURLMiddleware(),
   apiCache('security', { ttl: 2400 }), // 40分钟缓存
   asyncHandler(async (req, res) => {
-    const { url, options = {}, module } = req.body;
+    const { url: _url, options = {}, module } = req.body;
 
     // URL验证已由中间件完成，可以直接使用验证后的URL
     const validatedURL = req.validatedURL.url.toString();
@@ -2864,7 +2864,7 @@ router.post('/performance',
   validateURLMiddleware(),
   apiCache('performance', { ttl: 1800 }), // 30分钟缓存
   asyncHandler(async (req, res) => {
-    const { url, config = {} } = req.body;
+    const { url: _url, config = {} } = req.body;
 
     // URL验证已由中间件完成，可以直接使用验证后的URL
     const validatedURL = req.validatedURL.url.toString();
@@ -2912,7 +2912,7 @@ router.post('/performance/page-speed',
   validateURLMiddleware(),
   apiCache('performance', { ttl: 1200 }), // 20分钟缓存
   asyncHandler(async (req, res) => {
-    const { url, device = 'desktop', timeout = 30000 } = req.body;
+    const { url: _url, device = 'desktop', timeout = 30000 } = req.body;
 
     // URL验证已由中间件完成
     const validatedURL = req.validatedURL.url.toString();
@@ -2954,7 +2954,7 @@ router.post('/performance/page-speed',
  * POST /api/test/performance/core-web-vitals
  */
 router.post('/performance/core-web-vitals', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, device = 'desktop' } = req.body;
+  const { url: _url, device = 'desktop' } = req.body;
 
   // URL验证已由中间件完成
   const validatedURL = req.validatedURL.url.toString();
@@ -2994,7 +2994,7 @@ router.post('/performance/core-web-vitals', optionalAuth, testRateLimiter, valid
  * POST /api/test/compatibility
  */
 router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, options = {} } = req.body;
+  const { url: _url, options = {} } = req.body;
 
   // URL验证已由中间件完成，可以直接使用验证后的URL
   const validatedURL = req.validatedURL.url.toString();
@@ -3071,7 +3071,7 @@ router.post('/caniuse', optionalAuth, testRateLimiter, asyncHandler(async (req, 
  * POST /api/test/browserstack
  */
 router.post('/browserstack', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, browsers = [], features = [] } = req.body;
+  const { url, browsers: _browsers = [], features = [] } = req.body;
 
   try {
     console.log(`🔍 Starting BrowserStack compatibility test for: ${url}`);
@@ -3109,7 +3109,7 @@ router.post('/browserstack', optionalAuth, testRateLimiter, asyncHandler(async (
  * POST /api/test/feature-detection
  */
 router.post('/feature-detection', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, features = [], browsers = [], options = {} } = req.body;
+  const { url, features = [], browsers = [], options: _options = {} } = req.body;
 
   try {
     console.log(`🔍 Starting feature detection compatibility test for: ${url}`);
@@ -3238,7 +3238,7 @@ router.post('/feature-detection', optionalAuth, testRateLimiter, asyncHandler(as
  * POST /api/test/feature-detection
  */
 router.post('/feature-detection', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, features = [], options = {} } = req.body;
+  const { url, features = [], options: _options = {} } = req.body;
 
   try {
     console.log(`🔍 Starting feature detection test for: ${url}`);
@@ -3275,7 +3275,7 @@ router.post('/feature-detection', optionalAuth, testRateLimiter, asyncHandler(as
  * POST /api/test/local-compatibility
  */
 router.post('/local-compatibility', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, features = [], browsers = [], timeout = 30000 } = req.body;
+  const { url, features = [], browsers: _browsers = [], timeout: _timeout = 30000 } = req.body;
 
   try {
     console.log(`🔍 Starting local compatibility test for: ${url}`);
@@ -3312,7 +3312,7 @@ router.post('/local-compatibility', optionalAuth, testRateLimiter, asyncHandler(
  * POST /api/test/performance/resources
  */
 router.post('/performance/resources', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, includeImages = true } = req.body;
+  const { url: _url, includeImages = true } = req.body;
 
   // URL验证已由中间件完成
   const validatedURL = req.validatedURL.url.toString();
@@ -3321,7 +3321,7 @@ router.post('/performance/resources', optionalAuth, testRateLimiter, validateURL
     console.log(`🔍 Starting resource analysis for: ${validatedURL}`);
 
     // 使用网站测试引擎进行资源分析
-    const testResult = await apiEngine.runTest(validatedURL, {
+    const _testResult = await apiEngine.runTest(validatedURL, {
       testType: 'performance',
       checkResourceOptimization: true,
       checkImageOptimization: includeImages,
@@ -3501,7 +3501,7 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
  * POST /api/test/pagespeed
  */
 router.post('/pagespeed', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, device = 'desktop' } = req.body;
+  const { url: _url, device: _device = 'desktop' } = req.body;
   const validatedURL = req.validatedURL.url.toString();
 
   try {
@@ -3550,7 +3550,7 @@ router.post('/pagespeed', optionalAuth, testRateLimiter, validateURLMiddleware()
  * POST /api/test/gtmetrix
  */
 router.post('/gtmetrix', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, device = 'desktop', location = 'vancouver' } = req.body;
+  const { url, device: _device = 'desktop', location: _location = 'vancouver' } = req.body;
 
   try {
     console.log(`🚀 Starting GTmetrix test for: ${url}`);
@@ -3604,7 +3604,7 @@ router.post('/gtmetrix', optionalAuth, testRateLimiter, asyncHandler(async (req,
  * POST /api/test/webpagetest
  */
 router.post('/webpagetest', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, device = 'desktop', location = 'Dulles', runs = 1 } = req.body;
+  const { url, device: _device = 'desktop', location: _location = 'Dulles', runs: _runs = 1 } = req.body;
 
   try {
     console.log(`🚀 Starting WebPageTest for: ${url}`);
@@ -3647,7 +3647,7 @@ router.post('/webpagetest', optionalAuth, testRateLimiter, asyncHandler(async (r
  * POST /api/test/lighthouse
  */
 router.post('/lighthouse', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, device = 'desktop', throttling = 'none' } = req.body;
+  const { url, device: _device = 'desktop', throttling: _throttling = 'none' } = req.body;
 
   try {
     console.log(`🚀 Starting Lighthouse test for: ${url}`);
@@ -3715,7 +3715,7 @@ router.post('/lighthouse', optionalAuth, testRateLimiter, asyncHandler(async (re
  * POST /api/test/local-performance
  */
 router.post('/local-performance', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, device = 'desktop', timeout = 30000 } = req.body;
+  const { url, device: _device = 'desktop', timeout: _timeout = 30000 } = req.body;
 
   try {
     console.log(`🚀 Starting local performance test for: ${url}`);
@@ -3766,7 +3766,7 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
 
   try {
     new URL(url);
-  } catch (error) {
+  } catch {
     return res.validationError([], '无效的URL格式');
   }
 
@@ -3841,7 +3841,7 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
  *         $ref: '#/components/responses/ServerError'
  */
 router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, options = {} } = req.body;
+  const { url: _url, options = {} } = req.body;
 
   // URL验证已由中间件完成
   const validatedURL = req.validatedURL.url.toString();
@@ -3877,7 +3877,7 @@ router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyn
  * POST /api/test/accessibility
  */
 router.post('/accessibility', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, level = 'AA', categories = [] } = req.body;
+  const { url: _url, level = 'AA', categories = [] } = req.body;
   const validatedURL = req.validatedURL.url.toString();
 
   try {
@@ -3932,7 +3932,7 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
   try {
     // 验证baseUrl格式
     new URL(baseUrl);
-  } catch (error) {
+  } catch {
     return res.validationError([], 'API基础URL格式无效');
   }
 
@@ -3984,7 +3984,7 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
  * POST /api/test/content
  */
 router.post('/content', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, options = {} } = req.body;
+  const { url, options: _options = {} } = req.body;
 
   if (!url) {
     return res.validationError([], 'URL是必填的');
@@ -4031,7 +4031,7 @@ router.post('/content', optionalAuth, testRateLimiter, asyncHandler(async (req, 
  * POST /api/test/network
  */
 router.post('/network', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { targets, pingCount = 5, timeout = 10000 } = req.body;
+  const { targets, pingCount: _pingCount = 5, timeout: _timeout = 10000 } = req.body;
 
   if (!targets || targets.length === 0) {
     return res.validationError([], '目标URL列表是必填的');
@@ -4080,7 +4080,7 @@ router.post('/network', optionalAuth, testRateLimiter, asyncHandler(async (req, 
  * POST /api/test/infrastructure
  */
 router.post('/infrastructure', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, checks = ['connectivity', 'dns', 'ssl'], timeout = 20000 } = req.body;
+  const { url, checks: _checks = ['connectivity', 'dns', 'ssl'], timeout: _timeout = 20000 } = req.body;
 
   if (!url) {
     return res.validationError([], 'URL是必填的');
@@ -4184,7 +4184,7 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
         engineStatus.version = stdout.trim().split(' ')[1] || 'unknown';
         engineStatus.status = 'ready';
       }
-    } catch (error) {
+    } catch {
       engineStatus.status = 'not_installed';
       engineStatus.error = 'K6 not found in PATH';
     }
@@ -4211,11 +4211,11 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
     };
 
     try {
-      const lighthouse = require('lighthouse');
+      require('lighthouse');
       engineStatus.available = true;
       engineStatus.version = require('lighthouse/package.json').version;
       engineStatus.status = 'ready';
-    } catch (error) {
+    } catch {
       engineStatus.status = 'not_installed';
       engineStatus.error = 'Lighthouse not installed';
     }
@@ -4242,11 +4242,11 @@ router.get('/playwright/status', asyncHandler(async (req, res) => {
     };
 
     try {
-      const playwright = require('playwright');
+      require('playwright');
       engineStatus.available = true;
       engineStatus.version = require('playwright/package.json').version;
       engineStatus.status = 'ready';
-    } catch (error) {
+    } catch {
       engineStatus.status = 'not_installed';
       engineStatus.error = 'Playwright not installed';
     }
@@ -4291,40 +4291,40 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
             engineStatus.version = stdout.trim().split(' ')[1] || 'unknown';
             engineStatus.status = 'ready';
           }
-        } catch (error) {
+        } catch {
           engineStatus.status = 'not_installed';
         }
         break;
 
       case 'lighthouse':
         try {
-          const lighthouse = require('lighthouse');
+          require('lighthouse');
           engineStatus.available = true;
           engineStatus.version = require('lighthouse/package.json').version;
           engineStatus.status = 'ready';
-        } catch (error) {
+        } catch {
           engineStatus.status = 'not_installed';
         }
         break;
 
       case 'playwright':
         try {
-          const { chromium } = require('playwright');
+          require('playwright');
           engineStatus.available = true;
           engineStatus.version = require('playwright/package.json').version;
           engineStatus.status = 'ready';
-        } catch (error) {
+        } catch {
           engineStatus.status = 'not_installed';
         }
         break;
 
       case 'puppeteer':
         try {
-          const puppeteer = require('puppeteer');
+          require('puppeteer');
           engineStatus.available = true;
           engineStatus.version = require('puppeteer/package.json').version;
           engineStatus.status = 'ready';
-        } catch (error) {
+        } catch {
           engineStatus.status = 'not_installed';
         }
         break;
@@ -4342,8 +4342,8 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
 }));
 
 // IP地理位置缓存 - 避免重复查询
-const ipLocationCache = new Map();
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24小时缓存
+const _ipLocationCache = new Map();
+const _CACHE_DURATION = 24 * 60 * 60 * 1000; // 24小时缓存
 
 // 引入地理位置服务
 const geoLocationService = require('../services/core/geoLocationService.js');
@@ -4495,8 +4495,6 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
     if (exitIp && exitIp !== '未知') {
       try {
         locationInfo = await geoLocationService.getLocation(exitIp);
-        if (locationInfo) {
-        }
       } catch (geoError) {
         console.warn('获取出口IP地理位置信息失败:', geoError.message);
       }
@@ -4646,11 +4644,12 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       agent = new HttpProxyAgent(proxyUrl);
     }
 
-    // 设置超时控制（优化为更快的响应）
+    // 设置超时控制（快速测试/完整测试）
+    const timeoutMs = fastTest ? 3000 : 8000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-    }, 3000); // 3秒超时，更快的响应
+    }, timeoutMs);
 
     // 发送测试请求
     const response = await fetch(testUrl, {
@@ -4687,8 +4686,6 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
     if (proxyIp && proxyIp !== '未知') {
       try {
         locationInfo = await geoLocationService.getLocation(proxyIp);
-        if (locationInfo) {
-        }
       } catch (geoError) {
         console.warn('获取IP地理位置信息失败:', geoError.message);
       }
@@ -4723,6 +4720,8 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       location: locationInfo, // 地理位置信息（辅助显示，不影响延迟）
       responseTime: networkLatency || responseTime, // 优先显示网络延迟
       networkLatency, // 到代理IP的网络延迟（主要指标）
+      fastTest,
+      timeoutMs,
       proxyConfig: {
         host: proxy.host,
         port: proxyPort,
@@ -4792,7 +4791,10 @@ router.get('/geo-status', optionalAuth, asyncHandler(async (req, res) => {
   const geoStatus = geoLocationService.getStatus();
   const updateStatus = geoUpdateService.getStatus();
 
-  res.success(geoStatus);
+  res.success({
+    geo: geoStatus,
+    update: updateStatus
+  });
 }));
 
 /**
@@ -4987,7 +4989,7 @@ router.post('/batch', authMiddleware, asyncHandler(async (req, res) => {
   // URL格式验证
   try {
     new URL(url);
-  } catch (error) {
+  } catch {
     return res.status(400).json({
       success: false,
       error: '无效的URL格式'
@@ -5023,7 +5025,8 @@ router.post('/batch', authMiddleware, asyncHandler(async (req, res) => {
         type,
         testId: `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         status: 'started',
-        url
+        url,
+        options
       };
       results.push(result);
     } catch (error) {
@@ -5111,7 +5114,7 @@ router.post('/comprehensive', authMiddleware, asyncHandler(async (req, res) => {
   // 验证URL格式
   try {
     new URL(url);
-  } catch (error) {
+  } catch {
     return res.status(400).json({
       success: false,
       error: '无效的URL格式'
@@ -5141,6 +5144,7 @@ router.post('/comprehensive', authMiddleware, asyncHandler(async (req, res) => {
 
     const result = {
       url,
+      options,
       timestamp: new Date().toISOString(),
       comprehensive: true,
       results: testResults,

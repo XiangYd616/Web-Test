@@ -7,9 +7,9 @@ const fs = require('fs').promises;
 const path = require('path');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
-const { query } = require('../../config/database');
+const { query: _query } = require('../../config/database');
 
-class EnhancedReportGenerator {
+class ReportGenerator {
   constructor() {
     this.reportsDir = path.join(__dirname, '../../reports');
     this.templatesDir = path.join(__dirname, '../../templates');
@@ -118,9 +118,9 @@ class EnhancedReportGenerator {
         format = 'html',
         title = '测试报告',
         description = '',
-        customSections = [],
-        includeCharts = true,
-        includeRecommendations = true,
+        customSections: _customSections = [],
+        includeCharts: _includeCharts = true,
+        includeRecommendations: _includeRecommendations = true,
         brandingOptions = {}
       } = options;
 
@@ -458,7 +458,7 @@ class EnhancedReportGenerator {
    */
   async generateEnhancedHTML(reportData) {
     const timestamp = Date.now();
-    const fileName = `enhanced_report_${timestamp}.html`;
+    const fileName = `analysis_report_${timestamp}.html`;
     const filePath = path.join(this.reportsDir, fileName);
 
     const { metadata, style, analysis, brandingOptions } = reportData;
@@ -1024,7 +1024,7 @@ class EnhancedReportGenerator {
    */
   async generateEnhancedPDF(reportData) {
     const timestamp = Date.now();
-    const fileName = `enhanced_report_${timestamp}.pdf`;
+    const fileName = `analysis_report_${timestamp}.pdf`;
     const filePath = path.join(this.reportsDir, fileName);
 
     return new Promise((resolve, reject) => {
@@ -1033,7 +1033,7 @@ class EnhancedReportGenerator {
       
       doc.pipe(stream);
 
-      const { metadata, style, analysis, brandingOptions } = reportData;
+      const { metadata, style, analysis, brandingOptions: _brandingOptions } = reportData;
 
       // 添加标题页
       doc.fontSize(28).fillColor(style.primaryColor).text(metadata.title, { align: 'center' });
@@ -1099,7 +1099,7 @@ class EnhancedReportGenerator {
    */
   async generateEnhancedExcel(reportData) {
     const timestamp = Date.now();
-    const fileName = `enhanced_report_${timestamp}.xlsx`;
+    const fileName = `analysis_report_${timestamp}.xlsx`;
     const filePath = path.join(this.reportsDir, fileName);
 
     const workbook = new ExcelJS.Workbook();
@@ -1237,14 +1237,14 @@ class EnhancedReportGenerator {
    */
   async generateWordDocument(reportData) {
     const timestamp = Date.now();
-    const fileName = `enhanced_report_${timestamp}.docx`;
+    const fileName = `analysis_report_${timestamp}.docx`;
     const filePath = path.join(this.reportsDir, fileName);
 
     // 这里需要使用docx库来生成Word文档
     // 由于依赖较大，这里提供简化的HTML转换方案
-    const htmlContent = await this.generateEnhancedHTML(reportData);
+    const _htmlContent = await this.generateEnhancedHTML(reportData);
     const htmlFileName = `temp_${timestamp}.html`;
-    const tempHtmlPath = path.join(this.reportsDir, htmlFileName);
+    const _tempHtmlPath = path.join(this.reportsDir, htmlFileName);
     
     // 生成一个简化的Word兼容的HTML
     const wordCompatibleHtml = `
@@ -1295,7 +1295,7 @@ class EnhancedReportGenerator {
    */
   async generateEnhancedJSON(reportData) {
     const timestamp = Date.now();
-    const fileName = `enhanced_report_${timestamp}.json`;
+    const fileName = `analysis_report_${timestamp}.json`;
     const filePath = path.join(this.reportsDir, fileName);
 
     const jsonReport = {
@@ -1309,7 +1309,7 @@ class EnhancedReportGenerator {
         pdf: fileName.replace('.json', '.pdf'),
         excel: fileName.replace('.json', '.xlsx')
       },
-      generatedBy: 'Test-Web Enhanced Report Generator v2.0'
+      generatedBy: 'Test-Web Report Generator v2.0'
     };
 
     await fs.writeFile(filePath, JSON.stringify(jsonReport, null, 2), 'utf8');
@@ -1340,4 +1340,25 @@ class EnhancedReportGenerator {
   }
 }
 
-module.exports = EnhancedReportGenerator;
+ReportGenerator.prototype.generateReport = function (testData, options = {}) {
+  return this.generateEnhancedReport(testData, options);
+};
+
+ReportGenerator.prototype.generateHTML = function (reportData) {
+  return this.generateEnhancedHTML(reportData);
+};
+
+ReportGenerator.prototype.generatePDF = function (reportData) {
+  return this.generateEnhancedPDF(reportData);
+};
+
+ReportGenerator.prototype.generateExcel = function (reportData) {
+  return this.generateEnhancedExcel(reportData);
+};
+
+ReportGenerator.prototype.generateJSON = function (reportData) {
+  return this.generateEnhancedJSON(reportData);
+};
+
+module.exports = ReportGenerator;
+module.exports.EnhancedReportGenerator = ReportGenerator;

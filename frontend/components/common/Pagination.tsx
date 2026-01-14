@@ -5,21 +5,20 @@
  */
 
 import Logger from '@/utils/logger';
-import React from 'react';
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
   Loader2,
-  MoreHorizontal
+  MoreHorizontal,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PaginationInfo } from '../../types/apiResponse.types';
 
 // ==================== 类型定义 ====================
 
-export interface EnhancedPaginationProps {
+export interface PaginationProps {
   current: number;
   total: number;
   pageSize: number;
@@ -42,7 +41,10 @@ export interface EnhancedPaginationProps {
   maxVisiblePages?: number;
   onPreload?: (page: number) => Promise<void>;
   renderTotal?: (total: number, range: [number, number]) => React.ReactNode;
-  renderPageItem?: (page: number, type: 'page' | 'prev' | 'next' | 'jump-prev' | 'jump-next') => React.ReactNode;
+  renderPageItem?: (
+    page: number,
+    type: 'page' | 'prev' | 'next' | 'jump-prev' | 'jump-next'
+  ) => React.ReactNode;
 }
 
 export interface PaginationState {
@@ -74,7 +76,7 @@ export function usePagination(options: UsePaginationOptions = {}) {
     preloadPages = 2,
     enableCache = true,
     onPageChange,
-    onPreload
+    onPreload,
   } = options;
 
   const [state, setState] = useState<PaginationState>({
@@ -83,7 +85,7 @@ export function usePagination(options: UsePaginationOptions = {}) {
     total: 0,
     totalPages: 0,
     preloadedPages: new Set(),
-    isPreloading: false
+    isPreloading: false,
   });
 
   const preloadTimeoutRef = useRef<NodeJS.Timeout>();
@@ -93,77 +95,84 @@ export function usePagination(options: UsePaginationOptions = {}) {
     setState(prev => ({
       ...prev,
       ...pagination,
-      totalPages: pagination.total && pagination.limit
-        ? Math.ceil(pagination.total / pagination.limit)
-        : prev.totalPages
+      totalPages:
+        pagination.total && pagination.limit
+          ? Math.ceil(pagination.total / pagination.limit)
+          : prev.totalPages,
     }));
   }, []);
 
   // 页面变化处理
-  const handlePageChange = useCallback((page: number, pageSize?: number) => {
-    const newPageSize = pageSize || state.pageSize;
-    const newTotalPages = Math.ceil(state.total / newPageSize);
+  const handlePageChange = useCallback(
+    (page: number, pageSize?: number) => {
+      const newPageSize = pageSize || state.pageSize;
+      const newTotalPages = Math.ceil(state.total / newPageSize);
 
-    if (page < 1 || page > newTotalPages) {
-      return;
-    }
+      if (page < 1 || page > newTotalPages) {
+        return;
+      }
 
-    setState(prev => ({
-      ...prev,
-      currentPage: page,
-      pageSize: newPageSize,
-      totalPages: newTotalPages
-    }));
+      setState(prev => ({
+        ...prev,
+        currentPage: page,
+        pageSize: newPageSize,
+        totalPages: newTotalPages,
+      }));
 
-    onPageChange?.(page, newPageSize);
+      onPageChange?.(page, newPageSize);
 
-    // 预加载相邻页面
-    if (enablePreload && onPreload) {
-      schedulePreload(page, newTotalPages);
-    }
-  }, [state.pageSize, state.total, onPageChange, enablePreload, onPreload]);
+      // 预加载相邻页面
+      if (enablePreload && onPreload) {
+        schedulePreload(page, newTotalPages);
+      }
+    },
+    [state.pageSize, state.total, onPageChange, enablePreload, onPreload]
+  );
 
   // 预加载调度
-  const schedulePreload = useCallback((currentPage: number, totalPages: number) => {
-    if (preloadTimeoutRef.current) {
-      clearTimeout(preloadTimeoutRef.current);
-    }
-
-    preloadTimeoutRef.current = setTimeout(async () => {
-      setState(prev => ({ ...prev, isPreloading: true }));
-
-      const pagesToPreload: number[] = [];
-
-      // 预加载前后几页
-      for (let i = 1; i <= preloadPages; i++) {
-        const prevPage = currentPage - i;
-        const nextPage = currentPage + i;
-
-        if (prevPage >= 1 && !state.preloadedPages.has(prevPage)) {
-          pagesToPreload.push(prevPage);
-        }
-
-        if (nextPage <= totalPages && !state.preloadedPages.has(nextPage)) {
-          pagesToPreload.push(nextPage);
-        }
+  const schedulePreload = useCallback(
+    (currentPage: number, totalPages: number) => {
+      if (preloadTimeoutRef.current) {
+        clearTimeout(preloadTimeoutRef.current);
       }
 
-      // 执行预加载
-      for (const page of pagesToPreload) {
-        try {
-          await onPreload!(page);
-          setState(prev => ({
-            ...prev,
-            preloadedPages: new Set([...prev.preloadedPages, page])
-          }));
-        } catch (error) {
-          Logger.warn(`预加载页面 ${page} 失败:`, { error: String(error) });
-        }
-      }
+      preloadTimeoutRef.current = setTimeout(async () => {
+        setState(prev => ({ ...prev, isPreloading: true }));
 
-      setState(prev => ({ ...prev, isPreloading: false }));
-    }, 500); // 延迟500ms执行预加载
-  }, [preloadPages, state.preloadedPages, onPreload]);
+        const pagesToPreload: number[] = [];
+
+        // 预加载前后几页
+        for (let i = 1; i <= preloadPages; i++) {
+          const prevPage = currentPage - i;
+          const nextPage = currentPage + i;
+
+          if (prevPage >= 1 && !state.preloadedPages.has(prevPage)) {
+            pagesToPreload.push(prevPage);
+          }
+
+          if (nextPage <= totalPages && !state.preloadedPages.has(nextPage)) {
+            pagesToPreload.push(nextPage);
+          }
+        }
+
+        // 执行预加载
+        for (const page of pagesToPreload) {
+          try {
+            await onPreload!(page);
+            setState(prev => ({
+              ...prev,
+              preloadedPages: new Set([...prev.preloadedPages, page]),
+            }));
+          } catch (error) {
+            Logger.warn(`预加载页面 ${page} 失败:`, { error: String(error) });
+          }
+        }
+
+        setState(prev => ({ ...prev, isPreloading: false }));
+      }, 500); // 延迟500ms执行预加载
+    },
+    [preloadPages, state.preloadedPages, onPreload]
+  );
 
   // 清理
   useEffect(() => {
@@ -193,13 +202,13 @@ export function usePagination(options: UsePaginationOptions = {}) {
       const start = (state.currentPage - 1) * state.pageSize + 1;
       const end = Math.min(state.currentPage * state.pageSize, state.total);
       return [start, end] as [number, number];
-    }
+    },
   };
 }
 
 // ==================== 增强分页组件 ====================
 
-export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
+export const Pagination: React.FC<PaginationProps> = ({
   current,
   total,
   pageSize,
@@ -221,7 +230,7 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
   maxVisiblePages = 7,
   onPreload,
   renderTotal,
-  renderPageItem
+  renderPageItem,
 }) => {
   const [jumpValue, setJumpValue] = useState('');
   const [isPreloading, setIsPreloading] = useState(false);
@@ -264,45 +273,61 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
   }, [current, totalPages, maxVisiblePages]);
 
   // 页面变化处理
-  const handlePageChange = useCallback((page: number) => {
-    if (page === current || disabled || loading) return;
+  const handlePageChange = useCallback(
+    (page: number) => {
+      if (page === current || disabled || loading) return;
 
-    onChange(page, pageSize);
+      onChange(page, pageSize);
 
-    // 预加载
-    if (enablePreload && onPreload) {
-      setIsPreloading(true);
-      const preloadPromises: Promise<void>[] = [];
+      // 预加载
+      if (enablePreload && onPreload) {
+        setIsPreloading(true);
+        const preloadPromises: Promise<void>[] = [];
 
-      for (let i = 1; i <= preloadPages; i++) {
-        const prevPage = page - i;
-        const nextPage = page + i;
+        for (let i = 1; i <= preloadPages; i++) {
+          const prevPage = page - i;
+          const nextPage = page + i;
 
-        if (prevPage >= 1) {
-          preloadPromises.push(onPreload(prevPage));
+          if (prevPage >= 1) {
+            preloadPromises.push(onPreload(prevPage));
+          }
+
+          if (nextPage <= totalPages) {
+            preloadPromises.push(onPreload(nextPage));
+          }
         }
 
-        if (nextPage <= totalPages) {
-          preloadPromises.push(onPreload(nextPage));
-        }
+        Promise.allSettled(preloadPromises).finally(() => {
+          setIsPreloading(false);
+        });
       }
-
-      Promise.allSettled(preloadPromises).finally(() => {
-        setIsPreloading(false);
-      });
-    }
-  }, [current, disabled, loading, onChange, pageSize, enablePreload, onPreload, preloadPages, totalPages]);
+    },
+    [
+      current,
+      disabled,
+      loading,
+      onChange,
+      pageSize,
+      enablePreload,
+      onPreload,
+      preloadPages,
+      totalPages,
+    ]
+  );
 
   // 页面大小变化处理
-  const handlePageSizeChange = useCallback((newPageSize: number) => {
-    if (onPageSizeChange) {
-      onPageSizeChange(newPageSize);
-    }
-    // 重新计算当前页
-    const newTotalPages = Math.ceil(total / newPageSize);
-    const newCurrentPage = Math.min(current, newTotalPages);
-    onChange(newCurrentPage, newPageSize);
-  }, [onPageSizeChange, total, current, onChange]);
+  const handlePageSizeChange = useCallback(
+    (newPageSize: number) => {
+      if (onPageSizeChange) {
+        onPageSizeChange(newPageSize);
+      }
+      // 重新计算当前页
+      const newTotalPages = Math.ceil(total / newPageSize);
+      const newCurrentPage = Math.min(current, newTotalPages);
+      onChange(newCurrentPage, newPageSize);
+    },
+    [onPageSizeChange, total, current, onChange]
+  );
 
   // 快速跳转处理
   const handleQuickJump = useCallback(() => {
@@ -317,13 +342,13 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
   const sizeClasses = {
     small: 'text-xs',
     medium: 'text-sm',
-    large: 'text-base'
+    large: 'text-base',
   };
 
   const buttonSizeClasses = {
     small: 'px-2 py-1 text-xs',
     medium: 'px-3 py-2 text-sm',
-    large: 'px-4 py-2 text-base'
+    large: 'px-4 py-2 text-base',
   };
 
   // 渲染页码按钮
@@ -339,9 +364,10 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
     const isActive = page === current;
     const buttonClass = `
       ${buttonSizeClasses[size]}
-      ${isActive
-        ? 'bg-blue-600 text-white border-blue-600'
-        : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600 hover:text-white'
+      ${
+        isActive
+          ? 'bg-blue-600 text-white border-blue-600'
+          : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600 hover:text-white'
       }
       border rounded-lg transition-colors duration-200
       ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -380,9 +406,9 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
       {/* 总数显示 */}
       {showTotal && (
         <div className="text-gray-400">
-          {renderTotal ? renderTotal(total, range) : (
-            `共 ${total} 条记录，第 ${range[0]}-${range[1]} 条`
-          )}
+          {renderTotal
+            ? renderTotal(total, range)
+            : `共 ${total} 条记录，第 ${range[0]}-${range[1]} 条`}
         </div>
       )}
 
@@ -441,9 +467,7 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
         {(isPreloading || loading) && (
           <div className="flex items-center gap-1 text-gray-400">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span className="text-xs">
-              {loading ? '加载中...' : '预加载中...'}
-            </span>
+            <span className="text-xs">{loading ? '加载中...' : '预加载中...'}</span>
           </div>
         )}
       </div>
@@ -454,12 +478,14 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
           <span className="text-gray-400">每页</span>
           <select
             value={pageSize}
-            onChange={(e) => handlePageSizeChange(Number(e?.target.value))}
+            onChange={e => handlePageSizeChange(Number(e?.target.value))}
             disabled={disabled}
             className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-300 focus:outline-none focus:border-blue-500 disabled:opacity-50"
           >
             {pageSizeOptions?.map(size => (
-              <option key={size} value={size}>{size}</option>
+              <option key={size} value={size}>
+                {size}
+              </option>
             ))}
           </select>
           <span className="text-gray-400">条</span>
@@ -475,8 +501,8 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
             min={1}
             max={totalPages}
             value={jumpValue}
-            onChange={(e) => setJumpValue(e?.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleQuickJump()}
+            onChange={e => setJumpValue(e?.target.value)}
+            onKeyPress={e => e.key === 'Enter' && handleQuickJump()}
             disabled={disabled}
             className="w-16 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-300 text-center focus:outline-none focus:border-blue-500 disabled:opacity-50"
             placeholder="页"
@@ -502,4 +528,4 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
   );
 };
 
-export default EnhancedPagination;
+export default Pagination;

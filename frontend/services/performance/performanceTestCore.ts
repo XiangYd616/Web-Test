@@ -118,7 +118,7 @@ export class PerformanceTestCore {
    */
   private async executePerformanceChecks(
     url: string,
-    config: UnifiedPerformanceConfig,
+    config: PerformanceConfig,
     result: PerformanceTestResult,
     onProgress?: PerformanceTestCallback
   ): Promise<void> {
@@ -151,7 +151,7 @@ export class PerformanceTestCore {
   private async executeSpecificCheck(
     checkType: string,
     url: string,
-    config: UnifiedPerformanceConfig,
+    config: PerformanceConfig,
     result: PerformanceTestResult
   ): Promise<void> {
     switch (checkType) {
@@ -173,14 +173,15 @@ export class PerformanceTestCore {
       case 'mobilePerformance':
         result.mobilePerformance = await this.checkMobilePerformance(url, config);
         break;
-      case 'modernWebFeatures':
+      case 'modernWebFeatures': {
         const modernFeatures = await this.checkModernWebFeatures(url, config);
         result.modernWebFeatures = {
           ...modernFeatures,
           modernityLevel: modernFeatures.modernityLevel as 'low' | 'medium' | 'high' | 'unknown',
         };
         break;
-      case 'networkOptimization':
+      }
+      case 'networkOptimization': {
         const networkOpt = await this.analyzeNetworkOptimization(url, config);
         result.networkOptimization = {
           score: networkOpt.score,
@@ -189,7 +190,8 @@ export class PerformanceTestCore {
           metrics: {},
         };
         break;
-      case 'thirdPartyImpact':
+      }
+      case 'thirdPartyImpact': {
         const thirdParty = await this.analyzeThirdPartyImpact(url, config);
         result.thirdPartyImpact = {
           score: thirdParty.score,
@@ -198,16 +200,14 @@ export class PerformanceTestCore {
           recommendations: thirdParty.recommendations || [],
         };
         break;
+      }
     }
   }
 
   /**
    * 页面速度检测
    */
-  private async checkPageSpeed(
-    url: string,
-    config: UnifiedPerformanceConfig
-  ): Promise<PageSpeedMetrics> {
+  private async checkPageSpeed(url: string, config: PerformanceConfig): Promise<PageSpeedMetrics> {
     try {
       const response = await fetch(`${this.apiBaseUrl}/performance/page-speed`, {
         method: 'POST',
@@ -230,10 +230,7 @@ export class PerformanceTestCore {
   /**
    * Core Web Vitals检测
    */
-  private async checkCoreWebVitals(
-    url: string,
-    config: UnifiedPerformanceConfig
-  ): Promise<CoreWebVitals> {
+  private async checkCoreWebVitals(url: string, config: PerformanceConfig): Promise<CoreWebVitals> {
     try {
       // 首先尝试API调用
       try {
@@ -275,7 +272,7 @@ export class PerformanceTestCore {
    */
   private async analyzeResources(
     url: string,
-    config: UnifiedPerformanceConfig
+    config: PerformanceConfig
   ): Promise<ResourceAnalysis> {
     try {
       const response = await fetch(`${this.apiBaseUrl}/performance/resources`, {
@@ -299,10 +296,7 @@ export class PerformanceTestCore {
   /**
    * 缓存分析
    */
-  private async analyzeCaching(
-    url: string,
-    config: UnifiedPerformanceConfig
-  ): Promise<CacheAnalysis> {
+  private async analyzeCaching(url: string, config: PerformanceConfig): Promise<CacheAnalysis> {
     // 实现缓存分析逻辑
     return this.getDefaultCacheAnalysis();
   }
@@ -312,7 +306,7 @@ export class PerformanceTestCore {
    */
   private async analyzeCompression(
     url: string,
-    config: UnifiedPerformanceConfig
+    config: PerformanceConfig
   ): Promise<CompressionAnalysis> {
     // 实现压缩分析逻辑
     return this.getDefaultCompressionAnalysis();
@@ -321,7 +315,7 @@ export class PerformanceTestCore {
   /**
    * 移动端性能检测
    */
-  private async checkMobilePerformance(url: string, config: UnifiedPerformanceConfig) {
+  private async checkMobilePerformance(url: string, config: PerformanceConfig) {
     // 实现移动端性能检测逻辑
     return {
       score: Math.floor(Math.random() * 40) + 60,
@@ -335,7 +329,7 @@ export class PerformanceTestCore {
   /**
    * 合并配置
    */
-  private mergeConfig(config: Partial<UnifiedPerformanceConfig>): UnifiedPerformanceConfig {
+  private mergeConfig(config: Partial<PerformanceConfig>): PerformanceConfig {
     const preset = config.level
       ? PERFORMANCE_CONFIG_PRESETS[config.level]
       : PERFORMANCE_CONFIG_PRESETS.standard;
@@ -363,7 +357,7 @@ export class PerformanceTestCore {
   /**
    * 获取启用的检测项
    */
-  private getEnabledChecks(config: UnifiedPerformanceConfig): string[] {
+  private getEnabledChecks(config: PerformanceConfig): string[] {
     const checks: string[] = [];
     if (config.pageSpeed) checks.push('pageSpeed');
     if (config.coreWebVitals) checks.push('coreWebVitals');
@@ -377,7 +371,7 @@ export class PerformanceTestCore {
   /**
    * 获取已完成的检测项
    */
-  private getCompletedChecks(config: UnifiedPerformanceConfig): string[] {
+  private getCompletedChecks(config: PerformanceConfig): string[] {
     return this.getEnabledChecks(config);
   }
 
@@ -717,7 +711,7 @@ export class PerformanceTestCore {
   /**
    * 现代Web功能检查
    */
-  private async checkModernWebFeatures(url: string, config: UnifiedPerformanceConfig) {
+  private async checkModernWebFeatures(url: string, config: PerformanceConfig) {
     try {
       const response = await fetch(url);
       const html = await response.text();
@@ -771,7 +765,7 @@ export class PerformanceTestCore {
   /**
    * 网络优化分析
    */
-  private async analyzeNetworkOptimization(url: string, config: UnifiedPerformanceConfig) {
+  private async analyzeNetworkOptimization(url: string, config: PerformanceConfig) {
     try {
       const response = await fetch(url);
       const headers = response.headers;
@@ -845,7 +839,7 @@ export class PerformanceTestCore {
   /**
    * 第三方影响分析
    */
-  private async analyzeThirdPartyImpact(url: string, config: UnifiedPerformanceConfig) {
+  private async analyzeThirdPartyImpact(url: string, config: PerformanceConfig) {
     try {
       const response = await fetch(url);
       const html = await response.text();

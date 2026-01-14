@@ -22,7 +22,6 @@ const CacheConfig = {
     connectTimeout: 10000,
     commandTimeout: 5000,
     // 连接池配置
-    maxRetriesPerRequest: 3,
     lazyConnect: true,
     keepAlive: 30000,
   },
@@ -230,7 +229,7 @@ const PerformanceConfig = {
 /**
  * 增强型缓存服务类
  */
-class EnhancedCacheService {
+class CacheService {
   constructor() {
     this.redis = null;
     this.memoryCache = new NodeCache(CacheConfig.memory);
@@ -267,21 +266,21 @@ class EnhancedCacheService {
       });
 
       // 设置内存缓存事件监听
-      this.memoryCache.on('set', (key, value) => {
+      this.memoryCache.on('set', (_key, _value) => {
         this.stats.sets++;
       });
       
-      this.memoryCache.on('del', (key, value) => {
+      this.memoryCache.on('del', (_key, _value) => {
         this.stats.deletes++;
       });
       
-      this.memoryCache.on('expired', (key, value) => {
+      this.memoryCache.on('expired', (_key, _value) => {
       });
 
       // 启动定期统计报告
       this.startStatsReporting();
 
-      console.log('✅ 增强型缓存服务初始化完成');
+      console.log('✅ 缓存服务初始化完成');
     } catch (error) {
       console.error('❌ 缓存服务初始化失败:', error);
       throw error;
@@ -622,7 +621,7 @@ function createCacheMiddleware(strategy = 'apiResponse', customTTL = null) {
     
     try {
       // 尝试从缓存获取
-      const cachedResponse = await global.enhancedCacheService?.get(cacheKey, strategy);
+      const cachedResponse = await global.cacheService?.get(cacheKey, strategy);
       
       if (cachedResponse) {
         res.locals.cacheHit = true;
@@ -639,7 +638,7 @@ function createCacheMiddleware(strategy = 'apiResponse', customTTL = null) {
       res.json = function(body) {
         // 只缓存成功的响应
         if (res.statusCode === 200 && body) {
-          global.enhancedCacheService?.set(cacheKey, body, strategy, customTTL);
+          global.cacheService?.set(cacheKey, body, strategy, customTTL);
         }
         return originalJson.call(this, body);
       };
@@ -656,18 +655,17 @@ function createCacheMiddleware(strategy = 'apiResponse', customTTL = null) {
 module.exports = {
   CacheConfig,
   PerformanceConfig,
-  EnhancedCacheService,
+  CacheService,
   createPerformanceMiddleware,
   createCacheMiddleware,
-  
+
   // 便捷方法
   async initializePerformanceOptimization() {
     try {
-      // 创建增强型缓存服务实例
-      global.enhancedCacheService = new EnhancedCacheService();
-      
+      global.cacheService = new CacheService();
+
       console.log('✅ 性能优化系统初始化完成');
-      return global.enhancedCacheService;
+      return global.cacheService;
     } catch (error) {
       console.error('❌ 性能优化系统初始化失败:', error);
       throw error;

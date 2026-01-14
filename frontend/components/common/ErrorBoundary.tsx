@@ -4,8 +4,17 @@
  */
 
 import Logger from '@/utils/logger';
+import {
+  AlertTriangle,
+  Bug,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Home,
+  RefreshCw,
+} from 'lucide-react';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home, Bug, ChevronDown, ChevronUp, Copy, CheckCircle } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -26,7 +35,7 @@ interface State {
   copied: boolean;
 }
 
-class EnhancedErrorBoundary extends Component<Props, State> {
+class ErrorBoundary extends Component<Props, State> {
   private retryCount = 0;
   private maxRetries = 3;
 
@@ -38,27 +47,27 @@ class EnhancedErrorBoundary extends Component<Props, State> {
       errorInfo: null,
       errorCount: 0,
       showErrorDetails: false,
-      copied: false
+      copied: false,
     };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     return {
       hasError: true,
-      error
+      error,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     const { onError, reportToSentry } = this.props;
-    
+
     // 记录错误到控制台
     Logger.error('错误边界捕获到错误:', error, errorInfo);
-    
+
     // 更新错误计数
     this.setState(prevState => ({
       errorInfo,
-      errorCount: prevState.errorCount + 1
+      errorCount: prevState.errorCount + 1,
     }));
 
     // 调用错误回调
@@ -71,9 +80,9 @@ class EnhancedErrorBoundary extends Component<Props, State> {
       window.Sentry.captureException(error, {
         contexts: {
           react: {
-            componentStack: errorInfo?.componentStack
-          }
-        }
+            componentStack: errorInfo?.componentStack,
+          },
+        },
       });
     }
 
@@ -90,15 +99,15 @@ class EnhancedErrorBoundary extends Component<Props, State> {
         componentStack: errorInfo?.componentStack,
         level: this.props.level || 'component',
         url: window.location.href,
-        userAgent: navigator.userAgent
+        userAgent: navigator.userAgent,
       };
 
       // 获取现有错误日志
       const existingLogs = JSON.parse(localStorage.getItem('errorLogs') || '[]');
-      
+
       // 限制存储的错误日志数量
       const updatedLogs = [errorLog, ...existingLogs].slice(0, 10);
-      
+
       localStorage.setItem('errorLogs', JSON.stringify(updatedLogs));
     } catch (e) {
       Logger.warn('无法存储错误日志:', { error: String(e) });
@@ -112,7 +121,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
         hasError: false,
         error: null,
         errorInfo: null,
-        showErrorDetails: false
+        showErrorDetails: false,
       });
     } else {
       alert(`已尝试 ${this.maxRetries} 次，请刷新页面或联系技术支持。`);
@@ -129,7 +138,7 @@ class EnhancedErrorBoundary extends Component<Props, State> {
 
   toggleErrorDetails = (): void => {
     this.setState(prevState => ({
-      showErrorDetails: !prevState.showErrorDetails
+      showErrorDetails: !prevState.showErrorDetails,
     }));
   };
 
@@ -148,14 +157,17 @@ ${error?.stack}
 ${errorInfo?.componentStack || '无'}
     `.trim();
 
-    navigator.clipboard.writeText(errorDetails).then(() => {
-      this.setState({ copied: true });
-      setTimeout(() => {
-        this.setState({ copied: false });
-      }, 2000);
-    }).catch(err => {
-      Logger.error('复制失败:', { error: String(err) });
-    });
+    navigator.clipboard
+      .writeText(errorDetails)
+      .then(() => {
+        this.setState({ copied: true });
+        setTimeout(() => {
+          this.setState({ copied: false });
+        }, 2000);
+      })
+      .catch(err => {
+        Logger.error('复制失败:', { error: String(err) });
+      });
   };
 
   renderDefaultFallback = (): ReactNode => {
@@ -165,15 +177,17 @@ ${errorInfo?.componentStack || '无'}
     // 根据错误级别确定样式
     const isAppLevel = level === 'app';
     const isPageLevel = level === 'page';
-    
-    const containerClass = isAppLevel 
-      ? 'min-h-screen' 
-      : isPageLevel 
-        ? 'min-h-[600px]' 
+
+    const containerClass = isAppLevel
+      ? 'min-h-screen'
+      : isPageLevel
+        ? 'min-h-[600px]'
         : 'min-h-[400px]';
 
     return (
-      <div className={`${containerClass} flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4`}>
+      <div
+        className={`${containerClass} flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4`}
+      >
         <div className="max-w-2xl w-full">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
             {/* 错误头部 */}
@@ -186,9 +200,7 @@ ${errorInfo?.componentStack || '无'}
                   <h2 className="text-2xl font-bold">
                     {isAppLevel ? '应用程序错误' : isPageLevel ? '页面加载失败' : '组件渲染错误'}
                   </h2>
-                  <p className="text-red-100 mt-1">
-                    很抱歉，出现了意外错误
-                  </p>
+                  <p className="text-red-100 mt-1">很抱歉，出现了意外错误</p>
                 </div>
               </div>
             </div>
@@ -217,10 +229,14 @@ ${errorInfo?.componentStack || '无'}
                     onClick={this.toggleErrorDetails}
                     className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
                   >
-                    {showErrorDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    {showErrorDetails ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
                     {showErrorDetails ? '隐藏' : '显示'}详细信息
                   </button>
-                  
+
                   {showErrorDetails && (
                     <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                       <div className="flex justify-between items-start mb-2">
@@ -278,7 +294,7 @@ ${errorInfo?.componentStack || '无'}
                     )}
                   </button>
                 )}
-                
+
                 {isPageLevel && (
                   <button
                     onClick={this.handleGoHome}
@@ -288,7 +304,7 @@ ${errorInfo?.componentStack || '无'}
                     返回首页
                   </button>
                 )}
-                
+
                 <button
                   onClick={this.handleRefreshPage}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -336,17 +352,17 @@ ${errorInfo?.componentStack || '无'}
 }
 
 // HOC包装函数
-export function withEnhancedErrorBoundary<P extends object>(
+export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   errorBoundaryProps?: Omit<Props, 'children'>
 ) {
   const WrappedComponent = (props: P) => (
-    <EnhancedErrorBoundary {...errorBoundaryProps}>
+    <ErrorBoundary {...errorBoundaryProps}>
       <Component {...props} />
-    </EnhancedErrorBoundary>
+    </ErrorBoundary>
   );
 
-  WrappedComponent.displayName = `withEnhancedErrorBoundary(${Component.displayName || Component.name})`;
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
 
   return WrappedComponent;
 }
@@ -360,4 +376,4 @@ declare global {
   }
 }
 
-export default EnhancedErrorBoundary;
+export default ErrorBoundary;

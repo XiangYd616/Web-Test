@@ -130,8 +130,8 @@
 ❌ UnifiedTestEngine.js
 ✅ TestEngine.js
 
-❌ unified-engine (API路径)
-✅ engine 或 test-engine
+❌ test-engine (旧API路径)
+✅ test-engine
 ```
 
 ### 变量/函数名清理
@@ -164,8 +164,8 @@ type APIResponse = { ... };
 
 ```javascript
 // Before
-url: '/api/unified-engine/test';
-url: '/api/unified-engine/status';
+url: '/api/test-engine/test';
+url: '/api/test-engine/status';
 
 // After
 url: '/api/engine/test';
@@ -193,7 +193,7 @@ socket.on('test:progress', handler);
 ```javascript
 // 需要更新
 - API标题: "统一测试引擎API" → "测试引擎API"
-- URL路径: /unified-engine → /engine
+- URL路径: /test-engine → /engine
 - 所有描述中的"统一"字样
 ```
 

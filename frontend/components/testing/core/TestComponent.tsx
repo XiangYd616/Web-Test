@@ -672,7 +672,7 @@ export const TestComponent: React.FC<TestComponentProps> = ({
   );
 
   return (
-    <div className={`universal-test-component ${className}`}>
+    <div className={`test-component ${className}`}>
       {/* 标题区域 */}
       {(title || description) && (
         <Card className="mb-4">

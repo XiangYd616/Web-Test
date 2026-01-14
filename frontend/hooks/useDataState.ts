@@ -4,7 +4,7 @@
  * 版本: v2.0.0
  */
 
-import type { ApiError } from '@/types/unified/baseTypes.types';
+import type { ApiError } from '@/types/api';
 import Logger from '@/utils/logger';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { apiErrorHandler } from '../services/api/errorHandler';

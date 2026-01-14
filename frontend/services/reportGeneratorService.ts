@@ -1,6 +1,5 @@
-import Logger from '@/utils/logger';
+import Logger from '@/utils/logger'; // 增强的报告生成和导出服务
 
-﻿// 增强的报告生成和导出服务
 export interface ReportConfig {
   title: string;
   description?: string;
@@ -92,7 +91,7 @@ export class ReportGeneratorService {
         content: reportContent,
         config,
         data: processedData,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       });
 
       return reportId;
@@ -140,13 +139,15 @@ export class ReportGeneratorService {
    */
   getReportPreview(reportId: string): unknown | null {
     const report = this.cache.get(reportId);
-    return report ? {
-      id: reportId,
-      title: report.config.title,
-      generatedAt: report.generatedAt,
-      sections: report.config.sections.filter((s: any) => s?.enabled).length,
-      template: report.config.template
-    } : null;
+    return report
+      ? {
+          id: reportId,
+          title: report.config.title,
+          generatedAt: report.generatedAt,
+          sections: report.config.sections.filter((s: any) => s?.enabled).length,
+          template: report.config.template,
+        }
+      : null;
   }
 
   /**
@@ -164,23 +165,23 @@ export class ReportGeneratorService {
       {
         id: 'professional',
         name: '专业版',
-        description: '适合商业演示的专业报告模板'
+        description: '适合商业演示的专业报告模板',
       },
       {
         id: 'executive',
         name: '高管版',
-        description: '简洁的高管摘要报告模板'
+        description: '简洁的高管摘要报告模板',
       },
       {
         id: 'technical',
         name: '技术版',
-        description: '详细的技术分析报告模板'
+        description: '详细的技术分析报告模板',
       },
       {
         id: 'minimal',
         name: '简约版',
-        description: '简洁明了的基础报告模板'
-      }
+        description: '简洁明了的基础报告模板',
+      },
     ];
   }
 
@@ -201,30 +202,30 @@ export class ReportGeneratorService {
           title: '执行摘要',
           type: 'summary',
           enabled: true,
-          order: 1
+          order: 1,
         },
         {
           id: 'metrics',
           title: '关键指标',
           type: 'metrics',
           enabled: true,
-          order: 2
+          order: 2,
         },
         {
           id: 'charts',
           title: '图表分析',
           type: 'charts',
           enabled: true,
-          order: 3
+          order: 3,
         },
         {
           id: 'recommendations',
           title: '优化建议',
           type: 'recommendations',
           enabled: true,
-          order: 4
-        }
-      ]
+          order: 4,
+        },
+      ],
     };
   }
 
@@ -235,28 +236,36 @@ export class ReportGeneratorService {
       layout: 'multi-column',
       colors: { primary: '#2563eb', secondary: '#64748b' },
       fonts: { heading: 'Inter', body: 'Inter' },
-      sections: ['header', 'summary', 'metrics', 'charts', 'recommendations', 'footer']
+      sections: ['header', 'summary', 'metrics', 'charts', 'recommendations', 'footer'],
     });
 
     this.templates.set('executive', {
       layout: 'single-column',
       colors: { primary: '#1f2937', secondary: '#6b7280' },
       fonts: { heading: 'Inter', body: 'Inter' },
-      sections: ['header', 'summary', 'key-metrics', 'footer']
+      sections: ['header', 'summary', 'key-metrics', 'footer'],
     });
 
     this.templates.set('technical', {
       layout: 'detailed',
       colors: { primary: '#059669', secondary: '#374151' },
       fonts: { heading: 'Inter', body: 'Fira Code' },
-      sections: ['header', 'summary', 'detailed-metrics', 'charts', 'raw-data', 'recommendations', 'footer']
+      sections: [
+        'header',
+        'summary',
+        'detailed-metrics',
+        'charts',
+        'raw-data',
+        'recommendations',
+        'footer',
+      ],
     });
 
     this.templates.set('minimal', {
       layout: 'simple',
       colors: { primary: '#000000', secondary: '#666666' },
       fonts: { heading: 'Inter', body: 'Inter' },
-      sections: ['summary', 'metrics']
+      sections: ['summary', 'metrics'],
     });
   }
 
@@ -275,11 +284,15 @@ export class ReportGeneratorService {
       processedAt: new Date().toISOString(),
       summary: this.generateSummary(data),
       metrics: this.extractMetrics(data),
-      charts: this.prepareChartData(data)
+      charts: this.prepareChartData(data),
     };
   }
 
-  private async buildReportContent(data: unknown, config: ReportConfig, template: any): Promise<string> {
+  private async buildReportContent(
+    data: unknown,
+    config: ReportConfig,
+    template: any
+  ): Promise<string> {
     // 构建报告内容
     const sections = config?.sections
       .filter(section => section.enabled)
@@ -293,7 +306,12 @@ export class ReportGeneratorService {
     return content;
   }
 
-  private async buildSection(section: ReportSection, data: unknown, config: ReportConfig, template: any): Promise<string> {
+  private async buildSection(
+    section: ReportSection,
+    data: unknown,
+    config: ReportConfig,
+    template: any
+  ): Promise<string> {
     // 构建单个报告部分
     switch (section.type) {
       case 'summary':
@@ -326,9 +344,12 @@ export class ReportGeneratorService {
     return `<section class="metrics">
       <h2>关键指标</h2>
       <div class="metrics-grid">
-        ${Object.entries(d?.metrics || {}).map(([key, value]) =>
-      `<div class="metric"><span class="label">${key}</span><span class="value">${value}</span></div>`
-    ).join('')}
+        ${Object.entries(d?.metrics || {})
+          .map(
+            ([key, value]) =>
+              `<div class="metric"><span class="label">${key}</span><span class="value">${value}</span></div>`
+          )
+          .join('')}
       </div>
     </section>`;
   }
@@ -367,7 +388,7 @@ export class ReportGeneratorService {
       url: data?.url,
       duration: data?.duration,
       overallScore: data?.overallScore,
-      status: data?.endTime ? 'completed' : 'running'
+      status: data?.endTime ? 'completed' : 'running',
     };
   }
 
@@ -430,7 +451,9 @@ export class ReportGeneratorService {
   private async exportToXLSX(report: unknown, options: ExportOptions): Promise<Blob> {
     // XLSX导出逻辑
     const xlsxContent = 'XLSX export not implemented yet';
-    return new Blob([xlsxContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    return new Blob([xlsxContent], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
   }
 
   private async exportToImage(report: unknown, options: ExportOptions): Promise<Blob> {
@@ -442,6 +465,5 @@ export class ReportGeneratorService {
 
 // 导出单例实例
 export const reportGeneratorService = new ReportGeneratorService();
-export const _EnhancedReportGenerator = reportGeneratorService; // 兼容性导出
 
 export default reportGeneratorService;

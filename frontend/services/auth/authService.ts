@@ -1,14 +1,12 @@
 import Logger from '@/utils/logger';
 import { jwtDecode } from 'jwt-decode';
-import { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/auth/models';
-import { UserRole, UserStatus } from '../../types/enums';
+import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/auth.types';
+import { UserRole, UserStatus } from '../../types/auth.types';
 import type { ChangePasswordData, CreateUserData, UpdateUserData } from '../../types/user';
 import { browserJwt } from '../../utils/browserJwt';
 import { canUseDatabase } from '../../utils/environment';
-
-// 导入企业级功能模块
 import type {
-  EnhancedAuthConfig,
+  AuthServiceConfig,
   IAuthService,
   JwtPayload,
   PasswordStrength,
@@ -41,6 +39,8 @@ const isElectron = typeof window !== 'undefined' && (window as any).process.type
 const isBrowser = typeof window !== 'undefined' && !isElectron;
 const isNode = typeof window === 'undefined';
 
+type AuthServiceEventCallback = (data?: unknown) => void;
+
 export class AuthService implements IAuthService {
   private readonly TOKEN_KEY = 'test_web_app_token';
   private readonly USER_KEY = 'test_web_app_user';
@@ -51,20 +51,20 @@ export class AuthService implements IAuthService {
   private isInitialized = false;
 
   // 企业级功能配置
-  private enhancedConfig: Partial<EnhancedAuthConfig>;
+  private serviceConfig: Partial<AuthServiceConfig>;
   private deviceFingerprint?: string;
   private deviceId: string;
   private refreshTimer?: NodeJS.Timeout;
   private sessionCheckTimer?: NodeJS.Timeout;
-  private eventListeners: Map<string, Function[]> = new Map();
+  private eventListeners: Map<string, AuthServiceEventCallback[]> = new Map();
 
   // JWT管理
   private currentTokenPair?: TokenPair;
   private activeSessions = new Map<string, SessionInfo>();
 
-  constructor(enhancedConfig: Partial<EnhancedAuthConfig> = {}) {
+  constructor(serviceConfig: Partial<AuthServiceConfig> = {}) {
     // 初始化企业级配置
-    this.enhancedConfig = {
+    this.serviceConfig = {
       enableDeviceFingerprinting: true,
       enableSecureStorage: true,
       requireMFA: false,
@@ -75,7 +75,7 @@ export class AuthService implements IAuthService {
       maxConcurrentSessions: 5,
       passwordPolicy: PasswordSecurityManager.DEFAULT_POLICY,
       apiBaseUrl: '/api',
-      ...enhancedConfig,
+      ...serviceConfig,
     };
 
     // 初始化设备ID
@@ -107,7 +107,7 @@ export class AuthService implements IAuthService {
    */
   private async initializeEnhancedFeatures(): Promise<void> {
     // 初始化设备指纹
-    if (this.enhancedConfig.enableDeviceFingerprinting) {
+    if (this.serviceConfig.enableDeviceFingerprinting) {
       try {
         this.deviceFingerprint = await DeviceFingerprinter.generateFingerprint();
       } catch (error) {
@@ -116,7 +116,7 @@ export class AuthService implements IAuthService {
     }
 
     // 启动会话监控
-    if (this.enhancedConfig.enableSessionTracking) {
+    if (this.serviceConfig.enableSessionTracking) {
       this.startSessionMonitoring();
     }
 
@@ -417,7 +417,7 @@ export class AuthService implements IAuthService {
       const tokenPair: TokenPair = {
         accessToken: token,
         refreshToken,
-        expiresAt: Date.now() + (this.enhancedConfig.accessTokenExpiry || 900) * 1000,
+        expiresAt: Date.now() + (this.serviceConfig.accessTokenExpiry || 900) * 1000,
         issuedAt: Date.now(),
       };
 
@@ -520,7 +520,7 @@ export class AuthService implements IAuthService {
 
       // 保存服务器返回的token（这里不保存，在上层处理）
       // 返回用户信息供上层使用
-      return user;
+      return user as unknown as User;
     } catch (error) {
       Logger.error('❌ API验证失败:', error);
       return null;
@@ -540,6 +540,7 @@ export class AuthService implements IAuthService {
         profile: {
           fullName: '系统管理员',
           avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+          timezone: 'Asia/Shanghai',
         },
         preferences: this.getDefaultPreferences(),
         emailVerified: true,
@@ -556,6 +557,7 @@ export class AuthService implements IAuthService {
         profile: {
           fullName: '项目经理',
           avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=manager',
+          timezone: 'Asia/Shanghai',
         },
         preferences: this.getDefaultPreferences(),
         emailVerified: true,
@@ -572,6 +574,7 @@ export class AuthService implements IAuthService {
         profile: {
           fullName: '测试工程师',
           avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tester',
+          timezone: 'Asia/Shanghai',
         },
         preferences: this.getDefaultPreferences(),
         emailVerified: true,
@@ -584,21 +587,28 @@ export class AuthService implements IAuthService {
   }
 
   // 获取默认用户偏好设置
-  private getDefaultPreferences(): import('../types/user').UserPreferences {
+  private getDefaultPreferences(): User['preferences'] {
     return {
       theme: 'light' as const,
       language: 'zh-CN',
       timezone: 'Asia/Shanghai',
+      dateFormat: 'YYYY-MM-DD',
+      timeFormat: '24h',
       notifications: {
         email: true,
         sms: false,
         push: false,
         browser: true,
+        testComplete: true,
+        testFailed: true,
+        weeklyReport: false,
+        securityAlert: true,
       },
       dashboard: {
         layout: 'grid',
         widgets: ['overview', 'recent-tests'],
         defaultView: 'overview',
+        refreshInterval: 300000,
       },
     };
   }
@@ -834,7 +844,7 @@ export class AuthService implements IAuthService {
           ...updates,
           preferences: { ...this.currentUser.preferences, ...updates.preferences },
           updatedAt: new Date().toISOString(),
-        };
+        } as unknown as User;
 
         // 更新本地存储
         localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
@@ -1059,15 +1069,10 @@ export class AuthService implements IAuthService {
     if (typeof window === 'undefined') return;
 
     try {
-      if (this.enhancedConfig.enableSecureStorage) {
+      if (this.serviceConfig.enableSecureStorage) {
         this.currentTokenPair =
           (await SecureStorageManager.getItem<TokenPair>('token_pair')) ?? undefined;
       } else {
-        /**
-         * if功能函数
-         * @param {Object} params - 参数对象
-         * @returns {Promise<Object>} 返回结果
-         */
         const stored = localStorage.getItem('auth_token_pair');
         if (stored) {
           this.currentTokenPair = JSON.parse(stored);
@@ -1089,7 +1094,7 @@ export class AuthService implements IAuthService {
     this.currentTokenPair = tokens;
 
     if (typeof window !== 'undefined') {
-      if (this.enhancedConfig.enableSecureStorage) {
+      if (this.serviceConfig.enableSecureStorage) {
         await SecureStorageManager.setItem('token_pair', tokens);
       } else {
         localStorage.setItem('auth_token_pair', JSON.stringify(tokens));
@@ -1140,7 +1145,7 @@ export class AuthService implements IAuthService {
     try {
       const decoded = jwtDecode<JwtPayload>(token);
       const expiryTime = decoded.exp * 1000;
-      const thresholdTime = Date.now() + (this.enhancedConfig.autoRefreshThreshold || 300) * 1000;
+      const thresholdTime = Date.now() + (this.serviceConfig.autoRefreshThreshold || 300) * 1000;
       return thresholdTime >= expiryTime;
     } catch {
       return true;
@@ -1172,7 +1177,7 @@ export class AuthService implements IAuthService {
     if (!decoded) return;
 
     const expiryTime = decoded.exp * 1000;
-    const refreshTime = expiryTime - this.enhancedConfig.autoRefreshThreshold! * 1000;
+    const refreshTime = expiryTime - this.serviceConfig.autoRefreshThreshold! * 1000;
     const delay = Math.max(0, refreshTime - Date.now());
 
     this.refreshTimer = setTimeout(() => {
@@ -1194,7 +1199,7 @@ export class AuthService implements IAuthService {
     }
 
     try {
-      const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/refresh`, {
+      const response = await fetch(`${this.serviceConfig.apiBaseUrl}/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1215,7 +1220,7 @@ export class AuthService implements IAuthService {
       const newTokens: TokenPair = {
         accessToken: result.token || result.accessToken,
         refreshToken: result.refreshToken,
-        expiresAt: Date.now() + this.enhancedConfig.accessTokenExpiry! * 1000,
+        expiresAt: Date.now() + this.serviceConfig.accessTokenExpiry! * 1000,
         issuedAt: Date.now(),
       };
 
@@ -1252,7 +1257,7 @@ export class AuthService implements IAuthService {
     }
 
     if (typeof window !== 'undefined') {
-      if (this.enhancedConfig.enableSecureStorage) {
+      if (this.serviceConfig.enableSecureStorage) {
         SecureStorageManager.removeItem('token_pair');
       } else {
         localStorage.removeItem('auth_token_pair');
@@ -1306,7 +1311,7 @@ export class AuthService implements IAuthService {
   validatePasswordStrength(password: string): PasswordStrength {
     return PasswordSecurityManager.validatePasswordStrength(
       password,
-      this.enhancedConfig.passwordPolicy || PasswordSecurityManager.DEFAULT_POLICY
+      this.serviceConfig.passwordPolicy || PasswordSecurityManager.DEFAULT_POLICY
     );
   }
 
@@ -1341,7 +1346,7 @@ export class AuthService implements IAuthService {
       const token = this.getAccessToken();
       if (!token) return [];
 
-      const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/sessions`, {
+      const response = await fetch(`${this.serviceConfig.apiBaseUrl}/auth/sessions`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -1363,7 +1368,7 @@ export class AuthService implements IAuthService {
       const token = this.getAccessToken();
       if (!token) return false;
 
-      const response = await fetch(`${this.enhancedConfig.apiBaseUrl}/auth/sessions/${sessionId}`, {
+      const response = await fetch(`${this.serviceConfig.apiBaseUrl}/auth/sessions/${sessionId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1387,7 +1392,7 @@ export class AuthService implements IAuthService {
       if (!token) return false;
 
       const response = await fetch(
-        `${this.enhancedConfig.apiBaseUrl}/auth/sessions/terminate-others`,
+        `${this.serviceConfig.apiBaseUrl}/auth/sessions/terminate-others`,
         {
           method: 'POST',
           headers: {
@@ -1407,7 +1412,7 @@ export class AuthService implements IAuthService {
   /**
    * 添加事件监听器
    */
-  on(event: string, callback: Function): void {
+  on(event: string, callback: AuthServiceEventCallback): void {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
     }
@@ -1417,7 +1422,7 @@ export class AuthService implements IAuthService {
   /**
    * 移除事件监听器
    */
-  off(event: string, callback: Function): void {
+  off(event: string, callback: AuthServiceEventCallback): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       const index = listeners.indexOf(callback);
@@ -1465,7 +1470,7 @@ export class AuthService implements IAuthService {
    * 安全存储token
    */
   private async storeTokenSecurely(key: string, value: string): Promise<void> {
-    if (this.enhancedConfig.enableSecureStorage) {
+    if (this.serviceConfig.enableSecureStorage) {
       try {
         await SecureStorageManager.setItem(key, value);
       } catch (error) {
@@ -1481,7 +1486,7 @@ export class AuthService implements IAuthService {
    * 安全获取token
    */
   private async getTokenSecurely(key: string): Promise<string | null> {
-    if (this.enhancedConfig.enableSecureStorage) {
+    if (this.serviceConfig.enableSecureStorage) {
       try {
         return await SecureStorageManager.getItem<string>(key);
       } catch (error) {
@@ -1496,15 +1501,15 @@ export class AuthService implements IAuthService {
   /**
    * 获取增强配置
    */
-  getEnhancedConfig(): Partial<EnhancedAuthConfig> {
-    return { ...this.enhancedConfig };
+  getServiceConfig(): Partial<AuthServiceConfig> {
+    return { ...this.serviceConfig };
   }
 
   /**
    * 更新增强配置
    */
-  updateEnhancedConfig(config: Partial<EnhancedAuthConfig>): void {
-    this.enhancedConfig = { ...this.enhancedConfig, ...config };
+  updateServiceConfig(config: Partial<AuthServiceConfig>): void {
+    this.serviceConfig = { ...this.serviceConfig, ...config };
   }
 
   /**
@@ -1542,18 +1547,9 @@ export class AuthService implements IAuthService {
       return { success: false, message: '只能在 Node.js 环境中执行数据迁移', migrated: 0 };
     }
 
-    try {
-      // 这里需要从浏览器环境获取数据，实际实现时需要考虑如何获取
-      // 暂时返回成功状态
-      return { success: true, message: '数据迁移完成', migrated: 0 };
-    } catch (error: any) {
-      Logger.error('❗ 数据迁移失败:', { error: String(error) });
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : '未知错误',
-        migrated: 0,
-      };
-    }
+    // 这里需要从浏览器环境获取数据，实际实现时需要考虑如何获取
+    // 暂时返回成功状态
+    return { success: true, message: '数据迁移完成', migrated: 0 };
   }
 
   // 清除所有认证数据（调试用）
@@ -1582,8 +1578,7 @@ export class AuthService implements IAuthService {
   }
 }
 
-// 创建全局统一认证服务实例
-export const unifiedAuthService = new UnifiedAuthService();
-export const authService = unifiedAuthService; // 主要导出
-export const _authService = unifiedAuthService; // 添加别名导出
-export default unifiedAuthService; // 导出实例而不是类
+// 创建全局认证服务实例
+export const authService = new AuthService();
+export const _authService = authService; // 添加别名导出
+export default authService; // 导出实例而不是类

@@ -1,17 +1,29 @@
 ﻿/**
  * ReportExporter.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\reports\ReportExporter.tsx
  * 创建时间: 2025-09-25
  */
 
 import Logger from '@/utils/logger';
-import React from 'react';
-import { AlertCircle, CheckCircle, Download, Eye, FileText, Layout, Loader, Settings, Table } from 'lucide-react';
-import { createElement, useState } from 'react';
-import type { FC } from 'react';;
-import { _EnhancedReportGenerator as EnhancedReportGenerator, ExportFormat, ReportConfig, ReportData } from '../../services/reportGeneratorService';
-
+import {
+  AlertCircle,
+  CheckCircle,
+  Download,
+  Eye,
+  FileText,
+  Layout,
+  Loader,
+  Settings,
+  Table,
+} from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  ExportFormat,
+  ReportConfig,
+  ReportData,
+  reportGeneratorService,
+} from '../../services/reportGeneratorService';
 interface ReportExporterProps {
   testResults: any[];
   analytics?: any;
@@ -23,12 +35,12 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
   testResults,
   analytics,
   onExport,
-  className = ''
+  className = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('html');
   const [config, setConfig] = useState<ReportConfig>(() =>
-    EnhancedReportGenerator.getDefaultConfig()
+    reportGeneratorService.getDefaultConfig()
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
@@ -39,43 +51,46 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
       name: 'HTML 报告',
       description: '交互式网页报告，包含图表和样式',
       icon: FileText,
-      color: 'text-blue-600 bg-blue-50'
+      color: 'text-blue-600 bg-blue-50',
     },
     {
       id: 'pdf' as ExportFormat,
       name: 'PDF 报告',
       description: '专业的PDF文档，适合打印和分享',
       icon: FileText,
-      color: 'text-red-600 bg-red-50'
+      color: 'text-red-600 bg-red-50',
     },
     {
       id: 'json' as ExportFormat,
       name: 'JSON 数据',
       description: '结构化数据，便于程序处理',
       icon: Settings,
-      color: 'text-green-600 bg-green-50'
+      color: 'text-green-600 bg-green-50',
     },
     {
       id: 'csv' as ExportFormat,
       name: 'CSV 表格',
       description: '逗号分隔值，可用Excel打开',
       icon: Table,
-      color: 'text-yellow-600 bg-yellow-50'
+      color: 'text-yellow-600 bg-yellow-50',
     },
     {
       id: 'xlsx' as ExportFormat,
       name: 'Excel 工作簿',
       description: '完整的Excel文件，支持多个工作表',
       icon: Table,
-      color: 'text-purple-600 bg-purple-50'
-    }
+      color: 'text-purple-600 bg-purple-50',
+    },
   ];
 
-  const templates = EnhancedReportGenerator.getAvailableTemplates();
-  const templatesMap = templates.reduce((acc, template) => {
-    acc[template.id] = template;
-    return acc;
-  }, {} as Record<string, any>);
+  const templates = reportGeneratorService.getAvailableTemplates();
+  const templatesMap = templates.reduce(
+    (acc, template) => {
+      acc[template.id] = template;
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 
   const handleExport = async () => {
     if (!testResults.length) {
@@ -93,27 +108,35 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
         url: testResults[0]?.url || 'N/A',
         startTime: testResults[0]?.timestamp || new Date().toISOString(),
         endTime: testResults[testResults.length - 1]?.timestamp || new Date().toISOString(),
-        duration: testResults.length > 0 ?
-          new Date(testResults[testResults.length - 1]?.timestamp || 0).getTime() -
-          new Date(testResults[0]?.timestamp || 0).getTime() : 0,
-        overallScore: testResults.length > 0 ?
-          Math.round(testResults.reduce((sum, r) => sum + (r.score || 0), 0) / testResults.length) : 0,
+        duration:
+          testResults.length > 0
+            ? new Date(testResults[testResults.length - 1]?.timestamp || 0).getTime() -
+              new Date(testResults[0]?.timestamp || 0).getTime()
+            : 0,
+        overallScore:
+          testResults.length > 0
+            ? Math.round(
+                testResults.reduce((sum, r) => sum + (r.score || 0), 0) / testResults.length
+              )
+            : 0,
         results: testResults,
         testResults,
         analytics: analytics || {},
         timeRange: {
           start: testResults[0]?.timestamp || new Date().toISOString(),
-          end: testResults[testResults.length - 1]?.timestamp || new Date().toISOString()
+          end: testResults[testResults.length - 1]?.timestamp || new Date().toISOString(),
         },
         metadata: {
           generatedAt: new Date().toISOString(),
           generatedBy: 'Test Web Platform',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
 
-      const reportId = await EnhancedReportGenerator.generateReport(reportData, config);
-      const result = await EnhancedReportGenerator.exportReport(reportId, { format: selectedFormat });
+      const reportId = await reportGeneratorService.generateReport(reportData, config);
+      const result = await reportGeneratorService.exportReport(reportId, {
+        format: selectedFormat,
+      });
 
       // 下载文件
       const blob = typeof result === 'string' ? new Blob([result], { type: 'text/plain' }) : result;
@@ -145,7 +168,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
       ...prev,
       sections: prev.sections.map(section =>
         section.id === sectionId ? { ...section, ...updates } : section
-      )
+      ),
     }));
   };
 
@@ -187,20 +210,21 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
             <div className="mb-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">选择导出格式</h3>
               <div className="grid grid-cols-1 gap-3">
-                {formats.map((format) => (
+                {formats.map(format => (
                   <label
                     key={format.id}
-                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${selectedFormat === format.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                      selectedFormat === format.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
                     <input
                       type="radio"
                       name="format"
                       value={format.id}
                       checked={selectedFormat === format.id}
-                      onChange={(e) => setSelectedFormat(e?.target.value as ExportFormat)}
+                      onChange={e => setSelectedFormat(e?.target.value as ExportFormat)}
                       className="sr-only"
                     />
                     <div className={`p-2 rounded-lg ${format.color} mr-3`}>
@@ -221,13 +245,11 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
 
               {/* 标题 */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  报告标题
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">报告标题</label>
                 <input
                   type="text"
                   value={config.title}
-                  onChange={(e) => updateConfig({ title: e?.target.value })}
+                  onChange={e => updateConfig({ title: e?.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="输入报告标题"
                   aria-label="报告标题"
@@ -236,12 +258,10 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
 
               {/* 描述 */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  报告描述
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">报告描述</label>
                 <textarea
                   value={config.description || ''}
-                  onChange={(e) => updateConfig({ description: e?.target.value })}
+                  onChange={e => updateConfig({ description: e?.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="输入报告描述"
@@ -251,12 +271,10 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
 
               {/* 模板选择 */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  报告模板
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">报告模板</label>
                 <select
                   value={config.template}
-                  onChange={(e) => updateConfig({ template: e?.target.value as any })}
+                  onChange={e => updateConfig({ template: e?.target.value as any })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   title="选择报告模板"
                   aria-label="选择报告模板"
@@ -278,7 +296,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                   <input
                     type="checkbox"
                     checked={config.includeCharts}
-                    onChange={(e) => updateConfig({ includeCharts: e?.target.checked })}
+                    onChange={e => updateConfig({ includeCharts: e?.target.checked })}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-2 text-sm text-gray-700">包含图表</span>
@@ -287,7 +305,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                   <input
                     type="checkbox"
                     checked={config.includeRecommendations}
-                    onChange={(e) => updateConfig({ includeRecommendations: e?.target.checked })}
+                    onChange={e => updateConfig({ includeRecommendations: e?.target.checked })}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-2 text-sm text-gray-700">包含优化建议</span>
@@ -296,7 +314,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                   <input
                     type="checkbox"
                     checked={config.includeRawData}
-                    onChange={(e) => updateConfig({ includeRawData: e?.target.checked })}
+                    onChange={e => updateConfig({ includeRawData: e?.target.checked })}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="ml-2 text-sm text-gray-700">包含原始数据</span>
@@ -308,24 +326,31 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
             <div className="mb-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">报告章节</h3>
               <div className="space-y-3">
-                {config.sections.map((section) => (
-                  <div key={section.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                {config.sections.map(section => (
+                  <div
+                    key={section.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex items-center">
                       <input
                         type="checkbox"
                         checked={section.enabled}
-                        onChange={(e) => updateSection(section.id, { enabled: e?.target.checked })}
+                        onChange={e => updateSection(section.id, { enabled: e?.target.checked })}
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         title={`启用/禁用 ${section.title}`}
                         aria-label={`启用/禁用 ${section.title}`}
                       />
-                      <span className="ml-3 text-sm font-medium text-gray-900">{section.title}</span>
+                      <span className="ml-3 text-sm font-medium text-gray-900">
+                        {section.title}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input
                         type="number"
                         value={section.order}
-                        onChange={(e) => updateSection(section.id, { order: parseInt(e?.target.value) })}
+                        onChange={e =>
+                          updateSection(section.id, { order: parseInt(e?.target.value) })
+                        }
                         min="1"
                         max="10"
                         className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
@@ -357,30 +382,31 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
               <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                 <div className="text-center mb-4">
                   <h4 className="text-xl font-bold text-gray-900">{config.title}</h4>
-                  {config.description && (
-                    <p className="text-gray-600 mt-2">{config.description}</p>
-                  )}
+                  {config.description && <p className="text-gray-600 mt-2">{config.description}</p>}
                 </div>
 
                 <div className="space-y-4">
-                  {config.sections.filter(s => s?.enabled).sort((a, b) => a.order - b.order).map(section => (
-                    <div key={section.id} className="border-l-4 border-blue-500 pl-4">
-                      <h5 className="font-medium text-gray-900">{section.title}</h5>
-                      <p className="text-sm text-gray-600">
-                        {section.type === 'summary' && '执行摘要和关键指标'}
-                        {section.type === 'metrics' && '详细的性能和安全指标'}
-                        {section.type === 'charts' && '可视化图表和趋势分析'}
-                        {section.type === 'recommendations' && '优化建议和最佳实践'}
-                        {section.type === 'raw-data' && '原始测试数据表格'}
-                      </p>
-                    </div>
-                  ))}
+                  {config.sections
+                    .filter(s => s?.enabled)
+                    .sort((a, b) => a.order - b.order)
+                    .map(section => (
+                      <div key={section.id} className="border-l-4 border-blue-500 pl-4">
+                        <h5 className="font-medium text-gray-900">{section.title}</h5>
+                        <p className="text-sm text-gray-600">
+                          {section.type === 'summary' && '执行摘要和关键指标'}
+                          {section.type === 'metrics' && '详细的性能和安全指标'}
+                          {section.type === 'charts' && '可视化图表和趋势分析'}
+                          {section.type === 'recommendations' && '优化建议和最佳实践'}
+                          {section.type === 'raw-data' && '原始测试数据表格'}
+                        </p>
+                      </div>
+                    ))}
                 </div>
               </div>
             ) : (
               <div className="text-center text-gray-500 py-12">
                 <Layout className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>点击"开启预览"查看报告结构</p>
+                <p>点击&quot;开启预览&quot;查看报告结构</p>
               </div>
             )}
 
@@ -407,9 +433,13 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                 <div>
                   <span className="text-blue-700">预计大小:</span>
                   <span className="font-medium ml-2">
-                    {selectedFormat === 'pdf' ? '~2MB' :
-                      selectedFormat === 'html' ? '~500KB' :
-                        selectedFormat === 'xlsx' ? '~1MB' : '~100KB'}
+                    {selectedFormat === 'pdf'
+                      ? '~2MB'
+                      : selectedFormat === 'html'
+                        ? '~500KB'
+                        : selectedFormat === 'xlsx'
+                          ? '~1MB'
+                          : '~100KB'}
                   </span>
                 </div>
               </div>

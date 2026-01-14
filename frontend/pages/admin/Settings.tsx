@@ -26,12 +26,12 @@ import {
   User,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import { SettingsService } from '../../services/settingsService';
 import BackupManagement from '../../components/admin/BackupManagement';
 import SecurityCenter from '../../components/admin/SecurityCenter';
 import SystemSettings from '../../components/admin/SystemSettings';
+import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { SettingsService } from '../../services/settingsService';
 
 interface TabConfig {
   id: string;
@@ -66,7 +66,7 @@ interface NotificationPrefs {
   browserPushResults: boolean;
 }
 
-const UnifiedSettings: React.FC = () => {
+const SettingsPage: React.FC = () => {
   const { user } = useAuth();
   const { actualTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('preferences');
@@ -660,7 +660,7 @@ const PreferencesSettings: React.FC<{
 const GeneralSettings: React.FC<{
   settings?: Record<string, any>;
   onSave?: (category: string, data: Record<string, any>) => Promise<void>;
-}> = ({ settings, onSave }) => (
+}> = _props => (
   <div className="space-y-8">
     <div className="flex items-center space-x-3 mb-6">
       <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-lg border border-blue-500/30">
@@ -1282,4 +1282,4 @@ const MaintenanceSettings: React.FC = () => (
   </div>
 );
 
-export default UnifiedSettings;
+export default SettingsPage;

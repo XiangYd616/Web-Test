@@ -4,7 +4,7 @@
  */
 
 import { ComponentType, ReactNode } from 'react';
-import { TestStatus, TestType } from '../unified/testTypes';
+import { TestStatus, TestType } from '../enums';
 
 // ==================== 基础UI类型 ====================
 

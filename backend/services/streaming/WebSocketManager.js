@@ -18,7 +18,7 @@ const EventEmitter = require('events');
    * @returns {Promise<void>}
 
    */
-class EnhancedWebSocketManager extends EventEmitter {
+class WebSocketManager extends EventEmitter {
   constructor(server, options = {}) {
     super();
     
@@ -227,7 +227,7 @@ class EnhancedWebSocketManager extends EventEmitter {
         }
         
         next();
-      } catch (error) {
+      } catch {
         next(new Error('连接验证失败'));
       }
     });
@@ -581,10 +581,6 @@ class EnhancedWebSocketManager extends EventEmitter {
    * 处理消息队列
    */
   processMessageQueues() {
-    const priorities = Object.entries(this.config.messageQueue.priority)
-      .sort(([,a], [,b]) => a - b)
-      .map(([priority]) => priority);
-    
     this.messageQueues.forEach((queue, socketId) => {
       if (queue.length === 0) return;
       
@@ -643,7 +639,6 @@ class EnhancedWebSocketManager extends EventEmitter {
    */
   performHeartbeat() {
     const now = Date.now();
-    const timeout = this.config.heartbeat.timeout;
     
     this.connections.forEach((connectionInfo, socketId) => {
       const socket = this.io.sockets.sockets.get(socketId);
@@ -878,7 +873,7 @@ class EnhancedWebSocketManager extends EventEmitter {
       this.reconnectionAttempts.clear();
       
       this.isInitialized = false;
-      console.log('✅ 增强版WebSocket管理器已关闭');
+      console.log('✅ WebSocket管理器已关闭');
       
     } catch (error) {
       console.error('❌ 关闭WebSocket管理器失败:', error);
@@ -900,4 +895,4 @@ class EnhancedWebSocketManager extends EventEmitter {
   }
 }
 
-module.exports = EnhancedWebSocketManager;
+module.exports = WebSocketManager;

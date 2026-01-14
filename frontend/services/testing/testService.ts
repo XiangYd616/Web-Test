@@ -284,7 +284,7 @@ class CompatibilityTestEngine implements TestEngine {
 }
 
 // 导出单例实例
-export const unifiedTestService = new UnifiedTestService();
+export const testService = new TestService();
 
 // 默认导出
-export default unifiedTestService;
+export default testService;

@@ -19,7 +19,7 @@ const engineAPIDoc = {
   },
   servers: [
     {
-      url: 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/engine',
+      url: `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/engine`,
       description: '开发环境'
     },
     {
@@ -501,8 +501,8 @@ const configExamples = {
  */
 const webSocketEvents = {
   connection: {
-    description: '客户端连接到统一测试引擎WebSocket',
-    url: 'ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/unified-engine',
+    description: '客户端连接到测试引擎WebSocket',
+    url: `ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/test-engine`,
     events: {
       engineStatus: {
         description: '引擎状态更新',
@@ -587,7 +587,7 @@ const usageExamples = {
   javascript: {
     executeTest: `
 // 执行性能测试
-const response = await fetch('/api/unified-engine/execute', {
+const response = await fetch('/api/test-engine/execute', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -612,7 +612,7 @@ console.log('测试ID:', result.data.testId);
     `,
     webSocket: `
 // WebSocket连接
-const ws = new WebSocket('ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/unified-engine');
+const ws = new WebSocket('ws://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/test-engine');
 
 ws.onopen = () => {
   console.log('连接到统一测试引擎');
@@ -644,7 +644,7 @@ ws.onmessage = (event) => {
   curl: {
     executeTest: `
 # 执行性能测试
-curl -X POST http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/unified-engine/execute \\
+curl -X POST http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test-engine/execute \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer your-jwt-token" \\
   -d '{

@@ -55,7 +55,7 @@ import {
   Wrench,
   X,
   XCircle,
-  Zap
+  Zap,
 } from 'lucide-react';
 import React from 'react';
 
@@ -63,18 +63,26 @@ import React from 'react';
 const Sort = ArrowUpDown;
 const _Tool = Wrench;
 
-
 // 图标尺寸类型
 export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 // 图标颜色类型
 export type IconColor =
-  | 'primary' | 'secondary' | 'tertiary' | 'muted' | 'disabled'
-  | 'success' | 'warning' | 'error' | 'info'
-  | 'white' | 'black' | 'current';
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'muted'
+  | 'disabled'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info'
+  | 'white'
+  | 'black'
+  | 'current';
 
 // 图标属性接口
-export interface UnifiedIconProps {
+export interface IconProps {
   icon: LucideIcon;
   size?: IconSize;
   color?: IconColor;
@@ -88,7 +96,7 @@ export interface UnifiedIconProps {
  * 统一图标组件
  * 提供一致的图标渲染和样式
  */
-export const UnifiedIcon: React.FC<UnifiedIconProps> = ({
+export const Icon: React.FC<IconProps> = ({
   icon: Icon,
   size = 'md',
   color = 'current',
@@ -100,12 +108,12 @@ export const UnifiedIcon: React.FC<UnifiedIconProps> = ({
 }) => {
   // 尺寸映射
   const sizeClasses = {
-    xs: 'w-3 h-3',      // 12px
-    sm: 'w-4 h-4',      // 16px
-    md: 'w-5 h-5',      // 20px
-    lg: 'w-6 h-6',      // 24px
-    xl: 'w-8 h-8',      // 32px
-    '2xl': 'w-10 h-10'  // 40px
+    xs: 'w-3 h-3', // 12px
+    sm: 'w-4 h-4', // 16px
+    md: 'w-5 h-5', // 20px
+    lg: 'w-6 h-6', // 24px
+    xl: 'w-8 h-8', // 32px
+    '2xl': 'w-10 h-10', // 40px
   };
 
   // 颜色映射
@@ -121,14 +129,10 @@ export const UnifiedIcon: React.FC<UnifiedIconProps> = ({
     info: 'text-blue-400',
     white: 'text-white',
     black: 'text-black',
-    current: 'text-current'
+    current: 'text-current',
   };
 
-  const iconClasses = [
-    sizeClasses[size],
-    colorClasses[color],
-    className
-  ].filter(Boolean).join(' ');
+  const iconClasses = [sizeClasses[size], colorClasses[color], className].filter(Boolean).join(' ');
 
   return (
     <Icon
@@ -154,7 +158,7 @@ export const TestTypeIcons = {
   seo: Search,
   network: Network,
   database: Database,
-  website: Globe
+  website: Globe,
 } as const;
 
 /**
@@ -168,7 +172,7 @@ export const TestStatusIcons = {
   failed: XCircle,
   cancelled: Square,
   warning: AlertTriangle,
-  pending: Clock
+  pending: Clock,
 } as const;
 
 /**
@@ -186,7 +190,7 @@ export const ActionIcons = {
   edit: Edit,
   delete: Trash2,
   add: Plus,
-  remove: Minus
+  remove: Minus,
 } as const;
 
 /**
@@ -204,7 +208,7 @@ export const NavigationIcons = {
   close: X,
   search: SearchIcon,
   filter: Filter,
-  sort: Sort
+  sort: Sort,
 } as const;
 
 /**
@@ -217,7 +221,7 @@ export const InfoIcons = {
   notification: Bell,
   favorite: Star,
   like: Heart,
-  bookmark: Bookmark
+  bookmark: Bookmark,
 } as const;
 
 /**
@@ -229,7 +233,7 @@ export const DataIcons = {
   trending_up: TrendingUp,
   trending_down: TrendingDown,
   activity: Activity,
-  target: Target
+  target: Target,
 } as const;
 
 /**
@@ -243,10 +247,10 @@ export const TestTypeIcon: React.FC<{
   color?: IconColor;
   className?: string;
 }> = ({ testType, size = 'md', color = 'primary', className = '' }) => {
-  const Icon = TestTypeIcons[testType];
+  const IconComponent = TestTypeIcons[testType];
   return (
-    <UnifiedIcon
-      icon={Icon}
+    <Icon
+      icon={IconComponent}
       size={size}
       color={color}
       className={className}
@@ -262,7 +266,7 @@ export const TestStatusIcon: React.FC<{
   className?: string;
   animated?: boolean;
 }> = ({ status, size = 'md', className = '', animated = false }) => {
-  const Icon = TestStatusIcons[status];
+  const IconComponent = TestStatusIcons[status];
 
   // 状态颜色映射
   const statusColors: Record<keyof typeof TestStatusIcons, IconColor> = {
@@ -273,16 +277,15 @@ export const TestStatusIcon: React.FC<{
     failed: 'error',
     cancelled: 'warning',
     warning: 'warning',
-    pending: 'muted'
+    pending: 'muted',
   };
 
-  const animationClass = animated && (status === 'starting' || status === 'running')
-    ? 'animate-spin'
-    : '';
+  const animationClass =
+    animated && (status === 'starting' || status === 'running') ? 'animate-spin' : '';
 
   return (
-    <UnifiedIcon
-      icon={Icon}
+    <Icon
+      icon={IconComponent}
       size={size}
       color={statusColors[status]}
       className={`${className} ${animationClass}`.trim()}
@@ -298,10 +301,10 @@ export const ActionIcon: React.FC<{
   color?: IconColor;
   className?: string;
 }> = ({ action, size = 'md', color = 'current', className = '' }) => {
-  const Icon = ActionIcons[action];
+  const IconComponent = ActionIcons[action];
   return (
-    <UnifiedIcon
-      icon={Icon}
+    <Icon
+      icon={IconComponent}
       size={size}
       color={color}
       className={className}
@@ -317,10 +320,10 @@ export const NavigationIcon: React.FC<{
   color?: IconColor;
   className?: string;
 }> = ({ direction, size = 'md', color = 'current', className = '' }) => {
-  const Icon = NavigationIcons[direction];
+  const IconComponent = NavigationIcons[direction];
   return (
-    <UnifiedIcon
-      icon={Icon}
+    <Icon
+      icon={IconComponent}
       size={size}
       color={color}
       className={className}
@@ -336,15 +339,9 @@ export const InfoIcon: React.FC<{
   color?: IconColor;
   className?: string;
 }> = ({ type, size = 'md', color = 'info', className = '' }) => {
-  const Icon = InfoIcons[type];
+  const IconComponent = InfoIcons[type];
   return (
-    <UnifiedIcon
-      icon={Icon}
-      size={size}
-      color={color}
-      className={className}
-      aria-label={type}
-    />
+    <Icon icon={IconComponent} size={size} color={color} className={className} aria-label={type} />
   );
 };
 
@@ -355,15 +352,9 @@ export const DataIcon: React.FC<{
   color?: IconColor;
   className?: string;
 }> = ({ type, size = 'md', color = 'primary', className = '' }) => {
-  const Icon = DataIcons[type];
+  const IconComponent = DataIcons[type];
   return (
-    <UnifiedIcon
-      icon={Icon}
-      size={size}
-      color={color}
-      className={className}
-      aria-label={type}
-    />
+    <Icon icon={IconComponent} size={size} color={color} className={className} aria-label={type} />
   );
 };
 
@@ -405,12 +396,12 @@ export const IconUsageGuide: React.FC = () => {
       <div>
         <h3 className="text-lg font-semibold mb-4">图标尺寸</h3>
         <div className="flex items-center space-x-4">
-          <UnifiedIcon icon={Zap} size="xs" color="primary" />
-          <UnifiedIcon icon={Zap} size="sm" color="primary" />
-          <UnifiedIcon icon={Zap} size="md" color="primary" />
-          <UnifiedIcon icon={Zap} size="lg" color="primary" />
-          <UnifiedIcon icon={Zap} size="xl" color="primary" />
-          <UnifiedIcon icon={Zap} size="2xl" color="primary" />
+          <Icon icon={Zap} size="xs" color="primary" />
+          <Icon icon={Zap} size="sm" color="primary" />
+          <Icon icon={Zap} size="md" color="primary" />
+          <Icon icon={Zap} size="lg" color="primary" />
+          <Icon icon={Zap} size="xl" color="primary" />
+          <Icon icon={Zap} size="2xl" color="primary" />
         </div>
         <div className="flex items-center space-x-4 mt-2 text-sm text-gray-400">
           <span>xs</span>
@@ -426,12 +417,12 @@ export const IconUsageGuide: React.FC = () => {
       <div>
         <h3 className="text-lg font-semibold mb-4">图标颜色</h3>
         <div className="flex items-center space-x-4">
-          <UnifiedIcon icon={Shield} color="primary" />
-          <UnifiedIcon icon={Shield} color="success" />
-          <UnifiedIcon icon={Shield} color="warning" />
-          <UnifiedIcon icon={Shield} color="error" />
-          <UnifiedIcon icon={Shield} color="info" />
-          <UnifiedIcon icon={Shield} color="muted" />
+          <Icon icon={Shield} color="primary" />
+          <Icon icon={Shield} color="success" />
+          <Icon icon={Shield} color="warning" />
+          <Icon icon={Shield} color="error" />
+          <Icon icon={Shield} color="info" />
+          <Icon icon={Shield} color="muted" />
         </div>
         <div className="flex items-center space-x-4 mt-2 text-sm text-gray-400">
           <span>primary</span>
@@ -446,4 +437,4 @@ export const IconUsageGuide: React.FC = () => {
   );
 };
 
-export default UnifiedIcon;
+export default Icon;

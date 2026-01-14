@@ -2,7 +2,7 @@
  * unified/apiResponse.ts - 统一API响应类型
  */
 
-export interface UnifiedAPIResponse<T = any> {
+export interface ApiResponseCompat<T = any> {
   success: boolean;
   data?: T;
   error?: string;
@@ -12,7 +12,7 @@ export interface UnifiedAPIResponse<T = any> {
   requestId?: string;
 }
 
-export interface UnifiedErrorResponse {
+export interface ApiErrorResponseCompat {
   success: false;
   error: string;
   message: string;
@@ -25,5 +25,4 @@ export interface UnifiedErrorResponse {
   };
 }
 
-export type UnifiedAPIResult<T> = UnifiedAPIResponse<T> | UnifiedErrorResponse;
-
+export type ApiResultCompat<T> = ApiResponseCompat<T> | ApiErrorResponseCompat;

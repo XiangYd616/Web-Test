@@ -3,12 +3,52 @@
  * 提供用户相关的数据库操作
  */
 
-import type { User } from '../../types/auth/models';
 import { UserRole, UserStatus } from '../../types/enums';
 import type { CreateUserData, UpdateUserData } from '../../types/user';
 
+type UserRecord = {
+  id: string;
+  username: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  status: UserStatus;
+  permissions: string[];
+  emailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt?: string;
+  isActive?: boolean;
+  profile: {
+    firstName?: string;
+    lastName?: string;
+    bio?: string;
+  };
+  preferences: {
+    theme: string;
+    language: string;
+    timezone: string;
+    notifications: {
+      email: boolean;
+      push: boolean;
+      sms: boolean;
+      browser: boolean;
+      testComplete?: boolean;
+      testFailed?: boolean;
+      weeklyReport?: boolean;
+      securityAlert?: boolean;
+    };
+    dashboard: {
+      layout: string;
+      widgets: string[];
+      defaultView?: string;
+      refreshInterval?: number;
+    };
+  };
+};
+
 // 模拟用户数据存储
-const users: User[] = [
+const users: UserRecord[] = [
   {
     id: '1',
     username: 'admin',
@@ -84,7 +124,7 @@ export const userDao = {
   /**
    * 根据ID查找用户
    */
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string): Promise<UserRecord | null> {
     const user = users.find(u => u.id === id);
     return user || null;
   },
@@ -92,7 +132,7 @@ export const userDao = {
   /**
    * 根据用户名查找用户
    */
-  async findByUsername(username: string): Promise<User | null> {
+  async findByUsername(username: string): Promise<UserRecord | null> {
     const user = users.find(u => u.username === username);
     return user || null;
   },
@@ -100,7 +140,7 @@ export const userDao = {
   /**
    * 根据邮箱查找用户
    */
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<UserRecord | null> {
     const user = users.find(u => u.email === email);
     return user || null;
   },
@@ -108,13 +148,13 @@ export const userDao = {
   /**
    * 创建新用户
    */
-  async create(userData: CreateUserData): Promise<User> {
-    const newUser: User = {
+  async create(userData: CreateUserData): Promise<UserRecord> {
+    const newUser: UserRecord = {
       id: (users.length + 1).toString(),
       username: userData.username,
       email: userData.email,
       password: userData.password,
-      role: userData.role || UserRole.USER,
+      role: (userData.role as unknown as UserRole) || UserRole.USER,
       status: UserStatus.ACTIVE,
       permissions: [],
       emailVerified: false,
@@ -150,16 +190,22 @@ export const userDao = {
   /**
    * 更新用户信息
    */
-  async update(id: string, updateData: UpdateUserData): Promise<User | null> {
+  async update(id: string, updateData: UpdateUserData): Promise<UserRecord | null> {
     const userIndex = users.findIndex(u => u.id === id);
     if (userIndex === -1) {
       return null;
     }
 
     const user = users[userIndex];
-    const updatedUser: User = {
+    const updatedUser: UserRecord = {
       ...user,
       ...updateData,
+      role: (updateData as any).role
+        ? ((updateData as any).role as unknown as UserRole)
+        : user.role,
+      status: (updateData as any).status
+        ? ((updateData as any).status as unknown as UserStatus)
+        : user.status,
       updatedAt: new Date().toISOString(),
       profile: {
         ...user.profile,
@@ -191,7 +237,7 @@ export const userDao = {
   /**
    * 获取所有用户
    */
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<UserRecord[]> {
     return [...users];
   },
 
@@ -209,9 +255,9 @@ export const userDao = {
   /**
    * 验证用户凭据
    */
-  async validateCredentials(username: string, password: string): Promise<User | null> {
+  async validateCredentials(username: string, password: string): Promise<UserRecord | null> {
     const user = (await this.findByUsername(username)) || (await this.findByEmail(username));
-    if (!user || !user.isActive) {
+    if (!user || user.isActive === false) {
       return null;
     }
 
@@ -247,7 +293,7 @@ export const userDao = {
     page: number = 1,
     limit: number = 10
   ): Promise<{
-    users: User[];
+    users: UserRecord[];
     total: number;
     page: number;
     limit: number;
@@ -269,7 +315,7 @@ export const userDao = {
   /**
    * 搜索用户
    */
-  async search(query: string): Promise<User[]> {
+  async search(query: string): Promise<UserRecord[]> {
     const lowercaseQuery = query.toLowerCase();
     return users.filter(
       user =>
@@ -283,15 +329,15 @@ export const userDao = {
   /**
    * 按角色查找用户
    */
-  async findByRole(role: string): Promise<User[]> {
-    return users.filter(user => user.role === role);
+  async findByRole(role: string): Promise<UserRecord[]> {
+    return users.filter(user => String(user.role) === role);
   },
 
   /**
    * 获取活跃用户数量
    */
   async getActiveUserCount(): Promise<number> {
-    return users.filter(user => user.isActive).length;
+    return users.filter(user => user.isActive !== false).length;
   },
 
   /**

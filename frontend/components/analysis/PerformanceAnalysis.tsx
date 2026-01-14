@@ -1,12 +1,12 @@
 /**
  * UnifiedPerformanceAnalysis.tsx - Unified Performance Analysis Component
- * 
- * This component combines features from both analytics/PerformanceAnalysis.tsx and 
+ *
+ * This component combines features from both analytics/PerformanceAnalysis.tsx and
  * analysis/PerformanceAnalysis.tsx to provide comprehensive performance monitoring.
- * 
+ *
  * Features:
  * - Real-time performance metrics with status indicators
- * - Summary dashboard with key statistics  
+ * - Summary dashboard with key statistics
  * - Recent test results with detailed information
  * - Performance trends visualization
  * - Interactive analysis controls
@@ -15,12 +15,23 @@
  */
 
 import Logger from '@/utils/logger';
-import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Clock, TrendingUp, TrendingDown, Activity, Zap, AlertCircle,
-  AlertTriangle, CheckCircle, BarChart3, RefreshCw, Target, 
-  Cpu, HardDrive, Users
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  Cpu,
+  HardDrive,
+  RefreshCw,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Users,
+  Zap,
 } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface PerformanceMetric {
   id: string;
@@ -68,7 +79,7 @@ interface PerformanceData {
   testResults: TestResult[];
 }
 
-interface UnifiedPerformanceAnalysisProps {
+interface PerformanceAnalysisProps {
   className?: string;
   showTestResults?: boolean;
   showTrends?: boolean;
@@ -76,26 +87,28 @@ interface UnifiedPerformanceAnalysisProps {
   refreshInterval?: number;
 }
 
-const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
+const PerformanceAnalysis: React.FC<PerformanceAnalysisProps> = ({
   className = '',
   showTestResults = true,
   showTrends = true,
   autoRefresh = false,
-  refreshInterval = 30000
+  refreshInterval = 30000,
 }) => {
   const [data, setData] = useState<PerformanceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'response_time' | 'throughput' | 'error_rate' | 'resource_usage'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<
+    'all' | 'response_time' | 'throughput' | 'error_rate' | 'resource_usage'
+  >('all');
   const [timeRange, setTimeRange] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
 
   const loadPerformanceData = useCallback(async () => {
     setLoading(true);
-    
+
     try {
       // Simulate API call - replace with actual API endpoint
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const mockMetrics: PerformanceMetric[] = [
         {
           id: 'response-time',
@@ -107,7 +120,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           trend: 'down',
           trendValue: -12.5,
           category: 'response_time',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         {
           id: 'throughput',
@@ -119,7 +132,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           trend: 'up',
           trendValue: 8.3,
           category: 'throughput',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         {
           id: 'error-rate',
@@ -131,7 +144,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           trend: 'stable',
           trendValue: 0.1,
           category: 'error_rate',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         {
           id: 'cpu-usage',
@@ -143,7 +156,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           trend: 'up',
           trendValue: 5.2,
           category: 'resource_usage',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         {
           id: 'memory-usage',
@@ -155,7 +168,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           trend: 'down',
           trendValue: -3.1,
           category: 'resource_usage',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         {
           id: 'active-connections',
@@ -167,8 +180,8 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           trend: 'up',
           trendValue: 5.7,
           category: 'resource_usage',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       ];
 
       const mockTestResults: TestResult[] = [
@@ -180,7 +193,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           responseTime: 235,
           throughput: 1280,
           errorRate: 1.8,
-          status: 'passed'
+          status: 'passed',
         },
         {
           id: '2',
@@ -190,7 +203,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           responseTime: 450,
           throughput: 890,
           errorRate: 4.2,
-          status: 'warning'
+          status: 'warning',
         },
         {
           id: '3',
@@ -200,8 +213,8 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           responseTime: 180,
           throughput: 1450,
           errorRate: 0.9,
-          status: 'passed'
-        }
+          status: 'passed',
+        },
       ];
 
       const mockData: PerformanceData = {
@@ -211,18 +224,43 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           totalRequests: 45678,
           avgResponseTime: 245,
           errorRate: 2.1,
-          uptime: 99.8
+          uptime: 99.8,
         },
         trends: [
-          { timestamp: '2024-01-15T06:00:00Z', responseTime: 280, throughput: 1100, errorRate: 2.5 },
-          { timestamp: '2024-01-15T07:00:00Z', responseTime: 265, throughput: 1180, errorRate: 2.3 },
-          { timestamp: '2024-01-15T08:00:00Z', responseTime: 250, throughput: 1220, errorRate: 2.1 },
-          { timestamp: '2024-01-15T09:00:00Z', responseTime: 245, throughput: 1250, errorRate: 2.0 },
-          { timestamp: '2024-01-15T10:00:00Z', responseTime: 240, throughput: 1280, errorRate: 1.9 }
+          {
+            timestamp: '2024-01-15T06:00:00Z',
+            responseTime: 280,
+            throughput: 1100,
+            errorRate: 2.5,
+          },
+          {
+            timestamp: '2024-01-15T07:00:00Z',
+            responseTime: 265,
+            throughput: 1180,
+            errorRate: 2.3,
+          },
+          {
+            timestamp: '2024-01-15T08:00:00Z',
+            responseTime: 250,
+            throughput: 1220,
+            errorRate: 2.1,
+          },
+          {
+            timestamp: '2024-01-15T09:00:00Z',
+            responseTime: 245,
+            throughput: 1250,
+            errorRate: 2.0,
+          },
+          {
+            timestamp: '2024-01-15T10:00:00Z',
+            responseTime: 240,
+            throughput: 1280,
+            errorRate: 1.9,
+          },
         ],
-        testResults: mockTestResults
+        testResults: mockTestResults,
       };
-      
+
       setData(mockData);
     } catch (error) {
       Logger.error('Failed to fetch performance data:', error);
@@ -233,23 +271,24 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
 
   const runAnalysis = useCallback(async () => {
     setIsAnalyzing(true);
-    
+
     try {
       // Simulate analysis
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       // Update metrics with new data
       if (data) {
         const updatedMetrics = data.metrics.map(metric => ({
           ...metric,
           value: metric.value + (Math.random() - 0.5) * metric.value * 0.1,
           trendValue: (Math.random() - 0.5) * 20,
-          trend: Math.random() > 0.5 ? 'up' : Math.random() > 0.5 ? 'down' : 'stable' as any,
-          status: Math.random() > 0.8 ? 'warning' : Math.random() > 0.9 ? 'critical' : 'good' as any,
-          timestamp: new Date().toISOString()
+          trend: Math.random() > 0.5 ? 'up' : Math.random() > 0.5 ? 'down' : ('stable' as any),
+          status:
+            Math.random() > 0.8 ? 'warning' : Math.random() > 0.9 ? 'critical' : ('good' as any),
+          timestamp: new Date().toISOString(),
         }));
-        
-        setData(prev => prev ? { ...prev, metrics: updatedMetrics } : null);
+
+        setData(prev => (prev ? { ...prev, metrics: updatedMetrics } : null));
       }
     } finally {
       setIsAnalyzing(false);
@@ -268,11 +307,14 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
     return undefined;
   }, [autoRefresh, refreshInterval, loadPerformanceData]);
 
-  const filteredMetrics = data?.metrics.filter(metric => 
-    selectedCategory === 'all' || metric.category === selectedCategory
-  ) || [];
+  const filteredMetrics =
+    data?.metrics.filter(
+      metric => selectedCategory === 'all' || metric.category === selectedCategory
+    ) || [];
 
-  const getStatusColor = (status: 'good' | 'warning' | 'critical' | 'passed' | 'failed'): string => {
+  const getStatusColor = (
+    status: 'good' | 'warning' | 'critical' | 'passed' | 'failed'
+  ): string => {
     switch (status) {
       case 'good':
       case 'passed':
@@ -316,7 +358,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
 
   const getTrendColor = (trend: 'up' | 'down' | 'stable', category: string): string => {
     if (trend === 'stable') return 'text-gray-500';
-    
+
     if (category === 'error_rate' || category === 'response_time') {
       return trend === 'down' ? 'text-green-500' : 'text-red-500';
     } else {
@@ -359,7 +401,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     } else {
@@ -403,7 +445,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
         <div className="flex items-center space-x-4">
           <select
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value as typeof timeRange)}
+            onChange={e => setTimeRange(e.target.value as typeof timeRange)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="1h">Last Hour</option>
@@ -435,7 +477,9 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Overall Score</p>
-              <p className={`text-2xl font-bold ${getOverallScoreColor(data.summary.overallScore)}`}>
+              <p
+                className={`text-2xl font-bold ${getOverallScoreColor(data.summary.overallScore)}`}
+              >
                 {data.summary.overallScore.toFixed(1)}
               </p>
             </div>
@@ -447,7 +491,9 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Requests</p>
-              <p className="text-2xl font-bold text-gray-900">{data.summary.totalRequests.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {data.summary.totalRequests.toLocaleString()}
+              </p>
             </div>
             <Activity className="w-8 h-8 text-blue-500" />
           </div>
@@ -493,7 +539,7 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
           <select
             id="category-filter"
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as typeof selectedCategory)}
+            onChange={e => setSelectedCategory(e.target.value as typeof selectedCategory)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="all">All Categories</option>
@@ -507,14 +553,20 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
 
       {/* Performance Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredMetrics.map((metric) => {
+        {filteredMetrics.map(metric => {
           const TrendIcon = getTrendIcon(metric.trend);
-          
+
           return (
-            <div key={metric.id} className={`bg-white rounded-lg shadow p-6 border-l-4 ${
-              metric.status === 'good' ? 'border-green-500' :
-              metric.status === 'warning' ? 'border-yellow-500' : 'border-red-500'
-            }`}>
+            <div
+              key={metric.id}
+              className={`bg-white rounded-lg shadow p-6 border-l-4 ${
+                metric.status === 'good'
+                  ? 'border-green-500'
+                  : metric.status === 'warning'
+                    ? 'border-yellow-500'
+                    : 'border-red-500'
+              }`}
+            >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
                   {getMetricIcon(metric.id)}
@@ -522,26 +574,37 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
                 </div>
                 <div className="flex items-center space-x-1">
                   {getStatusIcon(metric.status)}
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(metric.status)}`}>
+                  <span
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(metric.status)}`}
+                  >
                     {metric.status.toUpperCase()}
                   </span>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between mb-2">
-                <span className={`text-3xl font-bold ${getStatusColor(metric.status).split(' ')[0]}`}>
+                <span
+                  className={`text-3xl font-bold ${getStatusColor(metric.status).split(' ')[0]}`}
+                >
                   {formatValue(metric.value, metric.unit)}
                 </span>
                 <div className="flex items-center space-x-1">
-                  <TrendIcon className={`w-4 h-4 ${getTrendColor(metric.trend, metric.category)}`} />
-                  <span className={`text-sm font-medium ${getTrendColor(metric.trend, metric.category)}`}>
-                    {metric.trendValue > 0 ? '+' : ''}{metric.trendValue.toFixed(1)}%
+                  <TrendIcon
+                    className={`w-4 h-4 ${getTrendColor(metric.trend, metric.category)}`}
+                  />
+                  <span
+                    className={`text-sm font-medium ${getTrendColor(metric.trend, metric.category)}`}
+                  >
+                    {metric.trendValue > 0 ? '+' : ''}
+                    {metric.trendValue.toFixed(1)}%
                   </span>
                 </div>
               </div>
-              
+
               <div className="text-sm text-gray-500">
-                <span className="font-medium">Threshold: {formatValue(metric.threshold.good, metric.unit)}</span>
+                <span className="font-medium">
+                  Threshold: {formatValue(metric.threshold.good, metric.unit)}
+                </span>
                 <span className="mx-2">•</span>
                 <span>Updated {new Date(metric.timestamp).toLocaleTimeString()}</span>
               </div>
@@ -557,14 +620,18 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
             <h3 className="text-lg font-medium text-gray-900">Recent Test Results</h3>
           </div>
           <div className="divide-y divide-gray-200">
-            {data.testResults.map((result) => (
+            {data.testResults.map(result => (
               <div key={result.id} className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-medium text-gray-900">{result.name}</h4>
-                    <p className="text-sm text-gray-600">{new Date(result.timestamp).toLocaleString()}</p>
+                    <p className="text-sm text-gray-600">
+                      {new Date(result.timestamp).toLocaleString()}
+                    </p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full border ${getStatusColor(result.status)}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full border ${getStatusColor(result.status)}`}
+                  >
                     <div className="flex items-center space-x-1">
                       {getStatusIcon(result.status)}
                       <span className="text-sm font-medium capitalize">{result.status}</span>
@@ -575,7 +642,9 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <span className="text-sm text-gray-600">Duration:</span>
-                    <div className="font-medium text-gray-900">{formatDuration(result.duration)}</div>
+                    <div className="font-medium text-gray-900">
+                      {formatDuration(result.duration)}
+                    </div>
                   </div>
                   <div>
                     <span className="text-sm text-gray-600">Response Time:</span>
@@ -603,12 +672,12 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
             <BarChart3 className="w-5 h-5 text-gray-600" />
             <h3 className="text-lg font-medium text-gray-900">Performance Trends</h3>
           </div>
-          
+
           <div className="h-64 flex items-end justify-between space-x-2">
             {data.trends.map((trend, index) => {
               const maxResponseTime = Math.max(...data.trends.map(t => t.responseTime));
               const height = (trend.responseTime / maxResponseTime) * 200;
-              
+
               return (
                 <div key={index} className="flex flex-col items-center flex-1">
                   <div
@@ -617,7 +686,10 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
                     title={`${new Date(trend.timestamp).toLocaleTimeString()}: ${trend.responseTime}ms`}
                   ></div>
                   <span className="text-xs text-gray-500 mt-2">
-                    {new Date(trend.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(trend.timestamp).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </span>
                 </div>
               );
@@ -629,4 +701,4 @@ const UnifiedPerformanceAnalysis: React.FC<UnifiedPerformanceAnalysisProps> = ({
   );
 };
 
-export default UnifiedPerformanceAnalysis;
+export default PerformanceAnalysis;

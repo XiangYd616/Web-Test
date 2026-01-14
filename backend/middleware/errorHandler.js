@@ -4,16 +4,34 @@
  * 替代之前分散在多个文件中的错误处理逻辑
  */
 
-// 导入核心统一错误处理器
-const { 
-  errorMiddleware, 
-  notFoundHandler, 
-  handleError, 
-  ErrorFactory,
-  ErrorCode,
-  ErrorSeverity,
-  asyncHandler
-} = require('./unifiedErrorHandler');
+const { StandardErrorCode } = require('../../shared/types/standardApiResponse.js');
+const {
+  errorResponseFormatter: errorMiddleware,
+  notFoundHandler,
+} = require('./responseFormatter');
+const asyncHandler = require('./asyncHandler');
+
+const ErrorCode = StandardErrorCode;
+
+const ErrorSeverity = {
+  CRITICAL: 'critical',
+  HIGH: 'high',
+  MEDIUM: 'medium',
+  LOW: 'low',
+};
+
+const handleError = (error, context = {}) => {
+  try {
+    console.error('Error handled:', {
+      message: error?.message,
+      code: error?.code,
+      context,
+    });
+  } catch (_e) {
+    // ignore logging failures
+  }
+  return error;
+};
 
 /**
  * 向后兼容的错误处理器类
@@ -94,7 +112,7 @@ class ApiError extends Error {
 
   // 静态工厂方法
   static badRequest(message = '请求参数错误', details = null) {
-    return new ApiError(message, 400, ErrorCode.BAD_REQUEST, details);
+    return new ApiError(message, 400, ErrorCode.INVALID_INPUT, details);
   }
 
   static unauthorized(message = '未授权访问', details = null) {
@@ -118,9 +136,25 @@ class ApiError extends Error {
   }
 
   static internal(message = '内部服务器错误', details = null) {
-    return new ApiError(message, 500, ErrorCode.SYSTEM_ERROR, details);
+    return new ApiError(message, 500, ErrorCode.INTERNAL_SERVER_ERROR, details);
   }
 }
+
+const ErrorFactory = {
+  validation: (message, details = null) => ApiError.validationError(message, details),
+  unauthorized: (message = '未授权访问', details = null) => ApiError.unauthorized(message, details),
+  forbidden: (message = '禁止访问', details = null) => ApiError.forbidden(message, details),
+  notFound: (message = '资源未找到', details = null) => ApiError.notFound(message, details),
+  conflict: (message = '资源冲突', details = null) => ApiError.conflict(message, details),
+  business: (code, message, details = null) =>
+    new ApiError(message, 422, code || ErrorCode.BUSINESS_LOGIC_ERROR, details),
+  fromError: (error) => {
+    if (error instanceof ApiError) return error;
+    if (error instanceof Error) return new ApiError(error.message, 500, ErrorCode.INTERNAL_SERVER_ERROR);
+    if (typeof error === 'string') return new ApiError(error, 500, ErrorCode.INTERNAL_SERVER_ERROR);
+    return new ApiError('内部服务器错误', 500, ErrorCode.INTERNAL_SERVER_ERROR);
+  },
+};
 
 /**
  * 简化的异步错误处理器（向后兼容）

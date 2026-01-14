@@ -1,5 +1,5 @@
 /**
- * 统一缓存策略系统
+ * 缓存策略系统
  * 提供多层缓存、智能失效、性能优化
  * 版本: v1.0.0
  */
@@ -18,7 +18,7 @@ export interface CacheConfig {
   namespace: string;
 }
 
-export type CacheStrategy = 
+export type CacheStrategy =
   | 'lru' // 最近最少使用
   | 'lfu' // 最少使用频率
   | 'fifo' // 先进先出
@@ -58,7 +58,7 @@ export interface CacheKeyGenerator {
 export class DefaultCacheKeyGenerator implements CacheKeyGenerator {
   generate(namespace: string, identifier: string, params?: Record<string, any>): string {
     const baseKey = `${namespace}:${identifier}`;
-    
+
     if (!params || Object.keys(params).length === 0) {
       return baseKey;
     }
@@ -76,7 +76,7 @@ export class DefaultCacheKeyGenerator implements CacheKeyGenerator {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // 转换为32位整数
     }
     return Math.abs(hash).toString(36);
@@ -150,10 +150,10 @@ export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
       const entry: CacheEntry<T> = JSON.parse(item);
       entry.lastAccessed = Date.now();
       entry.accessCount++;
-      
+
       // 更新访问信息
       await this.set(key, entry);
-      
+
       return entry;
     } catch {
       return null;
@@ -208,7 +208,7 @@ export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
   private async cleanup(): Promise<void> {
     const keys = await this.keys();
     const now = Date.now();
-    
+
     for (const key of keys) {
       const entry = await this.get(key);
       if (entry && now - entry.timestamp > entry.ttl) {
@@ -226,27 +226,30 @@ export interface EvictionStrategy<T = any> {
 
 export class LRUEvictionStrategy<T = any> implements EvictionStrategy<T> {
   selectForEviction(entries: Map<string, CacheEntry<T>>, targetCount: number): string[] {
-    const sortedEntries = Array.from(entries.entries())
-      .sort(([, a], [, b]) => a?.lastAccessed - b.lastAccessed);
-    
+    const sortedEntries = Array.from(entries.entries()).sort(
+      ([, a], [, b]) => a?.lastAccessed - b.lastAccessed
+    );
+
     return sortedEntries.slice(0, targetCount).map(([key]) => key);
   }
 }
 
 export class LFUEvictionStrategy<T = any> implements EvictionStrategy<T> {
   selectForEviction(entries: Map<string, CacheEntry<T>>, targetCount: number): string[] {
-    const sortedEntries = Array.from(entries.entries())
-      .sort(([, a], [, b]) => a?.accessCount - b.accessCount);
-    
+    const sortedEntries = Array.from(entries.entries()).sort(
+      ([, a], [, b]) => a?.accessCount - b.accessCount
+    );
+
     return sortedEntries.slice(0, targetCount).map(([key]) => key);
   }
 }
 
 export class FIFOEvictionStrategy<T = any> implements EvictionStrategy<T> {
   selectForEviction(entries: Map<string, CacheEntry<T>>, targetCount: number): string[] {
-    const sortedEntries = Array.from(entries.entries())
-      .sort(([, a], [, b]) => a?.timestamp - b.timestamp);
-    
+    const sortedEntries = Array.from(entries.entries()).sort(
+      ([, a], [, b]) => a?.timestamp - b.timestamp
+    );
+
     return sortedEntries.slice(0, targetCount).map(([key]) => key);
   }
 }
@@ -257,11 +260,11 @@ export class TTLEvictionStrategy<T = any> implements EvictionStrategy<T> {
     const expiredEntries = Array.from(entries.entries())
       .filter(([, entry]) => now - entry.timestamp > entry.ttl)
       .map(([key]) => key);
-    
+
     if (expiredEntries.length >= targetCount) {
       return expiredEntries.slice(0, targetCount);
     }
-    
+
     // 如果过期条目不够，按剩余TTL排序
     const sortedByTTL = Array.from(entries.entries())
       .filter(([key]) => !expiredEntries.includes(key))
@@ -271,7 +274,7 @@ export class TTLEvictionStrategy<T = any> implements EvictionStrategy<T> {
         return aTTLRemaining - bTTLRemaining;
       })
       .map(([key]) => key);
-    
+
     return [...expiredEntries, ...sortedByTTL.slice(0, targetCount - expiredEntries.length)];
   }
 }
@@ -299,7 +302,7 @@ export class CacheManager<T = any> {
       encryption: false,
       persistToDisk: false,
       namespace: 'default',
-      ...config
+      ...config,
     };
     this.keyGenerator = keyGenerator;
     this.evictionStrategy = this.createEvictionStrategy(this.config.strategy);
@@ -311,7 +314,7 @@ export class CacheManager<T = any> {
       hitRate: 0,
       evictionCount: 0,
       averageAccessTime: 0,
-      memoryUsage: 0
+      memoryUsage: 0,
     };
 
     // 定期清理过期条目
@@ -324,7 +327,7 @@ export class CacheManager<T = any> {
 
     try {
       const entry = await this.storage.get(key);
-      
+
       if (!entry) {
         this.stats.missCount++;
         return null;
@@ -339,7 +342,7 @@ export class CacheManager<T = any> {
 
       this.stats.hitCount++;
       this.updateStats();
-      
+
       return entry.data;
     } finally {
       const accessTime = Date.now() - startTime;
@@ -348,8 +351,8 @@ export class CacheManager<T = any> {
   }
 
   async set(
-    identifier: string, 
-    data: T, 
+    identifier: string,
+    data: T,
     params?: Record<string, any>,
     customTTL?: number
   ): Promise<void> {
@@ -366,7 +369,7 @@ export class CacheManager<T = any> {
       lastAccessed: now,
       size: this.calculateSize(data),
       compressed: this.config.compression,
-      encrypted: this.config.encryption
+      encrypted: this.config.encryption,
     };
 
     // 检查是否需要驱逐
@@ -378,7 +381,7 @@ export class CacheManager<T = any> {
 
   async delete(identifier: string, params?: Record<string, any>): Promise<boolean> {
     const key = this.keyGenerator.generate(this.config.namespace, identifier, params);
-    
+
     /**
     
      * if功能函数
@@ -389,11 +392,11 @@ export class CacheManager<T = any> {
     
      */
     const result = await this.storage.delete(key);
-    
+
     if (result) {
       await this.updateCacheStats();
     }
-    
+
     return result;
   }
 
@@ -451,7 +454,6 @@ export class CacheManager<T = any> {
   }
 
   private async ensureCapacity(): Promise<void> {
-    
     /**
     
      * if功能函数
@@ -462,22 +464,22 @@ export class CacheManager<T = any> {
     
      */
     const currentSize = await this.storage.size();
-    
+
     if (currentSize >= this.config.maxSize) {
       const targetEvictionCount = Math.max(1, Math.floor(this.config.maxSize * 0.1)); // 驱逐10%
       await this.evictEntries(targetEvictionCount);
     }
   }
 
-    /**
-     * if功能函数
-     * @param {Object} params - 参数对象
-     * @returns {Promise<Object>} 返回结果
-     */
+  /**
+   * if功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
   private async evictEntries(count: number): Promise<void> {
     if (this.storage instanceof MemoryCacheStorage) {
       const entries = this.storage.getEntries();
-      
+
       /**
       
        * for功能函数
@@ -488,7 +490,7 @@ export class CacheManager<T = any> {
       
        */
       const keysToEvict = this.evictionStrategy.selectForEviction(entries, count);
-      
+
       for (const key of keysToEvict) {
         await this.storage.delete(key);
         this.stats.evictionCount++;
@@ -497,7 +499,7 @@ export class CacheManager<T = any> {
       // 对于其他存储类型，使用简单的FIFO策略
       const keys = await this.storage.keys();
       const keysToEvict = keys.slice(0, count);
-      
+
       for (const key of keysToEvict) {
         await this.storage.delete(key);
         this.stats.evictionCount++;
@@ -550,7 +552,7 @@ export class CacheManager<T = any> {
     if (totalRequests === 1) {
       this.stats.averageAccessTime = accessTime;
     } else {
-      this.stats.averageAccessTime = 
+      this.stats.averageAccessTime =
         (this.stats.averageAccessTime * (totalRequests - 1) + accessTime) / totalRequests;
     }
   }
@@ -564,7 +566,7 @@ export class CacheManager<T = any> {
       hitRate: 0,
       evictionCount: 0,
       averageAccessTime: 0,
-      memoryUsage: 0
+      memoryUsage: 0,
     };
   }
 }
@@ -584,7 +586,7 @@ export function cached<T extends (...args: unknown[]) => Promise<ApiResponse<any
 
     descriptor.value = async function (...args: Parameters<T>) {
       const { keyGenerator, ttl, condition } = options;
-      
+
       // 检查缓存条件
       if (condition && !condition(args)) {
         return originalMethod.apply(this, args);
@@ -592,7 +594,7 @@ export function cached<T extends (...args: unknown[]) => Promise<ApiResponse<any
 
       // 生成缓存键
       const cacheKey = keyGenerator ? keyGenerator(args) : `${propertyKey}_${JSON.stringify(args)}`;
-      
+
       // 尝试从缓存获取
       const cachedResult = await cacheManager.get(cacheKey);
       if (cachedResult) {
@@ -601,7 +603,7 @@ export function cached<T extends (...args: unknown[]) => Promise<ApiResponse<any
 
       // 执行原方法
       const result = await originalMethod.apply(this, args);
-      
+
       // 缓存结果（仅当成功时）
       if (result && result.success) {
         await cacheManager.set(cacheKey, result, undefined, ttl);
@@ -616,15 +618,12 @@ export function cached<T extends (...args: unknown[]) => Promise<ApiResponse<any
 
 // ==================== 默认缓存实例 ====================
 
-export const defaultMemoryCache = new CacheManager(
-  new MemoryCacheStorage(),
-  {
-    namespace: 'memory',
-    maxSize: 1000,
-    ttl: 300000, // 5分钟
-    strategy: 'lru'
-  }
-);
+export const defaultMemoryCache = new CacheManager(new MemoryCacheStorage(), {
+  namespace: 'memory',
+  maxSize: 1000,
+  ttl: 300000, // 5分钟
+  strategy: 'lru',
+});
 export const _defaultMemoryCache = defaultMemoryCache; // Alias
 
 export const defaultLocalStorageCache = new CacheManager(
@@ -634,7 +633,7 @@ export const defaultLocalStorageCache = new CacheManager(
     maxSize: 500,
     ttl: 3600000, // 1小时
     strategy: 'ttl',
-    persistToDisk: true
+    persistToDisk: true,
   }
 );
 export const _defaultLocalStorageCache = defaultLocalStorageCache; // Alias
@@ -646,7 +645,7 @@ export class CacheFactory {
     return new CacheManager(new MemoryCacheStorage(), {
       namespace: 'memory',
       strategy: 'lru',
-      ...config
+      ...config,
     });
   }
 
@@ -655,7 +654,7 @@ export class CacheFactory {
       namespace: 'localStorage',
       strategy: 'ttl',
       persistToDisk: true,
-      ...config
+      ...config,
     });
   }
 
@@ -665,7 +664,7 @@ export class CacheFactory {
   } {
     return {
       memory: this.createMemoryCache({ ttl: 60000, ...config }), // 1分钟
-      localStorage: this.createLocalStorageCache('hybrid', { ttl: 3600000, ...config }) // 1小时
+      localStorage: this.createLocalStorageCache('hybrid', { ttl: 3600000, ...config }), // 1小时
     };
   }
 }

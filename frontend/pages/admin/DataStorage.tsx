@@ -26,7 +26,7 @@ import { useLocation } from 'react-router-dom';
 // 临时注释掉不存在的组件导入
 // import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
 // import ImportExport from '../../components/analytics/ImportExport';
-import UnifiedPerformanceAnalysis from '../../components/analysis/PerformanceAnalysis';
+import PerformanceAnalysis from '../../components/analysis/PerformanceAnalysis';
 // import streamingMonitoring from '../../components/analytics/streamingMonitoring';
 import ReportManagement from '../../components/analytics/ReportManagement';
 
@@ -337,13 +337,14 @@ const DataStorage: React.FC = () => {
     }));
 
     switch (format) {
-      case 'json':
+      case 'json': {
         const jsonBlob = new Blob([JSON.stringify(dataToExport, null, 2)], {
           type: 'application/json',
         });
         downloadFile(jsonBlob, `test-records-${Date.now()}.json`);
         break;
-      case 'csv':
+      }
+      case 'csv': {
         const headers = Object.keys(dataToExport[0] || {});
         const csvContent = [
           '\uFEFF' + headers.join(','),
@@ -354,6 +355,7 @@ const DataStorage: React.FC = () => {
         const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
         downloadFile(csvBlob, `test-records-${Date.now()}.csv`);
         break;
+      }
     }
   };
 
@@ -775,7 +777,7 @@ const DataStorage: React.FC = () => {
           aria-labelledby="performance-tab"
           hidden={activeTab !== 'performance'}
         >
-          {activeTab === 'performance' && <UnifiedPerformanceAnalysis />}
+          {activeTab === 'performance' && <PerformanceAnalysis />}
         </section>
 
         <section

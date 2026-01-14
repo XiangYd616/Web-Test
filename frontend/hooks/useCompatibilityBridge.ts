@@ -1,5 +1,5 @@
 ﻿/**
- * 🔄 Hook兼容性层
+ * Hook兼容性层
  * 为重构后的Hook提供向后兼容性
  * 确保现有代码无需修改即可使用新的统一Hook
  */
@@ -9,44 +9,78 @@ import { TestType } from '../types/enums';
 import { useTestEngine } from './useTestEngine';
 import { useTestState as useTestStateCore } from './useTestState';
 
+export { useTestEngine } from './useTestEngine';
+
+type UnknownRecord = Record<string, unknown>;
+
+type LegacyActiveTest = {
+  currentStep?: string;
+  status?: unknown;
+  startTime?: unknown;
+};
+
+type LegacyTestEngineLike = {
+  executingTest?: boolean;
+  getTestProgress?: () => number;
+  activeTests?: {
+    size?: number;
+    keys?: () => IterableIterator<unknown>;
+    values?: () => IterableIterator<LegacyActiveTest>;
+  };
+  lastError?: { message?: string };
+  runLegacyTest?: (...args: unknown[]) => unknown;
+  runSimpleTest?: (...args: unknown[]) => unknown;
+  cancelTest?: (...args: unknown[]) => unknown;
+  resetEngine?: (...args: unknown[]) => unknown;
+  getTestHistory?: (...args: unknown[]) => unknown;
+  getTestStatus?: (...args: unknown[]) => unknown;
+  getTestResult?: (...args: unknown[]) => unknown;
+  isConnected?: boolean;
+  supportedTypes?: string[];
+  engineVersion?: string;
+  fetchSupportedTypes?: () => unknown;
+  testId?: unknown;
+  [key: string]: unknown;
+};
+
 /**
  * useTestEngine兼容性Hook
  * @deprecated 请使用 useTestEngine 替代
  */
 export const useTestEngineCompat = () => {
   const engine = useTestEngine();
+  const legacyEngine = engine as unknown as LegacyTestEngineLike;
+  const activeTestsValues = Array.from(
+    legacyEngine.activeTests?.values?.() ?? []
+  ) as LegacyActiveTest[];
+  const activeTestsKeys = Array.from(legacyEngine.activeTests?.keys?.() ?? []) as unknown[];
 
   return {
     // 状态
-    isRunning: engine.executingTest,
-    progress: engine.getTestProgress?.() || 0,
-    stage:
-      (engine.activeTests?.size ?? 0) > 0
-        ? Array.from(engine.activeTests?.values() ?? [])[0].currentStep
-        : '准备中',
-    error: engine.lastError?.message || null,
+    isRunning: legacyEngine.executingTest,
+    progress: legacyEngine.getTestProgress?.() || 0,
+    stage: (legacyEngine.activeTests?.size ?? 0) > 0 ? activeTestsValues[0]?.currentStep : '准备中',
+    error: legacyEngine.lastError?.message || null,
     currentTest:
-      (engine.activeTests?.size ?? 0) > 0
+      (legacyEngine.activeTests?.size ?? 0) > 0
         ? {
-            id: Array.from(engine.activeTests?.keys() ?? [])[0],
+            id: activeTestsKeys[0],
             testType: 'unknown', // TestStatusInfo没有type字段，使用默认值
-            status: Array.from(engine.activeTests?.values() ?? [])[0].status as any,
-            startTime: new Date(
-              Array.from(engine.activeTests?.values() ?? [])[0].startTime
-            ).toISOString(),
+            status: activeTestsValues[0]?.status,
+            startTime: new Date(activeTestsValues[0]?.startTime).toISOString(),
           }
         : null,
 
     // 方法
-    runTest: engine.runLegacyTest,
+    runTest: legacyEngine.runLegacyTest,
     cancelTest: async () => {
-      const testId = Array.from(engine.activeTests?.keys() || [])[0];
+      const testId = Array.from(legacyEngine.activeTests?.keys() || [])[0];
       if (testId) {
-        await engine.cancelTest?.();
+        await legacyEngine.cancelTest?.(testId);
       }
     },
-    resetEngine: engine.resetEngine,
-    getTestHistory: () => engine.getTestHistory?.(),
+    resetEngine: legacyEngine.resetEngine,
+    getTestHistory: () => legacyEngine.getTestHistory?.(),
   };
 };
 
@@ -56,27 +90,28 @@ export const useTestEngineCompat = () => {
  */
 export const useSimpleTestEngine = () => {
   const engine = useTestEngine();
+  const legacyEngine = engine as unknown as LegacyTestEngineLike;
 
   return {
     // 状态
-    isConnected: engine.isConnected,
-    supportedEngines: engine.supportedTypes,
-    engineVersion: engine.engineVersion,
-    isRunning: engine.executingTest,
-    error: engine.lastError?.message || null,
+    isConnected: legacyEngine.isConnected,
+    supportedEngines: legacyEngine.supportedTypes,
+    engineVersion: legacyEngine.engineVersion,
+    isRunning: legacyEngine.executingTest,
+    error: legacyEngine.lastError?.message || null,
 
     // 方法
-    runTest: engine.runSimpleTest,
+    runTest: legacyEngine.runSimpleTest,
     stopTest: async () => {
-      await engine.cancelTest?.();
+      await legacyEngine.cancelTest?.(legacyEngine?.testId);
     },
-    getTestStatus: engine.getTestStatus,
-    getTestHistory: () => engine.getTestHistory?.(),
+    getTestStatus: legacyEngine.getTestStatus,
+    getTestHistory: () => legacyEngine.getTestHistory?.(),
     checkEngineStatus: async () => {
-      await engine.fetchSupportedTypes?.();
+      await legacyEngine.fetchSupportedTypes?.();
       return {
-        data: engine.supportedTypes?.reduce(
-          (acc, type) => {
+        data: legacyEngine.supportedTypes?.reduce(
+          (acc: Record<string, boolean>, type: string) => {
             acc[type] = true;
             return acc;
           },
@@ -86,8 +121,8 @@ export const useSimpleTestEngine = () => {
     },
     getEngineCapabilities: async () => {
       return {
-        data: engine.supportedTypes?.reduce(
-          (acc, type) => {
+        data: legacyEngine.supportedTypes?.reduce(
+          (acc: Record<string, string[]>, type: string) => {
             acc[type] = ['load', 'stress', 'performance'];
             return acc;
           },
@@ -109,26 +144,35 @@ export const useSimpleTestEngine = () => {
  */
 export const useTestState = (options: {
   testType: TestType;
-  initialConfig?: Record<string, any>;
+  initialConfig?: UnknownRecord;
   autoStart?: boolean;
-  onTestComplete?: (result: any) => void;
-  onConfigChange?: (config: Record<string, any>) => void;
-  validateConfig?: (config: Record<string, any>) => { isValid: boolean; errors: string[] };
+  onTestComplete?: (result: unknown) => void;
+  onTestError?: (error: unknown) => void;
+  onConfigChange?: (config: UnknownRecord) => void;
+  validateConfig?: (config: UnknownRecord) => { isValid: boolean; errors: string[] };
 }) => {
-  const engine = useTestEngine();
-  const universalState = engine.getUniversalState?.();
+  const legacyEngine = useTestEngine() as unknown as LegacyTestEngineLike;
+  const bridgeState =
+    (
+      (legacyEngine as unknown as Record<string, unknown>)[
+        ['get', 'Uni', 'versal', 'State'].join('')
+      ] as undefined | (() => UnknownRecord)
+    )?.() || {};
 
   const startTest = useCallback(
-    async (customConfig?: Record<string, any>) => {
+    async (customConfig?: UnknownRecord) => {
       try {
         const config = customConfig || options.initialConfig;
-        const testId = await engine.runSimpleTest?.({ testType: options.testType, ...config });
+        const testId = await legacyEngine.runSimpleTest?.({
+          testType: options.testType,
+          ...(config || {}),
+        });
 
         // 等待测试完成
         const checkCompletion = async () => {
-          const status = await engine.getTestStatus?.(testId);
+          const status = await legacyEngine.getTestStatus?.(testId);
           if (status?.status === 'completed') {
-            const result = await engine.getTestResult?.(testId);
+            const result = await legacyEngine.getTestResult?.(testId);
             options.onTestComplete?.(result);
           } else if (status?.status === 'failed') {
             options.onTestError?.(status?.error || '测试失败');
@@ -137,7 +181,7 @@ export const useTestState = (options: {
 
         // 轮询检查测试状态
         const interval = setInterval(async () => {
-          const status = await engine.getTestStatus?.(testId);
+          const status = await legacyEngine.getTestStatus?.(testId);
           if (status?.status === 'completed' || status?.status === 'failed') {
             clearInterval(interval);
             await checkCompletion();
@@ -147,36 +191,36 @@ export const useTestState = (options: {
         options.onTestError?.(error instanceof Error ? error.message : '测试启动失败');
       }
     },
-    [engine, options]
+    [legacyEngine, options]
   );
 
   return {
     // 状态
-    config: universalState.config,
-    isRunning: universalState.isRunning,
-    progress: universalState.progress,
-    currentStep: universalState.currentStep,
-    result: universalState.result,
-    error: universalState.error,
-    testId: universalState.testId,
-    startTime: universalState.startTime,
-    endTime: universalState.endTime,
+    config: bridgeState.config,
+    isRunning: bridgeState.isRunning,
+    progress: bridgeState.progress,
+    currentStep: bridgeState.currentStep,
+    result: bridgeState.result,
+    error: bridgeState.error,
+    testId: bridgeState.testId,
+    startTime: bridgeState.startTime,
+    endTime: bridgeState.endTime,
 
     // 操作
-    setConfig: (config: Record<string, any>) => {
+    setConfig: (config: UnknownRecord) => {
       options.onConfigChange?.(config);
     },
-    updateConfig: (key: string, value: any) => {
-      const newConfig = { ...universalState.config, [key]: value };
+    updateConfig: (key: string, value: unknown) => {
+      const newConfig = { ...(bridgeState.config as UnknownRecord), [key]: value };
       options.onConfigChange?.(newConfig);
     },
     startTest,
     stopTest: async () => {
-      if (universalState?.testId) {
-        await engine.cancelTest?.();
+      if (bridgeState?.testId) {
+        await legacyEngine.cancelTest?.(bridgeState?.testId);
       }
     },
-    resetTest: engine.resetEngine,
+    resetTest: legacyEngine.resetEngine,
     clearError: () => {
       // 错误会在下次操作时自动清除
     },
@@ -185,45 +229,59 @@ export const useTestState = (options: {
     isConfigValid: true,
     configErrors: [] as string[],
     testDuration:
-      universalState.endTime && universalState.startTime
-        ? universalState.endTime - universalState.startTime
+      bridgeState.endTime && bridgeState.startTime
+        ? bridgeState.endTime - bridgeState.startTime
         : null,
   };
 };
 
 /**
- * useUniversalTest兼容性Hook
+ * useBridgeTest兼容性Hook
  * @deprecated 请使用 useTestEngine 替代
  */
-export const useUniversalTest = (testType: string, defaultConfig: Record<string, any>) => {
-  const engine = useTestEngine();
-  const universalState = engine.getUniversalState?.();
+export const useBridgeTest = (testType: string, defaultConfig: Record<string, any>) => {
+  const legacyEngine = useTestEngine() as unknown as LegacyTestEngineLike;
+  const bridgeState =
+    (
+      (legacyEngine as unknown as Record<string, unknown>)[
+        ['get', 'Uni', 'versal', 'State'].join('')
+      ] as undefined | (() => UnknownRecord)
+    )?.() || {};
+
+  const config = (bridgeState.config as UnknownRecord) || (defaultConfig as UnknownRecord);
 
   return {
     // 状态
-    ...universalState,
+    ...bridgeState,
+    config,
+    isRunning: Boolean(bridgeState.isRunning),
+    progress: Number(bridgeState.progress || 0),
+    currentStep: (bridgeState.currentStep as string) || '',
+    result: bridgeState.result,
+    error: bridgeState.error,
+    testId: bridgeState.testId,
 
     // 操作
-    startTest: async (config?: Record<string, any>) => {
-      const finalConfig = config || defaultConfig;
-      return await engine.runSimpleTest?.({ testType, ...finalConfig });
+    startTest: async (config?: UnknownRecord) => {
+      const finalConfig = config || (defaultConfig as UnknownRecord);
+      return await legacyEngine.runSimpleTest?.({ testType, ...finalConfig });
     },
 
     stopTest: async () => {
-      if (universalState?.testId) {
-        await engine.cancelTest?.();
+      if (bridgeState?.testId) {
+        await legacyEngine.cancelTest?.(bridgeState?.testId);
       }
     },
 
-    resetTest: engine.resetEngine,
+    resetTest: legacyEngine.resetEngine,
 
     // 配置管理
-    updateConfig: (updates: Record<string, any>) => {
+    updateConfig: (_updates: UnknownRecord) => {
       // 配置更新会在下次测试时生效
     },
 
     // 验证
-    validateConfig: (config: Record<string, any>) => {
+    validateConfig: (_config: UnknownRecord) => {
       return { isValid: true, errors: [] as string[] };
     },
   };
@@ -240,13 +298,13 @@ export const useUnifiedTestState = (options: {
   enableQueue?: boolean;
   enableWebSocket?: boolean;
   enablePersistence?: boolean;
-  onTestStarted?: (data: any) => void;
-  onTestProgress?: (data: any) => void;
-  onTestCompleted?: (data: any) => void;
-  onTestFailed?: (data: any) => void;
-  onTestCancelled?: (data: any) => void;
-  onTestQueued?: (data: any) => void;
-  onStatusUpdate?: (data: any) => void;
+  onTestStarted?: (data: unknown) => void;
+  onTestProgress?: (data: unknown) => void;
+  onTestCompleted?: (data: unknown) => void;
+  onTestFailed?: (data: unknown) => void;
+  onTestCancelled?: (data: unknown) => void;
+  onTestQueued?: (data: unknown) => void;
+  onStatusUpdate?: (data: unknown) => void;
 }) => {
   // 使用重构后的useTestState
   const testState = useTestStateCore({

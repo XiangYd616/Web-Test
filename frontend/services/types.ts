@@ -17,11 +17,13 @@ export type {
 } from '../types/enums';
 
 // 选择性导出以避免冲突 - 从模型导出
+import type { User, UserPreferences, UserProfile } from '../types/auth.types';
+
 export type {
   User as ServiceUser,
   UserPreferences as ServiceUserPreferences,
   UserProfile as ServiceUserProfile,
-} from '../types/auth/models';
+};
 
 export type {
   ProjectStatus as ServiceProjectStatus,
