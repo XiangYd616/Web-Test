@@ -3,7 +3,7 @@
  * 业务逻辑的唯一入口
  */
 
-export * from './testService';
+// export * from './testService'; // 已移动到 testing/testService.ts
 
 // 后续添加其他业务服务
 // export * from './userService';
