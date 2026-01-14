@@ -11,6 +11,7 @@
  */
 
 import type { ApiResponse } from '@/types/api';
+import { testRepository } from './repositories/testRepository';
 
 export interface ApiConfig {
   baseUrl: string;
@@ -107,6 +108,78 @@ export class ApiService {
     newPassword: string;
   }): Promise<ApiResponse<void>> {
     return this.apiPost('/user/change-password', data);
+  }
+
+  // ==================== 基础HTTP方法 (向后兼容) ====================
+
+  /**
+   * GET请求 - 向后兼容方法
+   * @deprecated 请使用 apiClient.get 或 Repository
+   */
+  public async get<T = any>(url: string, config?: any): Promise<ApiResponse<T>> {
+    try {
+      const { apiClient } = await import('./client');
+      const data = await apiClient.get<T>(url, config);
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * POST请求 - 向后兼容方法
+   * @deprecated 请使用 apiClient.post 或 Repository
+   */
+  public async post<T = any>(url: string, data?: unknown, config?: any): Promise<ApiResponse<T>> {
+    try {
+      const { apiClient } = await import('./client');
+      const result = await apiClient.post<T>(url, data, config);
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * PUT请求 - 向后兼容方法
+   * @deprecated 请使用 apiClient.put 或 Repository
+   */
+  public async put<T = any>(url: string, data?: unknown, config?: any): Promise<ApiResponse<T>> {
+    try {
+      const { apiClient } = await import('./client');
+      const result = await apiClient.put<T>(url, data, config);
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * DELETE请求 - 向后兼容方法
+   * @deprecated 请使用 apiClient.delete 或 Repository
+   */
+  public async delete<T = any>(url: string, config?: any): Promise<ApiResponse<T>> {
+    try {
+      const { apiClient } = await import('./client');
+      const result = await apiClient.delete<T>(url, config);
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * PATCH请求 - 向后兼容方法
+   * @deprecated 请使用 apiClient.patch 或 Repository
+   */
+  public async patch<T = any>(url: string, data?: unknown, config?: any): Promise<ApiResponse<T>> {
+    try {
+      const { apiClient } = await import('./client');
+      const result = await apiClient.patch<T>(url, data, config);
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
   }
 
   // Public wrapper methods - 适配器模式
