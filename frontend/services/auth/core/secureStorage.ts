@@ -18,7 +18,7 @@ export class SecureStorageManager {
       const encrypted = await this.encrypt(serialized);
       localStorage.setItem(this.STORAGE_KEY_PREFIX + key, encrypted);
     } catch (error) {
-      Logger.error('安全存储失败:', error);
+      Logger.error('安全存储失败:', { error: String(error) });
       // 降级到普通存储
       localStorage.setItem(this.STORAGE_KEY_PREFIX + key, JSON.stringify(value));
     }
@@ -40,7 +40,7 @@ export class SecureStorageManager {
         return JSON.parse(stored);
       }
     } catch (error) {
-      Logger.error('安全获取失败:', error);
+      Logger.error('安全获取失败:', { error: String(error) });
       return null;
     }
   }
@@ -96,7 +96,7 @@ export class SecureStorageManager {
 
         return btoa(String.fromCharCode(...combined));
       } catch (error) {
-        Logger.warn('加密失败，降级到Base64:', error);
+        Logger.warn('加密失败，降级到Base64:', { error: String(error) });
         return btoa(text);
       }
     } else {
@@ -127,7 +127,7 @@ export class SecureStorageManager {
 
         return new TextDecoder().decode(decrypted);
       } catch (error) {
-        Logger.warn('解密失败，尝试Base64解码:', error);
+        Logger.warn('解密失败，尝试Base64解码:', { error: String(error) });
         return atob(encryptedText);
       }
     } else {
@@ -177,7 +177,7 @@ export class SecureStorageManager {
       const stored = localStorage.getItem(this.STORAGE_KEY_PREFIX + key);
       return stored ? JSON.parse(stored) : null;
     } catch (error) {
-      Logger.error('获取数据失败:', error);
+      Logger.error('获取数据失败:', { error: String(error) });
       return null;
     }
   }

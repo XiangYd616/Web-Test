@@ -6,7 +6,7 @@
 
 import Logger from '@/utils/logger';
 import type { UserSession } from '../../types/auth.types';
-import type { User } from '../../types/user';
+import type { User } from '../../types/unified/models';
 import { defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
@@ -77,7 +77,12 @@ export interface SessionAlert {
   id: string;
   sessionId: string;
   userId: string;
-  type: 'new_device' | 'new_location' | 'suspicious_activity' | 'concurrent_limit' | 'security_breach';
+  type:
+    | 'new_device'
+    | 'new_location'
+    | 'suspicious_activity'
+    | 'concurrent_limit'
+    | 'security_breach';
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
   details: Record<string, any>;
@@ -91,7 +96,6 @@ export interface ConcurrentSessionPolicy {
   notifyUser: boolean;
   requireConfirmation: boolean;
 }
-
 
 /**
 
@@ -119,7 +123,7 @@ class DeviceDetector {
       screenResolution: `${screen.width}x${screen.height}`,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       language: navigator.language,
-      type: this.getDeviceType()
+      type: this.getDeviceType(),
     };
   }
 
@@ -131,7 +135,11 @@ class DeviceDetector {
     if (/tablet|ipad|playbook|silk/i.test(userAgent)) {
       return 'tablet';
     }
-    if (/mobile|iphone|ipod|android|blackberry|opera|mini|windows\sce|palm|smartphone|iemobile/i.test(userAgent)) {
+    if (
+      /mobile|iphone|ipod|android|blackberry|opera|mini|windows\sce|palm|smartphone|iemobile/i.test(
+        userAgent
+      )
+    ) {
       return 'mobile';
     }
     return 'desktop';
@@ -210,7 +218,6 @@ class DeviceDetector {
   }
 }
 
-
 /**
 
  * LocationDetector类 - 负责处理相关功能
@@ -238,7 +245,7 @@ class LocationDetector {
         locationInfo.isp = data.org;
       }
     } catch (error) {
-      Logger.warn('获取位置信息失败:', error);
+      Logger.warn('获取位置信息失败:', { error: String(error) });
     }
 
     // 检测VPN/Tor（简化实现）
@@ -345,7 +352,7 @@ class SecurityAnalyzer {
       isNewLocation,
       hasSecurityWarnings,
       riskScore: Math.min(100, riskScore),
-      lastSecurityCheck: new Date().toISOString()
+      lastSecurityCheck: new Date().toISOString(),
     };
   }
 }
@@ -377,7 +384,7 @@ export class SessionManager {
       enableDeviceTracking: true,
       enableSecurityAlerts: true,
       heartbeatInterval: 60 * 1000, // 1分钟
-      ...config
+      ...config,
     };
 
     this.startCleanupTimer();
@@ -395,7 +402,7 @@ export class SessionManager {
       maxSessions: this.config.maxConcurrentSessions,
       strategy: 'terminate_oldest',
       notifyUser: true,
-      requireConfirmation: false
+      requireConfirmation: false,
     }
   ): Promise<{ sessionId: string; warnings?: string[] }> {
     const sessionId = this.generateSessionId();
@@ -435,9 +442,9 @@ export class SessionManager {
         isNewLocation: false,
         hasSecurityWarnings: false,
         riskScore: 0,
-        lastSecurityCheck: new Date().toISOString()
+        lastSecurityCheck: new Date().toISOString(),
       },
-      activityLog: []
+      activityLog: [],
     };
 
     // 安全分析
@@ -462,7 +469,7 @@ export class SessionManager {
     // 记录活动
     this.recordActivity(sessionId, 'session_created', 'auth', {
       deviceInfo,
-      locationInfo
+      locationInfo,
     });
 
     return { sessionId, warnings: warnings?.length > 0 ? warnings : undefined };
@@ -519,8 +526,9 @@ export class SessionManager {
    * 获取用户的所有会话
    */
   getUserSessions(userId: string): SessionData[] {
-    return Array.from(this.activeSessions.values())
-      .filter(session => session.userId === userId && session.isActive);
+    return Array.from(this.activeSessions.values()).filter(
+      session => session.userId === userId && session.isActive
+    );
   }
 
   /**
@@ -548,7 +556,7 @@ export class SessionManager {
         message: '检测到新设备登录',
         details: { deviceInfo: sessionData.deviceInfo },
         timestamp: new Date().toISOString(),
-        acknowledged: false
+        acknowledged: false,
       });
     }
 
@@ -562,7 +570,7 @@ export class SessionManager {
         message: '检测到新位置登录',
         details: { locationInfo: sessionData.locationInfo },
         timestamp: new Date().toISOString(),
-        acknowledged: false
+        acknowledged: false,
       });
     }
 
@@ -576,7 +584,7 @@ export class SessionManager {
         message: '检测到可疑活动',
         details: { riskScore: sessionData.securityFlags.riskScore },
         timestamp: new Date().toISOString(),
-        acknowledged: false
+        acknowledged: false,
       });
     }
 
@@ -596,7 +604,6 @@ export class SessionManager {
     policy: ConcurrentSessionPolicy,
     warnings: string[]
   ): Promise<void> {
-
     /**
 
      * switch功能函数
@@ -613,8 +620,9 @@ export class SessionManager {
         throw new Error('已达到最大并发会话数限制');
 
       case 'terminate_oldest':
-        const oldestSession = userSessions
-          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
+        const oldestSession = userSessions.sort(
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        )[0];
         if (oldestSession) {
           await this.terminateSession(oldestSession.id, 'concurrent_limit');
           warnings?.push('已终止最旧的会话');
@@ -659,7 +667,7 @@ export class SessionManager {
       resource,
       details,
       ipAddress: session.ipAddress,
-      userAgent: session.userAgent
+      userAgent: session.userAgent,
     };
 
     session.activityLog.push(activity);
@@ -678,14 +686,19 @@ export class SessionManager {
       allActivities.push(...session.activityLog);
     });
 
-    return allActivities.sort((a, b) =>
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    return allActivities.sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
 
   private async persistSession(session: SessionData): Promise<void> {
     // 缓存会话数据
-    await defaultMemoryCache.set(`session_${session.id}`, session, undefined, this.config.sessionTimeout);
+    await defaultMemoryCache.set(
+      `session_${session.id}`,
+      session,
+      undefined,
+      this.config.sessionTimeout
+    );
   }
 
   private startHeartbeat(sessionId: string): void {
@@ -720,9 +733,12 @@ export class SessionManager {
   }
 
   private startCleanupTimer(): void {
-    setInterval(() => {
-      this.cleanupExpiredSessions();
-    }, 5 * 60 * 1000); // 每5分钟清理一次
+    setInterval(
+      () => {
+        this.cleanupExpiredSessions();
+      },
+      5 * 60 * 1000
+    ); // 每5分钟清理一次
   }
 
   private async cleanupExpiredSessions(): Promise<void> {

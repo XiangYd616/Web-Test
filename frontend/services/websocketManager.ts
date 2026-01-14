@@ -1,6 +1,4 @@
-import Logger from '@/utils/logger';
-
-﻿/**
+import Logger from '@/utils/logger'; /**
  * WebSocket管理器
  * 提供统一的WebSocket连接管理和消息处理
  */
@@ -40,7 +38,7 @@ class WebSocketManager {
       autoReconnect: config.autoReconnect ?? true,
       reconnectInterval: config.reconnectInterval || 3000,
       maxReconnectAttempts: config.maxReconnectAttempts || 5,
-      heartbeatInterval: config.heartbeatInterval || 30000
+      heartbeatInterval: config.heartbeatInterval || 30000,
     };
   }
 
@@ -58,7 +56,7 @@ class WebSocketManager {
    */
   public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.ws.readyState === WebSocket.OPEN) {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         resolve();
         return;
       }
@@ -75,25 +73,27 @@ class WebSocketManager {
           resolve();
         };
 
-        this.ws.onmessage = (event) => {
+        this.ws.onmessage = event => {
           this.handleMessage(event);
         };
 
-        this.ws.onclose = (event) => {
+        this.ws.onclose = event => {
           this.setConnectionStatus('disconnected');
           this.stopHeartbeat();
-          
-          if (this.config.autoReconnect && this.reconnectAttempts < this.config.maxReconnectAttempts) {
+
+          if (
+            this.config.autoReconnect &&
+            this.reconnectAttempts < this.config.maxReconnectAttempts
+          ) {
             this.scheduleReconnect();
           }
         };
 
-        this.ws.onerror = (error) => {
+        this.ws.onerror = error => {
           Logger.error('WebSocket连接错误:', error);
           this.setConnectionStatus('disconnected');
           reject(error);
         };
-
       } catch (error) {
         Logger.error('WebSocket连接失败:', error);
         this.setConnectionStatus('disconnected');
@@ -107,7 +107,7 @@ class WebSocketManager {
    */
   public disconnect(): void {
     this.config.autoReconnect = false; // 禁用自动重连
-    
+
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
@@ -127,11 +127,11 @@ class WebSocketManager {
    * 发送消息
    */
   public send(message: WebSocketMessage): boolean {
-    if (this.ws.readyState === WebSocket.OPEN) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       try {
         const messageWithTimestamp = {
           ...message,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
         this.ws.send(JSON.stringify(messageWithTimestamp));
         return true;
@@ -150,7 +150,7 @@ class WebSocketManager {
     if (!this.messageHandlers.has(messageType)) {
       this.messageHandlers.set(messageType, new Set());
     }
-    
+
     this.messageHandlers.get(messageType)!.add(handler);
 
     // 返回取消订阅函数
@@ -170,7 +170,7 @@ class WebSocketManager {
    */
   public onStatusChange(listener: (status: ConnectionStatus) => void): () => void {
     this.statusListeners.add(listener);
-    
+
     // 立即调用一次，提供当前状态
     listener(this.connectionStatus);
 
@@ -193,7 +193,7 @@ class WebSocketManager {
   private handleMessage(event: MessageEvent): void {
     try {
       const message: WebSocketMessage = JSON.parse(event.data);
-      
+
       // 处理心跳响应
       if (message.type === 'pong') {
         return;
@@ -210,7 +210,6 @@ class WebSocketManager {
           }
         });
       }
-
     } catch (error) {
       Logger.error('WebSocket消息解析错误:', error);
     }
@@ -243,7 +242,6 @@ class WebSocketManager {
     this.reconnectAttempts++;
     this.setConnectionStatus('reconnecting');
 
-
     this.reconnectTimeout = setTimeout(() => {
       this.reconnectTimeout = null;
       this.connect().catch(() => {
@@ -261,9 +259,9 @@ class WebSocketManager {
    */
   private startHeartbeat(): void {
     this.stopHeartbeat();
-    
+
     this.heartbeatInterval = setInterval(() => {
-      if (this.ws.readyState === WebSocket.OPEN) {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.send({ type: 'ping' });
       }
     }, this.config.heartbeatInterval);

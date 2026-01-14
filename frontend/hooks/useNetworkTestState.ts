@@ -7,11 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/backgroundTestManager';
-import type {
-  NetworkTestConfig,
-  NetworkTestHook,
-  NetworkTestResult
-} from '../types';
+import type { NetworkTestConfig, NetworkTestHook, NetworkTestResult } from '../types';
 import { TestStatus } from '../types/enums';
 
 // 所有类型定义已迁移到统一的类型系统
@@ -207,34 +203,34 @@ export const useNetworkTestState = (): NetworkTestHook => {
 
     connectivityConfig: {
       pingCount: 10,
-      packetSize: 64
+      packetSize: 64,
     },
 
     latencyConfig: {
       testCount: 20,
-      maxLatency: 1000
+      maxLatency: 1000,
     },
 
     bandwidthConfig: {
       downloadTest: true,
       uploadTest: false,
-      testFileSize: 10
+      testFileSize: 10,
     },
 
     dnsConfig: {
       dnsServers: ['8.8.8.8', '1.1.1.1'],
-      recordTypes: ['A', 'AAAA']
+      recordTypes: ['A', 'AAAA'],
     },
 
     portConfig: {
       ports: [80, 443, 22, 21, 25, 53, 110, 143, 993, 995],
-      scanType: 'tcp'
+      scanType: 'tcp',
     },
 
     tracerouteConfig: {
       maxHops: 30,
-      timeout: 5000
-    }
+      timeout: 5000,
+    },
   });
 
   const [isRunning, setIsRunning] = useState(false);
@@ -269,34 +265,34 @@ export const useNetworkTestState = (): NetworkTestHook => {
 
       connectivityConfig: {
         pingCount: 10,
-        packetSize: 64
+        packetSize: 64,
       },
 
       latencyConfig: {
         testCount: 20,
-        maxLatency: 1000
+        maxLatency: 1000,
       },
 
       bandwidthConfig: {
         downloadTest: true,
         uploadTest: false,
-        testFileSize: 10
+        testFileSize: 10,
       },
 
       dnsConfig: {
         dnsServers: ['8.8.8.8', '1.1.1.1'],
-        recordTypes: ['A', 'AAAA']
+        recordTypes: ['A', 'AAAA'],
       },
 
       portConfig: {
         ports: [80, 443, 22, 21, 25, 53, 110, 143, 993, 995],
-        scanType: 'tcp'
+        scanType: 'tcp',
       },
 
       tracerouteConfig: {
         maxHops: 30,
-        timeout: 5000
-      }
+        timeout: 5000,
+      },
     });
   }, []);
 
@@ -310,7 +306,10 @@ export const useNetworkTestState = (): NetworkTestHook => {
       errors.push('请输入目标地址（URL或IP）');
     }
 
-    if (localConfig.connectivityConfig?.pingCount < 1 || localConfig.connectivityConfig?.pingCount > 100) {
+    if (
+      localConfig.connectivityConfig?.pingCount < 1 ||
+      localConfig.connectivityConfig?.pingCount > 100
+    ) {
       errors.push('Ping次数应在1-100之间');
     }
 
@@ -328,7 +327,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }, [localConfig]);
 
@@ -355,9 +354,9 @@ export const useNetworkTestState = (): NetworkTestHook => {
       const newTestId = backgroundTestManager.startTest(
         'network' as any,
         localConfig,
-        (progress: number, step: string) => {
+        (progress: number, step?: string) => {
           setProgress(progress);
-          setCurrentStep(step);
+          if (step) setCurrentStep(step);
         },
         (testResult: any) => {
           setResult(testResult);
@@ -373,7 +372,6 @@ export const useNetworkTestState = (): NetworkTestHook => {
       );
 
       setTestId(newTestId);
-
     } catch (err: any) {
       setError(err.message || '网络测试启动失败');
       setIsRunning(false);
@@ -419,8 +417,10 @@ export const useNetworkTestState = (): NetworkTestHook => {
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        dnsServers: [...(prev.dnsConfig?.dnsServers || []), server].filter((s: unknown, i: number, arr: unknown[]) => arr.indexOf(s) === i)
-      }
+        dnsServers: [...(prev.dnsConfig?.dnsServers || []), server].filter(
+          (s: unknown, i: number, arr: unknown[]) => arr.indexOf(s) === i
+        ),
+      },
     }));
   }, []);
 
@@ -432,8 +432,8 @@ export const useNetworkTestState = (): NetworkTestHook => {
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        dnsServers: (prev.dnsConfig?.dnsServers || []).filter((s: any) => s !== server)
-      }
+        dnsServers: (prev.dnsConfig?.dnsServers || []).filter((s: any) => s !== server),
+      },
     }));
   }, []);
 
@@ -445,8 +445,10 @@ export const useNetworkTestState = (): NetworkTestHook => {
       ...prev,
       portConfig: {
         ...prev.portConfig,
-        ports: [...(prev.portConfig?.ports || []), port].filter((p: unknown, i: number, arr: unknown[]) => arr.indexOf(p) === i).sort((a: number, b: number) => a - b)
-      }
+        ports: [...(prev.portConfig?.ports || []), port]
+          .filter((p: unknown, i: number, arr: unknown[]) => arr.indexOf(p) === i)
+          .sort((a: number, b: number) => a - b),
+      },
     }));
   }, []);
 
@@ -458,8 +460,8 @@ export const useNetworkTestState = (): NetworkTestHook => {
       ...prev,
       portConfig: {
         ...prev.portConfig,
-        ports: (prev.portConfig?.ports || []).filter((p: any) => p !== port)
-      }
+        ports: (prev.portConfig?.ports || []).filter((p: any) => p !== port),
+      },
     }));
   }, []);
 
@@ -471,8 +473,10 @@ export const useNetworkTestState = (): NetworkTestHook => {
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        recordTypes: [...(prev.dnsConfig?.recordTypes || []), type].filter((t: unknown, i: number, arr: unknown[]) => arr.indexOf(t) === i)
-      }
+        recordTypes: [...(prev.dnsConfig?.recordTypes || []), type].filter(
+          (t: unknown, i: number, arr: unknown[]) => arr.indexOf(t) === i
+        ),
+      },
     }));
   }, []);
 
@@ -484,48 +488,63 @@ export const useNetworkTestState = (): NetworkTestHook => {
       ...prev,
       dnsConfig: {
         ...prev.dnsConfig,
-        recordTypes: (prev.dnsConfig?.recordTypes || []).filter((t: any) => t !== type)
-      }
+        recordTypes: (prev.dnsConfig?.recordTypes || []).filter((t: any) => t !== type),
+      },
     }));
   }, []);
 
   /**
    * 加载预设配置
    */
-  const loadPreset = useCallback((preset: 'basic' | 'comprehensive' | 'security' | 'performance') => {
-    const presets = {
-      basic: {
-        testType: 'connectivity' as const,
-        connectivityConfig: { pingCount: 5, packetSize: 64 },
-        dnsConfig: { dnsServers: ['8.8.8.8'], recordTypes: ['A'] as const },
-        portConfig: { ports: [80, 443], scanType: 'tcp' as const }
-      },
-      comprehensive: {
-        testType: 'comprehensive' as const,
-        connectivityConfig: { pingCount: 20, packetSize: 64 },
-        bandwidthConfig: { downloadTest: true, uploadTest: true, testFileSize: 50 },
-        dnsConfig: { dnsServers: ['8.8.8.8', '1.1.1.1', '208.67.222.222'], recordTypes: ['A', 'AAAA', 'MX', 'TXT'] as const },
-        portConfig: { ports: [21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995], scanType: 'both' as const }
-      },
-      security: {
-        testType: 'port' as const,
-        portConfig: { ports: [21, 22, 23, 25, 53, 80, 135, 139, 443, 445, 993, 995, 3389], scanType: 'tcp' as const },
-        dnsConfig: { dnsServers: ['8.8.8.8', '1.1.1.1'], recordTypes: ['A', 'MX', 'TXT'] as const }
-      },
-      performance: {
-        testType: 'bandwidth' as const,
-        bandwidthConfig: { downloadTest: true, uploadTest: true, testFileSize: 100 },
-        latencyConfig: { testCount: 50, maxLatency: 500 },
-        connectivityConfig: { pingCount: 30, packetSize: 1024 }
-      }
-    };
+  const loadPreset = useCallback(
+    (preset: 'basic' | 'comprehensive' | 'security' | 'performance') => {
+      const presets = {
+        basic: {
+          testType: 'connectivity' as const,
+          connectivityConfig: { pingCount: 5, packetSize: 64 },
+          dnsConfig: { dnsServers: ['8.8.8.8'], recordTypes: ['A'] as const },
+          portConfig: { ports: [80, 443], scanType: 'tcp' as const },
+        },
+        comprehensive: {
+          testType: 'comprehensive' as const,
+          connectivityConfig: { pingCount: 20, packetSize: 64 },
+          bandwidthConfig: { downloadTest: true, uploadTest: true, testFileSize: 50 },
+          dnsConfig: {
+            dnsServers: ['8.8.8.8', '1.1.1.1', '208.67.222.222'],
+            recordTypes: ['A', 'AAAA', 'MX', 'TXT'] as const,
+          },
+          portConfig: {
+            ports: [21, 22, 23, 25, 53, 80, 110, 143, 443, 993, 995],
+            scanType: 'both' as const,
+          },
+        },
+        security: {
+          testType: 'port' as const,
+          portConfig: {
+            ports: [21, 22, 23, 25, 53, 80, 135, 139, 443, 445, 993, 995, 3389],
+            scanType: 'tcp' as const,
+          },
+          dnsConfig: {
+            dnsServers: ['8.8.8.8', '1.1.1.1'],
+            recordTypes: ['A', 'MX', 'TXT'] as const,
+          },
+        },
+        performance: {
+          testType: 'bandwidth' as const,
+          bandwidthConfig: { downloadTest: true, uploadTest: true, testFileSize: 100 },
+          latencyConfig: { testCount: 50, maxLatency: 500 },
+          connectivityConfig: { pingCount: 30, packetSize: 1024 },
+        },
+      };
 
-    const presetConfig = presets[preset];
-    setLocalConfig((prev: any) => ({
-      ...prev,
-      ...presetConfig
-    }));
-  }, []);
+      const presetConfig = presets[preset];
+      setLocalConfig((prev: any) => ({
+        ...prev,
+        ...presetConfig,
+      }));
+    },
+    []
+  );
 
   // 清理资源
   useEffect(() => {
@@ -535,7 +554,13 @@ export const useNetworkTestState = (): NetworkTestHook => {
   }, []);
 
   // 计算派生状态
-  const status = isRunning ? TestStatus.RUNNING : (result ? TestStatus.COMPLETED : (error ? TestStatus.FAILED : TestStatus.IDLE));
+  const status = isRunning
+    ? TestStatus.RUNNING
+    : result
+      ? TestStatus.COMPLETED
+      : error
+        ? TestStatus.FAILED
+        : TestStatus.IDLE;
   const isCompleted = status === TestStatus.COMPLETED;
   const hasError = status === TestStatus.FAILED;
   const currentPort = localConfig.portConfig?.ports?.[0] || null;
@@ -546,7 +571,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     ports: localConfig.portConfig?.ports || [],
     protocols: ['tcp', 'udp', 'http', 'https'],
     timeout: localConfig.timeout,
-    retries: localConfig.retries
+    retries: localConfig.retries,
   };
 
   return {
@@ -554,7 +579,7 @@ export const useNetworkTestState = (): NetworkTestHook => {
     loading: isRunning,
     error,
     result: result as unknown as NetworkTestResult,
-    status
+    status,
   };
 };
 

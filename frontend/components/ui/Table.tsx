@@ -1,9 +1,6 @@
-import React from 'react';
 import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import type { ReactNode, FC } from 'react';;
+import React, { useMemo, useState } from 'react';
 import { cn } from '../../utils/cn';
-
 // 表格列定义接口
 export interface TableColumn<T = any> {
   key: string;
@@ -36,7 +33,10 @@ export interface TableProps<T = any> {
     onChange?: (selectedRowKeys: string[], selectedRows: T[]) => void;
     getCheckboxProps?: (record: T) => { disabled?: boolean };
   };
-  onRow?: (record: T, index: number) => {
+  onRow?: (
+    record: T,
+    index: number
+  ) => {
     onClick?: () => void;
     onDoubleClick?: () => void;
     className?: string;
@@ -69,7 +69,7 @@ export const Table = <T extends Record<string, any>>({
   bordered = false,
   showHeader = true,
   className,
-  emptyText = '暂无数据'
+  emptyText = '暂无数据',
 }: TableProps<T>) => {
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
@@ -110,7 +110,7 @@ export const Table = <T extends Record<string, any>>({
     const field = column.dataIndex || column.key;
     setFilters(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -159,14 +159,14 @@ export const Table = <T extends Record<string, any>>({
   const sizeClasses = {
     small: 'text-xs',
     middle: 'text-sm',
-    large: 'text-base'
+    large: 'text-base',
   };
 
   // 单元格内边距
   const cellPadding = {
     small: 'px-2 py-1',
     middle: 'px-3 py-2',
-    large: 'px-4 py-3'
+    large: 'px-4 py-3',
   };
 
   // 渲染表头
@@ -177,15 +177,17 @@ export const Table = <T extends Record<string, any>>({
       <thead className="bg-gray-50 dark:bg-gray-800">
         <tr>
           {rowSelection && (
-            <th className={cn(
-              'border-b border-gray-200 dark:border-gray-700',
-              cellPadding[size],
-              bordered && 'border-r'
-            )}>
+            <th
+              className={cn(
+                'border-b border-gray-200 dark:border-gray-700',
+                cellPadding[size],
+                bordered && 'border-r'
+              )}
+            >
               <input
                 type="checkbox"
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                onChange={(e) => {
+                onChange={e => {
                   const allKeys = paginatedData.map((record, index) => getRowKey(record, index));
                   if (e?.target.checked) {
                     rowSelection?.onChange?.(allKeys, paginatedData);
@@ -202,7 +204,7 @@ export const Table = <T extends Record<string, any>>({
               />
             </th>
           )}
-          {columns.map((column) => (
+          {columns.map(column => (
             <th
               key={column.key}
               className={cn(
@@ -239,9 +241,7 @@ export const Table = <T extends Record<string, any>>({
                     />
                   </div>
                 )}
-                {column.filterable && (
-                  <Filter className="w-3 h-3 text-gray-400" />
-                )}
+                {column.filterable && <Filter className="w-3 h-3 text-gray-400" />}
               </div>
             </th>
           ))}
@@ -258,10 +258,7 @@ export const Table = <T extends Record<string, any>>({
           <tr>
             <td
               colSpan={columns.length + (rowSelection ? 1 : 0)}
-              className={cn(
-                'text-center text-gray-500 dark:text-gray-400',
-                cellPadding[size]
-              )}
+              className={cn('text-center text-gray-500 dark:text-gray-400', cellPadding[size])}
             >
               <div className="flex items-center justify-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -279,10 +276,7 @@ export const Table = <T extends Record<string, any>>({
           <tr>
             <td
               colSpan={columns.length + (rowSelection ? 1 : 0)}
-              className={cn(
-                'text-center text-gray-500 dark:text-gray-400',
-                cellPadding[size]
-              )}
+              className={cn('text-center text-gray-500 dark:text-gray-400', cellPadding[size])}
             >
               {emptyText}
             </td>
@@ -308,31 +302,35 @@ export const Table = <T extends Record<string, any>>({
               onDoubleClick={rowProps.onDoubleClick}
             >
               {rowSelection && (
-                <td className={cn(
-                  'border-gray-200 dark:border-gray-700',
-                  cellPadding[size],
-                  bordered && 'border-r'
-                )}>
+                <td
+                  className={cn(
+                    'border-gray-200 dark:border-gray-700',
+                    cellPadding[size],
+                    bordered && 'border-r'
+                  )}
+                >
                   <input
                     type="checkbox"
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     checked={rowSelection?.selectedRowKeys?.includes(key) || false}
                     disabled={rowSelection?.getCheckboxProps?.(record)?.disabled}
-                    onChange={(e) => {
+                    onChange={e => {
                       const currentSelected = rowSelection?.selectedRowKeys || [];
                       let newSelected: string[];
                       let newSelectedRows: T[];
 
                       if (e?.target.checked) {
                         newSelected = [...currentSelected, key];
-                        newSelectedRows = [...(rowSelection?.selectedRowKeys?.map(k =>
-                          paginatedData.find((r, i) => getRowKey(r, i) === k)
-                        ).filter(Boolean) || []), record];
+                        const existingRows =
+                          rowSelection?.selectedRowKeys
+                            ?.map(k => paginatedData.find((r, i) => getRowKey(r, i) === k))
+                            .filter((r): r is T => r !== undefined) || [];
+                        newSelectedRows = [...existingRows, record];
                       } else {
                         newSelected = currentSelected.filter(k => k !== key);
-                        newSelectedRows = newSelected.map(k =>
-                          paginatedData.find((r, i) => getRowKey(r, i) === k)
-                        ).filter(Boolean) as T[];
+                        newSelectedRows = newSelected
+                          .map(k => paginatedData.find((r, i) => getRowKey(r, i) === k))
+                          .filter((r): r is T => r !== undefined);
                       }
 
                       rowSelection?.onChange?.(newSelected, newSelectedRows);
@@ -340,7 +338,7 @@ export const Table = <T extends Record<string, any>>({
                   />
                 </td>
               )}
-              {columns.map((column) => {
+              {columns.map(column => {
                 const dataIndex = column.dataIndex || column.key;
                 const value = record[dataIndex];
 
@@ -369,16 +367,21 @@ export const Table = <T extends Record<string, any>>({
 
   return (
     <div className={cn('w-full', className)}>
-      <div className={cn(
-        'overflow-auto',
-        scroll?.x && 'overflow-x-auto',
-        scroll?.y && 'overflow-y-auto'
-      )} style={{ maxHeight: scroll?.y }}>
-        <table className={cn(
-          'min-w-full divide-y divide-gray-200 dark:divide-gray-700',
-          sizeClasses[size],
-          bordered && 'border border-gray-200 dark:border-gray-700'
-        )}>
+      <div
+        className={cn(
+          'overflow-auto',
+          scroll?.x && 'overflow-x-auto',
+          scroll?.y && 'overflow-y-auto'
+        )}
+        style={{ maxHeight: scroll?.y }}
+      >
+        <table
+          className={cn(
+            'min-w-full divide-y divide-gray-200 dark:divide-gray-700',
+            sizeClasses[size],
+            bordered && 'border border-gray-200 dark:border-gray-700'
+          )}
+        >
           {renderHeader()}
           {renderBody()}
         </table>
@@ -414,7 +417,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   total,
   showSizeChanger = false,
   showQuickJumper = false,
-  onChange
+  onChange,
 }) => {
   const totalPages = Math.ceil(total / pageSize);
   const startItem = (current - 1) * pageSize + 1;
@@ -453,13 +456,21 @@ const TablePagination: React.FC<TablePaginationProps> = ({
             <span className="text-gray-700 dark:text-gray-300">每页显示:</span>
             <select
               value={pageSize}
-              onChange={(e) => handlePageSizeChange(Number(e?.target.value))}
+              onChange={e => handlePageSizeChange(Number(e?.target.value))}
               className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]"
             >
-              <option value={10} className="dark:bg-gray-700 dark:text-white">10 条</option>
-              <option value={20} className="dark:bg-gray-700 dark:text-white">20 条</option>
-              <option value={50} className="dark:bg-gray-700 dark:text-white">50 条</option>
-              <option value={100} className="dark:bg-gray-700 dark:text-white">100 条</option>
+              <option value={10} className="dark:bg-gray-700 dark:text-white">
+                10 条
+              </option>
+              <option value={20} className="dark:bg-gray-700 dark:text-white">
+                20 条
+              </option>
+              <option value={50} className="dark:bg-gray-700 dark:text-white">
+                50 条
+              </option>
+              <option value={100} className="dark:bg-gray-700 dark:text-white">
+                100 条
+              </option>
             </select>
           </div>
         )}
@@ -494,7 +505,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
               min={1}
               max={totalPages}
               className="w-12 px-1 py-1 text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-              onKeyPress={(e) => {
+              onKeyPress={e => {
                 if (e.key === 'Enter') {
                   const page = parseInt((e?.target as HTMLInputElement).value);
                   handlePageChange(page);

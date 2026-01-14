@@ -244,7 +244,7 @@ export const useDataVisualization = (
       };
       localStorage.setItem(`chart_data_${cacheKey}`, JSON.stringify(cacheData));
     } catch (error) {
-      Logger.warn('Failed to save chart data to cache:', error);
+      Logger.warn('Failed to save chart data to cache:', { error: String(error) });
     }
   }, [cacheKey, autoSave]);
 
@@ -262,7 +262,7 @@ export const useDataVisualization = (
         }
       }
     } catch (error) {
-      Logger.warn('Failed to load chart data from cache:', error);
+      Logger.warn('Failed to load chart data from cache:', { error: String(error) });
     }
     return false;
   }, [cacheKey]);

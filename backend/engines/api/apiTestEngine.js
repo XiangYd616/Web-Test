@@ -1,24 +1,44 @@
 /**
  * API测试引擎
  * 提供真实的API端点测试、性能分析、错误检测等功能
+ * 
+ * 增强功能:
+ * - 集成AssertionSystem断言系统
+ * - WebSocket实时进度通知
+ * - 告警系统集成
  */
 
 const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 const { performance } = require('perf_hooks');
+const { AssertionSystem } = require('./AssertionSystem');
+const { emitTestProgress, emitTestComplete, emitTestError } = require('../../websocket/testEvents');
+const { getAlertManager } = require('../../alert/AlertManager');
+const Logger = require('../../utils/logger');
 
 class ApiTestEngine {
   constructor(options = {}) {
     this.name = 'api';
-    this.version = '2.0.0';
-    this.description = 'API端点测试引擎';
+    this.version = '3.0.0';
+    this.description = 'API端点测试引擎 - 支持断言和告警';
     this.options = {
       timeout: process.env.REQUEST_TIMEOUT || 30000,
       maxRedirects: 5,
-      userAgent: 'API-Test-Engine/2.0.0',
+      userAgent: 'API-Test-Engine/3.0.0',
       ...options
     };
+    
+    // 初始化断言系统
+    this.assertionSystem = new AssertionSystem();
+    
+    // 初始化告警管理器
+    this.alertManager = null;
+    try {
+      this.alertManager = getAlertManager();
+    } catch (error) {
+      Logger.warn('告警管理器未初始化:', error.message);
+    }
   }
 
   /**
@@ -40,47 +60,93 @@ class ApiTestEngine {
    * 执行API测试
    */
   async executeTest(config) {
+    const testId = config.testId || `api-${Date.now()}`;
+    
     try {
-      const { url, method = 'GET', headers = {}, body = null, endpoints = [] } = config;
+      const { url, method = 'GET', headers = {}, body = null, endpoints = [], assertions = [] } = config;
       
-      console.log(`🔍 开始API测试: ${url || '多个端点'}`);
+      Logger.info(`🚀 开始API测试: ${testId} - ${url || '多个端点'}`);
+      
+      // 发送测试开始事件
+      emitTestProgress(testId, {
+        stage: 'started',
+        progress: 0,
+        message: `API测试开始: ${url || '多个端点'}`,
+        url
+      });
       
       let results;
       
       if (endpoints && endpoints.length > 0) {
         // 测试多个端点
-        results = await this.testMultipleEndpoints(endpoints);
+        results = await this.testMultipleEndpoints(endpoints, testId);
       } else if (url) {
         // 测试单个端点
-        results = await this.testSingleEndpoint({ url, method, headers, body });
+        results = await this.testSingleEndpoint({ url, method, headers, body, assertions, testId });
       } else {
         throw new Error('必须提供URL或端点列表');
       }
       
-      return {
+      const finalResult = {
         engine: this.name,
         version: this.version,
         success: true,
+        testId,
         results,
         timestamp: new Date().toISOString()
       };
+      
+      // 发送完成事件
+      emitTestComplete(testId, finalResult);
+      
+      Logger.info(`✅ API测试完成: ${testId}`);
+      
+      return finalResult;
+      
     } catch (error) {
-      console.error(`❌ API测试失败: ${error.message}`);
-      return {
+      Logger.error(`❌ API测试失败: ${testId}`, error);
+      
+      const errorResult = {
         engine: this.name,
         version: this.version,
         success: false,
+        testId,
         error: error.message,
         timestamp: new Date().toISOString()
       };
+      
+      // 发送错误事件
+      emitTestError(testId, {
+        error: error.message,
+        stack: error.stack
+      });
+      
+      // 触发错误告警
+      if (this.alertManager) {
+        await this.alertManager.checkAlert('TEST_FAILURE', {
+          testId,
+          testType: 'api',
+          error: error.message
+        });
+      }
+      
+      return errorResult;
     }
   }
 
   /**
    * 测试单个API端点
    */
-  async testSingleEndpoint({ url, method = 'GET', headers = {}, body = null }) {
+  async testSingleEndpoint({ url, method = 'GET', headers = {}, body = null, assertions = [], testId = null }) {
     const startTime = performance.now();
+    
+    if (testId) {
+      emitTestProgress(testId, {
+        stage: 'running',
+        progress: 30,
+        message: `测试: ${method} ${url}`
+      });
+    }
     
     try {
       const urlObj = new URL(url);
@@ -125,11 +191,28 @@ class ApiTestEngine {
       // 分析响应数据
       const analysis = this.analyzeResponse(response, responseTime);
       
+      // 执行断言验证
+      if (testId) {
+        emitTestProgress(testId, {
+          stage: 'validating',
+          progress: 70,
+          message: '验证响应结果...'
+        });
+      }
+      
+      const validationResults = this._runAssertions(response, responseTime, assertions);
+      
+      // 检查告警条件
+      if (this.alertManager && testId) {
+        await this._checkAlerts(testId, url, response, responseTime, validationResults);
+      }
+      
       return {
         url,
         method,
         timestamp: new Date().toISOString(),
         responseTime,
+        validations: validationResults,
         ...analysis,
         summary: {
           success: response.statusCode >= 200 && response.statusCode < 400,
@@ -167,14 +250,131 @@ class ApiTestEngine {
   }
 
   /**
+   * 运行断言验证
+   * @private
+   */
+  _runAssertions(response, responseTime, assertions) {
+    if (!assertions || assertions.length === 0) {
+      return {
+        passed: true,
+        total: 0,
+        results: []
+      };
+    }
+    
+    const assertionResults = [];
+    let passed = 0;
+    
+    for (const assertion of assertions) {
+      try {
+        let assertResult;
+        
+        // 构造result对象，使AssertionSystem可以使用
+        const result = {
+          status: response.statusCode,
+          statusCode: response.statusCode,
+          headers: response.headers,
+          body: response.body,
+          responseTime
+        };
+        
+        switch (assertion.type) {
+          case 'status':
+            assertResult = this.assertionSystem.status(assertion.expected).validate(result);
+            break;
+          case 'header':
+            assertResult = this.assertionSystem.header(assertion.name, assertion.value).validate(result);
+            break;
+          case 'json':
+            assertResult = this.assertionSystem.json(assertion.path, assertion.expected).validate(result);
+            break;
+          case 'responseTime':
+            assertResult = this.assertionSystem.responseTime(assertion.max).validate(result);
+            break;
+          default:
+            assertResult = {
+              passed: false,
+              message: `未知的断言类型: ${assertion.type}`
+            };
+        }
+        
+        assertionResults.push(assertResult);
+        if (assertResult.passed) passed++;
+        
+      } catch (error) {
+        assertionResults.push({
+          passed: false,
+          message: `断言执行错误: ${error.message}`
+        });
+      }
+    }
+    
+    return {
+      passed: passed === assertions.length,
+      total: assertions.length,
+      passedCount: passed,
+      failedCount: assertions.length - passed,
+      results: assertionResults
+    };
+  }
+  
+  /**
+   * 检查告警条件
+   * @private
+   */
+  async _checkAlerts(testId, url, response, responseTime, validationResults) {
+    try {
+      // 检查响应时间告警
+      await this.alertManager.checkAlert('RESPONSE_TIME_THRESHOLD', {
+        testId,
+        url,
+        value: responseTime,
+        threshold: 3000
+      });
+      
+      // 检查错误状态码
+      if (response.statusCode >= 500) {
+        await this.alertManager.checkAlert('API_ERROR', {
+          testId,
+          url,
+          statusCode: response.statusCode,
+          message: `API返回服务器错误: ${response.statusCode}`
+        });
+      }
+      
+      // 检查断言失败
+      if (!validationResults.passed) {
+        await this.alertManager.checkAlert('VALIDATION_FAILURE', {
+          testId,
+          url,
+          failedAssertions: validationResults.failedCount,
+          totalAssertions: validationResults.total
+        });
+      }
+    } catch (error) {
+      Logger.warn('告警检查失败:', error.message);
+    }
+  }
+  
+  /**
    * 测试多个API端点
    */
-  async testMultipleEndpoints(endpoints) {
+  async testMultipleEndpoints(endpoints, testId = null) {
     const results = [];
     const startTime = performance.now();
     
-    for (const endpoint of endpoints) {
-      const result = await this.testSingleEndpoint(endpoint);
+    for (let i = 0; i < endpoints.length; i++) {
+      const endpoint = endpoints[i];
+      
+      if (testId) {
+        emitTestProgress(testId, {
+          stage: 'running',
+          progress: Math.round(30 + (i / endpoints.length) * 60),
+          message: `测试端点 ${i + 1}/${endpoints.length}: ${endpoint.url}`
+        });
+      }
+      
+      const result = await this.testSingleEndpoint({ ...endpoint, testId: null }); // 不给子测试传testId
       results.push(result);
     }
     

@@ -1,32 +1,34 @@
 /**
  * AccessibilityTestHistory.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\accessibility\AccessibilityTestHistory.tsx
  * 创建时间: 2025-10-29
  */
 
-import React, { forwardRef } from 'react';
-import TestHistory from '../common/TestHistory';
-import type { TestHistoryItem } from '../common/TestHistory';
+import { forwardRef } from 'react';
+import { TestHistory } from '../common/TestHistory/TestHistory';
+import { accessibilityTestConfig } from '../common/TestHistory/config';
+import type { TestRecord } from '../common/TestHistory/types';
 
 interface AccessibilityTestHistoryProps {
-  onSelectTest?: (test: TestHistoryItem) => void;
-  onTestRerun?: (test: TestHistoryItem) => void;
-  onTestDelete?: (testId: string) => void;
+  onSelectTest?: (test: TestRecord) => void;
+  onTestRerun?: (test: TestRecord) => void;
+  onTestDelete?: (testId: string) => Promise<void>;
+  className?: string;
 }
 
 /**
  * AccessibilityTestHistory - 可访问性测试历史记录组件
- * 使用通用 TestHistory 组件，传入 testType="accessibility"
+ * 使用配置驱动的 TestHistory 组件
  */
 export const AccessibilityTestHistory = forwardRef<any, AccessibilityTestHistoryProps>(
-  (props, ref) => {
+  ({ onSelectTest, onTestRerun, onTestDelete, className }, ref) => {
     return (
       <TestHistory
-        testType="accessibility"
-        title="可访问性测试历史"
-        description="查看和管理可访问性测试记录"
-        {...props}
+        config={accessibilityTestConfig}
+        onRecordClick={onSelectTest}
+        onRecordDelete={onTestDelete}
+        className={className}
       />
     );
   }
@@ -35,4 +37,3 @@ export const AccessibilityTestHistory = forwardRef<any, AccessibilityTestHistory
 AccessibilityTestHistory.displayName = 'AccessibilityTestHistory';
 
 export default AccessibilityTestHistory;
-

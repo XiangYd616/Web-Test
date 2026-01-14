@@ -10,12 +10,12 @@
 
 /**
  * 用户角色枚举 - 与数据库约束保持一致
- * 
+ *
  * 修复问题：解决前端定义5个角色但数据库只支持3个角色的不匹配问题
- * 
+ *
  * 数据库约束需要更新为：
  * CHECK (role IN ('user', 'admin', 'moderator', 'tester', 'manager'))
- * 
+ *
  * 注意：如果需要添加新角色，必须同时更新：
  * 1. 此枚举定义
  * 2. 数据库约束
@@ -26,8 +26,8 @@ export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
   MODERATOR = 'moderator',
-  TESTER = 'tester',        // 需要添加到数据库约束
-  MANAGER = 'manager'       // 需要添加到数据库约束
+  TESTER = 'tester', // 需要添加到数据库约束
+  MANAGER = 'manager', // 需要添加到数据库约束
 }
 
 /**
@@ -37,7 +37,7 @@ export enum UserRole {
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  SUSPENDED = 'suspended',
 }
 
 /**
@@ -47,21 +47,57 @@ export enum UserStatus {
 export enum UserPlan {
   FREE = 'free',
   PRO = 'pro',
-  ENTERPRISE = 'enterprise'
+  ENTERPRISE = 'enterprise',
 }
 
 // ==================== 测试相关枚举 ====================
 
 /**
- * 测试类型枚举 - 导出仍enums.ts的枚举定义
+ * 测试类型枚举
  */
-export type { TestType, TestTypeValue } from './enums';
+export enum TestType {
+  STRESS = 'stress',
+  PERFORMANCE = 'performance',
+  API = 'api',
+  SECURITY = 'security',
+  SEO = 'seo',
+  ACCESSIBILITY = 'accessibility',
+  CONTENT = 'content',
+  INFRASTRUCTURE = 'infrastructure',
+  DOCUMENTATION = 'documentation',
+  UX = 'ux',
+  INTEGRATION = 'integration',
+  NETWORK = 'network',
+  COMPATIBILITY = 'compatibility',
+  DATABASE = 'database',
+  WEBSITE = 'website',
+}
+
+/**
+ * 测试类型值类型
+ */
+export type TestTypeValue =
+  | 'stress'
+  | 'performance'
+  | 'api'
+  | 'security'
+  | 'seo'
+  | 'accessibility'
+  | 'content'
+  | 'infrastructure'
+  | 'documentation'
+  | 'ux'
+  | 'integration'
+  | 'network'
+  | 'compatibility'
+  | 'database'
+  | 'website';
 
 /**
  * 测试状态枚举 - 与数据库约束保持一致
- * 
+ *
  * 修复问题：统一多个不同的状态定义版本
- * 
+ *
  * 数据库约束：
  * CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled'))
  */
@@ -70,21 +106,21 @@ export enum TestStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 /**
  * 测试等级枚举 - 基于评分的等级划分
  */
 export enum TestGrade {
-  A_PLUS = 'A+',    // 95-100分
-  A = 'A',          // 90-94分
-  B_PLUS = 'B+',    // 85-89分
-  B = 'B',          // 80-84分
-  C_PLUS = 'C+',    // 75-79分
-  C = 'C',          // 70-74分
-  D = 'D',          // 60-69分
-  F = 'F'           // 0-59分
+  A_PLUS = 'A+', // 95-100分
+  A = 'A', // 90-94分
+  B_PLUS = 'B+', // 85-89分
+  B = 'B', // 80-84分
+  C_PLUS = 'C+', // 75-79分
+  C = 'C', // 70-74分
+  D = 'D', // 60-69分
+  F = 'F', // 0-59分
 }
 
 /**
@@ -94,7 +130,7 @@ export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 // ==================== 系统相关枚举 ====================
@@ -105,7 +141,7 @@ export enum TestPriority {
 export enum ThemeMode {
   LIGHT = 'light',
   DARK = 'dark',
-  AUTO = 'auto'
+  AUTO = 'auto',
 }
 
 /**
@@ -115,7 +151,7 @@ export enum Language {
   ZH_CN = 'zh-CN',
   EN_US = 'en-US',
   JA_JP = 'ja-JP',
-  KO_KR = 'ko-KR'
+  KO_KR = 'ko-KR',
 }
 
 /**
@@ -126,7 +162,7 @@ export enum Timezone {
   UTC = 'UTC',
   AMERICA_NEW_YORK = 'America/New_York',
   EUROPE_LONDON = 'Europe/London',
-  ASIA_TOKYO = 'Asia/Tokyo'
+  ASIA_TOKYO = 'Asia/Tokyo',
 }
 
 // ==================== 枚举验证函数 ====================
@@ -205,7 +241,7 @@ export function getUserRoleDisplayName(role: UserRole): string {
     [UserRole.ADMIN]: '管理员',
     [UserRole.MODERATOR]: '版主',
     [UserRole.TESTER]: '测试员',
-    [UserRole.MANAGER]: '经理'
+    [UserRole.MANAGER]: '经理',
   };
   return roleNames[role] || role;
 }
@@ -215,13 +251,13 @@ export function getUserRoleDisplayName(role: UserRole): string {
  */
 export function getTestTypeDisplayName(type: TestTypeValue): string {
   const typeNames: Record<string, string> = {
-    'seo': 'SEO优化',
-    'performance': '性能测试',
-    'security': '安全测试',
-    'api': 'API测试',
-    'compatibility': '兼容性测试',
-    'accessibility': '可访问性测试',
-    'stress': '压力测试'
+    seo: 'SEO优化',
+    performance: '性能测试',
+    security: '安全测试',
+    api: 'API测试',
+    compatibility: '兼容性测试',
+    accessibility: '可访问性测试',
+    stress: '压力测试',
   };
   return typeNames[type] || type;
 }
@@ -235,7 +271,7 @@ export function getTestStatusDisplayName(status: TestStatus): string {
     [TestStatus.RUNNING]: '运行中',
     [TestStatus.COMPLETED]: '已完成',
     [TestStatus.FAILED]: '失败',
-    [TestStatus.CANCELLED]: '已取消'
+    [TestStatus.CANCELLED]: '已取消',
   };
   return statusNames[status] || status;
 }
@@ -251,4 +287,3 @@ export function getTestStatusDisplayName(status: TestStatus): string {
 // - export enum TestStatus { ... }
 // - export enum UserRole { ... }
 // - 等等...
-

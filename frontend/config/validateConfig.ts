@@ -1,7 +1,7 @@
 ﻿/**
  * 配置验证工具
  * 版本: v1.0.0
- * 
+ *
  * 提供API和Auth配置的运行时验证功能
  */
 
@@ -65,8 +65,16 @@ export interface ValidationSummary {
 
 // ==================== 验证规则接口 ====================
 
-export type ValidationRule<T = any> = (value: T, config: unknown, path: string) => ConfigValidationError | null;
-export type WarningRule<T = any> = (value: T, config: unknown, path: string) => ConfigValidationWarning | null;
+export type ValidationRule<T = any> = (
+  value: T,
+  config: unknown,
+  path: string
+) => ConfigValidationError | null;
+export type WarningRule<T = any> = (
+  value: T,
+  config: unknown,
+  path: string
+) => ConfigValidationWarning | null;
 
 export interface FieldValidator {
   /** 必填验证 */
@@ -90,7 +98,7 @@ export interface FieldValidator {
 // ==================== API配置验证 ====================
 
 const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
-  'baseURL': {
+  baseURL: {
     required: true,
     type: 'string',
     min: 1,
@@ -105,14 +113,14 @@ const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
             value,
             type: 'format',
             severity: 'low',
-            suggestion: value.slice(0, -1)
+            suggestion: value.slice(0, -1),
           };
         }
         return null;
-      }
-    ]
+      },
+    ],
   },
-  'timeout': {
+  timeout: {
     required: true,
     type: 'number',
     min: 1000,
@@ -126,7 +134,7 @@ const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
             message: 'API超时时间过短，可能导致请求失败',
             value,
             suggestedValue: 30000,
-            reason: '推荐使用30秒超时以适应网络延迟'
+            reason: '推荐使用30秒超时以适应网络延迟',
           };
         }
         if (value > 60000) {
@@ -135,16 +143,16 @@ const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
             message: 'API超时时间过长，可能影响用户体验',
             value,
             suggestedValue: 30000,
-            reason: '推荐使用30秒超时以平衡稳定性和响应性'
+            reason: '推荐使用30秒超时以平衡稳定性和响应性',
           };
         }
         return null;
-      }
-    ]
+      },
+    ],
   },
   'cache?.enabled': {
     required: true,
-    type: 'boolean'
+    type: 'boolean',
   },
   'cache?.maxSize': {
     required: true,
@@ -160,22 +168,22 @@ const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
             message: '缓存大小较小，可能影响性能',
             value,
             suggestedValue: 1000,
-            reason: '推荐至少100个缓存条目以获得更好的性能'
+            reason: '推荐至少100个缓存条目以获得更好的性能',
           };
         }
         return null;
-      }
-    ]
+      },
+    ],
   },
   'cache?.defaultTtl': {
     required: true,
     type: 'number',
     min: 1000,
-    max: 3600000
+    max: 3600000,
   },
   'retry?.enabled': {
     required: true,
-    type: 'boolean'
+    type: 'boolean',
   },
   'retry?.maxAttempts': {
     required: true,
@@ -191,19 +199,19 @@ const API_CONFIG_SCHEMA: Record<string, FieldValidator> = {
             message: '重试次数过多可能导致性能问题',
             value,
             suggestedValue: 3,
-            reason: '推荐最多3次重试以平衡可靠性和性能'
+            reason: '推荐最多3次重试以平衡可靠性和性能',
           };
         }
         return null;
-      }
-    ]
+      },
+    ],
   },
   'retry?.baseDelay': {
     required: true,
     type: 'number',
     min: 100,
-    max: 10000
-  }
+    max: 10000,
+  },
 };
 
 /**
@@ -237,8 +245,8 @@ export function validateApiConfig(config: Partial<ApiConfig>): ValidationResult 
       validFields,
       errorFields,
       warningFields,
-      validationTime
-    }
+      validationTime,
+    },
   };
 }
 
@@ -258,7 +266,7 @@ function validateApiConfigLogic(
         message: '高重试次数配合短缓存时间可能导致频繁的重复请求',
         value: config.cache.defaultTtl,
         suggestedValue: 300000,
-        reason: '建议增加缓存时间或减少重试次数'
+        reason: '建议增加缓存时间或减少重试次数',
       });
     }
   }
@@ -271,7 +279,7 @@ function validateApiConfigLogic(
         message: '生产环境不建议启用调试日志',
         value: true,
         suggestedValue: false,
-        reason: '调试日志可能泄露敏感信息并影响性能'
+        reason: '调试日志可能泄露敏感信息并影响性能',
       });
     }
 
@@ -281,7 +289,7 @@ function validateApiConfigLogic(
         message: '生产环境建议启用请求签名',
         value: false,
         suggestedValue: true,
-        reason: '请求签名可以提高API安全性'
+        reason: '请求签名可以提高API安全性',
       });
     }
   }
@@ -290,11 +298,11 @@ function validateApiConfigLogic(
 // ==================== Auth配置验证 ====================
 
 const AUTH_CONFIG_SCHEMA: Record<string, FieldValidator> = {
-  'apiBaseUrl': {
+  apiBaseUrl: {
     required: true,
     type: 'string',
     min: 1,
-    pattern: /^https?:\/\/.+/
+    pattern: /^https?:\/\/.+/,
   },
   'tokens?.jwt.accessTokenExpiry': {
     required: true,
@@ -310,18 +318,18 @@ const AUTH_CONFIG_SCHEMA: Record<string, FieldValidator> = {
             message: '访问token过期时间过长，存在安全风险',
             value,
             suggestedValue: 900,
-            reason: '推荐15分钟访问token过期时间以平衡安全性和用户体验'
+            reason: '推荐15分钟访问token过期时间以平衡安全性和用户体验',
           };
         }
         return null;
-      }
-    ]
+      },
+    ],
   },
   'tokens?.jwt.refreshTokenExpiry': {
     required: true,
     type: 'number',
     min: 3600,
-    max: 2592000
+    max: 2592000,
   },
   'security?.sessionManagement.maxConcurrentSessions': {
     required: true,
@@ -337,13 +345,13 @@ const AUTH_CONFIG_SCHEMA: Record<string, FieldValidator> = {
             message: '过多的并发会话可能存在安全风险',
             value,
             suggestedValue: 5,
-            reason: '建议限制并发会话数量以提高安全性'
+            reason: '建议限制并发会话数量以提高安全性',
           };
         }
         return null;
-      }
-    ]
-  }
+      },
+    ],
+  },
 };
 
 /**
@@ -377,8 +385,8 @@ export function validateAuthConfig(config: Partial<AuthConfig>): ValidationResul
       validFields,
       errorFields,
       warningFields,
-      validationTime
-    }
+      validationTime,
+    },
   };
 }
 
@@ -393,7 +401,7 @@ function validateAuthConfigLogic(
   // JWT配置逻辑验证
   if (config.tokens?.jwt) {
     const { accessTokenExpiry, refreshTokenExpiry, autoRefreshThreshold } = config.tokens.jwt;
-    
+
     if (accessTokenExpiry && autoRefreshThreshold && accessTokenExpiry <= autoRefreshThreshold) {
       errors.push({
         path: 'tokens?.jwt.autoRefreshThreshold',
@@ -401,7 +409,7 @@ function validateAuthConfigLogic(
         value: autoRefreshThreshold,
         type: 'dependency',
         severity: 'high',
-        suggestion: `设置为小于 ${accessTokenExpiry} 的值`
+        suggestion: `设置为小于 ${accessTokenExpiry} 的值`,
       });
     }
 
@@ -412,7 +420,7 @@ function validateAuthConfigLogic(
         value: refreshTokenExpiry,
         type: 'dependency',
         severity: 'high',
-        suggestion: `设置为大于 ${accessTokenExpiry} 的值`
+        suggestion: `设置为大于 ${accessTokenExpiry} 的值`,
       });
     }
   }
@@ -425,7 +433,7 @@ function validateAuthConfigLogic(
         message: '生产环境建议启用多因素认证',
         value: false,
         suggestedValue: true,
-        reason: 'MFA可以显著提高账户安全性'
+        reason: 'MFA可以显著提高账户安全性',
       });
     }
 
@@ -435,7 +443,7 @@ function validateAuthConfigLogic(
         message: '生产环境建议加密存储token',
         value: false,
         suggestedValue: true,
-        reason: 'Token加密可以防止本地存储泄露'
+        reason: 'Token加密可以防止本地存储泄露',
       });
     }
   }
@@ -454,7 +462,7 @@ function validateFields(
 ): void {
   for (const [path, validator] of Object.entries(schema)) {
     const value = getNestedValue(config, path);
-    
+
     // 必填验证
     if (validator.required && (value === undefined || value === null)) {
       errors.push({
@@ -462,7 +470,7 @@ function validateFields(
         message: `字段 ${path} 是必需的`,
         value,
         type: 'required',
-        severity: 'high'
+        severity: 'high',
       });
       continue;
     }
@@ -475,34 +483,44 @@ function validateFields(
           message: `字段 ${path} 类型错误，期望 ${validator.type}，实际 ${typeof value}`,
           value,
           type: 'type',
-          severity: 'high'
+          severity: 'high',
         });
         continue;
       }
 
       // 范围验证
       if (validator.min !== undefined) {
-        const actualLength = typeof value === 'string' || Array.isArray(value) ? value.length : (typeof value === 'number' ? value : 0);
+        const actualLength =
+          typeof value === 'string' || Array.isArray(value)
+            ? value.length
+            : typeof value === 'number'
+              ? value
+              : 0;
         if (typeof actualLength === 'number' && actualLength < validator.min) {
           errors.push({
             path,
             message: `字段 ${path} 值过小，最小值为 ${validator.min}`,
             value,
             type: 'range',
-            severity: 'medium'
+            severity: 'medium',
           });
         }
       }
 
       if (validator.max !== undefined) {
-        const actualLength = typeof value === 'string' || Array.isArray(value) ? value.length : (typeof value === 'number' ? value : 0);
+        const actualLength =
+          typeof value === 'string' || Array.isArray(value)
+            ? value.length
+            : typeof value === 'number'
+              ? value
+              : 0;
         if (typeof actualLength === 'number' && actualLength > validator.max) {
           errors.push({
             path,
             message: `字段 ${path} 值过大，最大值为 ${validator.max}`,
             value,
             type: 'range',
-            severity: 'medium'
+            severity: 'medium',
           });
         }
       }
@@ -514,7 +532,7 @@ function validateFields(
           message: `字段 ${path} 格式不正确`,
           value,
           type: 'format',
-          severity: 'medium'
+          severity: 'medium',
         });
       }
 
@@ -525,7 +543,7 @@ function validateFields(
           message: `字段 ${path} 值无效，允许的值为: ${validator.enum.join(', ')}`,
           value,
           type: 'format',
-          severity: 'medium'
+          severity: 'medium',
         });
       }
 
@@ -556,7 +574,7 @@ function validateFields(
  * 获取嵌套值
  */
 function getNestedValue(obj: unknown, path: string): unknown {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+  return path.split('.').reduce((current: any, key: string) => current?.[key], obj);
 }
 
 // ==================== 导出验证工具 ====================
@@ -587,8 +605,8 @@ export function validateAllConfigs(
       valid: apiResult.valid && authResult.valid,
       totalErrors: apiResult.errors.length + authResult.errors.length,
       totalWarnings: apiResult.warnings.length + authResult.warnings.length,
-      validationTime: apiResult.summary.validationTime + authResult.summary.validationTime
-    }
+      validationTime: apiResult.summary.validationTime + authResult.summary.validationTime,
+    },
   };
 }
 
@@ -597,11 +615,11 @@ export function validateAllConfigs(
  */
 export function createValidationReport(result: ValidationResult): string {
   const lines: string[] = [];
-  
+
   lines.push('='.repeat(50));
   lines.push('配置验证报告');
   lines.push('='.repeat(50));
-  
+
   // 摘要
   lines.push(`\n摘要:`);
   lines.push(`  总字段数: ${result.summary.totalFields}`);
@@ -610,7 +628,7 @@ export function createValidationReport(result: ValidationResult): string {
   lines.push(`  警告字段: ${result.summary.warningFields}`);
   lines.push(`  验证时间: ${result.summary.validationTime}ms`);
   lines.push(`  整体状态: ${result.valid ? '✅ 通过' : '❌ 失败'}`);
-  
+
   // 错误详情
   if (result.errors.length > 0) {
     lines.push(`\n错误详情:`);
@@ -624,7 +642,7 @@ export function createValidationReport(result: ValidationResult): string {
       lines.push('');
     });
   }
-  
+
   // 警告详情
   if (result.warnings.length > 0) {
     lines.push(`\n警告详情:`);
@@ -641,6 +659,6 @@ export function createValidationReport(result: ValidationResult): string {
       lines.push('');
     });
   }
-  
+
   return lines.join('\n');
 }

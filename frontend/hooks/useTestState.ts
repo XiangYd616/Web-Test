@@ -97,14 +97,8 @@ export interface UseTestStateReturn extends TestState, TestActions {
  * 提供所有测试页面共同需要的状态管理逻辑
  */
 export const useTestState = (options: UseTestStateOptions): UseTestStateReturn => {
-  const {
-    testType,
-    defaultConfig,
-    onTestComplete,
-    onTestError,
-    onConfigChange,
-    validateConfig
-  } = options;
+  const { testType, defaultConfig, onTestComplete, onTestError, onConfigChange, validateConfig } =
+    options;
 
   const { recordTestCompletion } = useUserStats();
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -119,7 +113,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
     error: null,
     testId: null,
     startTime: null,
-    endTime: null
+    endTime: null,
   });
 
   // 配置验证状态
@@ -137,10 +131,10 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
       totalRunning: 0,
       totalQueued: 0,
       maxConcurrent: options.maxConcurrentTests || 3,
-      estimatedWaitTime: 0
+      estimatedWaitTime: 0,
     },
     isQueued: false,
-    canStartTest: true
+    canStartTest: true,
   });
 
   // 清理定时器
@@ -161,115 +155,123 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
   }, [state.config, validateConfig]);
 
   // 设置配置
-  const setConfig = useCallback((config: TestConfig) => {
-    setState(prev => ({
-      ...prev,
-      config: { ...config },
-      error: null
-    }));
-    onConfigChange?.(config);
-  }, [onConfigChange]);
+  const setConfig = useCallback(
+    (config: TestConfig) => {
+      setState(prev => ({
+        ...prev,
+        config: { ...config },
+        error: null,
+      }));
+      onConfigChange?.(config);
+    },
+    [onConfigChange]
+  );
 
   // 更新单个配置项
-  const updateConfig = useCallback((key: string, value: any) => {
-    setState(prev => {
-      const newConfig = {
-        ...prev.config,
-        [key]: value
-      };
-      onConfigChange?.(newConfig);
-      return {
-        ...prev,
-        config: newConfig,
-        error: null
-      };
-    });
-  }, [onConfigChange]);
+  const updateConfig = useCallback(
+    (key: string, value: any) => {
+      setState(prev => {
+        const newConfig = {
+          ...prev.config,
+          [key]: value,
+        };
+        onConfigChange?.(newConfig);
+        return {
+          ...prev,
+          config: newConfig,
+          error: null,
+        };
+      });
+    },
+    [onConfigChange]
+  );
 
   // 开始测试
-  const startTest = useCallback(async (customConfig?: TestConfig) => {
-    const testConfig = customConfig || state.config;
+  const startTest = useCallback(
+    async (customConfig?: TestConfig) => {
+      const testConfig = customConfig || state.config;
 
-    // 验证配置
-    if (validateConfig) {
-      const validation = validateConfig(testConfig);
-      if (!validation.isValid) {
-        const errorMessage = `配置验证失败: ${validation.errors.join(', ')}`;
-        setState(prev => ({ ...prev, error: errorMessage }));
-        onTestError?.(errorMessage);
-        return;
-      }
-    }
-
-    try {
-      setState(prev => ({
-        ...prev,
-        isRunning: true,
-        progress: 0,
-        currentStep: '准备测试...',
-        result: null,
-        error: null,
-        startTime: Date.now(),
-        endTime: null
-      }));
-
-      // 启动测试
-      const testId = backgroundTestManager.startTest(
-        testType,
-        testConfig,
-        // 进度回调
-        (progress: number, step: string) => {
-          setState(prev => ({
-            ...prev,
-            progress,
-            currentStep: step
-          }));
-        },
-        // 完成回调
-        (result: any) => {
-          setState(prev => ({
-            ...prev,
-            isRunning: false,
-            progress: 100,
-            currentStep: '测试完成',
-            result,
-            endTime: Date.now(),
-            testId
-          }));
-
-          // 记录测试完成
-          recordTestCompletion(testType, true);
-          onTestComplete?.(result);
-        },
-        // 错误回调
-        (error: string | Error) => {
-          const errorMessage = typeof error === 'string' ? error : error.message;
-          setState(prev => ({
-            ...prev,
-            isRunning: false,
-            error: errorMessage,
-            endTime: Date.now()
-          }));
+      // 验证配置
+      if (validateConfig) {
+        const validation = validateConfig(testConfig);
+        if (!validation.isValid) {
+          const errorMessage = `配置验证失败: ${validation.errors.join(', ')}`;
+          setState(prev => ({ ...prev, error: errorMessage }));
           onTestError?.(errorMessage);
+          return;
         }
-      );
+      }
 
-      setState(prev => ({
-        ...prev,
-        testId
-      }));
+      try {
+        setState(prev => ({
+          ...prev,
+          isRunning: true,
+          progress: 0,
+          currentStep: '准备测试...',
+          result: null,
+          error: null,
+          startTime: Date.now(),
+          endTime: null,
+        }));
 
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '测试启动失败';
-      setState(prev => ({
-        ...prev,
-        isRunning: false,
-        error: errorMessage,
-        endTime: Date.now()
-      }));
-      onTestError?.(errorMessage);
-    }
-  }, [state.config, testType, validateConfig, recordTestCompletion, onTestComplete, onTestError]);
+        // 启动测试
+        const testId = backgroundTestManager.startTest(
+          testType,
+          testConfig,
+          // 进度回调
+          (progress: number, step?: string) => {
+            setState(prev => ({
+              ...prev,
+              progress,
+              currentStep: step || prev.currentStep,
+            }));
+          },
+          // 完成回调
+          (result: any) => {
+            setState(prev => ({
+              ...prev,
+              isRunning: false,
+              progress: 100,
+              currentStep: '测试完成',
+              result,
+              endTime: Date.now(),
+              testId,
+            }));
+
+            // 记录测试完成
+            recordTestCompletion(testType, true);
+            onTestComplete?.(result);
+          },
+          // 错误回调
+          (error: string | Error) => {
+            const errorMessage = typeof error === 'string' ? error : error.message;
+            setState(prev => ({
+              ...prev,
+              isRunning: false,
+              error: errorMessage,
+              endTime: Date.now(),
+            }));
+            onTestError?.(errorMessage);
+          }
+        );
+
+        setState(prev => ({
+          ...prev,
+          testId,
+        }));
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : '测试启动失败';
+        setState(prev => ({
+          ...prev,
+          isRunning: false,
+          error: errorMessage,
+          endTime: Date.now(),
+        }));
+        onTestError?.(errorMessage);
+      }
+    },
+    [state.config, testType, validateConfig, recordTestCompletion, onTestComplete, onTestError]
+  );
 
   // 停止测试
   const stopTest = useCallback(() => {
@@ -281,7 +283,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
       ...prev,
       isRunning: false,
       currentStep: '测试已停止',
-      endTime: Date.now()
+      endTime: Date.now(),
     }));
   }, [state.testId]);
 
@@ -295,7 +297,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
       error: null,
       testId: null,
       startTime: null,
-      endTime: null
+      endTime: null,
     }));
 
     // 重置队列状态
@@ -305,7 +307,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
       phase: 'IDLE',
       message: '',
       isQueued: false,
-      canStartTest: true
+      canStartTest: true,
     }));
   }, []);
 
@@ -313,14 +315,12 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
   const clearError = useCallback(() => {
     setState(prev => ({
       ...prev,
-      error: null
+      error: null,
     }));
   }, []);
 
   // 计算测试持续时间
-  const testDuration = state.startTime && state.endTime
-    ? state.endTime - state.startTime
-    : null;
+  const testDuration = state.startTime && state.endTime ? state.endTime - state.startTime : null;
 
   // 获取状态快照
   const getState = useCallback(() => state, [state]);
@@ -349,7 +349,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
     clearError,
 
     // 扩展操作
-    getState
+    getState,
   };
 };
 

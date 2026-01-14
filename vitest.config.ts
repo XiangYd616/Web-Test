@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()],
@@ -29,14 +29,14 @@ export default defineConfig({
     setupFiles: ['./frontend/tests/setup.ts'],
     include: [
       'frontend/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-      'shared/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'
+      'shared/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
     ],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
-      '**/e2e/**'
+      '**/tools/e2e/**',
     ],
     coverage: {
       provider: 'v8',
@@ -45,27 +45,22 @@ export default defineConfig({
         'frontend/services/**',
         'frontend/hooks/**',
         'frontend/utils/**',
-        'shared/types/**'
+        'shared/types/**',
       ],
-      exclude: [
-        '**/*.test.{ts,tsx}',
-        '**/*.spec.{ts,tsx}',
-        '**/node_modules/**',
-        '**/dist/**'
-      ],
+      exclude: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/node_modules/**', '**/dist/**'],
       thresholds: {
         global: {
           branches: 70,
           functions: 70,
           lines: 70,
-          statements: 70
-        }
-      }
+          statements: 70,
+        },
+      },
     },
     testTimeout: 10000,
     hookTimeout: 10000,
     maxConcurrency: 4,
     pool: 'threads',
-    reporters: ['verbose']
-  }
-})
+    reporters: ['verbose'],
+  },
+});

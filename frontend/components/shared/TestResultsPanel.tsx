@@ -3,19 +3,19 @@
  * 为各个独立测试页面提供统一的结果展示基础设施
  */
 
-import React, { ReactNode, useState } from 'react';
-import { 
-  BarChart3, 
-  Download, 
-  RefreshCw, 
-  Share2, 
-  Eye, 
-  EyeOff,
-  CheckCircle,
+import {
   AlertTriangle,
+  BarChart3,
+  CheckCircle,
+  Download,
+  Eye,
+  EyeOff,
+  Info,
+  RefreshCw,
+  Share2,
   XCircle,
-  Info
 } from 'lucide-react';
+import React, { ReactNode, useState } from 'react';
 
 export interface TestMetric {
   key: string;
@@ -62,7 +62,7 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
   onShare,
   showRawData = false,
   children,
-  className = ''
+  className = '',
 }) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(sections?.filter(s => s?.defaultExpanded !== false).map(s => s?.title))
@@ -118,8 +118,11 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {metrics?.map((metric) => (
-          <div key={metric.key} className="themed-bg-secondary rounded-lg p-4 border themed-border-secondary">
+        {metrics?.map(metric => (
+          <div
+            key={metric.key}
+            className="themed-bg-secondary rounded-lg p-4 border themed-border-secondary"
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-400">{metric.label}</span>
               {metric.status && getStatusIcon(metric.status)}
@@ -128,9 +131,7 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
               <span className={`text-2xl font-bold ${getStatusColor(metric.status)}`}>
                 {metric.value}
               </span>
-              {metric.unit && (
-                <span className="text-sm text-gray-400">{metric.unit}</span>
-              )}
+              {metric.unit && <span className="text-sm text-gray-400">{metric.unit}</span>}
             </div>
             {metric.description && (
               <p className="text-xs text-gray-500 mt-1">{metric.description}</p>
@@ -146,7 +147,10 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
     const isExpanded = expandedSections.has(section.title);
 
     return (
-      <div key={section.title} className="themed-bg-secondary rounded-lg border themed-border-secondary">
+      <div
+        key={section.title}
+        className="themed-bg-secondary rounded-lg border themed-border-secondary"
+      >
         <button
           type="button"
           onClick={() => section.collapsible && toggleSection(section.title)}
@@ -157,13 +161,23 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
           <h4 className="font-medium themed-text-primary">{section.title}</h4>
           {section.collapsible && (
             <div className={`transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg
+                className="w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </div>
           )}
         </button>
-        
+
         {(!section.collapsible || isExpanded) && (
           <div className="px-4 pb-4 border-t themed-border-secondary">
             {section.renderer ? (
@@ -185,7 +199,7 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
                       <tbody>
                         {section.data.map((row: unknown, index: number) => (
                           <tr key={index} className="border-b themed-border-secondary">
-                            {Object.values(row).map((value: unknown, cellIndex) => (
+                            {Object.values(row as any).map((value: unknown, cellIndex) => (
                               <td key={cellIndex} className="py-2 px-3 text-gray-300">
                                 {String(value)}
                               </td>
@@ -196,13 +210,11 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
                     </table>
                   </div>
                 )}
-                
+
                 {section.type === 'text' && (
-                  <div className="mt-3 text-gray-300 whitespace-pre-wrap">
-                    {section.data}
-                  </div>
+                  <div className="mt-3 text-gray-300 whitespace-pre-wrap">{section.data}</div>
                 )}
-                
+
                 {section.type === 'metrics' && (
                   <div className="mt-3 space-y-2">
                     {Object.entries(section.data).map(([key, value]) => (
@@ -222,14 +234,16 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
   };
 
   return (
-    <div className={`themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6 ${className}`}>
+    <div
+      className={`themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6 ${className}`}
+    >
       {/* 结果头部 */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold themed-text-primary flex items-center">
           <BarChart3 className="w-5 h-5 mr-2 text-green-400" />
           {title}
         </h3>
-        
+
         {/* 操作按钮 */}
         <div className="flex items-center space-x-2">
           {showRawData && (
@@ -242,7 +256,7 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
               {showRaw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           )}
-          
+
           {onShare && (
             <button
               type="button"
@@ -253,7 +267,7 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
               <Share2 className="w-4 h-4" />
             </button>
           )}
-          
+
           {onDownload && (
             <button
               type="button"
@@ -264,7 +278,7 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
               <Download className="w-4 h-4" />
             </button>
           )}
-          
+
           {onRetest && (
             <button
               type="button"
@@ -282,16 +296,10 @@ export const TestResultsPanel: React.FC<TestResultsPanelProps> = ({
       {renderMetrics()}
 
       {/* 结果章节 */}
-      <div className="space-y-4">
-        {sections?.map(renderSection)}
-      </div>
+      <div className="space-y-4">{sections?.map(renderSection)}</div>
 
       {/* 自定义内容 */}
-      {children && (
-        <div className="mt-6 pt-6 border-t themed-border-secondary">
-          {children}
-        </div>
-      )}
+      {children && <div className="mt-6 pt-6 border-t themed-border-secondary">{children}</div>}
 
       {/* 原始数据展示 */}
       {showRawData && showRaw && (

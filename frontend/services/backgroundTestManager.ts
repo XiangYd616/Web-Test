@@ -101,7 +101,7 @@ class BackgroundTestManager {
         });
       }
     } catch (error) {
-      Logger.warn('Failed to setup unified service listeners:', error);
+      Logger.warn('Failed to setup unified service listeners:', { error: String(error) });
     }
   }
 
@@ -178,7 +178,7 @@ class BackgroundTestManager {
         this.runningTests.set(actualTestId, testInfo);
         this.notifyListeners('testStarted', testInfo);
       }).catch((error: Error) => {
-        Logger.error('Unified test service failed:', error);
+        Logger.error('Unified test service failed:', { error: String(error) });
         if (onError) onError(error);
       });
     } else {

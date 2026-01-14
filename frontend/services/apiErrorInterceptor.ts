@@ -33,7 +33,7 @@ class ApiErrorInterceptor {
       retryCondition: (error: AxiosError) => {
         // 只对网络错误和5xx错误重试
         return !error.response || (error.response.status >= 500 && error.response.status < 600);
-      }
+      },
     };
 
     this.setupInterceptors();
@@ -45,31 +45,31 @@ class ApiErrorInterceptor {
   private setupInterceptors(): void {
     // 请求拦截器
     axios.interceptors.request.use(
-      (config) => {
+      config => {
         // 添加请求ID用于重试跟踪
         if (config) {
           config.metadata = {
             requestId: this.generateRequestId(),
-            startTime: Date.now()
+            startTime: Date.now(),
           };
         }
         return config;
       },
-      (error) => {
+      error => {
         return Promise.reject(this.handleRequestError(error));
       }
     );
 
     // 响应拦截器
     axios.interceptors.response?.use(
-      (response) => {
+      response => {
         // 成功响应，清除重试计数
         if (response?.config.metadata?.requestId) {
           this.retryCount.delete(response?.config.metadata?.requestId);
         }
         return response;
       },
-      async (error) => {
+      async error => {
         return Promise.reject(await this.handleResponseError(error));
       }
     );
@@ -85,13 +85,13 @@ class ApiErrorInterceptor {
     const errorHandler = useErrorHandler();
     const standardError = errorHandler.handleError(error, {
       url: error.config?.url,
-      method: error.config?.method
+      method: error.config?.method,
     });
 
     return {
       ...error,
       standardError,
-      isHandled: true
+      isHandled: true,
     };
   }
 
@@ -116,24 +116,25 @@ class ApiErrorInterceptor {
     const { useErrorHandler } = await import('./api/errorHandler');
     const errorHandler = useErrorHandler();
     const standardError = errorHandler.handleError(error, {
-      phase: 'response',
       url,
       method,
       status: error.response?.status,
       statusText: error.response?.statusText,
       responseData: errorData,
-      duration: error.config?.metadata?.startTime ?
-        Date.now() - error.config.metadata?.startTime : undefined
+      duration: error.config?.metadata?.startTime
+        ? Date.now() - error.config.metadata?.startTime
+        : undefined,
     });
 
     // 特殊处理某些错误类型
     await this.handleSpecialErrors(error, standardError);
 
+    const result = await standardError;
     return {
       ...error,
-      standardError,
+      standardError: result,
       isHandled: true,
-      userMessage: standardError.userFriendlyMessage
+      userMessage: result.userMessage,
     };
   }
 
@@ -156,7 +157,7 @@ class ApiErrorInterceptor {
     if (typeof data === 'string') {
       return {
         success: false,
-        message: data
+        message: data,
       };
     }
 
@@ -164,14 +165,14 @@ class ApiErrorInterceptor {
     if (typeof data === 'string' && data?.includes('<html>')) {
       return {
         success: false,
-        message: `服务器返回了HTML页面 (${error.response.status})`
+        message: `服务器返回了HTML页面 (${error.response.status})`,
       };
     }
 
     // 其他格式
     return {
       success: false,
-      message: error.message || '未知错误'
+      message: error.message || '未知错误',
     };
   }
 
@@ -181,10 +182,7 @@ class ApiErrorInterceptor {
   private shouldRetry(error: AxiosError, requestId: string): boolean {
     const currentRetries = this.retryCount.get(requestId) || 0;
 
-    return (
-      currentRetries < this.retryConfig.maxRetries &&
-      this.retryConfig.retryCondition(error)
-    );
+    return currentRetries < this.retryConfig.maxRetries && this.retryConfig.retryCondition(error);
   }
 
   /**
@@ -271,7 +269,7 @@ class ApiErrorInterceptor {
     Logger.warn('Access forbidden:', {
       url: error.config?.url,
       user: this.getCurrentUser(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -295,7 +293,7 @@ class ApiErrorInterceptor {
     Logger.error('Server error:', {
       status: error.response?.status,
       url: error.config?.url,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // 可以在这里实施降级策略
@@ -348,7 +346,7 @@ class ApiErrorInterceptor {
   getRetryStats(): { requestId: string; retries: number }[] {
     return Array.from(this.retryCount.entries()).map(([requestId, retries]) => ({
       requestId,
-      retries
+      retries,
     }));
   }
 }
@@ -363,10 +361,9 @@ export const _handleApiError = async (error: AxiosError, context?: Record<string
   const errorHandler = useErrorHandler();
   return errorHandler.handleError(error, {
     ...context,
-    phase: 'processing',
     url: error.config?.url,
     method: error.config?.method,
-    status: error.response?.status
+    status: error.response?.status,
   });
 };
 

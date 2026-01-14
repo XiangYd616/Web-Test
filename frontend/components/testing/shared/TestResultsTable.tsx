@@ -128,7 +128,7 @@ export const TestResultsTable: React.FC<TestResultsTableProps> = ({
       title: '时长',
       dataIndex: '1',
       key: 'duration',
-      render: (result: TestResult) => `${(result.duration / 1000).toFixed(1)}s`
+      render: (result: TestResult) => `${((result.duration ?? 0) / 1000).toFixed(1)}s`
     },
     {
       title: '完成时间',

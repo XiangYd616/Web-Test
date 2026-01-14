@@ -23,6 +23,9 @@ const testsRoutes = require('./routes/tests');
 const seoRoutes = require('./routes/seo');
 const securityRoutes = require('./routes/security');
 const performanceRoutes = require('./routes/performance');
+const enginesRoutes = require('./routes/engines');
+const scheduledTasksRoutes = require('./routes/scheduledTasks');
+const comparisonRoutes = require('./routes/comparison');
 
 // 导入中间件
 const authMiddleware = require('./middleware/auth');
@@ -122,7 +125,10 @@ app.get('/api/info', (req, res) => {
       tests: '/api/tests',
       seo: '/api/seo',
       security: '/api/security',
-      performance: '/api/performance'
+      performance: '/api/performance',
+      engines: '/api/engines',
+      scheduledTasks: '/api/scheduled-tasks',
+      comparison: '/api/comparison'
     },
     environment: NODE_ENV,
     timestamp: new Date().toISOString()
@@ -137,6 +143,9 @@ app.use('/api/tests', testsRoutes);
 app.use('/api/seo', seoRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/performance', performanceRoutes);
+app.use('/api/engines', enginesRoutes);
+app.use('/api/scheduled-tasks', scheduledTasksRoutes);
+app.use('/api/comparison', comparisonRoutes);
 
 // 静态文件服务（如果需要）
 if (NODE_ENV === 'production') {

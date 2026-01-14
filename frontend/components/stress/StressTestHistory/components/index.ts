@@ -5,7 +5,8 @@
  * 创建时间: 2025-10-05
  */
 
-export { LoadingState } from './LoadingState';
+// 使用共享的LoadingState组件
+export { LoadingState } from '../../../common/TestHistory/components/LoadingState';
 export { EmptyState } from './EmptyState';
 export { UnauthorizedState } from './UnauthorizedState';
 export { HistoryHeader } from './HistoryHeader';

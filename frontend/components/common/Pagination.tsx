@@ -157,7 +157,7 @@ export function usePagination(options: UsePaginationOptions = {}) {
             preloadedPages: new Set([...prev.preloadedPages, page])
           }));
         } catch (error) {
-          Logger.warn(`预加载页面 ${page} 失败:`, error);
+          Logger.warn(`预加载页面 ${page} 失败:`, { error: String(error) });
         }
       }
 

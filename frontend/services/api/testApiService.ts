@@ -10,11 +10,15 @@
 import Logger from '@/utils/logger';
 import type { ApiResponse, TestCallbacks } from '../../types/api/index';
 import type { UnifiedTestConfig } from '../../types/base.types';
-import type { TestExecution, TestHistory } from '../../types/unified/testTypes';
-import type { TestType, TestStatus } from '../../types/unified/testTypes';
 import { TestStatus as TestStatusEnum } from '../../types/enums';
-import { apiService } from './apiService';
+import type {
+  TestExecution,
+  TestHistory,
+  TestStatus,
+  TestType,
+} from '../../types/unified/testTypes';
 import { PermissionChecker, _TestPermissions as TestPermissions } from '../auth/authDecorator';
+import { apiService } from './apiService';
 
 // 定义本地类型
 interface TestApiClient {
@@ -151,16 +155,16 @@ class TestApiService implements TestApiClient {
    */
   private getTestTypePermission(testType: string): string | null {
     const permissionMap: Record<string, string> = {
-      'performance': TestPermissions.RUN_PERFORMANCE_TEST,
-      'security': TestPermissions.RUN_SECURITY_TEST,
-      'api': TestPermissions.RUN_API_TEST,
-      'stress': TestPermissions.RUN_STRESS_TEST,
-      'compatibility': TestPermissions.RUN_COMPATIBILITY_TEST,
-      'seo': TestPermissions.RUN_SEO_TEST,
-      'website': TestPermissions.RUN_PERFORMANCE_TEST, // 网站测试使用性能测试权限
-      'infrastructure': TestPermissions.ADMIN_ALL_TESTS // 基础设施测试需要管理员权限
+      performance: TestPermissions.RUN_PERFORMANCE_TEST,
+      security: TestPermissions.RUN_SECURITY_TEST,
+      api: TestPermissions.RUN_API_TEST,
+      stress: TestPermissions.RUN_STRESS_TEST,
+      compatibility: TestPermissions.RUN_COMPATIBILITY_TEST,
+      seo: TestPermissions.RUN_SEO_TEST,
+      website: TestPermissions.RUN_PERFORMANCE_TEST, // 网站测试使用性能测试权限
+      infrastructure: TestPermissions.ADMIN_ALL_TESTS, // 基础设施测试需要管理员权限
     };
-    
+
     return permissionMap[testType?.toLowerCase()] || null;
   }
 
@@ -176,14 +180,22 @@ class TestApiService implements TestApiClient {
   /**
    * 执行POST请求
    */
-  async post<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  async post<T = any>(
+    url: string,
+    data?: unknown,
+    config?: ApiRequestConfig
+  ): Promise<ApiResponse<T>> {
     return apiService.post(url, data, config as any);
   }
 
   /**
    * 执行PUT请求
    */
-  async put<T = any>(url: string, data?: unknown, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  async put<T = any>(
+    url: string,
+    data?: unknown,
+    config?: ApiRequestConfig
+  ): Promise<ApiResponse<T>> {
     return apiService.put(url, data, config as any);
   }
 
@@ -207,7 +219,8 @@ class TestApiService implements TestApiClient {
     const queryParams = new URLSearchParams();
     if (params?.test_type) queryParams.append('test_type', params?.test_type);
     if (params?.project_id) queryParams.append('project_id', params?.project_id.toString());
-    if (params?.is_template !== undefined) queryParams.append('is_template', params?.is_template.toString());
+    if (params?.is_template !== undefined)
+      queryParams.append('is_template', params?.is_template.toString());
 
     const url = `${this.baseUrl}/configurations${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return apiService.get(url);
@@ -233,7 +246,7 @@ class TestApiService implements TestApiClient {
       if (!user) {
         return {
           success: false,
-          error: '请先登录后再执行测试'
+          error: '请先登录后再执行测试',
         };
       }
 
@@ -244,7 +257,7 @@ class TestApiService implements TestApiClient {
         if (!hasPermission) {
           return {
             success: false,
-            error: `权限不足,无法执行${config?.testType}测试`
+            error: `权限不足,无法执行${config?.testType}测试`,
           };
         }
       }
@@ -254,7 +267,7 @@ class TestApiService implements TestApiClient {
         testType: config?.testType,
         target: config?.target,
         userId: user.id,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       // 适配后端API格式
@@ -264,7 +277,7 @@ class TestApiService implements TestApiClient {
         config,
         testName: `${config?.testType}_test_${Date.now()}`,
         userId: user.id,
-        userEmail: user.email
+        userEmail: user.email,
       };
 
       const response = await apiService.post(`${this.baseUrl}/run`, backendRequest);
@@ -281,30 +294,29 @@ class TestApiService implements TestApiClient {
           endTime: response.data.completed_at,
           results: response.data.result,
           error: response.data.error,
-          config
+          config,
         };
 
         // 记录成功日志
         Logger.debug(`✅ 测试启动成功`, {
           testId: testExecution.id,
           testType: config?.testType,
-          userId: user.id
+          userId: user.id,
         });
 
         return {
           success: true,
           data: testExecution,
-          message: response.message
+          message: response.message,
         };
       }
 
       return response as ApiResponse<TestExecution>;
-
     } catch (error) {
       Logger.error('❌ 测试执行失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '测试执行失败'
+        error: error instanceof Error ? error.message : '测试执行失败',
       };
     }
   }
@@ -312,13 +324,15 @@ class TestApiService implements TestApiClient {
   /**
    * 执行测试 - 保持向后兼容的方法
    */
-  async executeTestLegacy(request: TestExecutionRequest): Promise<ApiResponse<TestExecutionResponse>> {
+  async executeTestLegacy(
+    request: TestExecutionRequest
+  ): Promise<ApiResponse<TestExecutionResponse>> {
     // 适配后端API格式
     const backendRequest = {
       testType: request.test_type,
       url: request.target_url,
       config: request.configuration,
-      testName: `${request.test_type}_test_${Date.now()}`
+      testName: `${request.test_type}_test_${Date.now()}`,
     };
 
     return apiService.post(`${this.baseUrl}/run`, backendRequest);
@@ -338,7 +352,11 @@ class TestApiService implements TestApiClient {
     if (params?.test_type) queryParams.append('testType', params?.test_type);
     if (params?.status) queryParams.append('status', params?.status);
     if (params?.limit) queryParams.append('limit', params?.limit.toString());
-    if (params?.offset) queryParams.append('page', Math.floor((params?.offset || 0) / (params?.limit || 20) + 1).toString());
+    if (params?.offset)
+      queryParams.append(
+        'page',
+        Math.floor((params?.offset || 0) / (params?.limit || 20) + 1).toString()
+      );
 
     const url = `${this.baseUrl}/history${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     return apiService.get(url);
@@ -378,9 +396,8 @@ class TestApiService implements TestApiClient {
   ): Promise<ApiResponse<TestExecutionResponse>> {
     return apiService.post(`${this.baseUrl}/performance`, {
       url: target_url,
-      device: configuration.device,
       throttling: configuration.network_condition,
-      ...configuration
+      ...configuration,
     });
   }
 
@@ -416,7 +433,7 @@ class TestApiService implements TestApiClient {
       scanDepth: configuration.scan_depth,
       includeSsl: configuration.include_ssl,
       includeHeaders: configuration.include_headers,
-      customChecks: configuration.custom_checks
+      customChecks: configuration.custom_checks,
     });
   }
 
@@ -454,7 +471,7 @@ class TestApiService implements TestApiClient {
       globalHeaders: [],
       timeout: config?.configuration.timeout,
       retryCount: config?.configuration.retry_count,
-      parallelRequests: config?.configuration.parallel_requests
+      parallelRequests: config?.configuration.parallel_requests,
     });
   }
 
@@ -479,7 +496,7 @@ class TestApiService implements TestApiClient {
       concurrency: configuration.concurrent_users,
       duration: configuration.duration_seconds,
       rampUp: configuration.ramp_up_time,
-      testScenarios: configuration.test_scenarios
+      testScenarios: configuration.test_scenarios,
     });
   }
 
@@ -518,7 +535,7 @@ class TestApiService implements TestApiClient {
       browsers: configuration.browsers,
       devices: configuration.devices,
       features: configuration.features_to_test,
-      screenshotComparison: configuration.screenshot_comparison
+      screenshotComparison: configuration.screenshot_comparison,
     });
   }
 
@@ -543,7 +560,7 @@ class TestApiService implements TestApiClient {
       depth: configuration.depth,
       includeTechnical: configuration.include_technical,
       includeContent: configuration.include_content,
-      competitorUrls: configuration.competitor_urls
+      competitorUrls: configuration.competitor_urls,
     });
   }
 
@@ -568,7 +585,7 @@ class TestApiService implements TestApiClient {
       accessibilityLevel: configuration.accessibility_level,
       includeUsability: configuration.include_usability,
       includeMobile: configuration.include_mobile,
-      customChecks: configuration.custom_checks
+      customChecks: configuration.custom_checks,
     });
   }
 
@@ -589,7 +606,7 @@ class TestApiService implements TestApiClient {
     return apiService.post(`${this.baseUrl}/accessibility`, {
       url: target_url,
       level,
-      categories: []
+      categories: [],
     });
   }
 
@@ -604,7 +621,7 @@ class TestApiService implements TestApiClient {
   ): Promise<ApiResponse<TestExecutionResponse>> {
     return apiService.post(`${this.baseUrl}/website`, {
       url: target_url,
-      options
+      options,
     });
   }
 
@@ -621,7 +638,7 @@ class TestApiService implements TestApiClient {
     const result = await this.executeTest({
       testType: test_type,
       target: target_url,
-      options: configuration
+      options: configuration,
     });
 
     // 转换为TestExecutionResponse格式
@@ -633,17 +650,21 @@ class TestApiService implements TestApiClient {
         test_type,
         target_url,
         created_at: new Date().toISOString(),
-        status: (responseData as any)?.status === TestStatusEnum.RUNNING ? 'running' :
-          (responseData as any)?.status === TestStatusEnum.COMPLETED ? 'completed' :
-            (responseData as any)?.status === TestStatusEnum.FAILED ? 'failed' :
-              (responseData as any)?.status === TestStatusEnum.CANCELLED ? 'cancelled' : 'pending'
-      }
+        status:
+          (responseData as any)?.status === TestStatusEnum.RUNNING
+            ? 'running'
+            : (responseData as any)?.status === TestStatusEnum.COMPLETED
+              ? 'completed'
+              : (responseData as any)?.status === TestStatusEnum.FAILED
+                ? 'failed'
+                : (responseData as any)?.status === TestStatusEnum.CANCELLED
+                  ? 'cancelled'
+                  : 'pending',
+      },
     } as ApiResponse<TestExecutionResponse>;
   }
 
   // ==================== 用户体验测试 ====================
-
-
 
   // ==================== 基础设施测试 ====================
 
@@ -656,7 +677,7 @@ class TestApiService implements TestApiClient {
     // 基础设施测试通常需要特定的端点，这里使用通用测试端点
     return apiService.post(`${this.baseUrl}/run`, {
       testType: 'infrastructure',
-      config: configuration
+      config: configuration,
     });
   }
 
@@ -682,7 +703,7 @@ class TestApiService implements TestApiClient {
       execution_ids,
       report_type,
       format,
-      include_recommendations
+      include_recommendations,
     });
   }
 
@@ -698,11 +719,14 @@ class TestApiService implements TestApiClient {
    */
   async downloadReport(report_id: string): Promise<Response> {
     const token = localStorage.getItem('auth_token') || '';
-    const response = await fetch(`${process.env.REACT_APP_API_URL || process.env.BACKEND_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`}${this.baseUrl}/reports/${report_id}/download`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL || process.env.BACKEND_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}`}${this.baseUrl}/reports/${report_id}/download`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    });
+    );
     return response;
   }
 
@@ -781,13 +805,13 @@ class TestApiService implements TestApiClient {
         endTime: response.data.completed_at,
         results: response.data.result,
         error: response.data.error,
-        config: response.data.config || {}
+        config: response.data.config || {},
       };
 
       return {
         success: true,
         data: testExecution,
-        message: response.message
+        message: response.message,
       };
     }
 
@@ -814,7 +838,7 @@ class TestApiService implements TestApiClient {
   async getTestHistory(testType?: TestType, limit?: number): Promise<ApiResponse<TestHistory>> {
     const params = new URLSearchParams();
     if (testType) params?.append('testType', testType);
-    if (limit) params?.append('limit', limit?.toString());
+    if (limit !== undefined) params?.append('limit', limit.toString());
 
     const url = `${this.baseUrl}/history${params?.toString() ? '?' + params?.toString() : ''}`;
 
@@ -835,13 +859,13 @@ class TestApiService implements TestApiClient {
         total: response.data.total || 0,
         page: response.data.page || 1,
         pageSize: response.data.pageSize || limit || 10,
-        hasMore: response.data.hasMore || false
+        hasMore: response.data.hasMore || false,
       };
 
       return {
         success: true,
         data: testHistory,
-        message: response.message
+        message: response.message,
       };
     }
 
@@ -870,12 +894,15 @@ class TestApiService implements TestApiClient {
   /**
    * 启动实时监控（私有方法）
    */
-  private startstreamingMonitoring(testId: string, testType: TestType, callbacks: TestCallbacks): void {
+  private startstreamingMonitoring(
+    testId: string,
+    testType: TestType,
+    callbacks: TestCallbacks
+  ): void {
     const pollInterval = 1000; // 1秒轮询一次
 
     const poll = async () => {
       try {
-
         /**
 
          * if功能函数
@@ -891,7 +918,7 @@ class TestApiService implements TestApiClient {
           const execution = statusResponse.data;
 
           // 调用进度回调
-          if (callbacks.onProgress) {
+          if (callbacks.onProgress && execution.progress !== undefined) {
             callbacks.onProgress(execution.progress);
           }
 

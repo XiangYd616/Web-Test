@@ -1,4 +1,4 @@
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 
 ﻿/**
  * 前端性能优化工具集
@@ -121,7 +121,7 @@ class ResourcePreloader {
                     Logger.warn(`Critical resource not found: ${url}`);
                 }
             } catch (error) {
-                Logger.warn(`Failed to check resource: ${url}`, error);
+                Logger.warn(`Failed to check resource: ${url}`, { error: String(error) });
             }
         });
 
@@ -447,7 +447,7 @@ class PerformanceMonitor {
                 })
             });
         } catch (error) {
-            Logger.warn('Failed to send performance metrics:', error);
+            Logger.warn('Failed to send performance metrics:', { error: String(error) });
         }
     }
 
@@ -495,7 +495,7 @@ class MemoryManager {
             try {
                 task();
             } catch (error) {
-                Logger.warn('Cleanup task failed:', error);
+                Logger.warn('Cleanup task failed:', { error: String(error) });
             }
         });
 
@@ -543,8 +543,10 @@ class FrontendCacheManager {
     public set(key: string, data: unknown, ttl: number = this.defaultTTL) {
         // 如果缓存已满，删除最旧的项
         if (this.cache.size >= this.maxSize) {
-            const oldestKey = this.cache.keys().next().value;
-            this.cache.delete(oldestKey);
+            const oldestKey = this.cache.keys().next().value as string | undefined;
+            if (oldestKey) {
+                this.cache.delete(oldestKey);
+            }
         }
 
         this.cache.set(key, {

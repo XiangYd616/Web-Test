@@ -2,23 +2,25 @@
  * 测试路由总入口
  * 路径: /tests/*
  * 
- * 注意：这是过渡版本，暂时引用原始的 test.js
- * 后续需要逐步拆分为独立的子路由
+ * 文件路径: backend/routes/tests/index.js
+ * 更新时间: 2025-11-14
  */
 
 const express = require('express');
 const router = express.Router();
 
-// 暂时导入原始的大型 test.js 文件
-// TODO: 逐步拆分为：
-// - tests/seo.js
-// - tests/stress.js
-// - tests/security.js
-// - tests/compatibility.js
-// - tests/api-tests.js
+// 导入新的子路由模块
+const stressRouter = require('./stress');
+const apiRouter = require('./api');
+
+// 导入原始的测试路由（保持向后兼容）
 const originalTestRoutes = require('../test');
 
-// 临时方案：将原始路由挂载到当前路由下
+// 挂载新的子路由（优先级更高）
+router.use('/stress', stressRouter);
+router.use('/api', apiRouter);
+
+// 兼容旧路由（作为后备）
 router.use('/', originalTestRoutes);
 
 /**

@@ -46,7 +46,7 @@ const StressChart: React.FC<StressChartProps> = ({
 
   // WebSocket连接管理
   const connectWebSocket = useCallback(() => {
-    if (!testId || wsRef.current.readyState === WebSocket.OPEN) {
+    if (!testId || wsRef.current?.readyState === WebSocket.OPEN) {
       return;
     }
 

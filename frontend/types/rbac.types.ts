@@ -459,7 +459,7 @@ export function roleToDatabase(role: Role): RoleDatabaseFields {
  */
 export function validatePermissionCondition(condition: PermissionCondition, context: any): boolean {
   const { field, operator, value } = condition;
-  const fieldValue = getNestedValue(context, field);
+  const fieldValue: any = getNestedValue(context, field);
 
   switch (operator) {
     case 'eq':
@@ -467,13 +467,13 @@ export function validatePermissionCondition(condition: PermissionCondition, cont
     case 'ne':
       return fieldValue !== value;
     case 'gt':
-      return fieldValue > value;
+      return (fieldValue as number) > (value as number);
     case 'gte':
-      return fieldValue >= value;
+      return (fieldValue as number) >= (value as number);
     case 'lt':
-      return fieldValue < value;
+      return (fieldValue as number) < (value as number);
     case 'lte':
-      return fieldValue <= value;
+      return (fieldValue as number) <= (value as number);
     case 'in':
       return Array.isArray(value) && value.includes(fieldValue);
     case 'nin':
@@ -491,7 +491,7 @@ export function validatePermissionCondition(condition: PermissionCondition, cont
  * 获取嵌套对象的值
  */
 function getNestedValue(obj: unknown, path: string): unknown {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+  return path.split('.').reduce((current: any, key) => current?.[key], obj);
 }
 
 /**

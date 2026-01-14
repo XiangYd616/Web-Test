@@ -1,4 +1,4 @@
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 
 ﻿/**
  * 统一状态管理系统
@@ -683,7 +683,7 @@ class StateManager {
       try {
         listener(this.state, event);
       } catch (error) {
-        Logger.error('State listener error:', error);
+        Logger.error('State listener error:', { error: String(error) });
       }
     });
 
@@ -692,7 +692,7 @@ class StateManager {
       try {
         listener(this.state, event);
       } catch (error) {
-        Logger.error('Global state listener error:', error);
+        Logger.error('Global state listener error:', { error: String(error) });
       }
     });
   }
@@ -708,7 +708,7 @@ class StateManager {
       const stateToPersist = this.extractPersistableState();
       localStorage.setItem(this.persistenceKey, JSON.stringify(stateToPersist));
     } catch (error) {
-      Logger.warn('Failed to persist state:', error);
+      Logger.warn('Failed to persist state:', { error: String(error) });
     }
   }
 
@@ -730,7 +730,7 @@ class StateManager {
         this.mergePersistedState(parsed);
       }
     } catch (error) {
-      Logger.warn('Failed to load persisted state:', error);
+      Logger.warn('Failed to load persisted state:', { error: String(error) });
     }
   }
 
@@ -787,16 +787,16 @@ class StateManager {
   }
 
   private getNestedValue(obj: unknown, path: string): unknown {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+    return path.split('.').reduce((current: any, key) => current?.[key], obj);
   }
 
   private setNestedValue(obj: unknown, path: string, value: any): void {
     const keys = path.split('.');
     const lastKey = keys.pop()!;
-    const target = keys.reduce((current, key) => {
+    const target = keys.reduce((current: any, key) => {
       if (!current[key]) current[key] = {};
       return current[key];
-    }, obj);
+    }, obj as any);
     target[lastKey] = value;
   }
 

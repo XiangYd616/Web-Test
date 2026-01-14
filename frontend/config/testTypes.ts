@@ -2,11 +2,11 @@
  * testTypes.ts - 测试类型配置
  */
 
-export type TestType = 
-  | 'performance' 
-  | 'security' 
-  | 'seo' 
-  | 'api' 
+export type TestType =
+  | 'performance'
+  | 'security'
+  | 'seo'
+  | 'api'
   | 'stress'
   | 'network'
   | 'database'
@@ -18,9 +18,13 @@ export interface TestTypeConfig {
   id: TestType;
   name: string;
   description: string;
-  icon?: string;
+  icon?: any;
   category: 'web' | 'api' | 'system' | 'ux';
   enabled: boolean;
+  color?: string;
+  defaultConfig?: Record<string, any>;
+  configSchema?: { fields: any[] };
+  resultSchema?: { fields: any[] };
 }
 
 export const TEST_TYPES: Record<TestType, TestTypeConfig> = {
@@ -58,6 +62,11 @@ export const TEST_TYPES: Record<TestType, TestTypeConfig> = {
     description: '测试系统在高负载下的表现',
     category: 'system',
     enabled: true,
+    icon: undefined as any,
+    color: '#ef4444',
+    defaultConfig: {},
+    configSchema: { fields: [] },
+    resultSchema: { fields: [] },
   },
   network: {
     id: 'network',
@@ -109,4 +118,3 @@ export const stressTestConfig = TEST_TYPES.stress;
 export const performanceTestConfig = TEST_TYPES.performance;
 export const securityTestConfig = TEST_TYPES.security;
 export const apiTestConfig = TEST_TYPES.api;
-

@@ -1,4 +1,4 @@
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 
 ﻿
 // 反馈类型枚举
@@ -131,7 +131,7 @@ export class UserFeedbackService {
       }
 
     } catch (error) {
-      Logger.error('Failed to submit feedback:', error);
+      Logger.error('Failed to submit feedback:', { error: String(error) });
     }
   }
 
@@ -148,7 +148,7 @@ export class UserFeedbackService {
 
       this.usageStatsQueue.push(completeStats);
     } catch (error) {
-      Logger.error('Failed to record usage stats:', error);
+      Logger.error('Failed to record usage stats:', { error: String(error) });
     }
   }
 
@@ -181,7 +181,7 @@ export class UserFeedbackService {
         this.performanceQueue.push(metrics);
       }
     } catch (error) {
-      Logger.error('Failed to record performance metrics:', error);
+      Logger.error('Failed to record performance metrics:', { error: String(error) });
     }
   }
 
@@ -305,7 +305,7 @@ export class UserFeedbackService {
         });
         fidObserver.observe({ entryTypes: ['first-input'] });
       } catch (error) {
-        Logger.warn('Performance monitoring not fully supported:', error);
+        Logger.warn('Performance monitoring not fully supported:', { error: String(error) });
       }
     }
   }
@@ -347,7 +347,7 @@ export class UserFeedbackService {
       // 清空队列
       this.feedbackQueue = [];
     } catch (error) {
-      Logger.error('Failed to submit feedback queue:', error);
+      Logger.error('Failed to submit feedback queue:', { error: String(error) });
     }
   }
 
@@ -362,7 +362,7 @@ export class UserFeedbackService {
         this.submitPerformanceMetrics()
       ]);
     } catch (error) {
-      Logger.error('Failed to submit queued data:', error);
+      Logger.error('Failed to submit queued data:', { error: String(error) });
     }
   }
 
@@ -376,7 +376,7 @@ export class UserFeedbackService {
       await new Promise(resolve => setTimeout(resolve, 500));
       this.usageStatsQueue = [];
     } catch (error) {
-      Logger.error('Failed to submit usage stats:', error);
+      Logger.error('Failed to submit usage stats:', { error: String(error) });
     }
   }
 
@@ -390,7 +390,7 @@ export class UserFeedbackService {
       await new Promise(resolve => setTimeout(resolve, 500));
       this.performanceQueue = [];
     } catch (error) {
-      Logger.error('Failed to submit performance metrics:', error);
+      Logger.error('Failed to submit performance metrics:', { error: String(error) });
     }
   }
 }

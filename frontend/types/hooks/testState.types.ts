@@ -3,9 +3,7 @@
  * 统一管理所有测试状态管理Hook的类型
  */
 
-import {
-  TestStatus
-} from '../unified/testTypes';
+import { TestStatus } from '../unified/testTypes';
 
 // ==================== 基础测试状态类型 ====================
 
@@ -42,7 +40,7 @@ export interface BaseTestActions {
 }
 
 /** 基础测试Hook返回值 */
-export interface BaseTestHook extends BaseTestState, BaseTestActions { }
+export interface BaseTestHook extends BaseTestState, BaseTestActions {}
 
 // ==================== API测试Hook类型 ====================
 
@@ -195,7 +193,7 @@ export interface APITestActions extends BaseTestActions {
 }
 
 /** API测试Hook返回值 */
-export interface APITestHook extends APITestState, APITestActions { }
+export interface APITestHook extends APITestState, APITestActions {}
 
 // ==================== 兼容性测试Hook类型 ====================
 
@@ -337,7 +335,7 @@ export interface CompatibilityTestActions extends BaseTestActions {
 }
 
 /** 兼容性测试Hook返回值 */
-export interface CompatibilityTestHook extends CompatibilityTestState, CompatibilityTestActions { }
+export interface CompatibilityTestHook extends CompatibilityTestState, CompatibilityTestActions {}
 
 // ==================== UX测试Hook类型 ====================
 
@@ -521,8 +519,6 @@ export interface UXTestState extends BaseTestState {
   result: UXTestResult | null;
   /** 当前执行的流程 */
   currentFlow: string | null;
-  /** 当前执行的步骤 */
-  currentStep: string | null;
 }
 
 /** UX测试操作 */
@@ -540,7 +536,7 @@ export interface UXTestActions extends BaseTestActions {
 }
 
 /** UX测试Hook返回值 */
-export interface UXTestHook extends UXTestState, UXTestActions { }
+export interface UXTestHook extends UXTestState, UXTestActions {}
 
 // ==================== 网络测试Hook类型 ====================
 
@@ -619,7 +615,7 @@ export interface NetworkTestActions extends BaseTestActions {
 }
 
 /** 网络测试Hook返回值 */
-export interface NetworkTestHook extends NetworkTestState, NetworkTestActions { }
+export interface NetworkTestHook extends NetworkTestState, NetworkTestActions {}
 
 // ==================== 数据库测试Hook类型 ====================
 
@@ -718,4 +714,4 @@ export interface DatabaseTestActions extends BaseTestActions {
 }
 
 /** 数据库测试Hook返回值 */
-export interface DatabaseTestHook extends DatabaseTestState, DatabaseTestActions { }
+export interface DatabaseTestHook extends DatabaseTestState, DatabaseTestActions {}

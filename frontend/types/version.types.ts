@@ -33,9 +33,9 @@ export const VERSION_HISTORY: VersionInfo[] = [
       'common.ts - 统一基础类型定义',
       'testEngines.ts - 测试引擎类型定义',
       'api.ts - API接口类型定义',
-      'version.ts - 版本控制机制'
-    ]
-  }
+      'version.ts - 版本控制机制',
+    ],
+  },
 ];
 
 // ==================== 类型版本映射 ====================
@@ -49,21 +49,21 @@ export interface TypeVersionMap {
 }
 
 export const TYPE_VERSIONS: TypeVersionMap = {
-  'User': {
+  User: {
     currentVersion: '1.0.0',
     supportedVersions: ['1.0.0'],
-    migrationPath: {}
+    migrationPath: {},
   },
-  'TestResult': {
+  TestResult: {
     currentVersion: '1.0.0',
     supportedVersions: ['1.0.0'],
-    migrationPath: {}
+    migrationPath: {},
   },
-  'ApiResponse': {
+  ApiResponse: {
     currentVersion: '1.0.0',
     supportedVersions: ['1.0.0'],
-    migrationPath: {}
-  }
+    migrationPath: {},
+  },
 };
 
 // ==================== 版本检查工具 ====================
@@ -141,7 +141,9 @@ export class VersionChecker {
     while (currentVersion !== toVersion) {
       const nextVersion = typeInfo.migrationPath[currentVersion];
       if (!nextVersion) {
-        throw new Error(`No migration path from ${fromVersion} to ${toVersion} for type ${typeName}`);
+        throw new Error(
+          `No migration path from ${fromVersion} to ${toVersion} for type ${typeName}`
+        );
       }
       path.push(nextVersion);
       currentVersion = nextVersion;
@@ -182,7 +184,7 @@ export class VersionedDataWrapper<T = any> {
     public readonly version: string,
     public readonly data: T,
     public readonly metadata?: VersionedData<T>['metadata']
-  ) { }
+  ) {}
 
   /**
    * 创建版本化数据
@@ -191,7 +193,7 @@ export class VersionedDataWrapper<T = any> {
     return new VersionedDataWrapper(version, data, {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      source: 'client'
+      source: 'client',
     });
   }
 
@@ -209,7 +211,7 @@ export class VersionedDataWrapper<T = any> {
     return {
       version: this.version,
       data: this.data,
-      metadata: this.metadata
+      metadata: this.metadata,
     };
   }
 
@@ -228,8 +230,10 @@ export class VersionedDataWrapper<T = any> {
       this.version,
       { ...this.data, ...newData },
       {
-        ...this.metadata,
-        updatedAt: new Date().toISOString()
+        createdAt: this.metadata?.createdAt ?? new Date().toISOString(),
+        source: this.metadata?.source ?? 'client',
+        updatedAt: new Date().toISOString(),
+        checksum: this.metadata?.checksum,
       }
     );
   }
@@ -262,7 +266,9 @@ export class ApiVersionNegotiator {
     let negotiatedVersion = serverVersion;
 
     if (!compatible) {
-      errors?.push(`Client version ${clientVersion} is not compatible with server version ${serverVersion}`);
+      errors?.push(
+        `Client version ${clientVersion} is not compatible with server version ${serverVersion}`
+      );
 
       // 尝试找到兼容的版本
       const compatibleVersion = supportedVersions.find(v =>
@@ -277,9 +283,13 @@ export class ApiVersionNegotiator {
 
     // 检查版本差异
     if (VersionChecker.compareVersions(clientVersion, serverVersion) < 0) {
-      warnings?.push(`Client version ${clientVersion} is older than server version ${serverVersion}`);
+      warnings?.push(
+        `Client version ${clientVersion} is older than server version ${serverVersion}`
+      );
     } else if (VersionChecker.compareVersions(clientVersion, serverVersion) > 0) {
-      warnings?.push(`Client version ${clientVersion} is newer than server version ${serverVersion}`);
+      warnings?.push(
+        `Client version ${clientVersion} is newer than server version ${serverVersion}`
+      );
     }
 
     return {
@@ -288,7 +298,7 @@ export class ApiVersionNegotiator {
       negotiatedVersion,
       compatible: errors.length === 0,
       warnings: warnings?.length > 0 ? warnings : undefined,
-      errors: errors?.length > 0 ? errors : undefined
+      errors: errors?.length > 0 ? errors : undefined,
     };
   }
 }
@@ -362,10 +372,7 @@ export class AutoMigrationSystem {
   /**
    * 注册迁移
    */
-  registerMigration<TFrom, TTo>(
-    typeName: string,
-    migration: DataMigration<TFrom, TTo>
-  ): void {
+  registerMigration<TFrom, TTo>(typeName: string, migration: DataMigration<TFrom, TTo>): void {
     if (!this.migrations.has(typeName)) {
       this.migrations.set(typeName, []);
     }
@@ -390,24 +397,29 @@ export class AutoMigrationSystem {
     for (const nextVersion of migrationPath) {
       const migration = this.findMigration(typeName, currentData.version, nextVersion);
       if (!migration) {
-        throw new Error(`No migration found from ${currentData.version} to ${nextVersion} for type ${typeName}`);
+        throw new Error(
+          `No migration found from ${currentData.version} to ${nextVersion} for type ${typeName}`
+        );
       }
 
       const migratedData = migration.migrate(currentData.data);
 
       // 验证迁移结果
       if (migration.validate && !migration.validate(migratedData)) {
-        throw new Error(`Migration validation failed for ${typeName} from ${currentData.version} to ${nextVersion}`);
+        throw new Error(
+          `Migration validation failed for ${typeName} from ${currentData.version} to ${nextVersion}`
+        );
       }
 
       currentData = {
         version: nextVersion,
         data: migratedData,
         metadata: {
-          ...currentData.metadata,
+          createdAt: currentData.metadata?.createdAt || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          source: 'migration'
-        }
+          source: 'migration',
+          checksum: currentData.metadata?.checksum,
+        },
       };
     }
 
@@ -434,7 +446,11 @@ export class AutoMigrationSystem {
     return results;
   }
 
-  private findMigration(typeName: string, fromVersion: string, toVersion: string): DataMigration | undefined {
+  private findMigration(
+    typeName: string,
+    fromVersion: string,
+    toVersion: string
+  ): DataMigration | undefined {
     const migrations = this.migrations.get(typeName) || [];
     return migrations.find(m => m.fromVersion === fromVersion && m.toVersion === toVersion);
   }
@@ -465,7 +481,9 @@ export class CompatibilityChecker {
     const compatible = VersionChecker.isCompatible(clientVersion, serverVersion);
 
     if (!compatible) {
-      errors?.push(`Client version ${clientVersion} is not compatible with server version ${serverVersion}`);
+      errors?.push(
+        `Client version ${clientVersion} is not compatible with server version ${serverVersion}`
+      );
     }
 
     // 检查端点兼容性（简化实现）
@@ -478,7 +496,9 @@ export class CompatibilityChecker {
     });
 
     if (VersionChecker.compareVersions(clientVersion, serverVersion) < 0) {
-      warnings?.push(`Client version ${clientVersion} is older than server version ${serverVersion}. Some features may not be available.`);
+      warnings?.push(
+        `Client version ${clientVersion} is older than server version ${serverVersion}. Some features may not be available.`
+      );
     }
 
     return {
@@ -486,7 +506,7 @@ export class CompatibilityChecker {
       warnings,
       errors,
       supportedEndpoints,
-      unsupportedEndpoints
+      unsupportedEndpoints,
     };
   }
 
@@ -520,7 +540,7 @@ export class CompatibilityChecker {
     return {
       compatible: incompatibleModels.length === 0,
       incompatibleModels,
-      warnings
+      warnings,
     };
   }
 }
@@ -531,8 +551,9 @@ export const VERSION_INFO = {
   dataModel: DATA_MODEL_VERSION,
   api: API_VERSION,
   schema: SCHEMA_VERSION,
-  compatible: (clientVersion: string) => VersionChecker.isCompatible(clientVersion, DATA_MODEL_VERSION),
-  history: VERSION_HISTORY
+  compatible: (clientVersion: string) =>
+    VersionChecker.isCompatible(clientVersion, DATA_MODEL_VERSION),
+  history: VERSION_HISTORY,
 };
 
 // ==================== 默认实例 ====================
@@ -545,7 +566,7 @@ TypeVersionRegistry.register({
   version: '1.0.0',
   validator: (data: any) => {
     return data && typeof data.id === 'string' && typeof data.email === 'string';
-  }
+  },
 });
 
 TypeVersionRegistry.register({
@@ -553,7 +574,7 @@ TypeVersionRegistry.register({
   version: '1.0.0',
   validator: (data: any) => {
     return data && typeof data.id === 'string' && typeof data.testType === 'string';
-  }
+  },
 });
 
 TypeVersionRegistry.register({
@@ -561,5 +582,5 @@ TypeVersionRegistry.register({
   version: '1.0.0',
   validator: (data: any) => {
     return data && typeof data.success === 'boolean';
-  }
+  },
 });

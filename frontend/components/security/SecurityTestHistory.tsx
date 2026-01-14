@@ -1,36 +1,36 @@
 /**
  * SecurityTestHistory.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\security\SecurityTestHistory.tsx
  * 创建时间: 2025-09-25
  * 重构: 使用通用 TestHistory 组件
  */
 
-import React, { forwardRef } from 'react';
-import TestHistory from '../common/TestHistory';
-import type { TestHistoryItem } from '../common/TestHistory';
+import { forwardRef } from 'react';
+import { TestHistory } from '../common/TestHistory/TestHistory';
+import { securityTestConfig } from '../common/TestHistory/config';
+import type { TestRecord } from '../common/TestHistory/types';
 
 // SecurityTestHistory Props
 interface SecurityTestHistoryProps {
-  onSelectTest?: (test: TestHistoryItem) => void;
-  onTestRerun?: (test: TestHistoryItem) => void;
-  onTestDelete?: (testId: string) => void;
+  onSelectTest?: (test: TestRecord) => void;
+  onTestRerun?: (test: TestRecord) => void;
+  onTestDelete?: (testId: string) => Promise<void>;
+  className?: string;
 }
 
 /**
  * SecurityTestHistory - 安全测试历史记录组件
- * 使用通用 TestHistory 组件，传入 testType="security"
+ * 使用配置驱动的 TestHistory 组件
  */
 export const SecurityTestHistory = forwardRef<any, SecurityTestHistoryProps>(
-  ({ onSelectTest, onTestRerun, onTestDelete }, ref) => {
+  ({ onSelectTest, onTestRerun, onTestDelete, className }, ref) => {
     return (
       <TestHistory
-        testType="security"
-        title="安全测试历史"
-        description="查看和管理安全测试记录"
-        onTestSelect={onSelectTest}
-        onTestRerun={onTestRerun}
-        onTestDelete={onTestDelete}
+        config={securityTestConfig}
+        onRecordClick={onSelectTest}
+        onRecordDelete={onTestDelete}
+        className={className}
       />
     );
   }
@@ -39,4 +39,3 @@ export const SecurityTestHistory = forwardRef<any, SecurityTestHistoryProps>(
 SecurityTestHistory.displayName = 'SecurityTestHistory';
 
 export default SecurityTestHistory;
-

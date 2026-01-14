@@ -5,10 +5,11 @@
  * 创建时间: 2025-10-05
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { getStatusText } from '../../../../utils/testStatusUtils';
 import type { SortField } from '../types';
+import { useDebouncedCallback } from '../hooks/usePerformance';
 
 interface FilterBarProps {
   searchTerm: string;
@@ -23,7 +24,7 @@ interface FilterBarProps {
   onSortOrderToggle: () => void;
 }
 
-export const FilterBar: React.FC<FilterBarProps> = ({
+export const FilterBar: React.FC<FilterBarProps> = React.memo(({
   searchTerm,
   statusFilter,
   dateFilter,
@@ -35,6 +36,24 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   onSortByChange,
   onSortOrderToggle
 }) => {
+  // 本地状态用于立即显示，防抖后再触发搜索
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+
+  // 防抖搜索
+  const debouncedSearch = useDebouncedCallback((value: string) => {
+    onSearchChange(value);
+  }, 500);
+
+  // 同步外部searchTerm到本地
+  useEffect(() => {
+    setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
+
+  // 处理搜索输入
+  const handleSearchChange = (value: string) => {
+    setLocalSearchTerm(value);
+    debouncedSearch(value);
+  };
   return (
     <div className="bg-gray-800/40 backdrop-blur-sm rounded-xl p-6 mt-6 border border-gray-700/30">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 items-end">
@@ -48,8 +67,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             <input
               type="text"
               placeholder="输入测试名称或URL..."
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
+              value={localSearchTerm}
+              onChange={(e) => handleSearchChange(e.target.value)}
               aria-label="搜索测试记录"
               title="输入测试名称或URL进行搜索"
               className="w-full pl-8 pr-4 py-2.5 text-sm border border-gray-600/40 rounded-lg bg-gray-700/50 backdrop-blur-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
@@ -130,6 +149,6 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       </div>
     </div>
   );
-};
+});
 
 

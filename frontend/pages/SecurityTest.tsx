@@ -1,16 +1,12 @@
-﻿import { Shield, XCircle } from 'lucide-react';
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
+import { Shield, XCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
-import type {
-  SecurityTestConfig,
-  SecurityTestResult
-} from '../services/securityEngine';
-import type { TestProgress } from '../types/unifiedEngine.types';
+import type { SecurityTestConfig, SecurityTestResult } from '../services/securityEngine';
 
 // CSS样式已迁移到组件库中
 
@@ -20,21 +16,17 @@ const testApiService = {
     success: true,
     data: {
       id: `security_test_${Date.now()}`,
-      testId: `security_test_${Date.now()}`
+      testId: `security_test_${Date.now()}`,
     },
-    message: '安全测试启动成功'
-  })
+    message: '安全测试启动成功',
+  }),
 };
 
 const SecurityTest: React.FC = () => {
   // 登录检查
-  const {
-    isAuthenticated,
-    requireLogin,
-    LoginPromptComponent
-  } = useAuthCheck({
-    feature: "安全测试",
-    description: "使用安全测试功能"
+  const { isAuthenticated, requireLogin, LoginPromptComponent } = useAuthCheck({
+    feature: '安全测试',
+    description: '使用安全测试功能',
   });
 
   // 用户统计
@@ -52,8 +44,8 @@ const SecurityTest: React.FC = () => {
     modules: {
       ssl: { enabled: true, checkCertificate: true },
       headers: { enabled: true, checkSecurity: true },
-      vulnerabilities: { enabled: true, checkXSS: true }
-    }
+      vulnerabilities: { enabled: true, checkXSS: true },
+    },
   });
   const [testResult, setTestResult] = useState<any>(null);
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
@@ -68,17 +60,16 @@ const SecurityTest: React.FC = () => {
     startMonitoring,
     stopMonitoring,
     cancelTest,
-    error: progressError
+    error: progressError,
   } = useTestProgress(currentTestId || undefined, {
-    onProgress: (progressData) => {
-    },
-    onComplete: (result) => {
+    onProgress: progressData => {},
+    onComplete: result => {
       setTestResult(result);
       recordTestCompletion('安全测试', true, result?.overallScore || 0, result?.duration || 180);
     },
-    onError: (error) => {
+    onError: error => {
       Logger.error('安全测试失败:', error);
-    }
+    },
   });
 
   // 处理测试选择和重新运行
@@ -98,7 +89,6 @@ const SecurityTest: React.FC = () => {
     }
 
     try {
-
       // 执行安全测试
       const response = await testApiService.executeSecurityTest(testUrl, testConfig);
 
@@ -113,7 +103,6 @@ const SecurityTest: React.FC = () => {
       } else {
         throw new Error(response.message || '启动安全测试失败');
       }
-
     } catch (error) {
       Logger.error('安全测试失败:', error);
     }
@@ -157,7 +146,7 @@ const SecurityTest: React.FC = () => {
   };
 
   // 处理测试进度
-  const handleTestProgress = (progress: TestProgress) => {
+  const handleTestProgress = (progress: any) => {
     setTestProgress(progress);
   };
 
@@ -168,7 +157,12 @@ const SecurityTest: React.FC = () => {
     setTestProgress(null);
 
     // 记录测试完成统计
-    recordTestCompletion('安全测试', true, result?.overallScore || 0, Math.round((result?.duration || 0) / 1000));
+    recordTestCompletion(
+      '安全测试',
+      true,
+      result?.overallScore || 0,
+      Math.round((result?.duration || 0) / 1000)
+    );
   };
 
   // 处理测试错误

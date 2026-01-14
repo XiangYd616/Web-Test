@@ -288,7 +288,7 @@ export const ComplianceScanner: React.FC<ComplianceScannerProps> = ({
       ISO27001: <Globe size={16} className="text-indigo-400" />,
       NIST: <Users size={16} className="text-pink-400" />
     };
-    return icons[regulation] || <Shield size={16} className="text-gray-400" />;
+    return icons[regulation as keyof typeof icons] || <Shield size={16} className="text-gray-400" />;
   };
 
   const getStatusColor = (status: string) => {

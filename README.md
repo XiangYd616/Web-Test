@@ -15,27 +15,32 @@
 ## ✨ 核心功能
 
 ### 🏢 统一企业级架构
+
 - **统一API服务** - 智能缓存、重试机制、性能监控
 - **统一认证服务** - MFA、设备指纹、会话管理、JWT自动刷新
 - **配置驱动** - 灵活的功能开关和环境适配
 - **企业级安全** - 数据加密、安全存储、审计日志
 
 ### 🔥 性能测试
+
 - **压力测试** - 高并发负载测试和性能分析
 - **API测试** - RESTful API接口测试和验证
 - **SEO测试** - 搜索引擎优化检测和建议
 
 ### 🛡️ 安全检测
+
 - **安全扫描** - 智能安全漏洞检测
 - **内容安全** - 恶意内容和风险评估
 - **合规检查** - 安全标准合规性验证
 
 ### 📊 数据分析
+
 - **实时监控** - 可视化性能监控仪表板
 - **智能报告** - 自动化测试报告生成
 - **历史分析** - 测试数据趋势分析
 
 ### 🎯 用户体验
+
 - **现代化界面** - 响应式设计，支持深色模式
 - **智能导航** - 直观的用户界面和操作流程
 - **实时反馈** - 即时测试状态和结果展示
@@ -73,27 +78,6 @@ npm run dev
 
 ## 📋 常用命令
 
-### 🛠️ 脚本管理工具（推荐）
-
-```bash
-# 查看所有可用命令
-node scripts/script-manager.cjs help
-
-# 开发相关
-node scripts/script-manager.cjs dev          # 启动前端（安全模式）
-node scripts/script-manager.cjs fullstack   # 启动前后端
-node scripts/script-manager.cjs build       # 构建项目
-
-# 代码质量
-node scripts/script-manager.cjs check       # 完整代码检查
-node scripts/script-manager.cjs lint        # 代码规范检查
-node scripts/script-manager.cjs format      # 代码格式化
-
-# 项目维护
-node scripts/script-manager.cjs cleanup     # 项目清理
-node scripts/script-manager.cjs status      # 项目状态
-```
-
 ### 📦 npm 脚本
 
 ```bash
@@ -126,6 +110,7 @@ npm run deps:update  # 更新依赖
 ## 🛠️ 技术栈
 
 ### 前端技术
+
 - **React 18** - 现代化前端框架
 - **TypeScript 5** - 类型安全的JavaScript
 - **Vite** - 快速构建工具
@@ -133,18 +118,21 @@ npm run deps:update  # 更新依赖
 - **Ant Design** - 企业级UI组件库
 
 ### 后端技术
+
 - **Node.js** - 服务端JavaScript运行时
 - **Express** - Web应用框架
 - **SQLite** - 轻量级数据库
 - **Redis** - 内存数据库（可选）
 
 ### 开发工具
+
 - **ESLint** - 代码质量检查
 - **Prettier** - 代码格式化
 - **Jest** - 单元测试框架
 - **Docker** - 容器化部署
 
 ### 质量保证
+
 - ✅ **统一企业架构** - 消除代码重复，统一服务管理
 - ✅ **TypeScript严格模式** - 0个类型错误
 - ✅ **统一类型系统** - 180+个类型定义，完整类型安全
@@ -166,12 +154,6 @@ Test-Web/
 │   │   └── utils/           # 工具函数
 │   └── package.json         # 前端依赖
 ├── 🔧 backend/              # Node.js后端服务
-├── 📜 scripts/              # 项目脚本（已整理）
-│   ├── core/               # 核心脚本
-│   ├── deployment/         # 部署脚本
-│   ├── development/        # 开发脚本
-│   ├── maintenance/        # 维护脚本
-│   └── utils/              # 工具脚本
 └── 📚 docs/                # 项目文档
 ```
 
@@ -186,9 +168,9 @@ Test-Web/
 ## 📜 文档
 
 - 🏢 **[统一架构文档](docs/UNIFIED_ARCHITECTURE.md)** - 企业级统一架构说明 ✨
-- 📋 [项目使用指南](PROJECT_GUIDE.md) - 详细使用说明
-- 🧹 [清理报告](CLEANUP_REPORT.md) - 最新清理结果
-- 🛠️ [开发指南](frontend/DEVELOPMENT_GUIDE.md) - 开发环境配置
+- 📋 [文档索引](docs/INDEX.md) - 核心文档入口
+- 👤 [项目使用指南](docs/USER_GUIDE.md) - 详细使用说明
+- 🛠️ [启动与开发指南](docs/PROJECT_STARTUP_GUIDE.md) - 开发环境配置
 
 ## 🔧 技术栈
 
@@ -208,11 +190,13 @@ Test-Web/
 ## 🚨 故障排除
 
 ### 常见问题
+
 - **连接被拒绝**: 检查端口 3001 和 5174 是否被占用
 - **类型错误过多**: 运行 `npm run type-check` 查看详细错误
 - **构建失败**: 运行 `npm run build:check` 先检查类型
 
 ### 快速修复
+
 ```bash
 # 完全重置
 npm run clean:all
@@ -227,5 +211,3 @@ MIT License
 ---
 
 **🎉 项目已完全配置好，可以直接开始开发！**
-
-推荐使用：`node scripts/script-manager.cjs dev` 🚀

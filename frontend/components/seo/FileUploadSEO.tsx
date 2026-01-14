@@ -236,7 +236,7 @@ const FileUploadSEO = () => {
 
   const removeFile = (fileId: string) => {
     setFiles(prev => prev.filter(file => file.id !== fileId));
-    if (selectedFile.id === fileId) {
+    if (selectedFile?.id === fileId) {
       setSelectedFile(null);
       setSeoAnalysis(null);
     }

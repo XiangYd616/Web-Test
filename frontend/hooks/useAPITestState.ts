@@ -7,9 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/backgroundTestManager';
-import type {
-  APIEndpoint
-} from '../types';
+import type { APIEndpoint } from '../types';
 
 // Use TestConfig and TestResult as base types
 import type { TestConfig, TestResult } from '../types';
@@ -57,8 +55,8 @@ export const useAPITestState = (): any => {
     timeout: 10000,
     retries: 3,
     authentication: {
-      type: 'none'
-    }
+      type: 'none',
+    },
   });
 
   const [isRunning, setIsRunning] = useState(false);
@@ -88,8 +86,8 @@ export const useAPITestState = (): any => {
       timeout: 10000,
       retries: 3,
       authentication: {
-        type: 'none'
-      }
+        type: 'none',
+      },
     });
   }, []);
 
@@ -122,7 +120,7 @@ export const useAPITestState = (): any => {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }, [config]);
 
@@ -151,9 +149,9 @@ export const useAPITestState = (): any => {
       const newTestId = backgroundTestManager.startTest(
         'api' as any,
         config,
-        (progress: number, step: string) => {
+        (progress: number, step?: string) => {
           setProgress(progress);
-          setCurrentStep(step);
+          if (step) setCurrentStep(step);
         },
         (testResult: any) => {
           setResult(testResult);
@@ -169,7 +167,6 @@ export const useAPITestState = (): any => {
       );
 
       setTestId(newTestId);
-
     } catch (err: any) {
       setError(err.message || 'API测试启动失败');
       setIsRunning(false);
@@ -216,12 +213,12 @@ export const useAPITestState = (): any => {
       name: endpoint.name,
       url: endpoint.url,
       method: endpoint.method,
-      ...endpoint
+      ...endpoint,
     };
 
     setConfig((prev: APITestConfig) => ({
       ...prev,
-      endpoints: [...prev.endpoints, newEndpoint]
+      endpoints: [...prev.endpoints, newEndpoint],
     }));
   }, []);
 
@@ -233,7 +230,7 @@ export const useAPITestState = (): any => {
       ...prev,
       endpoints: prev.endpoints.map((endpoint: APIEndpoint) =>
         endpoint.id === id ? { ...endpoint, ...updates } : endpoint
-      )
+      ),
     }));
   }, []);
 
@@ -243,28 +240,31 @@ export const useAPITestState = (): any => {
   const removeEndpoint = useCallback((id: string) => {
     setConfig((prev: APITestConfig) => ({
       ...prev,
-      endpoints: prev.endpoints.filter((endpoint: APIEndpoint) => endpoint.id !== id)
+      endpoints: prev.endpoints.filter((endpoint: APIEndpoint) => endpoint.id !== id),
     }));
   }, []);
 
   /**
    * 复制端点
    */
-  const duplicateEndpoint = useCallback((id: string) => {
-    const endpoint = config.endpoints.find((ep: APIEndpoint) => ep.id === id);
-    if (endpoint) {
-      const duplicated = {
-        ...endpoint,
-        id: `endpoint_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
-        name: `${endpoint.name} (副本)`
-      };
+  const duplicateEndpoint = useCallback(
+    (id: string) => {
+      const endpoint = config.endpoints.find((ep: APIEndpoint) => ep.id === id);
+      if (endpoint) {
+        const duplicated = {
+          ...endpoint,
+          id: `endpoint_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+          name: `${endpoint.name} (副本)`,
+        };
 
-      setConfig((prev: APITestConfig) => ({
-        ...prev,
-        endpoints: [...prev.endpoints, duplicated]
-      }));
-    }
-  }, [config.endpoints]);
+        setConfig((prev: APITestConfig) => ({
+          ...prev,
+          endpoints: [...prev.endpoints, duplicated],
+        }));
+      }
+    },
+    [config.endpoints]
+  );
 
   /**
    * 导入端点
@@ -272,12 +272,12 @@ export const useAPITestState = (): any => {
   const importEndpoints = useCallback((endpoints: APIEndpoint[]) => {
     const newEndpoints = endpoints.map(endpoint => ({
       ...endpoint,
-      id: `endpoint_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
+      id: `endpoint_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
     }));
 
     setConfig((prev: APITestConfig) => ({
       ...prev,
-      endpoints: [...prev.endpoints, ...newEndpoints]
+      endpoints: [...prev.endpoints, ...newEndpoints],
     }));
   }, []);
 
@@ -296,7 +296,7 @@ export const useAPITestState = (): any => {
   }, []);
 
   // 计算派生状态
-  const status = isRunning ? 'running' : (result ? 'completed' : (error ? 'failed' : 'idle'));
+  const status = isRunning ? 'running' : result ? 'completed' : error ? 'failed' : 'idle';
   const isCompleted = status === 'completed';
   const hasError = status === 'failed';
   const currentEndpoint = config.endpoints.length > 0 ? config.endpoints[0]?.name || null : null;
@@ -336,7 +336,7 @@ export const useAPITestState = (): any => {
     importEndpoints,
     exportEndpoints,
     validateConfig,
-    testId  // 保留testId以便调试
+    testId, // 保留testId以便调试
   };
 };
 

@@ -1,4 +1,4 @@
-import Logger from '@/utils/logger';
+﻿import Logger from '@/utils/logger';
 
 ﻿// 用户统计数据服务
 
@@ -42,7 +42,7 @@ class UserStatsService {
         return apiStats;
       }
     } catch (error) {
-      Logger.warn('Failed to fetch stats from API, using cached data:', error);
+      Logger.warn('Failed to fetch stats from API, using cached data:', { error: String(error) });
     }
 
     // 如果API失败，从本地存储获取
@@ -67,7 +67,7 @@ class UserStatsService {
           ...stats
         };
       } catch (error) {
-        Logger.error('Failed to parse user stats:', error);
+        Logger.error('Failed to parse user stats:', { error: String(error) });
       }
     }
 
@@ -101,7 +101,7 @@ class UserStatsService {
 
       return null;
     } catch (error) {
-      Logger.error('Failed to fetch user stats from API:', error);
+      Logger.error('Failed to fetch user stats from API:', { error: String(error) });
       return null;
     }
   }
@@ -150,7 +150,7 @@ class UserStatsService {
     try {
       localStorage.setItem(`${this.STORAGE_KEY}_${userId}`, JSON.stringify(updatedStats));
     } catch (error) {
-      Logger.error('Failed to save user stats:', error);
+      Logger.error('Failed to save user stats:', { error: String(error) });
     }
   }
 
@@ -247,7 +247,7 @@ class UserStatsService {
     try {
       localStorage.setItem(`${this.ACTIVITY_KEY}_${userId}`, JSON.stringify(recentActivities));
     } catch (error) {
-      Logger.error('Failed to save user activity:', error);
+      Logger.error('Failed to save user activity:', { error: String(error) });
     }
   }
 
@@ -258,7 +258,7 @@ class UserStatsService {
       try {
         return JSON.parse(stored);
       } catch (error) {
-        Logger.error('Failed to parse user activity:', error);
+        Logger.error('Failed to parse user activity:', { error: String(error) });
       }
     }
     return [];
@@ -330,7 +330,7 @@ class UserStatsService {
       }
       return true;
     } catch (error) {
-      Logger.error('Failed to import user stats:', error);
+      Logger.error('Failed to import user stats:', { error: String(error) });
       return false;
     }
   }

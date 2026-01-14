@@ -136,11 +136,6 @@
         "config": "基于 .browserslistrc 配置"
       },
       {
-        "name": "check-css-compatibility.js",
-        "purpose": "自定义兼容性检查脚本",
-        "location": "scripts/check-css-compatibility.js"
-      },
-      {
         "name": "Can I Use",
         "purpose": "手动检查浏览器支持",
         "url": "https://caniuse.com"

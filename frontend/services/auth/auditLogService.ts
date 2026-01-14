@@ -11,14 +11,39 @@ import { defaultMemoryCache } from '../cacheStrategy';
 // ==================== 类型定义 ====================
 
 export type AuditEventType =
-  | 'login' | 'logout' | 'login_failed' | 'password_change' | 'password_reset'
-  | 'mfa_setup' | 'mfa_verify' | 'mfa_failed'
-  | 'permission_granted' | 'permission_denied' | 'permission_check'
-  | 'role_assigned' | 'role_removed' | 'role_created' | 'role_updated' | 'role_deleted'
-  | 'user_created' | 'user_updated' | 'user_deleted' | 'user_locked' | 'user_unlocked'
-  | 'session_created' | 'session_terminated' | 'session_expired'
-  | 'security_alert' | 'suspicious_activity' | 'data_access' | 'data_modification'
-  | 'data_export' | 'system_config' | 'admin_action' | 'api_access' | 'file_access';
+  | 'login'
+  | 'logout'
+  | 'login_failed'
+  | 'password_change'
+  | 'password_reset'
+  | 'mfa_setup'
+  | 'mfa_verify'
+  | 'mfa_failed'
+  | 'permission_granted'
+  | 'permission_denied'
+  | 'permission_check'
+  | 'role_assigned'
+  | 'role_removed'
+  | 'role_created'
+  | 'role_updated'
+  | 'role_deleted'
+  | 'user_created'
+  | 'user_updated'
+  | 'user_deleted'
+  | 'user_locked'
+  | 'user_unlocked'
+  | 'session_created'
+  | 'session_terminated'
+  | 'session_expired'
+  | 'security_alert'
+  | 'suspicious_activity'
+  | 'data_access'
+  | 'data_modification'
+  | 'data_export'
+  | 'system_config'
+  | 'admin_action'
+  | 'api_access'
+  | 'file_access';
 
 export type AuditSeverity = 'low' | 'medium' | 'high' | 'critical';
 
@@ -89,7 +114,12 @@ export interface AuditStatistics {
 export interface SecurityAlert {
   id: string;
   timestamp: string;
-  type: 'brute_force' | 'unusual_location' | 'privilege_escalation' | 'data_exfiltration' | 'suspicious_pattern';
+  type:
+    | 'brute_force'
+    | 'unusual_location'
+    | 'privilege_escalation'
+    | 'data_exfiltration'
+    | 'suspicious_pattern';
   severity: AuditSeverity;
   title: string;
   description: string;
@@ -119,7 +149,6 @@ export interface AuditConfig {
   complianceMode: 'gdpr' | 'hipaa' | 'sox' | 'custom';
 }
 
-
 /**
 
  * RiskScorer类 - 负责处理相关功能
@@ -136,39 +165,39 @@ class RiskScorer {
 
     // 基础事件类型风险
     const eventRisks: Record<AuditEventType, number> = {
-      'login_failed': 20,
-      'mfa_failed': 25,
-      'permission_denied': 15,
-      'suspicious_activity': 80,
-      'login': 90,
-      'data_access': 95,
-      'user_locked': 30,
-      'session_terminated': 10,
-      'password_change': 5,
-      'logout': 0,
-      'password_reset': 10,
-      'mfa_setup': 5,
-      'mfa_verify': 0,
-      'permission_granted': 0,
-      'permission_check': 0,
-      'role_assigned': 15,
-      'role_removed': 20,
-      'role_created': 25,
-      'role_updated': 20,
-      'role_deleted': 30,
-      'user_created': 10,
-      'user_updated': 5,
-      'user_deleted': 40,
-      'user_unlocked': 5,
-      'session_created': 0,
-      'session_expired': 5,
-      'security_alert': 60,
-      'data_modification': 5,
-      'data_export': 15,
-      'system_config': 30,
-      'admin_action': 25,
-      'api_access': 5,
-      'file_access': 10
+      login_failed: 20,
+      mfa_failed: 25,
+      permission_denied: 15,
+      suspicious_activity: 80,
+      login: 90,
+      data_access: 95,
+      user_locked: 30,
+      session_terminated: 10,
+      password_change: 5,
+      logout: 0,
+      password_reset: 10,
+      mfa_setup: 5,
+      mfa_verify: 0,
+      permission_granted: 0,
+      permission_check: 0,
+      role_assigned: 15,
+      role_removed: 20,
+      role_created: 25,
+      role_updated: 20,
+      role_deleted: 30,
+      user_created: 10,
+      user_updated: 5,
+      user_deleted: 40,
+      user_unlocked: 5,
+      session_created: 0,
+      session_expired: 5,
+      security_alert: 60,
+      data_modification: 5,
+      data_export: 15,
+      system_config: 30,
+      admin_action: 25,
+      api_access: 5,
+      file_access: 10,
     };
 
     if (entry.eventType) {
@@ -181,10 +210,10 @@ class RiskScorer {
 
     // 严重程度风险
     const severityRisks: Record<AuditSeverity, number> = {
-      'low': 0,
-      'medium': 10,
-      'high': 25,
-      'critical': 40
+      low: 0,
+      medium: 10,
+      high: 25,
+      critical: 40,
     };
 
     if (entry.severity) {
@@ -289,8 +318,8 @@ class SecurityEventDetector {
         metadata: {
           failureCount: recentFailures.length,
           timeWindow: '15分钟',
-          targetUser: entry.userId
-        }
+          targetUser: entry.userId,
+        },
       };
     }
 
@@ -323,8 +352,8 @@ class SecurityEventDetector {
       isResolved: false,
       metadata: {
         location: entry.location,
-        previousLocations: [] // 应该从历史记录获取
-      }
+        previousLocations: [], // 应该从历史记录获取
+      },
     };
   }
 
@@ -349,8 +378,8 @@ class SecurityEventDetector {
         metadata: {
           oldPermissions: entry.details?.oldPermissions,
           newPermissions: entry.details?.newPermissions,
-          grantedBy: entry.details?.grantedBy
-        }
+          grantedBy: entry.details?.grantedBy,
+        },
       };
     }
 
@@ -377,8 +406,8 @@ class SecurityEventDetector {
         isResolved: false,
         metadata: {
           riskScore: entry.riskScore,
-          riskFactors: this.analyzeRiskFactors(entry)
-        }
+          riskFactors: this.analyzeRiskFactors(entry),
+        },
       };
     }
 
@@ -403,13 +432,16 @@ class SecurityEventDetector {
   /**
    * 获取最近事件
    */
-  private static getRecentEvents(key: string, eventType: AuditEventType, timeWindow: number): AuditLogEntry[] {
+  private static getRecentEvents(
+    key: string,
+    eventType: AuditEventType,
+    timeWindow: number
+  ): AuditLogEntry[] {
     const events = this.recentEvents.get(key) || [];
     const cutoff = Date.now() - timeWindow;
 
-    return events.filter(event =>
-      event.eventType === eventType &&
-      new Date(event.timestamp).getTime() > cutoff
+    return events.filter(
+      event => event.eventType === eventType && new Date(event.timestamp).getTime() > cutoff
     );
   }
 
@@ -453,11 +485,11 @@ export class AuditLogService {
       alertThresholds: {
         failedLoginAttempts: 5,
         suspiciousActivityScore: 70,
-        privilegeEscalationDetection: true
+        privilegeEscalationDetection: true,
       },
       exportFormats: ['json', 'csv'],
       complianceMode: 'custom',
-      ...config
+      ...config,
     };
 
     this.startCleanupTimer();
@@ -504,7 +536,7 @@ export class AuditLogService {
       details,
       tags: options.tags || [],
       correlationId: options.correlationId,
-      parentEventId: options.parentEventId
+      parentEventId: options.parentEventId,
     };
 
     // 获取地理位置信息
@@ -513,11 +545,12 @@ export class AuditLogService {
     }
 
     // 获取设备信息
-    entry.deviceInfo = this.parseDeviceInfo(options.userAgent) || {
+    const parsedDeviceInfo = this.parseDeviceInfo(options.userAgent);
+    entry.deviceInfo = parsedDeviceInfo ?? {
       deviceId: 'unknown',
       platform: 'unknown',
       browser: 'unknown',
-      os: 'unknown'
+      os: 'unknown',
     };
 
     // 计算风险分数
@@ -554,11 +587,13 @@ export class AuditLogService {
   /**
    * 批量记录事件
    */
-  async logEvents(events: Array<{
-    eventType: AuditEventType;
-    details: Record<string, any>;
-    options: any;
-  }>): Promise<AuditLogEntry[]> {
+  async logEvents(
+    events: Array<{
+      eventType: AuditEventType;
+      details: Record<string, any>;
+      options: any;
+    }>
+  ): Promise<AuditLogEntry[]> {
     const entries: AuditLogEntry[] = [];
 
     for (const event of events) {
@@ -584,83 +619,70 @@ export class AuditLogService {
     // 时间范围过滤
     if (query.startTime) {
       const startTime = new Date(query.startTime).getTime();
-      filteredLogs = filteredLogs.filter(log =>
-        new Date(log?.timestamp).getTime() >= startTime
-      );
+      filteredLogs = filteredLogs.filter(log => new Date(log?.timestamp).getTime() >= startTime);
     }
 
     if (query.endTime) {
       const endTime = new Date(query.endTime).getTime();
-      filteredLogs = filteredLogs.filter(log =>
-        new Date(log?.timestamp).getTime() <= endTime
-      );
+      filteredLogs = filteredLogs.filter(log => new Date(log?.timestamp).getTime() <= endTime);
     }
 
     // 事件类型过滤
     if (query.eventTypes && query.eventTypes.length > 0) {
-      filteredLogs = filteredLogs.filter(log =>
-        query.eventTypes!.includes(log?.eventType)
-      );
+      filteredLogs = filteredLogs.filter(log => query.eventTypes!.includes(log?.eventType));
     }
 
     // 严重程度过滤
     if (query.severities && query.severities.length > 0) {
-      filteredLogs = filteredLogs.filter(log =>
-        query.severities!.includes(log?.severity)
-      );
+      filteredLogs = filteredLogs.filter(log => query.severities!.includes(log?.severity));
     }
 
     // 状态过滤
     if (query.statuses && query.statuses.length > 0) {
-      filteredLogs = filteredLogs.filter(log =>
-        query.statuses!.includes(log?.status)
-      );
+      filteredLogs = filteredLogs.filter(log => query.statuses!.includes(log?.status));
     }
 
     // 用户过滤
     if (query.userIds && query.userIds.length > 0) {
-      filteredLogs = filteredLogs.filter(log =>
-        log?.userId && query.userIds!.includes(log?.userId)
+      filteredLogs = filteredLogs.filter(
+        log => log?.userId && query.userIds!.includes(log?.userId)
       );
     }
 
     // IP地址过滤
     if (query.ipAddresses && query.ipAddresses.length > 0) {
-      filteredLogs = filteredLogs.filter(log =>
-        query.ipAddresses!.includes(log?.ipAddress)
-      );
+      filteredLogs = filteredLogs.filter(log => query.ipAddresses!.includes(log?.ipAddress));
     }
 
     // 资源过滤
     if (query.resources && query.resources.length > 0) {
-      filteredLogs = filteredLogs.filter(log =>
-        log?.resource && query.resources!.includes(log?.resource)
+      filteredLogs = filteredLogs.filter(
+        log => log?.resource && query.resources!.includes(log?.resource)
       );
     }
 
     // 操作过滤
     if (query.actions && query.actions.length > 0) {
-      filteredLogs = filteredLogs.filter(log =>
-        log?.action && query.actions!.includes(log?.action)
+      filteredLogs = filteredLogs.filter(
+        log => log?.action && query.actions!.includes(log?.action)
       );
     }
 
     // 标签过滤
     if (query.tags && query.tags.length > 0) {
-      filteredLogs = filteredLogs.filter(log =>
-        query.tags!.some(tag => log?.tags.includes(tag))
-      );
+      filteredLogs = filteredLogs.filter(log => query.tags!.some(tag => log?.tags.includes(tag)));
     }
 
     // 搜索词过滤
     if (query.searchTerm) {
       const searchTerm = query.searchTerm.toLowerCase();
-      filteredLogs = filteredLogs.filter(log =>
-        log?.username?.toLowerCase().includes(searchTerm) ||
-        log?.ipAddress.includes(searchTerm) ||
-        log?.resource?.toLowerCase().includes(searchTerm) ||
-        log?.action?.toLowerCase().includes(searchTerm) ||
-        JSON.stringify(log?.details).toLowerCase().includes(searchTerm)
+      filteredLogs = filteredLogs.filter(
+        log =>
+          log?.username?.toLowerCase().includes(searchTerm) ||
+          log?.ipAddress.includes(searchTerm) ||
+          log?.resource?.toLowerCase().includes(searchTerm) ||
+          log?.action?.toLowerCase().includes(searchTerm) ||
+          JSON.stringify(log?.details).toLowerCase().includes(searchTerm)
       );
     }
 
@@ -669,7 +691,7 @@ export class AuditLogService {
     const sortOrder = query.sortOrder || 'desc';
 
     filteredLogs.sort((a, b) => {
-      let aValue: unknown, bValue: any;
+      let aValue: number | string, bValue: number | string;
 
       switch (sortBy) {
         case 'timestamp':
@@ -677,7 +699,7 @@ export class AuditLogService {
           bValue = new Date(b.timestamp).getTime();
           break;
         case 'severity':
-          const severityOrder = { 'low': 1, 'medium': 2, 'high': 3, 'critical': 4 };
+          const severityOrder = { low: 1, medium: 2, high: 3, critical: 4 };
           aValue = severityOrder[a.severity];
           bValue = severityOrder[b.severity];
           break;
@@ -686,8 +708,8 @@ export class AuditLogService {
           bValue = b.riskScore || 0;
           break;
         default:
-          aValue = a.timestamp;
-          bValue = b.timestamp;
+          aValue = new Date(a.timestamp).getTime();
+          bValue = new Date(b.timestamp).getTime();
       }
 
       if (sortOrder === 'asc') {
@@ -707,7 +729,7 @@ export class AuditLogService {
     return {
       logs: paginatedLogs,
       total,
-      hasMore
+      hasMore,
     };
   }
 
@@ -717,35 +739,47 @@ export class AuditLogService {
   async getStatistics(query: AuditQuery = {}): Promise<AuditStatistics> {
     const { logs } = await this.queryLogs(query);
 
-    const eventsByType = logs.reduce((acc, log) => {
-      if (log?.eventType) {
-        acc[log.eventType] = (acc[log.eventType] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<AuditEventType, number>);
+    const eventsByType = logs.reduce(
+      (acc, log) => {
+        if (log?.eventType) {
+          acc[log.eventType] = (acc[log.eventType] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<AuditEventType, number>
+    );
 
-    const eventsBySeverity = logs.reduce((acc, log) => {
-      if (log?.severity) {
-        acc[log.severity] = (acc[log.severity] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<AuditSeverity, number>);
+    const eventsBySeverity = logs.reduce(
+      (acc, log) => {
+        if (log?.severity) {
+          acc[log.severity] = (acc[log.severity] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<AuditSeverity, number>
+    );
 
-    const eventsByStatus = logs.reduce((acc, log) => {
-      if (log?.status) {
-        acc[log.status] = (acc[log.status] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<AuditStatus, number>);
+    const eventsByStatus = logs.reduce(
+      (acc, log) => {
+        if (log?.status) {
+          acc[log.status] = (acc[log.status] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<AuditStatus, number>
+    );
 
     // 用户统计
-    const userCounts = logs.reduce((acc, log) => {
-      if (log?.userId) {
-        const key = log?.userId;
-        acc[key] = (acc[key] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    const userCounts = logs.reduce(
+      (acc, log) => {
+        if (log?.userId) {
+          const key = log?.userId;
+          acc[key] = (acc[key] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     const topUsers = Object.entries(userCounts)
       .map(([userId, count]) => {
@@ -753,19 +787,22 @@ export class AuditLogService {
         return {
           userId,
           username: log?.username || 'Unknown',
-          count
+          count,
         };
       })
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
     // IP地址统计
-    const ipCounts = logs.reduce((acc, log) => {
-      if (log?.ipAddress) {
-        acc[log.ipAddress] = (acc[log.ipAddress] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    const ipCounts = logs.reduce(
+      (acc, log) => {
+        if (log?.ipAddress) {
+          acc[log.ipAddress] = (acc[log.ipAddress] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     const topIpAddresses = Object.entries(ipCounts)
       .map(([ipAddress, count]) => ({ ipAddress, count }))
@@ -777,7 +814,7 @@ export class AuditLogService {
 
     const timeRange = {
       start: logs.length > 0 ? logs[logs.length - 1].timestamp : new Date().toISOString(),
-      end: logs.length > 0 ? logs[0].timestamp : new Date().toISOString()
+      end: logs.length > 0 ? logs[0].timestamp : new Date().toISOString(),
     };
 
     return {
@@ -788,7 +825,7 @@ export class AuditLogService {
       topUsers,
       topIpAddresses,
       riskTrends,
-      timeRange
+      timeRange,
     };
   }
 
@@ -817,18 +854,22 @@ export class AuditLogService {
     alert.resolution = resolution;
 
     // 记录解决事件
-    await this.logEvent('security_alert', {
-      alertId,
-      alertType: alert.type,
-      resolution
-    }, {
-      userId: resolvedBy,
-      ipAddress: '127.0.0.1', // 应该从请求中获取
-      userAgent: 'System',
-      severity: 'low',
-      status: 'success',
-      tags: ['alert_resolution']
-    });
+    await this.logEvent(
+      'security_alert',
+      {
+        alertId,
+        alertType: alert.type,
+        resolution,
+      },
+      {
+        userId: resolvedBy,
+        ipAddress: '127.0.0.1', // 应该从请求中获取
+        userAgent: 'System',
+        severity: 'low',
+        status: 'success',
+        tags: ['alert_resolution'],
+      }
+    );
 
     return true;
   }
@@ -882,39 +923,39 @@ export class AuditLogService {
 
   private getDefaultSeverity(eventType: AuditEventType): AuditSeverity {
     const severityMap: Record<AuditEventType, AuditSeverity> = {
-      'login_failed': 'medium',
-      'mfa_failed': 'medium',
-      'permission_denied': 'medium',
-      'suspicious_activity': 'high',
-      'security_alert': 'high',
-      'user_deleted': 'high',
-      'role_deleted': 'high',
-      'system_config': 'medium',
-      'admin_action': 'medium',
-      'session_terminated': 'low',
-      'login': 'low',
-      'logout': 'low',
-      'password_change': 'low',
-      'password_reset': 'medium',
-      'mfa_setup': 'low',
-      'mfa_verify': 'low',
-      'permission_granted': 'low',
-      'permission_check': 'low',
-      'role_assigned': 'medium',
-      'role_removed': 'medium',
-      'role_created': 'medium',
-      'role_updated': 'low',
-      'user_created': 'low',
-      'user_updated': 'low',
-      'user_locked': 'medium',
-      'user_unlocked': 'low',
-      'session_created': 'low',
-      'session_expired': 'low',
-      'data_access': 'low',
-      'data_modification': 'medium',
-      'data_export': 'medium',
-      'api_access': 'low',
-      'file_access': 'low'
+      login_failed: 'medium',
+      mfa_failed: 'medium',
+      permission_denied: 'medium',
+      suspicious_activity: 'high',
+      security_alert: 'high',
+      user_deleted: 'high',
+      role_deleted: 'high',
+      system_config: 'medium',
+      admin_action: 'medium',
+      session_terminated: 'low',
+      login: 'low',
+      logout: 'low',
+      password_change: 'low',
+      password_reset: 'medium',
+      mfa_setup: 'low',
+      mfa_verify: 'low',
+      permission_granted: 'low',
+      permission_check: 'low',
+      role_assigned: 'medium',
+      role_removed: 'medium',
+      role_created: 'medium',
+      role_updated: 'low',
+      user_created: 'low',
+      user_updated: 'low',
+      user_locked: 'medium',
+      user_unlocked: 'low',
+      session_created: 'low',
+      session_expired: 'low',
+      data_access: 'low',
+      data_modification: 'medium',
+      data_export: 'medium',
+      api_access: 'low',
+      file_access: 'low',
     };
 
     return severityMap[eventType] || 'low';
@@ -926,36 +967,44 @@ export class AuditLogService {
     return {
       country: 'China',
       region: 'Beijing',
-      city: 'Beijing'
+      city: 'Beijing',
     };
   }
 
-  private parseDeviceInfo(userAgent: string): unknown {
+  private parseDeviceInfo(
+    userAgent: string
+  ): { deviceId: string; platform: string; browser: string; os: string } | null {
     // 简化的用户代理解析
+    if (!userAgent) return null;
     return {
       deviceId: 'unknown',
       platform: 'web',
       browser: 'unknown',
-      os: 'unknown'
+      os: 'unknown',
     };
   }
 
-  private calculateRiskTrends(logs: AuditLogEntry[]): Array<{ date: string; averageRisk: number; eventCount: number }> {
-    const dailyData = logs.reduce((acc, log) => {
-      const date = log?.timestamp.split('T')[0];
-      if (!acc[date]) {
-        acc[date] = { totalRisk: 0, count: 0 };
-      }
-      acc[date].totalRisk += log?.riskScore || 0;
-      acc[date].count += 1;
-      return acc;
-    }, {} as Record<string, { totalRisk: number; count: number }>);
+  private calculateRiskTrends(
+    logs: AuditLogEntry[]
+  ): Array<{ date: string; averageRisk: number; eventCount: number }> {
+    const dailyData = logs.reduce(
+      (acc, log) => {
+        const date = log?.timestamp.split('T')[0];
+        if (!acc[date]) {
+          acc[date] = { totalRisk: 0, count: 0 };
+        }
+        acc[date].totalRisk += log?.riskScore || 0;
+        acc[date].count += 1;
+        return acc;
+      },
+      {} as Record<string, { totalRisk: number; count: number }>
+    );
 
     return Object.entries(dailyData)
       .map(([date, data]) => ({
         date,
         averageRisk: data.count > 0 ? data.totalRisk / data.count : 0,
-        eventCount: data.count
+        eventCount: data.count,
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
   }
@@ -965,16 +1014,17 @@ export class AuditLogService {
   }
 
   private startCleanupTimer(): void {
-    setInterval(() => {
-      this.cleanupOldLogs();
-    }, 24 * 60 * 60 * 1000); // 每天清理一次
+    setInterval(
+      () => {
+        this.cleanupOldLogs();
+      },
+      24 * 60 * 60 * 1000
+    ); // 每天清理一次
   }
 
   private cleanupOldLogs(): void {
-    const cutoffTime = Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000);
-    this.logs = this.logs.filter(log =>
-      new Date(log?.timestamp).getTime() > cutoffTime
-    );
+    const cutoffTime = Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000;
+    this.logs = this.logs.filter(log => new Date(log?.timestamp).getTime() > cutoffTime);
   }
 }
 
@@ -985,56 +1035,62 @@ export function useAuditLog() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const logEvent = useCallback(async (
-    eventType: AuditEventType,
-    details: Record<string, any>,
-    options: any) => {
-    setIsLoading(true);
-    setError(null);
+  const logEvent = useCallback(
+    async (eventType: AuditEventType, details: Record<string, any>, options: any) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await auditService.logEvent(eventType, details, options);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '记录审计日志失败';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [auditService]);
+      try {
+        const result = await auditService.logEvent(eventType, details, options);
+        return result;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : '记录审计日志失败';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [auditService]
+  );
 
-  const queryLogs = useCallback(async (query: AuditQuery = {}) => {
-    setIsLoading(true);
-    setError(null);
+  const queryLogs = useCallback(
+    async (query: AuditQuery = {}) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await auditService.queryLogs(query);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '查询审计日志失败';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [auditService]);
+      try {
+        const result = await auditService.queryLogs(query);
+        return result;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : '查询审计日志失败';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [auditService]
+  );
 
-  const getStatistics = useCallback(async (query: AuditQuery = {}) => {
-    setIsLoading(true);
-    setError(null);
+  const getStatistics = useCallback(
+    async (query: AuditQuery = {}) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await auditService.getStatistics(query);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '获取审计统计失败';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [auditService]);
+      try {
+        const result = await auditService.getStatistics(query);
+        return result;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : '获取审计统计失败';
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [auditService]
+  );
 
   return {
     auditService,
@@ -1043,7 +1099,7 @@ export function useAuditLog() {
     logEvent,
     queryLogs,
     getStatistics,
-    clearError: () => setError(null)
+    clearError: () => setError(null),
   };
 }
 

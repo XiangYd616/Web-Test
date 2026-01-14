@@ -13,8 +13,9 @@ import {
   GlobalOutlined,
   HeartOutlined,
   LineChartOutlined,
-  ReloadOutlined, SettingOutlined,
-  ThunderboltOutlined
+  ReloadOutlined,
+  SettingOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import {
   Alert,
@@ -29,7 +30,7 @@ import {
   Statistic,
   Tag,
   Timeline,
-  Typography
+  Typography,
 } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useUnifiedTestEngine } from '../../hooks/useUnifiedTestEngine';
@@ -48,7 +49,7 @@ interface EngineMonitorProps {
 export const EngineMonitor: React.FC<EngineMonitorProps> = ({
   className = '',
   refreshInterval = 5000,
-  showDetailedStats = true
+  showDetailedStats = true,
 }) => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(Date.now());
@@ -63,15 +64,15 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
     performance: {
       successRate: 0,
       errorRate: 0,
-      averageExecutionTime: 0
-    }
+      averageExecutionTime: 0,
+    },
   };
 
   /**
    * 手动刷新
    */
   const handleRefresh = useCallback(() => {
-    engine.fetchSupportedTypes();
+    engine.fetchSupportedTypes?.();
     setLastRefresh(Date.now());
   }, [engine]);
 
@@ -105,12 +106,7 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
       }
       extra={
         <Space>
-          <Button
-            size="small"
-            icon={<ReloadOutlined />}
-            onClick={handleRefresh}
-            loading={false}
-          >
+          <Button size="small" icon={<ReloadOutlined />} onClick={handleRefresh} loading={false}>
             刷新
           </Button>
           <Button
@@ -132,12 +128,10 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
             value={engine.isConnected ? '已连接' : '未连接'}
             valueStyle={{
               color: engine.isConnected ? '#3f8600' : '#cf1322',
-              fontSize: '16px'
+              fontSize: '16px',
             }}
             prefix={
-              <CheckCircleOutlined
-                style={{ color: engine.isConnected ? '#3f8600' : '#cf1322' }}
-              />
+              <CheckCircleOutlined style={{ color: engine.isConnected ? '#3f8600' : '#cf1322' }} />
             }
           />
         </Col>
@@ -236,8 +230,12 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
                 precision={1}
                 suffix="%"
                 valueStyle={{
-                  color: stats.performance.successRate >= 90 ? '#3f8600' :
-                    stats.performance.successRate >= 70 ? '#faad14' : '#cf1322'
+                  color:
+                    stats.performance.successRate >= 90
+                      ? '#3f8600'
+                      : stats.performance.successRate >= 70
+                        ? '#faad14'
+                        : '#cf1322',
                 }}
               />
             </Col>
@@ -249,8 +247,12 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
                 precision={1}
                 suffix="%"
                 valueStyle={{
-                  color: stats.performance.errorRate <= 5 ? '#3f8600' :
-                    stats.performance.errorRate <= 15 ? '#faad14' : '#cf1322'
+                  color:
+                    stats.performance.errorRate <= 5
+                      ? '#3f8600'
+                      : stats.performance.errorRate <= 15
+                        ? '#faad14'
+                        : '#cf1322',
                 }}
               />
             </Col>
@@ -285,11 +287,7 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
     >
       <Space wrap>
         {engine.supportedTypes?.map(type => (
-          <Tag
-            key={type}
-            color="blue"
-            icon={getTestTypeIcon(type)}
-          >
+          <Tag key={type} color="blue" icon={getTestTypeIcon(type)}>
             {getTestTypeLabel(type)}
           </Tag>
         )) || []}
@@ -305,8 +303,9 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
    * 渲染活跃测试列表
    */
   const renderActiveTests = () => {
-    const activeTestsArray = Array.from(engine.activeTests?.values() || [])
-      .filter(test => test.status === 'running' || test.status === 'pending');
+    const activeTestsArray = Array.from(engine.activeTests?.values() || []).filter(
+      test => test.status === 'running' || test.status === 'pending'
+    );
 
     return (
       <Card
@@ -378,7 +377,7 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
                 type="circle"
                 percent={healthScore}
                 strokeColor={getHealthColor(healthScore)}
-                format={(percent) => `${percent}%`}
+                format={percent => `${percent}%`}
               />
               <div className="mt-2">
                 <Text strong>健康评分</Text>
@@ -398,16 +397,20 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
 
               <div className="flex justify-between">
                 <Text>错误率:</Text>
-                <Text style={{
-                  color: stats.performance.errorRate <= 5 ? '#3f8600' : '#cf1322'
-                }}>
+                <Text
+                  style={{
+                    color: stats.performance.errorRate <= 5 ? '#3f8600' : '#cf1322',
+                  }}
+                >
                   {stats.performance.errorRate.toFixed(1)}%
                 </Text>
               </div>
 
               <div className="flex justify-between">
                 <Text>活跃测试:</Text>
-                <Text>{stats.runningTests} / {stats.totalActiveTests}</Text>
+                <Text>
+                  {stats.runningTests} / {stats.totalActiveTests}
+                </Text>
               </div>
 
               <div className="flex justify-between">
@@ -448,12 +451,8 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
   return (
     <div className={`engine-monitor ${className}`}>
       <div className="mb-4">
-        <Title level={3}>
-          📊 引擎监控面板
-        </Title>
-        <Text type="secondary">
-          实时监控统一测试引擎的状态和性能
-        </Text>
+        <Title level={3}>📊 引擎监控面板</Title>
+        <Text type="secondary">实时监控统一测试引擎的状态和性能</Text>
       </div>
 
       {renderEngineStatus()}
@@ -491,7 +490,7 @@ const getTestTypeLabel = (type: string): string => {
     ux: '用户体验',
     seo: 'SEO测试',
     compatibility: '兼容性测试',
-    website: '网站测试'
+    website: '网站测试',
   };
   return labels[type] || type;
 };
@@ -507,7 +506,7 @@ const getTestTypeIcon = (type: string) => {
     ux: <HeartOutlined />,
     seo: <LineChartOutlined />,
     compatibility: <SettingOutlined />,
-    website: <DashboardOutlined />
+    website: <DashboardOutlined />,
   };
   return icons[type] || <SettingOutlined />;
 };
@@ -518,7 +517,7 @@ const getStatusColor = (status: string): string => {
     running: 'orange',
     completed: 'green',
     failed: 'red',
-    cancelled: 'gray'
+    cancelled: 'gray',
   };
   return colors[status] || 'default';
 };
@@ -529,7 +528,7 @@ const getStatusText = (status: string): string => {
     running: '运行中',
     completed: '已完成',
     failed: '失败',
-    cancelled: '已取消'
+    cancelled: '已取消',
   };
   return texts[status] || status;
 };
@@ -540,7 +539,7 @@ const getStatusIcon = (status: string) => {
     running: <ThunderboltOutlined />,
     completed: <CheckCircleOutlined />,
     failed: <ExclamationCircleOutlined />,
-    cancelled: <ExclamationCircleOutlined />
+    cancelled: <ExclamationCircleOutlined />,
   };
   return icons[status] || <ClockCircleOutlined />;
 };

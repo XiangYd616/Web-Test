@@ -10,7 +10,7 @@ import type {
   ApiErrorResponse,
   ApiResponse,
   ApiSuccessResponse,
-  PaginationInfo
+  PaginationInfo,
 } from '../types/unified/models';
 
 // ==================== 数据处理配置 ====================
@@ -54,25 +54,25 @@ const DEFAULT_CONFIG: DataProcessorConfig = {
     enabled: true,
     ttl: 300000, // 5分钟
     maxSize: 100,
-    strategy: 'lru'
+    strategy: 'lru',
   },
   retry: {
     enabled: true,
     maxAttempts: 3,
     delay: 1000,
-    backoff: 'exponential'
+    backoff: 'exponential',
   },
   pagination: {
     defaultPageSize: 20,
     pageSizeOptions: [10, 20, 50, 100],
     showSizeChanger: true,
-    showQuickJumper: true
+    showQuickJumper: true,
   },
   errorHandling: {
     showNotification: true,
     autoRetry: true,
-    fallbackData: null
-  }
+    fallbackData: null,
+  },
 };
 
 // ==================== 数据状态类型 ====================
@@ -121,7 +121,6 @@ export interface DataActions<T = any> {
   setLoading: (loading: boolean) => void;
 }
 
-
 /**
 
  * DataCache类 - 负责处理相关功能
@@ -159,7 +158,7 @@ class DataCache {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl
+      ttl,
     });
 
     if (this.strategy === 'lru') {
@@ -203,29 +202,33 @@ class DataCache {
   private evict(): void {
     if (this.cache.size === 0) return;
 
-    let keyToEvict: string;
+    let keyToEvict: string | undefined;
 
     switch (this.strategy) {
       case 'lru':
         // 移除最久未访问的
-        keyToEvict = Array.from(this.accessOrder.entries())
-          .sort(([, a], [, b]) => a - b)[0][0];
+        keyToEvict = Array.from(this.accessOrder.entries()).sort(([, a], [, b]) => a - b)[0]?.[0];
         break;
 
       case 'ttl':
         // 移除最早过期的
-        keyToEvict = Array.from(this.cache.entries())
-          .sort(([, a], [, b]) => ((a?.timestamp || 0) + (a?.ttl || 0)) - ((b?.timestamp || 0) + (b?.ttl || 0)))[0][0];
+        keyToEvict = Array.from(this.cache.entries()).sort(
+          ([, a], [, b]) =>
+            (a?.timestamp || 0) + (a?.ttl || 0) - ((b?.timestamp || 0) + (b?.ttl || 0))
+        )[0]?.[0];
         break;
 
       case 'fifo':
-      default:
+      default: {
         // 移除最早添加的
         keyToEvict = this.cache.keys().next().value;
         break;
+      }
     }
 
-    this.delete(keyToEvict);
+    if (keyToEvict) {
+      this.delete(keyToEvict);
+    }
   }
 }
 
@@ -250,11 +253,11 @@ export function useDataProcessor<T = any>(
     refreshing: false,
     lastUpdated: null,
     retryCount: 0,
-    cacheHit: false
+    cacheHit: false,
   });
 
   // 引用
-  const lastRequestRef = useRef<() => Promise<ApiResponse<T>> | null>(null);
+  const lastRequestRef = useRef<() => Promise<ApiResponse<T>>>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -273,129 +276,138 @@ export function useDataProcessor<T = any>(
       loading: updates.state === 'loading',
       success: updates.state === 'success',
       hasError: updates.state === 'error',
-      refreshing: updates.state === 'refreshing'
+      refreshing: updates.state === 'refreshing',
     }));
   }, []);
 
   // 处理API响应
-  const processResponse = useCallback((response: ApiResponse<T>, cacheKey?: string): T | null => {
-    if (response.success) {
-      const successResponse = response as ApiSuccessResponse<T>;
+  const processResponse = useCallback(
+    (response: ApiResponse<T>, cacheKey?: string): T | null => {
+      if (response.success) {
+        const successResponse = response as ApiSuccessResponse<T>;
 
-      // 缓存数据
-      if (finalConfig.cache?.enabled && cacheKey) {
-        globalCache.set(cacheKey, successResponse.data, finalConfig.cache.ttl);
-      }
+        // 缓存数据
+        if (finalConfig.cache?.enabled && cacheKey) {
+          globalCache.set(cacheKey, successResponse.data, finalConfig.cache.ttl);
+        }
 
-      // 更新状态
-      updateState({
-        state: 'success',
-        data: successResponse.data,
-        error: null,
-        lastUpdated: new Date().toISOString(),
-        retryCount: 0,
-        pagination: 'pagination' in successResponse.meta ? successResponse.meta.pagination : undefined
-      });
-
-      return successResponse.data;
-    } else {
-      const errorResponse = response as ApiErrorResponse;
-      const errorMessage = typeof errorResponse.error === 'string'
-        ? errorResponse.error
-        : (errorResponse.error && typeof errorResponse.error === 'object' && 'message' in errorResponse.error) 
-          ? (errorResponse.error as any).message 
-          : '请求失败';
-
-      updateState({
-        state: 'error',
-        error: errorMessage,
-        data: finalConfig.errorHandling?.fallbackData || null
-      });
-
-      // 显示错误通知
-      if (finalConfig.errorHandling?.showNotification) {
-        Logger.error('API Error:', errorMessage);
-        // 这里可以集成通知系统
-      }
-
-      return null;
-    }
-  }, [finalConfig, updateState]);
-
-  // 执行请求
-  const executeRequest = useCallback(async (
-    requestFn: () => Promise<ApiResponse<T>>,
-    params?: unknown,
-    options: { useCache?: boolean; isRetry?: boolean } = {}
-  ): Promise<T | null> => {
-    const { useCache = true, isRetry = false } = options;
-    const cacheKey = generateCacheKey(params);
-
-    // 取消之前的请求
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    // 检查缓存
-    if (useCache && finalConfig.cache?.enabled) {
-      const cachedData = globalCache.get(cacheKey);
-      if (cachedData) {
+        // 更新状态
         updateState({
           state: 'success',
-          data: cachedData as T,
+          data: successResponse.data,
           error: null,
-          cacheHit: true,
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
+          retryCount: 0,
+          pagination:
+            'pagination' in successResponse.meta ? successResponse.meta.pagination : undefined,
         });
-        return cachedData as T;
+
+        return successResponse.data;
+      } else {
+        const errorResponse = response as ApiErrorResponse;
+        const errorMessage =
+          typeof errorResponse.error === 'string'
+            ? errorResponse.error
+            : errorResponse.error &&
+                typeof errorResponse.error === 'object' &&
+                'message' in errorResponse.error
+              ? (errorResponse.error as any).message
+              : '请求失败';
+
+        updateState({
+          state: 'error',
+          error: errorMessage,
+          data: finalConfig.errorHandling?.fallbackData || null,
+        });
+
+        // 显示错误通知
+        if (finalConfig.errorHandling?.showNotification) {
+          Logger.error('API Error:', errorMessage);
+          // 这里可以集成通知系统
+        }
+
+        return null;
       }
-    }
+    },
+    [finalConfig, updateState]
+  );
 
-    // 设置加载状态
-    updateState({
-      state: state.data ? 'refreshing' : 'loading',
-      error: null,
-      cacheHit: false,
-      retryCount: isRetry ? state.retryCount + 1 : 0
-    });
+  // 执行请求
+  const executeRequest = useCallback(
+    async (
+      requestFn: () => Promise<ApiResponse<T>>,
+      params?: unknown,
+      options: { useCache?: boolean; isRetry?: boolean } = {}
+    ): Promise<T | null> => {
+      const { useCache = true, isRetry = false } = options;
+      const cacheKey = generateCacheKey(params);
 
-    try {
-      // 创建新的AbortController
-      abortControllerRef.current = new AbortController();
+      // 取消之前的请求
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
 
-      // 保存请求函数用于重试
-      lastRequestRef.current = requestFn;
+      // 检查缓存
+      if (useCache && finalConfig.cache?.enabled) {
+        const cachedData = globalCache.get(cacheKey);
+        if (cachedData) {
+          updateState({
+            state: 'success',
+            data: cachedData as T,
+            error: null,
+            cacheHit: true,
+            lastUpdated: new Date().toISOString(),
+          });
+          return cachedData as T;
+        }
+      }
 
-      // 执行请求
-      const response = await requestFn();
-
-      return processResponse(response, cacheKey);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error?.message : '网络请求失败';
-
+      // 设置加载状态
       updateState({
-        state: 'error',
-        error: errorMessage,
-        data: finalConfig.errorHandling?.fallbackData || state.data
+        state: state.data ? 'refreshing' : 'loading',
+        error: null,
+        cacheHit: false,
+        retryCount: isRetry ? state.retryCount + 1 : 0,
       });
 
-      // 自动重试
-      if (finalConfig.retry?.enabled &&
-        finalConfig.errorHandling?.autoRetry &&
-        state.retryCount < (finalConfig.retry.maxAttempts - 1)) {
+      try {
+        // 创建新的AbortController
+        abortControllerRef.current = new AbortController();
 
-        const delay = finalConfig.retry.backoff === 'exponential'
-          ? finalConfig.retry.delay * Math.pow(2, state.retryCount)
-          : finalConfig.retry.delay;
+        // 执行请求
+        const response = await requestFn();
 
-        retryTimeoutRef.current = setTimeout(() => {
-          executeRequest(requestFn, params, { useCache: false, isRetry: true });
-        }, delay);
+        return processResponse(response, cacheKey);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error?.message : '网络请求失败';
+
+        updateState({
+          state: 'error',
+          error: errorMessage,
+          data: finalConfig.errorHandling?.fallbackData || state.data,
+        });
+
+        // 自动重试
+        if (
+          finalConfig.retry?.enabled &&
+          finalConfig.errorHandling?.autoRetry &&
+          state.retryCount < finalConfig.retry.maxAttempts - 1
+        ) {
+          const delay =
+            finalConfig.retry.backoff === 'exponential'
+              ? finalConfig.retry.delay * Math.pow(2, state.retryCount)
+              : finalConfig.retry.delay;
+
+          retryTimeoutRef.current = setTimeout(() => {
+            executeRequest(requestFn, params, { useCache: false, isRetry: true });
+          }, delay);
+        }
+
+        return null;
       }
-
-      return null;
-    }
-  }, [state, finalConfig, generateCacheKey, updateState, processResponse]);
+    },
+    [state, finalConfig, generateCacheKey, updateState, processResponse]
+  );
 
   // 清理函数
   useEffect(() => {
@@ -411,25 +423,31 @@ export function useDataProcessor<T = any>(
 
   // 操作函数
   const actions: DataActions<T> = {
-    load: (params) => {
-      if (!lastRequestRef.current) {
+    load: async params => {
+      const requestFn = lastRequestRef.current;
+      if (!requestFn) {
         throw new Error('No request function provided');
       }
-      return executeRequest(lastRequestRef.current, params);
+      return await executeRequest(requestFn, params);
     },
 
-    refresh: () => {
-      if (!lastRequestRef.current) {
+    refresh: async () => {
+      const requestFn = lastRequestRef.current;
+      if (!requestFn) {
         throw new Error('No request function provided');
       }
-      return executeRequest(lastRequestRef.current, undefined, { useCache: false });
+      return await executeRequest(requestFn, undefined, { useCache: false });
     },
 
-    retry: () => {
-      if (!lastRequestRef.current) {
+    retry: async () => {
+      const requestFn = lastRequestRef.current;
+      if (!requestFn) {
         throw new Error('No request function provided');
       }
-      return executeRequest(lastRequestRef.current, undefined, { useCache: false, isRetry: true });
+      return await executeRequest(requestFn, undefined, {
+        useCache: false,
+        isRetry: true,
+      });
     },
 
     reset: () => {
@@ -439,20 +457,27 @@ export function useDataProcessor<T = any>(
         error: null,
         lastUpdated: null,
         retryCount: 0,
-        cacheHit: false
+        cacheHit: false,
       });
     },
 
     loadPage: async (page: number) => {
       if (!lastRequestRef.current) return null;
-      const params = { page, limit: (state.pagination as any)?.limit || finalConfig.pagination?.defaultPageSize };
-      return executeRequest(lastRequestRef.current, params);
+      const params = {
+        page,
+        limit: (state.pagination as any)?.limit || finalConfig.pagination?.defaultPageSize,
+      };
+      const result = await executeRequest(lastRequestRef.current, params);
+      if (!result) throw new Error('Request returned null');
+      return result;
     },
 
     changePageSize: async (size: number) => {
       if (!lastRequestRef.current) return null;
       const params = { page: 1, limit: size };
-      return executeRequest(lastRequestRef.current, params);
+      const result = await executeRequest(lastRequestRef.current, params);
+      if (!result) throw new Error('Request returned null');
+      return result;
     },
 
     clearCache: () => {
@@ -472,7 +497,7 @@ export function useDataProcessor<T = any>(
         state: 'success',
         data,
         error: null,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       });
     },
 
@@ -480,15 +505,15 @@ export function useDataProcessor<T = any>(
       updateState({
         state: 'error',
         error,
-        data: finalConfig.errorHandling?.fallbackData || state.data
+        data: finalConfig.errorHandling?.fallbackData || state.data,
       });
     },
 
     setLoading: (loading: boolean) => {
       updateState({
-        state: loading ? 'loading' : 'idle'
+        state: loading ? 'loading' : 'idle',
       });
-    }
+    },
   };
 
   return [state, actions];

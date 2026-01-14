@@ -71,7 +71,7 @@ export const useStreamingData = (channel: string, config: RealTimeDataConfig = {
 
     // 发送心跳
     const sendHeartbeat = useCallback(() => {
-        if (wsRef.current.readyState === WebSocket.OPEN) {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify({
                 type: 'heartbeat',
                 channel,
@@ -88,7 +88,7 @@ export const useStreamingData = (channel: string, config: RealTimeDataConfig = {
 
     // 连接WebSocket
     const connect = useCallback(() => {
-        if (wsRef.current.readyState === WebSocket.OPEN) {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
             return;
         }
 
@@ -213,7 +213,7 @@ export const useStreamingData = (channel: string, config: RealTimeDataConfig = {
 
     // 发送数据
     const sendData = useCallback((data: any) => {
-        if (wsRef.current.readyState === WebSocket.OPEN) {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
             const message = {
                 type: 'client_message',
                 channel,

@@ -5,7 +5,6 @@
 
 import { useState } from 'react';
 import type { TestType } from '../types';
-import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../types/common';
 
 // 导出格式枚举
 export type ExportFormat = 'json' | 'csv' | 'pdf' | 'html' | 'xml';
@@ -62,7 +61,7 @@ class ExportManager {
       progress: 0,
       createdAt: new Date(),
       options,
-      data
+      data,
     };
 
     this.tasks.set(taskId, task);
@@ -106,14 +105,13 @@ class ExportManager {
 
       // 创建下载链接
       const blob = new Blob([exportedData], {
-        type: this.getMimeType(task.options.format)
+        type: this.getMimeType(task.options.format),
       });
       task.downloadUrl = URL.createObjectURL(blob);
 
       task.status = 'completed';
       task.progress = 100;
       task.completedAt = new Date();
-
     } catch (error) {
       task.status = 'failed';
       task.error = error instanceof Error ? error?.message : String(error);
@@ -131,8 +129,8 @@ class ExportManager {
         testType: task.testType,
         exportedAt: new Date().toISOString(),
         format: 'json',
-        version: '1.0'
-      }
+        version: '1.0',
+      },
     };
 
     if (task.options.includeConfig) {
@@ -554,10 +552,12 @@ class ExportManager {
     let html = '<div class="section"><h2>安全检查结果</h2>';
 
     if (data.securityChecks && Array.isArray(data.securityChecks)) {
-      html += '<table><thead><tr><th>检查项</th><th>状态</th><th>严重程度</th><th>描述</th></tr></thead><tbody>';
+      html +=
+        '<table><thead><tr><th>检查项</th><th>状态</th><th>严重程度</th><th>描述</th></tr></thead><tbody>';
 
       data.securityChecks.forEach((check: any) => {
-        const statusClass = check.status === 'pass' ? 'success' : check.status === 'warning' ? 'warning' : 'error';
+        const statusClass =
+          check.status === 'pass' ? 'success' : check.status === 'warning' ? 'warning' : 'error';
         html += `
           <tr>
             <td>${check.name || ''}</td>
@@ -591,6 +591,10 @@ class ExportManager {
   private objectToXML(obj: unknown, indent: string = ''): string {
     let xml = '';
 
+    if (typeof obj !== 'object' || obj === null) {
+      return String(obj);
+    }
+
     for (const [key, value] of Object.entries(obj)) {
       if (typeof value === 'object' && value !== null) {
         xml += `${indent}<${key}>\n`;
@@ -613,7 +617,7 @@ class ExportManager {
       csv: 'text/csv',
       pdf: 'application/pdf',
       html: 'text/html',
-      xml: 'application/xml'
+      xml: 'application/xml',
     };
 
     return mimeTypes[format] || 'text/plain';
@@ -623,7 +627,7 @@ class ExportManager {
    * 获取测试类型名称
    */
   private getTestTypeName(testType: TestType): string {
-    const names = {
+    const names: Record<string, string> = {
       stress: '压力测试',
       performance: '性能测试',
       security: '安全测试',
@@ -633,7 +637,12 @@ class ExportManager {
       ux: 'UX测试',
       compatibility: '兼容性测试',
       database: '数据库测试',
-      website: '网站测试'
+      website: '网站测试',
+      accessibility: '可访问性测试',
+      content: '内容测试',
+      infrastructure: '基础设施测试',
+      documentation: '文档测试',
+      integration: '集成测试',
     };
 
     return names[testType] || testType;
@@ -717,6 +726,6 @@ export const _useExportManager = () => {
     createExport: exportManager.createExportTask.bind(exportManager),
     getTask: exportManager.getTask.bind(exportManager),
     downloadExport: exportManager.downloadExport.bind(exportManager),
-    cleanup: exportManager.cleanupCompletedTasks.bind(exportManager)
+    cleanup: exportManager.cleanupCompletedTasks.bind(exportManager),
   };
 };
