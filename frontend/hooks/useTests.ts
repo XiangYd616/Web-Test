@@ -14,7 +14,7 @@ import { useCallback, useEffect, useState } from 'react';
 const testService = new UnifiedTestService();
 
 // 定义TestQueryParams类型
-interface TestQueryParams {
+export interface TestQueryParams {
   page?: number;
   limit?: number;
   testType?: string;
@@ -83,8 +83,8 @@ export function useTests(options: UseTestsOptions = {}): UseTestsReturn {
     setError(null);
 
     try {
-      const data = await testService.getAll(params);
-      setTests(data);
+      const history = await testRepository.getTestHistory(params);
+      setTests(history.tests);
     } catch (err) {
       const error = err as Error;
       setError(error);
