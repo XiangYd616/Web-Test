@@ -6,7 +6,7 @@
 
 import Logger from '@/utils/logger';
 import type { UserSession } from '../../types/auth.types';
-import type { User } from '../../types/unified/models';
+import type { User } from '../../types/auth/models';
 import { defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================

@@ -1,14 +1,18 @@
 /**
- * 用户类型定义 - 重新导出统一类型
- * 此文件已迁移到统一类型定义系统，现在只重新导出统一类型
- * 版本: v2.0.0 - 使用统一类型定义
+ * 用户类型定义 - 重新导出类型
+ * 此文件已迁移到类型定义系统，现在只重新导出类型
+ * 版本: v2.0.0 - 使用类型定义
  */
 
-// 重新导出统一的用户类型定义
+// 重新导出的用户类型定义
 export type {
-  AuthResponse, LoginCredentials,
-  RegisterData, User, UserPreferences, UserProfile
-} from '../../types/unified/models';
+  AuthResponse,
+  LoginCredentials,
+  RegisterData,
+  User,
+  UserPreferences,
+  UserProfile,
+} from '../../types/auth/models';
 
 // 从枚举中导入用户相关枚举
 export { UserRole } from '../../types/enums';

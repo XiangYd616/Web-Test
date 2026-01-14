@@ -1,7 +1,7 @@
 import Logger from '@/utils/logger';
 import { jwtDecode } from 'jwt-decode';
+import { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/auth/models';
 import { UserRole, UserStatus } from '../../types/enums';
-import { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/unified/models';
 import type { ChangePasswordData, CreateUserData, UpdateUserData } from '../../types/user';
 import { browserJwt } from '../../utils/browserJwt';
 import { canUseDatabase } from '../../utils/environment';
@@ -41,7 +41,7 @@ const isElectron = typeof window !== 'undefined' && (window as any).process.type
 const isBrowser = typeof window !== 'undefined' && !isElectron;
 const isNode = typeof window === 'undefined';
 
-export class UnifiedAuthService implements IAuthService {
+export class AuthService implements IAuthService {
   private readonly TOKEN_KEY = 'test_web_app_token';
   private readonly USER_KEY = 'test_web_app_user';
   private readonly REFRESH_TOKEN_KEY = 'test_web_app_refresh_token';

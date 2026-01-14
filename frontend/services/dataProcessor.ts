@@ -1,5 +1,5 @@
 ﻿/**
- * 统一前端数据处理器
+ * 前端数据处理器
  * 整合API错误处理、数据缓存、分页和加载状态管理
  * 版本: v2.0.0
  */
@@ -11,7 +11,7 @@ import type {
   ApiResponse,
   ApiSuccessResponse,
   PaginationInfo,
-} from '../types/unified/models';
+} from '../types/auth/models';
 
 // ==================== 数据处理配置 ====================
 

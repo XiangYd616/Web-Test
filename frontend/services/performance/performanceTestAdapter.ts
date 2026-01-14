@@ -1,12 +1,15 @@
-
-import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, UnifiedPerformanceConfig } from '../../types/performance.types';
+import {
+  PERFORMANCE_CONFIG_PRESETS,
+  PerformanceTestProgress,
+  PerformanceTestResult,
+} from '../../types/performance.types';
 import { PerformanceTestCore } from './performanceTestCore';
 
 const performanceTestCore = new PerformanceTestCore();
 
-// ==================== ¼æÈİĞÔ½Ó¿Ú¶¨Òå ====================
+// ==================== å…¼å®¹æ€§æ¥å£å®šä¹‰ ====================
 
-// ¼æÈİ¾ÉµÄĞÔÄÜ²âÊÔÅäÖÃ½Ó¿Ú
+// å…¼å®¹æ—§çš„æ€§èƒ½æµ‹è¯•é…ç½®æ¥å£
 export interface LegacyPerformanceTestConfig {
   url: string;
   mode: 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
@@ -23,52 +26,47 @@ export interface LegacyPerformanceTestConfig {
   device: 'desktop' | 'mobile' | 'both';
 }
 
-// ¼æÈİ¾ÉµÄ²âÊÔ½ø¶È½Ó¿Ú
+// å…¼å®¹æ—§çš„æµ‹è¯•è¿›åº¦æ¥å£
 export interface LegacyTestProgressCallback {
   onProgress: (progress: number, step: string) => void;
   onComplete: (result: any) => void;
   onError: (error: any) => void;
 }
 
-// ==================== ĞÔÄÜ²âÊÔÊÊÅäÆ÷Àà ====================
+// ==================== æ€§èƒ½æµ‹è¯•é€‚é…å™¨ç±» ====================
 
 export class PerformanceTestAdapter {
   /**
-   * ÊÊÅä¾ÉµÄĞÔÄÜ²âÊÔ½Ó¿Ú
+   * é€‚é…æ—§çš„æ€§èƒ½æµ‹è¯•æ¥å£
    */
   static async runLegacyPerformanceTest(
     config: LegacyPerformanceTestConfig,
     callbacks?: LegacyTestProgressCallback
   ): Promise<any> {
     try {
-      // ×ª»»ÅäÖÃ¸ñÊ½
-      const unifiedConfig = this.convertLegacyConfig(config);
+      // è½¬æ¢é…ç½®æ ¼å¼
+      const config = this.convertLegacyConfig(config);
 
-      // ×ª»»½ø¶È»Øµ÷
+      // è½¬æ¢è¿›åº¦å›è°ƒ
       const onProgress = callbacks ? this.convertProgressCallback(callbacks) : undefined;
 
-      // Ö´ĞĞĞÔÄÜ²âÊÔ
-      const result = await performanceTestCore.runPerformanceTest(
-        config.url,
-        unifiedConfig,
-        {
-          onProgress,
-          saveResults: true
-        }
-      );
+      // æ‰§è¡Œæ€§èƒ½æµ‹è¯•
+      const result = await performanceTestCore.runPerformanceTest(config.url, config, {
+        onProgress,
+        saveResults: true,
+      });
 
-      // ×ª»»½á¹û¸ñÊ½ÒÔ¼æÈİ¾É½Ó¿Ú
+      // è½¬æ¢ç»“æœæ ¼å¼ä»¥å…¼å®¹æ—§æ¥å£
       const legacyResult = this.convertResultToLegacy(result);
 
-      // µ÷ÓÃÍê³É»Øµ÷
+      // è°ƒç”¨å®Œæˆå›è°ƒ
       if (callbacks?.onComplete) {
         callbacks?.onComplete(legacyResult);
       }
 
       return legacyResult;
-
     } catch (error) {
-      // µ÷ÓÃ´íÎó»Øµ÷
+      // è°ƒç”¨é”™è¯¯å›è°ƒ
       if (callbacks?.onError) {
         callbacks?.onError(error);
       }
@@ -77,7 +75,7 @@ export class PerformanceTestAdapter {
   }
 
   /**
-   * ÊÊÅäÍøÕ¾²âÊÔÖĞµÄĞÔÄÜ¼ì²â
+   * é€‚é…ç½‘ç«™æµ‹è¯•ä¸­çš„æ€§èƒ½æ£€æµ‹
    */
   static async runWebsitePerformanceTest(
     url: string,
@@ -96,12 +94,12 @@ export class PerformanceTestAdapter {
       caching: true,
       compression: true,
       imageOptimization: true,
-      mobilePerformance: options.device !== 'desktop'
+      mobilePerformance: options.device !== 'desktop',
     };
 
     const result = await performanceTestCore.runPerformanceTest(url, config);
 
-    // ×ª»»ÎªÍøÕ¾²âÊÔÆÚÍûµÄ¸ñÊ½
+    // è½¬æ¢ä¸ºç½‘ç«™æµ‹è¯•æœŸæœ›çš„æ ¼å¼
     return {
       performance: {
         score: result.overallScore,
@@ -113,22 +111,22 @@ export class PerformanceTestAdapter {
           cls: result.coreWebVitals?.cls || 0,
           fid: result.coreWebVitals?.fid || 0,
           pageSize: result.pageSpeed?.pageSize || 0,
-          requests: result.pageSpeed?.requestCount || 0
+          requests: result.pageSpeed?.requestCount || 0,
         },
         details: {
           performance: { score: result.overallScore },
           accessibility: { score: options.includeAccessibility ? 85 : undefined },
           bestPractices: { score: 80 },
-          seo: { score: 75 }
+          seo: { score: 75 },
         },
         recommendations: result.recommendations.map(rec => rec.description),
-        issues: result.issues.map(issue => issue.description)
-      }
+        issues: result.issues.map(issue => issue.description),
+      },
     };
   }
 
   /**
-   * ÊÊÅäSEO²âÊÔÖĞµÄĞÔÄÜ¼ì²â
+   * é€‚é…SEOæµ‹è¯•ä¸­çš„æ€§èƒ½æ£€æµ‹
    */
   static async runSEOPerformanceTest(
     url: string,
@@ -138,20 +136,20 @@ export class PerformanceTestAdapter {
     } = {}
   ): Promise<any> {
     const config: Partial<UnifiedPerformanceConfig> = {
-      level: 'basic', // SEO²âÊÔÊ¹ÓÃ»ù´¡ĞÔÄÜ¼ì²â
+      level: 'basic', // SEOæµ‹è¯•ä½¿ç”¨åŸºç¡€æ€§èƒ½æ£€æµ‹
       device: options.device || 'desktop',
       pageSpeed: true,
       coreWebVitals: true,
-      resourceOptimization: false, // SEO²âÊÔ²»ĞèÒªÏêÏ¸µÄ×ÊÔ´·ÖÎö
+      resourceOptimization: false, // SEOæµ‹è¯•ä¸éœ€è¦è¯¦ç»†çš„èµ„æºåˆ†æ
       caching: false,
       compression: false,
       imageOptimization: false,
-      mobilePerformance: options.checkMobile || false
+      mobilePerformance: options.checkMobile || false,
     };
 
     const result = await performanceTestCore.runPerformanceTest(url, config);
 
-    // ×ª»»ÎªSEO²âÊÔÆÚÍûµÄ¸ñÊ½
+    // è½¬æ¢ä¸ºSEOæµ‹è¯•æœŸæœ›çš„æ ¼å¼
     return {
       score: result.overallScore,
       metrics: {
@@ -160,21 +158,21 @@ export class PerformanceTestAdapter {
         lcp: result.coreWebVitals?.lcp || 0,
         cls: result.coreWebVitals?.cls || 0,
         pageSize: result.pageSpeed?.pageSize || 0,
-        mobileScore: result.mobilePerformance?.score || null
+        mobileScore: result.mobilePerformance?.score || null,
       },
-      issues: result.issues.filter(issue =>
-        issue.type === 'speed' || issue.type === 'size'
-      ).map(issue => ({
-        type: 'performance',
-        severity: issue.severity,
-        description: issue.description,
-        recommendation: issue.solution
-      }))
+      issues: result.issues
+        .filter(issue => issue.type === 'speed' || issue.type === 'size')
+        .map(issue => ({
+          type: 'performance',
+          severity: issue.severity,
+          description: issue.description,
+          recommendation: issue.solution,
+        })),
     };
   }
 
   /**
-   * ÊÊÅäAPI²âÊÔÖĞµÄĞÔÄÜ¼ì²â
+   * é€‚é…APIæµ‹è¯•ä¸­çš„æ€§èƒ½æ£€æµ‹
    */
   static async runAPIPerformanceTest(
     url: string,
@@ -187,40 +185,42 @@ export class PerformanceTestAdapter {
       level: 'basic',
       device: 'desktop',
       pageSpeed: true,
-      coreWebVitals: false, // API²âÊÔ²»ĞèÒªCore Web Vitals
+      coreWebVitals: false, // APIæµ‹è¯•ä¸éœ€è¦Core Web Vitals
       resourceOptimization: false,
       caching: false,
       compression: false,
       imageOptimization: false,
       mobilePerformance: false,
       timeout: options.timeout || 30,
-      retries: options.retries || 1
+      retries: options.retries || 1,
     };
 
     const result = await performanceTestCore.runPerformanceTest(url, config);
 
-    // ×ª»»ÎªAPI²âÊÔÆÚÍûµÄ¸ñÊ½
+    // è½¬æ¢ä¸ºAPIæµ‹è¯•æœŸæœ›çš„æ ¼å¼
     return {
       responseTime: result.pageSpeed?.responseTime || 0,
       loadTime: result.pageSpeed?.loadTime || 0,
       ttfb: result.pageSpeed?.ttfb || 0,
       score: result.overallScore,
-      issues: result.issues.filter(issue =>
-        issue.type === 'speed'
-      ).map(issue => ({
-        type: 'slow_response',
-        severity: issue.severity,
-        description: issue.description
-      }))
+      issues: result.issues
+        .filter(issue => issue.type === 'speed')
+        .map(issue => ({
+          type: 'slow_response',
+          severity: issue.severity,
+          description: issue.description,
+        })),
     };
   }
 
-  // ==================== Ë½ÓĞ×ª»»·½·¨ ====================
+  // ==================== ç§æœ‰è½¬æ¢æ–¹æ³• ====================
 
   /**
-   * ×ª»»¾ÉÅäÖÃµ½ĞÂÅäÖÃ
+   * è½¬æ¢æ—§é…ç½®åˆ°æ–°é…ç½®
    */
-  private static convertLegacyConfig(legacy: LegacyPerformanceTestConfig): Partial<UnifiedPerformanceConfig> {
+  private static convertLegacyConfig(
+    legacy: LegacyPerformanceTestConfig
+  ): Partial<UnifiedPerformanceConfig> {
     return {
       level: legacy.mode === 'lighthouse' ? 'comprehensive' : legacy.mode,
       pageSpeed: legacy.checkPageSpeed,
@@ -234,12 +234,12 @@ export class PerformanceTestAdapter {
       mobilePerformance: legacy.checkMobilePerformance,
       device: legacy.device,
       timeout: 60,
-      retries: 2
+      retries: 2,
     };
   }
 
   /**
-   * ×ª»»½ø¶È»Øµ÷
+   * è½¬æ¢è¿›åº¦å›è°ƒ
    */
   private static convertProgressCallback(
     callbacks: LegacyTestProgressCallback
@@ -252,7 +252,7 @@ export class PerformanceTestAdapter {
   }
 
   /**
-   * ×ª»»½á¹ûµ½¾É¸ñÊ½
+   * è½¬æ¢ç»“æœåˆ°æ—§æ ¼å¼
    */
   public static convertResultToLegacy(result: PerformanceTestResult): unknown {
     return {
@@ -269,18 +269,18 @@ export class PerformanceTestAdapter {
         performance: { score: result.overallScore },
         accessibility: { score: 85 },
         bestPractices: { score: 80 },
-        seo: { score: 75 }
+        seo: { score: 75 },
       },
       recommendations: result.recommendations.map(rec => rec.description),
       issues: result.issues.map(issue => issue.description),
       timestamp: result.timestamp,
       duration: result.duration,
-      url: result.url
+      url: result.url,
     };
   }
 }
 
-// ==================== ±ã½İµ¼³öº¯Êı ====================
+// ==================== ä¾¿æ·å¯¼å‡ºå‡½æ•° ====================
 
 export async function quickPerformanceTest(
   url: string,
@@ -317,7 +317,7 @@ export async function getPerformanceMetrics(
     compression: false,
     imageOptimization: false,
     javascriptOptimization: false,
-    cssOptimization: false
+    cssOptimization: false,
   };
 
   const result = await performanceTestCore.runPerformanceTest(url, config);
@@ -328,9 +328,9 @@ export async function getPerformanceMetrics(
     pageSize: result.pageSpeed?.pageSize || 0,
     score: result.overallScore,
     vitals: options.includeVitals ? result.coreWebVitals : undefined,
-    mobile: options.includeMobile ? result.mobilePerformance : undefined
+    mobile: options.includeMobile ? result.mobilePerformance : undefined,
   };
 }
 
-// µ¼³öÊÊÅäÆ÷ÊµÀı
+// å¯¼å‡ºé€‚é…å™¨å®ä¾‹
 export const _performanceTestAdapter = PerformanceTestAdapter;

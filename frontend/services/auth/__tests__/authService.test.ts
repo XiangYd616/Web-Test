@@ -1,12 +1,11 @@
 /**
  * authService 单元测试
- * 测试UnifiedAuthService的所有核心功能
+ * 测试AuthService的所有核心功能
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { LoginCredentials, RegisterData } from '../../../types/auth/models';
 import { UserRole, UserStatus } from '../../../types/enums';
-import type { LoginCredentials, RegisterData } from '../../../types/unified/models';
-import { UnifiedAuthService } from '../authService';
 
 // Mock dependencies
 vi.mock('@/utils/logger', () => ({

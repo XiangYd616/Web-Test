@@ -1,6 +1,19 @@
-﻿
-import Logger from '@/utils/logger';
-import { CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PERFORMANCE_CONFIG_PRESETS, PerformanceIssue, PerformanceRecommendation, PerformanceTestCallback, PerformanceTestOptions, PerformanceTestProgress, PerformanceTestResult, ResourceAnalysis, UnifiedPerformanceConfig } from '../../types/performance.types';
+﻿import Logger from '@/utils/logger';
+import {
+  CacheAnalysis,
+  CompressionAnalysis,
+  CoreWebVitals,
+  PageSpeedMetrics,
+  PERFORMANCE_CONFIG_PRESETS,
+  PerformanceConfig,
+  PerformanceIssue,
+  PerformanceRecommendation,
+  PerformanceTestCallback,
+  PerformanceTestOptions,
+  PerformanceTestProgress,
+  PerformanceTestResult,
+  ResourceAnalysis,
+} from '../../types/performance.types';
 
 export class PerformanceTestCore {
   private activeTests = new Map<string, any>();
@@ -11,7 +24,7 @@ export class PerformanceTestCore {
    */
   async runPerformanceTest(
     url: string,
-    config: Partial<UnifiedPerformanceConfig> = {},
+    config: Partial<PerformanceConfig> = {},
     options: PerformanceTestOptions = {}
   ): Promise<PerformanceTestResult> {
     // 合并配置
@@ -33,7 +46,7 @@ export class PerformanceTestCore {
       grade: 'F',
       recommendations: [],
       issues: [],
-      duration: 0
+      duration: 0,
     };
 
     try {
@@ -46,7 +59,7 @@ export class PerformanceTestCore {
         progress: 0,
         currentStep: '初始化性能测试...',
         completedChecks: [],
-        currentCheck: 'initialization'
+        currentCheck: 'initialization',
       });
 
       const startTime = Date.now();
@@ -72,8 +85,8 @@ export class PerformanceTestCore {
         realTimeMetrics: {
           responseTime: result.pageSpeed?.responseTime || 0,
           throughput: 0,
-          errorRate: 0
-        }
+          errorRate: 0,
+        },
       });
 
       // 保存结果（如果需要）
@@ -82,7 +95,6 @@ export class PerformanceTestCore {
       }
 
       return result;
-
     } catch (error) {
       // 错误处理
       result.error = error instanceof Error ? error.message : '性能测试失败';
@@ -92,7 +104,7 @@ export class PerformanceTestCore {
         phase: 'failed',
         progress: 0,
         currentStep: `测试失败: ${result.error}`,
-        completedChecks: []
+        completedChecks: [],
       });
 
       throw error;
@@ -121,12 +133,11 @@ export class PerformanceTestCore {
           progress: (completedChecks / totalChecks) * 80 + 10, // 10-90%
           currentStep: `正在执行${check}检测...`,
           completedChecks: checks.slice(0, completedChecks),
-          currentCheck: check
+          currentCheck: check,
         });
 
         await this.executeSpecificCheck(check, url, config, result);
         completedChecks++;
-
       } catch (error) {
         Logger.warn(`性能检测 ${check} 失败:`, { error: String(error) });
         // 继续执行其他检测
@@ -166,7 +177,7 @@ export class PerformanceTestCore {
         const modernFeatures = await this.checkModernWebFeatures(url, config);
         result.modernWebFeatures = {
           ...modernFeatures,
-          modernityLevel: modernFeatures.modernityLevel as "low" | "medium" | "high" | "unknown"
+          modernityLevel: modernFeatures.modernityLevel as 'low' | 'medium' | 'high' | 'unknown',
         };
         break;
       case 'networkOptimization':
@@ -175,7 +186,7 @@ export class PerformanceTestCore {
           score: networkOpt.score,
           issues: [],
           recommendations: networkOpt.recommendations || [],
-          metrics: {}
+          metrics: {},
         };
         break;
       case 'thirdPartyImpact':
@@ -184,7 +195,7 @@ export class PerformanceTestCore {
           score: thirdParty.score,
           totalBlockingTime: 0,
           scripts: [],
-          recommendations: thirdParty.recommendations || []
+          recommendations: thirdParty.recommendations || [],
         };
         break;
     }
@@ -193,12 +204,15 @@ export class PerformanceTestCore {
   /**
    * 页面速度检测
    */
-  private async checkPageSpeed(url: string, config: UnifiedPerformanceConfig): Promise<PageSpeedMetrics> {
+  private async checkPageSpeed(
+    url: string,
+    config: UnifiedPerformanceConfig
+  ): Promise<PageSpeedMetrics> {
     try {
       const response = await fetch(`${this.apiBaseUrl}/performance/page-speed`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, device: config.device, timeout: config.timeout })
+        body: JSON.stringify({ url, device: config.device, timeout: config.timeout }),
       });
 
       if (!response.ok) {
@@ -207,7 +221,6 @@ export class PerformanceTestCore {
 
       const data = await response.json();
       return data.success ? data.data : this.getDefaultPageSpeedMetrics(url);
-
     } catch (error) {
       Logger.warn('页面速度检测失败，使用客户端分析:', { error: String(error) });
       return await this.getDefaultPageSpeedMetrics(url);
@@ -217,14 +230,17 @@ export class PerformanceTestCore {
   /**
    * Core Web Vitals检测
    */
-  private async checkCoreWebVitals(url: string, config: UnifiedPerformanceConfig): Promise<CoreWebVitals> {
+  private async checkCoreWebVitals(
+    url: string,
+    config: UnifiedPerformanceConfig
+  ): Promise<CoreWebVitals> {
     try {
       // 首先尝试API调用
       try {
         const response = await fetch(`${this.apiBaseUrl}/performance/core-web-vitals`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, device: config.device })
+          body: JSON.stringify({ url, device: config.device }),
         });
 
         if (response.ok) {
@@ -239,7 +255,6 @@ export class PerformanceTestCore {
 
       // API失败时使用客户端真实分析
       return await this.getDefaultCoreWebVitals(url);
-
     } catch (error) {
       Logger.warn('Core Web Vitals检测完全失败:', { error: String(error) });
       // 最后的回退方案
@@ -250,7 +265,7 @@ export class PerformanceTestCore {
         fcp: 1800,
         fmp: 2200,
         speedIndex: 2800,
-        tti: 3500
+        tti: 3500,
       };
     }
   }
@@ -258,12 +273,15 @@ export class PerformanceTestCore {
   /**
    * 资源分析
    */
-  private async analyzeResources(url: string, config: UnifiedPerformanceConfig): Promise<ResourceAnalysis> {
+  private async analyzeResources(
+    url: string,
+    config: UnifiedPerformanceConfig
+  ): Promise<ResourceAnalysis> {
     try {
       const response = await fetch(`${this.apiBaseUrl}/performance/resources`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, includeImages: config.imageOptimization })
+        body: JSON.stringify({ url, includeImages: config.imageOptimization }),
       });
 
       if (!response.ok) {
@@ -272,7 +290,6 @@ export class PerformanceTestCore {
 
       const data = await response.json();
       return data.success ? data.data : this.getDefaultResourceAnalysis();
-
     } catch (error) {
       Logger.warn('资源分析失败，使用模拟数据:', { error: String(error) });
       return this.getDefaultResourceAnalysis();
@@ -282,7 +299,10 @@ export class PerformanceTestCore {
   /**
    * 缓存分析
    */
-  private async analyzeCaching(url: string, config: UnifiedPerformanceConfig): Promise<CacheAnalysis> {
+  private async analyzeCaching(
+    url: string,
+    config: UnifiedPerformanceConfig
+  ): Promise<CacheAnalysis> {
     // 实现缓存分析逻辑
     return this.getDefaultCacheAnalysis();
   }
@@ -290,7 +310,10 @@ export class PerformanceTestCore {
   /**
    * 压缩分析
    */
-  private async analyzeCompression(url: string, config: UnifiedPerformanceConfig): Promise<CompressionAnalysis> {
+  private async analyzeCompression(
+    url: string,
+    config: UnifiedPerformanceConfig
+  ): Promise<CompressionAnalysis> {
     // 实现压缩分析逻辑
     return this.getDefaultCompressionAnalysis();
   }
@@ -303,7 +326,7 @@ export class PerformanceTestCore {
     return {
       score: Math.floor(Math.random() * 40) + 60,
       issues: [] as string[],
-      recommendations: [] as string[]
+      recommendations: [] as string[],
     };
   }
 
@@ -313,7 +336,9 @@ export class PerformanceTestCore {
    * 合并配置
    */
   private mergeConfig(config: Partial<UnifiedPerformanceConfig>): UnifiedPerformanceConfig {
-    const preset = config.level ? PERFORMANCE_CONFIG_PRESETS[config.level] : PERFORMANCE_CONFIG_PRESETS.standard;
+    const preset = config.level
+      ? PERFORMANCE_CONFIG_PRESETS[config.level]
+      : PERFORMANCE_CONFIG_PRESETS.standard;
     return { ...preset, ...config };
   }
 
@@ -359,7 +384,10 @@ export class PerformanceTestCore {
   /**
    * 报告进度
    */
-  private reportProgress(callback: PerformanceTestCallback | undefined, progress: PerformanceTestProgress): void {
+  private reportProgress(
+    callback: PerformanceTestCallback | undefined,
+    progress: PerformanceTestProgress
+  ): void {
     if (callback) {
       callback(progress);
     }
@@ -430,7 +458,8 @@ export class PerformanceTestCore {
     else if (metrics.responseTime > 500) score -= 10;
 
     // 页面大小评分
-    if (metrics.pageSize > 2000000) score -= 15; // 2MB
+    if (metrics.pageSize > 2000000)
+      score -= 15; // 2MB
     else if (metrics.pageSize > 1000000) score -= 10; // 1MB
 
     return Math.max(0, score);
@@ -499,10 +528,12 @@ export class PerformanceTestCore {
         pageSize,
         requestCount: resources.total,
         responseTime: Math.round(responseTime),
-        transferSize: Math.round(pageSize * 0.8) // 估算压缩后大小
+        transferSize: Math.round(pageSize * 0.8), // 估算压缩后大小
       };
     } catch (error) {
-      Logger.warn('Failed to measure real page speed, using estimated values:', { error: String(error) });
+      Logger.warn('Failed to measure real page speed, using estimated values:', {
+        error: String(error),
+      });
       return {
         loadTime: 2500,
         domContentLoaded: 1800,
@@ -510,7 +541,7 @@ export class PerformanceTestCore {
         pageSize: 1200000,
         requestCount: 35,
         responseTime: 800,
-        transferSize: 900000
+        transferSize: 900000,
       };
     }
   }
@@ -538,10 +569,12 @@ export class PerformanceTestCore {
         fcp: Math.round(fcp),
         fmp: Math.round(fcp * 1.3),
         speedIndex: Math.round(lcp * 0.8),
-        tti: Math.round(lcp * 1.5)
+        tti: Math.round(lcp * 1.5),
       };
     } catch (error) {
-      Logger.warn('Failed to measure real Core Web Vitals, using estimated values:', { error: String(error) });
+      Logger.warn('Failed to measure real Core Web Vitals, using estimated values:', {
+        error: String(error),
+      });
       return {
         lcp: 2400,
         fid: 120,
@@ -549,7 +582,7 @@ export class PerformanceTestCore {
         fcp: 1600,
         fmp: 2100,
         speedIndex: 2800,
-        tti: 3600
+        tti: 3600,
       };
     }
   }
@@ -560,25 +593,25 @@ export class PerformanceTestCore {
         count: Math.floor(Math.random() * 20) + 5,
         totalSize: Math.floor(Math.random() * 1000000) + 200000,
         unoptimized: Math.floor(Math.random() * 5),
-        missingAlt: Math.floor(Math.random() * 3)
+        missingAlt: Math.floor(Math.random() * 3),
       },
       javascript: {
         count: Math.floor(Math.random() * 15) + 3,
         totalSize: Math.floor(Math.random() * 500000) + 100000,
         blocking: Math.floor(Math.random() * 3),
-        unused: Math.floor(Math.random() * 30)
+        unused: Math.floor(Math.random() * 30),
       },
       css: {
         count: Math.floor(Math.random() * 10) + 2,
         totalSize: Math.floor(Math.random() * 200000) + 50000,
         blocking: Math.floor(Math.random() * 2),
-        unused: Math.floor(Math.random() * 20)
+        unused: Math.floor(Math.random() * 20),
       },
       fonts: {
         count: Math.floor(Math.random() * 5) + 1,
         totalSize: Math.floor(Math.random() * 100000) + 20000,
-        webFonts: Math.floor(Math.random() * 3) + 1
-      }
+        webFonts: Math.floor(Math.random() * 3) + 1,
+      },
     };
   }
 
@@ -592,8 +625,8 @@ export class PerformanceTestCore {
         cacheControl: Math.random() > 0.3,
         etag: Math.random() > 0.5,
         lastModified: Math.random() > 0.4,
-        expires: Math.random() > 0.6
-      }
+        expires: Math.random() > 0.6,
+      },
     };
   }
 
@@ -607,7 +640,7 @@ export class PerformanceTestCore {
       originalSize,
       compressedSize: Math.floor(originalSize * (1 - ratio)),
       compressible: { count: 20, size: originalSize },
-      uncompressed: { count: 5, size: Math.floor(originalSize * 0.2) }
+      uncompressed: { count: 5, size: Math.floor(originalSize * 0.2) },
     };
   }
 
@@ -625,7 +658,7 @@ export class PerformanceTestCore {
         description: '页面加载时间超过3秒，建议优化关键资源加载',
         impact: 'high',
         difficulty: 'medium',
-        metrics: ['loadTime', 'fcp']
+        metrics: ['loadTime', 'fcp'],
       });
     }
 
@@ -637,7 +670,7 @@ export class PerformanceTestCore {
         description: 'LCP超过2.5秒，建议优化主要内容的加载',
         impact: 'high',
         difficulty: 'medium',
-        metrics: ['lcp']
+        metrics: ['lcp'],
       });
     }
 
@@ -657,7 +690,7 @@ export class PerformanceTestCore {
         severity: 'high',
         description: '页面大小超过2MB，影响加载速度',
         affectedMetrics: ['loadTime', 'transferSize'],
-        solution: '压缩图片、启用Gzip压缩、移除未使用的资源'
+        solution: '压缩图片、启用Gzip压缩、移除未使用的资源',
       });
     }
 
@@ -672,7 +705,7 @@ export class PerformanceTestCore {
       await fetch(`${this.apiBaseUrl}/performance/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ result, userId })
+        body: JSON.stringify({ result, userId }),
       });
     } catch (error) {
       Logger.warn('保存性能测试结果失败:', { error: String(error) });
@@ -699,7 +732,7 @@ export class PerformanceTestCore {
         lazyLoading: html.includes('loading="lazy"'),
         criticalCSS: html.includes('<style>') && html.includes('critical'),
         webAssembly: html.includes('.wasm'),
-        pushState: html.includes('pushState') || html.includes('replaceState')
+        pushState: html.includes('pushState') || html.includes('replaceState'),
       };
 
       const score = Object.values(features).filter(Boolean).length * 10;
@@ -722,16 +755,15 @@ export class PerformanceTestCore {
         score: Math.min(100, score),
         features,
         recommendations,
-        modernityLevel: score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low'
+        modernityLevel: score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low',
       };
-
     } catch (error) {
       Logger.warn('现代Web功能检查失败:', { error: String(error) });
       return {
         score: 0,
         features: {},
         recommendations: ['无法检查现代Web功能'],
-        modernityLevel: 'unknown'
+        modernityLevel: 'unknown',
       };
     }
   }
@@ -748,37 +780,36 @@ export class PerformanceTestCore {
         compression: {
           enabled: !!headers.get('content-encoding'),
           type: headers.get('content-encoding') || 'none',
-          score: headers.get('content-encoding') ? 100 : 0
+          score: headers.get('content-encoding') ? 100 : 0,
         },
         caching: {
           cacheControl: headers.get('cache-control') || 'none',
           etag: !!headers.get('etag'),
           lastModified: !!headers.get('last-modified'),
-          score: this.calculateCachingScore(headers)
+          score: this.calculateCachingScore(headers),
         },
         cdn: {
           detected: this.detectCDN(headers, url),
           provider: this.identifyCDNProvider(headers, url),
-          score: this.detectCDN(headers, url) ? 100 : 0
+          score: this.detectCDN(headers, url) ? 100 : 0,
         },
         http2: {
           enabled: headers.get('server')?.includes('h2') || false,
-          score: headers.get('server')?.includes('h2') ? 100 : 0
+          score: headers.get('server')?.includes('h2') ? 100 : 0,
         },
         security: {
           hsts: !!headers.get('strict-transport-security'),
           csp: !!headers.get('content-security-policy'),
-          score: this.calculateSecurityScore(headers)
-        }
+          score: this.calculateSecurityScore(headers),
+        },
       };
 
-      const overallScore = (
+      const overallScore =
         optimization.compression.score * 0.25 +
         optimization.caching.score * 0.3 +
         optimization.cdn.score * 0.2 +
         optimization.http2.score * 0.15 +
-        optimization.security.score * 0.1
-      );
+        optimization.security.score * 0.1;
 
       const recommendations = [];
       if (!optimization.compression.enabled) {
@@ -798,16 +829,15 @@ export class PerformanceTestCore {
         score: Math.round(overallScore),
         optimization,
         recommendations,
-        networkGrade: this.getNetworkGrade(overallScore)
+        networkGrade: this.getNetworkGrade(overallScore),
       };
-
     } catch (error) {
       Logger.warn('网络优化分析失败:', { error: String(error) });
       return {
         score: 0,
         optimization: {},
         recommendations: ['无法分析网络优化'],
-        networkGrade: 'F'
+        networkGrade: 'F',
       };
     }
   }
@@ -827,7 +857,7 @@ export class PerformanceTestCore {
         fonts: this.detectWebFonts(html),
         maps: this.detectMaps(html),
         chatWidgets: this.detectChatWidgets(html),
-        videoPlayers: this.detectVideoPlayers(html)
+        videoPlayers: this.detectVideoPlayers(html),
       };
 
       const totalServices = Object.values(thirdPartyServices).flat().length;
@@ -849,9 +879,8 @@ export class PerformanceTestCore {
         services: thirdPartyServices,
         totalCount: totalServices,
         recommendations,
-        impactLevel: totalServices > 15 ? 'high' : totalServices > 8 ? 'medium' : 'low'
+        impactLevel: totalServices > 15 ? 'high' : totalServices > 8 ? 'medium' : 'low',
       };
-
     } catch (error) {
       Logger.warn('第三方影响分析失败:', { error: String(error) });
       return {
@@ -859,7 +888,7 @@ export class PerformanceTestCore {
         services: {},
         totalCount: 0,
         recommendations: ['无法分析第三方影响'],
-        impactLevel: 'unknown'
+        impactLevel: 'unknown',
       };
     }
   }
@@ -879,8 +908,10 @@ export class PerformanceTestCore {
     const cdnHeaders = ['cf-ray', 'x-cache', 'x-served-by', 'x-amz-cf-id'];
     const cdnDomains = ['cloudflare', 'amazonaws', 'fastly', 'maxcdn', 'jsdelivr'];
 
-    return cdnHeaders.some(header => headers.get(header)) ||
-      cdnDomains.some(domain => url.includes(domain));
+    return (
+      cdnHeaders.some(header => headers.get(header)) ||
+      cdnDomains.some(domain => url.includes(domain))
+    );
   }
 
   private identifyCDNProvider(headers: Headers, url: string): string {
@@ -915,7 +946,7 @@ export class PerformanceTestCore {
       { name: 'Adobe Analytics', pattern: /omniture|s_code|adobe/ },
       { name: 'Mixpanel', pattern: /mixpanel/ },
       { name: 'Hotjar', pattern: /hotjar/ },
-      { name: 'Segment', pattern: /segment/ }
+      { name: 'Segment', pattern: /segment/ },
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -926,7 +957,7 @@ export class PerformanceTestCore {
       { name: 'Facebook Pixel', pattern: /facebook\.net|fbevents/ },
       { name: 'Twitter', pattern: /twitter\.com\/widgets/ },
       { name: 'LinkedIn', pattern: /linkedin\.com/ },
-      { name: 'Pinterest', pattern: /pinterest\.com/ }
+      { name: 'Pinterest', pattern: /pinterest\.com/ },
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -936,7 +967,7 @@ export class PerformanceTestCore {
     const patterns = [
       { name: 'Google Ads', pattern: /googleadservices|googlesyndication/ },
       { name: 'Amazon Associates', pattern: /amazon-adsystem/ },
-      { name: 'Media.net', pattern: /media\.net/ }
+      { name: 'Media.net', pattern: /media\.net/ },
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -946,7 +977,7 @@ export class PerformanceTestCore {
     const patterns = [
       { name: 'Google Fonts', pattern: /fonts\.googleapis\.com/ },
       { name: 'Adobe Fonts', pattern: /typekit\.net|use\.typekit/ },
-      { name: 'Font Awesome', pattern: /fontawesome/ }
+      { name: 'Font Awesome', pattern: /fontawesome/ },
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -956,7 +987,7 @@ export class PerformanceTestCore {
     const patterns = [
       { name: 'Google Maps', pattern: /maps\.googleapis\.com/ },
       { name: 'Mapbox', pattern: /mapbox/ },
-      { name: 'OpenStreetMap', pattern: /openstreetmap/ }
+      { name: 'OpenStreetMap', pattern: /openstreetmap/ },
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -966,7 +997,7 @@ export class PerformanceTestCore {
     const patterns = [
       { name: 'Intercom', pattern: /intercom/ },
       { name: 'Zendesk', pattern: /zendesk/ },
-      { name: 'Drift', pattern: /drift/ }
+      { name: 'Drift', pattern: /drift/ },
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -976,7 +1007,7 @@ export class PerformanceTestCore {
     const patterns = [
       { name: 'YouTube', pattern: /youtube\.com\/embed/ },
       { name: 'Vimeo', pattern: /vimeo\.com/ },
-      { name: 'Wistia', pattern: /wistia/ }
+      { name: 'Wistia', pattern: /wistia/ },
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -998,7 +1029,7 @@ export class PerformanceTestCore {
       scripts,
       stylesheets,
       fonts,
-      total: images + scripts + stylesheets + fonts
+      total: images + scripts + stylesheets + fonts,
     };
   }
 
@@ -1070,7 +1101,9 @@ export class PerformanceTestCore {
     baseCLS += imagesWithoutDimensions * 0.03;
 
     // 动态内容
-    const dynamicElements = dom.querySelectorAll('[style*="position: absolute"], [style*="position: fixed"]').length;
+    const dynamicElements = dom.querySelectorAll(
+      '[style*="position: absolute"], [style*="position: fixed"]'
+    ).length;
     baseCLS += dynamicElements * 0.01;
 
     // 广告和嵌入内容

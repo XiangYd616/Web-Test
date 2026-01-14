@@ -1,9 +1,9 @@
 ﻿/**
  * 后台测试管理器 - 重构优化版本
- * 现在内部使用统一测试服务，保持向后兼容性
+ * 现在内部使用测试服务，保持向后兼容性
  * 已迁移到新的类型系统，使用统一的类型定义
  *
- * @deprecated 建议使用 unifiedTestService 或通过 serviceCompatibility 导入
+ * @deprecated 建议使用 testService 或通过 serviceCompatibility 导入
  */
 
 import Logger from '@/utils/logger';
@@ -11,13 +11,11 @@ import type { CompletionCallback, ErrorCallback, ProgressCallback } from '../typ
 
 import { TestStatus, TestType } from '../types/enums';
 
-// 导入统一测试服务
+// 导入测试服务
 import type { TestCallbacks } from '../types/api/index';
-import type { UnifiedTestConfig } from '../types/base.types';
-import { unifiedTestService } from './testing/testService';
 
 // 为了兼容性创建别名
-type UnifiedTestCallbacks = TestCallbacks;
+type TestCallbacks = TestCallbacks;
 
 export interface TestInfo {
   id: string;

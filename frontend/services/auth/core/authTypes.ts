@@ -1,6 +1,6 @@
 ﻿/**
  * 认证核心类型定义
- * 统一的认证接口，支持基础和企业级功能
+ * 认证接口，支持基础和企业级功能
  */
 
 import type {
@@ -8,9 +8,9 @@ import type {
   LoginCredentials as BaseLoginCredentials,
   RegisterData as BaseRegisterData,
   User as BaseUser,
-} from '../../../types/unified/models';
+} from '../../../types/auth/models';
 
-// 使用统一的类型
+// 使用类型
 export type User = BaseUser;
 export type AuthResponse = BaseAuthResponse;
 export type LoginCredentials = BaseLoginCredentials;

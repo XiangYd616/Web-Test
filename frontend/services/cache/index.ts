@@ -1,8 +1,8 @@
 /**
- * 统一缓存服务导出
+ * 缓存服务导出
  * 版本: v3.0.0
  *
- * 提供统一的缓存接口，整合所有缓存功能
+ * 提供缓存接口，整合所有缓存功能
  */
 
 // 主要导出 - CacheManager是最完整的实现
@@ -35,7 +35,7 @@ export const cacheService = cacheManager;
  * 向后兼容别名
  * @deprecated 请使用 cacheManager
  */
-export const unifiedCache = cacheManager;
+export const cache = cacheManager;
 
 // 默认导出
 export default cacheManager;

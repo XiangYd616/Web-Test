@@ -1,12 +1,12 @@
 /**
- * Í³Ò»API´íÎó´¦ÀíÆ÷
- * °æ±¾: v2.0.0
+ * APIé”™è¯¯å¤„ç†å™¨
+ * ç‰ˆæœ¬: v2.0.0
  */
 
 import type { ApiError, ApiResponse } from '../../types/api';
 import { ErrorCode } from '../../types/api';
 
-// ´íÎóÀàĞÍÃ¶¾Ù
+// é”™è¯¯ç±»å‹æšä¸¾
 export enum ErrorType {
   NETWORK = 'network',
   VALIDATION = 'validation',
@@ -15,16 +15,16 @@ export enum ErrorType {
   NOT_FOUND = 'not_found',
   SERVER = 'server',
   TIMEOUT = 'timeout',
-  UNKNOWN = 'unknown'
+  UNKNOWN = 'unknown',
 }
 
-// ´íÎó´¦ÀíÆ÷½Ó¿Ú
+// é”™è¯¯å¤„ç†å™¨æ¥å£
 export interface ErrorHandler {
   handle(error: any): ApiError;
   canHandle(error: any): boolean;
 }
 
-// ÍøÂç´íÎó´¦ÀíÆ÷
+// ç½‘ç»œé”™è¯¯å¤„ç†å™¨
 export class NetworkErrorHandler implements ErrorHandler {
   canHandle(error: any): boolean {
     return error.name === 'NetworkError' || error.code === 'NETWORK_ERROR';
@@ -33,14 +33,14 @@ export class NetworkErrorHandler implements ErrorHandler {
   handle(error: any): ApiError {
     return {
       code: ErrorCode.NETWORK_ERROR,
-      message: 'ÍøÂçÁ¬½ÓÊ§°Ü£¬Çë¼ì²éÍøÂçÉèÖÃ',
+      message: 'ç½‘ç»œè¿æ¥å¤±è´¥ï¼Œè¯·æ£€æŸ¥ç½‘ç»œè®¾ç½®',
       details: error,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
-// ÑéÖ¤´íÎó´¦ÀíÆ÷
+// éªŒè¯é”™è¯¯å¤„ç†å™¨
 export class ValidationErrorHandler implements ErrorHandler {
   canHandle(error: any): boolean {
     return error.status === 400 || error.code === 'VALIDATION_ERROR';
@@ -49,14 +49,14 @@ export class ValidationErrorHandler implements ErrorHandler {
   handle(error: any): ApiError {
     return {
       code: ErrorCode.VALIDATION_ERROR,
-      message: error.message || 'ÇëÇó²ÎÊıÑéÖ¤Ê§°Ü',
+      message: error.message || 'è¯·æ±‚å‚æ•°éªŒè¯å¤±è´¥',
       details: error.details || error.errors,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
-// ÈÏÖ¤´íÎó´¦ÀíÆ÷
+// è®¤è¯é”™è¯¯å¤„ç†å™¨
 export class AuthenticationErrorHandler implements ErrorHandler {
   canHandle(error: any): boolean {
     return error.status === 401 || error.code === 'AUTHENTICATION_ERROR';
@@ -65,14 +65,14 @@ export class AuthenticationErrorHandler implements ErrorHandler {
   handle(error: any): ApiError {
     return {
       code: ErrorCode.UNAUTHORIZED,
-      message: 'Éí·İÑéÖ¤Ê§°Ü£¬ÇëÖØĞÂµÇÂ¼',
+      message: 'èº«ä»½éªŒè¯å¤±è´¥ï¼Œè¯·é‡æ–°ç™»å½•',
       details: error,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
-// ÊÚÈ¨´íÎó´¦ÀíÆ÷
+// æˆæƒé”™è¯¯å¤„ç†å™¨
 export class AuthorizationErrorHandler implements ErrorHandler {
   canHandle(error: any): boolean {
     return error.status === 403 || error.code === 'AUTHORIZATION_ERROR';
@@ -81,14 +81,14 @@ export class AuthorizationErrorHandler implements ErrorHandler {
   handle(error: any): ApiError {
     return {
       code: ErrorCode.FORBIDDEN,
-      message: 'È¨ÏŞ²»×ã£¬ÎŞ·¨Ö´ĞĞ´Ë²Ù×÷',
+      message: 'æƒé™ä¸è¶³ï¼Œæ— æ³•æ‰§è¡Œæ­¤æ“ä½œ',
       details: error,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
-// 404´íÎó´¦ÀíÆ÷
+// 404é”™è¯¯å¤„ç†å™¨
 export class NotFoundErrorHandler implements ErrorHandler {
   canHandle(error: any): boolean {
     return error.status === 404 || error.code === 'NOT_FOUND';
@@ -97,14 +97,14 @@ export class NotFoundErrorHandler implements ErrorHandler {
   handle(error: any): ApiError {
     return {
       code: ErrorCode.NOT_FOUND,
-      message: 'ÇëÇóµÄ×ÊÔ´²»´æÔÚ',
+      message: 'è¯·æ±‚çš„èµ„æºä¸å­˜åœ¨',
       details: error,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
-// ·şÎñÆ÷´íÎó´¦ÀíÆ÷
+// æœåŠ¡å™¨é”™è¯¯å¤„ç†å™¨
 export class ServerErrorHandler implements ErrorHandler {
   canHandle(error: any): boolean {
     return error.status >= 500 || error.code === 'SERVER_ERROR';
@@ -113,14 +113,14 @@ export class ServerErrorHandler implements ErrorHandler {
   handle(error: any): ApiError {
     return {
       code: ErrorCode.INTERNAL_SERVER_ERROR,
-      message: '·şÎñÆ÷ÄÚ²¿´íÎó£¬ÇëÉÔºóÖØÊÔ',
+      message: 'æœåŠ¡å™¨å†…éƒ¨é”™è¯¯ï¼Œè¯·ç¨åé‡è¯•',
       details: error,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
-// ³¬Ê±´íÎó´¦ÀíÆ÷
+// è¶…æ—¶é”™è¯¯å¤„ç†å™¨
 export class TimeoutErrorHandler implements ErrorHandler {
   canHandle(error: any): boolean {
     return error.name === 'TimeoutError' || error.code === 'TIMEOUT';
@@ -129,14 +129,14 @@ export class TimeoutErrorHandler implements ErrorHandler {
   handle(error: any): ApiError {
     return {
       code: ErrorCode.TIMEOUT_ERROR,
-      message: 'ÇëÇó³¬Ê±£¬ÇëÉÔºóÖØÊÔ',
+      message: 'è¯·æ±‚è¶…æ—¶ï¼Œè¯·ç¨åé‡è¯•',
       details: error,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
-// Ä¬ÈÏ´íÎó´¦ÀíÆ÷
+// é»˜è®¤é”™è¯¯å¤„ç†å™¨
 export class DefaultErrorHandler implements ErrorHandler {
   canHandle(error: any): boolean {
     return true;
@@ -145,14 +145,14 @@ export class DefaultErrorHandler implements ErrorHandler {
   handle(error: any): ApiError {
     return {
       code: ErrorCode.UNKNOWN_ERROR,
-      message: error.message || 'Î´Öª´íÎó',
+      message: error.message || 'æœªçŸ¥é”™è¯¯',
       details: error,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
-// Í³Ò»´íÎó´¦ÀíÆ÷
+// ç»Ÿä¸€é”™è¯¯å¤„ç†å™¨
 export class UnifiedErrorHandler {
   private handlers: ErrorHandler[] = [
     new NetworkErrorHandler(),
@@ -162,7 +162,7 @@ export class UnifiedErrorHandler {
     new NotFoundErrorHandler(),
     new ServerErrorHandler(),
     new TimeoutErrorHandler(),
-    new DefaultErrorHandler()
+    new DefaultErrorHandler(),
   ];
 
   handle(error: any): ApiError {
@@ -178,14 +178,13 @@ export class UnifiedErrorHandler {
       meta: {
         timestamp: apiError.timestamp,
         code: apiError.code,
-        details: apiError.details
-      }
+        details: apiError.details,
+      },
     };
   }
 }
 
-// µ¼³öÄ¬ÈÏÊµÀı
+// å¯¼å‡ºé»˜è®¤å®ä¾‹
 export const _errorHandler = new UnifiedErrorHandler();
 
-// µ¼³öËùÓĞÀàĞÍºÍÀàÒÑÔÚÉÏÃæÍê³É
-
+// å¯¼å‡ºæ‰€æœ‰ç±»å‹å’Œç±»å·²åœ¨ä¸Šé¢å®Œæˆ

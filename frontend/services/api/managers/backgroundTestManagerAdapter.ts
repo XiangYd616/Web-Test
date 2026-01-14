@@ -1,6 +1,6 @@
 ﻿/**
  * backgroundTestManager适配器
- * 提供可选的统一API调用支持，保持与现有backgroundTestManager的完全兼容
+ * 提供可选的API调用支持，保持与现有backgroundTestManager的完全兼容
  *
  * 文件已移动到 services/api/managers/ 目录以符合项目结构规范
  */
@@ -10,7 +10,7 @@
 // import { TestStatus } from '@shared/types';
 // 使用字符串字面量类型替代
 type TestStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-// import { unifiedTestApiClient } from '../unifiedTestApiService';
+// import { testApiClient } from '../testApiService';
 import Logger from '@/utils/logger';
 import { testApiService } from '../testApiService';
 
@@ -38,11 +38,11 @@ export interface TestInfo {
 
 /**
  * backgroundTestManager适配器类
- * 提供可选的统一API支持，同时保持完全向后兼容
+ * 提供可选的API支持，同时保持完全向后兼容
  */
 export class BackgroundTestManagerAdapter {
   private config: any = {
-    useUnifiedApi: false, // 默认不使用，保持现有行为
+    useApi: false, // 默认不使用，保持现有行为
     fallbackToOriginal: true,
     enableWebSocket: true,
     enableLogging: false,

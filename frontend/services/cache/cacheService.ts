@@ -1,9 +1,7 @@
-import Logger from '@/utils/logger';
-
-﻿/**
- * 🗄️ 统一缓存服务
+import Logger from '@/utils/logger'; /**
+ * 🗄️ 缓存服务
  * 为测试结果和状态提供缓存和持久化支持
- * 
+ *
  * 功能特性：
  * - 内存缓存 (快速访问)
  * - localStorage持久化 (跨会话)
@@ -45,7 +43,7 @@ export interface CacheStats {
 }
 
 /**
- * 统一缓存服务类
+ * 缓存服务类
  */
 export class CacheService {
   private static instance: CacheService;
@@ -58,7 +56,7 @@ export class CacheService {
     totalMisses: 0,
     hitRate: 0,
     memoryUsage: 0,
-    lastCleanup: Date.now()
+    lastCleanup: Date.now(),
   };
 
   private constructor(config?: Partial<CacheConfig>) {
@@ -69,7 +67,7 @@ export class CacheService {
       enableCompression: true,
       enableMetrics: true,
       cleanupInterval: 60000, // 1分钟
-      ...config
+      ...config,
     };
 
     this.initializeService();
@@ -114,7 +112,7 @@ export class CacheService {
       ttl: ttl || this.config.defaultTTL,
       accessCount: 0,
       lastAccessed: Date.now(),
-      compressed: false
+      compressed: false,
     };
 
     // 压缩大数据
@@ -249,8 +247,10 @@ export class CacheService {
     let oldestAccess = Infinity;
 
     for (const [key, item] of this.memoryCache.entries()) {
-      if (item.accessCount < leastUsedCount ||
-        (item.accessCount === leastUsedCount && item.lastAccessed < oldestAccess)) {
+      if (
+        item.accessCount < leastUsedCount ||
+        (item.accessCount === leastUsedCount && item.lastAccessed < oldestAccess)
+      ) {
         leastUsedKey = key;
         leastUsedCount = item.accessCount;
         oldestAccess = item.lastAccessed;
@@ -289,7 +289,8 @@ export class CacheService {
    */
   private updateStats(): void {
     this.stats.memoryItems = this.memoryCache.size;
-    this.stats.hitRate = this.stats.totalHits / (this.stats.totalHits + this.stats.totalMisses) * 100;
+    this.stats.hitRate =
+      (this.stats.totalHits / (this.stats.totalHits + this.stats.totalMisses)) * 100;
     this.stats.memoryUsage = this.estimateMemoryUsage();
   }
 
@@ -304,7 +305,7 @@ export class CacheService {
       totalMisses: 0,
       hitRate: 0,
       memoryUsage: 0,
-      lastCleanup: Date.now()
+      lastCleanup: Date.now(),
     };
   }
 
@@ -329,7 +330,7 @@ export class CacheService {
       const data = {
         cache: Array.from(this.memoryCache.entries()),
         stats: this.stats,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       localStorage.setItem('unifiedCache', JSON.stringify(data));

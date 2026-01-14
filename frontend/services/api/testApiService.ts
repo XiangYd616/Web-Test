@@ -1,6 +1,6 @@
 ﻿/**
  * 测试API服务
- * 统一的测试相关API调用服务
+ * 测试相关API调用服务
  * 基于后端API规范v1.0实现
  *
  * 已迁移到新的类型系统，使用统一的类型定义
@@ -9,14 +9,9 @@
 
 import Logger from '@/utils/logger';
 import type { ApiResponse, TestCallbacks } from '../../types/api/index';
-import type { UnifiedTestConfig } from '../../types/base.types';
+import type { TestConfig } from '../../types/base.types';
 import { TestStatus as TestStatusEnum } from '../../types/enums';
-import type {
-  TestExecution,
-  TestHistory,
-  TestStatus,
-  TestType,
-} from '../../types/unified/testTypes';
+import type { TestExecution, TestHistory, TestStatus, TestType } from '../../types/test/testTypes';
 import { PermissionChecker, _TestPermissions as TestPermissions } from '../auth/authDecorator';
 import { apiService } from './apiService';
 
@@ -26,7 +21,7 @@ interface TestApiClient {
   post<T = any>(url: string, data?: unknown, config?: any): Promise<ApiResponse<T>>;
   put<T = any>(url: string, data?: unknown, config?: any): Promise<ApiResponse<T>>;
   delete<T = any>(url: string, config?: any): Promise<ApiResponse<T>>;
-  executeTest(config: UnifiedTestConfig): Promise<ApiResponse<TestExecution>>;
+  executeTest(config: TestConfig): Promise<ApiResponse<TestExecution>>;
 }
 
 interface RequestConfig {
@@ -38,7 +33,7 @@ interface ApiRequestConfig extends RequestConfig {
   retries?: number;
 }
 
-// 本地类型定义已迁移到统一的类型系统
+// 本地类型定义已迁移到类型系统
 // 请从 '../../types' 导入所需的类型
 
 // 保留一些后端API特定的接口

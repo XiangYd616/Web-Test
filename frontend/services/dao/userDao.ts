@@ -3,8 +3,8 @@
  * 提供用户相关的数据库操作
  */
 
+import type { User } from '../../types/auth/models';
 import { UserRole, UserStatus } from '../../types/enums';
-import type { User } from '../../types/unified/models';
 import type { CreateUserData, UpdateUserData } from '../../types/user';
 
 // 模拟用户数据存储
