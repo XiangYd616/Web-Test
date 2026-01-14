@@ -166,7 +166,8 @@ export function extractApiError<T>(response: ApiResponse<T>): string | null {
   if (typeof error === 'string') {
     return error;
   } else if (error && typeof error === 'object' && 'message' in error) {
-    return error.message || '未知错误';
+    const errorObj = error as { message?: string };
+    return errorObj.message || '未知错误';
   }
   return '未知错误';
 }

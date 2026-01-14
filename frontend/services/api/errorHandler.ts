@@ -33,6 +33,10 @@ export interface ErrorContext extends UtilsErrorContext {
   method?: string;
   userId?: string;
   retryCount?: number;
+  status?: number;
+  statusText?: string;
+  responseData?: any;
+  duration?: number;
 }
 
 // 错误处理结果
@@ -55,7 +59,7 @@ const DEFAULT_CONFIG: ErrorHandlerConfig = {
     'TIMEOUT_ERROR',
     'SERVER_ERROR',
     'SERVICE_UNAVAILABLE',
-    'CONNECTION_ERROR'
+    'CONNECTION_ERROR',
   ] as ErrorCode[],
   userFriendlyMessages: {
     [ErrorCode.NETWORK_ERROR]: '网络连接失败，请检查网络设置后重试',
@@ -77,8 +81,8 @@ const DEFAULT_CONFIG: ErrorHandlerConfig = {
     [ErrorCode.RATE_LIMIT_EXCEEDED]: '请求过于频繁，请稍后重试',
     [ErrorCode.QUOTA_EXCEEDED]: '已达到使用限额，请升级账户或稍后重试',
     [ErrorCode.RESOURCE_LOCKED]: '资源被锁定，请稍后重试',
-    [ErrorCode.UNKNOWN_ERROR]: '发生未知错误，请稍后重试或联系技术支持'
-  } as Record<ErrorCode, string>
+    [ErrorCode.UNKNOWN_ERROR]: '发生未知错误，请稍后重试或联系技术支持',
+  } as Record<ErrorCode, string>,
 };
 
 export class ApiErrorHandler {
@@ -112,10 +116,11 @@ export class ApiErrorHandler {
       url: context?.url,
       method: context?.method,
       timestamp: context?.timestamp || Date.now(),
-      userAgent: context?.userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : undefined),
+      userAgent:
+        context?.userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : undefined),
       userId: context?.userId,
       operation: context?.operation,
-      retryCount: this.retryCount.get(context?.requestId || '') || 0
+      retryCount: this.retryCount.get(context?.requestId || '') || 0,
     };
 
     // 标准化错误
@@ -133,7 +138,7 @@ export class ApiErrorHandler {
       url: errorContext.url,
       operation: errorContext.operation,
       userAgent: errorContext.userAgent,
-      timestamp: errorContext.timestamp
+      timestamp: errorContext.timestamp,
     };
 
     // 记录错误历史
@@ -149,7 +154,7 @@ export class ApiErrorHandler {
       userMessage,
       error: apiError,
       context: errorContext,
-      enhancedError
+      enhancedError,
     };
   }
 
@@ -169,7 +174,7 @@ export class ApiErrorHandler {
       baseDelay: retryConfig?.baseDelay ?? this.config.retryDelay,
       maxDelay: retryConfig?.maxDelay ?? 30000,
       exponentialBackoff: retryConfig?.exponentialBackoff ?? this.config.exponentialBackoff,
-      jitter: retryConfig?.jitter ?? true
+      jitter: retryConfig?.jitter ?? true,
     };
 
     let lastError: any;
@@ -186,7 +191,7 @@ export class ApiErrorHandler {
 
         const { shouldRetry } = await this.handleError(error, {
           ...finalContext,
-          retryCount: attempt - 1
+          retryCount: attempt - 1,
         });
 
         if (!shouldRetry || attempt === maxAttempts) {
@@ -211,7 +216,7 @@ export class ApiErrorHandler {
     if (err.code && err.message) {
       return {
         ...err,
-        context: { ...err.context, ...context }
+        context: { ...err.context, ...context },
       } as ApiError;
     }
 
@@ -223,11 +228,11 @@ export class ApiErrorHandler {
         details: {
           originalError: err.message,
           type: err.name,
-          stack: err.stack
+          stack: err.stack,
         },
         context,
         timestamp: new Date().toISOString(),
-        retryable: true
+        retryable: true,
       };
     }
 
@@ -238,11 +243,11 @@ export class ApiErrorHandler {
         message: '请求超时',
         details: {
           timeout: err.timeout,
-          originalError: err.message
+          originalError: err.message,
         },
         context,
         timestamp: new Date().toISOString(),
-        retryable: true
+        retryable: true,
       };
     }
 
@@ -258,11 +263,11 @@ export class ApiErrorHandler {
       details: {
         originalError: err,
         type: err.name,
-        stack: err.stack
+        stack: err.stack,
       },
       context,
       timestamp: new Date().toISOString(),
-      retryable: false
+      retryable: false,
     };
   }
 
@@ -279,7 +284,7 @@ export class ApiErrorHandler {
       return {
         ...data.error,
         context,
-        retryable: this.isRetryableHttpStatus(status)
+        retryable: this.isRetryableHttpStatus(status),
       };
     }
 
@@ -297,13 +302,13 @@ export class ApiErrorHandler {
       500: { code: ErrorCode.INTERNAL_SERVER_ERROR, message: '服务器内部错误', retryable: true },
       502: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '网关错误', retryable: true },
       503: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '服务不可用', retryable: true },
-      504: { code: ErrorCode.TIMEOUT_ERROR, message: '网关超时', retryable: true }
+      504: { code: ErrorCode.TIMEOUT_ERROR, message: '网关超时', retryable: true },
     };
 
     const errorInfo = errorMapping[status] || {
       code: ErrorCode.UNKNOWN_ERROR,
       message: `HTTP ${status} 错误`,
-      retryable: status >= 500
+      retryable: status >= 500,
     };
 
     return {
@@ -313,11 +318,11 @@ export class ApiErrorHandler {
         status,
         statusText: err.response?.statusText,
         data,
-        headers: err.response?.headers
+        headers: err.response?.headers,
       },
       context,
       timestamp: new Date().toISOString(),
-      retryable: errorInfo.retryable
+      retryable: errorInfo.retryable,
     };
   }
 
@@ -357,7 +362,10 @@ export class ApiErrorHandler {
    * 获取用户友好的错误消息
    */
   public getUserFriendlyMessage(errorCode: ErrorCode): string {
-    return this.config.userFriendlyMessages[errorCode] || this.config.userFriendlyMessages[ErrorCode.UNKNOWN_ERROR];
+    return (
+      this.config.userFriendlyMessages[errorCode] ||
+      this.config.userFriendlyMessages[ErrorCode.UNKNOWN_ERROR]
+    );
   }
 
   /**
@@ -425,7 +433,7 @@ export class ApiErrorHandler {
       message: error.message,
       details: error.details,
       context,
-      retryable: error.retryable
+      retryable: error.retryable,
     };
 
     // 在浏览器环境中使用console，在Node.js环境中可以集成专业日志库
@@ -454,13 +462,17 @@ export class ApiErrorHandler {
   /**
    * 获取错误统计信息
    */
-  getErrorStats(): { totalErrors: number; errorsByCode: Record<string, number>; recentErrors: ErrorContext[] } {
+  getErrorStats(): {
+    totalErrors: number;
+    errorsByCode: Record<string, number>;
+    recentErrors: ErrorContext[];
+  } {
     const errorsByCode: Record<string, number> = {};
     const recentErrors: ErrorContext[] = [];
     let totalErrors = 0;
 
-    this.errorHistory.forEach((contexts) => {
-      contexts.forEach((context) => {
+    this.errorHistory.forEach(contexts => {
+      contexts.forEach(context => {
         totalErrors++;
         recentErrors.push(context);
       });
@@ -472,7 +484,7 @@ export class ApiErrorHandler {
     return {
       totalErrors,
       errorsByCode,
-      recentErrors: recentErrors.slice(0, 20) // 返回最近20个错误
+      recentErrors: recentErrors.slice(0, 20), // 返回最近20个错误
     };
   }
 
@@ -492,7 +504,9 @@ export class ApiErrorHandler {
    */
   clearErrorHistory(userId?: string): void {
     if (userId) {
-      const keysToDelete = Array.from(this.errorHistory.keys()).filter(key => key.startsWith(userId));
+      const keysToDelete = Array.from(this.errorHistory.keys()).filter(key =>
+        key.startsWith(userId)
+      );
       keysToDelete.forEach(key => this.errorHistory.delete(key));
     } else {
       this.errorHistory.clear();
@@ -517,14 +531,21 @@ export class ApiErrorHandler {
    * 检查错误是否为认证相关
    */
   isAuthError(error: ApiError): boolean {
-    return ['TOKEN_EXPIRED', 'TOKEN_INVALID', 'INVALID_CREDENTIALS', 'PERMISSION_DENIED'].includes(error.code);
+    return ['TOKEN_EXPIRED', 'TOKEN_INVALID', 'INVALID_CREDENTIALS', 'PERMISSION_DENIED'].includes(
+      error.code
+    );
   }
 
   /**
    * 检查错误是否需要用户干预
    */
   requiresUserIntervention(error: ApiError): boolean {
-    return ['VALIDATION_ERROR', 'INVALID_CREDENTIALS', 'WEAK_PASSWORD', 'EMAIL_ALREADY_EXISTS'].includes(error.code);
+    return [
+      'VALIDATION_ERROR',
+      'INVALID_CREDENTIALS',
+      'WEAK_PASSWORD',
+      'EMAIL_ALREADY_EXISTS',
+    ].includes(error.code);
   }
 
   /**
@@ -532,15 +553,15 @@ export class ApiErrorHandler {
    */
   getErrorSeverity(error: ApiError): 'low' | 'medium' | 'high' | 'critical' {
     const severityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
-      'NETWORK_ERROR': 'medium',
-      'TIMEOUT_ERROR': 'medium',
-      'SERVER_ERROR': 'high',
-      'SERVICE_UNAVAILABLE': 'high',
-      'TOKEN_EXPIRED': 'medium',
-      'PERMISSION_DENIED': 'high',
-      'VALIDATION_ERROR': 'low',
-      'ACCOUNT_LOCKED': 'critical',
-      'UNKNOWN_ERROR': 'medium'
+      NETWORK_ERROR: 'medium',
+      TIMEOUT_ERROR: 'medium',
+      SERVER_ERROR: 'high',
+      SERVICE_UNAVAILABLE: 'high',
+      TOKEN_EXPIRED: 'medium',
+      PERMISSION_DENIED: 'high',
+      VALIDATION_ERROR: 'low',
+      ACCOUNT_LOCKED: 'critical',
+      UNKNOWN_ERROR: 'medium',
     };
 
     return severityMap[error.code] || 'medium';
@@ -570,7 +591,7 @@ export function useErrorHandler() {
     clearErrorHistory: apiErrorHandler.clearErrorHistory.bind(apiErrorHandler),
     isAuthError: apiErrorHandler.isAuthError.bind(apiErrorHandler),
     requiresUserIntervention: apiErrorHandler.requiresUserIntervention.bind(apiErrorHandler),
-    getErrorSeverity: apiErrorHandler.getErrorSeverity.bind(apiErrorHandler)
+    getErrorSeverity: apiErrorHandler.getErrorSeverity.bind(apiErrorHandler),
   };
 }
 
@@ -584,7 +605,12 @@ export const ErrorHandlerUtils = {
     message,
     details,
     timestamp: new Date().toISOString(),
-    retryable: [ErrorCode.NETWORK_ERROR, ErrorCode.TIMEOUT_ERROR, ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.SERVICE_UNAVAILABLE].includes(code)
+    retryable: [
+      ErrorCode.NETWORK_ERROR,
+      ErrorCode.TIMEOUT_ERROR,
+      ErrorCode.INTERNAL_SERVER_ERROR,
+      ErrorCode.SERVICE_UNAVAILABLE,
+    ].includes(code),
   }),
 
   /**
@@ -618,5 +644,5 @@ export const ErrorHandlerUtils = {
       `HTTP ${status} Error`,
       { status, statusText: response.statusText, data }
     );
-  }
+  },
 };

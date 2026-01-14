@@ -10,7 +10,7 @@ import type {
   TestHistoryResponse,
   TestSession,
   TestStatistics,
-  TestType
+  TestType,
 } from '../types/testHistory';
 
 export interface TestHistoryFilters {
@@ -49,7 +49,7 @@ class TestHistoryService {
     const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
     return {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     };
   }
 
@@ -63,7 +63,7 @@ class TestHistoryService {
   private setCache(key: string, data: any): void {
     this.cache.set(key, {
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -118,7 +118,7 @@ class TestHistoryService {
 
     try {
       const response = await fetch(`${this.baseUrl}?${params}`, {
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -128,7 +128,6 @@ class TestHistoryService {
       const data = await response.json();
       this.setCache(cacheKey, data);
       return data;
-
     } catch (error) {
       Logger.error('获取测试历史失败:', error);
       throw error;
@@ -138,7 +137,10 @@ class TestHistoryService {
   /**
    * 获取特定类型的测试历史（带详细数据）
    */
-  async getTestHistoryByType(testType: TestType, query: TestHistoryQuery = {}): Promise<TestHistoryResponse> {
+  async getTestHistoryByType(
+    testType: TestType,
+    query: TestHistoryQuery = {}
+  ): Promise<TestHistoryResponse> {
     const cacheKey = this.getCacheKey(`${testType}-history`, query);
     const cached = this.getCache(cacheKey);
     if (cached) return cached as TestHistoryResponse;
@@ -151,7 +153,7 @@ class TestHistoryService {
 
     try {
       const response = await fetch(`${this.baseUrl}/${testType}?${params}`, {
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -161,7 +163,6 @@ class TestHistoryService {
       const data = await response.json();
       this.setCache(cacheKey, data);
       return data;
-
     } catch (error) {
       Logger.error(`获取${testType}测试历史失败:`, error);
       throw error;
@@ -178,7 +179,7 @@ class TestHistoryService {
 
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}`, {
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -188,7 +189,6 @@ class TestHistoryService {
       const data = await response.json();
       this.setCache(cacheKey, data);
       return data;
-
     } catch (error) {
       Logger.error('获取测试详情失败:', error);
       throw error;
@@ -210,7 +210,7 @@ class TestHistoryService {
       const response = await fetch(`${this.baseUrl}/sessions`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(sessionData)
+        body: JSON.stringify(sessionData),
       });
 
       if (!response.ok) {
@@ -220,7 +220,6 @@ class TestHistoryService {
       const data = await response.json();
       this.clearCache(); // 清除缓存以确保数据一致性
       return data;
-
     } catch (error) {
       Logger.error('创建测试会话失败:', error);
       throw error;
@@ -235,7 +234,7 @@ class TestHistoryService {
       const response = await fetch(`${this.baseUrl}/${sessionId}/status`, {
         method: 'PATCH',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({ status, ...additionalData })
+        body: JSON.stringify({ status, ...additionalData }),
       });
 
       if (!response.ok) {
@@ -243,7 +242,6 @@ class TestHistoryService {
       }
 
       this.clearCache();
-
     } catch (error) {
       Logger.error('更新测试状态失败:', error);
       throw error;
@@ -258,7 +256,7 @@ class TestHistoryService {
       const response = await fetch(`${this.baseUrl}/${sessionId}/complete`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(results)
+        body: JSON.stringify(results),
       });
 
       if (!response.ok) {
@@ -266,7 +264,6 @@ class TestHistoryService {
       }
 
       this.clearCache();
-
     } catch (error) {
       Logger.error('完成测试失败:', error);
       throw error;
@@ -280,7 +277,7 @@ class TestHistoryService {
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}`, {
         method: 'DELETE',
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -288,7 +285,6 @@ class TestHistoryService {
       }
 
       this.clearCache();
-
     } catch (error) {
       Logger.error('删除测试失败:', error);
       throw error;
@@ -303,7 +299,7 @@ class TestHistoryService {
       const response = await fetch(`${this.baseUrl}/batch/delete`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({ sessionIds })
+        body: JSON.stringify({ sessionIds }),
       });
 
       if (!response.ok) {
@@ -313,7 +309,6 @@ class TestHistoryService {
       const result = await response.json();
       this.clearCache();
       return result;
-
     } catch (error) {
       Logger.error('批量删除失败:', error);
       throw error;
@@ -326,11 +321,11 @@ class TestHistoryService {
   async getTestStatistics(): Promise<TestStatistics> {
     const cacheKey = this.getCacheKey('statistics');
     const cached = this.getCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as TestStatistics;
 
     try {
       const response = await fetch(`${this.baseUrl}/statistics`, {
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -340,7 +335,6 @@ class TestHistoryService {
       const data = await response.json();
       this.setCache(cacheKey, data);
       return data;
-
     } catch (error) {
       Logger.error('获取统计信息失败:', error);
       throw error;
@@ -355,7 +349,7 @@ class TestHistoryService {
       const response = await fetch(`${this.baseUrl}/export`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(options)
+        body: JSON.stringify(options),
       });
 
       if (!response.ok) {
@@ -363,7 +357,6 @@ class TestHistoryService {
       }
 
       return await response.blob();
-
     } catch (error) {
       Logger.error('导出测试历史失败:', error);
       throw error;
@@ -373,16 +366,19 @@ class TestHistoryService {
   /**
    * 搜索测试历史
    */
-  async searchTests(searchQuery: string, filters?: TestHistoryFilters): Promise<TestHistoryResponse> {
+  async searchTests(
+    searchQuery: string,
+    filters?: TestHistoryFilters
+  ): Promise<TestHistoryResponse> {
     const params = new URLSearchParams();
     params?.append('search', searchQuery);
 
     if (filters) {
-        /**
-         * if功能函数
-         * @param {Object} params - 参数对象
-         * @returns {Promise<Object>} 返回结果
-         */
+      /**
+       * if功能函数
+       * @param {Object} params - 参数对象
+       * @returns {Promise<Object>} 返回结果
+       */
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
@@ -398,7 +394,7 @@ class TestHistoryService {
 
     try {
       const response = await fetch(`${this.baseUrl}/search?${params}`, {
-        headers: this.getAuthHeaders()
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -406,7 +402,6 @@ class TestHistoryService {
       }
 
       return await response.json();
-
     } catch (error) {
       Logger.error('搜索测试历史失败:', error);
       throw error;

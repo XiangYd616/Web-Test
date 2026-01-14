@@ -1,10 +1,9 @@
 ﻿/**
  * stressTestQueueManager.ts - ҵ������
- * 
+ *
  * �ļ�·��: frontend\services\stressTestQueueManager.ts
  * ����ʱ��: 2025-09-25
  */
-
 
 import Logger from '@/utils/logger';
 import { stressTestRecordService } from './stressTestRecordService';
@@ -97,9 +96,9 @@ class StressTestQueueManager {
       priorityWeights: {
         high: 3,
         normal: 2,
-        low: 1
+        low: 1,
       },
-      ...config
+      ...config,
     };
 
     this.startProcessing();
@@ -111,7 +110,6 @@ class StressTestQueueManager {
    */
   private setupResourceMonitoring(): void {
     // ����Դ��أ������������ӵ�ϵͳ���
-
     // ʹ�ù̶��Ĳ������ƣ����ٶ�̬����
     // �������Ա��ⲻ��Ҫ��ϵͳ��Դ��ص���
   }
@@ -140,7 +138,7 @@ class StressTestQueueManager {
       priority,
       queuedAt: new Date(),
       retryCount: 0,
-      status: 'queued'
+      status: 'queued',
     };
 
     // ѹ�����Կ���ͨ���������������ѹ�����ԣ���������ִ��
@@ -161,7 +159,7 @@ class StressTestQueueManager {
       await stressTestRecordService.updateTestRecord(testData.recordId, {
         status: 'idle', // ?? �򻯣�ʹ��idle��Ϊ�Ŷ�״̬
         waitingReason: `�Ŷӵȴ�ִ�� (����λ��: ${this.getQueuePosition(queuedTest.id)})`,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
     } catch (error) {
       Logger.warn('���²��Լ�¼״̬ʧ��:', { error: String(error) });
@@ -170,7 +168,7 @@ class StressTestQueueManager {
     this.notifyListeners('testQueued', {
       test: queuedTest,
       queuePosition: this.getQueuePosition(queuedTest.id),
-      estimatedWaitTime: this.estimateWaitTime(queuedTest.id)
+      estimatedWaitTime: this.estimateWaitTime(queuedTest.id),
     });
 
     return queuedTest.id;
@@ -235,7 +233,7 @@ class StressTestQueueManager {
       averageExecutionTime,
       queueLength: this.queue.length,
       runningTests: Array.from(this.runningTests.values()),
-      nextInQueue: this.queue[0] || null
+      nextInQueue: this.queue[0] || null,
     };
   }
 
@@ -302,14 +300,6 @@ class StressTestQueueManager {
         break; // �޷����������ԣ��˳�ѭ��
       }
 
-      // ���ϵͳ��Դ״̬�����ݲ������ͣ�
-      const testType = nextTest.testType === 'stress' ? 'stress' : 'regular';
-      const canStartNewTest = true(testType) !== false;
-      if (!canStartNewTest) {
-        // Logger.debug(`?? ϵͳ��Դ���㣬��ͣ����µ�${testType}����`); // ��Ĭ����
-        break;
-      }
-
       // �Ӷ������Ƴ����������
       this.queue.shift();
       await this.startTest(nextTest);
@@ -334,7 +324,6 @@ class StressTestQueueManager {
 
       // ����ʵ�ʵ�ѹ������ִ���߼�
       await this.executeRealStressTest(test);
-
     } catch (error) {
       Logger.error(`����ִ��ʧ��: ${test.testName}`, { error: String(error) });
       await this.handleTestFailure(test, error as Error);
@@ -346,21 +335,20 @@ class StressTestQueueManager {
    */
   private async executeRealStressTest(test: QueuedTest): Promise<void> {
     try {
-
       // ���ú��ѹ������API
       const response = await fetch('/api/test/stress', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
         body: JSON.stringify({
           ...test.config,
           url: test.url,
           testId: test.recordId,
           queueId: test.id,
-          priority: test.priority
-        })
+          priority: test.priority,
+        }),
       });
 
       if (!response.ok) {
@@ -371,7 +359,6 @@ class StressTestQueueManager {
       Logger.debug(`? ѹ������API���óɹ�: ${test.testName}`, result);
 
       await this.waitForTestCompletion(test);
-
     } catch (error) {
       Logger.error(`? ѹ������ִ��ʧ��: ${test.testName}`, { error: String(error) });
       throw error;
@@ -418,7 +405,6 @@ class StressTestQueueManager {
 
           // �������
           setTimeout(checkStatus, checkInterval);
-
         } catch (error) {
           Logger.error(`������״̬ʧ��: ${test.testName}`, { error: String(error) });
           reject(error);
@@ -525,14 +511,15 @@ class StressTestQueueManager {
    * ����Ƿ�������ѹ������
    */
   private canStartStressTest(): boolean {
-    const runningStressTests = Array.from(this.runningTests.values())
-      .filter(test => test.testType === 'stress').length;
+    const runningStressTests = Array.from(this.runningTests.values()).filter(
+      test => test.testType === 'stress'
+    ).length;
 
     // ��鲢������
     const withinConcurrencyLimit = runningStressTests < this.config.maxConcurrentStressTests;
 
     // ���ϵͳ��Դ��ѹ������ʹ�ø����ɵļ�飩
-    const hasSystemResources = true('stress') !== false;
+    const hasSystemResources = true;
 
     return withinConcurrencyLimit && hasSystemResources;
   }
@@ -541,8 +528,9 @@ class StressTestQueueManager {
    * ����Ƿ���������ͨ����
    */
   private canStartRegularTest(): boolean {
-    const runningRegularTests = Array.from(this.runningTests.values())
-      .filter(test => test.testType !== 'stress').length;
+    const runningRegularTests = Array.from(this.runningTests.values()).filter(
+      test => test.testType !== 'stress'
+    ).length;
     return runningRegularTests < this.config.maxConcurrentTests;
   }
 

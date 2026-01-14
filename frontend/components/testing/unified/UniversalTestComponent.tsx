@@ -1,12 +1,12 @@
 /**
  * 通用测试组件 - 统一重构版本
- * 
+ *
  * 整合功能：
  * - TestRunner.tsx 的测试运行功能
  * - UnifiedTestExecutor.tsx 的统一执行功能
  * - ModernTestRunner 的现代化界面
  * - UnifiedTestPanel 的面板功能
- * 
+ *
  * 设计目标：
  * - 消除重复组件
  * - 提供统一的测试界面
@@ -16,54 +16,44 @@
  */
 
 import Logger from '@/utils/logger';
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
-  Card,
-  Button,
-  Input,
-  Select,
-  Space,
-  Typography,
-  Progress,
-  Table,
-  Tabs,
-  Modal,
-  Form,
-  Row,
-  Col,
-  Statistic,
-  Badge,
-  Divider,
-  Timeline,
-  Alert,
-  Tooltip,
-  Drawer
-} from 'antd';
-import {
+  BarChartOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+  ExclamationCircleOutlined,
+  HistoryOutlined,
   PlayCircleOutlined,
-  PauseCircleOutlined,
-  StopOutlined,
   ReloadOutlined,
   SettingOutlined,
-  HistoryOutlined,
-  BarChartOutlined,
-  DownloadOutlined,
-  DeleteOutlined,
-  ExclamationCircleOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined
+  StopOutlined,
 } from '@ant-design/icons';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Col,
+  Drawer,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Select,
+  Space,
+  Statistic,
+  Table,
+  Tabs,
+  Tooltip,
+  Typography,
+} from 'antd';
+import React, { useCallback, useMemo, useState } from 'react';
 
 // 导入统一的Hook和类型
 import { useCoreTestEngine } from '../../../hooks/useCoreTestEngine';
 import { useNotification } from '../../../hooks/useNotification';
-import {
-  TestType,
-  TestTypeEnum,
-  TestConfig,
-  TestResult,
-  BaseTestConfig
-} from '../../../types/api';
+import { TestConfig, TestResult, TestType, TestTypeEnum } from '../../../types/api';
 
 // 测试进度接口
 interface TestProgress {
@@ -77,10 +67,10 @@ interface TestProgress {
 
 // 导入子组件
 import { TestConfigForm } from '../shared/TestConfigForm';
-import { TestResultsViewer } from '../shared/TestResultsViewer';
 import { TestHistoryPanel } from '../shared/TestHistoryPanel';
-import { TestStatsPanel } from '../shared/TestStatsPanel';
 import { TestProgressMonitor } from '../shared/TestProgressMonitor';
+import { TestResultsViewer } from '../shared/TestResultsViewer';
+import { TestStatsPanel } from '../shared/TestStatsPanel';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -132,7 +122,7 @@ const TEST_TYPE_OPTIONS = [
   { value: TestTypeEnum.ACCESSIBILITY, label: '♿ 可访问性测试', color: '#eb2f96' },
   { value: TestTypeEnum.UX, label: '🎨 用户体验测试', color: '#fa8c16' },
   { value: TestTypeEnum.NETWORK, label: '🌐 网络测试', color: '#096dd9' },
-  { value: TestTypeEnum.DATABASE, label: '🗄️ 数据库测试', color: '#389e0d' }
+  { value: TestTypeEnum.DATABASE, label: '🗄️ 数据库测试', color: '#389e0d' },
 ];
 
 // 获取测试类型配置
@@ -146,7 +136,7 @@ const STATUS_COLORS = {
   completed: '#52c41a',
   failed: '#f5222d',
   cancelled: '#8c8c8c',
-  pending: '#faad14'
+  pending: '#faad14',
 };
 
 // 获取分数颜色
@@ -181,7 +171,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
   onTestComplete,
   onTestError,
   onTestProgress,
-  onConfigChange
+  onConfigChange,
 }) => {
   const [form] = Form.useForm();
   const { showNotification } = useNotification();
@@ -202,17 +192,17 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       type: selectedTestType,
       url: defaultUrl,
       options: {},
-      ...defaultConfig
+      ...defaultConfig,
     },
     maxConcurrentTests,
     defaultTimeout,
     enableQueue,
     enableWebSocket,
-    onTestComplete: (result) => {
+    onTestComplete: result => {
       showNotification('测试完成', 'success');
       onTestComplete?.(result as any);
     },
-    onTestError: (error) => {
+    onTestError: error => {
       showNotification(`测试失败: ${error}`, 'error');
       onTestError?.(error);
     },
@@ -220,7 +210,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       showNotification('测试已启动', 'info');
     },
     onTestProgress: onTestProgress as any,
-    onConfigChange: onConfigChange as any
+    onConfigChange: onConfigChange as any,
   });
 
   // 当前测试类型配置
@@ -229,11 +219,14 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
   }, [selectedTestType]);
 
   // 表单初始值
-  const initialValues = useMemo(() => ({
-    url: defaultUrl || engine.config.url,
-    testType: selectedTestType,
-    ...engine.config.options
-  }), [defaultUrl, engine.config, selectedTestType]);
+  const initialValues = useMemo(
+    () => ({
+      url: defaultUrl || engine.config.url,
+      testType: selectedTestType,
+      ...engine.config.options,
+    }),
+    [defaultUrl, engine.config, selectedTestType]
+  );
 
   // 处理配置变更
   const handleConfigChange = useCallback(() => {
@@ -244,10 +237,10 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       url: values.url || '',
       options: {
         ...values,
-        testType: selectedTestType
-      }
+        testType: selectedTestType,
+      },
     };
-    
+
     engine.setConfig(newConfig);
     onConfigChange?.(newConfig);
   }, [form, selectedTestType, currentTestTypeConfig, engine, onConfigChange]);
@@ -257,15 +250,15 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
     try {
       await form.validateFields();
       const values = form.getFieldsValue();
-      
+
       const testConfig: any = {
         name: `${currentTestTypeConfig.label} - ${new Date().toLocaleString()}`,
         type: selectedTestType,
         url: values.url,
         options: {
           ...values,
-          testType: selectedTestType
-        }
+          testType: selectedTestType,
+        },
       };
 
       onTestStart?.(testConfig);
@@ -300,23 +293,26 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
   }, [handleStartTest]);
 
   // 导出结果
-  const handleExportResult = useCallback(async (testId: string, format: 'json' | 'pdf' | 'csv' = 'json') => {
-    try {
-      const blob = await engine.exportTestResult(testId, format);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `test-result-${testId}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showNotification('结果导出成功', 'success');
-    } catch (error) {
-      showNotification('导出失败', 'error');
-      Logger.error('导出结果失败:', error);
-    }
-  }, [engine, showNotification]);
+  const handleExportResult = useCallback(
+    async (testId: string, format: 'json' | 'pdf' | 'csv' = 'json') => {
+      try {
+        const blob = await engine.exportTestResult(testId, format);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `test-result-${testId}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showNotification('结果导出成功', 'success');
+      } catch (error) {
+        showNotification('导出失败', 'error');
+        Logger.error('导出结果失败:', error);
+      }
+    },
+    [engine, showNotification]
+  );
 
   // 查看测试结果详情
   const handleViewResult = useCallback((result: TestResult) => {
@@ -325,16 +321,19 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
   }, []);
 
   // 删除测试结果
-  const handleDeleteResult = useCallback((resultId: string) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除这个测试结果吗？',
-      onOk: () => {
-        // 这里应该调用删除API
-        showNotification('结果已删除', 'success');
-      }
-    });
-  }, [showNotification]);
+  const handleDeleteResult = useCallback(
+    (resultId: string) => {
+      Modal.confirm({
+        title: '确认删除',
+        content: '确定要删除这个测试结果吗？',
+        onOk: () => {
+          // 这里应该调用删除API
+          showNotification('结果已删除', 'success');
+        },
+      });
+    },
+    [showNotification]
+  );
 
   // 渲染配置表单
   const renderConfigForm = () => (
@@ -371,10 +370,10 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
               label="测试URL"
               rules={[
                 { required: true, message: '请输入测试URL' },
-                { type: 'url', message: '请输入有效的URL' }
+                { type: 'url', message: '请输入有效的URL' },
               ]}
             >
-              <Input 
+              <Input
                 placeholder="https://example.com"
                 prefix={currentTestTypeConfig.label.split(' ')[0]}
               />
@@ -416,44 +415,27 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         </Button>
 
         {engine.isRunning && (
-          <Button
-            icon={<StopOutlined />}
-            onClick={handleStopTest}
-            danger
-          >
+          <Button icon={<StopOutlined />} onClick={handleStopTest} danger>
             停止测试
           </Button>
         )}
 
-        <Button
-          icon={<ReloadOutlined />}
-          onClick={handleRetryTest}
-          disabled={engine.isRunning}
-        >
+        <Button icon={<ReloadOutlined />} onClick={handleRetryTest} disabled={engine.isRunning}>
           重新运行
         </Button>
 
-        <Button
-          icon={<SettingOutlined />}
-          onClick={() => setShowSettingsModal(true)}
-        >
+        <Button icon={<SettingOutlined />} onClick={() => setShowSettingsModal(true)}>
           高级设置
         </Button>
 
         {showHistory && (
-          <Button
-            icon={<HistoryOutlined />}
-            onClick={() => setShowHistoryDrawer(true)}
-          >
+          <Button icon={<HistoryOutlined />} onClick={() => setShowHistoryDrawer(true)}>
             测试历史
           </Button>
         )}
 
         {showStats && (
-          <Button
-            icon={<BarChartOutlined />}
-            onClick={() => setActiveTab('stats')}
-          >
+          <Button icon={<BarChartOutlined />} onClick={() => setActiveTab('stats')}>
             统计信息
           </Button>
         )}
@@ -481,17 +463,17 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
           testId: test.testId,
           status: test.status || 'running',
           progress: test.progress || engine.progress || 0,
-          currentStep: test.currentStep || engine.state.currentStep || ''
+          currentStep: test.currentStep || engine.state.currentStep || '',
         });
       }
     });
-    
+
     return (
       <TestProgressMonitor
         activeTests={activeTestsMap}
         realTimeMetrics={null}
-        onStopTest={(testId) => engine.stopTest(testId)}
-        onCancelTest={(testId) => engine.cancelTest(testId)}
+        onStopTest={testId => engine.stopTest(testId)}
+        onCancelTest={testId => engine.cancelTest(testId)}
       />
     );
   };
@@ -508,7 +490,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
           <Text code copyable={{ text: id }}>
             {id.substring(0, 8)}...
           </Text>
-        )
+        ),
       },
       {
         title: '测试类型',
@@ -518,7 +500,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         render: (type: string) => {
           const config = getTestTypeConfig(type as TestType);
           return <Badge color={config.color} text={config.label} />;
-        }
+        },
       },
       {
         title: '状态',
@@ -530,32 +512,29 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
             color={STATUS_COLORS[status as keyof typeof STATUS_COLORS] || '#8c8c8c'}
             text={status}
           />
-        )
+        ),
       },
       {
         title: '得分',
         dataIndex: 'score',
         key: 'score',
         width: 100,
-        render: (score: number) => score ? (
-          <Text style={{ color: getScoreColor(score) }}>
-            {score}
-          </Text>
-        ) : '-'
+        render: (score: number) =>
+          score ? <Text style={{ color: getScoreColor(score) }}>{score}</Text> : '-',
       },
       {
         title: '开始时间',
         dataIndex: 'startTime',
         key: 'startTime',
         width: 150,
-        render: (time: string) => new Date(time).toLocaleString()
+        render: (time: string) => new Date(time).toLocaleString(),
       },
       {
         title: '持续时间',
         dataIndex: 'duration',
         key: 'duration',
         width: 100,
-        render: (duration: number) => duration ? `${Math.round(duration / 1000)}s` : '-'
+        render: (duration: number) => (duration ? `${Math.round(duration / 1000)}s` : '-'),
       },
       {
         title: '操作',
@@ -564,11 +543,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
         render: (_: any, record: TestResult) => (
           <Space size="small">
             <Tooltip title="查看详情">
-              <Button
-                type="link"
-                size="small"
-                onClick={() => handleViewResult(record)}
-              >
+              <Button type="link" size="small" onClick={() => handleViewResult(record)}>
                 查看
               </Button>
             </Tooltip>
@@ -592,22 +567,22 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
               />
             </Tooltip>
           </Space>
-        )
-      }
+        ),
+      },
     ];
 
     return (
       <Card title="测试结果" className="mb-4">
         <Table
           columns={columns}
-          dataSource={engine.results}
+          dataSource={engine.results as any}
           rowKey="id"
           size="small"
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条记录`
+            showTotal: total => `共 ${total} 条记录`,
           }}
         />
       </Card>
@@ -617,17 +592,13 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
   // 渲染统计面板
   const renderStatsPanel = () => {
     const stats = engine.getStats();
-    
+
     return (
       <div>
         <Row gutter={16} className="mb-4">
           <Col span={6}>
             <Card>
-              <Statistic
-                title="总测试数"
-                value={stats.totalTests}
-                prefix={<BarChartOutlined />}
-              />
+              <Statistic title="总测试数" value={stats.totalTests} prefix={<BarChartOutlined />} />
             </Card>
           </Col>
           <Col span={6}>
@@ -660,15 +631,19 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
               />
             </Card>
           </Col>
-      </Row>
-        
-        {showStats && <TestStatsPanel stats={{
-          totalActiveTests: stats.totalTests,
-          runningTests: stats.runningTests,
-          completedTests: stats.completedTests,
-          failedTests: stats.failedTests,
-          totalResults: stats.totalTests
-        }} />}
+        </Row>
+
+        {showStats && (
+          <TestStatsPanel
+            stats={{
+              totalActiveTests: stats.totalTests,
+              runningTests: stats.runningTests,
+              completedTests: stats.completedTests,
+              failedTests: stats.failedTests,
+              totalResults: stats.totalTests,
+            }}
+          />
+        )}
       </div>
     );
   };
@@ -679,15 +654,15 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
       <TabPane tab="配置" key="config">
         {renderConfigForm()}
       </TabPane>
-      
+
       <TabPane tab="进度" key="progress">
         {renderProgressMonitor()}
       </TabPane>
-      
+
       <TabPane tab="结果" key="results">
         {renderResultsTable()}
       </TabPane>
-      
+
       {showStats && (
         <TabPane tab="统计" key="stats">
           {renderStatsPanel()}
@@ -756,7 +731,7 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
           </Button>,
           <Button key="ok" type="primary" onClick={() => setShowSettingsModal(false)}>
             确定
-          </Button>
+          </Button>,
         ]}
       >
         <TestConfigForm
@@ -787,9 +762,12 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
             testType: r.type,
             status: r.status,
             score: r.score,
-            startTime: r.startTime instanceof Date ? r.startTime.toISOString() : (r.startTime || new Date().toISOString()),
+            startTime:
+              r.startTime instanceof Date
+                ? r.startTime.toISOString()
+                : r.startTime || new Date().toISOString(),
             duration: r.duration,
-            url: r.url || ''
+            url: r.url || '',
           }))}
           onViewResult={(testId: string) => {
             const result = engine.results.find(r => r.id === testId);
@@ -817,18 +795,28 @@ export const UniversalTestComponent: React.FC<UniversalTestComponentProps> = ({
           ),
           <Button key="close" onClick={() => setShowResultModal(false)}>
             关闭
-          </Button>
+          </Button>,
         ].filter(Boolean)}
       >
         {selectedResult && (
-          <TestResultsViewer result={{
-            ...(selectedResult as any),
-            testType: (selectedResult as any).type,
-            url: (selectedResult as any).url || '',
-            startTime: (selectedResult as any).startTime instanceof Date ? (selectedResult as any).startTime : new Date(),
-            endTime: (selectedResult as any).endTime instanceof Date ? (selectedResult as any).endTime : new Date(),
-            duration: (selectedResult as any).duration || 0,
-          } as any} />
+          <TestResultsViewer
+            result={
+              {
+                ...(selectedResult as any),
+                testType: (selectedResult as any).type,
+                url: (selectedResult as any).url || '',
+                startTime:
+                  (selectedResult as any).startTime instanceof Date
+                    ? (selectedResult as any).startTime
+                    : new Date(),
+                endTime:
+                  (selectedResult as any).endTime instanceof Date
+                    ? (selectedResult as any).endTime
+                    : new Date(),
+                duration: (selectedResult as any).duration || 0,
+              } as any
+            }
+          />
         )}
       </Modal>
     </div>

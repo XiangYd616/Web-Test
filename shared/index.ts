@@ -16,8 +16,8 @@ export * from './utils';
 export * from './interfaces';
 
 // 整合默认导出
-import types from './types';
 import constants from './constants';
+import * as types from './types';
 import utils from './utils';
 
 export default {

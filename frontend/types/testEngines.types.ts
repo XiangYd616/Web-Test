@@ -5,10 +5,7 @@
  */
 
 // import SecurityTestResult from '../types'; // 避免冲突
-import type {
-  BaseTestConfig,
-  BaseTestResult
-} from './common';
+import type { BaseTestConfig, BaseTestResult } from './common.types';
 
 // ==================== SEO 测试类型 ====================
 
@@ -36,11 +33,11 @@ export interface SEOTestResult extends BaseTestResult {
 }
 
 export interface MetaTagsAnalysis {
-  title: { present: boolean; length: number; content?: string; };
-  description: { present: boolean; length: number; content?: string; };
-  keywords: { present: boolean; content?: string; };
-  robots: { present: boolean; content?: string; };
-  canonical: { present: boolean; url?: string; };
+  title: { present: boolean; length: number; content?: string };
+  description: { present: boolean; length: number; content?: string };
+  keywords: { present: boolean; content?: string };
+  robots: { present: boolean; content?: string };
+  canonical: { present: boolean; url?: string };
   openGraph: Record<string, any>;
   twitterCard: Record<string, any>;
 }
@@ -48,7 +45,7 @@ export interface MetaTagsAnalysis {
 export interface HeadingAnalysis {
   h1Count: number;
   h1Content: string[];
-  structure: Array<{ level: number; text: string; }>;
+  structure: Array<{ level: number; text: string }>;
   issues: string[];
 }
 
@@ -85,8 +82,8 @@ export interface StructuredDataAnalysis {
 }
 
 export interface SocialMediaAnalysis {
-  openGraph: { present: boolean; complete: boolean; };
-  twitterCard: { present: boolean; complete: boolean; };
+  openGraph: { present: boolean; complete: boolean };
+  twitterCard: { present: boolean; complete: boolean };
   facebookPixel: boolean;
   googleAnalytics: boolean;
 }
@@ -122,11 +119,11 @@ export interface PerformanceTestResult extends BaseTestResult {
 }
 
 export interface CoreWebVitals {
-  lcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
-  fid: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
-  cls: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
-  fcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
-  ttfb: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
+  lcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor' };
+  fid: { value: number; rating: 'good' | 'needs-improvement' | 'poor' };
+  cls: { value: number; rating: 'good' | 'needs-improvement' | 'poor' };
+  fcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor' };
+  ttfb: { value: number; rating: 'good' | 'needs-improvement' | 'poor' };
 }
 
 export interface LighthouseMetrics {
@@ -147,9 +144,9 @@ export interface LighthouseMetrics {
 export interface ResourceAnalysis {
   totalSize: number;
   totalRequests: number;
-  byType: Record<string, { size: number; count: number; }>;
-  largestResources: Array<{ url: string; size: number; type: string; }>;
-  unusedResources: Array<{ url: string; wastedBytes: number; }>;
+  byType: Record<string, { size: number; count: number }>;
+  largestResources: Array<{ url: string; size: number; type: string }>;
+  unusedResources: Array<{ url: string; wastedBytes: number }>;
 }
 
 export interface PerformanceOpportunity {
@@ -318,7 +315,7 @@ export interface DeviceConfig {
   name: string;
   type: 'desktop' | 'tablet' | 'mobile';
   userAgent: string;
-  viewport: { width: number; height: number; };
+  viewport: { width: number; height: number };
 }
 
 export interface ViewportConfig {

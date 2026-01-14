@@ -66,9 +66,7 @@ export const seoTestConfig: TestHistoryConfig = {
       formatter: (value: number) => {
         if (!value) return '-';
         const seconds = Math.floor(value / 1000);
-        return seconds > 60 
-          ? `${Math.floor(seconds / 60)}分${seconds % 60}秒`
-          : `${seconds}秒`;
+        return seconds > 60 ? `${Math.floor(seconds / 60)}分${seconds % 60}秒` : `${seconds}秒`;
       },
     },
     {
@@ -83,7 +81,7 @@ export const seoTestConfig: TestHistoryConfig = {
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit',
-          minute: '2-digit'
+          minute: '2-digit',
         });
       },
     },
@@ -106,7 +104,7 @@ export const seoTestConfig: TestHistoryConfig = {
   // 功能配置
   features: {
     export: true,
-    exportFormats: ['json', 'pdf'],
+    exportFormats: ['json', 'csv'],
     batchDelete: true,
     detailView: true,
     rerun: true,
@@ -142,18 +140,18 @@ export const seoTestConfig: TestHistoryConfig = {
     {
       key: 'viewReport',
       label: '查看报告',
-      onClick: (record) => {
+      onClick: record => {
         window.open(`/seo/report/${record.id}`, '_blank');
       },
-      visible: (record) => record.status === 'completed',
+      visible: record => record.status === 'completed',
     },
     {
       key: 'rerun',
       label: '重新测试',
-      onClick: (record) => {
+      onClick: record => {
         console.log('重新运行SEO测试:', record);
       },
-      visible: (record) => ['completed', 'failed'].includes(record.status),
+      visible: record => ['completed', 'failed'].includes(record.status),
     },
   ],
 

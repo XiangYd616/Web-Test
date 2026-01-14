@@ -81,10 +81,10 @@ class TestOrchestrator {
   private initializeOrchestrator() {
     // Initialize default pipelines
     this.registerDefaultPipelines();
-    
+
     // Start job processor
     this.startJobProcessor();
-    
+
     // Setup webhook listeners
     this.setupWebhooks();
   }
@@ -104,7 +104,7 @@ class TestOrchestrator {
           dependencies: [],
           status: 'pending' as const,
           retryCount: 0,
-          maxRetries: 3
+          maxRetries: 3,
         },
         {
           id: 'security-test',
@@ -114,7 +114,7 @@ class TestOrchestrator {
           dependencies: ['api-test'],
           status: 'pending' as const,
           retryCount: 0,
-          maxRetries: 2
+          maxRetries: 2,
         },
         {
           id: 'performance-test',
@@ -124,36 +124,36 @@ class TestOrchestrator {
           dependencies: ['api-test'],
           status: 'pending' as const,
           retryCount: 0,
-          maxRetries: 2
-        }
+          maxRetries: 2,
+        },
       ],
       triggers: [
         {
           type: 'git',
-          config: { branch: 'main', event: 'push' }
-        }
+          config: { branch: 'main', event: 'push' },
+        },
       ],
       notifications: [
         {
           type: 'slack',
           config: { channel: '#dev-alerts' },
-          events: ['complete', 'fail']
-        }
+          events: ['complete', 'fail'],
+        },
       ],
       qualityGates: [
         {
           metric: 'security.vulnerabilities.critical',
           operator: '==',
           value: 0,
-          action: 'block'
+          action: 'block',
         },
         {
           metric: 'performance.responseTime.p95',
           operator: '<=',
           value: 1000,
-          action: 'warn'
-        }
-      ]
+          action: 'warn',
+        },
+      ],
     };
 
     this.pipelines.set(cicdPipeline.id, cicdPipeline);
@@ -172,7 +172,7 @@ class TestOrchestrator {
           dependencies: [],
           status: 'pending' as const,
           retryCount: 0,
-          maxRetries: 5
+          maxRetries: 5,
         },
         {
           id: 'performance-monitor',
@@ -182,34 +182,34 @@ class TestOrchestrator {
           dependencies: [],
           status: 'pending' as const,
           retryCount: 0,
-          maxRetries: 3
-        }
+          maxRetries: 3,
+        },
       ],
       schedule: {
         cron: '*/15 * * * *', // Every 15 minutes
-        timezone: 'UTC'
+        timezone: 'UTC',
       },
       triggers: [
         {
           type: 'schedule',
-          config: {}
-        }
+          config: {},
+        },
       ],
       notifications: [
         {
           type: 'email',
           config: { to: 'ops@company.com' },
-          events: ['fail', 'warning']
-        }
+          events: ['fail', 'warning'],
+        },
       ],
       qualityGates: [
         {
           metric: 'availability',
           operator: '>=',
           value: 99.9,
-          action: 'fail'
-        }
-      ]
+          action: 'fail',
+        },
+      ],
     };
 
     this.pipelines.set(monitoringPipeline.id, monitoringPipeline);
@@ -221,14 +221,13 @@ class TestOrchestrator {
   }
 
   updatePipeline(pipelineId: string, updates: Partial<TestPipeline>): void {
-
     /**
 
-     * if功能函数
+     * if鍔熻兘鍑芥暟
 
-     * @param {Object} params - 参数对象
+     * @param {Object} params - 鍙傛暟瀵硅薄
 
-     * @returns {Promise<Object>} 返回结果
+     * @returns {Promise<Object>} 杩斿洖缁撴灉
 
      */
     const pipeline = this.pipelines.get(pipelineId);
@@ -250,7 +249,10 @@ class TestOrchestrator {
   }
 
   // Job Execution
-  async executePipeline(pipelineId: string, context?: Partial<TestExecutionContext>): Promise<void> {
+  async executePipeline(
+    pipelineId: string,
+    context?: Partial<TestExecutionContext>
+  ): Promise<void> {
     const pipeline = this.pipelines.get(pipelineId);
     if (!pipeline) {
       throw new Error(`Pipeline ${pipelineId} not found`);
@@ -261,7 +263,7 @@ class TestOrchestrator {
       environment: context?.environment || 'development',
       variables: context?.variables || {},
       secrets: context?.secrets || {},
-      artifacts: []
+      artifacts: [],
     };
 
     this.executionContexts.set(pipelineId, executionContext);
@@ -273,7 +275,7 @@ class TestOrchestrator {
     for (const job of pipeline.jobs) {
       this.queueJob({
         ...job,
-        status: 'pending'
+        status: 'pending',
       });
     }
 
@@ -285,21 +287,20 @@ class TestOrchestrator {
     this.jobQueue.push(job);
   }
 
+  /**
 
-    /**
+     * while鍔熻兘鍑芥暟
 
-     * while功能函数
+     * @param {Object} params - 鍙傛暟瀵硅薄
 
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
+     * @returns {Promise<Object>} 杩斿洖缁撴灉
 
      */
   private async processQueue(pipelineId: string): Promise<void> {
     while (this.jobQueue.length > 0 || this.runningJobs.size > 0) {
       // Check for jobs that can be started
       const readyJobs = this.getReadyJobs();
-      
+
       for (const job of readyJobs) {
         if (this.runningJobs.size < this.maxConcurrentJobs) {
           await this.executeJob(job, pipelineId);
@@ -329,7 +330,7 @@ class TestOrchestrator {
     if (index !== -1) {
       this.jobQueue.splice(index, 1);
     }
-    
+
     job.status = 'running';
     job.startTime = new Date();
     this.runningJobs.set(job.id, job);
@@ -337,17 +338,16 @@ class TestOrchestrator {
     try {
       // Execute the actual test
       const result = await this.runTest(job);
-      
+
       job.status = 'completed';
       job.result = result;
       job.endTime = new Date();
 
       // Check quality gates
       await this.checkQualityGates(pipelineId, job);
-
     } catch (error) {
       job.status = 'failed';
-      job.error = error?.message;
+      job.error = error instanceof Error ? error.message : String(error);
       job.endTime = new Date();
 
       // Retry if possible
@@ -369,31 +369,30 @@ class TestOrchestrator {
 
   private async runTest(job: TestJob): Promise<any> {
     // This would integrate with actual test runners
-    
+
     // Simulate test execution
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     return {
       success: Math.random() > 0.2,
       score: Math.random() * 100,
-      details: `Test ${job.id} completed`
+      details: `Test ${job.id} completed`,
     };
   }
 
   private async checkQualityGates(pipelineId: string, job: TestJob): Promise<void> {
     const pipeline = this.pipelines.get(pipelineId);
 
-
     /**
 
 
-     * for功能函数
+     * for鍔熻兘鍑芥暟
 
 
-     * @param {Object} params - 参数对象
+     * @param {Object} params - 鍙傛暟瀵硅薄
 
 
-     * @returns {Promise<Object>} 返回结果
+     * @returns {Promise<Object>} 杩斿洖缁撴灉
 
 
      */
@@ -402,17 +401,16 @@ class TestOrchestrator {
     for (const gate of pipeline.qualityGates) {
       const value = this.extractMetricValue(job.result, gate.metric);
 
-
       /**
 
 
-       * if功能函数
+       * if鍔熻兘鍑芥暟
 
 
-       * @param {Object} params - 参数对象
+       * @param {Object} params - 鍙傛暟瀵硅薄
 
 
-       * @returns {Promise<Object>} 返回结果
+       * @returns {Promise<Object>} 杩斿洖缁撴灉
 
 
        */
@@ -427,7 +425,11 @@ class TestOrchestrator {
             break;
           case 'warn':
             Logger.warn(`Quality gate warning: ${gate.metric} ${gate.operator} ${gate.value}`);
-            await this.sendNotification(pipeline, 'warning', this.executionContexts.get(pipelineId));
+            await this.sendNotification(
+              pipeline,
+              'warning',
+              this.executionContexts.get(pipelineId)
+            );
             break;
         }
       }
@@ -437,38 +439,44 @@ class TestOrchestrator {
   private extractMetricValue(result: unknown, metricPath: string): number {
     const parts = metricPath.split('.');
     let value = result;
-    
+
     for (const part of parts) {
-      value = value?.[part];
+      value = (value as any)?.[part];
     }
-    
+
     return Number(value) || 0;
   }
 
+  /**
 
-    /**
+     * switch鍔熻兘鍑芥暟
 
-     * switch功能函数
+     * @param {Object} params - 鍙傛暟瀵硅薄
 
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
+     * @returns {Promise<Object>} 杩斿洖缁撴灉
 
      */
   private evaluateGate(value: number, operator: string, threshold: number): boolean {
     switch (operator) {
-      case '>': return value > threshold;
-      case '<': return value < threshold;
-      case '>=': return value >= threshold;
-      case '<=': return value <= threshold;
-      case '==': return value === threshold;
-      case '!=': return value !== threshold;
-      default: return false;
+      case '>':
+        return value > threshold;
+      case '<':
+        return value < threshold;
+      case '>=':
+        return value >= threshold;
+      case '<=':
+        return value <= threshold;
+      case '==':
+        return value === threshold;
+      case '!=':
+        return value !== threshold;
+      default:
+        return false;
     }
   }
 
   private async sendNotification(
-    pipeline: TestPipeline, 
+    pipeline: TestPipeline,
     event: 'start' | 'complete' | 'fail' | 'warning',
     context?: TestExecutionContext
   ): Promise<void> {
@@ -488,7 +496,9 @@ class TestOrchestrator {
   }
 
   // Pipeline Templates
-  createPipelineFromTemplate(template: 'cicd' | 'monitoring' | 'regression' | 'security'): TestPipeline {
+  createPipelineFromTemplate(
+    template: 'cicd' | 'monitoring' | 'regression' | 'security'
+  ): TestPipeline {
     const templates = {
       cicd: {
         name: 'CI/CD Pipeline',
@@ -496,16 +506,16 @@ class TestOrchestrator {
         jobs: [
           { type: TestType.API, priority: 'critical' },
           { type: TestType.SECURITY, priority: 'critical' },
-          { type: TestType.PERFORMANCE, priority: 'high' }
-        ]
+          { type: TestType.PERFORMANCE, priority: 'high' },
+        ],
       },
       monitoring: {
         name: 'Monitoring Pipeline',
         description: 'Production monitoring pipeline',
         jobs: [
           { type: TestType.API, priority: 'high' },
-          { type: TestType.PERFORMANCE, priority: 'medium' }
-        ]
+          { type: TestType.PERFORMANCE, priority: 'medium' },
+        ],
       },
       regression: {
         name: 'Regression Test Pipeline',
@@ -514,17 +524,17 @@ class TestOrchestrator {
           { type: TestType.API, priority: 'high' },
           { type: 'ui' as any, priority: 'medium' },
           { type: TestType.PERFORMANCE, priority: 'medium' },
-          { type: TestType.SECURITY, priority: 'high' }
-        ]
+          { type: TestType.SECURITY, priority: 'high' },
+        ],
       },
       security: {
         name: 'Security Pipeline',
         description: 'Comprehensive security testing',
         jobs: [
           { type: TestType.SECURITY, priority: 'critical' },
-          { type: TestType.API, priority: 'high' }
-        ]
-      }
+          { type: TestType.API, priority: 'high' },
+        ],
+      },
     };
 
     const templateConfig = templates[template];
@@ -536,15 +546,15 @@ class TestOrchestrator {
         id: `job-${index}`,
         type: jobConfig.type,
         config: {},
-        priority: jobConfig.priority,
+        priority: jobConfig.priority as 'critical' | 'high' | 'medium' | 'low',
         dependencies: index > 0 ? [`job-${index - 1}`] : [],
         status: 'pending' as const,
         retryCount: 0,
-        maxRetries: 3
+        maxRetries: 3,
       })),
       triggers: [],
       notifications: [],
-      qualityGates: []
+      qualityGates: [],
     };
 
     return pipeline;
@@ -556,35 +566,34 @@ class TestOrchestrator {
       totalPipelines: this.pipelines.size,
       runningJobs: this.runningJobs.size,
       queuedJobs: this.jobQueue.length,
-      pipelines: []
+      pipelines: [],
     };
 
     if (pipelineId) {
       const context = this.executionContexts.get(pipelineId);
 
-      
       /**
 
       
-       * if功能函数
+       * if鍔熻兘鍑芥暟
 
       
-       * @param {Object} params - 参数对象
+       * @param {Object} params - 鍙傛暟瀵硅薄
 
       
-       * @returns {Promise<Object>} 返回结果
+       * @returns {Promise<Object>} 杩斿洖缁撴灉
 
       
        */
       const pipeline = this.pipelines.get(pipelineId);
-      
+
       if (pipeline && context) {
         // @ts-expect-error - Pipeline metrics needs proper typing
         metrics.pipelines.push({
           id: pipelineId,
           name: pipeline.name,
           environment: context?.environment,
-          artifacts: context?.artifacts.length
+          artifacts: context?.artifacts.length,
         });
       }
     }

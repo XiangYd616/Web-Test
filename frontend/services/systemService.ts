@@ -1,11 +1,7 @@
 // 系统管理服务 - 真实API实现
 
 import Logger from '@/utils/logger';
-import type {
-  MaintenanceInfo,
-  SystemConfig,
-  SystemLog
-} from '../types/system';
+import type { MaintenanceInfo, SystemConfig, SystemLog } from '../types/system';
 
 // 临时类型定义，等待完善
 type BackupInfo = any;
@@ -44,7 +40,7 @@ export class SystemService {
   static async getSystemConfig(): Promise<SystemConfig> {
     const cacheKey = 'system-config';
     const cached = this.getFromCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as SystemConfig;
 
     try {
       const response = await fetch(`${this.BASE_URL}/config`);
@@ -84,7 +80,7 @@ export class SystemService {
   static async getUsers(filter?: UserFilter): Promise<User[]> {
     const cacheKey = `users-${JSON.stringify(filter || {})}`;
     const cached = this.getFromCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as User[];
 
     try {
       const params = new URLSearchParams();
@@ -168,7 +164,7 @@ export class SystemService {
   static async getSystemLogs(filter?: LogFilter): Promise<SystemLog[]> {
     const cacheKey = `logs-${JSON.stringify(filter || {})}`;
     const cached = this.getFromCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as SystemLog[];
 
     try {
       const params = new URLSearchParams();
@@ -318,7 +314,7 @@ export class SystemService {
       diskUsage: 34.5,
       networkTraffic: {
         incoming: 1024 * 1024 * 150, // 150MB
-        outgoing: 1024 * 1024 * 89,  // 89MB
+        outgoing: 1024 * 1024 * 89, // 89MB
       },
       errorRate: 0.02,
       responseTime: 245,
@@ -334,31 +330,33 @@ export class SystemService {
           { type: 'performance', count: 5420, percentage: 35.2 },
           { type: 'security', count: 4320, percentage: 28.0 },
           { type: 'compatibility', count: 3680, percentage: 23.9 },
-          { type: 'api', count: 2000, percentage: 13.0 }
-        ]
+          { type: 'api', count: 2000, percentage: 13.0 },
+        ],
       },
       users: {
         total: 1247,
         active: 892,
         online: 156,
-        newToday: 23
+        newToday: 23,
       },
       performance: {
         successRate: 94.5,
         averageResponseTime: 245,
-        errorRate: 0.02
+        errorRate: 0.02,
       },
       system: {
         uptime: 2592000,
         diskUsage: 34.5,
         memoryUsage: 67.8,
-        cpuUsage: 45.2
-      }
+        cpuUsage: 45.2,
+      },
     };
   }
 
   private static getMockSystemConfig(): SystemConfig {
     return {
+      version: '1.0.0',
+      environment: 'development',
       id: 'system-config-1',
       key: 'system',
       value: {
@@ -385,27 +383,27 @@ export class SystemService {
             apiTest: true,
             uptimeMonitor: true,
             syntheticMonitor: true,
-            realUserMonitor: false
+            realUserMonitor: false,
           },
           defaultLocations: ['beijing', 'shanghai', 'guangzhou'],
           maxFileUploadSize: 10,
           screenshotQuality: 'high' as const,
           videoRecording: true,
-          harGeneration: true
+          harGeneration: true,
         },
         monitoring: {
           uptimeCheckInterval: 60,
           alertThresholds: {
             responseTime: 5000,
             errorRate: 5,
-            availability: 99.9
+            availability: 99.9,
           },
           retentionPeriods: {
             rawData: 30,
             aggregatedData: 365,
             screenshots: 7,
-            videos: 3
-          }
+            videos: 3,
+          },
         },
         security: {
           passwordMinLength: 8,
@@ -424,7 +422,7 @@ export class SystemService {
           smtpPassword: '',
           fromEmail: 'noreply@testweb.com',
           fromName: 'Test Web App',
-        }
+        },
       },
       type: 'object',
       description: '系统配置',
@@ -492,35 +490,24 @@ export class SystemService {
   private static getMockLogs(): SystemLog[] {
     return [
       {
-        id: '1',
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now(),
         level: 'info',
-        category: 'auth',
         message: '用户登录成功',
-        userId: '1',
       },
       {
-        id: '2',
-        timestamp: new Date().toISOString(),
-        level: 'warning',
-        category: 'test',
+        timestamp: Date.now(),
+        level: 'warn',
         message: '测试执行超时',
-        userId: '2',
       },
       {
-        id: '3',
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now(),
         level: 'error',
-        category: 'system',
         message: '数据库连接失败',
       },
       {
-        id: '4',
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now(),
         level: 'info',
-        category: 'admin',
         message: '系统配置更新',
-        userId: '1',
       },
     ];
   }
@@ -598,13 +585,10 @@ export class SystemService {
 
   private static getMockMaintenanceInfo(): MaintenanceInfo {
     return {
-      id: 'maintenance-1',
-      title: '系统维护',
-      description: '定期系统维护和更新',
-      scheduledStart: '2025-06-22T02:00:00Z',
-      scheduledEnd: '2025-06-22T03:00:00Z',
-      status: 'scheduled',
-      affectedServices: ['api', 'web', 'database'],
+      enabled: false,
+      message: '系统维护：定期系统维护和更新',
+      startTime: '2025-06-22T02:00:00Z',
+      endTime: '2025-06-22T03:00:00Z',
       // maintenanceMessage: '', // 临时注释，等待MaintenanceInfo接口完善
       // systemVersion: '1.2.3', // 临时注释，等待MaintenanceInfo接口完善
       // availableUpdates: [ // 临时注释，等待MaintenanceInfo接口完善

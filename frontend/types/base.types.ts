@@ -10,7 +10,7 @@ export type ComponentColor = 'primary' | 'secondary' | 'success' | 'warning' | '
 export type ComponentVariant = 'filled' | 'outlined' | 'text' | 'ghost';
 
 // 回调函数类型
-export type ProgressCallback = (progress: number, step: string, metrics?: any) => void;
+export type ProgressCallback = (progress: number, step?: string, metrics?: any) => void;
 export type CompletionCallback = (result: any) => void;
 export type ErrorCallback = (error: string | Error) => void;
 

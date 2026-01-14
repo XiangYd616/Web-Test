@@ -422,6 +422,8 @@ export class CoreWebVitalsAnalyzer {
   ): 'good' | 'needs-improvement' | 'poor' {
     const threshold = this.mobileThresholds[metric];
 
+    if (!threshold) return 'poor';
+
     if (value <= threshold.good) {
       return 'good';
     } else if (value <= threshold.needsImprovement) {
@@ -429,6 +431,16 @@ export class CoreWebVitalsAnalyzer {
     } else {
       return 'poor';
     }
+  }
+
+  /**
+   * 分类指标评级
+   */
+  private classifyMetric(
+    metric: keyof CoreWebVitalsMetrics,
+    value: number
+  ): 'good' | 'needs-improvement' | 'poor' {
+    return this.getRating(metric, value);
   }
 
   /**

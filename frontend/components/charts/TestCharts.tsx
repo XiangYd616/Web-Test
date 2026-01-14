@@ -1,7 +1,25 @@
-﻿
-import React from 'react';
-import { useMemo, useState } from 'react';
-import { Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+﻿import React, { useMemo, useState } from 'react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ComposedChart,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { TestResult } from '../../types/test';
 
 // CSS样式已迁移到组件库，不再需要外部CSS文件
@@ -21,9 +39,11 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
   theme = 'dark',
   height = 400,
   interactive = true,
-  showComparison = false
+  showComparison = false,
 }) => {
-  const [selectedChart, setSelectedChart] = useState<'overview' | 'metrics' | 'trends' | 'findings'>('overview');
+  const [selectedChart, setSelectedChart] = useState<
+    'overview' | 'metrics' | 'trends' | 'findings'
+  >('overview');
 
   const resultsArray = Array.isArray(results) ? results : [results];
   const latestResult = resultsArray[0];
@@ -37,7 +57,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
       info: '#06B6D4',
       purple: '#8B5CF6',
       pink: '#EC4899',
-      indigo: '#6366F1'
+      indigo: '#6366F1',
     },
     light: {
       primary: '#2563EB',
@@ -47,8 +67,8 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
       info: '#0891B2',
       purple: '#7C3AED',
       pink: '#DB2777',
-      indigo: '#4F46E5'
-    }
+      indigo: '#4F46E5',
+    },
   };
 
   const currentColors = colors[theme];
@@ -61,7 +81,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
     border: `1px solid ${gridColor}`,
     borderRadius: '8px',
     color: textColor,
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
   };
 
   // 生成总览数据
@@ -71,7 +91,8 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
     const data = [];
 
     // 获取总体评分，支持多种数据结构
-    const overallScore = latestResult?.overallScore ||
+    const overallScore =
+      latestResult?.overallScore ||
       (latestResult as any).securityScore ||
       (latestResult?.scores && latestResult?.scores.overall) ||
       0;
@@ -81,7 +102,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
       name: '总体评分',
       score: overallScore,
       target: 90,
-      color: currentColors.primary
+      color: currentColors.primary,
     });
 
     // 处理测试结果中的各种测试类型
@@ -94,7 +115,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         name: '性能测试',
         score: perfScore,
         target: 90,
-        color: currentColors.success
+        color: currentColors.success,
       });
     }
 
@@ -105,18 +126,43 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         name: 'SEO分析',
         score: seoScore,
         target: 85,
-        color: currentColors.warning
+        color: currentColors.warning,
       });
 
       // 如果是SEO测试类型，添加详细的SEO分数
       if (testType === 'seo' && latestResult?.scores) {
         const scores = latestResult?.scores;
         data.push(
-          { name: '技术SEO', score: Math.round(scores.technical || 0), target: 90, color: currentColors.primary },
-          { name: '内容质量', score: Math.round(scores.content || 0), target: 90, color: currentColors.info },
-          { name: '页面SEO', score: Math.round(scores.onPage || 0), target: 90, color: currentColors.purple },
-          { name: '性能因素', score: Math.round(scores.performance || 0), target: 90, color: currentColors.success },
-          { name: '移动端', score: Math.round(scores.mobile || 0), target: 90, color: currentColors.pink }
+          {
+            name: '技术SEO',
+            score: Math.round(scores.technical || 0),
+            target: 90,
+            color: currentColors.primary,
+          },
+          {
+            name: '内容质量',
+            score: Math.round(scores.content || 0),
+            target: 90,
+            color: currentColors.info,
+          },
+          {
+            name: '页面SEO',
+            score: Math.round(scores.onPage || 0),
+            target: 90,
+            color: currentColors.purple,
+          },
+          {
+            name: '性能因素',
+            score: Math.round(scores.performance || 0),
+            target: 90,
+            color: currentColors.success,
+          },
+          {
+            name: '移动端',
+            score: Math.round(scores.mobile || 0),
+            target: 90,
+            color: currentColors.pink,
+          }
         );
       }
     }
@@ -127,7 +173,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         name: '安全检测',
         score: secScore,
         target: 95,
-        color: currentColors.danger
+        color: currentColors.danger,
       });
     }
 
@@ -137,7 +183,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         name: '可访问性',
         score: accScore,
         target: 95,
-        color: currentColors.info
+        color: currentColors.info,
       });
     }
 
@@ -147,7 +193,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         name: '兼容性',
         score: compScore,
         target: 85,
-        color: currentColors.purple
+        color: currentColors.purple,
       });
     }
 
@@ -157,7 +203,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         name: 'API测试',
         score: apiScore,
         target: 80,
-        color: currentColors.pink
+        color: currentColors.pink,
       });
     }
 
@@ -167,7 +213,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         name: '连接测试',
         score: connScore,
         target: 95,
-        color: currentColors.indigo
+        color: currentColors.indigo,
       });
     }
 
@@ -177,7 +223,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         name: '暂无数据',
         score: 0,
         target: 100,
-        color: currentColors.info
+        color: currentColors.info,
       });
     }
 
@@ -195,49 +241,64 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         value: metrics?.lcp || 0,
         threshold: 2.5,
         unit: 's',
-        score: metrics?.lcp <= 2.5 ? 100 : metrics?.lcp <= 4.0 ? 70 : 30
+        score: metrics?.lcp <= 2.5 ? 100 : metrics?.lcp <= 4.0 ? 70 : 30,
       },
       {
         metric: 'FID',
         value: metrics?.fid || 0,
         threshold: 100,
         unit: 'ms',
-        score: metrics?.fid <= 100 ? 100 : metrics?.fid <= 300 ? 70 : 30
+        score: metrics?.fid <= 100 ? 100 : metrics?.fid <= 300 ? 70 : 30,
       },
       {
         metric: 'CLS',
         value: metrics?.cls || 0,
         threshold: 0.1,
         unit: '',
-        score: metrics?.cls <= 0.1 ? 100 : metrics?.cls <= 0.25 ? 70 : 30
+        score: metrics?.cls <= 0.1 ? 100 : metrics?.cls <= 0.25 ? 70 : 30,
       },
       {
         metric: 'FCP',
         value: metrics?.fcp || 0,
         threshold: 1.8,
         unit: 's',
-        score: metrics?.fcp <= 1.8 ? 100 : metrics?.fcp <= 3.0 ? 70 : 30
-      }
+        score: metrics?.fcp <= 1.8 ? 100 : metrics?.fcp <= 3.0 ? 70 : 30,
+      },
     ];
   }, [latestResult, testType]);
 
   // 生成发现问题的分布数据
   const findingsData = useMemo(() => {
     // 支持多种问题数据结构
-    const findings = latestResult?.findings || (latestResult as any)?.vulnerabilities || latestResult?.issues || [];
+    const findings =
+      latestResult?.findings ||
+      (latestResult as any)?.vulnerabilities ||
+      latestResult?.issues ||
+      [];
     if (!findings || findings.length === 0) return [];
 
-    const severityCount = findings.reduce((acc: Record<string, number>, finding: any) => {
-      const severity = finding.severity || finding.level || 'low';
-      acc[severity] = (acc[severity] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const severityCount = findings.reduce(
+      (acc: Record<string, number>, finding: any) => {
+        const severity = finding.severity || finding.level || 'low';
+        acc[severity] = (acc[severity] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return [
       { name: '严重', value: severityCount.critical || 0, color: currentColors.danger },
       { name: '高危', value: severityCount.high || severityCount['高'] || 0, color: '#F97316' },
-      { name: '中危', value: severityCount.medium || severityCount['中'] || 0, color: currentColors.warning },
-      { name: '低危', value: severityCount.low || severityCount['低'] || 0, color: currentColors.success }
+      {
+        name: '中危',
+        value: severityCount.medium || severityCount['中'] || 0,
+        color: currentColors.warning,
+      },
+      {
+        name: '低危',
+        value: severityCount.low || severityCount['低'] || 0,
+        color: currentColors.success,
+      },
     ].filter(item => item.value > 0);
   }, [latestResult, currentColors]);
 
@@ -245,13 +306,16 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
   const trendsData = useMemo(() => {
     if (resultsArray.length < 2) return [];
 
-    return resultsArray.slice(0, 10).reverse().map((result, index) => ({
-      test: `测试 ${index + 1}`,
-      timestamp: new Date(result.timestamp).toLocaleDateString(),
-      overallScore: result.overallScore || 0,
-      duration: result.duration || 0,
-      findings: (result.findings || result.issues || []).length
-    }));
+    return resultsArray
+      .slice(0, 10)
+      .reverse()
+      .map((result, index) => ({
+        test: `测试 ${index + 1}`,
+        timestamp: new Date(result.timestamp || Date.now()).toLocaleDateString(),
+        overallScore: result.overallScore || 0,
+        duration: result.duration || 0,
+        findings: (result.findings || result.issues || []).length,
+      }));
   }, [resultsArray]);
 
   const renderChart = () => {
@@ -259,7 +323,10 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
       case 'metrics':
         if (testType === 'performance' && coreWebVitalsData.length > 0) {
           return (
-            <ComposedChart data={coreWebVitalsData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <ComposedChart
+              data={coreWebVitalsData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis dataKey="metric" stroke={textColor} fontSize={12} />
               <YAxis yAxisId="left" stroke={textColor} fontSize={12} />
@@ -267,7 +334,14 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
               <Tooltip contentStyle={tooltipStyle} />
               <Legend />
               <Bar yAxisId="left" dataKey="score" fill={currentColors.primary} name="评分" />
-              <Line yAxisId="right" type="monotone" dataKey="value" stroke={currentColors.danger} strokeWidth={2} name="实际值" />
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey="value"
+                stroke={currentColors.danger}
+                strokeWidth={2}
+                name="实际值"
+              />
             </ComposedChart>
           );
         }
@@ -294,14 +368,26 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
           );
         }
         return (
-          <LineChart data={trendsData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+          <LineChart data={trendsData as any} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
             <XAxis dataKey="test" stroke={textColor} fontSize={12} />
             <YAxis stroke={textColor} fontSize={12} />
             <Tooltip contentStyle={tooltipStyle} />
             <Legend />
-            <Line type="monotone" dataKey="overallScore" stroke={currentColors.primary} strokeWidth={2} name="总体评分" />
-            <Line type="monotone" dataKey="findings" stroke={currentColors.danger} strokeWidth={2} name="问题数量" />
+            <Line
+              type="monotone"
+              dataKey="overallScore"
+              stroke={currentColors.primary}
+              strokeWidth={2}
+              name="总体评分"
+            />
+            <Line
+              type="monotone"
+              dataKey="findings"
+              stroke={currentColors.danger}
+              strokeWidth={2}
+              name="问题数量"
+            />
           </LineChart>
         );
 
@@ -309,9 +395,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         if (findingsData.length === 0) {
           return (
             <div className="flex items-center justify-center h-full">
-              <p className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'}`}>
-                未发现安全问题
-              </p>
+              <p className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'}`}>未发现安全问题</p>
             </div>
           );
         }
@@ -338,9 +422,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         if (overviewData.length === 0) {
           return (
             <div className="flex items-center justify-center h-full">
-              <p className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'}`}>
-                暂无测试数据
-              </p>
+              <p className={`text-${theme === 'dark' ? 'gray-400' : 'gray-600'}`}>暂无测试数据</p>
             </div>
           );
         }
@@ -390,23 +472,26 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
   return (
     <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>
       <div className="flex justify-between items-center mb-4">
-        <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+        <h3
+          className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+        >
           测试结果分析
         </h3>
 
         {interactive && (
           <div className="flex gap-2">
-            {['overview', 'metrics', 'trends', 'findings'].map((chart) => (
+            {['overview', 'metrics', 'trends', 'findings'].map(chart => (
               <button
                 key={chart}
                 type="button"
                 onClick={() => setSelectedChart(chart as any)}
-                className={`px-3 py-1 rounded text-sm transition-colors ${selectedChart === chart
-                  ? 'bg-blue-600 text-white'
-                  : theme === 'dark'
-                    ? 'bg-gray-700 text-white hover:bg-gray-600'
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                  }`}
+                className={`px-3 py-1 rounded text-sm transition-colors ${
+                  selectedChart === chart
+                    ? 'bg-blue-600 text-white'
+                    : theme === 'dark'
+                      ? 'bg-gray-700 text-white hover:bg-gray-600'
+                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                }`}
               >
                 {chart === 'overview' && '总览'}
                 {chart === 'metrics' && '指标'}
@@ -427,32 +512,53 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
       {/* 测试摘要 */}
       <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>总体评分</div>
-          <div className={`text-xl font-bold ${(latestResult?.overallScore || (latestResult as any).securityScore || 0) >= 90 ? 'text-green-500' :
-            (latestResult?.overallScore || (latestResult as any).securityScore || 0) >= 70 ? 'text-yellow-500' : 'text-red-500'
-            }`}>
+          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            总体评分
+          </div>
+          <div
+            className={`text-xl font-bold ${
+              (latestResult?.overallScore || (latestResult as any).securityScore || 0) >= 90
+                ? 'text-green-500'
+                : (latestResult?.overallScore || (latestResult as any).securityScore || 0) >= 70
+                  ? 'text-yellow-500'
+                  : 'text-red-500'
+            }`}
+          >
             {Math.round(latestResult?.overallScore || (latestResult as any).securityScore || 0)}
           </div>
         </div>
 
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>测试时长</div>
+          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            测试时长
+          </div>
           <div className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             {latestResult?.duration ? latestResult?.duration.toFixed(1) : '0.0'}s
           </div>
         </div>
 
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>发现问题</div>
-          <div className={`text-xl font-bold ${(latestResult?.findings || (latestResult as any).vulnerabilities || []).length === 0 ? 'text-green-500' :
-            (latestResult?.findings || (latestResult as any).vulnerabilities || []).length <= 3 ? 'text-yellow-500' : 'text-red-500'
-            }`}>
+          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            发现问题
+          </div>
+          <div
+            className={`text-xl font-bold ${
+              (latestResult?.findings || (latestResult as any).vulnerabilities || []).length === 0
+                ? 'text-green-500'
+                : (latestResult?.findings || (latestResult as any).vulnerabilities || []).length <=
+                    3
+                  ? 'text-yellow-500'
+                  : 'text-red-500'
+            }`}
+          >
             {(latestResult?.findings || (latestResult as any).vulnerabilities || []).length}
           </div>
         </div>
 
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>测试引擎</div>
+          <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            测试引擎
+          </div>
           <div className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             {latestResult?.engine}
           </div>

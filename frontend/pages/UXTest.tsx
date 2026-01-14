@@ -4,7 +4,19 @@
  */
 
 import Logger from '@/utils/logger';
-import { CheckCircle, Eye, Loader, MousePointer, Play, RotateCcw, Settings, Smartphone, Square, Users, Zap } from 'lucide-react';
+import {
+  CheckCircle,
+  Eye,
+  Loader,
+  MousePointer,
+  Play,
+  RotateCcw,
+  Settings,
+  Smartphone,
+  Square,
+  Users,
+  Zap,
+} from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import TestPageLayout from '../components/testing/TestPageLayout';
@@ -72,8 +84,8 @@ const UXTest: React.FC = () => {
       { width: 1920, height: 1080, name: '桌面大屏' },
       { width: 1366, height: 768, name: '桌面标准' },
       { width: 768, height: 1024, name: '平板' },
-      { width: 375, height: 667, name: '手机' }
-    ]
+      { width: 375, height: 667, name: '手机' },
+    ],
   });
 
   const [isRunning, setIsRunning] = useState(false);
@@ -86,9 +98,9 @@ const UXTest: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('准备就绪');
 
-  const updateProgress = useCallback((newProgress: number, step: string) => {
+  const updateProgress = useCallback((newProgress: number, step?: string) => {
     setProgress(newProgress);
-    setCurrentStep(step);
+    if (step) setCurrentStep(step);
   }, []);
 
   // 清理错误状态
@@ -128,10 +140,10 @@ const UXTest: React.FC = () => {
           includeAccessibilityTest: config.includeAccessibilityTest,
           includePerformanceUX: config.includePerformanceUX,
           includeVisualTest: config.includeVisualTest,
-          customViewports: config.customViewports
+          customViewports: config.customViewports,
         },
         // onProgress
-        (progress: number, step: string) => {
+        (progress: number, step?: string) => {
           updateProgress(progress, step);
         },
         // onComplete
@@ -145,35 +157,32 @@ const UXTest: React.FC = () => {
             visualTests: {
               colorContrast: result.visualTests?.colorContrast || 85,
               fontReadability: result.visualTests?.fontReadability || 90,
-              layoutConsistency: result.visualTests?.layoutConsistency || 88
+              layoutConsistency: result.visualTests?.layoutConsistency || 88,
             },
             performanceUX: {
               firstContentfulPaint: result.performanceUX?.firstContentfulPaint || 800,
               largestContentfulPaint: result.performanceUX?.largestContentfulPaint || 1200,
               cumulativeLayoutShift: result.performanceUX?.cumulativeLayoutShift || 0.1,
-              firstInputDelay: result.performanceUX?.firstInputDelay || 30
+              firstInputDelay: result.performanceUX?.firstInputDelay || 30,
             },
             accessibilityIssues: result.accessibilityIssues || [
               {
                 type: '可访问性检查',
                 severity: 'low',
                 description: '未发现严重的可访问性问题',
-                element: ''
-              }
+                element: '',
+              },
             ],
             usabilityIssues: result.usabilityIssues || [
               {
                 category: '用户体验',
                 description: '整体用户体验良好',
                 impact: 'low',
-                suggestion: '继续保持良好的用户体验设计'
-              }
+                suggestion: '继续保持良好的用户体验设计',
+              },
             ],
-            recommendations: result.recommendations || [
-              'UX测试完成',
-              '建议定期进行用户体验测试'
-            ],
-            overallScore: result.overallScore || result.score || 85
+            recommendations: result.recommendations || ['UX测试完成', '建议定期进行用户体验测试'],
+            overallScore: result.overallScore || result.score || 85,
           };
 
           setResult(uxResult);
@@ -194,7 +203,6 @@ const UXTest: React.FC = () => {
       );
 
       setCurrentTestId(testId);
-
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '启动测试失败';
       setError(errorMessage);
@@ -223,7 +231,7 @@ const UXTest: React.FC = () => {
   const handleConfigChange = useCallback((field: keyof UXConfig, value: any) => {
     setConfig(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   }, []);
 
@@ -231,25 +239,28 @@ const UXTest: React.FC = () => {
   const addCustomViewport = useCallback(() => {
     setConfig(prev => ({
       ...prev,
-      customViewports: [...prev.customViewports, { width: 1200, height: 800, name: '自定义' }]
+      customViewports: [...prev.customViewports, { width: 1200, height: 800, name: '自定义' }],
     }));
   }, []);
 
   // 更新自定义视口
-  const updateCustomViewport = useCallback((index: number, field: 'width' | 'height' | 'name', value: any) => {
-    setConfig(prev => ({
-      ...prev,
-      customViewports: prev.customViewports.map((viewport, i) =>
-        i === index ? { ...viewport, [field]: value } : viewport
-      )
-    }));
-  }, []);
+  const updateCustomViewport = useCallback(
+    (index: number, field: 'width' | 'height' | 'name', value: any) => {
+      setConfig(prev => ({
+        ...prev,
+        customViewports: prev.customViewports.map((viewport, i) =>
+          i === index ? { ...viewport, [field]: value } : viewport
+        ),
+      }));
+    },
+    []
+  );
 
   // 删除自定义视口
   const removeCustomViewport = useCallback((index: number) => {
     setConfig(prev => ({
       ...prev,
-      customViewports: prev.customViewports.filter((_, i) => i !== index)
+      customViewports: prev.customViewports.filter((_, i) => i !== index),
     }));
   }, []);
 
@@ -277,7 +288,7 @@ const UXTest: React.FC = () => {
                 <input
                   type="url"
                   value={config.targetUrl}
-                  onChange={(e) => handleConfigChange('targetUrl', e.target.value)}
+                  onChange={e => handleConfigChange('targetUrl', e.target.value)}
                   placeholder="https://www.example.com"
                   className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
                   disabled={isRunning}
@@ -290,12 +301,10 @@ const UXTest: React.FC = () => {
               {/* 测试类型和设备类型 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    测试类型
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">测试类型</label>
                   <select
                     value={config.testType}
-                    onChange={(e) => handleConfigChange('testType', e.target.value)}
+                    onChange={e => handleConfigChange('testType', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     disabled={isRunning}
                   >
@@ -307,12 +316,10 @@ const UXTest: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    设备类型
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">设备类型</label>
                   <select
                     value={config.deviceType}
-                    onChange={(e) => handleConfigChange('deviceType', e.target.value)}
+                    onChange={e => handleConfigChange('deviceType', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     disabled={isRunning}
                   >
@@ -330,7 +337,7 @@ const UXTest: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={config.includeAccessibilityTest}
-                    onChange={(e) => handleConfigChange('includeAccessibilityTest', e.target.checked)}
+                    onChange={e => handleConfigChange('includeAccessibilityTest', e.target.checked)}
                     className="mr-2"
                     disabled={isRunning}
                   />
@@ -341,7 +348,7 @@ const UXTest: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={config.includePerformanceUX}
-                    onChange={(e) => handleConfigChange('includePerformanceUX', e.target.checked)}
+                    onChange={e => handleConfigChange('includePerformanceUX', e.target.checked)}
                     className="mr-2"
                     disabled={isRunning}
                   />
@@ -352,7 +359,7 @@ const UXTest: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={config.includeVisualTest}
-                    onChange={(e) => handleConfigChange('includeVisualTest', e.target.checked)}
+                    onChange={e => handleConfigChange('includeVisualTest', e.target.checked)}
                     className="mr-2"
                     disabled={isRunning}
                   />
@@ -365,9 +372,7 @@ const UXTest: React.FC = () => {
           {/* 自定义视口配置 */}
           {config.deviceType === 'all' && (
             <div className="themed-bg-card rounded-lg shadow-xl border themed-border-primary p-6">
-              <h3 className="text-lg font-semibold themed-text-primary mb-4">
-                自定义视口尺寸
-              </h3>
+              <h3 className="text-lg font-semibold themed-text-primary mb-4">自定义视口尺寸</h3>
 
               <div className="space-y-3">
                 {config.customViewports.map((viewport, index) => (
@@ -375,7 +380,7 @@ const UXTest: React.FC = () => {
                     <input
                       type="text"
                       value={viewport.name}
-                      onChange={(e) => updateCustomViewport(index, 'name', e.target.value)}
+                      onChange={e => updateCustomViewport(index, 'name', e.target.value)}
                       placeholder="视口名称"
                       className="px-3 py-2 bg-gray-700 dark:bg-gray-800 text-white border border-gray-600 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
                       disabled={isRunning}
@@ -383,7 +388,7 @@ const UXTest: React.FC = () => {
                     <input
                       type="number"
                       value={viewport.width}
-                      onChange={(e) => updateCustomViewport(index, 'width', parseInt(e.target.value))}
+                      onChange={e => updateCustomViewport(index, 'width', parseInt(e.target.value))}
                       placeholder="宽度"
                       min="320"
                       max="3840"
@@ -393,7 +398,9 @@ const UXTest: React.FC = () => {
                     <input
                       type="number"
                       value={viewport.height}
-                      onChange={(e) => updateCustomViewport(index, 'height', parseInt(e.target.value))}
+                      onChange={e =>
+                        updateCustomViewport(index, 'height', parseInt(e.target.value))
+                      }
                       placeholder="高度"
                       min="240"
                       max="2160"
@@ -476,7 +483,11 @@ const UXTest: React.FC = () => {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div className="ml-3">
@@ -496,7 +507,9 @@ const UXTest: React.FC = () => {
                   <h3 className="text-lg font-semibold themed-text-primary">用户体验测试结果</h3>
                   <div className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-                    <span className="text-2xl font-bold text-green-600">{result.overallScore}/100</span>
+                    <span className="text-2xl font-bold text-green-600">
+                      {result.overallScore}/100
+                    </span>
                   </div>
                 </div>
 
@@ -511,7 +524,11 @@ const UXTest: React.FC = () => {
                       {result.usabilityScore}/100
                     </p>
                     <p className="text-sm text-blue-600">
-                      {result.usabilityScore >= 80 ? '优秀' : result.usabilityScore >= 60 ? '良好' : '需要改进'}
+                      {result.usabilityScore >= 80
+                        ? '优秀'
+                        : result.usabilityScore >= 60
+                          ? '良好'
+                          : '需要改进'}
                     </p>
                   </div>
 
@@ -524,7 +541,11 @@ const UXTest: React.FC = () => {
                       {result.accessibilityScore}/100
                     </p>
                     <p className="text-sm text-green-600">
-                      {result.accessibilityScore >= 80 ? '优秀' : result.accessibilityScore >= 60 ? '良好' : '需要改进'}
+                      {result.accessibilityScore >= 80
+                        ? '优秀'
+                        : result.accessibilityScore >= 60
+                          ? '良好'
+                          : '需要改进'}
                     </p>
                   </div>
 
@@ -537,7 +558,11 @@ const UXTest: React.FC = () => {
                       {result.mobileScore}/100
                     </p>
                     <p className="text-sm text-purple-600">
-                      {result.mobileScore >= 80 ? '优秀' : result.mobileScore >= 60 ? '良好' : '需要改进'}
+                      {result.mobileScore >= 80
+                        ? '优秀'
+                        : result.mobileScore >= 60
+                          ? '良好'
+                          : '需要改进'}
                     </p>
                   </div>
                 </div>
@@ -604,41 +629,68 @@ const UXTest: React.FC = () => {
                     <h4 className="text-md font-semibold text-gray-900 mb-3">可访问性问题</h4>
                     <div className="space-y-3">
                       {result.accessibilityIssues.map((issue, index) => (
-                        <div key={index} className={`rounded-lg p-4 ${issue.severity === 'critical' ? 'bg-red-50 border border-red-200' :
-                          issue.severity === 'high' ? 'bg-orange-50 border border-orange-200' :
-                            issue.severity === 'medium' ? 'bg-yellow-50 border border-yellow-200' :
-                              'bg-blue-50 border border-blue-200'
-                          }`}>
+                        <div
+                          key={index}
+                          className={`rounded-lg p-4 ${
+                            issue.severity === 'critical'
+                              ? 'bg-red-50 border border-red-200'
+                              : issue.severity === 'high'
+                                ? 'bg-orange-50 border border-orange-200'
+                                : issue.severity === 'medium'
+                                  ? 'bg-yellow-50 border border-yellow-200'
+                                  : 'bg-blue-50 border border-blue-200'
+                          }`}
+                        >
                           <div className="flex items-start justify-between">
                             <div>
-                              <h5 className={`font-medium ${issue.severity === 'critical' ? 'text-red-800' :
-                                issue.severity === 'high' ? 'text-orange-800' :
-                                  issue.severity === 'medium' ? 'text-yellow-800' :
-                                    'text-blue-800'
-                                }`}>
+                              <h5
+                                className={`font-medium ${
+                                  issue.severity === 'critical'
+                                    ? 'text-red-800'
+                                    : issue.severity === 'high'
+                                      ? 'text-orange-800'
+                                      : issue.severity === 'medium'
+                                        ? 'text-yellow-800'
+                                        : 'text-blue-800'
+                                }`}
+                              >
                                 {issue.type}
                               </h5>
-                              <p className={`text-sm mt-1 ${issue.severity === 'critical' ? 'text-red-700' :
-                                issue.severity === 'high' ? 'text-orange-700' :
-                                  issue.severity === 'medium' ? 'text-yellow-700' :
-                                    'text-blue-700'
-                                }`}>
+                              <p
+                                className={`text-sm mt-1 ${
+                                  issue.severity === 'critical'
+                                    ? 'text-red-700'
+                                    : issue.severity === 'high'
+                                      ? 'text-orange-700'
+                                      : issue.severity === 'medium'
+                                        ? 'text-yellow-700'
+                                        : 'text-blue-700'
+                                }`}
+                              >
                                 {issue.description}
                               </p>
                               {issue.element && (
-                                <p className="text-xs text-gray-500 mt-1">
-                                  元素: {issue.element}
-                                </p>
+                                <p className="text-xs text-gray-500 mt-1">元素: {issue.element}</p>
                               )}
                             </div>
-                            <span className={`px-2 py-1 text-xs font-medium rounded ${issue.severity === 'critical' ? 'bg-red-100 text-red-800' :
-                              issue.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                                issue.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                  'bg-blue-100 text-blue-800'
-                              }`}>
-                              {issue.severity === 'critical' ? '严重' :
-                                issue.severity === 'high' ? '高' :
-                                  issue.severity === 'medium' ? '中' : '低'}
+                            <span
+                              className={`px-2 py-1 text-xs font-medium rounded ${
+                                issue.severity === 'critical'
+                                  ? 'bg-red-100 text-red-800'
+                                  : issue.severity === 'high'
+                                    ? 'bg-orange-100 text-orange-800'
+                                    : issue.severity === 'medium'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-blue-100 text-blue-800'
+                              }`}
+                            >
+                              {issue.severity === 'critical'
+                                ? '严重'
+                                : issue.severity === 'high'
+                                  ? '高'
+                                  : issue.severity === 'medium'
+                                    ? '中'
+                                    : '低'}
                             </span>
                           </div>
                         </div>
@@ -662,12 +714,20 @@ const UXTest: React.FC = () => {
                                 <strong>建议:</strong> {issue.suggestion}
                               </p>
                             </div>
-                            <span className={`px-2 py-1 text-xs font-medium rounded ml-4 ${issue.impact === 'high' ? 'bg-red-100 text-red-800' :
-                              issue.impact === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-green-100 text-green-800'
-                              }`}>
-                              {issue.impact === 'high' ? '高影响' :
-                                issue.impact === 'medium' ? '中影响' : '低影响'}
+                            <span
+                              className={`px-2 py-1 text-xs font-medium rounded ml-4 ${
+                                issue.impact === 'high'
+                                  ? 'bg-red-100 text-red-800'
+                                  : issue.impact === 'medium'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : 'bg-green-100 text-green-800'
+                              }`}
+                            >
+                              {issue.impact === 'high'
+                                ? '高影响'
+                                : issue.impact === 'medium'
+                                  ? '中影响'
+                                  : '低影响'}
                             </span>
                           </div>
                         </div>

@@ -3,12 +3,12 @@
  * 提供完整的压力测试功能，包括实时监控、结果分析和报告导出
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import {Zap, AlertTriangle, Info, Download, AlertCircle} from 'lucide-react';
+import { AlertCircle, AlertTriangle, Download, Info, Zap } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import { UniversalTestPage } from '../components/testing/UniversalTestPage';
 import { stressTestConfig } from '../config/testTypes';
-import { toast } from 'react-hot-toast';
 
 /**
  * 自定义结果展示组件
@@ -120,10 +120,9 @@ const UnifiedStressTest: React.FC = () => {
 
   // 测试完成回调
   const handleTestComplete = useCallback((result: any) => {
-    
     // 添加到历史记录
     setTestHistory(prev => [result, ...prev.slice(0, 4)]);
-    
+
     // 显示通知
     if (result.summary) {
       const { avgResponseTime, errorRate } = result.summary;
@@ -138,8 +137,7 @@ const UnifiedStressTest: React.FC = () => {
   }, []);
 
   // 配置变更回调
-  const handleConfigChange = useCallback((config: any) => {
-  }, []);
+  const handleConfigChange = useCallback((config: any) => {}, []);
 
   // 导出测试结果
   const exportTestResult = (result: any) => {
@@ -154,7 +152,7 @@ const UnifiedStressTest: React.FC = () => {
       configuration: result.config,
       summary: result.summary,
       metrics: result.metrics,
-      errors: result.errors
+      errors: result.errors,
     };
 
     const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
@@ -166,7 +164,7 @@ const UnifiedStressTest: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast.success('测试报告已导出');
   };
 
@@ -179,14 +177,12 @@ const UnifiedStressTest: React.FC = () => {
             <Zap className="h-8 w-8 text-red-500" />
             <h1 className="text-3xl font-bold text-white">压力测试</h1>
           </div>
-          <p className="mt-2 text-gray-400">
-            模拟高并发负载，测试系统性能极限和稳定性
-          </p>
+          <p className="mt-2 text-gray-400">模拟高并发负载，测试系统性能极限和稳定性</p>
         </div>
 
         {/* 主测试界面 */}
         <UniversalTestPage
-          testType={stressTestConfig}
+          testType={stressTestConfig as any}
           onTestComplete={handleTestComplete}
           onConfigChange={handleConfigChange}
           customActions={
@@ -249,13 +245,24 @@ const UnifiedStressTest: React.FC = () => {
                   <span className="font-medium">快速帮助</span>
                   <span className="text-gray-500 ml-2">{showHelp ? '▼' : '▶'}</span>
                 </button>
-                
+
                 {showHelp && (
                   <div className="mt-3 space-y-2 text-sm text-gray-400">
-                    <p><strong className="text-white">并发用户数：</strong> 同时发送请求的虚拟用户数量</p>
-                    <p><strong className="text-white">目标RPS：</strong> 每秒期望发送的请求数量</p>
-                    <p><strong className="text-white">爬升时间：</strong> 从0逐步增加到目标并发数的时间</p>
-                    <p><strong className="text-white">95/99百分位：</strong> 95%/99%的请求响应时间不超过此值</p>
+                    <p>
+                      <strong className="text-white">并发用户数：</strong>{' '}
+                      同时发送请求的虚拟用户数量
+                    </p>
+                    <p>
+                      <strong className="text-white">目标RPS：</strong> 每秒期望发送的请求数量
+                    </p>
+                    <p>
+                      <strong className="text-white">爬升时间：</strong>{' '}
+                      从0逐步增加到目标并发数的时间
+                    </p>
+                    <p>
+                      <strong className="text-white">95/99百分位：</strong>{' '}
+                      95%/99%的请求响应时间不超过此值
+                    </p>
                   </div>
                 )}
               </div>

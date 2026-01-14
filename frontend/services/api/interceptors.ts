@@ -3,14 +3,14 @@
  * 处理请求和响应的拦截逻辑
  */
 
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 /**
  * 获取认证Token
  */
 function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
-  
+
   // 优先从localStorage获取,其次从sessionStorage
   return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
 }
@@ -20,7 +20,7 @@ function getAuthToken(): string | null {
  */
 function removeAuthToken(): void {
   if (typeof window === 'undefined') return;
-  
+
   localStorage.removeItem('authToken');
   sessionStorage.removeItem('authToken');
 }
@@ -28,7 +28,7 @@ function removeAuthToken(): void {
 /**
  * 请求拦截器
  */
-function requestInterceptor(config: AxiosRequestConfig): AxiosRequestConfig {
+function requestInterceptor(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
   // 添加认证Token
   const token = getAuthToken();
   if (token && config.headers) {
@@ -44,7 +44,7 @@ function requestInterceptor(config: AxiosRequestConfig): AxiosRequestConfig {
   if (import.meta.env.DEV) {
     console.log('[API Request]', config.method?.toUpperCase(), config.url, {
       params: config.params,
-      data: config.data
+      data: config.data,
     });
   }
 
@@ -67,7 +67,7 @@ function responseInterceptor(response: AxiosResponse): AxiosResponse {
   if (import.meta.env.DEV) {
     console.log('[API Response]', response.config.url, {
       status: response.status,
-      data: response.data
+      data: response.data,
     });
   }
 
@@ -84,21 +84,25 @@ function responseErrorInterceptor(error: AxiosError): Promise<never> {
     // 401 未授权 - 清除token并重定向到登录页
     if (status === 401) {
       removeAuthToken();
-      
+
       // 触发全局事件
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('auth:unauthorized', {
-          detail: { message: '登录已过期,请重新登录' }
-        }));
+        window.dispatchEvent(
+          new CustomEvent('auth:unauthorized', {
+            detail: { message: '登录已过期,请重新登录' },
+          })
+        );
       }
     }
 
     // 403 禁止访问
     if (status === 403) {
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('auth:forbidden', {
-          detail: { message: '您没有权限访问此资源' }
-        }));
+        window.dispatchEvent(
+          new CustomEvent('auth:forbidden', {
+            detail: { message: '您没有权限访问此资源' },
+          })
+        );
       }
     }
 
@@ -110,21 +114,25 @@ function responseErrorInterceptor(error: AxiosError): Promise<never> {
     // 500 服务器错误
     if (status >= 500) {
       console.error('[Server Error]', status, data);
-      
+
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('api:server-error', {
-          detail: { status, message: '服务器错误,请稍后重试' }
-        }));
+        window.dispatchEvent(
+          new CustomEvent('api:server-error', {
+            detail: { status, message: '服务器错误,请稍后重试' },
+          })
+        );
       }
     }
   } else if (error.request) {
     // 请求已发送但未收到响应
     console.error('[Network Error]', error.message);
-    
+
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('api:network-error', {
-        detail: { message: '网络连接失败,请检查网络' }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('api:network-error', {
+          detail: { message: '网络连接失败,请检查网络' },
+        })
+      );
     }
   }
 
@@ -135,7 +143,7 @@ function responseErrorInterceptor(error: AxiosError): Promise<never> {
       method: error.config?.method,
       status: error.response?.status,
       message: error.message,
-      data: error.response?.data
+      data: error.response?.data,
     });
   }
 
@@ -154,23 +162,13 @@ function generateRequestId(): string {
  */
 export function setupInterceptors(instance: AxiosInstance): void {
   // 请求拦截器
-  instance.interceptors.request.use(
-    requestInterceptor,
-    requestErrorInterceptor
-  );
+  instance.interceptors.request.use(requestInterceptor, requestErrorInterceptor);
 
   // 响应拦截器
-  instance.interceptors.response.use(
-    responseInterceptor,
-    responseErrorInterceptor
-  );
+  instance.interceptors.response.use(responseInterceptor, responseErrorInterceptor);
 }
 
 /**
  * 导出工具函数
  */
-export {
-  getAuthToken,
-  removeAuthToken,
-  generateRequestId
-};
+export { generateRequestId, getAuthToken, removeAuthToken };

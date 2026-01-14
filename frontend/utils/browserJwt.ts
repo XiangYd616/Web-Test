@@ -1,6 +1,5 @@
 import Logger from '@/utils/logger';
 
-﻿
 interface JWTHeader {
   alg: string;
   typ: string;
@@ -27,10 +26,7 @@ export class BrowserJWT {
    * Base64URL编码
    */
   private base64UrlEncode(str: string): string {
-    return btoa(str)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '');
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   }
 
   /**
@@ -38,7 +34,7 @@ export class BrowserJWT {
    */
   private base64UrlDecode(str: string): string {
     // 补齐padding
-    str += '='.repeat((4 - str.length % 4) % 4);
+    str += '='.repeat((4 - (str.length % 4)) % 4);
     // 替换字符
     str = str.replace(/-/g, '+').replace(/_/g, '/');
     return atob(str);
@@ -50,14 +46,14 @@ export class BrowserJWT {
   public createToken(payload: JWTPayload, expiresIn: number = 3600): string {
     const header: JWTHeader = {
       alg: 'HS256',
-      typ: 'JWT'
+      typ: 'JWT',
     };
 
     const now = Math.floor(Date.now() / 1000);
     const tokenPayload: JWTPayload = {
       ...payload,
       iat: now,
-      exp: now + expiresIn
+      exp: now + expiresIn,
     };
 
     const encodedHeader = this.base64UrlEncode(JSON.stringify(header));
@@ -72,7 +68,9 @@ export class BrowserJWT {
   /**
    * 解析JWT Token
    */
-  public parseToken(token: string): { header: JWTHeader; payload: JWTPayload; signature: string } | null {
+  public parseToken(
+    token: string
+  ): { header: JWTHeader; payload: JWTPayload; signature: string } | null {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) {
@@ -140,7 +138,7 @@ export class BrowserJWT {
     const newPayload = {
       ...parsed.payload,
       iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + expiresIn
+      exp: Math.floor(Date.now() / 1000) + expiresIn,
     };
 
     return this.createToken(newPayload, expiresIn);
@@ -160,7 +158,7 @@ export class BrowserJWT {
       username: parsed.payload.username,
       email: parsed.payload.email,
       role: parsed.payload.role,
-      ...parsed.payload
+      ...parsed.payload,
     };
   }
 
@@ -192,7 +190,7 @@ export class BrowserJWT {
       sub: 'guest',
       username: 'Guest',
       role: 'guest',
-      isGuest: true
+      isGuest: true,
     };
 
     return this.createToken(payload, 86400); // 24小时有效期
@@ -203,7 +201,7 @@ export class BrowserJWT {
    */
   public isGuestToken(token: string): boolean {
     const user = this.getUserFromToken(token);
-    return user && (user as any).isGuest === true;
+    return Boolean(user && (user as any).isGuest === true);
   }
 
   /**
@@ -226,7 +224,7 @@ export class BrowserJWT {
       remainingTime,
       isExpiringSoon: this.isTokenExpiringSoon(token),
       createdAt: parsed.payload.iat ? new Date(parsed.payload.iat * 1000) : null,
-      expiresAt: parsed.payload.exp ? new Date(parsed.payload.exp * 1000) : null
+      expiresAt: parsed.payload.exp ? new Date(parsed.payload.exp * 1000) : null,
     };
   }
 }
