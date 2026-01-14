@@ -2,7 +2,7 @@
  * 统一错误处理系统
  * 版本: v2.0.0
  * 创建时间: 2025-08-24
- * 
+ *
  * 此文件整合了所有重复的错误处理逻辑：
  * - backend/middleware/errorHandler.js
  * - backend/api/middleware/errorHandler.js
@@ -12,7 +12,7 @@
  * - frontend/services/api/apiErrorHandler.ts
  */
 
-import type { ApiErrorResponse, ApiMeta } from '../types/unifiedTypes';
+import type { ApiErrorResponse, ApiMeta } from '../types/shared.types';
 
 // ==================== 错误代码枚举 ====================
 
@@ -54,14 +54,14 @@ export enum ErrorCode {
   // 业务逻辑错误
   BUSINESS_LOGIC_ERROR = 'BUSINESS_LOGIC_ERROR',
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
-  QUOTA_EXCEEDED = 'QUOTA_EXCEEDED'
+  QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
 }
 
 export enum ErrorSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 // ==================== 错误接口定义 ====================
@@ -128,7 +128,7 @@ const ERROR_STATUS_MAP: Record<ErrorCode, number> = {
   [ErrorCode.ENGINE_UNAVAILABLE]: 503,
   [ErrorCode.BUSINESS_LOGIC_ERROR]: 400,
   [ErrorCode.RATE_LIMIT_EXCEEDED]: 429,
-  [ErrorCode.QUOTA_EXCEEDED]: 429
+  [ErrorCode.QUOTA_EXCEEDED]: 429,
 };
 
 const ERROR_MESSAGES: Record<ErrorCode, string> = {
@@ -156,7 +156,7 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.ENGINE_UNAVAILABLE]: '测试引擎不可用',
   [ErrorCode.BUSINESS_LOGIC_ERROR]: '业务逻辑错误',
   [ErrorCode.RATE_LIMIT_EXCEEDED]: '请求频率超限',
-  [ErrorCode.QUOTA_EXCEEDED]: '配额已用完'
+  [ErrorCode.QUOTA_EXCEEDED]: '配额已用完',
 };
 
 const RETRYABLE_ERRORS = new Set([
@@ -164,7 +164,7 @@ const RETRYABLE_ERRORS = new Set([
   ErrorCode.TIMEOUT_ERROR,
   ErrorCode.CONNECTION_ERROR,
   ErrorCode.INTERNAL_SERVER_ERROR,
-  ErrorCode.ENGINE_UNAVAILABLE
+  ErrorCode.ENGINE_UNAVAILABLE,
 ]);
 
 // ==================== 统一错误处理器类 ====================
@@ -183,7 +183,7 @@ export class UnifiedErrorHandler {
       maxRetries: 3,
       retryDelay: 1000,
       logLevel: 'error',
-      ...config
+      ...config,
     };
   }
 
@@ -248,7 +248,7 @@ export class UnifiedErrorHandler {
       stack,
       retryable: RETRYABLE_ERRORS.has(code),
       userFriendlyMessage: ERROR_MESSAGES[code] || message,
-      suggestions: this.generateSuggestions(code)
+      suggestions: this.generateSuggestions(code),
     };
   }
 
@@ -285,22 +285,15 @@ export class UnifiedErrorHandler {
    * 确定错误严重程度
    */
   private determineSeverity(code: ErrorCode): ErrorSeverity {
-    const criticalErrors = [
-      ErrorCode.INTERNAL_SERVER_ERROR,
-      ErrorCode.DATABASE_ERROR
-    ];
+    const criticalErrors = [ErrorCode.INTERNAL_SERVER_ERROR, ErrorCode.DATABASE_ERROR];
 
     const highErrors = [
       ErrorCode.UNAUTHORIZED,
       ErrorCode.FORBIDDEN,
-      ErrorCode.TEST_EXECUTION_ERROR
+      ErrorCode.TEST_EXECUTION_ERROR,
     ];
 
-    const lowErrors = [
-      ErrorCode.VALIDATION_ERROR,
-      ErrorCode.BAD_REQUEST,
-      ErrorCode.NOT_FOUND
-    ];
+    const lowErrors = [ErrorCode.VALIDATION_ERROR, ErrorCode.BAD_REQUEST, ErrorCode.NOT_FOUND];
 
     if (criticalErrors.includes(code)) return ErrorSeverity.CRITICAL;
     if (highErrors.includes(code)) return ErrorSeverity.HIGH;
@@ -318,7 +311,7 @@ export class UnifiedErrorHandler {
       [ErrorCode.NETWORK_ERROR]: ['检查网络连接', '稍后重试'],
       [ErrorCode.VALIDATION_ERROR]: ['检查输入数据格式', '确保必填字段已填写'],
       [ErrorCode.NOT_FOUND]: ['检查URL是否正确', '确认资源是否存在'],
-      [ErrorCode.RATE_LIMIT_EXCEEDED]: ['降低请求频率', '稍后重试']
+      [ErrorCode.RATE_LIMIT_EXCEEDED]: ['降低请求频率', '稍后重试'],
     };
 
     return suggestions[code] || ['请联系技术支持'];
@@ -396,7 +389,7 @@ export class UnifiedErrorHandler {
       error: {
         code: error.code,
         message: error.userFriendlyMessage,
-        details: error.context
+        details: error.context,
       },
       meta: {
         timestamp: error.timestamp,
@@ -404,8 +397,8 @@ export class UnifiedErrorHandler {
         path: meta.path || '',
         method: meta.method || '',
         version: meta.version || '2.0.0',
-        ...meta
-      }
+        ...meta,
+      },
     };
   }
 

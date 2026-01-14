@@ -7,8 +7,8 @@
 // 导入基础类型
 import type { Timestamp } from './unified/apiResponse.types';
 
-// 重新导出统一类型
-export * from '../../shared/types/unifiedTypes';
+// 重新导出共享类型
+export * from '../../shared/types/shared.types';
 
 // 导出基础类型
 export type { Timestamp };
@@ -280,4 +280,3 @@ export interface AppConfig {
 // - export interface TestResult { ... }
 // - export interface ApiResponse<T> { ... }
 // - 等等...
-
