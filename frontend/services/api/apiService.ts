@@ -177,7 +177,6 @@ export class ApiService {
   // Test-specific methods - 调用testRepository
   public async startTest(config: TestConfig): Promise<ApiResponse<TestSession>> {
     try {
-      const { testRepository } = await import('./testRepository');
       const result = await testRepository.executeTest({
         testType: config.testType,
         target: config.config?.url || '',
@@ -191,7 +190,6 @@ export class ApiService {
 
   public async getTestProgress(testId: string): Promise<ApiResponse<TestProgress>> {
     try {
-      const { testRepository } = await import('./testRepository');
       const result = await testRepository.getTestStatus(testId);
       return { success: true, data: result as any };
     } catch (error: any) {
@@ -201,7 +199,6 @@ export class ApiService {
 
   public async getTestResult(testId: string): Promise<ApiResponse<any>> {
     try {
-      const { testRepository } = await import('./testRepository');
       const result = await testRepository.getTestResult(testId);
       return { success: true, data: result };
     } catch (error: any) {
@@ -211,7 +208,6 @@ export class ApiService {
 
   public async cancelTest(testId: string): Promise<ApiResponse<void>> {
     try {
-      const { testRepository } = await import('./testRepository');
       await testRepository.cancelTest(testId);
       return { success: true };
     } catch (error: any) {
@@ -221,7 +217,6 @@ export class ApiService {
 
   public async stopTest(testId: string): Promise<ApiResponse<void>> {
     try {
-      const { testRepository } = await import('./testRepository');
       await testRepository.stopTest(testId);
       return { success: true };
     } catch (error: any) {
@@ -229,9 +224,8 @@ export class ApiService {
     }
   }
 
-  public async getTestHistory(testId: string): Promise<ApiResponse<any[]>> {
+  public async getTestHistory(_testId: string): Promise<ApiResponse<any[]>> {
     try {
-      const { testRepository } = await import('./testRepository');
       const result = await testRepository.getTestHistory();
       return { success: true, data: result.tests };
     } catch (error: any) {
@@ -240,13 +234,11 @@ export class ApiService {
   }
 
   public async getQueueStatus(): Promise<ApiResponse<any>> {
-    console.warn('getQueueStatus未实现，请使用testRepository');
-    return { success: false, error: '方法未实现' };
+    return { success: false, error: '方法未实现，请使用testRepository' };
   }
 
   public async getTestStatistics(timeRange?: string): Promise<ApiResponse<any>> {
     try {
-      const { testRepository } = await import('./testRepository');
       const result = await testRepository.getTestStatistics(timeRange);
       return { success: true, data: result };
     } catch (error: any) {
