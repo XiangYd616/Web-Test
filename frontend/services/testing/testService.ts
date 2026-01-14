@@ -1,7 +1,7 @@
 /**
- * unifiedTestService.ts - 业务服务层
- * 
- * 文件路径: frontend\services\testing\unifiedTestService.ts
+ * testService.ts - 业务服务层
+ *
+ * 文件路径: frontend\services\testing\testService.ts
  * 创建时间: 2025-09-25
  */
 
@@ -19,10 +19,9 @@ export interface TestServiceConfig {
   retryAttempts: number;
 }
 
-export class UnifiedTestService {
+export class TestService {
   private engines: Map<string, TestEngine> = new Map();
   private config: TestServiceConfig;
-
 
   /**
 
@@ -39,11 +38,13 @@ export class UnifiedTestService {
    */
   private activeTests: Map<string, AbortController> = new Map();
 
-  constructor(config: TestServiceConfig = {
-    maxConcurrentTests: 5,
-    timeout: (process.env.REQUEST_TIMEOUT as any) || 30000,
-    retryAttempts: 3
-  }) {
+  constructor(
+    config: TestServiceConfig = {
+      maxConcurrentTests: 5,
+      timeout: (process.env.REQUEST_TIMEOUT as any) || 30000,
+      retryAttempts: 3,
+    }
+  ) {
     this.config = config;
     this.initializeEngines();
   }
@@ -62,8 +63,7 @@ export class UnifiedTestService {
     this.engines.set(type, engine);
   }
 
-
-    /**
+  /**
 
      * if功能函数
 
@@ -76,7 +76,6 @@ export class UnifiedTestService {
     if (this.activeTests.size >= this.config.maxConcurrentTests) {
       throw new Error('达到最大并发测试数量限制');
     }
-
 
     /**
 
@@ -96,10 +95,7 @@ export class UnifiedTestService {
     this.activeTests.set(testId, abortController);
 
     try {
-      const result = await Promise.race([
-        engine.execute(config),
-        this.createTimeoutPromise()
-      ]);
+      const result = await Promise.race([engine.execute(config), this.createTimeoutPromise()]);
 
       return result;
     } finally {
@@ -108,7 +104,6 @@ export class UnifiedTestService {
   }
 
   cancelTest(testId: string): void {
-
     /**
 
      * if功能函数
@@ -144,7 +139,7 @@ class WebsiteTestEngine implements TestEngine {
   async execute(config: TestConfig): Promise<TestResult> {
     // 模拟网站测试
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     return {
       id: `website-${Date.now()}`,
       testId: `website-${Date.now()}`,
@@ -157,8 +152,8 @@ class WebsiteTestEngine implements TestEngine {
       results: {
         url: config.url,
         responseTime: Math.floor(Math.random() * 1000 + 200),
-        statusCode: 200
-      }
+        statusCode: 200,
+      },
     };
   }
 }
@@ -169,7 +164,7 @@ class SecurityTestEngine implements TestEngine {
 
   async execute(config: TestConfig): Promise<TestResult> {
     await new Promise(resolve => setTimeout(resolve, 3000));
-    
+
     return {
       id: `security-${Date.now()}`,
       testId: `security-${Date.now()}`,
@@ -181,8 +176,8 @@ class SecurityTestEngine implements TestEngine {
       summary: '安全扫描完成',
       results: {
         vulnerabilities: Math.floor(Math.random() * 5),
-        riskLevel: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)]
-      }
+        riskLevel: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)],
+      },
     };
   }
 }
@@ -193,7 +188,7 @@ class PerformanceTestEngine implements TestEngine {
 
   async execute(config: TestConfig): Promise<TestResult> {
     await new Promise(resolve => setTimeout(resolve, 2500));
-    
+
     return {
       id: `performance-${Date.now()}`,
       testId: `performance-${Date.now()}`,
@@ -206,8 +201,8 @@ class PerformanceTestEngine implements TestEngine {
       results: {
         loadTime: Math.floor(Math.random() * 2000 + 500),
         firstContentfulPaint: Math.floor(Math.random() * 1500 + 300),
-        largestContentfulPaint: Math.floor(Math.random() * 3000 + 800)
-      }
+        largestContentfulPaint: Math.floor(Math.random() * 3000 + 800),
+      },
     };
   }
 }
@@ -218,7 +213,7 @@ class SEOTestEngine implements TestEngine {
 
   async execute(config: TestConfig): Promise<TestResult> {
     await new Promise(resolve => setTimeout(resolve, 1800));
-    
+
     return {
       id: `seo-${Date.now()}`,
       testId: `seo-${Date.now()}`,
@@ -231,8 +226,8 @@ class SEOTestEngine implements TestEngine {
       results: {
         metaTags: Math.floor(Math.random() * 10 + 5),
         headings: Math.floor(Math.random() * 20 + 10),
-        images: Math.floor(Math.random() * 30 + 15)
-      }
+        images: Math.floor(Math.random() * 30 + 15),
+      },
     };
   }
 }
@@ -243,7 +238,7 @@ class APITestEngine implements TestEngine {
 
   async execute(config: TestConfig): Promise<TestResult> {
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     return {
       id: `api-${Date.now()}`,
       testId: `api-${Date.now()}`,
@@ -255,9 +250,11 @@ class APITestEngine implements TestEngine {
       summary: 'API测试完成',
       results: {
         endpoints: Math.floor(Math.random() * 10 + 3),
-        responseTime: Math.floor(Math.random() * 500 + 100)
+        responseTime: Math.floor(Math.random() * 500 + 100),
       },
-      errors: Array(Math.floor(Math.random() * 3)).fill('').map((_, i) => `Error ${i + 1}`)
+      errors: Array(Math.floor(Math.random() * 3))
+        .fill('')
+        .map((_, i) => `Error ${i + 1}`),
     };
   }
 }
@@ -268,7 +265,7 @@ class CompatibilityTestEngine implements TestEngine {
 
   async execute(config: TestConfig): Promise<TestResult> {
     await new Promise(resolve => setTimeout(resolve, 2200));
-    
+
     return {
       id: `compatibility-${Date.now()}`,
       testId: `compatibility-${Date.now()}`,
@@ -280,8 +277,8 @@ class CompatibilityTestEngine implements TestEngine {
       summary: '兼容性测试完成',
       results: {
         browsers: ['Chrome', 'Firefox', 'Safari', 'Edge'],
-        compatibility: Math.floor(Math.random() * 20 + 80)
-      }
+        compatibility: Math.floor(Math.random() * 20 + 80),
+      },
     };
   }
 }

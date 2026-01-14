@@ -452,29 +452,29 @@ class EngineWebSocketHandler {
 }
 
 // 创建全局实例
-const unifiedEngineWSHandler = new UnifiedEngineWebSocketHandler();
+const engineWSHandler = new EngineWebSocketHandler();
 
 /**
  * WebSocket中间件工厂
  */
-const createUnifiedEngineWebSocketMiddleware = () => {
+const createEngineWebSocketMiddleware = () => {
   return (ws, req) => {
     // 验证用户身份（如果需要）
     if (!req.user && process.env.NODE_ENV === 'production') {
-      ws.close(1008, '需要身份验证');
-      return;
+      logger.warn('未授权的WebSocket连接尝试');
+      return ws.close(1008, '需要身份验证');
     }
 
     // 处理连接
-    unifiedEngineWSHandler.handleConnection(ws, req);
+    engineWSHandler.handleConnection(ws, req);
   };
 };
 
 /**
  * 获取WebSocket处理器实例
  */
-const getUnifiedEngineWSHandler = () => {
-  return unifiedEngineWSHandler;
+const getEngineWSHandler = () => {
+  return engineWSHandler;
 };
 
 /**
