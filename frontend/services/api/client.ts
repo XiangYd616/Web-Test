@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { setupInterceptors } from './interceptors';
 
 /**
@@ -50,8 +50,8 @@ const DEFAULT_CONFIG: ApiClientConfig = {
   baseURL: import.meta.env.VITE_API_URL || '/api',
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 };
 
 /**
@@ -63,12 +63,12 @@ class ApiClient {
 
   constructor(config: Partial<ApiClientConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    
+
     // 创建axios实例
     this.instance = axios.create({
       baseURL: this.config.baseURL,
       timeout: this.config.timeout,
-      headers: this.config.headers
+      headers: this.config.headers,
     });
 
     // 设置拦截器
@@ -80,9 +80,20 @@ class ApiClient {
    */
   async get<T = any>(
     url: string,
-    config?: AxiosRequestConfig
+    paramsOrConfig?: Record<string, any> | AxiosRequestConfig
   ): Promise<T> {
     try {
+      let config: AxiosRequestConfig = {};
+
+      // 判断是查询参数还是配置对象
+      if (paramsOrConfig && !('headers' in paramsOrConfig || 'timeout' in paramsOrConfig)) {
+        // 是查询参数
+        config.params = paramsOrConfig;
+      } else {
+        // 是配置对象
+        config = (paramsOrConfig as AxiosRequestConfig) || {};
+      }
+
       const response: AxiosResponse<ApiResponse<T>> = await this.instance.get(url, config);
       return this.handleResponse(response);
     } catch (error) {
@@ -93,11 +104,7 @@ class ApiClient {
   /**
    * POST请求
    */
-  async post<T = any>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
+  async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await this.instance.post(url, data, config);
       return this.handleResponse(response);
@@ -109,11 +116,7 @@ class ApiClient {
   /**
    * PUT请求
    */
-  async put<T = any>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
+  async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await this.instance.put(url, data, config);
       return this.handleResponse(response);
@@ -125,11 +128,7 @@ class ApiClient {
   /**
    * PATCH请求
    */
-  async patch<T = any>(
-    url: string,
-    data?: any,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
+  async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await this.instance.patch(url, data, config);
       return this.handleResponse(response);
@@ -141,10 +140,7 @@ class ApiClient {
   /**
    * DELETE请求
    */
-  async delete<T = any>(
-    url: string,
-    config?: AxiosRequestConfig
-  ): Promise<T> {
+  async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await this.instance.delete(url, config);
       return this.handleResponse(response);
@@ -169,7 +165,7 @@ class ApiClient {
       if (data.success && data.data !== undefined) {
         return data.data as T;
       }
-      
+
       if (!data.success) {
         throw new Error(data.error?.message || data.message || 'Request failed');
       }
