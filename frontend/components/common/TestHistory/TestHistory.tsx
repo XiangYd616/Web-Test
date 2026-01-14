@@ -263,9 +263,16 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
   className = '',
 }) => {
   // ===== Hooks =====
-  const { records, loading, totalRecords, loadTestRecords, setRecords } = useTestRecords({
+  const {
+    records,
+    loading: loadingState,
+    totalRecords,
+    loadTestRecords,
+    setRecords,
+  } = useTestRecords({
     apiEndpoint: config.apiEndpoint,
   });
+  const loading = Boolean(loadingState);
   const {
     searchTerm,
     statusFilter,
@@ -280,8 +287,9 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
   } = useFilters();
   const { currentPage, pageSize, totalPages, startRecord, endRecord, goToPage, changePageSize } =
     usePagination(totalRecords, config.defaultPageSize || 10);
-  const { selectedIds, isSelected, selectAll, toggleSelect, clearSelection } = useSelection();
-  const { exportToJson, exportToCsv } = useExport(config.testType);
+  const { selectedIds, isSelected, selectAll, toggleSelect, clearSelection } =
+    useSelection(records);
+  const { exportToJson, exportToCsv } = useExport();
 
   // 响应式状态
   const { isMobile, isTablet } = useCommonMediaQueries();
@@ -475,7 +483,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
         if (format === 'json') {
           await exportToJson(records);
         } else {
-          await exportToCsv(records, config.columns);
+          await exportToCsv(records);
         }
         Logger.info(`成功导出 ${format.toUpperCase()} 格式数据`);
         announce(`成功导出 ${format.toUpperCase()} 格式数据`);
@@ -558,8 +566,8 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
 
         {/* 表格 */}
         {showEmptyState ? (
-          <EmptyState hasFilters={hasFilters} />
-        ) : loading === true || loading === 'true' ? (
+          <EmptyState hasFilters={!!hasFilters} />
+        ) : loading ? (
           <div className="px-4 py-12 text-center">
             <div className="inline-flex items-center gap-3 text-gray-400">
               <div className="w-5 h-5 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
@@ -573,7 +581,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
             selectedIds={selectedIds}
             isMobile={features.responsive !== false && isMobile}
             isTablet={features.responsive !== false && isTablet}
-            onSelectAll={ids => selectAll(ids)}
+            onSelectAll={selectAll}
             onToggleSelect={toggleSelect}
             onView={handleViewDetails}
             onDelete={handleDeleteSingle}

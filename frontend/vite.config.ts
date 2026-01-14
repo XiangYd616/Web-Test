@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,10 +17,10 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,  // 移除console
+        drop_console: true, // 移除console
         drop_debugger: true, // 移除debugger
       },
-    },
+    } as any,
     // 启用CSS代码分割
     cssCodeSplit: true,
     // 调整chunk大小警告限制
@@ -57,19 +57,14 @@ export default defineConfig({
       '@types': path.resolve(__dirname, './types'),
       '@pages': path.resolve(__dirname, './pages'),
     },
-    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
   },
   // 优化依赖预构建
   optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      'antd',
-      'axios',
-    ],
+    include: ['react', 'react-dom', 'react-router-dom', 'antd', 'axios'],
   },
   // Vitest测试配置
+  // @ts-expect-error Vitest config type compatibility
   test: {
     globals: true,
     environment: 'jsdom',
@@ -78,12 +73,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'tests/',
-        '*.config.ts',
-      ],
+      exclude: ['node_modules/', 'tests/', '*.config.ts'],
     },
   },
 });
-
