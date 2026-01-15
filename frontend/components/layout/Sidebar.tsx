@@ -1,11 +1,30 @@
 /**
  * Sidebar.tsx - React Component
- * 
+ *
  * File path: frontend/components/layout/Sidebar.tsx
  * Created: 2025-09-25
  */
 
-import { BarChart3, ChevronRight, Code, Database, Eye, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Wifi, Zap } from 'lucide-react';
+import {
+  BarChart3,
+  ChevronRight,
+  Code,
+  Database,
+  Eye,
+  GitBranch,
+  Globe,
+  Home,
+  Key,
+  Link2,
+  Monitor,
+  Package,
+  Search,
+  Settings,
+  Shield,
+  TestTube,
+  Wifi,
+  Zap,
+} from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -25,10 +44,7 @@ interface ModernSidebarProps {
   onToggle?: () => void;
 }
 
-const Sidebar: React.FC<ModernSidebarProps> = ({
-  collapsed = false,
-  onToggle
-}) => {
+const Sidebar: React.FC<ModernSidebarProps> = ({ collapsed = false, onToggle }) => {
   const location = useLocation();
   const { user } = useAuth();
   const { actualTheme } = useTheme();
@@ -53,7 +69,7 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
       id: 'dashboard',
       name: 'Dashboard',
       icon: Home,
-      href: '/'
+      href: '/',
     },
     {
       id: 'testing',
@@ -65,79 +81,79 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
           id: 'website-test',
           name: 'Website Test',
           icon: Globe,
-          href: '/website-test'
+          href: '/website-test',
         },
         {
           id: 'stress-test',
           name: 'Stress Test',
           icon: Zap,
-          href: '/stress-test'
+          href: '/stress-test',
         },
         {
           id: 'seo-test',
           name: 'SEO Test',
           icon: Search,
-          href: '/seo-test'
+          href: '/seo-test',
         },
         {
           id: 'security-test',
           name: 'Security Test',
           icon: Shield,
           href: '/security-test',
-          badge: 'NEW'
+          badge: 'NEW',
         },
         {
           id: 'performance-test',
           name: 'Performance Test',
           icon: Monitor,
           href: '/performance-test',
-          badge: 'NEW'
+          badge: 'NEW',
         },
         {
           id: 'compatibility-test',
           name: 'Compatibility Test',
           icon: Monitor,
-          href: '/compatibility-test'
+          href: '/compatibility-test',
         },
         {
           id: 'accessibility-test',
           name: 'Accessibility Test',
           icon: Eye,
           href: '/accessibility-test',
-          badge: 'NEW'
+          badge: 'NEW',
         },
         {
           id: 'api-test',
           name: 'API Test',
           icon: Code,
-          href: '/api-test'
+          href: '/api-test',
         },
         {
           id: 'network-test',
           name: 'Network Test',
           icon: Wifi,
-          href: '/network-test'
+          href: '/network-test',
         },
         {
           id: 'database-test',
           name: 'Database Test',
           icon: Database,
-          href: '/database-test'
+          href: '/database-test',
         },
         {
           id: 'ux-test',
           name: 'UX Test',
           icon: Eye,
-          href: '/ux-test'
+          href: '/ux-test',
         },
         {
-          id: 'unified-test',
-          name: 'Unified Test Engine',
+          id: 'test-engine',
+          name: 'Test Engine',
           icon: TestTube,
-          href: '/unified-test',
-          badge: 'NEW'
-        }
-      ]
+          href: '/test-engine',
+          badge: 'NEW',
+        },
+      ],
     },
     {
       id: 'data',
@@ -150,21 +166,21 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
           name: 'Test History',
           icon: TestTube,
           href: '/test-history',
-          badge: 'v2.0'
+          badge: 'v2.0',
         },
         {
           id: 'statistics',
           name: 'Statistics & Analytics',
           icon: BarChart3,
-          href: '/statistics'
+          href: '/statistics',
         },
         {
           id: 'data-center',
           name: 'Data Center',
           icon: Database,
-          href: '/data-center'
-        }
-      ]
+          href: '/data-center',
+        },
+      ],
     },
     {
       id: 'integration',
@@ -176,42 +192,40 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
           id: 'cicd',
           name: 'CI/CD Integration',
           icon: GitBranch,
-          href: '/cicd'
+          href: '/cicd',
         },
         {
           id: 'api-keys',
           name: 'API Keys',
           icon: Key,
-          href: '/api-keys'
+          href: '/api-keys',
         },
         {
           id: 'webhooks',
           name: 'Webhooks',
           icon: Link2,
-          href: '/webhooks'
+          href: '/webhooks',
         },
         {
           id: 'integrations',
           name: 'Third-party Integrations',
           icon: Package,
-          href: '/integrations'
-        }
-      ]
+          href: '/integrations',
+        },
+      ],
     },
     {
       id: 'settings',
       name: 'Settings',
       icon: Settings,
-      href: '/settings'
-    }
+      href: '/settings',
+    },
   ];
 
   // Toggle group expansion
   const toggleGroup = (groupId: string) => {
     setExpandedGroups(prev =>
-      prev.includes(groupId)
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId]
+      prev.includes(groupId) ? prev.filter(id => id !== groupId) : [...prev, groupId]
     );
   };
 
@@ -234,9 +248,11 @@ const Sidebar: React.FC<ModernSidebarProps> = ({
   }, []);
 
   return (
-    <div className={`sidebar bg-white border-r border-gray-200 transition-all duration-300 ${
-      collapsed ? 'w-16' : 'w-64'
-    }`}>
+    <div
+      className={`sidebar bg-white border-r border-gray-200 transition-all duration-300 ${
+        collapsed ? 'w-16' : 'w-64'
+      }`}
+    >
       <div className="p-4">
         <nav className="space-y-1">
           {sidebarItems.map(item => (

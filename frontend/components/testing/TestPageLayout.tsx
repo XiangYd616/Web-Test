@@ -6,7 +6,18 @@ import TestHeader from './TestHeader';
 
 interface TestPageLayoutProps {
   // 页面基本信息
-  testType: 'stress' | 'security' | 'api' | 'performance' | 'compatibility' | 'seo' | 'accessibility' | 'website' | 'network' | 'ux' | 'database';
+  testType:
+    | 'stress'
+    | 'security'
+    | 'api'
+    | 'performance'
+    | 'compatibility'
+    | 'seo'
+    | 'accessibility'
+    | 'website'
+    | 'network'
+    | 'ux'
+    | 'database';
   title: string;
   description: string;
   icon: LucideIcon;
@@ -60,7 +71,7 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   additionalComponents,
   className = '',
   testTabLabel,
-  historyTabLabel
+  historyTabLabel,
 }) => {
   const location = useLocation();
 
@@ -77,9 +88,14 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
       website: { primary: 'indigo' as const, secondary: 'blue' as const },
       network: { primary: 'blue' as const, secondary: 'green' as const },
       ux: { primary: 'pink' as const, secondary: 'purple' as const },
-      database: { primary: 'purple' as const, secondary: 'blue' as const }
+      database: { primary: 'purple' as const, secondary: 'blue' as const },
     };
-    return colorMap[type as keyof typeof colorMap] || { primary: 'blue' as const, secondary: 'green' as const };
+    return (
+      colorMap[type as keyof typeof colorMap] || {
+        primary: 'blue' as const,
+        secondary: 'green' as const,
+      }
+    );
   };
 
   const colors = getTestTypeColors(testType);
@@ -87,7 +103,7 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   const finalSecondaryColor = secondaryColor || colors.secondary;
 
   // 状态持久化的键名
-  const storageKey = `unified-test-page-${testType}-active-tab`;
+  const storageKey = `test-engine-page-${testType}-active-tab`;
 
   // 标签页状态（支持状态持久化）
   const [activeTab, setActiveTab] = useState<'test' | 'history'>(() => {
@@ -178,20 +194,22 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
       <div className="relative">
         {/* 测试标签页内容 */}
         <div
-          className={`transition-all duration-300 ease-in-out ${activeTab === 'test'
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
-            }`}
+          className={`transition-all duration-300 ease-in-out ${
+            activeTab === 'test'
+              ? 'opacity-100 translate-y-0 pointer-events-auto'
+              : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
+          }`}
         >
           {testContent}
         </div>
 
         {/* 历史标签页内容 */}
         <div
-          className={`transition-all duration-300 ease-in-out ${activeTab === 'history'
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
-            }`}
+          className={`transition-all duration-300 ease-in-out ${
+            activeTab === 'history'
+              ? 'opacity-100 translate-y-0 pointer-events-auto'
+              : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
+          }`}
         >
           <TestHistory
             testType={testType}
@@ -208,4 +226,3 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
 };
 
 export default TestPageLayout;
-

@@ -23,7 +23,7 @@ interface SEOTestHistoryProps {
  * 使用配置驱动的 TestHistory 组件
  */
 export const SEOTestHistory = forwardRef<any, SEOTestHistoryProps>(
-  ({ onSelectTest, onTestRerun, onTestDelete, className }, ref) => {
+  ({ onSelectTest, onTestDelete, className }, ref) => {
     return (
       <TestHistory
         config={seoTestConfig}

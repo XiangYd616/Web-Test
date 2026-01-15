@@ -1,17 +1,16 @@
 ﻿/**
  * SEOReportGenerator.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\seo\SEOReportGenerator.tsx
  * 创建时间: 2025-09-25
  */
 
 import Logger from '@/utils/logger';
-import React, { useState, useCallback } from 'react';
-import {Download, FileText, Share2, Eye} from 'lucide-react';
+import { Download, Eye, FileText, Share2 } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
 import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
 import { MobileSeoAnalysisResult } from '../../utils/MobileSEODetector';
 import { CoreWebVitalsResult } from '../../utils/coreWebVitalsAnalyzer';
-import type { StressTestRecord, TestProgress, TestMetrics, TestResults } from '../../types/common';
 
 interface SEOReportData {
   basicSEO?: SEOAnalysisResult;
@@ -45,14 +44,13 @@ interface SEOReportGeneratorProps {
 export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
   reportData,
   onReportGenerated,
-  onError
+  onError,
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('comprehensive');
   const [includeCharts, setIncludeCharts] = useState(true);
   const [includeRecommendations, setIncludeRecommendations] = useState(true);
-  const [customSections, setCustomSections] = useState<string[]>([]);
-  
+
   // 预定义报告模板
   const reportTemplates: ReportTemplate[] = [
     {
@@ -60,28 +58,38 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       name: '管理层报告',
       description: '简明扼要的高层次SEO概览，聚焦关键指标和业务影响',
       sections: ['summary', 'scores', 'keyIssues', 'recommendations'],
-      format: 'executive'
+      format: 'executive',
     },
     {
       id: 'technical',
       name: '技术报告',
       description: '详细的技术SEO分析，面向开发人员和SEO专家',
       sections: ['technicalSEO', 'structuredData', 'coreWebVitals', 'mobileSEO', 'issues'],
-      format: 'technical'
+      format: 'technical',
     },
     {
       id: 'comprehensive',
       name: '综合报告',
       description: '完整的SEO审计报告，包含所有分析维度和详细建议',
-      sections: ['summary', 'scores', 'technicalSEO', 'contentQuality', 'mobileSEO', 'structuredData', 'coreWebVitals', 'recommendations', 'appendix'],
-      format: 'comprehensive'
-    }
+      sections: [
+        'summary',
+        'scores',
+        'technicalSEO',
+        'contentQuality',
+        'mobileSEO',
+        'structuredData',
+        'coreWebVitals',
+        'recommendations',
+        'appendix',
+      ],
+      format: 'comprehensive',
+    },
   ];
 
   // 生成PDF报告
   const generatePDFReport = useCallback(async (): Promise<void> => {
     setIsGenerating(true);
-    
+
     try {
       const template = reportTemplates.find(t => t.id === selectedTemplate);
       if (!template) {
@@ -90,10 +98,10 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
       // 构建报告内容
       const reportContent = await buildReportContent(template);
-      
+
       // 生成PDF（实际应用中需要使用PDF生成库如jsPDF或Puppeteer）
       const pdfBlob = await generatePDFBlob(reportContent, template);
-      
+
       // 下载文件
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
@@ -105,7 +113,6 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       URL.revokeObjectURL(url);
 
       onReportGenerated?.('pdf', reportContent);
-      
     } catch (error) {
       Logger.error('PDF报告生成失败:', error);
       onError?.(error instanceof Error ? error.message : 'PDF生成失败');
@@ -117,7 +124,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
   // 生成JSON报告
   const generateJSONReport = useCallback(async (): Promise<void> => {
     setIsGenerating(true);
-    
+
     try {
       const template = reportTemplates.find(t => t.id === selectedTemplate);
       if (!template) {
@@ -125,7 +132,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       }
 
       const reportContent = await buildReportContent(template);
-      
+
       // 构建JSON结构
       const jsonReport = {
         metadata: {
@@ -133,22 +140,22 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
           template: template.name,
           url: reportData.url,
           testMode: reportData.testConfiguration.mode,
-          version: '1.0.0'
+          version: '1.0.0',
         },
         summary: generateReportSummary(),
         sections: reportContent,
         rawData: {
           basicSEO: reportData.basicSEO,
           mobileSEO: reportData.mobileSEO,
-          coreWebVitals: reportData.coreWebVitals
-        }
+          coreWebVitals: reportData.coreWebVitals,
+        },
       };
 
       // 下载JSON文件
-      const jsonBlob = new Blob([JSON.stringify(jsonReport, null, 2)], { 
-        type: 'application/json' 
+      const jsonBlob = new Blob([JSON.stringify(jsonReport, null, 2)], {
+        type: 'application/json',
       });
-      
+
       const url = URL.createObjectURL(jsonBlob);
       const link = document.createElement('a');
       link.href = url;
@@ -159,7 +166,6 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       URL.revokeObjectURL(url);
 
       onReportGenerated?.('json', jsonReport);
-      
     } catch (error) {
       Logger.error('JSON报告生成失败:', error);
       onError?.(error instanceof Error ? error.message : 'JSON生成失败');
@@ -171,7 +177,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
   // 生成HTML报告
   const generateHTMLReport = useCallback(async (): Promise<void> => {
     setIsGenerating(true);
-    
+
     try {
       const template = reportTemplates.find(t => t.id === selectedTemplate);
       if (!template) {
@@ -180,9 +186,9 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
 
       const reportContent = await buildReportContent(template);
       const htmlContent = await generateHTMLContent(reportContent, template);
-      
+
       const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-      
+
       const url = URL.createObjectURL(htmlBlob);
       const link = document.createElement('a');
       link.href = url;
@@ -193,7 +199,6 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       URL.revokeObjectURL(url);
 
       onReportGenerated?.('html', htmlContent);
-      
     } catch (error) {
       Logger.error('HTML报告生成失败:', error);
       onError?.(error instanceof Error ? error.message : 'HTML生成失败');
@@ -256,7 +261,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       overallScore: 0,
       totalIssues: 0,
       criticalIssues: 0,
-      keyFindings: [] as string[]
+      keyFindings: [] as string[],
     };
 
     // 计算总体评分
@@ -303,7 +308,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       content: 0,
       mobile: 0,
       performance: 0,
-      accessibility: 0
+      accessibility: 0,
     };
 
     if (reportData.basicSEO) {
@@ -334,7 +339,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       score: 0,
       robots: reportData.basicSEO.technical.robots,
       sitemap: reportData.basicSEO.technical.sitemap,
-      canonical: reportData.basicSEO.technical.canonical
+      canonical: reportData.basicSEO.technical.canonical,
     };
   };
 
@@ -349,7 +354,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       headings: reportData.basicSEO.contentQuality.headings,
       content: reportData.basicSEO.contentQuality.content,
       images: reportData.basicSEO.contentQuality.images,
-      links: reportData.basicSEO.contentQuality.links
+      links: reportData.basicSEO.contentQuality.links,
     };
   };
 
@@ -367,7 +372,7 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       schemas: reportData.basicSEO.structuredData.schemas,
       jsonLd: reportData.basicSEO.structuredData.jsonLd,
       microdata: reportData.basicSEO.structuredData.microdata,
-      issues: reportData.basicSEO.structuredData.issues
+      issues: reportData.basicSEO.structuredData.issues,
     };
   };
 
@@ -407,8 +412,8 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
     // 按优先级排序
     return recommendations.sort((a, b) => {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
-      const aPriority = (a as any)?.priority as keyof typeof priorityOrder || 'low';
-      const bPriority = (b as any)?.priority as keyof typeof priorityOrder || 'low';
+      const aPriority = ((a as any)?.priority as keyof typeof priorityOrder) || 'low';
+      const bPriority = ((b as any)?.priority as keyof typeof priorityOrder) || 'low';
       return (priorityOrder[bPriority] || 1) - (priorityOrder[aPriority] || 1);
     });
   };
@@ -432,17 +437,17 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
       glossary: [
         {
           term: 'LCP (Largest Contentful Paint)',
-          definition: '最大内容绘制时间，衡量页面主要内容加载完成的时间'
+          definition: '最大内容绘制时间，衡量页面主要内容加载完成的时间',
         },
         {
           term: 'FID (First Input Delay)',
-          definition: '首次输入延迟，衡量页面响应用户首次交互的时间'
+          definition: '首次输入延迟，衡量页面响应用户首次交互的时间',
         },
         {
           term: 'CLS (Cumulative Layout Shift)',
-          definition: '累积布局偏移，衡量页面视觉稳定性'
-        }
-      ]
+          definition: '累积布局偏移，衡量页面视觉稳定性',
+        },
+      ],
     };
   };
 
@@ -455,7 +460,10 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
   };
 
   // 生成HTML内容
-  const generateHTMLContent = async (content: unknown, template: ReportTemplate): Promise<string> => {
+  const generateHTMLContent = async (
+    content: unknown,
+    template: ReportTemplate
+  ): Promise<string> => {
     const htmlTemplate = `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -485,7 +493,9 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
         <p><strong>测试时间:</strong> ${new Date(reportData.timestamp).toLocaleString('zh-CN')}</p>
         <p><strong>报告模板:</strong> ${template.name}</p>
         
-        ${(content as any).summary ? `
+        ${
+          (content as any).summary
+            ? `
         <h2>执行摘要</h2>
         <div class="summary-grid">
             <div class="summary-card">
@@ -501,19 +511,29 @@ export const SEOReportGenerator: React.FC<SEOReportGeneratorProps> = ({
                 <div>关键问题</div>
             </div>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
         
-        ${(content as any).recommendations ? `
+        ${
+          (content as any).recommendations
+            ? `
         <h2>优化建议</h2>
-        ${(content as any).recommendations.map((rec: any, index: number) => `
+        ${(content as any).recommendations
+          .map(
+            (rec: any, index: number) => `
             <div class="recommendation">
                 <h4>${rec?.title || ''}</h4>
                 <p><strong>优先级:</strong> ${rec?.priority === 'high' ? '高' : rec?.priority === 'medium' ? '中' : '低'}</p>
                 <p><strong>说明:</strong> ${rec?.description || ''}</p>
                 <p><strong>实施方案:</strong> ${rec?.implementation || rec?.action || ''}</p>
             </div>
-        `).join('')}
-        ` : ''}
+        `
+          )
+          .join('')}
+        `
+            : ''
+        }
         
         <h2>详细数据</h2>
         <pre style="background: #f8fafc; padding: 20px; border-radius: 4px; overflow-x: auto; font-size: 12px;">
@@ -541,11 +561,9 @@ ${JSON.stringify(content, null, 2)}
 
       {/* 报告模板选择 */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          选择报告模板
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">选择报告模板</label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {reportTemplates.map((template) => (
+          {reportTemplates.map(template => (
             <div
               key={template.id}
               className={`p-4 border rounded-lg cursor-pointer transition-colors ${
@@ -577,15 +595,13 @@ ${JSON.stringify(content, null, 2)}
 
       {/* 报告选项 */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          报告选项
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">报告选项</label>
         <div className="space-y-2">
           <label className="flex items-center">
             <input
               type="checkbox"
               checked={includeCharts}
-              onChange={(e) => setIncludeCharts(e.target.checked)}
+              onChange={e => setIncludeCharts(e.target.checked)}
               className="mr-2"
             />
             <span className="text-sm">包含图表和可视化</span>
@@ -594,7 +610,7 @@ ${JSON.stringify(content, null, 2)}
             <input
               type="checkbox"
               checked={includeRecommendations}
-              onChange={(e) => setIncludeRecommendations(e.target.checked)}
+              onChange={e => setIncludeRecommendations(e.target.checked)}
               className="mr-2"
             />
             <span className="text-sm">包含优化建议</span>
@@ -612,7 +628,7 @@ ${JSON.stringify(content, null, 2)}
           <Download className="mr-2" size={16} />
           {isGenerating ? '生成中...' : '导出PDF'}
         </button>
-        
+
         <button
           onClick={generateJSONReport}
           disabled={isGenerating}
@@ -621,7 +637,7 @@ ${JSON.stringify(content, null, 2)}
           <Download className="mr-2" size={16} />
           {isGenerating ? '生成中...' : '导出JSON'}
         </button>
-        
+
         <button
           onClick={generateHTMLReport}
           disabled={isGenerating}
@@ -630,9 +646,11 @@ ${JSON.stringify(content, null, 2)}
           <Download className="mr-2" size={16} />
           {isGenerating ? '生成中...' : '导出HTML'}
         </button>
-        
+
         <button
-          onClick={() => {/* 实现分享功能 */}}
+          onClick={() => {
+            /* 实现分享功能 */
+          }}
           disabled={isGenerating}
           className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
         >
@@ -648,19 +666,32 @@ ${JSON.stringify(content, null, 2)}
           报告预览
         </h4>
         <div className="text-sm text-gray-600">
-          <p><strong>URL:</strong> {reportData.url}</p>
-          <p><strong>测试时间:</strong> {new Date(reportData.timestamp).toLocaleString('zh-CN')}</p>
-          <p><strong>测试模式:</strong> {reportData.testConfiguration.mode === 'online' ? '在线测试' : '本地测试'}</p>
-          <p><strong>分析深度:</strong> {reportData.testConfiguration.depth}</p>
-          
+          <p>
+            <strong>URL:</strong> {reportData.url}
+          </p>
+          <p>
+            <strong>测试时间:</strong> {new Date(reportData.timestamp).toLocaleString('zh-CN')}
+          </p>
+          <p>
+            <strong>测试模式:</strong>{' '}
+            {reportData.testConfiguration.mode === 'online' ? '在线测试' : '本地测试'}
+          </p>
+          <p>
+            <strong>分析深度:</strong> {reportData.testConfiguration.depth}
+          </p>
+
           {reportData.basicSEO && (
             <div className="mt-2">
               <span className="font-medium">总体评分: </span>
-              <span className={`font-bold ${
-                reportData.basicSEO.score >= 90 ? 'text-green-600' :
-                reportData.basicSEO.score >= 70 ? 'text-yellow-600' :
-                'text-red-600'
-              }`}>
+              <span
+                className={`font-bold ${
+                  reportData.basicSEO.score >= 90
+                    ? 'text-green-600'
+                    : reportData.basicSEO.score >= 70
+                      ? 'text-yellow-600'
+                      : 'text-red-600'
+                }`}
+              >
                 {reportData.basicSEO.score}/100
               </span>
             </div>
@@ -676,21 +707,21 @@ ${JSON.stringify(content, null, 2)}
           </div>
           <div className="text-sm text-blue-600">发现问题</div>
         </div>
-        
+
         <div className="text-center p-3 bg-red-50 rounded-lg">
           <div className="text-2xl font-bold text-red-600">
             {reportData.basicSEO?.issues.filter(i => i.impact === 'high').length || 0}
           </div>
           <div className="text-sm text-red-600">高优先级</div>
         </div>
-        
+
         <div className="text-center p-3 bg-green-50 rounded-lg">
           <div className="text-2xl font-bold text-green-600">
             {reportData.basicSEO?.recommendations.length || 0}
           </div>
           <div className="text-sm text-green-600">优化建议</div>
         </div>
-        
+
         <div className="text-center p-3 bg-purple-50 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">
             {reportData.basicSEO?.structuredData?.schemas?.length || 0}

@@ -19,12 +19,11 @@ export interface DataTableProps {
   rowKey?: string | ((record: any) => string);
 }
 
-export const DataTable: React.FC<DataTableProps> = ({ 
-  columns, 
-  dataSource, 
+export const DataTable: React.FC<DataTableProps> = ({
+  columns,
+  dataSource,
   loading = false,
-  pagination,
-  rowKey = 'id'
+  rowKey = 'id',
 }) => {
   return (
     <div className="data-table">
@@ -50,10 +49,9 @@ export const DataTable: React.FC<DataTableProps> = ({
               <tr key={typeof rowKey === 'function' ? rowKey(record) : (record as any)[rowKey]}>
                 {columns.map(col => (
                   <td key={col.key} className="border border-gray-300 p-2">
-                    {col.render 
+                    {col.render
                       ? col.render((record as any)[col.dataIndex || col.key], record, index)
-                      : (record as any)[col.dataIndex || col.key]
-                    }
+                      : (record as any)[col.dataIndex || col.key]}
                   </td>
                 ))}
               </tr>

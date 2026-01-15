@@ -1,25 +1,34 @@
 /**
- * Enhanced Charts Display Component
+ * Charts Display Component
  * Provides multiple data visualization solutions with real-time data updates and interactions
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { BarChart3, ChevronDown, Download, Maximize2, Minimize2, RefreshCw, Settings, ZoomIn, ZoomOut } from 'lucide-react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
   ArcElement,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
   RadialLinearScale,
   Title,
   Tooltip,
-  Legend,
-  Filler
 } from 'chart.js';
-import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
+import {
+  BarChart3,
+  Download,
+  Maximize2,
+  Minimize2,
+  RefreshCw,
+  Settings,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Line } from 'react-chartjs-2';
 import { toast } from 'react-hot-toast';
 
 // Register Chart.js components
@@ -62,13 +71,13 @@ const Charts: React.FC = () => {
   const generateMockData = (points: number = 24): number[] => {
     const data: number[] = [];
     let current = 100;
-    
+
     for (let i = 0; i < points; i++) {
       current += (Math.random() - 0.5) * 20;
       current = Math.max(0, current);
       data.push(Math.round(current * 100) / 100);
     }
-    
+
     return data;
   };
 
@@ -76,7 +85,7 @@ const Charts: React.FC = () => {
   const generateTimeLabels = (range: TimeRange): string[] => {
     const labels: string[] = [];
     const now = new Date();
-    
+
     switch (range) {
       case '1h':
         for (let i = 59; i >= 0; i--) {
@@ -99,7 +108,7 @@ const Charts: React.FC = () => {
       default:
         return generateTimeLabels('24h');
     }
-    
+
     return labels;
   };
 
@@ -111,21 +120,21 @@ const Charts: React.FC = () => {
           textColor: '#E5E7EB',
           gridColor: 'rgba(156, 163, 175, 0.1)',
           backgroundColor: '#1F2937',
-          colors: ['#60A5FA', '#34D399', '#F87171', '#FBBF24', '#A78BFA', '#FB923C']
+          colors: ['#60A5FA', '#34D399', '#F87171', '#FBBF24', '#A78BFA', '#FB923C'],
         };
       case 'colorful':
         return {
           textColor: '#374151',
           gridColor: 'rgba(156, 163, 175, 0.2)',
           backgroundColor: '#FFFFFF',
-          colors: ['#3B82F6', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899']
+          colors: ['#3B82F6', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6', '#EC4899'],
         };
       case 'minimal':
         return {
           textColor: '#6B7280',
           gridColor: 'rgba(209, 213, 219, 0.3)',
           backgroundColor: '#FFFFFF',
-          colors: ['#9CA3AF', '#6B7280', '#4B5563', '#374151', '#1F2937', '#111827']
+          colors: ['#9CA3AF', '#6B7280', '#4B5563', '#374151', '#1F2937', '#111827'],
         };
       default:
         return getThemeConfig('colorful');
@@ -135,7 +144,7 @@ const Charts: React.FC = () => {
   // Chart options
   const getChartOptions = (type: ChartType) => {
     const themeConfig = getThemeConfig(theme);
-    
+
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -147,8 +156,8 @@ const Charts: React.FC = () => {
             color: themeConfig.textColor,
             font: { size: 12 },
             padding: 15,
-            usePointStyle: true
-          }
+            usePointStyle: true,
+          },
         },
         tooltip: {
           backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -156,23 +165,26 @@ const Charts: React.FC = () => {
           bodyColor: '#FFFFFF',
           padding: 12,
           cornerRadius: 8,
-          displayColors: true
-        }
-      },
-      scales: type === 'pie' || type === 'doughnut' ? {} : {
-        x: {
-          grid: { color: themeConfig.gridColor },
-          ticks: { color: themeConfig.textColor, font: { size: 11 } }
+          displayColors: true,
         },
-        y: {
-          grid: { color: themeConfig.gridColor },
-          ticks: { color: themeConfig.textColor, font: { size: 11 } }
-        }
       },
+      scales:
+        type === 'pie' || type === 'doughnut'
+          ? {}
+          : {
+              x: {
+                grid: { color: themeConfig.gridColor },
+                ticks: { color: themeConfig.textColor, font: { size: 11 } },
+              },
+              y: {
+                grid: { color: themeConfig.gridColor },
+                ticks: { color: themeConfig.textColor, font: { size: 11 } },
+              },
+            },
       animation: {
         duration: 750,
-        easing: 'easeInOutQuart' as const
-      }
+        easing: 'easeInOutQuart' as const,
+      },
     };
   };
 
@@ -185,16 +197,16 @@ const Charts: React.FC = () => {
         data: generateMockData(timeRange === '7d' ? 7 : 24),
         borderColor: '#3B82F6',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4
+        tension: 0.4,
       },
       {
         label: 'Error Rate',
         data: generateMockData(timeRange === '7d' ? 7 : 24),
         borderColor: '#EF4444',
         backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        tension: 0.4
-      }
-    ]
+        tension: 0.4,
+      },
+    ],
   };
 
   // Auto refresh
@@ -214,7 +226,7 @@ const Charts: React.FC = () => {
   }, [autoRefresh]);
 
   return (
-    <div className={`enhanced-charts ${isFullscreen ? 'fullscreen' : ''}`}>
+    <div className={`charts ${isFullscreen ? 'fullscreen' : ''}`}>
       <div className="chart-container bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         {/* Chart Controls */}
         <div className="flex items-center justify-between mb-6">
@@ -227,7 +239,7 @@ const Charts: React.FC = () => {
             {/* Time Range Selector */}
             <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+              onChange={e => setTimeRange(e.target.value as TimeRange)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
             >
               <option value="1h">Last Hour</option>
@@ -241,7 +253,7 @@ const Charts: React.FC = () => {
             {/* Theme Selector */}
             <select
               value={theme}
-              onChange={(e) => setTheme(e.target.value as ChartTheme)}
+              onChange={e => setTheme(e.target.value as ChartTheme)}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
             >
               <option value="colorful">Colorful</option>
@@ -282,17 +294,11 @@ const Charts: React.FC = () => {
               {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
             </button>
 
-            <button
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-              title="Download"
-            >
+            <button className="p-2 rounded-lg text-gray-600 hover:bg-gray-100" title="Download">
               <Download className="w-5 h-5" />
             </button>
 
-            <button
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-              title="Settings"
-            >
+            <button className="p-2 rounded-lg text-gray-600 hover:bg-gray-100" title="Settings">
               <Settings className="w-5 h-5" />
             </button>
           </div>

@@ -1,12 +1,34 @@
 /**
  * Navigation.tsx - React Component
- * 
+ *
  * File path: frontend/components/navigation/Navigation.tsx
  * Created: 2025-09-25
  */
 
 import Logger from '@/utils/logger';
-import { BarChart3, Bell, Calendar, ChevronDown, Code, Database, Eye, FileText, Gauge, Globe, HelpCircle, LogOut, Menu, Monitor, Search, Settings, Shield, User, Wifi, X, Zap } from 'lucide-react';
+import {
+  BarChart3,
+  Bell,
+  Calendar,
+  ChevronDown,
+  Code,
+  Database,
+  Eye,
+  FileText,
+  Gauge,
+  Globe,
+  HelpCircle,
+  LogOut,
+  Menu,
+  Monitor,
+  Search,
+  Settings,
+  Shield,
+  User,
+  Wifi,
+  X,
+  Zap,
+} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -34,97 +56,97 @@ const Navigation: React.FC = () => {
       name: 'Website Test',
       href: '/website-test',
       icon: Zap,
-      description: 'Comprehensive website testing platform'
+      description: 'Comprehensive website testing platform',
     },
     {
       name: 'SEO Test',
       href: '/seo-test',
       icon: Search,
-      description: 'Search engine optimization analysis'
+      description: 'Search engine optimization analysis',
     },
     {
       name: 'Security Test',
       href: '/security-test',
       icon: Shield,
-      description: 'Security vulnerability scanning'
+      description: 'Security vulnerability scanning',
     },
     {
       name: 'Performance Test',
       href: '/performance-test',
       icon: Gauge,
-      description: 'Website performance analysis'
+      description: 'Website performance analysis',
     },
     {
       name: 'Compatibility Test',
       href: '/compatibility-test',
       icon: Globe,
-      description: 'Cross-browser compatibility testing'
+      description: 'Cross-browser compatibility testing',
     },
     {
       name: 'API Test',
       href: '/api-test',
       icon: Code,
-      description: 'RESTful API endpoint testing'
+      description: 'RESTful API endpoint testing',
     },
     {
       name: 'User Experience Test',
       href: '/ux-test',
       icon: Eye,
-      description: 'Core Web Vitals analysis'
+      description: 'Core Web Vitals analysis',
     },
     {
       name: 'Database Test',
       href: '/database-test',
       icon: Database,
-      description: 'Database performance and integrity testing'
+      description: 'Database performance and integrity testing',
     },
     {
       name: 'Network Test',
       href: '/network-test',
       icon: Wifi,
-      description: 'Network latency and bandwidth testing'
+      description: 'Network latency and bandwidth testing',
     },
     {
       name: 'Real-time Monitoring',
       href: '/dashboard',
       icon: Monitor,
-      description: '24/7 website monitoring'
+      description: '24/7 website monitoring',
     },
     {
       name: 'Test Scheduler',
       href: '/test-schedule',
       icon: Calendar,
-      description: 'Scheduled and batch test management'
+      description: 'Scheduled and batch test management',
     },
     {
-      name: 'Unified Test Engine',
-      href: '/unified-test',
+      name: 'Test Engine',
+      href: '/test-engine',
       icon: Zap,
-      description: 'Integrated multi-tool testing platform'
-    }
+      description: 'Integrated multi-tool testing platform',
+    },
   ];
 
   const mainNavigation: NavigationItem[] = [
     {
       name: 'Dashboard',
       href: '/',
-      icon: Monitor
+      icon: Monitor,
     },
     {
       name: 'Classic Dashboard',
       href: '/dashboard',
-      icon: BarChart3
+      icon: BarChart3,
     },
     {
       name: 'Test History',
       href: '/history',
-      icon: FileText
+      icon: FileText,
     },
     {
       name: 'Help Center',
       href: '/help',
-      icon: HelpCircle
-    }
+      icon: HelpCircle,
+    },
   ];
 
   const handleLogout = () => {
@@ -181,14 +203,15 @@ const Navigation: React.FC = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             {/* Main navigation */}
-            {mainNavigation.map((item) => (
+            {mainNavigation.map(item => (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActivePath(item.href)
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
+                className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActivePath(item.href)
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                }`}
               >
                 <item.icon className="w-4 h-4" />
                 <span>{item.name}</span>
@@ -203,7 +226,7 @@ const Navigation: React.FC = () => {
             {/* Testing Tools Dropdown */}
             <div className="dropdown-menu relative">
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   setIsTestMenuOpen(!isTestMenuOpen);
                 }}
@@ -211,12 +234,14 @@ const Navigation: React.FC = () => {
               >
                 <Zap className="w-4 h-4" />
                 <span>Testing Tools</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${isTestMenuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${isTestMenuOpen ? 'rotate-180' : ''}`}
+                />
               </button>
 
               {isTestMenuOpen && (
                 <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 py-2 max-h-96 overflow-y-auto">
-                  {testingTools.map((tool) => (
+                  {testingTools.map(tool => (
                     <Link
                       key={tool.name}
                       to={tool.href}
@@ -238,7 +263,7 @@ const Navigation: React.FC = () => {
             {/* User Menu */}
             <div className="dropdown-menu relative">
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   setIsUserMenuOpen(!isUserMenuOpen);
                 }}
@@ -246,7 +271,9 @@ const Navigation: React.FC = () => {
               >
                 <User className="w-5 h-5" />
                 <span>{user?.username || 'User'}</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}
+                />
               </button>
 
               {isUserMenuOpen && (
@@ -293,7 +320,7 @@ const Navigation: React.FC = () => {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="space-y-1">
-              {mainNavigation.map((item) => (
+              {mainNavigation.map(item => (
                 <Link
                   key={item.name}
                   to={item.href}

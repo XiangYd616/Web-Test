@@ -200,7 +200,7 @@ export interface ApiConfig {
 
 // ==================== Test API Types ====================
 
-// Import test-specific types from unified type system
+// Import test-specific types from the type system
 // Use the standard TestType from enums.ts
 import { TestType as EnumTestType, TestTypeValue } from '../enums';
 
@@ -484,7 +484,7 @@ export interface AuditLog {
   timestamp: string;
 }
 
-// ==================== Unified Test Configuration ====================
+// ==================== Test Configuration ====================
 
 export interface TestRunConfig {
   testType: TestType;

@@ -57,16 +57,18 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
   // 使用统一测试引擎Hook
   const engine = useTestEngine();
   const stats = engine.getStats?.() || {
-    totalActiveTests: 0,
     runningTests: 0,
     completedTests: 0,
     failedTests: 0,
-    performance: {
-      successRate: 0,
-      errorRate: 0,
-      averageExecutionTime: 0,
-    },
+    totalTests: 0,
   };
+
+  const totalActiveTests = stats.runningTests;
+  const totalFinished = stats.completedTests + stats.failedTests;
+  const successRate = totalFinished > 0 ? (stats.completedTests / totalFinished) * 100 : 0;
+  const errorRate = totalFinished > 0 ? (stats.failedTests / totalFinished) * 100 : 0;
+  const averageExecutionTime = 0;
+  const hasLastError = Boolean(engine.error);
 
   /**
    * 手动刷新
@@ -185,7 +187,7 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
         <Col span={6}>
           <Statistic
             title="活跃测试"
-            value={stats.totalActiveTests}
+            value={totalActiveTests}
             valueStyle={{ color: '#1890ff' }}
             prefix={<ClockCircleOutlined />}
           />
@@ -226,16 +228,11 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
             <Col span={8}>
               <Statistic
                 title="成功率"
-                value={stats.performance.successRate}
+                value={successRate}
                 precision={1}
                 suffix="%"
                 valueStyle={{
-                  color:
-                    stats.performance.successRate >= 90
-                      ? '#3f8600'
-                      : stats.performance.successRate >= 70
-                        ? '#faad14'
-                        : '#cf1322',
+                  color: successRate >= 90 ? '#3f8600' : successRate >= 70 ? '#faad14' : '#cf1322',
                 }}
               />
             </Col>
@@ -243,16 +240,11 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
             <Col span={8}>
               <Statistic
                 title="错误率"
-                value={stats.performance.errorRate}
+                value={errorRate}
                 precision={1}
                 suffix="%"
                 valueStyle={{
-                  color:
-                    stats.performance.errorRate <= 5
-                      ? '#3f8600'
-                      : stats.performance.errorRate <= 15
-                        ? '#faad14'
-                        : '#cf1322',
+                  color: errorRate <= 5 ? '#3f8600' : errorRate <= 15 ? '#faad14' : '#cf1322',
                 }}
               />
             </Col>
@@ -260,7 +252,7 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
             <Col span={8}>
               <Statistic
                 title="平均执行时间"
-                value={stats.performance.averageExecutionTime / 1000}
+                value={averageExecutionTime / 1000}
                 precision={1}
                 suffix="秒"
                 valueStyle={{ color: '#1890ff' }}
@@ -399,24 +391,24 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
                 <Text>错误率:</Text>
                 <Text
                   style={{
-                    color: stats.performance.errorRate <= 5 ? '#3f8600' : '#cf1322',
+                    color: errorRate <= 5 ? '#3f8600' : '#cf1322',
                   }}
                 >
-                  {stats.performance.errorRate.toFixed(1)}%
+                  {errorRate.toFixed(1)}%
                 </Text>
               </div>
 
               <div className="flex justify-between">
                 <Text>活跃测试:</Text>
                 <Text>
-                  {stats.runningTests} / {stats.totalActiveTests}
+                  {stats.runningTests} / {totalActiveTests}
                 </Text>
               </div>
 
               <div className="flex justify-between">
                 <Text>最后错误:</Text>
-                <Text type={engine.lastError ? 'danger' : 'secondary'}>
-                  {engine.lastError ? '有错误' : '无错误'}
+                <Text type={hasLastError ? 'danger' : 'secondary'}>
+                  {hasLastError ? '有错误' : '无错误'}
                 </Text>
               </div>
             </Space>
@@ -436,11 +428,11 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
     if (!engine.isConnected) score -= 30;
 
     // 错误率影响
-    if (stats.performance.errorRate > 15) score -= 25;
-    else if (stats.performance.errorRate > 5) score -= 10;
+    if (errorRate > 15) score -= 25;
+    else if (errorRate > 5) score -= 10;
 
     // 最后错误影响
-    if (engine.lastError) score -= 15;
+    if (hasLastError) score -= 15;
 
     // 活跃测试过多影响
     if (stats.runningTests > 10) score -= 10;
@@ -462,10 +454,10 @@ export const EngineMonitor: React.FC<EngineMonitorProps> = ({
       {renderSystemHealth()}
 
       {/* 错误提示 */}
-      {engine.lastError && (
+      {hasLastError && (
         <Alert
           message="引擎错误"
-          description={engine.lastError.message}
+          description={engine.error || ''}
           type="error"
           showIcon
           closable

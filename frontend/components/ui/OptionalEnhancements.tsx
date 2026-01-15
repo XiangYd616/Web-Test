@@ -447,12 +447,12 @@ export const LinkPreview: React.FC<{
 /**
  * 增强功能使用示例组件
  */
-export const EnhancementsUsageGuide: React.FC = () => {
+export const FeaturesUsageGuide: React.FC = () => {
   const [fullscreenEnabled, setFullscreenEnabled] = useState(false);
 
   return (
     <div className="space-y-8 p-6 bg-gray-900 text-white">
-      <h2 className="text-2xl font-bold">可选UI增强功能使用指南</h2>
+      <h2 className="text-2xl font-bold">可选UI功能使用指南</h2>
 
       {/* 可折叠面板示例 */}
       <div>

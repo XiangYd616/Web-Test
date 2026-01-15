@@ -245,13 +245,13 @@ export const SecurityTestPanel = forwardRef<SecurityTestPanelRef, SecurityTestPa
         const errorMessage = err instanceof Error ? err.message : '测试失败';
 
         // 创建增强错误
-        const enhancedErr = createError(err instanceof Error ? err : new Error(errorMessage), {
+        const detailedErr = createError(err instanceof Error ? err : new Error(errorMessage), {
           url: config.url,
           operation: 'security_test',
           timestamp: Date.now(),
         });
 
-        setDetailedError(enhancedErr);
+        setDetailedError(detailedErr);
         setError(errorMessage);
         onTestError?.(errorMessage);
       } finally {
@@ -283,7 +283,7 @@ export const SecurityTestPanel = forwardRef<SecurityTestPanelRef, SecurityTestPa
     );
 
     return (
-      <div className="unified-security-test-panel space-y-3 fade-in-up compact-layout">
+      <div className="security-test-panel space-y-3 fade-in-up compact-layout">
         {/* URL 输入 - 增强版 */}
         <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
           <URLInput

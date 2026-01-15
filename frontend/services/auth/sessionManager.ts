@@ -20,7 +20,17 @@ export interface SessionConfig {
   heartbeatInterval: number; // 心跳间隔（毫秒）
 }
 
-export interface SessionData extends UserSession {
+export interface SessionData {
+  id: string;
+  userId: string;
+  token: string;
+  refreshToken?: string;
+  expiresAt: string;
+  createdAt: string;
+  lastActivityAt: string;
+  ipAddress: string;
+  userAgent: string;
+  isActive: boolean;
   deviceInfo: DeviceInfo;
   locationInfo?: LocationInfo;
   securityFlags: SecurityFlags;
@@ -618,17 +628,16 @@ export class SessionManager {
       case 'reject_new':
         throw new Error('已达到最大并发会话数限制');
 
-      case 'terminate_oldest':
-        {
-          const oldestSession = userSessions.sort(
-            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          )[0];
-          if (oldestSession) {
-            await this.terminateSession(oldestSession.id, 'concurrent_limit');
-            warnings?.push('已终止最旧的会话');
-          }
-          break;
+      case 'terminate_oldest': {
+        const oldestSession = userSessions.sort(
+          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        )[0];
+        if (oldestSession) {
+          await this.terminateSession(oldestSession.id, 'concurrent_limit');
+          warnings?.push('已终止最旧的会话');
         }
+        break;
+      }
 
       case 'terminate_all_others':
         for (const session of userSessions) {

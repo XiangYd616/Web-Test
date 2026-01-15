@@ -1,7 +1,7 @@
-﻿// Unified Test Types
+﻿// Test Types (compat)
 // Centralized test type definitions
 
-export type TestType = 
+export type TestType =
   | 'stress'
   | 'performance'
   | 'api'
@@ -14,7 +14,7 @@ export type TestType =
   | 'ux'
   | 'integration';
 
-export type TestStatus = 
+export type TestStatus =
   | 'idle'
   | 'pending'
   | 'running'
@@ -140,7 +140,9 @@ export function isValidTestType(type: string): type is TestType {
 }
 
 export function isValidTestStatus(status: string): status is TestStatus {
-  return ['idle', 'pending', 'running', 'completed', 'failed', 'cancelled', 'paused'].includes(status);
+  return ['idle', 'pending', 'running', 'completed', 'failed', 'cancelled', 'paused'].includes(
+    status
+  );
 }
 
 export function getTestTypeConfig(type: TestType): TestTypeConfig | undefined {

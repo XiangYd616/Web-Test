@@ -1,4 +1,4 @@
-﻿// Unified Models - All shared types
+﻿// Models - All shared types (compat)
 import { FlexibleObject } from '../common';
 
 // ============================================

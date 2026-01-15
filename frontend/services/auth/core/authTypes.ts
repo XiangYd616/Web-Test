@@ -156,6 +156,6 @@ export interface IAuthService {
   validatePasswordStrength?(password: string): PasswordStrength;
 }
 
-// LoginCredentials 和 RegisterData 已从 unified/models 导入
+// LoginCredentials 和 RegisterData 已从 models 导入
 // 如需扩展，可以使用交叉类型：
 // export type LoginCredentials = BaseLoginCredentials & { deviceInfo?: DeviceInfo };

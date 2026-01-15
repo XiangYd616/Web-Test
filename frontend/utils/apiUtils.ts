@@ -3,8 +3,8 @@
  * 提供API响应格式化、错误处理和查询字符串构建等功能
  */
 
-import type { ApiResponse } from '@shared/types';
-import { ErrorCode } from '@shared/types';
+import type { ApiResponse } from '../types/api';
+import { ErrorCode } from '../types/api';
 
 /**
  * 格式化API响应
@@ -15,23 +15,31 @@ import { ErrorCode } from '@shared/types';
 export function formatApiResponse<T>(
   data: T | null = null,
   error: Error | null = null
-): ApiResponse<T> {
+): ApiResponse<T | null> {
   const timestamp = new Date().toISOString();
 
   if (error) {
     return {
       success: false,
-      error: error.message,
+      error: {
+        code: ErrorCode.UNKNOWN_ERROR,
+        message: error.message,
+        timestamp,
+        details: error,
+      },
       message: error.message,
-      code: ErrorCode.UNKNOWN_ERROR,
-      timestamp,
+      meta: {
+        timestamp,
+      },
     };
   }
 
   return {
     success: true,
-    data: data || undefined,
-    timestamp,
+    data,
+    meta: {
+      timestamp,
+    },
   };
 }
 

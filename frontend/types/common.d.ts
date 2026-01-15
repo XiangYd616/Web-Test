@@ -1,5 +1,5 @@
-﻿// Enhanced common type definitions
-// Final version with maximum flexibility
+﻿// Common type definitions
+// Version with maximum flexibility
 
 // ============================================
 // Flexible Base Types
@@ -343,7 +343,6 @@ export const X: LucideIcon;
 export const AlertCircle: LucideIcon;
 
 export {};
-
 
 // ============================================
 // Additional Type Aliases and Basic Types

@@ -1,9 +1,9 @@
 ﻿/**
- * Unified API Response Types - Legacy File (Deprecated)
- * 
+ * API Response Types - Legacy File (Deprecated)
+ *
  * This file has been consolidated into types/api/index.ts
  * Please update your imports to use the new consolidated API types.
- * 
+ *
  * @deprecated Use types/api/index.ts instead
  * Version: v3.0.0
  */

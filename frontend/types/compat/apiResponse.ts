@@ -1,5 +1,5 @@
 /**
- * unified/apiResponse.ts - 统一API响应类型
+ * apiResponse.ts - API响应类型（兼容层）
  */
 
 export interface ApiResponseCompat<T = any> {

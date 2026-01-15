@@ -1,7 +1,7 @@
 ﻿/**
  * Layout.tsx - Modern Layout Wrapper
- * 
- * This component provides a modern layout wrapper that uses the unified layout system
+ *
+ * This component provides a modern layout wrapper that uses the layout system
  * from components/common/Layout.tsx. It serves as the main application layout with
  * modern styling and responsive design.
  */
@@ -23,17 +23,12 @@ const Layout: React.FC<ModernLayoutProps> = ({
   ...props
 }) => {
   return (
-    <PageLayout
-      background={background}
-      maxWidth={maxWidth}
-      className="min-h-screen"
-      {...props}
-    >
+    <PageLayout background={background} maxWidth={maxWidth} className="min-h-screen" {...props}>
       {/* Main Content Area */}
       <div className="flex-1">
         <Outlet />
       </div>
-      
+
       {/* Optional Footer */}
       {showFooter && (
         <footer className="mt-auto py-6 border-t border-gray-200">

@@ -1,38 +1,33 @@
-// Unified Type Re-exports
+// Type re-exports
 // This file re-exports types from common.d.ts and test.ts to ensure consistency
 
 // Export from common.d.ts
 export type {
+  APIError,
+  APIResponse,
+  AuthResponse,
+  FlexibleObject,
+  LoginCredentials,
+  ProgressListener,
+  QueueStats,
+  RealTimeMetrics,
+  RegisterData,
+  SecurityTestProgress,
   StressTestRecord,
+  TestConfig,
+  TestHistory,
   TestMetrics,
+  TestProgress,
+  TestRecordQuery,
   TestResults,
   TestSummary,
-  TestProgress,
-  TestConfig,
-  TestRecordQuery,
-  TestHistory,
   User,
-  UserProfile,
   UserPreferences,
-  LoginCredentials,
-  RegisterData,
-  AuthResponse,
-  APIResponse,
-  APIError,
-  FlexibleObject,
-  RealTimeMetrics,
-  QueueStats,
-  ProgressListener,
-  SecurityTestProgress
+  UserProfile,
 } from './common';
 
 // Export from test.ts
-export type {
-  TestType,
-  TestStatus,
-  TestResult,
-  TestRecord
-} from './test';
+export type { TestRecord, TestResult, TestStatus, TestType } from './test';
 
 // Export specific test configuration types
 export interface CompatibilityTestConfig {

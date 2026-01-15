@@ -203,9 +203,9 @@ const AppRoutes: React.FC = () => {
           }
         />
 
-        {/* 统一测试引擎 */}
+        {/* 测试引擎 */}
         <Route
-          path="unified-test"
+          path="test-engine"
           element={
             <LazyPageWrapper>
               <TestPage />

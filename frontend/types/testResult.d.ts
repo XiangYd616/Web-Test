@@ -1,4 +1,4 @@
-﻿// Enhanced TestResult type for unified testing
+﻿// TestResult type
 import { FlexibleObject } from './common';
 
 export interface TestResult extends FlexibleObject {

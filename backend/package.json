@@ -13,6 +13,7 @@
     "test:run": "jest --run",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "type-check": "node -e \"console.log('backend: no TypeScript type-check (JS workspace)')\"",
     "_comment_maintenance": "🔧 代码维护",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",

@@ -1,4 +1,4 @@
-// Stub file - Unified Test Engine
+// Stub file - Test Engine
 import { TestResult as TestResultType, TestStatus, TestType } from '../../types/test';
 
 // Re-export TestResult type

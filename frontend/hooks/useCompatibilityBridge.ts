@@ -7,7 +7,6 @@
 import { useCallback } from 'react';
 import { TestType } from '../types/enums';
 import { useTestEngine } from './useTestEngine';
-import { useTestState as useTestStateCore } from './useTestState';
 
 export { useTestEngine } from './useTestEngine';
 
@@ -67,14 +66,18 @@ export const useTestEngineCompat = () => {
             id: activeTestsKeys[0],
             testType: 'unknown', // TestStatusInfo没有type字段，使用默认值
             status: activeTestsValues[0]?.status,
-            startTime: new Date(activeTestsValues[0]?.startTime).toISOString(),
+            startTime: (() => {
+              const start = activeTestsValues[0]?.startTime as unknown;
+              if (!start) return new Date().toISOString();
+              return new Date(start as any).toISOString();
+            })(),
           }
         : null,
 
     // 方法
     runTest: legacyEngine.runLegacyTest,
     cancelTest: async () => {
-      const testId = Array.from(legacyEngine.activeTests?.keys() || [])[0];
+      const testId = Array.from(legacyEngine.activeTests?.keys?.() ?? [])[0];
       if (testId) {
         await legacyEngine.cancelTest?.(testId);
       }
@@ -152,12 +155,7 @@ export const useTestState = (options: {
   validateConfig?: (config: UnknownRecord) => { isValid: boolean; errors: string[] };
 }) => {
   const legacyEngine = useTestEngine() as unknown as LegacyTestEngineLike;
-  const bridgeState =
-    (
-      (legacyEngine as unknown as Record<string, unknown>)[
-        ['get', 'Uni', 'versal', 'State'].join('')
-      ] as undefined | (() => UnknownRecord)
-    )?.() || {};
+  const bridgeState = (legacyEngine as any).getBridgeState?.() || {};
 
   const startTest = useCallback(
     async (customConfig?: UnknownRecord) => {
@@ -170,7 +168,7 @@ export const useTestState = (options: {
 
         // 等待测试完成
         const checkCompletion = async () => {
-          const status = await legacyEngine.getTestStatus?.(testId);
+          const status = (await legacyEngine.getTestStatus?.(testId)) as any;
           if (status?.status === 'completed') {
             const result = await legacyEngine.getTestResult?.(testId);
             options.onTestComplete?.(result);
@@ -181,7 +179,7 @@ export const useTestState = (options: {
 
         // 轮询检查测试状态
         const interval = setInterval(async () => {
-          const status = await legacyEngine.getTestStatus?.(testId);
+          const status = (await legacyEngine.getTestStatus?.(testId)) as any;
           if (status?.status === 'completed' || status?.status === 'failed') {
             clearInterval(interval);
             await checkCompletion();
@@ -228,10 +226,13 @@ export const useTestState = (options: {
     // 验证
     isConfigValid: true,
     configErrors: [] as string[],
-    testDuration:
-      bridgeState.endTime && bridgeState.startTime
-        ? bridgeState.endTime - bridgeState.startTime
-        : null,
+    testDuration: (() => {
+      if (!bridgeState.endTime || !bridgeState.startTime) return null;
+      const end = new Date(bridgeState.endTime as unknown as string | number | Date).getTime();
+      const start = new Date(bridgeState.startTime as unknown as string | number | Date).getTime();
+      const duration = end - start;
+      return Number.isFinite(duration) ? duration : null;
+    })(),
   };
 };
 
@@ -241,12 +242,7 @@ export const useTestState = (options: {
  */
 export const useBridgeTest = (testType: string, defaultConfig: Record<string, any>) => {
   const legacyEngine = useTestEngine() as unknown as LegacyTestEngineLike;
-  const bridgeState =
-    (
-      (legacyEngine as unknown as Record<string, unknown>)[
-        ['get', 'Uni', 'versal', 'State'].join('')
-      ] as undefined | (() => UnknownRecord)
-    )?.() || {};
+  const bridgeState = (legacyEngine as any).getBridgeState?.() || {};
 
   const config = (bridgeState.config as UnknownRecord) || (defaultConfig as UnknownRecord);
 
@@ -284,66 +280,5 @@ export const useBridgeTest = (testType: string, defaultConfig: Record<string, an
     validateConfig: (_config: UnknownRecord) => {
       return { isValid: true, errors: [] as string[] };
     },
-  };
-};
-
-/**
- * useUnifiedTestState兼容性Hook
- * @deprecated 请使用 useTestState 替代
- */
-export const useUnifiedTestState = (options: {
-  testType: string;
-  maxConcurrentTests?: number;
-  defaultTimeout?: number;
-  enableQueue?: boolean;
-  enableWebSocket?: boolean;
-  enablePersistence?: boolean;
-  onTestStarted?: (data: unknown) => void;
-  onTestProgress?: (data: unknown) => void;
-  onTestCompleted?: (data: unknown) => void;
-  onTestFailed?: (data: unknown) => void;
-  onTestCancelled?: (data: unknown) => void;
-  onTestQueued?: (data: unknown) => void;
-  onStatusUpdate?: (data: unknown) => void;
-}) => {
-  // 使用重构后的useTestState
-  const testState = useTestStateCore({
-    testType: options.testType as TestType,
-    defaultConfig: {},
-    maxConcurrentTests: options.maxConcurrentTests,
-    defaultTimeout: options.defaultTimeout,
-    enableQueue: options.enableQueue,
-    enableWebSocket: options.enableWebSocket,
-    enablePersistence: options.enablePersistence,
-    onTestStarted: options.onTestStarted,
-    onTestProgress: options.onTestProgress,
-    onTestComplete: options.onTestCompleted,
-    onTestError: options.onTestFailed,
-    onTestCancelled: options.onTestCancelled,
-    onTestQueued: options.onTestQueued,
-    onStatusUpdate: options.onStatusUpdate,
-  });
-
-  return {
-    // 状态映射
-    testId: testState.testId,
-    recordId: testState.recordId,
-    status: testState.isRunning ? 'running' : 'idle',
-    phase: testState.phase,
-    message: testState.message,
-    queueStats: testState.queueStats,
-    isRunning: testState.isRunning,
-    isQueued: testState.isQueued,
-    canStartTest: testState.canStartTest,
-    error: testState.error,
-
-    // 操作映射
-    startTest: testState.startTest,
-    cancelTest: async () => {
-      await testState.stopTest();
-    },
-    stopTest: testState.stopTest,
-    reset: testState.resetTest,
-    getState: testState.getState,
   };
 };

@@ -13,10 +13,10 @@ declare const expect: any;
 declare const beforeEach: any;
 declare const afterEach: any;
 declare const jest: any;
+import type { ApiErrorResponse, ApiResponse } from '../../types/api';
 import { apiService } from '../api/apiService';
 import { _projectApiService as projectApiService } from '../api/projectApiService';
 import { testApiService } from '../api/testApiService';
-import type { ApiResponse, ApiErrorResponse } from '../../types/api';
 
 // Type guard helper
 function isApiErrorResponse(response: ApiResponse<any>): response is ApiErrorResponse {
@@ -29,11 +29,13 @@ interface BackendApiResponse<T = any> {
   data?: T;
   message?: string;
   timestamp?: string;
-  error?: string | {
-    code: string;
-    message: string;
-    details?: any;
-  };
+  error?:
+    | string
+    | {
+        code: string;
+        message: string;
+        details?: any;
+      };
 }
 
 interface AuthResponse {
@@ -64,7 +66,7 @@ describe('API Integration Tests', () => {
         success: true,
         data: { id: '123', name: 'Test Project' },
         message: '操作成功',
-        timestamp: '2024-01-01T00:00:00Z'
+        timestamp: '2024-01-01T00:00:00Z',
       };
 
       (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
@@ -88,9 +90,9 @@ describe('API Integration Tests', () => {
         error: {
           code: 'VALIDATION_ERROR',
           message: '参数验证失败',
-          details: { field: 'name', message: '名称不能为空' }
+          details: { field: 'name', message: '名称不能为空' },
         },
-        timestamp: '2024-01-01T00:00:00Z'
+        timestamp: '2024-01-01T00:00:00Z',
       };
 
       (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
@@ -103,10 +105,17 @@ describe('API Integration Tests', () => {
 
       expect(response.success).toBe(false);
       if (isApiErrorResponse(response)) {
-        if (typeof response.error === 'object' && response.error !== null && 'code' in response.error) {
+        if (
+          typeof response.error === 'object' &&
+          response.error !== null &&
+          'code' in response.error
+        ) {
           expect((response.error as any).code).toBe('VALIDATION_ERROR');
           expect((response.error as any).message).toBe('参数验证失败');
-          expect((response.error as any).details).toEqual({ field: 'name', message: '名称不能为空' });
+          expect((response.error as any).details).toEqual({
+            field: 'name',
+            message: '名称不能为空',
+          });
         } else {
           // 如果error是字符串，则检查字符串内容
           expect(String(response.error)).toContain('VALIDATION_ERROR');
@@ -125,7 +134,11 @@ describe('API Integration Tests', () => {
 
       expect(response.success).toBe(false);
       if (isApiErrorResponse(response)) {
-        if (typeof response.error === 'object' && response.error !== null && 'code' in response.error) {
+        if (
+          typeof response.error === 'object' &&
+          response.error !== null &&
+          'code' in response.error
+        ) {
           expect((response.error as any).code).toBe('NOT_FOUND');
           expect((response.error as any).details?.httpStatus).toBe(404);
         } else {
@@ -143,7 +156,11 @@ describe('API Integration Tests', () => {
 
       expect(response.success).toBe(false);
       if (isApiErrorResponse(response)) {
-        if (typeof response.error === 'object' && response.error !== null && 'code' in response.error) {
+        if (
+          typeof response.error === 'object' &&
+          response.error !== null &&
+          'code' in response.error
+        ) {
           expect((response.error as any).code).toBe('NETWORK_ERROR');
           expect((response.error as any).message).toBe('Network error');
         } else {
@@ -161,10 +178,10 @@ describe('API Integration Tests', () => {
         success: true,
         data: {
           user: { id: '123', username: 'testuser' },
-          token: 'jwt-token'
+          token: 'jwt-token',
         },
         message: '登录成功',
-        timestamp: '2024-01-01T00:00:00Z'
+        timestamp: '2024-01-01T00:00:00Z',
       };
 
       (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
@@ -173,16 +190,19 @@ describe('API Integration Tests', () => {
       } as Response);
 
       const credentials = { username: 'testuser', password: 'password' };
-      const response = await apiService.login(credentials) as BackendApiResponse<{ token: string; user: unknown }>;
+      const response = (await apiService.login(credentials)) as BackendApiResponse<{
+        token: string;
+        user: unknown;
+      }>;
 
       expect(fetch).toHaveBeenCalledWith(
         `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/auth/login`,
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           }),
-          body: JSON.stringify(credentials)
+          body: JSON.stringify(credentials),
         })
       );
 
@@ -203,10 +223,10 @@ describe('API Integration Tests', () => {
         data: {
           id: 'test-123',
           status: 'pending',
-          test_type: 'performance'
+          test_type: 'performance',
         },
         message: '测试已启动',
-        timestamp: '2024-01-01T00:00:00Z'
+        timestamp: '2024-01-01T00:00:00Z',
       };
 
       (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
@@ -218,13 +238,10 @@ describe('API Integration Tests', () => {
         device: 'desktop' as const,
         network_condition: '4G',
         lighthouse_config: {},
-        custom_metrics: [] as any[]
+        custom_metrics: [] as any[],
       };
 
-      const response = await testApiService.executePerformanceTest(
-        'https://example.com',
-        config
-      );
+      const response = await testApiService.executePerformanceTest('https://example.com', config);
 
       expect(fetch).toHaveBeenCalledWith(
         `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/tests/performance/execute`,
@@ -232,8 +249,8 @@ describe('API Integration Tests', () => {
           method: 'POST',
           body: JSON.stringify({
             target_url: 'https://example.com',
-            configuration: config
-          })
+            configuration: config,
+          }),
         })
       );
 
@@ -245,10 +262,10 @@ describe('API Integration Tests', () => {
         success: true,
         data: [
           { id: '1', test_type: 'performance', name: 'Config 1' },
-          { id: '2', test_type: 'security', name: 'Config 2' }
+          { id: '2', test_type: 'security', name: 'Config 2' },
         ],
         message: '获取配置成功',
-        timestamp: '2024-01-01T00:00:00Z'
+        timestamp: '2024-01-01T00:00:00Z',
       };
 
       (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
@@ -259,13 +276,13 @@ describe('API Integration Tests', () => {
       const response = await testApiService.getConfigurations({
         test_type: 'performance',
         project_id: 123,
-        is_template: false
+        is_template: false,
       });
 
       expect(fetch).toHaveBeenCalledWith(
         `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/configurations?test_type=performance&project_id=123&is_template=false`,
         expect.objectContaining({
-          method: 'GET'
+          method: 'GET',
         })
       );
 
@@ -283,10 +300,10 @@ describe('API Integration Tests', () => {
           id: 'project-123',
           name: 'Test Project',
           description: 'Test Description',
-          target_url: 'https://example.com'
+          target_url: 'https://example.com',
         },
         message: '项目创建成功',
-        timestamp: '2024-01-01T00:00:00Z'
+        timestamp: '2024-01-01T00:00:00Z',
       };
 
       (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
@@ -297,7 +314,7 @@ describe('API Integration Tests', () => {
       const projectData = {
         name: 'Test Project',
         description: 'Test Description',
-        target_url: 'https://example.com'
+        target_url: 'https://example.com',
       };
 
       const response = await projectApiService.createProject(projectData);
@@ -306,7 +323,7 @@ describe('API Integration Tests', () => {
         `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/projects`,
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify(projectData)
+          body: JSON.stringify(projectData),
         })
       );
 
@@ -319,15 +336,15 @@ describe('API Integration Tests', () => {
         data: {
           projects: [
             { id: '1', name: 'Project 1' },
-            { id: '2', name: 'Project 2' }
+            { id: '2', name: 'Project 2' },
           ],
           total: 2,
           page: 1,
           limit: 10,
-          totalPages: 1
+          totalPages: 1,
         },
         message: '获取项目列表成功',
-        timestamp: '2024-01-01T00:00:00Z'
+        timestamp: '2024-01-01T00:00:00Z',
       };
 
       (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
@@ -341,13 +358,13 @@ describe('API Integration Tests', () => {
         search: 'test',
         status: 'active',
         sort: 'name',
-        order: 'asc'
+        order: 'asc',
       });
 
       expect(fetch).toHaveBeenCalledWith(
         `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/v1/projects?page=1&limit=10&search=test&status=active&sort=name&order=asc`,
         expect.objectContaining({
-          method: 'GET'
+          method: 'GET',
         })
       );
 
@@ -367,11 +384,11 @@ describe('API Integration Tests', () => {
           details: {
             errors: [
               { field: 'name', message: '名称不能为空' },
-              { field: 'url', message: 'URL格式不正确' }
-            ]
-          }
+              { field: 'url', message: 'URL格式不正确' },
+            ],
+          },
         },
-        timestamp: '2024-01-01T00:00:00Z'
+        timestamp: '2024-01-01T00:00:00Z',
       };
 
       (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
@@ -382,14 +399,22 @@ describe('API Integration Tests', () => {
 
       const response = await apiService.post('/api/v1/test', {
         name: '',
-        url: 'invalid-url'
+        url: 'invalid-url',
       });
 
       expect(response.success).toBe(false);
       if (!response.success) {
         if (typeof response.error === 'object' && response.error !== null) {
           expect(response.error.code).toBe('VALIDATION_ERROR');
-          expect(response.error.details?.errors).toHaveLength(2);
+          const details = response.error.details;
+          if (
+            typeof details === 'object' &&
+            details !== null &&
+            'errors' in details &&
+            Array.isArray((details as any).errors)
+          ) {
+            expect((details as any).errors).toHaveLength(2);
+          }
         } else {
           expect(response.error).toContain('VALIDATION_ERROR');
         }
@@ -401,9 +426,9 @@ describe('API Integration Tests', () => {
         success: false,
         error: {
           code: 'UNAUTHORIZED',
-          message: '未授权访问'
+          message: '未授权访问',
         },
-        timestamp: '2024-01-01T00:00:00Z'
+        timestamp: '2024-01-01T00:00:00Z',
       };
 
       (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
@@ -438,7 +463,7 @@ describe('API Integration Tests', () => {
         '/api/v1/tests/performance/execute',
         '/api/v1/tests/security/execute',
         '/api/v1/reports/generate',
-        '/api/v1/system/health'
+        '/api/v1/system/health',
       ];
 
       // 这里可以添加更多的路径验证逻辑
@@ -457,8 +482,8 @@ describe('API Integration Tests', () => {
           timestamp: '2024-01-01T00:00:00Z',
           requestId: 'req-123',
           path: '/api/v1/test',
-          method: 'GET'
-        }
+          method: 'GET',
+        },
       };
 
       const sampleErrorResponse = {
@@ -466,14 +491,14 @@ describe('API Integration Tests', () => {
         error: {
           code: 'ERROR_CODE',
           message: 'Error message',
-          timestamp: '2024-01-01T00:00:00Z'
+          timestamp: '2024-01-01T00:00:00Z',
         },
         meta: {
           timestamp: '2024-01-01T00:00:00Z',
           requestId: 'req-123',
           path: '/api/v1/test',
-          method: 'GET'
-        }
+          method: 'GET',
+        },
       };
 
       // 验证成功响应结构

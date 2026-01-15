@@ -93,8 +93,8 @@ export class BackgroundTestManagerAdapter {
     this.notifyListeners('testStarted', testInfo);
 
     // 根据配置选择执行方式
-    if (this.config.useUnifiedApi) {
-      this.executeTestWithUnifiedApi(testInfo);
+    if (this.config.useTestApiService) {
+      this.executeTestWithTestApiService(testInfo);
     } else {
       this.executeTestWithOriginalApi(testInfo);
     }
@@ -111,11 +111,11 @@ export class BackgroundTestManagerAdapter {
       return false;
     }
 
-    if (this.config.useUnifiedApi) {
-      // 使用统一API取消测试
+    if (this.config.useTestApiService) {
+      // 使用测试API服务取消测试
       testApiService.cancelTest(testId, testInfo.type as any).catch((error: any) => {
         if (this.config.enableLogging) {
-          Logger.warn('统一API取消测试失败:', error);
+          Logger.warn('测试API服务取消测试失败:', error);
         }
       });
     }
@@ -173,9 +173,9 @@ export class BackgroundTestManagerAdapter {
   // ==================== 私有方法 ====================
 
   /**
-   * 使用统一API执行测试
+   * 使用测试API服务执行测试
    */
-  private async executeTestWithUnifiedApi(testInfo: TestInfo): Promise<void> {
+  private async executeTestWithTestApiService(testInfo: TestInfo): Promise<void> {
     try {
       this.updateTestProgress(testInfo.id, 5, '🚀 正在启动测试...');
 
@@ -195,7 +195,7 @@ export class BackgroundTestManagerAdapter {
     } catch (error: any) {
       if (this.config.fallbackToOriginal) {
         if (this.config.enableLogging) {
-          Logger.warn('统一API执行失败，回退到原始实现:', error);
+          Logger.warn('测试API服务执行失败，回退到原始实现:', error);
         }
         this.executeTestWithOriginalApi(testInfo);
       } else {

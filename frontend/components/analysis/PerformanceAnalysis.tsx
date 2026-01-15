@@ -1,5 +1,5 @@
 /**
- * UnifiedPerformanceAnalysis.tsx - Unified Performance Analysis Component
+ * PerformanceAnalysis.tsx - Performance Analysis Component
  *
  * This component combines features from both analytics/PerformanceAnalysis.tsx and
  * analysis/PerformanceAnalysis.tsx to provide comprehensive performance monitoring.

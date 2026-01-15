@@ -1,9 +1,9 @@
 /**
  * usePerformance - 性能优化Hooks
- * 
+ *
  * 文件路径: frontend/components/common/TestHistory/hooks/usePerformance.ts
  * 创建时间: 2025-11-14
- * 
+ *
  * 功能特性:
  * - 防抖 (Debounce)
  * - 节流 (Throttle)
@@ -11,7 +11,7 @@
  * - Memoization
  */
 
-import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * 防抖Hook
@@ -87,6 +87,8 @@ export function useThrottle<T>(value: T, interval: number = 300): T {
 
       return () => clearTimeout(timer);
     }
+
+    return undefined;
   }, [value, interval]);
 
   return throttledValue;
@@ -164,12 +166,9 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLElement>(
     const element = elementRef.current;
     if (!element) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setEntry(entry);
-      },
-      options
-    );
+    const observer = new IntersectionObserver(([entry]) => {
+      setEntry(entry);
+    }, options);
 
     observer.observe(element);
 
@@ -309,24 +308,24 @@ export function useVisibility<T extends HTMLElement = HTMLElement>() {
 export function useRequestDeduplication() {
   const pendingRequests = useRef<Map<string, Promise<any>>>(new Map());
 
-  const dedupedFetch = useCallback(async <T,>(
-    key: string,
-    fetchFn: () => Promise<T>
-  ): Promise<T> => {
-    // 如果已有相同请求在进行中，返回该请求
-    if (pendingRequests.current.has(key)) {
-      return pendingRequests.current.get(key)!;
-    }
+  const dedupedFetch = useCallback(
+    async <T>(key: string, fetchFn: () => Promise<T>): Promise<T> => {
+      // 如果已有相同请求在进行中，返回该请求
+      if (pendingRequests.current.has(key)) {
+        return pendingRequests.current.get(key)!;
+      }
 
-    // 创建新请求
-    const promise = fetchFn().finally(() => {
-      // 请求完成后清除
-      pendingRequests.current.delete(key);
-    });
+      // 创建新请求
+      const promise = fetchFn().finally(() => {
+        // 请求完成后清除
+        pendingRequests.current.delete(key);
+      });
 
-    pendingRequests.current.set(key, promise);
-    return promise;
-  }, []);
+      pendingRequests.current.set(key, promise);
+      return promise;
+    },
+    []
+  );
 
   const clear = useCallback((key?: string) => {
     if (key) {

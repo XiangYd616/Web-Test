@@ -1,9 +1,9 @@
 /**
  * useAccessibility - 无障碍支持Hook
- * 
+ *
  * 文件路径: frontend/components/common/TestHistory/hooks/useAccessibility.ts
  * 创建时间: 2025-11-14
- * 
+ *
  * 功能特性:
  * - 键盘导航支持
  * - 焦点管理
@@ -11,7 +11,7 @@
  * - 屏幕阅读器友好
  */
 
-import { useEffect, useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * 键盘导航配置
@@ -208,7 +208,7 @@ export const useTableRowNavigation = (
   const [focusedRowIndex, setFocusedRowIndex] = useState(0);
 
   const handleArrowUp = useCallback(() => {
-    setFocusedRowIndex((prev) => {
+    setFocusedRowIndex(prev => {
       const newIndex = Math.max(0, prev - 1);
       onRowSelect(newIndex);
       return newIndex;
@@ -216,7 +216,7 @@ export const useTableRowNavigation = (
   }, [onRowSelect]);
 
   const handleArrowDown = useCallback(() => {
-    setFocusedRowIndex((prev) => {
+    setFocusedRowIndex(prev => {
       const newIndex = Math.min(rowCount - 1, prev + 1);
       onRowSelect(newIndex);
       return newIndex;
@@ -371,6 +371,8 @@ export const useReducedMotion = () => {
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
+
+    return undefined;
   }, []);
 
   return { prefersReducedMotion };

@@ -895,7 +895,7 @@ export class ExportUtils {
       });
     }
 
-    const filename = this.generateFilename(`enhanced-data-table-${testName || testType}`, 'csv');
+    const filename = this.generateFilename(`data-table-${testName || testType}`, 'csv');
 
     // 🔧 修复中文乱码：添加UTF-8 BOM头
     const BOM = '\uFEFF';

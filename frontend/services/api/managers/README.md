@@ -14,13 +14,16 @@ frontend/services/api/managers/
 ## 🎯 管理器说明
 
 ### backgroundTestManagerAdapter.ts
+
 后台测试管理适配器，提供：
+
 - 与现有backgroundTestManager的完全兼容
-- 可选的统一API调用支持
+- 可选的API调用支持
 - WebSocket实时更新功能
 - 失败时自动回退机制
 
 ### 设计原则
+
 1. **兼容性优先**: 保持与现有API的完全兼容
 2. **可选增强**: 提供可选的高级功能
 3. **故障恢复**: 支持自动回退和错误处理
@@ -33,9 +36,9 @@ import { backgroundTestManagerAdapter } from './managers/backgroundTestManagerAd
 
 // 配置适配器
 backgroundTestManagerAdapter.configure({
-  useUnifiedApi: true,
+  useTestApiService: true,
   enableWebSocket: true,
-  fallbackToOriginal: true
+  fallbackToOriginal: true,
 });
 
 // 使用与原有完全相同的接口
@@ -51,6 +54,7 @@ const testId = backgroundTestManagerAdapter.startTest(
 ## 📋 未来扩展
 
 计划添加的管理器：
+
 - `testExecutionManager.ts` - 统一的测试执行管理
 - `testResultManager.ts` - 测试结果管理和缓存
 - `testScheduleManager.ts` - 测试调度和队列管理
