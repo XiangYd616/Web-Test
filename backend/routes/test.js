@@ -19,6 +19,7 @@ const APIAnalyzer = require('../engines/api/ApiAnalyzer.js');
 const _StressTestEngine = require('../engines/stress/stressTestEngine.js');
 const SecurityTestEngine = require('../engines/security/SecurityTestEngine.js');
 const CompatibilityTestEngine = require('../engines/compatibility/CompatibilityTestEngine.js');
+const AccessibilityTestEngine = require('../engines/accessibility/AccessibilityTestEngine.js');
 const UXAnalyzer = require('../engines/api/UXAnalyzer.js');
 const ApiTestEngine = require('../engines/api/apiTestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
@@ -40,8 +41,9 @@ const apiEngine = new APIAnalyzer();
 // const stressTestEngine = createGlobalInstance(); // 已移除
 const securityEngine = new SecurityTestEngine();
 const compatibilityEngine = new CompatibilityTestEngine();
+const accessibilityEngine = new AccessibilityTestEngine();
 const _uxEngine = new UXAnalyzer();
-const _apiTestEngine = new ApiTestEngine();
+const realApiTestEngine = new ApiTestEngine();
 
 // 🔧 统一使用本地TestHistoryService实例
 const testHistoryService = new TestHistoryService(require('../config/database'));
@@ -3881,21 +3883,66 @@ router.post('/accessibility', optionalAuth, testRateLimiter, validateURLMiddlewa
   const validatedURL = req.validatedURL.url.toString();
 
   try {
+    const categoryMap = {
+      wcag2a: ['color-contrast', 'alt-text', 'headings-structure', 'form-labels', 'aria-attributes'],
+      wcag2aa: [
+        'color-contrast',
+        'alt-text',
+        'headings-structure',
+        'form-labels',
+        'aria-attributes',
+        'keyboard-navigation',
+        'focus-management'
+      ],
+      'best-practice': ['semantic-markup', 'keyboard-navigation', 'focus-management', 'aria-attributes']
+    };
 
-    // 重定向到专用的无障碍API
-    const accessibilityResponse = await fetch(`${req.protocol}://${req.get('host')}/api/accessibility/check`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': req.headers.authorization || ''
-      },
-      body: JSON.stringify({ url: validatedURL, level, categories })
+    const checks = Array.from(
+      new Set(
+        (Array.isArray(categories) ? categories : [])
+          .flatMap(category => categoryMap[category] || [])
+      )
+    );
+
+    const engineResult = await accessibilityEngine.runAccessibilityTest({
+      url: validatedURL,
+      wcagLevel: level,
+      ...(checks.length > 0 ? { checks } : {})
     });
 
-    const accessibilityResult = await accessibilityResponse.json();
+    const { results, testId, duration } = engineResult;
+    const summary = results?.summary || {};
+    const totalChecks = (summary.passed || 0) + (summary.errors || 0) + (summary.warnings || 0);
+    const overallScore = typeof summary.score === 'number'
+      ? summary.score
+      : (totalChecks > 0 ? Math.round(((summary.passed || 0) / totalChecks) * 100) : 0);
 
-    res.success(accessibilityResult.data);
-
+    res.success({
+      id: testId,
+      url: validatedURL,
+      timestamp: results?.timestamp || new Date().toISOString(),
+      overallScore,
+      wcagLevel: results?.wcagLevel || level,
+      violations: [],
+      passes: [],
+      statistics: {
+        totalElements: totalChecks,
+        violationsCount: (summary.errors || 0) + (summary.warnings || 0),
+        passesCount: summary.passed || 0,
+        criticalIssues: summary.errors || 0,
+        seriousIssues: summary.warnings || 0,
+        moderateIssues: 0,
+        minorIssues: 0
+      },
+      categories: {
+        perceivable: overallScore,
+        operable: overallScore,
+        understandable: overallScore,
+        robust: overallScore
+      },
+      recommendations: results?.recommendations || [],
+      duration: duration || 0
+    });
   } catch (error) {
     console.error('❌ Accessibility test failed:', error);
     res.status(500).json({
@@ -3915,7 +3962,7 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
     endpoints = [],
     authentication,
     globalHeaders = [],
-    config = {}
+    config: _config = {}
   } = req.body;
 
   // 验证必填参数
@@ -3940,32 +3987,55 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
     console.log(`📊 Testing ${endpoints.length} endpoints`);
 
     // 准备测试配置
-    const testConfig = {
-      baseUrl,
-      endpoints,
-      timeout: config.timeout || 10000,
-      retries: config.retries || 3,
-      validateSchema: config.validateSchema || false,
-      loadTest: config.loadTest || false,
-      testSecurity: config.testSecurity || false,
-      testPerformance: config.testPerformance || true,
-      testReliability: config.testReliability || false,
-      concurrentUsers: config.concurrentUsers || 1,
-        /**
-         * if功能函数
-         * @param {Object} params - 参数对象
-         * @returns {Promise<Object>} 返回结果
-         */
-      headers: globalHeaders.reduce((acc, header) => {
-        if (header.enabled && header.key && header.value) {
-          acc[header.key] = header.value;
-        }
-        return acc;
-      }, {}),
-      auth: authentication && authentication.type !== 'none' ? authentication : null
-    };
+    const baseHeaders = globalHeaders.reduce((acc, header) => {
+      if (header.enabled && header.key && header.value) {
+        acc[header.key] = header.value;
+      }
+      return acc;
+    }, {});
 
-    const testResult = await realAPITestEngine.runAPITest(testConfig);
+    if (authentication?.type === 'bearer' && authentication.token) {
+      baseHeaders.Authorization = `Bearer ${authentication.token}`;
+    }
+    if (authentication?.type === 'basic' && authentication.username) {
+      const encoded = Buffer.from(`${authentication.username}:${authentication.password || ''}`).toString('base64');
+      baseHeaders.Authorization = `Basic ${encoded}`;
+    }
+    if (authentication?.type === 'apikey' && authentication.apiKey) {
+      baseHeaders[authentication.headerName || 'X-API-Key'] = authentication.apiKey;
+    }
+
+    const resolvedEndpoints = endpoints.map(endpoint => {
+      const endpointUrl = endpoint.url || (endpoint.path ? `${baseUrl}${endpoint.path}` : baseUrl);
+      const rawAssertions = Array.isArray(endpoint.assertions) ? endpoint.assertions : [];
+      const assertions = rawAssertions
+        .map(assertion => {
+          if (typeof assertion === 'string') {
+            const match = assertion.match(/status\s*==\s*(\d+)/i);
+            if (match) {
+              return { type: 'status', expected: Number(match[1]) };
+            }
+            return null;
+          }
+          return assertion;
+        })
+        .filter(Boolean);
+
+      return {
+        url: endpointUrl,
+        method: endpoint.method || 'GET',
+        headers: {
+          ...baseHeaders,
+          ...(endpoint.headers || {})
+        },
+        body: endpoint.body || endpoint.data || null,
+        assertions
+      };
+    });
+
+    const testResult = await realApiTestEngine.executeTest({
+      endpoints: resolvedEndpoints
+    });
 
     // 确保返回成功状态
     const response = {

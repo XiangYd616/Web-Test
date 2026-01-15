@@ -2,25 +2,14 @@
 import { Shield, XCircle } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
-import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
+import {
+  SecurityTestPanel,
+  type SecurityTestPanelRef,
+} from '../components/security/SecurityTestPanel';
 import TestPageLayout from '../components/testing/TestPageLayout';
-import { useTestProgress } from '../hooks/useTestProgress';
 import { useUserStats } from '../hooks/useUserStats';
-import type { SecurityTestConfig, SecurityTestResult } from '../services/securityEngine';
 
 // CSS样式已迁移到组件库中
-
-// 临时testApiService实现
-const testApiService = {
-  executeSecurityTest: async (url: string, config: any) => ({
-    success: true,
-    data: {
-      id: `security_test_${Date.now()}`,
-      testId: `security_test_${Date.now()}`,
-    },
-    message: '安全测试启动成功',
-  }),
-};
 
 const SecurityTest: React.FC = () => {
   // 登录检查
@@ -33,91 +22,29 @@ const SecurityTest: React.FC = () => {
   const { recordTestCompletion } = useUserStats();
 
   // 状态管理 - 使用统一类型系统
-  const [testUrl, setTestUrl] = useState('');
   const [isTestRunning, setIsTestRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [testProgress, setTestProgress] = useState<any>(null);
   const [canStartTest, setCanStartTest] = useState(false);
-  const [testConfig, setTestConfig] = useState<Partial<SecurityTestConfig>>({
-    url: '',
-    depth: 'standard',
-    modules: {
-      ssl: { enabled: true, checkCertificate: true },
-      headers: { enabled: true, checkSecurity: true },
-      vulnerabilities: { enabled: true, checkXSS: true },
-    },
-  });
-  const [testResult, setTestResult] = useState<any>(null);
-  const [currentTestId, setCurrentTestId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'test' | 'history' | 'comparison'>('test');
-  const [comparisonResults, setComparisonResults] = useState<SecurityTestResult[]>([]);
-  const testPanelRef = useRef<any>(null);
-
-  // 使用测试进度监控Hook
-  const {
-    progress,
-    isMonitoring,
-    startMonitoring,
-    stopMonitoring,
-    cancelTest,
-    error: progressError,
-  } = useTestProgress(currentTestId || undefined, {
-    onProgress: progressData => {},
-    onComplete: result => {
-      setTestResult(result);
-      recordTestCompletion('安全测试', true, result?.overallScore || 0, result?.duration || 180);
-    },
-    onError: error => {
-      Logger.error('安全测试失败:', error);
-    },
-  });
-
-  // 处理测试选择和重新运行
-  const _handleTestSelect = (test: any) => {
-    // 可以在这里加载选中的测试配置
-  };
-
-  const _handleTestRerun = (test: any) => {
-    // 可以在这里重新运行选中的测试
-  };
+  const [testResult, setTestResult] = useState<unknown | null>(null);
+  const testPanelRef = useRef<SecurityTestPanelRef | null>(null);
 
   // 开始测试的处理函数
-  const handleStartTest = async () => {
-    if (!testUrl) {
-      Logger.warn('请输入要测试的URL');
+  const handleStartTest = () => {
+    if (!requireLogin()) {
       return;
     }
 
-    try {
-      // 执行安全测试
-      const response = await testApiService.executeSecurityTest(testUrl, testConfig);
-
-      if (response.success) {
-        const testId = response.data.id || response.data.testId;
-        setCurrentTestId(testId);
-
-        // 开始监控测试进度
-        if (testId) {
-          startMonitoring(testId);
-        }
-      } else {
-        throw new Error(response.message || '启动安全测试失败');
-      }
-    } catch (error) {
-      Logger.error('安全测试失败:', error);
+    if (!testPanelRef.current) {
+      Logger.warn('测试面板尚未就绪');
+      return;
     }
-  };
 
-  // 停止测试
-  const _handleStopTest = async () => {
-    if (currentTestId) {
-      try {
-        await cancelTest();
-        setCurrentTestId(null);
-      } catch (error) {
-        Logger.error('停止安全测试失败:', error);
-      }
+    if (!testPanelRef.current.canStartTest()) {
+      Logger.warn('请先完成测试配置');
+      return;
     }
+
+    testPanelRef.current.startTest();
   };
 
   // 更新按钮状态
@@ -142,26 +69,21 @@ const SecurityTest: React.FC = () => {
     setIsTestRunning(true);
     setError(null);
     setTestResult(null);
-    setTestProgress(null);
-  };
-
-  // 处理测试进度
-  const handleTestProgress = (progress: any) => {
-    setTestProgress(progress);
   };
 
   // 处理测试完成
-  const handleTestComplete = (result: any) => {
+  const handleTestComplete = (result: unknown) => {
     setTestResult(result);
     setIsTestRunning(false);
-    setTestProgress(null);
 
     // 记录测试完成统计
+    const resultData = result as { overallScore?: number; duration?: number } | null;
+
     recordTestCompletion(
       '安全测试',
       true,
-      result?.overallScore || 0,
-      Math.round((result?.duration || 0) / 1000)
+      resultData?.overallScore ?? 0,
+      Math.round((resultData?.duration ?? 0) / 1000)
     );
   };
 
@@ -169,27 +91,6 @@ const SecurityTest: React.FC = () => {
   const handleTestError = (errorMessage: string) => {
     setError(errorMessage);
     setIsTestRunning(false);
-    setTestProgress(null);
-  };
-
-  // 处理测试对比
-  const _handleCompareTests = (results: any[]) => {
-    setComparisonResults(results);
-    setActiveTab('comparison');
-  };
-
-  // 关闭对比页面
-  const _handleCloseComparison = () => {
-    setActiveTab('history');
-    setComparisonResults([]);
-  };
-
-  // 停止测试
-  const _handleTestStop = () => {
-    if (currentTestId) {
-      setCurrentTestId(null);
-      setTestResult(null);
-    }
   };
 
   // 移除强制登录检查，允许未登录用户查看页面
@@ -213,7 +114,6 @@ const SecurityTest: React.FC = () => {
           <SecurityTestPanel
             ref={testPanelRef}
             onTestStart={handleTestStart}
-            onTestProgress={handleTestProgress}
             onTestComplete={handleTestComplete}
             onTestError={handleTestError}
           />

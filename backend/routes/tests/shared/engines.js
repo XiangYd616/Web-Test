@@ -4,11 +4,10 @@
  */
 
 const APIAnalyzer = require('../../../engines/api/ApiAnalyzer');
-const StressTestEngine = require('../../../engines/stress/StressTestEngine');
 const SecurityTestEngine = require('../../../engines/security/SecurityTestEngine');
 const CompatibilityTestEngine = require('../../../engines/compatibility/CompatibilityTestEngine');
 const UXAnalyzer = require('../../../engines/api/UXAnalyzer');
-const ApiTestEngine = require('../../../engines/api/APITestEngine');
+const ApiTestEngine = require('../../../engines/api/apiTestEngine');
 
 /**
  * 测试引擎管理器

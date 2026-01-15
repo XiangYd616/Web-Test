@@ -34,18 +34,6 @@ import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
 
-// 临时testApiService实现
-const testApiService = {
-  executeApiTest: async (config: any) => ({
-    success: true,
-    data: {
-      id: `api_test_${Date.now()}`,
-      testId: `api_test_${Date.now()}`,
-    },
-    message: '基础设施测试启动成功',
-  }),
-};
-
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
 
@@ -129,14 +117,7 @@ const APITest: React.FC = () => {
   const [canSwitchPages, setCanSwitchPages] = useState(true);
 
   // 集成新的测试进度监控
-  const {
-    progress: apiProgress,
-    isMonitoring: apiIsMonitoring,
-    startMonitoring: startApiMonitoring,
-    stopMonitoring: stopApiMonitoring,
-    cancelTest: cancelApiTest,
-    error: apiProgressError,
-  } = useTestProgress(currentTestId || undefined, {
+  const { progress: apiProgress } = useTestProgress(currentTestId || undefined, {
     onProgress: progressData => {
       Logger.debug('📊 基础设施测试进度:', progressData);
       setTestProgress(progressData.message);
@@ -231,7 +212,10 @@ const APITest: React.FC = () => {
     // 准备测试配置
     const testConfigData = {
       baseUrl: testConfig.baseUrl,
-      endpoints: testConfig.endpoints,
+      endpoints: testConfig.endpoints.map(endpoint => ({
+        ...endpoint,
+        assertions: endpoint.expectedStatus?.map(status => `status == ${status}`) || [],
+      })),
       authentication: authentication.type !== 'none' ? authentication : undefined,
       globalHeaders: globalHeaders.filter(h => h.enabled && h.key && h.value),
       config: {
@@ -250,47 +234,7 @@ const APITest: React.FC = () => {
     };
 
     try {
-      // 构建基础设施测试配置
-      const apiTestConfig = {
-        endpoints: testConfig.endpoints.map(endpoint => ({
-          url: `${testConfig.baseUrl}${endpoint.path}`,
-          method: endpoint.method,
-          headers: {
-            ...Object.fromEntries(globalHeaders.filter(h => h.enabled).map(h => [h.key, h.value])),
-            ...(authentication.type === 'bearer'
-              ? { Authorization: `Bearer ${authentication.token}` }
-              : {}),
-            ...(authentication.type === 'apikey'
-              ? { [authentication.headerName]: authentication.apiKey }
-              : {}),
-          },
-          body: endpoint.body || '',
-          assertions: endpoint.expectedStatus?.map(status => `status == ${status}`) || [],
-        })),
-        configuration: {
-          timeout: testConfig.timeout || 30000,
-          retry_count: testConfig.retries || 0,
-          parallel_requests: testConfig.loadTest ? 5 : 1,
-        },
-      };
-
-      // 使用新的API服务执行测试
-      const response = await testApiService.executeApiTest(apiTestConfig);
-
-      if (response.success) {
-        const testId = response.data.id || response.data.testId;
-        setCurrentTestId(testId);
-        setTestStatus('running');
-
-        // 启动API进度监控
-        if (testId) {
-          startApiMonitoring(testId);
-        }
-      } else {
-        throw new Error(response.message || '启动基础设施测试失败');
-      }
-
-      // 同时使用后台测试管理器作为备用（保持现有功能）
+      // 使用后台测试管理器执行真实API测试
       const backupTestId = backgroundTestManager.startTest(
         'api' as any,
         testConfigData,
@@ -783,6 +727,9 @@ const APITest: React.FC = () => {
       onStopTest={handleStopTest}
       testContent={
         <>
+          {/* 未登录提示 */}
+          {!isAuthenticated && <>{LoginPromptComponent}</>}
+
           {/* 页面标题 */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 space-y-4 lg:space-y-0">

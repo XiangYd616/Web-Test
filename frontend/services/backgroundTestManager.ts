@@ -262,6 +262,9 @@ class BackgroundTestManager {
         case 'seo':
           await this.executeSEOTest(testInfo);
           break;
+        case 'compatibility':
+          await this.executeCompatibilityTest(testInfo);
+          break;
         case 'api':
           await this.executeAPITest(testInfo);
           break;
@@ -421,6 +424,73 @@ class BackgroundTestManager {
     );
   }
 
+  // 执行兼容性测试
+  private async executeCompatibilityTest(testInfo: TestInfo): Promise<void> {
+    const { config } = testInfo;
+
+    this.updateTestProgress(testInfo.id, 10, '🧪 正在准备兼容性测试...');
+
+    try {
+      const enabledBrowsers = Array.isArray(config?.browsers)
+        ? config.browsers
+            .filter((browser: any) => browser?.enabled)
+            .map((browser: any) => browser.name)
+        : undefined;
+      const devices = Array.isArray(config?.devices)
+        ? config.devices.reduce(
+            (acc: { desktop: boolean; tablet: boolean; mobile: boolean }, device: any) => {
+              if (!device?.enabled) return acc;
+              if (device.type === 'desktop') acc.desktop = true;
+              if (device.type === 'tablet') acc.tablet = true;
+              if (device.type === 'mobile') acc.mobile = true;
+              return acc;
+            },
+            { desktop: false, tablet: false, mobile: false }
+          )
+        : undefined;
+
+      const response = await fetch(`${this.apiBaseUrl}/test/compatibility`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: JSON.stringify({
+          url: config?.url,
+          options: {
+            browsers: enabledBrowsers,
+            devices,
+            accessibility: config?.includeAccessibility,
+            includeScreenshots: config?.includeScreenshots,
+            includePerformance: config?.includePerformance,
+            features: config?.features,
+            testViewports: config?.testViewports,
+            testEngine: config?.testEngine,
+            timeout: config?.timeout,
+            retries: config?.retries,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      this.updateTestProgress(testInfo.id, 50, '🧩 正在分析兼容性...');
+
+      const data = await response.json();
+      const testResult = data.data || data.results || data;
+
+      if (data.success || data.status === 'completed') {
+        this.completeTest(testInfo.id, testResult);
+      } else {
+        throw new Error(data.message || '兼容性测试失败');
+      }
+    } catch (error) {
+      this.handleTestError(testInfo.id, error as Error);
+    }
+  }
+
   // 执行API测试
   private async executeAPITest(testInfo: TestInfo): Promise<void> {
     const { config } = testInfo;
@@ -428,7 +498,7 @@ class BackgroundTestManager {
     this.updateTestProgress(testInfo.id, 10, '🔌 正在准备API测试...');
 
     try {
-      const response = await fetch(`${this.apiBaseUrl}/test/api`, {
+      const response = await fetch(`${this.apiBaseUrl}/test/api-test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -453,9 +523,10 @@ class BackgroundTestManager {
       ]);
 
       const data = await response.json();
+      const testResult = data.data || data.results || data;
 
       if (data.success || data.status === 'completed') {
-        this.completeTest(testInfo.id, data.results || data);
+        this.completeTest(testInfo.id, testResult);
       } else {
         throw new Error(data.message || 'API测试失败');
       }
