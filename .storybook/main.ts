@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import type { UserConfig } from 'vite';
 
 const config: StorybookConfig = {
   stories: [
@@ -27,10 +28,11 @@ const config: StorybookConfig = {
     reactDocgen: 'react-docgen-typescript',
     reactDocgenTypescriptOptions: {
       shouldExtractLiteralValuesFromEnum: true,
-      propFilter: (prop) => (prop.parent ? !/node_modules/.test(prop.parent.fileName) : true),
+      propFilter: (prop: { parent?: { fileName: string } }) =>
+        prop.parent ? !/node_modules/.test(prop.parent.fileName) : true,
     },
   },
-  viteFinal: async (config) => {
+  viteFinal: async (config: UserConfig) => {
     // 自定义Vite配置
     if (config.resolve) {
       config.resolve.alias = {

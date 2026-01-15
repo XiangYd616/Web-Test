@@ -25,7 +25,7 @@ async function initializeOptimizer() {
 function queryPerformanceMiddleware() {
     return async (req, res, next) => {
         // 为请求对象添加优化查询方法
-        req.optimizedQuery = async (sql, params = [], options = {}) => {
+        req.optimizedQuery = async (sql, params = [], _options = {}) => {
             const startTime = Date.now();
 
             try {
@@ -70,8 +70,7 @@ function queryPerformanceMiddleware() {
         };
 
         // 为请求对象添加批量查询方法
-        req.batchQuery = async (queries, options = {}) => {
-            const startTime = Date.now();
+        req.batchQuery = async (queries, _options = {}) => {
             const results = [];
 
             try {
@@ -79,8 +78,6 @@ function queryPerformanceMiddleware() {
                     const result = await req.optimizedQuery(query.sql, query.params, query.options);
                     results.push(result);
                 }
-
-                const totalDuration = Date.now() - startTime;
 
                 return results;
             } catch (error) {
@@ -147,7 +144,8 @@ function paginationOptimizationMiddleware() {
             try {
                 // 构建WHERE条件
                 let whereClause = '';
-                let params = [];
+                const params = [];
+
                 let paramIndex = 1;
 
                 if (Object.keys(filters).length > 0) {
@@ -224,81 +222,6 @@ function paginationOptimizationMiddleware() {
 }
 
 /**
- * 查询缓存中间件
- */
-function queryCacheMiddleware(cacheManager) {
-    return (req, res, next) => {
-        if (!cacheManager || !cacheManager.isAvailable()) {
-            return next();
-        }
-
-        // 为请求对象添加缓存查询方法
-        req.cachedQuery = async (sql, params = [], options = {}) => {
-            const {
-                ttl = 300, // 5分钟默认TTL
-                skipCache = false,
-                cacheKey = null
-            } = options;
-
-            if (skipCache) {
-                
-        return req.optimizedQuery(sql, params);
-      }
-
-            // 生成缓存键
-            const key = cacheKey || generateQueryCacheKey(sql, params);
-
-            try {
-                // 尝试从缓存获取
-                const cached = await cacheManager.get('db_queries', key);
-                if (cached) {
-                    
-        return {
-                        rows: cached.rows,
-                        rowCount: cached.rowCount,
-                        cached: true,
-                        queryTime: 0
-      };
-                }
-
-                // 缓存未命中，执行查询
-                const result = await req.optimizedQuery(sql, params);
-
-                // 缓存结果（只缓存SELECT查询）
-                if (sql.trim().toLowerCase().startsWith('select')) {
-                    await cacheManager.set('db_queries', key, {
-                        rows: result.rows,
-                        rowCount: result.rowCount,
-                        timestamp: new Date().toISOString()
-                    }, ttl);
-                }
-
-                return {
-                    ...result,
-                    cached: false
-                };
-            } catch (error) {
-                console.error('缓存查询失败:', error);
-                // 降级到普通查询
-                return req.optimizedQuery(sql, params);
-            }
-        };
-
-        next();
-    };
-}
-
-/**
- * 生成查询缓存键
- */
-function generateQueryCacheKey(sql, params) {
-    const crypto = require('crypto');
-    const normalizedSQL = sql.replace(/\s+/g, ' ').trim().toLowerCase();
-    const paramString = JSON.stringify(params);
-    return crypto.createHash('md5').update(normalizedSQL + paramString).digest('hex');
-}
-
-/**
  * 查询统计中间件
  */
 function queryStatsMiddleware() {
@@ -315,34 +238,28 @@ function queryStatsMiddleware() {
         const originalOptimizedQuery = req.optimizedQuery;
 
         req.optimizedQuery = async (sql, params = [], options = {}) => {
-            const startTime = Date.now();
+            const result = await originalOptimizedQuery.call(req, sql, params, options);
+            const duration = result.queryTime;
 
-            try {
-                const result = await originalOptimizedQuery.call(req, sql, params, options);
-                const duration = result.queryTime || (Date.now() - startTime);
+            // 更新统计信息
+            stats.totalQueries++;
 
-                // 更新统计信息
-                stats.totalQueries++;
-
-                if (duration > 1000) {
-                    stats.slowQueries++;
-                }
-
-                if (result.cached) {
-                    stats.cachedQueries++;
-                }
-
-                // 更新平均查询时间
-                stats.averageQueryTime = (stats.averageQueryTime * (stats.totalQueries - 1) + duration) / stats.totalQueries;
-
-                // 统计查询类型
-                const queryType = sql.trim().split(' ')[0].toUpperCase();
-                stats.queryTypes[queryType] = (stats.queryTypes[queryType] || 0) + 1;
-
-                return result;
-            } catch (error) {
-                throw error;
+            if (duration > 1000) {
+                stats.slowQueries++;
             }
+
+            if (result.cached) {
+                stats.cachedQueries++;
+            }
+
+            // 更新平均查询时间
+            stats.averageQueryTime = (stats.averageQueryTime * (stats.totalQueries - 1) + duration) / stats.totalQueries;
+
+            // 统计查询类型
+            const queryType = sql.trim().split(' ')[0].toUpperCase();
+            stats.queryTypes[queryType] = (stats.queryTypes[queryType] || 0) + 1;
+
+            return result;
         };
 
         // 添加获取统计信息的方法
