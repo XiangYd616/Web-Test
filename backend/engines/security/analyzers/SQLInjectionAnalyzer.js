@@ -13,13 +13,13 @@ class SQLInjectionAnalyzer {
       // 基础SQL注入测试
       basic: [
         "'",
-        "/"",
+        "\"",
         "')",
         "';",
         "' OR '1'='1",
         "' OR 1=1--",
-        "/" OR \"1/" =\"1",
-        "/" OR 1 = 1--",
+        "\" OR \"1\"=\"1",
+        "\" OR 1=1--",
         "' OR 'a'='a",
         "' OR 1=1#",
         "admin'--",
@@ -69,53 +69,52 @@ class SQLInjectionAnalyzer {
     // SQL错误特征
     this.errorSignatures = [
       // MySQL错误
-      /mysql_fetch_array/(/)/i,
-        /mysql_num_rows/(/)/i,
-          /mysql_query/(/)/i,
-            /You have an error in your SQL syntax/i,
-            /Warning.*mysql_.*/(/)/i,
-              /MySQL server version for the right syntax/i,
+      /mysql_fetch_array\(\)/i,
+      /mysql_num_rows\(\)/i,
+      /mysql_query\(\)/i,
+      /You have an error in your SQL syntax/i,
+      /Warning.*mysql_.*/i,
+      /MySQL server version for the right syntax/i,
 
-              // PostgreSQL错误
-              /PostgreSQL.*ERROR/i,
-              /Warning.*pg_.*/(/)/i,
-                /valid PostgreSQL result/i,
-                /Npgsql/./ i,
+      // PostgreSQL错误
+      /PostgreSQL.*ERROR/i,
+      /Warning.*pg_.*/i,
+      /valid PostgreSQL result/i,
+      /Npgsql/i,
 
-                // MSSQL错误
-                /Driver.*SQL[/-/_/ ]*Server/i,
-                /OLE DB.*SQL Server/i,
-                /(/W | /A)SQL Server.*Driver/i,
-                /Warning.*mssql_.*/(/)/i,
-                  /Microsoft OLE DB Provider for ODBC Drivers/i,
-                  /Microsoft OLE DB Provider for SQL Server/i,
-                  /Incorrect syntax near/i,
-                  /Unclosed quotation mark after the character string/i,
+      // MSSQL错误
+      /Driver.*SQL[-_/ ]*Server/i,
+      /OLE DB.*SQL Server/i,
+      /(W|A)SQL Server.*Driver/i,
+      /Warning.*mssql_.*/i,
+      /Microsoft OLE DB Provider for ODBC Drivers/i,
+      /Microsoft OLE DB Provider for SQL Server/i,
+      /Incorrect syntax near/i,
+      /Unclosed quotation mark after the character string/i,
 
-                  // Oracle错误
-                  //bORA-[0-9][0-9][0-9][0-9]/i,
-                  /Oracle error/i,
-                  /Oracle.*Driver/i,
-                  /Warning.*oci_.*/(/)/i,
-                    /Warning.*ora_.*/(/)/i,
+      // Oracle错误
+      /ORA-\d{4}/i,
+      /Oracle error/i,
+      /Oracle.*Driver/i,
+      /Warning.*oci_.*/i,
+      /Warning.*ora_.*/i,
 
-                      // 通用SQL错误
-                      /SQL syntax.*MySQL/i,
-                      /Warning.*mysql_query/(/)/i,
-                        /valid MySQL result/i,
-                        /MySqlClient/./ i,
-                        /com/.mysql /.jdbc / i,
-                        /Zend_Db_(Adapter|Statement)/i,
-                        /Pdo[./_//]Mysql/i,
-                        /MySqlException/i,
-                        /SQLSTATE/[/d+/] / i,
-                        //[SQL Server/]/i,
-                        //[Microsoft/]/[ODBC SQL Server Driver/]/i,
-                        //[SQLServer JDBC Driver/]/i,
-                        //[SqlException/i,
-                        /System/.Data /.SqlClient /.SqlException / i,
-                        /Unclosed quotation mark after the character string/i,
-                        /quoted string not properly terminated/i
+      // 通用SQL错误
+      /SQL syntax.*MySQL/i,
+      /Warning.*mysql_query\(\)/i,
+      /valid MySQL result/i,
+      /MySqlClient/i,
+      /com\.mysql\.jdbc/i,
+      /Zend_Db_(Adapter|Statement)/i,
+      /Pdo[._/]Mysql/i,
+      /MySqlException/i,
+      /SQLSTATE\[\d+\]/i,
+      /\[SQL Server\]/i,
+      /\[Microsoft\]\[ODBC SQL Server Driver\]/i,
+      /\[SQLServer JDBC Driver\]/i,
+      /\[SqlException\]/i,
+      /System\.Data\.SqlClient\.SqlException/i,
+      /quoted string not properly terminated/i
     ];
 
     // 时间阈值（毫秒）
@@ -240,7 +239,7 @@ class SQLInjectionAnalyzer {
 
           const vulnerability = this.analyzeResponse(response, responseTime, {
             type: 'form',
-            form: form,
+            form,
             input: input.name,
             payload,
             injectionType: type

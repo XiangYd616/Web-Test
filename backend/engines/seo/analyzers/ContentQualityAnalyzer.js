@@ -383,7 +383,7 @@ class ContentQualityAnalyzer {
     ];
 
     return positiveWords.reduce((count, word) => {
-      return count + (text.match(new RegExp(`//b${word}//b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -395,7 +395,7 @@ class ContentQualityAnalyzer {
     ];
 
     return negativeWords.reduce((count, word) => {
-      return count + (text.match(new RegExp(`//b${word}//b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -406,7 +406,7 @@ class ContentQualityAnalyzer {
     ];
 
     return neutralWords.reduce((count, word) => {
-      return count + (text.match(new RegExp(`//b${word}//b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -586,11 +586,11 @@ class ContentQualityAnalyzer {
   countTechnicalTerms($) {
     const text = $('body').text().toLowerCase();
     const technicalPatterns = [
-      //b/w+tion/b/g, // -tion endings
-      //b/w+ment/b/g, // -ment endings
-      //b/w+ness/b/g, // -ness endings
-      //b/w+ity/b/g,  // -ity endings
-      //b/w+ing/b/g   // -ing endings (filtered)
+      /\b\w+tion\b/g, // -tion endings
+      /\b\w+ment\b/g, // -ment endings
+      /\b\w+ness\b/g, // -ness endings
+      /\b\w+ity\b/g,  // -ity endings
+      /\b\w+ing\b/g   // -ing endings (filtered)
     ];
 
     let count = 0;
@@ -605,11 +605,11 @@ class ContentQualityAnalyzer {
   countStatistics($) {
     const text = $('body').text();
     const statPatterns = [
-      //d+%/g,                    // 百分比
-      //$/d+/g,                   // 金额
-      //d+,/d+/g,                 // 大数字
-      //d+/./d+/g,                // 小数
-      //b/d+/s*(million|billion|thousand)/b/gi // 数量级
+      /\d+%/g,                    // 百分比
+      /\$\d+/g,                   // 金额
+      /\d+,\d+/g,                 // 大数字
+      /\d+\.\d+/g,                // 小数
+      /\b\d+\s*(million|billion|thousand)\b/gi // 数量级
     ];
 
     let count = 0;
@@ -633,7 +633,7 @@ class ContentQualityAnalyzer {
     const exampleKeywords = ['example', 'for instance', 'such as', 'like', 'including'];
 
     return exampleKeywords.reduce((count, keyword) => {
-      return count + (text.match(new RegExp(`//b${keyword}//b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`\\b${keyword}\\b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -1217,7 +1217,7 @@ class ContentQualityAnalyzer {
   /**
    * 分析内容深度和专业性
    */
-  analyzeContentDepth(content, $) {
+  analyzeContentDepthDetails(content, _unused) {
     const analysis = {
       wordCount: content.length,
       paragraphCount: content.split(/\n\s*\n/).length,
@@ -1275,7 +1275,7 @@ class ContentQualityAnalyzer {
     });
 
     // 判断内容深度
-    const depthScore = this.calculateDepthScore(analysis);
+    const depthScore = this.calculateDepthScoreDetails(analysis);
     if (depthScore >= 80) analysis.depth = 'deep';
     else if (depthScore >= 60) analysis.depth = 'medium';
     else analysis.depth = 'shallow';
@@ -1289,7 +1289,7 @@ class ContentQualityAnalyzer {
   /**
    * 计算内容深度评分
    */
-  calculateDepthScore(analysis) {
+  calculateDepthScoreDetails(analysis) {
     let score = 0;
 
     // 字数评分 (30%)

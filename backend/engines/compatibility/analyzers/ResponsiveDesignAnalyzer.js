@@ -267,7 +267,7 @@ class ResponsiveDesignAnalyzer {
             issues.push({
               type: 'small_text',
               element: el.tagName.toLowerCase(),
-              fontSize: fontSize,
+              fontSize,
               minSize: 16,
               text: el.textContent.substring(0, 50)
             });
@@ -392,7 +392,7 @@ class ResponsiveDesignAnalyzer {
         const layoutData = await page.evaluate(() => {
           const elements = document.querySelectorAll('*');
           let overflowCount = 0;
-          let layoutShifts = 0;
+          const layoutShifts = 0;
 
           elements.forEach(el => {
             /**
@@ -566,10 +566,10 @@ class ResponsiveDesignAnalyzer {
           if (media.includes('pointer')) features.pointer++;
 
           // 提取断点
-          const widthMatch = media.match(/(?:min-width|max-width):/s*(/d+)px/g);
+          const widthMatch = media.match(/(?:min-width|max-width):\s*(\d+)px/g);
           if (widthMatch) {
             widthMatch.forEach(match => {
-              const value = parseInt(match.match(//d+/)[0]);
+              const value = parseInt(match.match(/\d+/)[0]);
               if (!breakpoints.includes(value)) {
                 breakpoints.push(value);
               }

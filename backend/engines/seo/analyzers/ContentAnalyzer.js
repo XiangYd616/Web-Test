@@ -469,7 +469,7 @@ class ContentAnalyzer {
   }
 
   countWords(text) {
-    return text.trim().split(//s+/).filter(word => word.length > 0).length;
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   }
 
   countSentences(text) {
@@ -478,7 +478,7 @@ class ContentAnalyzer {
 
   countSyllables(text) {
     // 简化的音节计算
-    const words = text.toLowerCase().match(//b/w+/b/g) || [];
+    const words = text.toLowerCase().match(/\b\w+\b/g) || [];
     return words.reduce((total, word) => {
       const syllables = word.match(/[aeiouy]+/g) || [];
       return total + Math.max(1, syllables.length);
@@ -486,7 +486,7 @@ class ContentAnalyzer {
   }
 
   extractWords(text) {
-    return text.toLowerCase().match(//b/w+/b/g) || [];
+    return text.toLowerCase().match(/\b\w+\b/g) || [];
   }
 
   calculateWordFrequency(words) {

@@ -93,7 +93,7 @@ class PasswordSecurityService {
     // 字符类型检查
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
-    const hasNumbers = //d/.test(password);
+    const hasNumbers = /\d/.test(password);
     const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
     if (PASSWORD_CONFIG.requireUppercase && !hasUppercase) {
@@ -180,7 +180,7 @@ class PasswordSecurityService {
     
     if (/[a-z]/.test(password)) charsetSize += 26;
     if (/[A-Z]/.test(password)) charsetSize += 26;
-    if (//d/.test(password)) charsetSize += 10;
+    if (/\d/.test(password)) charsetSize += 10;
     if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) charsetSize += 32;
     if (/[^a-zA-Z0-9!@#$%^&*(),.?":{}|<>]/.test(password)) charsetSize += 32;
 
