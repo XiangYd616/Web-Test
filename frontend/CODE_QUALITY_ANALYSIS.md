@@ -8,7 +8,7 @@
 
 ### 1. 测试工具实现虚假化
 
-- **安全测试引擎**：`frontend/services/unifiedSecurityEngine.ts` 完全是Mock实现
+- **安全测试引擎**：`frontend/services/SecurityEngine.ts` 完全是Mock实现
 - **性能测试**：多个文件使用模拟数据，没有真实的性能测试逻辑
 - **压力测试**：主要依赖前端模拟，缺乏真实的后端测试能力
 
@@ -32,7 +32,7 @@
 ### Mock数据问题
 
 ```typescript
-// frontend/services/unifiedSecurityEngine.ts
+// frontend/services/SecurityEngine.ts
 // 这整个文件都是Mock实现，没有真实的安全扫描能力
 private generateMockResult(url: string, testType: string, index: number): SecurityScanResult {
   const vulnerabilities = [
@@ -56,7 +56,7 @@ const metrics = (results as any)?.metrics || {}; // 更多不安全转换
 // frontend/services/api/testApiService.ts
 // 大量API调用实际上只是转发，没有真实的业务逻辑
 async executeSecurityTest(target_url: string, configuration: LocalSecurityTestConfig) {
-  return unifiedApiService.post(`${this.baseUrl}/security`, {
+  return ApiService.post(`${this.baseUrl}/security`, {
     // 简单的数据转发，没有验证或处理
   });
 }
@@ -136,7 +136,7 @@ async executeSecurityTest(target_url: string, configuration: LocalSecurityTestCo
 ### ✅ 高优先级修复（已完成）
 
 - [x] **替换Mock安全测试引擎为真实实现**
-  - 重写了 `unifiedSecurityEngine.ts` 实现真实的安全扫描功能
+  - 重写了 `SecurityEngine.ts` 实现真实的安全扫描功能
   - 添加了SSL/TLS检查、安全头检查、XSS扫描、SQL注入检测等
   - 移除了硬编码的Mock数据，使用实际的网络请求和检测逻辑
 
@@ -163,7 +163,7 @@ async executeSecurityTest(target_url: string, configuration: LocalSecurityTestCo
    - 基于角色的访问控制（RBAC）
    - 测试类型权限映射
 
-2. **真实安全测试引擎** (`frontend/services/unifiedSecurityEngine.ts`)
+2. **真实安全测试引擎** (`frontend/services/SecurityEngine.ts`)
    - SSL/TLS配置检查
    - HTTP安全头验证
    - XSS漏洞扫描

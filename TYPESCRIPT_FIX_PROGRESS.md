@@ -70,7 +70,7 @@
 
 - `TestHistory.tsx` - Type 'string | boolean' not assignable to 'boolean'
 - `TestExecutor.tsx` - Map type mismatch
-- `UniversalTestComponent.tsx` - Array type incompatibility
+- `TestComponent.tsx` - Array type incompatibility
 - `Table.tsx` - Undefined type issues (2 instances)
 - `useDatabaseTestState.ts` - null vs undefined mismatch
 - `useStressTestRecord.ts` - Complex object type mismatch

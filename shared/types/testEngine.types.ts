@@ -214,7 +214,7 @@ export interface TestExecutionOptions {
 
 /**
  * 组合测试配置
- * 用于WebsiteTest和UnifiedTest等聚合测试
+ * 用于WebsiteTest和Test等聚合测试
  */
 export interface CompositeTestConfig extends BaseTestConfig {
   engines: TestEngineType[];

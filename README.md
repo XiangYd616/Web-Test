@@ -167,7 +167,7 @@ Test-Web/
 
 ## 📜 文档
 
-- 🏢 **[统一架构文档](docs/UNIFIED_ARCHITECTURE.md)** - 企业级统一架构说明 ✨
+- 🏢 **[统一架构文档](docs/_ARCHITECTURE.md)** - 企业级统一架构说明 ✨
 - 📋 [文档索引](docs/INDEX.md) - 核心文档入口
 - 👤 [项目使用指南](docs/USER_GUIDE.md) - 详细使用说明
 - 🛠️ [启动与开发指南](docs/PROJECT_STARTUP_GUIDE.md) - 开发环境配置

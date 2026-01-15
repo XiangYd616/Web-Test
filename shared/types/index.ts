@@ -234,7 +234,7 @@ export interface TestCallbacks {
   onError?: (error: Error) => void;
 }
 
-export interface UnifiedTestConfig {
+export interface TestExecutionConfig {
   testType: string;
   target: string;
   options?: any;

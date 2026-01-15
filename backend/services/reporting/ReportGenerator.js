@@ -111,7 +111,7 @@ class ReportGenerator {
   /**
    * 生成增强报告
    */
-  async generateEnhancedReport(testData, options = {}) {
+  async generateReport(testData, options = {}) {
     try {
       const {
         template = 'technical',
@@ -161,21 +161,21 @@ class ReportGenerator {
       let filePath;
       switch (format.toLowerCase()) {
         case 'html':
-          filePath = await this.generateEnhancedHTML(reportData);
+          filePath = await this.generateHTML(reportData);
           break;
         case 'pdf':
-          filePath = await this.generateEnhancedPDF(reportData);
+          filePath = await this.generatePDF(reportData);
           break;
         case 'excel':
         case 'xlsx':
-          filePath = await this.generateEnhancedExcel(reportData);
+          filePath = await this.generateExcel(reportData);
           break;
         case 'word':
         case 'docx':
           filePath = await this.generateWordDocument(reportData);
           break;
         case 'json':
-          filePath = await this.generateEnhancedJSON(reportData);
+          filePath = await this.generateJSON(reportData);
           break;
         default:
           throw new Error(`不支持的报告格式: ${format}`);
@@ -456,7 +456,7 @@ class ReportGenerator {
   /**
    * 生成增强HTML报告
    */
-  async generateEnhancedHTML(reportData) {
+  async generateHTML(reportData) {
     const timestamp = Date.now();
     const fileName = `analysis_report_${timestamp}.html`;
     const filePath = path.join(this.reportsDir, fileName);
@@ -1022,7 +1022,7 @@ class ReportGenerator {
   /**
    * 生成增强PDF报告
    */
-  async generateEnhancedPDF(reportData) {
+  async generatePDF(reportData) {
     const timestamp = Date.now();
     const fileName = `analysis_report_${timestamp}.pdf`;
     const filePath = path.join(this.reportsDir, fileName);
@@ -1097,7 +1097,7 @@ class ReportGenerator {
   /**
    * 生成增强Excel报告
    */
-  async generateEnhancedExcel(reportData) {
+  async generateExcel(reportData) {
     const timestamp = Date.now();
     const fileName = `analysis_report_${timestamp}.xlsx`;
     const filePath = path.join(this.reportsDir, fileName);
@@ -1242,7 +1242,7 @@ class ReportGenerator {
 
     // 这里需要使用docx库来生成Word文档
     // 由于依赖较大，这里提供简化的HTML转换方案
-    const _htmlContent = await this.generateEnhancedHTML(reportData);
+    const _htmlContent = await this.generateHTML(reportData);
     const htmlFileName = `temp_${timestamp}.html`;
     const _tempHtmlPath = path.join(this.reportsDir, htmlFileName);
     
@@ -1293,7 +1293,7 @@ class ReportGenerator {
   /**
    * 生成增强JSON报告
    */
-  async generateEnhancedJSON(reportData) {
+  async generateJSON(reportData) {
     const timestamp = Date.now();
     const fileName = `analysis_report_${timestamp}.json`;
     const filePath = path.join(this.reportsDir, fileName);
@@ -1341,24 +1341,24 @@ class ReportGenerator {
 }
 
 ReportGenerator.prototype.generateReport = function (testData, options = {}) {
-  return this.generateEnhancedReport(testData, options);
+  return this.generateReport(testData, options);
 };
 
 ReportGenerator.prototype.generateHTML = function (reportData) {
-  return this.generateEnhancedHTML(reportData);
+  return this.generateHTML(reportData);
 };
 
 ReportGenerator.prototype.generatePDF = function (reportData) {
-  return this.generateEnhancedPDF(reportData);
+  return this.generatePDF(reportData);
 };
 
 ReportGenerator.prototype.generateExcel = function (reportData) {
-  return this.generateEnhancedExcel(reportData);
+  return this.generateExcel(reportData);
 };
 
 ReportGenerator.prototype.generateJSON = function (reportData) {
-  return this.generateEnhancedJSON(reportData);
+  return this.generateJSON(reportData);
 };
 
 module.exports = ReportGenerator;
-module.exports.EnhancedReportGenerator = ReportGenerator;
+module.exports.ReportGenerator = ReportGenerator;

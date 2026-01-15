@@ -1,6 +1,6 @@
 /**
  * 📊 测试统计面板组件
- * 从UnifiedTestExecutor中提取的专用统计展示
+ * 从TestExecutor中提取的专用统计展示
  * 提供测试统计数据的可视化展示
  */
 

@@ -565,7 +565,7 @@ class CSSFeatureDetector {
         name: feature.name,
         category: feature.category,
         browserSupport,
-        universalSupport: Object.values(browserSupport).every(supported => supported),
+        Support: Object.values(browserSupport).every(supported => supported),
         noSupport: Object.values(browserSupport).every(supported => !supported),
         partialSupport: Object.values(browserSupport).some(supported => supported) && 
                        Object.values(browserSupport).some(supported => !supported)

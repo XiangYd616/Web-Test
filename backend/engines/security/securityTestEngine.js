@@ -226,7 +226,7 @@ class SecurityTestEngine {
       }
       
       // 计算总体安全评分（增强版）
-      const overallScore = this.calculateEnhancedSecurityScore({
+      const overallScore = this.calculateSecurityScore({
         ssl: sslAnalysis,
         headers: headersAnalysis,
         vulnerabilities: vulnerabilityAnalysis,
@@ -263,7 +263,7 @@ class SecurityTestEngine {
           informationDisclosure,
           accessControl
         },
-        recommendations: this.generateEnhancedSecurityRecommendations({
+        recommendations: this.generateSecurityRecommendations({
           ssl: sslAnalysis,
           headers: headersAnalysis,
           vulnerabilities: vulnerabilityAnalysis,
@@ -1346,7 +1346,7 @@ class SecurityTestEngine {
   /**
    * 计算增强安全评分
    */
-  calculateEnhancedSecurityScore(analyses) {
+  calculateSecurityScore(analyses) {
     const weights = {
       ssl: 0.25,
       headers: 0.20,
@@ -1579,7 +1579,7 @@ class SecurityTestEngine {
   /**
    * 生成增强的安全建议
    */
-  generateEnhancedSecurityRecommendations(analyses) {
+  generateSecurityRecommendations(analyses) {
     const recommendations = {
       immediate: [], // 立即处理
       shortTerm: [], // 短期处理

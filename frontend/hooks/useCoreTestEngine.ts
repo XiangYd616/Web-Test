@@ -4,7 +4,7 @@
  * 整合功能：
  * - useTest.ts 的测试管理功能
  * - useTestManager.ts 的API调用功能
- * - useUnifiedTestEngine.ts 的统一引擎功能
+ * - useTestEngine.ts 的统一引擎功能
  * - useTestState.ts 的状态管理功能
  * - useTestProgress.ts 的进度监控功能
  *
@@ -463,7 +463,7 @@ export const useCoreTestEngine = (options: CoreTestEngineOptions = {}): CoreTest
               timeout: testConfig.timeout || defaultTimeout,
             },
           });
-          // 转换为UnifiedTestResult格式（如果需要）
+          // 转换为TestResult格式（如果需要）
           Logger.debug('Test API result', { testResult });
         } else {
           // 使用backgroundTestManager

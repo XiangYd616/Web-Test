@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import LoginPrompt from './LoginPrompt';
 
@@ -7,7 +6,7 @@ interface WithAuthCheckOptions {
   feature?: string;
   description?: string;
   requireAuth?: boolean; // 是否强制要求登录
-  showPrompt?: boolean;  // 是否显示登录提示
+  showPrompt?: boolean; // 是否显示登录提示
 }
 
 // 高阶组件：为组件添加登录检查功能
@@ -16,10 +15,10 @@ export function withAuthCheck<P extends object>(
   options: WithAuthCheckOptions = {}
 ) {
   const {
-    feature = "此功能",
-    description = "使用此功能",
+    feature = '此功能',
+    description = '使用此功能',
     requireAuth = false,
-    showPrompt = true
+    showPrompt = true,
   } = options;
 
   return function AuthCheckedComponent(props: P) {
@@ -36,7 +35,7 @@ export function withAuthCheck<P extends object>(
               <p className="text-gray-300 mb-6">{description}需要登录账户</p>
               <LoginPrompt
                 isOpen={true}
-                onClose={() => { }}
+                onClose={() => {}}
                 feature={feature}
                 description={description}
               />
@@ -47,7 +46,7 @@ export function withAuthCheck<P extends object>(
     }
 
     // 传递额外的props给包装的组件
-    const enhancedProps = {
+    const Props = {
       ...props,
       isAuthenticated,
       showLoginPrompt: () => setShowLoginPrompt(true),
@@ -57,7 +56,7 @@ export function withAuthCheck<P extends object>(
           return false;
         }
         return true;
-      }
+      },
     } as P & {
       isAuthenticated: boolean;
       showLoginPrompt: () => void;
@@ -66,7 +65,7 @@ export function withAuthCheck<P extends object>(
 
     return (
       <>
-        <WrappedComponent {...enhancedProps} />
+        <WrappedComponent {...Props} />
         {showPrompt && (
           <LoginPrompt
             isOpen={showLoginPrompt}
@@ -85,11 +84,7 @@ export function useAuthCheck(options: WithAuthCheckOptions = {}) {
   const { isAuthenticated } = useAuth();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
-  const {
-    feature = "此功能",
-    description = "使用此功能",
-    showPrompt = true
-  } = options;
+  const { feature = '此功能', description = '使用此功能', showPrompt = true } = options;
 
   const requireLogin = () => {
     if (!isAuthenticated) {
@@ -115,7 +110,7 @@ export function useAuthCheck(options: WithAuthCheckOptions = {}) {
     requireLogin,
     showLoginPrompt: () => setShowLoginPrompt(true),
     hideLoginPrompt: () => setShowLoginPrompt(false),
-    LoginPromptComponent
+    LoginPromptComponent,
   };
 }
 

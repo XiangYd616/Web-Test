@@ -149,7 +149,7 @@ class StorageService {
 
       return {
         stats,
-        unified: stats,
+        : stats,
         storage: storageStats,
         archive: archiveStats,
         cleanup: cleanupStats,

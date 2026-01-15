@@ -159,7 +159,7 @@ class RouteManager {
     // 为未来版本预留
     this.versions.set('v2', {
       version: 'v2',
-      description: 'Enhanced API version',
+      description: ' API version',
       releaseDate: '2024-12-01',
       deprecated: false,
       routes: new Map()

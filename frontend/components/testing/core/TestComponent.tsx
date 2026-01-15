@@ -3,9 +3,9 @@
  *
  * 整合功能：
  * - TestRunner.tsx 的测试运行功能
- * - UnifiedTestExecutor.tsx 的统一执行功能
+ * - TestExecutor.tsx 的统一执行功能
  * - ModernTestRunner 的现代化界面
- * - UnifiedTestPanel 的面板功能
+ * - TestPanel 的面板功能
  *
  * 设计目标：
  * - 消除重复组件

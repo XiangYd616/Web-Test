@@ -7,7 +7,7 @@ const { Pool } = require('pg');
 const mysql = require('mysql2/promise');
 const { MongoClient } = require('mongodb');
 
-class EnhancedDatabaseTestEngine {
+class DatabaseTestEngine {
   constructor() {
     this.name = 'database';
     this.version = '2.0.0';
@@ -917,4 +917,4 @@ class EnhancedDatabaseTestEngine {
   }
 }
 
-module.exports = EnhancedDatabaseTestEngine;
+module.exports = DatabaseTestEngine;

@@ -82,7 +82,7 @@ export class AuthService implements IAuthService {
     this.deviceId = this.generateDeviceId();
 
     this.initializeAuth();
-    this.initializeEnhancedFeatures();
+    this.initializeFeatures();
   }
 
   /**
@@ -105,7 +105,7 @@ export class AuthService implements IAuthService {
   /**
    * 初始化企业级功能
    */
-  private async initializeEnhancedFeatures(): Promise<void> {
+  private async initializeFeatures(): Promise<void> {
     // 初始化设备指纹
     if (this.serviceConfig.enableDeviceFingerprinting) {
       try {

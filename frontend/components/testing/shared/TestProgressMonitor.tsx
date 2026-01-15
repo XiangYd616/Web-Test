@@ -1,6 +1,6 @@
 ﻿/**
  * 📊 测试进度监控组件
- * 从UnifiedTestExecutor中提取的专用进度监控
+ * 从TestExecutor中提取的专用进度监控
  * 提供实时测试进度和状态监控
  */
 

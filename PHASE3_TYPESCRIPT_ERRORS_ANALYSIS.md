@@ -26,7 +26,7 @@
 - **严重性**: 高（阻塞构建）
 - **影响**: 无法编译
 - **示例**:
-  - `Cannot find module '../../hooks/useUnifiedTestEngine'`
+  - `Cannot find module '../../hooks/useTestEngine'`
 
 #### 类型3: 隐式any类型 (TS7006)
 
@@ -52,7 +52,7 @@
 
 **模块找不到错误**:
 
-1. `useUnifiedTestEngine` - 已重命名为 `useTestEngine`
+1. `useTestEngine` - 已重命名为 `useTestEngine`
 2. 其他过时的导入路径
 
 **预计时间**: 30分钟
@@ -85,7 +85,7 @@
 
 ```typescript
 // 错误
-import { useUnifiedTestEngine } from '../../hooks/useUnifiedTestEngine';
+import { useTestEngine } from '../../hooks/useTestEngine';
 
 // 修复
 import { useTestEngine } from '../../hooks/useTestEngine';

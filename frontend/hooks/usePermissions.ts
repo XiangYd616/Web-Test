@@ -442,7 +442,7 @@ export function usePermissions(
     // });
 
     return () => {
-      // 清理事件监听器（EnhancedAuthManager没有off方法，暂时跳过）
+      // 清理事件监听器（AuthManager没有off方法，暂时跳过）
       // authManager.off?.('loginSuccess', handleAuthChange);
       // authManager.off?.('logout', handleAuthChange);
     };

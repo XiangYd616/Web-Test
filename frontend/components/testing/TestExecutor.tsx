@@ -1,6 +1,6 @@
 ﻿/**
  * 🎯 统一测试引擎执行器组件 - 重构优化版本
- * 整合了UnifiedTestPanel、ModernUnifiedTestPanel、ModernTestRunner的功能
+ * 整合了TestPanel、ModernTestPanel、ModernTestRunner的功能
  * 提供完整的测试执行、监控和结果展示功能
  *
  * 重构特性：
@@ -83,14 +83,14 @@ interface TestExecutorProps {
   onTestComplete?: (testId: string, result: TestResult) => void;
   onTestError?: (error: Error) => void;
 
-  // 整合ModernUnifiedTestPanel功能
+  // 整合ModernTestPanel功能
   testType?: TestType;
   defaultConfig?: Partial<any>;
   showHistory?: boolean;
   showStats?: boolean;
   allowMultipleTests?: boolean;
 
-  // 整合UnifiedTestPanel功能
+  // 整合TestPanel功能
   enableQueue?: boolean;
   enableWebSocket?: boolean;
   maxConcurrentTests?: number;
@@ -150,7 +150,7 @@ export const TestExecutorComponent: React.FC<TestExecutorProps> = ({
   // 整合的功能方法
 
   /**
-   * 加载测试历史 - 整合UnifiedTestPanel功能
+   * 加载测试历史 - 整合TestPanel功能
    */
   const loadTestHistory = useCallback(async () => {
     try {
@@ -164,7 +164,7 @@ export const TestExecutorComponent: React.FC<TestExecutorProps> = ({
   }, [engine, selectedTestType]);
 
   /**
-   * 加载测试统计 - 整合ModernUnifiedTestPanel功能
+   * 加载测试统计 - 整合ModernTestPanel功能
    */
   const loadTestStatistics = useCallback(async () => {
     try {
@@ -349,7 +349,7 @@ export const TestExecutorComponent: React.FC<TestExecutorProps> = ({
   );
 
   /**
-   * 批量操作 - 整合UnifiedTestPanel功能
+   * 批量操作 - 整合TestPanel功能
    */
   const _handleBatchCancel = useCallback(async () => {
     try {

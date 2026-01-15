@@ -11,9 +11,9 @@ const performanceFix = `
   /**
    * 运行增强的性能测试
    */
-  async runEnhancedPerformanceTest(url, config = {}) {
+  async runPerformanceTest(url, config = {}) {
     try {
-      console.log('🚀 Running enhanced performance test for:', url);
+      console.log('🚀 Running  performance test for:', url);
       
       // 生成性能测试结果
       const result = {
@@ -72,7 +72,7 @@ const performanceFix = `
    * 运行基础测试
    */
   async runTest(url, config = {}) {
-    return this.runEnhancedPerformanceTest(url, config);
+    return this.runPerformanceTest(url, config);
   }
 
   /**
@@ -128,7 +128,7 @@ function fixApiAnalyzer() {
     let content = fs.readFileSync(filePath, 'utf8');
     
     // 检查是否已有这些方法
-    if (!content.includes('runEnhancedPerformanceTest')) {
+    if (!content.includes('runPerformanceTest')) {
       // 在类的结尾之前添加方法
       const classEndIndex = content.lastIndexOf('}');
       content = content.slice(0, classEndIndex) + performanceFix + '\n' + content.slice(classEndIndex);

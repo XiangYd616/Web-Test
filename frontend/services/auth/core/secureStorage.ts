@@ -1,8 +1,6 @@
-import Logger from '@/utils/logger';
-
-﻿/**
+import Logger from '@/utils/logger'; /**
  * 安全存储模块
- * 从enhancedJwtManager提取的安全存储功能
+ * 从JwtManager提取的安全存储功能
  */
 
 export class SecureStorageManager {
@@ -68,9 +66,11 @@ export class SecureStorageManager {
    * 检查是否支持加密存储
    */
   static isEncryptionSupported(): boolean {
-    return typeof crypto !== 'undefined' && 
-           crypto.subtle !== undefined &&
-           typeof crypto.getRandomValues === 'function';
+    return (
+      typeof crypto !== 'undefined' &&
+      crypto.subtle !== undefined &&
+      typeof crypto.getRandomValues === 'function'
+    );
   }
 
   /**
@@ -84,11 +84,7 @@ export class SecureStorageManager {
         const key = await this.getEncryptionKey();
         const iv = crypto.getRandomValues(new Uint8Array(12));
 
-        const encrypted = await crypto.subtle.encrypt(
-          { name: 'AES-GCM', iv },
-          key,
-          data
-        );
+        const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
 
         const combined = new Uint8Array(iv.length + encrypted.byteLength);
         combined.set(iv);
@@ -112,18 +108,16 @@ export class SecureStorageManager {
     if (this.isEncryptionSupported()) {
       try {
         const combined = new Uint8Array(
-          atob(encryptedText).split('').map(char => char.charCodeAt(0))
+          atob(encryptedText)
+            .split('')
+            .map(char => char.charCodeAt(0))
         );
 
         const iv = combined.slice(0, 12);
         const encrypted = combined.slice(12);
 
         const key = await this.getEncryptionKey();
-        const decrypted = await crypto.subtle.decrypt(
-          { name: 'AES-GCM', iv },
-          key,
-          encrypted
-        );
+        const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encrypted);
 
         return new TextDecoder().decode(decrypted);
       } catch (error) {
@@ -153,7 +147,7 @@ export class SecureStorageManager {
         name: 'PBKDF2',
         salt: new TextEncoder().encode('testweb_salt'),
         iterations: 100000,
-        hash: 'SHA-256'
+        hash: 'SHA-256',
       },
       keyMaterial,
       { name: 'AES-GCM', length: 256 },

@@ -1,6 +1,6 @@
 /**
  * 📋 测试结果表格组件
- * 从UnifiedTestExecutor中提取的专用结果表格
+ * 从TestExecutor中提取的专用结果表格
  * 提供测试结果的列表展示和操作
  */
 

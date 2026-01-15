@@ -13,7 +13,7 @@
 ### 🏗️ 项目架构
 
 - [🏗️ 架构规范](ARCHITECTURE_STANDARDS.md) - 分层架构与代码组织规范
-- [🏗️ 统一架构说明](UNIFIED_ARCHITECTURE.md) - 统一架构说明与约定
+- [🏗️ 统一架构说明](_ARCHITECTURE.md) - 统一架构说明与约定
 - [📝 变更日志](CHANGELOG.md) - 版本更新记录
 - [📖 项目说明](../README.md) - 项目概述和快速开始
 - [📦 版本管理](VERSION_MANAGEMENT.md) - versions.json 与同步工具说明

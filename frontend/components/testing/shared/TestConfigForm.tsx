@@ -1,6 +1,6 @@
 ﻿/**
  * 🔧 测试配置表单组件
- * 从UnifiedTestExecutor中提取的专用配置表单
+ * 从TestExecutor中提取的专用配置表单
  * 支持所有测试类型的配置
  */
 

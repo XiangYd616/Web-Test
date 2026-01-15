@@ -1,6 +1,6 @@
 /**
  * API缓存管理模块
- * 从enhancedApiService提取的缓存功能
+ * 从ApiService提取的缓存功能
  */
 
 import type { CacheEntry } from './apiTypes';
@@ -26,7 +26,7 @@ export class ApiCache {
       data,
       timestamp: Date.now(),
       ttl,
-      key
+      key,
     });
   }
 
@@ -65,8 +65,7 @@ export class ApiCache {
     let oldestKey: string | null = null;
     let oldestTimestamp = Infinity;
 
-
-      /**
+    /**
 
        * if功能函数
 

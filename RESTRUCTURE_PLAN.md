@@ -49,7 +49,7 @@ npm install -g madge
 - `backend/middleware/cache.js` + `backend/middleware/cacheMiddleware.js` →
   `backend/middleware/cache.middleware.js`
 - `backend/middleware/errorHandler.js` +
-  `backend/middleware/unifiedErrorHandler.js` →
+  `backend/middleware/ErrorHandler.js` →
   `backend/middleware/error.middleware.js`
 
 ### 2.3 清理未使用的文件

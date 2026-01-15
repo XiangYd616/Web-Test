@@ -12,8 +12,8 @@
 **ComprehensiveTestPage.tsx**:
 
 - 文件名: `ComprehensiveTestPage.tsx`
-- 导出名: `UniversalTestPage` ❌
-- 接口名: `UniversalTestPageProps` ❌
+- 导出名: `TestPage` ❌
+- 接口名: `TestPageProps` ❌
 
 **应该**:
 
@@ -25,8 +25,8 @@
 **TestComponent.tsx**:
 
 - 文件名: `TestComponent.tsx`
-- 导出名: `UniversalTestComponent` ❌
-- 接口名: `UniversalTestComponentProps` ❌
+- 导出名: `TestComponent` ❌
+- 接口名: `TestComponentProps` ❌
 
 **应该**:
 
@@ -39,7 +39,7 @@
 
 ```typescript
 // 当前
-import { UniversalTestPage } from '../components/testing/ComprehensiveTestPage';
+import { TestPage } from '../components/testing/ComprehensiveTestPage';
 
 // 应该
 import { ComprehensiveTestPage } from '../components/testing/ComprehensiveTestPage';
@@ -51,14 +51,14 @@ import { ComprehensiveTestPage } from '../components/testing/ComprehensiveTestPa
 
 ### Step 1: 更新 ComprehensiveTestPage.tsx
 
-- [ ] 重命名接口: `UniversalTestPageProps` → `ComprehensiveTestPageProps`
-- [ ] 重命名导出: `UniversalTestPage` → `ComprehensiveTestPage`
+- [ ] 重命名接口: `TestPageProps` → `ComprehensiveTestPageProps`
+- [ ] 重命名导出: `TestPage` → `ComprehensiveTestPage`
 - [ ] 更新默认导出
 
 ### Step 2: 更新 TestComponent.tsx
 
-- [ ] 重命名接口: `UniversalTestComponentProps` → `TestComponentProps`
-- [ ] 重命名导出: `UniversalTestComponent` → `TestComponent`
+- [ ] 重命名接口: `TestComponentProps` → `TestComponentProps`
+- [ ] 重命名导出: `TestComponent` → `TestComponent`
 - [ ] 更新默认导出
 
 ### Step 3: 更新所有引用

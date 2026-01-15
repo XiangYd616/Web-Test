@@ -45,7 +45,7 @@ docs/
 ├── PROJECT_STARTUP_GUIDE.md     # 启动文档
 ├── TROUBLESHOOTING.md           # 故障排除
 ├── ARCHITECTURE_STANDARDS.md    # 架构规范
-├── UNIFIED_ARCHITECTURE.md      # 统一架构
+├── _ARCHITECTURE.md      # 统一架构
 ├── VERSION_MANAGEMENT.md        # 版本管理
 ├── USER_GUIDE.md                # 用户指南
 └── postman-features-usage.md    # Postman 功能使用

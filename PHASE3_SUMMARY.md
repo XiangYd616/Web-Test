@@ -25,10 +25,10 @@
 
 **P1错误修复（阻塞性）- 100%完成**:
 
-- ✅ 修复 `EngineMonitor.tsx` - useUnifiedTestEngine导入路径
-- ✅ 修复 `TestExecutor.tsx` - useUnifiedTestEngine导入路径
-- ✅ 修复 `TestProgressMonitor.tsx` - unifiedEngine.types导入路径
-- ✅ 修复 `TestResultsTable.tsx` - unifiedEngine.types导入路径
+- ✅ 修复 `EngineMonitor.tsx` - useTestEngine导入路径
+- ✅ 修复 `TestExecutor.tsx` - useTestEngine导入路径
+- ✅ 修复 `TestProgressMonitor.tsx` - Engine.types导入路径
+- ✅ 修复 `TestResultsTable.tsx` - Engine.types导入路径
 
 **修复的文件**: 4个 **修复的导入错误**: 6处
 
@@ -40,16 +40,16 @@
 
 | 错误类型                           | 数量 | 状态        |
 | ---------------------------------- | ---- | ----------- |
-| 模块找不到（useUnifiedTestEngine） | 2    | ✅ 已修复   |
-| 模块找不到（unifiedEngine.types）  | 4    | ✅ 已修复   |
+| 模块找不到（useTestEngine） | 2    | ✅ 已修复   |
+| 模块找不到（Engine.types）  | 4    | ✅ 已修复   |
 | 类型安全错误                       | -    | ⏳ 部分修复 |
 | 未使用变量警告                     | -    | ⏳ 未处理   |
 
 ### Git提交记录
 
 ```
-0540de6 fix: 修复所有unifiedEngine.types导入路径为engine.types
-b2202d0 fix: 修复useUnifiedTestEngine导入路径错误
+0540de6 fix: 修复所有Engine.types导入路径为engine.types
+b2202d0 fix: 修复useTestEngine导入路径错误
 3e98171 docs: 创建Phase 3进度报告
 ```
 
@@ -66,8 +66,8 @@ b2202d0 fix: 修复useUnifiedTestEngine导入路径错误
 ```typescript
 // 错误：找不到testRepository
 useTests.ts(86,29): Cannot find name 'testRepository'
-useTests.ts(104,38): Property 'create' does not exist on type 'UnifiedTestService'
-useTests.ts(121,38): Property 'createAndStart' does not exist on type 'UnifiedTestService'
+useTests.ts(104,38): Property 'create' does not exist on type 'TestService'
+useTests.ts(121,38): Property 'createAndStart' does not exist on type 'TestService'
 ```
 
 **原因**: useTests.ts文件中的testService/testRepository引用混乱  

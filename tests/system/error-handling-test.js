@@ -3,12 +3,12 @@
  * 验证增强的错误处理系统的功能
  */
 
-import ErrorHandler, { ServiceError } from '../backend/engines/shared/errors/ErrorHandler.js';
-import { ErrorCode, ErrorSeverity, RecoveryStrategy } from '../backend/engines/shared/errors/ErrorTypes.js';
-import BaseService from '../backend/engines/shared/services/BaseService.enhanced.js';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
 import { writeFile } from 'fs/promises';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import ErrorHandler, { ServiceError } from '../backend/engines/shared/errors/ErrorHandler.js';
+import { ErrorCode, ErrorSeverity } from '../backend/engines/shared/errors/ErrorTypes.js';
+import BaseService from '../backend/engines/shared/services/BaseService..js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -115,7 +115,7 @@ async function main() {
     await testRecoveryStrategies(testResults);
 
     // 4. 增强BaseService测试
-    await testEnhancedBaseService(testResults);
+    await testBaseService(testResults);
 
     // 5. 集成测试
     await testIntegration(testResults);
@@ -316,7 +316,7 @@ async function testRecoveryStrategies(testResults) {
   }
 }
 
-async function testEnhancedBaseService(testResults) {
+async function testBaseService(testResults) {
   log(colors.blue, '\n📋 4. 增强BaseService测试');
 
   const testService = new TestService();

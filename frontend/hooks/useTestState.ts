@@ -1,6 +1,6 @@
 ﻿/**
  * 统一测试状态管理Hook - 重构优化版本
- * 整合了useTestState和useUnifiedTestState的功能
+ * 整合了useTestState和useTestState的功能
  * 为各个独立测试页面提供共享的基础状态管理逻辑
  * 消除重复代码，但保持页面独立性
  *
@@ -41,7 +41,7 @@ export interface TestActions {
   clearError: () => void;
 }
 
-// 扩展的选项接口 - 整合useUnifiedTestState功能
+// 扩展的选项接口 - 整合useTestState功能
 export interface UseTestStateOptions {
   testType: TestType;
   defaultConfig: TestConfig;
@@ -52,7 +52,7 @@ export interface UseTestStateOptions {
   onConfigChange?: (config: TestConfig) => void;
   validateConfig?: (config: TestConfig) => { isValid: boolean; errors: string[] };
 
-  // 高级功能 - 来自useUnifiedTestState
+  // 高级功能 - 来自useTestState
   maxConcurrentTests?: number;
   defaultTimeout?: number;
   enableQueue?: boolean;
@@ -75,7 +75,7 @@ export interface UseTestStateReturn extends TestState, TestActions {
   configErrors: string[];
   testDuration: number | null;
 
-  // 队列管理 - 来自useUnifiedTestState
+  // 队列管理 - 来自useTestState
   recordId: string | null;
   phase: string;
   message: string;
@@ -122,7 +122,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
     errors: string[];
   }>({ isValid: true, errors: [] });
 
-  // 队列管理状态 - 整合useUnifiedTestState功能
+  // 队列管理状态 - 整合useTestState功能
   const [queueState, setQueueState] = useState({
     recordId: null as string | null,
     phase: 'IDLE' as string,
@@ -332,7 +332,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
     configErrors: configValidation.errors,
     testDuration,
 
-    // 队列管理状态 - 整合useUnifiedTestState
+    // 队列管理状态 - 整合useTestState
     recordId: queueState.recordId,
     phase: queueState.phase,
     message: queueState.message,

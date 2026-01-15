@@ -179,7 +179,7 @@ export class BackgroundTestManagerAdapter {
     try {
       this.updateTestProgress(testInfo.id, 5, '🚀 正在启动测试...');
 
-      // 使用testApiService替代unifiedTestApiClient
+      // 使用testApiService替代TestApiClient
       try {
         const result = await testApiService.executeTest({
           testType: testInfo.type,
@@ -460,6 +460,6 @@ export class BackgroundTestManagerAdapter {
 export const backgroundTestManagerAdapter = new BackgroundTestManagerAdapter();
 
 // 为了保持完全兼容，也可以直接导出为backgroundTestManager
-export const _enhancedBackgroundTestManager = backgroundTestManagerAdapter;
+export const _BackgroundTestManager = backgroundTestManagerAdapter;
 
 export default backgroundTestManagerAdapter;

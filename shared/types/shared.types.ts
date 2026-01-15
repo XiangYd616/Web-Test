@@ -41,7 +41,7 @@ export enum UserPlan {
 }
 
 // TestType 和 TestStatus 已迁移到统一类型系统
-// 请从 frontend/types/unified/testTypes 导入
+// 请从 frontend/types//testTypes 导入
 // 注意：这是共享类型文件，如果需要在后端使用，请考虑创建后端专用的类型定义
 
 // ==================== 用户相关类型 ====================

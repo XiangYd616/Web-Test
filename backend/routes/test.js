@@ -29,7 +29,7 @@ const testBusinessService = require('../services/testing/TestBusinessService.js'
 // const databaseService = require('../services/database/databaseService');
 // const testQueueService = require('../services/queue/queueService');
 // // // // // // // const smartCacheService = require('../services/smartCacheService'); // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
-// const enhancedTestHistoryService = require('../services/testing/testHistoryService'); // 已移除，功能迁移到 dataManagement
+// const TestHistoryService = require('../services/testing/testHistoryService'); // 已移除，功能迁移到 dataManagement
 
 const multer = require('multer');
 const path = require('path');
@@ -2873,7 +2873,7 @@ router.post('/performance',
       console.log(`🚀 Starting performance test for: ${validatedURL}`);
 
       // 使用现有的网站测试引擎进行性能测试
-      const testResult = await apiEngine.runEnhancedPerformanceTest(validatedURL, {
+      const testResult = await apiEngine.runPerformanceTest(validatedURL, {
         device: config.device || 'desktop',
         location: config.location || 'beijing',
         timeout: config.timeout || 60000,
@@ -3002,7 +3002,7 @@ router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddlewa
   try {
 
     // 增强的测试配置
-    const enhancedOptions = {
+    const Options = {
       devices: {
         desktop: options.devices?.desktop !== false,
         tablet: options.devices?.tablet !== false,
@@ -3016,7 +3016,7 @@ router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddlewa
       ...options
     };
 
-    const testResult = await compatibilityEngine.runCompatibilityTest(validatedURL, enhancedOptions);
+    const testResult = await compatibilityEngine.runCompatibilityTest(validatedURL, Options);
 
     // 如果测试成功，生成详细报告
     if (testResult.success && testResult.data) {
@@ -3029,7 +3029,7 @@ router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddlewa
       // 将详细报告添加到结果中
       testResult.data.detailedReport = detailedReport;
 
-      console.log(`✅ Enhanced compatibility test completed with detailed report`);
+      console.log(`✅  compatibility test completed with detailed report`);
     }
 
     // 确保返回成功状态

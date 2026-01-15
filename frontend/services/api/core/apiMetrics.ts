@@ -1,6 +1,6 @@
 /**
  * API指标收集模块
- * 从enhancedApiService提取的监控功能
+ * 从ApiService提取的监控功能
  */
 
 import type { ApiMetrics } from './apiTypes';
@@ -14,7 +14,7 @@ export class MetricsCollector {
     cacheHits: 0,
     cacheMisses: 0,
     retryAttempts: 0,
-    errorsByType: {}
+    errorsByType: {},
   };
 
   private responseTimes: number[] = [];
@@ -54,7 +54,7 @@ export class MetricsCollector {
     }
 
     // 更新平均响应时间
-    this.metrics.averageResponseTime = 
+    this.metrics.averageResponseTime =
       this.responseTimes.reduce((sum, time) => sum + time, 0) / this.responseTimes.length;
   }
 
@@ -71,7 +71,7 @@ export class MetricsCollector {
       cacheHits: 0,
       cacheMisses: 0,
       retryAttempts: 0,
-      errorsByType: {}
+      errorsByType: {},
     };
     this.responseTimes = [];
   }

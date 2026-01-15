@@ -486,8 +486,8 @@ class CompatibilityAnalyzer {
     // 特性评分
     if (results.featureComparison) {
       const features = Object.values(results.featureComparison.featureComparison);
-      const universalFeatures = features.filter(f => f.universalSupport).length;
-      scores.features = features.length > 0 ? Math.round((universalFeatures / features.length) * 100) : 100;
+      const Features = features.filter(f => f.Support).length;
+      scores.features = features.length > 0 ? Math.round((Features / features.length) * 100) : 100;
     }
 
     // 总体评分

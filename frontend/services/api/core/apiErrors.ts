@@ -1,6 +1,6 @@
 ﻿/**
  * API错误处理模块
- * 从enhancedApiService提取的专业错误类型
+ * 从ApiService提取的专业错误类型
  */
 
 export class ApiServiceError extends Error {
@@ -16,8 +16,7 @@ export class ApiServiceError extends Error {
   }
 }
 
-
-  /**
+/**
 
    * 处理constructor事件
 
@@ -33,8 +32,7 @@ export class NetworkError extends ApiServiceError {
   }
 }
 
-
-  /**
+/**
 
    * 处理constructor事件
 
@@ -50,8 +48,7 @@ export class TimeoutError extends ApiServiceError {
   }
 }
 
-
-  /**
+/**
 
    * 处理constructor事件
 
@@ -67,8 +64,7 @@ export class ValidationError extends ApiServiceError {
   }
 }
 
-
-  /**
+/**
 
    * 处理constructor事件
 
@@ -84,8 +80,7 @@ export class AuthenticationError extends ApiServiceError {
   }
 }
 
-
-  /**
+/**
 
    * 处理constructor事件
 
@@ -101,8 +96,7 @@ export class AuthorizationError extends ApiServiceError {
   }
 }
 
-
-  /**
+/**
 
    * 处理constructor事件
 
@@ -118,8 +112,7 @@ export class RateLimitError extends ApiServiceError {
   }
 }
 
-
-  /**
+/**
 
    * 处理constructor事件
 

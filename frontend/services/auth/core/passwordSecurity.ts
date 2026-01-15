@@ -1,6 +1,6 @@
 /**
  * 密码安全模块
- * 从enhancedAuthManager提取的密码策略功能
+ * 从AuthManager提取的密码策略功能
  */
 
 import type { PasswordPolicy, PasswordStrength } from './authTypes';
@@ -16,20 +16,23 @@ export class PasswordSecurityManager {
     requireNumbers: true,
     requireSpecialChars: true,
     maxAge: 90, // 90天
-    preventReuse: 5
+    preventReuse: 5,
   };
 
   /**
    * 验证密码强度
    */
-  static validatePasswordStrength(password: string, policy: PasswordPolicy = this.DEFAULT_POLICY): PasswordStrength {
+  static validatePasswordStrength(
+    password: string,
+    policy: PasswordPolicy = this.DEFAULT_POLICY
+  ): PasswordStrength {
     const feedback: string[] = [];
     const requirements = {
       length: password.length >= policy.minLength,
       uppercase: policy.requireUppercase ? /[A-Z]/.test(password) : true,
       lowercase: policy.requireLowercase ? /[a-z]/.test(password) : true,
       numbers: policy.requireNumbers ? /\d/.test(password) : true,
-      specialChars: policy.requireSpecialChars ? /[!@#$%^&*(),.?":{}|<>]/.test(password) : true
+      specialChars: policy.requireSpecialChars ? /[!@#$%^&*(),.?":{}|<>]/.test(password) : true,
     };
 
     let score = 0;
@@ -68,7 +71,7 @@ export class PasswordSecurityManager {
     // 检查常见弱密码模式
     const weakPatterns = this.getWeakPatterns();
     const foundWeakPattern = weakPatterns.find(pattern => pattern.regex.test(password));
-    
+
     if (foundWeakPattern) {
       feedback.push(foundWeakPattern.message);
       score = Math.max(0, score - 2);
@@ -101,7 +104,7 @@ export class PasswordSecurityManager {
       score: Math.min(4, Math.round(score)),
       feedback,
       isValid,
-      requirements
+      requirements,
     };
   }
 
@@ -117,7 +120,7 @@ export class PasswordSecurityManager {
       { regex: /^letmein/i, message: '避免使用常见短语' },
       { regex: /^welcome/i, message: '避免使用常见单词' },
       { regex: /^123123/, message: '避免重复的数字模式' },
-      { regex: /^abcabc/i, message: '避免重复的字母模式' }
+      { regex: /^abcabc/i, message: '避免重复的字母模式' },
     ];
   }
 
@@ -137,7 +140,7 @@ export class PasswordSecurityManager {
       '0123456789',
       'qwertyuiop',
       'asdfghjkl',
-      'zxcvbnm'
+      'zxcvbnm',
     ];
 
     for (const sequence of sequences) {
@@ -161,7 +164,7 @@ export class PasswordSecurityManager {
     if (/[A-Z]/.test(password)) variety++;
     if (/[0-9]/.test(password)) variety++;
     if (/[^a-zA-Z0-9]/.test(password)) variety++;
-    
+
     return variety >= 3;
   }
 
@@ -189,7 +192,10 @@ export class PasswordSecurityManager {
     }
 
     // 打乱密码字符顺序
-    return password.split('').sort(() => 0.5 - Math.random()).join('');
+    return password
+      .split('')
+      .sort(() => 0.5 - Math.random())
+      .join('');
   }
 
   /**
@@ -197,10 +203,26 @@ export class PasswordSecurityManager {
    */
   static isCommonPassword(password: string): boolean {
     const commonPasswords = [
-      '123456', 'password', '123456789', '12345678', '12345',
-      '1234567', '1234567890', 'qwerty', 'abc123', '111111',
-      '123123', 'admin', 'letmein', 'welcome', 'monkey',
-      '1234', 'dragon', 'princess', 'qwerty123', 'solo'
+      '123456',
+      'password',
+      '123456789',
+      '12345678',
+      '12345',
+      '1234567',
+      '1234567890',
+      'qwerty',
+      'abc123',
+      '111111',
+      '123123',
+      'admin',
+      'letmein',
+      'welcome',
+      'monkey',
+      '1234',
+      'dragon',
+      'princess',
+      'qwerty123',
+      'solo',
     ];
 
     return commonPasswords.includes(password.toLowerCase());

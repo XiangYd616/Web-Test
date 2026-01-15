@@ -56,8 +56,8 @@ import { useCallback, useEffect, useState } from 'react';
 
 **不应该存在的**:
 
-- ❌ `import { UnifiedTestService }`
-- ❌ `const testService = new UnifiedTestService()`
+- ❌ `import { TestService }`
+- ❌ `const testService = new TestService()`
 - ❌ `testService.`任何调用
 - ❌ `t.testId` (应该是 `t.id`)
 
@@ -87,7 +87,7 @@ import { useCallback, useEffect, useState } from 'react';
 完成后，确保：
 
 - [ ] 文件已保存
-- [ ] 没有 `UnifiedTestService` 导入
+- [ ] 没有 `TestService` 导入
 - [ ] 没有 `testService` 变量
 - [ ] 所有方法使用 `testRepository`
 - [ ] 所有 `testId` 改为 `id`

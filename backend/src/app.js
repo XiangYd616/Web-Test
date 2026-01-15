@@ -21,7 +21,7 @@ const { configManager: _configManager } = require('./ConfigManager.js');
 const _authRoutes = require('../routes/auth.js');
 const _testRoutes = require('../routes/test.js');
 const _seoRoutes = require('../routes/seo.js');
-// const unifiedSecurityRoutes = require('./routes/unifiedSecurity'); // 已移除
+// const SecurityRoutes = require('./routes/Security'); // 已移除
 const _userRoutes = require('../routes/users.js');
 const _adminRoutes = require('../routes/admin.js');
 // const dataRoutes = require('./routes/data'); // 已移除，功能合并到 dataManagementRoutes
@@ -38,7 +38,7 @@ const _errorRoutes = require('../routes/errors.js');
 const _performanceRoutes = require('../routes/performance.js');
 const _filesRoutes = require('../routes/files.js');
 // const performanceTestRoutes = require('../routes/performanceTestRoutes.js'); // 暂时注释，文件缺失
-// const unifiedTestRoutes = require('../routes/unifiedTest.js'); // 暂时注释，文件缺失
+// const TestRoutes = require('../routes/Test.js'); // 暂时注释，文件缺失
 
 // 导入中间件
 const { ErrorHandler } = require('../middleware/errorHandler.js');

@@ -8,7 +8,7 @@ import { ConfigProvider } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestExecutor } from '../components/testing/TestExecutor';
-// import { ModernUnifiedTestPanel } from '../components/testing/ModernUnifiedTestPanel'; // 已重构到UnifiedTestExecutor
+// import { ModernTestPanel } from '../components/testing/ModernTestPanel'; // 已重构到TestExecutor
 import { TestPage } from '../pages/TestPage';
 
 // Mock useTestEngine hook

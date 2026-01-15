@@ -56,7 +56,7 @@ backend/
 │   ├── cache.js
 │   ├── cacheMiddleware.js      ← 重复
 │   ├── errorHandler.js
-│   └── unifiedErrorHandler.js  ← 重复
+│   └── ErrorHandler.js  ← 重复
 └── utils/           ← 24+ 工具文件
 ```
 

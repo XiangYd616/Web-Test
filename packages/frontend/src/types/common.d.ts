@@ -1,4 +1,4 @@
-﻿// Enhanced common type definitions
+﻿//  common type definitions
 // Final version with maximum flexibility
 
 // ============================================
@@ -322,7 +322,6 @@ export const X: LucideIcon;
 export const AlertCircle: LucideIcon;
 
 export {};
-
 
 // ============================================
 // Additional Type Aliases and Basic Types

@@ -1,37 +1,37 @@
-# Unified命名批量清理脚本
-# 自动替换所有文件中的unified/Unified命名
+# 命名批量清理脚本
+# 自动替换所有文件中的/命名
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "🧹 开始批量清理Unified命名..." -ForegroundColor Cyan
+Write-Host "🧹 开始批量清理命名..." -ForegroundColor Cyan
 
 # 定义替换规则
 $replacements = @(
     # 类名和接口名
-    @{ Pattern = 'UnifiedTestEngine(?!Hook)'; Replacement = 'TestEngine' }
-    @{ Pattern = 'UnifiedEngineWebSocketHandler'; Replacement = 'EngineWebSocketHandler' }
-    @{ Pattern = 'UnifiedTestService'; Replacement = 'TestService' }
-    @{ Pattern = 'UnifiedPerformanceTest'; Replacement = 'PerformanceTest' }
-    @{ Pattern = 'UnifiedBackgroundTestManager'; Replacement = 'BackgroundTestManager' }
+    @{ Pattern = 'TestEngine(?!Hook)'; Replacement = 'TestEngine' }
+    @{ Pattern = 'EngineWebSocketHandler'; Replacement = 'EngineWebSocketHandler' }
+    @{ Pattern = 'TestService'; Replacement = 'TestService' }
+    @{ Pattern = 'PerformanceTest'; Replacement = 'PerformanceTest' }
+    @{ Pattern = 'BackgroundTestManager'; Replacement = 'BackgroundTestManager' }
     
     # 变量名和函数名
-    @{ Pattern = 'unifiedTestEngine'; Replacement = 'testEngine' }
-    @{ Pattern = 'unifiedEngineWSHandler'; Replacement = 'engineWSHandler' }
-    @{ Pattern = 'unifiedTestService'; Replacement = 'testService' }
-    @{ Pattern = 'unifiedAPIDoc'; Replacement = 'apiDoc' }
-    @{ Pattern = 'unifiedEngineAPIDoc'; Replacement = 'engineAPIDoc' }
+    @{ Pattern = 'TestEngine'; Replacement = 'testEngine' }
+    @{ Pattern = 'EngineWSHandler'; Replacement = 'engineWSHandler' }
+    @{ Pattern = 'TestService'; Replacement = 'testService' }
+    @{ Pattern = 'APIDoc'; Replacement = 'apiDoc' }
+    @{ Pattern = 'EngineAPIDoc'; Replacement = 'engineAPIDoc' }
     
     # 函数名
-    @{ Pattern = 'createUnifiedEngineWebSocketMiddleware'; Replacement = 'createEngineWebSocketMiddleware' }
-    @{ Pattern = 'getUnifiedEngineWSHandler'; Replacement = 'getEngineWSHandler' }
-    @{ Pattern = 'useUnifiedTestEngine'; Replacement = 'useTestEngine' }
+    @{ Pattern = 'createEngineWebSocketMiddleware'; Replacement = 'createEngineWebSocketMiddleware' }
+    @{ Pattern = 'getEngineWSHandler'; Replacement = 'getEngineWSHandler' }
+    @{ Pattern = 'useTestEngine'; Replacement = 'useTestEngine' }
     
     # API路径
-    @{ Pattern = '/api/unified-engine'; Replacement = '/api/engine' }
-    @{ Pattern = 'unified-engine'; Replacement = 'engine' }
+    @{ Pattern = '/api/-engine'; Replacement = '/api/engine' }
+    @{ Pattern = '-engine'; Replacement = 'engine' }
     
     # 日志和服务名
-    @{ Pattern = 'unified-engine-ws'; Replacement = 'engine-ws' }
+    @{ Pattern = '-engine-ws'; Replacement = 'engine-ws' }
     
     # 中文描述
     @{ Pattern = '统一测试引擎'; Replacement = '测试引擎' }
@@ -87,4 +87,4 @@ Write-Host ""
 Write-Host "💡 建议下一步操作:" -ForegroundColor Cyan
 Write-Host "  1. 检查修改: git diff" -ForegroundColor White
 Write-Host "  2. 运行测试: npm run type-check" -ForegroundColor White
-Write-Host "  3. 提交更改: git add -A && git commit -m 'refactor: 批量清理unified命名'" -ForegroundColor White
+Write-Host "  3. 提交更改: git add -A && git commit -m 'refactor: 批量清理命名'" -ForegroundColor White

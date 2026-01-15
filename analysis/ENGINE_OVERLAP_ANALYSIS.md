@@ -170,10 +170,10 @@ class PerformanceTestEngine extends BaseTestEngine {
 #### 合并重复的分析器:
 ```javascript
 // 替换三个性能分析器为一个
-engines/shared/analyzers/UnifiedPerformanceAnalyzer.js
+engines/shared/analyzers/PerformanceAnalyzer.js
 
 // 合并内容分析功能
-engines/shared/analyzers/UnifiedContentAnalyzer.js
+engines/shared/analyzers/ContentAnalyzer.js
 ```
 
 ### 💡 方案3: 功能模块化

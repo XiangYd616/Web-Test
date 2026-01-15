@@ -85,7 +85,7 @@ class BackgroundTestManager {
    * 设置统一服务监听器
    */
   private setupServiceListeners(): void {
-    // Note: unifiedTestService may not have 'on' method
+    // Note: TestService may not have 'on' method
     // Using try-catch to prevent errors if method doesn't exist
     try {
       if (typeof (testService as any).on === 'function') {

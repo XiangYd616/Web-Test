@@ -2,7 +2,7 @@ import Logger from '@/utils/logger';
 
 /**
  * 设备指纹模块
- * 从enhancedAuthManager提取的设备指纹功能
+ * 从AuthManager提取的设备指纹功能
  */
 
 export class DeviceFingerprinter {
@@ -24,7 +24,7 @@ export class DeviceFingerprinter {
     if (navigator.hardwareConcurrency) {
       components.push(navigator.hardwareConcurrency.toString());
     }
-    
+
     if ((navigator as any).deviceMemory) {
       components.push((navigator as any).deviceMemory.toString());
     }
@@ -78,7 +78,7 @@ export class DeviceFingerprinter {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
+        hash = (hash << 5) - hash + char;
         hash = hash & hash; // 转换为32位整数
       }
       return Math.abs(hash).toString(16);
@@ -108,7 +108,7 @@ export class DeviceFingerprinter {
     fingerprint?: string;
   }> {
     const deviceId = this.generateDeviceId();
-    
+
     try {
       const fingerprint = await this.generateFingerprint();
       return {
@@ -116,7 +116,7 @@ export class DeviceFingerprinter {
         userAgent: navigator.userAgent,
         language: navigator.language,
         platform: navigator.platform,
-        fingerprint
+        fingerprint,
       };
     } catch (error) {
       Logger.warn('生成设备指纹失败:', { error: String(error) });
@@ -124,7 +124,7 @@ export class DeviceFingerprinter {
         deviceId,
         userAgent: navigator.userAgent,
         language: navigator.language,
-        platform: navigator.platform
+        platform: navigator.platform,
       };
     }
   }

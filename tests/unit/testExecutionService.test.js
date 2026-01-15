@@ -3,13 +3,13 @@
  */
 
 const { describe, it, expect, beforeEach, afterEach } = require('@jest/globals');
-const EnhancedTestExecutionService = require('../../backend/services/testing/enhancedTestExecutionService');
+const TestExecutionService = require('../../backend/services/testing/TestExecutionService');
 
-describe('EnhancedTestExecutionService', () => {
+describe('TestExecutionService', () => {
   let testService;
 
   beforeEach(() => {
-    testService = new EnhancedTestExecutionService();
+    testService = new TestExecutionService();
   });
 
   afterEach(() => {

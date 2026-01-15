@@ -3,16 +3,14 @@
  * 提供完整的性能监控、告警和仪表板功能
  */
 
-import BaseService from '../services/BaseService.enhanced.js';
+import BaseService from '../services/BaseService..js';
 import MetricCollector from './MetricCollector.js';
-import { ErrorCode } from '../errors/ErrorTypes.js';
-import { 
-  MetricCategory, 
-  TimeWindow, 
-  AlertLevel, 
-  AlertRuleType,
-  PredefinedAlertRules,
-  PredefinedMetrics 
+import {
+    AlertLevel,
+    MetricCategory,
+    PredefinedAlertRules,
+    PredefinedMetrics,
+    TimeWindow
 } from './MetricTypes.js';
 
 /**

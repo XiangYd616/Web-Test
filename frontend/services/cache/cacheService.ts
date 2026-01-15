@@ -181,7 +181,7 @@ export class CacheService {
   public clear(): void {
     this.memoryCache.clear();
     if (this.config.enablePersistence) {
-      localStorage.removeItem('unifiedCache');
+      localStorage.removeItem('Cache');
     }
     this.resetStats();
   }
@@ -333,7 +333,7 @@ export class CacheService {
         timestamp: Date.now(),
       };
 
-      localStorage.setItem('unifiedCache', JSON.stringify(data));
+      localStorage.setItem('Cache', JSON.stringify(data));
     } catch (error) {
       Logger.warn('保存缓存到localStorage失败:', { error: String(error) });
     }
@@ -346,7 +346,7 @@ export class CacheService {
     if (!this.config.enablePersistence) return;
 
     try {
-      const saved = localStorage.getItem('unifiedCache');
+      const saved = localStorage.getItem('Cache');
       if (saved) {
         const data = JSON.parse(saved);
 

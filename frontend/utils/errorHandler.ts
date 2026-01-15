@@ -1,5 +1,5 @@
 import React from 'react';
-// import { EnhancedError, ErrorSolution } from '../components/security/EnhancedErrorDisplay';
+// import { Error, ErrorSolution } from '../components/security/ErrorDisplay';
 // 临时注释掉不存在的导入
 type AppError = any;
 type ErrorSolution = any;

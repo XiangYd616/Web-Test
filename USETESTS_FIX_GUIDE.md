@@ -15,11 +15,11 @@ import {
   TestConfig,
   TestExecution as TestResult,
 } from '@/services/api/repositories/testRepository';
-import { UnifiedTestService } from '@/services/testing/testService';
+import { TestService } from '@/services/testing/testService';
 import { useCallback, useEffect, useState } from 'react';
 
 // 创建testService实例
-const testService = new UnifiedTestService();
+const testService = new TestService();
 ```
 
 **修复为**:
@@ -173,7 +173,7 @@ setTests(prev => prev.map(t => (t.id === testId ? test : t)));
 
 ### 主要更改
 
-1. **移除**: `UnifiedTestService` 导入和实例
+1. **移除**: `TestService` 导入和实例
 2. **添加**: `testRepository` 导入
 3. **替换**: 所有 `testService.*` 调用为 `testRepository.*`
 4. **修复**: 所有 `t.testId` 为
@@ -198,7 +198,7 @@ setTests(prev => prev.map(t => (t.id === testId ? test : t)));
 修复后，确保：
 
 1. ✅ 没有 `testService` 引用
-2. ✅ 没有 `UnifiedTestService` 导入
+2. ✅ 没有 `TestService` 导入
 3. ✅ 所有 `testId` 属性改为 `id`
 4. ✅ 所有方法使用 `testRepository`
 

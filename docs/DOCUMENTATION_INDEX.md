@@ -65,7 +65,7 @@
 
 #### 统一架构
 
-- **UNIFIED_ARCHITECTURE.md** - 企业级统一架构
+- **_ARCHITECTURE.md** - 企业级统一架构
   - 统一API服务
   - 统一认证服务
   - 配置驱动

@@ -22,7 +22,7 @@ const HomePage = () => {
       title: '性能测试（增强版）',
       description: '使用Lighthouse进行全面的性能分析，包括Core Web Vitals指标',
       icon: Zap,
-      href: '/EnhancedPerformanceTest',
+      href: '/PerformanceTest',
       color: 'from-green-500 to-emerald-600',
       features: ['Core Web Vitals分析', 'Lighthouse集成', '性能评分', '优化建议'],
       badge: '新功能',
@@ -90,7 +90,7 @@ const HomePage = () => {
             </p>
             <div className="flex justify-center space-x-4">
               <Link
-                to="/EnhancedPerformanceTest"
+                to="/PerformanceTest"
                 className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 开始测试
@@ -191,7 +191,7 @@ const HomePage = () => {
             立即开始使用我们的增强版性能测试工具，获得详细的Core Web Vitals分析
           </p>
           <Link
-            to="/EnhancedPerformanceTest"
+            to="/PerformanceTest"
             className="inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg font-medium hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             立即体验增强版性能测试

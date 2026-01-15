@@ -230,7 +230,7 @@ refactor: remove duplicate JS files and update imports to use TS versions
 
 4. **合并重复的中间件**
    - `backend/middleware/cache.js` + `cacheMiddleware.js`
-   - `backend/middleware/errorHandler.js` + `unifiedErrorHandler.js`
+   - `backend/middleware/errorHandler.js` + `ErrorHandler.js`
 
 5. **整理 backend 路由**
    - 合并 56 个路由文件到 15-20 个模块化路由

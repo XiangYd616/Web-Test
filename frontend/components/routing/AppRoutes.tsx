@@ -173,7 +173,7 @@ const AppRoutes: React.FC = () => {
             </LazyPageWrapper>
           }
         />
-        <Route path="UnifiedStressTest" element={<Navigate to="/stress-test" replace />} />
+        <Route path="StressTest" element={<Navigate to="/stress-test" replace />} />
         <Route
           path="compatibility-test"
           element={

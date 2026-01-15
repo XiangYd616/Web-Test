@@ -113,17 +113,17 @@ class SeoTestEngine {
       };
 
       // 扩展的检查列表，包含新功能
-      const enhancedChecks = [
+      const Checks = [
         ...validatedConfig.checks,
         'mobile',      // 移动端优化
         'content'      // 内容质量
       ];
       
-      const progressStep = 75 / enhancedChecks.length;
+      const progressStep = 75 / Checks.length;
       let currentProgress = 15;
 
       // 执行各项SEO检查
-      for (const check of enhancedChecks) {
+      for (const check of Checks) {
         this.updateTestProgress(testId, currentProgress, `执行${check}检查`);
         
         switch (check) {
@@ -758,7 +758,7 @@ class SeoTestEngine {
       level: this.getSEOLevel(finalScore),
       breakdown: this.getScoreBreakdown(checks, weights),
       competitiveness: this.calculateCompetitiveness(finalScore),
-      recommendations: this.generateEnhancedRecommendations(checks)
+      recommendations: this.generateRecommendations(checks)
     };
     
     return scoringDetails;
@@ -804,7 +804,7 @@ class SeoTestEngine {
   /**
    * 生成增强的优化建议
    */
-  generateEnhancedRecommendations(checks) {
+  generateRecommendations(checks) {
     const recommendations = [];
     const actionableItems = [];
     const quickWins = [];

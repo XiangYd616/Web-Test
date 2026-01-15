@@ -1,6 +1,6 @@
 /**
  * Database Connection Manager
- * Enhanced database connection management with pooling, health checks, and monitoring
+ *  database connection management with pooling, health checks, and monitoring
  */
 
 const { Pool } = require('pg');
