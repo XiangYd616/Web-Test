@@ -6,9 +6,11 @@
  * modern styling and responsive design.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { PageLayout, PageLayoutProps } from '../common/Layout';
+import TopNavbar from '../modern/TopNavbar';
+import Sidebar from './Sidebar';
 
 interface ModernLayoutProps extends Omit<PageLayoutProps, 'children'> {
   showHeader?: boolean;
@@ -16,17 +18,37 @@ interface ModernLayoutProps extends Omit<PageLayoutProps, 'children'> {
 }
 
 const Layout: React.FC<ModernLayoutProps> = ({
-  showHeader = false,
+  showHeader = true,
   showFooter = false,
   background = 'default',
   maxWidth = 'full',
   ...props
 }) => {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const handleToggleSidebar = () => {
+    setSidebarCollapsed(prev => !prev);
+  };
+
   return (
-    <PageLayout background={background} maxWidth={maxWidth} className="min-h-screen" {...props}>
-      {/* Main Content Area */}
-      <div className="flex-1">
-        <Outlet />
+    <PageLayout
+      background={background}
+      maxWidth={maxWidth}
+      className="h-screen overflow-hidden"
+      {...props}
+    >
+      <div className="flex h-full">
+        <Sidebar collapsed={sidebarCollapsed} onToggle={handleToggleSidebar} />
+
+        <div className="flex-1 flex flex-col min-h-0">
+          {showHeader && (
+            <TopNavbar sidebarCollapsed={sidebarCollapsed} onToggleSidebar={handleToggleSidebar} />
+          )}
+
+          <div className="main-content flex-1 overflow-y-auto">
+            <Outlet />
+          </div>
+        </div>
       </div>
 
       {/* Optional Footer */}

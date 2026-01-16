@@ -417,11 +417,49 @@ class BackgroundTestManager {
 
   // 执行SEO测试
   private async executeSEOTest(testInfo: TestInfo): Promise<void> {
-    // SEO测试现在使用前端实现，不再需要后端API
-    this.handleTestError(
-      testInfo.id,
-      new Error('SEO测试已迁移到专用的SEO测试页面，请使用SEO测试功能')
-    );
+    const { config } = testInfo;
+    const { url, ...options } = (config || {}) as Record<string, any>;
+
+    this.updateTestProgress(testInfo.id, 10, '🔍 正在准备SEO测试...');
+
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/test/seo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: JSON.stringify({
+          url,
+          options,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      this.updateTestProgress(testInfo.id, 40, '📊 正在分析SEO数据...');
+
+      const data = await response.json();
+      const responsePayload = data?.data || data?.results || data;
+      const innerPayload = responsePayload?.data || responsePayload?.results || responsePayload;
+      const testResult = innerPayload?.data || innerPayload;
+      const isSuccessful =
+        (data.success || data.status === 'completed') &&
+        responsePayload?.success !== false &&
+        innerPayload?.success !== false;
+
+      if (isSuccessful) {
+        this.completeTest(testInfo.id, testResult);
+      } else {
+        throw new Error(
+          responsePayload?.error || responsePayload?.message || data.message || 'SEO测试失败'
+        );
+      }
+    } catch (error) {
+      this.handleTestError(testInfo.id, error as Error);
+    }
   }
 
   // 执行兼容性测试

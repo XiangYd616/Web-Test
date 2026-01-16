@@ -40,7 +40,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
 }) => {
   return (
     <div className={`${backgroundClasses[background]} ${className}`}>
-      <div className={`${maxWidthClasses[maxWidth]} mx-auto`}>{children}</div>
+      <div className={`${maxWidthClasses[maxWidth]} mx-auto h-full`}>{children}</div>
     </div>
   );
 };

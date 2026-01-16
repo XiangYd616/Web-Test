@@ -21,13 +21,20 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
-import SEOReportGenerator from '../components/seo/SEOReportGenerator';
+import SEOReportGenerator, {
+  type SEOReportGeneratorHandle,
+} from '../components/seo/SEOReportGenerator';
 import SEOResultVisualization from '../components/seo/SEOResultVisualization';
 import StructuredDataAnalyzer from '../components/seo/StructuredDataAnalyzer';
 import { URLInput } from '../components/ui';
+import { useTestProgress } from '../hooks/useTestProgress';
+import { useUserStats } from '../hooks/useUserStats';
+import type { TestInfo } from '../services/backgroundTestManager';
+import backgroundTestManager from '../services/backgroundTestManager';
 import type {} from '../types';
+import { formatScore } from '../utils/formatters';
 // import FileUploadSEO from '../components/seo/FileUploadSEO';
 
 // 临时FileUploadSEO组件实现
@@ -56,6 +63,186 @@ const FileUploadSEO = ({
   </div>
 );
 type SEOTestMode = TestMode;
+const ResultsPanel = ({
+  title,
+  result,
+  results,
+  onExport,
+}: {
+  title: string;
+  result?: any;
+  results?: any;
+  onExport?: (format: string) => Promise<void>;
+}) => {
+  const data = results || result;
+  if (!data) return null;
+
+  const details = data.details || data?.contentQuality?.details;
+  const metadata = data.metadata || {};
+  const titleText = details?.title?.text || metadata.title || '未检测';
+  const metaText = details?.metaDescription?.text || metadata.description || '未检测';
+  const titleLength = details?.title?.length;
+  const metaLength = details?.metaDescription?.length;
+  const headings = details?.headings || data?.contentQuality?.headings;
+  const images = details?.images || data?.contentQuality?.images;
+  const links = details?.links || data?.contentQuality?.links;
+  const imageAltRatio =
+    images?.total && images?.withAlt
+      ? Math.round((images.withAlt / Math.max(images.total, 1)) * 100)
+      : null;
+  const issues = Array.isArray(data.issues) ? data.issues : [];
+  const recommendations = Array.isArray(data.recommendations) ? data.recommendations : [];
+
+  const issueItems = issues.map((issue: any) => {
+    if (typeof issue === 'string') {
+      return {
+        message: issue,
+        severity: 'medium',
+        impact: 'medium',
+      };
+    }
+
+    return {
+      message: issue?.message || issue?.description || issue?.title || String(issue),
+      severity: issue?.severity || issue?.impact || 'medium',
+      impact: issue?.impact || issue?.severity || 'medium',
+    };
+  });
+
+  const severityClass = (severity?: string) => {
+    switch (severity) {
+      case 'high':
+        return 'bg-red-500/20 text-red-300 border-red-500/30';
+      case 'low':
+        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      default:
+        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        {onExport && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onExport('pdf')}
+              className="px-3 py-1.5 text-xs font-medium rounded-md bg-green-500/20 border border-green-500/30 text-green-300 hover:bg-green-500/30"
+            >
+              导出PDF
+            </button>
+            <button
+              type="button"
+              onClick={() => onExport('json')}
+              className="px-3 py-1.5 text-xs font-medium rounded-md bg-blue-500/20 border border-blue-500/30 text-blue-300 hover:bg-blue-500/30"
+            >
+              导出JSON
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-lg border border-gray-700/60 bg-gray-900/60 p-4">
+          <div className="text-xs text-gray-400">Title 标签</div>
+          <div className="mt-2 text-sm text-white break-words">{titleText}</div>
+          {titleLength !== undefined && (
+            <div className="mt-1 text-xs text-gray-500">长度 {titleLength} 字符</div>
+          )}
+        </div>
+        <div className="rounded-lg border border-gray-700/60 bg-gray-900/60 p-4">
+          <div className="text-xs text-gray-400">Meta Description</div>
+          <div className="mt-2 text-sm text-white break-words">{metaText}</div>
+          {metaLength !== undefined && (
+            <div className="mt-1 text-xs text-gray-500">长度 {metaLength} 字符</div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-lg border border-gray-700/60 bg-gray-900/60 p-4">
+          <div className="text-xs text-gray-400">标题结构</div>
+          <div className="mt-2 flex items-center justify-between text-sm">
+            <span className="text-gray-400">H1</span>
+            <span className="text-white">{headings?.h1 ?? 0}</span>
+          </div>
+          <div className="mt-1 flex items-center justify-between text-sm">
+            <span className="text-gray-400">H2</span>
+            <span className="text-white">{headings?.h2 ?? 0}</span>
+          </div>
+          <div className="mt-1 flex items-center justify-between text-sm">
+            <span className="text-gray-400">H3</span>
+            <span className="text-white">{headings?.h3 ?? 0}</span>
+          </div>
+        </div>
+        <div className="rounded-lg border border-gray-700/60 bg-gray-900/60 p-4">
+          <div className="text-xs text-gray-400">图片优化</div>
+          <div className="mt-2 flex items-center justify-between text-sm">
+            <span className="text-gray-400">总数</span>
+            <span className="text-white">{images?.total ?? 0}</span>
+          </div>
+          <div className="mt-1 flex items-center justify-between text-sm">
+            <span className="text-gray-400">Alt 完整率</span>
+            <span className="text-white">
+              {imageAltRatio !== null ? `${imageAltRatio}%` : '未检测'}
+            </span>
+          </div>
+        </div>
+        <div className="rounded-lg border border-gray-700/60 bg-gray-900/60 p-4">
+          <div className="text-xs text-gray-400">链接结构</div>
+          <div className="mt-2 flex items-center justify-between text-sm">
+            <span className="text-gray-400">内部链接</span>
+            <span className="text-white">{links?.internal ?? 0}</span>
+          </div>
+          <div className="mt-1 flex items-center justify-between text-sm">
+            <span className="text-gray-400">外部链接</span>
+            <span className="text-white">{links?.external ?? 0}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-gray-700/60 bg-gray-900/60 p-4">
+        <div className="text-sm font-medium text-white mb-3">发现的问题</div>
+        {issueItems.length === 0 ? (
+          <div className="text-sm text-gray-400">暂无明显问题</div>
+        ) : (
+          <ul className="space-y-2">
+            {issueItems.map((issue, index) => (
+              <li key={`${issue.message}-${index}`} className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 px-2 py-0.5 text-xs rounded-full border ${severityClass(
+                    issue.severity
+                  )}`}
+                >
+                  {issue.severity === 'high' ? '高' : issue.severity === 'low' ? '低' : '中'}
+                </span>
+                <span className="text-sm text-gray-200">{issue.message}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="rounded-lg border border-gray-700/60 bg-gray-900/60 p-4">
+        <div className="text-sm font-medium text-white mb-3">优化建议</div>
+        {recommendations.length === 0 ? (
+          <div className="text-sm text-gray-400">暂无建议</div>
+        ) : (
+          <ul className="space-y-2 list-disc list-inside text-sm text-gray-200">
+            {recommendations.map((rec: string, index: number) => (
+              <li key={`${rec}-${index}`} className="leading-relaxed">
+                {rec}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // 临时组件实现
 const LocalSEOResults = ({
   result,
@@ -66,19 +253,7 @@ const LocalSEOResults = ({
   results?: any;
   onExport?: (format: string) => Promise<void>;
 }) => (
-  <div className="bg-white rounded-lg shadow p-6">
-    <h3 className="text-lg font-semibold mb-4">本地SEO测试结果</h3>
-    <p className="text-gray-600">本地SEO结果展示功能开发中...</p>
-    {onExport && (
-      <button
-        type="button"
-        onClick={() => onExport('pdf')}
-        className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
-        导出报告
-      </button>
-    )}
-  </div>
+  <ResultsPanel title="本地SEO测试结果" result={result} results={results} onExport={onExport} />
 );
 
 const NetworkErrorPrompt = ({
@@ -122,21 +297,7 @@ const SEOResults = ({
   result?: any;
   results?: any;
   onExport?: (format: string) => Promise<void>;
-}) => (
-  <div className="bg-white rounded-lg shadow p-6">
-    <h3 className="text-lg font-semibold mb-4">SEO测试结果</h3>
-    <p className="text-gray-600">SEO结果展示功能开发中...</p>
-    {onExport && (
-      <button
-        type="button"
-        onClick={() => onExport('pdf')}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        导出报告
-      </button>
-    )}
-  </div>
-);
+}) => <ResultsPanel title="SEO测试结果" result={result} results={results} onExport={onExport} />;
 
 // CSS样式已迁移到组件库中
 
@@ -145,101 +306,6 @@ const SEOResults = ({
 // 使用 TestStatus 替代本地的 TestStatusType
 
 type TestMode = 'standard' | 'comprehensive' | 'online' | 'local';
-
-// 增强的SEO测试Hook实现
-const useSEOTest = () => {
-  const [currentMode, setCurrentMode] = useState<TestMode>('standard');
-  const [isRunning, setIsRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [results, setResults] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [advancedResults, setAdvancedResults] = useState<{
-    structuredData?: any;
-    mobileSEO?: any;
-    coreWebVitals?: any;
-  }>({});
-
-  const startTest = async (config: any) => {
-    setIsRunning(true);
-    setProgress(0);
-    setError(null);
-    setAdvancedResults({});
-
-    try {
-      // 基础SEO测试
-      setProgress(20);
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // 结构化数据分析（如果启用）
-      if (config.checkStructuredData) {
-        setProgress(40);
-        // 这里应该调用实际的结构化数据分析
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setAdvancedResults(prev => ({
-          ...prev,
-          structuredData: { totalItems: 3, validItems: 2, overallScore: 75 },
-        }));
-      }
-
-      // 移动SEO分析（如果启用）
-      if (config.checkMobileFriendly) {
-        setProgress(60);
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setAdvancedResults(prev => ({
-          ...prev,
-          mobileSEO: { overallScore: 82, viewport: { isOptimal: true } },
-        }));
-      }
-
-      // Core Web Vitals分析（如果启用）
-      if (config.checkCoreWebVitals) {
-        setProgress(80);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setAdvancedResults(prev => ({
-          ...prev,
-          coreWebVitals: { overallRating: 'good', metrics: { lcp: 2100, fid: 89, cls: 0.08 } },
-        }));
-      }
-
-      setProgress(100);
-      setResults({
-        score: 85,
-        issues: [
-          { type: 'warning', title: '示例警告', description: '这是一个示例警告' },
-          { type: 'info', title: '示例信息', description: '这是一个示例信息' },
-        ],
-        recommendations: [
-          { priority: 'high', title: '示例建议', description: '这是一个高优先级建议' },
-        ],
-      });
-    } catch (err) {
-      setError('测试失败: ' + (err as Error).message);
-    } finally {
-      setIsRunning(false);
-    }
-  };
-
-  const stopTest = () => {
-    setIsRunning(false);
-    setProgress(0);
-  };
-
-  const switchMode = (mode: TestMode) => {
-    setCurrentMode(mode);
-  };
-
-  return {
-    currentMode,
-    isRunning,
-    progress,
-    results,
-    error,
-    advancedResults,
-    startTest,
-    stopTest,
-    switchMode,
-  };
-};
 
 // 临时类型定义
 interface SeoTestConfig {
@@ -301,17 +367,12 @@ const SEOTest: React.FC = () => {
     description: '使用SEO分析功能',
   });
 
-  // 统一SEO测试（支持在线和本地）
-  const {
-    currentMode,
-    isRunning,
-    progress: testProgress,
-    results: testResults,
-    error: testError,
-    startTest: startSeoTest,
-    stopTest: stopSeoTest,
-    switchMode,
-  } = useSEOTest();
+  const { recordTestCompletion } = useUserStats();
+
+  const [results, setResults] = useState<any>(null);
+  const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState('准备就绪');
+  const [currentTestId, setCurrentTestId] = useState<string | null>(null);
 
   const [testConfig, setTestConfig] = useState<LocalSEOTestConfig>({
     url: '',
@@ -341,33 +402,110 @@ const SEOTest: React.FC = () => {
   const [seoTestMode, setSeoTestMode] = useState<SEOTestMode>('online');
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const isRunning = testStatus === 'running' || testStatus === 'starting';
+  const reportGeneratorRef = useRef<SEOReportGeneratorHandle | null>(null);
 
   // 新增高级UI状态
   const [activeTab, setActiveTab] = useState<'test' | 'results' | 'visualization' | 'reports'>(
     'test'
   );
-  const [showStructuredDataAnalyzer, setShowStructuredDataAnalyzer] = useState(false);
-  const [reportData, setReportData] = useState<any>(null);
-  const [visualizationData, setVisualizationData] = useState<any>(null);
+  const resolvedScore = useMemo(() => {
+    if (!results) return 0;
+    return typeof results.score === 'number'
+      ? results.score
+      : typeof results.overallScore === 'number'
+        ? results.overallScore
+        : 0;
+  }, [results]);
 
-  // 使用统一SEO测试的状态
-  const progress = testProgress || 0;
-  const currentStep = isRunning ? '正在分析...' : '准备就绪';
-  const results = testResults;
+  const resolvedGrade = useMemo(() => {
+    if (!results) return 'F';
+    return results.grade || formatScore(resolvedScore).grade;
+  }, [results, resolvedScore]);
 
-  // 监听统一SEO测试状态变化，同步更新testStatus
+  const { progress: apiProgress } = useTestProgress(currentTestId || undefined, {
+    onProgress: progressData => {
+      setProgress(progressData.progress || 0);
+      setCurrentStep(progressData.message || '正在分析...');
+      setTestStatus('running');
+    },
+    onComplete: resultData => {
+      const normalizedResult = normalizeSeoResult(resultData);
+      setResults(normalizedResult);
+      setTestStatus('completed');
+      setProgress(100);
+      setCurrentStep('分析完成');
+      recordTestCompletion(
+        'SEO分析',
+        true,
+        normalizedResult?.score || normalizedResult?.overallScore || 0,
+        normalizedResult?.duration || 30
+      );
+    },
+    onError: errorMessage => {
+      setError(errorMessage);
+      setTestStatus('failed');
+      setCurrentStep('');
+    },
+  });
+
   useEffect(() => {
-    if (!isRunning && testStatus === 'running') {
-      // 如果有结果，说明测试完成；如果有错误，说明测试失败
-      if (results) {
-        setTestStatus('completed');
-      } else if (testError) {
-        setTestStatus('failed');
-      } else {
-        setTestStatus('idle');
+    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: TestInfo) => {
+      if (testInfo.type === 'seo' && testInfo.id === currentTestId) {
+        switch (event) {
+          case 'testProgress':
+            setProgress(testInfo.progress || 0);
+            setCurrentStep(testInfo.currentStep || '正在分析...');
+            setTestStatus('running');
+            break;
+          case 'testCompleted': {
+            const normalizedResult = normalizeSeoResult(testInfo.result);
+            setResults(normalizedResult);
+            setTestStatus('completed');
+            setProgress(100);
+            setCurrentStep('分析完成');
+            setCurrentTestId(null);
+            if (normalizedResult) {
+              recordTestCompletion(
+                'SEO分析',
+                normalizedResult.success !== false,
+                normalizedResult.score || normalizedResult.overallScore || 0,
+                normalizedResult.duration || 30
+              );
+            }
+            break;
+          }
+          case 'testFailed':
+            setError(testInfo.error || '测试失败');
+            setTestStatus('failed');
+            setCurrentStep('');
+            setCurrentTestId(null);
+            break;
+          case 'testCancelled':
+            setTestStatus('idle');
+            setCurrentStep('准备就绪');
+            setProgress(0);
+            setError('');
+            setCurrentTestId(null);
+            break;
+        }
+      }
+    });
+
+    const runningTests = backgroundTestManager.getRunningTests();
+    const seoTest = runningTests.find(test => test.type === 'seo');
+    if (seoTest) {
+      setCurrentTestId(seoTest.id);
+      setTestStatus('running');
+      setProgress(seoTest.progress || 0);
+      setCurrentStep(seoTest.currentStep || '正在分析...');
+      if (seoTest.result) {
+        setResults(seoTest.result);
       }
     }
-  }, [isRunning, testStatus, results, testError]);
+
+    return unsubscribe;
+  }, [currentTestId, recordTestCompletion]);
 
   // 扩展的SEO检测项目 - 包含核心和高级检测功能
   const seoTests = [
@@ -507,72 +645,164 @@ const SEOTest: React.FC = () => {
     },
   ];
 
+  const normalizeSeoResult = (rawResult: any) => {
+    if (!rawResult) return rawResult;
+    let normalized = rawResult?.data || rawResult?.results || rawResult?.result || rawResult;
+    if (normalized?.success && normalized?.data) {
+      normalized = normalized.data;
+    }
+    if (normalized?.data || normalized?.results || normalized?.result) {
+      normalized = normalized?.data || normalized?.results || normalized?.result;
+    }
+
+    const resolvedScoreValue =
+      typeof normalized?.score === 'number'
+        ? normalized.score
+        : typeof normalized?.overallScore === 'number'
+          ? normalized.overallScore
+          : 0;
+
+    const detailsFromContent = normalized?.contentQuality
+      ? {
+          title: normalized?.contentQuality?.titleTag
+            ? {
+                text: normalized?.contentQuality?.titleTag,
+                length: normalized?.contentQuality?.titleTag.length,
+              }
+            : undefined,
+          metaDescription: normalized?.contentQuality?.metaDescription
+            ? {
+                text: normalized?.contentQuality?.metaDescription,
+                length: normalized?.contentQuality?.metaDescription.length,
+              }
+            : undefined,
+          headings: normalized?.contentQuality?.headings,
+          images: normalized?.contentQuality?.images,
+          links: normalized?.contentQuality?.links,
+        }
+      : undefined;
+    const details =
+      normalized?.details || normalized?.contentQuality?.details || detailsFromContent;
+    const metadata =
+      normalized?.metadata ||
+      normalized?.contentQuality?.metadata ||
+      normalized?.details?.metadata ||
+      (details
+        ? {
+            title: details?.title?.text,
+            description: details?.metaDescription?.text,
+          }
+        : undefined);
+
+    const { grade } = formatScore(resolvedScoreValue);
+    const issueSource = Array.isArray(normalized?.issues)
+      ? normalized.issues
+      : Array.isArray(normalized?.warnings)
+        ? normalized.warnings
+        : Array.isArray(normalized?.errors)
+          ? normalized.errors
+          : [];
+    const issues = issueSource.map((issue: any) => {
+      if (typeof issue === 'string') {
+        return {
+          type: 'issue',
+          severity: 'medium',
+          impact: 'medium',
+          message: issue,
+        };
+      }
+
+      return {
+        type: issue?.type || issue?.title || 'issue',
+        severity: issue?.severity || issue?.impact || 'medium',
+        impact: issue?.impact || issue?.severity || 'medium',
+        message: issue?.message || issue?.description || issue?.title || String(issue),
+      };
+    });
+
+    const recommendations = Array.isArray(normalized?.recommendations)
+      ? normalized.recommendations
+      : Array.isArray(normalized?.suggestions)
+        ? normalized.suggestions
+        : [];
+
+    return {
+      ...normalized,
+      score: resolvedScoreValue,
+      grade: normalized?.grade || grade,
+      details,
+      metadata,
+      issues,
+      recommendations,
+    };
+  };
+
   const handleStartTest = async () => {
-    // 检查登录状态
     if (!requireLogin()) {
       return;
     }
 
-    // 验证输入
     if (seoTestMode === 'online' && !testConfig.url) {
       setError('请输入要分析的URL');
       return;
     }
 
-    if (seoTestMode === 'local' && uploadedFiles.length === 0) {
-      setError('请上传要分析的HTML文件');
+    if (seoTestMode === 'local') {
+      setError('本地分析暂不支持，请使用在线分析模式。');
+      setTestStatus('failed');
       return;
     }
 
-    // 登录检查已在函数开始处处理
-
     try {
       setError('');
+      setResults(null);
+      setProgress(0);
+      setCurrentStep('正在初始化SEO分析...');
       setTestStatus('starting');
 
-      // 使用统一SEO测试
-      if (seoTestMode === 'online') {
-        await startSeoTest({
-          mode: 'online',
-          online: {
-            url: testConfig.url,
-            keywords: testConfig.keywords,
-            checkTechnicalSEO: testConfig.checkTechnicalSEO,
-            checkContentQuality: testConfig.checkContentQuality,
-            checkAccessibility: testConfig.checkAccessibility,
-            checkPerformance: testConfig.checkPerformance,
-            checkMobileFriendly: testConfig.checkMobileFriendly,
-            checkSocialMedia: testConfig.checkSocialMedia,
-            checkStructuredData: testConfig.checkStructuredData,
-            checkSecurity: testConfig.checkSecurity,
-            depth: testConfig.mode === 'comprehensive' ? 'comprehensive' : 'standard',
-          },
-        });
-      } else {
-        await startSeoTest({
-          mode: 'local',
-          local: {
-            files: uploadedFiles,
-            keywords: testConfig.keywords,
-            checkTechnicalSEO: testConfig.checkTechnicalSEO,
-            checkContentQuality: testConfig.checkContentQuality,
-            checkAccessibility: testConfig.checkAccessibility,
-            checkPerformance: testConfig.checkPerformance,
-            checkMobileFriendly: testConfig.checkMobileFriendly,
-            checkSocialMedia: testConfig.checkSocialMedia,
-            checkStructuredData: testConfig.checkStructuredData,
-            checkSecurity: testConfig.checkSecurity,
-            depth: testConfig.mode === 'comprehensive' ? 'comprehensive' : 'standard',
-          },
-        });
-      }
+      const testConfigData = {
+        url: testConfig.url,
+        keywords: testConfig.keywords,
+        depth: testConfig.mode === 'comprehensive' ? 'comprehensive' : 'standard',
+        includeTechnical: testConfig.checkTechnicalSEO,
+        includeContent: testConfig.checkContentQuality,
+        includeMobile: testConfig.checkMobileFriendly,
+        includeStructuredData: testConfig.checkStructuredData,
+        includeCoreWebVitals: testConfig.checkCoreWebVitals,
+        includeSocialMedia: testConfig.checkSocialMedia,
+        includePageSpeed: testConfig.checkPageSpeed,
+        includeVisualization: testConfig.includeVisualization,
+      };
 
+      const backupTestId = backgroundTestManager.startTest(
+        'seo' as any,
+        testConfigData,
+        (_: number, step?: string) => {
+          if (step) setCurrentStep(step);
+          setTestStatus('running');
+        },
+        (result: any) => {
+          if (!apiProgress || apiProgress.status !== 'completed') {
+            setResults(normalizeSeoResult(result));
+            setProgress(100);
+            setCurrentStep('分析完成');
+            setTestStatus('completed');
+          }
+        },
+        (testError: string | Error) => {
+          const errorMessage = typeof testError === 'string' ? testError : testError.message;
+          setError(errorMessage || 'SEO分析启动失败');
+          setTestStatus('failed');
+          setCurrentStep('');
+        }
+      );
+
+      setCurrentTestId(backupTestId);
       setTestStatus('running');
-      Logger.debug(`✅ ${seoTestMode === 'online' ? 'Online' : 'Local'} SEO test started`);
+      Logger.debug('✅ SEO test started');
     } catch (err: any) {
       Logger.error('❌ Failed to start SEO test:', err);
 
-      // 提供更友好的错误信息
       let errorMessage = 'SEO分析启动失败';
       if (err.message) {
         if (err.message.includes('CORS')) {
@@ -601,15 +831,16 @@ const SEOTest: React.FC = () => {
     }
   };
 
-  const handleStopTest = async () => {
-    try {
-      await stopSeoTest();
-      setTestStatus('idle');
-      setError('');
-      Logger.debug('✅ SEO test stopped');
-    } catch (err) {
-      Logger.error('Failed to stop test:', err);
+  const handleStopTest = () => {
+    if (currentTestId) {
+      backgroundTestManager.cancelTest(currentTestId);
+      setCurrentTestId(null);
     }
+    setTestStatus('idle');
+    setProgress(0);
+    setCurrentStep('准备就绪');
+    setError('');
+    Logger.debug('✅ SEO test stopped');
   };
 
   const handleTestTypeChange = (testKey: keyof SeoTestConfig) => {
@@ -628,7 +859,6 @@ const SEOTest: React.FC = () => {
       }
 
       setSeoTestMode(mode);
-      await switchMode(mode as TestMode);
       setError('');
 
       // 清除相关状态
@@ -667,135 +897,18 @@ const SEOTest: React.FC = () => {
     if (!results) return;
 
     try {
-      // 生成报告内容
-      const reportData = {
-        title: `SEO分析报告 - ${testConfig.url}`,
-        url: testConfig.url,
-        timestamp: new Date().toISOString(),
-        score: results?.score,
-        grade: results?.grade,
-        results,
-      };
-
-      // 根据格式导出
-      switch (format) {
-        case 'pdf':
-          // 生成HTML内容并打印为PDF
-          const htmlContent = generateHTMLReport(reportData);
-          const printWindow = window.open('', '_blank');
-          if (printWindow) {
-            printWindow.document.open();
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-              printWindow.print();
-            }, 500);
-          }
-          break;
-        case 'json':
-          // 导出JSON格式
-          const jsonContent = JSON.stringify(reportData, null, 2);
-          const jsonBlob = new Blob([jsonContent], { type: 'application/json' });
-          const jsonUrl = URL.createObjectURL(jsonBlob);
-          const jsonLink = document.createElement('a');
-          jsonLink.href = jsonUrl;
-          jsonLink.download = `seo-report-${Date.now()}.json`;
-          document.body.appendChild(jsonLink);
-          jsonLink.click();
-          document.body.removeChild(jsonLink);
-          URL.revokeObjectURL(jsonUrl);
-          break;
-        default:
-          Logger.warn('不支持的导出格式', { format });
+      const exportFormat =
+        format === 'pdf' || format === 'json' || format === 'html' ? format : 'pdf';
+      if (!reportGeneratorRef.current) {
+        setError('报告生成模块尚未就绪，请稍后重试。');
+        return;
       }
+
+      await reportGeneratorRef.current.exportReport(exportFormat);
     } catch (error) {
       Logger.error('导出报告失败:', error);
       setError('导出报告失败，请重试');
     }
-  };
-
-  const generateHTMLReport = (reportData: any) => {
-    return `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${reportData.title}</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e5e7eb; padding-bottom: 20px; }
-        .title { font-size: 24px; font-weight: bold; color: #1f2937; margin-bottom: 10px; }
-        .url { color: #6b7280; font-size: 14px; }
-        .score-section { display: flex; justify-content: center; align-items: center; margin: 30px 0; }
-        .score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; color: white; }
-        .grade-a { background: linear-gradient(135deg, #10b981, #059669); }
-        .grade-b { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .grade-c { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .grade-d { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .grade-f { background: linear-gradient(135deg, #7c2d12, #991b1b); }
-        .section { margin: 20px 0; }
-        .section-title { font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 15px; border-left: 4px solid #3b82f6; padding-left: 12px; }
-        .metric { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
-        .metric:last-child { border-bottom: none; }
-        .metric-name { font-weight: 500; color: #374151; }
-        .metric-value { font-weight: bold; }
-        .score-good { color: #10b981; }
-        .score-medium { color: #f59e0b; }
-        .score-poor { color: #ef4444; }
-        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
-        @media print { body { background: white; } .container { box-shadow: none; } }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="title">${reportData.title}</div>
-            <div class="url">${reportData.url}</div>
-            <div style="color: #6b7280; font-size: 12px; margin-top: 10px;">
-                生成时间: ${new Date(reportData.timestamp).toLocaleString('zh-CN')}
-            </div>
-        </div>
-
-        <div class="score-section">
-            <div class="score-circle grade-${reportData.grade.toLowerCase()}">
-                ${reportData.score}/100
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">各模块评分</div>
-            ${Object.entries({
-              技术SEO: reportData.results.technicalSEO?.score || 0,
-              内容质量: reportData.results.contentQuality?.score || 0,
-              可访问性: reportData.results.accessibility?.score || 0,
-              性能表现: reportData.results.performance?.score || 0,
-              移动友好: reportData.results.mobileFriendly?.score || 0,
-              社交媒体: reportData.results.socialMedia?.score || 0,
-              结构化数据: reportData.results.structuredData?.score || 0,
-              安全配置: reportData.results.security?.score || 0,
-            })
-              .map(
-                ([name, score]) => `
-                <div class="metric">
-                    <span class="metric-name">${name}</span>
-                    <span class="metric-value ${score >= 80 ? 'score-good' : score >= 60 ? 'score-medium' : 'score-poor'}">${score}/100</span>
-                </div>
-            `
-              )
-              .join('')}
-        </div>
-
-        <div class="footer">
-            <p>本报告由Test Web SEO分析工具生成</p>
-            <p>更多功能请访问我们的网站</p>
-        </div>
-    </div>
-</body>
-</html>
-    `;
   };
 
   // 历史记录处理
@@ -1818,9 +1931,10 @@ const SEOTest: React.FC = () => {
           )}
 
           {/* 报告生成标签页 */}
-          {activeTab === 'reports' && results && (
-            <div className="space-y-6">
+          {results && (
+            <div className={activeTab === 'reports' ? 'space-y-6' : 'hidden'}>
               <SEOReportGenerator
+                ref={reportGeneratorRef}
                 reportData={{
                   basicSEO: results,
                   mobileSEO: (results as any)?.mobileSEO || {},

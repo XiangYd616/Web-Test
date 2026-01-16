@@ -1,7 +1,5 @@
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-;
-
 // 主题类型定义
 export type ThemeMode = 'light' | 'dark';
 
@@ -21,12 +19,20 @@ interface ThemeProviderProps {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   // 从localStorage获取保存的主题，默认为dark
   const [theme, setThemeState] = useState<ThemeMode>(() => {
-    const savedTheme = localStorage.getItem('theme');
-    // 如果保存的主题是 'auto'，则转换为 'dark'
-    if (savedTheme === 'auto' || !savedTheme || (savedTheme !== 'light' && savedTheme !== 'dark')) {
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      // 如果保存的主题是 'auto'，则转换为 'dark'
+      if (
+        savedTheme === 'auto' ||
+        !savedTheme ||
+        (savedTheme !== 'light' && savedTheme !== 'dark')
+      ) {
+        return 'dark';
+      }
+      return savedTheme as ThemeMode;
+    } catch {
       return 'dark';
     }
-    return savedTheme as ThemeMode;
   });
 
   // 计算实际应用的主题
@@ -34,14 +40,16 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return currentTheme;
   };
 
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>(() =>
-    getActualTheme(theme)
-  );
+  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>(() => getActualTheme(theme));
 
   // 设置主题
   const setTheme = (newTheme: ThemeMode) => {
     setThemeState(newTheme);
-    localStorage.setItem('theme', newTheme);
+    try {
+      localStorage.setItem('theme', newTheme);
+    } catch {
+      // 忽略存储不可用的情况（例如In-IDE预览沙箱）
+    }
     setActualTheme(getActualTheme(newTheme));
   };
 
@@ -84,7 +92,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       root.style.setProperty('--shadow-color', 'rgba(0, 0, 0, 0.3)');
 
       // 登录页面专用变量
-      root.style.setProperty('--gradient-primary', 'linear-gradient(135deg, #1f2937 0%, #111827 100%)');
+      root.style.setProperty(
+        '--gradient-primary',
+        'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+      );
       root.style.setProperty('--card-background', 'rgba(31, 41, 55, 0.95)');
       root.style.setProperty('--input-background', 'rgba(55, 65, 81, 0.8)');
       root.style.setProperty('--input-border', '#4b5563');
@@ -110,7 +121,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       root.style.setProperty('--shadow-color', 'rgba(15, 23, 42, 0.08)');
 
       // 登录页面专用变量 - 优化配色
-      root.style.setProperty('--gradient-primary', 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 30%, #f1f5f9 70%, #fdf2f8 100%)');
+      root.style.setProperty(
+        '--gradient-primary',
+        'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 30%, #f1f5f9 70%, #fdf2f8 100%)'
+      );
       root.style.setProperty('--card-background', 'rgba(255, 255, 255, 0.90)');
       root.style.setProperty('--input-background', 'rgba(255, 255, 255, 0.98)');
       root.style.setProperty('--input-border', '#cbd5e1');
@@ -121,11 +135,20 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       root.style.setProperty('--error-text', '#dc2626');
 
       // 新增变量
-      root.style.setProperty('--card-shadow', '0 25px 50px -12px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05)');
+      root.style.setProperty(
+        '--card-shadow',
+        '0 25px 50px -12px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05)'
+      );
       root.style.setProperty('--input-focus-ring', 'rgba(59, 130, 246, 0.20)');
       root.style.setProperty('--button-shadow', '0 10px 25px -5px rgba(59, 130, 246, 0.25)');
-      root.style.setProperty('--text-gradient', 'linear-gradient(135deg, #1e293b 0%, #475569 100%)');
-      root.style.setProperty('--link-gradient', 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)');
+      root.style.setProperty(
+        '--text-gradient',
+        'linear-gradient(135deg, #1e293b 0%, #475569 100%)'
+      );
+      root.style.setProperty(
+        '--link-gradient',
+        'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)'
+      );
     }
   }, [actualTheme]);
 
@@ -136,11 +159,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     toggleTheme,
   };
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };
 
 // 自定义Hook
