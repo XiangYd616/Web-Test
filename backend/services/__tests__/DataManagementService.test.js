@@ -3,7 +3,7 @@
  * @description 测试DataManagementService的核心功能
  */
 
-const DataManagementService = require('../DataManagementService');
+const { DataManagementService } = require('../data/DataManagementService');
 
 // Mock依赖
 jest.mock('../../config/database', () => ({

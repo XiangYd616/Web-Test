@@ -3,10 +3,11 @@
  * 使用统一的测试历史组件和布局
  */
 
+import { TestHistory } from '@/components/common/TestHistory/TestHistory';
+import { stressTestConfig } from '@/components/common/TestHistory/config';
 import { FileText } from 'lucide-react';
 import React from 'react';
 import { PageLayout } from '../components/common/Layout';
-import TestHistoryComponent from '../components/common/TestHistory';
 
 const TestHistory: React.FC = () => {
   return (
@@ -17,11 +18,7 @@ const TestHistory: React.FC = () => {
       background="dark"
       maxWidth="xl"
     >
-      <TestHistoryComponent
-        testType="all"
-        title="所有测试历史"
-        description="查看和管理您的所有测试记录"
-      />
+      <TestHistory config={stressTestConfig} />
     </PageLayout>
   );
 };

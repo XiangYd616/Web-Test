@@ -34,7 +34,7 @@ const Statistics = lazy(() => import('../../pages/Statistics'));
 const Analytics = lazy(() => import('../../pages/analytics'));
 const MonitoringDashboard = lazy(() => import('../../pages/dashboard/MonitoringDashboard'));
 // 报告和历史
-// const TestHistory = lazy(() => import('../../pages/TestHistory'));
+const TestHistory = lazy(() => import('../../pages/TestHistory'));
 const Reports = lazy(() => import('../../pages/Reports'));
 const TestResultDetail = lazy(() => import('../../pages/TestResultDetail'));
 const SecurityReport = lazy(() => import('../../pages/SecurityReport'));
@@ -227,7 +227,7 @@ const AppRoutes: React.FC = () => {
           path="test-history"
           element={
             <LazyPageWrapper>
-              <DataCenter />
+              <TestHistory />
             </LazyPageWrapper>
           }
         />

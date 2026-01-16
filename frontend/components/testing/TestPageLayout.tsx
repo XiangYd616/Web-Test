@@ -1,7 +1,9 @@
 import { LucideIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import TestHistory from '../common/TestHistory';
+import { TestHistory } from '../common/TestHistory/TestHistory';
+import type { TestRecord } from '../common/TestHistory/types';
+import { getTestHistoryConfig } from '../common/TestHistory/config';
 import TestHeader from './TestHeader';
 
 interface TestPageLayoutProps {
@@ -36,8 +38,9 @@ interface TestPageLayoutProps {
   onStopTest?: () => void;
 
   // 历史记录处理
-  onTestSelect?: (test: any) => void;
-  onTestRerun?: (test: any) => void;
+  onTestSelect?: (test: TestRecord) => void;
+  onTestRerun?: (test: TestRecord) => void;
+  onTestDelete?: (id: string) => Promise<void>;
 
   // 额外控制
   extraControls?: React.ReactNode;
@@ -67,6 +70,7 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   onStopTest,
   onTestSelect,
   onTestRerun,
+  onTestDelete,
   extraControls,
   additionalComponents,
   className = '',
@@ -156,12 +160,12 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   }, []);
 
   // 默认的历史记录处理函数
-  const handleTestSelect = (test: any) => {
+  const handleTestSelect = (test: TestRecord) => {
     setActiveTab('test');
     onTestSelect?.(test);
   };
 
-  const handleTestRerun = (test: any) => {
+  const handleTestRerun = (test: TestRecord) => {
     setActiveTab('test');
     onTestRerun?.(test);
   };
@@ -203,7 +207,7 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
           {testContent}
         </div>
 
-        {/* 历史标签页内容 */}
+        {/* 历史记录标签页 */}
         <div
           className={`transition-all duration-300 ease-in-out ${
             activeTab === 'history'
@@ -211,13 +215,20 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
               : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
           }`}
         >
-          <TestHistory
-            testType={testType}
-            onTestSelect={handleTestSelect}
-            onTestRerun={handleTestRerun}
-          />
+          {(() => {
+            const config = getTestHistoryConfig(testType);
+            if (!config) {
+              return null;
+            }
+            return (
+              <TestHistory
+                config={config}
+                onRecordClick={handleTestSelect}
+                onRecordDelete={onTestDelete}
+              />
+            );
+          })()}
         </div>
-      </div>
 
       {/* 其他组件（如登录提示等） */}
       {additionalComponents}

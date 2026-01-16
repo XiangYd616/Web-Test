@@ -4,15 +4,17 @@
  */
 
 import { TestHistoryConfig } from '../types';
-import stressTestConfig from './stressTestConfig';
-import seoTestConfig from './seoTestConfig';
-import apiTestConfig from './apiTestConfig';
-import performanceTestConfig from './performanceTestConfig';
-import securityTestConfig from './securityTestConfig';
 import accessibilityTestConfig from './accessibilityTestConfig';
+import apiTestConfig from './apiTestConfig';
 import compatibilityTestConfig from './compatibilityTestConfig';
 import databaseTestConfig from './databaseTestConfig';
 import networkTestConfig from './networkTestConfig';
+import performanceTestConfig from './performanceTestConfig';
+import securityTestConfig from './securityTestConfig';
+import seoTestConfig from './seoTestConfig';
+import stressTestConfig from './stressTestConfig';
+import uxTestConfig from './uxTestConfig';
+import websiteTestConfig from './websiteTestConfig';
 
 /**
  * 配置映射表
@@ -28,6 +30,8 @@ export const configMap: Record<string, TestHistoryConfig> = {
   compatibility: compatibilityTestConfig,
   database: databaseTestConfig,
   network: networkTestConfig,
+  ux: uxTestConfig,
+  website: websiteTestConfig,
 };
 
 /**
@@ -57,16 +61,18 @@ export function getSupportedTestTypes(): string[] {
 }
 
 // 导出配置
-export { 
-  stressTestConfig, 
-  seoTestConfig,
-  apiTestConfig,
-  performanceTestConfig,
-  securityTestConfig,
+export {
   accessibilityTestConfig,
+  apiTestConfig,
   compatibilityTestConfig,
   databaseTestConfig,
   networkTestConfig,
+  performanceTestConfig,
+  securityTestConfig,
+  seoTestConfig,
+  stressTestConfig,
+  uxTestConfig,
+  websiteTestConfig,
 };
 
 // 默认导出配置映射

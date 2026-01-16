@@ -11,6 +11,7 @@
  * - 丰富功能:分页、筛选、排序、批量操作、导出等
  */
 
+import { DeleteConfirmDialog } from '@/components/common/DeleteConfirmDialog';
 import Logger from '@/utils/logger';
 import { FileJson, FileSpreadsheet } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -30,7 +31,7 @@ import { EmptyState } from './components/EmptyState';
 import { FilterBar } from './components/FilterBar';
 import { HistoryHeader } from './components/HistoryHeader';
 import { ResponsiveTable } from './components/ResponsiveTable';
-import { useAriaLiveAnnouncer, useFocusTrap } from './hooks/useAccessibility';
+import { useAriaLiveAnnouncer } from './hooks/useAccessibility';
 import { useCommonMediaQueries } from './hooks/useResponsive';
 
 /**
@@ -60,65 +61,6 @@ const StatusBadge: React.FC<{ status: string; formatter?: (status: string) => st
   });
 
 StatusBadge.displayName = 'StatusBadge';
-
-/**
- * 删除确认对话框组件
- */
-const DeleteDialog: React.FC<{
-  state: DeleteDialogState;
-  onConfirm: () => void;
-  onCancel: () => void;
-  focusTrapRef?: React.RefObject<HTMLDivElement>;
-}> = ({ state, onConfirm, onCancel, focusTrapRef }) => {
-  if (!state.isOpen) return null;
-
-  return (
-    <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="delete-dialog-title"
-      aria-describedby="delete-dialog-description"
-    >
-      <div
-        ref={focusTrapRef}
-        className="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 border border-gray-700"
-      >
-        <h3 id="delete-dialog-title" className="text-lg font-semibold text-white mb-2">
-          确认删除
-        </h3>
-        <p id="delete-dialog-description" className="text-gray-300 mb-6">
-          {state.type === 'single'
-            ? `确定要删除测试记录 "${state.recordName}" 吗?`
-            : `确定要删除选中的 ${state.recordNames?.length || 0} 条测试记录吗?`}
-          <br />
-          <span className="text-sm text-gray-400 mt-2 block">此操作无法撤销</span>
-        </p>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onCancel}
-            disabled={state.isLoading}
-            className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50"
-          >
-            取消
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={state.isLoading}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
-          >
-            {state.isLoading && (
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            )}
-            {state.isLoading ? '删除中...' : '确认删除'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-DeleteDialog.displayName = 'DeleteDialog';
 
 /**
  * TestHistory 主组件
@@ -172,7 +114,6 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
 
   // 无障碍支持
   const { announcement, announce } = useAriaLiveAnnouncer();
-  const dialogFocusTrapRef = useFocusTrap(deleteDialogState.isOpen);
 
   // ===== 数据加载 =====
   useEffect(() => {
@@ -511,11 +452,25 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
       </div>
 
       {/* 删除确认对话框 */}
-      <DeleteDialog
-        state={deleteDialogState}
+      <DeleteConfirmDialog
+        isOpen={deleteDialogState.isOpen}
+        onClose={cancelDelete}
         onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-        focusTrapRef={dialogFocusTrapRef}
+        title="确认删除"
+        message={
+          deleteDialogState.type === 'single'
+            ? `确定要删除测试记录 "${deleteDialogState.recordName || '该测试记录'}" 吗？此操作无法撤销。`
+            : `确定要删除选中的 ${deleteDialogState.recordNames?.length || 0} 条测试记录吗？此操作无法撤销。`
+        }
+        itemNames={
+          deleteDialogState.type === 'single'
+            ? deleteDialogState.recordName
+              ? [deleteDialogState.recordName]
+              : []
+            : deleteDialogState.recordNames || []
+        }
+        isLoading={deleteDialogState.isLoading}
+        type={deleteDialogState.type}
       />
     </div>
   );

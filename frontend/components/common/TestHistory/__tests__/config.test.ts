@@ -21,11 +21,13 @@ import { performanceTestConfig } from '../config/performanceTestConfig';
 import { securityTestConfig } from '../config/securityTestConfig';
 import { seoTestConfig } from '../config/seoTestConfig';
 import { stressTestConfig } from '../config/stressTestConfig';
+import { uxTestConfig } from '../config/uxTestConfig';
+import { websiteTestConfig } from '../config/websiteTestConfig';
 
 describe('配置系统', () => {
   describe('configMap', () => {
-    it('应该包含所有9个配置', () => {
-      expect(Object.keys(configMap)).toHaveLength(9);
+    it('应该包含所有11个配置', () => {
+      expect(Object.keys(configMap)).toHaveLength(11);
     });
 
     it('应该包含所有测试类型', () => {
@@ -39,6 +41,8 @@ describe('配置系统', () => {
         'compatibility',
         'database',
         'network',
+        'ux',
+        'website',
       ];
 
       expectedTypes.forEach(type => {
@@ -70,7 +74,7 @@ describe('配置系统', () => {
       expect(config).toBeNull();
     });
 
-    it('应该返回所有9种配置', () => {
+    it('应该返回所有11种配置', () => {
       expect(getTestHistoryConfig('stress')).toBe(stressTestConfig);
       expect(getTestHistoryConfig('seo')).toBe(seoTestConfig);
       expect(getTestHistoryConfig('api')).toBe(apiTestConfig);
@@ -80,6 +84,8 @@ describe('配置系统', () => {
       expect(getTestHistoryConfig('compatibility')).toBe(compatibilityTestConfig);
       expect(getTestHistoryConfig('database')).toBe(databaseTestConfig);
       expect(getTestHistoryConfig('network')).toBe(networkTestConfig);
+      expect(getTestHistoryConfig('ux')).toBe(uxTestConfig);
+      expect(getTestHistoryConfig('website')).toBe(websiteTestConfig);
     });
   });
 
@@ -100,10 +106,12 @@ describe('配置系统', () => {
   describe('getSupportedTestTypes', () => {
     it('应该返回所有支持的测试类型', () => {
       const types = getSupportedTestTypes();
-      expect(types).toHaveLength(9);
+      expect(types).toHaveLength(11);
       expect(types).toContain('stress');
       expect(types).toContain('seo');
       expect(types).toContain('api');
+      expect(types).toContain('ux');
+      expect(types).toContain('website');
     });
   });
 });
