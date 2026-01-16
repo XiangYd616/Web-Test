@@ -128,7 +128,7 @@ const CompatibilityTest: React.FC = () => {
   const summaryStats = useMemo(() => {
     if (!result) return null;
     return {
-      overallScore: result.overallScore || result.score || 0,
+      overallScore: result.overallScore || 0,
       summary: result.summary || '兼容性测试完成',
       browserCount: result.browserResults?.length || 0,
       deviceCount: result.deviceResults?.length || 0,
@@ -199,13 +199,15 @@ const CompatibilityTest: React.FC = () => {
             </div>
 
             <div className="mt-6 space-y-4">
-              <URLInput
-                label="测试URL"
-                value={config.url}
-                onChange={value => updateConfig({ url: value })}
-                placeholder="https://example.com"
-                disabled={isRunning}
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">测试URL</label>
+                <URLInput
+                  value={config.url}
+                  onChange={e => updateConfig({ url: e.target.value })}
+                  placeholder="https://example.com"
+                  disabled={isRunning}
+                />
+              </div>
 
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="rounded-lg border border-gray-700/60 bg-gray-900/40 p-4">

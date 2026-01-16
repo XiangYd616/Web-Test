@@ -9,6 +9,14 @@ interface WithAuthCheckOptions {
   showPrompt?: boolean; // 是否显示登录提示
 }
 
+interface AuthCheckReturn {
+  isAuthenticated: boolean;
+  requireLogin: () => boolean;
+  showLoginPrompt: () => void;
+  hideLoginPrompt: () => void;
+  LoginPromptComponent: React.ReactNode | null;
+}
+
 // 高阶组件：为组件添加登录检查功能
 export function withAuthCheck<P extends object>(
   WrappedComponent: React.ComponentType<P>,
@@ -80,7 +88,7 @@ export function withAuthCheck<P extends object>(
 }
 
 // Hook：用于在组件内部检查登录状态
-export function useAuthCheck(options: WithAuthCheckOptions = {}) {
+export function useAuthCheck(options: WithAuthCheckOptions = {}): AuthCheckReturn {
   const { isAuthenticated } = useAuth();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 

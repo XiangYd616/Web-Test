@@ -15,6 +15,7 @@ import { DeleteConfirmDialog } from '@/components/common/DeleteConfirmDialog';
 import Logger from '@/utils/logger';
 import { FileJson, FileSpreadsheet } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
+import testHistoryService from '../../../services/testHistoryService';
 
 // 导入类型定义
 import type { DeleteDialogState, TestHistoryProps, TestRecord } from './types';
@@ -216,17 +217,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
           await onRecordDelete(deleteDialogState.recordId);
         } else {
           // 默认删除逻辑
-          const response = await fetch(`${config.apiEndpoint}/${deleteDialogState.recordId}`, {
-            method: 'DELETE',
-            headers: {
-              ...(localStorage.getItem('auth_token')
-                ? {
-                    Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-                  }
-                : {}),
-            },
-          });
-          if (!response.ok) throw new Error('删除失败');
+          await testHistoryService.deleteTest(deleteDialogState.recordId);
         }
 
         // 更新本地状态
@@ -239,20 +230,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
           await onBatchDelete(selectedIds);
         } else {
           // 默认批量删除逻辑
-          await Promise.all(
-            selectedIds.map((id: string) =>
-              fetch(`${config.apiEndpoint}/${id}`, {
-                method: 'DELETE',
-                headers: {
-                  ...(localStorage.getItem('auth_token')
-                    ? {
-                        Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-                      }
-                    : {}),
-                },
-              })
-            )
-          );
+          await testHistoryService.batchDeleteTests(selectedIds);
         }
 
         // 更新本地状态
@@ -277,7 +255,6 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
     onRecordDelete,
     onBatchDelete,
     selectedIds,
-    config.apiEndpoint,
     handleRefresh,
     announce,
     clearSelection,

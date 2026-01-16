@@ -5,6 +5,7 @@
 TestHistory 是一个配置驱动的通用测试历史组件,支持多种测试类型的历史记录展示。
 
 **核心优势**:
+
 - 🎯 **配置驱动**: 通过配置文件定义,无需重复编写组件代码
 - 🔄 **高度复用**: 一个组件支持所有测试类型
 - 🎨 **灵活定制**: 支持自定义列、筛选器、操作等
@@ -47,7 +48,7 @@ function SEOTestHistoryPage() {
   };
 
   return (
-    <TestHistory 
+    <TestHistory
       config={seoTestConfig}
       onRecordClick={handleRecordClick}
       onRecordDelete={handleDelete}
@@ -66,7 +67,7 @@ function FilteredStressTestHistory() {
   const [userId, setUserId] = useState('');
 
   return (
-    <TestHistory 
+    <TestHistory
       config={stressTestConfig}
       additionalFilters={{
         userId,
@@ -93,7 +94,7 @@ export const apiTestConfig: TestHistoryConfig = {
   testType: 'api',
   apiEndpoint: '/api/test/api',
   title: 'API测试历史',
-  
+
   columns: [
     {
       key: 'testName',
@@ -174,7 +175,7 @@ import apiTestConfig from './apiTestConfig';
 export const configMap: Record<string, TestHistoryConfig> = {
   stress: stressTestConfig,
   seo: seoTestConfig,
-  api: apiTestConfig,  // 新增
+  api: apiTestConfig, // 新增
 };
 ```
 
@@ -198,33 +199,33 @@ function APITestHistoryPage() {
 ```typescript
 interface TestHistoryConfig {
   // 基础配置
-  testType: string;           // 测试类型标识
-  apiEndpoint: string;        // API基础路径
-  title: string;              // 页面标题
-  description?: string;       // 描述文本
+  testType: string; // 测试类型标识
+  apiEndpoint: string; // API基础路径
+  title: string; // 页面标题
+  description?: string; // 描述文本
 
   // 显示配置
-  columns: ColumnConfig[];    // 表格列配置
-  statusOptions: StatusOption[];  // 状态选项
-  defaultPageSize?: number;   // 默认每页数量
+  columns: ColumnConfig[]; // 表格列配置
+  statusOptions: StatusOption[]; // 状态选项
+  defaultPageSize?: number; // 默认每页数量
   pageSizeOptions?: number[]; // 页面大小选项
 
   // 功能配置
   features: {
-    export?: boolean;         // 是否支持导出
+    export?: boolean; // 是否支持导出
     exportFormats?: string[]; // 支持的导出格式
-    batchDelete?: boolean;    // 是否支持批量删除
-    detailView?: boolean;     // 是否支持详情查看
-    rerun?: boolean;          // 是否支持重新运行
-    search?: boolean;         // 是否支持搜索
+    batchDelete?: boolean; // 是否支持批量删除
+    detailView?: boolean; // 是否支持详情查看
+    rerun?: boolean; // 是否支持重新运行
+    search?: boolean; // 是否支持搜索
     advancedFilter?: boolean; // 是否支持高级筛选
   };
 
   // 自定义配置
-  customFilters?: FilterConfig[];  // 额外筛选器
-  customActions?: ActionConfig[];  // 自定义操作
-  formatters?: Formatters;         // 数据格式化函数
-  emptyState?: EmptyStateConfig;   // 空状态配置
+  customFilters?: FilterConfig[]; // 额外筛选器
+  customActions?: ActionConfig[]; // 自定义操作
+  formatters?: Formatters; // 数据格式化函数
+  emptyState?: EmptyStateConfig; // 空状态配置
 }
 ```
 
@@ -232,12 +233,12 @@ interface TestHistoryConfig {
 
 ```typescript
 interface ColumnConfig {
-  key: string;                  // 字段键
-  title: string;                // 列标题
-  width?: string | number;      // 列宽度
-  sortable?: boolean;           // 是否可排序
-  filterable?: boolean;         // 是否可筛选
-  formatter?: (value: any) => string;  // 格式化函数
+  key: string; // 字段键
+  title: string; // 列标题
+  width?: string | number; // 列宽度
+  sortable?: boolean; // 是否可排序
+  filterable?: boolean; // 是否可筛选
+  formatter?: (value: any) => string; // 格式化函数
   render?: (record: any) => ReactNode; // 自定义渲染
   align?: 'left' | 'center' | 'right'; // 对齐方式
 }
@@ -250,6 +251,7 @@ interface ColumnConfig {
 ### 1. 分页
 
 自动处理分页逻辑,支持:
+
 - 页码切换
 - 每页数量调整
 - 总数显示
@@ -257,12 +259,14 @@ interface ColumnConfig {
 ### 2. 排序
 
 点击列标题进行排序:
+
 - 升序/降序切换
 - 多列排序支持(可配置)
 
 ### 3. 筛选
 
 内置筛选功能:
+
 - 状态筛选
 - 搜索关键字
 - 日期范围
@@ -271,6 +275,7 @@ interface ColumnConfig {
 ### 4. 批量操作
 
 支持批量操作:
+
 - 全选/反选
 - 批量删除
 - 批量导出
@@ -278,9 +283,9 @@ interface ColumnConfig {
 ### 5. 导出
 
 支持多种格式导出:
+
 - JSON
 - CSV
-- PDF(可配置)
 
 ---
 
@@ -294,12 +299,12 @@ formatters: {
   date: (date: string | Date) => {
     return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
   },
-  
+
   // 数字格式化
   number: (num: number) => {
     return num.toLocaleString('zh-CN');
   },
-  
+
   // 自定义字段格式化
   customField: (value: any) => {
     return value ? '是' : '否';
@@ -392,7 +397,7 @@ interface StressTestRecord extends TestRecord {
 // 在formatter中使用类型
 formatter: (value: number, record: StressTestRecord) => {
   return `${value} / ${record.concurrent}`;
-}
+};
 ```
 
 ---
@@ -404,6 +409,7 @@ formatter: (value: number, record: StressTestRecord) => {
 **原因**: API端点配置错误或数据格式不匹配
 
 **解决**:
+
 1. 检查 `apiEndpoint` 配置
 2. 确认API返回格式符合 `TestHistoryResponse`
 3. 查看浏览器控制台错误
@@ -413,6 +419,7 @@ formatter: (value: number, record: StressTestRecord) => {
 **原因**: Column key 与数据字段不匹配
 
 **解决**:
+
 1. 确认 `columns[].key` 与 API 返回的字段名一致
 2. 使用 `formatter` 或 `render` 处理复杂数据
 
@@ -421,6 +428,7 @@ formatter: (value: number, record: StressTestRecord) => {
 **原因**: 后端未处理筛选参数
 
 **解决**:
+
 1. 确认后端接收并处理查询参数
 2. 检查网络请求中的查询字符串
 3. 验证 `customFilters` 配置

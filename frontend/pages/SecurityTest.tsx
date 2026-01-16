@@ -108,7 +108,7 @@ const SecurityTest: React.FC = () => {
       testContent={
         <div className="space-y-6">
           {/* 未登录提示 */}
-          {!isAuthenticated && <>{LoginPromptComponent}</>}
+          {!isAuthenticated && LoginPromptComponent}
 
           {/* 统一安全测试面板 */}
           <SecurityTestPanel
@@ -119,7 +119,7 @@ const SecurityTest: React.FC = () => {
           />
 
           {/* 测试结果展示 */}
-          {testResult && (
+          {!!testResult && (
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold mb-4">安全测试结果</h3>
               <p className="text-gray-600">测试结果展示功能开发中...</p>

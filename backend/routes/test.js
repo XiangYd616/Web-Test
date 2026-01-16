@@ -9,7 +9,7 @@
 const express = require('express');
 const { query } = require('../config/database');
 const { authMiddleware, optionalAuth, adminAuth } = require('../middleware/auth');
-const { testRateLimiter, historyRateLimiter } = require('../middleware/rateLimiter');
+const { testRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { validateURLMiddleware, validateAPIURLMiddleware: _validateAPIURLMiddleware } = require('../middleware/urlValidator');
 const { apiCache, dbCache } = require('../middleware/cache.js');
@@ -24,6 +24,7 @@ const UXAnalyzer = require('../engines/api/UXAnalyzer.js');
 const ApiTestEngine = require('../engines/api/apiTestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
+const historyRoutes = require('./tests/history');
 const userTestManager = require('../services/testing/UserTestManager.js');
 const testBusinessService = require('../services/testing/TestBusinessService.js');
 const DatabaseService = require('../services/core/DatabaseService');
@@ -74,6 +75,9 @@ const _upload = multer({
 });
 
 const router = express.Router();
+
+// 统一测试历史路由
+router.use('/history', historyRoutes);
 
 // ==================== 新架构: 业务服务端点 ====================
 
@@ -355,19 +359,19 @@ router.post('/batch-delete', authMiddleware, asyncHandler(async (req, res) => {
       });
     }
 
-    // 删除属于当前用户的测试
-    const result = await query(
-      'DELETE FROM test_history WHERE test_id = ANY($1) AND user_id = $2 RETURNING test_id',
-      [ids, userId]
-    );
+    const result = await testHistoryService.batchDeleteTestSessions(ids, userId);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        error: result.error || '批量删除测试失败'
+      });
+    }
 
     res.json({
       success: true,
-      data: {
-        deleted: result.rows.length,
-        ids: result.rows.map(r => r.test_id)
-      },
-      message: `成功删除${result.rows.length}个测试`
+      data: result.data,
+      message: `成功删除${result.data?.deletedCount || 0}个测试`
     });
   } catch (error) {
     console.error('批量删除测试失败:', error);
@@ -1033,44 +1037,6 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 /**
- * 获取测试历史记录 (新版本 - 使用数据库)
- * GET /api/test/history
- */
-router.get('/history', optionalAuth, historyRateLimiter, asyncHandler(async (req, res) => {
-  try {
-    const {
-      page = 1,
-      limit = 20,
-      testType,
-      status,
-      startDate,
-      endDate
-    } = req.query;
-
-    // 获取测试历史
-    const result = await databaseService.getTestHistory({
-      page: parseInt(page),
-      limit: parseInt(limit),
-      testType,
-      status,
-      userId: req.user?.id,
-      startDate,
-      endDate
-    });
-
-    res.success(result.data);
-
-  } catch (error) {
-    console.error('获取测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '获取测试历史失败',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
-  }
-}));
-
-/**
  * 获取测试历史统计信息
  * GET /api/test/statistics
  */
@@ -1472,214 +1438,6 @@ router.post('/config/templates', authMiddleware, asyncHandler(async (req, res) =
       success: false,
       error: '保存配置模板失败'
     });
-  }
-}));
-
-/**
- * 创建测试记录
- * POST /api/test/history
- */
-router.post('/history', authMiddleware, asyncHandler(async (req, res) => {
-  try {
-    const testData = {
-      ...req.body,
-      userId: req.user.id
-    };
-
-    const result = await testHistoryService.createTestRecord(testData);
-
-    res.json(result);
-  } catch (error) {
-    console.error('创建测试记录失败:', error);
-    res.serverError('创建测试记录失败');
-  }
-}));
-
-/**
- * 更新测试记录
- * PUT /api/test/history/:recordId
- */
-router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) => {
-  const { recordId } = req.params;
-
-  try {
-    // 验证记录所有权
-    const existingRecord = await query(
-      'SELECT id FROM test_sessions WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
-      [recordId, req.user.id]
-    );
-
-    if (existingRecord.rows.length === 0) {
-
-      return res.notFound('资源', '记录不存在或无权限访问');
-    }
-
-    const result = await testHistoryService.updateTestRecord(recordId, req.body);
-
-    res.json(result);
-  } catch (error) {
-    console.error('更新测试记录失败:', error);
-    res.serverError('更新测试记录失败');
-  }
-}));
-
-/**
- * 获取单个测试记录
- * GET /api/test/history/:recordId
- */
-router.get('/history/:recordId', optionalAuth, asyncHandler(async (req, res) => {
-  const { recordId } = req.params;
-
-  try {
-    let whereClause = 'WHERE id = $1';
-    const params = [recordId];
-
-    // 如果用户已登录，只显示该用户的记录；否则显示公开记录
-    if (req.user?.id) {
-      whereClause += ' AND user_id = $2';
-      params.push(req.user.id);
-    }
-
-    const result = await query(
-      `SELECT id, test_name, test_type, url, status, start_time, end_time,
-              duration, config, results, created_at, updated_at
-       FROM test_history
-       ${whereClause}`,
-      params
-    );
-
-    if (result.rows.length === 0) {
-
-      return res.notFound('资源', '记录不存在或无权限访问');
-    }
-
-    res.success(testHistoryService.formatTestRecord(result.rows[0]));
-  } catch (error) {
-    console.error('获取测试记录失败:', error);
-    res.serverError('获取测试记录失败');
-  }
-}));
-
-/**
- * 开始测试 - 更新状态为运行中
- * POST /api/test/history/:recordId/start
- */
-router.post('/history/:recordId/start', authMiddleware, asyncHandler(async (req, res) => {
-  const { recordId } = req.params;
-
-  try {
-    const result = await testHistoryService.startTest(recordId, req.user.id);
-    res.json(result);
-  } catch (error) {
-    console.error('开始测试失败:', error);
-    res.serverError('开始测试失败');
-  }
-}));
-
-/**
- * 更新测试进度
- * POST /api/test/history/:recordId/progress
- */
-router.post('/history/:recordId/progress', authMiddleware, asyncHandler(async (req, res) => {
-  const { recordId } = req.params;
-
-  try {
-    const result = await testHistoryService.updateTestProgress(recordId, req.body);
-    res.json(result);
-  } catch (error) {
-    console.error('更新测试进度失败:', error);
-    res.serverError('更新测试进度失败');
-  }
-}));
-
-/**
- * 完成测试
- * POST /api/test/history/:recordId/complete
- */
-router.post('/history/:recordId/complete', authMiddleware, asyncHandler(async (req, res) => {
-  const { recordId } = req.params;
-
-  try {
-    const result = await testHistoryService.completeTest(recordId, req.body, req.user.id);
-    res.json(result);
-  } catch (error) {
-    console.error('完成测试失败:', error);
-    res.serverError('完成测试失败');
-  }
-}));
-
-/**
- * 测试失败
- * POST /api/test/history/:recordId/fail
- */
-router.post('/history/:recordId/fail', authMiddleware, asyncHandler(async (req, res) => {
-  const { recordId } = req.params;
-  const { errorMessage, errorDetails } = req.body;
-
-  try {
-    const result = await testHistoryService.failTest(recordId, errorMessage, errorDetails, req.user.id);
-    res.json(result);
-  } catch (error) {
-    console.error('标记测试失败失败:', error);
-    res.serverError('标记测试失败失败');
-  }
-}));
-
-/**
- * 取消测试
- * POST /api/test/history/:recordId/cancel
- */
-router.post('/history/:recordId/cancel', authMiddleware, asyncHandler(async (req, res) => {
-  const { recordId } = req.params;
-  const { reason } = req.body;
-
-  try {
-    const result = await testHistoryService.cancelTest(recordId, reason || '用户取消', req.user.id);
-    res.json(result);
-  } catch (error) {
-    console.error('取消测试失败:', error);
-    res.serverError('取消测试失败');
-  }
-}));
-
-/**
- * 获取测试进度历史
- * GET /api/test/history/:recordId/progress
- */
-router.get('/history/:recordId/progress', authMiddleware, asyncHandler(async (req, res) => {
-  const { recordId } = req.params;
-
-  try {
-    const result = await testHistoryService.getTestProgress(recordId, req.user.id);
-    res.json(result);
-  } catch (error) {
-    console.error('获取测试进度失败:', error);
-    res.serverError('获取测试进度失败');
-  }
-}));
-
-/**
- * 删除测试历史记录
- * DELETE /api/test/history/:recordId
- */
-router.delete('/history/:recordId', authMiddleware, asyncHandler(async (req, res) => {
-  const { recordId } = req.params;
-
-  try {
-    const result = await query(
-      'UPDATE test_sessions SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
-      [recordId, req.user.id]
-    );
-
-    if (result.rowCount === 0) {
-
-      return res.notFound('资源', '测试记录不存在');
-    }
-
-    res.success('测试记录已删除');
-  } catch (error) {
-    console.error('删除测试记录失败:', error);
-    res.serverError('删除测试记录失败');
   }
 }));
 

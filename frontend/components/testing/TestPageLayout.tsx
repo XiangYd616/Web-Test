@@ -1,9 +1,9 @@
 import { LucideIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { getTestHistoryConfig } from '../common/TestHistory/config';
 import { TestHistory } from '../common/TestHistory/TestHistory';
 import type { TestRecord } from '../common/TestHistory/types';
-import { getTestHistoryConfig } from '../common/TestHistory/config';
 import TestHeader from './TestHeader';
 
 interface TestPageLayoutProps {
@@ -229,6 +229,7 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
             );
           })()}
         </div>
+      </div>
 
       {/* 其他组件（如登录提示等） */}
       {additionalComponents}

@@ -355,6 +355,7 @@ class TestHistoryService {
     try {
       const {
         status,
+        startTime,
         endTime,
         duration,
         results,
@@ -375,6 +376,11 @@ class TestHistoryService {
       if (status !== undefined) {
         updateFields.push(`status = $${paramIndex++}`);
         updateValues.push(status);
+      }
+
+      if (startTime !== undefined) {
+        updateFields.push(`start_time = $${paramIndex++}`);
+        updateValues.push(startTime);
       }
 
       if (endTime !== undefined) {
@@ -464,6 +470,267 @@ class TestHistoryService {
     } catch (error) {
       console.error('更新测试记录失败:', error);
       throw new Error(`更新测试记录失败: ${error.message}`);
+    }
+  }
+
+  parseJsonField(value) {
+    if (!value) return null;
+    if (typeof value === 'object') return value;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getSessionForUser(sessionId, userId) {
+    const query = `
+      SELECT * FROM test_sessions
+      WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+    `;
+
+    const result = await this.db.query(query, [sessionId, userId]);
+    return result.rows[0] || null;
+  }
+
+  async startTest(sessionId, userId) {
+    try {
+      const session = await this.getSessionForUser(sessionId, userId);
+      if (!session) {
+        return {
+          success: false,
+          error: '测试记录不存在或无权限操作'
+        };
+      }
+
+      const updateData = {
+        status: 'running',
+        startTime: session.start_time || new Date().toISOString()
+      };
+
+      return await this.updateTestRecord(sessionId, updateData);
+    } catch (error) {
+      console.error('开始测试失败:', error);
+      return {
+        success: false,
+        error: '开始测试失败'
+      };
+    }
+  }
+
+  async updateTestProgress(sessionId, progressData = {}, userId) {
+    try {
+      const session = await this.getSessionForUser(sessionId, userId);
+      if (!session) {
+        return {
+          success: false,
+          error: '测试记录不存在或无权限操作'
+        };
+      }
+
+      const {
+        status,
+        progress,
+        message,
+        results,
+        endTime,
+        duration
+      } = progressData;
+
+      const updateData = {};
+
+      if (status) {
+        updateData.status = status;
+      }
+
+      if (endTime !== undefined) {
+        updateData.endTime = endTime;
+      }
+
+      if (duration !== undefined) {
+        updateData.duration = duration;
+      }
+
+      let mergedResults = results;
+      if (progress !== undefined || message !== undefined) {
+        const existingResults = this.parseJsonField(session.results) || {};
+        mergedResults = {
+          ...existingResults,
+          ...(typeof results === 'object' && results !== null ? results : {}),
+          progress: progress !== undefined ? progress : existingResults.progress,
+          message: message !== undefined ? message : existingResults.message,
+          progressUpdatedAt: new Date().toISOString()
+        };
+      }
+
+      if (mergedResults !== undefined) {
+        updateData.results = mergedResults;
+      }
+
+      if (!updateData.status) {
+        updateData.status = 'running';
+      }
+
+      return await this.updateTestRecord(sessionId, updateData);
+    } catch (error) {
+      console.error('更新测试进度失败:', error);
+      return {
+        success: false,
+        error: '更新测试进度失败'
+      };
+    }
+  }
+
+  async completeTest(sessionId, resultData = {}, userId) {
+    try {
+      const session = await this.getSessionForUser(sessionId, userId);
+      if (!session) {
+        return {
+          success: false,
+          error: '测试记录不存在或无权限操作'
+        };
+      }
+
+      const endTime = resultData.endTime || new Date().toISOString();
+      let duration = resultData.duration;
+      if (duration === undefined && session.start_time) {
+        const startMs = new Date(session.start_time).getTime();
+        const endMs = new Date(endTime).getTime();
+        if (!Number.isNaN(startMs) && !Number.isNaN(endMs)) {
+          duration = Math.max(0, Math.round((endMs - startMs) / 1000));
+        }
+      }
+
+      const updateData = {
+        status: 'completed',
+        endTime,
+        duration,
+        results: resultData.results ?? resultData,
+        overallScore: resultData.overallScore,
+        grade: resultData.grade,
+        totalIssues: resultData.totalIssues,
+        criticalIssues: resultData.criticalIssues,
+        majorIssues: resultData.majorIssues,
+        minorIssues: resultData.minorIssues
+      };
+
+      return await this.updateTestRecord(sessionId, updateData);
+    } catch (error) {
+      console.error('完成测试失败:', error);
+      return {
+        success: false,
+        error: '完成测试失败'
+      };
+    }
+  }
+
+  async failTest(sessionId, failureData = {}, userId) {
+    try {
+      const session = await this.getSessionForUser(sessionId, userId);
+      if (!session) {
+        return {
+          success: false,
+          error: '测试记录不存在或无权限操作'
+        };
+      }
+
+      const { errorMessage, errorDetails, results } = failureData;
+      const existingResults = this.parseJsonField(session.results) || {};
+      const mergedResults = {
+        ...existingResults,
+        ...(typeof results === 'object' && results !== null ? results : {}),
+        errorMessage,
+        errorDetails,
+        failedAt: new Date().toISOString()
+      };
+
+      const updateData = {
+        status: 'failed',
+        endTime: failureData.endTime || new Date().toISOString(),
+        duration: failureData.duration,
+        results: mergedResults
+      };
+
+      return await this.updateTestRecord(sessionId, updateData);
+    } catch (error) {
+      console.error('标记测试失败失败:', error);
+      return {
+        success: false,
+        error: '标记测试失败失败'
+      };
+    }
+  }
+
+  async cancelTest(sessionId, cancelData = {}, userId) {
+    try {
+      const session = await this.getSessionForUser(sessionId, userId);
+      if (!session) {
+        return {
+          success: false,
+          error: '测试记录不存在或无权限操作'
+        };
+      }
+
+      const reason = cancelData.reason || '用户取消';
+      const existingResults = this.parseJsonField(session.results) || {};
+      const mergedResults = {
+        ...existingResults,
+        reason,
+        cancelReason: cancelData.cancelReason,
+        cancelledAt: new Date().toISOString()
+      };
+
+      const updateData = {
+        status: 'cancelled',
+        endTime: cancelData.endTime || new Date().toISOString(),
+        duration: cancelData.duration,
+        results: mergedResults
+      };
+
+      return await this.updateTestRecord(sessionId, updateData);
+    } catch (error) {
+      console.error('取消测试失败:', error);
+      return {
+        success: false,
+        error: '取消测试失败'
+      };
+    }
+  }
+
+  async getTestProgress(sessionId, userId) {
+    try {
+      const session = await this.getSessionForUser(sessionId, userId);
+      if (!session) {
+        return {
+          success: false,
+          error: '测试记录不存在或无权限访问'
+        };
+      }
+
+      const results = this.parseJsonField(session.results) || {};
+      let progress = results.progress;
+      if (progress === undefined || progress === null) {
+        progress = session.status === 'completed' ? 100 : 0;
+      }
+
+      return {
+        success: true,
+        data: {
+          id: session.id,
+          status: session.status,
+          progress,
+          message: results.message || '',
+          startTime: session.start_time,
+          endTime: session.end_time,
+          updatedAt: session.updated_at
+        }
+      };
+    } catch (error) {
+      console.error('获取测试进度失败:', error);
+      return {
+        success: false,
+        error: '获取测试进度失败'
+      };
     }
   }
 

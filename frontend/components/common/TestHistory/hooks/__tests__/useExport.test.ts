@@ -1,14 +1,14 @@
 ﻿/**
  * useExport Hook - Unit Tests
- * 
+ *
  * Tests for the useExport custom hook that manages export modal
  * and export operations for the TestHistory component.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useExport } from '../useExport';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TestRecord } from '../../types';
+import { useExport } from '../useExport';
 
 // Helper function to create mock test record
 const createMockRecord = (id: string): TestRecord => ({
@@ -146,7 +146,7 @@ describe('useExport', () => {
     it('should handle different export types', async () => {
       const { result } = renderHook(() => useExport());
       const data = { test: 'data' };
-      const types = ['json', 'csv', 'xlsx', 'pdf'];
+      const types = ['json', 'csv'];
 
       for (const type of types) {
         await act(async () => {
@@ -269,5 +269,3 @@ describe('useExport', () => {
     });
   });
 });
-
-

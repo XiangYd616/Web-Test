@@ -18,8 +18,10 @@ export interface TestRecord {
   updatedAt: string;
   overallScore?: number;
   performanceGrade?: string;
-  config: Record<string, unknown>;
-  results?: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  config: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  results?: Record<string, any>;
   errorMessage?: string;
   totalRequests?: number;
   successfulRequests?: number;
@@ -78,7 +80,8 @@ export interface ColumnConfig {
   sortable?: boolean; // 是否可排序
   filterable?: boolean; // 是否可筛选
   align?: 'left' | 'center' | 'right'; // 对齐方式
-  formatter?: (value: unknown, record?: TestRecord) => string | React.ReactNode; // 格式化器
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  formatter?: (value: any, record?: TestRecord) => string | React.ReactNode; // 格式化器
   hideOnMobile?: boolean; // 移动端是否隐藏 (Phase 5)
   hideOnTablet?: boolean; // 平板端是否隐藏 (Phase 5)
   priority?: number; // 响应式显示优先级 (Phase 5)
@@ -122,7 +125,7 @@ export interface CustomAction {
  */
 export interface FeaturesConfig {
   export?: boolean; // 是否启用导出
-  exportFormats?: ('json' | 'csv' | 'excel')[]; // 导出格式
+  exportFormats?: ('json' | 'csv')[]; // 导出格式
   batchDelete?: boolean; // 是否启用批量删除
   detailView?: boolean; // 是否启用详情查看
   rerun?: boolean; // 是否启用重新运行
@@ -174,7 +177,8 @@ export interface TestHistoryConfig {
     duration?: (ms: number) => string;
     number?: (num: number) => string;
     url?: (url: string) => string;
-    [key: string]: ((value: unknown) => string) | undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: ((value: any) => string) | undefined;
   };
 
   // 空状态配置

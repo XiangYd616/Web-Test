@@ -15,10 +15,13 @@ interface UseExportReturn {
   selectedExportRecord: TestRecord | null;
   openExportModal: (record: TestRecord) => void;
   closeExportModal: () => void;
-  handleExport: (exportType: string, data: any, exportUtils?: typeof ExportUtils) => Promise<void>;
-  exportToJson: (data: any) => Promise<void>;
-  exportToCsv: (data: any) => Promise<void>;
-  exportToExcel: (data: any) => Promise<void>;
+  handleExport: (
+    exportType: string,
+    data: unknown,
+    exportUtils?: typeof ExportUtils
+  ) => Promise<void>;
+  exportToJson: (data: unknown) => Promise<void>;
+  exportToCsv: (data: unknown) => Promise<void>;
 }
 
 /**
@@ -42,7 +45,7 @@ export const useExport = (): UseExportReturn => {
 
   // 处理导出操作
   const handleExport = useCallback(
-    async (exportType: string, data: any, exportUtils: typeof ExportUtils = ExportUtils) => {
+    async (exportType: string, data: unknown, exportUtils: typeof ExportUtils = ExportUtils) => {
       try {
         await exportUtils.exportByType(exportType, data);
         closeExportModal();
@@ -55,7 +58,7 @@ export const useExport = (): UseExportReturn => {
   );
 
   // 导出为 JSON
-  const exportToJson = useCallback(async (data: any) => {
+  const exportToJson = useCallback(async (data: unknown) => {
     try {
       await ExportUtils.exportByType('json', data);
       Logger.info('成功导出为 JSON');
@@ -66,23 +69,12 @@ export const useExport = (): UseExportReturn => {
   }, []);
 
   // 导出为 CSV
-  const exportToCsv = useCallback(async (data: any) => {
+  const exportToCsv = useCallback(async (data: unknown) => {
     try {
       await ExportUtils.exportByType('csv', data);
       Logger.info('成功导出为 CSV');
     } catch (error) {
       Logger.error('导出 CSV 失败:', error);
-      throw error;
-    }
-  }, []);
-
-  // 导出为 Excel
-  const exportToExcel = useCallback(async (data: any) => {
-    try {
-      await ExportUtils.exportByType('excel', data);
-      Logger.info('成功导出为 Excel');
-    } catch (error) {
-      Logger.error('导出 Excel 失败:', error);
       throw error;
     }
   }, []);
@@ -95,6 +87,5 @@ export const useExport = (): UseExportReturn => {
     handleExport,
     exportToJson,
     exportToCsv,
-    exportToExcel,
   };
 };

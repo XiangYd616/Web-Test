@@ -122,6 +122,8 @@ export interface StressTestDetails {
 
 export interface TestHistoryQuery {
   page?: number;
+  // 兼容旧字段
+  pageSize?: number;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';

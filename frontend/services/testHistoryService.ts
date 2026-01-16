@@ -28,7 +28,7 @@ export interface TestHistoryFilters {
 }
 
 export interface ExportOptions {
-  format: 'csv' | 'json' | 'pdf' | 'xlsx';
+  format: 'csv' | 'json' | 'excel' | 'xlsx' | 'pdf';
   includeDetails: boolean;
   dateRange?: {
     start: string;
@@ -350,10 +350,19 @@ class TestHistoryService {
    */
   async exportTestHistory(options: ExportOptions): Promise<Blob> {
     try {
-      const response = await fetch(`${this.baseUrl}/export`, {
-        method: 'POST',
+      const format = options.format === 'xlsx' ? 'excel' : options.format;
+      if (format === 'pdf') {
+        throw new Error('导出格式不受支持');
+      }
+
+      const params = new URLSearchParams();
+      params.append('format', format);
+      if (options.testTypes?.length) {
+        options.testTypes.forEach(testType => params.append('testType', testType));
+      }
+
+      const response = await fetch(`${this.baseUrl}/export?${params.toString()}`, {
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(options),
       });
 
       if (!response.ok) {
