@@ -8,7 +8,7 @@ import { TestHistoryConfig } from '../types';
 export const stressTestConfig: TestHistoryConfig = {
   // 基础配置
   testType: 'stress',
-  apiEndpoint: '/api/test/stress',
+  apiEndpoint: '/api/test/history',
   title: '压力测试历史',
   description: '查看和管理所有压力测试记录',
 
@@ -54,7 +54,7 @@ export const stressTestConfig: TestHistoryConfig = {
       width: 140,
       sortable: true,
       align: 'right',
-      formatter: (value: number) => value ? `${value.toFixed(0)}ms` : '-',
+      formatter: (value: number) => (value ? `${value.toFixed(0)}ms` : '-'),
     },
     {
       key: 'peakTps',
@@ -93,9 +93,7 @@ export const stressTestConfig: TestHistoryConfig = {
         const seconds = Math.floor(value / 1000);
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
-        return minutes > 0 
-          ? `${minutes}分${remainingSeconds}秒`
-          : `${seconds}秒`;
+        return minutes > 0 ? `${minutes}分${remainingSeconds}秒` : `${seconds}秒`;
       },
     },
     {
@@ -110,7 +108,7 @@ export const stressTestConfig: TestHistoryConfig = {
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit',
-          minute: '2-digit'
+          minute: '2-digit',
         });
       },
     },
@@ -174,20 +172,20 @@ export const stressTestConfig: TestHistoryConfig = {
     {
       key: 'compare',
       label: '对比',
-      onClick: (record) => {
-        console.log('对比测试:', record);
+      onClick: record => {
+        void record;
         // 实际实现中会导航到对比页面
       },
-      visible: (record) => record.status === 'completed',
+      visible: record => record.status === 'completed',
     },
     {
       key: 'rerun',
       label: '重新运行',
-      onClick: (record) => {
-        console.log('重新运行测试:', record);
+      onClick: record => {
+        void record;
         // 实际实现中会触发重新运行
       },
-      visible: (record) => ['completed', 'failed', 'cancelled'].includes(record.status),
+      visible: record => ['completed', 'failed', 'cancelled'].includes(record.status),
     },
   ],
 
@@ -213,7 +211,7 @@ export const stressTestConfig: TestHistoryConfig = {
       const seconds = Math.floor(ms / 1000);
       const minutes = Math.floor(seconds / 60);
       const hours = Math.floor(minutes / 60);
-      
+
       if (hours > 0) {
         return `${hours}小时${minutes % 60}分`;
       } else if (minutes > 0) {

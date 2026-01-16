@@ -1,12 +1,12 @@
 /**
  * TestHistory 组件单元测试
- * 
+ *
  * 文件路径: frontend/components/common/TestHistory/__tests__/TestHistory.test.tsx
  * 创建时间: 2025-11-14
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestHistory } from '../TestHistory';
 import { stressTestConfig } from '../config/stressTestConfig';
 import type { TestHistoryConfig } from '../types';
@@ -18,7 +18,7 @@ vi.mock('@/utils/logger', () => ({
     error: vi.fn(),
     warn: vi.fn(),
     debug: vi.fn(),
-  }
+  },
 }));
 
 // Mock fetch
@@ -79,7 +79,7 @@ describe('TestHistory 组件', () => {
   beforeEach(() => {
     // 重置所有mock
     vi.clearAllMocks();
-    
+
     // 设置fetch默认响应
     mockFetch.mockResolvedValue({
       ok: true,
@@ -119,10 +119,10 @@ describe('TestHistory 组件', () => {
   describe('数据加载', () => {
     it('应该在挂载时加载数据', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
-          expect.stringContaining('/api/test/stress'),
+          expect.stringContaining('/api/test/history'),
           expect.any(Object)
         );
       });
@@ -136,7 +136,7 @@ describe('TestHistory 组件', () => {
 
     it('应该正确显示加载的数据', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('压力测试1')).toBeInTheDocument();
         expect(screen.getByText('压力测试2')).toBeInTheDocument();
@@ -151,7 +151,7 @@ describe('TestHistory 组件', () => {
       });
 
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('暂无测试记录')).toBeInTheDocument();
       });
@@ -172,7 +172,7 @@ describe('TestHistory 组件', () => {
       });
 
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('暂无测试记录')).toBeInTheDocument();
       });
@@ -194,7 +194,7 @@ describe('TestHistory 组件', () => {
 
     it('应该在筛选时重新加载数据', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledTimes(1);
       });
@@ -202,19 +202,22 @@ describe('TestHistory 组件', () => {
       const searchInput = screen.getByPlaceholderText(/输入测试名称或URL/);
       fireEvent.change(searchInput, { target: { value: '测试' } });
 
-      await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith(
-          expect.stringContaining('search=测试'),
-          expect.any(Object)
-        );
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(mockFetch).toHaveBeenCalledWith(
+            expect.stringContaining('search=测试'),
+            expect.any(Object)
+          );
+        },
+        { timeout: 3000 }
+      );
     });
   });
 
   describe('分页功能', () => {
     it('应该显示分页信息', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(screen.getByText(/显示.*共.*条记录/)).toBeInTheDocument();
       });
@@ -226,31 +229,34 @@ describe('TestHistory 组件', () => {
         json: async () => ({
           success: true,
           data: {
-            tests: Array(20).fill(null).map((_, i) => ({
-              ...mockRecords[0],
-              id: String(i + 1),
-            })),
+            tests: Array(20)
+              .fill(null)
+              .map((_, i) => ({
+                ...mockRecords[0],
+                id: String(i + 1),
+              })),
             pagination: { total: 20, page: 1, pageSize: 10 },
           },
         }),
       });
 
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('压力测试1')).toBeInTheDocument();
       });
 
       // 查找页面大小选择器
       const pageSizeSelects = screen.getAllByRole('combobox');
-      const pageSizeSelect = pageSizeSelects.find(select => 
-        select.getAttribute('aria-label')?.includes('每页') || 
-        select.closest('.flex')?.textContent?.includes('每页')
+      const pageSizeSelect = pageSizeSelects.find(
+        select =>
+          select.getAttribute('aria-label')?.includes('每页') ||
+          select.closest('.flex')?.textContent?.includes('每页')
       );
-      
+
       if (pageSizeSelect) {
         fireEvent.change(pageSizeSelect, { target: { value: '20' } });
-        
+
         await waitFor(() => {
           expect(mockFetch).toHaveBeenCalledWith(
             expect.stringContaining('pageSize=20'),
@@ -264,7 +270,7 @@ describe('TestHistory 组件', () => {
   describe('批量操作', () => {
     it('应该支持全选', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('压力测试1')).toBeInTheDocument();
       });
@@ -277,14 +283,14 @@ describe('TestHistory 组件', () => {
 
     it('应该支持单个选择', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('压力测试1')).toBeInTheDocument();
       });
 
       const checkboxes = screen.getAllByRole('checkbox');
       const firstRecordCheckbox = checkboxes[1]; // 第0个是全选
-      
+
       fireEvent.click(firstRecordCheckbox);
 
       expect(screen.getByText(/删除选中.*1/)).toBeInTheDocument();
@@ -294,7 +300,7 @@ describe('TestHistory 组件', () => {
   describe('导出功能', () => {
     it('应该渲染导出按钮', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('压力测试1')).toBeInTheDocument();
       });
@@ -307,13 +313,8 @@ describe('TestHistory 组件', () => {
   describe('自定义Props', () => {
     it('应该调用onRecordClick回调', async () => {
       const handleRecordClick = vi.fn();
-      render(
-        <TestHistory 
-          config={stressTestConfig} 
-          onRecordClick={handleRecordClick}
-        />
-      );
-      
+      render(<TestHistory config={stressTestConfig} onRecordClick={handleRecordClick} />);
+
       await waitFor(() => {
         expect(screen.getByText('压力测试1')).toBeInTheDocument();
       });
@@ -331,7 +332,7 @@ describe('TestHistory 组件', () => {
       const { container } = render(
         <TestHistory config={stressTestConfig} className="custom-class" />
       );
-      
+
       expect(container.querySelector('.custom-class')).toBeInTheDocument();
     });
   });
@@ -339,7 +340,7 @@ describe('TestHistory 组件', () => {
   describe('刷新功能', () => {
     it('应该在点击刷新按钮时重新加载数据', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledTimes(1);
       });
@@ -356,7 +357,7 @@ describe('TestHistory 组件', () => {
   describe('列配置', () => {
     it('应该渲染配置的列', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('测试名称')).toBeInTheDocument();
         expect(screen.getByText('目标URL')).toBeInTheDocument();
@@ -367,7 +368,7 @@ describe('TestHistory 组件', () => {
 
     it('应该正确格式化列值', async () => {
       render(<TestHistory config={stressTestConfig} />);
-      
+
       await waitFor(() => {
         // 检查数字格式化
         expect(screen.getByText('1,000')).toBeInTheDocument();

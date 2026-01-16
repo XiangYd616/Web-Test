@@ -8,7 +8,7 @@ import { TestHistoryConfig } from '../types';
 export const apiTestConfig: TestHistoryConfig = {
   // 基础配置
   testType: 'api',
-  apiEndpoint: '/api/test/api',
+  apiEndpoint: '/api/test/history',
   title: 'API测试历史',
   description: '查看和管理所有API测试记录',
 
@@ -57,9 +57,14 @@ export const apiTestConfig: TestHistoryConfig = {
       align: 'center',
       formatter: (code: number) => {
         if (!code) return '-';
-        const codeClass = code >= 200 && code < 300 ? 'text-green-400' :
-                          code >= 400 && code < 500 ? 'text-yellow-400' :
-                          code >= 500 ? 'text-red-400' : 'text-gray-400';
+        const codeClass =
+          code >= 200 && code < 300
+            ? 'text-green-400'
+            : code >= 400 && code < 500
+              ? 'text-yellow-400'
+              : code >= 500
+                ? 'text-red-400'
+                : 'text-gray-400';
         return `<span class="${codeClass} font-mono">${code}</span>`;
       },
     },
@@ -71,9 +76,8 @@ export const apiTestConfig: TestHistoryConfig = {
       align: 'right',
       formatter: (ms: number) => {
         if (!ms && ms !== 0) return '-';
-        const timeClass = ms < 100 ? 'text-green-400' :
-                          ms < 500 ? 'text-yellow-400' :
-                          'text-red-400';
+        const timeClass =
+          ms < 100 ? 'text-green-400' : ms < 500 ? 'text-yellow-400' : 'text-red-400';
         return `<span class="${timeClass}">${ms}ms</span>`;
       },
     },
@@ -83,7 +87,7 @@ export const apiTestConfig: TestHistoryConfig = {
       width: 120,
       sortable: true,
       align: 'right',
-      formatter: (value: any) => {
+      formatter: (value: { passed?: number; total?: number } | null | undefined) => {
         if (!value) return '-';
         const { passed = 0, total = 0 } = value;
         const percentage = total > 0 ? ((passed / total) * 100).toFixed(0) : 0;
@@ -109,7 +113,7 @@ export const apiTestConfig: TestHistoryConfig = {
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit',
-          minute: '2-digit'
+          minute: '2-digit',
         });
       },
     },
@@ -179,17 +183,17 @@ export const apiTestConfig: TestHistoryConfig = {
     {
       key: 'rerun',
       label: '重新运行',
-      onClick: (record) => {
-        console.log('重新运行API测试:', record);
+      onClick: record => {
+        void record;
         // 实际实现中会触发重新运行
       },
-      visible: (record) => ['completed', 'failed', 'cancelled'].includes(record.status),
+      visible: record => ['completed', 'failed', 'cancelled'].includes(record.status),
     },
     {
       key: 'viewRequest',
       label: '查看请求',
-      onClick: (record) => {
-        console.log('查看API请求详情:', record);
+      onClick: record => {
+        void record;
       },
       visible: () => true,
     },

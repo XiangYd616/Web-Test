@@ -1,4 +1,6 @@
-﻿import Logger from '@/utils/logger';
+﻿import { DeleteConfirmDialog } from '@/components/common/DeleteConfirmDialog';
+import { showToast } from '@/components/common/Toast';
+import Logger from '@/utils/logger';
 import {
   Activity,
   BarChart3,
@@ -21,7 +23,7 @@ import {
   Wifi,
   Zap,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 // 临时注释掉不存在的组件导入
 // import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
@@ -48,7 +50,7 @@ interface TestRecord {
   startTime: string;
   endTime?: string;
   duration?: number;
-  results?: any;
+  results?: unknown;
   error?: string;
 }
 
@@ -60,19 +62,29 @@ interface FilterOptions {
   searchQuery: string;
 }
 
+interface DeleteDialogState {
+  isOpen: boolean;
+  record: TestRecord | null;
+  isLoading: boolean;
+}
+
+type TabId = 'history' | 'reports' | 'import-export' | 'analytics' | 'performance' | 'monitoring';
+type SortField = 'created_at' | 'overall_score' | 'test_type' | 'status';
+
 const DataStorage: React.FC = () => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<
-    'history' | 'reports' | 'import-export' | 'analytics' | 'performance' | 'monitoring'
-  >('history');
+  const [activeTab, setActiveTab] = useState<TabId>('history');
   const [testRecords, setTestRecords] = useState<TestRecord[]>([]);
   const [filteredRecords, setFilteredRecords] = useState<TestRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecord, setSelectedRecord] = useState<TestRecord | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>({
+    isOpen: false,
+    record: null,
+    isLoading: false,
+  });
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState<'created_at' | 'overall_score' | 'test_type' | 'status'>(
-    'created_at'
-  );
+  const [sortBy, setSortBy] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const [filters, setFilters] = useState<FilterOptions>({
@@ -129,31 +141,21 @@ const DataStorage: React.FC = () => {
     }
   }, [location.pathname]);
 
-  // 模拟加载测试数据
-  useEffect(() => {
-    loadTestRecords();
-  }, []);
-
-  // 应用过滤器
-  useEffect(() => {
-    applyFilters();
-  }, [testRecords, filters, sortBy, sortOrder]);
-
   // 获取认证头
-  const getAuthHeaders = (): HeadersInit => {
+  const getAuthHeaders = useCallback((): HeadersInit => {
     const token = localStorage.getItem('auth_token');
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
     };
-  };
+  }, []);
 
-  const loadTestRecords = async () => {
+  const loadTestRecords = useCallback(async () => {
     setLoading(true);
     try {
       // 从后端API加载真实数据（需要认证）
       const response = await fetch(
-        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test-history?` +
+        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test/history?` +
           new URLSearchParams({
             sortBy,
             sortOrder,
@@ -180,56 +182,18 @@ const DataStorage: React.FC = () => {
 
       // 如果后端加载失败，显示空数据而不是模拟数据
       setTestRecords([]);
-
-      // 可选：显示错误提示
-      // alert(`加载测试记录失败: ${error?.message}`);
+      showToast.error('加载测试记录失败，请稍后重试');
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAuthHeaders, sortBy, sortOrder]);
 
-  // 删除测试记录
-  const handleDeleteRecord = async (recordId: string) => {
-    if (!confirm('确定要删除这个测试记录吗？此操作无法撤销。')) {
-      return;
-    }
+  // 模拟加载测试数据
+  useEffect(() => {
+    void loadTestRecords();
+  }, [loadTestRecords]);
 
-    try {
-      const response = await fetch(
-        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test-history/${recordId}`,
-        {
-          method: 'DELETE',
-          headers: getAuthHeaders(),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        Logger.debug('✅ Test record deleted successfully');
-        // 从本地状态中移除记录
-        setTestRecords(prev => prev.filter(record => record.id !== recordId));
-
-        // 如果删除的是当前选中的记录，关闭详情模态框
-        if (selectedRecord?.id === recordId) {
-          setSelectedRecord(null);
-        }
-
-        alert('测试记录删除成功！');
-      } else {
-        throw new Error(data.message || 'Failed to delete test record');
-      }
-    } catch (error) {
-      Logger.error('❌ Failed to delete test record:', error);
-      alert('删除测试记录失败，请稍后重试。');
-    }
-  };
-
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...testRecords];
 
     // 按测试类型过滤
@@ -289,7 +253,8 @@ const DataStorage: React.FC = () => {
 
     // 排序
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: string | number = '';
+      let bValue: string | number = '';
 
       switch (sortBy) {
         case 'created_at':
@@ -315,13 +280,82 @@ const DataStorage: React.FC = () => {
 
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
       }
+
+      return aValue < bValue ? 1 : -1;
     });
 
     setFilteredRecords(filtered);
-  };
+  }, [testRecords, filters, sortBy, sortOrder]);
+
+  // 应用过滤器
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+  // 删除测试记录
+  const handleDeleteRecord = useCallback(
+    (recordId: string) => {
+      const record = testRecords.find(item => item.id === recordId) || null;
+      setDeleteDialog({
+        isOpen: true,
+        record,
+        isLoading: false,
+      });
+    },
+    [testRecords]
+  );
+
+  const closeDeleteDialog = useCallback(() => {
+    setDeleteDialog({
+      isOpen: false,
+      record: null,
+      isLoading: false,
+    });
+  }, []);
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteDialog.record) {
+      return;
+    }
+
+    setDeleteDialog(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      const response = await fetch(
+        `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/test/history/${deleteDialog.record.id}`,
+        {
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        Logger.debug('✅ Test record deleted successfully');
+        setTestRecords(prev => prev.filter(record => record.id !== deleteDialog.record?.id));
+
+        if (selectedRecord?.id === deleteDialog.record?.id) {
+          setSelectedRecord(null);
+        }
+
+        showToast.success('测试记录删除成功');
+        closeDeleteDialog();
+      } else {
+        throw new Error(data.message || 'Failed to delete test record');
+      }
+    } catch (error) {
+      Logger.error('❌ Failed to delete test record:', error);
+      showToast.error('删除测试记录失败，请稍后重试。');
+    } finally {
+      setDeleteDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  }, [closeDeleteDialog, deleteDialog.record, getAuthHeaders, selectedRecord]);
 
   const handleExportData = (format: 'json' | 'csv' | 'excel') => {
     const dataToExport = filteredRecords.map(record => ({
@@ -438,7 +472,7 @@ const DataStorage: React.FC = () => {
                   role="tab"
                   aria-selected={activeTab === tab.id}
                   aria-controls={`${tab.id}-panel`}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as TabId)}
                   className={`data-tab-button flex items-center space-x-2 rounded-lg transition-colors ${
                     activeTab === tab.id
                       ? 'bg-blue-600 text-white'
@@ -607,7 +641,7 @@ const DataStorage: React.FC = () => {
                       <span className="text-sm text-gray-300">排序:</span>
                       <select
                         value={sortBy}
-                        onChange={e => setSortBy(e?.target.value as any)}
+                        onChange={e => setSortBy(e.target.value as SortField)}
                         className="px-3 py-1 bg-gray-700/50 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         aria-label="选择排序方式"
                         title="选择数据排序的方式"
@@ -852,6 +886,21 @@ const DataStorage: React.FC = () => {
             </article>
           </div>
         )}
+
+        <DeleteConfirmDialog
+          isOpen={deleteDialog.isOpen}
+          onClose={closeDeleteDialog}
+          onConfirm={confirmDelete}
+          title="确认删除"
+          message={
+            deleteDialog.record
+              ? `确定要删除测试记录 "${deleteDialog.record.id}" 吗？此操作无法撤销。`
+              : '确定要删除该测试记录吗？此操作无法撤销。'
+          }
+          itemNames={deleteDialog.record ? [deleteDialog.record.id] : []}
+          isLoading={deleteDialog.isLoading}
+          type="single"
+        />
       </div>
     </main>
   );

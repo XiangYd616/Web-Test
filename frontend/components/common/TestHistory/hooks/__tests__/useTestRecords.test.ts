@@ -1,14 +1,14 @@
 ﻿/**
  * useTestRecords Hook - Unit Tests
- * 
+ *
  * Tests for the useTestRecords custom hook that manages test records
  * loading and state for the TestHistory component.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useTestRecords } from '../useTestRecords';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TestRecord } from '../../types';
+import { useTestRecords } from '../useTestRecords';
 
 // Helper function to create mock test record
 const createMockRecord = (id: string): TestRecord => ({
@@ -30,7 +30,7 @@ describe('useTestRecords', () => {
     global.fetch = mockFetch;
     vi.clearAllMocks();
     vi.useFakeTimers();
-    
+
     // Mock localStorage
     const localStorageMock = {
       getItem: vi.fn((key: string) => {
@@ -56,7 +56,7 @@ describe('useTestRecords', () => {
 
   describe('Initial State', () => {
     it('should initialize with default values', () => {
-      const { result } = renderHook(() => useTestRecords());
+      const { result } = renderHook(() => useTestRecords({ testType: 'stress' }));
 
       expect(result.current.records).toEqual([]);
       expect(result.current.loading).toBe(true);
@@ -150,9 +150,9 @@ describe('useTestRecords', () => {
       });
 
       const callUrl = mockFetch.mock.calls[0][0];
-      expect(callUrl).toContain('type=stress');
+      expect(callUrl).toContain('testType=stress');
       expect(callUrl).toContain('page=2');
-      expect(callUrl).toContain('pageSize=20');
+      expect(callUrl).toContain('limit=20');
       expect(callUrl).toContain('search=test+search');
       expect(callUrl).toContain('status=running');
       expect(callUrl).toContain('dateFilter=today');
@@ -304,7 +304,7 @@ describe('useTestRecords', () => {
 
     it('should wait for in-flight request with same params', async () => {
       let resolveRequest: () => void;
-      const requestPromise = new Promise<void>((resolve) => {
+      const requestPromise = new Promise<void>(resolve => {
         resolveRequest = resolve;
       });
 
@@ -462,7 +462,7 @@ describe('useTestRecords', () => {
   describe('Loading State', () => {
     it('should set loading to true during request', async () => {
       let resolveRequest: () => void;
-      const requestPromise = new Promise<void>((resolve) => {
+      const requestPromise = new Promise<void>(resolve => {
         resolveRequest = resolve;
       });
 
@@ -563,7 +563,7 @@ describe('useTestRecords', () => {
       const { result } = renderHook(() => useTestRecords());
 
       await act(async () => {
-        await result.current.loadTestRecords(undefined as any);
+        await result.current.loadTestRecords();
       });
 
       expect(result.current.loading).toBe(false);
@@ -596,5 +596,3 @@ describe('useTestRecords', () => {
     });
   });
 });
-
-

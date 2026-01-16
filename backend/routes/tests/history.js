@@ -209,59 +209,6 @@ router.delete('/:testId',
 );
 
 /**
- * POST /api/test/history/batch-delete
- * 批量删除测试记录
- */
-router.post('/batch-delete', 
-  authMiddleware,
-  async (req, res) => {
-    try {
-      const { testIds } = req.body;
-      const userId = req.user.id;
-
-      if (!Array.isArray(testIds) || testIds.length === 0) {
-        return res.status(400).json({
-          success: false,
-          error: '测试ID列表不能为空'
-        });
-      }
-
-      // 验证所有UUID格式
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      const invalidIds = testIds.filter(id => !uuidRegex.test(id));
-      if (invalidIds.length > 0) {
-        
-        return res.status(400).json({
-          success: false,
-          error: '包含无效的测试ID格式',
-          details: invalidIds
-      });
-      }
-
-      let result;
-      if (testHistoryService) {
-        result = await testHistoryService.batchDeleteTestRecords(testIds, userId);
-      } else {
-        result = {
-          success: false,
-          error: '历史服务不可用'
-        };
-      }
-
-      res.json(result);
-
-    } catch (error) {
-      console.error('批量删除测试记录失败:', error);
-      res.status(500).json({
-        success: false,
-        error: '批量删除测试记录失败',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      });
-    }
-  }
-);
-
-/**
  * GET /api/test/history/export
  * 导出测试历史
  */

@@ -1,14 +1,14 @@
 ﻿/**
  * useDeleteActions Hook - Unit Tests
- * 
+ *
  * Tests for the useDeleteActions custom hook that manages delete operations
  * for the TestHistory component.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useDeleteActions } from '../useDeleteActions';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TestRecord } from '../../types';
+import { useDeleteActions } from '../useDeleteActions';
 
 // Mock the Toast module
 vi.mock('../../../../common/Toast', () => ({
@@ -17,7 +17,7 @@ vi.mock('../../../../common/Toast', () => ({
     error: vi.fn(),
     info: vi.fn(),
     warning: vi.fn(),
-  }
+  },
 }));
 
 import { showToast } from '../../../../common/Toast';
@@ -40,11 +40,7 @@ describe('useDeleteActions', () => {
   const mockOnSelectionCleared = vi.fn();
 
   const defaultProps = {
-    records: [
-      createMockRecord('1'),
-      createMockRecord('2'),
-      createMockRecord('3'),
-    ],
+    records: [createMockRecord('1'), createMockRecord('2'), createMockRecord('3')],
     selectedRecords: new Set<string>(),
     onRecordsDeleted: mockOnRecordsDeleted,
     onSelectionCleared: mockOnSelectionCleared,
@@ -54,7 +50,7 @@ describe('useDeleteActions', () => {
     mockFetch = vi.fn();
     global.fetch = mockFetch;
     vi.clearAllMocks();
-    
+
     // Mock localStorage.getItem directly on the window object
     const localStorageMock = {
       getItem: vi.fn((key: string) => {
@@ -215,7 +211,7 @@ describe('useDeleteActions', () => {
           method: 'DELETE',
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer test-token',
+            Authorization: 'Bearer test-token',
           }),
         })
       );
@@ -263,9 +259,7 @@ describe('useDeleteActions', () => {
         await result.current.confirmDelete();
       });
 
-      expect(showToast.error).toHaveBeenCalledWith(
-        expect.stringContaining('没有权限删除此记录')
-      );
+      expect(showToast.error).toHaveBeenCalledWith(expect.stringContaining('没有权限删除此记录'));
     });
 
     it('should handle 429 rate limit error', async () => {
@@ -285,9 +279,7 @@ describe('useDeleteActions', () => {
         await result.current.confirmDelete();
       });
 
-      expect(showToast.error).toHaveBeenCalledWith(
-        expect.stringContaining('请求过于频繁')
-      );
+      expect(showToast.error).toHaveBeenCalledWith(expect.stringContaining('请求过于频繁'));
     });
 
     it('should handle server error response', async () => {
@@ -306,9 +298,7 @@ describe('useDeleteActions', () => {
         await result.current.confirmDelete();
       });
 
-      expect(showToast.error).toHaveBeenCalledWith(
-        expect.stringContaining('Server error')
-      );
+      expect(showToast.error).toHaveBeenCalledWith(expect.stringContaining('Server error'));
     });
   });
 
@@ -334,10 +324,10 @@ describe('useDeleteActions', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/test/history/batch',
+        '/api/test/batch-delete',
         expect.objectContaining({
-          method: 'DELETE',
-          body: JSON.stringify({ sessionIds: ['1', '2'] }),
+          method: 'POST',
+          body: JSON.stringify({ ids: ['1', '2'] }),
         })
       );
       expect(showToast.success).toHaveBeenCalledWith('成功删除 2 条记录');
@@ -388,16 +378,14 @@ describe('useDeleteActions', () => {
         await result.current.confirmDelete();
       });
 
-      expect(showToast.error).toHaveBeenCalledWith(
-        expect.stringContaining('Batch delete failed')
-      );
+      expect(showToast.error).toHaveBeenCalledWith(expect.stringContaining('Batch delete failed'));
     });
   });
 
   describe('Loading State', () => {
     it('should set loading state during delete operation', async () => {
       let resolveDelete: () => void;
-      const deletePromise = new Promise<void>((resolve) => {
+      const deletePromise = new Promise<void>(resolve => {
         resolveDelete = resolve;
       });
 
@@ -474,7 +462,7 @@ describe('useDeleteActions', () => {
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Authorization': 'Bearer test-token',
+            Authorization: 'Bearer test-token',
           }),
         })
       );
@@ -539,11 +527,7 @@ describe('useDeleteActions', () => {
         await result.current.confirmDelete();
       });
 
-      expect(showToast.error).toHaveBeenCalledWith(
-        expect.stringContaining('Network error')
-      );
+      expect(showToast.error).toHaveBeenCalledWith(expect.stringContaining('Network error'));
     });
   });
 });
-
-

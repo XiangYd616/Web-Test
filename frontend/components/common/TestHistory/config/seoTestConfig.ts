@@ -149,7 +149,7 @@ export const seoTestConfig: TestHistoryConfig = {
       key: 'rerun',
       label: '重新测试',
       onClick: record => {
-        console.log('重新运行SEO测试:', record);
+        void record;
       },
       visible: record => ['completed', 'failed'].includes(record.status),
     },

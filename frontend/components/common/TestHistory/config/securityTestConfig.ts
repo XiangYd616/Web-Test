@@ -8,7 +8,7 @@ import { TestHistoryConfig } from '../types';
 export const securityTestConfig: TestHistoryConfig = {
   // 基础配置
   testType: 'security',
-  apiEndpoint: '/api/test/security',
+  apiEndpoint: '/api/test/history',
   title: '安全测试历史',
   description: '查看和管理所有安全测试记录',
 
@@ -55,14 +55,23 @@ export const securityTestConfig: TestHistoryConfig = {
       width: 120,
       sortable: true,
       align: 'right',
-      formatter: (value: any) => {
+      formatter: (
+        value:
+          | { critical?: number; high?: number; medium?: number; low?: number }
+          | null
+          | undefined
+      ) => {
         if (!value) return '0';
         const { critical = 0, high = 0, medium = 0, low = 0 } = value;
         const total = critical + high + medium + low;
-        const color = critical > 0 ? 'text-red-400' :
-                      high > 0 ? 'text-orange-400' :
-                      medium > 0 ? 'text-yellow-400' :
-                      'text-green-400';
+        const color =
+          critical > 0
+            ? 'text-red-400'
+            : high > 0
+              ? 'text-orange-400'
+              : medium > 0
+                ? 'text-yellow-400'
+                : 'text-green-400';
         return `<span class="${color} font-semibold">${total}</span>`;
       },
     },
@@ -87,9 +96,8 @@ export const securityTestConfig: TestHistoryConfig = {
       align: 'center',
       formatter: (score: number) => {
         if (score === undefined || score === null) return '-';
-        const color = score >= 90 ? 'text-green-400' :
-                      score >= 70 ? 'text-yellow-400' :
-                      'text-red-400';
+        const color =
+          score >= 90 ? 'text-green-400' : score >= 70 ? 'text-yellow-400' : 'text-red-400';
         return `<span class="${color} text-lg font-bold">${score}</span>`;
       },
     },
@@ -111,7 +119,7 @@ export const securityTestConfig: TestHistoryConfig = {
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit',
-          minute: '2-digit'
+          minute: '2-digit',
         });
       },
     },
@@ -181,18 +189,18 @@ export const securityTestConfig: TestHistoryConfig = {
     {
       key: 'viewReport',
       label: '查看报告',
-      onClick: (record) => {
+      onClick: record => {
         window.location.href = `/testing/security/report/${record.id}`;
       },
-      visible: (record) => record.status === 'completed',
+      visible: record => record.status === 'completed',
     },
     {
       key: 'rescan',
       label: '重新扫描',
-      onClick: (record) => {
-        console.log('重新扫描:', record);
+      onClick: record => {
+        void record;
       },
-      visible: (record) => ['completed', 'failed', 'cancelled'].includes(record.status),
+      visible: record => ['completed', 'failed', 'cancelled'].includes(record.status),
     },
   ],
 

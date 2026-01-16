@@ -1,14 +1,14 @@
 /**
  * useDeleteActions Hook - 管理删除操作逻辑
- * 
+ *
  * 文件路径: frontend/components/stress/StressTestHistory/hooks/useDeleteActions.ts
  * 创建时间: 2025-10-05
  */
 
 import Logger from '@/utils/logger';
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { showToast } from '../../../common/Toast';
-import type { TestRecord, DeleteDialogState } from '../types';
+import type { DeleteDialogState, TestRecord } from '../types';
 
 interface UseDeleteActionsProps {
   records: TestRecord[];
@@ -29,26 +29,29 @@ export const useDeleteActions = ({
   records,
   selectedRecords,
   onRecordsDeleted,
-  onSelectionCleared
+  onSelectionCleared,
 }: UseDeleteActionsProps): UseDeleteActionsReturn => {
   const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>({
     isOpen: false,
     type: 'single',
-    isLoading: false
+    isLoading: false,
   });
 
-  const openDeleteDialog = useCallback((recordId: string) => {
-    const recordToDelete = records.find(r => r.id === recordId);
-    const recordName = recordToDelete ? recordToDelete.testName : '测试记录';
+  const openDeleteDialog = useCallback(
+    (recordId: string) => {
+      const recordToDelete = records.find(r => r.id === recordId);
+      const recordName = recordToDelete ? recordToDelete.testName : '测试记录';
 
-    setDeleteDialog({
-      isOpen: true,
-      type: 'single',
-      recordId,
-      recordName,
-      isLoading: false
-    });
-  }, [records]);
+      setDeleteDialog({
+        isOpen: true,
+        type: 'single',
+        recordId,
+        recordName,
+        isLoading: false,
+      });
+    },
+    [records]
+  );
 
   const openBatchDeleteDialog = useCallback(() => {
     if (selectedRecords.size === 0) {
@@ -63,7 +66,7 @@ export const useDeleteActions = ({
       isOpen: true,
       type: 'batch',
       recordNames,
-      isLoading: false
+      isLoading: false,
     });
   }, [records, selectedRecords]);
 
@@ -79,10 +82,12 @@ export const useDeleteActions = ({
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        ...(localStorage.getItem('auth_token') ? {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        } : {})
-      }
+        ...(localStorage.getItem('auth_token')
+          ? {
+              Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+            }
+          : {}),
+      },
     });
 
     if (!response.ok) {
@@ -112,17 +117,19 @@ export const useDeleteActions = ({
       throw new Error('请先选择要删除的记录');
     }
 
-    const response = await fetch('/api/test/history/batch', {
-      method: 'DELETE',
+    const response = await fetch('/api/test/batch-delete', {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(localStorage.getItem('auth_token') ? {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        } : {})
+        ...(localStorage.getItem('auth_token')
+          ? {
+              Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+            }
+          : {}),
       },
       body: JSON.stringify({
-        sessionIds: Array.from(selectedRecords)
-      })
+        ids: Array.from(selectedRecords),
+      }),
     });
 
     if (!response.ok) {
@@ -175,7 +182,6 @@ export const useDeleteActions = ({
     openDeleteDialog,
     openBatchDeleteDialog,
     closeDeleteDialog,
-    confirmDelete
+    confirmDelete,
   };
 };
-

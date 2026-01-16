@@ -1,16 +1,16 @@
 /**
  * Stress Test History Page - 压力测试历史页面
- * 
+ *
  * 文件路径: frontend/pages/testing/stress/history.tsx
  * 创建时间: 2025-11-13
- * 
+ *
  * 功能:使用配置驱动的TestHistory组件展示压力测试历史
  */
 
-import React from 'react';
 import { TestHistory } from '@/components/common/TestHistory/TestHistory';
 import { stressTestConfig } from '@/components/common/TestHistory/config';
 import type { TestRecord } from '@/components/common/TestHistory/types';
+import React from 'react';
 
 /**
  * 压力测试历史页面组件
@@ -25,12 +25,14 @@ const StressTestHistoryPage: React.FC = () => {
   // 自定义删除处理
   const handleRecordDelete = async (id: string) => {
     // 调用API删除
-    const response = await fetch(`/api/test/stress/${id}`, {
+    const response = await fetch(`/api/test/history/${id}`, {
       method: 'DELETE',
       headers: {
-        ...(localStorage.getItem('auth_token') ? {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        } : {})
+        ...(localStorage.getItem('auth_token')
+          ? {
+              Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+            }
+          : {}),
       },
     });
 
@@ -41,9 +43,22 @@ const StressTestHistoryPage: React.FC = () => {
 
   // 批量删除处理
   const handleBatchDelete = async (ids: string[]) => {
-    await Promise.all(
-      ids.map(id => handleRecordDelete(id))
-    );
+    const response = await fetch('/api/test/batch-delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(localStorage.getItem('auth_token')
+          ? {
+              Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+            }
+          : {}),
+      },
+      body: JSON.stringify({ ids }),
+    });
+
+    if (!response.ok) {
+      throw new Error('批量删除失败');
+    }
   };
 
   return (

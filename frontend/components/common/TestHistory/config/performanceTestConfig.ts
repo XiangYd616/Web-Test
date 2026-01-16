@@ -8,7 +8,7 @@ import { TestHistoryConfig } from '../types';
 export const performanceTestConfig: TestHistoryConfig = {
   // 基础配置
   testType: 'performance',
-  apiEndpoint: '/api/test/performance',
+  apiEndpoint: '/api/test/history',
   title: '性能测试历史',
   description: '查看和管理所有性能测试记录',
 
@@ -39,9 +39,8 @@ export const performanceTestConfig: TestHistoryConfig = {
       align: 'center',
       formatter: (score: number) => {
         if (score === undefined || score === null) return '-';
-        const scoreClass = score >= 90 ? 'text-green-400' :
-                           score >= 70 ? 'text-yellow-400' :
-                           'text-red-400';
+        const scoreClass =
+          score >= 90 ? 'text-green-400' : score >= 70 ? 'text-yellow-400' : 'text-red-400';
         return `<span class="${scoreClass} text-lg font-bold">${score}</span>`;
       },
     },
@@ -53,9 +52,7 @@ export const performanceTestConfig: TestHistoryConfig = {
       align: 'right',
       formatter: (ms: number) => {
         if (!ms && ms !== 0) return '-';
-        const color = ms < 1000 ? 'text-green-400' :
-                      ms < 2000 ? 'text-yellow-400' :
-                      'text-red-400';
+        const color = ms < 1000 ? 'text-green-400' : ms < 2000 ? 'text-yellow-400' : 'text-red-400';
         return `<span class="${color}">${(ms / 1000).toFixed(2)}s</span>`;
       },
     },
@@ -67,9 +64,7 @@ export const performanceTestConfig: TestHistoryConfig = {
       align: 'right',
       formatter: (ms: number) => {
         if (!ms && ms !== 0) return '-';
-        const color = ms < 2500 ? 'text-green-400' :
-                      ms < 4000 ? 'text-yellow-400' :
-                      'text-red-400';
+        const color = ms < 2500 ? 'text-green-400' : ms < 4000 ? 'text-yellow-400' : 'text-red-400';
         return `<span class="${color}">${(ms / 1000).toFixed(2)}s</span>`;
       },
     },
@@ -81,9 +76,7 @@ export const performanceTestConfig: TestHistoryConfig = {
       align: 'right',
       formatter: (ms: number) => {
         if (!ms && ms !== 0) return '-';
-        const color = ms < 3000 ? 'text-green-400' :
-                      ms < 5000 ? 'text-yellow-400' :
-                      'text-red-400';
+        const color = ms < 3000 ? 'text-green-400' : ms < 5000 ? 'text-yellow-400' : 'text-red-400';
         return `<span class="${color}">${(ms / 1000).toFixed(2)}s</span>`;
       },
     },
@@ -95,9 +88,8 @@ export const performanceTestConfig: TestHistoryConfig = {
       align: 'right',
       formatter: (value: number) => {
         if (value === undefined || value === null) return '-';
-        const color = value < 0.1 ? 'text-green-400' :
-                      value < 0.25 ? 'text-yellow-400' :
-                      'text-red-400';
+        const color =
+          value < 0.1 ? 'text-green-400' : value < 0.25 ? 'text-yellow-400' : 'text-red-400';
         return `<span class="${color}">${value.toFixed(3)}</span>`;
       },
     },
@@ -119,7 +111,7 @@ export const performanceTestConfig: TestHistoryConfig = {
           month: '2-digit',
           day: '2-digit',
           hour: '2-digit',
-          minute: '2-digit'
+          minute: '2-digit',
         });
       },
     },
@@ -187,18 +179,18 @@ export const performanceTestConfig: TestHistoryConfig = {
     {
       key: 'compare',
       label: '对比',
-      onClick: (record) => {
-        console.log('对比性能测试:', record);
+      onClick: record => {
+        void record;
       },
-      visible: (record) => record.status === 'completed',
+      visible: record => record.status === 'completed',
     },
     {
       key: 'rerun',
       label: '重新测试',
-      onClick: (record) => {
-        console.log('重新运行性能测试:', record);
+      onClick: record => {
+        void record;
       },
-      visible: (record) => ['completed', 'failed', 'cancelled'].includes(record.status),
+      visible: record => ['completed', 'failed', 'cancelled'].includes(record.status),
     },
   ],
 

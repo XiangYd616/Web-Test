@@ -7,17 +7,19 @@ export interface TestSession {
   startTime: number;
   endTime?: number;
   userId?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TestHistoryQuery {
   page?: number;
   pageSize?: number;
-  testType?: string;
+  testType?: string | string[];
   status?: string;
   dateFrom?: string | number;
   dateTo?: string | number;
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface TestHistoryResponse {
@@ -32,7 +34,7 @@ export interface TestStatistics {
   passed: number;
   failed: number;
   running: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface BatchOperationResult {
@@ -42,12 +44,6 @@ export interface BatchOperationResult {
   errors?: string[];
 }
 
-export type TestType = 
-  | 'stress'
-  | 'performance'
-  | 'api'
-  | 'security'
-  | 'seo'
-  | 'accessibility';
+export type TestType = 'stress' | 'performance' | 'api' | 'security' | 'seo' | 'accessibility';
 
 export {};

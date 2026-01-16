@@ -1,26 +1,26 @@
 /**
  * TestHistory 配置验证测试
- * 
+ *
  * 文件路径: frontend/components/common/TestHistory/__tests__/config.test.ts
  * 创建时间: 2025-11-14
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   configMap,
+  getSupportedTestTypes,
   getTestHistoryConfig,
   isSupportedTestType,
-  getSupportedTestTypes,
 } from '../config';
-import { stressTestConfig } from '../config/stressTestConfig';
-import { seoTestConfig } from '../config/seoTestConfig';
-import { apiTestConfig } from '../config/apiTestConfig';
-import { performanceTestConfig } from '../config/performanceTestConfig';
-import { securityTestConfig } from '../config/securityTestConfig';
 import { accessibilityTestConfig } from '../config/accessibilityTestConfig';
+import { apiTestConfig } from '../config/apiTestConfig';
 import { compatibilityTestConfig } from '../config/compatibilityTestConfig';
 import { databaseTestConfig } from '../config/databaseTestConfig';
 import { networkTestConfig } from '../config/networkTestConfig';
+import { performanceTestConfig } from '../config/performanceTestConfig';
+import { securityTestConfig } from '../config/securityTestConfig';
+import { seoTestConfig } from '../config/seoTestConfig';
+import { stressTestConfig } from '../config/stressTestConfig';
 
 describe('配置系统', () => {
   describe('configMap', () => {
@@ -112,7 +112,7 @@ describe('个别配置验证', () => {
   describe('stressTestConfig', () => {
     it('应该有正确的基础配置', () => {
       expect(stressTestConfig.testType).toBe('stress');
-      expect(stressTestConfig.apiEndpoint).toBe('/api/test/stress');
+      expect(stressTestConfig.apiEndpoint).toBe('/api/test/history');
       expect(stressTestConfig.title).toBe('压力测试历史');
     });
 
@@ -158,7 +158,7 @@ describe('个别配置验证', () => {
   describe('seoTestConfig', () => {
     it('应该有正确的基础配置', () => {
       expect(seoTestConfig.testType).toBe('seo');
-      expect(seoTestConfig.apiEndpoint).toBe('/api/test/seo');
+      expect(seoTestConfig.apiEndpoint).toBe('/api/test/history');
       expect(seoTestConfig.title).toBe('SEO测试历史');
     });
 
@@ -176,7 +176,7 @@ describe('个别配置验证', () => {
   describe('apiTestConfig', () => {
     it('应该有正确的基础配置', () => {
       expect(apiTestConfig.testType).toBe('api');
-      expect(apiTestConfig.apiEndpoint).toBe('/api/test/api');
+      expect(apiTestConfig.apiEndpoint).toBe('/api/test/history');
     });
 
     it('应该包含API特定的列', () => {
@@ -190,7 +190,7 @@ describe('个别配置验证', () => {
   describe('performanceTestConfig', () => {
     it('应该有正确的基础配置', () => {
       expect(performanceTestConfig.testType).toBe('performance');
-      expect(performanceTestConfig.apiEndpoint).toBe('/api/test/performance');
+      expect(performanceTestConfig.apiEndpoint).toBe('/api/test/history');
     });
 
     it('应该包含性能特定的列', () => {
@@ -205,7 +205,7 @@ describe('个别配置验证', () => {
   describe('securityTestConfig', () => {
     it('应该有正确的基础配置', () => {
       expect(securityTestConfig.testType).toBe('security');
-      expect(securityTestConfig.apiEndpoint).toBe('/api/test/security');
+      expect(securityTestConfig.apiEndpoint).toBe('/api/test/history');
     });
 
     it('应该包含安全特定的列', () => {
@@ -222,7 +222,7 @@ describe('配置一致性验证', () => {
     Object.values(configMap).forEach(config => {
       expect(config.statusOptions).toBeDefined();
       expect(config.statusOptions.length).toBeGreaterThan(0);
-      
+
       // 应该包含"全部状态"选项
       const allOption = config.statusOptions.find(opt => opt.value === 'all');
       expect(allOption).toBeDefined();
@@ -230,8 +230,8 @@ describe('配置一致性验证', () => {
   });
 
   it('所有配置的apiEndpoint应该匹配testType', () => {
-    Object.entries(configMap).forEach(([type, config]) => {
-      expect(config.apiEndpoint).toContain(type);
+    Object.entries(configMap).forEach(([_type, config]) => {
+      expect(config.apiEndpoint).toBe('/api/test/history');
     });
   });
 

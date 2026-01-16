@@ -12,11 +12,11 @@
  */
 
 import Logger from '@/utils/logger';
-import { Eye, FileJson, FileSpreadsheet, Trash2 } from 'lucide-react';
+import { FileJson, FileSpreadsheet } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 
 // 导入类型定义
-import type { ColumnConfig, DeleteDialogState, TestHistoryProps, TestRecord } from './types';
+import type { DeleteDialogState, TestHistoryProps, TestRecord } from './types';
 
 // 导入hooks
 import { useExport } from './hooks/useExport';
@@ -30,12 +30,7 @@ import { EmptyState } from './components/EmptyState';
 import { FilterBar } from './components/FilterBar';
 import { HistoryHeader } from './components/HistoryHeader';
 import { ResponsiveTable } from './components/ResponsiveTable';
-import {
-  useAriaLiveAnnouncer,
-  useFocusTrap,
-  useHighContrast,
-  useReducedMotion,
-} from './hooks/useAccessibility';
+import { useAriaLiveAnnouncer, useFocusTrap } from './hooks/useAccessibility';
 import { useCommonMediaQueries } from './hooks/useResponsive';
 
 /**
@@ -64,135 +59,7 @@ const StatusBadge: React.FC<{ status: string; formatter?: (status: string) => st
     );
   });
 
-/**
- * 表格行组件
- */
-const TableRow: React.FC<{
-  record: TestRecord;
-  columns: ColumnConfig[];
-  isSelected: boolean;
-  onSelect: (id: string) => void;
-  onView: (record: TestRecord) => void;
-  onDelete: (id: string) => void;
-  customActions?: any[];
-  formatters?: any;
-}> = React.memo(
-  ({
-    record,
-    columns,
-    isSelected,
-    onSelect,
-    onView,
-    onDelete,
-    customActions = [],
-    formatters = {},
-  }) => {
-    return (
-      <tr className="hover:bg-gray-700/30 transition-colors duration-150">
-        {/* 复选框列 */}
-        <td className="px-4 py-3 whitespace-nowrap">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={() => onSelect(record.id)}
-            className="w-4 h-4 rounded border-gray-600 bg-gray-700/50 text-blue-500 focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
-            aria-label={`选择 ${record.testName || record.id}`}
-          />
-        </td>
-
-        {/* 数据列 */}
-        {columns.map(column => {
-          const value = (record as any)[column.key];
-          let displayValue: React.ReactNode = value;
-
-          // 应用列级格式化器
-          if (column.formatter) {
-            displayValue = column.formatter(value, record);
-          }
-          // 应用全局格式化器
-          else if (formatters[column.key]) {
-            displayValue = formatters[column.key](value);
-          }
-          // 特殊处理status列
-          else if (column.key === 'status') {
-            displayValue = <StatusBadge status={value} formatter={formatters.status} />;
-          }
-          // 默认显示
-          else if (value === null || value === undefined) {
-            displayValue = '-';
-          }
-
-          const alignClass =
-            column.align === 'right'
-              ? 'text-right'
-              : column.align === 'center'
-                ? 'text-center'
-                : 'text-left';
-
-          return (
-            <td
-              key={column.key}
-              className={`px-4 py-3 text-sm text-gray-300 ${alignClass}`}
-              style={{ width: column.width }}
-            >
-              {displayValue}
-            </td>
-          );
-        })}
-
-        {/* 操作列 */}
-        <td className="px-4 py-3 whitespace-nowrap text-right">
-          <div className="flex items-center justify-end gap-2">
-            {/* 查看详情 */}
-            <button
-              onClick={() => onView(record)}
-              className="p-1.5 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded transition-colors"
-              title="查看详情"
-              aria-label={`查看 ${record.testName || record.id} 的详情`}
-            >
-              <Eye className="w-4 h-4" />
-            </button>
-
-            {/* 自定义操作 */}
-            {customActions.map(action => {
-              const isVisible = !action.visible || action.visible(record);
-              const isDisabled = action.disabled && action.disabled(record);
-
-              if (!isVisible) return null;
-
-              return (
-                <button
-                  key={action.key}
-                  onClick={() => action.onClick(record)}
-                  disabled={isDisabled}
-                  className={`p-1.5 rounded transition-colors ${
-                    isDisabled
-                      ? 'text-gray-500 cursor-not-allowed'
-                      : 'text-gray-400 hover:text-gray-300 hover:bg-gray-600/30'
-                  }`}
-                  title={action.label}
-                  aria-label={`${action.label}: ${record.testName || record.id}`}
-                >
-                  {action.icon || action.label}
-                </button>
-              );
-            })}
-
-            {/* 删除 */}
-            <button
-              onClick={() => onDelete(record.id)}
-              className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
-              title="删除"
-              aria-label={`删除 ${record.testName || record.id}`}
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        </td>
-      </tr>
-    );
-  }
-);
+StatusBadge.displayName = 'StatusBadge';
 
 /**
  * 删除确认对话框组件
@@ -251,6 +118,8 @@ const DeleteDialog: React.FC<{
   );
 };
 
+DeleteDialog.displayName = 'DeleteDialog';
+
 /**
  * TestHistory 主组件
  */
@@ -288,8 +157,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
   } = useFilters();
   const { currentPage, pageSize, totalPages, startRecord, endRecord, goToPage, changePageSize } =
     usePagination(totalRecords, config.defaultPageSize || 10);
-  const { selectedIds, isSelected, selectAll, toggleSelect, clearSelection } =
-    useSelection(records);
+  const { selectedIds, selectAll, toggleSelect, clearSelection } = useSelection(records);
   const { exportToJson, exportToCsv } = useExport();
 
   // 响应式状态
@@ -304,8 +172,6 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
 
   // 无障碍支持
   const { announcement, announce } = useAriaLiveAnnouncer();
-  const { isHighContrast } = useHighContrast();
-  const { prefersReducedMotion } = useReducedMotion();
   const dialogFocusTrapRef = useFocusTrap(deleteDialogState.isOpen);
 
   // ===== 数据加载 =====
@@ -329,6 +195,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
     sortBy,
     sortOrder,
     additionalFilters,
+    loadTestRecords,
   ]);
 
   // ===== 事件处理 =====
@@ -354,6 +221,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
     sortBy,
     sortOrder,
     additionalFilters,
+    loadTestRecords,
   ]);
 
   // 查看详情
@@ -461,7 +329,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
     } catch (error) {
       Logger.error('删除失败:', error);
       setDeleteDialogState(prev => ({ ...prev, isLoading: false }));
-      alert('删除失败,请重试');
+      announce('删除失败,请重试');
     }
   }, [
     deleteDialogState,
@@ -470,6 +338,9 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
     selectedIds,
     config.apiEndpoint,
     handleRefresh,
+    announce,
+    clearSelection,
+    setRecords,
   ]);
 
   // 取消删除
@@ -490,10 +361,10 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
         announce(`成功导出 ${format.toUpperCase()} 格式数据`);
       } catch (error) {
         Logger.error('导出失败:', error);
-        alert('导出失败,请重试');
+        announce('导出失败,请重试');
       }
     },
-    [records, config.columns, exportToJson, exportToCsv]
+    [records, exportToJson, exportToCsv, announce]
   );
 
   // ===== 渲染 =====

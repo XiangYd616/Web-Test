@@ -1,6 +1,4 @@
-import Logger from '@/utils/logger';
-
-﻿/**
+import Logger from '@/utils/logger'; /**
  * 历史管理服务
  * 提供测试历史的管理、查询、分析功能
  */
@@ -15,8 +13,8 @@ export interface HistoryRecord {
   startTime: string;
   endTime: string;
   duration: number;
-  results: any;
-  metrics: any;
+  results: unknown;
+  metrics: unknown;
   tags: string[];
   notes: string;
   archived: boolean;
@@ -56,7 +54,7 @@ export interface HistoryAnalytics {
 
 class HistoryManagementService {
   private baseUrl = '/api/test/history';
-  private cache = new Map<string, any>();
+  private cache = new Map<string, { data: HistoryAnalytics; timestamp: number }>();
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 
   /**
@@ -68,16 +66,16 @@ class HistoryManagementService {
   ): Promise<{
     records: HistoryRecord[];
     total: number;
-    pagination: any;
+    pagination: unknown;
   }> {
     try {
       const params = new URLSearchParams();
-      
+
       if (filter.testType) params.append('type', filter.testType);
       if (filter.status) params.append('status', filter.status);
       if (filter.search) params.append('search', filter.search);
       if (filter.archived !== undefined) params.append('archived', filter.archived.toString());
-      
+
       params.append('page', pagination?.page.toString());
       params.append('limit', pagination?.limit.toString());
 
@@ -91,7 +89,7 @@ class HistoryManagementService {
       return {
         records: data.data.tests || [],
         total: data.data.pagination?.total || 0,
-        pagination: data.data.pagination
+        pagination: data.data.pagination,
       };
     } catch (error) {
       Logger.error('获取历史记录失败:', error);
@@ -124,7 +122,7 @@ class HistoryManagementService {
   async deleteHistory(id: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       const data = await response.json();
@@ -146,12 +144,12 @@ class HistoryManagementService {
    */
   async batchDeleteHistory(ids: string[]): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/batch`, {
-        method: 'DELETE',
+      const response = await fetch('/api/test/batch-delete', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ids })
+        body: JSON.stringify({ ids }),
       });
 
       const data = await response.json();
@@ -174,7 +172,7 @@ class HistoryManagementService {
   async archiveHistory(id: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}/archive`, {
-        method: 'POST'
+        method: 'POST',
       });
 
       const data = await response.json();
@@ -199,9 +197,9 @@ class HistoryManagementService {
       const response = await fetch(`${this.baseUrl}/${id}/notes`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ notes })
+        body: JSON.stringify({ notes }),
       });
 
       const data = await response.json();
@@ -226,9 +224,9 @@ class HistoryManagementService {
       const response = await fetch(`${this.baseUrl}/${id}/tags`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ tag })
+        body: JSON.stringify({ tag }),
       });
 
       const data = await response.json();
@@ -251,7 +249,7 @@ class HistoryManagementService {
   async removeTag(id: string, tag: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}/tags/${encodeURIComponent(tag)}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       const data = await response.json();
@@ -276,19 +274,17 @@ class HistoryManagementService {
     timeRange: number = 30
   ): Promise<HistoryAnalytics> {
     const cacheKey = `analytics-${JSON.stringify(filter)}-${timeRange}`;
-    
+
     // 检查缓存
-    if (this.cache.has(cacheKey)) {
-      const cached = this.cache.get(cacheKey);
-      if (Date.now() - cached.timestamp < this.cacheTimeout) {
-        return cached.data;
-      }
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      return cached.data;
     }
 
     try {
       const params = new URLSearchParams();
       params.append('timeRange', timeRange.toString());
-      
+
       if (filter.testType) params.append('testType', filter.testType);
 
       const response = await fetch(`${this.baseUrl}/analytics?${params}`);
@@ -303,7 +299,7 @@ class HistoryManagementService {
       // 缓存结果
       this.cache.set(cacheKey, {
         data: analytics,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       return analytics;
@@ -323,11 +319,10 @@ class HistoryManagementService {
     try {
       const params = new URLSearchParams();
       params.append('format', format);
-      
+
       if (filter.testType) params.append('testType', filter.testType);
       if (filter.status) params.append('status', filter.status);
 
-      
       /**
       
        * if功能函数
@@ -338,7 +333,7 @@ class HistoryManagementService {
       
        */
       const response = await fetch(`${this.baseUrl}/export?${params}`);
-      
+
       if (format === 'json') {
         const data = await response.json();
         return data.success ? data.downloadUrl : '';

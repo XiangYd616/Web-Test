@@ -38,8 +38,8 @@ export interface ExportOptions {
 }
 
 class TestHistoryService {
-  private baseUrl = '/api/test-history';
-  private cache = new Map<string, any>();
+  private baseUrl = '/api/test/history';
+  private cache = new Map<string, { data: unknown; timestamp: number }>();
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 
   /**
@@ -56,11 +56,11 @@ class TestHistoryService {
   /**
    * 缓存管理
    */
-  private getCacheKey(endpoint: string, params?: any): string {
+  private getCacheKey(endpoint: string, params?: unknown): string {
     return `${endpoint}_${JSON.stringify(params || {})}`;
   }
 
-  private setCache(key: string, data: any): void {
+  private setCache(key: string, data: unknown): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -99,13 +99,13 @@ class TestHistoryService {
     // 基础查询参数
     if (query.page) params?.append('page', query.page.toString());
     if (query.pageSize) params?.append('limit', query.pageSize.toString());
-    if ((query as any).sortBy) params?.append('sortBy', (query as any).sortBy);
-    if ((query as any).sortOrder) params?.append('sortOrder', (query as any).sortOrder);
+    if (query.sortBy) params?.append('sortBy', query.sortBy);
+    if (query.sortOrder) params?.append('sortOrder', query.sortOrder);
 
     // 过滤参数
     if (query.testType) {
       if (Array.isArray(query.testType)) {
-        query.testType.forEach((type: any) => params?.append('testType', type));
+        query.testType.forEach(type => params?.append('testType', type));
       } else {
         params?.append('testType', query.testType);
       }
@@ -148,8 +148,8 @@ class TestHistoryService {
     const params = new URLSearchParams();
     if (query.page) params?.append('page', query.page.toString());
     if (query.pageSize) params?.append('limit', query.pageSize.toString());
-    if ((query as any).sortBy) params?.append('sortBy', (query as any).sortBy);
-    if ((query as any).sortOrder) params?.append('sortOrder', (query as any).sortOrder);
+    if (query.sortBy) params?.append('sortBy', query.sortBy);
+    if (query.sortOrder) params?.append('sortOrder', query.sortOrder);
 
     try {
       const response = await fetch(`${this.baseUrl}/${testType}?${params}`, {
@@ -202,7 +202,7 @@ class TestHistoryService {
     testName: string;
     testType: TestType;
     url?: string;
-    config?: any;
+    config?: Record<string, unknown>;
     environment?: string;
     tags?: string[];
   }): Promise<TestSession> {
@@ -229,7 +229,11 @@ class TestHistoryService {
   /**
    * 更新测试状态
    */
-  async updateTestStatus(sessionId: string, status: string, additionalData?: any): Promise<void> {
+  async updateTestStatus(
+    sessionId: string,
+    status: string,
+    additionalData?: Record<string, unknown>
+  ): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}/status`, {
         method: 'PATCH',
@@ -251,7 +255,7 @@ class TestHistoryService {
   /**
    * 完成测试并保存结果
    */
-  async completeTest(sessionId: string, results: any): Promise<void> {
+  async completeTest(sessionId: string, results: Record<string, unknown>): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${sessionId}/complete`, {
         method: 'POST',
@@ -294,12 +298,12 @@ class TestHistoryService {
   /**
    * 批量删除测试记录
    */
-  async batchDeleteTests(sessionIds: string[]): Promise<BatchOperationResult> {
+  async batchDeleteTests(ids: string[]): Promise<BatchOperationResult> {
     try {
-      const response = await fetch(`${this.baseUrl}/batch/delete`, {
+      const response = await fetch('/api/test/batch-delete', {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({ sessionIds }),
+        body: JSON.stringify({ ids }),
       });
 
       if (!response.ok) {
