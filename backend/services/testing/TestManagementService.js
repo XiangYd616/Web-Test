@@ -6,7 +6,6 @@
 const { v4: uuidv4 } = require('uuid');
 const EventEmitter = require('events');
 const DatabaseService = require('../core/DatabaseService');
-const WebSocketManager = require('../streaming/WebSocketManager');
 const ReportGenerator = require('../reporting/ReportGenerator');
 
 // 引入各个测试引擎
@@ -113,6 +112,10 @@ class TestManagementService extends EventEmitter {
     }
 
     const engine = this.engines.get(engineType);
+    const testConfig = {
+      ...(config || {}),
+      testId
+    };
     
     // 创建测试记录
     const testRecord = {
@@ -122,7 +125,7 @@ class TestManagementService extends EventEmitter {
       engine_name: engine.name,
       test_name: config.name || `${engine.name} - ${new Date().toLocaleString()}`,
       test_url: config.url,
-      test_config: config,
+      test_config: testConfig,
       status: 'pending',
       progress: 0,
       priority: config.priority || 'medium',
@@ -646,6 +649,7 @@ class TestManagementService extends EventEmitter {
     );
 
     if (result.rows.length > 0) {
+      console.warn(`Recovered ${result.rows.length} pending tests after restart.`);
     }
   }
 

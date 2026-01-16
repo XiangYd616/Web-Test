@@ -6,9 +6,11 @@
 const cheerio = require('cheerio');
 const axios = require('axios');
 const Joi = require('joi');
+const EventEmitter = require('events');
 
-class SeoTestEngine {
+class SeoTestEngine extends EventEmitter {
   constructor() {
+    super();
     this.name = 'seo';
     this.activeTests = new Map();
     this.defaultTimeout = 30000;
@@ -71,10 +73,17 @@ class SeoTestEngine {
   }
 
   /**
+   * 统一执行入口(供测试管理服务调用)
+   */
+  async execute(config) {
+    return this.runSeoTest(config);
+  }
+
+  /**
    * 执行SEO测试
    */
   async runSeoTest(config) {
-    const testId = `seo_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    const testId = config?.testId || `seo_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     
     try {
       const validatedConfig = this.validateConfig(config);
@@ -174,12 +183,16 @@ class SeoTestEngine {
       };
 
       this.updateTestProgress(testId, 100, 'SEO分析完成');
-      
+
       this.activeTests.set(testId, {
         status: 'completed',
         progress: 100,
         results
       });
+
+      if (this.listenerCount('complete') > 0) {
+        this.emit('complete', { testId, result: results });
+      }
 
       return results;
 
@@ -189,6 +202,10 @@ class SeoTestEngine {
         progress: 0,
         error: error.message
       });
+
+      if (this.listenerCount('error') > 0) {
+        this.emit('error', { testId, error: error.message });
+      }
       
       throw error;
     }
@@ -386,6 +403,10 @@ class SeoTestEngine {
       test.progress = progress;
       test.message = message;
       this.activeTests.set(testId, test);
+    }
+
+    if (this.listenerCount('progress') > 0) {
+      this.emit('progress', { testId, progress, message });
     }
   }
 

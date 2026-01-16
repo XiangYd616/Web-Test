@@ -56,6 +56,7 @@ class BackgroundTestManager {
   private completedTests = new Map<string, TestInfo>();
   private listeners = new Set<TestListener>();
   private testCounter = 0;
+  private abortControllers = new Map<string, AbortController>();
 
   /**
 
@@ -79,6 +80,24 @@ class BackgroundTestManager {
 
     // 监听统一测试服务的事件
     this.setupServiceListeners();
+  }
+
+  private getAuthToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return (
+      localStorage.getItem('authToken') ||
+      sessionStorage.getItem('authToken') ||
+      localStorage.getItem('auth_token') ||
+      localStorage.getItem('token')
+    );
+  }
+
+  private createAuthHeaders(): HeadersInit {
+    const token = this.getAuthToken();
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
   }
 
   /**
@@ -219,6 +238,12 @@ class BackgroundTestManager {
     // 委托给统一测试服务
     (testService as any).cancelTest(testId);
 
+    const controller = this.abortControllers.get(testId);
+    if (controller) {
+      controller.abort();
+      this.abortControllers.delete(testId);
+    }
+
     // 更新本地状态
     const testInfo = this.runningTests.get(testId);
     if (testInfo) {
@@ -287,7 +312,11 @@ class BackgroundTestManager {
           throw new Error(`不支持的测试类型: ${testInfo.type}`);
       }
     } catch (error) {
-      this.handleTestError(testInfo.id, error as Error);
+      if (!this.abortControllers.get(testInfo.id)?.signal.aborted) {
+        this.handleTestError(testInfo.id, error as Error);
+      }
+    } finally {
+      this.abortControllers.delete(testInfo.id);
     }
   }
 
@@ -300,10 +329,7 @@ class BackgroundTestManager {
     try {
       const response = await fetch(`${this.apiBaseUrl}/test/website`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: this.createAuthHeaders(),
         body: JSON.stringify(config),
       });
 
@@ -341,10 +367,7 @@ class BackgroundTestManager {
     try {
       const response = await fetch(`${this.apiBaseUrl}/test/performance`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: this.createAuthHeaders(),
         body: JSON.stringify(config),
       });
 
@@ -381,10 +404,7 @@ class BackgroundTestManager {
     try {
       const response = await fetch(`${this.apiBaseUrl}/test/security`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: this.createAuthHeaders(),
         body: JSON.stringify(config),
       });
 
@@ -423,16 +443,17 @@ class BackgroundTestManager {
     this.updateTestProgress(testInfo.id, 10, '🔍 正在准备SEO测试...');
 
     try {
+      const controller = new AbortController();
+      this.abortControllers.set(testInfo.id, controller);
+
       const response = await fetch(`${this.apiBaseUrl}/test/seo`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: this.createAuthHeaders(),
         body: JSON.stringify({
           url,
           options,
         }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -489,10 +510,7 @@ class BackgroundTestManager {
 
       const response = await fetch(`${this.apiBaseUrl}/test/compatibility`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: this.createAuthHeaders(),
         body: JSON.stringify({
           url: config?.url,
           options: {
@@ -538,10 +556,7 @@ class BackgroundTestManager {
     try {
       const response = await fetch(`${this.apiBaseUrl}/test/api-test`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: this.createAuthHeaders(),
         body: JSON.stringify(config),
       });
 
@@ -582,10 +597,7 @@ class BackgroundTestManager {
     try {
       const response = await fetch(`${this.apiBaseUrl}/test/network`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: this.createAuthHeaders(),
         body: JSON.stringify(config),
       });
 
@@ -622,10 +634,7 @@ class BackgroundTestManager {
     try {
       const response = await fetch(`${this.apiBaseUrl}/test/ux`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: this.createAuthHeaders(),
         body: JSON.stringify(config),
       });
 
@@ -707,10 +716,7 @@ class BackgroundTestManager {
     try {
       const response = await fetch(`${this.apiBaseUrl}/test/stress`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+        headers: this.createAuthHeaders(),
         body: JSON.stringify(config),
       });
 
@@ -914,7 +920,9 @@ class BackgroundTestManager {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        const response = await fetch(`/api/test-status/${backendTestId}`);
+        const response = await fetch(`${this.apiBaseUrl}/test/${backendTestId}/status`, {
+          headers: this.createAuthHeaders(),
+        });
         const data = await response.json();
 
         if (data.status === 'completed') {
