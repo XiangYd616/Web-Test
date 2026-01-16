@@ -271,6 +271,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
     setRecords,
   } = useTestRecords({
     apiEndpoint: config.apiEndpoint,
+    testType: config.testType,
   });
   const loading = Boolean(loadingState);
   const {

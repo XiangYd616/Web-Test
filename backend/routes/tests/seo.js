@@ -1,11 +1,10 @@
-/**
+ /**
  * SEO测试路由
  * 解决前端CORS跨域访问问题
  */
 
 const express = require('express');
 const axios = require('axios');
-const cheerio = require('cheerio');
 const rateLimit = require('express-rate-limit');
 const cacheMiddleware = require('../middleware/cache.js');
 
@@ -424,7 +423,7 @@ router.post('/mobile-analysis',
        * @returns {Promise<Object>} 返回结果
 
        */
-      const { url, html, options = {} } = req.body;
+      const { url, html } = req.body;
 
       if (!url && !html) {
         return res.status(400).json({
@@ -434,12 +433,10 @@ router.post('/mobile-analysis',
       }
 
       let htmlContent = html;
-      let targetUrl = url;
       
       // 如果提供了URL，获取页面内容
       if (url && !html) {
         const cleanedUrl = cleanUrl(url);
-        targetUrl = cleanedUrl;
         const axiosInstance = createAxiosInstance();
         const response = await axiosInstance.get(cleanedUrl);
         htmlContent = response.data;
@@ -671,8 +668,6 @@ router.post('/core-web-vitals',
         });
       }
 
-      const cleanedUrl = cleanUrl(url);
-      
       // 模拟Core Web Vitals数据（实际应该集成Google PageSpeed Insights API）
       const coreWebVitals = {
         metrics: {
@@ -774,158 +769,6 @@ function validateSchemaStructure(data) {
   
   return issues;
 }
-
-/**
- * SEO综合分析端点
- * POST /api/seo/analyze
- */
-router.post('/analyze', 
-  seoRateLimiter,
-  cacheMiddleware.apiCache('seo', { ttl: 1800 }),
-  asyncHandler(async (req, res) => {
-    try {
-      const { url } = req.body;
-      
-      if (!url) {
-        return res.status(400).json({
-          success: false,
-          error: '需要提供URL参数'
-        });
-      }
-      
-      const cleanedUrl = cleanUrl(url);
-      console.log(`🔍 开始SEO分析: ${cleanedUrl}`);
-      
-      // 获取页面内容
-      const axiosInstance = createAxiosInstance();
-      const response = await axiosInstance.get(cleanedUrl);
-      const $ = cheerio.load(response.data);
-      
-      // SEO分析结果
-      const analysis = {
-        url: cleanedUrl,
-        timestamp: new Date().toISOString(),
-        score: 0,
-        issues: [],
-        recommendations: [],
-        details: {
-          title: {
-            text: $('title').text().trim() || '',
-            length: ($('title').text().trim() || '').length,
-            optimal: false
-          },
-          metaDescription: {
-            text: $('meta[name="description"]').attr('content') || '',
-            length: ($('meta[name="description"]').attr('content') || '').length,
-            optimal: false
-          },
-          headings: {
-            h1: $('h1').length,
-            h2: $('h2').length,
-            h3: $('h3').length,
-            h1Text: $('h1').map((i, el) => $(el).text().trim()).get()
-          },
-          images: {
-            total: $('img').length,
-            withAlt: $('img[alt]').length,
-            withoutAlt: $('img').not('[alt]').length
-          },
-          links: {
-            internal: 0,
-            external: 0,
-            nofollow: $('a[rel*="nofollow"]').length
-          }
-        }
-      };
-      
-      // Title分析
-      if (analysis.details.title.text) {
-        if (analysis.details.title.length >= 30 && analysis.details.title.length <= 60) {
-          analysis.details.title.optimal = true;
-          analysis.score += 20;
-        } else {
-          if (analysis.details.title.length < 30) {
-            analysis.issues.push('Title标签过短，建议30-60个字符');
-          } else {
-            analysis.issues.push('Title标签过长，建议30-60个字符');
-          }
-        }
-      } else {
-        analysis.issues.push('缺少Title标签');
-      }
-      
-      // Meta Description分析
-      if (analysis.details.metaDescription.text) {
-        if (analysis.details.metaDescription.length >= 120 && analysis.details.metaDescription.length <= 160) {
-          analysis.details.metaDescription.optimal = true;
-          analysis.score += 20;
-        } else {
-          analysis.issues.push('Meta Description长度不理想，建议120-160个字符');
-        }
-      } else {
-        analysis.issues.push('缺少Meta Description');
-      }
-      
-      // H1分析
-      if (analysis.details.headings.h1 === 1) {
-        analysis.score += 15;
-      } else if (analysis.details.headings.h1 === 0) {
-        analysis.issues.push('缺少H1标签');
-      } else {
-        analysis.issues.push('多个H1标签，建议只使用一个');
-      }
-      
-      // 图片Alt分析
-      if (analysis.details.images.total > 0) {
-        const altRatio = analysis.details.images.withAlt / analysis.details.images.total;
-        if (altRatio >= 0.9) {
-          analysis.score += 15;
-        } else {
-          analysis.issues.push(`${analysis.details.images.withoutAlt}个图片缺少Alt属性`);
-        }
-      }
-      
-      // 链接分析
-      $('a[href]').each((i, el) => {
-        const href = $(el).attr('href');
-        if (href.startsWith('/') || href.includes(new URL(cleanedUrl).hostname)) {
-          analysis.details.links.internal++;
-        } else if (href.startsWith('http')) {
-          analysis.details.links.external++;
-        }
-      });
-      
-      // 生成建议
-      if (analysis.score < 60) {
-        analysis.recommendations.push('需要优化基本SEO要素');
-      }
-      if (!analysis.details.title.optimal) {
-        analysis.recommendations.push('优化Title标签长度和内容');
-      }
-      if (!analysis.details.metaDescription.optimal) {
-        analysis.recommendations.push('优化Meta Description');
-      }
-      if (analysis.details.images.withoutAlt > 0) {
-        analysis.recommendations.push('为所有图片添加Alt属性');
-      }
-      
-      console.log(`✅ SEO分析完成: ${cleanedUrl}, 评分: ${analysis.score}`);
-      
-      res.json({
-        success: true,
-        data: analysis
-      });
-      
-    } catch (error) {
-      console.error('SEO分析失败:', error.message);
-      res.status(500).json({
-        success: false,
-        error: 'SEO分析失败',
-        details: error.message
-      });
-    }
-  })
-);
 
 /**
  * 健康检查端点

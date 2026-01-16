@@ -14,13 +14,14 @@ const fs = require('fs');
 
 // 导入数据库连接
 const { connectDatabase, syncDatabase } = require('./database/sequelize');
+const { getDatabaseConfig } = require('./config/database');
 
 // 导入路由
 const authRoutes = require('./routes/auth');
 const oauthRoutes = require('./routes/oauth');
 const testRoutes = require('./routes/test');
 const testsRoutes = require('./routes/tests');
-const seoRoutes = require('./routes/seo');
+const seoRoutes = require('./routes/tests/seo');
 const securityRoutes = require('./routes/security');
 const performanceRoutes = require('./routes/performance');
 const enginesRoutes = require('./routes/engines');
@@ -28,10 +29,11 @@ const scheduledTasksRoutes = require('./routes/scheduledTasks');
 const comparisonRoutes = require('./routes/comparison');
 
 // 导入中间件
-const authMiddleware = require('./middleware/auth');
+const { responseFormatter } = require('./middleware/responseFormatter');
 // 导入统一错误处理系统
-const { errorMiddleware, notFoundHandler, handleError, ErrorCode } = require('./middleware/errorHandler');
+const { errorMiddleware, notFoundHandler, handleError } = require('./middleware/errorHandler');
 const { requestLogger, performanceMonitor, apiStats } = require('./middleware/logger');
+const TestManagementService = require('./services/testing/TestManagementService');
 
 // 创建Express应用
 const app = express();
@@ -101,6 +103,9 @@ app.use('/api', limiter);
 app.use(requestLogger);
 app.use(performanceMonitor);
 app.use(apiStats);
+
+// 响应格式化中间件（提供 res.success 等）
+app.use(responseFormatter);
 
 // 健康检查端点
 app.get('/health', (req, res) => {
@@ -235,6 +240,16 @@ const startServer = async () => {
       console.warn('⚠️  Database connection failed, but server will continue...');
     }
     
+    // 初始化测试管理服务（异步测试）
+    try {
+      const testManagementService = new TestManagementService();
+      await testManagementService.initialize(getDatabaseConfig(), null);
+      global.testManagementService = testManagementService;
+      console.log('✅ 测试管理服务初始化成功');
+    } catch (error) {
+      console.error('❌ 测试管理服务初始化失败:', error);
+    }
+
     // 启动HTTP服务器
     const server = app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);

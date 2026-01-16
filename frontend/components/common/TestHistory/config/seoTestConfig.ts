@@ -8,7 +8,7 @@ import { TestHistoryConfig } from '../types';
 export const seoTestConfig: TestHistoryConfig = {
   // 基础配置
   testType: 'seo',
-  apiEndpoint: '/api/seo',
+  apiEndpoint: '/api/test/history',
   title: 'SEO测试历史',
   description: '查看和管理所有SEO测试记录',
 

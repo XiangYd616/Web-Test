@@ -57,6 +57,7 @@ class BackgroundTestManager {
   private listeners = new Set<TestListener>();
   private testCounter = 0;
   private abortControllers = new Map<string, AbortController>();
+  private backendTestIds = new Map<string, string>();
 
   /**
 
@@ -242,6 +243,17 @@ class BackgroundTestManager {
     if (controller) {
       controller.abort();
       this.abortControllers.delete(testId);
+    }
+
+    const backendTestId = this.backendTestIds.get(testId);
+    if (backendTestId) {
+      fetch(`${this.apiBaseUrl}/test/${backendTestId}/stop`, {
+        method: 'POST',
+        headers: this.createAuthHeaders(),
+      }).catch(error => {
+        Logger.error('Failed to stop backend test:', error);
+      });
+      this.backendTestIds.delete(testId);
     }
 
     // 更新本地状态
@@ -464,10 +476,19 @@ class BackgroundTestManager {
 
       const data = await response.json();
       const responsePayload = data?.data || data?.results || data;
+      const backendTestId =
+        responsePayload?.testId || responsePayload?.test_id || data?.testId || data?.test_id;
+
+      if (backendTestId) {
+        this.backendTestIds.set(testInfo.id, backendTestId);
+        await this.pollTestStatus(testInfo.id, backendTestId, 'seo');
+        return;
+      }
+
       const innerPayload = responsePayload?.data || responsePayload?.results || responsePayload;
       const testResult = innerPayload?.data || innerPayload;
       const isSuccessful =
-        (data.success || data.status === 'completed') &&
+        (data.success || responsePayload?.status === 'completed' || responsePayload?.success) &&
         responsePayload?.success !== false &&
         innerPayload?.success !== false;
 
@@ -783,6 +804,7 @@ class BackgroundTestManager {
 
       this.runningTests.delete(testId);
       this.completedTests.set(testId, testInfo);
+      this.backendTestIds.delete(testId);
 
       /**
 
@@ -812,6 +834,7 @@ class BackgroundTestManager {
 
       this.runningTests.delete(testId);
       this.completedTests.set(testId, testInfo);
+      this.backendTestIds.delete(testId);
 
       /**
 
@@ -924,18 +947,24 @@ class BackgroundTestManager {
           headers: this.createAuthHeaders(),
         });
         const data = await response.json();
+        const payload = data?.data || data?.result || data;
+        const status = payload?.status;
+        const progressValue = payload?.progress;
+        const message = payload?.message || `🔄 ${testType}测试进行中...`;
 
-        if (data.status === 'completed') {
+        if (status === 'completed') {
           // 测试完成，更新结果
-          this.completeTest(testId, data.results || data.data);
+          const result = payload?.result || payload?.results || payload?.data;
+          this.completeTest(testId, result);
           return;
-        } else if (data.status === 'failed' || data.status === 'error') {
+        } else if (status === 'failed' || status === 'error') {
           // 测试失败
-          throw new Error(data.message || `${testType}测试失败`);
-        } else if (data.status === 'running' || data.status === 'pending') {
+          throw new Error(payload?.error || payload?.message || `${testType}测试失败`);
+        } else if (status === 'running' || status === 'pending') {
           // 测试仍在进行中，更新进度
-          const progress = Math.min(90, 30 + attempt * 2); // 从30%开始，最多到90%
-          this.updateTestProgress(testId, progress, `🔄 ${testType}测试进行中...`);
+          const progress =
+            typeof progressValue === 'number' ? progressValue : Math.min(90, 30 + attempt * 2); // 从30%开始，最多到90%
+          this.updateTestProgress(testId, progress, message);
 
           // 等待下次轮询
           await new Promise(resolve => setTimeout(resolve, pollInterval));

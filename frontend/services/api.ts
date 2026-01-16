@@ -1,12 +1,10 @@
-import Logger from '@/utils/logger';
-
-﻿/**
+import Logger from '@/utils/logger'; /**
  * API服务层
  * 统一管理前后端API调用
- * 
+ *
  * @deprecated 请使用 ApiService 替代该文件
  * @see apiService in services/api/apiService.ts
- * 
+ *
  * 迁移指南:
  * - 将 `import { apiClient } from './services/api'` 改为 `import { apiService } from './services/api/apiService'`
  * - 将 `apiClient.get()` 改为 `apiService.apiGet()`
@@ -15,10 +13,12 @@ import Logger from '@/utils/logger';
 
 // API配置
 const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_API_URL || `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`,
+  BASE_URL:
+    process.env.REACT_APP_API_URL ||
+    `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`,
   TIMEOUT: 30000, // 30秒超时
   RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000 // 1秒重试延迟
+  RETRY_DELAY: 1000, // 1秒重试延迟
 };
 
 // 请求/响应接口定义
@@ -118,7 +118,7 @@ class ApiClient {
   private createHeaders(customHeaders: Record<string, string> = {}): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...customHeaders
+      ...customHeaders,
     };
 
     const token = this.getAuthToken();
@@ -145,7 +145,7 @@ class ApiClient {
     attempt = 1
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -153,7 +153,7 @@ class ApiClient {
       const response = await fetch(url, {
         ...options,
         headers: this.createHeaders(options?.headers as Record<string, string>),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -161,7 +161,7 @@ class ApiClient {
       if (!response?.ok) {
         // 处理HTTP错误
         let errorMessage = `HTTP ${response?.status}: ${response?.statusText}`;
-        
+
         try {
           const errorData = await response?.json();
           errorMessage = errorData.error || errorData.message || errorMessage;
@@ -181,7 +181,6 @@ class ApiClient {
 
       const data = await response?.json();
       return data;
-
     } catch (error: any) {
       // 如果是网络错误且还有重试次数，则重试
       if (attempt < this.retryAttempts && !error?.name?.includes('AbortError')) {
@@ -194,7 +193,7 @@ class ApiClient {
       return {
         success: false,
         error: error?.message || 'Network request failed',
-        message: '网络请求失败'
+        message: '网络请求失败',
       };
     }
   }
@@ -204,11 +203,11 @@ class ApiClient {
    */
   async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
     let url = endpoint;
-    
+
     if (params && Object.keys(params).length > 0) {
       const searchParams = new URLSearchParams();
 
-        /**
+      /**
 
          * if功能函数
 
@@ -234,7 +233,7 @@ class ApiClient {
   async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined
+      body: data ? JSON.stringify(data) : undefined,
     });
   }
 
@@ -244,7 +243,7 @@ class ApiClient {
   async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined
+      body: data ? JSON.stringify(data) : undefined,
     });
   }
 
@@ -254,7 +253,7 @@ class ApiClient {
   async patch<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
       method: 'PATCH',
-      body: data ? JSON.stringify(data) : undefined
+      body: data ? JSON.stringify(data) : undefined,
     });
   }
 
@@ -269,13 +268,13 @@ class ApiClient {
    * 上传文件
    */
   async uploadFile<T>(
-    endpoint: string, 
-    file: File, 
+    endpoint: string,
+    file: File,
     additionalData?: Record<string, string>
   ): Promise<ApiResponse<T>> {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     if (additionalData) {
       Object.entries(additionalData).forEach(([key, value]) => {
         formData.append(key, value);
@@ -285,7 +284,7 @@ class ApiClient {
     return this.makeRequest<T>(endpoint, {
       method: 'POST',
       body: formData,
-      headers: {} // 不设置Content-Type，让浏览器自动设置
+      headers: {}, // 不设置Content-Type，让浏览器自动设置
     });
   }
 }
@@ -299,12 +298,15 @@ export const _authApi = {
    * 用户登录
    */
   login: async (credentials: { username: string; password: string; remember?: boolean }) => {
-    const response = await apiClient.post<{ token: string; user: User }>('/auth/login', credentials);
-    
+    const response = await apiClient.post<{ token: string; user: User }>(
+      '/auth/login',
+      credentials
+    );
+
     if (response?.success && response?.data?.token) {
       apiClient['setAuthToken'](response?.data.token, credentials.remember);
     }
-    
+
     return response;
   },
 
@@ -334,11 +336,11 @@ export const _authApi = {
    */
   refreshToken: async () => {
     const response = await apiClient.post<{ token: string }>('/auth/refresh');
-    
+
     if (response?.success && response?.data?.token) {
       apiClient['setAuthToken'](response?.data.token);
     }
-    
+
     return response;
   },
 
@@ -357,7 +359,7 @@ export const _authApi = {
    * 确认重置密码
    */
   confirmResetPassword: (data: { token: string; newPassword: string }) =>
-    apiClient.post('/auth/confirm-reset-password', data)
+    apiClient.post('/auth/confirm-reset-password', data),
 };
 
 // 测试API
@@ -370,12 +372,13 @@ export const _testApi = {
   /**
    * 启动SEO测试
    */
-  startSeoTest: (config: TestConfig) => apiClient.post<TestResult>('/seo/analyze', config),
+  startSeoTest: (config: TestConfig) => apiClient.post<TestResult>('/test/seo', config),
 
   /**
    * 启动性能测试
    */
-  startPerformanceTest: (config: TestConfig) => apiClient.post<TestResult>('/performance/analyze', config),
+  startPerformanceTest: (config: TestConfig) =>
+    apiClient.post<TestResult>('/performance/analyze', config),
 
   /**
    * 启动安全测试
@@ -390,12 +393,14 @@ export const _testApi = {
   /**
    * 启动兼容性测试
    */
-  startCompatibilityTest: (config: TestConfig) => apiClient.post<TestResult>('/tests/compatibility', config),
+  startCompatibilityTest: (config: TestConfig) =>
+    apiClient.post<TestResult>('/tests/compatibility', config),
 
   /**
    * 启动压力测试
    */
-  startStressTest: (config: TestConfig) => apiClient.post<TestResult>('/performance/stress', config),
+  startStressTest: (config: TestConfig) =>
+    apiClient.post<TestResult>('/performance/stress', config),
 
   /**
    * 启动UX测试
@@ -431,7 +436,7 @@ export const _testApi = {
    * 导出测试结果
    */
   exportTestResult: (testId: string, format: 'json' | 'csv' | 'pdf' = 'json') =>
-    apiClient.get(`/tests/${testId}/export`, { format })
+    apiClient.get(`/tests/${testId}/export`, { format }),
 };
 
 // OAuth API
@@ -455,7 +460,7 @@ export const _oauthApi = {
   /**
    * 获取绑定的OAuth账户
    */
-  getBoundAccounts: () => apiClient.get<{ provider: string; email: string }[]>('/oauth/accounts')
+  getBoundAccounts: () => apiClient.get<{ provider: string; email: string }[]>('/oauth/accounts'),
 };
 
 // 工具函数
@@ -493,7 +498,7 @@ export const _apiUtils = {
    */
   removeToken: (): void => {
     apiClient['removeAuthToken']();
-  }
+  },
 };
 
 // 错误处理工具
@@ -501,15 +506,15 @@ export const _handleApiError = (error: any): string => {
   if (typeof error === 'string') {
     return error;
   }
-  
+
   if (error?.response?.data?.message) {
     return error?.response.data?.message;
   }
-  
+
   if (error?.message) {
     return error?.message;
   }
-  
+
   return '发生未知错误';
 };
 

@@ -104,7 +104,8 @@ class TestManagementService extends EventEmitter {
    * 创建新的测试任务
    */
   async createTest(userId, engineType, config) {
-    const testId = `test_${Date.now()}_${uuidv4().substring(0, 8)}`;
+    const providedTestId = config?.testId;
+    const testId = providedTestId || `test_${Date.now()}_${uuidv4().substring(0, 8)}`;
     
     // 验证引擎是否存在
     if (!this.engines.has(engineType)) {
@@ -112,8 +113,9 @@ class TestManagementService extends EventEmitter {
     }
 
     const engine = this.engines.get(engineType);
+    const safeConfig = config || {};
     const testConfig = {
-      ...(config || {}),
+      ...safeConfig,
       testId
     };
     
@@ -123,12 +125,12 @@ class TestManagementService extends EventEmitter {
       user_id: userId,
       engine_type: engineType,
       engine_name: engine.name,
-      test_name: config.name || `${engine.name} - ${new Date().toLocaleString()}`,
-      test_url: config.url,
+      test_name: safeConfig.name || `${engine.name} - ${new Date().toLocaleString()}`,
+      test_url: safeConfig.url,
       test_config: testConfig,
       status: 'pending',
       progress: 0,
-      priority: config.priority || 'medium',
+      priority: safeConfig.priority || 'medium',
       created_at: new Date()
     };
 

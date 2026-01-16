@@ -21,7 +21,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
 import SEOReportGenerator, {
   type SEOReportGeneratorHandle,
@@ -209,7 +209,7 @@ const ResultsPanel = ({
           <div className="text-sm text-gray-400">暂无明显问题</div>
         ) : (
           <ul className="space-y-2">
-            {issueItems.map((issue, index) => (
+            {issueItems.map((issue: { message: string; severity?: string }, index: number) => (
               <li key={`${issue.message}-${index}`} className="flex items-start gap-3">
                 <span
                   className={`mt-0.5 px-2 py-0.5 text-xs rounded-full border ${severityClass(
@@ -409,20 +409,6 @@ const SEOTest: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'test' | 'results' | 'visualization' | 'reports'>(
     'test'
   );
-  const resolvedScore = useMemo(() => {
-    if (!results) return 0;
-    return typeof results.score === 'number'
-      ? results.score
-      : typeof results.overallScore === 'number'
-        ? results.overallScore
-        : 0;
-  }, [results]);
-
-  const resolvedGrade = useMemo(() => {
-    if (!results) return 'F';
-    return results.grade || formatScore(resolvedScore).grade;
-  }, [results, resolvedScore]);
-
   const { progress: apiProgress } = useTestProgress(currentTestId || undefined, {
     onProgress: progressData => {
       setProgress(progressData.progress || 0);

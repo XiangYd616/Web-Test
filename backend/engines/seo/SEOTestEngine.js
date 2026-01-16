@@ -797,32 +797,6 @@ class SeoTestEngine extends EventEmitter {
   }
 
   /**
-   * 生成优化建议
-   */
-  generateRecommendations(checks) {
-    const recommendations = [];
-    
-    // 收集所有issues
-    for (const [checkName, checkResult] of Object.entries(checks)) {
-      if (checkResult && checkResult.issues && checkResult.issues.length > 0) {
-        recommendations.push({
-          category: checkName,
-          priority: checkResult.status === 'failed' ? 'high' : 'medium',
-          issues: checkResult.issues
-        });
-      }
-    }
-    
-    // 按优先级排序
-    recommendations.sort((a, b) => {
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
-    });
-    
-    return recommendations;
-  }
-
-  /**
    * 生成增强的优化建议
    */
   generateRecommendations(checks) {
@@ -1269,7 +1243,7 @@ class SeoTestEngine extends EventEmitter {
   /**
    * 获取优势描述
    */
-  getStrengthDescription(category, score) {
+  getStrengthDescription(category, _score) {
     const descriptions = {
       meta: '页面元标签优化优秀，有利于搜索引擎理解页面内容',
       headings: '标题结构清晰合理，便于用户和搜索引擎理解内容层次',
@@ -1289,7 +1263,7 @@ class SeoTestEngine extends EventEmitter {
   /**
    * 获取弱点描述
    */
-  getWeaknessDescription(category, score) {
+  getWeaknessDescription(category, _score) {
     const descriptions = {
       meta: '页面元标签需要优化，影响搜索引擎对页面的理解',
       headings: '标题结构需要改进，不利于内容层次的展现',

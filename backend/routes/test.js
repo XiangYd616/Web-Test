@@ -26,6 +26,7 @@ const securityTestStorage = require('../services/testing/securityTestStorage.js'
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const userTestManager = require('../services/testing/UserTestManager.js');
 const testBusinessService = require('../services/testing/TestBusinessService.js');
+const DatabaseService = require('../services/core/DatabaseService');
 // 注意：这些服务文件已被删除，需要使用替代方案
 // const databaseService = require('../services/database/databaseService');
 // const testQueueService = require('../services/queue/queueService');
@@ -47,6 +48,10 @@ const realApiTestEngine = new ApiTestEngine();
 
 // 🔧 统一使用本地TestHistoryService实例
 const testHistoryService = new TestHistoryService(require('../config/database'));
+const databaseService = new DatabaseService();
+databaseService.initialize().catch(error => {
+  console.error('❌ DatabaseService 初始化失败:', error);
+});
 
 // 配置文件上传
 const storage = multer.memoryStorage();
@@ -1066,14 +1071,6 @@ router.get('/history', optionalAuth, historyRateLimiter, asyncHandler(async (req
 }));
 
 /**
- * 获取测试历史记录 (旧版本 - 兼容性)
- * GET /api/test/history/legacy
- */
-router.get('/history/legacy', optionalAuth, historyRateLimiter, asyncHandler(async (req, res) => {
-  return handleTestHistory(req, res);
-}));
-
-/**
  * 获取测试历史统计信息
  * GET /api/test/statistics
  */
@@ -1134,117 +1131,6 @@ router.get('/statistics', optionalAuth, asyncHandler(async (req, res) => {
     res.serverError('获取统计信息失败');
   }
 }));
-
-/**
- * 批量操作测试历史记录 - 已迁移
- * 请使用 /api/data-management/test-history/batch
- */
-router.post('/history/batch', authMiddleware, asyncHandler(async (req, res) => {
-  res.status(301).json({
-    success: false,
-    message: '此接口已迁移，请使用 /api/data-management/test-history/batch',
-    redirectTo: '/api/data-management/test-history/batch'
-  });
-}));
-
-// 共享的历史记录处理函数
-async function handleTestHistory(req, res) {
-  // 详细的请求日志
-  console.log('🔍 [TEST HISTORY] 收到请求:', {
-    method: req.method,
-    url: req.url,
-    originalUrl: req.originalUrl,
-    query: req.query,
-    headers: {
-      'user-agent': req.headers['user-agent']?.substring(0, 50) + '...',
-      'authorization': req.headers['authorization'] ? 'Bearer ***' : 'none',
-      'content-type': req.headers['content-type'],
-      'origin': req.headers['origin'],
-      'referer': req.headers['referer']
-    },
-    user: req.user ? { id: req.user.id, username: req.user.username } : null,
-    timestamp: new Date().toISOString()
-  });
-
-  // 🔧 修复：支持前端发送的pageSize参数，同时兼容limit参数
-  const { page = 1, limit, pageSize, type, status, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
-  const actualLimit = pageSize || limit || 10; // 优先使用pageSize，然后是limit，最后默认10
-  const _offset = (page - 1) * actualLimit;
-
-  let _whereClause = '';
-  const _params = [];
-  let _paramIndex = 1;
-
-  // 如果用户已登录，只显示该用户的记录；未登录用户返回空结果
-  if (req.user?.id) {
-    _whereClause = 'WHERE user_id = $1';
-    _params.push(req.user.id);
-    _paramIndex = 2;
-  } else {
-    // 未登录用户不能查看任何测试历史记录（隐私保护）
-    return res.json({
-      success: true,
-      data: {
-        tests: [],
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(actualLimit),
-          total: 0,
-          totalPages: 0,
-          hasNext: false,
-          hasPrev: false
-        }
-      },
-      message: '请登录以查看测试历史记录'
-    });
-  }
-
-  if (type) {
-    _whereClause += ` AND test_type = $${_paramIndex}`;
-    _params.push(type);
-    _paramIndex++;
-  }
-
-  if (status) {
-    _whereClause += ` AND status = $${_paramIndex}`;
-    _params.push(status);
-    _paramIndex++;
-  }
-
-  // 处理排序
-  const validSortFields = ['created_at', 'start_time', 'duration', 'status'];
-  const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at';
-  const sortDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
-
-  try {
-    // 使用本地TestHistoryService获取测试历史
-    const result = await testHistoryService.getTestHistory(req.user?.id, type, {
-      page: parseInt(page),
-      limit: parseInt(actualLimit),
-      status,
-      sortBy: sortField,
-      sortOrder: sortDirection.toUpperCase()
-    });
-
-    if (!result.success) {
-
-      return res.status(400).json(result);
-    }
-
-    const { tests, pagination } = result.data;
-
-    res.json({
-      success: true,
-      data: {
-        tests,
-        pagination
-      }
-    });
-  } catch (error) {
-    console.error('获取测试历史失败:', error);
-    res.serverError('获取测试历史失败');
-  }
-}
 
 /**
  * 统一测试启动端点
@@ -1349,13 +1235,17 @@ router.get('/queue/status', optionalAuth, asyncHandler(async (req, res) => {
  * POST /api/test/:testId/cancel
  */
 router.post('/:testId/cancel', authMiddleware, asyncHandler(async (req, res) => {
-  const { testId: _testId } = req.params;
+  const { testId } = req.params;
 
   try {
-    // await testQueueService.cancelTest(testId);
-    // 临时返回成功响应
+    const testManagementService = global.testManagementService;
+    if (testManagementService) {
+      await testManagementService.cancelTest(testId, req.user?.id);
+    } else {
+      await databaseService.updateTestStatus(testId, 'cancelled', null, '测试已取消');
+    }
 
-    res.success('测试已取消');
+    res.success({ testId, status: 'cancelled' }, '测试已取消');
   } catch (error) {
     console.error('取消测试失败:', error);
     res.status(500).json({
@@ -1445,7 +1335,10 @@ router.get('/:testId/status', optionalAuth, asyncHandler(async (req, res) => {
 
   try {
     // 从数据库获取测试状态
-    const testStatus = await databaseService.getTestStatus(testId);
+    const testStatus = await databaseService.getTestStatus(testId, req.user?.id || null);
+    if (!testStatus) {
+      return res.notFound('测试');
+    }
 
     res.success(testStatus);
 
@@ -1468,14 +1361,10 @@ router.get('/:testId/result', optionalAuth, asyncHandler(async (req, res) => {
 
   try {
     // 从数据库获取测试结果
-    const testResult = await databaseService.getTestResult(testId);
+    const testResult = await databaseService.getTestResult(testId, req.user?.id || null);
 
     if (!testResult) {
-
-      return res.status(404).json({
-        success: false,
-        error: '测试结果不存在或已过期'
-      });
+      return res.notFound('测试结果');
     }
 
     res.success(testResult);
@@ -1498,10 +1387,25 @@ router.post('/:testId/stop', authMiddleware, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
+    const testStatus = await databaseService.getTestStatus(testId, req.user?.id || null);
+    if (!testStatus) {
+      return res.notFound('测试');
+    }
+
+    const testManagementService = global.testManagementService;
+    if (testManagementService && testStatus.engine_type) {
+      const engineEntry = testManagementService.engines?.get(testStatus.engine_type);
+      if (engineEntry?.instance?.stopTest) {
+        await engineEntry.instance.stopTest(testId);
+      } else if (engineEntry?.instance?.cancel) {
+        await engineEntry.instance.cancel(testId);
+      }
+    }
+
     // 更新测试状态为已停止
     await databaseService.updateTestStatus(testId, 'stopped', null, '测试已被用户停止');
 
-    res.success('测试已停止');
+    res.success({ testId, status: 'stopped' }, '测试已停止');
 
   } catch (error) {
     console.error('停止测试失败:', error);
@@ -3843,31 +3747,36 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
  *         $ref: '#/components/responses/ServerError'
  */
 router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url: _url, options = {} } = req.body;
+  const { url: _url, options = {}, ...rest } = req.body;
 
   // URL验证已由中间件完成
   const validatedURL = req.validatedURL.url.toString();
 
   try {
-    console.log(`🔍 Starting SEO test for: ${validatedURL}`);
+    const testManagementService = global.testManagementService;
+    if (!testManagementService) {
+      return res.status(503).json({
+        success: false,
+        error: '测试服务未就绪'
+      });
+    }
 
-    // 重定向到现有的SEO API
-    const seoResponse = await fetch(`${req.protocol}://${req.get('host')}/api/seo/analyze`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': req.headers.authorization || ''
-      },
-      body: JSON.stringify({
-        url: validatedURL,
-        ...options
-      })
+    console.log(`🔍 Starting async SEO test for: ${validatedURL}`);
+
+    const testConfig = {
+      url: validatedURL,
+      testType: 'seo',
+      ...options,
+      ...rest
+    };
+
+    const test = await testManagementService.createTest(req.user?.id || null, 'seo', testConfig);
+
+    res.success({
+      testId: test.test_id,
+      status: test.status,
+      message: 'SEO测试已创建'
     });
-
-    const seoResult = await seoResponse.json();
-
-    res.success(seoResult);
-
   } catch (error) {
     console.error('❌ SEO test failed:', error);
     res.serverError('SEO测试失败');
