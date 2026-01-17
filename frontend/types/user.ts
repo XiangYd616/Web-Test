@@ -8,21 +8,21 @@ export interface User {
   status?: string;
   createdAt?: string | number;
   updatedAt?: string | number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface UserProfile {
   displayName?: string;
   avatar?: string;
   bio?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface UserPreferences {
   theme?: string;
   language?: string;
   timezone?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface LoginCredentials {
@@ -60,7 +60,7 @@ export interface UpdateUserData {
   email?: string;
   role?: string;
   status?: string;
-  preferences?: any;
+  preferences?: Record<string, unknown>;
 }
 
 export interface UserQuery {
@@ -75,7 +75,7 @@ export interface UserStats {
   total: number;
   active: number;
   inactive: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface AuthResponse {

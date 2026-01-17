@@ -99,13 +99,6 @@ class DataCleanupManager {
         coldData: 180,
         maxRecords: 12000,
         priority: 'low'
-      },
-      infrastructure: {
-        hotData: 14,
-        warmData: 30,
-        coldData: 90,
-        maxRecords: 8000,
-        priority: 'medium'
       }
     };
   }

@@ -11,7 +11,6 @@ const cron = require('node-cron');
 const { promisify } = require('util');
 
 const gzip = promisify(zlib.gzip);
-const gunzip = promisify(zlib.gunzip);
 
 class DataArchiveManager {
   constructor(config = {}) {
@@ -156,8 +155,7 @@ class DataArchiveManager {
       ux: { days: 30, priority: 'medium' },
       website: { days: 45, priority: 'medium' },
       api: { days: 30, priority: 'medium' },
-      seo: { days: 60, priority: 'low' },
-      infrastructure: { days: 30, priority: 'medium' }
+      seo: { days: 60, priority: 'low' }
     };
 
     for (const [engineType, strategy] of Object.entries(archiveStrategies)) {
@@ -178,7 +176,7 @@ class DataArchiveManager {
   /**
    * 获取需要归档的数据
    */
-  async getDataToArchive(engineType, criteria) {
+  async getDataToArchive(_engineType, _criteria) {
     // 这里应该查询数据库获取符合条件的数据
     // 简化实现，实际应该连接数据库
     
@@ -305,7 +303,7 @@ class DataArchiveManager {
   /**
    * 删除已归档的数据
    */
-  async removeArchivedData(dataToArchive) {
+  async removeArchivedData(_dataToArchive) {
     // 这里应该从数据库中删除已归档的数据
     // 实际实现应该是批量删除操作
     
@@ -376,7 +374,7 @@ class DataArchiveManager {
 
     try {
       const tempFiles = await fs.readdir(this.config.tempPath);
-      let cleanedCount = 0;
+      let _cleanedCount = 0;
 
       for (const tempFile of tempFiles) {
         const tempFilePath = path.join(this.config.tempPath, tempFile);
@@ -385,7 +383,7 @@ class DataArchiveManager {
         // 删除超过24小时的临时文件
         if (Date.now() - stats.mtime.getTime() > 24 * 60 * 60 * 1000) {
           await fs.rmdir(tempFilePath, { recursive: true });
-          cleanedCount++;
+          _cleanedCount++;
         }
       }
 

@@ -117,17 +117,6 @@ class SpecializedStorageManager {
       archiveAfterDays: 60,
       specialHandling: this.handleSEOData.bind(this)
     });
-
-    // 基础设施测试 - 网络数据，时间序列
-    this.storageStrategies.set('infrastructure', {
-      compress: true,
-      encrypt: false,
-      shard: true,
-      indexFields: ['url', 'check_type', 'timestamp'],
-      retentionDays: 90,
-      archiveAfterDays: 30,
-      specialHandling: this.handleInfrastructureData.bind(this)
-    });
   }
 
   /**
@@ -381,25 +370,6 @@ class SpecializedStorageManager {
       links: data.links || [],
       structured_data: data.structured_data || {},
       recommendations: data.recommendations || []
-    };
-  }
-
-  /**
-   * 处理基础设施测试数据
-   */
-  async handleInfrastructureData(data) {
-    // 网络和基础设施数据处理
-    return {
-      metadata: {
-        url: data.url,
-        check_type: data.check_type,
-        timestamp: data.timestamp
-      },
-      dns: data.dns || {},
-      connectivity: data.connectivity || {},
-      ssl: data.ssl || {},
-      performance: data.performance || {},
-      availability: data.availability || {}
     };
   }
 

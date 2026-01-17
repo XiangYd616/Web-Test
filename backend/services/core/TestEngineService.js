@@ -35,13 +35,10 @@ const TestType = {
   API: 'api',
   STRESS: 'stress',
   UX: 'ux',
-  INFRASTRUCTURE: 'infrastructure',
   ACCESSIBILITY: 'accessibility',
   DATABASE: 'database',
   NETWORK: 'network',
   WEBSITE: 'website',
-  CONTENT: 'content',
-  DOCUMENTATION: 'documentation',
   REGRESSION: 'regression',
   AUTOMATION: 'automation',
   CLIENTS: 'clients',
@@ -217,27 +214,6 @@ class TestEngineService extends EventEmitter {
       },
       
       // 专业测试引擎
-      { 
-        name: TestType.CONTENT, 
-        path: '../../engines/content/ContentTestEngine',
-        methods: ['runContentTest', 'runTest'],
-        enabled: true,
-        description: '内容测试引擎'
-      },
-      { 
-        name: TestType.INFRASTRUCTURE, 
-        path: '../../engines/infrastructure/infrastructureTestEngine',
-        methods: ['runInfrastructureTest', 'runTest'],
-        enabled: true,
-        description: '基础设施测试引擎'
-      },
-      { 
-        name: TestType.DOCUMENTATION, 
-        path: '../../engines/documentation/DocumentationTestEngine',
-        methods: ['runDocumentationTest', 'runTest'],
-        enabled: false, // 可选引擎
-        description: '文档测试引擎'
-      },
       { 
         name: TestType.REGRESSION, 
         path: '../../engines/regression/RegressionTestEngine',

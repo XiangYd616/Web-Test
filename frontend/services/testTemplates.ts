@@ -1,18 +1,24 @@
 ﻿/**
  * testTemplates.ts - 业务服务层
- * 
+ *
  * 文件路径: frontend\services\testTemplates.ts
  * 创建时间: 2025-09-25
  */
-
 
 export interface TestTemplate {
   id: string;
   name: string;
   description: string;
   category: 'ecommerce' | 'blog' | 'corporate' | 'saas' | 'portfolio' | 'news' | 'custom';
-  testType: 'stress' | 'content' | 'compatibility' | 'api' | 'security' | 'performance' | 'comprehensive';
-  config: any;
+  testType:
+    | 'stress'
+    | 'seo'
+    | 'compatibility'
+    | 'api'
+    | 'security'
+    | 'performance'
+    | 'comprehensive';
+  config: Record<string, unknown>;
   tags: string[];
   isDefault: boolean;
   createdAt: string;
@@ -45,34 +51,32 @@ export const DEFAULT_TEMPLATES: TestTemplate[] = [
         users: 100,
         duration: 300,
         rampUpTime: 60,
-        scenarios: ['browse_products', 'add_to_cart', 'checkout']
+        scenarios: ['browse_products', 'add_to_cart', 'checkout'],
       },
-      content: {
-        checkSEO: true,
-        checkAccessibility: true,
-        checkPerformance: true,
-        checkSecurity: true,
-        checkMobile: true,
-        customKeywords: ['产品', '购买', '支付', '配送']
+      seo: {
+        depth: 'site',
+        include_technical: true,
+        include_content: true,
+        competitor_urls: [],
       },
       security: {
         checkSSL: true,
         checkHeaders: true,
         checkVulnerabilities: true,
-        checkPaymentSecurity: true
+        checkPaymentSecurity: true,
       },
       performance: {
         checkCoreWebVitals: true,
         checkLoadTime: true,
         checkImageOptimization: true,
-        checkCaching: true
-      }
+        checkCaching: true,
+      },
     },
     tags: ['电商', '购物', '支付', '高流量'],
     isDefault: true,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
-    usage: 1250
+    usage: 1250,
   },
 
   // 博客网站模板
@@ -81,31 +85,18 @@ export const DEFAULT_TEMPLATES: TestTemplate[] = [
     name: '博客SEO优化测试',
     description: '专注于博客网站的SEO优化和内容质量检测',
     category: 'blog',
-    testType: 'content',
+    testType: 'seo',
     config: {
-      checkSEO: true,
-      checkAccessibility: true,
-      checkPerformance: true,
-      checkContent: true,
-      checkLinks: true,
-      checkImages: true,
-      checkMobile: true,
-      customKeywords: ['文章', '博客', '内容', 'SEO'],
-      depth: 3,
-      seoChecks: {
-        titleTags: true,
-        metaDescriptions: true,
-        headingStructure: true,
-        internalLinks: true,
-        imageAlt: true,
-        schemaMarkup: true
-      }
+      depth: 'site',
+      include_technical: true,
+      include_content: true,
+      competitor_urls: [],
     },
     tags: ['博客', 'SEO', '内容', '优化'],
     isDefault: true,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
-    usage: 890
+    usage: 890,
   },
 
   // 企业官网模板
@@ -120,34 +111,32 @@ export const DEFAULT_TEMPLATES: TestTemplate[] = [
         users: 50,
         duration: 180,
         rampUpTime: 30,
-        scenarios: ['homepage', 'about', 'contact', 'services']
+        scenarios: ['homepage', 'about', 'contact', 'services'],
       },
-      content: {
-        checkSEO: true,
-        checkAccessibility: true,
-        checkPerformance: true,
-        checkSecurity: true,
-        checkProfessionalism: true,
-        customKeywords: ['公司', '服务', '联系', '关于']
+      seo: {
+        depth: 'site',
+        include_technical: true,
+        include_content: true,
+        competitor_urls: [],
       },
       security: {
         checkSSL: true,
         checkHeaders: true,
         checkPrivacyPolicy: true,
-        checkContactSecurity: true
+        checkContactSecurity: true,
       },
       compatibility: {
         checkDesktop: true,
         checkMobile: true,
         checkTablet: true,
-        browsers: ['chrome', 'firefox', 'safari', 'edge']
-      }
+        browsers: ['chrome', 'firefox', 'safari', 'edge'],
+      },
     },
     tags: ['企业', '官网', '专业', '安全'],
     isDefault: true,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
-    usage: 670
+    usage: 670,
   },
 
   // SaaS应用模板
@@ -166,19 +155,19 @@ export const DEFAULT_TEMPLATES: TestTemplate[] = [
         { path: '/api/auth/login', method: 'POST', weight: 10 },
         { path: '/api/dashboard', method: 'GET', weight: 30 },
         { path: '/api/data', method: 'GET', weight: 40 },
-        { path: '/api/analytics', method: 'GET', weight: 20 }
+        { path: '/api/analytics', method: 'GET', weight: 20 },
       ],
       thresholds: {
         responseTime: 500,
         errorRate: 1,
-        throughput: 100
-      }
+        throughput: 100,
+      },
     },
     tags: ['SaaS', '高并发', 'API', '性能'],
     isDefault: true,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
-    usage: 445
+    usage: 445,
   },
 
   // 新闻网站模板
@@ -199,14 +188,14 @@ export const DEFAULT_TEMPLATES: TestTemplate[] = [
       thresholds: {
         responseTime: 200,
         errorRate: 0.5,
-        throughput: 1000
-      }
+        throughput: 1000,
+      },
     },
     tags: ['新闻', '高流量', '内容', '速度'],
     isDefault: true,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
-    usage: 320
+    usage: 320,
   },
 
   // 作品集网站模板
@@ -228,15 +217,15 @@ export const DEFAULT_TEMPLATES: TestTemplate[] = [
         firstContentfulPaint: true,
         largestContentfulPaint: true,
         cumulativeLayoutShift: true,
-        speedIndex: true
-      }
+        speedIndex: true,
+      },
     },
     tags: ['作品集', '视觉', '图片', '移动端'],
     isDefault: true,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
-    usage: 280
-  }
+    usage: 280,
+  },
 ];
 
 // 行业最佳实践预设
@@ -254,14 +243,14 @@ export const INDUSTRY_PRESETS: TestPreset[] = [
         description: '专门测试购物车和结账流程的用户体验',
         config: {
           ...DEFAULT_TEMPLATES[0].config,
-          scenarios: ['add_to_cart', 'cart_management', 'checkout', 'payment']
-        }
-      }
+          scenarios: ['add_to_cart', 'cart_management', 'checkout', 'payment'],
+        },
+      },
     ],
     isPublic: true,
     author: 'Test Web Team',
     rating: 4.8,
-    downloads: 1500
+    downloads: 1500,
   },
 
   {
@@ -275,8 +264,8 @@ export const INDUSTRY_PRESETS: TestPreset[] = [
     isPublic: true,
     author: 'Test Web Team',
     rating: 4.6,
-    downloads: 890
-  }
+    downloads: 890,
+  },
 ];
 
 export class TestTemplateService {
@@ -309,10 +298,11 @@ export class TestTemplateService {
   // 搜索模板
   static searchTemplates(query: string): TestTemplate[] {
     const lowercaseQuery = query.toLowerCase();
-    return this.getAllTemplates().filter(template =>
-      template.name.toLowerCase().includes(lowercaseQuery) ||
-      template.description.toLowerCase().includes(lowercaseQuery) ||
-      template.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+    return this.getAllTemplates().filter(
+      template =>
+        template.name.toLowerCase().includes(lowercaseQuery) ||
+        template.description.toLowerCase().includes(lowercaseQuery) ||
+        template.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
     );
   }
 
@@ -327,14 +317,16 @@ export class TestTemplateService {
   }
 
   // 保存自定义模板
-  static saveCustomTemplate(template: Omit<TestTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usage'>): TestTemplate {
+  static saveCustomTemplate(
+    template: Omit<TestTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usage'>
+  ): TestTemplate {
     const newTemplate: TestTemplate = {
       ...template,
       id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       usage: 0,
-      isDefault: false
+      isDefault: false,
     };
 
     const customTemplates = this.getCustomTemplates();
@@ -384,7 +376,7 @@ export class TestTemplateService {
         return this.saveCustomTemplate({
           ...template,
           name: `${template.name} (导入)`,
-          isDefault: false
+          isDefault: false,
         });
       }
     } catch {
@@ -394,15 +386,18 @@ export class TestTemplateService {
   }
 
   // 验证模板格式
-  private static validateTemplate(template: any): boolean {
+  private static validateTemplate(template: unknown): template is TestTemplate {
+    if (!template || typeof template !== 'object') {
+      return false;
+    }
+    const candidate = template as Record<string, unknown>;
     return (
-      template &&
-      typeof template.name === 'string' &&
-      typeof template.description === 'string' &&
-      typeof template.category === 'string' &&
-      typeof template.testType === 'string' &&
-      template.config &&
-      Array.isArray(template.tags)
+      typeof candidate.name === 'string' &&
+      typeof candidate.description === 'string' &&
+      typeof candidate.category === 'string' &&
+      typeof candidate.testType === 'string' &&
+      Boolean(candidate.config) &&
+      Array.isArray(candidate.tags)
     );
   }
 
@@ -428,7 +423,7 @@ export class TestTemplateService {
       .filter(template => !userHistory.includes(template.id))
       .map(template => ({
         template,
-        score: template.tags.filter(tag => userTags.has(tag)).length
+        score: template.tags.filter(tag => userTags.has(tag)).length,
       }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 5)

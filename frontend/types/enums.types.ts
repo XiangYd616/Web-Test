@@ -62,9 +62,6 @@ export enum TestType {
   SECURITY = 'security',
   SEO = 'seo',
   ACCESSIBILITY = 'accessibility',
-  CONTENT = 'content',
-  INFRASTRUCTURE = 'infrastructure',
-  DOCUMENTATION = 'documentation',
   UX = 'ux',
   INTEGRATION = 'integration',
   NETWORK = 'network',
@@ -83,9 +80,6 @@ export type TestTypeValue =
   | 'security'
   | 'seo'
   | 'accessibility'
-  | 'content'
-  | 'infrastructure'
-  | 'documentation'
   | 'ux'
   | 'integration'
   | 'network'

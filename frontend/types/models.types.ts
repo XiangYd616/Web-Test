@@ -8,32 +8,42 @@
 // ==================== 基础类型导出 ====================
 
 // 重新导出基础类型
-export type {
-  Email, Timestamp,
-  URL, UUID
-} from './common';
+export type { Email, Timestamp, URL, UUID } from './common';
 
 // ==================== 枚举类型导出 ====================
 
 // 重新导出所有枚举类型（只导出实际存在的枚举）
 export {
-  Language, TestGrade,
-  TestPriority, TestStatus, TestType, ThemeMode, Timezone, UserPlan, UserRole,
-  UserStatus
+  Language,
+  TestGrade,
+  TestPriority,
+  TestStatus,
+  TestType,
+  ThemeMode,
+  Timezone,
+  UserPlan,
+  UserRole,
+  UserStatus,
 } from './enums';
 
 // ==================== 用户相关类型导出 ====================
 
 // 重新导出用户相关类型（仅导出存在的类型）
 export type {
-  ChangePasswordData, CreateUserData, LoginCredentials,
-  RegisterData, UpdateUserData, User, UserPreferences, UserProfile, UserQuery, UserStats
+  ChangePasswordData,
+  CreateUserData,
+  LoginCredentials,
+  RegisterData,
+  UpdateUserData,
+  User,
+  UserPreferences,
+  UserProfile,
+  UserQuery,
+  UserStats,
 } from './user';
 
 // 从common.ts导入基础用户类型
-export type {
-  AuthResponse, UserSession
-} from './common';
+export type { AuthResponse, UserSession } from './common';
 
 // 注释掉不存在的类型导入
 // DEFAULT_USER_PREFERENCES, DEFAULT_USER_PROFILE, UserActivityLog, UserDatabaseFields, UserFilter,
@@ -43,8 +53,16 @@ export type {
 
 // 重新导出API响应类型（仅导出存在的类型）
 export type {
-  ApiError, ApiErrorResponse, ApiResponse, ApiSuccessResponse, ErrorCode, PaginatedResponse,
-  PaginationInfo, QueryParams, RequestConfig, ValidationError
+  ApiError,
+  ApiErrorResponse,
+  ApiResponse,
+  ApiSuccessResponse,
+  ErrorCode,
+  PaginatedResponse,
+  PaginationInfo,
+  QueryParams,
+  RequestConfig,
+  ValidationError,
 } from './apiResponse.types';
 
 // 注释掉不存在的类型导入
@@ -59,11 +77,8 @@ export type {
 export type {
   ApiTestConfig as APITestConfig,
   PerformanceTestConfig,
-  SecurityTestConfig
+  SecurityTestConfig,
 } from './api/client.types';
-
-// ContentTestConfig 已废弃，使用 UxTestConfig 替代
-export type { UxTestConfig as ContentTestConfig } from './api/client.types';
 
 /**
  * 测试配置接口
@@ -81,19 +96,9 @@ export interface TestConfig {
   api?: {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
     headers?: Record<string, string>;
-    body?: any;
+    body?: unknown;
     expectedStatus?: number[];
     timeout?: number;
-  };
-
-  // 内容测试配置
-  content?: {
-    checkSEO?: boolean;
-    checkAccessibility?: boolean;
-    checkPerformance?: boolean;
-    checkSecurity?: boolean;
-    checkMobile?: boolean;
-    customKeywords?: string[];
   };
 
   // 压力测试配置
@@ -132,7 +137,7 @@ export interface TestResult {
   // 测试配置
   type: string;
   url: string;
-  config: any;
+  config: Record<string, unknown>;
 
   // 执行状态
   status: string;
@@ -141,16 +146,16 @@ export interface TestResult {
   duration?: number; // 毫秒
 
   // 结果数据
-  results: any; // 具体结果数据，根据测试类型而定
+  results: unknown; // 具体结果数据，根据测试类型而定
   metrics: Record<string, number>; // 性能指标
   errors: Array<{
     type: string;
     message: string;
-    details?: any;
+    details?: unknown;
   }>;
 
   // 元数据
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -229,7 +234,7 @@ export function testResultFromDatabase(dbData: TestResultDatabaseFields): TestRe
     errors: JSON.parse(dbData.errors || '[]'),
     metadata: JSON.parse(dbData.metadata || '{}'),
     createdAt: dbData.created_at,
-    updatedAt: dbData.updated_at
+    updatedAt: dbData.updated_at,
   };
 }
 
@@ -253,7 +258,7 @@ export function testResultToDatabase(testResult: TestResult): TestResultDatabase
     errors: JSON.stringify(testResult.errors),
     metadata: JSON.stringify(testResult.metadata),
     created_at: testResult.createdAt,
-    updated_at: testResult.updatedAt
+    updated_at: testResult.updatedAt,
   };
 }
 
@@ -269,7 +274,7 @@ export function testHistoryFromDatabase(dbData: TestHistoryDatabaseFields): Test
     status: dbData.status,
     results: dbData.results ? JSON.parse(dbData.results) : undefined,
     createdAt: dbData.created_at,
-    updatedAt: dbData.updated_at
+    updatedAt: dbData.updated_at,
   };
 }
 
@@ -285,7 +290,7 @@ export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryData
     status: testHistory.status,
     results: testHistory.results ? JSON.stringify(testHistory.results) : undefined,
     created_at: testHistory.createdAt,
-    updated_at: testHistory.updatedAt
+    updated_at: testHistory.updatedAt,
   };
 }
 
@@ -294,7 +299,10 @@ export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryData
 /**
  * 验证测试配置
  */
-export function validateTestConfig(type: string, config: any): { isValid: boolean; errors: string[] } {
+export function validateTestConfig(
+  type: string,
+  config: TestConfig
+): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   switch (type) {
@@ -325,7 +333,7 @@ export function validateTestConfig(type: string, config: any): { isValid: boolea
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 

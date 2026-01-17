@@ -38,7 +38,7 @@ class GlobalSearchService {
         url: '/',
         icon: 'Home',
         category: '导航',
-        relevance: 1.0
+        relevance: 1.0,
       },
       {
         id: 'website-test',
@@ -48,7 +48,7 @@ class GlobalSearchService {
         url: '/test',
         icon: 'Globe',
         category: '测试工具',
-        relevance: 1.0
+        relevance: 1.0,
       },
       {
         id: 'stress-test',
@@ -58,7 +58,7 @@ class GlobalSearchService {
         url: '/stress-test',
         icon: 'Zap',
         category: '测试工具',
-        relevance: 1.0
+        relevance: 1.0,
       },
       {
         id: 'security-test',
@@ -68,17 +68,17 @@ class GlobalSearchService {
         url: '/security-test',
         icon: 'Shield',
         category: '测试工具',
-        relevance: 1.0
+        relevance: 1.0,
       },
       {
         id: 'seo-analysis',
         title: 'SEO分析',
         description: '搜索引擎优化分析和建议',
         type: 'page',
-        url: '/content-test',
+        url: '/seo-test',
         icon: 'Search',
         category: '测试工具',
-        relevance: 1.0
+        relevance: 1.0,
       },
       {
         id: 'api-test',
@@ -88,7 +88,7 @@ class GlobalSearchService {
         url: '/api-test',
         icon: 'Code',
         category: '测试工具',
-        relevance: 1.0
+        relevance: 1.0,
       },
       {
         id: 'compatibility-test',
@@ -98,7 +98,7 @@ class GlobalSearchService {
         url: '/compatibility-test',
         icon: 'Monitor',
         category: '测试工具',
-        relevance: 1.0
+        relevance: 1.0,
       },
       {
         id: 'analytics',
@@ -108,7 +108,7 @@ class GlobalSearchService {
         url: '/analytics',
         icon: 'BarChart3',
         category: '数据中心',
-        relevance: 1.0
+        relevance: 1.0,
       },
 
       {
@@ -119,7 +119,7 @@ class GlobalSearchService {
         url: '/monitoring',
         icon: 'Monitor',
         category: '数据管理',
-        relevance: 1.0
+        relevance: 1.0,
       },
       {
         id: 'data-import',
@@ -129,7 +129,7 @@ class GlobalSearchService {
         url: '/data-import',
         icon: 'Upload',
         category: '数据管理',
-        relevance: 0.8
+        relevance: 0.8,
       },
       {
         id: 'data-export',
@@ -139,7 +139,7 @@ class GlobalSearchService {
         url: '/data-export',
         icon: 'Download',
         category: '数据管理',
-        relevance: 0.8
+        relevance: 0.8,
       },
       {
         id: 'settings',
@@ -149,7 +149,7 @@ class GlobalSearchService {
         url: '/settings',
         icon: 'Settings',
         category: '设置',
-        relevance: 0.9
+        relevance: 0.9,
       },
       {
         id: 'help',
@@ -159,7 +159,7 @@ class GlobalSearchService {
         url: '/help',
         icon: 'HelpCircle',
         category: '帮助',
-        relevance: 0.9
+        relevance: 0.9,
       },
 
       {
@@ -170,7 +170,7 @@ class GlobalSearchService {
         url: '/security-test',
         icon: 'Lock',
         category: '安全测试',
-        relevance: 0.8
+        relevance: 0.8,
       },
       {
         id: 'load-test',
@@ -180,7 +180,7 @@ class GlobalSearchService {
         url: '/stress-test',
         icon: 'Zap',
         category: '性能测试',
-        relevance: 0.8
+        relevance: 0.8,
       },
       {
         id: 'response-time',
@@ -190,7 +190,7 @@ class GlobalSearchService {
         url: '/test',
         icon: 'Clock',
         category: '性能测试',
-        relevance: 0.8
+        relevance: 0.8,
       },
 
       // 设置搜索
@@ -202,7 +202,7 @@ class GlobalSearchService {
         url: '/settings',
         icon: 'User',
         category: '个人设置',
-        relevance: 0.7
+        relevance: 0.7,
       },
       {
         id: 'notification-settings',
@@ -212,7 +212,7 @@ class GlobalSearchService {
         url: '/settings',
         icon: 'Bell',
         category: '系统设置',
-        relevance: 0.7
+        relevance: 0.7,
       },
       {
         id: 'api-keys',
@@ -222,7 +222,7 @@ class GlobalSearchService {
         url: '/api-keys',
         icon: 'Key',
         category: 'API设置',
-        relevance: 0.7
+        relevance: 0.7,
       },
 
       // 帮助内容搜索
@@ -234,7 +234,7 @@ class GlobalSearchService {
         url: '/help',
         icon: 'Play',
         category: '入门指南',
-        relevance: 0.9
+        relevance: 0.9,
       },
       {
         id: 'api-documentation',
@@ -244,19 +244,22 @@ class GlobalSearchService {
         url: '/help',
         icon: 'Book',
         category: 'API文档',
-        relevance: 0.8
-      }
+        relevance: 0.8,
+      },
     ];
 
     this.initialized = true;
   }
 
   // 执行搜索
-  async search(query: string, options?: {
-    types?: SearchResult['type'][];
-    categories?: string[];
-    limit?: number;
-  }): Promise<SearchResult[]> {
+  async search(
+    query: string,
+    options?: {
+      types?: SearchResult['type'][];
+      categories?: string[];
+      limit?: number;
+    }
+  ): Promise<SearchResult[]> {
     await this.initializeSearchIndex();
 
     if (!query.trim()) {
@@ -358,10 +361,20 @@ class GlobalSearchService {
     const categories: SearchCategory[] = [
       { id: 'all', name: '全部', icon: 'Search', count: this.searchIndex.length },
       { id: 'navigation', name: '导航', icon: 'Navigation', count: categoryMap.get('导航') || 0 },
-      { id: 'test-tools', name: '测试工具', icon: 'TestTube', count: categoryMap.get('测试工具') || 0 },
-      { id: 'data-center', name: '数据中心', icon: 'Database', count: categoryMap.get('数据中心') || 0 },
+      {
+        id: 'test-tools',
+        name: '测试工具',
+        icon: 'TestTube',
+        count: categoryMap.get('测试工具') || 0,
+      },
+      {
+        id: 'data-center',
+        name: '数据中心',
+        icon: 'Database',
+        count: categoryMap.get('数据中心') || 0,
+      },
       { id: 'settings', name: '设置', icon: 'Settings', count: categoryMap.get('设置') || 0 },
-      { id: 'help', name: '帮助', icon: 'HelpCircle', count: categoryMap.get('帮助') || 0 }
+      { id: 'help', name: '帮助', icon: 'HelpCircle', count: categoryMap.get('帮助') || 0 },
     ];
 
     return categories?.filter(cat => cat.count > 0);

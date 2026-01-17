@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { storageService } = require('../services/storage/StorageService');
 const { authMiddleware, optionalAuth } = require('../middleware/auth');
-const { query, body, validationResult } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 
 /**
  * GET /api/storage/status
@@ -309,7 +309,7 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
     // 验证引擎类型
     const validEngineTypes = [
       'api', 'performance', 'security', 'seo', 'stress',
-      'infrastructure', 'ux', 'compatibility', 'website'
+      'ux', 'compatibility', 'website'
     ];
 
     if (!validEngineTypes.includes(engineType)) {
