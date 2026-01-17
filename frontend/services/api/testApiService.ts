@@ -12,7 +12,7 @@ import type { ApiResponse, TestCallbacks, TestRunConfig } from '../../types/api/
 import type { TestExecution, TestHistory, TestStatus } from '../../types/compat/testTypes';
 import { TestStatus as TestStatusEnum } from '../../types/enums';
 import { PermissionChecker, _TestPermissions as TestPermissions } from '../auth/authDecorator';
-import { apiClient } from './client';
+import { testApiClient } from './test/testApiClient';
 
 // 定义本地类型
 interface TestApiClient {
@@ -947,8 +947,8 @@ class TestApiService implements TestApiClient {
 }
 
 // 创建单例实例
-export const testApiService = new TestApiService();
+export const testApiService = testApiClient;
 
-// 注意：接口类型已通过 export interface 直接导出，无需重复导出
+// 注意：兼容旧导入路径，统一使用 testApiClient
 
 export default testApiService;

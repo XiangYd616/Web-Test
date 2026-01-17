@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { testApiService } from '../services/api/testApiService';
+import { testApiClient } from '../services/api/test/testApiClient';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type { DatabaseTestConfig, DatabaseTestHook, DatabaseTestResult } from '../types';
 import { TestStatus } from '../types/enums';
@@ -384,8 +384,8 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
       setCurrentStep('正在测试数据库连接...');
 
       // 这里应该调用实际的连接测试API
-      const response = await (testApiService as any).testDatabaseConnection(
-        config.connectionConfig
+      const response = await testApiClient.testDatabaseConnection(
+        config.connectionConfig as Record<string, unknown>
       );
 
       if (response.success) {

@@ -1,6 +1,6 @@
 /**
  * 统一测试API客户�?
- * 
+ *
  * 这是前端与后端测试引擎交互的唯一接口
  * 前端不执行任何测试逻辑，只负责�?
  * 1. 发送测试请求到后端
@@ -44,6 +44,12 @@ export interface TestResult {
   duration: number;
 }
 
+interface DatabaseConnectionResponse {
+  success: boolean;
+  message?: string;
+  data?: unknown;
+}
+
 /**
  * 测试API客户端类
  * 职责：与后端测试引擎通信
@@ -73,20 +79,20 @@ export class TestApiClient {
   private setupInterceptors(): void {
     // 请求拦截�?- 添加认证token�?
     this.api.interceptors.request.use(
-      (config) => {
+      config => {
         const token = localStorage.getItem('authToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error)
     );
 
     // 响应拦截�?- 统一错误处理
     this.api.interceptors.response.use(
-      (response) => response?.data,
-      (error) => {
+      response => response?.data,
+      error => {
         const errorMessage = error.response?.data?.message || error.message || '未知错误';
         Logger.error('API Error:', errorMessage);
         return Promise.reject(new Error(errorMessage));
@@ -97,14 +103,16 @@ export class TestApiClient {
   /**
    * 获取所有可用的测试引擎
    */
-  async getAvailableEngines(): Promise<Array<{
-    id: string;
-    name: string;
-    description: string;
-    category: string;
-    enabled: boolean;
-    features: string[];
-  }>> {
+  async getAvailableEngines(): Promise<
+    Array<{
+      id: string;
+      name: string;
+      description: string;
+      category: string;
+      enabled: boolean;
+      features: string[];
+    }>
+  > {
     return this.api.get('/test/engines');
   }
 
@@ -118,7 +126,10 @@ export class TestApiClient {
   /**
    * 验证测试配置
    */
-  async validateConfig(engineId: string, config: Record<string, any>): Promise<{
+  async validateConfig(
+    engineId: string,
+    config: Record<string, any>
+  ): Promise<{
     valid: boolean;
     errors?: string[];
     warnings?: string[];
@@ -127,16 +138,25 @@ export class TestApiClient {
   }
 
   /**
+   * 数据库连接测试
+   */
+  async testDatabaseConnection(
+    config: Record<string, unknown>
+  ): Promise<DatabaseConnectionResponse> {
+    return this.api.post('/database/connection-test', config);
+  }
+
+  /**
    * 运行测试
    */
   async runTest(request: TestRequest): Promise<TestResult> {
     const { engineId, config, options = {} } = request;
-    
+
     try {
       // 发送测试请求到后端
       const response: any = await this.api.post(`/test/${engineId}/run`, {
         config,
-        options
+        options,
       });
 
       // 如果是异步测试，建立WebSocket连接接收进度
@@ -156,7 +176,7 @@ export class TestApiClient {
   async runBatchTests(requests: TestRequest[]): Promise<TestResult[]> {
     try {
       const response: any = await this.api.post('/test/batch', {
-        tests: requests
+        tests: requests,
       });
       return response?.results || [];
     } catch (error) {
@@ -204,7 +224,7 @@ export class TestApiClient {
   async exportReport(testId: string, format: 'pdf' | 'html' | 'json' = 'pdf'): Promise<Blob> {
     const response = await this.api.get(`/test/${testId}/export`, {
       params: { format },
-      responseType: 'blob'
+      responseType: 'blob',
     });
     return response as unknown as Blob;
   }
@@ -220,7 +240,7 @@ export class TestApiClient {
     const wsUrl = this.baseUrl.replace('http', 'ws') + `/test/${testId}/progress`;
     this.wsConnection = new WebSocket(wsUrl);
 
-    this.wsConnection.onmessage = (event) => {
+    this.wsConnection.onmessage = event => {
       try {
         const progress: TestProgress = JSON.parse(event.data);
 
@@ -242,7 +262,7 @@ export class TestApiClient {
       }
     };
 
-    this.wsConnection.onerror = (error) => {
+    this.wsConnection.onerror = error => {
       Logger.error('WebSocket错误:', error);
     };
 

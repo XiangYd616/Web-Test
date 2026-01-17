@@ -114,6 +114,87 @@ class TestController {
   }
 
   /**
+   * 获取测试统计
+   * GET /api/test/stats
+   */
+  async getStats(req, res, next) {
+    try {
+      const stats = await testService.getUserStats(req.user.id);
+      return successResponse(res, stats);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取测试历史统计
+   * GET /api/test/statistics
+   */
+  async getHistoryStats(req, res, next) {
+    try {
+      const { timeRange = 30 } = req.query;
+      const stats = await testService.getHistoryStats(req.user.id, parseInt(timeRange));
+      return successResponse(res, stats);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * API根路径
+   * GET /api/test
+   */
+  async getApiInfo(req, res) {
+    return res.json({
+      success: true,
+      message: 'Test API',
+      version: '2.0.0',
+      endpoints: {
+        tests: [
+          'POST /api/test/create-and-start',
+          'POST /api/test/website',
+          'POST /api/test/performance',
+          'POST /api/test/security',
+          'POST /api/test/seo',
+          'POST /api/test/stress',
+          'POST /api/test/api',
+          'POST /api/test/accessibility'
+        ],
+        management: [
+          'GET /api/test/:testId/status',
+          'GET /api/test/:testId/result',
+          'POST /api/test/:testId/stop',
+          'DELETE /api/test/:testId',
+          'PUT /api/test/:testId',
+          'POST /api/test/:testId/rerun'
+        ],
+        batch: [
+          'POST /api/test/batch-delete',
+          'GET /api/test/running'
+        ],
+        statistics: [
+          'GET /api/test/stats',
+          'GET /api/test/statistics',
+          'GET /api/test/history'
+        ]
+      }
+    });
+  }
+
+  /**
+   * 健康检查
+   * GET /api/test/ping
+   */
+  async ping(req, res) {
+    return res.json({
+      success: true,
+      message: 'Test service is working!',
+      timestamp: new Date().toISOString(),
+      version: '2.0.0'
+    });
+  }
+
+  /**
    * 批量删除测试
    * POST /api/test/batch-delete
    */
