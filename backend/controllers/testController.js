@@ -91,56 +91,6 @@ class TestController {
   }
 
   /**
-   * 获取测试历史
-   * GET /api/test/history
-   */
-  async getHistory(req, res, next) {
-    try {
-      const { page = 1, limit = 20, testType, status } = req.query;
-      const userId = req.user.id;
-
-      const history = await testService.getHistory(userId, {
-        userId,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        testType,
-        status,
-      });
-
-      return successResponse(res, history);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * 获取测试统计
-   * GET /api/test/stats
-   */
-  async getStats(req, res, next) {
-    try {
-      const stats = await testService.getUserStats(req.user.id);
-      return successResponse(res, stats);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * 获取测试历史统计
-   * GET /api/test/statistics
-   */
-  async getHistoryStats(req, res, next) {
-    try {
-      const { timeRange = 30 } = req.query;
-      const stats = await testService.getHistoryStats(req.user.id, parseInt(timeRange));
-      return successResponse(res, stats);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
    * API根路径
    * GET /api/test
    */
@@ -172,11 +122,7 @@ class TestController {
           'POST /api/test/batch-delete',
           'GET /api/test/running'
         ],
-        statistics: [
-          'GET /api/test/stats',
-          'GET /api/test/statistics',
-          'GET /api/test/history'
-        ]
+        statistics: []
       }
     });
   }

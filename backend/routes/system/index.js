@@ -7,11 +7,18 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 
 const { getPool, healthCheck, getStats } = require('../config/database');
+const monitoringRoutes = require('./monitoring');
+const MonitoringService = require('../services/monitoring/MonitoringService');
 const { requireRole, ROLES } = require('../middleware/auth.js');
 const { asyncHandler } = require('../middleware/errorHandler.js');
 const { formatValidationErrors } = require('../middleware/responseFormatter.js');
 
 const router = express.Router();
+
+// 初始化监控服务并注入路由
+const monitoringService = new MonitoringService(getPool());
+monitoringRoutes.setMonitoringService(monitoringService);
+router.use('/monitoring', monitoringRoutes);
 
 // =====================================================
 // 验证规则
@@ -86,7 +93,7 @@ const getSystemInfo = () => {
 // =====================================================
 
 /**
- * GET /api/v1/system/info
+ * GET /api/system/info
  * 获取系统信息
  */
 router.get('/info', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
@@ -105,7 +112,7 @@ router.get('/info', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
 }));
 
 /**
- * GET /api/v1/system/config
+ * GET /api/system/config
  * 获取系统配置
  */
 router.get('/config', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
@@ -156,7 +163,7 @@ router.get('/config', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) =>
 }));
 
 /**
- * PUT /api/v1/system/config
+ * PUT /api/system/config
  * 更新系统配置
  */
 router.put('/config', requireRole(ROLES.ADMIN), configValidation, asyncHandler(async (req, res) => {
@@ -173,7 +180,7 @@ router.put('/config', requireRole(ROLES.ADMIN), configValidation, asyncHandler(a
   if (dataType === 'json') {
     try {
       JSON.parse(typeof value === 'string' ? value : JSON.stringify(value));
-    } catch (error) {
+    } catch {
       return res.badRequest('无效的JSON格式');
     }
   }
@@ -207,7 +214,7 @@ router.put('/config', requireRole(ROLES.ADMIN), configValidation, asyncHandler(a
 }));
 
 /**
- * DELETE /api/v1/system/config/:category/:key
+ * DELETE /api/system/config/:category/:key
  * 删除系统配置
  */
 router.delete('/config/:category/:key', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
@@ -228,7 +235,7 @@ router.delete('/config/:category/:key', requireRole(ROLES.ADMIN), asyncHandler(a
 }));
 
 /**
- * GET /api/v1/system/engines
+ * GET /api/system/engines
  * 获取测试引擎状态
  */
 router.get('/engines', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
@@ -245,7 +252,7 @@ router.get('/engines', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) =
 }));
 
 /**
- * PUT /api/v1/system/engines/:type
+ * PUT /api/system/engines/:type
  * 更新测试引擎状态
  */
 router.put('/engines/:type', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
@@ -280,7 +287,7 @@ router.put('/engines/:type', requireRole(ROLES.ADMIN), asyncHandler(async (req, 
 }));
 
 /**
- * POST /api/v1/system/maintenance
+ * POST /api/system/maintenance
  * 执行系统维护
  */
 router.post('/maintenance', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
@@ -302,11 +309,10 @@ router.post('/maintenance', requireRole(ROLES.ADMIN), asyncHandler(async (req, r
 }));
 
 /**
- * GET /api/v1/system/logs
+ * GET /api/system/logs
  * 获取系统日志（简化版本）
  */
-router.get('/logs', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
-  const { level = 'info', limit = 100 } = req.query;
+router.get('/logs', requireRole(ROLES.ADMIN), asyncHandler(async (_req, res) => {
 
   // 这里应该从日志文件或日志服务中获取日志
   // 暂时返回模拟数据
@@ -323,7 +329,7 @@ router.get('/logs', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {
 }));
 
 /**
- * GET /api/v1/system/stats
+ * GET /api/system/stats
  * 获取系统统计信息
  */
 router.get('/stats', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) => {

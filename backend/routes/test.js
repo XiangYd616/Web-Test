@@ -130,26 +130,6 @@ router.post('/batch-delete', authMiddleware, testController.batchDelete);
  */
 router.get('/running', authMiddleware, testController.getRunningTests);
 
-// ==================== 统计和历史路由 ====================
-
-/**
- * 获取测试历史
- * GET /api/test/history
- */
-router.get('/history', authMiddleware, testController.getHistory);
-
-/**
- * 获取测试统计
- * GET /api/test/stats
- */
-router.get('/stats', authMiddleware, testController.getStats);
-
-/**
- * 获取测试历史统计
- * GET /api/test/statistics
- */
-router.get('/statistics', authMiddleware, testController.getHistoryStats);
-
 // ==================== API信息路由 ====================
 
 /**

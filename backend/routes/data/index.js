@@ -239,26 +239,6 @@ router.post('/batch', asyncHandler(async (req, res) => {
 }));
 
 /**
- * 数据导出
- */
-router.post('/:type/export', asyncHandler(async (req, res) => {
-  const { type } = req.params;
-  const { format = 'json', query = {}, filename } = req.body;
-
-  try {
-    const result = await dataManagementService.exportData(type, format, {
-      query,
-      filename
-    });
-
-    res.success(result);
-  } catch (error) {
-    console.error('数据导出失败:', error);
-    res.serverError('数据导出失败');
-  }
-}));
-
-/**
  * 数据导入
  */
 router.post('/:type/import', upload.single('file'), asyncHandler(async (req, res) => {
@@ -298,7 +278,8 @@ router.get('/:type/statistics', asyncHandler(async (req, res) => {
     if (customStats) {
       try {
         options.customStats = JSON.parse(customStats);
-      } catch (e) {
+      } catch (error) {
+        console.warn('解析自定义统计参数失败:', error);
         return res.validationError([], '自定义统计参数格式错误');
       }
     }
@@ -351,24 +332,6 @@ router.get('/types', asyncHandler(async (req, res) => {
 }));
 
 /**
- * 获取支持的导出格式
- */
-router.get('/export-formats', asyncHandler(async (req, res) => {
-  try {
-    const formats = dataManagementService.exportFormats.map(format => ({
-      format,
-      description: getFormatDescription(format),
-      mimeType: getFormatMimeType(format)
-    }));
-
-    res.success(formats);
-  } catch (error) {
-    console.error('获取导出格式失败:', error);
-    res.serverError('获取导出格式失败');
-  }
-}));
-
-/**
  * 数据验证
  */
 router.post('/:type/validate', asyncHandler(async (req, res) => {
@@ -385,6 +348,7 @@ router.post('/:type/validate', asyncHandler(async (req, res) => {
     
     res.success('数据验证通过');
   } catch (error) {
+    console.warn('数据验证失败:', error);
     res.validationError([], '数据验证失败');
   }
 }));
@@ -400,26 +364,6 @@ function getTypeDescription(type) {
     'configurations': '配置数据'
   };
   return descriptions[type] || '未知类型';
-}
-
-function getFormatDescription(format) {
-  const descriptions = {
-    'json': 'JSON格式，适合程序处理',
-    'csv': 'CSV格式，适合Excel打开',
-    'excel': 'Excel格式，适合数据分析',
-    'xml': 'XML格式，适合系统集成'
-  };
-  return descriptions[format] || '未知格式';
-}
-
-function getFormatMimeType(format) {
-  const mimeTypes = {
-    'json': 'application/json',
-    'csv': 'text/csv',
-    'excel': 'application/vnd.ms-excel',
-    'xml': 'application/xml'
-  };
-  return mimeTypes[format] || 'application/octet-stream';
 }
 
 // =====================================================
@@ -540,67 +484,6 @@ router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
       success: false,
       message: '数据查询失败',
       error: error.message
-    });
-  }
-}));
-
-/**
- * 获取分析数据
- * GET /api/data/analytics
- */
-router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
-  try {
-    const { query } = require('../config/database');
-
-    // 获取测试历史统计
-    const testStats = await query(
-      `SELECT 
-        COUNT(*) as total_tests,
-        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
-        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
-        AVG(duration) as avg_duration
-       FROM test_history 
-       WHERE user_id = $1`,
-      [req.user.id]
-    );
-
-    // 获取按日期分组的测试数量
-    const dailyStats = await query(
-      `SELECT 
-        DATE(created_at) as date,
-        COUNT(*) as count
-       FROM test_history 
-       WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '30 days'
-       GROUP BY DATE(created_at)
-       ORDER BY date DESC`,
-      [req.user.id]
-    );
-
-    // 获取按测试类型分组的统计
-    const typeStats = await query(
-      `SELECT 
-        test_type,
-        COUNT(*) as count
-       FROM test_history 
-       WHERE user_id = $1
-       GROUP BY test_type
-       ORDER BY count DESC`,
-      [req.user.id]
-    );
-
-    res.json({
-      success: true,
-      data: {
-        overview: testStats.rows[0],
-        dailyStats: dailyStats.rows,
-        typeStats: typeStats.rows
-      }
-    });
-  } catch (error) {
-    console.error('获取分析数据失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取分析数据失败'
     });
   }
 }));

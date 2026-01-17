@@ -1,8 +1,8 @@
 /**
  * 防止主题闪烁组件
- * 基于 Remix Themes 的最佳实�? */
+ * 基于 Remix Themes 的最佳实践
+ */
 
-import Logger from '@/utils/logger';
 import React from 'react';
 
 interface PreventFlashOnWrongThemeProps {
@@ -13,7 +13,8 @@ interface PreventFlashOnWrongThemeProps {
 }
 
 /**
- * 防止主题闪烁的内联脚�? * 这个脚本会在页面加载时立即执行，避免闪烁
+ * 防止主题闪烁的内联脚本
+ * 这个脚本会在页面加载时立即执行，避免闪烁
  */
 const themeScript = `
 (function() {
@@ -23,7 +24,8 @@ const themeScript = `
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     const actualTheme = theme === 'system' || !theme ? systemTheme : theme;
     
-    // 立即应用主题�?    const root = document.documentElement;
+    // 立即应用主题
+    const root = document.documentElement;
     root.classList.remove('light', 'dark', 'light-theme', 'dark-theme');
     root.classList.add(actualTheme, actualTheme + '-theme');
     root.setAttribute('data-theme', actualTheme);
@@ -61,7 +63,7 @@ const themeScript = `
  */
 export const PreventFlashOnWrongTheme: React.FC<PreventFlashOnWrongThemeProps> = ({
   ssrTheme = false,
-  defaultTheme = 'light'
+  defaultTheme = 'light',
 }) => {
   // 如果有服务端主题，不需要防闪烁脚本
   if (ssrTheme) {
@@ -71,41 +73,44 @@ export const PreventFlashOnWrongTheme: React.FC<PreventFlashOnWrongThemeProps> =
   return (
     <script
       dangerouslySetInnerHTML={{
-        __html: themeScript
+        __html: themeScript,
       }}
     />
   );
 };
 
 /**
- * 主题初始化Hook
- * 确保主题在客户端正确初始�? */
+ * 主题初始化 Hook
+ * 确保主题在客户端正确初始化
+ */
 const useThemeInitialization = () => {
   React.useEffect(() => {
     // 监听系统主题变化
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
     const handleSystemThemeChange = (e: MediaQueryListEvent) => {
       const currentTheme = localStorage.getItem('theme');
-      
+
       // 只有当用户选择跟随系统时才更新
       if (currentTheme === 'system' || !currentTheme) {
         const newTheme = e?.matches ? 'dark' : 'light';
         const root = document.documentElement;
-        
+
         root.classList.remove('light', 'dark', 'light-theme', 'dark-theme');
         root.classList.add(newTheme, newTheme + '-theme');
         root.setAttribute('data-theme', newTheme);
-        
+
         // 触发自定义事件通知主题变化
-        window.dispatchEvent(new CustomEvent('themechange', {
-          detail: { theme: newTheme, source: 'system' }
-        }));
+        window.dispatchEvent(
+          new CustomEvent('themechange', {
+            detail: { theme: newTheme, source: 'system' },
+          })
+        );
       }
     };
-    
+
     mediaQuery.addEventListener('change', handleSystemThemeChange);
-    
+
     return () => {
       mediaQuery.removeEventListener('change', handleSystemThemeChange);
     };
@@ -113,28 +118,29 @@ const useThemeInitialization = () => {
 };
 
 /**
- * 主题同步Hook
- * 确保React状态与DOM状态同�? */
+ * 主题同步 Hook
+ * 确保 React 状态与 DOM 状态同步
+ */
 const useThemeSync = () => {
   const [theme, setTheme] = React.useState<string>('light');
-  
+
   React.useEffect(() => {
     // 从DOM获取当前主题
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     setTheme(currentTheme);
-    
+
     // 监听主题变化事件
     const handleThemeChange = (e: CustomEvent) => {
       setTheme(e?.detail.theme);
     };
-    
+
     window.addEventListener('themechange', handleThemeChange as EventListener);
-    
+
     return () => {
       window.removeEventListener('themechange', handleThemeChange as EventListener);
     };
   }, []);
-  
+
   return theme;
 };
 

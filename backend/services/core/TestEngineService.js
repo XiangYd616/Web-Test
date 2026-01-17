@@ -21,9 +21,7 @@ const path = require('path');
 
 // 导入标准响应类型
 const {
-  StandardErrorCode,
-  StandardStatusCodeMap,
-  StandardErrorMessages
+  StandardErrorCode
 } = require('../../../shared/types/standardApiResponse');
 
 // 测试类型枚举
@@ -124,6 +122,27 @@ class TestEngineService extends EventEmitter {
       this.status = 'error';
       throw error;
     }
+  }
+
+  /**
+   * 兼容旧接口：重新加载引擎
+   */
+  async reloadEngine(testType) {
+    const config = this.engineConfigs.get(testType);
+    if (!config) {
+      throw new Error(`引擎配置不存在: ${testType}`);
+    }
+
+    const engine = this.engines.get(testType);
+    if (engine && typeof engine.cleanup === 'function') {
+      await engine.cleanup();
+    }
+
+    this.engines.delete(testType);
+    this.engineConfigs.delete(testType);
+
+    await this.registerEngine(config);
+    return true;
   }
 
   /**
@@ -555,8 +574,8 @@ class TestEngineService extends EventEmitter {
       const testResult = {
         id: testId,
         type: testType,
-        config: config,
-        result: result,
+        config,
+        result,
         status: TestStatus.COMPLETED,
         startTime: testRequest.startTime,
         actualStartTime: testRequest.actualStartTime,
@@ -596,7 +615,7 @@ class TestEngineService extends EventEmitter {
       const errorResult = {
         id: testId,
         type: testType,
-        config: config,
+        config,
         status: TestStatus.FAILED,
         error: {
           message: error.message,
@@ -835,6 +854,81 @@ class TestEngineService extends EventEmitter {
   }
 
   /**
+   * 兼容旧接口：获取引擎列表
+   */
+  getEngines() {
+    return this.getAvailableEngines();
+  }
+
+  /**
+   * 兼容旧接口：获取引擎详情
+   */
+  getEngineInfo(testType) {
+    const engine = this.engines.get(testType);
+    if (!engine) {
+      return null;
+    }
+    const config = this.engineConfigs.get(testType);
+    return {
+      name: testType,
+      description: config?.description || engine.description || testType,
+      status: engine.status,
+      methods: config?.methods || [],
+      lastUsed: engine.lastUsed,
+      testCount: engine.testCount || 0
+    };
+  }
+
+  /**
+   * 兼容旧接口：获取统计信息
+   */
+  getStatistics() {
+    return this.getServiceStats();
+  }
+
+  /**
+   * 兼容旧接口：执行测试
+   */
+  async runTest(testType, config = {}) {
+    if (!this.engines.has(testType)) {
+      throw new Error(`不支持的测试类型: ${testType}`);
+    }
+
+    const availability = await this.checkEngineAvailability(testType);
+    if (!availability.available) {
+      throw new Error(`引擎不可用: ${availability.error || availability.status}`);
+    }
+
+    if (config.useCache !== false) {
+      const cachedResult = this.getCachedResult(testType, config.url || '', config.options || {});
+      if (cachedResult) {
+        return {
+          ...cachedResult,
+          fromCache: true
+        };
+      }
+    }
+
+    const testId = uuidv4();
+    const testRequest = {
+      id: testId,
+      type: testType,
+      config: {
+        url: config.url || '',
+        options: config.options || {},
+        timeout: config.timeout || 300000,
+        ...config
+      },
+      status: TestStatus.PENDING,
+      startTime: new Date(),
+      priority: config.priority || 'normal'
+    };
+
+    this.activeTests.set(testId, testRequest);
+    return await this.executeTest(testRequest);
+  }
+
+  /**
    * 获取服务统计信息
    */
   getServiceStats() {
@@ -939,7 +1033,7 @@ class TestEngineService extends EventEmitter {
   /**
    * 估算开始时间
    */
-  estimateStartTime(testRequest) {
+  estimateStartTime(_testRequest) {
     const waitTime = this.estimateWaitTime();
     return new Date(Date.now() + waitTime);
   }
@@ -1004,8 +1098,9 @@ class TestEngineService extends EventEmitter {
 }
 
 // 导出服务类和常量
+const testEngineService = new TestEngineService();
+
 module.exports = {
   TestEngineService,
   testEngineService
-};
 };

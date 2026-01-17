@@ -20,15 +20,19 @@ const { getDatabaseConfig } = require('./config/database');
 const authRoutes = require('./routes/auth');
 const oauthRoutes = require('./routes/oauth');
 const testRoutes = require('./routes/test');
-const testsRoutes = require('./routes/tests');
 const usersRoutes = require('./routes/users');
-const seoRoutes = require('./routes/tests/seo');
 const securityRoutes = require('./routes/security');
 const performanceRoutes = require('./routes/performance');
 const enginesRoutes = require('./routes/engines');
 const scheduledTasksRoutes = require('./routes/scheduledTasks');
-const comparisonRoutes = require('./routes/comparison');
+const comparisonRoutes = require('./routes/misc/comparison');
+const integrationsRoutes = require('./routes/misc/integrations');
+const batchRoutes = require('./routes/misc/batch');
+const coreRoutes = require('./routes/misc/core');
 const analyticsRoutes = require('./routes/analytics');
+const systemRoutes = require('./routes/system');
+const dataRoutes = require('./routes/data');
+const adminRoutes = require('./routes/admin');
 
 // 导入中间件
 const { responseFormatter } = require('./middleware/responseFormatter');
@@ -129,13 +133,20 @@ app.get('/api/info', (req, res) => {
     endpoints: {
       auth: '/api/auth',
       oauth: '/api/oauth',
-      tests: '/api/tests',
-      seo: '/api/seo',
+      test: '/api/test',
+      users: '/api/users',
       security: '/api/security',
       performance: '/api/performance',
       engines: '/api/engines',
       scheduledTasks: '/api/scheduled-tasks',
-      comparison: '/api/comparison'
+      comparison: '/api/comparison',
+      analytics: '/api/analytics',
+      integrations: '/api/integrations',
+      batch: '/api/batch',
+      core: '/api/core',
+      system: '/api/system',
+      data: '/api/data',
+      admin: '/api/admin'
     },
     environment: NODE_ENV,
     timestamp: new Date().toISOString()
@@ -146,15 +157,19 @@ app.get('/api/info', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/oauth', oauthRoutes);
 app.use('/api/test', testRoutes);
-app.use('/api/tests', testsRoutes);
 app.use('/api/users', usersRoutes);
-app.use('/api/seo', seoRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/engines', enginesRoutes);
 app.use('/api/scheduled-tasks', scheduledTasksRoutes);
 app.use('/api/comparison', comparisonRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/integrations', integrationsRoutes);
+app.use('/api/batch', batchRoutes);
+app.use('/api/core', coreRoutes);
+app.use('/api/system', systemRoutes);
+app.use('/api/data', dataRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 静态文件服务（如果需要）
 if (NODE_ENV === 'production') {

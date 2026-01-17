@@ -4,7 +4,7 @@
 
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { query, transaction } = require('../config/database');
+const { query } = require('../config/database');
 const {
   generateTokenPair,
   authMiddleware,
@@ -13,16 +13,14 @@ const {
   createUserSession
 } = require('../middleware/auth');
 const { loginRateLimiter, registerRateLimiter } = require('../middleware/rateLimiter');
-const { ErrorHandler, asyncHandler } = require('../middleware/errorHandler');
+const { asyncHandler } = require('../middleware/errorHandler');
 const { securityLogger } = require('../middleware/logger');
 
 const router = express.Router();
 
-// MFA和OAuth功能暂时禁用，避免模块缺失错误
-// const mfaRoutes = require('../src/routes/mfa');
-// const oauthRoutes = require('./oauth');
-// router.use('/mfa', mfaRoutes);
-// router.use('/oauth', oauthRoutes);
+// MFA路由
+const mfaRoutes = require('./mfa');
+router.use('/mfa', mfaRoutes);
 
 /**
  * 用户注册
@@ -318,6 +316,7 @@ router.post('/verify', asyncHandler(async (req, res) => {
       const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (error) {
+      console.warn('访问令牌验证失败:', error);
       return res.unauthorized('无效的访问令牌');
     }
 
@@ -594,7 +593,7 @@ router.post('/reset-password', asyncHandler(async (req, res) => {
     return res.validationError([], '密码必须包含大小写字母和数字');
   }
 
-  if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?])/.test(password)) {
+  if (!/(?=.*[!@#$%^&*()_+-=[\]{};':"\\|,.<>/?])/.test(password)) {
     return res.validationError([], '密码必须包含特殊字符');
   }
 

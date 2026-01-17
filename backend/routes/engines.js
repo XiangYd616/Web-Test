@@ -13,31 +13,26 @@
 
 const express = require('express');
 const router = express.Router();
-const { getTestEngineManager } = require('../engines/TestEngineManager');
+const { testEngineService } = require('../services/core/TestEngineService');
 const Logger = require('../utils/logger');
 
-// 获取测试引擎管理器实例
-let engineManager;
-try {
-  engineManager = getTestEngineManager();
-} catch (error) {
-  Logger.error('初始化测试引擎管理器失败:', error);
-}
+// 初始化统一测试引擎服务
+let engineServiceReady = false;
+const ensureEngineService = async () => {
+  if (!engineServiceReady) {
+    await testEngineService.initialize();
+    engineServiceReady = true;
+  }
+};
 
 /**
  * GET /api/engines
  * 获取所有可用的测试引擎列表
  */
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    if (!engineManager) {
-      return res.status(503).json({
-        success: false,
-        message: '测试引擎管理器未初始化'
-      });
-    }
-
-    const engines = engineManager.getEngines();
+    await ensureEngineService();
+    const engines = testEngineService.getEngines();
     
     res.json({
       success: true,
@@ -58,16 +53,10 @@ router.get('/', (req, res) => {
  * GET /api/engines/statistics
  * 获取引擎统计信息
  */
-router.get('/statistics', (req, res) => {
+router.get('/statistics', async (req, res) => {
   try {
-    if (!engineManager) {
-      return res.status(503).json({
-        success: false,
-        message: '测试引擎管理器未初始化'
-      });
-    }
-
-    const statistics = engineManager.getStatistics();
+    await ensureEngineService();
+    const statistics = testEngineService.getStatistics();
     
     res.json({
       success: true,
@@ -87,18 +76,12 @@ router.get('/statistics', (req, res) => {
  * GET /api/engines/:type
  * 获取指定引擎的详细信息
  */
-router.get('/:type', (req, res) => {
+router.get('/:type', async (req, res) => {
   try {
     const { type } = req.params;
     
-    if (!engineManager) {
-      return res.status(503).json({
-        success: false,
-        message: '测试引擎管理器未初始化'
-      });
-    }
-
-    const engineInfo = engineManager.getEngineInfo(type);
+    await ensureEngineService();
+    const engineInfo = testEngineService.getEngineInfo(type);
     
     if (!engineInfo) {
       return res.status(404).json({
@@ -130,15 +113,9 @@ router.post('/:type/test', async (req, res) => {
     const { type } = req.params;
     const config = req.body;
     
-    if (!engineManager) {
-      return res.status(503).json({
-        success: false,
-        message: '测试引擎管理器未初始化'
-      });
-    }
-
-    // 检查引擎是否可用
-    if (!engineManager.isEngineAvailable(type)) {
+    await ensureEngineService();
+    const availability = await testEngineService.checkEngineAvailability(type);
+    if (!availability.available) {
       return res.status(404).json({
         success: false,
         message: `引擎 ${type} 不可用`
@@ -148,7 +125,7 @@ router.post('/:type/test', async (req, res) => {
     Logger.info(`执行 ${type} 测试，配置:`, config);
     
     // 执行测试
-    const result = await engineManager.runTest(type, config);
+    const result = await testEngineService.runTest(type, config);
     
     res.json({
       success: result.success,
@@ -169,18 +146,12 @@ router.post('/:type/test', async (req, res) => {
  * POST /api/engines/:type/reload
  * 重新加载指定引擎
  */
-router.post('/:type/reload', (req, res) => {
+router.post('/:type/reload', async (req, res) => {
   try {
     const { type } = req.params;
     
-    if (!engineManager) {
-      return res.status(503).json({
-        success: false,
-        message: '测试引擎管理器未初始化'
-      });
-    }
-
-    const success = engineManager.reloadEngine(type);
+    await ensureEngineService();
+    const success = await testEngineService.reloadEngine(type);
     
     if (success) {
       res.json({
@@ -233,7 +204,7 @@ router.post('/batch', async (req, res) => {
     
     for (const test of tests) {
       try {
-        const result = await engineManager.runTest(test.type, test.config);
+        const result = await testEngineService.runTest(test.type, test.config);
         results.push({
           type: test.type,
           success: true,

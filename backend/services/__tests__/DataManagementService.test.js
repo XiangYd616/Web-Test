@@ -165,47 +165,7 @@ describe('DataManagementService', () => {
     });
   });
 
-  describe('数据导入导出功能', () => {
-    test('应该成功导出JSON格式数据', async () => {
-      const mockData = [
-        { id: 1, name: 'Test 1' },
-        { id: 2, name: 'Test 2' }
-      ];
-
-      const { query } = require('../../config/database');
-      query.mockResolvedValueOnce({ rows: mockData });
-
-      const result = await service.exportData({
-        dataType: 'test-results',
-        format: 'json',
-        userId: mockUserId
-      });
-
-      expect(result).toHaveProperty('format', 'json');
-      expect(result).toHaveProperty('data');
-      expect(JSON.parse(result.data)).toEqual(mockData);
-    });
-
-    test('应该成功导出CSV格式数据', async () => {
-      const mockData = [
-        { id: 1, name: 'Test 1', score: 85 },
-        { id: 2, name: 'Test 2', score: 92 }
-      ];
-
-      const { query } = require('../../config/database');
-      query.mockResolvedValueOnce({ rows: mockData });
-
-      const result = await service.exportData({
-        dataType: 'test-results',
-        format: 'csv',
-        userId: mockUserId
-      });
-
-      expect(result).toHaveProperty('format', 'csv');
-      expect(result.data).toContain('id,name,score');
-      expect(result.data).toContain('1,Test 1,85');
-    });
-
+  describe('数据导入功能', () => {
     test('应该成功导入JSON数据', async () => {
       const importData = [
         { name: 'Imported 1', score: 75 },

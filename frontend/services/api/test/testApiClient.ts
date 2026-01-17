@@ -1,11 +1,11 @@
 /**
- * 统一测试API客户�?
+ * 统一测试 API 客户端
  *
  * 这是前端与后端测试引擎交互的唯一接口
- * 前端不执行任何测试逻辑，只负责�?
+ * 前端不执行任何测试逻辑，只负责：
  * 1. 发送测试请求到后端
- * 2. 接收测试进度和结�?
- * 3. 处理UI展示
+ * 2. 接收测试进度和结果
+ * 3. 处理 UI 展示
  */
 
 import Logger from '@/utils/logger';
@@ -77,7 +77,7 @@ export class TestApiClient {
    * 设置请求和响应拦截器
    */
   private setupInterceptors(): void {
-    // 请求拦截�?- 添加认证token�?
+    // 请求拦截器 - 添加认证 token
     this.api.interceptors.request.use(
       config => {
         const token = localStorage.getItem('authToken');
@@ -89,7 +89,7 @@ export class TestApiClient {
       error => Promise.reject(error)
     );
 
-    // 响应拦截�?- 统一错误处理
+    // 响应拦截器 - 统一错误处理
     this.api.interceptors.response.use(
       response => response?.data,
       error => {
@@ -192,7 +192,7 @@ export class TestApiClient {
   }
 
   /**
-   * 获取测试状�?
+   * 获取测试状态
    */
   async getTestStatus(testId: string): Promise<TestProgress> {
     return this.api.get(`/test/${testId}/status`);

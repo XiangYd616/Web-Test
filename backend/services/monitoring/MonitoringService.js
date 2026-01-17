@@ -3,7 +3,7 @@
  * 实现24/7网站监控功能，支持多种监控指标
  */
 
-const { Pool } = require('pg');
+const { Pool: _Pool } = require('pg');
 const EventEmitter = require('events');
 const axios = require('axios');
 const { performance } = require('perf_hooks');
@@ -724,7 +724,7 @@ class MonitoringService extends EventEmitter {
              * @returns {Promise<Object>} 返回结果
 
              */
-        for (const [taskId, task] of this.activeMonitors) {
+        for (const [_taskId, task] of this.activeMonitors) {
             if (task.isRunning) {
                 // 检查是否有任务卡住
                 const runningTime = now - (task.startTime || now);
@@ -918,7 +918,7 @@ class MonitoringService extends EventEmitter {
             logger.info('重新加载监控目标...');
 
             // 停止所有当前任务
-            for (const [taskId, task] of this.activeMonitors) {
+            for (const [_taskId, task] of this.activeMonitors) {
                 if (task.intervalId) {
                     clearInterval(task.intervalId);
                 }
@@ -1360,7 +1360,7 @@ class MonitoringService extends EventEmitter {
      */
     async getAlerts(userId, options = {}) {
         try {
-            const { page = 1, limit = 20, severity, status = 'active' } = options;
+            const { page = 1, limit = 20, severity, status: _status = 'active' } = options;
             const offset = (page - 1) * limit;
 
             // 这里需要创建告警表，暂时从监控结果中生成告警
@@ -1705,7 +1705,7 @@ class MonitoringService extends EventEmitter {
             return {
                 id: reportRecord.id,
                 filename: reportFile.filename,
-                downloadUrl: `/api/v1/monitoring/reports/${reportRecord.id}/download`,
+                downloadUrl: `/api/monitoring/reports/${reportRecord.id}/download`,
                 createdAt: reportRecord.created_at
             };
 
@@ -1782,7 +1782,7 @@ class MonitoringService extends EventEmitter {
      * 创建报告文件
      */
     async createReportFile(reportData, options) {
-        const { format, includeCharts, reportType } = options;
+        const { format, includeCharts: _includeCharts, reportType } = options;
         const timestamp = new Date().toISOString().split('T')[0];
         const filename = `monitoring-report-${reportType}-${timestamp}.${format}`;
 

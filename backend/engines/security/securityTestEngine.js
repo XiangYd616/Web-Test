@@ -11,8 +11,6 @@
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
-const crypto = require('crypto');
-const tls = require('tls');
 const { emitTestProgress, emitTestComplete, emitTestError } = require('../../websocket/testEvents');
 const { getAlertManager } = require('../../alert/AlertManager');
 const Logger = require('../../utils/logger');
@@ -338,7 +336,7 @@ class SecurityTestEngine {
       }
       
     } catch (error) {
-      Logger.warn('安全告警检查失败:', error.message);
+      console.warn('安全告警检查失败:', error.message);
     }
   }
 
@@ -391,7 +389,7 @@ class SecurityTestEngine {
     try {
       const urlObj = new URL(url);
       
-      for (const [paramName, paramValue] of urlObj.searchParams.entries()) {
+      for (const [paramName] of urlObj.searchParams.entries()) {
         for (const payload of testPayloads) {
           const testUrl = new URL(url);
           testUrl.searchParams.set(paramName, payload);
@@ -413,7 +411,7 @@ class SecurityTestEngine {
                 recommendation: '对用户输入进行HTML编码'
               });
             }
-          } catch (error) {
+          } catch {
             // 忽略单个请求失败
           }
         }
@@ -442,7 +440,7 @@ class SecurityTestEngine {
     try {
       const urlObj = new URL(url);
       
-      for (const [paramName, paramValue] of urlObj.searchParams.entries()) {
+      for (const [paramName] of urlObj.searchParams.entries()) {
         for (const payload of testPayloads) {
           const testUrl = new URL(url);
           testUrl.searchParams.set(paramName, payload);
@@ -472,7 +470,7 @@ class SecurityTestEngine {
                 break;
               }
             }
-          } catch (error) {
+          } catch {
             // 忽略单个请求失败
           }
         }
@@ -520,7 +518,7 @@ class SecurityTestEngine {
     try {
       const urlObj = new URL(url);
       
-      for (const [paramName, paramValue] of urlObj.searchParams.entries()) {
+      for (const [paramName, _paramValue] of urlObj.searchParams.entries()) {
         for (const payload of payloads) {
           const testUrl = new URL(url);
           testUrl.searchParams.set(paramName, payload);
@@ -543,7 +541,7 @@ class SecurityTestEngine {
                 recommendation: '限制文件访问路径，验证用户输入'
               });
             }
-          } catch (error) {
+          } catch {
             // 忽略单个请求失败
           }
         }
@@ -587,7 +585,7 @@ class SecurityTestEngine {
               recommendation: '限制敏感文件的访问权限'
             });
           }
-        } catch (error) {
+        } catch {
           // 忽略单个请求失败
         }
       }
@@ -608,7 +606,7 @@ class SecurityTestEngine {
     try {
       const urlObj = new URL(url);
       
-      for (const [paramName, paramValue] of urlObj.searchParams.entries()) {
+      for (const [paramName, _paramValue] of urlObj.searchParams.entries()) {
         for (const payload of payloads) {
           const testUrl = new URL(url);
           testUrl.searchParams.set(paramName, `test${payload}`);
@@ -631,7 +629,7 @@ class SecurityTestEngine {
                 recommendation: '禁止直接执行系统命令，使用安全的API'
               });
             }
-          } catch (error) {
+          } catch {
             // 忽略单个请求失败
           }
         }
@@ -646,7 +644,7 @@ class SecurityTestEngine {
   /**
    * 深度其他漏洞扫描
    */
-  async scanOtherVulnerabilities(page, url) {
+  async scanOtherVulnerabilities(page, _url) {
     const vulnerabilities = [];
     
     try {
@@ -1192,7 +1190,6 @@ class SecurityTestEngine {
     // 测试常见的认证绕过
     const testPaths = [
       { path: '/api/', description: 'API端点' },
-      { path: '/api/v1/', description: 'API v1端点' },
       { path: '/api/users', description: '用户API' },
       { path: '/api/admin', description: '管理API' }
     ];
@@ -1217,28 +1214,6 @@ class SecurityTestEngine {
     
     result.score = Math.max(0, result.score);
     return result;
-  }
-
-  /**
-   * 计算安全评分
-   */
-  calculateSecurityScore(analyses) {
-    let totalScore = 0;
-    const weights = {
-      ssl: 0.3,
-      headers: 0.25,
-      vulnerabilities: 0.25,
-      informationDisclosure: 0.1,
-      accessControl: 0.1
-    };
-    
-    Object.keys(weights).forEach(key => {
-      if (analyses[key] && analyses[key].score !== undefined) {
-        totalScore += analyses[key].score * weights[key];
-      }
-    });
-    
-    return Math.round(totalScore);
   }
 
   /**
@@ -1279,56 +1254,11 @@ class SecurityTestEngine {
     
     if (analyses.ssl?.issues) count += analyses.ssl.issues.length;
     if (analyses.headers?.issues) count += analyses.headers.issues.length;
-    if (analyses.vulnerabilities?.vulnerabilities) count += analyses.vulnerabilities.vulnerabilities.length;
-    
-    return count;
-  }
-
-  /**
-   * 生成安全建议
-   */
-  generateSecurityRecommendations(analyses) {
-    const recommendations = [];
-    
-    // SSL建议
-    if (analyses.ssl && !analyses.ssl.enabled) {
-      recommendations.push('立即启用HTTPS以保护数据传输');
-    }
-    if (analyses.ssl?.certificate && !analyses.ssl.certificate.valid) {
-      recommendations.push('更新SSL证书，当前证书已过期或无效');
-    }
-    
-    // 安全头部建议
-    if (analyses.headers?.missingHeaders) {
-      const criticalMissing = analyses.headers.missingHeaders.filter(h => h.importance === 'high');
-      if (criticalMissing.length > 0) {
-        recommendations.push(`添加重要的安全头部: ${criticalMissing.map(h => h.name).join(', ')}`);
-      }
-    }
-    
-    // 漏洞建议
     if (analyses.vulnerabilities?.vulnerabilities) {
-      const critical = analyses.vulnerabilities.vulnerabilities.filter(v => v.severity === 'critical');
-      if (critical.length > 0) {
-        recommendations.push(`立即修复严重漏洞: ${critical.map(v => v.description).join(', ')}`);
-      }
+      count += analyses.vulnerabilities.vulnerabilities.length;
     }
-    
-    // 信息泄露建议
-    if (analyses.informationDisclosure?.disclosures?.length > 0) {
-      recommendations.push('隐藏服务器版本和技术栈信息，减少攻击面');
-    }
-    
-    // 访问控制建议
-    if (analyses.accessControl?.issues?.length > 0) {
-      recommendations.push('加强访问控制，确保敏感端点需要认证');
-    }
-    
-    if (recommendations.length === 0) {
-      recommendations.push('安全状态良好，继续保持当前的安全措施');
-    }
-    
-    return recommendations;
+
+    return count;
   }
 
   /**

@@ -381,7 +381,7 @@ const errorResponseFormatter = (err, req, res, next) => {
 /**
  * 404错误处理中间件
  */
-const notFoundHandler = (req, res, next) => {
+const notFoundHandler = (req, res, _next) => {
     return res.error(
         StandardErrorCode.NOT_FOUND,
         `接口 ${req.method} ${req.originalUrl} 不存在`,
@@ -402,18 +402,20 @@ const getAvailableEndpoints = () => {
     return {
         auth: '/api/auth',
         test: '/api/test',
-        seo: '/api/seo',
+        oauth: '/api/oauth',
         security: '/api/security',
         engines: '/api/engines',
-        user: '/api/user',
-        admin: '/api/admin',
-        monitoring: '/api/monitoring',
-        reports: '/api/reports',
-        system: '/api/system',
-        performance: '/api/performance',
+        users: '/api/users',
+        analytics: '/api/analytics',
+        comparison: '/api/comparison',
         integrations: '/api/integrations',
-        files: '/api/files',
+        batch: '/api/batch',
+        core: '/api/core',
+        system: '/api/system',
+        scheduledTasks: '/api/scheduled-tasks',
+        performance: '/api/performance',
         data: '/api/data',
+        admin: '/api/admin',
         health: '/health'
     };
 };

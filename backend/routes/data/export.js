@@ -9,7 +9,6 @@ const path = require('path');
 const fs = require('fs').promises;
 const DataExportService = require('../services/dataManagement/dataExportService');
 const { authMiddleware } = require('../middleware/auth');
-const { validateRequest } = require('../middleware/validation');
 const { formatResponse } = require('../middleware/responseFormatter');
 const winston = require('winston');
 
@@ -47,7 +46,8 @@ const initializeExportService = async (req, res, next) => {
 
 // 验证导出请求的中间件
 const validateExportRequest = (req, res, next) => {
-    const { dataType, format, dateRange, filters = {} } = req.body;
+    const { dataType, format, dateRange, filters: _filters = {} } = req.body;
+
     const errors = [];
 
     // 验证必需字段
@@ -81,12 +81,24 @@ const validateExportRequest = (req, res, next) => {
     }
 
     if (errors.length > 0) {
-        
         return res.status(400).json(formatResponse(false, null, '请求验证失败', errors));
-      }
+    }
 
     next();
 };
+
+// 获取支持的导出格式
+router.get('/formats', authMiddleware, initializeExportService, (req, res) => {
+    try {
+        const formats = req.exportService.supportedFormats.map(format => ({
+            format
+        }));
+        res.json(formatResponse(true, formats, '获取导出格式成功'));
+    } catch (error) {
+        logger.error('获取导出格式失败:', error);
+        res.status(500).json(formatResponse(false, null, error.message));
+    }
+});
 
 // 创建导出任务
 router.post('/create',
@@ -130,27 +142,11 @@ router.get('/task/:taskId/status',
             const userId = req.user.id;
             const taskId = req.params.taskId;
 
-
-
-            /**
-
-
-             * if功能函数
-
-
-             * @param {Object} params - 参数对象
-
-
-             * @returns {Promise<Object>} 返回结果
-
-
-             */
             const result = await req.exportService.getTaskStatus(taskId, userId);
 
             if (!result.success) {
-                
-        return res.status(404).json(formatResponse(false, null, result.error));
-      }
+                return res.status(404).json(formatResponse(false, null, result.error));
+            }
 
             res.json(formatResponse(true, result.data, '获取任务状态成功'));
 
@@ -195,27 +191,11 @@ router.post('/task/:taskId/cancel',
             const userId = req.user.id;
             const taskId = req.params.taskId;
 
-
-
-            /**
-
-
-             * if功能函数
-
-
-             * @param {Object} params - 参数对象
-
-
-             * @returns {Promise<Object>} 返回结果
-
-
-             */
             const result = await req.exportService.cancelTask(taskId, userId);
 
             if (!result.success) {
-                
-        return res.status(400).json(formatResponse(false, null, result.error));
-      }
+                return res.status(400).json(formatResponse(false, null, result.error));
+            }
 
             logger.info(`用户 ${userId} 取消导出任务 ${taskId}`);
             res.json(formatResponse(true, null, result.message));
@@ -240,26 +220,24 @@ router.get('/task/:taskId/download',
             const taskResult = await req.exportService.getTaskStatus(taskId, userId);
 
             if (!taskResult.success) {
-                
-        return res.status(404).json(formatResponse(false, null, '任务不存在或无权限访问'));
-      }
+                return res.status(404).json(formatResponse(false, null, '任务不存在或无权限访问'));
+            }
 
             const task = taskResult.data;
 
             if (task.status !== 'completed') {
-                
-        return res.status(400).json(formatResponse(false, null, '任务未完成，无法下载'));
-      }
+                return res.status(400).json(formatResponse(false, null, '任务未完成，无法下载'));
+            }
 
             if (!task.filePath) {
-                
-        return res.status(404).json(formatResponse(false, null, '文件不存在'));
-      }
+                return res.status(404).json(formatResponse(false, null, '文件不存在'));
+            }
 
             // 检查文件是否存在
             try {
                 await fs.access(task.filePath);
             } catch (error) {
+                logger.warn('导出文件访问失败:', error);
                 return res.status(404).json(formatResponse(false, null, '文件已过期或不存在'));
             }
 

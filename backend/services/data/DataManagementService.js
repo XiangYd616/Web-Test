@@ -38,8 +38,6 @@ class DataManagementService extends EventEmitter {
       CONFIGURATIONS: 'configurations'
     };
     
-    // 支持的导出格式
-    this.exportFormats = ['json', 'csv', 'excel', 'xml'];
   }
 
   /**
@@ -305,60 +303,6 @@ class DataManagementService extends EventEmitter {
       
     } catch (error) {
       console.error('批量操作失败:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * 数据导出
-   */
-  async exportData(type, format = 'json', options = {}) {
-    try {
-      const queryResult = await this.queryData(type, options.query || {}, options);
-      const data = queryResult.results;
-      
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `${type}_export_${timestamp}.${format}`;
-      
-      /**
-      
-       * switch功能函数
-      
-       * @param {Object} params - 参数对象
-      
-       * @returns {Promise<Object>} 返回结果
-      
-       */
-      const filepath = path.join(this.exportDir, filename);
-      
-      switch (format) {
-        case 'json':
-          await this.exportToJson(data, filepath);
-          break;
-        case 'csv':
-          await this.exportToCsv(data, filepath);
-          break;
-        case 'excel':
-          await this.exportToExcel(data, filepath);
-          break;
-        case 'xml':
-          await this.exportToXml(data, filepath);
-          break;
-        default:
-          throw new Error(`不支持的导出格式: ${format}`);
-      }
-      
-      
-      return {
-        filename,
-        filepath,
-        format,
-        recordCount: data.length,
-        fileSize: (await fs.stat(filepath)).size
-      };
-      
-    } catch (error) {
-      console.error('数据导出失败:', error);
       throw error;
     }
   }
@@ -681,10 +625,11 @@ class DataManagementService extends EventEmitter {
         case 'count':
           stats[stat.name] = records.filter(r => r.data[stat.field] === stat.value).length;
           break;
-        case 'average':
+        case 'average': {
           const values = records.map(r => r.data[stat.field]).filter(v => typeof v === 'number');
           stats[stat.name] = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
           break;
+        }
       }
     }
     return stats;

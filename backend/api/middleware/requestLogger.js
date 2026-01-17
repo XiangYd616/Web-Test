@@ -133,7 +133,7 @@ const shouldLogRequest = (req) => {
   // 开发环境跳过某些请求
   if (process.env.NODE_ENV === 'development') {
     
-        const devSkipPaths = ['/api/v1/health', '/api/v1/metrics'];
+        const devSkipPaths = ['/health', '/metrics'];
     if (devSkipPaths.some(path => req.path === path)) {
       return false;
       }
@@ -181,6 +181,7 @@ const colorLog = (level, message) => {
   };
   
   const color = colors[level] || colors.reset;
+  console.log(`${color}${message}${colors.reset}`);
 };
 
 /**
@@ -224,6 +225,7 @@ const requestLogger = (req, res, next) => {
       
       // 详细日志（仅在调试模式下）
       if (process.env.DEBUG === 'true') {
+        console.debug(JSON.stringify(logData, null, 2));
       }
     } else {
       // 生产环境：结构化JSON日志
@@ -294,6 +296,9 @@ const performanceMonitor = (req, res, next) => {
       
       // 这里可以将性能数据发送到监控系统
       // sendToMonitoringService(performanceData);
+      if (process.env.DEBUG === 'true') {
+        console.debug('性能监控:', JSON.stringify(performanceData));
+      }
     }
   });
   

@@ -91,7 +91,7 @@ router.post('/report', asyncHandler(async (req, res) => {
  * 获取错误统计
  */
 router.get('/stats', asyncHandler(async (req, res) => {
-  const { startDate, endDate, type, severity } = req.query;
+  const { startDate, endDate, type: _type, severity: _severity } = req.query;
 
   // 这里应该从数据库或日志文件中获取错误统计
   // 目前返回模拟数据
@@ -184,7 +184,7 @@ function determinePriority(errorReport) {
 /**
  * 检查错误频率
  */
-async function checkErrorFrequency(errorReport) {
+async function checkErrorFrequency(_errorReport) {
   // 这里应该查询数据库或缓存来获取错误频率
   // 目前返回模拟值
   return Math.floor(Math.random() * 20);
@@ -204,9 +204,6 @@ async function sendErrorAlert(errorReport, metadata) {
       frequency: metadata.frequency,
       timestamp: errorReport.timestamp
     });
-
-    // 示例：发送到监控系统
-    // await sendToMonitoringSystem(errorReport, metadata);
 
   } catch (alertError) {
     Logger.error('Failed to send error alert', alertError);
