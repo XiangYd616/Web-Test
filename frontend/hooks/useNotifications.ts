@@ -1,6 +1,6 @@
 ﻿/**
  * useNotifications.ts - 核心功能模块
- * 
+ *
  * 文件路径: frontend\hooks\useNotifications.ts
  * 创建时间: 2025-09-25
  */
@@ -57,7 +57,7 @@ const _generateMockNotifications = (): NotificationItem[] => {
       priority: 'medium',
       actionUrl: '/stress-test/results/1',
       actionText: '查看报告',
-      createdAt: new Date(now.getTime() - 2 * 60 * 1000)
+      createdAt: new Date(now.getTime() - 2 * 60 * 1000),
     },
     {
       id: '2',
@@ -70,7 +70,7 @@ const _generateMockNotifications = (): NotificationItem[] => {
       priority: 'high',
       actionUrl: '/security-test/results/2',
       actionText: '查看详情',
-      createdAt: new Date(now.getTime() - 15 * 60 * 1000)
+      createdAt: new Date(now.getTime() - 15 * 60 * 1000),
     },
     {
       id: '3',
@@ -83,7 +83,7 @@ const _generateMockNotifications = (): NotificationItem[] => {
       priority: 'urgent',
       actionUrl: '/api-test/results/3',
       actionText: '重新测试',
-      createdAt: new Date(now.getTime() - 30 * 60 * 1000)
+      createdAt: new Date(now.getTime() - 30 * 60 * 1000),
     },
     {
       id: '4',
@@ -94,7 +94,7 @@ const _generateMockNotifications = (): NotificationItem[] => {
       read: true,
       category: 'system',
       priority: 'medium',
-      createdAt: new Date(now.getTime() - 60 * 60 * 1000)
+      createdAt: new Date(now.getTime() - 60 * 60 * 1000),
     },
     {
       id: '5',
@@ -105,9 +105,9 @@ const _generateMockNotifications = (): NotificationItem[] => {
       read: false,
       category: 'test',
       priority: 'low',
-      actionUrl: '/content-test/results/5',
+      actionUrl: '/seo-test/results/5',
       actionText: '查看报告',
-      createdAt: new Date(now.getTime() - 2 * 60 * 60 * 1000)
+      createdAt: new Date(now.getTime() - 2 * 60 * 60 * 1000),
     },
     {
       id: '6',
@@ -120,7 +120,7 @@ const _generateMockNotifications = (): NotificationItem[] => {
       priority: 'high',
       actionUrl: '/monitoring/performance',
       actionText: '查看监控',
-      createdAt: new Date(now.getTime() - 3 * 60 * 60 * 1000)
+      createdAt: new Date(now.getTime() - 3 * 60 * 60 * 1000),
     },
     {
       id: '7',
@@ -133,7 +133,7 @@ const _generateMockNotifications = (): NotificationItem[] => {
       priority: 'low',
       actionUrl: '/batch-test',
       actionText: '立即体验',
-      createdAt: new Date(now.getTime() - 24 * 60 * 60 * 1000)
+      createdAt: new Date(now.getTime() - 24 * 60 * 60 * 1000),
     },
     {
       id: '8',
@@ -146,8 +146,8 @@ const _generateMockNotifications = (): NotificationItem[] => {
       priority: 'urgent',
       actionUrl: '/backup-management',
       actionText: '查看备份',
-      createdAt: new Date(now.getTime() - 25 * 60 * 60 * 1000)
-    }
+      createdAt: new Date(now.getTime() - 25 * 60 * 60 * 1000),
+    },
   ];
 };
 
@@ -171,15 +171,20 @@ export const useNotifications = () => {
           // 如果5分钟内已经检查过，直接使用缓存结果
           if (lastHealthCheck) {
             const { timestamp, isHealthy } = JSON.parse(lastHealthCheck);
-            if (now - timestamp < 5 * 60 * 1000) { // 5分钟缓存
+            if (now - timestamp < 5 * 60 * 1000) {
+              // 5分钟缓存
               if (!isHealthy) {
-                Logger.debug('Backend server not available (cached), using local storage for notifications');
+                Logger.debug(
+                  'Backend server not available (cached), using local storage for notifications'
+                );
                 loadNotificationsFromStorage();
                 setLoading(false);
                 return;
               } else {
                 // 缓存显示后端健康，但我们知道服务器实际上不可用，直接使用本地存储
-                Logger.debug('Backend server available (cached), but using local storage for notifications');
+                Logger.debug(
+                  'Backend server available (cached), but using local storage for notifications'
+                );
                 loadNotificationsFromStorage();
                 setLoading(false);
                 return;
@@ -191,10 +196,13 @@ export const useNotifications = () => {
           Logger.debug('Skipping backend health check, using local storage for notifications');
 
           // 缓存健康检查结果为不可用
-          localStorage.setItem(healthCheckKey, JSON.stringify({
-            timestamp: now,
-            isHealthy: false
-          }));
+          localStorage.setItem(
+            healthCheckKey,
+            JSON.stringify({
+              timestamp: now,
+              isHealthy: false,
+            })
+          );
 
           loadNotificationsFromStorage();
           setLoading(false);
@@ -236,7 +244,9 @@ export const useNotifications = () => {
           try {
             await fetchNotificationsFromAPI();
           } catch (error) {
-            Logger.debug('Failed to fetch notifications from API, using local storage:', { error: String(error) });
+            Logger.debug('Failed to fetch notifications from API, using local storage:', {
+              error: String(error),
+            });
             loadNotificationsFromStorage();
           } finally {
             setLoading(false);
@@ -267,10 +277,10 @@ export const useNotifications = () => {
     try {
       const response = await fetch('/api/user/notifications', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -283,7 +293,7 @@ export const useNotifications = () => {
       if (result.success && result.data) {
         const apiNotifications = result.data.map((n: any) => ({
           ...n,
-          createdAt: new Date(n.createdAt || n.created_at)
+          createdAt: new Date(n.createdAt || n.created_at),
         }));
         setNotifications(apiNotifications);
         // 同步到本地存储
@@ -306,10 +316,12 @@ export const useNotifications = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        setNotifications(parsed.map((n: any) => ({
-          ...n,
-          createdAt: new Date(n.createdAt)
-        })));
+        setNotifications(
+          parsed.map((n: any) => ({
+            ...n,
+            createdAt: new Date(n.createdAt),
+          }))
+        );
       } else {
         // 如果本地也没有数据，使用空数组
         setNotifications([]);
@@ -330,15 +342,18 @@ export const useNotifications = () => {
   }, []);
 
   // 标记通知为已读
-  const markAsRead = useCallback((id: string) => {
-    setNotifications(prev => {
-      const updated = prev.map(notification =>
-        notification.id === id ? { ...notification, read: true } : notification
-      );
-      saveNotifications(updated);
-      return updated;
-    });
-  }, [saveNotifications]);
+  const markAsRead = useCallback(
+    (id: string) => {
+      setNotifications(prev => {
+        const updated = prev.map(notification =>
+          notification.id === id ? { ...notification, read: true } : notification
+        );
+        saveNotifications(updated);
+        return updated;
+      });
+    },
+    [saveNotifications]
+  );
 
   // 标记所有通知为已读
   const markAllAsRead = useCallback(() => {
@@ -350,13 +365,16 @@ export const useNotifications = () => {
   }, [saveNotifications]);
 
   // 删除通知
-  const deleteNotification = useCallback((id: string) => {
-    setNotifications(prev => {
-      const updated = prev.filter(notification => notification.id !== id);
-      saveNotifications(updated);
-      return updated;
-    });
-  }, [saveNotifications]);
+  const deleteNotification = useCallback(
+    (id: string) => {
+      setNotifications(prev => {
+        const updated = prev.filter(notification => notification.id !== id);
+        saveNotifications(updated);
+        return updated;
+      });
+    },
+    [saveNotifications]
+  );
 
   // 清空所有通知
   const clearAllNotifications = useCallback(() => {
@@ -365,21 +383,24 @@ export const useNotifications = () => {
   }, [saveNotifications]);
 
   // 添加新通知
-  const addNotification = useCallback((notification: Omit<NotificationItem, 'id' | 'createdAt'>) => {
-    const newNotification: NotificationItem = {
-      ...notification,
-      id: Date.now().toString(),
-      createdAt: new Date()
-    };
+  const addNotification = useCallback(
+    (notification: Omit<NotificationItem, 'id' | 'createdAt'>) => {
+      const newNotification: NotificationItem = {
+        ...notification,
+        id: Date.now().toString(),
+        createdAt: new Date(),
+      };
 
-    setNotifications(prev => {
-      const updated = [newNotification, ...prev];
-      saveNotifications(updated);
-      return updated;
-    });
+      setNotifications(prev => {
+        const updated = [newNotification, ...prev];
+        saveNotifications(updated);
+        return updated;
+      });
 
-    return newNotification.id;
-  }, [saveNotifications]);
+      return newNotification.id;
+    },
+    [saveNotifications]
+  );
 
   // 获取通知统计
   const getStats = useCallback((): NotificationStats => {
@@ -390,28 +411,34 @@ export const useNotifications = () => {
         success: notifications.filter(n => n.type === 'success').length,
         warning: notifications.filter(n => n.type === 'warning').length,
         error: notifications.filter(n => n.type === 'error').length,
-        info: notifications.filter(n => n.type === 'info').length
+        info: notifications.filter(n => n.type === 'info').length,
       },
       byCategory: {
         system: notifications.filter(n => n.category === 'system').length,
         test: notifications.filter(n => n.category === 'test').length,
         security: notifications.filter(n => n.category === 'security').length,
         performance: notifications.filter(n => n.category === 'performance').length,
-        general: notifications.filter(n => n.category === 'general').length
-      }
+        general: notifications.filter(n => n.category === 'general').length,
+      },
     };
     return stats;
   }, [notifications]);
 
   // 按类型筛选通知
-  const getNotificationsByType = useCallback((type: NotificationItem['type']) => {
-    return notifications.filter(n => n.type === type);
-  }, [notifications]);
+  const getNotificationsByType = useCallback(
+    (type: NotificationItem['type']) => {
+      return notifications.filter(n => n.type === type);
+    },
+    [notifications]
+  );
 
   // 按类别筛选通知
-  const getNotificationsByCategory = useCallback((category: NotificationItem['category']) => {
-    return notifications.filter(n => n.category === category);
-  }, [notifications]);
+  const getNotificationsByCategory = useCallback(
+    (category: NotificationItem['category']) => {
+      return notifications.filter(n => n.category === category);
+    },
+    [notifications]
+  );
 
   // 获取未读通知
   const getUnreadNotifications = useCallback(() => {
@@ -419,11 +446,14 @@ export const useNotifications = () => {
   }, [notifications]);
 
   // 获取最近的通知
-  const getRecentNotifications = useCallback((limit: number = 5) => {
-    return notifications
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, limit);
-  }, [notifications]);
+  const getRecentNotifications = useCallback(
+    (limit: number = 5) => {
+      return notifications
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, limit);
+    },
+    [notifications]
+  );
 
   return {
     notifications,
@@ -438,6 +468,6 @@ export const useNotifications = () => {
     getNotificationsByType,
     getNotificationsByCategory,
     getUnreadNotifications,
-    getRecentNotifications
+    getRecentNotifications,
   };
 };

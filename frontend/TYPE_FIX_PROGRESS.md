@@ -116,7 +116,7 @@
 
 2. **TestProgress.message Property** (~10-15 instances)
    - Property doesn't exist on TestProgress but is accessed in multiple files
-   - Files: `pages/APITest.tsx`, `pages/ContentTest.tsx`, `pages/DocumentationTest.tsx`, etc.
+   - Files: `pages/APITest.tsx` 等
    - Need to verify if property should be added to type or usage should be changed
 
 3. **Type Mismatches in Test Engines** (~30-40 instances)

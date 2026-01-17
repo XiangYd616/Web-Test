@@ -221,23 +221,23 @@ router.get('/statistics', asyncHandler(async (req, res) => {
   try {
     // 计算时间范围
     const now = new Date();
-    let startTime;
+    let _startTime;
     
     switch (timeRange) {
       case '1h':
-        startTime = new Date(now.getTime() - 60 * 60 * 1000);
+        _startTime = new Date(now.getTime() - 60 * 60 * 1000);
         break;
       case '24h':
-        startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        _startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
         break;
       case '7d':
-        startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        _startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         break;
       case '30d':
-        startTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        _startTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         break;
       default:
-        startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        _startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     }
 
     // 这里应该从数据库获取真实数据
@@ -255,8 +255,7 @@ router.get('/statistics', asyncHandler(async (req, res) => {
         api: Math.floor(Math.random() * 120) + 12,
         stress: Math.floor(Math.random() * 40) + 4,
         compatibility: Math.floor(Math.random() * 30) + 3,
-        ux: Math.floor(Math.random() * 50) + 5,
-        infrastructure: Math.floor(Math.random() * 20) + 2
+        ux: Math.floor(Math.random() * 50) + 5
       },
       trends: {
         hourly: Array.from({ length: 24 }, (_, i) => ({

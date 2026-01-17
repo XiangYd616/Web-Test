@@ -17,7 +17,7 @@ import { TestType } from '../types/enums';
 import { useUserStats } from './useUserStats';
 
 export interface TestConfig {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TestState {
@@ -25,7 +25,7 @@ export interface TestState {
   isRunning: boolean;
   progress: number;
   currentStep: string;
-  result: any;
+  result: unknown;
   error: string | null;
   testId: string | null;
   startTime: number | null;
@@ -34,7 +34,7 @@ export interface TestState {
 
 export interface TestActions {
   setConfig: (config: TestConfig) => void;
-  updateConfig: (key: string, value: any) => void;
+  updateConfig: (key: string, value: unknown) => void;
   startTest: (customConfig?: TestConfig) => Promise<void>;
   stopTest: () => void;
   resetTest: () => void;
@@ -47,7 +47,7 @@ export interface UseTestStateOptions {
   defaultConfig: TestConfig;
 
   // 基础回调
-  onTestComplete?: (result: any) => void;
+  onTestComplete?: (result: unknown) => void;
   onTestError?: (error: string) => void;
   onConfigChange?: (config: TestConfig) => void;
   validateConfig?: (config: TestConfig) => { isValid: boolean; errors: string[] };
@@ -60,12 +60,12 @@ export interface UseTestStateOptions {
   enablePersistence?: boolean;
 
   // 扩展回调
-  onTestStarted?: (data: any) => void;
-  onTestProgress?: (data: any) => void;
-  onTestFailed?: (data: any) => void;
-  onTestCancelled?: (data: any) => void;
-  onTestQueued?: (data: any) => void;
-  onStatusUpdate?: (data: any) => void;
+  onTestStarted?: (data: unknown) => void;
+  onTestProgress?: (data: unknown) => void;
+  onTestFailed?: (data: unknown) => void;
+  onTestCancelled?: (data: unknown) => void;
+  onTestQueued?: (data: unknown) => void;
+  onStatusUpdate?: (data: unknown) => void;
 }
 
 // 扩展的返回接口 - 整合两个Hook的功能
@@ -139,9 +139,10 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
 
   // 清理定时器
   useEffect(() => {
+    const intervalId = progressIntervalRef.current;
     return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
+      if (intervalId) {
+        clearInterval(intervalId);
       }
     };
   }, []);
@@ -169,7 +170,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
 
   // 更新单个配置项
   const updateConfig = useCallback(
-    (key: string, value: any) => {
+    (key: string, value: unknown) => {
       setState(prev => {
         const newConfig = {
           ...prev.config,
@@ -227,7 +228,7 @@ export const useTestState = (options: UseTestStateOptions): UseTestStateReturn =
             }));
           },
           // 完成回调
-          (result: any) => {
+          (result: unknown) => {
             setState(prev => ({
               ...prev,
               isRunning: false,

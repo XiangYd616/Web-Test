@@ -1,30 +1,26 @@
+import { Activity, CheckCircle, Clock, Loader, Zap } from 'lucide-react';
+import type { ComponentType } from 'react';
 import React from 'react';
-import { useState } from 'react';
-import type { ReactNode, ComponentType, FC } from 'react';;
-
-import { Activity, CheckCircle, Clock, Loader, Target, Zap } from 'lucide-react';
 
 // 基础加载组件
 export const BasicLoader: React.FC<{ size?: 'sm' | 'md' | 'lg'; className?: string }> = ({
   size = 'md',
-  className = ''
+  className = '',
 }) => {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
-    lg: 'w-8 h-8'
+    lg: 'w-8 h-8',
   };
 
-  return (
-    <Loader className={`animate-spin ${sizeClasses[size]} ${className}`} />
-  );
+  return <Loader className={`animate-spin ${sizeClasses[size]} ${className}`} />;
 };
 
 // 带文本的加载组件
 export const LoadingWithText: React.FC<{
   text: string;
   subtext?: string;
-  className?: string
+  className?: string;
 }> = ({ text, subtext, className = '' }) => {
   return (
     <div className={`flex flex-col items-center justify-center p-8 ${className}`}>
@@ -61,27 +57,49 @@ export const ProgressLoader: React.FC<{
 
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div
-          className={`bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out progress-bar-fill ${progress <= 0 ? 'w-0' :
-              progress <= 5 ? 'w-5' :
-                progress <= 10 ? 'w-10' :
-                  progress <= 15 ? 'w-15' :
-                    progress <= 20 ? 'w-20' :
-                      progress <= 25 ? 'w-25' :
-                        progress <= 30 ? 'w-30' :
-                          progress <= 35 ? 'w-35' :
-                            progress <= 40 ? 'w-40' :
-                              progress <= 45 ? 'w-45' :
-                                progress <= 50 ? 'w-50' :
-                                  progress <= 55 ? 'w-55' :
-                                    progress <= 60 ? 'w-60' :
-                                      progress <= 65 ? 'w-65' :
-                                        progress <= 70 ? 'w-70' :
-                                          progress <= 75 ? 'w-75' :
-                                            progress <= 80 ? 'w-80' :
-                                              progress <= 85 ? 'w-85' :
-                                                progress <= 90 ? 'w-90' :
-                                                  progress <= 95 ? 'w-95' : 'w-100'
-            }`}
+          className={`bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out progress-bar-fill ${
+            progress <= 0
+              ? 'w-0'
+              : progress <= 5
+                ? 'w-5'
+                : progress <= 10
+                  ? 'w-10'
+                  : progress <= 15
+                    ? 'w-15'
+                    : progress <= 20
+                      ? 'w-20'
+                      : progress <= 25
+                        ? 'w-25'
+                        : progress <= 30
+                          ? 'w-30'
+                          : progress <= 35
+                            ? 'w-35'
+                            : progress <= 40
+                              ? 'w-40'
+                              : progress <= 45
+                                ? 'w-45'
+                                : progress <= 50
+                                  ? 'w-50'
+                                  : progress <= 55
+                                    ? 'w-55'
+                                    : progress <= 60
+                                      ? 'w-60'
+                                      : progress <= 65
+                                        ? 'w-65'
+                                        : progress <= 70
+                                          ? 'w-70'
+                                          : progress <= 75
+                                            ? 'w-75'
+                                            : progress <= 80
+                                              ? 'w-80'
+                                              : progress <= 85
+                                                ? 'w-85'
+                                                : progress <= 90
+                                                  ? 'w-90'
+                                                  : progress <= 95
+                                                    ? 'w-95'
+                                                    : 'w-100'
+          }`}
         />
       </div>
 
@@ -204,22 +222,6 @@ export const TestLoadingStates = {
     </div>
   ),
 
-  // 内容检测加载
-  ContentTest: ({ progress, stage }: { progress: number; stage: string }) => (
-    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 p-6">
-      <div className="flex items-center space-x-3 mb-4">
-        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-          <Target className="w-6 h-6 text-green-600 animate-pulse" />
-        </div>
-        <div>
-          <h3 className="font-semibold text-green-900">内容检测中</h3>
-          <p className="text-sm text-green-700">{stage}</p>
-        </div>
-      </div>
-      <ProgressLoader progress={progress} stage={stage} className="bg-transparent border-0 p-0" />
-    </div>
-  ),
-
   // 安全扫描加载
   SecurityTest: ({ progress, stage }: { progress: number; stage: string }) => (
     <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200 p-6">
@@ -234,7 +236,7 @@ export const TestLoadingStates = {
       </div>
       <ProgressLoader progress={progress} stage={stage} className="bg-transparent border-0 p-0" />
     </div>
-  )
+  ),
 };
 
 // 成功状态组件
@@ -258,7 +260,7 @@ export const SuccessState: React.FC<{
 
 // 空状态组件
 export const EmptyState: React.FC<{
-  icon: React.ComponentType<any>;
+  icon: ComponentType<{ className?: string }>;
   title: string;
   message?: string;
   action?: React.ReactNode;
@@ -341,14 +343,14 @@ export const useLoadingState = (initialState = false) => {
     startLoading,
     updateProgress,
     finishLoading,
-    setLoadingError
+    setLoadingError,
   };
 };
 
 // 智能加载组件 - 根据内容类型自动选择合适的加载状态
 export const SmartLoader: React.FC<{
   type: 'test' | 'data' | 'chart' | 'report';
-  testType?: 'stress' | 'content' | 'security' | 'api';
+  testType?: 'stress' | 'security' | 'api';
   progress?: number;
   stage?: string;
   className?: string;
@@ -358,17 +360,15 @@ export const SmartLoader: React.FC<{
    * @returns {Promise<Object>} 返回结果
    */
 }> = ({ type, testType, progress, stage, className = '' }) => {
-    /**
-     * switch功能函数
-     * @param {Object} params - 参数对象
-     * @returns {Promise<Object>} 返回结果
-     */
+  /**
+   * switch功能函数
+   * @param {Object} params - 参数对象
+   * @returns {Promise<Object>} 返回结果
+   */
   if (type === 'test' && testType && progress !== undefined && stage) {
     switch (testType) {
       case 'stress':
         return <TestLoadingStates.StressTest progress={progress} stage={stage} />;
-      case 'content':
-        return <TestLoadingStates.ContentTest progress={progress} stage={stage} />;
       case 'security':
         return <TestLoadingStates.SecurityTest progress={progress} stage={stage} />;
       default:
@@ -385,7 +385,13 @@ export const SmartLoader: React.FC<{
   }
 
   if (type === 'report') {
-    return <LoadingWithText text="生成报告中..." subtext="请稍候，正在处理数据..." className={className} />;
+    return (
+      <LoadingWithText
+        text="生成报告中..."
+        subtext="请稍候，正在处理数据..."
+        className={className}
+      />
+    );
   }
 
   return <BasicLoader className={className} />;
@@ -402,7 +408,7 @@ const LoadingStates = {
   EmptyState,
   TimeoutState,
   SmartLoader,
-  useLoadingState
+  useLoadingState,
 };
 
 export default LoadingStates;

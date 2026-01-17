@@ -1,15 +1,13 @@
 /**
  * BackgroundTestNotifications.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\system\BackgroundTestNotifications.tsx
  * 创建时间: 2025-09-25
  */
 
-﻿import React from 'react';
-import { useState } from 'react';
-import type { FC } from 'react';
+import { ExternalLink, X } from 'lucide-react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, ExternalLink } from 'lucide-react';
 import { useNotifications } from '../../hooks/useNotifications';
 
 const BackgroundTestNotifications: React.FC = () => {
@@ -31,7 +29,7 @@ const BackgroundTestNotifications: React.FC = () => {
       success: 'bg-green-600/90 border-green-500/50',
       error: 'bg-red-600/90 border-red-500/50',
       warning: 'bg-yellow-600/90 border-yellow-500/50',
-      info: 'bg-blue-600/90 border-blue-500/50'
+      info: 'bg-blue-600/90 border-blue-500/50',
     };
     return colors[type as keyof typeof colors] || colors.info;
   };
@@ -62,8 +60,8 @@ const BackgroundTestNotifications: React.FC = () => {
                       navigate('/security-test');
                     } else if (notification.actionUrl?.includes('/api-test')) {
                       navigate('/api-test');
-                    } else if (notification.actionUrl?.includes('/content-test')) {
-                      navigate('/content-test');
+                    } else if (notification.actionUrl?.includes('/seo-test')) {
+                      navigate('/seo-test');
                     } else if (notification.actionUrl?.includes('/compatibility-test')) {
                       navigate('/compatibility-test');
                     }
@@ -92,4 +90,3 @@ const BackgroundTestNotifications: React.FC = () => {
 };
 
 export default BackgroundTestNotifications;
-

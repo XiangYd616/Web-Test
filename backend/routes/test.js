@@ -3418,9 +3418,9 @@ router.post('/local-performance', optionalAuth, testRateLimiter, asyncHandler(as
 
 /**
  * 用户体验测试
- * POST /api/test/ux
+ * POST /api
  */
-router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
+router.post('/api', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
   const { url, options = {} } = req.body;
 
   if (!url) {
@@ -3717,53 +3717,6 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
 }));
 
 /**
- * 内容测试
- * POST /api/test/content
- */
-router.post('/content', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, options: _options = {} } = req.body;
-
-  if (!url) {
-    return res.validationError([], 'URL是必填的');
-  }
-
-  try {
-    
-    const result = {
-      success: true,
-      url,
-      timestamp: new Date().toISOString(),
-      score: Math.floor(Math.random() * 30) + 70,
-      readability: {
-        score: Math.floor(Math.random() * 30) + 70,
-        level: 'Good',
-        avgWordsPerSentence: Math.floor(Math.random() * 10) + 15
-      },
-      seo: {
-        keywordDensity: parseFloat((Math.random() * 3 + 1).toFixed(2)),
-        headingStructure: 'Well organized',
-        metaDescription: true
-      },
-      quality: {
-        spelling: 'No errors found',
-        grammar: 'Good',
-        uniqueness: Math.floor(Math.random() * 20) + 80
-      },
-      recommendations: [
-        'Add more internal links',
-        'Optimize heading structure',
-        'Improve keyword usage'
-      ]
-    };
-    
-    res.success(result);
-  } catch (error) {
-    console.error('内容测试失败:', error);
-    res.serverError('内容测试失败');
-  }
-}));
-
-/**
  * 网络测试
  * POST /api/test/network
  */
@@ -3809,61 +3762,6 @@ router.post('/network', optionalAuth, testRateLimiter, asyncHandler(async (req, 
   } catch (error) {
     console.error('网络测试失败:', error);
     res.serverError('网络测试失败');
-  }
-}));
-
-/**
- * 基础设施测试
- * POST /api/test/infrastructure
- */
-router.post('/infrastructure', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, checks: _checks = ['connectivity', 'dns', 'ssl'], timeout: _timeout = 20000 } = req.body;
-
-  if (!url) {
-    return res.validationError([], 'URL是必填的');
-  }
-
-  try {
-    
-    const result = {
-      success: true,
-      url,
-      timestamp: new Date().toISOString(),
-      score: Math.floor(Math.random() * 30) + 70,
-      checks: {
-        connectivity: {
-          status: 'pass',
-          responseTime: Math.floor(Math.random() * 500) + 100,
-          statusCode: 200
-        },
-        dns: {
-          status: 'pass',
-          resolveTime: Math.floor(Math.random() * 100) + 20,
-          records: ['A', 'AAAA', 'MX', 'TXT']
-        },
-        ssl: {
-          status: 'pass',
-          valid: true,
-          daysUntilExpiry: Math.floor(Math.random() * 300) + 60,
-          grade: 'A'
-        },
-        server: {
-          type: 'nginx',
-          version: '1.18.0',
-          location: 'US-East'
-        }
-      },
-      recommendations: [
-        'Enable HTTP/2 for better performance',
-        'Add redundant DNS servers',
-        'Implement load balancing'
-      ]
-    };
-    
-    res.success(result);
-  } catch (error) {
-    console.error('基础设施测试失败:', error);
-    res.serverError('基础设施测试失败');
   }
 }));
 

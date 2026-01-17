@@ -84,7 +84,6 @@ class I18nService {
           test: {
             performance: '性能测试',
             security: '安全测试',
-            content: '内容测试',
             api: 'API测试',
             stress: '压力测试',
             compatibility: '兼容性测试',
@@ -132,7 +131,6 @@ class I18nService {
           test: {
             performance: 'Performance Test',
             security: 'Security Test',
-            content: 'Content Test',
             api: 'API Test',
             stress: 'Stress Test',
             compatibility: 'Compatibility Test',

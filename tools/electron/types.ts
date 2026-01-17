@@ -46,21 +46,6 @@ export interface StressTestResult {
   overallScore: number;
 }
 
-// 内容测试结果接口
-export interface ContentTestResult {
-  seoScore: number;
-  seoIssues: Array<{
-    type: string;
-    severity: 'low' | 'medium' | 'high';
-    message: string;
-    element?: string;
-  }>;
-  performanceScore: number;
-  accessibilityScore: number;
-  contentQuality: number;
-  overallScore: number;
-}
-
 // 兼容性测试结果接口
 export interface CompatibilityTestResult {
   overallCompatibility: number;
@@ -85,7 +70,10 @@ export abstract class BaseTestEngine {
   protected progressCallback?: (progress: any) => void;
   protected completeCallback?: (result: any) => void;
 
-  constructor(progressCallback?: (progress: any) => void, completeCallback?: (result: any) => void) {
+  constructor(
+    progressCallback?: (progress: any) => void,
+    completeCallback?: (result: any) => void
+  ) {
     this.progressCallback = progressCallback;
     this.completeCallback = completeCallback;
   }
@@ -100,7 +88,10 @@ export class StressTestEngine extends BaseTestEngine {
   private isRunning = false;
   private shouldStop = false;
 
-  constructor(progressCallback?: (progress: any) => void, completeCallback?: (result: any) => void) {
+  constructor(
+    progressCallback?: (progress: any) => void,
+    completeCallback?: (result: any) => void
+  ) {
     super(progressCallback, completeCallback);
   }
 
@@ -120,17 +111,17 @@ export class StressTestEngine extends BaseTestEngine {
       requestsPerSecond: 0,
       errorRate: 0,
       throughput: 0,
-      overallScore: 0
+      overallScore: 0,
     };
 
     // 模拟测试进度
     for (let i = 0; i <= 100; i += 10) {
       if (this.shouldStop) break;
-      
+
       this.progressCallback?.({
         progress: i,
         stage: `压力测试进行中... ${i}%`,
-        currentUsers: Math.floor((config.users || 10) * (i / 100))
+        currentUsers: Math.floor((config.users || 10) * (i / 100)),
       });
 
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -143,7 +134,10 @@ export class StressTestEngine extends BaseTestEngine {
     result.averageResponseTime = Math.random() * 1000 + 200;
     result.requestsPerSecond = result.totalRequests / (config.duration || 60);
     result.errorRate = (result.failedRequests / result.totalRequests) * 100;
-    result.overallScore = Math.max(0, 100 - result.errorRate - (result.averageResponseTime > 1000 ? 20 : 0));
+    result.overallScore = Math.max(
+      0,
+      100 - result.errorRate - (result.averageResponseTime > 1000 ? 20 : 0)
+    );
 
     this.isRunning = false;
     this.completeCallback?.(result);
@@ -152,47 +146,6 @@ export class StressTestEngine extends BaseTestEngine {
 
   stop(): void {
     this.shouldStop = true;
-    this.isRunning = false;
-  }
-
-  getStatus(): string {
-    return this.isRunning ? 'running' : 'idle';
-  }
-}
-
-// 内容测试引擎
-export class ContentTestEngine extends BaseTestEngine {
-  private isRunning = false;
-
-  async runTest(config: TestConfig): Promise<ContentTestResult> {
-    this.isRunning = true;
-
-    // 模拟内容测试
-    const result: ContentTestResult = {
-      seoScore: Math.floor(Math.random() * 40) + 60,
-      seoIssues: [
-        {
-          type: 'meta',
-          severity: 'medium' as const,
-          message: '缺少meta description',
-          element: '<head>'
-        }
-      ],
-      performanceScore: Math.floor(Math.random() * 30) + 70,
-      accessibilityScore: Math.floor(Math.random() * 20) + 80,
-      contentQuality: Math.floor(Math.random() * 25) + 75,
-      overallScore: 0
-    };
-
-    result.overallScore = Math.floor(
-      (result.seoScore + result.performanceScore + result.accessibilityScore + result.contentQuality) / 4
-    );
-
-    this.isRunning = false;
-    return result;
-  }
-
-  stop(): void {
     this.isRunning = false;
   }
 
@@ -218,14 +171,19 @@ export class CompatibilityTestEngine extends BaseTestEngine {
         { browser: 'Firefox', version: '121.0', compatible: true, issues: [] },
         { browser: 'Safari', version: '17.0', compatible: true, issues: ['CSS Grid支持有限'] },
         { browser: 'Edge', version: '120.0', compatible: true, issues: [] },
-        { browser: 'IE', version: '11.0', compatible: false, issues: ['不支持ES6', '不支持Flexbox'] }
+        {
+          browser: 'IE',
+          version: '11.0',
+          compatible: false,
+          issues: ['不支持ES6', '不支持Flexbox'],
+        },
       ],
       deviceCompatibility: {
         desktop: true,
         tablet: true,
-        mobile: Math.random() > 0.2
+        mobile: Math.random() > 0.2,
       },
-      accessibilityScore: Math.floor(Math.random() * 20) + 80
+      accessibilityScore: Math.floor(Math.random() * 20) + 80,
     };
 
     this.isRunning = false;

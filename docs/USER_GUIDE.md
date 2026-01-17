@@ -237,39 +237,7 @@ const config = {
 - 测试不同类型的请求 (GET, POST, PUT)
 - 分析响应时间分布和错误率
 
-### 6. 基础设施测试
-
-**适用场景**: 服务器健康检查、网络连接验证、DNS解析测试
-
-**基础用法**:
-
-```javascript
-const config = {
-  url: 'https://example.com',
-  checks: ['connectivity', 'dns', 'ssl'],
-};
-
-const result = await infrastructureEngine.runInfrastructureTest(config);
-```
-
-**端口扫描**:
-
-```javascript
-const config = {
-  url: 'https://example.com',
-  checks: ['connectivity', 'ports'],
-  ports: [80, 443, 8080, 3000],
-};
-```
-
-**最佳实践**:
-
-- 定期检查关键服务端口状态
-- 监控DNS解析性能
-- 验证SSL证书配置
-- 检查网络连接稳定性
-
-### 7. UX测试
+### 6. UX测试
 
 **适用场景**: 可访问性审计、用户体验评估、交互功能测试
 

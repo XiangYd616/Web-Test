@@ -57,7 +57,6 @@ export enum Theme {
 
 export {};
 
-
 // Test Type as both enum and type
 export enum TestType {
   STRESS = 'stress',
@@ -66,9 +65,6 @@ export enum TestType {
   SECURITY = 'security',
   SEO = 'seo',
   ACCESSIBILITY = 'accessibility',
-  CONTENT = 'content',
-  INFRASTRUCTURE = 'infrastructure',
-  DOCUMENTATION = 'documentation',
   UX = 'ux',
   INTEGRATION = 'integration',
   NETWORK = 'network',
@@ -78,16 +74,13 @@ export enum TestType {
 }
 
 // Export as type alias as well for compatibility
-export type TestTypeValue = 
+export type TestTypeValue =
   | 'stress'
   | 'performance'
   | 'api'
   | 'security'
   | 'seo'
   | 'accessibility'
-  | 'content'
-  | 'infrastructure'
-  | 'documentation'
   | 'ux'
   | 'integration'
   | 'network'

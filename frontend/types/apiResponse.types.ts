@@ -40,7 +40,7 @@ export enum ErrorCode {
   USER_INACTIVE = 'USER_INACTIVE',
   ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
   TEST_NOT_FOUND = 'TEST_NOT_FOUND',
-  TEST_ALREADY_RUNNING = 'TEST_ALREADY_RUNNING'
+  TEST_ALREADY_RUNNING = 'TEST_ALREADY_RUNNING',
 }
 
 // ==================== API错误接口 ====================
@@ -48,7 +48,7 @@ export enum ErrorCode {
 export interface ApiError {
   code: ErrorCode | string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   retryable?: boolean;
   suggestions?: string[];
   timestamp?: Timestamp;
@@ -58,7 +58,7 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: any;
+  value?: unknown;
 }
 
 // ==================== API元数据接口 ====================
@@ -70,7 +70,7 @@ export interface ApiMeta {
   method: string;
   responseTime?: string;
   pagination?: PaginationInfo;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PaginationInfo {
@@ -90,7 +90,7 @@ export interface PaginationInfo {
 /**
  * 统一API响应格式 - 成功响应
  */
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = unknown> {
   success: true;
   message: string;
   data: T;
@@ -109,12 +109,12 @@ export interface ApiErrorResponse {
 /**
  * 统一API响应格式 - 联合类型
  */
-export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
+export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 /**
  * 分页响应格式
  */
-export interface PaginatedResponse<T = any> extends ApiSuccessResponse<T[]> {
+export interface PaginatedResponse<T = unknown> extends ApiSuccessResponse<T[]> {
   meta: ApiMeta & {
     pagination: PaginationInfo;
   };
@@ -123,23 +123,19 @@ export interface PaginatedResponse<T = any> extends ApiSuccessResponse<T[]> {
 /**
  * 创建响应格式（201状态码）
  */
-export interface CreatedResponse<T = any> extends ApiSuccessResponse<T> {
-  // 继承成功响应，但语义上表示创建成功
-}
+export type CreatedResponse<T = unknown> = ApiSuccessResponse<T>;
 
 /**
  * 无内容响应格式（204状态码）
  */
-export interface NoContentResponse {
-  // 204响应通常没有body
-}
+export type NoContentResponse = Record<string, never>;
 
 // ==================== 请求配置接口 ====================
 
 export interface RequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
   headers?: Record<string, string>;
-  body?: string | FormData | URLSearchParams | Record<string, any>;
+  body?: string | FormData | URLSearchParams | Record<string, unknown>;
   timeout?: number;
   retries?: number;
   retryDelay?: number;
@@ -162,19 +158,22 @@ export interface QueryParams {
   sort?: string;
   order?: 'asc' | 'desc';
   search?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
-export interface PaginatedRequest extends QueryParams {
-  // 继承查询参数
-}
+export type PaginatedRequest = QueryParams;
 
 // ==================== 响应构建器接口 ====================
 
 export interface ResponseBuilder {
   success<T>(data: T, message?: string, meta?: Partial<ApiMeta>): ApiSuccessResponse<T>;
   error(error: ApiError, meta?: Partial<ApiMeta>): ApiErrorResponse;
-  paginated<T>(data: T[], pagination: PaginationInfo, message?: string, meta?: Partial<ApiMeta>): PaginatedResponse<T>;
+  paginated<T>(
+    data: T[],
+    pagination: PaginationInfo,
+    message?: string,
+    meta?: Partial<ApiMeta>
+  ): PaginatedResponse<T>;
   created<T>(data: T, message?: string, meta?: Partial<ApiMeta>): CreatedResponse<T>;
   noContent(): NoContentResponse;
 }
@@ -182,15 +181,15 @@ export interface ResponseBuilder {
 // ==================== 错误响应快捷方法 ====================
 
 export interface ErrorResponseMethods {
-  badRequest(message?: string, details?: Record<string, any>): ApiErrorResponse;
-  unauthorized(message?: string, details?: Record<string, any>): ApiErrorResponse;
-  forbidden(message?: string, details?: Record<string, any>): ApiErrorResponse;
-  notFound(message?: string, details?: Record<string, any>): ApiErrorResponse;
-  conflict(message?: string, details?: Record<string, any>): ApiErrorResponse;
+  badRequest(message?: string, details?: Record<string, unknown>): ApiErrorResponse;
+  unauthorized(message?: string, details?: Record<string, unknown>): ApiErrorResponse;
+  forbidden(message?: string, details?: Record<string, unknown>): ApiErrorResponse;
+  notFound(message?: string, details?: Record<string, unknown>): ApiErrorResponse;
+  conflict(message?: string, details?: Record<string, unknown>): ApiErrorResponse;
   validationError(errors: ValidationError[], message?: string): ApiErrorResponse;
-  tooManyRequests(message?: string, details?: Record<string, any>): ApiErrorResponse;
-  internalError(message?: string, details?: Record<string, any>): ApiErrorResponse;
-  serviceUnavailable(message?: string, details?: Record<string, any>): ApiErrorResponse;
+  tooManyRequests(message?: string, details?: Record<string, unknown>): ApiErrorResponse;
+  internalError(message?: string, details?: Record<string, unknown>): ApiErrorResponse;
+  serviceUnavailable(message?: string, details?: Record<string, unknown>): ApiErrorResponse;
 }
 
 // ==================== 工具函数类型 ====================
@@ -225,13 +224,13 @@ export const DEFAULT_ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.USER_INACTIVE]: '用户账户已被禁用',
   [ErrorCode.ACCOUNT_LOCKED]: '账户已被锁定',
   [ErrorCode.TEST_NOT_FOUND]: '测试不存在',
-  [ErrorCode.TEST_ALREADY_RUNNING]: '测试已在运行中'
+  [ErrorCode.TEST_ALREADY_RUNNING]: '测试已在运行中',
 };
 
 export const RETRYABLE_ERROR_CODES: ErrorCode[] = [
   ErrorCode.INTERNAL_ERROR,
   ErrorCode.SERVICE_UNAVAILABLE,
-  ErrorCode.TOO_MANY_REQUESTS
+  ErrorCode.TOO_MANY_REQUESTS,
 ];
 
 export const DEFAULT_PAGINATION: PaginationInfo = {
@@ -243,12 +242,14 @@ export const DEFAULT_PAGINATION: PaginationInfo = {
   hasPrev: false,
   nextPage: null,
   prevPage: null,
-  count: 0
+  count: 0,
 };
 
 // ==================== 类型守卫函数 ====================
 
-export function isApiSuccessResponse<T>(response: ApiResponse<T>): response is ApiSuccessResponse<T> {
+export function isApiSuccessResponse<T>(
+  response: ApiResponse<T>
+): response is ApiSuccessResponse<T> {
   return response.success === true;
 }
 
@@ -256,15 +257,18 @@ export function isApiErrorResponse<T>(response: ApiResponse<T>): response is Api
   return response.success === false;
 }
 
-export function isPaginatedResponse<T>(response: ApiResponse<T[]>): response is PaginatedResponse<T> {
-  return isApiSuccessResponse(response) &&
+export function isPaginatedResponse<T>(
+  response: ApiResponse<T[]>
+): response is PaginatedResponse<T> {
+  return (
+    isApiSuccessResponse(response) &&
     'pagination' in response.meta &&
-    response.meta.pagination !== undefined;
+    response.meta.pagination !== undefined
+  );
 }
 
 export function isRetryableError(error: ApiError): boolean {
-  return error.retryable === true ||
-    RETRYABLE_ERROR_CODES.includes(error.code as ErrorCode);
+  return error.retryable === true || RETRYABLE_ERROR_CODES.includes(error.code as ErrorCode);
 }
 
 // ==================== 工具函数 ====================
@@ -286,8 +290,8 @@ export function createSuccessResponse<T>(
       requestId: '',
       path: '',
       method: '',
-      ...meta
-    }
+      ...meta,
+    },
   };
 }
 
@@ -297,7 +301,7 @@ export function createSuccessResponse<T>(
 export function createErrorResponse(
   code: ErrorCode | string,
   message?: string,
-  details?: Record<string, any>,
+  details?: Record<string, unknown>,
   meta: Partial<ApiMeta> = {}
 ): ApiErrorResponse {
   const errorMessage = message || DEFAULT_ERROR_MESSAGES[code as ErrorCode] || '未知错误';
@@ -309,15 +313,15 @@ export function createErrorResponse(
       message: errorMessage,
       details,
       retryable: RETRYABLE_ERROR_CODES.includes(code as ErrorCode),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     },
     meta: {
       timestamp: new Date().toISOString(),
       requestId: '',
       path: '',
       method: '',
-      ...meta
-    }
+      ...meta,
+    },
   };
 }
 
@@ -340,8 +344,8 @@ export function createPaginatedResponse<T>(
       path: '',
       method: '',
       pagination,
-      ...meta
-    }
+      ...meta,
+    },
   };
 }
 
@@ -367,7 +371,7 @@ export function createPagination(
     hasPrev,
     nextPage: hasNext ? page + 1 : null,
     prevPage: hasPrev ? page - 1 : null,
-    count: dataCount
+    count: dataCount,
   };
 }
 
@@ -388,6 +392,8 @@ export function extractError<T>(response: ApiResponse<T>): ApiError | null {
 /**
  * 提取分页信息
  */
-export function extractPagination<T extends unknown[]>(response: ApiResponse<T>): PaginationInfo | null {
+export function extractPagination<T extends unknown[]>(
+  response: ApiResponse<T>
+): PaginationInfo | null {
   return isPaginatedResponse(response) ? response.meta.pagination : null;
 }
