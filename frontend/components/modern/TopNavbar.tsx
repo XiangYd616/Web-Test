@@ -1,15 +1,50 @@
 /**
  * TopNavbar.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\modern\TopNavbar.tsx
  * 创建时间: 2025-09-25
  */
 
 import Logger from '@/utils/logger';
-import React from 'react';
-import { Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import type { ComponentType, FC } from 'react';;
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  Bell,
+  Book,
+  Check,
+  CheckCircle,
+  ChevronDown,
+  Clock,
+  Code,
+  Crown,
+  Download,
+  ExternalLink,
+  FileText,
+  Globe,
+  HelpCircle,
+  Home,
+  Info,
+  Key,
+  Lock,
+  Menu,
+  Monitor,
+  MoreVertical,
+  Package,
+  Play,
+  Search,
+  Settings,
+  Shield,
+  TestTube,
+  Trash2,
+  TrendingUp,
+  Upload,
+  User,
+  X,
+  Zap,
+} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -17,7 +52,6 @@ import { NotificationItem, useNotifications } from '../../hooks/useNotifications
 import { globalSearchService, SearchResult } from '../../services/globalSearchService';
 import { ThemeToggle } from '../ui';
 import UserDropdownMenu from './UserDropdownMenu';
-
 interface TopNavbarProps {
   sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
@@ -41,7 +75,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     markAsRead,
     markAllAsRead,
     deleteNotification,
-    getRecentNotifications
+    getRecentNotifications,
   } = useNotifications();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -65,20 +99,31 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
   // 快捷操作
   const quickActions: QuickAction[] = [
     { id: 'stress-test', name: '压力测试', icon: Activity, href: '/stress-test', color: 'blue' },
-    { id: 'security-test', name: '安全检测', icon: AlertTriangle, href: '/security-test', color: 'red' },
-    { id: 'seo-analysis', name: 'SEO分析', icon: Search, href: '/content-test', color: 'green' },
+    {
+      id: 'security-test',
+      name: '安全检测',
+      icon: AlertTriangle,
+      href: '/security-test',
+      color: 'red',
+    },
+    { id: 'seo-analysis', name: 'SEO分析', icon: Search, href: '/seo-test', color: 'green' },
     { id: 'api-test', name: 'API测试', icon: Package, href: '/api-test', color: 'purple' },
     { id: 'monitoring', name: '实时监控', icon: Monitor, href: '/monitoring', color: 'yellow' },
     {
-      id: 'system-status', name: '系统状态', icon: Settings, href: '/system-status', color: 'gray'
+      id: 'system-status',
+      name: '系统状态',
+      icon: Settings,
+      href: '/system-status',
+      color: 'gray',
     },
-    { id: 'reports', name: '测试报告', icon: FileText, href: '/reports', color: 'indigo' }
+    { id: 'reports', name: '测试报告', icon: FileText, href: '/reports', color: 'indigo' },
   ];
 
   // 获取要显示的通知列表
-  const displayNotifications = notificationFilter === 'unread'
-    ? notifications.filter(n => !n.read)
-    : getRecentNotifications(10);
+  const displayNotifications =
+    notificationFilter === 'unread'
+      ? notifications.filter(n => !n.read)
+      : getRecentNotifications(10);
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
@@ -107,7 +152,9 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
       // Ctrl+K 或 Cmd+K 打开搜索
       if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
         event.preventDefault();
-        const searchInput = document.querySelector('input[placeholder*="搜索"]') as HTMLInputElement;
+        const searchInput = document.querySelector(
+          'input[placeholder*="搜索"]'
+        ) as HTMLInputElement;
         if (searchInput) {
           searchInput.focus();
           setShowSearchDropdown(true);
@@ -153,8 +200,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
 
-
-    /**
+  /**
 
      * switch功能函数
 
@@ -165,15 +211,18 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
      */
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'success': return <CheckCircle className="w-4 h-4 text-green-400" />;
-      case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
-      case 'error': return <X className="w-4 h-4 text-red-400" />;
-      default: return <Info className="w-4 h-4 text-blue-400" />;
+      case 'success':
+        return <CheckCircle className="w-4 h-4 text-green-400" />;
+      case 'warning':
+        return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
+      case 'error':
+        return <X className="w-4 h-4 text-red-400" />;
+      default:
+        return <Info className="w-4 h-4 text-blue-400" />;
     }
   };
 
-
-    /**
+  /**
 
      * switch功能函数
 
@@ -184,11 +233,16 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
      */
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
-      case 'urgent': return 'border-l-red-500';
-      case 'high': return 'border-l-orange-500';
-      case 'medium': return 'border-l-yellow-500';
-      case 'low': return 'border-l-green-500';
-      default: return 'border-l-gray-500';
+      case 'urgent':
+        return 'border-l-red-500';
+      case 'high':
+        return 'border-l-orange-500';
+      case 'medium':
+        return 'border-l-yellow-500';
+      case 'low':
+        return 'border-l-green-500';
+      default:
+        return 'border-l-gray-500';
     }
   };
 
@@ -223,28 +277,39 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     // 可以在这里添加更多操作菜单
     const _actions = [
       {
-        label: '标记为已读', action: () => markAsRead(notification.id)
+        label: '标记为已读',
+        action: () => markAsRead(notification.id),
       },
       { label: '删除通知', action: () => deleteNotification(notification.id) },
-      { label: '查看详情', action: () => notification.actionUrl && (window.location.href = notification.actionUrl) }
+      {
+        label: '查看详情',
+        action: () => notification.actionUrl && (window.location.href = notification.actionUrl),
+      },
     ];
 
     // 简单的确认对话框实现
     const actionText = notification.read ? '删除此通知' : '标记为已读并删除';
-    if (confirm("确认执行此操作？")) {
+    if (confirm('确认执行此操作？')) {
       deleteNotification(notification.id);
     }
   };
 
   const getActionColor = (color: string) => {
     switch (color) {
-      case 'blue': return 'text-blue-400 bg-blue-500/20 hover:bg-blue-500/30';
-      case 'red': return 'text-red-400 bg-red-500/20 hover:bg-red-500/30';
-      case 'green': return 'text-green-400 bg-green-500/20 hover:bg-green-500/30';
-      case 'purple': return 'text-purple-400 bg-purple-500/20 hover:bg-purple-500/30';
-      case 'yellow': return 'text-yellow-400 bg-yellow-500/20 hover:bg-yellow-500/30';
-      case 'indigo': return 'text-indigo-400 bg-indigo-500/20 hover:bg-indigo-500/30';
-      default: return 'text-gray-400 bg-gray-500/20 hover:bg-gray-500/30';
+      case 'blue':
+        return 'text-blue-400 bg-blue-500/20 hover:bg-blue-500/30';
+      case 'red':
+        return 'text-red-400 bg-red-500/20 hover:bg-red-500/30';
+      case 'green':
+        return 'text-green-400 bg-green-500/20 hover:bg-green-500/30';
+      case 'purple':
+        return 'text-purple-400 bg-purple-500/20 hover:bg-purple-500/30';
+      case 'yellow':
+        return 'text-yellow-400 bg-yellow-500/20 hover:bg-yellow-500/30';
+      case 'indigo':
+        return 'text-indigo-400 bg-indigo-500/20 hover:bg-indigo-500/30';
+      default:
+        return 'text-gray-400 bg-gray-500/20 hover:bg-gray-500/30';
     }
   };
 
@@ -281,9 +346,27 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
   // 渲染搜索图标
   const renderSearchIcon = (iconName: string) => {
     const iconMap: Record<string, React.ComponentType<any>> = {
-      Home, Globe, Zap, Shield, Search, BarChart3, Settings, HelpCircle,
-      Code, Monitor, Activity, Upload, Download, User, Bell, Key, Play,
-      Book, Lock, TestTube, Clock
+      Home,
+      Globe,
+      Zap,
+      Shield,
+      Search,
+      BarChart3,
+      Settings,
+      HelpCircle,
+      Code,
+      Monitor,
+      Activity,
+      Upload,
+      Download,
+      User,
+      Bell,
+      Key,
+      Play,
+      Book,
+      Lock,
+      TestTube,
+      Clock,
     };
     const IconComponent = iconMap[iconName];
     return IconComponent ? <IconComponent className="w-3 h-3" /> : <Search className="w-3 h-3" />;
@@ -301,25 +384,31 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
         <span key={index} className="bg-blue-500/30 text-blue-300 font-medium">
           {part}
         </span>
-      ) : part
+      ) : (
+        part
+      )
     );
   };
 
   return (
-    <header className={`px-6 py-4 relative z-[1000] transition-all duration-300 ${actualTheme === 'light'
-      ? 'bg-white/95 border-b border-gray-200 backdrop-blur-sm'
-      : 'bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50'
-      }`}>
+    <header
+      className={`px-6 py-4 relative z-[1000] transition-all duration-300 ${
+        actualTheme === 'light'
+          ? 'bg-white/95 border-b border-gray-200 backdrop-blur-sm'
+          : 'bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50'
+      }`}
+    >
       <div className="flex items-center justify-between">
         {/* 左侧：Logo和导航控制 */}
         <div className="flex items-center space-x-4">
           <button
             type="button"
             onClick={onToggleSidebar}
-            className={`p-2 rounded-lg transition-colors ${actualTheme === 'light'
-              ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-              }`}
+            className={`p-2 rounded-lg transition-colors ${
+              actualTheme === 'light'
+                ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+            }`}
             title={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
           >
             <Menu className="w-5 h-5" />
@@ -331,10 +420,20 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                 <span className="text-white font-bold text-sm">T</span>
               </div>
               <div>
-                <h1 className={`text-lg font-bold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
-                  }`}>Test Web App</h1>
-                <p className={`text-xs ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'
-                  }`}>专业测试平台</p>
+                <h1
+                  className={`text-lg font-bold ${
+                    actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                  }`}
+                >
+                  Test Web App
+                </h1>
+                <p
+                  className={`text-xs ${
+                    actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'
+                  }`}
+                >
+                  专业测试平台
+                </p>
               </div>
             </div>
           )}
@@ -343,14 +442,17 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
         {/* 中间：搜索框 */}
         <div className="flex-1 max-w-xl mx-8 relative" ref={searchRef}>
           <div className="relative">
-            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-400'
-              }`} />
+            <Search
+              className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${
+                actualTheme === 'light' ? 'text-gray-500' : 'text-gray-400'
+              }`}
+            />
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               onFocus={() => setShowSearchDropdown(true)}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'ArrowDown') {
                   e.preventDefault();
                   setSelectedSearchIndex(prev =>
@@ -358,7 +460,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                   );
                 } else if (e.key === 'ArrowUp') {
                   e.preventDefault();
-                  setSelectedSearchIndex(prev => prev > -1 ? prev - 1 : prev);
+                  setSelectedSearchIndex(prev => (prev > -1 ? prev - 1 : prev));
                 } else if (e.key === 'Enter') {
                   e.preventDefault();
                   if (selectedSearchIndex >= 0 && searchResults[selectedSearchIndex]) {
@@ -374,16 +476,19 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                 }
               }}
               placeholder="搜索测试、报告、设置..."
-              className={`w-full pl-10 pr-4 py-2 text-sm transition-all duration-200 ${actualTheme === 'light'
-                ? `bg-gray-50 border text-gray-900 placeholder-gray-500 ${showSearchDropdown
-                  ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-white'
-                  : 'border-gray-300 rounded-lg hover:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                }`
-                : `bg-gray-700/50 border text-white placeholder-gray-400 ${showSearchDropdown
-                  ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-gray-700/80'
-                  : 'border-gray-600 rounded-lg hover:bg-gray-600/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                }`
-                }`}
+              className={`w-full pl-10 pr-4 py-2 text-sm transition-all duration-200 ${
+                actualTheme === 'light'
+                  ? `bg-gray-50 border text-gray-900 placeholder-gray-500 ${
+                      showSearchDropdown
+                        ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-white'
+                        : 'border-gray-300 rounded-lg hover:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    }`
+                  : `bg-gray-700/50 border text-white placeholder-gray-400 ${
+                      showSearchDropdown
+                        ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-gray-700/80'
+                        : 'border-gray-600 rounded-lg hover:bg-gray-600/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    }`
+              }`}
             />
             {searchQuery && (
               <button
@@ -418,18 +523,26 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                           key={result.id}
                           type="button"
                           onClick={() => handleSearchResultClick(result)}
-                          className={`w-full text-left px-4 py-3 transition-all duration-150 ${selectedSearchIndex === index
-                            ? 'bg-blue-500/20 border-l-2 border-blue-500'
-                            : 'hover:bg-gray-600/50'
-                            }`}
+                          className={`w-full text-left px-4 py-3 transition-all duration-150 ${
+                            selectedSearchIndex === index
+                              ? 'bg-blue-500/20 border-l-2 border-blue-500'
+                              : 'hover:bg-gray-600/50'
+                          }`}
                         >
                           <div className="flex items-center space-x-3">
-                            <div className={`p-2 rounded-lg ${result.type === 'page' ? 'bg-blue-500/20 text-blue-400' :
-                              result.type === 'test' ? 'bg-green-500/20 text-green-400' :
-                                result.type === 'setting' ? 'bg-purple-500/20 text-purple-400' :
-                                  result.type === 'help' ? 'bg-orange-500/20 text-orange-400' :
-                                    'bg-gray-500/20 text-gray-400'
-                              }`}>
+                            <div
+                              className={`p-2 rounded-lg ${
+                                result.type === 'page'
+                                  ? 'bg-blue-500/20 text-blue-400'
+                                  : result.type === 'test'
+                                    ? 'bg-green-500/20 text-green-400'
+                                    : result.type === 'setting'
+                                      ? 'bg-purple-500/20 text-purple-400'
+                                      : result.type === 'help'
+                                        ? 'bg-orange-500/20 text-orange-400'
+                                        : 'bg-gray-500/20 text-gray-400'
+                              }`}
+                            >
                               {renderSearchIcon(result.icon || 'Search')}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -454,49 +567,45 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                     <div className="p-6 text-center">
                       <Search className="w-6 h-6 text-gray-500 mx-auto mb-2" />
                       <p className="text-sm text-gray-400">没有找到相关结果</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        尝试使用不同的关键词
-                      </p>
+                      <p className="text-xs text-gray-500 mt-1">尝试使用不同的关键词</p>
                     </div>
                   )}
                 </div>
               ) : (
                 // 搜索历史和建议
                 <div className="py-2">
-                  {
-                    searchHistory.length > 0 && (
-                      <div className="px-4 py-2 border-b border-gray-600/50">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center text-gray-400">
-                            <Clock className="w-3 h-3 mr-2" />
-                            <span className="text-xs font-medium">最近搜索</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={clearSearchHistory}
-                            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-                          >
-                            清除
-                          </button>
+                  {searchHistory.length > 0 && (
+                    <div className="px-4 py-2 border-b border-gray-600/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center text-gray-400">
+                          <Clock className="w-3 h-3 mr-2" />
+                          <span className="text-xs font-medium">最近搜索</span>
                         </div>
-                        <div className="space-y-1">
-                          {searchHistory.slice(0, 3).map((historyItem, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              onClick={() => {
-                                setSearchQuery(historyItem);
-                                setShowSearchDropdown(false);
-                              }}
-                              className="w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors"
-                            >
-                              {historyItem}
-                            </button>
-                          ))}
-                        </div>
+                        <button
+                          type="button"
+                          onClick={clearSearchHistory}
+                          className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                        >
+                          清除
+                        </button>
                       </div>
-                    )
-                  }
+                      <div className="space-y-1">
+                        {searchHistory.slice(0, 3).map((historyItem, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery(historyItem);
+                              setShowSearchDropdown(false);
+                            }}
+                            className="w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors"
+                          >
+                            {historyItem}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* 快捷搜索建议 */}
                   <div className="px-4 py-2">
@@ -505,19 +614,21 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                       <span className="text-xs font-medium">快捷搜索</span>
                     </div>
                     <div className="grid grid-cols-2 gap-1">
-                      {['网站测试', '安全检测', 'API测试', '实时监控', '系统设置', '帮助文档'].map((suggestion, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => {
-                            setSearchQuery(suggestion);
-                            setShowSearchDropdown(false);
-                          }}
-                          className="text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors"
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
+                      {['网站测试', '安全检测', 'API测试', '实时监控', '系统设置', '帮助文档'].map(
+                        (suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery(suggestion);
+                              setShowSearchDropdown(false);
+                            }}
+                            className="text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors"
+                          >
+                            {suggestion}
+                          </button>
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
@@ -556,7 +667,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                 <div className="p-4">
                   <h3 className="text-sm font-semibold text-white mb-3">快捷操作</h3>
                   <div className="grid grid-cols-2 gap-2">
-                    {quickActions.map((action) => (
+                    {quickActions.map(action => (
                       <Link
                         key={action.id}
                         to={action.href}
@@ -614,20 +725,22 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                     <button
                       type="button"
                       onClick={() => setNotificationFilter('all')}
-                      className={`px-3 py-1 text-xs rounded-full transition-colors ${notificationFilter === 'all'
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                        : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
-                        }`}
+                      className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                        notificationFilter === 'all'
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
+                      }`}
                     >
                       全部
                     </button>
                     <button
                       type="button"
                       onClick={() => setNotificationFilter('unread')}
-                      className={`px-3 py-1 text-xs rounded-full transition-colors ${notificationFilter === 'unread'
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                        : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
-                        }`}
+                      className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                        notificationFilter === 'unread'
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
+                      }`}
                     >
                       未读 ({unreadCount})
                     </button>
@@ -644,11 +757,12 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                       </p>
                     </div>
                   ) : (
-                    displayNotifications.map((notification) => (
+                    displayNotifications.map(notification => (
                       <div
                         key={notification.id}
-                        className={`relative border-l-2 ${getPriorityColor(notification.priority)} ${!notification.read ? 'bg-blue-500/5' : ''
-                          }`}
+                        className={`relative border-l-2 ${getPriorityColor(notification.priority)} ${
+                          !notification.read ? 'bg-blue-500/5' : ''
+                        }`}
                       >
                         <div
                           className="p-4 border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors cursor-pointer"
@@ -658,8 +772,11 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                             {getNotificationIcon(notification.type)}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-1">
-                                <p className={`text-sm font-medium truncate ${!notification.read ? 'text-white' : 'text-gray-300'
-                                  }`}>
+                                <p
+                                  className={`text-sm font-medium truncate ${
+                                    !notification.read ? 'text-white' : 'text-gray-300'
+                                  }`}
+                                >
                                   {notification.title}
                                 </p>
                                 <div className="flex items-center space-x-2">
@@ -671,7 +788,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                                       type="button"
                                       className="p-1 text-gray-400 hover:text-gray-300 transition-colors"
                                       title="更多操作"
-                                      onClick={(e) => handleMoreActions(notification, e)}
+                                      onClick={e => handleMoreActions(notification, e)}
                                     >
                                       <MoreVertical className="w-3 h-3" />
                                     </button>
@@ -692,12 +809,20 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                                     </span>
                                   )}
                                   {notification.priority && notification.priority !== 'low' && (
-                                    <span className={`px-2 py-0.5 text-xs rounded ${notification.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
-                                      notification.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                                        'bg-yellow-500/20 text-yellow-400'
-                                      }`}>
-                                      {notification.priority === 'urgent' ? '紧急' :
-                                        notification.priority === 'high' ? '高' : '低'}
+                                    <span
+                                      className={`px-2 py-0.5 text-xs rounded ${
+                                        notification.priority === 'urgent'
+                                          ? 'bg-red-500/20 text-red-400'
+                                          : notification.priority === 'high'
+                                            ? 'bg-orange-500/20 text-orange-400'
+                                            : 'bg-yellow-500/20 text-yellow-400'
+                                      }`}
+                                    >
+                                      {notification.priority === 'urgent'
+                                        ? '紧急'
+                                        : notification.priority === 'high'
+                                          ? '高'
+                                          : '低'}
                                     </span>
                                   )}
                                 </div>
@@ -709,7 +834,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                                       type="button"
                                       className="p-1 text-blue-400 hover:text-blue-300 transition-colors"
                                       title={notification.actionText || '查看详情'}
-                                      onClick={(e) => {
+                                      onClick={e => {
                                         e.stopPropagation();
                                         handleNotificationClick(notification);
                                       }}
@@ -722,7 +847,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                                       type="button"
                                       className="p-1 text-green-400 hover:text-green-300 transition-colors"
                                       title="标记为已读"
-                                      onClick={(e) => handleMarkAsRead(notification.id, e)}
+                                      onClick={e => handleMarkAsRead(notification.id, e)}
                                     >
                                       <Check className="w-3 h-3" />
                                     </button>
@@ -731,7 +856,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                                     type="button"
                                     className="p-1 text-red-400 hover:text-red-300 transition-colors"
                                     title="删除通知"
-                                    onClick={(e) => handleDeleteNotification(notification.id, e)}
+                                    onClick={e => handleDeleteNotification(notification.id, e)}
                                   >
                                     <Trash2 className="w-3 h-3" />
                                   </button>
@@ -777,56 +902,53 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
           {/* 帮助中心 */}
           <Link
             to="/help"
-            className={`p-2 rounded-lg transition-colors ${actualTheme === 'light'
-              ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-              }`}
+            className={`p-2 rounded-lg transition-colors ${
+              actualTheme === 'light'
+                ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+            }`}
             title="帮助中心"
           >
             <HelpCircle className="w-5 h-5" />
           </Link>
 
           {/* 用户菜单或登录按钮 */}
-          {
-            isAuthenticated ? (
-              <div className="relative" ref={userMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
-                  title="用户菜单"
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    {user?.role === 'admin' ? (
-                      <Crown className="w-4 h-4 text-white" />
-                    ) : (
-                      <User className="w-4 h-4 text-white" />
-                    )}
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </button>
+          {isAuthenticated ? (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center space-x-2 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
+                title="用户菜单"
+              >
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  {user?.role === 'admin' ? (
+                    <Crown className="w-4 h-4 text-white" />
+                  ) : (
+                    <User className="w-4 h-4 text-white" />
+                  )}
+                </div>
+                <ChevronDown className="w-4 h-4" />
+              </button>
 
-                {showUserMenu && (
-                  <UserDropdownMenu onClose={() => setShowUserMenu(false)} />
-                )}
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${actualTheme === 'light'
+              {showUserMenu && <UserDropdownMenu onClose={() => setShowUserMenu(false)} />}
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                actualTheme === 'light'
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                title="登录"
-              >
-                <User className="w-4 h-4" />
-                <span className="text-sm font-medium">登录</span>
-              </Link>
-            )
-          }
-        </div >
-      </div >
-
+              }`}
+              title="登录"
+            >
+              <User className="w-4 h-4" />
+              <span className="text-sm font-medium">登录</span>
+            </Link>
+          )}
+        </div>
+      </div>
     </header>
   );
 };
