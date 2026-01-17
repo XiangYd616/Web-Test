@@ -3,12 +3,8 @@
  * 职责: 处理测试相关的HTTP请求
  */
 
-const testBusinessService = require('../services/testing/TestBusinessService');
-const userTestManager = require('../services/testing/UserTestManager');
-const TestHistoryService = require('../services/testing/TestHistoryService');
+const testService = require('../services/testing/testService');
 const { successResponse, createdResponse, errorResponse } = require('../utils/response');
-
-const testHistoryService = new TestHistoryService(require('../config/database'));
 
 class TestController {
   /**
@@ -39,7 +35,7 @@ class TestController {
       const { testId } = req.params;
       const userId = req.user.id;
 
-      const status = await userTestManager.getTestStatus(userId, testId);
+      const status = await testService.getStatus(userId, testId);
       return successResponse(res, status);
     } catch (error) {
       next(error);
@@ -55,7 +51,7 @@ class TestController {
       const { testId } = req.params;
       const userId = req.user.id;
 
-      const result = await userTestManager.getTestResult(userId, testId);
+      const result = await testService.getTestResults(testId, userId);
       return successResponse(res, result);
     } catch (error) {
       next(error);
@@ -71,7 +67,7 @@ class TestController {
       const { testId } = req.params;
       const userId = req.user.id;
 
-      await userTestManager.stopTest(userId, testId);
+      await testService.stopTest(userId, testId);
       return successResponse(res, { testId }, '测试已停止');
     } catch (error) {
       next(error);
@@ -87,7 +83,7 @@ class TestController {
       const { testId } = req.params;
       const userId = req.user.id;
 
-      await testHistoryService.deleteTest(testId, userId);
+      await testService.deleteTest(testId, userId);
       return successResponse(res, { testId }, '测试已删除');
     } catch (error) {
       next(error);
@@ -103,7 +99,7 @@ class TestController {
       const { page = 1, limit = 20, testType, status } = req.query;
       const userId = req.user.id;
 
-      const history = await testHistoryService.getTestHistory({
+      const history = await testService.getHistory(userId, {
         userId,
         page: parseInt(page),
         limit: parseInt(limit),
@@ -130,8 +126,8 @@ class TestController {
         return errorResponse(res, '请提供要删除的测试ID列表', 400);
       }
 
-      await testHistoryService.batchDelete(testIds, userId);
-      return successResponse(res, { deletedCount: testIds.length }, '批量删除成功');
+      const result = await testService.batchDelete(testIds, userId);
+      return successResponse(res, result, '批量删除成功');
     } catch (error) {
       next(error);
     }
@@ -144,7 +140,7 @@ class TestController {
   async getRunningTests(req, res, next) {
     try {
       const userId = req.user.id;
-      const runningTests = await userTestManager.getRunningTests(userId);
+      const runningTests = await testService.getRunningTests(userId);
       return successResponse(res, { tests: runningTests });
     } catch (error) {
       next(error);
@@ -160,19 +156,237 @@ class TestController {
       const { testId } = req.params;
       const userId = req.user.id;
 
-      const originalTest = await testHistoryService.getTestById(testId, userId);
-      if (!originalTest) {
-        return errorResponse(res, '测试不存在', 404);
+      const result = await testService.rerunTest(testId, userId);
+      return createdResponse(res, result, '测试已重新运行');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 更新测试
+   * PUT /api/test/:testId
+   */
+  async updateTest(req, res, next) {
+    try {
+      const { testId } = req.params;
+      const updates = req.body;
+      const userId = req.user.id;
+
+      const result = await testService.updateTest(testId, userId, updates);
+      return successResponse(res, result, '测试更新成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 运行网站测试
+   * POST /api/test/website
+   */
+  async runWebsiteTest(req, res, next) {
+    try {
+      const { url, options = {} } = req.body;
+      
+      if (!url) {
+        return errorResponse(res, 'URL是必填的', 400);
       }
 
-      const config = originalTest.config || {};
-      const user = {
-        userId,
-        role: req.user.role || 'free',
+      const config = {
+        testType: 'website',
+        url,
+        ...options
       };
 
-      const result = await testBusinessService.createAndStartTest(config, user);
-      return createdResponse(res, result, '测试已重新运行');
+      const user = {
+        userId: req.user?.id,
+        role: req.user?.role || 'free'
+      };
+
+      const result = await testService.createAndStart(config, user);
+      return createdResponse(res, result, '网站测试已启动');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 运行性能测试
+   * POST /api/test/performance
+   */
+  async runPerformanceTest(req, res, next) {
+    try {
+      const { url, device = 'desktop', throttling } = req.body;
+      
+      if (!url) {
+        return errorResponse(res, 'URL是必填的', 400);
+      }
+
+      const config = {
+        testType: 'performance',
+        url,
+        device,
+        throttling
+      };
+
+      const user = {
+        userId: req.user?.id,
+        role: req.user?.role || 'free'
+      };
+
+      const result = await testService.createAndStart(config, user);
+      return createdResponse(res, result, '性能测试已启动');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 运行安全测试
+   * POST /api/test/security
+   */
+  async runSecurityTest(req, res, next) {
+    try {
+      const { url, scanDepth = 'basic' } = req.body;
+      
+      if (!url) {
+        return errorResponse(res, 'URL是必填的', 400);
+      }
+
+      const config = {
+        testType: 'security',
+        url,
+        scanDepth
+      };
+
+      const user = {
+        userId: req.user?.id,
+        role: req.user?.role || 'free'
+      };
+
+      const result = await testService.createAndStart(config, user);
+      return createdResponse(res, result, '安全测试已启动');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 运行SEO测试
+   * POST /api/test/seo
+   */
+  async runSeoTest(req, res, next) {
+    try {
+      const { url, depth = 1 } = req.body;
+      
+      if (!url) {
+        return errorResponse(res, 'URL是必填的', 400);
+      }
+
+      const config = {
+        testType: 'seo',
+        url,
+        depth
+      };
+
+      const user = {
+        userId: req.user?.id,
+        role: req.user?.role || 'free'
+      };
+
+      const result = await testService.createAndStart(config, user);
+      return createdResponse(res, result, 'SEO测试已启动');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 运行压力测试
+   * POST /api/test/stress
+   */
+  async runStressTest(req, res, next) {
+    try {
+      const { url, concurrency = 10, duration = 60 } = req.body;
+      
+      if (!url) {
+        return errorResponse(res, 'URL是必填的', 400);
+      }
+
+      const config = {
+        testType: 'stress',
+        url,
+        concurrency,
+        duration
+      };
+
+      const user = {
+        userId: req.user?.id,
+        role: req.user?.role || 'free'
+      };
+
+      const result = await testService.createAndStart(config, user);
+      return createdResponse(res, result, '压力测试已启动');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 运行API测试
+   * POST /api/test/api
+   */
+  async runApiTest(req, res, next) {
+    try {
+      const { baseUrl, endpoints = [] } = req.body;
+      
+      if (!baseUrl) {
+        return errorResponse(res, 'baseUrl是必填的', 400);
+      }
+
+      const config = {
+        testType: 'api',
+        baseUrl,
+        endpoints
+      };
+
+      const user = {
+        userId: req.user?.id,
+        role: req.user?.role || 'free'
+      };
+
+      const result = await testService.createAndStart(config, user);
+      return createdResponse(res, result, 'API测试已启动');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 运行可访问性测试
+   * POST /api/test/accessibility
+   */
+  async runAccessibilityTest(req, res, next) {
+    try {
+      const { url, level = 'AA' } = req.body;
+      
+      if (!url) {
+        return errorResponse(res, 'URL是必填的', 400);
+      }
+
+      const config = {
+        testType: 'accessibility',
+        url,
+        level
+      };
+
+      const user = {
+        userId: req.user?.id,
+        role: req.user?.role || 'free'
+      };
+
+      const result = await testService.createAndStart(config, user);
+      return createdResponse(res, result, '可访问性测试已启动');
     } catch (error) {
       next(error);
     }
