@@ -1,6 +1,5 @@
 import Logger from '@/utils/logger';
-
-﻿/**
+import { apiClient } from './api/client'; /**
  * 批量测试服务
  * 提供批量测试创建、执行、监控功能
  */
@@ -25,7 +24,7 @@ export interface TestConfig {
   id?: string;
   url: string;
   type: string;
-  config: any;
+  config: unknown;
   name?: string;
   description?: string;
 }
@@ -52,7 +51,7 @@ export interface TestResult {
   testType: string;
   url: string;
   success: boolean;
-  results?: any;
+  results?: unknown;
   error?: string;
   startTime: string;
   endTime: string;
@@ -69,8 +68,22 @@ export interface BatchSummary {
 }
 
 class BatchTestingService {
-  private baseUrl = '/api/batch-testing';
-  private cache = new Map<string, any>();
+  private baseUrl = '/batch-testing';
+  private cache = new Map<
+    string,
+    {
+      data: {
+        totalBatches: number;
+        runningBatches: number;
+        completedBatches: number;
+        failedBatches: number;
+        averageSuccessRate: number;
+        averageDuration: number;
+        recentActivity: Array<{ date: string; count: number; successRate: number }>;
+      };
+      timestamp: number;
+    }
+  >();
   private cacheTimeout = 2 * 60 * 1000; // 2分钟缓存
 
   /**
@@ -83,17 +96,15 @@ class BatchTestingService {
     config: BatchConfig;
   }): Promise<BatchTest> {
     try {
-      const response = await fetch(`${this.baseUrl}/create`, {
-        method: 'POST',
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/create`, batchData, {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(batchData)
       });
 
-      const data = await response.json();
+      const data = response.data as { success?: boolean; data?: BatchTest; error?: string };
 
-      if (!data.success) {
+      if (!data.success || !data.data) {
         throw new Error(data.error || '创建批量测试失败');
       }
 
@@ -110,13 +121,11 @@ class BatchTestingService {
    */
   async executeBatchTest(batchId: string): Promise<BatchTest> {
     try {
-      const response = await fetch(`${this.baseUrl}/${batchId}/execute`, {
-        method: 'POST'
-      });
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/${batchId}/execute`, {});
 
-      const data = await response.json();
+      const data = response.data as { success?: boolean; data?: BatchTest; error?: string };
 
-      if (!data.success) {
+      if (!data.success || !data.data) {
         throw new Error(data.error || '执行批量测试失败');
       }
 
@@ -142,10 +151,23 @@ class BatchTestingService {
     duration?: number;
   }> {
     try {
-      const response = await fetch(`${this.baseUrl}/${batchId}/status`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/${batchId}/status`);
+      const data = response.data as {
+        success?: boolean;
+        data?: {
+          id: string;
+          name: string;
+          status: string;
+          progress: BatchProgress;
+          createdAt: string;
+          startedAt?: string;
+          completedAt?: string;
+          duration?: number;
+        };
+        error?: string;
+      };
 
-      if (!data.success) {
+      if (!data.success || !data.data) {
         throw new Error(data.error || '获取批量测试状态失败');
       }
 
@@ -170,10 +192,23 @@ class BatchTestingService {
     summary: BatchSummary;
   }> {
     try {
-      const response = await fetch(`${this.baseUrl}/${batchId}/results`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/${batchId}/results`);
+      const data = response.data as {
+        success?: boolean;
+        data?: {
+          batch: {
+            id: string;
+            name: string;
+            status: string;
+            progress: BatchProgress;
+          };
+          results: TestResult[];
+          summary: BatchSummary;
+        };
+        error?: string;
+      };
 
-      if (!data.success) {
+      if (!data.success || !data.data) {
         throw new Error(data.error || '获取批量测试结果失败');
       }
 
@@ -189,11 +224,9 @@ class BatchTestingService {
    */
   async cancelBatchTest(batchId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${batchId}/cancel`, {
-        method: 'POST'
-      });
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/${batchId}/cancel`, {});
 
-      const data = await response.json();
+      const data = response.data as { success?: boolean; error?: string };
 
       if (!data.success) {
         throw new Error(data.error || '取消批量测试失败');
@@ -224,19 +257,37 @@ class BatchTestingService {
       createdBy: string;
     }>;
     total: number;
-    pagination: any;
+    pagination: unknown;
   }> {
     try {
-      const params = new URLSearchParams();
-      
-      if (status) params.append('status', status);
-      params.append('page', pagination.page.toString());
-      params.append('limit', pagination.limit.toString());
+      const params: Record<string, string | number> = {
+        page: pagination.page,
+        limit: pagination.limit,
+      };
 
-      const response = await fetch(`${this.baseUrl}/list?${params}`);
-      const data = await response.json();
+      if (status) params.status = status;
 
-      if (!data.success) {
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/list`, { params });
+      const data = response.data as {
+        success?: boolean;
+        data?: {
+          batches: Array<{
+            id: string;
+            name: string;
+            status: string;
+            progress: BatchProgress;
+            createdAt: string;
+            startedAt?: string;
+            completedAt?: string;
+            createdBy: string;
+          }>;
+          total: number;
+          pagination: unknown;
+        };
+        error?: string;
+      };
+
+      if (!data.success || !data.data) {
         throw new Error(data.error || '获取批量测试列表失败');
       }
 
@@ -252,11 +303,9 @@ class BatchTestingService {
    */
   async deleteBatchTest(batchId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${batchId}`, {
-        method: 'DELETE'
-      });
+      const response = await apiClient.getInstance().delete(`${this.baseUrl}/${batchId}`);
 
-      const data = await response.json();
+      const data = response.data as { success?: boolean; error?: string };
 
       if (!data.success) {
         throw new Error(data.error || '删除批量测试失败');
@@ -274,17 +323,19 @@ class BatchTestingService {
    */
   async cloneBatchTest(batchId: string, newName?: string): Promise<BatchTest> {
     try {
-      const response = await fetch(`${this.baseUrl}/${batchId}/clone`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ newName })
-      });
+      const response = await apiClient.getInstance().post(
+        `${this.baseUrl}/${batchId}/clone`,
+        { newName },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      const data = await response.json();
+      const data = response.data as { success?: boolean; data?: BatchTest; error?: string };
 
-      if (!data.success) {
+      if (!data.success || !data.data) {
         throw new Error(data.error || '复制批量测试失败');
       }
 
@@ -304,7 +355,7 @@ class BatchTestingService {
     format: 'json' | 'csv' | 'excel' = 'json'
   ): Promise<string> {
     try {
-      const params = new URLSearchParams({ format });
+      const params: Record<string, string> = { format };
 
       /**
 
@@ -315,16 +366,20 @@ class BatchTestingService {
        * @returns {Promise<Object>} 返回结果
 
        */
-      const response = await fetch(`${this.baseUrl}/${batchId}/export?${params}`);
-
       if (format === 'json') {
-        const data = await response.json();
-        return data.success ? data.downloadUrl : '';
-      } else {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        return url;
+        const response = await apiClient.getInstance().get(`${this.baseUrl}/${batchId}/export`, {
+          params,
+        });
+        const data = response.data as { success?: boolean; downloadUrl?: string };
+        return data.success ? data.downloadUrl || '' : '';
       }
+
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/${batchId}/export`, {
+        params,
+        responseType: 'blob',
+      });
+      const blob = response.data as Blob;
+      return URL.createObjectURL(blob);
     } catch (error) {
       Logger.error('导出批量测试结果失败:', error);
       throw error;
@@ -348,26 +403,42 @@ class BatchTestingService {
     }>;
   }> {
     const cacheKey = 'batch-statistics';
-    
+
     if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey);
-      if (Date.now() - cached.timestamp < this.cacheTimeout) {
+      if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
         return cached.data;
       }
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/statistics`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/statistics`);
+      const data = response.data as {
+        success?: boolean;
+        data?: {
+          totalBatches: number;
+          runningBatches: number;
+          completedBatches: number;
+          failedBatches: number;
+          averageSuccessRate: number;
+          averageDuration: number;
+          recentActivity: Array<{
+            date: string;
+            count: number;
+            successRate: number;
+          }>;
+        };
+        error?: string;
+      };
 
-      if (!data.success) {
+      if (!data.success || !data.data) {
         throw new Error(data.error || '获取统计信息失败');
       }
 
       const statistics = data.data;
       this.cache.set(cacheKey, {
         data: statistics,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       return statistics;
@@ -383,11 +454,11 @@ class BatchTestingService {
   monitorBatchProgress(
     batchId: string,
     onProgress: (progress: BatchProgress) => void,
-    onComplete: (results: any) => void,
+    onComplete: (results: unknown) => void,
     onError: (error: string) => void
   ): () => void {
     let isMonitoring = true;
-    
+
     const checkProgress = async () => {
       if (!isMonitoring) return;
 
@@ -420,11 +491,10 @@ class BatchTestingService {
   /**
    * 验证批量测试配置
    */
-  validateBatchConfig(batchData: {
-    name: string;
-    tests: TestConfig[];
-    config: BatchConfig;
-  }): { isValid: boolean; errors: string[] } {
+  validateBatchConfig(batchData: { name: string; tests: TestConfig[]; config: BatchConfig }): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (!batchData.name || batchData.name.trim().length === 0) {
@@ -446,11 +516,11 @@ class BatchTestingService {
       });
     }
 
-      /**
-       * if功能函数
-       * @param {Object} params - 参数对象
-       * @returns {Promise<Object>} 返回结果
-       */
+    /**
+     * if功能函数
+     * @param {Object} params - 参数对象
+     * @returns {Promise<Object>} 返回结果
+     */
     if (batchData.config.execution.mode === 'parallel') {
       if (!batchData.config.execution.concurrency || batchData.config.execution.concurrency < 1) {
         errors.push('并行模式需要指定有效的并发数');
@@ -463,7 +533,7 @@ class BatchTestingService {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -474,11 +544,11 @@ class BatchTestingService {
     return {
       execution: {
         mode: 'sequential',
-        concurrency: 3
+        concurrency: 3,
       },
       timeout: Number(process.env.REQUEST_TIMEOUT) || 300000, // 5分钟
       retries: 0,
-      stopOnFailure: false
+      stopOnFailure: false,
     };
   }
 
@@ -523,7 +593,7 @@ class BatchTestingService {
       running: '运行中',
       completed: '已完成',
       failed: '失败',
-      cancelled: '已取消'
+      cancelled: '已取消',
     };
 
     return statusMap[status] || status;

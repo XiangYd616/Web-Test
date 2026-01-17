@@ -8,8 +8,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { testApiClient } from '../services/api/test/testApiClient';
 import backgroundTestManager from '../services/backgroundTestManager';
-import type { DatabaseTestConfig, DatabaseTestHook, DatabaseTestResult } from '../types';
-import { TestStatus } from '../types/enums';
+import type { DatabaseTestConfig, DatabaseTestResult } from '../types';
+import { TestStatus, TestType } from '../types/enums';
 
 // 扩展数据库测试配置类型，兼容统一类型系统
 interface ExtendedDatabaseTestConfig extends DatabaseTestConfig {
@@ -49,138 +49,19 @@ interface ExtendedDatabaseTestConfig extends DatabaseTestConfig {
     checkAuthentication: boolean;
     scanVulnerabilities: boolean;
   };
-  customQueries?: Array<{
-    id: string;
-    name: string;
-    query: string;
-    expectedResult?: any;
-    timeout?: number;
-  }>;
+  customQueries?: CustomQuery[];
+}
+
+interface CustomQuery {
+  id: string;
+  name: string;
+  query: string;
+  expectedResult?: unknown;
+  timeout?: number;
 }
 
 // 导入统一的DatabaseQuery类型
 import type { DatabaseQuery } from '../types/hooks/testState.types';
-interface DatabaseTestResultLocal {
-  id: string;
-  config: DatabaseTestConfig;
-  status: 'completed' | 'failed' | 'partial';
-  startTime: Date;
-  endTime: Date;
-  duration: number;
-  summary: {
-    overallHealth: 'healthy' | 'warning' | 'critical';
-    connectionScore: number;
-    performanceScore: number;
-    integrityScore: number;
-    securityScore: number;
-  };
-
-  // 连接测试结果
-  connectionResults: {
-    status: 'success' | 'failed';
-    connectionTime: number;
-    maxConnections: number;
-    currentConnections: number;
-    version: string;
-    serverInfo: Record<string, any>;
-  };
-
-  // 性能测试结果
-  performanceResults: {
-    status: 'good' | 'acceptable' | 'poor';
-    averageQueryTime: number;
-    slowestQuery: {
-      query: string;
-      duration: number;
-    };
-    fastestQuery: {
-      query: string;
-      duration: number;
-    };
-    throughput: number; // queries per second
-    resourceUsage: {
-      cpu: number;
-      memory: number;
-      disk: number;
-    };
-    indexEfficiency: number;
-  };
-
-  // 数据完整性结果
-  integrityResults: {
-    status: 'valid' | 'issues_found';
-    constraintViolations: Array<{
-      table: string;
-      constraint: string;
-      violationCount: number;
-    }>;
-    orphanedRecords: Array<{
-      table: string;
-      count: number;
-    }>;
-    indexIssues: Array<{
-      table: string;
-      index: string;
-      issue: string;
-    }>;
-    dataConsistency: {
-      score: number;
-      issues: string[];
-    };
-  };
-
-  // 负载测试结果
-  loadTestResults: {
-    status: 'passed' | 'failed';
-    maxConcurrentConnections: number;
-    averageResponseTime: number;
-    errorRate: number;
-    throughputOverTime: Array<{
-      timestamp: Date;
-      throughput: number;
-    }>;
-    resourceUtilization: Array<{
-      timestamp: Date;
-      cpu: number;
-      memory: number;
-      connections: number;
-    }>;
-  };
-
-  // 安全测试结果
-  securityResults: {
-    status: 'secure' | 'vulnerabilities_found';
-    vulnerabilities: Array<{
-      type: string;
-      severity: 'low' | 'medium' | 'high' | 'critical';
-      description: string;
-      recommendation: string;
-    }>;
-    permissionIssues: Array<{
-      user: string;
-      issue: string;
-      risk: string;
-    }>;
-    encryptionStatus: {
-      dataAtRest: boolean;
-      dataInTransit: boolean;
-      passwordHashing: boolean;
-    };
-  };
-
-  // 自定义查询结果
-  customQueryResults: Array<{
-    queryId: string;
-    queryName: string;
-    status: 'success' | 'failed' | 'timeout';
-    duration: number;
-    rowCount?: number;
-    error?: string;
-    result?: any;
-  }>;
-
-  recommendations: string[];
-}
 
 // Hook状态接口
 export interface UseDatabaseTestStateReturn {
@@ -198,6 +79,7 @@ export interface UseDatabaseTestStateReturn {
   // 结果状态
   result: DatabaseTestResult | null;
   error: string | null;
+  status: TestStatus;
 
   // 操作方法
   startTest: () => Promise<void>;
@@ -222,7 +104,7 @@ export interface UseDatabaseTestStateReturn {
  * 数据库测试专用状态管理Hook
  * 已迁移到新的类型系统，返回 DatabaseTestHook 类型
  */
-export const useDatabaseTestState = (): DatabaseTestHook => {
+export const useDatabaseTestState = (): UseDatabaseTestStateReturn => {
   // 基础状态
   const [config, setConfig] = useState<ExtendedDatabaseTestConfig>({
     // 基础DatabaseTestConfig属性
@@ -395,8 +277,8 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
         setError(response.message || '连接测试失败');
         return false;
       }
-    } catch (err: any) {
-      setError(err.message || '连接测试失败');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, '连接测试失败'));
       return false;
     }
   }, [config.connectionConfig]);
@@ -422,28 +304,28 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
 
       // 启动后台测试
       const newTestId = backgroundTestManager.startTest(
-        'database' as any,
+        TestType.DATABASE,
         config,
         (progress: number, step?: string) => {
           setProgress(progress);
           if (step) setCurrentStep(step);
         },
-        (testResult: any) => {
-          setResult(testResult);
+        (testResult: unknown) => {
+          setResult(testResult as DatabaseTestResult);
           setIsRunning(false);
           setProgress(100);
           setCurrentStep('测试完成');
         },
-        (testError: any) => {
-          setError(testError.message);
+        (testError: unknown) => {
+          setError(getErrorMessage(testError, '测试失败'));
           setIsRunning(false);
           setCurrentStep('测试失败');
         }
       );
 
       setTestId(newTestId);
-    } catch (err: any) {
-      setError(err.message || '数据库测试启动失败');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, '数据库测试启动失败'));
       setIsRunning(false);
       setCurrentStep('');
     }
@@ -459,8 +341,8 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
         abortControllerRef.current?.abort();
         setIsRunning(false);
         setCurrentStep('测试已停止');
-      } catch (err: any) {
-        setError(err.message || '停止测试失败');
+      } catch (err: unknown) {
+        setError(getErrorMessage(err, '停止测试失败'));
       }
     }
   }, [testId]);
@@ -508,7 +390,7 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
       testQueries: (prev.testQueries || []).map((query: DatabaseQuery) =>
         query.id === id ? { ...query, ...updates } : query
       ),
-      customQueries: (prev.customQueries || []).map((query: any) =>
+      customQueries: (prev.customQueries || []).map((query: CustomQuery) =>
         query.id === id
           ? {
               ...query,
@@ -527,7 +409,7 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
     setConfig(prev => ({
       ...prev,
       testQueries: (prev.testQueries || []).filter((query: DatabaseQuery) => query.id !== id),
-      customQueries: (prev.customQueries || []).filter((query: any) => query.id !== id),
+      customQueries: (prev.customQueries || []).filter((query: CustomQuery) => query.id !== id),
     }));
   }, []);
 
@@ -625,20 +507,35 @@ export const useDatabaseTestState = (): DatabaseTestHook => {
       : error
         ? TestStatus.FAILED
         : TestStatus.IDLE;
-  const isCompleted = status === TestStatus.COMPLETED;
-  const hasError = status === TestStatus.FAILED;
-  const currentQuery =
-    config.customQueries && config.customQueries.length > 0
-      ? config.customQueries[0]?.name || null
-      : null;
 
   return {
-    runTest: startTest,
-    loading: isRunning,
+    config,
+    updateConfig,
+    resetConfig,
+    isRunning,
+    progress,
+    currentStep,
+    testId,
+    result,
     error,
-    result: result ?? undefined,
     status,
+    startTest,
+    stopTest,
+    resetTest,
+    testConnection,
+    addCustomQuery,
+    updateCustomQuery,
+    removeCustomQuery,
+    loadPreset,
+    loadDatabasePreset,
+    validateConfig,
   };
+};
+
+const getErrorMessage = (error: unknown, fallback: string): string => {
+  if (error instanceof Error) return error.message || fallback;
+  if (typeof error === 'string') return error || fallback;
+  return fallback;
 };
 
 export default useDatabaseTestState;

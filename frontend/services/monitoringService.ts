@@ -1,4 +1,5 @@
 import Logger from '@/utils/logger';
+import { apiClient } from './api/client';
 
 /**
  * monitoringService.ts - 业务服务层
@@ -65,7 +66,7 @@ export interface MonitoringStats {
 }
 
 class MonitoringService {
-  private baseUrl = `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`;
+  private baseUrl = '/monitoring';
   private monitoringInterval: NodeJS.Timeout | null = null;
   private sites: MonitoringSite[] = [];
   private alertRules: AlertRule[] = [];
@@ -74,7 +75,7 @@ class MonitoringService {
   /**
    * 获取认证头
    */
-  private getAuthHeaders(): HeadersInit {
+  private getAuthHeaders(): Record<string, string> {
     const token = localStorage.getItem('auth_token');
     return {
       'Content-Type': 'application/json',
@@ -87,10 +88,10 @@ class MonitoringService {
    */
   async getSites(): Promise<MonitoringSite[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/monitoring/sites`, {
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/sites`, {
         headers: this.getAuthHeaders(),
       });
-      const data = await response.json();
+      const data = response.data as { success?: boolean; data?: MonitoringSite[] };
 
       if (data.success) {
         this.sites = data.data;
@@ -127,13 +128,11 @@ class MonitoringService {
     };
 
     try {
-      const response = await fetch(`${this.baseUrl}/monitoring/sites`, {
-        method: 'POST',
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/sites`, newSite, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSite),
       });
 
-      const data = await response.json();
+      const data = response.data as { success?: boolean; data?: MonitoringSite };
       if (data.success) {
         this.sites.push(data.data);
         return data.data;
@@ -159,11 +158,10 @@ class MonitoringService {
    */
   async removeSite(siteId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/monitoring/sites/${siteId}`, {
-        method: 'DELETE',
-      });
+      const response = await apiClient.getInstance().delete(`${this.baseUrl}/sites/${siteId}`);
+      const data = response.data as { success?: boolean };
 
-      if (response.ok) {
+      if (data.success) {
         this.sites = this.sites.filter(site => site.id !== siteId);
         return;
       }

@@ -5,6 +5,7 @@ import { UserRole, UserStatus } from '../../types/auth.types';
 import type { ChangePasswordData, CreateUserData, UpdateUserData } from '../../types/user';
 import { browserJwt } from '../../utils/browserJwt';
 import { canUseDatabase } from '../../utils/environment';
+import { apiClient } from '../api/client';
 import type {
   AuthServiceConfig,
   IAuthService,
@@ -309,23 +310,30 @@ export class AuthService implements IAuthService {
       } else {
         // 在浏览器环境中通过API验证
         try {
-          const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+          const response = await apiClient.getInstance().post(
+            '/api/auth/login',
+            {
               email: credentials.email,
               identifier: credentials.email, // 兼容完整版后端
               password: credentials.password,
-            }),
-          });
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
 
-          const result = await response.json();
+          const result = response.data as {
+            success?: boolean;
+            data?: { user?: User; token?: string };
+            error?: string;
+            message?: string;
+          };
 
-          if (response.ok && result.success) {
-            user = result.data.user;
-            serverToken = result.data.token;
+          if (result.success) {
+            user = result.data?.user || null;
+            serverToken = result.data?.token || null;
             isValidPassword = true;
             Logger.debug('✅ API登录成功', { username: user?.username });
           } else {
@@ -493,28 +501,35 @@ export class AuthService implements IAuthService {
 
     // 浏览器环境下通过 API 验证用户
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const response = await apiClient.getInstance().post(
+        '/api/auth/login',
+        {
           email: emailOrUsername,
           identifier: emailOrUsername, // 兼容完整版后端
           password,
-        }),
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      const result = await response.json();
+      const result = response.data as {
+        success?: boolean;
+        data?: { user?: User; token?: string };
+        error?: string;
+        message?: string;
+      };
 
-      if (!response.ok || !result.success) {
+      if (!result.success) {
         Logger.debug('❌ API登录失败:', result.error || result.message);
         return null;
       }
 
       // 从API响应中获取用户信息
-      const user = result.data.user;
-      const serverToken = result.data.token;
+      const user = result.data?.user;
+      const serverToken = result.data?.token;
 
       Logger.debug('✅ API验证成功:', user.username);
 
@@ -659,26 +674,37 @@ export class AuthService implements IAuthService {
       } else {
         // 浏览器环境通过 API 注册
 
-        const response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        const response = await apiClient.getInstance().post(
+          '/api/auth/register',
+          {
             username: data?.username,
             email: data?.email,
             fullName: data?.fullName,
             password: data?.password,
-          }),
-        });
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
-        const result = await response.json();
+        const result = response.data as {
+          success?: boolean;
+          data?: { user?: User; token?: string };
+          error?: string;
+          message?: string;
+        };
 
-        if (!response.ok || !result.success) {
+        if (!result.success) {
           throw new Error(result.error || result.message || '注册失败');
         }
 
         // 从API响应中获取用户信息和token
+        if (!result.data?.user || !result.data?.token) {
+          throw new Error('注册失败');
+        }
+
         newUser = result.data.user;
         const serverToken = result.data.token;
 
@@ -1199,21 +1225,30 @@ export class AuthService implements IAuthService {
     }
 
     try {
-      const response = await fetch(`${this.serviceConfig.apiBaseUrl}/auth/refresh`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const response = await apiClient.getInstance().post(
+        `${this.serviceConfig.apiBaseUrl}/auth/refresh`,
+        {
           refreshToken,
           deviceId: this.deviceId,
           fingerprint: this.deviceFingerprint,
-        }),
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      const result = await response.json();
+      const result = response.data as {
+        success?: boolean;
+        token?: string;
+        accessToken?: string;
+        refreshToken?: string;
+        user?: User;
+        message?: string;
+      };
 
-      if (!response.ok || !result.success) {
+      if (!result.success) {
         throw new Error(result.message || '刷新失败');
       }
 
@@ -1346,14 +1381,16 @@ export class AuthService implements IAuthService {
       const token = this.getAccessToken();
       if (!token) return [];
 
-      const response = await fetch(`${this.serviceConfig.apiBaseUrl}/auth/sessions`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await apiClient
+        .getInstance()
+        .get(`${this.serviceConfig.apiBaseUrl}/auth/sessions`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const result = await response.json();
-      return result.success ? result.sessions : [];
+      const result = response.data as { success?: boolean; sessions?: SessionInfo[] };
+      return result.success ? result.sessions || [] : [];
     } catch (error) {
       Logger.error('获取活跃会话失败:', error);
       return [];
@@ -1368,15 +1405,16 @@ export class AuthService implements IAuthService {
       const token = this.getAccessToken();
       if (!token) return false;
 
-      const response = await fetch(`${this.serviceConfig.apiBaseUrl}/auth/sessions/${sessionId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await apiClient
+        .getInstance()
+        .delete(`${this.serviceConfig.apiBaseUrl}/auth/sessions/${sessionId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const result = await response.json();
-      return result.success;
+      const result = response.data as { success?: boolean };
+      return !!result.success;
     } catch (error) {
       Logger.error('终止会话失败:', { error: String(error) });
       return false;
@@ -1391,18 +1429,18 @@ export class AuthService implements IAuthService {
       const token = this.getAccessToken();
       if (!token) return false;
 
-      const response = await fetch(
+      const response = await apiClient.getInstance().post(
         `${this.serviceConfig.apiBaseUrl}/auth/sessions/terminate-others`,
+        {},
         {
-          method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      const result = await response.json();
-      return result.success;
+      const result = response.data as { success?: boolean };
+      return !!result.success;
     } catch (error) {
       Logger.error('终止其他会话失败:', { error: String(error) });
       return false;

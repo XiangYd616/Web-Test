@@ -1,4 +1,6 @@
-import Logger from '@/utils/logger'; /**
+import Logger from '@/utils/logger';
+import { apiClient } from './api/client';
+/**
  * 历史管理服务
  * 提供测试历史的管理、查询、分析功能
  */
@@ -53,7 +55,7 @@ export interface HistoryAnalytics {
 }
 
 class HistoryManagementService {
-  private baseUrl = '/api/test/history';
+  private baseUrl = '/test/history';
   private cache = new Map<string, { data: HistoryAnalytics; timestamp: number }>();
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 
@@ -69,20 +71,24 @@ class HistoryManagementService {
     pagination: unknown;
   }> {
     try {
-      const params = new URLSearchParams();
+      const params: Record<string, string | number | boolean> = {
+        page: pagination?.page,
+        limit: pagination?.limit,
+      };
 
-      if (filter.testType) params.append('type', filter.testType);
-      if (filter.status) params.append('status', filter.status);
-      if (filter.search) params.append('search', filter.search);
-      if (filter.archived !== undefined) params.append('archived', filter.archived.toString());
+      if (filter.testType) params.type = filter.testType;
+      if (filter.status) params.status = filter.status;
+      if (filter.search) params.search = filter.search;
+      if (filter.archived !== undefined) params.archived = filter.archived;
 
-      params.append('page', pagination?.page.toString());
-      params.append('limit', pagination?.limit.toString());
+      const response = await apiClient.getInstance().get(this.baseUrl, { params });
+      const data = response.data as {
+        success?: boolean;
+        data?: { tests?: HistoryRecord[]; pagination?: { total?: number } };
+        message?: string;
+      };
 
-      const response = await fetch(`${this.baseUrl}?${params}`);
-      const data = await response.json();
-
-      if (!data.success) {
+      if (!data.success || !data.data) {
         throw new Error(data.message || '获取历史记录失败');
       }
 
@@ -102,10 +108,10 @@ class HistoryManagementService {
    */
   async getHistoryDetail(id: string): Promise<HistoryRecord> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/${id}`);
+      const data = response.data as { success?: boolean; data?: HistoryRecord; message?: string };
 
-      if (!data.success) {
+      if (!data.success || !data.data) {
         throw new Error(data.message || '获取历史记录详情失败');
       }
 
@@ -121,11 +127,8 @@ class HistoryManagementService {
    */
   async deleteHistory(id: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().delete(`${this.baseUrl}/${id}`);
+      const data = response.data as { success?: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '删除历史记录失败');
@@ -144,15 +147,16 @@ class HistoryManagementService {
    */
   async batchDeleteHistory(ids: string[]): Promise<void> {
     try {
-      const response = await fetch('/api/test/batch-delete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ids }),
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().post(
+        '/test/batch-delete',
+        { ids },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const data = response.data as { success?: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '批量删除历史记录失败');
@@ -171,11 +175,8 @@ class HistoryManagementService {
    */
   async archiveHistory(id: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}/archive`, {
-        method: 'POST',
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/${id}/archive`, {});
+      const data = response.data as { success?: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '归档历史记录失败');
@@ -194,15 +195,16 @@ class HistoryManagementService {
    */
   async updateNotes(id: string, notes: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}/notes`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ notes }),
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().put(
+        `${this.baseUrl}/${id}/notes`,
+        { notes },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const data = response.data as { success?: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '更新备注失败');
@@ -221,15 +223,16 @@ class HistoryManagementService {
    */
   async addTag(id: string, tag: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}/tags`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ tag }),
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().post(
+        `${this.baseUrl}/${id}/tags`,
+        { tag },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const data = response.data as { success?: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '添加标签失败');
@@ -248,11 +251,10 @@ class HistoryManagementService {
    */
   async removeTag(id: string, tag: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${id}/tags/${encodeURIComponent(tag)}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
+      const response = await apiClient
+        .getInstance()
+        .delete(`${this.baseUrl}/${id}/tags/${encodeURIComponent(tag)}`);
+      const data = response.data as { success?: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '移除标签失败');
@@ -282,15 +284,20 @@ class HistoryManagementService {
     }
 
     try {
-      const params = new URLSearchParams();
-      params.append('timeRange', timeRange.toString());
+      const params: Record<string, string | number> = {
+        timeRange,
+      };
 
-      if (filter.testType) params.append('testType', filter.testType);
+      if (filter.testType) params.testType = filter.testType;
 
-      const response = await fetch(`${this.baseUrl}/analytics?${params}`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/analytics`, { params });
+      const data = response.data as {
+        success?: boolean;
+        data?: HistoryAnalytics;
+        message?: string;
+      };
 
-      if (!data.success) {
+      if (!data.success || !data.data) {
         throw new Error(data.message || '获取分析数据失败');
       }
 
@@ -317,11 +324,12 @@ class HistoryManagementService {
     format: 'json' | 'csv' | 'excel' = 'json'
   ): Promise<string> {
     try {
-      const params = new URLSearchParams();
-      params.append('format', format);
+      const params: Record<string, string> = {
+        format,
+      };
 
-      if (filter.testType) params.append('testType', filter.testType);
-      if (filter.status) params.append('status', filter.status);
+      if (filter.testType) params.testType = filter.testType;
+      if (filter.status) params.status = filter.status;
 
       /**
       
@@ -332,16 +340,18 @@ class HistoryManagementService {
        * @returns {Promise<Object>} 返回结果
       
        */
-      const response = await fetch(`${this.baseUrl}/export?${params}`);
-
       if (format === 'json') {
-        const data = await response.json();
-        return data.success ? data.downloadUrl : '';
-      } else {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        return url;
+        const response = await apiClient.getInstance().get(`${this.baseUrl}/export`, { params });
+        const data = response.data as { success?: boolean; downloadUrl?: string };
+        return data.success ? data.downloadUrl || '' : '';
       }
+
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/export`, {
+        params,
+        responseType: 'blob',
+      });
+      const blob = response.data as Blob;
+      return URL.createObjectURL(blob);
     } catch (error) {
       Logger.error('导出历史记录失败:', error);
       throw error;
@@ -360,8 +370,8 @@ class HistoryManagementService {
    */
   async getPopularTags(): Promise<string[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/tags/popular`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/tags/popular`);
+      const data = response.data as { success?: boolean; data?: string[] };
 
       if (!data.success) {
         return [];

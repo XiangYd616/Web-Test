@@ -1,6 +1,5 @@
 ﻿import Logger from '@/utils/logger';
-
-﻿// 移除React Hook导入，这是一个服务文件，不应该使用React Hook
+import { apiClient } from './api/client'; // 移除React Hook导入，这是一个服务文件，不应该使用React Hook
 
 export interface SystemResources {
   cpu: {
@@ -43,7 +42,6 @@ export interface ResourceThresholds {
   };
 }
 
-
 /**
 
  * SystemResourceMonitor类 - 负责处理相关功能
@@ -63,25 +61,26 @@ class SystemResourceMonitor {
       cpu: {
         warning: 70,
         critical: 85,
-        ...thresholds?.cpu
+        ...thresholds?.cpu,
       },
       memory: {
         warning: 75,
         critical: 90,
-        ...thresholds?.memory
+        ...thresholds?.memory,
       },
       network: {
         maxConnections: 1000,
         maxBandwidth: 100,
-        ...thresholds?.network
-      }
+        ...thresholds?.network,
+      },
     };
   }
 
   /**
    * 开始监控系统资源
    */
-  startMonitoring(intervalMs: number = 30000): void { // 改为30秒间隔
+  startMonitoring(intervalMs: number = 30000): void {
+    // 改为30秒间隔
     if (this.isMonitoring) return;
 
     this.isMonitoring = true;
@@ -146,7 +145,6 @@ class SystemResourceMonitor {
           Logger.error('资源监控监听器错误:', { error: String(error) });
         }
       });
-
     } catch (error) {
       Logger.error('更新系统资源信息失败:', { error: String(error) });
     }
@@ -161,25 +159,25 @@ class SystemResourceMonitor {
       cpu: {
         usage: Math.random() * 30 + 10, // 10-40% CPU使用率
         cores: 8,
-        loadAverage: [0.5, 0.7, 0.9]
+        loadAverage: [0.5, 0.7, 0.9],
       },
       memory: {
         used: Math.random() * 8 * 1024 * 1024 * 1024 + 4 * 1024 * 1024 * 1024, // 4-12GB
         total: 16 * 1024 * 1024 * 1024, // 16GB
         usage: 0, // 将在计算中设置
-        available: 0 // 将在计算中设置
+        available: 0, // 将在计算中设置
       },
       disk: {
         usage: Math.random() * 50 + 20, // 20-70% 磁盘使用率
-        available: Math.random() * 200 * 1024 * 1024 * 1024 + 100 * 1024 * 1024 * 1024 // 100-300GB可用
+        available: Math.random() * 200 * 1024 * 1024 * 1024 + 100 * 1024 * 1024 * 1024, // 100-300GB可用
       },
       network: {
         activeConnections: Math.floor(Math.random() * 100) + 10,
         bandwidth: {
           upload: Math.random() * 100,
-          download: Math.random() * 1000
-        }
-      }
+          download: Math.random() * 1000,
+        },
+      },
     };
   }
 
@@ -188,20 +186,10 @@ class SystemResourceMonitor {
    */
   private async fetchResourcesFromAPI(): Promise<SystemResources> {
     try {
-      const response = await fetch(`http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api/system/resources`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.resources;
-
-    } catch (error) {
+      const response = await apiClient.getInstance().get('/system/resources');
+      const data = response.data as { resources?: SystemResources };
+      return data.resources || this.getMockResourcesV2();
+    } catch {
       // 如果API不可用，返回模拟数据
       // Logger.warn('无法获取真实资源信息，使用模拟数据:', { error: String(error) }); // 静默处理
       return this.getMockResourcesV2();
@@ -219,26 +207,26 @@ class SystemResourceMonitor {
       cpu: {
         usage: Math.max(0, Math.min(100, baseUsage + Math.random() * 20)),
         cores: 8,
-        loadAverage: [1.2, 1.5, 1.8]
+        loadAverage: [1.2, 1.5, 1.8],
       },
       memory: {
         used: 4096 + Math.random() * 2048,
         total: 16384,
         usage: Math.max(0, Math.min(100, baseUsage + Math.random() * 15)),
-        available: 12288 - Math.random() * 2048
+        available: 12288 - Math.random() * 2048,
       },
       network: {
         activeConnections: Math.floor(50 + Math.random() * 200),
         bandwidth: {
           upload: Math.random() * 10,
-          download: Math.random() * 50
-        }
+          download: Math.random() * 50,
+        },
       },
       disk: {
         usage: 45 + Math.random() * 10,
-        available: 500 + Math.random() * 200
+        available: 500 + Math.random() * 200,
       },
-      timestamp: now
+      timestamp: now,
     };
   }
 
@@ -361,19 +349,25 @@ class SystemResourceMonitor {
       return {
         status: 'healthy',
         recommendations: ['系统资源监控未启动'],
-        metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0 }
+        metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0 },
       };
     }
 
     // 生成建议
     if (resources.cpu.usage > this.thresholds.cpu.warning) {
-      recommendations.push(`CPU使用率较高 (${resources.cpu.usage.toFixed(1)}%)，建议减少并发测试数量`);
+      recommendations.push(
+        `CPU使用率较高 (${resources.cpu.usage.toFixed(1)}%)，建议减少并发测试数量`
+      );
     }
     if (resources.memory.usage > this.thresholds.memory.warning) {
-      recommendations.push(`内存使用率较高 (${resources.memory.usage.toFixed(1)}%)，建议清理内存或增加内存`);
+      recommendations.push(
+        `内存使用率较高 (${resources.memory.usage.toFixed(1)}%)，建议清理内存或增加内存`
+      );
     }
     if (resources.network.activeConnections > this.thresholds.network.maxConnections * 0.8) {
-      recommendations.push(`网络连接数较多 (${resources.network.activeConnections})，建议控制并发连接`);
+      recommendations.push(
+        `网络连接数较多 (${resources.network.activeConnections})，建议控制并发连接`
+      );
     }
 
     return {
@@ -382,18 +376,17 @@ class SystemResourceMonitor {
       metrics: {
         cpuUsage: resources.cpu.usage,
         memoryUsage: resources.memory.usage,
-        networkLoad: (resources.network.activeConnections / this.thresholds.network.maxConnections) * 100,
-        diskUsage: resources.disk.usage
-      }
+        networkLoad:
+          (resources.network.activeConnections / this.thresholds.network.maxConnections) * 100,
+        diskUsage: resources.disk.usage,
+      },
     };
   }
 }
 
 // 创建全局实例 - 静默启动监控
-export const _systemResourceMonitor = (() => {
+export const systemResourceMonitor = (() => {
   // 使用普通变量而不是React Hook
-  let error: string | null = null;
-
   try {
     const instance = new SystemResourceMonitor();
 
@@ -406,23 +399,22 @@ export const _systemResourceMonitor = (() => {
 
     return instance;
   } catch (err) {
-    error = err instanceof Error ? err.message : String(err);
     Logger.warn('⚠️ 系统资源监控器初始化失败:', { error: String(err) });
 
     // 返回一个安全的默认实现
     return {
       getCurrentStatus: () => 'healthy' as const,
-      canStartNewTest: (testType?: 'stress' | 'regular') => true, // 默认实现总是允许
+      canStartNewTest: (_testType?: 'stress' | 'regular') => true, // 默认实现总是允许
       getRecommendedMaxConcurrentTests: () => 3,
-      getCurrentResources: (): any => null,
-      addListener: () => () => { },
-      startMonitoring: () => { },
-      stopMonitoring: () => { },
+      getCurrentResources: (): SystemResources | null => null,
+      addListener: () => () => {},
+      startMonitoring: () => {},
+      stopMonitoring: () => {},
       getResourceStats: () => ({
         status: 'healthy' as const,
-        recommendations: [] as any[],
-        metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0 }
-      })
+        recommendations: [],
+        metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0 },
+      }),
     } as unknown as SystemResourceMonitor;
   }
 })();

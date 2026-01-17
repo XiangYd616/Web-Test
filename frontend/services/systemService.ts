@@ -2,31 +2,30 @@
 
 import Logger from '@/utils/logger';
 import type { MaintenanceInfo, SystemConfig, SystemLog } from '../types/system';
+import { apiClient } from './api/client';
 
 // 临时类型定义，等待完善
-type BackupInfo = any;
-type LogFilter = any;
-type SystemHealth = any;
-type SystemStats = any;
-type User = any;
-type UserFilter = any;
+type BackupInfo = Record<string, unknown>;
+type LogFilter = Record<string, string>;
+type SystemHealth = Record<string, unknown>;
+type SystemStats = Record<string, unknown>;
+type User = Record<string, unknown>;
+type UserFilter = Record<string, string>;
 
 export class SystemService {
   private static readonly BASE_URL = '/api/system';
-  private static cache = new Map<string, any>();
+  private static cache = new Map<string, { data: unknown; timestamp: number; timeout: number }>();
   private static cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 
   // 获取系统统计信息
   static async getSystemStats(): Promise<SystemStats> {
     const cacheKey = 'system-stats';
     const cached = this.getFromCache(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as SystemStats;
 
     try {
-      const response = await fetch(`${this.BASE_URL}/stats`);
-      if (!response.ok) throw new Error('Failed to fetch system stats');
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.BASE_URL}/stats`);
+      const data = response.data as SystemStats;
       this.setCache(cacheKey, data);
       return data;
     } catch (error) {
@@ -43,10 +42,8 @@ export class SystemService {
     if (cached) return cached as SystemConfig;
 
     try {
-      const response = await fetch(`${this.BASE_URL}/config`);
-      if (!response.ok) throw new Error('Failed to fetch system config');
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.BASE_URL}/config`);
+      const data = response.data as SystemConfig;
       this.setCache(cacheKey, data);
       return data;
     } catch (error) {
@@ -58,15 +55,7 @@ export class SystemService {
   // 更新系统配置
   static async updateSystemConfig(config: Partial<SystemConfig>): Promise<void> {
     try {
-      const response = await fetch(`${this.BASE_URL}/config`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(config),
-      });
-
-      if (!response.ok) throw new Error('Failed to update system config');
+      await apiClient.getInstance().put(`${this.BASE_URL}/config`, config);
 
       // 清除缓存
       this.clearCache('system-config');
@@ -88,10 +77,8 @@ export class SystemService {
       if (filter?.status) params.append('status', filter?.status);
       if (filter?.search) params.append('search', filter?.search);
 
-      const response = await fetch(`${this.BASE_URL}/users?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch users');
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.BASE_URL}/users?${params}`);
+      const data = response.data as User[];
       this.setCache(cacheKey, data);
       return data;
     } catch (error) {
@@ -103,17 +90,8 @@ export class SystemService {
   // 创建用户
   static async createUser(userData: Partial<User>): Promise<User> {
     try {
-      const response = await fetch(`${this.BASE_URL}/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) throw new Error('Failed to create user');
-
-      const user = await response.json();
+      const response = await apiClient.getInstance().post(`${this.BASE_URL}/users`, userData);
+      const user = response.data as User;
       this.clearCachePattern('users-');
       return user;
     } catch (error) {
@@ -125,17 +103,10 @@ export class SystemService {
   // 更新用户
   static async updateUser(userId: string, userData: Partial<User>): Promise<User> {
     try {
-      const response = await fetch(`${this.BASE_URL}/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) throw new Error('Failed to update user');
-
-      const user = await response.json();
+      const response = await apiClient
+        .getInstance()
+        .put(`${this.BASE_URL}/users/${userId}`, userData);
+      const user = response.data as User;
       this.clearCachePattern('users-');
       return user;
     } catch (error) {
@@ -147,11 +118,7 @@ export class SystemService {
   // 删除用户
   static async deleteUser(userId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.BASE_URL}/users/${userId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete user');
+      await apiClient.getInstance().delete(`${this.BASE_URL}/users/${userId}`);
 
       this.clearCachePattern('users-');
     } catch (error) {
@@ -173,10 +140,8 @@ export class SystemService {
       if (filter?.startDate) params.append('startDate', filter?.startDate);
       if (filter?.endDate) params.append('endDate', filter?.endDate);
 
-      const response = await fetch(`${this.BASE_URL}/logs?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch logs');
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.BASE_URL}/logs?${params}`);
+      const data = response.data as SystemLog[];
       this.setCache(cacheKey, data, 60000); // 1分钟缓存
       return data;
     } catch (error) {
@@ -188,10 +153,8 @@ export class SystemService {
   // 获取系统健康状态
   static async getSystemHealth(): Promise<SystemHealth> {
     try {
-      const response = await fetch(`${this.BASE_URL}/health`);
-      if (!response.ok) throw new Error('Failed to fetch system health');
-
-      return await response.json();
+      const response = await apiClient.getInstance().get(`${this.BASE_URL}/health`);
+      return response.data as SystemHealth;
     } catch (error) {
       Logger.error('Failed to fetch system health:', error);
       return this.getMockSystemHealth();
@@ -201,13 +164,8 @@ export class SystemService {
   // 创建备份
   static async createBackup(): Promise<BackupInfo> {
     try {
-      const response = await fetch(`${this.BASE_URL}/backup`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) throw new Error('Failed to create backup');
-
-      return await response.json();
+      const response = await apiClient.getInstance().post(`${this.BASE_URL}/backup`);
+      return response.data as BackupInfo;
     } catch (error) {
       Logger.error('Failed to create backup:', error);
       throw error;
@@ -217,10 +175,8 @@ export class SystemService {
   // 获取备份列表
   static async getBackups(): Promise<BackupInfo[]> {
     try {
-      const response = await fetch(`${this.BASE_URL}/backups`);
-      if (!response.ok) throw new Error('Failed to fetch backups');
-
-      return await response.json();
+      const response = await apiClient.getInstance().get(`${this.BASE_URL}/backups`);
+      return response.data as BackupInfo[];
     } catch (error) {
       Logger.error('Failed to fetch backups:', error);
       return this.getMockBackups();
@@ -230,11 +186,7 @@ export class SystemService {
   // 恢复备份
   static async restoreBackup(backupId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.BASE_URL}/backup/${backupId}/restore`, {
-        method: 'POST',
-      });
-
-      if (!response.ok) throw new Error('Failed to restore backup');
+      await apiClient.getInstance().post(`${this.BASE_URL}/backup/${backupId}/restore`);
     } catch (error) {
       Logger.error('Failed to restore backup:', error);
       throw error;
@@ -244,10 +196,8 @@ export class SystemService {
   // 获取维护信息
   static async getMaintenanceInfo(): Promise<MaintenanceInfo> {
     try {
-      const response = await fetch(`${this.BASE_URL}/maintenance`);
-      if (!response.ok) throw new Error('Failed to fetch maintenance info');
-
-      return await response.json();
+      const response = await apiClient.getInstance().get(`${this.BASE_URL}/maintenance`);
+      return response.data as MaintenanceInfo;
     } catch (error) {
       Logger.error('Failed to fetch maintenance info:', error);
       return this.getMockMaintenanceInfo();
@@ -257,15 +207,7 @@ export class SystemService {
   // 设置维护模式
   static async setMaintenanceMode(enabled: boolean, message?: string): Promise<void> {
     try {
-      const response = await fetch(`${this.BASE_URL}/maintenance`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ enabled, message }),
-      });
-
-      if (!response.ok) throw new Error('Failed to set maintenance mode');
+      await apiClient.getInstance().put(`${this.BASE_URL}/maintenance`, { enabled, message });
     } catch (error) {
       Logger.error('Failed to set maintenance mode:', error);
       throw error;
@@ -629,4 +571,3 @@ export class SystemService {
 
 // 创建单例实例
 export const systemService = new SystemService();
-export const _systemService = systemService; // Alias for backward compatibility

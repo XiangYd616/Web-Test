@@ -1,15 +1,15 @@
 ﻿/**
  * reportService.ts - 业务服务层
- * 
+ *
  * 文件路径: frontend\services\reporting\reportService.ts
  * 创建时间: 2025-09-25
  */
 
 import Logger from '@/utils/logger';
 import { format } from 'date-fns';
-import { dataAnalysisService, AnalyticsData } from '../dataAnalysisService';
+import { apiClient } from '../api/client';
+import { AnalyticsData, dataAnalysisService } from '../dataAnalysisService';
 import { monitoringService, MonitoringStats } from '../monitoringService';
-import { createElement } from 'react';
 
 export interface Report {
   id: string;
@@ -49,11 +49,11 @@ export interface ReportSection {
   title: string;
   type: 'summary' | 'chart' | 'table' | 'text' | 'recommendations';
   required: boolean;
-  config?: any;
+  config?: Record<string, unknown>;
 }
 
 class ReportService {
-  private baseUrl = `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`;
+  private baseUrl = '/reports';
   private reports: Report[] = [];
 
   /**
@@ -72,8 +72,8 @@ class ReportService {
           { id: 'core_web_vitals', title: 'Core Web Vitals', type: 'chart', required: true },
           { id: 'url_analysis', title: 'URL性能分析', type: 'table', required: true },
           { id: 'recommendations', title: '优化建议', type: 'recommendations', required: true },
-          { id: 'raw_data', title: '原始数据', type: 'table', required: false }
-        ]
+          { id: 'raw_data', title: '原始数据', type: 'table', required: false },
+        ],
       },
       {
         id: 'security',
@@ -85,8 +85,8 @@ class ReportService {
           { id: 'vulnerability_scan', title: '漏洞扫描', type: 'table', required: true },
           { id: 'ssl_analysis', title: 'SSL/TLS分析', type: 'chart', required: true },
           { id: 'security_headers', title: '安全头检查', type: 'table', required: true },
-          { id: 'recommendations', title: '安全建议', type: 'recommendations', required: true }
-        ]
+          { id: 'recommendations', title: '安全建议', type: 'recommendations', required: true },
+        ],
       },
       {
         id: 'comprehensive',
@@ -101,9 +101,9 @@ class ReportService {
           { id: 'monitoring_data', title: '监控数据', type: 'chart', required: false },
           { id: 'detailed_results', title: '详细结果', type: 'table', required: true },
           { id: 'recommendations', title: '综合建议', type: 'recommendations', required: true },
-          { id: 'appendix', title: '附录', type: 'table', required: false }
-        ]
-      }
+          { id: 'appendix', title: '附录', type: 'table', required: false },
+        ],
+      },
     ];
   }
 
@@ -126,7 +126,7 @@ class ReportService {
       testCount: 0,
       dateRange: `最近${config?.dateRange}天`,
       template,
-      config
+      config,
     };
 
     this.reports.push(report);
@@ -143,10 +143,10 @@ class ReportService {
    */
   async getReports(): Promise<Report[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/reports`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(this.baseUrl);
+      const data = response.data as { success: boolean; data?: Report[] };
 
-      if (data.success) {
+      if (data.success && data.data) {
         this.reports = data.data;
         return this.reports;
       }
@@ -162,11 +162,10 @@ class ReportService {
    */
   async deleteReport(reportId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/reports/${reportId}`, {
-        method: 'DELETE'
-      });
+      const response = await apiClient.getInstance().delete(`${this.baseUrl}/${reportId}`);
+      const data = response.data as { success?: boolean };
 
-      if (response.ok) {
+      if (data?.success !== false) {
         this.reports = this.reports.filter(report => report.id !== reportId);
         return;
       }
@@ -193,12 +192,12 @@ class ReportService {
        * @param {Object} params - 参数对象
        * @returns {Promise<Object>} 返回结果
        */
-      const response = await fetch(`${this.baseUrl}/reports/${reportId}/download`);
-      if (response.ok) {
-        const blob = await response.blob();
-        this.downloadBlob(blob, `${report.name}.${report.type}`);
-        return;
-      }
+      const response = await apiClient
+        .getInstance()
+        .get(`${this.baseUrl}/${reportId}/download`, { responseType: 'blob' });
+      const blob = response.data as Blob;
+      this.downloadBlob(blob, `${report.name}.${report.type}`);
+      return;
     } catch (error) {
       Logger.warn('Backend not available, generating local download:', { error: String(error) });
     }
@@ -218,7 +217,6 @@ class ReportService {
 
       // 获取数据
       const analyticsData = await dataAnalysisService.getAnalyticsData(report.config.dateRange);
-      const monitoringStats = monitoringService.getMonitoringStats();
 
       // 生成报告内容
       const content = await this.generateReportContent(report);
@@ -234,7 +232,7 @@ class ReportService {
         size,
         testCount: analyticsData.totalTests,
         downloadUrl: `#download-${report.id}`,
-        shareUrl: `#share-${report.id}`
+        shareUrl: `#share-${report.id}`,
       };
 
       const reportIndex = this.reports.findIndex(r => r.id === report.id);
@@ -242,7 +240,6 @@ class ReportService {
         this.reports[reportIndex] = updatedReport;
         this.saveLocalReports();
       }
-
     } catch (error) {
       Logger.error('Error generating report:', { error: String(error) });
 
@@ -252,7 +249,7 @@ class ReportService {
         this.reports[reportIndex] = {
           ...this.reports[reportIndex],
           status: 'failed',
-          completedAt: new Date().toISOString()
+          completedAt: new Date().toISOString(),
         };
         this.saveLocalReports();
       }
@@ -286,7 +283,12 @@ class ReportService {
   /**
    * 私有方法：生成HTML报告
    */
-  private generateHTMLReport(report: Report, analyticsData: AnalyticsData, monitoringStats: MonitoringStats, template: ReportTemplate): string {
+  private generateHTMLReport(
+    report: Report,
+    analyticsData: AnalyticsData,
+    monitoringStats: MonitoringStats,
+    _template: ReportTemplate
+  ): string {
     const currentDate = format(new Date(), 'yyyy年MM月dd日');
 
     return `
@@ -358,13 +360,17 @@ class ReportService {
                     </tr>
                 </thead>
                 <tbody>
-                    ${Object.entries(analyticsData.testsByType).map(([type, count]) => `
+                    ${Object.entries(analyticsData.testsByType)
+                      .map(
+                        ([type, count]) => `
                         <tr>
                             <td>${type}</td>
                             <td>${count}</td>
-                            <td>${((count as number / analyticsData.totalTests) * 100).toFixed(1)}%</td>
+                            <td>${(((count as number) / analyticsData.totalTests) * 100).toFixed(1)}%</td>
                         </tr>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                 </tbody>
             </table>
         </div>
@@ -380,18 +386,25 @@ class ReportService {
                     </tr>
                 </thead>
                 <tbody>
-                    ${analyticsData.topUrls.slice(0, 10).map((url: any) => `
+                    ${analyticsData.topUrls
+                      .slice(0, 10)
+                      .map(
+                        (url: { url: string; count: number; avgScore: number }) => `
                         <tr>
                             <td>${url.url}</td>
                             <td>${url.count}</td>
                             <td>${url.avgScore.toFixed(1)}</td>
                         </tr>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                 </tbody>
             </table>
         </div>
 
-        ${report.config.includeRecommendations ? `
+        ${
+          report.config.includeRecommendations
+            ? `
         <div class="section">
             <h2 class="section-title">优化建议</h2>
             <div class="recommendations">
@@ -409,7 +422,9 @@ class ReportService {
                 </div>
             </div>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <div class="footer">
             <p>本报告由Test Web App自动生成 | 生成时间: ${new Date().toLocaleString('zh-CN')}</p>
@@ -422,16 +437,26 @@ class ReportService {
   /**
    * 私有方法：生成PDF报告（模拟）
    */
-  private generatePDFReport(report: Report, analyticsData: AnalyticsData, monitoringStats: MonitoringStats, template: ReportTemplate): string {
+  private generatePDFReport(
+    report: Report,
+    analyticsData: AnalyticsData,
+    monitoringStats: MonitoringStats,
+    _template: ReportTemplate
+  ): string {
     // 在真实环境中，这里会使用PDF生成库如puppeteer或jsPDF
     // 现在返回HTML内容，实际应用中会转换为PDF
-    return this.generateHTMLReport(report, analyticsData, monitoringStats, template);
+    return this.generateHTMLReport(report, analyticsData, monitoringStats, _template);
   }
 
   /**
    * 私有方法：生成Excel报告（模拟）
    */
-  private generateExcelReport(report: Report, analyticsData: AnalyticsData, monitoringStats: MonitoringStats, template: ReportTemplate): string {
+  private generateExcelReport(
+    report: Report,
+    analyticsData: AnalyticsData,
+    monitoringStats: MonitoringStats,
+    _template: ReportTemplate
+  ): string {
     // 在真实环境中，这里会使用Excel生成库如SheetJS
     // 现在返回CSV格式的数据
     let csv = '报告名称,生成时间,数据范围\n';
@@ -444,7 +469,7 @@ class ReportService {
     csv += `在线站点,${monitoringStats.onlineSites}/${monitoringStats.totalSites}\n\n`;
 
     csv += 'URL,测试次数,平均分数\n';
-    analyticsData.topUrls.forEach((url: any) => {
+    analyticsData.topUrls.forEach((url: { url: string; count: number; avgScore: number }) => {
       csv += `${url.url},${url.count},${url.avgScore.toFixed(1)}\n`;
     });
 
@@ -466,8 +491,8 @@ class ReportService {
    */
   private downloadContent(content: string, report: Report): void {
     const blob = new Blob([content], {
-      type: report.type === 'html' ? 'text/html' :
-        report.type === 'excel' ? 'text/csv' : 'text/plain'
+      type:
+        report.type === 'html' ? 'text/html' : report.type === 'excel' ? 'text/csv' : 'text/plain',
     });
     this.downloadBlob(blob, `${report.name}.${report.type === 'excel' ? 'csv' : report.type}`);
   }

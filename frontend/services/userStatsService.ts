@@ -1,6 +1,5 @@
 ﻿import Logger from '@/utils/logger';
-
-﻿// 用户统计数据服务
+import { apiClient } from './api/client'; // 用户统计数据服务
 
 export interface UserActivityStats {
   totalTests: number;
@@ -24,7 +23,7 @@ export interface ActivityItem {
   title: string;
   description: string;
   timestamp: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 class UserStatsService {
@@ -64,7 +63,7 @@ class UserStatsService {
           mostUsedTestType: '压力测试',
           testsByType: {},
           recentActivity: [],
-          ...stats
+          ...stats,
         };
       } catch (error) {
         Logger.error('Failed to parse user stats:', { error: String(error) });
@@ -78,28 +77,8 @@ class UserStatsService {
   // 从API获取统计数据
   private async fetchStatsFromAPI(userId: string): Promise<UserActivityStats | null> {
     try {
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No auth token available');
-      }
-
-      const response = await fetch(`/api/user/stats/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      if (result.success && result.data) {
-        return this.normalizeStatsData(result.data);
-      }
-
-      return null;
+      const data = await apiClient.get<Record<string, unknown>>(`/user/stats/${userId}`);
+      return this.normalizeStatsData(data);
     } catch (error) {
       Logger.error('Failed to fetch user stats from API:', { error: String(error) });
       return null;
@@ -107,20 +86,26 @@ class UserStatsService {
   }
 
   // 标准化统计数据格式
-  private normalizeStatsData(apiData: any): UserActivityStats {
+  private normalizeStatsData(apiData: Record<string, unknown> = {}): UserActivityStats {
+    const data = apiData || {};
     return {
-      totalTests: apiData.total_tests || apiData.totalTests || 0,
-      testsToday: apiData.tests_today || apiData.testsToday || 0,
-      testsThisWeek: apiData.tests_this_week || apiData.testsThisWeek || 0,
-      testsThisMonth: apiData.tests_this_month || apiData.testsThisMonth || 0,
-      favoriteTests: apiData.favorite_tests || apiData.favoriteTests || 0,
-      successfulTests: apiData.successful_tests || apiData.successfulTests || 0,
-      failedTests: apiData.failed_tests || apiData.failedTests || 0,
-      averageScore: apiData.average_score || apiData.averageScore || 0,
-      totalTestTime: apiData.total_test_time || apiData.totalTestTime || 0,
-      mostUsedTestType: apiData.most_used_test_type || apiData.mostUsedTestType || '压力测试',
-      testsByType: apiData.tests_by_type || apiData.testsByType || {},
-      recentActivity: apiData.recent_activity || apiData.recentActivity || []
+      totalTests: (data.total_tests as number) || (data.totalTests as number) || 0,
+      testsToday: (data.tests_today as number) || (data.testsToday as number) || 0,
+      testsThisWeek: (data.tests_this_week as number) || (data.testsThisWeek as number) || 0,
+      testsThisMonth: (data.tests_this_month as number) || (data.testsThisMonth as number) || 0,
+      favoriteTests: (data.favorite_tests as number) || (data.favoriteTests as number) || 0,
+      successfulTests: (data.successful_tests as number) || (data.successfulTests as number) || 0,
+      failedTests: (data.failed_tests as number) || (data.failedTests as number) || 0,
+      averageScore: (data.average_score as number) || (data.averageScore as number) || 0,
+      totalTestTime: (data.total_test_time as number) || (data.totalTestTime as number) || 0,
+      mostUsedTestType:
+        (data.most_used_test_type as string) || (data.mostUsedTestType as string) || '压力测试',
+      testsByType:
+        (data.tests_by_type as Record<string, number>) ||
+        (data.testsByType as Record<string, number>) ||
+        {},
+      recentActivity:
+        (data.recent_activity as ActivityItem[]) || (data.recentActivity as ActivityItem[]) || [],
     };
   }
 
@@ -138,7 +123,7 @@ class UserStatsService {
       totalTestTime: 0,
       mostUsedTestType: '暂无',
       testsByType: {},
-      recentActivity: []
+      recentActivity: [],
     };
   }
 
@@ -155,7 +140,13 @@ class UserStatsService {
   }
 
   // 记录测试完成
-  async recordTestCompletion(userId: string, testType: string, success: boolean, score?: number, duration?: number): Promise<void> {
+  async recordTestCompletion(
+    userId: string,
+    testType: string,
+    success: boolean,
+    score?: number,
+    duration?: number
+  ): Promise<void> {
     const stats = await this.getUserStats(userId);
     const now = new Date();
     const today = now.toDateString();
@@ -205,18 +196,20 @@ class UserStatsService {
       id: `test_${Date.now()}`,
       type: success ? 'test_completed' : 'test_failed',
       title: `${testType}${success ? '完成' : '失败'}`,
-      description: success
-        ? `成功完成${testType}，评分：${score || 'N/A'}`
-        : `${testType}执行失败`,
+      description: success ? `成功完成${testType}，评分：${score || 'N/A'}` : `${testType}执行失败`,
       timestamp: now.toISOString(),
-      metadata: { testType, success, score, duration }
+      metadata: { testType, success, score, duration },
     });
 
     this.updateUserStats(userId, stats);
   }
 
   // 记录收藏操作
-  async recordBookmarkAction(userId: string, action: 'add' | 'remove', itemTitle: string): Promise<void> {
+  async recordBookmarkAction(
+    userId: string,
+    action: 'add' | 'remove',
+    itemTitle: string
+  ): Promise<void> {
     const stats = await this.getUserStats(userId);
 
     if (action === 'add') {
@@ -227,7 +220,7 @@ class UserStatsService {
         title: '添加收藏',
         description: `收藏了 ${itemTitle}`,
         timestamp: new Date().toISOString(),
-        metadata: { action, itemTitle }
+        metadata: { action, itemTitle },
       });
     } else {
       stats.favoriteTests = Math.max(0, stats.favoriteTests - 1);
@@ -271,12 +264,12 @@ class UserStatsService {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    const weekActivities = activities.filter(activity =>
-      new Date(activity.timestamp) >= oneWeekAgo
+    const weekActivities = activities.filter(
+      activity => new Date(activity.timestamp) >= oneWeekAgo
     );
 
-    stats.testsThisWeek = weekActivities.filter(activity =>
-      activity.type === 'test_completed' || activity.type === 'test_failed'
+    stats.testsThisWeek = weekActivities.filter(
+      activity => activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
     this.updateUserStats(userId, stats);
@@ -289,12 +282,12 @@ class UserStatsService {
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-    const monthActivities = activities.filter(activity =>
-      new Date(activity.timestamp) >= oneMonthAgo
+    const monthActivities = activities.filter(
+      activity => new Date(activity.timestamp) >= oneMonthAgo
     );
 
-    stats.testsThisMonth = monthActivities.filter(activity =>
-      activity.type === 'test_completed' || activity.type === 'test_failed'
+    stats.testsThisMonth = monthActivities.filter(
+      activity => activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
     this.updateUserStats(userId, stats);
@@ -311,11 +304,15 @@ class UserStatsService {
     const stats = await this.getUserStats(userId);
     const activities = this.getRecentActivity(userId);
 
-    return JSON.stringify({
-      stats,
-      activities,
-      exportDate: new Date().toISOString()
-    }, null, 2);
+    return JSON.stringify(
+      {
+        stats,
+        activities,
+        exportDate: new Date().toISOString(),
+      },
+      null,
+      2
+    );
   }
 
   // 导入统计数据

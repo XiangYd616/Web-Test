@@ -13,7 +13,7 @@ import axios, { AxiosInstance } from 'axios';
 
 export interface TestRequest {
   engineId: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   options?: {
     timeout?: number;
     priority?: 'low' | 'medium' | 'high';
@@ -36,7 +36,7 @@ export interface TestResult {
   engineId: string;
   status: 'success' | 'failure' | 'partial';
   score?: number;
-  results: Record<string, any>;
+  results: Record<string, unknown>;
   errors?: string[];
   warnings?: string[];
   recommendations?: string[];
@@ -119,7 +119,7 @@ export class TestApiClient {
   /**
    * 获取测试引擎配置模板
    */
-  async getEngineConfig(engineId: string): Promise<Record<string, any>> {
+  async getEngineConfig(engineId: string): Promise<Record<string, unknown>> {
     return this.api.get(`/test/${engineId}/config`);
   }
 
@@ -128,7 +128,7 @@ export class TestApiClient {
    */
   async validateConfig(
     engineId: string,
-    config: Record<string, any>
+    config: Record<string, unknown>
   ): Promise<{
     valid: boolean;
     errors?: string[];
@@ -154,10 +154,10 @@ export class TestApiClient {
 
     try {
       // 发送测试请求到后端
-      const response: any = await this.api.post(`/test/${engineId}/run`, {
+      const response = (await this.api.post(`/test/${engineId}/run`, {
         config,
         options,
-      });
+      })) as unknown as TestResult;
 
       // 如果是异步测试，建立WebSocket连接接收进度
       if (options?.async && response?.testId) {
@@ -175,9 +175,9 @@ export class TestApiClient {
    */
   async runBatchTests(requests: TestRequest[]): Promise<TestResult[]> {
     try {
-      const response: any = await this.api.post('/test/batch', {
+      const response = (await this.api.post('/test/batch', {
         tests: requests,
-      });
+      })) as unknown as { results?: TestResult[] };
       return response?.results || [];
     } catch (error) {
       throw new Error(`批量测试执行失败: ${error instanceof Error ? error.message : '未知错误'}`);
@@ -301,7 +301,7 @@ export class TestApiClient {
 export const testApiClient = new TestApiClient();
 
 // 导出便捷函数
-export const runTest = (engineId: string, config: Record<string, any>) => {
+export const runTest = (engineId: string, config: Record<string, unknown>) => {
   return testApiClient.runTest({ engineId, config });
 };
 
@@ -309,7 +309,7 @@ export const getTestEngines = () => {
   return testApiClient.getAvailableEngines();
 };
 
-export const validateTestConfig = (engineId: string, config: Record<string, any>) => {
+export const validateTestConfig = (engineId: string, config: Record<string, unknown>) => {
   return testApiClient.validateConfig(engineId, config);
 };
 

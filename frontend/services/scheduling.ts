@@ -1,6 +1,5 @@
 import Logger from '@/utils/logger';
-
-﻿/**
+import { apiClient } from './api/client'; /**
  * 调度管理服务
  * 提供测试任务调度、定时执行、批量管理功能
  */
@@ -63,7 +62,7 @@ export interface ScheduleFilter {
 
 class SchedulingService {
   private baseUrl = '/api/scheduling';
-  private cache = new Map<string, any>();
+  private cache = new Map<string, { data: unknown; timestamp: number }>();
   private cacheTimeout = 2 * 60 * 1000; // 2分钟缓存
 
   /**
@@ -79,26 +78,30 @@ class SchedulingService {
   }> {
     try {
       const params = new URLSearchParams();
-      
+
       if (filter.status) params.append('status', filter.status);
       if (filter.testType) params.append('testType', filter.testType);
       if (filter.search) params.append('search', filter.search);
       if (filter.createdBy) params.append('createdBy', filter.createdBy);
-      
+
       params.append('page', pagination.page.toString());
       params.append('limit', pagination.limit.toString());
 
-      const response = await fetch(`${this.baseUrl}/tasks?${params}`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/tasks?${params}`);
+      const data = response.data as {
+        success: boolean;
+        data?: Record<string, unknown>;
+        message?: string;
+      };
 
       if (!data.success) {
         throw new Error(data.message || '获取调度任务失败');
       }
 
       return {
-        tasks: data.data.tasks || [],
-        total: data.data.total || 0,
-        pagination: data.data.pagination
+        tasks: (data.data?.tasks as ScheduledTask[]) || [],
+        total: (data.data?.total as number) || 0,
+        pagination: data.data?.pagination,
       };
     } catch (error) {
       Logger.error('获取调度任务失败:', error);
@@ -109,24 +112,19 @@ class SchedulingService {
   /**
    * 创建调度任务
    */
-  async createTask(task: Omit<ScheduledTask, 'id' | 'status' | 'runCount' | 'createdAt' | 'updatedAt'>): Promise<ScheduledTask> {
+  async createTask(
+    task: Omit<ScheduledTask, 'id' | 'status' | 'runCount' | 'createdAt' | 'updatedAt'>
+  ): Promise<ScheduledTask> {
     try {
-      const response = await fetch(`${this.baseUrl}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(task)
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/tasks`, task);
+      const data = response.data as { success: boolean; data?: ScheduledTask; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '创建调度任务失败');
       }
 
       this.clearCache();
-      return data.data;
+      return data.data as ScheduledTask;
     } catch (error) {
       Logger.error('创建调度任务失败:', error);
       throw error;
@@ -138,15 +136,8 @@ class SchedulingService {
    */
   async updateTask(id: string, updates: Partial<ScheduledTask>): Promise<ScheduledTask> {
     try {
-      const response = await fetch(`${this.baseUrl}/tasks/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updates)
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().put(`${this.baseUrl}/tasks/${id}`, updates);
+      const data = response.data as { success: boolean; data?: ScheduledTask; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '更新调度任务失败');
@@ -165,11 +156,8 @@ class SchedulingService {
    */
   async deleteTask(id: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/tasks/${id}`, {
-        method: 'DELETE'
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().delete(`${this.baseUrl}/tasks/${id}`);
+      const data = response.data as { success: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '删除调度任务失败');
@@ -187,11 +175,8 @@ class SchedulingService {
    */
   async startTask(id: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/tasks/${id}/start`, {
-        method: 'POST'
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/tasks/${id}/start`);
+      const data = response.data as { success: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '启动调度任务失败');
@@ -209,11 +194,8 @@ class SchedulingService {
    */
   async pauseTask(id: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/tasks/${id}/pause`, {
-        method: 'POST'
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/tasks/${id}/pause`);
+      const data = response.data as { success: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '暂停调度任务失败');
@@ -231,11 +213,8 @@ class SchedulingService {
    */
   async executeTask(id: string): Promise<TaskExecution> {
     try {
-      const response = await fetch(`${this.baseUrl}/tasks/${id}/execute`, {
-        method: 'POST'
-      });
-
-      const data = await response.json();
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/tasks/${id}/execute`);
+      const data = response.data as { success: boolean; data?: TaskExecution; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '执行调度任务失败');
@@ -261,22 +240,26 @@ class SchedulingService {
   }> {
     try {
       const params = new URLSearchParams();
-      
+
       if (taskId) params.append('taskId', taskId);
       params.append('page', pagination.page.toString());
       params.append('limit', pagination.limit.toString());
 
-      const response = await fetch(`${this.baseUrl}/executions?${params}`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/executions?${params}`);
+      const data = response.data as {
+        success: boolean;
+        data?: Record<string, unknown>;
+        message?: string;
+      };
 
       if (!data.success) {
         throw new Error(data.message || '获取执行历史失败');
       }
 
       return {
-        executions: data.data.executions || [],
-        total: data.data.total || 0,
-        pagination: data.data.pagination
+        executions: (data.data?.executions as TaskExecution[]) || [],
+        total: (data.data?.total as number) || 0,
+        pagination: data.data?.pagination,
       };
     } catch (error) {
       Logger.error('获取执行历史失败:', error);
@@ -289,11 +272,10 @@ class SchedulingService {
    */
   async cancelExecution(executionId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/executions/${executionId}/cancel`, {
-        method: 'POST'
-      });
-
-      const data = await response.json();
+      const response = await apiClient
+        .getInstance()
+        .post(`${this.baseUrl}/executions/${executionId}/cancel`);
+      const data = response.data as { success: boolean; message?: string };
 
       if (!data.success) {
         throw new Error(data.message || '取消执行失败');
@@ -319,7 +301,7 @@ class SchedulingService {
     }>;
   }> {
     const cacheKey = 'statistics';
-    
+
     if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey);
       if (Date.now() - cached.timestamp < this.cacheTimeout) {
@@ -328,17 +310,27 @@ class SchedulingService {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/statistics`);
-      const data = await response.json();
+      const response = await apiClient.getInstance().get(`${this.baseUrl}/statistics`);
+      const data = response.data as {
+        success: boolean;
+        data?: Record<string, unknown>;
+        message?: string;
+      };
 
       if (!data.success) {
         throw new Error(data.message || '获取统计信息失败');
       }
 
-      const statistics = data.data;
+      const statistics = data.data as {
+        totalTasks: number;
+        activeTasks: number;
+        completedRuns: number;
+        failedRuns: number;
+        nextRuns: Array<{ taskId: string; taskName: string; nextRun: string }>;
+      };
       this.cache.set(cacheKey, {
         data: statistics,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       return statistics;
@@ -357,15 +349,14 @@ class SchedulingService {
     error?: string;
   }> {
     try {
-      const response = await fetch(`${this.baseUrl}/validate-cron`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ expression })
+      const response = await apiClient.getInstance().post(`${this.baseUrl}/validate-cron`, {
+        expression,
       });
-
-      const data = await response.json();
+      const data = response.data as {
+        success: boolean;
+        data?: { valid: boolean; nextRuns?: string[] };
+        message?: string;
+      };
       return data.success ? data.data : { valid: false, error: data.message };
     } catch (error) {
       Logger.error('验证Cron表达式失败:', error);

@@ -14,10 +14,19 @@ import {
   PerformanceTestResult,
   ResourceAnalysis,
 } from '../../types/performance.types';
+import { apiClient } from '../api/client';
+
+interface ResourceCounts {
+  images: number;
+  scripts: number;
+  stylesheets: number;
+  fonts: number;
+  total: number;
+}
 
 export class PerformanceTestCore {
-  private activeTests = new Map<string, any>();
-  private readonly apiBaseUrl = '/api/test';
+  private activeTests = new Map<string, { config: PerformanceConfig; startTime: number }>();
+  private readonly apiBaseUrl = '/test';
 
   /**
    * 运行性能测试
@@ -209,18 +218,16 @@ export class PerformanceTestCore {
    */
   private async checkPageSpeed(url: string, config: PerformanceConfig): Promise<PageSpeedMetrics> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/performance/page-speed`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, device: config.device, timeout: config.timeout }),
-      });
+      const response = await apiClient
+        .getInstance()
+        .post(`${this.apiBaseUrl}/performance/page-speed`, {
+          url,
+          device: config.device,
+          timeout: config.timeout,
+        });
 
-      if (!response.ok) {
-        throw new Error(`页面速度检测失败: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.success ? data.data : this.getDefaultPageSpeedMetrics(url);
+      const data = response.data as { success?: boolean; data?: PageSpeedMetrics };
+      return data?.success && data.data ? data.data : this.getDefaultPageSpeedMetrics(url);
     } catch (error) {
       Logger.warn('页面速度检测失败，使用客户端分析:', { error: String(error) });
       return await this.getDefaultPageSpeedMetrics(url);
@@ -234,17 +241,15 @@ export class PerformanceTestCore {
     try {
       // 首先尝试API调用
       try {
-        const response = await fetch(`${this.apiBaseUrl}/performance/core-web-vitals`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, device: config.device }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success) {
-            return data.data;
-          }
+        const response = await apiClient
+          .getInstance()
+          .post(`${this.apiBaseUrl}/performance/core-web-vitals`, {
+            url,
+            device: config.device,
+          });
+        const data = response.data as { success?: boolean; data?: CoreWebVitals };
+        if (data?.success && data.data) {
+          return data.data;
         }
       } catch (apiError) {
         Logger.warn('API调用失败，使用客户端分析:', { error: String(apiError) });
@@ -275,18 +280,15 @@ export class PerformanceTestCore {
     config: PerformanceConfig
   ): Promise<ResourceAnalysis> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/performance/resources`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, includeImages: config.imageOptimization }),
-      });
+      const response = await apiClient
+        .getInstance()
+        .post(`${this.apiBaseUrl}/performance/resources`, {
+          url,
+          includeImages: config.imageOptimization,
+        });
 
-      if (!response.ok) {
-        throw new Error(`资源分析失败: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.success ? data.data : this.getDefaultResourceAnalysis();
+      const data = response.data as { success?: boolean; data?: ResourceAnalysis };
+      return data?.success && data.data ? data.data : this.getDefaultResourceAnalysis();
     } catch (error) {
       Logger.warn('资源分析失败，使用模拟数据:', { error: String(error) });
       return this.getDefaultResourceAnalysis();
@@ -296,7 +298,7 @@ export class PerformanceTestCore {
   /**
    * 缓存分析
    */
-  private async analyzeCaching(url: string, config: PerformanceConfig): Promise<CacheAnalysis> {
+  private async analyzeCaching(_url: string, _config: PerformanceConfig): Promise<CacheAnalysis> {
     // 实现缓存分析逻辑
     return this.getDefaultCacheAnalysis();
   }
@@ -305,8 +307,8 @@ export class PerformanceTestCore {
    * 压缩分析
    */
   private async analyzeCompression(
-    url: string,
-    config: PerformanceConfig
+    _url: string,
+    _config: PerformanceConfig
   ): Promise<CompressionAnalysis> {
     // 实现压缩分析逻辑
     return this.getDefaultCompressionAnalysis();
@@ -315,7 +317,7 @@ export class PerformanceTestCore {
   /**
    * 移动端性能检测
    */
-  private async checkMobilePerformance(url: string, config: PerformanceConfig) {
+  private async checkMobilePerformance(_url: string, _config: PerformanceConfig) {
     // 实现移动端性能检测逻辑
     return {
       score: Math.floor(Math.random() * 40) + 60,
@@ -349,7 +351,7 @@ export class PerformanceTestCore {
   private validateUrl(url: string): void {
     try {
       new URL(url);
-    } catch (error) {
+    } catch {
       throw new Error('无效的URL格式');
     }
   }
@@ -696,11 +698,7 @@ export class PerformanceTestCore {
    */
   private async saveTestResult(result: PerformanceTestResult, userId?: string): Promise<void> {
     try {
-      await fetch(`${this.apiBaseUrl}/performance/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ result, userId }),
-      });
+      await apiClient.getInstance().post(`${this.apiBaseUrl}/performance/save`, { result, userId });
     } catch (error) {
       Logger.warn('保存性能测试结果失败:', { error: String(error) });
     }
@@ -711,7 +709,7 @@ export class PerformanceTestCore {
   /**
    * 现代Web功能检查
    */
-  private async checkModernWebFeatures(url: string, config: PerformanceConfig) {
+  private async checkModernWebFeatures(url: string, _config: PerformanceConfig) {
     try {
       const response = await fetch(url);
       const html = await response.text();
@@ -765,7 +763,7 @@ export class PerformanceTestCore {
   /**
    * 网络优化分析
    */
-  private async analyzeNetworkOptimization(url: string, config: PerformanceConfig) {
+  private async analyzeNetworkOptimization(url: string, _config: PerformanceConfig) {
     try {
       const response = await fetch(url);
       const headers = response.headers;
@@ -839,7 +837,7 @@ export class PerformanceTestCore {
   /**
    * 第三方影响分析
    */
-  private async analyzeThirdPartyImpact(url: string, config: PerformanceConfig) {
+  private async analyzeThirdPartyImpact(url: string, _config: PerformanceConfig) {
     try {
       const response = await fetch(url);
       const html = await response.text();
@@ -1012,7 +1010,7 @@ export class PerformanceTestCore {
   /**
    * 统计页面资源
    */
-  private countResources(dom: Document) {
+  private countResources(dom: Document): ResourceCounts {
     const images = dom.querySelectorAll('img').length;
     const scripts = dom.querySelectorAll('script').length;
     const stylesheets = dom.querySelectorAll('link[rel="stylesheet"]').length;
@@ -1030,7 +1028,7 @@ export class PerformanceTestCore {
   /**
    * 估算资源加载时间
    */
-  private estimateResourceLoadTime(resources: any): number {
+  private estimateResourceLoadTime(resources: ResourceCounts): number {
     // 基于资源数量估算加载时间
     return resources.images * 100 + resources.scripts * 150 + resources.stylesheets * 80;
   }
@@ -1038,14 +1036,14 @@ export class PerformanceTestCore {
   /**
    * 计算LCP (Largest Contentful Paint)
    */
-  private calculateLCP(pageSize: number, resources: unknown, dom: Document): number {
+  private calculateLCP(pageSize: number, resources: ResourceCounts, dom: Document): number {
     let baseLCP = 1200;
 
     // 页面大小影响
     baseLCP += pageSize / 10000;
 
     // 图片影响
-    baseLCP += (resources as any).images * 80;
+    baseLCP += resources.images * 80;
 
     // 检查大图片
     const largeImages = dom.querySelectorAll('img[width], img[height]');
@@ -1061,7 +1059,7 @@ export class PerformanceTestCore {
     const hasWebP = Array.from(dom.querySelectorAll('img')).some(img =>
       img.getAttribute('src')?.includes('.webp')
     );
-    if (!hasWebP && (resources as any).images > 3) {
+    if (!hasWebP && resources.images > 3) {
       baseLCP += 300;
     }
 

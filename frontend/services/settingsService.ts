@@ -262,7 +262,7 @@ export class SettingsService {
 }
 
 // ==================== 账户设置API ====================
-export const _accountAPI = {
+export const accountAPI = {
   // 更新用户个人信息
   updateProfile: async (profileData: DataPayload) => {
     const response = await request.put('/auth/profile', profileData);
@@ -277,7 +277,7 @@ export const _accountAPI = {
 };
 
 // ==================== 系统监控API ====================
-export const _monitoringAPI = {
+export const monitoringAPI = {
   // 获取系统监控数据
   getSystemMonitoring: async () => {
     const response = await request.get('/monitoring/system');
@@ -298,7 +298,7 @@ export const _monitoringAPI = {
 };
 
 // ==================== 定时任务API ====================
-export const _scheduledTasksAPI = {
+export const scheduledTasksAPI = {
   // 获取定时任务列表
   getTasks: async () => {
     const response = await request.get('/scheduled-tasks');
@@ -331,7 +331,7 @@ export const _scheduledTasksAPI = {
 };
 
 // ==================== 系统日志API ====================
-export const _systemLogsAPI = {
+export const systemLogsAPI = {
   // 获取系统日志
   getLogs: async (params: RequestConfig = {}) => {
     const response = await request.get('/system-logs', { params });
@@ -354,7 +354,7 @@ export const _systemLogsAPI = {
   },
 };
 
-export const _backupAPI = {
+export const backupAPI = {
   // 获取备份列表
   getBackups: async () => {
     const response = await request.get('/backups');
@@ -375,7 +375,7 @@ export const _backupAPI = {
 };
 
 // ==================== 数据管理API ====================
-export const _dataManagementAPI = {
+export const dataManagementAPI = {
   // 获取导出任务列表
   getExportTasks: async () => {
     const response = await request.get('/data-management/exports');
@@ -409,6 +409,5 @@ export const _dataManagementAPI = {
 
 // 创建单例实例
 export const settingsService = new SettingsService();
-export const _settingsService = settingsService; // Alias for backward compatibility
 
 export default SettingsService;

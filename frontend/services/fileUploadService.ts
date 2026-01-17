@@ -1,4 +1,5 @@
 import Logger from '@/utils/logger';
+import { apiClient } from './api/client';
 
 /**
  * 真实的文件上传服务
@@ -49,25 +50,31 @@ class FileUploadService {
   private readonly DEFAULT_CONFIG: UploadConfig = {
     maxSize: 10 * 1024 * 1024, // 10MB
     allowedTypes: [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-      'application/pdf', 'text/plain', 'text/csv',
-      'application/json', 'application/zip'
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'application/pdf',
+      'text/plain',
+      'text/csv',
+      'application/json',
+      'application/zip',
     ],
     multiple: false,
     compress: true,
-    generateThumbnail: true
+    generateThumbnail: true,
   };
 
   /**
    * 上传单个文件
    */
   async uploadFile(
-    file: File, 
+    file: File,
     config: UploadConfig = {},
     onProgress?: (progress: UploadProgress) => void
   ): Promise<UploadResult> {
     const finalConfig = { ...this.DEFAULT_CONFIG, ...config };
-    
+
     // 验证文件
     const validation = this.validateFile(file, finalConfig);
     if (!validation.valid) {
@@ -78,7 +85,7 @@ class FileUploadService {
         fileSize: file.size,
         fileType: file.type,
         url: '',
-        error: validation.error
+        error: validation.error,
       };
     }
 
@@ -94,7 +101,7 @@ class FileUploadService {
         const startTime = Date.now();
 
         // 监听上传进度
-        xhr.upload.addEventListener('progress', (event) => {
+        xhr.upload.addEventListener('progress', event => {
           if (event.lengthComputable && onProgress) {
             const elapsed = (Date.now() - startTime) / 1000;
             const speed = event.loaded / elapsed;
@@ -105,7 +112,7 @@ class FileUploadService {
               total: event.total,
               percentage: Math.round((event.loaded / event.total) * 100),
               speed,
-              timeRemaining
+              timeRemaining,
             });
           }
         });
@@ -122,7 +129,7 @@ class FileUploadService {
                 fileSize: response.data.size,
                 fileType: response.data.type,
                 url: response.data.url,
-                thumbnailUrl: response.data.thumbnailUrl
+                thumbnailUrl: response.data.thumbnailUrl,
               });
             } else {
               resolve({
@@ -132,10 +139,10 @@ class FileUploadService {
                 fileSize: file.size,
                 fileType: file.type,
                 url: '',
-                error: response.error || `HTTP ${xhr.status}`
+                error: response.error || `HTTP ${xhr.status}`,
               });
             }
-          } catch (error) {
+          } catch {
             reject(new Error('Invalid response format'));
           }
         });
@@ -153,7 +160,6 @@ class FileUploadService {
         }
         xhr.send(formData);
       });
-
     } catch (error) {
       return {
         success: false,
@@ -162,7 +168,7 @@ class FileUploadService {
         fileSize: file.size,
         fileType: file.type,
         url: '',
-        error: error instanceof Error ? error?.message : 'Upload failed'
+        error: error instanceof Error ? error?.message : 'Upload failed',
       };
     }
   }
@@ -183,7 +189,7 @@ class FileUploadService {
       const result = await this.uploadFile(
         file,
         config,
-        onProgress ? (progress) => onProgress(i, progress) : undefined
+        onProgress ? progress => onProgress(i, progress) : undefined
       );
       results.push(result);
     }
@@ -194,40 +200,54 @@ class FileUploadService {
   /**
    * 获取文件列表
    */
-  async getFiles(page = 1, limit = 20, type?: string): Promise<{
+  async getFiles(
+    page = 1,
+    limit = 20,
+    type?: string
+  ): Promise<{
     files: FileMetadata[];
     total: number;
     page: number;
     totalPages: number;
   }> {
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...(type && { type })
-      });
+      const params: Record<string, string | number> = {
+        page,
+        limit,
+      };
 
-      const response = await fetch(`${this.API_BASE}?${params}`, {
-        headers: this.getHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (type) {
+        params.type = type;
       }
 
-      const result = await response.json();
-      if (result.success) {
-        return result.data;
-      } else {
+      const response = await apiClient.getInstance().get(`${this.API_BASE}`, {
+        params,
+        headers: this.getHeaders(),
+      });
+
+      const result = response.data as {
+        success?: boolean;
+        data?: {
+          files: FileMetadata[];
+          total: number;
+          page: number;
+          totalPages: number;
+        };
+        error?: string;
+      };
+
+      if (!result.success || !result.data) {
         throw new Error(result.error || 'Failed to fetch files');
       }
+
+      return result.data;
     } catch (error) {
       Logger.error('Failed to fetch files:', error);
       return {
         files: [],
         total: 0,
         page: 1,
-        totalPages: 0
+        totalPages: 0,
       };
     }
   }
@@ -237,17 +257,12 @@ class FileUploadService {
    */
   async deleteFile(fileId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.API_BASE}/${fileId}`, {
-        method: 'DELETE',
-        headers: this.getHeaders()
+      const response = await apiClient.getInstance().delete(`${this.API_BASE}/${fileId}`, {
+        headers: this.getHeaders(),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      return result.success;
+      const result = response.data as { success?: boolean };
+      return !!result.success;
     } catch (error) {
       Logger.error('Failed to delete file:', error);
       return false;
@@ -259,18 +274,14 @@ class FileUploadService {
    */
   async updateFileMetadata(fileId: string, metadata: Partial<FileMetadata>): Promise<boolean> {
     try {
-      const response = await fetch(`${this.API_BASE}/${fileId}/metadata`, {
-        method: 'PUT',
-        headers: this.getHeaders(),
-        body: JSON.stringify(metadata)
-      });
+      const response = await apiClient
+        .getInstance()
+        .put(`${this.API_BASE}/${fileId}/metadata`, metadata, {
+          headers: this.getHeaders(),
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      return result.success;
+      const result = response.data as { success?: boolean };
+      return !!result.success;
     } catch (error) {
       Logger.error('Failed to update file metadata:', error);
       return false;
@@ -282,16 +293,12 @@ class FileUploadService {
    */
   async getDownloadUrl(fileId: string): Promise<string | null> {
     try {
-      const response = await fetch(`${this.API_BASE}/${fileId}/download`, {
-        headers: this.getHeaders()
+      const response = await apiClient.getInstance().get(`${this.API_BASE}/${fileId}/download`, {
+        headers: this.getHeaders(),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      return result.success ? result.data.url : null;
+      const result = response.data as { success?: boolean; data?: { url?: string } };
+      return result.success ? result.data?.url || null : null;
     } catch (error) {
       Logger.error('Failed to get download URL:', error);
       return null;
@@ -306,7 +313,7 @@ class FileUploadService {
     if (config.maxSize && file.size > config.maxSize) {
       return {
         valid: false,
-        error: `文件大小超过限制 (${this.formatFileSize(config.maxSize)})`
+        error: `文件大小超过限制 (${this.formatFileSize(config.maxSize)})`,
       };
     }
 
@@ -314,7 +321,7 @@ class FileUploadService {
     if (config.allowedTypes && !config.allowedTypes.includes(file.type)) {
       return {
         valid: false,
-        error: `不支持的文件类型: ${file.type}`
+        error: `不支持的文件类型: ${file.type}`,
       };
     }
 
@@ -344,7 +351,7 @@ class FileUploadService {
    */
   private getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
 
     const token = this.getAuthToken();

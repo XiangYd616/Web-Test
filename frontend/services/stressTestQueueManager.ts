@@ -5,8 +5,9 @@
  * ����ʱ��: 2025-09-25
  */
 
-import Logger from '@/utils/logger';
-import { stressTestRecordService } from './stressTestRecordService';
+import Logger, { type LogContext } from '@/utils/logger';
+import { apiClient } from './api/client';
+import { stressTestRecordService, type StressTestRecord } from './stressTestRecordService';
 
 export interface QueuedTest {
   id: string;
@@ -45,7 +46,7 @@ export interface QueuedTest {
   status: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
   progress?: number;
   onProgress?: (progress: number, message: string) => void;
-  onComplete?: (result: any) => void;
+  onComplete?: (result: unknown) => void;
   onError?: (error: Error) => void;
 }
 
@@ -83,7 +84,7 @@ class StressTestQueueManager {
   private config: QueueConfig;
   private isProcessing = false;
   private processingInterval: NodeJS.Timeout | null = null;
-  private listeners = new Set<(event: string, data: any) => void>();
+  private listeners = new Set<(event: string, data: Record<string, unknown>) => void>();
 
   constructor(config?: Partial<QueueConfig>) {
     this.config = {
@@ -336,27 +337,15 @@ class StressTestQueueManager {
   private async executeRealStressTest(test: QueuedTest): Promise<void> {
     try {
       // ���ú��ѹ������API
-      const response = await fetch('/api/test/stress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          ...test.config,
-          url: test.url,
-          testId: test.recordId,
-          queueId: test.id,
-          priority: test.priority,
-        }),
+      const response = await apiClient.getInstance().post('/test/stress', {
+        ...test.config,
+        url: test.url,
+        testId: test.recordId,
+        queueId: test.id,
+        priority: test.priority,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      Logger.debug(`? ѹ������API���óɹ�: ${test.testName}`, result);
+      const result = response.data as unknown;
+      Logger.debug(`? ѹ������API���óɹ�: ${test.testName}`, { result } as LogContext);
 
       await this.waitForTestCompletion(test);
     } catch (error) {
@@ -419,13 +408,16 @@ class StressTestQueueManager {
   /**
    * ����������
    */
-  private async handleTestCompletion(test: QueuedTest, result: any): Promise<void> {
+  private async handleTestCompletion(test: QueuedTest, result: unknown): Promise<void> {
     test.status = 'completed';
     this.runningTests.delete(test.id);
     this.completedTests.set(test.id, test);
 
     try {
-      await stressTestRecordService.completeTestRecord(test.recordId, result);
+      await stressTestRecordService.completeTestRecord(
+        test.recordId,
+        result as StressTestRecord['results']
+      );
     } catch (error) {
       Logger.warn('���²��Լ�¼ʧ��:', { error: String(error) });
     }
@@ -579,7 +571,7 @@ class StressTestQueueManager {
   /**
    * ����¼�������
    */
-  addListener(callback: (event: string, data: any) => void): () => void {
+  addListener(callback: (event: string, data: Record<string, unknown>) => void): () => void {
     this.listeners.add(callback);
     return () => this.listeners.delete(callback);
   }
@@ -587,7 +579,7 @@ class StressTestQueueManager {
   /**
    * ֪ͨ������
    */
-  private notifyListeners(event: string, data: any): void {
+  private notifyListeners(event: string, data: Record<string, unknown>): void {
     this.listeners.forEach(callback => {
       try {
         callback(event, data);
