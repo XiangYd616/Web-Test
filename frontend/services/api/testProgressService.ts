@@ -1,12 +1,12 @@
 /**
- * ²âÊÔ½ø¶È¼à¿Ø·şÎñ
- * Ìá¹©ÊµÊ±²âÊÔ½ø¶È¸üĞÂºÍ×´Ì¬¼à¿Ø
+ * æµ‹è¯•è¿›åº¦ç›‘æ§æœåŠ¡
+ * æä¾›å®æ—¶æµ‹è¯•è¿›åº¦æ›´æ–°å’ŒçŠ¶æ€ç›‘æ§
  */
 
 import Logger from '@/utils/logger';
-import { apiService } from './baseApiService';
 import type { ApiResponse } from '../../types/api';
-// ²âÊÔ½ø¶È½Ó¿Ú
+import { apiClient } from './client';
+// æµ‹è¯•è¿›åº¦æ¥å£
 export interface TestProgress {
   id: string;
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
@@ -18,7 +18,7 @@ export interface TestProgress {
   error?: string;
 }
 
-// ½ø¶È¼àÌıÆ÷½Ó¿Ú
+// è¿›åº¦ç›‘å¬å™¨æ¥å£
 export interface ProgressListener {
   onProgress: (progress: TestProgress) => void;
   onComplete: (result: any) => void;
@@ -26,53 +26,70 @@ export interface ProgressListener {
 }
 
 class TestProgressService {
-  private activeMonitors = new Map<string, {
-    intervalId: NodeJS.Timeout;
-    listeners: ProgressListener[];
-  }>();
+  private activeMonitors = new Map<
+    string,
+    {
+      intervalId: NodeJS.Timeout;
+      listeners: ProgressListener[];
+    }
+  >();
 
-  private baseUrl = '/api/test';
+  private baseUrl = '/test';
+
+  private async request<T>(action: () => Promise<T>): Promise<ApiResponse<T>> {
+    try {
+      const data = await action();
+      return { success: true, data };
+    } catch (error) {
+      Logger.error('APIè¯·æ±‚å¤±è´¥:', error);
+      return {
+        success: false,
+        data: undefined as T | undefined,
+        message: error instanceof Error ? error.message : 'è¯·æ±‚å¤±è´¥',
+      };
+    }
+  }
 
   /**
-   * ¿ªÊ¼¼à¿Ø²âÊÔ½ø¶È
+   * å¼€å§‹ç›‘æ§æµ‹è¯•è¿›åº¦
    */
   startMonitoring(testId: string, listener: ProgressListener): void {
     if (!this.activeMonitors.has(testId)) {
-      // ´´½¨ĞÂµÄ¼à¿Ø
+      // åˆ›å»ºæ–°çš„ç›‘æ§
       const intervalId = setInterval(() => {
         this.checkProgress(testId);
-      }, 2000); // Ã¿2Ãë¼ì²éÒ»´Î
+      }, 2000); // æ¯2ç§’æ£€æŸ¥ä¸€æ¬¡
 
       this.activeMonitors.set(testId, {
         intervalId,
-        listeners: [listener]
+        listeners: [listener],
       });
     } else {
-      // Ìí¼Ó¼àÌıÆ÷µ½ÏÖÓĞ¼à¿Ø
+      // æ·»åŠ ç›‘å¬å™¨åˆ°ç°æœ‰ç›‘æ§
       const monitor = this.activeMonitors.get(testId)!;
       monitor.listeners.push(listener);
     }
 
-    // Á¢¼´¼ì²éÒ»´Î½ø¶È
+    // ç«‹å³æ£€æŸ¥ä¸€æ¬¡è¿›åº¦
     this.checkProgress(testId);
   }
 
   /**
-   * Í£Ö¹¼à¿Ø²âÊÔ½ø¶È
+   * åœæ­¢ç›‘æ§æµ‹è¯•è¿›åº¦
    */
   stopMonitoring(testId: string, listener?: ProgressListener): void {
     const monitor = this.activeMonitors.get(testId);
     if (!monitor) return;
 
     if (listener) {
-      // ÒÆ³ıÌØ¶¨¼àÌıÆ÷
+      // ç§»é™¤ç‰¹å®šç›‘å¬å™¨
       const index = monitor.listeners.indexOf(listener);
       if (index > -1) {
         monitor.listeners.splice(index, 1);
       }
     }
 
-    // Èç¹ûÃ»ÓĞ¼àÌıÆ÷ÁË£¬Í£Ö¹¼à¿Ø
+    // å¦‚æœæ²¡æœ‰ç›‘å¬å™¨äº†ï¼Œåœæ­¢ç›‘æ§
     if (!listener || monitor.listeners.length === 0) {
       clearInterval(monitor.intervalId);
       this.activeMonitors.delete(testId);
@@ -80,13 +97,13 @@ class TestProgressService {
   }
 
   /**
-   * ¼ì²é²âÊÔ½ø¶È
+   * æ£€æŸ¥æµ‹è¯•è¿›åº¦
    */
   private async checkProgress(testId: string): Promise<void> {
     try {
       const response = await this.getTestStatus(testId);
       const monitor = this.activeMonitors.get(testId);
-      
+
       if (!monitor || !response.success) return;
 
       const progress: TestProgress = {
@@ -97,140 +114,137 @@ class TestProgressService {
         startTime: response.data.startTime || response.data.created_at,
         endTime: response.data.endTime || response.data.completed_at,
         result: response.data.result,
-        error: response.data.error
+        error: response.data.error,
       };
 
-      // Í¨ÖªËùÓĞ¼àÌıÆ÷
+      // é€šçŸ¥æ‰€æœ‰ç›‘å¬å™¨
       monitor.listeners.forEach(listener => {
         listener?.onProgress(progress);
 
-        // Èç¹û²âÊÔÍê³É£¬Í¨ÖªÍê³É»ò´íÎó
+        // å¦‚æœæµ‹è¯•å®Œæˆï¼Œé€šçŸ¥å®Œæˆæˆ–é”™è¯¯
         if (progress.status === 'completed') {
           listener?.onComplete(progress.result);
           this.stopMonitoring(testId);
         } else if (progress.status === 'failed') {
-          listener?.onError(progress.error || '²âÊÔÊ§°Ü');
+          listener?.onError(progress.error || 'æµ‹è¯•å¤±è´¥');
           this.stopMonitoring(testId);
         }
       });
-
     } catch (error) {
-      Logger.error('¼ì²é²âÊÔ½ø¶ÈÊ§°Ü:', error);
-      
+      Logger.error('æ£€æŸ¥æµ‹è¯•è¿›åº¦å¤±è´¥:', error);
+
       /**
-       * if¹¦ÄÜº¯Êı
-       * @param {Object} params - ²ÎÊı¶ÔÏó
-       * @returns {Promise<Object>} ·µ»Ø½á¹û
+       * ifåŠŸèƒ½å‡½æ•°
+       * @param {Object} params - å‚æ•°å¯¹è±¡
+       * @returns {Promise<Object>} è¿”å›ç»“æœ
        */
       const monitor = this.activeMonitors.get(testId);
       if (monitor) {
         monitor.listeners.forEach(listener => {
-          listener?.onError('ÎŞ·¨»ñÈ¡²âÊÔ½ø¶È');
+          listener?.onError('æ— æ³•è·å–æµ‹è¯•è¿›åº¦');
         });
       }
     }
   }
 
   /**
-   * »ñÈ¡²âÊÔ×´Ì¬
+   * è·å–æµ‹è¯•çŠ¶æ€
    */
   async getTestStatus(testId: string): Promise<ApiResponse<any>> {
     try {
-      // Ê×ÏÈ³¢ÊÔ´Ó²âÊÔÀúÊ·»ñÈ¡
-      const historyResponse = await apiService.apiGet(`${this.baseUrl}/history/${testId}`);
+      // é¦–å…ˆå°è¯•ä»æµ‹è¯•å†å²è·å–
+      const historyResponse = await this.request(() =>
+        apiClient.get(`${this.baseUrl}/history/${testId}`)
+      );
       if (historyResponse.success) {
         return historyResponse;
       }
 
-      // Èç¹ûÀúÊ·¼ÇÂ¼ÖĞÃ»ÓĞ£¬³¢ÊÔ´ÓÊµÊ±×´Ì¬»ñÈ¡
-      return await apiService.apiGet(`${this.baseUrl}/${testId}/status`);
+      // å¦‚æœå†å²è®°å½•ä¸­æ²¡æœ‰ï¼Œå°è¯•ä»å®æ—¶çŠ¶æ€è·å–
+      return await this.request(() => apiClient.get(`${this.baseUrl}/${testId}/status`));
     } catch (error) {
-      Logger.error('»ñÈ¡²âÊÔ×´Ì¬Ê§°Ü:', error);
+      Logger.error('è·å–æµ‹è¯•çŠ¶æ€å¤±è´¥:', error);
       return {
         success: false,
-        data: null,
-        message: '»ñÈ¡²âÊÔ×´Ì¬Ê§°Ü'
+        message: 'è·å–æµ‹è¯•çŠ¶æ€å¤±è´¥',
       };
     }
   }
 
   /**
-   * »ñÈ¡²âÊÔ½á¹û
+   * è·å–æµ‹è¯•ç»“æœ
    */
   async getTestResult(testId: string): Promise<ApiResponse<any>> {
     try {
-      return await apiService.apiGet(`${this.baseUrl}/${testId}/result`);
+      return await this.request(() => apiClient.get(`${this.baseUrl}/${testId}/result`));
     } catch (error) {
-      Logger.error('»ñÈ¡²âÊÔ½á¹ûÊ§°Ü:', error);
+      Logger.error('è·å–æµ‹è¯•ç»“æœå¤±è´¥:', error);
       return {
         success: false,
-        data: null,
-        message: '»ñÈ¡²âÊÔ½á¹ûÊ§°Ü'
+        message: 'è·å–æµ‹è¯•ç»“æœå¤±è´¥',
       };
     }
   }
 
   /**
-   * È¡Ïû²âÊÔ
+   * å–æ¶ˆæµ‹è¯•
    */
   async cancelTest(testId: string): Promise<ApiResponse<any>> {
     try {
-      const response = await apiService.apiPost(`${this.baseUrl}/${testId}/cancel`);
-      
-      // Í£Ö¹¼à¿Ø
+      const response = await this.request(() => apiClient.post(`${this.baseUrl}/${testId}/cancel`));
+
+      // åœæ­¢ç›‘æ§
       this.stopMonitoring(testId);
-      
+
       return response;
     } catch (error) {
-      Logger.error('È¡Ïû²âÊÔÊ§°Ü:', error);
+      Logger.error('å–æ¶ˆæµ‹è¯•å¤±è´¥:', error);
       return {
         success: false,
-        data: null,
-        message: 'È¡Ïû²âÊÔÊ§°Ü'
+        message: 'å–æ¶ˆæµ‹è¯•å¤±è´¥',
       };
     }
   }
 
   /**
-   * Í£Ö¹²âÊÔ
+   * åœæ­¢æµ‹è¯•
    */
   async stopTest(testId: string): Promise<ApiResponse<any>> {
     try {
-      const response = await apiService.apiPost(`${this.baseUrl}/${testId}/stop`);
-      
-      // Í£Ö¹¼à¿Ø
+      const response = await this.request(() => apiClient.post(`${this.baseUrl}/${testId}/stop`));
+
+      // åœæ­¢ç›‘æ§
       this.stopMonitoring(testId);
-      
+
       return response;
     } catch (error) {
-      Logger.error('Í£Ö¹²âÊÔÊ§°Ü:', error);
+      Logger.error('åœæ­¢æµ‹è¯•å¤±è´¥:', error);
       return {
         success: false,
-        data: null,
-        message: 'Í£Ö¹²âÊÔÊ§°Ü'
+        message: 'åœæ­¢æµ‹è¯•å¤±è´¥',
       };
     }
   }
 
   /**
-   * »ñÈ¡ËùÓĞ»îÔ¾µÄ¼à¿Ø
+   * è·å–æ‰€æœ‰æ´»è·ƒçš„ç›‘æ§
    */
   getActiveMonitors(): string[] {
     return Array.from(this.activeMonitors.keys());
   }
 
   /**
-   * ÇåÀíËùÓĞ¼à¿Ø
+   * æ¸…ç†æ‰€æœ‰ç›‘æ§
    */
   cleanup(): void {
-    this.activeMonitors.forEach((monitor, testId) => {
+    this.activeMonitors.forEach((monitor, _testId) => {
       clearInterval(monitor.intervalId);
     });
     this.activeMonitors.clear();
   }
 
   /**
-   * ÅúÁ¿¼à¿Ø¶à¸ö²âÊÔ
+   * æ‰¹é‡ç›‘æ§å¤šä¸ªæµ‹è¯•
    */
   startBatchMonitoring(testIds: string[], listener: ProgressListener): void {
     testIds.forEach(testId => {
@@ -239,42 +253,43 @@ class TestProgressService {
   }
 
   /**
-   * »ñÈ¡²âÊÔ¶ÓÁĞ×´Ì¬
+   * è·å–æµ‹è¯•é˜Ÿåˆ—çŠ¶æ€
    */
   async getQueueStatus(): Promise<ApiResponse<any>> {
     try {
-      return await apiService.apiGet(`${this.baseUrl}/queue/status`);
+      return await this.request(() => apiClient.get(`${this.baseUrl}/queue/status`));
     } catch (error) {
-      Logger.error('»ñÈ¡¶ÓÁĞ×´Ì¬Ê§°Ü:', error);
+      Logger.error('è·å–é˜Ÿåˆ—çŠ¶æ€å¤±è´¥:', error);
       return {
         success: false,
         data: { queueLength: 0, runningTests: 0, estimatedWaitTime: 0 },
-        message: '»ñÈ¡¶ÓÁĞ×´Ì¬Ê§°Ü'
+        message: 'è·å–é˜Ÿåˆ—çŠ¶æ€å¤±è´¥',
       };
     }
   }
 
   /**
-   * »ñÈ¡²âÊÔÍ³¼ÆĞÅÏ¢
+   * è·å–æµ‹è¯•ç»Ÿè®¡ä¿¡æ¯
    */
   async getTestStatistics(timeRange: string = '7d'): Promise<ApiResponse<any>> {
     try {
-      return await apiService.apiGet(`${this.baseUrl}/statistics?timeRange=${timeRange}`);
+      return await this.request(() =>
+        apiClient.get(`${this.baseUrl}/statistics?timeRange=${timeRange}`)
+      );
     } catch (error) {
-      Logger.error('»ñÈ¡²âÊÔÍ³¼ÆÊ§°Ü:', error);
+      Logger.error('è·å–ç»Ÿè®¡ä¿¡æ¯å¤±è´¥:', error);
       return {
         success: false,
-        data: null,
-        message: '»ñÈ¡²âÊÔÍ³¼ÆÊ§°Ü'
+        message: 'è·å–æµ‹è¯•ç»Ÿè®¡å¤±è´¥',
       };
     }
   }
 }
 
-// ´´½¨µ¥ÀıÊµÀı
+// åˆ›å»ºå•ä¾‹å®ä¾‹
 export const testProgressService = new TestProgressService();
 
-// Ò³ÃæĞ¶ÔØÊ±ÇåÀí×ÊÔ´
+// é¡µé¢å¸è½½æ—¶æ¸…ç†èµ„æº
 if (typeof window !== 'undefined') {
   window.addEventListener('beforeunload', () => {
     testProgressService.cleanup();

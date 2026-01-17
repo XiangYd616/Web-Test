@@ -8,7 +8,7 @@ import { apiClient } from '../client';
 export interface TestConfig {
   testType: string;
   target: string;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 export interface TestExecution {
@@ -18,7 +18,7 @@ export interface TestExecution {
   progress: number;
   startTime: string;
   endTime?: string;
-  results?: any;
+  results?: unknown;
   error?: string;
 }
 
@@ -54,7 +54,7 @@ export class TestRepository {
   /**
    * 获取测试结果
    */
-  async getTestResult(testId: string): Promise<any> {
+  async getTestResult(testId: string): Promise<unknown> {
     return apiClient.get(`${this.basePath}/history/${testId}`);
   }
 
@@ -94,7 +94,7 @@ export class TestRepository {
   /**
    * 获取测试统计
    */
-  async getTestStatistics(timeRange?: string): Promise<any> {
+  async getTestStatistics(timeRange?: string): Promise<unknown> {
     const params = timeRange ? { timeRange } : undefined;
     return apiClient.get(`${this.basePath}/statistics`, params);
   }
@@ -102,14 +102,17 @@ export class TestRepository {
   /**
    * 导出测试结果
    */
-  async exportTestResult(testId: string, format: 'json' | 'csv' | 'pdf' = 'json'): Promise<any> {
+  async exportTestResult(
+    testId: string,
+    format: 'json' | 'csv' | 'pdf' = 'json'
+  ): Promise<unknown> {
     return apiClient.get(`${this.basePath}/${testId}/export`, { format });
   }
 
   /**
    * 生成测试报告
    */
-  async generateReport(testId: string): Promise<any> {
+  async generateReport(testId: string): Promise<unknown> {
     return apiClient.get(`${this.basePath}/${testId}/report`);
   }
 
@@ -128,7 +131,10 @@ export class TestRepository {
    */
 
   // 性能测试
-  async executePerformanceTest(url: string, config?: Record<string, any>): Promise<TestExecution> {
+  async executePerformanceTest(
+    url: string,
+    config?: Record<string, unknown>
+  ): Promise<TestExecution> {
     return apiClient.post<TestExecution>(`${this.basePath}/performance`, {
       url,
       ...config,
@@ -136,7 +142,7 @@ export class TestRepository {
   }
 
   // 安全测试
-  async executeSecurityTest(url: string, config?: Record<string, any>): Promise<TestExecution> {
+  async executeSecurityTest(url: string, config?: Record<string, unknown>): Promise<TestExecution> {
     return apiClient.post<TestExecution>(`${this.basePath}/security`, {
       url,
       ...config,
@@ -144,7 +150,7 @@ export class TestRepository {
   }
 
   // SEO测试
-  async executeSeoTest(url: string, config?: Record<string, any>): Promise<TestExecution> {
+  async executeSeoTest(url: string, config?: Record<string, unknown>): Promise<TestExecution> {
     return apiClient.post<TestExecution>(`${this.basePath}/seo`, {
       url,
       ...config,
@@ -152,7 +158,7 @@ export class TestRepository {
   }
 
   // 压力测试
-  async executeStressTest(url: string, config?: Record<string, any>): Promise<TestExecution> {
+  async executeStressTest(url: string, config?: Record<string, unknown>): Promise<TestExecution> {
     return apiClient.post<TestExecution>(`${this.basePath}/stress`, {
       url,
       ...config,
@@ -162,7 +168,7 @@ export class TestRepository {
   // 兼容性测试
   async executeCompatibilityTest(
     url: string,
-    config?: Record<string, any>
+    config?: Record<string, unknown>
   ): Promise<TestExecution> {
     return apiClient.post<TestExecution>(`${this.basePath}/compatibility`, {
       url,
@@ -171,7 +177,7 @@ export class TestRepository {
   }
 
   // API测试
-  async executeApiTest(config: Record<string, any>): Promise<TestExecution> {
+  async executeApiTest(config: Record<string, unknown>): Promise<TestExecution> {
     return apiClient.post<TestExecution>(`${this.basePath}/api-test`, config);
   }
 

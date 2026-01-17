@@ -1,27 +1,39 @@
 /**
- * ÏîÄ¿¹ÜÀíAPI·şÎñ
- * »ùÓÚºó¶ËAPI¹æ·¶ÊµÏÖÍêÕûµÄÏîÄ¿¹ÜÀí¹¦ÄÜ
- * °æ±¾: v1.0.0
+ * é¡¹ç›®ç®¡ç†APIæœåŠ¡
+ * åŸºäºåç«¯APIè§„èŒƒå®ç°å®Œæ•´çš„é¡¹ç›®ç®¡ç†åŠŸèƒ½
+ * ç‰ˆæœ¬: v1.0.0
  */
 
+import type { ApiResponse } from '../../types/api';
 import type {
   CreateProjectRequest,
   Project,
   ProjectListResponse,
   ProjectResponse,
   ProjectStatsResponse,
-  UpdateProjectRequest
+  UpdateProjectRequest,
 } from '../../types/project';
-import type { ApiResponse } from '../../types/api';
-import { apiService } from './apiService';
+import { apiClient } from './client';
 
 class ProjectApiService {
-  private baseUrl = '/api/v1';
+  private baseUrl = '/v1';
 
-  // ==================== ÏîÄ¿¹ÜÀí ====================
+  private async request<T>(action: () => Promise<T>): Promise<ApiResponse<T>> {
+    try {
+      const data = await action();
+      return { success: true, data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  // ==================== é¡¹ç›®ç®¡ç† ====================
 
   /**
-   * »ñÈ¡ÓÃ»§ÏîÄ¿ÁĞ±í
+   * è·å–ç”¨æˆ·é¡¹ç›®åˆ—è¡¨
    */
   async getProjects(query?: any): Promise<ApiResponse<ProjectListResponse>> {
     const queryParams = new URLSearchParams();
@@ -34,180 +46,212 @@ class ProjectApiService {
     if (query?.order) queryParams.append('order', query?.order);
 
     const url = `${this.baseUrl}/projects${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return apiService.get<ProjectListResponse>(url);
+    return this.request(() => apiClient.get<ProjectListResponse>(url));
   }
 
   /**
-   * ´´½¨ĞÂÏîÄ¿
+   * åˆ›å»ºæ–°é¡¹ç›®
    */
   async createProject(projectData: CreateProjectRequest): Promise<ApiResponse<ProjectResponse>> {
-    return apiService.post<ProjectResponse>(`${this.baseUrl}/projects`, projectData);
+    return this.request(() =>
+      apiClient.post<ProjectResponse>(`${this.baseUrl}/projects`, projectData)
+    );
   }
 
   /**
-   * »ñÈ¡ÌØ¶¨ÏîÄ¿ÏêÇé
+   * è·å–ç‰¹å®šé¡¹ç›®è¯¦æƒ…
    */
   async getProject(projectId: string): Promise<ApiResponse<ProjectResponse>> {
-    return apiService.get<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`);
+    return this.request(() =>
+      apiClient.get<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`)
+    );
   }
 
   /**
-   * ¸üĞÂÏîÄ¿ĞÅÏ¢
+   * æ›´æ–°é¡¹ç›®ä¿¡æ¯
    */
-  async updateProject(projectId: string, updates: UpdateProjectRequest): Promise<ApiResponse<ProjectResponse>> {
-    return apiService.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, updates);
+  async updateProject(
+    projectId: string,
+    updates: UpdateProjectRequest
+  ): Promise<ApiResponse<ProjectResponse>> {
+    return this.request(() =>
+      apiClient.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, updates)
+    );
   }
 
   /**
-   * É¾³ıÏîÄ¿
+   * åˆ é™¤é¡¹ç›®
    */
   async deleteProject(projectId: string): Promise<ApiResponse<{ deleted: boolean }>> {
-    return apiService.delete(`${this.baseUrl}/projects/${projectId}`);
+    return this.request(() => apiClient.delete(`${this.baseUrl}/projects/${projectId}`));
   }
 
   /**
-   * »ñÈ¡ÏîÄ¿Í³¼ÆĞÅÏ¢
+   * è·å–é¡¹ç›®ç»Ÿè®¡ä¿¡æ¯
    */
   async getProjectStats(projectId?: string): Promise<ApiResponse<ProjectStatsResponse>> {
     const url = projectId
       ? `${this.baseUrl}/projects/${projectId}/stats`
       : `${this.baseUrl}/projects/stats`;
-    return apiService.get<ProjectStatsResponse>(url);
+    return this.request(() => apiClient.get<ProjectStatsResponse>(url));
   }
 
   /**
-   * ¹éµµÏîÄ¿
+   * å½’æ¡£é¡¹ç›®
    */
   async archiveProject(projectId: string): Promise<ApiResponse<ProjectResponse>> {
-    return apiService.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, {
-      status: 'archived'
-    });
+    return this.request(() =>
+      apiClient.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, {
+        status: 'archived',
+      })
+    );
   }
 
   /**
-   * »Ö¸´ÒÑ¹éµµµÄÏîÄ¿
+   * æ¢å¤å·²å½’æ¡£çš„é¡¹ç›®
    */
   async restoreProject(projectId: string): Promise<ApiResponse<ProjectResponse>> {
-    return apiService.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, {
-      status: 'active'
-    });
+    return this.request(() =>
+      apiClient.put<ProjectResponse>(`${this.baseUrl}/projects/${projectId}`, {
+        status: 'active',
+      })
+    );
   }
 
   /**
-   * ¸´ÖÆÏîÄ¿
+   * å¤åˆ¶é¡¹ç›®
    */
   async duplicateProject(
     projectId: string,
     newName: string,
     includeTests: boolean = true
   ): Promise<ApiResponse<ProjectResponse>> {
-    return apiService.post<ProjectResponse>(`${this.baseUrl}/projects/${projectId}/duplicate`, {
-      name: newName,
-      include_tests: includeTests
-    });
+    return this.request(() =>
+      apiClient.post<ProjectResponse>(`${this.baseUrl}/projects/${projectId}/duplicate`, {
+        name: newName,
+        include_tests: includeTests,
+      })
+    );
   }
 
   /**
-   * µ¼³öÏîÄ¿Êı¾İ
+   * å¯¼å‡ºé¡¹ç›®æ•°æ®
    */
   async exportProject(
     projectId: string,
     format: 'json' | 'csv' = 'json',
     includeTests: boolean = true
   ): Promise<ApiResponse<{ export_id: string; download_url: string }>> {
-    return apiService.post(`${this.baseUrl}/projects/${projectId}/export`, {
-      format,
-      include_tests: includeTests
-    });
+    return this.request(() =>
+      apiClient.post(`${this.baseUrl}/projects/${projectId}/export`, {
+        format,
+        include_tests: includeTests,
+      })
+    );
   }
 
   /**
-   * µ¼ÈëÏîÄ¿Êı¾İ
+   * å¯¼å…¥é¡¹ç›®æ•°æ®
    */
   async importProject(file: File): Promise<ApiResponse<ProjectResponse>> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return apiService.post<ProjectResponse>(`${this.baseUrl}/projects/import`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+    return this.request(() =>
+      apiClient.post<ProjectResponse>(`${this.baseUrl}/projects/import`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+    );
   }
 
-  // ==================== ÏîÄ¿ÉèÖÃ¹ÜÀí ====================
+  // ==================== é¡¹ç›®è®¾ç½®ç®¡ç† ====================
 
   /**
-   * »ñÈ¡ÏîÄ¿ÉèÖÃ
+   * è·å–é¡¹ç›®è®¾ç½®
    */
   async getProjectSettings(projectId: string): Promise<ApiResponse<any>> {
-    return apiService.get(`${this.baseUrl}/projects/${projectId}/settings`);
+    return this.request(() => apiClient.get(`${this.baseUrl}/projects/${projectId}/settings`));
   }
 
   /**
-   * ¸üĞÂÏîÄ¿ÉèÖÃ
+   * æ›´æ–°é¡¹ç›®è®¾ç½®
    */
   async updateProjectSettings(
     projectId: string,
     settings: Record<string, any>
   ): Promise<ApiResponse<any>> {
-    return apiService.put(`${this.baseUrl}/projects/${projectId}/settings`, settings);
+    return this.request(() =>
+      apiClient.put(`${this.baseUrl}/projects/${projectId}/settings`, settings)
+    );
   }
 
   /**
-   * ÖØÖÃÏîÄ¿ÉèÖÃÎªÄ¬ÈÏÖµ
+   * é‡ç½®é¡¹ç›®è®¾ç½®ä¸ºé»˜è®¤å€¼
    */
   async resetProjectSettings(projectId: string): Promise<ApiResponse<any>> {
-    return apiService.post(`${this.baseUrl}/projects/${projectId}/settings/reset`);
+    return this.request(() =>
+      apiClient.post(`${this.baseUrl}/projects/${projectId}/settings/reset`)
+    );
   }
 
-  // ==================== ÏîÄ¿³ÉÔ±¹ÜÀí ====================
+  // ==================== é¡¹ç›®æˆå‘˜ç®¡ç† ====================
 
   /**
-   * »ñÈ¡ÏîÄ¿³ÉÔ±ÁĞ±í
+   * è·å–é¡¹ç›®æˆå‘˜åˆ—è¡¨
    */
   async getProjectMembers(projectId: string): Promise<ApiResponse<any[]>> {
-    return apiService.get(`${this.baseUrl}/projects/${projectId}/members`);
+    return this.request(() => apiClient.get(`${this.baseUrl}/projects/${projectId}/members`));
   }
 
   /**
-   * Ìí¼ÓÏîÄ¿³ÉÔ±
+   * æ·»åŠ é¡¹ç›®æˆå‘˜
    */
   async addProjectMember(
     projectId: string,
     userId: string,
     role: 'viewer' | 'editor' | 'admin' = 'viewer'
   ): Promise<ApiResponse<any>> {
-    return apiService.post(`${this.baseUrl}/projects/${projectId}/members`, {
-      user_id: userId,
-      role
-    });
+    return this.request(() =>
+      apiClient.post(`${this.baseUrl}/projects/${projectId}/members`, {
+        user_id: userId,
+        role,
+      })
+    );
   }
 
   /**
-   * ¸üĞÂ³ÉÔ±½ÇÉ«
+   * æ›´æ–°æˆå‘˜è§’è‰²
    */
   async updateMemberRole(
     projectId: string,
     userId: string,
     role: 'viewer' | 'editor' | 'admin'
   ): Promise<ApiResponse<any>> {
-    return apiService.put(`${this.baseUrl}/projects/${projectId}/members/${userId}`, {
-      role
-    });
+    return this.request(() =>
+      apiClient.put(`${this.baseUrl}/projects/${projectId}/members/${userId}`, {
+        role,
+      })
+    );
   }
 
   /**
-   * ÒÆ³ıÏîÄ¿³ÉÔ±
+   * ç§»é™¤é¡¹ç›®æˆå‘˜
    */
-  async removeMember(projectId: string, userId: string): Promise<ApiResponse<{ removed: boolean }>> {
-    return apiService.delete(`${this.baseUrl}/projects/${projectId}/members/${userId}`);
+  async removeMember(
+    projectId: string,
+    userId: string
+  ): Promise<ApiResponse<{ removed: boolean }>> {
+    return this.request(() =>
+      apiClient.delete(`${this.baseUrl}/projects/${projectId}/members/${userId}`)
+    );
   }
 
-  // ==================== ÏîÄ¿»î¶¯ÈÕÖ¾ ====================
+  // ==================== é¡¹ç›®æ´»åŠ¨æ—¥å¿— ====================
 
   /**
-   * »ñÈ¡ÏîÄ¿»î¶¯ÈÕÖ¾
+   * è·å–é¡¹ç›®æ´»åŠ¨æ—¥å¿—
    */
   async getProjectActivity(
     projectId: string,
@@ -228,20 +272,20 @@ class ProjectApiService {
     if (params?.date_to) queryParams.append('date_to', params?.date_to);
 
     const url = `${this.baseUrl}/projects/${projectId}/activity${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-    return apiService.get(url);
+    return this.request(() => apiClient.get(url));
   }
 
-  // ==================== ÏîÄ¿Ä£°å¹ÜÀí ====================
+  // ==================== é¡¹ç›®æ¨¡æ¿ç®¡ç† ====================
 
   /**
-   * »ñÈ¡ÏîÄ¿Ä£°åÁĞ±í
+   * è·å–é¡¹ç›®æ¨¡æ¿åˆ—è¡¨
    */
   async getProjectTemplates(): Promise<ApiResponse<Project[]>> {
-    return apiService.get(`${this.baseUrl}/projects/templates`);
+    return this.request(() => apiClient.get(`${this.baseUrl}/projects/templates`));
   }
 
   /**
-   * ´ÓÄ£°å´´½¨ÏîÄ¿
+   * ä»æ¨¡æ¿åˆ›å»ºé¡¹ç›®
    */
   async createFromTemplate(
     templateId: string,
@@ -251,11 +295,13 @@ class ProjectApiService {
       target_url: string;
     }
   ): Promise<ApiResponse<ProjectResponse>> {
-    return apiService.post(`${this.baseUrl}/projects/templates/${templateId}/create`, projectData);
+    return this.request(() =>
+      apiClient.post(`${this.baseUrl}/projects/templates/${templateId}/create`, projectData)
+    );
   }
 
   /**
-   * ½«ÏîÄ¿±£´æÎªÄ£°å
+   * å°†é¡¹ç›®ä¿å­˜ä¸ºæ¨¡æ¿
    */
   async saveAsTemplate(
     projectId: string,
@@ -265,13 +311,15 @@ class ProjectApiService {
       is_public?: boolean;
     }
   ): Promise<ApiResponse<any>> {
-    return apiService.post(`${this.baseUrl}/projects/${projectId}/save-as-template`, templateData);
+    return this.request(() =>
+      apiClient.post(`${this.baseUrl}/projects/${projectId}/save-as-template`, templateData)
+    );
   }
 
-  // ==================== ÏîÄ¿ËÑË÷ºÍ¹ıÂË ====================
+  // ==================== é¡¹ç›®æœç´¢å’Œè¿‡æ»¤ ====================
 
   /**
-   * ËÑË÷ÏîÄ¿
+   * æœç´¢é¡¹ç›®
    */
   async searchProjects(
     query: string,
@@ -288,57 +336,68 @@ class ProjectApiService {
     if (filters?.status) queryParams.append('status', filters?.status);
     if (filters?.created_after) queryParams.append('created_after', filters?.created_after);
     if (filters?.created_before) queryParams.append('created_before', filters?.created_before);
-    if (filters?.has_tests !== undefined) queryParams.append('has_tests', filters?.has_tests.toString());
+    if (filters?.has_tests !== undefined)
+      queryParams.append('has_tests', filters?.has_tests.toString());
 
     const url = `${this.baseUrl}/projects/search?${queryParams.toString()}`;
-    return apiService.get(url);
+    return this.request(() => apiClient.get(url));
   }
 
   /**
-   * »ñÈ¡ÏîÄ¿±êÇ©ÁĞ±í
+   * è·å–é¡¹ç›®æ ‡ç­¾åˆ—è¡¨
    */
   async getProjectTags(): Promise<ApiResponse<string[]>> {
-    return apiService.get(`${this.baseUrl}/projects/tags`);
+    return this.request(() => apiClient.get(`${this.baseUrl}/projects/tags`));
   }
 
   /**
-   * °´±êÇ©»ñÈ¡ÏîÄ¿
+   * æŒ‰æ ‡ç­¾è·å–é¡¹ç›®
    */
   async getProjectsByTag(tag: string): Promise<ApiResponse<ProjectListResponse>> {
-    return apiService.get(`${this.baseUrl}/projects/by-tag/${encodeURIComponent(tag)}`);
+    return this.request(() =>
+      apiClient.get(`${this.baseUrl}/projects/by-tag/${encodeURIComponent(tag)}`)
+    );
   }
 
-  // ==================== ÅúÁ¿²Ù×÷ ====================
+  // ==================== æ‰¹é‡æ“ä½œ ====================
 
   /**
-   * ÅúÁ¿É¾³ıÏîÄ¿
+   * æ‰¹é‡åˆ é™¤é¡¹ç›®
    */
   async bulkDeleteProjects(projectIds: string[]): Promise<ApiResponse<{ deleted_count: number }>> {
-    return apiService.post(`${this.baseUrl}/projects/bulk-delete`, {
-      project_ids: projectIds
-    });
+    return this.request(() =>
+      apiClient.post(`${this.baseUrl}/projects/bulk-delete`, {
+        project_ids: projectIds,
+      })
+    );
   }
 
   /**
-   * ÅúÁ¿¹éµµÏîÄ¿
+   * æ‰¹é‡å½’æ¡£é¡¹ç›®
    */
-  async bulkArchiveProjects(projectIds: string[]): Promise<ApiResponse<{ archived_count: number }>> {
-    return apiService.post(`${this.baseUrl}/projects/bulk-archive`, {
-      project_ids: projectIds
-    });
+  async bulkArchiveProjects(
+    projectIds: string[]
+  ): Promise<ApiResponse<{ archived_count: number }>> {
+    return this.request(() =>
+      apiClient.post(`${this.baseUrl}/projects/bulk-archive`, {
+        project_ids: projectIds,
+      })
+    );
   }
 
   /**
-   * ÅúÁ¿¸üĞÂÏîÄ¿×´Ì¬
+   * æ‰¹é‡æ›´æ–°é¡¹ç›®çŠ¶æ€
    */
   async bulkUpdateStatus(
     projectIds: string[],
     status: 'active' | 'inactive' | 'archived'
   ): Promise<ApiResponse<{ updated_count: number }>> {
-    return apiService.post(`${this.baseUrl}/projects/bulk-update-status`, {
-      project_ids: projectIds,
-      status
-    });
+    return this.request(() =>
+      apiClient.post(`${this.baseUrl}/projects/bulk-update-status`, {
+        project_ids: projectIds,
+        status,
+      })
+    );
   }
 }
 

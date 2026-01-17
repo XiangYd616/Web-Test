@@ -21,12 +21,14 @@ const authRoutes = require('./routes/auth');
 const oauthRoutes = require('./routes/oauth');
 const testRoutes = require('./routes/test');
 const testsRoutes = require('./routes/tests');
+const usersRoutes = require('./routes/users');
 const seoRoutes = require('./routes/tests/seo');
 const securityRoutes = require('./routes/security');
 const performanceRoutes = require('./routes/performance');
 const enginesRoutes = require('./routes/engines');
 const scheduledTasksRoutes = require('./routes/scheduledTasks');
 const comparisonRoutes = require('./routes/comparison');
+const analyticsRoutes = require('./routes/analytics');
 
 // 导入中间件
 const { responseFormatter } = require('./middleware/responseFormatter');
@@ -145,12 +147,14 @@ app.use('/api/auth', authRoutes);
 app.use('/api/oauth', oauthRoutes);
 app.use('/api/test', testRoutes);
 app.use('/api/tests', testsRoutes);
+app.use('/api/users', usersRoutes);
 app.use('/api/seo', seoRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/engines', enginesRoutes);
 app.use('/api/scheduled-tasks', scheduledTasksRoutes);
 app.use('/api/comparison', comparisonRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // 静态文件服务（如果需要）
 if (NODE_ENV === 'production') {

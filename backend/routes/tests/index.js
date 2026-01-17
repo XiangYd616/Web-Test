@@ -13,15 +13,11 @@ const router = express.Router();
 const stressRouter = require('./stress');
 const apiRouter = require('./api');
 
-// 导入原始的测试路由（保持向后兼容）
-const originalTestRoutes = require('../test');
 
 // 挂载新的子路由（优先级更高）
 router.use('/stress', stressRouter);
 router.use('/api', apiRouter);
 
-// 兼容旧路由（作为后备）
-router.use('/', originalTestRoutes);
 
 /**
  * 测试概览端点

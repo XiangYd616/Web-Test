@@ -5,34 +5,12 @@
 const JwtService = require('../services/core/JwtService.js');
 const { PermissionService, PERMISSIONS } = require('../services/core/PermissionService.js');
 const { query } = require('../config/database');
-const { ErrorFactory } = require('../utils/apiError');
-const { ErrorCodes } = require('../types/apiResponse');
+const { ErrorFactory, ErrorCode } = require('./errorHandler');
 
 // 创建服务实例
 const jwtService = new JwtService();
 const permissionService = new PermissionService();
 
-// 错误类型定义（保持向后兼容）
-const AuthErrors = {
-  TOKEN_MISSING: ErrorCodes.TOKEN_MISSING,
-  TOKEN_INVALID: ErrorCodes.TOKEN_INVALID,
-  TOKEN_EXPIRED: ErrorCodes.TOKEN_EXPIRED,
-  USER_NOT_FOUND: ErrorCodes.USER_NOT_FOUND,
-  USER_INACTIVE: ErrorCodes.USER_INACTIVE,
-  INSUFFICIENT_PERMISSIONS: ErrorCodes.INSUFFICIENT_PERMISSIONS,
-  SESSION_EXPIRED: 'SESSION_EXPIRED'
-};
-
-// 创建标准化的认证错误响应（保持向后兼容）
-const createAuthError = (type, message, statusCode = 401) => {
-  return {
-    success: false,
-    error: type,
-    message,
-    statusCode,
-    timestamp: new Date().toISOString()
-  };
-};
 
 /**
  * 验证JWT令牌 - 使用增强的JWT服务
@@ -88,12 +66,12 @@ const authMiddleware = async (req, res, next) => {
   } catch (error) {
     console.error('认证中间件错误:', error);
 
-    if (error.code === ErrorCodes.TOKEN_EXPIRED) {
+    if (error.code === ErrorCode.TOKEN_EXPIRED) {
       
-        return res.error(ErrorCodes.TOKEN_EXPIRED, '令牌已过期，请重新登录');
-      } else if (error.code === ErrorCodes.TOKEN_INVALID) {
+        return res.error(ErrorCode.TOKEN_EXPIRED, '令牌已过期，请重新登录');
+      } else if (error.code === ErrorCode.INVALID_TOKEN) {
       
-        return res.error(ErrorCodes.TOKEN_INVALID, '令牌无效');
+        return res.error(ErrorCode.INVALID_TOKEN, '令牌无效');
       }
 
     return res.serverError('认证过程中发生错误');
@@ -136,7 +114,7 @@ const optionalAuth = async (req, res, next) => {
     }
 
     next();
-  } catch (error) {
+  } catch {
     // 可选认证失败时不返回错误，只是设置用户为null
     req.user = null;
     next();
@@ -229,7 +207,7 @@ const requirePermission = (permissions, requireAll = true) => {
 /**
  * 生成JWT令牌 - 使用新的JWT服务
  */
-const generateToken = async (userId, expiresIn = null) => {
+const generateToken = async (userId, _expiresIn = null) => {
   try {
     const tokenPair = await jwtService.generateTokenPair(userId);
     return tokenPair.accessToken;
@@ -255,7 +233,7 @@ const generateTokenPair = async (userId) => {
 const verifyToken = (token) => {
   try {
     return jwtService.verifyAccessToken(token);
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -263,14 +241,13 @@ const verifyToken = (token) => {
 /**
  * 刷新令牌 - 使用新的JWT服务
  */
-const refreshToken = async (req, res, next) => {
+const refreshToken = async (req, res, _next) => {
   try {
     const { refreshToken: refreshTokenValue } = req.body;
 
     if (!refreshTokenValue) {
-      
-        return res.error(ErrorCodes.MISSING_PARAMETER, '缺少刷新令牌');
-      }
+      return res.error(ErrorCode.MISSING_REQUIRED_FIELD, '缺少刷新令牌');
+    }
 
     // 使用JWT服务刷新令牌
     const tokenPair = await jwtService.refreshAccessToken(refreshTokenValue);
@@ -286,157 +263,19 @@ const refreshToken = async (req, res, next) => {
   } catch (error) {
     console.error('刷新令牌错误:', error);
 
-    if (error.code === ErrorCodes.TOKEN_EXPIRED) {
-      
-        return res.error(ErrorCodes.TOKEN_EXPIRED, '刷新令牌已过期，请重新登录');
-      } else if (error.code === ErrorCodes.TOKEN_INVALID) {
-      
-        return res.error(ErrorCodes.TOKEN_INVALID, '刷新令牌无效');
-      }
+    if (error.code === ErrorCode.TOKEN_EXPIRED) {
+      // 刷新令牌已过期
+      return res.error(ErrorCode.TOKEN_EXPIRED, '刷新令牌已过期，请重新登录');
+    } else if (error.code === ErrorCode.INVALID_TOKEN) {
+      // 刷新令牌无效
+      return res.error(ErrorCode.INVALID_TOKEN, '刷新令牌无效');
+    }
 
     return res.serverError('刷新令牌失败');
   }
 };
 
-
-
-
-
-/**
- * 记录用户活动
- */
-const recordUserActivity = async (userId, req) => {
-  try {
-    await query(`
-      INSERT INTO security_logs (user_id, event_type, event_data, ip_address, user_agent, success, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, NOW())
-    `, [
-      userId,
-      'user_activity',
-      {
-        path: req.originalUrl,
-        method: req.method,
-        timestamp: new Date().toISOString()
-      },
-      req.ip,
-      req.get('User-Agent'),
-      true
-    ]);
-  } catch (error) {
-    // 忽略记录失败，不影响主要功能
-    console.warn('记录用户活动失败:', error.message);
-  }
-};
-
-/**
- * 记录安全事件
- */
-const recordSecurityEvent = async (userId, eventType, eventData, req, success = true, riskLevel = 'low') => {
-  try {
-    await query(`
-      INSERT INTO security_logs (user_id, event_type, event_data, ip_address, user_agent, success, risk_level, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-    `, [
-      userId,
-      eventType,
-      eventData,
-      req?.ip || null,
-      req?.get('User-Agent') || null,
-      success,
-      riskLevel
-    ]);
-  } catch (error) {
-    console.warn('记录安全事件失败:', error.message);
-  }
-};
-
-/**
- * 撤销用户所有令牌
- */
-const revokeAllUserTokens = async (userId) => {
-  try {
-    await jwtService.revokeAllUserTokens(userId);
-    return true;
-  } catch (error) {
-    console.error('撤销用户令牌失败:', error);
-    return false;
-  }
-};
-
-/**
- * 获取用户权限列表
- */
-const getUserPermissions = async (userId) => {
-  try {
-    return await permissionService.getUserPermissions(userId);
-  } catch (error) {
-    console.error('获取用户权限失败:', error);
-    return [];
-  }
-};
-
-/**
- * 检查用户权限
- */
-const checkUserPermission = async (userId, permission) => {
-  try {
-    return await permissionService.hasPermission(userId, permission);
-  } catch (error) {
-    console.error('检查用户权限失败:', error);
-    return false;
-  }
-};
-
-/**
- * 创建用户会话（保持向后兼容）
- */
-const createUserSession = async (userId, accessToken, refreshToken, req) => {
-  try {
-    const sessionId = require('crypto').randomUUID();
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24); // 24小时后过期
-
-    const sessionResult = await query(`
-      INSERT INTO user_sessions (
-        user_id, session_id, access_token_hash, refresh_token_hash, 
-        ip_address, user_agent, expires_at, created_at, last_activity_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-      RETURNING id
-    `, [
-      userId,
-      sessionId,
-      hashToken(accessToken),
-      hashToken(refreshToken),
-      req.ip || req.connection?.remoteAddress,
-      req.get('User-Agent') || 'Unknown',
-      expiresAt
-    ]);
-
-    return sessionResult.rows[0].id;
-  } catch (error) {
-    console.error('创建用户会话失败:', error);
-    throw error;
-  }
-};
-
-/**
- * 清理过期会话（保持向后兼容）
- */
-const cleanupExpiredSessions = async () => {
-  try {
-    await query('DELETE FROM user_sessions WHERE expires_at < NOW() OR is_active = false');
-    await jwtService.cleanupExpiredTokens();
-  } catch (error) {
-    console.error('清理过期会话失败:', error);
-  }
-};
-
-/**
- * 生成令牌哈希值（保持向后兼容）
- */
-const hashToken = (token) => {
-  return jwtService.hashToken(token);
-};
+// ...
 
 module.exports = {
   // 核心中间件
@@ -472,9 +311,6 @@ module.exports = {
   jwtService,
   permissionService,
 
-// 常量（保持向后兼容）
-  AuthErrors,
-  createAuthError,
   PERMISSIONS,
   ROLES: {
     ADMIN: 'admin',

@@ -10,14 +10,14 @@ import { setupInterceptors } from './interceptors';
 /**
  * API响应格式
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
   error?: {
     code: string;
     message: string;
-    details?: any;
+    details?: Record<string, unknown>;
   };
   timestamp?: string;
 }
@@ -78,9 +78,9 @@ class ApiClient {
   /**
    * GET请求
    */
-  async get<T = any>(
+  async get<T = unknown>(
     url: string,
-    paramsOrConfig?: Record<string, any> | AxiosRequestConfig
+    paramsOrConfig?: Record<string, unknown> | AxiosRequestConfig
   ): Promise<T> {
     try {
       let config: AxiosRequestConfig = {};
@@ -104,7 +104,7 @@ class ApiClient {
   /**
    * POST请求
    */
-  async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await this.instance.post(url, data, config);
       return this.handleResponse(response);
@@ -116,7 +116,7 @@ class ApiClient {
   /**
    * PUT请求
    */
-  async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await this.instance.put(url, data, config);
       return this.handleResponse(response);
@@ -128,7 +128,7 @@ class ApiClient {
   /**
    * PATCH请求
    */
-  async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await this.instance.patch(url, data, config);
       return this.handleResponse(response);
@@ -140,7 +140,7 @@ class ApiClient {
   /**
    * DELETE请求
    */
-  async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  async delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
     try {
       const response: AxiosResponse<ApiResponse<T>> = await this.instance.delete(url, config);
       return this.handleResponse(response);
@@ -181,7 +181,7 @@ class ApiClient {
   private handleError(error: AxiosError): Error {
     if (error.response) {
       // 服务器返回错误
-      const data = error.response.data as ApiResponse;
+      const data = error.response.data as ApiResponse<unknown>;
       const message = data?.error?.message || data?.message || error.message;
       return new Error(message);
     } else if (error.request) {

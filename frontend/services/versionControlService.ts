@@ -1,14 +1,10 @@
 /**
- * °æ±¾¿ØÖÆ¼¯³É·şÎñ
- * Í³Ò»¹ÜÀíÊı¾İÄ£ĞÍ°æ±¾¡¢Ç¨ÒÆ¡¢¼æÈİĞÔ¼ì²é
- * °æ±¾: v1.0.0
+ * ç‰ˆæœ¬æ§åˆ¶é›†æˆæœåŠ¡
+ * ç»Ÿä¸€ç®¡ç†æ•°æ®æ¨¡å‹ç‰ˆæœ¬ã€è¿ç§»ã€å…¼å®¹æ€§æ£€æŸ¥
+ * ç‰ˆæœ¬: v1.0.0
  */
 
-import type {
-  ApiVersionNegotiation,
-  DataMigration,
-  VersionedData
-} from '../types/version.types';
+import type { ApiVersionNegotiation, DataMigration, VersionedData } from '../types/version.types';
 import {
   ApiVersionNegotiator,
   AutoMigrationSystem,
@@ -17,13 +13,13 @@ import {
   TypeVersionRegistry,
   VERSION_INFO,
   VersionChecker,
-  VersionedDataWrapper
+  VersionedDataWrapper,
 } from '../types/version.types';
-
-const autoMigrationSystem = new AutoMigrationSystem();
 import { defaultMemoryCache } from './cacheStrategy';
 
-// ==================== °æ±¾¿ØÖÆÅäÖÃ ====================
+const autoMigrationSystem = new AutoMigrationSystem();
+
+// ==================== ç‰ˆæœ¬æ§åˆ¶é…ç½® ====================
 
 export interface VersionControlConfig {
   enableAutoMigration: boolean;
@@ -35,7 +31,7 @@ export interface VersionControlConfig {
   logMigrations: boolean;
 }
 
-export interface MigrationResult<T = any> {
+export interface MigrationResult<T = unknown> {
   success: boolean;
   data?: VersionedData<T>;
   error?: string;
@@ -59,7 +55,7 @@ export interface CompatibilityReport {
   recommendations: string[];
 }
 
-// ==================== °æ±¾¿ØÖÆ·şÎñ ====================
+// ==================== ç‰ˆæœ¬æ§åˆ¶æœåŠ¡ ====================
 
 export class VersionControlService {
   private config: VersionControlConfig;
@@ -71,21 +67,21 @@ export class VersionControlService {
       enableAutoMigration: true,
       enableCompatibilityCheck: true,
       enableVersionCache: true,
-      cacheTimeout: 3600000, // 1Ğ¡Ê±
-      migrationTimeout: 30000, // 30Ãë
+      cacheTimeout: 3600000, // 1å°æ—¶
+      migrationTimeout: 30000, // 30ç§’
       strictMode: false,
       logMigrations: true,
-      ...config
+      ...config,
     };
 
     this.migrationSystem = autoMigrationSystem;
     this.setupDefaultMigrations();
   }
 
-  // ==================== °æ±¾¼ì²é ====================
+  // ==================== ç‰ˆæœ¬æ£€æŸ¥ ====================
 
   /**
-   * ¼ì²é¿Í»§¶ËºÍ·şÎñÆ÷°æ±¾¼æÈİĞÔ
+   * æ£€æŸ¥å®¢æˆ·ç«¯å’ŒæœåŠ¡å™¨ç‰ˆæœ¬å…¼å®¹æ€§
    */
   async checkCompatibility(
     clientVersion: string,
@@ -93,23 +89,22 @@ export class VersionControlService {
     endpoints: string[] = [],
     dataModels: Record<string, string> = {}
   ): Promise<CompatibilityReport> {
-
     /**
 
-     * if¹¦ÄÜº¯Êı
+     * ifåŠŸèƒ½å‡½æ•°
 
-     * @param {Object} params - ²ÎÊı¶ÔÏó
+     * @param {Object} params - å‚æ•°å¯¹è±¡
 
-     * @returns {Promise<Object>} ·µ»Ø½á¹û
+     * @returns {Promise<Object>} è¿”å›ç»“æœ
 
      */
     const cacheKey = `compatibility_${clientVersion}_${serverVersion}`;
 
     if (this.config.enableVersionCache) {
       /**
-       * if¹¦ÄÜº¯Êı
-       * @param {Object} params - ²ÎÊı¶ÔÏó
-       * @returns {Promise<Object>} ·µ»Ø½á¹û
+       * ifåŠŸèƒ½å‡½æ•°
+       * @param {Object} params - å‚æ•°å¯¹è±¡
+       * @returns {Promise<Object>} è¿”å›ç»“æœ
        */
       const cached = await defaultMemoryCache.get(cacheKey);
       if (cached) {
@@ -133,14 +128,14 @@ export class VersionControlService {
       api: {
         compatible: apiCheck.compatible,
         warnings: apiCheck.warnings,
-        errors: apiCheck.errors
+        errors: apiCheck.errors,
       },
       dataModels: {
         compatible: dataModelCheck.compatible,
         incompatibleModels: dataModelCheck.incompatibleModels,
-        warnings: dataModelCheck.warnings
+        warnings: dataModelCheck.warnings,
       },
-      recommendations: this.generateRecommendations(apiCheck, dataModelCheck)
+      recommendations: this.generateRecommendations(apiCheck, dataModelCheck),
     };
 
     if (this.config.enableVersionCache) {
@@ -151,7 +146,7 @@ export class VersionControlService {
   }
 
   /**
-   * Ğ­ÉÌAPI°æ±¾
+   * åå•†APIç‰ˆæœ¬
    */
   negotiateApiVersion(
     clientVersion: string,
@@ -161,58 +156,59 @@ export class VersionControlService {
     return ApiVersionNegotiator.negotiate(clientVersion, serverVersion, supportedVersions);
   }
 
-  // ==================== Êı¾İÇ¨ÒÆ ====================
+  // ==================== æ•°æ®è¿ç§» ====================
 
   /**
-   * Ç¨ÒÆµ¥¸öÊı¾İ¶ÔÏó
+   * è¿ç§»å•ä¸ªæ•°æ®å¯¹è±¡
    */
   async migrateData<T>(
     typeName: string,
-    data: VersionedData<any> | any,
+    data: VersionedData<unknown> | unknown,
     targetVersion: string = DATA_MODEL_VERSION
   ): Promise<MigrationResult<T>> {
     const startTime = Date.now();
     const migrationId = `${typeName}_${Date.now()}`;
 
     try {
-      // °ü×°Êı¾İÎª°æ±¾»¯¸ñÊ½
+      // åŒ…è£…æ•°æ®ä¸ºç‰ˆæœ¬åŒ–æ ¼å¼
       const versionedData = this.ensureVersionedData(data);
 
       if (versionedData.version === targetVersion) {
         return {
           success: true,
           data: versionedData as VersionedData<T>,
-          duration: Date.now() - startTime
+          duration: Date.now() - startTime,
         };
       }
 
-      // Ö´ĞĞÇ¨ÒÆ
+      // æ‰§è¡Œè¿ç§»
       const migrated = await Promise.race([
         this.migrationSystem.migrateData<T>(typeName, versionedData, targetVersion),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('Migration timeout')), this.config.migrationTimeout)
-        )
+        ),
       ]);
 
       const result: MigrationResult<T> = {
         success: true,
         data: migrated,
-        migrationPath: VersionChecker.getMigrationPath(typeName, versionedData.version, targetVersion),
-        duration: Date.now() - startTime
+        migrationPath: VersionChecker.getMigrationPath(
+          typeName,
+          versionedData.version,
+          targetVersion
+        ),
+        duration: Date.now() - startTime,
       };
 
-      // ¼ÇÂ¼Ç¨ÒÆÀúÊ·
+      // è®°å½•è¿ç§»å†å²
       this.recordMigration(migrationId, result);
-
-      if (this.config.logMigrations) {
-      }
 
       return result;
     } catch (error) {
       const result: MigrationResult<T> = {
         success: false,
         error: error instanceof Error ? error?.message : String(error),
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
       };
 
       this.recordMigration(migrationId, result);
@@ -226,11 +222,11 @@ export class VersionControlService {
   }
 
   /**
-   * ÅúÁ¿Ç¨ÒÆÊı¾İ
+   * æ‰¹é‡è¿ç§»æ•°æ®
    */
   async migrateBatch<T>(
     typeName: string,
-    dataList: (VersionedData<any> | any)[],
+    dataList: (VersionedData<unknown> | unknown)[],
     targetVersion: string = DATA_MODEL_VERSION,
     onProgress?: (completed: number, total: number, current?: MigrationResult<T>) => void
   ): Promise<MigrationResult<T>[]> {
@@ -246,7 +242,7 @@ export class VersionControlService {
   }
 
   /**
-   * ×¢²áÊı¾İÇ¨ÒÆ
+   * æ³¨å†Œæ•°æ®è¿ç§»
    */
   registerMigration<TFrom, TTo>(
     typeName: string,
@@ -259,23 +255,23 @@ export class VersionControlService {
       fromVersion,
       toVersion,
       migrate: migrator,
-      validate: validator
+      validate: validator,
     };
 
     this.migrationSystem.registerMigration(typeName, migration);
   }
 
-  // ==================== °æ±¾ĞÅÏ¢¹ÜÀí ====================
+  // ==================== ç‰ˆæœ¬ä¿¡æ¯ç®¡ç† ====================
 
   /**
-   * »ñÈ¡µ±Ç°°æ±¾ĞÅÏ¢
+   * è·å–å½“å‰ç‰ˆæœ¬ä¿¡æ¯
    */
   getVersionInfo(): typeof VERSION_INFO {
     return VERSION_INFO;
   }
 
   /**
-   * »ñÈ¡ÀàĞÍ°æ±¾ĞÅÏ¢
+   * è·å–ç±»å‹ç‰ˆæœ¬ä¿¡æ¯
    */
   getTypeVersions(typeName?: string): unknown {
     if (typeName) {
@@ -285,32 +281,33 @@ export class VersionControlService {
   }
 
   /**
-   * ×¢²áÀàĞÍ°æ±¾
+   * æ³¨å†Œç±»å‹ç‰ˆæœ¬
    */
   registerTypeVersion(
     name: string,
     version: string,
-    validator?: (data: any) => boolean,
-    schema?: any): void {
+    validator?: (data: unknown) => boolean,
+    schema?: unknown
+  ): void {
     TypeVersionRegistry.register({
       name,
       version,
       validator,
-      schema
+      schema,
     });
   }
 
   /**
-   * ÑéÖ¤Êı¾İÀàĞÍºÍ°æ±¾
+   * éªŒè¯æ•°æ®ç±»å‹å’Œç‰ˆæœ¬
    */
-  validateData(typeName: string, version: string, data: any): boolean {
+  validateData(typeName: string, version: string, data: unknown): boolean {
     return TypeVersionRegistry.validate(typeName, version, data);
   }
 
-  // ==================== Ç¨ÒÆÀúÊ·¹ÜÀí ====================
+  // ==================== è¿ç§»å†å²ç®¡ç† ====================
 
   /**
-   * »ñÈ¡Ç¨ÒÆÀúÊ·
+   * è·å–è¿ç§»å†å²
    */
   getMigrationHistory(migrationId?: string): MigrationResult[] | MigrationResult | null {
     if (migrationId) {
@@ -327,7 +324,7 @@ export class VersionControlService {
   }
 
   /**
-   * ÇåÀíÇ¨ÒÆÀúÊ·
+   * æ¸…ç†è¿ç§»å†å²
    */
   clearMigrationHistory(olderThan?: number): void {
     if (olderThan) {
@@ -345,77 +342,80 @@ export class VersionControlService {
     }
   }
 
-  // ==================== ¹¤¾ß·½·¨ ====================
+  // ==================== å·¥å…·æ–¹æ³• ====================
 
   /**
-   * ´´½¨°æ±¾»¯Êı¾İ°ü×°Æ÷
+   * åˆ›å»ºç‰ˆæœ¬åŒ–æ•°æ®åŒ…è£…å™¨
    */
   createVersionedData<T>(data: T, version: string = DATA_MODEL_VERSION): VersionedDataWrapper<T> {
     return VersionedDataWrapper.create(data, version);
   }
 
   /**
-   * ¼ì²éÊÇ·ñĞèÒªÇ¨ÒÆ
+   * æ£€æŸ¥æ˜¯å¦éœ€è¦è¿ç§»
    */
-  needsMigration(data: VersionedData<any> | any, targetVersion: string = DATA_MODEL_VERSION): boolean {
+  needsMigration(
+    data: VersionedData<unknown> | unknown,
+    targetVersion: string = DATA_MODEL_VERSION
+  ): boolean {
     const versionedData = this.ensureVersionedData(data);
     return VersionChecker.needsMigration(versionedData.version, targetVersion);
   }
 
   /**
-   * »ñÈ¡Ç¨ÒÆÂ·¾¶
+   * è·å–è¿ç§»è·¯å¾„
    */
   getMigrationPath(typeName: string, fromVersion: string, toVersion: string): string[] {
     return VersionChecker.getMigrationPath(typeName, fromVersion, toVersion);
   }
 
-  // ==================== Ë½ÓĞ·½·¨ ====================
+  // ==================== ç§æœ‰æ–¹æ³• ====================
 
-  private ensureVersionedData(data: VersionedData<any> | any): VersionedData<any> {
+  private ensureVersionedData(data: VersionedData<unknown> | unknown): VersionedData<unknown> {
     if (data && typeof data === 'object' && 'version' in data && 'data' in data) {
-      return data as VersionedData<any>;
+      return data as VersionedData<unknown>;
     }
 
     return {
-      version: '1.0.0', // Ä¬ÈÏ°æ±¾
+      version: '1.0.0', // é»˜è®¤ç‰ˆæœ¬
       data,
       metadata: {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        source: 'legacy'
-      }
+        source: 'legacy',
+      },
     };
   }
 
   private getServerDataModels(): Record<string, string> {
-    // ÕâÀïÓ¦¸Ã´Ó·şÎñÆ÷»ñÈ¡Êı¾İÄ£ĞÍ°æ±¾ĞÅÏ¢
-    // Ä¿Ç°·µ»ØÄ¬ÈÏ°æ±¾
+    // è¿™é‡Œåº”è¯¥ä»æœåŠ¡å™¨è·å–æ•°æ®æ¨¡å‹ç‰ˆæœ¬ä¿¡æ¯
+    // ç›®å‰è¿”å›é»˜è®¤ç‰ˆæœ¬
     return {
-      'User': '1.0.0',
-      'TestResult': '1.0.0',
-      'ApiResponse': '1.0.0'
+      User: '1.0.0',
+      TestResult: '1.0.0',
+      ApiResponse: '1.0.0',
     };
   }
 
-  private generateRecommendations(
-    apiCheck: unknown,
-    dataModelCheck: any): string[] {
+  private generateRecommendations(apiCheck: unknown, dataModelCheck: unknown): string[] {
     const recommendations: string[] = [];
+    const apiRecord = apiCheck as { compatible?: boolean; warnings?: unknown[] };
+    const dataRecord = dataModelCheck as { compatible?: boolean; warnings?: unknown[] };
 
-    if (!(apiCheck as any).compatible) {
-      recommendations.push('Éı¼¶¿Í»§¶Ëµ½¼æÈİµÄAPI°æ±¾');
+    if (apiRecord.compatible === false) {
+      recommendations.push('å‡çº§å®¢æˆ·ç«¯åˆ°å…¼å®¹çš„APIç‰ˆæœ¬');
     }
 
-    if (!(dataModelCheck as any).compatible) {
-      recommendations.push('Ö´ĞĞÊı¾İÄ£ĞÍÇ¨ÒÆÒÔÈ·±£¼æÈİĞÔ');
+    if (dataRecord.compatible === false) {
+      recommendations.push('æ‰§è¡Œæ•°æ®æ¨¡å‹è¿ç§»ä»¥ç¡®ä¿å…¼å®¹æ€§');
     }
 
-    if ((apiCheck as any).warnings?.length > 0) {
-      recommendations.push('¼ì²éAPIÊ¹ÓÃ·½Ê½£¬±ÜÃâÊ¹ÓÃÒÑÆúÓÃµÄ¹¦ÄÜ');
+    if (apiRecord.warnings && apiRecord.warnings.length > 0) {
+      recommendations.push('æ£€æŸ¥APIä½¿ç”¨æ–¹å¼ï¼Œé¿å…ä½¿ç”¨å·²å¼ƒç”¨çš„åŠŸèƒ½');
     }
 
-    if ((dataModelCheck as any).warnings?.length > 0) {
-      recommendations.push('¸üĞÂÊı¾İÄ£ĞÍ¶¨ÒåÒÔÆ¥Åä·şÎñÆ÷°æ±¾');
+    if (dataRecord.warnings && dataRecord.warnings.length > 0) {
+      recommendations.push('æ›´æ–°æ•°æ®æ¨¡å‹å®šä¹‰ä»¥åŒ¹é…æœåŠ¡å™¨ç‰ˆæœ¬');
     }
 
     return recommendations;
@@ -427,7 +427,7 @@ export class VersionControlService {
     }
     this.migrationHistory.get(migrationId)!.push(result);
 
-    // ÏŞÖÆÀúÊ·¼ÇÂ¼ÊıÁ¿
+    // é™åˆ¶å†å²è®°å½•æ•°é‡
     const history = this.migrationHistory.get(migrationId)!;
     if (history.length > 100) {
       history.splice(0, history.length - 100);
@@ -435,38 +435,38 @@ export class VersionControlService {
   }
 
   private setupDefaultMigrations(): void {
-    // ÉèÖÃÄ¬ÈÏµÄÊı¾İÇ¨ÒÆ
-    // ÕâÀï¿ÉÒÔ×¢²á³£¼ûµÄÊı¾İÄ£ĞÍÇ¨ÒÆ
+    // è®¾ç½®é»˜è®¤çš„æ•°æ®è¿ç§»
+    // è¿™é‡Œå¯ä»¥æ³¨å†Œå¸¸è§çš„æ•°æ®æ¨¡å‹è¿ç§»
 
-    // Ê¾Àı£ºÓÃ»§Ä£ĞÍ´Ó1.0.0µ½1.1.0µÄÇ¨ÒÆ
+    // ç¤ºä¾‹ï¼šç”¨æˆ·æ¨¡å‹ä»1.0.0åˆ°1.1.0çš„è¿ç§»
     this.registerMigration(
       'User',
       '1.0.0',
       '1.1.0',
-      (data: any) => ({
+      (data: Record<string, unknown>) => ({
         ...data,
         preferences: data?.preferences || {},
-        profile: data?.profile || {}
+        profile: data?.profile || {},
       }),
-      (data: any) => data && data?.preferences && data?.profile
+      (data: Record<string, unknown>) => Boolean(data && data?.preferences && data?.profile)
     );
 
-    // Ê¾Àı£º²âÊÔ½á¹ûÄ£ĞÍÇ¨ÒÆ
+    // ç¤ºä¾‹ï¼šæµ‹è¯•ç»“æœæ¨¡å‹è¿ç§»
     this.registerMigration(
       'TestResult',
       '1.0.0',
       '1.1.0',
-      (data: any) => ({
+      (data: Record<string, unknown>) => ({
         ...data,
         metadata: data?.metadata || {},
-        version: '1.1.0'
+        version: '1.1.0',
       }),
-      (data: any) => data && data?.metadata
+      (data: Record<string, unknown>) => Boolean(data && data?.metadata)
     );
   }
 }
 
-// ==================== Hook¼¯³É ====================
+// ==================== Hooké›†æˆ ====================
 
 export function useVersionControl(config?: Partial<VersionControlConfig>) {
   const service = new VersionControlService(config);
@@ -479,11 +479,11 @@ export function useVersionControl(config?: Partial<VersionControlConfig>) {
     getVersionInfo: service.getVersionInfo.bind(service),
     createVersionedData: service.createVersionedData.bind(service),
     validateData: service.validateData.bind(service),
-    getMigrationHistory: service.getMigrationHistory.bind(service)
+    getMigrationHistory: service.getMigrationHistory.bind(service),
   };
 }
 
-// ==================== Ä¬ÈÏÊµÀı ====================
+// ==================== é»˜è®¤å®ä¾‹ ====================
 
 export const defaultVersionControlService = new VersionControlService();
 

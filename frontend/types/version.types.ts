@@ -155,7 +155,7 @@ export class VersionChecker {
 
 // ==================== 数据迁移接口 ====================
 
-export interface DataMigration<TFrom = any, TTo = any> {
+export interface DataMigration<TFrom = unknown, TTo = unknown> {
   fromVersion: string;
   toVersion: string;
   migrate(data: TFrom): TTo;
@@ -168,7 +168,7 @@ export interface MigrationRegistry {
 
 // ==================== 版本化数据包装器 ====================
 
-export interface VersionedData<T = any> {
+export interface VersionedData<T = unknown> {
   version: string;
   data: T;
   metadata?: {
@@ -179,7 +179,7 @@ export interface VersionedData<T = any> {
   };
 }
 
-export class VersionedDataWrapper<T = any> {
+export class VersionedDataWrapper<T = unknown> {
   constructor(
     public readonly version: string,
     public readonly data: T,
@@ -308,8 +308,8 @@ export class ApiVersionNegotiator {
 export interface TypeVersionInfo {
   name: string;
   version: string;
-  schema?: any;
-  validator?: (data: any) => boolean;
+  schema?: unknown;
+  validator?: (data: unknown) => boolean;
 }
 
 export class TypeVersionRegistry {
@@ -332,7 +332,7 @@ export class TypeVersionRegistry {
   /**
    * 验证数据类型和版本
    */
-  static validate(name: string, version: string, data: any): boolean {
+  static validate(name: string, version: string, data: unknown): boolean {
     const info = this.get(name, version);
     if (!info) {
       return false;
@@ -384,7 +384,7 @@ export class AutoMigrationSystem {
    */
   async migrateData<T>(
     typeName: string,
-    data: VersionedData<any>,
+    data: VersionedData<unknown>,
     targetVersion: string = DATA_MODEL_VERSION
   ): Promise<VersionedData<T>> {
     if (data.version === targetVersion) {
@@ -431,7 +431,7 @@ export class AutoMigrationSystem {
    */
   async migrateBatch<T>(
     typeName: string,
-    dataList: VersionedData<any>[],
+    dataList: VersionedData<unknown>[],
     targetVersion: string = DATA_MODEL_VERSION,
     onProgress?: (completed: number, total: number) => void
   ): Promise<VersionedData<T>[]> {
@@ -564,23 +564,35 @@ export const _autoMigrationSystem = new AutoMigrationSystem();
 TypeVersionRegistry.register({
   name: 'User',
   version: '1.0.0',
-  validator: (data: any) => {
-    return data && typeof data.id === 'string' && typeof data.email === 'string';
+  validator: (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      return false;
+    }
+    const record = data as Record<string, unknown>;
+    return typeof record.id === 'string' && typeof record.email === 'string';
   },
 });
 
 TypeVersionRegistry.register({
   name: 'TestResult',
   version: '1.0.0',
-  validator: (data: any) => {
-    return data && typeof data.id === 'string' && typeof data.testType === 'string';
+  validator: (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      return false;
+    }
+    const record = data as Record<string, unknown>;
+    return typeof record.id === 'string' && typeof record.testType === 'string';
   },
 });
 
 TypeVersionRegistry.register({
   name: 'ApiResponse',
   version: '1.0.0',
-  validator: (data: any) => {
-    return data && typeof data.success === 'boolean';
+  validator: (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      return false;
+    }
+    const record = data as Record<string, unknown>;
+    return typeof record.success === 'boolean';
   },
 });

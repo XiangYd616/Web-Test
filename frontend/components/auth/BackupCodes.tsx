@@ -4,10 +4,10 @@
  */
 
 import Logger from '@/utils/logger';
-import React, { useState, useEffect } from 'react';
-import { Copy, Download, RefreshCw, Shield, AlertTriangle, Check, Eye, EyeOff } from 'lucide-react';
-import { api } from '../../services/api';
+import { AlertTriangle, Check, Copy, Download, Eye, EyeOff, RefreshCw, Shield } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiClient } from '../../services/api/client';
 // TODO: Install react-toastify package
 // import { toast } from 'react-toastify';
 const toast = {
@@ -29,10 +29,10 @@ interface BackupCodesProps {
   showGenerateButton?: boolean;
 }
 
-const BackupCodes: React.FC<BackupCodesProps> = ({ 
-  userId, 
+const BackupCodes: React.FC<BackupCodesProps> = ({
+  userId,
   onClose,
-  showGenerateButton = true 
+  showGenerateButton = true,
 }) => {
   const { user } = useAuth();
   const [codes, setCodes] = useState<BackupCode[]>([]);
@@ -40,36 +40,45 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
   const [showCodes, setShowCodes] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [regenerating, setRegenerating] = useState(false);
-  const [_downloadReady, setDownloadReady] = useState(false);
+  const setDownloadReady = useCallback((_ready: boolean) => {
+    // 备用：当前未显示下载状态
+  }, []);
 
   // 获取备份代码
-  const fetchBackupCodes = async () => {
+  const fetchBackupCodes = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/auth/backup-codes/${userId || user?.id}`);
-      setCodes((response.data as any).codes);
-      setDownloadReady((response.data as any).codes.length > 0);
+      const response = await apiClient.get<{ codes: BackupCode[] }>(
+        `/auth/backup-codes/${userId || user?.id}`
+      );
+      const nextCodes = response?.codes || [];
+      setCodes(nextCodes);
+      setDownloadReady(nextCodes.length > 0);
     } catch (error) {
       Logger.error('获取备份代码失败:', error);
       toast.error('获取备份代码失败');
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, user?.id, setDownloadReady]);
 
   // 生成新的备份代码
   const generateNewCodes = async () => {
+    // eslint-disable-next-line no-alert
     if (!window.confirm('生成新代码将使旧代码失效。确定要继续吗？')) {
       return;
     }
 
     setRegenerating(true);
     try {
-      const response = await api.post(`/auth/backup-codes/generate`, {
-        userId: userId || user?.id
-      });
-      
-      setCodes((response.data as any).codes);
+      const response = await apiClient.post<{ codes: BackupCode[] }>(
+        `/auth/backup-codes/generate`,
+        {
+          userId: userId || user?.id,
+        }
+      );
+      const nextCodes = response?.codes || [];
+      setCodes(nextCodes);
       setShowCodes(true);
       setDownloadReady(true);
       toast.success('已生成新的备份代码');
@@ -88,7 +97,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
       toast.success('代码已复制到剪贴板');
-    } catch (error) {
+    } catch {
       toast.error('复制失败');
     }
   };
@@ -99,23 +108,24 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       .filter(c => !c.used)
       .map(c => c.code)
       .join('\n');
-    
+
     try {
       await navigator.clipboard.writeText(allCodes);
       toast.success('所有代码已复制到剪贴板');
-    } catch (error) {
+    } catch {
       toast.error('复制失败');
     }
   };
 
   // 下载代码
   const downloadCodes = () => {
-    const content = `Test-Web 备份代码\n` +
+    const content =
+      `Test-Web 备份代码\n` +
       `生成时间: ${new Date().toLocaleString()}\n` +
       `用户: ${user?.email}\n\n` +
       `请将这些代码保存在安全的地方。每个代码只能使用一次。\n\n` +
       codes.map((c, i) => `${i + 1}. ${c.code}${c.used ? ' (已使用)' : ''}`).join('\n');
-    
+
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -125,13 +135,13 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     toast.success('备份代码已下载');
   };
 
   useEffect(() => {
     fetchBackupCodes();
-  }, [userId]);
+  }, [fetchBackupCodes]);
 
   const unusedCodesCount = codes.filter(c => !c.used).length;
 
@@ -150,27 +160,29 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
 
       {/* 状态提?*/}
       {codes.length > 0 && (
-        <div className={`mb-4 p-4 rounded-lg ${
-          unusedCodesCount < 3 
-            ? 'bg-yellow-50 border border-yellow-200' 
-            : 'bg-blue-50 border border-blue-200'
-        }`}>
+        <div
+          className={`mb-4 p-4 rounded-lg ${
+            unusedCodesCount < 3
+              ? 'bg-yellow-50 border border-yellow-200'
+              : 'bg-blue-50 border border-blue-200'
+          }`}
+        >
           <div className="flex items-center">
             {unusedCodesCount < 3 ? (
               <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2" />
             ) : (
               <Shield className="w-5 h-5 text-blue-600 mr-2" />
             )}
-            <span className={`font-medium ${
-              unusedCodesCount < 3 ? 'text-yellow-800' : 'text-blue-800'
-            }`}>
+            <span
+              className={`font-medium ${
+                unusedCodesCount < 3 ? 'text-yellow-800' : 'text-blue-800'
+              }`}
+            >
               您还有 {unusedCodesCount} 个未使用的备份代码
             </span>
           </div>
           {unusedCodesCount < 3 && (
-            <p className="text-sm text-yellow-700 mt-1">
-              建议生成新的备份代码以确保账户安全。
-            </p>
+            <p className="text-sm text-yellow-700 mt-1">建议生成新的备份代码以确保账户安全。</p>
           )}
         </div>
       )}
@@ -247,9 +259,11 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : codes.length > 0 ? (
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-3 ${
-          !showCodes ? 'filter blur-lg select-none' : ''
-        }`}>
+        <div
+          className={`grid grid-cols-1 md:grid-cols-2 gap-3 ${
+            !showCodes ? 'filter blur-lg select-none' : ''
+          }`}
+        >
           {codes.map((code, index) => (
             <div
               key={index}
@@ -260,14 +274,14 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
               }`}
             >
               <div className="flex items-center justify-between">
-                <code className={`font-mono text-sm ${
-                  code.used
-                    ? 'text-gray-500 line-through'
-                    : 'text-gray-900 dark:text-white'
-                }`}>
+                <code
+                  className={`font-mono text-sm ${
+                    code.used ? 'text-gray-500 line-through' : 'text-gray-900 dark:text-white'
+                  }`}
+                >
                   {showCodes ? code.code : '••••••••••••'}
                 </code>
-                
+
                 {!code.used && showCodes && (
                   <button
                     onClick={() => copyCode(code.code, index)}
@@ -282,7 +296,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
                   </button>
                 )}
               </div>
-              
+
               {code.used && code.usedAt && (
                 <p className="text-xs text-gray-500 mt-1">
                   使用于: {new Date(code.usedAt).toLocaleString()}
@@ -295,13 +309,15 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
         <div className="text-center py-8 text-gray-500">
           <Shield className="w-12 h-12 mx-auto mb-3 text-gray-400" />
           <p>尚未生成备份代码</p>
-          <p className="text-sm mt-1">点击"生成新代码"创建备份代码</p>
+          <p className="text-sm mt-1">点击“生成新代码”创建备份代码</p>
         </div>
       )}
 
       {/* 安全提示 */}
-      <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 
-                    dark:border-yellow-800 rounded-lg">
+      <div
+        className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 
+                    dark:border-yellow-800 rounded-lg"
+      >
         <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
           安全提示
         </h4>
