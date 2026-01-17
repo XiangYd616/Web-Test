@@ -18,12 +18,7 @@ import {
   Table,
 } from 'lucide-react';
 import React, { useState } from 'react';
-import {
-  ExportFormat,
-  ReportConfig,
-  ReportData,
-  reportGeneratorService,
-} from '../../services/reportGeneratorService';
+import type { ExportFormat, ReportConfig, ReportData } from '../../services/reporting/index';
 interface ReportExporterProps {
   testResults: any[];
   analytics?: any;

@@ -5,7 +5,6 @@
 
 import Logger from '@/utils/logger';
 import { useState } from 'react';
-import { errorService } from '../services/errorService';
 
 // 测试结果接口
 interface TestResult {
@@ -52,7 +51,7 @@ export class TestSuite {
         return {
           name,
           passed: true,
-          duration
+          duration,
         };
       } catch (error) {
         const duration = performance.now() - startTime;
@@ -60,7 +59,7 @@ export class TestSuite {
           name,
           passed: false,
           duration,
-          error: error instanceof Error ? error?.message : String(error)
+          error: error instanceof Error ? error?.message : String(error),
         };
       }
     });
@@ -93,9 +92,9 @@ export class TestSuite {
       total,
       passed,
       failed,
-      passRate: total > 0 ? (passed / total * 100).toFixed(2) : '0',
+      passRate: total > 0 ? ((passed / total) * 100).toFixed(2) : '0',
       totalDuration: totalDuration.toFixed(2),
-      avgDuration: total > 0 ? (totalDuration / total).toFixed(2) : '0'
+      avgDuration: total > 0 ? (totalDuration / total).toFixed(2) : '0',
     };
   }
 }
@@ -109,7 +108,7 @@ export class PerformanceTester {
     renderTime: 1000, // 1秒
     interactionTime: 100, // 100毫秒
     memoryUsage: 50, // 50MB
-    bundleSize: 1000 // 1MB
+    bundleSize: 1000, // 1MB
   };
 
   /**
@@ -120,7 +119,9 @@ export class PerformanceTester {
 
     // 测试导航时间
     if ('performance' in window && 'getEntriesByType' in performance) {
-      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      const navEntries = performance.getEntriesByType(
+        'navigation'
+      ) as PerformanceNavigationTiming[];
       if (navEntries.length > 0) {
         const nav = navEntries[0];
         const loadTime = nav.loadEventEnd - (nav as any).navigationStart;
@@ -130,7 +131,7 @@ export class PerformanceTester {
           value: loadTime,
           unit: 'ms',
           threshold: this.thresholds.loadTime,
-          passed: loadTime <= this.thresholds.loadTime
+          passed: loadTime <= this.thresholds.loadTime,
         });
 
         const renderTime = nav.domContentLoadedEventEnd - (nav as any).navigationStart;
@@ -139,7 +140,7 @@ export class PerformanceTester {
           value: renderTime,
           unit: 'ms',
           threshold: this.thresholds.renderTime,
-          passed: renderTime <= this.thresholds.renderTime
+          passed: renderTime <= this.thresholds.renderTime,
         });
       }
     }
@@ -153,7 +154,7 @@ export class PerformanceTester {
         value: fcp.startTime,
         unit: 'ms',
         threshold: this.thresholds.renderTime,
-        passed: fcp.startTime <= this.thresholds.renderTime
+        passed: fcp.startTime <= this.thresholds.renderTime,
       });
     }
 
@@ -173,7 +174,7 @@ export class PerformanceTester {
         value: usedMB,
         unit: 'MB',
         threshold: this.thresholds.memoryUsage,
-        passed: usedMB <= this.thresholds.memoryUsage
+        passed: usedMB <= this.thresholds.memoryUsage,
       };
     }
     return null;
@@ -182,7 +183,10 @@ export class PerformanceTester {
   /**
    * 测试组件渲染性能
    */
-  async testComponentRender(componentName: string, renderFn: () => void): Promise<PerformanceTestResult> {
+  async testComponentRender(
+    componentName: string,
+    renderFn: () => void
+  ): Promise<PerformanceTestResult> {
     const startMark = `${componentName}-start`;
     const endMark = `${componentName}-end`;
     const measureName = `${componentName}-render`;
@@ -200,7 +204,7 @@ export class PerformanceTester {
       value: renderTime,
       unit: 'ms',
       threshold: this.thresholds.renderTime,
-      passed: renderTime <= this.thresholds.renderTime
+      passed: renderTime <= this.thresholds.renderTime,
     };
   }
 }
@@ -213,14 +217,14 @@ export class UXTester {
    * 测试按钮响应时间
    */
   async testButtonResponse(buttonSelector: string): Promise<UXTestResult> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const button = document.querySelector(buttonSelector) as HTMLButtonElement;
       if (!button) {
         resolve({
           component: 'Button',
           interaction: 'Click',
           responseTime: -1,
-          passed: false
+          passed: false,
         });
         return;
       }
@@ -237,7 +241,7 @@ export class UXTester {
           component: 'Button',
           interaction: 'Click',
           responseTime,
-          passed: responseTime <= 100 // 100ms threshold
+          passed: responseTime <= 100, // 100ms threshold
         });
       };
 
@@ -256,7 +260,7 @@ export class UXTester {
         component: 'Form',
         interaction: 'Validation',
         responseTime: -1,
-        passed: false
+        passed: false,
       };
     }
 
@@ -279,7 +283,7 @@ export class UXTester {
       component: 'Form',
       interaction: 'Validation',
       responseTime,
-      passed: responseTime <= 200 // 200ms threshold for validation
+      passed: responseTime <= 200, // 200ms threshold for validation
     };
   }
 
@@ -287,7 +291,7 @@ export class UXTester {
    * 测试页面滚动性能
    */
   async testScrollPerformance(): Promise<UXTestResult> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const startTime = performance.now();
       let frameCount = 0;
       let lastFrameTime = startTime;
@@ -298,7 +302,8 @@ export class UXTester {
         lastFrameTime = currentTime;
         frameCount++;
 
-        if (frameCount >= 60) { // 测试60帧
+        if (frameCount >= 60) {
+          // 测试60帧
           const totalTime = currentTime - startTime;
           const avgFrameTime = totalTime / frameCount;
           const fps = 1000 / avgFrameTime;
@@ -307,7 +312,7 @@ export class UXTester {
             component: 'Page',
             interaction: 'Scroll',
             responseTime: avgFrameTime,
-            passed: fps >= 30 // 至少30fps
+            passed: fps >= 30, // 至少30fps
           });
         } else {
           requestAnimationFrame(measureFrame);
@@ -346,8 +351,8 @@ export class APITester {
         details: {
           status: response.status,
           statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries())
-        }
+          headers: Object.fromEntries(response.headers.entries()),
+        },
       };
     } catch (error) {
       const duration = performance.now() - startTime;
@@ -355,7 +360,7 @@ export class APITester {
         name: `API Response: ${url}`,
         passed: false,
         duration,
-        error: error instanceof Error ? error?.message : String(error)
+        error: error instanceof Error ? error?.message : String(error),
       };
     }
   }
@@ -370,7 +375,7 @@ export class APITester {
       // 故意发送错误请求
       const response = await fetch(url + '/nonexistent', {
         method: 'POST',
-        body: 'invalid data'
+        body: 'invalid data',
       });
 
       const duration = performance.now() - startTime;
@@ -385,8 +390,8 @@ export class APITester {
         details: {
           status: response.status,
           expectedError: true,
-          receivedError: hasErrorResponse
-        }
+          receivedError: hasErrorResponse,
+        },
       };
     } catch (error) {
       const duration = performance.now() - startTime;
@@ -396,8 +401,8 @@ export class APITester {
         duration,
         details: {
           networkError: true,
-          error: error instanceof Error ? error?.message : String(error)
-        }
+          error: error instanceof Error ? error?.message : String(error),
+        },
       };
     }
   }
@@ -420,7 +425,6 @@ export class TestRunner {
     api: TestResult[];
     summary: any;
   }> {
-
     try {
       // 性能测试
       Logger.debug('📊 运行性能测试...');
@@ -447,16 +451,16 @@ export class TestRunner {
       const summary = {
         performance: {
           total: performanceResults.length,
-          passed: performanceResults.filter(r => r?.passed).length
+          passed: performanceResults.filter(r => r?.passed).length,
         },
         ux: {
           total: uxResults.length,
-          passed: uxResults.filter(r => r?.passed).length
+          passed: uxResults.filter(r => r?.passed).length,
         },
         api: {
           total: apiResults.length,
-          passed: apiResults.filter(r => r?.passed).length
-        }
+          passed: apiResults.filter(r => r?.passed).length,
+        },
       };
 
       Logger.debug('✅ 测试套件运行完成');
@@ -465,12 +469,10 @@ export class TestRunner {
         performance: performanceResults,
         ux: uxResults,
         api: apiResults,
-        summary
+        summary,
       };
-
     } catch (error) {
       Logger.error('❌ 测试套件运行失败:', error);
-      errorService.handleError(error as Error);
       throw error;
     }
   }
@@ -493,5 +495,5 @@ export default {
   createPerformanceTester,
   createUXTester,
   createAPITester,
-  createTestRunner
+  createTestRunner,
 };

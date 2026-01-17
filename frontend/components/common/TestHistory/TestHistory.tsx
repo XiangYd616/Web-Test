@@ -15,7 +15,6 @@ import { DeleteConfirmDialog } from '@/components/common/DeleteConfirmDialog';
 import Logger from '@/utils/logger';
 import { FileJson, FileSpreadsheet } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import testHistoryService from '../../../services/testHistoryService';
 
 // 导入类型定义
 import type { DeleteDialogState, TestHistoryProps, TestRecord } from './types';
@@ -28,8 +27,8 @@ import { useSelection } from './hooks/useSelection';
 import { useTestRecords } from './hooks/useTestRecords';
 
 // 导入子组件
+import testService from '../../../services/testing/testService';
 import { EmptyState } from './components/EmptyState';
-import { FilterBar } from './components/FilterBar';
 import { HistoryHeader } from './components/HistoryHeader';
 import { ResponsiveTable } from './components/ResponsiveTable';
 import { useAriaLiveAnnouncer } from './hooks/useAccessibility';
@@ -217,7 +216,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
           await onRecordDelete(deleteDialogState.recordId);
         } else {
           // 默认删除逻辑
-          await testHistoryService.deleteTest(deleteDialogState.recordId);
+          await testService.deleteTest(deleteDialogState.recordId);
         }
 
         // 更新本地状态
@@ -230,7 +229,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({
           await onBatchDelete(selectedIds);
         } else {
           // 默认批量删除逻辑
-          await testHistoryService.batchDeleteTests(selectedIds);
+          await testService.batchDelete(selectedIds);
         }
 
         // 更新本地状态
