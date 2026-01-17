@@ -6,7 +6,8 @@ import Logger from '@/utils/logger';
 import { AlertCircle, CheckCircle, Monitor, XCircle } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuthCheck } from '../components/auth/WithAuthCheck';
-import CompatibilityTestHistory from '../components/compatibility/CompatibilityTestHistory';
+import TestHistory from '../components/common/TestHistory';
+import { compatibilityTestConfig } from '../components/common/TestHistory/config';
 import TestPageLayout from '../components/testing/TestPageLayout';
 import { URLInput } from '../components/ui';
 import { ProgressBar } from '../components/ui/ProgressBar';
@@ -356,7 +357,7 @@ const CompatibilityTest: React.FC = () => {
           )}
         </div>
       }
-      additionalComponents={<CompatibilityTestHistory className="mt-6" />}
+      additionalComponents={<TestHistory className="mt-6" config={compatibilityTestConfig} />}
     />
   );
 };

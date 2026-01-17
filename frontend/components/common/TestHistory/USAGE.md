@@ -21,7 +21,7 @@ TestHistory 是一个配置驱动的通用测试历史组件,支持多种测试�
 import { TestHistory } from '@/components/common/TestHistory';
 import { stressTestConfig } from '@/components/common/TestHistory/config';
 
-function StressTestHistoryPage() {
+function TestHistoryPage() {
   return (
     <TestHistory config={stressTestConfig} />
   );
@@ -34,7 +34,7 @@ function StressTestHistoryPage() {
 import { TestHistory } from '@/components/common/TestHistory';
 import { seoTestConfig } from '@/components/common/TestHistory/config';
 
-function SEOTestHistoryPage() {
+function SeoHistoryPage() {
   const handleRecordClick = (record: TestRecord) => {
     // 跳转到详情页
     navigate(`/seo/detail/${record.id}`);
@@ -63,7 +63,7 @@ function SEOTestHistoryPage() {
 import { TestHistory } from '@/components/common/TestHistory';
 import { stressTestConfig } from '@/components/common/TestHistory/config';
 
-function FilteredStressTestHistory() {
+function FilteredTestHistory() {
   const [userId, setUserId] = useState('');
 
   return (
@@ -185,7 +185,7 @@ export const configMap: Record<string, TestHistoryConfig> = {
 import { TestHistory } from '@/components/common/TestHistory';
 import { apiTestConfig } from '@/components/common/TestHistory/config';
 
-function APITestHistoryPage() {
+function ApiHistoryPage() {
   return <TestHistory config={apiTestConfig} />;
 }
 ```

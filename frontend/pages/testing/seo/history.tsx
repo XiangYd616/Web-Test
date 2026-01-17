@@ -12,8 +12,8 @@ import { Navigate } from 'react-router-dom';
 
 /**
  * SEO测试历史页面组件
- * 演示最简单的用法 - 只传入配置即可
+ * 统一跳转到测试历史入口
  */
-const SEOTestHistoryPage: React.FC = () => <Navigate to="/test-history?type=seo" replace />;
+const SeoHistoryRedirectPage: React.FC = () => <Navigate to="/test-history?type=seo" replace />;
 
-export default SEOTestHistoryPage;
+export default SeoHistoryRedirectPage;

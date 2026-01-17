@@ -1,6 +1,7 @@
 ﻿// TestType 和 TestStatus 已迁移到统一类型系统
 // 请从 './enums' 导入
 import type { TestStatus, TestType } from './enums';
+export type { TestStatus, TestType } from './enums';
 type TestStatusType = TestStatus;
 
 export enum TestPriority {

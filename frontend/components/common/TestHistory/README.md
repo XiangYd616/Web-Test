@@ -30,38 +30,35 @@ components/common/TestHistory/
 
 ## 使用方式
 
-### 1. 直接使用通用组件
+### 1. 基础用法（配置驱动）
 
 ```tsx
 import TestHistory from '@/components/common/TestHistory';
+import { stressTestConfig } from '@/components/common/TestHistory/config';
 
 function MyPage() {
   return (
     <TestHistory
-      testType="stress"
-      title="压力测试历史"
-      description="查看和管理压力测试记录"
-      onTestSelect={(test) => console.log(test)}
-      onTestRerun={(test) => console.log('重新运行', test)}
-      onTestDelete={(testId) => console.log('删除', testId)}
+      config={stressTestConfig}
+      onRecordClick={test => console.log(test)}
+      onRecordDelete={testId => console.log('删除', testId)}
     />
   );
 }
 ```
 
-### 2. 使用特定类型的包装组件
+### 2. 自定义事件处理
 
 ```tsx
-import StressTestHistory from '@/components/stress/StressTestHistory';
-// 或
-import { StressTestHistory } from '@/components/common/TestHistory/exports';
+import TestHistory from '@/components/common/TestHistory';
+import { stressTestConfig } from '@/components/common/TestHistory/config';
 
 function MyPage() {
   return (
-    <StressTestHistory
-      onTestSelect={(test) => console.log(test)}
-      onTestRerun={(test) => console.log('重新运行', test)}
-      onTestDelete={(testId) => console.log('删除', testId)}
+    <TestHistory
+      config={stressTestConfig}
+      onRecordClick={test => console.log('选择', test)}
+      onRecordDelete={testId => console.log('删除', testId)}
     />
   );
 }
@@ -69,20 +66,20 @@ function MyPage() {
 
 ## 可用的测试类型
 
-| testType | 包装组件 | 说明 |
-|----------|---------|------|
-| `stress` | `StressTestHistory` | 压力测试 |
-| `security` | `SecurityTestHistory` | 安全测试 |
-| `performance` | `PerformanceTestHistory` | 性能测试 |
-| `api` | `APITestHistory` | API 测试 |
-| `seo` | `SEOTestHistory` | SEO 测试 |
-| `accessibility` | `AccessibilityTestHistory` | 可访问性测试 |
-| `compatibility` | `CompatibilityTestHistory` | 兼容性测试 |
-| `network` | `NetworkTestHistory` | 网络测试 |
-| `database` | `DatabaseTestHistory` | 数据库测试 |
-| `ux` | `UXTestHistory` | UX 测试 |
-| `website` | `WebsiteTestHistory` | 网站测试 |
-| `all` | - | 所有类型 |
+| testType        | 配置                      | 说明         |
+| --------------- | ------------------------- | ------------ |
+| `stress`        | `stressTestConfig`        | 压力测试     |
+| `security`      | `securityTestConfig`      | 安全测试     |
+| `performance`   | `performanceTestConfig`   | 性能测试     |
+| `api`           | `apiTestConfig`           | API 测试     |
+| `seo`           | `seoTestConfig`           | SEO 测试     |
+| `accessibility` | `accessibilityTestConfig` | 可访问性测试 |
+| `compatibility` | `compatibilityTestConfig` | 兼容性测试   |
+| `network`       | `networkTestConfig`       | 网络测试     |
+| `database`      | `databaseTestConfig`      | 数据库测试   |
+| `ux`            | `uxTestConfig`            | UX 测试      |
+| `website`       | `websiteTestConfig`       | 网站测试     |
+| `all`           | -                         | 所有类型     |
 
 ## Props
 
@@ -90,31 +87,42 @@ function MyPage() {
 
 ```typescript
 interface TestHistoryProps {
-  testType: 'all' | 'stress' | 'security' | 'api' | 'performance' | 
-            'compatibility' | 'seo' | 'accessibility' | 'website' | 
-            'network' | 'ux' | 'database';
-  title?: string;                           // 标题
-  description?: string;                     // 描述
-  onTestSelect?: (test: TestHistoryItem) => void;   // 选择测试
-  onTestRerun?: (test: TestHistoryItem) => void;    // 重新运行测试
-  onTestDelete?: (testId: string) => void;          // 删除测试
+  config: TestHistoryConfig; // 配置对象
+  onRecordClick?: (record: TestRecord) => void; // 记录点击
+  onRecordDelete?: (id: string) => Promise<void>; // 单个删除
+  onBatchDelete?: (ids: string[]) => Promise<void>; // 批量删除
+  additionalFilters?: Record<string, unknown>; // 额外筛选条件
+  className?: string; // 自定义类名
 }
 ```
 
-### TestHistoryItem
+### TestRecord
 
 ```typescript
-interface TestHistoryItem {
+interface TestRecord {
   id: string;
+  testName: string;
   testType: string;
-  name?: string;
-  url?: string;
-  status: 'passed' | 'failed' | 'running' | 'cancelled';
-  score?: number;
-  startTime: string;
+  url: string;
+  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+  startTime?: string;
   endTime?: string;
   duration?: number;
-  results?: any;
+  overallScore?: number;
+  performanceGrade?: string;
+  config: Record<string, unknown>;
+  results?: Record<string, unknown>;
+  errorMessage?: string;
+  totalRequests?: number;
+  successfulRequests?: number;
+  failedRequests?: number;
+  averageResponseTime?: number;
+  peakTps?: number;
+  errorRate?: number;
+  tags?: string[];
+  environment?: string;
 }
 ```
 
@@ -134,25 +142,15 @@ interface TestHistoryItem {
 
 ### 从旧组件迁移
 
-如果你之前使用的是特定测试类型的历史组件（如 `StressTestHistory`），现在有两个选择：
+如果你之前使用的是特定测试类型的历史组件（如 `StressTestHistory`），请改为直接使用通用组件：
 
-1. **继续使用包装组件**（推荐，无需修改代码）
-   ```tsx
-   // 之前
-   import StressTestHistory from '@/components/stress/StressTestHistory';
-   
-   // 之后 - 无需修改，包装组件已更新
-   import StressTestHistory from '@/components/stress/StressTestHistory';
-   ```
+```tsx
+// 之前
+import StressTestHistory from '@/components/stress/StressTestHistory';
+<StressTestHistory onSelectTest={handleSelect} />;
 
-2. **直接使用通用组件**
-   ```tsx
-   // 之前
-   import StressTestHistory from '@/components/stress/StressTestHistory';
-   <StressTestHistory onSelectTest={handleSelect} />
-   
-   // 之后
-   import TestHistory from '@/components/common/TestHistory';
-   <TestHistory testType="stress" onTestSelect={handleSelect} />
-   ```
-
+// 之后
+import { TestHistory } from '@/components/common/TestHistory';
+import { stressTestConfig } from '@/components/common/TestHistory/config';
+<TestHistory config={stressTestConfig} onRecordSelect={handleSelect} />;
+```
