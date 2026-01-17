@@ -48,6 +48,13 @@ export interface TestConfiguration {
   is_template?: boolean;
 }
 
+export interface TestExecutionRequest {
+  test_type: string;
+  configuration: Record<string, any>;
+  project_id?: number;
+  target_url: string;
+}
+
 export interface TestExecutionResponse {
   id: string;
   test_type: string;
@@ -124,21 +131,22 @@ export interface UxTestConfig {
   custom_checks?: string[];
 }
 
-class TestApiService implements TestApiClient {
-  private baseUrl = '/test';
+// 基础设施测试配置
+export interface InfrastructureTestConfig {
+  database?: {
+    enabled: boolean;
+    connection_string: string;
+    test_queries: string[];
+  };
+  network?: {
+    enabled: boolean;
+    targets: string[];
+    test_types: string[];
+  };
+}
 
-  private async request<T>(action: () => Promise<T>): Promise<ApiResponse<T>> {
-    try {
-      const data = await action();
-      return { success: true, data };
-    } catch (error) {
-      Logger.error('❌ API请求失败:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-      };
-    }
-  }
+class TestApiService implements TestApiClient {
+  private baseUrl = '/api/test'; // 修正为实际的后端API路径
 
   /**
    * 获取测试类型对应的权限
@@ -162,8 +170,8 @@ class TestApiService implements TestApiClient {
   /**
    * 执行GET请求
    */
-  async get<T = unknown>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return this.request(() => apiClient.get<T>(url, config));
+  async get<T = any>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
+    return apiService.get(url, config as any);
   }
 
   /**
@@ -174,7 +182,7 @@ class TestApiService implements TestApiClient {
     data?: unknown,
     config?: ApiRequestConfig
   ): Promise<ApiResponse<T>> {
-    return this.request(() => apiClient.post<T>(url, data, config));
+    return apiService.post(url, data, config as any);
   }
 
   /**
@@ -185,14 +193,14 @@ class TestApiService implements TestApiClient {
     data?: unknown,
     config?: ApiRequestConfig
   ): Promise<ApiResponse<T>> {
-    return this.request(() => apiClient.put<T>(url, data, config));
+    return apiService.put(url, data, config as any);
   }
 
   /**
    * 执行DELETE请求
    */
-  async delete<T = unknown>(url: string, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return this.request(() => apiClient.delete<T>(url, config));
+  async delete<T = any>(url: string, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+    return apiService.delete(url, config as any);
   }
 
   // ==================== 测试配置管理 ====================
@@ -389,18 +397,18 @@ class TestApiService implements TestApiClient {
   /**
    * 获取性能测试结果 - 适配后端API
    */
-  async getPerformanceResults(execution_id: string): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/history/${execution_id}`);
+  async getPerformanceResults(execution_id: string): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   /**
    * 分析性能数据 - 使用现有的统计API
    */
   async analyzePerformanceData(
-    _execution_ids: string[],
-    _comparison_type: 'trend' | 'benchmark'
-  ): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/statistics?timeRange=30`);
+    execution_ids: string[],
+    comparison_type: 'trend' | 'benchmark'
+  ): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/statistics?timeRange=30`);
   }
 
   // ==================== 安全测试 ====================
@@ -425,22 +433,22 @@ class TestApiService implements TestApiClient {
   /**
    * 获取安全测试结果 - 适配后端API
    */
-  async getSecurityResults(execution_id: string): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/security/${execution_id}`);
+  async getSecurityResults(execution_id: string): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/security/${execution_id}`);
   }
 
   /**
    * 获取安全测试历史
    */
-  async getSecurityHistory(): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/security/history`);
+  async getSecurityHistory(): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/security/history`);
   }
 
   /**
    * 获取安全测试统计
    */
-  async getSecurityStatistics(): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/security/statistics`);
+  async getSecurityStatistics(): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/security/statistics`);
   }
 
   // ==================== API测试 ====================
@@ -463,8 +471,8 @@ class TestApiService implements TestApiClient {
   /**
    * 获取API测试结果 - 适配后端API
    */
-  async getApiResults(execution_id: string): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/history/${execution_id}`);
+  async getApiResults(execution_id: string): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   // ==================== 压力测试 ====================
@@ -488,22 +496,22 @@ class TestApiService implements TestApiClient {
   /**
    * 获取压力测试结果 - 适配后端API
    */
-  async getStressResults(execution_id: string): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/stress/status/${execution_id}`);
+  async getStressResults(execution_id: string): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/stress/status/${execution_id}`);
   }
 
   /**
    * 取消压力测试
    */
-  async cancelStressTest(execution_id: string): Promise<ApiResponse<unknown>> {
-    return this.post(`${this.baseUrl}/stress/cancel/${execution_id}`);
+  async cancelStressTest(execution_id: string): Promise<ApiResponse<any>> {
+    return apiService.post(`${this.baseUrl}/stress/cancel/${execution_id}`);
   }
 
   /**
    * 获取运行中的压力测试
    */
-  async getRunningStressTests(): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/stress/running`);
+  async getRunningStressTests(): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/stress/running`);
   }
 
   // ==================== 兼容性测试 ====================
@@ -527,8 +535,8 @@ class TestApiService implements TestApiClient {
   /**
    * 获取兼容性测试结果 - 适配后端API
    */
-  async getCompatibilityResults(execution_id: string): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/history/${execution_id}`);
+  async getCompatibilityResults(execution_id: string): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   // ==================== SEO测试 ====================
@@ -552,8 +560,8 @@ class TestApiService implements TestApiClient {
   /**
    * 获取SEO测试结果 - 适配后端API
    */
-  async getSeoResults(execution_id: string): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/history/${execution_id}`);
+  async getSeoResults(execution_id: string): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   // ==================== 用户体验测试 ====================
@@ -577,8 +585,8 @@ class TestApiService implements TestApiClient {
   /**
    * 获取UX测试结果 - 适配后端API
    */
-  async getUxResults(execution_id: string): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/history/${execution_id}`);
+  async getUxResults(execution_id: string): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/history/${execution_id}`);
   }
 
   /**
@@ -676,8 +684,8 @@ class TestApiService implements TestApiClient {
   /**
    * 获取生成的报告
    */
-  async getReport(report_id: string): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/reports/${report_id}`);
+  async getReport(report_id: string): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/reports/${report_id}`);
   }
 
   /**
@@ -699,8 +707,8 @@ class TestApiService implements TestApiClient {
   /**
    * 获取仪表板数据
    */
-  async getDashboardData(): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/analytics/dashboard`);
+  async getDashboardData(): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/analytics/dashboard`);
   }
 
   /**
@@ -723,8 +731,8 @@ class TestApiService implements TestApiClient {
   /**
    * 获取对比分析数据
    */
-  async getComparisonsData(): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/analytics/comparisons`);
+  async getComparisonsData(): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/analytics/comparisons`);
   }
 
   // ==================== 系统管理 ====================
@@ -732,24 +740,22 @@ class TestApiService implements TestApiClient {
   /**
    * 系统健康检查
    */
-  async checkSystemHealth(): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/system/health`);
+  async checkSystemHealth(): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/system/health`);
   }
 
   /**
    * 获取系统性能指标
    */
-  async getSystemMetrics(): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/system/metrics`);
+  async getSystemMetrics(): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/system/metrics`);
   }
 
   /**
    * 系统维护操作（管理员）
    */
-  async performMaintenance(operation: string): Promise<ApiResponse<unknown>> {
-    return this.post(`${this.baseUrl}/system/maintenance`, {
-      operation,
-    });
+  async performMaintenance(operation: string): Promise<ApiResponse<any>> {
+    return apiService.post(`${this.baseUrl}/system/maintenance`, { operation });
   }
 
   // ==================== TestApiClient 接口实现 ====================
@@ -808,8 +814,8 @@ class TestApiService implements TestApiClient {
   /**
    * 获取测试结果
    */
-  async getTestResult(testId: string, testType?: string): Promise<ApiResponse<unknown>> {
-    return this.get(`${this.baseUrl}/${testType}/result/${testId}`);
+  async getTestResult(testId: string, testType?: string): Promise<ApiResponse<any>> {
+    return apiService.get(`${this.baseUrl}/${testType}/result/${testId}`);
   }
 
   /**
