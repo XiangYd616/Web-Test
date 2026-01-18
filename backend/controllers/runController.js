@@ -1,6 +1,7 @@
 const { models } = require('../database/sequelize');
 const CollectionManager = require('../services/collections/CollectionManager');
 const EnvironmentManager = require('../services/environments/EnvironmentManager');
+const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
 const collectionManager = new CollectionManager({ models });
 const environmentManager = new EnvironmentManager({ models });
@@ -19,6 +20,17 @@ const ensureWorkspaceMember = async (workspaceId, userId) => {
   return WorkspaceMember.findOne({
     where: { workspace_id: workspaceId, user_id: userId, status: 'active' }
   });
+};
+
+const ensureWorkspacePermission = async (workspaceId, userId, action) => {
+  const member = await ensureWorkspaceMember(workspaceId, userId);
+  if (!member) {
+    return { error: '没有权限访问该工作空间运行记录' };
+  }
+  if (!hasWorkspacePermission(member.role, action)) {
+    return { error: '当前角色无此操作权限' };
+  }
+  return { member };
 };
 
 const ensureCollectionAccess = async (collectionId, userId) => {
@@ -114,9 +126,9 @@ const listRuns = async (req, res) => {
   if (!workspaceId) {
     return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
   }
-  const member = await ensureWorkspaceMember(workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限访问该工作空间运行记录');
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const where = { workspace_id: workspaceId };
@@ -166,6 +178,9 @@ const createRun = async (req, res) => {
   const access = await ensureCollectionAccess(collectionId, req.user.id);
   if (access.error) {
     return access.error === '集合不存在' ? res.notFound(access.error) : res.forbidden(access.error);
+  }
+  if (!hasWorkspacePermission(access.member.role, 'execute')) {
+    return res.forbidden('当前角色无执行权限');
   }
 
   const envContext = await buildEnvironmentContext(environmentId);
@@ -224,9 +239,9 @@ const getRun = async (req, res) => {
   if (!run) {
     return res.notFound('运行记录不存在');
   }
-  const member = await ensureWorkspaceMember(run.workspace_id, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限访问该运行记录');
+  const permission = await ensureWorkspacePermission(run.workspace_id, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const { page, limit, offset } = parsePagination(req);
@@ -271,9 +286,9 @@ const cancelRun = async (req, res) => {
   if (!run) {
     return res.notFound('运行记录不存在');
   }
-  const member = await ensureWorkspaceMember(run.workspace_id, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限取消该运行');
+  const permission = await ensureWorkspacePermission(run.workspace_id, req.user.id, 'execute');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
   if (run.status !== 'running') {
     return res.conflict('运行', '当前状态不可取消');
@@ -290,9 +305,9 @@ const rerun = async (req, res) => {
   if (!run) {
     return res.notFound('运行记录不存在');
   }
-  const member = await ensureWorkspaceMember(run.workspace_id, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限重跑该运行');
+  const permission = await ensureWorkspacePermission(run.workspace_id, req.user.id, 'execute');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const envContext = await buildEnvironmentContext(run.environment_id);
@@ -345,9 +360,9 @@ const getRunResults = async (req, res) => {
   if (!run) {
     return res.notFound('运行记录不存在');
   }
-  const member = await ensureWorkspaceMember(run.workspace_id, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限访问该运行结果');
+  const permission = await ensureWorkspacePermission(run.workspace_id, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const where = { run_id: run.id };
@@ -373,19 +388,35 @@ const getRunResults = async (req, res) => {
   }
 
   const { page, limit, offset } = parsePagination(req);
-  if (req.query.statusCode) {
-    const statusCode = Number(req.query.statusCode);
-    if (!Number.isFinite(statusCode)) {
+  const needsFilter = req.query.statusCode || req.query.statusCodeMin || req.query.statusCodeMax || req.query.assertionFailed === 'true';
+  if (needsFilter) {
+    const statusCode = req.query.statusCode ? Number(req.query.statusCode) : null;
+    const statusCodeMin = req.query.statusCodeMin ? Number(req.query.statusCodeMin) : null;
+    const statusCodeMax = req.query.statusCodeMax ? Number(req.query.statusCodeMax) : null;
+    if ((req.query.statusCode && !Number.isFinite(statusCode))
+      || (req.query.statusCodeMin && !Number.isFinite(statusCodeMin))
+      || (req.query.statusCodeMax && !Number.isFinite(statusCodeMax))) {
       return res.validationError([{ field: 'statusCode', message: 'statusCode 必须是数字' }]);
     }
-    const allRows = await RunResult.findAll({
-      where,
-      order
-    });
+    const allRows = await RunResult.findAll({ where, order });
     const filtered = allRows.filter(item => {
       const response = item.response || {};
-      const code = response.status || response.statusCode || response.code;
-      return Number(code) === statusCode;
+      const code = Number(response.status || response.statusCode || response.code);
+      if (Number.isFinite(statusCode) && code !== statusCode) {
+        return false;
+      }
+      if (Number.isFinite(statusCodeMin) && code < statusCodeMin) {
+        return false;
+      }
+      if (Number.isFinite(statusCodeMax) && code > statusCodeMax) {
+        return false;
+      }
+      if (req.query.assertionFailed === 'true') {
+        const assertions = Array.isArray(item.assertions) ? item.assertions : [];
+        const hasFailed = assertions.some(assertion => !assertion.passed);
+        return hasFailed;
+      }
+      return true;
     });
     const paged = filtered.slice(offset, offset + limit);
     return res.paginated(paged, page, limit, filtered.length, '获取运行结果成功', {
@@ -412,9 +443,9 @@ const exportRun = async (req, res) => {
   if (!run) {
     return res.notFound('运行记录不存在');
   }
-  const member = await ensureWorkspaceMember(run.workspace_id, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限导出该运行记录');
+  const permission = await ensureWorkspacePermission(run.workspace_id, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const results = await RunResult.findAll({
@@ -523,9 +554,9 @@ const getRunReport = async (req, res) => {
   if (!run) {
     return res.notFound('运行记录不存在');
   }
-  const member = await ensureWorkspaceMember(run.workspace_id, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限查看运行报告');
+  const permission = await ensureWorkspacePermission(run.workspace_id, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const results = await RunResult.findAll({ where: { run_id: run.id } });
@@ -588,6 +619,10 @@ const getRunReport = async (req, res) => {
     ? Math.round(results.reduce((sum, r) => sum + (r.duration_ms || 0), 0) / total)
     : 0;
 
+  const statusCodeChart = Object.entries(statusCodeStats)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
   return res.success({
     runId: run.id,
     status: run.status,
@@ -602,6 +637,7 @@ const getRunReport = async (req, res) => {
       ? Math.round((assertionStats.passed / assertionStats.total) * 100)
       : 0,
     statusCodeStats,
+    statusCodeChart,
     assertionFailureTop10,
     errorMessageTop20,
     averageDurationMs: avgDuration

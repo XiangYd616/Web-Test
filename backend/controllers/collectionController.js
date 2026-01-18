@@ -1,5 +1,6 @@
 const { models } = require('../database/sequelize');
 const CollectionManager = require('../services/collections/CollectionManager');
+const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
 const collectionManager = new CollectionManager({ models });
 
@@ -15,6 +16,17 @@ const ensureWorkspaceMember = async (workspaceId, userId) => {
   return WorkspaceMember.findOne({
     where: { workspace_id: workspaceId, user_id: userId, status: 'active' }
   });
+};
+
+const ensureWorkspacePermission = async (workspaceId, userId, action) => {
+  const member = await ensureWorkspaceMember(workspaceId, userId);
+  if (!member) {
+    return { error: '没有权限访问该工作空间集合' };
+  }
+  if (!hasWorkspacePermission(member.role, action)) {
+    return { error: '当前角色无此操作权限' };
+  }
+  return { member };
 };
 
 const ensureCollectionAccess = async (collectionId, userId) => {
@@ -116,9 +128,9 @@ const listCollections = async (req, res) => {
   if (!workspaceId) {
     return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
   }
-  const member = await ensureWorkspaceMember(workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限访问该工作空间集合');
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const { Collection, CollectionItem } = models;
@@ -156,9 +168,9 @@ const createCollection = async (req, res) => {
   if (!validateCollectionInput(req.body, res)) {
     return;
   }
-  const member = await ensureWorkspaceMember(workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限创建集合');
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'write');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const collection = await collectionManager.createCollection({
@@ -184,6 +196,9 @@ const deleteCollection = async (req, res) => {
   if (access.error) {
     return access.error === '集合不存在' ? res.notFound(access.error) : res.forbidden(access.error);
   }
+  if (!hasWorkspacePermission(access.member.role, 'delete')) {
+    return res.forbidden('当前角色无删除权限');
+  }
   await collectionManager.deleteCollection(req.params.collectionId);
   return res.success(null, '删除集合成功');
 };
@@ -199,6 +214,9 @@ const addFolder = async (req, res) => {
   if (access.error) {
     return access.error === '集合不存在' ? res.notFound(access.error) : res.forbidden(access.error);
   }
+  if (!hasWorkspacePermission(access.member.role, 'write')) {
+    return res.forbidden('当前角色无写入权限');
+  }
   const folder = await collectionManager.createFolder(req.params.collectionId, req.body || {});
   return res.created(folder, '创建文件夹成功');
 };
@@ -210,6 +228,9 @@ const addRequest = async (req, res) => {
   const access = await ensureCollectionAccess(req.params.collectionId, req.user.id);
   if (access.error) {
     return access.error === '集合不存在' ? res.notFound(access.error) : res.forbidden(access.error);
+  }
+  if (!hasWorkspacePermission(access.member.role, 'write')) {
+    return res.forbidden('当前角色无写入权限');
   }
   const request = await collectionManager.addRequest(
     req.params.collectionId,
@@ -230,9 +251,9 @@ const importPostmanCollection = async (req, res) => {
   if (!collection.info?.name || String(collection.info.name).length > 255) {
     return res.validationError([{ field: 'collection.info.name', message: '集合名称不能为空且长度不超过255' }]);
   }
-  const member = await ensureWorkspaceMember(workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限导入集合');
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'write');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
   const result = await collectionManager.importPostmanCollection(collection, {
     workspaceId,
@@ -249,6 +270,9 @@ const exportCollection = async (req, res) => {
   const access = await ensureCollectionAccess(req.params.collectionId, req.user.id);
   if (access.error) {
     return access.error === '集合不存在' ? res.notFound(access.error) : res.forbidden(access.error);
+  }
+  if (!hasWorkspacePermission(access.member.role, 'read')) {
+    return res.forbidden('当前角色无导出权限');
   }
   const collection = await collectionManager.exportToPostman(req.params.collectionId);
   return res.success(collection, '导出集合成功');

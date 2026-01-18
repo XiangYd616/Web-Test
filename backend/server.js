@@ -34,6 +34,9 @@ const workspaceRoutes = require('./routes/workspaces');
 const collectionRoutes = require('./routes/collections');
 const environmentRoutes = require('./routes/environments');
 const runRoutes = require('./routes/runs');
+const scheduledRunRoutes = require('./routes/scheduledRuns');
+const scheduledRunController = require('./controllers/scheduledRunController');
+const ScheduledRunService = require('./services/runs/ScheduledRunService');
 
 // 导入中间件
 const { responseFormatter } = require('./middleware/responseFormatter');
@@ -171,6 +174,7 @@ app.use('/api/workspaces', workspaceRoutes);
 app.use('/api/collections', collectionRoutes);
 app.use('/api/environments', environmentRoutes);
 app.use('/api/runs', runRoutes);
+app.use('/api/schedules', scheduledRunRoutes);
 
 // 静态文件服务（如果需要）
 if (NODE_ENV === 'production') {
@@ -256,6 +260,12 @@ const startServer = async () => {
       if (NODE_ENV === 'development') {
         await syncDatabase(false); // false = 不强制重建表
       }
+
+      const scheduledRunService = new ScheduledRunService();
+      scheduledRunController.setScheduledRunService(scheduledRunService);
+      scheduledRunService.start().catch(error => {
+        console.error('启动定时运行服务失败:', error);
+      });
     } else {
       console.warn('⚠️  Database connection failed, but server will continue...');
     }
