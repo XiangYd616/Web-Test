@@ -11,6 +11,9 @@ class BaseTestEngine {
     this.version = '1.0.0';
     this.activeTests = new Map();
     this.testHistory = [];
+    this.progressCallback = null;
+    this.completionCallback = null;
+    this.errorCallback = null;
   }
 
   /**
@@ -47,16 +50,6 @@ class BaseTestEngine {
       timeout: Joi.number().min(1000).max(300000).default(60000)
     });
 
-
-    /**
-
-     * if功能函数
-
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
-
-     */
     const { error, value } = baseSchema.validate(config);
     if (error) {
       throw new Error(`配置验证失败: ${error.details[0].message}`);
@@ -68,7 +61,7 @@ class BaseTestEngine {
    * 执行测试
    * 子类必须重写此方法
    */
-  async executeTest(config) {
+  async executeTest(_config) {
     throw new Error('executeTest 方法必须在子类中实现');
   }
 
@@ -77,10 +70,10 @@ class BaseTestEngine {
    */
   async runTest(config) {
     const testId = `${this.name}_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-    
+
     try {
       const validatedConfig = this.validateConfig(config);
-      
+
       this.activeTests.set(testId, {
         status: 'running',
         progress: 0,
@@ -89,12 +82,14 @@ class BaseTestEngine {
       });
 
       const results = await this.executeTest(validatedConfig);
-      
+
       this.activeTests.set(testId, {
         status: 'completed',
         progress: 100,
         results
       });
+
+      this.emitCompletion(results);
 
       // 添加到历史记录
       this.testHistory.push({
@@ -121,6 +116,7 @@ class BaseTestEngine {
         status: 'failed',
         error: error.message
       });
+      this.emitError(error);
       throw error;
     }
   }
@@ -184,6 +180,39 @@ class BaseTestEngine {
         message,
         lastUpdate: Date.now()
       });
+    }
+
+    if (this.progressCallback) {
+      this.progressCallback({
+        testId,
+        progress,
+        message,
+        status: test?.status || 'running'
+      });
+    }
+  }
+
+  setProgressCallback(callback) {
+    this.progressCallback = callback;
+  }
+
+  setCompletionCallback(callback) {
+    this.completionCallback = callback;
+  }
+
+  setErrorCallback(callback) {
+    this.errorCallback = callback;
+  }
+
+  emitCompletion(results) {
+    if (this.completionCallback) {
+      this.completionCallback(results);
+    }
+  }
+
+  emitError(error) {
+    if (this.errorCallback) {
+      this.errorCallback(error);
     }
   }
 

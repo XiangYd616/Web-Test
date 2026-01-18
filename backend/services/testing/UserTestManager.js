@@ -3,13 +3,7 @@
  * 每个用户管理自己的测试实例，不需要全局状态
  */
 
-const StressTestEngine = require('../../engines/stress/stressTestEngine');
-const WebsiteTestEngine = require('../../engines/website/websiteTestEngine');
-const PerformanceTestEngine = require('../../engines/performance/PerformanceTestEngine');
-const SecurityTestEngine = require('../../engines/security/securityTestEngine');
-const SeoTestEngine = require('../../engines/seo/SEOTestEngine');
-const ApiTestEngine = require('../../engines/api/apiTestEngine');
-const AccessibilityTestEngine = require('../../engines/accessibility/AccessibilityTestEngine');
+const { createEngine } = require('./TestEngineFactory');
 const { query } = require('../../config/database');
 // 暂时使用console.log替代Logger
 const Logger = {
@@ -76,18 +70,8 @@ class UserTestManager {
     }
 
     // 创建新的测试引擎实例
-    const engineMap = {
-      website: WebsiteTestEngine,
-      performance: PerformanceTestEngine,
-      security: SecurityTestEngine,
-      seo: SeoTestEngine,
-      stress: StressTestEngine,
-      api: ApiTestEngine,
-      accessibility: AccessibilityTestEngine
-    };
-
-    const Engine = engineMap[testType] || StressTestEngine;
-    const testEngine = new Engine();
+    const engineType = testType || 'stress';
+    const testEngine = createEngine(engineType);
 
     // 设置进度回调，直接推送给用户
     testEngine.setProgressCallback((progress) => {

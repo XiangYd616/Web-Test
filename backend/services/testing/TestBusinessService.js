@@ -445,6 +445,10 @@ class TestBusinessService {
       const config = typeof testData.config === 'string' 
         ? JSON.parse(testData.config) 
         : testData.config;
+      const executionConfig = {
+        ...config,
+        testId
+      };
 
       // 3. 更新测试状态为running
       await query(
@@ -458,7 +462,7 @@ class TestBusinessService {
       // 5. 异步执行测试(不阻塞响应)
       setImmediate(async () => {
         try {
-          await testEngine.executeTest(config);
+          await testEngine.executeTest(executionConfig);
         } catch (error) {
           console.error(`测试执行失败: ${testId}`, error);
           // 更新测试状态为失败

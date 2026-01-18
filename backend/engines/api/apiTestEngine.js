@@ -28,6 +28,10 @@ class ApiTestEngine {
       userAgent: 'API-Test-Engine/3.0.0',
       ...options
     };
+    this.activeTests = new Map();
+    this.progressCallback = null;
+    this.completionCallback = null;
+    this.errorCallback = null;
     
     // 初始化断言系统
     this.assertionSystem = new AssertionSystem();
@@ -67,13 +71,14 @@ class ApiTestEngine {
       
       Logger.info(`🚀 开始API测试: ${testId} - ${url || '多个端点'}`);
       
-      // 发送测试开始事件
-      emitTestProgress(testId, {
-        stage: 'started',
+      this.activeTests.set(testId, {
+        status: 'running',
         progress: 0,
-        message: `API测试开始: ${url || '多个端点'}`,
-        url
+        startTime: Date.now()
       });
+
+      // 发送测试开始事件
+      this.updateTestProgress(testId, 0, `API测试开始: ${url || '多个端点'}`, 'started', { url });
       
       let results;
       
@@ -95,6 +100,16 @@ class ApiTestEngine {
         results,
         timestamp: new Date().toISOString()
       };
+
+      this.activeTests.set(testId, {
+        status: 'completed',
+        progress: 100,
+        results: finalResult
+      });
+      this.updateTestProgress(testId, 100, 'API测试完成', 'completed');
+      if (this.completionCallback) {
+        this.completionCallback(finalResult);
+      }
       
       // 发送完成事件
       emitTestComplete(testId, finalResult);
@@ -114,6 +129,14 @@ class ApiTestEngine {
         error: error.message,
         timestamp: new Date().toISOString()
       };
+
+      this.activeTests.set(testId, {
+        status: 'failed',
+        error: error.message
+      });
+      if (this.errorCallback) {
+        this.errorCallback(error);
+      }
       
       // 发送错误事件
       emitTestError(testId, {
@@ -132,6 +155,60 @@ class ApiTestEngine {
       
       return errorResult;
     }
+  }
+
+  updateTestProgress(testId, progress, message, stage = 'running', extra = {}) {
+    const test = this.activeTests.get(testId) || { status: 'running' };
+    this.activeTests.set(testId, {
+      ...test,
+      progress,
+      message,
+      lastUpdate: Date.now()
+    });
+
+    emitTestProgress(testId, {
+      stage,
+      progress,
+      message,
+      ...extra
+    });
+
+    if (this.progressCallback) {
+      this.progressCallback({
+        testId,
+        progress,
+        message,
+        status: test.status || 'running'
+      });
+    }
+  }
+
+  getTestStatus(testId) {
+    return this.activeTests.get(testId);
+  }
+
+  async stopTest(testId) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      this.activeTests.set(testId, {
+        ...test,
+        status: 'stopped'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  setProgressCallback(callback) {
+    this.progressCallback = callback;
+  }
+
+  setCompletionCallback(callback) {
+    this.completionCallback = callback;
+  }
+
+  setErrorCallback(callback) {
+    this.errorCallback = callback;
   }
 
   /**
@@ -510,7 +587,8 @@ class ApiTestEngine {
         const parsed = JSON.parse(body);
         analysis.type = 'json';
         analysis.structure = this.analyzeJSONStructure(parsed);
-      } catch (error) {
+      } catch (_error) {
+        void _error;
         analysis.valid = false;
         analysis.error = '无效的JSON格式';
       }

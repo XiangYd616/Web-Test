@@ -19,6 +19,10 @@ class PerformanceTestEngine {
     this.metricsService = new PerformanceMetricsService();
     this.htmlService = new HTMLParsingService();
     this.initialized = false;
+    this.activeTests = new Map();
+    this.progressCallback = null;
+    this.completionCallback = null;
+    this.errorCallback = null;
   }
 
   /**
@@ -65,9 +69,12 @@ class PerformanceTestEngine {
    * 执行性能测试
    */
   async executeTest(config) {
+    const testId = config.testId || `performance-${Date.now()}`;
     try {
       // 确保初始化
       await this.initialize();
+
+      this.updateTestProgress(testId, 5, '初始化性能测试');
       
       const { 
         url = 'https://example.com', 
@@ -154,23 +161,89 @@ class PerformanceTestEngine {
         console.log(`✅ 性能测试完成，评分: ${results.summary.score}/100 (${results.summary.grade})`);
       }
       
-      return {
+      const finalResult = {
         engine: this.name,
         version: this.version,
         success: true,
         results,
         timestamp: new Date().toISOString()
       };
+      this.activeTests.set(testId, {
+        status: 'completed',
+        progress: 100,
+        results
+      });
+      this.updateTestProgress(testId, 100, '性能测试完成');
+      if (this.completionCallback) {
+        this.completionCallback(finalResult);
+      }
+      return finalResult;
     } catch (error) {
       console.error(`❌ 性能测试失败: ${error.message}`);
-      return {
+      const errorResult = {
         engine: this.name,
         version: this.version,
         success: false,
         error: error.message,
         timestamp: new Date().toISOString()
       };
+      this.activeTests.set(testId, {
+        status: 'failed',
+        error: error.message
+      });
+      if (this.errorCallback) {
+        this.errorCallback(error);
+      }
+      return errorResult;
     }
+  }
+
+  updateTestProgress(testId, progress, message) {
+    const test = this.activeTests.get(testId) || { status: 'running' };
+    this.activeTests.set(testId, {
+      ...test,
+      status: test.status || 'running',
+      progress,
+      message,
+      lastUpdate: Date.now()
+    });
+
+    if (this.progressCallback) {
+      this.progressCallback({
+        testId,
+        progress,
+        message,
+        status: test.status || 'running'
+      });
+    }
+  }
+
+  getTestStatus(testId) {
+    return this.activeTests.get(testId);
+  }
+
+  async stopTest(testId) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      this.activeTests.set(testId, {
+        ...test,
+        status: 'stopped'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  setProgressCallback(callback) {
+    this.progressCallback = callback;
+  }
+
+  setCompletionCallback(callback) {
+    this.completionCallback = callback;
+  }
+
+  setErrorCallback(callback) {
+    this.errorCallback = callback;
   }
 
   /**

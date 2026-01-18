@@ -14,6 +14,9 @@ class SeoTestEngine extends EventEmitter {
     this.name = 'seo';
     this.activeTests = new Map();
     this.defaultTimeout = 30000;
+    this.progressCallback = null;
+    this.completionCallback = null;
+    this.errorCallback = null;
   }
 
   /**
@@ -190,6 +193,10 @@ class SeoTestEngine extends EventEmitter {
         results
       });
 
+      if (this.completionCallback) {
+        this.completionCallback(results);
+      }
+
       if (this.listenerCount('complete') > 0) {
         this.emit('complete', { testId, result: results });
       }
@@ -199,10 +206,12 @@ class SeoTestEngine extends EventEmitter {
     } catch (error) {
       this.activeTests.set(testId, {
         status: 'failed',
-        progress: 0,
         error: error.message
       });
 
+      if (this.errorCallback) {
+        this.errorCallback(error);
+      }
       if (this.listenerCount('error') > 0) {
         this.emit('error', { testId, error: error.message });
       }
@@ -405,6 +414,15 @@ class SeoTestEngine extends EventEmitter {
       this.activeTests.set(testId, test);
     }
 
+    if (this.progressCallback) {
+      this.progressCallback({
+        testId,
+        progress,
+        message,
+        status: test?.status || 'running'
+      });
+    }
+
     if (this.listenerCount('progress') > 0) {
       this.emit('progress', { testId, progress, message });
     }
@@ -415,6 +433,18 @@ class SeoTestEngine extends EventEmitter {
    */
   getTestStatus(testId) {
     return this.activeTests.get(testId);
+  }
+
+  setProgressCallback(callback) {
+    this.progressCallback = callback;
+  }
+
+  setCompletionCallback(callback) {
+    this.completionCallback = callback;
+  }
+
+  setErrorCallback(callback) {
+    this.errorCallback = callback;
   }
 
   /**

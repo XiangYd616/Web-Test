@@ -22,6 +22,10 @@ class StressTestEngine {
     this.options = options;
     this.analyzer = new StressAnalyzer(options);
     this.alertManager = null;
+    this.activeTests = new Map();
+    this.progressCallback = null;
+    this.completionCallback = null;
+    this.errorCallback = null;
     
     // 初始化告警管理器
     try {
@@ -57,13 +61,14 @@ class StressTestEngine {
     try {
       Logger.info(`🚀 开始压力测试: ${testId} - ${url}`);
       
-      // 发送测试开始事件
-      emitTestProgress(testId, {
-        stage: 'started',
+      this.activeTests.set(testId, {
+        status: 'running',
         progress: 0,
-        message: '压力测试开始',
-        url
+        startTime: Date.now()
       });
+
+      // 发送测试开始事件
+      this.updateTestProgress(testId, 0, '压力测试开始', 'started', { url });
       
       // 提供默认的压力测试配置
       const testConfig = {
@@ -87,20 +92,12 @@ class StressTestEngine {
       };
       
       // 执行测试
-      emitTestProgress(testId, {
-        stage: 'running',
-        progress: 10,
-        message: '正在生成负载...'
-      });
+      this.updateTestProgress(testId, 10, '正在生成负载...', 'running');
       
       const results = await this.analyzer.analyze(url, testConfig);
       
       // 分析结果
-      emitTestProgress(testId, {
-        stage: 'analyzing',
-        progress: 90,
-        message: '分析测试结果...'
-      });
+      this.updateTestProgress(testId, 90, '分析测试结果...', 'analyzing');
       
       const analysis = this._analyzeResults(results);
       
@@ -119,6 +116,16 @@ class StressTestEngine {
         analysis,
         timestamp: new Date().toISOString()
       };
+
+      this.activeTests.set(testId, {
+        status: 'completed',
+        progress: 100,
+        results: finalResult
+      });
+      this.updateTestProgress(testId, 100, '压力测试完成', 'completed');
+      if (this.completionCallback) {
+        this.completionCallback(finalResult);
+      }
       
       // 发送完成事件
       emitTestComplete(testId, finalResult);
@@ -139,6 +146,14 @@ class StressTestEngine {
         error: error.message,
         timestamp: new Date().toISOString()
       };
+
+      this.activeTests.set(testId, {
+        status: 'failed',
+        error: error.message
+      });
+      if (this.errorCallback) {
+        this.errorCallback(error);
+      }
       
       // 发送错误事件
       emitTestError(testId, {
@@ -158,6 +173,60 @@ class StressTestEngine {
       
       return errorResult;
     }
+  }
+
+  updateTestProgress(testId, progress, message, stage = 'running', extra = {}) {
+    const test = this.activeTests.get(testId) || { status: 'running' };
+    this.activeTests.set(testId, {
+      ...test,
+      progress,
+      message,
+      lastUpdate: Date.now()
+    });
+
+    emitTestProgress(testId, {
+      stage,
+      progress,
+      message,
+      ...extra
+    });
+
+    if (this.progressCallback) {
+      this.progressCallback({
+        testId,
+        progress,
+        message,
+        status: test.status || 'running'
+      });
+    }
+  }
+
+  getTestStatus(testId) {
+    return this.activeTests.get(testId);
+  }
+
+  async stopTest(testId) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      this.activeTests.set(testId, {
+        ...test,
+        status: 'stopped'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  setProgressCallback(callback) {
+    this.progressCallback = callback;
+  }
+
+  setCompletionCallback(callback) {
+    this.completionCallback = callback;
+  }
+
+  setErrorCallback(callback) {
+    this.errorCallback = callback;
   }
   
   /**

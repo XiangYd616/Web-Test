@@ -25,6 +25,10 @@ class SecurityTestEngine {
       userAgent: 'Security-Scanner/3.0.0',
       ...options
     };
+    this.activeTests = new Map();
+    this.progressCallback = null;
+    this.completionCallback = null;
+    this.errorCallback = null;
     
     // 初始化告警管理器
     this.alertManager = null;
@@ -33,6 +37,60 @@ class SecurityTestEngine {
     } catch (error) {
       Logger.warn('告警管理器未初始化:', error.message);
     }
+  }
+
+  updateTestProgress(testId, progress, message, stage = 'running', extra = {}) {
+    const test = this.activeTests.get(testId) || { status: 'running' };
+    this.activeTests.set(testId, {
+      ...test,
+      progress,
+      message,
+      lastUpdate: Date.now()
+    });
+
+    emitTestProgress(testId, {
+      stage,
+      progress,
+      message,
+      ...extra
+    });
+
+    if (this.progressCallback) {
+      this.progressCallback({
+        testId,
+        progress,
+        message,
+        status: test.status || 'running'
+      });
+    }
+  }
+
+  getTestStatus(testId) {
+    return this.activeTests.get(testId);
+  }
+
+  async stopTest(testId) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      this.activeTests.set(testId, {
+        ...test,
+        status: 'stopped'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  setProgressCallback(callback) {
+    this.progressCallback = callback;
+  }
+
+  setCompletionCallback(callback) {
+    this.completionCallback = callback;
+  }
+
+  setErrorCallback(callback) {
+    this.errorCallback = callback;
   }
 
   /**
@@ -60,14 +118,15 @@ class SecurityTestEngine {
     
     try {
       Logger.info(`🚀 开始安全测试: ${testId} - ${url}`);
-      
-      // 发送测试开始事件
-      emitTestProgress(testId, {
-        stage: 'started',
+
+      this.activeTests.set(testId, {
+        status: 'running',
         progress: 0,
-        message: '安全扫描开始',
-        url
+        startTime: Date.now()
       });
+
+      // 发送测试开始事件
+      this.updateTestProgress(testId, 0, '安全扫描开始', 'started', { url });
       
       const results = await this.performSecurityScan(url, { testId });
       
@@ -79,6 +138,15 @@ class SecurityTestEngine {
         results,
         timestamp: new Date().toISOString()
       };
+
+      this.activeTests.set(testId, {
+        status: 'completed',
+        progress: 100,
+        results
+      });
+      if (this.completionCallback) {
+        this.completionCallback(finalResult);
+      }
       
       // 发送完成事件
       emitTestComplete(testId, finalResult);
@@ -97,8 +165,18 @@ class SecurityTestEngine {
         testId,
         url,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        startTime: new Date(this.activeTests.get(testId).startTime).toISOString(),
+        endTime: new Date().toISOString(),
       };
+
+      this.activeTests.set(testId, {
+        status: 'failed',
+        error: error.message
+      });
+      if (this.errorCallback) {
+        this.errorCallback(error);
+      }
       
       // 发送错误事件
       emitTestError(testId, {
@@ -133,11 +211,7 @@ class SecurityTestEngine {
       
       // 发送进度: SSL分析
       if (testId) {
-        emitTestProgress(testId, {
-          stage: 'running',
-          progress: 10,
-          message: '分析SSL/TLS配置...'
-        });
+        this.updateTestProgress(testId, 10, '分析SSL/TLS配置...', 'running');
       }
       
       // 初始化漏洞分析器
@@ -157,11 +231,7 @@ class SecurityTestEngine {
       
       // 发送进度: 基础检查完成
       if (testId) {
-        emitTestProgress(testId, {
-          stage: 'running',
-          progress: 40,
-          message: 'SSL和安全头部分析完成'
-        });
+        this.updateTestProgress(testId, 40, 'SSL和安全头部分析完成', 'running');
       }
       
       // 深度漏洞扫描（需要浏览器环境）
@@ -175,11 +245,7 @@ class SecurityTestEngine {
         Logger.info('🔍 开始深度漏洞扫描...');
         
         if (testId) {
-          emitTestProgress(testId, {
-            stage: 'running',
-            progress: 50,
-            message: '执行深度漏洞扫描...'
-          });
+          this.updateTestProgress(testId, 50, '执行深度漏洞扫描...', 'running');
         }
         
         try {
@@ -202,11 +268,7 @@ class SecurityTestEngine {
         Logger.info('🔍 执行快速安全扫描...');
         
         if (testId) {
-          emitTestProgress(testId, {
-            stage: 'running',
-            progress: 50,
-            message: '执行快速漏洞扫描...'
-          });
+          this.updateTestProgress(testId, 50, '执行快速漏洞扫描...', 'running');
         }
         
         vulnerabilityAnalysis = await this.performQuickVulnerabilityScan(url);
@@ -216,11 +278,7 @@ class SecurityTestEngine {
       
       // 发送进度: 分析结果
       if (testId) {
-        emitTestProgress(testId, {
-          stage: 'analyzing',
-          progress: 80,
-          message: '分析安全测试结果...'
-        });
+        this.updateTestProgress(testId, 80, '分析安全测试结果...', 'analyzing');
       }
       
       // 计算总体安全评分（增强版）

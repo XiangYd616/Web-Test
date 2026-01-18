@@ -13,13 +13,16 @@ class AccessibilityTestEngine {
     this.version = '2.0.0';
     this.activeTests = new Map();
     this.wcagLevels = ['A', 'AA', 'AAA'];
+    this.progressCallback = null;
+    this.completionCallback = null;
+    this.errorCallback = null;
   }
 
   async checkAvailability() {
     try {
       // 测试基础依赖是否可用
       const testResponse = await axios.get('https://httpbin.org/html', { timeout: 5000 });
-      const $ = cheerio.load(testResponse.data);
+      cheerio.load(testResponse.data);
       
       return {
         available: true,
@@ -104,6 +107,10 @@ class AccessibilityTestEngine {
         progress: 100,
         results
       });
+
+      if (this.completionCallback) {
+        this.completionCallback(results);
+      }
       
       return {
         success: true,
@@ -117,6 +124,10 @@ class AccessibilityTestEngine {
         status: 'failed',
         error: error.message
       });
+
+      if (this.errorCallback) {
+        this.errorCallback(error);
+      }
       throw error;
     }
   }
@@ -195,7 +206,6 @@ class AccessibilityTestEngine {
   }
 
   async checkColorContrast($) {
-    // 简化的颜色对比度检查
     const result = {
       name: '颜色对比度',
       description: 'WCAG 颜色对比度要求检查',
@@ -206,24 +216,31 @@ class AccessibilityTestEngine {
 
     // 检查所有可能有颜色的元素
     const textElements = $('p, span, div, h1, h2, h3, h4, h5, h6, a, button, label');
-    
+
     textElements.each((i, el) => {
       const $el = $(el);
       const text = $el.text().trim();
       
       if (text.length > 0) {
-        // 这里应该实现真正的颜色对比度计算
-        // 现在使用简化的检查
-        const hasGoodContrast = Math.random() > 0.2; // 80%通过率模拟
-        
-        if (hasGoodContrast) {
+        const style = this.parseInlineStyle($el.attr('style'));
+        const color = this.parseColor(style.color);
+        const background = this.parseColor(style['background-color'] || style.backgroundColor);
+
+        if (!color || !background) {
+          result.passed++;
+          return;
+        }
+
+        const contrast = this.calculateContrastRatio(color, background);
+        const threshold = this.getContrastThreshold('AA');
+        if (contrast >= threshold) {
           result.passed++;
         } else {
           result.failed++;
           result.issues.push({
             element: el.tagName.toLowerCase(),
             text: text.substring(0, 50),
-            issue: '颜色对比度不足',
+            issue: `颜色对比度不足(${contrast.toFixed(2)}:1)`,
             severity: 'error'
           });
         }
@@ -376,8 +393,7 @@ class AccessibilityTestEngine {
     };
 
     // 检查常见的ARIA属性
-    $('[aria-label], [aria-labelledby], [aria-describedby], [role]').each((i, el) => {
-      const $el = $(el);
+    $('[aria-label], [aria-labelledby], [aria-describedby], [role]').each(() => {
       result.passed++; // 简化检查，认为有ARIA属性就是好的
     });
 
@@ -440,8 +456,23 @@ class AccessibilityTestEngine {
       failed: 0
     };
 
-    // 简化检查：查找自定义焦点样式
-    result.passed = 1; // 假设基本通过
+    const focusable = $('a, button, input, select, textarea, [tabindex]');
+    focusable.each((_, el) => {
+      const $el = $(el);
+      const style = this.parseInlineStyle($el.attr('style'));
+      const outline = style.outline || style['outline-style'];
+      if (outline && outline.includes('none')) {
+        result.failed++;
+        result.issues.push({
+          element: el.tagName.toLowerCase(),
+          issue: '元素禁用了焦点样式(outline:none)',
+          severity: 'warning',
+          wcagCriterion: '2.4.7'
+        });
+      } else {
+        result.passed++;
+      }
+    });
     
     return result;
   }
@@ -479,7 +510,7 @@ class AccessibilityTestEngine {
     return result;
   }
 
-  calculateAccessibilityScore(checks, wcagLevel) {
+  calculateAccessibilityScore(checks, _wcagLevel) {
     let totalIssues = 0;
     let errors = 0;
     let warnings = 0;
@@ -533,11 +564,76 @@ class AccessibilityTestEngine {
     return recommendations;
   }
 
+  parseInlineStyle(style = '') {
+    return style.split(';').reduce((acc, pair) => {
+      const [key, value] = pair.split(':').map(item => item?.trim());
+      if (key && value) {
+        acc[key.replace(/-([a-z])/g, (_, char) => char.toUpperCase())] = value;
+      }
+      return acc;
+    }, {});
+  }
+
+  parseColor(value) {
+    if (!value) return null;
+    const hexMatch = value.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (hexMatch) {
+      const hex = hexMatch[1].length === 3
+        ? hexMatch[1].split('').map(c => c + c).join('')
+        : hexMatch[1];
+      const num = parseInt(hex, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    }
+
+    const rgbMatch = value.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
+    if (rgbMatch) {
+      return {
+        r: Number(rgbMatch[1]),
+        g: Number(rgbMatch[2]),
+        b: Number(rgbMatch[3])
+      };
+    }
+
+    return null;
+  }
+
+  calculateContrastRatio(foreground, background) {
+    const luminance = (color) => {
+      const channel = (value) => {
+        const c = value / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      };
+      return 0.2126 * channel(color.r) + 0.7152 * channel(color.g) + 0.0722 * channel(color.b);
+    };
+    const l1 = luminance(foreground) + 0.05;
+    const l2 = luminance(background) + 0.05;
+    return l1 > l2 ? l1 / l2 : l2 / l1;
+  }
+
+  getContrastThreshold(level = 'AA') {
+    if (level === 'AAA') return 7;
+    if (level === 'A') return 3;
+    return 4.5;
+  }
+
   updateTestProgress(testId, progress, message) {
     const test = this.activeTests.get(testId);
     if (test) {
       test.progress = progress;
       test.message = message;
+    }
+
+    if (this.progressCallback) {
+      this.progressCallback({
+        testId,
+        progress,
+        message,
+        status: test?.status || 'running'
+      });
     }
   }
 
@@ -552,6 +648,18 @@ class AccessibilityTestEngine {
       return true;
     }
     return false;
+  }
+
+  setProgressCallback(callback) {
+    this.progressCallback = callback;
+  }
+
+  setCompletionCallback(callback) {
+    this.completionCallback = callback;
+  }
+
+  setErrorCallback(callback) {
+    this.errorCallback = callback;
   }
 }
 

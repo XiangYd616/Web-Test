@@ -13,6 +13,7 @@
 
 const { v4: uuidv4 } = require('uuid');
 const Logger = require('../utils/logger');
+const { createEngine } = require('../services/testing/TestEngineFactory');
 
 class TestEventsHandler {
   constructor(io) {
@@ -158,9 +159,7 @@ class TestEventsHandler {
         config
       });
 
-      // 动态导入测试引擎（避免循环依赖）
-      const StressTestEngine = require('../engines/stress/stressTestEngine');
-      const engine = new StressTestEngine();
+      const engine = createEngine('stress');
 
       // 执行测试，带进度回调
       const testConfig = {
@@ -299,9 +298,7 @@ class TestEventsHandler {
         config
       });
 
-      // 导入API测试引擎
-      const ApiTestEngine = require('../engines/api/apiTestEngine');
-      const engine = new ApiTestEngine();
+      const engine = createEngine('api');
 
       // 执行测试
       const results = await engine.executeTest(config);
@@ -379,9 +376,7 @@ class TestEventsHandler {
         }
       }, 2000);
 
-      // 导入性能测试引擎
-      const PerformanceTestEngine = require('../engines/performance/PerformanceTestEngine');
-      const engine = new PerformanceTestEngine();
+      const engine = createEngine('performance');
 
       const results = await engine.executeTest(config);
 
