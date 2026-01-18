@@ -651,6 +651,56 @@ models.RunResult = sequelize.define('run_results', {
   }
 });
 
+// 定时运行任务模型
+models.ScheduledRun = sequelize.define('scheduled_runs', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  workspace_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  collection_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  environment_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    index: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  cron: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'inactive'),
+    allowNull: false,
+    defaultValue: 'active'
+  },
+  config: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  last_run_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  created_by: {
+    type: DataTypes.UUID,
+    allowNull: true
+  }
+});
+
 // 测试队列模型
 models.TestQueue = sequelize.define('test_queue', {
   id: {
@@ -784,6 +834,13 @@ models.Run.hasMany(models.RunResult, { foreignKey: 'run_id', as: 'results' });
 models.RunResult.belongsTo(models.Run, { foreignKey: 'run_id', as: 'run' });
 models.CollectionItem.hasMany(models.RunResult, { foreignKey: 'item_id', as: 'runResults' });
 models.RunResult.belongsTo(models.CollectionItem, { foreignKey: 'item_id', as: 'item' });
+
+models.Workspace.hasMany(models.ScheduledRun, { foreignKey: 'workspace_id', as: 'scheduledRuns' });
+models.ScheduledRun.belongsTo(models.Workspace, { foreignKey: 'workspace_id', as: 'workspace' });
+models.Collection.hasMany(models.ScheduledRun, { foreignKey: 'collection_id', as: 'scheduledRuns' });
+models.ScheduledRun.belongsTo(models.Collection, { foreignKey: 'collection_id', as: 'collection' });
+models.Environment.hasMany(models.ScheduledRun, { foreignKey: 'environment_id', as: 'scheduledRuns' });
+models.ScheduledRun.belongsTo(models.Environment, { foreignKey: 'environment_id', as: 'environment' });
 
 // 数据库连接和同步函数
 const connectDatabase = async () => {
