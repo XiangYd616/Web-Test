@@ -9,6 +9,7 @@ const { body, validationResult } = require('express-validator');
 const { getPool, healthCheck, getStats } = require('../config/database');
 const monitoringRoutes = require('./monitoring');
 const MonitoringService = require('../services/monitoring/MonitoringService');
+const AlertService = require('../services/core/alertService');
 const { requireRole, ROLES } = require('../middleware/auth.js');
 const { asyncHandler } = require('../middleware/errorHandler.js');
 const { formatValidationErrors } = require('../middleware/responseFormatter.js');
@@ -17,6 +18,20 @@ const router = express.Router();
 
 // 初始化监控服务并注入路由
 const monitoringService = new MonitoringService(getPool());
+const alertService = new AlertService(getPool());
+monitoringService.on('alert:triggered', (alertData) => {
+  alertService.handleMonitoringAlert(alertData).catch(error => {
+    console.error('处理监控告警失败:', error);
+  });
+});
+
+monitoringService.start().catch(error => {
+  console.error('启动监控服务失败:', error);
+});
+alertService.start().catch(error => {
+  console.error('启动告警服务失败:', error);
+});
+
 monitoringRoutes.setMonitoringService(monitoringService);
 router.use('/monitoring', monitoringRoutes);
 

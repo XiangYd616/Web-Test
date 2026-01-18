@@ -1298,7 +1298,7 @@ class MonitoringService extends EventEmitter {
                 throw new Error('监控站点不存在或无权限访问');
             }
 
-            const { page = 1, limit = 50, timeRange = '24h' } = options;
+            const { page = 1, limit = 50, timeRange = '24h', status } = options;
             const offset = (page - 1) * limit;
 
             let timeCondition = '';
@@ -1317,26 +1317,28 @@ class MonitoringService extends EventEmitter {
                     break;
             }
 
+            const statusCondition = status ? 'AND status = $4' : '';
             const query = `
         SELECT 
           id, status, response_time, status_code, 
           results, error_message, checked_at
         FROM monitoring_results 
-        WHERE site_id = $1 ${timeCondition}
+        WHERE site_id = $1 ${timeCondition} ${statusCondition}
         ORDER BY checked_at DESC 
         LIMIT $2 OFFSET $3
       `;
 
-            const result = await this.dbPool.query(query, [siteId, limit, offset]);
+            const params = status ? [siteId, limit, offset, status] : [siteId, limit, offset];
+            const result = await this.dbPool.query(query, params);
 
             // 获取总数
             const countQuery = `
         SELECT COUNT(*) as total 
         FROM monitoring_results 
-        WHERE site_id = $1 ${timeCondition}
+        WHERE site_id = $1 ${timeCondition} ${statusCondition}
       `;
 
-            const countResult = await this.dbPool.query(countQuery, [siteId]);
+            const countResult = await this.dbPool.query(countQuery, status ? [siteId, status] : [siteId]);
             const total = parseInt(countResult.rows[0].total);
 
             return {
@@ -1360,8 +1362,24 @@ class MonitoringService extends EventEmitter {
      */
     async getAlerts(userId, options = {}) {
         try {
-            const { page = 1, limit = 20, severity, status: _status = 'active' } = options;
+            const { page = 1, limit = 20, severity, status: _status = 'active', timeRange = null } = options;
             const offset = (page - 1) * limit;
+
+            let timeCondition = '';
+            switch (timeRange) {
+                case '1h':
+                    timeCondition = "AND mr.checked_at >= NOW() - INTERVAL '1 hour'";
+                    break;
+                case '24h':
+                    timeCondition = "AND mr.checked_at >= NOW() - INTERVAL '24 hours'";
+                    break;
+                case '7d':
+                    timeCondition = "AND mr.checked_at >= NOW() - INTERVAL '7 days'";
+                    break;
+                case '30d':
+                    timeCondition = "AND mr.checked_at >= NOW() - INTERVAL '30 days'";
+                    break;
+            }
 
             // 这里需要创建告警表，暂时从监控结果中生成告警
             let query = `
@@ -1384,7 +1402,7 @@ class MonitoringService extends EventEmitter {
         JOIN monitoring_sites ms ON mr.site_id = ms.id
         WHERE ms.user_id = $1 
           AND mr.status IN ('down', 'timeout', 'error')
-          AND ms.deleted_at IS NULL
+          AND ms.deleted_at IS NULL ${timeCondition}
       `;
 
             const params = [userId];
@@ -1416,7 +1434,7 @@ class MonitoringService extends EventEmitter {
         JOIN monitoring_sites ms ON mr.site_id = ms.id
         WHERE ms.user_id = $1 
           AND mr.status IN ('down', 'timeout', 'error')
-          AND ms.deleted_at IS NULL
+          AND ms.deleted_at IS NULL ${timeCondition}
       `;
 
             const countResult = await this.dbPool.query(countQuery, [userId]);
@@ -1602,6 +1620,51 @@ class MonitoringService extends EventEmitter {
             const result = await this.dbPool.query(query, params);
             const stats = result.rows[0];
 
+            const statusQuery = `
+        SELECT mr.status, COUNT(*) as count
+        FROM monitoring_results mr
+        JOIN monitoring_sites ms ON mr.site_id = ms.id
+        WHERE ms.user_id = $1 ${siteCondition} ${timeCondition}
+          AND ms.deleted_at IS NULL
+        GROUP BY mr.status
+      `;
+            const statusResult = await this.dbPool.query(statusQuery, params);
+            const statusCounts = statusResult.rows.reduce((acc, row) => {
+                acc[row.status] = parseInt(row.count);
+                return acc;
+            }, {});
+
+            const responseTimeBuckets = {
+                fast: 0,
+                normal: 0,
+                slow: 0
+            };
+            const bucketQuery = `
+        SELECT mr.response_time
+        FROM monitoring_results mr
+        JOIN monitoring_sites ms ON mr.site_id = ms.id
+        WHERE ms.user_id = $1 ${siteCondition} ${timeCondition}
+          AND ms.deleted_at IS NULL
+          AND mr.response_time IS NOT NULL
+      `;
+            const bucketResult = await this.dbPool.query(bucketQuery, params);
+            bucketResult.rows.forEach(row => {
+                const value = Number(row.response_time);
+                if (value <= 500) {
+                    responseTimeBuckets.fast += 1;
+                } else if (value <= 1500) {
+                    responseTimeBuckets.normal += 1;
+                } else {
+                    responseTimeBuckets.slow += 1;
+                }
+            });
+
+            const statusChart = Object.entries(statusCounts)
+                .map(([name, value]) => ({ name, value }))
+                .sort((a, b) => b.value - a.value);
+            const responseTimeChart = Object.entries(responseTimeBuckets)
+                .map(([name, value]) => ({ name, value }));
+
             return {
                 totalChecks: parseInt(stats.total_checks),
                 successfulChecks: parseInt(stats.successful_checks),
@@ -1612,7 +1675,11 @@ class MonitoringService extends EventEmitter {
                 avgResponseTime: stats.avg_response_time ? Math.round(stats.avg_response_time) : 0,
                 minResponseTime: stats.min_response_time ? Math.round(stats.min_response_time) : 0,
                 maxResponseTime: stats.max_response_time ? Math.round(stats.max_response_time) : 0,
-                timeRange
+                timeRange,
+                statusCounts,
+                responseTimeBuckets,
+                statusChart,
+                responseTimeChart
             };
 
         } catch (error) {
@@ -1632,6 +1699,14 @@ class MonitoringService extends EventEmitter {
             const analytics = await this.getAnalytics(userId, { timeRange, siteId });
             const sites = await this.getMonitoringTargets(userId);
 
+            const charts = {
+                statusChart: Object.entries(analytics.statusCounts || {})
+                    .map(([name, value]) => ({ name, value }))
+                    .sort((a, b) => b.value - a.value),
+                responseTimeChart: Object.entries(analytics.responseTimeBuckets || {})
+                    .map(([name, value]) => ({ name, value }))
+            };
+
             const exportData = {
                 metadata: {
                     exportedAt: new Date().toISOString(),
@@ -1640,6 +1715,7 @@ class MonitoringService extends EventEmitter {
                     userId
                 },
                 analytics,
+                charts,
                 sites: sites.data
             };
 
@@ -1651,7 +1727,7 @@ class MonitoringService extends EventEmitter {
                         `"${site.name}","${site.url}","${site.last_status || 'unknown'}","${site.last_checked_at || ''}","${site.last_response_time || ''}"`
                     )
                 ];
-                return csvLines.join('/n');
+                return csvLines.join('\n');
             }
 
             return JSON.stringify(exportData, null, 2);

@@ -3,9 +3,8 @@
  */
 
 const express = require('express');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, requirePermission, PERMISSIONS } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
-const MonitoringService = require('../services/monitoring/MonitoringService.js');
 const { validateRequest } = require('../middleware/validation');
 const Joi = require('joi');
 
@@ -49,7 +48,7 @@ const updateSiteSchema = Joi.object({
  * 获取监控站点列表
  * GET /api/monitoring/sites
  */
-router.get('/sites', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/sites', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -77,7 +76,7 @@ router.get('/sites', authMiddleware, asyncHandler(async (req, res) => {
  * 添加监控站点
  * POST /api/monitoring/sites
  */
-router.post('/sites', authMiddleware, validateRequest(addSiteSchema), asyncHandler(async (req, res) => {
+router.post('/sites', authMiddleware, requirePermission(PERMISSIONS.MONITORING_WRITE), validateRequest(addSiteSchema), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -107,7 +106,7 @@ router.post('/sites', authMiddleware, validateRequest(addSiteSchema), asyncHandl
  * 获取单个监控站点详情
  * GET /api/monitoring/sites/:id
  */
-router.get('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/sites/:id', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -143,7 +142,7 @@ router.get('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
  * 更新监控站点
  * PUT /api/monitoring/sites/:id
  */
-router.put('/sites/:id', authMiddleware, validateRequest(updateSiteSchema), asyncHandler(async (req, res) => {
+router.put('/sites/:id', authMiddleware, requirePermission(PERMISSIONS.MONITORING_WRITE), validateRequest(updateSiteSchema), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -189,7 +188,7 @@ router.put('/sites/:id', authMiddleware, validateRequest(updateSiteSchema), asyn
  * 删除监控站点
  * DELETE /api/monitoring/sites/:id
  */
-router.delete('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
+router.delete('/sites/:id', authMiddleware, requirePermission(PERMISSIONS.MONITORING_WRITE), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -234,7 +233,7 @@ router.delete('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
  * 立即执行监控检查
  * POST /api/monitoring/sites/:id/check
  */
-router.post('/sites/:id/check', authMiddleware, asyncHandler(async (req, res) => {
+router.post('/sites/:id/check', authMiddleware, requirePermission(PERMISSIONS.MONITORING_WRITE), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -258,7 +257,7 @@ router.post('/sites/:id/check', authMiddleware, asyncHandler(async (req, res) =>
  * 获取监控站点历史记录
  * GET /api/monitoring/sites/:id/history
  */
-router.get('/sites/:id/history', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/sites/:id/history', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -272,12 +271,13 @@ router.get('/sites/:id/history', authMiddleware, asyncHandler(async (req, res) =
 
   const siteId = req.params.id;
   const userId = req.user.id;
-  const { page = 1, limit = 50, timeRange = '24h' } = req.query;
+  const { page = 1, limit = 50, timeRange = '24h', status } = req.query;
 
   const history = await monitoringService.getMonitoringHistory(siteId, userId, {
     page: parseInt(page),
     limit: parseInt(limit),
-    timeRange
+    timeRange,
+    status
   });
 
   res.success(history.data);
@@ -287,7 +287,7 @@ router.get('/sites/:id/history', authMiddleware, asyncHandler(async (req, res) =
  * 获取监控告警
  * GET /api/monitoring/alerts
  */
-router.get('/alerts', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/alerts', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -300,13 +300,14 @@ router.get('/alerts', authMiddleware, asyncHandler(async (req, res) => {
   }
 
   const userId = req.user.id;
-  const { page = 1, limit = 20, severity, status = 'active' } = req.query;
+  const { page = 1, limit = 20, severity, status = 'active', timeRange } = req.query;
 
   const alerts = await monitoringService.getAlerts(userId, {
     page: parseInt(page),
     limit: parseInt(limit),
     severity,
-    status
+    status,
+    timeRange
   });
 
   res.success(alerts.data);
@@ -316,7 +317,7 @@ router.get('/alerts', authMiddleware, asyncHandler(async (req, res) => {
  * 标记告警为已读
  * PUT /api/monitoring/alerts/:id/read
  */
-router.put('/alerts/:id/read', authMiddleware, asyncHandler(async (req, res) => {
+router.put('/alerts/:id/read', authMiddleware, requirePermission(PERMISSIONS.MONITORING_WRITE), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -361,7 +362,7 @@ router.put('/alerts/:id/read', authMiddleware, asyncHandler(async (req, res) => 
  * 批量操作告警
  * POST /api/monitoring/alerts/batch
  */
-router.post('/alerts/batch', authMiddleware, asyncHandler(async (req, res) => {
+router.post('/alerts/batch', authMiddleware, requirePermission(PERMISSIONS.MONITORING_WRITE), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -396,10 +397,29 @@ router.post('/alerts/batch', authMiddleware, asyncHandler(async (req, res) => {
 }));
 
 /**
+ * 重载监控目标
+ * POST /api/monitoring/reload
+ */
+router.post('/reload', authMiddleware, requirePermission(PERMISSIONS.MONITORING_ADMIN), asyncHandler(async (req, res) => {
+  if (!monitoringService) {
+    return res.status(503).json({
+      success: false,
+      error: {
+        code: 'SERVICE_UNAVAILABLE',
+        message: '监控服务未启动'
+      }
+    });
+  }
+
+  await monitoringService.reloadMonitoringTargets();
+  res.success('监控目标已重载');
+}));
+
+/**
  * 获取监控统计
  * GET /api/monitoring/stats
  */
-router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/stats', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -433,7 +453,7 @@ router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
  * 获取监控服务健康状态
  * GET /api/monitoring/health
  */
-router.get('/health', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/health', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -454,7 +474,7 @@ router.get('/health', authMiddleware, asyncHandler(async (req, res) => {
  * 获取系统监控指标 (新增)
  * GET /api/monitoring/metrics
  */
-router.get('/metrics', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/metrics', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     // 提供默认指标数据
     const defaultMetrics = {
@@ -479,7 +499,7 @@ router.get('/metrics', authMiddleware, asyncHandler(async (req, res) => {
  * 获取监控数据统计
  * GET /api/monitoring/analytics
  */
-router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/analytics', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -506,7 +526,7 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
  * 导出监控数据
  * GET /api/monitoring/export
  */
-router.get('/export', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/export', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -544,7 +564,7 @@ router.get('/export', authMiddleware, asyncHandler(async (req, res) => {
  * 生成监控报告
  * POST /api/monitoring/reports
  */
-router.post('/reports', authMiddleware, asyncHandler(async (req, res) => {
+router.post('/reports', authMiddleware, requirePermission(PERMISSIONS.MONITORING_WRITE), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -582,7 +602,7 @@ router.post('/reports', authMiddleware, asyncHandler(async (req, res) => {
  * 获取监控报告列表
  * GET /api/monitoring/reports
  */
-router.get('/reports', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/reports', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({
@@ -609,7 +629,7 @@ router.get('/reports', authMiddleware, asyncHandler(async (req, res) => {
  * 下载监控报告
  * GET /api/monitoring/reports/:id/download
  */
-router.get('/reports/:id/download', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/reports/:id/download', authMiddleware, requirePermission(PERMISSIONS.MONITORING_READ), asyncHandler(async (req, res) => {
   if (!monitoringService) {
     
         return res.status(503).json({

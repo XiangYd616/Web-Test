@@ -36,9 +36,14 @@ const listScheduledRuns = async (req, res) => {
     return res.forbidden(permission.error);
   }
 
+  const status = req.query.status;
+  if (status && !['active', 'inactive'].includes(status)) {
+    return res.validationError([{ field: 'status', message: 'status 仅支持 active/inactive' }]);
+  }
+
   const { ScheduledRun } = models;
   const runs = await ScheduledRun.findAll({
-    where: { workspace_id: workspaceId },
+    where: { workspace_id: workspaceId, ...(status ? { status } : {}) },
     order: [['created_at', 'DESC']]
   });
   return res.success(runs, '获取定时运行列表成功');

@@ -76,14 +76,14 @@ export class RealSEOAnalysisEngine {
     onProgress?: (progress: number, step: string) => void
   ): Promise<SEOAnalysisResult> {
     this.stopped = false;
-    // TODO: 实现真实的 SEO 分析逻辑
+    // 占位实现：返回模拟 SEO 分析结果
     if (onProgress) {
       onProgress(50, '分析中...');
     }
     return {
       score: 75,
       issues: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -92,16 +92,16 @@ export class RealSEOAnalysisEngine {
     return {
       score: 75,
       issues: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 
   async analyzeContent(html: string): Promise<SEOAnalysisResult> {
-    // TODO: 实现内容分析逻辑
+    // 占位实现：返回模拟内容分析结果
     return {
       score: 80,
       issues: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -113,4 +113,3 @@ export class RealSEOAnalysisEngine {
 // 导出类型别名以保持兼容性
 export { RealSEOAnalysisEngine as SEOAnalysisEngine };
 export const seoAnalysisEngine = new RealSEOAnalysisEngine();
-

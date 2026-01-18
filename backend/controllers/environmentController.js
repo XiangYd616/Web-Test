@@ -1,5 +1,6 @@
 const { models } = require('../database/sequelize');
 const EnvironmentManager = require('../services/environments/EnvironmentManager');
+const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
 const environmentManager = new EnvironmentManager({ models });
 
@@ -15,6 +16,17 @@ const ensureWorkspaceMember = async (workspaceId, userId) => {
   return WorkspaceMember.findOne({
     where: { workspace_id: workspaceId, user_id: userId, status: 'active' }
   });
+};
+
+const ensureWorkspacePermission = async (workspaceId, userId, action) => {
+  const member = await ensureWorkspaceMember(workspaceId, userId);
+  if (!member) {
+    return { error: '没有权限访问该工作空间环境' };
+  }
+  if (!hasWorkspacePermission(member.role, action)) {
+    return { error: '当前角色无此操作权限' };
+  }
+  return { member };
 };
 
 const ensureEnvironmentAccess = async (environmentId, userId) => {
@@ -64,9 +76,9 @@ const listEnvironments = async (req, res) => {
   if (!workspaceId) {
     return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
   }
-  const member = await ensureWorkspaceMember(workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限访问该工作空间环境');
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const { Environment, EnvironmentVariable } = models;
@@ -104,9 +116,9 @@ const createEnvironment = async (req, res) => {
   if (!validateEnvironmentInput(req.body, res)) {
     return;
   }
-  const member = await ensureWorkspaceMember(workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限创建环境');
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'write');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
 
   const environment = await environmentManager.createEnvironment({
@@ -132,6 +144,9 @@ const deleteEnvironment = async (req, res) => {
   if (access.error) {
     return access.error === '环境不存在' ? res.notFound(access.error) : res.forbidden(access.error);
   }
+  if (!hasWorkspacePermission(access.member.role, 'delete')) {
+    return res.forbidden('当前角色无删除权限');
+  }
   await environmentManager.deleteEnvironment(req.params.environmentId);
   return res.success(null, '删除环境成功');
 };
@@ -140,6 +155,9 @@ const setActiveEnvironment = async (req, res) => {
   const access = await ensureEnvironmentAccess(req.params.environmentId, req.user.id);
   if (access.error) {
     return access.error === '环境不存在' ? res.notFound(access.error) : res.forbidden(access.error);
+  }
+  if (!hasWorkspacePermission(access.member.role, 'write')) {
+    return res.forbidden('当前角色无写入权限');
   }
   const environment = await environmentManager.setActiveEnvironment(req.params.environmentId);
   return res.success(environment, '设置活跃环境成功');
@@ -165,6 +183,9 @@ const setVariable = async (req, res) => {
     if (access.error) {
       return access.error === '环境不存在' ? res.notFound(access.error) : res.forbidden(access.error);
     }
+    if (!hasWorkspacePermission(access.member.role, 'write')) {
+      return res.forbidden('当前角色无写入权限');
+    }
   } else if (!req.body?.workspaceId) {
     return res.validationError([{ field: 'workspaceId', message: 'global 变量需要 workspaceId' }]);
   }
@@ -186,9 +207,9 @@ const getGlobalVariables = async (req, res) => {
   if (!req.query.workspaceId) {
     return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
   }
-  const member = await ensureWorkspaceMember(req.query.workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限访问全局变量');
+  const permission = await ensureWorkspacePermission(req.query.workspaceId, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
   const globals = await environmentManager.getGlobalVariables({
     userId: req.user.id,
