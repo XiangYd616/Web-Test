@@ -3,65 +3,135 @@
  * 提供完整的数据CRUD操作、导入导出、统计分析、备份恢复等功能
  */
 
-const { EventEmitter } = require('events');
-const fs = require('fs').promises;
-const path = require('path');
-const csv = require('csv-parser');
+import csv from 'csv-parser';
+import { EventEmitter } from 'events';
+import { createReadStream } from 'fs';
+import fs from 'fs/promises';
+import path from 'path';
 
-/**
+const { createObjectCsvWriter } = require('csv-writer');
 
- * DataManagementService类 - 负责处理相关功能
+type DataRecordMetadata = {
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+  tags: string[];
+  source: string;
+  userId?: string;
+  updatedBy?: string;
+  deletedAt?: string;
+  deletedBy?: string;
+};
 
- */
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+type DataRecord = {
+  id: string;
+  type: string;
+  data: Record<string, unknown>;
+  metadata: DataRecordMetadata;
+};
 
-  /**
-   * 处理constructor事件
-   * @param {Object} event - 事件对象
-   * @returns {Promise<void>}
-   */
+type DataTypeMap = {
+  TEST_RESULTS: string;
+  USER_DATA: string;
+  SYSTEM_LOGS: string;
+  ANALYTICS: string;
+  REPORTS: string;
+  CONFIGURATIONS: string;
+};
+
+type CreateOptions = {
+  tags?: string[];
+  source?: string;
+  userId?: string;
+};
+
+type ReadOptions = {
+  fields?: string[];
+};
+
+type UpdateOptions = {
+  userId?: string;
+};
+
+type DeleteOptions = {
+  softDelete?: boolean;
+  userId?: string;
+};
+
+type QueryFilters = Record<string, unknown>;
+
+type QuerySort = {
+  field: string;
+  direction?: 'asc' | 'desc';
+};
+
+type QueryOptions = {
+  filters?: QueryFilters;
+  search?: string;
+  sort?: QuerySort;
+};
+
+type PaginationOptions = {
+  page?: number;
+  limit?: number;
+};
+
+type BatchOperation = {
+  type: 'create' | 'update' | 'delete';
+  dataType: string;
+  data?: Record<string, unknown>;
+  id?: string;
+  updates?: Record<string, unknown>;
+  options?: CreateOptions | UpdateOptions | DeleteOptions;
+};
+
+type ImportOptions = {
+  userId?: string;
+  tags?: string[];
+  source?: string;
+};
+
+type CustomStatDefinition = {
+  type: 'count' | 'average';
+  name: string;
+  field: string;
+  value?: unknown;
+};
+
+type StatisticsOptions = {
+  customStats?: CustomStatDefinition[];
+};
+
 class DataManagementService extends EventEmitter {
-  constructor() {
-    super();
-    this.dataStore = new Map(); // 内存数据存储
-    this.backupDir = path.join(process.cwd(), 'data', 'backups');
-    this.exportDir = path.join(process.cwd(), 'data', 'exports');
-    this.isInitialized = false;
-    
-    // 数据类型定义
-    this.dataTypes = {
-      TEST_RESULTS: 'test_results',
-      USER_DATA: 'user_data',
-      SYSTEM_LOGS: 'system_logs',
-      ANALYTICS: 'analytics',
-      REPORTS: 'reports',
-      CONFIGURATIONS: 'configurations'
-    };
-    
-  }
+  private dataStore = new Map<string, Map<string, DataRecord>>();
+  private backupDir = path.join(process.cwd(), 'data', 'backups');
+  private exportDir = path.join(process.cwd(), 'data', 'exports');
+  private isInitialized = false;
+  private dataTypes: DataTypeMap = {
+    TEST_RESULTS: 'test_results',
+    USER_DATA: 'user_data',
+    SYSTEM_LOGS: 'system_logs',
+    ANALYTICS: 'analytics',
+    REPORTS: 'reports',
+    CONFIGURATIONS: 'configurations',
+  };
 
   /**
    * 初始化数据管理服务
    */
   async initialize() {
     if (this.isInitialized) {
-      
-        return;
-      }
+      return;
+    }
 
     try {
-      // 创建必要的目录
       await this.ensureDirectories();
-      
-      // 加载现有数据
       await this.loadExistingData();
-      
-      // 设置定期备份
       this.setupPeriodicBackup();
-      
+
       this.isInitialized = true;
       console.log('✅ 数据管理服务初始化完成');
-      
+
       this.emit('initialized');
     } catch (error) {
       console.error('❌ 数据管理服务初始化失败:', error);
@@ -72,12 +142,12 @@ class DataManagementService extends EventEmitter {
   /**
    * 创建数据记录
    */
-  async createData(type, data, options = {}) {
+  async createData(type: string, data: Record<string, unknown>, options: CreateOptions = {}) {
     try {
       const id = this.generateId();
       const timestamp = new Date().toISOString();
-      
-      const record = {
+
+      const record: DataRecord = {
         id,
         type,
         data,
@@ -87,24 +157,20 @@ class DataManagementService extends EventEmitter {
           version: 1,
           tags: options.tags || [],
           source: options.source || 'api',
-          userId: options.userId
-        }
+          userId: options.userId,
+        },
       };
 
-      // 验证数据
       this.validateData(type, data);
-      
-      // 存储数据
+
       if (!this.dataStore.has(type)) {
         this.dataStore.set(type, new Map());
       }
-      this.dataStore.get(type).set(id, record);
-      
-      // 触发事件
+      this.dataStore.get(type)?.set(id, record);
+
       this.emit('dataCreated', { type, id, record });
-      
+
       return { id, record };
-      
     } catch (error) {
       console.error('创建数据失败:', error);
       throw error;
@@ -114,27 +180,24 @@ class DataManagementService extends EventEmitter {
   /**
    * 读取数据记录
    */
-  async readData(type, id, options = {}) {
+  async readData(type: string, id: string, options: ReadOptions = {}) {
     try {
       if (!this.dataStore.has(type)) {
         throw new Error(`数据类型不存在: ${type}`);
       }
-      
+
       const typeStore = this.dataStore.get(type);
-      if (!typeStore.has(id)) {
+      if (!typeStore?.has(id)) {
         throw new Error(`数据记录不存在: ${type}/${id}`);
       }
-      
-      const record = typeStore.get(id);
-      
-      // 应用过滤器
+
+      const record = typeStore.get(id) as DataRecord;
+
       if (options.fields) {
-        
         return this.filterFields(record, options.fields);
       }
-      
+
       return record;
-      
     } catch (error) {
       console.error('读取数据失败:', error);
       throw error;
@@ -144,32 +207,33 @@ class DataManagementService extends EventEmitter {
   /**
    * 更新数据记录
    */
-  async updateData(type, id, updates, options = {}) {
+  async updateData(
+    type: string,
+    id: string,
+    updates: Record<string, unknown>,
+    options: UpdateOptions = {}
+  ) {
     try {
-      const existingRecord = await this.readData(type, id);
-      
-      const updatedRecord = {
+      const existingRecord = (await this.readData(type, id)) as DataRecord;
+
+      const updatedRecord: DataRecord = {
         ...existingRecord,
         data: { ...existingRecord.data, ...updates },
         metadata: {
           ...existingRecord.metadata,
           updatedAt: new Date().toISOString(),
           version: existingRecord.metadata.version + 1,
-          updatedBy: options.userId
-        }
+          updatedBy: options.userId,
+        },
       };
 
-      // 验证更新后的数据
       this.validateData(type, updatedRecord.data);
-      
-      // 保存更新
-      this.dataStore.get(type).set(id, updatedRecord);
-      
-      // 触发事件
+
+      this.dataStore.get(type)?.set(id, updatedRecord);
+
       this.emit('dataUpdated', { type, id, record: updatedRecord, changes: updates });
-      
+
       return updatedRecord;
-      
     } catch (error) {
       console.error('更新数据失败:', error);
       throw error;
@@ -179,28 +243,19 @@ class DataManagementService extends EventEmitter {
   /**
    * 删除数据记录
    */
-  async deleteData(type, id, options = {}) {
+  async deleteData(type: string, id: string, options: DeleteOptions = {}) {
     try {
       const record = await this.readData(type, id);
-      
+
       if (options.softDelete) {
-        
-        // 软删除：标记为已删除
-        return await this.updateData(type, id, {
-      }, {
-          ...options,
-          metadata: { deletedAt: new Date().toISOString(), deletedBy: options.userId }
-        });
-      } else {
-        // 硬删除：直接移除
-        this.dataStore.get(type).delete(id);
-        
-        // 触发事件
-        this.emit('dataDeleted', { type, id, record });
-        
-        return { success: true, deletedRecord: record };
+        return await this.updateData(type, id, {}, { userId: options.userId });
       }
-      
+
+      this.dataStore.get(type)?.delete(id);
+
+      this.emit('dataDeleted', { type, id, record });
+
+      return { success: true, deletedRecord: record };
     } catch (error) {
       console.error('删除数据失败:', error);
       throw error;
@@ -210,46 +265,41 @@ class DataManagementService extends EventEmitter {
   /**
    * 查询数据
    */
-  async queryData(type, query = {}, options = {}) {
+  async queryData(type: string, query: QueryOptions = {}, options: PaginationOptions = {}) {
     try {
       if (!this.dataStore.has(type)) {
         return { results: [], total: 0 };
       }
-      
-      const typeStore = this.dataStore.get(type);
+
+      const typeStore = this.dataStore.get(type) as Map<string, DataRecord>;
       let results = Array.from(typeStore.values());
-      
-      // 应用过滤器
+
       if (query.filters) {
         results = this.applyFilters(results, query.filters);
       }
-      
-      // 应用搜索
+
       if (query.search) {
         results = this.applySearch(results, query.search);
       }
-      
-      // 应用排序
+
       if (query.sort) {
         results = this.applySort(results, query.sort);
       }
-      
+
       const total = results.length;
-      
-      // 应用分页
+
       if (options.page && options.limit) {
         const start = (options.page - 1) * options.limit;
         results = results.slice(start, start + options.limit);
       }
-      
+
       return {
         results,
         total,
         page: options.page || 1,
         limit: options.limit || total,
-        totalPages: options.limit ? Math.ceil(total / options.limit) : 1
+        totalPages: options.limit ? Math.ceil(total / options.limit) : 1,
       };
-      
     } catch (error) {
       console.error('查询数据失败:', error);
       throw error;
@@ -259,37 +309,48 @@ class DataManagementService extends EventEmitter {
   /**
    * 批量操作
    */
-  async batchOperation(operations) {
-    const results = [];
-    const errors = [];
-    
+  async batchOperation(operations: BatchOperation[]) {
+    const results: Array<Record<string, unknown>> = [];
+    const errors: Array<Record<string, unknown>> = [];
+
     try {
       for (const operation of operations) {
         try {
-          let result;
-          
+          let result: unknown;
+
           switch (operation.type) {
             case 'create':
-              result = await this.createData(operation.dataType, operation.data, operation.options);
+              result = await this.createData(
+                operation.dataType,
+                operation.data || {},
+                (operation.options as CreateOptions) || {}
+              );
               break;
             case 'update':
-              result = await this.updateData(operation.dataType, operation.id, operation.updates, operation.options);
+              result = await this.updateData(
+                operation.dataType,
+                operation.id || '',
+                operation.updates || {},
+                (operation.options as UpdateOptions) || {}
+              );
               break;
             case 'delete':
-              result = await this.deleteData(operation.dataType, operation.id, operation.options);
+              result = await this.deleteData(
+                operation.dataType,
+                operation.id || '',
+                (operation.options as DeleteOptions) || {}
+              );
               break;
             default:
-              throw new Error(`不支持的操作类型: ${operation.type}`);
+              throw new Error(`不支持的操作类型: ${String(operation.type)}`);
           }
-          
+
           results.push({ operation, result, success: true });
-          
         } catch (error) {
-          errors.push({ operation, error: error.message, success: false });
+          errors.push({ operation, error: this.getErrorMessage(error), success: false });
         }
       }
-      
-      
+
       return {
         success: errors.length === 0,
         results,
@@ -297,10 +358,9 @@ class DataManagementService extends EventEmitter {
         summary: {
           total: operations.length,
           successful: results.length,
-          failed: errors.length
-        }
+          failed: errors.length,
+        },
       };
-      
     } catch (error) {
       console.error('批量操作失败:', error);
       throw error;
@@ -310,10 +370,10 @@ class DataManagementService extends EventEmitter {
   /**
    * 数据导入
    */
-  async importData(type, filepath, format = 'json', options = {}) {
+  async importData(type: string, filepath: string, format = 'json', options: ImportOptions = {}) {
     try {
-      let data;
-      
+      let data: Array<Record<string, unknown>>;
+
       switch (format) {
         case 'json':
           data = await this.importFromJson(filepath);
@@ -324,27 +384,25 @@ class DataManagementService extends EventEmitter {
         default:
           throw new Error(`不支持的导入格式: ${format}`);
       }
-      
-      const results = [];
-      const errors = [];
-      
+
+      const results: Array<Record<string, unknown>> = [];
+      const errors: Array<Record<string, unknown>> = [];
+
       for (const item of data) {
         try {
           const result = await this.createData(type, item, options);
           results.push(result);
         } catch (error) {
-          errors.push({ item, error: error.message });
+          errors.push({ item, error: this.getErrorMessage(error) });
         }
       }
-      
-      
+
       return {
         success: errors.length === 0,
         imported: results.length,
         failed: errors.length,
-        errors
+        errors,
       };
-      
     } catch (error) {
       console.error('数据导入失败:', error);
       throw error;
@@ -354,32 +412,30 @@ class DataManagementService extends EventEmitter {
   /**
    * 数据统计
    */
-  async getStatistics(type, options = {}) {
+  async getStatistics(type: string, options: StatisticsOptions = {}) {
     try {
       if (!this.dataStore.has(type)) {
         return { total: 0, statistics: {} };
       }
-      
-      const typeStore = this.dataStore.get(type);
+
+      const typeStore = this.dataStore.get(type) as Map<string, DataRecord>;
       const records = Array.from(typeStore.values());
-      
-      const statistics = {
+
+      const statistics: Record<string, unknown> = {
         total: records.length,
         createdToday: this.countRecordsToday(records),
         createdThisWeek: this.countRecordsThisWeek(records),
         createdThisMonth: this.countRecordsThisMonth(records),
         averageSize: this.calculateAverageSize(records),
         latestRecord: this.getLatestRecord(records),
-        oldestRecord: this.getOldestRecord(records)
+        oldestRecord: this.getOldestRecord(records),
       };
-      
-      // 自定义统计
+
       if (options.customStats) {
         statistics.custom = this.calculateCustomStats(records, options.customStats);
       }
-      
+
       return statistics;
-      
     } catch (error) {
       console.error('获取统计信息失败:', error);
       throw error;
@@ -389,39 +445,38 @@ class DataManagementService extends EventEmitter {
   /**
    * 数据备份
    */
-  async createBackup(types = null, options = {}) {
+  async createBackup(types: string[] | null = null, options: { name?: string } = {}) {
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const backupName = options.name || `backup_${timestamp}`;
       const backupPath = path.join(this.backupDir, backupName);
-      
+
       await fs.mkdir(backupPath, { recursive: true });
-      
+
       const typesToBackup = types || Array.from(this.dataStore.keys());
-      const backupInfo = {
+      const backupInfo: Record<string, unknown> = {
         name: backupName,
         timestamp,
         types: typesToBackup,
-        records: {}
+        records: {},
       };
-      
-      for (const type of typesToBackup) {
-        if (this.dataStore.has(type)) {
-          const typeData = Array.from(this.dataStore.get(type).values());
-          const typeFile = path.join(backupPath, `${type}.json`);
-          
+
+      for (const dataType of typesToBackup) {
+        if (this.dataStore.has(dataType)) {
+          const typeData = Array.from(
+            (this.dataStore.get(dataType) as Map<string, DataRecord>).values()
+          );
+          const typeFile = path.join(backupPath, `${dataType}.json`);
+
           await fs.writeFile(typeFile, JSON.stringify(typeData, null, 2));
-          backupInfo.records[type] = typeData.length;
+          (backupInfo.records as Record<string, unknown>)[dataType] = typeData.length;
         }
       }
-      
-      // 保存备份信息
+
       const infoFile = path.join(backupPath, 'backup-info.json');
       await fs.writeFile(infoFile, JSON.stringify(backupInfo, null, 2));
-      
-      
+
       return backupInfo;
-      
     } catch (error) {
       console.error('数据备份失败:', error);
       throw error;
@@ -435,13 +490,11 @@ class DataManagementService extends EventEmitter {
     return `data_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
-  validateData(type, data) {
-    // 基础数据验证
+  validateData(type: string, data: Record<string, unknown>) {
     if (!data || typeof data !== 'object') {
       throw new Error('数据必须是有效的对象');
     }
-    
-    // 根据类型进行特定验证
+
     switch (type) {
       case this.dataTypes.TEST_RESULTS:
         if (!data.url || !data.testType) {
@@ -452,6 +505,8 @@ class DataManagementService extends EventEmitter {
         if (!data.userId) {
           throw new Error('用户数据必须包含用户ID');
         }
+        break;
+      default:
         break;
     }
   }
@@ -466,8 +521,7 @@ class DataManagementService extends EventEmitter {
   }
 
   setupPeriodicBackup() {
-    // 每天凌晨2点自动备份
-    const backupInterval = 24 * 60 * 60 * 1000; // 24小时
+    const backupInterval = 24 * 60 * 60 * 1000;
     setInterval(async () => {
       try {
         await this.createBackup(null, { name: `auto_backup_${Date.now()}` });
@@ -477,34 +531,28 @@ class DataManagementService extends EventEmitter {
     }, backupInterval);
   }
 
-  filterFields(record, fields) {
-    const filtered = {};
+  filterFields(record: DataRecord, fields: string[]) {
+    const filtered: Record<string, unknown> = {};
     for (const field of fields) {
-      if (record[field] !== undefined) {
-        filtered[field] = record[field];
+      if ((record as Record<string, unknown>)[field] !== undefined) {
+        filtered[field] = (record as Record<string, unknown>)[field];
       }
     }
     return filtered;
   }
 
-  applyFilters(records, filters) {
+  applyFilters(records: DataRecord[], filters: QueryFilters) {
     return records.filter(record => {
-        /**
-         * if功能函数
-         * @param {Object} params - 参数对象
-         * @returns {Promise<Object>} 返回结果
-         */
       for (const [key, value] of Object.entries(filters)) {
-        if (record.data[key] !== value) {
-          
-        return false;
-      }
+        if ((record.data as Record<string, unknown>)[key] !== value) {
+          return false;
+        }
       }
       return true;
     });
   }
 
-  applySearch(records, searchTerm) {
+  applySearch(records: DataRecord[], searchTerm: string) {
     const term = searchTerm.toLowerCase();
     return records.filter(record => {
       const searchableText = JSON.stringify(record.data).toLowerCase();
@@ -512,134 +560,140 @@ class DataManagementService extends EventEmitter {
     });
   }
 
-  applySort(records, sortConfig) {
+  applySort(records: DataRecord[], sortConfig: QuerySort) {
     return records.sort((a, b) => {
-      const aValue = a.data[sortConfig.field] || a.metadata[sortConfig.field];
-      
-      /**
-      
-       * if功能函数
-      
-       * @param {Object} params - 参数对象
-      
-       * @returns {Promise<Object>} 返回结果
-      
-       */
-      const bValue = b.data[sortConfig.field] || b.metadata[sortConfig.field];
-      
+      const aValue =
+        (a.data as Record<string, unknown>)[sortConfig.field] ??
+        (a.metadata as Record<string, unknown>)[sortConfig.field];
+      const bValue =
+        (b.data as Record<string, unknown>)[sortConfig.field] ??
+        (b.metadata as Record<string, unknown>)[sortConfig.field];
+
       if (sortConfig.direction === 'desc') {
-        
-        return bValue > aValue ? 1 : -1;
-      } else {
-        return aValue > bValue ? 1 : -1;
+        return aValue === bValue ? 0 : aValue < bValue ? 1 : -1;
       }
+      return aValue === bValue ? 0 : aValue > bValue ? 1 : -1;
     });
   }
 
-  async exportToJson(data, filepath) {
+  async exportToJson(data: DataRecord[], filepath: string) {
     await fs.writeFile(filepath, JSON.stringify(data, null, 2));
   }
 
-  async exportToCsv(data, filepath) {
+  async exportToCsv(data: DataRecord[], filepath: string) {
     if (data.length === 0) return;
-    
+
     const headers = Object.keys(data[0].data);
-    const csvWriter = createCsvWriter({
+    const csvWriter = createObjectCsvWriter({
       path: filepath,
-      header: headers.map(h => ({ id: h, title: h }))
+      header: headers.map(header => ({ id: header, title: header })),
     });
-    
+
     const csvData = data.map(record => record.data);
     await csvWriter.writeRecords(csvData);
   }
 
-  async exportToExcel(data, filepath) {
-    // 简化的Excel导出（实际应使用xlsx库）
+  async exportToExcel(data: DataRecord[], filepath: string) {
     await this.exportToJson(data, filepath.replace('.excel', '.json'));
   }
 
-  async exportToXml(data, filepath) {
-    // 简化的XML导出
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<data>\n${
-      data.map(record => `  <record>${JSON.stringify(record.data)}</record>`).join('\n')
-    }\n</data>`;
+  async exportToXml(data: DataRecord[], filepath: string) {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<data>\n${data
+      .map(record => `  <record>${JSON.stringify(record.data)}</record>`)
+      .join('\n')}\n</data>`;
     await fs.writeFile(filepath, xml);
   }
 
-  async importFromJson(filepath) {
+  async importFromJson(filepath: string): Promise<Array<Record<string, unknown>>> {
     const content = await fs.readFile(filepath, 'utf8');
-    return JSON.parse(content);
+    return JSON.parse(content) as Array<Record<string, unknown>>;
   }
 
-  async importFromCsv(filepath) {
+  async importFromCsv(filepath: string): Promise<Array<Record<string, unknown>>> {
     return new Promise((resolve, reject) => {
-      const results = [];
-      fs.createReadStream(filepath)
+      const results: Array<Record<string, unknown>> = [];
+      createReadStream(filepath)
         .pipe(csv())
-        .on('data', (data) => results.push(data))
+        .on('data', data => results.push(data))
         .on('end', () => resolve(results))
         .on('error', reject);
     });
   }
 
-  countRecordsToday(records) {
+  countRecordsToday(records: DataRecord[]) {
     const today = new Date().toDateString();
-    return records.filter(r => new Date(r.metadata.createdAt).toDateString() === today).length;
+    return records.filter(record => new Date(record.metadata.createdAt).toDateString() === today)
+      .length;
   }
 
-  countRecordsThisWeek(records) {
+  countRecordsThisWeek(records: DataRecord[]) {
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    return records.filter(r => new Date(r.metadata.createdAt) > weekAgo).length;
+    return records.filter(record => new Date(record.metadata.createdAt) > weekAgo).length;
   }
 
-  countRecordsThisMonth(records) {
+  countRecordsThisMonth(records: DataRecord[]) {
     const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    return records.filter(r => new Date(r.metadata.createdAt) > monthAgo).length;
+    return records.filter(record => new Date(record.metadata.createdAt) > monthAgo).length;
   }
 
-  calculateAverageSize(records) {
+  calculateAverageSize(records: DataRecord[]) {
     if (records.length === 0) return 0;
     const totalSize = records.reduce((sum, record) => sum + JSON.stringify(record).length, 0);
     return Math.round(totalSize / records.length);
   }
 
-  getLatestRecord(records) {
+  getLatestRecord(records: DataRecord[]) {
     if (records.length === 0) return null;
-    return records.reduce((latest, record) => 
+    return records.reduce((latest, record) =>
       new Date(record.metadata.createdAt) > new Date(latest.metadata.createdAt) ? record : latest
     );
   }
 
-  getOldestRecord(records) {
+  getOldestRecord(records: DataRecord[]) {
     if (records.length === 0) return null;
-    return records.reduce((oldest, record) => 
+    return records.reduce((oldest, record) =>
       new Date(record.metadata.createdAt) < new Date(oldest.metadata.createdAt) ? record : oldest
     );
   }
 
-  calculateCustomStats(records, customStats) {
-    // 自定义统计计算逻辑
-    const stats = {};
+  calculateCustomStats(records: DataRecord[], customStats: CustomStatDefinition[]) {
+    const stats: Record<string, unknown> = {};
     for (const stat of customStats) {
       switch (stat.type) {
         case 'count':
-          stats[stat.name] = records.filter(r => r.data[stat.field] === stat.value).length;
+          stats[stat.name] = records.filter(
+            record => record.data[stat.field] === stat.value
+          ).length;
           break;
         case 'average': {
-          const values = records.map(r => r.data[stat.field]).filter(v => typeof v === 'number');
-          stats[stat.name] = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+          const values = records
+            .map(record => record.data[stat.field])
+            .filter(value => typeof value === 'number') as number[];
+          stats[stat.name] =
+            values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
           break;
         }
+        default:
+          break;
       }
     }
     return stats;
   }
+
+  private getErrorMessage(error: unknown) {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return String(error);
+  }
 }
 
-// 创建单例实例
 const dataManagementService = new DataManagementService();
 
+export { DataManagementService, dataManagementService };
+
+// 兼容 CommonJS require
 module.exports = {
   DataManagementService,
-  dataManagementService
+  dataManagementService,
 };

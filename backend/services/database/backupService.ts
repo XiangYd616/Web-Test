@@ -3,19 +3,55 @@
  * 提供自动备份、备份验证和恢复功能
  */
 
-const fs = require('fs').promises;
-const path = require('path');
-const { spawn } = require('child_process');
-const cron = require('node-cron');
+import { spawn } from 'child_process';
+import fs from 'fs/promises';
+import cron from 'node-cron';
+import path from 'path';
+
 const config = require('../../config/database');
 
+type DbConfig = {
+  host: string;
+  port: number;
+  user?: string;
+  username?: string;
+  database: string;
+  password: string;
+};
+
+type BackupResult = {
+  success: boolean;
+  backupFile?: string;
+  backupName?: string;
+  size?: number;
+  timestamp: string;
+  message?: string;
+  error?: string;
+};
+
+type BackupFileInfo = {
+  name: string;
+  path: string;
+  size: number;
+  sizeFormatted: string;
+  created: Date;
+  modified: Date;
+};
+
+type ScheduledTask = {
+  start: () => void;
+  stop: () => void;
+};
+
 class BackupService {
+  private backupDir = path.join(__dirname, '../../backups');
+  private maxBackups = 30;
+  private isScheduled = false;
+  private scheduledTask: ScheduledTask | null = null;
+  private dbConfig = config as DbConfig;
+
   constructor() {
-    this.backupDir = path.join(__dirname, '../../backups');
-    this.maxBackups = 30; // 保留30个备份
-    this.isScheduled = false;
-    this.scheduledTask = null;
-    this.init();
+    void this.init();
   }
 
   /**
@@ -23,7 +59,6 @@ class BackupService {
    */
   async init() {
     try {
-      // 确保备份目录存在
       await this.ensureBackupDirectory();
       console.log('✅ 数据库备份服务初始化完成');
     } catch (error) {
@@ -37,7 +72,7 @@ class BackupService {
   async ensureBackupDirectory() {
     try {
       await fs.access(this.backupDir);
-    } catch (error) {
+    } catch {
       await fs.mkdir(this.backupDir, { recursive: true });
     }
   }
@@ -45,56 +80,51 @@ class BackupService {
   /**
    * 创建数据库备份
    */
-  async createBackup(customName = null) {
+  async createBackup(customName: string | null = null): Promise<BackupResult> {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupName = customName || `backup_${timestamp}`;
     const backupFile = path.join(this.backupDir, `${backupName}.sql`);
 
-
     try {
       await this.performBackup(backupFile);
-      
-      // 验证备份文件
+
       const isValid = await this.validateBackup(backupFile);
       if (!isValid) {
         throw new Error('备份文件验证失败');
       }
 
-      // 清理旧备份
       await this.cleanupOldBackups();
 
       const stats = await fs.stat(backupFile);
-      const result = {
+      const result: BackupResult = {
         success: true,
         backupFile,
         backupName,
         size: stats.size,
         timestamp: new Date().toISOString(),
-        message: '备份创建成功'
+        message: '备份创建成功',
       };
 
       console.log('✅ 数据库备份完成:', {
         文件: backupName,
         大小: this.formatFileSize(stats.size),
-        路径: backupFile
+        路径: backupFile,
       });
 
       return result;
-
     } catch (error) {
       console.error('❌ 数据库备份失败:', error);
-      
-      // 清理失败的备份文件
+
       try {
         await fs.unlink(backupFile);
-      } catch (cleanupError) {
+      } catch {
         // 忽略清理错误
       }
 
       return {
         success: false,
-        error: error.message,
-        timestamp: new Date().toISOString()
+        error: this.getErrorMessage(error),
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -102,33 +132,43 @@ class BackupService {
   /**
    * 执行备份操作
    */
-  async performBackup(backupFile) {
-    return new Promise((resolve, reject) => {
-      const pgDump = spawn('pg_dump', [
-        '-h', config.host,
-        '-p', config.port.toString(),
-        '-U', config.user || config.username,
-        '-d', config.database,
-        '--no-password',
-        '--verbose',
-        '--clean',
-        '--if-exists',
-        '--create',
-        '-f', backupFile
-      ], {
-        env: {
-          ...process.env,
-          PGPASSWORD: config.password
+  async performBackup(backupFile: string) {
+    return new Promise<void>((resolve, reject) => {
+      const dbConfig = this.dbConfig;
+      const pgDump = spawn(
+        'pg_dump',
+        [
+          '-h',
+          dbConfig.host,
+          '-p',
+          dbConfig.port.toString(),
+          '-U',
+          dbConfig.user || dbConfig.username || '',
+          '-d',
+          dbConfig.database,
+          '--no-password',
+          '--verbose',
+          '--clean',
+          '--if-exists',
+          '--create',
+          '-f',
+          backupFile,
+        ],
+        {
+          env: {
+            ...process.env,
+            PGPASSWORD: dbConfig.password,
+          },
         }
-      });
+      );
 
       let errorOutput = '';
 
-      pgDump.stderr.on('data', (data) => {
+      pgDump.stderr.on('data', data => {
         errorOutput += data.toString();
       });
 
-      pgDump.on('close', (code) => {
+      pgDump.on('close', code => {
         if (code === 0) {
           resolve();
         } else {
@@ -136,8 +176,8 @@ class BackupService {
         }
       });
 
-      pgDump.on('error', (error) => {
-        reject(new Error(`pg_dump 执行失败: ${error.message}`));
+      pgDump.on('error', err => {
+        reject(new Error(`pg_dump 执行失败: ${err.message}`));
       });
     });
   }
@@ -145,33 +185,28 @@ class BackupService {
   /**
    * 验证备份文件
    */
-  async validateBackup(backupFile) {
+  async validateBackup(backupFile: string) {
     try {
       const stats = await fs.stat(backupFile);
-      
-      // 检查文件大小
-      if (stats.size < 1024) { // 小于1KB可能是空文件
+
+      if (stats.size < 1024) {
         console.warn('⚠️ 备份文件过小，可能无效');
         return false;
       }
 
-      // 检查文件内容
       const content = await fs.readFile(backupFile, 'utf8');
-      
-      // 检查是否包含PostgreSQL备份标识
+
       if (!content.includes('PostgreSQL database dump')) {
         console.warn('⚠️ 备份文件格式无效');
         return false;
       }
 
-      // 检查是否包含数据库名称
-      if (!content.includes(config.database)) {
+      if (!content.includes(this.dbConfig.database)) {
         console.warn('⚠️ 备份文件不包含目标数据库');
         return false;
       }
 
       return true;
-
     } catch (error) {
       console.error('❌ 备份文件验证失败:', error);
       return false;
@@ -188,29 +223,27 @@ class BackupService {
         .filter(file => file.endsWith('.sql'))
         .map(file => ({
           name: file,
-          path: path.join(this.backupDir, file)
+          path: path.join(this.backupDir, file),
         }));
 
       if (backupFiles.length <= this.maxBackups) {
         return;
       }
 
-      // 按修改时间排序
       const filesWithStats = await Promise.all(
-        backupFiles.map(async (file) => {
+        backupFiles.map(async file => {
           const stats = await fs.stat(file.path);
           return {
             ...file,
-            mtime: stats.mtime
+            mtime: stats.mtime,
           };
         })
       );
 
-      filesWithStats.sort((a, b) => b.mtime - a.mtime);
+      filesWithStats.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
 
-      // 删除多余的备份
       const filesToDelete = filesWithStats.slice(this.maxBackups);
-      
+
       for (const file of filesToDelete) {
         await fs.unlink(file.path);
       }
@@ -218,7 +251,6 @@ class BackupService {
       if (filesToDelete.length > 0) {
         console.log(`✅ 清理了 ${filesToDelete.length} 个旧备份文件`);
       }
-
     } catch (error) {
       console.error('❌ 清理旧备份失败:', error);
     }
@@ -227,13 +259,10 @@ class BackupService {
   /**
    * 恢复数据库
    */
-  async restoreBackup(backupFile) {
-
+  async restoreBackup(backupFile: string) {
     try {
-      // 验证备份文件存在
       await fs.access(backupFile);
 
-      // 验证备份文件有效性
       const isValid = await this.validateBackup(backupFile);
       if (!isValid) {
         throw new Error('备份文件无效');
@@ -242,20 +271,19 @@ class BackupService {
       await this.performRestore(backupFile);
 
       console.log('✅ 数据库恢复完成');
-      
+
       return {
         success: true,
         message: '数据库恢复成功',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       console.error('❌ 数据库恢复失败:', error);
-      
+
       return {
         success: false,
-        error: error.message,
-        timestamp: new Date().toISOString()
+        error: this.getErrorMessage(error),
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -263,28 +291,38 @@ class BackupService {
   /**
    * 执行恢复操作
    */
-  async performRestore(backupFile) {
-    return new Promise((resolve, reject) => {
-      const psql = spawn('psql', [
-        '-h', config.host,
-        '-p', config.port.toString(),
-        '-U', config.user || config.username,
-        '-d', config.database,
-        '-f', backupFile
-      ], {
-        env: {
-          ...process.env,
-          PGPASSWORD: config.password
+  async performRestore(backupFile: string) {
+    return new Promise<void>((resolve, reject) => {
+      const dbConfig = this.dbConfig;
+      const psql = spawn(
+        'psql',
+        [
+          '-h',
+          dbConfig.host,
+          '-p',
+          dbConfig.port.toString(),
+          '-U',
+          dbConfig.user || dbConfig.username || '',
+          '-d',
+          dbConfig.database,
+          '-f',
+          backupFile,
+        ],
+        {
+          env: {
+            ...process.env,
+            PGPASSWORD: dbConfig.password,
+          },
         }
-      });
+      );
 
       let errorOutput = '';
 
-      psql.stderr.on('data', (data) => {
+      psql.stderr.on('data', data => {
         errorOutput += data.toString();
       });
 
-      psql.on('close', (code) => {
+      psql.on('close', code => {
         if (code === 0) {
           resolve();
         } else {
@@ -292,8 +330,8 @@ class BackupService {
         }
       });
 
-      psql.on('error', (error) => {
-        reject(new Error(`psql 执行失败: ${error.message}`));
+      psql.on('error', err => {
+        reject(new Error(`psql 执行失败: ${err.message}`));
       });
     });
   }
@@ -301,21 +339,25 @@ class BackupService {
   /**
    * 启动自动备份调度
    */
-  startScheduledBackup(cronExpression = '0 2 * * *') { // 默认每天凌晨2点
+  startScheduledBackup(cronExpression = '0 2 * * *') {
     if (this.isScheduled) {
       console.log('⚠️ 自动备份调度已在运行');
       return;
     }
 
-    this.scheduledTask = cron.schedule(cronExpression, async () => {
-      await this.createBackup();
-    }, {
-      scheduled: false
-    });
+    const task = cron.schedule(
+      cronExpression,
+      async () => {
+        await this.createBackup();
+      },
+      {
+        scheduled: false,
+      }
+    );
 
-    this.scheduledTask.start();
+    task.start();
+    this.scheduledTask = task as ScheduledTask;
     this.isScheduled = true;
-
   }
 
   /**
@@ -326,39 +368,37 @@ class BackupService {
       this.scheduledTask.stop();
       this.scheduledTask = null;
     }
-    
+
     this.isScheduled = false;
   }
 
   /**
    * 获取备份列表
    */
-  async getBackupList() {
+  async getBackupList(): Promise<BackupFileInfo[]> {
     try {
       const files = await fs.readdir(this.backupDir);
       const backupFiles = files.filter(file => file.endsWith('.sql'));
 
       const backups = await Promise.all(
-        backupFiles.map(async (file) => {
+        backupFiles.map(async file => {
           const filePath = path.join(this.backupDir, file);
           const stats = await fs.stat(filePath);
-          
+
           return {
             name: file,
             path: filePath,
             size: stats.size,
             sizeFormatted: this.formatFileSize(stats.size),
             created: stats.birthtime,
-            modified: stats.mtime
+            modified: stats.mtime,
           };
         })
       );
 
-      // 按修改时间倒序排列
-      backups.sort((a, b) => b.modified - a.modified);
+      backups.sort((a, b) => b.modified.getTime() - a.modified.getTime());
 
       return backups;
-
     } catch (error) {
       console.error('❌ 获取备份列表失败:', error);
       return [];
@@ -368,12 +408,12 @@ class BackupService {
   /**
    * 格式化文件大小
    */
-  formatFileSize(bytes) {
+  formatFileSize(bytes: number) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     if (bytes === 0) return '0 Bytes';
-    
+
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
   }
 
   /**
@@ -384,9 +424,19 @@ class BackupService {
       isScheduled: this.isScheduled,
       backupDir: this.backupDir,
       maxBackups: this.maxBackups,
-      scheduledTask: this.scheduledTask ? '运行中' : '未运行'
+      scheduledTask: this.scheduledTask ? '运行中' : '未运行',
     };
+  }
+
+  private getErrorMessage(error: unknown) {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return String(error);
   }
 }
 
+export { BackupService };
+
+// 兼容 CommonJS require
 module.exports = BackupService;
