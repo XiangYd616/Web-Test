@@ -1,5 +1,6 @@
 const { models } = require('../database/sequelize');
 const WorkspaceManager = require('../services/collaboration/WorkspaceManager');
+const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
 const workspaceManager = new WorkspaceManager({ models });
 
@@ -15,6 +16,17 @@ const ensureWorkspaceMember = async (workspaceId, userId) => {
   return WorkspaceMember.findOne({
     where: { workspace_id: workspaceId, user_id: userId, status: 'active' }
   });
+};
+
+const ensureWorkspacePermission = async (workspaceId, userId, action) => {
+  const member = await ensureWorkspaceMember(workspaceId, userId);
+  if (!member) {
+    return { error: '没有权限访问该工作空间' };
+  }
+  if (!hasWorkspacePermission(member.role, action)) {
+    return { error: '当前角色无此操作权限' };
+  }
+  return { member };
 };
 
 const validateWorkspaceInput = (data, res, allowPartial = false) => {
@@ -78,9 +90,9 @@ const createWorkspace = async (req, res) => {
 
 const getWorkspace = async (req, res) => {
   const { Workspace, WorkspaceMember } = models;
-  const member = await ensureWorkspaceMember(req.params.workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限访问该工作空间');
+  const permission = await ensureWorkspacePermission(req.params.workspaceId, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
   }
   const workspace = await Workspace.findByPk(req.params.workspaceId, {
     include: [{ model: WorkspaceMember, as: 'members' }]
@@ -102,9 +114,9 @@ const updateWorkspace = async (req, res) => {
     return;
   }
 
-  const member = await ensureWorkspaceMember(workspace.id, req.user.id);
-  if (!member || !['owner', 'admin'].includes(member.role)) {
-    return res.forbidden('没有权限更新工作空间');
+  const permission = await ensureWorkspacePermission(workspace.id, req.user.id, 'manage');
+  if (permission.error) {
+    return res.forbidden(permission.error || '没有权限更新工作空间');
   }
 
   const updates = {
@@ -129,9 +141,9 @@ const deleteWorkspace = async (req, res) => {
     return res.notFound('工作空间不存在');
   }
 
-  const member = await ensureWorkspaceMember(workspace.id, req.user.id);
-  if (!member || member.role !== 'owner') {
-    return res.forbidden('只有所有者可以删除工作空间');
+  const permission = await ensureWorkspacePermission(workspace.id, req.user.id, 'delete');
+  if (permission.error) {
+    return res.forbidden(permission.error || '只有所有者可以删除工作空间');
   }
 
   await Workspace.destroy({ where: { id: workspace.id } });
@@ -140,9 +152,9 @@ const deleteWorkspace = async (req, res) => {
 
 const listMembers = async (req, res) => {
   const { WorkspaceMember, User } = models;
-  const member = await ensureWorkspaceMember(req.params.workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限查看成员列表');
+  const permission = await ensureWorkspacePermission(req.params.workspaceId, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error || '没有权限查看成员列表');
   }
   const { page, limit, offset } = parsePagination(req);
 
@@ -169,9 +181,9 @@ const inviteMember = async (req, res) => {
   if (role && !['admin', 'member', 'viewer'].includes(role)) {
     return res.validationError([{ field: 'role', message: 'role 仅支持 admin/member/viewer' }]);
   }
-  const member = await ensureWorkspaceMember(req.params.workspaceId, req.user.id);
-  if (!member) {
-    return res.forbidden('没有权限邀请成员');
+  const permission = await ensureWorkspacePermission(req.params.workspaceId, req.user.id, 'invite');
+  if (permission.error) {
+    return res.forbidden(permission.error || '没有权限邀请成员');
   }
   const invitation = await workspaceManager.inviteMember(
     req.params.workspaceId,
@@ -195,6 +207,13 @@ const updateMemberRole = async (req, res) => {
   const { role } = req.body || {};
   if (!role) {
     return res.validationError([{ field: 'role', message: '角色不能为空' }]);
+  }
+  if (!['owner', 'admin', 'member', 'viewer'].includes(role)) {
+    return res.validationError([{ field: 'role', message: '角色仅支持 owner/admin/member/viewer' }]);
+  }
+  const permission = await ensureWorkspacePermission(req.params.workspaceId, req.user.id, 'manage');
+  if (permission.error) {
+    return res.forbidden(permission.error || '没有权限更新成员角色');
   }
   const member = await workspaceManager.updateMemberRole(
     req.params.workspaceId,

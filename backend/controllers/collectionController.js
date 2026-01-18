@@ -187,6 +187,9 @@ const getCollection = async (req, res) => {
   if (access.error) {
     return access.error === '集合不存在' ? res.notFound(access.error) : res.forbidden(access.error);
   }
+  if (!hasWorkspacePermission(access.member.role, 'read')) {
+    return res.forbidden('当前角色无读取权限');
+  }
   const collection = await collectionManager.getCollection(req.params.collectionId);
   return res.success(collection, '获取集合成功');
 };

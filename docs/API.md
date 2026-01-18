@@ -26,6 +26,7 @@ Content-Type: application/json
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -48,6 +49,77 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
+## 运行记录 API
+
+### 获取运行列表
+
+```http
+GET /runs?workspaceId={workspaceId}&page=1&limit=20&status=completed
+```
+
+**查询参数**:
+
+- `workspaceId` (string, 必需)
+- `status` (string): pending/running/completed/failed/cancelled
+- `collectionId` (string)
+- `environmentId` (string)
+
+### 获取运行详情
+
+```http
+GET /runs/{runId}?page=1&limit=50
+```
+
+**响应包含**: summary、aggregates、results（分页时 results 为分页后的列表）
+
+### 获取运行报告
+
+```http
+GET /runs/{runId}/report
+```
+
+### 导出运行结果
+
+```http
+GET /runs/{runId}/export?format=json|csv
+```
+
+## 定时运行 API
+
+### 获取定时运行列表
+
+```http
+GET /scheduled-runs?workspaceId={workspaceId}&page=1&limit=20&status=active
+```
+
+### 获取定时运行详情
+
+```http
+GET /scheduled-runs/{scheduleId}
+```
+
+### 创建定时运行
+
+```http
+POST /scheduled-runs
+Content-Type: application/json
+
+{
+  "workspaceId": "xxx",
+  "collectionId": "xxx",
+  "environmentId": "xxx",
+  "name": "每日回归",
+  "cron": "0 9 * * *",
+  "config": { "iterations": 1, "timeout": 30000 }
+}
+```
+
+### 立即执行定时运行
+
+```http
+POST /scheduled-runs/{scheduleId}/run
+```
+
 ## 测试引擎 API
 
 ### 1. 性能测试
@@ -67,12 +139,14 @@ Content-Type: application/json
 ```
 
 **参数说明**:
+
 - `url` (string, 必需): 测试目标URL
 - `device` (string): 设备类型 (`desktop`, `mobile`)
 - `throttling` (string): 网络限制 (`none`, `3g`, `4g`)
 - `audits` (array): 审计类型数组
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -91,6 +165,7 @@ GET /tests/{sessionId}/status
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -110,6 +185,7 @@ GET /tests/{sessionId}/result
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -166,10 +242,12 @@ Content-Type: application/json
 ```
 
 **参数说明**:
+
 - `url` (string, 必需): 测试目标URL
 - `checks` (array): 检查项目数组
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -197,6 +275,7 @@ Content-Type: application/json
 ```
 
 **参数说明**:
+
 - `url` (string, 必需): 测试目标URL
 - `scanType` (string): 扫描类型 (`basic`, `comprehensive`)
 - `includeSubdomains` (boolean): 是否包含子域名
@@ -231,15 +310,13 @@ Content-Type: application/json
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
   "data": {
     "batchId": "batch_1234567890",
-    "sessions": [
-      "perf_1234567891",
-      "seo_1234567892"
-    ],
+    "sessions": ["perf_1234567891", "seo_1234567892"],
     "status": "running"
   }
 }
@@ -254,6 +331,7 @@ GET /tests/history?page=1&limit=10&type=performance&status=completed
 ```
 
 **查询参数**:
+
 - `page` (number): 页码
 - `limit` (number): 每页数量
 - `type` (string): 测试类型过滤
@@ -263,6 +341,7 @@ GET /tests/history?page=1&limit=10&type=performance&status=completed
 - `dateTo` (string): 结束日期 (ISO 8601)
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -306,10 +385,12 @@ Content-Type: application/json
 ```
 
 **参数说明**:
+
 - `format` (string): 导出格式 (`pdf`, `json`, `csv`, `html`)
 - `options` (object): 导出选项
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -329,6 +410,7 @@ GET /system/status
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -357,6 +439,7 @@ GET /test-engines
 ```
 
 **响应**:
+
 ```json
 {
   "success": true,
@@ -399,15 +482,15 @@ GET /test-engines
 
 ### 常见错误码
 
-| 错误码 | HTTP状态码 | 描述 |
-|--------|------------|------|
-| `VALIDATION_ERROR` | 400 | 请求参数验证失败 |
-| `UNAUTHORIZED` | 401 | 未授权访问 |
-| `FORBIDDEN` | 403 | 权限不足 |
-| `NOT_FOUND` | 404 | 资源不存在 |
-| `RATE_LIMIT_EXCEEDED` | 429 | 请求频率超限 |
-| `INTERNAL_ERROR` | 500 | 服务器内部错误 |
-| `SERVICE_UNAVAILABLE` | 503 | 服务不可用 |
+| 错误码                | HTTP状态码 | 描述             |
+| --------------------- | ---------- | ---------------- |
+| `VALIDATION_ERROR`    | 400        | 请求参数验证失败 |
+| `UNAUTHORIZED`        | 401        | 未授权访问       |
+| `FORBIDDEN`           | 403        | 权限不足         |
+| `NOT_FOUND`           | 404        | 资源不存在       |
+| `RATE_LIMIT_EXCEEDED` | 429        | 请求频率超限     |
+| `INTERNAL_ERROR`      | 500        | 服务器内部错误   |
+| `SERVICE_UNAVAILABLE` | 503        | 服务不可用       |
 
 ## 限制和配额
 
@@ -432,13 +515,13 @@ import { TestWebClient } from 'test-web-sdk';
 
 const client = new TestWebClient({
   baseURL: 'http://localhost:3001/api',
-  token: 'your-auth-token'
+  token: 'your-auth-token',
 });
 
 // 启动性能测试
 const result = await client.performance.test({
   url: 'https://example.com',
-  device: 'desktop'
+  device: 'desktop',
 });
 
 console.log('Session ID:', result.sessionId);
@@ -468,6 +551,7 @@ curl -X GET http://localhost:3001/api/tests/perf_1234567890/result \
 ## 更新日志
 
 ### v1.0.0 (2023-12-01)
+
 - 初始版本发布
 - 支持性能、SEO、安全测试
 - 批量测试功能

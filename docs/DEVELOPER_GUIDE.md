@@ -302,6 +302,37 @@ git commit -m "docs: update developer guide"
 
 ---
 
+## ✅ 运行记录与定时运行开发说明
+
+### 运行记录（Runs）
+
+- **列表接口**: `GET /runs?workspaceId=...`
+  支持分页与过滤（status/collectionId/environmentId）。
+- **详情接口**: `GET /runs/{runId}` 返回 `summary` 与
+  `aggregates`（状态码/断言/错误统计）。
+- **导出接口**:
+  `GET /runs/{runId}/export?format=json|csv`，CSV 包含 run 级汇总字段。
+- **权限**: 读取为 `read`，取消/重跑为 `execute`。
+
+### 定时运行（Scheduled Runs）
+
+- **列表/详情**: `GET /scheduled-runs`、`GET /scheduled-runs/{scheduleId}`。
+- **创建/更新**: 必须校验 collection/environment 归属 workspace。
+- **立即执行**: `POST /scheduled-runs/{scheduleId}/run` 会生成 Run 记录并更新
+  `last_run_at`。
+
+### 权限校验规范
+
+- 统一使用 `hasWorkspacePermission` 与 `ensureWorkspacePermission`。
+- 常用动作映射：
+  - `read`: 读取资源/列表/详情
+  - `write`: 创建/编辑
+  - `delete`: 删除
+  - `execute`: 执行/重跑/取消
+  - `manage`: 成员/角色/高级设置
+
+---
+
 ## 🔧 调试技巧
 
 ### 前端调试

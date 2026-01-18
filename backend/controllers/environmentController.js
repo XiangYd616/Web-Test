@@ -135,6 +135,9 @@ const getEnvironment = async (req, res) => {
   if (access.error) {
     return access.error === '环境不存在' ? res.notFound(access.error) : res.forbidden(access.error);
   }
+  if (!hasWorkspacePermission(access.member.role, 'read')) {
+    return res.forbidden('当前角色无读取权限');
+  }
   const environment = await environmentManager.getEnvironment(req.params.environmentId);
   return res.success(environment, '获取环境成功');
 };
@@ -188,6 +191,11 @@ const setVariable = async (req, res) => {
     }
   } else if (!req.body?.workspaceId) {
     return res.validationError([{ field: 'workspaceId', message: 'global 变量需要 workspaceId' }]);
+  } else {
+    const permission = await ensureWorkspacePermission(req.body.workspaceId, req.user.id, 'write');
+    if (permission.error) {
+      return res.forbidden(permission.error || '当前角色无写入权限');
+    }
   }
 
   await environmentManager.setVariable(key, value, {

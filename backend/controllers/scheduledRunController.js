@@ -33,6 +33,33 @@ const ensureWorkspacePermission = async (workspaceId, userId, action) => {
   return { member };
 };
 
+const ensureCollectionInWorkspace = async (collectionId, workspaceId) => {
+  const { Collection } = models;
+  const collection = await Collection.findByPk(collectionId);
+  if (!collection) {
+    return { error: '集合不存在' };
+  }
+  if (collection.workspace_id !== workspaceId) {
+    return { error: '集合不属于当前工作空间' };
+  }
+  return { collection };
+};
+
+const ensureEnvironmentInWorkspace = async (environmentId, workspaceId) => {
+  if (!environmentId) {
+    return { environment: null };
+  }
+  const { Environment } = models;
+  const environment = await Environment.findByPk(environmentId);
+  if (!environment) {
+    return { error: '环境不存在' };
+  }
+  if (environment.workspace_id !== workspaceId) {
+    return { error: '环境不属于当前工作空间' };
+  }
+  return { environment };
+};
+
 const validateScheduleConfig = (config = {}, res) => {
   const errors = [];
   if (config.iterations !== undefined) {
@@ -122,6 +149,15 @@ const createScheduledRun = async (req, res) => {
     return res.forbidden(permission.error);
   }
 
+  const collectionCheck = await ensureCollectionInWorkspace(collectionId, workspaceId);
+  if (collectionCheck.error) {
+    return res.validationError([{ field: 'collectionId', message: collectionCheck.error }]);
+  }
+  const environmentCheck = await ensureEnvironmentInWorkspace(environmentId, workspaceId);
+  if (environmentCheck.error) {
+    return res.validationError([{ field: 'environmentId', message: environmentCheck.error }]);
+  }
+
   const { ScheduledRun } = models;
   const scheduledRun = await ScheduledRun.create({
     workspace_id: workspaceId,
@@ -163,11 +199,26 @@ const updateScheduledRun = async (req, res) => {
     return;
   }
 
+  if (req.body?.collectionId) {
+    const collectionCheck = await ensureCollectionInWorkspace(req.body.collectionId, scheduledRun.workspace_id);
+    if (collectionCheck.error) {
+      return res.validationError([{ field: 'collectionId', message: collectionCheck.error }]);
+    }
+  }
+
+  if (req.body?.environmentId) {
+    const environmentCheck = await ensureEnvironmentInWorkspace(req.body.environmentId, scheduledRun.workspace_id);
+    if (environmentCheck.error) {
+      return res.validationError([{ field: 'environmentId', message: environmentCheck.error }]);
+    }
+  }
+
   await scheduledRun.update({
     name: req.body?.name ?? scheduledRun.name,
     cron: req.body?.cron ?? scheduledRun.cron,
     status: req.body?.status ?? scheduledRun.status,
     config: req.body?.config ?? scheduledRun.config,
+    collection_id: req.body?.collectionId ?? scheduledRun.collection_id,
     environment_id: req.body?.environmentId ?? scheduledRun.environment_id
   });
 

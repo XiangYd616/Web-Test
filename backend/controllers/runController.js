@@ -46,6 +46,120 @@ const ensureCollectionAccess = async (collectionId, userId) => {
   return { collection, member };
 };
 
+const ensureEnvironmentInWorkspace = async (environmentId, workspaceId) => {
+  if (!environmentId) {
+    return { environment: null };
+  }
+  const { Environment } = models;
+  const environment = await Environment.findByPk(environmentId);
+  if (!environment) {
+    return { error: '环境不存在' };
+  }
+  if (environment.workspace_id !== workspaceId) {
+    return { error: '环境不属于当前工作空间' };
+  }
+  return { environment };
+};
+
+const normalizeRunSummary = (summary = {}) => {
+  const total = Number(summary.totalRequests || 0);
+  const passed = Number(summary.passedRequests || 0);
+  const passRate = Number.isFinite(summary.passRate)
+    ? summary.passRate
+    : (total > 0 ? Math.round((passed / total) * 100) : 0);
+  return {
+    ...summary,
+    totalRequests: total,
+    passedRequests: passed,
+    failedRequests: Number(summary.failedRequests || Math.max(total - passed, 0)),
+    skippedRequests: Number(summary.skippedRequests || 0),
+    passRate
+  };
+};
+
+const buildRunAggregates = (results) => {
+  const total = results.length;
+  const passed = results.filter(r => r.success).length;
+  const failed = total - passed;
+  const assertionStats = results.reduce((acc, item) => {
+    const assertions = Array.isArray(item.assertions) ? item.assertions : [];
+    assertions.forEach(assertion => {
+      acc.total += 1;
+      if (assertion.passed) {
+        acc.passed += 1;
+      } else {
+        acc.failed += 1;
+      }
+    });
+    return acc;
+  }, { total: 0, passed: 0, failed: 0 });
+
+  const statusCodeStats = results.reduce((acc, item) => {
+    const response = item.response || {};
+    const code = response.status || response.statusCode || response.code || 'unknown';
+    const key = String(code);
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+  const assertionFailureStats = results.reduce((acc, item) => {
+    const assertions = Array.isArray(item.assertions) ? item.assertions : [];
+    assertions.forEach(assertion => {
+      if (assertion.passed) {
+        return;
+      }
+      const name = assertion.name || assertion.test || 'unknown';
+      acc[name] = (acc[name] || 0) + 1;
+    });
+    return acc;
+  }, {});
+
+  const assertionFailureTop10 = Object.entries(assertionFailureStats)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([name, count]) => ({ name, count }));
+
+  const errorMessageStats = results.reduce((acc, item) => {
+    if (item.success) {
+      return acc;
+    }
+    const response = item.response || {};
+    const message = item.error || response.error || response.message || 'unknown';
+    acc[message] = (acc[message] || 0) + 1;
+    return acc;
+  }, {});
+
+  const errorMessageTop20 = Object.entries(errorMessageStats)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 20)
+    .map(([message, count]) => ({ message, count }));
+
+  const avgDuration = total > 0
+    ? Math.round(results.reduce((sum, r) => sum + (r.duration_ms || 0), 0) / total)
+    : 0;
+
+  const statusCodeChart = Object.entries(statusCodeStats)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
+  return {
+    totalRequests: total,
+    passedRequests: passed,
+    failedRequests: failed,
+    assertionTotal: assertionStats.total,
+    assertionPassed: assertionStats.passed,
+    assertionFailed: assertionStats.failed,
+    assertionPassRate: assertionStats.total > 0
+      ? Math.round((assertionStats.passed / assertionStats.total) * 100)
+      : 0,
+    statusCodeStats,
+    statusCodeChart,
+    assertionFailureTop10,
+    errorMessageTop20,
+    averageDurationMs: avgDuration
+  };
+};
+
 const buildEnvironmentContext = async (environmentId) => {
   if (!environmentId) {
     return {};
@@ -184,6 +298,10 @@ const createRun = async (req, res) => {
   }
 
   const envContext = await buildEnvironmentContext(environmentId);
+  const environmentCheck = await ensureEnvironmentInWorkspace(environmentId, access.collection.workspace_id);
+  if (environmentCheck.error) {
+    return res.validationError([{ field: 'environmentId', message: environmentCheck.error }]);
+  }
 
   const runRecord = await createRunRecord({
     workspaceId: access.collection.workspace_id,
@@ -207,7 +325,10 @@ const createRun = async (req, res) => {
       totalRequests: result.totalRequests,
       passedRequests: result.passedRequests,
       failedRequests: result.failedRequests,
-      skippedRequests: result.skippedRequests
+      skippedRequests: result.skippedRequests,
+      passRate: result.totalRequests
+        ? Math.round((result.passedRequests / result.totalRequests) * 100)
+        : 0
     };
 
     await persistRunResults(runRecord, result);
@@ -226,7 +347,14 @@ const createRun = async (req, res) => {
     await runRecord.update({
       status: 'failed',
       completed_at: new Date(),
-      summary: { error: error.message }
+      summary: {
+        error: error.message,
+        totalRequests: 0,
+        passedRequests: 0,
+        failedRequests: 0,
+        skippedRequests: 0,
+        passRate: 0
+      }
     });
     runCancelFlags.delete(runRecord.id);
     return res.serverError('运行失败');
@@ -245,14 +373,21 @@ const getRun = async (req, res) => {
   }
 
   const { page, limit, offset } = parsePagination(req);
-  const { count, rows } = await RunResult.findAndCountAll({
+  const needsPagination = Boolean(req.query.page || req.query.limit);
+  const summary = normalizeRunSummary(run.summary || {});
+  const aggregateResults = await RunResult.findAll({
     where: { run_id: run.id },
-    order: [['created_at', 'ASC']],
-    limit,
-    offset
+    order: [['created_at', 'ASC']]
   });
+  const aggregates = buildRunAggregates(aggregateResults);
 
-  if (req.query.page || req.query.limit) {
+  if (needsPagination) {
+    const { count, rows } = await RunResult.findAndCountAll({
+      where: { run_id: run.id },
+      order: [['created_at', 'ASC']],
+      limit,
+      offset
+    });
     return res.paginated(rows, page, limit, count, '获取运行详情成功', {
       run: {
         id: run.id,
@@ -262,7 +397,8 @@ const getRun = async (req, res) => {
         startedAt: run.started_at,
         completedAt: run.completed_at,
         durationMs: run.duration_ms,
-        summary: run.summary || {}
+        summary,
+        aggregates
       }
     });
   }
@@ -275,8 +411,9 @@ const getRun = async (req, res) => {
     startedAt: run.started_at,
     completedAt: run.completed_at,
     durationMs: run.duration_ms,
-    summary: run.summary || {},
-    results: rows
+    summary,
+    aggregates,
+    results: aggregateResults
   }, '获取运行详情成功');
 };
 
@@ -311,6 +448,10 @@ const rerun = async (req, res) => {
   }
 
   const envContext = await buildEnvironmentContext(run.environment_id);
+  const environmentCheck = await ensureEnvironmentInWorkspace(run.environment_id, run.workspace_id);
+  if (environmentCheck.error) {
+    return res.validationError([{ field: 'environmentId', message: environmentCheck.error }]);
+  }
   const runRecord = await createRunRecord({
     workspaceId: run.workspace_id,
     collectionId: run.collection_id,
@@ -459,22 +600,34 @@ const exportRun = async (req, res) => {
     const assertions = Array.isArray(item.assertions) ? item.assertions : [];
     const passedAssertions = assertions.filter(a => a.passed).length;
     const failedAssertions = assertions.filter(a => !a.passed).length;
+    const assertionNames = assertions
+      .map(assertion => assertion.name || assertion.test || '')
+      .filter(Boolean);
+    const failedAssertionNames = assertions
+      .filter(assertion => !assertion.passed)
+      .map(assertion => assertion.name || assertion.test || '')
+      .filter(Boolean);
     const responseBody = response.body || response.data || response.text || '';
     const responseSize = typeof responseBody === 'string'
       ? responseBody.length
       : Buffer.byteLength(JSON.stringify(responseBody || {}));
     const requestHeaders = request.header || request.headers || null;
     const responseHeaders = response.headers || null;
+    const errorMessage = response.error || response.message || item.error || null;
     return {
       id: item.id,
       itemId: item.item_id,
       success: item.success,
       durationMs: item.duration_ms,
+      requestName: request.name || null,
       requestMethod: request.method || null,
       requestUrl: request.url?.raw || request.url || null,
       statusCode: response.status || response.statusCode || response.code || null,
       assertionsPassed: passedAssertions,
       assertionsFailed: failedAssertions,
+      assertionNames,
+      failedAssertionNames,
+      errorMessage,
       responseSize,
       responsePreview: typeof responseBody === 'string'
         ? responseBody.slice(0, 200)
@@ -486,6 +639,7 @@ const exportRun = async (req, res) => {
   });
 
   if (format === 'json') {
+    const summary = normalizeRunSummary(run.summary || {});
     return res.success({
       run: {
         id: run.id,
@@ -495,7 +649,8 @@ const exportRun = async (req, res) => {
         startedAt: run.started_at,
         completedAt: run.completed_at,
         durationMs: run.duration_ms,
-        summary: run.summary || {}
+        createdBy: run.created_by,
+        summary
       },
       results: derivedResults
     }, '导出运行记录成功');
@@ -511,30 +666,59 @@ const exportRun = async (req, res) => {
     };
 
     const header = [
+      'run_id',
+      'run_status',
+      'run_started_at',
+      'run_completed_at',
+      'run_duration_ms',
+      'run_total_requests',
+      'run_passed_requests',
+      'run_failed_requests',
+      'run_skipped_requests',
+      'run_pass_rate',
       'id',
       'item_id',
       'success',
       'duration_ms',
+      'request_name',
       'method',
       'url',
       'status_code',
       'assertions_passed',
       'assertions_failed',
+      'assertion_names',
+      'failed_assertion_names',
+      'error_message',
       'response_size',
       'response_preview',
       'request_headers',
       'response_headers'
     ].join(',');
+    const summary = normalizeRunSummary(run.summary || {});
     const rows = derivedResults.map(row => [
+      escapeCsv(run.id),
+      escapeCsv(run.status),
+      escapeCsv(run.started_at),
+      escapeCsv(run.completed_at),
+      escapeCsv(run.duration_ms),
+      escapeCsv(summary.totalRequests),
+      escapeCsv(summary.passedRequests),
+      escapeCsv(summary.failedRequests),
+      escapeCsv(summary.skippedRequests),
+      escapeCsv(summary.passRate),
       escapeCsv(row.id),
       escapeCsv(row.itemId),
       escapeCsv(row.success),
       escapeCsv(row.durationMs),
+      escapeCsv(row.requestName),
       escapeCsv(row.requestMethod),
       escapeCsv(row.requestUrl),
       escapeCsv(row.statusCode),
       escapeCsv(row.assertionsPassed),
       escapeCsv(row.assertionsFailed),
+      escapeCsv(row.assertionNames.join(';')),
+      escapeCsv(row.failedAssertionNames.join(';')),
+      escapeCsv(row.errorMessage),
       escapeCsv(row.responseSize),
       escapeCsv(row.responsePreview),
       escapeCsv(row.requestHeaders ? JSON.stringify(row.requestHeaders) : ''),
@@ -560,87 +744,29 @@ const getRunReport = async (req, res) => {
   }
 
   const results = await RunResult.findAll({ where: { run_id: run.id } });
-  const total = results.length;
-  const passed = results.filter(r => r.success).length;
-  const failed = total - passed;
-  const assertionStats = results.reduce((acc, item) => {
-    const assertions = Array.isArray(item.assertions) ? item.assertions : [];
-    assertions.forEach(assertion => {
-      acc.total += 1;
-      if (assertion.passed) {
-        acc.passed += 1;
-      } else {
-        acc.failed += 1;
-      }
-    });
-    return acc;
-  }, { total: 0, passed: 0, failed: 0 });
-
-  const statusCodeStats = results.reduce((acc, item) => {
-    const response = item.response || {};
-    const code = response.status || response.statusCode || response.code || 'unknown';
-    const key = String(code);
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {});
-
-  const assertionFailureStats = results.reduce((acc, item) => {
-    const assertions = Array.isArray(item.assertions) ? item.assertions : [];
-    assertions.forEach(assertion => {
-      if (assertion.passed) {
-        return;
-      }
-      const name = assertion.name || assertion.test || 'unknown';
-      acc[name] = (acc[name] || 0) + 1;
-    });
-    return acc;
-  }, {});
-
-  const assertionFailureTop10 = Object.entries(assertionFailureStats)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(([name, count]) => ({ name, count }));
-
-  const errorMessageStats = results.reduce((acc, item) => {
-    if (item.success) {
-      return acc;
-    }
-    const response = item.response || {};
-    const message = item.error || response.error || response.message || 'unknown';
-    acc[message] = (acc[message] || 0) + 1;
-    return acc;
-  }, {});
-
-  const errorMessageTop20 = Object.entries(errorMessageStats)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 20)
-    .map(([message, count]) => ({ message, count }));
-  const avgDuration = total > 0
-    ? Math.round(results.reduce((sum, r) => sum + (r.duration_ms || 0), 0) / total)
-    : 0;
-
-  const statusCodeChart = Object.entries(statusCodeStats)
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value);
-
+  const aggregates = buildRunAggregates(results);
+  const summary = normalizeRunSummary(run.summary || {});
   return res.success({
     runId: run.id,
     status: run.status,
-    summary: run.summary || {},
-    totalRequests: total,
-    passedRequests: passed,
-    failedRequests: failed,
-    assertionTotal: assertionStats.total,
-    assertionPassed: assertionStats.passed,
-    assertionFailed: assertionStats.failed,
-    assertionPassRate: assertionStats.total > 0
-      ? Math.round((assertionStats.passed / assertionStats.total) * 100)
-      : 0,
-    statusCodeStats,
-    statusCodeChart,
-    assertionFailureTop10,
-    errorMessageTop20,
-    averageDurationMs: avgDuration
+    collectionId: run.collection_id,
+    environmentId: run.environment_id,
+    startedAt: run.started_at,
+    completedAt: run.completed_at,
+    durationMs: run.duration_ms,
+    summary,
+    totalRequests: aggregates.totalRequests,
+    passedRequests: aggregates.passedRequests,
+    failedRequests: aggregates.failedRequests,
+    assertionTotal: aggregates.assertionTotal,
+    assertionPassed: aggregates.assertionPassed,
+    assertionFailed: aggregates.assertionFailed,
+    assertionPassRate: aggregates.assertionPassRate,
+    statusCodeStats: aggregates.statusCodeStats,
+    statusCodeChart: aggregates.statusCodeChart,
+    assertionFailureTop10: aggregates.assertionFailureTop10,
+    errorMessageTop20: aggregates.errorMessageTop20,
+    averageDurationMs: aggregates.averageDurationMs
   }, '获取运行报告成功');
 };
 
