@@ -15,6 +15,7 @@ const {
 const { loginRateLimiter, registerRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { securityLogger } = require('../middleware/logger');
+const emailService = require('../services/email/emailService');
 
 const router = express.Router();
 
@@ -526,7 +527,17 @@ router.post('/forgot-password', asyncHandler(async (req, res) => {
       [resetToken, resetTokenExpiry, user.id]
     );
 
-    // TODO: 发送重置密码邮件
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5174'}/reset-password?token=${resetToken}&email=${encodeURIComponent(user.email)}`;
+    await emailService.sendEmail({
+      to: user.email,
+      subject: '密码重置请求',
+      template: 'password-reset',
+      data: {
+        username: user.username,
+        resetUrl,
+        expiryHours: 1,
+      },
+    });
 
     res.success('如果该邮箱地址存在，我们已发送重置密码的邮件');
 
@@ -665,7 +676,16 @@ router.post('/send-verification', authMiddleware, asyncHandler(async (req, res) 
       [verificationToken, verificationExpiry, user.id]
     );
 
-    // TODO: 发送验证邮件
+    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5174'}/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(user.email)}`;
+    await emailService.sendEmail({
+      to: user.email,
+      subject: '邮箱验证',
+      template: 'email-verification',
+      data: {
+        username: user.username || user.email,
+        verificationUrl,
+      },
+    });
 
     res.success('验证邮件已发送，请检查您的邮箱');
 

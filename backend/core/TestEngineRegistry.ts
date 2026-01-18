@@ -283,7 +283,7 @@ export class TestEngineRegistry {
     // 根据是否并行执行选择策略
     if (options.parallel) {
       // 并行执行
-      const promises = config.engines.map(async engineType => {
+      const runEngine = async (engineType: TestEngineType) => {
         try {
           const engineConfig = {
             ...config,
@@ -312,13 +312,40 @@ export class TestEngineRegistry {
             throw error;
           }
         }
-      });
+      };
 
-      // 限制并发数
-      if (options.maxConcurrent) {
-        // TODO: 实现并发限制逻辑
-        await Promise.all(promises);
+      const maxConcurrent = options.maxConcurrent ? Math.max(1, options.maxConcurrent) : null;
+      if (maxConcurrent) {
+        let queueIndex = 0;
+        let firstError: Error | null = null;
+        let shouldStop = false;
+
+        const workers = Array.from(
+          { length: Math.min(maxConcurrent, config.engines.length) },
+          async () => {
+            while (queueIndex < config.engines.length && !shouldStop) {
+              const engineType = config.engines[queueIndex++];
+              try {
+                await runEngine(engineType);
+              } catch (error) {
+                if (!options.continueOnError) {
+                  shouldStop = true;
+                  if (!firstError) {
+                    firstError = error as Error;
+                  }
+                }
+              }
+            }
+          }
+        );
+
+        await Promise.all(workers);
+
+        if (firstError) {
+          throw firstError;
+        }
       } else {
+        const promises = config.engines.map(engineType => runEngine(engineType));
         await Promise.all(promises);
       }
     } else {

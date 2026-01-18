@@ -8,14 +8,7 @@ import { AlertTriangle, Check, Copy, Download, Eye, EyeOff, RefreshCw, Shield } 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiClient } from '../../services/api/client';
-// TODO: Install react-toastify package
-// import { toast } from 'react-toastify';
-const toast = {
-  success: (message: string) => Logger.debug(`Success: ${message}`),
-  error: (message: string) => Logger.error(`Error: ${message}`),
-  info: (message: string) => Logger.info(`Info: ${message}`),
-  warning: (message: string) => Logger.warn(`Warning: ${message}`),
-};
+import showToast from '../common/Toast';
 
 interface BackupCode {
   code: string;
@@ -56,7 +49,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       setDownloadReady(nextCodes.length > 0);
     } catch (error) {
       Logger.error('获取备份代码失败:', error);
-      toast.error('获取备份代码失败');
+      showToast.error('获取备份代码失败');
     } finally {
       setLoading(false);
     }
@@ -81,10 +74,10 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       setCodes(nextCodes);
       setShowCodes(true);
       setDownloadReady(true);
-      toast.success('已生成新的备份代码');
+      showToast.success('已生成新的备份代码');
     } catch (error) {
       Logger.error('生成备份代码失败:', error);
-      toast.error('生成备份代码失败');
+      showToast.error('生成备份代码失败');
     } finally {
       setRegenerating(false);
     }
@@ -96,9 +89,9 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
       await navigator.clipboard.writeText(code);
       setCopiedIndex(index);
       setTimeout(() => setCopiedIndex(null), 2000);
-      toast.success('代码已复制到剪贴板');
+      showToast.success('代码已复制到剪贴板');
     } catch {
-      toast.error('复制失败');
+      showToast.error('复制失败');
     }
   };
 
@@ -111,9 +104,9 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
 
     try {
       await navigator.clipboard.writeText(allCodes);
-      toast.success('所有代码已复制到剪贴板');
+      showToast.success('所有代码已复制到剪贴板');
     } catch {
-      toast.error('复制失败');
+      showToast.error('复制失败');
     }
   };
 
@@ -136,7 +129,7 @@ const BackupCodes: React.FC<BackupCodesProps> = ({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    toast.success('备份代码已下载');
+    showToast.success('备份代码已下载');
   };
 
   useEffect(() => {

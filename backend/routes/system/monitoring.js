@@ -541,6 +541,13 @@ router.get('/export', authMiddleware, requirePermission(PERMISSIONS.MONITORING_R
   const userId = req.user.id;
   const { format = 'json', timeRange = '24h', siteId } = req.query;
 
+  if (!['json', 'csv'].includes(format)) {
+    return res.validationError([{ field: 'format', message: 'format 仅支持 json/csv' }]);
+  }
+  if (!['1h', '24h', '7d', '30d'].includes(timeRange)) {
+    return res.validationError([{ field: 'timeRange', message: 'timeRange 仅支持 1h/24h/7d/30d' }]);
+  }
+
   const exportData = await monitoringService.exportData(userId, {
     format,
     timeRange,
@@ -586,6 +593,16 @@ router.post('/reports', authMiddleware, requirePermission(PERMISSIONS.MONITORING
     includeDetails = true
   } = req.body;
 
+  if (!['summary', 'detail', 'availability', 'performance'].includes(reportType)) {
+    return res.validationError([{ field: 'reportType', message: 'reportType 不合法' }]);
+  }
+  if (!['1h', '24h', '7d', '30d'].includes(timeRange)) {
+    return res.validationError([{ field: 'timeRange', message: 'timeRange 仅支持 1h/24h/7d/30d' }]);
+  }
+  if (!['pdf', 'html', 'csv'].includes(format)) {
+    return res.validationError([{ field: 'format', message: 'format 仅支持 pdf/html/csv' }]);
+  }
+
   const report = await monitoringService.generateReport(userId, {
     reportType,
     timeRange,
@@ -615,11 +632,20 @@ router.get('/reports', authMiddleware, requirePermission(PERMISSIONS.MONITORING_
   }
 
   const userId = req.user.id;
-  const { page = 1, limit = 20 } = req.query;
+  const { page = 1, limit = 20, reportType, timeRange } = req.query;
+
+  if (reportType && !['summary', 'detail', 'availability', 'performance'].includes(reportType)) {
+    return res.validationError([{ field: 'reportType', message: 'reportType 不合法' }]);
+  }
+  if (timeRange && !['1h', '24h', '7d', '30d'].includes(timeRange)) {
+    return res.validationError([{ field: 'timeRange', message: 'timeRange 仅支持 1h/24h/7d/30d' }]);
+  }
 
   const reports = await monitoringService.getReports(userId, {
     page: parseInt(page),
-    limit: parseInt(limit)
+    limit: parseInt(limit),
+    reportType,
+    timeRange
   });
 
   res.success(reports.data);

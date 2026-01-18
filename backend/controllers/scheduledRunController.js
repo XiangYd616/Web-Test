@@ -8,6 +8,13 @@ const setScheduledRunService = (service) => {
   scheduledRunService = service;
 };
 
+const parsePagination = (req) => {
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+  const offset = (page - 1) * limit;
+  return { page, limit, offset };
+};
+
 const ensureWorkspaceMember = async (workspaceId, userId) => {
   const { WorkspaceMember } = models;
   return WorkspaceMember.findOne({
@@ -26,6 +33,34 @@ const ensureWorkspacePermission = async (workspaceId, userId, action) => {
   return { member };
 };
 
+const validateScheduleConfig = (config = {}, res) => {
+  const errors = [];
+  if (config.iterations !== undefined) {
+    const iterations = Number(config.iterations);
+    if (!Number.isFinite(iterations) || iterations < 1 || iterations > 100) {
+      errors.push({ field: 'config.iterations', message: 'iterations 需在 1~100 之间' });
+    }
+  }
+  if (config.delay !== undefined) {
+    const delay = Number(config.delay);
+    if (!Number.isFinite(delay) || delay < 0 || delay > 10000) {
+      errors.push({ field: 'config.delay', message: 'delay 需在 0~10000 之间' });
+    }
+  }
+  if (config.timeout !== undefined) {
+    const timeout = Number(config.timeout);
+    if (!Number.isFinite(timeout) || timeout < 100 || timeout > 120000) {
+      errors.push({ field: 'config.timeout', message: 'timeout 需在 100~120000 之间' });
+    }
+  }
+
+  if (errors.length > 0) {
+    res.validationError(errors);
+    return false;
+  }
+  return true;
+};
+
 const listScheduledRuns = async (req, res) => {
   const workspaceId = req.query.workspaceId;
   if (!workspaceId) {
@@ -42,11 +77,27 @@ const listScheduledRuns = async (req, res) => {
   }
 
   const { ScheduledRun } = models;
-  const runs = await ScheduledRun.findAll({
+  const { page, limit, offset } = parsePagination(req);
+  const { count, rows } = await ScheduledRun.findAndCountAll({
     where: { workspace_id: workspaceId, ...(status ? { status } : {}) },
-    order: [['created_at', 'DESC']]
+    order: [['created_at', 'DESC']],
+    limit,
+    offset
   });
-  return res.success(runs, '获取定时运行列表成功');
+  return res.paginated(rows, page, limit, count, '获取定时运行列表成功');
+};
+
+const getScheduledRun = async (req, res) => {
+  const { ScheduledRun } = models;
+  const scheduledRun = await ScheduledRun.findByPk(req.params.scheduleId);
+  if (!scheduledRun) {
+    return res.notFound('定时运行不存在');
+  }
+  const permission = await ensureWorkspacePermission(scheduledRun.workspace_id, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
+  }
+  return res.success(scheduledRun, '获取定时运行成功');
 };
 
 const createScheduledRun = async (req, res) => {
@@ -61,6 +112,9 @@ const createScheduledRun = async (req, res) => {
   }
   if (!cron.validate(cronExpr)) {
     return res.validationError([{ field: 'cron', message: 'cron 表达式无效' }]);
+  }
+  if (!validateScheduleConfig(config || {}, res)) {
+    return;
   }
 
   const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'execute');
@@ -101,6 +155,12 @@ const updateScheduledRun = async (req, res) => {
 
   if (req.body?.cron && !cron.validate(req.body.cron)) {
     return res.validationError([{ field: 'cron', message: 'cron 表达式无效' }]);
+  }
+  if (req.body?.status && !['active', 'inactive'].includes(req.body.status)) {
+    return res.validationError([{ field: 'status', message: 'status 仅支持 active/inactive' }]);
+  }
+  if (req.body?.config && !validateScheduleConfig(req.body.config, res)) {
+    return;
   }
 
   await scheduledRun.update({
@@ -163,6 +223,7 @@ const runScheduledNow = async (req, res) => {
 
 module.exports = {
   listScheduledRuns,
+  getScheduledRun,
   createScheduledRun,
   updateScheduledRun,
   deleteScheduledRun,

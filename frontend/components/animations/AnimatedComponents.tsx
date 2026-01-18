@@ -3,19 +3,70 @@
  * 提供各种微交互和过渡动画效果
  */
 
-// TODO: Install framer-motion package
-// import { motion, AnimatePresence, Variants } from 'framer-motion';
+import React, { ReactNode } from 'react';
 
-// Placeholder types and components for now
-type Variants = Record<string, any>;
+// 当前采用简化的占位动画实现，避免额外依赖
+// 如需更丰富的动画效果，可替换为 framer-motion
+type Variants = Record<string, Record<string, unknown>>;
+
+type MotionBaseProps = {
+  initial?: unknown;
+  animate?: unknown;
+  exit?: unknown;
+  transition?: unknown;
+  variants?: Variants;
+  whileHover?: unknown;
+  whileTap?: unknown;
+};
+
+type MotionDivProps = React.HTMLAttributes<HTMLDivElement> & MotionBaseProps;
+type MotionSpanProps = React.HTMLAttributes<HTMLSpanElement> & MotionBaseProps;
+type MotionButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & MotionBaseProps;
+
+const MotionDiv: React.FC<MotionDivProps> = ({
+  children,
+  initial: _initial,
+  animate: _animate,
+  exit: _exit,
+  transition: _transition,
+  variants: _variants,
+  whileHover: _whileHover,
+  whileTap: _whileTap,
+  ...rest
+}) => <div {...rest}>{children}</div>;
+
+const MotionSpan: React.FC<MotionSpanProps> = ({
+  children,
+  initial: _initial,
+  animate: _animate,
+  exit: _exit,
+  transition: _transition,
+  variants: _variants,
+  whileHover: _whileHover,
+  whileTap: _whileTap,
+  ...rest
+}) => <span {...rest}>{children}</span>;
+
+const MotionButton: React.FC<MotionButtonProps> = ({
+  children,
+  initial: _initial,
+  animate: _animate,
+  exit: _exit,
+  transition: _transition,
+  variants: _variants,
+  whileHover: _whileHover,
+  whileTap: _whileTap,
+  ...rest
+}) => <button {...rest}>{children}</button>;
+
 const motion = {
-  div: 'div' as any,
-  span: 'span' as any,
-  button: 'button' as any,
-} as any;
+  div: MotionDiv,
+  span: MotionSpan,
+  button: MotionButton,
+};
+
 // Placeholder AnimatePresence component
 // const AnimatePresence = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-import React, { ReactNode } from 'react';
 
 // ==================== 基础动画配置 ====================
 
@@ -87,11 +138,11 @@ interface AnimatedProps {
 /**
  * 淡入动画组件
  */
-export const FadeIn: React.FC<AnimatedProps> = ({ 
-  children, 
-  className, 
-  delay = 0, 
-  duration = 0.3 
+export const FadeIn: React.FC<AnimatedProps> = ({
+  children,
+  className,
+  delay = 0,
+  duration = 0.3,
 }) => (
   <motion.div
     initial={{ opacity: 0 }}
@@ -106,20 +157,21 @@ export const FadeIn: React.FC<AnimatedProps> = ({
 /**
  * 滑入动画组件
  */
-export const SlideIn: React.FC<AnimatedProps & { direction?: 'up' | 'down' | 'left' | 'right' }> = ({ 
-  children, 
-  className, 
-  delay = 0, 
-  duration = 0.3,
-  direction = 'up'
-}) => {
+export const SlideIn: React.FC<
+  AnimatedProps & { direction?: 'up' | 'down' | 'left' | 'right' }
+> = ({ children, className, delay = 0, duration = 0.3, direction = 'up' }) => {
   const getInitialPosition = () => {
     switch (direction) {
-      case 'up': return { y: 20 };
-      case 'down': return { y: -20 };
-      case 'left': return { x: -20 };
-      case 'right': return { x: 20 };
-      default: return { y: 20 };
+      case 'up':
+        return { y: 20 };
+      case 'down':
+        return { y: -20 };
+      case 'left':
+        return { x: -20 };
+      case 'right':
+        return { x: 20 };
+      default:
+        return { y: 20 };
     }
   };
 
@@ -138,11 +190,11 @@ export const SlideIn: React.FC<AnimatedProps & { direction?: 'up' | 'down' | 'le
 /**
  * 缩放动画组件
  */
-export const ScaleIn: React.FC<AnimatedProps> = ({ 
-  children, 
-  className, 
-  delay = 0, 
-  duration = 0.3 
+export const ScaleIn: React.FC<AnimatedProps> = ({
+  children,
+  className,
+  delay = 0,
+  duration = 0.3,
 }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
@@ -157,11 +209,7 @@ export const ScaleIn: React.FC<AnimatedProps> = ({
 /**
  * 交错动画容器
  */
-export const StaggerContainer: React.FC<AnimatedProps> = ({ 
-  children, 
-  className, 
-  delay = 0 
-}) => (
+export const StaggerContainer: React.FC<AnimatedProps> = ({ children, className, delay = 0 }) => (
   <motion.div
     variants={staggerContainerVariants}
     initial="initial"
@@ -176,15 +224,8 @@ export const StaggerContainer: React.FC<AnimatedProps> = ({
 /**
  * 交错动画项
  */
-export const StaggerItem: React.FC<AnimatedProps> = ({ 
-  children, 
-  className 
-}) => (
-  <motion.div
-    variants={staggerItemVariants}
-    transition={springTransition}
-    className={className}
-  >
+export const StaggerItem: React.FC<AnimatedProps> = ({ children, className }) => (
+  <motion.div variants={staggerItemVariants} transition={springTransition} className={className}>
     {children}
   </motion.div>
 );
@@ -208,10 +249,10 @@ export const HoverButton: React.FC<HoverAnimatedProps> = ({
   tapScale = 0.98,
 }) => (
   <motion.button
-    whileHover={{ 
-      scale: hoverScale, 
+    whileHover={{
+      scale: hoverScale,
       y: hoverY,
-      transition: { duration: 0.2 }
+      transition: { duration: 0.2 },
     }}
     whileTap={{ scale: tapScale }}
     className={className}
@@ -230,10 +271,10 @@ export const HoverCard: React.FC<HoverAnimatedProps> = ({
   hoverY = -4,
 }) => (
   <motion.div
-    whileHover={{ 
-      scale: hoverScale, 
+    whileHover={{
+      scale: hoverScale,
       y: hoverY,
-      transition: { duration: 0.2, ...springTransition }
+      transition: { duration: 0.2, ...springTransition },
     }}
     className={className}
   >
@@ -244,10 +285,7 @@ export const HoverCard: React.FC<HoverAnimatedProps> = ({
 /**
  * 脉冲动画组件
  */
-export const Pulse: React.FC<AnimatedProps> = ({ 
-  children, 
-  className 
-}) => (
+export const Pulse: React.FC<AnimatedProps> = ({ children, className }) => (
   <motion.div
     animate={{
       scale: [1, 1.05, 1],
@@ -255,7 +293,7 @@ export const Pulse: React.FC<AnimatedProps> = ({
     transition={{
       duration: 2,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: 'easeInOut',
     }}
     className={className}
   >
@@ -266,17 +304,14 @@ export const Pulse: React.FC<AnimatedProps> = ({
 /**
  * 摇摆动画组件
  */
-export const Wiggle: React.FC<AnimatedProps> = ({ 
-  children, 
-  className 
-}) => (
+export const Wiggle: React.FC<AnimatedProps> = ({ children, className }) => (
   <motion.div
     animate={{
       rotate: [0, -3, 3, -3, 0],
     }}
     transition={{
       duration: 0.5,
-      ease: "easeInOut",
+      ease: 'easeInOut',
     }}
     className={className}
   >
@@ -294,10 +329,7 @@ interface PageTransitionProps {
 /**
  * 页面过渡动画
  */
-export const PageTransition: React.FC<PageTransitionProps> = ({ 
-  children, 
-  className 
-}) => (
+export const PageTransition: React.FC<PageTransitionProps> = ({ children, className }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -312,10 +344,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({
 /**
  * 模态框动画
  */
-export const ModalAnimation: React.FC<PageTransitionProps> = ({ 
-  children, 
-  className 
-}) => (
+export const ModalAnimation: React.FC<PageTransitionProps> = ({ children, className }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95, y: 20 }}
     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -334,7 +363,7 @@ export const ModalAnimation: React.FC<PageTransitionProps> = ({
  */
 export const LoadingDots: React.FC<{ className?: string }> = ({ className }) => (
   <div className={`flex space-x-1 ${className}`}>
-    {[0, 1, 2].map((i) => (
+    {[0, 1, 2].map(i => (
       <motion.div
         key={i}
         className="w-2 h-2 bg-current rounded-full"
@@ -346,7 +375,7 @@ export const LoadingDots: React.FC<{ className?: string }> = ({ className }) => 
           duration: 0.8,
           repeat: Infinity,
           delay: i * 0.2,
-          ease: "easeInOut",
+          ease: 'easeInOut',
         }}
       />
     ))}
@@ -356,9 +385,9 @@ export const LoadingDots: React.FC<{ className?: string }> = ({ className }) => 
 /**
  * 旋转加载动画
  */
-export const LoadingSpinner: React.FC<{ className?: string; size?: number }> = ({ 
-  className, 
-  size = 24 
+export const LoadingSpinner: React.FC<{ className?: string; size?: number }> = ({
+  className,
+  size = 24,
 }) => (
   <motion.div
     className={`border-2 border-gray-300 border-t-blue-500 rounded-full ${className}`}
@@ -367,7 +396,7 @@ export const LoadingSpinner: React.FC<{ className?: string; size?: number }> = (
     transition={{
       duration: 1,
       repeat: Infinity,
-      ease: "linear",
+      ease: 'linear',
     }}
   />
 );
@@ -385,7 +414,7 @@ export const AnimatedProgressBar: React.FC<{
       className={`h-2 rounded-full ${color}`}
       initial={{ width: 0 }}
       animate={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
     />
   </div>
 );
@@ -406,12 +435,12 @@ export const AnimatedNumber: React.FC<{
       className={className}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: Math.min(0.3, duration) }}
     >
       <motion.span
         initial={{ scale: 1.2 }}
         animate={{ scale: 1 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
+        transition={{ duration, delay: 0.1 }}
       >
         {value.toFixed(decimals)}
       </motion.span>

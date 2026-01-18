@@ -70,6 +70,7 @@ class ScheduledRunService {
       return null;
     }
 
+    const lastRunAt = new Date();
     const envContext = await this.buildEnvironmentContext(schedule.environment_id);
     const runRecord = await Run.create({
       workspace_id: schedule.workspace_id,
@@ -80,7 +81,9 @@ class ScheduledRunService {
       created_by: schedule.created_by,
       summary: {
         scheduledRunId: schedule.id,
-        scheduledName: schedule.name
+        scheduledName: schedule.name,
+        triggerType: 'scheduled',
+        scheduleConfig: schedule.config || {}
       }
     });
 
@@ -113,19 +116,30 @@ class ScheduledRunService {
           totalRequests: result.totalRequests,
           passedRequests: result.passedRequests,
           failedRequests: result.failedRequests,
-          skippedRequests: result.skippedRequests
+          skippedRequests: result.skippedRequests,
+          passRate: result.totalRequests
+            ? Math.round((result.passedRequests / result.totalRequests) * 100)
+            : 0
         }
       });
-
-      await schedule.update({ last_run_at: new Date() });
       return runRecord;
     } catch (error) {
       await runRecord.update({
         status: 'failed',
         completed_at: new Date(),
-        summary: { error: error.message, scheduledRunId: schedule.id }
+        summary: {
+          ...runRecord.summary,
+          error: error.message,
+          totalRequests: 0,
+          passedRequests: 0,
+          failedRequests: 0,
+          skippedRequests: 0,
+          passRate: 0
+        }
       });
       return null;
+    } finally {
+      await schedule.update({ last_run_at: lastRunAt });
     }
   }
 

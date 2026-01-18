@@ -8,7 +8,7 @@
 import Logger from '@/utils/logger';
 import { Download, Eye, FileText, Share2 } from 'lucide-react';
 import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
+import { SEOAnalysisResult } from '../../services/seoAnalysisEngine';
 import { MobileSeoAnalysisResult } from '../../utils/MobileSEODetector';
 import { CoreWebVitalsResult } from '../../utils/coreWebVitalsAnalyzer';
 

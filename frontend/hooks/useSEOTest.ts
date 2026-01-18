@@ -1,17 +1,16 @@
 import Logger from '@/utils/logger';
 import { useCallback, useRef, useState } from 'react';
-import { SEOAnalysisResult, SEOAnalysisEngine } from '../services/realSEOAnalysisEngine';
+import { SEOAnalysisEngine, SEOAnalysisResult } from '../services/seoAnalysisEngine';
 
 /**
  * 获取性能指标函数
- * 
+ *
  * @param {string} url - 网站URL
  * @param {any} options - 配置选项
  * @returns {Promise<Object>} 性能指标数据
  */
 
 const getPerformanceMetrics = async (url: string, options: any) => {
-
   return {
     loadTime: Math.random() * 3000 + 1000,
     fcp: Math.random() * 2000 + 500,
@@ -24,8 +23,8 @@ const getPerformanceMetrics = async (url: string, options: any) => {
       fid: Math.random() * 100 + 50,
       cls: Math.random() * 0.3,
       fcp: Math.random() * 2000 + 500,
-      ttfb: Math.random() * 500 + 100
-    }
+      ttfb: Math.random() * 500 + 100,
+    },
   };
 };
 
@@ -54,7 +53,7 @@ const useSEOTest = () => {
   const [progress, setProgress] = useState<SEOTestProgress>({
     progress: 0,
     currentStep: '',
-    isRunning: false
+    isRunning: false,
   });
   const [results, setResults] = useState<SEOAnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,14 +76,14 @@ const useSEOTest = () => {
         setProgress({
           progress: 10,
           currentStep: '获取性能指标...',
-          isRunning: true
+          isRunning: true,
         });
 
         try {
           performanceData = await getPerformanceMetrics(config.url, {
             includeVitals: true,
             includeMobile: config.checkMobileFriendly,
-            device: 'both'
+            device: 'both',
           });
         } catch (error) {
           Logger.warn('获取性能指标失败,继续 SEO分析:', { error: String(error) });
@@ -105,13 +104,13 @@ const useSEOTest = () => {
           checkStructuredData: config.checkStructuredData,
           checkSecurity: config.checkSecurity,
           depth: config.depth,
-          externalPerformanceData: performanceData // 传入外部性能数据
+          externalPerformanceData: performanceData, // 传入外部性能数据
         },
         (progressValue: number, step: string) => {
           setProgress({
             progress: Math.max(progressValue, 20), // 确保进度不倒退
             currentStep: step,
-            isRunning: true
+            isRunning: true,
           });
         }
       );
@@ -120,16 +119,15 @@ const useSEOTest = () => {
       setProgress({
         progress: 100,
         currentStep: '分析完成',
-        isRunning: false
+        isRunning: false,
       });
-
     } catch (err: any) {
       Logger.error('SEO test failed:', err);
       setError(err.message || 'SEO测试失败');
       setProgress({
         progress: 0,
         currentStep: '测试失败',
-        isRunning: false
+        isRunning: false,
       });
     } finally {
       setIsRunning(false);
@@ -145,7 +143,7 @@ const useSEOTest = () => {
     setProgress({
       progress: 0,
       currentStep: '测试已停止',
-      isRunning: false
+      isRunning: false,
     });
   }, []);
 
@@ -195,6 +193,6 @@ const useSEOTest = () => {
     getCurrentStep,
     getCompletedStepsCount,
     getTotalStepsCount,
-    getEstimatedTimeRemaining
+    getEstimatedTimeRemaining,
   };
 };

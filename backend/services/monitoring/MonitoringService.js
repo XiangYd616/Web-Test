@@ -1368,76 +1368,71 @@ class MonitoringService extends EventEmitter {
             let timeCondition = '';
             switch (timeRange) {
                 case '1h':
-                    timeCondition = "AND mr.checked_at >= NOW() - INTERVAL '1 hour'";
+                    timeCondition = "AND ma.created_at >= NOW() - INTERVAL '1 hour'";
                     break;
                 case '24h':
-                    timeCondition = "AND mr.checked_at >= NOW() - INTERVAL '24 hours'";
+                    timeCondition = "AND ma.created_at >= NOW() - INTERVAL '24 hours'";
                     break;
                 case '7d':
-                    timeCondition = "AND mr.checked_at >= NOW() - INTERVAL '7 days'";
+                    timeCondition = "AND ma.created_at >= NOW() - INTERVAL '7 days'";
                     break;
                 case '30d':
-                    timeCondition = "AND mr.checked_at >= NOW() - INTERVAL '30 days'";
+                    timeCondition = "AND ma.created_at >= NOW() - INTERVAL '30 days'";
                     break;
             }
 
-            // 这里需要创建告警表，暂时从监控结果中生成告警
-            let query = `
-        SELECT 
-          mr.id,
-          ms.name as site_name,
-          ms.url,
-          mr.status,
-          mr.error_message,
-          mr.checked_at,
-          ms.consecutive_failures,
-          'monitoring' as alert_type,
-          CASE 
-            WHEN ms.consecutive_failures >= 5 THEN 'critical'
-            WHEN ms.consecutive_failures >= 3 THEN 'high'
-            WHEN ms.consecutive_failures >= 1 THEN 'medium'
-            ELSE 'low'
-          END as severity
-        FROM monitoring_results mr
-        JOIN monitoring_sites ms ON mr.site_id = ms.id
-        WHERE ms.user_id = $1 
-          AND mr.status IN ('down', 'timeout', 'error')
-          AND ms.deleted_at IS NULL ${timeCondition}
-      `;
-
             const params = [userId];
-            const paramIndex = 2;
+            let paramIndex = 2;
+            const conditions = [
+                'ms.user_id = $1',
+                'ms.deleted_at IS NULL'
+            ];
 
+            if (_status) {
+                conditions.push(`ma.status = $${paramIndex}`);
+                params.push(_status);
+                paramIndex++;
+            }
             if (severity) {
-                // 添加严重程度过滤
-                const severityCondition = {
-                    'critical': 'ms.consecutive_failures >= 5',
-                    'high': 'ms.consecutive_failures >= 3 AND ms.consecutive_failures < 5',
-                    'medium': 'ms.consecutive_failures >= 1 AND ms.consecutive_failures < 3',
-                    'low': 'ms.consecutive_failures < 1'
-                };
-
-                if (severityCondition[severity]) {
-                    query += ` AND ${severityCondition[severity]}`;
-                }
+                conditions.push(`ma.severity = $${paramIndex}`);
+                params.push(severity);
+                paramIndex++;
             }
 
-            query += ` ORDER BY mr.checked_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+            const whereClause = `WHERE ${conditions.join(' AND ')} ${timeCondition}`;
+            const query = `
+        SELECT 
+          ma.id,
+          ma.site_id,
+          ms.name as site_name,
+          ms.url,
+          ma.alert_type,
+          ma.severity,
+          ma.status,
+          ma.message,
+          ma.details,
+          ma.created_at,
+          ma.acknowledged_at,
+          ma.resolved_at
+        FROM monitoring_alerts ma
+        JOIN monitoring_sites ms ON ma.site_id = ms.id
+        ${whereClause}
+        ORDER BY ma.created_at DESC
+        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      `;
             params.push(limit, offset);
 
-            const result = await this.dbPool.query(query, params);
-
-            // 获取总数
             const countQuery = `
-        SELECT COUNT(*) as total 
-        FROM monitoring_results mr
-        JOIN monitoring_sites ms ON mr.site_id = ms.id
-        WHERE ms.user_id = $1 
-          AND mr.status IN ('down', 'timeout', 'error')
-          AND ms.deleted_at IS NULL ${timeCondition}
+        SELECT COUNT(*) as total
+        FROM monitoring_alerts ma
+        JOIN monitoring_sites ms ON ma.site_id = ms.id
+        ${whereClause}
       `;
 
-            const countResult = await this.dbPool.query(countQuery, [userId]);
+            const [result, countResult] = await Promise.all([
+                this.dbPool.query(query, params),
+                this.dbPool.query(countQuery, params.slice(0, params.length - 2))
+            ]);
             const total = parseInt(countResult.rows[0].total);
 
             return {
@@ -1451,6 +1446,10 @@ class MonitoringService extends EventEmitter {
             };
 
         } catch (error) {
+            if (error.code === '42P01') {
+                await this.createAlertsTable();
+                return this.getAlerts(userId, options);
+            }
             logger.error('获取告警列表失败:', error);
             throw error;
         }
@@ -1461,11 +1460,24 @@ class MonitoringService extends EventEmitter {
      */
     async markAlertAsRead(alertId, userId) {
         try {
-            // 这里需要实现告警状态管理
-            // 暂时返回成功
+            const query = `
+        UPDATE monitoring_alerts ma
+        SET status = 'acknowledged', acknowledged_at = NOW(), updated_at = NOW()
+        FROM monitoring_sites ms
+        WHERE ma.id = $1 AND ma.site_id = ms.id AND ms.user_id = $2
+        RETURNING ma.id
+      `;
+            const result = await this.dbPool.query(query, [alertId, userId]);
+            if (result.rows.length === 0) {
+                return false;
+            }
             logger.info(`标记告警为已读: ${alertId} by user ${userId}`);
             return true;
         } catch (error) {
+            if (error.code === '42P01') {
+                await this.createAlertsTable();
+                return this.markAlertAsRead(alertId, userId);
+            }
             logger.error('标记告警为已读失败:', error);
             throw error;
         }
@@ -1476,13 +1488,63 @@ class MonitoringService extends EventEmitter {
      */
     async batchUpdateAlerts(alertIds, userId, action) {
         try {
-            // 这里需要实现批量告警操作
-            logger.info(`批量${action}告警: ${alertIds.length}个告警 by user ${userId}`);
-            return { updated: alertIds.length };
+            const actionMap = {
+                read: { status: 'acknowledged', field: 'acknowledged_at' },
+                resolve: { status: 'resolved', field: 'resolved_at' }
+            };
+            const config = actionMap[action];
+            if (!config) {
+                return { updated: 0 };
+            }
+
+            const query = `
+        UPDATE monitoring_alerts ma
+        SET status = $3, ${config.field} = NOW(), updated_at = NOW()
+        FROM monitoring_sites ms
+        WHERE ma.id = ANY($1) AND ma.site_id = ms.id AND ms.user_id = $2
+        RETURNING ma.id
+      `;
+            const result = await this.dbPool.query(query, [alertIds, userId, config.status]);
+            logger.info(`批量${action}告警: ${result.rows.length}个告警 by user ${userId}`);
+            return { updated: result.rows.length };
         } catch (error) {
+            if (error.code === '42P01') {
+                await this.createAlertsTable();
+                return this.batchUpdateAlerts(alertIds, userId, action);
+            }
             logger.error('批量更新告警失败:', error);
             throw error;
         }
+    }
+
+    /**
+     * 创建告警表
+     */
+    async createAlertsTable() {
+        const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS monitoring_alerts (
+          id VARCHAR(255) PRIMARY KEY,
+          site_id UUID NOT NULL,
+          alert_type VARCHAR(50) NOT NULL,
+          severity VARCHAR(20) NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+          status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'acknowledged', 'resolved')),
+          message TEXT,
+          details JSONB DEFAULT '{}',
+          acknowledged_at TIMESTAMP WITH TIME ZONE,
+          acknowledged_by UUID,
+          resolved_at TIMESTAMP WITH TIME ZONE,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_site ON monitoring_alerts(site_id);
+        CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_severity ON monitoring_alerts(severity);
+        CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_status ON monitoring_alerts(status);
+        CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_created ON monitoring_alerts(created_at DESC);
+      `;
+
+        await this.dbPool.query(createTableQuery);
+        logger.info('创建告警表成功');
     }
 
     /**
@@ -1932,7 +1994,7 @@ class MonitoringService extends EventEmitter {
             });
         }
 
-        return lines.join('/n');
+        return lines.join('\n');
     }
 
     /**
@@ -2005,24 +2067,41 @@ class MonitoringService extends EventEmitter {
      */
     async getReports(userId, options = {}) {
         try {
-            const { page = 1, limit = 20 } = options;
+            const { page = 1, limit = 20, reportType, timeRange } = options;
             const offset = (page - 1) * limit;
 
+            const conditions = ['user_id = $1'];
+            const params = [userId];
+            let paramIndex = 2;
+
+            if (reportType) {
+                conditions.push(`report_type = $${paramIndex}`);
+                params.push(reportType);
+                paramIndex++;
+            }
+
+            if (timeRange) {
+                conditions.push(`time_range = $${paramIndex}`);
+                params.push(timeRange);
+                paramIndex++;
+            }
+
+            const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
             const query = `
                 SELECT * FROM monitoring_reports
-                WHERE user_id = $1
+                ${whereClause}
                 ORDER BY created_at DESC
-                LIMIT $2 OFFSET $3
+                LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
             `;
-
             const countQuery = `
                 SELECT COUNT(*) as total FROM monitoring_reports
-                WHERE user_id = $1
+                ${whereClause}
             `;
+            params.push(limit, offset);
 
             const [dataResult, countResult] = await Promise.all([
-                this.dbPool.query(query, [userId, limit, offset]),
-                this.dbPool.query(countQuery, [userId])
+                this.dbPool.query(query, params),
+                this.dbPool.query(countQuery, params.slice(0, params.length - 2))
             ]);
 
             const total = parseInt(countResult.rows[0].total);

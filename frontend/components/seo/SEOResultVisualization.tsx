@@ -1,13 +1,13 @@
 /**
  * SEOResultVisualization.tsx - React组件
- * 
+ *
  * 文件路径: frontend\components\seo\SEOResultVisualization.tsx
  * 创建时间: 2025-09-25
  */
 
-import React, { useState, useMemo } from 'react';
-import {BarChart3, TrendingUp, AlertCircle, CheckCircle, Clock} from 'lucide-react';
-import { SEOAnalysisResult } from '../../services/realSEOAnalysisEngine';
+import { AlertCircle, BarChart3, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { SEOAnalysisResult } from '../../services/seoAnalysisEngine';
 import { MobileSeoAnalysisResult } from '../../utils/MobileSEODetector';
 import { CoreWebVitalsResult } from '../../utils/coreWebVitalsAnalyzer';
 
@@ -67,9 +67,7 @@ const CircularProgress: React.FC<{
           <span className="text-xl font-bold">{score}</span>
         </div>
       </div>
-      {label && (
-        <span className="text-sm text-gray-600 mt-2">{label}</span>
-      )}
+      {label && <span className="text-sm text-gray-600 mt-2">{label}</span>}
     </div>
   );
 };
@@ -92,16 +90,12 @@ const BarChart: React.FC<{
                 className="w-full rounded-t transition-all duration-500"
                 style={{
                   height: `${height}%`,
-                  backgroundColor: item.color
+                  backgroundColor: item.color,
                 }}
               />
             </div>
-            <div className="text-xs text-gray-600 mt-1 text-center">
-              {item.label}
-            </div>
-            <div className="text-sm font-semibold">
-              {item.value}
-            </div>
+            <div className="text-xs text-gray-600 mt-1 text-center">{item.label}</div>
+            <div className="text-sm font-semibold">{item.value}</div>
           </div>
         );
       })}
@@ -146,7 +140,7 @@ const RadarChart: React.FC<{
             />
           );
         })}
-        
+
         {/* 轴线 */}
         {points.map((point, index) => {
           const axisX = center + radius * Math.cos(point.angle);
@@ -163,15 +157,10 @@ const RadarChart: React.FC<{
             />
           );
         })}
-        
+
         {/* 数据区域 */}
-        <path
-          d={pathData}
-          fill="#3b82f680"
-          stroke="#3b82f6"
-          strokeWidth="2"
-        />
-        
+        <path d={pathData} fill="#3b82f680" stroke="#3b82f6" strokeWidth="2" />
+
         {/* 数据点 */}
         {points.map((point, index) => (
           <circle
@@ -185,7 +174,7 @@ const RadarChart: React.FC<{
           />
         ))}
       </svg>
-      
+
       {/* 标签 */}
       {points.map((point, index) => {
         const labelX = center + (radius + 15) * Math.cos(point.angle);
@@ -196,7 +185,7 @@ const RadarChart: React.FC<{
             className="absolute text-xs font-medium transform -translate-x-1/2 -translate-y-1/2"
             style={{
               left: labelX,
-              top: labelY
+              top: labelY,
             }}
           >
             {point.label}
@@ -210,22 +199,24 @@ const RadarChart: React.FC<{
 export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
   data,
   showComparison = false,
-  historicalData = []
+  historicalData = [],
 }) => {
-  const [activeView, setActiveView] = useState<'overview' | 'detailed' | 'comparison' | 'trends'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'detailed' | 'comparison' | 'trends'>(
+    'overview'
+  );
 
   // 计算总体评分数据
   const overviewScores = useMemo(() => {
     const scores = [];
-    
+
     if (data.basicSEO) {
       // 计算技术SEO分数（基于布尔值）
-      const technicalScore = data.basicSEO.technical 
-        ? ((data.basicSEO.technical.canonical ? 33 : 0) + 
-           (data.basicSEO.technical.robots ? 33 : 0) + 
-           (data.basicSEO.technical.sitemap ? 34 : 0))
+      const technicalScore = data.basicSEO.technical
+        ? (data.basicSEO.technical.canonical ? 33 : 0) +
+          (data.basicSEO.technical.robots ? 33 : 0) +
+          (data.basicSEO.technical.sitemap ? 34 : 0)
         : 0;
-      
+
       scores.push(
         { label: '技术SEO', value: technicalScore, color: '#3b82f6' },
         { label: '内容质量', value: data.basicSEO.contentQuality?.score || 0, color: '#10b981' },
@@ -234,26 +225,26 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
         { label: '结构化数据', value: data.basicSEO.structuredData?.score || 0, color: '#ef4444' }
       );
     }
-    
+
     if (data.mobileSEO) {
       scores.push({ label: '移动SEO', value: data.mobileSEO.overallScore, color: '#06b6d4' });
     }
-    
+
     return scores;
   }, [data]);
 
   // 计算雷达图数据
   const radarData = useMemo(() => {
     const radarScores = [];
-    
+
     if (data.basicSEO) {
       // 计算技术SEO分数
-      const technicalScore = data.basicSEO.technical 
-        ? ((data.basicSEO.technical.canonical ? 33 : 0) + 
-           (data.basicSEO.technical.robots ? 33 : 0) + 
-           (data.basicSEO.technical.sitemap ? 34 : 0))
+      const technicalScore = data.basicSEO.technical
+        ? (data.basicSEO.technical.canonical ? 33 : 0) +
+          (data.basicSEO.technical.robots ? 33 : 0) +
+          (data.basicSEO.technical.sitemap ? 34 : 0)
         : 0;
-      
+
       radarScores.push(
         { label: '技术', value: technicalScore },
         { label: '内容', value: data.basicSEO.contentQuality?.score || 0 },
@@ -262,56 +253,56 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
         { label: '结构化', value: data.basicSEO.structuredData?.score || 0 }
       );
     }
-    
+
     if (data.mobileSEO) {
       radarScores.push({ label: '移动', value: data.mobileSEO.overallScore });
     }
-    
+
     return radarScores;
   }, [data]);
 
   // 计算问题分布
   const issueDistribution = useMemo(() => {
     if (!data.basicSEO) return [];
-    
+
     const issues = data.basicSEO.issues;
     const distribution = {
       high: issues.filter(i => i.impact === 'high').length,
       medium: issues.filter(i => i.impact === 'medium').length,
-      low: issues.filter(i => i.impact === 'low').length
+      low: issues.filter(i => i.impact === 'low').length,
     };
-    
+
     return [
       { label: '高', value: distribution.high, color: '#ef4444' },
       { label: '中', value: distribution.medium, color: '#f59e0b' },
-      { label: '低', value: distribution.low, color: '#10b981' }
+      { label: '低', value: distribution.low, color: '#10b981' },
     ];
   }, [data]);
 
   // Core Web Vitals 数据
   const coreWebVitalsData = useMemo(() => {
     if (!data.coreWebVitals) return [];
-    
+
     const vitals = data.coreWebVitals;
     return [
-      { 
-        label: 'LCP', 
-        value: vitals.metrics.lcp, 
+      {
+        label: 'LCP',
+        value: vitals.metrics.lcp,
         rating: vitals.measurements.find(m => m.metric === 'lcp')?.rating || 'poor',
-        unit: 'ms' 
+        unit: 'ms',
       },
-      { 
-        label: 'FID', 
-        value: vitals.metrics.fid, 
+      {
+        label: 'FID',
+        value: vitals.metrics.fid,
         rating: vitals.measurements.find(m => m.metric === 'fid')?.rating || 'poor',
-        unit: 'ms' 
+        unit: 'ms',
       },
-      { 
-        label: 'CLS', 
-        value: vitals.metrics.cls, 
+      {
+        label: 'CLS',
+        value: vitals.metrics.cls,
         rating: vitals.measurements.find(m => m.metric === 'cls')?.rating || 'poor',
-        unit: '' 
-      }
+        unit: '',
+      },
     ];
   }, [data]);
 
@@ -326,10 +317,14 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
   // 获取评级图标
   const getRatingIcon = (rating: string) => {
     switch (rating) {
-      case 'good': return <CheckCircle className="text-green-500" size={16} />;
-      case 'needs-improvement': return <Clock className="text-yellow-500" size={16} />;
-      case 'poor': return <AlertCircle className="text-red-500" size={16} />;
-      default: return <AlertCircle className="text-gray-500" size={16} />;
+      case 'good':
+        return <CheckCircle className="text-green-500" size={16} />;
+      case 'needs-improvement':
+        return <Clock className="text-yellow-500" size={16} />;
+      case 'poor':
+        return <AlertCircle className="text-red-500" size={16} />;
+      default:
+        return <AlertCircle className="text-gray-500" size={16} />;
     }
   };
 
@@ -342,7 +337,7 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
           SEO测试结果可视化
         </h3>
         <div className="flex space-x-2">
-          {['overview', 'detailed', 'comparison', 'trends'].map((view) => (
+          {['overview', 'detailed', 'comparison', 'trends'].map(view => (
             <button
               key={view}
               onClick={() => setActiveView(view as any)}
@@ -352,9 +347,13 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {view === 'overview' ? '总览' :
-               view === 'detailed' ? '详细' :
-               view === 'comparison' ? '对比' : '趋势'}
+              {view === 'overview'
+                ? '总览'
+                : view === 'detailed'
+                  ? '详细'
+                  : view === 'comparison'
+                    ? '对比'
+                    : '趋势'}
             </button>
           ))}
         </div>
@@ -374,7 +373,7 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
                 label="总体评分"
               />
             </div>
-            
+
             {data.mobileSEO && (
               <div className="text-center">
                 <CircularProgress
@@ -386,16 +385,26 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
                 />
               </div>
             )}
-            
+
             {data.coreWebVitals && (
               <div className="text-center">
                 <CircularProgress
-                  score={data.coreWebVitals.overallRating === 'good' ? 90 :
-                         data.coreWebVitals.overallRating === 'needs-improvement' ? 60 : 30}
+                  score={
+                    data.coreWebVitals.overallRating === 'good'
+                      ? 90
+                      : data.coreWebVitals.overallRating === 'needs-improvement'
+                        ? 60
+                        : 30
+                  }
                   size={120}
                   strokeWidth={8}
-                  color={data.coreWebVitals.overallRating === 'good' ? '#10b981' :
-                         data.coreWebVitals.overallRating === 'needs-improvement' ? '#f59e0b' : '#ef4444'}
+                  color={
+                    data.coreWebVitals.overallRating === 'good'
+                      ? '#10b981'
+                      : data.coreWebVitals.overallRating === 'needs-improvement'
+                        ? '#f59e0b'
+                        : '#ef4444'
+                  }
                   label="Core Web Vitals"
                 />
               </div>
@@ -415,7 +424,7 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
                 <h4 className="text-md font-semibold mb-4">问题优先级分布</h4>
                 <BarChart data={issueDistribution} />
               </div>
-              
+
               <div>
                 <h4 className="text-md font-semibold mb-4">SEO维度雷达图</h4>
                 <div className="flex justify-center">
@@ -442,15 +451,23 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
                       {getRatingIcon(vital.rating)}
                     </div>
                     <div className="text-2xl font-bold mb-1">
-                      {vital.value.toFixed(vital.label === 'CLS' ? 3 : 0)}{vital.unit}
+                      {vital.value.toFixed(vital.label === 'CLS' ? 3 : 0)}
+                      {vital.unit}
                     </div>
-                    <div className={`text-sm ${
-                      vital.rating === 'good' ? 'text-green-600' :
-                      vital.rating === 'needs-improvement' ? 'text-yellow-600' :
-                      'text-red-600'
-                    }`}>
-                      {vital.rating === 'good' ? '良好' :
-                       vital.rating === 'needs-improvement' ? '需要改善' : '较差'}
+                    <div
+                      className={`text-sm ${
+                        vital.rating === 'good'
+                          ? 'text-green-600'
+                          : vital.rating === 'needs-improvement'
+                            ? 'text-yellow-600'
+                            : 'text-red-600'
+                      }`}
+                    >
+                      {vital.rating === 'good'
+                        ? '良好'
+                        : vital.rating === 'needs-improvement'
+                          ? '需要改善'
+                          : '较差'}
                     </div>
                   </div>
                 ))}
@@ -469,21 +486,21 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
                   </div>
                   <div className="text-sm text-blue-600">Viewport标签</div>
                 </div>
-                
+
                 <div className="p-3 bg-green-50 rounded-lg text-center">
                   <div className="text-xl font-bold text-green-600">
                     {data.mobileSEO.responsive.score}
                   </div>
                   <div className="text-sm text-green-600">响应式设计</div>
                 </div>
-                
+
                 <div className="p-3 bg-purple-50 rounded-lg text-center">
                   <div className="text-xl font-bold text-purple-600">
                     {data.mobileSEO.touchTargets.appropriateSize}
                   </div>
                   <div className="text-sm text-purple-600">触摸目标</div>
                 </div>
-                
+
                 <div className="p-3 bg-orange-50 rounded-lg text-center">
                   <div className="text-xl font-bold text-orange-600">
                     {data.mobileSEO.fonts.averageFontSize}px
@@ -502,38 +519,43 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
                     <span>Robots.txt</span>
-                    <span className={`font-semibold ${
-                      data.basicSEO.technical?.robots ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <span
+                      className={`font-semibold ${
+                        data.basicSEO.technical?.robots ? 'text-green-600' : 'text-red-600'
+                      }`}
+                    >
                       {data.basicSEO.technical?.robots ? '存在' : '缺失'}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
                     <span>Sitemap</span>
-                    <span className={`font-semibold ${
-                      data.basicSEO.technical?.sitemap ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <span
+                      className={`font-semibold ${
+                        data.basicSEO.technical?.sitemap ? 'text-green-600' : 'text-red-600'
+                      }`}
+                    >
                       {data.basicSEO.technical?.sitemap ? '存在' : '缺失'}
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
                     <span>Canonical标签</span>
-                    <span className={`font-semibold ${
-                      data.basicSEO.technical?.canonical ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <span
+                      className={`font-semibold ${
+                        data.basicSEO.technical?.canonical ? 'text-green-600' : 'text-red-600'
+                      }`}
+                    >
                       {data.basicSEO.technical?.canonical ? '存在' : '缺失'}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
                     <span>HTTPS</span>
                     <span className="font-semibold text-gray-600">
-                      {/* HTTPS信息需要从其他数据源获取 */}
-                      -
+                      {/* HTTPS信息需要从其他数据源获取 */}-
                     </span>
                   </div>
                 </div>
@@ -569,55 +591,55 @@ export const SEOResultVisualization: React.FC<SEOResultVisualizationProps> = ({
           <TrendingUp className="mr-2" />
           快速洞察
         </h4>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
           {data.basicSEO && (
             <>
               <div className="flex items-center">
-                {data.basicSEO.score >= 80 ? 
-                  <CheckCircle className="text-green-500 mr-2" size={16} /> :
+                {data.basicSEO.score >= 80 ? (
+                  <CheckCircle className="text-green-500 mr-2" size={16} />
+                ) : (
                   <AlertCircle className="text-yellow-500 mr-2" size={16} />
-                }
-                <span>
-                  SEO总分: {data.basicSEO.score >= 80 ? '表现优秀' : '有待改进'}
-                </span>
+                )}
+                <span>SEO总分: {data.basicSEO.score >= 80 ? '表现优秀' : '有待改进'}</span>
               </div>
-              
+
               <div className="flex items-center">
-                {data.basicSEO.issues.filter(i => i.impact === 'high').length === 0 ? 
-                  <CheckCircle className="text-green-500 mr-2" size={16} /> :
+                {data.basicSEO.issues.filter(i => i.impact === 'high').length === 0 ? (
+                  <CheckCircle className="text-green-500 mr-2" size={16} />
+                ) : (
                   <AlertCircle className="text-red-500 mr-2" size={16} />
-                }
+                )}
                 <span>
-                  {data.basicSEO.issues.filter(i => i.impact === 'high').length === 0 ? 
-                    '无高优先级问题' : 
-                    `${data.basicSEO.issues.filter(i => i.impact === 'high').length}个高优先级问题`
-                  }
+                  {data.basicSEO.issues.filter(i => i.impact === 'high').length === 0
+                    ? '无高优先级问题'
+                    : `${data.basicSEO.issues.filter(i => i.impact === 'high').length}个高优先级问题`}
                 </span>
               </div>
             </>
           )}
-          
+
           {data.mobileSEO && (
             <div className="flex items-center">
-              {data.mobileSEO.viewport.isOptimal ? 
-                <CheckCircle className="text-green-500 mr-2" size={16} /> :
+              {data.mobileSEO.viewport.isOptimal ? (
+                <CheckCircle className="text-green-500 mr-2" size={16} />
+              ) : (
                 <AlertCircle className="text-yellow-500 mr-2" size={16} />
-              }
-              <span>
-                移动优化: {data.mobileSEO.viewport.isOptimal ? '配置良好' : '需要优化'}
-              </span>
+              )}
+              <span>移动优化: {data.mobileSEO.viewport.isOptimal ? '配置良好' : '需要优化'}</span>
             </div>
           )}
-          
+
           {data.coreWebVitals && (
             <div className="flex items-center">
               {getRatingIcon(data.coreWebVitals.overallRating)}
               <span className="ml-2">
-                Core Web Vitals: {
-                  data.coreWebVitals.overallRating === 'good' ? '优秀' :
-                  data.coreWebVitals.overallRating === 'needs-improvement' ? '需改进' : '较差'
-                }
+                Core Web Vitals:{' '}
+                {data.coreWebVitals.overallRating === 'good'
+                  ? '优秀'
+                  : data.coreWebVitals.overallRating === 'needs-improvement'
+                    ? '需改进'
+                    : '较差'}
               </span>
             </div>
           )}
