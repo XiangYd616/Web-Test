@@ -3,7 +3,7 @@
  * 统一HTML解析逻辑，消除多个引擎中的重复解析代码
  */
 
-import BaseService from './BaseService.js';
+const BaseService = require('./BaseService');
 
 class HTMLParsingService extends BaseService {
   constructor() {
@@ -465,6 +465,7 @@ class HTMLParsingService extends BaseService {
         const url = new URL(baseUrl);
         return !href.includes(url.hostname);
       } catch (error) {
+        void error;
         return true;
       }
     }
@@ -530,4 +531,4 @@ class HTMLParsingService extends BaseService {
   }
 }
 
-export default HTMLParsingService;
+module.exports = HTMLParsingService;

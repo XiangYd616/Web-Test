@@ -5,7 +5,6 @@
 
 const express = require('express');
 const { configCenter } = require('../config/ConfigCenter');
-const { ServiceError, ErrorTypes } = require('../utils/errorHandler');
 
 const router = express.Router();
 

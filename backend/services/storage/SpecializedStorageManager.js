@@ -27,6 +27,21 @@ class SpecializedStorageManager {
   }
 
   /**
+   * 处理可访问性测试数据
+   */
+  async handleAccessibilityData(data) {
+    return {
+      metadata: {
+        url: data.url,
+        timestamp: data.timestamp,
+        level: data.level || 'AA'
+      },
+      results: data.results || data,
+      recommendations: data.recommendations || []
+    };
+  }
+
+  /**
    * 初始化各引擎的存储策略
    */
   initializeStrategies() {
@@ -52,17 +67,6 @@ class SpecializedStorageManager {
       specialHandling: this.handleStressData.bind(this)
     });
 
-    // 兼容性测试引擎 - 大量截图，需要文件存储优化
-    this.storageStrategies.set('compatibility', {
-      compress: false, // 图片已压缩
-      encrypt: false,
-      shard: true,
-      indexFields: ['url', 'browser', 'timestamp'],
-      retentionDays: 120,
-      archiveAfterDays: 45,
-      specialHandling: this.handleCompatibilityData.bind(this)
-    });
-
     // 安全测试引擎 - 敏感数据，需要加密存储
     this.storageStrategies.set('security', {
       compress: true,
@@ -72,17 +76,6 @@ class SpecializedStorageManager {
       retentionDays: 365,
       archiveAfterDays: 90,
       specialHandling: this.handleSecurityData.bind(this)
-    });
-
-    // UX测试引擎 - 交互录制，大文件处理
-    this.storageStrategies.set('ux', {
-      compress: true,
-      encrypt: false,
-      shard: true,
-      indexFields: ['url', 'device', 'timestamp'],
-      retentionDays: 90,
-      archiveAfterDays: 30,
-      specialHandling: this.handleUXData.bind(this)
     });
 
     // 网站综合测试 - 多页面关联数据
@@ -116,6 +109,17 @@ class SpecializedStorageManager {
       retentionDays: 180,
       archiveAfterDays: 60,
       specialHandling: this.handleSEOData.bind(this)
+    });
+
+    // 可访问性测试引擎 - 结构化结果
+    this.storageStrategies.set('accessibility', {
+      compress: true,
+      encrypt: false,
+      shard: false,
+      indexFields: ['url', 'score', 'timestamp'],
+      retentionDays: 180,
+      archiveAfterDays: 60,
+      specialHandling: this.handleAccessibilityData.bind(this)
     });
   }
 
@@ -188,7 +192,8 @@ class SpecializedStorageManager {
    */
   async handlePerformanceData(data) {
     // 分离大文件（如截图）和结构化数据
-    const { screenshots, traces, ...structuredData } = data;
+    const { screenshots, traces, ...structured } = data;
+    void structured;
     
     const processed = {
       metadata: {

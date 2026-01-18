@@ -14,7 +14,6 @@ const fs = require('fs');
 
 // 导入数据库连接
 const { connectDatabase, syncDatabase } = require('./database/sequelize');
-const { getDatabaseConfig } = require('./config/database');
 
 // 导入路由
 const authRoutes = require('./routes/auth');
@@ -23,8 +22,6 @@ const testRoutes = require('./routes/test');
 const usersRoutes = require('./routes/users');
 const securityRoutes = require('./routes/security');
 const performanceRoutes = require('./routes/performance');
-const enginesRoutes = require('./routes/engines');
-const scheduledTasksRoutes = require('./routes/scheduledTasks');
 const comparisonRoutes = require('./routes/misc/comparison');
 const integrationsRoutes = require('./routes/misc/integrations');
 const batchRoutes = require('./routes/misc/batch');
@@ -39,7 +36,6 @@ const { responseFormatter } = require('./middleware/responseFormatter');
 // 导入统一错误处理系统
 const { errorMiddleware, notFoundHandler, handleError } = require('./middleware/errorHandler');
 const { requestLogger, performanceMonitor, apiStats } = require('./middleware/logger');
-const TestManagementService = require('./services/testing/TestManagementService');
 
 // 创建Express应用
 const app = express();
@@ -137,8 +133,7 @@ app.get('/api/info', (req, res) => {
       users: '/api/users',
       security: '/api/security',
       performance: '/api/performance',
-      engines: '/api/engines',
-      scheduledTasks: '/api/scheduled-tasks',
+      
       comparison: '/api/comparison',
       analytics: '/api/analytics',
       integrations: '/api/integrations',
@@ -160,8 +155,6 @@ app.use('/api/test', testRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/security', securityRoutes);
 app.use('/api/performance', performanceRoutes);
-app.use('/api/engines', enginesRoutes);
-app.use('/api/scheduled-tasks', scheduledTasksRoutes);
 app.use('/api/comparison', comparisonRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/integrations', integrationsRoutes);
@@ -259,15 +252,7 @@ const startServer = async () => {
       console.warn('⚠️  Database connection failed, but server will continue...');
     }
     
-    // 初始化测试管理服务（异步测试）
-    try {
-      const testManagementService = new TestManagementService();
-      await testManagementService.initialize(getDatabaseConfig(), null);
-      global.testManagementService = testManagementService;
-      console.log('✅ 测试管理服务初始化成功');
-    } catch (error) {
-      console.error('❌ 测试管理服务初始化失败:', error);
-    }
+    
 
     // 启动HTTP服务器
     const server = app.listen(PORT, () => {

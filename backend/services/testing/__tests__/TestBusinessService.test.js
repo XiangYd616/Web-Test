@@ -11,13 +11,7 @@
 
 const TestBusinessService = require('../TestBusinessService');
 const { query } = require('../../../config/database');
-const {
-  ValidationError,
-  QuotaExceededError,
-  UnauthorizedError,
-  NotFoundError,
-  PermissionError
-} = require('../../../utils/errors');
+const { ApiError } = require('../../../middleware/errorHandler');
 
 // Mock数据库查询
 jest.mock('../../../config/database', () => ({
@@ -496,7 +490,7 @@ describe('TestBusinessService - 完整流程', () => {
     const config = { url: 'https://example.com' };
     
     await expect(service.createAndStartTest(config, null))
-      .rejects.toThrow(UnauthorizedError);
+      .rejects.toThrow(ApiError);
   });
 
   test('应该拒绝无效配置', async () => {
@@ -504,7 +498,7 @@ describe('TestBusinessService - 完整流程', () => {
     const user = { userId: '1', role: 'free' };
     
     await expect(service.createAndStartTest(config, user))
-      .rejects.toThrow(ValidationError);
+      .rejects.toThrow(ApiError);
   });
 
   test('应该成功创建并启动测试', async () => {

@@ -38,6 +38,7 @@ class BaseService {
         // 使用动态import检查依赖
         await import(dependency);
       } catch (error) {
+        void error;
         throw new Error(`缺少必需依赖: ${dependency}`);
       }
     }
@@ -128,6 +129,7 @@ class BaseService {
 
     // 可以集成到实际的日志系统中
     if (process.env.NODE_ENV === 'development') {
+      console.debug(`[${this.name}] Performance`, logData);
     }
   }
 
@@ -188,4 +190,4 @@ class BaseService {
   }
 }
 
-export default BaseService;
+module.exports = BaseService;

@@ -4,6 +4,13 @@
  */
 
 const StressTestEngine = require('../../engines/stress/stressTestEngine');
+const WebsiteTestEngine = require('../../engines/website/websiteTestEngine');
+const PerformanceTestEngine = require('../../engines/performance/PerformanceTestEngine');
+const SecurityTestEngine = require('../../engines/security/securityTestEngine');
+const SeoTestEngine = require('../../engines/seo/SEOTestEngine');
+const ApiTestEngine = require('../../engines/api/apiTestEngine');
+const AccessibilityTestEngine = require('../../engines/accessibility/AccessibilityTestEngine');
+const { query } = require('../../config/database');
 // 暂时使用console.log替代Logger
 const Logger = {
   info: (msg, meta) => console.log(`[INFO] ${msg}`, meta || ''),
@@ -54,7 +61,7 @@ class UserTestManager {
   /**
    * 为用户创建新的测试实例
    */
-  createUserTest(userId, testId) {
+  createUserTest(userId, testId, testType = 'stress') {
     // 确保用户测试映射存在
     if (!this.userTests.has(userId)) {
       this.userTests.set(userId, new Map());
@@ -69,7 +76,18 @@ class UserTestManager {
     }
 
     // 创建新的测试引擎实例
-    const testEngine = new StressTestEngine();
+    const engineMap = {
+      website: WebsiteTestEngine,
+      performance: PerformanceTestEngine,
+      security: SecurityTestEngine,
+      seo: SeoTestEngine,
+      stress: StressTestEngine,
+      api: ApiTestEngine,
+      accessibility: AccessibilityTestEngine
+    };
+
+    const Engine = engineMap[testType] || StressTestEngine;
+    const testEngine = new Engine();
 
     // 设置进度回调，直接推送给用户
     testEngine.setProgressCallback((progress) => {
@@ -244,120 +262,40 @@ class UserTestManager {
    */
   async saveTestResults(userId, testId, results) {
     try {
-      // 导入TestHistoryService
-      const TestHistoryService = require('./TestHistoryService');
-      const dbModule = require('../../config/database.js');
-      const testHistoryService = new TestHistoryService(dbModule);
+      const overallScore = results?.overallScore ?? results?.score ?? this.calculateOverallScore(results);
 
-      // 根据测试类型确定保存方式
-      const testType = this.getTestTypeFromId(testId);
-
-      if (testType === 'stress') {
-        // 保存压力测试结果
-        await this.saveStressTestResults(testHistoryService, userId, testId, results);
-      } else {
-        // 保存其他类型测试结果
-        await this.saveGenericTestResults(testHistoryService, userId, testId, results, testType);
+      let duration = results?.duration ? Math.floor(results.duration / 1000) : 0;
+      if (results?.actualDuration) {
+        duration = Math.floor(results.actualDuration / 1000);
       }
+
+      if (!duration) {
+        const durationResult = await query(
+          'SELECT started_at FROM test_history WHERE test_id = $1 AND user_id = $2',
+          [testId, userId]
+        );
+        if (durationResult.rows.length > 0 && durationResult.rows[0].started_at) {
+          const startTime = new Date(durationResult.rows[0].started_at);
+          duration = Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
+        }
+      }
+
+      await query(
+        `UPDATE test_history
+         SET status = 'completed',
+             results = $1,
+             completed_at = NOW(),
+             duration = $2,
+             overall_score = $3
+         WHERE test_id = $4 AND user_id = $5`,
+        [JSON.stringify(results), duration, overallScore, testId, userId]
+      );
 
       Logger.info(`测试结果保存成功: ${testId}`);
     } catch (error) {
       Logger.error(`保存测试结果失败: ${testId}`, error);
       throw error;
     }
-  }
-
-  /**
-   * 从测试ID中提取测试类型
-   */
-  getTestTypeFromId(testId) {
-    // 假设testId格式为 "stress_timestamp_random" 或类似
-    if (testId.startsWith('stress_')) return 'stress';
-    if (testId.startsWith('security_')) return 'security';
-    if (testId.startsWith('performance_')) return 'performance';
-    if (testId.startsWith('api_')) return 'api';
-    if (testId.startsWith('seo_')) return 'seo';
-    if (testId.startsWith('accessibility_')) return 'accessibility';
-    if (testId.startsWith('compatibility_')) return 'compatibility';
-
-    // 默认返回stress
-    return 'stress';
-  }
-
-  /**
-   * 保存压力测试结果
-   */
-  async saveStressTestResults(testHistoryService, userId, testId, results) {
-    // 创建主表记录
-    const testRecord = await testHistoryService.createTestRecord({
-      testName: results.testName || `压力测试 - ${new URL(results.url).hostname}`,
-      testType: 'stress',
-      url: results.url,
-      userId,
-      status: 'completed',
-      config: results.config || {},
-      environment: 'production',
-      tags: ['stress', 'performance'],
-      description: `压力测试完成，总请求数: ${results.metrics?.totalRequests || 0}`
-    });
-
-    if (!testRecord.success) {
-      throw new Error('创建测试记录失败');
-    }
-
-    // 更新测试记录为完成状态
-    await testHistoryService.updateTestRecord(testRecord.data.id, {
-      status: 'completed',
-      endTime: new Date(),
-      duration: Math.floor((results.actualDuration || 0) / 1000),
-      results: results.metrics,
-      overallScore: this.calculateOverallScore(results),
-      grade: this.calculateGrade(results),
-      totalIssues: results.metrics?.errors?.length || 0,
-      criticalIssues: results.metrics?.failedRequests || 0,
-      majorIssues: 0,
-      minorIssues: 0
-    });
-
-    Logger.info(`压力测试结果已保存: ${testRecord.data.id}`);
-  }
-
-  /**
-   * 保存通用测试结果
-   */
-  async saveGenericTestResults(testHistoryService, userId, testId, results, testType) {
-    // 创建主表记录
-    const testRecord = await testHistoryService.createTestRecord({
-      testName: results.testName || `${testType}测试`,
-      testType,
-      url: results.url,
-      userId,
-      status: 'completed',
-      config: results.config || {},
-      environment: 'production',
-      tags: [testType],
-      description: `${testType}测试完成`
-    });
-
-    if (!testRecord.success) {
-      throw new Error('创建测试记录失败');
-    }
-
-    // 更新测试记录为完成状态
-    await testHistoryService.updateTestRecord(testRecord.data.id, {
-      status: 'completed',
-      endTime: new Date(),
-      duration: Math.floor((results.duration || 0) / 1000),
-      results,
-      overallScore: results.score || results.overallScore || 0,
-      grade: results.grade || 'C',
-      totalIssues: results.issues?.length || 0,
-      criticalIssues: results.criticalIssues || 0,
-      majorIssues: results.majorIssues || 0,
-      minorIssues: results.minorIssues || 0
-    });
-
-    Logger.info(`${testType}测试结果已保存: ${testRecord.data.id}`);
   }
 
   /**
@@ -391,21 +329,6 @@ class UserTestManager {
     return Math.max(0, Math.round(score));
   }
 
-  /**
-   * 计算等级
-   */
-  calculateGrade(results) {
-    const score = this.calculateOverallScore(results);
-
-    if (score >= 95) return 'A+';
-    if (score >= 90) return 'A';
-    if (score >= 85) return 'B+';
-    if (score >= 80) return 'B';
-    if (score >= 75) return 'C+';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
-    return 'F';
-  }
 }
 
 // 创建单例实例

@@ -4,7 +4,7 @@
  */
 
 const Redis = require('ioredis');
-const { logger } = require('../../utils/errorHandler');
+const Logger = require('../../utils/logger');
 
 /**
  * 缓存策略枚举
@@ -116,7 +116,7 @@ class MemoryCache {
     }
     
     if (cleaned > 0) {
-      logger.logDebug(`Memory cache cleanup: removed ${cleaned} expired items`);
+      Logger.debug(`Memory cache cleanup: removed ${cleaned} expired items`);
     }
   }
 
@@ -171,11 +171,11 @@ class RedisCache {
     
     this.redis.on('error', (error) => {
       this.stats.errors++;
-      logger.logWarn('Redis cache error', { error: error.message });
+      Logger.warn('Redis cache error', { error: error.message });
     });
     
     this.redis.on('connect', () => {
-      logger.logInfo('Redis cache connected');
+      Logger.info('Redis cache connected');
     });
   }
 
@@ -203,7 +203,7 @@ class RedisCache {
       return JSON.parse(value);
     } catch (error) {
       this.stats.errors++;
-      logger.logWarn('Redis get error', { key, error: error.message });
+      Logger.warn('Redis get error', { key, error: error.message });
       return null;
     }
   }
@@ -226,7 +226,7 @@ class RedisCache {
       return true;
     } catch (error) {
       this.stats.errors++;
-      logger.logWarn('Redis set error', { key, error: error.message });
+      Logger.warn('Redis set error', { key, error: error.message });
       return false;
     }
   }
@@ -246,7 +246,7 @@ class RedisCache {
       return deleted > 0;
     } catch (error) {
       this.stats.errors++;
-      logger.logWarn('Redis delete error', { key, error: error.message });
+      Logger.warn('Redis delete error', { key, error: error.message });
       return false;
     }
   }
@@ -266,7 +266,7 @@ class RedisCache {
       return true;
     } catch (error) {
       this.stats.errors++;
-      logger.logWarn('Redis clear error', { error: error.message });
+      Logger.warn('Redis clear error', { error: error.message });
       return false;
     }
   }
@@ -302,7 +302,7 @@ class RedisCache {
     try {
       await this.redis.quit();
     } catch (error) {
-      logger.logWarn('Redis destroy error', { error: error.message });
+      Logger.warn('Redis destroy error', { error: error.message });
     }
   }
 }
@@ -330,19 +330,21 @@ class CacheService {
         return await this.redisCache.get(key);
         
       case CacheStrategy.MEMORY_FIRST:
-        // 先查内存缓存
-        let value = await this.memoryCache.get(key);
-        if (value !== null) {
+        {
+          // 先查内存缓存
+          let value = await this.memoryCache.get(key);
+          if (value !== null) {
+            return value;
+          }
+          
+          // 再查Redis缓存
+          value = await this.redisCache.get(key);
+          if (value !== null) {
+            // 回填到内存缓存
+            await this.memoryCache.set(key, value, this.defaultTTL);
+          }
           return value;
         }
-        
-        // 再查Redis缓存
-        value = await this.redisCache.get(key);
-        if (value !== null) {
-          // 回填到内存缓存
-          await this.memoryCache.set(key, value, this.defaultTTL);
-        }
-        return value;
         
       case CacheStrategy.REDIS_FIRST:
         // 先查Redis缓存
@@ -374,12 +376,14 @@ class CacheService {
         
       case CacheStrategy.MEMORY_FIRST:
       case CacheStrategy.REDIS_FIRST:
-        // 同时设置两个缓存
-        promises.push(this.memoryCache.set(key, value, ttl));
-        promises.push(this.redisCache.set(key, value, ttl));
-        
-        const results = await Promise.allSettled(promises);
-        return results.some(result => result.status === 'fulfilled' && result.value);
+        {
+          // 同时设置两个缓存
+          promises.push(this.memoryCache.set(key, value, ttl));
+          promises.push(this.redisCache.set(key, value, ttl));
+          
+          const results = await Promise.allSettled(promises);
+          return results.some(result => result.status === 'fulfilled' && result.value);
+        }
         
       default:
         return false;
@@ -401,11 +405,13 @@ class CacheService {
         
       case CacheStrategy.MEMORY_FIRST:
       case CacheStrategy.REDIS_FIRST:
-        promises.push(this.memoryCache.delete(key));
-        promises.push(this.redisCache.delete(key));
-        
-        const results = await Promise.allSettled(promises);
-        return results.some(result => result.status === 'fulfilled' && result.value);
+        {
+          promises.push(this.memoryCache.delete(key));
+          promises.push(this.redisCache.delete(key));
+          
+          const results = await Promise.allSettled(promises);
+          return results.some(result => result.status === 'fulfilled' && result.value);
+        }
         
       default:
         return false;

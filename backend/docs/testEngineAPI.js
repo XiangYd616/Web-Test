@@ -255,7 +255,7 @@ const engineAPIDoc = {
         properties: {
           testType: {
             type: 'string',
-            enum: ['performance', 'security', 'api', 'stress', 'database', 'network', 'ux', 'seo', 'compatibility', 'website'],
+            enum: ['performance', 'security', 'api', 'stress', 'seo', 'website', 'accessibility'],
             example: 'performance'
           },
           config: {

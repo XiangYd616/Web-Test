@@ -14,12 +14,6 @@ const { asyncHandler } = require('../middleware/errorHandler');
 // 导入Controller
 const testController = require('../controllers/testController');
 
-// 导入历史记录路由
-const historyRoutes = require('./tests/history');
-
-// ==================== 测试历史路由 ====================
-router.use('/history', historyRoutes);
-
 // ==================== 核心测试路由 ====================
 
 /**
@@ -81,10 +75,8 @@ router.get('/:testId/status', authMiddleware, testController.getStatus);
 /**
  * 获取测试结果
  * GET /api/test/:testId/result
- * GET /api/test/:testId/results
  */
 router.get('/:testId/result', authMiddleware, testController.getResult);
-router.get('/:testId/results', authMiddleware, testController.getResult);
 
 /**
  * 停止测试

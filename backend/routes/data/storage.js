@@ -309,7 +309,7 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
     // 验证引擎类型
     const validEngineTypes = [
       'api', 'performance', 'security', 'seo', 'stress',
-      'ux', 'compatibility', 'website'
+      'website', 'accessibility'
     ];
 
     if (!validEngineTypes.includes(engineType)) {
@@ -326,7 +326,7 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
       storage: {
         compress: true,
         encrypt: engineType === 'security',
-        shard: ['performance', 'stress', 'compatibility'].includes(engineType)
+        shard: ['performance', 'stress'].includes(engineType)
       },
       retention: {
         hotData: 7,

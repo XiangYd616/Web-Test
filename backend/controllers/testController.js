@@ -19,7 +19,7 @@ class TestController {
         role: req.user.role || 'free',
       };
 
-      const result = await testBusinessService.createAndStartTest(config, user);
+      const result = await testService.createAndStart(config, user);
       return createdResponse(res, result, '测试创建成功');
     } catch (error) {
       next(error);

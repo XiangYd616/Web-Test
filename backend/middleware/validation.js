@@ -11,24 +11,10 @@ const TEST_TYPES = [
   'security',
   'api',
   'stress',
-  'database',
-  'network',
-  'ux',
   'seo',
-  'compatibility',
-  'website'
+  'website',
+  'accessibility'
 ];
-
-/**
- * 基础URL验证Schema
- */
-const urlSchema = Joi.string()
-  .uri({ scheme: ['http', 'https'] })
-  .required()
-  .messages({
-    'string.uri': '请输入有效的URL地址',
-    'any.required': 'URL地址是必需的'
-  });
 
 /**
  * 验证测试类型

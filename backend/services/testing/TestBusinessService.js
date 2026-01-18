@@ -11,14 +11,7 @@
 
 const { query } = require('../../config/database');
 const UserTestManager = require('./UserTestManager');
-const TestHistoryService = require('./TestHistoryService');
-const {
-  ValidationError,
-  QuotaExceededError,
-  UnauthorizedError,
-  NotFoundError,
-  PermissionError
-} = require('../../utils/errors');
+const { ErrorFactory } = require('../../middleware/errorHandler');
 
 /**
  * 业务规则配置
@@ -61,7 +54,7 @@ const BUSINESS_RULES = {
   },
 
   // 有效的测试类型
-  validTestTypes: ['gradual', 'stress', 'spike', 'load', 'seo', 'performance', 'security', 'api', 'compatibility', 'accessibility'],
+  validTestTypes: ['website', 'performance', 'security', 'seo', 'stress', 'api', 'accessibility'],
 
   // 有效的HTTP方法
   validHttpMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
@@ -97,7 +90,6 @@ const BUSINESS_RULES = {
 class TestBusinessService {
   constructor() {
     this.userTestManager = UserTestManager;
-    this.testHistoryService = new TestHistoryService(require('../../config/database'));
   }
 
   /**
@@ -308,7 +300,7 @@ class TestBusinessService {
   normalizeTestConfig(config) {
     return {
       url: config.url.trim(),
-      testType: config.testType || 'load',
+      testType: config.testType || 'stress',
       concurrent: config.concurrent || BUSINESS_RULES.concurrent.default,
       duration: config.duration || BUSINESS_RULES.duration.default,
       rampUpTime: config.rampUpTime || BUSINESS_RULES.rampUpTime.default,
@@ -336,13 +328,16 @@ class TestBusinessService {
   async createAndStartTest(config, user) {
     // 1. 验证权限
     if (!user || !user.userId) {
-      throw new UnauthorizedError();
+      throw ErrorFactory.unauthorized();
     }
 
     // 2. 完整验证(格式+业务规则)
     const validation = await this.validateTestConfig(config, user);
     if (!validation.isValid) {
-      throw new ValidationError(validation.errors, validation.warnings);
+      throw ErrorFactory.validation('配置验证失败', {
+        errors: validation.errors,
+        warnings: validation.warnings
+      });
     }
 
     // 3. 规范化配置
@@ -433,7 +428,7 @@ class TestBusinessService {
       // 1. 检查权限
       const hasPermission = await this.checkTestPermission(testId, user.userId);
       if (!hasPermission) {
-        throw new PermissionError('start', 'test');
+        throw ErrorFactory.forbidden('无权限执行此操作');
       }
 
       // 2. 获取测试配置
@@ -443,7 +438,7 @@ class TestBusinessService {
       );
 
       if (result.rows.length === 0) {
-        throw new NotFoundError('测试', testId);
+        throw ErrorFactory.notFound('测试不存在');
       }
 
       const testData = result.rows[0];
@@ -458,7 +453,7 @@ class TestBusinessService {
       );
 
       // 4. 创建测试引擎实例
-      const testEngine = this.userTestManager.createUserTest(user.userId, testId);
+      const testEngine = this.userTestManager.createUserTest(user.userId, testId, testData.test_type);
 
       // 5. 异步执行测试(不阻塞响应)
       setImmediate(async () => {

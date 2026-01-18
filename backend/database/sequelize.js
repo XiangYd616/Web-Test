@@ -48,7 +48,7 @@ models.Test = sequelize.define('tests', {
     index: true
   },
   test_type: {
-    type: DataTypes.ENUM('api', 'security', 'stress', 'seo', 'compatibility', 'ux', 'website', 'infrastructure'),
+    type: DataTypes.ENUM('api', 'security', 'stress', 'seo', 'website', 'accessibility'),
     allowNull: false,
     index: true
   },
@@ -140,7 +140,7 @@ models.ConfigTemplate = sequelize.define('config_templates', {
     allowNull: false
   },
   test_type: {
-    type: DataTypes.ENUM('api', 'security', 'stress', 'seo', 'compatibility', 'ux', 'website', 'infrastructure'),
+    type: DataTypes.ENUM('api', 'security', 'stress', 'seo', 'website', 'accessibility'),
     allowNull: false,
     index: true
   },

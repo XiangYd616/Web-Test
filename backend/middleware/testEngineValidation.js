@@ -11,12 +11,9 @@ const TEST_TYPES = [
   'security',
   'api',
   'stress',
-  'database',
-  'network',
-  'ux',
   'seo',
-  'compatibility',
-  'website'
+  'website',
+  'accessibility'
 ];
 
 /**
@@ -129,20 +126,13 @@ const stressConfigSchema = Joi.object({
 }).required();
 
 /**
- * 数据库测试配置验证Schema
+ * 可访问性测试配置验证Schema
  */
-const databaseConfigSchema = Joi.object({
-  connectionString: Joi.string().required().messages({
-    'any.required': '数据库连接字符串是必需的',
-    'string.empty': '数据库连接字符串不能为空'
-  }),
-  testType: Joi.string().valid('connection', 'performance', 'security', 'comprehensive').default('comprehensive'),
-  timeout: Joi.number().integer().min(5000).max(300000).default(30000),
-  maxConnections: Joi.number().integer().min(1).max(100).default(10),
-  queryTimeout: Joi.number().integer().min(1000).max(60000).default(5000),
-  includePerformanceTests: Joi.boolean().default(true),
-  includeSecurityTests: Joi.boolean().default(true),
-  customQueries: Joi.array().items(Joi.string()).default([])
+const accessibilityConfigSchema = Joi.object({
+  url: urlSchema,
+  level: Joi.string().valid('A', 'AA', 'AAA').default('AA'),
+  includeWarnings: Joi.boolean().default(true),
+  timeout: Joi.number().integer().min(5000).max(60000).default(30000)
 }).required();
 
 /**
@@ -153,13 +143,9 @@ const configSchemas = {
   security: securityConfigSchema,
   api: apiConfigSchema,
   stress: stressConfigSchema,
-  database: databaseConfigSchema,
-  // 其他测试类型使用基础Schema
-  network: Joi.object({ url: urlSchema }).required(),
-  ux: Joi.object({ url: urlSchema }).required(),
   seo: Joi.object({ url: urlSchema }).required(),
-  compatibility: Joi.object({ url: urlSchema }).required(),
-  website: Joi.object({ url: urlSchema }).required()
+  website: Joi.object({ url: urlSchema }).required(),
+  accessibility: accessibilityConfigSchema
 };
 
 /**

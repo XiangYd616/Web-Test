@@ -26,28 +26,6 @@ class TestService {
     return this.formatResults(results);
   }
 
-  /**
-   * 获取用户统计
-   */
-  async getUserStats(userId) {
-    const stats = await testRepository.getUserStats(userId);
-    return this.calculateMetrics(stats);
-  }
-
-  /**
-   * 获取测试历史统计
-   */
-  async getHistoryStats(userId, timeRange = 30) {
-    const stats = await testRepository.getHistoryStats(userId, timeRange);
-    const dailyStats = await testRepository.getDailyStats(userId, 7);
-    const typeStats = await testRepository.getTypeStats(userId);
-
-    return {
-      summary: stats,
-      daily: dailyStats,
-      byType: typeStats,
-    };
-  }
 
   /**
    * 更新测试
@@ -113,12 +91,6 @@ class TestService {
     return await testRepository.getRunningTests(userId);
   }
 
-  /**
-   * 获取测试历史
-   */
-  async getHistory(userId, options) {
-    return await testRepository.getHistory(userId, options);
-  }
 
   /**
    * 创建并启动测试 (委托给TestBusinessService)
@@ -171,23 +143,6 @@ class TestService {
     };
   }
 
-  /**
-   * 计算指标
-   */
-  calculateMetrics(stats) {
-    const successRate = stats.total_tests > 0
-      ? (stats.successful_tests / stats.total_tests) * 100
-      : 0;
-
-    return {
-      totalTests: parseInt(stats.total_tests),
-      successfulTests: parseInt(stats.successful_tests),
-      failedTests: parseInt(stats.failed_tests),
-      successRate: successRate.toFixed(2),
-      averageScore: parseFloat(stats.avg_score || 0).toFixed(2),
-      averageDuration: parseFloat(stats.avg_duration || 0).toFixed(2),
-    };
-  }
 
   /**
    * 验证更新数据

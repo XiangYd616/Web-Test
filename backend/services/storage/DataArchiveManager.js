@@ -150,12 +150,11 @@ class DataArchiveManager {
     const archiveStrategies = {
       performance: { days: 30, priority: 'high' },
       stress: { days: 15, priority: 'high' },
-      compatibility: { days: 45, priority: 'medium' },
       security: { days: 90, priority: 'low' },
-      ux: { days: 30, priority: 'medium' },
       website: { days: 45, priority: 'medium' },
       api: { days: 30, priority: 'medium' },
-      seo: { days: 60, priority: 'low' }
+      seo: { days: 60, priority: 'low' },
+      accessibility: { days: 60, priority: 'low' }
     };
 
     for (const [engineType, strategy] of Object.entries(archiveStrategies)) {

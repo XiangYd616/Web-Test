@@ -6,7 +6,7 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { query } = require('../../config/database.js');
-const { ErrorFactory } = require('../../utils/apiError');
+const { ErrorFactory } = require('../../middleware/errorHandler');
 
 class JwtService {
     constructor() {
@@ -383,6 +383,7 @@ class JwtService {
         try {
             return jwt.decode(token);
         } catch (error) {
+            void error;
             return null;
         }
     }
@@ -406,6 +407,7 @@ class JwtService {
 
             return expirationTime <= thresholdTime;
         } catch (error) {
+            void error;
             return true;
         }
     }
@@ -426,6 +428,7 @@ class JwtService {
             const remainingTime = decoded.exp - Math.floor(Date.now() / 1000);
             return Math.max(0, remainingTime);
         } catch (error) {
+            void error;
             return 0;
         }
     }

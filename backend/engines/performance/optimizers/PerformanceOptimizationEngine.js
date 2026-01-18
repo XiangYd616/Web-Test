@@ -1,4 +1,3 @@
-const { handleAsyncError } = require('../utils/errorHandler');
 /**
  * 性能优化建议引擎
  * 本地化程度：100%
@@ -488,7 +487,7 @@ self.addEventListener('fetch', event => {
 
       resources.images.forEach(image => {
         // 检查图片格式
-        if (!image.url.match(//.(webp|avif)$/i)) {
+        if (!image.url.match(/\.(webp|avif)$/i)) {
           analysis.unoptimizedImages++;
           analysis.issues.push({
             type: 'format',
@@ -651,7 +650,7 @@ self.addEventListener('fetch', event => {
     };
 
     // 基于改进百分比估算收益
-    const improvementMatch = recommendation.estimatedImprovement.match(/(/d+)-?(/d+)?%/);
+    const improvementMatch = recommendation.estimatedImprovement.match(/(\d+)-?(\d+)?%/);
     if (improvementMatch) {
       const minImprovement = parseInt(improvementMatch[1]);
       const maxImprovement = parseInt(improvementMatch[2]) || minImprovement;
@@ -710,7 +709,7 @@ self.addEventListener('fetch', event => {
   /**
    * 估算总体影响
    */
-  estimateOverallImpact(recommendations, performanceAnalysis) {
+  estimateOverallImpact(recommendations, _performanceAnalysis) {
     const impact = {
       loadTimeImprovement: 0,
       coreWebVitalsImprovement: {
@@ -725,7 +724,7 @@ self.addEventListener('fetch', event => {
 
     // 累计所有建议的影响
     recommendations.forEach(rec => {
-      const improvementMatch = rec.estimatedImprovement.match(/(/d+)-?(/d+)?%/);
+      const improvementMatch = rec.estimatedImprovement.match(/(\d+)-?(\d+)?%/);
       if (improvementMatch) {
         const avgImprovement = (parseInt(improvementMatch[1]) + (parseInt(improvementMatch[2]) || parseInt(improvementMatch[1]))) / 2;
 
@@ -824,7 +823,7 @@ self.addEventListener('fetch', event => {
   /**
    * 创建监控计划
    */
-  createMonitoringPlan(recommendations) {
+  createMonitoringPlan(_recommendations) {
     return {
       keyMetrics: [
         'First Contentful Paint (FCP)',

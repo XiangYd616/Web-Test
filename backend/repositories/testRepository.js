@@ -143,7 +143,7 @@ class TestRepository {
    */
   async softDelete(testId, userId) {
     const result = await query(
-      'UPDATE test_sessions SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL RETURNING *',
+      "UPDATE test_history SET status = 'deleted', updated_at = NOW() WHERE test_id = $1 AND user_id = $2 RETURNING test_id",
       [testId, userId]
     );
     return result.rowCount > 0;

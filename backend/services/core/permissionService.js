@@ -4,7 +4,7 @@
  */
 
 const { query } = require('../../config/database.js');
-const { ErrorFactory } = require('../../utils/apiError');
+const { ErrorFactory } = require('../../middleware/errorHandler');
 
 /**
  * 预定义的权限常量
@@ -168,6 +168,7 @@ class PermissionService {
                 const customPermissions = customPermissionsResult.rows.map(row => row.permission);
                 permissions = [...new Set([...permissions, ...customPermissions])];
             } catch (error) {
+                void error;
                 // 如果没有自定义权限表，忽略错误
                 console.warn('自定义权限表不存在，使用基于角色的权限');
             }

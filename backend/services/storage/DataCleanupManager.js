@@ -5,6 +5,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+void path;
 const cron = require('node-cron');
 
 class DataCleanupManager {
@@ -54,13 +55,6 @@ class DataCleanupManager {
         maxRecords: 5000,
         priority: 'high'
       },
-      compatibility: {
-        hotData: 14,
-        warmData: 45,
-        coldData: 120,
-        maxRecords: 8000,
-        priority: 'medium'
-      },
       
       // 重要数据 - 较长保留期
       security: {
@@ -72,13 +66,6 @@ class DataCleanupManager {
       },
       
       // 中等频率数据
-      ux: {
-        hotData: 14,
-        warmData: 30,
-        coldData: 90,
-        maxRecords: 8000,
-        priority: 'medium'
-      },
       website: {
         hotData: 14,
         warmData: 45,
@@ -94,6 +81,13 @@ class DataCleanupManager {
         priority: 'medium'
       },
       seo: {
+        hotData: 30,
+        warmData: 60,
+        coldData: 180,
+        maxRecords: 12000,
+        priority: 'low'
+      },
+      accessibility: {
         hotData: 30,
         warmData: 60,
         coldData: 180,
@@ -250,6 +244,7 @@ class DataCleanupManager {
   async getExpiredData(engineType, policy) {
     const now = new Date();
     const coldDataCutoff = new Date(now.getTime() - policy.coldData * 24 * 60 * 60 * 1000);
+    void coldDataCutoff;
 
     // 这里应该查询数据库获取过期数据
     // 简化实现，实际应该连接数据库
@@ -272,6 +267,8 @@ class DataCleanupManager {
    * 获取超量数据
    */
   async getExcessData(engineType, policy) {
+    void engineType;
+    void policy;
     // 查询超过最大记录数的数据
 
     // 实际实现应该是：
@@ -292,6 +289,7 @@ class DataCleanupManager {
    * 获取损坏的数据
    */
   async getCorruptedData(engineType) {
+    void engineType;
     // 查询损坏或无效的数据
 
     // 实际实现应该是：
@@ -405,6 +403,7 @@ class DataCleanupManager {
    * 删除测试记录
    */
   async deleteTestRecord(testId) {
+    void testId;
     // 实际实现应该是：
     // await db.query('DELETE FROM test_results WHERE session_id = ?', [testId]);
     // await db.query('DELETE FROM test_sessions WHERE id = ?', [testId]);
@@ -426,6 +425,7 @@ class DataCleanupManager {
       try {
         await fs.rmdir(filePath, { recursive: true });
       } catch (error) {
+        void error;
         // 文件可能不存在，忽略错误
       }
     }

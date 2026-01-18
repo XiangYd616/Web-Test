@@ -3,8 +3,8 @@
  * 使用共享服务，避免代码重复
  */
 
-import PerformanceMetricsService from '../shared/services/PerformanceMetricsService.js';
-import HTMLParsingService from '../shared/services/HTMLParsingService.js';
+const PerformanceMetricsService = require('../shared/services/PerformanceMetricsService');
+const HTMLParsingService = require('../shared/services/HTMLParsingService');
 
 class PerformanceTestEngine {
   constructor() {
@@ -78,6 +78,7 @@ class PerformanceTestEngine {
       } = config;
       
       if (verbose) {
+        console.debug(`[PerformanceTestEngine] 测试中: ${url}`);
       }
       
       // 收集性能指标
@@ -318,6 +319,7 @@ class PerformanceTestEngine {
    * 分析内容
    */
   analyzeContent($, url) {
+    void url;
     try {
       const title = $('title').text().trim();
       const metaDescription = $('meta[name="description"]').attr('content') || '';
@@ -449,4 +451,4 @@ class PerformanceTestEngine {
   }
 }
 
-export default PerformanceTestEngine;
+module.exports = PerformanceTestEngine;

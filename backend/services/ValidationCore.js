@@ -52,9 +52,8 @@ class ValidationCore {
 
     // 测试类型验证Schema
     this.schemas.set('testType', Joi.string().valid(
-      'performance', 'security', 'api', 'stress', 
-      'database', 'network', 'ux', 'seo', 
-      'compatibility', 'website'
+      'performance', 'security', 'api', 'stress',
+      'seo', 'website', 'accessibility'
     ).required().messages({
       'any.only': '不支持的测试类型',
       'any.required': '测试类型是必需的'
@@ -220,46 +219,6 @@ class ValidationCore {
   }
 
   /**
-   * 验证数据库测试配置
-   */
-  validateDatabaseConfig(config) {
-    const databaseSchema = Joi.object({
-      connectionString: Joi.string().required(),
-      testType: Joi.string().valid('basic', 'performance', 'comprehensive').default('basic'),
-      timeout: this.schemas.get('timeout'),
-      maxConnections: Joi.number().integer().min(1).max(100).default(10),
-      includePerformanceTests: Joi.boolean().default(true),
-      includeSecurityTests: Joi.boolean().default(true)
-    });
-
-    return databaseSchema.validate(config, {
-      abortEarly: false,
-      stripUnknown: true,
-      convert: true
-    });
-  }
-
-  /**
-   * 验证网络测试配置
-   */
-  validateNetworkConfig(config) {
-    const networkSchema = Joi.object({
-      url: this.schemas.get('url'),
-      testType: Joi.string().valid('basic', 'comprehensive').default('basic'),
-      timeout: this.schemas.get('timeout'),
-      checkDNS: Joi.boolean().default(true),
-      checkCDN: Joi.boolean().default(true),
-      checkLatency: Joi.boolean().default(true)
-    });
-
-    return networkSchema.validate(config, {
-      abortEarly: false,
-      stripUnknown: true,
-      convert: true
-    });
-  }
-
-  /**
    * 根据测试类型验证配置
    */
   validateConfigByType(testType, config) {
@@ -272,10 +231,8 @@ class ValidationCore {
         return this.validateApiConfig(config);
       case 'stress':
         return this.validateStressConfig(config);
-      case 'database':
-        return this.validateDatabaseConfig(config);
-      case 'network':
-        return this.validateNetworkConfig(config);
+      case 'accessibility':
+        return this.validateBaseConfig(config);
       default:
         return this.validateBaseConfig(config);
     }
@@ -384,40 +341,22 @@ class ValidationCore {
         core: 'stress'
       },
       {
-        id: 'database',
-        name: '数据库测试',
-        description: '数据库连接和性能测试',
-        core: 'database'
-      },
-      {
-        id: 'network',
-        name: '网络测试',
-        description: '网络连通性和延迟测试',
-        core: 'network'
-      },
-      {
-        id: 'ux',
-        name: '用户体验测试',
-        description: '用户体验分析',
-        core: 'ux'
-      },
-      {
         id: 'seo',
         name: 'SEO测试',
         description: '搜索引擎优化检查',
         core: 'seo'
       },
       {
-        id: 'compatibility',
-        name: '兼容性测试',
-        description: '浏览器兼容性测试',
-        core: 'compatibility'
-      },
-      {
         id: 'website',
         name: '网站测试',
         description: '综合网站测试',
         core: 'website'
+      },
+      {
+        id: 'accessibility',
+        name: '可访问性测试',
+        description: 'WCAG可访问性检查',
+        core: 'accessibility'
       }
     ];
   }

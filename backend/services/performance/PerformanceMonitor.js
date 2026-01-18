@@ -5,7 +5,7 @@
 
 const os = require('os');
 const { performance } = require('perf_hooks');
-const { logger } = require('../../utils/errorHandler');
+const Logger = require('../../utils/logger');
 
 /**
  * 性能指标收集器
@@ -105,7 +105,7 @@ class PerformanceCollector {
     
     // 记录慢请求
     if (responseTime > 1000) { // 超过1秒的请求
-      logger.logWarn('Slow API request detected', {
+      Logger.warn('Slow API request detected', {
         path: request.path,
         method: request.method,
         responseTime: Math.round(responseTime),
@@ -251,7 +251,7 @@ class PerformanceCollector {
     this.errorCount = 0;
     this.startTime = Date.now();
     
-    logger.logInfo('Performance metrics reset');
+    Logger.info('Performance metrics reset');
   }
 
   /**
