@@ -21,6 +21,7 @@
   "exclude": [
     "node_modules",
     "dist",
+    "server.js",
     "**/*.test.js",
     "**/*.spec.js",
     "**/__tests__/**"

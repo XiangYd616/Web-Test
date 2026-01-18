@@ -2,25 +2,30 @@
  * 日志中间件
  */
 
+import type { NextFunction, Request, Response } from 'express';
+
 const fs = require('fs');
 const path = require('path');
+
+type RequestWithUser = Request & { user?: { id?: string } };
+type RequestWithStats = Request & { stats?: Record<string, unknown> };
 
 /**
  * 请求日志中间件
  */
-const requestLogger = (req, res, next) => {
+const requestLogger = (req: RequestWithUser, res: Response, next: NextFunction) => {
   const start = Date.now();
   const timestamp = new Date().toISOString();
 
   // 记录请求开始
-  const logEntry = {
+  const logEntry: Record<string, unknown> = {
     timestamp,
     method: req.method,
     url: req.originalUrl,
     ip: req.ip || req.connection.remoteAddress,
     userAgent: req.get('User-Agent'),
     user: req.user ? req.user.id : 'anonymous',
-    body: req.method === 'POST' || req.method === 'PUT' ? sanitizeBody(req.body) : undefined
+    body: req.method === 'POST' || req.method === 'PUT' ? sanitizeBody(req.body) : undefined,
   };
 
   // 监听响应结束
@@ -48,10 +53,10 @@ const requestLogger = (req, res, next) => {
 /**
  * 清理敏感信息
  */
-const sanitizeBody = (body) => {
+const sanitizeBody = (body: Record<string, unknown> | null) => {
   if (!body || typeof body !== 'object') return body;
 
-  const sanitized = { ...body };
+  const sanitized: Record<string, unknown> = { ...body };
   const sensitiveFields = ['password', 'token', 'secret', 'key', 'auth'];
 
   sensitiveFields.forEach(field => {
@@ -66,7 +71,7 @@ const sanitizeBody = (body) => {
 /**
  * 获取状态码颜色
  */
-const getStatusColor = (statusCode) => {
+const getStatusColor = (statusCode: number) => {
   if (statusCode >= 500) return '\x1b[31m'; // 红色
   if (statusCode >= 400) return '\x1b[33m'; // 黄色
   if (statusCode >= 300) return '\x1b[36m'; // 青色
@@ -77,11 +82,11 @@ const getStatusColor = (statusCode) => {
 /**
  * 写入日志文件
  */
-const writeLog = (logEntry) => {
+const writeLog = (logEntry: Record<string, unknown>) => {
   const logPath = path.join(__dirname, '..', 'logs', 'combined.log');
   const logString = JSON.stringify(logEntry) + '\n';
 
-  fs.appendFile(logPath, logString, (err) => {
+  fs.appendFile(logPath, logString, (err: Error) => {
     if (err) {
       console.error('写入日志失败:', err);
     }
@@ -91,21 +96,21 @@ const writeLog = (logEntry) => {
 /**
  * 安全日志记录器
  */
-const securityLogger = (event, details, req) => {
+const securityLogger = (event: string, details: Record<string, unknown>, req?: RequestWithUser) => {
   const timestamp = new Date().toISOString();
   const logEntry = {
     timestamp,
     event,
     details,
-    ip: req ? (req.ip || req.connection.remoteAddress) : 'system',
+    ip: req ? req.ip || req.connection.remoteAddress : 'system',
     userAgent: req ? req.get('User-Agent') : 'system',
-    user: req && req.user ? req.user.id : 'anonymous'
+    user: req && req.user ? req.user.id : 'anonymous',
   };
 
   const logPath = path.join(__dirname, '..', 'logs', 'security.log');
   const logString = JSON.stringify(logEntry) + '\n';
 
-  fs.appendFile(logPath, logString, (err) => {
+  fs.appendFile(logPath, logString, (err: Error) => {
     if (err) {
       console.error('写入安全日志失败:', err);
     }
@@ -117,19 +122,19 @@ const securityLogger = (event, details, req) => {
 /**
  * 数据库日志记录器
  */
-const dbLogger = (query, duration, error = null) => {
+const dbLogger = (query: string, duration: number, error: Error | null = null) => {
   const timestamp = new Date().toISOString();
   const logEntry = {
     timestamp,
     query: query.substring(0, 500), // 限制查询长度
     duration,
-    error: error ? error.message : null
+    error: error ? error.message : null,
   };
 
   const logPath = path.join(__dirname, '..', 'logs', 'database.log');
   const logString = JSON.stringify(logEntry) + '\n';
 
-  fs.appendFile(logPath, logString, (err) => {
+  fs.appendFile(logPath, logString, (err: Error) => {
     if (err) {
       console.error('写入数据库日志失败:', err);
     }
@@ -139,7 +144,7 @@ const dbLogger = (query, duration, error = null) => {
 /**
  * 性能监控中间件
  */
-const performanceMonitor = (req, res, next) => {
+const performanceMonitor = (req: Request, res: Response, next: NextFunction) => {
   const start = process.hrtime.bigint();
 
   res.on('finish', () => {
@@ -147,9 +152,10 @@ const performanceMonitor = (req, res, next) => {
     const duration = Number(end - start) / 1000000; // 转换为毫秒
 
     // 记录慢请求
-    if (duration > 1000) { // 超过1秒的请求
+    if (duration > 1000) {
+      // 超过1秒的请求
       console.warn(`[SLOW REQUEST] ${req.method} ${req.originalUrl} - ${duration.toFixed(2)}ms`);
-      
+
       const logEntry = {
         timestamp: new Date().toISOString(),
         type: 'slow_request',
@@ -157,7 +163,7 @@ const performanceMonitor = (req, res, next) => {
         url: req.originalUrl,
         duration: duration.toFixed(2),
         ip: req.ip,
-        user: req.user ? req.user.id : 'anonymous'
+        user: (req as RequestWithUser).user ? (req as RequestWithUser).user?.id : 'anonymous',
       };
 
       const logPath = path.join(__dirname, '..', 'logs', 'performance.log');
@@ -172,31 +178,30 @@ const performanceMonitor = (req, res, next) => {
  * API使用统计
  */
 const apiStats = (() => {
-  const stats = new Map();
+  const stats = new Map<string, { count: number; totalTime: number; errors: number }>();
 
-  return (req, res, next) => {
+  return (req: RequestWithStats, res: Response, next: NextFunction) => {
     const endpoint = `${req.method} ${req.route ? req.route.path : req.path}`;
-    
+
     if (!stats.has(endpoint)) {
       stats.set(endpoint, { count: 0, totalTime: 0, errors: 0 });
     }
 
     const start = Date.now();
     const endpointStats = stats.get(endpoint);
+    if (!endpointStats) {
+      return next();
+    }
     endpointStats.count++;
 
     res.on('finish', () => {
       const duration = Date.now() - start;
       endpointStats.totalTime += duration;
-      
+
       if (res.statusCode >= 400) {
         endpointStats.errors++;
       }
     });
-
-    // 定期输出统计信息
-    if (endpointStats.count % 100 === 0) {
-    }
 
     next();
   };
@@ -207,5 +212,7 @@ module.exports = {
   securityLogger,
   dbLogger,
   performanceMonitor,
-  apiStats
+  apiStats,
 };
+
+export {};

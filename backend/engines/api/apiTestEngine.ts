@@ -9,6 +9,48 @@ const Logger = require('../../utils/logger');
 
 type TestProgress = Record<string, unknown> & { testId?: string };
 
+type ApiResponse = {
+  statusCode?: number;
+  statusMessage?: string;
+  headers: Record<string, string | undefined>;
+  body: string;
+};
+
+type ApiAnalysis = {
+  status: {
+    code: number | undefined;
+    message: string | undefined;
+    category: string;
+  };
+  headers: {
+    contentType: string;
+    contentLength: number;
+    server: string;
+    caching: {
+      cacheControl?: unknown;
+      expires?: unknown;
+      etag?: unknown;
+    };
+    security: {
+      hasHttps: boolean;
+      hasCORS: boolean;
+      hasSecurityHeaders: Record<string, boolean>;
+    };
+    compression?: unknown;
+  };
+  body: {
+    size: number;
+    type: string;
+    valid: boolean;
+    structure: unknown;
+    error?: string;
+  };
+  performance: {
+    responseTime: number;
+    category: string;
+  };
+};
+
 class ApiTestEngine {
   name: string;
   version: string;
@@ -299,6 +341,8 @@ class ApiTestEngine {
         await this._checkAlerts(testId, url, response, responseTime, validationResults);
       }
 
+      const statusCode = Number(response.statusCode || 0);
+      const bodyText = response.body || '';
       return {
         url,
         method,
@@ -307,11 +351,11 @@ class ApiTestEngine {
         validations: validationResults,
         ...analysis,
         summary: {
-          success: response.statusCode >= 200 && response.statusCode < 400,
-          statusCode: response.statusCode,
+          success: statusCode >= 200 && statusCode < 400,
+          statusCode,
           responseTime: `${responseTime}ms`,
           contentType: response.headers['content-type'] || 'unknown',
-          contentLength: response.headers['content-length'] || response.body.length,
+          contentLength: response.headers['content-length'] || bodyText.length,
         },
         recommendations: this.generateRecommendations(analysis, responseTime),
       };
@@ -337,7 +381,7 @@ class ApiTestEngine {
   }
 
   _runAssertions(
-    response: Record<string, unknown>,
+    response: ApiResponse,
     responseTime: number,
     assertions: Array<Record<string, unknown>>
   ) {
@@ -410,7 +454,7 @@ class ApiTestEngine {
   async _checkAlerts(
     testId: string,
     url: string,
-    response: Record<string, unknown>,
+    response: ApiResponse,
     responseTime: number,
     validationResults: Record<string, unknown>
   ) {
@@ -422,15 +466,12 @@ class ApiTestEngine {
         threshold: 3000,
       });
 
-      if (
-        (response as { statusCode?: number }).statusCode &&
-        (response as { statusCode?: number }).statusCode >= 500
-      ) {
+      if (response.statusCode && response.statusCode >= 500) {
         await this.alertManager?.checkAlert?.('API_ERROR', {
           testId,
           url,
-          statusCode: (response as { statusCode?: number }).statusCode,
-          message: `API返回服务器错误: ${(response as { statusCode?: number }).statusCode}`,
+          statusCode: response.statusCode,
+          message: `API返回服务器错误: ${response.statusCode}`,
         });
       }
 
@@ -456,20 +497,38 @@ class ApiTestEngine {
 
     for (let i = 0; i < endpoints.length; i++) {
       const endpoint = endpoints[i];
+      const endpointUrl = typeof endpoint.url === 'string' ? endpoint.url : '';
 
       if (testId) {
         emitTestProgress(testId, {
           stage: 'running',
           progress: Math.round(30 + (i / endpoints.length) * 60),
-          message: `测试端点 ${i + 1}/${endpoints.length}: ${endpoint.url}`,
+          message: `测试端点 ${i + 1}/${endpoints.length}: ${endpointUrl || 'unknown'}`,
         });
       }
 
-      const result = await this.testSingleEndpoint({
-        ...(endpoint as Record<string, unknown>),
-        testId: null,
-      });
-      results.push(result);
+      if (!endpointUrl) {
+        results.push({
+          url: 'unknown',
+          method: endpoint.method || 'GET',
+          timestamp: new Date().toISOString(),
+          responseTime: 0,
+          error: '端点缺少url',
+          success: false,
+          summary: {
+            success: false,
+            error: '端点缺少url',
+            responseTime: '0ms',
+          },
+        });
+      } else {
+        const result = await this.testSingleEndpoint({
+          ...(endpoint as Record<string, unknown>),
+          url: endpointUrl,
+          testId: null,
+        });
+        results.push(result);
+      }
     }
 
     const endTime = performance.now();
@@ -492,23 +551,26 @@ class ApiTestEngine {
     options: Record<string, unknown>,
     body: unknown = null
   ) {
-    return new Promise<Record<string, unknown>>((resolve, reject) => {
-      const req = client.request(options, (res: Record<string, unknown>) => {
-        let data = '';
+    return new Promise<ApiResponse>((resolve, reject) => {
+      const req = (client as typeof http).request(
+        options as Record<string, unknown>,
+        (res: import('http').IncomingMessage) => {
+          let data = '';
 
-        res.on('data', (chunk: string) => {
-          data += chunk;
-        });
-
-        res.on('end', () => {
-          resolve({
-            statusCode: res.statusCode,
-            statusMessage: res.statusMessage,
-            headers: res.headers,
-            body: data,
+          res.on('data', chunk => {
+            data += chunk;
           });
-        });
-      });
+
+          res.on('end', () => {
+            resolve({
+              statusCode: res.statusCode,
+              statusMessage: res.statusMessage,
+              headers: res.headers as Record<string, string | undefined>,
+              body: data,
+            });
+          });
+        }
+      );
 
       req.on('error', (error: Error) => {
         reject(error);
@@ -528,18 +590,42 @@ class ApiTestEngine {
     });
   }
 
-  analyzeResponse(response: Record<string, unknown>, responseTime: number) {
+  analyzeHeaders(headers: Record<string, string | undefined>) {
+    const security = {
+      hasHttps: false,
+      hasCORS: !!headers['access-control-allow-origin'],
+      hasSecurityHeaders: {
+        'x-frame-options': !!headers['x-frame-options'],
+        'x-content-type-options': !!headers['x-content-type-options'],
+        'x-xss-protection': !!headers['x-xss-protection'],
+        'strict-transport-security': !!headers['strict-transport-security'],
+      },
+    };
+
+    return {
+      contentType: headers['content-type'] || 'unknown',
+      contentLength: parseInt(headers['content-length'] || '0', 10) || 0,
+      server: headers['server'] || 'unknown',
+      caching: {
+        cacheControl: headers['cache-control'],
+        expires: headers['expires'],
+        etag: headers['etag'],
+      },
+      security,
+      compression: headers['content-encoding'],
+    };
+  }
+
+  analyzeResponse(response: ApiResponse, responseTime: number): ApiAnalysis {
+    const statusCode = Number(response.statusCode || 0);
     return {
       status: {
-        code: response.statusCode,
+        code: statusCode,
         message: response.statusMessage,
-        category: this.getStatusCategory(response.statusCode as number),
+        category: this.getStatusCategory(statusCode),
       },
-      headers: this.analyzeHeaders(response.headers as Record<string, unknown>),
-      body: this.analyzeBody(
-        response.body as string,
-        (response.headers as Record<string, string>)['content-type']
-      ),
+      headers: this.analyzeHeaders(response.headers),
+      body: this.analyzeBody(response.body, response.headers['content-type'] || ''),
       performance: {
         responseTime,
         category: this.getPerformanceCategory(responseTime),
@@ -555,34 +641,8 @@ class ApiTestEngine {
     return 'unknown';
   }
 
-  analyzeHeaders(headers: Record<string, unknown>) {
-    const security = {
-      hasHttps: false,
-      hasCORS: !!headers['access-control-allow-origin'],
-      hasSecurityHeaders: {
-        'x-frame-options': !!headers['x-frame-options'],
-        'x-content-type-options': !!headers['x-content-type-options'],
-        'x-xss-protection': !!headers['x-xss-protection'],
-        'strict-transport-security': !!headers['strict-transport-security'],
-      },
-    };
-
-    return {
-      contentType: (headers['content-type'] as string) || 'unknown',
-      contentLength: parseInt(headers['content-length'] as string) || 0,
-      server: (headers['server'] as string) || 'unknown',
-      caching: {
-        cacheControl: headers['cache-control'],
-        expires: headers['expires'],
-        etag: headers['etag'],
-      },
-      security,
-      compression: headers['content-encoding'],
-    };
-  }
-
-  analyzeBody(body: string, contentType = '') {
-    const analysis: Record<string, unknown> = {
+  analyzeBody(body: string, contentType = ''): ApiAnalysis['body'] {
+    const analysis: ApiAnalysis['body'] = {
       size: Buffer.byteLength(body, 'utf8'),
       type: 'text',
       valid: true,
@@ -637,7 +697,7 @@ class ApiTestEngine {
     return 'very_slow';
   }
 
-  generateRecommendations(analysis: Record<string, any>, responseTime: number) {
+  generateRecommendations(analysis: ApiAnalysis, responseTime: number) {
     const recommendations: string[] = [];
 
     if (responseTime > 1000) {

@@ -539,4 +539,10 @@ export class TestEngineRegistry {
 }
 
 // 导出单例实例
-export default TestEngineRegistry.getInstance();
+const registryInstance = TestEngineRegistry.getInstance();
+
+module.exports = registryInstance;
+module.exports.TestEngineRegistry = TestEngineRegistry;
+
+export default registryInstance;
+export {};

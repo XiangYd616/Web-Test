@@ -53,41 +53,47 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
 
 // 基础中间件配置
-app.use(helmet({
-  contentSecurityPolicy: NODE_ENV === 'production' ? undefined : false,
-  crossOriginEmbedderPolicy: false
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: NODE_ENV === 'production' ? undefined : false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
 app.use(compression());
 
 // CORS配置
-app.use(cors({
-  origin (origin, callback) {
-    // 在开发环境允许所有源，生产环境使用配置的源
-    if (NODE_ENV === 'development') {
-      callback(null, true);
-    } else {
-      const allowedOrigins = CORS_ORIGIN.split(',');
-      if (!origin || allowedOrigins.includes(origin)) {
+app.use(
+  cors({
+    origin(origin, callback) {
+      // 在开发环境允许所有源，生产环境使用配置的源
+      if (NODE_ENV === 'development') {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        const allowedOrigins = CORS_ORIGIN.split(',');
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
       }
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  })
+);
 
 // 日志中间件
 if (NODE_ENV === 'development') {
   app.use(morgan('dev'));
 } else {
   // 生产环境使用更详细的日志格式
-  app.use(morgan('combined', {
-    stream: fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' })
-  }));
+  app.use(
+    morgan('combined', {
+      stream: fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' }),
+    })
+  );
 }
 
 // 请求解析中间件
@@ -100,7 +106,7 @@ const limiter = rateLimit({
   max: NODE_ENV === 'development' ? 1000 : 200, // 开发环境允许更多请求
   message: {
     error: 'Too many requests from this IP',
-    retryAfter: '15 minutes'
+    retryAfter: '15 minutes',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -123,7 +129,7 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: NODE_ENV,
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
   });
 });
 
@@ -140,7 +146,7 @@ app.get('/api/info', (req, res) => {
       users: '/api/users',
       security: '/api/security',
       performance: '/api/performance',
-      
+
       comparison: '/api/comparison',
       analytics: '/api/analytics',
       integrations: '/api/integrations',
@@ -148,10 +154,10 @@ app.get('/api/info', (req, res) => {
       core: '/api/core',
       system: '/api/system',
       data: '/api/data',
-      admin: '/api/admin'
+      admin: '/api/admin',
     },
     environment: NODE_ENV,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -181,7 +187,7 @@ if (NODE_ENV === 'production') {
   const frontendBuildPath = path.join(__dirname, '../frontend/build');
   if (fs.existsSync(frontendBuildPath)) {
     app.use(express.static(frontendBuildPath));
-    
+
     // SPA路由支持
     app.get('*', (req, res) => {
       res.sendFile(path.join(frontendBuildPath, 'index.html'));
@@ -197,19 +203,21 @@ app.use(errorMiddleware);
 
 // 优雅关闭处理
 const gracefulShutdown = () => {
-  
   server.close(() => {
     console.log('✅ HTTP server closed');
-    
+
     // 关闭数据库连接
     if (require('./database/sequelize').sequelize) {
-      require('./database/sequelize').sequelize.close().then(() => {
-        console.log('✅ Database connection closed');
-        process.exit(0);
-      }).catch(err => {
-        console.error('❌ Error during database shutdown:', err);
-        process.exit(1);
-      });
+      require('./database/sequelize')
+        .sequelize.close()
+        .then(() => {
+          console.log('✅ Database connection closed');
+          process.exit(0);
+        })
+        .catch(err => {
+          console.error('❌ Error during database shutdown:', err);
+          process.exit(1);
+        });
     } else {
       process.exit(0);
     }
@@ -227,16 +235,16 @@ process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
 // 处理未捕获的异常 - 使用统一错误处理系统
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   handleError(error, { type: 'uncaughtException', severity: 'CRITICAL' });
   gracefulShutdown();
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  handleError(new Error(`Unhandled Rejection: ${reason}`), { 
-    type: 'unhandledRejection', 
+  handleError(new Error(`Unhandled Rejection: ${reason}`), {
+    type: 'unhandledRejection',
     severity: 'HIGH',
-    promise 
+    promise,
   });
   gracefulShutdown();
 });
@@ -245,16 +253,16 @@ process.on('unhandledRejection', (reason, promise) => {
 const startServer = async () => {
   try {
     console.log('🚀 Starting Test-Web Platform Backend...');
-    
+
     // 确保日志目录存在
     const logsDir = path.join(__dirname, 'logs');
     if (!fs.existsSync(logsDir)) {
       fs.mkdirSync(logsDir, { recursive: true });
     }
-    
+
     // 连接数据库
     const dbConnected = await connectDatabase();
-    
+
     if (dbConnected) {
       // 同步数据库表结构（仅在开发环境）
       if (NODE_ENV === 'development') {
@@ -269,17 +277,14 @@ const startServer = async () => {
     } else {
       console.warn('⚠️  Database connection failed, but server will continue...');
     }
-    
-    
 
     // 启动HTTP服务器
     const server = app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
-      
+
       if (NODE_ENV === 'development') {
         console.log('🔧 Development mode - CORS enabled for all origins');
       }
-      
     });
 
     // 设置服务器超时
@@ -288,7 +293,6 @@ const startServer = async () => {
     server.headersTimeout = 66000; // 请求头超时
 
     return server;
-    
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);
@@ -300,7 +304,9 @@ let server;
 
 if (require.main === module) {
   // 直接运行时启动服务器
-  startServer().then(s => { server = s; });
+  startServer().then(s => {
+    server = s;
+  });
 } else {
   // 被require时导出启动函数
   module.exports = { app, startServer };
