@@ -4,39 +4,89 @@
  * 版本: v2.0.0
  */
 
-const crypto = require('crypto');
-const { getPool } = require('../../config/database.js');
-const Logger = require('../../utils/logger.js');
+import crypto from 'crypto';
+import { getPool } from '../../config/database';
+import Logger from '../../utils/logger';
+
+type DbRow = Record<string, unknown>;
+
+type DbQueryResult<T extends DbRow = DbRow> = {
+  rows: T[];
+};
+
+type DbPool = {
+  query: <T extends DbRow = DbRow>(text: string, params?: unknown[]) => Promise<DbQueryResult<T>>;
+};
+
+interface DeviceInfo {
+  deviceName?: string;
+  deviceType?: string;
+  userAgent?: string;
+  platform?: string;
+  fingerprint?: string;
+  language?: string;
+}
+
+interface SessionLocation {
+  country: string;
+  region: string;
+  city: string;
+  timezone: string;
+}
+
+interface SessionRow extends DbRow {
+  id: string;
+  device_id: string;
+  device_name?: string;
+  device_type?: string;
+  ip_address?: string;
+  location?: string;
+  created_at: Date;
+  last_activity_at: Date;
+  expires_at: Date;
+  is_current?: boolean;
+}
+
+interface SessionConfig {
+  maxConcurrentSessions: number;
+  sessionTimeout: number;
+  cleanupInterval: number;
+  enableDeviceTracking: boolean;
+  enableLocationTracking: boolean;
+}
 
 // ==================== 配置 ====================
 
-const SESSION_CONFIG = {
-  maxConcurrentSessions: parseInt(process.env.MAX_CONCURRENT_SESSIONS) || 5,
-  sessionTimeout: parseInt(process.env.SESSION_TIMEOUT) || 3600, // 1小时
-  cleanupInterval: parseInt(process.env.SESSION_CLEANUP_INTERVAL) || 300, // 5分钟
+const SESSION_CONFIG: SessionConfig = {
+  maxConcurrentSessions: Number.parseInt(process.env.MAX_CONCURRENT_SESSIONS || '5', 10) || 5,
+  sessionTimeout: Number.parseInt(process.env.SESSION_TIMEOUT || '3600', 10) || 3600, // 1小时
+  cleanupInterval: Number.parseInt(process.env.SESSION_CLEANUP_INTERVAL || '300', 10) || 300, // 5分钟
   enableDeviceTracking: process.env.ENABLE_DEVICE_TRACKING !== 'false',
-  enableLocationTracking: process.env.ENABLE_LOCATION_TRACKING === 'true'
+  enableLocationTracking: process.env.ENABLE_LOCATION_TRACKING === 'true',
 };
 
-
 /**
-
  * SessionManager类 - 负责处理相关功能
-
  */
 // ==================== 会话管理器 ====================
 
 class SessionManager {
+  private cleanupTimer: NodeJS.Timeout | null = null;
+
   constructor() {
-    this.cleanupTimer = null;
     this.startCleanupTimer();
   }
 
   /**
    * 创建新会话
    */
-  async createSession(userId, deviceInfo, ipAddress, userAgent) {
-    const pool = getPool();
+  async createSession(
+    userId: string,
+    deviceInfo: DeviceInfo,
+    ipAddress: string,
+    userAgent: string
+  ) {
+    const pool = getPool() as DbPool;
 
     try {
       // 生成会话ID
@@ -46,7 +96,7 @@ class SessionManager {
       const deviceId = this.generateDeviceId(deviceInfo);
 
       // 获取位置信息（如果启用）
-      let location = null;
+      let location: SessionLocation | null = null;
       if (SESSION_CONFIG.enableLocationTracking) {
         location = await this.getLocationFromIP(ipAddress);
       }
@@ -55,24 +105,27 @@ class SessionManager {
       await this.enforceSessionLimit(userId);
 
       // 创建会话记录
-      const result = await pool.query(`
+      const result = await pool.query<SessionRow>(
+        `
         INSERT INTO user_sessions (
-          id, user_id, device_id, device_name, device_type, 
-          ip_address, user_agent, location, created_at, 
+          id, user_id, device_id, device_name, device_type,
+          ip_address, user_agent, location, created_at,
           last_activity_at, expires_at, is_active
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW(), 
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW(),
                   NOW() + INTERVAL '${SESSION_CONFIG.sessionTimeout} seconds', true)
         RETURNING *
-      `, [
-        sessionId,
-        userId,
-        deviceId,
-        deviceInfo.deviceName || this.parseDeviceName(userAgent),
-        deviceInfo.deviceType || this.parseDeviceType(userAgent),
-        ipAddress,
-        userAgent,
-        location ? JSON.stringify(location) : null
-      ]);
+      `,
+        [
+          sessionId,
+          userId,
+          deviceId,
+          deviceInfo.deviceName || this.parseDeviceName(userAgent),
+          deviceInfo.deviceType || this.parseDeviceType(userAgent),
+          ipAddress,
+          userAgent,
+          location ? JSON.stringify(location) : null,
+        ]
+      );
 
       const session = result.rows[0];
 
@@ -80,7 +133,7 @@ class SessionManager {
         sessionId,
         userId,
         deviceId,
-        ipAddress
+        ipAddress,
       });
 
       return {
@@ -88,10 +141,10 @@ class SessionManager {
         deviceId,
         expiresAt: session.expires_at,
         deviceName: session.device_name,
-        location: session.location ? JSON.parse(session.location) : null
+        location: session.location ? (JSON.parse(session.location) as SessionLocation) : null,
       };
     } catch (error) {
-      Logger.error('Failed to create session', error, { userId, ipAddress });
+      Logger.error('Failed to create session', error as Error, { userId, ipAddress });
       throw error;
     }
   }
@@ -99,20 +152,23 @@ class SessionManager {
   /**
    * 验证会话
    */
-  async validateSession(sessionId, userId) {
-    const pool = getPool();
+  async validateSession(sessionId: string, userId: string) {
+    const pool = getPool() as DbPool;
 
     try {
-      const result = await pool.query(`
-        SELECT * FROM user_sessions 
-        WHERE id = $1 AND user_id = $2 AND is_active = true 
+      const result = await pool.query<SessionRow>(
+        `
+        SELECT * FROM user_sessions
+        WHERE id = $1 AND user_id = $2 AND is_active = true
         AND expires_at > NOW()
-      `, [sessionId, userId]);
+      `,
+        [sessionId, userId]
+      );
 
       if (result.rows.length === 0) {
-
         return {
-          valid: false, reason: 'SESSION_NOT_FOUND'
+          valid: false,
+          reason: 'SESSION_NOT_FOUND' as const,
         };
       }
 
@@ -129,49 +185,55 @@ class SessionManager {
           deviceName: session.device_name,
           ipAddress: session.ip_address,
           lastActivityAt: session.last_activity_at,
-          expiresAt: session.expires_at
-        }
+          expiresAt: session.expires_at,
+        },
       };
     } catch (error) {
-      Logger.error('Failed to validate session', error, { sessionId, userId });
-      return { valid: false, reason: 'VALIDATION_ERROR' };
+      Logger.error('Failed to validate session', error as Error, { sessionId, userId });
+      return { valid: false, reason: 'VALIDATION_ERROR' as const };
     }
   }
 
   /**
    * 更新会话活动时间
    */
-  async updateSessionActivity(sessionId) {
-    const pool = getPool();
+  async updateSessionActivity(sessionId: string) {
+    const pool = getPool() as DbPool;
 
     try {
-      await pool.query(`
-        UPDATE user_sessions 
+      await pool.query(
+        `
+        UPDATE user_sessions
         SET last_activity_at = NOW(),
             expires_at = NOW() + INTERVAL '${SESSION_CONFIG.sessionTimeout} seconds'
         WHERE id = $1 AND is_active = true
-      `, [sessionId]);
+      `,
+        [sessionId]
+      );
     } catch (error) {
-      Logger.error('Failed to update session activity', error, { sessionId });
+      Logger.error('Failed to update session activity', error as Error, { sessionId });
     }
   }
 
   /**
    * 获取用户所有活跃会话
    */
-  async getUserSessions(userId) {
-    const pool = getPool();
+  async getUserSessions(userId: string) {
+    const pool = getPool() as DbPool;
 
     try {
-      const result = await pool.query(`
-        SELECT 
+      const result = await pool.query<SessionRow>(
+        `
+        SELECT
           id, device_id, device_name, device_type, ip_address,
           location, created_at, last_activity_at, expires_at,
           (last_activity_at > NOW() - INTERVAL '5 minutes') as is_current
-        FROM user_sessions 
+        FROM user_sessions
         WHERE user_id = $1 AND is_active = true AND expires_at > NOW()
         ORDER BY last_activity_at DESC
-      `, [userId]);
+      `,
+        [userId]
+      );
 
       return result.rows.map(session => ({
         id: session.id,
@@ -179,15 +241,15 @@ class SessionManager {
         deviceName: session.device_name,
         deviceType: session.device_type,
         ipAddress: session.ip_address,
-        location: session.location ? JSON.parse(session.location) : null,
+        location: session.location ? (JSON.parse(session.location) as SessionLocation) : null,
         createdAt: session.created_at,
         lastActivityAt: session.last_activity_at,
         expiresAt: session.expires_at,
-        isCurrent: session.is_current,
-        isActive: true
+        isCurrent: Boolean(session.is_current),
+        isActive: true,
       }));
     } catch (error) {
-      Logger.error('Failed to get user sessions', error, { userId });
+      Logger.error('Failed to get user sessions', error as Error, { userId });
       return [];
     }
   }
@@ -195,16 +257,19 @@ class SessionManager {
   /**
    * 终止指定会话
    */
-  async terminateSession(sessionId, userId) {
-    const pool = getPool();
+  async terminateSession(sessionId: string, userId: string) {
+    const pool = getPool() as DbPool;
 
     try {
-      const result = await pool.query(`
-        UPDATE user_sessions 
+      const result = await pool.query<DbRow>(
+        `
+        UPDATE user_sessions
         SET is_active = false, terminated_at = NOW()
         WHERE id = $1 AND user_id = $2
         RETURNING id
-      `, [sessionId, userId]);
+      `,
+        [sessionId, userId]
+      );
 
       if (result.rows.length > 0) {
         Logger.info('Session terminated', { sessionId, userId });
@@ -213,7 +278,7 @@ class SessionManager {
 
       return false;
     } catch (error) {
-      Logger.error('Failed to terminate session', error, { sessionId, userId });
+      Logger.error('Failed to terminate session', error as Error, { sessionId, userId });
       return false;
     }
   }
@@ -221,30 +286,33 @@ class SessionManager {
   /**
    * 终止用户的其他所有会话
    */
-  async terminateOtherSessions(currentSessionId, userId) {
-    const pool = getPool();
+  async terminateOtherSessions(currentSessionId: string, userId: string) {
+    const pool = getPool() as DbPool;
 
     try {
-      const result = await pool.query(`
-        UPDATE user_sessions 
+      const result = await pool.query<DbRow>(
+        `
+        UPDATE user_sessions
         SET is_active = false, terminated_at = NOW()
         WHERE user_id = $1 AND id != $2 AND is_active = true
         RETURNING id
-      `, [userId, currentSessionId]);
+      `,
+        [userId, currentSessionId]
+      );
 
       const terminatedCount = result.rows.length;
 
       Logger.info('Other sessions terminated', {
         userId,
         currentSessionId,
-        terminatedCount
+        terminatedCount,
       });
 
       return terminatedCount;
     } catch (error) {
-      Logger.error('Failed to terminate other sessions', error, {
+      Logger.error('Failed to terminate other sessions', error as Error, {
         currentSessionId,
-        userId
+        userId,
       });
       return 0;
     }
@@ -253,16 +321,19 @@ class SessionManager {
   /**
    * 终止用户所有会话
    */
-  async terminateAllUserSessions(userId) {
-    const pool = getPool();
+  async terminateAllUserSessions(userId: string) {
+    const pool = getPool() as DbPool;
 
     try {
-      const result = await pool.query(`
-        UPDATE user_sessions 
+      const result = await pool.query<DbRow>(
+        `
+        UPDATE user_sessions
         SET is_active = false, terminated_at = NOW()
         WHERE user_id = $1 AND is_active = true
         RETURNING id
-      `, [userId]);
+      `,
+        [userId]
+      );
 
       const terminatedCount = result.rows.length;
 
@@ -270,7 +341,7 @@ class SessionManager {
 
       return terminatedCount;
     } catch (error) {
-      Logger.error('Failed to terminate all user sessions', error, { userId });
+      Logger.error('Failed to terminate all user sessions', error as Error, { userId });
       return 0;
     }
   }
@@ -278,51 +349,47 @@ class SessionManager {
   /**
    * 强制执行会话数量限制
    */
-  async enforceSessionLimit(userId) {
-    const pool = getPool();
+  async enforceSessionLimit(userId: string) {
+    const pool = getPool() as DbPool;
 
     try {
       // 获取当前活跃会话数
-      const countResult = await pool.query(`
-        SELECT COUNT(*) as count 
-        FROM user_sessions 
+      const countResult = await pool.query<{ count: string }>(
+        `
+        SELECT COUNT(*) as count
+        FROM user_sessions
         WHERE user_id = $1 AND is_active = true AND expires_at > NOW()
-      `, [userId]);
+      `,
+        [userId]
+      );
 
-
-      /**
-
-       * if功能函数
-
-       * @param {Object} params - 参数对象
-
-       * @returns {Promise<Object>} 返回结果
-
-       */
-      const currentCount = parseInt(countResult.rows[0].count);
+      const currentCount = Number.parseInt(countResult.rows[0]?.count || '0', 10);
 
       if (currentCount >= SESSION_CONFIG.maxConcurrentSessions) {
         // 终止最旧的会话
         const sessionsToTerminate = currentCount - SESSION_CONFIG.maxConcurrentSessions + 1;
 
-        await pool.query(`
-          UPDATE user_sessions 
+        await pool.query(
+          `
+          UPDATE user_sessions
           SET is_active = false, terminated_at = NOW()
           WHERE id IN (
-            SELECT id FROM user_sessions 
+            SELECT id FROM user_sessions
             WHERE user_id = $1 AND is_active = true AND expires_at > NOW()
-            ORDER BY last_activity_at ASC 
+            ORDER BY last_activity_at ASC
             LIMIT $2
           )
-        `, [userId, sessionsToTerminate]);
+        `,
+          [userId, sessionsToTerminate]
+        );
 
         Logger.info('Sessions terminated due to limit', {
           userId,
-          terminatedCount: sessionsToTerminate
+          terminatedCount: sessionsToTerminate,
         });
       }
     } catch (error) {
-      Logger.error('Failed to enforce session limit', error, { userId });
+      Logger.error('Failed to enforce session limit', error as Error, { userId });
     }
   }
 
@@ -330,15 +397,17 @@ class SessionManager {
    * 清理过期会话
    */
   async cleanupExpiredSessions() {
-    const pool = getPool();
+    const pool = getPool() as DbPool;
 
     try {
-      const result = await pool.query(`
-        UPDATE user_sessions 
+      const result = await pool.query<DbRow>(
+        `
+        UPDATE user_sessions
         SET is_active = false, terminated_at = NOW()
         WHERE is_active = true AND expires_at <= NOW()
         RETURNING id
-      `);
+      `
+      );
 
       const cleanedCount = result.rows.length;
 
@@ -348,7 +417,7 @@ class SessionManager {
 
       return cleanedCount;
     } catch (error) {
-      Logger.error('Failed to cleanup expired sessions', error);
+      Logger.error('Failed to cleanup expired sessions', error as Error);
       return 0;
     }
   }
@@ -357,23 +426,25 @@ class SessionManager {
    * 获取会话统计信息
    */
   async getSessionStats() {
-    const pool = getPool();
+    const pool = getPool() as DbPool;
 
     try {
-      const result = await pool.query(`
-        SELECT 
+      const result = await pool.query(
+        `
+        SELECT
           COUNT(*) as total_sessions,
           COUNT(CASE WHEN is_active = true AND expires_at > NOW() THEN 1 END) as active_sessions,
           COUNT(DISTINCT user_id) as unique_users,
           COUNT(DISTINCT device_id) as unique_devices,
           AVG(EXTRACT(EPOCH FROM (terminated_at - created_at))) as avg_session_duration
-        FROM user_sessions 
+        FROM user_sessions
         WHERE created_at > NOW() - INTERVAL '24 hours'
-      `);
+      `
+      );
 
-      return result.rows[0];
+      return result.rows[0] ?? null;
     } catch (error) {
-      Logger.error('Failed to get session stats', error);
+      Logger.error('Failed to get session stats', error as Error);
       return null;
     }
   }
@@ -390,12 +461,12 @@ class SessionManager {
   /**
    * 生成设备ID
    */
-  generateDeviceId(deviceInfo) {
+  generateDeviceId(deviceInfo: DeviceInfo) {
     const components = [
       deviceInfo.userAgent || '',
       deviceInfo.platform || '',
       deviceInfo.fingerprint || '',
-      deviceInfo.language || ''
+      deviceInfo.language || '',
     ].join('|');
 
     return crypto.createHash('sha256').update(components).digest('hex').substring(0, 32);
@@ -404,7 +475,7 @@ class SessionManager {
   /**
    * 解析设备名称
    */
-  parseDeviceName(userAgent) {
+  parseDeviceName(userAgent: string) {
     if (!userAgent) return 'Unknown Device';
 
     // 简单的设备名称解析
@@ -421,10 +492,14 @@ class SessionManager {
   /**
    * 解析设备类型
    */
-  parseDeviceType(userAgent) {
+  parseDeviceType(userAgent: string) {
     if (!userAgent) return 'unknown';
 
-    if (userAgent.includes('Mobile') || userAgent.includes('iPhone') || userAgent.includes('Android')) {
+    if (
+      userAgent.includes('Mobile') ||
+      userAgent.includes('iPhone') ||
+      userAgent.includes('Android')
+    ) {
       return 'mobile';
     }
     if (userAgent.includes('iPad') || userAgent.includes('Tablet')) {
@@ -437,7 +512,7 @@ class SessionManager {
   /**
    * 从IP地址获取位置信息
    */
-  async getLocationFromIP(ipAddress) {
+  async getLocationFromIP(ipAddress: string) {
     // 这里应该集成IP地理位置服务
     // 例如：MaxMind GeoIP、ipapi.co等
     try {
@@ -447,7 +522,7 @@ class SessionManager {
           country: 'Local',
           region: 'Local',
           city: 'Local',
-          timezone: 'Local'
+          timezone: 'Local',
         };
       }
 
@@ -456,10 +531,10 @@ class SessionManager {
         country: 'Unknown',
         region: 'Unknown',
         city: 'Unknown',
-        timezone: 'Unknown'
+        timezone: 'Unknown',
       };
     } catch (error) {
-      Logger.error('Failed to get location from IP', error, { ipAddress });
+      Logger.error('Failed to get location from IP', error as Error, { ipAddress });
       return null;
     }
   }
@@ -491,20 +566,15 @@ class SessionManager {
   }
 }
 
-
 /**
-
  * 创建新的createSessionTable
-
  * @param {Object} data - 创建数据
-
  * @returns {Promise<Object>} 创建的对象
-
  */
 // ==================== 数据库表创建 ====================
 
 const createSessionTable = async () => {
-  const pool = getPool();
+  const pool = getPool() as DbPool;
 
   try {
     await pool.query(`
@@ -523,7 +593,7 @@ const createSessionTable = async () => {
         terminated_at TIMESTAMP WITH TIME ZONE,
         is_active BOOLEAN DEFAULT true
       );
-      
+
       CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
       CREATE INDEX IF NOT EXISTS idx_user_sessions_device_id ON user_sessions(device_id);
       CREATE INDEX IF NOT EXISTS idx_user_sessions_active ON user_sessions(is_active, expires_at);
@@ -532,7 +602,7 @@ const createSessionTable = async () => {
 
     Logger.info('User sessions table created/verified');
   } catch (error) {
-    Logger.error('Failed to create user sessions table', error);
+    Logger.error('Failed to create user sessions table', error as Error);
     throw error;
   }
 };
@@ -541,9 +611,12 @@ const createSessionTable = async () => {
 
 const sessionManager = new SessionManager();
 
+export { createSessionTable, SESSION_CONFIG, SessionManager, sessionManager };
+
+// 兼容 CommonJS require
 module.exports = {
   SessionManager,
   sessionManager,
   createSessionTable,
-  SESSION_CONFIG
+  SESSION_CONFIG,
 };

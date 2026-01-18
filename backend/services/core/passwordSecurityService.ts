@@ -4,42 +4,82 @@
  * 版本: v2.0.0
  */
 
+import crypto from 'crypto';
+
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const { getPool } = require('../../config/database.js');
-const Logger = require('../../middleware/logger.js');
+const { getPool } = require('../../config/database');
+const Logger = require('../../utils/logger');
 const emailService = require('../email/emailService');
+
+type DbRow = Record<string, unknown>;
+
+type DbQueryResult<T extends DbRow = DbRow> = {
+  rows: T[];
+};
+
+type DbPool = {
+  query: <T extends DbRow = DbRow>(text: string, params?: unknown[]) => Promise<DbQueryResult<T>>;
+};
+
+type PasswordStrengthResult = {
+  isValid: boolean;
+  score: number;
+  strength: string;
+  entropy: number;
+  errors: string[];
+  warnings: string[];
+  requirements: {
+    length: boolean;
+    uppercase: boolean;
+    lowercase: boolean;
+    numbers: boolean;
+    specialChars: boolean;
+  };
+};
+
+type AccountLockStatus =
+  | false
+  | {
+      locked: true;
+      until: Date;
+      remainingTime: number;
+    };
+
+type UserInfo = {
+  username?: string;
+  email?: string;
+};
 
 // ==================== 配置 ====================
 
 const PASSWORD_CONFIG = {
   // 密码策略
-  minLength: parseInt(process.env.PASSWORD_MIN_LENGTH) || 8,
-  maxLength: parseInt(process.env.PASSWORD_MAX_LENGTH) || 128,
+  minLength: Number.parseInt(process.env.PASSWORD_MIN_LENGTH || '8', 10) || 8,
+  maxLength: Number.parseInt(process.env.PASSWORD_MAX_LENGTH || '128', 10) || 128,
   requireUppercase: process.env.PASSWORD_REQUIRE_UPPERCASE !== 'false',
   requireLowercase: process.env.PASSWORD_REQUIRE_LOWERCASE !== 'false',
   requireNumbers: process.env.PASSWORD_REQUIRE_NUMBERS !== 'false',
   requireSpecialChars: process.env.PASSWORD_REQUIRE_SPECIAL !== 'false',
-  
+
   // 密码历史
-  preventReuse: parseInt(process.env.PASSWORD_PREVENT_REUSE) || 5,
-  maxAge: parseInt(process.env.PASSWORD_MAX_AGE) || 90, // 天
-  
+  preventReuse: Number.parseInt(process.env.PASSWORD_PREVENT_REUSE || '5', 10) || 5,
+  maxAge: Number.parseInt(process.env.PASSWORD_MAX_AGE || '90', 10) || 90, // 天
+
   // 账户锁定
-  maxLoginAttempts: parseInt(process.env.MAX_LOGIN_ATTEMPTS) || 5,
-  lockoutDuration: parseInt(process.env.LOCKOUT_DURATION) || 900, // 15分钟
+  maxLoginAttempts: Number.parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5', 10) || 5,
+  lockoutDuration: Number.parseInt(process.env.LOCKOUT_DURATION || '900', 10) || 900, // 15分钟
   progressiveLockout: process.env.PROGRESSIVE_LOCKOUT === 'true',
-  
+
   // 密码重置
-  resetTokenExpiry: parseInt(process.env.RESET_TOKEN_EXPIRY) || 3600, // 1小时
+  resetTokenExpiry: Number.parseInt(process.env.RESET_TOKEN_EXPIRY || '3600', 10) || 3600, // 1小时
   resetTokenLength: 32,
-  
+
   // 通知设置
-  expiryWarningDays: parseInt(process.env.PASSWORD_EXPIRY_WARNING) || 7,
+  expiryWarningDays: Number.parseInt(process.env.PASSWORD_EXPIRY_WARNING || '7', 10) || 7,
   enableExpiryNotifications: process.env.ENABLE_EXPIRY_NOTIFICATIONS !== 'false',
-  
+
   // 加密设置
-  saltRounds: parseInt(process.env.BCRYPT_ROUNDS) || 12
+  saltRounds: Number.parseInt(process.env.BCRYPT_ROUNDS || '12', 10) || 12,
 };
 
 // 常见弱密码模式
@@ -52,21 +92,20 @@ const WEAK_PATTERNS = [
   /^welcome/i,
   /^monkey/i,
   /^dragon/i,
-  /(.)/1{2,}/, // 重复字符
-  /^(.+)/1+$/, // 重复模式
+  /(.)\1{2,}/, // 重复字符
+  /^(.+)\1+$/, // 重复模式
   /^(012|123|234|345|456|567|678|789|890)+/,
-  /^(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)+/i
+  /^(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)+/i,
 ];
 
-
 /**
-
  * PasswordSecurityService类 - 负责处理相关功能
-
  */
 // ==================== 密码安全服务 ====================
 
 class PasswordSecurityService {
+  private expiryCheckTimer: NodeJS.Timeout | null = null;
+
   constructor() {
     this.startPasswordExpiryCheck();
   }
@@ -74,9 +113,9 @@ class PasswordSecurityService {
   /**
    * 验证密码强度
    */
-  validatePasswordStrength(password, userInfo = {}) {
-    const errors = [];
-    const warnings = [];
+  validatePasswordStrength(password: string, userInfo: UserInfo = {}): PasswordStrengthResult {
+    const errors: string[] = [];
+    const warnings: string[] = [];
     let score = 0;
 
     // 基本长度检查
@@ -167,17 +206,17 @@ class PasswordSecurityService {
         uppercase: hasUppercase,
         lowercase: hasLowercase,
         numbers: hasNumbers,
-        specialChars: hasSpecialChars
-      }
+        specialChars: hasSpecialChars,
+      },
     };
   }
 
   /**
    * 计算密码熵值
    */
-  calculatePasswordEntropy(password) {
+  calculatePasswordEntropy(password: string) {
     let charsetSize = 0;
-    
+
     if (/[a-z]/.test(password)) charsetSize += 26;
     if (/[A-Z]/.test(password)) charsetSize += 26;
     if (/\d/.test(password)) charsetSize += 10;
@@ -190,7 +229,7 @@ class PasswordSecurityService {
   /**
    * 获取强度等级
    */
-  getStrengthLevel(score) {
+  getStrengthLevel(score: number) {
     const levels = ['很弱', '弱', '一般', '强', '很强'];
     return levels[Math.min(score, levels.length - 1)];
   }
@@ -198,7 +237,7 @@ class PasswordSecurityService {
   /**
    * 哈希密码
    */
-  async hashPassword(password) {
+  async hashPassword(password: string) {
     try {
       return await bcrypt.hash(password, PASSWORD_CONFIG.saltRounds);
     } catch (error) {
@@ -210,7 +249,7 @@ class PasswordSecurityService {
   /**
    * 验证密码
    */
-  async verifyPassword(password, hashedPassword) {
+  async verifyPassword(password: string, hashedPassword: string) {
     try {
       return await bcrypt.compare(password, hashedPassword);
     } catch (error) {
@@ -222,20 +261,19 @@ class PasswordSecurityService {
   /**
    * 更改密码
    */
-  async changePassword(userId, currentPassword, newPassword) {
-    const pool = getPool();
-    
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const pool = getPool() as DbPool;
+
     try {
       // 获取用户当前密码
-      const userResult = await pool.query(
-        'SELECT password_hash, email, username FROM users WHERE id = $1',
-        [userId]
-      );
+      const userResult = await pool.query<{
+        password_hash: string;
+        email: string;
+        username: string;
+      }>('SELECT password_hash, email, username FROM users WHERE id = $1', [userId]);
 
       if (userResult.rows.length === 0) {
-        
-        return { success: false, message: '用户不存在'
-      };
+        return { success: false, message: '用户不存在' };
       }
 
       const user = userResult.rows[0];
@@ -243,34 +281,29 @@ class PasswordSecurityService {
       // 验证当前密码
       const isCurrentPasswordValid = await this.verifyPassword(currentPassword, user.password_hash);
       if (!isCurrentPasswordValid) {
-        
-        return { success: false, message: '当前密码错误'
-      };
+        return { success: false, message: '当前密码错误' };
       }
 
       // 验证新密码强度
       const strengthCheck = this.validatePasswordStrength(newPassword, {
         username: user.username,
-        email: user.email
+        email: user.email,
       });
 
       if (!strengthCheck.isValid) {
-        
         return {
           success: false,
           message: '新密码不符合安全要求',
-          errors: strengthCheck.errors
-      };
+          errors: strengthCheck.errors,
+        };
       }
 
       // 检查密码历史
       const isReused = await this.checkPasswordHistory(userId, newPassword);
       if (isReused) {
-        
         return {
           success: false,
-          message: `新密码不能与最近${PASSWORD_CONFIG.preventReuse
-      }次使用的密码相同`
+          message: `新密码不能与最近${PASSWORD_CONFIG.preventReuse}次使用的密码相同`,
         };
       }
 
@@ -278,11 +311,14 @@ class PasswordSecurityService {
       const newPasswordHash = await this.hashPassword(newPassword);
 
       // 更新密码
-      await pool.query(`
-        UPDATE users 
+      await pool.query(
+        `
+        UPDATE users
         SET password_hash = $1, password_changed_at = NOW(), updated_at = NOW()
         WHERE id = $2
-      `, [newPasswordHash, userId]);
+      `,
+        [newPasswordHash, userId]
+      );
 
       // 保存密码历史
       await this.savePasswordHistory(userId, user.password_hash);
@@ -295,7 +331,7 @@ class PasswordSecurityService {
       return {
         success: true,
         message: '密码修改成功',
-        strength: strengthCheck.strength
+        strength: strengthCheck.strength,
       };
     } catch (error) {
       Logger.error('Failed to change password', error, { userId });
@@ -306,28 +342,25 @@ class PasswordSecurityService {
   /**
    * 检查密码历史
    */
-  async checkPasswordHistory(userId, newPassword) {
-    const pool = getPool();
-    
+  async checkPasswordHistory(userId: string, newPassword: string) {
+    const pool = getPool() as DbPool;
+
     try {
-      const result = await pool.query(`
-        SELECT password_hash FROM password_history 
-        WHERE user_id = $1 
-        ORDER BY created_at DESC 
+      const result = await pool.query<{ password_hash: string }>(
+        `
+        SELECT password_hash FROM password_history
+        WHERE user_id = $1
+        ORDER BY created_at DESC
         LIMIT $2
-      `, [userId, PASSWORD_CONFIG.preventReuse]);
+      `,
+        [userId, PASSWORD_CONFIG.preventReuse]
+      );
 
       for (const row of result.rows) {
-        /**
-         * if功能函数
-         * @param {Object} params - 参数对象
-         * @returns {Promise<Object>} 返回结果
-         */
         const isMatch = await this.verifyPassword(newPassword, row.password_hash);
         if (isMatch) {
-          
-        return true;
-      }
+          return true;
+        }
       }
 
       return false;
@@ -340,26 +373,32 @@ class PasswordSecurityService {
   /**
    * 保存密码历史
    */
-  async savePasswordHistory(userId, passwordHash) {
-    const pool = getPool();
-    
+  async savePasswordHistory(userId: string, passwordHash: string) {
+    const pool = getPool() as DbPool;
+
     try {
       // 添加新的密码历史记录
-      await pool.query(`
+      await pool.query(
+        `
         INSERT INTO password_history (user_id, password_hash, created_at)
         VALUES ($1, $2, NOW())
-      `, [userId, passwordHash]);
+      `,
+        [userId, passwordHash]
+      );
 
       // 清理超出限制的历史记录
-      await pool.query(`
-        DELETE FROM password_history 
+      await pool.query(
+        `
+        DELETE FROM password_history
         WHERE user_id = $1 AND id NOT IN (
-          SELECT id FROM password_history 
-          WHERE user_id = $1 
-          ORDER BY created_at DESC 
+          SELECT id FROM password_history
+          WHERE user_id = $1
+          ORDER BY created_at DESC
           LIMIT $2
         )
-      `, [userId, PASSWORD_CONFIG.preventReuse]);
+      `,
+        [userId, PASSWORD_CONFIG.preventReuse]
+      );
     } catch (error) {
       Logger.error('Failed to save password history', error, { userId });
     }
@@ -368,46 +407,44 @@ class PasswordSecurityService {
   /**
    * 记录登录失败
    */
-  async recordLoginFailure(userId, ipAddress, userAgent) {
-    const pool = getPool();
-    
+  async recordLoginFailure(userId: string, ipAddress: string, userAgent: string) {
+    const pool = getPool() as DbPool;
+
     try {
       // 增加失败次数
-      await pool.query(`
-        UPDATE users 
+      await pool.query(
+        `
+        UPDATE users
         SET login_attempts = COALESCE(login_attempts, 0) + 1,
             last_login_attempt = NOW()
         WHERE id = $1
-      `, [userId]);
+      `,
+        [userId]
+      );
 
       // 记录失败日志
-      await pool.query(`
+      await pool.query(
+        `
         INSERT INTO login_attempts (user_id, ip_address, user_agent, success, created_at)
         VALUES ($1, $2, $3, false, NOW())
-      `, [userId, ipAddress, userAgent]);
+      `,
+        [userId, ipAddress, userAgent]
+      );
 
       // 检查是否需要锁定账户
-      const userResult = await pool.query(
+      const userResult = await pool.query<{ login_attempts: number; locked_until: string | null }>(
         'SELECT login_attempts, locked_until FROM users WHERE id = $1',
         [userId]
       );
 
       if (userResult.rows.length > 0) {
-        
-        /**
-        
-         * if功能函数
-        
-         * @param {Object} params - 参数对象
-        
-         * @returns {Promise<Object>} 返回结果
-        
-         */
         const { login_attempts, locked_until } = userResult.rows[0];
-        
+
         if (login_attempts >= PASSWORD_CONFIG.maxLoginAttempts) {
           await this.lockAccount(userId, login_attempts);
         }
+
+        void locked_until;
       }
 
       Logger.warn('Login failure recorded', { userId, ipAddress, userAgent });
@@ -419,12 +456,12 @@ class PasswordSecurityService {
   /**
    * 锁定账户
    */
-  async lockAccount(userId, attemptCount) {
-    const pool = getPool();
-    
+  async lockAccount(userId: string, attemptCount: number) {
+    const pool = getPool() as DbPool;
+
     try {
       let lockDuration = PASSWORD_CONFIG.lockoutDuration;
-      
+
       // 渐进式锁定
       if (PASSWORD_CONFIG.progressiveLockout) {
         const multiplier = Math.min(attemptCount - PASSWORD_CONFIG.maxLoginAttempts + 1, 10);
@@ -433,17 +470,20 @@ class PasswordSecurityService {
 
       const lockedUntil = new Date(Date.now() + lockDuration * 1000);
 
-      await pool.query(`
-        UPDATE users 
+      await pool.query(
+        `
+        UPDATE users
         SET locked_until = $1, updated_at = NOW()
         WHERE id = $2
-      `, [lockedUntil, userId]);
+      `,
+        [lockedUntil, userId]
+      );
 
-      Logger.warn('Account locked', { 
-        userId, 
-        attemptCount, 
-        lockDuration, 
-        lockedUntil 
+      Logger.warn('Account locked', {
+        userId,
+        attemptCount,
+        lockDuration,
+        lockedUntil,
       });
 
       // 发送锁定通知邮件
@@ -456,15 +496,18 @@ class PasswordSecurityService {
   /**
    * 重置登录尝试
    */
-  async resetLoginAttempts(userId) {
-    const pool = getPool();
-    
+  async resetLoginAttempts(userId: string) {
+    const pool = getPool() as DbPool;
+
     try {
-      await pool.query(`
-        UPDATE users 
+      await pool.query(
+        `
+        UPDATE users
         SET login_attempts = 0, locked_until = NULL, updated_at = NOW()
         WHERE id = $1
-      `, [userId]);
+      `,
+        [userId]
+      );
     } catch (error) {
       Logger.error('Failed to reset login attempts', error, { userId });
     }
@@ -473,24 +516,22 @@ class PasswordSecurityService {
   /**
    * 检查账户是否被锁定
    */
-  async isAccountLocked(userId) {
-    const pool = getPool();
-    
+  async isAccountLocked(userId: string): Promise<AccountLockStatus> {
+    const pool = getPool() as DbPool;
+
     try {
-      const result = await pool.query(
+      const result = await pool.query<{ locked_until: string | null }>(
         'SELECT locked_until FROM users WHERE id = $1',
         [userId]
       );
 
       if (result.rows.length === 0) {
-        
         return false;
       }
 
       const { locked_until } = result.rows[0];
-      
+
       if (!locked_until) {
-        
         return false;
       }
 
@@ -498,7 +539,6 @@ class PasswordSecurityService {
       const lockExpiry = new Date(locked_until);
 
       if (now >= lockExpiry) {
-        
         // 锁定已过期，自动解锁
         await this.resetLoginAttempts(userId);
         return false;
@@ -507,7 +547,7 @@ class PasswordSecurityService {
       return {
         locked: true,
         until: lockExpiry,
-        remainingTime: Math.ceil((lockExpiry - now) / 1000)
+        remainingTime: Math.ceil((lockExpiry.getTime() - now.getTime()) / 1000),
       };
     } catch (error) {
       Logger.error('Failed to check account lock status', error, { userId });
@@ -518,21 +558,19 @@ class PasswordSecurityService {
   /**
    * 生成密码重置令牌
    */
-  async generatePasswordResetToken(email) {
-    const pool = getPool();
-    
+  async generatePasswordResetToken(email: string) {
+    const pool = getPool() as DbPool;
+
     try {
       // 检查用户是否存在
-      const userResult = await pool.query(
+      const userResult = await pool.query<{ id: string; username: string }>(
         'SELECT id, username FROM users WHERE email = $1 AND is_active = true',
         [email]
       );
 
       if (userResult.rows.length === 0) {
-        
         // 为了安全，即使用户不存在也返回成功
-        return { success: true, message: '如果邮箱存在，重置链接已发送'
-      };
+        return { success: true, message: '如果邮箱存在，重置链接已发送' };
       }
 
       const user = userResult.rows[0];
@@ -540,12 +578,15 @@ class PasswordSecurityService {
       const expiresAt = new Date(Date.now() + PASSWORD_CONFIG.resetTokenExpiry * 1000);
 
       // 保存重置令牌
-      await pool.query(`
+      await pool.query(
+        `
         INSERT INTO password_reset_tokens (user_id, token, expires_at, created_at)
         VALUES ($1, $2, $3, NOW())
-        ON CONFLICT (user_id) 
+        ON CONFLICT (user_id)
         DO UPDATE SET token = $2, expires_at = $3, created_at = NOW(), used_at = NULL
-      `, [user.id, token, expiresAt]);
+      `,
+        [user.id, token, expiresAt]
+      );
 
       // 发送重置邮件
       await this.sendPasswordResetEmail(email, user.username, token);
@@ -554,7 +595,7 @@ class PasswordSecurityService {
 
       return {
         success: true,
-        message: '密码重置链接已发送到您的邮箱'
+        message: '密码重置链接已发送到您的邮箱',
       };
     } catch (error) {
       Logger.error('Failed to generate password reset token', error, { email });
@@ -565,30 +606,36 @@ class PasswordSecurityService {
   /**
    * 验证密码重置令牌
    */
-  async validatePasswordResetToken(token) {
-    const pool = getPool();
-    
+  async validatePasswordResetToken(token: string) {
+    const pool = getPool() as DbPool;
+
     try {
-      const result = await pool.query(`
+      const result = await pool.query<{
+        user_id: string;
+        expires_at: string;
+        email: string;
+        username: string;
+      }>(
+        `
         SELECT prt.user_id, prt.expires_at, u.email, u.username
         FROM password_reset_tokens prt
         JOIN users u ON prt.user_id = u.id
         WHERE prt.token = $1 AND prt.used_at IS NULL AND prt.expires_at > NOW()
-      `, [token]);
+      `,
+        [token]
+      );
 
       if (result.rows.length === 0) {
-        
-        return { valid: false, message: '重置令牌无效或已过期'
-      };
+        return { valid: false, message: '重置令牌无效或已过期' };
       }
 
       const tokenData = result.rows[0];
-      
+
       return {
         valid: true,
         userId: tokenData.user_id,
         email: tokenData.email,
-        username: tokenData.username
+        username: tokenData.username,
       };
     } catch (error) {
       Logger.error('Failed to validate password reset token', error, { token });
@@ -599,16 +646,14 @@ class PasswordSecurityService {
   /**
    * 使用重置令牌重置密码
    */
-  async resetPasswordWithToken(token, newPassword) {
-    const pool = getPool();
-    
+  async resetPasswordWithToken(token: string, newPassword: string) {
+    const pool = getPool() as DbPool;
+
     try {
       // 验证令牌
       const tokenValidation = await this.validatePasswordResetToken(token);
       if (!tokenValidation.valid) {
-        
-        return { success: false, message: tokenValidation.message
-      };
+        return { success: false, message: tokenValidation.message };
       }
 
       const { userId, email, username } = tokenValidation;
@@ -616,27 +661,24 @@ class PasswordSecurityService {
       // 验证新密码强度
       const strengthCheck = this.validatePasswordStrength(newPassword, { username, email });
       if (!strengthCheck.isValid) {
-        
         return {
           success: false,
           message: '新密码不符合安全要求',
-          errors: strengthCheck.errors
-      };
+          errors: strengthCheck.errors,
+        };
       }
 
       // 检查密码历史
       const isReused = await this.checkPasswordHistory(userId, newPassword);
       if (isReused) {
-        
         return {
           success: false,
-          message: `新密码不能与最近${PASSWORD_CONFIG.preventReuse
-      }次使用的密码相同`
+          message: `新密码不能与最近${PASSWORD_CONFIG.preventReuse}次使用的密码相同`,
         };
       }
 
       // 获取当前密码用于历史记录
-      const currentPasswordResult = await pool.query(
+      const currentPasswordResult = await pool.query<{ password_hash: string }>(
         'SELECT password_hash FROM users WHERE id = $1',
         [userId]
       );
@@ -649,11 +691,14 @@ class PasswordSecurityService {
 
       try {
         // 更新密码
-        await pool.query(`
-          UPDATE users 
+        await pool.query(
+          `
+          UPDATE users
           SET password_hash = $1, password_changed_at = NOW(), updated_at = NOW()
           WHERE id = $2
-        `, [newPasswordHash, userId]);
+        `,
+          [newPasswordHash, userId]
+        );
 
         // 保存密码历史
         if (currentPasswordResult.rows.length > 0) {
@@ -661,11 +706,14 @@ class PasswordSecurityService {
         }
 
         // 标记令牌为已使用
-        await pool.query(`
-          UPDATE password_reset_tokens 
-          SET used_at = NOW() 
+        await pool.query(
+          `
+          UPDATE password_reset_tokens
+          SET used_at = NOW()
           WHERE token = $1
-        `, [token]);
+        `,
+          [token]
+        );
 
         // 重置登录尝试和解锁账户
         await this.resetLoginAttempts(userId);
@@ -677,7 +725,7 @@ class PasswordSecurityService {
         return {
           success: true,
           message: '密码重置成功',
-          strength: strengthCheck.strength
+          strength: strengthCheck.strength,
         };
       } catch (error) {
         await pool.query('ROLLBACK');
@@ -693,56 +741,61 @@ class PasswordSecurityService {
    * 检查密码过期
    */
   async checkPasswordExpiry() {
-    const pool = getPool();
-    
+    const pool = getPool() as DbPool;
+
     try {
       // 查找即将过期的密码
-      const warningResult = await pool.query(`
+      const warningResult = await pool.query<{
+        id: string;
+        email: string;
+        username: string;
+        password_changed_at: string;
+      }>(
+        `
         SELECT id, email, username, password_changed_at
-        FROM users 
-        WHERE is_active = true 
+        FROM users
+        WHERE is_active = true
         AND password_changed_at < NOW() - INTERVAL '${PASSWORD_CONFIG.maxAge - PASSWORD_CONFIG.expiryWarningDays} days'
         AND password_changed_at >= NOW() - INTERVAL '${PASSWORD_CONFIG.maxAge} days'
         AND (last_password_warning IS NULL OR last_password_warning < NOW() - INTERVAL '1 day')
-      `);
+      `
+      );
 
       // 发送过期警告
       for (const user of warningResult.rows) {
-        const daysUntilExpiry = PASSWORD_CONFIG.maxAge - Math.floor(
-          (Date.now() - new Date(user.password_changed_at)) / (1000 * 60 * 60 * 24)
-        );
-        
+        const daysUntilExpiry =
+          PASSWORD_CONFIG.maxAge -
+          Math.floor(
+            (Date.now() - new Date(user.password_changed_at).getTime()) / (1000 * 60 * 60 * 24)
+          );
+
         await this.sendPasswordExpiryWarning(user.email, user.username, daysUntilExpiry);
-        
+
         // 更新警告时间
-        await pool.query(
-          'UPDATE users SET last_password_warning = NOW() WHERE id = $1',
-          [user.id]
-        );
+        await pool.query('UPDATE users SET last_password_warning = NOW() WHERE id = $1', [user.id]);
       }
 
       // 查找已过期的密码
-      const expiredResult = await pool.query(`
+      const expiredResult = await pool.query<{ id: string; email: string; username: string }>(
+        `
         SELECT id, email, username
-        FROM users 
-        WHERE is_active = true 
+        FROM users
+        WHERE is_active = true
         AND password_changed_at < NOW() - INTERVAL '${PASSWORD_CONFIG.maxAge} days'
         AND password_expired = false
-      `);
+      `
+      );
 
       // 标记密码为过期
       for (const user of expiredResult.rows) {
-        await pool.query(
-          'UPDATE users SET password_expired = true WHERE id = $1',
-          [user.id]
-        );
-        
+        await pool.query('UPDATE users SET password_expired = true WHERE id = $1', [user.id]);
+
         await this.sendPasswordExpiredNotification(user.email, user.username);
       }
 
       Logger.info('Password expiry check completed', {
         warningsSent: warningResult.rows.length,
-        passwordsExpired: expiredResult.rows.length
+        passwordsExpired: expiredResult.rows.length,
       });
     } catch (error) {
       Logger.error('Failed to check password expiry', error);
@@ -752,7 +805,7 @@ class PasswordSecurityService {
   /**
    * 发送密码过期警告邮件
    */
-  async sendPasswordExpiryWarning(email, username, daysUntilExpiry) {
+  async sendPasswordExpiryWarning(email: string, username: string, daysUntilExpiry: number) {
     try {
       await emailService.sendEmail({
         to: email,
@@ -761,8 +814,8 @@ class PasswordSecurityService {
         data: {
           username,
           daysUntilExpiry,
-          changePasswordUrl: `${process.env.FRONTEND_URL}/change-password`
-        }
+          changePasswordUrl: `${process.env.FRONTEND_URL}/change-password`,
+        },
       });
     } catch (error) {
       Logger.error('Failed to send password expiry warning', error, { email });
@@ -772,7 +825,7 @@ class PasswordSecurityService {
   /**
    * 发送密码已过期通知
    */
-  async sendPasswordExpiredNotification(email, username) {
+  async sendPasswordExpiredNotification(email: string, username: string) {
     try {
       await emailService.sendEmail({
         to: email,
@@ -780,8 +833,8 @@ class PasswordSecurityService {
         template: 'password-expired',
         data: {
           username,
-          resetPasswordUrl: `${process.env.FRONTEND_URL}/reset-password`
-        }
+          resetPasswordUrl: `${process.env.FRONTEND_URL}/reset-password`,
+        },
       });
     } catch (error) {
       Logger.error('Failed to send password expired notification', error, { email });
@@ -791,18 +844,18 @@ class PasswordSecurityService {
   /**
    * 发送账户锁定通知
    */
-  async sendAccountLockNotification(userId, lockedUntil) {
-    const pool = getPool();
-    
+  async sendAccountLockNotification(userId: string, lockedUntil: Date) {
+    const pool = getPool() as DbPool;
+
     try {
-      const userResult = await pool.query(
+      const userResult = await pool.query<{ email: string; username: string }>(
         'SELECT email, username FROM users WHERE id = $1',
         [userId]
       );
 
       if (userResult.rows.length > 0) {
         const { email, username } = userResult.rows[0];
-        
+
         await emailService.sendEmail({
           to: email,
           subject: '账户已被锁定',
@@ -810,8 +863,8 @@ class PasswordSecurityService {
           data: {
             username,
             lockedUntil: lockedUntil.toLocaleString(),
-            supportEmail: process.env.SUPPORT_EMAIL || 'support@example.com'
-          }
+            supportEmail: process.env.SUPPORT_EMAIL || 'support@example.com',
+          },
         });
       }
     } catch (error) {
@@ -822,10 +875,10 @@ class PasswordSecurityService {
   /**
    * 发送密码重置邮件
    */
-  async sendPasswordResetEmail(email, username, token) {
+  async sendPasswordResetEmail(email: string, username: string, token: string) {
     try {
       const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-      
+
       await emailService.sendEmail({
         to: email,
         subject: '密码重置请求',
@@ -833,8 +886,8 @@ class PasswordSecurityService {
         data: {
           username,
           resetUrl,
-          expiryHours: PASSWORD_CONFIG.resetTokenExpiry / 3600
-        }
+          expiryHours: PASSWORD_CONFIG.resetTokenExpiry / 3600,
+        },
       });
     } catch (error) {
       Logger.error('Failed to send password reset email', error, { email });
@@ -848,12 +901,15 @@ class PasswordSecurityService {
     if (!PASSWORD_CONFIG.enableExpiryNotifications) return;
 
     // 每天检查一次
-    this.expiryCheckTimer = setInterval(() => {
-      this.checkPasswordExpiry();
-    }, 24 * 60 * 60 * 1000);
+    this.expiryCheckTimer = setInterval(
+      () => {
+        void this.checkPasswordExpiry();
+      },
+      24 * 60 * 60 * 1000
+    );
 
     // 启动时立即检查一次
-    this.checkPasswordExpiry();
+    void this.checkPasswordExpiry();
   }
 
   /**
@@ -874,21 +930,14 @@ class PasswordSecurityService {
   }
 }
 
-
 /**
-
  * 创建新的createPasswordSecurityTables
-
- * @param {Object} data - 创建数据
-
- * @returns {Promise<Object>} 创建的对象
-
  */
 // ==================== 数据库表创建 ====================
 
 const createPasswordSecurityTables = async () => {
-  const pool = getPool();
-  
+  const pool = getPool() as DbPool;
+
   try {
     // 密码历史表
     await pool.query(`
@@ -898,7 +947,7 @@ const createPasswordSecurityTables = async () => {
         password_hash TEXT NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
-      
+
       CREATE INDEX IF NOT EXISTS idx_password_history_user_id ON password_history(user_id);
       CREATE INDEX IF NOT EXISTS idx_password_history_created_at ON password_history(created_at);
     `);
@@ -914,7 +963,7 @@ const createPasswordSecurityTables = async () => {
         used_at TIMESTAMP WITH TIME ZONE,
         UNIQUE(user_id)
       );
-      
+
       CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token ON password_reset_tokens(token);
       CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires ON password_reset_tokens(expires_at);
     `);
@@ -929,7 +978,7 @@ const createPasswordSecurityTables = async () => {
         success BOOLEAN DEFAULT false,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
-      
+
       CREATE INDEX IF NOT EXISTS idx_login_attempts_user_id ON login_attempts(user_id);
       CREATE INDEX IF NOT EXISTS idx_login_attempts_ip ON login_attempts(ip_address);
       CREATE INDEX IF NOT EXISTS idx_login_attempts_created_at ON login_attempts(created_at);
@@ -937,7 +986,7 @@ const createPasswordSecurityTables = async () => {
 
     // 为users表添加密码安全相关字段
     await pool.query(`
-      ALTER TABLE users 
+      ALTER TABLE users
       ADD COLUMN IF NOT EXISTS login_attempts INTEGER DEFAULT 0,
       ADD COLUMN IF NOT EXISTS locked_until TIMESTAMP WITH TIME ZONE,
       ADD COLUMN IF NOT EXISTS last_login_attempt TIMESTAMP WITH TIME ZONE,
@@ -945,7 +994,7 @@ const createPasswordSecurityTables = async () => {
       ADD COLUMN IF NOT EXISTS password_expired BOOLEAN DEFAULT false,
       ADD COLUMN IF NOT EXISTS last_password_warning TIMESTAMP WITH TIME ZONE;
     `);
-    
+
     Logger.info('Password security tables created/verified');
   } catch (error) {
     Logger.error('Failed to create password security tables', error);
@@ -957,9 +1006,17 @@ const createPasswordSecurityTables = async () => {
 
 const passwordSecurityService = new PasswordSecurityService();
 
+export {
+  PASSWORD_CONFIG,
+  PasswordSecurityService,
+  createPasswordSecurityTables,
+  passwordSecurityService,
+};
+
+// 兼容 CommonJS require
 module.exports = {
   PasswordSecurityService,
   passwordSecurityService,
   createPasswordSecurityTables,
-  PASSWORD_CONFIG
+  PASSWORD_CONFIG,
 };

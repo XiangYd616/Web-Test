@@ -8,6 +8,7 @@ const { body, validationResult } = require('express-validator');
 
 const { getPool, healthCheck, getStats } = require('../config/database');
 const monitoringRoutes = require('./monitoring');
+const configRoutes = require('./config');
 const MonitoringService = require('../services/monitoring/MonitoringService');
 const AlertService = require('../services/core/alertService');
 const { requireRole, ROLES } = require('../middleware/auth.js');
@@ -33,6 +34,7 @@ alertService.start().catch(error => {
 });
 
 monitoringRoutes.setMonitoringService(monitoringService);
+router.use('/config-center', configRoutes);
 router.use('/monitoring', monitoringRoutes);
 
 // =====================================================

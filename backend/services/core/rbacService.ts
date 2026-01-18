@@ -4,47 +4,119 @@
  * 版本: v2.0.0
  */
 
-// const { v4: uuidv4 } = require('uuid');
-// 注意：需要安装uuid依赖包
-// npm install uuid
-const crypto = require('crypto');
+import crypto from 'crypto';
+
 const uuidv4 = () => crypto.randomUUID();
-const { getPool } = require('../../config/database.js');
-const Logger = require('../../utils/logger.js');
+const { getPool } = require('../../config/database');
+const Logger = require('../../utils/logger');
+
+type DbRow = Record<string, unknown>;
+
+type DbQueryResult<T extends DbRow = DbRow> = {
+  rows: T[];
+};
+
+type DbPool = {
+  query: <T extends DbRow = DbRow>(text: string, params?: unknown[]) => Promise<DbQueryResult<T>>;
+};
+
+interface CacheEntry<T> {
+  permissions?: T;
+  roles?: T;
+  result?: PermissionResult;
+  timestamp: number;
+}
+
+type PermissionCondition = {
+  field: string;
+  operator: string;
+  value: unknown;
+};
+
+type PermissionRule = {
+  id: string;
+  name: string;
+  description?: string;
+  resource: string;
+  action: string;
+  effect: 'allow' | 'deny' | string;
+  conditions?: PermissionCondition[];
+  metadata?: Record<string, unknown>;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+};
+
+type RoleInfo = {
+  id: string;
+  name: string;
+  description?: string;
+  type?: string;
+  level?: number;
+  parentRoleId?: string | null;
+  isActive?: boolean;
+  isSystem?: boolean;
+  metadata?: Record<string, unknown>;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+  assignedAt?: unknown;
+  expiresAt?: unknown;
+  assignedBy?: string;
+};
+
+type RoleData = {
+  name: string;
+  description?: string;
+  type?: string;
+  level?: number;
+  parentRoleId?: string | null;
+  isActive?: boolean;
+  isSystem?: boolean;
+  metadata?: Record<string, unknown>;
+  permissions?: string[];
+};
+
+type PermissionResult = {
+  allowed: boolean;
+  reason: string;
+  matchedRules: PermissionRule[];
+  deniedBy?: PermissionRule[];
+  allowedBy?: PermissionRule[];
+  error?: string;
+};
 
 // ==================== 配置 ====================
 
 const RBAC_CONFIG = {
   // 缓存配置
   enableCache: process.env.RBAC_ENABLE_CACHE !== 'false',
-  cacheExpiry: parseInt(process.env.RBAC_CACHE_EXPIRY) || 300, // 5分钟
+  cacheExpiry: Number.parseInt(process.env.RBAC_CACHE_EXPIRY || '300', 10) || 300, // 5分钟
 
   // 权限检查配置
   enableAuditLog: process.env.RBAC_ENABLE_AUDIT !== 'false',
-  maxRoleLevel: parseInt(process.env.RBAC_MAX_ROLE_LEVEL) || 10,
+  maxRoleLevel: Number.parseInt(process.env.RBAC_MAX_ROLE_LEVEL || '10', 10) || 10,
 
   // 系统角色
   systemRoles: {
     SUPER_ADMIN: 'super_admin',
     ADMIN: 'admin',
     USER: 'user',
-    VIEWER: 'viewer'
-  }
+    VIEWER: 'viewer',
+  },
 };
 
-
 /**
-
  * RBACService类 - 负责处理相关功能
-
  */
 // ==================== RBAC服务 ====================
 
 class RBACService {
+  private permissionCache = new Map<string, CacheEntry<PermissionRule[]>>();
+  private roleCache = new Map<string, CacheEntry<RoleInfo[]>>();
+  private userPermissionCache = new Map<string, CacheEntry<PermissionRule[]>>();
+  private permissionCheckCache = new Map<string, CacheEntry<PermissionResult>>();
+  private cacheCleanupTimer: NodeJS.Timeout | null = null;
+
   constructor() {
-    this.permissionCache = new Map();
-    this.roleCache = new Map();
-    this.userPermissionCache = new Map();
     this.startCacheCleanup();
   }
 
@@ -53,15 +125,21 @@ class RBACService {
   /**
    * 检查用户权限
    */
-  async checkPermission(userId, resource, action, resourceId = null, context = {}) {
+  async checkPermission(
+    userId: string,
+    resource: string,
+    action: string,
+    resourceId: string | null = null,
+    context: Record<string, unknown> = {}
+  ): Promise<PermissionResult> {
     try {
       const cacheKey = `${userId}:${resource}:${action}:${resourceId || 'null'}`;
 
       // 检查缓存
-      if (RBAC_CONFIG.enableCache && this.userPermissionCache.has(cacheKey)) {
-        const cached = this.userPermissionCache.get(cacheKey);
-        if (Date.now() - cached.timestamp < RBAC_CONFIG.cacheExpiry * 1000) {
-          return cached.result;
+      if (RBAC_CONFIG.enableCache && this.permissionCheckCache.has(cacheKey)) {
+        const cached = this.permissionCheckCache.get(cacheKey);
+        if (cached && Date.now() - cached.timestamp < RBAC_CONFIG.cacheExpiry * 1000) {
+          return cached.result as PermissionResult;
         }
       }
 
@@ -69,13 +147,19 @@ class RBACService {
       const userPermissions = await this.getUserPermissions(userId);
 
       // 检查权限匹配
-      const result = this.evaluatePermissions(userPermissions, resource, action, resourceId, context);
+      const result = this.evaluatePermissions(
+        userPermissions,
+        resource,
+        action,
+        resourceId,
+        context
+      );
 
-      // 缓存结果
+      // 缓存权限检查结果
       if (RBAC_CONFIG.enableCache) {
-        this.userPermissionCache.set(cacheKey, {
+        this.permissionCheckCache.set(cacheKey, {
           result,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
 
@@ -88,7 +172,7 @@ class RBACService {
           resourceId,
           result: result.allowed ? 'success' : 'denied',
           reason: result.reason,
-          context
+          context,
         });
       }
 
@@ -99,7 +183,7 @@ class RBACService {
         allowed: false,
         reason: 'Permission check error',
         matchedRules: [],
-        error: error.message
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -107,8 +191,12 @@ class RBACService {
   /**
    * 批量权限检查
    */
-  async checkBatchPermissions(userId, checks, context = {}) {
-    const results = {};
+  async checkBatchPermissions(
+    userId: string,
+    checks: Array<{ resource: string; action: string; resourceId?: string | null }>,
+    context: Record<string, unknown> = {}
+  ) {
+    const results: Record<string, PermissionResult> = {};
     let allowed = 0;
     let denied = 0;
 
@@ -118,16 +206,16 @@ class RBACService {
         userId,
         check.resource,
         check.action,
-        check.resourceId,
+        check.resourceId ?? null,
         context
       );
 
       results[key] = result;
 
       if (result.allowed) {
-        allowed++;
+        allowed += 1;
       } else {
-        denied++;
+        denied += 1;
       }
     }
 
@@ -136,18 +224,24 @@ class RBACService {
       summary: {
         total: checks.length,
         allowed,
-        denied
-      }
+        denied,
+      },
     };
   }
 
   /**
    * 评估权限
    */
-  evaluatePermissions(permissions, resource, action, resourceId, context) {
-    const matchedRules = [];
-    const allowedBy = [];
-    const deniedBy = [];
+  evaluatePermissions(
+    permissions: PermissionRule[],
+    resource: string,
+    action: string,
+    resourceId: string | null,
+    context: Record<string, unknown>
+  ): PermissionResult {
+    const matchedRules: PermissionRule[] = [];
+    const allowedBy: PermissionRule[] = [];
+    const deniedBy: PermissionRule[] = [];
 
     for (const permission of permissions) {
       if (this.isPermissionMatch(permission, resource, action, context)) {
@@ -163,25 +257,23 @@ class RBACService {
 
     // 拒绝优先原则
     if (deniedBy.length > 0) {
-
       return {
         allowed: false,
         reason: 'Explicitly denied by permission rules',
         matchedRules,
         deniedBy,
-        allowedBy
+        allowedBy,
       };
     }
 
     // 检查是否有允许的权限
     if (allowedBy.length > 0) {
-
       return {
         allowed: true,
         reason: 'Allowed by permission rules',
         matchedRules,
         allowedBy,
-        deniedBy
+        deniedBy,
       };
     }
 
@@ -191,26 +283,27 @@ class RBACService {
       reason: 'No matching permission rules found',
       matchedRules,
       allowedBy,
-      deniedBy
+      deniedBy,
     };
   }
 
   /**
    * 检查权限是否匹配
    */
-  isPermissionMatch(permission, resource, action, context) {
+  isPermissionMatch(
+    permission: PermissionRule,
+    resource: string,
+    action: string,
+    context: Record<string, unknown>
+  ) {
     // 检查资源和操作
     if (permission.resource !== resource || permission.action !== action) {
-
       return false;
     }
 
     // 检查条件
     if (permission.conditions && permission.conditions.length > 0) {
-
-      return permission.conditions.every(condition =>
-        this.validateCondition(condition, context)
-      );
+      return permission.conditions.every(condition => this.validateCondition(condition, context));
     }
 
     return true;
@@ -219,30 +312,55 @@ class RBACService {
   /**
    * 验证权限条件
    */
-  validateCondition(condition, context) {
+  validateCondition(condition: PermissionCondition, context: Record<string, unknown>) {
     const { field, operator, value } = condition;
     const fieldValue = this.getNestedValue(context, field);
 
     switch (operator) {
-      case 'eq': return fieldValue === value;
-      case 'ne': return fieldValue !== value;
-      case 'gt': return fieldValue > value;
-      case 'gte': return fieldValue >= value;
-      case 'lt': return fieldValue < value;
-      case 'lte': return fieldValue <= value;
-      case 'in': return Array.isArray(value) && value.includes(fieldValue);
-      case 'nin': return Array.isArray(value) && !value.includes(fieldValue);
-      case 'contains': return typeof fieldValue === 'string' && fieldValue.includes(value);
-      case 'regex': return typeof fieldValue === 'string' && new RegExp(value).test(fieldValue);
-      default: return false;
+      case 'eq':
+        return fieldValue === value;
+      case 'ne':
+        return fieldValue !== value;
+      case 'gt':
+        return typeof fieldValue === 'number' && typeof value === 'number' && fieldValue > value;
+      case 'gte':
+        return typeof fieldValue === 'number' && typeof value === 'number' && fieldValue >= value;
+      case 'lt':
+        return typeof fieldValue === 'number' && typeof value === 'number' && fieldValue < value;
+      case 'lte':
+        return typeof fieldValue === 'number' && typeof value === 'number' && fieldValue <= value;
+      case 'in':
+        return Array.isArray(value) && value.includes(fieldValue as never);
+      case 'nin':
+        return Array.isArray(value) && !value.includes(fieldValue as never);
+      case 'contains':
+        return (
+          typeof fieldValue === 'string' && typeof value === 'string' && fieldValue.includes(value)
+        );
+      case 'regex':
+        return (
+          typeof fieldValue === 'string' &&
+          typeof value === 'string' &&
+          new RegExp(value).test(fieldValue)
+        );
+      default:
+        return false;
     }
   }
 
   /**
    * 获取嵌套对象值
    */
-  getNestedValue(obj, path) {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+  getNestedValue(obj: Record<string, unknown>, path: string) {
+    return path.split('.').reduce(
+      (current, key) => {
+        if (!current || typeof current !== 'object') {
+          return undefined;
+        }
+        return (current as Record<string, unknown>)[key];
+      },
+      obj as Record<string, unknown> | undefined
+    );
   }
 
   // ==================== 用户权限管理 ====================
@@ -250,53 +368,58 @@ class RBACService {
   /**
    * 获取用户权限
    */
-  async getUserPermissions(userId) {
-    const pool = getPool();
+  async getUserPermissions(userId: string): Promise<PermissionRule[]> {
+    const pool = getPool() as DbPool;
 
     try {
       // 检查缓存
       const cacheKey = `user_permissions:${userId}`;
       if (RBAC_CONFIG.enableCache && this.userPermissionCache.has(cacheKey)) {
         const cached = this.userPermissionCache.get(cacheKey);
-        if (Date.now() - cached.timestamp < RBAC_CONFIG.cacheExpiry * 1000) {
-          return cached.permissions;
+        if (cached && Date.now() - cached.timestamp < RBAC_CONFIG.cacheExpiry * 1000) {
+          return (cached.permissions as PermissionRule[]) || [];
         }
       }
 
       // 获取用户角色和权限
-      const result = await pool.query(`
-        SELECT DISTINCT 
+      const result = await pool.query(
+        `
+        SELECT DISTINCT
           p.id, p.name, p.description, p.resource, p.action, p.effect,
           p.conditions, p.metadata, p.created_at, p.updated_at
         FROM permissions p
         JOIN role_permissions rp ON p.id = rp.permission_id
         JOIN roles r ON rp.role_id = r.id
         JOIN user_roles ur ON r.id = ur.role_id
-        WHERE ur.user_id = $1 
-        AND ur.is_active = true 
+        WHERE ur.user_id = $1
+        AND ur.is_active = true
         AND (ur.expires_at IS NULL OR ur.expires_at > NOW())
         AND r.is_active = true
         ORDER BY p.resource, p.action
-      `, [userId]);
+      `,
+        [userId]
+      );
 
       const permissions = result.rows.map(row => ({
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        resource: row.resource,
-        action: row.action,
-        effect: row.effect,
-        conditions: row.conditions ? JSON.parse(row.conditions) : [],
-        metadata: row.metadata ? JSON.parse(row.metadata) : {},
+        id: String(row.id),
+        name: String(row.name),
+        description: row.description ? String(row.description) : undefined,
+        resource: String(row.resource),
+        action: String(row.action),
+        effect: String(row.effect),
+        conditions: row.conditions
+          ? (JSON.parse(String(row.conditions)) as PermissionCondition[])
+          : [],
+        metadata: row.metadata ? (JSON.parse(String(row.metadata)) as Record<string, unknown>) : {},
         createdAt: row.created_at,
-        updatedAt: row.updated_at
+        updatedAt: row.updated_at,
       }));
 
       // 缓存权限
       if (RBAC_CONFIG.enableCache) {
         this.userPermissionCache.set(cacheKey, {
           permissions,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
 
@@ -310,39 +433,42 @@ class RBACService {
   /**
    * 获取用户角色
    */
-  async getUserRoles(userId) {
-    const pool = getPool();
+  async getUserRoles(userId: string): Promise<RoleInfo[]> {
+    const pool = getPool() as DbPool;
 
     try {
-      const result = await pool.query(`
-        SELECT 
+      const result = await pool.query(
+        `
+        SELECT
           r.id, r.name, r.description, r.type, r.level, r.parent_role_id,
           r.is_active, r.is_system, r.metadata, r.created_at, r.updated_at,
           ur.assigned_at, ur.expires_at, ur.assigned_by
         FROM roles r
         JOIN user_roles ur ON r.id = ur.role_id
-        WHERE ur.user_id = $1 
-        AND ur.is_active = true 
+        WHERE ur.user_id = $1
+        AND ur.is_active = true
         AND (ur.expires_at IS NULL OR ur.expires_at > NOW())
         AND r.is_active = true
         ORDER BY r.level DESC, r.name
-      `, [userId]);
+      `,
+        [userId]
+      );
 
       return result.rows.map(row => ({
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        type: row.type,
-        level: row.level,
-        parentRoleId: row.parent_role_id,
-        isActive: row.is_active,
-        isSystem: row.is_system,
-        metadata: row.metadata ? JSON.parse(row.metadata) : {},
+        id: String(row.id),
+        name: String(row.name),
+        description: row.description ? String(row.description) : undefined,
+        type: row.type ? String(row.type) : undefined,
+        level: row.level ? Number(row.level) : undefined,
+        parentRoleId: row.parent_role_id ? String(row.parent_role_id) : null,
+        isActive: Boolean(row.is_active),
+        isSystem: Boolean(row.is_system),
+        metadata: row.metadata ? (JSON.parse(String(row.metadata)) as Record<string, unknown>) : {},
         createdAt: row.created_at,
         updatedAt: row.updated_at,
         assignedAt: row.assigned_at,
         expiresAt: row.expires_at,
-        assignedBy: row.assigned_by
+        assignedBy: row.assigned_by ? String(row.assigned_by) : undefined,
       }));
     } catch (error) {
       Logger.error('Failed to get user roles', error, { userId });
@@ -355,35 +481,38 @@ class RBACService {
   /**
    * 创建角色
    */
-  async createRole(roleData, createdBy) {
-    const pool = getPool();
+  async createRole(roleData: RoleData, createdBy: string) {
+    const pool = getPool() as DbPool;
 
     try {
       const roleId = uuidv4();
       const now = new Date().toISOString();
 
-      const result = await pool.query(`
+      const result = await pool.query(
+        `
         INSERT INTO roles (
           id, name, description, type, level, parent_role_id,
           is_active, is_system, metadata, created_at, updated_at,
           created_by, updated_by
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING *
-      `, [
-        roleId,
-        roleData.name,
-        roleData.description,
-        roleData.type || 'custom',
-        roleData.level || 1,
-        roleData.parentRoleId || null,
-        roleData.isActive !== false,
-        roleData.isSystem || false,
-        JSON.stringify(roleData.metadata || {}),
-        now,
-        now,
-        createdBy,
-        createdBy
-      ]);
+      `,
+        [
+          roleId,
+          roleData.name,
+          roleData.description,
+          roleData.type || 'custom',
+          roleData.level || 1,
+          roleData.parentRoleId || null,
+          roleData.isActive !== false,
+          roleData.isSystem || false,
+          JSON.stringify(roleData.metadata || {}),
+          now,
+          now,
+          createdBy,
+          createdBy,
+        ]
+      );
 
       const role = result.rows[0];
 
@@ -400,7 +529,7 @@ class RBACService {
         roleId,
         userId: createdBy,
         action: 'create',
-        changes: { new: roleData }
+        changes: { new: roleData },
       });
 
       Logger.info('Role created', { roleId, name: roleData.name, createdBy });
@@ -414,12 +543,12 @@ class RBACService {
         parentRoleId: role.parent_role_id,
         isActive: role.is_active,
         isSystem: role.is_system,
-        metadata: JSON.parse(role.metadata || '{}'),
+        metadata: JSON.parse(String(role.metadata || '{}')),
         createdAt: role.created_at,
         updatedAt: role.updated_at,
         createdBy: role.created_by,
         updatedBy: role.updated_by,
-        permissions: roleData.permissions || []
+        permissions: roleData.permissions || [],
       };
     } catch (error) {
       Logger.error('Failed to create role', error, { roleData, createdBy });
@@ -430,8 +559,8 @@ class RBACService {
   /**
    * 更新角色
    */
-  async updateRole(roleId, updates, updatedBy) {
-    const pool = getPool();
+  async updateRole(roleId: string, updates: Record<string, unknown>, updatedBy: string) {
+    const pool = getPool() as DbPool;
 
     try {
       // 获取当前角色信息
@@ -440,32 +569,38 @@ class RBACService {
         throw new Error('Role not found');
       }
 
-      const currentRole = currentResult.rows[0];
+      const currentRole = currentResult.rows[0] as Record<string, unknown>;
 
       // 检查是否为系统角色
       if (currentRole.is_system && updates.isSystem === false) {
         throw new Error('Cannot modify system role');
       }
 
-      const updateFields = [];
-      const updateValues = [];
+      const updateFields: string[] = [];
+      const updateValues: unknown[] = [];
       let valueIndex = 1;
 
       // 构建更新字段
-      const allowedFields = ['name', 'description', 'level', 'parent_role_id', 'is_active', 'metadata'];
+      const allowedFields = [
+        'name',
+        'description',
+        'level',
+        'parent_role_id',
+        'is_active',
+        'metadata',
+      ];
       for (const field of allowedFields) {
-        const dbField = field === 'parentRoleId' ? 'parent_role_id' :
-          field === 'isActive' ? 'is_active' : field;
+        const dbField =
+          field === 'parentRoleId' ? 'parent_role_id' : field === 'isActive' ? 'is_active' : field;
 
         if (updates[field] !== undefined) {
           updateFields.push(`${dbField} = $${valueIndex}`);
           updateValues.push(field === 'metadata' ? JSON.stringify(updates[field]) : updates[field]);
-          valueIndex++;
+          valueIndex += 1;
         }
       }
 
       if (updateFields.length === 0) {
-
         return currentRole;
       }
 
@@ -473,18 +608,24 @@ class RBACService {
       updateFields.push(`updated_at = $${valueIndex}`, `updated_by = $${valueIndex + 1}`);
       updateValues.push(new Date().toISOString(), updatedBy);
 
-      const result = await pool.query(`
-        UPDATE roles 
+      const result = await pool.query(
+        `
+        UPDATE roles
         SET ${updateFields.join(', ')}
         WHERE id = $${valueIndex + 2}
         RETURNING *
-      `, [...updateValues, roleId]);
+      `,
+        [...updateValues, roleId]
+      );
 
       const updatedRole = result.rows[0];
 
       // 更新权限关联
-      if (updates.permissions) {
-        await this.updateRolePermissions(roleId, updates.permissions);
+      if ((updates as { permissions?: string[] }).permissions) {
+        await this.updateRolePermissions(
+          roleId,
+          (updates as { permissions: string[] }).permissions
+        );
       }
 
       // 清除缓存
@@ -497,8 +638,8 @@ class RBACService {
         action: 'update',
         changes: {
           old: currentRole,
-          new: updates
-        }
+          new: updates,
+        },
       });
 
       Logger.info('Role updated', { roleId, updates, updatedBy });
@@ -512,11 +653,11 @@ class RBACService {
         parentRoleId: updatedRole.parent_role_id,
         isActive: updatedRole.is_active,
         isSystem: updatedRole.is_system,
-        metadata: JSON.parse(updatedRole.metadata || '{}'),
+        metadata: JSON.parse(String(updatedRole.metadata || '{}')),
         createdAt: updatedRole.created_at,
         updatedAt: updatedRole.updated_at,
         createdBy: updatedRole.created_by,
-        updatedBy: updatedRole.updated_by
+        updatedBy: updatedRole.updated_by,
       };
     } catch (error) {
       Logger.error('Failed to update role', error, { roleId, updates, updatedBy });
@@ -527,8 +668,8 @@ class RBACService {
   /**
    * 删除角色
    */
-  async deleteRole(roleId, deletedBy) {
-    const pool = getPool();
+  async deleteRole(roleId: string, deletedBy: string) {
+    const pool = getPool() as DbPool;
 
     try {
       // 检查角色是否存在且不是系统角色
@@ -537,18 +678,18 @@ class RBACService {
         throw new Error('Role not found');
       }
 
-      const role = roleResult.rows[0];
+      const role = roleResult.rows[0] as Record<string, unknown>;
       if (role.is_system) {
         throw new Error('Cannot delete system role');
       }
 
       // 检查是否有用户使用此角色
-      const userRoleResult = await pool.query(
+      const userRoleResult = await pool.query<{ count: string }>(
         'SELECT COUNT(*) as count FROM user_roles WHERE role_id = $1 AND is_active = true',
         [roleId]
       );
 
-      if (parseInt(userRoleResult.rows[0].count) > 0) {
+      if (Number.parseInt(userRoleResult.rows[0].count, 10) > 0) {
         throw new Error('Cannot delete role that is assigned to users');
       }
 
@@ -572,7 +713,7 @@ class RBACService {
           roleId,
           userId: deletedBy,
           action: 'delete',
-          changes: { old: role }
+          changes: { old: role },
         });
 
         Logger.info('Role deleted', { roleId, deletedBy });
@@ -591,12 +732,20 @@ class RBACService {
   /**
    * 分配角色给用户
    */
-  async assignRole(userId, roleId, assignedBy, expiresAt = null) {
-    const pool = getPool();
+  async assignRole(
+    userId: string,
+    roleId: string,
+    assignedBy: string,
+    expiresAt: string | null = null
+  ) {
+    const pool = getPool() as DbPool;
 
     try {
       // 检查角色是否存在
-      const roleResult = await pool.query('SELECT * FROM roles WHERE id = $1 AND is_active = true', [roleId]);
+      const roleResult = await pool.query(
+        'SELECT * FROM roles WHERE id = $1 AND is_active = true',
+        [roleId]
+      );
       if (roleResult.rows.length === 0) {
         throw new Error('Role not found or inactive');
       }
@@ -614,11 +763,14 @@ class RBACService {
       const userRoleId = uuidv4();
       const now = new Date().toISOString();
 
-      await pool.query(`
+      await pool.query(
+        `
         INSERT INTO user_roles (
           id, user_id, role_id, assigned_by, assigned_at, expires_at, is_active
         ) VALUES ($1, $2, $3, $4, $5, $6, true)
-      `, [userRoleId, userId, roleId, assignedBy, now, expiresAt]);
+      `,
+        [userRoleId, userId, roleId, assignedBy, now, expiresAt]
+      );
 
       // 清除用户权限缓存
       this.clearUserCache(userId);
@@ -630,8 +782,8 @@ class RBACService {
         targetUserId: userId,
         action: 'assign',
         changes: {
-          new: { roleId, userId, expiresAt }
-        }
+          new: { roleId, userId, expiresAt },
+        },
       });
 
       Logger.info('Role assigned to user', { userId, roleId, assignedBy, expiresAt });
@@ -646,16 +798,19 @@ class RBACService {
   /**
    * 撤销用户角色
    */
-  async revokeRole(userId, roleId, revokedBy) {
-    const pool = getPool();
+  async revokeRole(userId: string, roleId: string, revokedBy: string) {
+    const pool = getPool() as DbPool;
 
     try {
-      const result = await pool.query(`
-        UPDATE user_roles 
+      const result = await pool.query(
+        `
+        UPDATE user_roles
         SET is_active = false, revoked_at = NOW(), revoked_by = $3
         WHERE user_id = $1 AND role_id = $2 AND is_active = true
         RETURNING *
-      `, [userId, roleId, revokedBy]);
+      `,
+        [userId, roleId, revokedBy]
+      );
 
       if (result.rows.length === 0) {
         throw new Error('User role assignment not found');
@@ -671,8 +826,8 @@ class RBACService {
         targetUserId: userId,
         action: 'revoke',
         changes: {
-          old: { roleId, userId }
-        }
+          old: { roleId, userId },
+        },
       });
 
       Logger.info('Role revoked from user', { userId, roleId, revokedBy });
@@ -689,8 +844,8 @@ class RBACService {
   /**
    * 为角色分配权限
    */
-  async assignPermissionsToRole(roleId, permissionIds) {
-    const pool = getPool();
+  async assignPermissionsToRole(roleId: string, permissionIds: string[]) {
+    const pool = getPool() as DbPool;
 
     try {
       // 删除现有权限关联
@@ -698,14 +853,15 @@ class RBACService {
 
       // 添加新的权限关联
       if (permissionIds.length > 0) {
-        const values = permissionIds.map((permId, index) =>
-          `($1, $${index + 2})`
-        ).join(', ');
+        const values = permissionIds.map((_, index) => `($1, $${index + 2})`).join(', ');
 
-        await pool.query(`
+        await pool.query(
+          `
           INSERT INTO role_permissions (role_id, permission_id)
           VALUES ${values}
-        `, [roleId, ...permissionIds]);
+        `,
+          [roleId, ...permissionIds]
+        );
       }
 
       // 清除缓存
@@ -721,7 +877,7 @@ class RBACService {
   /**
    * 更新角色权限
    */
-  async updateRolePermissions(roleId, permissionIds) {
+  async updateRolePermissions(roleId: string, permissionIds: string[]) {
     return this.assignPermissionsToRole(roleId, permissionIds);
   }
 
@@ -730,28 +886,39 @@ class RBACService {
   /**
    * 记录权限检查日志
    */
-  async logPermissionCheck(logData) {
-    const pool = getPool();
+  async logPermissionCheck(logData: {
+    userId: string;
+    resource: string;
+    action: string;
+    resourceId?: string | null;
+    result: string;
+    reason?: string;
+    context?: Record<string, unknown>;
+  }) {
+    const pool = getPool() as DbPool;
 
     try {
-      await pool.query(`
+      await pool.query(
+        `
         INSERT INTO permission_audit_logs (
           id, user_id, action, resource, resource_id, result, reason,
           ip_address, user_agent, session_id, timestamp, metadata
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
-      `, [
-        uuidv4(),
-        logData.userId,
-        logData.action,
-        logData.resource,
-        logData.resourceId,
-        logData.result,
-        logData.reason,
-        logData.context?.ipAddress || null,
-        logData.context?.userAgent || null,
-        logData.context?.sessionId || null,
-        JSON.stringify(logData.context || {})
-      ]);
+      `,
+        [
+          uuidv4(),
+          logData.userId,
+          logData.action,
+          logData.resource,
+          logData.resourceId,
+          logData.result,
+          logData.reason,
+          logData.context?.ipAddress || null,
+          logData.context?.userAgent || null,
+          logData.context?.sessionId || null,
+          JSON.stringify(logData.context || {}),
+        ]
+      );
     } catch (error) {
       Logger.error('Failed to log permission check', error, logData);
     }
@@ -760,26 +927,38 @@ class RBACService {
   /**
    * 记录角色变更日志
    */
-  async logRoleChange(logData) {
-    const pool = getPool();
+  async logRoleChange(logData: {
+    roleId: string;
+    userId: string;
+    targetUserId?: string;
+    action: string;
+    changes: Record<string, unknown>;
+    reason?: string;
+    ipAddress?: string;
+    userAgent?: string;
+  }) {
+    const pool = getPool() as DbPool;
 
     try {
-      await pool.query(`
+      await pool.query(
+        `
         INSERT INTO role_audit_logs (
           id, role_id, user_id, target_user_id, action, changes,
           reason, ip_address, user_agent, timestamp
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
-      `, [
-        uuidv4(),
-        logData.roleId,
-        logData.userId,
-        logData.targetUserId || null,
-        logData.action,
-        JSON.stringify(logData.changes),
-        logData.reason || null,
-        logData.ipAddress || null,
-        logData.userAgent || null
-      ]);
+      `,
+        [
+          uuidv4(),
+          logData.roleId,
+          logData.userId,
+          logData.targetUserId || null,
+          logData.action,
+          JSON.stringify(logData.changes),
+          logData.reason || null,
+          logData.ipAddress || null,
+          logData.userAgent || null,
+        ]
+      );
     } catch (error) {
       Logger.error('Failed to log role change', error, logData);
     }
@@ -794,16 +973,23 @@ class RBACService {
     this.permissionCache.clear();
     this.roleCache.clear();
     this.userPermissionCache.clear();
+    this.permissionCheckCache.clear();
   }
 
   /**
    * 清除用户相关缓存
    */
-  clearUserCache(userId) {
+  clearUserCache(userId: string) {
     // 清除用户权限缓存
     for (const [key] of this.userPermissionCache) {
-      if (key.startsWith(`user_permissions:${userId}`) || key.startsWith(`${userId}:`)) {
+      if (key.startsWith(`user_permissions:${userId}`)) {
         this.userPermissionCache.delete(key);
+      }
+    }
+
+    for (const [key] of this.permissionCheckCache) {
+      if (key.startsWith(`${userId}:`)) {
+        this.permissionCheckCache.delete(key);
       }
     }
   }
@@ -820,6 +1006,12 @@ class RBACService {
       for (const [key, value] of this.userPermissionCache) {
         if (now - value.timestamp > expiry) {
           this.userPermissionCache.delete(key);
+        }
+      }
+
+      for (const [key, value] of this.permissionCheckCache) {
+        if (now - value.timestamp > expiry) {
+          this.permissionCheckCache.delete(key);
         }
       }
     }, 3600000);
@@ -840,8 +1032,11 @@ class RBACService {
 
 const rbacService = new RBACService();
 
+export { RBACService, RBAC_CONFIG, rbacService };
+
+// 兼容 CommonJS require
 module.exports = {
   RBACService,
   rbacService,
-  RBAC_CONFIG
+  RBAC_CONFIG,
 };

@@ -3,15 +3,67 @@
  * 提供企业级配置管理、热更新、验证、历史记录等功能
  */
 
-const fs = require('fs');
-const path = require('path');
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
+import fs from 'fs';
+import path from 'path';
+
+type ConfigValueType = 'string' | 'number' | 'boolean' | 'array' | 'object';
+
+interface ConfigSchemaEntry {
+  type: ConfigValueType;
+  default?: unknown;
+  min?: number;
+  max?: number;
+  required?: boolean;
+  description?: string;
+  hotReload?: boolean;
+  sensitive?: boolean;
+  enum?: string[];
+}
+
+type ConfigSchema = Record<string, ConfigSchemaEntry>;
+
+type ConfigChangeSource =
+  | 'unknown'
+  | 'environment'
+  | 'default'
+  | 'file'
+  | 'manual'
+  | 'api'
+  | 'api_batch'
+  | 'rollback'
+  | 'reset';
+
+interface ConfigChange {
+  timestamp: string;
+  key: string;
+  oldValue: unknown;
+  newValue: unknown;
+  source: ConfigChangeSource | string;
+  id: string;
+}
+
+interface RollbackInfo {
+  key: string;
+  value: unknown;
+  rollbackFrom: unknown;
+}
+
+interface ConfigStatus {
+  initialized: boolean;
+  totalConfigs: number;
+  schemaConfigs: number;
+  historyCount: number;
+  watchersCount: number;
+  configFile: string;
+  fileExists: boolean;
+}
 
 /**
  * 配置验证器
  */
-class ConfigValidator {
-  static validateType(value, type, name) {
+export class ConfigValidator {
+  static validateType(value: unknown, type: ConfigValueType, name: string): void {
     switch (type) {
       case 'string':
         if (typeof value !== 'string') {
@@ -19,7 +71,7 @@ class ConfigValidator {
         }
         break;
       case 'number':
-        if (typeof value !== 'number' || isNaN(value)) {
+        if (typeof value !== 'number' || Number.isNaN(value)) {
           throw new Error(`配置项 ${name} 必须是数字类型`);
         }
         break;
@@ -43,7 +95,12 @@ class ConfigValidator {
     }
   }
 
-  static validateRange(value, min, max, name) {
+  static validateRange(
+    value: unknown,
+    min: number | undefined,
+    max: number | undefined,
+    name: string
+  ): void {
     if (typeof value === 'number') {
       if (min !== undefined && value < min) {
         throw new Error(`配置项 ${name} 的值 ${value} 小于最小值 ${min}`);
@@ -54,9 +111,11 @@ class ConfigValidator {
     }
   }
 
-  static validateEnum(value, allowedValues, name) {
-    if (allowedValues && !allowedValues.includes(value)) {
-      throw new Error(`配置项 ${name} 的值 ${value} 不在允许的值列表中: ${allowedValues.join(', ')}`);
+  static validateEnum(value: unknown, allowedValues: string[] | undefined, name: string): void {
+    if (allowedValues && !allowedValues.includes(String(value))) {
+      throw new Error(
+        `配置项 ${name} 的值 ${value} 不在允许的值列表中: ${allowedValues.join(', ')}`
+      );
     }
   }
 }
@@ -64,24 +123,32 @@ class ConfigValidator {
 /**
  * 配置历史管理器
  */
-class ConfigHistory {
+export class ConfigHistory {
+  history: ConfigChange[] = [];
+
+  maxHistory: number;
+
   constructor(maxHistory = 100) {
-    this.history = [];
     this.maxHistory = maxHistory;
   }
 
-  addChange(key, oldValue, newValue, source = 'unknown') {
-    const change = {
+  addChange(
+    key: string,
+    oldValue: unknown,
+    newValue: unknown,
+    source: ConfigChangeSource | string = 'unknown'
+  ): string {
+    const change: ConfigChange = {
       timestamp: new Date().toISOString(),
       key,
       oldValue,
       newValue,
       source,
-      id: `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+      id: `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
     };
 
     this.history.unshift(change);
-    
+
     // 保持历史记录数量限制
     if (this.history.length > this.maxHistory) {
       this.history = this.history.slice(0, this.maxHistory);
@@ -90,26 +157,26 @@ class ConfigHistory {
     return change.id;
   }
 
-  getHistory(key = null, limit = 50) {
+  getHistory(key: string | null = null, limit = 50): ConfigChange[] {
     let filtered = this.history;
-    
+
     if (key) {
       filtered = this.history.filter(change => change.key === key);
     }
-    
+
     return filtered.slice(0, limit);
   }
 
-  rollback(changeId) {
+  rollback(changeId: string): RollbackInfo {
     const change = this.history.find(c => c.id === changeId);
     if (!change) {
       throw new Error(`未找到变更记录: ${changeId}`);
     }
-    
+
     return {
       key: change.key,
       value: change.oldValue,
-      rollbackFrom: change.newValue
+      rollbackFrom: change.newValue,
     };
   }
 }
@@ -117,27 +184,37 @@ class ConfigHistory {
 /**
  * 统一配置中心
  */
-class ConfigCenter extends EventEmitter {
+export class ConfigCenter extends EventEmitter {
+  config: Record<string, unknown> = {};
+
+  schema: ConfigSchema = {};
+
+  history: ConfigHistory;
+
+  watchers: Map<string, Array<(value: unknown, oldValue: unknown) => void>>;
+
+  isInitialized: boolean;
+
+  configFile: string;
+
   constructor() {
     super();
-    this.config = {};
-    this.schema = {};
     this.history = new ConfigHistory();
     this.watchers = new Map();
     this.isInitialized = false;
     this.configFile = path.join(__dirname, 'runtime-config.json');
-    
+
     // 配置模式定义
     this.defineSchema();
-    
+
     // 初始化配置
-    this.initialize();
+    void this.initialize();
   }
 
   /**
    * 定义配置模式
    */
-  defineSchema() {
+  defineSchema(): void {
     this.schema = {
       // 服务器配置
       'server.port': {
@@ -147,14 +224,14 @@ class ConfigCenter extends EventEmitter {
         max: 65535,
         required: true,
         description: '服务器端口号',
-        hotReload: false // 端口变更需要重启
+        hotReload: false, // 端口变更需要重启
       },
       'server.host': {
         type: 'string',
         default: '0.0.0.0',
         required: false,
         description: '服务器主机地址',
-        hotReload: false
+        hotReload: false,
       },
       'server.nodeEnv': {
         type: 'string',
@@ -162,7 +239,7 @@ class ConfigCenter extends EventEmitter {
         enum: ['development', 'production', 'test'],
         required: true,
         description: '运行环境',
-        hotReload: false
+        hotReload: false,
       },
 
       // 数据库配置
@@ -171,7 +248,7 @@ class ConfigCenter extends EventEmitter {
         default: 'localhost',
         required: true,
         description: '数据库主机地址',
-        hotReload: false
+        hotReload: false,
       },
       'database.port': {
         type: 'number',
@@ -180,21 +257,21 @@ class ConfigCenter extends EventEmitter {
         max: 65535,
         required: true,
         description: '数据库端口',
-        hotReload: false
+        hotReload: false,
       },
       'database.name': {
         type: 'string',
         default: 'testweb',
         required: true,
         description: '数据库名称',
-        hotReload: false
+        hotReload: false,
       },
       'database.user': {
         type: 'string',
         default: 'postgres',
         required: true,
         description: '数据库用户名',
-        hotReload: false
+        hotReload: false,
       },
       'database.password': {
         type: 'string',
@@ -202,7 +279,7 @@ class ConfigCenter extends EventEmitter {
         required: true,
         description: '数据库密码',
         sensitive: true,
-        hotReload: false
+        hotReload: false,
       },
       'database.maxConnections': {
         type: 'number',
@@ -211,7 +288,7 @@ class ConfigCenter extends EventEmitter {
         max: 100,
         required: false,
         description: '最大连接数',
-        hotReload: true
+        hotReload: true,
       },
 
       // 认证配置
@@ -221,14 +298,14 @@ class ConfigCenter extends EventEmitter {
         required: true,
         description: 'JWT密钥',
         sensitive: true,
-        hotReload: true
+        hotReload: true,
       },
       'auth.jwtExpiration': {
         type: 'string',
         default: '24h',
         required: false,
         description: 'JWT过期时间',
-        hotReload: true
+        hotReload: true,
       },
       'auth.sessionTimeout': {
         type: 'number',
@@ -237,7 +314,7 @@ class ConfigCenter extends EventEmitter {
         max: 86400000,
         required: false,
         description: '会话超时时间（毫秒）',
-        hotReload: true
+        hotReload: true,
       },
 
       // 测试引擎配置
@@ -248,7 +325,7 @@ class ConfigCenter extends EventEmitter {
         max: 20,
         required: false,
         description: '最大并发测试数',
-        hotReload: true
+        hotReload: true,
       },
       'testEngine.defaultTimeout': {
         type: 'number',
@@ -257,14 +334,14 @@ class ConfigCenter extends EventEmitter {
         max: 1800000,
         required: false,
         description: '默认测试超时时间（毫秒）',
-        hotReload: true
+        hotReload: true,
       },
       'testEngine.enableHistory': {
         type: 'boolean',
         default: true,
         required: false,
         description: '是否启用测试历史',
-        hotReload: true
+        hotReload: true,
       },
 
       // 文件存储配置
@@ -273,14 +350,14 @@ class ConfigCenter extends EventEmitter {
         default: './uploads',
         required: false,
         description: '上传文件目录',
-        hotReload: true
+        hotReload: true,
       },
       'storage.exportsDir': {
         type: 'string',
         default: './exports',
         required: false,
         description: '导出文件目录',
-        hotReload: true
+        hotReload: true,
       },
       'storage.maxFileSize': {
         type: 'number',
@@ -289,7 +366,7 @@ class ConfigCenter extends EventEmitter {
         max: 104857600, // 100MB
         required: false,
         description: '最大文件大小（字节）',
-        hotReload: true
+        hotReload: true,
       },
 
       // 监控配置
@@ -298,7 +375,7 @@ class ConfigCenter extends EventEmitter {
         default: true,
         required: false,
         description: '是否启用监控',
-        hotReload: true
+        hotReload: true,
       },
       'monitoring.interval': {
         type: 'number',
@@ -307,7 +384,7 @@ class ConfigCenter extends EventEmitter {
         max: 300000,
         required: false,
         description: '监控间隔（毫秒）',
-        hotReload: true
+        hotReload: true,
       },
       'monitoring.retentionDays': {
         type: 'number',
@@ -316,7 +393,7 @@ class ConfigCenter extends EventEmitter {
         max: 365,
         required: false,
         description: '监控数据保留天数',
-        hotReload: true
+        hotReload: true,
       },
 
       // 安全配置
@@ -325,7 +402,7 @@ class ConfigCenter extends EventEmitter {
         default: ['http://localhost:5173'],
         required: false,
         description: 'CORS允许的源',
-        hotReload: true
+        hotReload: true,
       },
       'security.rateLimitWindow': {
         type: 'number',
@@ -334,7 +411,7 @@ class ConfigCenter extends EventEmitter {
         max: 3600000,
         required: false,
         description: '速率限制窗口（毫秒）',
-        hotReload: true
+        hotReload: true,
       },
       'security.rateLimitMax': {
         type: 'number',
@@ -343,7 +420,7 @@ class ConfigCenter extends EventEmitter {
         max: 1000,
         required: false,
         description: '速率限制最大请求数',
-        hotReload: true
+        hotReload: true,
       },
 
       // 日志配置
@@ -353,48 +430,47 @@ class ConfigCenter extends EventEmitter {
         enum: ['error', 'warn', 'info', 'debug'],
         required: false,
         description: '日志级别',
-        hotReload: true
+        hotReload: true,
       },
       'logging.enableConsole': {
         type: 'boolean',
         default: true,
         required: false,
         description: '是否启用控制台日志',
-        hotReload: true
+        hotReload: true,
       },
       'logging.enableFile': {
         type: 'boolean',
         default: false,
         required: false,
         description: '是否启用文件日志',
-        hotReload: true
-      }
+        hotReload: true,
+      },
     };
   }
 
   /**
    * 初始化配置中心
    */
-  async initialize() {
+  async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
     try {
       // 加载环境变量配置
       this.loadFromEnvironment();
-      
+
       // 加载运行时配置文件
       await this.loadFromFile();
-      
+
       // 验证所有配置
       this.validateAllConfigs();
-      
+
       // 设置文件监听（用于热更新）
       this.setupFileWatcher();
-      
+
       this.isInitialized = true;
       console.log('✅ 配置中心初始化完成');
       this.emit('initialized');
-      
     } catch (error) {
       console.error('❌ 配置中心初始化失败:', error);
       throw error;
@@ -404,8 +480,8 @@ class ConfigCenter extends EventEmitter {
   /**
    * 从环境变量加载配置
    */
-  loadFromEnvironment() {
-    const envMapping = {
+  loadFromEnvironment(): void {
+    const envMapping: Record<string, string> = {
       'server.port': 'PORT',
       'server.host': 'HOST',
       'server.nodeEnv': 'NODE_ENV',
@@ -432,7 +508,7 @@ class ConfigCenter extends EventEmitter {
       'security.rateLimitMax': 'RATE_LIMIT_MAX',
       'logging.level': 'LOG_LEVEL',
       'logging.enableConsole': 'LOG_ENABLE_CONSOLE',
-      'logging.enableFile': 'LOG_ENABLE_FILE'
+      'logging.enableFile': 'LOG_ENABLE_FILE',
     };
 
     for (const [configKey, envKey] of Object.entries(envMapping)) {
@@ -452,21 +528,22 @@ class ConfigCenter extends EventEmitter {
   /**
    * 解析环境变量值
    */
-  parseEnvValue(value, configKey) {
+  parseEnvValue(value: string, configKey: string): unknown {
     const schema = this.schema[configKey];
     if (!schema) return value;
 
     switch (schema.type) {
-      case 'number':
+      case 'number': {
         const num = Number(value);
-        return isNaN(num) ? schema.default : num;
+        return Number.isNaN(num) ? schema.default : num;
+      }
       case 'boolean':
         return value.toLowerCase() === 'true';
       case 'array':
         try {
           return JSON.parse(value);
         } catch {
-          return value.split(',').map(s => s.trim());
+          return value.split(',').map(item => item.trim());
         }
       case 'object':
         try {
@@ -482,39 +559,42 @@ class ConfigCenter extends EventEmitter {
   /**
    * 从文件加载配置
    */
-  async loadFromFile() {
+  async loadFromFile(): Promise<void> {
     try {
       if (fs.existsSync(this.configFile)) {
         const fileContent = fs.readFileSync(this.configFile, 'utf8');
-        const fileConfig = JSON.parse(fileContent);
-        
+        const fileConfig: Record<string, unknown> = JSON.parse(fileContent);
+
         for (const [key, value] of Object.entries(fileConfig)) {
           this.setConfigValue(key, value, 'file');
         }
-        
       }
     } catch (error) {
-      console.warn(`⚠️ 加载配置文件失败: ${error.message}`);
+      console.warn(`⚠️ 加载配置文件失败: ${(error as Error).message}`);
     }
   }
 
   /**
    * 设置配置值
    */
-  setConfigValue(key, value, source = 'manual') {
+  setConfigValue(
+    key: string,
+    value: unknown,
+    source: ConfigChangeSource | string = 'manual'
+  ): void {
     const oldValue = this.config[key];
     this.config[key] = value;
-    
+
     // 记录变更历史
     if (oldValue !== value) {
       this.history.addChange(key, oldValue, value, source);
-      
+
       // 触发变更事件
       this.emit('configChanged', { key, oldValue, newValue: value, source });
-      
+
       // 触发特定配置的监听器
       if (this.watchers.has(key)) {
-        this.watchers.get(key).forEach(callback => {
+        this.watchers.get(key)?.forEach(callback => {
           try {
             callback(value, oldValue);
           } catch (error) {
@@ -528,38 +608,37 @@ class ConfigCenter extends EventEmitter {
   /**
    * 获取配置值
    */
-  get(key, defaultValue = undefined) {
-    if (this.config.hasOwnProperty(key)) {
+  get(key: string, defaultValue: unknown = undefined): unknown {
+    if (Object.prototype.hasOwnProperty.call(this.config, key)) {
       return this.config[key];
     }
-    
+
     const schema = this.schema[key];
     if (schema && schema.default !== undefined) {
-      
-        return schema.default;
-      }
-    
+      return schema.default;
+    }
+
     return defaultValue;
   }
 
   /**
    * 设置配置值（带验证）
    */
-  set(key, value, source = 'manual') {
+  set(key: string, value: unknown, source: ConfigChangeSource | string = 'manual'): void {
     this.validateConfig(key, value);
     this.setConfigValue(key, value, source);
-    
+
     // 如果支持热更新，保存到文件
     const schema = this.schema[key];
     if (schema && schema.hotReload) {
-      this.saveToFile();
+      void this.saveToFile();
     }
   }
 
   /**
    * 验证配置
    */
-  validateConfig(key, value) {
+  validateConfig(key: string, value: unknown): void {
     const schema = this.schema[key];
     if (!schema) {
       throw new Error(`未知的配置项: ${key}`);
@@ -567,12 +646,12 @@ class ConfigCenter extends EventEmitter {
 
     // 类型验证
     ConfigValidator.validateType(value, schema.type, key);
-    
+
     // 范围验证
     if (schema.min !== undefined || schema.max !== undefined) {
       ConfigValidator.validateRange(value, schema.min, schema.max, key);
     }
-    
+
     // 枚举验证
     if (schema.enum) {
       ConfigValidator.validateEnum(value, schema.enum, key);
@@ -582,12 +661,12 @@ class ConfigCenter extends EventEmitter {
   /**
    * 验证所有配置
    */
-  validateAllConfigs() {
+  validateAllConfigs(): void {
     for (const [key, value] of Object.entries(this.config)) {
       try {
         this.validateConfig(key, value);
       } catch (error) {
-        console.error(`配置验证失败 [${key}]:`, error.message);
+        console.error(`配置验证失败 [${key}]:`, (error as Error).message);
         throw error;
       }
     }
@@ -596,17 +675,17 @@ class ConfigCenter extends EventEmitter {
   /**
    * 保存配置到文件
    */
-  async saveToFile() {
+  async saveToFile(): Promise<void> {
     try {
       // 只保存支持热更新的配置
-      const hotReloadConfig = {};
+      const hotReloadConfig: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(this.config)) {
         const schema = this.schema[key];
         if (schema && schema.hotReload) {
           hotReloadConfig[key] = value;
         }
       }
-      
+
       fs.writeFileSync(this.configFile, JSON.stringify(hotReloadConfig, null, 2));
     } catch (error) {
       console.error('保存配置文件失败:', error);
@@ -617,7 +696,7 @@ class ConfigCenter extends EventEmitter {
   /**
    * 设置文件监听
    */
-  setupFileWatcher() {
+  setupFileWatcher(): void {
     if (fs.existsSync(this.configFile)) {
       fs.watchFile(this.configFile, { interval: 1000 }, async () => {
         try {
@@ -633,12 +712,12 @@ class ConfigCenter extends EventEmitter {
   /**
    * 监听配置变更
    */
-  watch(key, callback) {
+  watch(key: string, callback: (value: unknown, oldValue: unknown) => void): () => void {
     if (!this.watchers.has(key)) {
       this.watchers.set(key, []);
     }
-    this.watchers.get(key).push(callback);
-    
+    this.watchers.get(key)?.push(callback);
+
     // 返回取消监听的函数
     return () => {
       const callbacks = this.watchers.get(key);
@@ -654,8 +733,8 @@ class ConfigCenter extends EventEmitter {
   /**
    * 获取所有配置
    */
-  getAll(includeSensitive = false) {
-    const result = {};
+  getAll(includeSensitive = false): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(this.config)) {
       const schema = this.schema[key];
       if (!includeSensitive && schema && schema.sensitive) {
@@ -670,21 +749,21 @@ class ConfigCenter extends EventEmitter {
   /**
    * 获取配置模式
    */
-  getSchema() {
+  getSchema(): ConfigSchema {
     return this.schema;
   }
 
   /**
    * 获取配置历史
    */
-  getHistory(key = null, limit = 50) {
+  getHistory(key: string | null = null, limit = 50): ConfigChange[] {
     return this.history.getHistory(key, limit);
   }
 
   /**
    * 回滚配置
    */
-  rollback(changeId) {
+  rollback(changeId: string): RollbackInfo {
     const rollbackInfo = this.history.rollback(changeId);
     this.set(rollbackInfo.key, rollbackInfo.value, 'rollback');
     return rollbackInfo;
@@ -693,7 +772,7 @@ class ConfigCenter extends EventEmitter {
   /**
    * 重置配置为默认值
    */
-  reset(key = null) {
+  reset(key: string | null = null): void {
     if (key) {
       const schema = this.schema[key];
       if (schema && schema.default !== undefined) {
@@ -711,7 +790,7 @@ class ConfigCenter extends EventEmitter {
   /**
    * 获取配置状态
    */
-  getStatus() {
+  getStatus(): ConfigStatus {
     return {
       initialized: this.isInitialized,
       totalConfigs: Object.keys(this.config).length,
@@ -719,17 +798,18 @@ class ConfigCenter extends EventEmitter {
       historyCount: this.history.history.length,
       watchersCount: this.watchers.size,
       configFile: this.configFile,
-      fileExists: fs.existsSync(this.configFile)
+      fileExists: fs.existsSync(this.configFile),
     };
   }
 }
 
 // 创建全局配置中心实例
-const configCenter = new ConfigCenter();
+export const configCenter = new ConfigCenter();
 
+// 兼容 CommonJS require
 module.exports = {
   ConfigCenter,
   ConfigValidator,
   ConfigHistory,
-  configCenter
+  configCenter,
 };

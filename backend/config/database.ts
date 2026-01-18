@@ -3,14 +3,48 @@
  * 支持环境自适应、连接池优化、故障恢复
  */
 
-const { Pool } = require('pg');
+import type { Pool, QueryResult } from 'pg';
+
+const { Pool: PgPool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 const DatabaseConnectionManager = require('../utils/database');
 
+type DbConfig = {
+  host: string;
+  port: number;
+  database: string;
+  user: string;
+  password: string;
+  max: number;
+  min: number;
+  idleTimeoutMillis: number;
+  connectionTimeoutMillis: number;
+  acquireTimeoutMillis: number;
+  statement_timeout: number;
+  query_timeout: number;
+  ssl: false | { rejectUnauthorized: boolean };
+  application_name: string;
+  retryAttempts: number;
+  retryDelay: number;
+  healthCheckInterval: number;
+  logLevel: string;
+};
+
+type ConnectionManager = {
+  on: (event: string, handler: (data: { status?: string; error?: Error }) => void) => void;
+  initialize: () => Promise<void>;
+  query: (
+    sql: string,
+    params?: unknown[],
+    options?: Record<string, unknown>
+  ) => Promise<QueryResult<unknown>>;
+  getStatus: () => { pool?: { totalCount?: number; idleCount?: number; waitingCount?: number } };
+};
+
 // 数据库连接池和管理器
-let pool = null;
-let connectionManager = null;
+let pool: Pool | null = null;
+let connectionManager: ConnectionManager | null = null;
 
 // 根据环境自动选择数据库
 const getDefaultDatabase = () => {
@@ -26,41 +60,46 @@ const getDefaultDatabase = () => {
 };
 
 // 优化的数据库配置 - 环境自适应版本
-const dbConfig = {
+const dbConfig: DbConfig = {
   host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT) || 5432,
+  port: parseInt(process.env.DB_PORT || '', 10) || 5432,
   database: getDefaultDatabase(),
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
 
   // 连接池优化配置 (根据环境调整)
-  max: parseInt(process.env.DB_MAX_CONNECTIONS) || (process.env.NODE_ENV === 'production' ? 50 : 20),
-  min: parseInt(process.env.DB_MIN_CONNECTIONS) || (process.env.NODE_ENV === 'production' ? 10 : 5),
-  idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT) || 30000,
-  connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 5000,
-  acquireTimeoutMillis: parseInt(process.env.DB_ACQUIRE_TIMEOUT) || 60000,
+  max:
+    parseInt(process.env.DB_MAX_CONNECTIONS || '', 10) ||
+    (process.env.NODE_ENV === 'production' ? 50 : 20),
+  min:
+    parseInt(process.env.DB_MIN_CONNECTIONS || '', 10) ||
+    (process.env.NODE_ENV === 'production' ? 10 : 5),
+  idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '', 10) || 30000,
+  connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '', 10) || 5000,
+  acquireTimeoutMillis: parseInt(process.env.DB_ACQUIRE_TIMEOUT || '', 10) || 60000,
 
   // 性能优化配置
-  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000,
-  query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT) || 30000,
+  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT || '', 10) || 30000,
+  query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT || '', 10) || 30000,
 
   // SSL配置 (根据环境变量决定)
-  ssl: process.env.DB_SSL === 'true' ? {
-    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false'
-  } : false,
+  ssl:
+    process.env.DB_SSL === 'true'
+      ? { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false' }
+      : false,
 
   // 应用名称 (便于监控)
   application_name: process.env.DB_APPLICATION_NAME || `testweb_${process.env.NODE_ENV || 'dev'}`,
 
   // 连接重试配置
-  retryAttempts: parseInt(process.env.DB_RETRY_ATTEMPTS) || 5,
-  retryDelay: parseInt(process.env.DB_RETRY_DELAY) || 1000,
+  retryAttempts: parseInt(process.env.DB_RETRY_ATTEMPTS || '', 10) || 5,
+  retryDelay: parseInt(process.env.DB_RETRY_DELAY || '', 10) || 1000,
 
   // 健康检查配置
-  healthCheckInterval: parseInt(process.env.DB_HEALTH_CHECK_INTERVAL) || 30000,
+  healthCheckInterval: parseInt(process.env.DB_HEALTH_CHECK_INTERVAL || '', 10) || 30000,
 
   // 日志配置
-  logLevel: process.env.DB_LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'error' : 'info')
+  logLevel: process.env.DB_LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'error' : 'info'),
 };
 
 /**
@@ -68,24 +107,27 @@ const dbConfig = {
  */
 const createPool = () => {
   if (!pool) {
-    pool = new Pool(dbConfig);
+    pool = new PgPool(dbConfig);
 
     // 连接池事件监听
-    pool.on('connect', (client) => {
-
+    pool.on('connect', (client: { query: (sql: string) => Promise<unknown> }) => {
       // 设置连接级别的优化参数
-      client.query(`
+      client
+        .query(
+          `
         SET search_path TO public;
         SET timezone TO 'UTC';
         SET statement_timeout TO '${dbConfig.statement_timeout}ms';
         SET lock_timeout TO '10s';
         SET idle_in_transaction_session_timeout TO '60s';
-      `).catch(err => {
-        console.error('❌ 连接初始化失败:', err);
-      });
+      `
+        )
+        .catch((err: Error) => {
+          console.error('❌ 连接初始化失败:', err);
+        });
     });
 
-    pool.on('error', (err, client) => {
+    pool.on('error', (err: Error) => {
       console.error('❌ 数据库连接池错误:', err);
 
       // 记录错误详情用于监控
@@ -94,22 +136,9 @@ const createPool = () => {
         console.error('生产环境数据库错误:', {
           error: err.message,
           stack: err.stack,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
-    });
-
-    pool.on('acquire', (client) => {
-      if (process.env.NODE_ENV === 'development') {
-      }
-    });
-
-    pool.on('release', (client) => {
-      if (process.env.NODE_ENV === 'development') {
-      }
-    });
-
-    pool.on('remove', (client) => {
     });
   }
   return pool;
@@ -132,8 +161,9 @@ const connectDB = async () => {
     await initializeTables();
 
     return dbPool;
-  } catch (error) {
-    console.error('❌ 数据库连接失败:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ 数据库连接失败:', message);
     throw error;
   }
 };
@@ -147,7 +177,7 @@ const testConnection = async () => {
     const client = await dbPool.connect();
     const result = await client.query('SELECT NOW() as current_time, version() as version');
     client.release();
-    return result.rows[0];
+    return result.rows[0] as Record<string, unknown>;
   } catch (error) {
     console.error('数据库连接测试失败:', error);
     throw error;
@@ -167,7 +197,7 @@ const getPool = () => {
 /**
  * 执行查询
  */
-const query = async (text, params = []) => {
+const query = async (text: string, params: unknown[] = []) => {
   const dbPool = getPool();
   const start = Date.now();
 
@@ -180,8 +210,9 @@ const query = async (text, params = []) => {
     }
 
     return result;
-  } catch (error) {
-    console.error('❌ SQL查询错误:', { text, error: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ SQL查询错误:', { text, error: message });
     throw error;
   }
 };
@@ -201,7 +232,7 @@ const initializeTables = async () => {
       AND table_name IN ('users', 'test_results', 'system_config', 'engine_status')
     `);
 
-    const tableCount = parseInt(tablesResult.rows[0].count);
+    const tableCount = parseInt(String(tablesResult.rows[0].count), 10);
 
     if (tableCount >= 4) {
       console.log('✅ 优化数据库表已存在，跳过初始化');
@@ -214,8 +245,7 @@ const initializeTables = async () => {
         AND table_name IN ('seo_test_details', 'performance_test_details', 'security_test_details')
       `);
 
-      if (parseInt(newTablesResult.rows[0].count) < 3) {
-      }
+      void newTablesResult;
 
       return;
     }
@@ -223,7 +253,12 @@ const initializeTables = async () => {
     console.log('🔧 开始优化数据库架构初始化...');
 
     // 读取并执行优化的数据库架构脚本
-    const optimizedSchemaSqlPath = path.join(__dirname, '..', 'scripts', 'optimized-database-schema.sql');
+    const optimizedSchemaSqlPath = path.join(
+      __dirname,
+      '..',
+      'scripts',
+      'optimized-database-schema.sql'
+    );
     const fallbackSqlPath = path.join(__dirname, '..', 'scripts', 'fix-database.sql');
 
     let sqlPath = optimizedSchemaSqlPath;
@@ -244,16 +279,12 @@ const initializeTables = async () => {
         WHERE table_schema = 'public'
       `);
       console.log(`📊 创建了 ${verifyResult.rows[0].count} 个表`);
-
     } else {
       console.log('⚠️ 未找到数据库初始化脚本，跳过表创建');
     }
-  } catch (error) {
-    console.error('❌ 数据库表初始化失败:', error.message);
-
-    if (process.env.NODE_ENV === 'development') {
-    }
-
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('❌ 数据库表初始化失败:', message);
     // 不抛出错误，允许应用继续启动
   }
 };
@@ -276,7 +307,9 @@ const closeConnection = async () => {
 /**
  * 事务处理
  */
-const transaction = async (callback) => {
+const transaction = async <T>(
+  callback: (client: { query: (sql: string, params?: unknown[]) => Promise<unknown> }) => Promise<T>
+) => {
   const dbPool = getPool();
   const client = await dbPool.connect();
 
@@ -296,25 +329,27 @@ const transaction = async (callback) => {
 /**
  * 批量插入
  */
-const batchInsert = async (tableName, columns, values) => {
+const batchInsert = async (tableName: string, columns: string[], values: unknown[][]) => {
   if (!values || values.length === 0) {
-    
-        return { rowCount: 0
-      };
+    return { rowCount: 0 };
   }
 
   const dbPool = getPool();
   const columnNames = columns.join(', ');
-  const placeholders = values.map((_, index) => {
-    const rowPlaceholders = columns.map((_, colIndex) => `$${index * columns.length + colIndex + 1}`);
-    return `(${rowPlaceholders.join(', ')})`;
-  }).join(', ');
+  const placeholders = values
+    .map((_, index) => {
+      const rowPlaceholders = columns.map(
+        (_, colIndex) => `$${index * columns.length + colIndex + 1}`
+      );
+      return `(${rowPlaceholders.join(', ')})`;
+    })
+    .join(', ');
 
   const flatValues = values.flat();
-  const query = `INSERT INTO ${tableName} (${columnNames}) VALUES ${placeholders}`;
+  const sql = `INSERT INTO ${tableName} (${columnNames}) VALUES ${placeholders}`;
 
   try {
-    const result = await dbPool.query(query, flatValues);
+    const result = await dbPool.query(sql, flatValues);
     return result;
   } catch (error) {
     console.error('批量插入失败:', error);
@@ -331,7 +366,9 @@ const healthCheck = async () => {
     const start = Date.now();
 
     // 基础连接测试
-    const connectionTest = await manager.query('SELECT NOW() as current_time, version() as version');
+    const connectionTest = await manager.query(
+      'SELECT NOW() as current_time, version() as version'
+    );
     const connectionTime = Date.now() - start;
 
     // 检查连接池状态
@@ -339,7 +376,7 @@ const healthCheck = async () => {
     const poolStats = status.pool || {
       totalCount: 0,
       idleCount: 0,
-      waitingCount: 0
+      waitingCount: 0,
     };
 
     // 检查核心表是否存在
@@ -349,16 +386,16 @@ const healthCheck = async () => {
       WHERE table_schema = 'public'
       AND table_name IN ('users', 'test_results', 'system_config', 'engine_status')
     `);
-
-    const coreTablesExist = parseInt(tablesCheck.rows[0].count) >= 4;
+    const tableRows = tablesCheck.rows as Array<{ count?: string | number }>;
+    const coreTablesExist = parseInt(String(tableRows[0]?.count ?? 0), 10) >= 4;
 
     // 检查引擎状态 (如果表存在)
-    let engineStatus = null;
+    let engineStatus: unknown = null;
     if (coreTablesExist) {
       try {
         const engineCheck = await manager.query('SELECT engine_type, status FROM engine_status');
         engineStatus = engineCheck.rows;
-      } catch (err) {
+      } catch {
         // 引擎状态表可能不存在
         engineStatus = [];
       }
@@ -371,13 +408,14 @@ const healthCheck = async () => {
       poolStats,
       coreTablesExist,
       engineStatus,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       status: 'unhealthy',
-      error: error.message,
-      timestamp: new Date().toISOString()
+      error: message,
+      timestamp: new Date().toISOString(),
     };
   }
 };
@@ -419,8 +457,8 @@ const getStats = async () => {
       poolStats: status.pool || {
         totalCount: 0,
         idleCount: 0,
-        waitingCount: 0
-      }
+        waitingCount: 0,
+      },
     };
   } catch (error) {
     console.error('获取数据库统计信息失败:', error);
@@ -437,18 +475,17 @@ const getConnectionManager = async () => {
     connectionManager = new DatabaseConnectionManager(dbConfig);
 
     // 设置事件监听
-    connectionManager.on('connected', (data) => {
+    connectionManager.on('connected', (data: { status?: string }) => {
       console.log('✅ 数据库连接管理器已连接', data);
     });
 
-    connectionManager.on('connectionError', (data) => {
-      console.error('❌ 数据库连接错误', data.error.message);
+    connectionManager.on('connectionError', (data: { error?: Error }) => {
+      console.error('❌ 数据库连接错误', data.error?.message);
     });
 
-    connectionManager.on('reconnected', (data) => {
-    });
+    connectionManager.on('reconnected', () => {});
 
-    connectionManager.on('healthCheck', (data) => {
+    connectionManager.on('healthCheck', (data: { status?: string; error?: Error }) => {
       if (data.status === 'unhealthy') {
         console.warn('⚠️ 数据库健康检查失败', data.error);
       }
@@ -462,7 +499,11 @@ const getConnectionManager = async () => {
 /**
  * 执行优化的数据库查询
  */
-const executeOptimizedQuery = async (sql, params = [], options = {}) => {
+const executeOptimizedQuery = async (
+  sql: string,
+  params: unknown[] = [],
+  options: Record<string, unknown> = {}
+) => {
   const manager = await getConnectionManager();
   return manager.query(sql, params, options);
 };
@@ -474,11 +515,12 @@ const getDatabaseStatus = async () => {
   try {
     const manager = await getConnectionManager();
     return manager.getStatus();
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       isConnected: false,
-      error: error.message,
-      timestamp: new Date().toISOString()
+      error: message,
+      timestamp: new Date().toISOString(),
     };
   }
 };
@@ -493,7 +535,7 @@ const getDatabaseConfig = () => {
     database: dbConfig.database,
     username: dbConfig.user,
     password: dbConfig.password,
-    dialect: 'postgres' // 添加dialect配置
+    dialect: 'postgres', // 添加dialect配置
   };
 };
 
@@ -515,5 +557,7 @@ module.exports = {
   db: { query },
   pool: () => getPool(),
   // Sequelize配置
-  ...getDatabaseConfig()
+  ...getDatabaseConfig(),
 };
+
+export {};

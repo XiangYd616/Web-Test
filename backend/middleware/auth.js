@@ -2,8 +2,8 @@
  * 认证中间件 - 使用增强的JWT服务和权限系统
  */
 
-const JwtService = require('../services/core/JwtService.js');
-const { PermissionService, PERMISSIONS } = require('../services/core/PermissionService.js');
+const JwtService = require('../services/core/jwtService');
+const { PermissionService, PERMISSIONS } = require('../services/core/permissionService');
 const { query } = require('../config/database');
 const { ErrorFactory, ErrorCode } = require('./errorHandler');
 

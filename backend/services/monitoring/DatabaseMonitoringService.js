@@ -5,8 +5,7 @@
 
 const EventEmitter = require('events');
 const winston = require('winston');
-const { getConnectionManager } = require('../../config/database.js');
-
+const { getConnectionManager } = require('../../config/database');
 
     /**
 
