@@ -2,7 +2,7 @@
  * 后端服务层类型定义
  * 版本: v2.0.0
  * 创建时间: 2025-08-16
- * 
+ *
  * 此文件定义了后端服务层的接口和类型
  * 包括数据库服务、业务逻辑服务、外部服务等
  */
@@ -20,9 +20,8 @@ import {
   UpdateUserData,
   User,
   UserProfile,
-  UserSession
+  UserSession,
 } from './models';
-
 
 // ==================== 数据库服务接口 ====================
 
@@ -125,10 +124,6 @@ export interface TestExecutionService {
   getTestExecution(executionId: number): Promise<TestExecution | null>;
   getTestExecutions(query: GetTestExecutionsQuery): Promise<PaginatedQueryResult<TestExecution>>;
   updateTestStatus(executionId: number, status: string, metadata?: any): Promise<void>;
-
-  // 测试引擎管理
-  getAvailableEngines(): Promise<TestEngine[]>;
-  getEngineStatus(engineId: string): Promise<EngineStatus>;
 }
 
 export interface GetTestExecutionsQuery {
@@ -321,23 +316,6 @@ export interface ValidationError {
   value?: any;
 }
 
-export interface TestEngine {
-  id: string;
-  name: string;
-  version: string;
-  supported_types: string[];
-  is_available: boolean;
-  configuration_schema: any;
-}
-
-export interface EngineStatus {
-  id: string;
-  status: 'online' | 'offline' | 'busy' | 'error';
-  current_jobs: number;
-  max_jobs: number;
-  last_heartbeat: Date;
-}
-
 // ==================== 服务容器接口 ====================
 
 export interface ServiceContainer {
@@ -352,32 +330,3 @@ export interface ServiceContainer {
   notification: NotificationService;
   cache: CacheService;
 }
-
-// ==================== 导出所有服务类型 ====================
-
-export type {
-
-  // 缓存服务
-  CacheService,
-  CacheStats, CreateReportData,
-  // 数据库服务
-  DatabaseService, EmailTemplate, EngineStatus, FileRecord,
-  // 文件服务
-  FileService, FileStream, FileUpload, GetReportsQuery, GetTestConfigsQuery,
-  GetTestExecutionsQuery,
-  GetTestResultsQuery, GetUsersQuery,
-  // 通知服务
-  NotificationService, ReportFile,
-  // 报告服务
-  ReportService, ReportTemplate,
-  // 服务容器
-  ServiceContainer, SessionService, StorageStats,
-  // 测试相关服务
-  TestConfigService, TestEngine, TestExecutionService,
-  TestResultService,
-  // 用户相关服务
-  UserService, ValidationError,
-  // 验证和工具
-  ValidationResult
-};
-

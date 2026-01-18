@@ -20,7 +20,7 @@
  *           example: "https://example.com"
  *         testType:
  *           type: string
- *           enum: [seo, performance, security, api, compatibility, accessibility, loadtest]
+ *           enum: [seo, performance, security, api, stress, website, accessibility]
  *           description: 测试类型
  *           example: "seo"
  *         testName:

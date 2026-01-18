@@ -49,7 +49,7 @@ module.exports = (sequelize) => {
 
     // 任务类型
     type: {
-      type: DataTypes.ENUM('stress', 'api', 'performance', 'security', 'seo', 'compatibility'),
+      type: DataTypes.ENUM('stress', 'api', 'performance', 'security', 'seo', 'website', 'accessibility'),
       allowNull: false
     },
 

@@ -5,14 +5,17 @@
 
 const fs = require('fs');
 const path = require('path');
+void fs;
+void path;
 const Logger = require('../../middleware/logger.js');
 
 class ReportingService {
   constructor() {
     this.logger = Logger;
     this.reportTypes = [
-      'performance', 'security', 'content', 'api', 
-      'stress', 'compatibility', 'summary', 'comparison'
+      'performance', 'security', 'content', 'api',
+      'stress', 'website', 'seo', 'accessibility',
+      'summary', 'comparison'
     ];
     this.formats = ['html', 'pdf', 'json', 'csv', 'excel'];
     this.templates = new Map();
@@ -165,6 +168,7 @@ class ReportingService {
    * 构建报告内容
    */
   async buildReportContent(type, testData, template, options) {
+    void options;
     const content = {
       title: template.title || `${type}测试报告`,
       sections: {},
@@ -304,6 +308,7 @@ class ReportingService {
    * 格式化为HTML
    */
   formatAsHTML(content, options) {
+    void options;
     let html = `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -332,7 +337,7 @@ class ReportingService {
 `;
 
     // 添加各个部分
-    Object.entries(content.sections).forEach(([key, section]) => {
+    Object.entries(content.sections).forEach(([_key, section]) => {
       if (section && section.title) {
         html += `
     <div class="section">
@@ -621,6 +626,7 @@ class ReportingService {
   }
 
   generateReportSummary(testData, type) {
+    void type;
     return {
       totalTests: testData.length,
       successRate: testData.filter(test => test.status === 'completed').length / testData.length * 100,

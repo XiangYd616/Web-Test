@@ -325,41 +325,7 @@ class AnalysisCore {
       metrics: {}
     };
 
-    if (testType === 'compatibility') {
-      // 兼容性分析
-      if (results.browserCompatibility) {
-        const browserCompat = results.browserCompatibility;
-        summary.metrics.browserSupport = browserCompat.supportPercentage;
-        
-        if (browserCompat.supportPercentage >= 95) {
-          summary.findings.push('浏览器兼容性优秀');
-        } else if (browserCompat.supportPercentage < 80) {
-          summary.findings.push('浏览器兼容性需要改进');
-          summary.recommendations.push('添加浏览器兼容性polyfill');
-        }
-      }
-      
-      if (results.deviceCompatibility) {
-        const deviceCompat = results.deviceCompatibility;
-        
-        /**
-        
-         * if功能函数
-        
-         * @param {Object} params - 参数对象
-        
-         * @returns {Promise<Object>} 返回结果
-        
-         */
-        summary.metrics.deviceSupport = deviceCompat.supportPercentage;
-        
-        if (deviceCompat.mobileOptimized) {
-          summary.findings.push('移动设备优化良好');
-        } else {
-          summary.recommendations.push('优化移动设备体验');
-        }
-      }
-    }
+    void results;
 
     summary.overallScore = this.calculateAnalysisScore(results, testType);
     return summary;
@@ -618,20 +584,8 @@ class AnalysisCore {
    * 计算分析评分
    */
   calculateAnalysisScore(results, testType) {
-    if (testType === 'compatibility') {
-      let score = 0;
-      
-      if (results.browserCompatibility) {
-        score += results.browserCompatibility.supportPercentage * 0.6;
-      }
-      
-      if (results.deviceCompatibility) {
-        score += results.deviceCompatibility.supportPercentage * 0.4;
-      }
-      
-      return Math.round(score);
-    }
-    
+    void results;
+    void testType;
     return 0;
   }
 

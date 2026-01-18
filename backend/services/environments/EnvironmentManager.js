@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const fs = require('fs').promises;
 const path = require('path');
+const { models } = require('../../database/sequelize');
 
 class EnvironmentManager {
   constructor(options = {}) {
@@ -16,6 +17,8 @@ class EnvironmentManager {
       allowGlobalAccess: options.allowGlobalAccess !== false,
       ...options
     };
+
+    this.models = options.models || models;
 
     this.environments = new Map();
     this.globalVariables = new Map();
@@ -44,48 +47,59 @@ class EnvironmentManager {
    * 创建新环境
    */
   async createEnvironment(environmentData) {
-    const environment = {
-      id: uuidv4(),
-      name: environmentData.name || 'New Environment',
-      description: environmentData.description || '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      
-      // 变量定义
-      variables: this.processVariables(environmentData.variables || []),
-      
-      // 环境配置
-      config: {
-        baseUrl: environmentData.baseUrl || '',
-        timeout: environmentData.timeout || 30000,
-        retries: environmentData.retries || 0,
-        followRedirects: environmentData.followRedirects !== false,
-        ...environmentData.config
-      },
-      
-      // 认证配置
+    const { Environment, EnvironmentVariable } = this.models;
+    if (!environmentData.workspaceId) {
+      throw new Error('workspaceId 不能为空');
+    }
+
+    const variables = this.processVariables(environmentData.variables || []);
+    const config = {
+      baseUrl: environmentData.baseUrl || '',
+      timeout: environmentData.timeout || 30000,
+      retries: environmentData.retries || 0,
+      followRedirects: environmentData.followRedirects !== false,
       auth: environmentData.auth || null,
-      
-      // 代理配置
       proxy: environmentData.proxy || null,
-      
-      // SSL配置
       ssl: environmentData.ssl || {},
-      
-      // 元数据
-      metadata: {
-        isActive: environmentData.isActive || false,
-        isGlobal: environmentData.isGlobal || false,
-        tags: environmentData.tags || [],
-        color: environmentData.color || this.getRandomColor(),
-        order: environmentData.order || 0
-      }
+      ...environmentData.config
     };
 
+    const metadata = {
+      isActive: environmentData.isActive || false,
+      isGlobal: environmentData.isGlobal || false,
+      tags: environmentData.tags || [],
+      color: environmentData.color || this.getRandomColor(),
+      order: environmentData.order || 0,
+      ...(environmentData.metadata || {})
+    };
+
+    const environmentRecord = await Environment.create({
+      workspace_id: environmentData.workspaceId,
+      name: environmentData.name || 'New Environment',
+      description: environmentData.description || '',
+      config,
+      metadata,
+      created_by: environmentData.createdBy || null,
+      updated_by: environmentData.createdBy || null
+    });
+
+    if (variables.length > 0) {
+      await EnvironmentVariable.bulkCreate(
+        variables.map(variable => ({
+          environment_id: environmentRecord.id,
+          key: variable.key,
+          value: variable.value,
+          type: variable.type || 'text',
+          enabled: variable.enabled !== false,
+          secret: variable.secret || false,
+          encrypted: variable.encrypted || false
+        }))
+      );
+    }
+
+    const environment = this.buildEnvironmentCache(environmentRecord, variables);
     this.environments.set(environment.id, environment);
-    await this.saveEnvironment(environment);
-    
-    
+
     return environment;
   }
 
@@ -117,30 +131,32 @@ class EnvironmentManager {
    * 设置活跃环境
    */
   async setActiveEnvironment(environmentId) {
-    // 清除之前的活跃状态
-    if (this.activeEnvironment) {
-      this.activeEnvironment.metadata.isActive = false;
-      await this.saveEnvironment(this.activeEnvironment);
-    }
-
-
-    /**
-
-     * if功能函数
-
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
-
-     */
-    const environment = this.environments.get(environmentId);
-    if (!environment) {
+    const { Environment } = this.models;
+    const environmentRecord = await Environment.findByPk(environmentId);
+    if (!environmentRecord) {
       throw new Error(`环境不存在: ${environmentId}`);
     }
 
-    environment.metadata.isActive = true;
+    if (environmentRecord.workspace_id) {
+      await Environment.update(
+        { metadata: { ...(environmentRecord.metadata || {}), isActive: false } },
+        { where: { workspace_id: environmentRecord.workspace_id } }
+      );
+    }
+
+    environmentRecord.metadata = {
+      ...(environmentRecord.metadata || {}),
+      isActive: true
+    };
+    await environmentRecord.save();
+
+    const cached = this.environments.get(environmentId);
+    if (cached) {
+      cached.metadata.isActive = true;
+    }
+
+    const environment = cached || this.buildEnvironmentCache(environmentRecord, []);
     this.activeEnvironment = environment;
-    await this.saveEnvironment(environment);
 
     
     // 记录环境切换历史
@@ -153,7 +169,7 @@ class EnvironmentManager {
    * 获取变量值（支持作用域和动态变量）
    */
   getVariable(key, options = {}) {
-    const context = options.context || 'environment';
+    const _context = options.context || 'environment';
     const environmentId = options.environmentId;
     
     // 1. 检查动态变量
@@ -181,6 +197,7 @@ class EnvironmentManager {
     }
 
     // 4. 检查全局变量
+    void _context;
     if (this.globalVariables.has(key)) {
       const variable = this.globalVariables.get(key);
       if (variable.enabled) {
@@ -199,62 +216,107 @@ class EnvironmentManager {
     const scope = options.scope || 'environment';
     const environmentId = options.environmentId || (this.activeEnvironment?.id);
     const isSecret = options.secret || false;
+    const { Environment, EnvironmentVariable, GlobalVariable } = this.models;
 
     if (scope === 'global') {
       // 设置全局变量
-      const variable = {
-        key,
-        value,
-        type: options.type || 'text',
-        description: options.description || '',
-        enabled: true,
-        secret: isSecret,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      if (!options.userId) {
+        throw new Error('global 变量需要 userId');
+      }
+      const variableValue = isSecret ? this.encryptValue(value) : value;
+      const existingGlobal = await GlobalVariable.findOne({
+        where: {
+          user_id: options.userId,
+          workspace_id: options.workspaceId || null,
+          key
+        }
+      });
 
-      if (isSecret) {
-        variable.value = this.encryptValue(value);
-        variable.encrypted = true;
+      if (existingGlobal) {
+        existingGlobal.value = variableValue;
+        existingGlobal.secret = isSecret;
+        existingGlobal.encrypted = isSecret;
+        existingGlobal.type = options.type || existingGlobal.type || 'text';
+        existingGlobal.enabled = true;
+        await existingGlobal.save();
+      } else {
+        await GlobalVariable.create({
+          user_id: options.userId,
+          workspace_id: options.workspaceId || null,
+          key,
+          value: variableValue,
+          type: options.type || 'text',
+          enabled: true,
+          secret: isSecret,
+          encrypted: isSecret
+        });
       }
 
-      this.globalVariables.set(key, variable);
-      await this.saveGlobalVariables();
+      this.globalVariables.set(key, {
+        key,
+        value: variableValue,
+        type: options.type || 'text',
+        enabled: true,
+        secret: isSecret,
+        encrypted: isSecret,
+        updatedAt: new Date().toISOString()
+      });
     } else {
       // 设置环境变量
       if (!environmentId) {
         throw new Error('没有指定环境或活跃环境');
       }
-
-      const environment = this.environments.get(environmentId);
-      if (!environment) {
+      const environmentRecord = await Environment.findByPk(environmentId);
+      if (!environmentRecord) {
         throw new Error(`环境不存在: ${environmentId}`);
       }
 
-      // 查找现有变量或创建新变量
-      let variable = environment.variables.find(v => v.key === key);
-      if (variable) {
-        variable.value = isSecret ? this.encryptValue(value) : value;
-        variable.secret = isSecret;
-        variable.encrypted = isSecret;
-        variable.updatedAt = new Date().toISOString();
+      const variableValue = isSecret ? this.encryptValue(value) : value;
+      const existingVar = await EnvironmentVariable.findOne({
+        where: { environment_id: environmentId, key }
+      });
+
+      if (existingVar) {
+        existingVar.value = variableValue;
+        existingVar.secret = isSecret;
+        existingVar.encrypted = isSecret;
+        existingVar.type = options.type || existingVar.type || 'text';
+        existingVar.enabled = true;
+        await existingVar.save();
       } else {
-        variable = {
+        await EnvironmentVariable.create({
+          environment_id: environmentId,
           key,
-          value: isSecret ? this.encryptValue(value) : value,
+          value: variableValue,
           type: options.type || 'text',
-          description: options.description || '',
           enabled: true,
           secret: isSecret,
-          encrypted: isSecret,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        environment.variables.push(variable);
+          encrypted: isSecret
+        });
       }
 
-      environment.updatedAt = new Date().toISOString();
-      await this.saveEnvironment(environment);
+      const environment = this.environments.get(environmentId);
+      if (environment) {
+        const variable = environment.variables.find(v => v.key === key);
+        if (variable) {
+          variable.value = variableValue;
+          variable.secret = isSecret;
+          variable.encrypted = isSecret;
+          variable.updatedAt = new Date().toISOString();
+        } else {
+          environment.variables.push({
+            key,
+            value: variableValue,
+            type: options.type || 'text',
+            enabled: true,
+            secret: isSecret,
+            encrypted: isSecret,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
+        }
+        environment.updatedAt = new Date().toISOString();
+      }
     }
 
     // 记录变量变更历史
@@ -325,7 +387,7 @@ class EnvironmentManager {
    * 动态变量处理
    */
   isDynamicVariable(key) {
-    return key.startsWith('$') && this.dynamicVariables.hasOwnProperty(key);
+    return key.startsWith('$') && Object.prototype.hasOwnProperty.call(this.dynamicVariables, key);
   }
 
   resolveDynamicVariable(key) {
@@ -378,17 +440,7 @@ class EnvironmentManager {
   }
 
   async exportEnvironment(environmentId, format = 'testweb') {
-
-    /**
-
-     * if功能函数
-
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
-
-     */
-    const environment = this.environments.get(environmentId);
+    const environment = await this.getEnvironment(environmentId, { raw: true });
     if (!environment) {
       throw new Error(`环境不存在: ${environmentId}`);
     }
@@ -549,7 +601,8 @@ class EnvironmentManager {
     try {
       const data = await fs.readFile(filePath, 'utf8');
       return JSON.parse(data);
-    } catch (error) {
+    } catch (_error) {
+      void _error;
       return null;
     }
   }
@@ -558,35 +611,62 @@ class EnvironmentManager {
    * 查询方法
    */
   getEnvironments() {
-    return Array.from(this.environments.values()).map(env => ({
-      id: env.id,
-      name: env.name,
-      description: env.description,
-      variableCount: env.variables.length,
-      isActive: env.metadata.isActive,
-      color: env.metadata.color,
-      createdAt: env.createdAt,
-      updatedAt: env.updatedAt
-    }));
+    return this.getEnvironmentsFromDb();
   }
 
-  getEnvironment(environmentId) {
+  async getEnvironmentsFromDb() {
+    const { Environment, EnvironmentVariable } = this.models;
+    const environments = await Environment.findAll();
 
-    /**
+    const results = [];
+    for (const environmentRecord of environments) {
+      const variableCount = await EnvironmentVariable.count({
+        where: { environment_id: environmentRecord.id }
+      });
+      results.push({
+        id: environmentRecord.id,
+        name: environmentRecord.name,
+        description: environmentRecord.description,
+        variableCount,
+        isActive: environmentRecord.metadata?.isActive || false,
+        color: environmentRecord.metadata?.color || null,
+        createdAt: environmentRecord.createdAt?.toISOString?.() || environmentRecord.created_at,
+        updatedAt: environmentRecord.updatedAt?.toISOString?.() || environmentRecord.updated_at
+      });
+    }
 
-     * if功能函数
+    return results;
+  }
 
-     * @param {Object} params - 参数对象
-
-     * @returns {Promise<Object>} 返回结果
-
-     */
-    const environment = this.environments.get(environmentId);
-    if (!environment) {
+  async getEnvironment(environmentId, options = {}) {
+    const { Environment, EnvironmentVariable } = this.models;
+    const environmentRecord = await Environment.findByPk(environmentId);
+    if (!environmentRecord) {
       return null;
     }
 
-    // 返回时不包含加密变量的实际值
+    const variableRecords = await EnvironmentVariable.findAll({
+      where: { environment_id: environmentId },
+      order: [['created_at', 'ASC']]
+    });
+    const variables = variableRecords.map(record => ({
+      key: record.key,
+      value: record.value,
+      type: record.type || 'text',
+      enabled: record.enabled,
+      secret: record.secret,
+      encrypted: record.encrypted,
+      createdAt: record.createdAt?.toISOString?.() || record.created_at,
+      updatedAt: record.updatedAt?.toISOString?.() || record.updated_at
+    }));
+
+    const environment = this.buildEnvironmentCache(environmentRecord, variables);
+    this.environments.set(environment.id, environment);
+
+    if (options.raw) {
+      return environment;
+    }
+
     const result = JSON.parse(JSON.stringify(environment));
     result.variables = result.variables.map(v => {
       if (v.encrypted) {
@@ -602,9 +682,30 @@ class EnvironmentManager {
     return this.activeEnvironment;
   }
 
-  getGlobalVariables() {
-    return Array.from(this.globalVariables.values()).map(v => {
-      const result = { ...v };
+  async getGlobalVariables(options = {}) {
+    const { GlobalVariable } = this.models;
+    if (!options.userId) {
+      throw new Error('获取全局变量需要 userId');
+    }
+
+    const globals = await GlobalVariable.findAll({
+      where: {
+        user_id: options.userId,
+        workspace_id: options.workspaceId || null
+      }
+    });
+
+    return globals.map(record => {
+      const result = {
+        key: record.key,
+        value: record.value,
+        type: record.type || 'text',
+        enabled: record.enabled,
+        secret: record.secret,
+        encrypted: record.encrypted,
+        createdAt: record.createdAt?.toISOString?.() || record.created_at,
+        updatedAt: record.updatedAt?.toISOString?.() || record.updated_at
+      };
       if (result.encrypted) {
         result.value = '[ENCRYPTED]';
       }
@@ -620,27 +721,36 @@ class EnvironmentManager {
    * 删除方法
    */
   async deleteEnvironment(environmentId) {
-    const environment = this.environments.get(environmentId);
+    const { Environment } = this.models;
+    const environment = await Environment.findByPk(environmentId);
     if (!environment) {
       throw new Error(`环境不存在: ${environmentId}`);
     }
 
-    // 如果是活跃环境，清除活跃状态
     if (this.activeEnvironment?.id === environmentId) {
       this.activeEnvironment = null;
     }
 
+    await Environment.destroy({ where: { id: environmentId } });
     this.environments.delete(environmentId);
 
-    // 删除文件
-    const filePath = path.join(this.options.storageDir, `${environmentId}.json`);
-    try {
-      await fs.unlink(filePath);
-    } catch (error) {
-      console.warn('删除环境文件失败:', error.message);
-    }
-
     return true;
+  }
+
+  buildEnvironmentCache(environmentRecord, variables) {
+    return {
+      id: environmentRecord.id,
+      name: environmentRecord.name,
+      description: environmentRecord.description || '',
+      createdAt: environmentRecord.createdAt?.toISOString?.() || new Date().toISOString(),
+      updatedAt: environmentRecord.updatedAt?.toISOString?.() || new Date().toISOString(),
+      variables,
+      config: environmentRecord.config || {},
+      auth: environmentRecord.config?.auth || null,
+      proxy: environmentRecord.config?.proxy || null,
+      ssl: environmentRecord.config?.ssl || {},
+      metadata: environmentRecord.metadata || {}
+    };
   }
 }
 

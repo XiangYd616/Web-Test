@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS test_history (
     id SERIAL PRIMARY KEY,
     test_id VARCHAR(100) UNIQUE NOT NULL,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    engine_type VARCHAR(50) NOT NULL, -- performance, security, seo, api, stress, compatibility, ux, database
+    engine_type VARCHAR(50) NOT NULL, -- performance, security, seo, api, stress, website, accessibility
     engine_name VARCHAR(100) NOT NULL,
     test_name VARCHAR(255) NOT NULL,
     test_url VARCHAR(500),

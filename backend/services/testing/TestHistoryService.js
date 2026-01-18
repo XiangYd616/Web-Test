@@ -4,6 +4,7 @@
  */
 
 const { Pool } = require('pg');
+void Pool;
 const { v4: uuidv4 } = require('uuid');
 
 class TestHistoryService {
@@ -146,8 +147,8 @@ class TestHistoryService {
       api: 'api_test_history',
       seo: 'seo_test_history',
       accessibility: 'accessibility_test_history',
-      compatibility: 'compatibility_test_history',
-      performance: 'performance_test_history'
+      performance: 'performance_test_history',
+      website: 'website_test_history'
     };
 
     const viewName = viewMap[testType];
@@ -231,8 +232,8 @@ class TestHistoryService {
         api: 'api_test_details',
         seo: 'seo_test_details',
         accessibility: 'accessibility_test_details',
-        compatibility: 'compatibility_test_details',
-        performance: 'performance_test_details'
+        performance: 'performance_test_details',
+        website: 'website_test_details'
       };
 
       const detailsTable = detailsMap[testType];
@@ -301,7 +302,7 @@ class TestHistoryService {
     }
 
     // 验证测试类型
-    const validTestTypes = ['stress', 'security', 'api', 'performance', 'compatibility', 'seo', 'accessibility'];
+    const validTestTypes = ['stress', 'security', 'api', 'performance', 'seo', 'accessibility', 'website'];
     if (!validTestTypes.includes(testType)) {
       throw new Error(`无效的测试类型: ${testType}`);
     }
@@ -479,6 +480,7 @@ class TestHistoryService {
     try {
       return JSON.parse(value);
     } catch (error) {
+      void error;
       return null;
     }
   }

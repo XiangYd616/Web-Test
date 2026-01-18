@@ -256,6 +256,401 @@ models.User = sequelize.define('users', {
   }
 });
 
+// 工作空间模型
+models.Workspace = sequelize.define('workspaces', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  visibility: {
+    type: DataTypes.ENUM('private', 'team', 'public'),
+    allowNull: false,
+    defaultValue: 'private'
+  },
+  created_by: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    index: true
+  },
+  metadata: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  }
+});
+
+// 工作空间成员模型
+models.WorkspaceMember = sequelize.define('workspace_members', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  workspace_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  user_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  role: {
+    type: DataTypes.ENUM('owner', 'admin', 'member', 'viewer'),
+    allowNull: false,
+    defaultValue: 'member'
+  },
+  status: {
+    type: DataTypes.ENUM('pending', 'active', 'inactive'),
+    allowNull: false,
+    defaultValue: 'active'
+  },
+  permissions: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  invited_by: {
+    type: DataTypes.UUID,
+    allowNull: true
+  },
+  invited_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  joined_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
+});
+
+// 集合模型
+models.Collection = sequelize.define('collections', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  workspace_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  version: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  auth: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  events: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  variables: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  metadata: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  created_by: {
+    type: DataTypes.UUID,
+    allowNull: true
+  },
+  updated_by: {
+    type: DataTypes.UUID,
+    allowNull: true
+  }
+});
+
+// 集合项模型（文件夹/请求）
+models.CollectionItem = sequelize.define('collection_items', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  collection_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  parent_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    index: true
+  },
+  type: {
+    type: DataTypes.ENUM('folder', 'request'),
+    allowNull: false
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  request_data: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  order_index: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  }
+});
+
+// 环境模型
+models.Environment = sequelize.define('environments', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  workspace_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  config: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  metadata: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  created_by: {
+    type: DataTypes.UUID,
+    allowNull: true
+  },
+  updated_by: {
+    type: DataTypes.UUID,
+    allowNull: true
+  }
+});
+
+// 环境变量模型
+models.EnvironmentVariable = sequelize.define('environment_variables', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  environment_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  key: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  value: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  type: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: 'string'
+  },
+  enabled: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  secret: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  },
+  encrypted: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  }
+});
+
+// 全局变量模型
+models.GlobalVariable = sequelize.define('global_variables', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  user_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  workspace_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    index: true
+  },
+  key: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  value: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  type: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: 'string'
+  },
+  enabled: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  },
+  secret: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  },
+  encrypted: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  }
+});
+
+// 运行记录模型
+models.Run = sequelize.define('runs', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  workspace_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    index: true
+  },
+  collection_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    index: true
+  },
+  environment_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    index: true
+  },
+  status: {
+    type: DataTypes.ENUM('pending', 'running', 'completed', 'failed', 'cancelled'),
+    allowNull: false,
+    defaultValue: 'pending'
+  },
+  started_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  completed_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  duration_ms: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  summary: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  created_by: {
+    type: DataTypes.UUID,
+    allowNull: true
+  }
+});
+
+// 运行结果模型
+models.RunResult = sequelize.define('run_results', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  run_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    index: true
+  },
+  item_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    index: true
+  },
+  request_snapshot: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  response: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
+  },
+  assertions: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  duration_ms: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  success: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true
+  }
+});
+
 // 测试队列模型
 models.TestQueue = sequelize.define('test_queue', {
   id: {
@@ -353,6 +748,42 @@ models.ConfigTemplate.belongsTo(models.User, { foreignKey: 'user_id', as: 'user'
 
 models.Test.hasOne(models.TestQueue, { foreignKey: 'test_id', sourceKey: 'test_id', as: 'queueItem' });
 models.TestQueue.belongsTo(models.Test, { foreignKey: 'test_id', targetKey: 'test_id', as: 'test' });
+
+models.User.hasMany(models.Workspace, { foreignKey: 'created_by', as: 'workspaces' });
+models.Workspace.belongsTo(models.User, { foreignKey: 'created_by', as: 'creator' });
+
+models.Workspace.hasMany(models.WorkspaceMember, { foreignKey: 'workspace_id', as: 'members' });
+models.WorkspaceMember.belongsTo(models.Workspace, { foreignKey: 'workspace_id', as: 'workspace' });
+models.User.hasMany(models.WorkspaceMember, { foreignKey: 'user_id', as: 'workspaceMemberships' });
+models.WorkspaceMember.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+
+models.Workspace.hasMany(models.Collection, { foreignKey: 'workspace_id', as: 'collections' });
+models.Collection.belongsTo(models.Workspace, { foreignKey: 'workspace_id', as: 'workspace' });
+models.Collection.hasMany(models.CollectionItem, { foreignKey: 'collection_id', as: 'items' });
+models.CollectionItem.belongsTo(models.Collection, { foreignKey: 'collection_id', as: 'collection' });
+models.CollectionItem.hasMany(models.CollectionItem, { foreignKey: 'parent_id', as: 'children' });
+models.CollectionItem.belongsTo(models.CollectionItem, { foreignKey: 'parent_id', as: 'parent' });
+
+models.Workspace.hasMany(models.Environment, { foreignKey: 'workspace_id', as: 'environments' });
+models.Environment.belongsTo(models.Workspace, { foreignKey: 'workspace_id', as: 'workspace' });
+models.Environment.hasMany(models.EnvironmentVariable, { foreignKey: 'environment_id', as: 'variables' });
+models.EnvironmentVariable.belongsTo(models.Environment, { foreignKey: 'environment_id', as: 'environment' });
+
+models.User.hasMany(models.GlobalVariable, { foreignKey: 'user_id', as: 'globalVariables' });
+models.GlobalVariable.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+models.Workspace.hasMany(models.GlobalVariable, { foreignKey: 'workspace_id', as: 'workspaceVariables' });
+models.GlobalVariable.belongsTo(models.Workspace, { foreignKey: 'workspace_id', as: 'workspace' });
+
+models.Workspace.hasMany(models.Run, { foreignKey: 'workspace_id', as: 'runs' });
+models.Run.belongsTo(models.Workspace, { foreignKey: 'workspace_id', as: 'workspace' });
+models.Collection.hasMany(models.Run, { foreignKey: 'collection_id', as: 'runs' });
+models.Run.belongsTo(models.Collection, { foreignKey: 'collection_id', as: 'collection' });
+models.Environment.hasMany(models.Run, { foreignKey: 'environment_id', as: 'runs' });
+models.Run.belongsTo(models.Environment, { foreignKey: 'environment_id', as: 'environment' });
+models.Run.hasMany(models.RunResult, { foreignKey: 'run_id', as: 'results' });
+models.RunResult.belongsTo(models.Run, { foreignKey: 'run_id', as: 'run' });
+models.CollectionItem.hasMany(models.RunResult, { foreignKey: 'item_id', as: 'runResults' });
+models.RunResult.belongsTo(models.CollectionItem, { foreignKey: 'item_id', as: 'item' });
 
 // 数据库连接和同步函数
 const connectDatabase = async () => {

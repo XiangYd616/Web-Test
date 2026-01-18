@@ -40,7 +40,6 @@ export {
 export {
   AccessibilityTestResult,
   AuditLog,
-  CompatibilityTestResult,
   CreateTestConfigData,
   CreateTestExecutionData,
   CreateUserData,
@@ -48,7 +47,6 @@ export {
   DatabaseId,
   DatabaseTimestamp,
   JsonObject,
-  LoadTestResult,
   PaginatedQueryResult,
   // 详细测试结果模型
   PerformanceTestResult,
@@ -146,7 +144,6 @@ export {
   // 数据库服务
   DatabaseService,
   EmailTemplate,
-  EngineStatus,
   FileRecord,
   // 文件服务
   FileService,
@@ -164,7 +161,6 @@ export {
   StorageStats,
   // 测试相关服务
   TestConfigService,
-  TestEngine,
   TestExecutionService,
   TestResultService,
   // 用户相关服务

@@ -250,26 +250,6 @@ class SpecializedStorageManager {
   }
 
   /**
-   * 处理兼容性测试数据
-   */
-  async handleCompatibilityData(data) {
-    // 优化截图和渲染结果存储
-    const processed = {
-      metadata: {
-        url: data.url,
-        browsers: data.browsers || [],
-        timestamp: data.timestamp
-      },
-      compatibility_matrix: data.compatibility_matrix || {},
-      issues: data.issues || [],
-      screenshots: await this.processScreenshots(data.screenshots || {}),
-      rendering_diffs: await this.processRenderingDiffs(data.rendering_diffs || {})
-    };
-
-    return processed;
-  }
-
-  /**
    * 处理安全测试数据
    */
   async handleSecurityData(data) {
@@ -292,27 +272,6 @@ class SpecializedStorageManager {
       ssl_info: data.ssl_info || {},
       headers: data.headers || {},
       recommendations: data.recommendations || []
-    };
-
-    return processed;
-  }
-
-  /**
-   * 处理UX测试数据
-   */
-  async handleUXData(data) {
-    // 处理交互录制和大文件
-    const processed = {
-      metadata: {
-        url: data.url,
-        device: data.device,
-        timestamp: data.timestamp
-      },
-      accessibility: data.accessibility || {},
-      usability: data.usability || {},
-      interactions: await this.processInteractionData(data.interactions || []),
-      recordings: await this.processRecordings(data.recordings || {}),
-      screenshots: await this.processScreenshots(data.screenshots || {})
     };
 
     return processed;

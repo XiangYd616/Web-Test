@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
+const { models } = require('../../database/sequelize');
 
 class CollectionManager {
   constructor(options = {}) {
@@ -16,6 +17,8 @@ class CollectionManager {
       maxVersions: options.maxVersions || 10,
       ...options
     };
+
+    this.models = options.models || models;
     
     this.collections = new Map();
     this.folders = new Map();
@@ -30,52 +33,37 @@ class CollectionManager {
    * 创建新的API集合
    */
   async createCollection(collectionData) {
-    const collection = {
-      id: uuidv4(),
-      name: collectionData.name || 'Untitled Collection',
-      description: collectionData.description || '',
-      version: '1.0.0',
-      schema: 'https://schema.testweb.com/v1/collection.json',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      author: collectionData.author || 'Anonymous',
-      
-      // 集合配置
-      info: {
-        name: collectionData.name,
-        description: collectionData.description,
-        version: collectionData.version || '1.0.0',
-        schema: 'https://schema.testweb.com/v1/collection.json'
-      },
-      
-      // 变量定义
-      variable: collectionData.variables || [],
-      
-      // 认证配置
-      auth: collectionData.auth || null,
-      
-      // 事件脚本
-      event: collectionData.events || [],
-      
-      // 请求项目
-      item: [],
-      
-      // 元数据
-      metadata: {
-        tags: collectionData.tags || [],
-        isPublic: collectionData.isPublic || false,
-        sharedWith: collectionData.sharedWith || [],
-        forkedFrom: collectionData.forkedFrom || null,
-        starCount: 0,
-        downloadCount: 0
-      }
+    const { Collection } = this.models;
+    if (!collectionData.workspaceId) {
+      throw new Error('workspaceId 不能为空');
+    }
+
+    const metadata = {
+      tags: collectionData.tags || [],
+      isPublic: collectionData.isPublic || false,
+      sharedWith: collectionData.sharedWith || [],
+      forkedFrom: collectionData.forkedFrom || null,
+      starCount: 0,
+      downloadCount: 0,
+      ...(collectionData.metadata || {})
     };
 
-    // 保存到内存和磁盘
+    const collectionRecord = await Collection.create({
+      workspace_id: collectionData.workspaceId,
+      name: collectionData.name || 'Untitled Collection',
+      description: collectionData.description || '',
+      version: collectionData.version || '1.0.0',
+      auth: collectionData.auth || {},
+      events: collectionData.events || [],
+      variables: collectionData.variables || [],
+      metadata,
+      created_by: collectionData.createdBy || null,
+      updated_by: collectionData.createdBy || null
+    });
+
+    const collection = this.buildCollectionCache(collectionRecord, []);
     this.collections.set(collection.id, collection);
-    await this.saveCollection(collection);
-    
-    
+
     return collection;
   }
 
@@ -83,37 +71,29 @@ class CollectionManager {
    * 创建文件夹
    */
   async createFolder(collectionId, folderData) {
-    const collection = this.collections.get(collectionId);
-    if (!collection) {
+    const { Collection, CollectionItem } = this.models;
+    const collectionRecord = await Collection.findByPk(collectionId);
+    if (!collectionRecord) {
       throw new Error(`集合不存在: ${collectionId}`);
     }
 
-    const folder = {
-      id: uuidv4(),
+    const orderIndex = await this.getNextOrderIndex(collectionId, folderData.parentId || null);
+    const folderRecord = await CollectionItem.create({
+      collection_id: collectionId,
+      parent_id: folderData.parentId || null,
+      type: 'folder',
       name: folderData.name || 'New Folder',
       description: folderData.description || '',
-      auth: folderData.auth || null,
-      event: folderData.events || [],
-      variable: folderData.variables || [],
-      item: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+      request_data: {
+        auth: folderData.auth || null,
+        event: folderData.events || [],
+        variable: folderData.variables || []
+      },
+      order_index: orderIndex
+    });
 
-    // 添加到父级（集合或文件夹）
-    const parentId = folderData.parentId;
-    if (parentId && parentId !== collectionId) {
-      const parentFolder = this.findItemInCollection(collection, parentId);
-      if (parentFolder && parentFolder.item) {
-        parentFolder.item.push(folder);
-      }
-    } else {
-      collection.item.push(folder);
-    }
-
-    this.folders.set(folder.id, folder);
-    collection.updatedAt = new Date().toISOString();
-    await this.saveCollection(collection);
+    const folder = this.buildFolderItem(folderRecord);
+    this.insertItemIntoCache(collectionId, folderData.parentId || null, folder);
 
     return folder;
   }
@@ -122,59 +102,47 @@ class CollectionManager {
    * 添加请求到集合
    */
   async addRequest(collectionId, requestData, parentFolderId = null) {
-    const collection = this.collections.get(collectionId);
-    if (!collection) {
+    const { Collection, CollectionItem } = this.models;
+    const collectionRecord = await Collection.findByPk(collectionId);
+    if (!collectionRecord) {
       throw new Error(`集合不存在: ${collectionId}`);
     }
 
-    const request = {
-      id: uuidv4(),
-      name: requestData.name || 'Untitled Request',
-      description: requestData.description || '',
-      
-      // HTTP请求配置
-      request: {
-        method: requestData.method || 'GET',
-        header: this.normalizeHeaders(requestData.headers || []),
-        body: requestData.body || {},
-        url: this.normalizeUrl(requestData.url || ''),
-        auth: requestData.auth || null,
-        proxy: requestData.proxy || {},
-        certificate: requestData.certificate || {},
-        description: requestData.description || ''
-      },
-      
-      // 响应示例
-      response: requestData.responses || [],
-      
-      // 事件脚本
-      event: requestData.events || [],
-      
-      // 元数据
-      metadata: {
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        tags: requestData.tags || [],
-        notes: requestData.notes || '',
-        difficulty: requestData.difficulty || 'beginner'
-      }
+    const normalizedRequest = {
+      method: requestData.method || 'GET',
+      header: this.normalizeHeaders(requestData.headers || []),
+      body: requestData.body || {},
+      url: this.normalizeUrl(requestData.url || ''),
+      auth: requestData.auth || null,
+      proxy: requestData.proxy || {},
+      certificate: requestData.certificate || {},
+      description: requestData.description || ''
     };
 
-    // 添加到指定位置
-    if (parentFolderId) {
-      const folder = this.findItemInCollection(collection, parentFolderId);
-      if (folder && folder.item) {
-        folder.item.push(request);
-      } else {
-        throw new Error(`文件夹不存在: ${parentFolderId}`);
-      }
-    } else {
-      collection.item.push(request);
-    }
+    const orderIndex = await this.getNextOrderIndex(collectionId, parentFolderId || null);
+    const requestRecord = await CollectionItem.create({
+      collection_id: collectionId,
+      parent_id: parentFolderId || null,
+      type: 'request',
+      name: requestData.name || 'Untitled Request',
+      description: requestData.description || '',
+      request_data: {
+        request: normalizedRequest,
+        response: requestData.responses || [],
+        event: requestData.events || [],
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          tags: requestData.tags || [],
+          notes: requestData.notes || '',
+          difficulty: requestData.difficulty || 'beginner'
+        }
+      },
+      order_index: orderIndex
+    });
 
-    this.requests.set(request.id, request);
-    collection.updatedAt = new Date().toISOString();
-    await this.saveCollection(collection);
+    const request = this.buildRequestItem(requestRecord);
+    this.insertItemIntoCache(collectionId, parentFolderId || null, request);
 
     return request;
   }
@@ -182,9 +150,10 @@ class CollectionManager {
   /**
    * 批量导入Postman集合
    */
-  async importPostmanCollection(postmanData) {
-    
+  async importPostmanCollection(postmanData, options = {}) {
     const collection = await this.createCollection({
+      workspaceId: options.workspaceId,
+      createdBy: options.createdBy,
       name: postmanData.info?.name || 'Imported Collection',
       description: postmanData.info?.description || 'Imported from Postman',
       version: postmanData.info?.version || '1.0.0',
@@ -242,7 +211,7 @@ class CollectionManager {
    * 导出集合为Postman格式
    */
   async exportToPostman(collectionId) {
-    const collection = this.collections.get(collectionId);
+    const collection = await this.getCollection(collectionId);
     if (!collection) {
       throw new Error(`集合不存在: ${collectionId}`);
     }
@@ -267,10 +236,16 @@ class CollectionManager {
    * 运行集合中的所有请求
    */
   async runCollection(collectionId, options = {}) {
-    const collection = this.collections.get(collectionId);
+    const collection = await this.getCollection(collectionId);
     if (!collection) {
       throw new Error(`集合不存在: ${collectionId}`);
     }
+
+    const TestScriptEngine = require('../testing/TestScriptEngine');
+    const scriptEngine = options.scriptEngine || new TestScriptEngine({
+      timeout: options.scriptTimeout || 30000
+    });
+    const runContext = { ...(options.environment || {}) };
 
     const runId = uuidv4();
     const startTime = Date.now();
@@ -297,7 +272,11 @@ class CollectionManager {
     };
 
     // 递归运行所有请求
-    await this.runCollectionItems(collection.item, results, options);
+    await this.runCollectionItems(collection.item, results, {
+      ...options,
+      scriptEngine,
+      context: runContext
+    });
 
     // 完成统计
     results.endTime = Date.now();
@@ -314,8 +293,13 @@ class CollectionManager {
   async runCollectionItems(items, results, options, folderPath = '') {
     const RealHTTPEngine = require('../../engines/api/RealHTTPEngine');
     const httpEngine = new RealHTTPEngine();
+    const { scriptEngine, context = {} } = options;
 
     for (const item of items) {
+      if (options.shouldCancel && options.shouldCancel()) {
+        results.cancelled = true;
+        break;
+      }
       if (item.item) {
         // 文件夹 - 递归运行
         const currentPath = folderPath ? `${folderPath}/${item.name}` : item.name;
@@ -327,8 +311,19 @@ class CollectionManager {
         const requestPath = folderPath ? `${folderPath}/${item.name}` : item.name;
 
         try {
+          const preScript = this.extractScript(item.event, 'prerequest');
+          if (preScript && scriptEngine) {
+            const preResult = await scriptEngine.executePreRequestScript(preScript, {
+              ...context,
+              requestName: item.name
+            });
+            if (preResult?.variables) {
+              Object.assign(context, preResult.variables);
+            }
+          }
+
           // 解析变量和环境
-          const resolvedRequest = this.resolveVariables(item.request, options.environment || {});
+          const resolvedRequest = this.resolveVariables(item.request, context);
           
           // 执行HTTP请求
           const response = await httpEngine.makeRequest({
@@ -340,13 +335,30 @@ class CollectionManager {
             timeout: options.timeout || 30000
           });
 
+          let assertions = [];
+          if (scriptEngine) {
+            const testScript = this.extractScript(item.event, 'test');
+            if (testScript) {
+              const testResult = await scriptEngine.executeTestScript(testScript, {
+                ...context,
+                request: resolvedRequest,
+                response,
+                requestName: item.name
+              });
+              assertions = testResult.tests || [];
+            }
+          }
+
           // 记录结果
           const requestResult = {
             id: uuidv4(),
+            itemId: item.id,
             name: item.name,
             path: requestPath,
             request: resolvedRequest,
+            requestSnapshot: resolvedRequest,
             response,
+            assertions,
             success: response.success !== false,
             duration: response.duration,
             timestamp: new Date().toISOString()
@@ -370,10 +382,13 @@ class CollectionManager {
           
           results.results.push({
             id: uuidv4(),
+            itemId: item.id,
             name: item.name,
             path: requestPath,
             request: item.request,
+            requestSnapshot: item.request,
             error: error.message,
+            assertions: [],
             success: false,
             timestamp: new Date().toISOString()
           });
@@ -382,11 +397,25 @@ class CollectionManager {
     }
   }
 
+  extractScript(events = [], listenType) {
+    if (!Array.isArray(events)) {
+      return null;
+    }
+    const event = events.find(e => e.listen === listenType);
+    if (!event || !event.script) {
+      return null;
+    }
+    if (Array.isArray(event.script.exec)) {
+      return event.script.exec.join('\n');
+    }
+    return event.script.exec || '';
+  }
+
   /**
    * 分享集合
    */
   async shareCollection(collectionId, shareOptions = {}) {
-    const collection = this.collections.get(collectionId);
+    const collection = await this.getCollection(collectionId);
     if (!collection) {
       throw new Error(`集合不存在: ${collectionId}`);
     }
@@ -610,7 +639,8 @@ class CollectionManager {
     try {
       const data = await fs.readFile(filePath, 'utf8');
       return JSON.parse(data);
-    } catch (error) {
+    } catch (_error) {
+      void _error;
       return null;
     }
   }
@@ -625,46 +655,167 @@ class CollectionManager {
    * 获取集合列表
    */
   async getCollections() {
-    return Array.from(this.collections.values()).map(collection => ({
-      id: collection.id,
-      name: collection.name,
-      description: collection.description,
-      createdAt: collection.createdAt,
-      updatedAt: collection.updatedAt,
-      itemCount: this.countItemsInCollection(collection),
-      isPublic: collection.metadata?.isPublic || false,
-      tags: collection.metadata?.tags || []
-    }));
+    const { Collection, CollectionItem } = this.models;
+    const collections = await Collection.findAll();
+
+    const results = [];
+    for (const collectionRecord of collections) {
+      const itemCount = await CollectionItem.count({
+        where: { collection_id: collectionRecord.id }
+      });
+      results.push({
+        id: collectionRecord.id,
+        name: collectionRecord.name,
+        description: collectionRecord.description,
+        createdAt: collectionRecord.createdAt?.toISOString?.() || collectionRecord.created_at,
+        updatedAt: collectionRecord.updatedAt?.toISOString?.() || collectionRecord.updated_at,
+        itemCount,
+        isPublic: collectionRecord.metadata?.isPublic || false,
+        tags: collectionRecord.metadata?.tags || []
+      });
+    }
+
+    return results;
   }
 
   /**
    * 获取集合详情
    */
-  getCollection(collectionId) {
-    return this.collections.get(collectionId);
+  async getCollection(collectionId) {
+    const { Collection, CollectionItem } = this.models;
+    const collectionRecord = await Collection.findByPk(collectionId);
+    if (!collectionRecord) {
+      return null;
+    }
+
+    const items = await CollectionItem.findAll({
+      where: { collection_id: collectionId },
+      order: [['order_index', 'ASC'], ['created_at', 'ASC']]
+    });
+
+    const itemTree = this.buildCollectionItems(items);
+    const collection = this.buildCollectionCache(collectionRecord, itemTree);
+    this.collections.set(collection.id, collection);
+    return collection;
   }
 
   /**
    * 删除集合
    */
   async deleteCollection(collectionId) {
-    const collection = this.collections.get(collectionId);
+    const { Collection } = this.models;
+    const collection = await Collection.findByPk(collectionId);
     if (!collection) {
       throw new Error(`集合不存在: ${collectionId}`);
     }
 
-    // 从内存中删除
+    await Collection.destroy({ where: { id: collectionId } });
     this.collections.delete(collectionId);
-
-    // 从磁盘删除
-    const filePath = path.join(this.options.storageDir, `${collectionId}.json`);
-    try {
-      await fs.unlink(filePath);
-    } catch (error) {
-      console.warn('删除集合文件失败:', error.message);
-    }
-
     return true;
+  }
+
+  buildCollectionCache(collectionRecord, items) {
+    return {
+      id: collectionRecord.id,
+      name: collectionRecord.name,
+      description: collectionRecord.description || '',
+      version: collectionRecord.version || '1.0.0',
+      schema: 'https://schema.testweb.com/v1/collection.json',
+      createdAt: collectionRecord.createdAt?.toISOString?.() || new Date().toISOString(),
+      updatedAt: collectionRecord.updatedAt?.toISOString?.() || new Date().toISOString(),
+      author: collectionRecord.created_by || 'Anonymous',
+      info: {
+        name: collectionRecord.name,
+        description: collectionRecord.description,
+        version: collectionRecord.version || '1.0.0',
+        schema: 'https://schema.testweb.com/v1/collection.json'
+      },
+      variable: collectionRecord.variables || [],
+      auth: collectionRecord.auth || null,
+      event: collectionRecord.events || [],
+      item: items,
+      metadata: collectionRecord.metadata || {}
+    };
+  }
+
+  buildCollectionItems(itemRecords) {
+    const itemsMap = new Map();
+    const roots = [];
+
+    itemRecords.forEach(record => {
+      let item;
+      if (record.type === 'folder') {
+        item = this.buildFolderItem(record);
+      } else {
+        item = this.buildRequestItem(record);
+      }
+      itemsMap.set(record.id, item);
+    });
+
+    itemRecords.forEach(record => {
+      const item = itemsMap.get(record.id);
+      if (record.parent_id) {
+        const parent = itemsMap.get(record.parent_id);
+        if (parent && parent.item) {
+          parent.item.push(item);
+        } else {
+          roots.push(item);
+        }
+      } else {
+        roots.push(item);
+      }
+    });
+
+    return roots;
+  }
+
+  buildFolderItem(folderRecord) {
+    return {
+      id: folderRecord.id,
+      name: folderRecord.name,
+      description: folderRecord.description || '',
+      auth: folderRecord.request_data?.auth || null,
+      event: folderRecord.request_data?.event || [],
+      variable: folderRecord.request_data?.variable || [],
+      item: [],
+      createdAt: folderRecord.createdAt?.toISOString?.() || new Date().toISOString(),
+      updatedAt: folderRecord.updatedAt?.toISOString?.() || new Date().toISOString()
+    };
+  }
+
+  buildRequestItem(requestRecord) {
+    return {
+      id: requestRecord.id,
+      name: requestRecord.name,
+      description: requestRecord.description || '',
+      request: requestRecord.request_data?.request || {},
+      response: requestRecord.request_data?.response || [],
+      event: requestRecord.request_data?.event || [],
+      metadata: requestRecord.request_data?.metadata || {}
+    };
+  }
+
+  insertItemIntoCache(collectionId, parentId, item) {
+    const collection = this.collections.get(collectionId);
+    if (!collection) {
+      return;
+    }
+    if (parentId) {
+      const parent = this.findItemInCollection(collection, parentId);
+      if (parent && parent.item) {
+        parent.item.push(item);
+      }
+    } else {
+      collection.item.push(item);
+    }
+  }
+
+  async getNextOrderIndex(collectionId, parentId) {
+    const { CollectionItem } = this.models;
+    const maxIndex = await CollectionItem.max('order_index', {
+      where: { collection_id: collectionId, parent_id: parentId }
+    });
+    return Number.isFinite(maxIndex) ? maxIndex + 1 : 0;
   }
 }
 

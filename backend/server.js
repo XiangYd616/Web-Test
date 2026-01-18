@@ -30,6 +30,10 @@ const analyticsRoutes = require('./routes/analytics');
 const systemRoutes = require('./routes/system');
 const dataRoutes = require('./routes/data');
 const adminRoutes = require('./routes/admin');
+const workspaceRoutes = require('./routes/workspaces');
+const collectionRoutes = require('./routes/collections');
+const environmentRoutes = require('./routes/environments');
+const runRoutes = require('./routes/runs');
 
 // 导入中间件
 const { responseFormatter } = require('./middleware/responseFormatter');
@@ -163,6 +167,10 @@ app.use('/api/core', coreRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/data', dataRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/workspaces', workspaceRoutes);
+app.use('/api/collections', collectionRoutes);
+app.use('/api/environments', environmentRoutes);
+app.use('/api/runs', runRoutes);
 
 // 静态文件服务（如果需要）
 if (NODE_ENV === 'production') {

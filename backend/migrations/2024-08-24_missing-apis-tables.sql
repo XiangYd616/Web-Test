@@ -195,7 +195,9 @@ INSERT INTO engine_status (engine_type, status) VALUES
     ('performance', 'active'),
     ('security', 'active'),
     ('api', 'active'),
-    ('compatibility', 'active')
+    ('website', 'active'),
+    ('accessibility', 'active'),
+    ('seo', 'active')
 ON CONFLICT (engine_type) DO NOTHING;
 
 -- 插入默认角色

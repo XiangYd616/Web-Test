@@ -438,9 +438,10 @@ router.get('/usage', optionalAuth, async (req, res) => {
       byEngine: {
         performance: 800 * 1024 * 1024,
         stress: 600 * 1024 * 1024,
-        compatibility: 700 * 1024 * 1024,
+        website: 700 * 1024 * 1024,
         security: 400 * 1024 * 1024,
-        others: 1000 * 1024 * 1024
+        accessibility: 300 * 1024 * 1024,
+        others: 700 * 1024 * 1024
       }
     };
 

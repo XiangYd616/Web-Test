@@ -2,7 +2,7 @@
  * 后端数据模型类型定义
  * 版本: v2.0.0
  * 创建时间: 2025-08-16
- * 
+ *
  * 此文件定义了后端使用的所有数据模型类型
  * 确保与前端类型定义保持一致
  */
@@ -77,7 +77,7 @@ export interface TestConfiguration {
   user_id: DatabaseId;
   name: string;
   description?: string;
-  test_type: 'performance' | 'accessibility' | 'seo' | 'security' | 'compatibility' | 'load' | 'stress';
+  test_type: 'performance' | 'accessibility' | 'seo' | 'security' | 'api' | 'website' | 'stress';
   target_url: string;
   configuration: JsonObject;
   is_active: boolean;
@@ -176,36 +176,6 @@ export interface SecurityTestResult {
   created_at: DatabaseTimestamp;
 }
 
-// ==================== 兼容性测试详细结果 ====================
-
-export interface CompatibilityTestResult {
-  id: DatabaseId;
-  test_result_id: DatabaseId;
-  browser_results: JsonObject[];
-  device_results: JsonObject[];
-  compatibility_score: number;
-  issues: JsonObject[];
-  created_at: DatabaseTimestamp;
-}
-
-// ==================== 负载测试详细结果 ====================
-
-export interface LoadTestResult {
-  id: DatabaseId;
-  test_result_id: DatabaseId;
-  concurrent_users: number;
-  duration_seconds: number;
-  total_requests: number;
-  successful_requests: number;
-  failed_requests: number;
-  average_response_time: number;
-  max_response_time: number;
-  min_response_time: number;
-  requests_per_second: number;
-  error_rate: number;
-  created_at: DatabaseTimestamp;
-}
-
 // ==================== 压力测试详细结果 ====================
 
 export interface StressTestResult {
@@ -298,37 +268,63 @@ export interface RequestContext {
 
 // ==================== 创建和更新类型 ====================
 
-export type CreateUserData = Omit<User, 'id' | 'uuid' | 'created_at' | 'updated_at' | 'deleted_at' | 'last_login' | 'login_attempts' | 'locked_until'>;
-export type UpdateUserData = Partial<Pick<User, 'username' | 'email' | 'first_name' | 'last_name' | 'avatar_url' | 'is_active' | 'is_admin'>>;
+export type CreateUserData = Omit<
+  User,
+  | 'id'
+  | 'uuid'
+  | 'created_at'
+  | 'updated_at'
+  | 'deleted_at'
+  | 'last_login'
+  | 'login_attempts'
+  | 'locked_until'
+>;
+export type UpdateUserData = Partial<
+  Pick<
+    User,
+    'username' | 'email' | 'first_name' | 'last_name' | 'avatar_url' | 'is_active' | 'is_admin'
+  >
+>;
 
-export type CreateTestConfigData = Omit<TestConfiguration, 'id' | 'uuid' | 'created_at' | 'updated_at' | 'deleted_at'>;
-export type UpdateTestConfigData = Partial<Pick<TestConfiguration, 'name' | 'description' | 'configuration' | 'is_active'>>;
+export type CreateTestConfigData = Omit<
+  TestConfiguration,
+  'id' | 'uuid' | 'created_at' | 'updated_at' | 'deleted_at'
+>;
+export type UpdateTestConfigData = Partial<
+  Pick<TestConfiguration, 'name' | 'description' | 'configuration' | 'is_active'>
+>;
 
-export type CreateTestExecutionData = Omit<TestExecution, 'id' | 'uuid' | 'created_at' | 'updated_at' | 'started_at' | 'completed_at' | 'duration_ms'>;
-export type UpdateTestExecutionData = Partial<Pick<TestExecution, 'status' | 'error_message' | 'metadata'>>;
-
-// ==================== 导出所有类型 ====================
-
+export type CreateTestExecutionData = Omit<
+  TestExecution,
+  'id' | 'uuid' | 'created_at' | 'updated_at' | 'started_at' | 'completed_at' | 'duration_ms'
+>;
+export type UpdateTestExecutionData = Partial<
+  Pick<TestExecution, 'status' | 'error_message' | 'metadata'>
+>;
 export type {
-  AccessibilityTestResult, AuditLog, CompatibilityTestResult, CreateTestConfigData, CreateTestExecutionData, CreateUserData,
+  AccessibilityTestResult,
+  AuditLog,
+  CreateTestConfigData,
+  CreateTestExecutionData,
+  CreateUserData,
   // 基础类型
-  DatabaseId, DatabaseTimestamp, JsonObject, LoadTestResult, PaginatedQueryResult,
+  DatabaseId,
+  DatabaseTimestamp,
+  JsonObject,
+  PaginatedQueryResult,
   // 详细测试结果
   PerformanceTestResult,
   // 查询结果
   QueryResult,
-  // 上下文
-  RequestContext, SecurityTestResult, SeoTestResult, StressTestResult,
-  // 系统相关
+  SecurityTestResult,
+  SeoTestResult,
+  StressTestResult,
   SystemConfiguration,
-  // 测试相关
   TestConfiguration,
   TestExecution,
-  // 报告相关
-  TestReport, TestResult, UpdateTestConfigData, UpdateTestExecutionData, UpdateUserData,
-  // 用户相关
+  TestReport,
+  TestResult,
   User,
   UserProfile,
-  UserSession
+  UserSession,
 };
-

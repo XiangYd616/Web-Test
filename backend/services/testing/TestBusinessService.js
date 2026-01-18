@@ -392,7 +392,7 @@ class TestBusinessService {
       `, [
         testId,
         user.userId,
-        config.testType || 'load',
+        config.testType || 'website',
         config.url,
         'pending',
         JSON.stringify(config)
@@ -414,7 +414,7 @@ class TestBusinessService {
   /**
    * 生成测试ID
    */
-  generateTestId(testType = 'load') {
+  generateTestId(testType = 'website') {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 9);
     return `${testType}_${timestamp}_${random}`;

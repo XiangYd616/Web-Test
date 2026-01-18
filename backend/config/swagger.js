@@ -97,7 +97,7 @@ API支持两种认证方式：
   },
   servers: [
     {
-      url: 'http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api',
+      url: `http://${process.env.BACKEND_HOST || 'localhost'}:${process.env.BACKEND_PORT || 3001}/api`,
       description: '开发环境'
     },
     {
@@ -263,7 +263,7 @@ API支持两种认证方式：
           },
           testType: {
             type: 'string',
-            enum: ['performance', 'seo', 'security', 'api', 'stress', 'compatibility'],
+            enum: ['performance', 'seo', 'security', 'api', 'stress', 'website', 'accessibility'],
             example: 'performance',
             description: '测试类型'
           },
