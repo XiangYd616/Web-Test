@@ -3,6 +3,7 @@
  * 统一HTML解析逻辑，消除多个引擎中的重复解析代码
  */
 
+import type { CheerioAPI } from 'cheerio';
 import { ErrorCode, ErrorFactory, ErrorSeverity } from '../errors/ErrorTypes';
 import BaseService, { ServiceConfig } from './BaseService';
 
@@ -19,7 +20,7 @@ export interface HTMLParsingOptions {
 
 // 解析结果接口
 export interface ParsedHTML {
-  $: any; // Cheerio实例
+  $: CheerioAPI; // Cheerio实例
   title: string;
   description: string;
   keywords: string;
@@ -83,7 +84,7 @@ export interface MetaInfo {
 export interface StructuredDataInfo {
   type: 'json-ld' | 'microdata' | 'rdfa';
   content: string;
-  data?: any;
+  data?: unknown;
 }
 
 // CSS选择器配置接口
@@ -102,8 +103,10 @@ export interface CSSSelectorConfig {
   };
 }
 
+type CheerioElement = Parameters<CheerioAPI>[0];
+
 class HTMLParsingService extends BaseService {
-  private cheerio: any;
+  private cheerio?: typeof import('cheerio');
   private defaultSelectors: CSSSelectorConfig;
 
   constructor(config?: Partial<ServiceConfig>) {
@@ -154,9 +157,9 @@ class HTMLParsingService extends BaseService {
       const cheerioModule = await import('cheerio');
       this.cheerio = cheerioModule.default || cheerioModule;
       this.log('info', 'HTMLParsingService initialized successfully');
-    } catch (error) {
+    } catch {
       throw ErrorFactory.createSystemError('Failed to initialize cheerio module', {
-        code: ErrorCode.DEPENDENCY_FAILED,
+        code: ErrorCode.SYSTEM_INIT_FAILED,
         severity: ErrorSeverity.CRITICAL,
         context: { dependency: 'cheerio' },
       });
@@ -190,6 +193,14 @@ class HTMLParsingService extends BaseService {
       const startTime = Date.now();
 
       try {
+        if (!this.cheerio) {
+          throw ErrorFactory.createSystemError('Cheerio module is not initialized', {
+            code: ErrorCode.SYSTEM_INIT_FAILED,
+            severity: ErrorSeverity.CRITICAL,
+            context: { dependency: 'cheerio' },
+          });
+        }
+
         const $ = this.cheerio.load(html, {
           decodeEntities: options.decodeEntities !== false,
           normalizeWhitespace: options.normalizeWhitespace || false,
@@ -239,9 +250,11 @@ class HTMLParsingService extends BaseService {
         const responseTime = Date.now() - startTime;
         this.recordRequest(false, responseTime);
 
-        throw ErrorFactory.createParsingError(
+        throw ErrorFactory.createSystemError(
           `Failed to parse HTML: ${error instanceof Error ? error.message : String(error)}`,
           {
+            code: ErrorCode.PARSING_FAILED,
+            severity: ErrorSeverity.HIGH,
             context: { htmlLength: html.length, options },
           }
         );
@@ -252,14 +265,14 @@ class HTMLParsingService extends BaseService {
   /**
    * 提取标题
    */
-  private extractTitle($: any): string {
+  private extractTitle($: CheerioAPI): string {
     return $(this.defaultSelectors.title).first().text().trim() || '';
   }
 
   /**
    * 提取描述
    */
-  private extractDescription($: any): string {
+  private extractDescription($: CheerioAPI): string {
     for (const selector of this.defaultSelectors.description) {
       const content = $(selector).first().attr('content') || '';
       if (content) {
@@ -272,7 +285,7 @@ class HTMLParsingService extends BaseService {
   /**
    * 提取关键词
    */
-  private extractKeywords($: any): string {
+  private extractKeywords($: CheerioAPI): string {
     for (const selector of this.defaultSelectors.keywords) {
       const content = $(selector).first().attr('content') || '';
       if (content) {
@@ -285,12 +298,12 @@ class HTMLParsingService extends BaseService {
   /**
    * 提取标题结构
    */
-  private extractHeadings($: any): HeadingInfo[] {
+  private extractHeadings($: CheerioAPI): HeadingInfo[] {
     const headings: HeadingInfo[] = [];
 
-    $(this.defaultSelectors.headings).each((index: number, element: any) => {
-      const $element = $(element);
-      const tagName = element.tagName.toLowerCase();
+    $(this.defaultSelectors.headings).each((index: number, element: unknown) => {
+      const $element = $(element as CheerioElement);
+      const tagName = ((element as { tagName?: string }).tagName || '').toLowerCase();
       const level = parseInt(tagName.charAt(1));
 
       headings.push({
@@ -307,11 +320,11 @@ class HTMLParsingService extends BaseService {
   /**
    * 提取链接
    */
-  private extractLinks($: any): LinkInfo[] {
+  private extractLinks($: CheerioAPI): LinkInfo[] {
     const links: LinkInfo[] = [];
 
-    $(this.defaultSelectors.links).each((index: number, element: any) => {
-      const $element = $(element);
+    $(this.defaultSelectors.links).each((index: number, element: unknown) => {
+      const $element = $(element as CheerioElement);
       const href = $element.attr('href') || '';
       const text = $element.text().trim();
 
@@ -335,11 +348,11 @@ class HTMLParsingService extends BaseService {
   /**
    * 提取图片
    */
-  private extractImages($: any): ImageInfo[] {
+  private extractImages($: CheerioAPI): ImageInfo[] {
     const images: ImageInfo[] = [];
 
-    $(this.defaultSelectors.images).each((index: number, element: any) => {
-      const $element = $(element);
+    $(this.defaultSelectors.images).each((index: number, element: unknown) => {
+      const $element = $(element as CheerioElement);
       const src = $element.attr('src') || '';
 
       if (src) {
@@ -364,11 +377,11 @@ class HTMLParsingService extends BaseService {
   /**
    * 提取Meta标签
    */
-  private extractMeta($: any): MetaInfo[] {
+  private extractMeta($: CheerioAPI): MetaInfo[] {
     const meta: MetaInfo[] = [];
 
-    $(this.defaultSelectors.meta).each((_: number, element: any) => {
-      const $element = $(element);
+    $(this.defaultSelectors.meta).each((_: number, element: unknown) => {
+      const $element = $(element as CheerioElement);
       const metaInfo: MetaInfo = {
         content: $element.attr('content') || '',
       };
@@ -393,21 +406,21 @@ class HTMLParsingService extends BaseService {
   /**
    * 提取纯文本
    */
-  private extractText($: any): string {
+  private extractText($: CheerioAPI): string {
     return $('body').text() || $.text() || '';
   }
 
   /**
    * 提取语言
    */
-  private extractLanguage($: any): string {
+  private extractLanguage($: CheerioAPI): string {
     return $('html').attr('lang') || $('meta[http-equiv="content-language"]').attr('content') || '';
   }
 
   /**
    * 提取字符集
    */
-  private extractCharset($: any): string {
+  private extractCharset($: CheerioAPI): string {
     return (
       $('meta[charset]').attr('charset') ||
       $('meta[http-equiv="content-type"]')
@@ -420,47 +433,47 @@ class HTMLParsingService extends BaseService {
   /**
    * 提取视口设置
    */
-  private extractViewport($: any): string {
+  private extractViewport($: CheerioAPI): string {
     return $('meta[name="viewport"]').attr('content') || '';
   }
 
   /**
    * 提取Canonical URL
    */
-  private extractCanonical($: any): string {
+  private extractCanonical($: CheerioAPI): string {
     return $('link[rel="canonical"]').attr('href') || '';
   }
 
   /**
    * 提取Robots设置
    */
-  private extractRobots($: any): string {
+  private extractRobots($: CheerioAPI): string {
     return $('meta[name="robots"]').attr('content') || '';
   }
 
   /**
    * 提取作者
    */
-  private extractAuthor($: any): string {
+  private extractAuthor($: CheerioAPI): string {
     return $('meta[name="author"]').attr('content') || '';
   }
 
   /**
    * 提取Favicon
    */
-  private extractFavicon($: any): string {
+  private extractFavicon($: CheerioAPI): string {
     return $('link[rel="icon"], link[rel="shortcut icon"]').attr('href') || '';
   }
 
   /**
    * 提取结构化数据
    */
-  private extractStructuredData($: any): StructuredDataInfo[] {
+  private extractStructuredData($: CheerioAPI): StructuredDataInfo[] {
     const structuredData: StructuredDataInfo[] = [];
 
     // JSON-LD
-    $(this.defaultSelectors.structuredData.jsonLd).each((_: number, element: any) => {
-      const content = $(element).html() || '';
+    $(this.defaultSelectors.structuredData.jsonLd).each((_: number, element: unknown) => {
+      const content = $(element as CheerioElement).html() || '';
       if (content.trim()) {
         try {
           const data = JSON.parse(content);
@@ -480,8 +493,8 @@ class HTMLParsingService extends BaseService {
     });
 
     // Microdata
-    $(this.defaultSelectors.structuredData.microdata).each((_: number, element: any) => {
-      const $element = $(element);
+    $(this.defaultSelectors.structuredData.microdata).each((_: number, element: unknown) => {
+      const $element = $(element as CheerioElement);
       structuredData.push({
         type: 'microdata',
         content: $element.html() || '',
@@ -493,8 +506,8 @@ class HTMLParsingService extends BaseService {
     });
 
     // RDFa
-    $(this.defaultSelectors.structuredData.rdfa).each((_: number, element: any) => {
-      const $element = $(element);
+    $(this.defaultSelectors.structuredData.rdfa).each((_: number, element: unknown) => {
+      const $element = $(element as CheerioElement);
       structuredData.push({
         type: 'rdfa',
         content: $element.html() || '',
@@ -556,18 +569,6 @@ class HTMLParsingService extends BaseService {
       warnings.push('Missing <head> tag');
     }
 
-    if (!html.includes('<body')) {
-      warnings.push('Missing <body> tag');
-    }
-
-    // 检查未闭合的标签（简化检查）
-    const openTags = (html.match(/<[^\/][^>]*>/g) || []).length;
-    const closeTags = (html.match(/<\/[^>]*>/g) || []).length;
-
-    if (openTags !== closeTags) {
-      warnings.push('Possible unclosed tags detected');
-    }
-
     return {
       isValid: errors.length === 0,
       errors,
@@ -614,10 +615,10 @@ class HTMLParsingService extends BaseService {
     if (allowedTags.length > 0) {
       const allowedPattern = allowedTags.join('|');
       sanitized = sanitized.replace(
-        new RegExp(`<(?!\/?(?:${allowedPattern})[^>]*>)[^>]*>`, 'gi'),
+        new RegExp(`<(?!/?(?:${allowedPattern})[^>]*>)[^>]*>`, 'gi'),
         ''
       );
-      sanitized = sanitized.replace(new RegExp(`<\/(?!${allowedPattern})[^>]*>`, 'gi'), '');
+      sanitized = sanitized.replace(new RegExp(`</(?!${allowedPattern})[^>]*>`, 'gi'), '');
     }
 
     return sanitized;
@@ -627,7 +628,7 @@ class HTMLParsingService extends BaseService {
    * 提取特定选择器的内容
    */
   extractBySelector(
-    $: any,
+    $: CheerioAPI,
     selector: string
   ): {
     text: string;
@@ -637,10 +638,15 @@ class HTMLParsingService extends BaseService {
   } {
     const elements = $(selector);
 
+    const firstElement =
+      elements.length > 0
+        ? (elements[0] as { attribs?: Record<string, string> } | undefined)
+        : undefined;
+
     return {
       text: elements.text().trim(),
       html: elements.html() || '',
-      attributes: elements.length > 0 ? elements[0].attribs || {} : {},
+      attributes: firstElement?.attribs || {},
       count: elements.length,
     };
   }

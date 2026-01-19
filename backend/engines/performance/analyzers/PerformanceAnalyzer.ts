@@ -4,7 +4,30 @@
  * 深度分析Core Web Vitals、资源加载、网络优化、缓存策略等
  */
 
-import puppeteer from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
+
+type PerformanceWindow = Window & {
+  __lcp?: number;
+  __fid?: number;
+  __fcp?: number;
+  __ttfb?: number;
+  __clsEntries?: number[];
+  __resourceEntries?: PerformanceResourceTiming[];
+};
+
+interface NetworkMetrics {
+  requests: number;
+  totalTransferTime: number;
+  averageResponseTime: number;
+  connectionType: string;
+  effectiveBandwidth: number;
+}
+
+interface CacheMetrics {
+  cacheHitRate: number;
+  cacheableResources: number;
+  optimizedCaching: boolean;
+}
 
 interface PerformanceThresholds {
   coreWebVitals: {
@@ -205,8 +228,9 @@ class PerformanceAnalyzer {
   /**
    * 开始性能监控
    */
-  private async startPerformanceMonitoring(page: any): Promise<void> {
+  private async startPerformanceMonitoring(page: Page): Promise<void> {
     await page.evaluateOnNewDocument(() => {
+      const win = window as PerformanceWindow;
       // 监控Core Web Vitals
       new PerformanceObserver((entryList) => {
         const entries = entryList.getEntries();
@@ -214,23 +238,23 @@ class PerformanceAnalyzer {
         // LCP
         const lcpEntry = entries.find(entry => entry.entryType === 'largest-contentful-paint');
         if (lcpEntry) {
-          (window as any).__lcp = lcpEntry.startTime;
+          win.__lcp = lcpEntry.startTime;
         }
 
         // FID
         entries.forEach((entry) => {
           if (entry.entryType === 'first-input') {
-            (window as any).__fid = entry.processingStart - entry.startTime;
+            win.__fid = entry.processingStart - entry.startTime;
           }
         });
 
         // CLS
         entries.forEach((entry) => {
           if (entry.entryType === 'layout-shift' && !entry.hadRecentInput) {
-          if (!(window as any).__clsEntries) {
-            (window as any).__clsEntries = [];
+          if (!win.__clsEntries) {
+            win.__clsEntries = [];
           }
-          (window as any).__clsEntries.push(entry.value);
+          win.__clsEntries.push(entry.value);
         }
       }).observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
 
@@ -241,23 +265,23 @@ class PerformanceAnalyzer {
         // FCP
         const fcpEntry = entries.find(entry => entry.name === 'first-contentful-paint');
         if (fcpEntry) {
-          (window as any).__fcp = fcpEntry.startTime;
+          win.__fcp = fcpEntry.startTime;
         }
 
         // TTFB
         const navEntry = entries.find(entry => entry.entryType === 'navigation');
         if (navEntry) {
-          (window as any).__ttfb = navEntry.responseStart - navEntry.requestStart;
+          win.__ttfb = navEntry.responseStart - navEntry.requestStart;
         }
       }).observe({ entryTypes: ['paint', 'navigation'] });
 
       // 监控资源加载
       new PerformanceObserver((entryList) => {
         const entries = entryList.getEntries();
-        if (!(window as any).__resourceEntries) {
-          (window as any).__resourceEntries = [];
+        if (!win.__resourceEntries) {
+          win.__resourceEntries = [];
         }
-        (window as any).__resourceEntries.push(...entries);
+        win.__resourceEntries.push(...(entries as PerformanceResourceTiming[]));
       }).observe({ entryTypes: ['resource'] });
     });
   }
@@ -265,18 +289,19 @@ class PerformanceAnalyzer {
   /**
    * 收集性能数据
    */
-  private async collectPerformanceData(page: any, navigationStart: number, options: {
+  private async collectPerformanceData(page: Page, navigationStart: number, options: {
     analyzeResources: boolean;
     analyzeNetwork: boolean;
     analyzeCaching: boolean;
   }): Promise<{
     timingMetrics: TimingMetrics;
     resources: ResourceInfo[];
-    networkMetrics: any;
-    cacheMetrics: any;
+    networkMetrics: NetworkMetrics | null;
+    cacheMetrics: CacheMetrics | null;
   }> {
     const data = await page.evaluate(() => {
       const perfEntries = performance.getEntries();
+      const win = window as PerformanceWindow;
       
       // 时间指标
       const navEntry = perfEntries.find(entry => entry.entryType === 'navigation');
@@ -285,9 +310,9 @@ class PerformanceAnalyzer {
         domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.startTime,
         loadComplete: navEntry.loadEventEnd - navEntry.startTime,
         firstPaint: 0,
-        firstContentfulPaint: (window as any).__fcp || 0,
-        largestContentfulPaint: (window as any).__lcp || 0,
-        firstInputDelay: (window as any).__fid || 0,
+        firstContentfulPaint: win.__fcp || 0,
+        largestContentfulPaint: win.__lcp || 0,
+        firstInputDelay: win.__fid || 0,
         timeToInteractive: 0
       } : {
         navigationStart: 0,
@@ -301,8 +326,8 @@ class PerformanceAnalyzer {
       };
 
       // 资源信息
-      const resourceEntries = (window as any).__resourceEntries || [];
-      const resources = resourceEntries.map((entry: any) => ({
+      const resourceEntries = win.__resourceEntries || [];
+      const resources = resourceEntries.map((entry: PerformanceResourceTiming) => ({
         url: entry.name,
         type: this.getResourceType(entry.name),
         size: entry.transferSize || 0,
@@ -322,13 +347,13 @@ class PerformanceAnalyzer {
     });
 
     // 分析网络指标
-    let networkMetrics = null;
+    let networkMetrics: NetworkMetrics | null = null;
     if (options.analyzeNetwork) {
       networkMetrics = await this.analyzeNetworkMetrics(page);
     }
 
     // 分析缓存指标
-    let cacheMetrics = null;
+    let cacheMetrics: CacheMetrics | null = null;
     if (options.analyzeCaching) {
       cacheMetrics = await this.analyzeCacheMetrics(data.resources);
     }
@@ -344,22 +369,17 @@ class PerformanceAnalyzer {
   /**
    * 分析网络指标
    */
-  private async analyzeNetworkMetrics(page: any): Promise<{
-    requests: number;
-    totalTransferTime: number;
-    averageResponseTime: number;
-    connectionType: string;
-    effectiveBandwidth: number;
-  }> {
+  private async analyzeNetworkMetrics(page: Page): Promise<NetworkMetrics> {
     const metrics = await page.evaluate(() => {
-      const entries = performance.getEntriesByType('resource');
+      const entries = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
       
       const requests = entries.length;
-      const totalTransferTime = entries.reduce((sum: number, entry: any) => sum + entry.duration, 0);
+      const totalTransferTime = entries.reduce((sum, entry) => sum + entry.duration, 0);
       const averageResponseTime = totalTransferTime / requests;
 
       // 尝试获取网络信息
-      const connection = (navigator as any).connection;
+      const connection = (navigator as { connection?: { effectiveType?: string; downlink?: number } })
+        .connection;
       
       return {
         requests,
@@ -406,8 +426,8 @@ class PerformanceAnalyzer {
   private calculatePerformanceScore(data: {
     timingMetrics: TimingMetrics;
     resources: ResourceInfo[];
-    networkMetrics: any;
-    cacheMetrics: any;
+    networkMetrics: NetworkMetrics | null;
+    cacheMetrics: CacheMetrics | null;
   }): PerformanceScore {
     // 计算Core Web Vitals分数
     const coreWebVitalsScore = this.calculateCoreWebVitalsScore(data.timingMetrics);
@@ -714,7 +734,7 @@ class PerformanceAnalyzer {
   /**
    * 获取资源优先级
    */
-  private getResourcePriority(entry: any): 'high' | 'medium' | 'low' {
+  private getResourcePriority(entry: PerformanceResourceTiming): 'high' | 'medium' | 'low' {
     // 根据资源类型和加载时间判断优先级
     const type = this.getResourceType(entry.name);
     const loadTime = entry.duration || 0;
@@ -731,7 +751,7 @@ class PerformanceAnalyzer {
   /**
    * 判断是否为渲染阻塞资源
    */
-  private isRenderBlocking(entry: any): boolean {
+  private isRenderBlocking(entry: PerformanceResourceTiming): boolean {
     const type = this.getResourceType(entry.name);
     return type === 'script' || type === 'stylesheet';
   }

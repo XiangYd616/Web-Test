@@ -4,6 +4,7 @@
  * 分析页面内容质量、结构、关键词密度等
  */
 
+import type { Page } from 'puppeteer';
 import puppeteer from 'puppeteer';
 
 interface ContentRules {
@@ -162,6 +163,102 @@ interface CodeExample {
   explanation: string;
 }
 
+type ExtractedHeading = {
+  level: number;
+  text: string;
+  position: number;
+};
+
+type ExtractedImage = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  position: number;
+};
+
+type ExtractedLink = {
+  href: string;
+  text: string;
+  title: string;
+  rel: string;
+  position: number;
+};
+
+type ExtractedList = {
+  type: string;
+  itemCount: number;
+  position: number;
+};
+
+type ExtractedContent = {
+  text: string;
+  title: string;
+  description: string;
+  headings: ExtractedHeading[];
+  images: ExtractedImage[];
+  links: ExtractedLink[];
+  lists: ExtractedList[];
+};
+
+type HeadingEvaluationResult = {
+  h1: Array<{ text: string; wordCount: number; position: number }>;
+  h2: Array<{ text: string; wordCount: number; position: number }>;
+  h3: Array<{ text: string; wordCount: number; position: number }>;
+  h4: Array<{ text: string; wordCount: number; position: number }>;
+  h5: Array<{ text: string; wordCount: number; position: number }>;
+  h6: Array<{ text: string; wordCount: number; position: number }>;
+};
+
+type ListEvaluationResult = {
+  ordered: Array<{ type: 'ordered'; itemCount: number; depth: number; position: number }>;
+  unordered: Array<{ type: 'unordered'; itemCount: number; depth: number; position: number }>;
+};
+
+type LinkEvaluationResult = {
+  internal: Array<{
+    url: string;
+    text: string;
+    isInternal: boolean;
+    hasTitle: boolean;
+    isNoFollow: boolean;
+    position: number;
+  }>;
+  external: Array<{
+    url: string;
+    text: string;
+    isInternal: boolean;
+    hasTitle: boolean;
+    isNoFollow: boolean;
+    position: number;
+  }>;
+};
+
+type ContentQualityResult = {
+  wordCount: number;
+  characterCount: number;
+  paragraphCount: number;
+  sentenceCount: number;
+  averageWordsPerSentence: number;
+  readabilityLevel: string;
+  issues: ContentIssue[];
+};
+
+type StructureAnalysisResult = {
+  headings: HeadingAnalysis;
+  lists: ListAnalysis;
+  links: LinkAnalysis;
+  images: ImageAnalysis;
+};
+
+type KeywordsAnalysisResult = {
+  primary: string[];
+  secondary: string[];
+  density: Record<string, number>;
+  prominence: KeywordProminence[];
+  issues: KeywordIssue[];
+};
+
 class ContentAnalyzer {
   private rules: ContentRules;
 
@@ -234,7 +331,7 @@ class ContentAnalyzer {
       await page.goto(url, { waitUntil: 'networkidle0', timeout });
 
       // 等待页面完全加载
-      await page.waitFor(waitTime);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
 
       // 提取页面内容
       const contentData = await this.extractContent(page, keywords);
@@ -274,19 +371,8 @@ class ContentAnalyzer {
   /**
    * 提取页面内容
    */
-  private async extractContent(
-    page: any,
-    keywords: string[]
-  ): Promise<{
-    text: string;
-    title: string;
-    description: string;
-    headings: any[];
-    images: any[];
-    links: any[];
-    lists: any[];
-  }> {
-    return await page.evaluate((targetKeywords: string[]) => {
+  private async extractContent(page: Page, keywords: string[]): Promise<ExtractedContent> {
+    return await page.evaluate((_targetKeywords: string[]) => {
       // 提取文本内容
       const textContent = document.body.innerText || '';
 
@@ -298,44 +384,59 @@ class ContentAnalyzer {
       const description = descriptionMeta ? descriptionMeta.getAttribute('content') || '' : '';
 
       // 提取标题
-      const headings: any[] = [];
+      const headings: Array<{ level: number; text: string; position: number }> = [];
       for (let i = 1; i <= 6; i++) {
         const elements = document.querySelectorAll(`h${i}`);
         elements.forEach((element, index) => {
+          const headingElement = element as HTMLElement;
           headings.push({
             level: i,
-            text: element.innerText || '',
+            text: headingElement.innerText || '',
             position: index,
           });
         });
       }
 
       // 提取图片
-      const images: any[] = [];
+      const images: Array<{
+        src: string;
+        alt: string;
+        width: number;
+        height: number;
+        position: number;
+      }> = [];
       document.querySelectorAll('img').forEach((img, index) => {
+        const imageElement = img as HTMLImageElement;
         images.push({
-          src: img.src || '',
-          alt: img.alt || '',
-          width: img.naturalWidth || 0,
-          height: img.naturalHeight || 0,
+          src: imageElement.src || '',
+          alt: imageElement.alt || '',
+          width: imageElement.naturalWidth || 0,
+          height: imageElement.naturalHeight || 0,
           position: index,
         });
       });
 
       // 提取链接
-      const links: any[] = [];
+      const links: Array<{
+        href: string;
+        text: string;
+        title: string;
+        rel: string;
+        position: number;
+      }> = [];
       document.querySelectorAll('a[href]').forEach((link, index) => {
+        const anchorElement = link as HTMLAnchorElement;
         links.push({
-          href: link.href || '',
-          text: link.innerText || '',
-          title: link.title || '',
-          rel: link.rel || '',
+          href: anchorElement.href || '',
+          text: anchorElement.innerText || '',
+          title: anchorElement.title || '',
+          rel: anchorElement.rel || '',
           position: index,
         });
       });
 
       // 提取列表
-      const lists: any[] = [];
+      const lists: Array<{ type: string; itemCount: number; position: number }> = [];
       document.querySelectorAll('ol, ul').forEach((list, index) => {
         const items = list.querySelectorAll('li');
         lists.push({
@@ -360,15 +461,7 @@ class ContentAnalyzer {
   /**
    * 分析内容质量
    */
-  private analyzeContentQuality(contentData: any): {
-    wordCount: number;
-    characterCount: number;
-    paragraphCount: number;
-    sentenceCount: number;
-    averageWordsPerSentence: number;
-    readabilityLevel: string;
-    issues: ContentIssue[];
-  } {
+  private analyzeContentQuality(contentData: ExtractedContent): ContentQualityResult {
     const text = contentData.text;
     const wordCount = this.countWords(text);
     const characterCount = text.length;
@@ -426,12 +519,7 @@ class ContentAnalyzer {
   /**
    * 分析页面结构
    */
-  private async analyzeStructure(page: any): {
-    headings: HeadingAnalysis;
-    lists: ListAnalysis;
-    links: LinkAnalysis;
-    images: ImageAnalysis;
-  } {
+  private async analyzeStructure(page: Page): Promise<StructureAnalysisResult> {
     // 分析标题结构
     const headings = await this.analyzeHeadings(page);
 
@@ -455,9 +543,9 @@ class ContentAnalyzer {
   /**
    * 分析标题结构
    */
-  private async analyzeHeadings(page: any): HeadingAnalysis {
+  private async analyzeHeadings(page: Page): Promise<HeadingAnalysis> {
     const headings = await page.evaluate(() => {
-      const result: any = {
+      const result: HeadingEvaluationResult = {
         h1: [],
         h2: [],
         h3: [],
@@ -469,9 +557,11 @@ class ContentAnalyzer {
       for (let i = 1; i <= 6; i++) {
         const elements = document.querySelectorAll(`h${i}`);
         elements.forEach((element, index) => {
-          result[`h${i}`].push({
-            text: element.innerText || '',
-            wordCount: (element.innerText || '').split(/\s+/).length,
+          const headingElement = element as HTMLElement;
+          const key = `h${i}` as keyof HeadingEvaluationResult;
+          result[key].push({
+            text: headingElement.innerText || '',
+            wordCount: (headingElement.innerText || '').split(/\s+/).length,
             position: index,
           });
         });
@@ -480,26 +570,35 @@ class ContentAnalyzer {
       return result;
     });
 
+    const headingsWithKeywords = {
+      h1: headings.h1.map(h => ({ ...h, containsKeywords: false })),
+      h2: headings.h2.map(h => ({ ...h, containsKeywords: false })),
+      h3: headings.h3.map(h => ({ ...h, containsKeywords: false })),
+      h4: headings.h4.map(h => ({ ...h, containsKeywords: false })),
+      h5: headings.h5.map(h => ({ ...h, containsKeywords: false })),
+      h6: headings.h6.map(h => ({ ...h, containsKeywords: false })),
+    };
+
     const issues: string[] = [];
     let score = 100;
 
     // H1检查
-    if (headings.h1.length === 0 && this.rules.headings.requiredH1) {
+    if (headingsWithKeywords.h1.length === 0 && this.rules.headings.requiredH1) {
       issues.push('缺少H1标题');
       score -= 30;
-    } else if (headings.h1.length > this.rules.headings.maxH1Count) {
-      issues.push(`H1标题过多 (${headings.h1.length}个)`);
+    } else if (headingsWithKeywords.h1.length > this.rules.headings.maxH1Count) {
+      issues.push(`H1标题过多 (${headingsWithKeywords.h1.length}个)`);
       score -= 20;
     }
 
     // 标题层级检查
     const allHeadings = [
-      ...headings.h1.map(h => ({ ...h, level: 1 })),
-      ...headings.h2.map(h => ({ ...h, level: 2 })),
-      ...headings.h3.map(h => ({ ...h, level: 3 })),
-      ...headings.h4.map(h => ({ ...h, level: 4 })),
-      ...headings.h5.map(h => ({ ...h, level: 5 })),
-      ...headings.h6.map(h => ({ ...h, level: 6 })),
+      ...headingsWithKeywords.h1.map(h => ({ ...h, level: 1 })),
+      ...headingsWithKeywords.h2.map(h => ({ ...h, level: 2 })),
+      ...headingsWithKeywords.h3.map(h => ({ ...h, level: 3 })),
+      ...headingsWithKeywords.h4.map(h => ({ ...h, level: 4 })),
+      ...headingsWithKeywords.h5.map(h => ({ ...h, level: 5 })),
+      ...headingsWithKeywords.h6.map(h => ({ ...h, level: 6 })),
     ].sort((a, b) => a.position - b.position);
 
     // 检查标题层级跳跃
@@ -513,10 +612,10 @@ class ContentAnalyzer {
       }
     }
 
-    const structure = this.getHeadingStructure(headings);
+    const structure = this.getHeadingStructure(headingsWithKeywords);
 
     return {
-      ...headings,
+      ...headingsWithKeywords,
       structure,
       issues,
       score: Math.max(0, score),
@@ -526,25 +625,51 @@ class ContentAnalyzer {
   /**
    * 分析列表
    */
-  private async analyzeLists(page: any): ListAnalysis {
+  private async analyzeLists(page: Page): Promise<ListAnalysis> {
     const lists = await page.evaluate(() => {
-      const result: any = {
+      const result: ListEvaluationResult = {
         ordered: [],
         unordered: [],
       };
 
       document.querySelectorAll('ol').forEach((list, index) => {
         const items = list.querySelectorAll('li');
+        const depth = (() => {
+          let current = list.parentElement;
+          let level = 0;
+          while (current) {
+            if (current.tagName === 'UL' || current.tagName === 'OL') {
+              level += 1;
+            }
+            current = current.parentElement;
+          }
+          return level;
+        })();
         result.ordered.push({
+          type: 'ordered',
           itemCount: items.length,
+          depth,
           position: index,
         });
       });
 
       document.querySelectorAll('ul').forEach((list, index) => {
         const items = list.querySelectorAll('li');
+        const depth = (() => {
+          let current = list.parentElement;
+          let level = 0;
+          while (current) {
+            if (current.tagName === 'UL' || current.tagName === 'OL') {
+              level += 1;
+            }
+            current = current.parentElement;
+          }
+          return level;
+        })();
         result.unordered.push({
+          type: 'unordered',
           itemCount: items.length,
+          depth,
           position: index,
         });
       });
@@ -565,7 +690,7 @@ class ContentAnalyzer {
     let score = 100;
 
     // 检查列表项数量
-    if (averageItemsPerSentence > 10) {
+    if (averageItemsPerList > 10) {
       issues.push('列表项过多，建议拆分');
       score -= 10;
     }
@@ -582,32 +707,35 @@ class ContentAnalyzer {
   /**
    * 分析链接
    */
-  private async analyzeLinks(page: any): LinkAnalysis {
+  private async analyzeLinks(page: Page): Promise<LinkAnalysis> {
     const links = await page.evaluate(() => {
-      const result: any = {
+      const result: LinkEvaluationResult = {
         internal: [],
         external: [],
       };
 
       document.querySelectorAll('a[href]').forEach((link, index) => {
-        const href = link.href || '';
-        const text = link.innerText || '';
+        const anchorElement = link as HTMLAnchorElement;
+        const href = anchorElement.href || '';
+        const text = anchorElement.innerText || '';
         const isInternal = href.includes(window.location.hostname);
 
         if (isInternal) {
           result.internal.push({
             url: href,
             text,
-            hasTitle: !!link.title,
-            isNoFollow: link.rel.includes('nofollow'),
+            isInternal: true,
+            hasTitle: !!anchorElement.title,
+            isNoFollow: anchorElement.rel.includes('nofollow'),
             position: index,
           });
         } else {
           result.external.push({
             url: href,
             text,
-            hasTitle: !!link.title,
-            isNoFollow: link.rel.includes('nofollow'),
+            isInternal: false,
+            hasTitle: !!anchorElement.title,
+            isNoFollow: anchorElement.rel.includes('nofollow'),
             position: index,
           });
         }
@@ -650,9 +778,15 @@ class ContentAnalyzer {
   /**
    * 分析图片
    */
-  private async analyzeImages(page: any): ImageAnalysis {
+  private async analyzeImages(page: Page): Promise<ImageAnalysis> {
     const images = await page.evaluate(() => {
-      const result: any[] = [];
+      const result: Array<{
+        src: string;
+        alt: string;
+        width: number;
+        height: number;
+        position: number;
+      }> = [];
 
       document.querySelectorAll('img').forEach((img, index) => {
         result.push({
@@ -673,7 +807,7 @@ class ContentAnalyzer {
     const optimized = images.filter(img => img.width > 0 && img.height > 0).length;
     const largeImages = images
       .filter(img => img.width > 2000 || img.height > 2000)
-      .map(img => img.src);
+      .map(img => img.position);
 
     const issues: string[] = [];
     let score = 100;
@@ -707,15 +841,9 @@ class ContentAnalyzer {
    * 分析关键词
    */
   private analyzeKeywords(
-    contentData: any,
-    targetKeywords: string[]
-  ): {
-    primary: string[];
-    secondary: string[];
-    density: Record<string, number>;
-    prominence: KeywordProminence[];
-    issues: KeywordIssue[];
-  } {
+    contentData: ExtractedContent,
+    _targetKeywords: string[]
+  ): KeywordsAnalysisResult {
     const text = contentData.text.toLowerCase();
     const title = contentData.title.toLowerCase();
     const description = contentData.description.toLowerCase();
@@ -768,7 +896,7 @@ class ContentAnalyzer {
       }
 
       // H1中的关键词
-      contentData.headings.forEach((heading: any) => {
+      contentData.headings.forEach(heading => {
         if (heading.level === 1 && heading.text.toLowerCase().includes(keyword)) {
           locations.push('h1');
           score += 25;
@@ -776,7 +904,7 @@ class ContentAnalyzer {
       });
 
       // H2中的关键词
-      contentData.headings.forEach((heading: any) => {
+      contentData.headings.forEach(heading => {
         if (heading.level === 2 && heading.text.toLowerCase().includes(keyword)) {
           locations.push('h2');
           score += 15;
@@ -829,9 +957,9 @@ class ContentAnalyzer {
    * 计算总体分数
    */
   private calculateOverallScore(
-    content: any,
-    structure: any,
-    keywords: any
+    content: ContentQualityResult,
+    structure: StructureAnalysisResult,
+    keywords: KeywordsAnalysisResult
   ): {
     score: number;
     grade: 'A' | 'B' | 'C' | 'D' | 'F';
@@ -871,9 +999,9 @@ class ContentAnalyzer {
    * 生成建议
    */
   private generateRecommendations(
-    content: any,
-    structure: any,
-    keywords: any
+    content: ContentQualityResult,
+    structure: StructureAnalysisResult,
+    keywords: KeywordsAnalysisResult
   ): ContentRecommendation[] {
     const recommendations: ContentRecommendation[] = [];
 
@@ -1004,7 +1132,7 @@ class ContentAnalyzer {
   /**
    * 计算可读性分数
    */
-  private calculateReadabilityScore(content: any): number {
+  private calculateReadabilityScore(content: ContentQualityResult): number {
     const level = content.readabilityLevel;
     const scores = {
       easy: 100,
@@ -1018,7 +1146,9 @@ class ContentAnalyzer {
   /**
    * 获取标题结构
    */
-  private getHeadingStructure(headings: any): string {
+  private getHeadingStructure(
+    headings: Pick<HeadingAnalysis, 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'>
+  ): string {
     const levels = [];
 
     if (headings.h1.length > 0) levels.push('H1');

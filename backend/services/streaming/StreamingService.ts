@@ -20,7 +20,7 @@ export enum MessageType {
 export interface StreamingMessage {
   id: string;
   type: MessageType;
-  data: any;
+  data: unknown;
   timestamp: Date;
   userId?: string;
   sessionId?: string;
@@ -47,7 +47,7 @@ export interface TestProgress {
   totalSteps: number;
   startTime: Date;
   estimatedCompletion?: Date;
-  results?: any;
+  results?: unknown;
   error?: string;
 }
 
@@ -59,7 +59,7 @@ export interface Room {
   participants: string[];
   createdAt: Date;
   lastActivity: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // 通知接口
@@ -68,7 +68,7 @@ export interface Notification {
   type: 'info' | 'warning' | 'error' | 'success';
   title: string;
   message: string;
-  data?: any;
+  data?: unknown;
   timestamp: Date;
   read: boolean;
   userId?: string;
@@ -86,16 +86,16 @@ export interface StreamingServiceConfig {
 }
 
 interface SocketManager {
-  emit(event: string, data: any): void;
-  broadcast(event: string, data: any): void;
+  emit(event: string, data: unknown): void;
+  broadcast(event: string, data: unknown): void;
   joinRoom(socketId: string, roomId: string): void;
   leaveRoom(socketId: string, roomId: string): void;
   getConnectedClients(): string[];
 }
 
 interface CacheManager {
-  get(key: string): any;
-  set(key: string, value: any, ttl?: number): void;
+  get(key: string): unknown;
+  set(key: string, value: unknown, ttl?: number): void;
   delete(key: string): void;
   clear(): void;
 }
@@ -289,7 +289,7 @@ class StreamingService {
   /**
    * 完成测试
    */
-  completeTest(testId: string, results: any): void {
+  completeTest(testId: string, results: unknown): void {
     this.updateTestProgress(testId, {
       status: 'completed',
       progress: 100,
@@ -331,7 +331,7 @@ class StreamingService {
    * 创建房间
    */
   createRoom(room: Omit<Room, 'id' | 'createdAt' | 'lastActivity'>): string {
-    const id = room.id || this.generateId();
+    const id = this.generateId();
     const fullRoom: Room = {
       ...room,
       id,

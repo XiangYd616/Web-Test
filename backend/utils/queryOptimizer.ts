@@ -3,7 +3,7 @@
  * 提供查询性能分析、优化建议和自动优化功能
  */
 
-import type { Pool, QueryResult } from 'pg';
+import type { Pool, QueryResult, QueryResultRow } from 'pg';
 
 const { getPool } = require('../config/database');
 const Logger = require('./logger');
@@ -42,7 +42,7 @@ type QueryPlanAnalysis = {
 } | null;
 
 type QueryCacheEntry = {
-  data: QueryResult<unknown>;
+  data: QueryResult<QueryResultRow>;
   timestamp: number;
   timeout: number;
 };
@@ -68,7 +68,7 @@ class QueryOptimizer {
     sql: string,
     params: unknown[] = [],
     options: OptimizedQueryOptions = {}
-  ) {
+  ): Promise<QueryResult<QueryResultRow>> {
     const {
       enableCache = true,
       cacheTimeout = this.cacheTimeout,
@@ -96,14 +96,15 @@ class QueryOptimizer {
 
       // 执行查询
       const pool: Pool = getPool();
-      const result = await pool.query(sql, params);
+      const result = await pool.query<QueryResultRow>(sql, params);
       const duration = Date.now() - startTime;
+      const rowCount = result.rowCount ?? 0;
 
       // 记录性能统计
-      this.recordPerformanceStats(queryHash, duration, result.rowCount);
+      this.recordPerformanceStats(queryHash, duration, rowCount);
 
       // 缓存结果
-      if (enableCache && result.rowCount > 0) {
+      if (enableCache && rowCount > 0) {
         this.setCache(queryHash, result, cacheTimeout);
       }
 
@@ -113,7 +114,7 @@ class QueryOptimizer {
       }
 
       Logger.db('OPTIMIZED_QUERY', operationName, duration, {
-        rowCount: result.rowCount,
+        rowCount,
         cached: false,
         queryHash,
       });
@@ -134,7 +135,10 @@ class QueryOptimizer {
   /**
    * 批量查询优化
    */
-  async executeBatchQueries(queries: BatchQuery[], options: BatchQueryOptions = {}) {
+  async executeBatchQueries(
+    queries: BatchQuery[],
+    options: BatchQueryOptions = {}
+  ): Promise<QueryResult<QueryResultRow>[]> {
     const { enableTransaction = true, enableParallel = false, maxConcurrency = 5 } = options;
 
     if (enableTransaction && !enableParallel) {
@@ -149,16 +153,16 @@ class QueryOptimizer {
   /**
    * 在事务中执行批量查询
    */
-  async executeBatchInTransaction(queries: BatchQuery[]) {
+  async executeBatchInTransaction(queries: BatchQuery[]): Promise<QueryResult<QueryResultRow>[]> {
     const pool: Pool = getPool();
     const client = await pool.connect();
 
     try {
       await client.query('BEGIN');
-      const results = [] as Array<QueryResult<unknown>>;
+      const results: QueryResult<QueryResultRow>[] = [];
 
       for (const query of queries) {
-        const result = await client.query(query.sql, query.params || []);
+        const result = await client.query<QueryResultRow>(query.sql, query.params);
         results.push(result);
       }
 
@@ -176,7 +180,7 @@ class QueryOptimizer {
    * 并行执行批量查询
    */
   async executeBatchInParallel(queries: BatchQuery[], maxConcurrency: number) {
-    const results: Array<QueryResult<unknown>> = [];
+    const results: QueryResult<QueryResultRow>[] = [];
 
     for (let i = 0; i < queries.length; i += maxConcurrency) {
       const batch = queries.slice(i, i + maxConcurrency);
@@ -195,7 +199,7 @@ class QueryOptimizer {
    * 顺序执行批量查询
    */
   async executeBatchSequential(queries: BatchQuery[]) {
-    const results: Array<QueryResult<unknown>> = [];
+    const results: QueryResult<QueryResultRow>[] = [];
 
     for (const query of queries) {
       const result = await this.executeOptimizedQuery(query.sql, query.params, query.options);
@@ -212,11 +216,12 @@ class QueryOptimizer {
     try {
       const explainSql = `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${sql}`;
       const pool: Pool = getPool();
-      const result = await pool.query(explainSql, params);
+      type PlanRow = { 'QUERY PLAN': Array<Record<string, unknown>> };
+      const result = await pool.query<PlanRow>(explainSql, params);
 
       const plan = result.rows[0]['QUERY PLAN'][0];
-      const executionTime = plan['Execution Time'];
-      const planningTime = plan['Planning Time'];
+      const executionTime = typeof plan['Execution Time'] === 'number' ? plan['Execution Time'] : 0;
+      const planningTime = typeof plan['Planning Time'] === 'number' ? plan['Planning Time'] : 0;
 
       // 检查潜在问题
       const issues = this.detectQueryIssues(plan);
@@ -240,33 +245,35 @@ class QueryOptimizer {
   /**
    * 检测查询问题
    */
-  detectQueryIssues(plan: Record<string, any>) {
+  detectQueryIssues(plan: Record<string, unknown>) {
     const issues: QueryPlanIssue[] = [];
 
     // 递归检查查询计划节点
-    const checkNode = (node: Record<string, any>) => {
+    const checkNode = (node: Record<string, unknown>) => {
       // 检查顺序扫描
-      if (node['Node Type'] === 'Seq Scan' && node['Actual Rows'] > 1000) {
+      const nodeType = node['Node Type'];
+      const actualRows = typeof node['Actual Rows'] === 'number' ? node['Actual Rows'] : 0;
+      if (nodeType === 'Seq Scan' && actualRows > 1000) {
         issues.push({
           type: 'sequential_scan',
           severity: 'medium',
-          message: `Sequential scan on ${node['Relation Name']} with ${node['Actual Rows']} rows`,
+          message: `Sequential scan on ${String(node['Relation Name'])} with ${actualRows} rows`,
           suggestion: 'Consider adding an index',
         });
       }
 
       // 检查嵌套循环连接
-      if (node['Node Type'] === 'Nested Loop' && node['Actual Rows'] > 10000) {
+      if (nodeType === 'Nested Loop' && actualRows > 10000) {
         issues.push({
           type: 'nested_loop',
           severity: 'high',
-          message: `Nested loop with ${node['Actual Rows']} rows`,
+          message: `Nested loop with ${actualRows} rows`,
           suggestion: 'Consider using hash join or merge join',
         });
       }
 
       // 检查排序操作
-      if (node['Node Type'] === 'Sort' && node['Sort Method'] === 'external merge') {
+      if (nodeType === 'Sort' && node['Sort Method'] === 'external merge') {
         issues.push({
           type: 'external_sort',
           severity: 'medium',
@@ -276,12 +283,20 @@ class QueryOptimizer {
       }
 
       // 递归检查子节点
-      if (node['Plans']) {
-        node['Plans'].forEach(checkNode);
+      const plans = node['Plans'];
+      if (Array.isArray(plans)) {
+        plans.forEach(planNode => {
+          if (planNode && typeof planNode === 'object') {
+            checkNode(planNode as Record<string, unknown>);
+          }
+        });
       }
     };
 
-    checkNode(plan['Plan']);
+    const rootPlan = plan['Plan'];
+    if (rootPlan && typeof rootPlan === 'object') {
+      checkNode(rootPlan as Record<string, unknown>);
+    }
     return issues;
   }
 
@@ -372,7 +387,7 @@ class QueryOptimizer {
   /**
    * 缓存操作
    */
-  getFromCache(queryHash: string) {
+  private getFromCache(queryHash: string): QueryResult<QueryResultRow> | null {
     const cached = this.queryCache.get(queryHash);
     if (cached && Date.now() - cached.timestamp < cached.timeout) {
       return cached.data;
@@ -381,7 +396,7 @@ class QueryOptimizer {
     return null;
   }
 
-  setCache(queryHash: string, data: QueryResult<unknown>, timeout: number) {
+  private setCache(queryHash: string, data: QueryResult<QueryResultRow>, timeout: number) {
     this.queryCache.set(queryHash, {
       data,
       timestamp: Date.now(),

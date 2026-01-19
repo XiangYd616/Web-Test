@@ -6,8 +6,8 @@
 import axios, { AxiosResponse } from 'axios';
 import * as crypto from 'crypto';
 import { query } from '../../config/database';
-import { generateTokenPair } from '../../middleware/auth';
-import { logSecurityEvent } from '../utils/securityLogger';
+import JwtService from '../../services/core/jwtService';
+import { logSecurityEvent, SecurityEventType } from '../utils/securityLogger';
 
 // OAuth2提供商配置接口
 export interface OAuthProviderConfig {
@@ -70,6 +70,16 @@ export interface OAuthState {
   createdAt: Date;
 }
 
+interface OAuthDbUser {
+  id: string;
+  email: string;
+  username: string;
+  avatar?: string;
+  provider: string;
+  providerId: string;
+  createdAt: Date;
+}
+
 /**
  * OAuth2 服务类
  */
@@ -77,6 +87,7 @@ class OAuthService {
   private providers: Record<string, OAuthProviderConfig>;
   private states: Map<string, OAuthState> = new Map();
   private stateExpiry: number = 600000; // 10分钟
+  private jwtService: JwtService;
 
   constructor() {
     // OAuth2 提供商配置
@@ -123,6 +134,7 @@ class OAuthService {
       },
     };
 
+    this.jwtService = new JwtService();
     // 定期清理过期状态
     setInterval(() => this.cleanExpiredStates(), 60000); // 每分钟清理一次
   }
@@ -151,7 +163,7 @@ class OAuthService {
       redirect_uri: redirectUri || config.redirectUri,
       scope: config.scope,
       response_type: 'code',
-      state: state,
+      state,
       access_type: 'offline', // Google特有
       prompt: 'consent', // 强制显示同意页面
     });
@@ -183,8 +195,7 @@ class OAuthService {
       const user = await this.findOrCreateUser(userInfo);
 
       // 生成JWT令牌
-      const tokens = generateTokenPair({
-        userId: user.id,
+      const tokens = await this.jwtService.generateTokenPair(user.id, {
         username: user.username,
         email: user.email,
         provider: user.provider,
@@ -192,7 +203,7 @@ class OAuthService {
 
       // 记录安全事件
       await logSecurityEvent({
-        type: 'oauth_login',
+        type: SecurityEventType.OAUTH_LOGIN,
         userId: user.id,
         provider,
         success: true,
@@ -224,13 +235,14 @@ class OAuthService {
           expiresIn: tokens.expiresIn,
         },
       };
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       // 记录安全事件
       await logSecurityEvent({
-        type: 'oauth_login_failed',
+        type: SecurityEventType.OAUTH_LOGIN_FAILED,
         provider,
         success: false,
-        error: error.message,
+        error: message,
         timestamp: new Date(),
         metadata: {
           code: code ? 'present' : 'missing',
@@ -240,7 +252,7 @@ class OAuthService {
 
       return {
         success: false,
-        error: error.message,
+        error: message,
       };
     }
   }
@@ -265,7 +277,7 @@ class OAuthService {
           grant_type: 'authorization_code',
           client_id: config.clientId,
           client_secret: config.clientSecret,
-          code: code,
+          code,
           redirect_uri: redirectUri || config.redirectUri,
         }),
         {
@@ -277,8 +289,9 @@ class OAuthService {
       );
 
       return response.data;
-    } catch (error: any) {
-      throw new Error(`Failed to exchange code for token: ${error.message}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to exchange code for token: ${message}`);
     }
   }
 
@@ -301,56 +314,60 @@ class OAuthService {
 
       // 根据不同提供商标准化用户信息
       return this.normalizeUserInfo(provider, response.data);
-    } catch (error: any) {
-      throw new Error(`Failed to get user info: ${error.message}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to get user info: ${message}`);
     }
   }
 
   /**
    * 标准化用户信息
    */
-  private normalizeUserInfo(provider: string, data: any): OAuthUserInfo {
+  private normalizeUserInfo(provider: string, data: Record<string, unknown>): OAuthUserInfo {
+    const toStringValue = (value: unknown): string | undefined =>
+      value === undefined || value === null ? undefined : String(value);
+
     switch (provider) {
       case 'google':
         return {
-          id: data.id,
-          email: data.email,
-          name: data.name,
-          avatar: data.picture,
+          id: toStringValue(data.id) || '',
+          email: toStringValue(data.email),
+          name: toStringValue(data.name),
+          avatar: toStringValue(data.picture),
           provider,
-          verified: data.verified_email,
+          verified: Boolean(data.verified_email),
         };
 
       case 'github':
         return {
-          id: data.id.toString(),
-          email: data.email,
-          name: data.name,
-          username: data.login,
-          avatar: data.avatar_url,
+          id: toStringValue(data.id) || '',
+          email: toStringValue(data.email),
+          name: toStringValue(data.name),
+          username: toStringValue(data.login),
+          avatar: toStringValue(data.avatar_url),
           provider,
         };
 
       case 'facebook':
         return {
-          id: data.id,
-          name: data.name,
+          id: toStringValue(data.id) || '',
+          name: toStringValue(data.name),
           provider,
         };
 
       case 'microsoft':
         return {
-          id: data.id,
-          email: data.mail || data.userPrincipalName,
-          name: data.displayName,
+          id: toStringValue(data.id) || '',
+          email: toStringValue(data.mail) || toStringValue(data.userPrincipalName),
+          name: toStringValue(data.displayName),
           provider,
         };
 
       default:
         return {
-          id: data.id,
-          email: data.email,
-          name: data.name,
+          id: toStringValue(data.id) || '',
+          email: toStringValue(data.email),
+          name: toStringValue(data.name),
           provider,
         };
     }
@@ -359,20 +376,20 @@ class OAuthService {
   /**
    * 查找或创建用户
    */
-  private async findOrCreateUser(userInfo: OAuthUserInfo): Promise<any> {
+  private async findOrCreateUser(userInfo: OAuthUserInfo): Promise<OAuthDbUser> {
     try {
       // 首先查找现有用户
-      const existingUser = await query(
+      const existingUserResult = (await query(
         'SELECT * FROM users WHERE provider = ? AND provider_id = ?',
         [userInfo.provider, userInfo.id]
-      );
+      )) as unknown as { rows: OAuthDbUser[] };
 
-      if (existingUser.length > 0) {
-        return existingUser[0];
+      if (existingUserResult.rows.length > 0) {
+        return existingUserResult.rows[0];
       }
 
       // 如果用户不存在，创建新用户
-      const newUser = await query(
+      const newUser = (await query(
         `INSERT INTO users (
           provider, provider_id, email, username, avatar, 
           verified, created_at, updated_at
@@ -385,14 +402,17 @@ class OAuthService {
           userInfo.avatar || '',
           userInfo.verified || false,
         ]
-      );
+      )) as unknown as { insertId?: string };
 
       // 返回新创建的用户
-      const createdUser = await query('SELECT * FROM users WHERE id = ?', [newUser.insertId]);
+      const createdUserResult = (await query('SELECT * FROM users WHERE id = ?', [
+        newUser.insertId,
+      ])) as unknown as { rows: OAuthDbUser[] };
 
-      return createdUser[0];
-    } catch (error: any) {
-      throw new Error(`Failed to find or create user: ${error.message}`);
+      return createdUserResult.rows[0];
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to find or create user: ${message}`);
     }
   }
 
@@ -402,9 +422,10 @@ class OAuthService {
   private async updateLastLogin(userId: string): Promise<void> {
     try {
       await query('UPDATE users SET last_login_at = NOW() WHERE id = ?', [userId]);
-    } catch (error: any) {
+    } catch (error) {
       // 记录错误但不抛出异常
-      console.error('Failed to update last login time:', error);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Failed to update last login time:', message);
     }
   }
 
@@ -486,8 +507,9 @@ class OAuthService {
       }
 
       return true;
-    } catch (error: any) {
-      console.error('Failed to revoke token:', error);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Failed to revoke token:', message);
       return false;
     }
   }
@@ -519,8 +541,9 @@ class OAuthService {
       );
 
       return response.data;
-    } catch (error: any) {
-      console.error('Failed to refresh token:', error);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Failed to refresh token:', message);
       return null;
     }
   }

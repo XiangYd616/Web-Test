@@ -221,31 +221,31 @@ declare global {
     }
 
     interface Response {
-      success: (data?: any, message?: string, statusCode?: number, meta?: any) => Response;
+      success: (data?: unknown, message?: string, statusCode?: number, meta?: unknown) => Response;
       error: (
         code: string,
         message?: string,
-        details?: any,
+        details?: unknown,
         statusCode?: number,
-        meta?: any
+        meta?: unknown
       ) => Response;
       paginated: (
-        data: any[],
+        data: unknown[],
         page: number,
         limit: number,
         total: number,
         message?: string,
-        meta?: any
+        meta?: unknown
       ) => Response;
-      created: (data: any, message?: string, meta?: any) => Response;
-      noContent: (message?: string, meta?: any) => Response;
+      created: (data: unknown, message?: string, meta?: unknown) => Response;
+      noContent: (message?: string, meta?: unknown) => Response;
       unauthorized: (message?: string) => Response;
       forbidden: (message?: string) => Response;
       notFound: (resource?: string) => Response;
       conflict: (resource?: string, message?: string) => Response;
       rateLimit: (message?: string, retryAfter?: number) => Response;
-      serverError: (message?: string, details?: any) => Response;
-      validationError: (errors: any[], message?: string) => Response;
+      serverError: (message?: string, details?: unknown) => Response;
+      validationError: (errors: unknown[], message?: string) => Response;
     }
   }
 }

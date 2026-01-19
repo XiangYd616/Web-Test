@@ -44,13 +44,14 @@ export enum SecuritySeverity {
 export interface SecurityEvent {
   type: SecurityEventType;
   userId?: string;
+  provider?: string;
   sessionId?: string;
   ipAddress?: string;
   userAgent?: string;
   success: boolean;
   error?: string;
   timestamp: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   severity?: SecuritySeverity;
   category?: string;
 }
@@ -79,7 +80,7 @@ export interface SecurityAlert {
   timestamp: Date;
   count: number;
   threshold: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 创建安全事件专用的日志记录器
@@ -127,7 +128,9 @@ const securityLogger = winston.createLogger({
 });
 
 // 安全事件阈值配置
-const SECURITY_THRESHOLDS = {
+const SECURITY_THRESHOLDS: Partial<
+  Record<SecurityEventType, { threshold: number; window: number }>
+> = {
   [SecurityEventType.LOGIN_FAILED]: { threshold: 5, window: 300000 }, // 5次失败，5分钟窗口
   [SecurityEventType.SUSPICIOUS_ACTIVITY]: { threshold: 3, window: 600000 }, // 3次可疑活动，10分钟窗口
   [SecurityEventType.RATE_LIMIT_EXCEEDED]: { threshold: 10, window: 300000 }, // 10次限流，5分钟窗口
@@ -163,12 +166,14 @@ export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
 
     // 检查是否需要触发警报
     await checkAndTriggerAlert(event);
-  } catch (error: any) {
-    console.error('Failed to log security event:', error);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const stack = error instanceof Error ? error.stack : undefined;
+    console.error('Failed to log security event:', message);
     // 尝试记录到错误日志
     securityLogger.error('Security logging error', {
-      error: error.message,
-      stack: error.stack,
+      error: message,
+      stack,
       originalEvent: event,
     });
   }
@@ -247,7 +252,7 @@ function getCategory(eventType: SecurityEventType): string {
  * 检查并触发警报
  */
 async function checkAndTriggerAlert(event: SecurityEvent): Promise<void> {
-  const threshold = SECURITY_THRESHOLDS[event.type];
+  const threshold = SECURITY_THRESHOLDS[event.type as SecurityEventType];
   if (!threshold) {
     return;
   }
@@ -277,13 +282,13 @@ async function checkAndTriggerAlert(event: SecurityEvent): Promise<void> {
     const newAlert: SecurityAlert = {
       id: generateAlertId(),
       type: event.type,
-      severity: event.severity!,
+      severity: event.severity ?? getDefaultSeverity(event.type),
       message: generateAlertMessage(event.type, event.ipAddress),
       timestamp: new Date(),
       count: 1,
       threshold: threshold.threshold,
       metadata: {
-        ...event.metadata,
+        ...(event.metadata || {}),
         ipAddress: event.ipAddress,
         userId: event.userId,
       },
@@ -355,8 +360,9 @@ async function sendAlert(alert: SecurityAlert): Promise<void> {
       count: alert.count,
       threshold: alert.threshold,
     });
-  } catch (error: any) {
-    console.error('Failed to send security alert:', error);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Failed to send security alert:', message);
   }
 }
 
@@ -402,7 +408,7 @@ export function cleanupExpiredAlerts(): void {
   const now = Date.now();
 
   for (const [key, alert] of activeAlerts.entries()) {
-    const threshold = SECURITY_THRESHOLDS[alert.type];
+    const threshold = SECURITY_THRESHOLDS[alert.type as SecurityEventType];
     if (threshold && alert.timestamp.getTime() < now - threshold.window) {
       activeAlerts.delete(key);
     }
@@ -414,7 +420,7 @@ export function cleanupExpiredAlerts(): void {
  */
 export async function triggerSecurityCheck(
   checkType: string,
-  metadata: Record<string, any> = {}
+  metadata: Record<string, unknown> = {}
 ): Promise<void> {
   await logSecurityEvent({
     type: SecurityEventType.SUSPICIOUS_ACTIVITY,
@@ -492,10 +498,10 @@ export async function logPermissionDenied(
  * 记录可疑活动
  */
 export async function logSuspiciousActivity(
-  userId?: string,
   activity: string,
+  userId?: string,
   ipAddress?: string,
-  metadata: Record<string, any> = {}
+  metadata: Record<string, unknown> = {}
 ): Promise<void> {
   await logSecurityEvent({
     type: SecurityEventType.SUSPICIOUS_ACTIVITY,
@@ -517,7 +523,7 @@ export async function logAttackAttempt(
   attackType: SecurityEventType,
   ipAddress?: string,
   userAgent?: string,
-  metadata: Record<string, any> = {}
+  metadata: Record<string, unknown> = {}
 ): Promise<void> {
   await logSecurityEvent({
     type: attackType,

@@ -269,7 +269,16 @@ class ApiResponse {
   static middleware() {
     console.warn('ApiResponse.middleware() 已废弃，请使用 responseFormatter 中间件');
 
-    return (req: Record<string, unknown>, res: Record<string, any>, next: () => void) => {
+    return (
+      req: Record<string, unknown>,
+      res: Record<string, unknown> & {
+        json: (body: unknown) => unknown;
+        status: (code: number) => { json: (body: unknown) => unknown };
+        apiSuccess?: (data: unknown, message?: string, meta?: ApiMeta) => unknown;
+        apiError?: (code: string, message?: string, details?: ApiErrorDetails) => unknown;
+      },
+      next: () => void
+    ) => {
       // 为了向后兼容，保留这些方法，但建议迁移到responseFormatter
       res.apiSuccess = (data: unknown, message?: string, meta?: ApiMeta) => {
         return res.json(ApiResponse.success(data, message, meta));

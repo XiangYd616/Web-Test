@@ -21,7 +21,7 @@ interface JWTOptions {
 }
 
 const jwt = {
-  sign: (payload: any, secret: string, options?: JWTOptions): string => {
+  sign: (payload: Record<string, unknown>, secret: string, options?: JWTOptions): string => {
     // 简化实现，实际应该使用JWT库
     return `jwt_token_${JSON.stringify(payload)}`;
   },
@@ -48,7 +48,7 @@ export interface LegacyWebSocketConnection {
   lastActivity: Date;
   rooms: Set<string>;
   subscriptions: Set<string>;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   heartbeatInterval?: NodeJS.Timeout;
 }
 
@@ -61,14 +61,14 @@ export interface LegacyWebSocketRoom {
   createdAt: Date;
   maxMembers?: number;
   isPrivate: boolean;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 订阅接口
 export interface LegacyWebSocketSubscription {
   id: string;
   type: string;
-  filter?: Record<string, any>;
+  filter?: Record<string, unknown>;
   connections: Set<string>;
   createdAt: Date;
 }
@@ -76,7 +76,7 @@ export interface LegacyWebSocketSubscription {
 // 消息处理器接口
 export interface MessageHandler {
   type: string;
-  handler: (connection: LegacyWebSocketConnection, data: any) => Promise<void>;
+  handler: (connection: LegacyWebSocketConnection, data: unknown) => Promise<void>;
   requireAuth?: boolean;
 }
 
@@ -225,7 +225,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 发送消息到指定连接
    */
-  sendToConnection(connectionId: string, type: string, data: any): boolean {
+  sendToConnection(connectionId: string, type: string, data: unknown): boolean {
     const connection = this.connections.get(connectionId);
     if (!connection || connection.socket.readyState !== WebSocket.OPEN) {
       return false;
@@ -249,7 +249,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 发送消息到指定用户
    */
-  sendToUser(userId: string, type: string, data: any): number {
+  sendToUser(userId: string, type: string, data: unknown): number {
     const connectionIds = this.userConnections.get(userId);
     if (!connectionIds) {
       return 0;
@@ -268,7 +268,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 发送消息到房间
    */
-  sendToRoom(roomId: string, type: string, data: any, excludeConnections?: string[]): number {
+  sendToRoom(roomId: string, type: string, data: unknown, excludeConnections?: string[]): number {
     const room = this.rooms.get(roomId);
     if (!room) {
       throw new Error(`Room not found: ${roomId}`);
@@ -291,7 +291,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 广播消息到所有连接
    */
-  broadcast(type: string, data: any, excludeConnections?: string[]): number {
+  broadcast(type: string, data: unknown, excludeConnections?: string[]): number {
     let sentCount = 0;
 
     for (const [connectionId] of this.connections.entries()) {
@@ -330,7 +330,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 加入房间
    */
-  joinRoom(connectionId: string, roomId: string, metadata?: Record<string, any>): boolean {
+  joinRoom(connectionId: string, roomId: string, metadata?: Record<string, unknown>): boolean {
     const connection = this.connections.get(connectionId);
     const room = this.rooms.get(roomId);
 
@@ -409,7 +409,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 创建订阅
    */
-  createSubscription(type: string, filter?: Record<string, any>): string {
+  createSubscription(type: string, filter?: Record<string, unknown>): string {
     const subscriptionId = this.generateSubscriptionId();
 
     const subscription: LegacyWebSocketSubscription = {
@@ -472,7 +472,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 发布事件到订阅者
    */
-  publish(type: string, data: any): number {
+  publish(type: string, data: unknown): number {
     let sentCount = 0;
 
     for (const subscription of this.subscriptions.values()) {
@@ -535,7 +535,7 @@ class WebSocketManager extends EventEmitter {
   private setupServerListeners(): void {
     if (!this.server) return;
 
-    this.server.on('connection', (socket: WebSocket, request: any) => {
+    this.server.on('connection', (socket: WebSocket, request: unknown) => {
       this.handleConnection(socket, request);
     });
 
@@ -547,7 +547,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 处理新连接
    */
-  private handleConnection(socket: WebSocket, request: any): void {
+  private handleConnection(socket: WebSocket, request: unknown): void {
     // 检查连接限制
     if (this.connections.size >= this.config.maxConnections) {
       socket.close(1013, 'Server overloaded');
@@ -662,10 +662,17 @@ class WebSocketManager extends EventEmitter {
    */
   private async handleAuthentication(
     connection: LegacyWebSocketConnection,
-    data: any
+    data: unknown
   ): Promise<void> {
     try {
-      const token = data.token;
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid authentication payload');
+      }
+
+      const token = (data as { token?: string }).token;
+      if (!token) {
+        throw new Error('Missing token');
+      }
       const payload = jwt.verify(token, this.config.jwtSecret);
 
       connection.isAuthenticated = true;
@@ -778,11 +785,16 @@ class WebSocketManager extends EventEmitter {
   /**
    * 匹配过滤器
    */
-  private matchesFilter(data: any, filter?: Record<string, any>): boolean {
+  private matchesFilter(data: unknown, filter?: Record<string, unknown>): boolean {
     if (!filter) return true;
+    if (!data || typeof data !== 'object') {
+      return false;
+    }
+
+    const record = data as Record<string, unknown>;
 
     for (const [key, value] of Object.entries(filter)) {
-      if (data[key] !== value) {
+      if (record[key] !== value) {
         return false;
       }
     }

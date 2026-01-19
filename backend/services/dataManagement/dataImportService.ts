@@ -4,7 +4,7 @@
  * 包含进度跟踪和错误处理功能
  */
 
-import * as csv from 'csv-parser';
+import csvParser from 'csv-parser';
 import { EventEmitter } from 'events';
 import ExcelJS from 'exceljs';
 import { createReadStream } from 'fs';
@@ -20,16 +20,16 @@ export interface ImportConfig {
   maxRows?: number;
   validation?: ValidationConfig;
   mapping?: FieldMapping[];
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 // 验证配置接口
 export interface ValidationConfig {
   required: string[];
   types: Record<string, 'string' | 'number' | 'date' | 'boolean'>;
-  formats: Record<string, RegExp>;
-  ranges: Record<string, { min?: number; max?: number }>;
-  custom: Record<string, (value: any) => boolean>;
+  formats?: Record<string, RegExp>;
+  ranges?: Record<string, { min?: number; max?: number }>;
+  custom?: Record<string, (value: unknown) => boolean>;
 }
 
 // 字段映射接口
@@ -38,8 +38,9 @@ export interface FieldMapping {
   target: string;
   type: 'string' | 'number' | 'date' | 'boolean';
   format?: string;
-  transform?: (value: any) => any;
-  defaultValue?: any;
+  transform?: (value: unknown) => unknown;
+  defaultValue?: unknown;
+  required?: boolean;
 }
 
 // 导入任务接口
@@ -59,7 +60,7 @@ export interface ImportTask {
     failed: number;
     skipped: number;
     errors: ImportError[];
-    data: any[];
+    data: Record<string, unknown>[];
   };
   error?: string;
   createdAt: Date;
@@ -72,7 +73,7 @@ export interface ImportTask {
 export interface ImportError {
   row: number;
   field: string;
-  value: any;
+  value: unknown;
   error: string;
   severity: 'error' | 'warning';
 }
@@ -86,13 +87,13 @@ export interface ImportResult {
   total: number;
   duration: number;
   errors: ImportError[];
-  data: any[];
+  data: Record<string, unknown>[];
 }
 
 // 数据预览接口
 export interface DataPreview {
   headers: string[];
-  rows: any[][];
+  rows: Array<Array<unknown>>;
   totalRows: number;
   sampleSize: number;
   detectedTypes: Record<string, string>;
@@ -106,7 +107,7 @@ export interface ImportTemplate {
   format: string;
   mapping: FieldMapping[];
   validation: ValidationConfig;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 // 导入统计接口
@@ -121,7 +122,7 @@ export interface ImportStatistics {
 }
 
 class DataImportService extends EventEmitter {
-  private dbPool: any;
+  private dbPool: { query: (sql: string, params?: unknown[]) => Promise<unknown> };
   private logger: winston.Logger;
   private tasks: Map<string, ImportTask> = new Map();
   private queue: ImportTask[] = [];
@@ -130,7 +131,7 @@ class DataImportService extends EventEmitter {
   private activeTasks: Set<string> = new Set();
   private templates: Map<string, ImportTemplate> = new Map();
 
-  constructor(dbPool: any) {
+  constructor(dbPool: { query: (sql: string, params?: unknown[]) => Promise<unknown> }) {
     super();
 
     this.dbPool = dbPool;
@@ -161,7 +162,7 @@ class DataImportService extends EventEmitter {
     // 检查文件是否存在
     try {
       await fs.access(filePath);
-    } catch (error) {
+    } catch {
       throw new Error('File not found or not accessible');
     }
 
@@ -455,7 +456,11 @@ class DataImportService extends EventEmitter {
   /**
    * 读取文件
    */
-  private async readFile(filePath: string, config: ImportConfig, limit?: number): Promise<any[]> {
+  private async readFile(
+    filePath: string,
+    config: ImportConfig,
+    limit?: number
+  ): Promise<Record<string, unknown>[]> {
     switch (config.format) {
       case 'csv':
         return this.readCSVFile(filePath, config, limit);
@@ -477,19 +482,21 @@ class DataImportService extends EventEmitter {
     filePath: string,
     config: ImportConfig,
     limit?: number
-  ): Promise<any[]> {
+  ): Promise<Record<string, unknown>[]> {
     return new Promise((resolve, reject) => {
-      const results: any[] = [];
-      const stream = createReadStream(filePath, { encoding: config.encoding || 'utf8' });
+      const results: Record<string, unknown>[] = [];
+      const encoding: NodeJS.BufferEncoding = (config.encoding ?? 'utf8') as NodeJS.BufferEncoding;
+      const stream = createReadStream(filePath, { encoding });
+      const parser = csvParser as unknown as (options?: unknown) => NodeJS.ReadWriteStream;
 
       stream
         .pipe(
-          csv({
+          parser({
             separator: config.delimiter || ',',
             skipLines: config.skipRows || 0,
           })
         )
-        .on('data', data => {
+        .on('data', (data: Record<string, unknown>) => {
           if (limit && results.length >= limit) {
             stream.destroy();
             return;
@@ -508,14 +515,23 @@ class DataImportService extends EventEmitter {
     filePath: string,
     config: ImportConfig,
     limit?: number
-  ): Promise<any[]> {
-    const content = await fs.readFile(filePath, config.encoding || 'utf8');
-    const data = JSON.parse(content);
+  ): Promise<Record<string, unknown>[]> {
+    const encoding: NodeJS.BufferEncoding = (config.encoding ?? 'utf8') as NodeJS.BufferEncoding;
+    const content = await fs.readFile(filePath, { encoding });
+    const data = JSON.parse(content.toString()) as unknown;
 
     if (Array.isArray(data)) {
-      return limit ? data.slice(0, limit) : data;
-    } else if (data.data && Array.isArray(data.data)) {
-      return limit ? data.data.slice(0, limit) : data.data;
+      return limit
+        ? (data.slice(0, limit) as Record<string, unknown>[])
+        : (data as Record<string, unknown>[]);
+    } else if (
+      typeof data === 'object' &&
+      data !== null &&
+      'data' in data &&
+      Array.isArray((data as Record<string, unknown>).data)
+    ) {
+      const payload = (data as Record<string, unknown>).data as Record<string, unknown>[];
+      return limit ? payload.slice(0, limit) : payload;
     } else {
       throw new Error('Invalid JSON format, expected array');
     }
@@ -528,7 +544,7 @@ class DataImportService extends EventEmitter {
     filePath: string,
     config: ImportConfig,
     limit?: number
-  ): Promise<any[]> {
+  ): Promise<Record<string, unknown>[]> {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePath);
 
@@ -537,7 +553,7 @@ class DataImportService extends EventEmitter {
       throw new Error('No worksheet found in Excel file');
     }
 
-    const data: any[] = [];
+    const data: Record<string, unknown>[] = [];
     const headers: string[] = [];
 
     // 读取表头
@@ -552,7 +568,7 @@ class DataImportService extends EventEmitter {
       if (limit && data.length >= limit) break;
 
       const row = worksheet.getRow(rowNumber);
-      const rowData: any = {};
+      const rowData: Record<string, unknown> = {};
 
       row.eachCell((cell, colNumber) => {
         rowData[headers[colNumber - 1]] = cell.value;
@@ -570,9 +586,10 @@ class DataImportService extends EventEmitter {
   private async readXMLFile(
     filePath: string,
     config: ImportConfig,
-    limit?: number
-  ): Promise<any[]> {
-    const content = await fs.readFile(filePath, config.encoding || 'utf8');
+    _limit?: number
+  ): Promise<Record<string, unknown>[]> {
+    const encoding: NodeJS.BufferEncoding = (config.encoding ?? 'utf8') as NodeJS.BufferEncoding;
+    const _content = await fs.readFile(filePath, { encoding });
 
     // 简化的XML解析，实际项目中应该使用专门的XML解析库
     throw new Error('XML import not implemented yet');
@@ -582,22 +599,22 @@ class DataImportService extends EventEmitter {
    * 验证数据
    */
   private async validateData(
-    data: any[],
+    data: Record<string, unknown>[],
     validation?: ValidationConfig
   ): Promise<{
-    validatedData: any[];
+    validatedData: Record<string, unknown>[];
     errors: ImportError[];
   }> {
     if (!validation) {
       return { validatedData: data, errors: [] };
     }
 
-    const validatedData: any[] = [];
+    const validatedData: Record<string, unknown>[] = [];
     const errors: ImportError[] = [];
 
     data.forEach((row, rowIndex) => {
       const rowErrors: ImportError[] = [];
-      const validatedRow: any = {};
+      const validatedRow: Record<string, unknown> = {};
 
       // 检查必填字段
       validation.required.forEach(field => {
@@ -630,7 +647,7 @@ class DataImportService extends EventEmitter {
       });
 
       // 检查格式
-      Object.entries(validation.formats).forEach(([field, pattern]) => {
+      Object.entries(validation.formats || {}).forEach(([field, pattern]) => {
         const value = row[field];
         if (value && !pattern.test(String(value))) {
           rowErrors.push({
@@ -644,7 +661,7 @@ class DataImportService extends EventEmitter {
       });
 
       // 检查范围
-      Object.entries(validation.ranges).forEach(([field, range]) => {
+      Object.entries(validation.ranges || {}).forEach(([field, range]) => {
         const value = row[field];
         if (typeof value === 'number') {
           if (range.min !== undefined && value < range.min) {
@@ -669,7 +686,7 @@ class DataImportService extends EventEmitter {
       });
 
       // 自定义验证
-      Object.entries(validation.custom).forEach(([field, validator]) => {
+      Object.entries(validation.custom || {}).forEach(([field, validator]) => {
         const value = row[field];
         if (!validator(value)) {
           rowErrors.push({
@@ -697,13 +714,16 @@ class DataImportService extends EventEmitter {
   /**
    * 转换数据
    */
-  private async transformData(data: any[], mapping?: FieldMapping[]): Promise<any[]> {
+  private async transformData(
+    data: Record<string, unknown>[],
+    mapping?: FieldMapping[]
+  ): Promise<Record<string, unknown>[]> {
     if (!mapping || mapping.length === 0) {
       return data;
     }
 
     return data.map(row => {
-      const transformedRow: any = {};
+      const transformedRow: Record<string, unknown> = {};
 
       mapping.forEach(fieldMap => {
         const sourceValue = row[fieldMap.source];
@@ -723,7 +743,7 @@ class DataImportService extends EventEmitter {
             transformedValue = Boolean(transformedValue);
             break;
           case 'date':
-            transformedValue = new Date(transformedValue);
+            transformedValue = new Date(String(transformedValue));
             break;
           default:
             transformedValue = String(transformedValue);
@@ -748,7 +768,7 @@ class DataImportService extends EventEmitter {
   /**
    * 导入数据
    */
-  private async importData(data: any[], type: string): Promise<number> {
+  private async importData(data: Record<string, unknown>[], _type: string): Promise<number> {
     // 这里应该根据type导入到不同的数据源
     // 简化实现，只返回导入的记录数
     return data.length;
@@ -761,7 +781,7 @@ class DataImportService extends EventEmitter {
     try {
       const preview = await this.previewData(filePath, config, 100);
       return preview.totalRows;
-    } catch (error) {
+    } catch {
       return 0;
     }
   }
@@ -769,7 +789,7 @@ class DataImportService extends EventEmitter {
   /**
    * 检测数据类型
    */
-  private detectDataType(values: any[]): string {
+  private detectDataType(values: unknown[]): string {
     if (values.length === 0) return 'string';
 
     const nonNullValues = values.filter(v => v !== null && v !== undefined && v !== '');
@@ -782,7 +802,7 @@ class DataImportService extends EventEmitter {
     }
 
     // 检查是否为日期
-    const dateValues = nonNullValues.filter(v => !isNaN(Date.parse(v)));
+    const dateValues = nonNullValues.filter(v => !isNaN(Date.parse(String(v))));
     if (dateValues.length === nonNullValues.length) {
       return 'date';
     }

@@ -20,6 +20,17 @@ type ComparisonMetric = {
   status: 'improved' | 'degraded' | 'unchanged' | 'changed';
 };
 
+const toNumber = (value: unknown, fallback = 0): number => {
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? fallback : parsed;
+  }
+  return fallback;
+};
+
 type ComparisonSummary = {
   totalMetrics: number;
   improved: number;
@@ -39,11 +50,11 @@ type ComparisonResult = {
   message?: string;
 };
 
-type TestResultRecord = Record<string, any> & {
+type TestResultRecord = Record<string, unknown> & {
   testId?: string;
   type?: string;
-  result?: Record<string, any>;
-  metrics?: Record<string, any>;
+  result?: Record<string, unknown>;
+  metrics?: Record<string, unknown>;
   performanceScore?: number;
   score?: number;
   passedChecks?: number;
@@ -82,15 +93,16 @@ class ComparisonAnalyzer {
    * @private
    */
   _compareStressTests(current: TestResultRecord, previous: TestResultRecord): ComparisonResult {
-    const curr = current.result || {};
-    const prev = previous.result || {};
+    const curr = (current.result || {}) as Record<string, unknown>;
+    const prev = (previous.result || {}) as Record<string, unknown>;
 
+    const metricsMap: Record<string, ComparisonMetric> = {};
     const comparison: ComparisonResult = {
       testType: 'stress',
       currentTestId: current.testId || '',
       previousTestId: previous.testId || '',
       timestamp: new Date(),
-      metrics: {},
+      metrics: metricsMap,
     };
 
     // 对比各项指标
@@ -106,8 +118,8 @@ class ComparisonAnalyzer {
     ];
 
     metrics.forEach(metric => {
-      const currentValue = curr[metric.key] || 0;
-      const previousValue = prev[metric.key] || 0;
+      const currentValue = toNumber(curr[metric.key]);
+      const previousValue = toNumber(prev[metric.key]);
       const change = currentValue - previousValue;
       const changePercent = previousValue !== 0 ? ((change / previousValue) * 100).toFixed(2) : '0';
 
@@ -123,16 +135,14 @@ class ComparisonAnalyzer {
         }
       }
 
-      if (comparison.metrics) {
-        comparison.metrics[metric.key] = {
-          name: metric.name,
-          current: currentValue,
-          previous: previousValue,
-          change,
-          changePercent: Number.parseFloat(changePercent),
-          status,
-        };
-      }
+      metricsMap[metric.key] = {
+        name: metric.name,
+        current: currentValue,
+        previous: previousValue,
+        change,
+        changePercent: Number.parseFloat(changePercent),
+        status,
+      };
     });
 
     // 整体评估
@@ -146,49 +156,52 @@ class ComparisonAnalyzer {
    * @private
    */
   _compareApiTests(current: TestResultRecord, previous: TestResultRecord): ComparisonResult {
-    const curr = current.result || {};
-    const prev = previous.result || {};
+    const curr = (current.result || {}) as Record<string, unknown>;
+    const prev = (previous.result || {}) as Record<string, unknown>;
 
+    const metricsMap: Record<string, ComparisonMetric> = {};
     const comparison: ComparisonResult = {
       testType: 'api',
       currentTestId: current.testId || '',
       previousTestId: previous.testId || '',
       timestamp: new Date(),
-      metrics: {},
+      metrics: metricsMap,
     };
 
     // 对比响应时间
-    comparison.metrics!.responseTime = this._compareMetric(
+    metricsMap.responseTime = this._compareMetric(
       'responseTime',
       '响应时间 (ms)',
-      curr.responseTime || 0,
-      prev.responseTime || 0,
+      toNumber(curr.responseTime),
+      toNumber(prev.responseTime),
       true
     );
 
     // 对比状态码
-    comparison.metrics!.statusCode = {
+    metricsMap.statusCode = {
       name: '状态码',
-      current: curr.statusCode || 'N/A',
-      previous: prev.statusCode || 'N/A',
+      current: curr.statusCode ? String(curr.statusCode) : 'N/A',
+      previous: prev.statusCode ? String(prev.statusCode) : 'N/A',
       status: curr.statusCode === prev.statusCode ? 'unchanged' : 'changed',
     };
 
     // 对比断言结果
     if (curr.assertions && prev.assertions) {
-      comparison.metrics!.assertionPassRate = this._compareMetric(
+      const currAssertions = curr.assertions as Record<string, unknown>;
+      const prevAssertions = prev.assertions as Record<string, unknown>;
+      metricsMap.assertionPassRate = this._compareMetric(
         'assertionPassRate',
         '断言通过率 (%)',
-        curr.assertions.passRate || 0,
-        prev.assertions.passRate || 0,
+        toNumber(currAssertions.passRate),
+        toNumber(prevAssertions.passRate),
         false
       );
 
-      comparison.metrics!.assertionsPassed = this._compareMetric(
+      metricsMap.assertionsPassed = this._compareMetric(
         'assertionsPassed',
         '通过的断言数',
-        curr.assertions.passed || 0,
-        prev.assertions.passed || 0,
+        toNumber(currAssertions.passed),
+        toNumber(prevAssertions.passed),
         false
       );
     }
@@ -206,23 +219,24 @@ class ComparisonAnalyzer {
     current: TestResultRecord,
     previous: TestResultRecord
   ): ComparisonResult {
-    const currMetrics = current.metrics || {};
-    const prevMetrics = previous.metrics || {};
+    const currMetrics = (current.metrics || {}) as Record<string, unknown>;
+    const prevMetrics = (previous.metrics || {}) as Record<string, unknown>;
 
+    const metricsMap: Record<string, ComparisonMetric> = {};
     const comparison: ComparisonResult = {
       testType: 'performance',
       currentTestId: current.testId || '',
       previousTestId: previous.testId || '',
       timestamp: new Date(),
-      metrics: {},
+      metrics: metricsMap,
     };
 
     // 对比性能得分
-    comparison.metrics!.performanceScore = this._compareMetric(
+    metricsMap.performanceScore = this._compareMetric(
       'performanceScore',
       '性能得分',
-      current.performanceScore || 0,
-      previous.performanceScore || 0,
+      toNumber(current.performanceScore),
+      toNumber(previous.performanceScore),
       false
     );
 
@@ -238,11 +252,11 @@ class ComparisonAnalyzer {
 
     vitals.forEach(vital => {
       if (currMetrics[vital.key] !== undefined || prevMetrics[vital.key] !== undefined) {
-        comparison.metrics![vital.key] = this._compareMetric(
+        metricsMap[vital.key] = this._compareMetric(
           vital.key,
           vital.name,
-          currMetrics[vital.key] || 0,
-          prevMetrics[vital.key] || 0,
+          toNumber(currMetrics[vital.key]),
+          toNumber(prevMetrics[vital.key]),
           Boolean(vital.reverse)
         );
       }
@@ -258,38 +272,39 @@ class ComparisonAnalyzer {
    * @private
    */
   _compareSecurityTests(current: TestResultRecord, previous: TestResultRecord): ComparisonResult {
+    const metricsMap: Record<string, ComparisonMetric> = {};
     const comparison: ComparisonResult = {
       testType: 'security',
       currentTestId: current.testId || '',
       previousTestId: previous.testId || '',
       timestamp: new Date(),
-      metrics: {},
+      metrics: metricsMap,
     };
 
     // 对比安全得分
-    comparison.metrics!.securityScore = this._compareMetric(
+    metricsMap.securityScore = this._compareMetric(
       'securityScore',
       '安全得分',
-      current.score || 0,
-      previous.score || 0,
+      toNumber(current.score),
+      toNumber(previous.score),
       false
     );
 
     // 对比通过的检查数
-    comparison.metrics!.passedChecks = this._compareMetric(
+    metricsMap.passedChecks = this._compareMetric(
       'passedChecks',
       '通过的检查数',
-      current.passedChecks || 0,
-      previous.passedChecks || 0,
+      toNumber(current.passedChecks),
+      toNumber(previous.passedChecks),
       false
     );
 
     // 对比总检查数
-    comparison.metrics!.totalChecks = {
+    metricsMap.totalChecks = {
       name: '总检查数',
-      current: current.totalChecks || 0,
-      previous: previous.totalChecks || 0,
-      change: (current.totalChecks || 0) - (previous.totalChecks || 0),
+      current: toNumber(current.totalChecks),
+      previous: toNumber(previous.totalChecks),
+      change: toNumber(current.totalChecks) - toNumber(previous.totalChecks),
       status: 'unchanged',
     };
 
@@ -451,7 +466,7 @@ class ComparisonAnalyzer {
     const metrics = ['successRate', 'avgResponseTime', 'throughput'];
 
     metrics.forEach(metricKey => {
-      const values = results.map(r => (r.result && r.result[metricKey]) || 0);
+      const values = results.map(r => toNumber(r.result ? r.result[metricKey] : 0));
 
       trend.metrics[metricKey] = {
         values,
@@ -487,7 +502,7 @@ class ComparisonAnalyzer {
    * @private
    */
   _analyzeApiTrend(results: TestResultRecord[], trend: { metrics: Record<string, unknown> }) {
-    const responseTimes = results.map(r => (r.result && r.result.responseTime) || 0);
+    const responseTimes = results.map(r => toNumber(r.result ? r.result.responseTime : 0));
 
     trend.metrics.responseTime = {
       values: responseTimes,

@@ -30,10 +30,10 @@ import {
 
 // ==================== 基础API类型 ====================
 
-export type ApiResponse<T = any> = StandardApiResponse<T>;
-export type ApiSuccessResponse<T = any> = StandardApiSuccessResponse<T>;
+export type ApiResponse<T = unknown> = StandardApiResponse<T>;
+export type ApiSuccessResponse<T = unknown> = StandardApiSuccessResponse<T>;
 export type ApiErrorResponse = StandardApiErrorResponse;
-export type PaginatedResponse<T = any> = StandardPaginatedResponse<T>;
+export type PaginatedResponse<T = unknown> = StandardPaginatedResponse<T>;
 
 // ==================== 认证相关API类型 ====================
 
@@ -149,7 +149,7 @@ export interface GetTestConfigsResponse {
 
 export interface StartTestRequest {
   test_config_id: number;
-  configuration_override?: Record<string, any>;
+  configuration_override?: Record<string, unknown>;
 }
 
 export interface StartTestResponse {
@@ -205,7 +205,7 @@ export interface GetTestResultsResponse {
 
 export interface GetTestResultResponse {
   result: TestResult;
-  detailed_result?: any; // 根据test_type返回对应的详细结果
+  detailed_result?: unknown; // 根据test_type返回对应的详细结果
 }
 
 // ==================== 报告相关API类型 ====================
@@ -215,7 +215,7 @@ export interface CreateReportRequest {
   description?: string;
   report_type: 'single' | 'comparison' | 'trend' | 'summary';
   test_executions: number[];
-  configuration?: Record<string, any>;
+  configuration?: Record<string, unknown>;
   is_public?: boolean;
 }
 
@@ -275,11 +275,11 @@ export interface GetSystemStatsResponse {
 }
 
 export interface GetSystemConfigResponse {
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface UpdateSystemConfigRequest {
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 // ==================== 文件上传相关API类型 ====================
@@ -298,7 +298,7 @@ export interface DeleteFileRequest {
 
 // ==================== WebSocket相关类型 ====================
 
-export interface WebSocketMessage<T = any> {
+export interface WebSocketMessage<T = unknown> {
   type: string;
   data: T;
   timestamp: string;
@@ -327,12 +327,12 @@ export interface ValidationErrorDetail {
   field: string;
   message: string;
   code: string;
-  value?: any;
+  value?: unknown;
 }
 
 export interface BusinessLogicError {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   suggestions?: string[];
 }

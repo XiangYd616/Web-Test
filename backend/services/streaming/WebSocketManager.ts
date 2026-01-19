@@ -5,7 +5,9 @@
  */
 
 import { EventEmitter } from 'events';
-import { Server as SocketIOServer } from 'socket.io';
+import { ServerOptions, Socket, Server as SocketIOServer } from 'socket.io';
+
+type SocketIOServerTarget = ConstructorParameters<typeof SocketIOServer>[0];
 
 // 模拟Redis客户端
 class RedisClient {
@@ -33,16 +35,40 @@ class RedisClient {
   }
 }
 
+interface AuthPayload {
+  token?: string;
+  userId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface JoinRoomPayload {
+  roomId: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface LeaveRoomPayload {
+  roomId: string;
+}
+
+interface MessagePayload {
+  type: string;
+  data: unknown;
+  to?: string;
+  room?: string;
+  priority?: WebSocketMessage['priority'];
+  encrypted?: boolean;
+}
+
 // WebSocket连接接口
 export interface WebSocketConnection {
   id: string;
   userId?: string;
   sessionId: string;
-  socket: any;
+  socket: Socket;
   connectedAt: Date;
   lastActivity: Date;
   rooms: Set<string>;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   isAuthenticated: boolean;
 }
 
@@ -55,7 +81,7 @@ export interface WebSocketRoom {
   createdAt: Date;
   maxMembers?: number;
   isPrivate: boolean;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 消息队列接口
@@ -72,7 +98,7 @@ export interface MessageQueue {
 export interface QueuedMessage {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   timestamp: Date;
   attempts: number;
   maxAttempts: number;
@@ -83,7 +109,7 @@ export interface QueuedMessage {
 export interface WebSocketMessage {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   from: string;
   to?: string;
   room?: string;
@@ -157,7 +183,7 @@ export interface WebSocketConfig {
  * 增强版WebSocket管理器
  */
 class WebSocketManager extends EventEmitter {
-  private server: any;
+  private server: SocketIOServerTarget;
   private io: SocketIOServer | null = null;
   private redisClient: RedisClient | null = null;
   private connections: Map<string, WebSocketConnection> = new Map();
@@ -167,7 +193,7 @@ class WebSocketManager extends EventEmitter {
   private statistics: WebSocketStatistics;
   private isInitialized: boolean = false;
 
-  constructor(server: any, options: Partial<WebSocketConfig> = {}) {
+  constructor(server: SocketIOServerTarget, options: Partial<WebSocketConfig> = {}) {
     super();
 
     this.server = server;
@@ -198,15 +224,17 @@ class WebSocketManager extends EventEmitter {
 
     try {
       // 初始化Socket.IO服务器
-      this.io = new SocketIOServer(this.server, {
+      const serverOptions: Partial<ServerOptions> = {
         cors: this.config.cors,
-        transports: this.config.transports,
+        transports: this.config.transports as ServerOptions['transports'],
         pingTimeout: this.config.pingTimeout,
         pingInterval: this.config.pingInterval,
         maxHttpBufferSize: this.config.maxHttpBufferSize,
         allowEIO3: this.config.allowEIO3,
         compression: this.config.compression,
-      });
+      };
+
+      this.io = new SocketIOServer(this.server, serverOptions);
 
       // 设置事件监听器
       this.setupEventListeners();
@@ -329,7 +357,7 @@ class WebSocketManager extends EventEmitter {
   async joinRoom(
     connectionId: string,
     roomId: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<boolean> {
     const connection = this.connections.get(connectionId);
     const room = this.rooms.get(roomId);
@@ -490,7 +518,7 @@ class WebSocketManager extends EventEmitter {
 
     // 断开Socket连接
     if (connection.socket) {
-      connection.socket.disconnect(reason);
+      connection.socket.disconnect(true);
     }
 
     // 删除连接
@@ -528,7 +556,7 @@ class WebSocketManager extends EventEmitter {
   private setupEventListeners(): void {
     if (!this.io) return;
 
-    this.io.on('connection', (socket: any) => {
+    this.io.on('connection', (socket: Socket) => {
       this.handleConnection(socket);
     });
 
@@ -540,7 +568,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 处理新连接
    */
-  private handleConnection(socket: any): void {
+  private handleConnection(socket: Socket): void {
     const connectionId = this.generateConnectionId();
     const sessionId = this.generateSessionId();
 
@@ -570,19 +598,19 @@ class WebSocketManager extends EventEmitter {
   private setupSocketListeners(connection: WebSocketConnection): void {
     const socket = connection.socket;
 
-    socket.on('authenticate', async (data: any) => {
+    socket.on('authenticate', async (data: AuthPayload) => {
       await this.handleAuthentication(connection, data);
     });
 
-    socket.on('join_room', async (data: any) => {
+    socket.on('join_room', async (data: JoinRoomPayload) => {
       await this.joinRoom(connection.id, data.roomId, data.metadata);
     });
 
-    socket.on('leave_room', async (data: any) => {
+    socket.on('leave_room', async (data: LeaveRoomPayload) => {
       await this.leaveRoom(connection.id, data.roomId);
     });
 
-    socket.on('message', async (data: any) => {
+    socket.on('message', async (data: MessagePayload) => {
       await this.handleMessage(connection, data);
     });
 
@@ -598,7 +626,10 @@ class WebSocketManager extends EventEmitter {
   /**
    * 处理认证
    */
-  private async handleAuthentication(connection: WebSocketConnection, data: any): Promise<void> {
+  private async handleAuthentication(
+    connection: WebSocketConnection,
+    data: AuthPayload
+  ): Promise<void> {
     try {
       // 简化认证逻辑
       const isAuthenticated = data.token === 'valid-token';
@@ -620,7 +651,10 @@ class WebSocketManager extends EventEmitter {
   /**
    * 处理消息
    */
-  private async handleMessage(connection: WebSocketConnection, data: any): Promise<void> {
+  private async handleMessage(
+    connection: WebSocketConnection,
+    data: MessagePayload
+  ): Promise<void> {
     try {
       const message: WebSocketMessage = {
         id: this.generateMessageId(),
@@ -679,7 +713,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 加密消息
    */
-  private async encryptMessage(data: any): Promise<any> {
+  private async encryptMessage(data: unknown): Promise<unknown> {
     // 简化实现，实际应该使用加密算法
     return data;
   }
@@ -687,7 +721,7 @@ class WebSocketManager extends EventEmitter {
   /**
    * 压缩消息
    */
-  private async compressMessage(data: any): Promise<any> {
+  private async compressMessage(data: unknown): Promise<unknown> {
     // 简化实现，实际应该使用压缩算法
     return data;
   }

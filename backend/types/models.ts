@@ -13,7 +13,7 @@ import { UUID } from '../../shared/types/standardApiResponse';
 // ==================== 基础类型 ====================
 
 export type DatabaseId = number;
-export type JsonObject = Record<string, any>;
+export type JsonObject = Record<string, unknown>;
 export type DatabaseTimestamp = Date | string;
 
 // ==================== 用户相关模型 ====================
@@ -237,14 +237,14 @@ export interface AuditLog {
 
 // ==================== 数据库查询结果类型 ====================
 
-export interface QueryResult<T = any> {
+export interface QueryResult<T = unknown> {
   rows: T[];
   rowCount: number;
   command: string;
-  fields?: any[];
+  fields?: unknown[];
 }
 
-export interface PaginatedQueryResult<T = any> extends QueryResult<T> {
+export interface PaginatedQueryResult<T = unknown> extends QueryResult<T> {
   totalCount: number;
   page: number;
   limit: number;

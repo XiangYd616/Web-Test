@@ -32,13 +32,13 @@ export interface DatabaseService {
   isConnected(): boolean;
 
   // 事务管理
-  beginTransaction(): Promise<any>;
-  commitTransaction(transaction: any): Promise<void>;
-  rollbackTransaction(transaction: any): Promise<void>;
+  beginTransaction(): Promise<unknown>;
+  commitTransaction(transaction: unknown): Promise<void>;
+  rollbackTransaction(transaction: unknown): Promise<void>;
 
   // 查询执行
-  query<T = any>(sql: string, params?: any[]): Promise<QueryResult<T>>;
-  queryOne<T = any>(sql: string, params?: any[]): Promise<T | null>;
+  query<T = unknown>(sql: string, params?: unknown[]): Promise<QueryResult<T>>;
+  queryOne<T = unknown>(sql: string, params?: unknown[]): Promise<T | null>;
 
   // 健康检查
   healthCheck(): Promise<boolean>;
@@ -104,7 +104,7 @@ export interface TestConfigService {
   deleteTestConfig(configId: number): Promise<void>;
   getTestConfig(configId: number): Promise<TestConfiguration | null>;
   getTestConfigs(query: GetTestConfigsQuery): Promise<PaginatedQueryResult<TestConfiguration>>;
-  validateTestConfig(configData: any): Promise<ValidationResult>;
+  validateTestConfig(configData: unknown): Promise<ValidationResult>;
 }
 
 export interface GetTestConfigsQuery {
@@ -119,11 +119,19 @@ export interface GetTestConfigsQuery {
 }
 
 export interface TestExecutionService {
-  startTest(testConfigId: number, userId: number, overrides?: any): Promise<TestExecution>;
+  startTest(
+    testConfigId: number,
+    userId: number,
+    overrides?: Record<string, unknown>
+  ): Promise<TestExecution>;
   cancelTest(executionId: number): Promise<void>;
   getTestExecution(executionId: number): Promise<TestExecution | null>;
   getTestExecutions(query: GetTestExecutionsQuery): Promise<PaginatedQueryResult<TestExecution>>;
-  updateTestStatus(executionId: number, status: string, metadata?: any): Promise<void>;
+  updateTestStatus(
+    executionId: number,
+    status: string,
+    metadata?: Record<string, unknown>
+  ): Promise<void>;
 }
 
 export interface GetTestExecutionsQuery {
@@ -139,10 +147,10 @@ export interface GetTestExecutionsQuery {
 }
 
 export interface TestResultService {
-  saveTestResult(executionId: number, resultData: any): Promise<TestResult>;
+  saveTestResult(executionId: number, resultData: Record<string, unknown>): Promise<TestResult>;
   getTestResult(resultId: number): Promise<TestResult | null>;
   getTestResults(query: GetTestResultsQuery): Promise<PaginatedQueryResult<TestResult>>;
-  getDetailedResult(resultId: number): Promise<any>;
+  getDetailedResult(resultId: number): Promise<unknown>;
   deleteTestResult(resultId: number): Promise<void>;
 }
 
@@ -171,7 +179,7 @@ export interface ReportService {
 
   // 报告模板管理
   getReportTemplates(): Promise<ReportTemplate[]>;
-  createReportTemplate(templateData: any): Promise<ReportTemplate>;
+  createReportTemplate(templateData: Record<string, unknown>): Promise<ReportTemplate>;
 }
 
 export interface CreateReportData {
@@ -179,7 +187,7 @@ export interface CreateReportData {
   description?: string;
   report_type: string;
   test_executions: number[];
-  configuration?: any;
+  configuration?: Record<string, unknown>;
   user_id: number;
   is_public?: boolean;
 }
@@ -210,7 +218,7 @@ export interface ReportTemplate {
   id: number;
   name: string;
   description?: string;
-  template_data: any;
+  template_data: Record<string, unknown>;
   is_default: boolean;
   created_at: Date;
 }
@@ -266,12 +274,12 @@ export interface StorageStats {
 export interface NotificationService {
   sendEmail(to: string, subject: string, content: string, template?: string): Promise<void>;
   sendSMS(to: string, message: string): Promise<void>;
-  sendWebSocketMessage(userId: number, message: any): Promise<void>;
-  broadcastMessage(message: any, userIds?: number[]): Promise<void>;
+  sendWebSocketMessage(userId: number, message: unknown): Promise<void>;
+  broadcastMessage(message: unknown, userIds?: number[]): Promise<void>;
 
   // 通知模板管理
   getEmailTemplate(templateName: string): Promise<EmailTemplate | null>;
-  renderEmailTemplate(templateName: string, data: any): Promise<string>;
+  renderEmailTemplate(templateName: string, data: Record<string, unknown>): Promise<string>;
 }
 
 export interface EmailTemplate {
@@ -285,8 +293,8 @@ export interface EmailTemplate {
 // ==================== 缓存服务接口 ====================
 
 export interface CacheService {
-  get<T = any>(key: string): Promise<T | null>;
-  set(key: string, value: any, ttl?: number): Promise<void>;
+  get<T = unknown>(key: string): Promise<T | null>;
+  set(key: string, value: unknown, ttl?: number): Promise<void>;
   delete(key: string): Promise<void>;
   clear(pattern?: string): Promise<void>;
   exists(key: string): Promise<boolean>;
@@ -313,7 +321,7 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  value?: any;
+  value?: unknown;
 }
 
 // ==================== 服务容器接口 ====================
