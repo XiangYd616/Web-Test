@@ -3,6 +3,7 @@
  * 提供API请求的组织、存储、分享和版本管理功能
  */
 
+import axios from 'axios';
 import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -13,8 +14,15 @@ export interface CollectionManagerConfig {
   storageDir?: string;
   backupEnabled?: boolean;
   maxVersions?: number;
-  models?: any;
+  models?: CollectionModels;
 }
+
+type ResolvedCollectionManagerConfig = {
+  storageDir: string;
+  backupEnabled: boolean;
+  maxVersions: number;
+  models?: CollectionModels;
+};
 
 // API集合接口
 export interface ApiCollection {
@@ -31,7 +39,7 @@ export interface ApiCollection {
   createdBy: string;
   version: number;
   tags: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // API请求接口
@@ -43,14 +51,14 @@ export interface ApiRequest {
   url: string;
   headers?: Record<string, string>;
   params?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   tests?: string[];
   preRequestScript?: string;
   postResponseScript?: string;
   timeout?: number;
   auth?: AuthConfig;
   variables?: Record<string, string>;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 环境配置接口
@@ -153,7 +161,7 @@ export interface ExecutionResult {
     status: number;
     statusText: string;
     headers: Record<string, string>;
-    body: any;
+    body: unknown;
     time: number;
   };
   error?: string;
@@ -171,9 +179,90 @@ export interface TestResult {
   duration: number;
 }
 
+// 模型类型
+export interface CollectionModels {
+  Collection: Model<CollectionRecord>;
+  Environment?: Model<EnvironmentRecord>;
+  EnvironmentVariable?: Model<EnvironmentVariableRecord>;
+  Run: Model<RunRecord>;
+  RunResult: Model<RunResultRecord>;
+}
+
+type Model<T> = {
+  findByPk: (id: string) => Promise<T | null>;
+  findAll: (options?: Record<string, unknown>) => Promise<T[]>;
+  findAndCountAll?: (options: Record<string, unknown>) => Promise<{ rows: T[]; count: number }>;
+  create: (data: Record<string, unknown>) => Promise<T>;
+  update: (
+    data: Record<string, unknown>,
+    options: Record<string, unknown>
+  ) => Promise<[number, T[]]>;
+  destroy: (options: Record<string, unknown>) => Promise<number>;
+};
+
+// 记录类型
+type CollectionRecord = {
+  id: string;
+  name: string;
+  description?: string | null;
+  workspace_id?: string | null;
+  created_by?: string | null;
+  definition?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  created_at?: Date;
+  updated_at?: Date;
+};
+
+type EnvironmentRecord = {
+  id: string;
+  name: string;
+  description?: string | null;
+  workspace_id?: string | null;
+  config?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  created_at?: Date;
+  updated_at?: Date;
+};
+
+type EnvironmentVariableRecord = {
+  id: string;
+  environment_id: string;
+  key: string;
+  value: string;
+  type?: string;
+  description?: string | null;
+  enabled?: boolean;
+  secret?: boolean;
+  encrypted?: boolean;
+};
+
+type RunRecord = {
+  id: string;
+  collection_id: string;
+  environment_id?: string | null;
+  workspace_id?: string | null;
+  user_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  options?: Record<string, unknown>;
+  summary?: Record<string, unknown>;
+  started_at?: Date;
+  completed_at?: Date;
+  updated_at?: Date;
+};
+
+type RunResultRecord = {
+  id: string;
+  run_id: string;
+  request_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  response?: Record<string, unknown>;
+  assertions?: TestResult[];
+  duration?: number;
+};
+
 class CollectionManager {
-  private options: CollectionManagerConfig;
-  private models: any;
+  private options: ResolvedCollectionManagerConfig;
+  private models: CollectionModels;
   private collections: Map<string, ApiCollection> = new Map();
   private folders: Map<string, Folder> = new Map();
   private requests: Map<string, ApiRequest> = new Map();
@@ -189,7 +278,7 @@ class CollectionManager {
       ...options,
     };
 
-    this.models = options.models;
+    this.models = options.models as CollectionModels;
 
     // 确保存储目录存在
     this.ensureStorageDir();
@@ -199,53 +288,90 @@ class CollectionManager {
    * 创建集合
    */
   async createCollection(
-    collectionData: Omit<ApiCollection, 'id' | 'createdAt' | 'updatedAt' | 'version'>
-  ): Promise<string> {
-    const collection: ApiCollection = {
-      ...collectionData,
-      id: uuidv4(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    collectionData: Omit<
+      ApiCollection,
+      'id' | 'createdAt' | 'updatedAt' | 'version' | 'createdBy'
+    > & {
+      workspaceId: string;
+    },
+    userId?: string
+  ): Promise<ApiCollection> {
+    const metadata = {
+      ...(collectionData.metadata || {}),
       version: 1,
+      tags: collectionData.tags || [],
     };
 
+    const collectionRecord = await this.models.Collection.create({
+      workspace_id: collectionData.workspaceId,
+      name: collectionData.name,
+      description: collectionData.description,
+      created_by: userId || null,
+      definition: {
+        requests: collectionData.requests || [],
+        variables: collectionData.variables || {},
+        auth: collectionData.auth || null,
+      },
+      metadata,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    const collection = this.toApiCollection(collectionRecord);
     this.collections.set(collection.id, collection);
-
-    // 保存到文件
     await this.saveCollectionToFile(collection);
-
-    // 创建初始版本
     await this.createVersion(collection.id, 'Initial version', 'Collection created');
-
-    return collection.id;
+    return collection;
   }
 
   /**
    * 更新集合
    */
   async updateCollection(id: string, updates: Partial<ApiCollection>): Promise<ApiCollection> {
-    const collection = this.collections.get(id);
-    if (!collection) {
+    const existing = await this.models.Collection.findByPk(id);
+    if (!existing) {
       throw new Error('Collection not found');
     }
 
-    const oldCollection = { ...collection };
-    const updatedCollection = {
-      ...collection,
-      ...updates,
-      updatedAt: new Date(),
-      version: collection.version + 1,
+    const existingDefinition = existing.definition || {};
+    const existingMetadata = existing.metadata || {};
+    const nextVersion = Number(existingMetadata.version || 1) + 1;
+    const definition = {
+      ...existingDefinition,
+      requests: updates.requests ?? (existingDefinition.requests as ApiRequest[]) ?? [],
+      variables:
+        updates.variables ?? (existingDefinition.variables as Record<string, string>) ?? {},
+      auth: updates.auth ?? (existingDefinition.auth as AuthConfig) ?? null,
     };
 
+    const metadata = {
+      ...existingMetadata,
+      ...(updates.metadata || {}),
+      version: nextVersion,
+      tags: updates.tags ?? (existingMetadata.tags as string[]) ?? [],
+    };
+
+    await this.models.Collection.update(
+      {
+        name: updates.name ?? existing.name,
+        description: updates.description ?? existing.description,
+        definition,
+        metadata,
+        updated_at: new Date(),
+      },
+      { where: { id }, returning: true }
+    );
+
+    const updated = await this.models.Collection.findByPk(id);
+    if (!updated) {
+      throw new Error('Collection not found');
+    }
+
+    const updatedCollection = this.toApiCollection(updated);
     this.collections.set(id, updatedCollection);
-
-    // 保存到文件
     await this.saveCollectionToFile(updatedCollection);
-
-    // 创建版本
-    const changes = this.detectChanges(oldCollection, updatedCollection);
+    const changes = this.detectChanges(this.toApiCollection(existing), updatedCollection);
     await this.createVersion(id, `Version ${updatedCollection.version}`, changes.join(', '));
-
     return updatedCollection;
   }
 
@@ -253,33 +379,12 @@ class CollectionManager {
    * 删除集合
    */
   async deleteCollection(id: string): Promise<boolean> {
-    const collection = this.collections.get(id);
-    if (!collection) {
+    const deleted = await this.models.Collection.destroy({ where: { id } });
+    if (!deleted) {
       return false;
     }
-
-    // 从文件夹中移除
-    if (collection.folderId) {
-      const folder = this.folders.get(collection.folderId);
-      if (folder) {
-        folder.collections = folder.collections.filter(cId => cId !== id);
-        await this.saveFolderToFile(folder);
-      }
-    }
-
-    // 删除文件
     await this.deleteCollectionFile(id);
-
-    // 删除版本
     this.versions.delete(id);
-
-    // 删除分享
-    for (const [shareId, share] of this.shares.entries()) {
-      if (share.collectionId === id) {
-        this.shares.delete(shareId);
-      }
-    }
-
     this.collections.delete(id);
     return true;
   }
@@ -288,65 +393,285 @@ class CollectionManager {
    * 获取集合
    */
   async getCollection(id: string): Promise<ApiCollection | null> {
-    return this.collections.get(id) || null;
+    const record = await this.models.Collection.findByPk(id);
+    if (!record) {
+      return null;
+    }
+    const collection = this.toApiCollection(record);
+    this.collections.set(id, collection);
+    return collection;
   }
 
   /**
    * 获取所有集合
    */
   async getAllCollections(): Promise<ApiCollection[]> {
-    return Array.from(this.collections.values());
+    const records = await this.models.Collection.findAll();
+    const collections = records.map(record => this.toApiCollection(record));
+    collections.forEach(collection => this.collections.set(collection.id, collection));
+    return collections;
   }
 
-  /**
-   * 创建文件夹
-   */
-  async createFolder(
-    folderData: Omit<Folder, 'id' | 'createdAt' | 'updatedAt' | 'collections' | 'subfolders'>
-  ): Promise<string> {
-    const folder: Folder = {
-      ...folderData,
-      id: uuidv4(),
-      collections: [],
-      subfolders: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+  async getCollections(options: { workspaceId: string; limit: number; offset: number }): Promise<{
+    collections: ApiCollection[];
+    total: number;
+  }> {
+    if (!this.models.Collection.findAndCountAll) {
+      const records = await this.models.Collection.findAll({
+        where: { workspace_id: options.workspaceId },
+      });
+      const collections = records.map(record => this.toApiCollection(record));
+      return { collections, total: collections.length };
+    }
+
+    const result = await this.models.Collection.findAndCountAll({
+      where: { workspace_id: options.workspaceId },
+      limit: options.limit,
+      offset: options.offset,
+      order: [['created_at', 'DESC']],
+    });
+
+    const collections = result.rows.map(record => this.toApiCollection(record));
+    collections.forEach(collection => this.collections.set(collection.id, collection));
+    return { collections, total: result.count };
+  }
+
+  async getRuns(options: { workspaceId: string; limit: number; offset: number }): Promise<{
+    runs: RunRecord[];
+    total: number;
+  }> {
+    if (!this.models.Run.findAndCountAll) {
+      const records = await this.models.Run.findAll({
+        where: { workspace_id: options.workspaceId },
+      });
+      return { runs: records, total: records.length };
+    }
+
+    const result = await this.models.Run.findAndCountAll({
+      where: { workspace_id: options.workspaceId },
+      limit: options.limit,
+      offset: options.offset,
+      order: [['created_at', 'DESC']],
+    });
+    return { runs: result.rows, total: result.count };
+  }
+
+  async getRun(runId: string): Promise<RunRecord | null> {
+    return this.models.Run.findByPk(runId);
+  }
+
+  async getRunResults(options: { runId: string; limit: number; offset: number }): Promise<{
+    results: RunResultRecord[];
+    total: number;
+  }> {
+    if (!this.models.RunResult.findAndCountAll) {
+      const records = await this.models.RunResult.findAll({ where: { run_id: options.runId } });
+      return { results: records, total: records.length };
+    }
+
+    const result = await this.models.RunResult.findAndCountAll({
+      where: { run_id: options.runId },
+      limit: options.limit,
+      offset: options.offset,
+      order: [['created_at', 'ASC']],
+    });
+
+    return { results: result.rows, total: result.count };
+  }
+
+  async cancelRun(runId: string): Promise<void> {
+    await this.models.Run.update(
+      { status: 'cancelled', updated_at: new Date() },
+      { where: { id: runId } }
+    );
+  }
+
+  async rerunRun(runId: string, userId: string): Promise<RunRecord> {
+    const run = await this.models.Run.findByPk(runId);
+    if (!run) {
+      throw new Error('运行记录不存在');
+    }
+    return this.createRun({
+      collectionId: run.collection_id,
+      environmentId: run.environment_id || undefined,
+      userId,
+      options: run.options || {},
+    });
+  }
+
+  async createRun(params: {
+    collectionId: string;
+    environmentId?: string;
+    userId: string;
+    options?: Record<string, unknown>;
+  }): Promise<RunRecord> {
+    const collection = await this.models.Collection.findByPk(params.collectionId);
+    if (!collection) {
+      throw new Error('集合不存在');
+    }
+
+    const run = await this.models.Run.create({
+      collection_id: params.collectionId,
+      environment_id: params.environmentId || null,
+      workspace_id: collection.workspace_id || null,
+      user_id: params.userId,
+      status: 'running',
+      options: params.options || {},
+      started_at: new Date(),
+    });
+
+    const { results, summary, duration } = await this.executeCollection(
+      params.collectionId,
+      params.environmentId || '',
+      { runId: run.id }
+    );
+
+    for (const result of results) {
+      await this.models.RunResult.create({
+        run_id: run.id,
+        request_id: result.requestId,
+        status: result.status,
+        response: result.response || {},
+        assertions: result.tests,
+        duration: result.duration,
+        created_at: new Date(),
+      });
+    }
+
+    await this.models.Run.update(
+      {
+        status: summary.failedRequests > 0 ? 'failed' : 'completed',
+        summary,
+        duration,
+        completed_at: new Date(),
+        updated_at: new Date(),
+      },
+      { where: { id: run.id } }
+    );
+
+    const updated = await this.models.Run.findByPk(run.id);
+    if (!updated) {
+      throw new Error('运行记录不存在');
+    }
+    return updated;
+  }
+
+  async executeCollection(
+    collectionId: string,
+    environmentId: string,
+    options: { runId?: string; environment?: Environment | null } = {}
+  ): Promise<{
+    results: ExecutionResult[];
+    summary: {
+      totalRequests: number;
+      passedRequests: number;
+      failedRequests: number;
+      errorCount: number;
+      logs: string[];
     };
+    duration: number;
+  }> {
+    const collectionRecord = await this.models.Collection.findByPk(collectionId);
+    if (!collectionRecord) {
+      throw new Error('集合不存在');
+    }
 
-    this.folders.set(folder.id, folder);
+    const definition = collectionRecord.definition || {};
+    const requests = (definition.requests as ApiRequest[]) || [];
+    const environment =
+      options.environment ||
+      (environmentId ? await this.getEnvironmentContext(environmentId) : null);
 
-    // 如果有父文件夹，添加到父文件夹的子文件夹列表
-    if (folder.parentId) {
-      const parentFolder = this.folders.get(folder.parentId);
-      if (parentFolder) {
-        parentFolder.subfolders.push(folder.id);
-        await this.saveFolderToFile(parentFolder);
+    const start = Date.now();
+    const results: ExecutionResult[] = [];
+    const logs: string[] = [];
+
+    for (const request of requests) {
+      const result = await this.executeRequest(request, environment || undefined);
+      results.push(result);
+      logs.push(`${request.name}: ${result.status}`);
+    }
+
+    const totalRequests = results.length;
+    const passedRequests = results.filter(r => r.status === 'completed').length;
+    const failedRequests = results.filter(r => r.status === 'failed').length;
+
+    return {
+      results,
+      summary: {
+        totalRequests,
+        passedRequests,
+        failedRequests,
+        errorCount: failedRequests,
+        logs,
+      },
+      duration: Date.now() - start,
+    };
+  }
+
+  private async getEnvironmentContext(environmentId: string): Promise<Environment | null> {
+    if (!this.models.Environment) {
+      return this.environments.get(environmentId) || null;
+    }
+
+    const record = await this.models.Environment.findByPk(environmentId);
+    if (!record) {
+      return null;
+    }
+
+    const variables: EnvironmentVariable[] = [];
+    if (this.models.EnvironmentVariable) {
+      const variableRecords = await this.models.EnvironmentVariable.findAll({
+        where: { environment_id: environmentId },
+      });
+      for (const variable of variableRecords) {
+        if (variable.enabled === false) {
+          continue;
+        }
+        variables.push({
+          key: variable.key,
+          value: variable.value,
+          description: variable.description || undefined,
+          enabled: variable.enabled === undefined ? true : variable.enabled,
+          type: (variable.type as EnvironmentVariable['type']) || 'string',
+        });
       }
     }
 
-    await this.saveFolderToFile(folder);
-    return folder.id;
+    const values = variables.reduce<Record<string, string>>((acc, variable) => {
+      acc[variable.key] = variable.value;
+      return acc;
+    }, {});
+
+    return {
+      id: record.id,
+      name: record.name,
+      values,
+      variables,
+      createdAt: record.created_at || new Date(),
+      updatedAt: record.updated_at || new Date(),
+      createdBy: record.metadata?.createdBy ? String(record.metadata.createdBy) : '',
+    };
   }
 
-  /**
-   * 更新文件夹
-   */
-  async updateFolder(id: string, updates: Partial<Folder>): Promise<Folder> {
-    const folder = this.folders.get(id);
-    if (!folder) {
-      throw new Error('Folder not found');
-    }
-
-    const updatedFolder = {
-      ...folder,
-      ...updates,
-      updatedAt: new Date(),
+  private toApiCollection(record: CollectionRecord): ApiCollection {
+    const definition = record.definition || {};
+    const metadata = record.metadata || {};
+    return {
+      id: record.id,
+      name: record.name,
+      description: record.description || '',
+      folderId: (metadata.folderId as string) || undefined,
+      requests: (definition.requests as ApiRequest[]) || [],
+      variables: (definition.variables as Record<string, string>) || {},
+      auth: (definition.auth as AuthConfig) || undefined,
+      createdAt: record.created_at || new Date(),
+      updatedAt: record.updated_at || new Date(),
+      createdBy: record.created_by || '',
+      version: Number(metadata.version || 1),
+      tags: (metadata.tags as string[]) || [],
+      metadata: metadata as Record<string, unknown>,
     };
-
-    this.folders.set(id, updatedFolder);
-    await this.saveFolderToFile(updatedFolder);
-
-    return updatedFolder;
   }
 
   /**
@@ -478,12 +803,9 @@ class CollectionManager {
       changes: [],
     };
 
-    if (!this.versions.has(collectionId)) {
-      this.versions.set(collectionId, []);
-    }
-
-    const versions = this.versions.get(collectionId)!;
+    const versions = this.versions.get(collectionId) || [];
     versions.push(version);
+    this.versions.set(collectionId, versions);
 
     // 限制版本数量
     if (versions.length > this.options.maxVersions) {
@@ -614,20 +936,35 @@ class CollectionManager {
    * 导入集合
    */
   async importCollection(exportData: CollectionExport): Promise<string> {
-    const collectionId = await this.createCollection({
-      ...exportData.collection,
-      createdBy: exportData.exportedBy,
-    });
+    const workspaceId = (exportData.collection as unknown as Record<string, unknown>).workspaceId;
+    if (!workspaceId) {
+      throw new Error('导入集合缺少 workspaceId');
+    }
+    const collection = await this.createCollection(
+      {
+        workspaceId: String(workspaceId),
+        name: exportData.collection.name,
+        description: exportData.collection.description,
+        requests: exportData.collection.requests,
+        variables: exportData.collection.variables,
+        auth: exportData.collection.auth,
+        tags: exportData.collection.tags,
+        metadata: exportData.collection.metadata,
+      },
+      exportData.exportedBy
+    );
 
     // 导入环境
     for (const environment of exportData.environments) {
       await this.createEnvironment({
-        ...environment,
+        name: environment.name,
+        values: environment.values,
+        variables: environment.variables,
         createdBy: exportData.exportedBy,
       });
     }
 
-    return collectionId;
+    return collection.id;
   }
 
   /**
@@ -678,12 +1015,13 @@ class CollectionManager {
    */
   private async ensureStorageDir(): Promise<void> {
     try {
-      await fs.mkdir(this.options.storageDir, { recursive: true });
-      await fs.mkdir(path.join(this.options.storageDir, 'collections'), { recursive: true });
-      await fs.mkdir(path.join(this.options.storageDir, 'folders'), { recursive: true });
-      await fs.mkdir(path.join(this.options.storageDir, 'environments'), { recursive: true });
-      await fs.mkdir(path.join(this.options.storageDir, 'versions'), { recursive: true });
-      await fs.mkdir(path.join(this.options.storageDir, 'shares'), { recursive: true });
+      const baseDir = this.options.storageDir;
+      await fs.mkdir(baseDir, { recursive: true });
+      await fs.mkdir(path.join(baseDir, 'collections'), { recursive: true });
+      await fs.mkdir(path.join(baseDir, 'folders'), { recursive: true });
+      await fs.mkdir(path.join(baseDir, 'environments'), { recursive: true });
+      await fs.mkdir(path.join(baseDir, 'versions'), { recursive: true });
+      await fs.mkdir(path.join(baseDir, 'shares'), { recursive: true });
     } catch (error) {
       console.error('Failed to create storage directories:', error);
     }
@@ -704,7 +1042,7 @@ class CollectionManager {
     const filePath = path.join(this.options.storageDir, 'collections', `${id}.json`);
     try {
       await fs.unlink(filePath);
-    } catch (error) {
+    } catch {
       // 文件不存在，忽略错误
     }
   }
@@ -724,7 +1062,7 @@ class CollectionManager {
     const filePath = path.join(this.options.storageDir, 'folders', `${id}.json`);
     try {
       await fs.unlink(filePath);
-    } catch (error) {
+    } catch {
       // 文件不存在，忽略错误
     }
   }
@@ -744,7 +1082,7 @@ class CollectionManager {
     const filePath = path.join(this.options.storageDir, 'environments', `${id}.json`);
     try {
       await fs.unlink(filePath);
-    } catch (error) {
+    } catch {
       // 文件不存在，忽略错误
     }
   }
@@ -802,7 +1140,7 @@ class CollectionManager {
    * 处理请求（替换变量）
    */
   private processRequest(request: ApiRequest, environment?: Environment): ApiRequest {
-    let processedRequest = { ...request };
+    const processedRequest = { ...request };
 
     if (environment) {
       // 替换URL中的变量
@@ -813,7 +1151,7 @@ class CollectionManager {
         processedRequest.headers = this.replaceVariablesInObject(
           processedRequest.headers,
           environment.values
-        );
+        ) as Record<string, string>;
       }
 
       // 替换请求体中的变量
@@ -838,14 +1176,14 @@ class CollectionManager {
   /**
    * 替换对象中的变量
    */
-  private replaceVariablesInObject(obj: any, variables: Record<string, string>): any {
+  private replaceVariablesInObject(obj: unknown, variables: Record<string, string>): unknown {
     if (typeof obj === 'string') {
       return this.replaceVariables(obj, variables);
     } else if (Array.isArray(obj)) {
       return obj.map(item => this.replaceVariablesInObject(item, variables));
     } else if (typeof obj === 'object' && obj !== null) {
-      const result: any = {};
-      for (const [key, value] of Object.entries(obj)) {
+      const result: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
         result[key] = this.replaceVariablesInObject(value, variables);
       }
       return result;
@@ -856,34 +1194,47 @@ class CollectionManager {
   /**
    * 发送HTTP请求（模拟实现）
    */
-  private async sendHttpRequest(request: ApiRequest): Promise<any> {
-    // 这里应该实现实际的HTTP请求
-    // 简化实现，返回模拟数据
+  private async sendHttpRequest(request: ApiRequest): Promise<ExecutionResult['response']> {
+    const startTime = Date.now();
+    const config = {
+      method: request.method,
+      url: request.url,
+      headers: request.headers,
+      params: request.params,
+      data: request.body,
+      timeout: request.timeout || 30000,
+      validateStatus: () => true,
+    };
+
+    const response = await axios(config);
     return {
-      status: 200,
-      statusText: 'OK',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: {
-        message: 'Mock response',
-        url: request.url,
-        method: request.method,
-      },
-      time: Math.random() * 1000,
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers as Record<string, string>,
+      body: response.data,
+      time: Date.now() - startTime,
     };
   }
 
   /**
    * 执行测试
    */
-  private async executeTests(tests: string[], response: any): Promise<TestResult[]> {
+  private async executeTests(
+    tests: string[],
+    response: ExecutionResult['response']
+  ): Promise<TestResult[]> {
     const results: TestResult[] = [];
 
     for (const test of tests) {
       try {
-        // 这里应该执行实际的测试脚本
-        // 简化实现，总是返回通过
+        const assert = (condition: boolean, message: string) => {
+          if (!condition) {
+            throw new Error(message);
+          }
+        };
+        // 支持简单脚本表达式
+        const runner = new Function('response', 'assert', test);
+        runner(response, assert);
         results.push({
           name: test,
           passed: true,

@@ -3,125 +3,70 @@
  * 提供定时任务调度、执行管理、结果追踪等功能
  */
 
-// 模拟cron功能
+import cron from 'node-cron';
+const CollectionManager = require('../collections/CollectionManager');
+const EnvironmentManager = require('../environments/EnvironmentManager');
+
+const { models: sequelizeModels } = require('../../database/sequelize');
+
 interface CronTask {
   start: () => void;
   stop: () => void;
 }
 
-interface CronValidator {
-  validate: (schedule: string) => boolean;
-  schedule: (schedule: string, callback: () => void) => CronTask;
-}
-
-const cron: CronValidator = {
-  validate: (schedule: string): boolean => {
-    const parts = schedule.split(' ');
-    return parts.length === 5 || parts.length === 6;
-  },
-  schedule: (schedule: string, callback: () => void): CronTask => {
-    const task: CronTask = {
-      start: () => {
-        setInterval(callback, 60000); // 简化实现，每分钟执行一次
-      },
-      stop: () => {
-        // 停止任务
-      },
-    };
-    return task;
-  },
+type ScheduledRunRecord = {
+  id: string;
+  workspace_id: string;
+  collection_id: string;
+  environment_id?: string | null;
+  cron_expression: string;
+  timezone?: string | null;
+  status: string;
+  name?: string | null;
+  description?: string | null;
+  config?: Record<string, unknown>;
+  created_by?: string | null;
+  last_run_at?: Date | null;
+  next_run_at?: Date | null;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
-// 模拟数据库模型
-interface ScheduledRunModel {
+type ScheduledRunResultRecord = {
   id: string;
-  name: string;
-  description: string;
-  cronExpression: string;
-  timezone: string;
-  collectionId: string;
-  environmentId: string;
-  status: 'active' | 'inactive' | 'paused';
-  lastRunAt?: Date;
-  nextRunAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface ScheduledRunResultModel {
-  id: string;
-  scheduledRunId: string;
-  status: 'pending' | 'running' | 'success' | 'failed' | 'cancelled';
-  startedAt?: Date;
-  completedAt?: Date;
+  scheduled_run_id: string;
+  status: string;
+  started_at?: Date;
+  completed_at?: Date;
   duration?: number;
-  totalRequests: number;
-  passedRequests: number;
-  failedRequests: number;
-  errorCount: number;
-  logs: string[];
-  metadata: Record<string, any>;
-}
+  total_requests?: number;
+  passed_requests?: number;
+  failed_requests?: number;
+  error_count?: number;
+  logs?: string[];
+  metadata?: Record<string, unknown>;
+};
+
+type Model<T> = {
+  findAll: (options?: Record<string, unknown>) => Promise<T[]>;
+  findByPk: (id: string) => Promise<T | null>;
+  create: (data: Record<string, unknown>) => Promise<T>;
+  update: (
+    data: Record<string, unknown>,
+    options: Record<string, unknown>
+  ) => Promise<[number, T[]]>;
+  destroy: (options: Record<string, unknown>) => Promise<number>;
+};
 
 interface Models {
-  ScheduledRun: {
-    findAll: (options: any) => Promise<ScheduledRunModel[]>;
-    findByPk: (id: string) => Promise<ScheduledRunModel | null>;
-    create: (data: any) => Promise<ScheduledRunModel>;
-    update: (data: any, options: any) => Promise<[number, ScheduledRunModel[]]>;
-    destroy: (options: any) => Promise<number>;
-  };
-  ScheduledRunResult: {
-    create: (data: any) => Promise<ScheduledRunResultModel>;
-    findByPk: (id: string) => Promise<ScheduledRunResultModel | null>;
-    findAll: (options: any) => Promise<ScheduledRunResultModel[]>;
-  };
-}
-
-// 模拟CollectionManager
-class CollectionManager {
-  constructor(options: any) {}
-
-  async executeCollection(
-    collectionId: string,
-    environmentId: string,
-    options: any = {}
-  ): Promise<{
-    totalRequests: number;
-    passedRequests: number;
-    failedRequests: number;
-    errorCount: number;
-    logs: string[];
-    duration: number;
-  }> {
-    // 简化实现
-    return {
-      totalRequests: 10,
-      passedRequests: 8,
-      failedRequests: 2,
-      errorCount: 2,
-      logs: ['Request 1 passed', 'Request 2 failed'],
-      duration: 1500,
-    };
-  }
-}
-
-// 模拟EnvironmentManager
-class EnvironmentManager {
-  constructor(options: any) {}
-
-  async getEnvironment(environmentId: string): Promise<any> {
-    return {
-      id: environmentId,
-      name: 'Production',
-      variables: {},
-    };
-  }
+  ScheduledRun: Model<ScheduledRunRecord>;
+  ScheduledRunResult: Model<ScheduledRunResultRecord>;
 }
 
 // 定时运行配置接口
 export interface ScheduledRunConfig {
   id: string;
+  workspaceId?: string;
   name: string;
   description: string;
   cronExpression: string;
@@ -148,7 +93,7 @@ export interface ScheduledRunResult {
   failedRequests: number;
   errorCount: number;
   logs: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 任务执行接口
@@ -187,8 +132,8 @@ export interface ScheduledRunStatistics {
  */
 class ScheduledRunService {
   private models: Models;
-  private collectionManager: CollectionManager;
-  private environmentManager: EnvironmentManager;
+  private collectionManager: InstanceType<typeof CollectionManager>;
+  private environmentManager: InstanceType<typeof EnvironmentManager>;
   private jobs: Map<string, { task: CronTask; config: ScheduledRunConfig }> = new Map();
   private isRunning: boolean = false;
   private executions: Map<string, JobExecution> = new Map();
@@ -196,24 +141,11 @@ class ScheduledRunService {
   constructor(
     options: {
       models?: Models;
-      collectionManager?: CollectionManager;
-      environmentManager?: EnvironmentManager;
+      collectionManager?: InstanceType<typeof CollectionManager>;
+      environmentManager?: InstanceType<typeof EnvironmentManager>;
     } = {}
   ) {
-    this.models = options.models || {
-      ScheduledRun: {
-        findAll: async () => [],
-        findByPk: async () => null,
-        create: async () => ({}) as ScheduledRunModel,
-        update: async () => [0, []],
-        destroy: async () => 0,
-      },
-      ScheduledRunResult: {
-        create: async () => ({}) as ScheduledRunResultModel,
-        findByPk: async () => null,
-        findAll: async () => [],
-      },
-    };
+    this.models = options.models || (sequelizeModels as Models);
     this.collectionManager =
       options.collectionManager || new CollectionManager({ models: this.models });
     this.environmentManager =
@@ -262,29 +194,39 @@ class ScheduledRunService {
   async createSchedule(
     scheduleData: Omit<ScheduledRunConfig, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<string> {
-    const schedule: ScheduledRunModel = await this.models.ScheduledRun.create({
-      ...scheduleData,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const schedule: ScheduledRunRecord = await this.models.ScheduledRun.create({
+      workspace_id: scheduleData.workspaceId,
+      name: scheduleData.name,
+      description: scheduleData.description,
+      cron_expression: scheduleData.cronExpression,
+      timezone: scheduleData.timezone,
+      collection_id: scheduleData.collectionId,
+      environment_id: scheduleData.environmentId,
+      status: scheduleData.status,
+      last_run_at: scheduleData.lastRunAt,
+      next_run_at: scheduleData.nextRunAt,
+      created_at: new Date(),
+      updated_at: new Date(),
     });
 
     const config: ScheduledRunConfig = {
       id: schedule.id,
-      name: schedule.name,
-      description: schedule.description,
-      cronExpression: schedule.cronExpression,
-      timezone: schedule.timezone,
-      collectionId: schedule.collectionId,
-      environmentId: schedule.environmentId,
-      status: schedule.status,
-      lastRunAt: schedule.lastRunAt,
-      nextRunAt: schedule.nextRunAt,
-      createdAt: schedule.createdAt,
-      updatedAt: schedule.updatedAt,
+      workspaceId: schedule.workspace_id,
+      name: schedule.name || '',
+      description: schedule.description || '',
+      cronExpression: schedule.cron_expression,
+      timezone: schedule.timezone || 'UTC',
+      collectionId: schedule.collection_id,
+      environmentId: schedule.environment_id || '',
+      status: schedule.status as ScheduledRunConfig['status'],
+      lastRunAt: schedule.last_run_at || undefined,
+      nextRunAt: schedule.next_run_at || undefined,
+      createdAt: schedule.created_at || new Date(),
+      updatedAt: schedule.updated_at || new Date(),
     };
 
     if (config.status === 'active') {
-      await this.scheduleJob(config);
+      await this.scheduleJob(schedule);
     }
 
     return schedule.id;
@@ -301,17 +243,18 @@ class ScheduledRunService {
 
     return {
       id: schedule.id,
-      name: schedule.name,
-      description: schedule.description,
-      cronExpression: schedule.cronExpression,
-      timezone: schedule.timezone,
-      collectionId: schedule.collectionId,
-      environmentId: schedule.environmentId,
-      status: schedule.status,
-      lastRunAt: schedule.lastRunAt,
-      nextRunAt: schedule.nextRunAt,
-      createdAt: schedule.createdAt,
-      updatedAt: schedule.updatedAt,
+      workspaceId: schedule.workspace_id,
+      name: schedule.name || '',
+      description: schedule.description || '',
+      cronExpression: schedule.cron_expression,
+      timezone: schedule.timezone || 'UTC',
+      collectionId: schedule.collection_id,
+      environmentId: schedule.environment_id || '',
+      status: schedule.status as ScheduledRunConfig['status'],
+      lastRunAt: schedule.last_run_at || undefined,
+      nextRunAt: schedule.next_run_at || undefined,
+      createdAt: schedule.created_at || new Date(),
+      updatedAt: schedule.updated_at || new Date(),
     };
   }
 
@@ -323,17 +266,18 @@ class ScheduledRunService {
 
     return schedules.map(schedule => ({
       id: schedule.id,
-      name: schedule.name,
-      description: schedule.description,
-      cronExpression: schedule.cronExpression,
-      timezone: schedule.timezone,
-      collectionId: schedule.collectionId,
-      environmentId: schedule.environmentId,
-      status: schedule.status,
-      lastRunAt: schedule.lastRunAt,
-      nextRunAt: schedule.nextRunAt,
-      createdAt: schedule.createdAt,
-      updatedAt: schedule.updatedAt,
+      workspaceId: schedule.workspace_id,
+      name: schedule.name || '',
+      description: schedule.description || '',
+      cronExpression: schedule.cron_expression,
+      timezone: schedule.timezone || 'UTC',
+      collectionId: schedule.collection_id,
+      environmentId: schedule.environment_id || '',
+      status: schedule.status as ScheduledRunConfig['status'],
+      lastRunAt: schedule.last_run_at || undefined,
+      nextRunAt: schedule.next_run_at || undefined,
+      createdAt: schedule.created_at || new Date(),
+      updatedAt: schedule.updated_at || new Date(),
     }));
   }
 
@@ -351,13 +295,25 @@ class ScheduledRunService {
 
     const [_, updatedSchedules] = await this.models.ScheduledRun.update(
       {
-        ...updates,
-        updatedAt: new Date(),
+        name: updates.name,
+        description: updates.description,
+        cron_expression: updates.cronExpression,
+        timezone: updates.timezone,
+        collection_id: updates.collectionId,
+        environment_id: updates.environmentId,
+        status: updates.status,
+        last_run_at: updates.lastRunAt,
+        next_run_at: updates.nextRunAt,
+        updated_at: new Date(),
       },
-      { where: { id: scheduleId } }
+      { where: { id: scheduleId }, returning: true }
     );
 
-    const updatedSchedule = updatedSchedules[0];
+    const updatedSchedule =
+      updatedSchedules[0] || (await this.models.ScheduledRun.findByPk(scheduleId));
+    if (!updatedSchedule) {
+      throw new Error('Schedule not found');
+    }
 
     // 重新调度任务
     if (updates.status || updates.cronExpression) {
@@ -366,17 +322,18 @@ class ScheduledRunService {
 
     return {
       id: updatedSchedule.id,
-      name: updatedSchedule.name,
-      description: updatedSchedule.description,
-      cronExpression: updatedSchedule.cronExpression,
-      timezone: updatedSchedule.timezone,
-      collectionId: updatedSchedule.collectionId,
-      environmentId: updatedSchedule.environmentId,
-      status: updatedSchedule.status,
-      lastRunAt: updatedSchedule.lastRunAt,
-      nextRunAt: updatedSchedule.nextRunAt,
-      createdAt: updatedSchedule.createdAt,
-      updatedAt: updatedSchedule.updatedAt,
+      workspaceId: updatedSchedule.workspace_id,
+      name: updatedSchedule.name || '',
+      description: updatedSchedule.description || '',
+      cronExpression: updatedSchedule.cron_expression,
+      timezone: updatedSchedule.timezone || 'UTC',
+      collectionId: updatedSchedule.collection_id,
+      environmentId: updatedSchedule.environment_id || '',
+      status: updatedSchedule.status as ScheduledRunConfig['status'],
+      lastRunAt: updatedSchedule.last_run_at || undefined,
+      nextRunAt: updatedSchedule.next_run_at || undefined,
+      createdAt: updatedSchedule.created_at || new Date(),
+      updatedAt: updatedSchedule.updated_at || new Date(),
     };
   }
 
@@ -403,7 +360,7 @@ class ScheduledRunService {
     scheduleId: string,
     options: {
       dryRun?: boolean;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
     } = {}
   ): Promise<string> {
     const schedule = await this.models.ScheduledRun.findByPk(scheduleId);
@@ -422,7 +379,6 @@ class ScheduledRunService {
     };
 
     this.executions.set(executionId, execution);
-
     try {
       if (options.dryRun) {
         // 干运行模式
@@ -446,7 +402,7 @@ class ScheduledRunService {
         execution.endTime = new Date();
         execution.duration = 0;
 
-        await this.models.ScheduledRunResult.create(result);
+        await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(result));
         return executionId;
       }
 
@@ -461,8 +417,8 @@ class ScheduledRunService {
       // 更新任务的最后运行时间
       await this.models.ScheduledRun.update(
         {
-          lastRunAt: new Date(),
-          updatedAt: new Date(),
+          last_run_at: new Date(),
+          updated_at: new Date(),
         },
         { where: { id: scheduleId } }
       );
@@ -489,7 +445,7 @@ class ScheduledRunService {
         metadata: { error: execution.error, ...options.metadata },
       };
 
-      await this.models.ScheduledRunResult.create(failedResult);
+      await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(failedResult));
       throw error;
     }
   }
@@ -541,7 +497,9 @@ class ScheduledRunService {
     const successfulExecutions = results.filter(r => r.status === 'success').length;
     const failedExecutions = results.filter(r => r.status === 'failed').length;
 
-    const durations = results.filter(r => r.duration).map(r => r.duration!);
+    const durations = results
+      .map(result => result.duration)
+      .filter((duration): duration is number => typeof duration === 'number');
     const averageExecutionTime =
       durations.length > 0
         ? durations.reduce((sum, duration) => sum + duration, 0) / durations.length
@@ -552,8 +510,9 @@ class ScheduledRunService {
     const byStatus: Record<string, number> = {};
 
     schedules.forEach(schedule => {
-      byCollection[schedule.collectionId] = (byCollection[schedule.collectionId] || 0) + 1;
-      byEnvironment[schedule.environmentId] = (byEnvironment[schedule.environmentId] || 0) + 1;
+      byCollection[schedule.collection_id] = (byCollection[schedule.collection_id] || 0) + 1;
+      const envId = schedule.environment_id || 'unknown';
+      byEnvironment[envId] = (byEnvironment[envId] || 0) + 1;
       byStatus[schedule.status] = (byStatus[schedule.status] || 0) + 1;
     });
 
@@ -576,27 +535,27 @@ class ScheduledRunService {
   /**
    * 调度任务
    */
-  private async scheduleJob(schedule: ScheduledRunModel): Promise<void> {
-    if (!cron.validate(schedule.cronExpression)) {
-      throw new Error(`Invalid cron expression: ${schedule.cronExpression}`);
+  private async scheduleJob(schedule: ScheduledRunRecord): Promise<void> {
+    if (!cron.validate(schedule.cron_expression)) {
+      throw new Error(`Invalid cron expression: ${schedule.cron_expression}`);
     }
 
     const config: ScheduledRunConfig = {
       id: schedule.id,
-      name: schedule.name,
-      description: schedule.description,
-      cronExpression: schedule.cronExpression,
-      timezone: schedule.timezone,
-      collectionId: schedule.collectionId,
-      environmentId: schedule.environmentId,
-      status: schedule.status,
-      lastRunAt: schedule.lastRunAt,
-      nextRunAt: schedule.nextRunAt,
-      createdAt: schedule.createdAt,
-      updatedAt: schedule.updatedAt,
+      name: schedule.name || '',
+      description: schedule.description || '',
+      cronExpression: schedule.cron_expression,
+      timezone: schedule.timezone || 'UTC',
+      collectionId: schedule.collection_id,
+      environmentId: schedule.environment_id || '',
+      status: schedule.status as ScheduledRunConfig['status'],
+      lastRunAt: schedule.last_run_at || undefined,
+      nextRunAt: schedule.next_run_at || undefined,
+      createdAt: schedule.created_at || new Date(),
+      updatedAt: schedule.updated_at || new Date(),
     };
 
-    const task = cron.schedule(schedule.cronExpression, async () => {
+    const task = cron.schedule(schedule.cron_expression, async () => {
       try {
         await this.executeSchedule(schedule.id);
       } catch (error) {
@@ -635,19 +594,21 @@ class ScheduledRunService {
    * 执行集合运行
    */
   private async executeCollectionRun(
-    schedule: ScheduledRunModel,
-    metadata?: Record<string, any>
+    schedule: ScheduledRunRecord,
+    metadata?: Record<string, unknown>
   ): Promise<ScheduledRunResult> {
     const startTime = new Date();
 
     try {
       // 获取环境配置
-      const environment = await this.environmentManager.getEnvironment(schedule.environmentId);
+      const environment = schedule.environment_id
+        ? await this.environmentManager.getEnvironment(schedule.environment_id)
+        : null;
 
       // 执行集合
       const result = await this.collectionManager.executeCollection(
-        schedule.collectionId,
-        schedule.environmentId,
+        schedule.collection_id,
+        schedule.environment_id || '',
         { environment }
       );
 
@@ -666,7 +627,7 @@ class ScheduledRunService {
         metadata: metadata || {},
       };
 
-      await this.models.ScheduledRunResult.create(runResult);
+      await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(runResult));
       return runResult;
     } catch (error) {
       const failedResult: ScheduledRunResult = {
@@ -686,7 +647,7 @@ class ScheduledRunService {
         metadata: { error: error instanceof Error ? error.message : String(error), ...metadata },
       };
 
-      await this.models.ScheduledRunResult.create(failedResult);
+      await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(failedResult));
       throw error;
     }
   }
@@ -694,7 +655,7 @@ class ScheduledRunService {
   /**
    * 计算执行趋势
    */
-  private calculateExecutionTrends(results: ScheduledRunResultModel[]): Array<{
+  private calculateExecutionTrends(results: ScheduledRunResultRecord[]): Array<{
     date: string;
     executions: number;
     successRate: number;
@@ -710,8 +671,8 @@ class ScheduledRunService {
     > = {};
 
     results.forEach(result => {
-      if (result.completedAt) {
-        const date = result.completedAt.toISOString().split('T')[0];
+      if (result.completed_at) {
+        const date = result.completed_at.toISOString().split('T')[0];
 
         if (!dailyStats[date]) {
           dailyStats[date] = { executions: 0, successes: 0, totalTime: 0 };
@@ -749,6 +710,23 @@ class ScheduledRunService {
    */
   private generateId(): string {
     return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private toScheduledRunResultRecord(result: ScheduledRunResult): ScheduledRunResultRecord {
+    return {
+      id: result.id,
+      scheduled_run_id: result.scheduledRunId,
+      status: result.status,
+      started_at: result.startedAt,
+      completed_at: result.completedAt,
+      duration: result.duration,
+      total_requests: result.totalRequests,
+      passed_requests: result.passedRequests,
+      failed_requests: result.failedRequests,
+      error_count: result.errorCount,
+      logs: result.logs,
+      metadata: result.metadata,
+    };
   }
 }
 

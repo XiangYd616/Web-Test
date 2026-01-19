@@ -10,7 +10,7 @@ interface TestResult {
   id: string;
   testId: string;
   userId: string;
-  results: any;
+  results: unknown;
   status: string;
   createdAt: Date;
   updatedAt: Date;
@@ -22,7 +22,7 @@ interface TestRecord {
   url: string;
   test_type: string;
   status: string;
-  results?: any;
+  results?: unknown;
   overall_score?: number;
   duration?: number;
   created_at: Date;
@@ -34,8 +34,55 @@ interface TestRecord {
 interface TestConfig {
   url: string;
   testType: string;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
+
+type TestHistoryResponse = {
+  tests: TestRecord[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+type TestDetailResponse = {
+  id: string;
+  userId: string;
+  url: string;
+  testType: string;
+  status: string;
+  results: unknown | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type TestStatusResponse = {
+  testId: string;
+  status: string;
+  progress: number;
+  startTime: Date;
+  endTime: Date;
+  results: unknown | null;
+};
+
+type TestListResponse = {
+  tests: Array<{
+    id: string;
+    url: string;
+    testType: string;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }>;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
 
 interface User {
   userId: string;
@@ -64,7 +111,12 @@ class TestService {
   /**
    * 获取测试历史
    */
-  async getTestHistory(userId: string, testType?: string, page = 1, limit = 20): Promise<any> {
+  async getTestHistory(
+    userId: string,
+    testType?: string,
+    page = 1,
+    limit = 20
+  ): Promise<TestHistoryResponse> {
     const offset = (page - 1) * limit;
     const result = await testRepository.getTestHistory(userId, testType, limit, offset);
     return {
@@ -81,7 +133,7 @@ class TestService {
   /**
    * 获取测试详情
    */
-  async getTestDetail(userId: string, testId: string): Promise<any> {
+  async getTestDetail(userId: string, testId: string): Promise<TestDetailResponse> {
     const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
     if (!test) {
       throw new Error('测试不存在');
@@ -118,7 +170,7 @@ class TestService {
   /**
    * 创建并启动测试
    */
-  async createAndStart(config: TestConfig, user: User): Promise<any> {
+  async createAndStart(config: TestConfig, user: User): Promise<Record<string, unknown>> {
     try {
       const result = await testBusinessService.createAndStartTest(config, user);
       return {
@@ -133,56 +185,56 @@ class TestService {
   /**
    * 创建网站测试
    */
-  async createWebsiteTest(config: TestConfig, user: User): Promise<any> {
+  async createWebsiteTest(config: TestConfig, user: User): Promise<Record<string, unknown>> {
     return this.createAndStart({ ...config, testType: 'website' }, user);
   }
 
   /**
    * 创建性能测试
    */
-  async createPerformanceTest(config: TestConfig, user: User): Promise<any> {
+  async createPerformanceTest(config: TestConfig, user: User): Promise<Record<string, unknown>> {
     return this.createAndStart({ ...config, testType: 'performance' }, user);
   }
 
   /**
    * 创建安全测试
    */
-  async createSecurityTest(config: TestConfig, user: User): Promise<any> {
+  async createSecurityTest(config: TestConfig, user: User): Promise<Record<string, unknown>> {
     return this.createAndStart({ ...config, testType: 'security' }, user);
   }
 
   /**
    * 创建SEO测试
    */
-  async createSEOTest(config: TestConfig, user: User): Promise<any> {
+  async createSEOTest(config: TestConfig, user: User): Promise<Record<string, unknown>> {
     return this.createAndStart({ ...config, testType: 'seo' }, user);
   }
 
   /**
    * 创建压力测试
    */
-  async createStressTest(config: TestConfig, user: User): Promise<any> {
+  async createStressTest(config: TestConfig, user: User): Promise<Record<string, unknown>> {
     return this.createAndStart({ ...config, testType: 'stress' }, user);
   }
 
   /**
    * 创建API测试
    */
-  async createAPITest(config: TestConfig, user: User): Promise<any> {
+  async createAPITest(config: TestConfig, user: User): Promise<Record<string, unknown>> {
     return this.createAndStart({ ...config, testType: 'api' }, user);
   }
 
   /**
    * 创建可访问性测试
    */
-  async createAccessibilityTest(config: TestConfig, user: User): Promise<any> {
+  async createAccessibilityTest(config: TestConfig, user: User): Promise<Record<string, unknown>> {
     return this.createAndStart({ ...config, testType: 'accessibility' }, user);
   }
 
   /**
    * 获取测试状态
    */
-  async getStatus(userId: string, testId: string): Promise<any> {
+  async getStatus(userId: string, testId: string): Promise<TestStatusResponse> {
     const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
 
     if (!test) {
@@ -249,7 +301,7 @@ class TestService {
   /**
    * 获取测试列表
    */
-  async getTestList(userId: string, page = 1, limit = 10): Promise<any> {
+  async getTestList(userId: string, page = 1, limit = 10): Promise<TestListResponse> {
     const offset = (page - 1) * limit;
 
     const tests = (await testRepository.findByUserId(userId, limit, offset)) as TestRecord[];
@@ -296,7 +348,7 @@ class TestService {
   /**
    * 运行测试
    */
-  private async runTest(testId: string, config: TestConfig): Promise<any> {
+  private async runTest(testId: string, config: TestConfig): Promise<unknown> {
     // 根据测试类型调用不同的测试引擎
     switch (config.testType) {
       case 'website':
@@ -330,9 +382,9 @@ class TestService {
   /**
    * 格式化测试结果
    */
-  private formatResults(results: any): TestResult {
+  private formatResults(results: TestRecord): TestResult {
     return {
-      id: results.id,
+      id: results.test_id,
       testId: results.test_id,
       userId: results.user_id,
       results: results.results,
