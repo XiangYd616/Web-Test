@@ -89,14 +89,14 @@ function ensureTransporter() {
 }
 
 function renderTemplate(template: string, data: TemplateData = {}) {
-  const safe = (value: unknown, fallback = '') =>
+  const safe = <T>(value: T | undefined | null, fallback: T): T =>
     value === undefined || value === null ? fallback : value;
-  const username = String(safe(data.username, '用户'));
+  const username = String(safe<string>(data.username, '用户'));
 
   switch (template) {
     case 'password-reset': {
-      const resetUrl = String(safe(data.resetUrl, '#'));
-      const expiryHours = Number(safe(data.expiryHours, 1));
+      const resetUrl = String(safe<string>(data.resetUrl, '#'));
+      const expiryHours = Number(safe<number>(data.expiryHours, 1));
       return `
         <p>${username}，您好：</p>
         <p>我们收到您的密码重置请求，请在 ${expiryHours} 小时内点击以下链接完成重置：</p>
@@ -105,7 +105,7 @@ function renderTemplate(template: string, data: TemplateData = {}) {
       `;
     }
     case 'email-verification': {
-      const verificationUrl = String(safe(data.verificationUrl, '#'));
+      const verificationUrl = String(safe<string>(data.verificationUrl, '#'));
       return `
         <p>${username}，您好：</p>
         <p>请点击以下链接完成邮箱验证：</p>
@@ -114,9 +114,9 @@ function renderTemplate(template: string, data: TemplateData = {}) {
       `;
     }
     case 'mfa-code': {
-      const code = String(safe(data.code, '******'));
-      const expiryMinutes = Number(safe(data.expiryMinutes, 5));
-      const appName = String(safe(data.appName, 'Test-Web Platform'));
+      const code = String(safe<string>(data.code, '******'));
+      const expiryMinutes = Number(safe<number>(data.expiryMinutes, 5));
+      const appName = String(safe<string>(data.appName, 'Test-Web Platform'));
       return `
         <p>您的 ${appName} 登录验证码为：</p>
         <h2 style="letter-spacing: 3px;">${code}</h2>
@@ -124,7 +124,7 @@ function renderTemplate(template: string, data: TemplateData = {}) {
       `;
     }
     case 'password-expiry-warning': {
-      const days = Number(safe(data.daysUntilExpiry, 7));
+      const days = Number(safe<number>(data.daysUntilExpiry, 7));
       return `
         <p>${username}，您好：</p>
         <p>您的账户密码将在 ${days} 天后过期，请尽快更新密码。</p>
@@ -143,7 +143,7 @@ function renderTemplate(template: string, data: TemplateData = {}) {
     default:
       return `
         <p>${username}，您好：</p>
-        <p>${String(safe(data.message, '您收到一条系统通知。'))}</p>
+        <p>${String(safe<string>(data.message, '您收到一条系统通知。'))}</p>
       `;
   }
 }

@@ -3,7 +3,7 @@
     "target": "ES2020",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "rootDir": ".",
+    "rootDir": "..",
     "outDir": "dist",
     "allowJs": true,
     "checkJs": false,
@@ -16,7 +16,8 @@
   },
   "include": [
     "**/*.js",
-    "**/*.ts"
+    "**/*.ts",
+    "../shared/**/*.ts"
   ],
   "exclude": [
     "node_modules",

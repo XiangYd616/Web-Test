@@ -247,7 +247,7 @@ class MetaTagAnalyzer {
     
     return {
       exists: charsetElement.length > 0 || httpEquivElement.length > 0,
-      charset: charset,
+      charset,
       isUTF8: charset && charset.toLowerCase().includes('utf-8'),
       isValid: this.validateCharset(charset)
     };
@@ -430,7 +430,7 @@ class MetaTagAnalyzer {
 
   validateImageUrl(url) {
     if (!url) return false;
-    return url.startsWith('http') && //.(jpg|jpeg|png|gif|webp)$/i.test(url);
+    return url.startsWith('http') && /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
   }
 
   getRequiredTwitterTags(cardType) {

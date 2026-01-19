@@ -26,21 +26,21 @@ class ApiSecurity {
 
     this.suspiciousPatterns = [
       // SQL注入模式
-      /(/b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)/b)/i,
-      /(/b(OR|AND)/s+/d+/s*=/s*/d+)/i,
-      /(/'|\"|;|--|/*|/|)/,
-      
+      /\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b/i,
+      /\b(OR|AND)\s+\d+\s*=\s*\d+/i,
+      /('|"|;|--|\/\*|\/)/,
+
       // XSS模式
-      /<script/b[^<]*(?:(?!<//script>)<[^<]*)*<//script>/gi,
+      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
       /javascript:/i,
-      /on/w+/s*=/i,
-      
+      /on\w+\s*=/i,
+
       // 路径遍历
-      //././//,
-      //././//,
-      
+      /\.\.\//,
+      /\.\//,
+
       // 命令注入
-      /(/||&|;|/$/(|/`)/
+      /(\|\||&|;|\$\(|`)/
     ];
 
     this.rateLimiters = this.createRateLimiters();

@@ -83,7 +83,7 @@ class LinkAnalyzer {
     });
     
     const duplicateLinks = Object.entries(linkFrequency)
-      .filter(([href, count]) => count > 1)
+      .filter(([_href, count]) => count > 1)
       .map(([href, count]) => ({ href, count }));
     
     return {
@@ -326,7 +326,7 @@ class LinkAnalyzer {
             rel,
             isPrev: rel === 'prev' || text.toLowerCase().includes('prev'),
             isNext: rel === 'next' || text.toLowerCase().includes('next'),
-            isNumeric: /^/d+$/.test(text)
+            isNumeric: /^\d+$/.test(text)
           });
         });
         

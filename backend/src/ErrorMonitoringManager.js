@@ -6,7 +6,7 @@
 const EventEmitter = require('events');
 const fs = require('fs').promises;
 const path = require('path');
-const { configManager } = require('./ConfigManager.js');
+const { configManager } = require('./ConfigManager');
 
 /**
  * 错误级别定义
@@ -327,7 +327,7 @@ class ErrorMonitoringManager extends EventEmitter {
    * 发送频率告警
    * @param {Object} alertInfo - 告警信息
    */
-  async sendFrequencyAlert(alertInfo) {
+  async sendFrequencyAlert(_alertInfo) {
     console.warn('⚠️ 错误频率过高告警:', {
       recentErrorCount: this.getRecentErrors(5).length,
       threshold: 10
@@ -457,6 +457,7 @@ class ErrorMonitoringManager extends EventEmitter {
     }
 
     if (cleanedCount > 0) {
+      console.log(`🧹 清理旧错误记录: ${cleanedCount} 条`);
     }
   }
 

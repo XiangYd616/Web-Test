@@ -197,19 +197,19 @@ const createScheduledTask = (sequelize: Sequelize): ScheduledTaskModel => {
   };
 
   // 实例方法：启用任务
-  ScheduledTask.prototype.enable = async function enable(this: ScheduledTaskInstance) {
+  (ScheduledTask as any).prototype.enable = async function enable(this: ScheduledTaskInstance) {
     this.enabled = true;
     return this.save();
   };
 
   // 实例方法：禁用任务
-  ScheduledTask.prototype.disable = async function disable(this: ScheduledTaskInstance) {
+  (ScheduledTask as any).prototype.disable = async function disable(this: ScheduledTaskInstance) {
     this.enabled = false;
     return this.save();
   };
 
   // 实例方法：更新执行统计
-  ScheduledTask.prototype.updateExecutionStats = async function updateExecutionStats(
+  (ScheduledTask as any).prototype.updateExecutionStats = async function updateExecutionStats(
     this: ScheduledTaskInstance,
     success = true
   ) {
@@ -222,7 +222,7 @@ const createScheduledTask = (sequelize: Sequelize): ScheduledTaskModel => {
   };
 
   // 实例方法：更新下次执行时间
-  ScheduledTask.prototype.updateNextExecution = async function updateNextExecution(
+  (ScheduledTask as any).prototype.updateNextExecution = async function updateNextExecution(
     this: ScheduledTaskInstance,
     nextTime: Date
   ) {
@@ -231,7 +231,9 @@ const createScheduledTask = (sequelize: Sequelize): ScheduledTaskModel => {
   };
 
   // 实例方法：获取成功率
-  ScheduledTask.prototype.getSuccessRate = function getSuccessRate(this: ScheduledTaskInstance) {
+  (ScheduledTask as any).prototype.getSuccessRate = function getSuccessRate(
+    this: ScheduledTaskInstance
+  ) {
     if (!this.executionCount) return 0;
     const successCount = (this.executionCount ?? 0) - (this.failureCount ?? 0);
     return ((successCount / (this.executionCount ?? 1)) * 100).toFixed(2);

@@ -6,21 +6,11 @@
 import crypto from 'crypto';
 import { EventEmitter } from 'events';
 import { configCenter } from '../config/ConfigCenter';
-import { ErrorSeverity } from './ErrorHandler';
+import { ErrorSeverity } from '../middleware/errorHandler';
 
 interface AlertChannelConfig {
   enabled?: boolean;
   [key: string]: unknown;
-}
-
-interface AlertPayload {
-  id: string;
-  title: string;
-  message: string;
-  severity: string;
-  type: string;
-  timestamp: string;
-  details: Record<string, unknown>;
 }
 
 interface Alert {
@@ -38,6 +28,7 @@ interface Alert {
     requestId?: string;
     userId?: string;
     context?: Record<string, unknown>;
+    test?: boolean;
   };
   sentAt?: string;
 }
@@ -119,7 +110,6 @@ export class AlertChannel {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
   async doSend(_alert: Alert): Promise<void> {
     throw new Error('doSend method must be implemented');
   }
@@ -169,7 +159,6 @@ export class EmailAlertChannel extends AlertChannel {
     this.recipients = (config.recipients as string[]) || [];
   }
 
-  // eslint-disable-next-line class-methods-use-this
   async doSend(_alert: Alert): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, 100));
   }
@@ -648,6 +637,7 @@ export class ErrorMonitoringSystem extends EventEmitter {
       id: 'test_alert',
       rule: 'manual',
       level: AlertLevels.LOW,
+      channels: [],
       title: '🧪 告警通道测试',
       message: '这是一个测试告警，用于验证告警通道配置是否正确。',
       severity: ErrorSeverity.LOW,

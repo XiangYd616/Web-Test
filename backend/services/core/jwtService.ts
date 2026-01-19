@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken';
 import { query } from '../../config/database';
 import { ErrorFactory } from '../../middleware/errorHandler';
 
@@ -61,12 +61,14 @@ class JwtService {
       iat: Math.floor(Date.now() / 1000),
     };
 
-    return jwt.sign(tokenPayload, this.accessTokenSecret, {
-      expiresIn: expiresIn || this.accessTokenExpiry,
+    const options: SignOptions = {
+      expiresIn: (expiresIn || this.accessTokenExpiry) as SignOptions['expiresIn'],
       issuer: this.issuer,
       audience: this.audience,
       algorithm: 'HS256',
-    });
+    };
+
+    return jwt.sign(tokenPayload, this.accessTokenSecret as jwt.Secret, options);
   }
 
   /**
@@ -83,12 +85,14 @@ class JwtService {
       iat: Math.floor(Date.now() / 1000),
     };
 
-    return jwt.sign(tokenPayload, this.refreshTokenSecret, {
-      expiresIn: expiresIn || this.refreshTokenExpiry,
+    const options: SignOptions = {
+      expiresIn: (expiresIn || this.refreshTokenExpiry) as SignOptions['expiresIn'],
       issuer: this.issuer,
       audience: this.audience,
       algorithm: 'HS256',
-    });
+    };
+
+    return jwt.sign(tokenPayload, this.refreshTokenSecret as jwt.Secret, options);
   }
 
   /**

@@ -187,7 +187,7 @@ const testConnection = async () => {
 /**
  * 获取连接池
  */
-const getPool = () => {
+export const getPool = () => {
   if (!pool) {
     throw new Error('数据库连接池未初始化');
   }
@@ -197,7 +197,7 @@ const getPool = () => {
 /**
  * 执行查询
  */
-const query = async (text: string, params: unknown[] = []) => {
+export const query = async (text: string, params: unknown[] = []) => {
   const dbPool = getPool();
   const start = Date.now();
 

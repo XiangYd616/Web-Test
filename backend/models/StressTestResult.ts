@@ -333,7 +333,7 @@ const createStressTestResult = (sequelize: Sequelize): StressTestResultModel => 
   /**
    * 更新测试状态
    */
-  StressTestResult.prototype.updateStatus = async function updateStatus(
+  (StressTestResult as any).prototype.updateStatus = async function updateStatus(
     this: StressTestResultInstance,
     status: string,
     errorMessage: string | null = null
@@ -354,7 +354,7 @@ const createStressTestResult = (sequelize: Sequelize): StressTestResultModel => 
   /**
    * 设置测试结果
    */
-  StressTestResult.prototype.setResults = async function setResults(
+  (StressTestResult as any).prototype.setResults = async function setResults(
     this: StressTestResultInstance,
     results: Record<string, unknown>
   ) {

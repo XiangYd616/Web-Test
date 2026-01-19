@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
-const GeoDBDownloader = require('../../utils/download-geodb.js');
+const GeoDBDownloader = require('../../utils/download-geodb');
 
 // 环境变量已在主应用中加载，无需重复加载
 

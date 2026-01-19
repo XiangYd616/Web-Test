@@ -225,10 +225,10 @@ class PerformanceAnalyzer {
       function getResourceType(entry) {
         const url = entry.name.toLowerCase();
         if (entry.initiatorType) return entry.initiatorType;
-        if (url.match(//.(js|mjs)$/)) return 'script';
-        if (url.match(//.(css)$/)) return 'stylesheet';
-        if (url.match(//.(png|jpg|jpeg|gif|webp|svg)$/)) return 'image';
-        if (url.match(//.(woff|woff2|ttf|otf)$/)) return 'font';
+        if (url.match(/\.(js|mjs)$/)) return 'script';
+        if (url.match(/\.(css)$/)) return 'stylesheet';
+        if (url.match(/\.(png|jpg|jpeg|gif|webp|svg)$/)) return 'image';
+        if (url.match(/\.(woff|woff2|ttf|otf)$/)) return 'font';
         return 'other';
       }
 

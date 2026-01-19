@@ -5,7 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const Logger = require('../../utils/logger.js');
+const Logger = require('../../utils/logger');
 
 class ApiDocumentationService {
   constructor() {
@@ -99,7 +99,7 @@ class ApiDocumentationService {
       this.documentation.paths = {};
 
       // 重新构建路径文档
-      for (const [routeKey, routeInfo] of this.apiRoutes) {
+      for (const [_routeKey, routeInfo] of this.apiRoutes) {
         const { method, path: routePath, ...pathInfo } = routeInfo;
 
         if (!this.documentation.paths[routePath]) {

@@ -2,24 +2,24 @@
  * test.types.ts - 测试相关类型定义
  */
 
-export type TestType = 
-  | 'performance' 
-  | 'security' 
-  | 'seo' 
-  | 'api' 
-  | 'stress'
-  | 'network'
-  | 'database'
-  | 'compatibility'
-  | 'ux'
-  | 'accessibility';
+export const TestTypeValues = [
+  'performance',
+  'security',
+  'seo',
+  'api',
+  'stress',
+  'network',
+  'database',
+  'compatibility',
+  'ux',
+  'accessibility',
+] as const;
 
-export type TestStatus = 
-  | 'pending' 
-  | 'running' 
-  | 'completed' 
-  | 'failed' 
-  | 'cancelled';
+export type TestType = (typeof TestTypeValues)[number];
+
+export const TestStatusValues = ['pending', 'running', 'completed', 'failed', 'cancelled'] as const;
+
+export type TestStatus = (typeof TestStatusValues)[number];
 
 export interface TestConfig {
   id?: string;
@@ -46,4 +46,3 @@ export interface TestResult {
   grade?: string;
   summary?: string;
 }
-

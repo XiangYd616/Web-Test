@@ -429,8 +429,8 @@ class ThemeService {
    */
   isValidColor(color) {
     const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-    const rgbRegex = /^rgb/(/s*/d+/s*,/s*/d+/s*,/s*/d+/s*/)$/;
-    const rgbaRegex = /^rgba/(/s*/d+/s*,/s*/d+/s*,/s*/d+/s*,/s*[/d.]+/s*/)$/;
+    const rgbRegex = /^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)$/;
+    const rgbaRegex = /^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\s*\)$/;
     
     return hexRegex.test(color) || rgbRegex.test(color) || rgbaRegex.test(color);
   }

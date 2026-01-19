@@ -1,10 +1,10 @@
-import { TestStatus, TestType } from '../../frontend/types/enums';
+import { TestStatus, TestStatusValues, TestType, TestTypeValues } from './test.types';
 
 /**
  * 统一类型定义 - 前后端共享
  * 版本: v2.0.0
  * 创建时间: 2025-08-24
- * 
+ *
  * 此文件解决前后端类型定义不一致问题：
  * 1. 统一字段命名规范（camelCase vs snake_case）
  * 2. 统一数据结构定义
@@ -23,21 +23,21 @@ export type JsonObject = Record<string, any>;
 export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
-  GUEST = 'guest'
+  GUEST = 'guest',
 }
 
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   SUSPENDED = 'suspended',
-  PENDING = 'pending'
+  PENDING = 'pending',
 }
 
 export enum UserPlan {
   FREE = 'free',
   BASIC = 'basic',
   PRO = 'pro',
-  ENTERPRISE = 'enterprise'
+  ENTERPRISE = 'enterprise',
 }
 
 // TestType 和 TestStatus 已迁移到统一类型系统
@@ -313,7 +313,7 @@ export const USER_FIELD_MAPPING = {
   // JSON字段
   preferences: 'preferences',
   metadata: 'metadata',
-  permissions: 'permissions'
+  permissions: 'permissions',
 } as const;
 
 export const TEST_FIELD_MAPPING = {
@@ -330,7 +330,7 @@ export const TEST_FIELD_MAPPING = {
   updatedAt: 'updated_at',
   config: 'config',
   result: 'result',
-  error: 'error'
+  error: 'error',
 } as const;
 
 // ==================== 类型转换工具 ====================
@@ -492,8 +492,8 @@ export class TypeValidator {
       session &&
       typeof session.id === 'string' &&
       typeof session.userId === 'string' &&
-      Object.values(TestType).includes(session.type) &&
-      Object.values(TestStatus).includes(session.status)
+      TestTypeValues.includes(session.type) &&
+      TestStatusValues.includes(session.status)
     );
   }
 

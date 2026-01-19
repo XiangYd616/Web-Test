@@ -1,0 +1,370 @@
+/**
+ * 测试控制器
+ * 职责: 处理测试相关的HTTP请求
+ */
+
+import type { NextFunction, Request, Response } from 'express';
+
+const testService = require('../services/testing/testService');
+const { successResponse, createdResponse, _errorResponse } = require('../utils/response');
+
+type AuthRequest = Request & { user: { id: string; role?: string } };
+
+type ApiResponse = Response & {
+  json: (data: unknown) => Response;
+  status: (code: number) => Response;
+};
+
+class TestController {
+  /**
+   * 创建并启动测试
+   * POST /api/test/create-and-start
+   */
+  async createAndStart(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createAndStart(config, user);
+      return createdResponse(res, result, '测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取测试状态
+   * GET /api/test/:testId/status
+   */
+  async getStatus(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const userId = req.user.id;
+
+      const status = await testService.getStatus(userId, testId);
+      return successResponse(res, status);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取测试结果
+   * GET /api/test/:testId/result
+   */
+  async getResult(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const userId = req.user.id;
+
+      const result = await testService.getTestResults(testId, userId);
+      return successResponse(res, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 停止测试
+   * POST /api/test/:testId/stop
+   */
+  async stopTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const userId = req.user.id;
+
+      await testService.stopTest(userId, testId);
+      return successResponse(res, { testId }, '测试已停止');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 删除测试
+   * DELETE /api/test/:testId
+   */
+  async deleteTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const userId = req.user.id;
+
+      await testService.deleteTest(testId, userId);
+      return successResponse(res, { testId }, '测试已删除');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * API根路径
+   * GET /api/test
+   */
+  async getApiInfo(req: Request, res: ApiResponse) {
+    return res.json({
+      success: true,
+      message: 'Test API',
+      version: '2.0.0',
+      endpoints: {
+        tests: [
+          'POST /api/test/create-and-start',
+          'POST /api/test/website',
+          'POST /api/test/performance',
+          'POST /api/test/security',
+          'POST /api/test/seo',
+          'POST /api/test/stress',
+          'POST /api/test/api',
+          'POST /api/test/accessibility',
+        ],
+        management: [
+          'GET /api/test/:testId/status',
+          'GET /api/test/:testId/result',
+          'POST /api/test/:testId/stop',
+          'DELETE /api/test/:testId',
+          'PUT /api/test/:testId',
+          'POST /api/test/:testId/rerun',
+        ],
+        batch: [
+          'POST /api/test/batch',
+          'GET /api/test/batch/:batchId',
+          'DELETE /api/test/batch/:batchId',
+        ],
+        templates: [
+          'GET /api/test/templates',
+          'POST /api/test/templates',
+          'PUT /api/test/templates/:templateId',
+          'DELETE /api/test/templates/:templateId',
+        ],
+      },
+    });
+  }
+
+  /**
+   * 创建网站测试
+   * POST /api/test/website
+   */
+  async createWebsiteTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createWebsiteTest(config, user);
+      return createdResponse(res, result, '网站测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 创建性能测试
+   * POST /api/test/performance
+   */
+  async createPerformanceTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createPerformanceTest(config, user);
+      return createdResponse(res, result, '性能测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 创建安全测试
+   * POST /api/test/security
+   */
+  async createSecurityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createSecurityTest(config, user);
+      return createdResponse(res, result, '安全测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 创建SEO测试
+   * POST /api/test/seo
+   */
+  async createSEOTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createSEOTest(config, user);
+      return createdResponse(res, result, 'SEO测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 创建压力测试
+   * POST /api/test/stress
+   */
+  async createStressTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createStressTest(config, user);
+      return createdResponse(res, result, '压力测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 创建API测试
+   * POST /api/test/api
+   */
+  async createAPITest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createAPITest(config, user);
+      return createdResponse(res, result, 'API测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 创建可访问性测试
+   * POST /api/test/accessibility
+   */
+  async createAccessibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const config = req.body as Record<string, unknown>;
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      const result = await testService.createAccessibilityTest(config, user);
+      return createdResponse(res, result, '可访问性测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 重新运行测试
+   * POST /api/test/:testId/rerun
+   */
+  async rerunTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const userId = req.user.id;
+
+      const result = await testService.rerunTest(testId, userId);
+      return successResponse(res, result, '测试重新运行成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 更新测试
+   * PUT /api/test/:testId
+   */
+  async updateTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const userId = req.user.id;
+      const updates = req.body as Record<string, unknown>;
+
+      const result = await testService.updateTest(testId, userId, updates);
+      return successResponse(res, result, '测试更新成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 批量创建测试
+   * POST /api/test/batch
+   */
+  async createBatchTests(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { tests } = req.body as { tests?: Record<string, unknown>[] };
+      const user = {
+        userId: req.user.id,
+        role: req.user.role || 'free',
+      };
+
+      if (!Array.isArray(tests) || tests.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: '请提供有效的测试列表',
+        });
+      }
+
+      const result = await testService.createBatchTests(tests, user);
+      return createdResponse(res, result, '批量测试创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取批量测试状态
+   * GET /api/test/batch/:batchId
+   */
+  async getBatchTestStatus(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { batchId } = req.params as { batchId: string };
+      const userId = req.user.id;
+
+      const result = await testService.getBatchTestStatus(batchId, userId);
+      return successResponse(res, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 删除批量测试
+   * DELETE /api/test/batch/:batchId
+   */
+  async deleteBatchTests(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { batchId } = req.params as { batchId: string };
+      const userId = req.user.id;
+
+      await testService.deleteBatchTests(batchId, userId);
+      return successResponse(res, { batchId }, '批量测试删除成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+module.exports = new TestController();

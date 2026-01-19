@@ -301,30 +301,3 @@ export type CreateTestExecutionData = Omit<
 export type UpdateTestExecutionData = Partial<
   Pick<TestExecution, 'status' | 'error_message' | 'metadata'>
 >;
-export type {
-  AccessibilityTestResult,
-  AuditLog,
-  CreateTestConfigData,
-  CreateTestExecutionData,
-  CreateUserData,
-  // 基础类型
-  DatabaseId,
-  DatabaseTimestamp,
-  JsonObject,
-  PaginatedQueryResult,
-  // 详细测试结果
-  PerformanceTestResult,
-  // 查询结果
-  QueryResult,
-  SecurityTestResult,
-  SeoTestResult,
-  StressTestResult,
-  SystemConfiguration,
-  TestConfiguration,
-  TestExecution,
-  TestReport,
-  TestResult,
-  User,
-  UserProfile,
-  UserSession,
-};

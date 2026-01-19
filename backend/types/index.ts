@@ -7,6 +7,15 @@
  * 使用统一类型定义，解决前后端不一致问题
  */
 
+import type {
+  RequestContext,
+  TestConfiguration,
+  TestExecution,
+  TestResult,
+  User,
+  UserSession,
+} from './models';
+
 // ==================== 导出共享类型 ====================
 
 // 重新导出共享类型
@@ -24,6 +33,8 @@ export {
   StandardErrorCode as ErrorCode,
   StandardErrorMessages as ErrorMessages,
   HttpStatusCode,
+  isStandardApiErrorResponse as isApiErrorResponse,
+  isStandardApiSuccessResponse as isApiSuccessResponse,
   StandardNoContentResponse as NoContentResponse,
   StandardPaginatedResponse as PaginatedResponse,
   PaginationMeta,
@@ -31,8 +42,6 @@ export {
   StandardStatusCodeMap as StatusCodeMap,
   Timestamp,
   UUID,
-  isStandardApiErrorResponse as isApiErrorResponse,
-  isStandardApiSuccessResponse as isApiSuccessResponse,
 } from '../../shared/types/standardApiResponse';
 
 // ==================== 导出数据模型类型 ====================
@@ -240,29 +249,3 @@ declare global {
     }
   }
 }
-
-// ==================== 默认导出 ====================
-
-export default {
-  // 共享类型
-  ErrorCode,
-  ApiResponse,
-  ApiSuccessResponse,
-  ApiErrorResponse,
-  PaginatedResponse,
-
-  // 数据模型
-  User,
-  TestConfiguration,
-  TestExecution,
-  TestResult,
-
-  // 服务接口
-  UserService,
-  TestConfigService,
-  TestExecutionService,
-  TestResultService,
-
-  // 响应构建工具
-  ApiResponseBuilder,
-};

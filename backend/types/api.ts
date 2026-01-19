@@ -2,7 +2,7 @@
  * 后端API请求和响应类型定义
  * 版本: v2.0.0
  * 创建时间: 2025-08-16
- * 
+ *
  * 此文件定义了后端API的请求和响应类型
  * 确保与前端API类型保持一致
  */
@@ -13,7 +13,7 @@ import {
   StandardApiErrorResponse,
   StandardApiResponse,
   StandardApiSuccessResponse,
-  StandardPaginatedResponse
+  StandardPaginatedResponse,
 } from '../../shared/types/standardApiResponse';
 
 import {
@@ -25,7 +25,7 @@ import {
   UpdateTestConfigData,
   UpdateUserData,
   User,
-  UserProfile
+  UserProfile,
 } from './models';
 
 // ==================== 基础API类型 ====================
@@ -94,7 +94,7 @@ export interface GetUserResponse {
   profile?: UserProfile;
 }
 
-export interface UpdateUserRequest extends UpdateUserData { }
+export interface UpdateUserRequest extends UpdateUserData {}
 
 export interface UpdateUserResponse {
   user: Omit<User, 'password_hash'>;
@@ -117,13 +117,13 @@ export interface GetUsersResponse {
 
 // ==================== 测试配置相关API类型 ====================
 
-export interface CreateTestConfigRequest extends CreateTestConfigData { }
+export interface CreateTestConfigRequest extends CreateTestConfigData {}
 
 export interface CreateTestConfigResponse {
   test_config: TestConfiguration;
 }
 
-export interface UpdateTestConfigRequest extends UpdateTestConfigData { }
+export interface UpdateTestConfigRequest extends UpdateTestConfigData {}
 
 export interface UpdateTestConfigResponse {
   test_config: TestConfiguration;
@@ -336,47 +336,3 @@ export interface BusinessLogicError {
   details?: Record<string, any>;
   suggestions?: string[];
 }
-
-// ==================== 导出所有API类型 ====================
-
-export type {
-  ApiErrorResponse,
-  // 基础API类型
-  ApiResponse,
-  ApiSuccessResponse, BusinessLogicError, CancelTestRequest, ChangePasswordRequest,
-  // 报告相关
-  CreateReportRequest,
-  CreateReportResponse,
-  // 测试配置相关
-  CreateTestConfigRequest,
-  CreateTestConfigResponse, DeleteFileRequest, GenerateReportRequest,
-  GenerateReportResponse, GetReportsQuery,
-  GetReportsResponse, GetSystemConfigResponse,
-  // 系统相关
-  GetSystemStatsResponse, GetTestConfigsQuery,
-  GetTestConfigsResponse, GetTestExecutionResponse, GetTestExecutionsQuery,
-  GetTestExecutionsResponse, GetTestResultResponse,
-  // 测试结果相关
-  GetTestResultsQuery,
-  GetTestResultsResponse,
-  // 用户相关
-  GetUserResponse, GetUsersQuery,
-  GetUsersResponse,
-  // 认证相关
-  LoginRequest,
-  LoginResponse, PaginatedResponse, RefreshTokenRequest,
-  RefreshTokenResponse, RegisterRequest,
-  RegisterResponse, ResetPasswordConfirmRequest, ResetPasswordRequest,
-  // 测试执行相关
-  StartTestRequest,
-  StartTestResponse, SystemNotificationMessage, TestProgressMessage, UpdateSystemConfigRequest, UpdateTestConfigRequest,
-  UpdateTestConfigResponse, UpdateUserRequest,
-  UpdateUserResponse,
-  // 文件上传相关
-  UploadFileResponse,
-  // 错误处理
-  ValidationErrorDetail,
-  // WebSocket相关
-  WebSocketMessage
-};
-
