@@ -12,7 +12,15 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "declaration": false,
-    "strict": false
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": false
   },
   "include": [
     "**/*.js",

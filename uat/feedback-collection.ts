@@ -1,22 +1,89 @@
 // 用户反馈收集系统
 
+interface UserAction {
+  type: string;
+  details?: Record<string, any>;
+  timestamp?: Date;
+}
+
+interface UserFeedback {
+  ratings: {
+    usability: number;
+    design: number;
+    performance: number;
+    functionality: number;
+    overall: number;
+  };
+  issues: string[];
+  comments?: string;
+  timestamp: Date;
+  completed?: boolean;
+}
+
+interface TestSession {
+  id: string;
+  userId: string;
+  testType: string;
+  startTime: Date;
+  actions: UserAction[];
+  feedback: UserFeedback | null;
+  completed: boolean;
+}
+
+interface FeedbackReport {
+  timestamp: string;
+  totalSessions: number;
+  completedSessions: number;
+  completionRate: number;
+  averageRatings: {
+    usability: string;
+    design: string;
+    performance: string;
+    functionality: string;
+    overall: string;
+  };
+  commonIssues: Array<{
+    issue: string;
+    count: number;
+    percentage: string;
+  }>;
+  userJourneyAnalysis: {
+    averageSessionDuration: number;
+    commonPaths: Record<string, number>;
+    dropOffPoints: Record<string, number>;
+    successfulCompletions: number;
+    completionRate: string;
+  };
+  recommendations: Array<{
+    type: 'rating' | 'issue';
+    priority: 'high' | 'medium' | 'low';
+    category?: string;
+    issue?: string;
+    message: string;
+  }>;
+}
+
+interface ExportData {
+  sessions: TestSession[];
+  feedbacks: TestSession[];
+  report: FeedbackReport;
+}
+
 class FeedbackCollector {
-  constructor() {
-    this.feedbacks = [];
-    this.testSessions = new Map();
-  }
+  private feedbacks: TestSession[] = [];
+  private testSessions: Map<string, TestSession> = new Map();
 
   // 开始用户测试会话
-  startTestSession(userId, testType) {
+  startTestSession(userId: string, testType: string): string {
     const sessionId = `session_${Date.now()}_${userId}`;
-    const session = {
+    const session: TestSession = {
       id: sessionId,
       userId,
       testType,
       startTime: new Date(),
       actions: [],
       feedback: null,
-      completed: false
+      completed: false,
     };
 
     this.testSessions.set(sessionId, session);
@@ -24,36 +91,36 @@ class FeedbackCollector {
   }
 
   // 记录用户操作
-  recordAction(sessionId, action) {
+  recordAction(sessionId: string, action: UserAction): void {
     const session = this.testSessions.get(sessionId);
     if (session) {
       session.actions.push({
         ...action,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
   }
 
   // 收集用户反馈
-  collectFeedback(sessionId, feedback) {
+  collectFeedback(sessionId: string, feedback: Omit<UserFeedback, 'timestamp'>): void {
     const session = this.testSessions.get(sessionId);
     if (session) {
       session.feedback = {
         ...feedback,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       session.completed = true;
 
       this.feedbacks.push({
         sessionId,
-        ...session
+        ...session,
       });
     }
   }
 
   // 生成反馈报告
-  generateFeedbackReport() {
-    const report = {
+  generateFeedbackReport(): FeedbackReport {
+    const report: FeedbackReport = {
       timestamp: new Date().toISOString(),
       totalSessions: this.testSessions.size,
       completedSessions: this.feedbacks.length,
@@ -61,19 +128,19 @@ class FeedbackCollector {
       averageRatings: this.calculateAverageRatings(),
       commonIssues: this.identifyCommonIssues(),
       userJourneyAnalysis: this.analyzeUserJourneys(),
-      recommendations: this.generateRecommendations()
+      recommendations: this.generateRecommendations(),
     };
 
     return report;
   }
 
-  calculateAverageRatings() {
+  private calculateAverageRatings(): FeedbackReport['averageRatings'] {
     const ratings = {
       usability: 0,
       design: 0,
       performance: 0,
       functionality: 0,
-      overall: 0
+      overall: 0,
     };
 
     if (this.feedbacks.length === 0) return ratings;
@@ -81,22 +148,24 @@ class FeedbackCollector {
     this.feedbacks.forEach(feedback => {
       if (feedback.feedback && feedback.feedback.ratings) {
         Object.keys(ratings).forEach(key => {
-          if (feedback.feedback.ratings[key]) {
-            ratings[key] += feedback.feedback.ratings[key];
+          const ratingKey = key as keyof typeof ratings;
+          if (feedback.feedback.ratings[ratingKey]) {
+            ratings[ratingKey] += feedback.feedback.ratings[ratingKey];
           }
         });
       }
     });
 
     Object.keys(ratings).forEach(key => {
-      ratings[key] = (ratings[key] / this.feedbacks.length).toFixed(2);
+      const ratingKey = key as keyof typeof ratings;
+      ratings[ratingKey] = (ratings[ratingKey] / this.feedbacks.length).toFixed(2);
     });
 
     return ratings;
   }
 
-  identifyCommonIssues() {
-    const issues = {};
+  private identifyCommonIssues(): FeedbackReport['commonIssues'] {
+    const issues: Record<string, number> = {};
 
     this.feedbacks.forEach(feedback => {
       if (feedback.feedback && feedback.feedback.issues) {
@@ -112,17 +181,21 @@ class FeedbackCollector {
 
     // 按频率排序
     return Object.entries(issues)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 10)
-      .map(([issue, count]) => ({ issue, count, percentage: (count / this.feedbacks.length * 100).toFixed(1) }));
+      .map(([issue, count]) => ({
+        issue,
+        count,
+        percentage: ((count / this.feedbacks.length) * 100).toFixed(1),
+      }));
   }
 
-  analyzeUserJourneys() {
+  private analyzeUserJourneys(): FeedbackReport['userJourneyAnalysis'] {
     const journeyAnalysis = {
       averageSessionDuration: 0,
-      commonPaths: {},
-      dropOffPoints: {},
-      successfulCompletions: 0
+      commonPaths: {} as Record<string, number>,
+      dropOffPoints: {} as Record<string, number>,
+      successfulCompletions: 0,
     };
 
     let totalDuration = 0;
@@ -130,7 +203,8 @@ class FeedbackCollector {
     this.feedbacks.forEach(feedback => {
       // 计算会话时长
       if (feedback.startTime && feedback.feedback.timestamp) {
-        const duration = new Date(feedback.feedback.timestamp) - new Date(feedback.startTime);
+        const duration =
+          new Date(feedback.feedback.timestamp).getTime() - new Date(feedback.startTime).getTime();
         totalDuration += duration;
       }
 
@@ -162,36 +236,41 @@ class FeedbackCollector {
     });
 
     journeyAnalysis.averageSessionDuration = totalDuration / this.feedbacks.length;
-    journeyAnalysis.completionRate = (journeyAnalysis.successfulCompletions / this.feedbacks.length * 100).toFixed(1);
+    journeyAnalysis.completionRate = (
+      (journeyAnalysis.successfulCompletions / this.feedbacks.length) *
+      100
+    ).toFixed(1);
 
     return journeyAnalysis;
   }
 
-  generateRecommendations() {
-    const recommendations = [];
+  private generateRecommendations(): FeedbackReport['recommendations'] {
+    const recommendations: FeedbackReport['recommendations'] = [];
     const averageRatings = this.calculateAverageRatings();
     const commonIssues = this.identifyCommonIssues();
 
     // 基于评分的建议
     Object.entries(averageRatings).forEach(([category, rating]) => {
-      if (rating < 3.5) {
+      const ratingValue = parseFloat(rating);
+      if (ratingValue < 3.5) {
         recommendations.push({
           type: 'rating',
-          priority: rating < 2.5 ? 'high' : 'medium',
+          priority: ratingValue < 2.5 ? 'high' : 'medium',
           category,
-          message: `${category}评分较低(${rating}/5)，需要重点改进`
+          message: `${category}评分较低(${rating}/5)，需要重点改进`,
         });
       }
     });
 
     // 基于常见问题的建议
     commonIssues.slice(0, 3).forEach(issue => {
-      if (issue.count > this.feedbacks.length * 0.3) { // 超过30%用户反馈的问题
+      if (issue.count > this.feedbacks.length * 0.3) {
+        // 超过30%用户反馈的问题
         recommendations.push({
           type: 'issue',
           priority: 'high',
           issue: issue.issue,
-          message: `${issue.percentage}%的用户反馈了"${issue.issue}"问题，需要优先解决`
+          message: `${issue.percentage}%的用户反馈了"${issue.issue}"问题，需要优先解决`,
         });
       }
     });
@@ -200,11 +279,11 @@ class FeedbackCollector {
   }
 
   // 导出反馈数据
-  exportFeedbackData(format = 'json') {
-    const data = {
+  exportFeedbackData(format: 'json' | 'csv' = 'json'): string | ExportData {
+    const data: ExportData = {
       sessions: Array.from(this.testSessions.values()),
       feedbacks: this.feedbacks,
-      report: this.generateFeedbackReport()
+      report: this.generateFeedbackReport(),
     };
 
     if (format === 'json') {
@@ -216,7 +295,7 @@ class FeedbackCollector {
     return data;
   }
 
-  convertToCSV(feedbacks) {
+  private convertToCSV(feedbacks: TestSession[]): string {
     if (feedbacks.length === 0) return '';
 
     const headers = [
@@ -232,12 +311,16 @@ class FeedbackCollector {
       'Overall Rating',
       'Completed',
       'Issues',
-      'Comments'
+      'Comments',
     ];
 
     const rows = feedbacks.map(feedback => {
-      const duration = feedback.feedback && feedback.feedback.timestamp ?
-        (new Date(feedback.feedback.timestamp) - new Date(feedback.startTime)) / (1000 * 60) : 0;
+      const duration =
+        feedback.feedback && feedback.feedback.timestamp
+          ? (new Date(feedback.feedback.timestamp).getTime() -
+              new Date(feedback.startTime).getTime()) /
+            (1000 * 60)
+          : 0;
 
       return [
         feedback.id,
@@ -252,7 +335,7 @@ class FeedbackCollector {
         feedback.feedback?.ratings?.overall || '',
         feedback.completed ? 'Yes' : 'No',
         feedback.feedback?.issues?.join('; ') || '',
-        feedback.feedback?.comments || ''
+        feedback.feedback?.comments || '',
       ];
     });
 
@@ -415,7 +498,6 @@ const feedbackFormTemplate = `
 </style>
 `;
 
-// 使用示例
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { FeedbackCollector, feedbackFormTemplate };
-}
+// 导出
+export { FeedbackCollector, feedbackFormTemplate };
+export type { ExportData, FeedbackReport, TestSession, UserAction, UserFeedback };

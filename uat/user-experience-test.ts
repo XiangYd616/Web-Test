@@ -1,9 +1,9 @@
-const { test, expect } = require('@playwright/test');
+import { expect, test, type Page } from '@playwright/test';
 
 // 用户体验测试套件
 test.describe('用户体验测试', () => {
   test.describe('页面加载性能', () => {
-    test('首页应在3秒内加载完成', async ({ page }) => {
+    test('首页应在3秒内加载完成', async ({ page }: { page: Page }) => {
       const startTime = Date.now();
 
       await page.goto('/');
@@ -17,7 +17,7 @@ test.describe('用户体验测试', () => {
       await expect(page.locator('nav')).toBeVisible();
     });
 
-    test('页面切换应流畅无卡顿', async ({ page }) => {
+    test('页面切换应流畅无卡顿', async ({ page }: { page: Page }) => {
       await page.goto('/');
 
       const pages = ['/api-test', '/security-test', '/stress-test'];
@@ -35,7 +35,7 @@ test.describe('用户体验测试', () => {
   });
 
   test.describe('视觉设计一致性', () => {
-    test('所有页面应使用一致的设计系统', async ({ page }) => {
+    test('所有页面应使用一致的设计系统', async ({ page }: { page: Page }) => {
       const pages = ['/', '/api-test', '/security-test', '/stress-test'];
 
       for (const pagePath of pages) {
@@ -43,45 +43,41 @@ test.describe('用户体验测试', () => {
 
         // 检查主题色彩
         const primaryButton = page.locator('button.btn-primary').first();
-        if (await primaryButton.count() > 0) {
-          const buttonColor = await primaryButton.evaluate(el =>
-            getComputedStyle(el).backgroundColor
+        if ((await primaryButton.count()) > 0) {
+          const buttonColor = await primaryButton.evaluate(
+            el => getComputedStyle(el).backgroundColor
           );
           expect(buttonColor).toBe('rgb(37, 99, 235)'); // blue-600
         }
 
         // 检查字体
-        const bodyFont = await page.evaluate(() =>
-          getComputedStyle(document.body).fontFamily
-        );
+        const bodyFont = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
         expect(bodyFont).toContain('Inter');
       }
     });
 
-    test('深色模式应正确切换', async ({ page }) => {
+    test('深色模式应正确切换', async ({ page }: { page: Page }) => {
       await page.goto('/');
 
       // 切换到深色模式
       await page.click('[data-testid="theme-toggle"]');
 
       // 检查深色模式样式
-      const bodyBg = await page.evaluate(() =>
-        getComputedStyle(document.body).backgroundColor
-      );
+      const bodyBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
       expect(bodyBg).toBe('rgb(17, 24, 39)'); // gray-900
 
       // 切换回浅色模式
       await page.click('[data-testid="theme-toggle"]');
 
-      const lightBodyBg = await page.evaluate(() =>
-        getComputedStyle(document.body).backgroundColor
+      const lightBodyBg = await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor
       );
       expect(lightBodyBg).toBe('rgb(255, 255, 255)'); // white
     });
   });
 
   test.describe('交互体验', () => {
-    test('表单验证应提供清晰的反馈', async ({ page }) => {
+    test('表单验证应提供清晰的反馈', async ({ page }: { page: Page }) => {
       await page.goto('/api-test');
 
       // 尝试提交空表单
@@ -99,7 +95,7 @@ test.describe('用户体验测试', () => {
       await expect(page.locator('[data-testid="validation-error"]')).not.toBeVisible();
     });
 
-    test('加载状态应有明确指示', async ({ page }) => {
+    test('加载状态应有明确指示', async ({ page }: { page: Page }) => {
       await page.goto('/api-test');
 
       // 配置测试
@@ -117,7 +113,9 @@ test.describe('用户体验测试', () => {
       await expect(page.locator('[data-testid="start-test-button"]')).toContainText('测试中');
 
       // 等待测试完成
-      await page.waitForSelector('[data-testid="test-completed"]', { timeout: process.env.REQUEST_TIMEOUT || 30000 });
+      await page.waitForSelector('[data-testid="test-completed"]', {
+        timeout: Number(process.env.REQUEST_TIMEOUT) || 30000,
+      });
 
       // 加载指示器应消失
       await expect(page.locator('[data-testid="loading-indicator"]')).not.toBeVisible();
@@ -125,7 +123,7 @@ test.describe('用户体验测试', () => {
   });
 
   test.describe('响应式设计', () => {
-    test('移动端布局应适配良好', async ({ page }) => {
+    test('移动端布局应适配良好', async ({ page }: { page: Page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
       await page.goto('/');
 
@@ -141,50 +139,48 @@ test.describe('用户体验测试', () => {
       await expect(page.locator('[data-testid="mobile-nav-menu"]')).toBeVisible();
     });
 
-    test('平板端布局应适配良好', async ({ page }) => {
+    test('平板端布局应适配良好', async ({ page }: { page: Page }) => {
       await page.setViewportSize({ width: 768, height: 1024 });
       await page.goto('/api-test');
 
       // 检查平板端布局
       const sidebar = page.locator('[data-testid="sidebar"]');
-      if (await sidebar.count() > 0) {
+      if ((await sidebar.count()) > 0) {
         await expect(sidebar).toBeVisible();
       }
 
       // 检查表单布局
       const formGrid = page.locator('[data-testid="form-grid"]');
-      if (await formGrid.count() > 0) {
-        const gridColumns = await formGrid.evaluate(el =>
-          getComputedStyle(el).gridTemplateColumns
-        );
+      if ((await formGrid.count()) > 0) {
+        const gridColumns = await formGrid.evaluate(el => getComputedStyle(el).gridTemplateColumns);
         expect(gridColumns).not.toBe('none');
       }
     });
   });
 
   test.describe('可访问性', () => {
-    test('键盘导航应完整可用', async ({ page }) => {
+    test('键盘导航应完整可用', async ({ page }: { page: Page }) => {
       await page.goto('/api-test');
 
       // 使用Tab键导航
       await page.keyboard.press('Tab');
-      let focusedElement = await page.evaluate(() => document.activeElement.tagName);
+      let focusedElement = await page.evaluate(() => document.activeElement?.tagName);
       expect(['INPUT', 'BUTTON', 'A']).toContain(focusedElement);
 
       // 继续导航
       for (let i = 0; i < 5; i++) {
         await page.keyboard.press('Tab');
-        focusedElement = await page.evaluate(() => document.activeElement.tagName);
+        focusedElement = await page.evaluate(() => document.activeElement?.tagName);
         expect(['INPUT', 'BUTTON', 'A', 'SELECT']).toContain(focusedElement);
       }
     });
 
-    test('屏幕阅读器支持应完整', async ({ page }) => {
+    test('屏幕阅读器支持应完整', async ({ page }: { page: Page }) => {
       await page.goto('/api-test');
 
       // 检查ARIA标签
       const form = page.locator('form').first();
-      if (await form.count() > 0) {
+      if ((await form.count()) > 0) {
         const ariaLabel = await form.getAttribute('aria-label');
         expect(ariaLabel).toBeTruthy();
       }
@@ -196,21 +192,24 @@ test.describe('用户体验测试', () => {
       for (let i = 0; i < inputCount; i++) {
         const input = inputs.nth(i);
         const id = await input.getAttribute('id');
-        const label = page.locator(`label[for="${id}"]`);
-        await expect(label).toBeVisible();
+        if (id) {
+          const label = page.locator(`label[for="${id}"]`);
+          await expect(label).toBeVisible();
+        }
       }
     });
 
-    test('颜色对比度应符合WCAG标准', async ({ page }) => {
+    test('颜色对比度应符合WCAG标准', async ({ page }: { page: Page }) => {
       await page.goto('/');
 
       // 检查主要文本的对比度
       const textColor = await page.evaluate(() => {
         const element = document.querySelector('h1');
+        if (!element) return { color: '', backgroundColor: '' };
         const styles = getComputedStyle(element);
         return {
           color: styles.color,
-          backgroundColor: styles.backgroundColor
+          backgroundColor: styles.backgroundColor,
         };
       });
 
@@ -221,7 +220,7 @@ test.describe('用户体验测试', () => {
   });
 
   test.describe('错误处理', () => {
-    test('网络错误应有友好提示', async ({ page }) => {
+    test('网络错误应有友好提示', async ({ page }: { page: Page }) => {
       await page.goto('/api-test');
 
       // 配置无效的API
@@ -233,16 +232,18 @@ test.describe('用户体验测试', () => {
       await page.click('[data-testid="start-test-button"]');
 
       // 等待错误消息
-      await page.waitForSelector('[data-testid="error-message"]', { timeout: process.env.REQUEST_TIMEOUT || 30000 });
+      await page.waitForSelector('[data-testid="error-message"]', {
+        timeout: Number(process.env.REQUEST_TIMEOUT) || 30000,
+      });
 
       // 检查错误消息是否友好
       const errorMessage = await page.locator('[data-testid="error-message"]').textContent();
       expect(errorMessage).not.toContain('undefined');
       expect(errorMessage).not.toContain('null');
-      expect(errorMessage.length).toBeGreaterThan(10);
+      expect(errorMessage!.length).toBeGreaterThan(10);
     });
 
-    test('页面崩溃应有恢复机制', async ({ page }) => {
+    test('页面崩溃应有恢复机制', async ({ page }: { page: Page }) => {
       await page.goto('/');
 
       // 模拟JavaScript错误
@@ -262,13 +263,13 @@ test.describe('用户体验测试', () => {
 
 // 性能基准测试
 test.describe('性能基准', () => {
-  test('Core Web Vitals应达标', async ({ page }) => {
+  test('Core Web Vitals应达标', async ({ page }: { page: Page }) => {
     await page.goto('/');
 
     // 测量LCP (Largest Contentful Paint)
     const lcp = await page.evaluate(() => {
-      return new Promise((resolve) => {
-        new PerformanceObserver((list) => {
+      return new Promise<number>(resolve => {
+        new PerformanceObserver(list => {
           const entries = list.getEntries();
           const lastEntry = entries[entries.length - 1];
           resolve(lastEntry.startTime);
@@ -283,12 +284,13 @@ test.describe('性能基准', () => {
 
     // 测量CLS (Cumulative Layout Shift)
     const cls = await page.evaluate(() => {
-      return new Promise((resolve) => {
+      return new Promise<number>(resolve => {
         let clsValue = 0;
-        new PerformanceObserver((list) => {
+        new PerformanceObserver(list => {
           for (const entry of list.getEntries()) {
-            if (!entry.hadRecentInput) {
-              clsValue += entry.value;
+            const layoutShiftEntry = entry as any;
+            if (!layoutShiftEntry.hadRecentInput) {
+              clsValue += layoutShiftEntry.value;
             }
           }
           resolve(clsValue);
@@ -301,3 +303,5 @@ test.describe('性能基准', () => {
     expect(cls).toBeLessThan(0.1); // CLS应小于0.1
   });
 });
+
+export {};
