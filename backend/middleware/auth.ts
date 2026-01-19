@@ -26,10 +26,27 @@ type AuthenticatedRequest = Request & {
 };
 
 type ApiResponse = Response & {
+  success: (
+    data?: unknown,
+    message?: string,
+    statusCode?: number,
+    meta?: Record<string, unknown>
+  ) => Response;
+  error: (
+    code: string,
+    message?: string,
+    details?: unknown,
+    statusCode?: number,
+    meta?: Record<string, unknown>
+  ) => Response;
   unauthorized: (message?: string) => Response;
   forbidden: (message?: string) => Response;
-  error: (code: string, message?: string) => Response;
-  serverError: (message?: string) => Response;
+  notFound: (message?: string) => Response;
+  conflict: (message?: string) => Response;
+  rateLimit: (message?: string) => Response;
+  internalError: (message?: string) => Response;
+  created: (data?: unknown, message?: string, meta?: Record<string, unknown>) => Response;
+  noContent: () => Response;
 };
 
 type UserRecord = {
@@ -75,7 +92,7 @@ const authMiddleware = async (req: AuthenticatedRequest, res: ApiResponse, next:
     }
 
     // 将用户信息添加到请求对象
-    req.user = {
+    (req as AuthenticatedRequest).user = {
       id: user.id,
       email: user.email,
       username: user.username,
@@ -86,7 +103,7 @@ const authMiddleware = async (req: AuthenticatedRequest, res: ApiResponse, next:
     };
 
     // 记录用户活动（异步，不阻塞请求）
-    recordUserActivity(req.user.id, req).catch(err => {
+    recordUserActivity((req as AuthenticatedRequest).user!.id, req).catch((err: unknown) => {
       console.error('记录用户活动失败:', err);
     });
 
@@ -127,7 +144,7 @@ const optionalAuth = async (req: AuthenticatedRequest, res: ApiResponse, next: N
 
     if (userResult.rows.length > 0 && userResult.rows[0].is_active) {
       const user = userResult.rows[0] as UserRecord;
-      req.user = {
+      (req as AuthenticatedRequest).user = {
         id: user.id,
         email: user.email,
         username: user.username,
@@ -135,13 +152,13 @@ const optionalAuth = async (req: AuthenticatedRequest, res: ApiResponse, next: N
         emailVerified: user.email_verified,
       };
     } else {
-      req.user = null;
+      (req as AuthenticatedRequest).user = null;
     }
 
     next();
   } catch {
     // 可选认证失败时不返回错误，只是设置用户为null
-    req.user = null;
+    (req as AuthenticatedRequest).user = null;
     next();
   }
 };

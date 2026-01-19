@@ -101,7 +101,7 @@ async function checkDNSResolution(
       resolvable: true,
       addresses,
     };
-  } catch (error) {
+  } catch {
     try {
       // 如果A记录失败，尝试AAAA记录
       const addresses = await dns.resolve6(hostname);
@@ -109,10 +109,11 @@ async function checkDNSResolution(
         resolvable: true,
         addresses,
       };
-    } catch (error2) {
+    } catch {
       return {
         resolvable: false,
-        error: (error as Error).message,
+        error: '无法解析DNS',
+        addresses: [],
       };
     }
   }
@@ -198,7 +199,7 @@ async function validateURL(
     }
 
     // 端口检查
-    if (parsedUrl.port && (parsedUrl.port < 1 || parsedUrl.port > 65535)) {
+    if (parsedUrl.port && (Number(parsedUrl.port) < 1 || Number(parsedUrl.port) > 65535)) {
       result.errors.push('端口号必须在1-65535范围内');
     }
 

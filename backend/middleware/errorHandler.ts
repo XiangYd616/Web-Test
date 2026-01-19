@@ -217,6 +217,34 @@ class ErrorFactory {
   static serviceUnavailable(message: string, details: unknown = null) {
     return new ApiError(message, 503, ErrorCode.SERVICE_UNAVAILABLE, details);
   }
+
+  static token(type: string, message?: string, details: unknown = null) {
+    const code = type === 'expired' ? ErrorCode.TOKEN_EXPIRED : ErrorCode.INVALID_TOKEN;
+    const statusCode = type === 'expired' ? 401 : 401;
+    const defaultMessage = type === 'expired' ? '令牌已过期' : '令牌无效';
+    return new ApiError(message || defaultMessage, statusCode, code, details);
+  }
+
+  static database(operation: string, message: string, details: unknown = null) {
+    return new ApiError(message, 500, ErrorCode.DATABASE_ERROR, details);
+  }
+
+  static fromError(error: Error) {
+    if (error instanceof ApiError) {
+      return error;
+    }
+
+    // 根据错误类型创建相应的 ApiError
+    if ((error as any).code === '23505') {
+      return new ApiError('数据冲突', 409, ErrorCode.CONFLICT, error.message);
+    }
+
+    if ((error as any).code === '23503') {
+      return new ApiError('外键约束失败', 400, ErrorCode.INVALID_INPUT, error.message);
+    }
+
+    return new ApiError(error.message || '未知错误', 500, ErrorCode.INTERNAL_ERROR, error.stack);
+  }
 }
 
 /**

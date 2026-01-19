@@ -17,10 +17,16 @@ interface CacheMiddlewareOptions {
   excludeStatus?: number[];
 }
 
-interface AuthenticatedRequest extends Request {
+interface CacheRequest {
   user?: {
-    id: string;
+    id: number | string;
+    role?: string;
+    username?: string;
+    email?: string;
   };
+  originalUrl?: string;
+  url?: string;
+  method: string;
 }
 
 // 简单的内存缓存存储
@@ -41,17 +47,22 @@ function createCacheMiddleware(options: CacheMiddlewareOptions = {}) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       // 跳过不缓存的方法
-      if (config.excludeMethods!.includes(req.method)) {
+      if (config.excludeMethods?.includes(req.method)) {
         return next();
       }
 
       // 生成缓存键
-      const cacheKey = generateCacheKey(req);
+      const cacheKey = generateCacheKey({
+        user: req.user,
+        originalUrl: req.originalUrl,
+        url: req.url,
+        method: req.method,
+      });
 
       // 尝试从缓存获取
       const cached = cache.get(cacheKey);
 
-      if (cached && Date.now() - cached.timestamp < config.ttl! * 1000) {
+      if (cached && Date.now() - cached.timestamp < (config.ttl ?? 0) * 1000) {
         res.set('X-Cache', 'HIT');
         return res.json(cached.data);
       }
@@ -66,7 +77,7 @@ function createCacheMiddleware(options: CacheMiddlewareOptions = {}) {
         if (
           res.statusCode >= 200 &&
           res.statusCode < 300 &&
-          !config.excludeStatus!.includes(res.statusCode)
+          !config.excludeStatus?.includes(res.statusCode)
         ) {
           cache.set(cacheKey, {
             data,
@@ -104,7 +115,7 @@ function cleanExpiredCache(ttl?: number) {
 /**
  * 生成缓存键
  */
-function generateCacheKey(req: AuthenticatedRequest) {
+function generateCacheKey(req: CacheRequest) {
   const url = req.originalUrl || req.url;
   const method = req.method;
   const userId = req.user?.id || 'anonymous';

@@ -272,12 +272,13 @@ function validateTestConfig(testType: TestType, config: unknown): ValidationResu
   const schema = testTypeSchemas[testType];
 
   if (!schema) {
+    const validationError = new Error(`Invalid test type: ${testType}`) as Joi.ValidationError;
     return {
       error: {
         success: false,
         message: `不支持的测试类型: ${testType}`,
         details: {
-          error: new Error(`Invalid test type: ${testType}`),
+          error: validationError,
           value: config,
         },
       },
@@ -295,7 +296,7 @@ function validateTestConfig(testType: TestType, config: unknown): ValidationResu
       error: {
         success: false,
         message: '测试配置验证失败',
-        details: error,
+        details: error as unknown as Joi.ValidationResult,
       },
     };
   }

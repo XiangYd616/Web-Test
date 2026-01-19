@@ -21,9 +21,14 @@ class TestDataTransformer {
       test_name: dbRecord.test_name || dbRecord.testName || '未命名测试',
       test_type: dbRecord.test_type || dbRecord.testType,
       url: dbRecord.url || dbRecord.target_url,
-      status: this.normalizeStatus(dbRecord.status),
+      status: this.normalizeStatus(dbRecord.status as string),
       overall_score: dbRecord.overall_score || dbRecord.score,
-      duration: dbRecord.duration || this.calculateDuration(dbRecord.start_time, dbRecord.end_time),
+      duration:
+        dbRecord.duration ||
+        this.calculateDuration(
+          dbRecord.start_time as string | Date,
+          dbRecord.end_time as string | Date
+        ),
       created_at: dbRecord.created_at || dbRecord.createdAt,
       updated_at: dbRecord.updated_at || dbRecord.updatedAt,
       config: this.parseJSON(dbRecord.config),
@@ -61,13 +66,14 @@ class TestDataTransformer {
         score: dbRecord.overall_score || dbRecord.score || 0,
         totalChecks: dbRecord.total_issues || this.calculateTotalChecks(results),
         passed: this.calculatePassedChecks(results),
-        failed: (dbRecord.critical_issues || 0) + (dbRecord.major_issues || 0),
+        failed:
+          ((dbRecord.critical_issues as number) || 0) + ((dbRecord.major_issues as number) || 0),
         warnings: dbRecord.minor_issues || 0,
         grade: dbRecord.grade,
       },
       checks: this.extractChecks(results),
       config,
-      status: this.normalizeStatus(dbRecord.status),
+      status: this.normalizeStatus(dbRecord.status as string),
       metadata: {
         environment: dbRecord.environment,
         tags: this.parseJSON(dbRecord.tags) || [],
@@ -163,9 +169,9 @@ class TestDataTransformer {
    * 计算总问题数
    */
   static calculateTotalIssues(dbRecord: DbRecord) {
-    const critical = dbRecord.critical_issues || 0;
-    const major = dbRecord.major_issues || 0;
-    const minor = dbRecord.minor_issues || 0;
+    const critical = (dbRecord.critical_issues as number) || 0;
+    const major = (dbRecord.major_issues as number) || 0;
+    const minor = (dbRecord.minor_issues as number) || 0;
     return critical + major + minor;
   }
 
@@ -265,17 +271,17 @@ class TestDataTransformer {
 
     if (params.testType) {
       conditions.push('test_type = ?');
-      values.push(params.testType);
+      values.push(params.testType as string | number);
     }
 
     if (params.status && params.status !== 'all') {
       conditions.push('status = ?');
-      values.push(params.status);
+      values.push(params.status as string | number);
     }
 
     if (params.userId) {
       conditions.push('user_id = ?');
-      values.push(params.userId);
+      values.push(params.userId as string | number);
     }
 
     if (params.search) {
@@ -285,12 +291,12 @@ class TestDataTransformer {
 
     if (params.startDate) {
       conditions.push('created_at >= ?');
-      values.push(params.startDate);
+      values.push(params.startDate as string | number);
     }
 
     if (params.endDate) {
       conditions.push('created_at <= ?');
-      values.push(params.endDate);
+      values.push(params.endDate as string | number);
     }
 
     return {
