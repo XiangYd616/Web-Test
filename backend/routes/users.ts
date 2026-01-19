@@ -3,10 +3,11 @@
  * 职责: 定义用户相关的路由
  */
 
-const express = require('express');
+import express from 'express';
+import userController from '../controllers/userController';
+import { adminAuth, authMiddleware } from '../middleware/auth';
+
 const router = express.Router();
-const userController = require('../controllers/userController');
-const { authMiddleware, adminAuth } = require('../middleware/auth');
 
 // 用户个人信息
 router.get('/profile', authMiddleware, userController.getProfile);
@@ -23,4 +24,4 @@ router.get('/', adminAuth, userController.getUsers);
 router.delete('/:userId', adminAuth, userController.deleteUser);
 router.put('/:userId/role', adminAuth, userController.updateRole);
 
-module.exports = router;
+export default router;

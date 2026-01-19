@@ -3,10 +3,11 @@
  * 职责: 定义分析相关的路由
  */
 
-const express = require('express');
+import express from 'express';
+import analyticsController from '../controllers/analyticsController';
+import { authMiddleware } from '../middleware/auth';
+
 const router = express.Router();
-const analyticsController = require('../controllers/analyticsController');
-const { authMiddleware } = require('../middleware/auth');
 
 // 获取分析摘要
 router.get('/summary', authMiddleware, analyticsController.getSummary);
@@ -24,4 +25,4 @@ router.post('/export', authMiddleware, analyticsController.exportReport);
 // 获取实时统计
 router.get('/realtime', authMiddleware, analyticsController.getRealTimeStats);
 
-module.exports = router;
+export default router;

@@ -1,9 +1,9 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import runController from '../controllers/runController';
+import { authMiddleware } from '../middleware/auth';
+import { asyncHandler } from '../middleware/errorHandler';
 
-const { authMiddleware } = require('../middleware/auth');
-const { asyncHandler } = require('../middleware/errorHandler');
-const runController = require('../controllers/runController');
+const router = express.Router();
 
 router.get('/', authMiddleware, asyncHandler(runController.listRuns));
 router.post('/', authMiddleware, asyncHandler(runController.createRun));
@@ -14,4 +14,4 @@ router.get('/:runId/report', authMiddleware, asyncHandler(runController.getRunRe
 router.post('/:runId/cancel', authMiddleware, asyncHandler(runController.cancelRun));
 router.post('/:runId/rerun', authMiddleware, asyncHandler(runController.rerun));
 
-module.exports = router;
+export default router;
