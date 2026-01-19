@@ -162,6 +162,14 @@ class TestController {
   }
 
   /**
+   * 运行网站测试（兼容旧路由）
+   * POST /api/test/website
+   */
+  async runWebsiteTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    return this.createWebsiteTest(req, res, next);
+  }
+
+  /**
    * 创建性能测试
    * POST /api/test/performance
    */
@@ -178,6 +186,14 @@ class TestController {
     } catch (error) {
       next(error);
     }
+  }
+
+  /**
+   * 运行性能测试（兼容旧路由）
+   * POST /api/test/performance
+   */
+  async runPerformanceTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    return this.createPerformanceTest(req, res, next);
   }
 
   /**
@@ -200,6 +216,14 @@ class TestController {
   }
 
   /**
+   * 运行安全测试（兼容旧路由）
+   * POST /api/test/security
+   */
+  async runSecurityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    return this.createSecurityTest(req, res, next);
+  }
+
+  /**
    * 创建SEO测试
    * POST /api/test/seo
    */
@@ -216,6 +240,14 @@ class TestController {
     } catch (error) {
       next(error);
     }
+  }
+
+  /**
+   * 运行SEO测试（兼容旧路由）
+   * POST /api/test/seo
+   */
+  async runSEOTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    return this.createSEOTest(req, res, next);
   }
 
   /**
@@ -238,6 +270,14 @@ class TestController {
   }
 
   /**
+   * 运行压力测试（兼容旧路由）
+   * POST /api/test/stress
+   */
+  async runStressTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    return this.createStressTest(req, res, next);
+  }
+
+  /**
    * 创建API测试
    * POST /api/test/api
    */
@@ -257,6 +297,14 @@ class TestController {
   }
 
   /**
+   * 运行API测试（兼容旧路由）
+   * POST /api/test/api
+   */
+  async runAPITest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    return this.createAPITest(req, res, next);
+  }
+
+  /**
    * 创建可访问性测试
    * POST /api/test/accessibility
    */
@@ -273,6 +321,14 @@ class TestController {
     } catch (error) {
       next(error);
     }
+  }
+
+  /**
+   * 运行可访问性测试（兼容旧路由）
+   * POST /api/test/accessibility
+   */
+  async runAccessibilityTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    return this.createAccessibilityTest(req, res, next);
   }
 
   /**
@@ -361,6 +417,112 @@ class TestController {
 
       await testService.deleteBatchTests(batchId, userId);
       return successResponse(res, { batchId }, '批量测试删除成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取测试列表
+   * GET /api/test
+   */
+  async getTestList(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { page = '1', limit = '10' } = req.query as Record<string, string>;
+      const result = await testService.getTestList(
+        req.user.id,
+        parseInt(page, 10) || 1,
+        parseInt(limit, 10) || 10
+      );
+      return successResponse(res, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取测试历史
+   * GET /api/test/history
+   */
+  async getTestHistory(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testType, page = '1', limit = '20' } = req.query as Record<string, string>;
+      const result = await testService.getTestHistory(
+        req.user.id,
+        testType,
+        parseInt(page, 10) || 1,
+        parseInt(limit, 10) || 20
+      );
+      return successResponse(res, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取测试进度
+   * GET /api/test/:testId/progress
+   */
+  async getProgress(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const status = await testService.getStatus(req.user.id, testId);
+      return successResponse(res, { testId, progress: status.progress, status: status.status });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 导出测试结果
+   * GET /api/test/:testId/export
+   */
+  async exportTestResult(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const { format = 'json' } = req.query as { format?: string };
+      const result = await testService.getTestResults(testId, req.user.id);
+
+      if (format === 'csv') {
+        const csvRows = [['field', 'value']];
+        Object.entries(result.results || {}).forEach(([key, value]) => {
+          csvRows.push([key, JSON.stringify(value)]);
+        });
+        const csvContent = csvRows.map(row => row.map(item => `"${item}"`).join(',')).join('\n');
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="test-${testId}.csv"`);
+        return res.send('\ufeff' + csvContent);
+      }
+
+      return successResponse(res, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 取消测试
+   * POST /api/test/:testId/cancel
+   */
+  async cancelTest(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      await testService.cancelTest(req.user.id, testId);
+      return successResponse(res, { testId }, '测试已取消');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取历史记录详情
+   * GET /api/test/history/:testId
+   */
+  async getHistoryDetail(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const result = await testService.getTestDetail(req.user.id, testId);
+      return successResponse(res, result);
     } catch (error) {
       next(error);
     }

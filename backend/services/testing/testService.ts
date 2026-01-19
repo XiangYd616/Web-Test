@@ -16,6 +16,21 @@ interface TestResult {
   updatedAt: Date;
 }
 
+interface TestRecord {
+  test_id: string;
+  user_id: string;
+  url: string;
+  test_type: string;
+  status: string;
+  results?: any;
+  overall_score?: number;
+  duration?: number;
+  created_at: Date;
+  updated_at: Date;
+  progress?: number;
+  options?: Record<string, unknown> | string | null;
+}
+
 interface TestConfig {
   url: string;
   testType: string;
@@ -47,34 +62,68 @@ class TestService {
   }
 
   /**
+   * 获取测试历史
+   */
+  async getTestHistory(userId: string, testType?: string, page = 1, limit = 20): Promise<any> {
+    const offset = (page - 1) * limit;
+    const result = await testRepository.getTestHistory(userId, testType, limit, offset);
+    return {
+      tests: result.tests,
+      pagination: {
+        page,
+        limit,
+        total: result.total,
+        totalPages: Math.ceil(result.total / limit),
+      },
+    };
+  }
+
+  /**
+   * 获取测试详情
+   */
+  async getTestDetail(userId: string, testId: string): Promise<any> {
+    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
+    if (!test) {
+      throw new Error('测试不存在');
+    }
+    return {
+      id: test.test_id,
+      userId: test.user_id,
+      url: test.url,
+      testType: test.test_type,
+      status: test.status,
+      results: test.results || null,
+      createdAt: test.created_at,
+      updatedAt: test.updated_at,
+    };
+  }
+
+  /**
+   * 取消测试
+   */
+  async cancelTest(userId: string, testId: string): Promise<void> {
+    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
+    if (!test) {
+      throw new Error('测试不存在');
+    }
+
+    if (test.status === 'completed') {
+      throw new Error('测试已完成，无法取消');
+    }
+
+    await this.stopTestExecution(testId);
+    await testRepository.updateStatus(testId, 'cancelled');
+  }
+
+  /**
    * 创建并启动测试
    */
   async createAndStart(config: TestConfig, user: User): Promise<any> {
     try {
-      // 验证配置
-      this.validateTestConfig(config);
-
-      // 创建测试记录
-      const test = await testRepository.create({
-        userId: user.userId,
-        url: config.url,
-        testType: config.testType,
-        options: config.options || {},
-        status: 'pending',
-        createdAt: new Date(),
-      });
-
-      // 启动测试
-      const testResult = await this.runTest(test.id, config);
-
-      // 更新测试状态
-      await testRepository.updateStatus(test.id, 'running');
-
+      const result = await testBusinessService.createAndStartTest(config, user);
       return {
-        testId: test.id,
-        status: 'running',
-        config: config,
-        startTime: new Date(),
+        ...result,
+        config,
       };
     } catch (error) {
       throw new Error(`创建测试失败: ${error instanceof Error ? error.message : String(error)}`);
@@ -82,26 +131,75 @@ class TestService {
   }
 
   /**
+   * 创建网站测试
+   */
+  async createWebsiteTest(config: TestConfig, user: User): Promise<any> {
+    return this.createAndStart({ ...config, testType: 'website' }, user);
+  }
+
+  /**
+   * 创建性能测试
+   */
+  async createPerformanceTest(config: TestConfig, user: User): Promise<any> {
+    return this.createAndStart({ ...config, testType: 'performance' }, user);
+  }
+
+  /**
+   * 创建安全测试
+   */
+  async createSecurityTest(config: TestConfig, user: User): Promise<any> {
+    return this.createAndStart({ ...config, testType: 'security' }, user);
+  }
+
+  /**
+   * 创建SEO测试
+   */
+  async createSEOTest(config: TestConfig, user: User): Promise<any> {
+    return this.createAndStart({ ...config, testType: 'seo' }, user);
+  }
+
+  /**
+   * 创建压力测试
+   */
+  async createStressTest(config: TestConfig, user: User): Promise<any> {
+    return this.createAndStart({ ...config, testType: 'stress' }, user);
+  }
+
+  /**
+   * 创建API测试
+   */
+  async createAPITest(config: TestConfig, user: User): Promise<any> {
+    return this.createAndStart({ ...config, testType: 'api' }, user);
+  }
+
+  /**
+   * 创建可访问性测试
+   */
+  async createAccessibilityTest(config: TestConfig, user: User): Promise<any> {
+    return this.createAndStart({ ...config, testType: 'accessibility' }, user);
+  }
+
+  /**
    * 获取测试状态
    */
   async getStatus(userId: string, testId: string): Promise<any> {
-    const test = await testRepository.findById(testId);
+    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
 
     if (!test) {
       throw new Error('测试不存在');
     }
 
-    if (test.userId !== userId) {
+    if (test.user_id !== userId) {
       throw new Error('无权访问此测试');
     }
 
     return {
-      testId: test.id,
+      testId: test.test_id,
       status: test.status,
-      progress: test.progress || 0,
-      startTime: test.createdAt,
-      endTime: test.updatedAt,
-      results: test.results || null,
+      progress: typeof test.progress === 'number' ? test.progress : 0,
+      startTime: test.created_at,
+      endTime: test.updated_at,
+      results: test.results ?? null,
     };
   }
 
@@ -109,13 +207,13 @@ class TestService {
    * 停止测试
    */
   async stopTest(userId: string, testId: string): Promise<void> {
-    const test = await testRepository.findById(testId);
+    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
 
     if (!test) {
       throw new Error('测试不存在');
     }
 
-    if (test.userId !== userId) {
+    if (test.user_id !== userId) {
       throw new Error('无权访问此测试');
     }
 
@@ -134,13 +232,13 @@ class TestService {
    * 删除测试
    */
   async deleteTest(userId: string, testId: string): Promise<void> {
-    const test = await testRepository.findById(testId);
+    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
 
     if (!test) {
       throw new Error('测试不存在');
     }
 
-    if (test.userId !== userId) {
+    if (test.user_id !== userId) {
       throw new Error('无权访问此测试');
     }
 
@@ -154,17 +252,17 @@ class TestService {
   async getTestList(userId: string, page = 1, limit = 10): Promise<any> {
     const offset = (page - 1) * limit;
 
-    const tests = await testRepository.findByUserId(userId, limit, offset);
+    const tests = (await testRepository.findByUserId(userId, limit, offset)) as TestRecord[];
     const total = await testRepository.countByUserId(userId);
 
     return {
       tests: tests.map(test => ({
-        id: test.id,
+        id: test.test_id,
         url: test.url,
-        testType: test.testType,
+        testType: test.test_type,
         status: test.status,
-        createdAt: test.createdAt,
-        updatedAt: test.updatedAt,
+        createdAt: test.created_at,
+        updatedAt: test.updated_at,
       })),
       pagination: {
         page,
@@ -201,6 +299,8 @@ class TestService {
   private async runTest(testId: string, config: TestConfig): Promise<any> {
     // 根据测试类型调用不同的测试引擎
     switch (config.testType) {
+      case 'website':
+        return await testBusinessService.runWebsiteTest(testId, config);
       case 'seo':
         return await testBusinessService.runSEOTest(testId, config);
       case 'performance':
@@ -209,6 +309,10 @@ class TestService {
         return await testBusinessService.runAccessibilityTest(testId, config);
       case 'security':
         return await testBusinessService.runSecurityTest(testId, config);
+      case 'api':
+        return await testBusinessService.runAPITest(testId, config);
+      case 'stress':
+        return await testBusinessService.runStressTest(testId, config);
       default:
         throw new Error(`不支持的测试类型: ${config.testType}`);
     }

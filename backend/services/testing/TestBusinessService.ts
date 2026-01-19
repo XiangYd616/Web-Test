@@ -129,7 +129,15 @@ class TestBusinessService {
     if (!config.testType) {
       errors.push('测试类型不能为空');
     } else {
-      const validTypes = ['seo', 'performance', 'accessibility', 'security', 'api'];
+      const validTypes = [
+        'website',
+        'seo',
+        'performance',
+        'accessibility',
+        'security',
+        'api',
+        'stress',
+      ];
       if (!validTypes.includes(config.testType)) {
         errors.push(`不支持的测试类型: ${config.testType}`);
       }
@@ -215,7 +223,7 @@ class TestBusinessService {
       if (monthlyCount >= quota.monthly) {
         errors.push(`本月测试次数已达上限 (${quota.monthly})`);
       }
-    } catch (error) {
+    } catch {
       errors.push('无法检查用户配额');
     }
 
@@ -256,14 +264,16 @@ class TestBusinessService {
   normalizeTestConfig(config: TestConfig, user: User): TestConfig {
     const normalized: TestConfig = {
       ...config,
-      concurrency: config.concurrency || BUSINESS_RULES.concurrent.default,
-      duration: config.duration || BUSINESS_RULES.duration.default,
+      concurrency: config.concurrency ?? BUSINESS_RULES.concurrent.default,
+      duration: config.duration ?? BUSINESS_RULES.duration.default,
     };
 
     // 根据用户角色调整配置
     if (user.role === 'free') {
-      normalized.concurrency = Math.min(normalized.concurrency, BUSINESS_RULES.concurrent.default);
-      normalized.duration = Math.min(normalized.duration, 600); // 免费用户最多10分钟
+      const concurrency = normalized.concurrency ?? BUSINESS_RULES.concurrent.default;
+      const duration = normalized.duration ?? BUSINESS_RULES.duration.default;
+      normalized.concurrency = Math.min(concurrency, BUSINESS_RULES.concurrent.default);
+      normalized.duration = Math.min(duration, 600); // 免费用户最多10分钟
     }
 
     return normalized;
@@ -336,6 +346,9 @@ class TestBusinessService {
 
     // 根据测试类型调用相应的测试引擎
     switch (config.testType) {
+      case 'website':
+        await this.runWebsiteTest(testId, config);
+        break;
       case 'seo':
         await this.runSEOTest(testId, config);
         break;
@@ -351,15 +364,39 @@ class TestBusinessService {
       case 'api':
         await this.runAPITest(testId, config);
         break;
+      case 'stress':
+        await this.runStressTest(testId, config);
+        break;
       default:
         throw new Error(`不支持的测试类型: ${config.testType}`);
     }
   }
 
   /**
+   * 运行网站测试
+   */
+  async runWebsiteTest(testId: string, _config: TestConfig): Promise<void> {
+    console.log(`Running website test for ${testId}`);
+
+    setTimeout(async () => {
+      const results = {
+        score: 83,
+        checks: {
+          availability: 'ok',
+          seo: 'warning',
+          performance: 'ok',
+        },
+        recommendations: ['补充页面元信息', '优化首屏资源加载'],
+      };
+
+      await this.completeTest(testId, results);
+    }, 4000);
+  }
+
+  /**
    * 运行SEO测试
    */
-  async runSEOTest(testId: string, config: TestConfig): Promise<void> {
+  async runSEOTest(testId: string, _config: TestConfig): Promise<void> {
     // SEO测试逻辑
     console.log(`Running SEO test for ${testId}`);
 
@@ -381,7 +418,7 @@ class TestBusinessService {
   /**
    * 运行性能测试
    */
-  async runPerformanceTest(testId: string, config: TestConfig): Promise<void> {
+  async runPerformanceTest(testId: string, _config: TestConfig): Promise<void> {
     // 性能测试逻辑
     console.log(`Running performance test for ${testId}`);
 
@@ -404,7 +441,7 @@ class TestBusinessService {
   /**
    * 运行无障碍测试
    */
-  async runAccessibilityTest(testId: string, config: TestConfig): Promise<void> {
+  async runAccessibilityTest(testId: string, _config: TestConfig): Promise<void> {
     // 无障碍测试逻辑
     console.log(`Running accessibility test for ${testId}`);
 
@@ -426,7 +463,7 @@ class TestBusinessService {
   /**
    * 运行安全测试
    */
-  async runSecurityTest(testId: string, config: TestConfig): Promise<void> {
+  async runSecurityTest(testId: string, _config: TestConfig): Promise<void> {
     // 安全测试逻辑
     console.log(`Running security test for ${testId}`);
 
@@ -447,7 +484,7 @@ class TestBusinessService {
   /**
    * 运行API测试
    */
-  async runAPITest(testId: string, config: TestConfig): Promise<void> {
+  async runAPITest(testId: string, _config: TestConfig): Promise<void> {
     // API测试逻辑
     console.log(`Running API test for ${testId}`);
 
@@ -463,6 +500,27 @@ class TestBusinessService {
 
       await this.completeTest(testId, results);
     }, 7000);
+  }
+
+  /**
+   * 运行压力测试
+   */
+  async runStressTest(testId: string, _config: TestConfig): Promise<void> {
+    console.log(`Running stress test for ${testId}`);
+
+    setTimeout(async () => {
+      const results = {
+        score: 80,
+        metrics: {
+          rps: 420,
+          avgResponseTime: 240,
+          errorRate: 0.02,
+        },
+        recommendations: ['提高缓存命中率', '优化慢查询接口'],
+      };
+
+      await this.completeTest(testId, results);
+    }, 9000);
   }
 
   /**

@@ -348,7 +348,55 @@ const getRunResults = async (req: AuthRequest, res: ApiResponse) => {
   }
 };
 
-export { cancelRun, createRun, getRun, getRunResults, listRuns };
+const exportRun = async (req: AuthRequest, res: ApiResponse) => {
+  try {
+    const { runId } = req.params;
+    return res.status(501).json({
+      success: false,
+      error: `运行导出暂未实现 (runId: ${runId})`,
+    });
+  } catch (error) {
+    console.error('导出运行失败:', error);
+    return res.status(500).json({
+      success: false,
+      error: '导出运行失败',
+    });
+  }
+};
+
+const getRunReport = async (req: AuthRequest, res: ApiResponse) => {
+  try {
+    const { runId } = req.params;
+    return res.status(501).json({
+      success: false,
+      error: `运行报告暂未实现 (runId: ${runId})`,
+    });
+  } catch (error) {
+    console.error('获取运行报告失败:', error);
+    return res.status(500).json({
+      success: false,
+      error: '获取运行报告失败',
+    });
+  }
+};
+
+const rerun = async (req: AuthRequest, res: ApiResponse) => {
+  try {
+    const { runId } = req.params;
+    return res.status(501).json({
+      success: false,
+      error: `运行重试暂未实现 (runId: ${runId})`,
+    });
+  } catch (error) {
+    console.error('重试运行失败:', error);
+    return res.status(500).json({
+      success: false,
+      error: '重试运行失败',
+    });
+  }
+};
+
+export { cancelRun, createRun, exportRun, getRun, getRunReport, getRunResults, listRuns, rerun };
 
 module.exports = {
   listRuns,
@@ -356,4 +404,7 @@ module.exports = {
   getRun,
   cancelRun,
   getRunResults,
+  exportRun,
+  getRunReport,
+  rerun,
 };

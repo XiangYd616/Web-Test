@@ -5,10 +5,12 @@
 import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { authMiddleware } from '../../middleware/auth';
-import { asyncHandler } from '../../middleware/errorHandler';
-import { automatedReportingService } from '../../services/reporting/AutomatedReportingService';
+import { getPool } from '../../config/database';
 import Logger from '../../utils/logger';
+const { authMiddleware } = require('../../middleware/auth');
+const { asyncHandler } = require('../../middleware/errorHandler');
+const AutomatedReportingService = require('../../services/reporting/AutomatedReportingService');
+const MonitoringService = require('../../services/monitoring/MonitoringService');
 
 enum ReportType {
   PERFORMANCE = 'performance',
@@ -92,6 +94,9 @@ interface ReportStatistics {
 }
 
 const router = express.Router();
+
+const monitoringService = new MonitoringService(getPool());
+const automatedReportingService = new AutomatedReportingService();
 
 // 模拟报告数据
 const reports: Report[] = [
@@ -210,8 +215,10 @@ router.get(
       filteredReports.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
       // 分页
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
+      const pageNumber = Number(page) || 1;
+      const limitNumber = Number(limit) || 20;
+      const startIndex = (pageNumber - 1) * limitNumber;
+      const endIndex = startIndex + limitNumber;
       const paginatedReports = filteredReports.slice(startIndex, endIndex);
 
       res.json({
@@ -219,10 +226,10 @@ router.get(
         data: {
           reports: paginatedReports,
           pagination: {
-            page: parseInt(page as string),
-            limit: parseInt(limit as string),
+            page: pageNumber,
+            limit: limitNumber,
             total: filteredReports.length,
-            totalPages: Math.ceil(filteredReports.length / parseInt(limit as string)),
+            totalPages: Math.ceil(filteredReports.length / limitNumber),
           },
           summary: {
             total: reports.length,
@@ -269,6 +276,7 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const userId = (req as any).user.id;
 
     try {
       const report = reports.find(r => r.id === id);
@@ -281,7 +289,7 @@ router.get(
       }
 
       // 检查权限
-      if (report.createdBy !== (req as any).user.id) {
+      if (report.createdBy !== userId) {
         return res.status(403).json({
           success: false,
           message: '无权访问此报告',
@@ -344,13 +352,13 @@ router.post(
       // 异步生成报告
       generateReport(newReport.id, reportRequest);
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '报告创建成功，正在生成中',
         data: newReport,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建报告失败',
         error: error instanceof Error ? error.message : String(error),
@@ -366,8 +374,9 @@ router.post(
 router.get(
   '/:id/download',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Request) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const userId = (req as any).user.id;
 
     try {
       const report = reports.find(r => r.id === id);
@@ -415,13 +424,12 @@ router.get(
 
       // 设置下载响应头
       const fileName = path.basename(report.filePath);
+      Logger.info('报告下载', { reportId: id, userId, fileName });
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
       res.setHeader('Content-Type', 'application/octet-stream');
 
       // 发送文件
-      res.sendFile(report.filePath);
-
-      Logger.info('报告下载', { reportId: id, userId, fileName });
+      return res.sendFile(report.filePath);
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -508,12 +516,12 @@ router.get(
         filteredTemplates = filteredTemplates.filter(template => template.type === type);
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: filteredTemplates,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取报告模板失败',
         error: error instanceof Error ? error.message : String(error),
@@ -555,13 +563,13 @@ router.post(
 
       reportTemplates.push(newTemplate);
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '报告模板创建成功',
         data: newTemplate,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建报告模板失败',
         error: error instanceof Error ? error.message : String(error),
@@ -578,7 +586,7 @@ router.get(
   '/statistics',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { timeRange = '30d' } = req.query;
+    const _timeRange = req.query.timeRange || '30d';
 
     try {
       const statistics: ReportStatistics = {
@@ -623,12 +631,12 @@ router.get(
           })),
       };
 
-      res.json({
+      return res.json({
         success: true,
         data: statistics,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取报告统计失败',
         error: error instanceof Error ? error.message : String(error),
@@ -670,12 +678,16 @@ router.post(
       }
 
       // 更新定时设置
-      if (report.metadata.schedule) {
-        report.metadata.schedule.enabled = enabled;
-        report.metadata.schedule.frequency = frequency;
-        report.metadata.schedule.recipients = recipients;
+      const metadata = report.metadata as Record<string, unknown> & {
+        schedule?: { enabled: boolean; frequency: string; recipients: string[] };
+      };
+
+      if (metadata.schedule) {
+        metadata.schedule.enabled = enabled;
+        metadata.schedule.frequency = frequency;
+        metadata.schedule.recipients = recipients;
       } else {
-        report.metadata.schedule = {
+        metadata.schedule = {
           enabled,
           frequency: frequency || 'weekly',
           recipients: recipients || [],
@@ -687,13 +699,13 @@ router.post(
         await automatedReportingService.scheduleReport(id, frequency);
       }
 
-      res.json({
+      return res.json({
         success: true,
         message: '定时任务设置成功',
-        data: report.metadata.schedule,
+        data: metadata.schedule,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '设置定时任务失败',
         error: error instanceof Error ? error.message : String(error),
@@ -710,7 +722,7 @@ router.get(
   '/export',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { format = 'json', type } = req.query;
+    const { format = 'json', type: _type } = req.query as { format?: string; type?: string };
 
     try {
       let data: unknown;
@@ -741,9 +753,9 @@ router.get(
       res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Content-Disposition', `attachment; filename="reports.${format}"`);
 
-      res.send(JSON.stringify(data, null, 2));
+      return res.send(JSON.stringify(data, null, 2));
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '导出报告数据失败',
         error: error instanceof Error ? error.message : String(error),
@@ -753,7 +765,7 @@ router.get(
 );
 
 // 异步生成报告的函数
-async function generateReport(reportId: string, request: ReportRequest): Promise<void> {
+async function generateReport(reportId: string, _request: ReportRequest): Promise<void> {
   const report = reports.find(r => r.id === reportId);
 
   if (!report) return;
