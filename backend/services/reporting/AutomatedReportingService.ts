@@ -4,6 +4,13 @@
  */
 
 import { EventEmitter } from 'events';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { query } from '../../config/database';
+import ReportGenerator, {
+  ReportConfig as GeneratorReportConfig,
+  ReportData as GeneratorReportData,
+} from './ReportGenerator';
 
 // 报告模板接口
 export interface ReportTemplate {
@@ -27,7 +34,7 @@ export interface ReportVariable {
   type: 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object';
   description: string;
   required: boolean;
-  defaultValue?: any;
+  defaultValue?: unknown;
   validation?: {
     min?: number;
     max?: number;
@@ -111,7 +118,7 @@ export interface ReportRecipient {
   address: string;
   name?: string;
   enabled: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // 报告过滤器接口
@@ -125,7 +132,7 @@ export interface ReportFilter {
     | 'greater_than'
     | 'less_than'
     | 'between';
-  value: any;
+  value: unknown;
   enabled: boolean;
 }
 
@@ -184,17 +191,17 @@ export interface ReportInstance {
   path?: string;
   url?: string;
   error?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 报告数据接口
 export interface ReportData {
   timestamp: Date;
-  metrics: Record<string, any>;
-  summary: Record<string, any>;
+  metrics: Record<string, unknown>;
+  summary: Record<string, unknown>;
   charts: ChartData[];
   tables: TableData[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 图表数据接口
@@ -220,7 +227,7 @@ export interface TableData {
   id: string;
   title: string;
   headers: string[];
-  rows: Array<Record<string, any>>;
+  rows: Array<Record<string, unknown>>;
   options: {
     sortable?: boolean;
     filterable?: boolean;
@@ -336,9 +343,17 @@ class AutomatedReportingService extends EventEmitter {
   private scheduledTasks: Map<string, CronTask> = new Map();
   private mailTransporter?: MailTransporter;
   private isInitialized: boolean = false;
+  private reportGenerator: ReportGenerator;
+  private reportsDir: string;
+  private templatesFile: string;
+  private configsFile: string;
 
   constructor() {
     super();
+    this.reportGenerator = new ReportGenerator();
+    this.reportsDir = path.join(__dirname, '../../reports');
+    this.templatesFile = path.join(this.reportsDir, 'report_templates.json');
+    this.configsFile = path.join(this.reportsDir, 'report_configs.json');
     this.initializeDefaultTemplates();
   }
 
@@ -542,7 +557,7 @@ class AutomatedReportingService extends EventEmitter {
     configId: string,
     options: {
       data?: ReportData;
-      variables?: Record<string, any>;
+      variables?: Record<string, unknown>;
     } = {}
   ): Promise<string> {
     const config = this.configs.get(configId);
@@ -575,11 +590,17 @@ class AutomatedReportingService extends EventEmitter {
       // 收集数据
       const data = options.data || (await this.collectReportData(config));
 
-      // 生成报告
-      const reportContent = await this.renderReport(template, data, options.variables || {});
-
-      // 保存报告
-      const reportPath = await this.saveReport(instanceId, reportContent, config.format);
+      const generatorData = this.buildGeneratorData(config, template, data);
+      const reportPath = await this.generateReportFile(generatorData, template, config, instanceId);
+      const executionId = await this.resolveExecutionId(config.filters || []);
+      const reportRecordId = await this.saveReportRecord(
+        executionId,
+        template,
+        config.format.type,
+        generatorData,
+        reportPath.path,
+        reportPath.size
+      );
 
       // 更新实例
       instance.status = 'completed';
@@ -587,7 +608,11 @@ class AutomatedReportingService extends EventEmitter {
       instance.duration = Date.now() - startTime;
       instance.path = reportPath.path;
       instance.url = reportPath.url;
-      instance.size = reportContent.length;
+      instance.size = reportPath.size;
+      instance.metadata = {
+        ...instance.metadata,
+        reportRecordId,
+      };
 
       this.instances.set(instanceId, instance);
       this.emit('report_generation_completed', instance);
@@ -653,7 +678,12 @@ class AutomatedReportingService extends EventEmitter {
     const successfulReports = instances.filter(i => i.status === 'completed').length;
     const failedReports = instances.filter(i => i.status === 'failed').length;
 
-    const durations = instances.filter(i => i.duration).map(i => i.duration!);
+    const durations = instances
+      .filter(
+        (instance): instance is ReportInstance & { duration: number } =>
+          typeof instance.duration === 'number'
+      )
+      .map(instance => instance.duration);
     const averageGenerationTime =
       durations.length > 0
         ? durations.reduce((sum, duration) => sum + duration, 0) / durations.length
@@ -687,36 +717,123 @@ class AutomatedReportingService extends EventEmitter {
    * 收集报告数据
    */
   private async collectReportData(config: ReportConfig): Promise<ReportData> {
-    // 简化实现，实际应该从各种数据源收集数据
+    const { clause, params } = this.buildFilterClause(config.filters || []);
+    const whereClause = clause ? `WHERE ${clause}` : '';
+
+    const summaryResult = await query(
+      `SELECT
+         COUNT(*)::int AS total,
+         COUNT(*) FILTER (WHERE te.status = 'completed')::int AS completed,
+         COUNT(*) FILTER (WHERE te.status = 'failed')::int AS failed,
+         COALESCE(AVG(tr.score), 0)::float AS average_score,
+         COALESCE(AVG(te.execution_time), 0)::float AS average_duration
+       FROM test_executions te
+       LEFT JOIN test_results tr ON tr.execution_id = te.id
+       ${whereClause}`,
+      params
+    );
+
+    const baseSummary = summaryResult.rows[0] || {
+      total: 0,
+      completed: 0,
+      failed: 0,
+      average_score: 0,
+      average_duration: 0,
+    };
+
+    const typeStats = await query(
+      `SELECT te.engine_type AS type, COUNT(*)::int AS count
+       FROM test_executions te
+       ${whereClause}
+       GROUP BY te.engine_type`,
+      params
+    );
+
+    const statusStats = await query(
+      `SELECT te.status AS status, COUNT(*)::int AS count
+       FROM test_executions te
+       ${whereClause}
+       GROUP BY te.status`,
+      params
+    );
+
+    const dailyStats = await query(
+      `SELECT
+         DATE(te.created_at) AS date,
+         COUNT(*)::int AS count,
+         AVG(CASE WHEN te.status = 'completed' THEN 1.0 ELSE 0 END) * 100 AS success_rate,
+         COALESCE(AVG(tr.score), 0)::float AS average_score
+       FROM test_executions te
+       LEFT JOIN test_results tr ON tr.execution_id = te.id
+       ${whereClause}
+       GROUP BY DATE(te.created_at)
+       ORDER BY date ASC
+       LIMIT 30`,
+      params
+    );
+
+    const recommendations = await query(
+      `SELECT tm.recommendation AS recommendation, COUNT(*)::int AS count
+       FROM test_metrics tm
+       INNER JOIN test_results tr ON tr.id = tm.result_id
+       INNER JOIN test_executions te ON te.id = tr.execution_id
+       ${whereClause ? `${whereClause} AND tm.recommendation IS NOT NULL` : 'WHERE tm.recommendation IS NOT NULL'}
+       GROUP BY tm.recommendation
+       ORDER BY count DESC
+       LIMIT 10`,
+      params
+    );
+
+    const recentExecutions = await query(
+      `SELECT
+         te.test_id,
+         te.engine_type,
+         te.status,
+         te.created_at,
+         te.completed_at,
+         te.execution_time,
+         tr.score
+       FROM test_executions te
+       LEFT JOIN test_results tr ON tr.execution_id = te.id
+       ${whereClause}
+       ORDER BY te.created_at DESC
+       LIMIT 10`,
+      params
+    );
+
+    const successRate =
+      baseSummary.total > 0 ? (baseSummary.completed / baseSummary.total) * 100 : 0;
+
     return {
       timestamp: new Date(),
       metrics: {
-        totalUsers: 1000,
-        activeUsers: 800,
-        totalRequests: 10000,
-        errorRate: 2.5,
-        averageResponseTime: 250,
+        totalTests: baseSummary.total,
+        completedTests: baseSummary.completed,
+        failedTests: baseSummary.failed,
+        averageScore: baseSummary.average_score,
+        averageDuration: baseSummary.average_duration,
+        byType: this.mapKeyValue(typeStats.rows, 'type', 'count'),
+        byStatus: this.mapKeyValue(statusStats.rows, 'status', 'count'),
       },
       summary: {
-        performance: 'good',
-        security: 'excellent',
-        availability: 99.9,
+        overallScore: baseSummary.average_score,
+        successRate,
+        totalTests: baseSummary.total,
+        completedTests: baseSummary.completed,
+        failedTests: baseSummary.failed,
       },
       charts: [
         {
-          id: 'chart1',
+          id: 'test-trend',
           type: 'line',
-          title: '用户增长趋势',
-          data: [
-            { label: '1月', value: 800 },
-            { label: '2月', value: 850 },
-            { label: '3月', value: 900 },
-            { label: '4月', value: 950 },
-            { label: '5月', value: 1000 },
-          ],
+          title: '测试趋势',
+          data: (dailyStats.rows || []).map((row: Record<string, unknown>) => ({
+            label: String(row.date),
+            value: Number(row.count) || 0,
+          })),
           options: {
-            width: 600,
-            height: 400,
+            width: 680,
+            height: 320,
             showLegend: true,
             showGrid: true,
           },
@@ -724,24 +841,42 @@ class AutomatedReportingService extends EventEmitter {
       ],
       tables: [
         {
-          id: 'table1',
-          title: '性能指标',
-          headers: ['指标', '当前值', '目标值', '状态'],
-          rows: [
-            { 指标: '响应时间', 当前值: '250ms', 目标值: '200ms', 状态: '良好' },
-            { 指标: '错误率', 当前值: '2.5%', 目标值: '1%', 状态: '需改进' },
-            { 指标: '可用性', 当前值: '99.9%', 目标值: '99.5%', 状态: '优秀' },
-          ],
+          id: 'recent-tests',
+          title: '最近测试',
+          headers: ['测试ID', '类型', '状态', '分数', '开始时间', '完成时间', '耗时(s)'],
+          rows: (recentExecutions.rows || []).map((row: Record<string, unknown>) => ({
+            测试ID: row.test_id,
+            类型: row.engine_type,
+            状态: row.status,
+            分数: row.score ?? '- ',
+            开始时间: row.created_at,
+            完成时间: row.completed_at ?? '- ',
+            耗时: row.execution_time ?? '- ',
+          })),
           options: {
             sortable: true,
-            filterable: true,
+            filterable: false,
+            pagination: false,
+          },
+        },
+        {
+          id: 'recommendations',
+          title: '高频建议',
+          headers: ['建议', '次数'],
+          rows: (recommendations.rows || []).map((row: Record<string, unknown>) => ({
+            建议: row.recommendation,
+            次数: row.count,
+          })),
+          options: {
+            sortable: true,
+            filterable: false,
             pagination: false,
           },
         },
       ],
       metadata: {
         generatedBy: 'AutomatedReportingService',
-        version: '1.0.0',
+        filters: config.filters || [],
       },
     };
   }
@@ -749,43 +884,47 @@ class AutomatedReportingService extends EventEmitter {
   /**
    * 渲染报告
    */
-  private async renderReport(
+  private async generateReportFile(
+    data: GeneratorReportData,
     template: ReportTemplate,
-    data: ReportData,
-    variables: Record<string, any>
-  ): Promise<string> {
-    // 简化实现，实际应该使用模板引擎
-    let content = template.template;
+    config: ReportConfig,
+    instanceId: string
+  ): Promise<{ path: string; url: string; size: number }> {
+    await fs.mkdir(this.reportsDir, { recursive: true });
 
-    // 替换变量
-    Object.entries(variables).forEach(([key, value]) => {
-      content = content.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
-    });
+    const format = this.normalizeFormat(config.format.type);
+    if (format === 'csv') {
+      const fileName = `report_${instanceId}.csv`;
+      const filePath = path.join(this.reportsDir, fileName);
+      const csvContent = this.convertReportToCSV(data);
+      await fs.writeFile(filePath, csvContent, 'utf8');
+      const stats = await fs.stat(filePath);
+      return {
+        path: filePath,
+        url: `/reports/${fileName}`,
+        size: stats.size,
+      };
+    }
 
-    // 替换数据占位符
-    content = content.replace('{{reportDate}}', new Date().toLocaleDateString());
-    content = content.replace('{{totalUsers}}', String(data.metrics.totalUsers));
-    content = content.replace('{{activeUsers}}', String(data.metrics.activeUsers));
+    const generatorConfig: GeneratorReportConfig = {
+      template: this.mapGeneratorTemplate(template),
+      format,
+      outputDir: this.reportsDir,
+      filename: `report_${instanceId}.${format}`,
+      includeCharts: config.format.options.includeCharts,
+      includeRawData: config.format.options.includeRawData,
+    };
 
-    return content;
-  }
+    const result = await this.reportGenerator.generateReport(data, generatorConfig);
+    if (!result.success || !result.filePath) {
+      throw new Error(result.error || '报告生成失败');
+    }
 
-  /**
-   * 保存报告
-   */
-  private async saveReport(
-    instanceId: string,
-    content: string,
-    format: ReportFormat
-  ): Promise<{
-    path: string;
-    url: string;
-  }> {
-    // 简化实现，实际应该保存到文件系统或云存储
-    const path = `reports/${instanceId}.${format.type}`;
-    const url = `https://example.com/reports/${instanceId}.${format.type}`;
-
-    return { path, url };
+    return {
+      path: result.filePath,
+      url: `/reports/${result.filename || path.basename(result.filePath)}`,
+      size: result.size || 0,
+    };
   }
 
   /**
@@ -804,6 +943,10 @@ class AutomatedReportingService extends EventEmitter {
       return;
     }
 
+    const attachmentContent = instance.path
+      ? await fs.readFile(instance.path).catch(() => Buffer.from(''))
+      : Buffer.from('');
+
     const mailOptions: MailOptions = {
       from: 'reports@example.com',
       to: recipients,
@@ -813,7 +956,7 @@ class AutomatedReportingService extends EventEmitter {
         ? [
             {
               filename: `report_${instance.id}.${instance.format}`,
-              content: Buffer.from('模拟报告内容'),
+              content: attachmentContent,
             },
           ]
         : undefined,
@@ -1098,28 +1241,42 @@ class AutomatedReportingService extends EventEmitter {
    * 加载模板
    */
   private async loadTemplates(): Promise<void> {
-    // 简化实现，实际应该从数据库或文件加载
+    try {
+      const raw = await fs.readFile(this.templatesFile, 'utf8');
+      const data = JSON.parse(raw) as ReportTemplate[];
+      data.forEach(template => this.templates.set(template.id, template));
+    } catch {
+      // 忽略首次加载失败
+    }
   }
 
   /**
    * 保存模板
    */
   private async saveTemplates(): Promise<void> {
-    // 简化实现，实际应该保存到数据库或文件
+    const data = Array.from(this.templates.values());
+    await fs.writeFile(this.templatesFile, JSON.stringify(data, null, 2), 'utf8');
   }
 
   /**
    * 加载配置
    */
   private async loadConfigs(): Promise<void> {
-    // 简化实现，实际应该从数据库或文件加载
+    try {
+      const raw = await fs.readFile(this.configsFile, 'utf8');
+      const data = JSON.parse(raw) as ReportConfig[];
+      data.forEach(config => this.configs.set(config.id, config));
+    } catch {
+      // 忽略首次加载失败
+    }
   }
 
   /**
    * 保存配置
    */
   private async saveConfigs(): Promise<void> {
-    // 简化实现，实际应该保存到数据库或文件
+    const data = Array.from(this.configs.values());
+    await fs.writeFile(this.configsFile, JSON.stringify(data, null, 2), 'utf8');
   }
 
   /**
@@ -1127,6 +1284,194 @@ class AutomatedReportingService extends EventEmitter {
    */
   private generateId(): string {
     return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private mapKeyValue(rows: Array<Record<string, unknown>>, keyField: string, valueField: string) {
+    const result: Record<string, number> = {};
+    rows.forEach(row => {
+      const key = String(row[keyField]);
+      const value = Number(row[valueField]);
+      result[key] = Number.isFinite(value) ? value : 0;
+    });
+    return result;
+  }
+
+  private buildGeneratorData(
+    config: ReportConfig,
+    template: ReportTemplate,
+    data: ReportData
+  ): GeneratorReportData {
+    const summary = data.summary as {
+      overallScore?: number;
+      totalTests?: number;
+      failedTests?: number;
+    };
+
+    const overallScore = Number(summary.overallScore) || 0;
+    const failedTests = Number(summary.failedTests) || 0;
+
+    const sections: Record<string, unknown> = {
+      summary: data.summary,
+      key_metrics: data.metrics,
+      recommendations: data.tables.find(table => table.id === 'recommendations')?.rows || [],
+      trend_analysis: data.charts,
+      detailed_metrics: data.tables.find(table => table.id === 'recent-tests')?.rows || [],
+    };
+
+    return {
+      title: config.name,
+      description: config.description,
+      generatedAt: new Date(),
+      generatedBy: 'AutomatedReportingService',
+      summary: {
+        overallScore,
+        totalIssues: failedTests,
+        criticalIssues: failedTests,
+        recommendations: Array.isArray(sections.recommendations)
+          ? (sections.recommendations as Array<unknown>).length
+          : 0,
+      },
+      metrics: data.metrics,
+      sections,
+      metadata: {
+        templateId: template.id,
+        format: config.format.type,
+      },
+    };
+  }
+
+  private mapGeneratorTemplate(template: ReportTemplate): string {
+    switch (template.category) {
+      case 'performance':
+        return 'performance';
+      case 'security':
+        return 'compliance';
+      case 'seo':
+        return 'technical';
+      case 'analytics':
+        return 'executive';
+      default:
+        return 'custom';
+    }
+  }
+
+  private normalizeFormat(format: ReportFormat['type']): GeneratorReportConfig['format'] | 'csv' {
+    if (format === 'excel' || format === 'pdf' || format === 'html' || format === 'json') {
+      return format;
+    }
+    return 'csv';
+  }
+
+  private convertReportToCSV(data: GeneratorReportData): string {
+    const rows: string[] = [];
+    rows.push('section,key,value');
+    const appendEntries = (section: string, record: Record<string, unknown>) => {
+      Object.entries(record).forEach(([key, value]) => {
+        const safeValue = String(value ?? '').replace(/"/g, '""');
+        rows.push(`${section},${key},"${safeValue}"`);
+      });
+    };
+
+    appendEntries('summary', data.summary as Record<string, unknown>);
+    appendEntries('metrics', data.metrics);
+    return rows.join('\n');
+  }
+
+  private async resolveExecutionId(filters: ReportFilter[]): Promise<number | null> {
+    const testIdFilter = filters.find(
+      filter => filter.field === 'test_id' && filter.operator === 'equals'
+    );
+    if (!testIdFilter) {
+      return null;
+    }
+
+    const result = await query('SELECT id FROM test_executions WHERE test_id = $1', [
+      testIdFilter.value,
+    ]);
+    return result.rows[0]?.id ?? null;
+  }
+
+  private async saveReportRecord(
+    executionId: number | null,
+    template: ReportTemplate,
+    format: string,
+    data: GeneratorReportData,
+    filePath: string,
+    fileSize: number
+  ): Promise<number> {
+    const result = await query(
+      `INSERT INTO test_reports (
+         execution_id, report_type, format, report_data, file_path, file_size
+       ) VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id`,
+      [executionId, template.type, format, JSON.stringify(data), filePath, fileSize]
+    );
+    return result.rows[0]?.id;
+  }
+
+  private buildFilterClause(filters: ReportFilter[]): { clause: string; params: unknown[] } {
+    const clauses: string[] = [];
+    const params: unknown[] = [];
+
+    const fieldMap: Record<string, string> = {
+      engine_type: 'te.engine_type',
+      status: 'te.status',
+      user_id: 'te.user_id',
+      test_id: 'te.test_id',
+      created_at: 'te.created_at',
+      started_at: 'te.started_at',
+      completed_at: 'te.completed_at',
+      score: 'tr.score',
+      test_url: 'te.test_url',
+    };
+
+    filters
+      .filter(filter => filter.enabled !== false)
+      .forEach(filter => {
+        const column = fieldMap[filter.field];
+        if (!column) return;
+        const paramIndex = params.length + 1;
+
+        switch (filter.operator) {
+          case 'equals':
+            clauses.push(`${column} = $${paramIndex}`);
+            params.push(filter.value);
+            break;
+          case 'not_equals':
+            clauses.push(`${column} != $${paramIndex}`);
+            params.push(filter.value);
+            break;
+          case 'contains':
+            clauses.push(`${column} ILIKE $${paramIndex}`);
+            params.push(`%${filter.value}%`);
+            break;
+          case 'not_contains':
+            clauses.push(`${column} NOT ILIKE $${paramIndex}`);
+            params.push(`%${filter.value}%`);
+            break;
+          case 'greater_than':
+            clauses.push(`${column} > $${paramIndex}`);
+            params.push(filter.value);
+            break;
+          case 'less_than':
+            clauses.push(`${column} < $${paramIndex}`);
+            params.push(filter.value);
+            break;
+          case 'between': {
+            if (Array.isArray(filter.value) && filter.value.length === 2) {
+              const startIndex = params.length + 1;
+              const endIndex = params.length + 2;
+              clauses.push(`${column} BETWEEN $${startIndex} AND $${endIndex}`);
+              params.push(filter.value[0], filter.value[1]);
+            }
+            break;
+          }
+          default:
+            break;
+        }
+      });
+
+    return { clause: clauses.join(' AND '), params };
   }
 }
 

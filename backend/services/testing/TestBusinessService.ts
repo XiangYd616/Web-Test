@@ -9,8 +9,12 @@
  * 4. 数据转换和处理
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { query } from '../../config/database';
 import { ErrorFactory } from '../../middleware/errorHandler';
+import testRepository from '../../repositories/testRepository';
+
+const userTestManager = require('./UserTestManager');
 
 interface BusinessRules {
   concurrent: {
@@ -200,13 +204,13 @@ class TestBusinessService {
     try {
       // 查询今日测试次数
       const dailyResult = await query(
-        'SELECT COUNT(*) as count FROM test_history WHERE user_id = $1 AND DATE(created_at) = CURRENT_DATE',
+        'SELECT COUNT(*) as count FROM test_executions WHERE user_id = $1 AND DATE(created_at) = CURRENT_DATE',
         [user.userId]
       );
 
       // 查询本月测试次数
       const monthlyResult = await query(
-        'SELECT COUNT(*) as count FROM test_history WHERE user_id = $1 AND created_at >= $2',
+        'SELECT COUNT(*) as count FROM test_executions WHERE user_id = $1 AND created_at >= $2',
         [user.userId, thisMonth]
       );
 
@@ -301,24 +305,24 @@ class TestBusinessService {
     const normalizedConfig = this.normalizeTestConfig(config, user);
 
     try {
-      // 创建测试记录
-      const testResult = await query(
-        `INSERT INTO test_history (user_id, url, test_type, concurrency, duration, options, status, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, 'pending', NOW()) RETURNING test_id`,
-        [
-          user.userId,
-          normalizedConfig.url,
-          normalizedConfig.testType,
-          normalizedConfig.concurrency,
-          normalizedConfig.duration,
-          JSON.stringify(normalizedConfig.options || {}),
-        ]
-      );
+      const testId = uuidv4();
+      const engineMeta = this.getEngineMeta(normalizedConfig.testType);
 
-      const testId = testResult.rows[0].test_id;
+      const testConfigPayload: Record<string, unknown> = { ...normalizedConfig };
 
-      // 启动测试
-      await this.startTestExecution(testId, normalizedConfig);
+      await testRepository.create({
+        testId,
+        userId: user.userId,
+        engineType: normalizedConfig.testType,
+        engineName: engineMeta.engineName,
+        testName: engineMeta.testName,
+        testUrl: normalizedConfig.url,
+        testConfig: testConfigPayload,
+        status: 'pending',
+        createdAt: new Date(),
+      });
+
+      await this.startTestExecution(testId, normalizedConfig, user);
 
       return {
         testId,
@@ -337,214 +341,57 @@ class TestBusinessService {
   /**
    * 启动测试执行
    */
-  private async startTestExecution(testId: string, config: TestConfig): Promise<void> {
-    // 更新测试状态为运行中
-    await query('UPDATE test_history SET status = $1, started_at = NOW() WHERE test_id = $2', [
-      'running',
+  private async startTestExecution(testId: string, config: TestConfig, user: User): Promise<void> {
+    await testRepository.markStarted(testId);
+    await this.insertExecutionLog(testId, 'info', '测试启动', {
+      engineType: config.testType,
+      url: config.url,
+    });
+
+    const engine = userTestManager.createUserTest(user.userId, testId, config.testType);
+    if (!engine || typeof engine.executeTest !== 'function') {
+      await testRepository.markFailed(testId, '测试引擎初始化失败');
+      throw new Error('测试引擎初始化失败');
+    }
+
+    const payload = {
+      ...config,
       testId,
-    ]);
+    };
 
-    // 根据测试类型调用相应的测试引擎
-    switch (config.testType) {
-      case 'website':
-        await this.runWebsiteTest(testId, config);
-        break;
-      case 'seo':
-        await this.runSEOTest(testId, config);
-        break;
-      case 'performance':
-        await this.runPerformanceTest(testId, config);
-        break;
-      case 'accessibility':
-        await this.runAccessibilityTest(testId, config);
-        break;
-      case 'security':
-        await this.runSecurityTest(testId, config);
-        break;
-      case 'api':
-        await this.runAPITest(testId, config);
-        break;
-      case 'stress':
-        await this.runStressTest(testId, config);
-        break;
-      default:
-        throw new Error(`不支持的测试类型: ${config.testType}`);
-    }
+    Promise.resolve(engine.executeTest(payload)).catch(async (error: Error) => {
+      await testRepository.markFailed(testId, error.message);
+      await this.insertExecutionLog(testId, 'error', '测试执行失败', {
+        message: error.message,
+      });
+    });
   }
 
-  /**
-   * 运行网站测试
-   */
-  async runWebsiteTest(testId: string, _config: TestConfig): Promise<void> {
-    console.log(`Running website test for ${testId}`);
+  private getEngineMeta(testType: string) {
+    const metaMap: Record<string, { engineName: string; testName: string }> = {
+      website: { engineName: 'WebsiteTestEngine', testName: '网站综合测试' },
+      seo: { engineName: 'SeoTestEngine', testName: 'SEO测试' },
+      performance: { engineName: 'PerformanceTestEngine', testName: '性能测试' },
+      accessibility: { engineName: 'AccessibilityTestEngine', testName: '可访问性测试' },
+      security: { engineName: 'SecurityTestEngine', testName: '安全测试' },
+      api: { engineName: 'ApiTestEngine', testName: 'API测试' },
+      stress: { engineName: 'StressTestEngine', testName: '压力测试' },
+    };
 
-    setTimeout(async () => {
-      const results = {
-        score: 83,
-        checks: {
-          availability: 'ok',
-          seo: 'warning',
-          performance: 'ok',
-        },
-        recommendations: ['补充页面元信息', '优化首屏资源加载'],
-      };
-
-      await this.completeTest(testId, results);
-    }, 4000);
+    return metaMap[testType] || { engineName: 'UnknownEngine', testName: '未知测试' };
   }
 
-  /**
-   * 运行SEO测试
-   */
-  async runSEOTest(testId: string, _config: TestConfig): Promise<void> {
-    // SEO测试逻辑
-    console.log(`Running SEO test for ${testId}`);
-
-    // 模拟测试执行
-    setTimeout(async () => {
-      const results = {
-        score: 85,
-        issues: [
-          { type: 'missing_meta_description', severity: 'medium' },
-          { type: 'missing_h1', severity: 'high' },
-        ],
-        recommendations: ['添加页面描述', '确保每个页面有H1标题'],
-      };
-
-      await this.completeTest(testId, results);
-    }, 5000);
-  }
-
-  /**
-   * 运行性能测试
-   */
-  async runPerformanceTest(testId: string, _config: TestConfig): Promise<void> {
-    // 性能测试逻辑
-    console.log(`Running performance test for ${testId}`);
-
-    setTimeout(async () => {
-      const results = {
-        score: 92,
-        metrics: {
-          loadTime: 2.3,
-          firstContentfulPaint: 1.8,
-          largestContentfulPaint: 3.2,
-          cumulativeLayoutShift: 0.1,
-        },
-        recommendations: ['优化图片加载', '减少JavaScript执行时间'],
-      };
-
-      await this.completeTest(testId, results);
-    }, 8000);
-  }
-
-  /**
-   * 运行无障碍测试
-   */
-  async runAccessibilityTest(testId: string, _config: TestConfig): Promise<void> {
-    // 无障碍测试逻辑
-    console.log(`Running accessibility test for ${testId}`);
-
-    setTimeout(async () => {
-      const results = {
-        score: 78,
-        checks: [
-          { category: 'color_contrast', passed: true },
-          { category: 'keyboard_navigation', passed: false },
-          { category: 'screen_reader', passed: true },
-        ],
-        recommendations: ['改善键盘导航', '添加跳过链接'],
-      };
-
-      await this.completeTest(testId, results);
-    }, 6000);
-  }
-
-  /**
-   * 运行安全测试
-   */
-  async runSecurityTest(testId: string, _config: TestConfig): Promise<void> {
-    // 安全测试逻辑
-    console.log(`Running security test for ${testId}`);
-
-    setTimeout(async () => {
-      const results = {
-        score: 88,
-        vulnerabilities: [
-          { type: 'missing_https', severity: 'high' },
-          { type: 'outdated_libraries', severity: 'medium' },
-        ],
-        recommendations: ['启用HTTPS', '更新第三方库'],
-      };
-
-      await this.completeTest(testId, results);
-    }, 10000);
-  }
-
-  /**
-   * 运行API测试
-   */
-  async runAPITest(testId: string, _config: TestConfig): Promise<void> {
-    // API测试逻辑
-    console.log(`Running API test for ${testId}`);
-
-    setTimeout(async () => {
-      const results = {
-        score: 95,
-        endpoints: [
-          { url: '/api/users', status: 200, responseTime: 150 },
-          { url: '/api/products', status: 200, responseTime: 200 },
-        ],
-        recommendations: ['优化数据库查询', '添加缓存'],
-      };
-
-      await this.completeTest(testId, results);
-    }, 7000);
-  }
-
-  /**
-   * 运行压力测试
-   */
-  async runStressTest(testId: string, _config: TestConfig): Promise<void> {
-    console.log(`Running stress test for ${testId}`);
-
-    setTimeout(async () => {
-      const results = {
-        score: 80,
-        metrics: {
-          rps: 420,
-          avgResponseTime: 240,
-          errorRate: 0.02,
-        },
-        recommendations: ['提高缓存命中率', '优化慢查询接口'],
-      };
-
-      await this.completeTest(testId, results);
-    }, 9000);
-  }
-
-  /**
-   * 完成测试
-   */
-  private async completeTest(testId: string, results: unknown): Promise<void> {
+  private async insertExecutionLog(
+    testId: string,
+    level: string,
+    message: string,
+    context: Record<string, unknown> = {}
+  ): Promise<void> {
     await query(
-      `UPDATE test_history 
-       SET status = 'completed', results = $1, completed_at = NOW(), overall_score = $2
-       WHERE test_id = $3`,
-      [JSON.stringify(results), this.extractScore(results), testId]
+      `INSERT INTO test_logs (execution_id, level, message, context)
+       SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
+      [level, message, JSON.stringify(context), testId]
     );
-  }
-
-  /**
-   * 提取测试分数
-   */
-  private extractScore(results: unknown): number {
-    if (typeof results === 'object' && results !== null && 'score' in results) {
-      return typeof (results as { score: unknown }).score === 'number'
-        ? (results as { score: number }).score
-        : 0;
-    }
-    return 0;
   }
 
   /**

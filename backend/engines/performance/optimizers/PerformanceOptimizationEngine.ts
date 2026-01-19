@@ -4,8 +4,35 @@
  * 基于性能分析结果生成智能化优化建议：代码优化、资源压缩、CDN配置、数据库优化等
  */
 
-interface OptimizationRule {
-  condition: (metrics: any) => boolean;
+interface CoreWebVitalsMetrics {
+  fcp: number;
+  lcp: number;
+  fid: number;
+  cls: number;
+  ttfb: number;
+}
+
+interface ResourceMetrics {
+  imageSize: number;
+  scriptCount: number;
+  stylesheetCount: number;
+  fontSize: number;
+}
+
+interface NetworkMetrics {
+  compressionRatio: number;
+  cacheHitRate: number;
+  usingCDN: boolean;
+}
+
+interface CodeMetrics {
+  unusedCode: number;
+  cssComplexity: number;
+  domDepth: number;
+}
+
+interface OptimizationRule<TMetrics> {
+  condition: (metrics: TMetrics) => boolean;
   priority: 'low' | 'medium' | 'high' | 'critical';
   category: string;
   title: string;
@@ -32,41 +59,48 @@ interface OptimizationRules {
   coreWebVitals: {
     fcp: {
       threshold: number;
-      rules: OptimizationRule[];
+      rules: OptimizationRule<CoreWebVitalsMetrics>[];
     };
     lcp: {
       threshold: number;
-      rules: OptimizationRule[];
+      rules: OptimizationRule<CoreWebVitalsMetrics>[];
     };
     fid: {
       threshold: number;
-      rules: OptimizationRule[];
+      rules: OptimizationRule<CoreWebVitalsMetrics>[];
     };
     cls: {
       threshold: number;
-      rules: OptimizationRule[];
+      rules: OptimizationRule<CoreWebVitalsMetrics>[];
     };
     ttfb: {
       threshold: number;
-      rules: OptimizationRule[];
+      rules: OptimizationRule<CoreWebVitalsMetrics>[];
     };
   };
   resources: {
-    images: OptimizationRule[];
-    scripts: OptimizationRule[];
-    stylesheets: OptimizationRule[];
-    fonts: OptimizationRule[];
+    images: OptimizationRule<ResourceMetrics>[];
+    scripts: OptimizationRule<ResourceMetrics>[];
+    stylesheets: OptimizationRule<ResourceMetrics>[];
+    fonts: OptimizationRule<ResourceMetrics>[];
   };
   network: {
-    compression: OptimizationRule[];
-    caching: OptimizationRule[];
-    cdn: OptimizationRule[];
+    compression: OptimizationRule<NetworkMetrics>[];
+    caching: OptimizationRule<NetworkMetrics>[];
+    cdn: OptimizationRule<NetworkMetrics>[];
   };
   code: {
-    javascript: OptimizationRule[];
-    css: OptimizationRule[];
-    html: OptimizationRule[];
+    javascript: OptimizationRule<CodeMetrics>[];
+    css: OptimizationRule<CodeMetrics>[];
+    html: OptimizationRule<CodeMetrics>[];
   };
+}
+
+interface OptimizationAnalysisData {
+  metrics: CoreWebVitalsMetrics;
+  resources: ResourceMetrics;
+  network: NetworkMetrics;
+  code: CodeMetrics;
 }
 
 interface OptimizationResult {
@@ -160,7 +194,7 @@ class PerformanceOptimizationEngine {
           threshold: 1800,
           rules: [
             {
-              condition: (metrics: any) => metrics.fcp > 3000,
+              condition: metrics => metrics.fcp > 3000,
               priority: 'high',
               category: 'critical_rendering_path',
               title: '优化关键渲染路径',
@@ -188,7 +222,7 @@ class PerformanceOptimizationEngine {
               dependencies: ['css-analysis'],
             },
             {
-              condition: (metrics: any) => metrics.fcp > 2500 && metrics.fcp <= 3000,
+              condition: metrics => metrics.fcp > 2500 && metrics.fcp <= 3000,
               priority: 'medium',
               category: 'resource_optimization',
               title: '优化资源加载',
@@ -221,7 +255,7 @@ class PerformanceOptimizationEngine {
           threshold: 2500,
           rules: [
             {
-              condition: (metrics: any) => metrics.lcp > 4000,
+              condition: metrics => metrics.lcp > 4000,
               priority: 'critical',
               category: 'content_optimization',
               title: '优化最大内容绘制',
@@ -261,7 +295,7 @@ images.forEach(img => imageObserver.observe(img));`,
           threshold: 100,
           rules: [
             {
-              condition: (metrics: any) => metrics.fid > 300,
+              condition: metrics => metrics.fid > 300,
               priority: 'high',
               category: 'javascript_optimization',
               title: '减少输入延迟',
@@ -304,7 +338,7 @@ observer.observe(document.querySelector('.heavy-content'));`,
           threshold: 0.1,
           rules: [
             {
-              condition: (metrics: any) => metrics.cls > 0.25,
+              condition: metrics => metrics.cls > 0.25,
               priority: 'medium',
               category: 'layout_stability',
               title: '改善布局稳定性',
@@ -346,7 +380,7 @@ observer.observe(document.querySelector('.heavy-content'));`,
           threshold: 800,
           rules: [
             {
-              condition: (metrics: any) => metrics.ttfb > 1800,
+              condition: metrics => metrics.ttfb > 1800,
               priority: 'critical',
               category: 'server_optimization',
               title: '优化服务器响应',
@@ -388,7 +422,7 @@ const getCachedData = async (key) => {
       resources: {
         images: [
           {
-            condition: (resources: any) => resources.imageSize > 1000000,
+            condition: resources => resources.imageSize > 1000000,
             priority: 'high',
             category: 'image_optimization',
             title: '优化图片资源',
@@ -419,7 +453,7 @@ const getCachedData = async (key) => {
         ],
         scripts: [
           {
-            condition: (resources: any) => resources.scriptCount > 10,
+            condition: resources => resources.scriptCount > 10,
             priority: 'medium',
             category: 'script_optimization',
             title: '合并JavaScript文件',
@@ -458,7 +492,7 @@ const getCachedData = async (key) => {
         ],
         stylesheets: [
           {
-            condition: (resources: any) => resources.stylesheetCount > 5,
+            condition: resources => resources.stylesheetCount > 5,
             priority: 'medium',
             category: 'css_optimization',
             title: '优化CSS文件',
@@ -468,9 +502,9 @@ const getCachedData = async (key) => {
               {
                 title: 'PurgeCSS配置',
                 language: 'javascript',
-                code: `const purgecss = require('@fullhuman/postcss-purgecss')({
+                code: String.raw`const purgecss = require('@fullhuman/postcss-purgecss')({
   content: ['./src/**/*.html', './src/**/*.js'],
-  defaultExtractor: content => content.match(/[\w-/:]+(?<!:)/g) || [],
+  defaultExtractor: content => content.match(/[\\w-/:]+(?<!:)/g) || [],
 });
 
 module.exports = {
@@ -488,7 +522,7 @@ module.exports = {
         ],
         fonts: [
           {
-            condition: (resources: any) => resources.fontSize > 300000,
+            condition: resources => resources.fontSize > 300000,
             priority: 'medium',
             category: 'font_optimization',
             title: '优化字体文件',
@@ -524,7 +558,7 @@ body {
       network: {
         compression: [
           {
-            condition: (network: any) => network.compressionRatio < 0.7,
+            condition: network => network.compressionRatio < 0.7,
             priority: 'high',
             category: 'compression',
             title: '启用压缩',
@@ -557,7 +591,7 @@ brotli_types text/plain text/css text/xml text/javascript application/javascript
         ],
         caching: [
           {
-            condition: (network: any) => network.cacheHitRate < 80,
+            condition: network => network.cacheHitRate < 80,
             priority: 'medium',
             category: 'caching',
             title: '优化缓存策略',
@@ -587,7 +621,7 @@ location ~* \\.(html)$ {
         ],
         cdn: [
           {
-            condition: (network: any) => !network.usingCDN,
+            condition: network => !network.usingCDN,
             priority: 'medium',
             category: 'cdn',
             title: '使用CDN加速',
@@ -635,7 +669,7 @@ async function handleRequest(request) {
       code: {
         javascript: [
           {
-            condition: (code: any) => code.unusedCode > 0.3,
+            condition: code => code.unusedCode > 0.3,
             priority: 'medium',
             category: 'code_optimization',
             title: '移除未使用代码',
@@ -671,7 +705,7 @@ module.exports = {
         ],
         css: [
           {
-            condition: (code: any) => code.cssComplexity > 1000,
+            condition: code => code.cssComplexity > 1000,
             priority: 'low',
             category: 'css_optimization',
             title: '简化CSS',
@@ -703,7 +737,7 @@ module.exports = {
         ],
         html: [
           {
-            condition: (code: any) => code.domDepth > 50,
+            condition: code => code.domDepth > 50,
             priority: 'low',
             category: 'html_optimization',
             title: '优化DOM结构',
@@ -750,12 +784,7 @@ module.exports = {
   /**
    * 生成优化建议
    */
-  generateOptimizations(analysisData: {
-    metrics: any;
-    resources: any;
-    network: any;
-    code: any;
-  }): OptimizationResult {
+  generateOptimizations(analysisData: OptimizationAnalysisData): OptimizationResult {
     const optimizations: Optimization[] = [];
 
     // Core Web Vitals 优化
@@ -831,7 +860,10 @@ module.exports = {
   /**
    * 创建优化项
    */
-  private createOptimization(rule: OptimizationRule, category: string): Optimization {
+  private createOptimization<TMetrics>(
+    rule: OptimizationRule<TMetrics>,
+    category: string
+  ): Optimization {
     return {
       id: this.generateId(),
       title: rule.title,
@@ -856,7 +888,7 @@ module.exports = {
     network: CategoryOptimization[];
     code: CategoryOptimization[];
   } {
-    const categories: any = {
+    const categories: Record<'coreWebVitals' | 'resources' | 'network' | 'code', Optimization[]> = {
       coreWebVitals: [],
       resources: [],
       network: [],
@@ -884,20 +916,29 @@ module.exports = {
     });
 
     // 计算每个类别的分数和影响
-    Object.keys(categories).forEach(key => {
+    const result = {
+      coreWebVitals: [] as CategoryOptimization[],
+      resources: [] as CategoryOptimization[],
+      network: [] as CategoryOptimization[],
+      code: [] as CategoryOptimization[],
+    };
+
+    (Object.keys(categories) as Array<keyof typeof categories>).forEach(key => {
       const categoryOptimizations = categories[key];
       const score = this.calculateCategoryScore(categoryOptimizations);
       const impact = this.calculateCategoryImpact(categoryOptimizations);
 
-      categories[key] = {
-        category: key,
-        score,
-        optimizations: categoryOptimizations,
-        estimatedImpact: impact,
-      };
+      result[key] = [
+        {
+          category: key,
+          score,
+          optimizations: categoryOptimizations,
+          estimatedImpact: impact,
+        },
+      ];
     });
 
-    return categories;
+    return result;
   }
 
   /**

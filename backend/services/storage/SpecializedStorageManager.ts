@@ -54,9 +54,10 @@ export interface StorageItem {
   createdAt: Date;
   updatedAt: Date;
   version: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   tags: string[];
   checksum: string;
+  encrypted?: boolean;
 }
 
 // 存储结果接口
@@ -67,17 +68,17 @@ export interface StorageResult {
   size: number;
   compressedSize?: number;
   duration: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 检索结果接口
 export interface RetrievalResult {
   success: boolean;
-  item: StorageItem;
+  item: StorageItem | null;
   data: Buffer | string;
   decompressedSize?: number;
   duration: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 存储统计接口
@@ -151,7 +152,7 @@ class SpecializedStorageManager {
       name: string;
       type: string;
       strategy: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
       tags?: string[];
     }
   ): Promise<StorageResult> {
@@ -217,6 +218,7 @@ class SpecializedStorageManager {
         metadata: options.metadata || {},
         tags: options.tags || [],
         checksum,
+        encrypted: strategy.encryptionEnabled,
       };
 
       this.items.set(itemId, item);
@@ -269,7 +271,7 @@ class SpecializedStorageManager {
     if (!item) {
       return {
         success: false,
-        item: item as StorageItem,
+        item: null,
         data: Buffer.alloc(0),
         duration: Date.now() - startTime,
         metadata: {
@@ -282,8 +284,9 @@ class SpecializedStorageManager {
       let data: Buffer;
 
       // 检查缓存
-      if (this.cache.has(itemId)) {
-        data = this.cache.get(itemId)!;
+      const cached = this.cache.get(itemId);
+      if (cached) {
+        data = cached;
       } else {
         // 从文件读取
         const storagePath = this.getStoragePath(item.strategy, itemId);
@@ -323,7 +326,7 @@ class SpecializedStorageManager {
         metadata: {
           cached: this.cache.has(itemId),
           compressed: !!item.compressedSize,
-          encrypted: item.encrypted,
+          encrypted: !!item.encrypted,
         },
       };
     } catch (error) {
@@ -376,7 +379,7 @@ class SpecializedStorageManager {
     itemId: string,
     data: Buffer | string,
     options: {
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
       tags?: string[];
     } = {}
   ): Promise<StorageResult> {
@@ -429,7 +432,7 @@ class SpecializedStorageManager {
       start: Date;
       end: Date;
     };
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): StorageItem[] {
     let results = Array.from(this.items.values());
 
@@ -444,21 +447,23 @@ class SpecializedStorageManager {
     }
 
     // 按标签过滤
-    if (criteria.tags && criteria.tags.length > 0) {
-      results = results.filter(item => criteria.tags!.some(tag => item.tags.includes(tag)));
+    const tags = criteria.tags;
+    if (tags && tags.length > 0) {
+      results = results.filter(item => tags.some(tag => item.tags.includes(tag)));
     }
 
     // 按日期范围过滤
-    if (criteria.dateRange) {
+    const dateRange = criteria.dateRange;
+    if (dateRange) {
       results = results.filter(
-        item =>
-          item.createdAt >= criteria.dateRange!.start && item.createdAt <= criteria.dateRange!.end
+        item => item.createdAt >= dateRange.start && item.createdAt <= dateRange.end
       );
     }
 
     // 按元数据过滤
-    if (criteria.metadata) {
-      results = results.filter(item => this.matchesMetadata(item.metadata, criteria.metadata!));
+    const metadata = criteria.metadata;
+    if (metadata) {
+      results = results.filter(item => this.matchesMetadata(item.metadata, metadata));
     }
 
     return results;
@@ -472,13 +477,15 @@ class SpecializedStorageManager {
 
     const totalItems = items.length;
     const totalSize = items.reduce((sum, item) => sum + item.size, 0);
-    const totalCompressedSize = items
-      .filter(item => item.compressedSize)
-      .reduce((sum, item) => sum + item.compressedSize!, 0);
+    const compressedItems = items.filter(
+      (item): item is StorageItem & { compressedSize: number } =>
+        typeof item.compressedSize === 'number'
+    );
+    const totalCompressedSize = compressedItems.reduce((sum, item) => sum + item.compressedSize, 0);
 
-    const compressionRatios = items
-      .filter(item => item.compressedSize)
-      .map(item => (item.size - item.compressedSize!) / item.size);
+    const compressionRatios = compressedItems.map(
+      item => (item.size - item.compressedSize) / item.size
+    );
     const averageCompressionRatio =
       compressionRatios.length > 0
         ? compressionRatios.reduce((sum, ratio) => sum + ratio, 0) / compressionRatios.length
@@ -494,7 +501,7 @@ class SpecializedStorageManager {
       }
       byStrategy[item.strategy].items++;
       byStrategy[item.strategy].size += item.size;
-      if (item.compressedSize) {
+      if (typeof item.compressedSize === 'number') {
         byStrategy[item.strategy].compressedSize += item.compressedSize;
       }
 
@@ -604,7 +611,10 @@ class SpecializedStorageManager {
       if (!this.index.has(tag)) {
         this.index.set(tag, new Set());
       }
-      this.index.get(tag)!.add(item.id);
+      const tagIndex = this.index.get(tag);
+      if (tagIndex) {
+        tagIndex.add(item.id);
+      }
     }
   }
 
@@ -639,8 +649,8 @@ class SpecializedStorageManager {
    * 匹配元数据
    */
   private matchesMetadata(
-    itemMetadata: Record<string, any>,
-    criteria: Record<string, any>
+    itemMetadata: Record<string, unknown>,
+    criteria: Record<string, unknown>
   ): boolean {
     for (const [key, value] of Object.entries(criteria)) {
       if (itemMetadata[key] !== value) {

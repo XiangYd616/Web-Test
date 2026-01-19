@@ -4,6 +4,7 @@
  */
 
 import * as winston from 'winston';
+import { query as dbQuery } from '../../config/database';
 
 // 统计查询接口
 export interface StatisticsQuery {
@@ -11,7 +12,7 @@ export interface StatisticsQuery {
   timeRange?: number;
   startDate?: Date;
   endDate?: Date;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   groupBy?: string[];
   aggregations?: string[];
 }
@@ -149,7 +150,7 @@ export interface StatisticsConfig {
 class StatisticsService {
   private logger: winston.Logger;
   private config: StatisticsConfig;
-  private cache: Map<string, { data: any; timestamp: number }> = new Map();
+  private cache: Map<string, { data: unknown; timestamp: number }> = new Map();
 
   constructor(config: Partial<StatisticsConfig> = {}) {
     this.config = {
@@ -176,69 +177,82 @@ class StatisticsService {
    */
   async getTestHistoryStatistics(query: StatisticsQuery): Promise<TestHistoryStatistics> {
     const cacheKey = this.generateCacheKey('testHistory', query);
-    const cached = this.getFromCache(cacheKey);
+    const cached = this.getFromCache<TestHistoryStatistics>(cacheKey);
     if (cached) {
       return cached;
     }
 
     try {
-      const { query: dbQuery } = require('../../config/database');
-
       // 基础统计
-      const baseQuery = this.buildBaseQuery(query);
-      const [totalResult] = await dbQuery(`
-        SELECT 
-          COUNT(*) as total,
-          COUNT(CASE WHEN status = 'completed' THEN 1 END) as successful,
-          COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed,
-          AVG(overall_score) as averageScore,
-          AVG(duration) as averageDuration
-        FROM test_history 
-        ${baseQuery}
-      `);
+      const { clause, params } = this.buildBaseFilter(query, 'te');
+      const whereClause = clause ? `WHERE ${clause}` : '';
+
+      const totalResult = await dbQuery(
+        `SELECT
+           COUNT(*)::int AS total,
+           COUNT(*) FILTER (WHERE te.status = 'completed')::int AS successful,
+           COUNT(*) FILTER (WHERE te.status = 'failed')::int AS failed,
+           COALESCE(AVG(tr.score), 0)::float AS average_score,
+           COALESCE(AVG(te.execution_time), 0)::float AS average_duration
+         FROM test_executions te
+         LEFT JOIN test_results tr ON tr.execution_id = te.id
+         ${whereClause}`,
+        params
+      );
 
       // 按类型统计
-      const typeResults = await dbQuery(`
-        SELECT test_type, COUNT(*) as count
-        FROM test_history 
-        ${baseQuery}
-        GROUP BY test_type
-      `);
+      const typeResults = await dbQuery(
+        `SELECT te.engine_type AS test_type, COUNT(*)::int AS count
+         FROM test_executions te
+         ${whereClause}
+         GROUP BY te.engine_type`,
+        params
+      );
 
       // 按状态统计
-      const statusResults = await dbQuery(`
-        SELECT status, COUNT(*) as count
-        FROM test_history 
-        ${baseQuery}
-        GROUP BY status
-      `);
+      const statusResults = await dbQuery(
+        `SELECT te.status AS status, COUNT(*)::int AS count
+         FROM test_executions te
+         ${whereClause}
+         GROUP BY te.status`,
+        params
+      );
 
       // 按日期统计
-      const dailyResults = await dbQuery(`
-        SELECT 
-          DATE(created_at) as date,
-          COUNT(*) as count,
-          AVG(CASE WHEN status = 'completed' THEN 1.0 ELSE 0.0 END) * 100 as successRate,
-          AVG(overall_score) as averageScore
-        FROM test_history 
-        ${baseQuery}
-        GROUP BY DATE(created_at)
-        ORDER BY date DESC
-        LIMIT 30
-      `);
+      const dailyResults = await dbQuery(
+        `SELECT
+           DATE(te.created_at) AS date,
+           COUNT(*)::int AS count,
+           AVG(CASE WHEN te.status = 'completed' THEN 1.0 ELSE 0.0 END) * 100 AS success_rate,
+           COALESCE(AVG(tr.score), 0)::float AS average_score
+         FROM test_executions te
+         LEFT JOIN test_results tr ON tr.execution_id = te.id
+         ${whereClause}
+         GROUP BY DATE(te.created_at)
+         ORDER BY date DESC
+         LIMIT 30`,
+        params
+      );
+
+      const byDay = (dailyResults.rows || []).map(row => ({
+        date: String(row.date),
+        count: Number(row.count) || 0,
+        successRate: Number(row.success_rate) || 0,
+        averageScore: Number(row.average_score) || 0,
+      }));
 
       // 趋势分析
-      const trends = this.analyzeTrends(dailyResults);
+      const trends = this.analyzeTestHistoryTrends(byDay);
 
       const statistics: TestHistoryStatistics = {
-        total: totalResult.total || 0,
-        successful: totalResult.successful || 0,
-        failed: totalResult.failed || 0,
-        averageScore: totalResult.averageScore || 0,
-        averageDuration: totalResult.averageDuration || 0,
+        total: Number(totalResult.rows[0]?.total) || 0,
+        successful: Number(totalResult.rows[0]?.successful) || 0,
+        failed: Number(totalResult.rows[0]?.failed) || 0,
+        averageScore: Number(totalResult.rows[0]?.average_score) || 0,
+        averageDuration: Number(totalResult.rows[0]?.average_duration) || 0,
         byType: this.arrayToObject(typeResults, 'test_type', 'count'),
         byStatus: this.arrayToObject(statusResults, 'status', 'count'),
-        byDay: dailyResults,
+        byDay,
         trends,
       };
 
@@ -255,68 +269,114 @@ class StatisticsService {
    */
   async getUserActivityStatistics(query: StatisticsQuery): Promise<UserActivityStatistics> {
     const cacheKey = this.generateCacheKey('userActivity', query);
-    const cached = this.getFromCache(cacheKey);
+    const cached = this.getFromCache<UserActivityStatistics>(cacheKey);
     if (cached) {
       return cached;
     }
 
     try {
-      const { query: dbQuery } = require('../../config/database');
+      const userParams: unknown[] = [];
+      const userConditions: string[] = [];
+      if (query.userId) {
+        userParams.push(query.userId);
+        userConditions.push(`u.id = $${userParams.length}`);
+      }
+      const userClause = userConditions.length > 0 ? `WHERE ${userConditions.join(' AND ')}` : '';
 
-      // 基础用户统计
-      const baseQuery = this.buildBaseQuery(query);
-      const [userStats] = await dbQuery(`
-        SELECT 
-          COUNT(DISTINCT user_id) as totalUsers,
-          COUNT(DISTINCT CASE WHEN last_login > DATE_SUB(NOW(), INTERVAL 30 DAY) THEN user_id END) as activeUsers,
-          COUNT(DISTINCT CASE WHEN created_at > DATE_SUB(NOW(), INTERVAL 30 DAY) THEN user_id END) as newUsers,
-          AVG(test_count) as averageTestsPerUser
-        FROM users u
-        LEFT JOIN (
-          SELECT user_id, COUNT(*) as test_count
-          FROM test_history
-          ${baseQuery}
-          GROUP BY user_id
-        ) t ON u.id = t.user_id
-      `);
+      const rangeDays = query.timeRange || 30;
+      const activeCondition = this.buildDateRangeCondition(
+        'u.last_login',
+        query,
+        userParams,
+        rangeDays
+      );
+      const newUserCondition = this.buildDateRangeCondition(
+        'u.created_at',
+        query,
+        userParams,
+        rangeDays
+      );
+
+      const activeClause = activeCondition ? `AND ${activeCondition}` : '';
+      const newUserClause = newUserCondition ? `AND ${newUserCondition}` : '';
+
+      const userStats = await dbQuery(
+        `SELECT
+           COUNT(*)::int AS total_users,
+           COUNT(*) FILTER (WHERE TRUE ${activeClause})::int AS active_users,
+           COUNT(*) FILTER (WHERE TRUE ${newUserClause})::int AS new_users
+         FROM users u
+         ${userClause}`,
+        userParams
+      );
+
+      const { clause, params } = this.buildBaseFilter(query, 'te');
+      const whereClause = clause ? `WHERE ${clause}` : '';
+
+      const testsPerUser = await dbQuery(
+        `SELECT te.user_id, COUNT(*)::int AS test_count
+         FROM test_executions te
+         ${whereClause}
+         GROUP BY te.user_id`,
+        params
+      );
+
+      const averageTestsPerUser =
+        testsPerUser.rows.length > 0
+          ? testsPerUser.rows.reduce((sum, row) => sum + Number(row.test_count || 0), 0) /
+            testsPerUser.rows.length
+          : 0;
 
       // 顶级用户
-      const topUsers = await dbQuery(`
-        SELECT 
-          u.id as userId,
-          u.username,
-          COUNT(t.id) as testCount,
-          AVG(t.overall_score) as averageScore
-        FROM users u
-        JOIN test_history t ON u.id = t.user_id
-        ${baseQuery}
-        GROUP BY u.id, u.username
-        ORDER BY testCount DESC
-        LIMIT 10
-      `);
+      const topUsers = await dbQuery(
+        `SELECT
+           te.user_id AS userId,
+           u.username,
+           COUNT(*)::int AS testCount,
+           COALESCE(AVG(tr.score), 0)::float AS averageScore
+         FROM test_executions te
+         JOIN users u ON u.id = te.user_id
+         LEFT JOIN test_results tr ON tr.execution_id = te.id
+         ${whereClause}
+         GROUP BY te.user_id, u.username
+         ORDER BY testCount DESC
+         LIMIT 10`,
+        params
+      );
 
       // 每日活动
-      const dailyActivity = await dbQuery(`
-        SELECT 
-          DATE(t.created_at) as date,
-          COUNT(DISTINCT t.user_id) as activeUsers,
-          COUNT(DISTINCT CASE WHEN u.created_at = DATE(t.created_at) THEN u.id END) as newUsers,
-          COUNT(t.id) as totalTests
-        FROM test_history t
-        LEFT JOIN users u ON t.user_id = u.id
-        ${baseQuery}
-        GROUP BY DATE(t.created_at)
-        ORDER BY date DESC
-        LIMIT 30
-      `);
+      const dailyActivity = await dbQuery(
+        `SELECT
+           DATE(te.created_at) AS date,
+           COUNT(DISTINCT te.user_id)::int AS active_users,
+           COUNT(DISTINCT CASE WHEN DATE(u.created_at) = DATE(te.created_at) THEN u.id END)::int AS new_users,
+           COUNT(*)::int AS total_tests
+         FROM test_executions te
+         LEFT JOIN users u ON te.user_id = u.id
+         ${whereClause}
+         GROUP BY DATE(te.created_at)
+         ORDER BY date DESC
+         LIMIT 30`,
+        params
+      );
 
       const statistics: UserActivityStatistics = {
-        totalUsers: userStats.totalUsers || 0,
-        activeUsers: userStats.activeUsers || 0,
-        newUsers: userStats.newUsers || 0,
-        averageTestsPerUser: userStats.averageTestsPerUser || 0,
-        topUsers,
-        activityByDay: dailyActivity,
+        totalUsers: Number(userStats.rows[0]?.total_users) || 0,
+        activeUsers: Number(userStats.rows[0]?.active_users) || 0,
+        newUsers: Number(userStats.rows[0]?.new_users) || 0,
+        averageTestsPerUser,
+        topUsers: (topUsers.rows || []).map(row => ({
+          userId: String(row.userid ?? row.userId),
+          username: String(row.username ?? ''),
+          testCount: Number(row.testcount ?? row.testCount) || 0,
+          averageScore: Number(row.averagescore ?? row.averageScore) || 0,
+        })),
+        activityByDay: (dailyActivity.rows || []).map(row => ({
+          date: String(row.date),
+          activeUsers: Number(row.active_users) || 0,
+          newUsers: Number(row.new_users) || 0,
+          totalTests: Number(row.total_tests) || 0,
+        })),
       };
 
       this.setCache(cacheKey, statistics);
@@ -332,57 +392,63 @@ class StatisticsService {
    */
   async getPerformanceStatistics(query: StatisticsQuery): Promise<PerformanceStatistics> {
     const cacheKey = this.generateCacheKey('performance', query);
-    const cached = this.getFromCache(cacheKey);
+    const cached = this.getFromCache<PerformanceStatistics>(cacheKey);
     if (cached) {
       return cached;
     }
 
     try {
-      const { query: dbQuery } = require('../../config/database');
+      const { clause, params } = this.buildBaseFilter(query, 'te');
+      const whereClause = clause ? `WHERE ${clause}` : '';
 
-      // 基础性能统计
-      const [perfStats] = await dbQuery(
-        `
-        SELECT 
-          AVG(response_time) as averageResponseTime,
-          AVG(page_load_time) as averagePageLoadTime,
-          AVG(test_duration) as averageTestDuration,
-          COUNT(*) / 3600 as throughput,
-          COUNT(CASE WHEN status = 'error' THEN 1 END) / COUNT(*) * 100 as errorRate,
-          COUNT(CASE WHEN status = 'success' THEN 1 END) / COUNT(*) * 100 as availability
-        FROM performance_logs
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-      `,
-        [query.timeRange || 30]
+      const metricValueExpr = this.buildMetricValueExpression('tm.metric_value');
+
+      const perfStats = await dbQuery(
+        `SELECT
+           AVG(CASE WHEN tm.metric_name IN ('averageResponseTime', 'responseTime') THEN ${metricValueExpr} END)::float AS average_response_time,
+           AVG(CASE WHEN tm.metric_name IN ('pageLoadTime', 'averagePageLoadTime') THEN ${metricValueExpr} END)::float AS average_page_load_time,
+           AVG(CASE WHEN tm.metric_name IN ('testDuration', 'averageTestDuration', 'duration') THEN ${metricValueExpr} END)::float AS average_test_duration,
+           AVG(CASE WHEN tm.metric_name IN ('throughput') THEN ${metricValueExpr} END)::float AS throughput,
+           AVG(CASE WHEN tm.metric_name IN ('errorRate') THEN ${metricValueExpr} END)::float AS error_rate,
+           AVG(CASE WHEN tm.metric_name IN ('availability') THEN ${metricValueExpr} END)::float AS availability
+         FROM test_metrics tm
+         JOIN test_results tr ON tr.id = tm.result_id
+         JOIN test_executions te ON te.id = tr.execution_id
+         ${whereClause}`,
+        params
       );
 
-      // 按端点统计
       const endpointStats = await dbQuery(
-        `
-        SELECT 
-          endpoint,
-          AVG(response_time) as averageResponseTime,
-          COUNT(*) as requestCount,
-          COUNT(CASE WHEN status = 'error' THEN 1 END) / COUNT(*) * 100 as errorRate
-        FROM performance_logs
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-        GROUP BY endpoint
-        ORDER BY requestCount DESC
-      `,
-        [query.timeRange || 30]
+        `SELECT
+           tm.metric_name AS endpoint,
+           AVG(${metricValueExpr})::float AS average_response_time,
+           COUNT(*)::int AS request_count,
+           AVG(CASE WHEN tm.passed = false THEN 1 ELSE 0 END) * 100 AS error_rate
+         FROM test_metrics tm
+         JOIN test_results tr ON tr.id = tm.result_id
+         JOIN test_executions te ON te.id = tr.execution_id
+         ${whereClause ? `${whereClause} AND tm.metric_type = 'endpoint'` : "WHERE tm.metric_type = 'endpoint'"}
+         GROUP BY tm.metric_name
+         ORDER BY request_count DESC
+         LIMIT 20`,
+        params
       );
 
-      // 趋势分析
-      const trends = this.analyzePerformanceTrends(query.timeRange || 30);
+      const trends = await this.analyzePerformanceTrends(query);
 
       const statistics: PerformanceStatistics = {
-        averageResponseTime: perfStats.averageResponseTime || 0,
-        averagePageLoadTime: perfStats.averagePageLoadTime || 0,
-        averageTestDuration: perfStats.averageTestDuration || 0,
-        throughput: perfStats.throughput || 0,
-        errorRate: perfStats.errorRate || 0,
-        availability: perfStats.availability || 0,
-        byEndpoint: endpointStats,
+        averageResponseTime: Number(perfStats.rows[0]?.average_response_time) || 0,
+        averagePageLoadTime: Number(perfStats.rows[0]?.average_page_load_time) || 0,
+        averageTestDuration: Number(perfStats.rows[0]?.average_test_duration) || 0,
+        throughput: Number(perfStats.rows[0]?.throughput) || 0,
+        errorRate: Number(perfStats.rows[0]?.error_rate) || 0,
+        availability: Number(perfStats.rows[0]?.availability) || 0,
+        byEndpoint: (endpointStats.rows || []).map(row => ({
+          endpoint: String(row.endpoint),
+          averageResponseTime: Number(row.average_response_time) || 0,
+          requestCount: Number(row.request_count) || 0,
+          errorRate: Number(row.error_rate) || 0,
+        })),
         trends,
       };
 
@@ -399,71 +465,60 @@ class StatisticsService {
    */
   async getSystemUsageStatistics(query: StatisticsQuery): Promise<SystemUsageStatistics> {
     const cacheKey = this.generateCacheKey('systemUsage', query);
-    const cached = this.getFromCache(cacheKey);
+    const cached = this.getFromCache<SystemUsageStatistics>(cacheKey);
     if (cached) {
       return cached;
     }
 
     try {
-      const { query: dbQuery } = require('../../config/database');
+      const { clause, params } = this.buildBaseFilter(query, 'te');
+      const whereClause = clause ? `WHERE ${clause}` : '';
 
-      // 基础使用统计
-      const [usageStats] = await dbQuery(
-        `
-        SELECT 
-          (SELECT COUNT(*) FROM test_history WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)) as totalTests,
-          (SELECT COUNT(*) FROM reports WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)) as totalReports,
-          (SELECT COUNT(*) FROM export_tasks WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)) as totalExports,
-          (SELECT COUNT(*) FROM import_tasks WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)) as totalImports,
-          (SELECT SUM(file_size) FROM file_storage WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)) as storageUsed,
-          (SELECT COUNT(*) FROM api_logs WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)) as apiCalls
-      `,
-        [
-          query.timeRange || 30,
-          query.timeRange || 30,
-          query.timeRange || 30,
-          query.timeRange || 30,
-          query.timeRange || 30,
-          query.timeRange || 30,
-        ]
+      const usageStats = await dbQuery(
+        `SELECT
+           (SELECT COUNT(*) FROM test_executions te ${whereClause})::int AS total_tests,
+           (SELECT COUNT(*) FROM test_reports tr
+             LEFT JOIN test_executions te ON te.id = tr.execution_id
+             ${whereClause})::int AS total_reports,
+           (SELECT COUNT(*) FROM export_tasks et
+             WHERE et.created_at >= NOW() - ($1::int || ' days')::interval)::int AS total_exports,
+           0::int AS total_imports,
+           (SELECT COALESCE(SUM(file_size), 0) FROM test_reports tr
+             LEFT JOIN test_executions te ON te.id = tr.execution_id
+             ${whereClause})::float AS storage_used,
+           (SELECT COUNT(*) FROM test_logs tl
+             LEFT JOIN test_executions te ON te.id = tl.execution_id
+             ${whereClause})::int AS api_calls`,
+        params.length > 0 ? params : [query.timeRange || 30]
       );
 
-      // 按模块统计
       const moduleStats = await dbQuery(
-        `
-        SELECT 
-          module,
-          COUNT(*) as count
-        FROM usage_logs
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-        GROUP BY module
-      `,
-        [query.timeRange || 30]
+        `SELECT te.engine_type AS module, COUNT(*)::int AS count
+         FROM test_executions te
+         ${whereClause}
+         GROUP BY te.engine_type`,
+        params
       );
 
-      // 按功能统计
       const featureStats = await dbQuery(
-        `
-        SELECT 
-          feature,
-          COUNT(*) as count
-        FROM usage_logs
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-        GROUP BY feature
-      `,
-        [query.timeRange || 30]
+        `SELECT tr.report_type AS feature, COUNT(*)::int AS count
+         FROM test_reports tr
+         LEFT JOIN test_executions te ON te.id = tr.execution_id
+         ${whereClause}
+         GROUP BY tr.report_type`,
+        params
       );
 
       // 增长统计
       const growth = await this.calculateGrowth(query.timeRange || 30);
 
       const statistics: SystemUsageStatistics = {
-        totalTests: usageStats.totalTests || 0,
-        totalReports: usageStats.totalReports || 0,
-        totalExports: usageStats.totalExports || 0,
-        totalImports: usageStats.totalImports || 0,
-        storageUsed: usageStats.storageUsed || 0,
-        apiCalls: usageStats.apiCalls || 0,
+        totalTests: Number(usageStats.rows[0]?.total_tests) || 0,
+        totalReports: Number(usageStats.rows[0]?.total_reports) || 0,
+        totalExports: Number(usageStats.rows[0]?.total_exports) || 0,
+        totalImports: Number(usageStats.rows[0]?.total_imports) || 0,
+        storageUsed: Number(usageStats.rows[0]?.storage_used) || 0,
+        apiCalls: Number(usageStats.rows[0]?.api_calls) || 0,
         byModule: this.arrayToObject(moduleStats, 'module', 'count'),
         byFeature: this.arrayToObject(featureStats, 'feature', 'count'),
         growth,
@@ -528,28 +583,30 @@ class StatisticsService {
    */
   async analyzeTrends(metric: string, period: number = 30): Promise<TrendAnalysis> {
     try {
-      const { query: dbQuery } = require('../../config/database');
-
+      const metricValueExpr = this.buildMetricValueExpression('tm.metric_value');
       const data = await dbQuery(
-        `
-        SELECT 
-          DATE(created_at) as date,
-          AVG(${metric}) as value
-        FROM test_history
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-        GROUP BY DATE(created_at)
-        ORDER BY date ASC
-      `,
-        [period]
+        `SELECT
+           DATE(te.created_at) AS date,
+           AVG(${metricValueExpr})::float AS value
+         FROM test_metrics tm
+         JOIN test_results tr ON tr.id = tm.result_id
+         JOIN test_executions te ON te.id = tr.execution_id
+         WHERE tm.metric_name = $1
+           AND te.created_at >= NOW() - ($2::int || ' days')::interval
+         GROUP BY DATE(te.created_at)
+         ORDER BY date ASC`,
+        [metric, period]
       );
 
-      const trend = this.calculateTrend(data);
-      const prediction = this.generatePrediction(data, 7);
+      const typedData = data as Array<{ date: string; value: number }>;
+      const values = typedData.map(item => Number(item.value) || 0);
+      const trend = this.calculateTrend(values);
+      const prediction = this.generatePrediction(typedData, 7);
 
       return {
         metric,
         period,
-        data,
+        data: data.rows || [],
         trend: trend.direction,
         changeRate: trend.changeRate,
         prediction,
@@ -578,11 +635,11 @@ class StatisticsService {
     newestEntry?: Date;
   } {
     const now = Date.now();
-    let hits = 0;
+    const hits = 0;
     let oldestTimestamp = now;
     let newestTimestamp = 0;
 
-    for (const [key, entry] of this.cache.entries()) {
+    for (const [_key, entry] of this.cache.entries()) {
       if (entry.timestamp > newestTimestamp) {
         newestTimestamp = entry.timestamp;
       }
@@ -602,37 +659,41 @@ class StatisticsService {
   /**
    * 构建基础查询条件
    */
-  private buildBaseQuery(query: StatisticsQuery): string {
+  private buildBaseFilter(query: StatisticsQuery, alias: string) {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (query.userId) {
-      conditions.push('user_id = ?');
       params.push(query.userId);
+      conditions.push(`${alias}.user_id = $${params.length}`);
     }
 
     if (query.startDate) {
-      conditions.push('created_at >= ?');
       params.push(query.startDate);
+      conditions.push(`${alias}.created_at >= $${params.length}`);
     }
 
     if (query.endDate) {
-      conditions.push('created_at <= ?');
       params.push(query.endDate);
+      conditions.push(`${alias}.created_at <= $${params.length}`);
     }
 
     if (query.timeRange) {
-      conditions.push('created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)');
       params.push(query.timeRange);
+      conditions.push(
+        `${alias}.created_at >= NOW() - ($${params.length}::int || ' days')::interval`
+      );
     }
 
-    return conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    return { clause: conditions.join(' AND '), params };
   }
 
   /**
    * 分析趋势
    */
-  private analyzeTrends(data: any[]): TestHistoryStatistics['trends'] {
+  private analyzeTestHistoryTrends(
+    data: Array<Record<string, unknown>>
+  ): TestHistoryStatistics['trends'] {
     if (data.length < 2) {
       return {
         score: 'stable',
@@ -641,9 +702,11 @@ class StatisticsService {
       };
     }
 
-    const scoreTrend = this.calculateTrend(data.map(d => d.averageScore));
-    const successRateTrend = this.calculateTrend(data.map(d => d.successRate));
-    const volumeTrend = this.calculateTrend(data.map(d => d.count));
+    const toNumber = (value: unknown): number =>
+      typeof value === 'number' ? value : Number(value) || 0;
+    const scoreTrend = this.calculateTrend(data.map(d => toNumber(d.averageScore)));
+    const successRateTrend = this.calculateTrend(data.map(d => toNumber(d.successRate)));
+    const volumeTrend = this.calculateTrend(data.map(d => toNumber(d.count)));
 
     return {
       score: scoreTrend.direction,
@@ -655,12 +718,39 @@ class StatisticsService {
   /**
    * 分析性能趋势
    */
-  private analyzePerformanceTrends(period: number): PerformanceStatistics['trends'] {
-    // 简化实现，实际应该从性能日志中分析
+  private async analyzePerformanceTrends(
+    query: StatisticsQuery
+  ): Promise<PerformanceStatistics['trends']> {
+    const { clause, params } = this.buildBaseFilter(query, 'te');
+    const whereClause = clause ? `WHERE ${clause}` : '';
+    const metricValueExpr = this.buildMetricValueExpression('tm.metric_value');
+
+    const metricData = await dbQuery(
+      `SELECT
+         DATE(te.created_at) AS date,
+         AVG(CASE WHEN tm.metric_name IN ('averageResponseTime', 'responseTime') THEN ${metricValueExpr} END)::float AS response_time,
+         AVG(CASE WHEN tm.metric_name IN ('throughput') THEN ${metricValueExpr} END)::float AS throughput,
+         AVG(CASE WHEN tm.metric_name IN ('errorRate') THEN ${metricValueExpr} END)::float AS error_rate
+       FROM test_metrics tm
+       JOIN test_results tr ON tr.id = tm.result_id
+       JOIN test_executions te ON te.id = tr.execution_id
+       ${whereClause}
+       GROUP BY DATE(te.created_at)
+       ORDER BY date ASC`,
+      params
+    );
+
+    const rows = metricData.rows || [];
+    const responseTrend = this.calculateTrend(rows.map(row => Number(row.response_time) || 0));
+    const throughputTrend = this.calculateTrend(rows.map(row => Number(row.throughput) || 0));
+    const errorRateTrend = this.calculateTrend(rows.map(row => Number(row.error_rate) || 0));
+
     return {
-      responseTime: 'stable',
-      throughput: 'stable',
-      errorRate: 'stable',
+      responseTime:
+        responseTrend.direction === 'increasing' ? 'degrading' : responseTrend.direction,
+      throughput:
+        throughputTrend.direction === 'increasing' ? 'improving' : throughputTrend.direction,
+      errorRate: errorRateTrend.direction === 'decreasing' ? 'improving' : errorRateTrend.direction,
     };
   }
 
@@ -696,40 +786,55 @@ class StatisticsService {
    */
   private async calculateGrowth(period: number): Promise<SystemUsageStatistics['growth']> {
     try {
-      const { query: dbQuery } = require('../../config/database');
-
-      const [currentPeriod] = await dbQuery(
-        `
-        SELECT 
-          COUNT(*) as tests,
-          COUNT(DISTINCT user_id) as users,
-          COALESCE(SUM(file_size), 0) as storage
-        FROM test_history t
-        LEFT JOIN file_storage f ON DATE(f.created_at) = DATE(t.created_at)
-        WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
-      `,
+      const currentPeriod = await dbQuery(
+        `SELECT
+           COUNT(*)::int AS tests,
+           COUNT(DISTINCT user_id)::int AS users
+         FROM test_executions
+         WHERE created_at >= NOW() - ($1::int || ' days')::interval`,
         [period]
       );
 
-      const [previousPeriod] = await dbQuery(
-        `
-        SELECT 
-          COUNT(*) as tests,
-          COUNT(DISTINCT user_id) as users,
-          COALESCE(SUM(file_size), 0) as storage
-        FROM test_history t
-        LEFT JOIN file_storage f ON DATE(f.created_at) = DATE(t.created_at)
-        WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL ? DAY) AND t.created_at < DATE_SUB(NOW(), INTERVAL ? DAY)
-      `,
+      const currentStorage = await dbQuery(
+        `SELECT COALESCE(SUM(file_size), 0)::float AS storage
+         FROM test_reports
+         WHERE generated_at >= NOW() - ($1::int || ' days')::interval`,
+        [period]
+      );
+
+      const previousPeriod = await dbQuery(
+        `SELECT
+           COUNT(*)::int AS tests,
+           COUNT(DISTINCT user_id)::int AS users
+         FROM test_executions
+         WHERE created_at >= NOW() - ($1::int || ' days')::interval
+           AND created_at < NOW() - ($2::int || ' days')::interval`,
+        [period * 2, period]
+      );
+
+      const previousStorage = await dbQuery(
+        `SELECT COALESCE(SUM(file_size), 0)::float AS storage
+         FROM test_reports
+         WHERE generated_at >= NOW() - ($1::int || ' days')::interval
+           AND generated_at < NOW() - ($2::int || ' days')::interval`,
         [period * 2, period]
       );
 
       return {
-        tests: this.calculateGrowthRate(previousPeriod.tests, currentPeriod.tests),
-        users: this.calculateGrowthRate(previousPeriod.users, currentPeriod.users),
-        storage: this.calculateGrowthRate(previousPeriod.storage, currentPeriod.storage),
+        tests: this.calculateGrowthRate(
+          Number(previousPeriod.rows[0]?.tests) || 0,
+          Number(currentPeriod.rows[0]?.tests) || 0
+        ),
+        users: this.calculateGrowthRate(
+          Number(previousPeriod.rows[0]?.users) || 0,
+          Number(currentPeriod.rows[0]?.users) || 0
+        ),
+        storage: this.calculateGrowthRate(
+          Number(previousStorage.rows[0]?.storage) || 0,
+          Number(currentStorage.rows[0]?.storage) || 0
+        ),
       };
-    } catch (error) {
+    } catch {
       return { tests: 0, users: 0, storage: 0 };
     }
   }
@@ -747,7 +852,7 @@ class StatisticsService {
    */
   private calculateSystemHealth(
     performance: PerformanceStatistics,
-    usage: SystemUsageStatistics
+    _usage: SystemUsageStatistics
   ): 'excellent' | 'good' | 'fair' | 'poor' {
     let score = 0;
 
@@ -776,7 +881,10 @@ class StatisticsService {
   /**
    * 生成预测
    */
-  private generatePrediction(data: any[], days: number): TrendAnalysis['prediction'] {
+  private generatePrediction(
+    data: Array<{ date: string; value: number }>,
+    days: number
+  ): TrendAnalysis['prediction'] {
     // 简化的线性预测
     if (data.length < 2) {
       return [];
@@ -825,13 +933,16 @@ class StatisticsService {
    * 数组转对象
    */
   private arrayToObject(
-    array: any[],
+    array: Array<Record<string, unknown>>,
     keyField: string,
     valueField: string
   ): Record<string, number> {
     const result: Record<string, number> = {};
     array.forEach(item => {
-      result[item[keyField]] = item[valueField];
+      const key = String(item[keyField]);
+      const value =
+        typeof item[valueField] === 'number' ? item[valueField] : Number(item[valueField]);
+      result[key] = Number.isFinite(value) ? value : 0;
     });
     return result;
   }
@@ -846,7 +957,7 @@ class StatisticsService {
   /**
    * 从缓存获取
    */
-  private getFromCache(key: string): any {
+  private getFromCache<T>(key: string): T | null {
     if (!this.config.cacheEnabled) return null;
 
     const entry = this.cache.get(key);
@@ -857,13 +968,13 @@ class StatisticsService {
       return null;
     }
 
-    return entry.data;
+    return entry.data as T;
   }
 
   /**
    * 设置缓存
    */
-  private setCache(key: string, data: any): void {
+  private setCache(key: string, data: unknown): void {
     if (!this.config.cacheEnabled) return;
 
     this.cache.set(key, {
@@ -877,6 +988,37 @@ class StatisticsService {
    */
   private generateReportId(): string {
     return `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private buildDateRangeCondition(
+    column: string,
+    query: StatisticsQuery,
+    params: unknown[],
+    fallbackDays: number
+  ): string {
+    const conditions: string[] = [];
+    if (query.startDate) {
+      params.push(query.startDate);
+      conditions.push(`${column} >= $${params.length}`);
+    }
+    if (query.endDate) {
+      params.push(query.endDate);
+      conditions.push(`${column} <= $${params.length}`);
+    }
+    if (conditions.length === 0) {
+      params.push(fallbackDays);
+      conditions.push(`${column} >= NOW() - ($${params.length}::int || ' days')::interval`);
+    }
+    return conditions.join(' AND ');
+  }
+
+  private buildMetricValueExpression(column: string): string {
+    return `CASE
+      WHEN jsonb_typeof(${column}) = 'number' THEN (${column})::numeric
+      WHEN jsonb_typeof(${column}) = 'string' THEN NULLIF(${column}::text, '')::numeric
+      WHEN jsonb_typeof(${column}) = 'object' AND ${column} ? 'value' THEN (${column} ->> 'value')::numeric
+      ELSE NULL
+    END`;
   }
 }
 

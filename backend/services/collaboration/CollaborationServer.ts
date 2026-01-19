@@ -16,7 +16,8 @@ export interface CollaborationConnection {
   roomId?: string;
   connectedAt: Date;
   lastActivity: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
+  isAuthenticated?: boolean;
 }
 
 // 协作房间接口
@@ -28,19 +29,19 @@ export interface CollaborationRoom {
   createdAt: Date;
   maxMembers?: number;
   isPrivate: boolean;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 协作消息接口
 export interface CollaborationMessage {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   from: string;
   to?: string;
   roomId?: string;
   timestamp: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 协作服务器配置接口
@@ -67,8 +68,10 @@ class CollaborationServer extends EventEmitter {
   private server: WebSocket.Server | null = null;
   private connections: Map<string, CollaborationConnection> = new Map();
   private rooms: Map<string, CollaborationRoom> = new Map();
-  private messageHandlers: Map<string, (connection: CollaborationConnection, data: any) => void> =
-    new Map();
+  private messageHandlers: Map<
+    string,
+    (connection: CollaborationConnection, data: unknown) => void
+  > = new Map();
 
   constructor(options: Partial<CollaborationServerConfig> = {}) {
     super();
@@ -142,7 +145,7 @@ class CollaborationServer extends EventEmitter {
    */
   registerHandler(
     type: string,
-    handler: (connection: CollaborationConnection, data: any) => void
+    handler: (connection: CollaborationConnection, data: unknown) => void
   ): void {
     this.messageHandlers.set(type, handler);
   }
@@ -150,7 +153,7 @@ class CollaborationServer extends EventEmitter {
   /**
    * 发送消息到指定连接
    */
-  sendToConnection(connectionId: string, type: string, data: any): boolean {
+  sendToConnection(connectionId: string, type: string, data: unknown): boolean {
     const connection = this.connections.get(connectionId);
     if (!connection || connection.socket.readyState !== WebSocket.OPEN) {
       return false;
@@ -177,7 +180,7 @@ class CollaborationServer extends EventEmitter {
   /**
    * 发送消息到房间
    */
-  sendToRoom(roomId: string, type: string, data: any, excludeConnections?: string[]): number {
+  sendToRoom(roomId: string, type: string, data: unknown, excludeConnections?: string[]): number {
     const room = this.rooms.get(roomId);
     if (!room) {
       throw new Error(`Room not found: ${roomId}`);
@@ -200,7 +203,7 @@ class CollaborationServer extends EventEmitter {
   /**
    * 广播消息到所有连接
    */
-  broadcast(type: string, data: any, excludeConnections?: string[]): number {
+  broadcast(type: string, data: unknown, excludeConnections?: string[]): number {
     let sentCount = 0;
 
     for (const [connectionId] of this.connections.entries()) {
@@ -375,7 +378,7 @@ class CollaborationServer extends EventEmitter {
   private setupServerListeners(): void {
     if (!this.server) return;
 
-    this.server.on('connection', (socket: WebSocket, request: any) => {
+    this.server.on('connection', (socket: WebSocket, request: unknown) => {
       this.handleConnection(socket, request);
     });
 
@@ -387,7 +390,7 @@ class CollaborationServer extends EventEmitter {
   /**
    * 处理新连接
    */
-  private handleConnection(socket: WebSocket, request: any): void {
+  private handleConnection(socket: WebSocket, _request: unknown): void {
     const connectionId = uuidv4();
     const connection: CollaborationConnection = {
       id: connectionId,
@@ -469,11 +472,18 @@ class CollaborationServer extends EventEmitter {
   /**
    * 处理认证
    */
-  private handleAuthentication(connection: CollaborationConnection, data: any): void {
+  private handleAuthentication(connection: CollaborationConnection, data: unknown): void {
+    if (!isRecord(data)) {
+      this.sendToConnection(connection.id, 'authenticated', {
+        success: false,
+        error: 'Invalid authentication payload',
+      });
+      return;
+    }
     if (!this.options.authentication.required) {
       connection.isAuthenticated = true;
-      connection.userId = data.userId;
-      connection.username = data.username;
+      connection.userId = typeof data.userId === 'string' ? data.userId : undefined;
+      connection.username = typeof data.username === 'string' ? data.username : undefined;
 
       this.sendToConnection(connection.id, 'authenticated', {
         success: true,
@@ -490,8 +500,8 @@ class CollaborationServer extends EventEmitter {
     // 简化的认证逻辑
     if (data.token === this.options.authentication.secret) {
       connection.isAuthenticated = true;
-      connection.userId = data.userId;
-      connection.username = data.username;
+      connection.userId = typeof data.userId === 'string' ? data.userId : undefined;
+      connection.username = typeof data.username === 'string' ? data.username : undefined;
 
       this.sendToConnection(connection.id, 'authenticated', {
         success: true,

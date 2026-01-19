@@ -127,11 +127,15 @@ export interface RoomSettings {
 // 协作事件接口
 export interface CollaborationEvent {
   type: 'user_joined' | 'user_left' | 'document_updated' | 'comment_added' | 'cursor_moved';
-  data: any;
+  data: unknown;
   timestamp: Date;
   userId?: string;
   roomId: string;
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null;
+};
 
 class CollaborationService extends EventEmitter {
   private rooms: Map<string, CollaborationRoom> = new Map();
@@ -145,7 +149,7 @@ class CollaborationService extends EventEmitter {
   /**
    * 初始化协作服务
    */
-  async initialize(server?: any): Promise<void> {
+  async initialize(server?: unknown): Promise<void> {
     if (this.isInitialized) {
       return;
     }
@@ -589,15 +593,15 @@ class CollaborationService extends EventEmitter {
   private setupWebSocketServer(): void {
     if (!this.wsServer) return;
 
-    this.wsServer.on('connection', (ws: WebSocket, req) => {
-      this.handleWebSocketConnection(ws, req);
+    this.wsServer.on('connection', (ws: WebSocket, _req: unknown) => {
+      this.handleWebSocketConnection(ws, _req);
     });
   }
 
   /**
    * 处理WebSocket连接
    */
-  private handleWebSocketConnection(ws: WebSocket, req: any): void {
+  private handleWebSocketConnection(ws: WebSocket, _req: unknown): void {
     const participantId = this.generateId();
 
     ws.on('message', (data: WebSocket.Data) => {
@@ -613,7 +617,7 @@ class CollaborationService extends EventEmitter {
       this.handleWebSocketClose(participantId);
     });
 
-    ws.on('error', error => {
+    ws.on('error', (error: Error) => {
       this.emit('error', error);
     });
   }
@@ -621,10 +625,15 @@ class CollaborationService extends EventEmitter {
   /**
    * 处理WebSocket消息
    */
-  private handleWebSocketMessage(ws: WebSocket, participantId: string, message: any): void {
+  private handleWebSocketMessage(ws: WebSocket, participantId: string, message: unknown): void {
+    if (!isRecord(message) || typeof message.type !== 'string') {
+      ws.send(JSON.stringify({ type: 'error', message: 'Invalid message format' }));
+      return;
+    }
+
     switch (message.type) {
       case 'join_room':
-        this.joinRoom(message.roomId, message.participant)
+        this.joinRoom(String(message.roomId || ''), message.participant as Participant)
           .then(participant => {
             ws.send(JSON.stringify({ type: 'joined', participant }));
           })
@@ -634,15 +643,19 @@ class CollaborationService extends EventEmitter {
         break;
 
       case 'leave_room':
-        this.leaveRoom(message.roomId, participantId);
+        this.leaveRoom(String(message.roomId || ''), participantId);
         break;
 
       case 'update_document':
-        this.updateDocument(message.documentId, message.changes, participantId);
+        this.updateDocument(
+          String(message.documentId || ''),
+          message.changes as DocumentChange[],
+          participantId
+        );
         break;
 
       case 'update_cursor':
-        this.updateCursor(participantId, message.cursor);
+        this.updateCursor(participantId, message.cursor as CursorPosition);
         break;
 
       default:

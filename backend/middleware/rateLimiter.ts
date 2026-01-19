@@ -20,11 +20,25 @@ interface AuthenticatedRequest extends Request {
     id: string;
     role: string;
   };
-  rateLimit?: {
-    resetTime: number;
-    totalHits: number;
-  };
+  rateLimit?: RateLimitInfo;
 }
+
+interface RateLimitInfo {
+  resetTime: number;
+  totalHits: number;
+}
+
+interface RateLimitRequest extends Request {
+  rateLimit?: RateLimitInfo;
+}
+
+const getBodyString = (body: unknown, key: string): string | undefined => {
+  if (!body || typeof body !== 'object') {
+    return undefined;
+  }
+  const value = (body as Record<string, unknown>)[key];
+  return typeof value === 'string' ? value : undefined;
+};
 
 /**
  * 通用速率限制
@@ -38,7 +52,7 @@ const rateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  handler: (req: Request, res: Response) => {
+  handler: (req: RateLimitRequest, res: Response) => {
     securityLogger(
       'rate_limit_exceeded',
       {
@@ -52,7 +66,7 @@ const rateLimiter = rateLimit({
     res.status(429).json({
       success: false,
       message: '请求过于频繁，请稍后再试',
-      retryAfter: Math.round((req as any).rateLimit.resetTime / 1000),
+      retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
     });
   },
 });
@@ -67,7 +81,7 @@ const strictRateLimiter = rateLimit({
     success: false,
     message: '敏感操作请求过于频繁，请稍后再试',
   },
-  handler: (req: Request, res: Response) => {
+  handler: (req: RateLimitRequest, res: Response) => {
     securityLogger(
       'strict_rate_limit_exceeded',
       {
@@ -81,7 +95,7 @@ const strictRateLimiter = rateLimit({
     res.status(429).json({
       success: false,
       message: '敏感操作请求过于频繁，请稍后再试',
-      retryAfter: Math.round((req as any).rateLimit.resetTime / 1000),
+      retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
     });
   },
 });
@@ -97,13 +111,13 @@ const loginRateLimiter = rateLimit({
     success: false,
     message: '登录尝试过于频繁，请15分钟后再试',
   },
-  handler: (req: Request, res: Response) => {
+  handler: (req: RateLimitRequest, res: Response) => {
     securityLogger(
       'login_rate_limit_exceeded',
       {
         ip: req.ip,
-        email: (req.body as any).email,
-        attempts: (req as any).rateLimit.totalHits,
+        email: getBodyString(req.body, 'email'),
+        attempts: req.rateLimit?.totalHits ?? 0,
       },
       req
     );
@@ -111,7 +125,7 @@ const loginRateLimiter = rateLimit({
     res.status(429).json({
       success: false,
       message: '登录尝试过于频繁，请15分钟后再试',
-      retryAfter: Math.round((req as any).rateLimit.resetTime / 1000),
+      retryAfter: Math.round((req.rateLimit?.resetTime ?? 0) / 1000),
     });
   },
 });
@@ -126,12 +140,12 @@ const registerRateLimiter = rateLimit({
     success: false,
     message: '注册请求过于频繁，请1小时后再试',
   },
-  handler: (req: Request, res: Response) => {
+  handler: (req: RateLimitRequest, res: Response) => {
     securityLogger(
       'register_rate_limit_exceeded',
       {
         ip: req.ip,
-        email: (req.body as any).email,
+        email: getBodyString(req.body, 'email'),
       },
       req
     );
@@ -139,7 +153,7 @@ const registerRateLimiter = rateLimit({
     res.status(429).json({
       success: false,
       message: '注册请求过于频繁，请1小时后再试',
-      retryAfter: Math.round((req as any).rateLimit.resetTime / 1000),
+      retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
     });
   },
 });
@@ -152,7 +166,7 @@ const testEngineRateLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5分钟窗口
   limit: async (req: AuthenticatedRequest) => {
     // 根据用户类型和测试类型动态设置限制
-    const testType = (req.body as any)?.testType;
+    const testType = getBodyString(req.body, 'testType');
     const userRole = req.user?.role || 'guest';
 
     const limits: Record<string, number> = {
@@ -181,13 +195,14 @@ const testEngineRateLimiter = rateLimit({
     message: '测试请求过于频繁，请稍后再试',
   },
   handler: (req: AuthenticatedRequest, res: Response) => {
+    const testType = getBodyString(req.body, 'testType');
     securityLogger(
       'test_engine_rate_limit_exceeded',
       {
         ip: req.ip,
         userId: req.user?.id,
-        testType: (req.body as any)?.testType,
-        attempts: (req as any).rateLimit.totalHits,
+        testType,
+        attempts: req.rateLimit?.totalHits ?? 0,
       },
       req
     );
@@ -195,7 +210,7 @@ const testEngineRateLimiter = rateLimit({
     res.status(429).json({
       success: false,
       message: '测试请求过于频繁，请稍后再试',
-      retryAfter: Math.round((req as any).rateLimit.resetTime / 1000),
+      retryAfter: Math.round((req.rateLimit?.resetTime ?? 0) / 1000),
     });
   },
 });
@@ -228,7 +243,7 @@ const apiRateLimiter = rateLimit({
     res.status(429).json({
       success: false,
       message: 'API调用过于频繁，请稍后再试',
-      retryAfter: Math.round((req as any).rateLimit.resetTime / 1000),
+      retryAfter: Math.round((req.rateLimit?.resetTime ?? 0) / 1000),
     });
   },
 });
@@ -245,15 +260,15 @@ const uploadRateLimiter = rateLimit({
   },
   keyGenerator: (req: Request) => {
     // 基于IP和文件类型的组合键
-    const fileType = (req.body as any)?.type || 'unknown';
+    const fileType = getBodyString(req.body, 'type') || 'unknown';
     return `upload_${req.ip}_${fileType}`;
   },
-  handler: (req: Request, res: Response) => {
+  handler: (req: RateLimitRequest, res: Response) => {
     securityLogger(
       'upload_rate_limit_exceeded',
       {
         ip: req.ip,
-        fileType: (req.body as any)?.type,
+        fileType: getBodyString(req.body, 'type'),
       },
       req
     );
@@ -261,7 +276,7 @@ const uploadRateLimiter = rateLimit({
     res.status(429).json({
       success: false,
       message: '文件上传过于频繁，请稍后再试',
-      retryAfter: Math.round((req as any).rateLimit.resetTime / 1000),
+      retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
     });
   },
 });
@@ -281,12 +296,12 @@ function createCustomRateLimiter(options: RateLimitOptions) {
     keyGenerator: options.keyGenerator,
     handler:
       options.handler ||
-      ((req: Request, res: Response) => {
+      ((req: RateLimitRequest, res: Response) => {
         res.status(429).json({
           success: false,
           message:
             typeof options.message === 'string' ? options.message : '请求过于频繁，请稍后再试',
-          retryAfter: Math.round((req as any).rateLimit.resetTime / 1000),
+          retryAfter: Math.round(((req as RateLimitRequest).rateLimit?.resetTime ?? 0) / 1000),
         });
       }),
   });
@@ -368,7 +383,10 @@ function createProgressiveRateLimiter(baseLimit: number, multiplier: number = 1.
 /**
  * 条件速率限制
  */
-function createConditionalRateLimiter(condition: (req: Request) => boolean, limiter: any) {
+function createConditionalRateLimiter(
+  condition: (req: Request) => boolean,
+  limiter: Parameters<typeof rateLimit>[0]
+) {
   return rateLimit({
     ...limiter,
     skip: (req: Request) => !condition(req),

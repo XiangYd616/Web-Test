@@ -12,7 +12,7 @@ export interface WorkspaceManagerConfig {
   maxMembersPerWorkspace?: number;
   maxWorkspacesPerUser?: number;
   enableRealTimeSync?: boolean;
-  models?: any;
+  models?: unknown;
 }
 
 // 工作空间接口
@@ -29,7 +29,7 @@ export interface Workspace {
   createdAt: Date;
   updatedAt: Date;
   lastActivity: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 工作空间设置接口
@@ -56,7 +56,7 @@ export interface WorkspaceMember {
   status: 'active' | 'inactive' | 'suspended';
   joinedAt: Date;
   lastSeen: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 权限接口
@@ -78,7 +78,7 @@ export interface WorkspaceResource {
   permissions: Permission[];
   createdAt: Date;
   updatedAt: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 工作空间邀请接口
@@ -108,7 +108,7 @@ export interface WorkspaceActivity {
     id: string;
     name: string;
   };
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   timestamp: Date;
 }
 
@@ -151,9 +151,9 @@ export interface WorkspaceSearchResult {
 
 class WorkspaceManager extends EventEmitter {
   private options: WorkspaceManagerConfig;
-  private models: any;
+  private models: unknown;
   private workspaces: Map<string, Workspace> = new Map();
-  private users: Map<string, any> = new Map();
+  private users: Map<string, unknown> = new Map();
   private invitations: Map<string, WorkspaceInvitation> = new Map();
   private activities: WorkspaceActivity[] = [];
   private activeConnections: Map<string, string> = new Map(); // userId -> workspaceId

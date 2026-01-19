@@ -51,7 +51,7 @@ export interface RetentionPolicy {
 export interface CleanupCondition {
   field: string;
   operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'not_contains';
-  value: any;
+  value: unknown;
   logicalOperator?: 'and' | 'or';
 }
 
@@ -59,7 +59,7 @@ export interface CleanupCondition {
 export interface CleanupAction {
   type: 'delete' | 'archive' | 'compress' | 'move';
   target: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 // 清理配置接口
@@ -91,7 +91,7 @@ export interface CleanupJob {
   sizeProcessed: number;
   sizeFreed: number;
   errors: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 清理结果接口
@@ -105,7 +105,7 @@ export interface CleanupResult {
   sizeFreed: number;
   errors: string[];
   duration: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 清理统计接口
@@ -526,8 +526,11 @@ class DataCleanupManager {
       .reduce((sum, job) => sum + job.sizeFreed, 0);
 
     const durations = jobs
-      .filter(job => job.status === 'completed' && job.duration)
-      .map(job => job.duration!);
+      .filter(
+        (job): job is CleanupJob & { duration: number } =>
+          job.status === 'completed' && typeof job.duration === 'number'
+      )
+      .map(job => job.duration);
     const averageCleanupTime =
       durations.length > 0
         ? durations.reduce((sum, duration) => sum + duration, 0) / durations.length
@@ -704,9 +707,14 @@ class DataCleanupManager {
         case 'compress':
           await this.compressItem(item.path, action.parameters);
           break;
-        case 'move':
-          await this.moveItem(item.path, action.parameters.target);
+        case 'move': {
+          const targetPath = action.parameters.target;
+          if (typeof targetPath !== 'string') {
+            throw new Error('Move action requires target path');
+          }
+          await this.moveItem(item.path, targetPath);
           break;
+        }
       }
     }
 
@@ -724,7 +732,7 @@ class DataCleanupManager {
   /**
    * 归档项目
    */
-  private async archiveItem(itemPath: string, parameters: Record<string, any>): Promise<void> {
+  private async archiveItem(itemPath: string, parameters: Record<string, unknown>): Promise<void> {
     // 简化实现，实际应该归档文件
     console.log(`Archiving: ${itemPath} to ${parameters.archivePath}`);
   }
@@ -732,7 +740,7 @@ class DataCleanupManager {
   /**
    * 压缩项目
    */
-  private async compressItem(itemPath: string, parameters: Record<string, any>): Promise<void> {
+  private async compressItem(itemPath: string, parameters: Record<string, unknown>): Promise<void> {
     // 简化实现，实际应该压缩文件
     console.log(`Compressing: ${itemPath} with level ${parameters.compressionLevel}`);
   }
@@ -776,9 +784,12 @@ class DataCleanupManager {
     > = {};
 
     jobs
-      .filter(job => job.status === 'completed' && job.completedAt)
+      .filter(
+        (job): job is CleanupJob & { completedAt: Date } =>
+          job.status === 'completed' && job.completedAt instanceof Date
+      )
       .forEach(job => {
-        const date = job.completedAt!.toISOString().split('T')[0];
+        const date = job.completedAt.toISOString().split('T')[0];
 
         if (!dailyStats[date]) {
           dailyStats[date] = {

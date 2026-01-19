@@ -9,9 +9,9 @@ import { SpecializedStorageManager } from './SpecializedStorageManager';
 
 // 存储配置接口
 export interface StorageServiceConfig {
-  storage?: any;
-  archive?: any;
-  cleanup?: any;
+  storage?: Record<string, unknown>;
+  archive?: Record<string, unknown>;
+  cleanup?: Record<string, unknown>;
   monitoring?: {
     enabled: boolean;
   };
@@ -70,7 +70,11 @@ class StorageService {
   /**
    * 存储数据
    */
-  async store(key: string, data: any, options: any = {}): Promise<StorageOperationResult> {
+  async store(
+    key: string,
+    data: unknown,
+    options: Record<string, unknown> = {}
+  ): Promise<StorageOperationResult> {
     const startTime = Date.now();
 
     try {
@@ -100,7 +104,7 @@ class StorageService {
   /**
    * 检索数据
    */
-  async retrieve(key: string, options: any = {}): Promise<any> {
+  async retrieve(key: string, options: Record<string, unknown> = {}): Promise<unknown> {
     const startTime = Date.now();
 
     try {
@@ -119,7 +123,10 @@ class StorageService {
   /**
    * 删除数据
    */
-  async delete(key: string, options: any = {}): Promise<StorageOperationResult> {
+  async delete(
+    key: string,
+    options: Record<string, unknown> = {}
+  ): Promise<StorageOperationResult> {
     const startTime = Date.now();
 
     try {
@@ -149,7 +156,10 @@ class StorageService {
   /**
    * 归档数据
    */
-  async archive(criteria: any, options: any = {}): Promise<StorageOperationResult> {
+  async archive(
+    criteria: Record<string, unknown>,
+    options: Record<string, unknown> = {}
+  ): Promise<StorageOperationResult> {
     const startTime = Date.now();
 
     try {
@@ -179,7 +189,10 @@ class StorageService {
   /**
    * 清理数据
    */
-  async cleanup(criteria: any, options: any = {}): Promise<StorageOperationResult> {
+  async cleanup(
+    criteria: Record<string, unknown>,
+    options: Record<string, unknown> = {}
+  ): Promise<StorageOperationResult> {
     const startTime = Date.now();
 
     try {

@@ -1,5 +1,6 @@
 const { createEngine } = require('./TestEngineFactory');
 const { query } = require('../../config/database');
+const testRepository = require('../../repositories/testRepository');
 
 type EngineProgress = Record<string, unknown> & { testId?: string };
 
@@ -31,6 +32,10 @@ class UserTestManager {
 
   constructor() {
     Logger.info('用户测试管理器初始化完成');
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
   }
 
   registerUserSocket(userId: string, socket: SocketLike) {
@@ -70,6 +75,23 @@ class UserTestManager {
         testId,
         ...progress,
       });
+
+      const progressValue = (progress as { progress?: number }).progress;
+      if (typeof progressValue === 'number') {
+        Promise.resolve(testRepository.updateProgress(testId, progressValue)).catch(error => {
+          Logger.warn(`更新测试进度失败: ${testId}`, error);
+        });
+      }
+
+      const message = (progress as { message?: string }).message;
+      if (message) {
+        Promise.resolve(
+          this.insertExecutionLog(testId, 'info', '测试进度更新', {
+            message,
+            progress: progressValue,
+          })
+        ).catch(error => Logger.warn(`记录测试进度日志失败: ${testId}`, error));
+      }
     });
 
     testEngine.setCompletionCallback(async results => {
@@ -97,6 +119,14 @@ class UserTestManager {
         testId,
         error: error.message,
       });
+
+      Promise.resolve(testRepository.markFailed(testId, error.message))
+        .then(() =>
+          this.insertExecutionLog(testId, 'error', '测试执行失败', {
+            message: error.message,
+          })
+        )
+        .catch(err => Logger.error(`记录失败状态异常: ${testId}`, err));
 
       this.cleanupUserTest(userId, testId);
     });
@@ -202,47 +232,140 @@ class UserTestManager {
 
   async saveTestResults(userId: string, testId: string, results: Record<string, unknown>) {
     try {
-      const overallScore =
-        (results as { overallScore?: number }).overallScore ??
-        (results as { score?: number }).score ??
-        this.calculateOverallScore(results);
-
-      let duration = (results as { duration?: number }).duration
-        ? Math.floor(((results as { duration?: number }).duration || 0) / 1000)
-        : 0;
-      if ((results as { actualDuration?: number }).actualDuration) {
-        duration = Math.floor(
-          ((results as { actualDuration?: number }).actualDuration || 0) / 1000
-        );
+      const execution = await testRepository.findById(testId, userId);
+      if (!execution) {
+        throw new Error('测试执行不存在');
       }
 
-      if (!duration) {
-        const durationResult = await query(
-          'SELECT started_at FROM test_history WHERE test_id = $1 AND user_id = $2',
-          [testId, userId]
-        );
-        if (durationResult.rows.length > 0 && durationResult.rows[0].started_at) {
-          const startTime = new Date(durationResult.rows[0].started_at);
-          duration = Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
-        }
-      }
+      const summary = this.extractSummary(results);
+      const score = this.extractScore(results, summary);
+      const grade = this.calculateGrade(score);
+      const passed = score >= 70;
+      const warnings = this.extractArray(results, 'warnings');
+      const errors = this.extractArray(results, 'errors');
 
-      await query(
-        `UPDATE test_history
-         SET status = 'completed',
-             results = $1,
-             completed_at = NOW(),
-             duration = $2,
-             overall_score = $3
-         WHERE test_id = $4 AND user_id = $5`,
-        [JSON.stringify(results), duration, overallScore, testId, userId]
+      const resultId = await testRepository.saveResult(
+        execution.id,
+        summary,
+        score,
+        grade,
+        passed,
+        warnings,
+        errors
       );
+
+      const metrics = this.buildMetricsFromResults(results, resultId);
+      await testRepository.saveMetrics(metrics);
+
+      const executionTime = this.calculateExecutionTimeSeconds(
+        execution.started_at,
+        execution.created_at
+      );
+      await testRepository.markCompleted(testId, executionTime);
+
+      await this.insertExecutionLog(testId, 'info', '测试完成', {
+        score,
+        grade,
+        metricCount: metrics.length,
+      });
 
       Logger.info(`测试结果保存成功: ${testId}`);
     } catch (error) {
       Logger.error(`保存测试结果失败: ${testId}`, error);
       throw error;
     }
+  }
+
+  private extractSummary(results: Record<string, unknown>): Record<string, unknown> {
+    const nested = results as {
+      results?: Record<string, unknown>;
+      summary?: Record<string, unknown>;
+    };
+
+    if (nested.results?.summary && this.isRecord(nested.results.summary)) {
+      return nested.results.summary;
+    }
+
+    if (nested.summary && this.isRecord(nested.summary)) {
+      return nested.summary;
+    }
+
+    if (nested.results && this.isRecord(nested.results)) {
+      return nested.results;
+    }
+
+    return { raw: results } as Record<string, unknown>;
+  }
+
+  private extractScore(results: Record<string, unknown>, summary: Record<string, unknown>): number {
+    const directScore =
+      (results as { score?: number }).score ??
+      (results as { overallScore?: number }).overallScore ??
+      (summary as { score?: number }).score ??
+      (summary as { overallScore?: number }).overallScore;
+
+    if (typeof directScore === 'number' && Number.isFinite(directScore)) {
+      return Math.round(directScore);
+    }
+
+    return this.calculateOverallScore(results);
+  }
+
+  private extractArray(results: Record<string, unknown>, field: 'warnings' | 'errors'): unknown[] {
+    const fromRoot = (results as Record<string, unknown>)[field];
+    const nested = results as { results?: Record<string, unknown> };
+    const fromNested = nested.results?.[field];
+
+    if (Array.isArray(fromRoot)) return fromRoot;
+    if (Array.isArray(fromNested)) return fromNested;
+    return [];
+  }
+
+  private calculateGrade(score: number): string {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+  }
+
+  private calculateExecutionTimeSeconds(startedAt?: Date, createdAt?: Date): number {
+    const startTime = startedAt ? new Date(startedAt) : createdAt ? new Date(createdAt) : null;
+    if (!startTime) return 0;
+    return Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
+  }
+
+  private buildMetricsFromResults(results: Record<string, unknown>, resultId: number) {
+    const metricsSource =
+      (results as { metrics?: Record<string, unknown> }).metrics ||
+      (results as { results?: { metrics?: Record<string, unknown> } }).results?.metrics ||
+      (results as { results?: { summary?: { metrics?: Record<string, unknown> } } }).results
+        ?.summary?.metrics ||
+      {};
+
+    if (!metricsSource || typeof metricsSource !== 'object') {
+      return [];
+    }
+
+    return Object.entries(metricsSource).map(([metricName, metricValue]) => ({
+      resultId,
+      metricName,
+      metricValue: metricValue as Record<string, unknown> | number | string,
+      metricType: 'summary',
+    }));
+  }
+
+  private async insertExecutionLog(
+    testId: string,
+    level: string,
+    message: string,
+    context: Record<string, unknown> = {}
+  ): Promise<void> {
+    await query(
+      `INSERT INTO test_logs (execution_id, level, message, context)
+       SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
+      [level, message, JSON.stringify(context), testId]
+    );
   }
 
   calculateOverallScore(results: Record<string, unknown>) {

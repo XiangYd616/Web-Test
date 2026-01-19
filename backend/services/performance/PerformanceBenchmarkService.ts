@@ -26,6 +26,7 @@ export interface PerformanceMetrics {
 
 // 基准测试配置接口
 export interface BenchmarkConfig {
+  id: string;
   name: string;
   description: string;
   category: 'frontend' | 'backend' | 'business';
@@ -69,10 +70,10 @@ export interface BenchmarkResult {
   status: 'passed' | 'failed' | 'warning';
   scores: PerformanceScores;
   metrics: PerformanceData;
-  comparison: BaselineComparison;
+  comparison: BaselineComparison | null;
   recommendations: PerformanceRecommendation[];
   artifacts: BenchmarkArtifact[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 性能分数接口
@@ -87,8 +88,13 @@ export interface PerformanceScores {
 export interface PerformanceData {
   timestamp: Date;
   values: Record<string, number>;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
+
+type BenchmarkExecutionOptions = {
+  environment?: string;
+  metadata?: Record<string, unknown>;
+};
 
 // 基线比较接口
 export interface BaselineComparison {
@@ -333,10 +339,7 @@ class PerformanceBenchmarkService extends EventEmitter {
    */
   async executeBenchmark(
     benchmarkId: string,
-    options: {
-      environment?: string;
-      metadata?: Record<string, any>;
-    } = {}
+    options: BenchmarkExecutionOptions = {}
   ): Promise<string> {
     const benchmark = this.benchmarks.get(benchmarkId);
     if (!benchmark) {
@@ -538,7 +541,7 @@ class PerformanceBenchmarkService extends EventEmitter {
    */
   private async runPerformanceTests(
     benchmark: BenchmarkConfig,
-    options: any
+    options: BenchmarkExecutionOptions
   ): Promise<PerformanceData> {
     // 简化实现，实际应该运行真实的性能测试
     const metrics: Record<string, number> = {};
@@ -782,7 +785,6 @@ class PerformanceBenchmarkService extends EventEmitter {
       failedBenchmarks,
       warningBenchmarks,
       keyMetrics: {},
-      trends: {},
     };
   }
 
@@ -798,17 +800,18 @@ class PerformanceBenchmarkService extends EventEmitter {
         .sort((a, b) => a.executedAt.getTime() - b.executedAt.getTime());
 
       if (results.length >= 2) {
-        const metric = results[0].metrics.values;
+        const metricValues = results[0].metrics.values;
+        const metricKey = Object.keys(metricValues)[0] || '';
         const data = results.map(r => ({
           date: r.executedAt.toISOString().split('T')[0],
-          value: Object.values(metric.values)[0] || 0,
+          value: Object.values(metricValues)[0] || 0,
         }));
 
         const trend = this.calculateLinearTrend(data);
         const prediction = this.generatePrediction(data, 7);
 
         trends.push({
-          metric: Object.keys(metric.values)[0] || '',
+          metric: metricKey,
           period: 30,
           data,
           trend: trend.direction,
@@ -890,8 +893,6 @@ class PerformanceBenchmarkService extends EventEmitter {
    * 生成全局建议
    */
   private generateGlobalRecommendations(results: BenchmarkResult[]): PerformanceRecommendation[] {
-    const recommendations: PerformanceRecommendation[] = [];
-
     // 分析所有结果中的建议
     const allRecommendations = results.flatMap(r => r.recommendations);
 

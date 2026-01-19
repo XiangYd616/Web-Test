@@ -3,32 +3,53 @@
  * 职责: 包含业务逻辑,协调Repository和其他服务
  */
 
+import { query } from '../../config/database';
 import testRepository from '../../repositories/testRepository';
 import testBusinessService from './TestBusinessService';
 
+const userTestManager = require('./UserTestManager');
+
 interface TestResult {
-  id: string;
+  id: number;
   testId: string;
   userId: string;
-  results: unknown;
-  status: string;
+  summary: Record<string, unknown>;
+  score?: number;
+  grade?: string;
+  passed?: boolean;
+  warnings?: unknown[];
+  errors?: unknown[];
   createdAt: Date;
-  updatedAt: Date;
 }
 
-interface TestRecord {
+interface TestExecutionRecord {
+  id: number;
   test_id: string;
   user_id: string;
-  url: string;
-  test_type: string;
+  engine_type: string;
+  engine_name: string;
+  test_name: string;
+  test_url?: string;
   status: string;
-  results?: unknown;
-  overall_score?: number;
-  duration?: number;
+  progress?: number;
   created_at: Date;
   updated_at: Date;
-  progress?: number;
-  options?: Record<string, unknown> | string | null;
+  started_at?: Date;
+  completed_at?: Date;
+  execution_time?: number;
+  error_message?: string;
+}
+
+interface TestResultRecord {
+  id: number;
+  execution_id: number;
+  summary: Record<string, unknown>;
+  score?: number;
+  grade?: string;
+  passed?: boolean;
+  warnings?: unknown[];
+  errors?: unknown[];
+  created_at: Date;
 }
 
 interface TestConfig {
@@ -38,7 +59,7 @@ interface TestConfig {
 }
 
 type TestHistoryResponse = {
-  tests: TestRecord[];
+  tests: TestExecutionRecord[];
   pagination: {
     page: number;
     limit: number;
@@ -100,12 +121,17 @@ class TestService {
       throw new Error('无权访问此测试');
     }
 
-    const results = await testRepository.findResults(testId, userId);
-    if (!results) {
+    const execution = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+    if (!execution) {
+      throw new Error('测试不存在');
+    }
+
+    const result = (await testRepository.findResults(testId, userId)) as TestResultRecord | null;
+    if (!result) {
       throw new Error('测试结果不存在');
     }
 
-    return this.formatResults(results);
+    return this.formatResults(execution, result);
   }
 
   /**
@@ -134,17 +160,18 @@ class TestService {
    * 获取测试详情
    */
   async getTestDetail(userId: string, testId: string): Promise<TestDetailResponse> {
-    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
+    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
     if (!test) {
       throw new Error('测试不存在');
     }
+    const result = (await testRepository.findResults(testId, userId)) as TestResultRecord | null;
     return {
       id: test.test_id,
       userId: test.user_id,
-      url: test.url,
-      testType: test.test_type,
+      url: test.test_url || '',
+      testType: test.engine_type,
       status: test.status,
-      results: test.results || null,
+      results: result?.summary || null,
       createdAt: test.created_at,
       updatedAt: test.updated_at,
     };
@@ -154,7 +181,7 @@ class TestService {
    * 取消测试
    */
   async cancelTest(userId: string, testId: string): Promise<void> {
-    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
+    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
     if (!test) {
       throw new Error('测试不存在');
     }
@@ -163,8 +190,11 @@ class TestService {
       throw new Error('测试已完成，无法取消');
     }
 
-    await this.stopTestExecution(testId);
+    await this.stopTestExecution(testId, userId);
     await testRepository.updateStatus(testId, 'cancelled');
+    await this.insertExecutionLog(testId, 'info', '测试已取消', {
+      userId,
+    });
   }
 
   /**
@@ -235,7 +265,7 @@ class TestService {
    * 获取测试状态
    */
   async getStatus(userId: string, testId: string): Promise<TestStatusResponse> {
-    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
+    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
 
     if (!test) {
       throw new Error('测试不存在');
@@ -249,9 +279,9 @@ class TestService {
       testId: test.test_id,
       status: test.status,
       progress: typeof test.progress === 'number' ? test.progress : 0,
-      startTime: test.created_at,
-      endTime: test.updated_at,
-      results: test.results ?? null,
+      startTime: test.started_at || test.created_at,
+      endTime: test.completed_at || test.updated_at,
+      results: null,
     };
   }
 
@@ -259,7 +289,7 @@ class TestService {
    * 停止测试
    */
   async stopTest(userId: string, testId: string): Promise<void> {
-    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
+    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
 
     if (!test) {
       throw new Error('测试不存在');
@@ -274,17 +304,20 @@ class TestService {
     }
 
     // 停止测试执行
-    await this.stopTestExecution(testId);
+    await this.stopTestExecution(testId, userId);
 
     // 更新状态
     await testRepository.updateStatus(testId, 'stopped');
+    await this.insertExecutionLog(testId, 'info', '测试已停止', {
+      userId,
+    });
   }
 
   /**
    * 删除测试
    */
   async deleteTest(userId: string, testId: string): Promise<void> {
-    const test = (await testRepository.findById(testId, userId)) as TestRecord | null;
+    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
 
     if (!test) {
       throw new Error('测试不存在');
@@ -304,14 +337,18 @@ class TestService {
   async getTestList(userId: string, page = 1, limit = 10): Promise<TestListResponse> {
     const offset = (page - 1) * limit;
 
-    const tests = (await testRepository.findByUserId(userId, limit, offset)) as TestRecord[];
+    const tests = (await testRepository.findByUserId(
+      userId,
+      limit,
+      offset
+    )) as TestExecutionRecord[];
     const total = await testRepository.countByUserId(userId);
 
     return {
       tests: tests.map(test => ({
         id: test.test_id,
-        url: test.url,
-        testType: test.test_type,
+        url: test.test_url || '',
+        testType: test.engine_type,
         status: test.status,
         createdAt: test.created_at,
         updatedAt: test.updated_at,
@@ -346,51 +383,45 @@ class TestService {
   }
 
   /**
-   * 运行测试
-   */
-  private async runTest(testId: string, config: TestConfig): Promise<unknown> {
-    // 根据测试类型调用不同的测试引擎
-    switch (config.testType) {
-      case 'website':
-        return await testBusinessService.runWebsiteTest(testId, config);
-      case 'seo':
-        return await testBusinessService.runSEOTest(testId, config);
-      case 'performance':
-        return await testBusinessService.runPerformanceTest(testId, config);
-      case 'accessibility':
-        return await testBusinessService.runAccessibilityTest(testId, config);
-      case 'security':
-        return await testBusinessService.runSecurityTest(testId, config);
-      case 'api':
-        return await testBusinessService.runAPITest(testId, config);
-      case 'stress':
-        return await testBusinessService.runStressTest(testId, config);
-      default:
-        throw new Error(`不支持的测试类型: ${config.testType}`);
-    }
-  }
-
-  /**
    * 停止测试执行
    */
-  private async stopTestExecution(testId: string): Promise<void> {
-    // 实现测试停止逻辑
-    // 这里可能需要与测试引擎通信来停止正在运行的测试
-    console.log(`停止测试执行: ${testId}`);
+  private async stopTestExecution(testId: string, userId: string): Promise<void> {
+    const engine = userTestManager.getUserTestEngine(userId, testId);
+    if (!engine) {
+      return;
+    }
+
+    await userTestManager.stopUserTest(userId, testId);
+  }
+
+  private async insertExecutionLog(
+    testId: string,
+    level: string,
+    message: string,
+    context: Record<string, unknown> = {}
+  ): Promise<void> {
+    await query(
+      `INSERT INTO test_logs (execution_id, level, message, context)
+       SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
+      [level, message, JSON.stringify(context), testId]
+    );
   }
 
   /**
    * 格式化测试结果
    */
-  private formatResults(results: TestRecord): TestResult {
+  private formatResults(execution: TestExecutionRecord, result: TestResultRecord): TestResult {
     return {
-      id: results.test_id,
-      testId: results.test_id,
-      userId: results.user_id,
-      results: results.results,
-      status: results.status,
-      createdAt: results.created_at,
-      updatedAt: results.updated_at,
+      id: result.id,
+      testId: execution.test_id,
+      userId: execution.user_id,
+      summary: result.summary,
+      score: result.score,
+      grade: result.grade,
+      passed: result.passed,
+      warnings: result.warnings,
+      errors: result.errors,
+      createdAt: result.created_at,
     };
   }
 }

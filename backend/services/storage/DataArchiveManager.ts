@@ -24,7 +24,7 @@ class Tar {
     console.log(`Creating archive ${options.file} with ${files.length} files`);
   }
 
-  static async extract(options: TarOptions, files?: string[]): Promise<void> {
+  static async extract(options: TarOptions, _files?: string[]): Promise<void> {
     // 简化实现，实际应该使用tar库
     console.log(`Extracting archive ${options.file}`);
   }
@@ -59,7 +59,7 @@ const cron: CronValidator = {
   },
 };
 
-const gzip = promisify(zlib.gzip);
+const _gzip = promisify(zlib.gzip);
 
 // 归档配置接口
 export interface ArchiveConfig {
@@ -94,7 +94,7 @@ export interface ArchiveJob {
   filesCount: number;
   archivedFilesCount: number;
   error?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // 归档策略接口
@@ -117,7 +117,7 @@ export interface ArchiveRule {
   action: 'archive' | 'delete' | 'compress';
   priority: number;
   enabled: boolean;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 // 归档统计接口
@@ -149,7 +149,7 @@ export interface ArchiveResult {
   compressionRatio: number;
   filesCount: number;
   duration: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 /**
@@ -255,7 +255,7 @@ class DataArchiveManager {
     // 检查源路径
     try {
       await fs.access(jobData.sourcePath);
-    } catch (error) {
+    } catch {
       throw new Error(`Source path does not exist: ${jobData.sourcePath}`);
     }
 
@@ -501,13 +501,18 @@ class DataArchiveManager {
     const totalArchivedSize = jobs
       .filter(job => job.status === 'completed')
       .reduce((sum, job) => sum + job.size, 0);
-    const totalCompressedSize = jobs
-      .filter(job => job.status === 'completed' && job.compressedSize)
-      .reduce((sum, job) => sum + job.compressedSize!, 0);
+    const compressedJobs = jobs.filter(
+      (job): job is ArchiveJob & { compressedSize: number } =>
+        job.status === 'completed' && typeof job.compressedSize === 'number'
+    );
+    const totalCompressedSize = compressedJobs.reduce((sum, job) => sum + job.compressedSize, 0);
 
     const compressionRatios = jobs
-      .filter(job => job.status === 'completed' && job.compressionRatio)
-      .map(job => job.compressionRatio!);
+      .filter(
+        (job): job is ArchiveJob & { compressionRatio: number } =>
+          job.status === 'completed' && typeof job.compressionRatio === 'number'
+      )
+      .map(job => job.compressionRatio);
     const averageCompressionRatio =
       compressionRatios.length > 0
         ? compressionRatios.reduce((sum, ratio) => sum + ratio, 0) / compressionRatios.length
@@ -616,7 +621,7 @@ class DataArchiveManager {
           count++;
           size += stats.size;
         }
-      } catch (error) {
+      } catch {
         // 忽略无法访问的文件
       }
     }
@@ -644,7 +649,7 @@ class DataArchiveManager {
             files.push(entryRelativePath);
           }
         }
-      } catch (error) {
+      } catch {
         // 忽略无法访问的目录
       }
     }
@@ -682,9 +687,12 @@ class DataArchiveManager {
     > = {};
 
     jobs
-      .filter(job => job.status === 'completed' && job.completedAt)
+      .filter(
+        (job): job is ArchiveJob & { completedAt: Date } =>
+          job.status === 'completed' && job.completedAt instanceof Date
+      )
       .forEach(job => {
-        const date = job.completedAt!.toISOString().split('T')[0];
+        const date = job.completedAt.toISOString().split('T')[0];
 
         if (!dailyStats[date]) {
           dailyStats[date] = { archives: 0, size: 0, compressionRatios: [] };

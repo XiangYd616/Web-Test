@@ -8,10 +8,12 @@
 import archiver from 'archiver';
 import { EventEmitter } from 'events';
 import ExcelJS from 'exceljs';
+import { createReadStream, createWriteStream } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import PDFDocument from 'pdfkit';
 import * as winston from 'winston';
+import { query as dbQuery } from '../../config/database';
+const PDFDocument = require('pdfkit');
 
 // 导出配置接口
 export interface ExportConfig {
@@ -22,9 +24,28 @@ export interface ExportConfig {
     password?: string;
     algorithm: 'aes-256-cbc';
   };
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   columns?: string[];
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
+}
+
+export interface ExportJobRequest {
+  userId: string;
+  dataType: ExportData['type'];
+  format: ExportConfig['format'];
+  filters?: Record<string, unknown>;
+  options?: Record<string, unknown>;
+}
+
+export interface ExportJobStatus {
+  id: string;
+  userId: string;
+  status: ExportTask['status'];
+  createdAt: Date;
+  startedAt?: Date;
+  completedAt?: Date;
+  error?: string;
+  filePath?: string;
 }
 
 // 导出任务接口
@@ -38,7 +59,7 @@ export interface ExportTask {
     percentage: number;
   };
   config: ExportConfig;
-  data: any;
+  data: ExportData;
   result?: {
     filePath: string;
     fileName: string;
@@ -55,8 +76,8 @@ export interface ExportTask {
 // 导出数据接口
 export interface ExportData {
   type: 'test_results' | 'analytics' | 'reports' | 'users' | 'logs';
-  data: any[];
-  metadata: Record<string, any>;
+  data: Array<Record<string, unknown>>;
+  metadata: Record<string, unknown>;
   totalCount: number;
 }
 
@@ -86,14 +107,14 @@ export interface DataFilter {
     | 'contains'
     | 'startsWith'
     | 'endsWith';
-  value: any;
+  value: unknown;
 }
 
 // 数据源接口
 export interface DataSource {
   type: string;
   query: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
   filters?: DataFilter[];
 }
 
@@ -106,8 +127,14 @@ export interface ExportTemplate {
   template: string;
   fields: ExportField[];
   filters?: DataFilter[];
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+type PDFDocumentType = InstanceType<typeof PDFDocument>;
 
 // 导出字段接口
 export interface ExportField {
@@ -131,7 +158,6 @@ export interface ExportStatistics {
 }
 
 class DataExportService extends EventEmitter {
-  private dbPool: any;
   private logger: winston.Logger;
   private tasks: Map<string, ExportTask> = new Map();
   private queue: ExportTask[] = [];
@@ -139,11 +165,20 @@ class DataExportService extends EventEmitter {
   private maxConcurrentTasks: number = 3;
   private activeTasks: Set<string> = new Set();
   private templates: Map<string, ExportTemplate> = new Map();
+  private exportDir: string;
+  private maxFileSize: number;
+  private supportedFormats: ExportConfig['format'][];
 
-  constructor(dbPool: any) {
+  constructor(config: {
+    exportDir: string;
+    maxFileSize: number;
+    supportedFormats: ExportConfig['format'][];
+  }) {
     super();
 
-    this.dbPool = dbPool;
+    this.exportDir = config.exportDir;
+    this.maxFileSize = config.maxFileSize;
+    this.supportedFormats = config.supportedFormats;
     this.logger = winston.createLogger({
       level: 'info',
       format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -189,7 +224,34 @@ class DataExportService extends EventEmitter {
     this.logger.info('Export task created', { taskId, type, createdBy });
     this.emit('task_created', task);
 
+    await this.saveExportTask(task);
+
     return taskId;
+  }
+
+  async createExportJob(request: ExportJobRequest): Promise<ExportTask> {
+    if (!this.supportedFormats.includes(request.format)) {
+      throw new Error(`不支持的导出格式: ${request.format}`);
+    }
+
+    const data = await this.collectExportData(request);
+    const taskId = await this.createExportTask(
+      request.dataType,
+      data,
+      {
+        format: request.format,
+        filters: request.filters,
+        options: request.options,
+      },
+      request.userId
+    );
+
+    const task = this.tasks.get(taskId);
+    if (!task) {
+      throw new Error('导出任务创建失败');
+    }
+
+    return task;
   }
 
   /**
@@ -197,6 +259,45 @@ class DataExportService extends EventEmitter {
    */
   async getTaskStatus(taskId: string): Promise<ExportTask | null> {
     return this.tasks.get(taskId) || null;
+  }
+
+  async getExportStatus(taskId: string): Promise<ExportJobStatus> {
+    const task = this.tasks.get(taskId);
+    if (task) {
+      return {
+        id: task.id,
+        userId: task.createdBy,
+        status: task.status,
+        createdAt: task.createdAt,
+        startedAt: task.startedAt,
+        completedAt: task.completedAt,
+        error: task.error,
+        filePath: task.result?.filePath,
+      };
+    }
+
+    const result = await dbQuery(
+      `SELECT id, user_id, status, created_at, started_at, completed_at, file_path, error_message
+       FROM export_tasks
+       WHERE id = $1`,
+      [taskId]
+    );
+
+    const row = result.rows[0];
+    if (!row) {
+      throw new Error('导出任务不存在');
+    }
+
+    return {
+      id: String(row.id),
+      userId: String(row.user_id),
+      status: row.status,
+      createdAt: row.created_at,
+      startedAt: row.started_at || undefined,
+      completedAt: row.completed_at || undefined,
+      error: row.error_message || undefined,
+      filePath: row.file_path || undefined,
+    };
   }
 
   /**
@@ -218,6 +319,7 @@ class DataExportService extends EventEmitter {
     if (task.status === 'pending') {
       task.status = 'cancelled';
       this.emit('task_cancelled', task);
+      await this.updateExportTask(task);
       return true;
     }
 
@@ -225,6 +327,7 @@ class DataExportService extends EventEmitter {
       task.status = 'cancelled';
       this.activeTasks.delete(taskId);
       this.emit('task_cancelled', task);
+      await this.updateExportTask(task);
       return true;
     }
 
@@ -252,7 +355,97 @@ class DataExportService extends EventEmitter {
     this.tasks.delete(taskId);
     this.emit('task_deleted', { taskId });
 
+    await dbQuery('DELETE FROM export_tasks WHERE id = $1', [taskId]);
+
     return true;
+  }
+
+  async cancelExportJob(taskId: string): Promise<void> {
+    const cancelled = await this.cancelTask(taskId);
+    if (!cancelled) {
+      throw new Error('导出任务无法取消');
+    }
+  }
+
+  async getExportFilePath(taskId: string): Promise<string | null> {
+    const task = this.tasks.get(taskId);
+    if (task?.result?.filePath) {
+      return task.result.filePath;
+    }
+
+    const result = await dbQuery('SELECT file_path FROM export_tasks WHERE id = $1', [taskId]);
+    return result.rows[0]?.file_path ?? null;
+  }
+
+  async getUserExportHistory(
+    userId: string,
+    pagination: { page: number; limit: number; status?: string }
+  ): Promise<{ items: ExportJobStatus[]; total: number; page: number; limit: number }> {
+    const offset = (pagination.page - 1) * pagination.limit;
+    const params: Array<string | number> = [userId];
+    const conditions = ['user_id = $1'];
+    if (pagination.status) {
+      params.push(pagination.status);
+      conditions.push(`status = $${params.length}`);
+    }
+    params.push(pagination.limit, offset);
+
+    const listResult = await dbQuery(
+      `SELECT id, user_id, status, created_at, started_at, completed_at, file_path, error_message
+       FROM export_tasks
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY created_at DESC
+       LIMIT $${params.length - 1} OFFSET $${params.length}`,
+      params
+    );
+
+    const countResult = await dbQuery(
+      `SELECT COUNT(*)::int AS total FROM export_tasks WHERE ${conditions.join(' AND ')}`,
+      params.slice(0, params.length - 2)
+    );
+
+    return {
+      items: (listResult.rows || []).map(row => ({
+        id: String(row.id),
+        userId: String(row.user_id),
+        status: row.status,
+        createdAt: row.created_at,
+        startedAt: row.started_at || undefined,
+        completedAt: row.completed_at || undefined,
+        error: row.error_message || undefined,
+        filePath: row.file_path || undefined,
+      })),
+      total: Number(countResult.rows[0]?.total) || 0,
+      page: pagination.page,
+      limit: pagination.limit,
+    };
+  }
+
+  getSupportedFormats(): ExportConfig['format'][] {
+    return this.supportedFormats;
+  }
+
+  async cleanupExpiredExports(
+    userId: string,
+    options: { olderThan: number }
+  ): Promise<{ deleted: number }> {
+    const cutoff = new Date(Date.now() - options.olderThan * 24 * 60 * 60 * 1000);
+    const tasks = await dbQuery(
+      `SELECT id, file_path FROM export_tasks
+       WHERE user_id = $1 AND created_at < $2`,
+      [userId, cutoff]
+    );
+
+    let deleted = 0;
+    for (const row of tasks.rows || []) {
+      if (row.file_path) {
+        await fs.unlink(row.file_path).catch(() => undefined);
+      }
+      await dbQuery('DELETE FROM export_tasks WHERE id = $1', [row.id]);
+      deleted += 1;
+    }
+
+    return { deleted };
   }
 
   /**
@@ -385,6 +578,8 @@ class DataExportService extends EventEmitter {
     task.startedAt = new Date();
     this.activeTasks.add(task.id);
 
+    await this.updateExportTask(task);
+
     this.emit('task_started', task);
     this.logger.info('Processing export task', { taskId: task.id, type: task.type });
 
@@ -396,12 +591,16 @@ class DataExportService extends EventEmitter {
       task.completedAt = new Date();
       task.progress.percentage = 100;
 
+      await this.updateExportTask(task);
+
       this.emit('task_completed', task);
       this.logger.info('Export task completed', { taskId: task.id, fileName: result.fileName });
     } catch (error) {
       task.status = 'failed';
       task.error = error instanceof Error ? error.message : String(error);
       task.completedAt = new Date();
+
+      await this.updateExportTask(task);
 
       this.emit('task_failed', task);
       this.logger.error('Export task failed', { taskId: task.id, error: task.error });
@@ -460,9 +659,9 @@ class DataExportService extends EventEmitter {
    */
   private async exportToCSV(task: ExportTask): Promise<ExportResult> {
     const fileName = `${task.type}_${task.id}.csv`;
-    const filePath = path.join('exports', fileName);
+    const filePath = path.join(this.exportDir, fileName);
 
-    await fs.mkdir('exports', { recursive: true });
+    await fs.mkdir(this.exportDir, { recursive: true });
 
     const csvData = this.convertToCSV(task.data.data, task.config.columns);
     await fs.writeFile(filePath, csvData, 'utf8');
@@ -484,9 +683,9 @@ class DataExportService extends EventEmitter {
    */
   private async exportToJSON(task: ExportTask): Promise<ExportResult> {
     const fileName = `${task.type}_${task.id}.json`;
-    const filePath = path.join('exports', fileName);
+    const filePath = path.join(this.exportDir, fileName);
 
-    await fs.mkdir('exports', { recursive: true });
+    await fs.mkdir(this.exportDir, { recursive: true });
 
     const jsonData = JSON.stringify(
       {
@@ -519,9 +718,9 @@ class DataExportService extends EventEmitter {
    */
   private async exportToExcel(task: ExportTask): Promise<ExportResult> {
     const fileName = `${task.type}_${task.id}.xlsx`;
-    const filePath = path.join('exports', fileName);
+    const filePath = path.join(this.exportDir, fileName);
 
-    await fs.mkdir('exports', { recursive: true });
+    await fs.mkdir(this.exportDir, { recursive: true });
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(task.type);
@@ -535,14 +734,22 @@ class DataExportService extends EventEmitter {
     // 添加数据
     for (let i = 0; i < task.data.data.length; i++) {
       const item = task.data.data[i];
-      const row: any[] = [];
+      const row: unknown[] = [];
 
       if (task.config.columns) {
         task.config.columns.forEach(column => {
-          row.push(item[column] || '');
+          if (isRecord(item)) {
+            row.push(item[column] ?? '');
+          } else {
+            row.push('');
+          }
         });
       } else {
-        Object.values(item).forEach(value => row.push(value));
+        if (isRecord(item)) {
+          Object.values(item).forEach(value => row.push(value));
+        } else {
+          row.push(String(item));
+        }
       }
 
       worksheet.addRow(row);
@@ -572,9 +779,9 @@ class DataExportService extends EventEmitter {
    */
   private async exportToPDF(task: ExportTask): Promise<ExportResult> {
     const fileName = `${task.type}_${task.id}.pdf`;
-    const filePath = path.join('exports', fileName);
+    const filePath = path.join(this.exportDir, fileName);
 
-    await fs.mkdir('exports', { recursive: true });
+    await fs.mkdir(this.exportDir, { recursive: true });
 
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument();
@@ -594,7 +801,7 @@ class DataExportService extends EventEmitter {
       }
 
       // 保存文件
-      doc.pipe(fs.createWriteStream(filePath));
+      doc.pipe(createWriteStream(filePath));
 
       doc.on('end', async () => {
         try {
@@ -621,13 +828,13 @@ class DataExportService extends EventEmitter {
    */
   private async exportToZIP(task: ExportTask): Promise<ExportResult> {
     const fileName = `${task.type}_${task.id}.zip`;
-    const filePath = path.join('exports', fileName);
+    const filePath = path.join(this.exportDir, fileName);
 
-    await fs.mkdir('exports', { recursive: true });
+    await fs.mkdir(this.exportDir, { recursive: true });
 
     return new Promise((resolve, reject) => {
       const archive = archiver('zip', { zlib: { level: 9 } });
-      const output = fs.createWriteStream(filePath);
+      const output = createWriteStream(filePath);
 
       archive.on('error', reject);
       output.on('close', async () => {
@@ -661,7 +868,7 @@ class DataExportService extends EventEmitter {
 
     return new Promise((resolve, reject) => {
       const archive = archiver('zip', { zlib: { level: 9 } });
-      const output = fs.createWriteStream(compressedPath);
+      const output = createWriteStream(compressedPath);
 
       archive.on('error', reject);
       output.on('close', async () => {
@@ -681,7 +888,7 @@ class DataExportService extends EventEmitter {
         }
       });
 
-      archive.file(result.fileName, fs.createReadStream(result.filePath));
+      archive.file(result.fileName, createReadStream(result.filePath));
       archive.finalize();
     });
   }
@@ -691,22 +898,23 @@ class DataExportService extends EventEmitter {
    */
   private async encryptFile(
     result: ExportResult,
-    encryption: ExportConfig['encryption']
+    encryption?: ExportConfig['encryption']
   ): Promise<ExportResult> {
+    if (!encryption) {
+      return result;
+    }
+
     const crypto = require('crypto');
     const algorithm = encryption.algorithm;
     const password = encryption.password || 'default-password';
-
-    // 生成随机IV
-    const iv = crypto.randomBytes(16);
 
     // 创建加密器
     const cipher = crypto.createCipher(algorithm, password);
     cipher.setAutoPadding(true);
 
     const encryptedPath = result.filePath + '.enc';
-    const input = fs.createReadStream(result.filePath);
-    const output = fs.createWriteStream(encryptedPath);
+    const input = createReadStream(result.filePath);
+    const output = createWriteStream(encryptedPath);
 
     return new Promise((resolve, reject) => {
       output.on('finish', async () => {
@@ -733,15 +941,16 @@ class DataExportService extends EventEmitter {
   /**
    * 转换为CSV格式
    */
-  private convertToCSV(data: any[], columns?: string[]): string {
+  private convertToCSV(data: Array<Record<string, unknown>>, columns?: string[]): string {
     if (data.length === 0) return '';
 
-    const headers = columns || Object.keys(data[0]);
+    const firstRow = data[0];
+    const headers = columns || (isRecord(firstRow) ? Object.keys(firstRow) : []);
     const csvRows = [headers.join(',')];
 
     data.forEach(item => {
       const row = headers.map(header => {
-        const value = item[header];
+        const value = isRecord(item) ? item[header] : undefined;
         if (value === null || value === undefined) {
           return '';
         }
@@ -759,7 +968,11 @@ class DataExportService extends EventEmitter {
   /**
    * 添加PDF表格
    */
-  private addPDFTable(doc: PDFKit.PDFDocument, data: any[], columns: string[]): void {
+  private addPDFTable(
+    doc: PDFDocumentType,
+    data: Array<Record<string, unknown>>,
+    columns: string[]
+  ): void {
     // 简化的表格实现
     const tableTop = doc.y;
     const cellWidth = 100;
@@ -776,7 +989,7 @@ class DataExportService extends EventEmitter {
     // 数据行
     data.slice(0, 10).forEach((row, rowIndex) => {
       columns.forEach((column, colIndex) => {
-        const value = row[column] || '';
+        const value = row && typeof row === 'object' ? row[column] : '';
         doc.text(String(value), 50 + colIndex * cellWidth, tableTop + (rowIndex + 1) * cellHeight);
       });
     });
@@ -848,6 +1061,251 @@ class DataExportService extends EventEmitter {
    */
   private generateTemplateId(): string {
     return `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private async collectExportData(request: ExportJobRequest): Promise<ExportData> {
+    const filters = this.normalizeFilters(request.filters);
+    const { clause, params } = this.buildFilterClause(filters);
+    const baseParams = [...params];
+    const userClause = this.appendUserFilter(request.dataType, request.userId, clause, baseParams);
+
+    switch (request.dataType) {
+      case 'test_results': {
+        const result = await dbQuery(
+          `SELECT
+             te.test_id,
+             te.engine_type,
+             te.status,
+             te.created_at,
+             te.completed_at,
+             te.execution_time,
+             tr.score,
+             tr.grade,
+             tr.passed,
+             tr.summary
+           FROM test_executions te
+           LEFT JOIN test_results tr ON tr.execution_id = te.id
+           ${userClause}`,
+          baseParams
+        );
+        return {
+          type: 'test_results',
+          data: result.rows || [],
+          metadata: { source: 'test_executions', filters },
+          totalCount: result.rows?.length || 0,
+        };
+      }
+      case 'reports': {
+        const result = await dbQuery(
+          `SELECT
+             tr.id,
+             tr.report_type,
+             tr.format,
+             tr.file_path,
+             tr.file_size,
+             tr.generated_at,
+             te.test_id
+           FROM test_reports tr
+           LEFT JOIN test_executions te ON te.id = tr.execution_id
+           ${userClause}`,
+          baseParams
+        );
+        return {
+          type: 'reports',
+          data: result.rows || [],
+          metadata: { source: 'test_reports', filters },
+          totalCount: result.rows?.length || 0,
+        };
+      }
+      case 'logs': {
+        const result = await dbQuery(
+          `SELECT
+             tl.id,
+             tl.level,
+             tl.message,
+             tl.context,
+             tl.created_at,
+             te.test_id
+           FROM test_logs tl
+           LEFT JOIN test_executions te ON te.id = tl.execution_id
+           ${userClause}`,
+          baseParams
+        );
+        return {
+          type: 'logs',
+          data: result.rows || [],
+          metadata: { source: 'test_logs', filters },
+          totalCount: result.rows?.length || 0,
+        };
+      }
+      case 'users': {
+        const result = await dbQuery(
+          `SELECT id, username, email, created_at, last_login
+           FROM users
+           WHERE id = $1`,
+          [request.userId]
+        );
+        return {
+          type: 'users',
+          data: result.rows || [],
+          metadata: { source: 'users', filters },
+          totalCount: result.rows?.length || 0,
+        };
+      }
+      case 'analytics':
+      default: {
+        const result = await dbQuery(
+          `SELECT
+             tm.metric_name,
+             tm.metric_value,
+             tm.metric_type,
+             tm.passed,
+             tm.severity,
+             tm.recommendation,
+             tm.created_at,
+             te.test_id
+           FROM test_metrics tm
+           JOIN test_results tr ON tr.id = tm.result_id
+           JOIN test_executions te ON te.id = tr.execution_id
+           ${userClause}`,
+          baseParams
+        );
+        return {
+          type: 'analytics',
+          data: result.rows || [],
+          metadata: { source: 'test_metrics', filters },
+          totalCount: result.rows?.length || 0,
+        };
+      }
+    }
+  }
+
+  private normalizeFilters(filters?: Record<string, unknown>): DataFilter[] {
+    if (!filters) return [];
+    return Object.entries(filters)
+      .filter(([, value]) => value !== undefined && value !== null)
+      .map(([field, value]) => ({ field, operator: 'eq', value }));
+  }
+
+  private buildFilterClause(filters: DataFilter[]): { clause: string; params: unknown[] } {
+    const clauses: string[] = [];
+    const params: unknown[] = [];
+    const operatorMap: Record<DataFilter['operator'], string> = {
+      eq: '=',
+      ne: '!=',
+      gt: '>',
+      gte: '>=',
+      lt: '<',
+      lte: '<=',
+      in: 'IN',
+      nin: 'NOT IN',
+      contains: 'ILIKE',
+      startsWith: 'ILIKE',
+      endsWith: 'ILIKE',
+    };
+
+    filters.forEach(filter => {
+      const paramIndex = params.length + 1;
+      const operator = operatorMap[filter.operator];
+      if (!operator) return;
+
+      if (filter.operator === 'in' || filter.operator === 'nin') {
+        if (Array.isArray(filter.value) && filter.value.length > 0) {
+          clauses.push(
+            `${filter.field} ${operator} (${filter.value
+              .map((_, idx) => `$${paramIndex + idx}`)
+              .join(', ')})`
+          );
+          params.push(...filter.value);
+        }
+        return;
+      }
+
+      if (filter.operator === 'contains') {
+        clauses.push(`${filter.field} ${operator} $${paramIndex}`);
+        params.push(`%${filter.value}%`);
+        return;
+      }
+
+      if (filter.operator === 'startsWith') {
+        clauses.push(`${filter.field} ${operator} $${paramIndex}`);
+        params.push(`${filter.value}%`);
+        return;
+      }
+
+      if (filter.operator === 'endsWith') {
+        clauses.push(`${filter.field} ${operator} $${paramIndex}`);
+        params.push(`%${filter.value}`);
+        return;
+      }
+
+      clauses.push(`${filter.field} ${operator} $${paramIndex}`);
+      params.push(filter.value);
+    });
+
+    return { clause: clauses.join(' AND '), params };
+  }
+
+  private appendUserFilter(
+    dataType: ExportData['type'],
+    userId: string,
+    clause: string,
+    params: unknown[]
+  ): string {
+    if (dataType === 'users') {
+      return clause ? `WHERE ${clause}` : '';
+    }
+
+    const userParamIndex = params.length + 1;
+    params.push(userId);
+    const userClause =
+      dataType === 'reports' || dataType === 'logs' || dataType === 'analytics'
+        ? `te.user_id = $${userParamIndex}`
+        : `te.user_id = $${userParamIndex}`;
+
+    if (clause) {
+      return `WHERE ${clause} AND ${userClause}`;
+    }
+    return `WHERE ${userClause}`;
+  }
+
+  private async saveExportTask(task: ExportTask): Promise<void> {
+    await dbQuery(
+      `INSERT INTO export_tasks
+         (id, user_id, type, filters, format, options, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (id) DO NOTHING`,
+      [
+        task.id,
+        task.createdBy,
+        task.type,
+        JSON.stringify(task.config.filters || {}),
+        task.config.format,
+        JSON.stringify(task.config.options || {}),
+        task.status,
+        task.createdAt,
+      ]
+    );
+  }
+
+  private async updateExportTask(task: ExportTask): Promise<void> {
+    await dbQuery(
+      `UPDATE export_tasks
+       SET status = $1,
+           started_at = $2,
+           completed_at = $3,
+           file_path = $4,
+           error_message = $5
+       WHERE id = $6`,
+      [
+        task.status,
+        task.startedAt || null,
+        task.completedAt || null,
+        task.result?.filePath || null,
+        task.error || null,
+        task.id,
+      ]
+    );
   }
 }
 

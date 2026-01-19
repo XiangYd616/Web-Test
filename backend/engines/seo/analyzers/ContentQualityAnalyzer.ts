@@ -4,7 +4,46 @@
  * 高级内容质量分析，包括语义分析、内容深度、用户意图匹配等
  */
 
-import puppeteer from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
+
+interface ContentHeading {
+  level: number;
+  text: string;
+  position: number;
+}
+
+interface ContentList {
+  type: string;
+  itemCount: number;
+  position: number;
+}
+
+interface ContentImage {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  position: number;
+}
+
+interface ContentLink {
+  href: string;
+  text: string;
+  title: string;
+  position: number;
+}
+
+interface ContentData {
+  title: string;
+  content: string;
+  headings: ContentHeading[];
+  paragraphs: string[];
+  lists: ContentList[];
+  images: ContentImage[];
+  links: ContentLink[];
+  questions: string[];
+  examples: string[];
+}
 
 interface QualityMetrics {
   depth: {
@@ -376,23 +415,13 @@ class ContentQualityAnalyzer {
   /**
    * 提取内容数据
    */
-  private async extractContentData(page: any): Promise<{
-    title: string;
-    content: string;
-    headings: any[];
-    paragraphs: string[];
-    lists: any[];
-    images: any[];
-    links: any[];
-    questions: string[];
-    examples: string[];
-  }> {
+  private async extractContentData(page: Page): Promise<ContentData> {
     return await page.evaluate(() => {
       const title = document.title || '';
       const content = document.body.innerText || '';
 
       // 提取标题
-      const headings: any[] = [];
+      const headings: ContentHeading[] = [];
       for (let i = 1; i <= 6; i++) {
         const elements = document.querySelectorAll(`h${i}`);
         elements.forEach((element, index) => {
@@ -414,7 +443,7 @@ class ContentQualityAnalyzer {
       });
 
       // 提取列表
-      const lists: any[] = [];
+      const lists: ContentList[] = [];
       document.querySelectorAll('ol, ul').forEach((list, index) => {
         const items = list.querySelectorAll('li');
         lists.push({
@@ -425,7 +454,7 @@ class ContentQualityAnalyzer {
       });
 
       // 提取图片
-      const images: any[] = [];
+      const images: ContentImage[] = [];
       document.querySelectorAll('img').forEach((img, index) => {
         images.push({
           src: (img as HTMLImageElement).src || '',
@@ -437,7 +466,7 @@ class ContentQualityAnalyzer {
       });
 
       // 提取链接
-      const links: any[] = [];
+      const links: ContentLink[] = [];
       document.querySelectorAll('a[href]').forEach((link, index) => {
         links.push({
           href: (link as HTMLAnchorElement).href || '',
@@ -486,7 +515,7 @@ class ContentQualityAnalyzer {
   /**
    * 分析内容深度
    */
-  private analyzeDepth(contentData: any): DepthAnalysis {
+  private analyzeDepth(contentData: ContentData): DepthAnalysis {
     const wordCount = this.countWords(contentData.content);
 
     let depth: 'shallow' | 'moderate' | 'deep';
@@ -536,10 +565,10 @@ class ContentQualityAnalyzer {
   /**
    * 分析用户参与度
    */
-  private analyzeEngagement(contentData: any): EngagementAnalysis {
+  private analyzeEngagement(contentData: ContentData): EngagementAnalysis {
     const questions = contentData.questions.length;
     const lists = contentData.lists.length;
-    const subheadings = contentData.headings.filter((h: any) => h.level >= 2).length;
+    const subheadings = contentData.headings.filter(heading => heading.level >= 2).length;
     const images = contentData.images.length;
     const videos = 0; // 需要更复杂的检测
     const interactive = 0; // 需要检测交互元素
@@ -582,7 +611,7 @@ class ContentQualityAnalyzer {
   /**
    * 分析专业性
    */
-  private analyzeExpertise(contentData: any): ExpertiseAnalysis {
+  private analyzeExpertise(contentData: ContentData): ExpertiseAnalysis {
     const technicalTerms = this.countTechnicalTerms(contentData.content);
     const examples = contentData.examples.length;
     const references = this.countReferences(contentData.content);
@@ -621,7 +650,7 @@ class ContentQualityAnalyzer {
   /**
    * 分析可读性
    */
-  private analyzeReadability(contentData: any): ReadabilityAnalysis {
+  private analyzeReadability(contentData: ContentData): ReadabilityAnalysis {
     const sentences = contentData.content
       .split(/[.!?]+/)
       .filter((s: string) => s.trim().length > 0);
@@ -675,7 +704,7 @@ class ContentQualityAnalyzer {
   /**
    * 分析独特性
    */
-  private analyzeUniqueness(contentData: any): UniquenessAnalysis {
+  private analyzeUniqueness(contentData: ContentData): UniquenessAnalysis {
     // 简化的独特性分析
     const uniquenessScore = this.calculateUniqueness(contentData.content);
     const duplicateContent: string[] = []; // 需要更复杂的检测
@@ -704,7 +733,7 @@ class ContentQualityAnalyzer {
   /**
    * 语义分析
    */
-  private analyzeSemantic(contentData: any): SemanticAnalysis {
+  private analyzeSemantic(contentData: ContentData): SemanticAnalysis {
     // 简化的语义分析
     const entities = this.extractEntities(contentData.content);
     const concepts = this.extractConcepts(contentData.content);
@@ -743,7 +772,7 @@ class ContentQualityAnalyzer {
    * 意图分析
    */
   private analyzeIntent(
-    contentData: any,
+    contentData: ContentData,
     targetIntent: string,
     keywords: string[]
   ): IntentAnalysis {

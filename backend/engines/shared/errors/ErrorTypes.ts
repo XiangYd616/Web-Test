@@ -102,7 +102,7 @@ export interface BaseError {
   category: ErrorCategoryType;
   severity: ErrorSeverityType;
   timestamp: Date;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   cause?: Error;
   stack?: string;
 }
@@ -115,7 +115,7 @@ export interface ExtendedError extends BaseError {
   requestId?: string;
   service: string;
   version: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   retryable: boolean;
   retryCount?: number;
   maxRetries?: number;
@@ -124,7 +124,7 @@ export interface ExtendedError extends BaseError {
 // 错误详情接口
 export interface ErrorDetail {
   field?: string;
-  value?: any;
+  value?: unknown;
   constraint?: string;
   message: string;
   code?: string;
@@ -215,7 +215,7 @@ export interface ErrorHandlingStrategy {
   action: 'retry' | 'fallback' | 'ignore' | 'escalate' | 'log';
   maxRetries?: number;
   retryDelay?: number;
-  fallbackValue?: any;
+  fallbackValue?: unknown;
   escalationLevel?: number;
 }
 
@@ -242,13 +242,13 @@ export class CustomError extends Error implements ExtendedError {
   public readonly category: ErrorCategoryType;
   public readonly severity: ErrorSeverityType;
   public readonly timestamp: Date;
-  public readonly context?: Record<string, any>;
+  public readonly context?: Record<string, unknown>;
   public readonly userId?: string;
   public readonly sessionId?: string;
   public readonly requestId?: string;
   public readonly service: string;
   public readonly version: string;
-  public readonly metadata: Record<string, any>;
+  public readonly metadata: Record<string, unknown>;
   public readonly retryable: boolean;
   public retryCount?: number;
   public maxRetries?: number;
@@ -259,14 +259,14 @@ export class CustomError extends Error implements ExtendedError {
     category: ErrorCategoryType,
     severity: ErrorSeverityType,
     options: {
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
       cause?: Error;
       userId?: string;
       sessionId?: string;
       requestId?: string;
       service?: string;
       version?: string;
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
       retryable?: boolean;
       maxRetries?: number;
     } = {}
@@ -367,7 +367,7 @@ export class ValidationError extends CustomError {
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
     } = {}
   ) {
     const code = options.code || ErrorCode.VALIDATION_FAILED;
@@ -407,7 +407,7 @@ export class SystemError extends CustomError {
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
     } = {}
   ) {
     const code = options.code || ErrorCode.SYSTEM_OVERLOAD;
@@ -431,7 +431,7 @@ export class SystemError extends CustomError {
       message: string;
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
     } = {}
   ): SystemError {
     const systemInfo = {
@@ -461,7 +461,7 @@ export class NetworkError extends CustomError {
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
     } = {}
   ) {
     const code = options.code || ErrorCode.NETWORK_CONNECTION_FAILED;
@@ -496,7 +496,7 @@ export class ExternalServiceError extends CustomError {
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
     } = {}
   ) {
     const code = options.code || ErrorCode.EXTERNAL_SERVICE_UNAVAILABLE;
@@ -527,7 +527,7 @@ export class ErrorFactory {
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
     } = {}
   ): ValidationError {
     return new ValidationError(message, details, options);
@@ -541,7 +541,7 @@ export class ErrorFactory {
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
     } = {}
   ): SystemError {
     return SystemError.create({ message, ...options });
@@ -556,7 +556,7 @@ export class ErrorFactory {
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
     } = {}
   ): NetworkError {
     return new NetworkError(message, networkInfo, options);
@@ -571,7 +571,7 @@ export class ErrorFactory {
     options: {
       code?: ErrorCodeType;
       severity?: ErrorSeverityType;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
     } = {}
   ): ExternalServiceError {
     return new ExternalServiceError(message, serviceInfo, options);

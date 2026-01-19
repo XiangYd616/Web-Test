@@ -65,6 +65,20 @@ interface EnvironmentExport {
 
 const router = express.Router();
 
+interface AuthenticatedRequest extends express.Request {
+  user?: {
+    id: string;
+  };
+}
+
+const getUserId = (req: AuthenticatedRequest): string => {
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new Error('用户未认证');
+  }
+  return userId;
+};
+
 // 初始化环境管理器
 let environmentManager: EnvironmentManager;
 try {
@@ -162,10 +176,10 @@ const environments: Environment[] = [
  */
 router.get(
   '/',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { scope, tags, search } = req.query;
-      const userId = (req as any).user.id;
+      const userId = getUserId(req);
 
       let filteredEnvironments = [...environments];
 
@@ -246,8 +260,8 @@ router.get(
  */
 router.post(
   '/',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const environmentData: CreateEnvironmentRequest = req.body;
 
     if (!environmentData.name) {
@@ -294,9 +308,9 @@ router.post(
  */
 router.put(
   '/:id',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
     const updateData: UpdateEnvironmentRequest = req.body;
 
     try {
@@ -378,9 +392,9 @@ router.delete(
  */
 router.post(
   '/:id/activate',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       // 先将所有环境设为非激活状态
@@ -477,9 +491,9 @@ router.get(
  */
 router.post(
   '/:id/variables',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
     const { variables } = req.body;
 
     if (!variables || typeof variables !== 'object') {
@@ -528,9 +542,9 @@ router.post(
  */
 router.delete(
   '/:id/variables/:key',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id, key } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const environmentIndex = environments.findIndex(env => env.id === id);
@@ -573,10 +587,10 @@ router.delete(
  */
 router.post(
   '/:id/export',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id } = req.params;
     const { format = 'json', includeSecrets = false } = req.body;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const environment = environments.find(env => env.id === id);
@@ -636,8 +650,8 @@ router.post(
  */
 router.post(
   '/import',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { name, description, variables, tags } = req.body;
 
     if (!name || !variables) {

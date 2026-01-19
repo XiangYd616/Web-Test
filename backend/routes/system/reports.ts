@@ -5,12 +5,18 @@
 import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { getPool } from '../../config/database';
+import { query } from '../../config/database';
+import type { ReportTemplate as ServiceReportTemplate } from '../../services/reporting/AutomatedReportingService';
 import Logger from '../../utils/logger';
 const { authMiddleware } = require('../../middleware/auth');
 const { asyncHandler } = require('../../middleware/errorHandler');
 const AutomatedReportingService = require('../../services/reporting/AutomatedReportingService');
-const MonitoringService = require('../../services/monitoring/MonitoringService');
+
+type AuthRequest = express.Request & {
+  user: {
+    id: string;
+  };
+};
 
 enum ReportType {
   PERFORMANCE = 'performance',
@@ -95,89 +101,11 @@ interface ReportStatistics {
 
 const router = express.Router();
 
-const monitoringService = new MonitoringService(getPool());
 const automatedReportingService = new AutomatedReportingService();
 
-// 模拟报告数据
-const reports: Report[] = [
-  {
-    id: '1',
-    name: '2025年1月性能报告',
-    type: ReportType.PERFORMANCE,
-    format: ReportFormat.PDF,
-    status: 'completed',
-    progress: 100,
-    createdAt: new Date('2025-01-01'),
-    completedAt: new Date('2025-01-01'),
-    expiresAt: new Date('2025-02-01'),
-    createdBy: 'admin',
-    filePath: '/reports/performance_2025_01.pdf',
-    fileSize: 2048576,
-    downloadCount: 15,
-    metadata: {
-      timeRange: '2025-01',
-      siteCount: 5,
-      metrics: ['responseTime', 'throughput', 'errorRate', 'availability'],
-    },
-  },
-  {
-    id: '2',
-    name: '2025年1月安全报告',
-    type: ReportType.SECURITY,
-    format: ReportFormat.HTML,
-    status: 'completed',
-    progress: 100,
-    createdAt: new Date('2025-01-01'),
-    completedAt: new Date('2025-01-02'),
-    expiresAt: new Date('2025-02-02'),
-    createdBy: 'admin',
-    filePath: '/reports/security_2025_01.html',
-    fileSize: 1024000,
-    downloadCount: 8,
-    metadata: {
-      timeRange: '2025-01',
-      vulnerabilityCount: 12,
-      severity: { high: 3, medium: 7, low: 2 },
-      categories: ['injection', 'xss', 'csrf', 'authentication'],
-    },
-  },
-];
-
-// 模拟报告模板
-const reportTemplates: ReportTemplate[] = [
-  {
-    id: '1',
-    name: '性能报告模板',
-    type: ReportType.PERFORMANCE,
-    description: '标准性能分析报告模板',
-    template: 'performance_template.html',
-    variables: [
-      { name: 'siteName', type: 'string', description: '网站名称', required: true },
-      { name: 'timeRange', type: 'string', description: '时间范围', required: true },
-      { name: 'metrics', type: 'array', description: '性能指标', required: true },
-      { name: 'thresholds', type: 'object', description: '阈值设置', required: false },
-    ],
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    createdBy: 'admin',
-  },
-  {
-    id: '2',
-    name: '安全报告模板',
-    type: ReportType.SECURITY,
-    description: '安全漏洞分析报告模板',
-    template: 'security_template.html',
-    variables: [
-      { name: 'siteName', type: 'string', description: '网站名称', required: true },
-      { name: 'scanDate', type: 'string', description: '扫描日期', required: true },
-      { name: 'vulnerabilities', type: 'array', description: '漏洞列表', required: true },
-      { name: 'riskLevel', type: 'string', description: '风险等级', required: false },
-    ],
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    createdBy: 'admin',
-  },
-];
+const ensureReportingInitialized = async () => {
+  await automatedReportingService.initialize();
+};
 
 /**
  * GET /api/system/reports
@@ -188,77 +116,100 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { type, format, status, page = 1, limit = 20 } = req.query;
-    const userId = (req as any).user.id;
+    const userId = (req as AuthRequest).user.id;
 
     try {
-      let filteredReports = [...reports];
-
-      // 按类型过滤
-      if (type) {
-        filteredReports = filteredReports.filter(report => report.type === type);
-      }
-
-      // 按格式过滤
-      if (format) {
-        filteredReports = filteredReports.filter(report => report.format === format);
-      }
-
-      // 按状态过滤
-      if (status) {
-        filteredReports = filteredReports.filter(report => report.status === status);
-      }
-
-      // 按用户过滤
-      filteredReports = filteredReports.filter(report => report.createdBy === userId);
-
-      // 排序
-      filteredReports.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-      // 分页
       const pageNumber = Number(page) || 1;
       const limitNumber = Number(limit) || 20;
-      const startIndex = (pageNumber - 1) * limitNumber;
-      const endIndex = startIndex + limitNumber;
-      const paginatedReports = filteredReports.slice(startIndex, endIndex);
+      const offset = (pageNumber - 1) * limitNumber;
 
-      res.json({
+      const filters: string[] = ['te.user_id = $1'];
+      const params: Array<string | number> = [userId];
+      if (type) {
+        params.push(type as string);
+        filters.push(`tr.report_data -> 'metadata' ->> 'type' = $${params.length}`);
+      }
+      if (format) {
+        params.push(format as string);
+        filters.push(`tr.format = $${params.length}`);
+      }
+      const whereClause = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
+
+      const listResult = await query(
+        `SELECT
+           tr.id,
+           tr.report_type,
+           tr.format,
+           tr.generated_at,
+           tr.file_path,
+           tr.file_size,
+           tr.report_data,
+           te.test_id,
+           te.user_id
+         FROM test_reports tr
+         LEFT JOIN test_executions te ON te.id = tr.execution_id
+         ${whereClause}
+         ORDER BY tr.generated_at DESC
+         LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limitNumber, offset]
+      );
+
+      const countResult = await query(
+        `SELECT COUNT(*)::int AS total
+         FROM test_reports tr
+         LEFT JOIN test_executions te ON te.id = tr.execution_id
+         ${whereClause}`,
+        params
+      );
+
+      const reportRows = listResult.rows || [];
+      const mappedReports = reportRows
+        .map(row => mapReportRow(row, userId, status as string | undefined))
+        .filter(report => report !== null);
+
+      const summaryByType: Record<ReportType, number> = {
+        [ReportType.PERFORMANCE]: 0,
+        [ReportType.SECURITY]: 0,
+        [ReportType.SEO]: 0,
+        [ReportType.COMPREHENSIVE]: 0,
+        [ReportType.STRESS_TEST]: 0,
+        [ReportType.API_TEST]: 0,
+      };
+      const summaryByFormat: Record<ReportFormat, number> = {
+        [ReportFormat.PDF]: 0,
+        [ReportFormat.HTML]: 0,
+        [ReportFormat.JSON]: 0,
+        [ReportFormat.CSV]: 0,
+        [ReportFormat.EXCEL]: 0,
+      };
+      const summaryByStatus: Record<string, number> = {};
+
+      mappedReports.forEach(report => {
+        summaryByType[report.type] = (summaryByType[report.type] || 0) + 1;
+        summaryByFormat[report.format] = (summaryByFormat[report.format] || 0) + 1;
+        summaryByStatus[report.status] = (summaryByStatus[report.status] || 0) + 1;
+      });
+
+      return res.json({
         success: true,
         data: {
-          reports: paginatedReports,
+          reports: mappedReports,
           pagination: {
             page: pageNumber,
             limit: limitNumber,
-            total: filteredReports.length,
-            totalPages: Math.ceil(filteredReports.length / limitNumber),
+            total: Number(countResult.rows[0]?.total) || 0,
+            totalPages: Math.ceil((Number(countResult.rows[0]?.total) || 0) / limitNumber),
           },
           summary: {
-            total: reports.length,
-            byType: reports.reduce(
-              (acc, report) => {
-                acc[report.type] = (acc[report.type] || 0) + 1;
-                return acc;
-              },
-              {} as Record<ReportType, number>
-            ),
-            byFormat: reports.reduce(
-              (acc, report) => {
-                acc[report.format] = (acc[report.format] || 0) + 1;
-                return acc;
-              },
-              {} as Record<ReportFormat, number>
-            ),
-            byStatus: reports.reduce(
-              (acc, report) => {
-                acc[report.status] = (acc[report.status] || 0) + 1;
-                return acc;
-              },
-              {} as Record<string, number>
-            ),
+            total: Number(countResult.rows[0]?.total) || 0,
+            byType: summaryByType,
+            byFormat: summaryByFormat,
+            byStatus: summaryByStatus,
           },
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取报告列表失败',
         error: error instanceof Error ? error.message : String(error),
@@ -276,10 +227,28 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const userId = (req as AuthRequest).user.id;
 
     try {
-      const report = reports.find(r => r.id === id);
+      const reportResult = await query(
+        `SELECT
+           tr.id,
+           tr.report_type,
+           tr.format,
+           tr.generated_at,
+           tr.file_path,
+           tr.file_size,
+           tr.report_data,
+           te.test_id,
+           te.user_id
+         FROM test_reports tr
+         LEFT JOIN test_executions te ON te.id = tr.execution_id
+         WHERE tr.id = $1`,
+        [id]
+      );
+
+      const reportRow = reportResult.rows[0];
+      const report = reportRow ? mapReportRow(reportRow, userId) : null;
 
       if (!report) {
         return res.status(404).json({
@@ -288,20 +257,12 @@ router.get(
         });
       }
 
-      // 检查权限
-      if (report.createdBy !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: '无权访问此报告',
-        });
-      }
-
-      res.json({
+      return res.json({
         success: true,
         data: report,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取报告详情失败',
         error: error instanceof Error ? error.message : String(error),
@@ -318,7 +279,7 @@ router.post(
   '/',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+    const userId = (req as AuthRequest).user.id;
     const reportRequest: ReportRequest = req.body;
 
     if (!reportRequest.type || !reportRequest.format) {
@@ -329,33 +290,92 @@ router.post(
     }
 
     try {
-      const newReport: Report = {
-        id: Date.now().toString(),
+      await ensureReportingInitialized();
+
+      const templates =
+        (await automatedReportingService.getAllTemplates()) as ServiceReportTemplate[];
+      const matchedTemplate = templates.find(
+        template => mapReportCategory(template.category) === reportRequest.type
+      );
+
+      if (!matchedTemplate) {
+        return res.status(400).json({
+          success: false,
+          message: '未找到匹配的报告模板',
+        });
+      }
+
+      const configId = await automatedReportingService.createConfig({
+        name: `${reportRequest.type}_${new Date().toISOString().split('T')[0]}报告`,
+        description: `${reportRequest.type} 报告`,
+        templateId: matchedTemplate.id,
+        schedule: {
+          type: 'once',
+        },
+        recipients: (reportRequest.schedule?.recipients || []).map((address, index) => ({
+          id: `${userId}_${index}`,
+          type: 'email',
+          address,
+          enabled: true,
+        })),
+        filters: buildReportFilters(reportRequest.filters || {}),
+        format: {
+          type: reportRequest.format,
+          options: {
+            includeCharts: reportRequest.options?.includeCharts as boolean | undefined,
+            includeRawData: reportRequest.options?.includeRawData as boolean | undefined,
+          },
+        },
+        delivery: {
+          method: reportRequest.schedule?.recipients?.length ? 'email' : 'storage',
+          settings: {
+            email: reportRequest.schedule?.recipients?.length
+              ? {
+                  subject: `${reportRequest.type} 报告`,
+                  body: '请查收报告附件',
+                  attachments: true,
+                }
+              : undefined,
+          },
+        },
+        enabled: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const instanceId = await automatedReportingService.generateReport(configId);
+      const instance = await automatedReportingService.getReportInstance(instanceId);
+
+      const createdReport: Report = {
+        id: instance?.metadata?.reportRecordId
+          ? String(instance.metadata.reportRecordId)
+          : instanceId,
         name: `${reportRequest.type}_${new Date().toISOString().split('T')[0]}报告`,
         type: reportRequest.type,
         format: reportRequest.format,
-        status: 'pending',
-        progress: 0,
-        createdAt: new Date(),
+        status: instance?.status === 'failed' ? 'failed' : 'completed',
+        progress: 100,
+        createdAt: instance?.generatedAt || new Date(),
+        completedAt: instance?.completedAt,
         createdBy: userId,
+        filePath: instance?.path,
+        fileSize: instance?.size,
         downloadCount: 0,
         metadata: {
           timeRange: reportRequest.timeRange,
           filters: reportRequest.filters || {},
           options: reportRequest.options || {},
           schedule: reportRequest.schedule,
+          instanceId,
+          configId,
         },
+        error: instance?.error,
       };
-
-      reports.push(newReport);
-
-      // 异步生成报告
-      generateReport(newReport.id, reportRequest);
 
       return res.status(201).json({
         success: true,
-        message: '报告创建成功，正在生成中',
-        data: newReport,
+        message: '报告创建成功',
+        data: createdReport,
       });
     } catch (error) {
       return res.status(500).json({
@@ -376,11 +396,40 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const userId = (req as AuthRequest).user.id;
 
     try {
-      const report = reports.find(r => r.id === id);
+      const reportResult = await query(
+        `SELECT
+           tr.id,
+           tr.file_path,
+           tr.format,
+           tr.report_data,
+           tr.file_size,
+           tr.generated_at,
+           te.user_id
+         FROM test_reports tr
+         LEFT JOIN test_executions te ON te.id = tr.execution_id
+         WHERE tr.id = $1`,
+        [id]
+      );
 
+      const reportRow = reportResult.rows[0];
+      if (!reportRow) {
+        return res.status(404).json({
+          success: false,
+          message: '报告不存在',
+        });
+      }
+
+      if (String(reportRow.user_id) !== String(userId)) {
+        return res.status(403).json({
+          success: false,
+          message: '无权下载此报告',
+        });
+      }
+
+      const report = mapReportRow(reportRow, userId);
       if (!report) {
         return res.status(404).json({
           success: false,
@@ -392,13 +441,6 @@ router.get(
         return res.status(400).json({
           success: false,
           message: '报告尚未生成完成',
-        });
-      }
-
-      if (report.createdBy !== (req as any).user.id) {
-        return res.status(403).json({
-          success: false,
-          message: '无权下载此报告',
         });
       }
 
@@ -419,9 +461,6 @@ router.get(
         });
       }
 
-      // 更新下载次数
-      report.downloadCount++;
-
       // 设置下载响应头
       const fileName = path.basename(report.filePath);
       Logger.info('报告下载', { reportId: id, userId, fileName });
@@ -431,7 +470,7 @@ router.get(
       // 发送文件
       return res.sendFile(report.filePath);
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '下载报告失败',
         error: error instanceof Error ? error.message : String(error),
@@ -449,48 +488,50 @@ router.delete(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const userId = (req as AuthRequest).user.id;
 
     try {
-      const reportIndex = reports.findIndex(r => r.id === id);
+      const reportResult = await query(
+        `SELECT tr.file_path, te.user_id
+         FROM test_reports tr
+         LEFT JOIN test_executions te ON te.id = tr.execution_id
+         WHERE tr.id = $1`,
+        [id]
+      );
 
-      if (reportIndex === -1) {
+      const reportRow = reportResult.rows[0];
+      if (!reportRow) {
         return res.status(404).json({
           success: false,
           message: '报告不存在',
         });
       }
 
-      const report = reports[reportIndex];
-
-      // 检查权限
-      if (report.createdBy !== userId) {
+      if (String(reportRow.user_id) !== String(userId)) {
         return res.status(403).json({
           success: false,
           message: '无权删除此报告',
         });
       }
 
-      // 删除文件
-      if (report.filePath) {
+      if (reportRow.file_path) {
         try {
-          await fs.unlink(report.filePath);
+          await fs.unlink(reportRow.file_path);
         } catch (error) {
-          Logger.error('删除报告文件失败', { error, filePath: report.filePath });
+          Logger.error('删除报告文件失败', { error, filePath: reportRow.file_path });
         }
       }
 
-      // 从列表中删除
-      reports.splice(reportIndex, 1);
+      await query('DELETE FROM test_reports WHERE id = $1', [id]);
 
-      Logger.info('报告删除', { reportId: id, userId, reportName: report.name });
+      Logger.info('报告删除', { reportId: id, userId });
 
-      res.json({
+      return res.json({
         success: true,
         message: '报告删除成功',
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '删除报告失败',
         error: error instanceof Error ? error.message : String(error),
@@ -509,16 +550,37 @@ router.get(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const { type } = req.query;
+      await ensureReportingInitialized();
 
-      let filteredTemplates = [...reportTemplates];
-
+      let templates =
+        (await automatedReportingService.getAllTemplates()) as ServiceReportTemplate[];
       if (type) {
-        filteredTemplates = filteredTemplates.filter(template => template.type === type);
+        templates = templates.filter(
+          template => mapReportCategory(template.category) === (type as ReportType)
+        );
       }
+
+      const mapped = templates.map(template => ({
+        id: template.id,
+        name: template.name,
+        type: mapReportCategory(template.category),
+        description: template.description,
+        template: template.template,
+        variables: template.variables.map(variable => ({
+          name: variable.name,
+          type: variable.type,
+          description: variable.description,
+          required: variable.required,
+          defaultValue: variable.defaultValue ? String(variable.defaultValue) : undefined,
+        })),
+        createdAt: template.createdAt,
+        updatedAt: template.updatedAt,
+        createdBy: 'system',
+      }));
 
       return res.json({
         success: true,
-        data: filteredTemplates,
+        data: mapped,
       });
     } catch (error) {
       return res.status(500).json({
@@ -538,7 +600,7 @@ router.post(
   '/templates',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+    const userId = (req as AuthRequest).user.id;
     const { name, type, description, template, variables } = req.body;
 
     if (!name || !type || !template) {
@@ -549,24 +611,84 @@ router.post(
     }
 
     try {
-      const newTemplate: ReportTemplate = {
-        id: Date.now().toString(),
+      await ensureReportingInitialized();
+
+      const templateId = await automatedReportingService.createTemplate({
         name,
-        type: type as ReportType,
         description,
+        category: mapReportTypeToCategory(type as ReportType),
+        type: 'summary',
+        format: 'html',
         template,
-        variables: variables || [],
+        variables: (variables || []).map((variable: ReportTemplate['variables'][number]) => ({
+          name: variable.name,
+          type: (variable.type || 'string') as
+            | 'string'
+            | 'number'
+            | 'boolean'
+            | 'date'
+            | 'array'
+            | 'object',
+          description: variable.description || '',
+          required: variable.required ?? false,
+          defaultValue: variable.defaultValue,
+        })),
+        sections: [
+          {
+            id: 'summary',
+            name: '摘要',
+            type: 'summary',
+            order: 1,
+            content: template,
+          },
+        ],
+        styling: {
+          theme: 'light',
+          colors: {
+            primary: '#1d4ed8',
+            secondary: '#64748b',
+            accent: '#22c55e',
+            background: '#ffffff',
+            text: '#0f172a',
+          },
+          fonts: {
+            heading: 'Inter',
+            body: 'Inter',
+            code: 'Fira Code',
+          },
+          layout: {
+            pageSize: 'A4',
+            orientation: 'portrait',
+            margins: {
+              top: 40,
+              right: 32,
+              bottom: 40,
+              left: 32,
+            },
+          },
+        },
         createdAt: new Date(),
         updatedAt: new Date(),
-        createdBy: userId,
-      };
+      });
 
-      reportTemplates.push(newTemplate);
+      const createdTemplate = await automatedReportingService.getTemplate(templateId);
 
       return res.status(201).json({
         success: true,
         message: '报告模板创建成功',
-        data: newTemplate,
+        data: createdTemplate
+          ? {
+              id: createdTemplate.id,
+              name: createdTemplate.name,
+              type: mapReportCategory(createdTemplate.category),
+              description: createdTemplate.description,
+              template: createdTemplate.template,
+              variables: createdTemplate.variables,
+              createdAt: createdTemplate.createdAt,
+              updatedAt: createdTemplate.updatedAt,
+              createdBy: userId,
+            }
+          : null,
       });
     } catch (error) {
       return res.status(500).json({
@@ -586,49 +708,64 @@ router.get(
   '/statistics',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const _timeRange = req.query.timeRange || '30d';
+    const userId = (req as AuthRequest).user.id;
 
     try {
+      const statsResult = await query(
+        `SELECT
+           tr.id,
+           tr.report_type,
+           tr.format,
+           tr.file_size,
+           tr.generated_at,
+           tr.report_data
+         FROM test_reports tr
+         LEFT JOIN test_executions te ON te.id = tr.execution_id
+         WHERE te.user_id = $1`,
+        [userId]
+      );
+
+      const reportRows = statsResult.rows || [];
+      const byType: Record<ReportType, number> = {
+        [ReportType.PERFORMANCE]: 0,
+        [ReportType.SECURITY]: 0,
+        [ReportType.SEO]: 0,
+        [ReportType.COMPREHENSIVE]: 0,
+        [ReportType.STRESS_TEST]: 0,
+        [ReportType.API_TEST]: 0,
+      };
+      const byFormat: Record<ReportFormat, number> = {
+        [ReportFormat.PDF]: 0,
+        [ReportFormat.HTML]: 0,
+        [ReportFormat.JSON]: 0,
+        [ReportFormat.CSV]: 0,
+        [ReportFormat.EXCEL]: 0,
+      };
+      const byStatus: Record<string, number> = {};
+      let totalSize = 0;
+
+      reportRows.forEach(row => {
+        const mapped = mapReportRow(row, userId);
+        if (!mapped) return;
+        byType[mapped.type] = (byType[mapped.type] || 0) + 1;
+        byFormat[mapped.format] = (byFormat[mapped.format] || 0) + 1;
+        byStatus[mapped.status] = (byStatus[mapped.status] || 0) + 1;
+        totalSize += Number(row.file_size) || 0;
+      });
+
       const statistics: ReportStatistics = {
-        total: reports.length,
-        byType: reports.reduce(
-          (acc, report) => {
-            acc[report.type] = (acc[report.type] || 0) + 1;
-            return acc;
-          },
-          {} as Record<ReportType, number>
-        ),
-        byFormat: reports.reduce(
-          (acc, report) => {
-            acc[report.format] = (acc[report.format] || 0) + 1;
-            return acc;
-          },
-          {} as Record<ReportFormat, number>
-        ),
-        byStatus: reports.reduce(
-          (acc, report) => {
-            acc[report.status] = (acc[report.status] || 0) + 1;
-            return acc;
-          },
-          {} as Record<string, number>
-        ),
-        averageGenerationTime:
-          reports
-            .filter(r => r.completedAt)
-            .reduce(
-              (sum, report) => sum + (report.completedAt!.getTime() - report.createdAt.getTime()),
-              0
-            ) / reports.filter(r => r.completedAt).length,
-        totalFileSize: reports.reduce((sum, report) => sum + (report.fileSize || 0), 0),
-        popularReports: reports
-          .sort((a, b) => b.downloadCount - a.downloadCount)
-          .slice(0, 10)
-          .map(report => ({
-            id: report.id,
-            name: report.name,
-            type: report.type,
-            downloadCount: report.downloadCount,
-          })),
+        total: reportRows.length,
+        byType,
+        byFormat,
+        byStatus,
+        averageGenerationTime: 0,
+        totalFileSize: totalSize,
+        popularReports: reportRows.slice(0, 10).map(row => ({
+          id: String(row.id),
+          name: `报告_${row.id}`,
+          type: mapReportTypeFromRow(row),
+          downloadCount: 0,
+        })),
       };
 
       return res.json({
@@ -654,55 +791,96 @@ router.post(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
-    const { enabled, frequency, recipients } = req.body;
-    const userId = (req as any).user.id;
+    const { enabled, frequency, recipients } = req.body as {
+      enabled?: boolean;
+      frequency?: 'daily' | 'weekly' | 'monthly';
+      recipients?: string[];
+    };
+    const userId = (req as AuthRequest).user.id;
 
     try {
-      const reportIndex = reports.findIndex(r => r.id === id);
+      await ensureReportingInitialized();
 
-      if (reportIndex === -1) {
+      const reportResult = await query(
+        `SELECT tr.report_data, te.user_id
+         FROM test_reports tr
+         LEFT JOIN test_executions te ON te.id = tr.execution_id
+         WHERE tr.id = $1`,
+        [id]
+      );
+
+      const reportRow = reportResult.rows[0];
+      if (!reportRow) {
         return res.status(404).json({
           success: false,
           message: '报告不存在',
         });
       }
 
-      const report = reports[reportIndex];
-
-      // 检查权限
-      if (report.createdBy !== userId) {
+      if (String(reportRow.user_id) !== String(userId)) {
         return res.status(403).json({
           success: false,
           message: '无权设置此报告的定时任务',
         });
       }
 
-      // 更新定时设置
-      const metadata = report.metadata as Record<string, unknown> & {
-        schedule?: { enabled: boolean; frequency: string; recipients: string[] };
-      };
-
-      if (metadata.schedule) {
-        metadata.schedule.enabled = enabled;
-        metadata.schedule.frequency = frequency;
-        metadata.schedule.recipients = recipients;
-      } else {
-        metadata.schedule = {
-          enabled,
-          frequency: frequency || 'weekly',
-          recipients: recipients || [],
-        };
+      const reportData = reportRow.report_data as { metadata?: { templateId?: string } };
+      if (!reportData?.metadata?.templateId) {
+        return res.status(400).json({
+          success: false,
+          message: '报告缺少模板信息，无法设置定时任务',
+        });
       }
 
-      // 如果启用了定时任务，设置定时器
-      if (enabled && monitoringService) {
-        await automatedReportingService.scheduleReport(id, frequency);
+      const configId = await automatedReportingService.createConfig({
+        name: `scheduled_${id}`,
+        description: '定时报告',
+        templateId: reportData.metadata.templateId,
+        schedule: {
+          type: 'recurring',
+          cronExpression: mapFrequencyToCron(frequency ?? 'weekly'),
+        },
+        recipients: (recipients || []).map((address, index) => ({
+          id: `${userId}_${index}`,
+          type: 'email',
+          address,
+          enabled: true,
+        })),
+        filters: [],
+        format: {
+          type: 'pdf',
+          options: {},
+        },
+        delivery: {
+          method: recipients?.length ? 'email' : 'storage',
+          settings: {
+            email: recipients?.length
+              ? {
+                  subject: '定时报表',
+                  body: '请查收报告附件',
+                  attachments: true,
+                }
+              : undefined,
+          },
+        },
+        enabled: Boolean(enabled),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      if (enabled) {
+        await automatedReportingService.scheduleReport(configId);
       }
 
       return res.json({
         success: true,
         message: '定时任务设置成功',
-        data: metadata.schedule,
+        data: {
+          enabled,
+          frequency,
+          recipients: recipients || [],
+          configId,
+        },
       });
     } catch (error) {
       return res.status(500).json({
@@ -722,38 +900,52 @@ router.get(
   '/export',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { format = 'json', type: _type } = req.query as { format?: string; type?: string };
+    const { format = 'json' } = req.query as { format?: string };
+    const userId = (req as AuthRequest).user.id;
 
     try {
-      let data: unknown;
+      const reportResult = await query(
+        `SELECT
+           tr.id,
+           tr.report_type,
+           tr.format,
+           tr.generated_at,
+           tr.file_size,
+           te.test_id
+         FROM test_reports tr
+         LEFT JOIN test_executions te ON te.id = tr.execution_id
+         WHERE te.user_id = $1`,
+        [userId]
+      );
 
-      switch (format) {
-        case 'json':
-          data = reports;
-          break;
-        case 'csv':
-          data = reports.map(report => ({
-            id: report.id,
-            name: report.name,
-            type: report.type,
-            format: report.format,
-            status: report.status,
-            createdAt: report.createdAt,
-            createdBy: report.createdBy,
-            downloadCount: report.downloadCount,
-          }));
-          break;
-        default:
-          return res.status(400).json({
-            success: false,
-            message: '不支持的导出格式',
-          });
+      const rows = reportResult.rows || [];
+      if (format === 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename="reports.json"');
+        return res.send(JSON.stringify(rows, null, 2));
       }
 
-      res.setHeader('Content-Type', 'application/octet-stream');
-      res.setHeader('Content-Disposition', `attachment; filename="reports.${format}"`);
+      if (format === 'csv') {
+        const headers = ['id', 'report_type', 'format', 'generated_at', 'file_size', 'test_id'];
+        const csvRows = [headers.join(',')];
+        rows.forEach(row => {
+          const values = headers.map(header => {
+            const value = row[header];
+            if (value === null || value === undefined) return '';
+            const valueString = String(value);
+            return valueString.includes(',') ? `"${valueString.replace(/"/g, '""')}"` : valueString;
+          });
+          csvRows.push(values.join(','));
+        });
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="reports.csv"');
+        return res.send(csvRows.join('\n'));
+      }
 
-      return res.send(JSON.stringify(data, null, 2));
+      return res.status(400).json({
+        success: false,
+        message: '不支持的导出格式',
+      });
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -764,59 +956,122 @@ router.get(
   })
 );
 
-// 异步生成报告的函数
-async function generateReport(reportId: string, _request: ReportRequest): Promise<void> {
-  const report = reports.find(r => r.id === reportId);
-
-  if (!report) return;
-
-  try {
-    // 更新状态为生成中
-    report.status = 'generating';
-    report.progress = 0;
-
-    // 模拟生成过程
-    const steps = [
-      { progress: 10, message: '收集数据中...' },
-      { progress: 30, message: '分析数据中...' },
-      { progress: 60, message: '生成报告中...' },
-      { progress: 90, message: '保存报告中...' },
-      { progress: 100, message: '完成' },
-    ];
-
-    for (const step of steps) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      report.progress = step.progress;
-      report.status = step.progress === 100 ? 'completed' : 'generating';
-    }
-
-    // 生成文件路径
-    const fileName = `${report.type}_${report.id}.${report.format}`;
-    const filePath = path.join(process.cwd(), 'reports', fileName);
-
-    // 确保目录存在
-    const reportsDir = path.dirname(filePath);
-    try {
-      await fs.mkdir(reportsDir, { recursive: true });
-    } catch {
-      // 目录可能已存在
-    }
-
-    // 模拟生成文件
-    await fs.writeFile(filePath, `报告内容 - ${report.name}`);
-
-    // 更新报告信息
-    report.status = 'completed';
-    report.completedAt = new Date();
-    report.filePath = filePath;
-    report.fileSize = 1024; // 模拟文件大小
-
-    Logger.info('报告生成完成', { reportId, fileName });
-  } catch (error) {
-    report.status = 'failed';
-    report.error = error instanceof Error ? error.message : String(error);
-    Logger.error('报告生成失败', { reportId, error });
+const mapReportCategory = (category: string): ReportType => {
+  switch (category) {
+    case 'performance':
+      return ReportType.PERFORMANCE;
+    case 'security':
+      return ReportType.SECURITY;
+    case 'seo':
+      return ReportType.SEO;
+    case 'analytics':
+      return ReportType.COMPREHENSIVE;
+    default:
+      return ReportType.COMPREHENSIVE;
   }
-}
+};
+
+const mapReportTypeToCategory = (
+  type: ReportType
+): 'performance' | 'security' | 'seo' | 'analytics' | 'custom' => {
+  switch (type) {
+    case ReportType.PERFORMANCE:
+      return 'performance';
+    case ReportType.SECURITY:
+      return 'security';
+    case ReportType.SEO:
+      return 'seo';
+    case ReportType.COMPREHENSIVE:
+      return 'analytics';
+    default:
+      return 'custom';
+  }
+};
+
+const mapReportFormat = (format: string): ReportFormat => {
+  switch (format) {
+    case 'pdf':
+      return ReportFormat.PDF;
+    case 'html':
+      return ReportFormat.HTML;
+    case 'json':
+      return ReportFormat.JSON;
+    case 'csv':
+      return ReportFormat.CSV;
+    case 'excel':
+      return ReportFormat.EXCEL;
+    default:
+      return ReportFormat.JSON;
+  }
+};
+
+const mapReportTypeFromRow = (row: Record<string, unknown>): ReportType => {
+  const metadata = row.report_data as { metadata?: { type?: string } } | undefined;
+  if (
+    metadata?.metadata?.type &&
+    Object.values(ReportType).includes(metadata.metadata.type as ReportType)
+  ) {
+    return metadata.metadata.type as ReportType;
+  }
+  return ReportType.COMPREHENSIVE;
+};
+
+const mapReportRow = (
+  row: Record<string, unknown>,
+  userId: string,
+  statusFilter?: string
+): Report | null => {
+  if (row.user_id && String(row.user_id) !== String(userId)) {
+    return null;
+  }
+
+  const status: Report['status'] = 'completed';
+  if (statusFilter && statusFilter !== status) {
+    return null;
+  }
+
+  const reportType = mapReportTypeFromRow(row);
+  const metadata = row.report_data || {};
+
+  return {
+    id: String(row.id),
+    name: `报告_${row.id}`,
+    type: reportType,
+    format: mapReportFormat(String(row.format || 'json')),
+    status,
+    progress: 100,
+    createdAt: row.generated_at ? new Date(row.generated_at as string | number | Date) : new Date(),
+    completedAt: row.generated_at
+      ? new Date(row.generated_at as string | number | Date)
+      : undefined,
+    createdBy: String(row.user_id || userId),
+    filePath: row.file_path ? String(row.file_path) : undefined,
+    fileSize: row.file_size ? Number(row.file_size) : undefined,
+    downloadCount: 0,
+    metadata:
+      typeof metadata === 'object' && metadata !== null
+        ? (metadata as Record<string, unknown>)
+        : {},
+  };
+};
+
+const buildReportFilters = (filters: Record<string, unknown>) =>
+  Object.entries(filters).map(([field, value]) => ({
+    field,
+    operator: 'equals' as const,
+    value,
+    enabled: true,
+  }));
+
+const mapFrequencyToCron = (frequency: string) => {
+  switch (frequency) {
+    case 'daily':
+      return '0 2 * * *';
+    case 'monthly':
+      return '0 3 1 * *';
+    default:
+      return '0 3 * * 1';
+  }
+};
 
 export default router;

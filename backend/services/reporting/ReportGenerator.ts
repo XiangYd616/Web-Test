@@ -4,9 +4,10 @@
  */
 
 import ExcelJS from 'exceljs';
+import { createWriteStream } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import PDFDocument from 'pdfkit';
+const PDFDocument = require('pdfkit');
 
 // 报告模板接口
 export interface ReportTemplate {
@@ -29,9 +30,9 @@ export interface ReportData {
     criticalIssues: number;
     recommendations: number;
   };
-  metrics: Record<string, any>;
-  sections: Record<string, any>;
-  metadata?: Record<string, any>;
+  metrics: Record<string, unknown>;
+  sections: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 // 报告配置接口
@@ -42,7 +43,7 @@ export interface ReportConfig {
   filename?: string;
   includeCharts?: boolean;
   includeRawData?: boolean;
-  customStyles?: Record<string, any>;
+  customStyles?: Record<string, unknown>;
 }
 
 // 报告生成结果接口
@@ -60,12 +61,18 @@ export interface ReportGenerationResult {
 export interface ChartConfig {
   type: 'bar' | 'line' | 'pie' | 'area' | 'scatter';
   title: string;
-  data: any[];
+  data: unknown[];
   xAxis?: string;
   yAxis?: string;
   width?: number;
   height?: number;
 }
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+type PDFDocumentType = InstanceType<typeof PDFDocument>;
 
 class ReportGenerator {
   private reportsDir: string;
@@ -235,7 +242,7 @@ class ReportGenerator {
         }
 
         // 保存文件
-        doc.pipe(fs.createWriteStream(filePath));
+        doc.pipe(createWriteStream(filePath));
 
         doc.on('end', () => {
           fs.stat(filePath)
@@ -268,42 +275,38 @@ class ReportGenerator {
     config: ReportConfig,
     filePath: string
   ): Promise<ReportGenerationResult> {
-    try {
-      const workbook = new ExcelJS.Workbook();
+    const workbook = new ExcelJS.Workbook();
 
-      // 创建摘要工作表
-      const summarySheet = workbook.addWorksheet('摘要');
-      this.addExcelSummary(summarySheet, data, template);
+    // 创建摘要工作表
+    const summarySheet = workbook.addWorksheet('摘要');
+    this.addExcelSummary(summarySheet, data);
 
-      // 创建各部分工作表
-      template.sections.forEach(section => {
-        if (data.sections[section]) {
-          const sheet = workbook.addWorksheet(this.getSectionTitle(section));
-          this.addExcelSection(sheet, data.sections[section], section);
-        }
-      });
-
-      // 如果包含原始数据，添加数据工作表
-      if (config.includeRawData) {
-        const rawDataSheet = workbook.addWorksheet('原始数据');
-        this.addExcelRawData(rawDataSheet, data);
+    // 创建各部分工作表
+    template.sections.forEach(section => {
+      if (data.sections[section]) {
+        const sheet = workbook.addWorksheet(this.getSectionTitle(section));
+        this.addExcelSection(sheet, data.sections[section]);
       }
+    });
 
-      // 保存文件
-      await workbook.xlsx.writeFile(filePath);
-      const stats = await fs.stat(filePath);
-
-      return {
-        success: true,
-        filePath,
-        filename: path.basename(filePath),
-        format: 'excel',
-        size: stats.size,
-        duration: 0,
-      };
-    } catch (error) {
-      throw error;
+    // 如果包含原始数据，添加数据工作表
+    if (config.includeRawData) {
+      const rawDataSheet = workbook.addWorksheet('原始数据');
+      this.addExcelRawData(rawDataSheet, data);
     }
+
+    // 保存文件
+    await workbook.xlsx.writeFile(filePath);
+    const stats = await fs.stat(filePath);
+
+    return {
+      success: true,
+      filePath,
+      filename: path.basename(filePath),
+      format: 'excel',
+      size: stats.size,
+      duration: 0,
+    };
   }
 
   /**
@@ -315,23 +318,19 @@ class ReportGenerator {
     config: ReportConfig,
     filePath: string
   ): Promise<ReportGenerationResult> {
-    try {
-      let html = this.generateHTMLTemplate(data, template, config);
+    const html = this.generateHTMLTemplate(data, template, config);
 
-      await fs.writeFile(filePath, html, 'utf8');
-      const stats = await fs.stat(filePath);
+    await fs.writeFile(filePath, html, 'utf8');
+    const stats = await fs.stat(filePath);
 
-      return {
-        success: true,
-        filePath,
-        filename: path.basename(filePath),
-        format: 'html',
-        size: stats.size,
-        duration: 0,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      success: true,
+      filePath,
+      filename: path.basename(filePath),
+      format: 'html',
+      size: stats.size,
+      duration: 0,
+    };
   }
 
   /**
@@ -343,34 +342,35 @@ class ReportGenerator {
     config: ReportConfig,
     filePath: string
   ): Promise<ReportGenerationResult> {
-    try {
-      const reportData = {
-        template: template.name,
-        format: 'json',
-        generatedAt: new Date().toISOString(),
-        data,
-      };
+    const reportData = {
+      template: template.name,
+      format: 'json',
+      generatedAt: new Date().toISOString(),
+      data,
+    };
 
-      await fs.writeFile(filePath, JSON.stringify(reportData, null, 2), 'utf8');
-      const stats = await fs.stat(filePath);
+    await fs.writeFile(filePath, JSON.stringify(reportData, null, 2), 'utf8');
+    const stats = await fs.stat(filePath);
 
-      return {
-        success: true,
-        filePath,
-        filename: path.basename(filePath),
-        format: 'json',
-        size: stats.size,
-        duration: 0,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      success: true,
+      filePath,
+      filename: path.basename(filePath),
+      format: 'json',
+      size: stats.size,
+      duration: 0,
+    };
   }
 
   /**
    * 添加PDF部分
    */
-  private addPDFSection(doc: PDFKit.PDFDocument, title: string, content: any, style: string): void {
+  private addPDFSection(
+    doc: PDFDocumentType,
+    title: string,
+    content: unknown,
+    _style: string
+  ): void {
     doc.fontSize(14).font('Helvetica-Bold').text(title, { underline: true });
     doc.moveDown();
 
@@ -378,7 +378,7 @@ class ReportGenerator {
       doc.fontSize(10).font('Helvetica').text(content, { align: 'justify' });
     } else {
       // 格式化对象内容
-      const formattedContent = this.formatContentForPDF(content, style);
+      const formattedContent = this.formatContentForPDF(content, _style);
       doc.fontSize(10).font('Helvetica').text(formattedContent, { align: 'justify' });
     }
 
@@ -388,11 +388,7 @@ class ReportGenerator {
   /**
    * 添加Excel摘要
    */
-  private addExcelSummary(
-    sheet: ExcelJS.Worksheet,
-    data: ReportData,
-    template: ReportTemplate
-  ): void {
+  private addExcelSummary(sheet: ExcelJS.Worksheet, data: ReportData): void {
     // 标题行
     sheet.getCell('A1').value = '项目';
     sheet.getCell('B1').value = '值';
@@ -441,27 +437,33 @@ class ReportGenerator {
   /**
    * 添加Excel部分
    */
-  private addExcelSection(sheet: ExcelJS.Worksheet, content: any, sectionName: string): void {
+  private addExcelSection(sheet: ExcelJS.Worksheet, content: unknown): void {
     if (Array.isArray(content)) {
       // 表格数据
-      sheet.getRow(1).values = Object.keys(content[0] || {});
+      const firstRow = content[0];
+      const headers = isRecord(firstRow) ? Object.keys(firstRow) : [];
+      sheet.getRow(1).values = headers;
       content.forEach((item, index) => {
         const row = index + 2;
-        Object.entries(item).forEach(([key, value], colIndex) => {
-          sheet.getCell(row, colIndex + 1).value = value;
-        });
+        if (isRecord(item)) {
+          Object.entries(item).forEach(([_key, value], colIndex) => {
+            sheet.getCell(row, colIndex + 1).value = value as ExcelJS.CellValue;
+          });
+        } else {
+          sheet.getCell(row, 1).value = String(item);
+        }
       });
-    } else if (typeof content === 'object') {
+    } else if (isRecord(content)) {
       // 对象数据
       let row = 1;
       Object.entries(content).forEach(([key, value]) => {
         sheet.getCell(`A${row}`).value = key;
-        sheet.getCell(`B${row}`).value = value;
+        sheet.getCell(`B${row}`).value = value as ExcelJS.CellValue;
         row++;
       });
     } else {
       // 文本内容
-      sheet.getCell('A1').value = content;
+      sheet.getCell('A1').value = String(content ?? '');
     }
   }
 
@@ -703,27 +705,29 @@ class ReportGenerator {
   /**
    * 格式化内容为HTML
    */
-  private formatContentHTML(content: any): string {
+  private formatContentHTML(content: unknown): string {
     if (typeof content === 'string') {
       return `<p>${content}</p>`;
     } else if (Array.isArray(content)) {
+      const firstRow = content[0];
+      const headers = isRecord(firstRow) ? Object.keys(firstRow) : [];
       return `
         <table class="data-table">
           <thead>
             <tr>
-              ${Object.keys(content[0] || {})
-                .map(key => `<th>${key}</th>`)
-                .join('')}
+              ${headers.map(key => `<th>${key}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
             ${content
-              .map(
-                item =>
-                  `<tr>${Object.values(item)
+              .map(item => {
+                if (isRecord(item)) {
+                  return `<tr>${Object.values(item)
                     .map(value => `<td>${value}</td>`)
-                    .join('')}</tr>`
-              )
+                    .join('')}</tr>`;
+                }
+                return `<tr><td>${String(item)}</td></tr>`;
+              })
               .join('')}
           </tbody>
         </table>
@@ -745,7 +749,7 @@ class ReportGenerator {
           }
         </style>
       `;
-    } else if (typeof content === 'object') {
+    } else if (isRecord(content)) {
       return `
         <div class="object-content">
           ${Object.entries(content)
@@ -776,12 +780,12 @@ class ReportGenerator {
   /**
    * 格式化内容为PDF
    */
-  private formatContentForPDF(content: any, style: string): string {
+  private formatContentForPDF(content: unknown, _style: string): string {
     if (typeof content === 'string') {
       return content;
     } else if (Array.isArray(content)) {
-      return content.map(item => JSON.stringify(item)).join('\n');
-    } else if (typeof content === 'object') {
+      return content.map(item => (isRecord(item) ? JSON.stringify(item) : String(item))).join('\n');
+    } else if (isRecord(content)) {
       return JSON.stringify(content, null, 2);
     }
     return String(content);
@@ -849,7 +853,7 @@ class ReportGenerator {
     for (const dir of dirs) {
       try {
         await fs.mkdir(dir, { recursive: true });
-      } catch (error) {
+      } catch {
         // 目录已存在，忽略错误
       }
     }

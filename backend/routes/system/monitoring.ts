@@ -82,11 +82,25 @@ interface MonitoringQuery {
 
 const router = express.Router();
 
+interface AuthenticatedRequest extends express.Request {
+  user?: {
+    id: string;
+  };
+}
+
+const getUserId = (req: AuthenticatedRequest): string => {
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new Error('用户未认证');
+  }
+  return userId;
+};
+
 // 监控服务实例 (将在app.js中初始化)
-let monitoringService: any = null;
+let monitoringService: unknown = null;
 
 // 设置监控服务实例
-router.setMonitoringService = (service: any): void => {
+router.setMonitoringService = (service: unknown): void => {
   monitoringService = service;
 };
 
@@ -217,9 +231,9 @@ router.get(
   '/sites',
   authMiddleware,
   validateRequest(addSiteSchema),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const query: MonitoringQuery = req.query;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       let filteredSites = [...monitoringSites];
@@ -297,8 +311,8 @@ router.post(
   '/sites',
   authMiddleware,
   validateRequest(addSiteSchema),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const siteData: AddSiteRequest = req.body;
 
     try {
@@ -397,9 +411,9 @@ router.get(
 router.put(
   '/sites/:id',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
     const updateData = req.body;
 
     try {

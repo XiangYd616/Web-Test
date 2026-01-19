@@ -2,21 +2,40 @@
  * 认证路由
  */
 
-import bcrypt from 'bcryptjs';
+const bcrypt = require('bcryptjs');
 import express from 'express';
 import { query } from '../config/database';
-import {
-  authMiddleware,
-  createUserSession,
-  generateTokenPair,
-  recordSecurityEvent,
-  refreshToken,
-} from '../middleware/auth';
 import { asyncHandler } from '../middleware/errorHandler';
-import { securityLogger } from '../middleware/logger';
 import { loginRateLimiter, registerRateLimiter } from '../middleware/rateLimiter';
+const { authMiddleware } = require('../middleware/auth');
+const JwtService = require('../services/core/jwtService');
+const SessionManager = require('../services/auth/sessionManager');
+const { securityLogger } = require('../middleware/logger');
 
 const router = express.Router();
+const jwtService = new JwtService();
+const sessionManager = new SessionManager();
+
+type AuthenticatedRequest = Omit<express.Request, 'user'> & {
+  user?: {
+    id: string;
+    username?: string;
+    email?: string;
+    role?: string;
+    twoFactorEnabled?: boolean;
+    emailVerified?: boolean;
+    createdAt?: Date | string;
+    lastLogin?: Date | string;
+  } | null;
+};
+
+const getUser = (req: AuthenticatedRequest): NonNullable<AuthenticatedRequest['user']> => {
+  const user = req.user;
+  if (!user) {
+    throw new Error('用户未认证');
+  }
+  return user;
+};
 
 // MFA路由
 const mfaRoutes = require('./mfa');
@@ -42,12 +61,12 @@ router.post(
       }
 
       // 检查用户是否已存在
-      const existingUser = await query('SELECT id FROM users WHERE username = ? OR email = ?', [
+      const existingUser = await query('SELECT id FROM users WHERE username = $1 OR email = $2', [
         username,
         email,
       ]);
 
-      if (existingUser.length > 0) {
+      if (existingUser.rows.length > 0) {
         return res.status(409).json({
           success: false,
           message: '用户名或邮箱已存在',
@@ -59,14 +78,20 @@ router.post(
 
       // 创建用户
       const result = await query(
-        'INSERT INTO users (username, email, password, role, created_at) VALUES (?, ?, ?, ?, NOW())',
+        'INSERT INTO users (username, email, password, role, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id',
         [username, email, hashedPassword, 'user']
       );
 
-      const userId = result.insertId;
+      const userId = result.rows[0]?.id;
+      if (!userId) {
+        return res.status(500).json({
+          success: false,
+          message: '创建用户失败',
+        });
+      }
 
       // 记录安全事件
-      await recordSecurityEvent('USER_REGISTERED', {
+      securityLogger('USER_REGISTERED', {
         userId,
         username,
         email,
@@ -75,12 +100,17 @@ router.post(
       });
 
       // 生成令牌
-      const tokens = await generateTokenPair(userId, username, 'user');
+      const tokens = await jwtService.generateTokenPair(userId, { username, role: 'user' });
 
       // 创建会话
-      await createUserSession(userId, tokens.refreshToken, req.ip, req.get('User-Agent'));
+      await sessionManager.createSession(
+        userId,
+        { userAgent: req.get('User-Agent') },
+        req.ip,
+        req.get('User-Agent')
+      );
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '注册成功',
         data: {
@@ -94,13 +124,16 @@ router.post(
         },
       });
     } catch (error) {
-      securityLogger.error('用户注册失败', {
-        error: error instanceof Error ? error.message : String(error),
-        body: req.body,
-        ip: req.ip,
-      });
+      securityLogger(
+        'USER_REGISTER_FAILED',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          body: req.body,
+        },
+        req
+      );
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '注册失败，请稍后重试',
       });
@@ -128,28 +161,40 @@ router.post(
 
       // 查找用户
       const users = await query(
-        'SELECT id, username, email, password, role, two_factor_enabled FROM users WHERE username = ? OR email = ?',
+        'SELECT id, username, email, password, role, two_factor_enabled FROM users WHERE username = $1 OR email = $2',
         [username, username]
       );
 
-      if (users.length === 0) {
+      if (users.rows.length === 0) {
         return res.status(401).json({
           success: false,
           message: '用户名或密码错误',
         });
       }
 
-      const user = users[0];
+      const user = users.rows[0] as {
+        id: string;
+        username: string;
+        email: string;
+        password: string;
+        role: string;
+        two_factor_enabled?: boolean;
+        status?: string;
+      };
 
       // 验证密码
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
-        await recordSecurityEvent('LOGIN_FAILED', {
-          userId: user.id,
-          username: user.username,
-          ip: req.ip,
-          userAgent: req.get('User-Agent'),
-        });
+        securityLogger(
+          'LOGIN_FAILED',
+          {
+            userId: user.id,
+            username: user.username,
+            ip: req.ip,
+            userAgent: req.get('User-Agent'),
+          },
+          req
+        );
 
         return res.status(401).json({
           success: false,
@@ -166,23 +211,35 @@ router.post(
       }
 
       // 生成令牌
-      const tokens = await generateTokenPair(user.id, user.username, user.role);
-
-      // 创建会话
-      await createUserSession(user.id, tokens.refreshToken, req.ip, req.get('User-Agent'));
-
-      // 更新最后登录时间
-      await query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
-
-      // 记录安全事件
-      await recordSecurityEvent('LOGIN_SUCCESS', {
-        userId: user.id,
+      const tokens = await jwtService.generateTokenPair(user.id, {
         username: user.username,
-        ip: req.ip,
-        userAgent: req.get('User-Agent'),
+        role: user.role,
       });
 
-      res.json({
+      // 创建会话
+      await sessionManager.createSession(
+        user.id,
+        { userAgent: req.get('User-Agent') },
+        req.ip,
+        req.get('User-Agent')
+      );
+
+      // 更新最后登录时间
+      await query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+
+      // 记录安全事件
+      securityLogger(
+        'LOGIN_SUCCESS',
+        {
+          userId: user.id,
+          username: user.username,
+          ip: req.ip,
+          userAgent: req.get('User-Agent'),
+        },
+        req
+      );
+
+      return res.json({
         success: true,
         message: '登录成功',
         data: {
@@ -197,13 +254,17 @@ router.post(
         },
       });
     } catch (error) {
-      securityLogger.error('用户登录失败', {
-        error: error instanceof Error ? error.message : String(error),
-        body: req.body,
-        ip: req.ip,
-      });
+      securityLogger(
+        'LOGIN_FAILED_INTERNAL',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          body: req.body,
+          ip: req.ip,
+        },
+        req
+      );
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '登录失败，请稍后重试',
       });
@@ -228,15 +289,15 @@ router.post(
         });
       }
 
-      const tokens = await refreshToken(token);
+      const tokens = await jwtService.refreshAccessToken(token);
 
-      res.json({
+      return res.json({
         success: true,
         message: '令牌刷新成功',
         data: { tokens },
       });
     } catch (error) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         message: error instanceof Error ? error.message : '令牌刷新失败',
       });
@@ -251,38 +312,47 @@ router.post(
 router.post(
   '/logout',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
-      const userId = (req as any).user.id;
+      const user = getUser(req);
+      const userId = user.id;
       const refreshToken = req.body.refreshToken;
 
       // 删除会话
       if (refreshToken) {
-        await query('DELETE FROM user_sessions WHERE user_id = ? AND refresh_token = ?', [
+        await query('DELETE FROM user_sessions WHERE user_id = $1 AND refresh_token = $2', [
           userId,
           refreshToken,
         ]);
       }
 
       // 记录安全事件
-      await recordSecurityEvent('LOGOUT', {
-        userId,
-        ip: req.ip,
-        userAgent: req.get('User-Agent'),
-      });
+      securityLogger(
+        'LOGOUT',
+        {
+          userId,
+          ip: req.ip,
+          userAgent: req.get('User-Agent'),
+        },
+        req
+      );
 
-      res.json({
+      return res.json({
         success: true,
         message: '登出成功',
       });
     } catch (error) {
-      securityLogger.error('用户登出失败', {
-        error: error instanceof Error ? error.message : String(error),
-        userId: (req as any).user?.id,
-        ip: req.ip,
-      });
+      securityLogger(
+        'LOGOUT_FAILED',
+        {
+          error: error instanceof Error ? error.message : String(error),
+          userId: req.user?.id,
+          ip: req.ip,
+        },
+        req
+      );
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '登出失败',
       });
@@ -297,11 +367,11 @@ router.post(
 router.get(
   '/me',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
-      const user = (req as any).user;
+      const user = getUser(req);
 
-      res.json({
+      return res.json({
         success: true,
         data: {
           user: {
@@ -309,15 +379,15 @@ router.get(
             username: user.username,
             email: user.email,
             role: user.role,
-            twoFactorEnabled: user.two_factor_enabled,
-            emailVerified: user.email_verified,
-            createdAt: user.created_at,
-            lastLogin: user.last_login,
+            twoFactorEnabled: user.twoFactorEnabled,
+            emailVerified: user.emailVerified,
+            createdAt: user.createdAt,
+            lastLogin: user.lastLogin,
           },
         },
       });
-    } catch (error) {
-      res.status(500).json({
+    } catch {
+      return res.status(500).json({
         success: false,
         message: '获取用户信息失败',
       });

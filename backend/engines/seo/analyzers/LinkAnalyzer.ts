@@ -4,7 +4,40 @@
  * 分析页面的内部链接和外部链接结构
  */
 
-import puppeteer from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
+
+interface ExtractedLink {
+  href: string;
+  text: string;
+  title: string;
+  rel: string;
+  className: string;
+  id: string;
+  position: number;
+}
+
+interface ExtractedAnchor {
+  name: string;
+  href: string;
+  position: number;
+}
+
+interface NavigationLink {
+  href: string;
+  text: string;
+}
+
+interface NavigationBlock {
+  type: string;
+  links: NavigationLink[];
+  position: string;
+}
+
+interface LinkData {
+  links: ExtractedLink[];
+  anchors: ExtractedAnchor[];
+  navigation: NavigationBlock[];
+}
 
 interface LinkRules {
   maxInternalLinks: number;
@@ -299,41 +332,10 @@ class LinkAnalyzer {
   /**
    * 提取链接数据
    */
-  private async extractLinkData(
-    page: any,
-    baseUrl: string
-  ): Promise<{
-    links: Array<{
-      href: string;
-      text: string;
-      title: string;
-      rel: string;
-      className: string;
-      id: string;
-      position: number;
-    }>;
-    anchors: Array<{
-      name: string;
-      href: string;
-      position: number;
-    }>;
-    navigation: Array<{
-      type: string;
-      links: any[];
-      position: string;
-    }>;
-  }> {
-    return await page.evaluate((url: string) => {
+  private async extractLinkData(page: Page, _baseUrl: string): Promise<LinkData> {
+    return await page.evaluate(() => {
       // 提取所有链接
-      const links: Array<{
-        href: string;
-        text: string;
-        title: string;
-        rel: string;
-        className: string;
-        id: string;
-        position: number;
-      }> = [];
+      const links: ExtractedLink[] = [];
 
       document.querySelectorAll('a[href]').forEach((link, index) => {
         const element = link as HTMLAnchorElement;
@@ -349,11 +351,7 @@ class LinkAnalyzer {
       });
 
       // 提取锚点
-      const anchors: Array<{
-        name: string;
-        href: string;
-        position: number;
-      }> = [];
+      const anchors: ExtractedAnchor[] = [];
 
       document.querySelectorAll('a[name], a[id]').forEach((element, index) => {
         const htmlElement = element as HTMLElement;
@@ -368,11 +366,7 @@ class LinkAnalyzer {
       });
 
       // 提取导航结构
-      const navigation: Array<{
-        type: string;
-        links: any[];
-        position: string;
-      }> = [];
+      const navigation: NavigationBlock[] = [];
 
       // 主导航
       const mainNav = document.querySelector('nav, .nav, .navigation, #navigation');
@@ -421,17 +415,17 @@ class LinkAnalyzer {
         anchors,
         navigation,
       };
-    }, baseUrl);
+    });
   }
 
   /**
    * 分析内部链接
    */
-  private analyzeInternalLinks(linkData: any, baseUrl: string): InternalLinkAnalysis {
+  private analyzeInternalLinks(linkData: LinkData, baseUrl: string): InternalLinkAnalysis {
     const urlObj = new URL(baseUrl);
     const domain = urlObj.hostname;
 
-    const internalLinks = linkData.links.filter((link: any) => {
+    const internalLinks = linkData.links.filter(link => {
       try {
         const linkUrl = new URL(link.href);
         return linkUrl.hostname === domain;
@@ -440,7 +434,7 @@ class LinkAnalyzer {
       }
     });
 
-    const links: InternalLink[] = internalLinks.map((link: any, index: number) => {
+    const links: InternalLink[] = internalLinks.map(link => {
       const issues: string[] = [];
       let isValid = true;
 
@@ -498,11 +492,11 @@ class LinkAnalyzer {
   /**
    * 分析外部链接
    */
-  private analyzeExternalLinks(linkData: any, baseUrl: string): ExternalLinkAnalysis {
+  private analyzeExternalLinks(linkData: LinkData, baseUrl: string): ExternalLinkAnalysis {
     const urlObj = new URL(baseUrl);
     const domain = urlObj.hostname;
 
-    const externalLinks = linkData.links.filter((link: any) => {
+    const externalLinks = linkData.links.filter(link => {
       try {
         const linkUrl = new URL(link.href);
         return linkUrl.hostname !== domain;
@@ -511,7 +505,7 @@ class LinkAnalyzer {
       }
     });
 
-    const links: ExternalLink[] = externalLinks.map((link: any, index: number) => {
+    const links: ExternalLink[] = externalLinks.map(link => {
       const issues: string[] = [];
       let isValid = true;
 
@@ -574,14 +568,14 @@ class LinkAnalyzer {
   /**
    * 分析锚点链接
    */
-  private analyzeAnchorLinks(linkData: any): AnchorLinkAnalysis {
+  private analyzeAnchorLinks(linkData: LinkData): AnchorLinkAnalysis {
     const anchors = linkData.anchors || [];
-    const links = linkData.links.filter((link: any) => link.href.startsWith('#'));
+    const links = linkData.links.filter(link => link.href.startsWith('#'));
 
-    const anchorLinks: AnchorLink[] = links.map((link: any) => {
+    const anchorLinks: AnchorLink[] = links.map(link => {
       const issues: string[] = [];
       const targetId = link.href.substring(1);
-      const exists = anchors.some((anchor: any) => anchor.name === targetId);
+      const exists = anchors.some(anchor => anchor.name === targetId);
 
       if (!exists) {
         issues.push('锚点目标不存在');
@@ -613,11 +607,11 @@ class LinkAnalyzer {
   /**
    * 分析导航链接
    */
-  private analyzeNavigationLinks(linkData: any): NavigationAnalysis {
+  private analyzeNavigationLinks(linkData: LinkData): NavigationAnalysis {
     const navigationData = linkData.navigation || [];
-    const menus: NavigationMenu[] = navigationData.map((nav: any) => ({
+    const menus: NavigationMenu[] = navigationData.map(nav => ({
       type: nav.type,
-      links: nav.links.map((link: any) => ({
+      links: nav.links.map(link => ({
         url: link.href,
         anchorText: link.text,
         title: '',
@@ -649,9 +643,9 @@ class LinkAnalyzer {
   /**
    * 分析面包屑
    */
-  private analyzeBreadcrumbs(linkData: any): BreadcrumbAnalysis {
+  private analyzeBreadcrumbs(linkData: LinkData): BreadcrumbAnalysis {
     // 简化的面包屑检测
-    const breadcrumbSelectors = [
+    const _breadcrumbSelectors = [
       '.breadcrumb',
       '.breadcrumbs',
       '.breadcrumb-nav',
@@ -664,7 +658,7 @@ class LinkAnalyzer {
     let depth = 0;
 
     // 这里需要实际的DOM检测，简化处理
-    if (linkData.navigation.some((nav: any) => nav.type === 'breadcrumb')) {
+    if (linkData.navigation.some(nav => nav.type === 'breadcrumb')) {
       present = true;
       structure = [
         { text: '首页', url: '/', position: 0, isCurrent: false },
@@ -699,8 +693,8 @@ class LinkAnalyzer {
   /**
    * 分析分页
    */
-  private analyzePagination(linkData: any): PaginationAnalysis {
-    const paginationSelectors = [
+  private analyzePagination(linkData: LinkData): PaginationAnalysis {
+    const _paginationSelectors = [
       '.pagination',
       '.pager',
       '.paging',
@@ -720,7 +714,7 @@ class LinkAnalyzer {
 
     // 简化的分页检测
     const paginationLinks = linkData.links.filter(
-      (link: any) =>
+      link =>
         link.text.includes('下一页') ||
         link.text.includes('上一页') ||
         link.className.includes('page') ||
@@ -730,8 +724,8 @@ class LinkAnalyzer {
 
     if (paginationLinks.length > 0) {
       present = true;
-      structure.hasNext = paginationLinks.some((link: any) => link.text.includes('下一页'));
-      structure.hasPrev = paginationLinks.some((link: any) => link.text.includes('上一页'));
+      structure.hasNext = paginationLinks.some(link => link.text.includes('下一页'));
+      structure.hasPrev = paginationLinks.some(link => link.text.includes('上一页'));
     }
 
     const issues: LinkIssue[] = [];
@@ -779,7 +773,7 @@ class LinkAnalyzer {
   /**
    * 计算链接分布
    */
-  private calculateLinkDistribution(links: any[]): LinkDistribution {
+  private calculateLinkDistribution(links: Array<InternalLink | ExternalLink>): LinkDistribution {
     const distribution: LinkDistribution = {
       byDepth: {},
       byPosition: {},
@@ -788,7 +782,7 @@ class LinkAnalyzer {
 
     links.forEach(link => {
       // 按深度分布
-      const depth = link.depth || 1;
+      const depth = 'depth' in link ? link.depth || 1 : 1;
       distribution.byDepth[depth] = (distribution.byDepth[depth] || 0) + 1;
 
       // 按位置分布
@@ -806,7 +800,9 @@ class LinkAnalyzer {
   /**
    * 分类链接问题
    */
-  private categorizeLinkIssues(links: any[]): LinkIssue[] {
+  private categorizeLinkIssues(
+    links: Array<InternalLink | ExternalLink | AnchorLink>
+  ): LinkIssue[] {
     const issuesMap: Record<string, LinkIssue> = {};
 
     links.forEach(link => {
@@ -862,7 +858,10 @@ class LinkAnalyzer {
   /**
    * 计算链接分数
    */
-  private calculateLinkScore(links: any[], issues: LinkIssue[]): number {
+  private calculateLinkScore(
+    links: Array<InternalLink | ExternalLink | AnchorLink>,
+    issues: LinkIssue[]
+  ): number {
     if (links.length === 0) return 100;
 
     let score = 100;
@@ -1006,7 +1005,7 @@ class LinkAnalyzer {
     anchors: AnchorLinkAnalysis,
     navigation: NavigationAnalysis,
     breadcrumbs: BreadcrumbAnalysis,
-    pagination: PaginationAnalysis
+    _pagination: PaginationAnalysis
   ): LinkRecommendation[] {
     const recommendations: LinkRecommendation[] = [];
 

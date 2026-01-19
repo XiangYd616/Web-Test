@@ -21,7 +21,7 @@ export interface CICDIntegrationConfig {
   name: string;
   description?: string;
   enabled: boolean;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   webhook?: {
     url: string;
     secret?: string;
@@ -42,7 +42,7 @@ export interface CICDTrigger {
   type: 'webhook' | 'schedule' | 'manual';
   condition: string;
   enabled: boolean;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 // CI/CD通知接口
@@ -51,7 +51,7 @@ export interface CICDNotification {
   type: 'email' | 'slack' | 'webhook' | 'teams';
   condition: string;
   enabled: boolean;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 // CI/CD构建接口
@@ -68,7 +68,7 @@ export interface CICDBuild {
   url?: string;
   logs?: string[];
   artifacts?: CICDArtifact[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // CI/CD构建产物接口
@@ -116,7 +116,7 @@ export interface CICDExecutionResult {
   duration: number;
   artifacts: CICDArtifact[];
   logs: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // CI/CD阶段结果接口
@@ -150,7 +150,7 @@ export interface CICDStatistics {
 
 class CICDIntegrationService extends EventEmitter {
   private integrations: Map<string, CICDIntegrationConfig> = new Map();
-  private webhooks: Map<string, any> = new Map();
+  private webhooks: Map<string, CICDIntegrationConfig['webhook']> = new Map();
   private apiKeys: Map<string, string> = new Map();
   private isInitialized: boolean = false;
   private builds: Map<string, CICDBuild> = new Map();
@@ -341,14 +341,7 @@ class CICDIntegrationService extends EventEmitter {
   /**
    * 触发构建
    */
-  async triggerBuild(
-    integrationId: string,
-    options: {
-      branch?: string;
-      commit?: string;
-      parameters?: Record<string, any>;
-    } = {}
-  ): Promise<string> {
+  async triggerBuild(integrationId: string, options: BuildTriggerOptions = {}): Promise<string> {
     const integration = this.integrations.get(integrationId);
     if (!integration) {
       throw new Error('Integration not found');
@@ -366,7 +359,7 @@ class CICDIntegrationService extends EventEmitter {
       status: 'pending',
       triggeredBy: 'system',
       triggeredAt: new Date(),
-      metadata: options,
+      metadata: { ...options },
     };
 
     this.builds.set(buildId, build);
@@ -550,7 +543,7 @@ class CICDIntegrationService extends EventEmitter {
   /**
    * 处理webhook
    */
-  async handleWebhook(platform: string, payload: any, signature?: string): Promise<void> {
+  async handleWebhook(platform: string, payload: unknown, signature?: string): Promise<void> {
     try {
       // 验证签名
       if (signature) {
@@ -576,8 +569,8 @@ class CICDIntegrationService extends EventEmitter {
   private async triggerPlatformBuild(
     integration: CICDIntegrationConfig,
     build: CICDBuild,
-    options: any
-  ): Promise<any> {
+    options: BuildTriggerOptions
+  ): Promise<BuildTriggerResult> {
     switch (integration.platform) {
       case 'jenkins':
         return this.triggerJenkinsBuild(integration, build, options);
@@ -596,11 +589,13 @@ class CICDIntegrationService extends EventEmitter {
   private async triggerJenkinsBuild(
     integration: CICDIntegrationConfig,
     build: CICDBuild,
-    options: any
-  ): Promise<any> {
+    options: BuildTriggerOptions
+  ): Promise<BuildTriggerResult> {
     // 简化实现，实际应该调用Jenkins API
+    const serverUrl = String(integration.config.serverUrl || '');
+    const jobName = String(integration.config.jobName || '');
     return {
-      url: `${integration.config.serverUrl}/job/${integration.config.jobName}/${build.id}`,
+      url: `${serverUrl}/job/${jobName}/${build.id}`,
       buildNumber: Math.floor(Math.random() * 1000),
     };
   }
@@ -611,11 +606,13 @@ class CICDIntegrationService extends EventEmitter {
   private async triggerGitHubActionsBuild(
     integration: CICDIntegrationConfig,
     build: CICDBuild,
-    options: any
-  ): Promise<any> {
+    options: BuildTriggerOptions
+  ): Promise<BuildTriggerResult> {
     // 简化实现，实际应该调用GitHub API
+    const owner = String(integration.config.owner || '');
+    const repo = String(integration.config.repo || '');
     return {
-      url: `https://github.com/${integration.config.owner}/${integration.config.repo}/actions/runs/${build.id}`,
+      url: `https://github.com/${owner}/${repo}/actions/runs/${build.id}`,
       runId: Math.floor(Math.random() * 1000),
     };
   }
@@ -626,11 +623,13 @@ class CICDIntegrationService extends EventEmitter {
   private async triggerGitLabCIBuild(
     integration: CICDIntegrationConfig,
     build: CICDBuild,
-    options: any
-  ): Promise<any> {
+    options: BuildTriggerOptions
+  ): Promise<BuildTriggerResult> {
     // 简化实现，实际应该调用GitLab API
+    const serverUrl = String(integration.config.serverUrl || '');
+    const projectId = String(integration.config.projectId || '');
     return {
-      url: `${integration.config.serverUrl}/projects/${integration.config.projectId}/pipelines/${build.id}`,
+      url: `${serverUrl}/projects/${projectId}/pipelines/${build.id}`,
       pipelineId: Math.floor(Math.random() * 1000),
     };
   }
@@ -760,7 +759,10 @@ class CICDIntegrationService extends EventEmitter {
   /**
    * 设置webhook
    */
-  private async setupWebhook(integrationId: string, webhook: any): Promise<void> {
+  private async setupWebhook(
+    integrationId: string,
+    webhook: CICDIntegrationConfig['webhook']
+  ): Promise<void> {
     // 简化实现，实际应该设置webhook
     this.webhooks.set(integrationId, webhook);
   }
@@ -784,7 +786,7 @@ class CICDIntegrationService extends EventEmitter {
    */
   private async verifyWebhookSignature(
     platform: string,
-    payload: any,
+    payload: unknown,
     signature: string
   ): Promise<boolean> {
     // 简化实现，实际应该验证签名
@@ -794,7 +796,10 @@ class CICDIntegrationService extends EventEmitter {
   /**
    * 根据平台处理webhook
    */
-  private async processWebhookByPlatform(platform: string, payload: any): Promise<any> {
+  private async processWebhookByPlatform(
+    platform: string,
+    payload: unknown
+  ): Promise<Record<string, unknown>> {
     // 简化实现，实际应该根据平台处理webhook
     return { processed: true };
   }

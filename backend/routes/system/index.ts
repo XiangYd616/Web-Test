@@ -5,25 +5,40 @@
 
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { getPool, getStats, healthCheck } from '../../config/database';
-import { requireRole, ROLES } from '../../middleware/auth';
 import { asyncHandler } from '../../middleware/errorHandler';
-import { formatValidationErrors } from '../../middleware/responseFormatter';
-import AlertService from '../../services/core/alertService';
-import MonitoringService from '../../services/monitoring/MonitoringService';
 import configRoutes from './config';
 import monitoringRoutes from './monitoring';
+const { getPool, getStats, healthCheck } = require('../../config/database');
+const { requireRole } = require('../../middleware/auth');
+const { AlertManager } = require('../../alert/AlertManager');
+const { MonitoringService } = require('../../services/monitoring/MonitoringService');
 
 const router = express.Router();
 
+type AuthenticatedRequest = Omit<express.Request, 'user'> & {
+  user?: {
+    id: string;
+  } | null;
+};
+
+const getUserId = (req: AuthenticatedRequest): string => {
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new Error('用户未认证');
+  }
+  return userId;
+};
+
 // 初始化监控服务并注入路由
 const monitoringService = new MonitoringService(getPool());
-const alertService = new AlertService(getPool());
+const alertService = new AlertManager();
 
 monitoringService.on('alert:triggered', (alertData: unknown) => {
-  alertService.handleMonitoringAlert(alertData).catch((error: unknown) => {
+  try {
+    alertService.emit('alert', alertData);
+  } catch (error) {
     console.error('处理监控告警失败:', error);
-  });
+  }
 });
 
 monitoringService.start().catch((error: unknown) => {
@@ -36,7 +51,7 @@ monitoringService.start().catch((error: unknown) => {
  */
 router.get(
   '/health',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const dbHealth = await healthCheck();
       const monitoringHealth = await monitoringService.getHealthStatus();
@@ -75,7 +90,7 @@ router.get(
     try {
       const dbStats = getStats();
       const monitoringStats = await monitoringService.getStatistics();
-      const alertStats = await alertService.getStatistics();
+      const alertStats = alertService.getStatistics();
 
       const stats = {
         database: dbStats,
@@ -149,7 +164,7 @@ router.get(
  */
 router.post(
   '/restart',
-  requireRole(ROLES.ADMIN),
+  requireRole('admin'),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const { graceful = true } = req.body;
@@ -157,7 +172,7 @@ router.post(
       // 停止接受新请求
       if (graceful) {
         await monitoringService.stop();
-        await alertService.stop();
+        alertService.removeAllListeners();
       }
 
       // 发送重启信号
@@ -185,7 +200,7 @@ router.post(
  */
 router.get(
   '/logs',
-  requireRole(ROLES.ADMIN),
+  requireRole('admin'),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const { level = 'info', limit = 100, offset = 0 } = req.query;
@@ -216,7 +231,7 @@ router.get(
  */
 router.post(
   '/config',
-  requireRole(ROLES.ADMIN),
+  requireRole('admin'),
   [
     body('key').notEmpty().withMessage('配置键不能为空'),
     body('value').notEmpty().withMessage('配置值不能为空'),
@@ -227,7 +242,7 @@ router.post(
       return res.status(400).json({
         success: false,
         message: '配置验证失败',
-        errors: formatValidationErrors(errors),
+        errors: errors.array(),
       });
     }
 
@@ -238,7 +253,7 @@ router.post(
       process.env[key] = value;
 
       // 记录配置变更
-      await monitoringService.logConfigChange(key, value, (req as any).user.id);
+      await monitoringService.logConfigChange(key, value, getUserId(req));
 
       res.json({
         success: true,
@@ -261,7 +276,7 @@ router.post(
  */
 router.get(
   '/config',
-  requireRole(ROLES.ADMIN),
+  requireRole('admin'),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const { category } = req.query;
@@ -356,7 +371,7 @@ router.get(
  */
 router.post(
   '/maintenance',
-  requireRole(ROLES.ADMIN),
+  requireRole('admin'),
   [
     body('enabled').isBoolean().withMessage('enabled必须是布尔值'),
     body('message').optional().isString().withMessage('message必须是字符串'),
@@ -367,7 +382,7 @@ router.post(
       return res.status(400).json({
         success: false,
         message: '参数验证失败',
-        errors: formatValidationErrors(errors),
+        errors: errors.array(),
       });
     }
 
@@ -378,7 +393,7 @@ router.post(
       process.env.MAINTENANCE_MODE = enabled ? 'true' : 'false';
 
       // 记录维护模式变更
-      await monitoringService.logMaintenanceModeChange(enabled, message, (req as any).user.id);
+      await monitoringService.logMaintenanceModeChange(enabled, message, getUserId(req));
 
       res.json({
         success: true,
@@ -405,15 +420,15 @@ router.post(
  */
 router.post(
   '/backup',
-  requireRole(ROLES.ADMIN),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  requireRole('admin'),
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     try {
       const { type = 'full', includeLogs = false } = req.body;
 
       const backup = await monitoringService.createBackup({
         type,
         includeLogs,
-        createdBy: (req as any).user.id,
+        createdBy: getUserId(req),
       });
 
       res.json({
@@ -437,7 +452,7 @@ router.post(
  */
 router.get(
   '/backup/list',
-  requireRole(ROLES.ADMIN),
+  requireRole('admin'),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const backups = await monitoringService.getBackupList();
@@ -462,7 +477,7 @@ router.get(
  */
 router.delete(
   '/backup/:id',
-  requireRole(ROLES.ADMIN),
+  requireRole('admin'),
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const { id } = req.params;

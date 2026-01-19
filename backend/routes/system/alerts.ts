@@ -55,11 +55,25 @@ interface AlertRule {
 
 const router = express.Router();
 
+interface AuthenticatedRequest extends express.Request {
+  user?: {
+    id: string;
+  };
+}
+
+const getUserId = (req: AuthenticatedRequest): string => {
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new Error('用户未认证');
+  }
+  return userId;
+};
+
 // 告警服务实例 (将在app.js中初始化)
-let alertService: any = null;
+let alertService: unknown = null;
 
 // 设置告警服务实例
-router.setAlertService = (service: any): void => {
+router.setAlertService = (service: unknown): void => {
   alertService = service;
 };
 
@@ -192,9 +206,9 @@ router.get(
   '/',
   authMiddleware,
   validateQuery(alertQuerySchema),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const query = req.query as AlertQuery;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       let filteredAlerts = [...alerts];
@@ -332,10 +346,10 @@ router.get(
 router.post(
   '/:id/acknowledge',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id } = req.params;
     const { comment } = req.body;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const alertIndex = alerts.findIndex(a => a.id === id);
@@ -380,10 +394,10 @@ router.post(
 router.post(
   '/:id/resolve',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id } = req.params;
     const { comment } = req.body;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const alertIndex = alerts.findIndex(a => a.id === id);
@@ -422,9 +436,9 @@ router.post(
   '/batch',
   authMiddleware,
   validateRequest(batchActionSchema),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { action, alertIds, comment } = req.body;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const results = [];
@@ -528,8 +542,8 @@ router.post(
   '/rules',
   authMiddleware,
   validateRequest(alertRuleSchema),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const ruleData = req.body;
 
     try {

@@ -5,46 +5,85 @@
 
 import { query } from '../config/database';
 
-interface TestRecord {
+interface TestExecutionRecord {
+  id: number;
   test_id: string;
   user_id: string;
-  url: string;
-  test_type: string;
+  engine_type: string;
+  engine_name: string;
+  test_name: string;
+  test_url?: string;
+  test_config?: Record<string, unknown>;
   status: string;
-  results?: any;
-  overall_score?: number;
-  duration?: number;
+  progress?: number;
   created_at: Date;
   updated_at: Date;
+  started_at?: Date;
+  completed_at?: Date;
+  execution_time?: number;
+  error_message?: string;
+}
+
+interface TestResultRecord {
+  id: number;
+  execution_id: number;
+  summary: Record<string, unknown>;
+  score?: number;
+  grade?: string;
+  passed?: boolean;
+  warnings?: unknown[];
+  errors?: unknown[];
+  created_at: Date;
 }
 
 interface TestCreateData {
+  testId: string;
   userId: string;
-  url: string;
-  testType: string;
-  options?: Record<string, unknown>;
+  engineType: string;
+  engineName: string;
+  testName: string;
+  testUrl?: string;
+  testConfig?: Record<string, unknown>;
   status: string;
   createdAt: Date;
+}
+
+interface TestMetricCreateData {
+  resultId: number;
+  metricName: string;
+  metricValue: Record<string, unknown> | number | string;
+  metricUnit?: string;
+  metricType?: string;
+  thresholdMin?: number;
+  thresholdMax?: number;
+  passed?: boolean;
+  severity?: string;
+  recommendation?: string;
 }
 
 class TestRepository {
   /**
    * 根据ID查找测试
    */
-  async findById(testId: string, userId: string): Promise<TestRecord | null> {
-    const result = await query('SELECT * FROM test_history WHERE test_id = $1 AND user_id = $2', [
-      testId,
-      userId,
-    ]);
+  async findById(testId: string, userId: string): Promise<TestExecutionRecord | null> {
+    const result = await query(
+      'SELECT * FROM test_executions WHERE test_id = $1 AND user_id = $2',
+      [testId, userId]
+    );
     return result.rows[0] || null;
   }
 
   /**
    * 获取测试结果
    */
-  async findResults(testId: string, userId: string): Promise<TestRecord | null> {
+  async findResults(testId: string, userId: string): Promise<TestResultRecord | null> {
     const result = await query(
-      'SELECT results, status, overall_score, duration FROM test_history WHERE test_id = $1 AND user_id = $2',
+      `SELECT tr.*
+       FROM test_results tr
+       INNER JOIN test_executions te ON te.id = tr.execution_id
+       WHERE te.test_id = $1 AND te.user_id = $2
+       ORDER BY tr.created_at DESC
+       LIMIT 1`,
       [testId, userId]
     );
     return result.rows[0] || null;
@@ -54,56 +93,151 @@ class TestRepository {
    * 检查所有权
    */
   async checkOwnership(testId: string, userId: string): Promise<boolean> {
-    const result = await query('SELECT 1 FROM test_history WHERE test_id = $1 AND user_id = $2', [
-      testId,
-      userId,
-    ]);
+    const result = await query(
+      'SELECT 1 FROM test_executions WHERE test_id = $1 AND user_id = $2',
+      [testId, userId]
+    );
     return result.rows.length > 0;
   }
 
   /**
    * 创建测试记录
    */
-  async create(data: TestCreateData): Promise<{ id: string }> {
+  async create(data: TestCreateData): Promise<{ id: number; testId: string }> {
     const result = await query(
-      `INSERT INTO test_history (user_id, url, test_type, status, options, created_at) 
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING test_id`,
+      `INSERT INTO test_executions (
+         test_id, user_id, engine_type, engine_name, test_name, test_url, test_config,
+         status, created_at
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id, test_id`,
       [
+        data.testId,
         data.userId,
-        data.url,
-        data.testType,
+        data.engineType,
+        data.engineName,
+        data.testName,
+        data.testUrl || null,
+        JSON.stringify(data.testConfig || {}),
         data.status,
-        JSON.stringify(data.options || {}),
         data.createdAt,
       ]
     );
-    return { id: result.rows[0].test_id };
+    return { id: result.rows[0].id, testId: result.rows[0].test_id };
   }
 
   /**
    * 更新测试状态
    */
   async updateStatus(testId: string, status: string): Promise<void> {
-    await query('UPDATE test_history SET status = $1, updated_at = NOW() WHERE test_id = $2', [
+    await query('UPDATE test_executions SET status = $1, updated_at = NOW() WHERE test_id = $2', [
       status,
       testId,
     ]);
   }
 
+  async updateProgress(testId: string, progress: number): Promise<void> {
+    await query('UPDATE test_executions SET progress = $1, updated_at = NOW() WHERE test_id = $2', [
+      progress,
+      testId,
+    ]);
+  }
+
+  async markStarted(testId: string): Promise<void> {
+    await query(
+      'UPDATE test_executions SET status = $1, started_at = NOW(), updated_at = NOW() WHERE test_id = $2',
+      ['running', testId]
+    );
+  }
+
+  async markCompleted(
+    testId: string,
+    executionTimeSeconds: number,
+    errorMessage?: string
+  ): Promise<void> {
+    await query(
+      `UPDATE test_executions
+       SET status = $1,
+           completed_at = NOW(),
+           execution_time = $2,
+           error_message = $3,
+           updated_at = NOW()
+       WHERE test_id = $4`,
+      ['completed', executionTimeSeconds, errorMessage || null, testId]
+    );
+  }
+
+  async markFailed(testId: string, errorMessage: string): Promise<void> {
+    await query(
+      `UPDATE test_executions
+       SET status = $1,
+           error_message = $2,
+           updated_at = NOW()
+       WHERE test_id = $3`,
+      ['failed', errorMessage, testId]
+    );
+  }
+
   /**
    * 更新测试结果
    */
-  async updateResults(
-    testId: string,
-    results: any,
-    overallScore: number,
-    duration: number
-  ): Promise<void> {
+  async saveResult(
+    executionId: number,
+    summary: Record<string, unknown>,
+    score?: number,
+    grade?: string,
+    passed?: boolean,
+    warnings?: unknown[],
+    errors?: unknown[]
+  ): Promise<number> {
+    const result = await query(
+      `INSERT INTO test_results (
+         execution_id, summary, score, grade, passed, warnings, errors
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id`,
+      [
+        executionId,
+        JSON.stringify(summary),
+        score ?? null,
+        grade ?? null,
+        passed ?? null,
+        JSON.stringify(warnings || []),
+        JSON.stringify(errors || []),
+      ]
+    );
+    return result.rows[0].id;
+  }
+
+  async saveMetrics(metrics: TestMetricCreateData[]): Promise<void> {
+    if (metrics.length === 0) {
+      return;
+    }
+
+    const values: unknown[] = [];
+    const placeholders = metrics
+      .map((metric, index) => {
+        const baseIndex = index * 9;
+        values.push(
+          metric.resultId,
+          metric.metricName,
+          JSON.stringify(metric.metricValue),
+          metric.metricUnit || null,
+          metric.metricType || null,
+          metric.thresholdMin ?? null,
+          metric.thresholdMax ?? null,
+          metric.passed ?? null,
+          metric.severity || null
+        );
+        return `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6}, $${baseIndex + 7}, $${baseIndex + 8}, $${baseIndex + 9})`;
+      })
+      .join(', ');
+
     await query(
-      `UPDATE test_history 
-       SET results = $1, overall_score = $2, duration = $3, status = 'completed', updated_at = NOW() 
-       WHERE test_id = $4`,
-      [JSON.stringify(results), overallScore, duration, testId]
+      `INSERT INTO test_metrics (
+         result_id, metric_name, metric_value, metric_unit, metric_type,
+         threshold_min, threshold_max, passed, severity
+       ) VALUES ${placeholders}`,
+      values
     );
   }
 
@@ -111,17 +245,21 @@ class TestRepository {
    * 删除测试
    */
   async delete(testId: string): Promise<void> {
-    await query('DELETE FROM test_history WHERE test_id = $1', [testId]);
+    await query('DELETE FROM test_executions WHERE test_id = $1', [testId]);
   }
 
   /**
    * 根据用户ID获取测试列表
    */
-  async findByUserId(userId: string, limit: number, offset: number): Promise<TestRecord[]> {
+  async findByUserId(
+    userId: string,
+    limit: number,
+    offset: number
+  ): Promise<TestExecutionRecord[]> {
     const result = await query(
-      `SELECT * FROM test_history 
-       WHERE user_id = $1 
-       ORDER BY created_at DESC 
+      `SELECT * FROM test_executions
+       WHERE user_id = $1
+       ORDER BY created_at DESC
        LIMIT $2 OFFSET $3`,
       [userId, limit, offset]
     );
@@ -132,7 +270,7 @@ class TestRepository {
    * 统计用户测试数量
    */
   async countByUserId(userId: string): Promise<number> {
-    const result = await query('SELECT COUNT(*) as count FROM test_history WHERE user_id = $1', [
+    const result = await query('SELECT COUNT(*) as count FROM test_executions WHERE user_id = $1', [
       userId,
     ]);
     return parseInt(result.rows[0].count);
@@ -151,10 +289,17 @@ class TestRepository {
       `SELECT 
         COUNT(*) as total_tests,
         COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
-        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
-        COALESCE(AVG(overall_score), 0) as average_score
-       FROM test_history 
+        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests
+       FROM test_executions 
        WHERE user_id = $1`,
+      [userId]
+    );
+
+    const scoreResult = await query(
+      `SELECT COALESCE(AVG(tr.score), 0) as average_score
+       FROM test_results tr
+       INNER JOIN test_executions te ON te.id = tr.execution_id
+       WHERE te.user_id = $1`,
       [userId]
     );
 
@@ -163,16 +308,16 @@ class TestRepository {
       totalTests: parseInt(stats.total_tests),
       completedTests: parseInt(stats.completed_tests),
       failedTests: parseInt(stats.failed_tests),
-      averageScore: parseFloat(stats.average_score),
+      averageScore: parseFloat(scoreResult.rows[0].average_score),
     };
   }
 
   /**
    * 获取最近的测试
    */
-  async getRecentTests(userId: string, limit = 5): Promise<TestRecord[]> {
+  async getRecentTests(userId: string, limit = 5): Promise<TestExecutionRecord[]> {
     const result = await query(
-      `SELECT * FROM test_history 
+      `SELECT * FROM test_executions 
        WHERE user_id = $1 
        ORDER BY created_at DESC 
        LIMIT $2`,
@@ -190,27 +335,25 @@ class TestRepository {
     limit = 20,
     offset = 0
   ): Promise<{
-    tests: TestRecord[];
+    tests: TestExecutionRecord[];
     total: number;
   }> {
     let whereClause = 'WHERE user_id = $1';
     const params: (string | number)[] = [userId];
 
     if (testType) {
-      whereClause += ' AND test_type = $2';
+      whereClause += ' AND engine_type = $2';
       params.push(testType);
     }
 
-    // 获取总数
     const countResult = await query(
-      `SELECT COUNT(*) as total FROM test_history ${whereClause}`,
+      `SELECT COUNT(*) as total FROM test_executions ${whereClause}`,
       params
     );
     const total = parseInt(countResult.rows[0].total);
 
-    // 获取测试列表
     const testsResult = await query(
-      `SELECT * FROM test_history 
+      `SELECT * FROM test_executions 
        ${whereClause} 
        ORDER BY created_at DESC 
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,

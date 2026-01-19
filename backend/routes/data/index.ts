@@ -27,6 +27,20 @@ const upload = multer({
 
 const router = express.Router();
 
+interface AuthenticatedRequest extends express.Request {
+  user?: {
+    id: string;
+  };
+}
+
+const getUserId = (req: AuthenticatedRequest): string => {
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new Error('用户未认证');
+  }
+  return userId;
+};
+
 // 应用认证中间件
 router.use(authMiddleware);
 
@@ -36,8 +50,8 @@ router.use(authMiddleware);
  */
 router.get(
   '/overview',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
 
     try {
       const overview = await dataManagementService.getDataOverview(userId);
@@ -62,8 +76,8 @@ router.get(
  */
 router.get(
   '/statistics',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { period = '30d', type } = req.query;
 
     try {
@@ -92,8 +106,8 @@ router.get(
  */
 router.post(
   '/',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const data = req.body;
 
     try {
@@ -120,8 +134,8 @@ router.post(
  */
 router.get(
   '/',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { page = 1, limit = 10, type, status, search } = req.query;
 
     try {
@@ -153,8 +167,8 @@ router.get(
  */
 router.get(
   '/:id',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { id } = req.params;
 
     try {
@@ -187,8 +201,8 @@ router.get(
  */
 router.put(
   '/:id',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { id } = req.params;
     const data = req.body;
 
@@ -216,8 +230,8 @@ router.put(
  */
 router.delete(
   '/:id',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { id } = req.params;
 
     try {
@@ -243,8 +257,8 @@ router.delete(
  */
 router.post(
   '/batch',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { operation, ids, data } = req.body;
 
     try {
@@ -275,8 +289,8 @@ router.post(
  */
 router.post(
   '/search',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { query, filters, options } = req.body;
 
     try {
@@ -307,8 +321,8 @@ router.post(
 router.post(
   '/export',
   upload.single('file'),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { format, filters, options } = req.body;
 
     try {
@@ -340,8 +354,8 @@ router.post(
 router.post(
   '/import',
   upload.single('file'),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const file = req.file;
     const { options } = req.body;
 
@@ -379,8 +393,8 @@ router.post(
  */
 router.post(
   '/backup',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { type = 'full', options } = req.body;
 
     try {
@@ -411,8 +425,8 @@ router.post(
 router.post(
   '/restore',
   upload.single('file'),
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const file = req.file;
     const { options } = req.body;
 
@@ -450,8 +464,8 @@ router.post(
  */
 router.get(
   '/:id/versions',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { id } = req.params;
 
     try {
@@ -477,8 +491,8 @@ router.get(
  */
 router.post(
   '/validate',
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { data, schema } = req.body;
 
     try {

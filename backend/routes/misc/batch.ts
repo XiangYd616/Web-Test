@@ -4,8 +4,8 @@
  */
 
 import express from 'express';
-import { authMiddleware } from '../../middleware/auth';
 import { asyncHandler } from '../../middleware/errorHandler';
+const { authMiddleware } = require('../../middleware/auth');
 
 interface BatchOperation {
   id: string;
@@ -17,19 +17,37 @@ interface BatchOperation {
   startTime: Date;
   endTime?: Date;
   userId: string;
-  config: Record<string, unknown>;
+  config: BatchConfig;
   results: unknown[];
   errors: string[];
   progress: number;
 }
 
 interface BatchConfig {
-  items: unknown[];
-  operation: string;
+  items?: unknown[];
+  operation?: string;
   options?: Record<string, unknown>;
+  testConfigs?: unknown[];
+  exportConfigs?: unknown[];
+  deleteConfigs?: unknown[];
+  format?: string;
 }
 
+type AuthenticatedRequest = express.Request & {
+  user?: {
+    id: string;
+  } | null;
+};
+
 const router = express.Router();
+
+const getUserId = (req: AuthenticatedRequest): string => {
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new Error('用户未认证');
+  }
+  return userId;
+};
 
 // 存储批量操作状态
 const batchOperations = new Map<string, BatchOperation>();
@@ -91,10 +109,7 @@ function updateOperationProgress(
 /**
  * 完成操作
  */
-function completeOperation(
-  operationId: string,
-  status: 'completed' | 'failed' | 'cancelled'
-): void {
+function completeOperation(operationId: string, status: BatchOperation['status']): void {
   const operation = batchOperations.get(operationId);
   if (operation) {
     operation.status = status;
@@ -110,8 +125,8 @@ function completeOperation(
 router.post(
   '/test',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { testConfigs, options } = req.body;
 
     if (!Array.isArray(testConfigs) || testConfigs.length === 0) {
@@ -132,7 +147,7 @@ router.post(
       // 异步执行批量测试
       executeBatchTest(operation.id, testConfigs, options || {});
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '批量测试任务已创建',
         data: {
@@ -142,7 +157,7 @@ router.post(
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建批量测试任务失败',
         error: error instanceof Error ? error.message : String(error),
@@ -158,8 +173,8 @@ router.post(
 router.post(
   '/export',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { exportConfigs, format = 'json', options } = req.body;
 
     if (!Array.isArray(exportConfigs) || exportConfigs.length === 0) {
@@ -180,7 +195,7 @@ router.post(
       // 异步执行批量导出
       executeBatchExport(operation.id, exportConfigs, format, options || {});
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '批量导出任务已创建',
         data: {
@@ -190,7 +205,7 @@ router.post(
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建批量导出任务失败',
         error: error instanceof Error ? error.message : String(error),
@@ -206,8 +221,8 @@ router.post(
 router.post(
   '/delete',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { deleteConfigs, options } = req.body;
 
     if (!Array.isArray(deleteConfigs) || deleteConfigs.length === 0) {
@@ -228,7 +243,7 @@ router.post(
       // 异步执行批量删除
       executeBatchDelete(operation.id, deleteConfigs, options || {});
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '批量删除任务已创建',
         data: {
@@ -237,7 +252,7 @@ router.post(
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建批量删除任务失败',
         error: error instanceof Error ? error.message : String(error),
@@ -253,9 +268,9 @@ router.post(
 router.get(
   '/:operationId/status',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { operationId } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const operation = batchOperations.get(operationId);
@@ -274,12 +289,12 @@ router.get(
         });
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: operation,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取批量操作状态失败',
         error: error instanceof Error ? error.message : String(error),
@@ -295,9 +310,9 @@ router.get(
 router.delete(
   '/:operationId',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { operationId } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const operation = batchOperations.get(operationId);
@@ -325,12 +340,12 @@ router.delete(
 
       completeOperation(operationId, 'cancelled');
 
-      res.json({
+      return res.json({
         success: true,
         message: '批量操作已取消',
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '取消批量操作失败',
         error: error instanceof Error ? error.message : String(error),
@@ -346,8 +361,8 @@ router.delete(
 router.get(
   '/',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { page = 1, limit = 10, status, type } = req.query;
 
     try {
@@ -361,7 +376,7 @@ router.get(
       const endIndex = startIndex + parseInt(limit as string);
       const paginatedOperations = userOperations.slice(startIndex, endIndex);
 
-      res.json({
+      return res.json({
         success: true,
         data: {
           operations: paginatedOperations,
@@ -374,7 +389,7 @@ router.get(
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取批量操作列表失败',
         error: error instanceof Error ? error.message : String(error),
@@ -390,8 +405,8 @@ router.get(
 router.delete(
   '/cleanup',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
     const { olderThan = 7 } = req.query; // 默认清理7天前的操作
 
     try {
@@ -411,18 +426,17 @@ router.delete(
         }
       }
 
-      res.json({
+      return res.json({
         success: true,
-        message: '批量操作清理完成',
+        message: '清理完成',
         data: {
           cleanedCount,
-          cutoffDate: cutoffDate.toISOString(),
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
-        message: '清理批量操作失败',
+        message: '清理失败',
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -436,13 +450,22 @@ router.delete(
 router.get(
   '/statistics',
   authMiddleware,
-  asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+    const userId = getUserId(req);
 
     try {
       const userOperations = Array.from(batchOperations.values()).filter(
         op => op.userId === userId
       );
+
+      const completedDurations = userOperations
+        .filter(op => op.endTime && op.startTime)
+        .map(op => (op.endTime ? op.endTime.getTime() - op.startTime.getTime() : 0))
+        .filter(duration => duration > 0);
+      const averageProcessingTime = completedDurations.length
+        ? completedDurations.reduce((sum, duration) => sum + duration, 0) /
+          completedDurations.length
+        : 0;
 
       const statistics = {
         total: userOperations.length,
@@ -458,19 +481,15 @@ router.get(
           },
           {} as Record<string, number>
         ),
-        averageProcessingTime:
-          userOperations
-            .filter(op => op.endTime && op.startTime)
-            .reduce((sum, op) => sum + (op.endTime!.getTime() - op.startTime.getTime()), 0) /
-          userOperations.filter(op => op.endTime).length,
+        averageProcessingTime,
       };
 
-      res.json({
+      return res.json({
         success: true,
         data: statistics,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取批量操作统计失败',
         error: error instanceof Error ? error.message : String(error),
@@ -483,12 +502,14 @@ router.get(
 async function executeBatchTest(
   operationId: string,
   testConfigs: unknown[],
-  options: Record<string, unknown>
+  _options: Record<string, unknown>
 ): Promise<void> {
   const operation = batchOperations.get(operationId);
   if (!operation) return;
 
-  completeOperation(operationId, 'running');
+  if (operation) {
+    operation.status = 'running';
+  }
 
   for (let i = 0; i < testConfigs.length; i++) {
     const config = testConfigs[i];
@@ -516,12 +537,14 @@ async function executeBatchExport(
   operationId: string,
   exportConfigs: unknown[],
   format: string,
-  options: Record<string, unknown>
+  _options: Record<string, unknown>
 ): Promise<void> {
   const operation = batchOperations.get(operationId);
   if (!operation) return;
 
-  completeOperation(operationId, 'running');
+  if (operation) {
+    operation.status = 'running';
+  }
 
   for (let i = 0; i < exportConfigs.length; i++) {
     const config = exportConfigs[i];
@@ -548,12 +571,12 @@ async function executeBatchExport(
 async function executeBatchDelete(
   operationId: string,
   deleteConfigs: unknown[],
-  options: Record<string, unknown>
+  _options: Record<string, unknown>
 ): Promise<void> {
   const operation = batchOperations.get(operationId);
   if (!operation) return;
 
-  completeOperation(operationId, 'running');
+  operation.status = 'running';
 
   for (let i = 0; i < deleteConfigs.length; i++) {
     const config = deleteConfigs[i];
