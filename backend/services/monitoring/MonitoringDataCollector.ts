@@ -373,7 +373,39 @@ class MonitoringDataCollector extends EventEmitter {
    * 存储性能指标
    */
   async storePerformanceMetrics(items: MonitoringDataPoint[]) {
-    void items;
+    if (items.length === 0) return;
+
+    const values: unknown[] = [];
+    const placeholders: string[] = [];
+
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      const data = item.data as Record<string, unknown>;
+      const metrics = (data.metrics as Record<string, unknown>) || {};
+      const baseIndex = i * 6;
+
+      values.push(
+        data.site_id,
+        'ok',
+        metrics.response_time ?? null,
+        null,
+        JSON.stringify(metrics),
+        null
+      );
+
+      placeholders.push(
+        `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6}, NOW())`
+      );
+    }
+
+    const query = `
+      INSERT INTO monitoring_results (
+        site_id, status, response_time, status_code,
+        results, error_message, checked_at
+      ) VALUES ${placeholders.join(', ')}
+    `;
+
+    await this.dbPool.query(query, values);
     logger.debug(`存储性能指标: ${items.length} 条`);
   }
 
@@ -381,7 +413,39 @@ class MonitoringDataCollector extends EventEmitter {
    * 存储可用性数据
    */
   async storeUptimeData(items: MonitoringDataPoint[]) {
-    void items;
+    if (items.length === 0) return;
+
+    const values: unknown[] = [];
+    const placeholders: string[] = [];
+
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      const data = item.data as Record<string, unknown>;
+      const status = data.is_up ? 'up' : 'down';
+      const baseIndex = i * 6;
+
+      values.push(
+        data.site_id,
+        status,
+        data.response_time ?? null,
+        data.status_code ?? null,
+        JSON.stringify({}),
+        data.error_message ?? null
+      );
+
+      placeholders.push(
+        `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6}, NOW())`
+      );
+    }
+
+    const query = `
+      INSERT INTO monitoring_results (
+        site_id, status, response_time, status_code,
+        results, error_message, checked_at
+      ) VALUES ${placeholders.join(', ')}
+    `;
+
+    await this.dbPool.query(query, values);
     logger.debug(`存储可用性数据: ${items.length} 条`);
   }
 
@@ -403,8 +467,62 @@ class MonitoringDataCollector extends EventEmitter {
    * 存储系统指标
    */
   async storeSystemMetrics(items: MonitoringDataPoint[]) {
-    void items;
-    logger.debug(`存储系统指标: ${items.length} 条`);
+    if (items.length === 0) return;
+
+    const values: unknown[] = [];
+    const placeholders: string[] = [];
+    let index = 0;
+
+    for (const item of items) {
+      const data = item.data as Record<string, unknown>;
+      const memory = (data.memory as Record<string, unknown>) || {};
+      const cpu = (data.cpu as Record<string, unknown>) || {};
+      const timestamp = data.timestamp ?? new Date().toISOString();
+
+      const metrics: Array<{ name: string; value: unknown; unit: string; type: string }> = [
+        { name: 'memory_rss', value: memory.rss, unit: 'bytes', type: 'memory' },
+        { name: 'memory_heap_total', value: memory.heapTotal, unit: 'bytes', type: 'memory' },
+        { name: 'memory_heap_used', value: memory.heapUsed, unit: 'bytes', type: 'memory' },
+        { name: 'memory_external', value: memory.external, unit: 'bytes', type: 'memory' },
+        { name: 'cpu_user', value: cpu.user, unit: 'microseconds', type: 'cpu' },
+        { name: 'cpu_system', value: cpu.system, unit: 'microseconds', type: 'cpu' },
+        { name: 'uptime', value: data.uptime, unit: 'seconds', type: 'system' },
+      ];
+
+      for (const metric of metrics) {
+        if (metric.value === undefined || metric.value === null) {
+          continue;
+        }
+        index += 1;
+        const baseIndex = (index - 1) * 7;
+        values.push(
+          metric.type,
+          metric.name,
+          Number(metric.value),
+          metric.unit,
+          'system',
+          JSON.stringify({ source: 'monitoring' }),
+          timestamp
+        );
+        placeholders.push(
+          `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, $${baseIndex + 5}, $${baseIndex + 6}, $${baseIndex + 7})`
+        );
+      }
+    }
+
+    if (placeholders.length === 0) {
+      return;
+    }
+
+    const query = `
+      INSERT INTO system_metrics (
+        metric_type, metric_name, value, unit,
+        source, tags, timestamp
+      ) VALUES ${placeholders.join(', ')}
+    `;
+
+    await this.dbPool.query(query, values);
+    logger.debug(`存储系统指标: ${placeholders.length} 条`);
   }
 
   /**

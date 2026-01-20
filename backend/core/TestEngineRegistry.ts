@@ -456,13 +456,22 @@ export class TestEngineRegistry {
   public async cancel(testId: string): Promise<void> {
     const progress = this.runningTests.get(testId);
     if (!progress) {
-      throw new Error(`测试 ${testId} 不存在或已完成`);
+      return;
     }
+
+    this.runningTests.set(testId, {
+      ...progress,
+      status: TestStatus.CANCELLED,
+      currentStep: '已取消',
+    });
 
     // 查找对应的引擎并取消
     for (const [_type, registration] of this.engines) {
       try {
         await registration.engine.cancel(testId);
+        if (registration.engine.lifecycle?.onCancel) {
+          await registration.engine.lifecycle.onCancel();
+        }
         console.log(`✅ 已取消测试: ${testId}`);
         break;
       } catch {

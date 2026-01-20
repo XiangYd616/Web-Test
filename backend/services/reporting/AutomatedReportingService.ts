@@ -11,6 +11,8 @@ import ReportGenerator, {
   ReportConfig as GeneratorReportConfig,
   ReportData as GeneratorReportData,
 } from './ReportGenerator';
+const cron = require('node-cron');
+const nodemailer = require('nodemailer');
 
 // 报告模板接口
 export interface ReportTemplate {
@@ -251,48 +253,9 @@ export interface ReportStatistics {
   }>;
 }
 
-// 模拟cron功能
-interface CronTask {
-  start: () => void;
-  stop: () => void;
-}
+type CronTask = ReturnType<typeof cron.schedule>;
 
-interface CronValidator {
-  validate: (schedule: string) => boolean;
-  schedule: (schedule: string, callback: () => void, options?: { scheduled?: boolean }) => CronTask;
-}
-
-const cron: CronValidator = {
-  validate: (schedule: string): boolean => {
-    const parts = schedule.split(' ');
-    return parts.length === 5 || parts.length === 6;
-  },
-  schedule: (
-    schedule: string,
-    callback: () => void,
-    options: { scheduled?: boolean } = {}
-  ): CronTask => {
-    const task: CronTask = {
-      start: () => {
-        if (!options.scheduled) {
-          setInterval(callback, 60000);
-        }
-      },
-      stop: () => {
-        // 停止任务
-      },
-    };
-    return task;
-  },
-};
-
-// 模拟nodemailer功能
-interface MailTransporter {
-  verify: () => Promise<boolean>;
-  sendMail: (options: MailOptions) => Promise<MailResponse>;
-}
-
-interface MailOptions {
+type MailOptions = {
   from: string;
   to: string | string[];
   subject: string;
@@ -302,35 +265,6 @@ interface MailOptions {
     filename: string;
     content: Buffer | string;
   }>;
-}
-
-interface MailResponse {
-  messageId: string;
-  response: string;
-}
-
-interface Mailer {
-  createTransporter: (config: MailConfig) => MailTransporter;
-}
-
-interface MailConfig {
-  host: string;
-  port: number;
-  secure: boolean;
-  auth: {
-    user: string;
-    pass: string;
-  };
-}
-
-const nodemailer: Mailer = {
-  createTransporter: (config: MailConfig): MailTransporter => ({
-    verify: async (): Promise<boolean> => true,
-    sendMail: async (options: MailOptions): Promise<MailResponse> => ({
-      messageId: `msg_${Date.now()}`,
-      response: 'OK',
-    }),
-  }),
 };
 
 /**
@@ -341,7 +275,8 @@ class AutomatedReportingService extends EventEmitter {
   private configs: Map<string, ReportConfig> = new Map();
   private instances: Map<string, ReportInstance> = new Map();
   private scheduledTasks: Map<string, CronTask> = new Map();
-  private mailTransporter?: MailTransporter;
+  private mailTransporter?: ReturnType<typeof nodemailer.createTransport>;
+  private mailFrom?: string;
   private isInitialized: boolean = false;
   private reportGenerator: ReportGenerator;
   private reportsDir: string;
@@ -373,7 +308,7 @@ class AutomatedReportingService extends EventEmitter {
       await this.loadConfigs();
 
       // 设置邮件传输
-      this.setupMailTransporter();
+      await this.setupMailTransporter();
 
       // 启动调度任务
       this.startScheduledTasks();
@@ -948,7 +883,7 @@ class AutomatedReportingService extends EventEmitter {
       : Buffer.from('');
 
     const mailOptions: MailOptions = {
-      from: 'reports@example.com',
+      from: this.mailFrom || 'reports@example.com',
       to: recipients,
       subject: config.delivery.settings.email?.subject || `报告: ${config.name}`,
       html: config.delivery.settings.email?.body || '请查收附件中的报告',
@@ -1222,19 +1157,29 @@ class AutomatedReportingService extends EventEmitter {
   /**
    * 设置邮件传输
    */
-  private setupMailTransporter(): void {
-    // 简化实现，实际应该从配置读取
-    const mailConfig: MailConfig = {
-      host: 'smtp.example.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: 'reports@example.com',
-        pass: 'password',
-      },
-    };
+  private async setupMailTransporter(): Promise<void> {
+    const host = process.env.SMTP_HOST;
+    const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587;
+    const secure = process.env.SMTP_SECURE === 'true';
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+    this.mailFrom = process.env.SMTP_FROM || user || 'reports@example.com';
 
-    this.mailTransporter = nodemailer.createTransporter(mailConfig);
+    if (!host || !user || !pass) {
+      this.mailTransporter = undefined;
+      return;
+    }
+
+    this.mailTransporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: {
+        user,
+        pass,
+      },
+    });
+    await this.mailTransporter.verify();
   }
 
   /**

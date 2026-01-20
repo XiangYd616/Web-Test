@@ -4,7 +4,10 @@
  */
 
 import axios from 'axios';
+import * as cheerio from 'cheerio';
 import { EventEmitter } from 'events';
+import * as http from 'http';
+import * as https from 'https';
 import { performance } from 'perf_hooks';
 
 const logger = require('../../utils/logger');
@@ -439,12 +442,15 @@ class MonitoringService extends EventEmitter {
       return uptimeResult;
     }
 
+    const timing = await this.measureNetworkTimings(target.url, timeout).catch(() => null);
+
     const performanceMetrics = {
       response_time: uptimeResult.response_time,
-      ttfb: uptimeResult.response_time,
-      dns_lookup: 0,
-      tcp_connect: 0,
-      ssl_handshake: 0,
+      ttfb: timing?.ttfb ?? uptimeResult.response_time,
+      dns_lookup: timing?.dns ?? null,
+      tcp_connect: timing?.tcp ?? null,
+      ssl_handshake: timing?.tls ?? null,
+      content_download: timing?.download ?? null,
     };
 
     let performanceGrade = 'A';
@@ -510,11 +516,33 @@ class MonitoringService extends EventEmitter {
       return uptimeResult;
     }
 
+    let html = '';
+    try {
+      const response = await axios.get(target.url, {
+        timeout,
+        validateStatus: () => true,
+        headers: {
+          'User-Agent': 'TestWebApp-Monitor/1.0',
+        },
+      });
+      if (typeof response.data === 'string') {
+        html = response.data;
+      }
+    } catch {
+      html = '';
+    }
+
+    const $ = html ? cheerio.load(html) : null;
+    const titleText = $ ? $('title').text().trim() : '';
+    const descriptionText = $ ? $('meta[name="description"]').attr('content')?.trim() || '' : '';
+    const h1Count = $ ? $('h1').length : 0;
+    const robotsText = $ ? $('meta[name="robots"]').attr('content')?.trim() || '' : '';
+
     const seoChecks = {
-      has_title: false,
-      has_description: false,
-      has_h1: false,
-      has_robots: false,
+      has_title: Boolean(titleText),
+      has_description: Boolean(descriptionText),
+      has_h1: h1Count > 0,
+      has_robots: Boolean(robotsText),
     };
 
     return {
@@ -522,8 +550,81 @@ class MonitoringService extends EventEmitter {
       results: {
         ...uptimeResult.results,
         seo: seoChecks,
+        title: titleText,
+        description: descriptionText,
+        h1_count: h1Count,
+        robots: robotsText,
       },
     };
+  }
+
+  private async measureNetworkTimings(
+    targetUrl: string,
+    timeout: number
+  ): Promise<{
+    dns: number | null;
+    tcp: number | null;
+    tls: number | null;
+    ttfb: number | null;
+    download: number | null;
+  }> {
+    const url = new URL(targetUrl);
+    const isHttps = url.protocol === 'https:';
+
+    return new Promise((resolve, reject) => {
+      const start = process.hrtime.bigint();
+      let dnsStart: bigint | null = null;
+      let dnsEnd: bigint | null = null;
+      let tcpStart: bigint | null = null;
+      let tcpEnd: bigint | null = null;
+      let tlsEnd: bigint | null = null;
+      let ttfbEnd: bigint | null = null;
+
+      const request = (isHttps ? https : http).request(
+        targetUrl,
+        { method: 'GET', timeout },
+        response => {
+          ttfbEnd = process.hrtime.bigint();
+          response.on('data', () => {
+            if (!ttfbEnd) {
+              ttfbEnd = process.hrtime.bigint();
+            }
+          });
+          response.on('end', () => {
+            const end = process.hrtime.bigint();
+            const toMs = (value: bigint | null) => (value ? Number(value) / 1_000_000 : null);
+            resolve({
+              dns: dnsStart && dnsEnd ? toMs(dnsEnd - dnsStart) : null,
+              tcp: tcpStart && tcpEnd ? toMs(tcpEnd - tcpStart) : null,
+              tls: tcpEnd && tlsEnd ? toMs(tlsEnd - tcpEnd) : null,
+              ttfb: ttfbEnd ? toMs(ttfbEnd - start) : null,
+              download: toMs(end - (ttfbEnd || start)),
+            });
+          });
+        }
+      );
+
+      request.on('socket', socket => {
+        socket.on('lookup', () => {
+          dnsEnd = process.hrtime.bigint();
+        });
+        socket.on('connect', () => {
+          tcpEnd = process.hrtime.bigint();
+        });
+        socket.on('secureConnect', () => {
+          tlsEnd = process.hrtime.bigint();
+        });
+
+        dnsStart = process.hrtime.bigint();
+        tcpStart = process.hrtime.bigint();
+      });
+
+      request.on('timeout', () => {
+        request.destroy(new Error('Request timeout'));
+      });
+      request.on('error', reject);
+      request.end();
+    });
   }
 
   /**
@@ -1353,7 +1454,13 @@ class MonitoringService extends EventEmitter {
   /**
    * 获取告警列表
    */
-  async getAlerts(userId: string, options: Record<string, unknown> = {}) {
+  async getAlerts(
+    userId: string,
+    options: Record<string, unknown> = {}
+  ): Promise<{
+    data: Array<Record<string, unknown>>;
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }> {
     try {
       const {
         page = 1,
@@ -1461,7 +1568,7 @@ class MonitoringService extends EventEmitter {
   /**
    * 标记告警为已读
    */
-  async markAlertAsRead(alertId: string, userId: string) {
+  async markAlertAsRead(alertId: string, userId: string): Promise<boolean> {
     try {
       const query = `
         UPDATE monitoring_alerts ma
@@ -1489,7 +1596,11 @@ class MonitoringService extends EventEmitter {
   /**
    * 批量更新告警
    */
-  async batchUpdateAlerts(alertIds: string[], userId: string, action: string) {
+  async batchUpdateAlerts(
+    alertIds: string[],
+    userId: string,
+    action: string
+  ): Promise<{ updated: number }> {
     try {
       const actionMap: Record<string, { status: string; field: string }> = {
         read: { status: 'acknowledged', field: 'acknowledged_at' },
@@ -2020,7 +2131,10 @@ class MonitoringService extends EventEmitter {
   /**
    * 保存报告记录
    */
-  async saveReportRecord(userId: string, reportInfo: Record<string, unknown>) {
+  async saveReportRecord(
+    userId: string,
+    reportInfo: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
     try {
       const query = `
                 INSERT INTO monitoring_reports (

@@ -324,8 +324,11 @@ class TestScheduleService {
       scheduleId,
     };
 
+    let executionId: string | undefined;
+
     try {
       const result = await testService.createAndStart(config, { userId, role });
+      executionId = result.testId as string | undefined;
       const nextRunAt = this.resolveNextRunAt({
         scheduleName: schedule.schedule_name,
         engineType: schedule.engine_type,
@@ -353,8 +356,23 @@ class TestScheduleService {
         [nextRunAt, nextActive, JSON.stringify(updatedConfig), scheduleId, userId]
       );
 
+      if (executionId) {
+        await this.insertExecutionLog(executionId, 'info', '调度任务触发执行', {
+          scheduleId,
+          scheduleName: schedule.schedule_name,
+          engineType: schedule.engine_type,
+        });
+      }
+
       return result;
     } catch (error) {
+      if (executionId) {
+        await this.insertExecutionLog(executionId, 'warn', '调度任务执行失败', {
+          scheduleId,
+          scheduleName: schedule.schedule_name,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
       retryCount += 1;
       const shouldRetry = retryCount <= maxRetries && schedule.is_active;
       const retryAt = shouldRetry ? new Date(Date.now() + retryDelayMinutes * 60 * 1000) : null;
@@ -376,6 +394,19 @@ class TestScheduleService {
 
       throw error;
     }
+  }
+
+  private async insertExecutionLog(
+    testId: string,
+    level: string,
+    message: string,
+    context: Record<string, unknown> = {}
+  ): Promise<void> {
+    await query(
+      `INSERT INTO test_logs (execution_id, level, message, context)
+       SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
+      [level, message, JSON.stringify(context), testId]
+    );
   }
 
   async listScheduleRuns(

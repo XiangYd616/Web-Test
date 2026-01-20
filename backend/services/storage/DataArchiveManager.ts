@@ -4,62 +4,15 @@
  */
 
 import * as fs from 'fs/promises';
+import cron from 'node-cron';
 import * as path from 'path';
-import { promisify } from 'util';
+import * as tar from 'tar';
 import * as zlib from 'zlib';
 
-// 模拟tar功能
-interface TarOptions {
-  file: string;
-  cwd?: string;
-}
-
-interface TarCreateOptions extends TarOptions {
-  gzip?: boolean;
-}
-
-class Tar {
-  static async create(options: TarCreateOptions, files: string[]): Promise<void> {
-    // 简化实现，实际应该使用tar库
-    console.log(`Creating archive ${options.file} with ${files.length} files`);
-  }
-
-  static async extract(options: TarOptions, _files?: string[]): Promise<void> {
-    // 简化实现，实际应该使用tar库
-    console.log(`Extracting archive ${options.file}`);
-  }
-}
-
-// 模拟cron功能
 interface CronTask {
   start: () => void;
   stop: () => void;
 }
-
-interface CronValidator {
-  validate: (schedule: string) => boolean;
-  schedule: (schedule: string, callback: () => void) => CronTask;
-}
-
-const cron: CronValidator = {
-  validate: (schedule: string): boolean => {
-    const parts = schedule.split(' ');
-    return parts.length === 5 || parts.length === 6;
-  },
-  schedule: (schedule: string, callback: () => void): CronTask => {
-    const task: CronTask = {
-      start: () => {
-        setInterval(callback, 60000); // 简化实现，每分钟执行一次
-      },
-      stop: () => {
-        // 停止任务
-      },
-    };
-    return task;
-  },
-};
-
-const _gzip = promisify(zlib.gzip);
 
 // 归档配置接口
 export interface ArchiveConfig {
@@ -162,6 +115,9 @@ class DataArchiveManager {
   private statistics: ArchiveStatistics;
   private scheduledTasks: Map<string, CronTask> = new Map();
   private policies: Map<string, ArchivePolicy> = new Map();
+  private dataDir: string;
+  private jobsFile: string;
+  private policiesFile: string;
 
   constructor(config: Partial<ArchiveConfig> = {}) {
     this.config = {
@@ -177,6 +133,10 @@ class DataArchiveManager {
       encryptionKey: config.encryptionKey,
       ...config,
     };
+
+    this.dataDir = path.join(process.cwd(), 'storage', 'archive');
+    this.jobsFile = path.join(this.dataDir, 'archive_jobs.json');
+    this.policiesFile = path.join(this.dataDir, 'archive_policies.json');
 
     this.statistics = {
       totalArchives: 0,
@@ -205,6 +165,7 @@ class DataArchiveManager {
     try {
       // 确保目录存在
       await this.ensureDirectories();
+      await fs.mkdir(this.dataDir, { recursive: true });
 
       // 加载现有任务
       await this.loadJobs();
@@ -560,12 +521,14 @@ class DataArchiveManager {
       // 获取文件列表
       const files = await this.getFileList(job.sourcePath);
 
-      // 创建归档
-      await Tar.create(
+      if (this.config.compressionFormat !== 'gzip') {
+        throw new Error('当前仅支持 gzip 归档格式');
+      }
+      await tar.c(
         {
-          file: archivePath,
-          cwd: job.sourcePath,
           gzip: true,
+          cwd: job.sourcePath,
+          file: archivePath,
         },
         files
       );
@@ -787,8 +750,57 @@ class DataArchiveManager {
    * 执行规则
    */
   private async executeRule(rule: ArchiveRule): Promise<void> {
-    // 简化实现，实际应该根据规则条件执行相应操作
-    console.log(`Executing rule: ${rule.name} with action: ${rule.action}`);
+    const retentionDays =
+      typeof rule.parameters.retentionDays === 'number' ? rule.parameters.retentionDays : 0;
+    const sourcePath =
+      typeof rule.parameters.sourcePath === 'string'
+        ? rule.parameters.sourcePath
+        : path.join(process.cwd(), 'storage');
+    const archivePath =
+      typeof rule.parameters.archivePath === 'string'
+        ? rule.parameters.archivePath
+        : this.config.archivePath;
+    const files = await this.getFileList(sourcePath);
+    const now = Date.now();
+    const staleFiles = await this.filterFilesByAge(files, sourcePath, retentionDays, now);
+
+    if (staleFiles.length === 0) {
+      return;
+    }
+
+    if (rule.action === 'delete') {
+      await Promise.all(
+        staleFiles.map(filePath => fs.rm(path.join(sourcePath, filePath), { force: true }))
+      );
+      return;
+    }
+
+    if (rule.action === 'compress') {
+      await Promise.all(
+        staleFiles.map(async filePath => {
+          const absolutePath = path.join(sourcePath, filePath);
+          const content = await fs.readFile(absolutePath);
+          const compressed = await new Promise<Buffer>((resolve, reject) => {
+            zlib.gzip(content, { level: this.config.compressionLevel }, (err, result) => {
+              if (err) reject(err);
+              else resolve(result);
+            });
+          });
+          await fs.writeFile(`${absolutePath}.gz`, compressed);
+          await fs.rm(absolutePath, { force: true });
+        })
+      );
+      return;
+    }
+
+    if (rule.action === 'archive') {
+      await fs.mkdir(archivePath, { recursive: true });
+      const archiveFile = path.join(archivePath, `archive_${Date.now()}.tar.gz`);
+      await tar.c({ gzip: true, cwd: sourcePath, file: archiveFile }, staleFiles);
+      await Promise.all(
+        staleFiles.map(filePath => fs.rm(path.join(sourcePath, filePath), { force: true }))
+      );
+    }
   }
 
   /**
@@ -864,28 +876,92 @@ class DataArchiveManager {
    * 加载任务
    */
   private async loadJobs(): Promise<void> {
-    // 简化实现，实际应该从数据库或文件加载
+    try {
+      const raw = await fs.readFile(this.jobsFile, 'utf-8');
+      const data = JSON.parse(raw) as ArchiveJob[];
+      data.forEach(job => {
+        this.archiveJobs.set(job.id, {
+          ...job,
+          createdAt: new Date(job.createdAt),
+          startedAt: job.startedAt ? new Date(job.startedAt) : undefined,
+          completedAt: job.completedAt ? new Date(job.completedAt) : undefined,
+        });
+      });
+    } catch {
+      // ignore
+    }
   }
 
   /**
    * 保存任务
    */
   private async saveJobs(): Promise<void> {
-    // 简化实现，实际应该保存到数据库或文件
+    await fs.mkdir(this.dataDir, { recursive: true });
+    const data = Array.from(this.archiveJobs.values()).map(job => ({
+      ...job,
+      createdAt: job.createdAt.toISOString(),
+      startedAt: job.startedAt ? job.startedAt.toISOString() : undefined,
+      completedAt: job.completedAt ? job.completedAt.toISOString() : undefined,
+    }));
+    await fs.writeFile(this.jobsFile, JSON.stringify(data, null, 2), 'utf-8');
   }
 
   /**
    * 加载策略
    */
   private async loadPolicies(): Promise<void> {
-    // 简化实现，实际应该从数据库或文件加载
+    try {
+      const raw = await fs.readFile(this.policiesFile, 'utf-8');
+      const data = JSON.parse(raw) as ArchivePolicy[];
+      data.forEach(policy => {
+        this.policies.set(policy.id, {
+          ...policy,
+          createdAt: new Date(policy.createdAt),
+          updatedAt: new Date(policy.updatedAt),
+        });
+      });
+    } catch {
+      // ignore
+    }
   }
 
   /**
    * 保存策略
    */
   private async savePolicies(): Promise<void> {
-    // 简化实现，实际应该保存到数据库或文件
+    await fs.mkdir(this.dataDir, { recursive: true });
+    const data = Array.from(this.policies.values()).map(policy => ({
+      ...policy,
+      createdAt: policy.createdAt.toISOString(),
+      updatedAt: policy.updatedAt.toISOString(),
+    }));
+    await fs.writeFile(this.policiesFile, JSON.stringify(data, null, 2), 'utf-8');
+  }
+
+  private async filterFilesByAge(
+    files: string[],
+    basePath: string,
+    retentionDays: number,
+    now: number
+  ): Promise<string[]> {
+    if (retentionDays <= 0) {
+      return files;
+    }
+    const result: string[] = [];
+    await Promise.all(
+      files.map(async filePath => {
+        try {
+          const stats = await fs.stat(path.join(basePath, filePath));
+          const ageDays = (now - stats.mtime.getTime()) / (24 * 60 * 60 * 1000);
+          if (ageDays > retentionDays) {
+            result.push(filePath);
+          }
+        } catch {
+          // ignore
+        }
+      })
+    );
+    return result;
   }
 
   /**

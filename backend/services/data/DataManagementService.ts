@@ -104,6 +104,7 @@ type StatisticsOptions = {
 
 class DataManagementService extends EventEmitter {
   private dataStore = new Map<string, Map<string, DataRecord>>();
+  private dataDir = path.join(process.cwd(), 'data', 'records');
   private backupDir = path.join(process.cwd(), 'data', 'backups');
   private exportDir = path.join(process.cwd(), 'data', 'exports');
   private isInitialized = false;
@@ -123,7 +124,6 @@ class DataManagementService extends EventEmitter {
     if (this.isInitialized) {
       return;
     }
-
     try {
       await this.ensureDirectories();
       await this.loadExistingData();
@@ -167,6 +167,7 @@ class DataManagementService extends EventEmitter {
         this.dataStore.set(type, new Map());
       }
       this.dataStore.get(type)?.set(id, record);
+      await this.persistType(type);
 
       this.emit('dataCreated', { type, id, record });
 
@@ -230,6 +231,7 @@ class DataManagementService extends EventEmitter {
       this.validateData(type, updatedRecord.data);
 
       this.dataStore.get(type)?.set(id, updatedRecord);
+      await this.persistType(type);
 
       this.emit('dataUpdated', { type, id, record: updatedRecord, changes: updates });
 
@@ -248,10 +250,25 @@ class DataManagementService extends EventEmitter {
       const record = await this.readData(type, id);
 
       if (options.softDelete) {
-        return await this.updateData(type, id, {}, { userId: options.userId });
+        const recordValue = record as DataRecord;
+        const updatedRecord: DataRecord = {
+          ...recordValue,
+          metadata: {
+            ...recordValue.metadata,
+            deletedAt: new Date().toISOString(),
+            deletedBy: options.userId,
+            updatedAt: new Date().toISOString(),
+            version: recordValue.metadata.version + 1,
+          },
+        };
+        this.dataStore.get(type)?.set(id, updatedRecord);
+        await this.persistType(type);
+        this.emit('dataDeleted', { type, id, record: updatedRecord });
+        return { success: true, deletedRecord: updatedRecord };
       }
 
       this.dataStore.get(type)?.delete(id);
+      await this.persistType(type);
 
       this.emit('dataDeleted', { type, id, record });
 
@@ -512,12 +529,34 @@ class DataManagementService extends EventEmitter {
   }
 
   async ensureDirectories() {
+    await fs.mkdir(this.dataDir, { recursive: true });
     await fs.mkdir(this.backupDir, { recursive: true });
     await fs.mkdir(this.exportDir, { recursive: true });
   }
 
   async loadExistingData() {
-    // 这里可以从数据库或文件系统加载现有数据
+    try {
+      const entries = await fs.readdir(this.dataDir);
+      await Promise.all(
+        entries
+          .filter(entry => entry.endsWith('.json'))
+          .map(async entry => {
+            const type = entry.replace(/\.json$/, '');
+            const filePath = path.join(this.dataDir, entry);
+            const content = await fs.readFile(filePath, 'utf8');
+            const records = JSON.parse(content) as DataRecord[];
+            const map = new Map<string, DataRecord>();
+            records.forEach(record => {
+              map.set(record.id, record);
+            });
+            this.dataStore.set(type, map);
+          })
+      );
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        console.error('加载数据失败:', error);
+      }
+    }
   }
 
   setupPeriodicBackup() {
@@ -529,6 +568,16 @@ class DataManagementService extends EventEmitter {
         console.error('自动备份失败:', error);
       }
     }, backupInterval);
+  }
+
+  private getTypeFilePath(type: string): string {
+    return path.join(this.dataDir, `${type}.json`);
+  }
+
+  private async persistType(type: string): Promise<void> {
+    await fs.mkdir(this.dataDir, { recursive: true });
+    const records = Array.from(this.dataStore.get(type)?.values() || []);
+    await fs.writeFile(this.getTypeFilePath(type), JSON.stringify(records, null, 2));
   }
 
   filterFields(record: DataRecord, fields: string[]) {

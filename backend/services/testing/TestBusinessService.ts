@@ -50,6 +50,9 @@ interface TestConfig {
   options?: Record<string, unknown>;
   concurrency?: number;
   duration?: number;
+  batchId?: string;
+  templateId?: string;
+  scheduleId?: string | number;
 }
 
 interface User {
@@ -359,11 +362,9 @@ class TestBusinessService {
       testId,
     };
 
-    Promise.resolve(engine.executeTest(payload)).catch(async (error: Error) => {
-      await testRepository.markFailed(testId, error.message);
-      await this.insertExecutionLog(testId, 'error', '测试执行失败', {
-        message: error.message,
-      });
+    Promise.resolve(engine.executeTest(payload)).catch((error: Error) => {
+      // 错误落库与日志由 UserTestManager 统一处理，避免重复写入
+      console.error('测试执行失败:', testId, error.message);
     });
   }
 

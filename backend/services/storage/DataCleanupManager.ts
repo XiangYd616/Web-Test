@@ -3,34 +3,14 @@
  * 处理测试数据的自动清理和生命周期管理
  */
 
-// 模拟cron功能
+import * as fs from 'fs/promises';
+import cron from 'node-cron';
+import * as path from 'path';
+
 interface CronTask {
   start: () => void;
   stop: () => void;
 }
-
-interface CronValidator {
-  validate: (schedule: string) => boolean;
-  schedule: (schedule: string, callback: () => void) => CronTask;
-}
-
-const cron: CronValidator = {
-  validate: (schedule: string): boolean => {
-    const parts = schedule.split(' ');
-    return parts.length === 5 || parts.length === 6;
-  },
-  schedule: (schedule: string, callback: () => void): CronTask => {
-    const task: CronTask = {
-      start: () => {
-        setInterval(callback, 60000); // 简化实现，每分钟执行一次
-      },
-      stop: () => {
-        // 停止任务
-      },
-    };
-    return task;
-  },
-};
 
 // 保留策略接口
 export interface RetentionPolicy {
@@ -146,6 +126,9 @@ class DataCleanupManager {
   private statistics: CleanupStatistics;
   private scheduledTasks: Map<string, CronTask> = new Map();
   private retentionPolicies: Map<string, RetentionPolicy> = new Map();
+  private dataDir: string;
+  private jobsFile: string;
+  private policiesFile: string;
 
   constructor(config: Partial<CleanupConfig> = {}) {
     this.config = {
@@ -159,6 +142,10 @@ class DataCleanupManager {
       logLevel: config.logLevel || 'info',
       ...config,
     };
+
+    this.dataDir = path.join(process.cwd(), 'storage', 'cleanup');
+    this.jobsFile = path.join(this.dataDir, 'cleanup_jobs.json');
+    this.policiesFile = path.join(this.dataDir, 'cleanup_policies.json');
 
     this.statistics = {
       totalCleanups: 0,
@@ -186,6 +173,7 @@ class DataCleanupManager {
     }
 
     try {
+      await this.ensureDataDir();
       // 加载现有任务
       await this.loadJobs();
 
@@ -485,29 +473,42 @@ class DataCleanupManager {
    * 获取存储使用情况
    */
   async getStorageUsage(): Promise<StorageUsage> {
-    // 简化实现，实际应该扫描存储目录
     const totalSize = this.config.maxStorageSize;
-    const usedSize = Math.floor(totalSize * (0.6 + Math.random() * 0.3)); // 模拟60-90%使用率
-    const freeSize = totalSize - usedSize;
-    const usagePercentage = (usedSize / totalSize) * 100;
+    const byType: Record<string, number> = {};
+    const byAge: Record<string, number> = {
+      less_than_7_days: 0,
+      '7_to_30_days': 0,
+      '30_to_90_days': 0,
+      more_than_90_days: 0,
+    };
+
+    const typePaths = this.getDataTypePaths();
+    const now = Date.now();
+    let usedSize = 0;
+
+    for (const [type, dirPath] of Object.entries(typePaths)) {
+      const { size, ages } = await this.calculateDirectoryUsage(dirPath, now);
+      if (size === 0) {
+        continue;
+      }
+      byType[type] = (byType[type] || 0) + size;
+      usedSize += size;
+      byAge.less_than_7_days += ages.less_than_7_days;
+      byAge['7_to_30_days'] += ages['7_to_30_days'];
+      byAge['30_to_90_days'] += ages['30_to_90_days'];
+      byAge.more_than_90_days += ages.more_than_90_days;
+    }
+
+    const freeSize = Math.max(0, totalSize - usedSize);
+    const usagePercentage = totalSize > 0 ? (usedSize / totalSize) * 100 : 0;
 
     return {
       totalSize,
       usedSize,
       freeSize,
       usagePercentage,
-      byType: {
-        test_results: Math.floor(usedSize * 0.4),
-        logs: Math.floor(usedSize * 0.3),
-        temp: Math.floor(usedSize * 0.2),
-        other: Math.floor(usedSize * 0.1),
-      },
-      byAge: {
-        less_than_7_days: Math.floor(usedSize * 0.3),
-        '7_to_30_days': Math.floor(usedSize * 0.4),
-        '30_to_90_days': Math.floor(usedSize * 0.2),
-        more_than_90_days: Math.floor(usedSize * 0.1),
-      },
+      byType,
+      byAge,
     };
   }
 
@@ -648,7 +649,6 @@ class DataCleanupManager {
       type: string;
     }>
   > {
-    // 简化实现，实际应该根据策略条件扫描文件系统
     const items: Array<{
       path: string;
       size: number;
@@ -656,19 +656,30 @@ class DataCleanupManager {
       type: string;
     }> = [];
 
-    // 模拟扫描结果
-    for (const dataType of policy.dataTypes) {
-      for (let i = 0; i < 100; i++) {
-        const age = Math.floor(Math.random() * 120); // 0-120天
-        const createdAt = new Date(Date.now() - age * 24 * 60 * 60 * 1000);
+    const typePaths = this.getDataTypePaths();
+    const now = Date.now();
 
-        if (age > policy.retentionDays) {
+    for (const dataType of policy.dataTypes) {
+      const dirPath = typePaths[dataType];
+      if (!dirPath) continue;
+
+      const files = await this.listFiles(dirPath);
+      for (const filePath of files) {
+        try {
+          const stats = await fs.stat(filePath);
+          if (!stats.isFile()) continue;
+
+          const ageDays = (now - stats.mtime.getTime()) / (24 * 60 * 60 * 1000);
+          if (ageDays <= policy.retentionDays) continue;
+
           items.push({
-            path: `/${dataType}/item_${i}.dat`,
-            size: Math.floor(Math.random() * 1024 * 1024), // 0-1MB
-            createdAt,
+            path: filePath,
+            size: stats.size,
+            createdAt: stats.mtime,
             type: dataType,
           });
+        } catch {
+          // 忽略无法访问的文件
         }
       }
     }
@@ -725,32 +736,53 @@ class DataCleanupManager {
    * 删除项目
    */
   private async deleteItem(itemPath: string): Promise<void> {
-    // 简化实现，实际应该删除文件
-    console.log(`Deleting: ${itemPath}`);
+    await fs.rm(itemPath, { recursive: true, force: true });
   }
 
   /**
    * 归档项目
    */
   private async archiveItem(itemPath: string, parameters: Record<string, unknown>): Promise<void> {
-    // 简化实现，实际应该归档文件
-    console.log(`Archiving: ${itemPath} to ${parameters.archivePath}`);
+    const archivePath =
+      typeof parameters.archivePath === 'string'
+        ? parameters.archivePath
+        : path.join(process.cwd(), 'archives');
+    await fs.mkdir(archivePath, { recursive: true });
+    const targetPath = path.join(archivePath, path.basename(itemPath));
+    await fs.rename(itemPath, targetPath).catch(async () => {
+      await fs.copyFile(itemPath, targetPath);
+      await fs.rm(itemPath, { force: true });
+    });
   }
 
   /**
    * 压缩项目
    */
   private async compressItem(itemPath: string, parameters: Record<string, unknown>): Promise<void> {
-    // 简化实现，实际应该压缩文件
-    console.log(`Compressing: ${itemPath} with level ${parameters.compressionLevel}`);
+    const zlib = await import('zlib');
+    const compressionLevel =
+      typeof parameters.compressionLevel === 'number' ? parameters.compressionLevel : 6;
+    const content = await fs.readFile(itemPath);
+    const compressed = await new Promise<Buffer>((resolve, reject) => {
+      zlib.gzip(content, { level: compressionLevel }, (err: Error | null, result: Buffer) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
+    const targetPath = `${itemPath}.gz`;
+    await fs.writeFile(targetPath, compressed);
+    await fs.rm(itemPath, { force: true });
   }
 
   /**
    * 移动项目
    */
   private async moveItem(itemPath: string, targetPath: string): Promise<void> {
-    // 简化实现，实际应该移动文件
-    console.log(`Moving: ${itemPath} to ${targetPath}`);
+    await fs.mkdir(path.dirname(targetPath), { recursive: true });
+    await fs.rename(itemPath, targetPath).catch(async () => {
+      await fs.copyFile(itemPath, targetPath);
+      await fs.rm(itemPath, { force: true });
+    });
   }
 
   /**
@@ -823,7 +855,6 @@ class DataCleanupManager {
    * 启动调度任务
    */
   private startScheduledTasks(): void {
-    // 简化实现，实际应该根据策略启动调度
     const task = cron.schedule('0 2 * * *', async () => {
       try {
         await this.performScheduledCleanup();
@@ -940,21 +971,113 @@ class DataCleanupManager {
    * 加载任务
    */
   private async loadJobs(): Promise<void> {
-    // 简化实现，实际应该从数据库或文件加载
+    try {
+      const content = await fs.readFile(this.jobsFile, 'utf-8');
+      const parsed = JSON.parse(content) as CleanupJob[];
+      parsed.forEach(job => {
+        this.cleanupJobs.set(job.id, {
+          ...job,
+          createdAt: new Date(job.createdAt),
+          startedAt: job.startedAt ? new Date(job.startedAt) : undefined,
+          completedAt: job.completedAt ? new Date(job.completedAt) : undefined,
+        });
+      });
+    } catch {
+      // 无持久化数据时忽略
+    }
   }
 
   /**
    * 保存任务
    */
   private async saveJobs(): Promise<void> {
-    // 简化实现，实际应该保存到数据库或文件
+    await this.ensureDataDir();
+    const jobs = Array.from(this.cleanupJobs.values()).map(job => ({
+      ...job,
+      createdAt: job.createdAt.toISOString(),
+      startedAt: job.startedAt ? job.startedAt.toISOString() : undefined,
+      completedAt: job.completedAt ? job.completedAt.toISOString() : undefined,
+    }));
+    await fs.writeFile(this.jobsFile, JSON.stringify(jobs, null, 2), 'utf-8');
   }
 
   /**
    * 保存策略
    */
   private async savePolicies(): Promise<void> {
-    // 简化实现，实际应该保存到数据库或文件
+    await this.ensureDataDir();
+    const policies = Array.from(this.retentionPolicies.values()).map(policy => ({
+      ...policy,
+      createdAt: policy.createdAt.toISOString(),
+      updatedAt: policy.updatedAt.toISOString(),
+    }));
+    await fs.writeFile(this.policiesFile, JSON.stringify(policies, null, 2), 'utf-8');
+  }
+
+  private async ensureDataDir(): Promise<void> {
+    await fs.mkdir(this.dataDir, { recursive: true });
+  }
+
+  private getDataTypePaths(): Record<string, string> {
+    const baseStorage = path.join(process.cwd(), 'storage');
+    return {
+      test_results: path.join(baseStorage, 'test_results'),
+      performance_data: path.join(baseStorage, 'performance_data'),
+      logs: path.join(process.cwd(), 'logs'),
+      temp: path.join(process.cwd(), 'temp'),
+      other: baseStorage,
+    };
+  }
+
+  private async calculateDirectoryUsage(
+    dirPath: string,
+    now: number
+  ): Promise<{ size: number; ages: StorageUsage['byAge'] }> {
+    const ages: StorageUsage['byAge'] = {
+      less_than_7_days: 0,
+      '7_to_30_days': 0,
+      '30_to_90_days': 0,
+      more_than_90_days: 0,
+    };
+    let size = 0;
+
+    const files = await this.listFiles(dirPath);
+    for (const filePath of files) {
+      try {
+        const stats = await fs.stat(filePath);
+        if (!stats.isFile()) continue;
+        size += stats.size;
+        const ageDays = (now - stats.mtime.getTime()) / (24 * 60 * 60 * 1000);
+        if (ageDays <= 7) ages.less_than_7_days += stats.size;
+        else if (ageDays <= 30) ages['7_to_30_days'] += stats.size;
+        else if (ageDays <= 90) ages['30_to_90_days'] += stats.size;
+        else ages.more_than_90_days += stats.size;
+      } catch {
+        // ignore
+      }
+    }
+
+    return { size, ages };
+  }
+
+  private async listFiles(dirPath: string): Promise<string[]> {
+    const result: string[] = [];
+    try {
+      const entries = await fs.readdir(dirPath, { withFileTypes: true });
+      await Promise.all(
+        entries.map(async entry => {
+          const entryPath = path.join(dirPath, entry.name);
+          if (entry.isDirectory()) {
+            result.push(...(await this.listFiles(entryPath)));
+          } else {
+            result.push(entryPath);
+          }
+        })
+      );
+    } catch {
+      return result;
+    }
+    return result;
   }
 
   /**

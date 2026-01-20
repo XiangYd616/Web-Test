@@ -3,6 +3,7 @@
  * 用于记录和监控安全相关事件
  */
 
+import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as winston from 'winston';
 
@@ -373,13 +374,12 @@ export async function getSecurityStatistics(
   startTime?: Date,
   endTime?: Date
 ): Promise<SecurityStatistics> {
-  // 这里应该从数据库或日志文件中读取统计信息
-  // 为了简化，返回模拟数据
+  const logPath = path.join(__dirname, '../../logs/security.log');
   const now = new Date();
   const start = startTime || new Date(now.getTime() - 24 * 60 * 60 * 1000); // 默认24小时
   const end = endTime || now;
 
-  return {
+  const stats: SecurityStatistics = {
     totalEvents: 0,
     eventsByType: {} as Record<SecurityEventType, number>,
     eventsBySeverity: {} as Record<SecuritySeverity, number>,
@@ -392,6 +392,65 @@ export async function getSecurityStatistics(
       end,
     },
   };
+
+  try {
+    const content = await fs.readFile(logPath, 'utf-8');
+    const lines = content.split('\n').filter(Boolean);
+
+    lines.forEach(line => {
+      let parsed: {
+        timestamp?: string;
+        type?: SecurityEventType;
+        severity?: SecuritySeverity;
+      } | null = null;
+
+      try {
+        parsed = JSON.parse(line) as {
+          timestamp?: string;
+          type?: SecurityEventType;
+          severity?: SecuritySeverity;
+        };
+      } catch {
+        parsed = null;
+      }
+
+      if (!parsed?.timestamp || !parsed.type) {
+        return;
+      }
+
+      const eventTime = new Date(parsed.timestamp);
+      if (Number.isNaN(eventTime.getTime())) {
+        return;
+      }
+
+      if (eventTime < start || eventTime > end) {
+        return;
+      }
+
+      stats.totalEvents += 1;
+      stats.eventsByType[parsed.type] = (stats.eventsByType[parsed.type] || 0) + 1;
+
+      const severity = parsed.severity ?? getDefaultSeverity(parsed.type);
+      stats.eventsBySeverity[severity] = (stats.eventsBySeverity[severity] || 0) + 1;
+
+      const hourKey = eventTime.toISOString().slice(0, 13);
+      stats.eventsByHour[hourKey] = (stats.eventsByHour[hourKey] || 0) + 1;
+
+      if (parsed.type === SecurityEventType.LOGIN_FAILED) {
+        stats.failedLogins += 1;
+      }
+      if (parsed.type === SecurityEventType.SUSPICIOUS_ACTIVITY) {
+        stats.suspiciousActivities += 1;
+      }
+      if (severity === SecuritySeverity.CRITICAL) {
+        stats.criticalEvents += 1;
+      }
+    });
+  } catch {
+    return stats;
+  }
+
+  return stats;
 }
 
 /**

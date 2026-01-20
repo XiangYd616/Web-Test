@@ -33,6 +33,7 @@ const Logger = {
 class UserTestManager {
   private userTests: Map<string, Map<string, EngineInstance>> = new Map();
   private userSockets: Map<string, SocketLike> = new Map();
+  private stoppedTests: Set<string> = new Set();
 
   constructor() {
     Logger.info('用户测试管理器初始化完成');
@@ -130,6 +131,9 @@ class UserTestManager {
     };
 
     testEngine.setProgressCallback(progress => {
+      if (this.stoppedTests.has(testId)) {
+        return;
+      }
       this.sendToUser(userId, 'test-progress', {
         testId,
         ...progress,
@@ -173,19 +177,32 @@ class UserTestManager {
       this.cleanupUserTest(userId, testId);
     });
 
-    testEngine.setErrorCallback(error => {
+    testEngine.setErrorCallback(async error => {
       this.sendToUser(userId, 'test-error', {
         testId,
         error: error.message,
       });
 
-      Promise.resolve(testRepository.markFailed(testId, error.message))
-        .then(() =>
-          this.insertExecutionLog(testId, 'error', '测试执行失败', {
-            message: error.message,
-          })
-        )
-        .catch(err => Logger.error(`记录失败状态异常: ${testId}`, err));
+      try {
+        const execution = await testRepository.findById(testId, userId);
+        const currentStatus = execution?.status;
+        if (currentStatus === 'cancelled' || currentStatus === 'stopped') {
+          Logger.warn(`测试已取消/停止，忽略失败状态写入: ${testId}`);
+          this.cleanupUserTest(userId, testId);
+          return;
+        }
+      } catch (lookupError) {
+        Logger.warn(`检查测试状态失败，继续记录失败: ${testId}`, lookupError);
+      }
+
+      try {
+        await testRepository.markFailed(testId, error.message);
+        await this.insertExecutionLog(testId, 'error', '测试执行失败', {
+          message: error.message,
+        });
+      } catch (err) {
+        Logger.error(`记录失败状态异常: ${testId}`, err);
+      }
 
       this.cleanupUserTest(userId, testId);
     });
@@ -210,6 +227,21 @@ class UserTestManager {
       throw new Error(`测试不存在: ${userId}/${testId}`);
     }
 
+    try {
+      const execution = await testRepository.findById(testId, userId);
+      const status = execution?.status;
+      if (status !== 'stopped' && status !== 'cancelled') {
+        await testRepository.updateStatus(testId, 'stopped');
+        await this.insertExecutionLog(testId, 'info', '测试已停止', {
+          userId,
+          source: 'registry.cancel',
+        });
+      }
+    } catch (error) {
+      Logger.warn(`停止测试时回写状态失败: ${testId}`, error);
+    }
+
+    this.stoppedTests.add(testId);
     await testEngine.stopTest(testId);
     this.cleanupUserTest(userId, testId);
 
@@ -225,6 +257,8 @@ class UserTestManager {
         this.userTests.delete(userId);
       }
     }
+
+    this.stoppedTests.delete(testId);
 
     Logger.info(`清理测试实例: ${userId}/${testId}`);
   }
@@ -294,6 +328,11 @@ class UserTestManager {
       const execution = await testRepository.findById(testId, userId);
       if (!execution) {
         throw new Error('测试执行不存在');
+      }
+
+      if (execution.status === 'cancelled' || execution.status === 'stopped') {
+        Logger.warn(`测试已取消/停止，忽略结果落库: ${testId}`);
+        return;
       }
 
       const summary = this.extractSummary(results);

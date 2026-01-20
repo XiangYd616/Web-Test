@@ -278,6 +278,9 @@ const startServer = async (): Promise<Server> => {
         await syncDatabase(false); // false = 不强制重建表
       }
 
+      registerTestEngines();
+      await testEngineRegistry.initialize();
+
       const scheduledRunService = new ScheduledRunService();
       scheduledRunController.setScheduledRunService(scheduledRunService);
       scheduledRunService.start().catch((error: unknown) => {
@@ -285,11 +288,6 @@ const startServer = async (): Promise<Server> => {
       });
 
       testScheduleService.startScheduler(60000);
-
-      registerTestEngines();
-      testEngineRegistry.initialize().catch((error: unknown) => {
-        console.error('初始化测试引擎注册器失败:', error);
-      });
     } else {
       console.warn('⚠️  Database connection failed, but server will continue...');
     }

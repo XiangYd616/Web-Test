@@ -4,7 +4,8 @@
  * 检测反射型、存储型和DOM型XSS漏洞
  */
 
-import puppeteer from 'puppeteer';
+import cheerio from 'cheerio';
+import puppeteer, { type Browser, type Page } from 'puppeteer';
 
 interface XSSPayloads {
   basic: string[];
@@ -361,30 +362,42 @@ class XSSAnalyzer {
         }>;
       }> = [];
 
-      // 简化的表单解析
-      const formRegex = /<form[^>]*>([\s\S]*?)<\/form>/gi;
-      const inputRegex = /<input[^>]*name\s*=\s*["']([^"']*)["'][^>]*>/gi;
-
-      let formMatch;
-      while ((formMatch = formRegex.exec(html)) !== null) {
-        const formHtml = formMatch[0];
-        const methodMatch = formHtml.match(/method\s*=\s*["']([^"']*)["']/i);
-        const actionMatch = formHtml.match(/action\s*=\s*["']([^"']*)["']/i);
-
-        const method = methodMatch ? methodMatch[1].toUpperCase() : 'GET';
-        const action = actionMatch ? actionMatch[1] : url;
-
+      const $ = cheerio.load(html);
+      $('form').each((_, formElement) => {
+        const form = $(formElement);
+        const method = (form.attr('method') || 'GET').toUpperCase();
+        const action = form.attr('action') || url;
         const formUrl = new URL(action, url).toString();
         const parameters: Array<{ name: string; type: 'form'; value: string }> = [];
 
-        let inputMatch;
-        while ((inputMatch = inputRegex.exec(formHtml)) !== null) {
+        form.find('input, select, textarea').each((_, fieldElement) => {
+          const field = $(fieldElement);
+          const name = field.attr('name');
+          if (!name) return;
+
+          const tagName = fieldElement.tagName.toLowerCase();
+          if (tagName === 'input') {
+            const inputType = (field.attr('type') || 'text').toLowerCase();
+            if (['submit', 'button', 'reset', 'image', 'file'].includes(inputType)) {
+              return;
+            }
+          }
+
+          let value = field.attr('value') || '';
+          if (tagName === 'textarea') {
+            value = field.text() || value;
+          }
+          if (tagName === 'select') {
+            const selected = field.find('option:selected');
+            value = selected.attr('value') || selected.text() || value;
+          }
+
           parameters.push({
-            name: inputMatch[1],
+            name,
             type: 'form',
-            value: 'test',
+            value: value || 'test',
           });
-        }
+        });
 
         if (parameters.length > 0) {
           forms.push({
@@ -393,7 +406,7 @@ class XSSAnalyzer {
             parameters,
           });
         }
-      }
+      });
 
       return forms;
     } catch (error) {
@@ -407,7 +420,7 @@ class XSSAnalyzer {
    */
   private async discoverAPIEndpoints(
     url: string,
-    options: {
+    _options: {
       timeout: number;
       userAgent: string;
     }
@@ -491,8 +504,8 @@ class XSSAnalyzer {
     }
   ): Promise<XSSVulnerability[]> {
     const vulnerabilities: XSSVulnerability[] = [];
-    let browser;
-    let page;
+    let browser: Browser | null = null;
+    let page: Page | null = null;
 
     try {
       browser = await puppeteer.launch({
@@ -538,8 +551,8 @@ class XSSAnalyzer {
     }
   ): Promise<XSSVulnerability[]> {
     const vulnerabilities: XSSVulnerability[] = [];
-    let browser;
-    let page;
+    let browser: Browser | null = null;
+    let page: Page | null = null;
 
     try {
       browser = await puppeteer.launch({
@@ -552,14 +565,22 @@ class XSSAnalyzer {
 
       // 设置XSS监听器
       await page.evaluateOnNewDocument(() => {
-        window.xssDetected = false;
-        window.xssPayload = '';
+        const xssWindow = window as unknown as {
+          xssDetected: boolean;
+          xssPayload: string;
+        };
+        xssWindow.xssDetected = false;
+        xssWindow.xssPayload = '';
 
         // 监听alert
         const originalAlert = window.alert;
         window.alert = function (message) {
-          window.xssDetected = true;
-          window.xssPayload = message;
+          const currentWindow = window as unknown as {
+            xssDetected: boolean;
+            xssPayload: string;
+          };
+          currentWindow.xssDetected = true;
+          currentWindow.xssPayload = message;
           return originalAlert.call(this, message);
         };
 
@@ -567,8 +588,12 @@ class XSSAnalyzer {
         const originalLog = console.log;
         console.log = function (...args) {
           if (args[0] === 'XSS') {
-            window.xssDetected = true;
-            window.xssPayload = args.join(' ');
+            const currentWindow = window as unknown as {
+              xssDetected: boolean;
+              xssPayload: string;
+            };
+            currentWindow.xssDetected = true;
+            currentWindow.xssPayload = args.join(' ');
           }
           return originalLog.apply(this, args);
         };
@@ -582,8 +607,18 @@ class XSSAnalyzer {
           await page.goto(testUrl, { waitUntil: 'networkidle0', timeout: browserOptions.timeout });
 
           // 检查XSS是否触发
-          const xssDetected = await page.evaluate(() => window.xssDetected);
-          const xssPayload = await page.evaluate(() => window.xssPayload);
+          const xssDetected = await page.evaluate(() => {
+            const xssWindow = window as unknown as {
+              xssDetected?: boolean;
+            };
+            return xssWindow.xssDetected ?? false;
+          });
+          const xssPayload = await page.evaluate(() => {
+            const xssWindow = window as unknown as {
+              xssPayload?: string;
+            };
+            return xssWindow.xssPayload ?? '';
+          });
 
           if (xssDetected) {
             vulnerabilities.push({
@@ -599,7 +634,7 @@ class XSSAnalyzer {
               context: 'DOM',
             });
           }
-        } catch (error) {
+        } catch {
           // 忽略单个测试的错误
         }
       }
@@ -635,8 +670,8 @@ class XSSAnalyzer {
     }
   ): Promise<XSSVulnerability[]> {
     const vulnerabilities: XSSVulnerability[] = [];
-    let browser;
-    let page;
+    let browser: Browser | null = null;
+    let page: Page | null = null;
 
     try {
       browser = await puppeteer.launch({
@@ -649,13 +684,21 @@ class XSSAnalyzer {
 
       // 设置XSS监听器
       await page.evaluateOnNewDocument(() => {
-        window.xssDetected = false;
-        window.xssPayload = '';
+        const xssWindow = window as unknown as {
+          xssDetected: boolean;
+          xssPayload: string;
+        };
+        xssWindow.xssDetected = false;
+        xssWindow.xssPayload = '';
 
         const originalAlert = window.alert;
         window.alert = function (message) {
-          window.xssDetected = true;
-          window.xssPayload = message;
+          const currentWindow = window as unknown as {
+            xssDetected: boolean;
+            xssPayload: string;
+          };
+          currentWindow.xssDetected = true;
+          currentWindow.xssPayload = message;
           return originalAlert.call(this, message);
         };
       });
@@ -667,7 +710,7 @@ class XSSAnalyzer {
           // 只测试前3个载荷
           try {
             // 提交恶意载荷
-            const formData: any = {};
+            const formData: Record<string, string> = {};
             form.parameters.forEach(param => {
               formData[param.name] = payload;
             });
@@ -678,9 +721,11 @@ class XSSAnalyzer {
             });
 
             // 填写表单
-            await page.evaluate(data => {
+            await page.evaluate((data: Record<string, string>) => {
               Object.keys(data).forEach(key => {
-                const input = document.querySelector(`[name="${key}"]`);
+                const input = document.querySelector<
+                  HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+                >(`[name="${key}"]`);
                 if (input) {
                   input.value = data[key];
                 }
@@ -697,8 +742,18 @@ class XSSAnalyzer {
             ]);
 
             // 检查XSS是否触发
-            const xssDetected = await page.evaluate(() => window.xssDetected);
-            const xssPayload = await page.evaluate(() => window.xssPayload);
+            const xssDetected = await page.evaluate(() => {
+              const xssWindow = window as unknown as {
+                xssDetected?: boolean;
+              };
+              return xssWindow.xssDetected ?? false;
+            });
+            const xssPayload = await page.evaluate(() => {
+              const xssWindow = window as unknown as {
+                xssPayload?: string;
+              };
+              return xssWindow.xssPayload ?? '';
+            });
 
             if (xssDetected) {
               vulnerabilities.push({
@@ -715,7 +770,7 @@ class XSSAnalyzer {
               });
               break; // 发现一个就够了
             }
-          } catch (error) {
+          } catch {
             // 忽略单个测试的错误
           }
         }
@@ -734,7 +789,7 @@ class XSSAnalyzer {
    * 测试基础XSS
    */
   private async testBasicXSS(
-    page: any,
+    page: Page,
     testPoint: {
       url: string;
       method: string;
@@ -755,13 +810,21 @@ class XSSAnalyzer {
 
     // 设置XSS监听器
     await page.evaluateOnNewDocument(() => {
-      window.xssDetected = false;
-      window.xssPayload = '';
+      const xssWindow = window as unknown as {
+        xssDetected: boolean;
+        xssPayload: string;
+      };
+      xssWindow.xssDetected = false;
+      xssWindow.xssPayload = '';
 
       const originalAlert = window.alert;
       window.alert = function (message) {
-        window.xssDetected = true;
-        window.xssPayload = message;
+        const currentWindow = window as unknown as {
+          xssDetected: boolean;
+          xssPayload: string;
+        };
+        currentWindow.xssDetected = true;
+        currentWindow.xssPayload = message;
         return originalAlert.call(this, message);
       };
     });
@@ -771,8 +834,14 @@ class XSSAnalyzer {
         await this.sendRequest(page, testPoint, parameter, payload);
 
         // 检查XSS是否触发
-        const xssDetected = await page.evaluate(() => window.xssDetected);
-        const xssPayload = await page.evaluate(() => window.xssPayload);
+        const xssDetected = await page.evaluate(() => {
+          const xssWindow = window as unknown as { xssDetected?: boolean };
+          return xssWindow.xssDetected ?? false;
+        });
+        const xssPayload = await page.evaluate(() => {
+          const xssWindow = window as unknown as { xssPayload?: string };
+          return xssWindow.xssPayload ?? '';
+        });
 
         if (xssDetected) {
           vulnerabilities.push({
@@ -788,7 +857,7 @@ class XSSAnalyzer {
             context: 'reflection',
           });
         }
-      } catch (error) {
+      } catch {
         // 忽略单个测试的错误
       }
 
@@ -802,7 +871,7 @@ class XSSAnalyzer {
    * 测试绕过载荷
    */
   private async testEvasionXSS(
-    page: any,
+    page: Page,
     testPoint: {
       url: string;
       method: string;
@@ -826,8 +895,14 @@ class XSSAnalyzer {
         await this.sendRequest(page, testPoint, parameter, payload);
 
         // 检查XSS是否触发
-        const xssDetected = await page.evaluate(() => window.xssDetected);
-        const xssPayload = await page.evaluate(() => window.xssPayload);
+        const xssDetected = await page.evaluate(() => {
+          const xssWindow = window as unknown as { xssDetected?: boolean };
+          return xssWindow.xssDetected ?? false;
+        });
+        const xssPayload = await page.evaluate(() => {
+          const xssWindow = window as unknown as { xssPayload?: string };
+          return xssWindow.xssPayload ?? '';
+        });
 
         if (xssDetected) {
           vulnerabilities.push({
@@ -843,7 +918,7 @@ class XSSAnalyzer {
             context: 'evasion',
           });
         }
-      } catch (error) {
+      } catch {
         // 忽略单个测试的错误
       }
 
@@ -857,7 +932,7 @@ class XSSAnalyzer {
    * 测试编码载荷
    */
   private async testEncodedXSS(
-    page: any,
+    page: Page,
     testPoint: {
       url: string;
       method: string;
@@ -881,8 +956,14 @@ class XSSAnalyzer {
         await this.sendRequest(page, testPoint, parameter, payload);
 
         // 检查XSS是否触发
-        const xssDetected = await page.evaluate(() => window.xssDetected);
-        const xssPayload = await page.evaluate(() => window.xssPayload);
+        const xssDetected = await page.evaluate(() => {
+          const xssWindow = window as unknown as { xssDetected?: boolean };
+          return xssWindow.xssDetected ?? false;
+        });
+        const xssPayload = await page.evaluate(() => {
+          const xssWindow = window as unknown as { xssPayload?: string };
+          return xssWindow.xssPayload ?? '';
+        });
 
         if (xssDetected) {
           vulnerabilities.push({
@@ -898,7 +979,7 @@ class XSSAnalyzer {
             context: 'encoding',
           });
         }
-      } catch (error) {
+      } catch {
         // 忽略单个测试的错误
       }
 
@@ -912,7 +993,7 @@ class XSSAnalyzer {
    * 发送请求
    */
   private async sendRequest(
-    page: any,
+    page: Page,
     testPoint: {
       url: string;
       method: string;
@@ -931,15 +1012,19 @@ class XSSAnalyzer {
   ): Promise<void> {
     // 重置XSS检测状态
     await page.evaluate(() => {
-      window.xssDetected = false;
-      window.xssPayload = '';
+      const xssWindow = window as unknown as {
+        xssDetected: boolean;
+        xssPayload: string;
+      };
+      xssWindow.xssDetected = false;
+      xssWindow.xssPayload = '';
     });
 
     // 准备请求参数
-    const params: any = {};
-    const data: any = {};
+    const params: Record<string, string> = {};
+    const data: Record<string, string> = {};
 
-    testPoint.parameters.forEach(param => {
+    for (const param of testPoint.parameters) {
       if (param.name === parameter.name) {
         const value = payload;
 
@@ -967,7 +1052,7 @@ class XSSAnalyzer {
             break;
         }
       }
-    });
+    }
 
     if (testPoint.method === 'GET') {
       const url = new URL(testPoint.url);
@@ -977,9 +1062,11 @@ class XSSAnalyzer {
       await page.goto(url.toString(), { waitUntil: 'networkidle0' });
     } else {
       await page.goto(testPoint.url, { waitUntil: 'networkidle0' });
-      await page.evaluate(data => {
+      await page.evaluate((data: Record<string, string>) => {
         Object.keys(data).forEach(key => {
-          const input = document.querySelector(`[name="${key}"]`);
+          const input = document.querySelector<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+          >(`[name="${key}"]`);
           if (input) {
             input.value = data[key];
           }

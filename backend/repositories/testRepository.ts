@@ -130,22 +130,28 @@ class TestRepository {
    * 更新测试状态
    */
   async updateStatus(testId: string, status: string): Promise<void> {
-    await query('UPDATE test_executions SET status = $1, updated_at = NOW() WHERE test_id = $2', [
-      status,
-      testId,
-    ]);
+    await query(
+      `UPDATE test_executions
+       SET status = $1, updated_at = NOW()
+       WHERE test_id = $2 AND status IN ('pending', 'running')`,
+      [status, testId]
+    );
   }
 
   async updateProgress(testId: string, progress: number): Promise<void> {
-    await query('UPDATE test_executions SET progress = $1, updated_at = NOW() WHERE test_id = $2', [
-      progress,
-      testId,
-    ]);
+    await query(
+      `UPDATE test_executions
+       SET progress = $1, updated_at = NOW()
+       WHERE test_id = $2 AND status = 'running'`,
+      [progress, testId]
+    );
   }
 
   async markStarted(testId: string): Promise<void> {
     await query(
-      'UPDATE test_executions SET status = $1, started_at = NOW(), updated_at = NOW() WHERE test_id = $2',
+      `UPDATE test_executions
+       SET status = $1, started_at = NOW(), updated_at = NOW()
+       WHERE test_id = $2 AND status IN ('pending')`,
       ['running', testId]
     );
   }
@@ -162,7 +168,7 @@ class TestRepository {
            execution_time = $2,
            error_message = $3,
            updated_at = NOW()
-       WHERE test_id = $4`,
+       WHERE test_id = $4 AND status IN ('running', 'pending')`,
       ['completed', executionTimeSeconds, errorMessage || null, testId]
     );
   }
@@ -173,7 +179,7 @@ class TestRepository {
        SET status = $1,
            error_message = $2,
            updated_at = NOW()
-       WHERE test_id = $3`,
+       WHERE test_id = $3 AND status IN ('running', 'pending')`,
       ['failed', errorMessage, testId]
     );
   }

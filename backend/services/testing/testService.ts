@@ -63,6 +63,7 @@ interface TestConfig {
   duration?: number;
   batchId?: string;
   templateId?: string;
+  scheduleId?: string | number;
 }
 
 type TestHistoryResponse = {
@@ -383,20 +384,7 @@ class TestService {
    * 取消测试
    */
   async cancelTest(userId: string, testId: string): Promise<void> {
-    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
-    if (!test) {
-      throw new Error('测试不存在');
-    }
-
-    if (test.status === 'completed') {
-      throw new Error('测试已完成，无法取消');
-    }
-
-    await this.stopTestExecution(testId, userId);
-    await testRepository.updateStatus(testId, 'cancelled');
-    await this.insertExecutionLog(testId, 'info', '测试已取消', {
-      userId,
-    });
+    await this.updateAndStopTest(userId, testId, 'cancelled', '测试已取消');
   }
 
   /**
@@ -499,6 +487,15 @@ class TestService {
    * 停止测试
    */
   async stopTest(userId: string, testId: string): Promise<void> {
+    await this.updateAndStopTest(userId, testId, 'stopped', '测试已停止');
+  }
+
+  private async updateAndStopTest(
+    userId: string,
+    testId: string,
+    status: 'cancelled' | 'stopped',
+    message: string
+  ): Promise<void> {
     const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
 
     if (!test) {
@@ -510,17 +507,20 @@ class TestService {
     }
 
     if (test.status === 'completed') {
-      throw new Error('测试已完成，无法停止');
+      throw new Error('测试已完成，无法停止/取消');
     }
 
-    // 停止测试执行
-    await this.stopTestExecution(testId, userId);
+    if (test.status === status) {
+      return;
+    }
 
-    // 更新状态
-    await testRepository.updateStatus(testId, 'stopped');
-    await this.insertExecutionLog(testId, 'info', '测试已停止', {
+    // 先更新状态，避免停止过程中被错误标记为 failed
+    await testRepository.updateStatus(testId, status);
+    await this.insertExecutionLog(testId, 'info', message, {
       userId,
     });
+
+    await this.stopTestExecution(testId, userId);
   }
 
   /**

@@ -4,7 +4,8 @@
  * 检测各种SQL注入漏洞类型
  */
 
-import axios from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import cheerio from 'cheerio';
 
 interface SQLPayloads {
   basic: string[];
@@ -349,30 +350,42 @@ class SQLInjectionAnalyzer {
         }>;
       }> = [];
 
-      // 简化的表单解析
-      const formRegex = /<form[^>]*>([\s\S]*?)<\/form>/gi;
-      const inputRegex = /<input[^>]*name\s*=\s*["']([^"']*)["'][^>]*>/gi;
-
-      let formMatch;
-      while ((formMatch = formRegex.exec(html)) !== null) {
-        const formHtml = formMatch[0];
-        const methodMatch = formHtml.match(/method\s*=\s*["']([^"']*)["']/i);
-        const actionMatch = formHtml.match(/action\s*=\s*["']([^"']*)["']/i);
-
-        const method = methodMatch ? methodMatch[1].toUpperCase() : 'GET';
-        const action = actionMatch ? actionMatch[1] : url;
-
+      const $ = cheerio.load(html);
+      $('form').each((_, formElement) => {
+        const form = $(formElement);
+        const method = (form.attr('method') || 'GET').toUpperCase();
+        const action = form.attr('action') || url;
         const formUrl = new URL(action, url).toString();
         const parameters: Array<{ name: string; type: 'form'; value: string }> = [];
 
-        let inputMatch;
-        while ((inputMatch = inputRegex.exec(formHtml)) !== null) {
+        form.find('input, select, textarea').each((_, fieldElement) => {
+          const field = $(fieldElement);
+          const name = field.attr('name');
+          if (!name) return;
+
+          const tagName = fieldElement.tagName.toLowerCase();
+          if (tagName === 'input') {
+            const inputType = (field.attr('type') || 'text').toLowerCase();
+            if (['submit', 'button', 'reset', 'image', 'file'].includes(inputType)) {
+              return;
+            }
+          }
+
+          let value = field.attr('value') || '';
+          if (tagName === 'textarea') {
+            value = field.text() || value;
+          }
+          if (tagName === 'select') {
+            const selected = field.find('option:selected');
+            value = selected.attr('value') || selected.text() || value;
+          }
+
           parameters.push({
-            name: inputMatch[1],
+            name,
             type: 'form',
-            value: 'test',
+            value: value || 'test',
           });
-        }
+        });
 
         if (parameters.length > 0) {
           forms.push({
@@ -381,7 +394,7 @@ class SQLInjectionAnalyzer {
             parameters,
           });
         }
-      }
+      });
 
       return forms;
     } catch (error) {
@@ -395,7 +408,7 @@ class SQLInjectionAnalyzer {
    */
   private async discoverAPIEndpoints(
     url: string,
-    options: {
+    _options: {
       timeout: number;
       userAgent: string;
       followRedirects: boolean;
@@ -531,14 +544,15 @@ class SQLInjectionAnalyzer {
             payload,
             parameter: parameter.name,
             method: testPoint.method,
-            evidence: response.data,
+            evidence:
+              typeof response.data === 'string' ? response.data : JSON.stringify(response.data),
             severity: 'high',
             description: '发现基础SQL注入漏洞',
             impact: '攻击者可以获取、修改或删除数据库数据',
             remediation: '使用参数化查询或预编译语句',
           });
         }
-      } catch (error) {
+      } catch {
         // 忽略单个测试的错误
       }
 
@@ -581,14 +595,15 @@ class SQLInjectionAnalyzer {
             payload,
             parameter: parameter.name,
             method: testPoint.method,
-            evidence: response.data,
+            evidence:
+              typeof response.data === 'string' ? response.data : JSON.stringify(response.data),
             severity: 'critical',
             description: '发现高级SQL注入漏洞',
             impact: '攻击者可以完全控制数据库',
             remediation: '使用参数化查询，限制数据库权限',
           });
         }
-      } catch (error) {
+      } catch {
         // 忽略单个测试的错误
       }
 
@@ -642,7 +657,7 @@ class SQLInjectionAnalyzer {
             remediation: '使用参数化查询，统一错误处理',
           });
         }
-      } catch (error) {
+      } catch {
         // 忽略单个测试的错误
       }
 
@@ -695,7 +710,7 @@ class SQLInjectionAnalyzer {
             remediation: '使用参数化查询，限制查询执行时间',
           });
         }
-      } catch (error) {
+      } catch {
         // 忽略单个测试的错误
       }
 
@@ -724,16 +739,16 @@ class SQLInjectionAnalyzer {
       value: string;
     },
     payload: string
-  ): Promise<any> {
-    const config: any = {
+  ): Promise<AxiosResponse<unknown>> {
+    const config: AxiosRequestConfig = {
       timeout: 10000,
       validateStatus: () => true,
     };
 
     // 准备请求参数
-    const params: any = {};
-    const data: any = {};
-    const headers: any = {};
+    const params: Record<string, string> = {};
+    const data: Record<string, string> = {};
+    const headers: Record<string, string> = {};
 
     testPoint.parameters.forEach(param => {
       if (param.name === parameter.name) {
@@ -786,7 +801,7 @@ class SQLInjectionAnalyzer {
   /**
    * 判断是否为SQL注入响应
    */
-  private isSQLInjectionResponse(response: any, payload: string): boolean {
+  private isSQLInjectionResponse(response: AxiosResponse<unknown>, payload: string): boolean {
     const responseData = response.data;
     const responseText =
       typeof responseData === 'string' ? responseData : JSON.stringify(responseData);
@@ -838,7 +853,10 @@ class SQLInjectionAnalyzer {
   /**
    * 判断是否为盲注
    */
-  private isBlindSQLInjection(trueResponse: any, falseResponse: any): boolean {
+  private isBlindSQLInjection(
+    trueResponse: AxiosResponse<unknown>,
+    falseResponse: AxiosResponse<unknown>
+  ): boolean {
     const trueText =
       typeof trueResponse.data === 'string' ? trueResponse.data : JSON.stringify(trueResponse.data);
     const falseText =

@@ -17,7 +17,7 @@ class RedisClient {
     return this.data.get(key) || null;
   }
 
-  async set(key: string, value: string, options?: { EX?: number }): Promise<void> {
+  async set(key: string, value: string, _options?: { EX?: number }): Promise<void> {
     this.data.set(key, value);
     // 简化实现，忽略过期时间
   }
@@ -30,7 +30,7 @@ class RedisClient {
     return this.data.has(key) ? 1 : 0;
   }
 
-  async expire(key: string, seconds: number): Promise<void> {
+  async expire(_key: string, _seconds: number): Promise<void> {
     // 简化实现，忽略过期时间
   }
 }
@@ -189,6 +189,8 @@ class WebSocketManager extends EventEmitter {
   private connections: Map<string, WebSocketConnection> = new Map();
   private rooms: Map<string, WebSocketRoom> = new Map();
   private messageQueues: Map<string, MessageQueue> = new Map();
+  private latencySamples: number[] = [];
+  private latencyByConnection: Map<string, number> = new Map();
   private config: WebSocketConfig;
   private statistics: WebSocketStatistics;
   private isInitialized: boolean = false;
@@ -231,7 +233,6 @@ class WebSocketManager extends EventEmitter {
         pingInterval: this.config.pingInterval,
         maxHttpBufferSize: this.config.maxHttpBufferSize,
         allowEIO3: this.config.allowEIO3,
-        compression: this.config.compression,
       };
 
       this.io = new SocketIOServer(this.server, serverOptions);
@@ -598,8 +599,29 @@ class WebSocketManager extends EventEmitter {
   private setupSocketListeners(connection: WebSocketConnection): void {
     const socket = connection.socket;
 
+    const latencyTimer = setInterval(() => {
+      socket.emit('latency-ping', { timestamp: Date.now() });
+    }, this.config.pingInterval);
+    connection.metadata.latencyTimer = latencyTimer;
+
     socket.on('authenticate', async (data: AuthPayload) => {
       await this.handleAuthentication(connection, data);
+    });
+
+    socket.on('latency-ping', (payload: { timestamp?: number }) => {
+      socket.emit('latency-pong', { timestamp: payload.timestamp ?? Date.now() });
+    });
+
+    socket.on('latency-pong', (payload: { timestamp?: number }) => {
+      if (!payload.timestamp) return;
+      const latency = Date.now() - payload.timestamp;
+      if (latency >= 0) {
+        this.latencyByConnection.set(connection.id, latency);
+        this.latencySamples.push(latency);
+        if (this.latencySamples.length > 200) {
+          this.latencySamples.shift();
+        }
+      }
     });
 
     socket.on('join_room', async (data: JoinRoomPayload) => {
@@ -687,6 +709,14 @@ class WebSocketManager extends EventEmitter {
       this.leaveRoom(connection.id, roomId);
     }
 
+    const latencyTimer = connection.metadata.latencyTimer as
+      | ReturnType<typeof setInterval>
+      | undefined;
+    if (latencyTimer) {
+      clearInterval(latencyTimer);
+    }
+    this.latencyByConnection.delete(connection.id);
+
     // 删除连接
     this.connections.delete(connection.id);
 
@@ -767,8 +797,11 @@ class WebSocketManager extends EventEmitter {
    * 计算平均延迟
    */
   private calculateAverageLatency(): number {
-    // 简化实现，实际应该基于ping/pong计算
-    return 50; // 模拟50ms延迟
+    if (this.latencySamples.length === 0) {
+      return 0;
+    }
+    const total = this.latencySamples.reduce((sum, value) => sum + value, 0);
+    return total / this.latencySamples.length;
   }
 
   /**
