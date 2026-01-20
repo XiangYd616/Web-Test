@@ -240,6 +240,30 @@ export class TestEngineRegistry {
       }
     };
 
+    const timeoutMs = typeof config.timeout === 'number' && config.timeout > 0 ? config.timeout : 0;
+
+    const runWithTimeout = async () => {
+      if (!timeoutMs) {
+        return engine.run(config, progressWrapper);
+      }
+
+      let timeoutHandle: NodeJS.Timeout | null = null;
+      const timeoutError = new Error(`测试执行超时(${timeoutMs}ms)`);
+      timeoutError.name = 'TestTimeoutError';
+
+      const timeoutPromise = new Promise<never>((_resolve, reject) => {
+        timeoutHandle = setTimeout(() => reject(timeoutError), timeoutMs);
+      });
+
+      try {
+        return await Promise.race([engine.run(config, progressWrapper), timeoutPromise]);
+      } finally {
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle);
+        }
+      }
+    };
+
     try {
       // 执行生命周期钩子
       if (engine.lifecycle?.beforeRun) {
@@ -247,7 +271,7 @@ export class TestEngineRegistry {
       }
 
       // 执行测试
-      const result = await engine.run(config, progressWrapper);
+      const result = await runWithTimeout();
 
       // 执行生命周期钩子
       if (engine.lifecycle?.afterRun) {
@@ -260,6 +284,22 @@ export class TestEngineRegistry {
       console.log(`✅ 测试引擎 ${type} 执行成功`);
       return result;
     } catch (error) {
+      if ((error as Error).name === 'TestTimeoutError') {
+        const timeoutProgress: TestProgress = {
+          ...progress,
+          status: TestStatus.FAILED,
+          progress: 100,
+          currentStep: '测试超时',
+          messages: [...progress.messages, '测试执行超时'],
+        };
+        progressWrapper(timeoutProgress);
+        try {
+          await engine.cancel(testId);
+        } catch (cancelError) {
+          console.warn(`取消超时测试失败: ${testId}`, cancelError);
+        }
+      }
+
       // 错误处理
       if (engine.lifecycle?.onError) {
         await engine.lifecycle.onError(error as Error);

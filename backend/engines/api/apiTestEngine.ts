@@ -250,7 +250,7 @@ class ApiTestEngine {
     if (test) {
       this.activeTests.set(testId, {
         ...test,
-        status: 'stopped',
+        status: 'cancelled',
       });
       return true;
     }

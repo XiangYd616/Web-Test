@@ -2,6 +2,7 @@ const cheerio = require('cheerio');
 const axios = require('axios');
 const Joi = require('joi');
 const EventEmitter = require('events');
+const { query } = require('../../config/database');
 
 type CheerioSelection = {
   each: (callback: (index: number, el: unknown) => void) => void;
@@ -80,26 +81,44 @@ class SeoTestEngine extends EventEmitter {
 
   async checkAvailability() {
     try {
-      const testResponse = await axios.get('https://httpbin.org/html', {
-        timeout: 5000,
-      });
+      const probeUrl = process.env.SEO_HEALTHCHECK_URL || '';
+      if (probeUrl) {
+        const testResponse = await axios.get(probeUrl, {
+          timeout: 5000,
+        });
 
-      const $ = cheerio.load(testResponse.data) as CheerioAPI;
-      const hasTitle = ($('title').length || 0) > 0;
+        const $ = cheerio.load(testResponse.data) as CheerioAPI;
+        const hasTitle = ($('title').length || 0) > 0;
+
+        return {
+          engine: this.name,
+          available: testResponse.status === 200 && hasTitle,
+          version: {
+            cheerio: require('cheerio/package.json').version,
+            axios: require('axios/package.json').version,
+          },
+          dependencies: ['cheerio', 'axios'],
+          probeUrl,
+        };
+      }
 
       return {
-        available: testResponse.status === 200 && hasTitle,
+        engine: this.name,
+        available: true,
         version: {
           cheerio: require('cheerio/package.json').version,
           axios: require('axios/package.json').version,
         },
         dependencies: ['cheerio', 'axios'],
+        probeUrl: null,
       };
     } catch (error) {
       return {
+        engine: this.name,
         available: false,
         error: (error as Error).message,
         dependencies: ['cheerio', 'axios'],
+        probeUrl: process.env.SEO_HEALTHCHECK_URL || null,
       };
     }
   }
@@ -201,7 +220,7 @@ class SeoTestEngine extends EventEmitter {
       results.detailedAnalysis = {
         strengths: this.identifyStrengths(results.checks as Record<string, SeoCheckResult>),
         weaknesses: this.identifyWeaknesses(results.checks as Record<string, SeoCheckResult>),
-        competitorInsights: this.generateCompetitorInsights(
+        competitorInsights: await this.generateCompetitorInsights(
           (results.summary as { score?: number })?.score || 0
         ),
         actionPlan: this.generateActionPlan(
@@ -211,35 +230,88 @@ class SeoTestEngine extends EventEmitter {
 
       this.updateTestProgress(testId, 100, 'SEO分析完成');
 
+      const warnings: string[] = [];
+      const errors: string[] = [];
+      Object.values(results.checks as Record<string, SeoCheckResult>).forEach(check => {
+        if (!check) return;
+        const issues = Array.isArray(check.issues) ? check.issues : [];
+        if (check.status === 'failed') {
+          if (issues.length > 0) {
+            errors.push(...issues.map(issue => String(issue)));
+          } else {
+            errors.push('SEO检查失败');
+          }
+        } else if (check.status === 'warning') {
+          warnings.push(...issues.map(issue => String(issue)));
+        }
+      });
+
+      const normalizedResult = {
+        testId,
+        status: 'completed',
+        score: (results.summary as { score?: number })?.score ?? 0,
+        summary: results.summary as Record<string, unknown>,
+        warnings,
+        errors,
+        details: results,
+      };
+
+      const finalResult = {
+        engine: this.name,
+        success: true,
+        testId,
+        results: normalizedResult,
+        status: normalizedResult.status,
+        score: normalizedResult.score,
+        summary: normalizedResult.summary,
+        warnings: normalizedResult.warnings,
+        errors: normalizedResult.errors,
+        timestamp: new Date().toISOString(),
+      };
+
       this.activeTests.set(testId, {
         status: 'completed',
         progress: 100,
-        results,
+        results: normalizedResult,
       });
 
       if (this.completionCallback) {
-        this.completionCallback(results);
+        this.completionCallback(finalResult);
       }
 
       if (this.listenerCount('complete') > 0) {
-        this.emit('complete', { testId, result: results });
+        this.emit('complete', { testId, result: finalResult });
       }
 
-      return results;
+      return finalResult;
     } catch (error) {
+      const message = (error as Error).message;
+      const errorResult = {
+        engine: this.name,
+        success: false,
+        testId,
+        error: message,
+        status: 'failed',
+        score: 0,
+        summary: {},
+        warnings: [],
+        errors: [message],
+        timestamp: new Date().toISOString(),
+      };
+
       this.activeTests.set(testId, {
         status: 'failed',
-        error: (error as Error).message,
+        error: message,
       });
 
       if (this.errorCallback) {
         this.errorCallback(error as Error);
       }
       if (this.listenerCount('error') > 0) {
-        this.emit('error', { testId, error: (error as Error).message });
+        this.emit('error', { testId, error: message });
       }
 
-      throw error;
+      return errorResult;
     }
   }
 
@@ -254,9 +326,11 @@ class SeoTestEngine extends EventEmitter {
       issues: [] as string[],
     };
 
-    const title = $('title').first();
-    if ((title.length || 0) > 0) {
-      const titleText = (title.text ? title.text() : '').trim();
+    const titleSelection = $('title');
+    const title =
+      typeof titleSelection.first === 'function' ? titleSelection.first() : titleSelection;
+    if ((title?.length || 0) > 0) {
+      const titleText = (typeof title.text === 'function' ? title.text() : '').trim();
       results.title = {
         content: titleText,
         length: titleText.length,
@@ -275,9 +349,10 @@ class SeoTestEngine extends EventEmitter {
       (results.issues as string[]).push('缺少title标签');
     }
 
-    const description = $('meta[name="description"]').first();
-    if ((description.length || 0) > 0) {
-      const descContent = (description.attr ? description.attr('content') : '') || '';
+    const descriptionSelection = $('meta[name="description"]');
+    const description = descriptionSelection.first?.() ?? descriptionSelection;
+    if ((description?.length || 0) > 0) {
+      const descContent = description.attr?.('content') ?? '';
       results.description = {
         content: descContent,
         length: descContent.length,
@@ -296,8 +371,9 @@ class SeoTestEngine extends EventEmitter {
       (results.issues as string[]).push('缺少meta description');
     }
 
-    const viewport = $('meta[name="viewport"]').first();
-    if ((viewport.length || 0) > 0) {
+    const viewportSelection = $('meta[name="viewport"]');
+    const viewport = viewportSelection.first?.() ?? viewportSelection;
+    if ((viewport?.length || 0) > 0) {
       results.viewport = {
         content: viewport.attr ? viewport.attr('content') : undefined,
         present: true,
@@ -308,8 +384,9 @@ class SeoTestEngine extends EventEmitter {
       (results.issues as string[]).push('缺少viewport meta标签');
     }
 
-    const charset = $('meta[charset]').first();
-    if ((charset.length || 0) > 0) {
+    const charsetSelection = $('meta[charset]');
+    const charset = charsetSelection.first?.() ?? charsetSelection;
+    if ((charset?.length || 0) > 0) {
       results.charset = {
         content: charset.attr ? charset.attr('charset') : undefined,
         present: true,
@@ -341,7 +418,7 @@ class SeoTestEngine extends EventEmitter {
       const $elem = $(elem);
       headings.push({
         tag: ((elem as { tagName?: string }).tagName || '').toLowerCase(),
-        text: ($elem.text ? $elem.text() : '').trim(),
+        text: ($elem.text?.() ?? '').trim(),
         level: parseInt(((elem as { tagName?: string }).tagName || 'h0').charAt(1), 10),
       });
     });
@@ -518,7 +595,8 @@ class SeoTestEngine extends EventEmitter {
 
     $('script[type="application/ld+json"]').each((_, elem) => {
       try {
-        const data = JSON.parse((($(elem).html ? $(elem).html() : null) || '') as string);
+        const scriptContent = $(elem).html?.() ?? '';
+        const data = JSON.parse(scriptContent as string);
         structuredData.push({
           type: 'JSON-LD',
           schema: (data as { ['@type']?: string })['@type'] || 'Unknown',
@@ -989,9 +1067,10 @@ class SeoTestEngine extends EventEmitter {
       issues: [] as string[],
     };
 
-    const viewport = $('meta[name="viewport"]').first();
-    if ((viewport.length || 0) > 0) {
-      const content = (viewport.attr ? viewport.attr('content') : '') || '';
+    const viewportSelection = $('meta[name="viewport"]');
+    const viewport = viewportSelection.first?.() ?? viewportSelection;
+    if ((viewport?.length || 0) > 0) {
+      const content = viewport.attr?.('content') ?? '';
       results.viewport = {
         present: true,
         content,
@@ -1012,11 +1091,11 @@ class SeoTestEngine extends EventEmitter {
       (results.issues as string[]).push('缺少viewport meta标签');
     }
 
-    const hasMediaQueries = (
-      $('link[media*="screen"], style').text ? $('link[media*="screen"], style').text() : ''
-    ).includes('@media');
-    const hasFlexboxGrid = ($('*').toArray ? $('*').toArray() : []).some(elem => {
-      const style = ($(elem).attr ? $(elem).attr('style') : '') || '';
+    const mediaSelection = $('link[media*="screen"], style');
+    const hasMediaQueries = (mediaSelection.text?.() ?? '').includes('@media');
+    const allElements = $('*');
+    const hasFlexboxGrid = (allElements.toArray?.() ?? []).some(elem => {
+      const style = $(elem).attr?.('style') ?? '';
       return style.includes('flex') || style.includes('grid');
     });
 
@@ -1076,9 +1155,10 @@ class SeoTestEngine extends EventEmitter {
       issues: [] as string[],
     };
 
-    const mainContent = $('main, article, .content, #content, .post, #main').first();
-    const contentText =
-      ((mainContent.length || 0) > 0 ? mainContent : $('body')).text?.().trim() || '';
+    const mainContentSelection = $('main, article, .content, #content, .post, #main');
+    const mainContent = mainContentSelection.first?.() ?? mainContentSelection;
+    const mainSelection = (mainContent?.length || 0) > 0 ? mainContent : $('body');
+    const contentText = (mainSelection.text?.() ?? '').trim() || '';
 
     const words = contentText.split(/\s+/).filter(word => word.length > 0);
     results.wordCount = words.length;
@@ -1178,12 +1258,12 @@ class SeoTestEngine extends EventEmitter {
     return weaknesses.sort((a, b) => (b.impact as number) - (a.impact as number));
   }
 
-  generateCompetitorInsights(score: number) {
+  async generateCompetitorInsights(score: number) {
     return {
       marketPosition: this.getMarketPosition(score),
       competitiveAdvantages: this.getCompetitiveAdvantages(score),
       improvementAreas: this.getImprovementAreas(score),
-      benchmarkComparison: this.getBenchmarkComparison(score),
+      benchmarkComparison: await this.getBenchmarkComparison(score),
     };
   }
 
@@ -1272,23 +1352,78 @@ class SeoTestEngine extends EventEmitter {
     return areas;
   }
 
-  getBenchmarkComparison(score: number) {
+  async getBenchmarkComparison(score: number) {
+    const scores = await this.fetchSeoScores();
+    const comparison = this.buildScoreComparison(score, scores);
+
     return {
-      industryAverage: 65,
+      industryAverage: comparison.industry,
       yourScore: score,
-      percentile: this.calculatePercentile(score),
-      gap: Math.max(0, 80 - score),
-      recommendation: score >= 80 ? '保持优势，持续优化' : '重点改进，缩小差距',
+      percentile: comparison.percentile,
+      gap: Math.max(0, comparison.benchmark - score),
+      recommendation: score >= comparison.benchmark ? '保持优势，持续优化' : '重点改进，缩小差距',
     };
   }
 
-  calculatePercentile(score: number) {
-    if (score >= 90) return 95;
-    if (score >= 80) return 85;
-    if (score >= 70) return 70;
-    if (score >= 60) return 50;
-    if (score >= 50) return 30;
-    return 15;
+  private async fetchSeoScores(limit = 200): Promise<number[]> {
+    const result = await query(
+      `SELECT tr.score
+       FROM test_results tr
+       INNER JOIN test_executions te ON te.id = tr.execution_id
+       WHERE te.engine_type = 'seo'
+         AND tr.score IS NOT NULL
+       ORDER BY tr.created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
+
+    return (result.rows || [])
+      .map((row: { score?: number | string }) => Number(row.score))
+      .filter((score: number) => Number.isFinite(score));
+  }
+
+  private buildScoreComparison(score: number, scores: number[]) {
+    if (!scores.length) {
+      const fallback = score || 0;
+      return {
+        industry: fallback,
+        competitors: fallback,
+        benchmark: fallback,
+        percentile: 0,
+      };
+    }
+
+    const sorted = [...scores].sort((a, b) => a - b);
+    const industry = this.calculateAverage(sorted);
+    const competitors = this.calculatePercentileValue(sorted, 0.75);
+    const benchmark = this.calculatePercentileValue(sorted, 0.9);
+    const percentile = this.calculatePercentileRank(sorted, score);
+
+    return {
+      industry: Math.round(industry * 100) / 100,
+      competitors: Math.round(competitors * 100) / 100,
+      benchmark: Math.round(benchmark * 100) / 100,
+      percentile,
+    };
+  }
+
+  private calculateAverage(values: number[]): number {
+    const total = values.reduce((sum, value) => sum + value, 0);
+    return total / values.length;
+  }
+
+  private calculatePercentileValue(values: number[], percentile: number): number {
+    if (values.length === 1) {
+      return values[0];
+    }
+    const index = Math.min(values.length - 1, Math.floor(percentile * (values.length - 1)));
+    return values[index];
+  }
+
+  private calculatePercentileRank(values: number[], score: number): number {
+    if (!values.length) return 0;
+    const below = values.filter(value => value <= score).length;
+    return Math.round((below / values.length) * 100);
   }
 
   async cleanup() {

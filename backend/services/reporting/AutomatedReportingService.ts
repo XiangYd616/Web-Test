@@ -522,10 +522,12 @@ class AutomatedReportingService extends EventEmitter {
     this.emit('report_generation_started', instance);
 
     try {
+      const resolvedVariables = this.resolveTemplateVariables(template, options.variables || {});
+
       // 收集数据
       const data = options.data || (await this.collectReportData(config));
 
-      const generatorData = this.buildGeneratorData(config, template, data);
+      const generatorData = this.buildGeneratorData(config, template, data, resolvedVariables);
       const reportPath = await this.generateReportFile(generatorData, template, config, instanceId);
       const executionId = await this.resolveExecutionId(config.filters || []);
       const reportRecordId = await this.saveReportRecord(
@@ -668,6 +670,18 @@ class AutomatedReportingService extends EventEmitter {
       params
     );
 
+    const testIdFilter = (config.filters || []).find(
+      filter =>
+        filter.enabled !== false && filter.field === 'test_id' && filter.operator === 'equals'
+    );
+    const detailMetrics = await this.collectDetailMetrics(
+      typeof testIdFilter?.value === 'string' ? testIdFilter.value : undefined
+    );
+    const detailMetricsRows = Object.entries(detailMetrics).map(([name, value]) => ({
+      指标: name,
+      详情: value,
+    }));
+
     const baseSummary = summaryResult.rows[0] || {
       total: 0,
       completed: 0,
@@ -749,6 +763,7 @@ class AutomatedReportingService extends EventEmitter {
         averageDuration: baseSummary.average_duration,
         byType: this.mapKeyValue(typeStats.rows, 'type', 'count'),
         byStatus: this.mapKeyValue(statusStats.rows, 'status', 'count'),
+        ...(Object.keys(detailMetrics).length > 0 ? { detailMetrics } : {}),
       },
       summary: {
         overallScore: baseSummary.average_score,
@@ -794,6 +809,21 @@ class AutomatedReportingService extends EventEmitter {
             pagination: false,
           },
         },
+        ...(detailMetricsRows.length > 0
+          ? [
+              {
+                id: 'test-metrics',
+                title: '测试指标明细',
+                headers: ['指标', '详情'],
+                rows: detailMetricsRows,
+                options: {
+                  sortable: false,
+                  filterable: false,
+                  pagination: false,
+                },
+              },
+            ]
+          : []),
         {
           id: 'recommendations',
           title: '高频建议',
@@ -1241,10 +1271,43 @@ class AutomatedReportingService extends EventEmitter {
     return result;
   }
 
+  private async collectDetailMetrics(testId?: string): Promise<Record<string, unknown>> {
+    if (!testId) {
+      return {};
+    }
+
+    const result = await query(
+      `SELECT tm.metric_name, tm.metric_value, tm.metric_unit, tm.metric_type,
+              tm.passed, tm.severity, tm.recommendation
+       FROM test_metrics tm
+       INNER JOIN test_results tr ON tr.id = tm.result_id
+       INNER JOIN test_executions te ON te.id = tr.execution_id
+       WHERE te.test_id = $1
+       ORDER BY tm.created_at DESC`,
+      [testId]
+    );
+
+    const metrics: Record<string, unknown> = {};
+    (result.rows || []).forEach((row: Record<string, unknown>) => {
+      const name = String(row.metric_name || 'metric');
+      metrics[name] = {
+        value: row.metric_value,
+        unit: row.metric_unit ?? null,
+        type: row.metric_type ?? null,
+        passed: row.passed ?? null,
+        severity: row.severity ?? null,
+        recommendation: row.recommendation ?? null,
+      };
+    });
+
+    return metrics;
+  }
+
   private buildGeneratorData(
     config: ReportConfig,
     template: ReportTemplate,
-    data: ReportData
+    data: ReportData,
+    variables: Record<string, unknown>
   ): GeneratorReportData {
     const summary = data.summary as {
       overallScore?: number;
@@ -1255,13 +1318,7 @@ class AutomatedReportingService extends EventEmitter {
     const overallScore = Number(summary.overallScore) || 0;
     const failedTests = Number(summary.failedTests) || 0;
 
-    const sections: Record<string, unknown> = {
-      summary: data.summary,
-      key_metrics: data.metrics,
-      recommendations: data.tables.find(table => table.id === 'recommendations')?.rows || [],
-      trend_analysis: data.charts,
-      detailed_metrics: data.tables.find(table => table.id === 'recent-tests')?.rows || [],
-    };
+    const sections = this.buildTemplateSections(template, data);
 
     return {
       title: config.name,
@@ -1281,8 +1338,162 @@ class AutomatedReportingService extends EventEmitter {
       metadata: {
         templateId: template.id,
         format: config.format.type,
+        variables,
       },
     };
+  }
+
+  private resolveTemplateVariables(
+    template: ReportTemplate,
+    variables: Record<string, unknown>
+  ): Record<string, unknown> {
+    const resolved: Record<string, unknown> = {};
+
+    template.variables.forEach(variable => {
+      const rawValue = variables[variable.name];
+      const hasValue = rawValue !== undefined && rawValue !== null;
+      const value = hasValue ? rawValue : variable.defaultValue;
+
+      if ((value === undefined || value === null) && variable.required) {
+        throw new Error(`报告变量缺失: ${variable.name}`);
+      }
+
+      if (value === undefined || value === null) {
+        return;
+      }
+
+      const normalized = this.normalizeVariableValue(variable.name, value, variable.type);
+      this.validateVariableRules(variable.name, normalized, variable.validation);
+      resolved[variable.name] = normalized;
+    });
+
+    return resolved;
+  }
+
+  private normalizeVariableValue(name: string, value: unknown, type: ReportVariable['type']) {
+    switch (type) {
+      case 'string':
+        return String(value);
+      case 'number': {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) {
+          throw new Error(`报告变量 ${name} 必须为数字`);
+        }
+        return numeric;
+      }
+      case 'boolean':
+        if (typeof value === 'boolean') return value;
+        if (value === 'true') return true;
+        if (value === 'false') return false;
+        throw new Error(`报告变量 ${name} 必须为布尔值`);
+      case 'date': {
+        const parsed = value instanceof Date ? value : new Date(String(value));
+        if (Number.isNaN(parsed.getTime())) {
+          throw new Error(`报告变量 ${name} 必须为有效日期`);
+        }
+        return parsed.toISOString();
+      }
+      case 'array':
+        if (!Array.isArray(value)) {
+          throw new Error(`报告变量 ${name} 必须为数组`);
+        }
+        return value;
+      case 'object':
+        if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+          throw new Error(`报告变量 ${name} 必须为对象`);
+        }
+        return value as Record<string, unknown>;
+      default:
+        return value;
+    }
+  }
+
+  private validateVariableRules(
+    name: string,
+    value: unknown,
+    validation?: ReportVariable['validation']
+  ): void {
+    if (!validation) return;
+
+    const { min, max, pattern } = validation;
+    let numericValue: number | null = null;
+
+    if (typeof value === 'number') {
+      numericValue = value;
+    } else if (typeof value === 'string') {
+      numericValue = value.length;
+    } else if (Array.isArray(value)) {
+      numericValue = value.length;
+    }
+
+    if (min !== undefined && numericValue !== null && numericValue < min) {
+      throw new Error(`报告变量 ${name} 不满足最小值要求`);
+    }
+
+    if (max !== undefined && numericValue !== null && numericValue > max) {
+      throw new Error(`报告变量 ${name} 超过最大值限制`);
+    }
+
+    if (pattern && typeof value === 'string') {
+      const regex = new RegExp(pattern);
+      if (!regex.test(value)) {
+        throw new Error(`报告变量 ${name} 不匹配校验规则`);
+      }
+    }
+  }
+
+  private buildTemplateSections(
+    template: ReportTemplate,
+    data: ReportData
+  ): Record<string, unknown> {
+    const detailMetricsSource = (data.metrics as { detailMetrics?: Record<string, unknown> })
+      .detailMetrics;
+    const detailMetricsList = detailMetricsSource
+      ? Object.entries(detailMetricsSource).map(([name, value]) => ({
+          name,
+          ...(value as Record<string, unknown>),
+        }))
+      : [];
+    const recommendations = data.tables.find(table => table.id === 'recommendations')?.rows || [];
+    const recentTests = data.tables.find(table => table.id === 'recent-tests')?.rows || [];
+
+    const filterByType = (type: string) =>
+      detailMetricsList.filter(metric => String(metric.type || '') === type);
+    const filterBottlenecks = () =>
+      detailMetricsList.filter(metric => {
+        const severity = String(metric.severity || '').toLowerCase();
+        const passed = metric.passed;
+        return passed === false || severity === 'high' || severity === 'critical';
+      });
+
+    const sectionMap: Record<string, unknown> = {
+      summary: data.summary,
+      key_metrics: data.metrics,
+      recommendations,
+      trend_analysis: data.charts,
+      detailed_metrics: recentTests,
+      performance_analysis: filterByType('performance'),
+      security_analysis: filterByType('security'),
+      compliance_checklist: filterByType('compliance'),
+      security_findings: filterByType('security'),
+      risk_assessment: filterByType('risk'),
+      remediation_plan: recommendations,
+      performance_metrics: filterByType('performance'),
+      bottlenecks: filterBottlenecks(),
+      optimization_recommendations: recommendations,
+      appendix: {
+        metrics: detailMetricsList,
+        tables: data.tables,
+      },
+      cost_impact: data.metrics,
+    };
+
+    const sections: Record<string, unknown> = {};
+    template.sections.forEach(sectionId => {
+      sections[sectionId] = sectionMap[sectionId] ?? {};
+    });
+
+    return sections;
   }
 
   private mapGeneratorTemplate(template: ReportTemplate): string {

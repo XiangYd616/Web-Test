@@ -3,6 +3,8 @@
  * 计算各模块评分和综合评分
  */
 
+const { query } = require('../../../config/database');
+
 interface ScoreWeights {
   meta: number;
   content: number;
@@ -79,6 +81,7 @@ interface ScoreImprovement {
 class ScoreCalculator {
   private weights: ScoreWeights;
   private gradeThresholds: GradeThresholds;
+  private referenceScores: number[] = [];
 
   constructor() {
     // 各模块权重配置
@@ -103,6 +106,8 @@ class ScoreCalculator {
       D: 60,
       F: 0,
     };
+
+    void this.loadReferenceScores();
   }
 
   /**
@@ -291,13 +296,20 @@ class ScoreCalculator {
    * 生成分数比较
    */
   private generateScoreComparison(score: number): ScoreComparison {
-    // 模拟行业数据
-    const industry = 72;
-    const competitors = 78;
-    const benchmark = 85;
+    if (this.referenceScores.length === 0) {
+      return {
+        industry: score,
+        competitors: score,
+        benchmark: score,
+        percentile: 0,
+      };
+    }
 
-    // 计算百分位
-    const percentile = this.calculatePercentile(score, industry, competitors, benchmark);
+    const sorted = [...this.referenceScores].sort((a, b) => a - b);
+    const industry = this.calculateAverage(sorted);
+    const competitors = this.calculatePercentileValue(sorted, 0.75);
+    const benchmark = this.calculatePercentileValue(sorted, 0.9);
+    const percentile = this.calculatePercentileRank(sorted, score);
 
     return {
       industry,
@@ -310,10 +322,44 @@ class ScoreCalculator {
   /**
    * 计算百分位
    */
-  private calculatePercentile(score: number, ...references: number[]): number {
-    const sorted = references.sort((a, b) => a - b);
-    const better = sorted.filter(ref => ref <= score).length;
-    return Math.round((better / sorted.length) * 100);
+  private calculateAverage(values: number[]): number {
+    const total = values.reduce((sum, value) => sum + value, 0);
+    return total / values.length;
+  }
+
+  private calculatePercentileValue(values: number[], percentile: number): number {
+    if (values.length === 1) {
+      return values[0];
+    }
+    const index = Math.min(values.length - 1, Math.floor(percentile * (values.length - 1)));
+    return values[index];
+  }
+
+  private calculatePercentileRank(values: number[], score: number): number {
+    if (!values.length) return 0;
+    const below = values.filter(value => value <= score).length;
+    return Math.round((below / values.length) * 100);
+  }
+
+  private async loadReferenceScores(limit = 200): Promise<void> {
+    try {
+      const result = await query(
+        `SELECT tr.score
+         FROM test_results tr
+         INNER JOIN test_executions te ON te.id = tr.execution_id
+         WHERE te.engine_type = 'seo'
+           AND tr.score IS NOT NULL
+         ORDER BY tr.created_at DESC
+         LIMIT $1`,
+        [limit]
+      );
+
+      this.referenceScores = (result.rows || [])
+        .map((row: { score?: number | string }) => Number(row.score))
+        .filter((score: number) => Number.isFinite(score));
+    } catch {
+      this.referenceScores = [];
+    }
   }
 
   /**

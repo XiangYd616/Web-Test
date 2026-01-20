@@ -49,6 +49,7 @@ class StressTestEngine {
 
   checkAvailability() {
     return {
+      engine: this.name,
       available: true,
       version: this.version,
       features: [
@@ -62,7 +63,10 @@ class StressTestEngine {
 
   async executeTest(config: Record<string, unknown>) {
     const testId = (config as { testId?: string }).testId || `stress-${Date.now()}`;
-    const { url = 'http://example.com' } = config as { url?: string };
+    const { url } = config as { url?: string };
+    if (!url) {
+      throw new Error('压力测试URL不能为空');
+    }
 
     try {
       Logger.info(`🚀 开始压力测试: ${testId} - ${url}`);
@@ -109,6 +113,28 @@ class StressTestEngine {
 
       const analysis = this._analyzeResults(results);
 
+      const rawIssues = (analysis as { issues?: string[] }).issues || [];
+      const warnings = rawIssues.map(item => String(item));
+      const errors: string[] = [];
+      const failedRequests = (results as { failedRequests?: number }).failedRequests || 0;
+      if (failedRequests > 0) {
+        errors.push(`存在失败请求: ${failedRequests}`);
+      }
+
+      const normalizedResult = {
+        testId,
+        status: 'completed',
+        score: this.calculateScore(results, analysis),
+        summary: this.buildSummary(results, analysis),
+        warnings,
+        errors,
+        details: {
+          url,
+          results,
+          analysis,
+        },
+      };
+
       if (this.alertManager?.checkAlert) {
         await this._checkAlerts(testId, url, results, analysis);
       }
@@ -119,7 +145,12 @@ class StressTestEngine {
         success: true,
         testId,
         url,
-        results,
+        results: normalizedResult,
+        status: normalizedResult.status,
+        score: normalizedResult.score,
+        summary: normalizedResult.summary,
+        warnings: normalizedResult.warnings,
+        errors: normalizedResult.errors,
         analysis,
         timestamp: new Date().toISOString(),
       };
@@ -127,7 +158,7 @@ class StressTestEngine {
       this.activeTests.set(testId, {
         status: 'completed',
         progress: 100,
-        results: finalResult,
+        results: normalizedResult,
       });
       this.updateTestProgress(testId, 100, '压力测试完成', 'completed');
       if (this.completionCallback) {
@@ -149,6 +180,11 @@ class StressTestEngine {
         testId,
         url,
         error: (error as Error).message,
+        status: 'failed',
+        score: 0,
+        summary: {},
+        warnings: [],
+        errors: [(error as Error).message],
         timestamp: new Date().toISOString(),
       };
 
@@ -219,7 +255,7 @@ class StressTestEngine {
     if (test) {
       this.activeTests.set(testId, {
         ...test,
-        status: 'stopped',
+        status: 'cancelled',
       });
       return true;
     }
@@ -282,6 +318,44 @@ class StressTestEngine {
     }
 
     return analysis;
+  }
+
+  private calculateScore(results: Record<string, unknown>, analysis: Record<string, unknown>) {
+    const total = (results as { totalRequests?: number }).totalRequests || 0;
+    const failed = (results as { failedRequests?: number }).failedRequests || 0;
+    const avgResponseTime = (results as { averageResponseTime?: number }).averageResponseTime || 0;
+    const successRate = total > 0 ? (total - failed) / total : 1;
+    let score = Math.round(successRate * 100);
+
+    if (avgResponseTime > 3000) {
+      score = Math.round(score * 0.7);
+    } else if (avgResponseTime > 1000) {
+      score = Math.round(score * 0.85);
+    }
+
+    if ((analysis as { performance?: string }).performance === 'poor') {
+      score = Math.round(score * 0.8);
+    }
+
+    return Math.max(0, Math.min(100, score));
+  }
+
+  private buildSummary(results: Record<string, unknown>, analysis: Record<string, unknown>) {
+    const total = (results as { totalRequests?: number }).totalRequests || 0;
+    const failed = (results as { failedRequests?: number }).failedRequests || 0;
+    const avgResponseTime = (results as { averageResponseTime?: number }).averageResponseTime || 0;
+    const requestsPerSecond =
+      (results as { requestsPerSecond?: number }).requestsPerSecond || (total > 0 ? total / 1 : 0);
+    const successRate = total > 0 ? Math.round(((total - failed) / total) * 100) : 100;
+
+    return {
+      totalRequests: total,
+      failedRequests: failed,
+      successRate,
+      averageResponseTime: avgResponseTime,
+      requestsPerSecond,
+      performance: (analysis as { performance?: string }).performance || 'unknown',
+    };
   }
 
   async _checkAlerts(

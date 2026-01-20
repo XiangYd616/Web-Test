@@ -10,7 +10,7 @@ export class TestEngineClass {
       id: Math.random().toString(36),
       testId: config.id || 'test-1',
       type: config.type || ('performance' as TestType),
-      status: 'pending' as TestStatus,
+      status: 'completed' as TestStatus,
       startTime: new Date(),
       results: {},
     };

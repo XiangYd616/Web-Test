@@ -29,6 +29,42 @@ export interface TestTemplateRecord {
 }
 
 class TestTemplateService {
+  async getTemplateForUser(
+    userId: string,
+    templateId: string | number
+  ): Promise<TestTemplateRecord> {
+    const result = await query('SELECT * FROM test_templates WHERE id = $1', [templateId]);
+    const template = result.rows[0] as TestTemplateRecord | undefined;
+    if (!template) {
+      throw new Error('模板不存在');
+    }
+    if (!template.is_public && String(template.user_id) !== String(userId)) {
+      throw new Error('无权访问此模板');
+    }
+    return {
+      ...template,
+      config: this.parseJsonValue(template.config, {} as Record<string, unknown>),
+    };
+  }
+
+  async getDefaultTemplate(userId: string, engineType: string): Promise<TestTemplateRecord | null> {
+    const result = await query(
+      `SELECT * FROM test_templates
+       WHERE engine_type = $2 AND is_default = true AND (user_id = $1 OR is_public = true)
+       ORDER BY CASE WHEN user_id = $1 THEN 0 ELSE 1 END, updated_at DESC
+       LIMIT 1`,
+      [userId, engineType]
+    );
+    const template = result.rows[0] as TestTemplateRecord | undefined;
+    if (!template) {
+      return null;
+    }
+    return {
+      ...template,
+      config: this.parseJsonValue(template.config, {} as Record<string, unknown>),
+    };
+  }
+
   async listTemplates(userId: string, engineType?: string): Promise<TestTemplateRecord[]> {
     const params: Array<string | number> = [userId];
     let whereClause = '(is_public = true OR user_id = $1)';
@@ -153,6 +189,20 @@ class TestTemplateService {
        WHERE id = $1`,
       [templateId]
     );
+  }
+
+  private parseJsonValue<T>(value: unknown, fallback: T): T {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return fallback;
+      }
+    }
+    if (value !== null && value !== undefined) {
+      return value as T;
+    }
+    return fallback;
   }
 }
 

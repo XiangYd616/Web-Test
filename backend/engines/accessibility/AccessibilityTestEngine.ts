@@ -49,22 +49,42 @@ class AccessibilityTestEngine {
     this.errorCallback = null;
   }
 
+  async executeTest(config: AccessibilityConfig) {
+    return this.runAccessibilityTest(config);
+  }
+
   async checkAvailability() {
     try {
-      const testResponse = await axios.get('https://httpbin.org/html', { timeout: 5000 });
-      cheerio.load(testResponse.data);
+      const probeUrl = process.env.ACCESSIBILITY_HEALTHCHECK_URL || '';
+      if (probeUrl) {
+        const testResponse = await axios.get(probeUrl, { timeout: 5000 });
+        cheerio.load(testResponse.data);
+
+        return {
+          engine: this.name,
+          available: true,
+          version: this.version,
+          capabilities: this.getCapabilities(),
+          dependencies: ['axios', 'cheerio'],
+          probeUrl,
+        };
+      }
 
       return {
+        engine: this.name,
         available: true,
         version: this.version,
         capabilities: this.getCapabilities(),
         dependencies: ['axios', 'cheerio'],
+        probeUrl: null,
       };
     } catch (error) {
       return {
+        engine: this.name,
         available: false,
         error: (error as Error).message,
         dependencies: ['axios', 'cheerio'],
+        probeUrl: process.env.ACCESSIBILITY_HEALTHCHECK_URL || null,
       };
     }
   }
@@ -134,32 +154,83 @@ class AccessibilityTestEngine {
 
       this.updateTestProgress(testId, 100, '测试完成');
 
+      const warnings: string[] = [];
+      const errors: string[] = [];
+      Object.values(results.checks as Record<string, AccessibilityCheckResult>).forEach(check => {
+        if (!check) return;
+        (check.issues || []).forEach(issue => {
+          if (!issue || typeof issue !== 'object') return;
+          const severity = (issue as { severity?: string }).severity || 'warning';
+          const message =
+            (issue as { issue?: string }).issue || (issue as { description?: string }).description;
+          if (!message) return;
+          if (severity === 'error' || severity === 'critical') {
+            errors.push(String(message));
+          } else {
+            warnings.push(String(message));
+          }
+        });
+      });
+
+      const normalizedResult = {
+        testId,
+        status: 'completed',
+        score: (results.summary as { score?: number })?.score ?? 0,
+        summary: results.summary as Record<string, unknown>,
+        warnings,
+        errors,
+        details: results,
+      };
+
+      const finalResult = {
+        engine: this.name,
+        version: this.version,
+        success: true,
+        testId,
+        results: normalizedResult,
+        status: normalizedResult.status,
+        score: normalizedResult.score,
+        summary: normalizedResult.summary,
+        warnings: normalizedResult.warnings,
+        errors: normalizedResult.errors,
+        duration: Date.now() - ((this.activeTests.get(testId)?.startTime as number) || 0),
+      };
+
       this.activeTests.set(testId, {
         status: 'completed',
         progress: 100,
-        results,
+        results: normalizedResult,
       });
 
       if (this.completionCallback) {
-        this.completionCallback(results);
+        this.completionCallback(finalResult);
       }
 
-      return {
-        success: true,
-        testId,
-        results,
-        duration: Date.now() - ((this.activeTests.get(testId)?.startTime as number) || 0),
-      };
+      return finalResult;
     } catch (error) {
+      const message = (error as Error).message;
+      const errorResult = {
+        engine: this.name,
+        version: this.version,
+        success: false,
+        testId,
+        error: message,
+        status: 'failed',
+        score: 0,
+        summary: {},
+        warnings: [],
+        errors: [message],
+      };
+
       this.activeTests.set(testId, {
         status: 'failed',
-        error: (error as Error).message,
+        error: message,
       });
 
       if (this.errorCallback) {
         this.errorCallback(error as Error);
       }
-      throw error;
+      return errorResult;
     }
   }
 
@@ -326,7 +397,8 @@ class AccessibilityTestEngine {
 
     headings.each((_, el) => {
       const currentLevel = parseInt(((el as { tagName?: string }).tagName || 'h0').charAt(1), 10);
-      const text = ($(el).text ? $(el).text() : '').trim();
+      const selection = $(el);
+      const text = (typeof selection.text === 'function' ? selection.text() : '').trim();
 
       if (currentLevel === 1) {
         hasH1 = true;
@@ -659,7 +731,7 @@ class AccessibilityTestEngine {
     if (test) {
       this.activeTests.set(testId, {
         ...test,
-        status: 'stopped',
+        status: 'cancelled',
       });
       return true;
     }

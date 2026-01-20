@@ -1,9 +1,20 @@
+import Joi from 'joi';
 import type { TestProgress } from '../../../shared/types/testEngine.types';
+import { TestEngineType, TestStatus } from '../../../shared/types/testEngine.types';
+import { errorLogAggregator } from '../../utils/ErrorLogAggregator';
 
 const { query } = require('../../config/database');
 const testRepository = require('../../repositories/testRepository');
 const registry = require('../../core/TestEngineRegistry');
-const { TestEngineType, TestStatus } = require('../../../shared/types/testEngine.types');
+
+const TEST_LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const;
+type TestLogLevel = (typeof TEST_LOG_LEVELS)[number];
+const normalizeTestLogLevel = (level?: string, fallback: TestLogLevel = 'info'): TestLogLevel => {
+  if (level && (TEST_LOG_LEVELS as readonly string[]).includes(level)) {
+    return level as TestLogLevel;
+  }
+  return fallback;
+};
 
 type EngineProgress = Record<string, unknown> & { testId?: string };
 
@@ -34,9 +45,111 @@ class UserTestManager {
   private userTests: Map<string, Map<string, EngineInstance>> = new Map();
   private userSockets: Map<string, SocketLike> = new Map();
   private stoppedTests: Set<string> = new Set();
+  private progressLogState: Map<
+    string,
+    { lastLoggedAt: number; lastProgress?: number; lastMessage?: string }
+  > = new Map();
 
   constructor() {
     Logger.info('用户测试管理器初始化完成');
+  }
+
+  private normalizeResultsPayload(results: Record<string, unknown>): Record<string, unknown> {
+    if (!this.isRecord(results)) {
+      Logger.warn('测试结果结构异常，已转换为对象', { results });
+      return { raw: results } as Record<string, unknown>;
+    }
+
+    const warnings = (results as { warnings?: unknown }).warnings;
+    const errors = (results as { errors?: unknown }).errors;
+
+    if (warnings !== undefined && !Array.isArray(warnings)) {
+      Logger.warn('测试结果 warnings 非数组，已忽略', { warnings });
+    }
+
+    if (errors !== undefined && !Array.isArray(errors)) {
+      Logger.warn('测试结果 errors 非数组，已忽略', { errors });
+    }
+
+    return results;
+  }
+
+  private validateResultSchema(results: Record<string, unknown>): void {
+    const schema = Joi.object({
+      summary: Joi.object().unknown(true),
+      warnings: Joi.array().items(Joi.any()).optional(),
+      errors: Joi.array().items(Joi.any()).optional(),
+      metrics: Joi.alternatives()
+        .try(Joi.object().unknown(true), Joi.array().items(Joi.any()))
+        .optional(),
+      status: Joi.string().optional(),
+      score: Joi.number().optional(),
+    }).unknown(true);
+
+    const { error } = schema.validate(results, {
+      abortEarly: false,
+      allowUnknown: true,
+    });
+
+    if (error) {
+      Logger.warn('测试结果结构校验失败', { details: error.details.map(item => item.message) });
+      void this.insertExecutionLog(
+        (results as { testId?: string }).testId || '',
+        'warn',
+        '测试结果结构校验失败',
+        {
+          details: error.details.map(item => item.message),
+        }
+      );
+    }
+  }
+
+  private normalizeStatus(value: unknown, fallback: TestStatus = TestStatus.COMPLETED): TestStatus {
+    if (!value) {
+      return fallback;
+    }
+    const raw = typeof value === 'string' ? value.toLowerCase() : String(value).toLowerCase();
+    if (raw === 'completed' || raw === 'success' || raw === 'passed') return TestStatus.COMPLETED;
+    if (raw === 'failed' || raw === 'error' || raw === 'timeout') return TestStatus.FAILED;
+    if (raw === 'cancelled' || raw === 'canceled' || raw === 'stopped') return TestStatus.CANCELLED;
+    if (raw === 'running') return TestStatus.RUNNING;
+    if (raw === 'pending' || raw === 'queued' || raw === 'preparing') return TestStatus.PREPARING;
+    if (raw === 'idle') return TestStatus.IDLE;
+    return fallback;
+  }
+
+  private shouldLogProgress(testId: string, progress?: number, message?: string): boolean {
+    const now = Date.now();
+    const state = this.progressLogState.get(testId);
+    const intervalMs = 10000;
+    const minProgressDelta = 5;
+
+    if (!state) {
+      this.progressLogState.set(testId, {
+        lastLoggedAt: now,
+        lastProgress: progress,
+        lastMessage: message,
+      });
+      return true;
+    }
+
+    const progressChanged =
+      typeof progress === 'number' &&
+      (typeof state.lastProgress !== 'number' ||
+        Math.abs(progress - state.lastProgress) >= minProgressDelta);
+    const messageChanged = message && message !== state.lastMessage;
+    const intervalReached = now - state.lastLoggedAt >= intervalMs;
+
+    if (progressChanged || messageChanged || intervalReached) {
+      this.progressLogState.set(testId, {
+        lastLoggedAt: now,
+        lastProgress: progress,
+        lastMessage: message,
+      });
+      return true;
+    }
+
+    return false;
   }
 
   private resolveEngineType(engineType: string) {
@@ -49,6 +162,74 @@ class UserTestManager {
 
   private isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private parseJsonValue<T>(value: unknown, fallback: T): T {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return fallback;
+      }
+    }
+    if (value !== null && value !== undefined) {
+      return value as T;
+    }
+    return fallback;
+  }
+
+  private extractScheduleId(testConfig?: Record<string, unknown> | null): number | null {
+    const config = this.parseJsonValue<Record<string, unknown> | null>(testConfig, null);
+    if (!config || !this.isRecord(config)) {
+      return null;
+    }
+    const raw = config.scheduleId;
+    if (typeof raw === 'number' && Number.isFinite(raw)) {
+      return raw;
+    }
+    if (typeof raw === 'string') {
+      const parsed = Number(raw);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+  }
+
+  private async updateScheduleSummary(
+    scheduleId: number,
+    payload: { lastSuccess?: Record<string, unknown> | null; lastError?: string | null }
+  ): Promise<void> {
+    try {
+      const result = await query('SELECT test_config FROM test_schedules WHERE id = $1', [
+        scheduleId,
+      ]);
+      const rawConfig = result.rows?.[0]?.test_config;
+      if (!rawConfig) {
+        return;
+      }
+
+      const config = this.parseJsonValue<Record<string, unknown>>(rawConfig, {});
+      const scheduleOptions = (config.scheduleOptions as Record<string, unknown>) || {};
+      const nextOptions = { ...scheduleOptions };
+
+      if ('lastSuccess' in payload) {
+        nextOptions.lastSuccess = payload.lastSuccess;
+      }
+      if ('lastError' in payload) {
+        nextOptions.lastError = payload.lastError;
+      }
+
+      const nextConfig = {
+        ...config,
+        scheduleOptions: nextOptions,
+      };
+
+      await query('UPDATE test_schedules SET test_config = $1, updated_at = NOW() WHERE id = $2', [
+        JSON.stringify(nextConfig),
+        scheduleId,
+      ]);
+    } catch (error) {
+      Logger.warn(`更新调度任务摘要失败: ${scheduleId}`, error);
+    }
   }
 
   registerUserSocket(userId: string, socket: SocketLike) {
@@ -103,7 +284,7 @@ class UserTestManager {
               testId,
               progress: progress.progress,
               message: progress.currentStep,
-              status: progress.status,
+              status: this.normalizeStatus(progress.status, TestStatus.RUNNING),
             });
           });
           if (completionCallback) {
@@ -134,9 +315,14 @@ class UserTestManager {
       if (this.stoppedTests.has(testId)) {
         return;
       }
+      const normalizedStatus = this.normalizeStatus(
+        (progress as { status?: unknown }).status,
+        TestStatus.RUNNING
+      );
       this.sendToUser(userId, 'test-progress', {
         testId,
         ...progress,
+        status: normalizedStatus,
       });
 
       const progressValue = (progress as { progress?: number }).progress;
@@ -147,7 +333,7 @@ class UserTestManager {
       }
 
       const message = (progress as { message?: string }).message;
-      if (message) {
+      if (message && this.shouldLogProgress(testId, progressValue, message)) {
         Promise.resolve(
           this.insertExecutionLog(testId, 'info', '测试进度更新', {
             message,
@@ -183,8 +369,16 @@ class UserTestManager {
         error: error.message,
       });
 
+      const isTimeout =
+        error.name === 'TestTimeoutError' ||
+        error.message.includes('超时') ||
+        error.message.toLowerCase().includes('timeout');
+      const failureMessage = isTimeout ? '测试执行超时' : '测试执行失败';
+
+      let execution: { status?: string; test_config?: Record<string, unknown> | null } | null =
+        null;
       try {
-        const execution = await testRepository.findById(testId, userId);
+        execution = await testRepository.findById(testId, userId);
         const currentStatus = execution?.status;
         if (currentStatus === 'cancelled' || currentStatus === 'stopped') {
           Logger.warn(`测试已取消/停止，忽略失败状态写入: ${testId}`);
@@ -197,9 +391,21 @@ class UserTestManager {
 
       try {
         await testRepository.markFailed(testId, error.message);
-        await this.insertExecutionLog(testId, 'error', '测试执行失败', {
+        await this.insertExecutionLog(testId, 'error', failureMessage, {
           message: error.message,
+          timeout: isTimeout,
+          errorName: error.name,
+          stack: error.stack,
+          details: (error as { details?: unknown }).details,
         });
+
+        const scheduleId = this.extractScheduleId(execution?.test_config || null);
+        if (scheduleId) {
+          await this.updateScheduleSummary(scheduleId, {
+            lastError: error.message,
+            lastSuccess: null,
+          });
+        }
       } catch (err) {
         Logger.error(`记录失败状态异常: ${testId}`, err);
       }
@@ -335,16 +541,30 @@ class UserTestManager {
         return;
       }
 
-      const summary = this.extractSummary(results);
+      const normalizedResults = this.normalizeResultsPayload(results);
+      this.validateResultSchema(normalizedResults);
+      const summary = this.extractSummary(normalizedResults);
       const score = this.extractScore(results, summary);
       const grade = this.calculateGrade(score);
       const passed = score >= 70;
-      const warnings = this.extractArray(results, 'warnings');
-      const errors = this.extractArray(results, 'errors');
+      const warnings = this.extractArray(normalizedResults, 'warnings');
+      const errors = this.extractArray(normalizedResults, 'errors');
+      const resultStatus = this.normalizeStatus(
+        (normalizedResults as { status?: unknown }).status,
+        TestStatus.COMPLETED
+      );
+      const normalizedSummary = this.normalizeSummary(summary, {
+        score,
+        grade,
+        passed,
+        status: resultStatus,
+        warningCount: warnings.length,
+        errorCount: errors.length,
+      });
 
       const resultId = await testRepository.saveResult(
         execution.id,
-        summary,
+        normalizedSummary,
         score,
         grade,
         passed,
@@ -352,7 +572,7 @@ class UserTestManager {
         errors
       );
 
-      const metrics = this.buildMetricsFromResults(results, resultId);
+      const metrics = this.buildMetricsFromResults(normalizedResults, resultId, normalizedSummary);
       await testRepository.saveMetrics(metrics);
 
       const executionTime = this.calculateExecutionTimeSeconds(
@@ -360,18 +580,51 @@ class UserTestManager {
         execution.created_at
       );
 
-      const status = (results as { status?: string }).status;
-      if (status && status !== TestStatus.COMPLETED) {
-        await testRepository.markFailed(testId, errors[0] ? String(errors[0]) : '测试失败');
+      const status = (results as { status?: unknown }).status;
+      const normalizedStatus = this.normalizeStatus(status, TestStatus.COMPLETED);
+      const failureMessage = errors[0] ? String(errors[0]) : '测试失败';
+      const isFailed = normalizedStatus !== TestStatus.COMPLETED;
+
+      if (isFailed) {
+        await testRepository.markFailed(testId, failureMessage);
       } else {
         await testRepository.markCompleted(testId, executionTime);
       }
 
-      await this.insertExecutionLog(testId, 'info', '测试完成', {
-        score,
-        grade,
-        metricCount: metrics.length,
-      });
+      const scheduleId = this.extractScheduleId(execution.test_config || null);
+      if (scheduleId) {
+        if (isFailed) {
+          await this.updateScheduleSummary(scheduleId, {
+            lastError: failureMessage,
+            lastSuccess: null,
+          });
+        } else {
+          await this.updateScheduleSummary(scheduleId, {
+            lastError: null,
+            lastSuccess: {
+              testId,
+              completedAt: new Date().toISOString(),
+              score,
+              grade,
+              passed,
+              status: TestStatus.COMPLETED,
+            },
+          });
+        }
+      }
+
+      await this.insertExecutionLog(
+        testId,
+        isFailed ? 'error' : 'info',
+        isFailed ? '测试失败' : '测试完成',
+        {
+          score,
+          grade,
+          metricCount: metrics.length,
+          errorCount: errors.length,
+          failureMessage: isFailed ? failureMessage : undefined,
+        }
+      );
 
       Logger.info(`测试结果保存成功: ${testId}`);
     } catch (error) {
@@ -452,7 +705,50 @@ class UserTestManager {
     return Math.max(0, Math.floor((Date.now() - startTime.getTime()) / 1000));
   }
 
-  private buildMetricsFromResults(results: Record<string, unknown>, resultId: number) {
+  private buildMetricsFromResults(
+    results: Record<string, unknown>,
+    resultId: number,
+    summary: Record<string, unknown>
+  ) {
+    const metricsSource = this.extractMetricsSource(results, summary);
+
+    if (!this.isRecord(metricsSource)) {
+      return [];
+    }
+
+    const recordMetrics = this.isRecord(metricsSource)
+      ? Object.entries(metricsSource).map(([metricName, metricValue]) => ({
+          metricName,
+          metricValue,
+        }))
+      : [];
+    const listMetrics = this.extractMetricsList(results).map(item => ({
+      metricName: item.name,
+      metricValue: item.value,
+    }));
+    const combinedMetrics = [...recordMetrics, ...listMetrics];
+
+    return combinedMetrics
+      .filter(item => item.metricValue !== undefined)
+      .map(({ metricName, metricValue }) => {
+        const detail = this.parseMetricDetail(metricValue);
+        return {
+          resultId,
+          metricName,
+          metricValue: detail.value,
+          metricUnit: detail.unit,
+          metricType: detail.type,
+          passed: detail.passed,
+          severity: detail.severity,
+          recommendation: detail.recommendation,
+        };
+      });
+  }
+
+  private extractMetricsSource(
+    results: Record<string, unknown>,
+    summary: Record<string, unknown>
+  ): Record<string, unknown> {
     const metricsSource =
       (results as { metrics?: Record<string, unknown> }).metrics ||
       (results as { details?: { metrics?: Record<string, unknown> } }).details?.metrics ||
@@ -461,16 +757,91 @@ class UserTestManager {
         ?.summary?.metrics ||
       {};
 
-    if (!metricsSource || typeof metricsSource !== 'object') {
-      return [];
+    if (this.isRecord(metricsSource) && Object.keys(metricsSource).length > 0) {
+      return metricsSource;
     }
 
-    return Object.entries(metricsSource).map(([metricName, metricValue]) => ({
-      resultId,
-      metricName,
-      metricValue: metricValue as Record<string, unknown> | number | string,
-      metricType: 'summary',
-    }));
+    return summary;
+  }
+
+  private extractMetricsList(
+    results: Record<string, unknown>
+  ): Array<{ name: string; value: unknown }> {
+    const candidates = [
+      (results as { metrics?: unknown }).metrics,
+      (results as { details?: { metrics?: unknown } }).details?.metrics,
+      (results as { results?: { metrics?: unknown } }).results?.metrics,
+    ];
+
+    for (const candidate of candidates) {
+      if (Array.isArray(candidate)) {
+        return candidate
+          .filter(item => this.isRecord(item))
+          .map(item => {
+            const record = item as Record<string, unknown>;
+            const name =
+              (record.name as string) ||
+              (record.metricName as string) ||
+              (record.key as string) ||
+              'metric';
+            const value = record.value ?? record.metricValue ?? record.metric ?? record.data;
+            return { name, value };
+          });
+      }
+    }
+
+    return [];
+  }
+
+  private normalizeMetricValue(value: unknown): Record<string, unknown> | number | string {
+    if (typeof value === 'number' || typeof value === 'string') {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return { values: value };
+    }
+    if (this.isRecord(value)) {
+      return value;
+    }
+    return String(value ?? '');
+  }
+
+  private parseMetricDetail(value: unknown): {
+    value: Record<string, unknown> | number | string;
+    unit?: string;
+    type?: string;
+    passed?: boolean;
+    severity?: string;
+    recommendation?: string;
+  } {
+    if (this.isRecord(value)) {
+      const record = value as Record<string, unknown>;
+      const rawValue = record.value ?? record.metricValue ?? record.metric ?? record.data ?? record;
+      return {
+        value: this.normalizeMetricValue(rawValue),
+        unit:
+          typeof record.unit === 'string'
+            ? record.unit
+            : typeof record.metricUnit === 'string'
+              ? record.metricUnit
+              : undefined,
+        type:
+          typeof record.type === 'string'
+            ? record.type
+            : typeof record.metricType === 'string'
+              ? record.metricType
+              : 'summary',
+        passed: typeof record.passed === 'boolean' ? record.passed : undefined,
+        severity: typeof record.severity === 'string' ? record.severity : undefined,
+        recommendation:
+          typeof record.recommendation === 'string' ? record.recommendation : undefined,
+      };
+    }
+
+    return {
+      value: this.normalizeMetricValue(value),
+      type: 'summary',
+    };
   }
 
   private async insertExecutionLog(
@@ -479,11 +850,22 @@ class UserTestManager {
     message: string,
     context: Record<string, unknown> = {}
   ): Promise<void> {
+    const normalizedLevel = normalizeTestLogLevel(level, 'info');
     await query(
       `INSERT INTO test_logs (execution_id, level, message, context)
        SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
-      [level, message, JSON.stringify(context), testId]
+      [normalizedLevel, message, JSON.stringify(context), testId]
     );
+
+    void errorLogAggregator.log({
+      level: normalizedLevel,
+      message,
+      type: 'test',
+      details: context,
+      context: {
+        testId,
+      },
+    });
   }
 
   calculateOverallScore(results: Record<string, unknown>) {
@@ -514,6 +896,28 @@ class UserTestManager {
     }
 
     return Math.max(0, Math.round(score));
+  }
+
+  private normalizeSummary(
+    summary: Record<string, unknown>,
+    extras: {
+      score: number;
+      grade: string;
+      passed: boolean;
+      status: string;
+      warningCount: number;
+      errorCount: number;
+    }
+  ): Record<string, unknown> {
+    return {
+      ...summary,
+      score: extras.score,
+      grade: extras.grade,
+      passed: extras.passed,
+      status: extras.status,
+      warningCount: extras.warningCount,
+      errorCount: extras.errorCount,
+    };
   }
 }
 

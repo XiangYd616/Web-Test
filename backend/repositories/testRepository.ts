@@ -61,6 +61,18 @@ interface TestMetricCreateData {
   recommendation?: string;
 }
 
+interface TestMetricRecord {
+  id: number;
+  metric_name: string;
+  metric_value: Record<string, unknown> | number | string;
+  metric_unit?: string | null;
+  metric_type?: string | null;
+  passed?: boolean | null;
+  severity?: string | null;
+  recommendation?: string | null;
+  created_at: Date;
+}
+
 class TestRepository {
   /**
    * 根据ID查找测试
@@ -71,6 +83,20 @@ class TestRepository {
       [testId, userId]
     );
     return result.rows[0] || null;
+  }
+
+  async findMetrics(testId: string, userId: string): Promise<TestMetricRecord[]> {
+    const result = await query(
+      `SELECT tm.id, tm.metric_name, tm.metric_value, tm.metric_unit, tm.metric_type,
+              tm.passed, tm.severity, tm.recommendation, tm.created_at
+       FROM test_metrics tm
+       INNER JOIN test_results tr ON tr.id = tm.result_id
+       INNER JOIN test_executions te ON te.id = tr.execution_id
+       WHERE te.test_id = $1 AND te.user_id = $2
+       ORDER BY tm.created_at DESC`,
+      [testId, userId]
+    );
+    return result.rows as TestMetricRecord[];
   }
 
   /**

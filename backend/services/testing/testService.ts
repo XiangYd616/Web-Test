@@ -6,16 +6,27 @@
 import { v4 as uuidv4 } from 'uuid';
 import { query } from '../../config/database';
 import testRepository from '../../repositories/testRepository';
+import { errorLogAggregator } from '../../utils/ErrorLogAggregator';
 import testBusinessService from './TestBusinessService';
 import testTemplateService from './testTemplateService';
 
 const userTestManager = require('./UserTestManager');
+
+const TEST_LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const;
+type TestLogLevel = (typeof TEST_LOG_LEVELS)[number];
+const normalizeTestLogLevel = (level?: string, fallback: TestLogLevel = 'info'): TestLogLevel => {
+  if (level && (TEST_LOG_LEVELS as readonly string[]).includes(level)) {
+    return level as TestLogLevel;
+  }
+  return fallback;
+};
 
 interface TestResult {
   id: number;
   testId: string;
   userId: string;
   summary: Record<string, unknown>;
+  metrics?: Array<Record<string, unknown>>;
   score?: number;
   grade?: string;
   passed?: boolean;
@@ -147,7 +158,10 @@ class TestService {
       throw new Error('测试结果不存在');
     }
 
-    return this.formatResults(execution, result);
+    const metrics = await testRepository.findMetrics(testId, userId);
+    const metricsPayload = metrics.map(metric => ({ ...metric }));
+
+    return this.formatResults(execution, result, metricsPayload);
   }
 
   /**
@@ -341,8 +355,9 @@ class TestService {
     const params: Array<string | number> = [testId, userId];
     let whereClause = 'te.test_id = $1 AND te.user_id = $2';
 
-    if (level) {
-      params.push(level);
+    const normalizedLevel = level ? normalizeTestLogLevel(level, 'info') : undefined;
+    if (normalizedLevel) {
+      params.push(normalizedLevel);
       whereClause += ` AND tl.level = $${params.length}`;
     }
 
@@ -399,7 +414,11 @@ class TestService {
       }
 
       return {
-        ...result,
+        testId: result.testId,
+        status: result.status,
+        startTime: result.startTime,
+        estimatedDuration: result.estimatedDuration,
+        templateId: result.templateId,
         config,
       };
     } catch (error) {
@@ -610,22 +629,38 @@ class TestService {
     message: string,
     context: Record<string, unknown> = {}
   ): Promise<void> {
+    const normalizedLevel = normalizeTestLogLevel(level, 'info');
     await query(
       `INSERT INTO test_logs (execution_id, level, message, context)
        SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
-      [level, message, JSON.stringify(context), testId]
+      [normalizedLevel, message, JSON.stringify(context), testId]
     );
+
+    void errorLogAggregator.log({
+      level: normalizedLevel,
+      message,
+      type: 'test',
+      details: context,
+      context: {
+        testId,
+      },
+    });
   }
 
   /**
    * 格式化测试结果
    */
-  private formatResults(execution: TestExecutionRecord, result: TestResultRecord): TestResult {
+  private formatResults(
+    execution: TestExecutionRecord,
+    result: TestResultRecord,
+    metrics: Array<Record<string, unknown>> = []
+  ): TestResult {
     return {
       id: result.id,
       testId: execution.test_id,
       userId: execution.user_id,
       summary: this.parseJsonValue(result.summary, {}),
+      metrics,
       score: result.score,
       grade: result.grade,
       passed: result.passed,
@@ -644,6 +679,7 @@ class TestService {
       concurrency: parsedConfig.concurrency,
       duration: parsedConfig.duration,
       templateId: parsedConfig.templateId,
+      scheduleId: parsedConfig.scheduleId,
     };
   }
 
@@ -661,6 +697,10 @@ class TestService {
       duration: typeof record.duration === 'number' ? record.duration : undefined,
       batchId: typeof record.batchId === 'string' ? record.batchId : undefined,
       templateId: typeof record.templateId === 'string' ? record.templateId : undefined,
+      scheduleId:
+        typeof record.scheduleId === 'string' || typeof record.scheduleId === 'number'
+          ? record.scheduleId
+          : undefined,
     };
   }
 

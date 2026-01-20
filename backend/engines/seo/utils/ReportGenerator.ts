@@ -4,6 +4,8 @@
  * 智能化SEO报告生成，包括问题优先级排序、具体优化建议、代码示例、效果预估等
  */
 
+const { query } = require('../../../config/database');
+
 interface ImpactWeights {
   high: number;
   medium: number;
@@ -196,10 +198,22 @@ interface ReferenceResource {
   authority: number;
 }
 
+type ScoreComparisonStats = {
+  industry: number;
+  competitors: number;
+  benchmark: number;
+};
+
 class ReportGenerator {
   private impactWeights: ImpactWeights;
   private effortWeights: EffortWeights;
   private seoImpactFactors: SeoImpactFactors;
+  private comparisonStats: ScoreComparisonStats = {
+    industry: 0,
+    competitors: 0,
+    benchmark: 0,
+  };
+  private referenceScores: number[] = [];
 
   constructor() {
     this.impactWeights = {
@@ -225,6 +239,60 @@ class ReportGenerator {
       mobile_friendly: { traffic: 0.2, ranking: 0.25, ctr: 0.2 },
       structured_data: { traffic: 0.1, ranking: 0.15, ctr: 0.25 },
     };
+
+    void this.loadComparisonStats();
+  }
+
+  setComparisonStats(stats: Partial<ScoreComparisonStats>): void {
+    this.comparisonStats = {
+      ...this.comparisonStats,
+      ...stats,
+    };
+  }
+
+  private async loadComparisonStats(limit = 200): Promise<void> {
+    try {
+      const result = await query(
+        `SELECT tr.score
+         FROM test_results tr
+         INNER JOIN test_executions te ON te.id = tr.execution_id
+         WHERE te.engine_type = 'seo'
+           AND tr.score IS NOT NULL
+         ORDER BY tr.created_at DESC
+         LIMIT $1`,
+        [limit]
+      );
+
+      this.referenceScores = (result.rows || [])
+        .map((row: { score?: number | string }) => Number(row.score))
+        .filter((score: number) => Number.isFinite(score));
+
+      if (this.referenceScores.length === 0) {
+        return;
+      }
+
+      const sorted = [...this.referenceScores].sort((a, b) => a - b);
+      this.comparisonStats = {
+        industry: this.calculateAverage(sorted),
+        competitors: this.calculatePercentileValue(sorted, 0.75),
+        benchmark: this.calculatePercentileValue(sorted, 0.9),
+      };
+    } catch {
+      this.referenceScores = [];
+    }
+  }
+
+  private calculateAverage(values: number[]): number {
+    const total = values.reduce((sum, value) => sum + value, 0);
+    return total / values.length;
+  }
+
+  private calculatePercentileValue(values: number[], percentile: number): number {
+    if (values.length === 1) {
+      return values[0];
+    }
+    const index = Math.min(values.length - 1, Math.floor(percentile * (values.length - 1)));
+    return values[index];
   }
 
   /**
@@ -373,9 +441,9 @@ class ReportGenerator {
     };
 
     const comparison: ScoreComparison = {
-      industry: 75,
-      competitors: 80,
-      benchmark: 85,
+      industry: this.comparisonStats.industry || analysisData.overall.score,
+      competitors: this.comparisonStats.competitors || analysisData.overall.score,
+      benchmark: this.comparisonStats.benchmark || analysisData.overall.score,
     };
 
     return {

@@ -9,9 +9,72 @@
  */
 
 const { URL } = require('url');
+const tls = require('tls');
+const axios = require('axios');
+const SecurityHeadersAnalyzer = require('./analyzers/securityHeadersAnalyzer');
 const { emitTestProgress, emitTestComplete, emitTestError } = require('../../websocket/testEvents');
 const { getAlertManager } = require('../../alert/AlertManager');
 const Logger = require('../../utils/logger');
+
+type SecurityHeaderMissing = {
+  name: string;
+  importance: 'high' | 'medium' | 'low';
+};
+
+type VulnerabilityItem = {
+  type: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  evidence?: string;
+};
+
+type VulnerabilityAnalysis = {
+  xss: { vulnerabilities: VulnerabilityItem[]; summary: { totalTests: number; riskLevel: string } };
+  sqlInjection: {
+    vulnerabilities: VulnerabilityItem[];
+    summary: { totalTests: number; riskLevel: string };
+  };
+  other: VulnerabilityItem[];
+};
+
+type SecurityAnalyses = {
+  ssl?: { score: number; issues?: string[]; enabled?: boolean };
+  headers?: { score: number; missingHeaders?: SecurityHeaderMissing[] };
+  vulnerabilities?: {
+    xss?: { vulnerabilities: VulnerabilityItem[] };
+    sqlInjection?: { vulnerabilities: VulnerabilityItem[] };
+    other?: VulnerabilityItem[];
+  };
+  informationDisclosure?: { score: number; issues?: string[] };
+  accessControl?: { score: number; issues?: string[] };
+};
+
+type SSLAnalysis = {
+  enabled: boolean;
+  version: string;
+  certificate: { valid: boolean; issuer: string; expires: string | null };
+  score: number;
+  issues: string[];
+};
+
+type HeadersAnalysis = {
+  score: number;
+  headers: unknown;
+  missingHeaders: SecurityHeaderMissing[];
+  warnings: string[];
+};
+
+type InfoDisclosureAnalysis = {
+  score: number;
+  issues: string[];
+  warnings: string[];
+};
+
+type AccessControlAnalysis = {
+  score: number;
+  issues: string[];
+  warnings: string[];
+};
 
 class SecurityTestEngine {
   name: string;
@@ -25,7 +88,7 @@ class SecurityTestEngine {
   alertManager: {
     checkAlert?: (type: string, payload: Record<string, unknown>) => Promise<void>;
   } | null;
-  constructor(options = {}) {
+  constructor(options: Record<string, unknown> = {}) {
     this.name = 'security';
     this.version = '3.0.0';
     this.description = '安全测试引擎 - 支持实时通知和告警';
@@ -44,11 +107,18 @@ class SecurityTestEngine {
     try {
       this.alertManager = getAlertManager();
     } catch (error) {
-      Logger.warn('告警管理器未初始化:', error.message);
+      const message = error instanceof Error ? error.message : String(error);
+      Logger.warn('告警管理器未初始化:', message);
     }
   }
 
-  updateTestProgress(testId, progress, message, stage = 'running', extra = {}) {
+  updateTestProgress(
+    testId: string,
+    progress: number,
+    message: string,
+    stage = 'running',
+    extra: Record<string, unknown> = {}
+  ) {
     const test = this.activeTests.get(testId) || { status: 'running' };
     this.activeTests.set(testId, {
       ...test,
@@ -74,31 +144,31 @@ class SecurityTestEngine {
     }
   }
 
-  getTestStatus(testId) {
+  getTestStatus(testId: string) {
     return this.activeTests.get(testId);
   }
 
-  async stopTest(testId) {
+  async stopTest(testId: string) {
     const test = this.activeTests.get(testId);
     if (test) {
       this.activeTests.set(testId, {
         ...test,
-        status: 'stopped',
+        status: 'cancelled',
       });
       return true;
     }
     return false;
   }
 
-  setProgressCallback(callback) {
+  setProgressCallback(callback: (progress: Record<string, unknown>) => void) {
     this.progressCallback = callback;
   }
 
-  setCompletionCallback(callback) {
+  setCompletionCallback(callback: (results: Record<string, unknown>) => void) {
     this.completionCallback = callback;
   }
 
-  setErrorCallback(callback) {
+  setErrorCallback(callback: (error: Error) => void) {
     this.errorCallback = callback;
   }
 
@@ -107,6 +177,7 @@ class SecurityTestEngine {
    */
   checkAvailability() {
     return {
+      engine: this.name,
       available: true,
       version: this.version,
       features: ['security-testing', 'vulnerability-scanning', 'ssl-analysis', 'security-headers'],
@@ -116,9 +187,12 @@ class SecurityTestEngine {
   /**
    * 执行安全测试
    */
-  async executeTest(config) {
+  async executeTest(config: { testId?: string; url?: string; enableDeepScan?: boolean }) {
     const testId = config.testId || `security-${Date.now()}`;
-    const { url = 'https://example.com' } = config;
+    const { url } = config;
+    if (!url) {
+      throw new Error('安全测试URL不能为空');
+    }
 
     try {
       Logger.info(`🚀 开始安全测试: ${testId} - ${url}`);
@@ -134,19 +208,83 @@ class SecurityTestEngine {
 
       const results = await this.performSecurityScan(url, { testId });
 
+      const warnings: string[] = [];
+      const errors: string[] = [];
+      const checks = (results as { checks?: Record<string, unknown> }).checks || {};
+      const sslIssues = (checks as { ssl?: { issues?: string[] } }).ssl?.issues || [];
+      const headerWarnings =
+        (checks as { headers?: { warnings?: string[] } }).headers?.warnings || [];
+      const infoIssues =
+        (checks as { informationDisclosure?: { issues?: string[] } }).informationDisclosure
+          ?.issues || [];
+      const infoWarnings =
+        (checks as { informationDisclosure?: { warnings?: string[] } }).informationDisclosure
+          ?.warnings || [];
+      const accessIssues =
+        (checks as { accessControl?: { issues?: string[] } }).accessControl?.issues || [];
+      const accessWarnings =
+        (checks as { accessControl?: { warnings?: string[] } }).accessControl?.warnings || [];
+      errors.push(...sslIssues, ...infoIssues, ...accessIssues);
+      warnings.push(...headerWarnings, ...infoWarnings, ...accessWarnings);
+
+      const vulnerabilities = (
+        checks as {
+          vulnerabilities?: {
+            xss?: { vulnerabilities?: Array<{ severity?: string; description?: string }> };
+            sqlInjection?: { vulnerabilities?: Array<{ severity?: string; description?: string }> };
+            other?: Array<{ severity?: string; description?: string }>;
+          };
+        }
+      ).vulnerabilities;
+      const vulnerabilityLists = [
+        ...(vulnerabilities?.xss?.vulnerabilities || []),
+        ...(vulnerabilities?.sqlInjection?.vulnerabilities || []),
+        ...(vulnerabilities?.other || []),
+      ];
+      vulnerabilityLists.forEach(item => {
+        const severity = (item.severity || 'low').toLowerCase();
+        const description = item.description || '安全漏洞';
+        if (severity === 'critical' || severity === 'high') {
+          errors.push(String(description));
+        } else {
+          warnings.push(String(description));
+        }
+      });
+
+      const normalizedResult = {
+        testId,
+        status: 'completed',
+        score:
+          (results as { score?: number }).score ??
+          (results as { summary?: { securityScore?: number } }).summary?.securityScore ??
+          0,
+        summary: (results as { summary?: Record<string, unknown> }).summary || {},
+        warnings,
+        errors,
+        recommendations:
+          (results as { recommendations?: Record<string, unknown> }).recommendations || {},
+        details: results,
+      };
+
       const finalResult = {
         engine: this.name,
         version: this.version,
         success: true,
         testId,
-        results,
+        results: normalizedResult,
+        status: normalizedResult.status,
+        score: normalizedResult.score,
+        summary: normalizedResult.summary,
+        warnings: normalizedResult.warnings,
+        errors: normalizedResult.errors,
+        recommendations: normalizedResult.recommendations,
         timestamp: new Date().toISOString(),
       };
 
       this.activeTests.set(testId, {
         status: 'completed',
         progress: 100,
-        results,
+        results: normalizedResult,
       });
       if (this.completionCallback) {
         this.completionCallback(finalResult);
@@ -159,7 +297,8 @@ class SecurityTestEngine {
 
       return finalResult;
     } catch (error) {
-      Logger.error(`❌ 安全测试失败: ${testId}`, error);
+      const message = error instanceof Error ? error.message : String(error);
+      Logger.error(`❌ 安全测试失败: ${testId}`, message);
 
       const startTimestamp = this.activeTests.get(testId)?.startTime;
       const startAt = typeof startTimestamp === 'number' ? new Date(startTimestamp) : new Date();
@@ -169,7 +308,12 @@ class SecurityTestEngine {
         success: false,
         testId,
         url,
-        error: error.message,
+        error: message,
+        status: 'failed',
+        score: 0,
+        summary: {},
+        warnings: [],
+        errors: [message],
         timestamp: new Date().toISOString(),
         startTime: startAt.toISOString(),
         endTime: new Date().toISOString(),
@@ -177,25 +321,25 @@ class SecurityTestEngine {
 
       this.activeTests.set(testId, {
         status: 'failed',
-        error: error.message,
+        error: message,
       });
       if (this.errorCallback) {
-        this.errorCallback(error);
+        this.errorCallback(error instanceof Error ? error : new Error(message));
       }
 
       // 发送错误事件
       emitTestError(testId, {
-        error: error.message,
-        stack: error.stack,
+        error: message,
+        stack: error instanceof Error ? error.stack : undefined,
       });
 
       // 触发错误告警
-      if (this.alertManager) {
+      if (this.alertManager?.checkAlert) {
         await this.alertManager.checkAlert('TEST_FAILURE', {
           testId,
           testType: 'security',
           url,
-          error: error.message,
+          error: message,
         });
       }
 
@@ -230,13 +374,17 @@ class SecurityTestEngine {
       const sqlAnalyzer = new SQLInjectionAnalyzer();
 
       // 并行执行基础安全检查
-      const [sslAnalysis, headersAnalysis, informationDisclosure, accessControl] =
-        await Promise.all([
-          this.analyzeSSL(urlObj),
-          this.analyzeSecurityHeaders(url),
-          this.checkInformationDisclosure(url),
-          this.testAccessControl(url),
-        ]);
+      const [sslAnalysis, headersAnalysis, informationDisclosure, accessControl]: [
+        SSLAnalysis,
+        HeadersAnalysis,
+        InfoDisclosureAnalysis,
+        AccessControlAnalysis,
+      ] = await Promise.all([
+        this.analyzeSSL(urlObj),
+        this.analyzeSecurityHeaders(url),
+        this.checkInformationDisclosure(url),
+        this.testAccessControl(url),
+      ]);
 
       // 发送进度: 基础检查完成
       if (testId) {
@@ -244,7 +392,7 @@ class SecurityTestEngine {
       }
 
       // 深度漏洞扫描（需要浏览器环境）
-      let vulnerabilityAnalysis = {
+      let vulnerabilityAnalysis: VulnerabilityAnalysis = {
         xss: { vulnerabilities: [], summary: { totalTests: 0, riskLevel: 'low' } },
         sqlInjection: { vulnerabilities: [], summary: { totalTests: 0, riskLevel: 'low' } },
         other: [],
@@ -259,18 +407,35 @@ class SecurityTestEngine {
 
         try {
           // XSS漏洞检测
-          const xssResults = await xssAnalyzer.analyze(options.page, url);
+          const xssResults = await xssAnalyzer.analyze(url, {
+            timeout: this.options.timeout as number,
+            userAgent: this.options.userAgent as string,
+            testHeaders: true,
+            testCookies: true,
+            delay: 100,
+            headless: true,
+          });
           vulnerabilityAnalysis.xss = xssResults;
 
           // SQL注入漏洞检测
-          const sqlResults = await sqlAnalyzer.analyze(options.page, url);
+          const sqlResults = await sqlAnalyzer.analyze(url, {
+            timeout: this.options.timeout as number,
+            userAgent: this.options.userAgent as string,
+            followRedirects: true,
+            maxRedirects: 5,
+            testHeaders: true,
+            testCookies: true,
+            delay: 100,
+          });
           vulnerabilityAnalysis.sqlInjection = sqlResults;
 
           // 其他漏洞检测
-          const otherVulns = await this.scanOtherVulnerabilities(options.page, url);
+          const otherVulns = await this.scanOtherVulnerabilities(undefined, url);
           vulnerabilityAnalysis.other = otherVulns;
         } catch (deepScanError) {
-          console.warn('⚠️ 深度扫描部分失败:', deepScanError.message);
+          const message =
+            deepScanError instanceof Error ? deepScanError.message : String(deepScanError);
+          console.warn('⚠️ 深度扫描部分失败:', message);
         }
       } else {
         Logger.info('🔍 执行快速安全扫描...');
@@ -362,7 +527,8 @@ class SecurityTestEngine {
         results,
       };
     } catch (error) {
-      Logger.error(`❌ 安全扫描失败: ${url}`, error);
+      const message = error instanceof Error ? error.message : String(error);
+      Logger.error(`❌ 安全扫描失败: ${url}`, message);
 
       if (testId) {
         this.updateTestProgress(testId, 100, '安全测试失败', 'failed');
@@ -372,77 +538,340 @@ class SecurityTestEngine {
         success: false,
         testId,
         url,
-        error: error.message,
+        error: message,
         timestamp: new Date().toISOString(),
       };
     }
   }
 
-  async analyzeSSL(urlObj) {
-    // ...保持原有实现不变...
-    const sslInfo = {
-      enabled: urlObj.protocol === 'https:',
-      version: 'TLSv1.3',
-      certificate: {
-        valid: true,
-        issuer: "Let's Encrypt",
-        expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      score: urlObj.protocol === 'https:' ? 90 : 0,
-      issues: [],
-    };
-
-    if (!sslInfo.enabled) {
-      sslInfo.issues.push('未启用HTTPS');
+  async analyzeSSL(urlObj: {
+    protocol: string;
+    hostname: string;
+    port?: string;
+  }): Promise<SSLAnalysis> {
+    if (urlObj.protocol !== 'https:') {
+      return {
+        enabled: false,
+        version: 'unknown',
+        certificate: {
+          valid: false,
+          issuer: '',
+          expires: null,
+        },
+        score: 0,
+        issues: ['未启用HTTPS'],
+      };
     }
 
-    return sslInfo;
+    const hostname = urlObj.hostname;
+    const port = urlObj.port ? Number(urlObj.port) : 443;
+
+    return new Promise(resolve => {
+      const socket = tls.connect(
+        {
+          host: hostname,
+          port,
+          servername: hostname,
+        },
+        () => {
+          const cert = socket.getPeerCertificate(true) || {};
+          const expiresAt = cert.valid_to ? new Date(cert.valid_to) : null;
+          const daysUntilExpiry = expiresAt
+            ? Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+            : 0;
+          const selfSigned =
+            cert.issuer && cert.subject ? cert.issuer.CN === cert.subject.CN : false;
+
+          const issues: string[] = [];
+          let score = 100;
+
+          if (!socket.authorized) {
+            issues.push('SSL证书无效或不被信任');
+            score -= 40;
+          }
+          if (selfSigned) {
+            issues.push('使用自签名证书');
+            score -= 20;
+          }
+          if (daysUntilExpiry > 0 && daysUntilExpiry < 30) {
+            issues.push(`SSL证书将在${daysUntilExpiry}天内过期`);
+            score -= 15;
+          }
+
+          const protocol = socket.getProtocol() || 'unknown';
+          if (protocol !== 'TLSv1.2' && protocol !== 'TLSv1.3') {
+            issues.push(`使用不安全的协议: ${protocol}`);
+            score -= 15;
+          }
+
+          resolve({
+            enabled: true,
+            version: protocol,
+            certificate: {
+              valid: socket.authorized || false,
+              issuer: cert.issuer?.CN || '',
+              expires: expiresAt ? expiresAt.toISOString() : null,
+            },
+            score: Math.max(0, score),
+            issues,
+          });
+        }
+      );
+
+      socket.setTimeout(10000, () => {
+        socket.destroy();
+        resolve({
+          enabled: true,
+          version: 'unknown',
+          certificate: { valid: false, issuer: '', expires: null },
+          score: 0,
+          issues: ['SSL连接超时'],
+        });
+      });
+
+      socket.on('error', () => {
+        resolve({
+          enabled: true,
+          version: 'unknown',
+          certificate: { valid: false, issuer: '', expires: null },
+          score: 0,
+          issues: ['无法获取SSL证书信息'],
+        });
+      });
+    });
   }
 
-  async analyzeSecurityHeaders(_url: string) {
-    const result = {
-      score: 70,
-      headers: {},
-      missingHeaders: [],
-      warnings: [],
+  async analyzeSecurityHeaders(url: string): Promise<HeadersAnalysis> {
+    const analyzer = new SecurityHeadersAnalyzer();
+    const analysis = await analyzer.analyze(url, {
+      timeout: Number(this.options.timeout) || 30000,
+      userAgent: this.options.userAgent as string,
+      followRedirects: true,
+      maxRedirects: 5,
+    });
+
+    const importanceMap: Record<string, 'high' | 'medium' | 'low'> = {
+      'Content-Security-Policy': 'high',
+      'Strict-Transport-Security': 'high',
+      'X-Frame-Options': 'high',
+      'X-Content-Type-Options': 'high',
+      'X-XSS-Protection': 'medium',
+      'Referrer-Policy': 'medium',
+      'Permissions-Policy': 'medium',
+      'Cross-Origin-Embedder-Policy': 'low',
+      'Cross-Origin-Opener-Policy': 'low',
+      'Cross-Origin-Resource-Policy': 'low',
     };
 
-    return result;
-  }
+    const missingHeaders = (analysis.headers as Array<{ header: string; present: boolean }>)
+      .filter(header => !header.present)
+      .map(header => ({
+        name: header.header,
+        importance: importanceMap[header.header] || 'low',
+      }));
 
-  async checkInformationDisclosure(_url: string) {
-    const result = {
-      score: 80,
-      issues: [],
-      warnings: [],
-    };
+    const warnings = (
+      analysis.headers as Array<{ header: string; present: boolean; valid: boolean }>
+    )
+      .filter(header => header.present && !header.valid)
+      .map(header => `安全头配置不符合要求: ${header.header}`);
 
-    return result;
-  }
-
-  async testAccessControl(_url: string) {
-    const result = {
-      score: 85,
-      issues: [],
-      warnings: [],
-    };
-
-    return result;
-  }
-
-  async scanOtherVulnerabilities(_page: unknown, _url: string) {
-    return [];
-  }
-
-  async performQuickVulnerabilityScan(_url: string) {
     return {
-      xss: { vulnerabilities: [], summary: { totalTests: 0, riskLevel: 'low' } },
-      sqlInjection: { vulnerabilities: [], summary: { totalTests: 0, riskLevel: 'low' } },
-      other: [],
+      score: analysis.overall.score,
+      headers: analysis.headers,
+      missingHeaders,
+      warnings,
     };
   }
 
-  calculateSecurityScore(analyses) {
+  async checkInformationDisclosure(url: string): Promise<InfoDisclosureAnalysis> {
+    const result = {
+      score: 100,
+      issues: [] as string[],
+      warnings: [] as string[],
+    };
+
+    try {
+      const response = await axios.get(url, {
+        timeout: Number(this.options.timeout) || 15000,
+        headers: { 'User-Agent': this.options.userAgent as string },
+      });
+
+      const headers = response.headers || {};
+      const disclosedHeaders = ['server', 'x-powered-by', 'x-aspnet-version'];
+      disclosedHeaders.forEach(header => {
+        if (headers[header]) {
+          result.issues.push(`响应头暴露敏感信息: ${header}`);
+          result.score -= 10;
+        }
+      });
+
+      const body = typeof response.data === 'string' ? response.data : '';
+      const leakagePatterns = ['Stack trace', 'Traceback', 'Exception', 'SQLSTATE'];
+      leakagePatterns.forEach(pattern => {
+        if (body.includes(pattern)) {
+          result.issues.push(`页面内容疑似泄露错误信息: ${pattern}`);
+          result.score -= 15;
+        }
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      result.warnings.push(`无法检查信息泄露: ${message}`);
+      result.score = Math.max(0, result.score - 10);
+    }
+
+    result.score = Math.max(0, result.score);
+    return result;
+  }
+
+  async testAccessControl(url: string): Promise<AccessControlAnalysis> {
+    const result = {
+      score: 100,
+      issues: [] as string[],
+      warnings: [] as string[],
+    };
+
+    const target = new URL(url);
+    const sensitivePaths = ['/admin', '/admin/login', '/dashboard', '/config', '/.env'];
+
+    await Promise.all(
+      sensitivePaths.map(async path => {
+        try {
+          const response = await axios.get(`${target.origin}${path}`, {
+            timeout: 8000,
+            maxRedirects: 0,
+            validateStatus: (status: number) => status >= 200 && status < 500,
+            headers: { 'User-Agent': this.options.userAgent as string },
+          });
+
+          if (response.status === 200) {
+            result.issues.push(`疑似未授权访问敏感路径: ${path}`);
+            result.score -= 15;
+          } else if (
+            response.status === 302 ||
+            response.status === 401 ||
+            response.status === 403
+          ) {
+            result.warnings.push(`敏感路径受限: ${path}`);
+          }
+        } catch {
+          result.warnings.push(`无法验证访问控制: ${path}`);
+        }
+      })
+    );
+
+    result.score = Math.max(0, result.score);
+    return result;
+  }
+
+  async scanOtherVulnerabilities(_page: unknown, url: string) {
+    const issues: VulnerabilityItem[] = [];
+
+    const redirectPayloads = ['http://evil.com', '//evil.com', 'javascript:alert(1)'];
+    for (const payload of redirectPayloads) {
+      try {
+        const response = await axios.get(url, {
+          params: { redirect: payload },
+          timeout: 5000,
+          maxRedirects: 0,
+          validateStatus: (status: number) => status >= 200 && status < 500,
+        });
+        if (response.status >= 300 && response.status < 400) {
+          issues.push({
+            type: 'open-redirect',
+            severity: 'medium',
+            description: '检测到开放重定向风险',
+          });
+          break;
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    const traversalPayloads = ['../etc/passwd', '..\\..\\windows\\system32\\drivers\\etc\\hosts'];
+    for (const payload of traversalPayloads) {
+      try {
+        const response = await axios.get(url, {
+          params: { file: payload },
+          timeout: 5000,
+          validateStatus: (status: number) => status >= 200 && status < 500,
+        });
+        const body = typeof response.data === 'string' ? response.data : '';
+        if (body.includes('root:x:0:0') || body.includes('localhost')) {
+          issues.push({
+            type: 'directory-traversal',
+            severity: 'high',
+            description: '检测到目录遍历风险',
+          });
+          break;
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    return issues;
+  }
+
+  async performQuickVulnerabilityScan(url: string) {
+    const XSSAnalyzer = require('./analyzers/XSSAnalyzer');
+    const SQLInjectionAnalyzer = require('./analyzers/SQLInjectionAnalyzer');
+    const xssAnalyzer = new XSSAnalyzer();
+    const sqlAnalyzer = new SQLInjectionAnalyzer();
+
+    const buildRiskLevel = (vulnerabilities: Array<{ severity: string }>) => {
+      if (vulnerabilities.some(v => v.severity === 'critical')) return 'critical';
+      if (vulnerabilities.some(v => v.severity === 'high')) return 'high';
+      if (vulnerabilities.some(v => v.severity === 'medium')) return 'medium';
+      return 'low';
+    };
+
+    const [xssResult, sqlResult, other] = await Promise.all([
+      xssAnalyzer
+        .analyze(url, {
+          timeout: this.options.timeout as number,
+          userAgent: this.options.userAgent as string,
+          testHeaders: false,
+          testCookies: false,
+          delay: 50,
+          headless: true,
+        })
+        .catch(() => ({ vulnerabilities: [], summary: { totalTests: 0 } })),
+      sqlAnalyzer
+        .analyze(url, {
+          timeout: this.options.timeout as number,
+          userAgent: this.options.userAgent as string,
+          followRedirects: true,
+          maxRedirects: 3,
+          testHeaders: false,
+          testCookies: false,
+          delay: 50,
+        })
+        .catch(() => ({ vulnerabilities: [], summary: { totalTests: 0 } })),
+      this.scanOtherVulnerabilities(undefined, url).catch(() => []),
+    ]);
+
+    return {
+      xss: {
+        ...xssResult,
+        summary: {
+          totalTests: xssResult.summary?.totalTests || 0,
+          riskLevel: buildRiskLevel(xssResult.vulnerabilities || []),
+        },
+      },
+      sqlInjection: {
+        ...sqlResult,
+        summary: {
+          totalTests: sqlResult.summary?.totalTests || 0,
+          riskLevel: buildRiskLevel(sqlResult.vulnerabilities || []),
+        },
+      },
+      other,
+    };
+  }
+
+  calculateSecurityScore(analyses: SecurityAnalyses) {
     let totalScore = 0;
     let totalWeight = 0;
     const weights = {
@@ -500,7 +929,7 @@ class SecurityTestEngine {
     return totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
   }
 
-  calculateRiskRating(vulnerabilities) {
+  calculateRiskRating(vulnerabilities: VulnerabilityAnalysis) {
     let criticalCount = 0;
     let highCount = 0;
     let mediumCount = 0;
@@ -530,7 +959,7 @@ class SecurityTestEngine {
     return 'Minimal';
   }
 
-  countCriticalVulnerabilities(vulnerabilities) {
+  countCriticalVulnerabilities(vulnerabilities: VulnerabilityAnalysis) {
     let count = 0;
 
     if (vulnerabilities.xss && vulnerabilities.xss.vulnerabilities) {
@@ -550,7 +979,7 @@ class SecurityTestEngine {
     return count;
   }
 
-  countHighRiskIssues(vulnerabilities) {
+  countHighRiskIssues(vulnerabilities: VulnerabilityAnalysis) {
     let count = 0;
 
     if (vulnerabilities.xss && vulnerabilities.xss.vulnerabilities) {
@@ -570,7 +999,7 @@ class SecurityTestEngine {
     return count;
   }
 
-  countTotalSecurityIssues(analyses) {
+  countTotalSecurityIssues(analyses: SecurityAnalyses) {
     let count = 0;
 
     if (analyses.ssl?.issues) {
@@ -596,20 +1025,20 @@ class SecurityTestEngine {
     return count;
   }
 
-  assessComplianceStatus(analyses) {
+  assessComplianceStatus(analyses: SecurityAnalyses) {
     const compliance = {
-      owasp: { status: 'unknown', issues: [] },
-      gdpr: { status: 'unknown', issues: [] },
-      pci: { status: 'unknown', issues: [] },
+      owasp: { status: 'unknown', issues: [] as string[] },
+      gdpr: { status: 'unknown', issues: [] as string[] },
+      pci: { status: 'unknown', issues: [] as string[] },
     };
 
     let owaspIssues = 0;
     if (analyses.vulnerabilities) {
-      if (analyses.vulnerabilities.xss?.vulnerabilities.length > 0) {
+      if ((analyses.vulnerabilities.xss?.vulnerabilities.length || 0) > 0) {
         compliance.owasp.issues.push('A03: Injection (XSS)');
         owaspIssues++;
       }
-      if (analyses.vulnerabilities.sqlInjection?.vulnerabilities.length > 0) {
+      if ((analyses.vulnerabilities.sqlInjection?.vulnerabilities.length || 0) > 0) {
         compliance.owasp.issues.push('A03: Injection (SQL)');
         owaspIssues++;
       }
@@ -639,16 +1068,27 @@ class SecurityTestEngine {
     return compliance;
   }
 
-  generateSecurityRecommendations(analyses) {
-    const recommendations = {
-      immediate: [], // 立即处理
-      shortTerm: [], // 短期处理
-      longTerm: [], // 长期处理
-      preventive: [], // 预防措施
+  generateSecurityRecommendations(analyses: SecurityAnalyses) {
+    type RecommendationItem = {
+      priority: string;
+      issue: string;
+      action: string;
+      timeframe: string;
+    };
+    const recommendations: {
+      immediate: RecommendationItem[];
+      shortTerm: RecommendationItem[];
+      longTerm: RecommendationItem[];
+      preventive: RecommendationItem[];
+    } = {
+      immediate: [],
+      shortTerm: [],
+      longTerm: [],
+      preventive: [],
     };
 
     if (analyses.vulnerabilities) {
-      if (analyses.vulnerabilities.sqlInjection?.vulnerabilities.length > 0) {
+      if ((analyses.vulnerabilities.sqlInjection?.vulnerabilities.length || 0) > 0) {
         recommendations.immediate.push({
           priority: 'critical',
           issue: 'SQL注入漏洞',
@@ -656,7 +1096,7 @@ class SecurityTestEngine {
           timeframe: '24小时内',
         });
       }
-      if (analyses.vulnerabilities.xss?.vulnerabilities.length > 0) {
+      if ((analyses.vulnerabilities.xss?.vulnerabilities.length || 0) > 0) {
         recommendations.immediate.push({
           priority: 'high',
           issue: 'XSS漏洞',
@@ -667,7 +1107,7 @@ class SecurityTestEngine {
     }
 
     if (analyses.headers && analyses.headers.missingHeaders) {
-      analyses.headers.missingHeaders.forEach(header => {
+      analyses.headers.missingHeaders.forEach((header: SecurityHeaderMissing) => {
         if (header.importance === 'high') {
           recommendations.shortTerm.push({
             priority: 'high',
@@ -689,12 +1129,12 @@ class SecurityTestEngine {
     return recommendations;
   }
 
-  generateThreatIntelligence(vulnerabilities) {
+  generateThreatIntelligence(vulnerabilities: VulnerabilityAnalysis) {
     const intelligence = {
       threatLevel: 'unknown',
-      attackVectors: [],
-      mitigationStrategies: [],
-      industryTrends: [],
+      attackVectors: [] as Array<{ type: string; risk: string; description: string }>,
+      mitigationStrategies: [] as string[],
+      industryTrends: [] as string[],
     };
 
     const criticalCount = this.countCriticalVulnerabilities(vulnerabilities);
@@ -710,7 +1150,7 @@ class SecurityTestEngine {
       intelligence.threatLevel = 'low';
     }
 
-    if (vulnerabilities.xss?.vulnerabilities.length > 0) {
+    if ((vulnerabilities.xss?.vulnerabilities.length || 0) > 0) {
       intelligence.attackVectors.push({
         type: 'Cross-Site Scripting (XSS)',
         risk: 'High',
@@ -718,7 +1158,7 @@ class SecurityTestEngine {
       });
     }
 
-    if (vulnerabilities.sqlInjection?.vulnerabilities.length > 0) {
+    if ((vulnerabilities.sqlInjection?.vulnerabilities.length || 0) > 0) {
       intelligence.attackVectors.push({
         type: 'SQL Injection',
         risk: 'Critical',

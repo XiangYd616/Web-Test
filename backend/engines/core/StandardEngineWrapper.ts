@@ -107,19 +107,31 @@ class StandardEngineWrapper implements ITestEngine<BaseTestConfig, BaseTestResul
     const endTime = new Date();
     const success = Boolean((rawResult as { success?: boolean }).success);
     const details = (rawResult as { results?: Record<string, unknown> }).results || rawResult;
+    const normalizedStatus = this.normalizeStatus(
+      (rawResult as { status?: unknown }).status ?? (details as { status?: unknown }).status,
+      success ? TestStatus.COMPLETED : TestStatus.FAILED
+    );
+    const detailErrors = (details as { errors?: unknown }).errors;
+    const detailWarnings = (details as { warnings?: unknown }).warnings;
+    const errors = Array.isArray(detailErrors)
+      ? detailErrors.map(item => String(item))
+      : normalizedStatus === TestStatus.FAILED
+        ? [String((rawResult as { error?: string }).error || '测试失败')]
+        : [];
+    const warnings = Array.isArray(detailWarnings) ? detailWarnings.map(item => String(item)) : [];
 
     return {
       testId,
       engineType: this.type,
-      status: success ? TestStatus.COMPLETED : TestStatus.FAILED,
+      status: normalizedStatus,
       score: this.extractScore(details as Record<string, unknown>),
       startTime,
       endTime,
       duration: endTime.getTime() - startTime.getTime(),
       summary: success ? '测试完成' : '测试失败',
       details: (details || {}) as Record<string, unknown>,
-      errors: success ? [] : [String((rawResult as { error?: string }).error || '测试失败')],
-      warnings: [],
+      errors,
+      warnings,
       recommendations: [],
     };
   }
@@ -136,7 +148,7 @@ class StandardEngineWrapper implements ITestEngine<BaseTestConfig, BaseTestResul
       typeof status === 'string' ? status : (status as { status?: string })?.status;
     const progressValue = Number((status as { progress?: number })?.progress ?? 0);
     return {
-      status: (statusValue as TestStatus) || TestStatus.RUNNING,
+      status: this.normalizeStatus(statusValue, TestStatus.RUNNING),
       progress: progressValue,
       currentStep: 'running',
       startTime: new Date(),
@@ -171,6 +183,18 @@ class StandardEngineWrapper implements ITestEngine<BaseTestConfig, BaseTestResul
       (details.overallScore as number) ??
       (details.score as number);
     return typeof score === 'number' && Number.isFinite(score) ? Math.round(score) : 0;
+  }
+
+  private normalizeStatus(value: unknown, fallback: TestStatus): TestStatus {
+    if (!value) return fallback;
+    const raw = typeof value === 'string' ? value.toLowerCase() : String(value).toLowerCase();
+    if (raw === 'completed' || raw === 'success' || raw === 'passed') return TestStatus.COMPLETED;
+    if (raw === 'failed' || raw === 'error' || raw === 'timeout') return TestStatus.FAILED;
+    if (raw === 'cancelled' || raw === 'canceled' || raw === 'stopped') return TestStatus.CANCELLED;
+    if (raw === 'running') return TestStatus.RUNNING;
+    if (raw === 'pending' || raw === 'queued' || raw === 'preparing') return TestStatus.PREPARING;
+    if (raw === 'idle') return TestStatus.IDLE;
+    return fallback;
   }
 }
 

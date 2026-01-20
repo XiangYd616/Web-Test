@@ -1,6 +1,16 @@
 import cronParser from 'cron-parser';
 import { query } from '../../config/database';
+import { errorLogAggregator } from '../../utils/ErrorLogAggregator';
 import testService from './testService';
+
+const TEST_LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const;
+type TestLogLevel = (typeof TEST_LOG_LEVELS)[number];
+const normalizeTestLogLevel = (level?: string, fallback: TestLogLevel = 'info'): TestLogLevel => {
+  if (level && (TEST_LOG_LEVELS as readonly string[]).includes(level)) {
+    return level as TestLogLevel;
+  }
+  return fallback;
+};
 
 type TestScheduleRecord = {
   id: number;
@@ -129,7 +139,11 @@ class TestScheduleService {
 
   private applyScheduleOptions(
     config: Record<string, unknown>,
-    options: { retryCount: number; lastError?: string }
+    options: {
+      retryCount: number;
+      lastError?: string;
+      lastSuccess?: Record<string, unknown> | null;
+    }
   ): Record<string, unknown> {
     const existing = (config.scheduleOptions as Record<string, unknown>) || {};
     return {
@@ -138,6 +152,7 @@ class TestScheduleService {
         ...existing,
         retryCount: options.retryCount,
         lastError: options.lastError,
+        lastSuccess: options.lastSuccess ?? existing.lastSuccess,
       },
     };
   }
@@ -305,8 +320,28 @@ class TestScheduleService {
     scheduleId: number,
     role = 'free'
   ): Promise<Record<string, unknown>> {
+    if (this.runningSchedules.has(scheduleId)) {
+      return {
+        scheduleId,
+        skipped: true,
+        reason: '调度任务正在执行中',
+      };
+    }
+
+    const hasActiveExecution = await this.hasActiveExecution(userId, scheduleId);
+    if (hasActiveExecution) {
+      return {
+        scheduleId,
+        skipped: true,
+        reason: '存在运行中的调度测试，已跳过本次执行',
+      };
+    }
+
+    this.runningSchedules.add(scheduleId);
+
     const schedule = await this.findSchedule(userId, scheduleId);
     if (!schedule) {
+      this.runningSchedules.delete(scheduleId);
       throw new Error('调度任务不存在');
     }
 
@@ -342,6 +377,11 @@ class TestScheduleService {
       const updatedConfig = this.applyScheduleOptions(scheduleConfig, {
         retryCount: 0,
         lastError: undefined,
+        lastSuccess: {
+          testId: executionId,
+          executedAt: new Date().toISOString(),
+          scheduleName: schedule.schedule_name,
+        },
       });
 
       await query(
@@ -379,6 +419,7 @@ class TestScheduleService {
       const updatedConfig = this.applyScheduleOptions(scheduleConfig, {
         retryCount,
         lastError: error instanceof Error ? error.message : String(error),
+        lastSuccess: null,
       });
 
       await query(
@@ -392,8 +433,33 @@ class TestScheduleService {
         [retryAt, shouldRetry, JSON.stringify(updatedConfig), scheduleId, userId]
       );
 
+      if (executionId && !shouldRetry) {
+        await this.insertExecutionLog(executionId, 'warn', '调度任务重试已耗尽', {
+          scheduleId,
+          scheduleName: schedule.schedule_name,
+          retryCount,
+          maxRetries,
+          lastError: error instanceof Error ? error.message : String(error),
+        });
+      }
+
       throw error;
+    } finally {
+      this.runningSchedules.delete(scheduleId);
     }
+  }
+
+  private async hasActiveExecution(userId: string, scheduleId: number): Promise<boolean> {
+    const result = await query(
+      `SELECT test_id
+       FROM test_executions
+       WHERE user_id = $1
+         AND (test_config->>'scheduleId') = $2
+         AND status IN ('running', 'pending', 'queued')
+       LIMIT 1`,
+      [userId, String(scheduleId)]
+    );
+    return (result.rows || []).length > 0;
   }
 
   private async insertExecutionLog(
@@ -402,39 +468,73 @@ class TestScheduleService {
     message: string,
     context: Record<string, unknown> = {}
   ): Promise<void> {
+    const normalizedLevel = normalizeTestLogLevel(level, 'info');
     await query(
       `INSERT INTO test_logs (execution_id, level, message, context)
        SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
-      [level, message, JSON.stringify(context), testId]
+      [normalizedLevel, message, JSON.stringify(context), testId]
     );
+
+    void errorLogAggregator.log({
+      level: normalizedLevel,
+      message,
+      type: 'test',
+      details: context,
+      context: {
+        testId,
+      },
+    });
   }
 
   async listScheduleRuns(
     userId: string,
     scheduleId: number,
     limit = 20,
-    offset = 0
+    offset = 0,
+    filters: {
+      status?: string;
+      from?: Date | string;
+      to?: Date | string;
+    } = {}
   ): Promise<{ runs: Array<Record<string, unknown>>; total: number; hasMore: boolean }> {
     const schedule = await this.findSchedule(userId, scheduleId);
     if (!schedule) {
       throw new Error('调度任务不存在');
     }
 
+    const params: Array<string | number | Date> = [userId, String(scheduleId)];
+    let whereClause = "user_id = $1 AND test_config->>'scheduleId' = $2";
+
+    if (filters.status) {
+      params.push(filters.status);
+      whereClause += ` AND status = $${params.length}`;
+    }
+
+    if (filters.from) {
+      params.push(new Date(filters.from));
+      whereClause += ` AND created_at >= $${params.length}`;
+    }
+
+    if (filters.to) {
+      params.push(new Date(filters.to));
+      whereClause += ` AND created_at <= $${params.length}`;
+    }
+
     const countResult = await query(
       `SELECT COUNT(*)::int AS total
        FROM test_executions
-       WHERE user_id = $1 AND test_config->>'scheduleId' = $2`,
-      [userId, String(scheduleId)]
+       WHERE ${whereClause}`,
+      params
     );
     const total = countResult.rows[0]?.total || 0;
 
     const listResult = await query(
       `SELECT test_id, status, created_at, completed_at, test_config
        FROM test_executions
-       WHERE user_id = $1 AND test_config->>'scheduleId' = $2
+       WHERE ${whereClause}
        ORDER BY created_at DESC
-       LIMIT $3 OFFSET $4`,
-      [userId, String(scheduleId), limit, offset]
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, offset]
     );
 
     return {

@@ -199,12 +199,17 @@ class TestController {
   async getScheduleRuns(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
       const scheduleId = parseInt(req.params.scheduleId, 10);
-      const { page = '1', limit = '20' } = req.query as Record<string, string>;
+      const { page = '1', limit = '20', status, from, to } = req.query as Record<string, string>;
       const result = await testScheduleService.listScheduleRuns(
         req.user.id,
         scheduleId,
         parseInt(limit, 10) || 20,
-        (parseInt(page, 10) - 1) * (parseInt(limit, 10) || 20)
+        (parseInt(page, 10) - 1) * (parseInt(limit, 10) || 20),
+        {
+          status: status || undefined,
+          from: from || undefined,
+          to: to || undefined,
+        }
       );
       return successResponse(res, result);
     } catch (error) {
@@ -661,10 +666,31 @@ class TestController {
       const result = await testService.getTestResults(testId, req.user.id);
 
       if (format === 'csv') {
-        const csvRows = [['field', 'value']];
-        Object.entries(result.summary || {}).forEach(([key, value]) => {
-          csvRows.push([key, JSON.stringify(value)]);
+        const csvRows: string[][] = [['section', 'field', 'value']];
+        const appendEntries = (section: string, record: Record<string, unknown>) => {
+          Object.entries(record).forEach(([key, value]) => {
+            csvRows.push([section, key, JSON.stringify(value)]);
+          });
+        };
+
+        appendEntries('summary', result.summary || {});
+
+        (result.metrics || []).forEach((metric: Record<string, unknown>) => {
+          const metricName =
+            (metric as { metric_name?: string; metricName?: string }).metric_name ||
+            (metric as { metric_name?: string; metricName?: string }).metricName ||
+            'metric';
+          csvRows.push(['metric', metricName, JSON.stringify(metric)]);
         });
+
+        (result.warnings || []).forEach((warning: unknown, index: number) => {
+          csvRows.push(['warning', `warning_${index + 1}`, JSON.stringify(warning)]);
+        });
+
+        (result.errors || []).forEach((error: unknown, index: number) => {
+          csvRows.push(['error', `error_${index + 1}`, JSON.stringify(error)]);
+        });
+
         const csvContent = csvRows.map(row => row.map(item => `"${item}"`).join(',')).join('\n');
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="test-${testId}.csv"`);

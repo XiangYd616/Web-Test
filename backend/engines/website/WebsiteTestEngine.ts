@@ -1,3 +1,5 @@
+import type { Element as DomElement } from 'domhandler';
+
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { emitTestProgress, emitTestComplete, emitTestError } = require('../../websocket/testEvents');
@@ -188,13 +190,17 @@ class WebsiteTestEngine {
     const errors: string[] = [];
 
     const images = $('img');
-    const imagesWithoutAlt = images.filter((_, el) => !$(el).attr('alt')).length;
+    const imagesWithoutAlt = images.filter(
+      (_index: number, el: DomElement) => !$(el).attr('alt')
+    ).length;
     if (imagesWithoutAlt > 0) {
       warnings.push(`图片缺少alt属性: ${imagesWithoutAlt}个`);
     }
 
     const links = $('a');
-    const linksWithoutText = links.filter((_, el) => !$(el).text().trim()).length;
+    const linksWithoutText = links.filter(
+      (_index: number, el: DomElement) => !$(el).text().trim()
+    ).length;
     if (linksWithoutText > 0) {
       warnings.push(`链接缺少文本描述: ${linksWithoutText}个`);
     }
@@ -302,7 +308,7 @@ class WebsiteTestEngine {
     if (test) {
       this.activeTests.set(testId, {
         ...test,
-        status: 'stopped',
+        status: 'cancelled',
       });
       return true;
     }

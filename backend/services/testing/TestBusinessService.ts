@@ -13,8 +13,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { query } from '../../config/database';
 import { ErrorFactory } from '../../middleware/errorHandler';
 import testRepository from '../../repositories/testRepository';
+import { errorLogAggregator } from '../../utils/ErrorLogAggregator';
+import testTemplateService from './testTemplateService';
 
 const userTestManager = require('./UserTestManager');
+
+const TEST_LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const;
+type TestLogLevel = (typeof TEST_LOG_LEVELS)[number];
+const normalizeTestLogLevel = (level?: string, fallback: TestLogLevel = 'info'): TestLogLevel => {
+  if (level && (TEST_LOG_LEVELS as readonly string[]).includes(level)) {
+    return level as TestLogLevel;
+  }
+  return fallback;
+};
 
 interface BusinessRules {
   concurrent: {
@@ -297,15 +308,19 @@ class TestBusinessService {
     status: string;
     startTime: Date;
     estimatedDuration: number;
+    templateId?: string;
   }> {
+    const templateResult = await this.applyTemplateConfig(config, user);
+    const preparedConfig = templateResult.config;
+
     // 验证配置
-    const validation = await this.validateTestConfig(config, user);
+    const validation = await this.validateTestConfig(preparedConfig, user);
     if (!validation.isValid) {
       throw ErrorFactory.validation('测试配置验证失败', validation.errors);
     }
 
     // 规范化配置
-    const normalizedConfig = this.normalizeTestConfig(config, user);
+    const normalizedConfig = this.normalizeTestConfig(preparedConfig, user);
 
     try {
       const testId = uuidv4();
@@ -332,6 +347,7 @@ class TestBusinessService {
         status: 'running',
         startTime: new Date(),
         estimatedDuration: normalizedConfig.duration || BUSINESS_RULES.duration.default,
+        templateId: normalizedConfig.templateId ?? templateResult.templateId,
       };
     } catch (error) {
       throw ErrorFactory.database(
@@ -339,6 +355,65 @@ class TestBusinessService {
         error instanceof Error ? error.message : String(error)
       );
     }
+  }
+
+  private async applyTemplateConfig(
+    config: TestConfig,
+    user: User
+  ): Promise<{ config: TestConfig; templateId?: string }> {
+    let templateId = config.templateId;
+    let template = null as { id: number; config: Record<string, unknown> } | null;
+
+    if (config.templateId) {
+      const resolved = await testTemplateService.getTemplateForUser(user.userId, config.templateId);
+      template = { id: resolved.id, config: resolved.config };
+      templateId = String(resolved.id);
+    } else if (config.testType) {
+      const resolved = await testTemplateService.getDefaultTemplate(user.userId, config.testType);
+      if (resolved) {
+        template = { id: resolved.id, config: resolved.config };
+        templateId = String(resolved.id);
+      }
+    }
+
+    if (!template) {
+      return { config, templateId };
+    }
+
+    const templateConfig = this.extractTemplateConfig(template.config);
+    const mergedConfig: TestConfig = {
+      ...templateConfig,
+      ...config,
+      url: config.url || templateConfig.url || '',
+      testType: config.testType || templateConfig.testType || '',
+      options: {
+        ...(templateConfig.options || {}),
+        ...(config.options || {}),
+      },
+      concurrency: config.concurrency ?? templateConfig.concurrency,
+      duration: config.duration ?? templateConfig.duration,
+      batchId: config.batchId ?? templateConfig.batchId,
+      scheduleId: config.scheduleId ?? templateConfig.scheduleId,
+      templateId,
+    };
+
+    return { config: mergedConfig, templateId };
+  }
+
+  private extractTemplateConfig(config: Record<string, unknown>): TestConfig {
+    return {
+      url: typeof config.url === 'string' ? config.url : '',
+      testType: typeof config.testType === 'string' ? config.testType : '',
+      options: this.isRecord(config.options) ? (config.options as Record<string, unknown>) : {},
+      concurrency: typeof config.concurrency === 'number' ? config.concurrency : undefined,
+      duration: typeof config.duration === 'number' ? config.duration : undefined,
+      batchId: typeof config.batchId === 'string' ? config.batchId : undefined,
+      templateId: typeof config.templateId === 'string' ? config.templateId : undefined,
+      scheduleId:
+        typeof config.scheduleId === 'string' || typeof config.scheduleId === 'number'
+          ? config.scheduleId
+          : undefined,
+    };
   }
 
   /**
@@ -388,11 +463,22 @@ class TestBusinessService {
     message: string,
     context: Record<string, unknown> = {}
   ): Promise<void> {
+    const normalizedLevel = normalizeTestLogLevel(level, 'info');
     await query(
       `INSERT INTO test_logs (execution_id, level, message, context)
        SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
-      [level, message, JSON.stringify(context), testId]
+      [normalizedLevel, message, JSON.stringify(context), testId]
     );
+
+    void errorLogAggregator.log({
+      level: normalizedLevel,
+      message,
+      type: 'test',
+      details: context,
+      context: {
+        testId,
+      },
+    });
   }
 
   /**
@@ -400,6 +486,10 @@ class TestBusinessService {
    */
   getBusinessRules(): BusinessRules {
     return BUSINESS_RULES;
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
   }
 
   /**

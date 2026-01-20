@@ -120,6 +120,7 @@ class PerformanceTestEngine {
     await this.initialize();
 
     return {
+      engine: this.name,
       available: this.initialized,
       version: this.version,
       features: [
@@ -145,12 +146,20 @@ class PerformanceTestEngine {
       this.updateTestProgress(testId, 5, '初始化性能测试');
 
       const {
-        url = 'https://example.com',
+        url,
         iterations = 3,
         includeResources = true,
         fetchHtml = true,
         verbose = false,
       } = config;
+
+      if (!url || typeof url !== 'string') {
+        throw new Error('性能测试URL不能为空');
+      }
+
+      if (!Number.isFinite(iterations) || iterations <= 0) {
+        throw new Error('iterations 必须为正整数');
+      }
 
       if (verbose) {
         console.debug(`[PerformanceTestEngine] 测试中: ${url}`);
@@ -202,6 +211,22 @@ class PerformanceTestEngine {
       );
       results.recommendations = this.generateRecommendations(results);
 
+      const warnings = (results.recommendations || []).map(item =>
+        String(
+          (item as { title?: string }).title || (item as { type?: string }).type || '性能优化建议'
+        )
+      );
+
+      const normalizedResult = {
+        testId,
+        status: 'completed',
+        score: results.summary.score,
+        summary: results.summary,
+        warnings,
+        errors: [] as string[],
+        details: results,
+      };
+
       if (verbose) {
         const summary = results.summary;
         console.log(`✅ 性能测试完成，评分: ${summary.score}/100 (${summary.grade})`);
@@ -211,13 +236,18 @@ class PerformanceTestEngine {
         engine: this.name,
         version: this.version,
         success: true,
-        results,
+        results: normalizedResult,
+        status: normalizedResult.status,
+        score: normalizedResult.score,
+        summary: normalizedResult.summary,
+        warnings: normalizedResult.warnings,
+        errors: normalizedResult.errors,
         timestamp: new Date().toISOString(),
       };
       this.activeTests.set(testId, {
         status: 'completed',
         progress: 100,
-        results,
+        results: normalizedResult,
       });
       this.updateTestProgress(testId, 100, '性能测试完成');
       if (this.completionCallback) {
@@ -225,20 +255,26 @@ class PerformanceTestEngine {
       }
       return finalResult;
     } catch (error) {
-      console.error(`❌ 性能测试失败: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`❌ 性能测试失败: ${message}`);
       const errorResult = {
         engine: this.name,
         version: this.version,
         success: false,
-        error: error.message,
+        error: message,
+        status: 'failed',
+        score: 0,
+        summary: {},
+        warnings: [],
+        errors: [message],
         timestamp: new Date().toISOString(),
       };
       this.activeTests.set(testId, {
         status: 'failed',
-        error: error.message,
+        error: message,
       });
       if (this.errorCallback) {
-        this.errorCallback(error);
+        this.errorCallback(error instanceof Error ? error : new Error(message));
       }
       return errorResult;
     }
@@ -273,7 +309,7 @@ class PerformanceTestEngine {
     if (test) {
       this.activeTests.set(testId, {
         ...test,
-        status: 'stopped',
+        status: 'cancelled',
       });
       return true;
     }
@@ -365,7 +401,26 @@ class PerformanceTestEngine {
   }
 
   analyzeResources($: CheerioAPI) {
-    const resources = {
+    const resources: {
+      images: Array<{
+        src: string | undefined;
+        alt: string;
+        width: string | null;
+        height: string | null;
+        loading: string | null;
+        type: string;
+      }>;
+      scripts: Array<{
+        src: string | undefined;
+        type: string;
+        async: boolean;
+        defer: boolean;
+        integrity: string | null;
+      }>;
+      stylesheets: Array<{ href: string | undefined; media: string; type: string }>;
+      fonts: Array<{ href: string | undefined; type: string | null; crossOrigin: string | null }>;
+      other: unknown[];
+    } = {
       images: [],
       scripts: [],
       stylesheets: [],
@@ -376,11 +431,11 @@ class PerformanceTestEngine {
     $('img[src]').each((_, el) => {
       const $el = $(el);
       resources.images.push({
-        src: $el.attr('src'),
-        alt: $el.attr('alt') || '',
-        width: $el.attr('width') || null,
-        height: $el.attr('height') || null,
-        loading: $el.attr('loading') || null,
+        src: $el.attr?.('src'),
+        alt: $el.attr?.('alt') || '',
+        width: $el.attr?.('width') || null,
+        height: $el.attr?.('height') || null,
+        loading: $el.attr?.('loading') || null,
         type: 'image',
       });
     });
@@ -388,29 +443,29 @@ class PerformanceTestEngine {
     $('script[src]').each((_, el) => {
       const $el = $(el);
       resources.scripts.push({
-        src: $el.attr('src'),
-        type: $el.attr('type') || 'text/javascript',
-        async: $el.attr('async') !== undefined,
-        defer: $el.attr('defer') !== undefined,
-        integrity: $el.attr('integrity') || null,
+        src: $el.attr?.('src'),
+        type: $el.attr?.('type') || 'text/javascript',
+        async: $el.attr?.('async') !== undefined,
+        defer: $el.attr?.('defer') !== undefined,
+        integrity: $el.attr?.('integrity') || null,
       });
     });
 
     $('link[rel="stylesheet"]').each((_, el) => {
       const $el = $(el);
       resources.stylesheets.push({
-        href: $el.attr('href'),
-        media: $el.attr('media') || 'all',
-        type: $el.attr('type') || 'text/css',
+        href: $el.attr?.('href'),
+        media: $el.attr?.('media') || 'all',
+        type: $el.attr?.('type') || 'text/css',
       });
     });
 
     $('link[rel="preload"][as="font"]').each((_, el) => {
       const $el = $(el);
       resources.fonts.push({
-        href: $el.attr('href'),
-        type: $el.attr('type') || null,
-        crossOrigin: $el.attr('crossorigin') || null,
+        href: $el.attr?.('href'),
+        type: $el.attr?.('type') || null,
+        crossOrigin: $el.attr?.('crossorigin') || null,
       });
     });
 
@@ -431,9 +486,13 @@ class PerformanceTestEngine {
 
   analyzeContent($: CheerioAPI, _url: string) {
     try {
-      const title = $('title').text().trim();
-      const metaDescription = $('meta[name="description"]').attr('content') || '';
-      const h1 = $('h1').first().text().trim();
+      const titleNode = $('title');
+      const title = (titleNode.text?.() || '').trim();
+      const metaNode = $('meta[name="description"]');
+      const metaDescription = metaNode.attr?.('content') || '';
+      const h1Selection = $('h1');
+      const h1Node = h1Selection.first ? h1Selection.first() : h1Selection;
+      const h1 = (h1Node.text?.() || '').trim();
 
       return {
         title: {
@@ -451,10 +510,10 @@ class PerformanceTestEngine {
           hasH1: h1.length > 0,
         },
         resourceHints: {
-          preconnect: $('link[rel="preconnect"]').length,
-          prefetch: $('link[rel="prefetch"]').length,
-          preload: $('link[rel="preload"]').length,
-          dns_prefetch: $('link[rel="dns-prefetch"]').length,
+          preconnect: $('link[rel="preconnect"]').length || 0,
+          prefetch: $('link[rel="prefetch"]').length || 0,
+          preload: $('link[rel="preload"]').length || 0,
+          dns_prefetch: $('link[rel="dns-prefetch"]').length || 0,
         },
       };
     } catch (error) {
