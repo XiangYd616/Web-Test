@@ -214,8 +214,12 @@ export class TestEngineRegistry {
     }
     const engine = registration.engine;
 
-    // 生成测试ID
-    const testId = `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const metadata = (config.metadata || {}) as Record<string, unknown>;
+    const metadataTestId = typeof metadata.testId === 'string' ? metadata.testId : undefined;
+
+    // 生成测试ID（允许外部传入）
+    const testId =
+      metadataTestId || `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // 创建进度追踪
     const progress: TestProgress = {

@@ -69,6 +69,7 @@ interface TimingMetrics {
   firstContentfulPaint: number;
   largestContentfulPaint: number;
   firstInputDelay: number;
+  cls: number;
   timeToInteractive: number;
 }
 
@@ -137,34 +138,47 @@ class PerformanceAnalyzer {
         fid: { good: 100, needsImprovement: 300 },
         cls: { good: 0.1, needsImprovement: 0.25 },
         fcp: { good: 1800, needsImprovement: 3000 },
-        ttfb: { good: 800, needsImprovement: 1800 }
+        ttfb: { good: 800, needsImprovement: 1800 },
       },
       resources: {
         totalSize: { good: 1000000, warning: 3000000 }, // 1MB, 3MB
-        imageSize: { good: 500000, warning: 1500000 },   // 500KB, 1.5MB
-        jsSize: { good: 300000, warning: 1000000 },      // 300KB, 1MB
-        cssSize: { good: 100000, warning: 300000 }       // 100KB, 300KB
+        imageSize: { good: 500000, warning: 1500000 }, // 500KB, 1.5MB
+        jsSize: { good: 300000, warning: 1000000 }, // 300KB, 1MB
+        cssSize: { good: 100000, warning: 300000 }, // 100KB, 300KB
       },
       timing: {
         domContentLoaded: { good: 1500, warning: 3000 },
         loadComplete: { good: 3000, warning: 6000 },
-        firstPaint: { good: 1000, warning: 2000 }
-      }
+        firstPaint: { good: 1000, warning: 2000 },
+      },
+    };
+  }
+
+  private getMetricRating(
+    value: number,
+    metric: string
+  ): { value: number; rating: 'good' | 'needs-improvement' | 'poor' } {
+    return {
+      value,
+      rating: this.getRating(value, metric),
     };
   }
 
   /**
    * 运行完整的性能分析
    */
-  async analyze(url: string, options: {
-    timeout?: number;
-    viewport?: { width: number; height: number };
-    device?: 'desktop' | 'mobile';
-    waitTime?: number;
-    analyzeResources?: boolean;
-    analyzeNetwork?: boolean;
-    analyzeCaching?: boolean;
-  } = {}): Promise<PerformanceScore> {
+  async analyze(
+    url: string,
+    options: {
+      timeout?: number;
+      viewport?: { width: number; height: number };
+      device?: 'desktop' | 'mobile';
+      waitTime?: number;
+      analyzeResources?: boolean;
+      analyzeNetwork?: boolean;
+      analyzeCaching?: boolean;
+    } = {}
+  ): Promise<PerformanceScore> {
     const {
       timeout = 30000,
       viewport = { width: 1920, height: 1080 },
@@ -172,7 +186,7 @@ class PerformanceAnalyzer {
       waitTime = 5000,
       analyzeResources = true,
       analyzeNetwork = true,
-      analyzeCaching = true
+      analyzeCaching = true,
     } = options;
 
     let browser;
@@ -182,7 +196,7 @@ class PerformanceAnalyzer {
       // 启动浏览器
       browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
 
       page = await browser.newPage();
@@ -191,30 +205,44 @@ class PerformanceAnalyzer {
       await page.setViewport(viewport);
 
       // 设置用户代理
-      const userAgent = device === 'mobile' 
-        ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15'
-        : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+      const userAgent =
+        device === 'mobile'
+          ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15'
+          : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
       await page.setUserAgent(userAgent);
 
       // 开始性能监控
-      const performanceData = await this.startPerformanceMonitoring(page);
+      await this.startPerformanceMonitoring(page);
 
       // 导航到页面
-      const navigationStart = Date.now();
       await page.goto(url, { waitUntil: 'networkidle0', timeout });
 
       // 等待页面完全加载
-      await page.waitFor(waitTime);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
 
       // 收集性能数据
-      const metrics = await this.collectPerformanceData(page, navigationStart, {
+      const metrics = await this.collectPerformanceData(page, {
         analyzeResources,
         analyzeNetwork,
-        analyzeCaching
+        analyzeCaching,
       });
 
+      const resourceInfo = metrics.resources.map(resource => ({
+        url: resource.name,
+        type: this.getResourceType(resource.name, resource.initiatorType),
+        size: resource.transferSize,
+        loadTime: resource.duration,
+        cached: resource.transferSize === 0 && resource.decodedBodySize > 0,
+        compressed: resource.encodedBodySize < resource.decodedBodySize,
+        priority: this.getResourcePriority(resource.initiatorType, resource.duration),
+        renderBlocking: this.isRenderBlocking(resource.initiatorType),
+      }));
+
       // 计算性能分数
-      const score = this.calculatePerformanceScore(metrics);
+      const score = this.calculatePerformanceScore({
+        ...metrics,
+        resources: resourceInfo,
+      });
 
       return score;
     } catch (error) {
@@ -232,9 +260,9 @@ class PerformanceAnalyzer {
     await page.evaluateOnNewDocument(() => {
       const win = window as PerformanceWindow;
       // 监控Core Web Vitals
-      new PerformanceObserver((entryList) => {
+      new PerformanceObserver(entryList => {
         const entries = entryList.getEntries();
-        
+
         // LCP
         const lcpEntry = entries.find(entry => entry.entryType === 'largest-contentful-paint');
         if (lcpEntry) {
@@ -242,26 +270,31 @@ class PerformanceAnalyzer {
         }
 
         // FID
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           if (entry.entryType === 'first-input') {
-            win.__fid = entry.processingStart - entry.startTime;
+            const firstInput = entry as unknown as { processingStart: number; startTime: number };
+            win.__fid = firstInput.processingStart - firstInput.startTime;
           }
         });
 
         // CLS
-        entries.forEach((entry) => {
-          if (entry.entryType === 'layout-shift' && !entry.hadRecentInput) {
-          if (!win.__clsEntries) {
-            win.__clsEntries = [];
+        entries.forEach(entry => {
+          if (entry.entryType === 'layout-shift') {
+            const layoutShift = entry as unknown as { value: number; hadRecentInput: boolean };
+            if (!layoutShift.hadRecentInput) {
+              if (!win.__clsEntries) {
+                win.__clsEntries = [];
+              }
+              win.__clsEntries.push(layoutShift.value);
+            }
           }
-          win.__clsEntries.push(entry.value);
-        }
+        });
       }).observe({ entryTypes: ['largest-contentful-paint', 'first-input', 'layout-shift'] });
 
       // 监控时间指标
-      new PerformanceObserver((entryList) => {
+      new PerformanceObserver(entryList => {
         const entries = entryList.getEntries();
-        
+
         // FCP
         const fcpEntry = entries.find(entry => entry.name === 'first-contentful-paint');
         if (fcpEntry) {
@@ -271,12 +304,13 @@ class PerformanceAnalyzer {
         // TTFB
         const navEntry = entries.find(entry => entry.entryType === 'navigation');
         if (navEntry) {
-          win.__ttfb = navEntry.responseStart - navEntry.requestStart;
+          const navTiming = navEntry as unknown as { responseStart: number; requestStart: number };
+          win.__ttfb = navTiming.responseStart - navTiming.requestStart;
         }
       }).observe({ entryTypes: ['paint', 'navigation'] });
 
       // 监控资源加载
-      new PerformanceObserver((entryList) => {
+      new PerformanceObserver(entryList => {
         const entries = entryList.getEntries();
         if (!win.__resourceEntries) {
           win.__resourceEntries = [];
@@ -289,60 +323,82 @@ class PerformanceAnalyzer {
   /**
    * 收集性能数据
    */
-  private async collectPerformanceData(page: Page, navigationStart: number, options: {
-    analyzeResources: boolean;
-    analyzeNetwork: boolean;
-    analyzeCaching: boolean;
-  }): Promise<{
+  private async collectPerformanceData(
+    page: Page,
+    options: {
+      analyzeResources: boolean;
+      analyzeNetwork: boolean;
+      analyzeCaching: boolean;
+    }
+  ): Promise<{
     timingMetrics: TimingMetrics;
-    resources: ResourceInfo[];
+    resources: Array<{
+      name: string;
+      initiatorType: string;
+      transferSize: number;
+      decodedBodySize: number;
+      encodedBodySize: number;
+      duration: number;
+    }>;
     networkMetrics: NetworkMetrics | null;
     cacheMetrics: CacheMetrics | null;
   }> {
     const data = await page.evaluate(() => {
       const perfEntries = performance.getEntries();
       const win = window as PerformanceWindow;
-      
+
       // 时间指标
       const navEntry = perfEntries.find(entry => entry.entryType === 'navigation');
-      const timingMetrics = navEntry ? {
-        navigationStart: navEntry.startTime,
-        domContentLoaded: navEntry.domContentLoadedEventEnd - navEntry.startTime,
-        loadComplete: navEntry.loadEventEnd - navEntry.startTime,
-        firstPaint: 0,
-        firstContentfulPaint: win.__fcp || 0,
-        largestContentfulPaint: win.__lcp || 0,
-        firstInputDelay: win.__fid || 0,
-        timeToInteractive: 0
-      } : {
-        navigationStart: 0,
-        domContentLoaded: 0,
-        loadComplete: 0,
-        firstPaint: 0,
-        firstContentfulPaint: 0,
-        largestContentfulPaint: 0,
-        firstInputDelay: 0,
-        timeToInteractive: 0
-      };
+      const firstPaintEntry = perfEntries.find(entry => entry.name === 'first-paint');
+      const clsValue = (win.__clsEntries || []).reduce((sum, value) => sum + value, 0);
+      const navTiming = navEntry as
+        | {
+            startTime: number;
+            domContentLoadedEventEnd: number;
+            loadEventEnd: number;
+            domInteractive: number;
+          }
+        | undefined;
+      const timingMetrics = navTiming
+        ? {
+            navigationStart: navTiming.startTime,
+            domContentLoaded: navTiming.domContentLoadedEventEnd - navTiming.startTime,
+            loadComplete: navTiming.loadEventEnd - navTiming.startTime,
+            firstPaint: firstPaintEntry ? firstPaintEntry.startTime : 0,
+            firstContentfulPaint: win.__fcp || 0,
+            largestContentfulPaint: win.__lcp || 0,
+            firstInputDelay: win.__fid || 0,
+            cls: clsValue,
+            timeToInteractive: navTiming.domInteractive - navTiming.startTime,
+          }
+        : {
+            navigationStart: 0,
+            domContentLoaded: 0,
+            loadComplete: 0,
+            firstPaint: 0,
+            firstContentfulPaint: 0,
+            largestContentfulPaint: 0,
+            firstInputDelay: 0,
+            cls: 0,
+            timeToInteractive: 0,
+          };
 
       // 资源信息
       const resourceEntries = win.__resourceEntries || [];
       const resources = resourceEntries.map((entry: PerformanceResourceTiming) => ({
-        url: entry.name,
-        type: this.getResourceType(entry.name),
-        size: entry.transferSize || 0,
-        loadTime: entry.duration || 0,
-        cached: entry.transferSize === 0 && entry.decodedBodySize > 0,
-        compressed: entry.encodedBodySize < entry.decodedBodySize,
-        priority: this.getResourcePriority(entry),
-        renderBlocking: this.isRenderBlocking(entry)
+        name: entry.name,
+        initiatorType: entry.initiatorType,
+        transferSize: entry.transferSize || 0,
+        decodedBodySize: entry.decodedBodySize || 0,
+        encodedBodySize: entry.encodedBodySize || 0,
+        duration: entry.duration || 0,
       }));
 
       return {
         timingMetrics,
         resources,
         networkMetrics: null,
-        cacheMetrics: null
+        cacheMetrics: null,
       };
     });
 
@@ -355,14 +411,25 @@ class PerformanceAnalyzer {
     // 分析缓存指标
     let cacheMetrics: CacheMetrics | null = null;
     if (options.analyzeCaching) {
-      cacheMetrics = await this.analyzeCacheMetrics(data.resources);
+      cacheMetrics = await this.analyzeCacheMetrics(
+        data.resources.map(resource => ({
+          url: resource.name,
+          type: this.getResourceType(resource.name, resource.initiatorType),
+          size: resource.transferSize,
+          loadTime: resource.duration,
+          cached: resource.transferSize === 0 && resource.decodedBodySize > 0,
+          compressed: resource.encodedBodySize < resource.decodedBodySize,
+          priority: this.getResourcePriority(resource.initiatorType, resource.duration),
+          renderBlocking: this.isRenderBlocking(resource.initiatorType),
+        }))
+      );
     }
 
     return {
       timingMetrics: data.timingMetrics,
       resources: data.resources,
       networkMetrics,
-      cacheMetrics
+      cacheMetrics,
     };
   }
 
@@ -372,21 +439,22 @@ class PerformanceAnalyzer {
   private async analyzeNetworkMetrics(page: Page): Promise<NetworkMetrics> {
     const metrics = await page.evaluate(() => {
       const entries = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-      
+
       const requests = entries.length;
       const totalTransferTime = entries.reduce((sum, entry) => sum + entry.duration, 0);
       const averageResponseTime = totalTransferTime / requests;
 
       // 尝试获取网络信息
-      const connection = (navigator as { connection?: { effectiveType?: string; downlink?: number } })
-        .connection;
-      
+      const connection = (
+        navigator as { connection?: { effectiveType?: string; downlink?: number } }
+      ).connection;
+
       return {
         requests,
         totalTransferTime,
         averageResponseTime,
-        connectionType: connection ? connection.effectiveType : 'unknown',
-        effectiveBandwidth: connection ? connection.downlink : 0
+        connectionType: connection?.effectiveType || 'unknown',
+        effectiveBandwidth: connection?.downlink || 0,
       };
     });
 
@@ -401,14 +469,15 @@ class PerformanceAnalyzer {
     cacheableResources: number;
     optimizedCaching: boolean;
   } {
-    const cacheableResources = resources.filter(resource => 
+    const cacheableResources = resources.filter(resource =>
       this.isCacheableResource(resource.type, resource.url)
     );
-    
+
     const cachedResources = cacheableResources.filter(resource => resource.cached);
-    const cacheHitRate = cacheableResources.length > 0 
-      ? (cachedResources.length / cacheableResources.length) * 100 
-      : 0;
+    const cacheHitRate =
+      cacheableResources.length > 0
+        ? (cachedResources.length / cacheableResources.length) * 100
+        : 0;
 
     // 检查缓存策略优化
     const optimizedCaching = this.isOptimizedCaching(resources);
@@ -416,7 +485,7 @@ class PerformanceAnalyzer {
     return {
       cacheHitRate,
       cacheableResources: cacheableResources.length,
-      optimizedCaching
+      optimizedCaching,
     };
   }
 
@@ -445,7 +514,8 @@ class PerformanceAnalyzer {
     const cachingScore = data.cacheMetrics ? this.calculateCachingScore(data.cacheMetrics) : 50;
 
     // 计算总体分数
-    const overall = (coreWebVitalsScore + resourcesScore + timingScore + networkScore + cachingScore) / 5;
+    const overall =
+      (coreWebVitalsScore + resourcesScore + timingScore + networkScore + cachingScore) / 5;
     const grade = this.getGrade(overall);
 
     return {
@@ -456,31 +526,31 @@ class PerformanceAnalyzer {
         resources: resourcesScore,
         timing: timingScore,
         network: networkScore,
-        caching: cachingScore
+        caching: cachingScore,
       },
       details: {
-        lcp: this.getRating(data.timingMetrics.largestContentfulPaint, 'lcp'),
-        fid: this.getRating(data.timingMetrics.firstInputDelay, 'fid'),
-        cls: this.getRating(0, 'cls'), // TODO: 实现CLS计算
-        fcp: this.getRating(data.timingMetrics.firstContentfulPaint, 'fcp'),
-        ttfb: this.getRating(data.timingMetrics.domContentLoaded, 'ttfb')
+        lcp: this.getMetricRating(data.timingMetrics.largestContentfulPaint, 'lcp'),
+        fid: this.getMetricRating(data.timingMetrics.firstInputDelay, 'fid'),
+        cls: this.getMetricRating(data.timingMetrics.cls, 'cls'),
+        fcp: this.getMetricRating(data.timingMetrics.firstContentfulPaint, 'fcp'),
+        ttfb: this.getMetricRating(data.timingMetrics.domContentLoaded, 'ttfb'),
       },
       resources: this.getResourceSummary(data.resources),
       timing: {
         domContentLoaded: data.timingMetrics.domContentLoaded,
         loadComplete: data.timingMetrics.loadComplete,
-        firstPaint: data.timingMetrics.firstPaint
+        firstPaint: data.timingMetrics.firstPaint,
       },
       network: data.networkMetrics || {
         requests: 0,
         totalTransferTime: 0,
-        averageResponseTime: 0
+        averageResponseTime: 0,
       },
       caching: data.cacheMetrics || {
         cacheHitRate: 0,
         cacheableResources: 0,
-        optimizedCaching: false
-      }
+        optimizedCaching: false,
+      },
     };
   }
 
@@ -490,12 +560,17 @@ class PerformanceAnalyzer {
   private calculateCoreWebVitalsScore(timing: TimingMetrics): number {
     const lcpScore = this.getRating(timing.largestContentfulPaint, 'lcp');
     const fidScore = this.getRating(timing.firstInputDelay, 'fid');
-    const clsScore = this.getRating(0, 'cls'); // TODO: 实现CLS计算
+    const clsScore = this.getRating(timing.cls, 'cls');
     const fcpScore = this.getRating(timing.firstContentfulPaint, 'fcp');
     const ttfbScore = this.getRating(timing.domContentLoaded, 'ttfb');
 
     const scores = [lcpScore, fidScore, clsScore, fcpScore, ttfbScore];
-    return scores.reduce((sum, score) => sum + (score === 'good' ? 100 : score === 'needs-improvement' ? 50 : 25), 0) / scores.length;
+    return (
+      scores.reduce(
+        (sum, score) => sum + (score === 'good' ? 100 : score === 'needs-improvement' ? 50 : 25),
+        0
+      ) / scores.length
+    );
   }
 
   /**
@@ -646,8 +721,11 @@ class PerformanceAnalyzer {
    * 获取评级
    */
   private getRating(value: number, metric: string): 'good' | 'needs-improvement' | 'poor' {
-    const thresholds = this.performanceThresholds.coreWebVitals[metric as keyof typeof this.performanceThresholds.coreWebVitals];
-    
+    const thresholds =
+      this.performanceThresholds.coreWebVitals[
+        metric as keyof typeof this.performanceThresholds.coreWebVitals
+      ];
+
     if (value <= thresholds.good) {
       return 'good';
     } else if (value <= thresholds.needsImprovement) {
@@ -673,6 +751,13 @@ class PerformanceAnalyzer {
    * 获取资源摘要
    */
   private getResourceSummary(resources: ResourceInfo[]): {
+    totalSize: number;
+    count: number;
+    compressed: number;
+    cached: number;
+    renderBlocking: number;
+    categories: Record<string, { size: number; count: number }>;
+  } {
     const totalSize = resources.reduce((sum, resource) => sum + resource.size, 0);
     const count = resources.length;
     const compressed = resources.filter(r => r.compressed).length;
@@ -680,7 +765,7 @@ class PerformanceAnalyzer {
     const renderBlocking = resources.filter(r => r.renderBlocking).length;
 
     const categories: Record<string, { size: number; count: number }> = {};
-    
+
     resources.forEach(resource => {
       if (!categories[resource.type]) {
         categories[resource.type] = { size: 0, count: 0 };
@@ -695,64 +780,72 @@ class PerformanceAnalyzer {
       compressed,
       cached,
       renderBlocking,
-      categories
+      categories,
     };
   }
 
   /**
    * 获取资源类型
    */
-  private getResourceType(url: string): string {
+  private getResourceType(url: string, initiatorType?: string): string {
+    if (initiatorType) {
+      const normalizedType = initiatorType.toLowerCase();
+      if (normalizedType === 'script') return 'script';
+      if (normalizedType === 'stylesheet') return 'stylesheet';
+      if (normalizedType === 'image') return 'image';
+      if (normalizedType === 'xmlhttprequest' || normalizedType === 'fetch') return 'data';
+    }
     const extension = url.split('.').pop()?.toLowerCase();
-    
+
     if (extension) {
       const typeMap: Record<string, string> = {
-        'jpg': 'image',
-        'jpeg': 'image',
-        'png': 'image',
-        'gif': 'image',
-        'svg': 'image',
-        'webp': 'image',
-        'css': 'stylesheet',
-        'js': 'script',
-        'html': 'document',
-        'json': 'data',
-        'xml': 'data',
-        'txt': 'data',
-        'woff': 'font',
-        'woff2': 'font',
-        'ttf': 'font',
-        'eot': 'font'
+        jpg: 'image',
+        jpeg: 'image',
+        png: 'image',
+        gif: 'image',
+        svg: 'image',
+        webp: 'image',
+        css: 'stylesheet',
+        js: 'script',
+        html: 'document',
+        json: 'data',
+        xml: 'data',
+        txt: 'data',
+        woff: 'font',
+        woff2: 'font',
+        ttf: 'font',
+        eot: 'font',
       };
-      
+
       return typeMap[extension] || 'other';
     }
-    
+
     return 'other';
   }
 
   /**
    * 获取资源优先级
    */
-  private getResourcePriority(entry: PerformanceResourceTiming): 'high' | 'medium' | 'low' {
-    // 根据资源类型和加载时间判断优先级
-    const type = this.getResourceType(entry.name);
-    const loadTime = entry.duration || 0;
+  private getResourcePriority(
+    initiatorType: string | undefined,
+    loadTime: number
+  ): 'high' | 'medium' | 'low' {
+    const type = this.getResourceType('', initiatorType);
 
     if (type === 'script' || type === 'stylesheet') {
       return loadTime > 100 ? 'low' : 'high';
     } else if (type === 'image') {
       return loadTime > 500 ? 'low' : 'medium';
     }
-    
+
     return 'low';
   }
 
   /**
    * 判断是否为渲染阻塞资源
    */
-  private isRenderBlocking(entry: PerformanceResourceTiming): boolean {
-    const type = this.getResourceType(entry.name);
+  private isRenderBlocking(initiatorType: string | undefined): boolean {
+    const type = this.getResourceType('', initiatorType);
     return type === 'script' || type === 'stylesheet';
   }
 
@@ -773,7 +866,7 @@ class PerformanceAnalyzer {
     // 这里简化实现，实际应该检查HTTP头
     const cacheableResources = resources.filter(r => this.isCacheableResource(r.type, r.url));
     const cachedResources = cacheableResources.filter(r => r.cached);
-    
+
     return cachedResources.length / cacheableResources.length > 0.8;
   }
 
@@ -794,8 +887,8 @@ class PerformanceAnalyzer {
         effort: 'medium',
         savings: {
           time: score.details.lcp.value - 2500,
-          size: 0
-        }
+          size: 0,
+        },
       });
     }
 
@@ -809,8 +902,8 @@ class PerformanceAnalyzer {
         effort: 'medium',
         savings: {
           time: score.details.fid.value - 100,
-          size: 0
-        }
+          size: 0,
+        },
       });
     }
 
@@ -825,8 +918,8 @@ class PerformanceAnalyzer {
         effort: 'medium',
         savings: {
           time: 0,
-          size: score.resources.totalSize - this.performanceThresholds.resources.totalSize.good
-        }
+          size: score.resources.totalSize - this.performanceThresholds.resources.totalSize.good,
+        },
       });
     }
 
@@ -841,8 +934,8 @@ class PerformanceAnalyzer {
         effort: 'low',
         savings: {
           time: 0,
-          size: 0
-        }
+          size: 0,
+        },
       });
     }
 
@@ -854,9 +947,12 @@ class PerformanceAnalyzer {
    */
   private getScoreFromRating(rating: 'good' | 'needs-improvement' | 'poor'): number {
     switch (rating) {
-      case 'good': return 100;
-      case 'needs-improvement': return 50;
-      case 'poor': return 25;
+      case 'good':
+        return 100;
+      case 'needs-improvement':
+        return 50;
+      case 'poor':
+        return 25;
     }
   }
 
@@ -879,13 +975,17 @@ class PerformanceAnalyzer {
    */
   exportReport(score: PerformanceScore): string {
     const recommendations = this.generateRecommendations(score);
-    
-    return JSON.stringify({
-      timestamp: new Date().toISOString(),
-      score,
-      recommendations,
-      thresholds: this.performanceThresholds
-    }, null, 2);
+
+    return JSON.stringify(
+      {
+        timestamp: new Date().toISOString(),
+        score,
+        recommendations,
+        thresholds: this.performanceThresholds,
+      },
+      null,
+      2
+    );
   }
 }
 

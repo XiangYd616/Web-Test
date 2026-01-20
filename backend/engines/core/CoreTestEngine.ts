@@ -3,6 +3,10 @@
  * 核心测试引擎 - 提供基础测试功能
  */
 
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+
 type CoreTestConfig = Record<string, unknown>;
 type CoreTestResult = {
   testId: string;
@@ -68,11 +72,15 @@ class CoreTestEngine {
    * 健康检查
    */
   healthCheck() {
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const memoryUsage = totalMem > 0 ? (totalMem - freeMem) / totalMem : 0;
     return {
-      status: 'healthy',
+      status: memoryUsage < 0.85 ? 'healthy' : 'warning',
       version: this.version,
       activeTests: this.activeTests.size,
       uptime: process.uptime(),
+      memoryUsage,
       timestamp: new Date().toISOString(),
     };
   }
@@ -88,7 +96,9 @@ class CoreTestEngine {
     error?: string;
     timestamp: string;
   }> {
-    const testId = `core_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    const configTestId = (config as { testId?: string }).testId;
+    const testId =
+      configTestId || `core_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     try {
       console.log(`🔧 开始核心测试: ${testId}`);
@@ -99,30 +109,39 @@ class CoreTestEngine {
         config,
       });
 
-      // 模拟核心测试逻辑
+      const totalMem = os.totalmem();
+      const freeMem = os.freemem();
+      const memoryUsage = totalMem > 0 ? (totalMem - freeMem) / totalMem : 0;
+      const cpuUsage = this.calculateCpuUsage();
+      const diskUsage = this.calculateDiskUsage();
+      const coreServices = this.getCoreServiceStatus();
+
+      const healthScore = Math.max(
+        0,
+        100 - Math.round(memoryUsage * 60) - Math.round(cpuUsage * 40)
+      );
+      const performanceIndex = Math.max(0, 100 - Math.round(cpuUsage * 100));
+      const errorRate = this.activeTests.size > 0 ? 1 / Math.max(1, this.activeTests.size) : 0;
+
       const results: CoreTestResult = {
         testId,
         timestamp: new Date().toISOString(),
         summary: {
-          overallScore: 85,
-          coreStability: 90,
-          performanceIndex: 80,
-          errorRate: 0.05,
+          overallScore: Math.round((healthScore + performanceIndex) / 2),
+          coreStability: healthScore,
+          performanceIndex,
+          errorRate,
         },
         details: {
-          systemHealth: 'good',
+          systemHealth: memoryUsage < 0.85 && cpuUsage < 0.8 ? 'good' : 'warning',
           resourceUsage: {
-            memory: '45%',
-            cpu: '12%',
-            disk: '67%',
+            memory: `${Math.round(memoryUsage * 100)}%`,
+            cpu: `${Math.round(cpuUsage * 100)}%`,
+            disk: diskUsage ? `${Math.round(diskUsage * 100)}%` : 'unknown',
           },
-          coreServices: [
-            { name: '测试引擎管理器', status: 'active', uptime: '99.8%' },
-            { name: '结果处理器', status: 'active', uptime: '99.5%' },
-            { name: '配置管理器', status: 'active', uptime: '100%' },
-          ],
+          coreServices,
         },
-        recommendations: ['核心系统运行稳定', '建议定期监控资源使用情况', '可考虑优化内存使用'],
+        recommendations: this.buildRecommendations(memoryUsage, cpuUsage, diskUsage),
       };
 
       this.activeTests.set(testId, {
@@ -168,7 +187,6 @@ class CoreTestEngine {
     }
 
     try {
-      // 模拟初始化过程
       console.log('🔧 初始化核心测试引擎...');
 
       // 验证核心依赖
@@ -176,7 +194,7 @@ class CoreTestEngine {
       for (const dep of requiredDependencies) {
         try {
           require(dep);
-        } catch (error) {
+        } catch {
           console.error(`❌ 缺少必需依赖: ${dep}`);
           return false;
         }
@@ -202,6 +220,73 @@ class CoreTestEngine {
       isInitialized: this.isInitialized,
       registeredEngines: this.engines.size,
     };
+  }
+
+  private calculateCpuUsage(): number {
+    const cpus = os.cpus();
+    if (!cpus.length) return 0;
+    const total = cpus.reduce(
+      (acc, cpu) => {
+        const times = cpu.times;
+        return {
+          idle: acc.idle + times.idle,
+          total: acc.total + times.user + times.nice + times.sys + times.idle + times.irq,
+        };
+      },
+      { idle: 0, total: 0 }
+    );
+    if (total.total === 0) return 0;
+    return 1 - total.idle / total.total;
+  }
+
+  private calculateDiskUsage(): number | null {
+    const statfs = (fs as typeof fs & { statfsSync?: (path: string) => unknown }).statfsSync;
+    if (!statfs) return null;
+    try {
+      const stats = statfs(path.resolve(process.cwd()));
+      const castStats = stats as { bsize: number; blocks: number; bfree: number };
+      const total = castStats.bsize * castStats.blocks;
+      const free = castStats.bsize * castStats.bfree;
+      if (!total) return null;
+      return (total - free) / total;
+    } catch {
+      return null;
+    }
+  }
+
+  private getCoreServiceStatus(): Array<{ name: string; status: string; uptime: string }> {
+    const registry = require('../../core/TestEngineRegistry');
+    const available = registry.getAvailableEngines?.() || [];
+    return available.length
+      ? available.map((engine: { type: string; enabled: boolean }) => ({
+          name: `引擎:${engine.type}`,
+          status: engine.enabled ? 'active' : 'disabled',
+          uptime: `${Math.round(process.uptime() / 60)}min`,
+        }))
+      : [
+          {
+            name: '测试引擎管理器',
+            status: 'active',
+            uptime: `${Math.round(process.uptime() / 60)}min`,
+          },
+        ];
+  }
+
+  private buildRecommendations(memoryUsage: number, cpuUsage: number, diskUsage: number | null) {
+    const recommendations: string[] = [];
+    if (memoryUsage > 0.85) {
+      recommendations.push('内存使用率偏高，建议排查长时间占用的测试任务或增加内存配额');
+    }
+    if (cpuUsage > 0.8) {
+      recommendations.push('CPU负载偏高，建议错峰执行测试或降低并发');
+    }
+    if (diskUsage !== null && diskUsage > 0.9) {
+      recommendations.push('磁盘空间不足，建议清理历史结果或扩容存储');
+    }
+    if (recommendations.length === 0) {
+      recommendations.push('系统状态良好，建议持续观察核心指标');
+    }
+    return recommendations;
   }
 
   /**

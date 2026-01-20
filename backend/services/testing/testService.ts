@@ -625,12 +625,12 @@ class TestService {
       id: result.id,
       testId: execution.test_id,
       userId: execution.user_id,
-      summary: result.summary,
+      summary: this.parseJsonValue(result.summary, {}),
       score: result.score,
       grade: result.grade,
       passed: result.passed,
-      warnings: result.warnings,
-      errors: result.errors,
+      warnings: this.parseJsonArray(result.warnings),
+      errors: this.parseJsonArray(result.errors),
       createdAt: result.created_at,
     };
   }
@@ -648,10 +648,11 @@ class TestService {
   }
 
   private parseTestConfig(config?: Record<string, unknown>): TestConfig {
-    if (!config || typeof config !== 'object') {
+    const parsedConfig = this.parseJsonValue<Record<string, unknown> | null>(config, null);
+    if (!parsedConfig || typeof parsedConfig !== 'object') {
       return { url: '', testType: '' };
     }
-    const record = config as Record<string, unknown>;
+    const record = parsedConfig as Record<string, unknown>;
     return {
       url: (record.url as string) || '',
       testType: (record.testType as string) || (record.engine_type as string) || '',
@@ -673,6 +674,27 @@ class TestService {
       batchId,
       templateId: typeof raw.templateId === 'string' ? raw.templateId : undefined,
     };
+  }
+
+  private parseJsonValue<T>(value: unknown, fallback: T): T {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return fallback;
+      }
+    }
+    if (value !== null && value !== undefined) {
+      return value as T;
+    }
+    return fallback;
+  }
+
+  private parseJsonArray(value: unknown): unknown[] {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    return this.parseJsonValue(value, [] as unknown[]);
   }
 }
 

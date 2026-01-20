@@ -3,10 +3,8 @@
  * 统一所有性能测试功能，消除重复代码
  */
 
-import lighthouse from 'lighthouse';
 import chromeLauncher from 'chrome-launcher';
-import puppeteer from 'puppeteer';
-import axios from 'axios';
+import lighthouse from 'lighthouse';
 
 interface WebVitalsResult {
   id: string;
@@ -14,47 +12,26 @@ interface WebVitalsResult {
   timestamp: Date;
   device: string;
   locale: string;
-  categories: Array<{
-    id: string;
-    score: number;
-    title: string;
-    description: string;
-    manualDescription: string;
-  }>;
-  audits: Array<{
-    id: string;
-    title: string;
-    description: string;
-    score: number;
-    numericValue?: {
-      value: number;
-      unit: string;
-      optimalValue: number;
-      optimalUnit: string;
-    };
-    details: {
-      items: Array<{
-        node: {
-          path: string;
-        };
-        value: string;
-        unit: string;
-      }>;
-    }>;
-  }>;
-  lighthouse: {
-    version: string;
-    requestedUrl: string;
-    fetcher: string;
-    runner: string;
-    settings: {
-      device: string;
-      locale: string;
-      throttling: string;
-      categories: string[];
+  categories: Array<Record<string, unknown>>;
+  audits: Array<Record<string, unknown>>;
+  lighthouse: Record<string, unknown>;
+}
+
+type AuditEntry = {
+  id?: string;
+  score?: number;
+  displayValue?: string | number;
+  numericValue?:
+    | number
+    | { value?: number; unit?: string; optimalValue?: number; optimalUnit?: string };
+  details?: {
+    savings?: {
+      savings?: number;
+      unit?: string;
+      unitSavings?: number;
     };
   };
-}
+};
 
 interface PerformanceConfig {
   device?: 'desktop' | 'mobile';
@@ -72,7 +49,7 @@ interface PerformanceMetrics {
   accessibility: number;
   bestPractices: number;
   seo: number;
-  pw a: number;
+  pwa: number;
   webVitals: {
     lcp: {
       value: number;
@@ -99,9 +76,9 @@ interface PerformanceMetrics {
       optimalUnit: string;
     };
     fcp: {
-      value: string;
+      value: number;
       unit: string;
-      optimalValue: string;
+      optimalValue: number;
       optimalUnit: string;
     };
     inp: {
@@ -116,12 +93,6 @@ interface PerformanceMetrics {
       optimalValue: number;
       optimalUnit: string;
     };
-    cls: {
-      value: number;
-      unit: string;
-      optimalValue: number;
-      optimalUnit: string;
-    };
   };
 }
 
@@ -129,27 +100,13 @@ interface PageSpeedInsight {
   id: string;
   title: string;
   description: string;
-  numericValue: {
-    value: number;
-    unit: string;
-    optimalValue: number;
-    optimalUnit: string;
-  };
-  savings: {
+  numericValue?: Record<string, unknown>;
+  savings?: {
     savings: number;
     unit: string;
     unitSavings: number;
   };
-  details: {
-    items: Array<{
-      node: {
-        path: string;
-        type: string;
-        snippet: string;
-        explanation: string;
-      }>;
-    }>;
-  };
+  details?: Record<string, unknown>;
 }
 
 interface PerformanceReport {
@@ -182,16 +139,20 @@ interface PerformanceReport {
 class PerformanceTestCore {
   private name: string;
   private cache: Map<string, WebVitalsResult>;
+  private cacheHits: number;
+  private cacheMisses: number;
   private defaultConfig: PerformanceConfig;
 
   constructor() {
     this.name = 'performance-core';
     this.cache = new Map(); // 结果缓存
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
     this.defaultConfig = {
       device: 'desktop',
       locale: 'zh-CN',
-      throttling: 'simulated3G',
-      categories: ['performance', 'accessibility', 'best-practices', 'seo']
+      throttling: 'slow-3g',
+      categories: ['performance', 'accessibility', 'best-practices', 'seo'],
     };
   }
 
@@ -202,19 +163,23 @@ class PerformanceTestCore {
   async getCoreWebVitals(url: string, config: PerformanceConfig = {}): Promise<WebVitalsResult> {
     const mergedConfig = { ...this.defaultConfig, ...config };
     const cacheKey = `cwv_${url}_${JSON.stringify(mergedConfig)}`;
-    
-    if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey)!;
+
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      this.cacheHits += 1;
+      return cached;
     }
 
     try {
       // 启动Chrome
-      const chrome = await chromeLauncher({
-        chromeFlags: mergedConfig.chromeFlags || []
+      const chrome = await chromeLauncher.launch({
+        chromeFlags: mergedConfig.chromeFlags || [],
       });
 
       // 运行Lighthouse
-      const runnerResult = await lighthouse(url, {
+      const runnerResult = (await (
+        lighthouse as unknown as (url: string, options: Record<string, unknown>) => Promise<unknown>
+      )(url, {
         port: mergedConfig.port || 9222,
         output: 'json',
         logLevel: 'info',
@@ -222,8 +187,8 @@ class PerformanceTestCore {
         device: mergedConfig.device,
         locale: mergedConfig.locale,
         throttling: mergedConfig.throttling,
-        timeout: mergedConfig.timeout || 60000
-      });
+        timeout: mergedConfig.timeout || 60000,
+      })) as { lhr?: Record<string, unknown> };
 
       // 关闭Chrome
       await chrome.kill();
@@ -232,32 +197,40 @@ class PerformanceTestCore {
         id: this.generateId(),
         url,
         timestamp: new Date(),
-        device: mergedConfig.device,
-        locale: mergedConfig.locale,
-        categories: runnerResult.lhr.categories,
-        audits: runnerResult.lhr.audits,
-        lighthouse: {
-          version: runnerResult.lhr.version,
-          requestedUrl: runnerResult.lhr.requestedUrl,
-          fetcher: runnerResult.lhr.fetcher,
-          runner: runnerResult.lhr.runner,
-          settings: runnerResult.lhr.settings
-        }
+        device: mergedConfig.device || 'desktop',
+        locale: mergedConfig.locale || 'zh-CN',
+        categories: runnerResult?.lhr?.categories
+          ? (Object.values(runnerResult.lhr.categories as Record<string, unknown>) as Array<
+              Record<string, unknown>
+            >)
+          : [],
+        audits: runnerResult?.lhr?.audits
+          ? (Object.values(runnerResult.lhr.audits as Record<string, unknown>) as Array<
+              Record<string, unknown>
+            >)
+          : [],
+        lighthouse: runnerResult?.lhr || {},
       };
 
       // 缓存结果
       this.cache.set(cacheKey, result);
+      this.cacheMisses += 1;
 
       return result;
     } catch (error) {
-      throw new Error(`获取CoreWebVitals失败: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `获取CoreWebVitals失败: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
   /**
    * 运行完整的性能测试
    */
-  async runPerformanceTest(url: string, config: PerformanceConfig = {}): Promise<PerformanceReport> {
+  async runPerformanceTest(
+    url: string,
+    config: PerformanceConfig = {}
+  ): Promise<PerformanceReport> {
     try {
       // 获取Core Web Vitals
       const webVitals = await this.getCoreWebVitals(url, config);
@@ -283,7 +256,7 @@ class PerformanceTestCore {
         webVitals: this.extractWebVitals(webVitals),
         pageSpeedInsights,
         recommendations,
-        summary: this.generateSummary(webVitals, recommendations)
+        summary: this.generateSummary(webVitals, recommendations),
       };
 
       return report;
@@ -295,42 +268,49 @@ class PerformanceTestCore {
   /**
    * 获取PageSpeed Insights
    */
-  private async getPageSpeedInsights(url: string, config: PerformanceConfig = {}): Promise<PageSpeedInsight[]> {
+  private async getPageSpeedInsights(
+    url: string,
+    config: PerformanceConfig = {}
+  ): Promise<PageSpeedInsight[]> {
     try {
       // 使用Lighthouse的PageSpeed Insights
-      const chrome = await chromeLauncher({
-        chromeFlags: config.chromeFlags || []
+      const chrome = await chromeLauncher.launch({
+        chromeFlags: config.chromeFlags || [],
       });
 
-      const runnerResult = await lighthouse(url, {
+      const runnerResult = (await (
+        lighthouse as unknown as (url: string, options: Record<string, unknown>) => Promise<unknown>
+      )(url, {
         onlyCategories: ['performance'],
         config: {
           onlyAudits: ['performance'],
           settings: {
             device: config.device || 'desktop',
-            throttling: config.throttling || 'simulated3g',
-            locale: config.locale || 'zh-CN'
-          }
-        }
-      });
+            throttling: config.throttling || 'slow-3g',
+            locale: config.locale || 'zh-CN',
+          },
+        },
+      })) as { lhr?: { audits?: Array<Record<string, unknown>> } };
 
       await chrome.kill();
 
       // 提取PageSpeed Insights
-      const insights = runnerResult.lhr.audits
-        .filter(audit => audit.id.includes('page-speed'))
-        .map(audit => ({
-          id: audit.id,
-          title: audit.title,
-          description: audit.description,
-          numericValue: audit.numericValue,
-          savings: audit.details?.savings,
-          details: audit.details
+      const insights = (runnerResult.lhr?.audits || [])
+        .filter((audit: Record<string, unknown>) => String(audit.id || '').includes('page-speed'))
+        .map((audit: Record<string, unknown>) => ({
+          id: String(audit.id || ''),
+          title: String(audit.title || ''),
+          description: String(audit.description || ''),
+          numericValue: audit.numericValue as Record<string, unknown> | undefined,
+          savings: (audit.details as { savings?: PageSpeedInsight['savings'] })?.savings,
+          details: audit.details as Record<string, unknown> | undefined,
         }));
 
       return insights;
     } catch (error) {
-      console.warn(`获取PageSpeed Insights失败: ${error instanceof Error ? error.message : String(error)}`);
+      console.warn(
+        `获取PageSpeed Insights失败: ${error instanceof Error ? error.message : String(error)}`
+      );
       return [];
     }
   }
@@ -338,7 +318,10 @@ class PerformanceTestCore {
   /**
    * 生成建议
    */
-  private generateRecommendations(webVitals: WebVitals, pageSpeedInsights: PageSpeedInsights[]): Array<{
+  private generateRecommendations(
+    webVitals: WebVitalsResult,
+    pageSpeedInsights: PageSpeedInsight[]
+  ): Array<{
     title: string;
     description: string;
     priority: 'high' | 'medium' | 'low';
@@ -362,53 +345,65 @@ class PerformanceTestCore {
     }> = [];
 
     // 基于Web Vitals生成建议
-    const webVitalsAudits = webVitals.audits;
-    
+    const webVitalsAudits = webVitals.audits as AuditEntry[];
+    const getAuditValue = (audit: AuditEntry): number => {
+      if (typeof audit.numericValue === 'number') return audit.numericValue;
+      if (typeof audit.displayValue === 'number') return audit.displayValue;
+      if (typeof audit.displayValue === 'string') {
+        const parsed = Number.parseFloat(audit.displayValue);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+      if (audit.numericValue && typeof audit.numericValue === 'object') {
+        return typeof audit.numericValue.value === 'number' ? audit.numericValue.value : 0;
+      }
+      return 0;
+    };
+
     // LCP建议
     const lcpAudit = webVitalsAudits.find(audit => audit.id === 'largest-contentful-paint');
-    if (lcpAudit && lcpAudit.score < 0.9) {
+    if (lcpAudit && (lcpAudit.score ?? 1) < 0.9) {
       recommendations.push({
         title: '优化Largest Contentful Paint',
-        description: `LCP为${lcpAudit.displayValue}ms，超过建议的2.5秒`,
+        description: `LCP为${getAuditValue(lcpAudit)}ms，超过建议的2.5秒`,
         priority: 'high',
         potentialSavings: {
           savings: lcpAudit.details?.savings?.savings || 0,
           unit: lcpAudit.details?.savings?.unit || 'ms',
-          unitSavings: lcpAudit.details?.savings?.unitSavings || 0
+          unitSavings: lcpAudit.details?.savings?.unitSavings || 0,
         },
-        category: 'performance'
+        category: 'performance',
       });
     }
 
     // FID建议
     const fidAudit = webVitalsAudits.find(audit => audit.id === 'first-input-delay');
-    if (fidAudit && fidAudit.score < 0.9) {
+    if (fidAudit && (fidAudit.score ?? 1) < 0.9) {
       recommendations.push({
         title: '减少首次输入延迟',
-        description: `FID为${fidAudit.displayValue}ms，超过建议的100ms`,
+        description: `FID为${getAuditValue(fidAudit)}ms，超过建议的100ms`,
         priority: 'medium',
         potentialSavings: {
           savings: fidAudit.details?.savings?.savings || 0,
           unit: fidAudit.details?.savings?.unit || 'ms',
-          unitSavings: fidAudit.details?.savings?.unitSavings || 0
+          unitSavings: fidAudit.details?.savings?.unitSavings || 0,
         },
-        category: 'performance'
+        category: 'performance',
       });
     }
 
     // CLS建议
     const clsAudit = webVitalsAudits.find(audit => audit.id === 'cumulative-layout-shift');
-    if (clsAudit && clsAudit.score < 0.9) {
+    if (clsAudit && (clsAudit.score ?? 1) < 0.9) {
       recommendations.push({
         title: '减少累积布局偏移',
-        description: `CLS为${clsAudit.displayValue}，超过建议的0.1`,
+        description: `CLS为${getAuditValue(clsAudit)}，超过建议的0.1`,
         priority: 'medium',
         potentialSavings: {
           savings: clsAudit.details?.savings?.savings || 0,
           unit: clsAudit.details?.savings?.unit || '',
-          unitSavings: clsAudit.details?.savings?.unitSavings || 0
+          unitSavings: clsAudit.details?.savings?.unitSavings || 0,
         },
-        category: 'performance'
+        category: 'performance',
       });
     }
 
@@ -418,20 +413,20 @@ class PerformanceTestCore {
         recommendations.push({
           title: insight.title,
           description: insight.description,
-          priority: this.getPriorityFromSavings(insight.savings.savings),
+          priority: this.getPriorityFromSavings(insight.savings),
           potentialSavings: {
             savings: insight.savings.savings,
             unit: insight.savings.unit,
-            unitSavings: insight.savings.unitSavings || 0
+            unitSavings: insight.savings.unitSavings || 0,
           },
-          category: 'performance'
+          category: 'performance',
         });
       }
     });
 
     // 去重重复建议
-    const uniqueRecommendations = recommendations.filter((rec, index, self) => 
-      recommendations.findIndex(r => r.title === rec.title) === index
+    const uniqueRecommendations = recommendations.filter(
+      (rec, index, list) => list.findIndex(r => r.title === rec.title) === index
     );
 
     return uniqueRecommendations;
@@ -440,25 +435,30 @@ class PerformanceTestCore {
   /**
    * 获取优先级
    */
-  private getPriorityFromSavings(savings: { savings: number; unit: string; unitSavings: number }): 'high' | 'medium' | 'low' {
+  private getPriorityFromSavings(savings: {
+    savings: number;
+    unit: string;
+    unitSavings: number;
+  }): 'high' | 'medium' | 'low' {
     const value = savings.savings;
-    
+
     if (value > 5000) return 'high';
     if (value > 2000) return 'medium';
-    if (value > 500) return 'medium';
-    if (value > 500) return 'medium';
+    if (value > 500) return 'low';
     return 'low';
   }
 
   /**
    * 计算分类分数
    */
-  private calculateCategoryScores(webVitals: WebVitals): Record<string, number> {
+  private calculateCategoryScores(webVitals: WebVitalsResult): Record<string, number> {
     const categories = webVitals.categories;
     const scores: Record<string, number> = {};
 
     categories.forEach(category => {
-      scores[category.id] = category.score;
+      scores[String((category as { id?: string }).id || '')] = Number(
+        (category as { score?: number }).score ?? 0
+      );
     });
 
     return scores;
@@ -467,69 +467,91 @@ class PerformanceTestCore {
   /**
    * 计算总体分数
    */
-  private calculateOverallScore(webVitals: WebVitals): number {
+  private calculateOverallScore(webVitals: WebVitalsResult): number {
     const categories = webVitals.categories;
-    const scores = categories.map(cat => cat.score);
-    return scores.reduce((sum, score) => sum + score, 0) / categories.length;
+    const scores = categories.map(cat => Number((cat as { score?: number }).score ?? 0));
+    return scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
   }
 
   /**
    * 提取Web Vitals指标
    */
-  private extractWebVitals(webVitals: WebVitals): PerformanceMetrics['webVitals'] {
-    const metrics = webVitals.categories
-      .find(cat => cat.id === 'performance')
-      ?.auditRefs
-      .reduce((acc, ref) => {
-        const audit = webVitals.audits.find(a => a.id === ref.id);
-        if (audit && audit.numericValue) {
-          acc[ref.id] = {
-            value: audit.numericValue.value,
-            unit: audit.numericValue.unit,
-            optimalValue: audit.numericValue.optimalValue,
-            optimalUnit: audit.numericValue.optimalUnit
-          };
+  private extractWebVitals(webVitals: WebVitalsResult): PerformanceMetrics['webVitals'] {
+    type Metric = { value: number; unit: string; optimalValue: number; optimalUnit: string };
+    const metrics = (webVitals.audits || []).reduce(
+      (acc, audit: Record<string, unknown>) => {
+        const numericValue = (audit as AuditEntry).numericValue;
+        const key = String((audit as AuditEntry).id || '');
+        if (numericValue) {
+          if (typeof numericValue === 'number') {
+            acc[key] = { value: numericValue, unit: '', optimalValue: 0, optimalUnit: '' };
+          } else {
+            acc[key] = {
+              value: numericValue.value ?? 0,
+              unit: numericValue.unit ?? '',
+              optimalValue: numericValue.optimalValue ?? 0,
+              optimalUnit: numericValue.optimalUnit ?? '',
+            };
+          }
         }
         return acc;
-      }, {} as PerformanceMetrics['webVitals']);
+      },
+      {} as Record<string, Metric>
+    );
 
-    return metrics || {
-      lcp: { value: 0, unit: 'ms', optimalValue: 2500, optimalUnit: 'ms' },
-      fid: { value: 0, unit: 'ms', optimalValue: 100, optimalUnit: 'ms' },
-      cls: { value: 0, unit: '', optimalValue: 0.1, optimalUnit: '' },
-      ttfb: { value: 0, unit: 'ms', optimalValue: 600, optimalUnit: 'ms' },
-      fcp: { value: '', unit: 'ms', optimalValue: '1.8s', optimalUnit: 's' },
-      inp: { value: 0, unit: 'ms', optimalValue: 100, optimalUnit: 'ms' },
-      tbt: { value: 0, unit: 'ms', optimalValue: 600, optimalUnit: 'ms' },
-      cls: { value: 0, unit: '', optimalValue: 0.1, optimalUnit: '' }
+    const metricOrDefault = (key: string, fallback: Metric): Metric =>
+      (metrics[key] as Metric | undefined) ?? fallback;
+
+    return {
+      lcp: metricOrDefault('lcp', { value: 0, unit: 'ms', optimalValue: 2500, optimalUnit: 'ms' }),
+      fid: metricOrDefault('fid', { value: 0, unit: 'ms', optimalValue: 100, optimalUnit: 'ms' }),
+      cls: metricOrDefault('cls', { value: 0, unit: '', optimalValue: 0.1, optimalUnit: '' }),
+      ttfb: metricOrDefault('ttfb', { value: 0, unit: 'ms', optimalValue: 600, optimalUnit: 'ms' }),
+      fcp: metricOrDefault('fcp', { value: 0, unit: 'ms', optimalValue: 1800, optimalUnit: 'ms' }),
+      inp: metricOrDefault('inp', { value: 0, unit: 'ms', optimalValue: 100, optimalUnit: 'ms' }),
+      tbt: metricOrDefault('tbt', { value: 0, unit: 'ms', optimalValue: 600, optimalUnit: 'ms' }),
     };
   }
 
-  /**
-   * 生成摘要
-   */
-  private generateSummary(webVitals: WebVitals, recommendations: Array<{
-    title: string;
-    description: string;
-    priority: 'high' | 'medium' | 'low';
-    potentialSavings: {
-      savings: number;
-      unit: string;
-      unitSavings: number;
-    };
-    category: string;
-  }>): {
-    const issues = webVitals.audits.filter(audit => audit.score < 0.9).length;
-    const warnings = webVitals.audits.filter(audit => audit.score >= 0.9 && audit.score < 1).length;
+  private generateSummary(
+    webVitals: WebVitalsResult,
+    recommendations: Array<{
+      title: string;
+      description: string;
+      priority: 'high' | 'medium' | 'low';
+      potentialSavings: {
+        savings: number;
+        unit: string;
+        unitSavings: number;
+      };
+      category: string;
+    }>
+  ): {
+    grade: string;
+    issues: number;
+    warnings: number;
+    opportunities: number;
+  } {
+    const issues = webVitals.audits.filter(audit => {
+      const score = (audit as AuditEntry).score;
+      return score !== undefined && score < 0.9;
+    }).length;
+    const warnings = webVitals.audits.filter(audit => {
+      const score = (audit as AuditEntry).score;
+      return score !== undefined && score >= 0.9 && score < 1;
+    }).length;
     const opportunities = recommendations.length;
 
-    const grade = this.getGrade(webVitals.lighthouse.categories[0]?.score || 0);
+    const lighthouseCategories = (
+      webVitals.lighthouse as { categories?: Array<{ score?: number }> }
+    ).categories;
+    const grade = this.getGrade(lighthouseCategories?.[0]?.score ?? 0);
 
     return {
       grade,
       issues,
       warnings,
-      opportunities
+      opportunities,
     };
   }
 
@@ -555,10 +577,12 @@ class PerformanceTestCore {
    * 获取缓存统计
    */
   getCacheStats() {
+    const totalRequests = this.cacheHits + this.cacheMisses;
+    const hitRate = totalRequests > 0 ? Math.round((this.cacheHits / totalRequests) * 100) : 0;
     return {
       size: this.cache.size,
-      hitRate: 0, // TODO: 实现缓存命中率统计
-      entries: Array.from(this.cache.keys()).slice(0, 10)
+      hitRate,
+      entries: Array.from(this.cache.keys()).slice(0, 10),
     };
   }
 

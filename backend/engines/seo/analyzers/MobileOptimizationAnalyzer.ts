@@ -4,6 +4,7 @@
  * 分析页面的移动端友好性和响应式设计
  */
 
+import type { Page } from 'puppeteer';
 import puppeteer from 'puppeteer';
 
 interface ViewportConfig {
@@ -232,7 +233,7 @@ class MobileOptimizationAnalyzer {
       checkTablet?: boolean;
     } = {}
   ): Promise<MobileOptimizationResult> {
-    const { timeout = 30000, checkPerformance = true, checkTablet = true } = options;
+    const { timeout = 30000, checkPerformance = true, checkTablet: _checkTablet = true } = options;
 
     const timestamp = new Date();
 
@@ -322,13 +323,13 @@ class MobileOptimizationAnalyzer {
   /**
    * 分析视口配置
    */
-  private async analyzeViewport(page: any): Promise<ViewportAnalysis> {
+  private async analyzeViewport(page: Page): Promise<ViewportAnalysis> {
     const viewportData = await page.evaluate(() => {
       const viewportMeta = document.querySelector('meta[name="viewport"]');
       const content = viewportMeta ? viewportMeta.getAttribute('content') || '' : '';
 
       // 解析视口配置
-      const config: any = {
+      const config: Record<string, string | number | boolean> = {
         configured: !!viewportMeta,
         width: 0,
         height: 0,
@@ -345,7 +346,16 @@ class MobileOptimizationAnalyzer {
         });
       }
 
-      return config;
+      const width = typeof config.width === 'number' ? config.width : 0;
+      const height = typeof config.height === 'number' ? config.height : 0;
+      const initialScale = typeof config.initialScale === 'number' ? config.initialScale : 1;
+
+      return {
+        configured: Boolean(config.configured),
+        width,
+        height,
+        initialScale,
+      };
     });
 
     const issues: ViewportIssue[] = [];
@@ -360,7 +370,7 @@ class MobileOptimizationAnalyzer {
       });
       score = 0;
     } else {
-      if (!viewportData.width || viewportData.width === 'device-width') {
+      if (!viewportData.width) {
         // 正确配置
       } else {
         issues.push({
@@ -385,9 +395,9 @@ class MobileOptimizationAnalyzer {
 
     return {
       configured: viewportData.configured,
-      width: typeof viewportData.width === 'number' ? viewportData.width : 0,
-      height: typeof viewportData.height === 'number' ? viewportData.height : 0,
-      initialScale: typeof viewportData.initialScale === 'number' ? viewportData.initialScale : 1,
+      width: viewportData.width,
+      height: viewportData.height,
+      initialScale: viewportData.initialScale,
       issues,
       score: Math.max(0, score),
     };
@@ -396,11 +406,11 @@ class MobileOptimizationAnalyzer {
   /**
    * 分析响应式设计
    */
-  private async analyzeResponsiveDesign(page: any): Promise<ResponsiveDesignAnalysis> {
+  private async analyzeResponsiveDesign(page: Page): Promise<ResponsiveDesignAnalysis> {
     const responsiveData = await page.evaluate(() => {
       // 获取所有CSS规则
       const stylesheets = Array.from(document.styleSheets);
-      const mediaQueries: any[] = [];
+      const mediaQueries: Array<{ rule: string; cssText: string }> = [];
 
       try {
         stylesheets.forEach(stylesheet => {
@@ -415,11 +425,11 @@ class MobileOptimizationAnalyzer {
                 });
               }
             });
-          } catch (e) {
+          } catch {
             // 跨域样式表访问限制
           }
         });
-      } catch (e) {
+      } catch {
         // 样式表访问限制
       }
 
@@ -446,37 +456,45 @@ class MobileOptimizationAnalyzer {
     });
 
     // 分析媒体查询
-    const mediaQueries: MediaQuery[] = responsiveData.mediaQueries.map((mq: any) => {
-      const issues: string[] = [];
-      let valid = true;
+    const mediaQueries: MediaQuery[] = responsiveData.mediaQueries.map(
+      (mq: { rule: string; cssText: string }) => {
+        const issues: string[] = [];
+        let valid = true;
 
-      // 简化的媒体查询解析
-      const minWidthMatch = mq.rule.match(/min-width:\s*(\d+)px/);
-      const maxWidthMatch = mq.rule.match(/max-width:\s*(\d+)px/);
+        // 简化的媒体查询解析
+        const minWidthMatch = mq.rule.match(/min-width:\s*(\d+)px/);
+        const maxWidthMatch = mq.rule.match(/max-width:\s*(\d+)px/);
 
-      if (!minWidthMatch && !maxWidthMatch) {
-        issues.push('缺少宽度断点');
-        valid = false;
+        if (!minWidthMatch && !maxWidthMatch) {
+          issues.push('缺少宽度断点');
+          valid = false;
+        }
+
+        return {
+          rule: mq.rule,
+          minWidth: minWidthMatch ? Number(minWidthMatch[1]) : undefined,
+          maxWidth: maxWidthMatch ? Number(maxWidthMatch[1]) : undefined,
+          valid,
+          issues,
+        };
       }
-
-      return {
-        rule: mq.rule,
-        minWidth: minWidthMatch ? Number(minWidthMatch[1]) : undefined,
-        maxWidth: maxWidthMatch ? Number(maxWidthMatch[1]) : undefined,
-        valid,
-        issues,
-      };
-    });
+    );
 
     // 分析断点
-    const breakpoints: Breakpoint[] = responsiveData.breakpoints.map((bp: any) => ({
-      width: bp.width,
-      type: bp.type,
-      detected: mediaQueries.some(
-        mq => (mq.minWidth && mq.minWidth <= bp.width) || (mq.maxWidth && mq.maxWidth >= bp.width)
-      ),
-      issues: [],
-    }));
+    const breakpoints: Breakpoint[] = responsiveData.breakpoints.map(
+      (bp: { width: number; type: string }) => {
+        const type = bp.type as Breakpoint['type'];
+        return {
+          width: bp.width,
+          type,
+          detected: mediaQueries.some(
+            mq =>
+              (mq.minWidth && mq.minWidth <= bp.width) || (mq.maxWidth && mq.maxWidth >= bp.width)
+          ),
+          issues: [],
+        };
+      }
+    );
 
     // 分析布局适配
     const layoutAdaptation: LayoutAdaptation = {
@@ -523,14 +541,20 @@ class MobileOptimizationAnalyzer {
   /**
    * 分析触摸目标
    */
-  private async analyzeTouchTargets(page: any): Promise<TouchTargetAnalysis> {
+  private async analyzeTouchTargets(page: Page): Promise<TouchTargetAnalysis> {
     const touchData = await page.evaluate(() => {
       const clickableElements = document.querySelectorAll(
         'a, button, input, select, textarea, [onclick], [role="button"]'
       );
-      const targets: any[] = [];
+      const targets: Array<{
+        element: string;
+        size: { width: number; height: number };
+        position: { x: number; y: number };
+        valid: boolean;
+        issues: string[];
+      }> = [];
 
-      clickableElements.forEach((element, index) => {
+      clickableElements.forEach(element => {
         const htmlElement = element as HTMLElement;
         const rect = htmlElement.getBoundingClientRect();
 
@@ -552,7 +576,7 @@ class MobileOptimizationAnalyzer {
       return targets;
     });
 
-    const targets: TouchTarget[] = touchData.map((target: any) => {
+    const targets: TouchTarget[] = touchData.map(target => {
       const issues: string[] = [];
       let valid = true;
 
@@ -582,7 +606,9 @@ class MobileOptimizationAnalyzer {
     const total = targets.length;
     const valid = targets.filter(t => t.valid).length;
     const averageSize =
-      targets.reduce((sum, t) => sum + (t.size.width + t.size.height) / 2, 0) / total;
+      total > 0
+        ? targets.reduce((sum: number, t) => sum + (t.size.width + t.size.height) / 2, 0) / total
+        : 0;
 
     const issuesMap: Record<string, TouchIssue> = {};
     targets.forEach(target => {
@@ -616,7 +642,7 @@ class MobileOptimizationAnalyzer {
   /**
    * 分析字体排版
    */
-  private async analyzeTypography(page: any): Promise<TypographyAnalysis> {
+  private async analyzeTypography(page: Page): Promise<TypographyAnalysis> {
     const typographyData = await page.evaluate(() => {
       const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, span, div');
       const fontSizes: number[] = [];
@@ -633,23 +659,54 @@ class MobileOptimizationAnalyzer {
         if (!isNaN(lineHeight)) lineHeights.push(lineHeight);
       });
 
-      // 检查对比度（简化）
-      const contrast = 4.5; // 假设值
+      const parseColor = (value: string): [number, number, number] => {
+        const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+        if (!match) return [0, 0, 0];
+        return [Number(match[1]), Number(match[2]), Number(match[3])];
+      };
+
+      const luminance = (rgb: [number, number, number]): number => {
+        const transform = (channel: number) => {
+          const value = channel / 255;
+          return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+        };
+        return 0.2126 * transform(rgb[0]) + 0.7152 * transform(rgb[1]) + 0.0722 * transform(rgb[2]);
+      };
+
+      const bodyStyles = window.getComputedStyle(document.body);
+      const textColor = parseColor(bodyStyles.color);
+      const backgroundColor = parseColor(bodyStyles.backgroundColor || 'rgb(255,255,255)');
+      const textLum = luminance(textColor);
+      const backgroundLum = luminance(backgroundColor);
+      const contrast =
+        (Math.max(textLum, backgroundLum) + 0.05) / (Math.min(textLum, backgroundLum) + 0.05);
+
+      const averageFontSize = fontSizes.length
+        ? fontSizes.reduce((sum: number, size: number) => sum + size, 0) / fontSizes.length
+        : 0;
+      const averageLineHeight = lineHeights.length
+        ? lineHeights.reduce((sum: number, height: number) => sum + height, 0) / lineHeights.length
+        : 0;
+      const spacing = averageFontSize > 0 ? averageLineHeight / averageFontSize : 0;
 
       return {
         fontSizes,
         lineHeights,
         contrast,
+        spacing,
       };
     });
 
     // 字体大小分析
+    const minFontSize = typographyData.fontSizes.length ? Math.min(...typographyData.fontSizes) : 0;
+    const avgFontSize = typographyData.fontSizes.length
+      ? typographyData.fontSizes.reduce((sum: number, size: number) => sum + size, 0) /
+        typographyData.fontSizes.length
+      : 0;
     const fontSizeAnalysis: FontSizeAnalysis = {
-      minimum: Math.min(...typographyData.fontSizes),
-      average:
-        typographyData.fontSizes.reduce((sum, size) => sum + size, 0) /
-        typographyData.fontSizes.length,
-      valid: Math.min(...typographyData.fontSizes) >= this.thresholds.minFontSize,
+      minimum: minFontSize,
+      average: avgFontSize,
+      valid: minFontSize >= this.thresholds.minFontSize,
       issues: [],
     };
 
@@ -660,12 +717,17 @@ class MobileOptimizationAnalyzer {
     }
 
     // 行高分析
+    const minLineHeight = typographyData.lineHeights.length
+      ? Math.min(...typographyData.lineHeights)
+      : 0;
+    const avgLineHeight = typographyData.lineHeights.length
+      ? typographyData.lineHeights.reduce((sum: number, height: number) => sum + height, 0) /
+        typographyData.lineHeights.length
+      : 0;
     const lineHeightAnalysis: LineHeightAnalysis = {
-      minimum: Math.min(...typographyData.lineHeights),
-      average:
-        typographyData.lineHeights.reduce((sum, height) => sum + height, 0) /
-        typographyData.lineHeights.length,
-      valid: Math.min(...typographyData.lineHeights) >= 1.2,
+      minimum: minLineHeight,
+      average: avgLineHeight,
+      valid: minLineHeight >= 1.2,
       issues: [],
     };
 
@@ -676,7 +738,7 @@ class MobileOptimizationAnalyzer {
     // 可读性分析
     const readabilityAnalysis: ReadabilityAnalysis = {
       contrast: typographyData.contrast,
-      spacing: 1.5, // 假设值
+      spacing: typographyData.spacing,
       issues: [],
     };
 
@@ -729,7 +791,7 @@ class MobileOptimizationAnalyzer {
   /**
    * 分析内容适配
    */
-  private async analyzeContentFit(page: any): Promise<ContentFitAnalysis> {
+  private async analyzeContentFit(page: Page): Promise<ContentFitAnalysis> {
     const contentFitData = await page.evaluate(() => {
       const body = document.body;
       const html = document.documentElement;
@@ -818,7 +880,7 @@ class MobileOptimizationAnalyzer {
   /**
    * 分析性能
    */
-  private async analyzePerformance(page: any): Promise<PerformanceAnalysis> {
+  private async analyzePerformance(page: Page): Promise<PerformanceAnalysis> {
     const performanceData = await page.evaluate(() => {
       const navigation = performance.getEntriesByType(
         'navigation'
@@ -921,8 +983,8 @@ class MobileOptimizationAnalyzer {
     responsiveDesign: ResponsiveDesignAnalysis,
     touchTargets: TouchTargetAnalysis,
     typography: TypographyAnalysis,
-    contentFit: ContentFitAnalysis,
-    performance: PerformanceAnalysis
+    _contentFit: ContentFitAnalysis,
+    _performance: PerformanceAnalysis
   ): MobileRecommendation[] {
     const recommendations: MobileRecommendation[] = [];
 

@@ -3,6 +3,9 @@
  * 网站测试平台后端服务器
  */
 
+import type { Request, Response } from 'express';
+import type { Server } from 'http';
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -37,6 +40,9 @@ const runRoutes = require('./routes/runs');
 const scheduledRunRoutes = require('./routes/scheduledRuns');
 const scheduledRunController = require('./controllers/scheduledRunController');
 const ScheduledRunService = require('./services/runs/ScheduledRunService');
+const testScheduleService = require('./services/testing/testScheduleService');
+const registerTestEngines = require('./engines/core/registerEngines');
+const testEngineRegistry = require('./core/TestEngineRegistry');
 
 // 导入中间件
 const { responseFormatter } = require('./middleware/responseFormatter');
@@ -65,7 +71,7 @@ app.use(compression());
 // CORS配置
 app.use(
   cors({
-    origin(origin, callback) {
+    origin(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
       // 在开发环境允许所有源，生产环境使用配置的源
       if (NODE_ENV === 'development') {
         callback(null, true);
@@ -123,7 +129,7 @@ app.use(apiStats);
 app.use(responseFormatter);
 
 // 健康检查端点
-app.get('/health', (req, res) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -134,7 +140,7 @@ app.get('/health', (req, res) => {
 });
 
 // API信息端点
-app.get('/api/info', (req, res) => {
+app.get('/api/info', (_req: Request, res: Response) => {
   res.json({
     name: 'Test-Web Platform API',
     version: process.env.npm_package_version || '1.0.0',
@@ -189,7 +195,7 @@ if (NODE_ENV === 'production') {
     app.use(express.static(frontendBuildPath));
 
     // SPA路由支持
-    app.get('*', (req, res) => {
+    app.get('*', (_req: Request, res: Response) => {
       res.sendFile(path.join(frontendBuildPath, 'index.html'));
     });
   }
@@ -203,6 +209,9 @@ app.use(errorMiddleware);
 
 // 优雅关闭处理
 const gracefulShutdown = () => {
+  if (!server) {
+    process.exit(0);
+  }
   server.close(() => {
     console.log('✅ HTTP server closed');
 
@@ -214,7 +223,7 @@ const gracefulShutdown = () => {
           console.log('✅ Database connection closed');
           process.exit(0);
         })
-        .catch(err => {
+        .catch((err: unknown) => {
           console.error('❌ Error during database shutdown:', err);
           process.exit(1);
         });
@@ -235,12 +244,12 @@ process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
 // 处理未捕获的异常 - 使用统一错误处理系统
-process.on('uncaughtException', error => {
+process.on('uncaughtException', (error: Error) => {
   handleError(error, { type: 'uncaughtException', severity: 'CRITICAL' });
   gracefulShutdown();
 });
 
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   handleError(new Error(`Unhandled Rejection: ${reason}`), {
     type: 'unhandledRejection',
     severity: 'HIGH',
@@ -250,7 +259,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // 启动服务器
-const startServer = async () => {
+const startServer = async (): Promise<Server> => {
   try {
     console.log('🚀 Starting Test-Web Platform Backend...');
 
@@ -271,8 +280,15 @@ const startServer = async () => {
 
       const scheduledRunService = new ScheduledRunService();
       scheduledRunController.setScheduledRunService(scheduledRunService);
-      scheduledRunService.start().catch(error => {
+      scheduledRunService.start().catch((error: unknown) => {
         console.error('启动定时运行服务失败:', error);
+      });
+
+      testScheduleService.startScheduler(60000);
+
+      registerTestEngines();
+      testEngineRegistry.initialize().catch((error: unknown) => {
+        console.error('初始化测试引擎注册器失败:', error);
       });
     } else {
       console.warn('⚠️  Database connection failed, but server will continue...');
@@ -293,14 +309,14 @@ const startServer = async () => {
     server.headersTimeout = 66000; // 请求头超时
 
     return server;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 };
 
 // 导出服务器实例（用于测试）
-let server;
+let server: Server | null = null;
 
 if (require.main === module) {
   // 直接运行时启动服务器

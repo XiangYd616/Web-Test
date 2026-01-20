@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const Logger = require('../utils/logger');
-const { createEngine } = require('../services/testing/TestEngineFactory');
+const registry = require('../core/TestEngineRegistry');
+const { TestEngineType, TestStatus } = require('../../shared/types/testEngine.types');
 
 type SocketLike = {
   id: string;
@@ -151,36 +152,38 @@ class TestEventsHandler {
         config,
       });
 
-      const engine = createEngine('stress');
-
-      const testConfig = {
-        ...config,
-        onProgress: (progressData: Record<string, unknown>) => {
-          const percentage = Number((progressData as { percentage?: number }).percentage || 0);
+      const results = await registry.execute(
+        TestEngineType.STRESS,
+        {
+          ...(config as Record<string, unknown>),
+          metadata: {
+            ...(config as { metadata?: Record<string, unknown> }).metadata,
+            testId,
+          },
+        },
+        (progress: import('../../shared/types/testEngine.types').TestProgress) => {
+          const percentage = Number(progress.progress || 0);
           testSession.progress = percentage;
 
           this.io.to(testId).emit('stress:progress', {
             testId,
             percentage,
-            stage: (progressData as { stage?: string }).stage,
-            message: (progressData as { message?: string }).message,
-            stats: (progressData as { stats?: unknown }).stats,
+            stage: progress.currentStep,
+            message: progress.messages?.[progress.messages.length - 1],
             timestamp: new Date().toISOString(),
           });
-        },
-      };
+        }
+      );
 
-      const results = await engine.executeTest(testConfig);
-
-      testSession.status = results.success ? 'completed' : 'failed';
+      testSession.status = results.status === TestStatus.COMPLETED ? 'completed' : 'failed';
       testSession.progress = 100;
       testSession.endTime = new Date();
       testSession.results = results;
 
       this.io.to(testId).emit('stress:completed', {
         testId,
-        success: results.success,
-        results: results.results,
+        success: results.status === TestStatus.COMPLETED,
+        results: results.details,
         timestamp: new Date().toISOString(),
       });
 
@@ -270,18 +273,23 @@ class TestEventsHandler {
         config,
       });
 
-      const engine = createEngine('api');
-      const results = await engine.executeTest(config);
+      const results = await registry.execute(TestEngineType.API, {
+        ...(config as Record<string, unknown>),
+        metadata: {
+          ...(config as { metadata?: Record<string, unknown> }).metadata,
+          testId,
+        },
+      });
 
-      testSession.status = results.success ? 'completed' : 'failed';
+      testSession.status = results.status === TestStatus.COMPLETED ? 'completed' : 'failed';
       testSession.progress = 100;
       testSession.endTime = new Date();
       testSession.results = results;
 
       this.io.to(testId).emit('api:completed', {
         testId,
-        success: results.success,
-        results: results.results,
+        success: results.status === TestStatus.COMPLETED,
+        results: results.details,
         timestamp: new Date().toISOString(),
       });
 
@@ -341,20 +349,25 @@ class TestEventsHandler {
         }
       }, 2000);
 
-      const engine = createEngine('performance');
-      const results = await engine.executeTest(config);
+      const results = await registry.execute(TestEngineType.PERFORMANCE, {
+        ...(config as Record<string, unknown>),
+        metadata: {
+          ...(config as { metadata?: Record<string, unknown> }).metadata,
+          testId,
+        },
+      });
 
       clearInterval(progressInterval);
 
-      testSession.status = results.success ? 'completed' : 'failed';
+      testSession.status = results.status === TestStatus.COMPLETED ? 'completed' : 'failed';
       testSession.progress = 100;
       testSession.endTime = new Date();
       testSession.results = results;
 
       this.io.to(testId).emit('performance:completed', {
         testId,
-        success: results.success,
-        results: results.results,
+        success: results.status === TestStatus.COMPLETED,
+        results: results.details,
         timestamp: new Date().toISOString(),
       });
 

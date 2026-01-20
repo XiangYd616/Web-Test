@@ -1,15 +1,19 @@
-const { createEngine } = require('./TestEngineFactory');
+import type { TestProgress } from '../../../shared/types/testEngine.types';
+
 const { query } = require('../../config/database');
 const testRepository = require('../../repositories/testRepository');
+const registry = require('../../core/TestEngineRegistry');
+const { TestEngineType, TestStatus } = require('../../../shared/types/testEngine.types');
 
 type EngineProgress = Record<string, unknown> & { testId?: string };
 
 type EngineInstance = {
+  executeTest: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>;
   setProgressCallback: (callback: (progress: EngineProgress) => void) => void;
   setCompletionCallback: (callback: (results: Record<string, unknown>) => void) => void;
   setErrorCallback: (callback: (error: Error) => void) => void;
   getTestStatus: (testId: string) => unknown;
-  stopTest: (testId: string) => Promise<boolean> | boolean;
+  stopTest: (testId: string) => Promise<void> | void;
 };
 
 type SocketLike = {
@@ -32,6 +36,14 @@ class UserTestManager {
 
   constructor() {
     Logger.info('用户测试管理器初始化完成');
+  }
+
+  private resolveEngineType(engineType: string) {
+    const types = Object.values(TestEngineType) as string[];
+    if (!types.includes(engineType)) {
+      throw new Error(`未知测试引擎类型: ${engineType}`);
+    }
+    return engineType as (typeof TestEngineType)[keyof typeof TestEngineType];
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {
@@ -68,7 +80,54 @@ class UserTestManager {
     }
 
     const engineType = testType || 'stress';
-    const testEngine = createEngine(engineType) as EngineInstance;
+    const resolvedType = this.resolveEngineType(engineType);
+    let progressCallback: ((progress: EngineProgress) => void) | null = null;
+    let completionCallback: ((results: Record<string, unknown>) => void) | null = null;
+    let errorCallback: ((error: Error) => void) | null = null;
+
+    const testEngine: EngineInstance = {
+      executeTest: async (payload: Record<string, unknown>) => {
+        const config = {
+          ...payload,
+          metadata: {
+            ...(payload.metadata as Record<string, unknown>),
+            testId,
+          },
+        } as Record<string, unknown>;
+
+        try {
+          const result = await registry.execute(resolvedType, config, (progress: TestProgress) => {
+            if (!progressCallback) return;
+            progressCallback({
+              testId,
+              progress: progress.progress,
+              message: progress.currentStep,
+              status: progress.status,
+            });
+          });
+          if (completionCallback) {
+            completionCallback(result as Record<string, unknown>);
+          }
+          return result as Record<string, unknown>;
+        } catch (error) {
+          if (errorCallback) {
+            errorCallback(error as Error);
+          }
+          throw error;
+        }
+      },
+      setProgressCallback: callback => {
+        progressCallback = callback;
+      },
+      setCompletionCallback: callback => {
+        completionCallback = callback;
+      },
+      setErrorCallback: callback => {
+        errorCallback = callback;
+      },
+      getTestStatus: id => registry.getTestStatus(id),
+      stopTest: id => registry.cancel(id),
+    };
 
     testEngine.setProgressCallback(progress => {
       this.sendToUser(userId, 'test-progress', {
@@ -261,7 +320,13 @@ class UserTestManager {
         execution.started_at,
         execution.created_at
       );
-      await testRepository.markCompleted(testId, executionTime);
+
+      const status = (results as { status?: string }).status;
+      if (status && status !== TestStatus.COMPLETED) {
+        await testRepository.markFailed(testId, errors[0] ? String(errors[0]) : '测试失败');
+      } else {
+        await testRepository.markCompleted(testId, executionTime);
+      }
 
       await this.insertExecutionLog(testId, 'info', '测试完成', {
         score,
@@ -280,7 +345,16 @@ class UserTestManager {
     const nested = results as {
       results?: Record<string, unknown>;
       summary?: Record<string, unknown>;
+      details?: Record<string, unknown>;
     };
+
+    if (nested.details && this.isRecord(nested.details)) {
+      const detailSummary = (nested.details as { summary?: Record<string, unknown> }).summary;
+      if (detailSummary && this.isRecord(detailSummary)) {
+        return detailSummary;
+      }
+      return nested.details;
+    }
 
     if (nested.results?.summary && this.isRecord(nested.results.summary)) {
       return nested.results.summary;
@@ -301,6 +375,8 @@ class UserTestManager {
     const directScore =
       (results as { score?: number }).score ??
       (results as { overallScore?: number }).overallScore ??
+      (results as { details?: { score?: number; overallScore?: number } }).details?.score ??
+      (results as { details?: { score?: number; overallScore?: number } }).details?.overallScore ??
       (summary as { score?: number }).score ??
       (summary as { overallScore?: number }).overallScore;
 
@@ -313,10 +389,12 @@ class UserTestManager {
 
   private extractArray(results: Record<string, unknown>, field: 'warnings' | 'errors'): unknown[] {
     const fromRoot = (results as Record<string, unknown>)[field];
+    const fromDetails = (results as { details?: Record<string, unknown> }).details?.[field];
     const nested = results as { results?: Record<string, unknown> };
     const fromNested = nested.results?.[field];
 
     if (Array.isArray(fromRoot)) return fromRoot;
+    if (Array.isArray(fromDetails)) return fromDetails;
     if (Array.isArray(fromNested)) return fromNested;
     return [];
   }
@@ -338,6 +416,7 @@ class UserTestManager {
   private buildMetricsFromResults(results: Record<string, unknown>, resultId: number) {
     const metricsSource =
       (results as { metrics?: Record<string, unknown> }).metrics ||
+      (results as { details?: { metrics?: Record<string, unknown> } }).details?.metrics ||
       (results as { results?: { metrics?: Record<string, unknown> } }).results?.metrics ||
       (results as { results?: { summary?: { metrics?: Record<string, unknown> } } }).results
         ?.summary?.metrics ||

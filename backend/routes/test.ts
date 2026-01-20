@@ -131,6 +131,74 @@ router.get('/:testId/export', authMiddleware, asyncHandler(testController.export
 router.get('/history', authMiddleware, asyncHandler(testController.getTestHistory));
 
 /**
+ * 获取测试调度列表
+ * GET /api/test/schedules
+ */
+router.get('/schedules', authMiddleware, asyncHandler(testController.getSchedules));
+
+/**
+ * 获取测试调度详情
+ * GET /api/test/schedules/:scheduleId
+ */
+router.get(
+  '/schedules/:scheduleId',
+  authMiddleware,
+  asyncHandler(testController.getScheduleDetail)
+);
+
+/**
+ * 创建测试调度
+ * POST /api/test/schedules
+ */
+router.post('/schedules', authMiddleware, asyncHandler(testController.createSchedule));
+
+/**
+ * 更新测试调度
+ * PUT /api/test/schedules/:scheduleId
+ */
+router.put('/schedules/:scheduleId', authMiddleware, asyncHandler(testController.updateSchedule));
+
+/**
+ * 删除测试调度
+ * DELETE /api/test/schedules/:scheduleId
+ */
+router.delete(
+  '/schedules/:scheduleId',
+  authMiddleware,
+  asyncHandler(testController.deleteSchedule)
+);
+
+/**
+ * 启用/暂停调度
+ * POST /api/test/schedules/:scheduleId/toggle
+ */
+router.post(
+  '/schedules/:scheduleId/toggle',
+  authMiddleware,
+  asyncHandler(testController.toggleSchedule)
+);
+
+/**
+ * 立即执行调度任务
+ * POST /api/test/schedules/:scheduleId/execute
+ */
+router.post(
+  '/schedules/:scheduleId/execute',
+  authMiddleware,
+  asyncHandler(testController.executeSchedule)
+);
+
+/**
+ * 获取调度执行记录
+ * GET /api/test/schedules/:scheduleId/runs
+ */
+router.get(
+  '/schedules/:scheduleId/runs',
+  authMiddleware,
+  asyncHandler(testController.getScheduleRuns)
+);
+
+/**
  * 获取测试模板列表
  * GET /api/test/templates
  */
