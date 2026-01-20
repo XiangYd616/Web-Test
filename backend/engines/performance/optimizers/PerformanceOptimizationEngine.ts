@@ -796,7 +796,8 @@ module.exports = {
       if (rules && 'rules' in rules) {
         rules.rules.forEach(rule => {
           if (rule.condition(analysisData.metrics)) {
-            optimizations.push(this.createOptimization(rule, metric));
+            const scale = this.calculateImpactScale(metric, analysisData, rules.threshold);
+            optimizations.push(this.createOptimization(rule, metric, scale));
           }
         });
       }
@@ -810,7 +811,8 @@ module.exports = {
         ];
       rules.forEach(rule => {
         if (rule.condition(analysisData.resources)) {
-          optimizations.push(this.createOptimization(rule, resourceType));
+          const scale = this.calculateImpactScale(resourceType, analysisData);
+          optimizations.push(this.createOptimization(rule, resourceType, scale));
         }
       });
     });
@@ -821,7 +823,8 @@ module.exports = {
         this.optimizationRules.network[networkType as keyof typeof this.optimizationRules.network];
       rules.forEach(rule => {
         if (rule.condition(analysisData.network)) {
-          optimizations.push(this.createOptimization(rule, networkType));
+          const scale = this.calculateImpactScale(networkType, analysisData);
+          optimizations.push(this.createOptimization(rule, networkType, scale));
         }
       });
     });
@@ -832,7 +835,8 @@ module.exports = {
         this.optimizationRules.code[codeType as keyof typeof this.optimizationRules.code];
       rules.forEach(rule => {
         if (rule.condition(analysisData.code)) {
-          optimizations.push(this.createOptimization(rule, codeType));
+          const scale = this.calculateImpactScale(codeType, analysisData);
+          optimizations.push(this.createOptimization(rule, codeType, scale));
         }
       });
     });
@@ -862,8 +866,14 @@ module.exports = {
    */
   private createOptimization<TMetrics>(
     rule: OptimizationRule<TMetrics>,
-    category: string
+    category: string,
+    scale = 1
   ): Optimization {
+    const impact = {
+      time: Math.round(rule.impact.time * scale),
+      size: Math.round(rule.impact.size * scale),
+      score: Math.round(rule.impact.score * Math.min(scale, 2)),
+    };
     return {
       id: this.generateId(),
       title: rule.title,
@@ -872,11 +882,75 @@ module.exports = {
       category,
       solutions: rule.solutions,
       codeExamples: rule.codeExamples,
-      impact: rule.impact,
+      impact,
       effort: rule.effort,
       dependencies: rule.dependencies,
       status: 'pending',
     };
+  }
+
+  private calculateImpactScale(
+    category: string,
+    analysisData: OptimizationAnalysisData,
+    threshold?: number
+  ): number {
+    const clamp = (value: number, min = 1, max = 2.5) => Math.max(min, Math.min(max, value));
+
+    if (['fcp', 'lcp', 'fid', 'cls', 'ttfb'].includes(category)) {
+      const metricValue = analysisData.metrics[category as keyof CoreWebVitalsMetrics];
+      if (threshold && metricValue) {
+        return clamp(metricValue / threshold);
+      }
+      return 1;
+    }
+
+    if (['images', 'scripts', 'stylesheets', 'fonts'].includes(category)) {
+      const resourceBaselines: Record<string, number> = {
+        images: 500 * 1024,
+        scripts: 20,
+        stylesheets: 5,
+        fonts: 100 * 1024,
+      };
+      const valueMap: Record<string, number> = {
+        images: analysisData.resources.imageSize,
+        scripts: analysisData.resources.scriptCount,
+        stylesheets: analysisData.resources.stylesheetCount,
+        fonts: analysisData.resources.fontSize,
+      };
+      const baseline = resourceBaselines[category] || 1;
+      const value = valueMap[category] || 0;
+      return clamp(value / baseline);
+    }
+
+    if (['compression', 'caching', 'cdn'].includes(category)) {
+      if (category === 'compression') {
+        return clamp(analysisData.network.compressionRatio / 0.7);
+      }
+      if (category === 'caching') {
+        return clamp(1 + Math.max(0, 80 - analysisData.network.cacheHitRate) / 80);
+      }
+      if (category === 'cdn') {
+        return analysisData.network.usingCDN ? 1 : 1.5;
+      }
+    }
+
+    if (['javascript', 'css', 'html'].includes(category)) {
+      const codeBaselines: Record<string, number> = {
+        javascript: 100,
+        css: 800,
+        html: 20,
+      };
+      const valueMap: Record<string, number> = {
+        javascript: analysisData.code.unusedCode,
+        css: analysisData.code.cssComplexity,
+        html: analysisData.code.domDepth,
+      };
+      const baseline = codeBaselines[category] || 1;
+      const value = valueMap[category] || 0;
+      return clamp(value / baseline);
+    }
+
+    return 1;
   }
 
   /**

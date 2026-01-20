@@ -4,7 +4,7 @@
  * 分析页面资源加载性能、优化建议等
  */
 
-import puppeteer from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
 
 interface ResourceTypes {
   document: string[];
@@ -136,9 +136,25 @@ interface BundlingOpportunity {
   potentialSavings: number;
 }
 
+interface ResourceEntrySnapshot {
+  url: string;
+  type: string;
+  size: number;
+  compressedSize: number;
+  loadTime: number;
+  startTime: number;
+  endTime: number;
+  cached: boolean;
+  initiatorType: string;
+}
+
 class ResourceAnalyzer {
   private resourceTypes: ResourceTypes;
   private thresholds: ResourceThresholds;
+  private responseMetadata: Map<
+    string,
+    { status: number; headers: Record<string, string>; mimeType: string }
+  > = new Map();
 
   constructor() {
     // 资源类型分类
@@ -217,17 +233,22 @@ class ResourceAnalyzer {
       await page.setUserAgent(userAgent);
 
       // 开始资源监控
-      const resourceData = await this.startResourceMonitoring(page, analyzeHeaders);
+      this.responseMetadata.clear();
+      await this.startResourceMonitoring(page, analyzeHeaders, this.responseMetadata);
 
       // 导航到页面
       const navigationStart = Date.now();
       await page.goto(url, { waitUntil: 'networkidle0', timeout });
 
       // 等待页面完全加载
-      await page.waitFor(waitTime);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
 
       // 收集资源数据
-      const resources = await this.collectResourceData(page, navigationStart);
+      const resources = await this.collectResourceData(
+        page,
+        navigationStart,
+        this.responseMetadata
+      );
 
       // 分析资源
       const analysis = this.analyzeResources(resources);
@@ -244,10 +265,38 @@ class ResourceAnalyzer {
   /**
    * 开始资源监控
    */
-  private async startResourceMonitoring(page: any, analyzeHeaders: boolean): Promise<void> {
+  private async startResourceMonitoring(
+    page: Page,
+    analyzeHeaders: boolean,
+    responseMetadata: Map<
+      string,
+      { status: number; headers: Record<string, string>; mimeType: string }
+    >
+  ): Promise<void> {
+    if (analyzeHeaders) {
+      page.on('response', response => {
+        const headers = response.headers();
+        const normalizedHeaders: Record<string, string> = {};
+        Object.entries(headers).forEach(([key, value]) => {
+          normalizedHeaders[key.toLowerCase()] = String(value);
+        });
+        const contentType = normalizedHeaders['content-type'] || '';
+        const mimeType = contentType.split(';')[0] || response.request().resourceType();
+        responseMetadata.set(response.url(), {
+          status: response.status(),
+          headers: normalizedHeaders,
+          mimeType,
+        });
+      });
+    }
+
     await page.evaluateOnNewDocument(() => {
-      if (!(window as any).__resourceEntries) {
-        (window as any).__resourceEntries = [];
+      const resourceWindow = window as unknown as {
+        __resourceEntries?: ResourceEntrySnapshot[];
+        __getResourceType?: (url: string) => string;
+      };
+      if (!resourceWindow.__resourceEntries) {
+        resourceWindow.__resourceEntries = [];
       }
 
       // 监控资源加载
@@ -255,26 +304,26 @@ class ResourceAnalyzer {
         const entries = entryList.getEntries();
         entries.forEach(entry => {
           if (entry.entryType === 'resource') {
-            const resourceData = {
-              name: entry.name,
-              type: this.getResourceType(entry.name),
-              startTime: entry.startTime,
-              duration: entry.duration,
-              transferSize: entry.transferSize || 0,
-              encodedBodySize: entry.encodedBodySize || 0,
-              decodedBodySize: entry.decodedBodySize || 0,
-              responseStart: entry.responseStart || 0,
-              responseEnd: entry.responseEnd || 0,
-              initiatorType: entry.initiatorType || 'other',
+            const resourceEntry = entry as PerformanceResourceTiming;
+            const resourceData: ResourceEntrySnapshot = {
+              url: resourceEntry.name,
+              type: resourceWindow.__getResourceType?.(resourceEntry.name) || 'other',
+              size: resourceEntry.decodedBodySize || 0,
+              compressedSize: resourceEntry.encodedBodySize || 0,
+              loadTime: resourceEntry.duration || 0,
+              startTime: resourceEntry.startTime || 0,
+              endTime: (resourceEntry.startTime || 0) + (resourceEntry.duration || 0),
+              cached: resourceEntry.transferSize === 0 && resourceEntry.decodedBodySize > 0,
+              initiatorType: resourceEntry.initiatorType || 'other',
             };
 
-            (window as any).__resourceEntries.push(resourceData);
+            resourceWindow.__resourceEntries?.push(resourceData);
           }
         });
       }).observe({ entryTypes: ['resource'] });
 
       // 获取资源类型
-      (window as any).__getResourceType = function (url: string): string {
+      resourceWindow.__getResourceType = function (url: string): string {
         const extension = url.split('.').pop()?.toLowerCase();
 
         if (extension) {
@@ -312,28 +361,39 @@ class ResourceAnalyzer {
   /**
    * 收集资源数据
    */
-  private async collectResourceData(page: any, navigationStart: number): Promise<ResourceInfo[]> {
+  private async collectResourceData(
+    page: Page,
+    navigationStart: number,
+    responseMetadata: Map<
+      string,
+      { status: number; headers: Record<string, string>; mimeType: string }
+    >
+  ): Promise<ResourceInfo[]> {
     const data = await page.evaluate(() => {
-      const entries = (window as any).__resourceEntries || [];
-
-      return entries.map((entry: any) => ({
-        url: entry.name,
-        type: entry.type,
-        size: entry.decodedBodySize,
-        compressedSize: entry.encodedBodySize,
-        loadTime: entry.duration,
-        startTime: entry.startTime,
-        endTime: entry.startTime + entry.duration,
-        cached: entry.transferSize === 0 && entry.decodedBodySize > 0,
-        renderBlocking: this.isRenderBlocking(entry.type, entry.initiatorType),
-        priority: this.getResourcePriority(entry.type, entry.duration),
-        responseCode: 200, // 默认值，实际需要通过其他方式获取
-        mimeType: this.getMimeType(entry.name),
-        headers: {}, // 简化实现
-      }));
+      const resourceWindow = window as unknown as {
+        __resourceEntries?: ResourceEntrySnapshot[];
+      };
+      return resourceWindow.__resourceEntries || [];
     });
 
-    return data;
+    return (data as ResourceEntrySnapshot[]).map(entry => {
+      const responseInfo = responseMetadata.get(entry.url);
+      return {
+        url: entry.url,
+        type: entry.type,
+        size: entry.size,
+        compressedSize: entry.compressedSize,
+        loadTime: entry.loadTime,
+        startTime: entry.startTime + navigationStart,
+        endTime: entry.endTime + navigationStart,
+        cached: entry.cached,
+        renderBlocking: this.isRenderBlocking(entry.type, entry.initiatorType),
+        priority: this.getResourcePriority(entry.type, entry.loadTime),
+        responseCode: responseInfo?.status ?? 0,
+        mimeType: responseInfo?.mimeType || this.getMimeType(entry.url),
+        headers: responseInfo?.headers || {},
+      } as ResourceInfo;
+    });
   }
 
   /**
@@ -443,32 +503,86 @@ class ResourceAnalyzer {
     xhr: ResourceCategoryResult;
     other: ResourceCategoryResult;
   } {
-    const categories: any = {};
-
-    // 初始化分类
-    Object.keys(this.resourceTypes).forEach(type => {
-      categories[type] = {
+    const categories: Record<keyof ResourceTypes, ResourceCategoryResult> = {
+      document: {
         count: 0,
         size: 0,
         compressedSize: 0,
         averageLoadTime: 0,
         score: 100,
         issues: [],
-      };
-    });
+      },
+      script: {
+        count: 0,
+        size: 0,
+        compressedSize: 0,
+        averageLoadTime: 0,
+        score: 100,
+        issues: [],
+      },
+      stylesheet: {
+        count: 0,
+        size: 0,
+        compressedSize: 0,
+        averageLoadTime: 0,
+        score: 100,
+        issues: [],
+      },
+      image: {
+        count: 0,
+        size: 0,
+        compressedSize: 0,
+        averageLoadTime: 0,
+        score: 100,
+        issues: [],
+      },
+      font: {
+        count: 0,
+        size: 0,
+        compressedSize: 0,
+        averageLoadTime: 0,
+        score: 100,
+        issues: [],
+      },
+      media: {
+        count: 0,
+        size: 0,
+        compressedSize: 0,
+        averageLoadTime: 0,
+        score: 100,
+        issues: [],
+      },
+      xhr: {
+        count: 0,
+        size: 0,
+        compressedSize: 0,
+        averageLoadTime: 0,
+        score: 100,
+        issues: [],
+      },
+      other: {
+        count: 0,
+        size: 0,
+        compressedSize: 0,
+        averageLoadTime: 0,
+        score: 100,
+        issues: [],
+      },
+    };
 
     // 分类统计
     resources.forEach(resource => {
       const category = resource.type;
-      if (categories[category]) {
-        categories[category].count++;
-        categories[category].size += resource.size;
-        categories[category].compressedSize += resource.compressedSize;
+      if (category in categories) {
+        const key = category as keyof ResourceTypes;
+        categories[key].count += 1;
+        categories[key].size += resource.size;
+        categories[key].compressedSize += resource.compressedSize;
       }
     });
 
     // 计算平均加载时间和分数
-    Object.keys(categories).forEach(type => {
+    (Object.keys(categories) as Array<keyof ResourceTypes>).forEach(type => {
       const categoryResources = resources.filter(r => r.type === type);
       const category = categories[type];
 
@@ -592,6 +706,11 @@ class ResourceAnalyzer {
     const imageIssues = issues.filter(i => i.resource.type === 'image' && i.type === 'size');
     if (imageIssues.length > 0) {
       const totalSavings = imageIssues.reduce((sum, issue) => sum + issue.resource.size * 0.5, 0);
+      const timeSavings = imageIssues.reduce((sum, issue) => {
+        const ratio =
+          issue.resource.size > 0 ? (issue.resource.size * 0.5) / issue.resource.size : 0;
+        return sum + issue.resource.loadTime * ratio;
+      }, 0);
       recommendations.push({
         category: 'images',
         priority: 'high',
@@ -600,7 +719,7 @@ class ResourceAnalyzer {
         resources: imageIssues.map(i => i.resource.url),
         savings: {
           size: totalSavings,
-          time: (totalSavings / (1024 * 1024)) * 1000, // 简化计算
+          time: Math.round(timeSavings),
         },
         effort: 'medium',
       });
@@ -610,6 +729,11 @@ class ResourceAnalyzer {
     const scriptIssues = issues.filter(i => i.resource.type === 'script');
     if (scriptIssues.length > 0) {
       const totalSavings = scriptIssues.reduce((sum, issue) => sum + issue.resource.size * 0.3, 0);
+      const timeSavings = scriptIssues.reduce((sum, issue) => {
+        const ratio =
+          issue.resource.size > 0 ? (issue.resource.size * 0.3) / issue.resource.size : 0;
+        return sum + issue.resource.loadTime * ratio;
+      }, 0);
       recommendations.push({
         category: 'scripts',
         priority: 'high',
@@ -618,7 +742,7 @@ class ResourceAnalyzer {
         resources: scriptIssues.map(i => i.resource.url),
         savings: {
           size: totalSavings,
-          time: (totalSavings / (1024 * 1024)) * 500,
+          time: Math.round(timeSavings),
         },
         effort: 'high',
       });
@@ -628,6 +752,11 @@ class ResourceAnalyzer {
     const cssIssues = issues.filter(i => i.resource.type === 'stylesheet');
     if (cssIssues.length > 0) {
       const totalSavings = cssIssues.reduce((sum, issue) => sum + issue.resource.size * 0.4, 0);
+      const timeSavings = cssIssues.reduce((sum, issue) => {
+        const ratio =
+          issue.resource.size > 0 ? (issue.resource.size * 0.4) / issue.resource.size : 0;
+        return sum + issue.resource.loadTime * ratio;
+      }, 0);
       recommendations.push({
         category: 'stylesheets',
         priority: 'medium',
@@ -636,7 +765,7 @@ class ResourceAnalyzer {
         resources: cssIssues.map(i => i.resource.url),
         savings: {
           size: totalSavings,
-          time: (totalSavings / (1024 * 1024)) * 300,
+          time: Math.round(timeSavings),
         },
         effort: 'medium',
       });

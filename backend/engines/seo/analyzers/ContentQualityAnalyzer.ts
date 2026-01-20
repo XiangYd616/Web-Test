@@ -418,7 +418,7 @@ class ContentQualityAnalyzer {
   private async extractContentData(page: Page): Promise<ContentData> {
     return await page.evaluate(() => {
       const title = document.title || '';
-      const content = document.body.innerText || '';
+      const content = (document.body as HTMLElement)?.textContent || '';
 
       // 提取标题
       const headings: ContentHeading[] = [];
@@ -427,7 +427,7 @@ class ContentQualityAnalyzer {
         elements.forEach((element, index) => {
           headings.push({
             level: i,
-            text: element.innerText || '',
+            text: (element as HTMLElement).textContent || '',
             position: index,
           });
         });
@@ -436,7 +436,7 @@ class ContentQualityAnalyzer {
       // 提取段落
       const paragraphs: string[] = [];
       document.querySelectorAll('p').forEach(p => {
-        const text = (p as HTMLElement).innerText || '';
+        const text = (p as HTMLElement).textContent || '';
         if (text.trim().length > 0) {
           paragraphs.push(text.trim());
         }
@@ -470,7 +470,7 @@ class ContentQualityAnalyzer {
       document.querySelectorAll('a[href]').forEach((link, index) => {
         links.push({
           href: (link as HTMLAnchorElement).href || '',
-          text: (link as HTMLElement).innerText || '',
+          text: (link as HTMLElement).textContent || '',
           title: (link as HTMLElement).title || '',
           position: index,
         });
@@ -492,7 +492,7 @@ class ContentQualityAnalyzer {
       // 提取示例
       const examples: string[] = [];
       document.querySelectorAll('code, pre, blockquote').forEach(element => {
-        const text = (element as HTMLElement).innerText || '';
+        const text = (element as HTMLElement).textContent || '';
         if (text.trim().length > 10) {
           examples.push(text.trim());
         }
@@ -705,10 +705,9 @@ class ContentQualityAnalyzer {
    * 分析独特性
    */
   private analyzeUniqueness(contentData: ContentData): UniquenessAnalysis {
-    // 简化的独特性分析
     const uniquenessScore = this.calculateUniqueness(contentData.content);
-    const duplicateContent: string[] = []; // 需要更复杂的检测
-    const originality = uniquenessScore;
+    const duplicateContent = this.extractDuplicatePhrases(contentData.content);
+    const originality = Math.max(0, Math.min(1, uniquenessScore - duplicateContent.length * 0.02));
 
     const issues: string[] = [];
     let score = 100;
@@ -734,7 +733,6 @@ class ContentQualityAnalyzer {
    * 语义分析
    */
   private analyzeSemantic(contentData: ContentData): SemanticAnalysis {
-    // 简化的语义分析
     const entities = this.extractEntities(contentData.content);
     const concepts = this.extractConcepts(contentData.content);
     const relationships = this.extractRelationships(contentData.content);
@@ -904,6 +902,63 @@ class ContentQualityAnalyzer {
       });
     }
 
+    if (uniqueness.score < 70) {
+      recommendations.push({
+        priority: 'high',
+        category: 'originality',
+        title: '提升内容原创度',
+        description: '检测到内容独特性不足，可能存在重复表达。',
+        impact: '增强内容差异化与权威度',
+        effort: 'medium',
+        examples: [
+          {
+            title: '原创性提升示例',
+            language: 'markdown',
+            code: '补充独家观点、案例或数据来源，以区分同质化内容。',
+            explanation: '增加原创观点和独特案例提升差异化',
+          },
+        ],
+      });
+    }
+
+    if (semantic.issues.length > 0) {
+      recommendations.push({
+        priority: 'medium',
+        category: 'semantic',
+        title: '增强语义连贯性',
+        description: '语义实体或概念覆盖不足，需补充关联信息。',
+        impact: '提升搜索引擎对主题的理解',
+        effort: 'medium',
+        examples: [
+          {
+            title: '语义优化示例',
+            language: 'markdown',
+            code: '补充相关概念、关键术语与关联实体，形成主题闭环。',
+            explanation: '通过语义扩展提升内容完整度',
+          },
+        ],
+      });
+    }
+
+    if (intent.score < 70 || intent.gaps.length > 0) {
+      recommendations.push({
+        priority: 'medium',
+        category: 'intent',
+        title: '对齐用户意图',
+        description: '检测到内容与目标意图存在偏差或需求缺口。',
+        impact: '提升内容命中用户需求的能力',
+        effort: 'medium',
+        examples: [
+          {
+            title: '意图对齐示例',
+            language: 'markdown',
+            code: '补充用户常见问题、操作步骤或购买决策信息。',
+            explanation: '围绕目标意图补齐关键内容',
+          },
+        ],
+      });
+    }
+
     // 参与度建议
     if (engagement.questions < this.qualityMetrics.engagement.minQuestions) {
       recommendations.push({
@@ -995,24 +1050,30 @@ class ContentQualityAnalyzer {
   }
 
   private analyzeTopics(content: string): TopicAnalysis[] {
-    // 简化的主题分析
-    const words = content.toLowerCase().split(/\s+/);
+    const tokens = content
+      .toLowerCase()
+      .split(/\s+/)
+      .map(word => word.replace(/[^\w\u4e00-\u9fff]/g, ''))
+      .filter(word => word.length > 2 && !this.stopWords.has(word));
     const wordFrequency: Record<string, number> = {};
+    const bigramFrequency: Record<string, number> = {};
 
-    words.forEach(word => {
-      const cleanWord = word.replace(/[^\w]/g, '');
-      if (cleanWord.length > 3 && !this.stopWords.has(cleanWord)) {
-        wordFrequency[cleanWord] = (wordFrequency[cleanWord] || 0) + 1;
-      }
+    tokens.forEach(word => {
+      wordFrequency[word] = (wordFrequency[word] || 0) + 1;
     });
 
-    const topics = Object.entries(wordFrequency)
+    for (let index = 0; index < tokens.length - 1; index += 1) {
+      const bigram = `${tokens[index]} ${tokens[index + 1]}`;
+      bigramFrequency[bigram] = (bigramFrequency[bigram] || 0) + 1;
+    }
+
+    const topics = Object.entries({ ...wordFrequency, ...bigramFrequency })
       .sort(([, a], [, b]) => b - a)
       .slice(0, 10)
       .map(([topic, frequency]) => ({
         topic,
-        coverage: frequency / words.length,
-        relevance: Math.min(1, frequency / 5),
+        coverage: tokens.length > 0 ? frequency / tokens.length : 0,
+        relevance: Math.min(1, frequency / 4),
         subtopics: [],
       }));
 
@@ -1109,85 +1170,162 @@ class ContentQualityAnalyzer {
   }
 
   private calculateUniqueness(content: string): number {
-    // 简化的独特性计算
-    const words = content.toLowerCase().split(/\s+/);
-    const uniqueWords = new Set(words.filter(w => w.length > 3 && !this.stopWords.has(w)));
-    return uniqueWords.size / words.length;
+    const tokens = content
+      .toLowerCase()
+      .split(/\s+/)
+      .map(word => word.replace(/[^\w\u4e00-\u9fff]/g, ''))
+      .filter(word => word.length > 2 && !this.stopWords.has(word));
+    if (tokens.length === 0) return 0;
+
+    const uniqueWords = new Set(tokens);
+    const unigramScore = uniqueWords.size / tokens.length;
+
+    const shingles = new Set<string>();
+    for (let i = 0; i < tokens.length - 2; i += 1) {
+      shingles.add(`${tokens[i]} ${tokens[i + 1]} ${tokens[i + 2]}`);
+    }
+    const shingleScore = shingles.size / Math.max(1, tokens.length - 2);
+
+    return Math.min(1, unigramScore * 0.6 + shingleScore * 0.4);
   }
 
   private extractEntities(content: string): SemanticEntity[] {
-    // 简化的实体提取
-    const entities: SemanticEntity[] = [];
-    const words = content.split(/\s+/);
+    const entityMap: Record<string, { count: number; positions: number[] }> = {};
+    const englishMatches = content.match(/\b[A-Z][a-z]{2,}(?:\s+[A-Z][a-z]{2,})*\b/g) || [];
+    const chineseMatches = content.match(/[\u4e00-\u9fff]{2,6}/g) || [];
+    const candidates = [...englishMatches, ...chineseMatches].map(text => text.trim());
 
-    words.forEach((word, index) => {
-      if (word.length > 4 && !this.stopWords.has(word.toLowerCase())) {
-        entities.push({
-          text: word,
-          type: 'unknown',
-          confidence: 0.5,
-          position: index,
-        });
+    candidates.forEach((text, index) => {
+      const lower = text.toLowerCase();
+      if (this.stopWords.has(lower)) return;
+      if (!entityMap[lower]) {
+        entityMap[lower] = { count: 0, positions: [] };
       }
+      entityMap[lower].count += 1;
+      entityMap[lower].positions.push(index);
     });
 
-    return entities.slice(0, 20);
+    return Object.entries(entityMap)
+      .sort(([, left], [, right]) => right.count - left.count)
+      .slice(0, 20)
+      .map(([text, data]) => ({
+        text,
+        type: 'entity',
+        confidence: Math.min(1, 0.4 + data.count * 0.1),
+        position: data.positions[0] ?? 0,
+      }));
   }
 
   private extractConcepts(content: string): SemanticConcept[] {
-    // 简化的概念提取
     const topics = this.analyzeTopics(content);
-    return topics.slice(0, 5).map(topic => ({
+    const concepts = topics.slice(0, 6).map(topic => ({
       concept: topic.topic,
-      weight: topic.relevance,
+      weight: Math.min(1, topic.relevance + topic.coverage),
       context: [topic.topic],
     }));
+    return concepts;
   }
 
   private extractRelationships(content: string): SemanticRelationship[] {
-    // 简化的关系提取
-    return [];
+    const entities = this.extractEntities(content);
+    const sentences = content.split(/[。！？.!?]+/).filter(s => s.trim().length > 0);
+    const relationshipMap: Record<string, { source: string; target: string; count: number }> = {};
+
+    sentences.forEach(sentence => {
+      const lowerSentence = sentence.toLowerCase();
+      const present = entities.filter(entity => lowerSentence.includes(entity.text.toLowerCase()));
+      for (let i = 0; i < present.length; i += 1) {
+        for (let j = i + 1; j < present.length; j += 1) {
+          const key = `${present[i].text}::${present[j].text}`;
+          if (!relationshipMap[key]) {
+            relationshipMap[key] = {
+              source: present[i].text,
+              target: present[j].text,
+              count: 0,
+            };
+          }
+          relationshipMap[key].count += 1;
+        }
+      }
+    });
+
+    return Object.values(relationshipMap)
+      .filter(item => item.count > 1)
+      .map(item => ({
+        entity1: item.source,
+        entity2: item.target,
+        relationship: 'co-occurrence',
+        confidence: Math.min(1, item.count / 3),
+      }));
   }
 
   private calculateCoherence(content: string): number {
-    // 简化的连贯性计算
-    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const sentences = content.split(/[。！？.!?]+/).filter(s => s.trim().length > 0);
     if (sentences.length < 2) return 1;
 
     let coherenceScore = 0;
     for (let i = 1; i < sentences.length; i++) {
-      const prevWords = new Set(sentences[i - 1].toLowerCase().split(/\s+/));
-      const currWords = sentences[i].toLowerCase().split(/\s+/);
+      const prevWords = new Set(
+        sentences[i - 1]
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(word => word.length > 1 && !this.stopWords.has(word))
+      );
+      const currWords = sentences[i]
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(word => word.length > 1 && !this.stopWords.has(word));
+      if (currWords.length === 0) continue;
       const commonWords = currWords.filter(word => prevWords.has(word));
-      coherenceScore += commonWords.length / currWords.length;
+      const jaccard = commonWords.length / (new Set([...prevWords, ...currWords]).size || 1);
+      coherenceScore += jaccard;
     }
 
     return coherenceScore / (sentences.length - 1);
   }
 
   private detectPrimaryIntent(content: string, keywords: string[]): string {
-    // 简化的意图检测
+    const lowerContent = content.toLowerCase();
+    const transactionalSignals = [
+      '购买',
+      '价格',
+      '优惠',
+      '订阅',
+      '试用',
+      'order',
+      'buy',
+      'pricing',
+    ];
+    const informationalSignals = ['如何', '怎么', '步骤', '指南', 'guide', 'how to'];
+    const navigationalSignals = ['官网', '登录', '入口', 'download', '官网', 'login'];
+
+    if (transactionalSignals.some(signal => lowerContent.includes(signal))) return 'commercial';
+    if (navigationalSignals.some(signal => lowerContent.includes(signal))) return 'navigational';
+    if (informationalSignals.some(signal => lowerContent.includes(signal))) return 'informational';
     if (keywords.length === 0) return 'informational';
-
-    const keywordMatches = keywords.reduce((count, keyword) => {
-      const regex = new RegExp(keyword, 'gi');
-      const matches = content.match(regex);
-      return count + (matches ? matches.length : 0);
-    }, 0);
-
-    if (keywordMatches > 5) return 'commercial';
-    if (content.includes('如何') || content.includes('怎么')) return 'navigational';
     return 'informational';
   }
 
   private calculateIntentConfidence(content: string, intent: string): number {
-    // 简化的意图置信度计算
-    return 0.75; // 固定值，实际应该基于内容分析
+    const lowerContent = content.toLowerCase();
+    const signals: Record<string, string[]> = {
+      informational: ['如何', '怎么', '步骤', '方法', 'guide', 'tutorial', 'how to'],
+      navigational: ['官网', '登录', '下载', '入口', 'login', 'download'],
+      commercial: ['购买', '价格', '报价', '优惠', '订阅', 'buy', 'pricing', 'trial'],
+    };
+    const matched = signals[intent]?.filter(signal => lowerContent.includes(signal)).length || 0;
+    const total = signals[intent]?.length || 1;
+    return Math.min(1, 0.4 + matched / total);
   }
 
   private identifyUserNeeds(content: string, keywords: string[]): string[] {
-    // 简化的用户需求识别
-    return keywords.slice(0, 5);
+    const sentences = content.split(/[。！？.!?]+/).filter(s => s.trim().length > 0);
+    const questionNeeds = sentences
+      .filter(sentence => /\?|？/.test(sentence))
+      .map(sentence => sentence.replace(/[?？]/g, '').trim())
+      .filter(Boolean);
+    const keywordNeeds = keywords.slice(0, 5);
+    return Array.from(new Set([...questionNeeds, ...keywordNeeds])).slice(0, 6);
   }
 
   private calculateContentAlignment(
@@ -1195,19 +1333,37 @@ class ContentQualityAnalyzer {
     targetIntent: string,
     keywords: string[]
   ): number {
-    // 简化的内容对齐计算
+    const lowerContent = content.toLowerCase();
     const keywordMatches = keywords.reduce((count, keyword) => {
       const regex = new RegExp(keyword, 'gi');
       const matches = content.match(regex);
       return count + (matches ? matches.length : 0);
     }, 0);
-
-    return Math.min(1, keywordMatches / (keywords.length * 2));
+    const intentConfidence = this.calculateIntentConfidence(lowerContent, targetIntent);
+    const density = keywords.length > 0 ? keywordMatches / Math.max(1, keywords.length * 2) : 0;
+    return Math.min(1, density * 0.6 + intentConfidence * 0.4);
   }
 
   private identifyContentGaps(content: string, userNeeds: string[]): string[] {
-    // 简化的内容缺口识别
-    return userNeeds.filter(need => !content.includes(need));
+    const lowerContent = content.toLowerCase();
+    return userNeeds.filter(need => !lowerContent.includes(need.toLowerCase()));
+  }
+
+  private extractDuplicatePhrases(content: string): string[] {
+    const tokens = content
+      .toLowerCase()
+      .split(/\s+/)
+      .map(word => word.replace(/[^\w\u4e00-\u9fff]/g, ''))
+      .filter(word => word.length > 2 && !this.stopWords.has(word));
+    const phraseMap: Record<string, number> = {};
+    for (let i = 0; i < tokens.length - 2; i += 1) {
+      const phrase = `${tokens[i]} ${tokens[i + 1]} ${tokens[i + 2]}`;
+      phraseMap[phrase] = (phraseMap[phrase] || 0) + 1;
+    }
+    return Object.entries(phraseMap)
+      .filter(([, count]) => count > 1)
+      .slice(0, 5)
+      .map(([phrase]) => phrase);
   }
 
   private getGrade(score: number): 'A' | 'B' | 'C' | 'D' | 'F' {

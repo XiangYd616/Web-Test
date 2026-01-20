@@ -37,6 +37,8 @@ interface LinkData {
   links: ExtractedLink[];
   anchors: ExtractedAnchor[];
   navigation: NavigationBlock[];
+  breadcrumbs: BreadcrumbItem[];
+  pagination: PaginationStructure | null;
 }
 
 interface LinkRules {
@@ -341,7 +343,7 @@ class LinkAnalyzer {
         const element = link as HTMLAnchorElement;
         links.push({
           href: element.href || '',
-          text: element.innerText || '',
+          text: element.textContent || '',
           title: element.title || '',
           rel: element.rel || '',
           className: element.className || '',
@@ -373,7 +375,7 @@ class LinkAnalyzer {
       if (mainNav) {
         const navLinks = Array.from(mainNav.querySelectorAll('a')).map(link => ({
           href: (link as HTMLAnchorElement).href || '',
-          text: (link as HTMLElement).innerText || '',
+          text: (link as HTMLElement).textContent || '',
         }));
         navigation.push({
           type: 'main',
@@ -401,7 +403,7 @@ class LinkAnalyzer {
       if (footerNav) {
         const navLinks = Array.from(footerNav.querySelectorAll('a')).map(link => ({
           href: (link as HTMLAnchorElement).href || '',
-          text: (link as HTMLElement).innerText || '',
+          text: (link as HTMLElement).textContent || '',
         }));
         navigation.push({
           type: 'footer',
@@ -410,10 +412,123 @@ class LinkAnalyzer {
         });
       }
 
+      const breadcrumbs: BreadcrumbItem[] = [];
+      const breadcrumbSelectors = [
+        'nav[aria-label="breadcrumb"]',
+        '.breadcrumb',
+        '.breadcrumbs',
+        '.breadcrumb-nav',
+        '.breadcrumb-trail',
+      ];
+      const breadcrumbContainer =
+        (breadcrumbSelectors
+          .map(selector => document.querySelector(selector))
+          .find((element): element is Element => Boolean(element)) as HTMLElement | null) || null;
+      if (breadcrumbContainer) {
+        const elements = Array.from(
+          breadcrumbContainer.querySelectorAll('a, span, li')
+        ) as HTMLElement[];
+        elements
+          .map((element, index) => {
+            const text = element.textContent?.trim() || '';
+            if (!text) return null;
+            const anchor =
+              element.tagName.toLowerCase() === 'a' ? (element as HTMLAnchorElement) : null;
+            const url = anchor?.href || '';
+            const isCurrent =
+              element.getAttribute('aria-current') === 'page' ||
+              element.classList.contains('current') ||
+              element.classList.contains('active');
+            return { text, url, position: index, isCurrent } as BreadcrumbItem;
+          })
+          .filter((item): item is BreadcrumbItem => Boolean(item))
+          .forEach(item => breadcrumbs.push(item));
+
+        if (breadcrumbs.length > 0 && !breadcrumbs.some(item => item.isCurrent)) {
+          breadcrumbs[breadcrumbs.length - 1].isCurrent = true;
+        }
+      }
+
+      const paginationSelectors = [
+        '.pagination',
+        '.pager',
+        '.paging',
+        '[aria-label="pagination"]',
+        '.page-navigation',
+        'nav[aria-label="pagination"]',
+      ];
+      const paginationContainer =
+        (paginationSelectors
+          .map(selector => document.querySelector(selector))
+          .find((element): element is Element => Boolean(element)) as HTMLElement | null) || null;
+
+      let pagination: PaginationStructure | null = null;
+      if (paginationContainer) {
+        const elements = Array.from(
+          paginationContainer.querySelectorAll('a, button, span')
+        ) as HTMLElement[];
+        let currentPage = 1;
+        let totalPages = 1;
+        let hasNext = false;
+        let hasPrev = false;
+        let nextUrl = '';
+        let prevUrl = '';
+
+        const parsePageNumber = (element: HTMLElement): number | null => {
+          const text = element.textContent?.trim() || '';
+          const numeric = Number(text);
+          if (!Number.isNaN(numeric)) return numeric;
+          const data = element.getAttribute('data-page');
+          if (data) {
+            const parsed = Number(data);
+            return Number.isNaN(parsed) ? null : parsed;
+          }
+          return null;
+        };
+
+        elements.forEach(element => {
+          const text = element.textContent?.trim() || '';
+          const anchor =
+            element.tagName.toLowerCase() === 'a' ? (element as HTMLAnchorElement) : null;
+          const rel = anchor?.rel || '';
+          const href = anchor?.href || '';
+          const pageNumber = parsePageNumber(element);
+          const isCurrent =
+            element.getAttribute('aria-current') === 'page' ||
+            element.classList.contains('active') ||
+            element.classList.contains('current');
+
+          if (pageNumber) {
+            totalPages = Math.max(totalPages, pageNumber);
+            if (isCurrent) currentPage = pageNumber;
+          }
+
+          if (/下一页|next|›|»/i.test(text) || rel.includes('next')) {
+            hasNext = true;
+            if (href) nextUrl = href;
+          }
+          if (/上一页|prev|‹|«/i.test(text) || rel.includes('prev')) {
+            hasPrev = true;
+            if (href) prevUrl = href;
+          }
+        });
+
+        pagination = {
+          currentPage,
+          totalPages,
+          hasNext,
+          hasPrev,
+          nextUrl,
+          prevUrl,
+        };
+      }
+
       return {
         links,
         anchors,
         navigation,
+        breadcrumbs,
+        pagination,
       };
     });
   }
@@ -644,28 +759,9 @@ class LinkAnalyzer {
    * 分析面包屑
    */
   private analyzeBreadcrumbs(linkData: LinkData): BreadcrumbAnalysis {
-    // 简化的面包屑检测
-    const _breadcrumbSelectors = [
-      '.breadcrumb',
-      '.breadcrumbs',
-      '.breadcrumb-nav',
-      '[aria-label="breadcrumb"]',
-      '.breadcrumb-trail',
-    ];
-
-    let present = false;
-    let structure: BreadcrumbItem[] = [];
-    let depth = 0;
-
-    // 这里需要实际的DOM检测，简化处理
-    if (linkData.navigation.some(nav => nav.type === 'breadcrumb')) {
-      present = true;
-      structure = [
-        { text: '首页', url: '/', position: 0, isCurrent: false },
-        { text: '当前页面', url: '#', position: 1, isCurrent: true },
-      ];
-      depth = structure.length;
-    }
+    const structure = linkData.breadcrumbs || [];
+    const present = structure.length > 0;
+    const depth = structure.length;
 
     const issues: LinkIssue[] = [];
     let score = 100;
@@ -679,6 +775,27 @@ class LinkAnalyzer {
         count: 1,
       });
       score = 0;
+    } else {
+      if (!structure.some(item => item.isCurrent)) {
+        issues.push({
+          type: 'missing-current',
+          severity: 'low',
+          description: '面包屑未标记当前页面',
+          suggestion: '为当前页面添加aria-current或高亮样式',
+          count: 1,
+        });
+        score -= 10;
+      }
+      if (depth < 2) {
+        issues.push({
+          type: 'shallow-breadcrumb',
+          severity: 'low',
+          description: '面包屑层级过浅',
+          suggestion: '补充上级路径以提升导航指引',
+          count: 1,
+        });
+        score -= 10;
+      }
     }
 
     return {
@@ -694,46 +811,56 @@ class LinkAnalyzer {
    * 分析分页
    */
   private analyzePagination(linkData: LinkData): PaginationAnalysis {
-    const _paginationSelectors = [
-      '.pagination',
-      '.pager',
-      '.paging',
-      '[aria-label="pagination"]',
-      '.page-navigation',
-    ];
-
-    let present = false;
-    const structure: PaginationStructure = {
-      currentPage: 1,
-      totalPages: 1,
-      hasNext: false,
-      hasPrev: false,
-      nextUrl: '',
-      prevUrl: '',
-    };
-
-    // 简化的分页检测
-    const paginationLinks = linkData.links.filter(
-      link =>
-        link.text.includes('下一页') ||
-        link.text.includes('上一页') ||
-        link.className.includes('page') ||
-        link.className.includes('next') ||
-        link.className.includes('prev')
-    );
-
-    if (paginationLinks.length > 0) {
-      present = true;
-      structure.hasNext = paginationLinks.some(link => link.text.includes('下一页'));
-      structure.hasPrev = paginationLinks.some(link => link.text.includes('上一页'));
-    }
+    const structure =
+      linkData.pagination ||
+      ({
+        currentPage: 1,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
+        nextUrl: '',
+        prevUrl: '',
+      } as PaginationStructure);
+    const present = Boolean(linkData.pagination);
 
     const issues: LinkIssue[] = [];
     let score = 100;
 
-    if (!present) {
-      // 如果没有分页，不算问题
-      score = 100;
+    if (present) {
+      if (
+        structure.totalPages > 1 &&
+        !structure.hasNext &&
+        structure.currentPage < structure.totalPages
+      ) {
+        issues.push({
+          type: 'missing-next',
+          severity: 'medium',
+          description: '缺少下一页链接',
+          suggestion: '补充下一页导航链接',
+          count: 1,
+        });
+        score -= 15;
+      }
+      if (structure.totalPages > 1 && !structure.hasPrev && structure.currentPage > 1) {
+        issues.push({
+          type: 'missing-prev',
+          severity: 'medium',
+          description: '缺少上一页链接',
+          suggestion: '补充上一页导航链接',
+          count: 1,
+        });
+        score -= 15;
+      }
+      if (structure.totalPages > 1 && structure.currentPage <= 0) {
+        issues.push({
+          type: 'missing-current',
+          severity: 'low',
+          description: '分页未标记当前页',
+          suggestion: '为当前页添加高亮或aria-current',
+          count: 1,
+        });
+        score -= 10;
+      }
     }
 
     return {
@@ -893,13 +1020,50 @@ class LinkAnalyzer {
    */
   private calculateNavigationConsistency(menus: NavigationMenu[]): number {
     if (menus.length <= 1) return 100;
+    const linkSets = menus.map(
+      menu =>
+        new Set(
+          menu.links
+            .map(
+              link =>
+                `${this.normalizeLinkText(link.anchorText)}|${this.normalizeLinkUrl(link.url)}`
+            )
+            .filter(item => item !== '|')
+        )
+    );
+    const similarities: number[] = [];
+    for (let i = 0; i < linkSets.length; i += 1) {
+      for (let j = i + 1; j < linkSets.length; j += 1) {
+        const union = new Set([...linkSets[i], ...linkSets[j]]);
+        const intersectionCount = [...linkSets[i]].filter(item => linkSets[j].has(item)).length;
+        if (union.size > 0) {
+          similarities.push(intersectionCount / union.size);
+        }
+      }
+    }
+    const avgSimilarity = similarities.length
+      ? similarities.reduce((sum, value) => sum + value, 0) / similarities.length
+      : 1;
+    const avgSize = menus.reduce((sum, menu) => sum + menu.links.length, 0) / menus.length;
+    const sizeVariation = avgSize
+      ? menus.reduce((sum, menu) => sum + Math.abs(menu.links.length - avgSize), 0) /
+        (menus.length * avgSize)
+      : 0;
+    const sizePenalty = Math.min(0.5, sizeVariation * 0.3);
+    return Math.max(0, Math.min(100, avgSimilarity * 100 * (1 - sizePenalty)));
+  }
 
-    // 简化的一致性计算
-    const firstMenuLinks = menus[0].links.length;
-    const variations = menus.map(menu => Math.abs(menu.links.length - firstMenuLinks));
-    const totalVariation = variations.reduce((sum, variation) => sum + variation, 0);
+  private normalizeLinkText(text: string): string {
+    return text.trim().toLowerCase().replace(/\s+/g, ' ');
+  }
 
-    return Math.max(0, 100 - totalVariation * 5);
+  private normalizeLinkUrl(url: string): string {
+    try {
+      const parsed = new URL(url);
+      return parsed.pathname.replace(/\/$/, '');
+    } catch {
+      return url.split('?')[0].replace(/\/$/, '');
+    }
   }
 
   /**

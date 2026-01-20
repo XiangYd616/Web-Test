@@ -4,7 +4,7 @@
  * 分析页面的结构化数据，包括JSON-LD、Microdata、RDFa等
  */
 
-import puppeteer from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
 
 interface StructuredDataResult {
   url: string;
@@ -35,7 +35,7 @@ interface JsonLdItem {
   type: string;
   id?: string;
   context: string;
-  data: any;
+  data: Record<string, unknown>;
   valid: boolean;
   errors: string[];
   warnings: string[];
@@ -266,15 +266,57 @@ class StructuredDataAnalyzer {
   /**
    * 提取结构化数据
    */
-  private async extractStructuredData(page: any): Promise<{
-    jsonLd: any[];
-    microdata: any[];
-    rdfa: any[];
+  private async extractStructuredData(page: Page): Promise<{
+    jsonLd: Array<Record<string, unknown>>;
+    microdata: Array<{
+      itemType: string;
+      itemScope: boolean;
+      properties: MicrodataProperty[];
+    }>;
+    rdfa: Array<{
+      vocab?: string;
+      typeof?: string;
+      property?: string;
+      content?: string;
+      resource?: string;
+    }>;
   }> {
     return await page.evaluate(() => {
+      const extractMicrodataProperties = (element: HTMLElement) => {
+        const properties: Array<{ name: string; value: string; type: string }> = [];
+        const propElements = Array.from(element.querySelectorAll('[itemprop]')) as HTMLElement[];
+
+        propElements.forEach(propElement => {
+          const name = propElement.getAttribute('itemprop') || '';
+          if (!name) return;
+
+          const tagName = propElement.tagName.toLowerCase();
+          let value = '';
+
+          if (propElement.hasAttribute('itemscope')) {
+            value = propElement.getAttribute('itemtype') || 'itemscope';
+          } else if (tagName === 'meta') {
+            value = propElement.getAttribute('content') || '';
+          } else if (tagName === 'a' || tagName === 'area') {
+            value = (propElement as HTMLAnchorElement).href || '';
+          } else if (tagName === 'img' || tagName === 'source') {
+            value = (propElement as HTMLImageElement).src || '';
+          } else {
+            value = propElement.textContent?.trim() || '';
+          }
+
+          properties.push({
+            name,
+            value,
+            type: tagName,
+          });
+        });
+
+        return properties;
+      };
       // 提取JSON-LD
       const jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
-      const jsonLd: any[] = [];
+      const jsonLd: Array<Record<string, unknown>> = [];
 
       jsonLdScripts.forEach(script => {
         try {
@@ -287,34 +329,44 @@ class StructuredDataAnalyzer {
               jsonLd.push(parsed);
             }
           }
-        } catch (e) {
+        } catch {
           // JSON解析错误
           jsonLd.push({
             '@context': 'https://schema.org',
             '@type': 'Error',
             error: 'Invalid JSON',
-            rawContent: script.textContent,
+            rawContent: script.textContent || '',
           });
         }
       });
 
       // 提取Microdata
       const microdataElements = document.querySelectorAll('[itemscope]');
-      const microdata: any[] = [];
+      const microdata: Array<{
+        itemType: string;
+        itemScope: boolean;
+        properties: Array<{ name: string; value: string; type: string }>;
+      }> = [];
 
       microdataElements.forEach(element => {
         const htmlElement = element as HTMLElement;
         const item = {
           itemType: htmlElement.getAttribute('itemtype') || '',
           itemScope: htmlElement.hasAttribute('itemscope'),
-          properties: this.extractMicrodataProperties(htmlElement),
+          properties: extractMicrodataProperties(htmlElement),
         };
         microdata.push(item);
       });
 
       // 提取RDFa
       const rdfaElements = document.querySelectorAll('[vocab], [typeof], [property], [resource]');
-      const rdfa: any[] = [];
+      const rdfa: Array<{
+        vocab?: string;
+        typeof?: string;
+        property?: string;
+        content?: string;
+        resource?: string;
+      }> = [];
 
       rdfaElements.forEach(element => {
         const htmlElement = element as HTMLElement;
@@ -333,55 +385,46 @@ class StructuredDataAnalyzer {
   }
 
   /**
-   * 提取Microdata属性
-   */
-  private extractMicrodataProperties(element: HTMLElement): MicrodataProperty[] {
-    const properties: MicrodataProperty[] = [];
-
-    // 这里需要在页面上下文中执行，简化处理
-    return properties;
-  }
-
-  /**
    * 分析JSON-LD
    */
-  private analyzeJsonLd(jsonLdData: any[]): JsonLdAnalysis {
-    const items: JsonLdItem[] = jsonLdData.map((data, index) => {
+  private analyzeJsonLd(jsonLdData: Array<Record<string, unknown>>): JsonLdAnalysis {
+    const items: JsonLdItem[] = jsonLdData.map(data => {
+      const context = data['@context'] as string | undefined;
+      const type = data['@type'] as string | undefined;
+      const id = data['@id'] as string | undefined;
+      const name = data['name'] as string | undefined;
       const errors: string[] = [];
       const warnings: string[] = [];
       let valid = true;
 
       // 检查基本结构
-      if (!data['@context']) {
+      if (!context) {
         errors.push('缺少@context');
         valid = false;
       }
 
-      if (!data['@type']) {
+      if (!type) {
         errors.push('缺少@type');
         valid = false;
-      } else if (
-        typeof data['@type'] === 'string' &&
-        !this.supportedTypes.includes(data['@type'])
-      ) {
-        warnings.push(`不支持的类型: ${data['@type']}`);
+      } else if (typeof type === 'string' && !this.supportedTypes.includes(type)) {
+        warnings.push(`不支持的类型: ${type}`);
       }
 
       // 检查必需属性
-      if (data['@type'] === 'Article' && !data.name) {
+      if (type === 'Article' && !name) {
         errors.push('Article缺少name属性');
         valid = false;
       }
 
-      if (data['@type'] === 'Organization' && !data.name) {
+      if (type === 'Organization' && !name) {
         errors.push('Organization缺少name属性');
         valid = false;
       }
 
       return {
-        type: data['@type'] || 'Unknown',
-        id: data['@id'],
-        context: data['@context'] || '',
+        type: type || 'Unknown',
+        id,
+        context: context || '',
         data,
         valid,
         errors,
@@ -424,8 +467,10 @@ class StructuredDataAnalyzer {
   /**
    * 分析Microdata
    */
-  private analyzeMicrodata(microdataData: any[]): MicrodataAnalysis {
-    const items: MicrodataItem[] = microdataData.map((data, index) => {
+  private analyzeMicrodata(
+    microdataData: Array<{ itemType: string; itemScope: boolean; properties: MicrodataProperty[] }>
+  ): MicrodataAnalysis {
+    const items: MicrodataItem[] = microdataData.map(data => {
       const errors: string[] = [];
       const warnings: string[] = [];
       let valid = true;
@@ -489,8 +534,16 @@ class StructuredDataAnalyzer {
   /**
    * 分析RDFa
    */
-  private analyzeRdfa(rdfaData: any[]): RdfaAnalysis {
-    const items: RdfaItem[] = rdfaData.map((data, index) => {
+  private analyzeRdfa(
+    rdfaData: Array<{
+      vocab?: string;
+      typeof?: string;
+      property?: string;
+      content?: string;
+      resource?: string;
+    }>
+  ): RdfaAnalysis {
+    const items: RdfaItem[] = rdfaData.map(data => {
       const errors: string[] = [];
       const warnings: string[] = [];
       let valid = true;

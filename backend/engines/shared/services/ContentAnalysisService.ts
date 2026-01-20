@@ -398,6 +398,64 @@ class ContentAnalysisService extends BaseService {
     };
   }
 
+  private getStopWords(language: string, customStopWords: string[]): string[] {
+    const baseStopWords = this.stopWords[language] || [];
+    const normalizedCustom = customStopWords.map(word => word.trim().toLowerCase()).filter(Boolean);
+    return Array.from(new Set([...baseStopWords, ...normalizedCustom]));
+  }
+
+  private buildKeywordVariants(content: string, words: string[], language: string): string[] {
+    const synonymsMap: Record<string, string[]> = {
+      performance: ['speed', 'latency', '加载', '性能', '速度'],
+      seo: ['optimization', 'ranking', '搜索', '排名', '优化'],
+      security: ['safe', 'vulnerability', '安全', '漏洞'],
+      accessibility: ['a11y', '可访问性', '无障碍'],
+      api: ['interface', 'endpoint', '接口', '端点'],
+      stress: ['load', '压力', '负载'],
+      website: ['site', 'web', '站点', '网站'],
+    };
+    const lowerContent = content.toLowerCase();
+    const results = new Set<string>(words);
+    words.forEach(word => {
+      const lowerWord = word.toLowerCase();
+      const synonyms = synonymsMap[lowerWord];
+      if (synonyms) {
+        synonyms.forEach(synonym => {
+          const normalized = language === 'zh' ? synonym : synonym.toLowerCase();
+          if (lowerContent.includes(normalized.toLowerCase())) {
+            results.add(normalized);
+          }
+        });
+      }
+      if (language === 'en') {
+        const variations = this.buildEnglishVariants(lowerWord);
+        variations.forEach(variant => {
+          if (lowerContent.includes(variant)) {
+            results.add(variant);
+          }
+        });
+      }
+    });
+    return Array.from(results);
+  }
+
+  private buildEnglishVariants(word: string): string[] {
+    const variants = new Set<string>();
+    if (word.length > 2) {
+      variants.add(`${word}s`);
+      variants.add(`${word}es`);
+      variants.add(`${word}ing`);
+      variants.add(`${word}ed`);
+      if (word.endsWith('y')) {
+        variants.add(`${word.slice(0, -1)}ies`);
+      }
+      if (word.endsWith('s')) {
+        variants.add(word.slice(0, -1));
+      }
+    }
+    return Array.from(variants);
+  }
+
   /**
    * 执行初始化
    */
@@ -443,12 +501,12 @@ class ContentAnalysisService extends BaseService {
 
       // 分析可读性
       const readability = config.includeReadability
-        ? this.analyzeReadability(content, language)
+        ? this.analyzeReadability(content, language, config.customStopWords || [])
         : this.createEmptyReadabilityMetrics();
 
       // 分析关键词
       const keywords = config.includeKeywordAnalysis
-        ? this.analyzeKeywords(content, language)
+        ? this.analyzeKeywords(content, language, config.customStopWords || [])
         : this.createEmptyKeywordAnalysis();
 
       // 评估质量
@@ -579,9 +637,14 @@ class ContentAnalysisService extends BaseService {
   /**
    * 分析可读性
    */
-  private analyzeReadability(content: string, language: string): ReadabilityMetrics {
+  private analyzeReadability(
+    content: string,
+    language: string,
+    customStopWords: string[]
+  ): ReadabilityMetrics {
     const sentences = this.extractSentences(content);
     const words = this.extractWords(content);
+    const paragraphs = this.extractParagraphs(content);
 
     const avgSentenceLength = sentences.length > 0 ? words.length / sentences.length : 0;
     const avgWordLength =
@@ -605,7 +668,8 @@ class ContentAnalysisService extends BaseService {
     const punctuationMatches = content.match(/[。！？!?.,;:，；：]/g) || [];
     const punctuationDensity = content.length > 0 ? punctuationMatches.length / content.length : 0;
 
-    const issues = this.identifyReadabilityIssues(sentences, words, language);
+    const stopWords = this.getStopWords(language, customStopWords);
+    const issues = this.identifyReadabilityIssues(sentences, words, language, stopWords);
     if (punctuationDensity < 0.01 && content.length > 120) {
       issues.push({
         type: 'repetition',
@@ -616,11 +680,47 @@ class ContentAnalysisService extends BaseService {
       });
     }
 
+    const paragraphLengths = paragraphs
+      .map(paragraph => paragraph.length)
+      .filter(length => length > 0);
+    const averageParagraphLength = paragraphLengths.length
+      ? paragraphLengths.reduce((sum, length) => sum + length, 0) / paragraphLengths.length
+      : 0;
+    const maxParagraphLength = paragraphLengths.length ? Math.max(...paragraphLengths) : 0;
+    if (
+      maxParagraphLength > this.qualityThresholds.readability.maxParagraphLength &&
+      paragraphLengths.length > 1
+    ) {
+      issues.push({
+        type: 'long_sentence',
+        severity: 'medium',
+        position: 0,
+        text: `段落长度偏长（最大${maxParagraphLength}字）`,
+        suggestion: '拆分长段落，增强结构层次',
+      });
+    }
+    if (averageParagraphLength > this.qualityThresholds.readability.maxParagraphLength * 0.8) {
+      issues.push({
+        type: 'short_sentence',
+        severity: 'low',
+        position: 0,
+        text: '段落整体偏长',
+        suggestion: '增加小标题或分段以提升可读性',
+      });
+    }
+
     const longSentenceRatio = sentences.length
       ? sentences.filter(sentence => sentence.trim().split(/\s+/).length > avgSentenceLength * 1.3)
           .length / sentences.length
       : 0;
-    const penalty = Math.min(30, issues.length * 3 + longSentenceRatio * 20);
+    const paragraphPenalty =
+      averageParagraphLength > 0
+        ? Math.min(
+            10,
+            (averageParagraphLength / this.qualityThresholds.readability.maxParagraphLength) * 10
+          )
+        : 0;
+    const penalty = Math.min(30, issues.length * 3 + longSentenceRatio * 20 + paragraphPenalty);
     const score = Math.max(0, Math.min(100, fleschReadingEase - penalty));
     const grade = this.getReadabilityGrade(score);
 
@@ -642,23 +742,28 @@ class ContentAnalysisService extends BaseService {
   /**
    * 分析关键词
    */
-  private analyzeKeywords(content: string, language: string): KeywordAnalysis {
+  private analyzeKeywords(
+    content: string,
+    language: string,
+    customStopWords: string[]
+  ): KeywordAnalysis {
     const words = this.extractWords(content);
-    const stopWords = this.stopWords[language] || [];
+    const stopWords = this.getStopWords(language, customStopWords);
 
     // 过滤停用词
     const filteredWords = words.filter(word => !stopWords.includes(word.toLowerCase()));
+    const keywordVariants = this.buildKeywordVariants(content, filteredWords, language);
 
     // 计算词频（包含双词组）
     const wordFreq: Record<string, number> = {};
-    filteredWords.forEach(word => {
+    keywordVariants.forEach(word => {
       const lowerWord = word.toLowerCase();
       wordFreq[lowerWord] = (wordFreq[lowerWord] || 0) + 1;
     });
 
-    for (let index = 0; index < filteredWords.length - 1; index += 1) {
-      const first = filteredWords[index]?.toLowerCase();
-      const second = filteredWords[index + 1]?.toLowerCase();
+    for (let index = 0; index < keywordVariants.length - 1; index += 1) {
+      const first = keywordVariants[index]?.toLowerCase();
+      const second = keywordVariants[index + 1]?.toLowerCase();
       if (first && second) {
         const bigram = `${first} ${second}`;
         wordFreq[bigram] = (wordFreq[bigram] || 0) + 1;
@@ -691,7 +796,7 @@ class ContentAnalysisService extends BaseService {
         density: keywordDensity,
         prominence: keywordProminence,
         positions: this.findKeywordPositions(content, keyword),
-        variations: this.findVariations(words, keyword),
+        variations: this.findVariations(keywordVariants, keyword),
       };
 
       if (index < 5) {
@@ -796,10 +901,16 @@ class ContentAnalysisService extends BaseService {
     const sentenceSentiments: SentenceSentiment[] = [];
 
     let totalScore = 0;
+    let totalWeight = 0;
     const emotions: Record<string, number> = {};
 
     sentences.forEach((sentence, index) => {
       const sentiment = this.analyzeSentenceSentiment(sentence);
+      const positionRatio = sentences.length > 1 ? index / (sentences.length - 1) : 0;
+      const positionWeight = positionRatio < 0.3 ? 1.1 : positionRatio > 0.7 ? 0.9 : 1;
+      const lengthWeight = Math.min(1.3, Math.max(0.7, sentence.length / 80));
+      const weight = positionWeight * lengthWeight;
+
       sentenceSentiments.push({
         sentence,
         sentiment: sentiment.overall,
@@ -807,15 +918,19 @@ class ContentAnalysisService extends BaseService {
         position: index,
       });
 
-      totalScore += sentiment.score;
+      totalScore += sentiment.score * weight;
+      totalWeight += weight;
 
       // 累积情感
       emotions[sentiment.overall] = (emotions[sentiment.overall] || 0) + 1;
     });
 
-    const avgScore = sentences.length > 0 ? totalScore / sentences.length : 0;
+    const avgScore = totalWeight > 0 ? totalScore / totalWeight : 0;
     const overall = avgScore > 0.1 ? 'positive' : avgScore < -0.1 ? 'negative' : 'neutral';
-    const confidence = Math.abs(avgScore);
+    const sentimentCoverage = sentences.length
+      ? sentenceSentiments.filter(item => item.sentiment !== 'neutral').length / sentences.length
+      : 0;
+    const confidence = Math.min(1, Math.abs(avgScore) * (0.6 + sentimentCoverage * 0.4));
 
     return {
       overall,
@@ -834,7 +949,7 @@ class ContentAnalysisService extends BaseService {
     readability: ReadabilityMetrics,
     keywords: KeywordAnalysis,
     _quality: QualityAssessment,
-    _structure: StructureAnalysis
+    structure: StructureAnalysis
   ): ContentRecommendation[] {
     const recommendations: ContentRecommendation[] = [];
 
@@ -848,6 +963,86 @@ class ContentAnalysisService extends BaseService {
         examples: ['添加更详细的解释和说明', '增加实例和案例分析', '扩展相关背景信息'],
         impact: '提高内容价值和SEO效果',
         effort: 'medium',
+      });
+    }
+
+    if (keywords.issues.length > 0) {
+      const missingCount = keywords.issues.filter(issue => issue.type === 'missing').length;
+      const underuseCount = keywords.issues.filter(issue => issue.type === 'underuse').length;
+      const stuffingCount = keywords.issues.filter(issue => issue.type === 'stuffing').length;
+      const overuseCount = keywords.issues.filter(issue => issue.type === 'overuse').length;
+      const irrelevantCount = keywords.issues.filter(issue => issue.type === 'irrelevant').length;
+
+      if (missingCount > 0) {
+        recommendations.push({
+          priority: 'high',
+          category: 'seo',
+          title: '补充核心关键词',
+          description: `检测到${missingCount}项关键词缺失问题，核心主题信号不足。`,
+          examples: ['在标题与首段加入核心关键词', '使用相关词汇补充语义覆盖'],
+          impact: '提升主题明确度与搜索相关性',
+          effort: 'medium',
+        });
+      }
+
+      if (underuseCount > 0) {
+        recommendations.push({
+          priority: 'medium',
+          category: 'seo',
+          title: '提升关键词覆盖率',
+          description: `检测到${underuseCount}项关键词覆盖不足问题。`,
+          examples: ['在更多段落中自然出现关键词', '使用同义词扩展覆盖面'],
+          impact: '提升内容相关性与主题一致性',
+          effort: 'low',
+        });
+      }
+
+      if (stuffingCount + overuseCount > 0) {
+        recommendations.push({
+          priority: 'medium',
+          category: 'seo',
+          title: '避免关键词堆砌',
+          description: `检测到${stuffingCount + overuseCount}项关键词过度使用问题。`,
+          examples: ['降低重复频次', '使用近义词替换重复表达'],
+          impact: '降低过度优化风险',
+          effort: 'low',
+        });
+      }
+
+      if (irrelevantCount > 0) {
+        recommendations.push({
+          priority: 'low',
+          category: 'seo',
+          title: '优化关键词分布',
+          description: `检测到${irrelevantCount}项关键词分布集中问题。`,
+          examples: ['在不同段落均衡分布关键词', '避免集中在单一章节'],
+          impact: '提升内容覆盖均衡性',
+          effort: 'low',
+        });
+      }
+    }
+
+    if (structure.headings.h1 === 0 || structure.headings.h2 === 0) {
+      recommendations.push({
+        priority: 'medium',
+        category: 'seo',
+        title: '补充标题层级以提升SEO信号',
+        description: '缺少关键标题层级会削弱搜索引擎对主题的识别。',
+        examples: ['补充H1标题', '使用H2/H3拆分主题段落'],
+        impact: '提升关键词聚焦度与结构化信号',
+        effort: 'low',
+      });
+    }
+
+    if (structure.links.total === 0) {
+      recommendations.push({
+        priority: 'low',
+        category: 'seo',
+        title: '增加参考链接',
+        description: '内容缺少内外链支持，降低可信度与可导航性。',
+        examples: ['添加内部相关文章链接', '引用权威来源'],
+        impact: '提升内容权威性与用户停留时长',
+        effort: 'low',
       });
     }
 
@@ -878,7 +1073,87 @@ class ContentAnalysisService extends BaseService {
       });
     }
 
-    return recommendations;
+    const paragraphIssues = structure.paragraphs.issues;
+    const structureIssueCount = structure.issues.length + paragraphIssues.length;
+    if (paragraphIssues.includes('未检测到段落结构')) {
+      recommendations.push({
+        priority: 'medium',
+        category: 'structure',
+        title: '补充段落结构',
+        description: '检测到内容缺少段落划分，结构不利于阅读。',
+        examples: ['使用空行或<p>标签分段', '每段聚焦一个主题点'],
+        impact: '提升阅读体验与内容结构清晰度',
+        effort: 'low',
+      });
+    }
+
+    if (paragraphIssues.includes('存在过长段落')) {
+      recommendations.push({
+        priority: 'medium',
+        category: 'structure',
+        title: '拆分长段落',
+        description: '存在过长段落，用户阅读负担较高。',
+        examples: ['将长段落拆分为2-3段', '增加小标题引导'],
+        impact: '提升阅读节奏与内容消化效率',
+        effort: 'low',
+      });
+    }
+
+    if (paragraphIssues.includes('存在过短段落')) {
+      recommendations.push({
+        priority: 'low',
+        category: 'structure',
+        title: '合并过短段落',
+        description: '存在过短段落，信息密度偏低。',
+        examples: ['合并相邻短段落', '补充背景或解释内容'],
+        impact: '提升信息完整度与逻辑连贯性',
+        effort: 'low',
+      });
+    }
+
+    if (structure.paragraphs.total > 0) {
+      const headingCount =
+        structure.headings.h1 +
+        structure.headings.h2 +
+        structure.headings.h3 +
+        structure.headings.h4 +
+        structure.headings.h5 +
+        structure.headings.h6;
+      const headingRatio = headingCount / structure.paragraphs.total;
+      if (headingRatio < 0.15 && structure.paragraphs.total > 3) {
+        recommendations.push({
+          priority: 'medium',
+          category: 'structure',
+          title: '增加标题层级',
+          description: '标题数量相对段落偏少，层级引导不足。',
+          examples: ['每2-3段增加一个小标题', '使用H2/H3划分主题'],
+          impact: '改善内容结构与可扫描性',
+          effort: 'medium',
+        });
+      }
+    }
+
+    if (structureIssueCount > 0) {
+      recommendations.push({
+        priority: 'low',
+        category: 'structure',
+        title: '结构问题覆盖提示',
+        description: `检测到${structureIssueCount}项结构问题，建议优先处理影响阅读的段落与标题问题。`,
+        examples: ['先处理长段落与标题缺失', '按问题数量逐项改进'],
+        impact: '提升结构清晰度与内容可读性',
+        effort: 'low',
+      });
+    }
+
+    const priorityOrder: Record<ContentRecommendation['priority'], number> = {
+      high: 0,
+      medium: 1,
+      low: 2,
+    };
+
+    return recommendations.sort(
+      (left, right) => priorityOrder[left.priority] - priorityOrder[right.priority]
+    );
   }
 
   /**
@@ -889,9 +1164,18 @@ class ContentAnalysisService extends BaseService {
     readability: ReadabilityMetrics,
     structure: StructureAnalysis
   ): ContentAnalysisResult['overall'] {
-    const score = (quality.overall + readability.score + (100 - structure.issues.length * 5)) / 3;
+    const structurePenalty = Math.min(
+      30,
+      (structure.issues.length + structure.paragraphs.issues.length) * 4
+    );
+    const structureScore = Math.max(0, 100 - structurePenalty);
+    const score = quality.overall * 0.4 + readability.score * 0.3 + structureScore * 0.3;
     const grade = this.getGrade(score);
-    const issues = quality.issues.length + readability.issues.length + structure.issues.length;
+    const issues =
+      quality.issues.length +
+      readability.issues.length +
+      structure.issues.length +
+      structure.paragraphs.issues.length;
     const improvements = Math.max(0, 10 - Math.floor(score / 10));
 
     return {
@@ -908,11 +1192,25 @@ class ContentAnalysisService extends BaseService {
   }
 
   private extractSentences(content: string): string[] {
-    return content.match(/[^.!?]+[.!?]+/g) || [];
+    const matches = content.match(/[^。！？.!?]+[。！？.!?]+/g);
+    if (matches && matches.length > 0) {
+      return matches.map(sentence => sentence.trim()).filter(Boolean);
+    }
+    return content
+      .split(/[\n\r]+/)
+      .map(segment => segment.trim())
+      .filter(Boolean);
   }
 
   private extractParagraphs(content: string): string[] {
-    return content.split(/\n\n+/).filter(p => p.trim().length > 0);
+    const matches = content.match(/<p[^>]*>[\s\S]*?<\/p>/gi);
+    if (matches && matches.length > 0) {
+      return matches.map(paragraph => paragraph.replace(/<[^>]+>/g, '').trim()).filter(Boolean);
+    }
+    return content
+      .split(/\n\n+/)
+      .map(paragraph => paragraph.trim())
+      .filter(Boolean);
   }
 
   private extractHeadings(content: string): string[] {
@@ -1088,12 +1386,12 @@ class ContentAnalysisService extends BaseService {
   private identifyReadabilityIssues(
     sentences: string[],
     words: string[],
-    language: string
+    language: string,
+    stopWords: string[]
   ): ReadabilityIssue[] {
     const issues: ReadabilityIssue[] = [];
     const maxSentenceLength = this.qualityThresholds.readability.maxSentenceLength;
     const minSentenceLength = language === 'zh' ? 6 : 5;
-    const stopWords = this.stopWords[language] || [];
     sentences.forEach((sentence, index) => {
       const wordCount = sentence.trim().split(/\s+/).filter(Boolean).length;
       if (wordCount > maxSentenceLength) {
@@ -1189,6 +1487,9 @@ class ContentAnalysisService extends BaseService {
     const maxDensity = this.qualityThresholds.content.maxKeywordDensity;
     const optimalDensity = this.qualityThresholds.content.optimalKeywordDensity;
     const contentLength = content.length || 1;
+    const sentences = this.extractSentences(content);
+    const lowerSentences = sentences.map(sentence => sentence.toLowerCase());
+    const sectionSize = Math.max(1, Math.floor(contentLength / 3));
 
     if (primary.length === 0) {
       issues.push({
@@ -1203,6 +1504,14 @@ class ContentAnalysisService extends BaseService {
     primary.forEach(keyword => {
       const keywordDensity = density[keyword.keyword] || keyword.density;
       const firstPosition = keyword.positions.length > 0 ? Math.min(...keyword.positions) : null;
+      const keywordLower = keyword.keyword.toLowerCase();
+      const sentenceCoverage = lowerSentences.length
+        ? lowerSentences.filter(sentence => sentence.includes(keywordLower)).length /
+          lowerSentences.length
+        : 0;
+      const sectionCoverage = new Set(
+        keyword.positions.map(position => Math.min(2, Math.floor(position / sectionSize)))
+      ).size;
       if (keywordDensity > maxDensity) {
         issues.push({
           type: 'stuffing',
@@ -1236,6 +1545,24 @@ class ContentAnalysisService extends BaseService {
           keyword: keyword.keyword,
           description: '关键词出现频次过低',
           suggestion: '适当增加关键词出现次数',
+        });
+      }
+      if (sentenceCoverage < 0.2 && lowerSentences.length > 3) {
+        issues.push({
+          type: 'underuse',
+          severity: 'medium',
+          keyword: keyword.keyword,
+          description: '关键词覆盖句子比例偏低',
+          suggestion: '在更多段落中自然融入关键词',
+        });
+      }
+      if (sectionCoverage < 2 && contentLength > 300) {
+        issues.push({
+          type: 'irrelevant',
+          severity: 'low',
+          keyword: keyword.keyword,
+          description: '关键词分布过于集中',
+          suggestion: '在不同段落分散关键词出现',
         });
       }
     });
@@ -1293,6 +1620,29 @@ class ContentAnalysisService extends BaseService {
       });
     }
 
+    if (content.paragraphCount === 0) {
+      issues.push({
+        category: 'structure',
+        severity: 'medium',
+        description: '内容缺少段落结构',
+        suggestion: '使用段落划分内容，提升可读性',
+        impact: '结构不清影响阅读体验',
+      });
+    }
+
+    if (
+      content.paragraphCount > 0 &&
+      content.characterCount / content.paragraphCount > thresholds.readability.maxParagraphLength
+    ) {
+      issues.push({
+        category: 'structure',
+        severity: 'low',
+        description: '段落平均长度偏长',
+        suggestion: '拆分长段落并增加小标题',
+        impact: '阅读负担偏高',
+      });
+    }
+
     if (keywords.primary.length === 0) {
       issues.push({
         category: 'seo',
@@ -1335,6 +1685,19 @@ class ContentAnalysisService extends BaseService {
   private analyzeParagraphStructure(content: string): ParagraphStructure {
     const paragraphs = this.extractParagraphs(content);
     const lengths = paragraphs.map(p => p.length);
+    const issues: string[] = [];
+    const maxParagraphLength = this.qualityThresholds.readability.maxParagraphLength;
+    const minParagraphLength = Math.max(20, Math.floor(maxParagraphLength * 0.2));
+
+    if (paragraphs.length === 0) {
+      issues.push('未检测到段落结构');
+    }
+    if (lengths.length > 0 && Math.max(...lengths) > maxParagraphLength) {
+      issues.push('存在过长段落');
+    }
+    if (lengths.length > 1 && Math.min(...lengths) < minParagraphLength) {
+      issues.push('存在过短段落');
+    }
 
     return {
       total: paragraphs.length,
@@ -1342,7 +1705,7 @@ class ContentAnalysisService extends BaseService {
         lengths.length > 0 ? lengths.reduce((sum, len) => sum + len, 0) / lengths.length : 0,
       maxLength: lengths.length > 0 ? Math.max(...lengths) : 0,
       minLength: lengths.length > 0 ? Math.min(...lengths) : 0,
-      issues: [],
+      issues,
     };
   }
 

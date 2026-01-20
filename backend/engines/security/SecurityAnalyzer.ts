@@ -55,6 +55,7 @@ interface HTTPCheckResult {
   statusCode: number;
   headers: Record<string, string>;
   httpsEnabled: boolean;
+  certificateValid: boolean;
 }
 
 class SecurityAnalyzer {
@@ -76,52 +77,103 @@ class SecurityAnalyzer {
     const { url } = config;
 
     try {
+      const httpCheck = await this.performBasicHttpCheck(url);
+      const requiredHeaders = [
+        'content-security-policy',
+        'strict-transport-security',
+        'x-frame-options',
+        'x-content-type-options',
+        'referrer-policy',
+        'permissions-policy',
+        'x-xss-protection',
+      ];
+      const headerLabels: Record<string, string> = {
+        'content-security-policy': 'Content-Security-Policy',
+        'strict-transport-security': 'Strict-Transport-Security',
+        'x-frame-options': 'X-Frame-Options',
+        'x-content-type-options': 'X-Content-Type-Options',
+        'referrer-policy': 'Referrer-Policy',
+        'permissions-policy': 'Permissions-Policy',
+        'x-xss-protection': 'X-XSS-Protection',
+      };
+      const presentHeaders = requiredHeaders.filter(header => httpCheck.headers[header]);
+      const missingHeaders = requiredHeaders
+        .filter(header => !httpCheck.headers[header])
+        .map(header => headerLabels[header] || header);
+      const headerScore = Math.round((presentHeaders.length / requiredHeaders.length) * 100);
+
+      const sslScore = httpCheck.httpsEnabled ? (httpCheck.certificateValid ? 100 : 60) : 0;
+
+      const vulnerabilities: SecurityResults['vulnerabilities'] = [];
+      const recommendations: string[] = [];
+
+      if (missingHeaders.length > 0) {
+        vulnerabilities.push({
+          type: 'headers',
+          severity: 'high',
+          title: '缺少安全头',
+          description: `缺少${missingHeaders.join(', ')}等关键安全头`,
+          recommendation: '补充缺失的安全头配置',
+        });
+        recommendations.push(`添加安全头: ${missingHeaders.join(', ')}`);
+      }
+
+      if (!httpCheck.httpsEnabled) {
+        vulnerabilities.push({
+          type: 'ssl',
+          severity: 'critical',
+          title: '未启用HTTPS',
+          description: '网站未启用HTTPS，数据传输存在风险',
+          recommendation: '启用HTTPS并强制跳转',
+        });
+        recommendations.push('启用HTTPS并配置强制跳转');
+      } else if (!httpCheck.certificateValid) {
+        vulnerabilities.push({
+          type: 'ssl',
+          severity: 'medium',
+          title: '证书验证失败',
+          description: 'HTTPS证书验证失败或未被信任',
+          recommendation: '检查证书链与过期时间',
+        });
+        recommendations.push('检查证书链和有效期');
+      }
+
+      const securityScore = Math.round(headerScore * 0.6 + sslScore * 0.4);
+      const severityCounts = vulnerabilities.reduce(
+        (acc, item) => {
+          if (item.severity === 'critical') acc.critical += 1;
+          else if (item.severity === 'high') acc.high += 1;
+          else if (item.severity === 'medium') acc.medium += 1;
+          else acc.low += 1;
+          return acc;
+        },
+        { critical: 0, high: 0, medium: 0, low: 0 }
+      );
+
       const results: SecurityResults = {
         url,
         timestamp: new Date().toISOString(),
         summary: {
-          securityScore: 75,
-          criticalVulnerabilities: 0,
-          highVulnerabilities: 1,
-          mediumVulnerabilities: 2,
-          lowVulnerabilities: 1,
+          securityScore,
+          criticalVulnerabilities: severityCounts.critical,
+          highVulnerabilities: severityCounts.high,
+          mediumVulnerabilities: severityCounts.medium,
+          lowVulnerabilities: severityCounts.low,
         },
-        vulnerabilities: [
-          {
-            type: 'headers',
-            severity: 'high',
-            title: '缺少安全头',
-            description: '网站缺少重要的安全头配置',
-            recommendation: '添加Content-Security-Policy等安全头',
-          },
-          {
-            type: 'ssl',
-            severity: 'medium',
-            title: 'SSL配置',
-            description: 'SSL配置可以进一步优化',
-            recommendation: '使用更强的加密套件',
-          },
-        ],
+        vulnerabilities,
         securityHeaders: {
-          score: 60,
-          present: ['X-Content-Type-Options'],
-          missing: ['Content-Security-Policy', 'Strict-Transport-Security'],
+          score: headerScore,
+          present: presentHeaders.map(header => headerLabels[header] || header),
+          missing: missingHeaders,
         },
         ssl: {
-          score: 80,
-          httpsEnabled: url.startsWith('https'),
-          certificateValid: true,
+          score: sslScore,
+          httpsEnabled: httpCheck.httpsEnabled,
+          certificateValid: httpCheck.certificateValid,
         },
-        recommendations: [
-          '添加Content-Security-Policy头部',
-          '启用HSTS安全传输',
-          '配置X-Frame-Options防止点击劫持',
-        ],
+        recommendations,
+        httpCheck,
       };
-
-      // 执行基础HTTP检查
-      const httpCheck = await this.performBasicHttpCheck(url);
-      results.httpCheck = httpCheck;
 
       console.log(`✅ 安全测试完成: ${url}, 评分: ${results.summary.securityScore}`);
       return results;
@@ -182,10 +234,19 @@ class SecurityAnalyzer {
         };
 
         const req = client.request(options, (res: IncomingMessage) => {
+          const socket = res.socket as unknown as {
+            authorized?: boolean;
+            getPeerCertificate?: () => { valid_to?: string };
+          };
+          const certificate = socket?.getPeerCertificate ? socket.getPeerCertificate() : undefined;
+          const validTo = certificate?.valid_to ? new Date(certificate.valid_to) : null;
+          const certificateValid =
+            Boolean(socket?.authorized) && (!validTo || validTo > new Date());
           resolve({
             statusCode: res.statusCode || 0,
             headers: res.headers as Record<string, string>,
             httpsEnabled: urlObj.protocol === 'https:',
+            certificateValid,
           });
         });
 
@@ -194,6 +255,7 @@ class SecurityAnalyzer {
             statusCode: 0,
             headers: {},
             httpsEnabled: urlObj.protocol === 'https:',
+            certificateValid: false,
           });
         });
 
@@ -203,6 +265,7 @@ class SecurityAnalyzer {
             statusCode: 0,
             headers: {},
             httpsEnabled: urlObj.protocol === 'https:',
+            certificateValid: false,
           });
         });
 
@@ -212,6 +275,7 @@ class SecurityAnalyzer {
           statusCode: 0,
           headers: {},
           httpsEnabled: false,
+          certificateValid: false,
         });
       }
     });
