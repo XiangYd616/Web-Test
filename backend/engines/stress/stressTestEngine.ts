@@ -126,6 +126,7 @@ class StressTestEngine {
         status: 'completed',
         score: this.calculateScore(results, analysis),
         summary: this.buildSummary(results, analysis),
+        metrics: (results as { performance?: Record<string, unknown> }).performance || {},
         warnings,
         errors,
         details: {
@@ -183,6 +184,7 @@ class StressTestEngine {
         status: 'failed',
         score: 0,
         summary: {},
+        metrics: {},
         warnings: [],
         errors: [(error as Error).message],
         timestamp: new Date().toISOString(),

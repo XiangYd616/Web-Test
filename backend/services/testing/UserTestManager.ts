@@ -682,12 +682,17 @@ class UserTestManager {
   private extractArray(results: Record<string, unknown>, field: 'warnings' | 'errors'): unknown[] {
     const fromRoot = (results as Record<string, unknown>)[field];
     const fromDetails = (results as { details?: Record<string, unknown> }).details?.[field];
+    const fromDetailSummary = (results as { details?: { summary?: Record<string, unknown> } })
+      .details?.summary?.[field];
     const nested = results as { results?: Record<string, unknown> };
     const fromNested = nested.results?.[field];
+    const fromSummary = (results as { summary?: Record<string, unknown> }).summary?.[field];
 
     if (Array.isArray(fromRoot)) return fromRoot;
     if (Array.isArray(fromDetails)) return fromDetails;
+    if (Array.isArray(fromDetailSummary)) return fromDetailSummary;
     if (Array.isArray(fromNested)) return fromNested;
+    if (Array.isArray(fromSummary)) return fromSummary;
     return [];
   }
 

@@ -181,6 +181,12 @@ class ApiTestEngine {
         success: false,
         testId,
         error: (error as Error).message,
+        status: 'failed',
+        score: 0,
+        summary: {},
+        metrics: {},
+        warnings: [],
+        errors: [(error as Error).message],
         timestamp: new Date().toISOString(),
       };
 

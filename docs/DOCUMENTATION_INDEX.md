@@ -17,6 +17,7 @@
 
 - [架构标准](ARCHITECTURE_STANDARDS.md) - 统一架构规范
 - [API文档](API.md) - 完整的API接口说明
+- [测试结果Schema](TEST_RESULT_SCHEMA.md) - 引擎统一输出结构
 - [贡献指南](CONTRIBUTING.md) - 如何参与项目开发
 
 ### 运维部署
@@ -65,7 +66,7 @@
 
 #### 统一架构
 
-- **_ARCHITECTURE.md** - 企业级统一架构
+- **\_ARCHITECTURE.md** - 企业级统一架构
   - 统一API服务
   - 统一认证服务
   - 配置驱动
@@ -96,6 +97,11 @@
   - 环境配置
   - 开发流程
   - 调试技巧
+
+- **TEST_RESULT_SCHEMA.md** - 测试结果统一Schema
+  - 引擎输出结构
+  - 字段规范与失败最小结构
+  - 落库字段映射
 
 #### 贡献指南
 

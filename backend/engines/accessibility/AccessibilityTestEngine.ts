@@ -177,6 +177,7 @@ class AccessibilityTestEngine {
         status: 'completed',
         score: (results.summary as { score?: number })?.score ?? 0,
         summary: results.summary as Record<string, unknown>,
+        metrics: results.checks as Record<string, unknown>,
         warnings,
         errors,
         details: results,
@@ -218,6 +219,7 @@ class AccessibilityTestEngine {
         status: 'failed',
         score: 0,
         summary: {},
+        metrics: {},
         warnings: [],
         errors: [message],
       };

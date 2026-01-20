@@ -9,15 +9,15 @@ export interface TestResultMetrics {
   errorRate?: number;
   throughput?: number;
   successRate?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TestResultDetails {
   passed?: number;
   failed?: number;
   total?: number;
-  items?: any[];
-  [key: string]: any;
+  items?: unknown[];
+  [key: string]: unknown;
 }
 
 export interface TestResult {
@@ -43,3 +43,23 @@ export interface TestResult {
   }>;
 }
 
+export interface NormalizedTestResult {
+  testId: string;
+  status: TestStatus;
+  score: number;
+  summary: Record<string, unknown>;
+  metrics: Record<string, unknown>;
+  warnings: string[];
+  errors: string[];
+  details?: Record<string, unknown>;
+}
+
+export interface EngineResultEnvelope {
+  engine: string;
+  version?: string;
+  success: boolean;
+  testId: string;
+  results?: NormalizedTestResult;
+  error?: string;
+  timestamp?: string;
+}

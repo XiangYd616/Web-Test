@@ -359,6 +359,32 @@ class TestScheduleService {
       scheduleId,
     };
 
+    if (!config.url) {
+      const errorMessage = '调度任务缺少测试URL';
+      const updatedConfig = this.applyScheduleOptions(scheduleConfig, {
+        retryCount,
+        lastError: errorMessage,
+        lastSuccess: null,
+      });
+      await query(
+        `UPDATE test_schedules
+         SET next_run_at = NULL,
+             is_active = false,
+             test_config = $1,
+             updated_at = NOW()
+         WHERE id = $2 AND user_id = $3`,
+        [JSON.stringify(updatedConfig), scheduleId, userId]
+      );
+      await this.insertExecutionLog(String(scheduleId), 'warn', '调度任务配置无效', {
+        scheduleId,
+        scheduleName: schedule.schedule_name,
+        engineType: schedule.engine_type,
+        error: errorMessage,
+      });
+      this.runningSchedules.delete(scheduleId);
+      throw new Error(errorMessage);
+    }
+
     let executionId: string | undefined;
 
     try {

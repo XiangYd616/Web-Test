@@ -259,6 +259,10 @@ class SecurityTestEngine {
           (results as { summary?: { securityScore?: number } }).summary?.securityScore ??
           0,
         summary: (results as { summary?: Record<string, unknown> }).summary || {},
+        metrics:
+          (results as { metrics?: Record<string, unknown> }).metrics ||
+          (results as { summary?: Record<string, unknown> }).summary ||
+          {},
         warnings,
         errors,
         recommendations:
@@ -312,6 +316,7 @@ class SecurityTestEngine {
         status: 'failed',
         score: 0,
         summary: {},
+        metrics: {},
         warnings: [],
         errors: [message],
         timestamp: new Date().toISOString(),

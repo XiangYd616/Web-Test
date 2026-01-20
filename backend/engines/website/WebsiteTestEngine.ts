@@ -170,6 +170,12 @@ class WebsiteTestEngine {
         version: this.version,
         success: false,
         error: (error as Error).message,
+        status: 'failed',
+        score: 0,
+        summary: {},
+        metrics: {},
+        warnings: [],
+        errors: [(error as Error).message],
         timestamp: new Date().toISOString(),
       };
 

@@ -8,6 +8,7 @@ import { body, validationResult } from 'express-validator';
 import { asyncHandler } from '../../middleware/errorHandler';
 import configRoutes from './config';
 import monitoringRoutes from './monitoring';
+import reportRoutes from './reports';
 const { getPool, getStats, healthCheck } = require('../../config/database');
 const { requireRole } = require('../../middleware/auth');
 const { AlertManager } = require('../../alert/AlertManager');
@@ -32,6 +33,10 @@ const getUserId = (req: AuthenticatedRequest): string => {
 // 初始化监控服务并注入路由
 const monitoringService = new MonitoringService(getPool());
 const alertService = new AlertManager();
+
+(monitoringRoutes as { setMonitoringService?: (service: unknown) => void }).setMonitoringService?.(
+  monitoringService
+);
 
 monitoringService.on('alert:triggered', (alertData: unknown) => {
   try {
@@ -500,6 +505,7 @@ router.delete(
 
 // 挂载子路由
 router.use('/monitoring', monitoringRoutes);
+router.use('/reports', reportRoutes);
 router.use('/config', configRoutes);
 
 export default router;
