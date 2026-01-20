@@ -1,13 +1,32 @@
 import type { Request, Response } from 'express';
 
 const cron = require('node-cron');
+const { Op } = require('sequelize');
 const { models } = require('../database/sequelize');
 const { hasWorkspacePermission } = require('../utils/workspacePermissions');
 
-let _scheduledRunService: unknown = null;
+type ScheduledRunServiceLike = {
+  createSchedule: (data: Record<string, unknown>) => Promise<string>;
+  updateSchedule: (scheduleId: string, updates: Record<string, unknown>) => Promise<unknown>;
+  deleteSchedule: (scheduleId: string) => Promise<boolean>;
+  executeSchedule: (scheduleId: string, options?: Record<string, unknown>) => Promise<string>;
+  getStatistics: () => Promise<unknown>;
+  getExecution: (executionId: string) => Promise<unknown>;
+  getAllExecutions: () => Promise<unknown[]>;
+  cancelExecution: (executionId: string) => Promise<boolean>;
+};
+
+let _scheduledRunService: ScheduledRunServiceLike | null = null;
 
 const setScheduledRunService = (service: unknown) => {
-  _scheduledRunService = service;
+  _scheduledRunService = service as ScheduledRunServiceLike;
+};
+
+const getScheduledRunService = () => {
+  if (!_scheduledRunService) {
+    throw new Error('ScheduledRunService 未初始化');
+  }
+  return _scheduledRunService;
 };
 
 type ApiResponse = Response & {
@@ -33,6 +52,20 @@ type ScheduleConfig = {
   iterations?: number;
   delay?: number;
   timeout?: number;
+};
+
+type TaskExecutionResponse = {
+  id: string;
+  taskId: string;
+  status: string;
+  startTime?: Date;
+  endTime?: Date;
+  duration?: number;
+  results?: Record<string, unknown>;
+  error?: string;
+  triggeredBy: 'schedule' | 'manual';
+  retryCount: number;
+  maxRetries: number;
 };
 
 const parsePagination = (req: Request) => {
@@ -141,6 +174,47 @@ const listScheduledRuns = async (req: AuthRequest, res: ApiResponse) => {
   return res.paginated(rows, page, limit, count, '获取定时运行列表成功');
 };
 
+const listSchedulingTasks = async (req: AuthRequest, res: ApiResponse) => {
+  const workspaceId = req.query.workspaceId as string;
+  if (!workspaceId) {
+    return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
+  }
+
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
+  }
+
+  const { page, limit, offset } = parsePagination(req);
+  const status = req.query.status as string | undefined;
+  const search = req.query.search as string | undefined;
+
+  const where: Record<string, unknown> = { workspace_id: workspaceId };
+  if (status && ['active', 'inactive'].includes(status)) {
+    where.status = status;
+  }
+  if (search) {
+    where[Op.or] = [
+      { name: { [Op.iLike]: `%${search}%` } },
+      { description: { [Op.iLike]: `%${search}%` } },
+    ];
+  }
+
+  const { ScheduledRun } = models;
+  const { count, rows } = await ScheduledRun.findAndCountAll({
+    where,
+    order: [['created_at', 'DESC']],
+    limit,
+    offset,
+  });
+
+  return res.success({
+    tasks: rows,
+    total: count,
+    pagination: { page, limit, total: count },
+  });
+};
+
 const getScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
   const { ScheduledRun } = models;
   const scheduledRun = await ScheduledRun.findByPk(req.params.scheduleId);
@@ -166,11 +240,17 @@ const createScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
     environmentId,
     cronExpression,
     config = {},
+    name,
+    description,
+    timezone = 'UTC',
   } = req.body as {
     collectionId?: string;
     environmentId?: string;
     cronExpression?: string;
     config?: ScheduleConfig;
+    name?: string;
+    description?: string;
+    timezone?: string;
   };
 
   if (!collectionId || !cronExpression) {
@@ -210,17 +290,24 @@ const createScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
     return res.notFound(envCheck.error);
   }
 
-  const { ScheduledRun } = models;
-  const scheduledRun = await ScheduledRun.create({
-    collection_id: collectionId,
-    environment_id: envCheck.environment?.id,
-    workspace_id: collection.collection.workspace_id,
-    cron_expression: cronExpression,
-    config,
+  const service = getScheduledRunService();
+  const scheduleId = await service.createSchedule({
+    workspaceId: collection.collection.workspace_id,
+    name: name || `scheduled-${collectionId}`,
+    description: description || '',
+    cronExpression,
+    timezone,
+    collectionId,
+    environmentId: envCheck.environment?.id || '',
     status: 'active',
-    created_by: req.user.id,
+    lastRunAt: undefined,
+    nextRunAt: undefined,
+    config,
+    createdBy: req.user.id,
   });
 
+  const { ScheduledRun } = models;
+  const scheduledRun = await ScheduledRun.findByPk(scheduleId);
   return res.created(scheduledRun, '定时运行创建成功');
 };
 
@@ -244,10 +331,16 @@ const updateScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
     cronExpression,
     config = {},
     status,
+    name,
+    description,
+    timezone,
   } = req.body as {
     cronExpression?: string;
     config?: ScheduleConfig;
     status?: string;
+    name?: string;
+    description?: string;
+    timezone?: string;
   };
 
   if (cronExpression && !cron.validate(cronExpression)) {
@@ -263,13 +356,18 @@ const updateScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
   }
 
   const updates: Record<string, unknown> = {};
-  if (cronExpression) updates.cron_expression = cronExpression;
+  if (cronExpression) updates.cronExpression = cronExpression;
   if (config) updates.config = config;
   if (status) updates.status = status;
+  if (name !== undefined) updates.name = name;
+  if (description !== undefined) updates.description = description;
+  if (timezone !== undefined) updates.timezone = timezone;
 
-  await scheduledRun.update(updates);
+  const service = getScheduledRunService();
+  await service.updateSchedule(scheduledRun.id, updates);
 
-  return res.success(scheduledRun, '定时运行更新成功');
+  const refreshed = await ScheduledRun.findByPk(scheduledRun.id);
+  return res.success(refreshed, '定时运行更新成功');
 };
 
 const deleteScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
@@ -288,18 +386,160 @@ const deleteScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
     return res.forbidden(permission.error);
   }
 
-  await scheduledRun.destroy();
+  const service = getScheduledRunService();
+  await service.deleteSchedule(scheduledRun.id);
 
   return res.success(null, '定时运行删除成功');
 };
 
+const executeScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
+  const scheduleId = req.params.scheduleId;
+  const { ScheduledRun } = models;
+  const scheduledRun = await ScheduledRun.findByPk(scheduleId);
+  if (!scheduledRun) {
+    return res.notFound('定时运行不存在');
+  }
+
+  const permission = await ensureWorkspacePermission(
+    scheduledRun.workspace_id,
+    req.user.id,
+    'write'
+  );
+  if (permission.error) {
+    return res.forbidden(permission.error);
+  }
+
+  const service = getScheduledRunService();
+  const executionId = await service.executeSchedule(scheduleId, {
+    metadata: { triggeredBy: 'manual', userId: req.user.id },
+  });
+
+  return res.success({ executionId }, '定时运行已触发');
+};
+
+const cancelExecution = async (req: AuthRequest, res: ApiResponse) => {
+  const executionId = req.params.executionId;
+  const service = getScheduledRunService();
+  const cancelled = await service.cancelExecution(executionId);
+  if (!cancelled) {
+    return res.notFound('执行任务不存在或已结束');
+  }
+  return res.success(null, '执行已取消');
+};
+
+const getExecutionHistory = async (req: AuthRequest, res: ApiResponse) => {
+  const scheduleId = req.query.taskId as string | undefined;
+  const { page, limit, offset } = parsePagination(req);
+  const { ScheduledRunResult } = models;
+
+  const where: Record<string, unknown> = {};
+  if (scheduleId) {
+    where.scheduled_run_id = scheduleId;
+  }
+
+  const { count, rows } = await ScheduledRunResult.findAndCountAll({
+    where,
+    order: [['created_at', 'DESC']],
+    limit,
+    offset,
+  });
+
+  const executions: TaskExecutionResponse[] = rows.map((row: Record<string, unknown>) => {
+    const metadata = (row.metadata as Record<string, unknown> | undefined) || {};
+    return {
+      id: String(row.id),
+      taskId: String(row.scheduled_run_id),
+      status: String(row.status),
+      startTime: row.started_at as Date | undefined,
+      endTime: row.completed_at as Date | undefined,
+      duration: row.duration as number | undefined,
+      results: metadata,
+      error: metadata.error as string | undefined,
+      triggeredBy: (metadata.triggeredBy as 'schedule' | 'manual' | undefined) || 'schedule',
+      retryCount: 0,
+      maxRetries: 0,
+    };
+  });
+
+  return res.success({
+    executions,
+    total: count,
+    pagination: { page, limit, total: count },
+  });
+};
+
+const getSchedulingStatistics = async (_req: AuthRequest, res: ApiResponse) => {
+  const service = getScheduledRunService();
+  const statistics = await service.getStatistics();
+  return res.success(statistics);
+};
+
+const validateCronExpression = async (req: AuthRequest, res: ApiResponse) => {
+  const expression = String(req.body?.expression || '');
+  if (!expression) {
+    return res.validationError([{ field: 'expression', message: 'expression 不能为空' }]);
+  }
+  const valid = cron.validate(expression);
+  return res.success({ valid, nextRuns: valid ? [] : undefined });
+};
+
+const startScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
+  const { ScheduledRun } = models;
+  const scheduledRun = await ScheduledRun.findByPk(req.params.scheduleId);
+  if (!scheduledRun) {
+    return res.notFound('定时运行不存在');
+  }
+
+  const permission = await ensureWorkspacePermission(
+    scheduledRun.workspace_id,
+    req.user.id,
+    'write'
+  );
+  if (permission.error) {
+    return res.forbidden(permission.error);
+  }
+
+  const service = getScheduledRunService();
+  await service.updateSchedule(scheduledRun.id, { status: 'active' });
+  const refreshed = await ScheduledRun.findByPk(scheduledRun.id);
+  return res.success(refreshed, '定时运行已启动');
+};
+
+const pauseScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
+  const { ScheduledRun } = models;
+  const scheduledRun = await ScheduledRun.findByPk(req.params.scheduleId);
+  if (!scheduledRun) {
+    return res.notFound('定时运行不存在');
+  }
+
+  const permission = await ensureWorkspacePermission(
+    scheduledRun.workspace_id,
+    req.user.id,
+    'write'
+  );
+  if (permission.error) {
+    return res.forbidden(permission.error);
+  }
+
+  const service = getScheduledRunService();
+  await service.updateSchedule(scheduledRun.id, { status: 'inactive' });
+  const refreshed = await ScheduledRun.findByPk(scheduledRun.id);
+  return res.success(refreshed, '定时运行已暂停');
+};
+
 export {
+  cancelExecution,
   createScheduledRun,
   deleteScheduledRun,
+  executeScheduledRun,
+  getExecutionHistory,
   getScheduledRun,
+  getSchedulingStatistics,
   listScheduledRuns,
+  listSchedulingTasks,
   setScheduledRunService,
   updateScheduledRun,
+  validateCronExpression,
 };
 
 module.exports = {
@@ -308,5 +548,13 @@ module.exports = {
   createScheduledRun,
   updateScheduledRun,
   deleteScheduledRun,
+  listSchedulingTasks,
+  executeScheduledRun,
+  cancelExecution,
+  getExecutionHistory,
+  getSchedulingStatistics,
+  validateCronExpression,
+  startScheduledRun,
+  pauseScheduledRun,
   setScheduledRunService,
 };

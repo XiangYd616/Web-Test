@@ -3,9 +3,11 @@
  * 职责: 包含业务逻辑,协调Repository和其他服务
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { query } from '../../config/database';
 import testRepository from '../../repositories/testRepository';
 import testBusinessService from './TestBusinessService';
+import testTemplateService from './testTemplateService';
 
 const userTestManager = require('./UserTestManager');
 
@@ -30,6 +32,7 @@ interface TestExecutionRecord {
   engine_name: string;
   test_name: string;
   test_url?: string;
+  test_config?: Record<string, unknown>;
   status: string;
   progress?: number;
   created_at: Date;
@@ -56,6 +59,10 @@ interface TestConfig {
   url: string;
   testType: string;
   options?: Record<string, unknown>;
+  concurrency?: number;
+  duration?: number;
+  batchId?: string;
+  templateId?: string;
 }
 
 type TestHistoryResponse = {
@@ -105,6 +112,14 @@ type TestListResponse = {
   };
 };
 
+type TestLogEntry = {
+  id: number;
+  level: string;
+  message: string;
+  context: Record<string, unknown>;
+  createdAt: Date;
+};
+
 interface User {
   userId: string;
   role: string;
@@ -132,6 +147,136 @@ class TestService {
     }
 
     return this.formatResults(execution, result);
+  }
+
+  /**
+   * 重新运行测试
+   */
+  async rerunTest(testId: string, userId: string, role = 'free'): Promise<Record<string, unknown>> {
+    const execution = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+    if (!execution) {
+      throw new Error('测试不存在');
+    }
+
+    const config = this.buildConfigFromExecution(execution);
+    return this.createAndStart(config, { userId, role });
+  }
+
+  /**
+   * 更新测试配置/信息
+   */
+  async updateTest(
+    testId: string,
+    userId: string,
+    updates: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
+    const execution = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+    if (!execution) {
+      throw new Error('测试不存在');
+    }
+
+    if (execution.user_id !== userId) {
+      throw new Error('无权访问此测试');
+    }
+
+    const currentConfig = this.parseTestConfig(execution.test_config);
+    const nextConfig = {
+      ...currentConfig,
+      ...updates,
+    };
+
+    const nextTestUrl = (updates.url as string) ?? execution.test_url ?? currentConfig.url;
+    const nextTestName = (updates.testName as string) ?? execution.test_name;
+
+    await query(
+      `UPDATE test_executions
+       SET test_name = $1,
+           test_url = $2,
+           test_config = $3,
+           updated_at = NOW()
+       WHERE test_id = $4 AND user_id = $5`,
+      [nextTestName, nextTestUrl || null, JSON.stringify(nextConfig), testId, userId]
+    );
+
+    await this.insertExecutionLog(testId, 'info', '测试配置已更新', {
+      updates: Object.keys(updates),
+    });
+
+    return {
+      testId,
+      config: nextConfig,
+    };
+  }
+
+  /**
+   * 批量创建测试
+   */
+  async createBatchTests(tests: Record<string, unknown>[], user: User) {
+    const batchId = uuidv4();
+    const results: Array<{ testId: string; status: string }> = [];
+
+    for (const raw of tests) {
+      const config = this.normalizeBatchConfig(raw, batchId);
+      const result = await this.createAndStart(config, user);
+      results.push({
+        testId: result.testId as string,
+        status: result.status as string,
+      });
+    }
+
+    return {
+      batchId,
+      total: results.length,
+      tests: results,
+    };
+  }
+
+  /**
+   * 获取批量测试状态
+   */
+  async getBatchTestStatus(batchId: string, userId: string) {
+    const result = await query(
+      `SELECT test_id, status, progress, created_at, updated_at
+       FROM test_executions
+       WHERE user_id = $1 AND (test_config->>'batchId') = $2
+       ORDER BY created_at DESC`,
+      [userId, batchId]
+    );
+
+    const tests = result.rows.map(row => ({
+      testId: row.test_id as string,
+      status: row.status as string,
+      progress: typeof row.progress === 'number' ? row.progress : 0,
+      createdAt: row.created_at as Date,
+      updatedAt: row.updated_at as Date,
+    }));
+
+    return {
+      batchId,
+      total: tests.length,
+      tests,
+    };
+  }
+
+  /**
+   * 删除批量测试
+   */
+  async deleteBatchTests(batchId: string, userId: string): Promise<void> {
+    const testIdsResult = await query(
+      `SELECT test_id FROM test_executions
+       WHERE user_id = $1 AND (test_config->>'batchId') = $2`,
+      [userId, batchId]
+    );
+
+    for (const row of testIdsResult.rows) {
+      const testId = row.test_id as string;
+      try {
+        await this.stopTestExecution(testId, userId);
+      } catch {
+        // ignore stop errors for cleanup
+      }
+      await testRepository.delete(testId);
+    }
   }
 
   /**
@@ -178,6 +323,63 @@ class TestService {
   }
 
   /**
+   * 获取测试日志
+   */
+  async getTestLogs(
+    userId: string,
+    testId: string,
+    limit = 100,
+    offset = 0,
+    level?: string
+  ): Promise<{ logs: TestLogEntry[]; total: number; hasMore: boolean }> {
+    const test = (await testRepository.findById(testId, userId)) as TestExecutionRecord | null;
+    if (!test) {
+      throw new Error('测试不存在');
+    }
+
+    const params: Array<string | number> = [testId, userId];
+    let whereClause = 'te.test_id = $1 AND te.user_id = $2';
+
+    if (level) {
+      params.push(level);
+      whereClause += ` AND tl.level = $${params.length}`;
+    }
+
+    const countResult = await query(
+      `SELECT COUNT(*)::int AS total
+       FROM test_logs tl
+       INNER JOIN test_executions te ON te.id = tl.execution_id
+       WHERE ${whereClause}`,
+      params
+    );
+    const total = countResult.rows[0]?.total || 0;
+
+    const listResult = await query(
+      `SELECT tl.id, tl.level, tl.message, tl.context, tl.created_at
+       FROM test_logs tl
+       INNER JOIN test_executions te ON te.id = tl.execution_id
+       WHERE ${whereClause}
+       ORDER BY tl.created_at DESC
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, offset]
+    );
+
+    const logs = listResult.rows.map(row => ({
+      id: row.id as number,
+      level: row.level as string,
+      message: row.message as string,
+      context: (row.context || {}) as Record<string, unknown>,
+      createdAt: row.created_at as Date,
+    }));
+
+    return {
+      logs,
+      total,
+      hasMore: offset + limit < total,
+    };
+  }
+
+  /**
    * 取消测试
    */
   async cancelTest(userId: string, testId: string): Promise<void> {
@@ -203,6 +405,11 @@ class TestService {
   async createAndStart(config: TestConfig, user: User): Promise<Record<string, unknown>> {
     try {
       const result = await testBusinessService.createAndStartTest(config, user);
+
+      if (config.templateId) {
+        await testTemplateService.incrementUsage(config.templateId);
+      }
+
       return {
         ...result,
         config,
@@ -275,13 +482,16 @@ class TestService {
       throw new Error('无权访问此测试');
     }
 
+    const result = await testRepository.findResults(testId, userId);
+    const results = result?.summary ?? null;
+
     return {
       testId: test.test_id,
       status: test.status,
       progress: typeof test.progress === 'number' ? test.progress : 0,
       startTime: test.started_at || test.created_at,
       endTime: test.completed_at || test.updated_at,
-      results: null,
+      results,
     };
   }
 
@@ -422,6 +632,46 @@ class TestService {
       warnings: result.warnings,
       errors: result.errors,
       createdAt: result.created_at,
+    };
+  }
+
+  private buildConfigFromExecution(execution: TestExecutionRecord): TestConfig {
+    const parsedConfig = this.parseTestConfig(execution.test_config);
+    return {
+      url: execution.test_url || parsedConfig.url || '',
+      testType: execution.engine_type || parsedConfig.testType || '',
+      options: parsedConfig.options,
+      concurrency: parsedConfig.concurrency,
+      duration: parsedConfig.duration,
+      templateId: parsedConfig.templateId,
+    };
+  }
+
+  private parseTestConfig(config?: Record<string, unknown>): TestConfig {
+    if (!config || typeof config !== 'object') {
+      return { url: '', testType: '' };
+    }
+    const record = config as Record<string, unknown>;
+    return {
+      url: (record.url as string) || '',
+      testType: (record.testType as string) || (record.engine_type as string) || '',
+      options: record.options as Record<string, unknown> | undefined,
+      concurrency: typeof record.concurrency === 'number' ? record.concurrency : undefined,
+      duration: typeof record.duration === 'number' ? record.duration : undefined,
+      batchId: typeof record.batchId === 'string' ? record.batchId : undefined,
+      templateId: typeof record.templateId === 'string' ? record.templateId : undefined,
+    };
+  }
+
+  private normalizeBatchConfig(raw: Record<string, unknown>, batchId: string): TestConfig {
+    return {
+      url: String(raw.url || ''),
+      testType: String(raw.testType || raw.engineType || ''),
+      options: (raw.options as Record<string, unknown> | undefined) ?? {},
+      concurrency: typeof raw.concurrency === 'number' ? raw.concurrency : undefined,
+      duration: typeof raw.duration === 'number' ? raw.duration : undefined,
+      batchId,
+      templateId: typeof raw.templateId === 'string' ? raw.templateId : undefined,
     };
   }
 }

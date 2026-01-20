@@ -4,10 +4,10 @@
  */
 
 import express from 'express';
-import testController from '../controllers/testController';
-import { authMiddleware, optionalAuth } from '../middleware/auth';
-import { asyncHandler } from '../middleware/errorHandler';
-import { testRateLimiter } from '../middleware/rateLimiter';
+const testController = require('../controllers/testController');
+const { authMiddleware, optionalAuth } = require('../middleware/auth');
+const { asyncHandler } = require('../middleware/errorHandler');
+const { rateLimiter: testRateLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
@@ -43,6 +43,12 @@ router.get('/:testId/status', authMiddleware, asyncHandler(testController.getSta
 router.get('/:testId/result', authMiddleware, asyncHandler(testController.getResult));
 
 /**
+ * 获取测试日志
+ * GET /api/test/:testId/logs
+ */
+router.get('/:testId/logs', authMiddleware, asyncHandler(testController.getTestLogs));
+
+/**
  * 获取测试进度
  * GET /api/test/:testId/progress
  */
@@ -59,6 +65,18 @@ router.post('/:testId/stop', authMiddleware, asyncHandler(testController.stopTes
  * DELETE /api/test/:testId
  */
 router.delete('/:testId', authMiddleware, asyncHandler(testController.deleteTest));
+
+/**
+ * 取消测试
+ * POST /api/test/:testId/cancel
+ */
+router.post('/:testId/cancel', authMiddleware, asyncHandler(testController.cancelTest));
+
+/**
+ * 更新测试
+ * PUT /api/test/:testId
+ */
+router.put('/:testId', authMiddleware, asyncHandler(testController.updateTest));
 
 /**
  * 获取测试列表
@@ -78,6 +96,29 @@ router.post(
 );
 
 /**
+ * 批量创建测试
+ * POST /api/test/batch
+ */
+router.post(
+  '/batch',
+  authMiddleware,
+  testRateLimiter,
+  asyncHandler(testController.createBatchTests)
+);
+
+/**
+ * 获取批量测试状态
+ * GET /api/test/batch/:batchId
+ */
+router.get('/batch/:batchId', authMiddleware, asyncHandler(testController.getBatchTestStatus));
+
+/**
+ * 删除批量测试
+ * DELETE /api/test/batch/:batchId
+ */
+router.delete('/batch/:batchId', authMiddleware, asyncHandler(testController.deleteBatchTests));
+
+/**
  * 导出测试结果
  * GET /api/test/:testId/export
  */
@@ -88,5 +129,39 @@ router.get('/:testId/export', authMiddleware, asyncHandler(testController.export
  * GET /api/test/history
  */
 router.get('/history', authMiddleware, asyncHandler(testController.getTestHistory));
+
+/**
+ * 获取测试模板列表
+ * GET /api/test/templates
+ */
+router.get('/templates', authMiddleware, asyncHandler(testController.getTemplates));
+
+/**
+ * 创建测试模板
+ * POST /api/test/templates
+ */
+router.post('/templates', authMiddleware, asyncHandler(testController.createTemplate));
+
+/**
+ * 更新测试模板
+ * PUT /api/test/templates/:templateId
+ */
+router.put('/templates/:templateId', authMiddleware, asyncHandler(testController.updateTemplate));
+
+/**
+ * 删除测试模板
+ * DELETE /api/test/templates/:templateId
+ */
+router.delete(
+  '/templates/:templateId',
+  authMiddleware,
+  asyncHandler(testController.deleteTemplate)
+);
+
+/**
+ * 获取历史记录详情
+ * GET /api/test/history/:testId
+ */
+router.get('/history/:testId', authMiddleware, asyncHandler(testController.getHistoryDetail));
 
 export default router;

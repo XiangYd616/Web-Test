@@ -6,6 +6,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
 const testService = require('../services/testing/testService');
+const testTemplateService = require('../services/testing/testTemplateService');
 const { successResponse, createdResponse, _errorResponse } = require('../utils/response');
 
 type AuthRequest = Request & { user: { id: string; role?: string } };
@@ -485,7 +486,7 @@ class TestController {
 
       if (format === 'csv') {
         const csvRows = [['field', 'value']];
-        Object.entries(result.results || {}).forEach(([key, value]) => {
+        Object.entries(result.summary || {}).forEach(([key, value]) => {
           csvRows.push([key, JSON.stringify(value)]);
         });
         const csvContent = csvRows.map(row => row.map(item => `"${item}"`).join(',')).join('\n');
@@ -523,6 +524,115 @@ class TestController {
       const { testId } = req.params as { testId: string };
       const result = await testService.getTestDetail(req.user.id, testId);
       return successResponse(res, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取测试日志
+   * GET /api/test/:testId/logs
+   */
+  async getTestLogs(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { testId } = req.params as { testId: string };
+      const { limit = '100', offset = '0', level } = req.query as Record<string, string>;
+      const result = await testService.getTestLogs(
+        req.user.id,
+        testId,
+        parseInt(limit, 10) || 100,
+        parseInt(offset, 10) || 0,
+        level
+      );
+      return successResponse(res, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 获取测试模板列表
+   * GET /api/test/templates
+   */
+  async getTemplates(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { engineType } = req.query as { engineType?: string };
+      const templates = await testTemplateService.listTemplates(req.user.id, engineType);
+      return successResponse(res, templates);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 创建测试模板
+   * POST /api/test/templates
+   */
+  async createTemplate(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const payload = req.body as {
+        name?: string;
+        description?: string;
+        engineType?: string;
+        config?: Record<string, unknown>;
+        isPublic?: boolean;
+        isDefault?: boolean;
+      };
+
+      if (!payload.name || !payload.engineType) {
+        return res.status(400).json({
+          success: false,
+          message: '模板名称和测试类型必填',
+        });
+      }
+
+      const templateId = await testTemplateService.createTemplate(req.user.id, {
+        name: payload.name,
+        description: payload.description,
+        engineType: payload.engineType,
+        config: payload.config || {},
+        isPublic: payload.isPublic,
+        isDefault: payload.isDefault,
+      });
+
+      return createdResponse(res, { id: templateId }, '模板创建成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 更新测试模板
+   * PUT /api/test/templates/:templateId
+   */
+  async updateTemplate(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { templateId } = req.params as { templateId: string };
+      const updates = req.body as {
+        name?: string;
+        description?: string;
+        engineType?: string;
+        config?: Record<string, unknown>;
+        isPublic?: boolean;
+        isDefault?: boolean;
+      };
+
+      await testTemplateService.updateTemplate(req.user.id, templateId, updates);
+      return successResponse(res, { templateId }, '模板更新成功');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * 删除测试模板
+   * DELETE /api/test/templates/:templateId
+   */
+  async deleteTemplate(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { templateId } = req.params as { templateId: string };
+      await testTemplateService.deleteTemplate(req.user.id, templateId);
+      return successResponse(res, { templateId }, '模板删除成功');
     } catch (error) {
       next(error);
     }

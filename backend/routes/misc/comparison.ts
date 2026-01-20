@@ -11,26 +11,15 @@
  */
 
 import express from 'express';
+import { query } from '../../config/database';
 import ComparisonAnalyzer from '../../utils/ComparisonAnalyzer';
 import Logger from '../../utils/logger';
-
-interface TestResult {
-  id: string;
-  testType: string;
-  url: string;
-  score: number;
-  timestamp: Date;
-  metrics: Record<string, unknown>;
-  issues: Array<{
-    type: string;
-    severity: string;
-    description: string;
-  }>;
-}
+const { authMiddleware } = require('../../middleware/auth');
+const { asyncHandler } = require('../../middleware/errorHandler');
 
 interface ComparisonRequest {
-  currentResult: TestResult;
-  previousResult: TestResult;
+  currentTestId: string;
+  previousTestId: string;
 }
 
 interface TrendAnalysisRequest {
@@ -90,45 +79,249 @@ interface TrendAnalysisResult {
 const router = express.Router();
 const analyzer = new ComparisonAnalyzer();
 
+type TestResultRow = {
+  test_id: string;
+  engine_type: string;
+  test_url: string | null;
+  created_at: Date;
+  completed_at: Date | null;
+  score: number | null;
+  summary: Record<string, unknown> | null;
+};
+
+const buildComparisonResult = (row: TestResultRow) => ({
+  testId: row.test_id,
+  type: row.engine_type,
+  result: row.summary || {},
+  metrics: row.summary || {},
+  score: row.score || 0,
+  createdAt: row.completed_at || row.created_at,
+});
+
+const buildTrendRecord = (row: TestResultRow, metrics?: string[]) => {
+  const summary = row.summary || {};
+  const filtered = metrics?.length
+    ? metrics.reduce<Record<string, unknown>>((acc, key) => {
+        if (summary[key] !== undefined) acc[key] = summary[key];
+        return acc;
+      }, {})
+    : summary;
+
+  return {
+    testId: row.test_id,
+    type: row.engine_type,
+    result: filtered,
+    metrics: filtered,
+    score: row.score || 0,
+    createdAt: row.completed_at || row.created_at,
+  };
+};
+
+const getExecutionId = async (testId: string, userId: string): Promise<number | null> => {
+  const result = await query('SELECT id FROM test_executions WHERE test_id = $1 AND user_id = $2', [
+    testId,
+    userId,
+  ]);
+  return result.rows[0]?.id ? Number(result.rows[0].id) : null;
+};
+
+const getTestResultRecord = async (
+  testId: string,
+  userId: string
+): Promise<TestResultRow | null> => {
+  const result = await query(
+    `SELECT te.test_id, te.engine_type, te.test_url, te.created_at, te.completed_at,
+            tr.score, tr.summary
+     FROM test_executions te
+     LEFT JOIN test_results tr ON tr.execution_id = te.id
+     WHERE te.test_id = $1 AND te.user_id = $2
+     ORDER BY tr.created_at DESC
+     LIMIT 1`,
+    [testId, userId]
+  );
+  return (result.rows[0] as TestResultRow) || null;
+};
+
+const getTestHistoryResults = async (
+  testId: string,
+  userId: string,
+  period: string
+): Promise<TestResultRow[]> => {
+  const days = parseInt(period.replace(/\D/g, ''), 10) || 30;
+  const result = await query(
+    `SELECT te.test_id, te.engine_type, te.test_url, te.created_at, te.completed_at,
+            tr.score, tr.summary
+     FROM test_executions te
+     LEFT JOIN test_results tr ON tr.execution_id = te.id
+     WHERE te.user_id = $1 AND te.test_id = $2 AND te.created_at >= NOW() - ($3 || ' days')::interval
+     ORDER BY te.created_at ASC`,
+    [userId, testId, String(days)]
+  );
+
+  return result.rows as TestResultRow[];
+};
+
+const getTestHistoryPaged = async (
+  testId: string,
+  userId: string,
+  limit: number,
+  offset: number
+): Promise<{ results: TestResultRow[]; total: number; hasMore: boolean }> => {
+  const countResult = await query(
+    `SELECT COUNT(*)::int AS total
+     FROM test_executions te
+     WHERE te.user_id = $1 AND te.test_id = $2`,
+    [userId, testId]
+  );
+  const total = countResult.rows[0]?.total || 0;
+
+  const result = await query(
+    `SELECT te.test_id, te.engine_type, te.test_url, te.created_at, te.completed_at,
+            tr.score, tr.summary
+     FROM test_executions te
+     LEFT JOIN test_results tr ON tr.execution_id = te.id
+     WHERE te.user_id = $1 AND te.test_id = $2
+     ORDER BY te.created_at DESC
+     LIMIT $3 OFFSET $4`,
+    [userId, testId, limit, offset]
+  );
+
+  return {
+    results: result.rows as TestResultRow[],
+    total,
+    hasMore: offset + limit < total,
+  };
+};
+
+const getComparisonHistory = async (
+  userId: string,
+  limit: number,
+  offset: number
+): Promise<{
+  records: Array<{ id: string; name: string; type: string; createdAt: Date }>;
+  total: number;
+}> => {
+  const countResult = await query(
+    'SELECT COUNT(*)::int AS total FROM test_comparisons WHERE user_id = $1',
+    [userId]
+  );
+  const total = countResult.rows[0]?.total || 0;
+
+  const listResult = await query(
+    `SELECT id, comparison_name, comparison_type, created_at
+     FROM test_comparisons
+     WHERE user_id = $1
+     ORDER BY created_at DESC
+     LIMIT $2 OFFSET $3`,
+    [userId, limit, offset]
+  );
+
+  const records = listResult.rows.map(row => ({
+    id: String(row.id),
+    name: row.comparison_name as string,
+    type: row.comparison_type as string,
+    createdAt: row.created_at as Date,
+  }));
+
+  return { records, total };
+};
+
 /**
  * POST /api/comparison/compare
  * 对比两个测试结果
  */
 router.post(
   '/compare',
+  authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const { currentResult, previousResult }: ComparisonRequest = req.body;
+      const { currentTestId, previousTestId }: ComparisonRequest = req.body;
+      const userId = (req as { user: { id: string } }).user.id;
 
-      if (!currentResult || !previousResult) {
+      if (!currentTestId || !previousTestId) {
         return res.status(400).json({
           success: false,
-          message: '当前结果和之前结果都是必需的',
+          message: '当前测试和之前测试都是必需的',
         });
       }
 
-      // 验证测试类型是否相同
-      if (currentResult.testType !== previousResult.testType) {
+      const [currentRow, previousRow] = await Promise.all([
+        getTestResultRecord(currentTestId, userId),
+        getTestResultRecord(previousTestId, userId),
+      ]);
+
+      if (!currentRow || !previousRow) {
+        return res.status(404).json({
+          success: false,
+          message: '测试结果不存在',
+        });
+      }
+
+      if (currentRow.engine_type !== previousRow.engine_type) {
         return res.status(400).json({
           success: false,
           message: '只能对比相同类型的测试结果',
         });
       }
 
-      const comparison = await analyzer.compareResults(currentResult, previousResult);
+      const comparison = analyzer.compare(
+        buildComparisonResult(currentRow),
+        buildComparisonResult(previousRow)
+      );
 
       const result: ComparisonResult = {
         id: `comparison_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        currentResult,
-        previousResult,
+        currentResult: {
+          id: currentRow.test_id,
+          testType: currentRow.engine_type,
+          url: currentRow.test_url || '',
+          score: Number(currentRow.score || 0),
+          timestamp: currentRow.completed_at || currentRow.created_at,
+          metrics: currentRow.summary || {},
+          issues: [],
+        },
+        previousResult: {
+          id: previousRow.test_id,
+          testType: previousRow.engine_type,
+          url: previousRow.test_url || '',
+          score: Number(previousRow.score || 0),
+          timestamp: previousRow.completed_at || previousRow.created_at,
+          metrics: previousRow.summary || {},
+          issues: [],
+        },
         comparison,
         timestamp: new Date(),
       };
 
+      const [currentExecutionId, previousExecutionId] = await Promise.all([
+        getExecutionId(currentTestId, userId),
+        getExecutionId(previousTestId, userId),
+      ]);
+
+      if (currentExecutionId && previousExecutionId) {
+        const comparisonName = `${currentTestId} vs ${previousTestId}`;
+        const insertResult = await query(
+          `INSERT INTO test_comparisons
+            (user_id, comparison_name, execution_ids, comparison_type, comparison_data)
+           VALUES ($1, $2, $3, $4, $5)
+           RETURNING id`,
+          [
+            userId,
+            comparisonName,
+            [currentExecutionId, previousExecutionId],
+            currentRow.engine_type,
+            JSON.stringify(result),
+          ]
+        );
+        if (insertResult.rows[0]?.id) {
+          result.id = String(insertResult.rows[0].id);
+        }
+      }
+
       Logger.info('测试对比完成', {
         comparisonId: result.id,
-        currentScore: currentResult.score,
-        previousScore: previousResult.score,
+        currentScore: result.currentResult.score,
+        previousScore: result.previousResult.score,
         scoreChange: comparison.scoreChange,
       });
 
@@ -149,14 +342,58 @@ router.post(
 );
 
 /**
+ * GET /api/comparison/history
+ * 获取对比记录列表
+ */
+router.get(
+  '/history',
+  authMiddleware,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { limit = 20, offset = 0 } = req.query;
+    const userId = (req as { user: { id: string } }).user.id;
+
+    try {
+      const history = await getComparisonHistory(
+        userId,
+        parseInt(limit as string),
+        parseInt(offset as string)
+      );
+
+      res.json({
+        success: true,
+        data: {
+          records: history.records,
+          total: history.total,
+          pagination: {
+            limit: parseInt(limit as string),
+            offset: parseInt(offset as string),
+            hasMore: offset + Number(limit) < history.total,
+          },
+        },
+      });
+    } catch (error) {
+      Logger.error('获取对比记录失败', { error, userId });
+
+      res.status(500).json({
+        success: false,
+        message: '获取对比记录失败',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })
+);
+
+/**
  * POST /api/comparison/trend
  * 趋势分析
  */
 router.post(
   '/trend',
+  authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const { testId, period, metrics }: TrendAnalysisRequest = req.body;
+      const userId = (req as { user: { id: string } }).user.id;
 
       if (!testId || !period) {
         return res.status(400).json({
@@ -165,7 +402,17 @@ router.post(
         });
       }
 
-      const trendAnalysis = await analyzer.analyzeTrend(testId, period, metrics);
+      const history = await getTestHistoryResults(testId, userId, period);
+      if (history.length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: '趋势分析需要至少2次测试结果',
+        });
+      }
+
+      const trendAnalysis = analyzer.analyzeTrend(
+        history.map(record => buildTrendRecord(record, metrics))
+      );
 
       const result: TrendAnalysisResult = {
         testId,
@@ -209,26 +456,30 @@ router.post(
  */
 router.get(
   '/history/:testId',
+  authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { testId } = req.params;
     const { limit = 20, offset = 0 } = req.query;
+    const userId = (req as { user: { id: string } }).user.id;
 
     try {
-      const history = await analyzer.getTestHistory(testId, {
-        limit: parseInt(limit as string),
-        offset: parseInt(offset as string),
-      });
+      const history = await getTestHistoryPaged(
+        testId,
+        userId,
+        parseInt(limit as string),
+        parseInt(offset as string)
+      );
 
       res.json({
         success: true,
         data: {
           testId,
-          history: history.results || [],
-          total: history.total || 0,
+          history: history.results,
+          total: history.total,
           pagination: {
             limit: parseInt(limit as string),
             offset: parseInt(offset as string),
-            hasMore: history.hasMore || false,
+            hasMore: history.hasMore,
           },
         },
       });

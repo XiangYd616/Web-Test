@@ -7,15 +7,23 @@ import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
 import winston from 'winston';
-import { authMiddleware } from '../../middleware/auth';
-import { formatResponse } from '../../middleware/responseFormatter';
-import DataExportService from '../../services/dataManagement/dataExportService';
+import DataExportService, {
+  ExportJobRequest,
+} from '../../services/dataManagement/dataExportService';
+const { authMiddleware } = require('../../middleware/auth');
+const { asyncHandler } = require('../../middleware/errorHandler');
 
 type AuthRequest = express.Request & {
   user: {
     id: string;
   };
 };
+
+const formatResponse = (success: boolean, message: string, data: Record<string, unknown> = {}) => ({
+  success,
+  message,
+  data,
+});
 
 // 创建日志记录器
 const logger = winston.createLogger({
@@ -60,7 +68,7 @@ router.get(
     try {
       const status = await service.getExportStatus(jobId);
 
-      res.json(
+      return res.json(
         formatResponse(true, '获取导出状态成功', {
           jobId,
           ...status,
@@ -69,7 +77,7 @@ router.get(
     } catch (error) {
       logger.error('获取导出状态失败', { jobId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '获取导出状态失败', {
           jobId,
           error: error instanceof Error ? error.message : String(error),
@@ -87,8 +95,22 @@ router.post(
   '/',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { dataType, format, filters, options } = req.body;
+    const { dataType, format, filters, options } = req.body as {
+      dataType?: string;
+      format?: string;
+      filters?: Record<string, unknown>;
+      options?: Record<string, unknown>;
+    };
     const userId = (req as AuthRequest).user.id;
+
+    const allowedTypes: ExportJobRequest['dataType'][] = [
+      'test_results',
+      'analytics',
+      'reports',
+      'users',
+      'logs',
+    ];
+    const allowedFormats: ExportJobRequest['format'][] = ['pdf', 'csv', 'json', 'excel', 'zip'];
 
     try {
       // 验证请求参数
@@ -96,13 +118,21 @@ router.post(
         return res.status(400).json(formatResponse(false, '数据类型和格式是必需的'));
       }
 
+      if (!allowedTypes.includes(dataType as ExportJobRequest['dataType'])) {
+        return res.status(400).json(formatResponse(false, '不支持的数据类型'));
+      }
+
+      if (!allowedFormats.includes(format as ExportJobRequest['format'])) {
+        return res.status(400).json(formatResponse(false, '不支持的导出格式'));
+      }
+
       const service = initializeExportService();
 
       // 创建导出任务
       const job = await service.createExportJob({
         userId,
-        dataType,
-        format,
+        dataType: dataType as ExportJobRequest['dataType'],
+        format: format as ExportJobRequest['format'],
         filters: filters || {},
         options: options || {},
       });
@@ -113,13 +143,12 @@ router.post(
         formatResponse(true, '导出任务创建成功', {
           jobId: job.id,
           status: job.status,
-          estimatedTime: job.estimatedTime,
         })
       );
     } catch (error) {
       logger.error('创建导出任务失败', { userId, dataType, format, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '创建导出任务失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -178,14 +207,14 @@ router.get(
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
       res.setHeader('Content-Type', 'application/octet-stream');
 
+      logger.info('下载导出文件', { jobId, userId, fileName });
+
       // 发送文件
       return res.sendFile(filePath);
-
-      logger.info('下载导出文件', { jobId, userId, fileName });
     } catch (error) {
       logger.error('下载导出文件失败', { jobId, userId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '下载导出文件失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -203,7 +232,7 @@ router.delete(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { jobId } = req.params;
-    const userId = (req as any).user.id;
+    const userId = (req as AuthRequest).user.id;
 
     try {
       const service = initializeExportService();
@@ -228,7 +257,7 @@ router.delete(
     } catch (error) {
       logger.error('取消导出任务失败', { jobId, userId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '取消导出任务失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -261,7 +290,7 @@ router.get(
     } catch (error) {
       logger.error('获取导出历史失败', { userId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '获取导出历史失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -286,7 +315,7 @@ router.get(
     } catch (error) {
       logger.error('获取支持的导出格式失败', { error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '获取支持的导出格式失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -319,7 +348,7 @@ router.delete(
     } catch (error) {
       logger.error('清理过期导出文件失败', { userId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '清理过期导出文件失败', {
           error: error instanceof Error ? error.message : String(error),
         })
