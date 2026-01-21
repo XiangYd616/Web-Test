@@ -4,9 +4,10 @@
 
 import express from 'express';
 import Joi from 'joi';
-import { authMiddleware } from '../../middleware/auth';
 import { asyncHandler } from '../../middleware/errorHandler';
-import { validateQuery, validateRequest } from '../../middleware/validation';
+import { dataManagementService } from '../../services/data/DataManagementService';
+const { authMiddleware } = require('../../middleware/auth');
+const { validateQuery, validateRequest } = require('../../middleware/validation');
 
 interface Alert {
   id: string;
@@ -34,12 +35,6 @@ interface AlertQuery {
   search?: string;
 }
 
-interface BatchAction {
-  action: 'acknowledge' | 'resolve' | 'delete';
-  alertIds: string[];
-  comment?: string;
-}
-
 interface AlertRule {
   id: string;
   name: string;
@@ -55,11 +50,11 @@ interface AlertRule {
 
 const router = express.Router();
 
-interface AuthenticatedRequest extends express.Request {
+type AuthenticatedRequest = Omit<express.Request, 'user'> & {
   user?: {
     id: string;
-  };
-}
+  } | null;
+};
 
 const getUserId = (req: AuthenticatedRequest): string => {
   const userId = req.user?.id;
@@ -67,14 +62,6 @@ const getUserId = (req: AuthenticatedRequest): string => {
     throw new Error('用户未认证');
   }
   return userId;
-};
-
-// 告警服务实例 (将在app.js中初始化)
-let alertService: unknown = null;
-
-// 设置告警服务实例
-router.setAlertService = (service: unknown): void => {
-  alertService = service;
 };
 
 // 验证规则
@@ -103,100 +90,49 @@ const alertRuleSchema = Joi.object({
   severity: Joi.string().valid('low', 'medium', 'high', 'critical').required(),
 });
 
-// 模拟告警数据
-const alerts: Alert[] = [
-  {
-    id: '1',
-    title: 'CPU使用率过高',
-    description: '服务器CPU使用率超过80%',
-    severity: 'high',
-    status: 'active',
-    source: 'system',
-    timestamp: new Date(Date.now() - 1000 * 60 * 5),
-    metadata: {
-      cpuUsage: 85,
-      serverId: 'server-001',
-    },
-    tags: ['performance', 'cpu', 'server'],
-  },
-  {
-    id: '2',
-    title: '内存不足',
-    description: '可用内存低于20%',
-    severity: 'medium',
-    status: 'acknowledged',
-    source: 'system',
-    timestamp: new Date(Date.now() - 1000 * 60 * 15),
-    acknowledgedAt: new Date(Date.now() - 1000 * 60 * 10),
-    acknowledgedBy: 'admin',
-    metadata: {
-      memoryUsage: 85,
-      availableMemory: '2GB',
-      totalMemory: '16GB',
-    },
-    tags: ['performance', 'memory', 'server'],
-  },
-  {
-    id: '3',
-    title: '数据库连接失败',
-    description: '无法连接到主数据库',
-    severity: 'critical',
-    status: 'resolved',
-    source: 'database',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    resolvedAt: new Date(Date.now() - 1000 * 60 * 5),
-    resolvedBy: 'admin',
-    metadata: {
-      database: 'primary',
-      error: 'Connection timeout',
-    },
-    tags: ['database', 'connection', 'critical'],
-  },
-];
+const ALERTS_TYPE = 'system_alerts';
+const ALERT_RULES_TYPE = 'system_alert_rules';
 
-// 模拟告警规则数据
-const alertRules: AlertRule[] = [
-  {
-    id: '1',
-    name: 'CPU使用率告警',
-    description: '当CPU使用率超过80%时触发告警',
-    enabled: true,
-    conditions: {
-      metric: 'cpu_usage',
-      operator: '>',
-      threshold: 80,
-      duration: '5m',
-    },
-    actions: {
-      type: 'notification',
-      channels: ['email', 'slack'],
-    },
-    severity: 'high',
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    createdBy: 'admin',
-  },
-  {
-    id: '2',
-    name: '内存使用率告警',
-    description: '当内存使用率超过90%时触发告警',
-    enabled: true,
-    conditions: {
-      metric: 'memory_usage',
-      operator: '>',
-      threshold: 90,
-      duration: '2m',
-    },
-    actions: {
-      type: 'notification',
-      channels: ['email'],
-    },
-    severity: 'medium',
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    createdBy: 'admin',
-  },
-];
+dataManagementService.initialize().catch(error => {
+  console.error('告警数据服务初始化失败:', error);
+});
+
+const mapAlertRecord = (record: { id: string; data: Record<string, unknown> }) =>
+  ({
+    ...(record.data as unknown as Alert),
+    id: record.id,
+  }) as Alert;
+
+const mapRuleRecord = (record: { id: string; data: Record<string, unknown> }) =>
+  ({
+    ...(record.data as unknown as AlertRule),
+    id: record.id,
+  }) as AlertRule;
+
+const filterAlertsByTimeRange = (alerts: Alert[], timeRange?: AlertQuery['timeRange']) => {
+  if (!timeRange) return alerts;
+  const now = new Date();
+  let cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  switch (timeRange) {
+    case '1h':
+      cutoffTime = new Date(now.getTime() - 60 * 60 * 1000);
+      break;
+    case '24h':
+      cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      break;
+    case '7d':
+      cutoffTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case '30d':
+      cutoffTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    default:
+      break;
+  }
+
+  return alerts.filter(alert => new Date(alert.timestamp) >= cutoffTime);
+};
 
 /**
  * GET /api/system/alerts
@@ -208,72 +144,36 @@ router.get(
   validateQuery(alertQuerySchema),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const query = req.query as AlertQuery;
-    const userId = getUserId(req);
+    getUserId(req);
 
     try {
-      let filteredAlerts = [...alerts];
+      const { results } = await dataManagementService.queryData(
+        ALERTS_TYPE,
+        {
+          filters: {
+            ...(query.severity ? { severity: query.severity } : {}),
+            ...(query.status ? { status: query.status } : {}),
+            ...(query.source ? { source: query.source } : {}),
+          },
+          search: query.search,
+          sort: { field: 'timestamp', direction: 'desc' },
+        },
+        {}
+      );
 
-      // 按严重程度过滤
-      if (query.severity) {
-        filteredAlerts = filteredAlerts.filter(alert => alert.severity === query.severity);
-      }
+      const rawAlerts = results.map(record => mapAlertRecord(record));
+      const filteredAlerts = filterAlertsByTimeRange(rawAlerts, query.timeRange);
+      filteredAlerts.sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
 
-      // 按状态过滤
-      if (query.status) {
-        filteredAlerts = filteredAlerts.filter(alert => alert.status === query.status);
-      }
-
-      // 按来源过滤
-      if (query.source) {
-        filteredAlerts = filteredAlerts.filter(alert => alert.source === query.source);
-      }
-
-      // 搜索过滤
-      if (query.search) {
-        const searchLower = query.search.toLowerCase();
-        filteredAlerts = filteredAlerts.filter(
-          alert =>
-            alert.title.toLowerCase().includes(searchLower) ||
-            alert.description.toLowerCase().includes(searchLower)
-        );
-      }
-
-      // 时间范围过滤
-      if (query.timeRange) {
-        const now = new Date();
-        let cutoffTime: Date;
-
-        switch (query.timeRange) {
-          case '1h':
-            cutoffTime = new Date(now.getTime() - 60 * 60 * 1000);
-            break;
-          case '24h':
-            cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-            break;
-          case '7d':
-            cutoffTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            break;
-          case '30d':
-            cutoffTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            break;
-          default:
-            cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        }
-
-        filteredAlerts = filteredAlerts.filter(alert => alert.timestamp >= cutoffTime);
-      }
-
-      // 排序
-      filteredAlerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-      // 分页
       const page = query.page || 1;
       const limit = query.limit || 20;
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       const paginatedAlerts = filteredAlerts.slice(startIndex, endIndex);
 
-      res.json({
+      return res.json({
         success: true,
         data: {
           alerts: paginatedAlerts,
@@ -284,19 +184,19 @@ router.get(
             totalPages: Math.ceil(filteredAlerts.length / limit),
           },
           summary: {
-            total: alerts.length,
-            active: alerts.filter(a => a.status === 'active').length,
-            acknowledged: alerts.filter(a => a.status === 'acknowledged').length,
-            resolved: alerts.filter(a => a.status === 'resolved').length,
-            critical: alerts.filter(a => a.severity === 'critical').length,
-            high: alerts.filter(a => a.severity === 'high').length,
-            medium: alerts.filter(a => a.severity === 'medium').length,
-            low: alerts.filter(a => a.severity === 'low').length,
+            total: filteredAlerts.length,
+            active: filteredAlerts.filter(a => a.status === 'active').length,
+            acknowledged: filteredAlerts.filter(a => a.status === 'acknowledged').length,
+            resolved: filteredAlerts.filter(a => a.status === 'resolved').length,
+            critical: filteredAlerts.filter(a => a.severity === 'critical').length,
+            high: filteredAlerts.filter(a => a.severity === 'high').length,
+            medium: filteredAlerts.filter(a => a.severity === 'medium').length,
+            low: filteredAlerts.filter(a => a.severity === 'low').length,
           },
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取告警列表失败',
         error: error instanceof Error ? error.message : String(error),
@@ -316,21 +216,21 @@ router.get(
     const { id } = req.params;
 
     try {
-      const alert = alerts.find(a => a.id === id);
+      const alertRecord = await dataManagementService.readData(ALERTS_TYPE, id);
+      const alert = mapAlertRecord(alertRecord as { id: string; data: Record<string, unknown> });
 
-      if (!alert) {
+      return res.json({
+        success: true,
+        data: alert,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '告警不存在',
         });
       }
-
-      res.json({
-        success: true,
-        data: alert,
-      });
-    } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取告警详情失败',
         error: error instanceof Error ? error.message : String(error),
@@ -348,37 +248,44 @@ router.post(
   authMiddleware,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id } = req.params;
-    const { comment } = req.body;
+    const { comment: _comment } = req.body;
     const userId = getUserId(req);
 
     try {
-      const alertIndex = alerts.findIndex(a => a.id === id);
+      const alertRecord = await dataManagementService.readData(ALERTS_TYPE, id);
+      const alert = mapAlertRecord(alertRecord as { id: string; data: Record<string, unknown> });
 
-      if (alertIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: '告警不存在',
-        });
-      }
-
-      if (alerts[alertIndex].status !== 'active') {
+      if (alert.status !== 'active') {
         return res.status(400).json({
           success: false,
           message: '只能确认活跃的告警',
         });
       }
 
-      alerts[alertIndex].status = 'acknowledged';
-      alerts[alertIndex].acknowledgedAt = new Date();
-      alerts[alertIndex].acknowledgedBy = userId;
+      const updatedAlert = await dataManagementService.updateData(
+        ALERTS_TYPE,
+        id,
+        {
+          status: 'acknowledged',
+          acknowledgedAt: new Date(),
+          acknowledgedBy: userId,
+        },
+        { userId }
+      );
 
-      res.json({
+      return res.json({
         success: true,
         message: '告警已确认',
-        data: alerts[alertIndex],
+        data: mapAlertRecord(updatedAlert as { id: string; data: Record<string, unknown> }),
       });
     } catch (error) {
-      res.status(500).json({
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '告警不存在',
+        });
+      }
+      return res.status(500).json({
         success: false,
         message: '确认告警失败',
         error: error instanceof Error ? error.message : String(error),
@@ -396,30 +303,36 @@ router.post(
   authMiddleware,
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { id } = req.params;
-    const { comment } = req.body;
+    const { comment: _comment } = req.body;
     const userId = getUserId(req);
 
     try {
-      const alertIndex = alerts.findIndex(a => a.id === id);
+      await dataManagementService.readData(ALERTS_TYPE, id);
 
-      if (alertIndex === -1) {
+      const updatedAlert = await dataManagementService.updateData(
+        ALERTS_TYPE,
+        id,
+        {
+          status: 'resolved',
+          resolvedAt: new Date(),
+          resolvedBy: userId,
+        },
+        { userId }
+      );
+
+      return res.json({
+        success: true,
+        message: '告警已解决',
+        data: mapAlertRecord(updatedAlert as { id: string; data: Record<string, unknown> }),
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '告警不存在',
         });
       }
-
-      alerts[alertIndex].status = 'resolved';
-      alerts[alertIndex].resolvedAt = new Date();
-      alerts[alertIndex].resolvedBy = userId;
-
-      res.json({
-        success: true,
-        message: '告警已解决',
-        data: alerts[alertIndex],
-      });
-    } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '解决告警失败',
         error: error instanceof Error ? error.message : String(error),
@@ -437,27 +350,32 @@ router.post(
   authMiddleware,
   validateRequest(batchActionSchema),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
-    const { action, alertIds, comment } = req.body;
+    const { action, alertIds, comment: _comment } = req.body;
     const userId = getUserId(req);
 
     try {
       const results = [];
 
       for (const alertId of alertIds) {
-        const alertIndex = alerts.findIndex(a => a.id === alertId);
-
-        if (alertIndex === -1) {
-          results.push({ alertId, success: false, error: '告警不存在' });
-          continue;
-        }
-
         try {
+          const alertRecord = await dataManagementService.readData(ALERTS_TYPE, alertId);
+          const alert = mapAlertRecord(
+            alertRecord as { id: string; data: Record<string, unknown> }
+          );
+
           switch (action) {
             case 'acknowledge':
-              if (alerts[alertIndex].status === 'active') {
-                alerts[alertIndex].status = 'acknowledged';
-                alerts[alertIndex].acknowledgedAt = new Date();
-                alerts[alertIndex].acknowledgedBy = userId;
+              if (alert.status === 'active') {
+                await dataManagementService.updateData(
+                  ALERTS_TYPE,
+                  alertId,
+                  {
+                    status: 'acknowledged',
+                    acknowledgedAt: new Date(),
+                    acknowledgedBy: userId,
+                  },
+                  { userId }
+                );
                 results.push({ alertId, success: true });
               } else {
                 results.push({ alertId, success: false, error: '告警状态不正确' });
@@ -465,14 +383,21 @@ router.post(
               break;
 
             case 'resolve':
-              alerts[alertIndex].status = 'resolved';
-              alerts[alertIndex].resolvedAt = new Date();
-              alerts[alertIndex].resolvedBy = userId;
+              await dataManagementService.updateData(
+                ALERTS_TYPE,
+                alertId,
+                {
+                  status: 'resolved',
+                  resolvedAt: new Date(),
+                  resolvedBy: userId,
+                },
+                { userId }
+              );
               results.push({ alertId, success: true });
               break;
 
             case 'delete':
-              alerts.splice(alertIndex, 1);
+              await dataManagementService.deleteData(ALERTS_TYPE, alertId, { userId });
               results.push({ alertId, success: true });
               break;
 
@@ -483,12 +408,17 @@ router.post(
           results.push({
             alertId,
             success: false,
-            error: error instanceof Error ? error.message : String(error),
+            error:
+              error instanceof Error && error.message.includes('数据记录不存在')
+                ? '告警不存在'
+                : error instanceof Error
+                  ? error.message
+                  : String(error),
           });
         }
       }
 
-      res.json({
+      return res.json({
         success: true,
         message: `批量${action}操作完成`,
         data: {
@@ -502,7 +432,7 @@ router.post(
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '批量操作失败',
         error: error instanceof Error ? error.message : String(error),
@@ -520,12 +450,15 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      res.json({
+      const { results } = await dataManagementService.queryData(ALERT_RULES_TYPE, {}, {});
+      const rules = results.map(record => mapRuleRecord(record));
+
+      return res.json({
         success: true,
-        data: alertRules,
+        data: rules,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取告警规则失败',
         error: error instanceof Error ? error.message : String(error),
@@ -547,23 +480,28 @@ router.post(
     const ruleData = req.body;
 
     try {
-      const newRule: AlertRule = {
-        id: Date.now().toString(),
-        ...ruleData,
+      const newRuleData: AlertRule = {
+        ...(ruleData as AlertRule),
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: userId,
       };
 
-      alertRules.push(newRule);
+      const { id } = await dataManagementService.createData(
+        ALERT_RULES_TYPE,
+        newRuleData as unknown as Record<string, unknown>,
+        { userId, source: 'alerts' }
+      );
 
-      res.status(201).json({
+      const newRule: AlertRule = { ...newRuleData, id };
+
+      return res.status(201).json({
         success: true,
         message: '告警规则创建成功',
         data: newRule,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建告警规则失败',
         error: error instanceof Error ? error.message : String(error),
@@ -584,28 +522,24 @@ router.put(
     const updateData = req.body;
 
     try {
-      const ruleIndex = alertRules.findIndex(r => r.id === id);
+      await dataManagementService.readData(ALERT_RULES_TYPE, id);
+      const updatedRule = await dataManagementService.updateData(
+        ALERT_RULES_TYPE,
+        id,
+        {
+          ...updateData,
+          updatedAt: new Date(),
+        },
+        { userId: getUserId(req as AuthenticatedRequest) }
+      );
 
-      if (ruleIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: '告警规则不存在',
-        });
-      }
-
-      alertRules[ruleIndex] = {
-        ...alertRules[ruleIndex],
-        ...updateData,
-        updatedAt: new Date(),
-      };
-
-      res.json({
+      return res.json({
         success: true,
         message: '告警规则更新成功',
-        data: alertRules[ruleIndex],
+        data: mapRuleRecord(updatedRule as { id: string; data: Record<string, unknown> }),
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '更新告警规则失败',
         error: error instanceof Error ? error.message : String(error),
@@ -625,23 +559,16 @@ router.delete(
     const { id } = req.params;
 
     try {
-      const ruleIndex = alertRules.findIndex(r => r.id === id);
+      await dataManagementService.deleteData(ALERT_RULES_TYPE, id, {
+        userId: getUserId(req as AuthenticatedRequest),
+      });
 
-      if (ruleIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: '告警规则不存在',
-        });
-      }
-
-      alertRules.splice(ruleIndex, 1);
-
-      res.json({
+      return res.json({
         success: true,
         message: '告警规则删除成功',
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '删除告警规则失败',
         error: error instanceof Error ? error.message : String(error),
@@ -681,7 +608,9 @@ router.get(
           cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
       }
 
-      const recentAlerts = alerts.filter(alert => alert.timestamp >= cutoffTime);
+      const { results } = await dataManagementService.queryData(ALERTS_TYPE, {}, {});
+      const allAlerts = results.map(record => mapAlertRecord(record));
+      const recentAlerts = allAlerts.filter(alert => new Date(alert.timestamp) >= cutoffTime);
 
       const statistics = {
         total: recentAlerts.length,
@@ -706,23 +635,35 @@ router.get(
         averageResolutionTime:
           recentAlerts
             .filter(a => a.status === 'resolved' && a.resolvedAt)
-            .reduce(
-              (sum, alert) => sum + (alert.resolvedAt!.getTime() - alert.timestamp.getTime()),
-              0
-            ) / recentAlerts.filter(a => a.status === 'resolved').length,
+            .reduce((sum, alert) => {
+              const resolvedAt = alert.resolvedAt ? new Date(alert.resolvedAt).getTime() : 0;
+              return sum + (resolvedAt - new Date(alert.timestamp).getTime());
+            }, 0) / (recentAlerts.filter(a => a.status === 'resolved').length || 1),
         rules: {
-          total: alertRules.length,
-          enabled: alertRules.filter(r => r.enabled).length,
-          disabled: alertRules.filter(r => !r.enabled).length,
+          total: (await dataManagementService.queryData(ALERT_RULES_TYPE, {}, {})).total,
+          enabled: (
+            await dataManagementService.queryData(
+              ALERT_RULES_TYPE,
+              { filters: { enabled: true } },
+              {}
+            )
+          ).total,
+          disabled: (
+            await dataManagementService.queryData(
+              ALERT_RULES_TYPE,
+              { filters: { enabled: false } },
+              {}
+            )
+          ).total,
         },
       };
 
-      res.json({
+      return res.json({
         success: true,
         data: statistics,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取告警统计失败',
         error: error instanceof Error ? error.message : String(error),

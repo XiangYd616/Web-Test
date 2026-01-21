@@ -173,6 +173,41 @@ const buildRunAggregates = (results: RunResult[]) => {
   };
 };
 
+const escapeCsvValue = (value: unknown) => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+  const escaped = stringValue.replace(/"/g, '""');
+  return /[",\n]/.test(escaped) ? `"${escaped}"` : escaped;
+};
+
+const formatCsv = (headers: string[], rows: Record<string, unknown>[]) => {
+  const headerLine = headers.map(escapeCsvValue).join(',');
+  const lines = rows.map(row => headers.map(key => escapeCsvValue(row[key])).join(','));
+  return [headerLine, ...lines].join('\n');
+};
+
+const fetchAllRunResults = async (runId: string) => {
+  const pageSize = 1000;
+  let offset = 0;
+  let total = 0;
+  const results: RunResult[] = [];
+
+  do {
+    const batch = await collectionManager.getRunResults({
+      runId,
+      limit: pageSize,
+      offset,
+    });
+    results.push(...batch.results);
+    total = batch.total;
+    offset += pageSize;
+  } while (offset < total);
+
+  return results;
+};
+
 const listRuns = async (req: AuthRequest, res: ApiResponse) => {
   try {
     const { workspaceId } = req.params;
@@ -351,10 +386,64 @@ const getRunResults = async (req: AuthRequest, res: ApiResponse) => {
 const exportRun = async (req: AuthRequest, res: ApiResponse) => {
   try {
     const { runId } = req.params;
-    return res.status(501).json({
-      success: false,
-      error: `运行导出暂未实现 (runId: ${runId})`,
-    });
+    const format = String(req.query.format || 'json').toLowerCase();
+
+    const run = await collectionManager.getRun(runId);
+    if (!run) {
+      return res.notFound('运行记录不存在');
+    }
+
+    const access = await ensureCollectionAccess(run.collection_id, req.user.id);
+    if (access.error) {
+      return res.forbidden(access.error);
+    }
+
+    const results = await fetchAllRunResults(runId);
+    const aggregates = buildRunAggregates(results);
+    const payload = {
+      run,
+      aggregates,
+      results,
+      exportedAt: new Date().toISOString(),
+    };
+
+    if (format === 'csv') {
+      const rows = results.map(result => {
+        const assertions = Array.isArray(result.assertions) ? result.assertions : [];
+        const passedAssertions = assertions.filter(assertion => assertion.passed).length;
+        const failedAssertions = assertions.length - passedAssertions;
+        const response = result.response || {};
+        return {
+          id: (result as { id?: string }).id || '',
+          requestId: (result as { request_id?: string }).request_id || '',
+          status: result.success ? 'passed' : 'failed',
+          duration: (result as { duration?: number }).duration || 0,
+          responseStatus: response.status || response.statusCode || response.code || '',
+          passedAssertions,
+          failedAssertions,
+        };
+      });
+
+      const csv = formatCsv(
+        [
+          'id',
+          'requestId',
+          'status',
+          'duration',
+          'responseStatus',
+          'passedAssertions',
+          'failedAssertions',
+        ],
+        rows
+      );
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="run-${runId}-${Date.now()}.csv"`);
+      return res.send(csv);
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="run-${runId}-${Date.now()}.json"`);
+    return res.send(JSON.stringify(payload, null, 2));
   } catch (error) {
     console.error('导出运行失败:', error);
     return res.status(500).json({
@@ -367,10 +456,31 @@ const exportRun = async (req: AuthRequest, res: ApiResponse) => {
 const getRunReport = async (req: AuthRequest, res: ApiResponse) => {
   try {
     const { runId } = req.params;
-    return res.status(501).json({
-      success: false,
-      error: `运行报告暂未实现 (runId: ${runId})`,
-    });
+    const run = await collectionManager.getRun(runId);
+    if (!run) {
+      return res.notFound('运行记录不存在');
+    }
+
+    const access = await ensureCollectionAccess(run.collection_id, req.user.id);
+    if (access.error) {
+      return res.forbidden(access.error);
+    }
+
+    const results = await fetchAllRunResults(runId);
+    const aggregates = buildRunAggregates(results);
+    const report = {
+      runId,
+      status: run.status,
+      collectionId: run.collection_id,
+      environmentId: run.environment_id,
+      startedAt: run.started_at,
+      completedAt: run.completed_at,
+      summary: run.summary || {},
+      aggregates,
+      generatedAt: new Date().toISOString(),
+    };
+
+    return res.success(report, '运行报告生成成功');
   } catch (error) {
     console.error('获取运行报告失败:', error);
     return res.status(500).json({
@@ -383,10 +493,21 @@ const getRunReport = async (req: AuthRequest, res: ApiResponse) => {
 const rerun = async (req: AuthRequest, res: ApiResponse) => {
   try {
     const { runId } = req.params;
-    return res.status(501).json({
-      success: false,
-      error: `运行重试暂未实现 (runId: ${runId})`,
-    });
+    const run = await collectionManager.getRun(runId);
+    if (!run) {
+      return res.notFound('运行记录不存在');
+    }
+
+    const access = await ensureCollectionAccess(run.collection_id, req.user.id);
+    if (access.error) {
+      return res.forbidden(access.error);
+    }
+    if (!hasWorkspacePermission(access.member.role, 'write')) {
+      return res.forbidden('当前角色无运行权限');
+    }
+
+    const newRun = await collectionManager.rerunRun(runId, req.user.id);
+    return res.created(newRun, '运行重试已创建');
   } catch (error) {
     console.error('重试运行失败:', error);
     return res.status(500).json({

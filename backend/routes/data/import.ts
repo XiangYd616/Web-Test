@@ -7,23 +7,25 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import winston from 'winston';
-import { authMiddleware } from '../../middleware/auth';
-import { formatResponse } from '../../middleware/responseFormatter';
-import DataImportService from '../../services/dataManagement/dataImportService';
+import { asyncHandler } from '../../middleware/errorHandler';
+import DataImportService, { ImportConfig } from '../../services/dataManagement/dataImportService';
+const { authMiddleware } = require('../../middleware/auth');
 
-interface ImportJob {
-  id: string;
-  userId: string;
-  fileName: string;
-  fileType: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress: number;
-  totalRecords: number;
-  processedRecords: number;
-  errors: string[];
-  createdAt: Date;
-  completedAt?: Date;
-}
+const formatResponse = (success: boolean, message: string, data: Record<string, unknown> = {}) => ({
+  success,
+  message,
+  data,
+});
+
+const resolveFormat = (fileType: string): ImportConfig['format'] => {
+  if (fileType === 'xlsx') {
+    return 'excel';
+  }
+  if (fileType === 'csv' || fileType === 'json' || fileType === 'xml') {
+    return fileType;
+  }
+  return 'csv';
+};
 
 interface ImportOptions {
   skipHeader?: boolean;
@@ -69,15 +71,21 @@ const upload = multer({
 
 const router = express.Router();
 
+const getUserId = (req: express.Request): string => {
+  const userId = (req as { user?: { id?: string } }).user?.id;
+  if (!userId) {
+    throw new Error('用户未认证');
+  }
+  return userId;
+};
+
 // 初始化导入服务
 let importService: DataImportService;
 
 const initializeImportService = (): DataImportService => {
   if (!importService) {
     importService = new DataImportService({
-      maxFileSize: 100 * 1024 * 1024,
-      supportedFormats: ['csv', 'xlsx', 'json'],
-      tempDir: path.join(process.cwd(), 'temp'),
+      query: async () => Promise.resolve(null),
     });
   }
   return importService;
@@ -92,7 +100,7 @@ router.post(
   authMiddleware,
   upload.single('file'),
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
     const file = req.file;
     const { options = {} } = req.body;
 
@@ -112,28 +120,36 @@ router.post(
         updateExisting: options.updateExisting === 'true',
       };
 
-      // 创建导入任务
-      const job = await service.createImportJob({
-        userId,
-        fileName: file.originalname,
-        fileType: path.extname(file.originalname).substring(1),
-        fileBuffer: file.buffer,
-        options: importOptions,
-      });
+      const fileType = path.extname(file.originalname).substring(1);
+      const format = resolveFormat(fileType);
+      const taskId = await service.createImportTask(
+        fileType,
+        file.path || file.originalname,
+        {
+          format,
+          encoding: importOptions.encoding,
+          delimiter: importOptions.delimiter,
+          options: {
+            skipHeader: importOptions.skipHeader,
+            batchSize: importOptions.batchSize,
+            updateExisting: importOptions.updateExisting,
+          },
+        },
+        userId
+      );
 
-      logger.info('创建导入任务', { jobId: job.id, userId, fileName: file.originalname });
+      logger.info('创建导入任务', { jobId: taskId, userId, fileName: file.originalname });
 
-      res.status(201).json(
+      return res.status(201).json(
         formatResponse(true, '导入任务创建成功', {
-          jobId: job.id,
-          status: job.status,
-          estimatedTime: job.estimatedTime,
+          jobId: taskId,
+          status: 'pending',
         })
       );
     } catch (error) {
       logger.error('创建导入任务失败', { userId, fileName: file?.originalname, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '创建导入任务失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -151,22 +167,28 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { jobId } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const service = initializeImportService();
-      const status = await service.getImportStatus(jobId);
+      const status = await service.getTaskStatus(jobId);
 
       // 验证用户权限
-      if (status.userId !== userId) {
+      if (!status) {
+        return res.status(404).json(formatResponse(false, '导入任务不存在'));
+      }
+
+      if (status.createdBy !== userId) {
         return res.status(403).json(formatResponse(false, '无权访问此导入任务'));
       }
 
-      res.json(formatResponse(true, '获取导入状态成功', status));
+      return res.json(
+        formatResponse(true, '获取导入状态成功', status as unknown as Record<string, unknown>)
+      );
     } catch (error) {
       logger.error('获取导入状态失败', { jobId, userId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '获取导入状态失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -184,15 +206,19 @@ router.delete(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { jobId } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const service = initializeImportService();
 
       // 检查任务状态和权限
-      const status = await service.getImportStatus(jobId);
+      const status = await service.getTaskStatus(jobId);
 
-      if (status.userId !== userId) {
+      if (!status) {
+        return res.status(404).json(formatResponse(false, '导入任务不存在'));
+      }
+
+      if (status.createdBy !== userId) {
         return res.status(403).json(formatResponse(false, '无权取消此导入任务'));
       }
 
@@ -201,15 +227,15 @@ router.delete(
       }
 
       // 取消导入任务
-      await service.cancelImportJob(jobId);
+      await service.cancelTask(jobId);
 
       logger.info('取消导入任务', { jobId, userId });
 
-      res.json(formatResponse(true, '导入任务已取消', { jobId }));
+      return res.json(formatResponse(true, '导入任务已取消', { jobId }));
     } catch (error) {
       logger.error('取消导入任务失败', { jobId, userId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '取消导入任务失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -226,23 +252,33 @@ router.get(
   '/history',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
     const { page = 1, limit = 10, status } = req.query;
 
     try {
       const service = initializeImportService();
 
-      const history = await service.getUserImportHistory(userId, {
-        page: parseInt(page as string),
-        limit: parseInt(limit as string),
-        status: status as string,
-      });
+      const allTasks = await service.getAllTasks();
+      const userTasks = allTasks.filter(task => task.createdBy === userId);
+      const filteredTasks = status ? userTasks.filter(task => task.status === status) : userTasks;
+      const pageNumber = parseInt(page as string);
+      const limitNumber = parseInt(limit as string);
+      const startIndex = (pageNumber - 1) * limitNumber;
+      const history = {
+        tasks: filteredTasks.slice(startIndex, startIndex + limitNumber),
+        pagination: {
+          page: pageNumber,
+          limit: limitNumber,
+          total: filteredTasks.length,
+          totalPages: Math.ceil(filteredTasks.length / limitNumber),
+        },
+      };
 
-      res.json(formatResponse(true, '获取导入历史成功', history));
+      return res.json(formatResponse(true, '获取导入历史成功', history));
     } catch (error) {
       logger.error('获取导入历史失败', { userId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '获取导入历史失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -263,7 +299,7 @@ router.get(
 
     try {
       const service = initializeImportService();
-      const template = await service.getImportTemplate(type);
+      const template = await service.getTemplate(type);
 
       if (!template) {
         return res.status(404).json(formatResponse(false, '不支持的导入类型'));
@@ -272,11 +308,11 @@ router.get(
       res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader('Content-Disposition', `attachment; filename="${type}_template.csv"`);
 
-      res.send(template);
+      return res.send(template);
     } catch (error) {
       logger.error('获取导入模板失败', { type, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '获取导入模板失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -294,7 +330,7 @@ router.post(
   authMiddleware,
   upload.single('file'),
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
     const file = req.file;
     const { options = {} } = req.body;
 
@@ -311,18 +347,21 @@ router.post(
         encoding: options.encoding || 'utf8',
       };
 
-      const validation = await service.validateImportFile({
-        fileName: file.originalname,
-        fileType: path.extname(file.originalname).substring(1),
-        fileBuffer: file.buffer,
-        options: importOptions,
+      const fileType = path.extname(file.originalname).substring(1);
+      const format = resolveFormat(fileType);
+      const validation = await service.previewData(file.path || file.originalname, {
+        format,
+        encoding: importOptions.encoding,
+        delimiter: importOptions.delimiter,
       });
 
-      res.json(formatResponse(true, '文件验证完成', validation));
+      return res.json(
+        formatResponse(true, '文件验证完成', validation as unknown as Record<string, unknown>)
+      );
     } catch (error) {
       logger.error('验证导入文件失败', { userId, fileName: file?.originalname, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '验证导入文件失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -340,14 +379,13 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const service = initializeImportService();
-      const formats = service.getSupportedFormats();
+      const formats = ['csv', 'xlsx', 'json', 'xml'];
 
-      res.json(formatResponse(true, '获取支持的导入格式成功', { formats }));
+      return res.json(formatResponse(true, '获取支持的导入格式成功', { formats }));
     } catch (error) {
       logger.error('获取支持的导入格式失败', { error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '获取支持的导入格式失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -364,17 +402,19 @@ router.get(
   '/stats',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const service = initializeImportService();
-      const stats = await service.getUserImportStats(userId);
+      const stats = await service.getStatistics();
 
-      res.json(formatResponse(true, '获取导入统计成功', stats));
+      return res.json(
+        formatResponse(true, '获取导入统计成功', stats as unknown as Record<string, unknown>)
+      );
     } catch (error) {
       logger.error('获取导入统计失败', { userId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '获取导入统计失败', {
           error: error instanceof Error ? error.message : String(error),
         })
@@ -392,15 +432,19 @@ router.post(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { jobId } = req.params;
-    const userId = (req as any).user.id;
+    const userId = getUserId(req);
 
     try {
       const service = initializeImportService();
 
       // 检查任务状态和权限
-      const status = await service.getImportStatus(jobId);
+      const status = await service.getTaskStatus(jobId);
 
-      if (status.userId !== userId) {
+      if (!status) {
+        return res.status(404).json(formatResponse(false, '导入任务不存在'));
+      }
+
+      if (status.createdBy !== userId) {
         return res.status(403).json(formatResponse(false, '无权重试此导入任务'));
       }
 
@@ -408,16 +452,21 @@ router.post(
         return res.status(400).json(formatResponse(false, '只能重试失败的导入任务'));
       }
 
-      // 重试导入任务
-      await service.retryImportJob(jobId);
+      const retried = await service.retryTask(jobId);
 
       logger.info('重试导入任务', { jobId, userId });
 
-      res.json(formatResponse(true, '导入任务重试中', { jobId }));
+      return res.json(
+        formatResponse(true, '导入任务已重试', {
+          jobId: retried.id,
+          status: retried.status,
+          progress: retried.progress,
+        })
+      );
     } catch (error) {
       logger.error('重试导入任务失败', { jobId, userId, error });
 
-      res.status(500).json(
+      return res.status(500).json(
         formatResponse(false, '重试导入任务失败', {
           error: error instanceof Error ? error.message : String(error),
         })

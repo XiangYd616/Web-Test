@@ -4,117 +4,36 @@
  */
 
 import express from 'express';
-import advancedAnalyticsController from '../../controllers/advancedAnalyticsController';
-import { authMiddleware } from '../../middleware/auth';
 import { asyncHandler } from '../../middleware/errorHandler';
+const advancedAnalyticsController = require('../../controllers/advancedAnalyticsController');
+const { authMiddleware } = require('../../middleware/auth');
 
 interface TrendAnalysisRequest {
-  metric: string;
-  timeRange: string;
-  granularity?: string;
-  filters?: Record<string, unknown>;
+  dataPoints: Array<{ timestamp: Date; value: number; metadata?: Record<string, unknown> }>;
   options?: Record<string, unknown>;
 }
 
 interface ComparisonAnalysisRequest {
-  datasets: Array<{
-    name: string;
-    data: unknown[];
-    metadata?: Record<string, unknown>;
-  }>;
-  comparisonType: 'absolute' | 'relative' | 'statistical';
-  metrics: string[];
+  baseline: unknown[];
+  comparison: unknown[];
   options?: Record<string, unknown>;
 }
 
 interface PerformanceAnalysisRequest {
-  target: string;
-  timeRange: string;
-  benchmarks?: string[];
-  metrics?: string[];
+  dataPoints: Array<{ timestamp: Date; value: number; metadata?: Record<string, unknown> }>;
   options?: Record<string, unknown>;
 }
 
-interface TrendAnalysisResult {
-  metric: string;
-  timeRange: string;
-  data: Array<{
-    timestamp: Date;
-    value: number;
-    metadata?: Record<string, unknown>;
-  }>;
-  trend: {
-    direction: 'increasing' | 'decreasing' | 'stable';
-    slope: number;
-    confidence: number;
-    seasonality?: {
-      detected: boolean;
-      pattern?: string;
-      strength?: number;
-    };
-  };
-  statistics: {
-    mean: number;
-    median: number;
-    stdDev: number;
-    min: number;
-    max: number;
-    outliers: number;
-  };
-  insights: string[];
-  recommendations: string[];
-}
+type AnalyticsRequest = express.Request & { user?: { id: string } };
 
-interface ComparisonAnalysisResult {
-  comparisonType: string;
-  datasets: Array<{
-    name: string;
-    summary: Record<string, number>;
-    statistics: Record<string, number>;
-  }>;
-  correlations: Array<{
-    dataset1: string;
-    dataset2: string;
-    correlation: number;
-    significance: number;
-  }>;
-  differences: Array<{
-    metric: string;
-    values: number[];
-    significance: number;
-    interpretation: string;
-  }>;
-  insights: string[];
-  recommendations: string[];
-}
-
-interface PerformanceAnalysisResult {
-  target: string;
-  timeRange: string;
-  metrics: Record<
-    string,
-    {
-      current: number;
-      baseline: number;
-      change: number;
-      changePercent: number;
-      trend: string;
-    }
-  >;
-  benchmarks: Array<{
-    name: string;
-    value: number;
-    percentile: number;
-    rating: 'excellent' | 'good' | 'average' | 'poor';
-  }>;
-  score: {
-    overall: number;
-    breakdown: Record<string, number>;
-    rating: 'excellent' | 'good' | 'average' | 'poor';
-  };
-  insights: string[];
-  recommendations: string[];
-}
+type AnalyticsResponse = express.Response & {
+  success: (data?: unknown, message?: string) => express.Response;
+  created: (data?: unknown, message?: string) => express.Response;
+  validationError: (
+    errors: unknown[] | Record<string, unknown>,
+    message?: string
+  ) => express.Response;
+};
 
 const router = express.Router();
 
@@ -132,19 +51,18 @@ router.post(
       const request: TrendAnalysisRequest = req.body;
 
       // 验证请求参数
-      if (!request.metric || !request.timeRange) {
+      if (!Array.isArray(request.dataPoints) || request.dataPoints.length < 2) {
         return res.status(400).json({
           success: false,
-          message: '指标和时间范围是必需的',
+          message: '需要至少2个数据点进行趋势分析',
         });
       }
 
-      const result = await advancedAnalyticsController.analyzeTrend(req, res);
-
-      res.json({
-        success: true,
-        data: result,
-      });
+      return advancedAnalyticsController.analyzeTrend(
+        req as AnalyticsRequest,
+        res as AnalyticsResponse,
+        () => undefined
+      );
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -166,19 +84,18 @@ router.post(
       const request: ComparisonAnalysisRequest = req.body;
 
       // 验证请求参数
-      if (!request.datasets || request.datasets.length < 2) {
+      if (!request.baseline || !request.comparison) {
         return res.status(400).json({
           success: false,
-          message: '至少需要两个数据集进行对比',
+          message: '需要提供基准数据和对比数据',
         });
       }
 
-      const result = await advancedAnalyticsController.analyzeComparison(req, res);
-
-      res.json({
-        success: true,
-        data: result,
-      });
+      return advancedAnalyticsController.analyzeComparison(
+        req as AnalyticsRequest,
+        res as AnalyticsResponse,
+        () => undefined
+      );
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -200,21 +117,21 @@ router.post(
       const request: PerformanceAnalysisRequest = req.body;
 
       // 验证请求参数
-      if (!request.target || !request.timeRange) {
+      if (!Array.isArray(request.dataPoints) || request.dataPoints.length < 2) {
         return res.status(400).json({
           success: false,
-          message: '目标和时间范围是必需的',
+          message: '需要至少2个数据点进行性能分析',
         });
       }
 
-      const result = await advancedAnalyticsController.analyzePerformance(req, res);
-
-      res.json({
-        success: true,
-        data: result,
-      });
+      const result = await advancedAnalyticsController.analyzePerformance(
+        req as AnalyticsRequest,
+        res as AnalyticsResponse,
+        () => undefined
+      );
+      return result;
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '性能分析失败',
         error: error instanceof Error ? error.message : String(error),
@@ -233,12 +150,10 @@ router.get(
     try {
       const { category } = req.query;
 
-      const metrics = await advancedAnalyticsController.getAvailableMetrics(category as string);
-
-      res.json({
-        success: true,
-        data: metrics,
-      });
+      return advancedAnalyticsController.getAvailableMetrics(
+        category as string,
+        res as AnalyticsResponse
+      );
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -257,21 +172,21 @@ router.post(
   '/forecast',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const { metric, timeRange, horizon, method, options } = req.body;
+      const { dataPoints, options = {} } = req.body;
 
-      if (!metric || !timeRange || !horizon) {
+      if (!Array.isArray(dataPoints) || dataPoints.length < 2) {
         return res.status(400).json({
           success: false,
-          message: '指标、时间范围和预测周期是必需的',
+          message: '需要至少2个数据点进行预测分析',
         });
       }
 
-      const result = await advancedAnalyticsController.generateForecast(req, res);
-
-      res.json({
-        success: true,
-        data: result,
-      });
+      req.body = { dataPoints, options };
+      return advancedAnalyticsController.generateForecast(
+        req as AnalyticsRequest,
+        res as AnalyticsResponse,
+        () => undefined
+      );
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -290,21 +205,21 @@ router.post(
   '/anomaly',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const { metric, timeRange, sensitivity, method } = req.body;
+      const { dataPoints, options = {} } = req.body;
 
-      if (!metric || !timeRange) {
+      if (!Array.isArray(dataPoints) || dataPoints.length < 3) {
         return res.status(400).json({
           success: false,
-          message: '指标和时间范围是必需的',
+          message: '需要至少3个数据点进行异常检测',
         });
       }
 
-      const result = await advancedAnalyticsController.detectAnomalies(req, res);
-
-      res.json({
-        success: true,
-        data: result,
-      });
+      req.body = { dataPoints, options };
+      return advancedAnalyticsController.detectAnomalies(
+        req as AnalyticsRequest,
+        res as AnalyticsResponse,
+        () => undefined
+      );
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -354,7 +269,7 @@ router.post(
   '/reports',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const { name, type, config, schedule } = req.body;
+      const { name, type, config, schedule: _schedule } = req.body;
 
       if (!name || !type || !config) {
         return res.status(400).json({
@@ -363,13 +278,10 @@ router.post(
         });
       }
 
-      const report = await advancedAnalyticsController.createAnalysisReport(req, res);
-
-      res.status(201).json({
-        success: true,
-        message: '分析报告创建成功',
-        data: report,
-      });
+      return advancedAnalyticsController.createAnalysisReport(
+        req as AnalyticsRequest,
+        res as AnalyticsResponse
+      );
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -436,7 +348,7 @@ router.post(
         `attachment; filename="analytics_report_${id}.${format}"`
       );
 
-      res.send(exportData);
+      return res.send(exportData);
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -484,7 +396,7 @@ router.post(
   '/dashboard',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const { widgets, timeRange, filters, refreshInterval } = req.body;
+      const { widgets } = req.body;
 
       if (!Array.isArray(widgets) || widgets.length === 0) {
         return res.status(400).json({
@@ -493,12 +405,10 @@ router.post(
         });
       }
 
-      const dashboardData = await advancedAnalyticsController.generateDashboardData(req, res);
-
-      res.json({
-        success: true,
-        data: dashboardData,
-      });
+      return advancedAnalyticsController.generateDashboardData(
+        req as AnalyticsRequest,
+        res as AnalyticsResponse
+      );
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -517,12 +427,11 @@ router.get(
   '/health',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const health = await advancedAnalyticsController.healthCheck();
-
-      res.json({
-        success: true,
-        data: health,
-      });
+      return advancedAnalyticsController.healthCheck(
+        req as AnalyticsRequest,
+        res as AnalyticsResponse,
+        () => undefined
+      );
     } catch (error) {
       res.status(500).json({
         success: false,

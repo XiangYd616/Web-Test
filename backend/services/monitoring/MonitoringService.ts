@@ -252,6 +252,70 @@ class MonitoringService extends EventEmitter {
   }
 
   /**
+   * 获取监控服务统计信息
+   */
+  async getStatistics() {
+    const [monitoringStats, systemStats] = await Promise.all([
+      this.getMonitoringStats(),
+      this.getSystemStats(),
+    ]);
+
+    return {
+      monitoring: monitoringStats,
+      system: systemStats,
+    };
+  }
+
+  /**
+   * 获取系统日志
+   */
+  async getLogs(options: { level?: string; limit?: number; offset?: number }) {
+    const { level = 'info', limit = 100, offset = 0 } = options;
+    const statusFilterMap: Record<string, string[]> = {
+      error: ['down', 'timeout', 'error'],
+      warn: ['degraded', 'slow'],
+      info: [],
+    };
+    const statuses = statusFilterMap[level] || [];
+    const statusClause = statuses.length ? `AND mr.status = ANY($3)` : '';
+
+    const query = `
+      SELECT
+        mr.id,
+        ms.name AS site_name,
+        ms.url,
+        mr.status,
+        mr.response_time,
+        mr.status_code,
+        mr.error_message,
+        mr.checked_at
+      FROM monitoring_results mr
+      JOIN monitoring_sites ms ON mr.site_id = ms.id
+      WHERE ms.deleted_at IS NULL
+      ${statusClause}
+      ORDER BY mr.checked_at DESC
+      LIMIT $1 OFFSET $2
+    `;
+
+    const params: Array<number | string[] | string> = [limit, offset];
+    if (statuses.length) {
+      params.push(statuses);
+    }
+
+    const result = await this.dbPool.query(query, params as unknown[]);
+
+    return {
+      level,
+      data: result.rows,
+      pagination: {
+        limit,
+        offset,
+        count: result.rows.length,
+      },
+    };
+  }
+
+  /**
    * 停止监控服务
    */
   async stop() {

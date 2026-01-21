@@ -262,6 +262,40 @@ class DataImportService extends EventEmitter {
   }
 
   /**
+   * 重试失败任务
+   */
+  async retryTask(taskId: string): Promise<ImportTask> {
+    const task = this.tasks.get(taskId);
+    if (!task) {
+      throw new Error('导入任务不存在');
+    }
+
+    if (task.status !== 'failed') {
+      throw new Error('只能重试失败的导入任务');
+    }
+
+    await fs.access(task.filePath);
+
+    const totalRows = await this.getFileRowCount(task.filePath, task.config);
+    task.status = 'pending';
+    task.error = undefined;
+    task.result = undefined;
+    task.startedAt = undefined;
+    task.completedAt = undefined;
+    task.progress = {
+      current: 0,
+      total: totalRows,
+      percentage: 0,
+    };
+
+    this.queue.push(task);
+    this.emit('task_retried', task);
+    this.logger.info('Import task retried', { taskId });
+
+    return task;
+  }
+
+  /**
    * 删除任务
    */
   async deleteTask(taskId: string): Promise<boolean> {

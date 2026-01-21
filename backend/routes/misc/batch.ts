@@ -4,7 +4,13 @@
  */
 
 import express from 'express';
+import path from 'path';
 import { asyncHandler } from '../../middleware/errorHandler';
+import { dataManagementService } from '../../services/data/DataManagementService';
+import DataExportService, {
+  ExportJobRequest,
+} from '../../services/dataManagement/dataExportService';
+import testService from '../../services/testing/testService';
 const { authMiddleware } = require('../../middleware/auth');
 
 interface BatchOperation {
@@ -31,46 +37,69 @@ interface BatchConfig {
   exportConfigs?: unknown[];
   deleteConfigs?: unknown[];
   format?: string;
+  role?: string;
 }
-
-type AuthenticatedRequest = express.Request & {
-  user?: {
-    id: string;
-  } | null;
-};
 
 const router = express.Router();
 
-const getUserId = (req: AuthenticatedRequest): string => {
-  const userId = req.user?.id;
+const getUserId = (req: express.Request): string => {
+  const userId = (req as { user?: { id?: string } }).user?.id;
   if (!userId) {
     throw new Error('用户未认证');
   }
   return userId;
 };
 
-// 存储批量操作状态
-const batchOperations = new Map<string, BatchOperation>();
+const getUserRole = (req: express.Request): string =>
+  (req as { user?: { role?: string } }).user?.role || 'free';
+
+const BATCH_OPERATIONS_TYPE = 'misc_batch_operations';
+
+dataManagementService.initialize().catch(error => {
+  console.error('批量操作数据服务初始化失败:', error);
+});
+
+let exportService: DataExportService;
+const initializeExportService = (): DataExportService => {
+  if (!exportService) {
+    exportService = new DataExportService({
+      exportDir: path.join(process.cwd(), 'exports'),
+      maxFileSize: 100 * 1024 * 1024,
+      supportedFormats: ['json', 'csv', 'excel', 'pdf', 'zip'],
+    });
+  }
+  return exportService;
+};
+
+const mapBatchRecord = (record: { id: string; data: Record<string, unknown> }) => {
+  const data = record.data as unknown as BatchOperation;
+  return {
+    ...data,
+    id: record.id,
+    startTime: new Date(data.startTime),
+    endTime: data.endTime ? new Date(data.endTime) : undefined,
+  } as BatchOperation;
+};
+
+const fetchOperationById = async (id: string) => {
+  const record = await dataManagementService.readData(BATCH_OPERATIONS_TYPE, id);
+  return mapBatchRecord(record as { id: string; data: Record<string, unknown> });
+};
 
 /**
  * 生成操作ID
  */
-function generateOperationId(): string {
-  return `batch_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-}
-
 /**
  * 创建批量操作记录
  */
-function createBatchOperation(
+async function createBatchOperation(
   type: string,
   config: BatchConfig,
   totalItems: number,
   userId: string
-): BatchOperation {
-  const operationId = generateOperationId();
+): Promise<BatchOperation> {
   const operation: BatchOperation = {
-    id: operationId,
+    id: '',
     type,
     status: 'pending',
     totalItems,
@@ -84,38 +113,58 @@ function createBatchOperation(
     progress: 0,
   };
 
-  batchOperations.set(operationId, operation);
-  return operation;
+  const { id } = await dataManagementService.createData(
+    BATCH_OPERATIONS_TYPE,
+    operation as unknown as Record<string, unknown>,
+    { userId, source: 'batch' }
+  );
+  return { ...operation, id };
 }
 
 /**
  * 更新操作进度
  */
-function updateOperationProgress(
+async function updateOperationProgress(
   operationId: string,
   processedItems: number,
   failedItems: number = 0,
   errors: string[] = []
-): void {
-  const operation = batchOperations.get(operationId);
-  if (operation) {
-    operation.processedItems = processedItems;
-    operation.failedItems = failedItems;
-    operation.errors = [...operation.errors, ...errors];
-    operation.progress = (processedItems / operation.totalItems) * 100;
-  }
+): Promise<void> {
+  const operation = await fetchOperationById(operationId);
+  const updatedErrors = errors.length ? [...operation.errors, ...errors] : operation.errors;
+  const progress = (processedItems / operation.totalItems) * 100;
+
+  await dataManagementService.updateData(
+    BATCH_OPERATIONS_TYPE,
+    operationId,
+    {
+      processedItems,
+      failedItems,
+      errors: updatedErrors,
+      progress,
+    },
+    { userId: operation.userId }
+  );
 }
 
 /**
  * 完成操作
  */
-function completeOperation(operationId: string, status: BatchOperation['status']): void {
-  const operation = batchOperations.get(operationId);
-  if (operation) {
-    operation.status = status;
-    operation.endTime = new Date();
-    operation.progress = 100;
-  }
+async function completeOperation(
+  operationId: string,
+  status: BatchOperation['status']
+): Promise<void> {
+  const operation = await fetchOperationById(operationId);
+  await dataManagementService.updateData(
+    BATCH_OPERATIONS_TYPE,
+    operationId,
+    {
+      status,
+      endTime: new Date(),
+      progress: 100,
+    },
+    { userId: operation.userId }
+  );
 }
 
 /**
@@ -125,7 +174,7 @@ function completeOperation(operationId: string, status: BatchOperation['status']
 router.post(
   '/test',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const { testConfigs, options } = req.body;
 
@@ -137,9 +186,9 @@ router.post(
     }
 
     try {
-      const operation = createBatchOperation(
+      const operation = await createBatchOperation(
         'batch_test',
-        { testConfigs, options },
+        { testConfigs, options, role: getUserRole(req) },
         testConfigs.length,
         userId
       );
@@ -157,6 +206,13 @@ router.post(
         },
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '批量操作不存在',
+        });
+      }
+
       return res.status(500).json({
         success: false,
         message: '创建批量测试任务失败',
@@ -173,7 +229,7 @@ router.post(
 router.post(
   '/export',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const { exportConfigs, format = 'json', options } = req.body;
 
@@ -185,7 +241,7 @@ router.post(
     }
 
     try {
-      const operation = createBatchOperation(
+      const operation = await createBatchOperation(
         'batch_export',
         { exportConfigs, format, options },
         exportConfigs.length,
@@ -221,7 +277,7 @@ router.post(
 router.post(
   '/delete',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const { deleteConfigs, options } = req.body;
 
@@ -233,7 +289,7 @@ router.post(
     }
 
     try {
-      const operation = createBatchOperation(
+      const operation = await createBatchOperation(
         'batch_delete',
         { deleteConfigs, options },
         deleteConfigs.length,
@@ -268,19 +324,12 @@ router.post(
 router.get(
   '/:operationId/status',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { operationId } = req.params;
     const userId = getUserId(req);
 
     try {
-      const operation = batchOperations.get(operationId);
-
-      if (!operation) {
-        return res.status(404).json({
-          success: false,
-          message: '批量操作不存在',
-        });
-      }
+      const operation = await fetchOperationById(operationId);
 
       if (operation.userId !== userId) {
         return res.status(403).json({
@@ -294,6 +343,13 @@ router.get(
         data: operation,
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '批量操作不存在',
+        });
+      }
+
       return res.status(500).json({
         success: false,
         message: '获取批量操作状态失败',
@@ -310,19 +366,12 @@ router.get(
 router.delete(
   '/:operationId',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { operationId } = req.params;
     const userId = getUserId(req);
 
     try {
-      const operation = batchOperations.get(operationId);
-
-      if (!operation) {
-        return res.status(404).json({
-          success: false,
-          message: '批量操作不存在',
-        });
-      }
+      const operation = await fetchOperationById(operationId);
 
       if (operation.userId !== userId) {
         return res.status(403).json({
@@ -338,7 +387,7 @@ router.delete(
         });
       }
 
-      completeOperation(operationId, 'cancelled');
+      await completeOperation(operationId, 'cancelled');
 
       return res.json({
         success: true,
@@ -361,30 +410,35 @@ router.delete(
 router.get(
   '/',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const { page = 1, limit = 10, status, type } = req.query;
 
     try {
-      const userOperations = Array.from(batchOperations.values())
-        .filter(op => op.userId === userId)
-        .filter(op => !status || op.status === status)
-        .filter(op => !type || op.type === type)
-        .sort((a, b) => b.startTime.getTime() - a.startTime.getTime());
+      const filters: Record<string, unknown> = { userId };
+      if (status) filters.status = status;
+      if (type) filters.type = type;
 
-      const startIndex = (parseInt(page as string) - 1) * parseInt(limit as string);
-      const endIndex = startIndex + parseInt(limit as string);
-      const paginatedOperations = userOperations.slice(startIndex, endIndex);
+      const queryResult = await dataManagementService.queryData(
+        BATCH_OPERATIONS_TYPE,
+        {
+          filters,
+          sort: { field: 'startTime', direction: 'desc' },
+        },
+        { page: parseInt(page as string), limit: parseInt(limit as string) }
+      );
+
+      const operations = queryResult.results.map(record => mapBatchRecord(record));
 
       return res.json({
         success: true,
         data: {
-          operations: paginatedOperations,
+          operations,
           pagination: {
-            page: parseInt(page as string),
-            limit: parseInt(limit as string),
-            total: userOperations.length,
-            totalPages: Math.ceil(userOperations.length / parseInt(limit as string)),
+            page: queryResult.page,
+            limit: queryResult.limit,
+            total: queryResult.total,
+            totalPages: queryResult.totalPages,
           },
         },
       });
@@ -405,7 +459,7 @@ router.get(
 router.delete(
   '/cleanup',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const { olderThan = 7 } = req.query; // 默认清理7天前的操作
 
@@ -413,15 +467,17 @@ router.delete(
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - parseInt(olderThan as string));
 
+      const { results } = await dataManagementService.queryData(
+        BATCH_OPERATIONS_TYPE,
+        { filters: { userId, status: 'completed' } },
+        {}
+      );
+
       let cleanedCount = 0;
-      for (const [operationId, operation] of batchOperations.entries()) {
-        if (
-          operation.userId === userId &&
-          operation.status === 'completed' &&
-          operation.endTime &&
-          operation.endTime < cutoffDate
-        ) {
-          batchOperations.delete(operationId);
+      for (const record of results) {
+        const operation = mapBatchRecord(record);
+        if (operation.endTime && operation.endTime < cutoffDate) {
+          await dataManagementService.deleteData(BATCH_OPERATIONS_TYPE, operation.id, { userId });
           cleanedCount++;
         }
       }
@@ -450,13 +506,16 @@ router.delete(
 router.get(
   '/statistics',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
 
     try {
-      const userOperations = Array.from(batchOperations.values()).filter(
-        op => op.userId === userId
+      const { results } = await dataManagementService.queryData(
+        BATCH_OPERATIONS_TYPE,
+        { filters: { userId } },
+        {}
       );
+      const userOperations = results.map(record => mapBatchRecord(record));
 
       const completedDurations = userOperations
         .filter(op => op.endTime && op.startTime)
@@ -504,33 +563,82 @@ async function executeBatchTest(
   testConfigs: unknown[],
   _options: Record<string, unknown>
 ): Promise<void> {
-  const operation = batchOperations.get(operationId);
-  if (!operation) return;
-
-  if (operation) {
-    operation.status = 'running';
-  }
+  const operation = await fetchOperationById(operationId);
+  const userRole = operation.config.role || 'free';
+  await dataManagementService.updateData(
+    BATCH_OPERATIONS_TYPE,
+    operationId,
+    { status: 'running' },
+    { userId: operation.userId }
+  );
 
   for (let i = 0; i < testConfigs.length; i++) {
     const config = testConfigs[i];
     try {
-      // 模拟测试执行
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000));
+      const normalizedConfig = {
+        url: String((config as { url?: string }).url || ''),
+        testType: String(
+          (config as { testType?: string; engineType?: string; type?: string }).testType ||
+            (config as { testType?: string; engineType?: string; type?: string }).engineType ||
+            (config as { testType?: string; engineType?: string; type?: string }).type ||
+            ''
+        ),
+        options:
+          (config as { options?: Record<string, unknown>; config?: Record<string, unknown> })
+            .options ||
+          (config as { options?: Record<string, unknown>; config?: Record<string, unknown> })
+            .config ||
+          {},
+        concurrency:
+          typeof (config as { concurrency?: number }).concurrency === 'number'
+            ? (config as { concurrency?: number }).concurrency
+            : undefined,
+        duration:
+          typeof (config as { duration?: number }).duration === 'number'
+            ? (config as { duration?: number }).duration
+            : undefined,
+        templateId:
+          typeof (config as { templateId?: string }).templateId === 'string'
+            ? (config as { templateId?: string }).templateId
+            : undefined,
+      };
 
-      operation.results.push({
-        index: i,
-        config,
-        result: { success: true, score: Math.random() * 100 },
+      const result = await testService.createAndStart(normalizedConfig, {
+        userId: operation.userId,
+        role: userRole,
       });
 
-      updateOperationProgress(operationId, i + 1);
+      const resultEntry = {
+        index: i,
+        config,
+        result: {
+          success: true,
+          testId: result.testId,
+          status: result.status,
+        },
+      };
+
+      const latest = await fetchOperationById(operationId);
+      await dataManagementService.updateData(
+        BATCH_OPERATIONS_TYPE,
+        operationId,
+        {
+          results: [...latest.results, resultEntry],
+        },
+        { userId: latest.userId }
+      );
+
+      await updateOperationProgress(operationId, i + 1, latest.failedItems);
     } catch (error) {
-      operation.errors.push(`测试 ${i} 失败: ${error}`);
-      updateOperationProgress(operationId, i + 1, 1, [`测试 ${i} 失败: ${error}`]);
+      const latest = await fetchOperationById(operationId);
+      await updateOperationProgress(operationId, i + 1, latest.failedItems + 1, [
+        `测试 ${i} 失败: ${error}`,
+      ]);
     }
   }
 
-  completeOperation(operationId, operation.failedItems > 0 ? 'failed' : 'completed');
+  const finalOperation = await fetchOperationById(operationId);
+  await completeOperation(operationId, finalOperation.failedItems > 0 ? 'failed' : 'completed');
 }
 
 async function executeBatchExport(
@@ -539,33 +647,62 @@ async function executeBatchExport(
   format: string,
   _options: Record<string, unknown>
 ): Promise<void> {
-  const operation = batchOperations.get(operationId);
-  if (!operation) return;
-
-  if (operation) {
-    operation.status = 'running';
-  }
+  const operation = await fetchOperationById(operationId);
+  const service = initializeExportService();
+  await dataManagementService.updateData(
+    BATCH_OPERATIONS_TYPE,
+    operationId,
+    { status: 'running' },
+    { userId: operation.userId }
+  );
 
   for (let i = 0; i < exportConfigs.length; i++) {
     const config = exportConfigs[i];
     try {
-      // 模拟导出执行
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1000));
+      const batchId =
+        (config as { batchId?: string; batch_id?: string }).batchId ||
+        (config as { batchId?: string; batch_id?: string }).batch_id;
+      if (!batchId) {
+        throw new Error('导出配置缺少 batchId');
+      }
 
-      operation.results.push({
-        index: i,
-        config,
-        result: { success: true, filePath: `/exports/export_${operationId}_${i}.${format}` },
+      const job = await service.createExportJob({
+        userId: operation.userId,
+        dataType: 'test_results',
+        format: format as ExportJobRequest['format'],
+        filters: {
+          "te.test_config->>'batchId'": batchId,
+        },
+        options: { ...(_options || {}), batchId },
       });
 
-      updateOperationProgress(operationId, i + 1);
+      const resultEntry = {
+        index: i,
+        config,
+        result: { success: true, jobId: job.id, status: job.status },
+      };
+
+      const latest = await fetchOperationById(operationId);
+      await dataManagementService.updateData(
+        BATCH_OPERATIONS_TYPE,
+        operationId,
+        {
+          results: [...latest.results, resultEntry],
+        },
+        { userId: latest.userId }
+      );
+
+      await updateOperationProgress(operationId, i + 1, latest.failedItems);
     } catch (error) {
-      operation.errors.push(`导出 ${i} 失败: ${error}`);
-      updateOperationProgress(operationId, i + 1, 1, [`导出 ${i} 失败: ${error}`]);
+      const latest = await fetchOperationById(operationId);
+      await updateOperationProgress(operationId, i + 1, latest.failedItems + 1, [
+        `导出 ${i} 失败: ${error}`,
+      ]);
     }
   }
 
-  completeOperation(operationId, operation.failedItems > 0 ? 'failed' : 'completed');
+  const finalOperation = await fetchOperationById(operationId);
+  await completeOperation(operationId, finalOperation.failedItems > 0 ? 'failed' : 'completed');
 }
 
 async function executeBatchDelete(
@@ -573,31 +710,59 @@ async function executeBatchDelete(
   deleteConfigs: unknown[],
   _options: Record<string, unknown>
 ): Promise<void> {
-  const operation = batchOperations.get(operationId);
-  if (!operation) return;
-
-  operation.status = 'running';
+  const operation = await fetchOperationById(operationId);
+  await dataManagementService.updateData(
+    BATCH_OPERATIONS_TYPE,
+    operationId,
+    { status: 'running' },
+    { userId: operation.userId }
+  );
 
   for (let i = 0; i < deleteConfigs.length; i++) {
     const config = deleteConfigs[i];
     try {
-      // 模拟删除执行
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+      const batchId =
+        (config as { batchId?: string; batch_id?: string }).batchId ||
+        (config as { batchId?: string; batch_id?: string }).batch_id;
+      const testId =
+        (config as { testId?: string; test_id?: string }).testId ||
+        (config as { testId?: string; test_id?: string }).test_id;
 
-      operation.results.push({
+      if (batchId) {
+        await testService.deleteBatchTests(batchId, operation.userId);
+      } else if (testId) {
+        await testService.deleteTest(operation.userId, testId);
+      } else {
+        throw new Error('删除配置缺少 batchId 或 testId');
+      }
+
+      const resultEntry = {
         index: i,
         config,
-        result: { success: true, deleted: true },
-      });
+        result: { success: true, deleted: true, batchId, testId },
+      };
 
-      updateOperationProgress(operationId, i + 1);
+      const latest = await fetchOperationById(operationId);
+      await dataManagementService.updateData(
+        BATCH_OPERATIONS_TYPE,
+        operationId,
+        {
+          results: [...latest.results, resultEntry],
+        },
+        { userId: latest.userId }
+      );
+
+      await updateOperationProgress(operationId, i + 1, latest.failedItems);
     } catch (error) {
-      operation.errors.push(`删除 ${i} 失败: ${error}`);
-      updateOperationProgress(operationId, i + 1, 1, [`删除 ${i} 失败: ${error}`]);
+      const latest = await fetchOperationById(operationId);
+      await updateOperationProgress(operationId, i + 1, latest.failedItems + 1, [
+        `删除 ${i} 失败: ${error}`,
+      ]);
     }
   }
 
-  completeOperation(operationId, operation.failedItems > 0 ? 'failed' : 'completed');
+  const finalOperation = await fetchOperationById(operationId);
+  await completeOperation(operationId, finalOperation.failedItems > 0 ? 'failed' : 'completed');
 }
 
 export default router;

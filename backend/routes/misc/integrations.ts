@@ -2,8 +2,11 @@
  * 集成路由
  */
 
+import axios from 'axios';
 import express from 'express';
+import nodemailer from 'nodemailer';
 import { asyncHandler } from '../../middleware/errorHandler';
+import { dataManagementService } from '../../services/data/DataManagementService';
 import Logger from '../../utils/logger';
 const { authMiddleware } = require('../../middleware/auth');
 
@@ -34,112 +37,272 @@ interface Integration {
 
 const router = express.Router();
 
-const testIntegration = async (type: IntegrationType, config: Record<string, unknown>) => {
-  return {
-    success: true,
-    type,
-    testedAt: new Date(),
-    details: { configKeys: Object.keys(config) },
-  };
-};
-
 const triggerIntegration = async (
   type: IntegrationType,
   config: Record<string, unknown>,
   eventType: string,
   payload: unknown
 ) => {
-  return {
-    success: true,
-    type,
-    eventType,
-    triggeredAt: new Date(),
-    payloadSize: payload && typeof payload === 'object' ? Object.keys(payload as object).length : 0,
-  };
+  switch (type) {
+    case IntegrationType.WEBHOOK: {
+      const url = String(config.url || config.webhookUrl || '');
+      const response = await axios.post(url, payload, { timeout: 10000 });
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.SLACK: {
+      const url = String(config.webhookUrl || '');
+      const response = await axios.post(
+        url,
+        {
+          text: (payload as { text?: string }).text || 'TestWeb 集成触发',
+          username: config.username || 'TestWeb',
+          channel: config.channel,
+        },
+        { timeout: 10000 }
+      );
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.TEAMS: {
+      const url = String(config.webhookUrl || '');
+      const response = await axios.post(
+        url,
+        {
+          title: (payload as { title?: string }).title || 'TestWeb 集成触发',
+          text: (payload as { text?: string }).text || 'TestWeb 集成事件通知',
+        },
+        { timeout: 10000 }
+      );
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.EMAIL: {
+      const smtp = config.smtp as {
+        host: string;
+        port: number;
+        secure: boolean;
+        auth?: { user: string; pass: string };
+      };
+      const transporter = nodemailer.createTransport({
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.secure,
+        auth: smtp.auth,
+      });
+      const info = await transporter.sendMail({
+        from: config.from as string,
+        to: (config.to as string[]) || [],
+        subject: (payload as { subject?: string }).subject || (config.subject as string),
+        text: (payload as { text?: string }).text || 'TestWeb 集成触发通知',
+      });
+      return { success: true, messageId: info.messageId };
+    }
+    case IntegrationType.JENKINS: {
+      const serverUrl = String(config.serverUrl || '');
+      const jobName = String(config.jobName || '');
+      const username = String(config.username || '');
+      const apiToken = String(config.apiToken || '');
+      const auth = { username, password: apiToken };
+      const response = await axios.post(
+        `${serverUrl}/job/${jobName}/build`,
+        {},
+        { auth, timeout: 10000 }
+      );
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.GITHUB: {
+      const owner = String(config.owner || '');
+      const repo = String(config.repository || config.repo || '');
+      const token = String(config.token || '');
+      const response = await axios.post(
+        `https://api.github.com/repos/${owner}/${repo}/dispatches`,
+        {
+          event_type: eventType || 'testweb.trigger',
+          client_payload: payload || {},
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
+          timeout: 10000,
+        }
+      );
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.GITLAB: {
+      const serverUrl = String(config.serverUrl || 'https://gitlab.com');
+      const projectId = String(config.projectId || '');
+      const token = String(config.token || '');
+      const ref = String(config.branch || 'main');
+      const response = await axios.post(
+        `${serverUrl}/api/v4/projects/${encodeURIComponent(projectId)}/trigger/pipeline`,
+        null,
+        {
+          params: { ref, token },
+          timeout: 10000,
+        }
+      );
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.JIRA: {
+      const baseUrl = String(config.url || '');
+      const username = String(config.username || '');
+      const password = String(config.password || '');
+      const response = await axios.post(
+        `${baseUrl}/rest/api/2/issue`,
+        payload || {
+          fields: {
+            project: { key: config.projectKey || 'TEST' },
+            summary: 'TestWeb 集成触发',
+            description: '由 TestWeb 触发的 Jira 集成事件',
+            issuetype: { name: 'Task' },
+          },
+        },
+        { auth: { username, password }, timeout: 10000 }
+      );
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    default:
+      return { success: false, message: '未支持的集成类型' };
+  }
 };
 
-const getIntegrationLogs = async (id: string, options: { limit: number; level: string }) => {
-  return Array.from({ length: options.limit }, (_, index) => ({
-    id: `${id}-${index + 1}`,
-    level: options.level,
-    message: `Log entry ${index + 1} for ${id}`,
-    timestamp: new Date(Date.now() - index * 1000 * 60),
-  }));
+const INTEGRATION_LOGS_TYPE = 'misc_integration_logs';
+
+const recordIntegrationLog = async (
+  integrationId: string,
+  level: 'info' | 'warn' | 'error',
+  message: string,
+  details: Record<string, unknown>
+) => {
+  await dataManagementService.createData(
+    INTEGRATION_LOGS_TYPE,
+    {
+      integrationId,
+      level,
+      message,
+      details,
+      createdAt: new Date(),
+    },
+    { source: 'integrations' }
+  );
 };
 
-type AuthenticatedRequest = Omit<express.Request, 'user'> & {
-  user?: {
-    id: string;
-  } | null;
-};
-
-const getUserId = (req: AuthenticatedRequest): string => {
-  const userId = req.user?.id;
+const getUserId = (req: express.Request): string => {
+  const userId = (req as { user?: { id?: string } }).user?.id;
   if (!userId) {
     throw new Error('用户未认证');
   }
   return userId;
 };
+const INTEGRATIONS_TYPE = 'misc_integrations';
 
-// 模拟数据库存储
-const integrations: Integration[] = [
-  {
-    id: '1',
-    name: 'Slack通知',
-    type: IntegrationType.SLACK,
-    config: {
-      webhookUrl: 'https://hooks.slack.com/services/T00000000/B00000000/bot',
-      channel: '#general',
-      botToken: 'xoxb-0000000000-0000-0000-000000000000000',
-      username: 'TestBot',
-      iconEmoji: ':robot_face:',
-    },
-    enabled: true,
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    status: 'active',
-  },
-  {
-    id: '2',
-    name: '邮件通知',
-    type: IntegrationType.EMAIL,
-    config: {
-      smtp: {
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: true,
-        auth: {
-          user: 'test@example.com',
-          pass: 'app_password',
-        },
-      },
-      from: 'noreply@testweb.com',
-      to: ['admin@testweb.com'],
-      subject: 'TestWeb 通知',
-      template: 'default',
-    },
-    enabled: false,
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    status: 'inactive',
-  },
-  {
-    id: '3',
-    name: 'GitHub Actions',
-    type: IntegrationType.GITHUB,
-    config: {
-      token: 'ghp_000000000000000000000',
-      repository: 'testweb/testweb',
-      owner: 'testweb',
-      events: ['push', 'pull_request'],
-      branch: 'main',
-    },
-    enabled: true,
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    status: 'active',
-  },
-];
+dataManagementService.initialize().catch(error => {
+  console.error('集成数据服务初始化失败:', error);
+});
+
+const mapIntegrationRecord = (record: { id: string; data: Record<string, unknown> }) => {
+  const data = record.data as unknown as Integration;
+  return {
+    ...data,
+    id: record.id,
+    createdAt: new Date(data.createdAt),
+    updatedAt: new Date(data.updatedAt),
+    lastTriggered: data.lastTriggered ? new Date(data.lastTriggered) : undefined,
+  } as Integration;
+};
+
+const fetchIntegrationById = async (id: string) => {
+  const record = await dataManagementService.readData(INTEGRATIONS_TYPE, id);
+  return mapIntegrationRecord(record as { id: string; data: Record<string, unknown> });
+};
+
+const testIntegration = async (type: IntegrationType, config: Record<string, unknown>) => {
+  switch (type) {
+    case IntegrationType.WEBHOOK: {
+      const url = String(config.url || config.webhookUrl || '');
+      const response = await axios.post(url, { test: true }, { timeout: 10000 });
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.SLACK: {
+      const url = String(config.webhookUrl || '');
+      const response = await axios.post(url, { text: 'TestWeb 集成连接测试' }, { timeout: 10000 });
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.TEAMS: {
+      const url = String(config.webhookUrl || '');
+      const response = await axios.post(
+        url,
+        { title: 'TestWeb 集成连接测试', text: 'TestWeb 集成连接测试' },
+        { timeout: 10000 }
+      );
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.EMAIL: {
+      const smtp = config.smtp as {
+        host: string;
+        port: number;
+        secure: boolean;
+        auth?: { user: string; pass: string };
+      };
+      const transporter = nodemailer.createTransport({
+        host: smtp.host,
+        port: smtp.port,
+        secure: smtp.secure,
+        auth: smtp.auth,
+      });
+      const info = await transporter.sendMail({
+        from: config.from as string,
+        to: (config.to as string[]) || [],
+        subject: 'TestWeb 集成连接测试',
+        text: 'TestWeb 集成连接测试',
+      });
+      return { success: true, messageId: info.messageId };
+    }
+    case IntegrationType.JENKINS: {
+      const serverUrl = String(config.serverUrl || '');
+      const jobName = String(config.jobName || '');
+      const username = String(config.username || '');
+      const apiToken = String(config.apiToken || '');
+      const response = await axios.get(`${serverUrl}/job/${jobName}/api/json`, {
+        auth: { username, password: apiToken },
+        timeout: 10000,
+      });
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.GITHUB: {
+      const owner = String(config.owner || '');
+      const repo = String(config.repository || config.repo || '');
+      const token = String(config.token || '');
+      const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000,
+      });
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.GITLAB: {
+      const serverUrl = String(config.serverUrl || 'https://gitlab.com');
+      const projectId = String(config.projectId || '');
+      const token = String(config.token || '');
+      const response = await axios.get(
+        `${serverUrl}/api/v4/projects/${encodeURIComponent(projectId)}`,
+        { headers: { 'PRIVATE-TOKEN': token }, timeout: 10000 }
+      );
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    case IntegrationType.JIRA: {
+      const baseUrl = String(config.url || '');
+      const username = String(config.username || '');
+      const password = String(config.password || '');
+      const response = await axios.get(`${baseUrl}/rest/api/2/myself`, {
+        auth: { username, password },
+        timeout: 10000,
+      });
+      return { success: response.status >= 200 && response.status < 300, status: response.status };
+    }
+    default:
+      return { success: false, message: '未支持的集成类型' };
+  }
+};
 
 /**
  * GET /api/misc/integrations
@@ -148,12 +311,19 @@ const integrations: Integration[] = [
 router.get(
   '/',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
 
     try {
-      // 在实际应用中，这里应该从数据库获取用户特定的集成配置
-      const userIntegrations = integrations.filter(integration => integration.enabled);
+      const { results } = await dataManagementService.queryData(
+        INTEGRATIONS_TYPE,
+        { filters: { createdBy: userId } },
+        {}
+      );
+
+      const userIntegrations = results
+        .map(record => mapIntegrationRecord(record))
+        .filter(integration => integration.enabled);
 
       return res.json({
         success: true,
@@ -181,7 +351,7 @@ router.get(
 router.post(
   '/',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const { name, type, config } = req.body;
 
@@ -201,8 +371,8 @@ router.post(
     }
 
     try {
-      const newIntegration: Integration = {
-        id: Date.now().toString(),
+      const newIntegrationData: Integration = {
+        id: '',
         name,
         type: type as IntegrationType,
         config,
@@ -212,14 +382,21 @@ router.post(
         status: 'active',
       };
 
-      integrations.push(newIntegration);
+      const { id } = await dataManagementService.createData(
+        INTEGRATIONS_TYPE,
+        {
+          ...newIntegrationData,
+          createdBy: userId,
+        } as unknown as Record<string, unknown>,
+        { userId, source: 'integrations' }
+      );
 
-      Logger.info('创建集成配置', { integrationId: newIntegration.id, userId, name, type });
+      Logger.info('创建集成配置', { integrationId: id, userId, name, type });
 
       return res.status(201).json({
         success: true,
         message: '集成配置创建成功',
-        data: newIntegration,
+        data: { ...newIntegrationData, id },
       });
     } catch (error) {
       Logger.error('创建集成配置失败', { error, userId, name, type });
@@ -240,34 +417,43 @@ router.post(
 router.put(
   '/:id',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const { id } = req.params;
     const { name, config, enabled } = req.body;
 
     try {
-      const integrationIndex = integrations.findIndex(integration => integration.id === id);
+      await dataManagementService.readData(INTEGRATIONS_TYPE, id);
 
-      if (integrationIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
-      }
-
-      if (name) integrations[integrationIndex].name = name;
-      if (config) integrations[integrationIndex].config = config;
-      if (enabled !== undefined) integrations[integrationIndex].enabled = enabled;
-      integrations[integrationIndex].updatedAt = new Date();
+      const updatedIntegration = await dataManagementService.updateData(
+        INTEGRATIONS_TYPE,
+        id,
+        {
+          ...(name ? { name } : {}),
+          ...(config ? { config } : {}),
+          ...(enabled !== undefined ? { enabled } : {}),
+          updatedAt: new Date(),
+        },
+        { userId }
+      );
 
       Logger.info('更新集成配置', { integrationId: id, userId, changes: { name, enabled } });
 
       return res.json({
         success: true,
         message: '集成配置更新成功',
-        data: integrations[integrationIndex],
+        data: mapIntegrationRecord(
+          updatedIntegration as { id: string; data: Record<string, unknown> }
+        ),
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '集成配置不存在',
+        });
+      }
+
       Logger.error('更新集成配置失败', { error, integrationId: id, userId });
 
       return res.status(500).json({
@@ -286,29 +472,28 @@ router.put(
 router.delete(
   '/:id',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const { id } = req.params;
 
     try {
-      const integrationIndex = integrations.findIndex(integration => integration.id === id);
+      const integration = await fetchIntegrationById(id);
+      await dataManagementService.deleteData(INTEGRATIONS_TYPE, id, { userId });
 
-      if (integrationIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
-      }
-
-      const deletedIntegration = integrations.splice(integrationIndex, 1)[0];
-
-      Logger.info('删除集成配置', { integrationId: id, userId, name: deletedIntegration.name });
+      Logger.info('删除集成配置', { integrationId: id, userId, name: integration.name });
 
       return res.json({
         success: true,
         message: '集成配置删除成功',
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '集成配置不存在',
+        });
+      }
+
       Logger.error('删除集成配置失败', { error, integrationId: id, userId });
 
       return res.status(500).json({
@@ -327,26 +512,31 @@ router.delete(
 router.post(
   '/:id/test',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const userId = getUserId(req);
 
     try {
-      const integration = integrations.find(integration => integration.id === id);
+      const integration = await fetchIntegrationById(id);
 
-      if (!integration) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
-      }
-
-      // 模拟测试连接
       const testResult = await testIntegration(integration.type, integration.config);
 
-      // 更新最后触发时间和状态
-      integration.lastTriggered = new Date();
-      integration.status = testResult.success ? 'active' : 'error';
+      const updatedIntegration = await dataManagementService.updateData(
+        INTEGRATIONS_TYPE,
+        id,
+        {
+          lastTriggered: new Date(),
+          status: testResult.success ? 'active' : 'error',
+          updatedAt: new Date(),
+        },
+        { userId }
+      );
+
+      await recordIntegrationLog(id, 'info', '集成连接测试', {
+        integrationType: integration.type,
+        success: testResult.success,
+        status: testResult.status,
+      });
 
       Logger.info('测试集成连接', {
         integrationId: id,
@@ -358,9 +548,21 @@ router.post(
       return res.json({
         success: testResult.success,
         message: testResult.success ? '集成连接测试成功' : '集成连接测试失败',
-        data: testResult,
+        data: {
+          ...testResult,
+          integration: mapIntegrationRecord(
+            updatedIntegration as { id: string; data: Record<string, unknown> }
+          ),
+        },
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '集成配置不存在',
+        });
+      }
+
       Logger.error('测试集成连接失败', { error, integrationId: id, userId });
 
       return res.status(500).json({
@@ -379,20 +581,13 @@ router.post(
 router.post(
   '/:id/trigger',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const userId = getUserId(req);
     const { eventType, payload } = req.body;
 
     try {
-      const integration = integrations.find(integration => integration.id === id);
-
-      if (!integration) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
-      }
+      const integration = await fetchIntegrationById(id);
 
       if (!integration.enabled) {
         return res.status(400).json({
@@ -401,7 +596,6 @@ router.post(
         });
       }
 
-      // 触发集成
       const triggerResult = await triggerIntegration(
         integration.type,
         integration.config,
@@ -409,8 +603,21 @@ router.post(
         payload
       );
 
-      // 更新最后触发时间
-      integration.lastTriggered = new Date();
+      await dataManagementService.updateData(
+        INTEGRATIONS_TYPE,
+        id,
+        {
+          lastTriggered: new Date(),
+          updatedAt: new Date(),
+        },
+        { userId }
+      );
+
+      await recordIntegrationLog(id, triggerResult.success ? 'info' : 'error', '手动触发集成', {
+        integrationType: integration.type,
+        eventType,
+        success: triggerResult.success,
+      });
 
       Logger.info('手动触发集成', {
         integrationId: id,
@@ -426,6 +633,13 @@ router.post(
         data: triggerResult,
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '集成配置不存在',
+        });
+      }
+
       Logger.error('手动触发集成失败', { error, integrationId: id, userId, eventType });
 
       return res.status(500).json({
@@ -444,31 +658,41 @@ router.post(
 router.get(
   '/:id/logs',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const { limit = 50, level = 'info' } = req.query;
 
     try {
-      const integration = integrations.find(integration => integration.id === id);
+      await fetchIntegrationById(id);
 
-      if (!integration) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
-      }
-
-      // 模拟获取日志
-      const logs = await getIntegrationLogs(id, {
-        limit: parseInt(limit as string),
-        level: level as string,
-      });
+      const { results } = await dataManagementService.queryData(
+        INTEGRATION_LOGS_TYPE,
+        {
+          filters: {
+            integrationId: id,
+            ...(level ? { level: level as string } : {}),
+          },
+          sort: { field: 'createdAt', direction: 'desc' },
+        },
+        { page: 1, limit: parseInt(limit as string) }
+      );
+      const logs = results.map(record => ({
+        id: record.id,
+        ...(record.data as Record<string, unknown>),
+      }));
 
       return res.json({
         success: true,
         data: logs,
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '集成配置不存在',
+        });
+      }
+
       Logger.error('获取集成日志失败', { error, integrationId: id });
 
       return res.status(500).json({
@@ -607,24 +831,24 @@ router.get(
 router.get(
   '/:id',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
 
     try {
-      const integration = integrations.find(integration => integration.id === id);
-
-      if (!integration) {
-        return res.status(404).json({
-          success: false,
-          message: '集成配置不存在',
-        });
-      }
+      const integration = await fetchIntegrationById(id);
 
       return res.json({
         success: true,
         data: integration,
       });
     } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '集成配置不存在',
+        });
+      }
+
       return res.status(500).json({
         success: false,
         message: '获取集成详情失败',
@@ -641,36 +865,44 @@ router.get(
 router.post(
   '/:id/enable',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const userId = getUserId(req);
 
     try {
-      const integrationIndex = integrations.findIndex(integration => integration.id === id);
+      const integration = await fetchIntegrationById(id);
+      const updatedIntegration = await dataManagementService.updateData(
+        INTEGRATIONS_TYPE,
+        id,
+        {
+          enabled: true,
+          status: 'active',
+          updatedAt: new Date(),
+        },
+        { userId }
+      );
 
-      if (integrationIndex === -1) {
+      Logger.info('启用集成', {
+        integrationId: id,
+        userId,
+        name: integration.name,
+      });
+
+      return res.json({
+        success: true,
+        message: '集成已启用',
+        data: mapIntegrationRecord(
+          updatedIntegration as { id: string; data: Record<string, unknown> }
+        ),
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '集成配置不存在',
         });
       }
 
-      integrations[integrationIndex].enabled = true;
-      integrations[integrationIndex].updatedAt = new Date();
-      integrations[integrationIndex].status = 'active';
-
-      Logger.info('启用集成', {
-        integrationId: id,
-        userId,
-        name: integrations[integrationIndex].name,
-      });
-
-      return res.json({
-        success: true,
-        message: '集成已启用',
-        data: integrations[integrationIndex],
-      });
-    } catch (error) {
       return res.status(500).json({
         success: false,
         message: '启用集成失败',
@@ -687,36 +919,44 @@ router.post(
 router.post(
   '/:id/disable',
   authMiddleware,
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const userId = getUserId(req);
 
     try {
-      const integrationIndex = integrations.findIndex(integration => integration.id === id);
+      const integration = await fetchIntegrationById(id);
+      const updatedIntegration = await dataManagementService.updateData(
+        INTEGRATIONS_TYPE,
+        id,
+        {
+          enabled: false,
+          status: 'inactive',
+          updatedAt: new Date(),
+        },
+        { userId }
+      );
 
-      if (integrationIndex === -1) {
+      Logger.info('禁用集成', {
+        integrationId: id,
+        userId,
+        name: integration.name,
+      });
+
+      return res.json({
+        success: true,
+        message: '集成已禁用',
+        data: mapIntegrationRecord(
+          updatedIntegration as { id: string; data: Record<string, unknown> }
+        ),
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '集成配置不存在',
         });
       }
 
-      integrations[integrationIndex].enabled = false;
-      integrations[integrationIndex].updatedAt = new Date();
-      integrations[integrationIndex].status = 'inactive';
-
-      Logger.info('禁用集成', {
-        integrationId: id,
-        userId,
-        name: integrations[integrationIndex].name,
-      });
-
-      return res.json({
-        success: true,
-        message: '集成已禁用',
-        data: integrations[integrationIndex],
-      });
-    } catch (error) {
       return res.status(500).json({
         success: false,
         message: '禁用集成失败',

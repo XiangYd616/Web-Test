@@ -5,7 +5,8 @@
 
 import express from 'express';
 import { asyncHandler } from '../../middleware/errorHandler';
-import { errorMonitoringManager } from '../../src/ErrorMonitoringManager';
+import { dataManagementService } from '../../services/data/DataManagementService';
+import { errorMonitoringSystem } from '../../utils/ErrorMonitoringSystem';
 import Logger from '../../utils/logger';
 
 interface ErrorReport {
@@ -69,75 +70,44 @@ interface ErrorStatistics {
 const router = express.Router();
 
 // 初始化错误监控管理器
-errorMonitoringManager.initialize().catch(console.error);
+errorMonitoringSystem.initialize().catch(console.error);
 
-// 模拟错误数据
-const errorReports: ErrorReport[] = [
-  {
-    id: '1',
-    type: 'javascript',
-    severity: 'high',
-    message: 'Cannot read property of undefined',
-    details: {
-      component: 'UserProfile',
-      action: 'loadUserData',
-    },
-    timestamp: new Date(Date.now() - 1000 * 60 * 5),
-    context: {
-      userId: 'user123',
-      sessionId: 'session456',
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      url: 'https://testweb.com/profile',
-      browser: 'Chrome',
-      os: 'Windows',
-      screen: { width: 1920, height: 1080 },
-    },
-    stack:
-      'TypeError: Cannot read property of undefined\\n  at UserProfile.loadUserData (profile.js:45:12)',
-    source: 'profile.js',
-    line: 45,
-    column: 12,
-  },
-  {
-    id: '2',
-    type: 'network',
-    severity: 'medium',
-    message: 'Network request failed',
-    details: {
-      url: '/api/users/123',
-      method: 'GET',
-      status: 500,
-    },
-    timestamp: new Date(Date.now() - 1000 * 60 * 15),
-    context: {
-      userId: 'user123',
-      sessionId: 'session456',
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      url: 'https://testweb.com/profile',
-      browser: 'Chrome',
-      os: 'Windows',
-    },
-  },
-  {
-    id: '3',
-    type: 'api',
-    severity: 'critical',
-    message: 'API authentication failed',
-    details: {
-      endpoint: '/api/auth/login',
-      error: 'Invalid credentials',
-    },
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    context: {
-      userId: 'user456',
-      sessionId: 'session789',
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      url: 'https://testweb.com/login',
-      browser: 'Safari',
-      os: 'macOS',
-    },
-  },
-];
+const ERROR_REPORTS_TYPE = 'system_error_reports';
+
+dataManagementService.initialize().catch(error => {
+  console.error('错误数据服务初始化失败:', error);
+});
+
+const mapErrorRecord = (record: { id: string; data: Record<string, unknown> }): ErrorReport =>
+  ({
+    ...(record.data as unknown as ErrorReport),
+    id: record.id,
+  }) as ErrorReport;
+
+const applyTimeRangeFilter = (errors: ErrorReport[], timeRange?: ErrorQuery['timeRange']) => {
+  if (!timeRange) return errors;
+  const now = new Date();
+  let cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  switch (timeRange) {
+    case '1h':
+      cutoffTime = new Date(now.getTime() - 60 * 60 * 1000);
+      break;
+    case '24h':
+      cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+      break;
+    case '7d':
+      cutoffTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case '30d':
+      cutoffTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    default:
+      break;
+  }
+
+  return errors.filter(error => new Date(error.timestamp) >= cutoffTime);
+};
 
 /**
  * POST /api/system/errors/report
@@ -150,19 +120,22 @@ router.post(
       const errorReport: ErrorReport = req.body;
 
       // 验证必需字段
-      if (!errorReport.id || !errorReport.type || !errorReport.message || !errorReport.timestamp) {
+      if (!errorReport.type || !errorReport.message || !errorReport.timestamp) {
         return res.status(400).json({
           success: false,
           message: '错误报告缺少必需字段',
         });
       }
 
-      // 添加到错误报告列表
-      errorReports.push(errorReport);
+      const { id } = await dataManagementService.createData(
+        ERROR_REPORTS_TYPE,
+        { ...errorReport, id: undefined },
+        { source: 'error-report' }
+      );
 
       // 记录到日志
       Logger.error('前端错误报告', {
-        errorId: errorReport.id,
+        errorId: id,
         type: errorReport.type,
         severity: errorReport.severity,
         message: errorReport.message,
@@ -171,16 +144,25 @@ router.post(
       });
 
       // 通知错误监控管理器
-      await errorMonitoringManager.reportError(errorReport);
+      await errorMonitoringSystem.recordError({
+        severity: errorReport.severity,
+        type: errorReport.type,
+        message: errorReport.message,
+        timestamp: new Date(errorReport.timestamp).toISOString(),
+        errorId: id,
+        context: errorReport.context as Record<string, unknown> | undefined,
+        details: errorReport.details,
+      });
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '错误报告已记录',
+        data: { id },
       });
     } catch (error) {
       Logger.error('处理错误报告失败', { error, body: req.body });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '处理错误报告失败',
         error: error instanceof Error ? error.message : String(error),
@@ -199,64 +181,32 @@ router.get(
     const query: ErrorQuery = req.query;
 
     try {
-      let filteredErrors = [...errorReports];
+      const { results } = await dataManagementService.queryData(
+        ERROR_REPORTS_TYPE,
+        {
+          filters: {
+            ...(query.severity ? { severity: query.severity } : {}),
+            ...(query.type ? { type: query.type } : {}),
+          },
+          search: query.search,
+          sort: { field: 'timestamp', direction: 'desc' },
+        },
+        {}
+      );
 
-      // 按严重程度过滤
-      if (query.severity) {
-        filteredErrors = filteredErrors.filter(error => error.severity === query.severity);
-      }
+      const rawErrors = results.map(record => mapErrorRecord(record));
+      const filteredErrors = applyTimeRangeFilter(rawErrors, query.timeRange);
+      filteredErrors.sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
 
-      // 按类型过滤
-      if (query.type) {
-        filteredErrors = filteredErrors.filter(error => error.type === query.type);
-      }
-
-      // 搜索过滤
-      if (query.search) {
-        const searchLower = query.search.toLowerCase();
-        filteredErrors = filteredErrors.filter(
-          error =>
-            error.message.toLowerCase().includes(searchLower) ||
-            error.type.toLowerCase().includes(searchLower)
-        );
-      }
-
-      // 时间范围过滤
-      if (query.timeRange) {
-        const now = new Date();
-        let cutoffTime: Date;
-
-        switch (query.timeRange) {
-          case '1h':
-            cutoffTime = new Date(now.getTime() - 60 * 60 * 1000);
-            break;
-          case '24h':
-            cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-            break;
-          case '7d':
-            cutoffTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            break;
-          case '30d':
-            cutoffTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            break;
-          default:
-            cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        }
-
-        filteredErrors = filteredErrors.filter(error => error.timestamp >= cutoffTime);
-      }
-
-      // 排序
-      filteredErrors.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-      // 分页
       const page = query.page || 1;
       const limit = query.limit || 20;
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       const paginatedErrors = filteredErrors.slice(startIndex, endIndex);
 
-      res.json({
+      return res.json({
         success: true,
         data: {
           errors: paginatedErrors,
@@ -269,7 +219,7 @@ router.get(
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取错误列表失败',
         error: error instanceof Error ? error.message : String(error),
@@ -288,21 +238,23 @@ router.get(
     const { id } = req.params;
 
     try {
-      const error = errorReports.find(e => e.id === id);
+      const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, id);
+      const errorReport = mapErrorRecord(
+        errorRecord as { id: string; data: Record<string, unknown> }
+      );
 
-      if (!error) {
+      return res.json({
+        success: true,
+        data: errorReport,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '错误报告不存在',
         });
       }
-
-      res.json({
-        success: true,
-        data: error,
-      });
-    } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取错误详情失败',
         error: error instanceof Error ? error.message : String(error),
@@ -321,27 +273,12 @@ router.get(
     const { timeRange = '24h' } = req.query;
 
     try {
+      const { results } = await dataManagementService.queryData(ERROR_REPORTS_TYPE, {}, {});
       const now = new Date();
-      let cutoffTime: Date;
-
-      switch (timeRange) {
-        case '1h':
-          cutoffTime = new Date(now.getTime() - 60 * 60 * 1000);
-          break;
-        case '24h':
-          cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-          break;
-        case '7d':
-          cutoffTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          break;
-        case '30d':
-          cutoffTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-          break;
-        default:
-          cutoffTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      }
-
-      const recentErrors = errorReports.filter(error => error.timestamp >= cutoffTime);
+      const recentErrors = applyTimeRangeFilter(
+        results.map(record => mapErrorRecord(record)),
+        timeRange as ErrorQuery['timeRange']
+      );
 
       const statistics: ErrorStatistics = {
         total: recentErrors.length,
@@ -390,12 +327,12 @@ router.get(
           })),
       };
 
-      res.json({
+      return res.json({
         success: true,
         data: statistics,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取错误统计失败',
         error: error instanceof Error ? error.message : String(error),
@@ -415,33 +352,34 @@ router.post(
     const { comment, resolvedBy } = req.body;
 
     try {
-      const errorIndex = errorReports.findIndex(e => e.id === id);
+      const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, id);
+      const errorReport = mapErrorRecord(
+        errorRecord as { id: string; data: Record<string, unknown> }
+      );
 
-      if (errorIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: '错误报告不存在',
-        });
-      }
-
-      // 在实际应用中，这里应该更新数据库中的状态
-      // 这里只是模拟标记为已解决
-      errorReports[errorIndex].details = {
-        ...errorReports[errorIndex].details,
-        resolved: true,
-        resolvedAt: new Date(),
-        resolvedBy: resolvedBy || 'system',
-        resolutionComment: comment,
-      };
+      await dataManagementService.updateData(
+        ERROR_REPORTS_TYPE,
+        id,
+        {
+          details: {
+            ...(errorReport.details || {}),
+            resolved: true,
+            resolvedAt: new Date(),
+            resolvedBy: resolvedBy || 'system',
+            resolutionComment: comment,
+          },
+        },
+        { userId: resolvedBy }
+      );
 
       Logger.info('错误已标记为解决', { errorId: id, resolvedBy, comment });
 
-      res.json({
+      return res.json({
         success: true,
         message: '错误已标记为解决',
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '标记错误解决失败',
         error: error instanceof Error ? error.message : String(error),
@@ -470,19 +408,39 @@ router.post(
       const results = [];
 
       for (const errorId of errorIds) {
-        const errorIndex = errorReports.findIndex(e => e.id === errorId);
+        try {
+          const errorRecord = await dataManagementService.readData(ERROR_REPORTS_TYPE, errorId);
+          const errorReport = mapErrorRecord(
+            errorRecord as { id: string; data: Record<string, unknown> }
+          );
 
-        if (errorIndex !== -1) {
-          errorReports[errorIndex].details = {
-            ...errorReports[errorIndex].details,
-            resolved: true,
-            resolvedAt: new Date(),
-            resolvedBy: resolvedBy || 'system',
-            resolutionComment: comment,
-          };
+          await dataManagementService.updateData(
+            ERROR_REPORTS_TYPE,
+            errorId,
+            {
+              details: {
+                ...(errorReport.details || {}),
+                resolved: true,
+                resolvedAt: new Date(),
+                resolvedBy: resolvedBy || 'system',
+                resolutionComment: comment,
+              },
+            },
+            { userId: resolvedBy }
+          );
+
           results.push({ errorId, success: true });
-        } else {
-          results.push({ errorId, success: false, error: '错误不存在' });
+        } catch (error) {
+          results.push({
+            errorId,
+            success: false,
+            error:
+              error instanceof Error && error.message.includes('数据记录不存在')
+                ? '错误不存在'
+                : error instanceof Error
+                  ? error.message
+                  : String(error),
+          });
         }
       }
 
@@ -492,7 +450,7 @@ router.post(
         resolvedBy,
       });
 
-      res.json({
+      return res.json({
         success: true,
         message: '批量标记完成',
         data: {
@@ -505,7 +463,7 @@ router.post(
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '批量标记错误解决失败',
         error: error instanceof Error ? error.message : String(error),
@@ -524,25 +482,16 @@ router.delete(
     const { id } = req.params;
 
     try {
-      const errorIndex = errorReports.findIndex(e => e.id === id);
+      await dataManagementService.deleteData(ERROR_REPORTS_TYPE, id);
 
-      if (errorIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: '错误报告不存在',
-        });
-      }
+      Logger.info('删除错误报告', { errorId: id });
 
-      const deletedError = errorReports.splice(errorIndex, 1)[0];
-
-      Logger.info('删除错误报告', { errorId: id, message: deletedError.message });
-
-      res.json({
+      return res.json({
         success: true,
         message: '错误报告已删除',
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '删除错误报告失败',
         error: error instanceof Error ? error.message : String(error),
@@ -559,14 +508,15 @@ router.get(
   '/types',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const types = Array.from(new Set(errorReports.map(error => error.type)));
+      const { results } = await dataManagementService.queryData(ERROR_REPORTS_TYPE, {}, {});
+      const types = Array.from(new Set(results.map(record => mapErrorRecord(record).type)));
 
-      res.json({
+      return res.json({
         success: true,
         data: types,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取错误类型失败',
         error: error instanceof Error ? error.message : String(error),
@@ -583,20 +533,25 @@ router.get(
   '/health',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const health = await errorMonitoringManager.healthCheck();
+      const health = errorMonitoringSystem.getStatus();
+      const { total } = await dataManagementService.queryData(ERROR_REPORTS_TYPE, {}, {});
+      const { results } = await dataManagementService.queryData(ERROR_REPORTS_TYPE, {}, {});
+      const lastRecord = results
+        .map(record => mapErrorRecord(record))
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+        .pop();
 
-      res.json({
+      return res.json({
         success: true,
         data: {
           status: 'healthy',
-          errorReports: errorReports.length,
-          lastReport:
-            errorReports.length > 0 ? errorReports[errorReports.length - 1].timestamp : null,
+          errorReports: total,
+          lastReport: lastRecord?.timestamp ?? null,
           ...health,
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '错误监控健康检查失败',
         error: error instanceof Error ? error.message : String(error),

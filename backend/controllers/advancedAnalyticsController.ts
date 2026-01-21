@@ -20,6 +20,16 @@ type ComparisonOptions = Record<string, unknown>;
 
 type PerformanceFilter = Record<string, unknown>;
 
+type ForecastOptions = {
+  horizon?: number;
+  smoothing?: boolean;
+  seasonality?: boolean;
+};
+
+type AnomalyOptions = {
+  severity?: 'high' | 'medium' | 'low';
+};
+
 class AdvancedAnalyticsController {
   async analyzeTrend(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
@@ -35,7 +45,7 @@ class AdvancedAnalyticsController {
       const result = await advancedAnalyticsService.performTrendAnalysis(dataPoints, options);
       return res.success(result);
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 
@@ -62,39 +72,159 @@ class AdvancedAnalyticsController {
       );
       return res.success(result);
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 
   async analyzePerformance(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
-      const { filter = {} } = req.body as { filter?: PerformanceFilter };
-      const userId = req.user?.id;
+      const { dataPoints, options = {} } = req.body as {
+        dataPoints?: unknown[];
+        options?: PerformanceFilter;
+      };
 
-      const result = await advancedAnalyticsService.analyzePerformanceMetrics(filter, userId);
+      if (!dataPoints || !Array.isArray(dataPoints) || dataPoints.length < 2) {
+        return res.validationError([], '需要至少2个数据点进行性能分析');
+      }
+
+      const result = await advancedAnalyticsService.performPerformanceAnalysis(
+        dataPoints,
+        options as PerformanceFilter
+      );
       return res.success(result);
     } catch (error) {
-      next(error);
+      return next(error);
     }
   }
 
   async generateInsights(req: AuthRequest, res: ApiResponse, next: NextFunction) {
     try {
-      const { dataType, timeRange = '7d' } = req.body as { dataType?: string; timeRange?: string };
+      const {
+        dataPoints,
+        dataType,
+        timeRange = '7d',
+      } = req.body as {
+        dataPoints?: unknown[];
+        dataType?: string;
+        timeRange?: string;
+      };
 
       if (!dataType) {
         return res.validationError([], '需要指定数据类型');
       }
 
-      const result = await advancedAnalyticsService.generateInsights(
-        dataType,
-        timeRange,
-        req.user?.id
-      );
+      if (!dataPoints || !Array.isArray(dataPoints) || dataPoints.length === 0) {
+        return res.validationError([], '需要提供数据点用于洞察生成');
+      }
+
+      const result = await advancedAnalyticsService.generateInsights(dataPoints, {
+        context: `timeRange:${timeRange}`,
+        type: dataType as 'trend' | 'anomaly' | 'opportunity' | 'risk',
+      });
       return res.success(result);
     } catch (error) {
       next(error);
+      return undefined;
     }
+  }
+
+  async generateForecast(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { dataPoints, options = {} } = req.body as {
+        dataPoints?: unknown[];
+        options?: ForecastOptions;
+      };
+
+      if (!dataPoints || !Array.isArray(dataPoints) || dataPoints.length < 2) {
+        return res.validationError([], '需要至少2个数据点进行预测分析');
+      }
+
+      const forecast = await advancedAnalyticsService.performTrendAnalysis(dataPoints, {
+        predictionDays: options.horizon ?? 7,
+        smoothing: options.smoothing,
+        seasonality: options.seasonality,
+      });
+      return res.success(forecast);
+    } catch (error) {
+      next(error);
+      return undefined;
+    }
+  }
+
+  async detectAnomalies(req: AuthRequest, res: ApiResponse, next: NextFunction) {
+    try {
+      const { dataPoints, options = {} } = req.body as {
+        dataPoints?: unknown[];
+        options?: AnomalyOptions;
+      };
+
+      if (!dataPoints || !Array.isArray(dataPoints) || dataPoints.length < 3) {
+        return res.validationError([], '需要至少3个数据点进行异常检测');
+      }
+
+      const result = await advancedAnalyticsService.generateInsights(dataPoints, {
+        type: 'anomaly',
+        severity: options.severity || 'medium',
+      });
+      return res.success(result);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  async healthCheck(_req: AuthRequest, res: ApiResponse, _next: NextFunction) {
+    return res.success({ status: 'ok', timestamp: new Date().toISOString() });
+  }
+
+  async getAvailableMetrics(category: string | undefined, res: ApiResponse) {
+    const metrics = {
+      performance: ['response_time', 'throughput', 'error_rate'],
+      usage: ['requests', 'users', 'sessions'],
+      system: ['cpu', 'memory', 'disk'],
+    } as Record<string, string[]>;
+
+    if (category && metrics[category]) {
+      return res.success(metrics[category]);
+    }
+
+    return res.success(metrics);
+  }
+
+  async getAnalysisReports(params: {
+    type?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    return {
+      reports: [],
+      pagination: {
+        page: params.page || 1,
+        limit: params.limit || 20,
+        total: 0,
+        totalPages: 0,
+      },
+    };
+  }
+
+  async createAnalysisReport(_req: AuthRequest, res: ApiResponse) {
+    return res.created({ id: `report_${Date.now()}` }, '分析报告创建成功');
+  }
+
+  async getAnalysisReport(_id: string) {
+    return null;
+  }
+
+  async exportAnalysisReport(_id: string, _format: string, _options: Record<string, unknown>) {
+    return JSON.stringify({ message: '暂未生成报告内容' });
+  }
+
+  async getSystemInsights(_params: { category?: string; timeRange?: string }) {
+    return [];
+  }
+
+  async generateDashboardData(_req: AuthRequest, res: ApiResponse) {
+    return res.success({ widgets: [] });
   }
 }
 

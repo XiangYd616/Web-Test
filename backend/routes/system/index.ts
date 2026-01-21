@@ -16,14 +16,8 @@ const { MonitoringService } = require('../../services/monitoring/MonitoringServi
 
 const router = express.Router();
 
-type AuthenticatedRequest = Omit<express.Request, 'user'> & {
-  user?: {
-    id: string;
-  } | null;
-};
-
-const getUserId = (req: AuthenticatedRequest): string => {
-  const userId = req.user?.id;
+const getUserId = (req: express.Request): string => {
+  const userId = (req as { user?: { id?: string } }).user?.id;
   if (!userId) {
     throw new Error('用户未认证');
   }
@@ -56,7 +50,7 @@ monitoringService.start().catch((error: unknown) => {
  */
 router.get(
   '/health',
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const dbHealth = await healthCheck();
       const monitoringHealth = await monitoringService.getHealthStatus();
@@ -71,12 +65,12 @@ router.get(
         version: process.env.npm_package_version || '1.0.0',
       };
 
-      res.json({
+      return res.json({
         success: true,
         data: health,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '系统健康检查失败',
         error: error instanceof Error ? error.message : String(error),
@@ -112,12 +106,12 @@ router.get(
         timestamp: new Date().toISOString(),
       };
 
-      res.json({
+      return res.json({
         success: true,
         data: stats,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取系统统计失败',
         error: error instanceof Error ? error.message : String(error),
@@ -149,12 +143,12 @@ router.get(
         timestamp: new Date().toISOString(),
       };
 
-      res.json({
+      return res.json({
         success: true,
         data: info,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取系统信息失败',
         error: error instanceof Error ? error.message : String(error),
@@ -185,12 +179,12 @@ router.post(
         process.exit(0);
       }, 1000);
 
-      res.json({
+      return res.json({
         success: true,
         message: '系统重启中...',
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '系统重启失败',
         error: error instanceof Error ? error.message : String(error),
@@ -216,12 +210,12 @@ router.get(
         offset: parseInt(offset as string),
       });
 
-      res.json({
+      return res.json({
         success: true,
         data: logs,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取系统日志失败',
         error: error instanceof Error ? error.message : String(error),
@@ -260,13 +254,13 @@ router.post(
       // 记录配置变更
       await monitoringService.logConfigChange(key, value, getUserId(req));
 
-      res.json({
+      return res.json({
         success: true,
         message: '配置更新成功',
         data: { key, value },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '更新配置失败',
         error: error instanceof Error ? error.message : String(error),
@@ -332,12 +326,12 @@ router.get(
           };
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: config,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取配置失败',
         error: error instanceof Error ? error.message : String(error),
@@ -356,12 +350,12 @@ router.get(
     try {
       const metrics = await monitoringService.getMetrics();
 
-      res.json({
+      return res.json({
         success: true,
         data: metrics,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取系统指标失败',
         error: error instanceof Error ? error.message : String(error),
@@ -400,7 +394,7 @@ router.post(
       // 记录维护模式变更
       await monitoringService.logMaintenanceModeChange(enabled, message, getUserId(req));
 
-      res.json({
+      return res.json({
         success: true,
         message: enabled ? '维护模式已启用' : '维护模式已禁用',
         data: {
@@ -410,7 +404,7 @@ router.post(
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '设置维护模式失败',
         error: error instanceof Error ? error.message : String(error),
@@ -426,7 +420,7 @@ router.post(
 router.post(
   '/backup',
   requireRole('admin'),
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const { type = 'full', includeLogs = false } = req.body;
 
@@ -436,13 +430,13 @@ router.post(
         createdBy: getUserId(req),
       });
 
-      res.json({
+      return res.json({
         success: true,
         message: '备份创建成功',
         data: backup,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建备份失败',
         error: error instanceof Error ? error.message : String(error),
@@ -462,12 +456,12 @@ router.get(
     try {
       const backups = await monitoringService.getBackupList();
 
-      res.json({
+      return res.json({
         success: true,
         data: backups,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取备份列表失败',
         error: error instanceof Error ? error.message : String(error),
@@ -489,12 +483,12 @@ router.delete(
 
       await monitoringService.deleteBackup(id);
 
-      res.json({
+      return res.json({
         success: true,
         message: '备份删除成功',
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '删除备份失败',
         error: error instanceof Error ? error.message : String(error),

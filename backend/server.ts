@@ -23,7 +23,6 @@ const authRoutes = require('./routes/auth');
 const oauthRoutes = require('./routes/oauth');
 const testRoutes = require('./routes/test');
 const usersRoutes = require('./routes/users');
-const securityRoutes = require('./routes/security');
 const performanceRoutes = require('./routes/performance');
 const comparisonRoutes = require('./routes/misc/comparison');
 const integrationsRoutes = require('./routes/misc/integrations');
@@ -149,7 +148,6 @@ app.get('/api/info', (_req: Request, res: Response) => {
       oauth: '/api/oauth',
       test: '/api/test',
       users: '/api/users',
-      security: '/api/security',
       performance: '/api/performance',
 
       comparison: '/api/comparison',
@@ -171,7 +169,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/oauth', oauthRoutes);
 app.use('/api/test', testRoutes);
 app.use('/api/users', usersRoutes);
-app.use('/api/security', securityRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/comparison', comparisonRoutes);
 app.use('/api/analytics', analyticsRoutes);

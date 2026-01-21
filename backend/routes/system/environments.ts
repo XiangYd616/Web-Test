@@ -4,7 +4,8 @@
  */
 
 import express from 'express';
-import EnvironmentManager from '../../services/environments/EnvironmentManager';
+import { asyncHandler } from '../../middleware/errorHandler';
+import { dataManagementService } from '../../services/data/DataManagementService';
 
 interface Environment {
   id: string;
@@ -65,110 +66,35 @@ interface EnvironmentExport {
 
 const router = express.Router();
 
-interface AuthenticatedRequest extends express.Request {
-  user?: {
-    id: string;
-  };
-}
-
-const getUserId = (req: AuthenticatedRequest): string => {
-  const userId = req.user?.id;
+const getUserId = (req: express.Request): string => {
+  const userId = (req as { user?: { id?: string } }).user?.id;
   if (!userId) {
     throw new Error('用户未认证');
   }
   return userId;
 };
 
-// 初始化环境管理器
-let environmentManager: EnvironmentManager;
-try {
-  environmentManager = new EnvironmentManager({
-    storageDir: './data/environments',
-    encryptionKey: process.env.ENVIRONMENT_ENCRYPTION_KEY,
-  });
-} catch (error) {
-  console.error('环境管理器初始化失败:', error);
-}
+const ENVIRONMENTS_TYPE = 'system_environments';
 
-// 模拟环境数据
-const environments: Environment[] = [
-  {
-    id: '1',
-    name: 'Development',
-    description: '开发环境配置',
-    variables: {
-      API_BASE_URL: {
-        value: 'http://localhost:3000',
-        type: 'string',
-        description: 'API基础URL',
-        enabled: true,
-      },
-      DATABASE_URL: {
-        value: 'postgresql://localhost:5432/devdb',
-        type: 'string',
-        description: '数据库连接字符串',
-        enabled: true,
-        secret: true,
-      },
-      DEBUG_MODE: {
-        value: 'true',
-        type: 'boolean',
-        description: '调试模式',
-        enabled: true,
-      },
-      TIMEOUT: {
-        value: '30',
-        type: 'number',
-        description: '请求超时时间(秒)',
-        enabled: true,
-      },
-    },
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    createdBy: 'admin',
-    tags: ['development', 'local'],
-    scope: 'workspace',
-    isActive: true,
-  },
-  {
-    id: '2',
-    name: 'Production',
-    description: '生产环境配置',
-    variables: {
-      API_BASE_URL: {
-        value: 'https://api.testweb.com',
-        type: 'string',
-        description: 'API基础URL',
-        enabled: true,
-      },
-      DATABASE_URL: {
-        value: 'postgresql://prod-db:5432/proddb',
-        type: 'string',
-        description: '数据库连接字符串',
-        enabled: true,
-        secret: true,
-      },
-      DEBUG_MODE: {
-        value: 'false',
-        type: 'boolean',
-        description: '调试模式',
-        enabled: true,
-      },
-      TIMEOUT: {
-        value: '15',
-        type: 'number',
-        description: '请求超时时间(秒)',
-        enabled: true,
-      },
-    },
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    createdBy: 'admin',
-    tags: ['production', 'live'],
-    scope: 'global',
-    isActive: false,
-  },
-];
+dataManagementService.initialize().catch(error => {
+  console.error('环境数据服务初始化失败:', error);
+});
+
+const mapEnvironmentRecord = (record: { id: string; data: Record<string, unknown> }) =>
+  ({
+    ...(record.data as unknown as Environment),
+    id: record.id,
+  }) as Environment;
+
+const fetchAllEnvironments = async () => {
+  const { results } = await dataManagementService.queryData(ENVIRONMENTS_TYPE, {}, {});
+  return results.map(record => mapEnvironmentRecord(record));
+};
+
+const fetchEnvironmentById = async (id: string) => {
+  const record = await dataManagementService.readData(ENVIRONMENTS_TYPE, id);
+  return mapEnvironmentRecord(record as { id: string; data: Record<string, unknown> });
+};
 
 /**
  * GET /api/system/environments
@@ -176,19 +102,22 @@ const environments: Environment[] = [
  */
 router.get(
   '/',
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
       const { scope, tags, search } = req.query;
-      const userId = getUserId(req);
+      getUserId(req);
 
-      let filteredEnvironments = [...environments];
+      const { results } = await dataManagementService.queryData(
+        ENVIRONMENTS_TYPE,
+        {
+          filters: scope ? { scope } : undefined,
+          search: search as string,
+        },
+        {}
+      );
 
-      // 按作用域过滤
-      if (scope) {
-        filteredEnvironments = filteredEnvironments.filter(env => env.scope === scope);
-      }
+      let filteredEnvironments = results.map(record => mapEnvironmentRecord(record));
 
-      // 按标签过滤
       if (tags) {
         const tagArray = (tags as string).split(',');
         filteredEnvironments = filteredEnvironments.filter(env =>
@@ -196,23 +125,13 @@ router.get(
         );
       }
 
-      // 搜索过滤
-      if (search) {
-        const searchLower = (search as string).toLowerCase();
-        filteredEnvironments = filteredEnvironments.filter(
-          env =>
-            env.name.toLowerCase().includes(searchLower) ||
-            (env.description && env.description.toLowerCase().includes(searchLower))
-        );
-      }
-
-      res.json({
+      return res.json({
         success: true,
         data: filteredEnvironments,
         total: filteredEnvironments.length,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取环境列表失败',
         error: error instanceof Error ? error.message : String(error),
@@ -231,21 +150,21 @@ router.get(
     const { id } = req.params;
 
     try {
-      const environment = environments.find(env => env.id === id);
+      const environment = await fetchEnvironmentById(id);
 
-      if (!environment) {
+      return res.json({
+        success: true,
+        data: environment,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '环境不存在',
         });
       }
 
-      res.json({
-        success: true,
-        data: environment,
-      });
-    } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取环境详情失败',
         error: error instanceof Error ? error.message : String(error),
@@ -260,7 +179,7 @@ router.get(
  */
 router.post(
   '/',
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const environmentData: CreateEnvironmentRequest = req.body;
 
@@ -272,8 +191,8 @@ router.post(
     }
 
     try {
-      const newEnvironment: Environment = {
-        id: Date.now().toString(),
+      const newEnvironmentData: Environment = {
+        id: '',
         name: environmentData.name,
         description: environmentData.description,
         variables: environmentData.variables || {},
@@ -285,15 +204,19 @@ router.post(
         isActive: false,
       };
 
-      environments.push(newEnvironment);
+      const { id } = await dataManagementService.createData(
+        ENVIRONMENTS_TYPE,
+        newEnvironmentData as unknown as Record<string, unknown>,
+        { userId, source: 'environment' }
+      );
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '环境创建成功',
-        data: newEnvironment,
+        data: { ...newEnvironmentData, id },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '创建环境失败',
         error: error instanceof Error ? error.message : String(error),
@@ -308,40 +231,41 @@ router.post(
  */
 router.put(
   '/:id',
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const userId = getUserId(req);
     const updateData: UpdateEnvironmentRequest = req.body;
 
     try {
-      const environmentIndex = environments.findIndex(env => env.id === id);
+      await dataManagementService.readData(ENVIRONMENTS_TYPE, id);
 
-      if (environmentIndex === -1) {
+      const updatedEnvironment = await dataManagementService.updateData(
+        ENVIRONMENTS_TYPE,
+        id,
+        {
+          ...updateData,
+          updatedAt: new Date(),
+          updatedBy: userId,
+        },
+        { userId }
+      );
+
+      return res.json({
+        success: true,
+        message: '环境更新成功',
+        data: mapEnvironmentRecord(
+          updatedEnvironment as { id: string; data: Record<string, unknown> }
+        ),
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '环境不存在',
         });
       }
 
-      // 更新环境信息
-      if (updateData.name) environments[environmentIndex].name = updateData.name;
-      if (updateData.description)
-        environments[environmentIndex].description = updateData.description;
-      if (updateData.variables) environments[environmentIndex].variables = updateData.variables;
-      if (updateData.tags) environments[environmentIndex].tags = updateData.tags;
-      if (updateData.isActive !== undefined)
-        environments[environmentIndex].isActive = updateData.isActive;
-
-      environments[environmentIndex].updatedAt = new Date();
-      environments[environmentIndex].updatedBy = userId;
-
-      res.json({
-        success: true,
-        message: '环境更新成功',
-        data: environments[environmentIndex],
-      });
-    } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '更新环境失败',
         error: error instanceof Error ? error.message : String(error),
@@ -360,24 +284,21 @@ router.delete(
     const { id } = req.params;
 
     try {
-      const environmentIndex = environments.findIndex(env => env.id === id);
+      await dataManagementService.deleteData(ENVIRONMENTS_TYPE, id, { userId: getUserId(req) });
 
-      if (environmentIndex === -1) {
+      return res.json({
+        success: true,
+        message: '环境删除成功',
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '环境不存在',
         });
       }
 
-      const deletedEnvironment = environments.splice(environmentIndex, 1)[0];
-
-      res.json({
-        success: true,
-        message: '环境删除成功',
-        data: deletedEnvironment,
-      });
-    } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '删除环境失败',
         error: error instanceof Error ? error.message : String(error),
@@ -392,35 +313,44 @@ router.delete(
  */
 router.post(
   '/:id/activate',
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const userId = getUserId(req);
 
     try {
-      // 先将所有环境设为非激活状态
-      environments.forEach(env => (env.isActive = false));
+      const environmentsList = await fetchAllEnvironments();
 
-      // 激活指定环境
-      const environmentIndex = environments.findIndex(env => env.id === id);
+      await Promise.all(
+        environmentsList.map(env =>
+          dataManagementService.updateData(
+            ENVIRONMENTS_TYPE,
+            env.id,
+            {
+              isActive: env.id === id,
+              updatedAt: new Date(),
+              updatedBy: userId,
+            },
+            { userId }
+          )
+        )
+      );
 
-      if (environmentIndex === -1) {
+      const updatedEnvironment = await fetchEnvironmentById(id);
+
+      return res.json({
+        success: true,
+        message: '环境激活成功',
+        data: updatedEnvironment,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '环境不存在',
         });
       }
 
-      environments[environmentIndex].isActive = true;
-      environments[environmentIndex].updatedAt = new Date();
-      environments[environmentIndex].updatedBy = userId;
-
-      res.json({
-        success: true,
-        message: '环境激活成功',
-        data: environments[environmentIndex],
-      });
-    } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '激活环境失败',
         error: error instanceof Error ? error.message : String(error),
@@ -440,43 +370,47 @@ router.get(
     const { includeDisabled = false, includeSecrets = false } = req.query;
 
     try {
-      const environment = environments.find(env => env.id === id);
-
-      if (!environment) {
-        return res.status(404).json({
-          success: false,
-          message: '环境不存在',
-        });
-      }
-
+      const environment = await fetchEnvironmentById(id);
       let variables = { ...environment.variables };
 
       // 过滤禁用的变量
       if (includeDisabled !== 'true') {
         variables = Object.fromEntries(
-          Object.entries(variables).filter(([_, varData]) => varData.enabled)
+          Object.entries(variables).filter(
+            ([_, varData]) => (varData as EnvironmentVariable).enabled
+          )
         );
       }
 
       // 过滤敏感变量
       if (includeSecrets !== 'true') {
         variables = Object.fromEntries(
-          Object.entries(variables).map(([key, varData]) => [
-            key,
-            {
-              ...varData,
-              value: varData.secret ? '***SECRET***' : varData.value,
-            },
-          ])
+          Object.entries(variables).map(([key, varData]) => {
+            const envVar = varData as EnvironmentVariable;
+            return [
+              key,
+              {
+                ...envVar,
+                value: envVar.secret ? '***SECRET***' : envVar.value,
+              },
+            ];
+          })
         );
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: variables,
       });
     } catch (error) {
-      res.status(500).json({
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '环境不存在',
+        });
+      }
+
+      return res.status(500).json({
         success: false,
         message: '获取环境变量失败',
         error: error instanceof Error ? error.message : String(error),
@@ -491,7 +425,7 @@ router.get(
  */
 router.post(
   '/:id/variables',
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const userId = getUserId(req);
     const { variables } = req.body;
@@ -504,30 +438,38 @@ router.post(
     }
 
     try {
-      const environmentIndex = environments.findIndex(env => env.id === id);
+      const environment = await fetchEnvironmentById(id);
 
-      if (environmentIndex === -1) {
+      const updatedEnvironment = await dataManagementService.updateData(
+        ENVIRONMENTS_TYPE,
+        id,
+        {
+          variables: {
+            ...environment.variables,
+            ...variables,
+          },
+          updatedAt: new Date(),
+          updatedBy: userId,
+        },
+        { userId }
+      );
+
+      return res.json({
+        success: true,
+        message: '环境变量更新成功',
+        data: mapEnvironmentRecord(
+          updatedEnvironment as { id: string; data: Record<string, unknown> }
+        ).variables,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
         return res.status(404).json({
           success: false,
           message: '环境不存在',
         });
       }
 
-      // 合并变量
-      environments[environmentIndex].variables = {
-        ...environments[environmentIndex].variables,
-        ...variables,
-      };
-      environments[environmentIndex].updatedAt = new Date();
-      environments[environmentIndex].updatedBy = userId;
-
-      res.json({
-        success: true,
-        message: '环境变量更新成功',
-        data: environments[environmentIndex].variables,
-      });
-    } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '更新环境变量失败',
         error: error instanceof Error ? error.message : String(error),
@@ -542,37 +484,47 @@ router.post(
  */
 router.delete(
   '/:id/variables/:key',
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id, key } = req.params;
     const userId = getUserId(req);
 
     try {
-      const environmentIndex = environments.findIndex(env => env.id === id);
+      const environment = await fetchEnvironmentById(id);
 
-      if (environmentIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: '环境不存在',
-        });
-      }
-
-      if (!environments[environmentIndex].variables[key]) {
+      if (!environment.variables[key]) {
         return res.status(404).json({
           success: false,
           message: '环境变量不存在',
         });
       }
 
-      delete environments[environmentIndex].variables[key];
-      environments[environmentIndex].updatedAt = new Date();
-      environments[environmentIndex].updatedBy = userId;
+      const updatedVariables = { ...environment.variables };
+      delete updatedVariables[key];
 
-      res.json({
+      await dataManagementService.updateData(
+        ENVIRONMENTS_TYPE,
+        id,
+        {
+          variables: updatedVariables,
+          updatedAt: new Date(),
+          updatedBy: userId,
+        },
+        { userId }
+      );
+
+      return res.json({
         success: true,
         message: '环境变量删除成功',
       });
     } catch (error) {
-      res.status(500).json({
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
+          success: false,
+          message: '环境不存在',
+        });
+      }
+
+      return res.status(500).json({
         success: false,
         message: '删除环境变量失败',
         error: error instanceof Error ? error.message : String(error),
@@ -587,35 +539,30 @@ router.delete(
  */
 router.post(
   '/:id/export',
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
     const { format = 'json', includeSecrets = false } = req.body;
     const userId = getUserId(req);
 
     try {
-      const environment = environments.find(env => env.id === id);
-
-      if (!environment) {
-        return res.status(404).json({
-          success: false,
-          message: '环境不存在',
-        });
-      }
+      const environment = await fetchEnvironmentById(id);
 
       const exportData: EnvironmentExport = {
         name: environment.name,
         description: environment.description,
-        variables: includeSecrets
-          ? environment.variables
-          : Object.fromEntries(
-              Object.entries(environment.variables).map(([key, varData]) => [
+        variables: Object.fromEntries(
+          Object.entries(environment.variables).map(([key, varData]) => {
+            const envVar = varData as EnvironmentVariable;
+            return [
+              key,
+              {
+                ...envVar,
                 key,
-                {
-                  ...varData,
-                  value: varData.secret ? '***SECRET***' : varData.value,
-                },
-              ])
-            ),
+                value: includeSecrets || !envVar.secret ? envVar.value : '***SECRET***',
+              },
+            ];
+          })
+        ) as Record<string, EnvironmentVariable>,
         tags: environment.tags,
         exportedAt: new Date(),
         exportedBy: userId,
@@ -627,15 +574,22 @@ router.post(
           'Content-Disposition',
           `attachment; filename="${environment.name}_environment.json"`
         );
-        res.json(exportData);
-      } else {
-        res.status(400).json({
+        return res.json(exportData);
+      }
+
+      return res.status(400).json({
+        success: false,
+        message: '不支持的导出格式',
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('数据记录不存在')) {
+        return res.status(404).json({
           success: false,
-          message: '不支持的导出格式',
+          message: '环境不存在',
         });
       }
-    } catch (error) {
-      res.status(500).json({
+
+      return res.status(500).json({
         success: false,
         message: '导出环境失败',
         error: error instanceof Error ? error.message : String(error),
@@ -650,7 +604,7 @@ router.post(
  */
 router.post(
   '/import',
-  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
+  asyncHandler(async (req: express.Request, res: express.Response) => {
     const userId = getUserId(req);
     const { name, description, variables, tags } = req.body;
 
@@ -662,8 +616,8 @@ router.post(
     }
 
     try {
-      const newEnvironment: Environment = {
-        id: Date.now().toString(),
+      const newEnvironmentData: Environment = {
+        id: '',
         name,
         description,
         variables,
@@ -675,15 +629,19 @@ router.post(
         isActive: false,
       };
 
-      environments.push(newEnvironment);
+      const { id } = await dataManagementService.createData(
+        ENVIRONMENTS_TYPE,
+        newEnvironmentData as unknown as Record<string, unknown>,
+        { userId, source: 'environment' }
+      );
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '环境导入成功',
-        data: newEnvironment,
+        data: { ...newEnvironmentData, id },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '导入环境失败',
         error: error instanceof Error ? error.message : String(error),
@@ -700,9 +658,13 @@ router.get(
   '/active',
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const activeEnvironment = environments.find(env => env.isActive);
+      const { results } = await dataManagementService.queryData(
+        ENVIRONMENTS_TYPE,
+        { filters: { isActive: true } },
+        {}
+      );
 
-      if (!activeEnvironment) {
+      if (results.length === 0) {
         return res.json({
           success: true,
           data: null,
@@ -710,12 +672,12 @@ router.get(
         });
       }
 
-      res.json({
+      return res.json({
         success: true,
-        data: activeEnvironment,
+        data: mapEnvironmentRecord(results[0] as { id: string; data: Record<string, unknown> }),
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取激活环境失败',
         error: error instanceof Error ? error.message : String(error),
