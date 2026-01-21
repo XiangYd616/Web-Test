@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
-  testDir: '../../tools/e2e/e2e',
+  testDir: '../../tests/e2e/tools/e2e',
 
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -22,7 +22,7 @@ export default defineConfig({
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],
-    ['junit', { outputFile: 'test-results/results.xml' }]
+    ['junit', { outputFile: 'test-results/results.xml' }],
   ],
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -87,8 +87,8 @@ export default defineConfig({
   },
 
   /* Global setup and teardown */
-  globalSetup: require.resolve('../../tools/e2e/global-setup.ts'),
-  globalTeardown: require.resolve('../../tools/e2e/global-teardown.ts'),
+  globalSetup: require.resolve('../../tests/e2e/tools/global-setup.ts'),
+  globalTeardown: require.resolve('../../tests/e2e/tools/global-teardown.ts'),
 
   /* Test timeout */
   timeout: 30 * 1000,

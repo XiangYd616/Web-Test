@@ -299,7 +299,7 @@ export default defineConfig({
       'backend/tests/**/*.{test,spec}.{js,ts}',
       'tests/**/*.{test,spec}.{js,ts}',
     ],
-    exclude: [...configDefaults.exclude, 'tools/e2e/**'],
+    exclude: [...configDefaults.exclude, 'tests/e2e/tools/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

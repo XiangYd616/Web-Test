@@ -7,6 +7,7 @@
 import csvParser from 'csv-parser';
 import { EventEmitter } from 'events';
 import ExcelJS from 'exceljs';
+import { XMLParser } from 'fast-xml-parser';
 import { createReadStream } from 'fs';
 import * as fs from 'fs/promises';
 import * as winston from 'winston';
@@ -586,13 +587,92 @@ class DataImportService extends EventEmitter {
   private async readXMLFile(
     filePath: string,
     config: ImportConfig,
-    _limit?: number
+    limit?: number
   ): Promise<Record<string, unknown>[]> {
     const encoding: NodeJS.BufferEncoding = (config.encoding ?? 'utf8') as NodeJS.BufferEncoding;
-    const _content = await fs.readFile(filePath, { encoding });
+    const content = await fs.readFile(filePath, { encoding });
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '',
+      parseAttributeValue: true,
+      trimValues: true,
+    });
 
-    // 简化的XML解析，实际项目中应该使用专门的XML解析库
-    throw new Error('XML import not implemented yet');
+    const parsed = parser.parse(content.toString());
+    const recordPath = (config.options?.recordPath as string | undefined) || undefined;
+    let payload: unknown = parsed;
+
+    if (recordPath) {
+      const segments = recordPath
+        .split('.')
+        .map(segment => segment.trim())
+        .filter(Boolean);
+      for (const segment of segments) {
+        if (
+          payload &&
+          typeof payload === 'object' &&
+          segment in (payload as Record<string, unknown>)
+        ) {
+          payload = (payload as Record<string, unknown>)[segment];
+        } else {
+          payload = [];
+          break;
+        }
+      }
+    }
+
+    let records = this.extractXmlRecords(payload);
+
+    if (config.skipRows && config.skipRows > 0) {
+      records = records.slice(config.skipRows);
+    }
+
+    if (limit && records.length > limit) {
+      records = records.slice(0, limit);
+    }
+
+    return records;
+  }
+
+  private extractXmlRecords(payload: unknown): Record<string, unknown>[] {
+    if (Array.isArray(payload)) {
+      return payload.filter(item => this.isRecord(item)) as Record<string, unknown>[];
+    }
+
+    if (!this.isRecord(payload)) {
+      return [];
+    }
+
+    const candidates: unknown[] = [];
+    const knownKeys = ['data', 'items', 'records', 'rows', 'row', 'item'];
+
+    for (const key of knownKeys) {
+      if (key in payload) {
+        candidates.push(payload[key]);
+      }
+    }
+
+    for (const value of candidates) {
+      if (Array.isArray(value)) {
+        return value.filter(item => this.isRecord(item)) as Record<string, unknown>[];
+      }
+    }
+
+    const directArray = Object.values(payload).find(value => Array.isArray(value));
+    if (Array.isArray(directArray)) {
+      return directArray.filter(item => this.isRecord(item)) as Record<string, unknown>[];
+    }
+
+    if (Object.keys(payload).length === 1) {
+      const single = Object.values(payload)[0];
+      return this.extractXmlRecords(single);
+    }
+
+    return [payload];
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
   }
 
   /**

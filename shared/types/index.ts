@@ -53,15 +53,8 @@ export enum TestType {
   PERFORMANCE = 'performance',
   SEO = 'seo',
   API = 'api',
-  NETWORK = 'network',
-  DATABASE = 'database',
-  COMPATIBILITY = 'compatibility',
   ACCESSIBILITY = 'accessibility',
-  UX = 'ux',
   STRESS = 'stress',
-  CONTENT = 'content',
-  INFRASTRUCTURE = 'infrastructure',
-  DOCUMENTATION = 'documentation',
 }
 
 // 测试状态枚举

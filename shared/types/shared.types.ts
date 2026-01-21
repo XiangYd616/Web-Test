@@ -128,7 +128,7 @@ export interface UserDatabase {
 
   // 统计信息
   login_count: number;
-  last_login_at?: string;
+  last_login?: string;
   test_count: number;
 
   // 偏好设置

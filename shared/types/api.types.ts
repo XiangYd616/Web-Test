@@ -85,7 +85,7 @@ export enum ErrorCode {
   // 业务错误
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
   QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
-  RESOURCE_LOCKED = 'RESOURCE_LOCKED'
+  RESOURCE_LOCKED = 'RESOURCE_LOCKED',
 }
 
 // ==================== 测试类型枚举 ====================
@@ -96,9 +96,8 @@ export enum TestType {
   PERFORMANCE = 'performance',
   SECURITY = 'security',
   SEO = 'seo',
-  COMPATIBILITY = 'compatibility',
+  ACCESSIBILITY = 'accessibility',
   STRESS = 'stress',
-  UX = 'ux'
 }
 
 export enum TestStatus {
@@ -106,7 +105,7 @@ export enum TestStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 // ==================== 测试相关类型 ====================
@@ -163,7 +162,7 @@ export interface User {
 export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
-  VIEWER = 'viewer'
+  VIEWER = 'viewer',
 }
 
 export interface UserSettings {
@@ -190,10 +189,11 @@ export interface AuthToken {
   tokenType: string;
 }
 
-export interface AuthResponse extends ApiResponse<{
-  user: User;
-  token: AuthToken;
-}> {}
+export interface AuthResponse
+  extends ApiResponse<{
+    user: User;
+    token: AuthToken;
+  }> {}
 
 // ==================== 分页和过滤 ====================
 

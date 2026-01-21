@@ -3,15 +3,12 @@
  */
 
 export const TestTypeValues = [
+  'website',
   'performance',
   'security',
   'seo',
   'api',
   'stress',
-  'network',
-  'database',
-  'compatibility',
-  'ux',
   'accessibility',
 ] as const;
 

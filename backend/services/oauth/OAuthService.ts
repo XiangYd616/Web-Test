@@ -6,8 +6,8 @@
 import axios, { AxiosResponse } from 'axios';
 import * as crypto from 'crypto';
 import { query } from '../../config/database';
-import JwtService from '../../services/core/jwtService';
-import { logSecurityEvent, SecurityEventType } from '../utils/securityLogger';
+import { logSecurityEvent, SecurityEventType } from '../../src/utils/securityLogger';
+import JwtService from '../core/jwtService';
 
 // OAuth2提供商配置接口
 export interface OAuthProviderConfig {

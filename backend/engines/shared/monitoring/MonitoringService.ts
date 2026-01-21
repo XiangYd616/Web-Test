@@ -3,11 +3,13 @@
  * 提供完整的性能监控、告警和仪表板功能
  */
 
-import BaseService, { ServiceConfig } from '../services/BaseService';
+import BaseService, { ServiceConfig, ServiceHealth } from '../services/BaseService';
 import MetricCollector, { MemoryMetricStorage, MetricStorage } from './MetricCollector';
 import {
   AggregationType,
+  AggregationTypeType,
   AlertSeverity,
+  AlertSeverityType,
   MetricAlertEvent,
   MetricConfig,
   MetricDashboard,
@@ -17,9 +19,11 @@ import {
   MetricReport,
   MetricStatistics,
   MetricType,
+  MetricTypeType,
   MetricUnit,
   MetricUtils,
   TimeWindow,
+  TimeWindowType,
 } from './MetricTypes';
 
 // 告警规则接口
@@ -51,13 +55,13 @@ export interface NotificationChannel {
   id: string;
   name: string;
   type: 'email' | 'webhook' | 'slack' | 'sms';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   enabled: boolean;
 }
 
 // 监控配置接口
-export interface MonitoringConfig extends ServiceConfig {
-  metrics: MetricConfig;
+export type MonitoringConfig = Omit<ServiceConfig, 'metrics'> & {
+  metrics: MetricConfig & ServiceConfig['metrics'];
   alerts: {
     enabled: boolean;
     defaultChannels: string[];
@@ -75,9 +79,9 @@ export interface MonitoringConfig extends ServiceConfig {
       maxPerHour: number;
     };
   };
-}
+};
 
-class MonitoringService extends BaseService {
+class EngineMonitoringService extends BaseService {
   private collector: MetricCollector;
   private storage: MetricStorage;
   private alertRules: Map<string, AlertRule> = new Map();
@@ -116,7 +120,7 @@ class MonitoringService extends BaseService {
         this.collector.startAutoCollection(
           this.monitoringConfig.metrics.aggregation?.intervals?.[0]
             ? MetricUtils.getTimeWindowMs(
-                this.monitoringConfig.metrics.aggregation.intervals[0] as any
+                this.monitoringConfig.metrics.aggregation.intervals[0] as TimeWindowType
               )
             : 60000
         );
@@ -127,10 +131,10 @@ class MonitoringService extends BaseService {
         this.startAlertChecking();
       }
 
-      this.log('info', 'MonitoringService initialized successfully');
+      this.log('info', 'EngineMonitoringService initialized successfully');
     } catch (error) {
       throw new Error(
-        `Failed to initialize MonitoringService: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to initialize EngineMonitoringService: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   }
@@ -146,9 +150,9 @@ class MonitoringService extends BaseService {
       this.dashboards.clear();
       this.alertHistory.length = 0;
 
-      this.log('info', 'MonitoringService shutdown successfully');
+      this.log('info', 'EngineMonitoringService shutdown successfully');
     } catch (error) {
-      this.log('error', 'Error during MonitoringService shutdown', error);
+      this.log('error', 'Error during EngineMonitoringService shutdown', error);
     }
   }
 
@@ -448,7 +452,7 @@ class MonitoringService extends BaseService {
   /**
    * 获取健康状态
    */
-  async getHealth(): Promise<any> {
+  async getHealth(): Promise<ServiceHealth> {
     const baseHealth = await super.getHealth();
     const stats = await this.getMetricStatistics();
     const performance = this.getPerformanceMetrics();
@@ -465,7 +469,7 @@ class MonitoringService extends BaseService {
         },
         dashboards: this.dashboards.size,
       },
-    };
+    } as ServiceHealth;
   }
 
   /**
@@ -695,7 +699,7 @@ class MonitoringService extends BaseService {
    */
   private async sendNotification(
     channel: NotificationChannel,
-    event: MetricAlertEvent
+    _event: MetricAlertEvent
   ): Promise<void> {
     // 这里可以实现各种通知方式
     switch (channel.type) {
@@ -778,4 +782,5 @@ class MonitoringService extends BaseService {
   }
 }
 
-export default MonitoringService;
+export { EngineMonitoringService };
+export default EngineMonitoringService;

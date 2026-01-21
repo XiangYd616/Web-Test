@@ -1,6 +1,7 @@
 # Test-Web 部署指南
 
 ## 目录
+
 - [环境要求](#环境要求)
 - [部署架构](#部署架构)
 - [部署步骤](#部署步骤)
@@ -12,12 +13,14 @@
 ## 环境要求
 
 ### 系统要求
+
 - **操作系统**: Ubuntu 20.04+ / CentOS 7+ / Windows Server 2019+
 - **CPU**: 最小 2 核心，推荐 4 核心
 - **内存**: 最小 4GB，推荐 8GB
 - **存储**: 最小 20GB SSD
 
 ### 软件要求
+
 - **Node.js**: 18.x 或更高版本
 - **PostgreSQL**: 13+ 或 MySQL 8+
 - **Redis**: 6+ (可选，用于缓存)
@@ -97,6 +100,7 @@ nano .env.production
 ```
 
 必要的环境变量：
+
 ```env
 NODE_ENV=production
 PORT=3001
@@ -215,6 +219,7 @@ server {
 ```
 
 启用配置：
+
 ```bash
 sudo ln -s /etc/nginx/sites-available/testweb /etc/nginx/sites-enabled/
 sudo nginx -t
@@ -225,7 +230,22 @@ sudo systemctl reload nginx
 
 ### 使用 Docker Compose
 
-创建 `docker-compose.yml`:
+项目已将 Compose 文件集中在 `deploy/` 目录：
+
+- `deploy/docker-compose.root.yml`：一体化部署（原根目录版本）
+- `deploy/docker-compose.yml`：前后端拆分部署
+
+执行示例：
+
+```bash
+# 一体化部署
+docker-compose -f deploy/docker-compose.root.yml up -d
+
+# 前后端拆分部署
+docker-compose -f deploy/docker-compose.yml up -d
+```
+
+如需自定义 Compose，可参考以下示例（示例结构仍可保留）：
 
 ```yaml
 version: '3.8'
@@ -236,7 +256,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "5174:5174"
+      - '5174:5174'
     environment:
       - REACT_APP_API_URL=http://backend:3001
     depends_on:
@@ -247,7 +267,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "3001:3001"
+      - '3001:3001'
     environment:
       - NODE_ENV=production
       - DB_HOST=postgres
@@ -277,8 +297,8 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./ssl:/etc/nginx/ssl
@@ -292,15 +312,16 @@ volumes:
 ```
 
 部署：
+
 ```bash
 # 构建并启动
-docker-compose up -d
+docker-compose -f deploy/docker-compose.root.yml up -d
 
 # 查看日志
-docker-compose logs -f
+docker-compose -f deploy/docker-compose.root.yml logs -f
 
 # 停止服务
-docker-compose down
+docker-compose -f deploy/docker-compose.root.yml down
 ```
 
 ## Kubernetes 部署
@@ -324,25 +345,25 @@ spec:
         app: testweb-backend
     spec:
       containers:
-      - name: backend
-        image: testweb/backend:latest
-        ports:
-        - containerPort: 3001
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: DB_HOST
-          valueFrom:
-            secretKeyRef:
-              name: testweb-secrets
-              key: db-host
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: backend
+          image: testweb/backend:latest
+          ports:
+            - containerPort: 3001
+          env:
+            - name: NODE_ENV
+              value: 'production'
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: testweb-secrets
+                  key: db-host
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '250m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
 ---
 apiVersion: v1
 kind: Service
@@ -359,6 +380,7 @@ spec:
 ```
 
 部署到 Kubernetes：
+
 ```bash
 # 创建命名空间
 kubectl create namespace testweb
@@ -382,6 +404,7 @@ kubectl get services -n testweb
 ### 1. 应用监控
 
 使用 PM2 监控：
+
 ```bash
 # 查看进程状态
 pm2 status
@@ -396,6 +419,7 @@ pm2 monit
 ### 2. 系统监控
 
 安装 Prometheus 和 Grafana：
+
 ```bash
 # 使用 Docker Compose
 docker-compose -f monitoring-compose.yml up -d
@@ -404,6 +428,7 @@ docker-compose -f monitoring-compose.yml up -d
 ### 3. 日志管理
 
 配置集中式日志：
+
 ```javascript
 // logger.js
 const winston = require('winston');
@@ -418,9 +443,9 @@ const logger = winston.createLogger({
     new ElasticsearchTransport({
       level: 'info',
       clientOpts: { node: 'http://localhost:9200' },
-      index: 'testweb-logs'
-    })
-  ]
+      index: 'testweb-logs',
+    }),
+  ],
 });
 ```
 
@@ -429,6 +454,7 @@ const logger = winston.createLogger({
 ### 常见问题
 
 #### 1. 数据库连接失败
+
 ```bash
 # 检查 PostgreSQL 状态
 sudo systemctl status postgresql
@@ -441,6 +467,7 @@ sudo ufw status
 ```
 
 #### 2. 端口被占用
+
 ```bash
 # 查找占用端口的进程
 sudo lsof -i :3001
@@ -451,6 +478,7 @@ sudo kill -9 <PID>
 ```
 
 #### 3. 内存不足
+
 ```bash
 # 检查内存使用
 free -h
@@ -461,6 +489,7 @@ NODE_OPTIONS="--max-old-space-size=4096" npm start
 ```
 
 #### 4. SSL 证书问题
+
 ```bash
 # 使用 Let's Encrypt 获取免费证书
 sudo apt install certbot python3-certbot-nginx
@@ -470,6 +499,7 @@ sudo certbot --nginx -d your-domain.com
 ## 性能优化
 
 ### 1. 启用 Gzip 压缩
+
 ```nginx
 gzip on;
 gzip_vary on;
@@ -478,11 +508,13 @@ gzip_types text/plain text/css text/xml text/javascript application/json applica
 ```
 
 ### 2. 配置 CDN
+
 - 使用 Cloudflare 或 AWS CloudFront
 - 缓存静态资源
 - 启用图片优化
 
 ### 3. 数据库优化
+
 ```sql
 -- 创建索引
 CREATE INDEX idx_tests_user_id ON tests(user_id);
@@ -495,6 +527,7 @@ EXPLAIN ANALYZE SELECT * FROM tests WHERE user_id = 1;
 ## 备份策略
 
 ### 自动备份脚本
+
 ```bash
 #!/bin/bash
 # backup.sh
@@ -513,6 +546,7 @@ find /backups -type f -mtime +30 -delete
 ```
 
 添加到 cron：
+
 ```bash
 crontab -e
 0 2 * * * /path/to/backup.sh
@@ -530,6 +564,7 @@ crontab -e
 ## 联系支持
 
 如有部署问题，请联系：
+
 - 邮箱: support@testweb.com
 - 文档: https://docs.testweb.com
 - GitHub Issues: https://github.com/testweb/issues

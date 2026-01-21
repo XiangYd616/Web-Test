@@ -9,5 +9,5 @@ export default defineConfig({
   ...baseConfig,
 
   // 项目级设置可以在此覆盖
-  // 例如：testDir: './tools/e2e/e2e'
+  // 例如：testDir: './tests/e2e/tools/e2e'
 });

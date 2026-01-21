@@ -8,7 +8,6 @@ import {
   updateStatusWithLog,
 } from './testLogService';
 
-const { query } = require('../../config/database');
 const testRepository = require('../../repositories/testRepository');
 const registry = require('../../core/TestEngineRegistry');
 
@@ -172,60 +171,6 @@ class UserTestManager {
       return value as T;
     }
     return fallback;
-  }
-
-  private extractScheduleId(testConfig?: Record<string, unknown> | null): number | null {
-    const config = this.parseJsonValue<Record<string, unknown> | null>(testConfig, null);
-    if (!config || !this.isRecord(config)) {
-      return null;
-    }
-    const raw = config.scheduleId;
-    if (typeof raw === 'number' && Number.isFinite(raw)) {
-      return raw;
-    }
-    if (typeof raw === 'string') {
-      const parsed = Number(raw);
-      return Number.isFinite(parsed) ? parsed : null;
-    }
-    return null;
-  }
-
-  private async updateScheduleSummary(
-    scheduleId: number,
-    payload: { lastSuccess?: Record<string, unknown> | null; lastError?: string | null }
-  ): Promise<void> {
-    try {
-      const result = await query('SELECT test_config FROM test_schedules WHERE id = $1', [
-        scheduleId,
-      ]);
-      const rawConfig = result.rows?.[0]?.test_config;
-      if (!rawConfig) {
-        return;
-      }
-
-      const config = this.parseJsonValue<Record<string, unknown>>(rawConfig, {});
-      const scheduleOptions = (config.scheduleOptions as Record<string, unknown>) || {};
-      const nextOptions = { ...scheduleOptions };
-
-      if ('lastSuccess' in payload) {
-        nextOptions.lastSuccess = payload.lastSuccess;
-      }
-      if ('lastError' in payload) {
-        nextOptions.lastError = payload.lastError;
-      }
-
-      const nextConfig = {
-        ...config,
-        scheduleOptions: nextOptions,
-      };
-
-      await query('UPDATE test_schedules SET test_config = $1, updated_at = NOW() WHERE id = $2', [
-        JSON.stringify(nextConfig),
-        scheduleId,
-      ]);
-    } catch (error) {
-      Logger.warn(`更新调度任务摘要失败: ${scheduleId}`, error);
-    }
   }
 
   registerUserSocket(userId: string, socket: SocketLike) {
@@ -398,14 +343,6 @@ class UserTestManager {
           },
           failureMessage
         );
-
-        const scheduleId = this.extractScheduleId(execution?.test_config || null);
-        if (scheduleId) {
-          await this.updateScheduleSummary(scheduleId, {
-            lastError: error.message,
-            lastSuccess: null,
-          });
-        }
       } catch (err) {
         Logger.error(`记录失败状态异常: ${testId}`, err);
       }
@@ -604,28 +541,6 @@ class UserTestManager {
           metricCount: metrics.length,
           errorCount: errors.length,
         });
-      }
-
-      const scheduleId = this.extractScheduleId(execution.test_config || null);
-      if (scheduleId) {
-        if (isFailed) {
-          await this.updateScheduleSummary(scheduleId, {
-            lastError: failureMessage,
-            lastSuccess: null,
-          });
-        } else {
-          await this.updateScheduleSummary(scheduleId, {
-            lastError: null,
-            lastSuccess: {
-              testId,
-              completedAt: new Date().toISOString(),
-              score,
-              grade,
-              passed,
-              status: TestStatus.COMPLETED,
-            },
-          });
-        }
       }
 
       Logger.info(`测试结果保存成功: ${testId}`);

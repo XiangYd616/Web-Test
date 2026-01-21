@@ -40,7 +40,6 @@ const runRoutes = require('./routes/runs');
 const scheduledRunRoutes = require('./routes/scheduledRuns');
 const scheduledRunController = require('./controllers/scheduledRunController');
 const ScheduledRunService = require('./services/runs/ScheduledRunService');
-const testScheduleService = require('./services/testing/testScheduleService');
 const registerTestEngines = require('./engines/core/registerEngines');
 const testEngineRegistry = require('./core/TestEngineRegistry');
 
@@ -281,14 +280,7 @@ const startServer = async (): Promise<Server> => {
       registerTestEngines();
       await testEngineRegistry.initialize();
 
-      const enableTestSchedules = process.env.TEST_SCHEDULES_ENABLED !== 'false';
       const enableScheduledRuns = process.env.SCHEDULED_RUNS_ENABLED === 'true';
-
-      if (enableTestSchedules && enableScheduledRuns) {
-        console.warn(
-          '检测到两套调度体系同时启用，请确认 TEST_SCHEDULES_ENABLED 与 SCHEDULED_RUNS_ENABLED 配置'
-        );
-      }
 
       if (enableScheduledRuns) {
         const scheduledRunService = new ScheduledRunService();
@@ -296,10 +288,6 @@ const startServer = async (): Promise<Server> => {
         scheduledRunService.start().catch((error: unknown) => {
           console.error('启动定时运行服务失败:', error);
         });
-      }
-
-      if (enableTestSchedules) {
-        testScheduleService.startScheduler(60000);
       }
     } else {
       console.warn('⚠️  Database connection failed, but server will continue...');

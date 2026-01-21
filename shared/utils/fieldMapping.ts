@@ -30,11 +30,13 @@ const USER_FIELD_MAPPING: FieldMapping = {
   lockedUntil: 'locked_until',
   loginCount: 'login_count',
   lastLoginAt: 'last_login',
+  testCount: 'test_count',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
   deletedAt: 'deleted_at',
   preferences: 'preferences',
   metadata: 'metadata',
+  permissions: 'permissions',
   apiKey: 'api_key',
 };
 

@@ -580,26 +580,6 @@ class TestService {
   }
 
   /**
-   * 验证测试配置
-   */
-  private validateTestConfig(config: TestConfig): void {
-    if (!config.url) {
-      throw new Error('测试URL不能为空');
-    }
-
-    if (!config.testType) {
-      throw new Error('测试类型不能为空');
-    }
-
-    // URL格式验证
-    try {
-      new URL(config.url);
-    } catch {
-      throw new Error('无效的URL格式');
-    }
-  }
-
-  /**
    * 停止测试执行
    */
   private async stopTestExecution(testId: string, userId: string): Promise<void> {

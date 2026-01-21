@@ -36,7 +36,7 @@ export default defineConfig({
       '**/dist/**',
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
-      '**/tools/e2e/**',
+      '**/tests/e2e/tools/**',
     ],
     coverage: {
       provider: 'v8',

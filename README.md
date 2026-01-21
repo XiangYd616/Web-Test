@@ -144,18 +144,24 @@ npm run deps:update  # 更新依赖
 
 ```
 Test-Web/
+├── 🧰 tools/                 # 开发/测试辅助工具（e2e、electron、压测等）
+├── 🧪 tests/                 # 测试用例与测试配置（unit/e2e/system）
+├── 🚀 deploy/                # 部署相关（Docker、Nginx、脚本）
+├── ☸️  k8s/                   # Kubernetes 部署清单
 ├── 📱 frontend/              # React前端应用
-│   ├── src/
-│   │   ├── pages/           # 页面组件
-│   │   │   ├── core/        # 核心功能页面
-│   │   │   └── user/        # 用户相关页面
-│   │   ├── components/      # 可复用组件
-│   │   ├── styles/          # 样式文件
-│   │   └── utils/           # 工具函数
+│   ├── pages/               # 页面组件
+│   ├── components/          # 可复用组件
+│   ├── services/            # 业务与API服务
+│   ├── hooks/               # 自定义Hooks
+│   ├── styles/              # 样式文件
+│   ├── utils/               # 工具函数
 │   └── package.json         # 前端依赖
 ├── 🔧 backend/              # Node.js后端服务
 └── 📚 docs/                # 项目文档
 ```
+
+> 说明：根目录中工具、测试、部署脚本按用途集中在 tools/tests/deploy/k8s 等目录，避免与业务代码混杂。如需扩展基础设施脚本，可新增
+> `infra/` 或 `ops/` 目录并在此处补充说明。
 
 ## 🎯 核心页面
 

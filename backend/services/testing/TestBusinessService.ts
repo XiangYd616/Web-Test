@@ -10,6 +10,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { TestTypeValues } from '../../../shared/types/test.types';
 import { query } from '../../config/database';
 import { ErrorFactory } from '../../middleware/errorHandler';
 import testRepository from '../../repositories/testRepository';
@@ -138,16 +139,7 @@ class TestBusinessService {
     if (!config.testType) {
       errors.push('测试类型不能为空');
     } else {
-      const validTypes = [
-        'website',
-        'seo',
-        'performance',
-        'accessibility',
-        'security',
-        'api',
-        'stress',
-      ];
-      if (!validTypes.includes(config.testType)) {
+      if (!TestTypeValues.includes(config.testType as (typeof TestTypeValues)[number])) {
         errors.push(`不支持的测试类型: ${config.testType}`);
       }
     }
