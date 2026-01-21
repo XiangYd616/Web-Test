@@ -10,6 +10,10 @@ export interface WebSocketMessage {
   timestamp?: number;
 }
 
+export enum WebSocketMessageType {
+  SYSTEM_NOTIFICATION = 'system_notification',
+}
+
 export interface WebSocketConfig {
   url?: string;
   autoReconnect?: boolean;

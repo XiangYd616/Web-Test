@@ -1,6 +1,6 @@
 /**
- * WebSocket Á¬½Ó¹ÜÀíºÍÓÅ»¯¹¤¾ß
- * Ìá¹©Á¬½Ó¹ÜÀí¡¢ÖØÁ¬»úÖÆ¡¢ÏûÏ¢¶ÓÁĞ¡¢ĞÔÄÜ¼à¿ØµÈ¹¦ÄÜ
+ * WebSocket è¿æ¥ç®¡ç†å’Œä¼˜åŒ–å·¥å…·
+ * æä¾›è¿æ¥ç®¡ç†ã€é‡è¿æœºåˆ¶ã€æ¶ˆæ¯é˜Ÿåˆ—ã€æ€§èƒ½ç›‘æ§ç­‰åŠŸèƒ½
  */
 
 import Logger from '@/utils/logger';
@@ -21,7 +21,7 @@ export interface WebSocketConfig {
 export interface WebSocketMessage {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   timestamp: number;
   priority?: 'low' | 'normal' | 'high';
   retry?: number;
@@ -39,19 +39,26 @@ export interface WebSocketStats {
   lastError?: string;
 }
 
-export type WebSocketEventType = 
+export type WebSocketEventType =
   | 'connecting'
-  | 'connected' 
+  | 'connected'
   | 'disconnected'
   | 'reconnecting'
   | 'error'
   | 'message'
   | 'heartbeat';
 
-export type WebSocketEventListener = (event: any) => void;
+export type WebSocketEventListener = (event: unknown) => void;
+
+type IncomingMessage = {
+  type?: string;
+  data?: unknown;
+  messageId?: string;
+  timestamp?: number;
+};
 
 /**
- * WebSocketÁ¬½Ó¹ÜÀíÆ÷
+ * WebSocketè¿æ¥ç®¡ç†å™¨
  */
 export class WebSocketManager {
   private ws: WebSocket | null = null;
@@ -76,7 +83,7 @@ export class WebSocketManager {
       enableCompression: true,
       enableBinaryMessages: false,
       protocols: [],
-      ...config
+      ...config,
     };
 
     this.stats = {
@@ -87,12 +94,12 @@ export class WebSocketManager {
       messagesReceived: 0,
       bytesTransferred: 0,
       averageLatency: 0,
-      errors: 0
+      errors: 0,
     };
   }
 
   /**
-   * ½¨Á¢WebSocketÁ¬½Ó
+   * å»ºç«‹WebSocketè¿æ¥
    */
   public connect(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -100,16 +107,16 @@ export class WebSocketManager {
         this.connectionStartTime = Date.now();
         this.emit('connecting', { url: this.config.url });
 
-        // ´´½¨WebSocketÁ¬½Ó
+        // åˆ›å»ºWebSocketè¿æ¥
         this.ws = new WebSocket(this.config.url, this.config.protocols);
 
-        // ÆôÓÃÑ¹Ëõ£¨Èç¹ûÖ§³Ö£©
+        // å¯ç”¨å‹ç¼©ï¼ˆå¦‚æœæ”¯æŒï¼‰
         if (this.config.enableCompression) {
-          // ×¢Òâ£ºä¯ÀÀÆ÷µÄWebSocket API²»Ö±½ÓÖ§³ÖÉèÖÃÑ¹Ëõ£¬ÕâÍ¨³£ÓÉä¯ÀÀÆ÷×Ô¶¯´¦Àí
-          // ÕâÀïÖ»ÊÇ×÷ÎªÅäÖÃ²ÎÊı£¬Êµ¼ÊÑ¹ËõÓÉä¯ÀÀÆ÷ºÍ·şÎñÆ÷Ğ­ÉÌ
+          // æ³¨æ„ï¼šæµè§ˆå™¨çš„WebSocket APIä¸ç›´æ¥æ”¯æŒè®¾ç½®å‹ç¼©ï¼Œè¿™é€šå¸¸ç”±æµè§ˆå™¨è‡ªåŠ¨å¤„ç†
+          // è¿™é‡Œåªæ˜¯ä½œä¸ºé…ç½®å‚æ•°ï¼Œå®é™…å‹ç¼©ç”±æµè§ˆå™¨å’ŒæœåŠ¡å™¨åå•†
         }
 
-        // Á¬½Ó³É¹¦
+        // è¿æ¥æˆåŠŸ
         this.ws.onopen = () => {
           this.stats.connected = true;
           this.stats.connectionTime = Date.now() - this.connectionStartTime;
@@ -117,56 +124,55 @@ export class WebSocketManager {
           this.isReconnecting = false;
 
           this.emit('connected', {
-            connectionTime: this.stats.connectionTime
+            connectionTime: this.stats.connectionTime,
           });
 
-          // ´¦ÀíÅÅ¶ÓµÄÏûÏ¢
+          // å¤„ç†æ’é˜Ÿçš„æ¶ˆæ¯
           this.processMessageQueue();
 
-          // Æô¶¯ĞÄÌø
+          // å¯åŠ¨å¿ƒè·³
           this.startHeartbeat();
 
           resolve();
         };
 
-        // ½ÓÊÕÏûÏ¢
-        this.ws.onmessage = (event) => {
+        // æ¥æ”¶æ¶ˆæ¯
+        this.ws.onmessage = event => {
           this.handleMessage(event);
         };
 
-        // Á¬½Ó´íÎó
-        this.ws.onerror = (event) => {
+        // è¿æ¥é”™è¯¯
+        this.ws.onerror = event => {
           this.stats.errors++;
           this.stats.lastError = 'Connection error';
           this.emit('error', event);
           reject(new Error('WebSocket connection error'));
         };
 
-        // Á¬½Ó¹Ø±Õ
-        this.ws.onclose = (event) => {
+        // è¿æ¥å…³é—­
+        this.ws.onclose = event => {
           this.stats.connected = false;
           this.stopHeartbeat();
 
           this.emit('disconnected', {
             code: event.code,
             reason: event.reason,
-            wasClean: event.wasClean
+            wasClean: event.wasClean,
           });
 
-          // ×Ô¶¯ÖØÁ¬
+          // è‡ªåŠ¨é‡è¿
           if (this.shouldReconnect && !this.isReconnecting) {
             this.scheduleReconnect();
           }
         };
 
-        // Á¬½Ó³¬Ê±´¦Àí
+        // è¿æ¥è¶…æ—¶å¤„ç†
         setTimeout(() => {
           if (!this.stats.connected) {
             this.ws?.close();
             reject(new Error('Connection timeout'));
           }
         }, this.config.timeout);
-
       } catch (error) {
         this.stats.errors++;
         this.stats.lastError = error instanceof Error ? error.message : 'Unknown error';
@@ -176,50 +182,54 @@ export class WebSocketManager {
   }
 
   /**
-   * ¶Ï¿ªÁ¬½Ó
+   * æ–­å¼€è¿æ¥
    */
   public disconnect(): void {
     this.shouldReconnect = false;
     this.stopHeartbeat();
     this.clearReconnectTimer();
-    
+
     if (this.ws) {
       this.ws.close(1000, 'Client disconnecting');
       this.ws = null;
     }
-    
+
     this.stats.connected = false;
   }
 
   /**
-   * ·¢ËÍÏûÏ¢
+   * å‘é€æ¶ˆæ¯
    */
-  public send(type: string, data: unknown, options: {
-    priority?: 'low' | 'normal' | 'high';
-    timeout?: number;
-    retry?: boolean;
-  } = {}): Promise<void> {
+  public send(
+    type: string,
+    data: unknown,
+    options: {
+      priority?: 'low' | 'normal' | 'high';
+      timeout?: number;
+      retry?: boolean;
+    } = {}
+  ): Promise<void> {
     const message: WebSocketMessage = {
       id: this.generateMessageId(),
       type,
       data,
       timestamp: Date.now(),
       priority: options.priority || 'normal',
-      retry: options.retry ? 3 : 0
+      retry: options.retry ? 3 : 0,
     };
 
     return this.sendMessage(message, options.timeout);
   }
 
   /**
-   * ·¢ËÍÏûÏ¢£¨ÄÚ²¿£©
+   * å‘é€æ¶ˆæ¯ï¼ˆå†…éƒ¨ï¼‰
    */
   private sendMessage(message: WebSocketMessage, timeout?: number): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.isConnected()) {
-        // Èç¹ûÎ´Á¬½Ó£¬½«ÏûÏ¢¼ÓÈë¶ÓÁĞ
+        // å¦‚æœæœªè¿æ¥ï¼Œå°†æ¶ˆæ¯åŠ å…¥é˜Ÿåˆ—
         this.queueMessage(message);
-        resolve(); // ¼ÙÉèÉÔºó»á·¢ËÍ
+        resolve(); // å‡è®¾ç¨åä¼šå‘é€
         return;
       }
 
@@ -230,7 +240,7 @@ export class WebSocketManager {
         this.stats.messagesSent++;
         this.stats.bytesTransferred += payload.length;
 
-        // Èç¹ûĞèÒªÈ·ÈÏ£¬Ìí¼Óµ½´ıÈ·ÈÏÏûÏ¢
+        // å¦‚æœéœ€è¦ç¡®è®¤ï¼Œæ·»åŠ åˆ°å¾…ç¡®è®¤æ¶ˆæ¯
         if (timeout) {
           this.pendingMessages.set(message.id, message);
           setTimeout(() => {
@@ -250,40 +260,58 @@ export class WebSocketManager {
   }
 
   /**
-   * ´¦Àí½ÓÊÕµ½µÄÏûÏ¢
+   * å¤„ç†æ¥æ”¶åˆ°çš„æ¶ˆæ¯
    */
   private handleMessage(event: MessageEvent): void {
     try {
-      let message;
-      
+      let message: IncomingMessage;
+
       if (typeof event.data === 'string') {
-        message = JSON.parse(event.data);
+        message = JSON.parse(event.data) as IncomingMessage;
       } else if (this.config.enableBinaryMessages && event.data instanceof ArrayBuffer) {
-        // ´¦Àí¶ş½øÖÆÏûÏ¢
+        // å¤„ç†äºŒè¿›åˆ¶æ¶ˆæ¯
         message = this.parseBinaryMessage(event.data);
       } else {
-        Logger.warn('Unsupported message format', { type: typeof event.data } as any);
+        Logger.warn('Unsupported message format', { type: typeof event.data });
         return;
       }
 
       this.stats.messagesReceived++;
-      this.stats.bytesTransferred += (typeof event.data === 'string' ? event.data.length : event.data.byteLength) || 0;
+      this.stats.bytesTransferred +=
+        (typeof event.data === 'string' ? event.data.length : event.data.byteLength) || 0;
 
-      // ´¦ÀíÈ·ÈÏÏûÏ¢
+      // å¤„ç†ç¡®è®¤æ¶ˆæ¯
       if (message.type === 'ack' && message.messageId) {
         this.handleAckMessage(message.messageId);
         return;
       }
 
-      // ´¦ÀíĞÄÌøÏìÓ¦
+      // å¤„ç†å¿ƒè·³å“åº”
       if (message.type === 'pong') {
         this.handlePongMessage(message);
         return;
       }
 
-      // ´¥·¢ÏûÏ¢ÊÂ¼ş
+      // è§¦å‘æ¶ˆæ¯äº‹ä»¶
       this.emit('message', message);
 
+      if (message.type === 'system_notification' && message.data) {
+        const notification = message.data as { type?: string; title?: string; message?: string };
+        const toastMessage = notification.message || 'ç³»ç»Ÿé€šçŸ¥';
+        switch (notification.type) {
+          case 'success':
+            toast.success(toastMessage);
+            break;
+          case 'warning':
+            toast(toastMessage);
+            break;
+          case 'error':
+            toast.error(toastMessage);
+            break;
+          default:
+            toast(toastMessage);
+        }
+      }
     } catch (error) {
       this.stats.errors++;
       this.stats.lastError = error instanceof Error ? error.message : 'Message parsing error';
@@ -292,7 +320,7 @@ export class WebSocketManager {
   }
 
   /**
-   * ´¦ÀíÈ·ÈÏÏûÏ¢
+   * å¤„ç†ç¡®è®¤æ¶ˆæ¯
    */
   private handleAckMessage(messageId: string): void {
     if (this.pendingMessages.has(messageId)) {
@@ -301,9 +329,9 @@ export class WebSocketManager {
   }
 
   /**
-   * ´¦ÀíĞÄÌøÏìÓ¦
+   * å¤„ç†å¿ƒè·³å“åº”
    */
-  private handlePongMessage(message: any): void {
+  private handlePongMessage(message: { timestamp?: number }): void {
     if (message.timestamp) {
       const latency = Date.now() - message.timestamp;
       this.updateLatency(latency);
@@ -312,36 +340,35 @@ export class WebSocketManager {
   }
 
   /**
-   * ¸üĞÂÑÓ³ÙÍ³¼Æ
+   * æ›´æ–°å»¶è¿Ÿç»Ÿè®¡
    */
   private updateLatency(latency: number): void {
     if (this.stats.averageLatency === 0) {
       this.stats.averageLatency = latency;
     } else {
-      // Ê¹ÓÃÖ¸ÊıÒÆ¶¯Æ½¾ù
+      // ä½¿ç”¨æŒ‡æ•°ç§»åŠ¨å¹³å‡
       this.stats.averageLatency = this.stats.averageLatency * 0.9 + latency * 0.1;
     }
   }
 
   /**
-   * Æô¶¯ĞÄÌø
+   * å¯åŠ¨å¿ƒè·³
    */
   private startHeartbeat(): void {
     this.stopHeartbeat();
-    
+
     this.heartbeatTimer = setInterval(() => {
       if (this.isConnected()) {
-        this.send('ping', { timestamp: Date.now() })
-          .catch(() => {
-            // ĞÄÌøÊ§°Ü£¬¿ÉÄÜÁ¬½ÓÓĞÎÊÌâ
-            Logger.warn('Heartbeat failed', {} as any);
-          });
+        this.send('ping', { timestamp: Date.now() }).catch(() => {
+          // å¿ƒè·³å¤±è´¥ï¼Œå¯èƒ½è¿æ¥æœ‰é—®é¢˜
+          Logger.warn('Heartbeat failed', {});
+        });
       }
     }, this.config.heartbeatInterval);
   }
 
   /**
-   * Í£Ö¹ĞÄÌø
+   * åœæ­¢å¿ƒè·³
    */
   private stopHeartbeat(): void {
     if (this.heartbeatTimer) {
@@ -351,7 +378,7 @@ export class WebSocketManager {
   }
 
   /**
-   * °²ÅÅÖØÁ¬
+   * å®‰æ’é‡è¿
    */
   private scheduleReconnect(): void {
     if (this.isReconnecting || this.stats.reconnectAttempts >= this.config.reconnectAttempts) {
@@ -363,12 +390,12 @@ export class WebSocketManager {
 
     const delay = Math.min(
       this.config.reconnectInterval * Math.pow(2, this.stats.reconnectAttempts - 1),
-      30000 // ×î´ó30Ãë
+      30000 // æœ€å¤§30ç§’
     );
 
     this.emit('reconnecting', {
       attempt: this.stats.reconnectAttempts,
-      delay
+      delay,
     });
 
     this.reconnectTimer = setTimeout(async () => {
@@ -377,19 +404,19 @@ export class WebSocketManager {
       } catch (error) {
         Logger.error('Reconnection failed:', error);
         this.isReconnecting = false;
-        
+
         if (this.stats.reconnectAttempts < this.config.reconnectAttempts) {
           this.scheduleReconnect();
         } else {
           this.emit('error', new Error('Max reconnection attempts reached'));
-          toast.error('Á¬½ÓÊ§°Ü£¬ÒÑ´ïµ½×î´óÖØÊÔ´ÎÊı');
+          toast.error('è¿æ¥å¤±è´¥ï¼Œå·²è¾¾åˆ°æœ€å¤§é‡è¯•æ¬¡æ•°');
         }
       }
     }, delay);
   }
 
   /**
-   * Çå³ıÖØÁ¬¶¨Ê±Æ÷
+   * æ¸…é™¤é‡è¿å®šæ—¶å™¨
    */
   private clearReconnectTimer(): void {
     if (this.reconnectTimer) {
@@ -399,19 +426,21 @@ export class WebSocketManager {
   }
 
   /**
-   * ½«ÏûÏ¢¼ÓÈë¶ÓÁĞ
+   * å°†æ¶ˆæ¯åŠ å…¥é˜Ÿåˆ—
    */
   private queueMessage(message: WebSocketMessage): void {
-    // °´ÓÅÏÈ¼¶ÅÅĞò
+    // æŒ‰ä¼˜å…ˆçº§æ’åº
     const priorityOrder = { high: 0, normal: 1, low: 2 };
-    
-    // Èç¹û¶ÓÁĞÒÑÂú£¬É¾³ıµÍÓÅÏÈ¼¶µÄ¾ÉÏûÏ¢
+
+    // å¦‚æœé˜Ÿåˆ—å·²æ»¡ï¼Œåˆ é™¤ä½ä¼˜å…ˆçº§çš„æ—§æ¶ˆæ¯
     if (this.messageQueue.length >= this.config.messageQueueLimit) {
       this.messageQueue = this.messageQueue
         .sort((a, b) => {
-          const priorityDiff = priorityOrder[a?.priority!] - priorityOrder[b.priority!];
+          const aPriority = priorityOrder[a?.priority ?? 'normal'];
+          const bPriority = priorityOrder[b?.priority ?? 'normal'];
+          const priorityDiff = aPriority - bPriority;
           if (priorityDiff !== 0) return priorityDiff;
-          return a?.timestamp - b.timestamp;
+          return (a?.timestamp ?? 0) - (b?.timestamp ?? 0);
         })
         .slice(0, this.config.messageQueueLimit - 1);
     }
@@ -420,15 +449,15 @@ export class WebSocketManager {
   }
 
   /**
-   * ´¦ÀíÏûÏ¢¶ÓÁĞ
+   * å¤„ç†æ¶ˆæ¯é˜Ÿåˆ—
    */
   private processMessageQueue(): void {
     while (this.messageQueue.length > 0 && this.isConnected()) {
       const message = this.messageQueue.shift()!;
       this.sendMessage(message).catch(error => {
         Logger.error('Failed to send queued message:', error);
-        
-        // Èç¹ûÔÊĞíÖØÊÔ
+
+        // å¦‚æœå…è®¸é‡è¯•
         if (message.retry && message.retry > 0) {
           message.retry--;
           this.queueMessage(message);
@@ -438,36 +467,37 @@ export class WebSocketManager {
   }
 
   /**
-   * ½âÎö¶ş½øÖÆÏûÏ¢
+   * è§£æäºŒè¿›åˆ¶æ¶ˆæ¯
    */
-  private parseBinaryMessage(buffer: ArrayBuffer): unknown {
-    // ÕâÀï¿ÉÒÔÊµÏÖ×Ô¶¨ÒåµÄ¶ş½øÖÆĞ­Òé½âÎö
-    // ÀıÈçÊ¹ÓÃ MessagePack¡¢Protocol Buffers µÈ
+  private parseBinaryMessage(buffer: ArrayBuffer): IncomingMessage {
+    // è¿™é‡Œå¯ä»¥å®ç°è‡ªå®šä¹‰çš„äºŒè¿›åˆ¶åè®®è§£æ
+    // ä¾‹å¦‚ä½¿ç”¨ MessagePackã€Protocol Buffers ç­‰
     try {
       const decoder = new TextDecoder();
       const text = decoder.decode(buffer);
-      return JSON.parse(text);
+      return JSON.parse(text) as IncomingMessage;
     } catch (error) {
+      Logger.error('Failed to parse binary message', error);
       throw new Error('Failed to parse binary message');
     }
   }
 
   /**
-   * Éú³ÉÏûÏ¢ID
+   * ç”Ÿæˆæ¶ˆæ¯ID
    */
   private generateMessageId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
-   * ¼ì²éÁ¬½Ó×´Ì¬
+   * æ£€æŸ¥è¿æ¥çŠ¶æ€
    */
   public isConnected(): boolean {
     return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
   }
 
   /**
-   * Ìí¼ÓÊÂ¼ş¼àÌıÆ÷
+   * æ·»åŠ äº‹ä»¶ç›‘å¬å™¨
    */
   public on(event: WebSocketEventType, listener: WebSocketEventListener): void {
     if (!this.eventListeners.has(event)) {
@@ -477,7 +507,7 @@ export class WebSocketManager {
   }
 
   /**
-   * ÒÆ³ıÊÂ¼ş¼àÌıÆ÷
+   * ç§»é™¤äº‹ä»¶ç›‘å¬å™¨
    */
   public off(event: WebSocketEventType, listener: WebSocketEventListener): void {
     const listeners = this.eventListeners.get(event);
@@ -487,9 +517,9 @@ export class WebSocketManager {
   }
 
   /**
-   * ´¥·¢ÊÂ¼ş
+   * è§¦å‘äº‹ä»¶
    */
-  private emit(event: WebSocketEventType, data?: any): void {
+  private emit(event: WebSocketEventType, data?: unknown): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
       listeners.forEach(listener => {
@@ -503,14 +533,14 @@ export class WebSocketManager {
   }
 
   /**
-   * »ñÈ¡Á¬½ÓÍ³¼ÆĞÅÏ¢
+   * è·å–è¿æ¥ç»Ÿè®¡ä¿¡æ¯
    */
   public getStats(): WebSocketStats {
     return { ...this.stats };
   }
 
   /**
-   * ÖØÖÃÍ³¼ÆĞÅÏ¢
+   * é‡ç½®ç»Ÿè®¡ä¿¡æ¯
    */
   public resetStats(): void {
     this.stats = {
@@ -521,12 +551,12 @@ export class WebSocketManager {
       messagesReceived: 0,
       bytesTransferred: 0,
       averageLatency: 0,
-      errors: 0
+      errors: 0,
     };
   }
 
   /**
-   * »ñÈ¡Á¬½Ó×´Ì¬ĞÅÏ¢
+   * è·å–è¿æ¥çŠ¶æ€ä¿¡æ¯
    */
   public getConnectionInfo(): {
     state: string;
@@ -538,7 +568,7 @@ export class WebSocketManager {
     if (!this.ws) {
       return {
         state: 'disconnected',
-        url: this.config.url
+        url: this.config.url,
       };
     }
 
@@ -547,27 +577,32 @@ export class WebSocketManager {
       url: this.ws.url,
       protocol: this.ws.protocol,
       extensions: this.ws.extensions,
-      bufferedAmount: this.ws.bufferedAmount
+      bufferedAmount: this.ws.bufferedAmount,
     };
   }
 
   /**
-   * »ñÈ¡Á¬½Ó×´Ì¬×Ö·û´®
+   * è·å–è¿æ¥çŠ¶æ€å­—ç¬¦ä¸²
    */
   private getReadyState(): string {
     if (!this.ws) return 'disconnected';
-    
+
     switch (this.ws.readyState) {
-      case WebSocket.CONNECTING: return 'connecting';
-      case WebSocket.OPEN: return 'open';
-      case WebSocket.CLOSING: return 'closing';
-      case WebSocket.CLOSED: return 'closed';
-      default: return 'unknown';
+      case WebSocket.CONNECTING:
+        return 'connecting';
+      case WebSocket.OPEN:
+        return 'open';
+      case WebSocket.CLOSING:
+        return 'closing';
+      case WebSocket.CLOSED:
+        return 'closed';
+      default:
+        return 'unknown';
     }
   }
 
   /**
-   * ÇåÀí×ÊÔ´
+   * æ¸…ç†èµ„æº
    */
   public destroy(): void {
     this.shouldReconnect = false;
@@ -581,14 +616,14 @@ export class WebSocketManager {
 }
 
 /**
- * WebSocket¹ÜÀíÆ÷¹¤³§º¯Êı
+ * WebSocketç®¡ç†å™¨å·¥å‚å‡½æ•°
  */
 export function createWebSocketManager(config: WebSocketConfig): WebSocketManager {
   return new WebSocketManager(config);
 }
 
 /**
- * Ä¬ÈÏWebSocketÅäÖÃ
+ * é»˜è®¤WebSocketé…ç½®
  */
 export const defaultWebSocketConfig: Partial<WebSocketConfig> = {
   reconnectAttempts: 5,
@@ -597,17 +632,17 @@ export const defaultWebSocketConfig: Partial<WebSocketConfig> = {
   messageQueueLimit: 100,
   timeout: 10000,
   enableCompression: true,
-  enableBinaryMessages: false
+  enableBinaryMessages: false,
 };
 
 /**
  * React Hook for WebSocket
  */
 export function useWebSocket(url: string, config?: Partial<WebSocketConfig>) {
-  const [manager] = React.useState(() => 
+  const [manager] = React.useState(() =>
     createWebSocketManager({ url, ...defaultWebSocketConfig, ...config })
   );
-  
+
   const [isConnected, setIsConnected] = React.useState(false);
   const [stats, setStats] = React.useState<WebSocketStats>(manager.getStats());
 
@@ -621,8 +656,8 @@ export function useWebSocket(url: string, config?: Partial<WebSocketConfig>) {
     manager.on('message', handleStatsUpdate);
     manager.on('error', handleStatsUpdate);
 
-    // ×Ô¶¯Á¬½Ó
-    manager.connect().catch((error) => Logger.error('WebSocket connection failed', error));
+    // è‡ªåŠ¨è¿æ¥
+    manager.connect().catch(error => Logger.error('WebSocket connection failed', error));
 
     return () => {
       manager.off('connected', handleConnect);
@@ -639,9 +674,9 @@ export function useWebSocket(url: string, config?: Partial<WebSocketConfig>) {
     stats,
     send: manager.send.bind(manager),
     disconnect: manager.disconnect.bind(manager),
-    connect: manager.connect.bind(manager)
+    connect: manager.connect.bind(manager),
   };
 }
 
-// ĞèÒªµ¼ÈëReactÒÔÓÃÓÚHook
+// éœ€è¦å¯¼å…¥Reactä»¥ç”¨äºHook
 import React from 'react';

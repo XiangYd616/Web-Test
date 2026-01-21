@@ -14,6 +14,7 @@ import ReportGenerator, {
 } from './ReportGenerator';
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
+const websocketConfig = require('../../config/websocket');
 
 // 报告模板接口
 export interface ReportTemplate {
@@ -285,6 +286,7 @@ class AutomatedReportingService extends EventEmitter {
   private isInitialized: boolean = false;
   private reportGenerator: ReportGenerator;
   private reportsDir: string;
+  private shareEmailRetryTask?: CronTask;
 
   constructor() {
     super();
@@ -315,6 +317,7 @@ class AutomatedReportingService extends EventEmitter {
 
       // 启动调度任务
       this.startScheduledTasks();
+      this.startShareEmailRetryTask();
 
       this.isInitialized = true;
       this.emit('initialized');
@@ -427,42 +430,232 @@ class AutomatedReportingService extends EventEmitter {
    * 发送分享邮件
    */
   async sendShareEmail(options: {
+    reportId: string;
+    shareId: string;
     recipients: string[];
     subject: string;
     html: string;
+    userId?: string;
   }): Promise<void> {
     if (!this.mailTransporter) {
       throw new Error('邮件服务未配置');
     }
 
-    const mailOptions: MailOptions = {
-      from: this.mailFrom || 'reports@example.com',
-      to: options.recipients,
+    const logResult = await query(
+      `INSERT INTO report_share_emails
+       (report_id, share_id, recipients, subject, body, status, attempts)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       RETURNING id`,
+      [
+        options.reportId,
+        options.shareId,
+        JSON.stringify(options.recipients),
+        options.subject,
+        options.html,
+        'pending',
+        0,
+      ]
+    );
+    const emailId = String(logResult.rows[0]?.id);
+
+    await this.sendShareEmailAttempt({
+      emailId,
+      reportId: options.reportId,
+      shareId: options.shareId,
+      recipients: options.recipients,
       subject: options.subject,
       html: options.html,
+      userId: options.userId,
+      attempt: 1,
+    });
+  }
+
+  async retryShareEmail(emailId: string, userId?: string, force = false): Promise<void> {
+    const result = await query(
+      `SELECT rse.id, rse.report_id, rse.share_id, rse.recipients, rse.subject, rse.body, rse.attempts,
+              rse.status, rs.shared_by
+       FROM report_share_emails rse
+       LEFT JOIN report_shares rs ON rs.id = rse.share_id
+       WHERE rse.id = $1`,
+      [emailId]
+    );
+    const row = result.rows?.[0];
+    if (!row) {
+      throw new Error('Share email not found');
+    }
+
+    const attempts = Number(row.attempts || 0);
+    if (String(row.status) !== 'failed' && !force) {
+      throw new Error('仅支持重试失败记录');
+    }
+    if (attempts >= 3 && !force) {
+      throw new Error('已达到最大重试次数');
+    }
+
+    const recipients = Array.isArray(row.recipients) ? row.recipients : [];
+    await this.sendShareEmailAttempt({
+      emailId: String(row.id),
+      reportId: String(row.report_id),
+      shareId: String(row.share_id),
+      recipients,
+      subject: String(row.subject),
+      html: String(row.body),
+      userId: userId || (row.shared_by ? String(row.shared_by) : undefined),
+      attempt: attempts + 1,
+    });
+  }
+
+  private async sendShareEmailAttempt(params: {
+    emailId: string;
+    reportId: string;
+    shareId: string;
+    recipients: string[];
+    subject: string;
+    html: string;
+    userId?: string;
+    attempt: number;
+  }): Promise<void> {
+    const mailOptions: MailOptions = {
+      from: this.mailFrom || 'reports@example.com',
+      to: params.recipients,
+      subject: params.subject,
+      html: params.html,
     };
 
     const maxAttempts = 3;
-    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      try {
-        await this.mailTransporter.sendMail(mailOptions);
-        Logger.info('分享邮件发送成功', { recipients: options.recipients, attempt });
-        return;
-      } catch (error) {
-        Logger.error('分享邮件发送失败', error, {
-          recipients: options.recipients,
-          attempt,
-        });
-        if (attempt === maxAttempts) {
-          throw error;
-        }
-        await this.delay(1000 * attempt);
+    try {
+      await this.mailTransporter?.sendMail(mailOptions);
+      await query(
+        `UPDATE report_share_emails
+         SET status = 'sent', attempts = $2, sent_at = NOW(), last_error = NULL, next_retry_at = NULL
+         WHERE id = $1`,
+        [params.emailId, params.attempt]
+      );
+      Logger.info('分享邮件发送成功', { recipients: params.recipients, attempt: params.attempt });
+      this.emit('share_email_sent', {
+        reportId: params.reportId,
+        shareId: params.shareId,
+        emailId: params.emailId,
+      });
+      await this.notifyShareEmailStatus(params.userId, 'success', params);
+    } catch (error) {
+      const nextRetryAt =
+        params.attempt < maxAttempts ? new Date(Date.now() + 5 * 60 * 1000 * params.attempt) : null;
+      await query(
+        `UPDATE report_share_emails
+         SET status = $2,
+             attempts = $3,
+             last_error = $4,
+             next_retry_at = $5
+         WHERE id = $1`,
+        [
+          params.emailId,
+          params.attempt < maxAttempts ? 'failed' : 'failed',
+          params.attempt,
+          error instanceof Error ? error.message : String(error),
+          nextRetryAt,
+        ]
+      );
+      Logger.error('分享邮件发送失败', error, {
+        recipients: params.recipients,
+        attempt: params.attempt,
+      });
+      await this.recordAccess(params.reportId, params.userId || null, 'share', false, {
+        shareId: params.shareId,
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
+      this.emit('share_email_failed', {
+        reportId: params.reportId,
+        shareId: params.shareId,
+        emailId: params.emailId,
+        error,
+      });
+      await this.notifyShareEmailStatus(params.userId, 'error', params, error);
+      if (params.attempt < maxAttempts) {
+        throw error;
       }
     }
   }
 
   private async delay(ms: number): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private startShareEmailRetryTask(): void {
+    const task = cron.schedule('*/5 * * * *', async () => {
+      try {
+        await this.retryFailedShareEmails();
+      } catch (error) {
+        Logger.error('分享邮件重试任务失败', error);
+      }
+    });
+
+    this.shareEmailRetryTask = task;
+    task.start();
+  }
+
+  private async retryFailedShareEmails(): Promise<void> {
+    const result = await query(
+      `SELECT rse.id, rse.report_id, rse.share_id, rse.recipients, rse.subject, rse.body, rse.attempts,
+              rs.shared_by
+       FROM report_share_emails rse
+       LEFT JOIN report_shares rs ON rs.id = rse.share_id
+       WHERE rse.status = 'failed'
+         AND (rse.next_retry_at IS NULL OR rse.next_retry_at <= NOW())
+       ORDER BY rse.updated_at ASC
+       LIMIT 20`
+    );
+
+    for (const row of result.rows || []) {
+      const recipients = Array.isArray(row.recipients) ? row.recipients : [];
+      await this.sendShareEmailAttempt({
+        emailId: String(row.id),
+        reportId: String(row.report_id),
+        shareId: String(row.share_id),
+        recipients,
+        subject: String(row.subject),
+        html: String(row.body),
+        userId: row.shared_by ? String(row.shared_by) : undefined,
+        attempt: Number(row.attempts || 0) + 1,
+      });
+    }
+  }
+
+  private async notifyShareEmailStatus(
+    userId: string | undefined,
+    level: 'success' | 'error',
+    params: {
+      reportId: string;
+      shareId: string;
+      emailId: string;
+      recipients: string[];
+      subject: string;
+    },
+    error?: unknown
+  ) {
+    if (!userId) return;
+    const services = websocketConfig.getServices?.();
+    const realtimeService = services?.realtimeService;
+    if (!realtimeService?.sendNotification) return;
+
+    const message =
+      level === 'success'
+        ? `报告分享邮件已发送 (${params.recipients.join(', ')})`
+        : `报告分享邮件发送失败 (${params.recipients.join(', ')})`;
+
+    realtimeService.sendNotification({
+      type: level === 'success' ? 'success' : 'error',
+      title: '报告分享邮件',
+      message,
+      data: {
+        reportId: params.reportId,
+        shareId: params.shareId,
+        emailId: params.emailId,
+        subject: params.subject,
+        error: error instanceof Error ? error.message : error ? String(error) : undefined,
+      },
+      userId,
+    });
   }
 
   /**

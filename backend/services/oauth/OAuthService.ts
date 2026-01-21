@@ -380,7 +380,7 @@ class OAuthService {
     try {
       // 首先查找现有用户
       const existingUserResult = (await query(
-        'SELECT * FROM users WHERE provider = ? AND provider_id = ?',
+        'SELECT * FROM users WHERE provider = $1 AND provider_id = $2',
         [userInfo.provider, userInfo.id]
       )) as unknown as { rows: OAuthDbUser[] };
 
@@ -393,7 +393,8 @@ class OAuthService {
         `INSERT INTO users (
           provider, provider_id, email, username, avatar, 
           verified, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+        RETURNING id`,
         [
           userInfo.provider,
           userInfo.id,
@@ -402,11 +403,11 @@ class OAuthService {
           userInfo.avatar || '',
           userInfo.verified || false,
         ]
-      )) as unknown as { insertId?: string };
+      )) as unknown as { rows: Array<{ id: string }> };
 
       // 返回新创建的用户
-      const createdUserResult = (await query('SELECT * FROM users WHERE id = ?', [
-        newUser.insertId,
+      const createdUserResult = (await query('SELECT * FROM users WHERE id = $1', [
+        newUser.rows[0]?.id,
       ])) as unknown as { rows: OAuthDbUser[] };
 
       return createdUserResult.rows[0];
@@ -421,7 +422,7 @@ class OAuthService {
    */
   private async updateLastLogin(userId: string): Promise<void> {
     try {
-      await query('UPDATE users SET last_login_at = NOW() WHERE id = ?', [userId]);
+      await query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [userId]);
     } catch (error) {
       // 记录错误但不抛出异常
       const message = error instanceof Error ? error.message : String(error);

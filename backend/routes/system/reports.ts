@@ -275,6 +275,198 @@ router.get(
 );
 
 /**
+ * DELETE /api/system/reports/share-emails/:id
+ * 删除分享邮件记录
+ */
+router.delete(
+  '/share-emails/:id',
+  authMiddleware,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const userId = (req as AuthRequest).user.id;
+    const { id } = req.params;
+
+    try {
+      const ownership = await query(
+        `SELECT rse.id, rse.status
+         FROM report_share_emails rse
+         LEFT JOIN test_reports tr ON tr.id = rse.report_id
+         WHERE rse.id = $1 AND tr.user_id = $2`,
+        [id, userId]
+      );
+      const ownedRow = ownership.rows?.[0];
+      if (!ownedRow) {
+        return res.status(404).json({
+          success: false,
+          message: '分享邮件记录不存在或无权限',
+        });
+      }
+
+      if (String(ownedRow.status) !== 'sent') {
+        return res.status(400).json({
+          success: false,
+          message: '仅支持删除已发送记录',
+        });
+      }
+
+      await query('DELETE FROM report_share_emails WHERE id = $1', [id]);
+
+      return res.json({
+        success: true,
+        message: '分享邮件记录已删除',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: '删除分享邮件记录失败',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })
+);
+
+/**
+ * GET /api/system/reports/share-emails
+ * 获取分享邮件记录
+ */
+router.get(
+  '/share-emails',
+  authMiddleware,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const userId = (req as AuthRequest).user.id;
+    const { reportId, shareId, status, onlyFailed = 'false', page = 1, limit = 20 } = req.query;
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 20;
+    const offset = (pageNumber - 1) * limitNumber;
+    const params: Array<string | number> = [userId];
+    let filterClause = '';
+
+    if (reportId) {
+      params.push(String(reportId));
+      filterClause = `${filterClause} AND rse.report_id = $${params.length}`;
+    }
+    if (shareId) {
+      params.push(String(shareId));
+      filterClause = `${filterClause} AND rse.share_id = $${params.length}`;
+    }
+    if (status) {
+      params.push(String(status));
+      filterClause = `${filterClause} AND rse.status = $${params.length}`;
+    }
+    if (String(onlyFailed) === 'true') {
+      filterClause = `${filterClause} AND rse.status = 'failed'`;
+    }
+
+    try {
+      const result = await query(
+        `SELECT rse.*, rs.share_token, rs.share_type,
+           CASE
+             WHEN rse.status = 'failed' AND rse.attempts < 3 THEN true
+             ELSE false
+           END AS can_retry,
+           CASE
+             WHEN rse.status = 'sent' THEN true
+             ELSE false
+           END AS can_delete
+         FROM report_share_emails rse
+         LEFT JOIN report_shares rs ON rs.id = rse.share_id
+         LEFT JOIN test_reports tr ON tr.id = rse.report_id
+         WHERE tr.user_id = $1 ${filterClause}
+         ORDER BY rse.created_at DESC
+         LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limitNumber, offset]
+      );
+      const countResult = await query(
+        `SELECT COUNT(*)::int AS total
+         FROM report_share_emails rse
+         LEFT JOIN test_reports tr ON tr.id = rse.report_id
+         WHERE tr.user_id = $1 ${filterClause}`,
+        params
+      );
+
+      return res.json({
+        success: true,
+        data: result.rows || [],
+        pagination: {
+          page: pageNumber,
+          limit: limitNumber,
+          total: Number(countResult.rows[0]?.total) || 0,
+          totalPages: Math.ceil((Number(countResult.rows[0]?.total) || 0) / limitNumber),
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: '获取分享邮件记录失败',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })
+);
+
+/**
+ * POST /api/system/reports/share-emails/:id/retry
+ * 手动重试分享邮件发送
+ */
+router.post(
+  '/share-emails/:id/retry',
+  authMiddleware,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const userId = (req as AuthRequest).user.id;
+    const { id } = req.params;
+    const { force = 'false' } = req.query;
+
+    try {
+      const ownership = await query(
+        `SELECT rse.id, rse.status, rse.attempts
+         FROM report_share_emails rse
+         LEFT JOIN test_reports tr ON tr.id = rse.report_id
+         WHERE rse.id = $1 AND tr.user_id = $2`,
+        [id, userId]
+      );
+      const ownedRow = ownership.rows?.[0];
+      if (!ownedRow) {
+        return res.status(404).json({
+          success: false,
+          message: '分享邮件记录不存在或无权限',
+        });
+      }
+
+      if (String(ownedRow.status) !== 'failed' && String(force) !== 'true') {
+        return res.status(400).json({
+          success: false,
+          message: '仅支持重试失败记录',
+        });
+      }
+
+      if (Number(ownedRow.attempts || 0) >= 3 && String(force) !== 'true') {
+        return res.status(400).json({
+          success: false,
+          message: '已达到最大重试次数',
+        });
+      }
+
+      await ensureReportingInitialized();
+      await automatedReportingService.retryShareEmail(
+        String(id),
+        String(userId),
+        String(force) === 'true'
+      );
+
+      return res.json({
+        success: true,
+        message: '已触发分享邮件重试',
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: '重试分享邮件失败',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })
+);
+
+/**
  * GET /api/system/reports/instances
  * 获取报告实例列表
  */
@@ -379,6 +571,8 @@ router.post(
         await ensureReportingInitialized();
         const shareUrl = buildShareDownloadUrl(shareRow.share_token);
         await automatedReportingService.sendShareEmail({
+          reportId: String(id),
+          shareId: String(shareRow.id),
           recipients: emailRecipients,
           subject: subject || '报告分享链接',
           html:
@@ -386,6 +580,7 @@ router.post(
             `请使用以下链接访问报告：<a href="${shareUrl}">${shareUrl}</a>${
               password ? '<br/>该分享已设置访问密码。' : ''
             }`,
+          userId: String(userId),
         });
       }
 

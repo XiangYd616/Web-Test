@@ -16,6 +16,7 @@ type ScheduledRunResultInstance = Model & {
   failed_requests?: number;
   error_count?: number;
   logs?: string[];
+  triggered_by?: string;
   metadata?: Record<string, unknown>;
   created_at?: Date;
   updated_at?: Date;
@@ -72,6 +73,10 @@ const createScheduledRunResult = (sequelize: Sequelize): ScheduledRunResultModel
       logs: {
         type: DataTypes.JSONB,
         defaultValue: [],
+      },
+      triggered_by: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
       },
       metadata: {
         type: DataTypes.JSONB,

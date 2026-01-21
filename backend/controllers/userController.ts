@@ -40,7 +40,7 @@ class UserController {
     try {
       const userId = req.user.id;
 
-      const sql = 'SELECT id, username, email, role, created_at FROM users WHERE id = ?';
+      const sql = 'SELECT id, username, email, role, created_at FROM users WHERE id = $1';
       const [user] = (await query(sql, [userId])) as UserProfile[];
 
       if (!user) {
@@ -66,12 +66,12 @@ class UserController {
       const values: unknown[] = [];
 
       if (username) {
-        updates.push('username = ?');
+        updates.push('username = $' + (values.length + 1));
         values.push(username);
       }
 
       if (email) {
-        updates.push('email = ?');
+        updates.push('email = $' + (values.length + 1));
         values.push(email);
       }
 
@@ -80,7 +80,7 @@ class UserController {
       }
 
       values.push(userId);
-      const sql = `UPDATE users SET ${updates.join(', ')}, updated_at = NOW() WHERE id = ?`;
+      const sql = `UPDATE users SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $$${values.length}`;
       await query(sql, values);
 
       return successResponse(res, { userId }, '用户信息更新成功');
@@ -109,7 +109,7 @@ class UserController {
         return errorResponse(res, '新密码长度至少6位', 400);
       }
 
-      const [user] = (await query('SELECT password FROM users WHERE id = ?', [userId])) as {
+      const [user] = (await query('SELECT password FROM users WHERE id = $1', [userId])) as {
         password: string;
       }[];
       if (!user) {
@@ -122,7 +122,7 @@ class UserController {
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await query('UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?', [
+      await query('UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2', [
         hashedPassword,
         userId,
       ]);
@@ -148,7 +148,7 @@ class UserController {
           SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failedTests,
           AVG(overall_score) as averageScore
         FROM test_sessions 
-        WHERE user_id = ? AND deleted_at IS NULL
+        WHERE user_id = $1 AND deleted_at IS NULL
       `;
 
       const [stats] = (await query(sql, [userId])) as UserStats[];
@@ -190,15 +190,15 @@ class UserController {
           created_at,
           updated_at
         FROM test_sessions 
-        WHERE user_id = ? AND deleted_at IS NULL
+        WHERE user_id = $1 AND deleted_at IS NULL
         ORDER BY created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT $2 OFFSET $3
       `;
 
       const activities = await query(sql, [userId, limitNum, offset]);
 
       const countSql =
-        'SELECT COUNT(*) as total FROM test_sessions WHERE user_id = ? AND deleted_at IS NULL';
+        'SELECT COUNT(*) as total FROM test_sessions WHERE user_id = $1 AND deleted_at IS NULL';
       const [countResult] = (await query(countSql, [userId])) as { total: number }[];
 
       return successResponse(res, {
@@ -228,7 +228,7 @@ class UserController {
         return errorResponse(res, '请提供密码确认删除', 400);
       }
 
-      const [user] = (await query('SELECT password FROM users WHERE id = ?', [userId])) as {
+      const [user] = (await query('SELECT password FROM users WHERE id = $1', [userId])) as {
         password: string;
       }[];
       if (!user) {
@@ -241,10 +241,10 @@ class UserController {
       }
 
       // 软删除用户相关的所有数据
-      await query('UPDATE users SET is_active = false, updated_at = NOW() WHERE id = ?', [userId]);
-      await query('UPDATE test_sessions SET deleted_at = NOW() WHERE user_id = ?', [userId]);
+      await query('UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1', [userId]);
+      await query('UPDATE test_sessions SET deleted_at = NOW() WHERE user_id = $1', [userId]);
       await query(
-        "UPDATE workspace_members SET status = 'inactive', updated_at = NOW() WHERE user_id = ?",
+        "UPDATE workspace_members SET status = 'inactive', updated_at = NOW() WHERE user_id = $1",
         [userId]
       );
 
@@ -262,7 +262,7 @@ class UserController {
     try {
       const _userId = req.user.id;
 
-      const [preferences] = (await query('SELECT preferences FROM users WHERE id = ?', [
+      const [preferences] = (await query('SELECT preferences FROM users WHERE id = $1', [
         _userId,
       ])) as { preferences: string | null }[];
 
@@ -296,7 +296,7 @@ class UserController {
       }
 
       const preferencesJson = JSON.stringify(preferences);
-      await query('UPDATE users SET preferences = ?, updated_at = NOW() WHERE id = ?', [
+      await query('UPDATE users SET preferences = $1, updated_at = NOW() WHERE id = $2', [
         preferencesJson,
         userId,
       ]);

@@ -14,10 +14,14 @@ import { TestTypeValues } from '../../../shared/types/test.types';
 import { query } from '../../config/database';
 import { ErrorFactory } from '../../middleware/errorHandler';
 import testRepository from '../../repositories/testRepository';
-import { markFailedWithLog, markStartedWithLog } from './testLogService';
+import { markFailedWithLog, markStartedWithLog, updateStatusWithLog } from './testLogService';
 import testTemplateService from './testTemplateService';
 
+const registerTestEngines = require('../../engines/core/registerEngines');
+const testEngineRegistry = require('../../core/TestEngineRegistry');
+
 const userTestManager = require('./UserTestManager');
+const { enqueueTest } = require('./TestQueueService');
 
 interface BusinessRules {
   concurrent: {
@@ -323,11 +327,23 @@ class TestBusinessService {
         createdAt: new Date(),
       });
 
-      await this.startTestExecution(testId, normalizedConfig, user);
+      await updateStatusWithLog(testId, 'queued', '测试已进入队列', {
+        engineType: normalizedConfig.testType,
+        url: normalizedConfig.url,
+      });
+
+      await enqueueTest({
+        testId,
+        userId: user.userId,
+        config: {
+          ...normalizedConfig,
+          userRole: user.role,
+        },
+      });
 
       return {
         testId,
-        status: 'running',
+        status: 'queued',
         startTime: new Date(),
         estimatedDuration: normalizedConfig.duration || BUSINESS_RULES.duration.default,
         templateId: normalizedConfig.templateId ?? templateResult.templateId,
@@ -403,6 +419,29 @@ class TestBusinessService {
    * 启动测试执行
    */
   private async startTestExecution(testId: string, config: TestConfig, user: User): Promise<void> {
+    try {
+      const stats =
+        typeof testEngineRegistry.getStats === 'function' ? testEngineRegistry.getStats() : null;
+      if (stats && stats.totalEngines === 0) {
+        registerTestEngines();
+      }
+      if (typeof testEngineRegistry.initialize === 'function') {
+        await testEngineRegistry.initialize();
+      }
+      const refreshedStats =
+        typeof testEngineRegistry.getStats === 'function' ? testEngineRegistry.getStats() : null;
+      if (refreshedStats && refreshedStats.totalEngines === 0) {
+        throw new Error('测试引擎未注册');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await markFailedWithLog(testId, message, {
+        engineType: config.testType,
+        url: config.url,
+      });
+      throw error;
+    }
+
     await markStartedWithLog(testId, {
       engineType: config.testType,
       url: config.url,
@@ -422,10 +461,32 @@ class TestBusinessService {
       testId,
     };
 
-    Promise.resolve(engine.executeTest(payload)).catch((error: Error) => {
-      // 错误落库与日志由 UserTestManager 统一处理，避免重复写入
-      console.error('测试执行失败:', testId, error.message);
+    Promise.resolve(engine.executeTest(payload)).catch(async (error: Error) => {
+      try {
+        const execution = await testRepository.findById(testId, user.userId);
+        const status = execution?.status;
+        if (
+          status === 'cancelled' ||
+          status === 'stopped' ||
+          status === 'failed' ||
+          status === 'completed'
+        ) {
+          return;
+        }
+      } catch (lookupError) {
+        console.warn('检查测试状态失败，继续执行兜底失败落库:', lookupError);
+      }
+
+      await markFailedWithLog(testId, error.message, {
+        engineType: config.testType,
+        url: config.url,
+        errorName: error.name,
+      });
     });
+  }
+
+  async executeQueuedTest(testId: string, config: TestConfig, user: User): Promise<void> {
+    await this.startTestExecution(testId, config, user);
   }
 
   private getEngineMeta(testType: string) {

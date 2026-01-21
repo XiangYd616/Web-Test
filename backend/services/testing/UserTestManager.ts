@@ -472,8 +472,19 @@ class UserTestManager {
         throw new Error('测试执行不存在');
       }
 
-      if (execution.status === 'cancelled' || execution.status === 'stopped') {
+      if (
+        execution.status === 'cancelled' ||
+        execution.status === 'stopped' ||
+        execution.status === 'failed' ||
+        execution.status === 'completed'
+      ) {
         Logger.warn(`测试已取消/停止，忽略结果落库: ${testId}`);
+        return;
+      }
+
+      const existingResult = await testRepository.findResults(testId, userId);
+      if (existingResult) {
+        Logger.warn(`测试结果已存在，跳过重复落库: ${testId}`);
         return;
       }
 

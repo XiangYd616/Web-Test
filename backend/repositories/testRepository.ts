@@ -159,7 +159,7 @@ class TestRepository {
     await query(
       `UPDATE test_executions
        SET status = $1, updated_at = NOW()
-       WHERE test_id = $2 AND status IN ('pending', 'running')`,
+       WHERE test_id = $2 AND status IN ('pending', 'queued', 'running')`,
       [status, testId]
     );
   }
@@ -177,7 +177,7 @@ class TestRepository {
     await query(
       `UPDATE test_executions
        SET status = $1, started_at = NOW(), updated_at = NOW()
-       WHERE test_id = $2 AND status IN ('pending')`,
+       WHERE test_id = $2 AND status IN ('pending', 'queued')`,
       ['running', testId]
     );
   }

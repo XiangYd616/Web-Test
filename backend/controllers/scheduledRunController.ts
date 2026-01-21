@@ -66,6 +66,12 @@ type TaskExecutionResponse = {
   triggeredBy: 'schedule' | 'manual';
   retryCount: number;
   maxRetries: number;
+  totalRequests?: number;
+  passedRequests?: number;
+  failedRequests?: number;
+  errorCount?: number;
+  logs?: string[];
+  metadata?: Record<string, unknown>;
 };
 
 const parsePagination = (req: Request) => {
@@ -236,6 +242,7 @@ const getScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
 
 const createScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
   const {
+    workspaceId,
     collectionId,
     environmentId,
     cronExpression,
@@ -244,6 +251,7 @@ const createScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
     description,
     timezone = 'UTC',
   } = req.body as {
+    workspaceId?: string;
     collectionId?: string;
     environmentId?: string;
     cronExpression?: string;
@@ -253,8 +261,9 @@ const createScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
     timezone?: string;
   };
 
-  if (!collectionId || !cronExpression) {
+  if (!workspaceId || !collectionId || !cronExpression) {
     return res.validationError([
+      { field: 'workspaceId', message: 'workspaceId 不能为空' },
       { field: 'collectionId', message: 'collectionId 不能为空' },
       { field: 'cronExpression', message: 'cronExpression 不能为空' },
     ]);
@@ -268,7 +277,7 @@ const createScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
     return;
   }
 
-  const collection = await ensureCollectionInWorkspace(collectionId, req.body.workspaceId);
+  const collection = await ensureCollectionInWorkspace(collectionId, workspaceId);
   if (collection.error) {
     return res.notFound(collection.error);
   }
@@ -394,17 +403,19 @@ const deleteScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
 
 const executeScheduledRun = async (req: AuthRequest, res: ApiResponse) => {
   const scheduleId = req.params.scheduleId;
+  const workspaceId = req.query.workspaceId as string | undefined;
+  if (!workspaceId) {
+    return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
+  }
   const { ScheduledRun } = models;
-  const scheduledRun = await ScheduledRun.findByPk(scheduleId);
+  const scheduledRun = await ScheduledRun.findOne({
+    where: { id: scheduleId, workspace_id: workspaceId },
+  });
   if (!scheduledRun) {
     return res.notFound('定时运行不存在');
   }
 
-  const permission = await ensureWorkspacePermission(
-    scheduledRun.workspace_id,
-    req.user.id,
-    'write'
-  );
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'write');
   if (permission.error) {
     return res.forbidden(permission.error);
   }
@@ -429,12 +440,49 @@ const cancelExecution = async (req: AuthRequest, res: ApiResponse) => {
 
 const getExecutionHistory = async (req: AuthRequest, res: ApiResponse) => {
   const scheduleId = req.query.taskId as string | undefined;
+  const workspaceId = req.query.workspaceId as string | undefined;
+  const status = req.query.status as string | undefined;
+  const triggeredBy = req.query.triggeredBy as string | undefined;
+  if (!workspaceId) {
+    return res.validationError([{ field: 'workspaceId', message: 'workspaceId 不能为空' }]);
+  }
+  const permission = await ensureWorkspacePermission(workspaceId, req.user.id, 'read');
+  if (permission.error) {
+    return res.forbidden(permission.error);
+  }
   const { page, limit, offset } = parsePagination(req);
   const { ScheduledRunResult } = models;
+  const { ScheduledRun } = models;
+
+  if (status && !['success', 'failed', 'running', 'cancelled'].includes(status)) {
+    return res.validationError([
+      { field: 'status', message: 'status 仅支持 success/failed/running/cancelled' },
+    ]);
+  }
+
+  if (triggeredBy && !['schedule', 'manual'].includes(triggeredBy)) {
+    return res.validationError([
+      { field: 'triggeredBy', message: 'triggeredBy 仅支持 schedule/manual' },
+    ]);
+  }
 
   const where: Record<string, unknown> = {};
+  const scheduleWhere: Record<string, unknown> = { workspace_id: workspaceId };
   if (scheduleId) {
-    where.scheduled_run_id = scheduleId;
+    scheduleWhere.id = scheduleId;
+  }
+  const schedules = await ScheduledRun.findAll({ where: scheduleWhere });
+  const scheduleIds = schedules.map((schedule: { id: string }) => schedule.id);
+  if (scheduleIds.length === 0) {
+    return res.success({ executions: [], total: 0, pagination: { page, limit, total: 0 } });
+  }
+  where.scheduled_run_id = scheduleIds;
+  if (status) {
+    where.status = status;
+  }
+
+  if (triggeredBy) {
+    where.triggered_by = triggeredBy;
   }
 
   const { count, rows } = await ScheduledRunResult.findAndCountAll({
@@ -455,7 +503,16 @@ const getExecutionHistory = async (req: AuthRequest, res: ApiResponse) => {
       duration: row.duration as number | undefined,
       results: metadata,
       error: metadata.error as string | undefined,
-      triggeredBy: (metadata.triggeredBy as 'schedule' | 'manual' | undefined) || 'schedule',
+      totalRequests: row.total_requests as number | undefined,
+      passedRequests: row.passed_requests as number | undefined,
+      failedRequests: row.failed_requests as number | undefined,
+      errorCount: row.error_count as number | undefined,
+      logs: row.logs as string[] | undefined,
+      metadata,
+      triggeredBy:
+        (row.triggered_by as 'schedule' | 'manual' | undefined) ||
+        (metadata.triggeredBy as 'schedule' | 'manual' | undefined) ||
+        'schedule',
       retryCount: 0,
       maxRetries: 0,
     };

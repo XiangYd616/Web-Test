@@ -44,6 +44,7 @@ type ScheduledRunResultRecord = {
   failed_requests?: number;
   error_count?: number;
   logs?: string[];
+  triggered_by?: string;
   metadata?: Record<string, unknown>;
 };
 
@@ -78,6 +79,8 @@ export interface ScheduledRunConfig {
   nextRunAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  config?: Record<string, unknown>;
+  createdBy?: string;
 }
 
 // 定时运行结果接口
@@ -93,6 +96,7 @@ export interface ScheduledRunResult {
   failedRequests: number;
   errorCount: number;
   logs: string[];
+  triggeredBy?: 'schedule' | 'manual';
   metadata: Record<string, unknown>;
 }
 
@@ -205,6 +209,8 @@ class ScheduledRunService {
       status: scheduleData.status,
       last_run_at: scheduleData.lastRunAt,
       next_run_at: scheduleData.nextRunAt,
+      config: scheduleData.config,
+      created_by: scheduleData.createdBy,
       created_at: new Date(),
       updated_at: new Date(),
     });
@@ -223,6 +229,8 @@ class ScheduledRunService {
       nextRunAt: schedule.next_run_at || undefined,
       createdAt: schedule.created_at || new Date(),
       updatedAt: schedule.updated_at || new Date(),
+      config: schedule.config || {},
+      createdBy: schedule.created_by || undefined,
     };
 
     if (config.status === 'active') {
@@ -255,6 +263,8 @@ class ScheduledRunService {
       nextRunAt: schedule.next_run_at || undefined,
       createdAt: schedule.created_at || new Date(),
       updatedAt: schedule.updated_at || new Date(),
+      config: schedule.config || {},
+      createdBy: schedule.created_by || undefined,
     };
   }
 
@@ -278,6 +288,8 @@ class ScheduledRunService {
       nextRunAt: schedule.next_run_at || undefined,
       createdAt: schedule.created_at || new Date(),
       updatedAt: schedule.updated_at || new Date(),
+      config: schedule.config || {},
+      createdBy: schedule.created_by || undefined,
     }));
   }
 
@@ -304,6 +316,7 @@ class ScheduledRunService {
         status: updates.status,
         last_run_at: updates.lastRunAt,
         next_run_at: updates.nextRunAt,
+        config: updates.config,
         updated_at: new Date(),
       },
       { where: { id: scheduleId }, returning: true }
@@ -334,6 +347,8 @@ class ScheduledRunService {
       nextRunAt: updatedSchedule.next_run_at || undefined,
       createdAt: updatedSchedule.created_at || new Date(),
       updatedAt: updatedSchedule.updated_at || new Date(),
+      config: updatedSchedule.config || {},
+      createdBy: updatedSchedule.created_by || undefined,
     };
   }
 
@@ -378,12 +393,33 @@ class ScheduledRunService {
       startTime,
     };
 
+    const baseMetadata = { ...options.metadata };
+    const triggeredBy =
+      (baseMetadata?.triggeredBy as ScheduledRunResult['triggeredBy']) || 'schedule';
+    if (baseMetadata?.triggeredBy !== undefined) {
+      delete baseMetadata.triggeredBy;
+    }
+    const runningResult: ScheduledRunResult = {
+      id: this.generateId(),
+      scheduledRunId: scheduleId,
+      status: 'running',
+      startedAt: startTime,
+      totalRequests: 0,
+      passedRequests: 0,
+      failedRequests: 0,
+      errorCount: 0,
+      logs: [],
+      triggeredBy,
+      metadata: { ...baseMetadata, executionId },
+    };
+
     this.executions.set(executionId, execution);
+    await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(runningResult));
     try {
       if (options.dryRun) {
         // 干运行模式
         const result: ScheduledRunResult = {
-          id: this.generateId(),
+          id: runningResult.id,
           scheduledRunId: scheduleId,
           status: 'success',
           startedAt: startTime,
@@ -394,7 +430,8 @@ class ScheduledRunService {
           failedRequests: 0,
           errorCount: 0,
           logs: ['Dry run completed'],
-          metadata: { dryRun: true, ...options.metadata },
+          triggeredBy,
+          metadata: { dryRun: true, ...baseMetadata },
         };
 
         execution.result = result;
@@ -402,7 +439,9 @@ class ScheduledRunService {
         execution.endTime = new Date();
         execution.duration = 0;
 
-        await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(result));
+        await this.models.ScheduledRunResult.update(this.toScheduledRunResultRecord(result), {
+          where: { id: runningResult.id },
+        });
         return executionId;
       }
 
@@ -413,6 +452,10 @@ class ScheduledRunService {
       execution.status = result.status;
       execution.endTime = new Date();
       execution.duration = result.duration;
+
+      await this.models.ScheduledRunResult.update(this.toScheduledRunResultRecord(result), {
+        where: { id: runningResult.id },
+      });
 
       // 更新任务的最后运行时间
       await this.models.ScheduledRun.update(
@@ -431,7 +474,7 @@ class ScheduledRunService {
       execution.error = error instanceof Error ? error.message : String(error);
 
       const failedResult: ScheduledRunResult = {
-        id: this.generateId(),
+        id: runningResult.id,
         scheduledRunId: scheduleId,
         status: 'failed',
         startedAt: startTime,
@@ -442,10 +485,13 @@ class ScheduledRunService {
         failedRequests: 0,
         errorCount: 1,
         logs: [`Execution failed: ${execution.error}`],
-        metadata: { error: execution.error, ...options.metadata },
+        triggeredBy,
+        metadata: { error: execution.error, ...baseMetadata },
       };
 
-      await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(failedResult));
+      await this.models.ScheduledRunResult.update(this.toScheduledRunResultRecord(failedResult), {
+        where: { id: runningResult.id },
+      });
       throw error;
     }
   }
@@ -553,15 +599,23 @@ class ScheduledRunService {
       nextRunAt: schedule.next_run_at || undefined,
       createdAt: schedule.created_at || new Date(),
       updatedAt: schedule.updated_at || new Date(),
+      config: schedule.config || {},
+      createdBy: schedule.created_by || undefined,
     };
 
-    const task = cron.schedule(schedule.cron_expression, async () => {
-      try {
-        await this.executeSchedule(schedule.id);
-      } catch (error) {
-        console.error(`Scheduled execution failed for ${schedule.name}:`, error);
+    const task = cron.schedule(
+      schedule.cron_expression,
+      async () => {
+        try {
+          await this.executeSchedule(schedule.id);
+        } catch (error) {
+          console.error(`Scheduled execution failed for ${schedule.name}:`, error);
+        }
+      },
+      {
+        timezone: schedule.timezone || 'UTC',
       }
-    });
+    );
 
     this.jobs.set(schedule.id, { task, config });
     task.start();
@@ -624,10 +678,16 @@ class ScheduledRunService {
         failedRequests: result.failedRequests,
         errorCount: result.errorCount,
         logs: result.logs,
-        metadata: metadata || {},
+        triggeredBy: (metadata?.triggeredBy as ScheduledRunResult['triggeredBy']) || 'schedule',
+        metadata: (() => {
+          const next = { ...(metadata || {}) };
+          if (next.triggeredBy !== undefined) {
+            delete next.triggeredBy;
+          }
+          return next;
+        })(),
       };
 
-      await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(runResult));
       return runResult;
     } catch (error) {
       const failedResult: ScheduledRunResult = {
@@ -644,11 +704,19 @@ class ScheduledRunService {
         logs: [
           `Collection execution failed: ${error instanceof Error ? error.message : String(error)}`,
         ],
-        metadata: { error: error instanceof Error ? error.message : String(error), ...metadata },
+        triggeredBy: (metadata?.triggeredBy as ScheduledRunResult['triggeredBy']) || 'schedule',
+        metadata: (() => {
+          const next: Record<string, unknown> = {
+            error: error instanceof Error ? error.message : String(error),
+            ...(metadata || {}),
+          };
+          if (next.triggeredBy !== undefined) {
+            delete next.triggeredBy;
+          }
+          return next;
+        })(),
       };
-
-      await this.models.ScheduledRunResult.create(this.toScheduledRunResultRecord(failedResult));
-      throw error;
+      return failedResult;
     }
   }
 
@@ -713,6 +781,8 @@ class ScheduledRunService {
   }
 
   private toScheduledRunResultRecord(result: ScheduledRunResult): ScheduledRunResultRecord {
+    const triggeredBy =
+      result.triggeredBy || (result.metadata?.triggeredBy as ScheduledRunResult['triggeredBy']);
     return {
       id: result.id,
       scheduled_run_id: result.scheduledRunId,
@@ -725,6 +795,7 @@ class ScheduledRunService {
       failed_requests: result.failedRequests,
       error_count: result.errorCount,
       logs: result.logs,
+      triggered_by: triggeredBy,
       metadata: result.metadata,
     };
   }

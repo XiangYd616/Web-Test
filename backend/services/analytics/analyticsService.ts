@@ -29,7 +29,78 @@ interface AnalyticsSummary {
 interface AnalyticsParams {
   userId: string;
   dateRange?: number;
+  period?: string | number;
 }
+
+type PerformanceTrend = {
+  date: string;
+  averageScore: number;
+  testCount: number;
+  avgDuration: number;
+};
+
+type RecommendationPriority = 'critical' | 'high' | 'medium' | 'low';
+
+type Recommendation = {
+  type: 'improvement' | 'issue';
+  category: string;
+  message: string;
+  priority: RecommendationPriority;
+  testId?: string;
+  recommendation?: unknown;
+};
+
+type AnalyticsReport = {
+  generatedAt: string;
+  dateRange: number;
+  summary: AnalyticsSummary;
+  trends: PerformanceTrend[];
+  recommendations: Recommendation[];
+  metadata: {
+    totalTests: number;
+    averageScore: number;
+    completionRate: number;
+  };
+};
+
+type RealTimeStats = {
+  totalTests: number;
+  runningTests: number;
+  completedTests: number;
+  failedTests: number;
+  averageScore: number;
+  updatedAt: string;
+};
+
+type SummaryRow = {
+  engine_type: string;
+  status: string;
+  score: number | null;
+  created_at: string | Date;
+};
+
+type TrendRow = {
+  date: string;
+  average_score: string | number | null;
+  test_count: string | number;
+  avg_duration: string | number | null;
+};
+
+type RecommendationRow = {
+  engine_type: string;
+  score: number | null;
+  summary: unknown;
+  test_id?: string;
+  created_at: string | Date;
+};
+
+type RealTimeRow = {
+  total_tests: string | number;
+  running_tests: string | number;
+  completed_tests: string | number;
+  failed_tests: string | number;
+  average_score: string | number | null;
+};
 
 class AnalyticsService {
   /**
@@ -37,57 +108,66 @@ class AnalyticsService {
    */
   async getSummary({ userId, dateRange = 30 }: AnalyticsParams): Promise<AnalyticsSummary> {
     try {
+      if (!userId) {
+        throw new Error('用户未认证');
+      }
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - dateRange);
 
       const sql = `
         SELECT 
-          test_type,
-          status,
-          overall_score,
-          start_time,
-          created_at
-        FROM test_history
-        WHERE user_id = $1 AND created_at >= $2
-        ORDER BY created_at DESC
+          te.engine_type,
+          te.status,
+          tr.score,
+          te.created_at
+        FROM test_executions te
+        LEFT JOIN test_results tr ON tr.execution_id = te.id
+        WHERE te.user_id = $1 AND te.created_at >= $2
+        ORDER BY te.created_at DESC
       `;
 
       const results = await query(sql, [userId, cutoffDate]);
+      const rows = results.rows as SummaryRow[];
 
       const summary: AnalyticsSummary = {
-        totalTests: results.rows.length,
-        completedTests: results.rows.filter(row => row.status === 'completed').length,
-        failedTests: results.rows.filter(row => row.status === 'failed').length,
+        totalTests: rows.length,
+        completedTests: rows.filter(row => row.status === 'completed').length,
+        failedTests: rows.filter(row => row.status === 'failed').length,
         averageScore: 0,
         testTypes: {},
         trends: [],
       };
 
       // 计算平均分
-      const completedTests = results.rows.filter(row => row.status === 'completed');
+      const completedTests = rows.filter(
+        row => row.status === 'completed' && typeof row.score === 'number'
+      );
       if (completedTests.length > 0) {
         summary.averageScore =
-          completedTests.reduce((sum, test) => sum + (test.overall_score || 0), 0) /
-          completedTests.length;
+          completedTests.reduce((sum, test) => sum + (test.score || 0), 0) / completedTests.length;
       }
 
       // 统计测试类型
-      results.rows.forEach(test => {
-        summary.testTypes[test.test_type] = (summary.testTypes[test.test_type] || 0) + 1;
+      rows.forEach(test => {
+        summary.testTypes[test.engine_type] = (summary.testTypes[test.engine_type] || 0) + 1;
       });
 
       // 生成趋势数据
       const trendsByDate = new Map<string, { count: number; totalScore: number }>();
 
-      results.rows.forEach(test => {
-        const date = test.created_at.toISOString().split('T')[0];
+      rows.forEach(test => {
+        const createdAt = new Date(test.created_at);
+        const date = createdAt.toISOString().split('T')[0];
         if (!trendsByDate.has(date)) {
           trendsByDate.set(date, { count: 0, totalScore: 0 });
         }
-        const trend = trendsByDate.get(date)!;
+        const trend = trendsByDate.get(date);
+        if (!trend) {
+          return;
+        }
         trend.count++;
-        if (test.overall_score) {
-          trend.totalScore += test.overall_score;
+        if (typeof test.score === 'number') {
+          trend.totalScore += test.score;
         }
       });
 
@@ -111,30 +191,40 @@ class AnalyticsService {
   /**
    * 获取性能趋势
    */
-  async getPerformanceTrends({ userId, dateRange = 30 }: AnalyticsParams): Promise<any[]> {
+  async getPerformanceTrends({
+    userId,
+    dateRange,
+    period,
+  }: AnalyticsParams): Promise<PerformanceTrend[]> {
     try {
+      if (!userId) {
+        throw new Error('用户未认证');
+      }
+      const resolvedRange = this.resolveDateRange(dateRange, period, 30);
       const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - dateRange);
+      cutoffDate.setDate(cutoffDate.getDate() - resolvedRange);
 
       const sql = `
         SELECT 
-          DATE(created_at) as date,
-          AVG(overall_score) as average_score,
+          DATE(te.created_at) as date,
+          AVG(tr.score) as average_score,
           COUNT(*) as test_count,
-          AVG(EXTRACT(EPOCH FROM (completed_at - started_at))) as avg_duration
-        FROM test_history
-        WHERE user_id = $1 AND created_at >= $2 AND status = 'completed'
-        GROUP BY DATE(created_at)
+          AVG(EXTRACT(EPOCH FROM (te.completed_at - te.started_at))) as avg_duration
+        FROM test_executions te
+        LEFT JOIN test_results tr ON tr.execution_id = te.id
+        WHERE te.user_id = $1 AND te.created_at >= $2 AND te.status = 'completed'
+        GROUP BY DATE(te.created_at)
         ORDER BY date DESC
       `;
 
       const results = await query(sql, [userId, cutoffDate]);
+      const rows = results.rows as TrendRow[];
 
-      return results.rows.map(row => ({
-        date: row.date,
-        averageScore: parseFloat(row.average_score) || 0,
-        testCount: parseInt(row.test_count),
-        avgDuration: parseFloat(row.avg_duration) || 0,
+      return rows.map(row => ({
+        date: String(row.date),
+        averageScore: parseFloat(String(row.average_score ?? 0)) || 0,
+        testCount: parseInt(String(row.test_count), 10) || 0,
+        avgDuration: parseFloat(String(row.avg_duration ?? 0)) || 0,
       }));
     } catch (error) {
       Logger.error('获取性能趋势失败', { error, userId });
@@ -153,16 +243,21 @@ class AnalyticsService {
   }: {
     userId: string;
     testId?: string;
-  }): Promise<any[]> {
+  }): Promise<Recommendation[]> {
     try {
+      if (!userId) {
+        throw new Error('用户未认证');
+      }
       let sql = `
         SELECT 
-          test_type,
-          overall_score,
-          results,
-          created_at
-        FROM test_history
-        WHERE user_id = $1 AND status = 'completed'
+          te.engine_type,
+          tr.score,
+          tr.summary,
+          te.test_id,
+          te.created_at
+        FROM test_executions te
+        LEFT JOIN test_results tr ON tr.execution_id = te.id
+        WHERE te.user_id = $1 AND te.status = 'completed'
       `;
 
       const params = [userId];
@@ -175,38 +270,55 @@ class AnalyticsService {
       sql += ' ORDER BY created_at DESC LIMIT 10';
 
       const results = await query(sql, params);
+      const rows = results.rows as RecommendationRow[];
 
-      const recommendations: any[] = [];
+      const recommendations: Recommendation[] = [];
 
-      results.rows.forEach(test => {
-        if (test.overall_score < 80) {
+      rows.forEach(test => {
+        const score = typeof test.score === 'number' ? test.score : 0;
+        const summary = this.ensureRecord(test.summary);
+        if (score < 80) {
           recommendations.push({
             type: 'improvement',
-            category: test.test_type,
-            message: `${test.test_type}测试得分较低 (${test.overall_score})，建议优化相关配置`,
-            priority: test.overall_score < 60 ? 'high' : 'medium',
+            category: test.engine_type,
+            message: `${test.engine_type}测试得分较低 (${score})，建议优化相关配置`,
+            priority: score < 60 ? 'high' : 'medium',
             testId: test.test_id,
           });
         }
 
         // 分析测试结果中的具体问题
-        if (test.results && typeof test.results === 'object') {
-          const resultsObj = test.results as any;
-          if (resultsObj.issues && Array.isArray(resultsObj.issues)) {
-            resultsObj.issues.forEach((issue: any) => {
-              if (issue.severity === 'high' || issue.severity === 'critical') {
-                recommendations.push({
-                  type: 'issue',
-                  category: test.test_type,
-                  message: issue.description || '发现严重问题',
-                  priority: issue.severity,
-                  recommendation: issue.recommendation,
-                  testId: test.test_id,
-                });
-              }
+        const issues = Array.isArray(summary.issues)
+          ? summary.issues
+          : Array.isArray(summary.errors)
+            ? summary.errors
+            : [];
+        issues.forEach(issue => {
+          if (typeof issue === 'string') {
+            recommendations.push({
+              type: 'issue',
+              category: test.engine_type,
+              message: issue,
+              priority: 'medium',
+              testId: test.test_id,
             });
+            return;
           }
-        }
+          if (issue && typeof issue === 'object') {
+            const issueRecord = issue as Record<string, unknown>;
+            const severity = String(issueRecord.severity || issueRecord.level || 'medium');
+            if (severity === 'high' || severity === 'critical') {
+              recommendations.push({
+                type: 'issue',
+                category: test.engine_type,
+                message: String(issueRecord.description || issueRecord.message || '发现严重问题'),
+                priority: severity,
+                recommendation: issueRecord.recommendation,
+                testId: test.test_id,
+              });
+            }
+          }
+        });
       });
 
       // 去重并按优先级排序
@@ -215,7 +327,12 @@ class AnalyticsService {
       );
 
       return uniqueRecommendations.sort((a, b) => {
-        const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+        const priorityOrder: Record<RecommendationPriority, number> = {
+          critical: 4,
+          high: 3,
+          medium: 2,
+          low: 1,
+        };
         return priorityOrder[b.priority] - priorityOrder[a.priority];
       });
     } catch (error) {
@@ -235,13 +352,13 @@ class AnalyticsService {
     userId: string;
     format?: string;
     dateRange?: number;
-  }): Promise<any> {
+  }): Promise<AnalyticsReport | string> {
     try {
       const summary = await this.getSummary({ userId, dateRange });
       const trends = await this.getPerformanceTrends({ userId, dateRange });
       const recommendations = await this.getRecommendations({ userId });
 
-      const report = {
+      const report: AnalyticsReport = {
         generatedAt: new Date().toISOString(),
         dateRange,
         summary,
@@ -269,29 +386,33 @@ class AnalyticsService {
   /**
    * 获取实时统计
    */
-  async getRealTimeStats({ userId }: { userId: string }): Promise<any> {
+  async getRealTimeStats({ userId }: { userId: string }): Promise<RealTimeStats> {
     try {
+      if (!userId) {
+        throw new Error('用户未认证');
+      }
       const sql = `
         SELECT 
           COUNT(*) as total_tests,
-          COUNT(CASE WHEN status = 'running' THEN 1 END) as running_tests,
-          COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
-          COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
-          AVG(overall_score) as average_score
-        FROM test_history
-        WHERE user_id = $1 AND created_at >= CURRENT_DATE
+          COUNT(CASE WHEN te.status = 'running' THEN 1 END) as running_tests,
+          COUNT(CASE WHEN te.status = 'completed' THEN 1 END) as completed_tests,
+          COUNT(CASE WHEN te.status = 'failed' THEN 1 END) as failed_tests,
+          AVG(tr.score) as average_score
+        FROM test_executions te
+        LEFT JOIN test_results tr ON tr.execution_id = te.id
+        WHERE te.user_id = $1 AND te.created_at >= CURRENT_DATE
       `;
 
       const results = await query(sql, [userId]);
 
-      const stats = results.rows[0];
+      const stats = results.rows[0] as RealTimeRow;
 
       return {
-        totalTests: parseInt(stats.total_tests),
-        runningTests: parseInt(stats.running_tests),
-        completedTests: parseInt(stats.completed_tests),
-        failedTests: parseInt(stats.failed_tests),
-        averageScore: parseFloat(stats.average_score) || 0,
+        totalTests: parseInt(String(stats.total_tests), 10) || 0,
+        runningTests: parseInt(String(stats.running_tests), 10) || 0,
+        completedTests: parseInt(String(stats.completed_tests), 10) || 0,
+        failedTests: parseInt(String(stats.failed_tests), 10) || 0,
+        averageScore: parseFloat(String(stats.average_score ?? 0)) || 0,
         updatedAt: new Date().toISOString(),
       };
     } catch (error) {
@@ -305,7 +426,7 @@ class AnalyticsService {
   /**
    * 转换为CSV格式
    */
-  private convertToCSV(report: any): string {
+  private convertToCSV(report: AnalyticsReport): string {
     const headers = ['日期', '测试类型', '状态', '得分', '持续时间'];
     const rows = [headers.join(',')];
 
@@ -313,6 +434,38 @@ class AnalyticsService {
     rows.push(`${report.generatedAt},汇总,完成,${report.summary.averageScore},-`);
 
     return rows.join('\n');
+  }
+
+  private ensureRecord(value: unknown): Record<string, unknown> {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+    return {};
+  }
+
+  private resolveDateRange(
+    dateRange: number | undefined,
+    period: string | number | undefined,
+    fallback: number
+  ): number {
+    if (typeof dateRange === 'number' && Number.isFinite(dateRange)) {
+      return dateRange;
+    }
+    if (typeof period === 'number' && Number.isFinite(period)) {
+      return period;
+    }
+    if (typeof period === 'string') {
+      const match = period.match(/(\d+)([dwmy])/i);
+      if (match) {
+        const value = parseInt(match[1], 10);
+        const unit = match[2].toLowerCase();
+        if (unit === 'w') return value * 7;
+        if (unit === 'm') return value * 30;
+        if (unit === 'y') return value * 365;
+        return value;
+      }
+    }
+    return fallback;
   }
 }
 
