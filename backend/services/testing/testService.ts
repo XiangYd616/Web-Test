@@ -6,20 +6,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { query } from '../../config/database';
 import testRepository from '../../repositories/testRepository';
-import { errorLogAggregator } from '../../utils/ErrorLogAggregator';
 import testBusinessService from './TestBusinessService';
+import { insertExecutionLog, normalizeTestLogLevel, updateStatusWithLog } from './testLogService';
 import testTemplateService from './testTemplateService';
 
 const userTestManager = require('./UserTestManager');
-
-const TEST_LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const;
-type TestLogLevel = (typeof TEST_LOG_LEVELS)[number];
-const normalizeTestLogLevel = (level?: string, fallback: TestLogLevel = 'info'): TestLogLevel => {
-  if (level && (TEST_LOG_LEVELS as readonly string[]).includes(level)) {
-    return level as TestLogLevel;
-  }
-  return fallback;
-};
 
 interface TestResult {
   id: number;
@@ -213,7 +204,7 @@ class TestService {
       [nextTestName, nextTestUrl || null, JSON.stringify(nextConfig), testId, userId]
     );
 
-    await this.insertExecutionLog(testId, 'info', '测试配置已更新', {
+    await insertExecutionLog(testId, 'info', '测试配置已更新', {
       updates: Object.keys(updates),
     });
 
@@ -534,10 +525,7 @@ class TestService {
     }
 
     // 先更新状态，避免停止过程中被错误标记为 failed
-    await testRepository.updateStatus(testId, status);
-    await this.insertExecutionLog(testId, 'info', message, {
-      userId,
-    });
+    await updateStatusWithLog(testId, status, message, { userId });
 
     await this.stopTestExecution(testId, userId);
   }
@@ -621,30 +609,6 @@ class TestService {
     }
 
     await userTestManager.stopUserTest(userId, testId);
-  }
-
-  private async insertExecutionLog(
-    testId: string,
-    level: string,
-    message: string,
-    context: Record<string, unknown> = {}
-  ): Promise<void> {
-    const normalizedLevel = normalizeTestLogLevel(level, 'info');
-    await query(
-      `INSERT INTO test_logs (execution_id, level, message, context)
-       SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
-      [normalizedLevel, message, JSON.stringify(context), testId]
-    );
-
-    void errorLogAggregator.log({
-      level: normalizedLevel,
-      message,
-      type: 'test',
-      details: context,
-      context: {
-        testId,
-      },
-    });
   }
 
   /**

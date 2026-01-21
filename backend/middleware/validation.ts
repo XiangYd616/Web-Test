@@ -17,8 +17,6 @@ const TEST_TYPES = [
   'accessibility',
 ] as const;
 
-type TestType = (typeof TEST_TYPES)[number];
-
 /**
  * 验证测试类型
  */
@@ -33,8 +31,32 @@ const validateTestType = (req: Request, res: Response, next: NextFunction) => {
     });
   }
 
-  next();
+  return next();
 };
+
+/**
+ * 使用 Joi 验证请求体/查询参数
+ */
+const validateRequest = (schema: Joi.Schema, target: 'body' | 'query' = 'body') => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const { error, value } = schema.validate(req[target], {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details.map(detail => detail.message).join(', '),
+      });
+    }
+
+    (req as Request & { [key: string]: unknown })[target] = value;
+    return next();
+  };
+};
+
+const validateQuery = (schema: Joi.Schema) => validateRequest(schema, 'query');
 
 /**
  * 验证分页参数
@@ -51,7 +73,7 @@ const validatePagination = (req: Request, res: Response, next: NextFunction) => 
         error: '页码必须是大于0的整数',
       });
     }
-    (req.query as any).page = pageNum;
+    (req.query as Record<string, unknown>).page = pageNum;
   }
 
   // 验证每页数量
@@ -63,10 +85,10 @@ const validatePagination = (req: Request, res: Response, next: NextFunction) => 
         error: '每页数量必须是1-100之间的整数',
       });
     }
-    (req.query as any).limit = limitNum;
+    (req.query as Record<string, unknown>).limit = limitNum;
   }
 
-  next();
+  return next();
 };
 
 /**
@@ -101,7 +123,7 @@ const validateSorting = (req: Request, res: Response, next: NextFunction) => {
     });
   }
 
-  next();
+  return next();
 };
 
 /**
@@ -119,7 +141,7 @@ const validateUUID = (paramName: string) => {
       });
     }
 
-    next();
+    return next();
   };
 };
 
@@ -137,7 +159,7 @@ const validateEmail = (req: Request, res: Response, next: NextFunction) => {
     });
   }
 
-  next();
+  return next();
 };
 
 /**
@@ -180,7 +202,7 @@ const validatePassword = (req: Request, res: Response, next: NextFunction) => {
     });
   }
 
-  next();
+  return next();
 };
 
 /**
@@ -197,7 +219,7 @@ const validatePhoneNumber = (req: Request, res: Response, next: NextFunction) =>
     });
   }
 
-  next();
+  return next();
 };
 
 /**
@@ -247,7 +269,7 @@ const validateDateRange = (req: Request, res: Response, next: NextFunction) => {
     }
   }
 
-  next();
+  return next();
 };
 
 /**
@@ -263,7 +285,7 @@ const validateFileUpload = (
   const { maxSize = 10 * 1024 * 1024, allowedTypes = [], maxFiles = 1 } = options;
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const files = (req as any).files;
+    const files = (req as { files?: Array<{ size: number; mimetype: string }> }).files;
 
     if (!files || files.length === 0) {
       return res.status(400).json({
@@ -297,7 +319,7 @@ const validateFileUpload = (
       }
     }
 
-    next();
+    return next();
   };
 };
 
@@ -310,7 +332,7 @@ const validateJSON = (req: Request, res: Response, next: NextFunction) => {
   if (data && typeof data === 'string') {
     try {
       JSON.parse(data);
-    } catch (error) {
+    } catch {
       return res.status(400).json({
         success: false,
         error: '无效的JSON格式',
@@ -318,7 +340,7 @@ const validateJSON = (req: Request, res: Response, next: NextFunction) => {
     }
   }
 
-  next();
+  return next();
 };
 
 /**
@@ -375,7 +397,7 @@ const validateArray = (
       }
     }
 
-    next();
+    return next();
   };
 };
 
@@ -405,7 +427,7 @@ const validateObject = (fieldName: string, schema: Joi.Schema) => {
       });
     }
 
-    next();
+    return next();
   };
 };
 
@@ -423,7 +445,7 @@ const customValidation = (validator: (req: Request) => { isValid: boolean; messa
       });
     }
 
-    next();
+    return next();
   };
 };
 
@@ -438,7 +460,7 @@ const conditionalValidation = (
     if (condition(req)) {
       return validator(req, res, next);
     }
-    next();
+    return next();
   };
 };
 
@@ -460,7 +482,7 @@ const combineValidations = (
       validator(req, res, runNext);
     };
 
-    runNext();
+    return runNext();
   };
 };
 
@@ -481,9 +503,9 @@ const asyncValidation = (
         });
       }
 
-      next();
-    } catch (error) {
-      res.status(500).json({
+      return next();
+    } catch {
+      return res.status(500).json({
         success: false,
         error: '验证过程中发生错误',
       });
@@ -520,6 +542,8 @@ module.exports = {
   validateEmail,
   validatePassword,
   validatePhoneNumber,
+  validateRequest,
+  validateQuery,
   validateDateRange,
   validateFileUpload,
   validateJSON,

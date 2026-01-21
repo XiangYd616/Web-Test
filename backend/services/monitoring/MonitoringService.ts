@@ -131,6 +131,99 @@ class MonitoringService extends EventEmitter {
   }
 
   /**
+   * 暂停监控目标
+   */
+  async pauseMonitoringTarget(siteId: string, userId: string) {
+    const target = await this.getMonitoringTarget(siteId, userId);
+    if (!target) {
+      throw new Error('监控站点不存在或无权限访问');
+    }
+
+    if (this.activeMonitors.has(siteId)) {
+      const task = this.activeMonitors.get(siteId);
+      if (task?.intervalId) {
+        clearInterval(task.intervalId);
+      }
+      this.activeMonitors.delete(siteId);
+    }
+
+    const result = await this.dbPool.query<MonitoringTarget>(
+      `UPDATE monitoring_sites
+       SET status = 'paused', updated_at = NOW()
+       WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+       RETURNING *`,
+      [siteId, userId]
+    );
+
+    return result.rows[0] || null;
+  }
+
+  /**
+   * 恢复监控目标
+   */
+  async resumeMonitoringTarget(siteId: string, userId: string) {
+    const result = await this.dbPool.query<MonitoringTarget>(
+      `UPDATE monitoring_sites
+       SET status = 'active', updated_at = NOW()
+       WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+       RETURNING *`,
+      [siteId, userId]
+    );
+
+    const target = result.rows[0];
+    if (target) {
+      this.createMonitoringTask(target);
+    }
+
+    return target || null;
+  }
+
+  /**
+   * 获取监控摘要（按状态/类型统计）
+   */
+  async getMonitoringSummary(userId: string) {
+    const statusResult = await this.dbPool.query<Record<string, string>>(
+      `SELECT status, COUNT(*)::int AS count
+       FROM monitoring_sites
+       WHERE deleted_at IS NULL AND user_id = $1
+       GROUP BY status`,
+      [userId]
+    );
+
+    const typeResult = await this.dbPool.query<Record<string, string>>(
+      `SELECT monitoring_type, COUNT(*)::int AS count
+       FROM monitoring_sites
+       WHERE deleted_at IS NULL AND user_id = $1
+       GROUP BY monitoring_type`,
+      [userId]
+    );
+
+    const statusMap = statusResult.rows.reduce(
+      (acc, row) => {
+        acc[row.status] = Number(row.count);
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const typeMap = typeResult.rows.reduce(
+      (acc, row) => {
+        acc[row.monitoring_type] = Number(row.count);
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    return {
+      total: Object.values(statusMap).reduce((sum, count) => sum + count, 0),
+      active: statusMap.active || 0,
+      inactive: statusMap.inactive || 0,
+      paused: statusMap.paused || 0,
+      byType: typeMap,
+    };
+  }
+
+  /**
    * 启动监控服务
    */
   async start() {
@@ -846,10 +939,22 @@ class MonitoringService extends EventEmitter {
       if (stats.overallHealth !== 'healthy') {
         await this.attemptAutoRecovery(stats);
       }
+      return stats;
     } catch (error) {
       logger.error('健康检查失败:', error);
       this.emit('health:error', error);
+      return {
+        isRunning: this.isRunning,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
+  }
+
+  /**
+   * 对外健康检查
+   */
+  async healthCheck() {
+    return this.performHealthCheck();
   }
 
   /**
@@ -1188,10 +1293,16 @@ class MonitoringService extends EventEmitter {
    */
   async getMonitoringTargets(
     userId: string,
-    options: { page?: number; limit?: number; status?: string | null } = {}
+    options: {
+      page?: number;
+      limit?: number;
+      status?: string | null;
+      monitoringType?: string | null;
+      search?: string | null;
+    } = {}
   ) {
     try {
-      const { page = 1, limit = 20, status = null } = options;
+      const { page = 1, limit = 20, status = null, monitoringType = null, search = null } = options;
       const offset = (page - 1) * limit;
 
       let query = `
@@ -1220,19 +1331,35 @@ class MonitoringService extends EventEmitter {
         paramIndex += 1;
       }
 
+      if (monitoringType) {
+        query += ` AND ms.monitoring_type = $${paramIndex}`;
+        params.push(monitoringType);
+        paramIndex += 1;
+      }
+
+      if (search) {
+        query += ` AND (ms.name ILIKE $${paramIndex} OR ms.url ILIKE $${paramIndex})`;
+        params.push(`%${search}%`);
+        paramIndex += 1;
+      }
+
       query += ` ORDER BY ms.created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
       params.push(limit, offset);
 
       const result = await this.dbPool.query(query, params);
 
+      const countParams = params.slice(0, paramIndex - 1);
       const countQuery = `
         SELECT COUNT(*) as total
-        FROM monitoring_sites
-        WHERE deleted_at IS NULL AND user_id = $1
-        ${status ? `AND status = '${status}'` : ''}
+        FROM monitoring_sites ms
+        WHERE ms.deleted_at IS NULL AND ms.user_id = $1
+        ${status ? `AND ms.status = $2` : ''}
+        ${status && monitoringType ? `AND ms.monitoring_type = $3` : ''}
+        ${!status && monitoringType ? `AND ms.monitoring_type = $2` : ''}
+        ${search ? `AND (ms.name ILIKE $${countParams.length + 1} OR ms.url ILIKE $${countParams.length + 1})` : ''}
       `;
 
-      const countResult = await this.dbPool.query<Record<string, string>>(countQuery, [userId]);
+      const countResult = await this.dbPool.query<Record<string, string>>(countQuery, countParams);
       const total = Number.parseInt(countResult.rows[0].total, 10);
 
       return {
@@ -1293,6 +1420,7 @@ class MonitoringService extends EventEmitter {
     try {
       const allowedFields = [
         'name',
+        'url',
         'monitoring_type',
         'check_interval',
         'timeout',

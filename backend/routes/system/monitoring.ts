@@ -4,42 +4,46 @@
 
 import express from 'express';
 import Joi from 'joi';
-import { authMiddleware } from '../../middleware/auth';
 import { asyncHandler } from '../../middleware/errorHandler';
-import { validateRequest } from '../../middleware/validation';
+const { authMiddleware } = require('../../middleware/auth');
+const { validateRequest } = require('../../middleware/validation');
 
-interface MonitoringSite {
-  id: string;
-  name: string;
-  url: string;
-  monitoringType: 'uptime' | 'performance' | 'security' | 'seo';
-  checkInterval: number;
-  timeout: number;
-  config: Record<string, unknown>;
-  notificationSettings: {
-    email: boolean;
-    sms: boolean;
-    webhook: boolean;
-    threshold: {
-      responseTime: number;
-      uptime: number;
-      errorRate: number;
-    };
-  };
-  status: 'active' | 'inactive' | 'paused';
-  lastCheck?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: string;
-  statistics: {
-    totalChecks: number;
-    successfulChecks: number;
-    failedChecks: number;
-    averageResponseTime: number;
-    uptime: number;
-    lastError?: string;
-  };
-}
+type MonitoringServiceApi = {
+  getMonitoringTargets: (
+    userId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      status?: string | null;
+      monitoringType?: string | null;
+      search?: string | null;
+    }
+  ) => Promise<{ data: Array<Record<string, unknown>>; pagination: Record<string, unknown> }>;
+  getMonitoringSummary: (userId: string) => Promise<Record<string, unknown>>;
+  addMonitoringTarget: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>;
+  getMonitoringTarget: (siteId: string, userId: string) => Promise<Record<string, unknown> | null>;
+  updateMonitoringTarget: (
+    siteId: string,
+    userId: string,
+    updateData: Record<string, unknown>
+  ) => Promise<Record<string, unknown> | null>;
+  removeMonitoringTarget: (siteId: string) => Promise<boolean>;
+  executeImmediateCheck: (siteId: string, userId: string) => Promise<Record<string, unknown>>;
+  pauseMonitoringTarget: (
+    siteId: string,
+    userId: string
+  ) => Promise<Record<string, unknown> | null>;
+  resumeMonitoringTarget: (
+    siteId: string,
+    userId: string
+  ) => Promise<Record<string, unknown> | null>;
+  getAlerts: (
+    userId: string,
+    options?: Record<string, unknown>
+  ) => Promise<{ data: Array<Record<string, unknown>>; pagination: Record<string, unknown> }>;
+  getMonitoringStats: (userId?: string | null) => Promise<Record<string, unknown>>;
+  healthCheck: () => Promise<Record<string, unknown>>;
+};
 
 interface AddSiteRequest {
   name: string;
@@ -60,18 +64,6 @@ interface AddSiteRequest {
   };
 }
 
-interface MonitoringAlert {
-  id: string;
-  siteId: string;
-  type: 'down' | 'slow' | 'error' | 'recovery';
-  message: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  timestamp: Date;
-  resolved: boolean;
-  resolvedAt?: Date;
-  metadata: Record<string, unknown>;
-}
-
 interface MonitoringQuery {
   page?: number;
   limit?: number;
@@ -82,11 +74,11 @@ interface MonitoringQuery {
 
 const router = express.Router();
 
-interface AuthenticatedRequest extends express.Request {
+type AuthenticatedRequest = express.Request & {
   user?: {
     id: string;
-  };
-}
+  } | null;
+};
 
 const getUserId = (req: AuthenticatedRequest): string => {
   const userId = req.user?.id;
@@ -97,12 +89,13 @@ const getUserId = (req: AuthenticatedRequest): string => {
 };
 
 // 监控服务实例 (将在app.js中初始化)
-let monitoringService: unknown = null;
+let monitoringService: MonitoringServiceApi | null = null;
 
 // 设置监控服务实例
-router.setMonitoringService = (service: unknown): void => {
-  monitoringService = service;
-};
+(router as unknown as { setMonitoringService?: (service: unknown) => void }).setMonitoringService =
+  (service: unknown): void => {
+    monitoringService = service as MonitoringServiceApi;
+  };
 
 // 验证规则
 const addSiteSchema = Joi.object({
@@ -124,104 +117,12 @@ const addSiteSchema = Joi.object({
   }).default(),
 });
 
-// 模拟监控站点数据
-const monitoringSites: MonitoringSite[] = [
-  {
-    id: '1',
-    name: 'TestWeb 主站',
-    url: 'https://testweb.com',
-    monitoringType: 'uptime',
-    checkInterval: 300,
-    timeout: 30,
-    config: {},
-    notificationSettings: {
-      email: true,
-      sms: false,
-      webhook: false,
-      threshold: {
-        responseTime: 5000,
-        uptime: 99.9,
-        errorRate: 5,
-      },
-    },
-    status: 'active',
-    lastCheck: new Date(Date.now() - 1000 * 60 * 5),
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    createdBy: 'admin',
-    statistics: {
-      totalChecks: 1440,
-      successfulChecks: 1435,
-      failedChecks: 5,
-      averageResponseTime: 1200,
-      uptime: 99.65,
-      lastError: 'Connection timeout',
-    },
-  },
-  {
-    id: '2',
-    name: 'TestWeb API',
-    url: 'https://api.testweb.com',
-    monitoringType: 'performance',
-    checkInterval: 60,
-    timeout: 10,
-    config: {},
-    notificationSettings: {
-      email: true,
-      sms: true,
-      webhook: true,
-      threshold: {
-        responseTime: 2000,
-        uptime: 99.5,
-        errorRate: 3,
-      },
-    },
-    status: 'active',
-    lastCheck: new Date(Date.now() - 1000 * 60 * 2),
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
-    createdBy: 'admin',
-    statistics: {
-      totalChecks: 7200,
-      successfulChecks: 7180,
-      failedChecks: 20,
-      averageResponseTime: 800,
-      uptime: 99.72,
-      lastError: 'Database connection failed',
-    },
-  },
-];
-
-// 模拟监控告警数据
-const monitoringAlerts: MonitoringAlert[] = [
-  {
-    id: '1',
-    siteId: '1',
-    type: 'down',
-    message: '网站无法访问',
-    severity: 'critical',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    resolved: false,
-    metadata: {
-      error: 'Connection refused',
-      responseTime: null,
-    },
-  },
-  {
-    id: '2',
-    siteId: '2',
-    type: 'slow',
-    message: '响应时间过慢',
-    severity: 'medium',
-    timestamp: new Date(Date.now() - 1000 * 60 * 15),
-    resolved: true,
-    resolvedAt: new Date(Date.now() - 1000 * 60 * 10),
-    metadata: {
-      responseTime: 3500,
-      threshold: 2000,
-    },
-  },
-];
+const ensureMonitoringService = (): MonitoringServiceApi => {
+  if (!monitoringService) {
+    throw new Error('监控服务未初始化');
+  }
+  return monitoringService;
+};
 
 /**
  * GET /api/system/monitoring/sites
@@ -230,71 +131,33 @@ const monitoringAlerts: MonitoringAlert[] = [
 router.get(
   '/sites',
   authMiddleware,
-  validateRequest(addSiteSchema),
   asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const query: MonitoringQuery = req.query;
     const userId = getUserId(req);
 
     try {
-      let filteredSites = [...monitoringSites];
+      const service = ensureMonitoringService();
+      const page = query.page ? Number(query.page) : 1;
+      const limit = query.limit ? Number(query.limit) : 20;
+      const result = await service.getMonitoringTargets(userId, {
+        page,
+        limit,
+        status: query.status || null,
+        monitoringType: query.monitoringType || null,
+        search: query.search || null,
+      });
+      const summary = await service.getMonitoringSummary(userId);
 
-      // 按状态过滤
-      if (query.status) {
-        filteredSites = filteredSites.filter(site => site.status === query.status);
-      }
-
-      // 按监控类型过滤
-      if (query.monitoringType) {
-        filteredSites = filteredSites.filter(site => site.monitoringType === query.monitoringType);
-      }
-
-      // 搜索过滤
-      if (query.search) {
-        const searchLower = query.search.toLowerCase();
-        filteredSites = filteredSites.filter(
-          site =>
-            site.name.toLowerCase().includes(searchLower) ||
-            site.url.toLowerCase().includes(searchLower)
-        );
-      }
-
-      // 排序
-      filteredSites.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-      // 分页
-      const page = query.page || 1;
-      const limit = query.limit || 20;
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedSites = filteredSites.slice(startIndex, endIndex);
-
-      res.json({
+      return res.json({
         success: true,
         data: {
-          sites: paginatedSites,
-          pagination: {
-            page,
-            limit,
-            total: filteredSites.length,
-            totalPages: Math.ceil(filteredSites.length / limit),
-          },
-          summary: {
-            total: monitoringSites.length,
-            active: monitoringSites.filter(s => s.status === 'active').length,
-            inactive: monitoringSites.filter(s => s.status === 'inactive').length,
-            paused: monitoringSites.filter(s => s.status === 'paused').length,
-            byType: monitoringSites.reduce(
-              (acc, site) => {
-                acc[site.monitoringType] = (acc[site.monitoringType] || 0) + 1;
-                return acc;
-              },
-              {} as Record<string, number>
-            ),
-          },
+          sites: result.data,
+          pagination: result.pagination,
+          summary,
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取监控站点列表失败',
         error: error instanceof Error ? error.message : String(error),
@@ -316,15 +179,16 @@ router.post(
     const siteData: AddSiteRequest = req.body;
 
     try {
-      const newSite: MonitoringSite = {
-        id: Date.now().toString(),
+      const service = ensureMonitoringService();
+      const newSite = await service.addMonitoringTarget({
+        user_id: userId,
         name: siteData.name,
         url: siteData.url,
-        monitoringType: siteData.monitoringType || 'uptime',
-        checkInterval: siteData.checkInterval || 300,
+        monitoring_type: siteData.monitoringType || 'uptime',
+        check_interval: siteData.checkInterval || 300,
         timeout: siteData.timeout || 30,
         config: siteData.config || {},
-        notificationSettings: {
+        notification_settings: {
           email: true,
           sms: false,
           webhook: false,
@@ -335,33 +199,15 @@ router.post(
           },
           ...siteData.notificationSettings,
         },
-        status: 'active',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        createdBy: userId,
-        statistics: {
-          totalChecks: 0,
-          successfulChecks: 0,
-          failedChecks: 0,
-          averageResponseTime: 0,
-          uptime: 100,
-        },
-      };
+      });
 
-      monitoringSites.push(newSite);
-
-      // 启动监控
-      if (monitoringService) {
-        await monitoringService.startMonitoring(newSite.id);
-      }
-
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: '监控站点添加成功',
         data: newSite,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '添加监控站点失败',
         error: error instanceof Error ? error.message : String(error),
@@ -379,9 +225,11 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const userId = getUserId(req as AuthenticatedRequest);
 
     try {
-      const site = monitoringSites.find(s => s.id === id);
+      const service = ensureMonitoringService();
+      const site = await service.getMonitoringTarget(id, userId);
 
       if (!site) {
         return res.status(404).json({
@@ -390,12 +238,12 @@ router.get(
         });
       }
 
-      res.json({
+      return res.json({
         success: true,
         data: site,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取监控站点详情失败',
         error: error instanceof Error ? error.message : String(error),
@@ -417,31 +265,23 @@ router.put(
     const updateData = req.body;
 
     try {
-      const siteIndex = monitoringSites.findIndex(s => s.id === id);
+      const service = ensureMonitoringService();
+      const updated = await service.updateMonitoringTarget(id, userId, updateData);
 
-      if (siteIndex === -1) {
+      if (!updated) {
         return res.status(404).json({
           success: false,
           message: '监控站点不存在',
         });
       }
 
-      // 更新站点信息
-      Object.assign(monitoringSites[siteIndex], updateData);
-      monitoringSites[siteIndex].updatedAt = new Date();
-
-      // 如果监控服务存在，更新监控配置
-      if (monitoringService) {
-        await monitoringService.updateMonitoring(id, updateData);
-      }
-
-      res.json({
+      return res.json({
         success: true,
         message: '监控站点更新成功',
-        data: monitoringSites[siteIndex],
+        data: updated,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '更新监控站点失败',
         error: error instanceof Error ? error.message : String(error),
@@ -459,31 +299,24 @@ router.delete(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
-
     try {
-      const siteIndex = monitoringSites.findIndex(s => s.id === id);
+      const service = ensureMonitoringService();
+      const removed = await service.removeMonitoringTarget(id);
 
-      if (siteIndex === -1) {
+      if (!removed) {
         return res.status(404).json({
           success: false,
           message: '监控站点不存在',
         });
       }
 
-      const deletedSite = monitoringSites.splice(siteIndex, 1)[0];
-
-      // 停止监控
-      if (monitoringService) {
-        await monitoringService.stopMonitoring(id);
-      }
-
-      res.json({
+      return res.json({
         success: true,
         message: '监控站点删除成功',
-        data: deletedSite,
+        data: { id },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '删除监控站点失败',
         error: error instanceof Error ? error.message : String(error),
@@ -501,40 +334,19 @@ router.post(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const userId = getUserId(req as AuthenticatedRequest);
 
     try {
-      const site = monitoringSites.find(s => s.id === id);
+      const service = ensureMonitoringService();
+      const checkResult = await service.executeImmediateCheck(id, userId);
 
-      if (!site) {
-        return res.status(404).json({
-          success: false,
-          message: '监控站点不存在',
-        });
-      }
-
-      // 执行检查
-      const checkResult = await monitoringService.checkSite(id);
-
-      // 更新统计信息
-      site.statistics.totalChecks++;
-      if (checkResult.success) {
-        site.statistics.successfulChecks++;
-      } else {
-        site.statistics.failedChecks++;
-        site.statistics.lastError = checkResult.error;
-      }
-      site.statistics.averageResponseTime = checkResult.responseTime || 0;
-      site.statistics.uptime =
-        (site.statistics.successfulChecks / site.statistics.totalChecks) * 100;
-      site.lastCheck = new Date();
-
-      res.json({
+      return res.json({
         success: true,
         message: '站点检查完成',
         data: checkResult,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '站点检查失败',
         error: error instanceof Error ? error.message : String(error),
@@ -552,31 +364,26 @@ router.post(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const userId = getUserId(req as AuthenticatedRequest);
 
     try {
-      const siteIndex = monitoringSites.findIndex(s => s.id === id);
+      const service = ensureMonitoringService();
+      const updated = await service.pauseMonitoringTarget(id, userId);
 
-      if (siteIndex === -1) {
+      if (!updated) {
         return res.status(404).json({
           success: false,
           message: '监控站点不存在',
         });
       }
 
-      monitoringSites[siteIndex].status = 'paused';
-
-      // 暂停监控
-      if (monitoringService) {
-        await monitoringService.pauseMonitoring(id);
-      }
-
-      res.json({
+      return res.json({
         success: true,
         message: '监控已暂停',
-        data: monitoringSites[siteIndex],
+        data: updated,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '暂停监控失败',
         error: error instanceof Error ? error.message : String(error),
@@ -594,31 +401,26 @@ router.post(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { id } = req.params;
+    const userId = getUserId(req as AuthenticatedRequest);
 
     try {
-      const siteIndex = monitoringSites.findIndex(s => s.id === id);
+      const service = ensureMonitoringService();
+      const updated = await service.resumeMonitoringTarget(id, userId);
 
-      if (siteIndex === -1) {
+      if (!updated) {
         return res.status(404).json({
           success: false,
           message: '监控站点不存在',
         });
       }
 
-      monitoringSites[siteIndex].status = 'active';
-
-      // 恢复监控
-      if (monitoringService) {
-        await monitoringService.resumeMonitoring(id);
-      }
-
-      res.json({
+      return res.json({
         success: true,
         message: '监控已恢复',
-        data: monitoringSites[siteIndex],
+        data: updated,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '恢复监控失败',
         error: error instanceof Error ? error.message : String(error),
@@ -635,68 +437,28 @@ router.get(
   '/alerts',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { page = 1, limit = 20, type, severity, resolved } = req.query;
+    const { page = 1, limit = 20, severity, status, timeRange } = req.query;
+    const userId = getUserId(req as AuthenticatedRequest);
 
     try {
-      let filteredAlerts = [...monitoringAlerts];
+      const service = ensureMonitoringService();
+      const alerts = await service.getAlerts(userId, {
+        page: Number(page),
+        limit: Number(limit),
+        severity,
+        status,
+        timeRange,
+      });
 
-      // 按类型过滤
-      if (type) {
-        filteredAlerts = filteredAlerts.filter(alert => alert.type === type);
-      }
-
-      // 按严重程度过滤
-      if (severity) {
-        filteredAlerts = filteredAlerts.filter(alert => alert.severity === severity);
-      }
-
-      // 按解决状态过滤
-      if (resolved !== undefined) {
-        const isResolved = resolved === 'true';
-        filteredAlerts = filteredAlerts.filter(alert => alert.resolved === isResolved);
-      }
-
-      // 排序
-      filteredAlerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-      // 分页
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedAlerts = filteredAlerts.slice(startIndex, endIndex);
-
-      res.json({
+      return res.json({
         success: true,
         data: {
-          alerts: paginatedAlerts,
-          pagination: {
-            page: parseInt(page as string),
-            limit: parseInt(limit as string),
-            total: filteredAlerts.length,
-            totalPages: Math.ceil(filteredAlerts.length / parseInt(limit as string)),
-          },
-          summary: {
-            total: monitoringAlerts.length,
-            resolved: monitoringAlerts.filter(a => a.resolved).length,
-            unresolved: monitoringAlerts.filter(a => !a.resolved).length,
-            byType: monitoringAlerts.reduce(
-              (acc, alert) => {
-                acc[alert.type] = (acc[alert.type] || 0) + 1;
-                return acc;
-              },
-              {} as Record<string, number>
-            ),
-            bySeverity: monitoringAlerts.reduce(
-              (acc, alert) => {
-                acc[alert.severity] = (acc[alert.severity] || 0) + 1;
-                return acc;
-              },
-              {} as Record<string, number>
-            ),
-          },
+          alerts: alerts.data,
+          pagination: alerts.pagination,
         },
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取监控告警失败',
         error: error instanceof Error ? error.message : String(error),
@@ -713,67 +475,18 @@ router.get(
   '/statistics',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { timeRange = '24h' } = req.query;
+    const userId = getUserId(req as AuthenticatedRequest);
 
     try {
-      const statistics = {
-        sites: {
-          total: monitoringSites.length,
-          active: monitoringSites.filter(s => s.status === 'active').length,
-          inactive: monitoringSites.filter(s => s.status === 'inactive').length,
-          paused: monitoringSites.filter(s => s.status === 'paused').length,
-        },
-        checks: {
-          total: monitoringSites.reduce((sum, site) => sum + site.statistics.totalChecks, 0),
-          successful: monitoringSites.reduce(
-            (sum, site) => sum + site.statistics.successfulChecks,
-            0
-          ),
-          failed: monitoringSites.reduce((sum, site) => sum + site.statistics.failedChecks, 0),
-          averageResponseTime:
-            monitoringSites.reduce((sum, site) => sum + site.statistics.averageResponseTime, 0) /
-            monitoringSites.length,
-          averageUptime:
-            monitoringSites.reduce((sum, site) => sum + site.statistics.uptime, 0) /
-            monitoringSites.length,
-        },
-        alerts: {
-          total: monitoringAlerts.length,
-          resolved: monitoringAlerts.filter(a => a.resolved).length,
-          unresolved: monitoringAlerts.filter(a => !a.resolved).length,
-          byType: monitoringAlerts.reduce(
-            (acc, alert) => {
-              acc[alert.type] = (acc[alert.type] || 0) + 1;
-              return acc;
-            },
-            {} as Record<string, number>
-          ),
-          bySeverity: monitoringAlerts.reduce(
-            (acc, alert) => {
-              acc[alert.severity] = (acc[alert.severity] || 0) + 1;
-              return acc;
-            },
-            {} as Record<string, number>
-          ),
-        },
-        uptime: {
-          overall:
-            monitoringSites.reduce((sum, site) => sum + site.statistics.uptime, 0) /
-            monitoringSites.length,
-          bySite: monitoringSites.map(site => ({
-            id: site.id,
-            name: site.name,
-            uptime: site.statistics.uptime,
-          })),
-        },
-      };
+      const service = ensureMonitoringService();
+      const stats = await service.getMonitoringStats(userId);
 
-      res.json({
+      return res.json({
         success: true,
-        data: statistics,
+        data: stats,
       });
     } catch (error) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: '获取监控统计失败',
         error: error instanceof Error ? error.message : String(error),
@@ -791,15 +504,14 @@ router.get(
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
     try {
-      const health = await monitoringService.healthCheck();
+      const health = await ensureMonitoringService().healthCheck();
 
-      res.json({
+      return res.json({
         success: true,
         data: health,
       });
     } catch (error) {
-      res.status(500).json({
-        ...error,
+      return res.status(500).json({
         success: false,
         message: '监控服务健康检查失败',
         error: error instanceof Error ? error.message : String(error),

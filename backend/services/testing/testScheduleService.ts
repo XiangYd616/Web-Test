@@ -1,16 +1,7 @@
 import cronParser from 'cron-parser';
 import { query } from '../../config/database';
-import { errorLogAggregator } from '../../utils/ErrorLogAggregator';
+import { insertExecutionLog } from './testLogService';
 import testService from './testService';
-
-const TEST_LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const;
-type TestLogLevel = (typeof TEST_LOG_LEVELS)[number];
-const normalizeTestLogLevel = (level?: string, fallback: TestLogLevel = 'info'): TestLogLevel => {
-  if (level && (TEST_LOG_LEVELS as readonly string[]).includes(level)) {
-    return level as TestLogLevel;
-  }
-  return fallback;
-};
 
 type TestScheduleRecord = {
   id: number;
@@ -375,7 +366,7 @@ class TestScheduleService {
          WHERE id = $2 AND user_id = $3`,
         [JSON.stringify(updatedConfig), scheduleId, userId]
       );
-      await this.insertExecutionLog(String(scheduleId), 'warn', '调度任务配置无效', {
+      await insertExecutionLog(String(scheduleId), 'warn', '调度任务配置无效', {
         scheduleId,
         scheduleName: schedule.schedule_name,
         engineType: schedule.engine_type,
@@ -423,7 +414,7 @@ class TestScheduleService {
       );
 
       if (executionId) {
-        await this.insertExecutionLog(executionId, 'info', '调度任务触发执行', {
+        await insertExecutionLog(executionId, 'info', '调度任务触发执行', {
           scheduleId,
           scheduleName: schedule.schedule_name,
           engineType: schedule.engine_type,
@@ -433,7 +424,7 @@ class TestScheduleService {
       return result;
     } catch (error) {
       if (executionId) {
-        await this.insertExecutionLog(executionId, 'warn', '调度任务执行失败', {
+        await insertExecutionLog(executionId, 'warn', '调度任务执行失败', {
           scheduleId,
           scheduleName: schedule.schedule_name,
           error: error instanceof Error ? error.message : String(error),
@@ -460,7 +451,7 @@ class TestScheduleService {
       );
 
       if (executionId && !shouldRetry) {
-        await this.insertExecutionLog(executionId, 'warn', '调度任务重试已耗尽', {
+        await insertExecutionLog(executionId, 'warn', '调度任务重试已耗尽', {
           scheduleId,
           scheduleName: schedule.schedule_name,
           retryCount,
@@ -486,30 +477,6 @@ class TestScheduleService {
       [userId, String(scheduleId)]
     );
     return (result.rows || []).length > 0;
-  }
-
-  private async insertExecutionLog(
-    testId: string,
-    level: string,
-    message: string,
-    context: Record<string, unknown> = {}
-  ): Promise<void> {
-    const normalizedLevel = normalizeTestLogLevel(level, 'info');
-    await query(
-      `INSERT INTO test_logs (execution_id, level, message, context)
-       SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
-      [normalizedLevel, message, JSON.stringify(context), testId]
-    );
-
-    void errorLogAggregator.log({
-      level: normalizedLevel,
-      message,
-      type: 'test',
-      details: context,
-      context: {
-        testId,
-      },
-    });
   }
 
   async listScheduleRuns(

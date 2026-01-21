@@ -6,7 +6,11 @@
 import type { Pool } from 'pg';
 
 const { getPool } = require('../config/database');
-const { USER_FIELD_MAPPING, TEST_FIELD_MAPPING, FieldMapper } = require('../config/fieldMapping');
+const {
+  USER_FIELD_MAPPING,
+  TEST_FIELD_MAPPING,
+  FieldMapper,
+} = require('../../shared/utils/fieldMapping');
 
 type UserFilters = {
   role?: string;

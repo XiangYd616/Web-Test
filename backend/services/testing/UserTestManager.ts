@@ -1,20 +1,16 @@
 import Joi from 'joi';
 import type { TestProgress } from '../../../shared/types/testEngine.types';
 import { TestEngineType, TestStatus } from '../../../shared/types/testEngine.types';
-import { errorLogAggregator } from '../../utils/ErrorLogAggregator';
+import {
+  insertExecutionLog,
+  markCompletedWithLog,
+  markFailedWithLog,
+  updateStatusWithLog,
+} from './testLogService';
 
 const { query } = require('../../config/database');
 const testRepository = require('../../repositories/testRepository');
 const registry = require('../../core/TestEngineRegistry');
-
-const TEST_LOG_LEVELS = ['error', 'warn', 'info', 'debug'] as const;
-type TestLogLevel = (typeof TEST_LOG_LEVELS)[number];
-const normalizeTestLogLevel = (level?: string, fallback: TestLogLevel = 'info'): TestLogLevel => {
-  if (level && (TEST_LOG_LEVELS as readonly string[]).includes(level)) {
-    return level as TestLogLevel;
-  }
-  return fallback;
-};
 
 type EngineProgress = Record<string, unknown> & { testId?: string };
 
@@ -93,7 +89,7 @@ class UserTestManager {
 
     if (error) {
       Logger.warn('测试结果结构校验失败', { details: error.details.map(item => item.message) });
-      void this.insertExecutionLog(
+      void insertExecutionLog(
         (results as { testId?: string }).testId || '',
         'warn',
         '测试结果结构校验失败',
@@ -335,7 +331,7 @@ class UserTestManager {
       const message = (progress as { message?: string }).message;
       if (message && this.shouldLogProgress(testId, progressValue, message)) {
         Promise.resolve(
-          this.insertExecutionLog(testId, 'info', '测试进度更新', {
+          insertExecutionLog(testId, 'info', '测试进度更新', {
             message,
             progress: progressValue,
           })
@@ -390,14 +386,18 @@ class UserTestManager {
       }
 
       try {
-        await testRepository.markFailed(testId, error.message);
-        await this.insertExecutionLog(testId, 'error', failureMessage, {
-          message: error.message,
-          timeout: isTimeout,
-          errorName: error.name,
-          stack: error.stack,
-          details: (error as { details?: unknown }).details,
-        });
+        await markFailedWithLog(
+          testId,
+          error.message,
+          {
+            message: error.message,
+            timeout: isTimeout,
+            errorName: error.name,
+            stack: error.stack,
+            details: (error as { details?: unknown }).details,
+          },
+          failureMessage
+        );
 
         const scheduleId = this.extractScheduleId(execution?.test_config || null);
         if (scheduleId) {
@@ -437,8 +437,7 @@ class UserTestManager {
       const execution = await testRepository.findById(testId, userId);
       const status = execution?.status;
       if (status !== 'stopped' && status !== 'cancelled') {
-        await testRepository.updateStatus(testId, 'stopped');
-        await this.insertExecutionLog(testId, 'info', '测试已停止', {
+        await updateStatusWithLog(testId, 'stopped', '测试已停止', {
           userId,
           source: 'registry.cancel',
         });
@@ -586,9 +585,25 @@ class UserTestManager {
       const isFailed = normalizedStatus !== TestStatus.COMPLETED;
 
       if (isFailed) {
-        await testRepository.markFailed(testId, failureMessage);
+        await markFailedWithLog(
+          testId,
+          failureMessage,
+          {
+            score,
+            grade,
+            metricCount: metrics.length,
+            errorCount: errors.length,
+            failureMessage,
+          },
+          '测试失败'
+        );
       } else {
-        await testRepository.markCompleted(testId, executionTime);
+        await markCompletedWithLog(testId, executionTime, {
+          score,
+          grade,
+          metricCount: metrics.length,
+          errorCount: errors.length,
+        });
       }
 
       const scheduleId = this.extractScheduleId(execution.test_config || null);
@@ -612,19 +627,6 @@ class UserTestManager {
           });
         }
       }
-
-      await this.insertExecutionLog(
-        testId,
-        isFailed ? 'error' : 'info',
-        isFailed ? '测试失败' : '测试完成',
-        {
-          score,
-          grade,
-          metricCount: metrics.length,
-          errorCount: errors.length,
-          failureMessage: isFailed ? failureMessage : undefined,
-        }
-      );
 
       Logger.info(`测试结果保存成功: ${testId}`);
     } catch (error) {
@@ -847,30 +849,6 @@ class UserTestManager {
       value: this.normalizeMetricValue(value),
       type: 'summary',
     };
-  }
-
-  private async insertExecutionLog(
-    testId: string,
-    level: string,
-    message: string,
-    context: Record<string, unknown> = {}
-  ): Promise<void> {
-    const normalizedLevel = normalizeTestLogLevel(level, 'info');
-    await query(
-      `INSERT INTO test_logs (execution_id, level, message, context)
-       SELECT id, $1, $2, $3 FROM test_executions WHERE test_id = $4`,
-      [normalizedLevel, message, JSON.stringify(context), testId]
-    );
-
-    void errorLogAggregator.log({
-      level: normalizedLevel,
-      message,
-      type: 'test',
-      details: context,
-      context: {
-        testId,
-      },
-    });
   }
 
   calculateOverallScore(results: Record<string, unknown>) {
