@@ -7,6 +7,7 @@ import { EventEmitter } from 'events';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { query } from '../../config/database';
+import Logger from '../../utils/logger';
 import ReportGenerator, {
   ReportConfig as GeneratorReportConfig,
   ReportData as GeneratorReportData,
@@ -28,6 +29,9 @@ export interface ReportTemplate {
   styling: ReportStyling;
   createdAt: Date;
   updatedAt: Date;
+  createdBy?: string;
+  isSystem?: boolean;
+  isPublic?: boolean;
 }
 
 // 报告变量接口
@@ -101,6 +105,7 @@ export interface ReportConfig {
   enabled: boolean;
   createdAt: Date;
   updatedAt: Date;
+  createdBy?: string;
 }
 
 // 报告调度接口
@@ -280,16 +285,11 @@ class AutomatedReportingService extends EventEmitter {
   private isInitialized: boolean = false;
   private reportGenerator: ReportGenerator;
   private reportsDir: string;
-  private templatesFile: string;
-  private configsFile: string;
 
   constructor() {
     super();
     this.reportGenerator = new ReportGenerator();
     this.reportsDir = path.join(__dirname, '../../reports');
-    this.templatesFile = path.join(this.reportsDir, 'report_templates.json');
-    this.configsFile = path.join(this.reportsDir, 'report_configs.json');
-    this.initializeDefaultTemplates();
   }
 
   /**
@@ -303,6 +303,9 @@ class AutomatedReportingService extends EventEmitter {
     try {
       // 加载模板
       await this.loadTemplates();
+
+      // 初始化默认模板
+      await this.initializeDefaultTemplates();
 
       // 加载配置
       await this.loadConfigs();
@@ -396,6 +399,70 @@ class AutomatedReportingService extends EventEmitter {
     this.emit('template_deleted', { templateId });
 
     return true;
+  }
+
+  /**
+   * 记录报告访问
+   */
+  async recordAccess(
+    reportId: string,
+    userId: string | null,
+    accessType: 'view' | 'download' | 'share' | 'generate',
+    success: boolean,
+    meta: { errorMessage?: string; userAgent?: string; ipAddress?: string; shareId?: string } = {}
+  ) {
+    await this.logReportAccess(
+      reportId,
+      userId,
+      meta.shareId || null,
+      accessType,
+      success,
+      meta.errorMessage,
+      meta.userAgent,
+      meta.ipAddress
+    );
+  }
+
+  /**
+   * 发送分享邮件
+   */
+  async sendShareEmail(options: {
+    recipients: string[];
+    subject: string;
+    html: string;
+  }): Promise<void> {
+    if (!this.mailTransporter) {
+      throw new Error('邮件服务未配置');
+    }
+
+    const mailOptions: MailOptions = {
+      from: this.mailFrom || 'reports@example.com',
+      to: options.recipients,
+      subject: options.subject,
+      html: options.html,
+    };
+
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        await this.mailTransporter.sendMail(mailOptions);
+        Logger.info('分享邮件发送成功', { recipients: options.recipients, attempt });
+        return;
+      } catch (error) {
+        Logger.error('分享邮件发送失败', error, {
+          recipients: options.recipients,
+          attempt,
+        });
+        if (attempt === maxAttempts) {
+          throw error;
+        }
+        await this.delay(1000 * attempt);
+      }
+    }
+  }
+
+  private async delay(ms: number): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -520,6 +587,7 @@ class AutomatedReportingService extends EventEmitter {
 
     this.instances.set(instanceId, instance);
     this.emit('report_generation_started', instance);
+    await this.saveReportInstance(instanceId, null, instance);
 
     try {
       const resolvedVariables = this.resolveTemplateVariables(template, options.variables || {});
@@ -554,6 +622,16 @@ class AutomatedReportingService extends EventEmitter {
       this.instances.set(instanceId, instance);
       this.emit('report_generation_completed', instance);
 
+      await this.saveReportInstance(instanceId, reportRecordId, instance);
+
+      await this.logReportAccess(
+        String(reportRecordId),
+        config.createdBy || null,
+        null,
+        'generate',
+        true
+      );
+
       // 发送报告
       if (config.delivery.method === 'email') {
         await this.sendReport(instance, config);
@@ -568,6 +646,8 @@ class AutomatedReportingService extends EventEmitter {
 
       this.instances.set(instanceId, instance);
       this.emit('report_generation_failed', instance);
+
+      await this.saveReportInstance(instanceId, null, instance);
       throw error;
     }
   }
@@ -576,14 +656,26 @@ class AutomatedReportingService extends EventEmitter {
    * 获取报告实例
    */
   async getReportInstance(instanceId: string): Promise<ReportInstance | null> {
-    return this.instances.get(instanceId) || null;
+    const cached = this.instances.get(instanceId) || null;
+    if (cached) {
+      return cached;
+    }
+
+    const rows = await this.loadReportInstancesFromDb(instanceId);
+    return rows[0] || null;
   }
 
   /**
    * 获取所有报告实例
    */
   async getAllReportInstances(): Promise<ReportInstance[]> {
-    return Array.from(this.instances.values());
+    const stored = await this.loadReportInstancesFromDb();
+    const merged = new Map<string, ReportInstance>();
+
+    stored.forEach(instance => merged.set(instance.id, instance));
+    this.instances.forEach((instance, id) => merged.set(id, instance));
+
+    return Array.from(merged.values());
   }
 
   /**
@@ -602,6 +694,8 @@ class AutomatedReportingService extends EventEmitter {
     this.instances.set(instanceId, instance);
     this.emit('report_generation_cancelled', instance);
 
+    await this.saveReportInstance(instanceId, null, instance);
+
     return true;
   }
 
@@ -609,7 +703,7 @@ class AutomatedReportingService extends EventEmitter {
    * 获取统计信息
    */
   async getStatistics(): Promise<ReportStatistics> {
-    const instances = Array.from(this.instances.values());
+    const instances = await this.getAllReportInstances();
 
     const totalReports = instances.length;
     const successfulReports = instances.filter(i => i.status === 'completed').length;
@@ -1025,7 +1119,13 @@ class AutomatedReportingService extends EventEmitter {
   /**
    * 初始化默认模板
    */
-  private initializeDefaultTemplates(): void {
+  private async initializeDefaultTemplates(): Promise<void> {
+    const hasSystemTemplate = Array.from(this.templates.values()).some(
+      template => template.isSystem
+    );
+    if (hasSystemTemplate) {
+      return;
+    }
     const defaultTemplates: Omit<ReportTemplate, 'id' | 'createdAt' | 'updatedAt'>[] = [
       {
         name: '性能报告模板',
@@ -1163,9 +1263,13 @@ class AutomatedReportingService extends EventEmitter {
       },
     ];
 
-    defaultTemplates.forEach(template => {
-      this.createTemplate(template);
-    });
+    for (const template of defaultTemplates) {
+      await this.createTemplate({
+        ...template,
+        isSystem: true,
+        isPublic: true,
+      });
+    }
   }
 
   /**
@@ -1216,42 +1320,170 @@ class AutomatedReportingService extends EventEmitter {
    * 加载模板
    */
   private async loadTemplates(): Promise<void> {
-    try {
-      const raw = await fs.readFile(this.templatesFile, 'utf8');
-      const data = JSON.parse(raw) as ReportTemplate[];
-      data.forEach(template => this.templates.set(template.id, template));
-    } catch {
-      // 忽略首次加载失败
-    }
+    const result = await query(
+      `SELECT id, name, description, report_type, template_config, default_format,
+              is_public, is_system, created_at, updated_at, user_id
+       FROM report_templates`
+    );
+
+    (result.rows || []).forEach((row: Record<string, unknown>) => {
+      const config = (row.template_config || {}) as Record<string, unknown>;
+      const template: ReportTemplate = {
+        id: String(row.id),
+        name: String(row.name),
+        description: String(row.description || ''),
+        category: (row.report_type as ReportTemplate['category']) || 'custom',
+        type: (config.type as ReportTemplate['type']) || 'summary',
+        format: (row.default_format as ReportTemplate['format']) || 'html',
+        template: String(config.template || ''),
+        variables: (config.variables as ReportVariable[]) || [],
+        sections: (config.sections as ReportSection[]) || [],
+        styling: (config.styling as ReportStyling) || {
+          theme: 'light',
+          colors: {
+            primary: '#1d4ed8',
+            secondary: '#64748b',
+            accent: '#22c55e',
+            background: '#ffffff',
+            text: '#0f172a',
+          },
+          fonts: {
+            heading: 'Inter',
+            body: 'Inter',
+            code: 'Fira Code',
+          },
+          layout: {
+            pageSize: 'A4',
+            orientation: 'portrait',
+            margins: { top: 40, right: 32, bottom: 40, left: 32 },
+          },
+        },
+        createdAt: new Date(String(row.created_at)),
+        updatedAt: new Date(String(row.updated_at)),
+        createdBy: row.user_id ? String(row.user_id) : undefined,
+        isSystem: Boolean(row.is_system),
+        isPublic: Boolean(row.is_public),
+      };
+
+      this.templates.set(template.id, template);
+    });
   }
 
   /**
    * 保存模板
    */
   private async saveTemplates(): Promise<void> {
-    const data = Array.from(this.templates.values());
-    await fs.writeFile(this.templatesFile, JSON.stringify(data, null, 2), 'utf8');
+    const templates = Array.from(this.templates.values());
+    for (const template of templates) {
+      await query(
+        `INSERT INTO report_templates (
+           id, name, description, report_type, template_config, default_format,
+           is_public, is_system, created_at, updated_at, user_id
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+         ON CONFLICT (id) DO UPDATE SET
+           name = EXCLUDED.name,
+           description = EXCLUDED.description,
+           report_type = EXCLUDED.report_type,
+           template_config = EXCLUDED.template_config,
+           default_format = EXCLUDED.default_format,
+           is_public = EXCLUDED.is_public,
+           is_system = EXCLUDED.is_system,
+           updated_at = EXCLUDED.updated_at,
+           user_id = EXCLUDED.user_id`,
+        [
+          template.id,
+          template.name,
+          template.description,
+          template.category,
+          JSON.stringify({
+            type: template.type,
+            template: template.template,
+            variables: template.variables,
+            sections: template.sections,
+            styling: template.styling,
+          }),
+          template.format,
+          template.isPublic ?? false,
+          template.isSystem ?? false,
+          template.createdAt,
+          template.updatedAt,
+          template.createdBy ?? null,
+        ]
+      );
+    }
   }
 
   /**
    * 加载配置
    */
   private async loadConfigs(): Promise<void> {
-    try {
-      const raw = await fs.readFile(this.configsFile, 'utf8');
-      const data = JSON.parse(raw) as ReportConfig[];
-      data.forEach(config => this.configs.set(config.id, config));
-    } catch {
-      // 忽略首次加载失败
-    }
+    const result = await query(
+      `SELECT id, name, description, template_id, schedule, recipients, filters,
+              format, delivery, enabled, created_at, updated_at, user_id
+       FROM report_configs`
+    );
+
+    (result.rows || []).forEach((row: Record<string, unknown>) => {
+      const config: ReportConfig = {
+        id: String(row.id),
+        name: String(row.name),
+        description: String(row.description || ''),
+        templateId: String(row.template_id),
+        schedule: (row.schedule as ReportSchedule) || { type: 'once' },
+        recipients: (row.recipients as ReportRecipient[]) || [],
+        filters: (row.filters as ReportFilter[]) || [],
+        format: (row.format as ReportFormat) || { type: 'html', options: {} },
+        delivery: (row.delivery as ReportDelivery) || { method: 'storage', settings: {} },
+        enabled: Boolean(row.enabled),
+        createdAt: new Date(String(row.created_at)),
+        updatedAt: new Date(String(row.updated_at)),
+        createdBy: row.user_id ? String(row.user_id) : undefined,
+      };
+
+      this.configs.set(config.id, config);
+    });
   }
 
   /**
    * 保存配置
    */
   private async saveConfigs(): Promise<void> {
-    const data = Array.from(this.configs.values());
-    await fs.writeFile(this.configsFile, JSON.stringify(data, null, 2), 'utf8');
+    const configs = Array.from(this.configs.values());
+    for (const config of configs) {
+      await query(
+        `INSERT INTO report_configs (
+           id, name, description, template_id, schedule, recipients, filters,
+           format, delivery, enabled, created_at, updated_at, user_id
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+         ON CONFLICT (id) DO UPDATE SET
+           name = EXCLUDED.name,
+           description = EXCLUDED.description,
+           template_id = EXCLUDED.template_id,
+           schedule = EXCLUDED.schedule,
+           recipients = EXCLUDED.recipients,
+           filters = EXCLUDED.filters,
+           format = EXCLUDED.format,
+           delivery = EXCLUDED.delivery,
+           enabled = EXCLUDED.enabled,
+           updated_at = EXCLUDED.updated_at,
+           user_id = EXCLUDED.user_id`,
+        [
+          config.id,
+          config.name,
+          config.description,
+          config.templateId,
+          JSON.stringify(config.schedule || {}),
+          JSON.stringify(config.recipients || []),
+          JSON.stringify(config.filters || []),
+          JSON.stringify(config.format || { type: 'html', options: {} }),
+          JSON.stringify(config.delivery || { method: 'storage', settings: {} }),
+          config.enabled,
+          config.createdAt,
+          config.updatedAt,
+          config.createdBy ?? null,
+        ]
+      );
+    }
   }
 
   /**
@@ -1338,6 +1570,7 @@ class AutomatedReportingService extends EventEmitter {
       metadata: {
         templateId: template.id,
         format: config.format.type,
+        configId: config.id,
         variables,
       },
     };
@@ -1458,11 +1691,11 @@ class AutomatedReportingService extends EventEmitter {
     const recentTests = data.tables.find(table => table.id === 'recent-tests')?.rows || [];
 
     const filterByType = (type: string) =>
-      detailMetricsList.filter(metric => String(metric.type || '') === type);
+      detailMetricsList.filter(metric => String((metric as { type?: string }).type || '') === type);
     const filterBottlenecks = () =>
       detailMetricsList.filter(metric => {
-        const severity = String(metric.severity || '').toLowerCase();
-        const passed = metric.passed;
+        const severity = String((metric as { severity?: string }).severity || '').toLowerCase();
+        const passed = (metric as { passed?: boolean }).passed;
         return passed === false || severity === 'high' || severity === 'critical';
       });
 
@@ -1489,8 +1722,9 @@ class AutomatedReportingService extends EventEmitter {
     };
 
     const sections: Record<string, unknown> = {};
-    template.sections.forEach(sectionId => {
-      sections[sectionId] = sectionMap[sectionId] ?? {};
+    template.sections.forEach(section => {
+      const key = section.id;
+      sections[key] = sectionMap[key] ?? {};
     });
 
     return sections;
@@ -1554,7 +1788,7 @@ class AutomatedReportingService extends EventEmitter {
     data: GeneratorReportData,
     filePath: string,
     fileSize: number
-  ): Promise<number> {
+  ): Promise<string> {
     const result = await query(
       `INSERT INTO test_reports (
          execution_id, report_type, format, report_data, file_path, file_size
@@ -1562,7 +1796,130 @@ class AutomatedReportingService extends EventEmitter {
        RETURNING id`,
       [executionId, template.type, format, JSON.stringify(data), filePath, fileSize]
     );
-    return result.rows[0]?.id;
+    return String(result.rows[0]?.id);
+  }
+
+  private async saveReportInstance(
+    instanceId: string,
+    reportId: string | null,
+    instance: ReportInstance
+  ) {
+    await query(
+      `INSERT INTO report_instances (
+         id, report_id, config_id, template_id, status, format, generated_at, completed_at,
+         duration, path, url, size, error, metadata
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+       ON CONFLICT (id) DO UPDATE SET
+         report_id = EXCLUDED.report_id,
+         config_id = EXCLUDED.config_id,
+         template_id = EXCLUDED.template_id,
+         status = EXCLUDED.status,
+         format = EXCLUDED.format,
+         generated_at = EXCLUDED.generated_at,
+         completed_at = EXCLUDED.completed_at,
+         duration = EXCLUDED.duration,
+         path = EXCLUDED.path,
+         url = EXCLUDED.url,
+         size = EXCLUDED.size,
+         error = EXCLUDED.error,
+         metadata = EXCLUDED.metadata`,
+      [
+        instanceId,
+        reportId,
+        instance.configId || null,
+        instance.templateId || null,
+        instance.status,
+        instance.format,
+        instance.generatedAt,
+        instance.completedAt || null,
+        instance.duration || null,
+        instance.path || null,
+        instance.url || null,
+        instance.size || null,
+        instance.error || null,
+        JSON.stringify(instance.metadata || {}),
+      ]
+    );
+  }
+
+  private async loadReportInstancesFromDb(instanceId?: string): Promise<ReportInstance[]> {
+    const params: unknown[] = [];
+    const whereClause = instanceId ? 'WHERE ri.id = $1' : '';
+    if (instanceId) {
+      params.push(instanceId);
+    }
+
+    const result = await query(
+      `SELECT
+         ri.id,
+         ri.report_id,
+         ri.config_id,
+         ri.template_id,
+         ri.status,
+         ri.format,
+         ri.generated_at,
+         ri.completed_at,
+         ri.duration,
+         ri.path,
+         ri.url,
+         ri.size,
+         ri.error,
+         ri.metadata
+       FROM report_instances ri
+       ${whereClause}
+       ORDER BY ri.generated_at DESC`,
+      params
+    );
+
+    return (result.rows || []).map(
+      (row: Record<string, unknown>) =>
+        ({
+          id: String(row.id),
+          configId: row.config_id ? String(row.config_id) : '',
+          templateId: row.template_id ? String(row.template_id) : '',
+          status: (row.status as ReportInstance['status']) || 'completed',
+          generatedAt: row.generated_at
+            ? new Date(row.generated_at as string | number | Date)
+            : new Date(),
+          completedAt: row.completed_at
+            ? new Date(row.completed_at as string | number | Date)
+            : undefined,
+          duration: row.duration ? Number(row.duration) : undefined,
+          format: String(row.format || 'json'),
+          size: row.size ? Number(row.size) : undefined,
+          path: row.path ? String(row.path) : undefined,
+          url: row.url ? String(row.url) : undefined,
+          error: row.error ? String(row.error) : undefined,
+          metadata: (row.metadata as Record<string, unknown>) || {},
+        }) as ReportInstance
+    );
+  }
+
+  private async logReportAccess(
+    reportId: string,
+    userId: string | null,
+    shareId: string | null,
+    accessType: 'view' | 'download' | 'share' | 'generate',
+    success: boolean,
+    errorMessage?: string,
+    userAgent?: string,
+    ipAddress?: string
+  ) {
+    await query(
+      `INSERT INTO report_access_logs
+       (report_id, user_id, share_id, access_type, ip_address, user_agent, success, error_message)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [
+        reportId,
+        userId,
+        shareId,
+        accessType,
+        ipAddress || null,
+        userAgent || null,
+        success,
+        errorMessage || null,
+      ]
+    );
   }
 
   private buildFilterClause(filters: ReportFilter[]): { clause: string; params: unknown[] } {

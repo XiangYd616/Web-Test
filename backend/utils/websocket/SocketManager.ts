@@ -133,9 +133,10 @@ class SocketManager extends EventEmitter {
       this.unregisterConnection(id);
     });
 
-    socket.on('error', (error: Error) => {
-      console.error(`WebSocket错误 [${id}]:`, error);
-      this.emit('connection:error', { connectionId: id, error });
+    socket.on('error', (error: unknown) => {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error(`WebSocket错误 [${id}]:`, err);
+      this.emit('connection:error', { connectionId: id, error: err });
     });
 
     socket.on('pong', () => {
@@ -157,7 +158,7 @@ class SocketManager extends EventEmitter {
       let message: Record<string, unknown> | { type: string; data: string };
       try {
         message = JSON.parse(data) as Record<string, unknown>;
-      } catch (e) {
+      } catch {
         message = { type: 'text', data };
       }
 
@@ -352,11 +353,6 @@ class SocketManager extends EventEmitter {
    * 发送心跳包
    */
   sendHeartbeat() {
-    const heartbeatMessage = {
-      type: 'heartbeat',
-      timestamp: new Date().toISOString(),
-    };
-
     this.connections.forEach((connection, connectionId) => {
       try {
         connection.socket.ping();

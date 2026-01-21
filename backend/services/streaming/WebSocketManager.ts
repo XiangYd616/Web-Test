@@ -5,35 +5,14 @@
  */
 
 import { EventEmitter } from 'events';
+import Redis from 'ioredis';
 import { ServerOptions, Socket, Server as SocketIOServer } from 'socket.io';
+import { query } from '../../config/database';
+import JwtService from '../core/jwtService';
 
 type SocketIOServerTarget = ConstructorParameters<typeof SocketIOServer>[0];
 
-// 模拟Redis客户端
-class RedisClient {
-  private data: Map<string, string> = new Map();
-
-  async get(key: string): Promise<string | null> {
-    return this.data.get(key) || null;
-  }
-
-  async set(key: string, value: string, _options?: { EX?: number }): Promise<void> {
-    this.data.set(key, value);
-    // 简化实现，忽略过期时间
-  }
-
-  async del(key: string): Promise<void> {
-    this.data.delete(key);
-  }
-
-  async exists(key: string): Promise<number> {
-    return this.data.has(key) ? 1 : 0;
-  }
-
-  async expire(_key: string, _seconds: number): Promise<void> {
-    // 简化实现，忽略过期时间
-  }
-}
+type DbUserRow = { id: string; is_active: boolean };
 
 interface AuthPayload {
   token?: string;
@@ -185,7 +164,8 @@ export interface WebSocketConfig {
 class WebSocketManager extends EventEmitter {
   private server: SocketIOServerTarget;
   private io: SocketIOServer | null = null;
-  private redisClient: RedisClient | null = null;
+  private redisClient: Redis | null = null;
+  private jwtService = new JwtService();
   private connections: Map<string, WebSocketConnection> = new Map();
   private rooms: Map<string, WebSocketRoom> = new Map();
   private messageQueues: Map<string, MessageQueue> = new Map();
@@ -195,12 +175,17 @@ class WebSocketManager extends EventEmitter {
   private statistics: WebSocketStatistics;
   private isInitialized: boolean = false;
 
-  constructor(server: SocketIOServerTarget, options: Partial<WebSocketConfig> = {}) {
+  constructor(
+    server: SocketIOServerTarget,
+    options: Partial<WebSocketConfig> = {},
+    redisClient?: Redis | null
+  ) {
     super();
 
     this.server = server;
     this.config = this.getDefaultConfig(options);
 
+    this.redisClient = redisClient || null;
     this.statistics = {
       totalConnections: 0,
       activeConnections: 0,
@@ -344,8 +329,12 @@ class WebSocketManager extends EventEmitter {
 
     // 保存到Redis
     if (this.redisClient) {
-      await this.redisClient.set(`room:${roomId}`, JSON.stringify(room));
-      await this.redisClient.expire(`room:${roomId}`, this.config.rooms.defaultRoomTTL);
+      await this.redisClient.set(
+        `room:${roomId}`,
+        JSON.stringify(room),
+        'EX',
+        this.config.rooms.defaultRoomTTL
+      );
     }
 
     this.emit('room_created', room);
@@ -386,7 +375,12 @@ class WebSocketManager extends EventEmitter {
 
     // 保存到Redis
     if (this.redisClient) {
-      await this.redisClient.set(`room:${roomId}`, JSON.stringify(room));
+      await this.redisClient.set(
+        `room:${roomId}`,
+        JSON.stringify(room),
+        'EX',
+        this.config.rooms.defaultRoomTTL
+      );
     }
 
     this.emit('user_joined_room', { connectionId, roomId, metadata });
@@ -422,7 +416,12 @@ class WebSocketManager extends EventEmitter {
     } else {
       // 保存到Redis
       if (this.redisClient) {
-        await this.redisClient.set(`room:${roomId}`, JSON.stringify(room));
+        await this.redisClient.set(
+          `room:${roomId}`,
+          JSON.stringify(room),
+          'EX',
+          this.config.rooms.defaultRoomTTL
+        );
       }
     }
 
@@ -539,7 +538,7 @@ class WebSocketManager extends EventEmitter {
     }
 
     if (this.redisClient) {
-      // 关闭Redis连接
+      this.redisClient.disconnect();
       this.redisClient = null;
     }
 
@@ -653,15 +652,36 @@ class WebSocketManager extends EventEmitter {
     data: AuthPayload
   ): Promise<void> {
     try {
-      // 简化认证逻辑
-      const isAuthenticated = data.token === 'valid-token';
+      const requireAuth = this.config.security.authenticationRequired;
+      let resolvedUserId: string | undefined;
 
-      connection.isAuthenticated = isAuthenticated;
-      connection.userId = data.userId;
+      if (data.token) {
+        const decoded = this.jwtService.verifyAccessToken(data.token);
+        resolvedUserId = String(decoded.userId);
+      } else if (!requireAuth && data.userId) {
+        resolvedUserId = data.userId;
+      }
+
+      if (!resolvedUserId) {
+        connection.socket.emit('authenticated', { success: false, error: '认证失败' });
+        return;
+      }
+
+      const userResult = await query('SELECT id, is_active FROM users WHERE id = $1', [
+        resolvedUserId,
+      ]);
+      const user = (userResult.rows?.[0] || null) as DbUserRow | null;
+      if (!user || !user.is_active) {
+        connection.socket.emit('authenticated', { success: false, error: '用户不可用' });
+        return;
+      }
+
+      connection.isAuthenticated = true;
+      connection.userId = user.id;
       connection.metadata = { ...connection.metadata, ...data.metadata };
 
-      connection.socket.emit('authenticated', { success: isAuthenticated });
-      this.emit('authentication_result', { connectionId: connection.id, success: isAuthenticated });
+      connection.socket.emit('authenticated', { success: true, userId: user.id });
+      this.emit('authentication_result', { connectionId: connection.id, success: true });
     } catch (error) {
       connection.socket.emit('authenticated', {
         success: false,
@@ -848,10 +868,24 @@ class WebSocketManager extends EventEmitter {
    * 初始化Redis
    */
   private initializeRedis(): void {
+    if (this.redisClient) {
+      return;
+    }
+
     try {
-      this.redisClient = new RedisClient();
+      this.redisClient = new Redis({
+        host: this.config.redis.host,
+        port: this.config.redis.port,
+        password: this.config.redis.password,
+        db: this.config.redis.db,
+      });
+
+      this.redisClient.on('error', (error: Error) => {
+        console.warn('Redis连接异常，WebSocket将运行在无共享状态:', error.message);
+      });
     } catch (error) {
-      console.warn('Redis initialization failed, running in single-instance mode:', error);
+      console.warn('Redis初始化失败，WebSocket将运行在无共享状态:', error);
+      this.redisClient = null;
     }
   }
 

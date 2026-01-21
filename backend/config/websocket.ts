@@ -35,7 +35,8 @@ type StreamingServiceLike = {
 
 type WebSocketManagerConstructor = new (
   server: unknown,
-  config: Record<string, unknown>
+  config: Record<string, unknown>,
+  redisClient?: unknown
 ) => WebSocketManagerLike;
 
 type StreamingServiceConstructor = new (
@@ -135,7 +136,6 @@ class WebSocketConfig {
   async initialize(server: unknown, redisClient: unknown, cacheManager: unknown) {
     try {
       console.log('🚀 初始化增强版实时通信系统...');
-      void redisClient;
 
       if (this.isInitialized) {
         console.warn('实时通信系统已初始化');
@@ -145,7 +145,8 @@ class WebSocketConfig {
       // 初始化WebSocket管理器
       this.websocketManager = new WebSocketManager(
         server,
-        this.config.websocket as Record<string, unknown>
+        this.config.websocket as Record<string, unknown>,
+        redisClient as unknown
       );
       this.socketManager = this.websocketManager;
       await this.websocketManager.initialize();

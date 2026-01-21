@@ -5,8 +5,8 @@
  */
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { Agent as HttpsAgent } from 'http';
-import { Agent as HttpAgent } from 'https';
+import { Agent as HttpAgent } from 'http';
+import { Agent as HttpsAgent } from 'https';
 
 // 负载生成器配置接口
 export interface LoadGeneratorConfig {
@@ -34,7 +34,7 @@ export interface LoadTestRequest {
   url: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   timeout?: number;
   retries?: number;
 }
@@ -169,8 +169,8 @@ class LoadGenerator {
         this.updateStatistics(result);
         this.activeRequests--;
         return result;
-      } catch (error: any) {
-        lastError = error;
+      } catch (error: unknown) {
+        lastError = error as Error;
         const endTime = Date.now();
         const responseTime = endTime - startTime;
 
@@ -179,12 +179,14 @@ class LoadGenerator {
         }
 
         if (attempt === this.options.retryAttempts) {
+          const responseStatus = (error as { response?: { status?: number } })?.response?.status;
+          const errorMessage = error instanceof Error ? error.message : String(error);
           const result: LoadTestResult = {
             success: false,
-            statusCode: error.response?.status || 0,
+            statusCode: responseStatus || 0,
             responseTime,
             responseSize: 0,
-            error: error.message,
+            error: errorMessage,
             attempt,
             timestamp: new Date(),
           };
@@ -291,6 +293,10 @@ class LoadGenerator {
     // 突发负载阶段
     const spikeResults = await this.executeConcurrentLoad(spikeRequests, spikeConcurrency);
     results.push(...spikeResults);
+
+    if (spikeDuration > 0) {
+      await this.delay(spikeDuration);
+    }
 
     // 恢复正常负载
     const recoveryResults = await this.executeConcurrentLoad(
@@ -425,8 +431,8 @@ class LoadGenerator {
     ];
 
     for (let i = 0; i < count; i++) {
-      const method = methods[Math.floor(Math.random() * methods.length)];
-      const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
+      const method = methods[i % methods.length];
+      const endpoint = endpoints[i % endpoints.length];
       const url = `${baseUrl}${endpoint}`;
 
       const request: LoadTestRequest = {
@@ -442,7 +448,7 @@ class LoadGenerator {
         request.body = {
           data: `test-data-${i}`,
           timestamp: new Date().toISOString(),
-          random: Math.random(),
+          sequence: i,
         };
       }
 
@@ -470,12 +476,12 @@ class LoadGenerator {
     const config = complexityMap[complexity];
 
     for (let i = 0; i < count; i++) {
-      const endpoint = config.endpoints[Math.floor(Math.random() * config.endpoints.length)];
+      const endpoint = config.endpoints[i % config.endpoints.length];
       const url = `${baseUrl}${endpoint}`;
 
       const request: LoadTestRequest = {
         url,
-        method: Math.random() > 0.5 ? 'GET' : 'POST',
+        method: i % 2 === 0 ? 'GET' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Request-ID': `stress-${i}-${Date.now()}`,
@@ -489,6 +495,7 @@ class LoadGenerator {
             requestId: `stress-${i}`,
             timestamp: new Date().toISOString(),
             complexity,
+            sequence: i,
           },
         };
       }

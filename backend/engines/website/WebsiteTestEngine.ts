@@ -56,7 +56,10 @@ class WebsiteTestEngine {
   async executeTest(config: WebsiteConfig) {
     try {
       const testId = config.testId || `website-${Date.now()}`;
-      const { url = 'https://example.com', timeout = 30000 } = config;
+      const { url, timeout = 30000 } = config;
+      if (!url) {
+        throw new Error('网站测试URL不能为空');
+      }
 
       this.activeTests.set(testId, {
         status: 'running',

@@ -2,6 +2,7 @@
  * 报告路由
  */
 
+import crypto from 'crypto';
 import express from 'express';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -64,6 +65,7 @@ interface Report {
   downloadCount: number;
   metadata: Record<string, unknown>;
   error?: string;
+  duration?: number;
 }
 
 interface ReportTemplate {
@@ -107,6 +109,50 @@ const ensureReportingInitialized = async () => {
   await automatedReportingService.initialize();
 };
 
+const hashPassword = (password: string) =>
+  crypto.createHash('sha256').update(password).digest('hex');
+
+const buildShareDownloadUrl = (token: string) => `/api/system/reports/share/${token}/download`;
+
+const validateShareAccess = (
+  share: Record<string, unknown>,
+  ip: string,
+  password: string,
+  requiredPermission: 'view' | 'download'
+) => {
+  if (share.is_active === false) {
+    return { allowed: false, message: '分享已失效' };
+  }
+
+  if (share.expires_at && new Date(String(share.expires_at)) < new Date()) {
+    return { allowed: false, message: '分享已过期' };
+  }
+
+  const maxAccess = share.max_access_count ? Number(share.max_access_count) : null;
+  const currentAccess = share.current_access_count ? Number(share.current_access_count) : 0;
+  if (maxAccess !== null && currentAccess >= maxAccess) {
+    return { allowed: false, message: '访问次数已达上限' };
+  }
+
+  const allowedIps = Array.isArray(share.allowed_ips) ? share.allowed_ips : [];
+  if (allowedIps.length > 0 && !allowedIps.includes(ip)) {
+    return { allowed: false, message: 'IP 不在允许范围内' };
+  }
+
+  if (share.password_hash) {
+    if (!password || hashPassword(password) !== String(share.password_hash)) {
+      return { allowed: false, message: '访问密码错误' };
+    }
+  }
+
+  const permissions = Array.isArray(share.permissions) ? share.permissions : [];
+  if (!permissions.includes(requiredPermission)) {
+    return { allowed: false, message: '无访问权限' };
+  }
+
+  return { allowed: true, message: '' };
+};
+
 /**
  * GET /api/system/reports
  * 获取报告列表
@@ -145,9 +191,19 @@ router.get(
            tr.file_size,
            tr.report_data,
            te.test_id,
-           te.user_id
+           te.user_id,
+           ri.status AS instance_status,
+           ri.duration AS instance_duration,
+           COALESCE(al.download_count, 0) AS download_count
          FROM test_reports tr
          LEFT JOIN test_executions te ON te.id = tr.execution_id
+         LEFT JOIN report_instances ri ON ri.report_id = tr.id
+         LEFT JOIN (
+           SELECT report_id, COUNT(*)::int AS download_count
+           FROM report_access_logs
+           WHERE access_type = 'download' AND success = true
+           GROUP BY report_id
+         ) al ON al.report_id = tr.id
          ${whereClause}
          ORDER BY tr.generated_at DESC
          LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -219,6 +275,390 @@ router.get(
 );
 
 /**
+ * GET /api/system/reports/instances
+ * 获取报告实例列表
+ */
+router.get(
+  '/instances',
+  authMiddleware,
+  asyncHandler(async (_req: express.Request, res: express.Response) => {
+    try {
+      await ensureReportingInitialized();
+      const instances = await automatedReportingService.getAllReportInstances();
+      return res.json({
+        success: true,
+        data: instances,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: '获取报告实例失败',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })
+);
+
+/**
+ * POST /api/system/reports/:id/share
+ * 创建报告分享
+ */
+router.post(
+  '/:id/share',
+  authMiddleware,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { id } = req.params;
+    const userId = (req as AuthRequest).user.id;
+    const {
+      shareType = 'link',
+      expiresAt,
+      password,
+      recipients,
+      subject,
+      message,
+      allowedIps,
+      maxAccessCount,
+      permissions,
+    } = req.body as {
+      shareType?: 'link' | 'email' | 'download';
+      expiresAt?: string;
+      password?: string;
+      recipients?: string[];
+      subject?: string;
+      message?: string;
+      allowedIps?: string[];
+      maxAccessCount?: number;
+      permissions?: string[];
+    };
+
+    try {
+      const reportResult = await query('SELECT user_id FROM test_reports WHERE id = $1', [id]);
+      const reportRow = reportResult.rows[0];
+      if (!reportRow) {
+        return res.status(404).json({ success: false, message: '报告不存在' });
+      }
+      if (String(reportRow.user_id) !== String(userId)) {
+        return res.status(403).json({ success: false, message: '无权分享此报告' });
+      }
+
+      const shareToken = crypto.randomBytes(20).toString('hex');
+      const shareResult = await query(
+        `INSERT INTO report_shares
+         (report_id, shared_by, share_token, share_type, password_hash, allowed_ips, max_access_count, permissions, expires_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+         RETURNING id, share_token`,
+        [
+          id,
+          userId,
+          shareToken,
+          shareType,
+          password ? hashPassword(password) : null,
+          JSON.stringify(allowedIps || []),
+          maxAccessCount ?? null,
+          JSON.stringify(permissions || ['view', 'download']),
+          expiresAt ? new Date(expiresAt) : null,
+        ]
+      );
+
+      const shareRow = shareResult.rows[0];
+      await automatedReportingService.recordAccess(String(id), userId, 'share', true, {
+        shareId: shareRow.id,
+        userAgent: req.get('User-Agent') || undefined,
+        ipAddress: req.ip,
+      });
+
+      if (shareType === 'email') {
+        const emailRecipients = Array.isArray(recipients) ? recipients.filter(Boolean) : [];
+        if (emailRecipients.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: '分享类型为 email 时需提供 recipients',
+          });
+        }
+
+        await ensureReportingInitialized();
+        const shareUrl = buildShareDownloadUrl(shareRow.share_token);
+        await automatedReportingService.sendShareEmail({
+          recipients: emailRecipients,
+          subject: subject || '报告分享链接',
+          html:
+            message ||
+            `请使用以下链接访问报告：<a href="${shareUrl}">${shareUrl}</a>${
+              password ? '<br/>该分享已设置访问密码。' : ''
+            }`,
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          shareId: shareRow.id,
+          token: shareRow.share_token,
+          url: buildShareDownloadUrl(shareRow.share_token),
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: '创建分享失败',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })
+);
+
+/**
+ * GET /api/system/reports/share/:token
+ * 获取分享详情
+ */
+router.get(
+  '/share/:token',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { token } = req.params;
+    const { password } = req.query as { password?: string };
+    const normalizedPassword = typeof password === 'string' ? password : '';
+
+    const shareResult = await query(
+      `SELECT
+         rs.*, tr.file_path, tr.file_size, tr.format,
+         COALESCE(al.download_count, 0) AS download_count
+       FROM report_shares rs
+       LEFT JOIN test_reports tr ON tr.id = rs.report_id
+       LEFT JOIN (
+         SELECT share_id, COUNT(*)::int AS download_count
+         FROM report_access_logs
+         WHERE access_type = 'download' AND success = true
+         GROUP BY share_id
+       ) al ON al.share_id = rs.id
+       WHERE rs.share_token = $1`,
+      [token]
+    );
+    const shareRow = shareResult.rows[0];
+    if (!shareRow) {
+      return res.status(404).json({ success: false, message: '分享不存在' });
+    }
+
+    const validation = validateShareAccess(
+      shareRow,
+      String(req.ip ?? ''),
+      normalizedPassword,
+      'view'
+    );
+    if (!validation.allowed) {
+      await automatedReportingService.recordAccess(
+        String(shareRow.report_id),
+        null,
+        'view',
+        false,
+        {
+          shareId: shareRow.id,
+          errorMessage: validation.message,
+          userAgent: req.get('User-Agent') || undefined,
+          ipAddress: req.ip,
+        }
+      );
+      return res.status(403).json({ success: false, message: validation.message });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        id: shareRow.id,
+        reportId: shareRow.report_id,
+        shareType: shareRow.share_type,
+        expiresAt: shareRow.expires_at,
+        currentAccessCount: shareRow.current_access_count,
+        maxAccessCount: shareRow.max_access_count,
+        permissions: shareRow.permissions,
+        lastAccessedAt: shareRow.last_accessed_at,
+        downloadCount: Number(shareRow.download_count || 0),
+      },
+    });
+  })
+);
+
+/**
+ * GET /api/system/reports/share/:token/download
+ * 分享下载
+ */
+router.get(
+  '/share/:token/download',
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const { token } = req.params;
+    const { password = '' } = req.query as { password?: string };
+
+    const shareResult = await query(
+      `SELECT rs.*, tr.file_path, tr.file_size, tr.format
+       FROM report_shares rs
+       LEFT JOIN test_reports tr ON tr.id = rs.report_id
+       WHERE rs.share_token = $1`,
+      [token]
+    );
+    const shareRow = shareResult.rows[0];
+    if (!shareRow) {
+      return res.status(404).json({ success: false, message: '分享不存在' });
+    }
+
+    const validation = validateShareAccess(
+      shareRow,
+      String(req.ip ?? ''),
+      String(password ?? ''),
+      'download'
+    );
+    if (!validation.allowed) {
+      await automatedReportingService.recordAccess(
+        String(shareRow.report_id),
+        null,
+        'download',
+        false,
+        {
+          shareId: shareRow.id,
+          errorMessage: validation.message,
+          userAgent: req.get('User-Agent') || undefined,
+          ipAddress: req.ip,
+        }
+      );
+      return res.status(403).json({ success: false, message: validation.message });
+    }
+
+    const permissions = Array.isArray(shareRow.permissions) ? shareRow.permissions : [];
+    if (!permissions.includes('download')) {
+      await automatedReportingService.recordAccess(
+        String(shareRow.report_id),
+        null,
+        'download',
+        false,
+        {
+          shareId: shareRow.id,
+          errorMessage: '无下载权限',
+          userAgent: req.get('User-Agent') || undefined,
+          ipAddress: req.ip,
+        }
+      );
+      return res.status(403).json({ success: false, message: '无下载权限' });
+    }
+
+    if (!shareRow.file_path) {
+      await automatedReportingService.recordAccess(
+        String(shareRow.report_id),
+        null,
+        'download',
+        false,
+        {
+          shareId: shareRow.id,
+          errorMessage: '报告文件不存在',
+          userAgent: req.get('User-Agent') || undefined,
+          ipAddress: req.ip,
+        }
+      );
+      return res.status(404).json({ success: false, message: '报告文件不存在' });
+    }
+
+    try {
+      await fs.access(shareRow.file_path);
+    } catch {
+      await automatedReportingService.recordAccess(
+        String(shareRow.report_id),
+        null,
+        'download',
+        false,
+        {
+          shareId: shareRow.id,
+          errorMessage: '报告文件不存在',
+          userAgent: req.get('User-Agent') || undefined,
+          ipAddress: req.ip,
+        }
+      );
+      return res.status(404).json({ success: false, message: '报告文件不存在' });
+    }
+
+    await query(
+      'UPDATE report_shares SET current_access_count = current_access_count + 1, last_accessed_at = NOW() WHERE id = $1',
+      [shareRow.id]
+    );
+
+    await automatedReportingService.recordAccess(
+      String(shareRow.report_id),
+      null,
+      'download',
+      true,
+      {
+        shareId: shareRow.id,
+        userAgent: req.get('User-Agent') || undefined,
+        ipAddress: req.ip,
+      }
+    );
+
+    const fileName = path.basename(shareRow.file_path);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
+    return res.sendFile(shareRow.file_path);
+  })
+);
+
+/**
+ * GET /api/system/reports/access-logs
+ * 获取报告访问日志
+ */
+router.get(
+  '/access-logs',
+  authMiddleware,
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    const userId = (req as AuthRequest).user.id;
+    const { reportId, shareId, page = 1, limit = 20 } = req.query;
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 20;
+    const offset = (pageNumber - 1) * limitNumber;
+    const params: Array<string | number> = [userId];
+    let filterClause = '';
+    if (reportId) {
+      params.push(String(reportId));
+      filterClause = `AND ral.report_id = $${params.length}`;
+    }
+    if (shareId) {
+      params.push(String(shareId));
+      filterClause = `${filterClause} AND ral.share_id = $${params.length}`;
+    }
+
+    try {
+      const result = await query(
+        `SELECT ral.*
+         FROM report_access_logs ral
+         LEFT JOIN test_reports tr ON tr.id = ral.report_id
+         WHERE tr.user_id = $1 ${filterClause}
+         ORDER BY ral.accessed_at DESC
+         LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limitNumber, offset]
+      );
+      const countResult = await query(
+        `SELECT COUNT(*)::int AS total
+         FROM report_access_logs ral
+         LEFT JOIN test_reports tr ON tr.id = ral.report_id
+         WHERE tr.user_id = $1 ${filterClause}`,
+        params
+      );
+
+      return res.json({
+        success: true,
+        data: result.rows || [],
+        pagination: {
+          page: pageNumber,
+          limit: limitNumber,
+          total: Number(countResult.rows[0]?.total) || 0,
+          totalPages: Math.ceil((Number(countResult.rows[0]?.total) || 0) / limitNumber),
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: '获取访问日志失败',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })
+);
+
+/**
  * GET /api/system/reports/:id
  * 获取单个报告详情
  */
@@ -240,9 +680,22 @@ router.get(
            tr.file_size,
            tr.report_data,
            te.test_id,
-           te.user_id
+           te.user_id,
+           ri.status AS instance_status,
+           ri.duration AS instance_duration,
+           ri.config_id AS instance_config_id,
+           ri.template_id AS instance_template_id,
+           ri.metadata AS instance_metadata,
+           COALESCE(al.download_count, 0) AS download_count
          FROM test_reports tr
          LEFT JOIN test_executions te ON te.id = tr.execution_id
+         LEFT JOIN report_instances ri ON ri.report_id = tr.id
+         LEFT JOIN (
+           SELECT report_id, COUNT(*)::int AS download_count
+           FROM report_access_logs
+           WHERE access_type = 'download' AND success = true
+           GROUP BY report_id
+         ) al ON al.report_id = tr.id
          WHERE tr.id = $1`,
         [id]
       );
@@ -257,9 +710,102 @@ router.get(
         });
       }
 
+      const shareResult = await query(
+        `SELECT
+           rs.id,
+           rs.share_token,
+           rs.share_type,
+           rs.expires_at,
+           rs.current_access_count,
+           rs.max_access_count,
+           rs.permissions,
+           rs.last_accessed_at,
+           COALESCE(al.download_count, 0) AS download_count
+         FROM report_shares rs
+         LEFT JOIN (
+           SELECT share_id, COUNT(*)::int AS download_count
+           FROM report_access_logs
+           WHERE access_type = 'download' AND success = true
+           GROUP BY share_id
+         ) al ON al.share_id = rs.id
+         WHERE rs.report_id = $1 AND rs.is_active = true
+         ORDER BY rs.created_at DESC`,
+        [id]
+      );
+
+      const configId = reportRow.instance_config_id ? String(reportRow.instance_config_id) : null;
+      const templateId = reportRow.instance_template_id
+        ? String(reportRow.instance_template_id)
+        : null;
+
+      const configResult = configId
+        ? await query(
+            `SELECT id, name, description, template_id, schedule, recipients, filters, format, delivery, enabled
+             FROM report_configs WHERE id = $1`,
+            [configId]
+          )
+        : { rows: [] };
+      const templateResult = templateId
+        ? await query(
+            `SELECT id, name, description, report_type, default_format, is_public, is_system
+             FROM report_templates WHERE id = $1`,
+            [templateId]
+          )
+        : { rows: [] };
+      const configRow = configResult.rows?.[0];
+      const templateRow = templateResult.rows?.[0];
+
       return res.json({
         success: true,
-        data: report,
+        data: {
+          ...report,
+          instance: reportRow
+            ? {
+                status: reportRow.instance_status,
+                duration: reportRow.instance_duration,
+                configId,
+                templateId,
+                metadata: reportRow.instance_metadata || {},
+              }
+            : null,
+          config: configRow
+            ? {
+                id: String(configRow.id),
+                name: configRow.name,
+                description: configRow.description,
+                templateId: configRow.template_id,
+                schedule: configRow.schedule,
+                recipients: configRow.recipients,
+                filters: configRow.filters,
+                format: configRow.format,
+                delivery: configRow.delivery,
+                enabled: configRow.enabled,
+              }
+            : null,
+          template: templateRow
+            ? {
+                id: String(templateRow.id),
+                name: templateRow.name,
+                description: templateRow.description,
+                reportType: templateRow.report_type,
+                defaultFormat: templateRow.default_format,
+                isPublic: templateRow.is_public,
+                isSystem: templateRow.is_system,
+              }
+            : null,
+          shares: (shareResult.rows || []).map((row: Record<string, unknown>) => ({
+            id: String(row.id),
+            token: String(row.share_token),
+            shareType: row.share_type,
+            expiresAt: row.expires_at,
+            currentAccessCount: row.current_access_count,
+            maxAccessCount: row.max_access_count,
+            permissions: row.permissions,
+            lastAccessedAt: row.last_accessed_at,
+            downloadCount: Number(row.download_count || 0),
+            url: buildShareDownloadUrl(String(row.share_token)),
+          })),
+        },
       });
     } catch (error) {
       return res.status(500).json({
@@ -423,6 +969,11 @@ router.get(
       }
 
       if (String(reportRow.user_id) !== String(userId)) {
+        await automatedReportingService.recordAccess(String(id), userId, 'download', false, {
+          errorMessage: '无权下载此报告',
+          userAgent: req.get('User-Agent') || undefined,
+          ipAddress: req.ip,
+        });
         return res.status(403).json({
           success: false,
           message: '无权下载此报告',
@@ -445,6 +996,11 @@ router.get(
       }
 
       if (!report.filePath) {
+        await automatedReportingService.recordAccess(String(id), userId, 'download', false, {
+          errorMessage: '报告文件不存在',
+          userAgent: req.get('User-Agent') || undefined,
+          ipAddress: req.ip,
+        });
         return res.status(404).json({
           success: false,
           message: '报告文件不存在',
@@ -455,6 +1011,11 @@ router.get(
       try {
         await fs.access(report.filePath);
       } catch {
+        await automatedReportingService.recordAccess(String(id), userId, 'download', false, {
+          errorMessage: '报告文件不存在',
+          userAgent: req.get('User-Agent') || undefined,
+          ipAddress: req.ip,
+        });
         return res.status(404).json({
           success: false,
           message: '报告文件不存在',
@@ -466,6 +1027,11 @@ router.get(
       Logger.info('报告下载', { reportId: id, userId, fileName });
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
       res.setHeader('Content-Type', 'application/octet-stream');
+
+      await automatedReportingService.recordAccess(String(id), userId, 'download', true, {
+        userAgent: req.get('User-Agent') || undefined,
+        ipAddress: req.ip,
+      });
 
       // 发送文件
       return res.sendFile(report.filePath);
@@ -514,6 +1080,17 @@ router.delete(
         });
       }
 
+      const instanceResult = await query(
+        'SELECT config_id, template_id FROM report_instances WHERE report_id = $1',
+        [id]
+      );
+      const configIds = (instanceResult.rows || [])
+        .map((row: Record<string, unknown>) => row.config_id)
+        .filter(Boolean) as string[];
+      const templateIds = (instanceResult.rows || [])
+        .map((row: Record<string, unknown>) => row.template_id)
+        .filter(Boolean) as string[];
+
       if (reportRow.file_path) {
         try {
           await fs.unlink(reportRow.file_path);
@@ -522,7 +1099,40 @@ router.delete(
         }
       }
 
+      await query('DELETE FROM report_access_logs WHERE report_id = $1', [id]);
+      await query('DELETE FROM report_shares WHERE report_id = $1', [id]);
+      await query('DELETE FROM report_instances WHERE report_id = $1', [id]);
       await query('DELETE FROM test_reports WHERE id = $1', [id]);
+
+      for (const configId of configIds) {
+        const remaining = await query(
+          'SELECT 1 FROM report_instances WHERE config_id = $1 LIMIT 1',
+          [configId]
+        );
+        if ((remaining.rows || []).length === 0) {
+          await query('DELETE FROM report_configs WHERE id = $1', [configId]);
+        }
+      }
+
+      for (const templateId of templateIds) {
+        const remainingInstances = await query(
+          'SELECT 1 FROM report_instances WHERE template_id = $1 LIMIT 1',
+          [templateId]
+        );
+        const remainingConfigs = await query(
+          'SELECT 1 FROM report_configs WHERE template_id = $1 LIMIT 1',
+          [templateId]
+        );
+        if (
+          (remainingInstances.rows || []).length === 0 &&
+          (remainingConfigs.rows || []).length === 0
+        ) {
+          await query(
+            'DELETE FROM report_templates WHERE id = $1 AND is_public = false AND is_system = false',
+            [templateId]
+          );
+        }
+      }
 
       Logger.info('报告删除', { reportId: id, userId });
 
@@ -718,9 +1328,19 @@ router.get(
            tr.format,
            tr.file_size,
            tr.generated_at,
-           tr.report_data
+           tr.report_data,
+           ri.status AS instance_status,
+           ri.duration AS instance_duration,
+           COALESCE(al.download_count, 0) AS download_count
          FROM test_reports tr
          LEFT JOIN test_executions te ON te.id = tr.execution_id
+         LEFT JOIN report_instances ri ON ri.report_id = tr.id
+         LEFT JOIN (
+           SELECT report_id, COUNT(*)::int AS download_count
+           FROM report_access_logs
+           WHERE access_type = 'download' AND success = true
+           GROUP BY report_id
+         ) al ON al.report_id = tr.id
          WHERE te.user_id = $1`,
         [userId]
       );
@@ -744,6 +1364,7 @@ router.get(
       const byStatus: Record<string, number> = {};
       let totalSize = 0;
 
+      const durations: number[] = [];
       reportRows.forEach(row => {
         const mapped = mapReportRow(row, userId);
         if (!mapped) return;
@@ -751,21 +1372,32 @@ router.get(
         byFormat[mapped.format] = (byFormat[mapped.format] || 0) + 1;
         byStatus[mapped.status] = (byStatus[mapped.status] || 0) + 1;
         totalSize += Number(row.file_size) || 0;
+        if (row.instance_duration) {
+          durations.push(Number(row.instance_duration));
+        }
       });
+
+      const averageGenerationTime =
+        durations.length > 0
+          ? durations.reduce((sum, value) => sum + value, 0) / durations.length
+          : 0;
 
       const statistics: ReportStatistics = {
         total: reportRows.length,
         byType,
         byFormat,
         byStatus,
-        averageGenerationTime: 0,
+        averageGenerationTime,
         totalFileSize: totalSize,
-        popularReports: reportRows.slice(0, 10).map(row => ({
-          id: String(row.id),
-          name: `报告_${row.id}`,
-          type: mapReportTypeFromRow(row),
-          downloadCount: 0,
-        })),
+        popularReports: reportRows
+          .sort((a, b) => Number(b.download_count || 0) - Number(a.download_count || 0))
+          .slice(0, 10)
+          .map(row => ({
+            id: String(row.id),
+            name: `报告_${row.id}`,
+            type: mapReportTypeFromRow(row),
+            downloadCount: Number(row.download_count || 0),
+          })),
       };
 
       return res.json({
@@ -1025,7 +1657,9 @@ const mapReportRow = (
     return null;
   }
 
-  const status: Report['status'] = 'completed';
+  const status: Report['status'] = row.instance_status
+    ? (String(row.instance_status) as Report['status'])
+    : 'completed';
   if (statusFilter && statusFilter !== status) {
     return null;
   }
@@ -1039,7 +1673,7 @@ const mapReportRow = (
     type: reportType,
     format: mapReportFormat(String(row.format || 'json')),
     status,
-    progress: 100,
+    progress: status === 'completed' ? 100 : status === 'failed' ? 0 : 50,
     createdAt: row.generated_at ? new Date(row.generated_at as string | number | Date) : new Date(),
     completedAt: row.generated_at
       ? new Date(row.generated_at as string | number | Date)
@@ -1047,7 +1681,8 @@ const mapReportRow = (
     createdBy: String(row.user_id || userId),
     filePath: row.file_path ? String(row.file_path) : undefined,
     fileSize: row.file_size ? Number(row.file_size) : undefined,
-    downloadCount: 0,
+    downloadCount: Number(row.download_count || 0),
+    duration: row.instance_duration ? Number(row.instance_duration) : undefined,
     metadata:
       typeof metadata === 'object' && metadata !== null
         ? (metadata as Record<string, unknown>)

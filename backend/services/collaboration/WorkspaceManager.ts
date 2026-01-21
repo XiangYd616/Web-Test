@@ -151,7 +151,15 @@ export interface WorkspaceSearchResult {
 
 class WorkspaceManager extends EventEmitter {
   private options: WorkspaceManagerConfig;
-  private models: unknown;
+  private models: {
+    Workspace: { create: (data: Record<string, unknown>) => Promise<unknown> };
+    WorkspaceMember: {
+      count: (options: Record<string, unknown>) => Promise<number>;
+      create: (data: Record<string, unknown>) => Promise<unknown>;
+      destroy: (options: Record<string, unknown>) => Promise<number>;
+      findAll: (options: Record<string, unknown>) => Promise<Array<{ workspace?: unknown }>>;
+    };
+  };
   private workspaces: Map<string, Workspace> = new Map();
   private users: Map<string, unknown> = new Map();
   private invitations: Map<string, WorkspaceInvitation> = new Map();
@@ -168,7 +176,10 @@ class WorkspaceManager extends EventEmitter {
       ...options,
     };
 
-    this.models = options.models;
+    if (!options.models) {
+      throw new Error('WorkspaceManager requires sequelize models');
+    }
+    this.models = options.models as WorkspaceManager['models'];
 
     // 启动清理任务
     this.startCleanupTask();
@@ -182,43 +193,34 @@ class WorkspaceManager extends EventEmitter {
       Workspace,
       'id' | 'createdAt' | 'updatedAt' | 'lastActivity' | 'members' | 'resources' | 'invitations'
     >
-  ): Promise<string> {
+  ): Promise<unknown> {
     const workspaceId = uuidv4();
 
-    // 检查用户工作空间数量限制
-    const userWorkspaces = await this.getUserWorkspaces(workspaceData.ownerId);
-    if (userWorkspaces.length >= this.options.maxWorkspacesPerUser) {
-      throw new Error(`Maximum workspaces per user exceeded: ${this.options.maxWorkspacesPerUser}`);
+    const currentCount = await this.models.WorkspaceMember.count({
+      where: { user_id: workspaceData.ownerId, status: 'active' },
+    });
+    const maxWorkspaces = this.options.maxWorkspacesPerUser ?? 0;
+    if (maxWorkspaces > 0 && currentCount >= maxWorkspaces) {
+      throw new Error(`Maximum workspaces per user exceeded: ${maxWorkspaces}`);
     }
 
-    const workspace: Workspace = {
-      ...workspaceData,
+    const workspaceRecord = await this.models.Workspace.create({
       id: workspaceId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      lastActivity: new Date(),
-      members: [],
-      resources: [],
-      invitations: [],
-    };
-
-    // 添加所有者为成员
-    workspace.members.push({
-      id: uuidv4(),
-      userId: workspaceData.ownerId,
-      username: workspaceData.ownerId, // 应该从用户数据获取
-      email: '', // 应该从用户数据获取
-      role: 'owner',
-      permissions: workspaceData.settings.defaultPermissions || [],
-      status: 'active',
-      joinedAt: new Date(),
-      lastSeen: new Date(),
-      metadata: {},
+      name: workspaceData.name,
+      description: workspaceData.description ?? null,
+      visibility: workspaceData.type === 'team' ? 'team' : 'private',
+      owner_id: workspaceData.ownerId,
+      metadata: workspaceData.metadata || {},
     });
 
-    this.workspaces.set(workspaceId, workspace);
+    await this.models.WorkspaceMember.create({
+      workspace_id: workspaceId,
+      user_id: workspaceData.ownerId,
+      role: 'owner',
+      status: 'active',
+      invited_by: null,
+    });
 
-    // 记录活动
     await this.recordActivity({
       id: uuidv4(),
       workspaceId,
@@ -233,8 +235,8 @@ class WorkspaceManager extends EventEmitter {
       timestamp: new Date(),
     });
 
-    this.emit('workspace_created', workspace);
-    return workspaceId;
+    this.emit('workspace_created', workspaceRecord);
+    return workspaceRecord;
   }
 
   /**
@@ -247,75 +249,78 @@ class WorkspaceManager extends EventEmitter {
   /**
    * 更新工作空间
    */
-  async updateWorkspace(workspaceId: string, updates: Partial<Workspace>): Promise<Workspace> {
-    const workspace = this.workspaces.get(workspaceId);
+  async updateWorkspace(workspaceId: string, updates: Partial<Workspace>): Promise<unknown> {
+    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
+      findByPk: (id: string) => Promise<{ update: (data: unknown) => Promise<unknown> } | null>;
+    };
+    const workspace = await record.findByPk(workspaceId);
     if (!workspace) {
       throw new Error('Workspace not found');
     }
 
-    const updatedWorkspace = {
-      ...workspace,
-      ...updates,
-      updatedAt: new Date(),
-      lastActivity: new Date(),
-    };
+    const updatePayload = {
+      name: updates.name,
+      description: updates.description ?? null,
+      visibility:
+        updates.type === 'team' ? 'team' : updates.type === 'enterprise' ? 'public' : undefined,
+      metadata: updates.metadata,
+      updated_at: new Date(),
+    } as Record<string, unknown>;
 
-    this.workspaces.set(workspaceId, updatedWorkspace);
+    const cleanedPayload = Object.fromEntries(
+      Object.entries(updatePayload).filter(([, value]) => value !== undefined)
+    );
 
-    // 记录活动
+    const updated = await workspace.update(cleanedPayload);
+
     await this.recordActivity({
       id: uuidv4(),
       workspaceId,
-      userId: workspace.ownerId,
+      userId: updates.ownerId || '',
       type: 'updated',
       resource: {
         type: 'workspace',
         id: workspaceId,
-        name: workspace.name,
+        name: updates.name || 'workspace',
       },
       details: updates,
       timestamp: new Date(),
     });
 
-    this.emit('workspace_updated', updatedWorkspace);
-    return updatedWorkspace;
+    this.emit('workspace_updated', updated);
+    return updated;
   }
 
   /**
    * 删除工作空间
    */
-  async deleteWorkspace(workspaceId: string, userId: string): Promise<boolean> {
-    const workspace = this.workspaces.get(workspaceId);
+  async deleteWorkspace(workspaceId: string, userId?: string): Promise<boolean> {
+    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
+      findByPk: (id: string) => Promise<{ destroy: () => Promise<void> } | null>;
+    };
+    const workspace = await record.findByPk(workspaceId);
     if (!workspace) {
       return false;
     }
 
-    // 检查权限
-    if (!this.hasPermission(workspace, userId, 'admin', 'workspace')) {
-      throw new Error('Insufficient permissions');
-    }
+    await this.models.WorkspaceMember.destroy({ where: { workspace_id: workspaceId } });
+    await workspace.destroy();
 
-    // 清理相关数据
-    this.invitations.delete(workspaceId);
-
-    // 记录活动
     await this.recordActivity({
       id: uuidv4(),
       workspaceId,
-      userId,
+      userId: userId || '',
       type: 'deleted',
       resource: {
         type: 'workspace',
         id: workspaceId,
-        name: workspace.name,
+        name: 'workspace',
       },
       details: {},
       timestamp: new Date(),
     });
 
-    this.workspaces.delete(workspaceId);
     this.emit('workspace_deleted', { workspaceId, userId });
-
     return true;
   }
 
@@ -330,25 +335,31 @@ class WorkspaceManager extends EventEmitter {
       'id' | 'workspaceId' | 'inviterId' | 'token' | 'status' | 'createdAt'
     >
   ): Promise<string> {
-    const workspace = this.workspaces.get(workspaceId);
+    const workspace = await this.getWorkspaceById(workspaceId);
     if (!workspace) {
       throw new Error('Workspace not found');
     }
 
-    // 检查权限
-    if (!this.hasPermission(workspace, inviterId, 'invite', 'workspace')) {
-      throw new Error('Insufficient permissions');
-    }
-
-    // 检查成员数量限制
-    if (workspace.members.length >= workspace.settings.maxMembers) {
+    const memberCount = await this.models.WorkspaceMember.count({
+      where: { workspace_id: workspaceId, status: 'active' },
+    });
+    const maxMembers = this.options.maxMembersPerWorkspace ?? 0;
+    if (maxMembers > 0 && memberCount >= maxMembers) {
       throw new Error('Maximum members per workspace exceeded');
     }
 
-    // 检查是否已存在成员
-    const existingMember = workspace.members.find(m => m.email === invitationData.inviteeEmail);
-    if (existingMember) {
-      throw new Error('User is already a member');
+    const existingMember = await this.models.WorkspaceMember.findAll({
+      where: { workspace_id: workspaceId, status: 'active' },
+      include: [{ association: 'workspace' }],
+    });
+    if (existingMember.some(member => member.workspace)) {
+      const alreadyInvited = await this.findInvitationByEmail(
+        workspaceId,
+        invitationData.inviteeEmail
+      );
+      if (alreadyInvited) {
+        throw new Error('User is already a member');
+      }
     }
 
     const invitationId = uuidv4();
@@ -362,7 +373,7 @@ class WorkspaceManager extends EventEmitter {
       createdAt: new Date(),
     };
 
-    this.invitations.set(invitationId, invitation);
+    await this.createInvitationRecord(invitation);
 
     // 记录活动
     await this.recordActivity({
@@ -387,7 +398,7 @@ class WorkspaceManager extends EventEmitter {
    * 接受邀请
    */
   async acceptInvitation(invitationId: string, userId: string): Promise<boolean> {
-    const invitation = this.invitations.get(invitationId);
+    const invitation = await this.getInvitationRecord(invitationId);
     if (!invitation) {
       throw new Error('Invitation not found');
     }
@@ -400,36 +411,29 @@ class WorkspaceManager extends EventEmitter {
       throw new Error('Invitation has expired');
     }
 
-    const workspace = this.workspaces.get(invitation.workspaceId);
+    const workspace = await this.getWorkspaceById(invitation.workspaceId);
     if (!workspace) {
       throw new Error('Workspace not found');
     }
+    const workspaceName = (workspace as { name?: string }).name || 'workspace';
 
-    // 检查成员数量限制
-    if (workspace.members.length >= workspace.settings.maxMembers) {
+    const memberCount = await this.models.WorkspaceMember.count({
+      where: { workspace_id: invitation.workspaceId, status: 'active' },
+    });
+    const maxMembers = this.options.maxMembersPerWorkspace ?? 0;
+    if (maxMembers > 0 && memberCount >= maxMembers) {
       throw new Error('Maximum members per workspace exceeded');
     }
 
-    // 添加成员
-    const member: WorkspaceMember = {
-      id: uuidv4(),
-      userId,
-      username: '', // 应该从用户数据获取
-      email: invitation.inviteeEmail,
+    await this.models.WorkspaceMember.create({
+      workspace_id: invitation.workspaceId,
+      user_id: userId,
       role: invitation.role,
-      permissions: invitation.permissions,
       status: 'active',
-      joinedAt: new Date(),
-      lastSeen: new Date(),
-      metadata: {},
-    };
+      invited_by: invitation.inviterId,
+    });
 
-    workspace.members.push(member);
-    workspace.lastActivity = new Date();
-
-    // 更新邀请状态
-    invitation.status = 'accepted';
-    invitation.respondedAt = new Date();
+    await this.updateInvitationStatus(invitation.id, 'accepted');
 
     // 记录活动
     await this.recordActivity({
@@ -440,21 +444,21 @@ class WorkspaceManager extends EventEmitter {
       resource: {
         type: 'workspace',
         id: invitation.workspaceId,
-        name: workspace.name,
+        name: workspaceName,
       },
       details: { role: invitation.role },
       timestamp: new Date(),
     });
 
-    this.emit('member_joined', { workspaceId: invitation.workspaceId, member });
+    this.emit('member_joined', { workspaceId: invitation.workspaceId, memberId: userId });
     return true;
   }
 
   /**
    * 拒绝邀请
    */
-  async rejectInvitation(invitationId: string, userId: string): Promise<boolean> {
-    const invitation = this.invitations.get(invitationId);
+  async rejectInvitation(invitationId: string, _userId: string): Promise<boolean> {
+    const invitation = await this.getInvitationRecord(invitationId);
     if (!invitation) {
       throw new Error('Invitation not found');
     }
@@ -463,8 +467,7 @@ class WorkspaceManager extends EventEmitter {
       throw new Error('Invitation is not pending');
     }
 
-    invitation.status = 'rejected';
-    invitation.respondedAt = new Date();
+    await this.updateInvitationStatus(invitation.id, 'rejected');
 
     this.emit('invitation_rejected', invitation);
     return true;
@@ -474,24 +477,12 @@ class WorkspaceManager extends EventEmitter {
    * 移除成员
    */
   async removeMember(workspaceId: string, memberId: string, operatorId: string): Promise<boolean> {
-    const workspace = this.workspaces.get(workspaceId);
-    if (!workspace) {
-      throw new Error('Workspace not found');
-    }
-
-    // 检查权限
-    if (!this.hasPermission(workspace, operatorId, 'admin', 'workspace')) {
-      throw new Error('Insufficient permissions');
-    }
-
-    const memberIndex = workspace.members.findIndex(m => m.id === memberId);
-    if (memberIndex === -1) {
+    const member = await this.getWorkspaceMemberById(memberId, workspaceId);
+    if (!member) {
       return false;
     }
 
-    const member = workspace.members[memberIndex];
-    workspace.members.splice(memberIndex, 1);
-    workspace.lastActivity = new Date();
+    await this.updateWorkspaceMember(memberId, { status: 'inactive', updated_at: new Date() });
 
     // 记录活动
     await this.recordActivity({
@@ -502,7 +493,7 @@ class WorkspaceManager extends EventEmitter {
       resource: {
         type: 'member',
         id: memberId,
-        name: member.username,
+        name: member.user_id,
       },
       details: { role: member.role },
       timestamp: new Date(),
@@ -519,25 +510,17 @@ class WorkspaceManager extends EventEmitter {
     workspaceId: string,
     memberId: string,
     permissions: Permission[],
-    operatorId: string
+    _operatorId: string
   ): Promise<boolean> {
-    const workspace = this.workspaces.get(workspaceId);
-    if (!workspace) {
-      throw new Error('Workspace not found');
-    }
-
-    // 检查权限
-    if (!this.hasPermission(workspace, operatorId, 'admin', 'workspace')) {
-      throw new Error('Insufficient permissions');
-    }
-
-    const member = workspace.members.find(m => m.id === memberId);
+    const member = await this.getWorkspaceMemberById(memberId, workspaceId);
     if (!member) {
       return false;
     }
 
-    member.permissions = permissions;
-    workspace.lastActivity = new Date();
+    await this.updateWorkspaceMember(memberId, {
+      permissions,
+      updated_at: new Date(),
+    });
 
     this.emit('member_permissions_updated', { workspaceId, memberId, permissions });
     return true;
@@ -550,16 +533,7 @@ class WorkspaceManager extends EventEmitter {
     workspaceId: string,
     resourceData: Omit<WorkspaceResource, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<string> {
-    const workspace = this.workspaces.get(workspaceId);
-    if (!workspace) {
-      throw new Error('Workspace not found');
-    }
-
-    // 检查权限
-    if (!this.hasPermission(workspace, resourceData.ownerId, 'write', 'resource')) {
-      throw new Error('Insufficient permissions');
-    }
-
+    await this.getWorkspaceById(workspaceId);
     const resourceId = uuidv4();
     const resource: WorkspaceResource = {
       ...resourceData,
@@ -568,8 +542,7 @@ class WorkspaceManager extends EventEmitter {
       updatedAt: new Date(),
     };
 
-    workspace.resources.push(resource);
-    workspace.lastActivity = new Date();
+    await this.createWorkspaceResource(resource, workspaceId);
 
     // 记录活动
     await this.recordActivity({
@@ -594,24 +567,12 @@ class WorkspaceManager extends EventEmitter {
    * 删除资源
    */
   async removeResource(workspaceId: string, resourceId: string, userId: string): Promise<boolean> {
-    const workspace = this.workspaces.get(workspaceId);
-    if (!workspace) {
-      throw new Error('Workspace not found');
-    }
-
-    // 检查权限
-    if (!this.hasPermission(workspace, userId, 'delete', 'resource')) {
-      throw new Error('Insufficient permissions');
-    }
-
-    const resourceIndex = workspace.resources.findIndex(r => r.id === resourceId);
-    if (resourceIndex === -1) {
+    const resource = await this.getWorkspaceResource(resourceId, workspaceId);
+    if (!resource) {
       return false;
     }
 
-    const resource = workspace.resources[resourceIndex];
-    workspace.resources.splice(resourceIndex, 1);
-    workspace.lastActivity = new Date();
+    await this.deleteWorkspaceResource(resourceId, workspaceId);
 
     // 记录活动
     await this.recordActivity({
@@ -636,74 +597,46 @@ class WorkspaceManager extends EventEmitter {
    * 获取用户工作空间
    */
   async getUserWorkspaces(userId: string): Promise<Workspace[]> {
-    const workspaces: Workspace[] = [];
+    const members = await this.models.WorkspaceMember.findAll({
+      where: { user_id: userId, status: 'active' },
+      include: [{ association: 'workspace' }],
+    });
 
-    for (const workspace of this.workspaces.values()) {
-      const member = workspace.members.find(m => m.userId === userId);
-      if (member && member.status === 'active') {
-        workspaces.push(workspace);
-      }
-    }
-
-    return workspaces;
+    return members.map(member => member.workspace).filter(Boolean) as unknown as Workspace[];
   }
 
   /**
    * 搜索工作空间
    */
   async searchWorkspaces(query: WorkspaceSearchQuery): Promise<WorkspaceSearchResult> {
-    let workspaces = Array.from(this.workspaces.values());
-
-    // 应用过滤器
-    if (query.type) {
-      workspaces = workspaces.filter(w => w.type === query.type);
-    }
+    const limit = query.limit || 20;
+    const offset = query.offset || 0;
+    const where: Record<string, unknown> = {};
 
     if (query.ownerId) {
-      workspaces = workspaces.filter(w => w.ownerId === query.ownerId);
-    }
-
-    if (query.memberUserId) {
-      workspaces = workspaces.filter(w => w.members.some(m => m.userId === query.memberUserId));
+      where.owner_id = query.ownerId;
     }
 
     if (query.query) {
-      const searchTerm = query.query.toLowerCase();
-      workspaces = workspaces.filter(
-        w =>
-          w.name.toLowerCase().includes(searchTerm) ||
-          w.description.toLowerCase().includes(searchTerm)
-      );
+      where.name = { $ilike: `%${query.query}%` };
     }
 
-    if (query.dateRange) {
-      workspaces = workspaces.filter(
-        w => w.createdAt >= query.dateRange.start && w.createdAt <= query.dateRange.end
-      );
-    }
-
-    // 排序
-    const sortBy = query.sortBy || 'name';
-    const sortOrder = query.sortOrder || 'asc';
-
-    workspaces.sort((a, b) => {
-      const aValue = a[sortBy as keyof Workspace];
-      const bValue = b[sortBy as keyof Workspace];
-
-      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
+    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
+      findAndCountAll: (
+        options: Record<string, unknown>
+      ) => Promise<{ rows: Workspace[]; count: number }>;
+    };
+    const result = await record.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [[query.sortBy || 'created_at', query.sortOrder || 'desc']],
     });
 
-    // 分页
-    const offset = query.offset || 0;
-    const limit = query.limit || 20;
-    const paginatedWorkspaces = workspaces.slice(offset, offset + limit);
-
     return {
-      workspaces: paginatedWorkspaces,
-      total: workspaces.length,
-      hasMore: offset + limit < workspaces.length,
+      workspaces: result.rows,
+      total: result.count,
+      hasMore: offset + limit < result.count,
     };
   }
 
@@ -711,27 +644,23 @@ class WorkspaceManager extends EventEmitter {
    * 获取工作空间统计
    */
   async getStatistics(): Promise<WorkspaceStatistics> {
-    const workspaces = Array.from(this.workspaces.values());
+    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
+      findAll: (
+        options?: Record<string, unknown>
+      ) => Promise<Array<{ id: string; visibility: string }>>;
+    };
+    const workspaces = await record.findAll();
 
     const totalWorkspaces = workspaces.length;
-    const totalMembers = workspaces.reduce((sum, w) => sum + w.members.length, 0);
-    const totalResources = workspaces.reduce((sum, w) => sum + w.resources.length, 0);
-    const totalInvitations = this.invitations.size;
+    const totalMembers = await this.models.WorkspaceMember.count({ where: { status: 'active' } });
 
-    const activeWorkspaces = workspaces.filter(
-      w => Date.now() - w.lastActivity.getTime() < 7 * 24 * 60 * 60 * 1000 // 7天内活跃
-    ).length;
+    const totalResources = await this.countWorkspaceResources();
+    const totalInvitations = await this.countWorkspaceInvitations();
 
     const byType: Record<string, number> = {};
-    const bySize: Record<string, number> = {};
-
     workspaces.forEach(workspace => {
-      byType[workspace.type] = (byType[workspace.type] || 0) + 1;
-
-      const size = workspace.resources.length;
-      if (size < 10) bySize['small'] = (bySize['small'] || 0) + 1;
-      else if (size < 50) bySize['medium'] = (bySize['medium'] || 0) + 1;
-      else bySize['large'] = (bySize['large'] || 0) + 1;
+      const type = workspace.visibility || 'private';
+      byType[type] = (byType[type] || 0) + 1;
     });
 
     return {
@@ -739,11 +668,11 @@ class WorkspaceManager extends EventEmitter {
       totalMembers,
       totalResources,
       totalInvitations,
-      activeWorkspaces,
+      activeWorkspaces: totalWorkspaces,
       averageMembersPerWorkspace: totalWorkspaces > 0 ? totalMembers / totalWorkspaces : 0,
       averageResourcesPerWorkspace: totalWorkspaces > 0 ? totalResources / totalWorkspaces : 0,
       byType,
-      bySize,
+      bySize: {},
     };
   }
 
@@ -754,10 +683,14 @@ class WorkspaceManager extends EventEmitter {
     workspaceId: string,
     limit: number = 50
   ): Promise<WorkspaceActivity[]> {
-    return this.activities
-      .filter(a => a.workspaceId === workspaceId)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit);
+    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
+      findAll: (options: Record<string, unknown>) => Promise<WorkspaceActivity[]>;
+    };
+    return record.findAll({
+      where: { workspace_id: workspaceId },
+      limit,
+      order: [['created_at', 'DESC']],
+    });
   }
 
   /**
@@ -788,13 +721,7 @@ class WorkspaceManager extends EventEmitter {
    * 记录活动
    */
   private async recordActivity(activity: WorkspaceActivity): Promise<void> {
-    this.activities.push(activity);
-
-    // 限制活动记录数量
-    if (this.activities.length > 10000) {
-      this.activities = this.activities.slice(-5000);
-    }
-
+    await this.createWorkspaceActivity(activity);
     this.emit('activity_recorded', activity);
   }
 
@@ -820,15 +747,199 @@ class WorkspaceManager extends EventEmitter {
   /**
    * 清理过期邀请
    */
-  private cleanupExpiredInvitations(): void {
+  private async cleanupExpiredInvitations(): Promise<void> {
     const now = new Date();
+    await this.expireInvitations(now);
+  }
 
-    for (const [id, invitation] of this.invitations.entries()) {
-      if (invitation.expiresAt < now) {
-        invitation.status = 'expired';
-        this.emit('invitation_expired', invitation);
-      }
+  private async getWorkspaceById(workspaceId: string) {
+    const record = (await this.models.Workspace.create({}).constructor) as unknown as {
+      findByPk: (id: string) => Promise<unknown | null>;
+    };
+    return record.findByPk(workspaceId);
+  }
+
+  private async createInvitationRecord(invitation: WorkspaceInvitation) {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
+    };
+    await db.sequelize.query(
+      `INSERT INTO workspace_invitations
+       (id, workspace_id, inviter_id, invitee_email, role, permissions, token, status, expires_at, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
+      [
+        invitation.id,
+        invitation.workspaceId,
+        invitation.inviterId,
+        invitation.inviteeEmail,
+        invitation.role,
+        JSON.stringify(invitation.permissions || []),
+        invitation.token,
+        invitation.status,
+        invitation.expiresAt,
+      ]
+    );
+  }
+
+  private async getInvitationRecord(invitationId: string): Promise<WorkspaceInvitation | null> {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: {
+        query: (sql: string, params: unknown[]) => Promise<{ rows: WorkspaceInvitation[] }>;
+      };
+    };
+    const result = await db.sequelize.query('SELECT * FROM workspace_invitations WHERE id = $1', [
+      invitationId,
+    ]);
+    return result.rows?.[0] || null;
+  }
+
+  private async updateInvitationStatus(invitationId: string, status: string) {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
+    };
+    await db.sequelize.query(
+      `UPDATE workspace_invitations
+       SET status = $2, responded_at = NOW()
+       WHERE id = $1`,
+      [invitationId, status]
+    );
+  }
+
+  private async findInvitationByEmail(workspaceId: string, email: string) {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: {
+        query: (sql: string, params: unknown[]) => Promise<{ rows: WorkspaceInvitation[] }>;
+      };
+    };
+    const result = await db.sequelize.query(
+      `SELECT * FROM workspace_invitations
+       WHERE workspace_id = $1 AND invitee_email = $2 AND status = 'pending'`,
+      [workspaceId, email]
+    );
+    return result.rows?.[0] || null;
+  }
+
+  private async updateWorkspaceMember(memberId: string, updates: Record<string, unknown>) {
+    const record = (await this.models.WorkspaceMember.create({}).constructor) as unknown as {
+      findByPk: (
+        id: string
+      ) => Promise<{ update: (data: Record<string, unknown>) => Promise<void> } | null>;
+    };
+    const member = await record.findByPk(memberId);
+    if (!member) {
+      throw new Error('Workspace member not found');
     }
+    await member.update(updates);
+  }
+
+  private async getWorkspaceMemberById(memberId: string, workspaceId: string) {
+    const record = (await this.models.WorkspaceMember.create({}).constructor) as unknown as {
+      findByPk: (
+        id: string
+      ) => Promise<{ workspace_id: string; user_id: string; role: string } | null>;
+    };
+    const member = await record.findByPk(memberId);
+    if (!member || member.workspace_id !== workspaceId) {
+      return null;
+    }
+    return member;
+  }
+
+  private async createWorkspaceResource(resource: WorkspaceResource, workspaceId: string) {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
+    };
+    await db.sequelize.query(
+      `INSERT INTO workspace_resources
+       (id, workspace_id, type, name, path, size, mime_type, owner_id, permissions, metadata, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW(),NOW())`,
+      [
+        resource.id,
+        workspaceId,
+        resource.type,
+        resource.name,
+        resource.path,
+        resource.size,
+        resource.mimeType || null,
+        resource.ownerId || null,
+        JSON.stringify(resource.permissions || []),
+        JSON.stringify(resource.metadata || {}),
+      ]
+    );
+  }
+
+  private async getWorkspaceResource(resourceId: string, workspaceId: string) {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: {
+        query: (sql: string, params: unknown[]) => Promise<{ rows: WorkspaceResource[] }>;
+      };
+    };
+    const result = await db.sequelize.query(
+      `SELECT * FROM workspace_resources WHERE id = $1 AND workspace_id = $2`,
+      [resourceId, workspaceId]
+    );
+    return result.rows?.[0] || null;
+  }
+
+  private async deleteWorkspaceResource(resourceId: string, workspaceId: string) {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
+    };
+    await db.sequelize.query(
+      `DELETE FROM workspace_resources WHERE id = $1 AND workspace_id = $2`,
+      [resourceId, workspaceId]
+    );
+  }
+
+  private async createWorkspaceActivity(activity: WorkspaceActivity) {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
+    };
+    await db.sequelize.query(
+      `INSERT INTO workspace_activities
+       (id, workspace_id, user_id, type, resource, details, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,NOW())`,
+      [
+        activity.id,
+        activity.workspaceId,
+        activity.userId || null,
+        activity.type,
+        JSON.stringify(activity.resource || {}),
+        JSON.stringify(activity.details || {}),
+      ]
+    );
+  }
+
+  private async expireInvitations(now: Date) {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: { query: (sql: string, params: unknown[]) => Promise<void> };
+    };
+    await db.sequelize.query(
+      `UPDATE workspace_invitations
+       SET status = 'expired'
+       WHERE status = 'pending' AND expires_at < $1`,
+      [now]
+    );
+  }
+
+  private async countWorkspaceInvitations() {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: {
+        query: (sql: string, params?: unknown[]) => Promise<{ rows: Array<{ total: string }> }>;
+      };
+    };
+    const result = await db.sequelize.query('SELECT COUNT(*) as total FROM workspace_invitations');
+    return parseInt(result.rows?.[0]?.total || '0', 10);
+  }
+
+  private async countWorkspaceResources() {
+    const db = (await this.models.Workspace.create({}).constructor) as unknown as {
+      sequelize: {
+        query: (sql: string, params?: unknown[]) => Promise<{ rows: Array<{ total: string }> }>;
+      };
+    };
+    const result = await db.sequelize.query('SELECT COUNT(*) as total FROM workspace_resources');
+    return parseInt(result.rows?.[0]?.total || '0', 10);
   }
 }
 
