@@ -1,6 +1,9 @@
 -- 测试表结构优化脚本
 -- 执行时间: 2025-08-14T10:37:17.287Z
 
+/*
+  已废弃（依赖 test_sessions/test_records 体系），保留历史记录。
+
 -- 1. 优化测试会话表索引
 CREATE INDEX IF NOT EXISTS idx_test_sessions_user_type_created
 ON test_sessions(user_id, test_type, created_at DESC);
@@ -176,3 +179,4 @@ ANALYZE test_result_cache;
 
 -- 优化完成
 SELECT 'Database optimization completed successfully' as status;
+*/

@@ -2,6 +2,9 @@
 -- Created: 2025-08-24T00:00:00.000Z
 -- Description: 添加系统监控、健康检查和分析功能，支持API规范中的系统管理和分析接口
 
+/*
+  已合并到 data/schema.sql 或当前未使用，迁移中保留作为历史记录。
+
 -- 创建系统指标表
 CREATE TABLE IF NOT EXISTS system_metrics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -381,3 +384,4 @@ BEGIN
     
     RAISE NOTICE '🎉 系统监控功能迁移完成！';
 END $$;
+*/

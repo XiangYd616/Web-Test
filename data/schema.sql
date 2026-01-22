@@ -104,21 +104,25 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- 用户会话表
 CREATE TABLE IF NOT EXISTS user_sessions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id VARCHAR(64) PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    session_token VARCHAR(255) UNIQUE NOT NULL,
+    device_id VARCHAR(64) NOT NULL,
+    device_name VARCHAR(255),
+    device_type VARCHAR(50),
     ip_address INET,
     user_agent TEXT,
+    location JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    terminated_at TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT true,
+    refresh_token VARCHAR(255),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- =====================================================
 -- 2. 测试管理模块
--- =====================================================
-
--- =====================================================
--- 测试记录主从表设计
 -- =====================================================
 
 -- 测试执行核心表（当前代码使用）
@@ -158,95 +162,6 @@ CREATE TABLE IF NOT EXISTS test_logs (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 测试会话主表 - 存储测试会话的基本信息
-CREATE TABLE IF NOT EXISTS test_sessions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-
-    -- 会话基本信息（必填字段）
-    session_name VARCHAR(200) NOT NULL,
-    description TEXT NOT NULL DEFAULT '',
-    target_url TEXT NOT NULL,
-    batch_id VARCHAR(100) NOT NULL DEFAULT generate_batch_id(),
-
-    -- 会话状态
-    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled')),
-    progress INTEGER NOT NULL DEFAULT 0 CHECK (progress BETWEEN 0 AND 100),
-
-    -- 会话级别统计（非空，有默认值）
-    total_tests INTEGER NOT NULL DEFAULT 0 CHECK (total_tests >= 0),
-    completed_tests INTEGER NOT NULL DEFAULT 0 CHECK (completed_tests >= 0),
-    failed_tests INTEGER NOT NULL DEFAULT 0 CHECK (failed_tests >= 0),
-
-    -- 会话配置（非空JSON）
-    global_config JSONB NOT NULL DEFAULT '{}',
-    environment JSONB NOT NULL DEFAULT '{}',
-
-    -- 时间信息（开始时间在创建时设置，完成时间在完成时设置）
-    started_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    completed_at TIMESTAMP WITH TIME ZONE,
-    total_duration INTEGER CHECK (total_duration >= 0),
-
-    -- 审计字段
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-
-    -- 业务约束
-    CONSTRAINT chk_session_tests_logic CHECK (completed_tests + failed_tests <= total_tests),
-    CONSTRAINT chk_session_time_logic CHECK (completed_at IS NULL OR completed_at >= started_at)
-);
-
--- 测试记录从表 - 存储具体的测试执行记录
-CREATE TABLE IF NOT EXISTS test_records (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    session_id UUID NOT NULL REFERENCES test_sessions(id) ON DELETE CASCADE,
-
-    -- 测试基本信息（全部必填）
-    test_name VARCHAR(200) NOT NULL,
-    test_type VARCHAR(20) NOT NULL CHECK (test_type IN ('api', 'compatibility', 'infrastructure', 'security', 'seo', 'stress', 'ux', 'website')),
-    target_url TEXT NOT NULL,
-
-    -- 测试状态（必填，有默认值）
-    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled')),
-
-    -- 测试配置（非空JSON）
-    test_config JSONB NOT NULL DEFAULT '{}',
-
-    -- 测试结果（完成后才有值）
-    results JSONB DEFAULT '{}',
-    overall_score INTEGER CHECK (overall_score BETWEEN 0 AND 100),
-    grade VARCHAR(5) CHECK (grade IN ('A+', 'A', 'B+', 'B', 'C+', 'C', 'D+', 'D', 'F')),
-
-    -- 执行信息（开始时间在开始时设置）
-    start_time TIMESTAMP WITH TIME ZONE,
-    end_time TIMESTAMP WITH TIME ZONE,
-    duration INTEGER CHECK (duration >= 0),
-
-    -- 错误信息（失败时才有）
-    error_message TEXT,
-    error_details JSONB,
-
-    -- 环境信息（可选，但有默认值）
-    user_agent TEXT NOT NULL DEFAULT '',
-    ip_address INET,
-
-    -- 审计字段
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-
-    -- 业务约束
-    CONSTRAINT chk_record_time_logic CHECK (start_time IS NULL OR end_time IS NULL OR end_time >= start_time),
-    CONSTRAINT chk_record_score_grade CHECK (
-        (overall_score IS NULL AND grade IS NULL) OR
-        (overall_score IS NOT NULL AND grade IS NOT NULL)
-    ),
-    CONSTRAINT chk_record_completion CHECK (
-        (status IN ('pending', 'running')) OR
-        (status = 'completed' AND overall_score IS NOT NULL) OR
-        (status IN ('failed', 'cancelled'))
-    )
-);
-
 -- 测试结果详情表 - 存储测试的详细结果数据
 CREATE TABLE IF NOT EXISTS test_results (
     id SERIAL PRIMARY KEY,
@@ -276,47 +191,6 @@ CREATE TABLE IF NOT EXISTS test_metrics (
     severity VARCHAR(20),
     recommendation TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- 测试问题表 - 存储发现的问题和建议
-CREATE TABLE IF NOT EXISTS test_issues (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    record_id UUID NOT NULL REFERENCES test_records(id) ON DELETE CASCADE,
-
-    -- 问题信息（必填）
-    issue_type VARCHAR(20) NOT NULL CHECK (issue_type IN ('error', 'warning', 'suggestion', 'info')),
-    severity VARCHAR(20) NOT NULL CHECK (severity IN ('critical', 'major', 'minor', 'info')),
-
-    -- 问题描述（必填）
-    title VARCHAR(200) NOT NULL,
-    description TEXT NOT NULL DEFAULT '',
-
-    -- 问题详情（可选）
-    affected_element TEXT,
-    location JSONB NOT NULL DEFAULT '{}',
-
-    -- 解决方案（建议类问题必填）
-    recommendation TEXT NOT NULL DEFAULT '',
-    fix_complexity VARCHAR(20) CHECK (fix_complexity IN ('easy', 'medium', 'hard')),
-    estimated_fix_time INTEGER CHECK (estimated_fix_time > 0),
-
-    -- 相关资源（可选）
-    documentation_url TEXT,
-    example_fix TEXT,
-
-    -- 分组和排序（必填，有默认值）
-    category VARCHAR(50) NOT NULL DEFAULT 'general',
-    subcategory VARCHAR(50),
-    sort_order INTEGER NOT NULL DEFAULT 0,
-
-    -- 时间戳（必填）
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-
-    -- 业务约束
-    CONSTRAINT chk_issue_recommendation CHECK (
-        (issue_type != 'suggestion') OR
-        (recommendation IS NOT NULL AND recommendation != '')
-    )
 );
 
 -- 用户测试统计表
@@ -368,6 +242,33 @@ CREATE TABLE IF NOT EXISTS system_logs (
     ip_address INET,
     user_agent TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 系统指标表（当前代码使用）
+CREATE TABLE IF NOT EXISTS system_metrics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    -- 指标分类和名称
+    metric_type VARCHAR(50) NOT NULL,
+    metric_name VARCHAR(100) NOT NULL,
+    metric_category VARCHAR(50),
+
+    -- 指标值和单位
+    value DOUBLE PRECISION NOT NULL,
+    unit VARCHAR(20),
+
+    -- 指标标签和元数据
+    tags JSONB DEFAULT '{}',
+    labels JSONB DEFAULT '{}',
+
+    -- 指标来源
+    source VARCHAR(100),
+    host VARCHAR(100),
+    service VARCHAR(100),
+
+    -- 时间戳
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    collected_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 监控告警表（当前代码使用）
@@ -434,14 +335,11 @@ CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
 
 -- 用户会话表索引
 CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_token ON user_sessions(session_token);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_device_id ON user_sessions(device_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_active ON user_sessions(is_active, expires_at);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_cleanup ON user_sessions(is_active, expires_at) WHERE is_active = true;
 CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions(expires_at);
-
--- 测试会话表索引
-CREATE INDEX IF NOT EXISTS idx_test_sessions_user_id ON test_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_test_sessions_status ON test_sessions(status);
-CREATE INDEX IF NOT EXISTS idx_test_sessions_batch_id ON test_sessions(batch_id);
-CREATE INDEX IF NOT EXISTS idx_test_sessions_created_at ON test_sessions(created_at);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_refresh_token ON user_sessions(refresh_token);
 
 -- 测试执行表索引
 CREATE INDEX IF NOT EXISTS idx_test_executions_user_id ON test_executions(user_id);
@@ -454,14 +352,6 @@ CREATE INDEX IF NOT EXISTS idx_test_executions_test_id ON test_executions(test_i
 CREATE INDEX IF NOT EXISTS idx_test_logs_execution_id ON test_logs(execution_id);
 CREATE INDEX IF NOT EXISTS idx_test_logs_level ON test_logs(level);
 
--- 测试记录表索引
-CREATE INDEX IF NOT EXISTS idx_test_records_session_id ON test_records(session_id);
-CREATE INDEX IF NOT EXISTS idx_test_records_test_type ON test_records(test_type);
-CREATE INDEX IF NOT EXISTS idx_test_records_status ON test_records(status);
-CREATE INDEX IF NOT EXISTS idx_test_records_target_url ON test_records(target_url);
-CREATE INDEX IF NOT EXISTS idx_test_records_overall_score ON test_records(overall_score);
-CREATE INDEX IF NOT EXISTS idx_test_records_created_at ON test_records(created_at);
-
 -- 测试结果表索引
 CREATE INDEX IF NOT EXISTS idx_test_results_execution_id ON test_results(execution_id);
 CREATE INDEX IF NOT EXISTS idx_test_results_score ON test_results(score);
@@ -472,12 +362,6 @@ CREATE INDEX IF NOT EXISTS idx_test_metrics_result_id ON test_metrics(result_id)
 CREATE INDEX IF NOT EXISTS idx_test_metrics_name ON test_metrics(metric_name);
 CREATE INDEX IF NOT EXISTS idx_test_metrics_type ON test_metrics(metric_type);
 CREATE INDEX IF NOT EXISTS idx_test_metrics_severity ON test_metrics(severity);
-
--- 测试问题表索引
-CREATE INDEX IF NOT EXISTS idx_test_issues_record_id ON test_issues(record_id);
-CREATE INDEX IF NOT EXISTS idx_test_issues_type ON test_issues(issue_type);
-CREATE INDEX IF NOT EXISTS idx_test_issues_severity ON test_issues(severity);
-CREATE INDEX IF NOT EXISTS idx_test_issues_category ON test_issues(category);
 
 -- 用户测试统计表索引
 CREATE INDEX IF NOT EXISTS idx_user_test_stats_user_id ON user_test_stats(user_id);
@@ -492,6 +376,20 @@ CREATE INDEX IF NOT EXISTS idx_system_configs_public ON system_configs(is_public
 CREATE INDEX IF NOT EXISTS idx_system_logs_level ON system_logs(level);
 CREATE INDEX IF NOT EXISTS idx_system_logs_user_id ON system_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at);
+
+-- 系统指标表索引
+CREATE INDEX IF NOT EXISTS idx_system_metrics_type ON system_metrics(metric_type);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_name ON system_metrics(metric_name);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_category ON system_metrics(metric_category);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_timestamp ON system_metrics(timestamp);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_source ON system_metrics(source);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_host ON system_metrics(host);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_service ON system_metrics(service);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_type_time ON system_metrics(metric_type, timestamp);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_name_time ON system_metrics(metric_name, timestamp);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_source_time ON system_metrics(source, timestamp);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_tags_gin ON system_metrics USING GIN (tags);
+CREATE INDEX IF NOT EXISTS idx_system_metrics_labels_gin ON system_metrics USING GIN (labels);
 
 -- 监控告警表索引
 CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_source ON monitoring_alerts(source);
@@ -513,19 +411,6 @@ CREATE INDEX IF NOT EXISTS idx_user_permissions_is_active ON user_permissions(is
 -- 5. 触发器 - 自动更新时间戳
 -- =====================================================
 
--- 自动计算grade的触发器函数
-CREATE OR REPLACE FUNCTION auto_calculate_grade()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    IF NEW.overall_score IS NOT NULL AND (OLD.overall_score IS NULL OR OLD.overall_score != NEW.overall_score) THEN
-        NEW.grade = calculate_grade(NEW.overall_score);
-    END IF;
-    RETURN NEW;
-END;
-$$;
-
 -- 为相关表创建触发器
 DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at
@@ -533,15 +418,9 @@ CREATE TRIGGER update_users_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_test_sessions_updated_at ON test_sessions;
-CREATE TRIGGER update_test_sessions_updated_at
-    BEFORE UPDATE ON test_sessions
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
-DROP TRIGGER IF EXISTS update_test_records_updated_at ON test_records;
-CREATE TRIGGER update_test_records_updated_at
-    BEFORE UPDATE ON test_records
+DROP TRIGGER IF EXISTS update_user_sessions_updated_at ON user_sessions;
+CREATE TRIGGER update_user_sessions_updated_at
+    BEFORE UPDATE ON user_sessions
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
@@ -574,13 +453,6 @@ CREATE TRIGGER update_user_permissions_updated_at
     BEFORE UPDATE ON user_permissions
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
-
--- 自动计算grade的触发器
-DROP TRIGGER IF EXISTS auto_calculate_grade_trigger ON test_records;
-CREATE TRIGGER auto_calculate_grade_trigger
-    BEFORE INSERT OR UPDATE ON test_records
-    FOR EACH ROW
-    EXECUTE FUNCTION auto_calculate_grade();
 
 -- =====================================================
 -- 6. 扩展功能表
@@ -1059,62 +931,6 @@ CHECK (file_size > 0 AND file_size <= 1073741824); -- 最大1GB
 -- =====================================================
 -- 10. 视图创建 - 便于查询的视图
 -- =====================================================
-
--- 用户测试概览视图
-CREATE OR REPLACE VIEW user_test_overview AS
-SELECT
-    u.id as user_id,
-    u.username,
-    u.email,
-    u.role,
-    COUNT(DISTINCT ts.id) as total_sessions,
-    COUNT(DISTINCT CASE WHEN ts.status = 'completed' THEN ts.id END) as completed_sessions,
-    COUNT(DISTINCT CASE WHEN ts.status = 'failed' THEN ts.id END) as failed_sessions,
-    COUNT(tr.id) as total_tests,
-    COUNT(CASE WHEN tr.status = 'completed' THEN 1 END) as completed_tests,
-    COUNT(CASE WHEN tr.status = 'failed' THEN 1 END) as failed_tests,
-    AVG(CASE WHEN tr.overall_score IS NOT NULL THEN tr.overall_score END) as average_score,
-    MAX(tr.created_at) as last_test_at
-FROM users u
-LEFT JOIN test_sessions ts ON u.id = ts.user_id
-LEFT JOIN test_records tr ON ts.id = tr.session_id
-GROUP BY u.id, u.username, u.email, u.role;
-
--- 测试类型统计视图
-CREATE OR REPLACE VIEW test_type_stats AS
-SELECT
-    test_type,
-    COUNT(*) as total_tests,
-    COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
-    COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
-    AVG(CASE WHEN overall_score IS NOT NULL THEN overall_score END) as average_score,
-    AVG(CASE WHEN duration IS NOT NULL THEN duration END) as average_duration
-FROM test_records
-GROUP BY test_type;
-
--- 测试会话详情视图
-CREATE OR REPLACE VIEW test_session_details AS
-SELECT
-    ts.id as session_id,
-    ts.session_name,
-    ts.user_id,
-    u.username,
-    ts.status as session_status,
-    ts.total_tests,
-    ts.completed_tests,
-    ts.failed_tests,
-    ts.started_at,
-    ts.completed_at,
-    ts.total_duration,
-    COUNT(tr.id) as actual_test_count,
-    AVG(tr.overall_score) as average_score,
-    STRING_AGG(DISTINCT tr.test_type, ', ') as test_types
-FROM test_sessions ts
-LEFT JOIN users u ON ts.user_id = u.id
-LEFT JOIN test_records tr ON ts.id = tr.session_id
-GROUP BY ts.id, ts.session_name, ts.user_id, u.username, ts.status,
-         ts.total_tests, ts.completed_tests, ts.failed_tests,
-         ts.started_at, ts.completed_at, ts.total_duration;
 
 -- 系统健康状态视图
 CREATE OR REPLACE VIEW system_health_overview AS

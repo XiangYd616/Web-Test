@@ -59,11 +59,16 @@ export interface UserProfile {
 export interface UserSession {
   id: DatabaseId;
   user_id: DatabaseId;
-  session_token: string;
+  device_id: string;
+  device_name?: string;
+  device_type?: string;
   refresh_token?: string;
   expires_at: DatabaseTimestamp;
   ip_address?: string;
   user_agent?: string;
+  location?: JsonObject | string;
+  last_activity_at?: DatabaseTimestamp;
+  terminated_at?: DatabaseTimestamp;
   is_active: boolean;
   created_at: DatabaseTimestamp;
   updated_at: DatabaseTimestamp;
