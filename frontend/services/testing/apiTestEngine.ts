@@ -87,5 +87,65 @@ export class APITestEngine {
   }
 }
 
+export const apiAssertionExampleConfig: APITestConfig = {
+  baseUrl: 'https://api.example.com',
+  timeout: 10000,
+  retries: 2,
+  endpoints: [
+    {
+      id: 'login',
+      name: '登录获取 Token',
+      method: 'POST',
+      path: '/auth/login',
+      expectedStatus: [200],
+      headers: { 'Content-Type': 'application/json' },
+      body: {
+        username: 'demo@example.com',
+        password: 'Password123',
+      },
+      assertions: [
+        { type: 'status', expected: [200, 201] },
+        { type: 'json', path: 'token', operator: 'exists' },
+        { type: 'extract', name: 'authToken', source: 'json', path: 'token' },
+      ],
+    },
+    {
+      id: 'profile',
+      name: '获取用户信息',
+      method: 'GET',
+      path: '/users/me',
+      headers: { Authorization: 'Bearer {{authToken}}' },
+      assertions: [
+        {
+          type: 'allOf',
+          assertions: [
+            { type: 'status', expected: 200 },
+            { type: 'json', path: 'id', operator: 'exists' },
+            { type: 'json', path: 'email', operator: 'regex', expected: '.+@.+' },
+            { type: 'responseTime', max: { max: 800 } },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'unauthorized',
+      name: '未授权访问示例',
+      method: 'GET',
+      path: '/admin/secret',
+      assertions: [
+        { type: 'status', expected: 401 },
+        { type: 'error', expected: 'Unauthorized' },
+        {
+          type: 'anyOf',
+          assertions: [
+            { type: 'status', expected: 401 },
+            { type: 'status', expected: 403 },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 export const createAPITest = (config: APITestConfig) => new APITestEngine();
 export default APITestEngine;

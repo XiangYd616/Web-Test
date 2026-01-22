@@ -153,16 +153,35 @@ export interface APIRequest {
 }
 
 export interface APIAssertion {
-  type: 'status' | 'header' | 'body' | 'response-time' | 'json-path' | 'regex';
-  target: string;
-  operator: 'equals' | 'not-equals' | 'contains' | 'not-contains' | 'greater-than' | 'less-than';
-  value: any;
+  type:
+    | 'status'
+    | 'header'
+    | 'json'
+    | 'jsonSchema'
+    | 'bodyContains'
+    | 'bodyRegex'
+    | 'responseTime'
+    | 'error'
+    | 'allOf'
+    | 'anyOf'
+    | 'extract';
+  name?: string;
+  expected?: any;
+  operator?: 'equals' | 'contains' | 'exists' | 'regex' | 'gt' | 'gte' | 'lt' | 'lte' | 'oneOf';
+  path?: string;
+  value?: string;
+  max?: number | { min?: number; max?: number };
+  schema?: Record<string, any>;
+  pattern?: string;
+  assertions?: APIAssertion[];
+  source?: 'header' | 'json' | 'regex';
 }
 
 export interface APIExtractor {
   name: string;
-  type: 'header' | 'json-path' | 'regex' | 'xpath';
-  expression: string;
+  source: 'header' | 'json' | 'regex';
+  path?: string;
+  pattern?: string;
   scope: 'global' | 'collection' | 'request';
 }
 
