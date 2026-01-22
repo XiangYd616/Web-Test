@@ -2,6 +2,9 @@
 -- Created: 2025-08-24T00:00:00.000Z
 -- Description: 添加测试报告生成和管理功能，支持API规范中的报告接口
 
+/*
+  已合并到 data/schema.sql，迁移中保留作为历史记录。
+
 -- 创建测试报告表
 CREATE TABLE IF NOT EXISTS test_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -342,3 +345,4 @@ BEGIN
     
     RAISE NOTICE '🎉 报告管理功能迁移完成！';
 END $$;
+*/

@@ -131,6 +131,63 @@ class MonitoringService extends EventEmitter {
   }
 
   /**
+   * 写入测试告警（来自测试系统）
+   */
+  async insertTestAlert(payload: {
+    alertId: string;
+    alertType: string;
+    severity: string;
+    message?: string | null;
+    details?: Record<string, unknown>;
+    createdAt?: string;
+  }) {
+    try {
+      await this.dbPool.query(
+        `INSERT INTO monitoring_alerts (
+           id,
+           site_id,
+           alert_type,
+           severity,
+           source,
+           status,
+           message,
+           details,
+           created_at,
+           updated_at
+         ) VALUES ($1, $2, $3, $4, $5, 'active', $6, $7, $8, NOW())
+         ON CONFLICT (id) DO NOTHING`,
+        [
+          payload.alertId,
+          '00000000-0000-0000-0000-000000000000',
+          payload.alertType,
+          payload.severity,
+          'test',
+          payload.message || null,
+          JSON.stringify(payload.details || {}),
+          payload.createdAt ? new Date(payload.createdAt) : new Date(),
+        ]
+      );
+    } catch (error) {
+      const errorCode = (error as { code?: string }).code;
+      if (errorCode === '42P01') {
+        await this.createAlertsTable();
+        await this.insertTestAlert(payload);
+        return;
+      }
+      if (errorCode === '42703') {
+        await this.dbPool.query(
+          `ALTER TABLE monitoring_alerts
+           ADD COLUMN IF NOT EXISTS source VARCHAR(50) NOT NULL DEFAULT 'monitoring'`
+        );
+        await this.insertTestAlert(payload);
+        return;
+      }
+      logger.error('写入测试告警失败:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 暂停监控目标
    */
   async pauseMonitoringTarget(siteId: string, userId: string) {
@@ -1658,12 +1715,14 @@ class MonitoringService extends EventEmitter {
         page = 1,
         limit = 20,
         severity,
+        source,
         status: statusValue = 'active',
         timeRange = null,
       } = options as {
         page?: number;
         limit?: number;
         severity?: string;
+        source?: string;
         status?: string;
         timeRange?: string | null;
       };
@@ -1701,6 +1760,11 @@ class MonitoringService extends EventEmitter {
         params.push(severity);
         paramIndex += 1;
       }
+      if (source) {
+        conditions.push(`ma.source = $${paramIndex}`);
+        params.push(source);
+        paramIndex += 1;
+      }
 
       const whereClause = `WHERE ${conditions.join(' AND ')} ${timeCondition}`;
       const query = `
@@ -1711,6 +1775,7 @@ class MonitoringService extends EventEmitter {
           ms.url,
           ma.alert_type,
           ma.severity,
+          ma.source,
           ma.status,
           ma.message,
           ma.details,
@@ -1833,6 +1898,7 @@ class MonitoringService extends EventEmitter {
           site_id UUID NOT NULL,
           alert_type VARCHAR(50) NOT NULL,
           severity VARCHAR(20) NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+          source VARCHAR(50) NOT NULL DEFAULT 'monitoring',
           status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'acknowledged', 'resolved')),
           message TEXT,
           details JSONB DEFAULT '{}',
@@ -1844,6 +1910,7 @@ class MonitoringService extends EventEmitter {
         );
 
         CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_site ON monitoring_alerts(site_id);
+        CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_source ON monitoring_alerts(source);
         CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_severity ON monitoring_alerts(severity);
         CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_status ON monitoring_alerts(status);
         CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_created ON monitoring_alerts(created_at DESC);

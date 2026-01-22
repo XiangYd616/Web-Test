@@ -3,9 +3,11 @@
  * 整合专门存储、归档和清理功能的统一接口
  */
 
-import { DataArchiveManager } from './DataArchiveManager';
-import { DataCleanupManager } from './DataCleanupManager';
-import { SpecializedStorageManager } from './SpecializedStorageManager';
+import * as fs from 'fs/promises';
+import { query } from '../../config/database';
+import DataArchiveManager from './DataArchiveManager';
+import DataCleanupManager from './DataCleanupManager';
+import SpecializedStorageManager from './SpecializedStorageManager';
 
 // 存储配置接口
 export interface StorageServiceConfig {
@@ -68,17 +70,114 @@ class StorageService {
   }
 
   /**
+   * 记录上传文件到数据库
+   */
+  async registerUploadedFile(
+    file: {
+      originalName: string;
+      filename: string;
+      mimetype: string;
+      size: number;
+      path: string;
+    },
+    userId: string
+  ) {
+    const result = await query(
+      `INSERT INTO uploaded_files (
+         user_id, original_name, filename, mimetype, size, upload_date, file_path
+       ) VALUES ($1, $2, $3, $4, $5, NOW(), $6)
+       RETURNING id, user_id, original_name, filename, mimetype, size, upload_date, file_path`,
+      [userId, file.originalName, file.filename, file.mimetype, file.size, file.path]
+    );
+    return result.rows[0] as Record<string, unknown>;
+  }
+
+  async getUploadedFile(fileId: string, userId?: string) {
+    const params: Array<string> = [fileId];
+    const filter = userId ? ` AND user_id = $2` : '';
+    if (userId) {
+      params.push(userId);
+    }
+    const result = await query(
+      `SELECT id, user_id, original_name, filename, mimetype, size, upload_date, file_path
+       FROM uploaded_files
+       WHERE id = $1${filter}`,
+      params
+    );
+    return result.rows[0] as Record<string, unknown> | undefined;
+  }
+
+  async deleteUploadedFile(fileId: string, userId?: string) {
+    const params: Array<string> = [fileId];
+    const filter = userId ? ` AND user_id = $2` : '';
+    if (userId) {
+      params.push(userId);
+    }
+    await query(`DELETE FROM uploaded_files WHERE id = $1${filter}`, params);
+  }
+
+  async updateUploadedFile(
+    fileId: string,
+    updates: { filename?: string; path?: string },
+    userId?: string
+  ) {
+    const params: Array<string | number> = [];
+    const fields: string[] = [];
+
+    if (updates.filename) {
+      params.push(updates.filename);
+      fields.push(`filename = $${params.length}`);
+    }
+    if (updates.path) {
+      params.push(updates.path);
+      fields.push(`file_path = $${params.length}`);
+    }
+
+    if (!fields.length) {
+      return;
+    }
+
+    params.push(fileId);
+    const filter = userId ? ` AND user_id = $${params.length + 1}` : '';
+    if (userId) {
+      params.push(userId);
+    }
+
+    await query(
+      `UPDATE uploaded_files SET ${fields.join(', ')} WHERE id = $${fields.length + 1}${filter}`,
+      params
+    );
+  }
+
+  /**
    * 存储数据
    */
   async store(
-    key: string,
     data: unknown,
     options: Record<string, unknown> = {}
   ): Promise<StorageOperationResult> {
     const startTime = Date.now();
 
     try {
-      const result = await this.storageManager.store(key, data, options);
+      const resolvedOptions = {
+        name: options.name || 'storage-item',
+        type: options.type || 'generic',
+        strategy: options.strategy || 'user_data',
+        metadata: options.metadata,
+        tags: options.tags,
+      } as Record<string, unknown>;
+      const normalizedData =
+        typeof data === 'string' || Buffer.isBuffer(data) ? data : JSON.stringify(data ?? {});
+      const result = await this.storageManager.store(
+        normalizedData as Buffer | string,
+        resolvedOptions as {
+          name: string;
+          type: string;
+          strategy: string;
+          metadata?: Record<string, unknown>;
+          tags?: string[];
+        }
+      );
       this.statistics.storageOperations++;
       this.statistics.totalOperations++;
       this.statistics.lastOperation = new Date();
@@ -87,7 +186,7 @@ class StorageService {
         success: true,
         operation: 'store',
         duration: Date.now() - startTime,
-        affected: result.affected || 1,
+        affected: result.success ? 1 : 0,
       };
     } catch (error) {
       this.statistics.errors++;
@@ -104,11 +203,9 @@ class StorageService {
   /**
    * 检索数据
    */
-  async retrieve(key: string, options: Record<string, unknown> = {}): Promise<unknown> {
-    const startTime = Date.now();
-
+  async retrieve(key: string): Promise<unknown> {
     try {
-      const result = await this.storageManager.retrieve(key, options);
+      const result = await this.storageManager.retrieve(key);
       this.statistics.storageOperations++;
       this.statistics.totalOperations++;
       this.statistics.lastOperation = new Date();
@@ -125,12 +222,12 @@ class StorageService {
    */
   async delete(
     key: string,
-    options: Record<string, unknown> = {}
+    _options: Record<string, unknown> = {}
   ): Promise<StorageOperationResult> {
     const startTime = Date.now();
 
     try {
-      const result = await this.storageManager.delete(key, options);
+      const result = await this.storageManager.delete(key);
       this.statistics.storageOperations++;
       this.statistics.totalOperations++;
       this.statistics.lastOperation = new Date();
@@ -139,7 +236,7 @@ class StorageService {
         success: true,
         operation: 'delete',
         duration: Date.now() - startTime,
-        affected: result.affected || 1,
+        affected: result ? 1 : 0,
       };
     } catch (error) {
       this.statistics.errors++;
@@ -163,7 +260,20 @@ class StorageService {
     const startTime = Date.now();
 
     try {
-      const result = await this.archiveManager.archive(criteria, options);
+      const sourcePath = String(criteria.sourcePath || '');
+      const targetPath = String(criteria.targetPath || options.targetPath || './archives');
+      if (!sourcePath) {
+        throw new Error('归档缺少 sourcePath');
+      }
+      await this.archiveManager.createArchiveJob({
+        name: String(criteria.name || 'archive'),
+        description: String(criteria.description || ''),
+        sourcePath,
+        targetPath,
+        status: 'pending',
+        size: 0,
+        metadata: { options, criteria },
+      });
       this.statistics.archiveOperations++;
       this.statistics.totalOperations++;
       this.statistics.lastOperation = new Date();
@@ -172,7 +282,7 @@ class StorageService {
         success: true,
         operation: 'archive',
         duration: Date.now() - startTime,
-        affected: result.affected || 0,
+        affected: 0,
       };
     } catch (error) {
       this.statistics.errors++;
@@ -191,12 +301,31 @@ class StorageService {
    */
   async cleanup(
     criteria: Record<string, unknown>,
-    options: Record<string, unknown> = {}
+    _options: Record<string, unknown> = {}
   ): Promise<StorageOperationResult> {
     const startTime = Date.now();
 
     try {
-      const result = await this.cleanupManager.cleanup(criteria, options);
+      const olderThan = Number(criteria.olderThan || 0);
+      const dryRun = Boolean(criteria.dryRun);
+      if (!olderThan || Number.isNaN(olderThan)) {
+        throw new Error('清理需要提供 olderThan(天)');
+      }
+      const rows = await query(
+        `SELECT id, file_path
+         FROM uploaded_files
+         WHERE upload_date < NOW() - ($1::text || ' days')::interval`,
+        [olderThan]
+      );
+      if (!dryRun) {
+        for (const row of rows.rows) {
+          const filePath = String(row.file_path || '');
+          if (filePath) {
+            await fs.unlink(filePath).catch(() => undefined);
+          }
+          await query('DELETE FROM uploaded_files WHERE id = $1', [row.id]);
+        }
+      }
       this.statistics.cleanupOperations++;
       this.statistics.totalOperations++;
       this.statistics.lastOperation = new Date();
@@ -205,7 +334,7 @@ class StorageService {
         success: true,
         operation: 'cleanup',
         duration: Date.now() - startTime,
-        affected: result.affected || 0,
+        affected: rows.rows.length,
       };
     } catch (error) {
       this.statistics.errors++;
@@ -261,7 +390,7 @@ class StorageService {
         cleanup,
         overall,
       };
-    } catch (error) {
+    } catch {
       return {
         storage: false,
         archive: false,

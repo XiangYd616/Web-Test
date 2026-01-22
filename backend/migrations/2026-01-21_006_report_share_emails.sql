@@ -1,6 +1,9 @@
 -- Migration: Report share email log table
 -- Created: 2026-01-21
 
+/*
+  已合并到 data/schema.sql，迁移中保留作为历史记录。
+
 CREATE TABLE IF NOT EXISTS report_share_emails (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   report_id UUID NOT NULL REFERENCES test_reports(id) ON DELETE CASCADE,
@@ -26,3 +29,4 @@ DROP TRIGGER IF EXISTS update_report_share_emails_updated_at ON report_share_ema
 CREATE TRIGGER update_report_share_emails_updated_at
 BEFORE UPDATE ON report_share_emails
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+*/

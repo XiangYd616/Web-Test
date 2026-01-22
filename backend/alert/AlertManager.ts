@@ -12,6 +12,7 @@
  */
 
 import { EventEmitter } from 'events';
+import { query } from '../config/database';
 
 const Logger = require('../utils/logger');
 
@@ -64,6 +65,159 @@ class AlertManager extends EventEmitter {
       failureRateThreshold: options.failureRateThreshold || 5,
       responseTimeIncreaseThreshold: options.responseTimeIncreaseThreshold || 20,
     };
+  }
+
+  private async persistAlert(alert: AlertItem) {
+    try {
+      await query(
+        `INSERT INTO monitoring_alerts (
+           id,
+           site_id,
+           alert_type,
+           severity,
+           source,
+           status,
+           message,
+           details,
+           created_at,
+           updated_at
+         ) VALUES ($1, $2, $3, $4, $5, 'active', $6, $7, NOW(), NOW())
+         ON CONFLICT (id) DO NOTHING`,
+        [
+          alert.alertId,
+          '00000000-0000-0000-0000-000000000000',
+          alert.type,
+          alert.severity,
+          'test',
+          alert.data.message || null,
+          JSON.stringify(alert.data || {}),
+        ]
+      );
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === '42P01') {
+        await this.createAlertsTable();
+        await this.persistAlert(alert);
+        return;
+      }
+      if (code === '42703') {
+        await query(
+          `ALTER TABLE monitoring_alerts
+           ADD COLUMN IF NOT EXISTS source VARCHAR(50) NOT NULL DEFAULT 'monitoring'`
+        );
+        await this.persistAlert(alert);
+        return;
+      }
+      Logger.error('告警落库失败:', error);
+    }
+  }
+
+  private async createAlertsTable() {
+    await query(
+      `CREATE TABLE IF NOT EXISTS monitoring_alerts (
+         id VARCHAR(255) PRIMARY KEY,
+         site_id UUID NOT NULL,
+         alert_type VARCHAR(50) NOT NULL,
+         severity VARCHAR(20) NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+         source VARCHAR(50) NOT NULL DEFAULT 'monitoring',
+         status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'acknowledged', 'resolved')),
+         message TEXT,
+         details JSONB DEFAULT '{}',
+         acknowledged_at TIMESTAMPTZ,
+         acknowledged_by UUID,
+         resolved_at TIMESTAMPTZ,
+         created_at TIMESTAMPTZ DEFAULT NOW(),
+         updated_at TIMESTAMPTZ DEFAULT NOW()
+       );
+
+       CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_source ON monitoring_alerts(source);
+       CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_severity ON monitoring_alerts(severity);
+       CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_status ON monitoring_alerts(status);
+       CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_created ON monitoring_alerts(created_at DESC);
+    `
+    );
+  }
+
+  async getTestAlerts(
+    options: {
+      page?: number;
+      limit?: number;
+      severity?: string | string[];
+      type?: string | string[];
+      search?: string;
+      startTime?: string;
+      endTime?: string;
+    } = {}
+  ): Promise<{
+    data: Array<Record<string, unknown>>;
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }> {
+    try {
+      const { page = 1, limit = 20, severity, type, search, startTime, endTime } = options;
+      const offset = (page - 1) * limit;
+      const params: Array<string | number | string[]> = [];
+      const filters: string[] = [];
+
+      params.push('test');
+      filters.push(`source = $${params.length}`);
+
+      if (severity) {
+        const severityList = Array.isArray(severity) ? severity : [severity];
+        params.push(severityList);
+        filters.push(`severity = ANY($${params.length})`);
+      }
+      if (type) {
+        const typeList = Array.isArray(type) ? type : [type];
+        params.push(typeList);
+        filters.push(`alert_type = ANY($${params.length})`);
+      }
+      if (search) {
+        params.push(`%${search}%`);
+        filters.push(`(message ILIKE $${params.length} OR details::text ILIKE $${params.length})`);
+      }
+      if (startTime) {
+        params.push(startTime);
+        filters.push(`created_at >= $${params.length}`);
+      }
+      if (endTime) {
+        params.push(endTime);
+        filters.push(`created_at <= $${params.length}`);
+      }
+
+      const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+      const listParams = [...params, limit, offset];
+      const listQuery = `
+        SELECT id, alert_type, severity, message, details as data, created_at
+        FROM monitoring_alerts
+        ${whereClause}
+        ORDER BY created_at DESC
+        LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+      `;
+      const countQuery = `SELECT COUNT(*) AS total FROM monitoring_alerts ${whereClause}`;
+
+      const [listResult, countResult] = await Promise.all([
+        query(listQuery, listParams),
+        query(countQuery, params),
+      ]);
+      const total = Number(countResult.rows[0]?.total || 0);
+
+      return {
+        data: listResult.rows,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      if ((error as { code?: string }).code === '42P01') {
+        await this.createAlertsTable();
+        return this.getTestAlerts(options);
+      }
+      Logger.error('获取测试告警失败:', error);
+      throw error;
+    }
   }
 
   /**
@@ -291,6 +445,8 @@ class AlertManager extends EventEmitter {
 
     // 记录日志
     Logger.warn(`[ALERT] ${alert.type} - ${alert.data.message}`);
+
+    void this.persistAlert(alert);
 
     // 触发事件
     this.emit('alert', alert);

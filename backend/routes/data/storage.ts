@@ -247,24 +247,19 @@ router.post(
       }
 
       const file = req.file;
-      const sql = `
-      INSERT INTO uploaded_files (
-        user_id, original_name, filename, mimetype, size, upload_date, file_path
-      ) VALUES ($1, $2, $3, $4, $5, NOW(), $6)
-      RETURNING id
-    `;
-
-      const result = await query(sql, [
-        userId,
-        file.originalname,
-        file.filename,
-        file.mimetype,
-        file.size,
-        file.path,
-      ]);
+      const result = await storageService.registerUploadedFile(
+        {
+          originalName: file.originalname,
+          filename: file.filename,
+          mimetype: file.mimetype,
+          size: file.size,
+          path: file.path,
+        },
+        userId
+      );
 
       const payload = {
-        id: result.rows[0].id,
+        id: result.id,
         name: name || file.originalname,
         type: type || file.mimetype,
         description,
@@ -307,22 +302,13 @@ router.get(
     const { fileId } = req.params;
 
     try {
-      const sql = `
-      SELECT id, original_name, filename, mimetype, file_path
-      FROM uploaded_files
-      WHERE id = $1
-    `;
-
-      const result = await query(sql, [fileId]);
-
-      if (result.rows.length === 0) {
+      const file = await storageService.getUploadedFile(fileId);
+      if (!file) {
         return res.status(404).json({
           success: false,
           message: '文件不存在',
         });
       }
-
-      const file = result.rows[0];
 
       try {
         await fs.access(file.file_path);
@@ -356,28 +342,20 @@ router.delete(
     const { fileId } = req.params;
 
     try {
-      const sql = `
-      SELECT id, filename, file_path
-      FROM uploaded_files
-      WHERE id = $1
-    `;
-      const result = await query(sql, [fileId]);
-
-      if (result.rows.length === 0) {
+      const file = await storageService.getUploadedFile(fileId);
+      if (!file) {
         return res.status(404).json({
           success: false,
           message: '文件不存在',
         });
       }
-
-      const file = result.rows[0];
       try {
         await fs.unlink(file.file_path);
       } catch (unlinkError) {
         logger.error('删除物理文件失败', { error: unlinkError, filePath: file.file_path });
       }
 
-      await query('DELETE FROM uploaded_files WHERE id = $1', [fileId]);
+      await storageService.deleteUploadedFile(fileId);
 
       return res.json({
         success: true,
@@ -599,15 +577,18 @@ router.post(
       for (const file of archiveData.files || []) {
         const restoredPath = path.join(targetDir, file.storedName);
         const stats = await fs.stat(restoredPath);
-        const insertResult = await query(
-          `INSERT INTO uploaded_files (
-            user_id, original_name, filename, mimetype, size, upload_date, file_path
-          ) VALUES ($1, $2, $3, $4, $5, NOW(), $6)
-          RETURNING id`,
-          [userId, file.originalName, file.storedName, file.mimetype, stats.size, restoredPath]
+        const insertResult = await storageService.registerUploadedFile(
+          {
+            originalName: file.originalName,
+            filename: file.storedName,
+            mimetype: file.mimetype,
+            size: file.size,
+            path: restoredPath,
+          },
+          userId
         );
         restoredFiles.push({
-          id: insertResult.rows[0].id,
+          id: insertResult.id,
           originalName: file.originalName,
           filename: file.storedName,
           size: stats.size,
@@ -787,11 +768,10 @@ router.post(
 
       await fs.rename(file.file_path, targetFilePath);
 
-      await query('UPDATE uploaded_files SET filename = $1, file_path = $2 WHERE id = $3', [
-        targetFilename,
-        targetFilePath,
-        fileId,
-      ]);
+      await storageService.updateUploadedFile(fileId, {
+        filename: targetFilename,
+        path: targetFilePath,
+      });
 
       return res.json({
         success: true,
@@ -850,18 +830,21 @@ router.post(
 
       await fs.copyFile(file.file_path, targetFilePath);
 
-      const insertResult = await query(
-        `INSERT INTO uploaded_files (
-          user_id, original_name, filename, mimetype, size, upload_date, file_path
-        ) VALUES ($1, $2, $3, $4, $5, NOW(), $6)
-        RETURNING id`,
-        [userId, file.original_name, targetFilename, file.mimetype, file.size, targetFilePath]
+      const insertResult = await storageService.registerUploadedFile(
+        {
+          originalName: String(file.original_name),
+          filename: targetFilename,
+          mimetype: String(file.mimetype || ''),
+          size: Number(file.size || 0),
+          path: targetFilePath,
+        },
+        userId
       );
 
       return res.status(201).json({
         success: true,
         message: '文件复制成功',
-        data: { fileId: insertResult.rows[0].id, filePath: targetFilePath },
+        data: { fileId: insertResult.id, filePath: targetFilePath },
       });
     } catch (error) {
       return res.status(500).json({

@@ -1,3 +1,6 @@
+/*
+  已废弃表结构，基线统一由 data/schema.sql 管理，迁移仅保留历史记录。
+
 -- 测试历史记录表
 CREATE TABLE IF NOT EXISTS test_history (
     id SERIAL PRIMARY KEY,
@@ -171,3 +174,4 @@ INSERT INTO test_templates (user_id, engine_type, template_name, description, co
 (NULL, 'stress', '压力测试-标准', '标准压力测试配置', 
  '{"virtualUsers": 100, "duration": 300, "rampUp": 60, "thinkTime": 1000}', 
  true, true);
+*/

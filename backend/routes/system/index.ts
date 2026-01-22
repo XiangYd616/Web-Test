@@ -11,7 +11,7 @@ import monitoringRoutes from './monitoring';
 import reportRoutes from './reports';
 const { getPool, getStats, healthCheck } = require('../../config/database');
 const { requireRole } = require('../../middleware/auth');
-const { AlertManager } = require('../../alert/AlertManager');
+const { getAlertManager } = require('../../alert/AlertManager');
 const { MonitoringService } = require('../../services/monitoring/MonitoringService');
 
 const router = express.Router();
@@ -24,9 +24,33 @@ const getUserId = (req: express.Request): string => {
   return userId;
 };
 
+const parseListParam = (value: unknown): string[] | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  if (Array.isArray(value)) {
+    return value.map(item => String(item).trim()).filter(Boolean);
+  }
+  return String(value)
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean);
+};
+
+const escapeCsvValue = (value: unknown) => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  const text = String(value);
+  if (text.includes('"') || text.includes(',') || text.includes('\n')) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+};
+
 // 初始化监控服务并注入路由
 const monitoringService = new MonitoringService(getPool());
-const alertService = new AlertManager();
+const alertService = getAlertManager();
 
 (monitoringRoutes as { setMonitoringService?: (service: unknown) => void }).setMonitoringService?.(
   monitoringService
@@ -40,9 +64,138 @@ monitoringService.on('alert:triggered', (alertData: unknown) => {
   }
 });
 
+alertService.on('alert', async (alertData: unknown) => {
+  const payload = alertData as {
+    alertId?: string;
+    type?: string;
+    severity?: string;
+    timestamp?: Date;
+    data?: { message?: string } & Record<string, unknown>;
+  };
+  if (!payload?.alertId || !payload.type || !payload.severity) {
+    return;
+  }
+  try {
+    await monitoringService.insertTestAlert({
+      alertId: payload.alertId,
+      alertType: payload.type,
+      severity: payload.severity,
+      message: payload.data?.message,
+      details: payload.data,
+      createdAt: payload.timestamp?.toISOString(),
+    });
+  } catch (error) {
+    console.error('推送测试告警到监控服务失败:', error);
+  }
+});
+
 monitoringService.start().catch((error: unknown) => {
   console.error('启动监控服务失败:', error);
 });
+
+/**
+ * GET /api/system/test-alerts/export
+ * 导出测试告警（仅管理员）
+ */
+router.get(
+  '/test-alerts/export',
+  requireRole('admin'),
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    try {
+      const {
+        format = 'json',
+        severity,
+        type,
+        search,
+        startTime,
+        endTime,
+        limit,
+        offset,
+      } = req.query;
+      const severityList = parseListParam(severity);
+      const typeList = parseListParam(type);
+      const pageLimit = limit ? Number(limit) : 1000;
+      const pageOffset = offset ? Number(offset) : 0;
+      const alerts = await alertService.getTestAlerts({
+        page: Math.floor(pageOffset / pageLimit) + 1,
+        limit: pageLimit,
+        severity: severityList,
+        type: typeList,
+        search: search as string | undefined,
+        startTime: startTime as string | undefined,
+        endTime: endTime as string | undefined,
+      });
+
+      if (format === 'csv') {
+        const header = ['id', 'alert_type', 'severity', 'message', 'created_at', 'data'];
+        const lines = [header.join(',')];
+        alerts.data.forEach((alert: Record<string, unknown>) => {
+          lines.push(
+            [
+              escapeCsvValue(alert.id),
+              escapeCsvValue(alert.alert_type),
+              escapeCsvValue(alert.severity),
+              escapeCsvValue(alert.message),
+              escapeCsvValue(alert.created_at),
+              escapeCsvValue(JSON.stringify(alert.data ?? {})),
+            ].join(',')
+          );
+        });
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', 'attachment; filename="test-alerts.csv"');
+        return res.status(200).send(lines.join('\n'));
+      }
+
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="test-alerts.json"');
+      return res.status(200).send(JSON.stringify(alerts.data, null, 2));
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: '导出测试告警失败',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })
+);
+
+/**
+ * GET /api/system/test-alerts
+ * 获取测试告警（仅管理员）
+ */
+router.get(
+  '/test-alerts',
+  requireRole('admin'),
+  asyncHandler(async (req: express.Request, res: express.Response) => {
+    try {
+      const { page = 1, limit = 20, severity, type, search, startTime, endTime } = req.query;
+      const severityList = parseListParam(severity);
+      const typeList = parseListParam(type);
+      const alerts = await alertService.getTestAlerts({
+        page: Number(page),
+        limit: Number(limit),
+        severity: severityList,
+        type: typeList,
+        search: search as string | undefined,
+        startTime: startTime as string | undefined,
+        endTime: endTime as string | undefined,
+      });
+      return res.json({
+        success: true,
+        data: {
+          alerts: alerts.data,
+          pagination: alerts.pagination,
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: '获取测试告警失败',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  })
+);
 
 /**
  * GET /api/system/health

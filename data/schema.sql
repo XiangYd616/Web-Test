@@ -121,6 +121,43 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 -- 测试记录主从表设计
 -- =====================================================
 
+-- 测试执行核心表（当前代码使用）
+CREATE TABLE IF NOT EXISTS test_executions (
+    id SERIAL PRIMARY KEY,
+    test_id VARCHAR(100) UNIQUE NOT NULL,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    engine_type VARCHAR(50) NOT NULL,
+    engine_name VARCHAR(100) NOT NULL,
+    test_name VARCHAR(255) NOT NULL,
+    test_url VARCHAR(500),
+    test_config JSONB DEFAULT '{}',
+
+    status VARCHAR(50) NOT NULL DEFAULT 'pending',
+    progress INTEGER DEFAULT 0,
+    priority VARCHAR(20) DEFAULT 'medium',
+
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    started_at TIMESTAMP WITH TIME ZONE,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    execution_time INTEGER,
+
+    error_message TEXT,
+    metadata JSONB DEFAULT '{}',
+    tags TEXT[],
+
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 执行日志表
+CREATE TABLE IF NOT EXISTS test_logs (
+    id SERIAL PRIMARY KEY,
+    execution_id INTEGER REFERENCES test_executions(id) ON DELETE CASCADE,
+    level VARCHAR(20) NOT NULL,
+    message TEXT NOT NULL,
+    context JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 测试会话主表 - 存储测试会话的基本信息
 CREATE TABLE IF NOT EXISTS test_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -212,67 +249,33 @@ CREATE TABLE IF NOT EXISTS test_records (
 
 -- 测试结果详情表 - 存储测试的详细结果数据
 CREATE TABLE IF NOT EXISTS test_results (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    record_id UUID NOT NULL REFERENCES test_records(id) ON DELETE CASCADE,
+    id SERIAL PRIMARY KEY,
+    execution_id INTEGER NOT NULL REFERENCES test_executions(id) ON DELETE CASCADE,
 
-    -- 结果分类（必填）
-    result_type VARCHAR(50) NOT NULL CHECK (result_type IN ('performance', 'security', 'accessibility', 'seo', 'compatibility', 'api', 'stress', 'infrastructure')),
-    category VARCHAR(50) NOT NULL DEFAULT 'general',
-
-    -- 结果数据（必填）
-    data JSONB NOT NULL,
-    summary JSONB NOT NULL DEFAULT '{}',
-
-    -- 严重程度（仅用于问题类型结果）
-    severity VARCHAR(20) CHECK (severity IN ('critical', 'major', 'minor', 'info')),
-
-    -- 排序和分组（必填，有默认值）
-    sort_order INTEGER NOT NULL DEFAULT 0,
-    group_name VARCHAR(100) NOT NULL DEFAULT 'default',
-
-    -- 时间戳（必填）
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-
-    -- 业务约束：确保数据不为空对象
-    CONSTRAINT chk_result_data_not_empty CHECK (jsonb_typeof(data) = 'object' AND data != '{}')
+    summary JSONB DEFAULT '{}',
+    score DECIMAL(5, 2),
+    grade VARCHAR(10),
+    passed BOOLEAN,
+    warnings JSONB DEFAULT '[]',
+    errors JSONB DEFAULT '[]',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 测试指标表 - 存储量化的测试指标（重构：统一值存储）
 CREATE TABLE IF NOT EXISTS test_metrics (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    record_id UUID NOT NULL REFERENCES test_records(id) ON DELETE CASCADE,
+    id SERIAL PRIMARY KEY,
+    result_id INTEGER NOT NULL REFERENCES test_results(id) ON DELETE CASCADE,
 
-    -- 指标信息（必填）
     metric_name VARCHAR(100) NOT NULL,
-    metric_category VARCHAR(50) NOT NULL,
-
-    -- 统一的值存储（使用TEXT存储所有类型的值）
-    metric_value TEXT NOT NULL,
-    value_type VARCHAR(20) NOT NULL CHECK (value_type IN ('number', 'text', 'boolean', 'json')),
-
-    -- 指标单位和阈值（仅数值类型使用）
-    unit VARCHAR(20),
-    threshold_min DECIMAL(15,6),
-    threshold_max DECIMAL(15,6),
-    is_within_threshold BOOLEAN,
-
-    -- 指标重要性（必填，有默认值）
-    weight DECIMAL(3,2) NOT NULL DEFAULT 1.0 CHECK (weight > 0),
-    is_key_metric BOOLEAN NOT NULL DEFAULT false,
-
-    -- 时间戳（必填）
-    measured_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-
-    -- 业务约束
-    CONSTRAINT chk_metric_threshold_logic CHECK (
-        (value_type != 'number') OR
-        (threshold_min IS NULL OR threshold_max IS NULL OR threshold_min <= threshold_max)
-    ),
-    CONSTRAINT chk_metric_threshold_usage CHECK (
-        (value_type = 'number') OR
-        (threshold_min IS NULL AND threshold_max IS NULL AND is_within_threshold IS NULL)
-    )
+    metric_value JSONB NOT NULL,
+    metric_unit VARCHAR(50),
+    metric_type VARCHAR(50),
+    threshold_min DECIMAL(10, 2),
+    threshold_max DECIMAL(10, 2),
+    passed BOOLEAN,
+    severity VARCHAR(20),
+    recommendation TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 测试问题表 - 存储发现的问题和建议
@@ -352,11 +355,6 @@ CREATE TABLE IF NOT EXISTS user_test_stats (
 -- 系统配置表
 CREATE TABLE IF NOT EXISTS system_configs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    config_key VARCHAR(100) UNIQUE NOT NULL,
-    config_value JSONB NOT NULL,
-    description TEXT,
-    is_public BOOLEAN DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -370,6 +368,50 @@ CREATE TABLE IF NOT EXISTS system_logs (
     ip_address INET,
     user_agent TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 监控告警表（当前代码使用）
+CREATE TABLE IF NOT EXISTS monitoring_alerts (
+    id VARCHAR(255) PRIMARY KEY,
+    site_id UUID NOT NULL,
+    alert_type VARCHAR(50) NOT NULL,
+    severity VARCHAR(20) NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+    source VARCHAR(50) NOT NULL DEFAULT 'monitoring',
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'acknowledged', 'resolved')),
+    message TEXT,
+    details JSONB DEFAULT '{}',
+    acknowledged_at TIMESTAMPTZ,
+    acknowledged_by UUID,
+    resolved_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 导出任务表（当前代码使用）
+CREATE TABLE IF NOT EXISTS export_tasks (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    type VARCHAR(50) NOT NULL,
+    filters JSONB,
+    format VARCHAR(20) NOT NULL DEFAULT 'csv',
+    options JSONB,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    file_path TEXT,
+    error_message TEXT
+);
+
+-- 用户权限表（当前代码使用）
+CREATE TABLE IF NOT EXISTS user_permissions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    permission VARCHAR(100) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, permission)
 );
 
 -- 数据库迁移记录表
@@ -401,6 +443,17 @@ CREATE INDEX IF NOT EXISTS idx_test_sessions_status ON test_sessions(status);
 CREATE INDEX IF NOT EXISTS idx_test_sessions_batch_id ON test_sessions(batch_id);
 CREATE INDEX IF NOT EXISTS idx_test_sessions_created_at ON test_sessions(created_at);
 
+-- 测试执行表索引
+CREATE INDEX IF NOT EXISTS idx_test_executions_user_id ON test_executions(user_id);
+CREATE INDEX IF NOT EXISTS idx_test_executions_engine_type ON test_executions(engine_type);
+CREATE INDEX IF NOT EXISTS idx_test_executions_status ON test_executions(status);
+CREATE INDEX IF NOT EXISTS idx_test_executions_created_at ON test_executions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_test_executions_test_id ON test_executions(test_id);
+
+-- 执行日志表索引
+CREATE INDEX IF NOT EXISTS idx_test_logs_execution_id ON test_logs(execution_id);
+CREATE INDEX IF NOT EXISTS idx_test_logs_level ON test_logs(level);
+
 -- 测试记录表索引
 CREATE INDEX IF NOT EXISTS idx_test_records_session_id ON test_records(session_id);
 CREATE INDEX IF NOT EXISTS idx_test_records_test_type ON test_records(test_type);
@@ -410,16 +463,15 @@ CREATE INDEX IF NOT EXISTS idx_test_records_overall_score ON test_records(overal
 CREATE INDEX IF NOT EXISTS idx_test_records_created_at ON test_records(created_at);
 
 -- 测试结果表索引
-CREATE INDEX IF NOT EXISTS idx_test_results_record_id ON test_results(record_id);
-CREATE INDEX IF NOT EXISTS idx_test_results_result_type ON test_results(result_type);
-CREATE INDEX IF NOT EXISTS idx_test_results_category ON test_results(category);
-CREATE INDEX IF NOT EXISTS idx_test_results_severity ON test_results(severity);
+CREATE INDEX IF NOT EXISTS idx_test_results_execution_id ON test_results(execution_id);
+CREATE INDEX IF NOT EXISTS idx_test_results_score ON test_results(score);
+CREATE INDEX IF NOT EXISTS idx_test_results_grade ON test_results(grade);
 
 -- 测试指标表索引
-CREATE INDEX IF NOT EXISTS idx_test_metrics_record_id ON test_metrics(record_id);
+CREATE INDEX IF NOT EXISTS idx_test_metrics_result_id ON test_metrics(result_id);
 CREATE INDEX IF NOT EXISTS idx_test_metrics_name ON test_metrics(metric_name);
-CREATE INDEX IF NOT EXISTS idx_test_metrics_category ON test_metrics(metric_category);
-CREATE INDEX IF NOT EXISTS idx_test_metrics_key_metric ON test_metrics(is_key_metric);
+CREATE INDEX IF NOT EXISTS idx_test_metrics_type ON test_metrics(metric_type);
+CREATE INDEX IF NOT EXISTS idx_test_metrics_severity ON test_metrics(severity);
 
 -- 测试问题表索引
 CREATE INDEX IF NOT EXISTS idx_test_issues_record_id ON test_issues(record_id);
@@ -440,6 +492,22 @@ CREATE INDEX IF NOT EXISTS idx_system_configs_public ON system_configs(is_public
 CREATE INDEX IF NOT EXISTS idx_system_logs_level ON system_logs(level);
 CREATE INDEX IF NOT EXISTS idx_system_logs_user_id ON system_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at);
+
+-- 监控告警表索引
+CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_source ON monitoring_alerts(source);
+CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_severity ON monitoring_alerts(severity);
+CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_status ON monitoring_alerts(status);
+CREATE INDEX IF NOT EXISTS idx_monitoring_alerts_created ON monitoring_alerts(created_at DESC);
+
+-- 导出任务表索引
+CREATE INDEX IF NOT EXISTS idx_export_tasks_user_id ON export_tasks(user_id);
+CREATE INDEX IF NOT EXISTS idx_export_tasks_status ON export_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_export_tasks_created_at ON export_tasks(created_at DESC);
+
+-- 用户权限表索引
+CREATE INDEX IF NOT EXISTS idx_user_permissions_user_id ON user_permissions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_permissions_permission ON user_permissions(permission);
+CREATE INDEX IF NOT EXISTS idx_user_permissions_is_active ON user_permissions(is_active);
 
 -- =====================================================
 -- 5. 触发器 - 自动更新时间戳
@@ -477,6 +545,12 @@ CREATE TRIGGER update_test_records_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_test_executions_updated_at ON test_executions;
+CREATE TRIGGER update_test_executions_updated_at
+    BEFORE UPDATE ON test_executions
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 DROP TRIGGER IF EXISTS update_user_test_stats_updated_at ON user_test_stats;
 CREATE TRIGGER update_user_test_stats_updated_at
     BEFORE UPDATE ON user_test_stats
@@ -486,6 +560,18 @@ CREATE TRIGGER update_user_test_stats_updated_at
 DROP TRIGGER IF EXISTS update_system_configs_updated_at ON system_configs;
 CREATE TRIGGER update_system_configs_updated_at
     BEFORE UPDATE ON system_configs
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_monitoring_alerts_updated_at ON monitoring_alerts;
+CREATE TRIGGER update_monitoring_alerts_updated_at
+    BEFORE UPDATE ON monitoring_alerts
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_user_permissions_updated_at ON user_permissions;
+CREATE TRIGGER update_user_permissions_updated_at
+    BEFORE UPDATE ON user_permissions
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
@@ -527,263 +613,187 @@ CREATE TABLE IF NOT EXISTS test_templates (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 测试报告表
+-- 测试报告表（以当前代码使用为准）
 CREATE TABLE IF NOT EXISTS test_reports (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    execution_id INTEGER REFERENCES test_executions(id) ON DELETE SET NULL,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-    session_id UUID REFERENCES test_sessions(id) ON DELETE CASCADE,
 
-    -- 报告信息
-    name VARCHAR(200) NOT NULL,
-    description TEXT,
-    report_type VARCHAR(20) DEFAULT 'standard' CHECK (report_type IN ('standard', 'detailed', 'summary', 'comparison')),
+    report_type VARCHAR(50) NOT NULL,
+    format VARCHAR(20) NOT NULL,
+    report_data JSONB NOT NULL DEFAULT '{}',
 
-    -- 报告内容
-    content JSONB DEFAULT '{}',
-    summary JSONB DEFAULT '{}',
-    recommendations JSONB DEFAULT '[]',
-
-    -- 文件信息
     file_path TEXT,
     file_size INTEGER,
-    file_format VARCHAR(10) DEFAULT 'json' CHECK (file_format IN ('json', 'pdf', 'html', 'csv')),
 
-    -- 状态
-    status VARCHAR(20) DEFAULT 'generating' CHECK (status IN ('generating', 'completed', 'failed')),
-
-    -- 分享设置
-    is_public BOOLEAN DEFAULT false,
-    share_token VARCHAR(255) UNIQUE,
-    share_expires_at TIMESTAMP WITH TIME ZONE,
-
-    -- 时间戳
+    generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 测试队列表
-CREATE TABLE IF NOT EXISTS test_queue (
+-- 报告分享表
+CREATE TABLE IF NOT EXISTS report_shares (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    report_id UUID NOT NULL REFERENCES test_reports(id) ON DELETE CASCADE,
+    shared_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    share_token VARCHAR(255) UNIQUE NOT NULL,
+    share_type VARCHAR(20) DEFAULT 'link' CHECK (share_type IN ('link', 'email', 'download')),
+    password_hash VARCHAR(255),
+    allowed_ips JSONB DEFAULT '[]',
+    max_access_count INTEGER,
+    current_access_count INTEGER DEFAULT 0,
+    permissions JSONB DEFAULT '["view"]',
+    expires_at TIMESTAMP WITH TIME ZONE,
+    last_accessed_at TIMESTAMP WITH TIME ZONE,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 报告访问日志表
+CREATE TABLE IF NOT EXISTS report_access_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    report_id UUID NOT NULL REFERENCES test_reports(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    share_id UUID REFERENCES report_shares(id) ON DELETE SET NULL,
+    access_type VARCHAR(20) NOT NULL CHECK (access_type IN ('view', 'download', 'share', 'generate')),
+    ip_address INET,
+    user_agent TEXT,
+    success BOOLEAN DEFAULT true,
+    error_message TEXT,
+    accessed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 报告模板表
+CREATE TABLE IF NOT EXISTS report_templates (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    report_type VARCHAR(50) NOT NULL,
+    template_config JSONB NOT NULL,
+    default_format VARCHAR(20) DEFAULT 'html',
+    is_public BOOLEAN DEFAULT false,
+    is_system BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-    -- 队列信息
-    test_type VARCHAR(20) NOT NULL CHECK (test_type IN ('api', 'compatibility', 'infrastructure', 'security', 'seo', 'stress', 'ux', 'website')),
-    target_url TEXT NOT NULL,
-    config JSONB DEFAULT '{}',
+-- 报告配置表
+CREATE TABLE IF NOT EXISTS report_configs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    template_id UUID NOT NULL REFERENCES report_templates(id) ON DELETE CASCADE,
+    schedule JSONB DEFAULT '{}',
+    recipients JSONB DEFAULT '[]',
+    filters JSONB DEFAULT '[]',
+    format JSONB DEFAULT '{}',
+    delivery JSONB DEFAULT '{}',
+    enabled BOOLEAN DEFAULT true,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-    -- 优先级和状态
-    priority INTEGER DEFAULT 5 CHECK (priority BETWEEN 1 AND 10),
-    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'cancelled')),
+-- 报告实例表
+CREATE TABLE IF NOT EXISTS report_instances (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    report_id UUID REFERENCES test_reports(id) ON DELETE SET NULL,
+    config_id UUID REFERENCES report_configs(id) ON DELETE SET NULL,
+    template_id UUID REFERENCES report_templates(id) ON DELETE SET NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'generating', 'completed', 'failed', 'cancelled')),
+    format VARCHAR(20) NOT NULL,
+    generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    completed_at TIMESTAMP WITH TIME ZONE,
+    duration INTEGER,
+    path TEXT,
+    url TEXT,
+    size INTEGER,
+    error TEXT,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-    -- 执行信息
-    assigned_worker VARCHAR(100),
+-- 报告分享邮件表
+CREATE TABLE IF NOT EXISTS report_share_emails (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    report_id UUID NOT NULL REFERENCES test_reports(id) ON DELETE CASCADE,
+    share_id UUID NOT NULL REFERENCES report_shares(id) ON DELETE CASCADE,
+    recipients JSONB NOT NULL,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'sent', 'failed')),
+    attempts INTEGER DEFAULT 0,
+    last_error TEXT,
+    next_retry_at TIMESTAMP WITH TIME ZONE,
+    sent_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 存储索引表
+CREATE TABLE IF NOT EXISTS storage_items (
+    id VARCHAR(80) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    strategy VARCHAR(100) NOT NULL,
+    size BIGINT NOT NULL,
+    compressed_size BIGINT,
+    storage_path TEXT NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1,
+    metadata JSONB DEFAULT '{}',
+    tags TEXT[] DEFAULT ARRAY[]::TEXT[],
+    checksum VARCHAR(255) NOT NULL,
+    encrypted BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_storage_items_type ON storage_items(type);
+CREATE INDEX IF NOT EXISTS idx_storage_items_strategy ON storage_items(strategy);
+CREATE INDEX IF NOT EXISTS idx_storage_items_created ON storage_items(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_storage_items_tags ON storage_items USING GIN(tags);
+
+-- 清理策略与任务表
+CREATE TABLE IF NOT EXISTS cleanup_policies (
+    id VARCHAR(80) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    data_types TEXT[] DEFAULT ARRAY[]::TEXT[],
+    retention_days INTEGER NOT NULL,
+    conditions JSONB DEFAULT '[]',
+    actions JSONB DEFAULT '[]',
+    priority INTEGER DEFAULT 0,
+    enabled BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS cleanup_jobs (
+    id VARCHAR(80) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    policy_id VARCHAR(80) NOT NULL REFERENCES cleanup_policies(id) ON DELETE CASCADE,
+    status VARCHAR(20) NOT NULL,
+    progress INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     started_at TIMESTAMP WITH TIME ZONE,
     completed_at TIMESTAMP WITH TIME ZONE,
-    error_message TEXT,
-
-    -- 重试机制
-    retry_count INTEGER DEFAULT 0,
-    max_retries INTEGER DEFAULT 3,
-
-    -- 时间戳
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    duration INTEGER,
+    items_processed INTEGER DEFAULT 0,
+    items_total INTEGER DEFAULT 0,
+    size_processed BIGINT DEFAULT 0,
+    size_freed BIGINT DEFAULT 0,
+    errors JSONB DEFAULT '[]',
+    metadata JSONB DEFAULT '{}'
 );
 
--- API密钥表
-CREATE TABLE IF NOT EXISTS api_keys (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-
-    -- 密钥信息
-    key_name VARCHAR(100) NOT NULL,
-    api_key VARCHAR(255) UNIQUE NOT NULL,
-    key_hash VARCHAR(255) NOT NULL,
-
-    -- 权限和限制
-    permissions JSONB DEFAULT '[]',
-    rate_limit INTEGER DEFAULT 1000, -- 每小时请求数
-    allowed_test_types JSONB DEFAULT '["api", "compatibility", "infrastructure", "security", "seo", "stress", "ux", "website"]',
-
-    -- 使用统计
-    usage_count INTEGER DEFAULT 0,
-    last_used_at TIMESTAMP WITH TIME ZONE,
-
-    -- 状态
-    is_active BOOLEAN DEFAULT true,
-    expires_at TIMESTAMP WITH TIME ZONE,
-
-    -- 时间戳
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 用户偏好设置表
-CREATE TABLE IF NOT EXISTS user_preferences (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-
-    -- 界面偏好
-    theme VARCHAR(20) DEFAULT 'light' CHECK (theme IN ('light', 'dark', 'auto')),
-    language VARCHAR(10) DEFAULT 'zh-CN',
-    timezone VARCHAR(50) DEFAULT 'Asia/Shanghai',
-
-    -- 通知偏好
-    email_notifications BOOLEAN DEFAULT true,
-    browser_notifications BOOLEAN DEFAULT true,
-    test_completion_notifications BOOLEAN DEFAULT true,
-    weekly_report_notifications BOOLEAN DEFAULT false,
-
-    -- 测试偏好
-    default_test_timeout INTEGER DEFAULT 300000, -- 毫秒
-    auto_save_results BOOLEAN DEFAULT true,
-    max_concurrent_tests INTEGER DEFAULT 3,
-
-    -- 仪表板偏好
-    dashboard_layout JSONB DEFAULT '{}',
-    favorite_test_types JSONB DEFAULT '[]',
-    recent_urls JSONB DEFAULT '[]',
-
-    -- 时间戳
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-
-    UNIQUE(user_id)
-);
-
--- 系统通知表
-CREATE TABLE IF NOT EXISTS system_notifications (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-
-    -- 通知内容
-    title VARCHAR(200) NOT NULL,
-    message TEXT NOT NULL,
-    type VARCHAR(20) DEFAULT 'info' CHECK (type IN ('info', 'success', 'warning', 'error')),
-
-    -- 目标用户
-    target_users JSONB DEFAULT '[]', -- 空数组表示所有用户
-    target_roles JSONB DEFAULT '[]', -- 特定角色
-
-    -- 显示设置
-    is_active BOOLEAN DEFAULT true,
-    is_dismissible BOOLEAN DEFAULT true,
-    auto_dismiss_after INTEGER, -- 秒数，null表示不自动消失
-
-    -- 优先级
-    priority INTEGER DEFAULT 5 CHECK (priority BETWEEN 1 AND 10),
-
-    -- 时间设置
-    show_from TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    show_until TIMESTAMP WITH TIME ZONE,
-
-    -- 统计
-    view_count INTEGER DEFAULT 0,
-    dismiss_count INTEGER DEFAULT 0,
-
-    -- 时间戳
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 监控站点表
-CREATE TABLE IF NOT EXISTS monitoring_sites (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-
-    -- 站点信息
-    name VARCHAR(200) NOT NULL,
-    url TEXT NOT NULL,
-    description TEXT,
-
-    -- 监控配置
-    monitoring_type VARCHAR(50) DEFAULT 'uptime' CHECK (monitoring_type IN ('uptime', 'performance', 'security', 'seo')),
-    check_interval INTEGER DEFAULT 300, -- 秒
-    timeout INTEGER DEFAULT 30, -- 秒
-    expected_status_code INTEGER DEFAULT 200,
-    expected_content TEXT,
-    config JSONB DEFAULT '{}',
-    notification_settings JSONB DEFAULT '{}',
-
-    -- 通知设置
-    notify_on_down BOOLEAN DEFAULT true,
-    notify_on_slow BOOLEAN DEFAULT false,
-    slow_threshold INTEGER DEFAULT 5000, -- 毫秒
-
-    -- 状态
-    is_active BOOLEAN DEFAULT true,
-    current_status VARCHAR(20) DEFAULT 'unknown' CHECK (current_status IN ('up', 'down', 'slow', 'unknown')),
-    last_check_at TIMESTAMP WITH TIME ZONE,
-    last_down_at TIMESTAMP WITH TIME ZONE,
-
-    -- 统计
-    uptime_percentage DECIMAL(5,2) DEFAULT 100.00,
-    average_response_time INTEGER DEFAULT 0,
-    total_checks INTEGER DEFAULT 0,
-    failed_checks INTEGER DEFAULT 0,
-
-    -- 时间戳
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 监控结果表
-CREATE TABLE IF NOT EXISTS monitoring_results (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    site_id UUID NOT NULL REFERENCES monitoring_sites(id) ON DELETE CASCADE,
-
-    -- 检查结果
-    status VARCHAR(20) NOT NULL CHECK (status IN ('up', 'down', 'slow', 'timeout', 'error')),
-    response_time INTEGER, -- 毫秒
-    status_code INTEGER,
-
-    -- 详细信息
-    error_message TEXT,
-    response_headers JSONB DEFAULT '{}',
-    response_body_size INTEGER,
-
-    -- 性能指标
-    dns_time INTEGER,
-    connect_time INTEGER,
-    ssl_time INTEGER,
-    ttfb INTEGER, -- Time to First Byte
-
-    -- 检查时间
-    checked_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 文件上传表
-CREATE TABLE IF NOT EXISTS uploaded_files (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
-
-    -- 文件信息
-    original_name VARCHAR(255) NOT NULL,
-    stored_name VARCHAR(255) NOT NULL,
-    file_path TEXT NOT NULL,
-    file_size INTEGER NOT NULL,
-    mime_type VARCHAR(100),
-    file_hash VARCHAR(255),
-
-    -- 用途分类
-    purpose VARCHAR(50) DEFAULT 'general' CHECK (purpose IN ('general', 'test_data', 'report', 'avatar', 'template')),
-    related_entity_type VARCHAR(50), -- 关联的实体类型
-    related_entity_id UUID, -- 关联的实体ID
-
-    -- 访问控制
-    is_public BOOLEAN DEFAULT false,
-    access_token VARCHAR(255),
-
-    -- 状态
-    is_processed BOOLEAN DEFAULT false,
-    processing_status VARCHAR(20) DEFAULT 'pending' CHECK (processing_status IN ('pending', 'processing', 'completed', 'failed')),
-
-    -- 过期设置
-    expires_at TIMESTAMP WITH TIME ZONE,
-
-    -- 时间戳
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+CREATE INDEX IF NOT EXISTS idx_cleanup_jobs_status ON cleanup_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_cleanup_jobs_policy ON cleanup_jobs(policy_id);
+CREATE INDEX IF NOT EXISTS idx_cleanup_jobs_created ON cleanup_jobs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_cleanup_policies_priority ON cleanup_policies(priority);
 
 -- 系统统计表
 CREATE TABLE IF NOT EXISTS system_stats (
@@ -870,10 +880,42 @@ CREATE INDEX IF NOT EXISTS idx_test_templates_test_type ON test_templates(test_t
 CREATE INDEX IF NOT EXISTS idx_test_templates_is_public ON test_templates(is_public);
 CREATE INDEX IF NOT EXISTS idx_test_templates_usage_count ON test_templates(usage_count);
 
+CREATE INDEX IF NOT EXISTS idx_test_reports_execution_id ON test_reports(execution_id);
 CREATE INDEX IF NOT EXISTS idx_test_reports_user_id ON test_reports(user_id);
-CREATE INDEX IF NOT EXISTS idx_test_reports_session_id ON test_reports(session_id);
-CREATE INDEX IF NOT EXISTS idx_test_reports_status ON test_reports(status);
-CREATE INDEX IF NOT EXISTS idx_test_reports_is_public ON test_reports(is_public);
+CREATE INDEX IF NOT EXISTS idx_test_reports_type ON test_reports(report_type);
+CREATE INDEX IF NOT EXISTS idx_test_reports_format ON test_reports(format);
+CREATE INDEX IF NOT EXISTS idx_test_reports_generated_at ON test_reports(generated_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_report_shares_report_id ON report_shares(report_id);
+CREATE INDEX IF NOT EXISTS idx_report_shares_shared_by ON report_shares(shared_by);
+CREATE INDEX IF NOT EXISTS idx_report_shares_token ON report_shares(share_token);
+CREATE INDEX IF NOT EXISTS idx_report_shares_expires_at ON report_shares(expires_at);
+CREATE INDEX IF NOT EXISTS idx_report_shares_is_active ON report_shares(is_active);
+
+CREATE INDEX IF NOT EXISTS idx_report_access_logs_report_id ON report_access_logs(report_id);
+CREATE INDEX IF NOT EXISTS idx_report_access_logs_user_id ON report_access_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_report_access_logs_share_id ON report_access_logs(share_id);
+CREATE INDEX IF NOT EXISTS idx_report_access_logs_accessed_at ON report_access_logs(accessed_at);
+
+CREATE INDEX IF NOT EXISTS idx_report_templates_user_id ON report_templates(user_id);
+CREATE INDEX IF NOT EXISTS idx_report_templates_type ON report_templates(report_type);
+CREATE INDEX IF NOT EXISTS idx_report_templates_is_public ON report_templates(is_public);
+CREATE INDEX IF NOT EXISTS idx_report_templates_is_system ON report_templates(is_system);
+CREATE INDEX IF NOT EXISTS idx_report_templates_config_gin ON report_templates USING GIN (template_config);
+
+CREATE INDEX IF NOT EXISTS idx_report_configs_template_id ON report_configs(template_id);
+CREATE INDEX IF NOT EXISTS idx_report_configs_user_id ON report_configs(user_id);
+CREATE INDEX IF NOT EXISTS idx_report_configs_enabled ON report_configs(enabled);
+
+CREATE INDEX IF NOT EXISTS idx_report_instances_report_id ON report_instances(report_id);
+CREATE INDEX IF NOT EXISTS idx_report_instances_config_id ON report_instances(config_id);
+CREATE INDEX IF NOT EXISTS idx_report_instances_status ON report_instances(status);
+CREATE INDEX IF NOT EXISTS idx_report_instances_generated_at ON report_instances(generated_at);
+
+CREATE INDEX IF NOT EXISTS idx_report_share_emails_report_id ON report_share_emails(report_id);
+CREATE INDEX IF NOT EXISTS idx_report_share_emails_share_id ON report_share_emails(share_id);
+CREATE INDEX IF NOT EXISTS idx_report_share_emails_status ON report_share_emails(status);
+CREATE INDEX IF NOT EXISTS idx_report_share_emails_next_retry_at ON report_share_emails(next_retry_at);
 
 CREATE INDEX IF NOT EXISTS idx_test_queue_user_id ON test_queue(user_id);
 CREATE INDEX IF NOT EXISTS idx_test_queue_test_type ON test_queue(test_type);
@@ -923,6 +965,36 @@ CREATE TRIGGER update_test_templates_updated_at
 DROP TRIGGER IF EXISTS update_test_reports_updated_at ON test_reports;
 CREATE TRIGGER update_test_reports_updated_at
     BEFORE UPDATE ON test_reports
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_report_shares_updated_at ON report_shares;
+CREATE TRIGGER update_report_shares_updated_at
+    BEFORE UPDATE ON report_shares
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_report_templates_updated_at ON report_templates;
+CREATE TRIGGER update_report_templates_updated_at
+    BEFORE UPDATE ON report_templates
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_report_configs_updated_at ON report_configs;
+CREATE TRIGGER update_report_configs_updated_at
+    BEFORE UPDATE ON report_configs
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_report_instances_updated_at ON report_instances;
+CREATE TRIGGER update_report_instances_updated_at
+    BEFORE UPDATE ON report_instances
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_report_share_emails_updated_at ON report_share_emails;
+CREATE TRIGGER update_report_share_emails_updated_at
+    BEFORE UPDATE ON report_share_emails
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 

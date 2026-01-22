@@ -41,6 +41,7 @@ const scheduledRunController = require('./controllers/scheduledRunController');
 const ScheduledRunService = require('./services/runs/ScheduledRunService');
 const registerTestEngines = require('./engines/core/registerEngines');
 const testEngineRegistry = require('./core/TestEngineRegistry');
+const { startWorker } = require('./services/testing/TestQueueService');
 
 // 导入中间件
 const { responseFormatter } = require('./middleware/responseFormatter');
@@ -276,6 +277,17 @@ const startServer = async (): Promise<Server> => {
 
       registerTestEngines();
       await testEngineRegistry.initialize();
+
+      const enableTestQueue = process.env.TEST_QUEUE_ENABLED !== 'false';
+      if (enableTestQueue) {
+        try {
+          startWorker({ queueName: 'test-execution' });
+          startWorker({ queueName: 'test-execution-heavy' });
+          console.log('✅ 测试队列 Worker 已启动');
+        } catch (error: unknown) {
+          console.error('启动测试队列 Worker 失败:', error);
+        }
+      }
 
       const enableScheduledRuns = process.env.SCHEDULED_RUNS_ENABLED === 'true';
 

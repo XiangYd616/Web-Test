@@ -24,6 +24,20 @@ interface TestExecutionRecord {
   error_message?: string;
 }
 
+interface QueueStatusCount {
+  queue_name: string;
+  status: string;
+  count: number;
+}
+
+type QueueStatusCountOptions = {
+  userId?: string;
+  startTime?: string;
+  endTime?: string;
+  limit?: number;
+  offset?: number;
+};
+
 interface TestResultRecord {
   id: number;
   execution_id: number;
@@ -83,6 +97,73 @@ class TestRepository {
       [testId, userId]
     );
     return result.rows[0] || null;
+  }
+
+  /**
+   * 获取队列状态统计（可选按 userId/时间窗/分页）
+   */
+  async getQueueStatusCounts(
+    options: QueueStatusCountOptions
+  ): Promise<{ rows: QueueStatusCount[]; total: number }> {
+    const { userId, startTime, endTime, limit, offset } = options;
+    const params: Array<string | number> = [];
+    const filters: string[] = [];
+
+    if (userId) {
+      params.push(userId);
+      filters.push(`user_id = $${params.length}`);
+    }
+    if (startTime) {
+      params.push(startTime);
+      filters.push(`created_at >= $${params.length}`);
+    }
+    if (endTime) {
+      params.push(endTime);
+      filters.push(`created_at <= $${params.length}`);
+    }
+
+    const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+    let pageClause = '';
+    if (typeof limit === 'number') {
+      params.push(limit);
+      pageClause += ` LIMIT $${params.length}`;
+    }
+    if (typeof offset === 'number') {
+      params.push(offset);
+      pageClause += ` OFFSET $${params.length}`;
+    }
+
+    const result = await query(
+      `WITH filtered AS (
+         SELECT engine_type, status, created_at
+         FROM test_executions
+         ${whereClause}
+         ORDER BY created_at DESC${pageClause}
+       )
+       SELECT
+         CASE
+           WHEN engine_type IN ('stress', 'performance') THEN 'test-execution-heavy'
+           WHEN engine_type = 'security' THEN 'test-execution-security'
+           ELSE 'test-execution'
+         END AS queue_name,
+         status,
+         COUNT(1)::int AS count
+       FROM filtered
+       GROUP BY queue_name, status`,
+      params
+    );
+    const countResult = await query(
+      `SELECT COUNT(1)::int AS total
+       FROM test_executions
+       ${whereClause}`,
+      params.slice(0, filters.length)
+    );
+    const total = Number(countResult.rows[0]?.total || 0);
+
+    return {
+      rows: result.rows as QueueStatusCount[],
+      total,
+    };
   }
 
   async findMetrics(testId: string, userId: string): Promise<TestMetricRecord[]> {

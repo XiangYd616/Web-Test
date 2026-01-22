@@ -437,7 +437,7 @@ router.get(
   '/alerts',
   authMiddleware,
   asyncHandler(async (req: express.Request, res: express.Response) => {
-    const { page = 1, limit = 20, severity, status, timeRange } = req.query;
+    const { page = 1, limit = 20, severity, status, timeRange, source } = req.query;
     const userId = getUserId(req as AuthenticatedRequest);
 
     try {
@@ -446,6 +446,7 @@ router.get(
         page: Number(page),
         limit: Number(limit),
         severity,
+        source,
         status,
         timeRange,
       });

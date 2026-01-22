@@ -1,6 +1,9 @@
 -- Migration: Report configs table
 -- Created: 2026-01-21
 
+/*
+  已合并到 data/schema.sql，迁移中保留作为历史记录。
+
 CREATE TABLE IF NOT EXISTS report_configs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
@@ -25,3 +28,4 @@ DROP TRIGGER IF EXISTS update_report_configs_updated_at ON report_configs;
 CREATE TRIGGER update_report_configs_updated_at
 BEFORE UPDATE ON report_configs
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+*/

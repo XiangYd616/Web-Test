@@ -8,7 +8,7 @@ import fs from 'fs';
 import path from 'path';
 
 type ConfigSchemaEntry = {
-  type: 'number' | 'string' | 'boolean' | 'array';
+  type: 'number' | 'string' | 'boolean' | 'array' | 'object';
   default: unknown;
   required: boolean;
 };
@@ -73,6 +73,43 @@ class ConfigManager {
         timeout: { type: 'number', default: 300000, required: false },
         maxConcurrent: { type: 'number', default: 10, required: false },
         retryAttempts: { type: 'number', default: 3, required: false },
+      },
+
+      // 测试队列配置
+      testQueue: {
+        replayLimits: {
+          type: 'object',
+          default: {
+            default: 3,
+            roles: {
+              admin: 5,
+              superadmin: 8,
+            },
+            users: {},
+          },
+          required: false,
+        },
+        exportLimits: {
+          type: 'object',
+          default: {
+            roles: {
+              admin: {
+                maxLimit: 1000,
+                maxBatchSize: 1000,
+              },
+              user: {
+                maxLimit: 500,
+                maxBatchSize: 500,
+              },
+              superadmin: {
+                maxLimit: 100000,
+                maxBatchSize: 100000,
+              },
+            },
+            users: {},
+          },
+          required: false,
+        },
       },
 
       // 文件存储配置
@@ -167,6 +204,35 @@ class ConfigManager {
       retryAttempts: this.getEnvValue('TEST_RETRY_ATTEMPTS', 'number', 3),
     };
 
+    // 测试队列配置
+    this.config.testQueue = {
+      replayLimits: this.getEnvValue('TEST_QUEUE_REPLAY_LIMITS', 'object', {
+        default: 3,
+        roles: {
+          admin: 5,
+          superadmin: 8,
+        },
+        users: {},
+      }),
+      exportLimits: this.getEnvValue('TEST_QUEUE_EXPORT_LIMITS', 'object', {
+        roles: {
+          admin: {
+            maxLimit: 1000,
+            maxBatchSize: 1000,
+          },
+          user: {
+            maxLimit: 500,
+            maxBatchSize: 500,
+          },
+          superadmin: {
+            maxLimit: 100000,
+            maxBatchSize: 100000,
+          },
+        },
+        users: {},
+      }),
+    };
+
     // 文件存储配置
     this.config.storage = {
       uploadsDir: this.getEnvValue('UPLOADS_DIR', 'string', './uploads'),
@@ -209,6 +275,8 @@ class ConfigManager {
           return value.toLowerCase() === 'true' || value === '1';
         case 'array':
           return value.split(',').map(item => item.trim());
+        case 'object':
+          return JSON.parse(value);
         case 'string':
         default:
           return value;
@@ -261,6 +329,8 @@ class ConfigManager {
         return typeof value === 'boolean';
       case 'array':
         return Array.isArray(value);
+      case 'object':
+        return value !== null && typeof value === 'object' && !Array.isArray(value);
       case 'string':
       default:
         return typeof value === 'string';

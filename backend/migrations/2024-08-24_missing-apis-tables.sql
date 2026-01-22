@@ -1,6 +1,9 @@
 -- 缺失API支持表结构
 -- 为新实现的API端点创建必要的数据库表
 
+/*
+  已废弃/已合并到 data/schema.sql，迁移中保留作为历史记录。
+
 -- 1. 告警相关表
 CREATE TABLE IF NOT EXISTS alerts (
     id SERIAL PRIMARY KEY,

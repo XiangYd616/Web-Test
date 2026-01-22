@@ -435,6 +435,20 @@ class TestBusinessService {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      try {
+        const { getAlertManager } = require('../../alert/AlertManager');
+        const alertManager = getAlertManager?.();
+        if (alertManager && typeof alertManager.checkTestResult === 'function') {
+          alertManager.checkTestResult({
+            success: false,
+            testId,
+            type: config.testType,
+            error: message,
+          });
+        }
+      } catch (alertError) {
+        console.warn('告警触发失败:', alertError);
+      }
       await markFailedWithLog(testId, message, {
         engineType: config.testType,
         url: config.url,

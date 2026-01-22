@@ -5,7 +5,7 @@
 
 import express from 'express';
 const testController = require('../controllers/testController');
-const { authMiddleware, optionalAuth } = require('../middleware/auth');
+const { authMiddleware, optionalAuth, requireAdmin } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { rateLimiter: testRateLimiter } = require('../middleware/rateLimiter');
 
@@ -53,6 +53,59 @@ router.get('/:testId/logs', authMiddleware, asyncHandler(testController.getTestL
  * GET /api/test/:testId/progress
  */
 router.get('/:testId/progress', authMiddleware, asyncHandler(testController.getProgress));
+
+/**
+ * 获取测试队列状态
+ * GET /api/test/queue/stats
+ */
+router.get('/queue/stats', authMiddleware, asyncHandler(testController.getQueueStats));
+
+/**
+ * 获取死信队列详情
+ * GET /api/test/queue/dead
+ */
+router.get('/queue/dead', authMiddleware, asyncHandler(testController.getDeadLetterQueue));
+
+/**
+ * 按 traceId 查询队列任务
+ * GET /api/test/queue/trace/:traceId
+ */
+router.get(
+  '/queue/trace/:traceId',
+  authMiddleware,
+  asyncHandler(testController.getQueueJobsByTraceId)
+);
+
+/**
+ * 按 traceId 导出任务日志
+ * GET /api/test/queue/trace/:traceId/logs
+ */
+router.get(
+  '/queue/trace/:traceId/logs',
+  authMiddleware,
+  asyncHandler(testController.getQueueTraceLogs)
+);
+
+/**
+ * 获取单个队列任务详情
+ * GET /api/test/queue/:queueName/jobs/:jobId
+ */
+router.get(
+  '/queue/:queueName/jobs/:jobId',
+  authMiddleware,
+  asyncHandler(testController.getQueueJob)
+);
+
+/**
+ * 重放死信队列任务
+ * POST /api/test/queue/dead/:jobId/replay
+ */
+router.post(
+  '/queue/dead/:jobId/replay',
+  authMiddleware,
+  requireAdmin,
+  asyncHandler(testController.replayDeadLetterJob)
+);
 
 /**
  * 停止测试

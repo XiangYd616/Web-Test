@@ -205,6 +205,15 @@ class DataArchiveManager {
     console.log('Data archive manager stopped');
   }
 
+  async healthCheck(): Promise<boolean> {
+    try {
+      await fs.access(this.config.archivePath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * 创建归档任务
    */

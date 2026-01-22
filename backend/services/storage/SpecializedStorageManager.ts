@@ -8,6 +8,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { promisify } from 'util';
 import * as zlib from 'zlib';
+import { query } from '../../config/database';
 
 const gzip = promisify(zlib.gzip);
 const gunzip = promisify(zlib.gunzip);
@@ -119,6 +120,8 @@ class SpecializedStorageManager {
   private items: Map<string, StorageItem> = new Map();
   private cache: Map<string, Buffer> = new Map();
   private index: Map<string, Set<string>> = new Map(); // tag -> itemIds
+  private initialized = false;
+  private initializing: Promise<void> | null = null;
 
   constructor(config: Partial<StorageConfig> = {}) {
     this.config = {
@@ -132,6 +135,158 @@ class SpecializedStorageManager {
     };
 
     this.initializeStrategies();
+  }
+
+  getItem(itemId: string): StorageItem | undefined {
+    return this.items.get(itemId);
+  }
+
+  async healthCheck(): Promise<boolean> {
+    try {
+      await fs.access(this.config.baseStoragePath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+    if (!this.initializing) {
+      this.initializing = this.loadItemsFromDb();
+    }
+    await this.initializing;
+    this.initialized = true;
+  }
+
+  private async loadItemsFromDb(): Promise<void> {
+    try {
+      const result = await query(
+        `SELECT id, name, type, strategy, size, compressed_size, storage_path,
+                version, metadata, tags, checksum, encrypted, created_at, updated_at
+         FROM storage_items`
+      );
+      this.items.clear();
+      this.index.clear();
+      result.rows.forEach(row => {
+        const item: StorageItem = {
+          id: row.id,
+          name: row.name,
+          type: row.type,
+          strategy: row.strategy,
+          size: Number(row.size),
+          compressedSize: row.compressed_size ?? undefined,
+          createdAt: new Date(row.created_at),
+          updatedAt: new Date(row.updated_at),
+          version: Number(row.version),
+          metadata: row.metadata || {},
+          tags: row.tags || [],
+          checksum: row.checksum,
+          encrypted: row.encrypted || false,
+        };
+        this.items.set(item.id, item);
+        if (item.tags.length > 0) {
+          this.updateIndex(item);
+        }
+      });
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === '42P01') {
+        await this.createStorageTables();
+        await this.loadItemsFromDb();
+        return;
+      }
+      throw error;
+    }
+  }
+
+  private async persistItem(item: StorageItem, storagePath: string): Promise<void> {
+    try {
+      await query(
+        `INSERT INTO storage_items (
+           id, name, type, strategy, size, compressed_size, storage_path,
+           version, metadata, tags, checksum, encrypted, created_at, updated_at
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+         ON CONFLICT (id) DO UPDATE SET
+           name = EXCLUDED.name,
+           type = EXCLUDED.type,
+           strategy = EXCLUDED.strategy,
+           size = EXCLUDED.size,
+           compressed_size = EXCLUDED.compressed_size,
+           storage_path = EXCLUDED.storage_path,
+           version = EXCLUDED.version,
+           metadata = EXCLUDED.metadata,
+           tags = EXCLUDED.tags,
+           checksum = EXCLUDED.checksum,
+           encrypted = EXCLUDED.encrypted,
+           updated_at = EXCLUDED.updated_at`,
+        [
+          item.id,
+          item.name,
+          item.type,
+          item.strategy,
+          item.size,
+          item.compressedSize || null,
+          storagePath,
+          item.version,
+          JSON.stringify(item.metadata || {}),
+          item.tags || [],
+          item.checksum,
+          item.encrypted || false,
+          item.createdAt,
+          item.updatedAt,
+        ]
+      );
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === '42P01') {
+        await this.createStorageTables();
+        await this.persistItem(item, storagePath);
+        return;
+      }
+      throw error;
+    }
+  }
+
+  private async removeItemRecord(itemId: string): Promise<void> {
+    try {
+      await query('DELETE FROM storage_items WHERE id = $1', [itemId]);
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === '42P01') {
+        await this.createStorageTables();
+        return;
+      }
+      throw error;
+    }
+  }
+
+  private async createStorageTables(): Promise<void> {
+    await query(
+      `CREATE TABLE IF NOT EXISTS storage_items (
+         id VARCHAR(80) PRIMARY KEY,
+         name VARCHAR(255) NOT NULL,
+         type VARCHAR(100) NOT NULL,
+         strategy VARCHAR(100) NOT NULL,
+         size BIGINT NOT NULL,
+         compressed_size BIGINT,
+         storage_path TEXT NOT NULL,
+         version INTEGER NOT NULL DEFAULT 1,
+         metadata JSONB DEFAULT '{}',
+         tags TEXT[] DEFAULT ARRAY[]::TEXT[],
+         checksum VARCHAR(255) NOT NULL,
+         encrypted BOOLEAN DEFAULT false,
+         created_at TIMESTAMPTZ DEFAULT NOW(),
+         updated_at TIMESTAMPTZ DEFAULT NOW()
+       );
+
+       CREATE INDEX IF NOT EXISTS idx_storage_items_type ON storage_items(type);
+       CREATE INDEX IF NOT EXISTS idx_storage_items_strategy ON storage_items(strategy);
+       CREATE INDEX IF NOT EXISTS idx_storage_items_created ON storage_items(created_at DESC);
+       CREATE INDEX IF NOT EXISTS idx_storage_items_tags ON storage_items USING GIN(tags);`
+    );
   }
 
   /**
@@ -156,6 +311,7 @@ class SpecializedStorageManager {
       tags?: string[];
     }
   ): Promise<StorageResult> {
+    await this.ensureInitialized();
     const startTime = Date.now();
     const itemId = this.generateItemId();
 
@@ -233,6 +389,8 @@ class SpecializedStorageManager {
         this.cache.set(itemId, processedData);
       }
 
+      await this.persistItem(item, storagePath);
+
       return {
         success: true,
         itemId,
@@ -265,6 +423,7 @@ class SpecializedStorageManager {
    * 检索数据
    */
   async retrieve(itemId: string): Promise<RetrievalResult> {
+    await this.ensureInitialized();
     const startTime = Date.now();
 
     const item = this.items.get(itemId);
@@ -346,6 +505,7 @@ class SpecializedStorageManager {
    * 删除数据
    */
   async delete(itemId: string): Promise<boolean> {
+    await this.ensureInitialized();
     const item = this.items.get(itemId);
     if (!item) {
       return false;
@@ -364,6 +524,7 @@ class SpecializedStorageManager {
 
       // 删除项目
       this.items.delete(itemId);
+      await this.removeItemRecord(itemId);
 
       return true;
     } catch (error) {
@@ -383,6 +544,7 @@ class SpecializedStorageManager {
       tags?: string[];
     } = {}
   ): Promise<StorageResult> {
+    await this.ensureInitialized();
     const item = this.items.get(itemId);
     if (!item) {
       throw new Error('Item not found');
@@ -434,6 +596,9 @@ class SpecializedStorageManager {
     };
     metadata?: Record<string, unknown>;
   }): StorageItem[] {
+    if (!this.initialized) {
+      void this.ensureInitialized();
+    }
     let results = Array.from(this.items.values());
 
     // 按类型过滤
@@ -473,6 +638,7 @@ class SpecializedStorageManager {
    * 获取存储统计
    */
   async getStatistics(): Promise<StorageStatistics> {
+    await this.ensureInitialized();
     const items = Array.from(this.items.values());
 
     const totalItems = items.length;
