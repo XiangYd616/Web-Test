@@ -78,7 +78,7 @@ router.post(
 
       // 创建用户
       const result = await query(
-        'INSERT INTO users (username, email, password, role, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id',
+        'INSERT INTO users (username, email, password_hash, role, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id',
         [username, email, hashedPassword, 'user']
       );
 
@@ -161,7 +161,7 @@ router.post(
 
       // 查找用户
       const users = await query(
-        'SELECT id, username, email, password, role, two_factor_enabled FROM users WHERE username = $1 OR email = $2',
+        'SELECT id, username, email, password_hash, role, two_factor_enabled FROM users WHERE username = $1 OR email = $2',
         [username, username]
       );
 
@@ -176,14 +176,14 @@ router.post(
         id: string;
         username: string;
         email: string;
-        password: string;
+        password_hash: string;
         role: string;
         two_factor_enabled?: boolean;
         status?: string;
       };
 
       // 验证密码
-      const isValidPassword = await bcrypt.compare(password, user.password);
+      const isValidPassword = await bcrypt.compare(password, user.password_hash);
       if (!isValidPassword) {
         securityLogger(
           'LOGIN_FAILED',

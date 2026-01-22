@@ -1,3 +1,7 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 -- Migration: Add System Monitoring and Analytics Tables
 -- Created: 2025-08-24T00:00:00.000Z
 -- Description: 添加系统监控、健康检查和分析功能，支持API规范中的系统管理和分析接口

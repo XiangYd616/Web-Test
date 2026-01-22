@@ -1,3 +1,7 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 /*
   已合并到 data/schema.sql，迁移中保留作为历史记录。
 

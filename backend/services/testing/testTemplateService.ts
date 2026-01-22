@@ -15,7 +15,7 @@ export interface TestTemplateInput {
 }
 
 export interface TestTemplateRecord {
-  id: number;
+  id: string;
   user_id: string | null;
   engine_type: string;
   template_name: string;
@@ -29,10 +29,7 @@ export interface TestTemplateRecord {
 }
 
 class TestTemplateService {
-  async getTemplateForUser(
-    userId: string,
-    templateId: string | number
-  ): Promise<TestTemplateRecord> {
+  async getTemplateForUser(userId: string, templateId: string): Promise<TestTemplateRecord> {
     const result = await query('SELECT * FROM test_templates WHERE id = $1', [templateId]);
     const template = result.rows[0] as TestTemplateRecord | undefined;
     if (!template) {
@@ -84,7 +81,7 @@ class TestTemplateService {
     return result.rows as TestTemplateRecord[];
   }
 
-  async createTemplate(userId: string, input: TestTemplateInput): Promise<number> {
+  async createTemplate(userId: string, input: TestTemplateInput): Promise<string> {
     if (input.isDefault) {
       await query(
         `UPDATE test_templates
@@ -110,7 +107,7 @@ class TestTemplateService {
       ]
     );
 
-    return result.rows[0].id as number;
+    return result.rows[0].id as string;
   }
 
   async updateTemplate(
@@ -121,7 +118,7 @@ class TestTemplateService {
     const existing = await query('SELECT id, user_id FROM test_templates WHERE id = $1', [
       templateId,
     ]);
-    const template = existing.rows[0] as { id: number; user_id: string | null } | undefined;
+    const template = existing.rows[0] as { id: string; user_id: string | null } | undefined;
     if (!template) {
       throw new Error('模板不存在');
     }
@@ -170,7 +167,7 @@ class TestTemplateService {
     const existing = await query('SELECT id, user_id FROM test_templates WHERE id = $1', [
       templateId,
     ]);
-    const template = existing.rows[0] as { id: number; user_id: string | null } | undefined;
+    const template = existing.rows[0] as { id: string; user_id: string | null } | undefined;
     if (!template) {
       throw new Error('模板不存在');
     }

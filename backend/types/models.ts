@@ -30,9 +30,6 @@ export interface User {
   is_active: boolean;
   is_admin: boolean;
   email_verified: boolean;
-  email_verification_token?: string;
-  password_reset_token?: string;
-  password_reset_expires?: DatabaseTimestamp;
   last_login?: DatabaseTimestamp;
   login_attempts: number;
   locked_until?: DatabaseTimestamp;

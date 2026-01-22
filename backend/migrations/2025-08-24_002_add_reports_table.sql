@@ -1,3 +1,7 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 -- Migration: Add Test Reports Management Table
 -- Created: 2025-08-24T00:00:00.000Z
 -- Description: 添加测试报告生成和管理功能，支持API规范中的报告接口

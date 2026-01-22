@@ -8,6 +8,7 @@ import cron from 'node-cron';
 import * as path from 'path';
 import * as tar from 'tar';
 import * as zlib from 'zlib';
+import { query } from '../../config/database';
 
 interface CronTask {
   start: () => void;
@@ -111,13 +112,8 @@ export interface ArchiveResult {
 class DataArchiveManager {
   private config: ArchiveConfig;
   private isRunning: boolean = false;
-  private archiveJobs: Map<string, ArchiveJob> = new Map();
   private statistics: ArchiveStatistics;
   private scheduledTasks: Map<string, CronTask> = new Map();
-  private policies: Map<string, ArchivePolicy> = new Map();
-  private dataDir: string;
-  private jobsFile: string;
-  private policiesFile: string;
 
   constructor(config: Partial<ArchiveConfig> = {}) {
     this.config = {
@@ -134,10 +130,6 @@ class DataArchiveManager {
       ...config,
     };
 
-    this.dataDir = path.join(process.cwd(), 'storage', 'archive');
-    this.jobsFile = path.join(this.dataDir, 'archive_jobs.json');
-    this.policiesFile = path.join(this.dataDir, 'archive_policies.json');
-
     this.statistics = {
       totalArchives: 0,
       totalArchivedSize: 0,
@@ -150,8 +142,6 @@ class DataArchiveManager {
       byType: {},
       trends: [],
     };
-
-    this.initializeDefaultPolicies();
   }
 
   /**
@@ -165,14 +155,12 @@ class DataArchiveManager {
     try {
       // 确保目录存在
       await this.ensureDirectories();
-      await fs.mkdir(this.dataDir, { recursive: true });
-
-      // 加载现有任务
+      await this.ensureTables();
+      await this.loadPolicies();
       await this.loadJobs();
 
-      // 启动调度任务
       if (this.config.scheduleEnabled) {
-        this.startScheduledTasks();
+        await this.startScheduledTasks();
       }
 
       this.isRunning = true;
@@ -194,10 +182,8 @@ class DataArchiveManager {
     this.scheduledTasks.clear();
 
     // 等待所有活跃任务完成
-    const activeJobs = Array.from(this.archiveJobs.values()).filter(
-      job => job.status === 'running'
-    );
-    for (const job of activeJobs) {
+    const activeJobs = await this.getAllArchiveJobs();
+    for (const job of activeJobs.filter(job => job.status === 'running')) {
       await this.cancelArchiveJob(job.id);
     }
 
@@ -238,8 +224,7 @@ class DataArchiveManager {
       archivedFilesCount: 0,
     };
 
-    this.archiveJobs.set(jobId, job);
-    await this.saveJobs();
+    await this.saveArchiveJob(job);
 
     // 自动执行任务
     if (jobData.status === 'pending') {
@@ -253,21 +238,37 @@ class DataArchiveManager {
    * 获取归档任务
    */
   async getArchiveJob(jobId: string): Promise<ArchiveJob | null> {
-    return this.archiveJobs.get(jobId) || null;
+    const result = await query(
+      `SELECT id, name, description, source_path, target_path, status, progress,
+              created_at, started_at, completed_at, duration, size, compressed_size,
+              compression_ratio, files_count, archived_files_count, error, metadata
+       FROM archive_jobs
+       WHERE id = $1`,
+      [jobId]
+    );
+    const row = result.rows[0];
+    return row ? this.mapArchiveJobRow(row) : null;
   }
 
   /**
    * 获取所有归档任务
    */
   async getAllArchiveJobs(): Promise<ArchiveJob[]> {
-    return Array.from(this.archiveJobs.values());
+    const result = await query(
+      `SELECT id, name, description, source_path, target_path, status, progress,
+              created_at, started_at, completed_at, duration, size, compressed_size,
+              compression_ratio, files_count, archived_files_count, error, metadata
+       FROM archive_jobs
+       ORDER BY created_at DESC`
+    );
+    return result.rows.map(row => this.mapArchiveJobRow(row));
   }
 
   /**
    * 更新归档任务
    */
   async updateArchiveJob(jobId: string, updates: Partial<ArchiveJob>): Promise<ArchiveJob> {
-    const job = this.archiveJobs.get(jobId);
+    const job = await this.getArchiveJob(jobId);
     if (!job) {
       throw new Error('Archive job not found');
     }
@@ -275,11 +276,9 @@ class DataArchiveManager {
     const updatedJob = {
       ...job,
       ...updates,
-    };
+    } as ArchiveJob;
 
-    this.archiveJobs.set(jobId, updatedJob);
-    await this.saveJobs();
-
+    await this.saveArchiveJob(updatedJob);
     return updatedJob;
   }
 
@@ -287,18 +286,15 @@ class DataArchiveManager {
    * 删除归档任务
    */
   async deleteArchiveJob(jobId: string): Promise<boolean> {
-    const job = this.archiveJobs.get(jobId);
-    if (!job) {
-      return false;
-    }
+    const job = await this.getArchiveJob(jobId);
+    if (!job) return false;
 
     // 如果任务正在运行，先取消
     if (job.status === 'running') {
       await this.cancelArchiveJob(jobId);
     }
 
-    this.archiveJobs.delete(jobId);
-    await this.saveJobs();
+    await query('DELETE FROM archive_jobs WHERE id = $1', [jobId]);
 
     return true;
   }
@@ -307,10 +303,8 @@ class DataArchiveManager {
    * 执行归档任务
    */
   async executeArchiveJob(jobId: string): Promise<ArchiveResult> {
-    const job = this.archiveJobs.get(jobId);
-    if (!job) {
-      throw new Error('Archive job not found');
-    }
+    const job = await this.getArchiveJob(jobId);
+    if (!job) throw new Error('Archive job not found');
 
     if (job.status !== 'pending') {
       throw new Error('Job is not in pending status');
@@ -322,6 +316,14 @@ class DataArchiveManager {
     job.status = 'running';
     job.startedAt = new Date();
     job.progress = 0;
+    await this.saveArchiveJob(job);
+
+    const cleanupSourcePath = async () => {
+      const cleanupPath = job.metadata?.cleanupSourcePath;
+      if (typeof cleanupPath === 'string' && cleanupPath.trim().length > 0) {
+        await fs.rm(cleanupPath, { recursive: true, force: true }).catch(() => undefined);
+      }
+    };
 
     try {
       // 计算文件数量和大小
@@ -339,12 +341,16 @@ class DataArchiveManager {
       job.compressedSize = result.compressedSize;
       job.compressionRatio = result.compressionRatio;
       job.archivedFilesCount = result.filesCount;
+      job.metadata = {
+        ...(job.metadata || {}),
+        archivePath: result.archivePath,
+      };
       job.progress = 100;
 
       // 更新统计
       this.updateStatistics(result);
 
-      await this.saveJobs();
+      await this.saveArchiveJob(job);
       return result;
     } catch (error) {
       job.status = 'failed';
@@ -352,8 +358,10 @@ class DataArchiveManager {
       job.duration = Date.now() - startTime;
       job.error = error instanceof Error ? error.message : String(error);
 
-      await this.saveJobs();
+      await this.saveArchiveJob(job);
       throw error;
+    } finally {
+      await cleanupSourcePath();
     }
   }
 
@@ -361,16 +369,14 @@ class DataArchiveManager {
    * 取消归档任务
    */
   async cancelArchiveJob(jobId: string): Promise<boolean> {
-    const job = this.archiveJobs.get(jobId);
-    if (!job || job.status !== 'running') {
-      return false;
-    }
+    const job = await this.getArchiveJob(jobId);
+    if (!job || job.status !== 'running') return false;
 
     job.status = 'cancelled';
     job.completedAt = new Date();
     job.duration = job.startedAt ? Date.now() - job.startedAt.getTime() : 0;
 
-    await this.saveJobs();
+    await this.saveArchiveJob(job);
     return true;
   }
 
@@ -389,12 +395,11 @@ class DataArchiveManager {
       updatedAt: new Date(),
     };
 
-    this.policies.set(policyId, policy);
-    await this.savePolicies();
+    await this.saveArchivePolicy(policy);
 
     // 如果策略启用，启动调度
     if (policy.enabled) {
-      this.schedulePolicy(policyId);
+      await this.schedulePolicy(policyId);
     }
 
     return policyId;
@@ -404,14 +409,26 @@ class DataArchiveManager {
    * 获取归档策略
    */
   async getArchivePolicy(policyId: string): Promise<ArchivePolicy | null> {
-    return this.policies.get(policyId) || null;
+    const result = await query(
+      `SELECT id, name, description, rules, schedule, enabled, created_at, updated_at
+       FROM archive_policies
+       WHERE id = $1`,
+      [policyId]
+    );
+    const row = result.rows[0];
+    return row ? this.mapArchivePolicyRow(row) : null;
   }
 
   /**
    * 获取所有归档策略
    */
   async getAllArchivePolicies(): Promise<ArchivePolicy[]> {
-    return Array.from(this.policies.values());
+    const result = await query(
+      `SELECT id, name, description, rules, schedule, enabled, created_at, updated_at
+       FROM archive_policies
+       ORDER BY created_at ASC`
+    );
+    return result.rows.map(row => this.mapArchivePolicyRow(row));
   }
 
   /**
@@ -421,10 +438,8 @@ class DataArchiveManager {
     policyId: string,
     updates: Partial<ArchivePolicy>
   ): Promise<ArchivePolicy> {
-    const policy = this.policies.get(policyId);
-    if (!policy) {
-      throw new Error('Archive policy not found');
-    }
+    const policy = await this.getArchivePolicy(policyId);
+    if (!policy) throw new Error('Archive policy not found');
 
     const updatedPolicy = {
       ...policy,
@@ -432,12 +447,11 @@ class DataArchiveManager {
       updatedAt: new Date(),
     };
 
-    this.policies.set(policyId, updatedPolicy);
-    await this.savePolicies();
+    await this.saveArchivePolicy(updatedPolicy);
 
     // 重新调度
     if (updates.enabled !== undefined || updates.schedule) {
-      this.reschedulePolicy(policyId);
+      await this.reschedulePolicy(policyId);
     }
 
     return updatedPolicy;
@@ -447,17 +461,11 @@ class DataArchiveManager {
    * 删除归档策略
    */
   async deleteArchivePolicy(policyId: string): Promise<boolean> {
-    const policy = this.policies.get(policyId);
-    if (!policy) {
-      return false;
-    }
+    const policy = await this.getArchivePolicy(policyId);
+    if (!policy) return false;
 
-    // 停止调度
-    this.unschedulePolicy(policyId);
-
-    this.policies.delete(policyId);
-    await this.savePolicies();
-
+    await this.unschedulePolicy(policyId);
+    await query('DELETE FROM archive_policies WHERE id = $1', [policyId]);
     return true;
   }
 
@@ -465,7 +473,7 @@ class DataArchiveManager {
    * 获取统计信息
    */
   async getStatistics(): Promise<ArchiveStatistics> {
-    const jobs = Array.from(this.archiveJobs.values());
+    const jobs = await this.getAllArchiveJobs();
 
     const totalArchives = jobs.filter(job => job.status === 'completed').length;
     const totalArchivedSize = jobs
@@ -521,7 +529,9 @@ class DataArchiveManager {
    */
   private async createArchive(job: ArchiveJob): Promise<ArchiveResult> {
     const tempDir = path.join(this.config.tempPath, job.id);
-    const archivePath = path.join(this.config.archivePath, `${job.name}_${Date.now()}.tar.gz`);
+    const archiveBasePath = job.targetPath || this.config.archivePath;
+    await fs.mkdir(archiveBasePath, { recursive: true });
+    const archivePath = path.join(archiveBasePath, `${job.name}_${Date.now()}.tar.gz`);
 
     try {
       // 创建临时目录
@@ -694,11 +704,9 @@ class DataArchiveManager {
   /**
    * 调度策略
    */
-  private schedulePolicy(policyId: string): void {
-    const policy = this.policies.get(policyId);
-    if (!policy || !policy.enabled) {
-      return;
-    }
+  private async schedulePolicy(policyId: string): Promise<void> {
+    const policy = await this.getArchivePolicy(policyId);
+    if (!policy || !policy.enabled) return;
 
     if (!cron.validate(policy.schedule)) {
       throw new Error(`Invalid cron expression: ${policy.schedule}`);
@@ -719,19 +727,18 @@ class DataArchiveManager {
   /**
    * 重新调度策略
    */
-  private reschedulePolicy(policyId: string): void {
-    this.unschedulePolicy(policyId);
-
-    const policy = this.policies.get(policyId);
+  private async reschedulePolicy(policyId: string): Promise<void> {
+    await this.unschedulePolicy(policyId);
+    const policy = await this.getArchivePolicy(policyId);
     if (policy && policy.enabled) {
-      this.schedulePolicy(policyId);
+      await this.schedulePolicy(policyId);
     }
   }
 
   /**
    * 取消调度策略
    */
-  private unschedulePolicy(policyId: string): void {
+  private async unschedulePolicy(policyId: string): Promise<void> {
     const task = this.scheduledTasks.get(policyId);
     if (task) {
       task.stop();
@@ -743,10 +750,8 @@ class DataArchiveManager {
    * 执行策略
    */
   private async executePolicy(policyId: string): Promise<void> {
-    const policy = this.policies.get(policyId);
-    if (!policy) {
-      return;
-    }
+    const policy = await this.getArchivePolicy(policyId);
+    if (!policy) return;
 
     for (const rule of policy.rules) {
       if (rule.enabled) {
@@ -816,11 +821,7 @@ class DataArchiveManager {
    * 启动调度任务
    */
   private startScheduledTasks(): void {
-    for (const [policyId, policy] of this.policies.entries()) {
-      if (policy.enabled) {
-        this.schedulePolicy(policyId);
-      }
-    }
+    return;
   }
 
   /**
@@ -834,8 +835,8 @@ class DataArchiveManager {
   /**
    * 初始化默认策略
    */
-  private initializeDefaultPolicies(): void {
-    const defaultPolicies: Omit<ArchivePolicy, 'id' | 'createdAt' | 'updatedAt'>[] = [
+  private getDefaultPolicies(): Omit<ArchivePolicy, 'id' | 'createdAt' | 'updatedAt'>[] {
+    return [
       {
         name: '每日数据归档',
         description: '每天自动归档测试数据',
@@ -875,10 +876,6 @@ class DataArchiveManager {
         enabled: false,
       },
     ];
-
-    defaultPolicies.forEach(policy => {
-      this.createArchivePolicy(policy);
-    });
   }
 
   /**
@@ -886,65 +883,187 @@ class DataArchiveManager {
    */
   private async loadJobs(): Promise<void> {
     try {
-      const raw = await fs.readFile(this.jobsFile, 'utf-8');
-      const data = JSON.parse(raw) as ArchiveJob[];
-      data.forEach(job => {
-        this.archiveJobs.set(job.id, {
-          ...job,
-          createdAt: new Date(job.createdAt),
-          startedAt: job.startedAt ? new Date(job.startedAt) : undefined,
-          completedAt: job.completedAt ? new Date(job.completedAt) : undefined,
-        });
-      });
-    } catch {
-      // ignore
+      await query('SELECT 1 FROM archive_jobs LIMIT 1');
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === '42P01') {
+        await this.ensureTables();
+      } else {
+        throw error;
+      }
     }
   }
 
-  /**
-   * 保存任务
-   */
-  private async saveJobs(): Promise<void> {
-    await fs.mkdir(this.dataDir, { recursive: true });
-    const data = Array.from(this.archiveJobs.values()).map(job => ({
-      ...job,
-      createdAt: job.createdAt.toISOString(),
-      startedAt: job.startedAt ? job.startedAt.toISOString() : undefined,
-      completedAt: job.completedAt ? job.completedAt.toISOString() : undefined,
-    }));
-    await fs.writeFile(this.jobsFile, JSON.stringify(data, null, 2), 'utf-8');
-  }
-
-  /**
-   * 加载策略
-   */
   private async loadPolicies(): Promise<void> {
     try {
-      const raw = await fs.readFile(this.policiesFile, 'utf-8');
-      const data = JSON.parse(raw) as ArchivePolicy[];
-      data.forEach(policy => {
-        this.policies.set(policy.id, {
-          ...policy,
-          createdAt: new Date(policy.createdAt),
-          updatedAt: new Date(policy.updatedAt),
-        });
-      });
-    } catch {
-      // ignore
+      const result = await query(
+        `SELECT id, name, description, rules, schedule, enabled, created_at, updated_at
+         FROM archive_policies
+         ORDER BY created_at ASC`
+      );
+      if (result.rows.length === 0) {
+        const defaults = this.getDefaultPolicies();
+        for (const policy of defaults) {
+          await this.createArchivePolicy(policy);
+        }
+      }
+    } catch (error) {
+      const code = (error as { code?: string }).code;
+      if (code === '42P01') {
+        await this.ensureTables();
+        await this.loadPolicies();
+        return;
+      }
+      throw error;
     }
   }
 
-  /**
-   * 保存策略
-   */
-  private async savePolicies(): Promise<void> {
-    await fs.mkdir(this.dataDir, { recursive: true });
-    const data = Array.from(this.policies.values()).map(policy => ({
-      ...policy,
-      createdAt: policy.createdAt.toISOString(),
-      updatedAt: policy.updatedAt.toISOString(),
-    }));
-    await fs.writeFile(this.policiesFile, JSON.stringify(data, null, 2), 'utf-8');
+  private async saveArchiveJob(job: ArchiveJob): Promise<void> {
+    await query(
+      `INSERT INTO archive_jobs (
+         id, name, description, source_path, target_path, status, progress,
+         created_at, started_at, completed_at, duration, size, compressed_size,
+         compression_ratio, files_count, archived_files_count, error, metadata
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+       ON CONFLICT (id) DO UPDATE SET
+         name = EXCLUDED.name,
+         description = EXCLUDED.description,
+         source_path = EXCLUDED.source_path,
+         target_path = EXCLUDED.target_path,
+         status = EXCLUDED.status,
+         progress = EXCLUDED.progress,
+         started_at = EXCLUDED.started_at,
+         completed_at = EXCLUDED.completed_at,
+         duration = EXCLUDED.duration,
+         size = EXCLUDED.size,
+         compressed_size = EXCLUDED.compressed_size,
+         compression_ratio = EXCLUDED.compression_ratio,
+         files_count = EXCLUDED.files_count,
+         archived_files_count = EXCLUDED.archived_files_count,
+         error = EXCLUDED.error,
+         metadata = EXCLUDED.metadata`,
+      [
+        job.id,
+        job.name,
+        job.description,
+        job.sourcePath,
+        job.targetPath,
+        job.status,
+        job.progress,
+        job.createdAt,
+        job.startedAt || null,
+        job.completedAt || null,
+        job.duration || null,
+        job.size,
+        job.compressedSize || null,
+        job.compressionRatio || null,
+        job.filesCount,
+        job.archivedFilesCount,
+        job.error || null,
+        JSON.stringify(job.metadata || {}),
+      ]
+    );
+  }
+
+  private async saveArchivePolicy(policy: ArchivePolicy): Promise<void> {
+    await query(
+      `INSERT INTO archive_policies (
+         id, name, description, rules, schedule, enabled, created_at, updated_at
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (id) DO UPDATE SET
+         name = EXCLUDED.name,
+         description = EXCLUDED.description,
+         rules = EXCLUDED.rules,
+         schedule = EXCLUDED.schedule,
+         enabled = EXCLUDED.enabled,
+         updated_at = EXCLUDED.updated_at`,
+      [
+        policy.id,
+        policy.name,
+        policy.description,
+        JSON.stringify(policy.rules || []),
+        policy.schedule,
+        policy.enabled,
+        policy.createdAt,
+        policy.updatedAt,
+      ]
+    );
+  }
+
+  private mapArchiveJobRow(row: Record<string, unknown>): ArchiveJob {
+    return {
+      id: String(row.id),
+      name: String(row.name),
+      description: String(row.description || ''),
+      sourcePath: String(row.source_path),
+      targetPath: String(row.target_path),
+      status: row.status as ArchiveJob['status'],
+      progress: Number(row.progress || 0),
+      createdAt: new Date(String(row.created_at)),
+      startedAt: row.started_at ? new Date(String(row.started_at)) : undefined,
+      completedAt: row.completed_at ? new Date(String(row.completed_at)) : undefined,
+      duration: row.duration ? Number(row.duration) : undefined,
+      size: Number(row.size || 0),
+      compressedSize: row.compressed_size ? Number(row.compressed_size) : undefined,
+      compressionRatio: row.compression_ratio ? Number(row.compression_ratio) : undefined,
+      filesCount: Number(row.files_count || 0),
+      archivedFilesCount: Number(row.archived_files_count || 0),
+      error: row.error ? String(row.error) : undefined,
+      metadata: (row.metadata as Record<string, unknown>) || {},
+    };
+  }
+
+  private mapArchivePolicyRow(row: Record<string, unknown>): ArchivePolicy {
+    return {
+      id: String(row.id),
+      name: String(row.name),
+      description: String(row.description || ''),
+      rules: (row.rules as ArchiveRule[]) || [],
+      schedule: String(row.schedule),
+      enabled: row.enabled !== false,
+      createdAt: new Date(String(row.created_at)),
+      updatedAt: new Date(String(row.updated_at)),
+    };
+  }
+
+  private async ensureTables(): Promise<void> {
+    await query(
+      `CREATE TABLE IF NOT EXISTS archive_policies (
+         id VARCHAR(80) PRIMARY KEY,
+         name VARCHAR(255) NOT NULL,
+         description TEXT,
+         rules JSONB DEFAULT '[]',
+         schedule VARCHAR(100) NOT NULL,
+         enabled BOOLEAN DEFAULT true,
+         created_at TIMESTAMPTZ DEFAULT NOW(),
+         updated_at TIMESTAMPTZ DEFAULT NOW()
+       );
+
+       CREATE TABLE IF NOT EXISTS archive_jobs (
+         id VARCHAR(80) PRIMARY KEY,
+         name VARCHAR(255) NOT NULL,
+         description TEXT,
+         source_path TEXT NOT NULL,
+         target_path TEXT NOT NULL,
+         status VARCHAR(20) NOT NULL,
+         progress INTEGER DEFAULT 0,
+         created_at TIMESTAMPTZ DEFAULT NOW(),
+         started_at TIMESTAMPTZ,
+         completed_at TIMESTAMPTZ,
+         duration INTEGER,
+         size BIGINT DEFAULT 0,
+         compressed_size BIGINT,
+         compression_ratio NUMERIC(8, 2),
+         files_count INTEGER DEFAULT 0,
+         archived_files_count INTEGER DEFAULT 0,
+         error TEXT,
+         metadata JSONB DEFAULT '{}'
+       );
+
+       CREATE INDEX IF NOT EXISTS idx_archive_jobs_status ON archive_jobs(status);
+       CREATE INDEX IF NOT EXISTS idx_archive_jobs_created ON archive_jobs(created_at DESC);
+       CREATE INDEX IF NOT EXISTS idx_archive_policies_enabled ON archive_policies(enabled);`
+    );
   }
 
   private async filterFilesByAge(

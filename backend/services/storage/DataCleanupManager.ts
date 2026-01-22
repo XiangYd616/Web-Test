@@ -123,17 +123,12 @@ export interface StorageUsage {
 class DataCleanupManager {
   private config: CleanupConfig;
   private isRunning: boolean = false;
-  private cleanupJobs: Map<string, CleanupJob> = new Map();
   private statistics: CleanupStatistics;
   private scheduledTasks: Map<string, CronTask> = new Map();
-  private retentionPolicies: Map<string, RetentionPolicy> = new Map();
-  private dataDir: string;
-  private jobsFile: string;
-  private policiesFile: string;
 
   constructor(config: Partial<CleanupConfig> = {}) {
     this.config = {
-      retentionPolicies: config.retentionPolicies || this.getDefaultRetentionPolicies(),
+      retentionPolicies: config.retentionPolicies ?? this.getDefaultRetentionPolicies(),
       maxStorageSize: config.maxStorageSize || 10 * 1024 * 1024 * 1024, // 10GB
       cleanupBatchSize: config.cleanupBatchSize || 1000,
       safetyMargin: config.safetyMargin || 0.1, // 10% 安全边际
@@ -143,10 +138,6 @@ class DataCleanupManager {
       logLevel: config.logLevel || 'info',
       ...config,
     };
-
-    this.dataDir = path.join(process.cwd(), 'storage', 'cleanup');
-    this.jobsFile = path.join(this.dataDir, 'cleanup_jobs.json');
-    this.policiesFile = path.join(this.dataDir, 'cleanup_policies.json');
 
     this.statistics = {
       totalCleanups: 0,
@@ -158,11 +149,6 @@ class DataCleanupManager {
       byDataType: {},
       trends: [],
     };
-
-    // 初始化默认策略
-    this.config.retentionPolicies.forEach(policy => {
-      this.retentionPolicies.set(policy.id, policy);
-    });
   }
 
   /**
@@ -174,7 +160,7 @@ class DataCleanupManager {
     }
 
     try {
-      await this.ensureDataDir();
+      await this.createCleanupTables();
       await this.loadPolicies();
       await this.loadJobs();
 
@@ -202,10 +188,8 @@ class DataCleanupManager {
     this.scheduledTasks.clear();
 
     // 等待所有活跃任务完成
-    const activeJobs = Array.from(this.cleanupJobs.values()).filter(
-      job => job.status === 'running'
-    );
-    for (const job of activeJobs) {
+    const activeJobs = await this.getAllCleanupJobs();
+    for (const job of activeJobs.filter(jobItem => jobItem.status === 'running')) {
       await this.cancelCleanupJob(job.id);
     }
 
@@ -215,7 +199,7 @@ class DataCleanupManager {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await fs.access(this.dataDir);
+      await query('SELECT 1 FROM cleanup_policies LIMIT 1');
       return true;
     } catch {
       return false;
@@ -237,10 +221,7 @@ class DataCleanupManager {
       updatedAt: new Date(),
     };
 
-    this.retentionPolicies.set(policyId, policy);
-    this.config.retentionPolicies.push(policy);
-
-    await this.savePolicies();
+    await this.savePolicy(policy);
     return policyId;
   }
 
@@ -248,14 +229,28 @@ class DataCleanupManager {
    * 获取保留策略
    */
   async getRetentionPolicy(policyId: string): Promise<RetentionPolicy | null> {
-    return this.retentionPolicies.get(policyId) || null;
+    const result = await query(
+      `SELECT id, name, description, data_types, retention_days,
+              conditions, actions, priority, enabled, created_at, updated_at
+       FROM cleanup_policies
+       WHERE id = $1`,
+      [policyId]
+    );
+    const row = result.rows[0];
+    return row ? this.mapPolicyRow(row) : null;
   }
 
   /**
    * 获取所有保留策略
    */
   async getAllRetentionPolicies(): Promise<RetentionPolicy[]> {
-    return Array.from(this.retentionPolicies.values());
+    const result = await query(
+      `SELECT id, name, description, data_types, retention_days,
+              conditions, actions, priority, enabled, created_at, updated_at
+       FROM cleanup_policies
+       ORDER BY priority ASC, created_at ASC`
+    );
+    return result.rows.map(row => this.mapPolicyRow(row));
   }
 
   /**
@@ -265,10 +260,8 @@ class DataCleanupManager {
     policyId: string,
     updates: Partial<RetentionPolicy>
   ): Promise<RetentionPolicy> {
-    const policy = this.retentionPolicies.get(policyId);
-    if (!policy) {
-      throw new Error('Retention policy not found');
-    }
+    const policy = await this.getRetentionPolicy(policyId);
+    if (!policy) throw new Error('Retention policy not found');
 
     const updatedPolicy = {
       ...policy,
@@ -276,15 +269,7 @@ class DataCleanupManager {
       updatedAt: new Date(),
     };
 
-    this.retentionPolicies.set(policyId, updatedPolicy);
-
-    // 更新配置中的策略
-    const configIndex = this.config.retentionPolicies.findIndex(p => p.id === policyId);
-    if (configIndex !== -1) {
-      this.config.retentionPolicies[configIndex] = updatedPolicy;
-    }
-
-    await this.savePolicies();
+    await this.savePolicy(updatedPolicy);
     return updatedPolicy;
   }
 
@@ -292,17 +277,9 @@ class DataCleanupManager {
    * 删除保留策略
    */
   async deleteRetentionPolicy(policyId: string): Promise<boolean> {
-    const policy = this.retentionPolicies.get(policyId);
-    if (!policy) {
-      return false;
-    }
-
-    this.retentionPolicies.delete(policyId);
-
-    // 从配置中移除
-    this.config.retentionPolicies = this.config.retentionPolicies.filter(p => p.id !== policyId);
-
-    await this.savePolicies();
+    const policy = await this.getRetentionPolicy(policyId);
+    if (!policy) return false;
+    await query('DELETE FROM cleanup_policies WHERE id = $1', [policyId]);
     return true;
   }
 
@@ -324,10 +301,8 @@ class DataCleanupManager {
   ): Promise<string> {
     const jobId = this.generateJobId();
 
-    const policy = this.retentionPolicies.get(jobData.policyId);
-    if (!policy) {
-      throw new Error('Retention policy not found');
-    }
+    const policy = await this.getRetentionPolicy(jobData.policyId);
+    if (!policy) throw new Error('Retention policy not found');
 
     const job: CleanupJob = {
       ...jobData,
@@ -341,8 +316,7 @@ class DataCleanupManager {
       errors: [],
     };
 
-    this.cleanupJobs.set(jobId, job);
-    await this.saveJobs();
+    await this.saveJob(job);
 
     // 自动执行任务
     if (jobData.status === 'pending') {
@@ -356,32 +330,47 @@ class DataCleanupManager {
    * 获取清理任务
    */
   async getCleanupJob(jobId: string): Promise<CleanupJob | null> {
-    return this.cleanupJobs.get(jobId) || null;
+    const result = await query(
+      `SELECT id, name, description, policy_id, status, progress,
+              created_at, started_at, completed_at, duration,
+              items_processed, items_total, size_processed, size_freed,
+              errors, metadata
+       FROM cleanup_jobs
+       WHERE id = $1`,
+      [jobId]
+    );
+    const row = result.rows[0];
+    return row ? this.mapJobRow(row) : null;
   }
 
   /**
    * 获取所有清理任务
    */
   async getAllCleanupJobs(): Promise<CleanupJob[]> {
-    return Array.from(this.cleanupJobs.values());
+    const result = await query(
+      `SELECT id, name, description, policy_id, status, progress,
+              created_at, started_at, completed_at, duration,
+              items_processed, items_total, size_processed, size_freed,
+              errors, metadata
+       FROM cleanup_jobs
+       ORDER BY created_at DESC`
+    );
+    return result.rows.map(row => this.mapJobRow(row));
   }
 
   /**
    * 更新清理任务
    */
   async updateCleanupJob(jobId: string, updates: Partial<CleanupJob>): Promise<CleanupJob> {
-    const job = this.cleanupJobs.get(jobId);
-    if (!job) {
-      throw new Error('Cleanup job not found');
-    }
+    const job = await this.getCleanupJob(jobId);
+    if (!job) throw new Error('Cleanup job not found');
 
     const updatedJob = {
       ...job,
       ...updates,
     };
 
-    this.cleanupJobs.set(jobId, updatedJob);
-    await this.saveJobs();
+    await this.saveJob(updatedJob);
 
     return updatedJob;
   }
@@ -390,18 +379,15 @@ class DataCleanupManager {
    * 删除清理任务
    */
   async deleteCleanupJob(jobId: string): Promise<boolean> {
-    const job = this.cleanupJobs.get(jobId);
-    if (!job) {
-      return false;
-    }
+    const job = await this.getCleanupJob(jobId);
+    if (!job) return false;
 
     // 如果任务正在运行，先取消
     if (job.status === 'running') {
       await this.cancelCleanupJob(jobId);
     }
 
-    this.cleanupJobs.delete(jobId);
-    await this.saveJobs();
+    await query('DELETE FROM cleanup_jobs WHERE id = $1', [jobId]);
 
     return true;
   }
@@ -410,10 +396,8 @@ class DataCleanupManager {
    * 执行清理任务
    */
   async executeCleanupJob(jobId: string): Promise<CleanupResult> {
-    const job = this.cleanupJobs.get(jobId);
-    if (!job) {
-      throw new Error('Cleanup job not found');
-    }
+    const job = await this.getCleanupJob(jobId);
+    if (!job) throw new Error('Cleanup job not found');
 
     if (job.status !== 'pending') {
       throw new Error('Job is not in pending status');
@@ -425,12 +409,11 @@ class DataCleanupManager {
     job.status = 'running';
     job.startedAt = new Date();
     job.progress = 0;
+    await this.saveJob(job);
 
     try {
-      const policy = this.retentionPolicies.get(job.policyId);
-      if (!policy) {
-        throw new Error('Retention policy not found');
-      }
+      const policy = await this.getRetentionPolicy(job.policyId);
+      if (!policy) throw new Error('Retention policy not found');
 
       // 执行清理
       const result = await this.performCleanup(job, policy);
@@ -449,7 +432,7 @@ class DataCleanupManager {
       // 更新统计
       this.updateStatistics(result);
 
-      await this.saveJobs();
+      await this.saveJob(job);
       return result;
     } catch (error) {
       job.status = 'failed';
@@ -457,7 +440,7 @@ class DataCleanupManager {
       job.duration = Date.now() - startTime;
       job.errors.push(error instanceof Error ? error.message : String(error));
 
-      await this.saveJobs();
+      await this.saveJob(job);
       throw error;
     }
   }
@@ -466,16 +449,14 @@ class DataCleanupManager {
    * 取消清理任务
    */
   async cancelCleanupJob(jobId: string): Promise<boolean> {
-    const job = this.cleanupJobs.get(jobId);
-    if (!job || job.status !== 'running') {
-      return false;
-    }
+    const job = await this.getCleanupJob(jobId);
+    if (!job || job.status !== 'running') return false;
 
     job.status = 'cancelled';
     job.completedAt = new Date();
     job.duration = job.startedAt ? Date.now() - job.startedAt.getTime() : 0;
 
-    await this.saveJobs();
+    await this.saveJob(job);
     return true;
   }
 
@@ -526,7 +507,7 @@ class DataCleanupManager {
    * 获取统计信息
    */
   async getStatistics(): Promise<CleanupStatistics> {
-    const jobs = Array.from(this.cleanupJobs.values());
+    const jobs = await this.getAllCleanupJobs();
 
     const totalCleanups = jobs.filter(job => job.status === 'completed').length;
     const totalItemsProcessed = jobs
@@ -881,7 +862,8 @@ class DataCleanupManager {
    * 执行计划清理
    */
   private async performScheduledCleanup(): Promise<void> {
-    for (const policy of this.retentionPolicies.values()) {
+    const policies = await this.getAllRetentionPolicies();
+    for (const policy of policies) {
       if (policy.enabled) {
         await this.createCleanupJob({
           name: `Scheduled cleanup for ${policy.name}`,
@@ -898,11 +880,14 @@ class DataCleanupManager {
    * 获取默认保留策略
    */
   private getDefaultRetentionPolicies(): RetentionPolicy[] {
+    if (process.env.CLEANUP_SEED_POLICIES !== 'true') {
+      return [];
+    }
     return [
       {
         id: 'test_results_policy',
         name: '测试结果保留策略',
-        description: '清理超过30天的测试结果',
+        description: '清理超过30天的测试结果数据',
         dataTypes: ['test_results', 'performance_data'],
         retentionDays: 30,
         conditions: [
@@ -982,148 +967,11 @@ class DataCleanupManager {
    */
   private async loadJobs(): Promise<void> {
     try {
-      const result = await query(
-        `SELECT id, name, description, policy_id, status, progress,
-                created_at, started_at, completed_at, duration,
-                items_processed, items_total, size_processed, size_freed,
-                errors, metadata
-         FROM cleanup_jobs
-         ORDER BY created_at DESC`
-      );
-      this.cleanupJobs.clear();
-      result.rows.forEach(row => {
-        this.cleanupJobs.set(row.id, {
-          id: row.id,
-          name: row.name,
-          description: row.description,
-          policyId: row.policy_id,
-          status: row.status,
-          progress: Number(row.progress || 0),
-          createdAt: new Date(row.created_at),
-          startedAt: row.started_at ? new Date(row.started_at) : undefined,
-          completedAt: row.completed_at ? new Date(row.completed_at) : undefined,
-          duration: row.duration ?? undefined,
-          itemsProcessed: Number(row.items_processed || 0),
-          itemsTotal: Number(row.items_total || 0),
-          sizeProcessed: Number(row.size_processed || 0),
-          sizeFreed: Number(row.size_freed || 0),
-          errors: row.errors || [],
-          metadata: row.metadata || {},
-        });
-      });
+      await query('SELECT 1 FROM cleanup_jobs LIMIT 1');
     } catch (error) {
       const code = (error as { code?: string }).code;
       if (code === '42P01') {
         await this.createCleanupTables();
-        await this.loadJobs();
-        return;
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * 保存任务
-   */
-  private async saveJobs(): Promise<void> {
-    try {
-      const jobs = Array.from(this.cleanupJobs.values());
-      for (const job of jobs) {
-        await query(
-          `INSERT INTO cleanup_jobs (
-             id, name, description, policy_id, status, progress,
-             created_at, started_at, completed_at, duration,
-             items_processed, items_total, size_processed, size_freed,
-             errors, metadata
-           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-           ON CONFLICT (id) DO UPDATE SET
-             name = EXCLUDED.name,
-             description = EXCLUDED.description,
-             policy_id = EXCLUDED.policy_id,
-             status = EXCLUDED.status,
-             progress = EXCLUDED.progress,
-             started_at = EXCLUDED.started_at,
-             completed_at = EXCLUDED.completed_at,
-             duration = EXCLUDED.duration,
-             items_processed = EXCLUDED.items_processed,
-             items_total = EXCLUDED.items_total,
-             size_processed = EXCLUDED.size_processed,
-             size_freed = EXCLUDED.size_freed,
-             errors = EXCLUDED.errors,
-             metadata = EXCLUDED.metadata`,
-          [
-            job.id,
-            job.name,
-            job.description,
-            job.policyId,
-            job.status,
-            job.progress,
-            job.createdAt,
-            job.startedAt || null,
-            job.completedAt || null,
-            job.duration || null,
-            job.itemsProcessed,
-            job.itemsTotal,
-            job.sizeProcessed,
-            job.sizeFreed,
-            JSON.stringify(job.errors || []),
-            JSON.stringify(job.metadata || {}),
-          ]
-        );
-      }
-    } catch (error) {
-      const code = (error as { code?: string }).code;
-      if (code === '42P01') {
-        await this.createCleanupTables();
-        await this.saveJobs();
-        return;
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * 保存策略
-   */
-  private async savePolicies(): Promise<void> {
-    try {
-      const policies = Array.from(this.retentionPolicies.values());
-      for (const policy of policies) {
-        await query(
-          `INSERT INTO cleanup_policies (
-             id, name, description, data_types, retention_days,
-             conditions, actions, priority, enabled, created_at, updated_at
-           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-           ON CONFLICT (id) DO UPDATE SET
-             name = EXCLUDED.name,
-             description = EXCLUDED.description,
-             data_types = EXCLUDED.data_types,
-             retention_days = EXCLUDED.retention_days,
-             conditions = EXCLUDED.conditions,
-             actions = EXCLUDED.actions,
-             priority = EXCLUDED.priority,
-             enabled = EXCLUDED.enabled,
-             updated_at = EXCLUDED.updated_at`,
-          [
-            policy.id,
-            policy.name,
-            policy.description,
-            policy.dataTypes,
-            policy.retentionDays,
-            JSON.stringify(policy.conditions || []),
-            JSON.stringify(policy.actions || []),
-            policy.priority,
-            policy.enabled,
-            policy.createdAt,
-            policy.updatedAt,
-          ]
-        );
-      }
-    } catch (error) {
-      const code = (error as { code?: string }).code;
-      if (code === '42P01') {
-        await this.createCleanupTables();
-        await this.savePolicies();
         return;
       }
       throw error;
@@ -1132,36 +980,13 @@ class DataCleanupManager {
 
   private async loadPolicies(): Promise<void> {
     try {
-      const result = await query(
-        `SELECT id, name, description, data_types, retention_days,
-                conditions, actions, priority, enabled, created_at, updated_at
-         FROM cleanup_policies
-         ORDER BY priority ASC, created_at ASC`
-      );
-      this.retentionPolicies.clear();
-      if (result.rows.length === 0) {
+      const result = await query('SELECT 1 FROM cleanup_policies LIMIT 1');
+      if (!result.rows.length) {
         const defaults = this.getDefaultRetentionPolicies();
-        defaults.forEach(policy => this.retentionPolicies.set(policy.id, policy));
-        this.config.retentionPolicies = defaults;
-        await this.savePolicies();
-        return;
+        for (const policy of defaults) {
+          await this.savePolicy(policy);
+        }
       }
-      result.rows.forEach(row => {
-        this.retentionPolicies.set(row.id, {
-          id: row.id,
-          name: row.name,
-          description: row.description,
-          dataTypes: row.data_types || [],
-          retentionDays: Number(row.retention_days || 0),
-          conditions: row.conditions || [],
-          actions: row.actions || [],
-          priority: Number(row.priority || 0),
-          enabled: row.enabled !== false,
-          createdAt: new Date(row.created_at),
-          updatedAt: new Date(row.updated_at),
-        });
-      });
-      this.config.retentionPolicies = Array.from(this.retentionPolicies.values());
     } catch (error) {
       const code = (error as { code?: string }).code;
       if (code === '42P01') {
@@ -1171,6 +996,119 @@ class DataCleanupManager {
       }
       throw error;
     }
+  }
+
+  private async saveJob(job: CleanupJob): Promise<void> {
+    await query(
+      `INSERT INTO cleanup_jobs (
+         id, name, description, policy_id, status, progress,
+         created_at, started_at, completed_at, duration,
+         items_processed, items_total, size_processed, size_freed,
+         errors, metadata
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+       ON CONFLICT (id) DO UPDATE SET
+         name = EXCLUDED.name,
+         description = EXCLUDED.description,
+         policy_id = EXCLUDED.policy_id,
+         status = EXCLUDED.status,
+         progress = EXCLUDED.progress,
+         started_at = EXCLUDED.started_at,
+         completed_at = EXCLUDED.completed_at,
+         duration = EXCLUDED.duration,
+         items_processed = EXCLUDED.items_processed,
+         items_total = EXCLUDED.items_total,
+         size_processed = EXCLUDED.size_processed,
+         size_freed = EXCLUDED.size_freed,
+         errors = EXCLUDED.errors,
+         metadata = EXCLUDED.metadata`,
+      [
+        job.id,
+        job.name,
+        job.description,
+        job.policyId,
+        job.status,
+        job.progress,
+        job.createdAt,
+        job.startedAt || null,
+        job.completedAt || null,
+        job.duration || null,
+        job.itemsProcessed,
+        job.itemsTotal,
+        job.sizeProcessed,
+        job.sizeFreed,
+        JSON.stringify(job.errors || []),
+        JSON.stringify(job.metadata || {}),
+      ]
+    );
+  }
+
+  private async savePolicy(policy: RetentionPolicy): Promise<void> {
+    await query(
+      `INSERT INTO cleanup_policies (
+         id, name, description, data_types, retention_days,
+         conditions, actions, priority, enabled, created_at, updated_at
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       ON CONFLICT (id) DO UPDATE SET
+         name = EXCLUDED.name,
+         description = EXCLUDED.description,
+         data_types = EXCLUDED.data_types,
+         retention_days = EXCLUDED.retention_days,
+         conditions = EXCLUDED.conditions,
+         actions = EXCLUDED.actions,
+         priority = EXCLUDED.priority,
+         enabled = EXCLUDED.enabled,
+         updated_at = EXCLUDED.updated_at`,
+      [
+        policy.id,
+        policy.name,
+        policy.description,
+        policy.dataTypes,
+        policy.retentionDays,
+        JSON.stringify(policy.conditions || []),
+        JSON.stringify(policy.actions || []),
+        policy.priority,
+        policy.enabled,
+        policy.createdAt,
+        policy.updatedAt,
+      ]
+    );
+  }
+
+  private mapJobRow(row: Record<string, unknown>): CleanupJob {
+    return {
+      id: String(row.id),
+      name: String(row.name),
+      description: String(row.description || ''),
+      policyId: String(row.policy_id),
+      status: row.status as CleanupJob['status'],
+      progress: Number(row.progress || 0),
+      createdAt: new Date(String(row.created_at)),
+      startedAt: row.started_at ? new Date(String(row.started_at)) : undefined,
+      completedAt: row.completed_at ? new Date(String(row.completed_at)) : undefined,
+      duration: row.duration ? Number(row.duration) : undefined,
+      itemsProcessed: Number(row.items_processed || 0),
+      itemsTotal: Number(row.items_total || 0),
+      sizeProcessed: Number(row.size_processed || 0),
+      sizeFreed: Number(row.size_freed || 0),
+      errors: (row.errors as string[]) || [],
+      metadata: (row.metadata as Record<string, unknown>) || {},
+    };
+  }
+
+  private mapPolicyRow(row: Record<string, unknown>): RetentionPolicy {
+    return {
+      id: String(row.id),
+      name: String(row.name),
+      description: String(row.description || ''),
+      dataTypes: (row.data_types as string[]) || [],
+      retentionDays: Number(row.retention_days || 0),
+      conditions: (row.conditions as CleanupCondition[]) || [],
+      actions: (row.actions as CleanupAction[]) || [],
+      priority: Number(row.priority || 0),
+      enabled: row.enabled !== false,
+      createdAt: new Date(String(row.created_at)),
+      updatedAt: new Date(String(row.updated_at)),
+    };
   }
 
   private async createCleanupTables(): Promise<void> {
@@ -1213,10 +1151,6 @@ class DataCleanupManager {
        CREATE INDEX IF NOT EXISTS idx_cleanup_jobs_created ON cleanup_jobs(created_at DESC);
        CREATE INDEX IF NOT EXISTS idx_cleanup_policies_priority ON cleanup_policies(priority);`
     );
-  }
-
-  private async ensureDataDir(): Promise<void> {
-    await fs.mkdir(this.dataDir, { recursive: true });
   }
 
   private getDataTypePaths(): Record<string, string> {

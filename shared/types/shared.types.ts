@@ -123,11 +123,10 @@ export interface UserDatabase {
   email_verified: boolean;
   email_verified_at?: string;
   two_factor_enabled: boolean;
-  failed_login_attempts: number;
+  login_attempts: number;
   locked_until?: string;
 
   // 统计信息
-  login_count: number;
   last_login?: string;
   test_count: number;
 

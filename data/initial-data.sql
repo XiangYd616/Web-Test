@@ -95,36 +95,6 @@ max_concurrent_tests = EXCLUDED.max_concurrent_tests,
 is_enabled = EXCLUDED.is_enabled,
 updated_at = NOW();
 
--- 插入系统通知
-INSERT INTO system_notifications (title, message, type, is_active, priority) VALUES
-('欢迎使用统一测试平台', '欢迎使用我们的统一测试平台！现在支持8种不同类型的测试工具，帮助您全面检测和优化您的网站。', 'info', true, 8),
-('平台功能介绍', '我们的平台支持API测试、兼容性测试、基础设施测试、安全测试、SEO测试、压力测试、用户体验测试和网站性能测试。', 'success', true, 7),
-('测试引擎状态', '所有8个测试引擎已启动并运行正常，您可以开始进行各种类型的测试。', 'success', true, 6)
-ON CONFLICT DO NOTHING;
-
--- 插入默认测试模板
-DO $$
-DECLARE
-    admin_user_id UUID;
-BEGIN
-    -- 获取管理员用户ID
-    SELECT id INTO admin_user_id FROM users WHERE username = 'admin';
-
-    IF admin_user_id IS NOT NULL THEN
-        -- 插入系统默认模板
-        INSERT INTO test_templates (user_id, name, description, test_type, config, is_public, is_system_template) VALUES
-        (admin_user_id, 'API基础测试', '标准的API接口测试模板，检查响应时间、状态码和数据格式', 'api', '{"timeout": 30000, "retries": 3, "validateSchema": true}', true, true),
-        (admin_user_id, '浏览器兼容性测试', '检查网站在不同浏览器中的兼容性', 'compatibility', '{"browsers": ["chrome", "firefox", "safari", "edge"], "viewports": ["desktop", "tablet", "mobile"]}', true, true),
-        (admin_user_id, '基础设施健康检查', '检查服务器、DNS、SSL等基础设施状态', 'infrastructure', '{"checkDNS": true, "checkSSL": true, "checkHeaders": true}', true, true),
-        (admin_user_id, '安全漏洞扫描', '基础的安全漏洞检测和HTTPS配置检查', 'security', '{"checkHTTPS": true, "checkHeaders": true, "scanVulnerabilities": true}', true, true),
-        (admin_user_id, 'SEO优化检查', '检查网站的SEO优化情况，包括元标签、结构化数据等', 'seo', '{"checkMetaTags": true, "checkStructuredData": true, "checkSitemap": true}', true, true),
-        (admin_user_id, '压力测试', '模拟高并发访问，测试网站性能极限', 'stress', '{"users": 100, "duration": 300, "rampUp": 60}', true, true),
-        (admin_user_id, '用户体验测试', '检查网站的可访问性和用户体验', 'ux', '{"checkAccessibility": true, "checkUsability": true, "checkMobile": true}', true, true),
-        (admin_user_id, '网站性能测试', '全面的网站性能检测，包括加载速度、资源优化等', 'website', '{"checkPerformance": true, "checkOptimization": true, "generateReport": true}', true, true)
-        ON CONFLICT DO NOTHING;
-    END IF;
-END $$;
-
 -- 插入今日系统统计初始数据
 INSERT INTO system_stats (
     date, total_users, active_users, new_users,

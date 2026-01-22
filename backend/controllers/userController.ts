@@ -109,20 +109,20 @@ class UserController {
         return errorResponse(res, '新密码长度至少6位', 400);
       }
 
-      const [user] = (await query('SELECT password FROM users WHERE id = $1', [userId])) as {
-        password: string;
+      const [user] = (await query('SELECT password_hash FROM users WHERE id = $1', [userId])) as {
+        password_hash: string;
       }[];
       if (!user) {
         return errorResponse(res, '用户不存在', 404);
       }
 
-      const isValid = await bcrypt.compare(currentPassword, user.password);
+      const isValid = await bcrypt.compare(currentPassword, user.password_hash);
       if (!isValid) {
         return errorResponse(res, '当前密码错误', 401);
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await query('UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2', [
+      await query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [
         hashedPassword,
         userId,
       ]);
@@ -144,11 +144,12 @@ class UserController {
       const sql = `
         SELECT 
           COUNT(*) as totalTests,
-          SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completedTests,
-          SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failedTests,
-          AVG(overall_score) as averageScore
-        FROM test_sessions 
-        WHERE user_id = $1 AND deleted_at IS NULL
+          SUM(CASE WHEN te.status = 'completed' THEN 1 ELSE 0 END) as completedTests,
+          SUM(CASE WHEN te.status = 'failed' THEN 1 ELSE 0 END) as failedTests,
+          AVG(tr.score) as averageScore
+        FROM test_executions te
+        LEFT JOIN test_results tr ON tr.execution_id = te.id
+        WHERE te.user_id = $1
       `;
 
       const [stats] = (await query(sql, [userId])) as UserStats[];
@@ -182,23 +183,23 @@ class UserController {
 
       const sql = `
         SELECT 
-          id,
-          test_type,
-          test_name,
-          status,
-          overall_score,
-          created_at,
-          updated_at
-        FROM test_sessions 
-        WHERE user_id = $1 AND deleted_at IS NULL
-        ORDER BY created_at DESC
+          te.id,
+          te.engine_type AS test_type,
+          te.test_name,
+          te.status,
+          tr.score AS overall_score,
+          te.created_at,
+          te.updated_at
+        FROM test_executions te
+        LEFT JOIN test_results tr ON tr.execution_id = te.id
+        WHERE te.user_id = $1
+        ORDER BY te.created_at DESC
         LIMIT $2 OFFSET $3
       `;
 
       const activities = await query(sql, [userId, limitNum, offset]);
 
-      const countSql =
-        'SELECT COUNT(*) as total FROM test_sessions WHERE user_id = $1 AND deleted_at IS NULL';
+      const countSql = 'SELECT COUNT(*) as total FROM test_executions WHERE user_id = $1';
       const [countResult] = (await query(countSql, [userId])) as { total: number }[];
 
       return successResponse(res, {
@@ -228,21 +229,21 @@ class UserController {
         return errorResponse(res, '请提供密码确认删除', 400);
       }
 
-      const [user] = (await query('SELECT password FROM users WHERE id = $1', [userId])) as {
-        password: string;
+      const [user] = (await query('SELECT password_hash FROM users WHERE id = $1', [userId])) as {
+        password_hash: string;
       }[];
       if (!user) {
         return errorResponse(res, '用户不存在', 404);
       }
 
-      const isValid = await bcrypt.compare(password, user.password);
+      const isValid = await bcrypt.compare(password, user.password_hash);
       if (!isValid) {
         return errorResponse(res, '密码错误', 401);
       }
 
       // 软删除用户相关的所有数据
       await query('UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1', [userId]);
-      await query('UPDATE test_sessions SET deleted_at = NOW() WHERE user_id = $1', [userId]);
+      await query('DELETE FROM test_executions WHERE user_id = $1', [userId]);
       await query(
         "UPDATE workspace_members SET status = 'inactive', updated_at = NOW() WHERE user_id = $1",
         [userId]

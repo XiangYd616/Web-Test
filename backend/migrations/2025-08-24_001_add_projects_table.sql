@@ -1,6 +1,12 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 -- Migration: Add Projects Management Table
 -- Created: 2025-08-24T00:00:00.000Z
 -- Description: 添加项目管理功能，支持API规范中的项目管理接口
+
+/* 已合并到 data/schema.sql，迁移保留作为历史记录。
 
 -- 创建项目表
 CREATE TABLE IF NOT EXISTS projects (
@@ -263,3 +269,4 @@ BEGIN
     
     RAISE NOTICE '🎉 项目管理功能迁移完成！';
 END $$;
+*/

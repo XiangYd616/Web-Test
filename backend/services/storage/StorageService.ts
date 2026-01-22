@@ -4,6 +4,8 @@
  */
 
 import * as fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
 import { query } from '../../config/database';
 import DataArchiveManager from './DataArchiveManager';
 import DataCleanupManager from './DataCleanupManager';
@@ -36,6 +38,7 @@ export interface StorageOperationResult {
   duration: number;
   affected: number;
   error?: string;
+  jobId?: string;
 }
 
 class StorageService {
@@ -200,6 +203,18 @@ class StorageService {
     }
   }
 
+  async getArchiveJob(jobId: string) {
+    return this.archiveManager.getArchiveJob(jobId);
+  }
+
+  async listArchiveJobs() {
+    return this.archiveManager.getAllArchiveJobs();
+  }
+
+  async deleteArchiveJob(jobId: string) {
+    return this.archiveManager.deleteArchiveJob(jobId);
+  }
+
   /**
    * 检索数据
    */
@@ -260,19 +275,71 @@ class StorageService {
     const startTime = Date.now();
 
     try {
-      const sourcePath = String(criteria.sourcePath || '');
+      const fileIds = Array.isArray(criteria.fileIds) ? criteria.fileIds : null;
+      const createdBy = criteria.userId ? String(criteria.userId) : undefined;
       const targetPath = String(criteria.targetPath || options.targetPath || './archives');
-      if (!sourcePath) {
-        throw new Error('归档缺少 sourcePath');
+      const name = String(criteria.archiveName || criteria.name || 'archive');
+      const description = String(criteria.description || '');
+
+      let sourcePath = String(criteria.sourcePath || '');
+      let filesCount = 0;
+      const metadataFiles: Array<Record<string, unknown>> = [];
+
+      if (fileIds?.length) {
+        const placeholders = fileIds.map((_: unknown, index: number) => `$${index + 1}`).join(',');
+        const params = [...fileIds] as Array<string | number>;
+        const userFilter = createdBy ? ` AND user_id = $${params.length + 1}` : '';
+        if (createdBy) {
+          params.push(createdBy);
+        }
+        const filesResult = await query(
+          `SELECT id, original_name, filename, mimetype, size, file_path
+           FROM uploaded_files
+           WHERE id IN (${placeholders})${userFilter}`,
+          params
+        );
+        if (!filesResult.rows.length) {
+          throw new Error('未找到可归档文件');
+        }
+
+        const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'storage-archive-'));
+        for (const file of filesResult.rows) {
+          const storedName = String(file.filename);
+          const sourceFilePath = String(file.file_path || '');
+          const targetFilePath = path.join(tempDir, storedName);
+          if (!sourceFilePath) {
+            continue;
+          }
+          await fs.copyFile(sourceFilePath, targetFilePath);
+          metadataFiles.push({
+            originalName: file.original_name,
+            storedName,
+            mimetype: file.mimetype,
+            size: file.size,
+          });
+        }
+        filesCount = metadataFiles.length;
+        sourcePath = tempDir;
       }
-      await this.archiveManager.createArchiveJob({
-        name: String(criteria.name || 'archive'),
-        description: String(criteria.description || ''),
+
+      if (!sourcePath) {
+        throw new Error('归档缺少 sourcePath 或 fileIds');
+      }
+
+      const jobId = await this.archiveManager.createArchiveJob({
+        name,
+        description,
         sourcePath,
         targetPath,
         status: 'pending',
         size: 0,
-        metadata: { options, criteria },
+        metadata: {
+          options,
+          criteria,
+          createdBy,
+          files: metadataFiles,
+          cleanupSourcePath: fileIds?.length ? sourcePath : undefined,
+        },
       });
       this.statistics.archiveOperations++;
       this.statistics.totalOperations++;
@@ -282,7 +349,8 @@ class StorageService {
         success: true,
         operation: 'archive',
         duration: Date.now() - startTime,
-        affected: 0,
+        affected: filesCount,
+        jobId,
       };
     } catch (error) {
       this.statistics.errors++;

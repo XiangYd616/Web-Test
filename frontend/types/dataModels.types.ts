@@ -7,16 +7,16 @@
  */
 
 import {
-  UserRole,
-  UserStatus,
-  UserPlan,
-  TestType,
-  TestStatus,
+  Language,
   TestGrade,
   TestPriority,
+  TestStatus,
+  TestType,
   ThemeMode,
-  Language,
-  Timezone
+  Timezone,
+  UserPlan,
+  UserRole,
+  UserStatus,
 } from './enums';
 
 // ==================== 基础类型定义 ====================
@@ -35,7 +35,7 @@ export type Email = string;
 export interface UserProfile {
   firstName?: string;
   lastName?: string;
-  fullName?: string;        // 计算字段：firstName + lastName
+  fullName?: string; // 计算字段：firstName + lastName
   company?: string;
   department?: string;
   phone?: string;
@@ -73,7 +73,7 @@ export interface DashboardSettings {
  * 测试设置接口
  */
 export interface TestingSettings {
-  defaultTimeout: number;     // 毫秒
+  defaultTimeout: number; // 毫秒
   maxConcurrentTests: number;
   autoSaveResults: boolean;
   enableAdvancedFeatures: boolean;
@@ -107,7 +107,7 @@ export interface UserPreferences {
 /**
  * 统一用户接口 - 前后端共享
  * 修复问题：解决字段命名不一致问题
- * 
+ *
  * 字段命名规范：
  * - 前端使用 camelCase
  * - 数据库使用 snake_case
@@ -118,33 +118,32 @@ export interface User {
   id: UUID;
   username: string;
   email: Email;
-  
+
   // 角色和权限
   role: UserRole;
   plan: UserPlan;
   status: UserStatus;
   permissions: string[];
-  
+
   // 个人信息
   profile: UserProfile;
   preferences: UserPreferences;
-  
+
   // 安全相关
   emailVerified: boolean;
   emailVerifiedAt?: Timestamp;
-  twoFactorEnabled?: boolean;      // 修复：添加缺失字段
-  loginAttempts: number;           // 修复：统一字段名（原 failed_login_attempts）
+  twoFactorEnabled?: boolean; // 修复：添加缺失字段
+  loginAttempts: number; // 修复：统一字段名（原 failed_login_attempts）
   lockedUntil?: Timestamp;
-  
+
   // 时间戳 - 统一字段命名
-  createdAt: Timestamp;            // 数据库：created_at
-  updatedAt: Timestamp;            // 数据库：updated_at
-  lastLoginAt?: Timestamp;         // 修复：统一字段名（原 lastLogin/last_login）
-  
+  createdAt: Timestamp; // 数据库：created_at
+  updatedAt: Timestamp; // 数据库：updated_at
+  lastLoginAt?: Timestamp; // 修复：统一字段名（原 lastLogin/last_login）
+
   // 统计信息
-  loginCount: number;              // 数据库：login_count
   testCount?: number;
-  
+
   // 元数据
   metadata: Record<string, any>;
 }
@@ -165,13 +164,12 @@ export interface UserDatabaseFields {
   status: string;
   email_verified: boolean;
   email_verified_at?: string;
-  two_factor_enabled?: boolean;    // 修复：添加缺失的数据库字段
-  last_login_at?: string;          // 修复：统一字段名
-  login_count: number;
-  failed_login_attempts: number;   // 映射到 loginAttempts
+  two_factor_enabled?: boolean; // 修复：添加缺失的数据库字段
+  last_login_at?: string; // 修复：统一字段名
+  login_attempts: number;
   locked_until?: string;
-  preferences: string;             // JSON字符串
-  metadata: string;                // JSON字符串
+  preferences: string; // JSON字符串
+  metadata: string; // JSON字符串
   created_at: string;
   updated_at: string;
 }
@@ -184,24 +182,24 @@ export interface UserDatabaseFields {
  */
 export interface TestConfig {
   // 基础配置
-  timeout?: number;                // 毫秒
+  timeout?: number; // 毫秒
   retries?: number;
   userAgent?: string;
   headers?: Record<string, string>;
-  
+
   // 性能测试配置
   performance?: {
     users?: number;
-    duration?: number;             // 秒
-    rampUpTime?: number;          // 秒
+    duration?: number; // 秒
+    rampUpTime?: number; // 秒
     scenarios?: string[];
     thresholds?: {
-      responseTime: number;        // 毫秒
-      errorRate: number;          // 百分比
-      throughput: number;         // 请求/秒
+      responseTime: number; // 毫秒
+      errorRate: number; // 百分比
+      throughput: number; // 请求/秒
     };
   };
-  
+
   // API测试配置
   api?: {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -210,7 +208,7 @@ export interface TestConfig {
     expectedStatus?: number[];
     timeout?: number;
   };
-  
+
   // 内容测试配置
   content?: {
     checkSEO?: boolean;
@@ -221,15 +219,15 @@ export interface TestConfig {
     customKeywords?: string[];
     depth?: number;
   };
-  
+
   // 压力测试配置
   stress?: {
     maxUsers: number;
-    duration: number;              // 秒
-    rampUpTime?: number;          // 秒
+    duration: number; // 秒
+    rampUpTime?: number; // 秒
     scenarios?: string[];
   };
-  
+
   // 安全测试配置
   security?: {
     checkSSL?: boolean;
@@ -237,7 +235,7 @@ export interface TestConfig {
     checkVulnerabilities?: boolean;
     customChecks?: string[];
   };
-  
+
   // 兼容性测试配置
   compatibility?: {
     browsers?: string[];
@@ -294,7 +292,7 @@ export interface TestArtifact {
   type: 'screenshot' | 'video' | 'report' | 'log' | 'trace';
   name: string;
   url: string;
-  size?: number;                   // 字节
+  size?: number; // 字节
   mimeType?: string;
   description?: string;
 }
@@ -304,19 +302,19 @@ export interface TestArtifact {
  */
 export interface TestMetrics {
   // 性能指标
-  responseTime?: number;           // 毫秒
-  throughput?: number;             // 请求/秒
-  errorRate?: number;              // 百分比
-  
+  responseTime?: number; // 毫秒
+  throughput?: number; // 请求/秒
+  errorRate?: number; // 百分比
+
   // 质量指标
-  score?: number;                  // 0-100
+  score?: number; // 0-100
   grade?: TestGrade;
-  
+
   // 资源指标
   totalRequests?: number;
-  totalSize?: number;              // 字节
-  loadTime?: number;               // 毫秒
-  
+  totalSize?: number; // 字节
+  loadTime?: number; // 毫秒
+
   // 自定义指标
   custom?: Record<string, number>;
 }
@@ -324,7 +322,7 @@ export interface TestMetrics {
 /**
  * 统一测试结果接口 - 前后端共享
  * 修复问题：解决字段命名不一致和结构差异问题
- * 
+ *
  * 字段命名修复：
  * - startTime -> startedAt (统一使用 -edAt 后缀)
  * - endTime -> completedAt
@@ -334,48 +332,48 @@ export interface TestResult {
   // 基础标识信息
   id: UUID;
   userId: UUID;
-  testType: TestType;              // 修复：统一使用 TestType 枚举
+  testType: TestType; // 修复：统一使用 TestType 枚举
   testName: string;
   url: URL;
-  
+
   // 状态和时间信息 - 修复字段命名不一致问题
   status: TestStatus;
-  startedAt: Timestamp;            // 修复：统一字段名（原 startTime/start_time）
-  completedAt?: Timestamp;         // 修复：统一字段名（原 endTime/end_time）
-  duration?: number;               // 毫秒
-  
+  startedAt: Timestamp; // 修复：统一字段名（原 startTime/start_time）
+  completedAt?: Timestamp; // 修复：统一字段名（原 endTime/end_time）
+  duration?: number; // 毫秒
+
   // 评分和等级
-  overallScore?: number;           // 修复：统一字段名（原 score）
+  overallScore?: number; // 修复：统一字段名（原 score）
   grade?: TestGrade;
-  
+
   // 测试配置和结果
   config: TestConfig;
   results: Record<string, any>;
-  
+
   // 详细信息
   summary?: string;
-  message?: string;                // 测试消息或错误信息
+  message?: string; // 测试消息或错误信息
   metrics?: TestMetrics;
   errors?: TestError[];
   warnings?: TestWarning[];
   recommendations?: TestRecommendation[];
   artifacts?: TestArtifact[];
-  
+
   // 统计信息
   totalIssues?: number;
   criticalIssues?: number;
   majorIssues?: number;
   minorIssues?: number;
   warningCount?: number;
-  
+
   // 环境信息
   environment?: string;
   tags?: string[];
-  
+
   // 时间戳
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  
+
   // 元数据
   metadata: Record<string, any>;
 }

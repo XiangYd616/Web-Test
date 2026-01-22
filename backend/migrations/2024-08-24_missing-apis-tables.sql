@@ -1,3 +1,7 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 -- 缺失API支持表结构
 -- 为新实现的API端点创建必要的数据库表
 
@@ -278,16 +282,16 @@ BEGIN
     END IF;
 END $$;
 
--- 更新现有的users表，添加缺失的字段（如果不存在）
-DO $$ 
-BEGIN
-    -- 添加profile_data字段
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'profile_data') THEN
-        ALTER TABLE users ADD COLUMN profile_data JSONB;
-    END IF;
-    
-    -- 添加last_login_at字段
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'last_login_at') THEN
-        ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP;
-    END IF;
-END $$;
+-- 已废弃：users 旧字段补丁不再执行
+-- DO $$ 
+-- BEGIN
+--     -- 添加profile_data字段
+--     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'profile_data') THEN
+--         ALTER TABLE users ADD COLUMN profile_data JSONB;
+--     END IF;
+--     
+--     -- 添加last_login_at字段
+--     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'last_login_at') THEN
+--         ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP;
+--     END IF;
+-- END $$;

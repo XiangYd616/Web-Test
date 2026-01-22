@@ -1,3 +1,7 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 /*
   已废弃表结构，基线统一由 data/schema.sql 管理，迁移仅保留历史记录。
 

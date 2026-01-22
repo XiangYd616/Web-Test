@@ -21,7 +21,7 @@ export enum UserRole {
   ADMIN = 'admin',
   MODERATOR = 'moderator',
   TESTER = 'tester',
-  MANAGER = 'manager'
+  MANAGER = 'manager',
 }
 
 /**
@@ -30,7 +30,7 @@ export enum UserRole {
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  SUSPENDED = 'suspended',
 }
 
 /**
@@ -39,7 +39,7 @@ export enum UserStatus {
 export enum UserPlan {
   FREE = 'free',
   PRO = 'pro',
-  ENTERPRISE = 'enterprise'
+  ENTERPRISE = 'enterprise',
 }
 
 // ==================== 用户偏好设置 ====================
@@ -153,7 +153,6 @@ export interface User {
   lastLoginAt?: Timestamp;
 
   // 统计信息
-  loginCount: number;
   testCount?: number;
 
   // 元数据
@@ -312,30 +311,30 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
     testComplete: true,
     testFailed: true,
     weeklyReport: false,
-    securityAlert: true
+    securityAlert: true,
   },
   dashboard: {
     defaultView: 'overview',
     layout: 'grid',
     widgets: [],
     refreshInterval: 30,
-    showTips: true
+    showTips: true,
   },
   testing: {
     defaultTimeout: 30000,
     maxConcurrentTests: 3,
     autoSaveResults: true,
-    enableAdvancedFeatures: false
+    enableAdvancedFeatures: false,
   },
   privacy: {
     shareUsageData: false,
     allowCookies: true,
-    trackingEnabled: false
-  }
+    trackingEnabled: false,
+  },
 };
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-  timezone: 'Asia/Shanghai'
+  timezone: 'Asia/Shanghai',
 };
 
 // ==================== 类型守卫函数 ====================
@@ -369,10 +368,11 @@ export function fromDatabaseFields(dbData: UserDatabaseFields): User {
     profile: {
       firstName: dbData.first_name,
       lastName: dbData.last_name,
-      fullName: dbData.first_name && dbData.last_name
-        ? `${dbData.first_name} ${dbData.last_name}`
-        : undefined,
-      timezone: 'Asia/Shanghai' // 默认值
+      fullName:
+        dbData.first_name && dbData.last_name
+          ? `${dbData.first_name} ${dbData.last_name}`
+          : undefined,
+      timezone: 'Asia/Shanghai', // 默认值
     },
     preferences: dbData.preferences ? JSON.parse(dbData.preferences) : DEFAULT_USER_PREFERENCES,
     emailVerified: dbData.email_verified,
@@ -383,7 +383,7 @@ export function fromDatabaseFields(dbData: UserDatabaseFields): User {
     updatedAt: dbData.updated_at,
     lastLoginAt: dbData.last_login,
     loginCount: dbData.login_count,
-    metadata: dbData.metadata ? JSON.parse(dbData.metadata) : {}
+    metadata: dbData.metadata ? JSON.parse(dbData.metadata) : {},
   };
 }
 
@@ -410,6 +410,6 @@ export function toDatabaseFields(user: User, passwordHash?: string): UserDatabas
     preferences: JSON.stringify(user?.preferences),
     metadata: JSON.stringify(user?.metadata),
     created_at: user?.createdAt,
-    updated_at: user?.updatedAt
+    updated_at: user?.updatedAt,
   };
 }

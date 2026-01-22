@@ -1,6 +1,12 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 -- 修复监控表缺失字段
 -- 创建时间: 2025-08-28
 -- 目的: 添加monitoring_sites表缺失的字段
+
+/* 已合并到 data/schema.sql，迁移保留作为历史记录。
 
 -- 1. 添加monitoring_type字段
 DO $$
@@ -158,3 +164,4 @@ SET
 WHERE monitoring_type IS NULL;
 
 RAISE NOTICE '🎉 监控表字段修复迁移完成！';
+*/

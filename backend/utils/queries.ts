@@ -138,8 +138,8 @@ class Queries {
 
     const query = `
       SELECT ${aliases},
-             t.url,
-             t.config,
+             t.test_url AS url,
+             t.test_config AS config,
              t.results,
              t.status
       FROM test_executions t

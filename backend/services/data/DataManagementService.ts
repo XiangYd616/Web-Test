@@ -7,7 +7,7 @@ import csv from 'csv-parser';
 import { EventEmitter } from 'events';
 import { createReadStream } from 'fs';
 import fs from 'fs/promises';
-import path from 'path';
+import { query } from '../../config/database';
 
 const { createObjectCsvWriter } = require('csv-writer');
 
@@ -103,10 +103,6 @@ type StatisticsOptions = {
 };
 
 class DataManagementService extends EventEmitter {
-  private dataStore = new Map<string, Map<string, DataRecord>>();
-  private dataDir = path.join(process.cwd(), 'data', 'records');
-  private backupDir = path.join(process.cwd(), 'data', 'backups');
-  private exportDir = path.join(process.cwd(), 'data', 'exports');
   private isInitialized = false;
   private dataTypes: DataTypeMap = {
     TEST_RESULTS: 'test_results',
@@ -125,8 +121,7 @@ class DataManagementService extends EventEmitter {
       return;
     }
     try {
-      await this.ensureDirectories();
-      await this.loadExistingData();
+      await this.ensureTables();
       this.setupPeriodicBackup();
 
       this.isInitialized = true;
@@ -163,11 +158,11 @@ class DataManagementService extends EventEmitter {
 
       this.validateData(type, data);
 
-      if (!this.dataStore.has(type)) {
-        this.dataStore.set(type, new Map());
-      }
-      this.dataStore.get(type)?.set(id, record);
-      await this.persistType(type);
+      await query(
+        `INSERT INTO data_records (id, type, data, metadata, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, NOW(), NOW())`,
+        [id, type, JSON.stringify(record.data), JSON.stringify(record.metadata)]
+      );
 
       this.emit('dataCreated', { type, id, record });
 
@@ -183,16 +178,22 @@ class DataManagementService extends EventEmitter {
    */
   async readData(type: string, id: string, options: ReadOptions = {}) {
     try {
-      if (!this.dataStore.has(type)) {
-        throw new Error(`数据类型不存在: ${type}`);
-      }
-
-      const typeStore = this.dataStore.get(type);
-      if (!typeStore?.has(id)) {
+      const result = await query(
+        `SELECT id, type, data, metadata, created_at, updated_at, deleted_at
+         FROM data_records
+         WHERE type = $1 AND id = $2 AND deleted_at IS NULL`,
+        [type, id]
+      );
+      const row = result.rows[0];
+      if (!row) {
         throw new Error(`数据记录不存在: ${type}/${id}`);
       }
-
-      const record = typeStore.get(id) as DataRecord;
+      const record: DataRecord = {
+        id: row.id,
+        type: row.type,
+        data: row.data || {},
+        metadata: row.metadata || {},
+      };
 
       if (options.fields) {
         return this.filterFields(record, options.fields);
@@ -230,8 +231,14 @@ class DataManagementService extends EventEmitter {
 
       this.validateData(type, updatedRecord.data);
 
-      this.dataStore.get(type)?.set(id, updatedRecord);
-      await this.persistType(type);
+      await query(
+        `UPDATE data_records
+         SET data = $1,
+             metadata = $2,
+             updated_at = NOW()
+         WHERE type = $3 AND id = $4 AND deleted_at IS NULL`,
+        [JSON.stringify(updatedRecord.data), JSON.stringify(updatedRecord.metadata), type, id]
+      );
 
       this.emit('dataUpdated', { type, id, record: updatedRecord, changes: updates });
 
@@ -261,14 +268,19 @@ class DataManagementService extends EventEmitter {
             version: recordValue.metadata.version + 1,
           },
         };
-        this.dataStore.get(type)?.set(id, updatedRecord);
-        await this.persistType(type);
+        await query(
+          `UPDATE data_records
+           SET metadata = $1,
+               updated_at = NOW(),
+               deleted_at = NOW()
+           WHERE type = $2 AND id = $3`,
+          [JSON.stringify(updatedRecord.metadata), type, id]
+        );
         this.emit('dataDeleted', { type, id, record: updatedRecord });
         return { success: true, deletedRecord: updatedRecord };
       }
 
-      this.dataStore.get(type)?.delete(id);
-      await this.persistType(type);
+      await query('DELETE FROM data_records WHERE type = $1 AND id = $2', [type, id]);
 
       this.emit('dataDeleted', { type, id, record });
 
@@ -282,40 +294,68 @@ class DataManagementService extends EventEmitter {
   /**
    * 查询数据
    */
-  async queryData(type: string, query: QueryOptions = {}, options: PaginationOptions = {}) {
+  async queryData(type: string, queryOptions: QueryOptions = {}, options: PaginationOptions = {}) {
     try {
-      if (!this.dataStore.has(type)) {
-        return { results: [], total: 0 };
+      const filters = queryOptions.filters || {};
+      const params: Array<string | number> = [type];
+      const clauses: string[] = ['type = $1', 'deleted_at IS NULL'];
+
+      Object.entries(filters).forEach(([key, value]) => {
+        params.push(String(value));
+        clauses.push(`data->>'${key}' = $${params.length}`);
+      });
+
+      if (queryOptions.search) {
+        params.push(`%${queryOptions.search}%`);
+        clauses.push(`data::text ILIKE $${params.length}`);
       }
 
-      const typeStore = this.dataStore.get(type) as Map<string, DataRecord>;
-      let results = Array.from(typeStore.values());
+      const whereClause = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+      const sortField = queryOptions.sort?.field
+        ? `COALESCE(data->>'${queryOptions.sort.field}', metadata->>'${queryOptions.sort.field}')`
+        : 'created_at';
+      const sortDirection = queryOptions.sort?.direction === 'asc' ? 'ASC' : 'DESC';
 
-      if (query.filters) {
-        results = this.applyFilters(results, query.filters);
-      }
+      const limit = options.limit ?? 20;
+      const page = options.page ?? 1;
+      const offset = (page - 1) * limit;
 
-      if (query.search) {
-        results = this.applySearch(results, query.search);
-      }
+      const countResult = await query(
+        `SELECT COUNT(*)::int AS total FROM data_records ${whereClause}`,
+        params
+      );
 
-      if (query.sort) {
-        results = this.applySort(results, query.sort);
-      }
+      const result = await query(
+        `SELECT id, type, data, metadata, created_at, updated_at, deleted_at
+         FROM data_records
+         ${whereClause}
+         ORDER BY ${sortField} ${sortDirection}
+         LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limit, offset]
+      );
 
-      const total = results.length;
+      const results = result.rows.map(
+        (row: {
+          id: string;
+          type: string;
+          data: Record<string, unknown>;
+          metadata: Record<string, unknown>;
+        }) => ({
+          id: row.id,
+          type: row.type,
+          data: row.data || {},
+          metadata: row.metadata || {},
+        })
+      );
 
-      if (options.page && options.limit) {
-        const start = (options.page - 1) * options.limit;
-        results = results.slice(start, start + options.limit);
-      }
+      const total = Number(countResult.rows[0]?.total || 0);
 
       return {
         results,
         total,
-        page: options.page || 1,
-        limit: options.limit || total,
-        totalPages: options.limit ? Math.ceil(total / options.limit) : 1,
+        page,
+        limit,
+        totalPages: limit ? Math.ceil(total / limit) : 1,
       };
     } catch (error) {
       console.error('查询数据失败:', error);
@@ -431,12 +471,18 @@ class DataManagementService extends EventEmitter {
    */
   async getStatistics(type: string, options: StatisticsOptions = {}) {
     try {
-      if (!this.dataStore.has(type)) {
-        return { total: 0, statistics: {} };
-      }
-
-      const typeStore = this.dataStore.get(type) as Map<string, DataRecord>;
-      const records = Array.from(typeStore.values());
+      const result = await query(
+        `SELECT id, type, data, metadata
+         FROM data_records
+         WHERE type = $1 AND deleted_at IS NULL`,
+        [type]
+      );
+      const records = result.rows.map(row => ({
+        id: row.id,
+        type: row.type,
+        data: row.data || {},
+        metadata: row.metadata || {},
+      })) as DataRecord[];
 
       const statistics: Record<string, unknown> = {
         total: records.length,
@@ -466,32 +512,30 @@ class DataManagementService extends EventEmitter {
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const backupName = options.name || `backup_${timestamp}`;
-      const backupPath = path.join(this.backupDir, backupName);
 
-      await fs.mkdir(backupPath, { recursive: true });
+      const typesToBackup = types || Object.values(this.dataTypes);
+      const recordsSummary: Record<string, number> = {};
 
-      const typesToBackup = types || Array.from(this.dataStore.keys());
-      const backupInfo: Record<string, unknown> = {
+      for (const dataType of typesToBackup) {
+        const countResult = await query(
+          'SELECT COUNT(*)::int AS total FROM data_records WHERE type = $1 AND deleted_at IS NULL',
+          [dataType]
+        );
+        recordsSummary[dataType] = Number(countResult.rows[0]?.total || 0);
+      }
+
+      const backupInfo = {
         name: backupName,
         timestamp,
         types: typesToBackup,
-        records: {},
+        records: recordsSummary,
       };
 
-      for (const dataType of typesToBackup) {
-        if (this.dataStore.has(dataType)) {
-          const typeData = Array.from(
-            (this.dataStore.get(dataType) as Map<string, DataRecord>).values()
-          );
-          const typeFile = path.join(backupPath, `${dataType}.json`);
-
-          await fs.writeFile(typeFile, JSON.stringify(typeData, null, 2));
-          (backupInfo.records as Record<string, unknown>)[dataType] = typeData.length;
-        }
-      }
-
-      const infoFile = path.join(backupPath, 'backup-info.json');
-      await fs.writeFile(infoFile, JSON.stringify(backupInfo, null, 2));
+      await query(
+        `INSERT INTO data_backups (name, data_types, summary, records, created_at)
+         VALUES ($1, $2, $3, $4, NOW())`,
+        [backupName, typesToBackup, JSON.stringify({ timestamp }), JSON.stringify(recordsSummary)]
+      );
 
       return backupInfo;
     } catch (error) {
@@ -528,35 +572,29 @@ class DataManagementService extends EventEmitter {
     }
   }
 
-  async ensureDirectories() {
-    await fs.mkdir(this.dataDir, { recursive: true });
-    await fs.mkdir(this.backupDir, { recursive: true });
-    await fs.mkdir(this.exportDir, { recursive: true });
-  }
+  async ensureTables() {
+    await query(
+      `CREATE TABLE IF NOT EXISTS data_records (
+         id VARCHAR(80) PRIMARY KEY,
+         type VARCHAR(100) NOT NULL,
+         data JSONB NOT NULL,
+         metadata JSONB NOT NULL DEFAULT '{}',
+         created_at TIMESTAMPTZ DEFAULT NOW(),
+         updated_at TIMESTAMPTZ DEFAULT NOW(),
+         deleted_at TIMESTAMPTZ
+       );
+       CREATE INDEX IF NOT EXISTS idx_data_records_type ON data_records(type);
+       CREATE INDEX IF NOT EXISTS idx_data_records_created ON data_records(created_at DESC);
 
-  async loadExistingData() {
-    try {
-      const entries = await fs.readdir(this.dataDir);
-      await Promise.all(
-        entries
-          .filter(entry => entry.endsWith('.json'))
-          .map(async entry => {
-            const type = entry.replace(/\.json$/, '');
-            const filePath = path.join(this.dataDir, entry);
-            const content = await fs.readFile(filePath, 'utf8');
-            const records = JSON.parse(content) as DataRecord[];
-            const map = new Map<string, DataRecord>();
-            records.forEach(record => {
-              map.set(record.id, record);
-            });
-            this.dataStore.set(type, map);
-          })
-      );
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-        console.error('加载数据失败:', error);
-      }
-    }
+       CREATE TABLE IF NOT EXISTS data_backups (
+         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+         name VARCHAR(255) NOT NULL,
+         data_types TEXT[] DEFAULT ARRAY[]::TEXT[],
+         summary JSONB DEFAULT '{}',
+         records JSONB DEFAULT '{}',
+         created_at TIMESTAMPTZ DEFAULT NOW()
+       );`
+    );
   }
 
   setupPeriodicBackup() {
@@ -568,16 +606,6 @@ class DataManagementService extends EventEmitter {
         console.error('自动备份失败:', error);
       }
     }, backupInterval);
-  }
-
-  private getTypeFilePath(type: string): string {
-    return path.join(this.dataDir, `${type}.json`);
-  }
-
-  private async persistType(type: string): Promise<void> {
-    await fs.mkdir(this.dataDir, { recursive: true });
-    const records = Array.from(this.dataStore.get(type)?.values() || []);
-    await fs.writeFile(this.getTypeFilePath(type), JSON.stringify(records, null, 2));
   }
 
   filterFields(record: DataRecord, fields: string[]) {
@@ -618,10 +646,13 @@ class DataManagementService extends EventEmitter {
         (b.data as Record<string, unknown>)[sortConfig.field] ??
         (b.metadata as Record<string, unknown>)[sortConfig.field];
 
+      const aComparable = typeof aValue === 'number' ? aValue : String(aValue ?? '');
+      const bComparable = typeof bValue === 'number' ? bValue : String(bValue ?? '');
+
       if (sortConfig.direction === 'desc') {
-        return aValue === bValue ? 0 : aValue < bValue ? 1 : -1;
+        return aComparable === bComparable ? 0 : aComparable < bComparable ? 1 : -1;
       }
-      return aValue === bValue ? 0 : aValue > bValue ? 1 : -1;
+      return aComparable === bComparable ? 0 : aComparable > bComparable ? 1 : -1;
     });
   }
 

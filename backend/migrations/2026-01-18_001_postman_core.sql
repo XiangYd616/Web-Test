@@ -1,6 +1,12 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 -- Migration: Postman Core Tables
 -- Created: 2026-01-18
 -- Description: Collections/Environments/Workspaces/Runs/Variables
+
+/* 已合并到 data/schema.sql，迁移保留作为历史记录。
 
 -- 1. Workspaces
 CREATE TABLE IF NOT EXISTS workspaces (
@@ -64,24 +70,24 @@ CREATE INDEX IF NOT EXISTS idx_collections_events_gin ON collections USING GIN (
 CREATE INDEX IF NOT EXISTS idx_collections_variables_gin ON collections USING GIN (variables);
 CREATE INDEX IF NOT EXISTS idx_collections_metadata_gin ON collections USING GIN (metadata);
 
--- 4. Collection Items (Folder/Request)
-CREATE TABLE IF NOT EXISTS collection_items (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  collection_id UUID NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
-  parent_id UUID REFERENCES collection_items(id) ON DELETE CASCADE,
-  type VARCHAR(20) NOT NULL CHECK (type IN ('folder', 'request')),
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  request_data JSONB DEFAULT '{}',
-  order_index INTEGER DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX IF NOT EXISTS idx_collection_items_collection_id ON collection_items(collection_id);
-CREATE INDEX IF NOT EXISTS idx_collection_items_parent_id ON collection_items(parent_id);
-CREATE INDEX IF NOT EXISTS idx_collection_items_type ON collection_items(type);
-CREATE INDEX IF NOT EXISTS idx_collection_items_request_data_gin ON collection_items USING GIN (request_data);
+-- 4. Collection Items (Folder/Request) - 已废弃（legacy）
+-- CREATE TABLE IF NOT EXISTS collection_items (
+--   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--   collection_id UUID NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
+--   parent_id UUID REFERENCES collection_items(id) ON DELETE CASCADE,
+--   type VARCHAR(20) NOT NULL CHECK (type IN ('folder', 'request')),
+--   name VARCHAR(255) NOT NULL,
+--   description TEXT,
+--   request_data JSONB DEFAULT '{}',
+--   order_index INTEGER DEFAULT 0,
+--   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+--
+-- CREATE INDEX IF NOT EXISTS idx_collection_items_collection_id ON collection_items(collection_id);
+-- CREATE INDEX IF NOT EXISTS idx_collection_items_parent_id ON collection_items(parent_id);
+-- CREATE INDEX IF NOT EXISTS idx_collection_items_type ON collection_items(type);
+-- CREATE INDEX IF NOT EXISTS idx_collection_items_request_data_gin ON collection_items USING GIN (request_data);
 
 -- 5. Environments
 CREATE TABLE IF NOT EXISTS environments (
@@ -168,7 +174,6 @@ CREATE INDEX IF NOT EXISTS idx_runs_summary_gin ON runs USING GIN (summary);
 CREATE TABLE IF NOT EXISTS run_results (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   run_id UUID NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
-  item_id UUID REFERENCES collection_items(id) ON DELETE SET NULL,
   request_snapshot JSONB DEFAULT '{}',
   response JSONB DEFAULT '{}',
   assertions JSONB DEFAULT '[]',
@@ -179,7 +184,6 @@ CREATE TABLE IF NOT EXISTS run_results (
 );
 
 CREATE INDEX IF NOT EXISTS idx_run_results_run_id ON run_results(run_id);
-CREATE INDEX IF NOT EXISTS idx_run_results_item_id ON run_results(item_id);
 CREATE INDEX IF NOT EXISTS idx_run_results_success ON run_results(success);
 CREATE INDEX IF NOT EXISTS idx_run_results_request_gin ON run_results USING GIN (request_snapshot);
 CREATE INDEX IF NOT EXISTS idx_run_results_response_gin ON run_results USING GIN (response);
@@ -201,10 +205,10 @@ CREATE TRIGGER update_collections_updated_at
 BEFORE UPDATE ON collections
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
-DROP TRIGGER IF EXISTS update_collection_items_updated_at ON collection_items;
-CREATE TRIGGER update_collection_items_updated_at
-BEFORE UPDATE ON collection_items
-FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+-- DROP TRIGGER IF EXISTS update_collection_items_updated_at ON collection_items;
+-- CREATE TRIGGER update_collection_items_updated_at
+-- BEFORE UPDATE ON collection_items
+-- FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 DROP TRIGGER IF EXISTS update_environments_updated_at ON environments;
 CREATE TRIGGER update_environments_updated_at
@@ -230,3 +234,4 @@ DROP TRIGGER IF EXISTS update_run_results_updated_at ON run_results;
 CREATE TRIGGER update_run_results_updated_at
 BEFORE UPDATE ON run_results
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+*/

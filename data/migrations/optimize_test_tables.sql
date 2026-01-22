@@ -1,3 +1,7 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 -- 测试表结构优化脚本
 -- 执行时间: 2025-08-14T10:37:17.287Z
 

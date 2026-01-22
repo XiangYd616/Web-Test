@@ -38,7 +38,7 @@ type ConnectionManager = {
     sql: string,
     params?: unknown[],
     options?: Record<string, unknown>
-  ) => Promise<QueryResult<unknown>>;
+  ) => Promise<QueryResult<Record<string, unknown>>>;
   getStatus: () => { pool?: { totalCount?: number; idleCount?: number; waitingCount?: number } };
 };
 
@@ -105,12 +105,13 @@ const dbConfig: DbConfig = {
 /**
  * 创建数据库连接池
  */
-const createPool = () => {
+const createPool = (): Pool => {
+  const activePool = pool ?? new PgPool(dbConfig);
   if (!pool) {
-    pool = new PgPool(dbConfig);
+    pool = activePool;
 
     // 连接池事件监听
-    pool.on('connect', (client: { query: (sql: string) => Promise<unknown> }) => {
+    activePool.on('connect', (client: { query: (sql: string) => Promise<unknown> }) => {
       // 设置连接级别的优化参数
       client
         .query(
@@ -127,7 +128,7 @@ const createPool = () => {
         });
     });
 
-    pool.on('error', (err: Error) => {
+    activePool.on('error', (err: Error) => {
       console.error('❌ 数据库连接池错误:', err);
 
       // 记录错误详情用于监控
@@ -141,7 +142,7 @@ const createPool = () => {
       }
     });
   }
-  return pool;
+  return activePool;
 };
 
 /**
@@ -229,7 +230,7 @@ const initializeTables = async () => {
       SELECT COUNT(*) as count
       FROM information_schema.tables
       WHERE table_schema = 'public'
-      AND table_name IN ('users', 'test_results', 'system_config', 'engine_status')
+      AND table_name IN ('users', 'test_results', 'system_configs', 'engine_status')
     `);
 
     const tableCount = parseInt(String(tablesResult.rows[0].count), 10);
@@ -384,7 +385,7 @@ const healthCheck = async () => {
       SELECT COUNT(*) as count
       FROM information_schema.tables
       WHERE table_schema = 'public'
-      AND table_name IN ('users', 'test_results', 'system_config', 'engine_status')
+      AND table_name IN ('users', 'test_results', 'system_configs', 'engine_status')
     `);
     const tableRows = tablesCheck.rows as Array<{ count?: string | number }>;
     const coreTablesExist = parseInt(String(tableRows[0]?.count ?? 0), 10) >= 4;
@@ -469,29 +470,29 @@ const getStats = async () => {
 /**
  * 获取增强的数据库连接管理器
  */
-const getConnectionManager = async () => {
+const getConnectionManager = async (): Promise<ConnectionManager> => {
   if (!connectionManager) {
-    // 使用增强版连接管理器
-    connectionManager = new DatabaseConnectionManager(dbConfig);
+    const manager = new DatabaseConnectionManager(dbConfig) as ConnectionManager;
 
     // 设置事件监听
-    connectionManager.on('connected', (data: { status?: string }) => {
+    manager.on('connected', (data: { status?: string }) => {
       console.log('✅ 数据库连接管理器已连接', data);
     });
 
-    connectionManager.on('connectionError', (data: { error?: Error }) => {
+    manager.on('connectionError', (data: { error?: Error }) => {
       console.error('❌ 数据库连接错误', data.error?.message);
     });
 
-    connectionManager.on('reconnected', () => {});
+    manager.on('reconnected', () => {});
 
-    connectionManager.on('healthCheck', (data: { status?: string; error?: Error }) => {
+    manager.on('healthCheck', (data: { status?: string; error?: Error }) => {
       if (data.status === 'unhealthy') {
         console.warn('⚠️ 数据库健康检查失败', data.error);
       }
     });
 
-    await connectionManager.initialize();
+    await manager.initialize();
+    connectionManager = manager;
   }
   return connectionManager;
 };

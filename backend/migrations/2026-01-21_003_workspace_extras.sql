@@ -1,5 +1,11 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 -- Migration: Workspace extras (invitations, activities, resources)
 -- Created: 2026-01-21
+
+/* 已合并到 data/schema.sql，迁移保留作为历史记录。
 
 -- 1. Workspace Invitations
 CREATE TABLE IF NOT EXISTS workspace_invitations (
@@ -61,3 +67,4 @@ DROP TRIGGER IF EXISTS update_workspace_resources_updated_at ON workspace_resour
 CREATE TRIGGER update_workspace_resources_updated_at
 BEFORE UPDATE ON workspace_resources
 FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+*/

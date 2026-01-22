@@ -1,6 +1,12 @@
+-- Deprecated / Merged into data/schema.sql as baseline
+-- Do NOT execute in production after 2026-01
+-- Last reviewed: 2026-01
+
 -- Migration: Scheduled Runs
 -- Created: 2026-01-18
 -- Description: 定时运行任务
+
+/* 已合并到 data/schema.sql，迁移保留作为历史记录。
 
 CREATE TABLE IF NOT EXISTS scheduled_runs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -24,3 +30,4 @@ CREATE INDEX IF NOT EXISTS idx_scheduled_runs_status ON scheduled_runs(status);
 CREATE TRIGGER update_scheduled_runs_updated_at
 BEFORE UPDATE ON scheduled_runs
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+*/

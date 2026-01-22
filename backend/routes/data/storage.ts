@@ -7,12 +7,10 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { promises as fs } from 'fs';
 import multer from 'multer';
-import os from 'os';
 import path from 'path';
 import * as tar from 'tar';
 import { query } from '../../config/database';
 import { asyncHandler } from '../../middleware/errorHandler';
-import { dataManagementService } from '../../services/data/DataManagementService';
 import StorageService from '../../services/storage/StorageService';
 import logger from '../../utils/logger';
 const { authMiddleware, optionalAuth } = require('../../middleware/auth');
@@ -31,21 +29,21 @@ const ensureUploadDir = async (): Promise<void> => {
   }
 };
 
-const ensureArchiveDir = async (): Promise<void> => {
-  try {
-    await fs.access(archiveDir);
-  } catch {
-    await fs.mkdir(archiveDir, { recursive: true });
-  }
-};
-
 const upload = multer({
   storage: multer.diskStorage({
-    destination: async (_req, _file, cb) => {
+    destination: async (
+      _req: express.Request,
+      _file: Express.Multer.File,
+      cb: (error: Error | null, destination: string) => void
+    ) => {
       await ensureUploadDir();
       cb(null, uploadDir);
     },
-    filename: (_req, file, cb) => {
+    filename: (
+      _req: express.Request,
+      file: Express.Multer.File,
+      cb: (error: Error | null, filename: string) => void
+    ) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
     },
@@ -53,12 +51,6 @@ const upload = multer({
   limits: {
     fileSize: 50 * 1024 * 1024,
   },
-});
-
-const ARCHIVES_TYPE = 'storage_archives';
-
-dataManagementService.initialize().catch(error => {
-  console.error('存储归档数据服务初始化失败:', error);
 });
 
 const resolveTargetDirectory = async (targetPath: string): Promise<string> => {
@@ -227,6 +219,7 @@ router.post(
   asyncHandler(async (req: express.Request, res: express.Response) => {
     const { name, type, description, tags } = req.body;
     const userId = (req as { user?: { id?: string } }).user?.id;
+    const ensuredUserId = userId ? String(userId) : '';
 
     try {
       // 验证输入
@@ -239,7 +232,7 @@ router.post(
         });
       }
 
-      if (!req.file || !userId) {
+      if (!req.file || !ensuredUserId) {
         return res.status(400).json({
           success: false,
           message: '没有上传文件或用户未认证',
@@ -255,7 +248,7 @@ router.post(
           size: file.size,
           path: file.path,
         },
-        userId
+        ensuredUserId
       );
 
       const payload = {
@@ -310,8 +303,16 @@ router.get(
         });
       }
 
+      const filePath = String((file as Record<string, unknown>).file_path || '');
+      if (!filePath) {
+        return res.status(404).json({
+          success: false,
+          message: '文件不存在',
+        });
+      }
+
       try {
-        await fs.access(file.file_path);
+        await fs.access(filePath);
       } catch {
         return res.status(404).json({
           success: false,
@@ -319,9 +320,15 @@ router.get(
         });
       }
 
-      res.setHeader('Content-Disposition', `attachment; filename="${file.original_name}"`);
-      res.setHeader('Content-Type', file.mimetype || 'application/octet-stream');
-      return res.sendFile(file.file_path);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${String((file as Record<string, unknown>).original_name || '')}"`
+      );
+      res.setHeader(
+        'Content-Type',
+        String((file as Record<string, unknown>).mimetype || 'application/octet-stream')
+      );
+      return res.sendFile(filePath);
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -349,10 +356,17 @@ router.delete(
           message: '文件不存在',
         });
       }
+      const filePath = String((file as Record<string, unknown>).file_path || '');
+      if (!filePath) {
+        return res.status(404).json({
+          success: false,
+          message: '文件不存在',
+        });
+      }
       try {
-        await fs.unlink(file.file_path);
+        await fs.unlink(filePath);
       } catch (unlinkError) {
-        logger.error('删除物理文件失败', { error: unlinkError, filePath: file.file_path });
+        logger.error('删除物理文件失败', { error: unlinkError, filePath });
       }
 
       await storageService.deleteUploadedFile(fileId);
@@ -393,83 +407,32 @@ router.post(
 
     const { fileIds, archiveName, description } = req.body;
     const userId = (req as { user?: { id?: string } }).user?.id;
+    const ensuredUserId = userId ? String(userId) : '';
 
     try {
-      if (!userId) {
+      if (!ensuredUserId) {
         return res.status(401).json({
           success: false,
           message: '用户未认证',
         });
       }
 
-      await ensureArchiveDir();
-
-      const idParams = fileIds.map((_: unknown, index: number) => `$${index + 1}`).join(',');
-      const filesResult = await query(
-        `SELECT id, original_name, filename, mimetype, size, file_path
-         FROM uploaded_files
-         WHERE id IN (${idParams})`,
-        fileIds
-      );
-
-      if (filesResult.rows.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: '未找到需要归档的文件',
-        });
-      }
-
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'storage-archive-'));
-      const files = filesResult.rows.map((file: Record<string, unknown>) => {
-        const storedName = String(file.filename);
-        return {
-          originalName: String(file.original_name),
-          storedName,
-          mimetype: String(file.mimetype || ''),
-          size: Number(file.size || 0),
-          sourcePath: String(file.file_path),
-        };
-      });
-
-      for (const file of files) {
-        const targetPath = path.join(tempDir, file.storedName);
-        await fs.copyFile(file.sourcePath, targetPath);
-      }
-
-      const archivePath = path.join(archiveDir, `${archiveName}_${Date.now()}.tar.gz`);
-      await tar.c(
-        { gzip: true, cwd: tempDir, file: archivePath },
-        files.map(file => file.storedName)
-      );
-
-      await fs.rm(tempDir, { recursive: true, force: true });
-
-      const { id: archiveId } = await dataManagementService.createData(
-        ARCHIVES_TYPE,
+      const result = await storageService.archive(
         {
+          fileIds,
           archiveName,
           description,
-          createdBy: userId,
-          fileIds,
-          files: files.map(file => ({
-            originalName: file.originalName,
-            storedName: file.storedName,
-            mimetype: file.mimetype,
-            size: file.size,
-          })),
-          archivePath,
-          createdAt: new Date().toISOString(),
+          userId: ensuredUserId,
         },
-        { userId, source: 'storage' }
+        { targetPath: archiveDir }
       );
 
       return res.status(201).json({
         success: true,
         message: '归档创建成功',
         data: {
-          archiveId,
-          archivePath,
-          filesCount: files.length,
+          jobId: result.jobId,
+          filesCount: result.affected,
         },
       });
     } catch (error) {
@@ -493,25 +456,36 @@ router.get(
     const userId = (req as { user?: { id?: string } }).user?.id;
 
     try {
-      const {
-        results,
-        total,
-        page: pageNumber,
-        limit: pageLimit,
-        totalPages,
-      } = await dataManagementService.queryData(
-        ARCHIVES_TYPE,
-        {
-          filters: {
-            createdBy: userId,
-          },
-          sort: { field: 'createdAt', direction: 'desc' },
-        },
-        { page: parseInt(page as string), limit: parseInt(limit as string) }
-      );
-      const archives = results.map(record => ({
-        id: record.id,
-        ...(record.data as Record<string, unknown>),
+      const pageNumber = parseInt(page as string);
+      const pageLimit = parseInt(limit as string);
+      const status = typeof _status === 'string' ? _status : undefined;
+      const jobs = await storageService.listArchiveJobs();
+      const filtered = jobs.filter(job => {
+        if (status && job.status !== status) return false;
+        if (userId) {
+          const createdBy = job.metadata?.createdBy;
+          if (!createdBy || createdBy !== userId) return false;
+        }
+        return true;
+      });
+      const total = filtered.length;
+      const totalPages = Math.ceil(total / pageLimit) || 1;
+      const start = (pageNumber - 1) * pageLimit;
+      const archives = filtered.slice(start, start + pageLimit).map(job => ({
+        id: job.id,
+        name: job.name,
+        description: job.description,
+        status: job.status,
+        createdAt: job.createdAt,
+        completedAt: job.completedAt,
+        size: job.size,
+        compressedSize: job.compressedSize,
+        compressionRatio: job.compressionRatio,
+        filesCount: job.filesCount,
+        archivedFilesCount: job.archivedFilesCount,
+        archivePath: job.metadata?.archivePath,
+        files: job.metadata?.files,
+        createdBy: job.metadata?.createdBy,
       }));
 
       return res.json({
@@ -546,24 +520,43 @@ router.post(
     const { archiveId } = req.params;
     const { destination } = req.body;
     const userId = (req as { user?: { id?: string } }).user?.id;
+    const ensuredUserId = userId ? String(userId) : '';
 
     try {
-      const archiveRecord = await dataManagementService.readData(ARCHIVES_TYPE, archiveId);
-      const archiveData = archiveRecord.data as {
-        archivePath: string;
-        files: Array<{
-          originalName: string;
-          storedName: string;
-          mimetype: string;
-          size: number;
-        }>;
-        createdBy: string;
-      };
+      if (!ensuredUserId) {
+        return res.status(401).json({
+          success: false,
+          message: '用户未认证',
+        });
+      }
 
-      if (archiveData.createdBy && archiveData.createdBy !== userId) {
+      const archiveJob = await storageService.getArchiveJob(archiveId);
+      if (!archiveJob) {
+        return res.status(404).json({
+          success: false,
+          message: '归档任务不存在',
+        });
+      }
+
+      const archiveData = archiveJob.metadata || {};
+      if (archiveData.createdBy && archiveData.createdBy !== ensuredUserId) {
         return res.status(403).json({
           success: false,
           message: '无权恢复该归档',
+        });
+      }
+
+      const archivePath = archiveData.archivePath as string | undefined;
+      const files = (archiveData.files || []) as Array<{
+        originalName: string;
+        storedName: string;
+        mimetype: string;
+        size: number;
+      }>;
+      if (!archivePath) {
+        return res.status(400).json({
+          success: false,
+          message: '归档文件不存在',
         });
       }
 
@@ -571,26 +564,26 @@ router.post(
         ? await resolveTargetDirectory(destination)
         : await resolveTargetDirectory(uploadDir);
 
-      await tar.x({ file: archiveData.archivePath, cwd: targetDir });
+      await tar.x({ file: archivePath, cwd: targetDir });
 
       const restoredFiles = [] as Array<Record<string, unknown>>;
-      for (const file of archiveData.files || []) {
-        const restoredPath = path.join(targetDir, file.storedName);
+      for (const file of files) {
+        const restoredPath = path.join(targetDir, String(file.storedName));
         const stats = await fs.stat(restoredPath);
         const insertResult = await storageService.registerUploadedFile(
           {
-            originalName: file.originalName,
-            filename: file.storedName,
-            mimetype: file.mimetype,
-            size: file.size,
+            originalName: String(file.originalName),
+            filename: String(file.storedName),
+            mimetype: String(file.mimetype || ''),
+            size: Number(file.size || 0),
             path: restoredPath,
           },
-          userId
+          ensuredUserId
         );
         restoredFiles.push({
           id: insertResult.id,
-          originalName: file.originalName,
-          filename: file.storedName,
+          originalName: String(file.originalName),
+          filename: String(file.storedName),
           size: stats.size,
         });
       }
@@ -624,16 +617,23 @@ router.delete(
     const { archiveId } = req.params;
 
     try {
-      const archiveRecord = await dataManagementService.readData(ARCHIVES_TYPE, archiveId);
-      const archiveData = archiveRecord.data as { archivePath?: string };
-      if (archiveData.archivePath) {
+      const archiveJob = await storageService.getArchiveJob(archiveId);
+      if (!archiveJob) {
+        return res.status(404).json({
+          success: false,
+          message: '归档任务不存在',
+        });
+      }
+
+      const archivePath = archiveJob.metadata?.archivePath as string | undefined;
+      if (archivePath) {
         try {
-          await fs.unlink(archiveData.archivePath);
+          await fs.unlink(archivePath);
         } catch (unlinkError) {
           logger.error('删除归档文件失败', { archiveId, error: unlinkError });
         }
       }
-      await dataManagementService.deleteData(ARCHIVES_TYPE, archiveId, { softDelete: false });
+      await storageService.deleteArchiveJob(archiveId);
 
       return res.json({
         success: true,
@@ -748,8 +748,16 @@ router.post(
     }
 
     const { fileId, targetPath } = req.body;
+    const userId = (req as { user?: { id?: string } }).user?.id;
+    const ensuredUserId = userId ? String(userId) : '';
 
     try {
+      if (!ensuredUserId) {
+        return res.status(401).json({
+          success: false,
+          message: '用户未认证',
+        });
+      }
       const fileResult = await query(
         'SELECT id, original_name, filename, mimetype, size, file_path FROM uploaded_files WHERE id = $1',
         [fileId]
@@ -761,12 +769,19 @@ router.post(
         });
       }
 
-      const file = fileResult.rows[0];
+      const file = fileResult.rows[0] as Record<string, unknown>;
       const targetDir = await resolveTargetDirectory(targetPath);
-      const targetFilename = await ensureUniqueFilename(targetDir, file.filename);
+      const sourcePath = String(file.file_path || '');
+      if (!sourcePath) {
+        return res.status(404).json({
+          success: false,
+          message: '文件不存在',
+        });
+      }
+      const targetFilename = await ensureUniqueFilename(targetDir, String(file.filename || ''));
       const targetFilePath = path.join(targetDir, targetFilename);
 
-      await fs.rename(file.file_path, targetFilePath);
+      await fs.rename(sourcePath, targetFilePath);
 
       await storageService.updateUploadedFile(fileId, {
         filename: targetFilename,
@@ -810,8 +825,15 @@ router.post(
 
     const { fileId, targetPath } = req.body;
     const userId = (req as { user?: { id?: string } }).user?.id;
+    const ensuredUserId = userId ? String(userId) : '';
 
     try {
+      if (!ensuredUserId) {
+        return res.status(401).json({
+          success: false,
+          message: '用户未认证',
+        });
+      }
       const fileResult = await query(
         'SELECT id, original_name, filename, mimetype, size, file_path FROM uploaded_files WHERE id = $1',
         [fileId]
@@ -823,12 +845,19 @@ router.post(
         });
       }
 
-      const file = fileResult.rows[0];
+      const file = fileResult.rows[0] as Record<string, unknown>;
       const targetDir = await resolveTargetDirectory(targetPath);
-      const targetFilename = await ensureUniqueFilename(targetDir, file.filename);
+      const sourcePath = String(file.file_path || '');
+      if (!sourcePath) {
+        return res.status(404).json({
+          success: false,
+          message: '文件不存在',
+        });
+      }
+      const targetFilename = await ensureUniqueFilename(targetDir, String(file.filename || ''));
       const targetFilePath = path.join(targetDir, targetFilename);
 
-      await fs.copyFile(file.file_path, targetFilePath);
+      await fs.copyFile(sourcePath, targetFilePath);
 
       const insertResult = await storageService.registerUploadedFile(
         {
